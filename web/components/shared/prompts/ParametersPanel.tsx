@@ -22,15 +22,16 @@ import {
   Provider,
   ProviderModel,
 } from "packages/cost/unified/types";
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   PiBrainBold,
   PiCoinsBold,
+  PiHandPalmBold,
   PiPaintBrushBold,
   PiPlugsBold,
-  PiTargetBold,
 } from "react-icons/pi";
 import GlassHeader from "../universal/GlassHeader";
+import ScrollableBadges from "../universal/ScrollableBadges";
 
 interface ParametersPanelProps {
   parameters: StateParameters;
@@ -124,6 +125,11 @@ export default function ParametersPanel({
   // Memoize derived parameter values
   const supportsReasoningEffort = useMemo(
     () => !!mergedParams?.reasoning_effort,
+    [mergedParams]
+  );
+
+  const supportsStopSequences = useMemo(
+    () => !!mergedParams?.stop,
     [mergedParams]
   );
 
@@ -339,20 +345,17 @@ export default function ParametersPanel({
   };
 
   return (
-    <div className="flex flex-col">
+    <div className="w-full flex flex-col">
       {/* Header */}
       <GlassHeader className="h-14 px-4">
         <h2 className="font-semibold text-secondary">Parameters</h2>
       </GlassHeader>
-      <div className="divide-y divide-slate-100 dark:divide-slate-900 px-4">
+      <div className="w-full divide-y divide-slate-100 dark:divide-slate-900">
         {/* Creator / Model / Provider */}
-        <div className="flex flex-row items-center justify-between gap-4 py-1 first:pt-0">
-          <div className="flex items-center gap-2">
-            <PiPlugsBold className="text-secondary" />
-            <label className="text-sm font-medium text-secondary">
-              Creator / Model / Provider
-            </label>
-          </div>
+        <div className="w-full flex flex-row items-center justify-between gap-4 py-1 first:pt-0 px-4">
+          <ParameterLabel icon={<PiPlugsBold className="shrink-0" />}>
+            Creator / Model / Provider
+          </ParameterLabel>
           <div className="flex gap-2">
             <Select value={selectedCreator} onValueChange={handleCreatorChange}>
               <SelectTrigger className="w-28 h-8">
@@ -400,17 +403,10 @@ export default function ParametersPanel({
         </div>
 
         {/* Temperature */}
-        <div className="flex flex-row items-center justify-between gap-4 py-2">
-          <div className="flex items-center gap-2">
-            {parameters.temperature ?? 1 < 1 ? (
-              <PiTargetBold className="text-secondary" />
-            ) : (
-              <PiPaintBrushBold className="text-secondary" />
-            )}
-            <label className="text-sm font-medium text-secondary">
-              Temperature
-            </label>
-          </div>
+        <ParameterRow>
+          <ParameterLabel icon={<PiPaintBrushBold />}>
+            Temperature
+          </ParameterLabel>
           <div className="flex items-center gap-2">
             <span className="text-sm">
               {(parameters.temperature ?? 1).toFixed(1)}
@@ -427,17 +423,12 @@ export default function ParametersPanel({
               variant="action"
             />
           </div>
-        </div>
+        </ParameterRow>
 
         {/* Max Tokens */}
         {maxTokens && (
-          <div className="flex flex-row items-center justify-between gap-4 py-2">
-            <div className="flex items-center gap-2">
-              <PiCoinsBold className="text-secondary" />
-              <label className="text-sm font-medium text-secondary">
-                Max Tokens
-              </label>
-            </div>
+          <ParameterRow>
+            <ParameterLabel icon={<PiCoinsBold />}>Max Tokens</ParameterLabel>
             <div className="flex items-center gap-2">
               <span className="text-sm">
                 {parameters.max_tokens?.toLocaleString()}
@@ -454,18 +445,15 @@ export default function ParametersPanel({
                 variant="action"
               />
             </div>
-          </div>
+          </ParameterRow>
         )}
 
         {/* Reasoning Effort */}
         {supportsReasoningEffort && (
-          <div className="flex flex-row items-center justify-between gap-4 py-2">
-            <div className="flex items-center gap-2">
-              <PiBrainBold className="text-secondary" />
-              <label className="text-sm font-medium text-secondary">
-                Reasoning Effort
-              </label>
-            </div>
+          <ParameterRow>
+            <ParameterLabel icon={<PiBrainBold />}>
+              Reasoning Effort
+            </ParameterLabel>
             <div className="flex items-center gap-2">
               <Select
                 value={parameters.reasoning_effort || "medium"}
@@ -485,9 +473,52 @@ export default function ParametersPanel({
                 </SelectContent>
               </Select>
             </div>
+          </ParameterRow>
+        )}
+
+        {/* Stop Sequences */}
+        {supportsStopSequences && (
+          <div className="w-full flex flex-row items-center justify-between pl-4">
+            <ParameterLabel icon={<PiHandPalmBold />}>
+              Stop Sequences
+            </ParameterLabel>
+            <ScrollableBadges
+              mode="singleValue"
+              items={parameters.stop || []}
+              onAdd={async (value) => {
+                const newStop = [...(parameters.stop || []), value];
+                onParameterChange({ stop: newStop });
+              }}
+              tooltipText="Add a stop sequence"
+              className="overflow-x-auto"
+            />
           </div>
         )}
       </div>
     </div>
   );
 }
+
+const ParameterRow: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  return (
+    <div className="w-full flex flex-row items-center justify-between gap-4 py-2 px-4">
+      {children}
+    </div>
+  );
+};
+
+export const ParameterLabel: React.FC<{
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}> = ({ icon, children }) => {
+  return (
+    <div className="flex items-center gap-2 text-secondary">
+      {icon}
+      <label className="text-sm font-medium whitespace-nowrap">
+        {children}
+      </label>
+    </div>
+  );
+};

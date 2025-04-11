@@ -1,6 +1,6 @@
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Database } from "../../supabase/database.types";
+import { Database } from "../../db/database.types";
 import { useCallback, useEffect, useState, useRef } from "react";
 import Cookies from "js-cookie";
 import { OrgContextValue } from "@/components/layout/org/OrgContextValue";
@@ -165,7 +165,7 @@ const useGetOrg = (orgId: string) => {
 const useGetOrgs = () => {
   const supabaseClient = useSupabaseClient<Database>();
   const user = useUser();
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isPending, refetch } = useQuery({
     queryKey: ["Organizations", user?.id ?? ""],
     queryFn: async (query) => {
       if (!user?.id) {
@@ -182,7 +182,7 @@ const useGetOrgs = () => {
       return data;
     },
     refetchOnWindowFocus: false,
-    refetchInterval: (data) => (data?.length === 0 ? 1_000 : false), // Refetch every 1 seconds if no orgs
+    refetchInterval: 10_000, // Refetch every 10 seconds
     refetchIntervalInBackground: true,
   });
 
@@ -196,7 +196,7 @@ const useGetOrgs = () => {
 
   return {
     data,
-    isLoading,
+    isPending,
     refetch,
   };
 };
@@ -386,6 +386,7 @@ const useOrgsContextManager = () => {
         stripe_customer_id: org.stripe_customer_id || "",
         organization_type: org.organization_type || "",
         date_joined: org.created_at || "",
+        has_onboarded: org.has_onboarded || false,
       });
 
       if (user && env("NEXT_PUBLIC_IS_ON_PREM") !== "true") {

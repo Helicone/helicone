@@ -1,5 +1,6 @@
 import { ArrowUpRightIcon, Link } from "lucide-react";
 import { Button } from "../ui/button";
+import Image from "next/image";
 
 const Log = () => {
   return (
@@ -31,7 +32,12 @@ const Log = () => {
             </Button>
           </a>
         </div>
-        <img src="/static/home/log.png" alt="Log" />
+        <Image
+          src="/static/home/log.webp"
+          alt="Log"
+          width={1000}
+          height={1000}
+        />
       </div>
     </div>
   );

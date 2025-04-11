@@ -1,9 +1,9 @@
 // src/users/usersController.ts
 import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
 import { hashAuth } from "../../utils/hash";
-import { supabaseServer } from "../../lib/routers/withAuth";
 import { JawnAuthenticatedRequest } from "../../types/request";
-import { KeyPermissions } from "../../models/models";
+import { KeyPermissions } from "../../packages/common/auth/types";
+import { dbExecute } from "../../lib/shared/db/dbExecute";
 
 export interface GenerateHashQueryParams {
   apiKey: string;
@@ -41,23 +41,26 @@ export class GenerateHashController extends Controller {
     try {
       const hashedKey = await hashAuth(apiKey);
 
-      const insertRes = await supabaseServer.client
-        .from("helicone_api_keys")
-        .insert({
-          api_key_hash: hashedKey,
-          user_id: userId,
-          api_key_name: keyName,
-          organization_id: request.authParams.organizationId,
-          key_permissions: requestBody.permissions,
-          governance: governance,
-        });
+      const { error } = await dbExecute(
+        `INSERT INTO helicone_api_keys
+         (api_key_hash, user_id, api_key_name, organization_id, key_permissions, governance)
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        [
+          hashedKey,
+          userId,
+          keyName,
+          request.authParams.organizationId,
+          requestBody.permissions,
+          governance,
+        ]
+      );
 
-      if (insertRes.error) {
+      if (error) {
         this.setStatus(500);
         return {
           error: {
             message: "Failed to insert key",
-            details: insertRes.error.message,
+            details: error,
           },
         };
       }

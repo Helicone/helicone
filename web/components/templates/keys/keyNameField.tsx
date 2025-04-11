@@ -1,6 +1,6 @@
 import { PencilIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
-import { Database } from "../../../supabase/database.types";
+import { Database } from "../../../db/database.types";
 
 interface KeyNameFieldProps {
   key: Database["public"]["Tables"]["user_api_keys"]["Row"];

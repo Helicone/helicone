@@ -3,7 +3,7 @@
  * Used to provide a preview of what the dashboard looks like with data.
  */
 
-import { Result } from "@/lib/result";
+import { Result } from "@/packages/common/result";
 import { TimeIncrement } from "@/lib/timeCalculations/fetchTimeData";
 import { ModelMetric } from "@/lib/api/models/models";
 import { SingleFilterDef } from "@/services/lib/filters/frontendFilterDefs";

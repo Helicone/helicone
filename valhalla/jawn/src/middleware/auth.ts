@@ -1,10 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import { authCheckThrow } from "../controllers/private/adminController";
 import { newPostHogClient } from "../lib/clients/postHogClient";
-import { AuthParams } from "../lib/db/supabase";
 import { RequestWrapper } from "../lib/requestWrapper";
-import { supabaseServer } from "../lib/routers/withAuth";
-import { uuid } from "uuidv4";
+import { AuthParams } from "../packages/common/auth/types";
+import { getHeliconeAuthClient } from "../packages/common/auth/server/AuthClientFactory";
 
 export const logInPostHog = (
   reqParams: {
@@ -56,6 +55,10 @@ export const authMiddleware = async (
     next();
     return;
   }
+  if (req.path === "/v1/organization") {
+    next();
+    return;
+  }
 
   try {
     const request = new RequestWrapper(req);
@@ -66,7 +69,9 @@ export const authMiddleware = async (
       });
       return;
     }
-    const authParams = await supabaseServer.authenticate(authorization.data!);
+    const authParams = await getHeliconeAuthClient().authenticate(
+      authorization.data!
+    );
 
     if (
       authParams.error ||
@@ -106,3 +111,7 @@ export const authMiddleware = async (
     res.status(400).send("Invalid token.");
   }
 };
+export interface HeliconeUser {
+  email: string;
+  id: string;
+}

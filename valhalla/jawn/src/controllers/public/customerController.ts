@@ -10,9 +10,10 @@ import {
   Tags,
 } from "tsoa";
 import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
-import { supabaseServer } from "../../lib/db/supabase";
 import { clickhousePriceCalc } from "../../packages/cost";
 import { JawnAuthenticatedRequest } from "../../types/request";
+import { dbExecute } from "../../lib/shared/db/dbExecute";
+import { err, ok, Result } from "../../packages/common/result";
 
 export interface CustomerUsage {
   id: string;
@@ -39,20 +40,29 @@ export class CustomerController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Path() customerId: string
   ): Promise<CustomerUsage | null> {
-    const customers = await supabaseServer.client
-      .from("organization")
-      .select("*")
-      .eq("reseller_id", request.authParams.organizationId)
-      .eq("id", customerId)
-      .eq("organization_type", "customer")
-      .eq("soft_delete", "false")
-      .single();
+    const customerResult = await dbExecute<{
+      id: string;
+      name: string;
+    }>(
+      `SELECT id, name FROM organization
+       WHERE reseller_id = $1
+       AND id = $2
+       AND organization_type = 'customer'
+       AND soft_delete = false`,
+      [request.authParams.organizationId, customerId]
+    );
 
-    if (customers.error) {
+    if (
+      customerResult.error ||
+      !customerResult.data ||
+      customerResult.data.length === 0
+    ) {
       this.setStatus(500);
-      console.error(customers.error);
+      console.error(customerResult.error);
       return null;
     }
+
+    const customer = customerResult.data[0];
 
     const { data, error } = await clickhouseDb.dbQuery<{
       count: number;
@@ -82,8 +92,8 @@ export class CustomerController extends Controller {
     const { cost, count, prompt_tokens, completion_tokens } = data[0];
     this.setStatus(200);
     return {
-      id: customers.data.id,
-      name: customers.data.name,
+      id: customer.id,
+      name: customer.name,
       cost,
       count,
       prompt_tokens,
@@ -97,19 +107,25 @@ export class CustomerController extends Controller {
     requestBody: {},
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Customer[]> {
-    const customers = await supabaseServer.client
-      .from("organization")
-      .select("*")
-      .eq("reseller_id", request.authParams.organizationId)
-      .eq("organization_type", "customer")
-      .eq("soft_delete", "false");
-    if (customers.error) {
+    const customersResult = await dbExecute<{
+      id: string;
+      name: string;
+    }>(
+      `SELECT id, name FROM organization
+       WHERE reseller_id = $1
+       AND organization_type = 'customer'
+       AND soft_delete = false`,
+      [request.authParams.organizationId]
+    );
+
+    if (customersResult.error || !customersResult.data) {
       this.setStatus(500);
-      console.error(customers.error);
+      console.error(customersResult.error);
       return [];
     }
+
     return (
-      customers.data.map((customer) => ({
+      customersResult.data.map((customer) => ({
         id: customer.id,
         name: customer.name,
       })) ?? []

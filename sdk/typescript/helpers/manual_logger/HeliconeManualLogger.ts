@@ -240,7 +240,13 @@ export class HeliconeManualLogger {
     };
 
     try {
-      await fetch(this.LOGGING_ENDPOINT, fetchOptions);
+      const response = await fetch(this.LOGGING_ENDPOINT, fetchOptions);
+      if (!response.ok) {
+        console.error(
+          "Error making request to Helicone log endpoint:",
+          response.statusText
+        );
+      }
     } catch (error: any) {
       console.error(
         "Error making request to Helicone log endpoint:",

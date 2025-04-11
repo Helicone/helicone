@@ -1,31 +1,49 @@
-In December 2024, OpenAI announced o3 and o3-mini, with o3 set to <a href="https://openai.com/index/early-access-for-safety-testing/#how-to-apply" target="_blank" rel="noopener">launch in early 2025</a> after completing safety testing.
+In December 2024, OpenAI announced o3 and o3-mini, with o3 set to launch in early 2025. However, plans have changed.
 
-Today, OpenAI released its newest reasoning model, **o3-mini**, positioned as a faster and cheaper alternative to the o1 family, optimized for STEM domains, particularly programming, math, and science.
+On April 4, 2025, OpenAI CEO Sam Altman <a href="https://x.com/sama/status/1908167621624856998" target="_blank" rel="noopener">announced</a> that the company will **release both o3 and a new model o4-mini in "a couple of weeks,"** while delaying GPT-5 until "a few months" later. 
 
 ![OpenAI o3 released](/static/blog/openai-o3/o3-cover.webp)
 
-Building on the foundation of OpenAI's <a href="https://www.helicone.ai/blog/openai-o1-and-chatgpt-pro" target="_blank" rel="noopener">o1 models</a>, the o3 family introduces several notable improvements in performance, deeper level of reasoning capabilities, and testing results.
+### The Timeline
+
+Originally, o3's reasoning capabilities were expected to be integrated into GPT-5, but OpenAI has pivoted to releasing both models separately. The delay in GPT-5 is reportedly to make it "much better than originally thought" while addressing integration challenges.
+
+Building on the foundation of OpenAI's o1 models, the o3 family introduces several notable improvements in performance, deeper reasoning capabilities, and better test results. 
 
 Let's dive into how o3 compares to top models in the market!
 
+
+<CallToAction
+  title="Track your o3 usage before costs spiral 🌀"
+  description="Get real-time visibility into o3 performance, token usage, and costs—before your experiments break the bank. Monitor all OpenAI models (including o3, o3-mini, and upcoming o4-mini) with a single integration."
+  primaryButtonText="Set Up in 30 Seconds"
+  primaryButtonLink="https://docs.helicone.ai/integrations/openai/javascript"
+  secondaryButtonText="See Usage in Dashboard"
+  secondaryButtonLink="https://helicone.ai/demo"
+/>
+
+## Table of Contents
+
 ## TL;DR
 
-- o3-mini reportedly outperforms o1-mini in reliability, making `39%` fewer major mistakes on real-world questions, while delivering `24%` faster responses than o1
-- o3-mini is `63%` cheaper than o1-mini and competitive with DeepSeek’s R1
-- Developers can choose from three reasoning effort levels (low, medium, high) to balance accuracy vs. speed.
-- o3-mini is accessible via ChatGPT and through OpenAI’s API
+- o3-mini outperforms o1-mini in reliability, making `39%` fewer major mistakes on real-world questions, while delivering `24%` faster responses than o1
+- o3-mini is `63%` cheaper than o1-mini and competitive with DeepSeek's R1
+- o3 will now be launched separately, rather than integrated into GPT-5
+- o3 is set to be OpenAI's most expensive model at launch, with <a href="https://von.gov.ng/openais-o3-ai-model-faces-revised-cost-estimates/" target="_blank" rel="noopener">rumored estimates</a> of up to $30,000 per **task**
+- o3-mini is accessible via ChatGPT and through OpenAI's API
+- o4-mini will launch alongside o3, ahead of GPT-5
 
 ## What sets OpenAI's o3 model apart?
 
-Unlike traditional large language models (LLMs) that rely on simple pattern recognition, the o3 model incorporates a process called **"simulated reasoning" (SR)**, deepening its reasoning capabilities compared to o1.
+Unlike traditional large language models (LLMs) that rely on simple pattern recognition, the o3 model incorporates a process called **"simulated reasoning" (SR)**, significantly enhancing its capabilities compared to o1.
 
-This allows the model to pause and reflect on its own internal thought processes before responding, mimicking human-like reasoning in a way that previous models like o1 couldn't.
+This allows the model to pause and reflect on its own internal thought processes before responding, mimicking human-like reasoning in a way that previous models couldn't achieve.
 
 While the o1 models were good at understanding and generating text, the o3 models take it a step further by thinking through problems and planning their responses ahead of time. This "private chain-of-thought" technique is a core feature that sets o3 apart.
 
-### Simulated Reasoning gaining popularity
+### Simulated Reasoning is gaining popularity
 
-OpenAI's o3 and o3-mini models both uses simulated reasoning (SR), which is gaining traction lately, with Google launching its own <a href="https://www.helicone.ai/blog/google-gemini-2-0-flash-thinking" target="_blank" rel="noopener">Gemini 2.0 Flash Thinking</a> and DeepSeek launching their own models based on this approach.
+OpenAI's o3 and o3-mini models both use simulated reasoning (SR), which is gaining traction lately, with Google launching its own <a href="https://www.helicone.ai/blog/google-gemini-2-0-flash-thinking" target="_blank" rel="noopener">Gemini 2.0 Flash Thinking</a> and DeepSeek launching their own models based on this approach.
 
 SR allows AI models to consider their own results and adjust their reasoning as they go, offering a more nuanced and accurate form of problem-solving compared to traditional LLMs.
 
@@ -33,17 +51,17 @@ Simulated reasoning models, including **OpenAI's o3**, are designed to scale at 
 
 ## o3-mini is a more adaptive model
 
-OpenAI also unveiled the **o3-mini** which is more lightweight and has an adaptive thinking time feature, allowing users to select low, medium, or high processing speeds depending on their needs.
+o3-mini is a more lightweight version of o3 that allows users to select the level of "reasoning effort": low, medium, or high in the API and medium or high (o3-mini-high) in ChatGPT.
 
-The o3-mini is designed for situations where you might not need the full power of o3 but still want to benefit from its advanced reasoning capabilities.
+o3-mini is designed for situations where you might not need the full power of o3 but still want to benefit from its advanced reasoning capabilities.
 
-Although smaller and faster, the o3-mini is still powerful. OpenAI claims that it outperforms o1 on several key benchmarks, making it a great option for those seeking more cost-effective performance.
+Although smaller and faster, o3-mini is still powerful. OpenAI claims that it outperforms o1 on several key benchmarks comparing o3-mini vs o1, making it a great option for those seeking more cost-effective performance.
 
-### o3-mini vs. deepseek's R1 model
+### o3-mini vs. DeepSeek's R1 model
 
-Despite its improvements, o3-mini is not a breakthrough across all benchmarks. While it edges out `DeepSeek’s R1 model` in select tests like AIME 2024, it lags in others, such as GPQA Diamond for PhD-level science queries.
+Despite its improvements, o3-mini is not a breakthrough across all benchmarks. While it edges out `DeepSeek's R1 model` in select tests like AIME 2024, it lags in others, such as GPQA Diamond for PhD-level science queries.
 
-O3-mini is `63%` cheaper than o1-mini and competitive with DeepSeek’s R1.
+o3-mini is `63%` cheaper than o1-mini and competitive with DeepSeek's R1.
 
 | Model       | Uncached Input Tokens ($/M) | Cached Input Tokens ($/M) | Output Tokens ($/M) |
 | ----------- | --------------------------- | ------------------------- | ------------------- |
@@ -51,73 +69,76 @@ O3-mini is `63%` cheaper than o1-mini and competitive with DeepSeek’s R1.
 | DeepSeek R1 | $0.55                       | $0.14                     | $2.19               |
 | o1-mini     | $3.00                       | $1.50                     | $12.00              |
 
-## Benchmark Comparison: o3 vs o1
+## o3 vs o1 Benchmarks
 
 ### Reasoning Ability
 
-The o3 models are built to simulate reasoning at a deeper level. While o1 could generate responses based on patterns learned during training, o3 actively "thinks" about the problem at hand, improving its ability to tackle complex and multi-step tasks.
+The difference between o1 and o3 is primarily in their reasoning depth. While o1 could generate responses based on patterns learned during training, o3 actively "thinks" about the problem at hand, improving its ability to tackle complex and multi-step tasks.
 
 ### Performance Benchmarks
 
-One of the most exciting aspects of o3 is its performance on various benchmarks. For example, it scored `75.7%` on the <a href="https://arcprize.org/arc" target="_blank" rel="noopener">ARC-AGI</a> visual reasoning benchmarkin low-compute scenarios, which is impressive compared to human-level performance (85%). This was a huge improvement over o1 and shows just how much further o3 can go in solving challenging problems.
+One of the most exciting aspects of o3 is its performance on various benchmarks. For example, it scored `75.7%` on the ARC-AGI visual reasoning benchmark in low-compute scenarios, which is impressive compared to human-level performance (85%). This was a huge improvement over o1 and shows just how much further o3 can go in solving challenging problems.
 
 ![o3 performance](/static/blog/openai-o3/o3-performance.webp)
 
-_Image source: <a href="https://www.youtube.com/live/SKBG1sqdyIU?si=lWccKHt8bnttuYta" target="_blank" rel="noopener noreferrer">OpenAI's Youtube announcement</a>_
+_Image source: OpenAI's Youtube announcement_
 
-### Mathematic and Science
+### Mathematics and Science
 
 OpenAI reports that o3 also achieved remarkable results in subjects like mathematics and science. For instance, it scored `96.7%` on the American Invitational Mathematics Exam and `87.7%` on a graduate-level science exam. These scores highlight the model's increased capacity for solving complex problems in fields that require high-level reasoning.
 
 ![o3 math performance](/static/blog/openai-o3/math-and-science.webp)
 
-### Code and Programming
+### o3 Coding Benchmark Results
 
-In terms of coding, o3 also outperforms o1. For example, it scored better than o1 on the Codeforces benchmark, which tests the model's ability to solve programming problems. This shows that o3 is more adept at tasks that require logical thinking and problem-solving.
+In terms of coding, is o3 better than o1? The benchmarks suggest yes. 
+
+o3 outperforms o1 on the Codeforces benchmark, which tests the model's ability to solve programming problems. This demonstrates that o3 is more adept at tasks requiring logical thinking and problem-solving.
 
 ![o3 code performance](/static/blog/openai-o3/o3-code.webp)
 
-## o3's Other Benchmarks
+## Other o3 Benchmark Results
 
 ### ARC-AGI Benchmark
 
 ARC-AGI tests an AI model's ability to recognize patterns in novel situations and how well it can adapt knowledge to unfamiliar challenges.
 
-- O3 scored `75.7%` on low compute
-- O3 scored `87.5%` on high compute, which is comparable to human performance at `85%`
+- o3 scored `75.7%` on low compute
+- o3 scored `87.5%` on high compute, which is comparable to human performance at `85%`
 
 ![o3 arc-agi](/static/blog/openai-o3/arc-agi.webp)
 
-With `87.5%` accuracy in visual reasoning, o3 addresses prior models' struggles with spatial and physical object analysis. This breakthrough enhances real-world applications like robotics, medical imaging, and AR, fueling the AGI conversation. O3’s advancements mark a key step toward smarter, more capable AI systems.
+With `87.5%` accuracy in visual reasoning, o3 addresses prior models' struggles with spatial and physical object analysis. This breakthrough enhances real-world applications like robotics, medical imaging, and AR. o3's advancements mark a key step toward smarter, more capable AI systems.
 
 ### American Invitational Mathematics Exam (AIME)
 
-With an impressive `96.7%` accuracy, O3 significantly outperforms O1's 83.3%. This leap showcases O3's superior ability to handle complex tasks. Mathematics, a crucial benchmark, highlights the model's capacity to grasp abstract concepts fundamental to scientific and universal understanding. O3's enhanced accuracy cements its position as a game-changer for users seeking precision and advanced reasoning in AI applications.
+With an impressive `96.7%` accuracy, the o3-mini-high vs o1 comparison shows o3 significantly outperforms o1's 83.3%. This leap showcases o3's superior ability to handle complex tasks. Mathematics, a crucial benchmark, highlights the model's capacity to grasp abstract concepts fundamental to scientific understanding.
 
 ### GPQA Diamond Benchmark
 
-Scored `87.7%`, demonstrating strong reasoning skills in graduate-level biology, physics, and chemistry questions.
+o3 scored `87.7%`, demonstrating strong reasoning skills in graduate-level biology, physics, and chemistry questions.
 
 ![o3 gpqa](/static/blog/openai-o3/gpqa-diamond.webp)
 
 ### EpochAI Frontier Math Benchmark
 
-The EpochAI Frontier Math benchmark is one of the toughest challenges featuring unpublished, research-level problems that demand advanced reasoning and creativity.
+The EpochAI Frontier Math benchmark is one of the toughest challenges, featuring unpublished, research-level problems that demand advanced reasoning and creativity.
 
-These problems often take professional mathematicians hours or even days to solve. O3 solved `25.2%` of the problems, when no other model has exceeded `2%` previously on this benchmark.
+These problems often take professional mathematicians hours or even days to solve. o3 solved `25.2%` of the problems, when no other model has exceeded `2%` previously on this benchmark.
 
 ![o3 epochai](/static/blog/openai-o3/epochai.webp)
 
-## Why not o2?
-
-Why did OpenAI skip o2? According to OpenAI's CEO, Sam Altman, the decision was purely a matter of avoiding potential trademark issues. The name o2 was not used because it could have clashed with a British telecom company, O2.
-
-So, in the spirit of "OpenAI being really bad at names," Altman humorously explained, the team decided to jump straight to o3 instead. While the name might seem a bit unconventional, the reasoning behind it was purely practical.
+<BottomLine
+  title="Why not o2❓"
+  description="Why did OpenAI skip o2? According to OpenAI's CEO, Sam Altman, the decision was purely a matter of avoiding potential trademark issues. The name o2 was not used because it could have clashed with a British telecom company, O2."
+/>
 
 ## How can developers access o3?
 
-- o3-mini is available in the API (Chat Completions, Assistants, and Batch API)
-- o3-mini is also available in ChatGPT and will <a href="https://openai.com/index/openai-o3-mini/" target="_blank" rel="noopener">replace o1-mini in the model picker</a>.
+- o3-mini will be available in the API (Chat Completions, Assistants, and Batch API)
+- o3-mini will also be available in ChatGPT and will replace o1-mini in the model picker
+- o3-mini high will be available as a separate model option
+- o3 and o4-mini will likely be accessible via API and ChatGPT too
 
 ## Integrate OpenAI o3 with Helicone ⚡️
 
@@ -130,35 +151,54 @@ const openai = new OpenAI({
 });
 ```
 
+<CallToAction
+  title="One o3 token costs 15x more than GPT-4 😳"
+  description="Don't get hit with a $30K bill. Monitor every o3 and o4-mini request in real-time, catch runaway costs before they happen, and optimize your prompts for maximum efficiency—all with one line of code."
+  primaryButtonText="Track Your LLM Spend"
+  primaryButtonLink="https://docs.helicone.ai/integrations/openai/javascript"
+  secondaryButtonText="See Live Cost Dashboard"
+  secondaryButtonLink="https://helicone.ai/demo"
+/>
+
 ## Bottom Line
 
-The o3 family is a major milestone for OpenAI towards models that can reason and tackle problems in a more human-like way. As simulated reasoning continues to rise in popularity across the industry, it will be exciting to see how **o3** and **o3-mini** influence the future of AI.
+The o3 family represents a major milestone for OpenAI towards models that can reason and tackle problems in a more human-like way, with o3-mini being one of the most competent models around, especially with complex tasks like Math and Coding. 
 
-In the coming months, we can expect to see more updates on the performance and availability of these groundbreaking models.
+With the upcoming separate releases of o3 and o4-mini—rather than an integrated release as originally planned—OpenAI is signaling that it might have quite a lot to offer in both o3 and the much-awaited GPT-5.
+
+We, for one, are quite excited to see what's in store!
 
 ### Other models you might be interested in:
 
-- <a
-    href="https://www.helicone.ai/blog/openai-o1-and-chatgpt-pro"
-    target="_blank"
-    rel="noopener"
-  >
-    Everything you need to know about OpenAI's o1 and ChatGPT Pro
-  </a>
-- <a
-    href="https://www.helicone.ai/blog/meta-llama-3-3-70-b-instruct"
-    target="_blank"
-    rel="noopener"
-  >
-    Meta's Llama 3.3 — Benchmarks, features & comparison with GPT-4 or
-    Claude-Sonnet-3.5
-  </a>
-- <a
-    href="https://www.helicone.ai/blog/openai-gpt-5"
-    target="_blank"
-    rel="noopener"
-  >
-    GPT-5: release date, features & what to expect
-  </a>
+- <a href="https://www.helicone.ai/blog/openai-o1-and-chatgpt-pro" target="_blank" rel="noopener">OpenAI's o1 and ChatGPT Pro: Everything You Need to Know</a>
+- <a href="https://www.helicone.ai/blog/meta-llama-3-3-70-b-instruct" target="_blank" rel="noopener">Llama 3.3 Benchmarks & How it Compares to GPT-4 or Claude-Sonnet-3.5</a>
+- <a href="https://www.helicone.ai/blog/openai-gpt-5" target="_blank" rel="noopener">GPT-5: Release Date, Features & What to Expect</a>
+
+<FAQ items={[
+  {
+    question: "What is OpenAI o4-mini?",
+    answer: "OpenAI o4-mini is the next-generation reasoning model being released alongside o3. It builds upon o3's foundation with enhanced reasoning capabilities and represents the latest advancement in OpenAI's reasoning-focused model lineup, though OpenAI hasn't yet revealed much details about its technical specifications."
+  },
+  {
+    question: "What's the difference between o3 and o4-mini?",
+    answer: "o4-mini is a newer, more advanced reasoning model that will be released alongside o3. While both utilize simulated reasoning, o4-mini represents the next generation in OpenAI's reasoning model family, though specific technical differences haven't been fully revealed yet."
+  },
+  {
+    question: "What is OpenAI o3's pricing like?",
+    answer: "While there's no official information on OpenAI o3's token cost and pricing yet, estimates suggest it could cost as high as $30,000 per task."
+  },
+  {
+    question: "How does o3-mini-high differ from regular o3-mini?",
+    answer: "o3-mini high is a more powerful version of o3-mini with enhanced reasoning capabilities designed for more complex tasks."
+  },
+  {
+    question: "Why was GPT-5 delayed again?",
+    answer: "According to Sam Altman, GPT-5 was delayed to make it 'much better than originally thought' while addressing integration challenges with the various reasoning capabilities. OpenAI also wants to ensure they have enough capacity to support 'unprecedented demand.'"
+  },
+  {
+    question: "How do o3's reasoning capabilities compare to human thinking?",
+    answer: "While o3's simulated reasoning is impressive, scoring near human-level on some benchmarks (87.5% on ARC-AGI vs. 85% for humans), it's still an approximation of human reasoning rather than truly human-like thought. It excels in structured domains like mathematics but may struggle with nuanced real-world contexts."
+  }
+]} />
 
 <Questions />

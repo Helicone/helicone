@@ -1,7 +1,8 @@
+import { Response } from "node-fetch";
 import { Provider } from "../../packages/llm-mapper/types";
 import { KafkaProducer } from "../clients/KafkaProducer";
-import { supabaseServer } from "../db/supabase";
 import { RequestWrapper } from "../requestWrapper/requestWrapper";
+import { getHeliconeAuthClient } from "../../packages/common/auth/server/AuthClientFactory";
 import { S3Client } from "../shared/db/s3Client";
 import { DBLoggable } from "./DBLoggable";
 import {
@@ -12,7 +13,6 @@ import { handleProxyRequest } from "./ProxyRequestHandler";
 import { checkRateLimit } from "./RateLimiter";
 import { ResponseBuilder } from "./ResponseBuilder";
 import { S3Manager } from "./S3Manager";
-import { Response } from "node-fetch";
 
 export async function proxyForwarder(
   request: RequestWrapper,
@@ -83,8 +83,9 @@ async function log(
     return;
   }
 
+  const authClient = getHeliconeAuthClient();
   const { data: authParams, error: authParamsError } =
-    await supabaseServer.authenticate(auth);
+    await authClient.authenticate(auth);
 
   if (authParamsError || !authParams) {
     console.error("Error getting auth params", authParamsError);
@@ -92,7 +93,7 @@ async function log(
   }
 
   const { data: orgParams, error: orgParamsError } =
-    await supabaseServer.getOrganization(authParams);
+    await authClient.getOrganization(authParams);
 
   if (orgParamsError || !orgParams) {
     console.error("Error getting organization", orgParamsError);

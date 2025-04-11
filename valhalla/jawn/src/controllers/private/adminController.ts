@@ -11,29 +11,33 @@ import {
   Route,
   Security,
   Tags,
+  Query,
 } from "tsoa";
 import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
 import { prepareRequestAzure } from "../../lib/experiment/requestPrep/azure";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { Setting, SettingName } from "../../utils/settings";
+import Stripe from "stripe";
+import { AdminManager } from "../../managers/admin/AdminManager";
 
 export const authCheckThrow = async (userId: string | undefined) => {
   if (!userId) {
     throw new Error("Unauthorized");
   }
 
-  // Replace Supabase call with dbExecute
   const result = await dbExecute<{ user_id: string }>(
     "SELECT user_id FROM admins WHERE user_id = $1",
     [userId]
   );
 
   if (result.error) {
-    throw new Error(result.error);
+    throw new Error(result.error || "Error checking authorization");
   }
 
-  const hasAdmin = result.data?.map((admin) => admin.user_id).includes(userId);
+  const hasAdmin = result.data
+    ?.map((admin) => admin.user_id)
+    .includes(userId as string);
 
   if (!hasAdmin) {
     throw new Error("Unauthorized");
@@ -515,7 +519,7 @@ export class AdminController extends Controller {
       user_id: string | null;
     }>(
       `
-      SELECT user_email, id, created_ai, user_id FROM
+      SELECT user_email, id, created_at, user_id FROM
       admins
       `,
       []
@@ -974,15 +978,17 @@ export class AdminController extends Controller {
     await authCheckThrow(request.authParams.userId);
     const { orgId, adminIds } = body;
 
-    const { error } = await dbExecute(
-      `
+    for (const adminId of adminIds) {
+      const { error } = await dbExecute(
+        `
       INSERT INTO organization_member (organization, member, org_role) VALUES ($1, $2, $3)
       `,
-      [orgId, adminIds, "admin"]
-    );
+        [orgId, adminId, "admin"]
+      );
 
-    if (error) {
-      throw new Error(error);
+      if (error) {
+        throw new Error(error);
+      }
     }
   }
 
@@ -1267,5 +1273,32 @@ export class AdminController extends Controller {
     });
 
     return { organizations };
+  }
+
+  /**
+   * Get all subscription data, invoices, and discounts for the admin projections page
+   * Uses caching to minimize API calls to Stripe
+   */
+  @Get("/subscription-data")
+  public async getSubscriptionData(
+    @Request() request: JawnAuthenticatedRequest,
+    @Query() forceRefresh?: boolean
+  ): Promise<{
+    subscriptions: Stripe.Subscription[];
+    invoices: Stripe.Invoice[];
+    discounts: Record<string, Stripe.Discount>;
+  }> {
+    await authCheckThrow(request.authParams.userId);
+
+    // Use AdminManager to handle Stripe API calls with rate limiting and caching
+    const adminManager = new AdminManager(request.authParams);
+    const result = await adminManager.getSubscriptionData(forceRefresh);
+
+    if (result.error || !result.data) {
+      throw new Error(result.error || "No subscription data returned");
+    }
+
+    // Return the data
+    return result.data;
   }
 }

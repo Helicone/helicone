@@ -340,7 +340,8 @@ export class StripeController extends Controller {
 
     if (result.error) {
       this.setStatus(400);
-      throw new Error(result.error);
+      console.error(result.error);
+      return null;
     }
 
     if (!result.data) return null;

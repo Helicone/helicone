@@ -43,7 +43,7 @@ const useRequestsPageV2 = (
   const { models, isLoading: isModelsLoading } = useModels(timeFilter, 50);
 
   const filterMap = (REQUEST_TABLE_FILTERS as SingleFilterDef<any>[]).concat(
-    propertyFilters
+    Array.isArray(propertyFilters) ? propertyFilters : []
   );
 
   // replace the model filter inside of the filterMap with the text suggestion model
@@ -98,7 +98,7 @@ const useRequestsPageV2 = (
   const isDataLoading = requests.isLoading || isPropertiesLoading;
 
   return {
-    requests: requests.requests.map(heliconeRequestToMappedContent),
+    requests: requests.requests?.map(heliconeRequestToMappedContent) ?? [],
     count: count.data?.data,
     isDataLoading,
     isBodyLoading: requests.isLoading,

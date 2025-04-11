@@ -1,9 +1,3 @@
-import { ExperimentStore } from "../../lib/stores/experimentStore";
-import { AuthParams, supabaseServer } from "../../lib/db/supabase";
-import { BaseManager } from "../BaseManager";
-import { err, ok, Result } from "../../lib/shared/result";
-import { dbExecute } from "../../lib/shared/db/dbExecute";
-import { InputsManager } from "../inputs/InputsManager";
 import {
   CreateNewPromptVersionForExperimentParams,
   ExperimentV2,
@@ -11,9 +5,15 @@ import {
   ExperimentV2Row,
   ExtendedExperimentData,
 } from "../../controllers/public/experimentV2Controller";
-import { run } from "../../lib/experiment/run";
-import { PromptManager } from "../prompt/PromptManager";
 import { PromptVersionResult } from "../../controllers/public/promptController";
+import { run } from "../../lib/experiment/run";
+import { AuthParams } from "../../packages/common/auth/types";
+import { dbExecute } from "../../lib/shared/db/dbExecute";
+import { err, ok, Result } from "../../packages/common/result";
+import { ExperimentStore } from "../../lib/stores/experimentStore";
+import { BaseManager } from "../BaseManager";
+import { InputsManager } from "../inputs/InputsManager";
+import { PromptManager } from "../prompt/PromptManager";
 import { RequestManager } from "../request/RequestManager";
 
 export interface ScoreV2 {
@@ -82,52 +82,84 @@ export class ExperimentV2Manager extends BaseManager {
       return err(requestResult.error);
     }
 
-    const res = await supabaseServer.client
-      .from("prompt_input_record")
-      .select("*")
-      .eq("source_request", requestId)
-      .single();
+    try {
+      const result = await dbExecute<{ prompt_version: string }>(
+        `SELECT prompt_version
+         FROM prompt_input_record
+         WHERE source_request = $1
+         LIMIT 1`,
+        [requestId]
+      );
 
-    if (res.error || !res.data) {
-      return err("Failed to get prompt version from request");
+      if (result.error || !result.data || result.data.length === 0) {
+        return err("Failed to get prompt version from request");
+      }
+
+      return ok(result.data[0].prompt_version);
+    } catch (error) {
+      return err(`Error retrieving prompt version: ${error}`);
     }
-
-    return ok(res.data.prompt_version);
   }
 
   async hasAccessToExperiment(experimentId: string): Promise<boolean> {
-    const experiment = await supabaseServer.client
-      .from("experiment_v3") // TODO: I have no clue if this has to be changed
-      .select("*")
-      .eq("id", experimentId)
-      .eq("organization", this.authParams.organizationId)
-      .single();
-    return !!experiment.data;
+    try {
+      const result = await dbExecute<{ id: string }>(
+        `SELECT id
+         FROM experiment_v3
+         WHERE id = $1
+         AND organization = $2
+         LIMIT 1`,
+        [experimentId, this.authParams.organizationId]
+      );
+
+      return !!(result.data && result.data.length > 0);
+    } catch (error) {
+      console.error("Error checking experiment access:", error);
+      return false;
+    }
   }
 
   async getExperiments(): Promise<Result<ExperimentV2[], string>> {
     try {
-      const response = await supabaseServer.client
-        .from("experiment_v3")
-        .select("*")
-        .eq("organization", this.authParams.organizationId)
-        .eq("soft_delete", false)
-        .order("created_at", { ascending: false });
+      const result = await dbExecute<ExperimentV2>(
+        `SELECT *
+         FROM experiment_v3
+         WHERE organization = $1
+         AND soft_delete = false
+         ORDER BY created_at DESC`,
+        [this.authParams.organizationId]
+      );
 
-      return ok(response.data ?? []);
-    } catch (e) {
-      return err("Failed to get experiments");
+      if (result.error) {
+        return err(`Failed to get experiments: ${result.error}`);
+      }
+
+      return ok(result.data || []);
+    } catch (error) {
+      return err(`Failed to get experiments: ${error}`);
     }
   }
 
   async getExperimentById(experimentId: string): Promise<ExperimentV2 | null> {
-    const experiment = await supabaseServer.client
-      .from("experiment_v3")
-      .select("*")
-      .eq("id", experimentId)
-      .eq("organization", this.authParams.organizationId)
-      .single();
-    return experiment.data ?? null;
+    try {
+      const result = await dbExecute<ExperimentV2>(
+        `SELECT *
+         FROM experiment_v3
+         WHERE id = $1
+         AND organization = $2
+         LIMIT 1`,
+        [experimentId, this.authParams.organizationId]
+      );
+
+      if (result.error || !result.data || result.data.length === 0) {
+        return null;
+      }
+
+      return result.data[0];
+    } catch (error) {
+      console.error("Error fetching experiment by ID:", error);
+      return null;
+    }
   }
 
   async deleteExperiment(experimentId: string): Promise<Result<null, string>> {
@@ -136,17 +168,23 @@ export class ExperimentV2Manager extends BaseManager {
       return err("Experiment not found");
     }
 
-    const result = await supabaseServer.client
-      .from("experiment_v3")
-      .update({ soft_delete: true })
-      .eq("id", experimentId)
-      .eq("organization", this.authParams.organizationId);
+    try {
+      const result = await dbExecute(
+        `UPDATE experiment_v3
+         SET soft_delete = true
+         WHERE id = $1
+         AND organization = $2`,
+        [experimentId, this.authParams.organizationId]
+      );
 
-    if (result.error) {
-      return err("Failed to delete experiment");
+      if (result.error) {
+        return err(`Failed to delete experiment: ${result.error}`);
+      }
+
+      return ok(null);
+    } catch (error) {
+      return err(`Failed to delete experiment: ${error}`);
     }
-
-    return ok(null);
   }
 
   // this query needs to be better imo
@@ -174,30 +212,45 @@ export class ExperimentV2Manager extends BaseManager {
 
       const originalPromptVersionData = originalPromptVersionRes.data[0];
 
-      const inputKeys = await supabaseServer.client
-        .from("prompt_input_keys")
-        .select("key")
-        .eq("prompt_version", originalPromptVersion);
+      // Get input keys for the prompt version
+      const inputKeysResult = await dbExecute<{ key: string }>(
+        `SELECT key
+         FROM prompt_input_keys
+         WHERE prompt_version = $1`,
+        [originalPromptVersion]
+      );
 
-      const result = await supabaseServer.client
-        .from("experiment_v3")
-        .insert({
+      // Create new experiment
+      const experimentResult = await dbExecute<{ id: string }>(
+        `INSERT INTO experiment_v3 (name, original_prompt_version, organization, input_keys)
+         VALUES ($1, $2, $3, $4)
+         RETURNING id`,
+        [
           name,
-          original_prompt_version: originalPromptVersion,
-          organization: this.authParams.organizationId,
-          input_keys: inputKeys.data?.map((key) => key.key) ?? [],
-        })
-        .select();
+          originalPromptVersion,
+          this.authParams.organizationId,
+          inputKeysResult.data?.map((row) => row.key) || [],
+        ]
+      );
 
-      if (result.error || !result.data || result.data.length === 0) {
-        return err("Failed to create new experiment");
+      if (
+        experimentResult.error ||
+        !experimentResult.data ||
+        experimentResult.data.length === 0
+      ) {
+        return err(
+          `Failed to create new experiment: ${experimentResult.error}`
+        );
       }
 
+      const experimentId = experimentResult.data[0].id;
+
+      // Create new prompt version for the experiment
       const newPromptVersion = await promptManager.createNewPromptVersion(
         originalPromptVersion,
         {
           newHeliconeTemplate: originalPromptVersionData.helicone_template,
-          experimentId: result.data[0].id,
+          experimentId: experimentId,
           metadata: {
             label: "Original",
           },
@@ -208,80 +261,87 @@ export class ExperimentV2Manager extends BaseManager {
         return err("Failed to create new prompt version");
       }
 
-      const updatedExperiment = await supabaseServer.client
-        .from("experiment_v3")
-        .update({
-          copied_original_prompt_version: newPromptVersion.data.id,
-        })
-        .eq("id", result.data[0].id);
+      // Update experiment with copied original prompt version
+      const updateResult = await dbExecute(
+        `UPDATE experiment_v3
+         SET copied_original_prompt_version = $1
+         WHERE id = $2`,
+        [newPromptVersion.data.id, experimentId]
+      );
 
-      if (updatedExperiment.error) {
-        return err("Failed to update experiment");
+      if (updateResult.error) {
+        return err(`Failed to update experiment: ${updateResult.error}`);
       }
 
-      return ok({ experimentId: result.data[0].id });
-    } catch (e) {
-      return err("Failed to create new experiment");
+      return ok({ experimentId });
+    } catch (error) {
+      return err(`Failed to create new experiment: ${error}`);
     }
   }
 
   async getExperimentWithRowsById(
     experimentId: string
   ): Promise<Result<ExtendedExperimentData, string>> {
-    const experiment = await supabaseServer.client
-      .from("experiment_v3")
-      .select("*")
-      .eq("id", experimentId)
-      .eq("organization", this.authParams.organizationId)
-      .single();
-
     try {
+      const experimentResult = await dbExecute<ExperimentV2>(
+        `SELECT *
+         FROM experiment_v3
+         WHERE id = $1
+         AND organization = $2
+         LIMIT 1`,
+        [experimentId, this.authParams.organizationId]
+      );
+
+      if (
+        experimentResult.error ||
+        !experimentResult.data ||
+        experimentResult.data.length === 0
+      ) {
+        return err("Experiment not found");
+      }
+
       const rows = await dbExecute<ExperimentV2Row>(
         `
-    SELECT 
-      pir.id,
-      pir.inputs,
-      pir.prompt_version,
-      pir.auto_prompt_inputs,
-      COALESCE(
-        (
-          SELECT jsonb_agg(
-            jsonb_build_object(
-              'id', eo.id,
-              'request_id', eo.request_id,
-              'is_original', eo.is_original,
-              'prompt_version_id', eo.prompt_version_id,
-              'input_record_id', eo.input_record_id,
-              'created_at', eo.created_at
-            )
-            ORDER BY eo.created_at DESC
-          )
-          FROM experiment_output eo 
-          WHERE pir.id = eo.input_record_id
-        ),
-        '[]'::jsonb
-      ) AS requests
-    FROM prompt_input_record pir
-    WHERE pir.experiment_id = $1
-    ORDER BY pir.created_at ASC
+        SELECT 
+          pir.id,
+          pir.inputs,
+          pir.prompt_version,
+          pir.auto_prompt_inputs,
+          COALESCE(
+            (
+              SELECT jsonb_agg(
+                jsonb_build_object(
+                  'id', eo.id,
+                  'request_id', eo.request_id,
+                  'is_original', eo.is_original,
+                  'prompt_version_id', eo.prompt_version_id,
+                  'input_record_id', eo.input_record_id,
+                  'created_at', eo.created_at
+                )
+                ORDER BY eo.created_at DESC
+              )
+              FROM experiment_output eo 
+              WHERE pir.id = eo.input_record_id
+            ),
+            '[]'::jsonb
+          ) AS requests
+        FROM prompt_input_record pir
+        WHERE pir.experiment_id = $1
+        ORDER BY pir.created_at ASC
         `,
         [experimentId]
       );
 
       if (rows.error || !rows.data) {
-        return err("Failed to get experiment");
-      }
-
-      if (!experiment.data || !experiment.data.id) {
-        return err("Experiment data is incomplete");
+        return err(`Failed to get experiment rows: ${rows.error}`);
       }
 
       return ok({
-        ...experiment.data,
+        ...experimentResult.data[0],
         rows: rows.data,
       });
-    } catch (e) {
-      return err("Failed to get experiment");
+    } catch (error) {
+      return err(`Failed to get experiment: ${error}`);
     }
   }
 
@@ -353,40 +413,46 @@ export class ExperimentV2Manager extends BaseManager {
         )
       ).map((match) => match[1]);
 
-      const existingExperimentInputKeys = await supabaseServer.client
-        .from("experiment_v3")
-        .select("input_keys")
-        .eq("id", experimentId)
-        .single();
+      // Get existing input keys
+      const existingKeysResult = await dbExecute<{ input_keys: string[] }>(
+        `SELECT input_keys
+         FROM experiment_v3
+         WHERE id = $1
+         LIMIT 1`,
+        [experimentId]
+      );
 
-      const res = await Promise.all([
-        supabaseServer.client
-          .from("experiment_v3")
-          .update({
-            input_keys: [
-              ...new Set([
-                ...(existingExperimentInputKeys.data?.input_keys ?? []),
-                ...newPromptVersionInputKeys,
-              ]),
-            ],
-          })
-          .eq("organization", this.authParams.organizationId)
-          .eq("id", experimentId),
-        dbExecute(
-          `INSERT INTO prompt_input_keys (key, prompt_version)
-       SELECT unnest($1::text[]), $2
-       ON CONFLICT (key, prompt_version) DO NOTHING`,
-          [`{${newPromptVersionInputKeys.join(",")}}`, result.data.id]
-        ),
-      ]);
+      const existingInputKeys = existingKeysResult.data?.[0]?.input_keys || [];
 
-      if (res.some((r) => r.error)) {
-        return err("Failed to create new prompt version for experiment");
+      // Update experiment input keys
+      const updateExperimentResult = await dbExecute(
+        `UPDATE experiment_v3
+         SET input_keys = $1
+         WHERE organization = $2
+         AND id = $3`,
+        [
+          [...new Set([...existingInputKeys, ...newPromptVersionInputKeys])],
+          this.authParams.organizationId,
+          experimentId,
+        ]
+      );
+
+      const insertPromptKeysResult = await dbExecute(
+        `INSERT INTO prompt_input_keys (key, prompt_version)
+         SELECT unnest($1::text[]), $2
+         ON CONFLICT (key, prompt_version) DO NOTHING`,
+        [`{${newPromptVersionInputKeys.join(",")}}`, result.data.id]
+      );
+
+      if (updateExperimentResult.error || insertPromptKeysResult.error) {
+        return err("Failed to update experiment input keys");
       }
 
       return ok(result.data);
-    } catch (e) {
-      return err("Failed to create new prompt version for experiment");
+    } catch (error) {
+      return err(
+        `Failed to create new prompt version for experiment: ${error}`
+      );
     }
   }
 
@@ -413,25 +479,47 @@ export class ExperimentV2Manager extends BaseManager {
   async getPromptVersionsForExperiment(
     experimentId: string
   ): Promise<Result<ExperimentV2PromptVersion[], string>> {
-    const promptVersions = await supabaseServer.client
-      .from("prompts_versions")
-      .select("*")
-      .eq("experiment_id", experimentId)
-      .eq("organization", this.authParams.organizationId)
-      .order("minor_version", { ascending: true });
-    return ok(promptVersions.data ?? []);
+    try {
+      const result = await dbExecute<ExperimentV2PromptVersion>(
+        `SELECT *
+         FROM prompts_versions
+         WHERE experiment_id = $1
+         AND organization = $2
+         ORDER BY minor_version ASC`,
+        [experimentId, this.authParams.organizationId]
+      );
+
+      if (result.error) {
+        return err(`Failed to get prompt versions: ${result.error}`);
+      }
+
+      return ok(result.data || []);
+    } catch (error) {
+      return err(`Failed to get prompt versions: ${error}`);
+    }
   }
 
   async getInputKeysForExperiment(
     experimentId: string
   ): Promise<Result<string[], string>> {
-    const inputKeys = await supabaseServer.client
-      .from("experiment_v3")
-      .select("input_keys")
-      .eq("id", experimentId)
-      .eq("organization", this.authParams.organizationId)
-      .single();
-    return ok(inputKeys.data?.input_keys ?? []);
+    try {
+      const result = await dbExecute<{ input_keys: string[] }>(
+        `SELECT input_keys
+         FROM experiment_v3
+         WHERE id = $1
+         AND organization = $2
+         LIMIT 1`,
+        [experimentId, this.authParams.organizationId]
+      );
+
+      if (result.error || !result.data || result.data.length === 0) {
+        return ok([]);
+      }
+
+      return ok(result.data[0].input_keys || []);
+    } catch (error) {
+      return err(`Failed to get input keys: ${error}`);
+    }
   }
 
   async addManualRowToExperiment(
@@ -543,8 +631,10 @@ export class ExperimentV2Manager extends BaseManager {
       );
 
       return ok(null);
-    } catch (e) {
-      return err("Failed to create experiment table row with cells batch");
+    } catch (error) {
+      return err(
+        `Failed to create experiment table row with cells batch: ${error}`
+      );
     }
   }
 
@@ -555,48 +645,80 @@ export class ExperimentV2Manager extends BaseManager {
     autoInputs: Record<string, any>
   ): Promise<Result<null, string>> {
     try {
-      const [originalPIR, experiment] = await Promise.all([
-        supabaseServer.client
-          .from("prompt_input_record")
-          .select("*")
-          .eq("id", inputRecordId)
-          .single(),
-        this.getExperimentById(experimentId),
-      ]);
+      // Get the original prompt input record
+      const originalPIRResult = await dbExecute<{ source_request: string }>(
+        `SELECT source_request
+         FROM prompt_input_record
+         WHERE id = $1
+         LIMIT 1`,
+        [inputRecordId]
+      );
 
-      if (!originalPIR.data) {
+      if (
+        originalPIRResult.error ||
+        !originalPIRResult.data ||
+        originalPIRResult.data.length === 0
+      ) {
         return err("Original prompt input record not found");
       }
 
+      const experiment = await this.getExperimentById(experimentId);
       if (!experiment) {
         return err("Experiment not found");
       }
 
-      const response = await supabaseServer.client
-        .from("prompt_input_record")
-        .insert({
+      // Create new prompt input record
+      const newPIRResult = await dbExecute<{ id: string }>(
+        `INSERT INTO prompt_input_record (
+           inputs, 
+           auto_prompt_inputs, 
+           prompt_version, 
+           experiment_id
+         )
+         VALUES ($1, $2, $3, $4)
+         RETURNING id`,
+        [
           inputs,
-          auto_prompt_inputs: autoInputs,
-          prompt_version: experiment?.copied_original_prompt_version ?? "",
-          experiment_id: experimentId,
-        })
-        .select();
+          autoInputs,
+          experiment.copied_original_prompt_version || "",
+          experimentId,
+        ]
+      );
 
-      if (response.error || !response.data || response.data.length === 0) {
+      if (
+        newPIRResult.error ||
+        !newPIRResult.data ||
+        newPIRResult.data.length === 0
+      ) {
         return err("Failed to create prompt input record");
       }
 
-      await supabaseServer.client.from("experiment_output").insert({
-        input_record_id: response.data[0].id,
-        prompt_version_id: experiment?.copied_original_prompt_version ?? "",
-        is_original: true,
-        experiment_id: experimentId,
-        request_id: originalPIR.data.source_request,
-      });
+      // Create experiment output
+      const outputResult = await dbExecute(
+        `INSERT INTO experiment_output (
+           input_record_id,
+           prompt_version_id,
+           is_original,
+           experiment_id,
+           request_id
+         )
+         VALUES ($1, $2, $3, $4, $5)`,
+        [
+          newPIRResult.data[0].id,
+          experiment.copied_original_prompt_version || "",
+          true,
+          experimentId,
+          originalPIRResult.data[0].source_request,
+        ]
+      );
+
+      if (outputResult.error) {
+        return err(`Failed to create experiment output: ${outputResult.error}`);
+      }
 
       return ok(null);
-    } catch (e) {
-      return err("Failed to create experiment table row");
+    } catch (error) {
+      return err(`Failed to create experiment table row: ${error}`);
     }
   }
 
@@ -614,19 +736,24 @@ export class ExperimentV2Manager extends BaseManager {
     }
 
     try {
-      const result = await supabaseServer.client
-        .from("prompt_input_record")
-        .update({ experiment_id: null })
-        .in("id", inputRecordIds)
-        .eq("experiment_id", experimentId);
+      // Create placeholders for the IN clause
+      const placeholders = inputRecordIds.map((_, i) => `$${i + 3}`).join(", ");
+
+      const result = await dbExecute(
+        `UPDATE prompt_input_record
+         SET experiment_id = null
+         WHERE id IN (${placeholders})
+         AND experiment_id = $1`,
+        [experimentId, ...inputRecordIds]
+      );
 
       if (result.error) {
-        return err("Failed to delete experiment table rows");
+        return err(`Failed to delete experiment table rows: ${result.error}`);
       }
 
       return ok(null);
-    } catch (e) {
-      return err("Failed to delete experiment table rows");
+    } catch (error) {
+      return err(`Failed to delete experiment table rows: ${error}`);
     }
   }
 
@@ -640,19 +767,22 @@ export class ExperimentV2Manager extends BaseManager {
       if (!experiment) {
         return err("Experiment not found");
       }
-      const result = await supabaseServer.client
-        .from("prompt_input_record")
-        .update({ inputs })
-        .eq("id", inputRecordId)
-        .eq("experiment_id", experimentId);
+
+      const result = await dbExecute(
+        `UPDATE prompt_input_record
+         SET inputs = $1
+         WHERE id = $2
+         AND experiment_id = $3`,
+        [inputs, inputRecordId, experimentId]
+      );
 
       if (result.error) {
-        return err("Failed to update experiment table row");
+        return err(`Failed to update experiment table row: ${result.error}`);
       }
 
       return ok(null);
-    } catch (e) {
-      return err("Failed to update experiment table row");
+    } catch (error) {
+      return err(`Failed to update experiment table row: ${error}`);
     }
   }
 

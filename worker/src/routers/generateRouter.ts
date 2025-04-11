@@ -25,6 +25,7 @@ const generateParamsSchema = z.object({
     .default("production"),
   inputs: z.record(z.string()).optional().default({}),
   chat: z.array(z.string()).optional(),
+  stream: z.boolean().optional().default(false),
 
   // Optional Helicone properties for tracking
   properties: z
@@ -182,7 +183,12 @@ const generateHandler = async (
     }
 
     // c. Map from LLMRequestBody type to provider body type
-    const requestTemplate = mapper.toExternal(filledTemplate);
+    const requestTemplate = parameters.stream
+      ? {
+          ...(mapper.toExternal(filledTemplate) as any),
+          stream: parameters.stream,
+        }
+      : mapper.toExternal(filledTemplate);
 
     // 7. FORWARD REQUEST TO PROVIDER
     const newRequest = new Request(targetUrl, {

@@ -1,7 +1,6 @@
 import * as Sentry from "@sentry/node";
 import { sendToWebhook, WebhookPayload } from "../clients/webhookSender";
-import { err, ok, PromiseGenericResult } from "../shared/result";
-import { FeatureFlagStore } from "../stores/FeatureFlagStore";
+import { err, ok, PromiseGenericResult } from "../../packages/common/result";
 import { WebhookStore } from "../stores/WebhookStore";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
@@ -66,6 +65,8 @@ export class WebhookHandler extends AbstractLogHandler {
             prompt_cache_read_tokens: context.usage.promptCacheReadTokens || 0,
             sum_completion_tokens: completionTokens,
             sum_tokens: totalTokens,
+            prompt_audio_tokens: context.usage.promptAudioTokens || 0,
+            completion_audio_tokens: context.usage.completionAudioTokens || 0,
           });
 
           // Calculate latency

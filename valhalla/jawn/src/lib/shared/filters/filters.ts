@@ -1,10 +1,8 @@
-import { supabaseServer } from "../../db/supabase";
 import {
   AllOperators,
   AnyOperator,
   FilterBranch,
   FilterLeaf,
-  filterListToTree,
   FilterNode,
   TablesAndViews,
 } from "./filterDefs";
@@ -241,22 +239,6 @@ const whereKeyMappings: KeyMappings = {
       scores_column: "request_response_rmt.scores",
     })(filter, placeValueSafely);
   },
-  request_response_search: (filter, placeValueSafely) => {
-    const keys = Object.keys(filter);
-    if (keys.length !== 1) {
-      throw new Error("Invalid filter, only one key is allowed");
-    }
-    const key = keys[0];
-    const { operator, value } = extractOperatorAndValueFromAnOperator(
-      filter[key as keyof typeof filter]!
-    );
-
-    return {
-      column: `request_response_search.${key}`,
-      operator: "vector-contains",
-      value: placeValueSafely(value),
-    };
-  },
   users_view: easyKeyMappings<"request_response_log">({
     status: "r.status",
     user_id: "r.user_id",
@@ -328,7 +310,7 @@ const havingKeyMappings: KeyMappings = {
       session_session_name: "properties['Helicone-Session-Name']",
     }),
   request_response_rmt: easyKeyMappings<"request_response_rmt">({}),
-  request_response_search: NOT_IMPLEMENTED,
+
   score_value: NOT_IMPLEMENTED,
   experiment_hypothesis_run: NOT_IMPLEMENTED,
   user_api_keys: NOT_IMPLEMENTED,
@@ -539,29 +521,6 @@ export function buildFilterPostgres(
     ...args,
     argPlaceHolder: (index, parameter) => `$${index + 1}`,
   });
-}
-
-async function getUserIdHashes(user_id: string): Promise<string[]> {
-  const { data: user_api_keys, error } = await supabaseServer.client
-    .from("user_api_keys")
-    .select("api_key_hash")
-    .eq("user_id", user_id);
-  if (error) {
-    throw error;
-  }
-  if (!user_api_keys || user_api_keys.length === 0) {
-    throw new Error("No API keys found for user");
-  }
-  return user_api_keys.map((x) => x.api_key_hash);
-}
-
-async function buildUserIdHashesFilter(
-  user_id: string,
-  hashToFilter: (hash: string) => FilterLeaf
-) {
-  const userIdHashes = await getUserIdHashes(user_id);
-  const filters: FilterLeaf[] = userIdHashes.map(hashToFilter);
-  return filterListToTree(filters, "or");
 }
 
 export interface BuildFilterArgs {

@@ -1,14 +1,14 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import { getAnthropicKeyFromAdmin } from "@/lib/clients/settings";
+import { getSSRHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 import Anthropic from "@anthropic-ai/sdk";
+import { NextApiRequest, NextApiResponse } from "next";
 
-import { DEMO_EMAIL } from "../../../../lib/constants";
-import { Result } from "../../../../lib/result";
-import { SupabaseServerWrapper } from "../../../../lib/wrappers/supabase";
 import {
   ImageBlockParam,
   TextBlockParam,
 } from "@anthropic-ai/sdk/resources/messages";
-import { getAnthropicKeyFromAdmin } from "@/lib/clients/settings";
+import { DEMO_EMAIL } from "../../../../lib/constants";
+import { Result } from "../../../../packages/common/result";
 
 export interface ChatParams {
   content: string | Array<TextBlockParam | ImageBlockParam>;
@@ -19,8 +19,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Result<Anthropic.Messages.Message, string>>
 ) {
-  const client = new SupabaseServerWrapper({ req, res }).getClient();
-  const user = await client.auth.getUser();
+  const client = await getSSRHeliconeAuthClient({ ctx: { req, res } });
+  const user = await client.getUser();
   let { messages, requestId, temperature, model, maxTokens, anthropicAPIKey } =
     req.body as {
       messages: ChatParams[];
@@ -49,17 +49,17 @@ export default async function handler(
     apiKey: anthropicAPIKey,
     defaultHeaders: {
       "Helicone-Auth": `Bearer ${process.env.TEST_HELICONE_API_KEY}`,
-      user: user.data.user?.id || "",
+      user: user.data?.id || "",
       "Helicone-Property-RequestId": requestId,
       "Helicone-Property-Tag": "experiment",
     },
   });
 
-  if (!user.data || !user.data.user) {
+  if (!user.data) {
     res.status(401).json({ error: "Unauthorized", data: null });
     return;
   }
-  if (user.data.user.email === DEMO_EMAIL) {
+  if (user.data.email === DEMO_EMAIL) {
     res.status(401).json({ error: "Unauthorized", data: null });
     return;
   }
@@ -89,7 +89,7 @@ export default async function handler(
       max_tokens: maxTokens,
       temperature: temperature,
       metadata: {
-        user_id: user.data.user.id,
+        user_id: user.data.id,
       },
       system: systemMessage || undefined,
       messages: anthropicMessages,

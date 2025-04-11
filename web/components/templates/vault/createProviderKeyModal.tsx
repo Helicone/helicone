@@ -1,7 +1,7 @@
 import { FormEvent, useState } from "react";
 import ThemedModal from "../../shared/themed/themedModal";
 import useNotification from "../../shared/notification/useNotification";
-import { Result } from "../../../lib/result";
+import { Result } from "../../../packages/common/result";
 import { DecryptedProviderKey } from "../../../services/lib/keys";
 import { clsx } from "../../shared/clsx";
 import {

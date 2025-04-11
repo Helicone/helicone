@@ -30,7 +30,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
     return path.charAt(0).toUpperCase() + path.slice(1);
   }, [pathname]);
 
-  const { alertBanners } = useAlertBanners();
+  const { data: alertBanners } = useAlertBanners();
   const orgContext = useOrg();
 
   const banner = useMemo((): BannerType | null => {

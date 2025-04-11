@@ -20,11 +20,13 @@ import { mapTool } from "../mappers/tool";
 import { MapperFn } from "../mappers/types";
 import { mapVectorDB } from "../mappers/vector-db";
 import { getMapperTypeFromHeliconeRequest } from "./getMapperType";
+import { mapOpenAIResponse } from "../mappers/openai/responses";
 
 const MAX_PREVIEW_LENGTH = 1_000;
 
 export const MAPPERS: Record<MapperType, MapperFn<any, any>> = {
   "openai-chat": mapOpenAIRequest,
+  "openai-response": mapOpenAIResponse,
   "anthropic-chat": mapAnthropicRequest,
   "gemini-chat": mapGeminiPro,
   "black-forest-labs-image": mapBlackForestLabsImage,
@@ -70,6 +72,9 @@ const metaDataFromHeliconeRequest = (
       sum_prompt_tokens: heliconeRequest.prompt_tokens || 0,
       prompt_cache_write_tokens: heliconeRequest.prompt_cache_write_tokens || 0,
       prompt_cache_read_tokens: heliconeRequest.prompt_cache_read_tokens || 0,
+
+      prompt_audio_tokens: heliconeRequest.prompt_audio_tokens || 0,
+      completion_audio_tokens: heliconeRequest.completion_audio_tokens || 0,
 
       sum_completion_tokens: heliconeRequest.completion_tokens || 0,
 

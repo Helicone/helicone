@@ -5,7 +5,7 @@ import { CreateAlertModal, EditAlertModal } from "./createAlertModal";
 import DeleteAlertModal from "./deleteAlertModal";
 import ThemedTable from "../../shared/themed/themedTable";
 import { User } from "@supabase/auth-helpers-react";
-import { Database } from "../../../supabase/database.types";
+import { Database } from "../../../db/database.types";
 import { getUSDate } from "../../shared/utils/utils";
 import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 import { useGetOrgSlackChannels } from "@/services/hooks/organizations";

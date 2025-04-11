@@ -1,13 +1,11 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-
+import { dbExecute } from "@/lib/api/db/dbExecute";
 import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { getTotalRequestsOverTime } from "../../../lib/api/metrics/getRequestOverTime";
-import { Result } from "../../../lib/result";
-import { getSupabaseServer } from "../../../lib/supabaseServer";
 import { RequestsOverTime } from "../../../lib/timeCalculations/fetchTimeData";
+import { Result } from "../../../packages/common/result";
 import { MetricsBackendBody } from "../../../services/hooks/useBackendFunction";
 
 async function handler(
@@ -23,20 +21,19 @@ async function handler(
     filter: userFilters,
     dbIncrement,
     timeZoneDifference,
-    organizationId,
+    organizationId: orgIdFromBody,
   } = options.req.body as MetricsBackendBody;
 
-  if (organizationId) {
-    await getSupabaseServer()
-      .from("organization_member")
-      .select("*")
-      .eq("organization_id", organizationId)
-      .eq("member_id", userId)
-      .then((org_res) => {
-        if (org_res.data?.length === 0) {
-          res.status(403).json({ error: "Unauthorized", data: null });
-        }
-      });
+  const organizationId = orgIdFromBody ?? orgId;
+
+  const { error, data } = await dbExecute(
+    `SELECT id FROM organization_member WHERE organization_id = $1 AND member_id = $2`,
+    [organizationId, userId]
+  );
+
+  if (!data || data.length === 0 || error) {
+    res.status(403).json({ error: "Unauthorized", data: null });
+    return;
   }
 
   res.status(200).json(

@@ -5,7 +5,7 @@ import {
 } from "../../../services/lib/filters/frontendFilterDefs";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import { RequestsOverTime } from "../../../lib/timeCalculations/fetchTimeData";
-import { Result, resultMap } from "../../../lib/result";
+import { Result, resultMap } from "../../../packages/common/result";
 import {
   BackendMetricsCall,
   useBackendMetricCall,

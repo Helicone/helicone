@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { getMetadata } from "@/components/templates/blog/getMetaData";
 import { Metadata } from "next";
+import BlogFilter from "@/app/blog/BlogFilter";
 
 export const metadata: Metadata = {
   title: "Helicone Blog | AI Development Insights & Best Practices",
@@ -30,6 +31,7 @@ export const metadata: Metadata = {
 
 type BlogPostProps = {
   blog: BlogStructure;
+  dynamicMetadata?: Map<string, any>;
 };
 
 type UnPromise<T> = T extends Promise<infer U> ? U : T;
@@ -74,9 +76,14 @@ function metaDataToBlogStructure(
   };
 }
 
-const RegularBlogPost: React.FC<BlogPostProps> = async ({ blog }) => {
+const RegularBlogPost: React.FC<BlogPostProps> = async ({
+  blog,
+  dynamicMetadata,
+}) => {
   if ("dynmaicEntry" in blog) {
-    const metadata = await getMetadata(blog.dynmaicEntry.folderName);
+    const metadata = dynamicMetadata
+      ? dynamicMetadata.get(blog.dynmaicEntry.folderName)
+      : await getMetadata(blog.dynmaicEntry.folderName);
     blog = metaDataToBlogStructure(blog.dynmaicEntry.folderName, metadata);
   }
 
@@ -98,10 +105,16 @@ const RegularBlogPost: React.FC<BlogPostProps> = async ({ blog }) => {
       </div>
 
       <div className="w-full h-fit flex flex-col space-y-2 text-left px-1 md:px-0">
-        <h2 className="font-bold text-lg leading-snug tracking-tight line-clamp-2">{blog.title}</h2>
-        <p className="text-slate-500 text-sm line-clamp-2 md:line-clamp-3">{blog.description}</p>
+        <h2 className="font-bold text-lg leading-snug tracking-tight line-clamp-2">
+          {blog.title}
+        </h2>
+        <p className="text-slate-500 text-sm line-clamp-2 md:line-clamp-3">
+          {blog.description}
+        </p>
         <div className="flex items-center gap-2 text-slate-500 text-sm pt-2">
-          <span>{blog.badgeText.charAt(0).toUpperCase() + blog.badgeText.slice(1)}</span>
+          <span>
+            {blog.badgeText.charAt(0).toUpperCase() + blog.badgeText.slice(1)}
+          </span>
           <span>•</span>
           <span>{blog.date}</span>
         </div>
@@ -110,9 +123,14 @@ const RegularBlogPost: React.FC<BlogPostProps> = async ({ blog }) => {
   );
 };
 
-const FeaturedBlogPost: React.FC<BlogPostProps> = async ({ blog }) => {
+const FeaturedBlogPost: React.FC<BlogPostProps> = async ({
+  blog,
+  dynamicMetadata,
+}) => {
   if ("dynmaicEntry" in blog) {
-    const metadata = await getMetadata(blog.dynmaicEntry.folderName);
+    const metadata = dynamicMetadata
+      ? dynamicMetadata.get(blog.dynmaicEntry.folderName)
+      : await getMetadata(blog.dynmaicEntry.folderName);
     blog = metaDataToBlogStructure(blog.dynmaicEntry.folderName, metadata);
   }
 
@@ -136,15 +154,21 @@ const FeaturedBlogPost: React.FC<BlogPostProps> = async ({ blog }) => {
       <div className="w-full md:w-1/2 h-full rounded-lg flex flex-col space-y-2 md:space-y-4 text-left order-2 md:mt-4 px-1 md:px-6">
         <div className="hidden md:flex items-center">
           <span className="bg-sky-200 text-sky-700 w-max items-center rounded-full px-3 py-1 text-sm font-medium">
-            {blog.badgeText.toLowerCase()}
+            {blog.badgeText.charAt(0).toUpperCase() + blog.badgeText.slice(1)}
           </span>
         </div>
 
-        <h2 className="font-bold text-lg md:text-3xl leading-snug md:leading-tight tracking-tight line-clamp-2">{blog.title}</h2>
-        <p className="text-slate-500 md:text-slate-600 text-sm md:text-base line-clamp-2 md:line-clamp-2">{blog.description}</p>
+        <h2 className="font-bold text-lg md:text-3xl leading-snug md:leading-tight tracking-tight line-clamp-2">
+          {blog.title}
+        </h2>
+        <p className="text-slate-500 md:text-slate-600 text-sm md:text-base line-clamp-2 md:line-clamp-2">
+          {blog.description}
+        </p>
 
         <div className="flex md:hidden items-center gap-2 text-slate-500 text-sm pt-2">
-          <span>{blog.badgeText.charAt(0).toUpperCase() + blog.badgeText.slice(1)}</span>
+          <span>
+            {blog.badgeText.charAt(0).toUpperCase() + blog.badgeText.slice(1)}
+          </span>
           <span>•</span>
           <span>{blog.date}</span>
         </div>
@@ -194,6 +218,16 @@ export type BlogStructure =
   };
 
 const blogContent: BlogStructure[] = [
+  {
+    dynmaicEntry: {
+      folderName: "openai-realtime-api-with-helicone",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "gemini-2.5-full-developer-guide",
+    },
+  },
   {
     dynmaicEntry: {
       folderName: "o1-pro-for-developers",
@@ -524,7 +558,7 @@ const blogContent: BlogStructure[] = [
       "Handling Billions of LLM Logs with Upstash Kafka and Cloudflare Workers",
     description:
       "We desperately needed a solution to these outages/data loss. Our reliability and scalability are core to our product.",
-    badgeText: "technical deep dive",
+    badgeText: "Company",
     date: "July 1, 2024",
     href: "https://upstash.com/blog/implementing-upstash-kafka-with-cloudflare-workers",
     imageUrl: "/static/blog/kafka-cover.webp",
@@ -538,262 +572,80 @@ const blogContent: BlogStructure[] = [
     time: "15 minute read",
   },
   {
-    title: "Best Practices for AI Developers: Full Guide (June 2024)",
-    description:
-      "Achieving high performance requires robust observability practices. In this blog, we will explore the key challenges of building with AI and the best practices to help you advance your AI development.",
-    badgeText: "guide",
-    date: "June 20, 2024",
-    href: "/blog/ai-best-practices",
-    imageUrl: "/static/blog/ai-best-practices/cover.webp",
-    authors: [
-      {
-        name: "Lina Lam",
-        imageUrl: "/static/blog/linalam-headshot.webp",
-        imageAlt: "Lina Lam's headshot",
-      },
-    ],
-    time: "6 minute read",
+    dynmaicEntry: {
+      folderName: "ai-best-practices",
+    },
   },
   {
-    title: "I built my first AI app and integrated it with Helicone",
-    description:
-      "So, I decided to make my first AI app with Helicone - in the spirit of getting a first-hand exposure to our user's pain points.",
-    badgeText: "guide",
-    date: "June 18, 2024",
-    href: "/blog/first-ai-app-with-helicone",
-    imageUrl: "/static/blog/first-ai-app/lina-first-ai-app.webp",
-    authors: [
-      {
-        name: "Lina Lam",
-        imageUrl: "/static/blog/linalam-headshot.webp",
-        imageAlt: "Lina Lam's headshot",
-      },
-    ],
-    time: "6 minute read",
+    dynmaicEntry: {
+      folderName: "first-ai-app-with-helicone",
+    },
   },
   {
-    title:
-      "How to Understand Your Users Better and Deliver a Top-Tier Experience with Custom Properties",
-    description:
-      "In today's digital landscape, every interaction, click, and engagement offers valuable insights into your users' preferences. But how do you harness this data to effectively grow your business? We may have the answer. ",
-    badgeText: "how-to",
-    date: "June 14, 2024",
-    href: "/blog/custom-properties",
-    imageUrl: "/static/blog/custom-properties/cover.webp",
-    authors: [
-      {
-        name: "Lina Lam",
-        imageUrl: "/static/blog/linalam-headshot.webp",
-        imageAlt: "Lina Lam's headshot",
-      },
-    ],
-    time: "6 minute read",
+    dynmaicEntry: {
+      folderName: "custom-properties",
+    },
   },
   {
-    title: "Helicone vs. Weights and Biases",
-    description:
-      "Training modern LLMs is generally less complex than traditional ML models. Here's how to have all the essential tools specifically designed for language model observability without the clutter.",
-    badgeText: "compare",
-    date: "May 31, 2024",
-    href: "/blog/weights-and-biases",
-    imageUrl: "/static/blog/weights-and-biases.webp",
-    authors: [
-      {
-        name: "Lina Lam",
-        imageUrl: "/static/blog/linalam-headshot.webp",
-        imageAlt: "Lina Lam's headshot",
-      },
-    ],
-    time: "5 minute read",
+    dynmaicEntry: {
+      folderName: "weights-and-biases",
+    },
   },
   {
-    title: "Insider Scoop: Our Co-founder's Take on GitHub Copilot",
-    description:
-      "No BS, no affiliations, just genuine opinions from Helicone's co-founder.",
-    badgeText: "insight",
-    date: "May 30, 2024",
-    href: "/blog/cole-github-copilot",
-    imageUrl: "/static/blog/cole-copilot.webp",
-    authors: [
-      {
-        name: "Cole Gottdank",
-        imageUrl: "/static/blog/colegottdank-headshot.webp",
-        imageAlt: "Cole Gottdank's headshot",
-      },
-      {
-        name: "Lina Lam",
-        imageUrl: "/static/blog/linalam-headshot.webp",
-        imageAlt: "Lina Lam's headshot",
-      },
-    ],
-    time: "4 minute read",
+    dynmaicEntry: {
+      folderName: "cole-github-copilot",
+    },
   },
   {
-    title: "Insider Scoop: Our Founding Engineer's Take on PostHog",
-    description:
-      "No BS, no affiliations, just genuine opinions from the founding engineer at Helicone.",
-    badgeText: "insight",
-    date: "May 23, 2024",
-    href: "/blog/stefan-posthog",
-    imageUrl: "/static/blog/stefan-posthog/posthog-cover.webp",
-    authors: [
-      {
-        name: "Stefan Bokarev",
-        imageUrl: "/static/blog/stefanbokarev-headshot.webp",
-        imageAlt: "Stefan Bokarev's headshot",
-      },
-      {
-        name: "Lina Lam",
-        imageUrl: "/static/blog/linalam-headshot.webp",
-        imageAlt: "Lina Lam's headshot",
-      },
-    ],
-    time: "3 minute read",
+    dynmaicEntry: {
+      folderName: "stefan-posthog",
+    },
   },
   {
-    title: "A step by step guide to switch to gpt-4o safely with Helicone",
-    description:
-      "Learn how to use Helicone's experiments features to regression test, compare and switch models.",
-    badgeText: "guide",
-    date: "May 14, 2024",
-    href: "/blog/switch-models-safely",
-    imageUrl: "/static/blog/experiments/gpt-4o.webp",
-    authors: [
-      {
-        name: "Scott Nguyen",
-        imageUrl: "/static/blog/scottnguyen-headshot.webp",
-        imageAlt: "Scott Nguyen's headshot",
-      },
-    ],
-    time: "5 minute read",
+    dynmaicEntry: {
+      folderName: "switch-models-safely",
+    },
   },
   {
-    title: "An Open-Source Datadog Alternative for LLM Observability",
-    description:
-      "Datadog has long been a favourite among developers for its application monitoring and observability capabilities. But recently, LLM developers have been exploring open-source observability options. Why? We have some answers.",
-    badgeText: "Compare",
-    date: "Apr 29, 2024",
-    href: "/blog/best-datadog-alternative-for-llm",
-    imageUrl: "/static/blog/datadog/title.webp",
-    authors: [
-      {
-        name: "Lina Lam",
-        imageUrl: "/static/blog/linalam-headshot.webp",
-        imageAlt: "Lina Lam's headshot",
-      },
-    ],
-    time: "4 minute read",
+    dynmaicEntry: {
+      folderName: "best-datadog-alternative-for-llm",
+    },
   },
   {
-    title:
-      "A LangSmith Alternative that Takes LLM Observability to the Next Level",
-    description:
-      "Both Helicone and LangSmith are capable, powerful DevOps platform used by enterprises and developers building LLM applications. But which is better?",
-    badgeText: "Compare",
-    date: "Apr 18, 2024",
-    href: "/blog/langsmith",
-    imageUrl: "/static/blog/langsmith-vs-helicone/cover-image.webp",
-    authors: [
-      {
-        name: "Lina Lam",
-        imageUrl: "/static/blog/linalam-headshot.webp",
-        imageAlt: "Lina Lam's headshot",
-      },
-    ],
-    time: "4 minute read",
+    dynmaicEntry: {
+      folderName: "langsmith",
+    },
   },
   {
-    title:
-      "Why Observability is the Key to Ethical and Safe Artificial Intelligence",
-    description:
-      "As AI continues to shape our world, the need for ethical practices and robust observability has never been greater. Learn how Helicone is rising to the challenge.",
-    badgeText: "insight",
-    date: "Sep 19, 2023",
-    href: "/blog/ai-safety",
-    imageUrl: "/static/blog/AI.webp",
-    authors: [
-      {
-        name: "Scott Nguyen",
-        imageUrl: "/static/blog/scottnguyen-headshot.webp",
-        imageAlt: "Scott Nguyen's headshot",
-      },
-    ],
-    time: "5 minute read",
+    dynmaicEntry: {
+      folderName: "ai-safety",
+    },
   },
   {
-    title:
-      "Introducing Vault: The Future of Secure and Simplified Provider API Key Management",
-    description:
-      "Helicone's Vault revolutionizes the way businesses handle, distribute, and monitor their provider API keys, with a focus on simplicity, security, and flexibility.",
-    badgeText: "feature",
-    date: "Sep 13, 2023",
-    href: "/blog/vault-introduction",
-    imageUrl: "/static/blog/vault_asset.webp",
-    authors: [
-      {
-        name: "Cole Gottdank",
-        imageUrl: "/static/blog/colegottdank-headshot.webp",
-        imageAlt: "Cole Gottdank's headshot",
-      },
-    ],
-    time: "3 minute read",
+    dynmaicEntry: {
+      folderName: "vault-introduction",
+    },
   },
   {
-    title: "Life after Y Combinator: Three Key Lessons for Startups",
-    description:
-      "From maintaining crucial relationships to keeping a razor-sharp focus, here's how to sustain your momentum after the YC batch ends.",
-    badgeText: "insight",
-    date: "Sep 11, 2023",
-    href: "/blog/life-after-yc",
-    imageUrl: "/static/blog/yc.webp",
-    authors: [
-      {
-        name: "Scott Nguyen",
-        imageUrl: "/static/blog/scottnguyen-headshot.webp",
-        imageAlt: "Scott Nguyen's headshot",
-      },
-    ],
-    time: "4 minute read",
+    dynmaicEntry: {
+      folderName: "life-after-yc",
+    },
   },
   {
-    title: "Helicone: The Next Evolution in OpenAI Monitoring and Optimization",
-    description:
-      "Learn how Helicone provides unmatched insights into your OpenAI usage, allowing you to monitor, optimize, and take control like never before.",
-    badgeText: "company",
-    date: "Sep 1, 2023",
-    href: "/blog/open-source-monitoring-for-openai",
-    imageUrl: "/static/blog/openai.webp",
-    authors: [
-      {
-        name: "Scott Nguyen",
-        imageUrl: "/static/blog/scottnguyen-headshot.webp",
-        imageAlt: "Scott Nguyen's headshot",
-      },
-    ],
-    time: "3 minute read",
+    dynmaicEntry: {
+      folderName: "open-source-monitoring-for-openai",
+    },
   },
   {
-    title: "Helicone partners with AutoGPT",
-    description:
-      "Helicone is excited to announce a partnership with AutoGPT, the leader in agent development.",
-    badgeText: "company",
-    date: "Jul 30, 2023",
-    href: "/blog/autoGPT",
-    imageUrl: "/static/blog/autogpt.webp",
-    authors: [
-      {
-        name: "Justin Torre",
-        imageUrl: "/static/blog/justintorre-headshot.webp",
-        imageAlt: "Justin Torre's headshot",
-      },
-    ],
-    time: "3 minute read",
+    dynmaicEntry: {
+      folderName: "autoGPT",
+    },
   },
   {
     title: "Generative AI with Helicone",
     description:
       "In the rapidly evolving world of generative AI, companies face the exciting challenge of building innovative solutions while effectively managing costs, result quality, and latency. Enter Helicone, an open-source observability platform specifically designed for these cutting-edge endeavors.",
-    badgeText: "External",
+    badgeText: "Company",
     date: "Jul 21, 2023",
     href: "https://dailybaileyai.com/software/helicone.php",
     imageUrl: "https://dailybaileyai.com/home_page_files/banner_image.jpg",
@@ -810,7 +662,7 @@ const blogContent: BlogStructure[] = [
     title: "(a16z) Emerging Architectures for LLM Applications",
     description:
       "Large language models are a powerful new primitive for building software. But since they are so new—and behave so differently from normal computing resources—it's not always obvious how to use them.",
-    badgeText: "External",
+    badgeText: "Company",
     date: "Jun 20, 2023",
     href: "https://a16z.com/2023/06/20/emerging-architectures-for-llm-applications",
     imageUrl:
@@ -834,7 +686,7 @@ const blogContent: BlogStructure[] = [
   {
     title: "(Sequoia) The New Language Model Stack",
     description: "How companies are bringing AI applications to life",
-    badgeText: "External",
+    badgeText: "Company",
     date: "Jun 14, 2023",
     href: "https://www.sequoiacap.com/article/llm-stack-perspective/",
     imageUrl:
@@ -857,26 +709,99 @@ const blogContent: BlogStructure[] = [
   },
 ];
 
-const Blog = async () => {
+export default async function Blog({
+  searchParams,
+}: {
+  searchParams: { category?: string; q?: string };
+}) {
+  // Get filter values from URL
+  const activeFilter = (searchParams.category || "all").toLowerCase();
+  const searchTerm = (searchParams.q || "").toLowerCase();
+
+  // Load metadata for all dynamic entries first
+  const dynamicMetadata = new Map();
+
+  for (const blog of blogContent) {
+    if ("dynmaicEntry" in blog) {
+      const metadata = await getMetadata(blog.dynmaicEntry.folderName);
+      dynamicMetadata.set(blog.dynmaicEntry.folderName, metadata);
+    }
+  }
+
+  // Extract unique badge values from blog content
+  const allBadges = Array.from(
+    new Set(
+      blogContent.map((blog) => {
+        if ("dynmaicEntry" in blog) {
+          const metadata = dynamicMetadata.get(blog.dynmaicEntry.folderName);
+          return (metadata?.badge || "insight").toLowerCase();
+        }
+        return blog.badgeText.toLowerCase();
+      })
+    )
+  );
+
+  // Always keep featured post visible
+  const featuredPost = blogContent[0];
+
+  // Filter the remaining posts based on URL parameters
+  const filteredPosts = blogContent.slice(1).filter((blog) => {
+    let badgeText = "";
+    let title = "";
+
+    if ("dynmaicEntry" in blog) {
+      const metadata = dynamicMetadata.get(blog.dynmaicEntry.folderName);
+      badgeText = (metadata?.badge || "insight").toLowerCase();
+      title = metadata?.title || "";
+    } else {
+      badgeText = blog.badgeText.toLowerCase();
+      title = blog.title;
+    }
+
+    // Apply filters
+    const matchesCategory =
+      activeFilter === "all" || badgeText === activeFilter;
+    const matchesSearch =
+      !searchTerm || title.toLowerCase().includes(searchTerm);
+
+    return matchesCategory && matchesSearch;
+  });
+
   return (
     <div className="w-full bg-gradient-to-b bg-white min-h-screen antialiased relative text-black">
       <div className="relative w-full flex flex-col mx-auto max-w-7xl h-full py-8 md:py-12 items-center text-center px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4">
-          {blogContent.map((blog, i) => {
-            if (i === 0) {
-              return (
-                <div className="col-span-1 md:col-span-2 lg:col-span-3 w-full" key={i}>
-                  <FeaturedBlogPost blog={blog} />
-                </div>
-              );
-            } else {
-              return <RegularBlogPost blog={blog} key={i} />;
-            }
-          })}
+          {/* Featured blog post */}
+          <div className="col-span-1 md:col-span-2 lg:col-span-3 w-full">
+            <FeaturedBlogPost
+              blog={featuredPost}
+              dynamicMetadata={dynamicMetadata}
+            />
+          </div>
+
+          {/* Filter component */}
+          <div className="col-span-1 md:col-span-2 lg:col-span-3 w-full mb-4">
+            <BlogFilter badges={allBadges} />
+          </div>
+
+          {/* Filtered blog posts */}
+          {filteredPosts.length > 0 ? (
+            filteredPosts.map((blog, i) => (
+              <RegularBlogPost
+                blog={blog}
+                dynamicMetadata={dynamicMetadata}
+                key={i}
+              />
+            ))
+          ) : (
+            <div className="col-span-1 md:col-span-2 lg:col-span-3 text-center py-8">
+              <p className="text-slate-500">
+                No matching blog posts found. Try adjusting your filters.
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
-};
-
-export default Blog;
+}

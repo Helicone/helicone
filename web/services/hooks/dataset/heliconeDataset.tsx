@@ -1,7 +1,13 @@
-import { useQuery, useQueries } from "@tanstack/react-query";
+import {
+  useQuery,
+  useQueries,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useState, useEffect, useMemo } from "react";
 import { useOrg } from "../../../components/layout/org/organizationContext";
 import { getJawnClient } from "../../../lib/clients/jawn";
+import { toast } from "sonner";
 
 const fetchHeliconeDatasetRows = async (
   orgId: string,
@@ -66,24 +72,29 @@ const useGetHeliconeDatasets = (datasetIds?: string[]) => {
 
   const hasValidDatasetIds = datasetIds && datasetIds.length > 0;
 
-  const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ["helicone-datasets", org?.currentOrg?.id, datasetIds],
-    queryFn: async (query) => {
-      const orgId = query.queryKey[1] as string;
-      const jawn = getJawnClient(orgId);
+  const { data, isLoading, refetch, isRefetching, status, isFetched } =
+    useQuery({
+      queryKey: ["helicone-datasets", org?.currentOrg?.id, datasetIds],
+      queryFn: async (query) => {
+        const orgId = query.queryKey[1] as string;
+        const jawn = getJawnClient(orgId);
 
-      return jawn.POST("/v1/helicone-dataset/query", {
-        body: hasValidDatasetIds ? { datasetIds } : {},
-      });
-    },
-    enabled: !!org?.currentOrg?.id,
-    refetchOnWindowFocus: false,
-  });
+        return jawn.POST("/v1/helicone-dataset/query", {
+          body: hasValidDatasetIds ? { datasetIds } : {},
+        });
+      },
+      enabled: !!org?.currentOrg?.id,
+      refetchOnWindowFocus: false,
+    });
 
   return {
     isLoading,
     refetch,
     isRefetching,
+    status,
+    isFetched,
+    // True when data has been fetched AND exists
+    hasData: isFetched && !!data?.data?.data?.length,
     datasets:
       data?.data?.data?.map((dataset) => ({
         ...dataset,
@@ -159,32 +170,53 @@ const useGetHeliconeDatasetRows = (
 
   const rowsWithSignedUrls = useMemo(() => data?.data?.data ?? [], [data]);
 
-  const urlQueries = useQueries({
-    queries: rowsWithSignedUrls.map((row, index: number) => ({
-      queryKey: ["row-content", row.signed_url],
-      queryFn: () =>
-        row.signed_url.error
-          ? Promise.resolve(row.signed_url.data)
-          : fetch(row.signed_url.data!).then((res) => res.json()),
-      enabled: !!row.signed_url,
-      onSuccess: (content: any) => {
-        setRows((prev) => {
-          const newRows = [...prev];
-          newRows[index] = {
-            ...newRows[index],
-            request_response_body: content,
-          };
-          return newRows;
-        });
-      },
-    })),
-  });
-
   useEffect(() => {
     if (rowsWithSignedUrls.length > 0) {
       setRows(rowsWithSignedUrls);
     }
   }, [rowsWithSignedUrls]);
+
+  const urlQueries = useQueries({
+    queries: rowsWithSignedUrls.map((row) => ({
+      queryKey: ["row-content", row.id],
+      queryFn: async () => {
+        if (row.signed_url?.error) {
+          return row.signed_url.data;
+        }
+        if (row.signed_url?.data) {
+          const response = await fetch(row.signed_url.data);
+          return response.json();
+        }
+        return null;
+      },
+      enabled: !!row.signed_url,
+    })),
+  });
+
+  useEffect(() => {
+    if (rows.length === 0) return;
+
+    urlQueries.forEach((query, index) => {
+      if (query.isSuccess && query.data) {
+        const rowId = rowsWithSignedUrls[index]?.id;
+        if (!rowId) return;
+
+        setRows((currentRows) => {
+          const rowIndex = currentRows.findIndex((r) => r.id === rowId);
+          if (rowIndex === -1 || currentRows[rowIndex].request_response_body) {
+            return currentRows;
+          }
+
+          const newRows = [...currentRows];
+          newRows[rowIndex] = {
+            ...newRows[rowIndex],
+            request_response_body: query.data,
+          };
+          return newRows;
+        });
+      }
+    });
+  }, [urlQueries, rows, rowsWithSignedUrls]);
 
   const isUrlsFetching = urlQueries.some((query) => query.isFetching);
 
@@ -204,8 +236,8 @@ const useGetHeliconeDatasetRows = (
     isRefetching: isRefetching || isUrlsFetching,
     rows: rows.map((r) => ({
       ...r,
-      request_body: r.request_response_body?.request,
-      response_body: r.request_response_body?.response,
+      request_body: r.request_response_body?.request || "",
+      response_body: r.request_response_body?.response || "",
     })),
     completedQueries: urlQueries.filter((query) => query.isSuccess).length,
     totalQueries: rowsWithSignedUrls.length,
@@ -241,9 +273,48 @@ const useGetHeliconeDatasetCount = (id: string) => {
   };
 };
 
+const useDeleteHeliconeDataset = () => {
+  const org = useOrg();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (datasetId: string) => {
+      const orgId = org?.currentOrg?.id as string;
+      const jawn = getJawnClient(orgId);
+      const response = await jawn.POST(
+        `/v1/helicone-dataset/{datasetId}/delete`,
+        {
+          params: {
+            path: {
+              datasetId,
+            },
+          },
+        }
+      );
+
+      if (!response.data) {
+        throw new Error("Failed to delete dataset");
+      }
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["helicone-datasets"] });
+      toast.success("Dataset deleted successfully");
+    },
+    onError: (error) => {
+      toast.error(
+        `Failed to delete dataset: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    },
+  });
+};
+
 export {
   useGetHeliconeDatasets,
   useGetHeliconeDatasetRows,
   useGetHeliconeDatasetCount,
+  useDeleteHeliconeDataset,
   fetchHeliconeDatasetRows,
 };

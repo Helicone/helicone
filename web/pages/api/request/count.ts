@@ -8,7 +8,7 @@ import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { Result } from "../../../lib/result";
+import { Result } from "../../../packages/common/result";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 async function handler({
   req,

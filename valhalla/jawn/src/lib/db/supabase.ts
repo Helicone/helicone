@@ -1,29 +1,16 @@
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
-import { KeyPermissions, Role } from "../../models/models";
+import { KeyPermissions } from "../../packages/common/auth/types";
+import { Role } from "../../packages/common/auth/types";
 import { cacheResultCustom } from "../../utils/cacheResult";
 import { hashAuth } from "../../utils/hash";
 import { KVCache } from "../cache/kvCache";
-import { HeliconeAuth } from "../requestWrapper";
-import { PromiseGenericResult, err, ok } from "../shared/result";
+import { HeliconeAuth } from "../../packages/common/auth/types";
+import { AuthParams } from "../../packages/common/auth/types";
+import { AuthResult } from "../../packages/common/auth/types";
+import { OrgParams } from "../../packages/common/auth/types";
+import { OrgResult } from "../../packages/common/auth/types";
+import { err, ok } from "../../packages/common/result";
 import { Database } from "./database.types";
-
-export interface AuthParams {
-  organizationId: string;
-  userId?: string;
-  heliconeApiKeyId?: number;
-  keyPermissions?: KeyPermissions;
-  role?: Role;
-}
-type AuthResult = PromiseGenericResult<AuthParams>;
-
-export interface OrgParams {
-  tier: string;
-  id: string;
-  percentLog: number;
-  has_onboarded: boolean;
-}
-
-type OrgResult = PromiseGenericResult<OrgParams>;
 
 const SUPABASE_CREDS = JSON.parse(process.env.SUPABASE_CREDS ?? "{}");
 const supabaseURL = SUPABASE_CREDS?.url ?? process.env.SUPABASE_URL;
@@ -148,7 +135,7 @@ export class SupabaseConnector {
       .from("helicone_proxy_keys")
       .select("*")
       .eq("id", proxyKeyId)
-      .eq("soft_delete", "false")
+      .eq("soft_delete", false)
       .single();
     if (storedProxyKey.error || !storedProxyKey.data) {
       return err("Proxy key not found in storedProxyKey");

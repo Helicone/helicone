@@ -2,7 +2,7 @@ import {
   ChatCompletion,
   ChatCompletionCreateParams,
 } from "openai/resources/chat";
-import { Result } from "../../../lib/result";
+import { Result } from "../../../packages/common/result";
 
 export const fetchAnthropic = async (
   messages: ChatCompletionCreateParams[],

@@ -1,25 +1,13 @@
-import generateApiKey from "generate-api-key";
-import { hashAuth } from "../../../utils/hash";
-import { supabaseServer } from "../../db/supabase";
-import { Result, err, ok } from "../../shared/result";
-import { BaseTempKey } from "./baseTempKey";
+import { KeyManager } from "../../../managers/apiKeys/KeyManager";
 import { cacheResultCustom } from "../../../utils/cacheResult";
 import { KVCache } from "../../cache/kvCache";
-import { KeyManager } from "../../../managers/apiKeys/KeyManager";
+import { Result, err, ok } from "../../../packages/common/result";
+import { BaseTempKey } from "./baseTempKey";
+import { dbExecute } from "../../shared/db/dbExecute";
 
 const CACHE_TTL = 60 * 1000 * 30; // 30 minutes
 
 const kvCache = new KVCache(CACHE_TTL);
-
-const IS_EU = process.env.AWS_REGION === "eu-west-1";
-
-async function getHeliconeApiKey() {
-  const apiKey = `sk-helicone${IS_EU ? "-eu" : ""}-${generateApiKey({
-    method: "base32",
-    dashes: true,
-  }).toString()}`.toLowerCase();
-  return apiKey;
-}
 
 class TempHeliconeAPIKey implements BaseTempKey {
   private keyUsed = false;
@@ -30,20 +18,13 @@ class TempHeliconeAPIKey implements BaseTempKey {
       return;
     }
 
-    await supabaseServer.client
-      .from("helicone_api_keys")
-      .update({
-        soft_delete: true,
-      })
-      .eq("temp_key", true)
-      .lt("created_at", new Date(Date.now() - CACHE_TTL).toISOString());
-
-    return await supabaseServer.client
-      .from("helicone_api_keys")
-      .delete({
-        count: "exact",
-      })
-      .eq("id", this.heliconeApiKeyId);
+    await dbExecute(
+      `UPDATE helicone_api_keys
+       SET soft_delete = true
+       WHERE temp_key = true
+       AND created_at < $1`,
+      [new Date(Date.now() - CACHE_TTL).toISOString()]
+    );
   }
 
   async with<T>(callback: (apiKey: string) => Promise<T>): Promise<T> {

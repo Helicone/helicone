@@ -1,11 +1,11 @@
 {
-  "title": "How to test your LLM prompts (with examples)",
+  "title": "How to Systematically Test and Improve Your LLM Prompts",
   "title1": "How to test your LLM prompts (with examples)",
   "title2": "How to test your LLM prompts (with examples)",
-  "description": "How do you measure the quality of your LLM prompts and outputs? In this blog, we talk about how you can evaluate LLM performance and effectively test your prompts.",
+  "description": "How do you measure the quality of your LLM prompts and outputs? Learn actionable techniques to evaluate your prompt quality and the best tools to measure output performance.",
   "images": "/static/blog/test-your-llm-prompts/cover.webp",
   "time": "10 minute read",
   "author": "Lina Lam",
-  "date": "December 4, 2024", 
-  "badge": "how-to"
+  "date": "April 2, 2025", 
+  "badge": "Best Practices"
 }
