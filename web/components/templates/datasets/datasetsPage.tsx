@@ -2,7 +2,6 @@ import { useRouter } from "next/router";
 import { useGetHeliconeDatasets } from "../../../services/hooks/dataset/heliconeDataset";
 import AuthHeader from "../../shared/authHeader";
 import { SimpleTable } from "../../shared/table/simpleTable";
-import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import React, { useState } from "react";
@@ -210,9 +209,9 @@ const DatasetsPage = (props: DatasetsPageProps) => {
               <DialogHeader>
                 <DialogTitle>Delete Dataset</DialogTitle>
                 <DialogDescription>
-                  Are you sure you want to delete the dataset "
-                  {datasetToDelete?.name || "Untitled Dataset"}"? This action
-                  cannot be undone.
+                  Are you sure you want to delete the dataset &ldquo;
+                  {datasetToDelete?.name || "Untitled Dataset"}
+                  &rdquo;? This action cannot be undone.
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter className="flex flex-row gap-2 justify-end">
