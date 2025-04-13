@@ -12,6 +12,7 @@ anthropic-types = { workspace = true }
 bytes = { workspace = true, features = ['serde'] }
 clap = { workspace = true }
 config = { workspace = true }
+deadpool-postgres = { workspace = true }
 derive_more = { workspace = true, features = ['as_ref', 'constructor', 'debug', 'deref', 'display', 'from', 'from_str'] }
 displaydoc = { workspace = true }
 futures = { workspace = true }

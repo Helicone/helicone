@@ -13,11 +13,11 @@ pub enum InvalidRequestError {
 /// Common API errors
 #[derive(Debug, Error, Display, strum::AsRefStr)]
 pub enum Error {
-    /// Invalid request
+    /// Invalid request: {0}
     InvalidRequest(#[from] InvalidRequestError),
-    /// Database error
-    Database(#[from] tokio_postgres::Error),
-    /// Minio error
+    /// Database error: {0}
+    Database(#[from] crate::error::database::DatabaseError),
+    /// Minio error: {0}
     Minio(#[from] minio_rsc::error::Error),
     /// Authentication error: {0}
     Authentication(#[from] crate::error::auth::AuthError),

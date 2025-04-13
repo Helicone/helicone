@@ -8,30 +8,34 @@ use crate::types::secret::Secret;
 #[serde(default, deny_unknown_fields, rename_all = "kebab-case")]
 pub struct Config {
     pub url: Secret<String>,
-    #[serde(default = "default_max_connections")]
-    pub max_connections: u32,
-    #[serde(with = "humantime_serde", default = "default_acquire_timeout")]
-    pub acquire_timeout: Duration,
+    #[serde(with = "humantime_serde", default = "default_connect_timeout")]
+    pub connect_timeout: Duration,
+}
+
+impl From<Config> for deadpool_postgres::Config {
+    fn from(config: Config) -> Self {
+        let mut deadpool_config = deadpool_postgres::Config::new();
+
+        deadpool_config.url = Some(config.url.0);
+        deadpool_config.connect_timeout = Some(config.connect_timeout);
+
+        deadpool_config
+    }
 }
 
 impl Default for Config {
     fn default() -> Self {
         Self {
             url: Secret(
-                "postgresql://rockstar-db-user:rockstar-db-pw@localhost:5432/\
-                 rockstar-db"
+                "postgresql://helicone-db-user:helicone-db-pw@localhost:5432/\
+                 helicone-db"
                     .to_string(),
             ),
-            max_connections: default_max_connections(),
-            acquire_timeout: default_acquire_timeout(),
+            connect_timeout: default_connect_timeout(),
         }
     }
 }
 
-fn default_max_connections() -> u32 {
-    20
-}
-
-fn default_acquire_timeout() -> Duration {
+fn default_connect_timeout() -> Duration {
     Duration::from_secs(3)
 }

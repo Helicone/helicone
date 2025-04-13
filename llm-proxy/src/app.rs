@@ -1,13 +1,11 @@
 use std::sync::Arc;
 
+use deadpool_postgres::Pool;
 use futures::future::BoxFuture;
-use http::Request;
-use hyper::body::Incoming;
 use meltdown::Token;
 use minio_rsc::{Minio, provider::StaticProvider};
-use reqwest::Client;
 use tokio::net::TcpListener;
-use tower::{ServiceBuilder, steer::Steer};
+use tower::ServiceBuilder;
 use tracing::info;
 
 use crate::{
@@ -15,9 +13,9 @@ use crate::{
         Config,
         rate_limit::{AuthedLimiterConfig, UnauthedLimiterConfig},
     },
-    dispatcher::Dispatcher,
     error,
-    router::picker::RouterPicker,
+    registry::Registry,
+    router::Router,
 };
 
 pub struct App {
@@ -25,6 +23,7 @@ pub struct App {
     pub minio: Option<Minio>,
     pub authed_rate_limit: Arc<AuthedLimiterConfig>,
     pub unauthed_rate_limit: Arc<UnauthedLimiterConfig>,
+    pub pg_pool: Pool,
 }
 
 impl App {
@@ -45,12 +44,19 @@ impl App {
         let unauthed_rate_limit =
             Arc::new(config.rate_limit.unauthed_limiter());
         let authed_rate_limit = Arc::new(config.rate_limit.authed_limiter());
+        let pg_config =
+            deadpool_postgres::Config::from(config.database.clone());
+        let pg_pool = pg_config.create_pool(
+            Some(deadpool_postgres::Runtime::Tokio1),
+            tokio_postgres::NoTls,
+        )?;
 
         Ok(Self {
             config,
             minio,
             authed_rate_limit,
             unauthed_rate_limit,
+            pg_pool,
         })
     }
 }
@@ -60,20 +66,15 @@ impl meltdown::Service for App {
 
     fn run(self, mut token: Token) -> Self::Future {
         Box::pin(async move {
-            let mut services = Vec::new();
-            for (provider, _url) in self.config.dispatcher.provider_urls.iter()
-            {
-                let dispatcher =
-                    Dispatcher::new(Client::new(), provider.clone());
-                services.push(dispatcher);
-            }
-            let service: Steer<_, _, Request<Incoming>> =
-                Steer::new(services, RouterPicker);
-
+            let registry = Registry::new(&self.config.dispatcher);
+            let router = Router::new(registry);
             let service_stack = ServiceBuilder::new()
-                .layer(crate::router::request_context::Layer)
+                .layer(crate::middleware::request_context::Layer::new(
+                    self.pg_pool.clone(),
+                ))
                 // other middleware: rate limiting, logging, etc, etc
-                .service(service);
+                // will be added here as well
+                .service(router);
             let service_stack =
                 hyper_util::service::TowerToHyperService::new(service_stack);
 

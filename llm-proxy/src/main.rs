@@ -15,7 +15,7 @@ pub struct Args {
     config: Option<PathBuf>,
 }
 
-#[tokio::main(flavor = "current_thread")]
+#[tokio::main]
 async fn main() -> Result<(), llm_proxy::error::runtime::Error> {
     let args = Args::parse();
     let config = match Config::try_read(args.config) {

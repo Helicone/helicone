@@ -6,12 +6,13 @@ use std::{
     time::Instant,
 };
 
+use deadpool_postgres::Pool;
 use http::Request;
 use isocountry::CountryCode;
 
 use crate::{
     dispatcher::ReqBody as Body,
-    error::api::Error,
+    error::{api::Error, database::DatabaseError},
     types::request::{Provider, RequestContext},
 };
 
@@ -20,11 +21,12 @@ type BoxFuture<'a, T> = Pin<Box<dyn Future<Output = T> + Send + 'a>>;
 #[derive(Debug, Clone)]
 pub struct Service<S> {
     inner: S,
+    pg_pool: Pool,
 }
 
 impl<S> Service<S> {
-    pub fn new(inner: S) -> Self {
-        Self { inner }
+    pub fn new(inner: S, pg_pool: Pool) -> Self {
+        Self { inner, pg_pool }
     }
 }
 
@@ -68,6 +70,13 @@ where
         &self,
         _req: &Request<Body>,
     ) -> Result<RequestContext, Error> {
+        let client = self
+            .pg_pool
+            .get()
+            .await
+            .map_err(DatabaseError::Connection)?;
+        let stmt = client.prepare_cached("SELECT 1 + $1").await.unwrap();
+
         // in a real implementation, we would fetch the router config from the
         // database
         let router_config = crate::config::router::test_router_config().await;
@@ -104,12 +113,20 @@ where
 }
 
 #[derive(Debug, Clone)]
-pub struct Layer;
+pub struct Layer {
+    pg_pool: Pool,
+}
+
+impl Layer {
+    pub fn new(pg_pool: Pool) -> Self {
+        Self { pg_pool }
+    }
+}
 
 impl<S> tower::Layer<S> for Layer {
     type Service = Service<S>;
 
     fn layer(&self, inner: S) -> Self::Service {
-        Service::new(inner)
+        Service::new(inner, self.pg_pool.clone())
     }
 }
