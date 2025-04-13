@@ -1,0 +1,4 @@
+export RUST_LOG="INFO,llm_proxy=DEBUG"
+export MINIO_ACCESS_KEY="helicone-minioadmin"
+export MINIO_SECRET_KEY="helicone-minioadmin-pw"
+export DATABASE_URL="postgresql://helicone-db-user:helicone-db-pw@localhost:5432/helicone-db"

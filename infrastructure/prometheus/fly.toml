@@ -1,0 +1,30 @@
+# We don't actually deploy this to fly.io 
+# since they still offer free metrics
+
+
+app = 'rockstar-prometheus'
+primary_region = 'sjc'
+
+[experimental]
+  cmd = ['--config.file=/etc/config.yaml', '--web.enable-remote-write-receiver', '--enable-feature=exemplar-storage']
+
+[build]
+  image = 'prom/prometheus:v2.54.1'
+
+[[services]]
+  protocol = 'tcp'
+  internal_port = 4317
+  ports = []
+
+[[files]]
+  guest_path = '/etc/config.yaml'
+  local_path = './config-production.yaml'
+
+[[vm]]
+  memory = '512mb'
+  cpu_kind = 'shared'
+  cpus = 1
+
+[[metrics]]
+  port = 8888
+  path = '/metrics'

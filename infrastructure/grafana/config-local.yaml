@@ -1,0 +1,12 @@
+[analytics]
+reporting_enabled = false
+
+[path]
+data = "/var/lib/grafana"
+plugins = "/var/lib/grafana/plugins"
+
+[server]
+root_url = "https://localhost"
+
+[snapshots]
+external_enabled = false

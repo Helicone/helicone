@@ -1,0 +1,51 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+
+exporters:
+  otlp:
+    endpoint: rockstar-tempo.internal:4317
+    tls:
+      insecure: true
+  otlphttp:
+    endpoint: http://rockstar-loki.internal:3100/otlp
+    tls:
+      insecure: true
+
+extensions:
+  health_check:
+
+processors:
+  batch:
+  # Data sources: traces, metrics, logs
+  memory_limiter:
+    check_interval: 5s
+    limit_mib: 500
+    spike_limit_mib: 100
+
+  # Data sources: traces
+  probabilistic_sampler:
+    hash_seed: 38722
+    # reduce this later
+    sampling_percentage: 100
+
+service:
+  extensions:
+    - health_check
+  pipelines:
+    traces:
+      receivers:
+        - otlp
+      processors:
+        - batch
+      exporters:
+        - otlp
+    logs:
+      receivers:
+        - otlp
+      processors:
+        - batch
+      exporters:
+        - otlphttp

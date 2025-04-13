@@ -1,0 +1,47 @@
+# fly.toml app configuration file generated for rockstar-grafana on 2024-09-07T11:23:06-07:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'rockstar-grafana'
+primary_region = 'sjc'
+
+[build]
+  image = 'grafana/grafana:11.2.0'
+
+[[mounts]]
+  source = 'grafana_storage_1'
+  destination = '/var/lib/grafana'
+  initial_size = '10gb'
+
+[[services]]
+  protocol = 'tcp'
+  internal_port = 3000
+
+  [[services.ports]]
+    port = 443
+    handlers = ['tls', 'http']
+
+  [[services.http_checks]]
+    interval = '15s'
+    timeout = '3s'
+    grace_period = '1m0s'
+    path = '/api/health'
+    protocol = 'http'
+
+[[files]]
+  guest_path = '/etc/grafana/provisioning/datasources/datasources.yaml'
+  local_path = './datasources-production.yaml'
+
+[[files]]
+  guest_path = '/etc/grafana/grafana.ini'
+  local_path = './config-production.yaml'
+
+[[vm]]
+  memory = '512mb'
+  cpu_kind = 'shared'
+  cpus = 1
+
+[[metrics]]
+  port = 3000
+  path = '/metrics'

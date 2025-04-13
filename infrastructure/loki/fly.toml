@@ -1,0 +1,43 @@
+# fly.toml app configuration file generated for rockstar-loki on 2024-09-06T17:20:31-07:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'rockstar-loki'
+primary_region = 'sjc'
+
+[experimental]
+  cmd = ['-config.file=/etc/loki.yaml']
+
+[build]
+  image = 'grafana/loki:3.0.0'
+
+[[mounts]]
+  source = 'loki_storage_1'
+  destination = '/var/lib/loki'
+  initial_size = '10gb'
+
+[[services]]
+  protocol = 'tcp'
+  internal_port = 3100
+  ports = []
+
+  [[services.http_checks]]
+    interval = '15s'
+    timeout = '3s'
+    grace_period = '15s'
+    path = '/ready'
+    protocol = 'http'
+
+[[files]]
+  guest_path = '/etc/loki.yaml'
+  local_path = './config-production.yaml'
+
+[[vm]]
+  memory = '512mb'
+  cpu_kind = 'shared'
+  cpus = 1
+
+[[metrics]]
+  port = 3100
+  path = '/metrics'

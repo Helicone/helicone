@@ -1,0 +1,131 @@
+name: helicone-proxy-cluster
+
+volumes:
+  postgres-data:
+  minio-data:
+
+networks:
+  traces:
+    name: traces
+    driver: bridge
+
+services:
+  # collects traces, metrics, logs
+  # then exports to tempo, prometheus, loki
+  otelcol:
+    image: otel/opentelemetry-collector:0.108.0
+    command:
+      - --config=/etc/config.yaml
+    volumes:
+      - ./opentelemetry-collector/config-local.yaml:/etc/config.yaml:ro
+    ports:
+      - 4317:4317
+    networks:
+      - traces
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    command:
+      - --config.file=/etc/config.yaml
+      - --web.enable-remote-write-receiver
+      - --enable-feature=exemplar-storage
+    volumes:
+      - ./prometheus/config-local.yaml:/etc/config.yaml:ro
+    ports:
+      - 9090:9090
+    networks:
+      - traces
+    extra_hosts:
+      - host.docker.internal:host-gateway
+
+  tempo:
+    image: grafana/tempo:2.5.0
+    command:
+      - -config.file=/etc/tempo.yaml
+    volumes:
+      - ./tempo/config-local.yaml:/etc/tempo.yaml:ro
+    networks:
+      - traces
+
+  loki:
+    image: grafana/loki:3.0.0
+    command:
+      - -config.file=/etc/loki.yaml
+    volumes:
+      - ./loki/config-local.yaml:/etc/loki.yaml:ro
+    networks:
+      - traces
+    ports:
+      - 3100:3100
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    volumes:
+      - ./grafana/datasources-local.yaml:/etc/grafana/provisioning/datasources/datasources.yaml:ro
+      - ./grafana/config-local.yaml:/etc/grafana/grafana.ini:ro
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+    ports:
+      - 3000:3000
+    networks:
+      - traces
+
+  postgres:
+    image: postgres:16.4-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: helicone-db
+      POSTGRES_USER: helicone-db-user
+      POSTGRES_PASSWORD: helicone-db-pw
+      # Uncomment to enable debug logging
+      # POSTGRES_LOGGING: true
+      # POSTGRES_LOG_STATEMENT: all
+      # POSTGRES_LOG_DURATION: true
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  minio:
+    image: quay.io/minio/minio
+    command: server /data
+    ports:
+      - "5532:5532"
+      - "5533:5533"
+    volumes:
+      - minio-data:/data
+    environment:
+      MINIO_ROOT_USER: helicone-minioadmin
+      MINIO_ROOT_PASSWORD: helicone-minioadmin-pw
+      MINIO_DEFAULT_BUCKETS: helicone-images-dev
+      MINIO_PROMETHEUS_AUTH_TYPE: "public"
+      MINIO_ADDRESS: ":5532"
+      MINIO_CONSOLE_ADDRESS: ":5533"
+  
+  redis:
+    image: redis:6.2.6-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    environment:
+      - REDIS_PASSWORD=helicone-redis-pw
+      - REDIS_PORT=6379
+
+# NOTE:
+# Grafana/loki/tempo/prom/otel stack above could be replaced with single image:
+#
+#  telemetry:
+#    image: grafana/otel-lgtm:0.7.1
+#    environment:
+#      - GF_AUTH_ANONYMOUS_ENABLED=true
+#      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+#      - GF_AUTH_DISABLE_LOGIN_FORM=true
+#    ports:
+#      - 3000:3000
+#      - 4317:4317
+#      - 4318:4318
+#
+# However at the moment I don't want to do that until we have working prod
+# configs in place.

@@ -1,0 +1,38 @@
+# fly.toml app configuration file generated for rockstar-minio on 2024-09-06T00:25:12-07:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'rockstar-minio'
+primary_region = 'sjc'
+
+[experimental]
+  cmd = ["server", "/data", "--address", ":8080", "--console-address", ":9001"]
+
+[build]
+image = "minio/minio"
+
+[env]
+MINIO_PROMETHEUS_AUTH_TYPE = "public"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = 'off'
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ['app']
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
+
+[mounts]
+source = "miniodata"
+destination = "/data"
+initial_size = '10gb'
+
+[[metrics]]
+  port = 8080
+  path = '/minio/v2/metrics/cluster'
