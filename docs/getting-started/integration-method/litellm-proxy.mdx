@@ -1,0 +1,185 @@
+---
+title: "LiteLLM Integration with Proxy"
+sidebarTitle: "Proxy"
+description: "Connect Helicone with LiteLLM through proxies for OpenAI, Azure, and Gemini to add logging, monitoring and advanced functionality."
+"twitter:title": "LiteLLM Proxy Integration - Helicone OSS LLM Observability"
+---
+
+## What is Proxy Integration?
+
+Using Helicone as a proxy allows your LiteLLM requests to flow through Helicone's infrastructure before reaching the LLM provider. This enables powerful features like:
+
+- **Request Caching** - Save money by reusing identical requests
+- **Rate Limiting** - Control your API usage
+- **Retries** - Automatically retry failed requests
+- **Advanced Logging** - Capture detailed metrics and request/response payloads
+
+Unlike callback-based integration, proxy integration works at the network level and can provide more functionality for supported providers.
+
+## OpenAI and Azure Integration
+
+Helicone offers native proxy support for OpenAI and Azure through LiteLLM. This is the simplest integration method.
+
+### Implementation Steps
+
+1. Install dependencies
+
+   ```bash
+   pip install litellm
+   ```
+
+2. Configure LiteLLM to use the Helicone proxy
+
+   ```python
+   import os
+   import litellm
+   from litellm import completion
+
+   litellm.api_base = "https://oai.helicone.ai/v1"
+   litellm.headers = {"Helicone-Auth": f"Bearer {os.getenv('HELICONE_API_KEY')}"}
+   ```
+
+3. Make API calls as usual
+
+   ```python
+   response = litellm.completion(
+       model="gpt-3.5-turbo",
+       messages=[{"role": "user", "content": "how does a court case get to the Supreme Court?"}],
+       metadata={
+           "Helicone-Property-Hello": "World"
+       }
+   )
+
+   print(response)
+   ```
+
+## Gemini Integration
+
+Gemini integration requires a special approach because of how the Vertex AI APIs are structured. We need to use a monkey patch with LiteLLM's Router to correctly route requests through Helicone.
+
+### Why a Monkey Patch?
+
+Gemini's API structure differs from OpenAI's, and LiteLLM's default proxy handling doesn't properly route Gemini requests through Helicone. The patch modifies LiteLLM's internal URL handling to correctly work with Helicone's Gemini proxy endpoints.
+
+### Implementation Steps
+
+1. Install dependencies
+
+   ```bash
+   pip install litellm asyncio
+   ```
+
+2. Set up environment variables
+
+   ```python
+   import os
+
+   HELICONE_API_KEY = os.getenv("HELICONE_API_KEY")
+   GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+   if not HELICONE_API_KEY or not GEMINI_API_KEY:
+       print("Error: HELICONE_API_KEY and GEMINI_API_KEY must be set.")
+   ```
+
+3. Configure the LiteLLM Router
+
+   ```python
+   import litellm
+   from litellm.router import Router
+
+   MODEL_NAME = "gemini-1.5-flash-latest"
+
+   router = Router(
+       model_list=[
+           {
+               "model_name": "gemini-hconeai",
+               "litellm_params": {
+                   "model": f"gemini/{MODEL_NAME}",
+                   "api_base": f"https://gateway.helicone.ai/v1beta/models/{MODEL_NAME}:generateContent?key={GEMINI_API_KEY}",
+                   "extra_headers": {
+                       "Content-Type": "application/json",
+                       "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+                       "Helicone-Target-Url": "https://generativelanguage.googleapis.com"
+                   },
+                   "custom_llm_provider": "gemini"
+               }
+           }
+       ]
+   )
+   ```
+
+4. Apply the monkey patch
+
+   ```python
+   from urllib.parse import urlparse, urlunparse, parse_qs, urlencode
+   from litellm.llms.vertex_ai.vertex_llm_base import VertexBase
+
+   _original_check_proxy = VertexBase._check_custom_proxy
+
+   def fixed_check_custom_proxy(
+       self, api_base: str | None, custom_llm_provider: str,
+       gemini_api_key: str | None, endpoint: str, stream: bool | None,
+       auth_header: str | None, url: str
+   ) -> tuple[str | None, str]:
+
+       is_helicone_gemini_proxy = (
+           api_base is not None
+           and "gateway.helicone.ai" in api_base
+           and custom_llm_provider == "gemini"
+       )
+
+       if is_helicone_gemini_proxy:
+           final_url = api_base
+           auth = None
+           if stream:
+               parsed = urlparse(final_url)
+               qs = parse_qs(parsed.query)
+               qs['alt'] = ['sse']
+               final_url = urlunparse((parsed.scheme, parsed.netloc, parsed.path, parsed.params, urlencode(qs, doseq=True), parsed.fragment))
+           return (auth, final_url)
+       elif _original_check_proxy:
+           return _original_check_proxy(
+               self, api_base, custom_llm_provider, gemini_api_key,
+               endpoint, stream, auth_header, url
+           )
+       else:
+           return (auth_header, url)
+
+   VertexBase._check_custom_proxy = fixed_check_custom_proxy
+   ```
+
+5. Make API calls
+
+   ```python
+   import asyncio
+
+   async def main():
+       response = await router.acompletion(
+           model="gemini-hconeai",
+           messages=[{"role": "user", "content": "Say 'Hello World'"}]
+       )
+       print(f"Response: {response.choices[0].message.content}")
+
+   if __name__ == "__main__":
+       asyncio.run(main())
+   ```
+
+## Using with Other Providers
+
+For LLM providers beyond OpenAI, Azure, and Gemini, the integration approach varies by provider:
+
+1. Each provider has a specific Helicone proxy URL format (e.g., OpenAI uses `oai.helicone.ai/v1`)
+2. Some providers require the `Helicone-Target-Url` header, while others don't
+
+```python
+# Example pattern (will vary by provider)
+litellm.api_base = "<provider-specific-helicone-endpoint>"
+litellm.headers = {
+    "Helicone-Auth": f"Bearer {os.getenv('HELICONE_API_KEY')}",
+    # Additional headers may be required depending on the provider
+}
+```
+
+Consult the Helicone documentation for provider-specific proxy endpoints and required headers. If your provider isn't explicitly supported, reach out to the Helicone team for guidance.
+
+For callback-based integration with LiteLLM, see our [LiteLLM Callbacks Integration](/getting-started/integration-method/litellm) guide.

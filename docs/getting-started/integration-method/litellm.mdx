@@ -1,22 +1,17 @@
 ---
-title: "LiteLLM Integration"
+title: "LiteLLM Integration with Callbacks"
 sidebarTitle: "Callbacks"
-description: "Connect Helicone with LiteLLM, a unified interface for multiple LLM providers. Standardize logging and monitoring across various AI models with simple callback or proxy setup."
-"twitter:title": "LiteLLM Integration - Helicone OSS LLM Observability"
+description: "Connect Helicone with LiteLLM using callbacks to log and monitor API calls across various AI models."
+"twitter:title": "LiteLLM Integration with Callbacks - Helicone OSS LLM Observability"
 ---
 
-[LiteLLM](https://github.com/BerriAI/litellm) is a model I/O library to standardize API calls to Azure, Anthropic, OpenAI, etc. Here's how you can log your LLM API calls to Helicone from LiteLLM.
+[LiteLLM](https://github.com/BerriAI/litellm) is a model I/O library to standardize API calls to Azure, Anthropic, OpenAI, etc. Here's how you can log your LLM API calls to Helicone from LiteLLM using callbacks.
 
 <Note>
   **Note:** [Custom
   Properties](https://docs.helicone.ai/features/advanced-usage/custom-properties)
   are available in `metadata` starting with LiteLLM version `1.41.23`.
 </Note>
-
-<Tabs>
-  <Tab title="Python">
-
-# Approach 1: Use Callbacks
 
 ## 1 line integration
 
@@ -37,6 +32,7 @@ litellm.success_callback=["helicone"]
 
 ```python
 from litellm import completion
+import os
 
 ## set env variables
 os.environ["HELICONE_API_KEY"] = "your-helicone-key"
@@ -63,42 +59,9 @@ response = completion(
   }
 )
 
-```
-
-# Approach 2: [OpenAI + Azure only] Use Helicone as a proxy
-
-Helicone provides advanced functionality like caching, etc. which they support for Azure and OpenAI.
-
-If you want to use Helicone to proxy your OpenAI/Azure requests, then you can -
-
-## 2 line integration
-
-```python
-litellm.api_url = ""https://oai.helicone.ai/v1"" # set the base url
-litellm.headers = {"Helicone-Auth": f"Bearer {os.getenv('HELICONE_API_KEY')}"} # set your headers
-```
-
-## Complete code
-
-```python
-import litellm
-from litellm import completion
-
-litellm.api_base = "https://oai.helicone.ai/v1"
-litellm.headers = {"Helicone-Auth": f"Bearer {os.getenv('HELICONE_API_KEY')}"}
-
-response = litellm.completion(
-    model="gpt-3.5-turbo",
-    messages=[{"role": "user", "content": "how does a court case get to the Supreme Court?"}],
-    metadata={
-        "Helicone-Property-Hello": "World"
-    }
-)
-
 print(response)
 ```
 
-</Tab>
-</Tabs>
-
 Feel free to [check it out](https://github.com/BerriAI/litellm) and tell us what you think 👋
+
+For proxy-based integration with LiteLLM, see our [LiteLLM Proxy Integration](/getting-started/integration-method/litellm-proxy) guide.
