@@ -1,16 +1,9 @@
-import {
-  HandThumbUpIcon,
-  HandThumbDownIcon,
-} from "@heroicons/react/24/outline";
-import {
-  HandThumbUpIcon as HTUp,
-  HandThumbDownIcon as HTDown,
-} from "@heroicons/react/24/solid";
-import { clsx } from "../../shared/clsx";
+import { ThumbsDown, ThumbsUp } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import useNotification from "../../shared/notification/useNotification";
 import { updateRequestFeedback } from "../../../services/lib/requests";
-import { Row } from "../../layout/common/row";
+import useNotification from "../../shared/notification/useNotification";
 
 const FeedbackButtons = ({
   requestId,
@@ -49,9 +42,11 @@ const FeedbackButtons = ({
   };
 
   return (
-    <Row className="items-center space-x-4">
+    <div className="flex flex-row items-center">
       {requestFeedback.rating}
-      <button
+      <Button
+        variant="ghost"
+        size="square_icon"
         onClick={() => {
           if (requestFeedback.rating === true) {
             return;
@@ -60,12 +55,16 @@ const FeedbackButtons = ({
         }}
       >
         {requestFeedback.rating === true ? (
-          <HTUp className={clsx("h-5 w-5 text-green-500")} />
+          <ThumbsUp size={16} className={"text-foreground"} />
+        ) : requestFeedback.rating === null ? (
+          <ThumbsUp size={16} className="text-foreground/40" />
         ) : (
-          <HandThumbUpIcon className="h-5 w-5 text-green-500" />
+          <ThumbsUp size={16} className="text-foreground/40" />
         )}
-      </button>
-      <button
+      </Button>
+      <Button
+        variant="ghost"
+        size="square_icon"
         onClick={() => {
           if (requestFeedback.rating === false) {
             return;
@@ -74,12 +73,14 @@ const FeedbackButtons = ({
         }}
       >
         {requestFeedback.rating === false ? (
-          <HTDown className={clsx("h-5 w-5 text-red-500")} />
+          <ThumbsDown size={16} className={"text-foreground"} />
+        ) : requestFeedback.rating === null ? (
+          <ThumbsDown size={16} className="text-foreground/40" />
         ) : (
-          <HandThumbDownIcon className="h-5 w-5 text-red-500" />
+          <ThumbsDown size={16} className="text-foreground/40" />
         )}
-      </button>
-    </Row>
+      </Button>
+    </div>
   );
 };
 
