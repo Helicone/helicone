@@ -1,8 +1,8 @@
 {
   "title": "How to Implement LLM Observability for Production with Helicone",
-  "title1": "5 Best Practices to Implement LLM Observability for Production",
-  "title2": "5 Best Practices to Implement LLM Observability for Production",
-  "description": "Technical leads who've successfully scaled LLM applications know that robust observability is beyond just tracking costs. Learn how LLM observability differs from traditional monitoring and discover 5 practical strategies to reduce hallucinations, prevent prompt injections, and optimize costs in production.",
+  "title1": "How to Implement LLM Observability for Production with Helicone",
+  "title2": "How to Implement LLM Observability for Production",
+  "description": "Let's talk about the best practices to monitor, debug, and optimize your AI applications for production use, and the best tools out there for monitoring LLM applications.",
   "images": "/static/blog/best-practices-for-llm-observability/llm-observability-cover.webp",
   "time": "9 minute read",
   "author": "Lina Lam",

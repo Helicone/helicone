@@ -1,5 +1,5 @@
 {
-  "title": "What is LLM Observability? A Developer's Guide to Building Reliable AI Applications",
+  "title": "LLM Observability: 5 Essential Pillars for Production-Ready AI Applications",
   "title1": "Building Reliable LLM Applications for Production with LLM Observability",
   "title2": "5 Best Practices to Building Reliable LLM Applications for Production",
   "description": "Technical leads who've successfully scaled LLM applications know that robust observability is beyond just tracking costs. Learn how LLM observability differs from traditional monitoring and discover 5 practical strategies to reduce hallucinations, prevent prompt injections, and optimize costs in production.",

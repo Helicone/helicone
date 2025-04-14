@@ -1,23 +1,25 @@
-In our <a href="https://www.helicone.ai/blog/llm-observability" target="_blank" rel="noopener">previous article</a>, we explored the fundamentals of LLM observability and why it's crucial for building reliable AI applications. Now, let's dive into the **practical side**-how to actually implement effective monitoring for your LLM applications.
+In our <a href="https://www.helicone.ai/blog/llm-observability" target="_blank" rel="noopener">previous article</a>, we explored the pillars of LLM observability and why it's crucial for building reliable AI applications. Now, let's dive into the **practical side** - how to actually implement effective monitoring for your LLM applications.
 
 ![Helicone: What is LLM Observability and Monitoring](/static/blog/llm-observability-cover.webp)
 
-## 5 Best Practices for LLM Observability in Production
 
-### 1. Use prompting techniques to reduce hallucinations
+## 1. Use prompting techniques to reduce hallucinations
 
 LLMs sometimes generate outputs that sound plausible but are factually incorrect - also known as hallucination. As your app usage goes up, hallucinations can happen frequently and undermine your user's trust.
 
+![Helicone: Prompt Engineering](/static/blog/best-practices-for-llm-observability/prompt-engineering.webp)
+
 The good news is, you can mitigate this by:
 
-- Designing your prompts carefully with <a href="https://www.helicone.ai/blog/prompt-engineering-tools" target="_blank" rel="noopener">prompt engineering</a>, or
+- Designing your prompts carefully with <a href="https://www.helicone.ai/blog/prompt-engineering-tools" target="_blank" rel="noopener">prompt engineering</a>
+- Testing prompts with other models in a <a href="https://docs.helicone.ai/features/prompts/editor" target="_blank" rel="noopener">prompt playground</a>, like above. 
 - Setting up evaluators to monitor your outputs in Helicone.
 
-### 2. Prevent prompt injections
+## 2. Prevent prompt injections
 
 Malicious users can manipulate their inputs to trick your model into revealing sensitive information or take risky actions. We dive deeper into this topic in the <a href="https://www.helicone.ai/blog/preventing-prompt-injection" target="_blank" rel="noopener">"How to prevent prompt injections"</a> blog.
 
-**On a high-level, you can prevent injections by**:
+**On a high level, you can prevent injections by**:
 
 - Implementing strict validation of user inputs.
 - Blocking inappropriate or malicious responses.
@@ -37,7 +39,7 @@ client.chat.completions.create(
 )
 ```
 
-### 3. Cache responses to reduce latency
+## 3. Cache responses to reduce latency
 
 Caching stores previously generated responses, allowing applications to quickly retrieve data without additional computation.
 
@@ -61,9 +63,9 @@ client.chat.completions.create(
 )
 ```
 
-### 4. Monitor and optimize costs
+## 4. Monitor usage and optimize costs
 
-It's important to know exactly what might be drilling a hole in your operational cost. LLM monitoring can improve cost savings by tracking expenses for every model interaction, from the initial prompt to the final response.
+It's important to know exactly what might be drilling a hole in your operational cost. You can save on costs by tracking expenses for every model interaction, from the initial prompt to the final response.
 
 **You can mitigate this by**:
 
@@ -71,39 +73,24 @@ It's important to know exactly what might be drilling a hole in your operational
 - Optimizing infrastructure and usage.
 - Fine-tuning smaller, open-source models to reduce costs.
 
-For more effective cost optimization strategies, check out our blog on <a href="https://www.helicone.ai/blog/monitor-and-optimize-llm-costs" target="_blank" rel="noopener">how to cut LLM costs by 90%</a>.
 
-### 5. Improve the prompt continuously
+In Helicone, you can see the cost trend in the dashboard and a ton of other useful metrics like usage, latency, top models, and top countries. You can also <a href="https://docs.helicone.ai/features/advanced-usage/custom-properties" target="_blank" rel="noopener">add metadata to your requests</a> to track costs by project or user, and set up alerts to notify you when costs exceed a certain threshold.
 
-As models evolve, it's important to continuously test and audit your prompts to ensure they're performing as expected.
+![Helicone: Cost Monitoring](/static/blog/best-practices-for-llm-observability/anomaly-detection.webp)
 
-You should experiment with different variations of your prompt, switch models or set up different configurations to find the best performing prompt. You should also evaluate against key metrics that's important to your business.
+For more cost optimization strategies, check out <a href="https://www.helicone.ai/blog/monitor-and-optimize-llm-costs" target="_blank" rel="noopener">how to cut LLM costs by 90%</a>.
+
+## 5. Systematically improve the prompt
+
+As models get updated, it's important to keep testing and auditing your prompts to make sure they're still performing as expected.
+
+You can either manually test your prompt using your own system, or use an experimentation tool. Here's a screenshot of what the prompt experimentation looks like in Helicone: 
 
 ![Helicone: Prompt Experiment & Evaluation](/static/blog/best-practices-for-llm-observability/prompt-experiments.webp)
 
-There are a few ways to do this in Helicone:
+The spreadsheet-like interface allows you to experiment with different variations of your prompt, switch models or set up different configurations to find the best performing prompt. 
 
-- Run a quick test on your new prompt changes in the <a href="https://docs.helicone.ai/features/prompts/editor" target="_blank" rel="noopener">Prompt Editor</a>.
-- Once you are ready to test the prompt at scale, run <a href="https://docs.helicone.ai/features/experiments" target="_blank" rel="noopener">prompt experiments</a> using production data.
-- While in production, use <a href="https://docs.helicone.ai/features/sessions" target="_blank" rel="noopener">sessions</a> to trace the workflows that are more prone to errors to help you pinpoint the exact request that's causing the issue. 
-
-<CallToAction
-  title="Start Monitoring with Helicone in Minutes 🔍"
-  description="Helicone works with any LLM providers and frameworks. Trace complex workflows, identify optimization, and fix errors with just one line of code."
-  primaryButtonText="Start Monitoring for Free"
-  buttonLink="https://us.helicone.ai/signup?demo=true"
-  secondaryButtonText="See Other Integrations"
-  secondaryButtonLink="https://docs.helicone.ai/getting-started/quick-start#quick-start"
->
-```js
-import OpenAI from "openai";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  baseURL: `https://oai.helicone.ai/v1/${HELICONE_API_KEY}/`
-});
-```
-</CallToAction>
+Once you're satisfied with the prompt, you should also consider setting up evals to help you measure quality before or after rolling it out to production.
 
 ## Bonus Tip: Real-Time Alerts
 
@@ -116,7 +103,7 @@ In Helicone, you can configure <a href="https://www.helicone.ai/changelog/202409
 - **Defining threshold metrics**: Add critical metrics to a watchlist and set thresholds for triggering notification events.
 - **Monitoring LLM drift**: Set up routine reports on key performance metrics to gain insight into model behavioral changes over time.
 - **Detecting anomalies**: Train robust evaluators to identify unusual patterns of behavior.
-- **Sending notifications**: Use webhooks to send alerts to dedicated communication channels
+- **Sending notifications**: Use webhooks to send alerts to dedicated communication channels.
 
 ## Getting Started
 
@@ -129,15 +116,15 @@ Here's how to get started:
 1. Create a free <a href="https://helicone.ai/signup" target="_blank" rel="noopener">Helicone account</a>
 2. Integrate using our <a href="https://docs.helicone.ai/getting-started/quick-start#quick-start" target="_blank" rel="noopener">quick start guide</a> for your preferred LLM provider
 3. Send your first request to Helicone
-4. Invite your team to collaboate and analyze data
+4. Invite your team to collaborate and analyze data
 
 We are here to help you every step of the way! If you have any questions, please reach out to us via email at [support@helicone.ai](mailto:support@helicone.ai) or through the chat feature in our platform. Happy monitoring!
 
 ### You might find these useful: 
 
-- <a href="https://www.helicone.ai/blog/llm-observability" target="_blank" rel="noopener">Why You Should Monitor Your AI Applications (Part 1)</a>
+- <a href="https://www.helicone.ai/blog/llm-observability" target="_blank" rel="noopener">5 Essential Pillars for Production-Ready LLM Application</a>
 - <a href="https://www.helicone.ai/blog/how-to-reduce-llm-hallucination" target="_blank" rel="noopener">How to Reduce LLM Hallucinations</a>
-- <a href="https://www.helicone.ai/blog/test-your-llm-prompts" target="_blank" rel="noopener">How to Test Your LLM Prompts (with Helicone)</a>
+- <a href="https://www.helicone.ai/blog/test-your-llm-prompts" target="_blank" rel="noopener">How to Systematically Test Your LLM Prompts</a>
 
 <FAQ items={[
   {
