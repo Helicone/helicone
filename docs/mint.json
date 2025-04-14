@@ -182,7 +182,8 @@
           "group": "LiteLLM",
           "pages": [
             "getting-started/integration-method/litellm-openllmetry",
-            "getting-started/integration-method/litellm"
+            "getting-started/integration-method/litellm",
+            "getting-started/integration-method/litellm-proxy"
           ]
         },
         "getting-started/integration-method/fireworks",
