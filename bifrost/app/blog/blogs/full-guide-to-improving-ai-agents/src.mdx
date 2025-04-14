@@ -17,52 +17,38 @@ Most online tutorials use "AI agent" to describe any system that makes an API ca
 - **Workflows**: Systems where LLMs and tools are orchestrated through predefined code paths.
 - **Agents**: Systems where LLMs dynamically direct their own processes and tool usage, maintaining control over how they accomplish tasks.
 
-This distinction here essentially being that while you "decide" what to do for the LLM in a workflow, a true agent makes this decision on its own.
-
-This matters because it affects your development approach. **For many applications, workflows are sufficient and more reliable than full agents.**
+The distinction matters because it affects your development approach. **For many applications, workflows are sufficient and more reliable than full agents.**
 
 ## When to Use Agents vs. Workflows
 
-Use an **agent** when:
-
-- The number of steps is unpredictable
-- The task requires dynamic decision-making
-- Tools and actions need to be selected adaptively
-
-A **workflow** typically works better when:
-
-- The task has clear, predictable steps
-- You need consistent, deterministic behavior
-- The process can be broken into discrete chunks
+| **Use an Agent when...** | **Use a Workflow when...** |
+| --------------------- | ----------------------- |
+| The number of steps is unpredictable | The task has clear, predictable steps |
+| The task requires dynamic decision-making | You need consistent, deterministic behavior |
+| Tools and actions need to be selected adaptively | The process can be broken into discrete chunks |
 
 ## Core Patterns for Building AI Systems
 
-Whether you're creating workflows or agents, there are a few common workflow patterns you should know. 
-
-Ideally, you're building with an LLM capable of:
+Whether you're creating workflows or agents, there are a few common workflow patterns you should know. Ideally, you're building with an LLM that is capable of:
 - **Retrieval** (Accessing external knowledge from databases or vector stores) 
 - **Tool use** (API calls to external services), and 
 - **Memory** (Context from previous interactions).
 
-Here they are:
-
-### Workflow Patterns for Building Agents
-
 Here are five common workflow patterns for building AI agents:
 
-#### 1. Prompt Chaining
+### 1. Prompt Chaining
 
 Prompt chaining decomposes a complex task into a sequence of steps, where each LLM call processes the output of the previous one. This approach helps by making each individual step simpler and more focused, improving overall accuracy.
 
 **Works best for**: Content creation, multi-step analysis, and processes with natural sequential flow.
 
-#### 2. Routing
+### 2. Routing
 
 Routing classifies an input and directs it to specialized handlers. This pattern allows for separation of concerns and enables building more specialized prompts for different categories of input.
 
 **Works best for**: Handling diverse inputs that need to be treated differently.
 
-#### 3. Parallelization
+### 3. Parallelization
 
 Parallelization involves running multiple LLM tasks simultaneously and then combining their outputs. It comes in two main forms:
 
@@ -71,13 +57,13 @@ Parallelization involves running multiple LLM tasks simultaneously and then comb
 
 **Works best for**: Tasks with multiple independent aspects or when seeking consensus.
 
-#### 4. Orchestrator-Workers
+### 4. Orchestrator-Workers
 
 In this pattern, a central "orchestrator" LLM dynamically breaks down tasks and delegates them to specialized "worker" LLMs. The orchestrator then synthesizes their results into a cohesive response.
 
 **Works best for**: Complex tasks requiring different types of expertise.
 
-#### 5. Evaluator-Optimizer
+### 5. Evaluator-Optimizer
 
 In the evaluator-optimizer workflow, one LLM generates content while another evaluates it and provides feedback. This feedback loop continues until the content meets quality criteria.
 
@@ -85,15 +71,15 @@ In the evaluator-optimizer workflow, one LLM generates content while another eva
 
 ## Best Practices for Building Effective Agents
 
-### 1. Don't Automate Until Value Is Established
+### 1. Don't automate until value is established
 
 Before building an AI agent, ensure the process itself creates value. Many businesses want to automate processes that don't exist yet or haven't been validated manually.
 
-Start by **testing the process manually** to confirm it works and Calculating the potential ROI of automating said process—using a formula such as: `(Rate × Hours - Operational costs) ÷ Development costs`.
+Start by **testing the process manually** to confirm it works and calculating the potential ROI of automating said process—using a formula such as: `(Rate x Hours - Operational costs) ÷ Development costs`.
 
-### 2. Use the Right Tooling
+### 2. Use the right tooling
 
-Many platforms have emerged to make building agents easier and faster and choosing the right one for your specific use case can significantly impact your success. 
+Many platforms have emerged to make building agents easier and faster, and choosing the right one for your specific use case can significantly impact your success. 
 
 Here are a few popular ones:
 
@@ -104,13 +90,11 @@ Here are a few popular ones:
 - **CrewAI**: Specializes in creating role-specific AI agents for collaborative tasks
 - **Pydantic AI**: Focused on production-grade applications requiring structured output and type safety
 
-When evaluating agent-building platforms, consider your team's **level of technicality**, **project complexity** and other requirements like **scalability**.
+When evaluating <a href="https://www.helicone.ai/blog/ai-agent-builders" target="_blank" rel="noreferrer">agent-building platforms</a>, consider your team's **level of technicality**, **project complexity** and other requirements like **scalability**.
 
 Remember that the right tool isn't necessarily the most complex one. In fact, simpler solutions can often lead to more reliable agents.
 
-Read more about choosing the best AI Agent for your project <a href="https://www.helicone.ai/blog/ai-agent-builders" target="_blank" rel="noreferrer">here</a>.
-
-### 3. Use Dedicated Agents
+### 3. Use dedicated agents
 
 When building AI agents, consider breaking complex workflows into multiple dedicated agents rather than overloading a single agent. 
 
@@ -127,7 +111,7 @@ Multi-agent architectures provide several advantages:
 
 Remember that the goal isn't complexity for its own sake. A thoughtfully designed multi-agent system should improve both reliability and scalability.
 
-### 4. Document Your Tools and Processes
+### 4. Document your tools and processes
 
 > People spend lots of effort on their prompts but then give the model tools with parameters named 'a' and 'b' with no documentation.
 
@@ -142,7 +126,7 @@ Your tools are only as good to an LLM as their documentation. Treat tool/process
 
 Think of the LLM as a new team member who needs to learn your API. The clearer your documentation, the more effectively it will work for you.
 
-### 5. Implement Proper Verification
+### 5. Implement proper verification
 
 The more you verify LLM outputs at each step of the way, the more you can rely on your system to get the job done. 
 
@@ -157,10 +141,10 @@ For coding agents, verification is easier because you can run tests. However, yo
 
 <BottomLine
   title="💡 Use Helicone for Evaluating your LLM Agents"
-  description="“Observability tools like Helicone were specifically designed to make evaluating LLM outputs while building agents very easy.“"
+  description="Observability tools like Helicone were specifically designed to make evaluating LLM outputs while building agents very easy."
 />
 
-### 6. Start Simple and Scale Gradually
+### 6. Start simple and scale gradually
 
 As with any attempt at automation, don't aim to do everything all at once. Instead:
 
@@ -168,7 +152,7 @@ As with any attempt at automation, don't aim to do everything all at once. Inste
 2. Perfect that workflow before adding complexity
 3. Use categorization to limit the scope of what your agent handles
 
-### 7. Develop Iteratively 
+### 7. Develop iteratively
 
 Agent development is most efficient when it's iterative. The best approaches include:
 
@@ -179,7 +163,7 @@ Agent development is most efficient when it's iterative. The best approaches inc
 
 Remember that the first version is rarely the best—successful agents evolve through multiple iterations.
 
-### 8. Measure Everything
+### 8. Measure everything
 
 Effective agent development hinges on measuring performance and iterating on implementations. Without comprehensive measurement, you're building blind. 
 
@@ -189,7 +173,7 @@ Establish clear metrics for success—task completion rate, accuracy, or user sa
 
 A good LLM observability platform like <a href="https://helicone.ai" target="_blank" rel="noopener">Helicone</a> can provide the measurement infrastructure you need to keep your agents in good shape.
 
-### 9. Add Guardrails
+### 9. Add guardrails
 
 Guard rails are protective constraints that prevent the system from producing harmful, incorrect, or irrelevant outputs. You typically want to implement some or all of the following:
 
@@ -206,9 +190,9 @@ Debugging agents can be quite tricky because their decision paths are non-determ
 
 However, by carefully tracking and analyzing your LLMs' actions at each step of the way, you can greatly simplify the process. Here's how:
 
-### How to Debug AI Agents 
+### How to debug AI agents 
 
-One easy way to debug AI agents is with step-by-step tracing using Helicone's <a href="https://docs.helicone.ai/features/sessions" target="_blank" rel="noopener">Sessions</a> feature.
+One easy way to <a href="https://www.helicone.ai/blog/debugging-chatbots-and-ai-agents-with-sessions" target="_blank" rel="noopener">debug AI agents</a> is with step-by-step tracing using Helicone's Sessions feature.
 
 Helicone's Sessions feature provides a structured way to visualize and analyze multi-step agent processes. It groups related requests together, making it easier to trace the flow of information and identify issues. 
 
@@ -235,8 +219,6 @@ const response = await openai.chat.completions({
 </CallToAction>
 
 Session-based tracking is particularly valuable for complex agents because it provides end-to-end visibility and even allows you to view **tool** and **retrieval** actions. 
-
-Read more about practical steps to <a href="https://www.helicone.ai/blog/debugging-chatbots-and-ai-agents-with-sessions" target="_blank" rel="noreferrer">debugging AI Agents</a> with Helicone's Sessions.
 
 ## Bottom Line
 
@@ -269,8 +251,6 @@ The most successful implementations follow this pragmatic approach, focusing on 
   >
     7 Awesome Open-Source Frameworks for Building AI Agents
   </a>
-
-## FAQs
 
 <FAQ items={[
   {
