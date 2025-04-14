@@ -11,7 +11,9 @@ export class S3ReaderHandler extends AbstractLogHandler {
     this.s3Client = s3Client;
   }
 
-  public async handle(context: HandlerContext): PromiseGenericResult<string> {
+  public async _handleWithoutTiming(
+    context: HandlerContext
+  ): PromiseGenericResult<string> {
     try {
       if (!context.orgParams?.id) {
         return err("Organization ID not found in org params");
@@ -45,7 +47,7 @@ export class S3ReaderHandler extends AbstractLogHandler {
       context.rawLog.rawRequestBody = content.data.request;
       context.rawLog.rawResponseBody = content.data.response;
 
-      return await super.handle(context);
+      return await super.handleNext(context);
     } catch (error) {
       return err(
         `Error fetching content from S3: ${error}, Context: ${this.constructor.name}`
