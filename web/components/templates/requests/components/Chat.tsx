@@ -118,7 +118,8 @@ export default function Chat({ mappedRequest }: ChatProps) {
   return (
     <div className="h-full w-full flex flex-col">
       {messages.map((message, index) => {
-        const content = message.content ?? JSON.stringify(message.tool_calls);
+        const content =
+          message.content ?? JSON.stringify(message.tool_calls) ?? "";
         const isLongMessage = content.length > MESSAGE_LENGTH_THRESHOLD;
         const isExpanded = expandedMessages[index];
         const displayContent =
