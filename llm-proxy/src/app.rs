@@ -13,10 +13,16 @@ use crate::{
         Config,
         rate_limit::{AuthedLimiterConfig, UnauthedLimiterConfig},
     },
+    middleware::request_context::Service as RequestContextService,
     error,
     registry::Registry,
     router::Router,
 };
+
+/// Type representing the middleware layers.
+/// 
+/// When adding a new middleware, you'll be required to add it to this type.
+pub type ServiceStack = RequestContextService<Router>;
 
 pub struct App {
     pub config: Config,
@@ -24,6 +30,7 @@ pub struct App {
     pub authed_rate_limit: Arc<AuthedLimiterConfig>,
     pub unauthed_rate_limit: Arc<UnauthedLimiterConfig>,
     pub pg_pool: Pool,
+    pub service_stack: ServiceStack,
 }
 
 impl App {
@@ -51,12 +58,24 @@ impl App {
             tokio_postgres::NoTls,
         )?;
 
+
+        let registry = Registry::new(&config.dispatcher);
+        let router = Router::new(registry);
+        let service_stack: ServiceStack = ServiceBuilder::new()
+            .layer(crate::middleware::request_context::Layer::new(
+                pg_pool.clone(),
+            ))
+            // other middleware: rate limiting, logging, etc, etc
+            // will be added here as well
+            .service(router);
+
         Ok(Self {
             config,
             minio,
             authed_rate_limit,
             unauthed_rate_limit,
             pg_pool,
+            service_stack,
         })
     }
 }
@@ -66,17 +85,8 @@ impl meltdown::Service for App {
 
     fn run(self, mut token: Token) -> Self::Future {
         Box::pin(async move {
-            let registry = Registry::new(&self.config.dispatcher);
-            let router = Router::new(registry);
-            let service_stack = ServiceBuilder::new()
-                .layer(crate::middleware::request_context::Layer::new(
-                    self.pg_pool.clone(),
-                ))
-                // other middleware: rate limiting, logging, etc, etc
-                // will be added here as well
-                .service(router);
             let service_stack =
-                hyper_util::service::TowerToHyperService::new(service_stack);
+                hyper_util::service::TowerToHyperService::new(self.service_stack);
 
             info!(address = %self.config.server.address, tls = %self.config.server.tls, "server starting");
             let listener = TcpListener::bind((

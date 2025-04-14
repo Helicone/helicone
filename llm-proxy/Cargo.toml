@@ -49,3 +49,12 @@ tracing-subscriber = { workspace = true, features = ['env-filter', 'std'] }
 url = { workspace = true, features = ['serde'] }
 utoipa = { workspace = true }
 uuid = { workspace = true, features = ["serde", "v7"] }
+
+
+[features]
+default = []
+testing = []
+
+[[test]]
+name = "default_target"
+required-features = ["testing"]

@@ -97,6 +97,13 @@ impl Default for Config {
     }
 }
 
+#[cfg(feature = "testing")]
+impl Config {
+    pub fn test_config() -> Self {
+        Config::default()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
