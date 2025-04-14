@@ -198,9 +198,6 @@ export async function getRequestsClickhouseNoSort(
       assets as asset_ids,
       target_url
     FROM request_response_rmt
-    PREWHERE (
-      organization_id = {val_0 : String}
-    )
     WHERE (
       (${builtFilter.filter})
     )
