@@ -11,6 +11,11 @@ SHELL ["/bin/bash", "-c"]
 RUN apt-get update && apt-get install -y python3-venv python3
 RUN python3 -m venv venv
 
+# Install FFMEG and FFPROBE
+RUN apt-get install -y ffmpeg
+ENV FFMPEG_PATH="/usr/bin/ffmpeg"
+ENV FFPROBE_PATH="/usr/bin/ffprobe"
+
 COPY ./valhalla/prompt_security/requirements.txt ./
 RUN . venv/bin/activate && \
     pip3 install torch==2.3.1+cpu torchvision==0.18.1+cpu -f https://download.pytorch.org/whl/torch_stable.html && \
