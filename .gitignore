@@ -17,3 +17,8 @@ venv/
 test-hcone-sessions/
 
 web/public/__ENV.js
+.yalc/
+codesandbox/
+
+lastmile/
+rosebud/

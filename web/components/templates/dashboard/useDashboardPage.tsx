@@ -1,6 +1,6 @@
 import { UseQueryResult } from "@tanstack/react-query";
 import { OverTimeRequestQueryParams } from "../../../lib/api/metrics/timeDataHandlerWrapper";
-import { Result, ok, resultMap } from "../../../lib/result";
+import { Result, ok, resultMap } from "../../../packages/common/result";
 import {
   RequestsOverTime,
   TimeIncrement,
@@ -8,6 +8,8 @@ import {
 import { CostOverTime } from "../../../pages/api/metrics/costOverTime";
 import { ErrorOverTime } from "../../../pages/api/metrics/errorOverTime";
 
+import { useFilterStore } from "@/filterAST/store/filterStore";
+import { toFilterNode } from "@/filterAST/toFilterNode";
 import { UIFilterRowTree } from "@/services/lib/filters/types";
 import { useCallback, useMemo } from "react";
 import { getTokensPerRequest } from "../../../lib/api/metrics/averageTokensPerRequest";
@@ -23,7 +25,10 @@ import {
   BackendMetricsCall,
   useBackendMetricCall,
 } from "../../../services/hooks/useBackendFunction";
-import { FilterLeaf } from "../../../services/lib/filters/filterDefs";
+import {
+  FilterLeaf,
+  FilterNode,
+} from "../../../services/lib/filters/filterDefs";
 import {
   DASHBOARD_PAGE_TABLE_FILTERS,
   SingleFilterDef,
@@ -82,7 +87,9 @@ export const useUIFilterConvert = (
 
   const filterMap = useMemo(() => {
     return (DASHBOARD_PAGE_TABLE_FILTERS as SingleFilterDef<any>[]).concat(
-      properties.propertyFilters
+      Array.isArray(properties.propertyFilters)
+        ? properties.propertyFilters
+        : []
     );
   }, [properties.propertyFilters]);
 
@@ -153,9 +160,15 @@ export const useUIFilterConvert = (
     return updateModelFilter(filterMap, sortedAllModelsData);
   }, [filterMap, sortedAllModelsData, updateModelFilter]);
 
+  const filterStore = useFilterStore();
+
   return {
     properties,
-    userFilters,
+    userFilters: {
+      left: userFilters,
+      right: filterStore.filter ? toFilterNode(filterStore.filter) : "all",
+      operator: "and",
+    } as FilterNode,
     filterMap: updatedFilterMap,
     allModelsData: sortedAllModelsData,
     isModelsLoading,
@@ -384,10 +397,6 @@ export const useDashboardPage = ({
     refetch: () => {
       Object.values(overTimeData).forEach((x) => x.refetch());
       Object.values(metrics).forEach((x) => x.refetch());
-    },
-    remove: () => {
-      Object.values(overTimeData).forEach((x) => x.remove());
-      Object.values(metrics).forEach((x) => x.remove());
     },
     models: ok(topModels),
     isModelsLoading,

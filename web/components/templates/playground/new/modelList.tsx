@@ -64,6 +64,11 @@ export const MODEL_LIST: {
     provider: "anthropic",
   },
   {
+    value: "claude-3-7-sonnet",
+    label: "claude-3-7-sonnet",
+    provider: "anthropic",
+  },
+  {
     value: "claude-3-opus-20240229",
     label: "claude-3-opus-20240229",
     provider: "anthropic",
@@ -71,6 +76,11 @@ export const MODEL_LIST: {
   {
     value: "claude-3-haiku-20240307",
     label: "claude-3-haiku-20240307",
+    provider: "anthropic",
+  },
+  {
+    value: "claude-3-5-haiku",
+    label: "claude-3-5-haiku",
     provider: "anthropic",
   },
   {
@@ -92,6 +102,11 @@ export const MODEL_LIST: {
     value: "gpt-3.5-turbo-1106",
     label: "gpt-3.5-turbo-1106",
     provider: "openai",
+  },
+  {
+    value: "gemini-2.0-flash-lite-001",
+    label: "gemini-2.0-flash-lite-001",
+    provider: "google",
   },
   {
     value: "gemini-flash-1.5-8b",

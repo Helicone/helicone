@@ -1,34 +1,16 @@
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
-import { InMemoryCache } from "../cache/staticMemCache";
-import { PromiseGenericResult, err, ok } from "../shared/result";
-import { Database } from "./database.types";
-import { hashAuth } from "../../utils/hash";
-import { HeliconeAuth } from "../requestWrapper";
-import { redisClient } from "../clients/redisClient";
-import { KeyPermissions, Role } from "../../models/models";
-import { KVCache } from "../cache/kvCache";
+import { KeyPermissions } from "../../packages/common/auth/types";
+import { Role } from "../../packages/common/auth/types";
 import { cacheResultCustom } from "../../utils/cacheResult";
-
-require("dotenv").config({
-  path: `${__dirname}/../../../.env`,
-});
-
-export interface AuthParams {
-  organizationId: string;
-  userId?: string;
-  heliconeApiKeyId?: number;
-  keyPermissions?: KeyPermissions;
-  role?: Role;
-}
-type AuthResult = PromiseGenericResult<AuthParams>;
-
-export interface OrgParams {
-  tier: string;
-  id: string;
-  percentLog: number;
-}
-
-type OrgResult = PromiseGenericResult<OrgParams>;
+import { hashAuth } from "../../utils/hash";
+import { KVCache } from "../cache/kvCache";
+import { HeliconeAuth } from "../../packages/common/auth/types";
+import { AuthParams } from "../../packages/common/auth/types";
+import { AuthResult } from "../../packages/common/auth/types";
+import { OrgParams } from "../../packages/common/auth/types";
+import { OrgResult } from "../../packages/common/auth/types";
+import { err, ok } from "../../packages/common/result";
+import { Database } from "./database.types";
 
 const SUPABASE_CREDS = JSON.parse(process.env.SUPABASE_CREDS ?? "{}");
 const supabaseURL = SUPABASE_CREDS?.url ?? process.env.SUPABASE_URL;
@@ -153,7 +135,7 @@ export class SupabaseConnector {
       .from("helicone_proxy_keys")
       .select("*")
       .eq("id", proxyKeyId)
-      .eq("soft_delete", "false")
+      .eq("soft_delete", false)
       .single();
     if (storedProxyKey.error || !storedProxyKey.data) {
       return err("Proxy key not found in storedProxyKey");
@@ -256,6 +238,7 @@ export class SupabaseConnector {
       tier: data.tier ?? "free",
       id: data.id ?? "",
       percentLog: data.percent_to_log ?? 100_000,
+      has_onboarded: data.has_onboarded ?? false,
     };
 
     return ok(orgResult);

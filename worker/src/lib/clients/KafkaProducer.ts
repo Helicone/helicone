@@ -72,6 +72,7 @@ export class KafkaProducer {
       );
       return;
     }
+    console.log(env.UPSTASH_KAFKA_URL);
     this.kafka = new Kafka({
       url: env.UPSTASH_KAFKA_URL,
       username: env.UPSTASH_KAFKA_USERNAME,

@@ -6,7 +6,7 @@ import AlertForm, { AlertRequest } from "./alertForm";
 
 import Cookies from "js-cookie";
 import { SUPABASE_AUTH_TOKEN } from "../../../lib/constants";
-import { Database } from "../../../supabase/database.types";
+import { Database } from "../../../db/database.types";
 
 interface EditAlertModalProps {
   open: boolean;

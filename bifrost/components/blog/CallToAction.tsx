@@ -24,16 +24,16 @@ export function CallToAction({
 }: CallToActionProps) {
   return (
     <section className="w-full max-w-4xl mx-auto mt-6 mb-2">
-      <div className="rounded-lg bg-[#F2F9FC] px-6 py-4 border border-[#E3EFF3]">
-        <h2 className="text-xl font-semibold text-slate-600 my-0">{title}</h2>
-        <p className="text-[#6B8C9C] text-md leading-relaxed mb-6">
+      <div className="rounded-lg bg-sky-50 px-5 py-4 border border-slate-200">
+        <h2 className="text-xl font-semibold text-slate-600 my-1">{title}</h2>
+        <p className="text-slate-500 text-md leading-relaxed mb-3">
           {description}
         </p>
-        {children && <div className="mb-6">{children}</div>}
-        <div className="flex flex-col sm:flex-row gap-4">
+        {children && <div className="mb-4">{children}</div>}
+        <div className="flex flex-col sm:flex-row gap-4 my-1">
           <Button
             onClick={() => window.open(primaryButtonLink, "_blank")}
-            className="inline-flex items-center justify-center p-6 rounded-md bg-[#0DA5E8] text-white font-medium hover:bg-[#0C94D1] transition-colors text-md"
+            className="inline-flex items-center justify-center p-6 rounded-md bg-sky-500 text-white font-medium hover:bg-sky-600 transition-colors text-md"
           >
             {primaryButtonText}
             <ArrowRight className="ml-2 h-4 w-4" />

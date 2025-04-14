@@ -22,6 +22,8 @@ import { useProFeature } from "@/hooks/useProFeature";
 import { UpgradeProDialog } from "@/components/templates/organization/plan/upgradeProDialog";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
 
 interface ThemedTimeFilterShadCNProps
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -36,6 +38,7 @@ export function ThemedTimeFilterShadCN({
 }: ThemedTimeFilterShadCNProps) {
   const [date, setDate] = useState<DateRange | undefined>(undefined);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isInvertedRange, setIsInvertedRange] = useState(false);
   const { hasAccess } = useProFeature("time_filter");
 
   useEffect(() => {
@@ -94,10 +97,14 @@ export function ThemedTimeFilterShadCN({
 
   const handleDateChange = (newDate: DateRange | undefined) => {
     if (newDate?.from && newDate?.to) {
-      if (newDate.from > newDate.to) {
-        return;
-      }
-      const daysDifference = differenceInDays(newDate.to, newDate.from);
+      // Check if range is inverted but allow it
+      setIsInvertedRange(newDate.from > newDate.to);
+
+      const daysDifference = differenceInDays(
+        newDate.from > newDate.to ? newDate.from : newDate.to,
+        newDate.from > newDate.to ? newDate.to : newDate.from
+      );
+
       if (daysDifference > 31 && !hasAccess) {
         setIsDialogOpen(true);
         return;
@@ -157,13 +164,19 @@ export function ThemedTimeFilterShadCN({
             variant={"outline"}
             className={cn(
               " dark:text-slate-400",
-              "justify-start text-left font-normal"
+              "justify-start text-left font-normal",
+              isInvertedRange ? "border-amber-500" : ""
             )}
             size="md_sleek"
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
             {date?.from && date?.to ? (
-              formatDateDisplay(date.from, date.to)
+              <>
+                {formatDateDisplay(date.from, date.to)}
+                {isInvertedRange && (
+                  <AlertTriangle className="ml-2 h-4 w-4 text-amber-500" />
+                )}
+              </>
             ) : (
               <span>Pick a date and time</span>
             )}
@@ -292,9 +305,6 @@ export function ThemedTimeFilterShadCN({
                   onChange={(e) => {
                     if (date?.from) {
                       let [hours, minutes] = e.target.value.split(":");
-                      if (+hours === 0) {
-                        hours = "12";
-                      }
                       const newFrom = new Date(date.from);
 
                       if (hours && minutes) {
@@ -324,11 +334,9 @@ export function ThemedTimeFilterShadCN({
                   onChange={(e) => {
                     if (date?.to) {
                       let [hours, minutes] = e.target.value.split(":");
-                      if (+hours === 0) {
-                        hours = "12";
-                      }
+                      const newTo = new Date(date.to);
+
                       if (hours && minutes) {
-                        const newTo = new Date(date.to);
                         newTo.setHours(Number(hours), Number(minutes));
                         handleDateChange({ ...date, to: newTo });
                       }
@@ -338,6 +346,16 @@ export function ThemedTimeFilterShadCN({
               </div>
             </div>
           </div>
+
+          {/* Warning moved to bottom to avoid content shifting */}
+          {isInvertedRange && (
+            <Alert variant="warning" className="mt-2">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                Warning: Start date is after end date
+              </AlertDescription>
+            </Alert>
+          )}
         </PopoverContent>
       </Popover>
       <UpgradeProDialog

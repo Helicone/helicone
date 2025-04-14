@@ -1,226 +1,395 @@
-import { MappedLLMRequest, Message } from "@/packages/llm-mapper/types";
+import GlassHeader from "@/components/shared/universal/GlassHeader";
 import {
-  PiCodeBold,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { getJawnClient } from "@/lib/clients/jawn";
+import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  PiCaretDownBold,
+  PiDownloadBold,
+  PiFunctionBold,
   PiGearBold,
+  PiInfoBold,
   PiMicrophoneBold,
+  PiPauseBold,
+  PiPlayBold,
+  PiSpeakerHighBold,
   PiTextTBold,
 } from "react-icons/pi";
+import ReactMarkdown from "react-markdown";
+import { JsonRenderer } from "../chatComponent/single/JsonRenderer";
+
+type MessageType =
+  | "text"
+  | "audio"
+  | "functionCall"
+  | "functionOutput"
+  | "session";
 
 interface RealtimeProps {
   mappedRequest: MappedLLMRequest;
+  messageIndexFilter?: {
+    startIndex: number;
+    endIndex: number;
+  };
 }
 
-type ContentItem = {
-  type: "text" | "audio";
-  text?: string;
-  transcript?: string;
+// Helper function to determine the default expansion state for deleted messages
+const calculateDefaultExpandedStates = (
+  messages: any[]
+): { [key: string]: boolean } => {
+  const states: { [key: string]: boolean } = {};
+  messages.forEach((message, idx) => {
+    const messageKey = `${idx}-${message.timestamp}`; // Use index within the current filtered list + timestamp
+    if (message.deleted === true) {
+      // Check if it's the last message OR the next message is not an assistant message or is also deleted
+      if (
+        idx === messages.length - 1 ||
+        messages[idx + 1].role === "user" ||
+        messages[idx + 1].deleted === true
+      ) {
+        // Default to collapsed
+        states[messageKey] = false;
+      } else {
+        // Default to expanded (it's deleted and the next is an assistant non-deleted message)
+        states[messageKey] = true;
+      }
+    }
+  });
+  return states;
 };
 
-export const Realtime: React.FC<RealtimeProps> = ({ mappedRequest }) => {
+export const Realtime: React.FC<RealtimeProps> = ({
+  mappedRequest,
+  messageIndexFilter,
+}) => {
   // Get all messages sorted by timestamp
-  const getAllMessages = (): Message[] => {
-    const requestMessages = mappedRequest.schema.request?.messages || [];
-    const responseMessages = mappedRequest.schema.response?.messages || [];
-    const allMessages = [...requestMessages, ...responseMessages];
+  const sortedMessages = [
+    ...(mappedRequest.schema.request?.messages || []),
+    ...(mappedRequest.schema.response?.messages || []),
+  ].sort((a, b) => {
+    const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+    const timeB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+    return timeA - timeB;
+  });
 
-    return allMessages.sort((a, b) => {
-      const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
-      const timeB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
-      return timeA - timeB;
-    });
-  };
-
-  const sortedMessages = getAllMessages();
-
-  // Get the latest session configuration from session.update messages
-  const getLatestSessionConfig = () => {
-    const sessionMessage = sortedMessages
-      .filter(
-        (msg) =>
-          typeof msg.content === "string" &&
-          msg.content.includes("session.update")
-      )
-      .pop();
-
-    if (sessionMessage) {
-      try {
-        const sessionData = JSON.parse(sessionMessage.content || "{}");
-        if (sessionData.type === "session.update" && sessionData.session) {
-          const { modalities, voice, instructions, tools } =
-            sessionData.session;
-          return {
-            Modalities: Array.isArray(modalities)
-              ? modalities.join(", ")
-              : null,
-            Voice: voice || null,
-            Instructions: instructions || null,
-            Tools: tools?.map((t: any) => t.name).join(", ") || null,
-          };
-        }
-      } catch (e) {}
-    }
-
-    // Fallback to raw request if no session update found
-    const rawRequest = mappedRequest.raw.request || {};
-    return {
-      Modalities: rawRequest.modalities?.length
-        ? Array.isArray(rawRequest.modalities)
-          ? rawRequest.modalities.join(", ")
-          : rawRequest.modalities
-        : null,
-      Voice: rawRequest.voice || null,
-      Instructions: rawRequest.instructions || null,
-      Tools:
-        rawRequest.tools?.map((tool: any) => tool.function.name).join(", ") ||
-        null,
-    };
-  };
-
-  const activeFeatures = Object.entries(getLatestSessionConfig()).filter(
-    ([_, value]) => value !== null
-  );
-
-  const getMessageContent = (message: Message) => {
+  // Define getMessageType function before using it
+  const getMessageType = (message: any): MessageType => {
+    if (message._type === "functionCall") return "functionCall";
+    if (message._type === "function") return "functionOutput";
     if (
-      typeof message.content === "string" &&
-      message.content.includes("session.update")
+      message._type === "message" &&
+      message.content &&
+      (message.content.startsWith("{") ||
+        message.content.includes('"session":'))
     ) {
-      try {
-        const sessionData = JSON.parse(message.content);
-        if (sessionData.type === "session.update" && sessionData.session) {
-          const { modalities, voice, instructions, tools } =
-            sessionData.session;
-          return {
-            text: JSON.stringify({
-              modalities,
-              voice,
-              instructions,
-              tools: tools?.map((t: any) => t.name),
-            }),
-            type: "session",
-          };
+      return "session";
+    }
+    if (message._type === "audio") return "audio";
+    return "text";
+  };
+
+  // Filter messages based on the provided index filter
+  const filteredMessages = useMemo(() => {
+    // If we have a message index filter, use that
+    if (messageIndexFilter) {
+      const { startIndex, endIndex } = messageIndexFilter;
+
+      // Filter by message index
+      if (typeof startIndex === "number") {
+        // Safety check for index out of bounds
+        if (startIndex >= 0 && startIndex < sortedMessages.length) {
+          // If we have both start and end index, get that range of messages
+          if (typeof endIndex === "number" && endIndex >= startIndex) {
+            const safeEndIndex = Math.min(endIndex, sortedMessages.length - 1);
+            return sortedMessages.slice(startIndex, safeEndIndex + 1);
+          }
+
+          // Otherwise just get the single message at startIndex
+          return [sortedMessages[startIndex]];
+        } else {
+          console.warn(
+            `Message index ${startIndex} is out of range (0-${
+              sortedMessages.length - 1
+            })`
+          );
+          // Fall back to showing all messages if index is out of range
+          return sortedMessages;
         }
-      } catch (e) {
-        // If parsing fails, fall back to default handling
       }
     }
 
-    if (message._type === "functionCall" && message.tool_calls?.[0]) {
-      const toolCall = message.tool_calls[0];
-      return {
-        text: JSON.stringify({
-          function: toolCall.name,
-          arguments: toolCall.arguments,
-        }),
-        type: "function",
-      };
-    }
-    if (message._type === "contentArray" && message.contentArray?.[0]) {
-      const content = message.contentArray[0] as unknown as ContentItem;
-      return {
-        text: content.type === "audio" ? content.transcript : content.text,
-        type: content.type,
-      };
-    }
-    return {
-      text: message.content || "",
-      type: "text",
-    };
+    // If no filter, return all messages
+    return sortedMessages;
+  }, [sortedMessages, messageIndexFilter]);
+
+  // State to manage the expansion of deleted messages
+  const [deletedMessageStates, setDeletedMessageStates] = useState<{
+    [key: string]: boolean;
+  }>({});
+
+  // Effect to update deleted message states when filters change, preserving user interactions
+  useEffect(() => {
+    const newDefaultStates = calculateDefaultExpandedStates(filteredMessages);
+
+    setDeletedMessageStates((prevStates) => {
+      const nextStates: { [key: string]: boolean } = {};
+      filteredMessages.forEach((message, idx) => {
+        const key = `${idx}-${message.timestamp}`;
+        if (message.deleted === true) {
+          // If the state for this key exists in the previous state (user might have toggled it), keep it.
+          // Otherwise, use the newly calculated default state.
+          nextStates[key] =
+            key in prevStates ? prevStates[key] : newDefaultStates[key];
+        }
+      });
+      return nextStates;
+    });
+  }, [filteredMessages]); // Re-run only when filteredMessages change
+
+  // Toggle function remains the same
+  const toggleDeletedMessage = (key: string) => {
+    setDeletedMessageStates((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const ModailityIcon = ({ type }: { type: string }) => {
-    switch (type) {
-      case "audio":
-        return <PiMicrophoneBold size={14} className="text-secondary" />;
-      case "function":
-        return <PiCodeBold size={14} className="text-secondary" />;
-      case "session":
-        return <PiGearBold size={14} className="text-secondary" />;
-      case "text":
-      default:
-        return <PiTextTBold size={14} className="text-secondary" />;
+  // Get information about the active filter for display
+  const filterInfo = useMemo(() => {
+    if (
+      messageIndexFilter &&
+      typeof messageIndexFilter.startIndex === "number"
+    ) {
+      const startIndex = messageIndexFilter.startIndex;
+      const endIndex = messageIndexFilter.endIndex;
+
+      // Simple filter info that just shows the index range
+      return {
+        startIndex,
+        endIndex,
+        isFiltered: true,
+      };
     }
+
+    return null;
+  }, [messageIndexFilter]);
+
+  // Always get the last session update from all messages, not just filtered ones
+  const lastMsg = sortedMessages.findLast((msg) => msg._type === "message");
+  const lastSessionUpdate = parseSessionUpdate(lastMsg?.content);
+
+  const ModailityIcon = ({ type }: { type: MessageType }) => {
+    const icons = {
+      audio: <PiMicrophoneBold size={14} className="text-secondary" />,
+      functionCall: <PiFunctionBold size={14} className="text-secondary" />,
+      functionOutput: <PiFunctionBold size={14} className="text-secondary" />,
+      session: <PiGearBold size={14} className="text-secondary" />,
+      text: <PiTextTBold size={14} className="text-secondary" />,
+    };
+    return icons[type];
   };
 
   return (
-    <div className="w-full">
-      {/* Header Section - Displays modalities and voice features if present */}
-      {activeFeatures.length > 0 && (
-        <div className="mb-6 border-b border-slate-200 dark:border-slate-700 pb-4">
-          <div className="text-xs text-secondary uppercase tracking-wider mb-2">
-            Realtime Session Features
-          </div>
-          <div className="flex flex-wrap gap-4">
-            {activeFeatures.map(([label, value]) => (
-              <div key={label} className="flex gap-1.5">
-                <span className="font-medium">{label}:</span>
-                <span className="text-secondary">{value}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+    <div className={`w-full flex flex-col gap-4 ${filterInfo ? "" : "pt-4"}`}>
+      {/* Filter Indicator */}
+      {filterInfo && (
+        <GlassHeader className="h-14 px-4 flex-shrink-0">
+          <h2 className="text-secondary underline">
+            {filterInfo.endIndex !== undefined
+              ? filterInfo.endIndex - filterInfo.startIndex === 0
+                ? `Highlighting message ${filterInfo.startIndex + 1}`
+                : `Highlighting messages ${filterInfo.startIndex + 1} through ${
+                    filterInfo.endIndex + 1
+                  }`
+              : `Highlighting message ${filterInfo.startIndex + 1}`}
+          </h2>
+        </GlassHeader>
       )}
 
-      {/* Messages Section - Renders the chat messages in chronological order */}
+      {/* Messages Section */}
       <div className="gap-4">
-        {sortedMessages.map((message) => {
+        {filteredMessages.map((message, idx) => {
           const isUser = message.role === "user";
-          const { text, type } = getMessageContent(message);
+          const isTranscript = message._type === "audio" && message.content;
           const timestamp = message.timestamp
             ? new Date(message.timestamp).toLocaleTimeString()
             : null;
+          const messageType = getMessageType(message);
+          const isDeleted = message.deleted === true;
+          const messageKey = `${idx}-${message.timestamp}`; // Use index within the current filtered list + timestamp
+          const isDeletedExpanded = deletedMessageStates[messageKey] ?? false; // Use state, default to false if not set
 
           return (
             <div
-              key={`${message.timestamp}-${text}`}
-              className={`flex flex-col ${
-                isUser ? "items-end" : "items-start"
-              } mb-4 w-full`}
+              key={messageKey} // Key remains the same
+              className={`flex flex-col px-4 pb-4 mb-4 w-full 
+                ${isUser ? "items-end" : "items-start"} `}
             >
-              <div className="flex flex-col gap-1 max-w-[80%]">
-                {/* Message Header - Shows role, timestamp, and modality */}
-                <div
-                  className={`flex items-center space-x-2 text-xs text-secondary ${
-                    isUser ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  <span>{isUser ? "User" : "Assistant"}</span>
-                  {timestamp && (
-                    <>
-                      <span>•</span>
-                      <ModailityIcon type={type} />
-                      <span>•</span>
-                      <span>{timestamp}</span>
-                    </>
-                  )}
-                </div>
-                {/* Message Content */}
-                <div
-                  className={`rounded-lg p-3 ${
-                    isUser
-                      ? `bg-blue-500 text-white ${
-                          type === "session" || type === "function"
-                            ? "border-4 border-blue-400 dark:border-blue-600"
-                            : ""
-                        }`
-                      : `bg-slate-100 dark:bg-slate-900 ${
-                          type === "session" || type === "function"
-                            ? "border-4 border-slate-50 dark:border-slate-950"
-                            : ""
-                        }`
-                  }`}
-                >
-                  {type === "session" ? (
-                    <SessionUpdate {...JSON.parse(text)} />
-                  ) : type === "function" ? (
-                    <FunctionCall {...JSON.parse(text)} />
-                  ) : (
-                    <div className="whitespace-pre-wrap break-words">
-                      {text}
+              {isDeleted ? (
+                // Collapsible structure for deleted messages
+                <div className="flex flex-col gap-1 max-w-[80%] w-full">
+                  {/* Clickable Header */}
+                  <div
+                    className={`flex items-center space-x-2 text-xs text-secondary cursor-pointer select-none 
+                      ${isUser ? "justify-end" : "justify-start"} 
+                      ${isDeletedExpanded ? "" : "opacity-50"}`}
+                    onClick={() => toggleDeletedMessage(messageKey)}
+                  >
+                    <PiCaretDownBold
+                      className={`w-4 h-4 transition-transform duration-200 ${
+                        isDeletedExpanded ? "rotate-180" : ""
+                      }`}
+                    />
+                    <span>
+                      {`${isUser ? "User" : "Assistant"} 
+                        ${isTranscript ? "(Transcript)" : ""}
+                        ${isDeleted ? "(Deleted)" : ""}`}
+                    </span>
+                    {timestamp && (
+                      <>
+                        <span className="text-tertiary">•</span>
+                        <ModailityIcon type={messageType} />
+                        <span className="text-tertiary">•</span>
+                        <span>{timestamp}</span>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Collapsible Content */}
+                  <div
+                    className={`overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${
+                      isDeletedExpanded
+                        ? "max-h-[1000px] opacity-100" // Use a large max-h
+                        : "max-h-0 opacity-0"
+                    }`}
+                  >
+                    <div className="pt-1">
+                      {" "}
+                      {/* Add slight padding */}
+                      <div
+                        className={`rounded-lg p-3 ${
+                          isUser
+                            ? `${
+                                messageType === "session" ||
+                                messageType === "functionCall"
+                                  ? "bg-blue-500 dark:bg-blue-700 text-white border-4 border-blue-400 dark:border-blue-600"
+                                  : messageType === "functionOutput"
+                                  ? "bg-slate-100 dark:bg-slate-900 border-4 border-slate-50 dark:border-slate-950"
+                                  : "bg-blue-500 dark:bg-blue-700 text-white"
+                              }`
+                            : `bg-slate-100 dark:bg-slate-900 ${
+                                messageType === "session" ||
+                                messageType === "functionCall" ||
+                                messageType === "functionOutput"
+                                  ? "border-4 border-slate-50 dark:border-slate-950"
+                                  : ""
+                              }`
+                        }`}
+                      >
+                        {/* Existing content rendering logic */}
+                        {messageType === "functionCall" &&
+                        message.tool_calls ? (
+                          <FunctionCallContent
+                            tool_call_id={message.tool_call_id}
+                            tool_call={message.tool_calls[0]}
+                          />
+                        ) : messageType === "functionOutput" &&
+                          message.tool_calls ? (
+                          <FunctionOutputContent
+                            tool_call_id={message.tool_call_id}
+                            tool_call={message.tool_calls[0]}
+                          />
+                        ) : messageType === "session" ? (
+                          <SessionUpdate content={message.content || ""} />
+                        ) : (
+                          <div className="whitespace-pre-wrap break-words">
+                            {message.content || ""}
+                            {messageType === "audio" && message.audio_data && (
+                              <AudioPlayer
+                                audioData={message.audio_data}
+                                isUserMessage={isUser}
+                              />
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  )}
+                  </div>
                 </div>
-              </div>
+              ) : (
+                // Original structure for non-deleted messages
+                <div className="flex flex-col gap-1 max-w-[80%]">
+                  {/* Message Info */}
+                  <div
+                    className={`flex items-center space-x-2 text-xs text-secondary ${
+                      isUser ? "justify-end" : "justify-start"
+                    }`}
+                  >
+                    <span>
+                      {`${isUser ? "User" : "Assistant"} 
+                        ${isTranscript ? "(Transcript)" : ""}`}
+                    </span>
+                    {timestamp && (
+                      <>
+                        <span className="text-tertiary">•</span>
+                        <ModailityIcon type={messageType} />
+                        <span className="text-tertiary">•</span>
+                        <span>{timestamp}</span>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Message Content */}
+                  <div
+                    className={`rounded-lg p-3 ${
+                      isUser
+                        ? `${
+                            messageType === "session" ||
+                            messageType === "functionCall"
+                              ? "bg-blue-500 dark:bg-blue-700 text-white border-4 border-blue-400 dark:border-blue-600"
+                              : messageType === "functionOutput"
+                              ? "bg-slate-100 dark:bg-slate-900 border-4 border-slate-50 dark:border-slate-950"
+                              : "bg-blue-500 dark:bg-blue-700 text-white"
+                          }`
+                        : `bg-slate-100 dark:bg-slate-900 ${
+                            messageType === "session" ||
+                            messageType === "functionCall" ||
+                            messageType === "functionOutput"
+                              ? "border-4 border-slate-50 dark:border-slate-950"
+                              : ""
+                          }`
+                    }`}
+                  >
+                    {/* Existing content rendering logic */}
+                    {messageType === "functionCall" && message.tool_calls ? (
+                      <FunctionCallContent
+                        tool_call_id={message.tool_call_id}
+                        tool_call={message.tool_calls[0]}
+                      />
+                    ) : messageType === "functionOutput" &&
+                      message.tool_calls ? (
+                      <FunctionOutputContent
+                        tool_call_id={message.tool_call_id}
+                        tool_call={message.tool_calls[0]}
+                      />
+                    ) : messageType === "session" ? (
+                      <SessionUpdate content={message.content || ""} />
+                    ) : (
+                      <div className="whitespace-pre-wrap break-words">
+                        {message.content || ""}
+                        {messageType === "audio" && message.audio_data && (
+                          <AudioPlayer
+                            audioData={message.audio_data}
+                            isUserMessage={isUser}
+                          />
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}
@@ -229,69 +398,521 @@ export const Realtime: React.FC<RealtimeProps> = ({ mappedRequest }) => {
   );
 };
 
-/* -------------------------------------------------------------------------- */
-/*                         Special Message Components                         */
-/* -------------------------------------------------------------------------- */
+const getPillStyle = (type: string, label?: string) => {
+  // Special handling for modalities
+  if (type === "modality") {
+    const modalityStyle = {
+      className:
+        "bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300",
+    };
 
-interface SessionUpdateProps {
+    switch (label) {
+      case "audio":
+        return {
+          icon: <PiMicrophoneBold className="w-3.5 h-3.5" />,
+          ...modalityStyle,
+        };
+      case "text":
+        return {
+          icon: <PiTextTBold className="w-3.5 h-3.5" />,
+          ...modalityStyle,
+        };
+      default:
+        return {
+          icon: <PiTextTBold className="w-3.5 h-3.5" />,
+          ...modalityStyle,
+        };
+    }
+  }
+
+  // Other types
+  switch (type) {
+    case "voice":
+      return {
+        icon: <PiSpeakerHighBold className="w-3.5 h-3.5" />,
+        className:
+          "bg-purple-50 dark:bg-purple-950 border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300",
+      };
+    case "tool":
+      return {
+        icon: <PiFunctionBold className="w-3.5 h-3.5" />,
+        className:
+          "bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300",
+      };
+    default:
+      return {
+        icon: null,
+        className:
+          "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300",
+      };
+  }
+};
+
+/* -------------------------------------------------------------------------- */
+/*                           Session Features Header                          */
+/* -------------------------------------------------------------------------- */
+type SessionUpdateData = {
   modalities?: string[];
   voice?: string;
+  tools?: Array<{ name: string }>;
   instructions?: string;
-  tools?: string[];
+  input_audio_format?: string;
+  input_audio_noise_reduction?: object | null;
+  input_audio_transcription?: object | null;
+  max_response_output_tokens?: number | "inf";
+  model?: string;
+  output_audio_format?: string;
+  temperature?: number;
+  tool_choice?: string;
+  turn_detection?: object | null;
+};
+const parseSessionUpdate = (
+  content: string | undefined
+): SessionUpdateData | null => {
+  if (!content) return null;
+  try {
+    const parsed = JSON.parse(content)?.session;
+    if (!parsed) return null;
+    return parsed as SessionUpdateData;
+  } catch {
+    return null;
+  }
+};
+
+/* -------------------------------------------------------------------------- */
+/*                           Special: Session Update                          */
+/* -------------------------------------------------------------------------- */
+interface SessionUpdateProps {
+  content: string;
 }
-const SessionUpdate: React.FC<SessionUpdateProps> = ({
-  modalities,
-  voice,
-  instructions,
-  tools,
-}) => {
+const SessionUpdate: React.FC<SessionUpdateProps> = ({ content }) => {
+  const sessionData = parseSessionUpdate(content);
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  if (!sessionData) {
+    return <div className="whitespace-pre-wrap break-words">{content}</div>;
+  }
+
   const items = [
-    { label: "Modalities", value: modalities?.join(", ") },
-    { label: "Voice", value: voice },
-    { label: "Instructions", value: instructions },
-    { label: "Available Tools", value: tools?.join(", ") },
-  ].filter((item) => item.value);
+    {
+      label: "Modalities",
+      pills:
+        sessionData.modalities?.map((m) => ({ type: "modality", label: m })) ||
+        [],
+    },
+    {
+      label: "Voice",
+      pills: sessionData.voice
+        ? [{ type: "voice", label: sessionData.voice }]
+        : [],
+    },
+    {
+      label: "Available Tools",
+      pills:
+        sessionData.tools?.map((t) => ({ type: "tool", label: t.name })) || [],
+    },
+  ].filter((item) => item.pills && item.pills.length > 0);
 
   return (
-    <div className="flex flex-col gap-1.5">
-      {items.map(
-        ({ label, value }) =>
-          value && (
-            <div key={label}>
-              <span className="font-medium">{label}:</span>{" "}
-              <span className="text-slate-300">{value}</span>
-            </div>
-          )
+    <div className="flex flex-col divide-y divide-slate-300">
+      {items.map(({ label, pills }) => (
+        <div key={label} className="flex flex-row justify-between gap-4 py-2">
+          <span className="font-medium">{label}:</span>
+          <div className="flex flex-wrap gap-1.5 justify-end">
+            {pills.map(({ type, label }, idx) => {
+              const { icon, className } = getPillStyle(type, label);
+              return (
+                <span
+                  key={`${type}-${idx}`}
+                  className={`px-2 py-0.5 rounded-full text-xs font-medium border flex items-center gap-1 ${className}`}
+                >
+                  {icon}
+                  {label}
+                </span>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+
+      {/* Instructions Section */}
+      {sessionData.instructions && (
+        <div className="flex flex-col gap-2 py-2">
+          <div
+            className="flex items-center gap-2 cursor-pointer select-none hover:underline"
+            onClick={() => setIsExpanded(!isExpanded)}
+          >
+            <span className="font-medium">Instructions:</span>
+            <PiCaretDownBold
+              className={`w-4 h-4 transition-transform duration-200 ${
+                isExpanded ? "rotate-180" : ""
+              }`}
+            />
+          </div>
+          <div
+            className={`overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${
+              isExpanded ? "max-h-full opacity-100" : "max-h-6 opacity-70"
+            }`}
+          >
+            <ReactMarkdown className="prose dark:prose-invert prose-sm prose-headings:text-slate-50 prose-p:text-slate-200 prose-strong:text-white prose-em:text-slate-300 prose-li:text-slate-200 prose-ol:text-slate-200 prose-ul:text-slate-200 prose-a:text-cyan-200 hover:prose-a:text-cyan-100 prose-code:text-yellow-200 prose-pre:bg-slate-800/50 prose-pre:text-slate-200 prose-blockquote:text-slate-300 prose-blockquote:border-slate-400 [&_ol>li::marker]:text-white [&_ul>li::marker]:text-white">
+              {sessionData.instructions}
+            </ReactMarkdown>
+          </div>
+        </div>
       )}
     </div>
   );
 };
 
+/* -------------------------------------------------------------------------- */
+/*                           Special: Function Call                           */
+/* -------------------------------------------------------------------------- */
 interface FunctionCallProps {
-  function: string;
-  arguments?: Record<string, any>;
+  tool_call_id?: string;
+  tool_call: {
+    name: string;
+    arguments: Record<string, any>;
+  };
 }
-const FunctionCall: React.FC<FunctionCallProps> = ({
-  function: name,
-  arguments: args,
+const FunctionCallContent: React.FC<FunctionCallProps> = ({
+  tool_call_id,
+  tool_call,
 }) => {
+  if (!tool_call) return null;
+
   return (
-    <div className="font-mono">
-      <span className="text-yellow-500 dark:text-yellow-400">{name}</span>
-      {args && (
-        <span className="text-slate-600 dark:text-slate-300">
-          (
-          {Object.entries(args).map(([key, value], i) => (
-            <span key={key}>
-              {"{"}
-              {i > 0 && ", "}
-              {key}:{" "}
-              {typeof value === "string" ? `"${value}"` : JSON.stringify(value)}
-              {"}"}
-            </span>
-          ))}
-          )
+    <div className="flex flex-col font-mono">
+      <div className="flex flex-row items-center gap-2">
+        {tool_call_id && (
+          <TooltipProvider delayDuration={100}>
+            <Tooltip>
+              <TooltipTrigger>
+                <PiInfoBold size={14} />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="font-mono text-xs">{tool_call_id}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+        <span className="text-yellow-500 dark:text-yellow-400">
+          {tool_call.name}
         </span>
+      </div>
+
+      <div className="flex flex-row gap-2">
+        <span className="text-yellow-500 dark:text-yellow-400">{"("}</span>
+        {tool_call.arguments && (
+          <JsonRenderer data={tool_call.arguments} isExpanded={false} />
+        )}
+        <span className="text-yellow-500 dark:text-yellow-400">{")"}</span>
+      </div>
+    </div>
+  );
+};
+
+/* -------------------------------------------------------------------------- */
+/*                          Special: Function Output                          */
+/* -------------------------------------------------------------------------- */
+interface FunctionOutputProps {
+  tool_call_id?: string;
+  tool_call: {
+    name?: string;
+    arguments: Record<string, any>;
+  };
+}
+const FunctionOutputContent: React.FC<FunctionOutputProps> = ({
+  tool_call_id,
+  tool_call,
+}) => {
+  if (!tool_call) return null;
+
+  return (
+    <div className="flex flex-col font-mono">
+      <div className="flex flex-row items-center gap-2">
+        <span className="text-green-400 dark:text-green-500">
+          {tool_call_id ? `${tool_call_id} =>` : ""}
+        </span>
+      </div>
+      <JsonRenderer data={tool_call.arguments} isExpanded={false} />
+    </div>
+  );
+};
+
+/* -------------------------------------------------------------------------- */
+/*                            Special: Audio Player                           */
+/* -------------------------------------------------------------------------- */
+interface AudioPlayerProps {
+  audioData: string; // Base64 encoded audio data
+  isUserMessage?: boolean; // Whether this is a user message (for styling)
+  audioFormat?: string; // Format hint from the API (pcm16)
+}
+
+type ConversionStatus = "idle" | "loading" | "success" | "error";
+
+const AudioPlayer: React.FC<AudioPlayerProps> = ({
+  audioData,
+  isUserMessage = false,
+}) => {
+  const jawn = getJawnClient();
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  // New state for conversion status and error message
+  const [conversionStatus, setConversionStatus] =
+    useState<ConversionStatus>("idle");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [convertedWavData, setConvertedWavData] = useState<string | null>(null);
+  const audioRef = React.useRef<HTMLAudioElement>(null);
+  const progressRef = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!audioData) {
+      setConversionStatus("idle"); // Reset if audioData is gone
+      return;
+    }
+
+    let isCancelled = false; // Flag to prevent state updates on unmounted component
+
+    const convertAudio = async () => {
+      setConversionStatus("loading");
+      setErrorMessage(null);
+      setConvertedWavData(null); // Clear previous data
+
+      try {
+        const response = await jawn.POST("/v1/audio/convert-to-wav", {
+          body: { audioData },
+        });
+
+        if (isCancelled) return; // Don't update if component unmounted
+
+        if (response.data?.error || !response.data?.data) {
+          throw new Error(
+            response.data?.error || "Conversion failed: No data returned"
+          );
+        }
+        setConvertedWavData(response.data.data);
+        setConversionStatus("success");
+      } catch (err: any) {
+        if (isCancelled) return; // Don't update if component unmounted
+        console.error("Error converting audio:", err);
+        setErrorMessage(`Conversion failed: ${err.message}`);
+        setConversionStatus("error");
+      }
+      // No finally block needed as status covers loading state
+    };
+
+    convertAudio();
+
+    // Cleanup function to prevent state updates on unmount
+    return () => {
+      isCancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [audioData]); // Only run when audioData changes
+
+  const handlePlayPause = () => {
+    // Should only be callable when status is 'success' due to disabled state
+    if (conversionStatus !== "success" || !convertedWavData) return;
+
+    if (isPlaying) {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        // isPlaying state updated by onPause handler
+      }
+    } else {
+      if (audioRef.current) {
+        // Reset error specific to playback attempt
+        setErrorMessage(null);
+        audioRef.current.play().catch((err) => {
+          console.error("Standard audio playback failed:", err);
+          const playErrorMsg = `Playback error: ${
+            err.message || "Unknown error"
+          }`;
+          setErrorMessage(playErrorMsg);
+          setConversionStatus("error"); // Set status to error to show the message
+          setIsPlaying(false); // Ensure playing state is false on error
+          // Note: Web Audio API fallback removed for simplicity, can be added back if needed
+        });
+        // isPlaying state updated by onPlay handler
+      }
+    }
+  };
+
+  const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      setCurrentTime(audioRef.current.currentTime);
+    }
+  };
+
+  const handleLoadedMetadata = () => {
+    if (audioRef.current) {
+      setDuration(audioRef.current.duration);
+    }
+  };
+
+  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Only allow seeking if playback is possible
+    if (conversionStatus !== "success" || !audioRef.current) return;
+    if (progressRef.current && audioRef.current) {
+      const rect = progressRef.current.getBoundingClientRect();
+      const pos = (e.clientX - rect.left) / rect.width;
+      audioRef.current.currentTime = pos * duration;
+    }
+  };
+
+  const formatTime = (time: number) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes < 10 ? "0" : ""}${minutes}:${
+      seconds < 10 ? "0" : ""
+    }${seconds}`;
+  };
+
+  // Create audio source from base64 data
+  const audioSrc = React.useMemo(() => {
+    if (conversionStatus !== "success" || !convertedWavData) return "";
+
+    try {
+      // Data from backend is already WAV
+      return `data:audio/wav;base64,${convertedWavData}`;
+    } catch (e) {
+      console.error("Error creating audio source from converted data:", e);
+      // Error should be handled during conversion or playback attempt
+      return "";
+    }
+  }, [conversionStatus, convertedWavData]);
+
+  // Handle download
+  const handleDownload = () => {
+    // Only allow download if conversion was successful
+    if (conversionStatus !== "success" || !convertedWavData || !audioSrc)
+      return;
+
+    const link = document.createElement("a");
+    link.href = audioSrc;
+    link.download = `audio-message-${new Date()
+      .toISOString()
+      .slice(0, 19)
+      .replace(/:/g, "-")}.wav`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Button color based on message type
+  const buttonClass = isUserMessage
+    ? "bg-blue-600 hover:bg-blue-700 text-white"
+    : "bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200";
+
+  // Progress bar colors
+  const progressBgClass = isUserMessage
+    ? "bg-blue-400/30"
+    : "bg-slate-300 dark:bg-slate-600";
+
+  const progressFillClass = isUserMessage
+    ? "bg-white"
+    : "bg-blue-500 dark:bg-blue-400";
+
+  // Handle <audio> element errors
+  const handleAudioElementError = () => {
+    const err = audioRef.current?.error;
+    const errorMsg = err
+      ? `Audio Error ${err.code}: ${err.message}`
+      : "Error loading audio";
+
+    console.error("Audio element error:", errorMsg);
+    setErrorMessage(errorMsg);
+    setConversionStatus("error");
+    setIsPlaying(false);
+  };
+
+  const canPlay = conversionStatus === "success";
+  const commonDisabledProps = {
+    disabled: !canPlay,
+    className: `flex items-center justify-center w-8 h-8 rounded-full ${buttonClass} transition-colors ${
+      !canPlay ? "opacity-50 cursor-not-allowed" : ""
+    }`,
+  };
+
+  return (
+    <div className="flex flex-col gap-2">
+      {/* Status Messages */}
+      {conversionStatus === "loading" && (
+        <div className="text-xs text-slate-300 mb-1">Converting audio...</div>
+      )}
+      {conversionStatus === "error" && errorMessage && (
+        <div className="text-xs text-red-500 dark:text-red-400 mb-1">
+          {errorMessage}
+        </div>
+      )}
+
+      {/* Audio Player - Render controls only on success, but keep layout consistent */}
+      <div className="flex flex-row items-center justify-center gap-3 h-8">
+        {/* Play/Pause Button */}
+        <button
+          onClick={handlePlayPause}
+          aria-label={isPlaying ? "Pause" : "Play"}
+          {...commonDisabledProps}
+        >
+          {isPlaying ? (
+            <PiPauseBold className="w-4 h-4" />
+          ) : (
+            <PiPlayBold className="w-4 h-4" />
+          )}
+        </button>
+
+        {/* Progress Bar */}
+        <div
+          ref={progressRef}
+          className={`w-24 h-2 rounded-full ${progressBgClass} ${
+            !canPlay ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+          }`}
+          onClick={handleProgressClick} // Disabled internally by status check
+        >
+          <div
+            className={`h-full rounded-full ${progressFillClass}`}
+            style={{
+              width: `${canPlay ? (currentTime / duration) * 100 : 0}%`,
+            }}
+          />
+        </div>
+
+        {/* Time */}
+        <div className="flex flex-row gap-1 text-xs text-slate-300">
+          <span className="font-mono w-10 text-start">
+            {canPlay ? formatTime(currentTime) : "00:00"}
+          </span>
+          <span className="text-xs text-slate-300">/</span>
+          <span className="font-mono w-10 text-end">
+            {canPlay && duration ? formatTime(duration) : "--:--"}
+          </span>
+        </div>
+
+        {/* Download Button */}
+        <button
+          onClick={handleDownload}
+          aria-label="Download audio"
+          title="Download audio"
+          {...commonDisabledProps}
+        >
+          <PiDownloadBold className="w-4 h-4" />
+        </button>
+      </div>
+
+      {/* Audio Element - Rendered only when data is ready */}
+      {canPlay && audioSrc && (
+        <audio
+          ref={audioRef}
+          src={audioSrc}
+          onTimeUpdate={handleTimeUpdate}
+          onLoadedMetadata={handleLoadedMetadata}
+          onEnded={() => setIsPlaying(false)}
+          onPause={() => setIsPlaying(false)}
+          onPlay={() => setIsPlaying(true)}
+          onError={handleAudioElementError}
+          className="hidden" // Hide the default audio controls
+        />
       )}
     </div>
   );

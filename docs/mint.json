@@ -77,14 +77,22 @@
       "pages": [
         {
           "group": "Generic Gateway",
-          "pages": [
-            "getting-started/integration-method/gateway",
-            "getting-started/integration-method/custom"
-          ]
+          "pages": ["getting-started/integration-method/gateway"]
         },
         {
           "group": "Async Logging",
-          "pages": ["getting-started/integration-method/openllmetry"]
+          "pages": [
+            "getting-started/integration-method/openllmetry",
+            {
+              "group": "Manual Logger",
+              "pages": [
+                "getting-started/integration-method/custom",
+                "getting-started/integration-method/manual-logger-typescript",
+                "getting-started/integration-method/manual-logger-python",
+                "getting-started/integration-method/manual-logger-curl"
+              ]
+            }
+          ]
         },
         {
           "group": "OpenAI",
@@ -94,7 +102,8 @@
             "integrations/openai/langchain",
             "integrations/openai/llamaindex",
             "integrations/openai/curl",
-            "integrations/openai/assistants"
+            "integrations/openai/assistants",
+            "integrations/openai/realtime"
           ]
         },
         {
@@ -173,13 +182,16 @@
           "group": "LiteLLM",
           "pages": [
             "getting-started/integration-method/litellm-openllmetry",
-            "getting-started/integration-method/litellm"
+            "getting-started/integration-method/litellm",
+            "getting-started/integration-method/litellm-proxy"
           ]
         },
         "getting-started/integration-method/fireworks",
         "getting-started/integration-method/deepseek",
+        "getting-started/integration-method/mistral",
         "getting-started/integration-method/perplexity",
         "getting-started/integration-method/nebius",
+        "getting-started/integration-method/novita",
         "getting-started/integration-method/x",
         {
           "group": "Vector DB",
@@ -202,7 +214,7 @@
     {
       "group": "Other Integrations",
       "pages": [
-        "getting-started/integration-method/posthog",
+        "other-integrations/langgraph",
         "other-integrations/ragas",
         "other-integrations/open-webui",
         "other-integrations/meta-gpt",
@@ -217,7 +229,8 @@
           ]
         },
         "other-integrations/firecrawl",
-        "other-integrations/bubble"
+        "other-integrations/bubble",
+        "getting-started/integration-method/posthog"
       ]
     },
     {
@@ -231,7 +244,14 @@
           ]
         },
         "features/sessions",
-        "features/prompts",
+        {
+          "group": "Prompts",
+          "pages": [
+            "features/prompts/editor",
+            "features/prompts/generate",
+            "features/prompts/import"
+          ]
+        },
         "features/experiments",
         {
           "group": "Webhooks",
@@ -271,6 +291,7 @@
         {
           "group": "Cookbooks",
           "pages": [
+            "guides/cookbooks/prompt-thinking-models",
             "guides/cookbooks/fine-tune",
             "guides/cookbooks/openai-structured-outputs",
             "guides/cookbooks/experiments",
@@ -283,7 +304,8 @@
             "guides/cookbooks/segmentation",
             "guides/cookbooks/github-actions",
             "guides/cookbooks/debugging",
-            "guides/cookbooks/labeling-request-data"
+            "guides/cookbooks/labeling-request-data",
+            "guides/cookbooks/manual-logger-streaming"
           ]
         },
         {
@@ -347,8 +369,8 @@
     {
       "group": "Request",
       "pages": [
-        "rest/request/post-v1requestquery",
         "rest/request/post-v1requestquery-clickhouse",
+        "rest/request/post-v1requestquery",
         "rest/request/get-v1request",
         "rest/request/post-v1requestquery-ids",
         "rest/request/post-v1request-feedback",

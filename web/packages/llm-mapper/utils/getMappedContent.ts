@@ -20,9 +20,13 @@ import { mapTool } from "../mappers/tool";
 import { MapperFn } from "../mappers/types";
 import { mapVectorDB } from "../mappers/vector-db";
 import { getMapperTypeFromHeliconeRequest } from "./getMapperType";
+import { mapOpenAIResponse } from "../mappers/openai/responses";
 
-const MAPPERS: Record<MapperType, MapperFn<any, any>> = {
+const MAX_PREVIEW_LENGTH = 1_000;
+
+export const MAPPERS: Record<MapperType, MapperFn<any, any>> = {
   "openai-chat": mapOpenAIRequest,
+  "openai-response": mapOpenAIResponse,
   "anthropic-chat": mapAnthropicRequest,
   "gemini-chat": mapGeminiPro,
   "black-forest-labs-image": mapBlackForestLabsImage,
@@ -62,11 +66,19 @@ const metaDataFromHeliconeRequest = (
     requestId: heliconeRequest.request_id,
     countryCode: heliconeRequest.country_code,
     cost: modelCost({
-      model: model,
-      sum_completion_tokens: heliconeRequest.completion_tokens || 0,
-      sum_prompt_tokens: heliconeRequest.prompt_tokens || 0,
-      sum_tokens: heliconeRequest.total_tokens || 0,
       provider: heliconeRequest.provider,
+      model: model,
+
+      sum_prompt_tokens: heliconeRequest.prompt_tokens || 0,
+      prompt_cache_write_tokens: heliconeRequest.prompt_cache_write_tokens || 0,
+      prompt_cache_read_tokens: heliconeRequest.prompt_cache_read_tokens || 0,
+
+      prompt_audio_tokens: heliconeRequest.prompt_audio_tokens || 0,
+      completion_audio_tokens: heliconeRequest.completion_audio_tokens || 0,
+
+      sum_completion_tokens: heliconeRequest.completion_tokens || 0,
+
+      sum_tokens: heliconeRequest.total_tokens || 0,
     }),
     createdAt: heliconeRequest.request_created_at,
     path: heliconeRequest.request_path,
@@ -116,6 +128,12 @@ const getUnsanitizedMappedContent = ({
         concatenatedMessages: [],
         request: JSON.stringify(heliconeRequest.request_body),
         response: JSON.stringify(heliconeRequest.response_body),
+        fullRequestText: () => {
+          return JSON.stringify(heliconeRequest.request_body);
+        },
+        fullResponseText: () => {
+          return JSON.stringify(heliconeRequest.response_body);
+        },
       },
       schema: {
         request: {
@@ -142,16 +160,46 @@ const getUnsanitizedMappedContent = ({
   };
 };
 
+const messageToText = (message: Message): string => {
+  let text = "";
+  message.contentArray?.forEach((message) => {
+    text += messageToText(message).trim();
+  });
+  text += message.content?.trim() ?? "";
+  message.tool_calls?.forEach((toolCall) => {
+    text += JSON.stringify(toolCall.arguments).trim();
+    text += JSON.stringify(toolCall.name).trim();
+  });
+  text += message.role ?? "";
+  text += message.name ?? "";
+  text += message.tool_call_id ?? "";
+  return text.trim();
+};
+
+const messagesToText = (messages: Message[]): string => {
+  return messages.map(messageToText).join("\n").trim();
+};
+
 const sanitizeMappedContent = (
   mappedContent: MappedLLMRequest
 ): MappedLLMRequest => {
-  const sanitizeMessage = (message: Message): Message => ({
-    ...message,
-    content:
-      typeof message.content === "string"
-        ? message.content
-        : JSON.stringify(message.content),
-  });
+  const sanitizeMessage = (message: Message): Message => {
+    if (!message) {
+      return {
+        role: "unknown",
+        content: "",
+        _type: "message",
+      };
+    }
+    return {
+      ...message,
+      content: message.content
+        ? typeof message.content === "string"
+          ? message.content
+          : JSON.stringify(message.content)
+        : "",
+    };
+  };
 
   const sanitizeMessages = (
     messages: Message[] | undefined | null
@@ -193,10 +241,26 @@ const sanitizeMappedContent = (
       },
     },
     preview: {
-      request: mappedContent.preview.request?.slice(0, 30),
-      response: mappedContent.preview.response?.slice(0, 30),
+      request: mappedContent.preview.request
+        ?.replaceAll("\n", " ")
+        .slice(0, MAX_PREVIEW_LENGTH),
+      response: mappedContent.preview.response
+        ?.replaceAll("\n", " ")
+        .slice(0, MAX_PREVIEW_LENGTH),
       concatenatedMessages:
         sanitizeMessages(mappedContent.preview.concatenatedMessages) ?? [],
+      fullRequestText: (preview?: boolean) => {
+        if (preview) {
+          return mappedContent.preview.request;
+        }
+        return messagesToText(mappedContent.schema.request.messages ?? []);
+      },
+      fullResponseText: (preview?: boolean) => {
+        if (preview) {
+          return mappedContent.preview.response;
+        }
+        return messagesToText(mappedContent.schema.response?.messages ?? []);
+      },
     },
     model: mappedContent.model,
     raw: mappedContent.raw,
@@ -215,6 +279,7 @@ export const getMappedContent = ({
     mapperType,
     heliconeRequest,
   });
+
   return sanitizeMappedContent(unsanitized);
 };
 

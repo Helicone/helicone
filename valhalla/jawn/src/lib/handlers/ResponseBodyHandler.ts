@@ -12,11 +12,17 @@ import { AnthropicStreamBodyProcessor } from "../shared/bodyProcessors/anthropic
 import { GenericBodyProcessor } from "../shared/bodyProcessors/genericBodyProcessor";
 import { GoogleBodyProcessor } from "../shared/bodyProcessors/googleBodyProcessor";
 import { GoogleStreamBodyProcessor } from "../shared/bodyProcessors/googleStreamBodyProcessor";
+import { GroqStreamProcessor } from "../shared/bodyProcessors/groqStreamProcessor";
 import { OpenAIStreamProcessor } from "../shared/bodyProcessors/openAIStreamProcessor";
 import { TogetherAIStreamProcessor } from "../shared/bodyProcessors/togetherAIStreamProcessor";
 import { ImageModelParsingResponse } from "../shared/imageParsers/core/parsingResponse";
 import { getResponseImageModelParser } from "../shared/imageParsers/parserMapper";
-import { PromiseGenericResult, Result, err, ok } from "../shared/result";
+import {
+  PromiseGenericResult,
+  Result,
+  err,
+  ok,
+} from "../../packages/common/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 
@@ -59,6 +65,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       context.processedLog.response.model = getModelFromResponse(
         processedResponseBody.data?.processedBody
       );
+
       const definedModel =
         calculateModel(
           context.processedLog.request.model,
@@ -67,6 +74,9 @@ export class ResponseBodyHandler extends AbstractLogHandler {
           this.getModelFromPath(context.message.log.request.path)
         ) ?? undefined;
 
+      if (typeof context.processedLog.response.model !== "string") {
+        context.processedLog.response.model = "unknown";
+      }
       const omittedResponseBody = this.handleOmitResponseBody(
         context,
         processedResponseBody,
@@ -94,15 +104,24 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       );
 
       context.processedLog.response.model = responseModel;
-      context.processedLog.model = model;
+      if (typeof model === "string") {
+        context.processedLog.model = model;
+      }
 
       // Set usage
-      const usage = processedResponseBody.data?.usage ?? {};
+      const usage =
+        processedResponseBody.data?.usage ??
+        processedResponseBody.data?.processedBody?.usage ??
+        {};
       context.usage.completionTokens = usage.completionTokens;
       context.usage.promptTokens = usage.promptTokens;
       context.usage.totalTokens = usage.totalTokens;
       context.usage.heliconeCalculated = usage.heliconeCalculated;
       context.usage.cost = usage.cost;
+      context.usage.promptCacheWriteTokens = usage.promptCacheWriteTokens;
+      context.usage.promptCacheReadTokens = usage.promptCacheReadTokens;
+      context.usage.promptAudioTokens = usage.promptAudioTokens;
+      context.usage.completionAudioTokens = usage.completionAudioTokens;
 
       return await super.handle(context);
     } catch (error: any) {
@@ -315,6 +334,8 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       return new GoogleStreamBodyProcessor();
     } else if (isStream && provider === "TOGETHER") {
       return new TogetherAIStreamProcessor();
+    } else if (isStream && provider === "GROQ") {
+      return new GroqStreamProcessor();
     } else if (isStream) {
       return new OpenAIStreamProcessor();
     } else {

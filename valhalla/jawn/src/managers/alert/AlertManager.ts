@@ -1,6 +1,6 @@
 import { Database } from "../../lib/db/database.types";
-import { AuthParams } from "../../lib/db/supabase";
-import { Result } from "../../lib/shared/result";
+import { AuthParams } from "../../packages/common/auth/types";
+import { Result } from "../../packages/common/result";
 import { AlertStore } from "../../lib/stores/AlertStore";
 import { BaseManager } from "../BaseManager";
 export interface AlertRequest {

@@ -1,28 +1,27 @@
 // Inspired by https://github.com/uixmat/onborda
 
-import {
-  createContext,
-  useContext,
-  useCallback,
-  useState,
-  useEffect,
-} from "react";
+import { cn } from "@/lib/utils";
+import { BeakerIcon } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
 import {
   HomeIcon,
   MessageCircleQuestionIcon,
-  NotepadTextIcon,
+  ScrollTextIcon,
   SheetIcon,
   SparklesIcon,
   WorkflowIcon,
 } from "lucide-react";
-import { BeakerIcon } from "@heroicons/react/24/outline";
-import { cn } from "@/lib/utils";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { OnboardingPopoverAccordion } from "../templates/onboarding/OnboardingPopoverMore";
 import { DiffHighlight } from "../templates/welcome/diffHighlight";
 import { useOrg } from "./org/organizationContext";
-import { useRouter } from "next/navigation";
-import { usePathname } from "next/navigation";
 
 export const ONBOARDING_STEP_LABELS = [
   "REQUESTS_TABLE",
@@ -207,7 +206,7 @@ export const ONBOARDING_STEPS: Record<OnboardingStepLabel, OnboardingStep> = {
   PROMPTS_PAGE: {
     stepNumber: 4,
     popoverData: {
-      icon: <NotepadTextIcon className="h-6 w-6" />,
+      icon: <ScrollTextIcon className="h-6 w-6" />,
       title: "Welcome to Prompts!",
       stepNumber: 3,
       description: (

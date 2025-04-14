@@ -1,15 +1,15 @@
-import { ENVIRONMENT } from "../clients/constant";
-import {
-  getAllSignedURLsFromInputs,
-  InputsManager,
-} from "../../managers/inputs/InputsManager";
+import { getAllSignedURLsFromInputs } from "../../managers/inputs/InputsManager";
 import { costOfPrompt } from "../../packages/cost";
-import { Database } from "../db/database.types";
-import { supabaseServer } from "../db/supabase";
 import { dbExecute } from "../shared/db/dbExecute";
 import { FilterNode } from "../shared/filters/filterDefs";
 import { buildFilterPostgres } from "../shared/filters/filters";
-import { Result, err, ok, promiseResultMap, resultMap } from "../shared/result";
+import {
+  err,
+  ok,
+  promiseResultMap,
+  Result,
+  resultMap,
+} from "../../packages/common/result";
 import { BaseStore } from "./baseStore";
 import { RequestResponseBodyStore } from "./request/RequestResponseBodyStore";
 
@@ -18,6 +18,8 @@ export interface ResponseObj {
   createdAt: string;
   completionTokens: number;
   promptTokens: number;
+  promptCacheWriteTokens: number;
+  promptCacheReadTokens: number;
   delayMs: number;
   model: string;
 }
@@ -411,37 +413,54 @@ export class ExperimentStore extends BaseStore {
   ): Promise<
     Result<{ experimentTableId: string; experimentId: string }, string>
   > {
-    const result = await supabaseServer.client
-      .from("experiment_v2")
-      .insert({
-        dataset: datasetId,
-        organization: this.organizationId,
-        meta: experimentMetadata,
-      })
-      .select("*")
-      .single();
-    if (result.error || !result.data) {
-      return err(result.error?.message ?? "Failed to create experiment table");
-    }
-    const experimentTable = await supabaseServer.client
-      .from("experiment_table")
-      .insert({
-        experiment_id: result.data.id,
-        name: name,
-        organization_id: this.organizationId,
-        metadata: experimentTableMetadata ?? null,
-      })
-      .select("*")
-      .single();
-    if (experimentTable.error || !experimentTable.data) {
-      return err(
-        experimentTable.error?.message ?? "Failed to create experiment table"
+    try {
+      // Create experiment
+      const experimentResult = await dbExecute<{ id: string }>(
+        `INSERT INTO experiment_v2 (dataset, organization, meta)
+         VALUES ($1, $2, $3)
+         RETURNING id`,
+        [datasetId, this.organizationId, experimentMetadata]
       );
+
+      if (
+        experimentResult.error ||
+        !experimentResult.data ||
+        experimentResult.data.length === 0
+      ) {
+        return err("Failed to create experiment");
+      }
+
+      const experimentId = experimentResult.data[0].id;
+
+      // Create experiment table
+      const experimentTableResult = await dbExecute<{ id: string }>(
+        `INSERT INTO experiment_table (experiment_id, name, organization_id, metadata)
+         VALUES ($1, $2, $3, $4)
+         RETURNING id`,
+        [
+          experimentId,
+          name,
+          this.organizationId,
+          experimentTableMetadata ?? null,
+        ]
+      );
+
+      if (
+        experimentTableResult.error ||
+        !experimentTableResult.data ||
+        experimentTableResult.data.length === 0
+      ) {
+        return err("Failed to create experiment table");
+      }
+
+      return ok({
+        experimentTableId: experimentTableResult.data[0].id,
+        experimentId: experimentId,
+      });
+    } catch (error) {
+      console.error("Error creating experiment table:", error);
+      return err(String(error));
     }
-    return ok({
-      experimentTableId: experimentTable.data.id,
-      experimentId: result.data.id,
-    });
   }
 
   async getMaxRowIndex(
@@ -466,6 +485,71 @@ export class ExperimentStore extends BaseStore {
     return ok(result.data[0].max_row_index);
   }
 
+  async getExperimentTableColumns(
+    experimentTableId: string
+  ): Promise<Result<Array<{ id: string; name: string }>, string>> {
+    try {
+      const result = await dbExecute<{ id: string; column_name: string }>(
+        `SELECT id, column_name
+         FROM experiment_column
+         WHERE table_id = $1`,
+        [experimentTableId]
+      );
+
+      if (result.error || !result.data) {
+        return err(result.error ?? "Experiment columns not found");
+      }
+
+      const columns = result.data.map((col) => ({
+        id: col.id,
+        name: col.column_name,
+      }));
+
+      return ok(columns);
+    } catch (error) {
+      console.error("Error fetching experiment table columns:", error);
+      return err(String(error));
+    }
+  }
+
+  async updateExperimentTableMetadata(params: {
+    experimentTableId: string;
+    metadata: Record<string, any>;
+  }): Promise<Result<null, string>> {
+    try {
+      const existingMetadata = await this.getExperimentTable(
+        params.experimentTableId
+      );
+
+      if (existingMetadata.error || !existingMetadata.data) {
+        return err("Failed to get existing experiment table metadata");
+      }
+
+      const result = await dbExecute(
+        `UPDATE experiment_table
+         SET metadata = $1
+         WHERE id = $2
+         AND organization_id = $3`,
+        [
+          {
+            ...existingMetadata.data?.metadata,
+            ...params.metadata,
+          },
+          params.experimentTableId,
+          this.organizationId,
+        ]
+      );
+
+      if (result.error) {
+        return err(result.error);
+      }
+      return ok(null);
+    } catch (error) {
+      console.error("Error updating experiment table metadata:", error);
+      return err(String(error));
+    }
+  }
+
   async createExperimentTableColumn(
     experimentTableId: string,
     columnName: string,
@@ -474,125 +558,158 @@ export class ExperimentStore extends BaseStore {
     promptVersionId?: string,
     inputKeys?: string[]
   ): Promise<Result<{ id: string }, string>> {
-    const metadata: Record<string, any> = {};
-    if (hypothesisId) {
-      metadata.hypothesisId = hypothesisId;
-    }
-    if (promptVersionId) {
-      metadata.promptVersionId = promptVersionId;
-    }
+    try {
+      const metadata: Record<string, any> = {};
+      if (hypothesisId) {
+        metadata.hypothesisId = hypothesisId;
+      }
+      if (promptVersionId) {
+        metadata.promptVersionId = promptVersionId;
+      }
 
-    // Create the column using Supabase
-    const columnResult = await supabaseServer.client
-      .from("experiment_column")
-      .insert({
-        table_id: experimentTableId,
-        column_name: columnName,
-        column_type: columnType,
-        metadata: metadata,
-      })
-      .select("*")
-      .single();
-
-    if (columnResult.error || !columnResult.data) {
-      return err(columnResult.error?.message ?? "Failed to create column");
-    }
-
-    // Fetch existing columns for the experiment table
-    const existingColumnsResult = await supabaseServer.client
-      .from("experiment_column")
-      .select("id")
-      .eq("table_id", experimentTableId);
-
-    if (
-      existingColumnsResult.error ||
-      !existingColumnsResult.data ||
-      existingColumnsResult.data.length === 0
-    ) {
-      return err("No existing columns found in the experiment table.");
-    }
-
-    // Use the first existing column to copy metadata from
-    const existingColumnId = existingColumnsResult.data[0].id;
-
-    // Fetch existing cells to obtain inputIds
-    const existingCellsResult = await supabaseServer.client
-      .from("experiment_cell")
-      .select("row_index, metadata")
-      .eq("column_id", existingColumnId);
-
-    if (existingCellsResult.error || !existingCellsResult.data) {
-      return err(
-        existingCellsResult.error?.message ?? "Failed to fetch existing cells"
+      // Create the column using dbExecute
+      const columnResult = await dbExecute<{ id: string }>(
+        `INSERT INTO experiment_column (table_id, column_name, column_type, metadata)
+         VALUES ($1, $2, $3, $4)
+         RETURNING id, table_id, column_name, column_type, metadata`,
+        [experimentTableId, columnName, columnType, metadata]
       );
-    }
 
-    // Prepare arrays to collect updates and new cells
-    const inputUpdates: { inputId: string; inputs: Record<string, string> }[] =
-      [];
-    const newCellsData: any[] = [];
+      if (
+        columnResult.error ||
+        !columnResult.data ||
+        columnResult.data.length === 0
+      ) {
+        return err(columnResult.error ?? "Failed to create column");
+      }
 
-    // Iterate over existing cells
-    for (const cell of existingCellsResult.data) {
-      const inputId = (cell.metadata as any)?.inputId;
-      if (inputId) {
-        // Build the inputs object you wish to add
-        const inputs = Object.fromEntries(
-          (inputKeys ?? []).map((key) => [key, ""])
+      // Fetch existing columns for the experiment table
+      const existingColumnsResult = await dbExecute<{ id: string }>(
+        `SELECT id FROM experiment_column
+         WHERE table_id = $1
+         LIMIT 1`,
+        [experimentTableId]
+      );
+
+      if (
+        existingColumnsResult.error ||
+        !existingColumnsResult.data ||
+        existingColumnsResult.data.length === 0
+      ) {
+        return err("No existing columns found in the experiment table.");
+      }
+
+      // Use the first existing column to copy metadata from
+      const existingColumnId = existingColumnsResult.data[0].id;
+
+      // Fetch existing cells to obtain inputIds
+      const existingCellsResult = await dbExecute<{
+        row_index: number;
+        metadata: any;
+      }>(
+        `SELECT row_index, metadata
+         FROM experiment_cell
+         WHERE column_id = $1`,
+        [existingColumnId]
+      );
+
+      if (existingCellsResult.error || !existingCellsResult.data) {
+        return err(
+          existingCellsResult.error ?? "Failed to fetch existing cells"
+        );
+      }
+
+      // Prepare arrays to collect updates and new cells
+      const inputUpdates: {
+        inputId: string;
+        inputs: Record<string, string>;
+      }[] = [];
+      const newCellsData: any[] = [];
+
+      // Iterate over existing cells
+      for (const cell of existingCellsResult.data) {
+        const inputId = cell.metadata?.inputId;
+        if (inputId) {
+          // Build the inputs object you wish to add
+          const inputs = Object.fromEntries(
+            (inputKeys ?? []).map((key) => [key, ""])
+          );
+
+          // Collect data for bulk input record update
+          inputUpdates.push({ inputId, inputs });
+        }
+
+        // Prepare new cell data
+        newCellsData.push({
+          column_id: columnResult.data[0].id,
+          row_index: cell.row_index,
+          status: "initialized",
+          value: null,
+          metadata: { ...(cell.metadata ?? {}), cellType: columnType },
+        });
+      }
+
+      // Insert new cells into the database
+      if (newCellsData.length > 0) {
+        const insertValues = newCellsData
+          .map((cell, index) => {
+            const baseIdx = index * 4 + 1;
+            return `($${baseIdx}, $${baseIdx + 1}, $${baseIdx + 2}, $${
+              baseIdx + 3
+            })`;
+          })
+          .join(", ");
+
+        const params = newCellsData.flatMap((cell) => [
+          cell.column_id,
+          cell.row_index,
+          cell.status,
+          cell.metadata,
+        ]);
+
+        const cellsInsertResult = await dbExecute(
+          `INSERT INTO experiment_cell (column_id, row_index, status, metadata)
+           VALUES ${insertValues}`,
+          params
         );
 
-        // Collect data for bulk input record update
-        inputUpdates.push({ inputId, inputs });
+        if (cellsInsertResult.error) {
+          return err(cellsInsertResult.error);
+        }
       }
 
-      // Prepare new cell data
-      newCellsData.push({
-        column_id: columnResult.data.id,
-        row_index: cell.row_index,
-        status: "initialized",
-        value: null,
-        //@ts-ignore
-        metadata: { ...(cell.metadata ?? {}), cellType: columnType },
-      });
-    }
+      // Perform bulk update of input records
+      if (inputUpdates.length > 0) {
+        // Build the SQL query for batch updating input records
+        const updateQueries = inputUpdates
+          .map((update, index) => {
+            const paramIdx1 = index * 2 + 1;
+            const paramIdx2 = index * 2 + 2;
+            return `
+            UPDATE prompt_input_record
+            SET inputs = COALESCE(inputs, '{}'::jsonb) || $${paramIdx1}::jsonb
+            WHERE id = $${paramIdx2};
+          `;
+          })
+          .join("\n");
 
-    // Insert new cells into the database
-    const cellsInsertResult = await supabaseServer.client
-      .from("experiment_cell")
-      .insert(newCellsData);
+        const queryParams = inputUpdates.flatMap((update) => [
+          JSON.stringify(update.inputs),
+          update.inputId,
+        ]);
 
-    if (cellsInsertResult.error) {
-      return err(cellsInsertResult.error.message);
-    }
+        const result = await dbExecute<any>(updateQueries, queryParams);
 
-    // Perform bulk update of input records
-    if (inputUpdates.length > 0) {
-      // Build the SQL query for batch updating input records
-      const updateQueries = inputUpdates
-        .map((update, index) => {
-          const paramIdx1 = index * 2 + 1;
-          const paramIdx2 = index * 2 + 2;
-          return `
-          UPDATE prompt_input_record
-          SET inputs = COALESCE(inputs, '{}'::jsonb) || $${paramIdx1}::jsonb
-          WHERE id = $${paramIdx2};
-        `;
-        })
-        .join("\n");
-
-      const queryParams = inputUpdates.flatMap((update) => [
-        JSON.stringify(update.inputs),
-        update.inputId,
-      ]);
-
-      const result = await dbExecute<any>(updateQueries, queryParams);
-
-      if (result.error) {
-        return err(result.error ?? "Failed to update input records");
+        if (result.error) {
+          return err(result.error ?? "Failed to update input records");
+        }
       }
-    }
 
-    return ok({ id: columnResult.data.id });
+      return ok({ id: columnResult.data[0].id });
+    } catch (error) {
+      console.error("Error creating experiment table column:", error);
+      return err(String(error));
+    }
   }
 
   async createExperimentTableColumns(
@@ -627,25 +744,30 @@ export class ExperimentStore extends BaseStore {
     value: string | null,
     metadata?: Record<string, any>
   ): Promise<Result<{ id: string; cellType: string }, string>> {
-    const result = await supabaseServer.client
-      .from("experiment_cell")
-      .insert({
-        column_id: columnId,
-        row_index: rowIndex,
-        value: value ?? null,
-        status: "initialized",
-        metadata: metadata ?? null,
-      })
-      .select("*")
-      .single();
+    try {
+      const result = await dbExecute<{
+        id: string;
+        metadata: Record<string, any> | null;
+      }>(
+        `INSERT INTO experiment_cell
+         (column_id, row_index, value, status, metadata)
+         VALUES ($1, $2, $3, $4, $5)
+         RETURNING id, metadata`,
+        [columnId, rowIndex, value ?? null, "initialized", metadata ?? null]
+      );
 
-    if (result.error || !result.data) {
-      return err(result.error?.message ?? "Failed to create experiment cell");
+      if (result.error || !result.data || result.data.length === 0) {
+        return err(result.error ?? "Failed to create experiment cell");
+      }
+
+      return ok({
+        id: result.data[0].id,
+        cellType: result.data[0].metadata?.cellType,
+      });
+    } catch (error) {
+      console.error("Error creating experiment cell:", error);
+      return err(String(error));
     }
-    return ok({
-      id: result.data.id,
-      cellType: (result.data.metadata as any)?.cellType,
-    });
   }
 
   async getExperimentCellsByIds(cellIds: string[]): Promise<
@@ -808,43 +930,49 @@ export class ExperimentStore extends BaseStore {
     metadata?: Record<string, any>;
     inputs?: Record<string, string>;
   }): Promise<Result<{ id: string; cellType: string }[], string>> {
-    // First, get all columns for this experiment table
-    const columnsResult = await supabaseServer.client
-      .from("experiment_column")
-      .select("*")
-      .eq("table_id", params.experimentTableId);
+    try {
+      // First, get all columns for this experiment table
+      const columnsResult = await dbExecute<{
+        id: string;
+        column_name: string;
+        column_type: string;
+      }>(
+        `SELECT id, column_name, column_type
+         FROM experiment_column
+         WHERE table_id = $1`,
+        [params.experimentTableId]
+      );
 
-    if (columnsResult.error) {
-      return err(columnsResult.error.message);
-    }
+      if (columnsResult.error || !columnsResult.data) {
+        return err(columnsResult.error ?? "Failed to fetch experiment columns");
+      }
 
-    // Create empty cells for each column
-    let cellPromises: Promise<
-      Result<{ id: string; cellType: string }, string>
-    >[] = [];
+      // Create empty cells for each column
+      let cellPromises: Promise<
+        Result<{ id: string; cellType: string }, string>
+      >[] = [];
 
-    if (params.inputs && Object.keys(params.inputs).length > 0) {
-      cellPromises = columnsResult.data.map((column) =>
-        this.createExperimentCell(
-          column.id,
-          params.rowIndex,
-          params?.inputs?.[column.column_name] ?? null,
-          {
+      if (params.inputs && Object.keys(params.inputs).length > 0) {
+        cellPromises = columnsResult.data.map((column) =>
+          this.createExperimentCell(
+            column.id,
+            params.rowIndex,
+            params?.inputs?.[column.column_name] ?? null,
+            {
+              ...params.metadata,
+              cellType: column.column_type,
+            }
+          )
+        );
+      } else {
+        cellPromises = columnsResult.data.map((column) =>
+          this.createExperimentCell(column.id, params.rowIndex, null, {
             ...params.metadata,
             cellType: column.column_type,
-          }
-        )
-      );
-    } else {
-      columnsResult.data.map((column) =>
-        this.createExperimentCell(column.id, params.rowIndex, null, {
-          ...params.metadata,
-          cellType: column.column_type,
-        })
-      );
-    }
+          })
+        );
+      }
 
-    try {
       const results = await Promise.all(cellPromises);
 
       // Check if any cell creation failed
@@ -862,6 +990,7 @@ export class ExperimentStore extends BaseStore {
         }))
       );
     } catch (error) {
+      console.error("Error creating experiment table row:", error);
       return err(`Failed to create experiment row: ${error}`);
     }
   }
@@ -974,6 +1103,8 @@ export class ExperimentStore extends BaseStore {
       created_at: string;
       completion_tokens: number;
       prompt_tokens: number;
+      prompt_cache_write_tokens: number;
+      prompt_cache_read_tokens: number;
       delay_ms: number;
       scores: Record<string, Score>;
     }>(query, [hypothesisId, this.organizationId]);
@@ -1002,6 +1133,8 @@ export class ExperimentStore extends BaseStore {
             model: run.model,
             provider: run.provider,
             sum_prompt_tokens: run.prompt_tokens,
+            prompt_cache_write_tokens: run.prompt_cache_write_tokens,
+            prompt_cache_read_tokens: run.prompt_cache_read_tokens,
             sum_completion_tokens: run.completion_tokens,
           }) ?? 0;
         return sum + cost;
@@ -1136,115 +1269,104 @@ export class ExperimentStore extends BaseStore {
   async getExperimentTableById(
     experimentTableId: string
   ): Promise<Result<ExperimentTableSimplified, string>> {
-    const result = await supabaseServer.client
-      .from("experiment_table")
-      .select(
-        `
-        id,
-        name,
-        experiment_id,
-        metadata,
-        created_at,
-        experiment_column (
-          id,
-          column_name,
-          column_type,
-          metadata
-        )
-      `
-      )
-      .eq("id", experimentTableId)
-      .eq("organization_id", this.organizationId)
-      .single();
+    try {
+      // First get the experiment table
+      const tableResult = await dbExecute<{
+        id: string;
+        name: string;
+        experiment_id: string;
+        metadata: any;
+        created_at: string;
+      }>(
+        `SELECT id, name, experiment_id, metadata, created_at
+         FROM experiment_table
+         WHERE id = $1 AND organization_id = $2`,
+        [experimentTableId, this.organizationId]
+      );
 
-    if (result.error || !result.data) {
-      return err(result.error?.message ?? "Experiment table not found");
+      if (
+        tableResult.error ||
+        !tableResult.data ||
+        tableResult.data.length === 0
+      ) {
+        return err("Experiment table not found");
+      }
+
+      // Then get the columns
+      const columnsResult = await dbExecute<{
+        id: string;
+        column_name: string;
+        column_type: string;
+        metadata: any;
+      }>(
+        `SELECT id, column_name, column_type, metadata
+         FROM experiment_column
+         WHERE table_id = $1`,
+        [experimentTableId]
+      );
+
+      if (columnsResult.error) {
+        return err("Failed to fetch experiment table columns");
+      }
+
+      const columns = (columnsResult.data || []).map((col) => ({
+        id: col.id,
+        columnName: col.column_name,
+        columnType: col.column_type,
+        metadata: col.metadata,
+      }));
+
+      const table = tableResult.data[0];
+      return ok({
+        id: table.id,
+        name: table.name,
+        experimentId: table.experiment_id,
+        metadata: table.metadata,
+        createdAt: table.created_at,
+        columns: columns,
+      });
+    } catch (error) {
+      console.error("Error fetching experiment table by ID:", error);
+      return err(String(error));
     }
-
-    const columns = result.data.experiment_column.map((col: any) => ({
-      id: col.id,
-      columnName: col.column_name,
-      columnType: col.column_type,
-      metadata: col.metadata,
-    }));
-
-    return ok({
-      id: result.data.id,
-      name: result.data.name,
-      experimentId: result.data.experiment_id,
-      metadata: result.data.metadata,
-      createdAt: result.data.created_at,
-      columns: columns,
-    });
-  }
-
-  async getExperimentTableColumns(
-    experimentTableId: string
-  ): Promise<Result<Array<{ id: string; name: string }>, string>> {
-    const result = await supabaseServer.client
-      .from("experiment_column")
-      .select("id, column_name")
-      .eq("table_id", experimentTableId);
-
-    if (result.error || !result.data) {
-      return err(result.error?.message ?? "Experiment columns not found");
-    }
-
-    const columns = result.data.map((col: any) => ({
-      id: col.id,
-      name: col.column_name,
-    }));
-
-    return ok(columns);
-  }
-
-  async updateExperimentTableMetadata(params: {
-    experimentTableId: string;
-    metadata: Record<string, any>;
-  }): Promise<Result<null, string>> {
-    const existingMetadata = await this.getExperimentTable(
-      params.experimentTableId
-    );
-    const result = await supabaseServer.client
-      .from("experiment_table")
-      .update({
-        metadata: {
-          ...existingMetadata.data?.metadata,
-          ...params.metadata,
-        },
-      })
-      .eq("id", params.experimentTableId)
-      .eq("organization_id", this.organizationId);
-
-    if (result.error) {
-      return err(result.error.message);
-    }
-    return ok(null);
   }
 
   async getExperimentTables(): Promise<
     Result<ExperimentTableSimplified[], string>
   > {
-    const { data, error } = await supabaseServer.client
-      .from("experiment_table")
-      .select("*")
-      .eq("organization_id", this.organizationId)
-      .order("created_at", { ascending: false });
+    try {
+      const result = await dbExecute<{
+        id: string;
+        name: string;
+        experiment_id: string;
+        metadata: any;
+        created_at: string;
+      }>(
+        `SELECT id, name, experiment_id, metadata, created_at
+         FROM experiment_table
+         WHERE organization_id = $1
+         ORDER BY created_at DESC`,
+        [this.organizationId]
+      );
 
-    if (error) {
-      return err(error.message);
-    }
+      if (result.error) {
+        return err("Failed to fetch experiment tables");
+      }
 
-    return ok(
-      data.map((table) => ({
+      const tables = (result.data || []).map((table) => ({
         id: table.id,
         name: table.name,
         experimentId: table.experiment_id,
         metadata: table.metadata,
         createdAt: table.created_at,
         columns: [],
-      }))
-    );
+      }));
+
+      return ok(tables);
+    } catch (error) {
+      console.error("Error fetching experiment tables:", error);
+      return err(String(error));
+    }
   }
 
   async getExperimentById(
@@ -1374,46 +1496,48 @@ export class ExperimentStore extends BaseStore {
       metadata?: Record<string, any>;
     }[];
   }): Promise<Result<{ ids: string[] }, string>> {
-    // Fetch all columns for the experiment table
-    const columnsResult = await supabaseServer.client
-      .from("experiment_column")
-      .select("id")
-      .eq("table_id", params.experimentTableId);
+    try {
+      // Fetch all columns for the experiment table
+      const columnsResult = await dbExecute<{ id: string }>(
+        `SELECT id
+         FROM experiment_column
+         WHERE table_id = $1`,
+        [params.experimentTableId]
+      );
 
-    if (columnsResult.error) {
-      return err(columnsResult.error.message);
-    }
+      if (columnsResult.error || !columnsResult.data) {
+        return err(columnsResult.error ?? "Failed to fetch experiment columns");
+      }
 
-    const allColumnIds = columnsResult.data.map((col) => col.id);
+      const allColumnIds = columnsResult.data.map((col) => col.id);
 
-    // Create cells for specified columns
-    const cellPromises = params.cells.map((cell) =>
-      this.createExperimentCell(
-        cell.columnId,
-        params.rowIndex,
-        cell.value,
-        cell.metadata ?? params.metadata
-      )
-    );
-
-    // Create empty cells for other columns
-    const specifiedColumnIds = params.cells.map((cell) => cell.columnId);
-    const otherColumnIds = allColumnIds.filter(
-      (id) => !specifiedColumnIds.includes(id)
-    );
-
-    for (const columnId of otherColumnIds) {
-      cellPromises.push(
+      // Create cells for specified columns
+      const cellPromises = params.cells.map((cell) =>
         this.createExperimentCell(
-          columnId,
+          cell.columnId,
           params.rowIndex,
-          null,
-          params.metadata
+          cell.value,
+          cell.metadata ?? params.metadata
         )
       );
-    }
 
-    try {
+      // Create empty cells for other columns
+      const specifiedColumnIds = params.cells.map((cell) => cell.columnId);
+      const otherColumnIds = allColumnIds.filter(
+        (id) => !specifiedColumnIds.includes(id)
+      );
+
+      for (const columnId of otherColumnIds) {
+        cellPromises.push(
+          this.createExperimentCell(
+            columnId,
+            params.rowIndex,
+            null,
+            params.metadata
+          )
+        );
+      }
+
       const results = await Promise.all(cellPromises);
 
       // Check if any cell creation failed
@@ -1422,10 +1546,10 @@ export class ExperimentStore extends BaseStore {
         return err(`Failed to create cells: ${failedResults[0].error}`);
       }
 
-      // Return the first cell's ID as the row identifier
-      // Since all cells are created for the same row, any cell ID can serve as the row ID
+      // Return the IDs of all created cells
       return ok({ ids: results.map((result) => result.data!.id) });
     } catch (error) {
+      console.error("Error creating experiment row with cells:", error);
       return err(`Failed to create experiment row: ${error}`);
     }
   }
@@ -1442,77 +1566,81 @@ export class ExperimentStore extends BaseStore {
       sourceRequest?: string;
     }[];
   }): Promise<Result<{ ids: string[] }, string>> {
-    // Fetch all columns for the experiment table
-    const columnsResult = await supabaseServer.client
-      .from("experiment_column")
-      .select("*")
-      .eq("table_id", params.experimentTableId);
-
-    if (columnsResult.error) {
-      return err(columnsResult.error.message);
-    }
-
-    const allColumns = columnsResult.data.map((col) => col);
-
-    // Get the current max row index
-    const maxRowIndexResult = await this.getMaxRowIndex(
-      params.experimentTableId
-    );
-    if (maxRowIndexResult.error || maxRowIndexResult.data === null) {
-      return err(maxRowIndexResult.error ?? "Failed to get max row index");
-    }
-
-    let currentRowIndex = maxRowIndexResult.data + 1;
-
-    // Collect all cells to create
-    const cellsToCreate: {
-      columnId: string;
-      rowIndex: number;
-      value: string | null;
-      metadata?: Record<string, any>;
-      sourceRequest?: string;
-    }[] = [];
-
-    for (const row of params.rows) {
-      // Create cells for specified columns
-      const specifiedColumnIds = row.cells.map((cell) => cell.columnId);
-      const otherColumnIds = allColumns.filter(
-        (col) => !specifiedColumnIds.includes(col.id)
+    try {
+      // Fetch all columns for the experiment table
+      const columnsResult = await dbExecute<{
+        id: string;
+        column_type: string;
+      }>(
+        `SELECT id, column_type
+         FROM experiment_column
+         WHERE table_id = $1`,
+        [params.experimentTableId]
       );
 
-      // Cells for specified columns
-      for (const cell of row.cells) {
-        cellsToCreate.push({
-          columnId: cell.columnId,
-          rowIndex: currentRowIndex,
-          value: cell.value,
-          metadata: cell.metadata ?? row.metadata,
-        });
+      if (columnsResult.error || !columnsResult.data) {
+        return err(columnsResult.error ?? "Failed to fetch experiment columns");
       }
 
-      // Cells for other columns (empty)
-      for (const columnId of otherColumnIds) {
-        cellsToCreate.push({
-          columnId: columnId.id,
-          rowIndex: currentRowIndex,
-          value:
-            columnId.column_type === "output"
-              ? row.sourceRequest ?? null
-              : null,
-          metadata: {
-            ...row.metadata,
-            cellType: "output",
-          },
-        });
+      const allColumns = columnsResult.data;
+
+      // Get the current max row index
+      const maxRowIndexResult = await this.getMaxRowIndex(
+        params.experimentTableId
+      );
+      if (maxRowIndexResult.error || maxRowIndexResult.data === null) {
+        return err(maxRowIndexResult.error ?? "Failed to get max row index");
       }
-      console.log("cellsToCreate", cellsToCreate);
 
-      // Increment rowIndex for next row
-      currentRowIndex++;
-    }
+      let currentRowIndex = maxRowIndexResult.data + 1;
 
-    // Now, bulk insert all cells
-    try {
+      // Collect all cells to create
+      const cellsToCreate: {
+        columnId: string;
+        rowIndex: number;
+        value: string | null;
+        metadata?: Record<string, any>;
+        sourceRequest?: string;
+      }[] = [];
+
+      for (const row of params.rows) {
+        // Create cells for specified columns
+        const specifiedColumnIds = row.cells.map((cell) => cell.columnId);
+        const otherColumnIds = allColumns.filter(
+          (col) => !specifiedColumnIds.includes(col.id)
+        );
+
+        // Cells for specified columns
+        for (const cell of row.cells) {
+          cellsToCreate.push({
+            columnId: cell.columnId,
+            rowIndex: currentRowIndex,
+            value: cell.value,
+            metadata: cell.metadata ?? row.metadata,
+          });
+        }
+
+        // Cells for other columns (empty)
+        for (const column of otherColumnIds) {
+          cellsToCreate.push({
+            columnId: column.id,
+            rowIndex: currentRowIndex,
+            value:
+              column.column_type === "output"
+                ? row.sourceRequest ?? null
+                : null,
+            metadata: {
+              ...row.metadata,
+              cellType: "output",
+            },
+          });
+        }
+
+        // Increment rowIndex for next row
+        currentRowIndex++;
+      }
+
+      // Now, bulk insert all cells
       const results = await this.createExperimentCells(cellsToCreate);
 
       if (results.error) {
@@ -1522,6 +1650,7 @@ export class ExperimentStore extends BaseStore {
       // Return the IDs of the created cells
       return ok({ ids: results.data?.ids ?? [] });
     } catch (error) {
+      console.error("Error creating experiment rows with cells:", error);
       return err(`Failed to create experiment rows: ${error}`);
     }
   }
@@ -1642,6 +1771,8 @@ function getExperimentHypothesisScores(
             model: hypothesis.model,
             provider: run.request!.provider,
             sum_prompt_tokens: run.response!.promptTokens,
+            prompt_cache_write_tokens: run.response!.promptCacheWriteTokens,
+            prompt_cache_read_tokens: run.response!.promptCacheReadTokens,
             sum_completion_tokens: run.response!.completionTokens,
           }) ?? 0;
 
@@ -1696,6 +1827,10 @@ function getExperimentDatasetScores(
             model: row.inputRecord!.response.model,
             provider: row.inputRecord!.request.provider,
             sum_prompt_tokens: row.inputRecord!.response.promptTokens,
+            prompt_cache_write_tokens:
+              row.inputRecord!.response.promptCacheWriteTokens,
+            prompt_cache_read_tokens:
+              row.inputRecord!.response.promptCacheReadTokens,
             sum_completion_tokens: row.inputRecord!.response.completionTokens,
           }) ?? 0;
 
@@ -1768,17 +1903,25 @@ function modelCost(modelRow: {
   model: string;
   provider: string;
   sum_prompt_tokens: number;
+  prompt_cache_write_tokens: number;
+  prompt_cache_read_tokens: number;
   sum_completion_tokens: number;
 }): number {
   const model = modelRow.model;
   const promptTokens = modelRow.sum_prompt_tokens;
+  const promptCacheWriteTokens = modelRow.prompt_cache_write_tokens;
+  const promptCacheReadTokens = modelRow.prompt_cache_read_tokens;
   const completionTokens = modelRow.sum_completion_tokens;
   return (
     costOfPrompt({
       model,
       promptTokens,
+      promptCacheWriteTokens,
+      promptCacheReadTokens,
       completionTokens,
       provider: modelRow.provider,
+      promptAudioTokens: 0,
+      completionAudioTokens: 0,
     }) ?? 0
   );
 }

@@ -39,7 +39,7 @@ const TeamCard: React.FC = () => {
               "Everything in Pro",
               "Unlimited seats",
               "Prompts, Experiments and Evals.",
-              "SOC-2 Compliance & HIPPA",
+              "SOC-2 Compliance & HIPAA",
               "Dedicated Slack channel",
             ].map((feature, index) => (
               <div key={index} className="px-2 py-1.5 flex items-start gap-2">

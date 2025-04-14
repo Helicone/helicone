@@ -28,9 +28,17 @@ export async function testEvaluator(
         _type: "completed",
       };
     } else {
+      // Handle error response - result can be any structure from the API
+      const errorObj = result?.error ||
+        result?.data?.error || { message: "Unknown error - try again" };
+      const errorMessage =
+        typeof errorObj === "object"
+          ? JSON.stringify(errorObj, null, 2)
+          : String(errorObj);
+
       return {
         _type: "error",
-        error: result?.error ?? "Unknown error - try again",
+        error: errorMessage,
       };
     }
   } else if (testData._type === "python") {
@@ -46,9 +54,17 @@ export async function testEvaluator(
         _type: "completed",
       };
     } else {
+      // Handle error response - result can be any structure from the API
+      const errorObj = result?.error ||
+        result?.data?.error || { message: "Unknown error - try again" };
+      const errorMessage =
+        typeof errorObj === "object"
+          ? JSON.stringify(errorObj, null, 2)
+          : String(errorObj);
+
       return {
         _type: "error",
-        error: result?.data?.error ?? "Unknown error - try again",
+        error: errorMessage,
       };
     }
   } else if (testData._type === "lastmile") {
@@ -69,9 +85,17 @@ export async function testEvaluator(
         _type: "completed",
       };
     } else {
+      // Handle error response - result can be any structure from the API
+      const errorObj = result?.error ||
+        result?.data?.error || { message: "Unknown error - try again" };
+      const errorMessage =
+        typeof errorObj === "object"
+          ? JSON.stringify(errorObj, null, 2)
+          : String(errorObj);
+
       return {
         _type: "error",
-        error: result?.data?.error ?? "Unknown error - try again",
+        error: errorMessage,
       };
     }
   } else {

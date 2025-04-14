@@ -10,6 +10,8 @@ export interface BackendMetricsCall<T> {
     dbIncrement?: TimeIncrement;
     timeZoneDifference: number;
     limit?: number;
+    sortKey?: string;
+    sortDirection?: "asc" | "desc";
   };
   endpoint: string;
   key?: string;
@@ -26,6 +28,8 @@ export type MetricsBackendBody = {
   dbIncrement?: TimeIncrement;
   timeZoneDifference: number;
   organizationId?: string;
+  sortKey?: string;
+  sortDirection?: "asc" | "desc";
 };
 
 export function useBackendMetricCall<T>({
@@ -40,8 +44,14 @@ export function useBackendMetricCall<T>({
     retry: false,
     refetchInterval: isLive ? 5_000 : undefined,
     queryFn: async (query) => {
-      const { timeFilter, userFilters, dbIncrement, timeZoneDifference } = query
-        .queryKey[1] as BackendMetricsCall<T>["params"];
+      const {
+        timeFilter,
+        userFilters,
+        dbIncrement,
+        timeZoneDifference,
+        sortKey,
+        sortDirection,
+      } = query.queryKey[1] as BackendMetricsCall<T>["params"];
       const res = fetch(endpoint, {
         method: "POST",
         headers: {
@@ -57,6 +67,8 @@ export function useBackendMetricCall<T>({
           dbIncrement,
           timeZoneDifference,
           limit: params.limit,
+          sortKey,
+          sortDirection,
         } as MetricsBackendBody),
       }).then((res) => res.json() as Promise<T>);
       if (postProcess === undefined) {

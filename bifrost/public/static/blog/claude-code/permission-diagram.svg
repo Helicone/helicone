@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 380">
+  <!-- Background -->
+  <rect width="600" height="380" fill="#f8f9fa" rx="10" ry="10" />
+  
+  <!-- Title -->
+  <text x="300" y="40" font-family="Arial" font-size="20" text-anchor="middle" font-weight="bold">Claude Code Permission System</text>
+  
+  <!-- Tier 1: Read-only Operations -->
+  <rect x="100" y="70" width="400" height="80" rx="5" ry="5" fill="#e3f2fd" stroke="#90caf9" stroke-width="2" />
+  <text x="300" y="95" font-family="Arial" font-size="16" text-anchor="middle" font-weight="bold">Tier 1: Read-only Operations</text>
+  <text x="300" y="120" font-family="Arial" font-size="14" text-anchor="middle">File reads, LS, Grep</text>
+  <text x="300" y="140" font-family="Arial" font-size="14" text-anchor="middle" fill="#2e7d32">No approval required</text>
+  
+  <!-- Tier 2: Shell Commands -->
+  <rect x="100" y="170" width="400" height="80" rx="5" ry="5" fill="#e8f5e9" stroke="#a5d6a7" stroke-width="2" />
+  <text x="300" y="195" font-family="Arial" font-size="16" text-anchor="middle" font-weight="bold">Tier 2: Shell Commands</text>
+  <text x="300" y="220" font-family="Arial" font-size="14" text-anchor="middle">npm install, git status, Jest tests</text>
+  <text x="300" y="240" font-family="Arial" font-size="14" text-anchor="middle" fill="#f57c00">Approval required (can be remembered)</text>
+  
+  <!-- Tier 3: File Modifications -->
+  <rect x="100" y="270" width="400" height="80" rx="5" ry="5" fill="#fff3e0" stroke="#ffcc80" stroke-width="2" />
+  <text x="300" y="295" font-family="Arial" font-size="16" text-anchor="middle" font-weight="bold">Tier 3: File Modifications</text>
+  <text x="300" y="320" font-family="Arial" font-size="14" text-anchor="middle">Edit/write files, create new files</text>
+  <text x="300" y="340" font-family="Arial" font-size="14" text-anchor="middle" fill="#c62828">Approval required (only remembered for session)</text>
+</svg>

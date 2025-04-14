@@ -1,0 +1,101 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Helicone System Architecture
+
+## Core Components
+
+1. **Frontend (Web)** - Next.js application
+   - Dashboard UI for visualization and management
+   - Located in `/web` directory
+
+2. **Proxy Workers** - Cloudflare Workers
+   - Intercept and process API calls to LLM providers
+   - Located in `/worker` directory
+   - Separate workers for OpenAI, Anthropic, and general API
+
+3. **Jawn Server** - Express.js + Tsoa backend
+   - Core business logic and data processing
+   - Located in `/valhalla/jawn` directory
+   - Handles authentication, logging, and analytics
+
+4. **Bifrost** - Landing page and blog application
+   - Marketing website and documentation
+   - Located in `/bifrost` directory
+
+5. **Databases**
+   - **PostgreSQL** (via Supabase): User data, organizations, API keys
+   - **ClickHouse**: High-performance analytics storage for request logs
+
+6. **Object Storage** - Minio/S3 compatible
+   - Stores large request/response payloads
+   - Enables efficient retrieval of historical data
+
+7. **Upstash** - Redis-compatible message queue
+   - Buffers requests between proxy and backend
+   - Ensures reliable delivery of logging data
+
+## Directory Structure
+
+```
+/helicone
+├── /web                 # Next.js frontend dashboard
+├── /worker              # Cloudflare Workers proxy
+│   ├── /src/routers     # API provider-specific routers
+│   └── /src/lib         # Shared utilities
+├── /valhalla
+│   └── /jawn            # Express.js backend server
+├── /bifrost             # Landing page and blog
+├── /sdk                 # Client SDKs
+│   ├── /typescript      # TypeScript SDK
+│   └── /python          # Python SDK
+```
+
+## Data Flow
+
+1. **Request Interception**:
+   - Client request → Helicone Proxy → LLM Provider
+   - Proxy adds tracking headers and applies features
+
+2. **Response Processing**:
+   - LLM Provider → Helicone Proxy → Client
+   - Proxy sends log data to Upstash queue
+
+3. **Log Processing**:
+   - Upstash queue → Jawn server
+   - Jawn processes and stores logs in databases
+
+4. **Data Storage**:
+   - Request metadata → PostgreSQL
+   - Analytics data → ClickHouse
+   - Large payloads → Object Storage
+
+5. **Analytics Processing**:
+   - Jawn server processes logs for insights
+   - Aggregates metrics for dashboard visualization
+
+## System Interactions
+
+- **Frontend ↔ Jawn**: REST API for dashboard data
+- **Proxy ↔ Upstash**: Asynchronous message queuing
+- **Upstash ↔ Jawn**: Reliable message delivery
+- **Jawn ↔ Databases**: Data storage and retrieval
+
+## Technical Implementation
+
+- **Frontend**: React, Next.js, Tailwind CSS
+- **Proxy**: Cloudflare Workers, TypeScript
+- **Backend**: Express.js, Tsoa, TypeScript
+- **Bifrost**: Next.js, React, TypeScript
+- **Databases**: PostgreSQL, ClickHouse
+- **Queue**: Upstash Redis
+
+## Key Files for Development
+
+- `/worker/src/index.ts`: Entry point for proxy workers
+- `/worker/src/routers/`: Provider-specific routing logic
+- `/valhalla/jawn/src/index.ts`: Backend server entry point
+- `/web/pages/`: Frontend dashboard components
+- `/bifrost/pages/`: Landing page and blog components

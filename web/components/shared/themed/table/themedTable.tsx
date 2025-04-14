@@ -1,3 +1,5 @@
+import { UIFilterRowTree } from "@/services/lib/filters/types";
+import { TimeFilter } from "@/types/timeFilter";
 import {
   AdjustmentsHorizontalIcon,
   TableCellsIcon,
@@ -8,15 +10,14 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import Link from "next/link";
 import React, { useEffect, useMemo, useState } from "react";
-import { Result } from "../../../../lib/result";
+import { Result } from "../../../../packages/common/result";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
 import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
-import { UIFilterRowTree } from "@/services/lib/filters/types";
 import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";
 import { SortDirection } from "../../../../services/lib/sorts/requests/sorts";
-import { TimeFilter } from "@/types/timeFilter";
 
 import { clsx } from "../../clsx";
 import LoadingAnimation from "../../loadingAnimation";
@@ -29,18 +30,20 @@ import DraggableColumnHeader from "./columns/draggableColumnHeader";
 import RequestRowView from "./requestRowView";
 import ThemedTableHeader from "./themedTableHeader";
 
+import useOnboardingContext, {
+  ONBOARDING_STEPS,
+} from "@/components/layout/onboardingContext";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import useOnboardingContext, {
-  ONBOARDING_STEPS,
-} from "@/components/layout/onboardingContext";
+import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { useRouter, useSearchParams } from "next/navigation";
 import { RequestViews } from "./RequestViews";
-import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+
+type CheckboxMode = "always_visible" | "on_hover" | "never";
 
 interface ThemedTableV5Props<T extends { id?: string }> {
   id: string;
@@ -69,12 +72,13 @@ interface ThemedTableV5Props<T extends { id?: string }> {
     sortDirection: SortDirection | null;
     isCustomProperty: boolean;
   };
-  onRowSelect?: (row: T, index: number) => void;
+  onRowSelect?: (row: T, index: number, event?: React.MouseEvent) => void;
   makeCard?: (row: T) => React.ReactNode;
   makeRow?: {
     properties: string[];
   };
   hideView?: boolean;
+  hideHeader?: boolean;
   noDataCTA?: React.ReactNode;
   onDataSet?: () => void;
   savedFilters?: {
@@ -85,11 +89,21 @@ interface ThemedTableV5Props<T extends { id?: string }> {
     layoutPage: "dashboard" | "requests";
   };
   highlightedIds?: string[];
-  showCheckboxes?: boolean;
+  /**
+   * Controls the visibility of checkboxes in the table
+   * - "always_visible": Checkboxes are always shown
+   * - "on_hover": Checkboxes are shown on hover and for selected rows
+   * - "never": No checkboxes are shown (default)
+   */
+  checkboxMode?: CheckboxMode;
   customButtons?: React.ReactNode[];
   children?: React.ReactNode;
   onSelectAll?: (checked: boolean) => void;
   selectedIds?: string[];
+  selectedRows?: {
+    showSelectedCount?: boolean;
+    children?: React.ReactNode;
+  };
   fullWidth?: boolean;
   isDatasetsPage?: boolean;
   rightPanel?: React.ReactNode;
@@ -98,6 +112,8 @@ interface ThemedTableV5Props<T extends { id?: string }> {
     onChange: (value: string) => void;
     placeholder: string;
   };
+  rowLink?: (row: T) => string;
+  showFilters?: boolean;
 }
 
 export default function ThemedTable<T extends { id?: string }>(
@@ -117,19 +133,23 @@ export default function ThemedTable<T extends { id?: string }>(
     makeCard,
     makeRow,
     hideView, // hides the view columns button
+    hideHeader,
     noDataCTA,
     onDataSet: onDataSet,
     savedFilters,
     highlightedIds: checkedIds,
-    showCheckboxes,
+    checkboxMode = "never",
     customButtons,
     children,
     onSelectAll,
     selectedIds,
+    selectedRows,
     fullWidth = false,
     isDatasetsPage,
     rightPanel,
     search,
+    rowLink,
+    showFilters,
   } = props;
 
   const [view, setView] = useLocalStorage<RequestViews>("view", "table");
@@ -177,8 +197,8 @@ export default function ThemedTable<T extends { id?: string }>(
     onSelectAll?.(checked);
   };
 
-  const handleRowSelect = (row: T, index: number) => {
-    onRowSelect?.(row, index);
+  const handleRowSelect = (row: T, index: number, event: React.MouseEvent) => {
+    onRowSelect?.(row, index, event);
   };
 
   const [isPanelVisible, setIsPanelVisible] = useState(false);
@@ -218,61 +238,73 @@ export default function ThemedTable<T extends { id?: string }>(
       currentStep === ONBOARDING_STEPS.REQUESTS_DRAWER.stepNumber
     ) {
       setOnClickElement(
-        () => () => router.push(`/sessions/${sessionData?.sessionId}`)
+        () => () =>
+          router.push(
+            `/sessions/${encodeURIComponent(sessionData?.sessionId || "")}`
+          )
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOnboardingVisible, currentStep]);
 
   return (
-    <div className="h-full flex flex-col border-b border-slate-300 dark:border-slate-700 divide-y divide-slate-300 dark:divide-slate-700">
-      <div className="p-1 flex-shrink-0">
-        <ThemedTableHeader
-          search={search}
-          onDataSet={onDataSet}
-          isDatasetsPage={isDatasetsPage}
-          advancedFilters={
-            advancedFilters
-              ? {
-                  filterMap: advancedFilters.filterMap,
-                  filters: advancedFilters.filters,
-                  searchPropertyFilters: advancedFilters.searchPropertyFilters,
-                  setAdvancedFilters: advancedFilters.setAdvancedFilters,
-                  show: advancedFilters.show,
-                }
-              : undefined
-          }
-          savedFilters={savedFilters}
-          activeColumns={activeColumns}
-          setActiveColumns={setActiveColumns}
-          columns={hideView ? [] : table.getAllColumns()}
-          timeFilter={
-            timeFilter
-              ? {
-                  defaultValue: timeFilter.defaultValue,
-                  onTimeSelectHandler: timeFilter.onTimeSelectHandler,
-                  currentTimeFilter: timeFilter.currentTimeFilter,
-                }
-              : undefined
-          }
-          viewToggle={
-            makeCard
-              ? {
-                  currentView: view,
-                  onViewChange: setView,
-                }
-              : undefined
-          }
-          rows={exportData}
-          customButtons={customButtons}
-        />
-      </div>
+    <div className="h-full flex flex-col border-slate-300 dark:border-slate-700 divide-y divide-slate-300 dark:divide-slate-700">
+      {!hideHeader && (
+        <div className="p-1 flex-shrink-0">
+          <ThemedTableHeader
+            search={search}
+            onDataSet={onDataSet}
+            advancedFilters={
+              advancedFilters
+                ? {
+                    filterMap: advancedFilters.filterMap,
+                    filters: advancedFilters.filters,
+                    searchPropertyFilters:
+                      advancedFilters.searchPropertyFilters,
+                    setAdvancedFilters: advancedFilters.setAdvancedFilters,
+                    show: advancedFilters.show,
+                  }
+                : undefined
+            }
+            showFilters={showFilters}
+            savedFilters={savedFilters}
+            activeColumns={activeColumns}
+            setActiveColumns={setActiveColumns}
+            columns={hideView ? [] : table.getAllColumns()}
+            timeFilter={
+              timeFilter
+                ? {
+                    defaultValue: timeFilter.defaultValue,
+                    onTimeSelectHandler: timeFilter.onTimeSelectHandler,
+                    currentTimeFilter: timeFilter.currentTimeFilter,
+                  }
+                : undefined
+            }
+            viewToggle={
+              makeCard
+                ? {
+                    currentView: view,
+                    onViewChange: setView,
+                  }
+                : undefined
+            }
+            rows={exportData}
+            customButtons={customButtons}
+            selectedRows={{
+              count: selectedIds?.length,
+              children: selectedRows?.children,
+            }}
+          />
+        </div>
+      )}
 
       {children && <div className="flex-shrink-0">{children}</div>}
-      <ResizablePanelGroup direction="horizontal">
-        <ResizablePanel>
-          {" "}
-          <div className="h-full overflow-x-auto bg-slate-100 dark:bg-slate-800">
+      <ResizablePanelGroup
+        direction="horizontal"
+        className="flex-grow overflow-hidden"
+      >
+        <ResizablePanel defaultSize={100} className="flex-grow">
+          <div className="h-full overflow-auto ">
             {skeletonLoading ? (
               <LoadingAnimation title="Loading Data..." />
             ) : rows.length === 0 ? (
@@ -326,8 +358,18 @@ export default function ThemedTable<T extends { id?: string }>(
                           key={headerGroup.id}
                           className="sticky top-0  bg-slate-50 dark:bg-slate-900 shadow-sm"
                         >
-                          {showCheckboxes && (
-                            <th className="w-8 px-2 sticky left-0 z-20 bg-slate-50 dark:bg-slate-900">
+                          <th
+                            className={clsx(
+                              "w-8 px-2 sticky left-0 z-20 bg-slate-50 dark:bg-slate-900",
+                              checkboxMode === "never" && "hidden"
+                            )}
+                          >
+                            <div
+                              className={clsx(
+                                checkboxMode === "on_hover" &&
+                                  "opacity-40 hover:opacity-100 transition-opacity duration-150"
+                              )}
+                            >
                               <Checkbox
                                 variant="blue"
                                 onCheckedChange={handleSelectAll}
@@ -344,9 +386,9 @@ export default function ThemedTable<T extends { id?: string }>(
                                 }}
                                 className="data-[state=checked]:bg-primary data-[state=indeterminate]:bg-primary"
                               />
-                              <div className="absolute bottom-0 left-0 right-0 h-px bg-slate-300 dark:bg-slate-700" />
-                            </th>
-                          )}
+                            </div>
+                            <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-300 dark:bg-slate-700" />
+                          </th>
                           {headerGroup.headers.map((header, index) => (
                             <th
                               key={`header-${index}`}
@@ -376,36 +418,61 @@ export default function ThemedTable<T extends { id?: string }>(
                         <tr
                           key={row.original?.id}
                           className={clsx(
-                            " hover:cursor-pointer",
+                            "hover:cursor-pointer group",
                             checkedIds?.includes(row.original?.id ?? "")
                               ? "bg-sky-100 border-l border-sky-500 pl-2 dark:bg-slate-800/50 dark:border-sky-900"
-                              : "hover:bg-sky-50 dark:hover:bg-slate-700/50"
+                              : "hover:bg-sky-50 dark:hover:bg-slate-700/50",
+                            rowLink && "relative"
                           )}
                           onClick={
                             onRowSelect &&
-                            (() => {
-                              handleRowSelect(row.original, index);
+                            ((e: React.MouseEvent) => {
+                              handleRowSelect(row.original, index, e);
                             })
                           }
                         >
-                          {showCheckboxes && (
-                            <td className="w-8 px-2">
-                              <Checkbox
-                                variant="blue"
-                                checked={selectedIds?.includes(
-                                  row.original?.id ?? ""
-                                )}
-                                onChange={() => {}} // Handle individual row selection
-                                className="text-slate-700 dark:text-slate-400"
-                              />
-                            </td>
-                          )}
+                          <td
+                            className={clsx(
+                              "w-8 px-2 border-t border-slate-300 dark:border-slate-700",
+                              checkboxMode === "on_hover"
+                                ? clsx(
+                                    "opacity-0 group-hover:opacity-100 transition-opacity duration-150",
+                                    selectedIds?.includes(
+                                      row.original?.id ?? ""
+                                    ) && "!opacity-100"
+                                  )
+                                : "",
+                              checkboxMode === "never" && "hidden"
+                            )}
+                          >
+                            <Checkbox
+                              variant="blue"
+                              checked={selectedIds?.includes(
+                                row.original?.id ?? ""
+                              )}
+                              onChange={() => {}}
+                              className="text-slate-700 dark:text-slate-400"
+                            />
+                          </td>
                           {row.getVisibleCells().map((cell, i) => (
                             <td
                               key={i}
                               className={clsx(
                                 "py-3 border-t border-slate-300 dark:border-slate-700 px-2 text-slate-700 dark:text-slate-300",
-                                i === 0 && "pl-10", // Add left padding to the first column
+                                i === 0 &&
+                                  checkboxMode === "always_visible" &&
+                                  "pl-2",
+                                i === 0 &&
+                                  checkboxMode === "on_hover" &&
+                                  "pl-2",
+                                i === 0 && checkboxMode === "never" && "pl-10",
+                                // For selected rows in hover mode
+                                i === 0 &&
+                                  checkboxMode === "on_hover" &&
+                                  selectedIds?.includes(
+                                    row.original?.id ?? ""
+                                  ) &&
+                                  "!pl-2",
                                 i === row.getVisibleCells().length - 1 &&
                                   "pr-10 border-r border-slate-300 dark:border-slate-700"
                               )}
@@ -439,6 +506,41 @@ export default function ThemedTable<T extends { id?: string }>(
                               )}
                             </td>
                           ))}
+                          {rowLink && (
+                            <td
+                              className="p-0 m-0 border-0"
+                              style={{
+                                position: "absolute",
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                padding: 0,
+                                margin: 0,
+                                border: "none",
+                                background: "transparent",
+                                pointerEvents: "none",
+                                zIndex: 2,
+                              }}
+                            >
+                              <Link
+                                href={rowLink(row.original)}
+                                style={{
+                                  display: "block",
+                                  width: "100%",
+                                  height: "100%",
+                                  opacity: 0,
+                                  pointerEvents: "auto",
+                                }}
+                                onClick={(e: React.MouseEvent) => {
+                                  if (onRowSelect) {
+                                    e.stopPropagation();
+                                  }
+                                }}
+                                aria-hidden="true"
+                              />
+                            </td>
+                          )}
                         </tr>
                       ))}
                     </tbody>
@@ -455,7 +557,7 @@ export default function ThemedTable<T extends { id?: string }>(
             ) : (
               <>
                 <ResizableHandle withHandle />
-                <ResizablePanel minSize={25} maxSize={75}>
+                <ResizablePanel minSize={25} maxSize={75} defaultSize={75}>
                   <div className="h-full flex-shrink-0 flex flex-col">
                     {rightPanel}
                   </div>

@@ -13,11 +13,10 @@ import {
   PromptsQueryParams,
   PromptsResult,
 } from "../../controllers/public/promptController";
-import { supabaseServer } from "../../lib/db/supabase";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
 import { buildFilterPostgres } from "../../lib/shared/filters/filters";
-import { Result, err, ok, resultMap } from "../../lib/shared/result";
+import { Result, err, ok, resultMap } from "../../packages/common/result";
 import { BaseManager } from "../BaseManager";
 import { RequestManager } from "../request/RequestManager";
 
@@ -45,6 +44,7 @@ export class PromptManager extends BaseManager {
       },
       prompt: requestResult.data.request_body,
       userDefinedId: `prompt-from-request-${requestId}-${Date.now()}`,
+      createdAt: requestResult.data.request_created_at ?? undefined,
     });
 
     if (prompt.error || !prompt.data) {
@@ -57,17 +57,23 @@ export class PromptManager extends BaseManager {
   private async getPromptVersionFromRequest(
     requestId: string
   ): Promise<Result<string, string>> {
-    const res = await supabaseServer.client
-      .from("prompt_input_record")
-      .select("*")
-      .eq("source_request", requestId)
-      .single();
+    try {
+      const result = await dbExecute<{ prompt_version: string }>(
+        `SELECT prompt_version
+         FROM prompt_input_record
+         WHERE source_request = $1
+         LIMIT 1`,
+        [requestId]
+      );
 
-    if (res.error || !res.data) {
-      return err("Failed to get prompt version from request");
+      if (result.error || !result.data || result.data.length === 0) {
+        return err("Failed to get prompt version from request");
+      }
+
+      return ok(result.data[0].prompt_version);
+    } catch (error) {
+      return err(`Error retrieving prompt version: ${error}`);
     }
-
-    return ok(res.data.prompt_version);
   }
   async createNewPromptVersion(
     parentPromptVersionId: string,
@@ -221,29 +227,34 @@ export class PromptManager extends BaseManager {
         ).matchAll(/<helicone-prompt-input key=\\"(\w+)\\" \/>/g)
       ).map((match) => match[1]);
 
-      const existingExperimentInputKeys = await supabaseServer.client
-        .from("experiment_v3")
-        .select("input_keys")
-        .eq("id", params.experimentId)
-        .single();
+      // Get existing input keys for experiment
+      const existingKeysResult = await dbExecute<{ input_keys: string[] }>(
+        `SELECT input_keys
+         FROM experiment_v3
+         WHERE id = $1
+         LIMIT 1`,
+        [params.experimentId]
+      );
 
+      const existingInputKeys = existingKeysResult.data?.[0]?.input_keys ?? [];
+
+      // Update experiment input keys
       const res = await Promise.all([
-        supabaseServer.client
-          .from("experiment_v3")
-          .update({
-            input_keys: [
-              ...new Set([
-                ...(existingExperimentInputKeys.data?.input_keys ?? []),
-                ...newPromptVersionInputKeys,
-              ]),
-            ],
-          })
-          .eq("organization", this.authParams.organizationId)
-          .eq("id", params.experimentId),
+        dbExecute(
+          `UPDATE experiment_v3
+           SET input_keys = $1
+           WHERE organization = $2
+           AND id = $3`,
+          [
+            [...new Set([...existingInputKeys, ...newPromptVersionInputKeys])],
+            this.authParams.organizationId,
+            params.experimentId,
+          ]
+        ),
         dbExecute(
           `INSERT INTO prompt_input_keys (key, prompt_version)
-       SELECT unnest($1::text[]), $2
-       ON CONFLICT (key, prompt_version) DO NOTHING`,
+           SELECT unnest($1::text[]), $2
+           ON CONFLICT (key, prompt_version) DO NOTHING`,
           [`{${newPromptVersionInputKeys.join(",")}}`, promptVersionId]
         ),
       ]);
@@ -372,6 +383,38 @@ export class PromptManager extends BaseManager {
     return ok(null);
   }
 
+  async removePromptVersionFromExperiment(
+    promptVersionId: string,
+    experimentId: string
+  ): Promise<Result<null, string>> {
+    const promptVersion = await this.getPromptVersion({
+      promptVersionId,
+    });
+
+    if (
+      promptVersion.error ||
+      !promptVersion.data ||
+      promptVersion.data.length === 0
+    ) {
+      return err(`Failed to get prompt version: ${promptVersion.error}`);
+    }
+
+    const result = await dbExecute(
+      `
+    UPDATE prompts_versions
+    SET experiment_id = null
+    WHERE id = $1 AND organization = $2 AND experiment_id = $3
+    `,
+      [promptVersionId, this.authParams.organizationId, experimentId]
+    );
+
+    if (result.error) {
+      return err(`Failed to delete prompt version: ${result.error}`);
+    }
+
+    return ok(null);
+  }
+
   async getPromptVersions(
     filter: FilterNode,
     includeExperimentVersions: boolean = false
@@ -467,7 +510,7 @@ export class PromptManager extends BaseManager {
     );
 
     if (result.error || !result.data || result.data.length === 0) {
-      return err("Failed to get compiled prompt versions");
+      return err(result.error || "Failed to get compiled prompt versions");
     }
 
     const lastVersion = result.data[result.data.length - 1];
@@ -532,7 +575,7 @@ export class PromptManager extends BaseManager {
     const lastVersion = result.data[result.data.length - 1];
     const filledTemplate = autoFillInputs({
       inputs: inputs,
-      autoInputs: lastVersion.auto_prompt_inputs,
+      autoInputs: lastVersion.auto_prompt_inputs ?? [],
       template: lastVersion.helicone_template,
     });
 
@@ -678,6 +721,7 @@ export class PromptManager extends BaseManager {
       messages: any[];
     };
     metadata: Record<string, any>;
+    createdAt?: string;
   }): Promise<Result<CreatePromptResponse, string>> {
     const existingPrompt = await dbExecute<{
       id: string;
@@ -719,7 +763,7 @@ export class PromptManager extends BaseManager {
     }>(
       `
     INSERT INTO prompts_versions (prompt_v2, organization, major_version, minor_version, helicone_template, model, created_at, metadata)
-    VALUES ($1, $2, $3, $4, $5, $6, NOW(), '{"isProduction": true}'::jsonb)
+    VALUES ($1, $2, $3, $4, $5, $6, COALESCE($7, NOW()), '{"isProduction": true, "provider": "OPENAI"}'::jsonb)
     RETURNING id
     `,
       [
@@ -729,12 +773,24 @@ export class PromptManager extends BaseManager {
         0, // Starting with minor version 0
         JSON.stringify(params.prompt),
         params.prompt.model,
+        params.createdAt,
       ]
     );
 
     if (insertVersionResult.error || !insertVersionResult.data) {
       return err(
         `Failed to create prompt version: ${insertVersionResult.error}`
+      );
+    }
+
+    const createPromptInputKeysResult = await this.createPromptInputKeys(
+      insertVersionResult.data[0].id,
+      JSON.stringify(params.prompt)
+    );
+
+    if (createPromptInputKeysResult.error) {
+      return err(
+        `Failed to create prompt input keys: ${createPromptInputKeysResult.error}`
       );
     }
 
@@ -816,11 +872,16 @@ export class PromptManager extends BaseManager {
 
       // Helper function to find keys in a string
       const findKeys = (str: string): string[] => {
-        const regex = /<helicone-prompt-input key="([^"]+)"\s*\/>/g;
+        const regex = /<helicone-prompt-input key=\\?"([^"]+)\\?"\s*\/>/g;
         const matches = str.match(regex);
         return matches
           ? matches.map((match) =>
-              match.replace(/<helicone-prompt-input key="|"\s*\/>/g, "")
+              match
+                .replace(
+                  /<helicone-prompt-input key=\\?"(.*?)\\?"\s*\/>/g,
+                  "$1"
+                )
+                .replace(/\\/g, "")
             )
           : [];
       };

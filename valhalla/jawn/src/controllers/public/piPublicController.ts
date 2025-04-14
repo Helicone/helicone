@@ -1,8 +1,8 @@
 import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
-import { Result, err, ok } from "../../lib/shared/result";
+import { Result, err, ok } from "../../packages/common/result";
 import { JawnAuthenticatedRequest } from "../../types/request";
 
-import { supabaseServer } from "../../lib/db/supabase";
+import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { generateHeliconeAPIKey } from "../../lib/experiment/tempKeys/tempAPIKey";
 
 @Route("/v1/public/pi")
@@ -19,39 +19,43 @@ export class PiPublicController extends Controller {
   ): Promise<Result<{ apiKey: string }, string>> {
     let one_hour_ago = new Date(new Date().getTime() - 1 * 60 * 60 * 1000);
 
-    const session = await supabaseServer.client
-      .from("pi_session")
-      .select("*")
-      .eq("session_id", body.sessionUUID)
-      .gt("created_at", one_hour_ago.toISOString())
-      .single();
+    const sessionResult = await dbExecute<{
+      organization_id: string;
+    }>(
+      `SELECT organization_id FROM pi_session
+       WHERE session_id = $1
+       AND created_at > $2
+       LIMIT 1`,
+      [body.sessionUUID, one_hour_ago.toISOString()]
+    );
 
-    if (session.error) {
-      console.error(session.error);
+    if (sessionResult.error) {
+      console.error(sessionResult.error);
       this.setStatus(500);
-      return err(session.error.message);
+      return err(sessionResult.error);
     }
 
-    if (!session.data) {
+    if (!sessionResult.data || sessionResult.data.length === 0) {
       this.setStatus(404);
       return err("Session not found");
     }
 
     const apiKey = await generateHeliconeAPIKey(
-      session.data.organization_id,
+      sessionResult.data[0].organization_id,
       "Auto Generated PI Key",
       "rw"
     );
 
-    const deleteKey = await supabaseServer.client
-      .from("pi_session")
-      .delete()
-      .eq("session_id", body.sessionUUID);
+    const { error: deleteError } = await dbExecute(
+      `DELETE FROM pi_session
+       WHERE session_id = $1`,
+      [body.sessionUUID]
+    );
 
-    if (deleteKey.error) {
-      console.error(deleteKey.error);
+    if (deleteError) {
+      console.error(deleteError);
       this.setStatus(500);
-      return err(deleteKey.error.message);
+      return err(deleteError);
     }
 
     if (apiKey.error) {

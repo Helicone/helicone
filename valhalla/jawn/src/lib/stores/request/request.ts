@@ -9,7 +9,7 @@ import {
   buildRequestSort,
   buildRequestSortClickhouse,
 } from "../../shared/sorts/requests/sorts";
-import { Result, resultMap, ok, err } from "../../shared/result";
+import { Result, resultMap, ok, err } from "../../../packages/common/result";
 import {
   dbExecute,
   dbQueryClickhouse,
@@ -20,6 +20,10 @@ import { mapGeminiPro } from "./mappers";
 import { S3Client } from "../../shared/db/s3Client";
 import { Provider } from "../../../packages/llm-mapper/types";
 import { HeliconeRequest } from "../../../packages/llm-mapper/types";
+import {
+  clickhousePriceCalc,
+  clickhousePriceCalcNonAggregated,
+} from "../../../packages/cost";
 
 const MAX_TOTAL_BODY_SIZE = 1024 * 1024;
 
@@ -52,10 +56,6 @@ function addJoinQueries(joinQuery: string, filter: FilterNode): string {
     left join score_value ON request.id = score_value.request_id`;
   }
 
-  if (JSON.stringify(filter).includes("request_response_search")) {
-    joinQuery += `
-    left join request_response_search on request.id = request_response_search.request_id`;
-  }
   return joinQuery;
 }
 
@@ -156,6 +156,74 @@ export async function getRequests(
   });
 }
 
+export async function getRequestsClickhouseNoSort(
+  orgId: string,
+  filter: FilterNode,
+  offset: number,
+  limit: number
+): Promise<Result<HeliconeRequest[], string>> {
+  if (isNaN(offset) || isNaN(limit)) {
+    return { data: null, error: "Invalid offset or limit" };
+  }
+
+  if (limit < 0 || limit > 1_000) {
+    return err("invalid limit");
+  }
+  const builtFilter = await buildFilterWithAuthClickHouse({
+    org_id: orgId,
+    filter,
+    argsAcc: [],
+  });
+
+  const query = `
+    SELECT response_id,
+      map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as response_body,
+      response_created_at,
+      toInt32(status) AS response_status,
+      request_id,
+      map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as request_body,
+      request_created_at,
+      user_id AS request_user_id,
+      properties AS request_properties,
+      provider,
+      toInt32(latency) AS delay_ms,
+      model AS request_model,
+      time_to_first_token,
+      (prompt_tokens + completion_tokens) AS total_tokens,
+      completion_tokens,
+      prompt_tokens,
+      country_code,
+      scores,
+      properties,
+      assets as asset_ids,
+      target_url
+    FROM request_response_rmt
+    WHERE (
+      (${builtFilter.filter})
+    )
+    ORDER BY (organization_id, toStartOfHour(request_created_at), request_created_at) DESC
+    LIMIT ${limit}
+    OFFSET ${offset}
+  `;
+
+  const requests = await dbQueryClickhouse<HeliconeRequest>(
+    query,
+    builtFilter.argsAcc
+  );
+
+  const s3Client = new S3Client(
+    process.env.S3_ACCESS_KEY ?? "",
+    process.env.S3_SECRET_KEY ?? "",
+    process.env.S3_ENDPOINT_PUBLIC ?? process.env.S3_ENDPOINT ?? "",
+    process.env.S3_BUCKET_NAME ?? "",
+    (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
+  );
+
+  const mappedRequests = await mapLLMCalls(requests.data, s3Client, orgId);
+
+  return mappedRequests;
+}
+
 export async function getRequestsClickhouse(
   orgId: string,
   filter: FilterNode,
@@ -163,6 +231,7 @@ export async function getRequestsClickhouse(
   limit: number,
   sort: SortLeafRequest
 ): Promise<Result<HeliconeRequest[], string>> {
+  console.log("getRequestsClickhouse");
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
   }
@@ -200,6 +269,7 @@ export async function getRequestsClickhouse(
       properties,
       assets as asset_ids,
       target_url,
+      ${clickhousePriceCalcNonAggregated("request_response_rmt")} as cost_usd
     FROM request_response_rmt FINAL
     WHERE (
       (${builtFilter.filter})

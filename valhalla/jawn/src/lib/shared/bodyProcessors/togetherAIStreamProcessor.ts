@@ -1,5 +1,5 @@
 import { consolidateTextFields } from "../../../utils/streamParser";
-import { PromiseGenericResult, err, ok } from "../result";
+import { PromiseGenericResult, err, ok } from "../../../packages/common/result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
 import { isParseInputJson } from "./helpers";
 
@@ -35,7 +35,7 @@ export class TogetherAIStreamProcessor implements IBodyProcessor {
       try {
         return JSON.parse(line.replace("data:", ""));
       } catch (e) {
-        console.log("Error parsing line OpenAI", line);
+        console.log("Error parsing line TogetherAI", line);
         return err({ msg: `Error parsing line`, line });
       }
     });

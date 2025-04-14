@@ -1,6 +1,6 @@
 import { consolidateTextFields } from "../../../utils/streamParser";
 import { getTokenCountGPT3 } from "../../tokens/tokenCounter";
-import { PromiseGenericResult, err, ok } from "../result";
+import { PromiseGenericResult, err, ok } from "../../../packages/common/result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
 import { isParseInputJson } from "./helpers";
 
@@ -53,7 +53,6 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
       .filter((line) => !NON_DATA_LINES.includes(line));
 
     const data = lines.map((line, i) => {
-      if (i === lines.length - 1) return {};
       try {
         return JSON.parse(line.replace("data:", ""));
       } catch (e) {

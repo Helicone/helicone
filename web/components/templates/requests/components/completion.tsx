@@ -1,8 +1,8 @@
-import { useState } from "react";
+import useNotification from "@/components/shared/notification/useNotification";
 import { removeLeadingWhitespace } from "@/components/shared/utils/utils";
 import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+import { useState } from "react";
 import { ChatTopBar, PROMPT_MODES } from "./chatComponent/chatTopBar";
-import useNotification from "@/components/shared/notification/useNotification";
 
 interface CompletionProps {
   mappedRequest: MappedLLMRequest;
@@ -45,9 +45,8 @@ export const Completion = (props: CompletionProps) => {
         <ChatTopBar
           allExpanded={false}
           isModal={true}
-          requestMessages={[]}
+          requestBody={mappedRequest.raw.request}
           requestId={mappedRequest.id}
-          model={mappedRequest.model}
           setOpen={() => {}}
           mode={mode}
           setMode={setMode}
@@ -92,7 +91,9 @@ export const Completion = (props: CompletionProps) => {
                 Request
               </p>
               <p className="text-slate-900 dark:text-slate-100 text-sm whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#17191d]">
-                {removeLeadingWhitespace(mappedRequest.preview.request)}
+                {removeLeadingWhitespace(
+                  mappedRequest.preview.fullRequestText?.(true) ?? ""
+                )}
               </p>
             </div>
             <div className="flex flex-col space-y-2 p-4">
@@ -100,8 +101,9 @@ export const Completion = (props: CompletionProps) => {
                 Response
               </p>
               <p className="text-slate-900 dark:text-slate-100 text-sm whitespace-pre-wrap rounded-lg overflow-auto p-4 border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#17191d]">
-                {mappedRequest.preview.response &&
-                  removeLeadingWhitespace(mappedRequest.preview.response)}
+                {removeLeadingWhitespace(
+                  mappedRequest.preview.fullResponseText?.(true) ?? ""
+                )}
                 {renderImageRow()}
               </p>
             </div>

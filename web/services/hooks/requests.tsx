@@ -1,13 +1,12 @@
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { useOrg } from "../../components/layout/org/organizationContext";
 import { HeliconeRequest } from "../../lib/api/request/request";
-import { getJawnClient } from "../../lib/clients/jawn";
-import { Result } from "../../lib/result";
+import { $JAWN_API, getJawnClient } from "../../lib/clients/jawn";
+import { Result } from "../../packages/common/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { placeAssetIdValues } from "../lib/requestTraverseHelper";
 import { SortLeafRequest } from "../lib/sorts/requests/sorts";
-import { ok } from "assert";
 
 function formatDateForClickHouse(date: Date): string {
   return date.toISOString().slice(0, 19).replace("T", " ");
@@ -89,98 +88,110 @@ export const useGetRequestsWithBodies = (
   isLive: boolean = false,
   isCached: boolean = false
 ) => {
-  const org = useOrg();
-
-  const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: [
-      "requestsData",
-      currentPage,
-      currentPageSize,
-      advancedFilter,
-      sortLeaf,
-      isCached,
-      org?.currentOrg?.id,
-    ],
-    queryFn: async (query) => {
-      const currentPage = query.queryKey[1] as number;
-      const currentPageSize = query.queryKey[2] as number;
-      const advancedFilter = query.queryKey[3];
-      const sortLeaf = query.queryKey[4];
-      const isCached = query.queryKey[5];
-      const orgId = query.queryKey[6] as string;
-      const jawn = getJawnClient(orgId);
-
-      const response = await jawn.POST("/v1/request/query-clickhouse", {
-        body: {
-          filter: advancedFilter as any,
-          offset: (currentPage - 1) * currentPageSize,
-          limit: currentPageSize,
-          sort: sortLeaf as any,
-          isCached: isCached as any,
-        },
-      });
-
-      return response.data as Result<HeliconeRequest[], string>;
-    },
-    refetchOnWindowFocus: false,
-    refetchInterval: isLive ? 1_000 : false,
-    keepPreviousData: true,
-  });
-
-  const requestsWithSignedUrls = useMemo(() => data?.data ?? [], [data]);
-
-  const urlQueries = useQueries({
-    queries: requestsWithSignedUrls.map((request) => ({
-      queryKey: ["request-content", request.signed_body_url],
-      queryFn: async () => {
-        if (requestBodyCache.has(request.request_id)) {
-          return requestBodyCache.get(request.request_id);
-        }
-        if (!request.signed_body_url) return null;
-        const contentResponse = await fetch(request.signed_body_url);
-        if (contentResponse.ok) {
-          const text = await contentResponse.text();
-          let content = JSON.parse(text);
-          if (request.asset_urls) {
-            content = placeAssetIdValues(request.asset_urls, content);
-          }
-          requestBodyCache.set(request.request_id, content);
-          if (requestBodyCache.size > 1000) {
-            requestBodyCache.clear();
-          }
-          return content;
-        }
-        return null;
+  // First query to fetch the initial request data
+  const requestQuery = $JAWN_API.useQuery(
+    "post",
+    "/v1/request/query-clickhouse",
+    {
+      body: {
+        filter: advancedFilter as any,
+        offset: (currentPage - 1) * currentPageSize,
+        limit: currentPageSize,
+        sort: sortLeaf as any,
+        isCached: isCached as any,
       },
+    },
+    {
+      refetchOnWindowFocus: false,
+      refetchInterval: isLive ? 1_000 : false,
       keepPreviousData: true,
-      enabled: !!request.signed_body_url,
-    })),
+    }
+  );
+
+  // Second query to fetch and process request bodies
+  const { data: requests, isLoading: bodiesLoading } = useQuery<
+    HeliconeRequest[]
+  >({
+    queryKey: ["requestsWithSignedUrls", requestQuery.data?.data],
+    placeholderData: (prev) => prev,
+    enabled: !!requestQuery.data?.data?.length,
+    queryFn: async () => {
+      try {
+        return await Promise.all(
+          requestQuery.data?.data?.map(async (request) => {
+            // Return from cache if available
+            if (requestBodyCache.has(request.request_id)) {
+              const bodyContent = requestBodyCache.get(request.request_id);
+              return {
+                ...request,
+                request_body: bodyContent?.request,
+                response_body: bodyContent?.response,
+              };
+            }
+
+            // Skip if no signed URL is available
+            if (!request.signed_body_url) return request;
+
+            try {
+              const contentResponse = await fetch(request.signed_body_url);
+              if (!contentResponse.ok) {
+                console.error(
+                  `Error fetching request body: ${contentResponse.status}`
+                );
+                return request;
+              }
+
+              const text = await contentResponse.text();
+              let content = JSON.parse(text);
+
+              if (request.asset_urls) {
+                content = placeAssetIdValues(request.asset_urls, content);
+              }
+
+              // Update cache with size limit protection
+              requestBodyCache.set(request.request_id, content);
+              if (requestBodyCache.size > 10_000) {
+                requestBodyCache.clear();
+              }
+
+              return {
+                ...request,
+                request_body: content.request,
+                response_body: content.response,
+              };
+            } catch (error) {
+              console.error("Error processing request body:", error);
+              return request;
+            }
+          }) ?? []
+        );
+      } catch (error) {
+        console.error("Error processing requests with bodies:", error);
+        return [];
+      }
+    },
   });
 
-  const requests = useMemo(() => {
-    return requestsWithSignedUrls.map((request, index) => {
-      const content = urlQueries[index].data;
-      if (!content) return request;
-
-      let updatedRequest = {
-        ...request,
-        request_body: content.request,
-        response_body: content.response,
-      };
-
-      return updatedRequest;
+  const mergedRequests = useMemo(() => {
+    const rawRequests = requestQuery.data?.data ?? [];
+    return rawRequests.map((rawRequest) => {
+      const requestWithBody = requests?.find(
+        (request) => request.request_id === rawRequest.request_id
+      );
+      if (requestWithBody) {
+        return requestWithBody;
+      }
+      return rawRequest;
     });
-  }, [requestsWithSignedUrls, urlQueries]);
-
-  const isUrlsFetching = urlQueries.some((query) => query.isFetching);
+  }, [requestQuery, requests]);
 
   return {
-    isLoading: isLoading,
-    refetch,
-    isRefetching: isRefetching || isUrlsFetching,
-    requests: requests,
-    completedQueries: urlQueries.filter((query) => query.isSuccess).length,
-    totalQueries: requestsWithSignedUrls.length,
+    isLoading: requestQuery.isLoading || bodiesLoading,
+    refetch: requestQuery.refetch,
+    isRefetching: requestQuery.isRefetching,
+    requests: mergedRequests,
+    completedQueries: mergedRequests?.length ?? 0,
+    totalQueries: mergedRequests?.length ?? 0,
   };
 };
 
@@ -227,21 +238,18 @@ const useGetRequests = (
       },
       refetchOnWindowFocus: false,
       refetchInterval: isLive ? 2_000 : false,
-      // cache the count for 5 minutes
-      cacheTime: 5 * 60 * 1000,
+      gcTime: 5 * 60 * 1000,
     }),
   };
 };
 
 const useGetRequestCountClickhouse = (
   startDateISO: string,
-  endDateISO: string,
-  orgId?: string
+  endDateISO: string
 ) => {
   const { data, isLoading, refetch } = useQuery({
-    queryKey: [`org-count`, orgId, startDateISO, endDateISO],
+    queryKey: [`org-count`, startDateISO, endDateISO],
     queryFn: async (query) => {
-      const organizationId = query.queryKey[1];
       const startDate = query.queryKey[2];
       const endDate = query.queryKey[3];
 
@@ -265,7 +273,6 @@ const useGetRequestCountClickhouse = (
               },
             },
           },
-          organization_id: organizationId,
         }),
         headers: {
           "Content-Type": "application/json",

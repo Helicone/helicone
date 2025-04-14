@@ -46,15 +46,30 @@ describe("Vector DB Mapper", () => {
     });
 
     expect(result.schema.request.model).toBe("vector_db");
-    expect(result.schema.request.messages?.[1].content).toContain(
-      "Operation: search"
+    expect(result.schema.request.vectorDBDetails).toBeDefined();
+    expect(result.schema.request.vectorDBDetails?._type).toBe("vector_db");
+    expect(result.schema.request.vectorDBDetails?.operation).toBe("search");
+    expect(result.schema.request.vectorDBDetails?.text).toBe(
+      "Generate travel tips for Bali"
     );
-    expect(result.schema.request.messages?.[1].content).toContain(
-      "Database: travel-tips"
+    expect(result.schema.request.vectorDBDetails?.databaseName).toBe(
+      "travel-tips"
     );
-    expect(result.schema.response?.messages?.[0].content).toBe(
-      response.message
+
+    expect(result.schema.response?.vectorDBDetailsResponse).toBeDefined();
+    expect(result.schema.response?.vectorDBDetailsResponse?.status).toBe(
+      "failed"
     );
+    expect(result.schema.response?.vectorDBDetailsResponse?.message).toBe(
+      "No travel tips found with sufficient similarity for Bali"
+    );
+    expect(
+      result.schema.response?.vectorDBDetailsResponse?.similarityThreshold
+    ).toBe(0.8);
+    expect(
+      result.schema.response?.vectorDBDetailsResponse?.actualSimilarity
+    ).toBe(0.5);
+
     expect(result.preview.request).toContain(
       "Text: Generate travel tips for Bali"
     );
@@ -89,8 +104,9 @@ describe("Vector DB Mapper", () => {
       model: "vector_db",
     });
 
-    expect(result.schema.request.messages?.[0].content).toBe(
-      "Vector DB insert operation"
+    expect(result.schema.request.vectorDBDetails?.operation).toBe("insert");
+    expect(result.schema.response?.vectorDBDetailsResponse?.status).toBe(
+      "success"
     );
     expect(result.preview.request).toContain("Operation: insert");
     expect(result.preview.response).toBe(response.message);
@@ -122,7 +138,10 @@ describe("Vector DB Mapper", () => {
     });
 
     expect(result.preview.response).toBe("Database connection failed");
-    expect(result.schema.response?.messages?.[0].content).toBe(
+    expect(result.schema.response?.vectorDBDetailsResponse?.status).toBe(
+      "error"
+    );
+    expect(result.schema.response?.vectorDBDetailsResponse?.message).toBe(
       "Database connection failed"
     );
   });
@@ -152,8 +171,9 @@ describe("Vector DB Mapper", () => {
       model: "vector_db",
     });
 
-    expect(result.schema.request.messages?.[0].content).toBe(
-      "Vector DB delete operation"
+    expect(result.schema.request.vectorDBDetails?.operation).toBe("delete");
+    expect(result.schema.response?.vectorDBDetailsResponse?.status).toBe(
+      "success"
     );
     expect(result.preview.request).toContain("Operation: delete");
     expect(result.preview.request).toContain(

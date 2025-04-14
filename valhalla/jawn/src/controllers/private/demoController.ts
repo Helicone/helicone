@@ -2,7 +2,7 @@
 import OpenAI from "openai";
 import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
 import { generateTempHeliconeAPIKey } from "../../lib/experiment/tempKeys/tempAPIKey";
-import { ok, Result } from "../../lib/shared/result";
+import { ok, Result } from "../../packages/common/result";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import {
   ChatCompletionTool,
@@ -69,6 +69,8 @@ export class DemoController extends Controller {
         baseURL:
           process.env.VERCEL_ENV === "production"
             ? "https://oai.helicone.ai/v1"
+            : process.env.HELICONE_WORKER_URL
+            ? `${process.env.HELICONE_WORKER_URL}/v1`
             : "http://localhost:8787/v1",
         defaultHeaders: {
           ...defaultHeaders,

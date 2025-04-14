@@ -1,0 +1,62 @@
+## Improved Streaming Support and Async Stream Parser
+
+We've made significant improvements to our streaming functionality with two key updates:
+
+### Stream Fixes
+
+We've resolved several issues with stream handling across different LLM providers, ensuring more reliable and consistent streaming experiences. These fixes address edge cases and improve compatibility with various streaming implementations, including:
+
+- Better handling of stream interruptions and reconnections
+- Improved error handling for streaming responses
+- Enhanced compatibility with different LLM provider streaming formats
+- Fixed timing calculations for streamed responses
+
+### New Streaming Methods
+
+The `HeliconeManualLogger` class now includes enhanced methods for working with streams:
+
+- `logStream`: Logs a streaming operation with full control over stream handling
+- `logSingleStream`: Simplified method for logging a single ReadableStream
+- `logSingleRequest`: Logs a single request with a response body
+
+### Example Usage with Together AI
+
+```typescript
+import Together from "together-ai";
+import { HeliconeManualLogger } from "@helicone/helpers";
+
+// Initialize with properties
+const helicone = new HeliconeManualLogger({
+  apiKey: process.env.HELICONE_API_KEY!,
+  loggingEndpoint: "https://api.worker.helicone.ai/oai/v1/log",
+  headers: {
+    "Helicone-Property-Environment": "production",
+  },
+});
+
+export async function POST(request: Request) {
+  const { question } = await request.json();
+
+  const body = {
+    model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+    messages: [{ role: "user", content: question }],
+    stream: true,
+  } as Together.Chat.CompletionCreateParamsStreaming & { stream: true };
+
+  const response = await together.chat.completions.create(body);
+  const [stream1, stream2] = response.tee();
+  helicone.logStream(
+    body,
+    async (resultRecorder) => {
+      resultRecorder.attachStream(stream2.toReadableStream());
+    },
+    {
+      "Helicone-User-Id": "123",
+    }
+  );
+
+  return new Response(stream1.toReadableStream());
+}
+```
+
+These improvements make working with streaming LLMs more reliable and efficient, especially for applications that require real-time responses.

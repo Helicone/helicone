@@ -161,9 +161,9 @@ export const useExperimentTable = (experimentTableId: string) => {
   const {
     data: promptVersionTemplateData,
     isLoading: isPromptVersionTemplateLoading,
-  } = useQuery(
-    ["promptVersionTemplate", promptSubversionId],
-    async () => {
+  } = useQuery({
+    queryKey: ["promptVersionTemplate", promptSubversionId],
+    queryFn: async () => {
       if (!orgId || !promptSubversionId) {
         return null;
       }
@@ -177,10 +177,8 @@ export const useExperimentTable = (experimentTableId: string) => {
       });
       return res.data?.data;
     },
-    {
-      enabled: !!promptSubversionId,
-    }
-  );
+    enabled: !!promptSubversionId,
+  });
 
   const addManualRow = useMutation({
     mutationFn: async ({ inputs }: { inputs: Record<string, string> }) => {
@@ -312,6 +310,27 @@ export const useExperimentTable = (experimentTableId: string) => {
     },
   });
 
+  const deletePromptVersion = useMutation({
+    mutationFn: async ({ promptVersionId }: { promptVersionId: string }) => {
+      const jawnClient = getJawnClient(orgId);
+      await jawnClient.DELETE(
+        "/v2/experiment/{experimentId}/prompt-version/{promptVersionId}",
+        {
+          params: {
+            path: { experimentId: experimentTableId, promptVersionId },
+          },
+        }
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["experimentTable", orgId, experimentTableId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["experimentPromptVersions", orgId, experimentTableId],
+      });
+    },
+  });
   return {
     experimentTableQuery,
     isExperimentTableLoading,
@@ -329,5 +348,6 @@ export const useExperimentTable = (experimentTableId: string) => {
     wrapText,
     selectedScoreKey,
     deleteSelectedRows,
+    deletePromptVersion,
   };
 };

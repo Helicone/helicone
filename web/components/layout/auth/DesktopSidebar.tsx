@@ -1,29 +1,22 @@
+import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import {
+  Bars3Icon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  Bars3Icon,
 } from "@heroicons/react/24/outline";
-import Link from "next/link";
+import { Rocket } from "lucide-react";
+import { useTheme } from "next-themes";
 import { useRouter } from "next/router";
-import { useMemo, useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import ChangelogModal from "../ChangelogModal";
 import { useOrg } from "../org/organizationContext";
 import OrgDropdown from "../orgDropdown";
+import SidebarHelpDropdown from "../SidebarHelpDropdown";
 import NavItem from "./NavItem";
 import { ChangelogItem } from "./types";
-import ChangelogModal from "../ChangelogModal";
-import SidebarHelpDropdown from "../SidebarHelpDropdown";
-import { useTheme } from "next-themes";
-import OnboardingNavItems from "./OnboardingNavItems";
-import useOnboardingContext from "../onboardingContext";
-import { Dialog } from "@/components/ui/dialog";
-import { DialogContent } from "@/components/ui/dialog";
-import CreateOrgForm from "@/components/templates/organization/createOrgForm";
-import { useUser } from "@supabase/auth-helpers-react";
-import { useOnboardingStore } from "@/store/onboardingStore";
-import { Rocket } from "lucide-react";
 
 export interface NavigationItem {
   name: string;
@@ -46,18 +39,13 @@ const DesktopSidebar = ({
   NAVIGATION,
   sidebarRef,
 }: SidebarProps) => {
-  const org = useOrg();
-  const user = useUser();
-  const tier = org?.currentOrg?.tier;
+  const orgContext = useOrg();
   const router = useRouter();
+
   const [isCollapsed, setIsCollapsed] = useLocalStorage(
     "isSideBarCollapsed",
     false
   );
-
-  const shouldShowInfoBox = useMemo(() => {
-    return tier === "pro" || tier === "growth";
-  }, [tier]);
 
   const [expandedItems, setExpandedItems] = useLocalStorage<string[]>(
     "expandedItems",
@@ -131,7 +119,7 @@ const DesktopSidebar = ({
       if (
         event.key === "b" &&
         event.metaKey &&
-        org?.currentOrg?.tier !== "demo"
+        orgContext?.currentOrg?.tier !== "demo"
       ) {
         event.preventDefault();
         setIsCollapsed(!isCollapsed);
@@ -140,6 +128,12 @@ const DesktopSidebar = ({
         setTheme(theme === "dark" ? "light" : "dark");
       }
     };
+
+    const sidebarWidth = isCollapsed ? 64 : 208;
+    document.documentElement.style.setProperty(
+      "--sidebar-width",
+      `${sidebarWidth}px`
+    );
 
     // Add event listeners
     window.addEventListener("resize", calculateAvailableSpace);
@@ -183,14 +177,10 @@ const DesktopSidebar = ({
     setModalOpen(open);
   };
 
-  const { isOnboardingVisible } = useOnboardingContext();
-
-  const { showCreateOrg, setShowCreateOrg } = useOnboardingStore();
-
   return (
     <>
       {/* Mobile hamburger menu */}
-      <div className="sticky top-0 z-20 px-2 py-3 flex md:hidden flex-shrink-0 bg-white dark:bg-black border-b border-slate-300 dark:border-slate-70">
+      <div className="sticky top-0 z-20 px-2 py-3 flex md:hidden flex-shrink-0 bg-slate-100 dark:bg-black border-b border-slate-300 dark:border-slate-70">
         <Button
           variant="ghost"
           size="icon"
@@ -228,7 +218,7 @@ const DesktopSidebar = ({
       <div
         ref={sidebarRef}
         className={cn(
-          "flex flex-col z-50 bg-background dark:bg-neutral-950 transition-all duration-300 h-screen bg-white",
+          "flex flex-col z-50 transition-all duration-300 h-screen bg-sidebar-background",
           largeWith,
           "fixed top-0 left-0",
           "md:translate-x-0", // Always visible on desktop
@@ -237,10 +227,10 @@ const DesktopSidebar = ({
             : "-translate-x-full md:translate-x-0"
         )}
       >
-        <div className="w-full flex flex-col h-full border-r dark:border-slate-800">
+        <div className="w-full flex flex-col h-full border-r border-slate-200 dark:border-slate-800">
           {/* Collapse button and OrgDropdown */}
           <div
-            className={`flex flex-row items-center border-b dark:border-slate-800 p-2.5 
+            className={`flex flex-row items-center border-b border-slate-200 dark:border-slate-800 p-2.5 
               ${isCollapsed ? "justify-center" : "justify-between"}`}
           >
             {/* - OrgDropdown */}
@@ -251,7 +241,7 @@ const DesktopSidebar = ({
               variant="ghost"
               size="icon"
               onClick={handleCollapseToggle}
-              className="flex justify-center items-center dark:hover:bg-slate-800 shrink-0"
+              className="flex justify-center items-center hover:bg-slate-200 dark:hover:bg-slate-800 shrink-0"
             >
               {isCollapsed ? (
                 <ChevronRightIcon className="h-4 w-4" />
@@ -267,8 +257,8 @@ const DesktopSidebar = ({
               {/* Navigation items */}
               <div className="flex flex-col">
                 {((!isCollapsed &&
-                  org?.currentOrg?.organization_type === "reseller") ||
-                  org?.isResellerOfCurrentCustomerOrg) && (
+                  orgContext?.currentOrg?.organization_type === "reseller") ||
+                  orgContext?.isResellerOfCurrentCustomerOrg) && (
                   <div className="flex w-full justify-center px-5 py-2">
                     <Button
                       variant="outline"
@@ -277,14 +267,17 @@ const DesktopSidebar = ({
                       onClick={() => {
                         router.push("/enterprise/portal");
                         if (
-                          org.currentOrg?.organization_type === "customer" &&
-                          org.currentOrg?.reseller_id
+                          orgContext.currentOrg?.organization_type ===
+                            "customer" &&
+                          orgContext.currentOrg?.reseller_id
                         ) {
-                          org.setCurrentOrg(org.currentOrg.reseller_id);
+                          orgContext.setCurrentOrg(
+                            orgContext.currentOrg.reseller_id
+                          );
                         }
                       }}
                     >
-                      {org.currentOrg?.organization_type === "customer"
+                      {orgContext.currentOrg?.organization_type === "customer"
                         ? "Back to Portal"
                         : "Customer Portal"}
                     </Button>
@@ -296,33 +289,49 @@ const DesktopSidebar = ({
                   className="group flex flex-col py-2 data-[collapsed=true]:py-2"
                 >
                   <nav className="grid px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
-                    {isOnboardingVisible && <OnboardingNavItems />}
-                    {!isOnboardingVisible &&
-                      NAVIGATION_ITEMS.map((link) => (
-                        <NavItem
-                          key={link.name}
-                          link={link}
-                          isCollapsed={isCollapsed}
-                          expandedItems={expandedItems}
-                          toggleExpand={toggleExpand}
-                          onClick={() => {
-                            setIsCollapsed(false);
-                            setIsMobileMenuOpen(false);
-                          }}
-                          deep={0}
-                        />
-                      ))}
+                    {NAVIGATION_ITEMS.map((link) => (
+                      <NavItem
+                        key={link.name}
+                        link={link}
+                        isCollapsed={isCollapsed}
+                        expandedItems={expandedItems}
+                        toggleExpand={toggleExpand}
+                        onClick={() => {
+                          setIsCollapsed(false);
+                          setIsMobileMenuOpen(false);
+                        }}
+                        deep={0}
+                      />
+                    ))}
 
-                    {org?.currentOrg?.tier === "demo" && (
+                    {orgContext?.currentOrg?.tier === "demo" && (
                       <Button
                         onClick={() => {
-                          setShowCreateOrg(true);
+                          orgContext.allOrgs.forEach((org) => {
+                            if (org.is_main_org === true) {
+                              orgContext.setCurrentOrg(org.id);
+                              router.push("/onboarding");
+                            }
+                          });
                         }}
-                        className="mt-10 gap-1 w-full text-white text-large font-medium leading-normal text-white tracking-normal h-[46px] px-6 md:px-4 bg-sky-500 hover:bg-sky-600 transition-colors"
+                        className={cn(
+                          "mt-10 gap-1 text-white text-large font-medium leading-normal tracking-normal bg-sky-500 hover:bg-sky-600 transition-colors",
+                          isCollapsed
+                            ? "h-8 w-8 px-2"
+                            : "h-[46px] w-full px-6 md:px-4"
+                        )}
                         variant="action"
                       >
-                        {!isCollapsed && <span>Ready to integrate</span>}
-                        <Rocket className="h-6 w-6" />
+                        {!isCollapsed && (
+                          <span className="text-white">Ready to integrate</span>
+                        )}
+                        <Rocket
+                          className={
+                            isCollapsed
+                              ? "h-4 w-4 text-white"
+                              : "h-6 w-6 text-white"
+                          }
+                        />
                       </Button>
                     )}
                   </nav>
@@ -331,57 +340,60 @@ const DesktopSidebar = ({
 
               {/* InfoBox */}
               {canShowInfoBox &&
-                !isCollapsed &&
-                org?.currentOrg?.tier !== "demo" && (
-                  <div className="bg-slate-50 dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 flex flex-col md:flex-row md:gap-2 gap-4 justify-between md:justify-center md:items-center items-start px-3 py-2 mt-2 mx-2 mb-4 font-medium">
-                    <h1 className="text-xs text-start tracking-tight leading-[1.35rem]">
-                      ⚡ Experiments is here: a new way to perfect your prompt.{" "}
-                      <Link
-                        href="https://docs.helicone.ai/features/experiments"
-                        target="_blank"
-                        className="underline decoration-slate-400 decoration-1 underline-offset-2 font-medium"
+                orgContext?.currentOrg?.tier === "free" &&
+                (isCollapsed ? (
+                  <div className="px-2 py-2">
+                    <ProFeatureWrapper featureName="pro" enabled={false}>
+                      <Button
+                        variant="action"
+                        size="icon"
+                        className="w-full h-8 bg-sky-500 hover:bg-sky-600 text-white"
                       >
-                        Check out the docs.
-                      </Link>{" "}
-                    </h1>
+                        <Rocket className="h-4 w-4" />
+                      </Button>
+                    </ProFeatureWrapper>
                   </div>
-                )}
+                ) : (
+                  <div className="bg-slate-50 dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 flex flex-col md:flex-row md:gap-2 gap-4 justify-between md:justify-center md:items-center items-start px-3 py-2 mt-2 mx-2 mb-4 font-medium">
+                    <div className="flex flex-col gap-2">
+                      <h1 className="text-xs text-start tracking-tight leading-[1.35rem]">
+                        Unlock more features with{" "}
+                        <span className="font-bold text-sky-500">Pro</span>. No
+                        usage limits, sessions, user analytics, custom
+                        properties and much more.
+                      </h1>
+                      <ProFeatureWrapper featureName="pro" enabled={false}>
+                        <Button
+                          variant="action"
+                          className="w-full text-xs h-8 bg-sky-500 hover:bg-sky-600 text-white"
+                        >
+                          Start Pro Free Trial
+                        </Button>
+                      </ProFeatureWrapper>
+                    </div>
+                  </div>
+                ))}
             </div>
 
             {/* Sticky help dropdown */}
-            {org?.currentOrg?.tier !== "demo" && (
+            {orgContext?.currentOrg?.tier !== "demo" && (
               <div className="p-3">
                 <SidebarHelpDropdown
                   changelog={changelog}
                   handleChangelogClick={handleChangelogClick}
+                  isCollapsed={isCollapsed}
                 />
               </div>
             )}
           </div>
         </div>
       </div>
+
       <ChangelogModal
         open={modalOpen}
         setOpen={handleModalOpen}
         changelog={changelogToView}
       />
-      <Dialog open={showCreateOrg} onOpenChange={setShowCreateOrg}>
-        <DialogContent className="w-11/12 sm:max-w-md gap-8 rounded-md">
-          <CreateOrgForm
-            firstOrg={true}
-            onCancelHandler={() => {
-              setShowCreateOrg(false);
-            }}
-            onCloseHandler={() => {
-              setShowCreateOrg(false);
-            }}
-            onSuccess={(orgId) => {
-              org?.setCurrentOrg(orgId ?? "");
-              router.push("/dashboard");
-            }}
-          />
-        </DialogContent>
-      </Dialog>
     </>
   );
 };

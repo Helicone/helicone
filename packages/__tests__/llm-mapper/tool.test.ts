@@ -50,12 +50,22 @@ describe("Tool Mapper", () => {
     });
 
     expect(result.schema.request.model).toBe("tool:HotelAPI");
-    expect(result.schema.request.messages?.[0].content).toBe(
-      "Tool operation: HotelAPI"
-    );
     expect(result.preview.request).toContain("Tool: HotelAPI");
     expect(result.preview.response).toContain("Found 2 hotels");
     expect(result.preview.response).toContain("Price range: $150 - $800");
+
+    // Verify toolDetails are correctly mapped
+    expect(result.schema.request.toolDetails).toBeDefined();
+    expect(result.schema.request.toolDetails?._type).toBe("tool");
+    expect(result.schema.request.toolDetails?.toolName).toBe("HotelAPI");
+    expect(result.schema.request.toolDetails?.input).toEqual(request.input);
+
+    expect(result.schema.response?.toolDetailsResponse).toBeDefined();
+    expect(result.schema.response?.toolDetailsResponse?.status).toBe("success");
+    expect(result.schema.response?.toolDetailsResponse?._type).toBe("tool");
+    expect(result.schema.response?.toolDetailsResponse?.toolName).toBe(
+      "HotelAPI"
+    );
   });
 
   it("should handle error responses", () => {
@@ -86,9 +96,43 @@ describe("Tool Mapper", () => {
     });
 
     expect(result.preview.response).toBe("Invalid destination provided");
-    expect(result.schema.response?.messages?.[0].content).toBe(
+    expect(result.schema.response?.toolDetailsResponse?.status).toBe("error");
+    expect(result.schema.response?.toolDetailsResponse?.message).toBe(
       "Invalid destination provided"
     );
+  });
+
+  it("should handle vector DB search results", () => {
+    const request = {
+      _type: "tool",
+      toolName: "VectorDB",
+      input: {
+        query: "Generate travel tips for New York City",
+        database: "travel-tips",
+      },
+    };
+
+    const response = {
+      Operation: "search",
+      Text: "Generate travel tips for New York City",
+      Database: "travel-tips",
+      Filter: { destination: "New York City" },
+      failed: true,
+      similarity: 0.8,
+      actualSimilarity: 0.5,
+      _type: "tool",
+      toolName: "VectorDB",
+    };
+
+    const result = mapTool({
+      request,
+      response,
+      statusCode: 200,
+      model: "tool:VectorDB",
+    });
+
+    expect(result.preview.response).toContain("Operation: search");
+    expect(result.preview.response).toContain("Failed:");
   });
 
   it("should handle generic tool responses", () => {
@@ -120,5 +164,6 @@ describe("Tool Mapper", () => {
     expect(result.schema.request.model).toBe("tool:WeatherAPI");
     expect(result.preview.request).toContain("Tool: WeatherAPI");
     expect(result.preview.response).toContain("Status: success");
+    expect(result.schema.response?.toolDetailsResponse?.status).toBe("success");
   });
 });

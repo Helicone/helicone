@@ -1,5 +1,5 @@
 import { consolidateGoogleTextFields } from "../../../utils/streamParser";
-import { PromiseGenericResult, err, ok } from "../result";
+import { PromiseGenericResult, err, ok } from "../../../packages/common/result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
 import { isParseInputJson } from "./helpers";
 
@@ -62,10 +62,30 @@ function getUsage(streamedData: any[]): {
   total_tokens: number;
   completion_tokens: number;
   prompt_tokens: number;
+  promptCacheWriteTokens?: number;
+  promptCacheReadTokens?: number;
 } {
   try {
     const lastData = streamedData[streamedData.length - 1];
-    if (lastData && lastData.usageMetadata) {
+
+    // Check for Anthropic-specific structure (Claude models via Google)
+    if (
+      lastData &&
+      lastData.usage &&
+      "input_tokens" in lastData.usage &&
+      "output_tokens" in lastData.usage
+    ) {
+      return {
+        total_tokens:
+          lastData.usage.input_tokens + lastData.usage.output_tokens,
+        completion_tokens: lastData.usage.output_tokens,
+        prompt_tokens: lastData.usage.input_tokens,
+        promptCacheWriteTokens: lastData.usage.cache_creation_input_tokens ?? 0,
+        promptCacheReadTokens: lastData.usage.cache_read_input_tokens ?? 0,
+      };
+    }
+    // Standard Google usage metadata format
+    else if (lastData && lastData.usageMetadata) {
       return {
         total_tokens: lastData.usageMetadata.totalTokenCount,
         completion_tokens: lastData.usageMetadata.candidatesTokenCount,

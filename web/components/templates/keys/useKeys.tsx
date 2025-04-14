@@ -67,7 +67,7 @@ export const useKeys = () => {
       return jawn.DELETE("/v1/api-keys/{apiKeyId}", {
         params: {
           path: {
-            apiKeyId: apiKeyId,
+            apiKeyId: Number(apiKeyId),
           },
         },
       });
@@ -91,7 +91,7 @@ export const useKeys = () => {
       const jawn = getJawnClient(org?.currentOrg?.id);
       return jawn.PATCH("/v1/api-keys/{apiKeyId}", {
         params: {
-          path: { apiKeyId },
+          path: { apiKeyId: Number(apiKeyId) },
         },
         body: {
           api_key_name: apiKeyName,

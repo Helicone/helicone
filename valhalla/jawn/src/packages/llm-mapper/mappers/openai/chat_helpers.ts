@@ -57,7 +57,7 @@ export const handleObjectContent = (content: any): string => {
 };
 
 export const handleToolCalls = (message: any): Message => ({
-  content: "",
+  content: message.content || "",
   role: message.role ?? "assistant",
   tool_calls: message.function_call
     ? [
@@ -77,18 +77,56 @@ export const handleImageMessage = (msg: any, imageContent: any): Message => ({
   image_url: imageContent.image_url.url,
 });
 
-export const handleToolResponse = (msg: any): Message => ({
-  content: msg.content,
-  role: msg.role,
-  tool_call_id: msg.tool_call_id,
-  _type: "message",
-});
+export const handleToolResponse = (msg: any): Message => {
+  if (msg.role === "function") {
+    return {
+      content: msg.content,
+      role: msg.role,
+      _type: "function",
+      name: msg.name,
+      tool_calls: [
+        {
+          name: msg.name,
+          arguments: {
+            query_result: msg.content,
+          },
+        },
+      ],
+    };
+  }
+
+  if (msg.role === "tool") {
+    return {
+      content: msg.content,
+      role: msg.role,
+      tool_call_id: msg.tool_call_id,
+      _type: "function",
+      name: msg.name,
+      tool_calls: [
+        {
+          name: msg.name,
+          arguments: {
+            query_result: msg.content,
+          },
+        },
+      ],
+    };
+  }
+
+  return {
+    content: msg.content,
+    role: msg.role,
+    tool_call_id: msg.tool_call_id,
+    _type: "function",
+    tool_calls: msg.tool_calls?.map(mapToolCallToFunction) ?? [],
+  };
+};
 
 export const formatStreamingToolCalls = (toolCalls: ToolCall[]): string => {
   return toolCalls
     .map((tool: ToolCall) => {
-      const args = parseFunctionArguments(tool.function.arguments);
-      return `${tool.function.name}(${JSON.stringify(args)})`;
+      const args = parseFunctionArguments(tool.function?.arguments);
+      return `${tool.function?.name}(${JSON.stringify(args)})`;
     })
     .join("\n");
 };

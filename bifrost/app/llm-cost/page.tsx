@@ -1,5 +1,13 @@
 import ModelPriceCalculator from "./ModelPriceCalculator";
 import { Metadata } from "next";
+// Import shared logic and types from utils.ts
+import {
+  getInitialCostData,
+  getProviderWithModelsData,
+  DEFAULT_INPUT_TOKENS,
+  DEFAULT_OUTPUT_TOKENS,
+  ProviderWithModels,
+} from "./utils";
 
 export const metadata: Metadata = {
   title: "LLM API Pricing Calculator | Compare 300+ AI Model Costs",
@@ -25,10 +33,22 @@ export const metadata: Metadata = {
   },
 };
 
-export default function PriceCalcPage() {
+// Make the page component async
+export default async function PriceCalcPage() {
+  // Calculate initial data on the server
+  const initialCostData = getInitialCostData();
+  // Prepare filter data on the server
+  const providerWithModels = getProviderWithModelsData(initialCostData);
+
   return (
     <div className="container mx-auto py-8">
-      <ModelPriceCalculator />
+      {/* Pass initial data AND filter data to the client component */}
+      <ModelPriceCalculator
+        initialCostData={initialCostData}
+        defaultInputTokens={DEFAULT_INPUT_TOKENS}
+        defaultOutputTokens={DEFAULT_OUTPUT_TOKENS}
+        providerWithModels={providerWithModels}
+      />
     </div>
   );
 }

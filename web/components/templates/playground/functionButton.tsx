@@ -1,9 +1,9 @@
-import { useState } from "react";
-import ThemedModal from "../../shared/themed/themedModal";
-import MarkdownEditor from "../../shared/markdownEditor";
+import { Button } from "@/components/ui/button";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { ChatCompletionTool } from "openai/resources";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import MarkdownEditor from "../../shared/markdownEditor";
+import ThemedModal from "../../shared/themed/themedModal";
 
 interface FunctionButtonProps {
   tool: ChatCompletionTool;
@@ -16,7 +16,7 @@ const FunctionButton = (props: FunctionButtonProps) => {
 
   const [open, setOpen] = useState(false);
   const [functionText, setFunctionText] = useState(
-    JSON.stringify(tool.function, null, 2)
+    tool.function ? JSON.stringify(tool.function, null, 2) : "{}"
   );
 
   const isValidJson = (jsonString: string) => {
@@ -43,10 +43,13 @@ const FunctionButton = (props: FunctionButtonProps) => {
             }}
             className="text-black dark:text-white font-semibold truncate w-40"
           >
-            {tool.function.name || "n/a"}
+            {tool?.function?.name || "n/a"}
           </p>
         </button>
-        <button onClick={() => onDelete(tool.function.name || "")} className="">
+        <button
+          onClick={() => onDelete(tool?.function?.name || "")}
+          className=""
+        >
           <TrashIcon className="h-4 w-4 text-red-500" />
         </button>
       </div>

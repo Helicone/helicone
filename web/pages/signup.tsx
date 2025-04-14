@@ -8,7 +8,6 @@ import AuthForm from "../components/templates/auth/authForm";
 import { DEMO_EMAIL } from "../lib/constants";
 import PublicMetaData from "../components/layout/public/publicMetaData";
 import { GetServerSidePropsContext } from "next";
-import posthog from "posthog-js";
 import { InfoBanner } from "../components/shared/themed/themedDemoBanner";
 import { env } from "next-runtime-env";
 const SignUp = () => {
@@ -42,16 +41,12 @@ const SignUp = () => {
       <AuthForm
         handleEmailSubmit={async (email: string, password: string) => {
           const origin = window.location.origin;
-          posthog.capture("user_signed_up", {
-            method: "email",
-            email: email,
-          });
 
           const { data, error } = await supabase.auth.signUp({
             email: email,
             password: password,
             options: {
-              emailRedirectTo: `${origin}/welcome`,
+              emailRedirectTo: `${origin}/onboarding`,
             },
           });
 
@@ -68,11 +63,11 @@ const SignUp = () => {
           setShowEmailConfirmation(true);
         }}
         handleGoogleSubmit={async () => {
-          posthog.capture("user_signed_up", {
-            method: "google",
-          });
           const { error } = await supabase.auth.signInWithOAuth({
             provider: "google",
+            options: {
+              redirectTo: `${origin}/onboarding`,
+            },
           });
           if (error) {
             setNotification(
@@ -84,11 +79,11 @@ const SignUp = () => {
           }
         }}
         handleGithubSubmit={async () => {
-          posthog.capture("user_signed_up", {
-            method: "github",
-          });
           const { error } = await supabase.auth.signInWithOAuth({
             provider: "github",
+            options: {
+              redirectTo: `${origin}/onboarding`,
+            },
           });
           if (error) {
             setNotification(

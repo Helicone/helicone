@@ -1,11 +1,40 @@
 import createMDX from "@next/mdx";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
+import remarkToc from "remark-toc";
+import rehypeSlug from "rehype-slug";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   pageExtensions: ["js", "jsx", "ts", "tsx", "md", "mdx"],
   transpilePackages: ["next-mdx-remote"],
+  images: {
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "img.shields.io",
+      },
+      {
+        protocol: "https",
+        hostname: "api.producthunt.com",
+      },
+      {
+        protocol: "https",
+        hostname: "dailybaileyai.com",
+      },
+      {
+        protocol: "https",
+        hostname: "i0.wp.com",
+      },
+      {
+        protocol: "https",
+        hostname: "www.sequoiacap.com",
+      },
+    ],
+  },
   async redirects() {
     return [
       {
@@ -29,15 +58,17 @@ const nextConfig = {
         destination: "https://us.helicone.ai/roadmap",
         permanent: true,
       },
+      {
+        source: "/blog/slash-llm-cost",
+        destination: "/blog/monitor-and-optimize-llm-costs",
+        permanent: true,
+      },
+      {
+        source: "/blog/langsmith",
+        destination: "/blog/langsmith-vs-helicone",
+        permanent: true,
+      },
     ];
-  },
-  images: {
-    domains: [
-      "api.producthunt.com",
-      "dailybaileyai.com",
-      "i0.wp.com",
-      "www.sequoiacap.com",
-    ],
   },
   async headers() {
     return [
@@ -60,13 +91,23 @@ const nextConfig = {
       },
     ];
   },
+  swcMinify: true,
+  experimental: {
+    optimizePackageImports: ["lucide-react"],
+    modern: true,
+    modernBrowsers: true,
+  },
 };
 
 const withMDX = createMDX({
   extension: /\.mdx?$/,
   options: {
-    remarkPlugins: [remarkGfm],
-    rehypePlugins: [rehypeHighlight],
+    remarkPlugins: [remarkGfm, remarkToc],
+    rehypePlugins: [
+      rehypeHighlight,
+      rehypeSlug,
+      [rehypeAutolinkHeadings, { behavior: "wrap" }],
+    ],
   },
 });
 

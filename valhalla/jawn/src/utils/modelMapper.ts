@@ -54,7 +54,12 @@ function getModelFromPath(path: string) {
 }
 
 export function getModelFromResponse(responseBody: any) {
-  return responseBody?.model ?? responseBody?.body?.model ?? null;
+  return (
+    responseBody?.model ??
+    responseBody?.body?.model ??
+    responseBody?.body?.modelVersion ??
+    null
+  );
 }
 
 export function calculateModel(

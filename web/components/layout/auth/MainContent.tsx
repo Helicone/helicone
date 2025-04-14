@@ -56,7 +56,7 @@ const MainContent = ({ children, banner, pathname }: MainContentProps) => {
             </div>
           </div>
         )}
-        <div className={clsx("dark:bg-black h-full min-h-screen bg-slate-50")}>
+        <div className={clsx("bg-background h-full min-h-screen")}>
           <OrgContext.Provider value={org}>
             <div
               className="mr-auto w-full min-h-screen"

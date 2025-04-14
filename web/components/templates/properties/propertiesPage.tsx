@@ -1,115 +1,156 @@
-import { useState, useMemo } from "react";
-
-import AuthHeader from "../../shared/authHeader";
-
-import { PlusIcon, TagIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
+import { useEffect, useState } from "react";
+import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
+import { LockIcon, Tag } from "lucide-react";
 import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
-import { clsx } from "../../shared/clsx";
-import LoadingAnimation from "../../shared/loadingAnimation";
-import PropertyPanel from "./propertyPanel";
 import { getPropertyFiltersV2 } from "../../../services/lib/filters/frontendFilterDefs";
-import { IslandContainer } from "@/components/ui/islandContainer";
-import { useHasAccess } from "@/hooks/useHasAccess";
-import { useOrg } from "@/components/layout/org/organizationContext";
-import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
+import PropertyPanel from "./propertyPanel";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
+import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
+import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
+import { H3 } from "@/components/ui/typography";
+import AuthHeader from "@/components/shared/authHeader";
 
 const PropertiesPage = (props: {}) => {
   const { properties, isLoading: isPropertiesLoading } =
     useGetPropertiesV2(getPropertyFiltersV2);
 
   const [selectedProperty, setSelectedProperty] = useState<string>("");
-  const hasAccess = useHasAccess("properties");
-  const org = useOrg();
 
-  const hasAccessToProperties = useMemo(() => {
+  const { hasAccess, freeLimit, canCreate } = useFeatureLimit(
+    "properties",
+    properties.length
+  );
+
+  useEffect(() => {
+    if (
+      !hasAccess &&
+      properties.length > 0 &&
+      selectedProperty === "" &&
+      !isPropertiesLoading
+    ) {
+      setSelectedProperty(properties[0]);
+    }
+  }, [properties, selectedProperty, isPropertiesLoading, hasAccess]);
+
+  if (isPropertiesLoading) {
     return (
-      hasAccess ||
-      (properties.length > 0 &&
-        new Date().getTime() < new Date("2024-09-27").getTime())
+      <div className="flex flex-col h-full min-h-screen bg-background dark:bg-sidebar-background">
+        <AuthHeader title="Properties" />
+
+        <div className="flex flex-col lg:flex-row flex-1 h-full bg-background dark:bg-sidebar-background">
+          <Card className="w-full lg:w-[350px] lg:min-w-[350px] lg:max-w-[350px] lg:flex-shrink-0 h-full rounded-none border-0 shadow-none bg-background dark:bg-sidebar-background">
+            <CardContent className="p-0">
+              <div className="bg-background dark:bg-sidebar-background border-b border-border dark:border-sidebar-border">
+                <CardHeader className="py-3 px-4">
+                  <H3>Your Properties</H3>
+                </CardHeader>
+              </div>
+
+              <ScrollArea className="h-full">
+                <div className="p-4 space-y-3">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <div key={i} className="flex items-center">
+                      <Skeleton className="h-4 w-4 mr-2 bg-slate-200 dark:bg-slate-700" />
+                      <Skeleton className="h-6 w-full bg-slate-200 dark:bg-slate-700" />
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+
+          <div className="w-full flex flex-col pt-2">
+            <Card className="rounded-none border-0 shadow-none">
+              <CardContent className="flex flex-col items-center justify-center py-16">
+                <Skeleton className="h-8 w-48 mb-6 bg-slate-200 dark:bg-slate-700" />
+                <Skeleton className="h-4 w-64 bg-slate-200 dark:bg-slate-700" />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
     );
-  }, [org?.currentOrg?.tier, properties.length]);
+  }
+
+  if (properties.length === 0) {
+    return (
+      <div className="flex flex-col w-full h-screen bg-background dark:bg-sidebar-background">
+        <div className="flex flex-1 h-full">
+          <EmptyStateCard feature="properties" />
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <IslandContainer>
-      <AuthHeader isWithinIsland={true} title={"Properties"} />
-      <div className="flex flex-col gap-4">
-        {isPropertiesLoading ? (
-          <LoadingAnimation title="Loading Properties" />
-        ) : org?.currentOrg?.tier === "free" ? (
-          <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-            <FeatureUpgradeCard
-              title="Unlock Custom Properties"
-              description="The Free plan does not include Custom Properties, but getting access is easy."
-              infoBoxText="Enrich your requests with custom metadata by adding simple headers."
-              documentationLink="https://docs.helicone.ai/features/advanced-usage/custom-properties"
-              tier={org?.currentOrg?.tier ?? "free"}
-              featureName="Properties"
-            />
-          </div>
-        ) : properties.length === 0 ? (
-          <div className="flex flex-col w-full h-96 justify-center items-center">
-            <div className="flex flex-col w-2/5">
-              <TagIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
-              <p className="text-xl text-black dark:text-white font-semibold mt-8">
-                You do not have any properties.
-              </p>
-              <p className="text-sm text-gray-500 max-w-sm mt-2">
-                View our docs to get started segmenting your LLM-requests
-              </p>
-              <div className="mt-4">
-                <Link
-                  href="https://docs.helicone.ai/features/advanced-usage/custom-properties#what-are-custom-properties"
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  className="w-fit items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                >
-                  <PlusIcon className="h-4 w-4" />
-                  Get Started
-                </Link>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col xl:flex-row xl:divide-x xl:divide-gray-200 dark:xl:divide-gray-800 gap-8 xl:gap-4 min-h-[80vh] h-full">
-            <div className="flex flex-col space-y-6 w-full min-w-[350px] max-w-[350px]">
-              <h3 className="font-semibold text-md text-black dark:text-white">
-                Your Properties
-              </h3>
+    <div className="flex flex-col h-full min-h-screen bg-background dark:bg-sidebar-background">
+      <AuthHeader title="Properties" />
 
-              <ul className="w-full bg-white h-fit border border-gray-300 dark:border-gray-700 rounded-lg">
-                {properties.map((property, i) => (
-                  <li key={i}>
-                    <button
-                      onClick={() => {
-                        setSelectedProperty(property);
-                      }}
-                      className={clsx(
-                        selectedProperty === property
-                          ? "bg-sky-200 dark:bg-sky-800"
-                          : "bg-white dark:bg-black hover:bg-sky-50 dark:hover:bg-sky-950",
-                        i === 0 ? "rounded-t-md" : "",
-                        i === properties.length - 1 ? "rounded-b-md" : "",
-                        "w-full flex flex-row items-center space-x-2 p-4 border-b border-gray-200 dark:border-gray-800"
-                      )}
-                    >
-                      <TagIcon className="h-4 w-4 text-black dark:text-white" />
-                      <p className="text-md font-semibold text-black dark:text-white">
-                        {property}
-                      </p>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
+      {!canCreate && (
+        <FreeTierLimitBanner
+          feature="properties"
+          itemCount={properties.length}
+          freeLimit={freeLimit}
+          className="w-full"
+        />
+      )}
 
-            <div className="w-full xl:pl-4 flex flex-col space-y-4">
-              <PropertyPanel property={selectedProperty} />
-            </div>
+      <div className="flex flex-col lg:flex-row h-full bg-background dark:bg-sidebar-background">
+        <Card className="w-full lg:w-[300px] lg:min-w-[300px] lg:max-w-[300px] lg:flex-shrink-0 h-full rounded-none border-0 border-r border-border dark:border-sidebar-border shadow-none bg-background dark:bg-sidebar-background">
+          <CardContent>
+            <ScrollArea className="h-full dark:bg-sidebar-background bg-background">
+              {properties.map((property, i) => {
+                const requiresPremium = !hasAccess && i >= freeLimit;
+
+                return (
+                  <div key={i}>
+                    {requiresPremium ? (
+                      <FreeTierLimitWrapper
+                        feature="properties"
+                        itemCount={properties.length}
+                      >
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start font-medium h-auto py-3 rounded-none text-muted-foreground dark:text-sidebar-foreground hover:text-foreground dark:hover:text-sidebar-foreground"
+                        >
+                          <LockIcon className="h-3 w-3 mr-2 text-muted-foreground dark:text-sidebar-foreground" />
+                          <span className="truncate max-w-[250px]">
+                            {property}
+                          </span>
+                        </Button>
+                      </FreeTierLimitWrapper>
+                    ) : (
+                      <Button
+                        variant={
+                          selectedProperty === property ? "default" : "ghost"
+                        }
+                        className="w-full justify-start font-medium h-auto py-3 rounded-none"
+                        onClick={() => setSelectedProperty(property)}
+                      >
+                        <Tag className="h-4 w-4 mr-2" />
+                        <span className="truncate max-w-[250px]">
+                          {property}
+                        </span>
+                      </Button>
+                    )}
+                  </div>
+                );
+              })}
+            </ScrollArea>
+          </CardContent>
+        </Card>
+
+        <div className="pt-2 w-full h-full flex-1 overflow-auto bg-background dark:bg-sidebar-background">
+          <div className="min-w-0 h-full">
+            <PropertyPanel property={selectedProperty} />
           </div>
-        )}
+        </div>
       </div>
-    </IslandContainer>
+    </div>
   );
 };
 

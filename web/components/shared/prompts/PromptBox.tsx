@@ -1,27 +1,26 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
-import { Variable } from "@/types/prompt-state";
+import { StateInputs } from "@/types/prompt-state";
+import { createSelectionRange } from "@/utils/selection";
 import { toCamelCase, toSnakeCase } from "@/utils/strings";
 import { getVariableStatus, isVariable } from "@/utils/variables";
-import { createSelectionRange } from "@/utils/selection";
 
 import { generateStream } from "@/lib/api/llm/generate-stream";
-import { $assistant, $system, $user } from "@/utils/llm";
-import { readStream } from "@/lib/api/llm/read-stream";
 import autoCompletePrompt from "@/prompts/auto-complete";
-import performEditPrompt from "@/prompts/perform-edit";
-import { suggestions } from "@/prompts/perform-edit";
+import performEditPrompt, { suggestions } from "@/prompts/perform-edit";
+import { $assistant, $system, $user } from "@/utils/generate";
 import {
+  cleanSuggestionIfNeeded,
   MIN_LENGTH_FOR_SUGGESTIONS,
   SUGGESTION_DELAY,
   suggestionReducer,
-  cleanSuggestionIfNeeded,
 } from "@/utils/suggestions";
 
-import LoadingDots from "@/components/shared/universal/LoadingDots";
 import Toolbar from "@/components/shared/prompts/Toolbar";
-import { PiChatDotsBold } from "react-icons/pi";
+import LoadingDots from "@/components/shared/universal/LoadingDots";
+import { processStream } from "@/lib/api/llm/process-stream";
 import { MdKeyboardTab } from "react-icons/md";
+import { PiChatDotsBold } from "react-icons/pi";
 
 type SelectionState = {
   text: string;
@@ -30,29 +29,39 @@ type SelectionState = {
   isVariable: boolean;
 } | null;
 
-const sharedTextAreaStyles = {
+const sharedTextAreaStyles: React.CSSProperties = {
   fontFamily: "inherit",
   whiteSpace: "pre-wrap",
   overflowWrap: "break-word",
   lineHeight: "24px",
   fontSize: "16px",
-  margin: 0,
   boxSizing: "border-box",
   overflow: "hidden",
+  height: "100%",
+  width: "100%",
   minHeight: "100%",
+  minWidth: "100%",
   position: "relative",
+  border: "none",
+  outline: "none",
+  margin: 0,
   zIndex: 2,
+  gridColumn: 1,
+  gridRow: 1,
+  paddingTop: "0px",
+  paddingBottom: "0px",
+  paddingLeft: "1rem",
+  paddingRight: "1rem",
 } as const;
 
 interface PromptBoxProps {
   value: string;
   onChange: (value: string) => void;
-  onVariableCreate?: (variable: Variable) => void;
+  onVariableCreate?: (variable: StateInputs) => void;
   contextText?: string;
-  variables?: Variable[];
+  variables?: StateInputs[];
   disabled?: boolean;
 }
-
 export default function PromptBox({
   value,
   onChange,
@@ -90,8 +99,10 @@ export default function PromptBox({
     generatedText: string;
     start: number;
     end: number;
-    isLoading: boolean;
+    isPending: boolean;
+    abortController?: AbortController;
   } | null>(null);
+  const preRef = useRef<HTMLPreElement>(null);
 
   // AUTOCOMPLETE: CANCEL
   const abortCurrentRequest = useCallback(() => {
@@ -125,13 +136,13 @@ export default function PromptBox({
     }
   }, [suggestionState.isTyping, value]);
   useEffect(() => {
-    console.log("Suggestion Effect:", {
-      isTyping: suggestionState.isTyping,
-      canShowSuggestions: suggestionState.canShowSuggestions,
-      textLength: value.trim().length,
-      endsWithSpace: /[\s\n]$/.test(value),
-      timeSinceLastType: Date.now() - suggestionState.lastTypingTime,
-    });
+    // console.log("Suggestion Effect:", {
+    //   isTyping: suggestionState.isTyping,
+    //   canShowSuggestions: suggestionState.canShowSuggestions,
+    //   textLength: value.trim().length,
+    //   endsWithSpace: /[\s\n]$/.test(value),
+    //   timeSinceLastType: Date.now() - suggestionState.lastTypingTime,
+    // });
 
     if (
       suggestionState.isTyping ||
@@ -139,19 +150,19 @@ export default function PromptBox({
       value.trim().length < MIN_LENGTH_FOR_SUGGESTIONS ||
       !/[\s\n]$/.test(value)
     ) {
-      console.log("Cancelling suggestions due to:", {
-        isTyping: suggestionState.isTyping,
-        canShowSuggestions: suggestionState.canShowSuggestions,
-        textLength: value.trim().length,
-        endsWithSpace: /[\s\n]$/.test(value),
-      });
+      // console.log("Cancelling suggestions due to:", {
+      //   isTyping: suggestionState.isTyping,
+      //   canShowSuggestions: suggestionState.canShowSuggestions,
+      //   textLength: value.trim().length,
+      //   endsWithSpace: /[\s\n]$/.test(value),
+      // });
       cancelCurrentSuggestion();
       return;
     }
 
     const timeSinceLastType = Date.now() - suggestionState.lastTypingTime;
     if (timeSinceLastType < SUGGESTION_DELAY) {
-      console.log("Not enough time since last type:", timeSinceLastType);
+      // console.log("Not enough time since last type:", timeSinceLastType);
       cancelCurrentSuggestion();
       return;
     }
@@ -166,37 +177,39 @@ export default function PromptBox({
     const fetchAndHandleStream = async () => {
       try {
         const prompt = autoCompletePrompt(value, contextText);
-        console.log("Fetching suggestions for:", value);
+        // console.log("Fetching suggestions for:", value);
 
         const stream = await generateStream(
           {
-            provider: "anthropic",
-            model: "claude-3-5-haiku:beta",
+            provider: "OPENROUTER",
+            model: "anthropic/claude-3.5-haiku:beta",
             messages: [
               $system(prompt.system),
               $user(prompt.user),
               $assistant(prompt.prefill),
             ],
             temperature: 0.7,
+            signal: controller.signal,
           },
           { headers: { "x-cancel": "0" } }
         );
 
-        let accumulatedText = "";
-        await readStream(
+        await processStream(
           stream,
-          (chunk: string) => {
-            accumulatedText += chunk;
-            console.log("Received suggestion:", accumulatedText);
-            dispatch({
-              type: "SET_SUGGESTION",
-              payload: cleanSuggestionIfNeeded(value, accumulatedText),
-            });
+          {
+            initialState: { content: "", reasoning: "", calls: "" },
+            onUpdate: (result) => {
+              // console.log("Received suggestion:", result.content);
+              dispatch({
+                type: "SET_SUGGESTION",
+                payload: cleanSuggestionIfNeeded(value, result.content),
+              });
+            },
           },
           controller.signal
         );
 
-        console.log("Stopped streaming");
+        // console.log("Stopped streaming");
         if (abortControllerRef.current === controller) {
           dispatch({ type: "STOP_STREAMING" });
           abortControllerRef.current = null;
@@ -206,6 +219,9 @@ export default function PromptBox({
           console.error("Error fetching suggestion:", error);
         }
         dispatch({ type: "STOP_STREAMING" });
+        if (abortControllerRef.current === controller) {
+          abortControllerRef.current = null;
+        }
       }
     };
     fetchAndHandleStream();
@@ -226,10 +242,10 @@ export default function PromptBox({
     abortCurrentRequest,
   ]);
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    console.log("KeyDown Event:", {
-      key: e.key,
-      hasSuggestion: !!suggestionState.suggestion,
-    });
+    // console.log("KeyDown Event:", {
+    //   key: e.key,
+    //   hasSuggestion: !!suggestionState.suggestion,
+    // });
 
     // Track undo operation
     if ((e.metaKey || e.ctrlKey) && e.key === "z") {
@@ -265,7 +281,7 @@ export default function PromptBox({
     if (!["Shift", "Control", "Alt", "Meta"].includes(e.key)) {
       // Only cancel if we're not at a word boundary
       if (!/[\s\n]$/.test(value)) {
-        console.log("Cancelling request - not at word boundary");
+        // console.log("Cancelling request - not at word boundary");
         abortCurrentRequest();
       }
       if (!isUndoingRef.current) {
@@ -281,7 +297,7 @@ export default function PromptBox({
     if (!isUndoingRef.current) {
       // Only cancel if we're not at a word boundary
       if (!/[\s\n]$/.test(newValue)) {
-        console.log("Cancelling request - not at word boundary");
+        // console.log("Cancelling request - not at word boundary");
         abortCurrentRequest();
       }
       dispatch({ type: "TYPE" });
@@ -488,6 +504,12 @@ export default function PromptBox({
   const handleGeneratedEdit = async (instruction: string) => {
     if (!selection) return;
 
+    // Abort previous edit if any
+    if (pendingEdit?.abortController) {
+      pendingEdit.abortController.abort();
+    }
+    const controller = new AbortController(); // Create new controller
+
     const prompt = performEditPrompt(
       instruction,
       selection.text,
@@ -496,19 +518,19 @@ export default function PromptBox({
     );
 
     try {
-      let generatedText = "";
       setPendingEdit({
         originalText: selection.text,
         generatedText: "",
         start: selection.selectionStart,
         end: selection.selectionEnd,
-        isLoading: true,
+        isPending: true,
+        abortController: controller,
       });
 
       const stream = await generateStream(
         {
-          provider: "anthropic",
-          model: "claude-3-5-haiku:beta",
+          provider: "OPENROUTER",
+          model: "anthropic/claude-3.5-haiku:beta",
           messages: [
             $system(prompt.system),
             $user(prompt.user),
@@ -516,21 +538,32 @@ export default function PromptBox({
           ],
           temperature: 1,
           stop: ["</edited_target>"],
+          signal: controller.signal, // Pass signal to generateStream
         },
         { headers: { "x-cancel": "0" } }
       );
 
-      await readStream(stream, (chunk: string) => {
-        generatedText += chunk;
-        setPendingEdit((prev) =>
-          prev ? { ...prev, generatedText: generatedText.trim() } : null
-        );
-      });
+      // Use processStream for the edit generation
+      await processStream(
+        stream,
+        {
+          initialState: { content: "", reasoning: "", calls: "" }, // Initial state
+          onUpdate: (result) => {
+            setPendingEdit((prev) =>
+              prev ? { ...prev, generatedText: result.content.trim() } : null
+            );
+          },
+        },
+        controller.signal // Pass signal to processStream
+      );
     } catch (error) {
-      console.error("Error generating edit:", error);
-      setPendingEdit(null);
+      if (error instanceof Error && error.name !== "AbortError") {
+        console.error("Error generating edit:", error);
+        setPendingEdit(null); // Clear pending edit on non-abort error
+      }
+      // If it was an abort error, pendingEdit might have already been cleared by handleDenyEdit
     } finally {
-      setPendingEdit((prev) => (prev ? { ...prev, isLoading: false } : null));
+      setPendingEdit((prev) => (prev ? { ...prev, isPending: false } : null));
     }
   };
   const handleAcceptEdit = () => {
@@ -557,15 +590,19 @@ export default function PromptBox({
     setPendingEdit(null);
   };
   const handleDenyEdit = () => {
-    setPendingEdit(null);
-    // TODO: Also cancel the generation if ongoing
+    setPendingEdit((prev) => {
+      if (prev?.abortController) {
+        prev.abortController.abort(); // Abort the stream on deny
+      }
+      return null; // Clear pending edit state
+    });
   };
 
   // TOOLBAR: TOOLS
   const tools = [
     {
       icon: <h3 className="font-medium">{"{{}}"}</h3>,
-      label: "Make Into Variable",
+      label: "Make Into Input",
       hotkey: "e",
       onSubmit: (varName: string) => {
         if (!selection || !textareaRef.current) return;
@@ -591,7 +628,7 @@ export default function PromptBox({
 
         handleTextEdit(newValue, newStart, newEnd);
       },
-      placeholder: "Variable name...",
+      placeholder: "Input name...",
     },
     {
       icon: <h3 className="font-medium">{"</>"}</h3>,
@@ -632,8 +669,8 @@ export default function PromptBox({
   return (
     <div
       ref={containerRef}
-      className={`group relative grid h-full focus-within:border-transparent focus-within:ring-2 focus-within:ring-heliblue rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 caret-black dark:caret-white ${
-        disabled ? "opacity-50 cursor-not-allowed" : "hover:shadow-md"
+      className={`relative h-full w-full group grid grid-cols-1 grid-rows-1 focus-within:border-transparent dark:border-slate-800 caret-black dark:caret-white ${
+        disabled ? "opacity-50 cursor-not-allowed" : ""
       }`}
     >
       <textarea
@@ -643,23 +680,20 @@ export default function PromptBox({
         onKeyDown={handleKeyDown}
         onSelect={handleSelection}
         onBlur={handleBlur}
-        className="col-[1] row-[1] h-full w-full border-none bg-transparent p-4 outline-none"
-        style={{
-          ...sharedTextAreaStyles,
-          color: "transparent",
-          resize: "none",
-        }}
-        placeholder="Start typing your prompt..."
+        placeholder="Type your prompt..."
         disabled={disabled}
+        style={sharedTextAreaStyles}
+        className="text-transparent bg-transparent resize-none"
       />
       <pre
         aria-hidden="true"
-        className="pointer-events-none col-[1] row-[1] h-full w-full p-4 selection:bg-blue-200"
-        style={{
-          ...sharedTextAreaStyles,
-        }}
+        ref={preRef}
+        style={sharedTextAreaStyles}
+        className="pointer-events-none selection:bg-blue-200"
       >
         {getColoredText()}
+        {/* Invisible character to ensure proper height when empty */}
+        <span className="invisible">{"\u200B"}</span>
         {suggestionState.suggestion && (
           <>
             <span className="text-tertiary opacity-0 transition-opacity group-focus-within:opacity-100">

@@ -1,5 +1,5 @@
-import { supabaseServer } from "../db/supabase";
-import { Result, ok, err, mapPostgrestErr } from "../shared/result";
+import { dbExecute } from "../shared/db/dbExecute";
+import { Result, err, ok } from "../../packages/common/result";
 
 interface RunnerProps {
   url: URL;
@@ -85,21 +85,25 @@ export async function runHypothesis(
     isOriginalRequest,
   } = props;
   const dbOp: DatabaseOperation = {
-    execute: async () =>
-      mapPostgrestErr(
-        await supabaseServer.client.from("experiment_output").upsert(
-          {
-            experiment_id: experimentId,
-            input_record_id: inputRecordId ?? "",
-            request_id: requestId,
-            prompt_version_id: promptVersionId,
-            is_original: isOriginalRequest ?? false,
-          },
-          {
-            onConflict: "experiment_id, input_record_id, prompt_version_id",
-          }
-        )
-      ),
+    execute: async () => {
+      return dbExecute(
+        `INSERT INTO experiment_output 
+         (experiment_id, input_record_id, request_id, prompt_version_id, is_original)
+         VALUES ($1, $2, $3, $4, $5)
+         ON CONFLICT (experiment_id, input_record_id, prompt_version_id)
+         DO UPDATE SET 
+         request_id = $3,
+         is_original = $5
+         RETURNING id`,
+        [
+          experimentId,
+          inputRecordId ?? "",
+          requestId,
+          promptVersionId,
+          isOriginalRequest ?? false,
+        ]
+      );
+    },
     errorMessage: "Failed to insert hypothesis run after multiple attempts",
   };
   return runWithRetry(props, dbOp);
@@ -110,15 +114,15 @@ export async function runOriginalRequest(
 ): Promise<Result<string, string>> {
   const { requestId, inputRecordId } = props;
   const dbOp: DatabaseOperation = {
-    execute: async () =>
-      mapPostgrestErr(
-        await supabaseServer.client
-          .from("prompt_input_record")
-          .update({
-            source_request: requestId,
-          })
-          .eq("id", inputRecordId)
-      ),
+    execute: async () => {
+      return await dbExecute(
+        `UPDATE prompt_input_record
+         SET source_request = $1
+         WHERE id = $2
+         RETURNING id`,
+        [requestId, inputRecordId]
+      );
+    },
     errorMessage:
       "Failed to update prompt input record after multiple attempts",
   };

@@ -2,6 +2,7 @@ import { useOrg } from "@/components/layout/org/organizationContext";
 import { useMemo } from "react";
 
 export const descriptions = {
+  pro: "Get unlimited usage, sessions, user analytics, custom properties and much more with Pro.",
   Datasets:
     "The Free plan does not include the Datasets feature, but getting access is easy.",
   Alerts:
@@ -35,6 +36,7 @@ export const descriptions = {
 export type FeatureName = keyof typeof descriptions;
 
 export const titles: Record<FeatureName, string> = {
+  pro: "Unlock Pro",
   Datasets: "Unlock Datasets",
   Alerts: "Unlock Alerts",
   time_filter: "Unlock Time Filter",

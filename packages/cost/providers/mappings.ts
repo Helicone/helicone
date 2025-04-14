@@ -1,25 +1,28 @@
-import { costs as fineTunedOpenAICosts } from "./openai/fine-tuned-models";
-import { costs as togetherAIChatCosts } from "./togetherai/chat";
-import { costs as togetherAIChatLlamaCosts } from "./togetherai/chat/llama";
-import { costs as togetherAICompletionCosts } from "./togetherai/completion";
-import { costs as togetherAICompletionLlamaCosts } from "./togetherai/completion";
+import { ModelDetailsMap, ModelRow } from "../interfaces/Cost";
+import { anthropicProvider } from "./anthropic";
+import { costs as avianCosts } from "./avian";
+import { costs as awsBedrockCosts } from "./awsBedrock";
 import { costs as azureCosts } from "./azure";
-import { costs as googleCosts } from "./google";
 import { costs as cohereCosts } from "./cohere";
-import { costs as mistralCosts } from "./mistral";
-import { costs as openRouterCosts } from "./openrouter";
+import { costs as deepseekCosts } from "./deepseek";
 import { costs as fireworksAICosts } from "./fireworks";
 import { costs as groqCosts } from "./groq";
-import { ModelDetailsMap, ModelRow } from "../interfaces/Cost";
-import { costs as qstashCosts } from "./qstash";
-import { openAIProvider } from "./openai";
-import { anthropicProvider } from "./anthropic";
-import { costs as awsBedrockCosts } from "./awsBedrock";
-import { costs as deepseekCosts } from "./deepseek";
-import { costs as xCosts } from "./x";
-import { costs as avianCosts } from "./avian";
+import { costs as mistralCosts } from "./mistral";
 import { costs as nebiusCosts } from "./nebius";
+import { costs as novitaCosts } from "./novita";
+import { openAIProvider } from "./openai";
+import { costs as fineTunedOpenAICosts } from "./openai/fine-tuned-models";
+import { costs as openRouterCosts } from "./openrouter";
 import { costs as perplexityCosts } from "./perplexity";
+import { costs as qstashCosts } from "./qstash";
+import { costs as togetherAIChatCosts } from "./togetherai/chat";
+import { costs as togetherAIChatLlamaCosts } from "./togetherai/chat/llama";
+import {
+  costs as togetherAICompletionCosts,
+  costs as togetherAICompletionLlamaCosts,
+} from "./togetherai/completion";
+import { costs as xCosts } from "./x";
+import { googleProvider } from "./google";
 
 const openAiPattern = /^https:\/\/api\.openai\.com/;
 const anthropicPattern = /^https:\/\/api\.anthropic\.com/;
@@ -62,6 +65,10 @@ const avianPattern = /^https:\/\/api\.avian\.io/;
 
 //https://api.studio.nebius.ai
 const nebius = /^https:\/\/api\.studio\.nebius\.ai/;
+
+// https://api.novita.ai
+const novita = /^https:\/\/api\.novita\.ai/;
+
 export const providersNames = [
   "OPENAI",
   "ANTHROPIC",
@@ -90,6 +97,7 @@ export const providersNames = [
   "X",
   "AVIAN",
   "NEBIUS",
+  "NOVITA",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -180,7 +188,8 @@ export const providers: {
   {
     pattern: googleapis,
     provider: "GOOGLE",
-    costs: googleCosts,
+    costs: googleProvider.costs,
+    modelDetails: googleProvider.modelDetails,
   },
   {
     pattern: openRouter,
@@ -233,6 +242,11 @@ export const providers: {
     pattern: avianPattern,
     provider: "AVIAN",
     costs: avianCosts,
+  },
+  {
+    pattern: novita,
+    provider: "NOVITA",
+    costs: novitaCosts,
   },
 ];
 

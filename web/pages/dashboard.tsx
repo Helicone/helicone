@@ -4,11 +4,11 @@ import { ReactElement } from "react";
 import AuthLayout from "../components/layout/auth/authLayout";
 import DashboardPage from "../components/templates/dashboard/dashboardPage";
 import { withAuthSSR } from "../lib/api/handlerWrappers";
+import { getSupabaseServer } from "../lib/supabaseServer";
 import {
   OrganizationFilter,
   OrganizationLayout,
 } from "../services/lib/organization_layout/organization_layout";
-import { getSupabaseServer } from "../lib/supabaseServer";
 
 interface DashboardProps {
   user: User;

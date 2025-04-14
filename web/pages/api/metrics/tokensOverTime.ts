@@ -6,7 +6,7 @@ import {
 import { getXOverTime } from "../../../lib/api/metrics/getXOverTime";
 import { DataOverTimeRequest } from "../../../lib/api/metrics/timeDataHandlerWrapper";
 
-import { Result, resultMap } from "../../../lib/result";
+import { Result, resultMap } from "../../../packages/common/result";
 import { MetricsBackendBody } from "../../../services/hooks/useBackendFunction";
 
 export interface TokensOverTime {

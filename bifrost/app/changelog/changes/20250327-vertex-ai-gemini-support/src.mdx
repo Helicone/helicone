@@ -1,0 +1,17 @@
+We just added support for Vertex AI Gemini integration with Helicone logging framework, including stream handling and logging capabilities for both Python and TypeScript SDKs.
+
+![Helicone integration with Vertex AI](/static/changelog/images/20250327-gemini-streaming-support.webp)
+
+There are two ways to integrate Helicone with Vertex AI's Python SDK, Proxy and Manual Logger. The manual logger provides more granular control over logging the LLM's responses.
+
+## Manual Logger Key Capabilities
+
+1. Log both request parameters and responses with full context.
+2. Handle streaming responses with proper chunk logging.
+3. Built-in error tracking and logging.
+4. Add custom metadata to your logs
+5. Explicitly specify which model is being used for better analytics.
+6. Automatic tracking of streaming response timing.
+
+For integration guide and advanced configuration options, please refer to our <a href="https://docs.helicone.ai/integrations/gemini/vertex/python
+" rel="noopener" target="_blank">Vertex AI documentation</a>. 

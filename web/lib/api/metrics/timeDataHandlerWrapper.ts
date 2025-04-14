@@ -3,7 +3,7 @@ import {
   FilterLeaf,
   FilterNode,
 } from "../../../services/lib/filters/filterDefs";
-import { Result } from "../../result";
+import { Result } from "../../../packages/common/result";
 import { TimeIncrement } from "../../timeCalculations/fetchTimeData";
 import { timeBackfill } from "../../timeCalculations/time";
 import { HandlerWrapperOptions } from "../handlerWrappers";

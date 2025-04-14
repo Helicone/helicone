@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
 import { Property } from "../../lib/api/properties/properties";
-import { ok, Result } from "../../lib/result";
+import { ok, Result } from "../../packages/common/result";
 import { InputParam, SingleFilterDef } from "../lib/filters/frontendFilterDefs";
 import { getPropertyParamsV2 } from "../lib/propertyParamsV2";
 import { useDebounce } from "./debounce";
@@ -68,8 +68,7 @@ function useGetPropertiesV2<T extends "properties" | "request_response_rmt">(
       );
     },
     enabled:
-      debouncedPropertySearch.property !== "" && !propertiesQuery.isLoading,
-    keepPreviousData: true,
+      debouncedPropertySearch.property !== "" && !propertiesQuery.isPending,
   });
 
   const propertyFilters = useMemo(() => {
@@ -86,7 +85,7 @@ function useGetPropertiesV2<T extends "properties" | "request_response_rmt">(
 
   return {
     properties: allProperties,
-    isLoading: propertiesQuery.isLoading,
+    isLoading: propertiesQuery.isPending,
     error: propertiesQuery.error,
     propertyFilters,
     searchPropertyFilters,

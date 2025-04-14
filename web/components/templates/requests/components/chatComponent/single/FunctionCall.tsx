@@ -1,6 +1,8 @@
 import { Message } from "@/packages/llm-mapper/types";
 import React from "react";
 import { renderFunctionCall } from "./renderFunctionCall";
+import MarkdownEditor from "@/components/shared/markdownEditor";
+import { JsonRenderer } from "./JsonRenderer";
 
 export const FunctionCall: React.FC<{ message: Message }> = ({ message }) => {
   if (Array.isArray(message.tool_calls) && message.tool_calls.length > 0) {
@@ -17,7 +19,7 @@ export const FunctionCall: React.FC<{ message: Message }> = ({ message }) => {
               key={index}
               className="text-xs whitespace-pre-wrap rounded-lg overflow-auto"
             >
-              {`${tool.name}(${JSON.stringify(tool.arguments, null, 2)})`}
+              {tool.name}(<JsonRenderer data={tool.arguments} />)
             </pre>
           ) : null
         )}
@@ -47,5 +49,14 @@ export const FunctionCall: React.FC<{ message: Message }> = ({ message }) => {
       </div>
     );
   }
-  return null;
+  return (
+    <div className="flex flex-col space-y-2">
+      <MarkdownEditor
+        language="markdown"
+        text={typeof message.content === "string" ? message.content : ""}
+        setText={() => {}}
+        className=""
+      />
+    </div>
+  );
 };

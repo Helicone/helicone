@@ -35,9 +35,9 @@ export const ExperimentRandomInputSelector = (
     data: randomInputRecordsData,
     isLoading,
     isError,
-  } = useQuery(
-    ["randomInputRecords", promptVersionId],
-    async () => {
+  } = useQuery({
+    queryKey: ["randomInputRecords", promptVersionId],
+    queryFn: async () => {
       const res = await jawn.POST(
         "/v1/prompt/version/{promptVersionId}/inputs/query",
         {
@@ -54,10 +54,8 @@ export const ExperimentRandomInputSelector = (
       );
       return res.data?.data ?? [];
     },
-    {
-      enabled: open && promptVersionId !== undefined, // Fetch only when the drawer is open
-    }
-  );
+    enabled: open && promptVersionId !== undefined, // Fetch only when the drawer is open
+  });
 
   // Process and select the desired number of random inputs
   const selectedRandomInputs = useMemo(() => {

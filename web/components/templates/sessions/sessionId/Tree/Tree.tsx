@@ -1,10 +1,4 @@
-import { useEffect, useState } from "react";
-import { Trace, TreeNodeData } from "../../../../../lib/sessions/sessionTypes";
-import { clsx } from "../../../../shared/clsx";
-import { PathNode } from "./PathNode";
-import { RequestNode } from "./RequestNode";
 import { Col, Row } from "@/components/layout/common";
-import { SidebarCloseIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -12,6 +6,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { SidebarCloseIcon } from "lucide-react";
+import { useEffect, useState } from "react";
+import { HeliconeRequest } from "../../../../../lib/api/request/request";
+import { Trace, TreeNodeData } from "../../../../../lib/sessions/sessionTypes";
+import { clsx } from "../../../../shared/clsx";
+import { PathNode } from "./PathNode";
+import { RequestNode } from "./RequestNode";
 
 export interface TreeNodeProps {
   node: TreeNodeData;
@@ -22,6 +23,11 @@ export interface TreeNodeProps {
   setShowDrawer: (x: boolean) => void;
   isRequestSingleChild?: boolean;
   onBoardingRequestTrace?: Trace;
+  realtimeData?: {
+    isRealtime: boolean;
+    effectiveRequests: HeliconeRequest[];
+    originalRequest: HeliconeRequest | null;
+  };
 }
 
 const TreeNode: React.FC<TreeNodeProps> = ({
@@ -33,6 +39,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
   setShowDrawer,
   isRequestSingleChild,
   onBoardingRequestTrace,
+  realtimeData,
 }) => {
   const [closeChildren, setCloseChildren] = useState(collapseAll ?? false);
   const [selectedRequestId, setSelectedRequestId] = selectedRequestIdDispatch;
@@ -92,6 +99,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
                 level={level + 1}
                 setShowDrawer={setShowDrawer}
                 isRequestSingleChild={node?.children?.length === 1}
+                realtimeData={realtimeData}
               />
             ))}
         </Col>
@@ -188,6 +196,17 @@ const TreeNode: React.FC<TreeNodeProps> = ({
     </div>
   );
 };
+
+function countAllLeavesInNode(node: TreeNodeData): number {
+  if (!node.children || node.children.length === 0) {
+    return node.trace?.request_id ? 1 : 0;
+  }
+  return node.children.reduce(
+    (acc, child) => acc + countAllLeavesInNode(child),
+    0
+  );
+}
+
 interface TreeProps {
   data: TreeNodeData;
   className?: string;
@@ -196,6 +215,12 @@ interface TreeProps {
   setShowDrawer: (x: boolean) => void;
   onBoardingRequestTrace?: Trace;
   sessionId: string;
+  isRealtime?: boolean;
+  realtimeData?: {
+    isRealtime: boolean;
+    effectiveRequests: HeliconeRequest[];
+    originalRequest: HeliconeRequest | null;
+  };
 }
 
 export const Tree: React.FC<TreeProps> = ({
@@ -206,6 +231,8 @@ export const Tree: React.FC<TreeProps> = ({
   setShowDrawer,
   onBoardingRequestTrace,
   sessionId,
+  isRealtime = false,
+  realtimeData,
 }) => {
   return (
     <div
@@ -225,6 +252,13 @@ export const Tree: React.FC<TreeProps> = ({
             level={0}
             collapseAll={collapseAll}
             setShowDrawer={setShowDrawer}
+            realtimeData={
+              realtimeData || {
+                isRealtime,
+                effectiveRequests: [],
+                originalRequest: null,
+              }
+            }
           />
         ))}
     </div>

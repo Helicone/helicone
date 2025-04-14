@@ -1,7 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
+import { LLMRequestBody } from "@/packages/llm-mapper/types";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useOrg } from "../../../components/layout/org/organizationContext";
-import { JawnFilterNode, getJawnClient } from "../../../lib/clients/jawn";
-import { Result, resultMap } from "../../../lib/result";
+import useNotification from "../../../components/shared/notification/useNotification";
+import { getJawnClient } from "../../../lib/clients/jawn";
+import { Result, resultMap } from "../../../packages/common/result";
 import { RequestsOverTime } from "../../../lib/timeCalculations/fetchTimeData";
 import {
   BackendMetricsCall,
@@ -11,7 +13,7 @@ import {
 export const usePromptVersions = (promptId: string) => {
   const org = useOrg();
 
-  const { data, isLoading, refetch, isRefetching } = useQuery({
+  const { data, isPending, refetch, isRefetching } = useQuery({
     queryKey: ["prompts", org?.currentOrg?.id, promptId],
     queryFn: async (query) => {
       const orgId = query.queryKey[1] as string;
@@ -29,6 +31,7 @@ export const usePromptVersions = (promptId: string) => {
         },
       });
     },
+    enabled: !!promptId && !!org?.currentOrg?.id,
     refetchOnWindowFocus: false,
   });
 
@@ -44,7 +47,7 @@ export const usePromptVersions = (promptId: string) => {
     : undefined;
 
   return {
-    isLoading,
+    isLoading: isPending,
     refetch,
     isRefetching,
     prompts: sortedVersions,
@@ -54,14 +57,14 @@ export const usePromptVersions = (promptId: string) => {
 export const usePrompts = (promptId?: string) => {
   const org = useOrg();
 
-  const { data, isLoading, refetch, isRefetching } = useQuery({
+  const { data, isPending, refetch, isRefetching } = useQuery({
     queryKey: ["prompts", org?.currentOrg?.id, promptId],
     queryFn: async (query) => {
       const orgId = query.queryKey[1] as string;
       const promptId = query.queryKey[2] as string;
       const jawn = getJawnClient(orgId);
 
-      let filterNode: JawnFilterNode = "all";
+      let filterNode: any = "all";
 
       if (promptId) {
         filterNode = {
@@ -83,7 +86,7 @@ export const usePrompts = (promptId?: string) => {
   });
 
   return {
-    isLoading,
+    isLoading: isPending,
     refetch,
     isRefetching,
     prompts: data?.data?.data,
@@ -93,7 +96,7 @@ export const usePrompts = (promptId?: string) => {
 export const usePrompt = (id: string) => {
   const org = useOrg();
 
-  const { data, isLoading, refetch, isRefetching } = useQuery({
+  const { data, isPending, refetch, isRefetching } = useQuery({
     queryKey: ["prompt", org?.currentOrg?.id, id],
     queryFn: async (query) => {
       const orgId = query.queryKey[1] as string;
@@ -115,11 +118,12 @@ export const usePrompt = (id: string) => {
         },
       });
     },
+    enabled: !!id && !!org?.currentOrg?.id,
     refetchOnWindowFocus: false,
   });
 
   return {
-    isLoading,
+    isLoading: isPending,
     refetch,
     isRefetching,
     prompt: data?.data?.data,
@@ -153,5 +157,71 @@ export const usePromptRequestsOverTime = (
     isLoading: promptUsageOverTime.isLoading,
     refetch: promptUsageOverTime.refetch,
     total: totalRequests,
+  };
+};
+
+export const useCreatePrompt = () => {
+  const org = useOrg();
+  const { setNotification } = useNotification();
+  const jawn = getJawnClient(org?.currentOrg?.id);
+
+  const mutation = useMutation({
+    mutationFn: async ({
+      prompt: prompt,
+      metadata = {
+        provider: "OPENAI",
+        createdFromUi: true,
+      },
+    }: {
+      prompt: Partial<LLMRequestBody>;
+      metadata?: Record<string, any>;
+    }) => {
+      // Generate a unique name like "new prompt", "new prompt (1)", etc.
+      const existingPrompts =
+        (
+          await jawn.POST("/v1/prompt/query", {
+            body: {
+              filter: "all",
+            },
+          })
+        )?.data?.data || [];
+      let promptName = "new-prompt";
+      let counter = 1;
+      while (
+        existingPrompts.some((p: any) => p.user_defined_id === promptName)
+      ) {
+        promptName = `new-prompt-${counter}`;
+        counter++;
+      }
+
+      const res = await jawn.POST("/v1/prompt/create", {
+        body: {
+          userDefinedId: promptName,
+          prompt: prompt,
+          metadata: metadata,
+        },
+      });
+
+      if (res.error || !res.data.data?.id) {
+        throw new Error("Error creating prompt");
+      }
+
+      return res.data.data;
+    },
+    onSuccess: () => {
+      setNotification("Prompt created successfully", "success");
+    },
+    onError: () => {
+      setNotification("Error creating prompt", "error");
+    },
+  });
+
+  return {
+    createPrompt: (
+      request: Partial<LLMRequestBody>,
+      metadata?: Record<string, any>
+    ) => mutation.mutateAsync({ prompt: request, metadata }),
+    isCreating: mutation.isPending,
+    error: mutation.error,
   };
 };

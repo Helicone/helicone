@@ -1,9 +1,7 @@
 "use client";
 
-import { ISLAND_WIDTH } from "@/lib/utils";
-import { cn } from "@/lib/utils";
-import { useState } from "react";
-import { Button, buttonVariants } from "../ui/button";
+import { cn, ISLAND_WIDTH } from "@/lib/utils";
+import { CircleStackIcon, TableCellsIcon } from "@heroicons/react/24/outline";
 import {
   BeakerIcon,
   ChevronDownIcon,
@@ -11,19 +9,21 @@ import {
   ChevronRightIcon,
   HomeIcon,
   ListTreeIcon,
-  NotepadTextIcon,
   RocketIcon,
+  ScrollTextIcon,
   SparklesIcon,
   TagIcon,
   TestTube2Icon,
   UsersIcon,
 } from "lucide-react";
-import { CircleStackIcon, TableCellsIcon } from "@heroicons/react/24/outline";
+import { useState } from "react";
+import { Button, buttonVariants } from "../ui/button";
+import Image from "next/image";
 
 const IMG_PATH = {
-  dashboard: "/static/home/dashboard.png",
-  requests: "/static/home/requests.png",
-  sessions: "/static/home/sessions.png",
+  dashboard: "/static/home/dashboard.webp",
+  requests: "/static/home/requests.webp",
+  sessions: "/static/home/sessions.webp",
 };
 
 const Prototype = () => {
@@ -41,18 +41,26 @@ const Prototype = () => {
               setOpenedPage={setOpenedPage}
             />
             <div className="col-span-5">
-              <img
+              <Image
                 src={IMG_PATH[openedPage]}
                 alt={openedPage}
+                width={1000}
+                height={500}
+                quality={100}
                 className="w-full h-full object-contain"
+                priority
               />
             </div>
           </div>
           <div className="block lg:hidden">
-            <img
-              src="/static/home/dashboard_with_sidebar.png"
+            <Image
+              src="/static/home/mobile/dashboard_with_sidebar.webp"
               alt="dashboard"
+              width={1200}
+              height={600}
+              quality={90}
               className="w-full h-full object-contain"
+              priority
             />
           </div>
         </div>
@@ -213,7 +221,7 @@ const PrototypeSidebar = ({
                     )}
                   >
                     <div className="flex items-center">
-                      <NotepadTextIcon className="mr-2 h-4 w-4" />
+                      <ScrollTextIcon className="mr-2 h-4 w-4" />
                       Prompts
                     </div>
                   </div>

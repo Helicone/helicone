@@ -10,45 +10,67 @@ The `HeliconeManualLogger` class can be used to log any external tools used in y
 
 <Steps>
   <Step title="To get started, install the `helicone-helpers` package">
+  
   ```bash
   pip install helicone-helpers
   ```
+  
   </Step>
   <Step title="Create a new HeliconeManualLogger instance">
-  ```python
-  from helicone_helpers import HeliconeManualLogger
 
-  heliconeLogger = HeliconeManualLogger(
-    api_key="your-helicone-api-key", # Can be set as env variable
-    headers={} # Additional headers to be sent with the request
-  );
-  ```
+```python
+from helicone_helpers import HeliconeManualLogger
+
+heliconeLogger = HeliconeManualLogger(
+  api_key="your-helicone-api-key", # Can be set as env variable
+  headers={} # Additional headers to be sent with the request
+);
+```
+
   </Step>
-  <Step title="Log your request">
-  ```python
-  def tool_call_operation(result_recorder: HeliconeResultRecorder):
-      # your tool call here
-      # you can access the request using result_recorder.request
-      result_recorder.appendResults({
-        ... # The results of the operation (this will be logged to Helicone)
-      })
-      return results # this will be returned by the logRequest function
+  <Step title="Log your request - Example">
 
-  res = heliconeLogger.logRequest(
-    request={
-      _type: "tool",
-      toolName: "...", # The name of the tool used
-      input: ..., # The input to the tool
-      # other data which you want to store about the tool call
-    },
-    operation=tool_call_operation,
-    additional_headers={
-      # Additional headers to be sent with the request
+### Quick example: Calculator tool
+
+```python
+request = {} # Your request object
+start_time = time.time()
+calculator_result = calculator_operation()
+res = heliconeLogger.send_log(
+    request=request,
+    response=calculator_result,
+    provider="openai",
+    options={
+      "start_time": start_time,
+      "end_time": time.time(),
+      "additional_headers": {}
     }
-  );
-  ```
-</Step>
+)
+```
+
+### Example: Weather API tool (log timing )
+
+```python
+
+def weather_tool_operation(result_recorder):
+  result = SOME_SLOW_OPERATION(result_recorder.request)
+  result_recorder.append_results(result.data)
+  return result
+
+request = {"city": "San Francisco"} # Your request object
+res = heliconeLogger.log_request(
+  request=request,
+  operation=weather_tool_operation
+)
+
+print(res) # Output: {'temperature': 60, 'condition': 'sunny'}
+```
+
+  </Step>
+
 </Steps>
+
+For more complex examples including weather APIs, database queries, and document search, check out our [full examples on GitHub](https://github.com/Helicone/helicone/tree/main/examples/tools/python).
 
 ## API Reference
 
@@ -75,7 +97,8 @@ log_request(
 
 #### Parameters
 
-1. `request`:  - The request object to log
+1. `request`: - The request object to log
+
 ```python
 {
   _type: "tool";
@@ -86,6 +109,7 @@ log_request(
 ```
 
 2. `operation`: `Callable[[HeliconeResultRecorder], T]` - The operation to be executed and logged
+
 ```python
 class HeliconeResultRecorder:
     def __init__(self, request: dict):
@@ -100,7 +124,5 @@ class HeliconeResultRecorder:
 ```
 
 3. `additionalHeaders`: `dict`
-    - Additional headers to be sent with the request
-    - This can be used to use features like [session management](/features/sessions), [custom properties](/features/advanced-usage/custom-properties), etc.
-
-
+   - Additional headers to be sent with the request
+   - This can be used to use features like [session management](/features/sessions), [custom properties](/features/advanced-usage/custom-properties), etc.

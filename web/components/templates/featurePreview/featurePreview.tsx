@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { useQuery } from "@tanstack/react-query";
 import { getJawnClient } from "@/lib/clients/jawn";
+import { H1, H4, P, Small } from "@/components/ui/typography";
 
 interface FeaturePreviewProps<T extends string> {
   title: string;
@@ -132,39 +133,34 @@ const FeaturePreview = <T extends string>({
         {/* Feature Preview */}
         <div className="flex flex-col items-center mx-auto mb-8">
           <div className="text-center mb-8 lg:mb-4">
-            <div className="text-[#031727] text-[40px] lg:text-[32px] font-semibold leading-[52px] tracking-normal">
+            <H1 className="text-[40px] lg:text-[32px] leading-[52px]">
               {title} <br />
               {subtitle}
-            </div>
+            </H1>
           </div>
 
           <div className="max-h-[367px] flex-col justify-start items-start inline-flex gap-6">
             {isOnFreeTier ? (
-              <div className="self-stretch px-3 py-2 bg-sky-50 rounded-lg border border-sky-200 justify-center items-center gap-2.5 inline-flex">
+              <div className="self-stretch px-3 py-2 bg-[hsl(var(--primary)/0.1)] rounded-lg border border-[hsl(var(--primary))] justify-center items-center gap-2.5 inline-flex">
                 <div className="w-[18px] h-[18px] relative overflow-hidden">
-                  <LightBulbIcon className="w-full h-full text-sky-500" />
+                  <LightBulbIcon className="w-full h-full text-[hsl(var(--primary))]" />
                 </div>
                 <div>
-                  <span className="text-sky-500 text-base font-normal leading-normal tracking-tight">
+                  <P className="text-[hsl(var(--primary))]">
                     Adding prompt management requires a{" "}
-                  </span>
-                  <span className="text-sky-500 text-base font-medium underline leading-normal tracking-tight">
-                    Pro plan
-                  </span>
-                  <span className="text-sky-500 text-base font-medium leading-normal tracking-tight">
-                    .{" "}
-                  </span>
+                    <span className="font-medium underline">Pro plan</span>.{" "}
+                  </P>
                 </div>
               </div>
             ) : isTrialActive ? (
-              <div className="self-stretch px-3 py-2 bg-sky-50 rounded-lg border border-sky-200 justify-center items-center gap-2.5 inline-flex">
+              <div className="self-stretch px-3 py-2 bg-[hsl(var(--primary)/0.1)] rounded-lg border border-[hsl(var(--primary))] justify-center items-center gap-2.5 inline-flex">
                 <div className="w-[18px] h-[18px] relative overflow-hidden">
-                  <LightBulbIcon className="w-full h-full text-sky-500" />
+                  <LightBulbIcon className="w-full h-full text-[hsl(var(--primary))]" />
                 </div>
                 <div>
-                  <span className="text-sky-500 text-base font-normal leading-normal tracking-tight">
+                  <P className="text-[hsl(var(--primary))]">
                     You won&apos;t be charged during your trial period
-                  </span>
+                  </P>
                 </div>
               </div>
             ) : null}
@@ -176,42 +172,40 @@ const FeaturePreview = <T extends string>({
                   onClick={() => setSelectedPlan(plan.name)}
                   className={`
                     w-[320px] h-[303px] lg:w-[300px] lg:h-[280px] p-5 rounded-[18px] flex-col justify-start items-start gap-4 inline-flex cursor-pointer
-                    relative overflow-hidden bg-white
+                    relative overflow-hidden bg-[hsl(var(--card))]
                     ${
                       plan.name === selectedPlan
-                        ? "border-2 border-sky-500"
-                        : "border border-slate-200"
+                        ? "border-2 border-[hsl(var(--primary))]"
+                        : "border border-[hsl(var(--border))]"
                     }
-                    group hover:bg-sky-100 transition-colors duration-300
+                    group hover:bg-[hsl(var(--primary)/0.1)] transition-colors duration-300
                   `}
                 >
                   <div className="relative z-10 self-stretch h-[255px] flex-col justify-start items-start gap-6 lg:gap-2 flex">
                     <div className="self-stretch h-[87px] flex-col justify-start items-start gap-3 flex">
                       <div className="self-stretch justify-between items-center inline-flex">
-                        <div className="text-slate-900 text-lg font-medium leading-none">
-                          {plan.name}
-                        </div>
+                        <H4>{plan.name}</H4>
                         <div
                           className={`w-[24px] h-[24px] rounded-full ${
                             plan.name === selectedPlan
-                              ? "border-[7px] border-sky-500"
-                              : "border border-slate-500"
-                          } bg-white flex items-center justify-center p-0`}
+                              ? "border-[7px] border-[hsl(var(--primary))]"
+                              : "border border-[hsl(var(--muted-foreground))]"
+                          } bg-[hsl(var(--card))] flex items-center justify-center p-0`}
                         ></div>
                       </div>
                       <div className="flex flex-row items-baseline gap-1">
                         <div>
-                          <span className="text-slate-900 text-[40px] font-medium">
+                          <span className="text-[hsl(var(--foreground))] text-[40px] font-medium">
                             ${plan.price}
                           </span>
-                          <span className="text-slate-500 text-[40px] font-light">
+                          <span className="text-[hsl(var(--muted-foreground))] text-[40px] font-light">
                             /mo
                           </span>
                         </div>
                         {plan.priceSubtext && (
-                          <div className="text-slate-500 text-sm mt-1">
+                          <Small className="text-[hsl(var(--muted-foreground))] mt-1">
                             {plan.priceSubtext}
-                          </div>
+                          </Small>
                         )}
                       </div>
                     </div>
@@ -224,17 +218,17 @@ const FeaturePreview = <T extends string>({
                           <div className="self-stretch p-2 justify-start items-center inline-flex gap-2">
                             <div className="w-[16px] h-[16px] relative overflow-hidden flex items-center justify-center">
                               {feature.included ? (
-                                <CheckIcon className="w-full h-full text-green-500" />
+                                <CheckIcon className="w-full h-full text-[hsl(var(--confirmative))]" />
                               ) : (
-                                <XMarkIcon className="w-full h-full text-red-500" />
+                                <XMarkIcon className="w-full h-full text-[hsl(var(--destructive))]" />
                               )}
                             </div>
-                            <div className="grow shrink basis-0 text-slate-700 text-base font-[16px] leading-tight">
+                            <P className="grow shrink basis-0">
                               {feature.name} {feature.additionalCost}
-                            </div>
+                            </P>
                           </div>
                           {index < plan.features.length - 1 && (
-                            <div className="self-stretch h-[0px] border-t border-slate-200" />
+                            <div className="self-stretch h-[0px] border-t border-[hsl(var(--border))]" />
                           )}
                         </div>
                       ))}
@@ -248,7 +242,7 @@ const FeaturePreview = <T extends string>({
           <div className="flex flex-col items-center gap-4 mt-8 w-[220px] lg:mt-4">
             <Button
               onClick={() => onStartTrial?.(selectedPlan)}
-              className="w-full text-white text-lg font-medium leading-normal tracking-normal h-[52px] px-6 py-1.5 bg-[#0da5e8] rounded-xl justify-center items-center gap-2.5 inline-flex"
+              className="w-full text-[hsl(var(--primary-foreground))] text-lg font-medium leading-normal tracking-normal h-[52px] px-6 py-1.5 bg-[hsl(var(--primary))] rounded-xl justify-center items-center gap-2.5 inline-flex"
               variant="action"
             >
               {isOnFreeTier ? "Start 7-day free trial" : "Upgrade now"}
@@ -261,7 +255,7 @@ const FeaturePreview = <T extends string>({
               rel="noreferrer"
             >
               <Button
-                className="w-full bg-transparent border-none rounded-xl hover:bg-slate-200 text-slate-700 text-lg font-semibold leading-normal tracking-tight hover:no-underline h-[52px] px-6 py-1.5"
+                className="w-full bg-transparent border-none rounded-xl hover:bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))] text-lg font-semibold leading-normal tracking-tight hover:no-underline h-[52px] px-6 py-1.5"
                 variant="action"
               >
                 Read the docs

@@ -1,11 +1,11 @@
 // src/users/usersService.ts
 import { RequestQueryParams } from "../../controllers/public/requestController";
-import { FREQUENT_PRECENT_LOGGING } from "../../lib/db/DBQueryTimer";
-import { AuthParams, supabaseServer } from "../../lib/db/supabase";
-import { dbExecute, dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
+import { KVCache } from "../../lib/cache/kvCache";
+import { HeliconeScoresMessage } from "../../lib/handlers/HandlerContext";
+import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { S3Client } from "../../lib/shared/db/s3Client";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
-import { Result, err, ok, resultMap } from "../../lib/shared/result";
+import { Result, err, ok, resultMap } from "../../packages/common/result";
 import { VersionedRequestStore } from "../../lib/stores/request/VersionedRequestStore";
 import {
   HeliconeRequestAsset,
@@ -14,14 +14,14 @@ import {
   getRequestsCached,
   getRequestsCachedClickhouse,
   getRequestsClickhouse,
+  getRequestsClickhouseNoSort,
 } from "../../lib/stores/request/request";
-import { HeliconeRequest } from "../../packages/llm-mapper/types";
 import { costOfPrompt } from "../../packages/cost";
+import { HeliconeRequest } from "../../packages/llm-mapper/types";
+import { cacheResultCustom } from "../../utils/cacheResult";
 import { BaseManager } from "../BaseManager";
 import { ScoreManager } from "../score/ScoreManager";
-import { HeliconeScoresMessage } from "../../lib/handlers/HandlerContext";
-import { cacheResultCustom } from "../../utils/cacheResult";
-import { KVCache } from "../../lib/cache/kvCache";
+import { AuthParams } from "../../packages/common/auth/types";
 export const getModelFromPath = (path: string) => {
   const regex1 = /\/engines\/([^/]+)/;
   const regex2 = /models\/([^/:]+)/;
@@ -433,6 +433,10 @@ export class RequestManager extends BaseManager {
             provider: r.provider ?? "",
             completionTokens: r.completion_tokens ?? 0,
             promptTokens: r.prompt_tokens ?? 0,
+            promptCacheWriteTokens: r.prompt_cache_write_tokens ?? 0,
+            promptCacheReadTokens: r.prompt_cache_read_tokens ?? 0,
+            promptAudioTokens: r.prompt_audio_tokens ?? 0,
+            completionAudioTokens: r.completion_audio_tokens ?? 0,
           }),
         };
       });
@@ -470,6 +474,13 @@ export class RequestManager extends BaseManager {
           isPartOfExperiment,
           isScored
         )
+      : sort.created_at === "desc"
+      ? await getRequestsClickhouseNoSort(
+          this.authParams.organizationId,
+          newFilter,
+          offset,
+          limit
+        )
       : await getRequestsClickhouse(
           this.authParams.organizationId,
           newFilter,
@@ -493,12 +504,6 @@ export class RequestManager extends BaseManager {
             response_created_at: r.response_created_at
               ? toISOStringClickhousePatch(r.response_created_at)
               : null,
-            costUSD: costOfPrompt({
-              model: r.request_model ?? "",
-              provider: r.provider ?? "",
-              completionTokens: r.completion_tokens ?? 0,
-              promptTokens: r.prompt_tokens ?? 0,
-            }),
             model:
               r.model_override ??
               r.request_model ??

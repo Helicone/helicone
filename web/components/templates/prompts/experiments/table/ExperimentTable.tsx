@@ -48,7 +48,6 @@ import EditInputsPanel from "./EditInputsPanel";
 import { useExperimentTable } from "./hooks/useExperimentTable";
 import ScoresEvaluatorsConfig from "./scores/ScoresEvaluatorsConfig";
 import ScoresGraphContainer from "./scores/ScoresGraphContainer";
-import { useOrg } from "@/components/layout/org/organizationContext";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -57,17 +56,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import ExperimentDatasetSelector from "../experimentDatasetSelector";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import ImportCSVDialog from "./ImportCSVDialog";
+import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
+import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 
 type TableDataType = {
   index: number;
@@ -96,7 +87,16 @@ export function ExperimentTable({
     inputKeysData,
     wrapText,
     deleteSelectedRows,
+    deletePromptVersion,
   } = useExperimentTable(experimentTableId);
+
+  // Variant limit check
+  const variantCount = promptVersionsData?.length || 0;
+  const {
+    canCreate: canCreateVariant,
+    hasAccess: hasAccess,
+    freeLimit: MAX_VARIANTS,
+  } = useFeatureLimit("experiments", variantCount, "variants");
 
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [showExperimentInputSelector, setShowExperimentInputSelector] =
@@ -122,9 +122,7 @@ export function ExperimentTable({
     setExternallySelectedForkFromPromptVersionId,
   ] = useState<string | null>(null);
   const [isAddColumnDialogOpen, setIsAddColumnDialogOpen] = useState(false);
-
-  const org = useOrg();
-  const orgId = org?.currentOrg?.id ?? "";
+  const [showImportCsvModal, setShowImportCsvModal] = useState(false);
 
   const [rowSelection, setRowSelection] = useState({});
 
@@ -283,6 +281,15 @@ export function ExperimentTable({
                   ? `${pv.metadata?.label}`
                   : `v${pv.major_version}.${pv.minor_version}`
               }
+              onDeleteColumn={
+                pv.id !== experimentTableQuery?.copied_original_prompt_version
+                  ? () => {
+                      deletePromptVersion.mutate({
+                        promptVersionId: pv.id,
+                      });
+                    }
+                  : undefined
+              }
               onForkColumn={() => {
                 setExternallySelectedForkFromPromptVersionId(pv.id);
                 setIsAddColumnDialogOpen(true);
@@ -352,7 +359,7 @@ export function ExperimentTable({
             promptVersionId={
               experimentTableQuery?.original_prompt_version ?? ""
             }
-            selectedProviderKey=""
+            selectedProviderKey={null}
             handleAddColumn={async () => {}}
             wrapText={false}
             originalColumnPromptVersionId={promptVersionsData?.[0]?.id ?? ""}
@@ -367,6 +374,7 @@ export function ExperimentTable({
             numberOfExistingPromptVersions={
               promptVersionsData?.length ? promptVersionsData.length - 1 : 0
             }
+            disabled={!canCreateVariant}
           />
         ),
         columns: [
@@ -516,98 +524,55 @@ export function ExperimentTable({
         </IslandContainer>
         <div className="flex items-center gap-5">
           {!(table.getIsSomeRowsSelected() || table.getIsAllRowsSelected()) ? (
-            <>
-              <div className="flex gap-2 items-center relative">
-                <Switch
-                  size="sm"
-                  checked={showScores}
-                  onCheckedChange={(checked) => {
-                    handleShowScoresChange(checked);
-                    setShowScores(checked);
-                  }}
-                />
-                <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">
-                  Show scores
-                </p>
-              </div>
-              <div className="flex gap-2 items-center">
-                <Switch
-                  size="sm"
-                  checked={wrapText.data ?? false}
-                  onCheckedChange={(checked) => {
-                    queryClient.setQueryData(
-                      ["wrapText", experimentTableId],
-                      checked
-                    );
-                  }}
-                />
-                <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">
-                  Wrap text
-                </p>
-              </div>
-            </>
-          ) : (
-            <>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={(e) => {
-                  table.resetRowSelection();
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                Show scores
+              </span>
+              <Switch
+                checked={showScores}
+                onCheckedChange={handleShowScoresChange}
+              />
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-4">
+                Wrap text
+              </span>
+              <Switch
+                checked={wrapText.data ?? false}
+                onCheckedChange={(checked) => {
+                  queryClient.setQueryData(
+                    ["wrapText", experimentTableId],
+                    checked
+                  );
                 }}
-              >
-                Deselect all
-              </Button>
-              <AlertDialog
-                open={showDeleteRowsConfirmation}
-                onOpenChange={setShowDeleteRowsConfirmation}
-              >
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    className="flex items-center gap-1"
-                  >
-                    <Trash2Icon className="w-3.5 h-3.5" />
-                    Delete row
-                    {table.getFilteredSelectedRowModel().rows.length === 1
-                      ? ""
-                      : "s"}{" "}
-                    {table.getFilteredSelectedRowModel().rows.length > 1 &&
-                      `(${
-                        table.getFilteredSelectedRowModel().rows.length
-                      } selected)`}
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Delete rows</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Once deleted, these rows cannot be recovered. Do you want
-                      to delete them?
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter className="w-full items-stretch gap-2">
-                    <AlertDialogCancel>Go back</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => {
-                        deleteSelectedRows.mutate({
-                          inputRecordIds: table
-                            .getFilteredSelectedRowModel()
-                            .rows.map((row) => row.original.rowRecordId),
-                        });
-                        setShowDeleteRowsConfirmation(false);
-                        table.resetRowSelection();
-                      }}
-                    >
-                      Yes, delete
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </>
+              />
+            </div>
+          ) : (
+            <Button
+              variant="ghost"
+              onClick={() => {
+                deleteSelectedRows.mutate({
+                  inputRecordIds: table
+                    .getSelectedRowModel()
+                    .rows.map((row) => row.original.rowRecordId),
+                });
+              }}
+            >
+              <Trash2Icon className="h-4 w-4 text-red-500 mr-2" />
+              Delete {table.getSelectedRowModel().rows.length} rows
+            </Button>
           )}
         </div>
       </div>
+
+      {/* Variant limit warning banner */}
+      {!canCreateVariant && (
+        <FreeTierLimitBanner
+          feature="experiments"
+          subfeature="variants"
+          itemCount={variantCount}
+          freeLimit={MAX_VARIANTS}
+        />
+      )}
+
       <div className="h-[calc(100vh-50px)]">
         <ResizablePanelGroup direction="horizontal" className="h-full">
           <ResizablePanel defaultSize={75}>
@@ -723,7 +688,7 @@ export function ExperimentTable({
                             {row.getVisibleCells().map((cell) => (
                               <TableCell
                                 className={cn(
-                                  "p-0 align-baseline border-r border-slate-200 dark:border-slate-800 h-full relative group",
+                                  "p-0 border-r border-slate-200 dark:border-slate-800 h-full relative group",
                                   "w-full max-w-0",
                                   cell.column.getIsLastColumn() && "border-r-0",
                                   (table.getIsSomeRowsSelected() ||
@@ -779,6 +744,7 @@ export function ExperimentTable({
                       setShowExperimentDatasetSelector={
                         setShowExperimentDatasetSelector
                       }
+                      setShowImportCsvModal={setShowImportCsvModal}
                     />
                   </PopoverContent>
                 </Popover>
@@ -858,6 +824,12 @@ export function ExperimentTable({
           numberOfExistingPromptVersions={
             promptVersionsData?.length ? promptVersionsData.length - 1 : 0
           }
+        />
+        <ImportCSVDialog
+          open={showImportCsvModal}
+          onOpenChange={setShowImportCsvModal}
+          experimentId={experimentTableId}
+          experimentPromptInputKeys={inputKeysData?.map((key) => key) ?? []}
         />
       </div>
     </>

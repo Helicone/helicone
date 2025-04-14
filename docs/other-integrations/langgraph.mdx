@@ -1,0 +1,198 @@
+---
+title: "LangGraph Integration"
+sidebarTitle: "LangGraph"
+description: "Use LangGraph to integrate Helicone with your LLM workflows."
+"twitter:title": "LangGraph Integration - Helicone OSS LLM Observability"
+iconType: "solid"
+---
+
+<Steps title="LangGraph Integration">
+  <Step title="Create an account + Generate an API Key">
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+  </Step>
+  <Step title="Set required API keys as environment variables">
+```bash
+# Required for all integrations
+export HELICONE_API_KEY=<your Helicone API key>
+
+# Required for specific LLM providers
+
+export OPENAI_API_KEY=<your OpenAI API key>
+export ANTHROPIC_API_KEY=<your Anthropic API key>
+```
+  </Step>
+  <Step title="Initialize your LLM with Helicone">
+<CodeGroup>
+
+```typescript OpenAI
+// Import the LangChain OpenAI package
+import { ChatOpenAI } from "@langchain/openai";
+
+// Initialize the OpenAI model with Helicone integration
+const model = new ChatOpenAI({
+  temperature: 0,
+  modelName: "gpt-4o",
+  configuration: {
+    baseURL: "https://oai.helicone.ai/v1",
+    defaultHeaders: {
+      "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+      "Helicone-Cache-Enabled": "true",
+    },
+  },
+});
+```
+
+```typescript Anthropic
+// Import the LangChain Anthropic package
+import { ChatAnthropic } from "@langchain/anthropic";
+
+// Initialize the Anthropic model with Helicone integration
+const model = new ChatAnthropic({
+  temperature: 0,
+  modelName: "claude-3-opus-20240229",
+  anthropicApiKey: process.env.ANTHROPIC_API_KEY,
+  clientOptions: {
+    baseURL: "https://anthropic.helicone.ai",
+    defaultHeaders: {
+      "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+      "Helicone-Cache-Enabled": "true",
+    },
+  },
+});
+```
+
+</CodeGroup>
+  </Step>
+  <Step title="Add custom properties to your requests">
+    
+You can add custom properties to your LangGraph agent invocations when calling `invoke()`:
+
+```typescript
+// Run the agent with custom Helicone properties
+const result = await agent.invoke(
+  { messages: [new HumanMessage("what is the current weather in sf")] },
+  {
+    options: {
+      headers: {
+        "Helicone-Prompt-Id": "weather-query",
+        "Helicone-Session-Id": uuidv4(),
+        "Helicone-Session-Name": "weather-session",
+        "Helicone-Session-Path": "/weather",
+      },
+    },
+  }
+);
+```
+
+These properties will appear in your Helicone dashboard for filtering and analytics.
+
+  </Step>
+</Steps>
+
+## Complete Working Examples
+
+### OpenAI Example
+
+```typescript
+// Import necessary dependencies
+import { ChatOpenAI } from "@langchain/openai";
+import { MemorySaver } from "@langchain/langgraph";
+import { HumanMessage } from "@langchain/core/messages";
+import { createReactAgent } from "@langchain/langgraph/prebuilt";
+import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
+
+// Define tools for the agent
+const agentTools = [new TavilySearchResults({ maxResults: 3 })];
+
+// Initialize the OpenAI model with Helicone integration
+const agentModel = new ChatOpenAI({
+  temperature: 0,
+  modelName: "gpt-4o",
+  configuration: {
+    baseURL: "https://oai.helicone.ai/v1",
+    defaultHeaders: {
+      "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+      "Helicone-Cache-Enabled": "true",
+    },
+  },
+}).bindTools(agentTools);
+
+// Initialize memory to persist state between graph runs
+const agentCheckpointer = new MemorySaver();
+
+// Create the agent
+const agent = createReactAgent({
+  llm: agentModel,
+  tools: agentTools,
+  checkpointer: agentCheckpointer,
+});
+
+// Run the agent with custom Helicone properties
+const result = await agent.invoke(
+  { messages: [new HumanMessage("what is the current weather in sf")] },
+  {
+    options: {
+      headers: {
+        "Helicone-Prompt-Id": "weather-query",
+        "Helicone-Session-Id": uuidv4(),
+        "Helicone-Session-Name": "weather-session",
+        "Helicone-Session-Path": "/weather",
+      },
+    },
+  }
+);
+```
+
+### Anthropic Example
+
+```typescript
+// Import necessary dependencies
+import { ChatAnthropic } from "@langchain/anthropic";
+import { MemorySaver } from "@langchain/langgraph";
+import { HumanMessage } from "@langchain/core/messages";
+import { createReactAgent } from "@langchain/langgraph/prebuilt";
+import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
+
+// Define tools for the agent
+const agentTools = [new TavilySearchResults({ maxResults: 3 })];
+
+// Initialize the Anthropic model with Helicone integration
+const agentModel = new ChatAnthropic({
+  temperature: 0,
+  modelName: "claude-3-opus-20240229",
+  anthropicApiKey: process.env.ANTHROPIC_API_KEY,
+  clientOptions: {
+    baseURL: "https://anthropic.helicone.ai",
+    defaultHeaders: {
+      "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+      "Helicone-Cache-Enabled": "true",
+    },
+  },
+}).bindTools(agentTools);
+
+// Initialize memory to persist state between graph runs
+const agentCheckpointer = new MemorySaver();
+
+// Create the agent
+const agent = createReactAgent({
+  llm: agentModel,
+  tools: agentTools,
+  checkpointer: agentCheckpointer,
+});
+
+// Run the agent with custom Helicone properties
+const result = await agent.invoke(
+  { messages: [new HumanMessage("what is the current weather in sf")] },
+  {
+    options: {
+      headers: {
+        "Helicone-Prompt-Id": "weather-query",
+        "Helicone-Session-Id": uuidv4(),
+        "Helicone-Session-Name": "weather-session",
+        "Helicone-Session-Path": "/weather",
+      },
+    },
+  }
+);
+```

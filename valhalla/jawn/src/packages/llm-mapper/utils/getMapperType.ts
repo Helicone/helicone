@@ -52,6 +52,7 @@ export const getMapperTypeFromHeliconeRequest = (
     provider: heliconeRequest.provider,
     path: heliconeRequest.request_path,
     isAssistant: isAssistantRequest(heliconeRequest),
+    targetUrl: heliconeRequest.target_url,
   });
 };
 
@@ -60,14 +61,24 @@ export const getMapperType = ({
   provider,
   path,
   isAssistant,
+  targetUrl,
 }: {
   model: string;
   provider: Provider;
   path?: string | null;
   isAssistant?: boolean;
+  targetUrl?: string | null;
 }): MapperType => {
   if (!model) {
     return "openai-chat";
+  }
+
+  if (typeof model !== "string") {
+    return "openai-chat";
+  }
+
+  if (targetUrl?.includes("/v1/response") && provider === "OPENAI") {
+    return "openai-response";
   }
 
   if (model.includes("deepseek")) {
@@ -108,7 +119,15 @@ export const getMapperType = ({
     return "openai-chat";
   }
 
-  if (/^claude/.test(model) || provider === "ANTHROPIC") {
+  // Check for any Anthropic model regardless of provider
+  if (
+    /^claude/.test(model) ||
+    model.includes("claude") ||
+    model.includes("anthropic") ||
+    provider === "ANTHROPIC" ||
+    (provider === "AWS" &&
+      (model.includes("claude") || model.includes("anthropic")))
+  ) {
     return "anthropic-chat";
   }
 
@@ -116,7 +135,13 @@ export const getMapperType = ({
     return "openai-assistant";
   }
 
-  if (model && model.toLowerCase().includes("gemini")) {
+  if (
+    model &&
+    (model.toLowerCase().includes("gemini") || provider === "GOOGLE")
+  ) {
+    if (provider === "OPENAI") {
+      return "openai-chat";
+    }
     return "gemini-chat";
   }
 

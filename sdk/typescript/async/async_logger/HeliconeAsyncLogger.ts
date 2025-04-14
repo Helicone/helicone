@@ -7,6 +7,7 @@ import * as azureOpenAI from "@azure/openai";
 import * as cohere from "cohere-ai";
 import * as bedrock from "@aws-sdk/client-bedrock-runtime";
 import * as google_aiplatform from "@google-cloud/aiplatform";
+import Together from "together-ai";
 import * as ChainsModule from "langchain/chains";
 import * as AgentsModule from "langchain/agents";
 import * as ToolsModule from "langchain/tools";
@@ -21,6 +22,7 @@ type IHeliconeAsyncLoggerOptions = {
     cohere?: typeof cohere;
     bedrock?: typeof bedrock;
     google_aiplatform?: typeof google_aiplatform;
+    together?: typeof Together;
     langchain?: {
       chainsModule?: typeof ChainsModule;
       agentsModule?: typeof AgentsModule;
@@ -36,6 +38,7 @@ export class HeliconeAsyncLogger {
   private openAI?: typeof OpenAI;
   private anthropic?: typeof anthropic;
   private azureOpenAI?: typeof azureOpenAI;
+  private together?: typeof Together;
   private cohere?: typeof cohere;
   private bedrock?: typeof bedrock;
   private google_aiplatform?: typeof google_aiplatform;
@@ -53,6 +56,7 @@ export class HeliconeAsyncLogger {
     this.cohere = opts.providers?.cohere ?? undefined;
     this.bedrock = opts.providers?.bedrock ?? undefined;
     this.google_aiplatform = opts.providers?.google_aiplatform ?? undefined;
+    this.together = opts.providers?.together ?? undefined;
     this.chainsModule = opts.providers?.langchain?.chainsModule ?? undefined;
     this.agentsModule = opts.providers?.langchain?.agentsModule ?? undefined;
     this.toolsModule = opts.providers?.langchain?.toolsModule ?? undefined;
@@ -78,6 +82,7 @@ export class HeliconeAsyncLogger {
         cohere: this.cohere ?? undefined,
         bedrock: this.bedrock ?? undefined,
         google_aiplatform: this.google_aiplatform ?? undefined,
+        together: this.together ?? undefined,
         langchain: {
           chainsModule: this.chainsModule ?? undefined,
           agentsModule: this.agentsModule ?? undefined,

@@ -1,5 +1,5 @@
 import { UseQueryResult } from "@tanstack/react-query";
-import { Result, resultMap } from "../../../lib/result";
+import { Result, resultMap } from "../../../packages/common/result";
 
 import { getAggregatedKeyMetrics } from "../../../lib/api/property/aggregatedKeyMetrics";
 import { UnPromise } from "../../../lib/tsxHelpers";
@@ -19,10 +19,12 @@ export interface PropertyPageData {
   };
   property: string;
   limit?: number;
+  sortKey?: string;
+  sortDirection?: "asc" | "desc";
 }
 
 export const usePropertyCard = (props: PropertyPageData) => {
-  const { timeFilter, property, limit = 10 } = props;
+  const { timeFilter, property, limit = 10, sortKey, sortDirection } = props;
   const propertyFilterLeaf: FilterLeaf = {
     request_response_rmt: {
       search_properties: {
@@ -43,6 +45,8 @@ export const usePropertyCard = (props: PropertyPageData) => {
     dbIncrement: "day",
     timeZoneDifference: 0,
     limit,
+    sortKey,
+    sortDirection,
   };
 
   const keyMetrics = {

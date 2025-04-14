@@ -10,7 +10,7 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { err, ok, Result } from "../../lib/shared/result";
+import { err, ok, Result } from "../../packages/common/result";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import {
   ExperimentV2Manager,
@@ -25,7 +25,7 @@ import { EvaluatorManager } from "../../managers/evaluator/EvaluatorManager";
 import { EvaluatorResult } from "./evaluatorController";
 import { RequestManager } from "../../managers/request/RequestManager";
 import { PromptManager } from "../../managers/prompt/PromptManager";
-import { supabaseServer } from "../../lib/db/supabase";
+import { dbExecute } from "../../lib/shared/db/dbExecute";
 
 export interface ExperimentV2 {
   id: string;
@@ -157,33 +157,60 @@ export class ExperimentV2Controller extends Controller {
       return err(experiment.error);
     }
 
-    let inputRecord = await supabaseServer.client
-      .from("prompt_input_record")
-      .select("*")
-      .eq("source_request", requestId)
-      .single();
+    // Try to find an existing input record
+    const inputRecordResult = await dbExecute<{
+      id: string;
+      inputs: Record<string, string>;
+      auto_prompt_inputs: any[];
+    }>(
+      `SELECT id, inputs, auto_prompt_inputs 
+       FROM prompt_input_record 
+       WHERE source_request = $1`,
+      [requestId]
+    );
 
-    if (inputRecord.error || !inputRecord.data) {
-      inputRecord = await supabaseServer.client
-        .from("prompt_input_record")
-        .insert({
-          experiment_id: experiment.data.experimentId,
-          inputs: {},
-          prompt_version: promptVersionResult.data!,
-          auto_prompt_inputs: [],
-          source_request: requestId,
-        })
-        .select("id")
-        .single();
+    let inputRecordId: string;
+    let inputs: Record<string, string> = {};
+    let autoInputs: any[] = [];
+
+    if (
+      inputRecordResult.error ||
+      !inputRecordResult.data ||
+      inputRecordResult.data.length === 0
+    ) {
+      // Create new input record if none exists
+      const newInputResult = await dbExecute<{ id: string }>(
+        `INSERT INTO prompt_input_record
+         (inputs, prompt_version, auto_prompt_inputs, source_request)
+         VALUES ($1, $2, $3, $4)
+         RETURNING id`,
+        [{}, promptVersionResult.data!, [], requestId]
+      );
+
+      if (
+        newInputResult.error ||
+        !newInputResult.data ||
+        newInputResult.data.length === 0
+      ) {
+        return err("Failed to create input record");
+      }
+
+      inputRecordId = newInputResult.data[0].id;
+    } else {
+      inputRecordId = inputRecordResult.data[0].id;
+      inputs =
+        (inputRecordResult.data[0].inputs as Record<string, string>) || {};
+      autoInputs =
+        (inputRecordResult.data[0].auto_prompt_inputs as any[]) || [];
     }
 
     await experimentManager.createExperimentTableRowBatch(
       experiment.data.experimentId,
       [
         {
-          inputRecordId: inputRecord.data?.id!,
-          inputs: (inputRecord.data?.inputs as Record<string, string>) ?? {},
-          autoInputs: (inputRecord.data?.auto_prompt_inputs as any[]) ?? [],
+          inputRecordId: inputRecordId,
+          inputs: inputs,
+          autoInputs: autoInputs,
         },
       ]
     );
@@ -229,6 +256,23 @@ export class ExperimentV2Controller extends Controller {
     return result;
   }
 
+  @Delete("/{experimentId}")
+  public async deleteExperiment(
+    @Path() experimentId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const experimentManager = new ExperimentV2Manager(request.authParams);
+    const result = await experimentManager.deleteExperiment(experimentId);
+
+    if (result.error) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+
+    return result;
+  }
+
   @Get("/{experimentId}")
   public async getExperimentById(
     @Path() experimentId: string,
@@ -263,6 +307,20 @@ export class ExperimentV2Controller extends Controller {
     } else {
       this.setStatus(200);
     }
+    return result;
+  }
+
+  @Delete("/{experimentId}/prompt-version/{promptVersionId}")
+  public async deletePromptVersion(
+    @Path() experimentId: string,
+    @Path() promptVersionId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const experimentManager = new ExperimentV2Manager(request.authParams);
+    const result = await experimentManager.deletePromptVersion(
+      experimentId,
+      promptVersionId
+    );
     return result;
   }
 
@@ -315,6 +373,26 @@ export class ExperimentV2Controller extends Controller {
     );
 
     if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
+  @Post("/{experimentId}/add-manual-rows-batch")
+  public async addManualRowsToExperimentBatch(
+    @Path() experimentId: string,
+    @Body() requestBody: { inputs: Record<string, string>[] },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const experimentManager = new ExperimentV2Manager(request.authParams);
+    const result = await experimentManager.addManualRowsToExperimentBatch(
+      experimentId,
+      requestBody.inputs
+    );
+
+    if (result.error) {
       this.setStatus(500);
     } else {
       this.setStatus(200);

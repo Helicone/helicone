@@ -29,6 +29,16 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "startsWith",
+      value: "gpt-4o-mini-2024-07-18.ft-",
+    },
+    cost: {
+      prompt_token: 0.0000003,
+      completion_token: 0.0000012,
+    },
+  },
+  {
+    model: {
+      operator: "startsWith",
       value: "ft:gpt-4o-2024-08-06:",
     },
     cost: {

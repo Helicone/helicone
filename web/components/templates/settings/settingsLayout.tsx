@@ -1,6 +1,5 @@
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { IslandContainer } from "@/components/ui/islandContainer";
-import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   BuildingOfficeIcon,
@@ -13,6 +12,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { ReactNode, useMemo } from "react";
 import { useIsGovernanceEnabled } from "../organization/hooks";
+import AuthHeader from "@/components/shared/authHeader";
 
 const DEFAULT_TABS = [
   {
@@ -83,7 +83,8 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
   }, [isGovernanceEnabled.data?.data?.data]);
 
   return (
-    <IslandContainer className="space-y-6 pt-10">
+    <IslandContainer>
+      <AuthHeader isWithinIsland={true} title={""} />
       {org?.currentOrg?.tier !== "demo" && (
         <div className="flex flex-col space-y-8 items-start">
           <div className="flex flex-col space-y-2 items-start">
@@ -94,25 +95,29 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
               className=""
               orientation="vertical"
             >
-              <TabsList className="flex flex-row h-full space-y-1">
+              <TabsList className="flex w-full overflow-x-auto p-1">
                 {tabs.map((tab) => (
-                  <Link key={tab.id} href={tab.href} passHref>
+                  <Link
+                    key={tab.id}
+                    href={tab.href}
+                    passHref
+                    legacyBehavior
+                    className="hover:no-underline"
+                  >
                     <TabsTrigger
                       value={tab.id}
-                      className="w-full justify-start"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        router.push(tab.href);
-                      }}
+                      className="px-4 py-2 text-sm gap-2"
+                      asChild
                     >
-                      <tab.icon className="h-5 w-5 mr-2" />
-                      {tab.title}
+                      <a href={tab.href} className="cursor-pointer">
+                        <tab.icon className="h-5 w-5" />
+                        {tab.title}
+                      </a>
                     </TabsTrigger>
                   </Link>
                 ))}
               </TabsList>
             </Tabs>
-            <Separator />
           </div>
 
           <div className="flex-1 w-full">{children}</div>

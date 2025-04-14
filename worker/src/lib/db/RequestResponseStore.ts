@@ -6,12 +6,8 @@ import {
   DBQueryTimer,
   FREQUENT_PRECENT_LOGGING,
 } from "../util/loggers/DBQueryTimer";
-import { Result, err, ok } from "../util/results";
-import { formatTimeString } from "./ClickhouseStore";
-import {
-  ClickhouseClientWrapper,
-  RequestResponseLog,
-} from "./ClickhouseWrapper";
+import { Result } from "../util/results";
+import { ClickhouseClientWrapper } from "./ClickhouseWrapper";
 import { Valhalla } from "./valhalla";
 
 export interface RequestPayload {
@@ -35,79 +31,6 @@ export class RequestResponseStore {
     public fallBackQueue: Queue,
     public responseAndResponseQueueKV: KVNamespace
   ) {}
-
-  async insertIntoRequest(
-    requestPayload: RequestPayload
-  ): Promise<Result<null, string>> {
-    const { request, properties, responseId } = requestPayload;
-    if (!request.id) {
-      return { data: null, error: "Missing request.id" };
-    }
-
-    const requestInsertResult = await this.queryTimer.withTiming(
-      this.database.from("request").insert([request]),
-      {
-        queryName: "insert_request",
-        percentLogging: FREQUENT_PRECENT_LOGGING,
-      }
-    );
-
-    if (requestInsertResult.error) {
-      return {
-        data: null,
-        error: JSON.stringify({
-          requestError: requestInsertResult.error,
-        }),
-      };
-    }
-    const createdAt = request.created_at
-      ? request.created_at
-      : new Date().toISOString();
-    const responseInsertResult = await this.queryTimer.withTiming(
-      this.database.from("response").insert([
-        {
-          request: request.id,
-          id: responseId,
-          delay_ms: -1,
-          body: {},
-          status: -2,
-          created_at: createdAt,
-        },
-      ]),
-      {
-        queryName: "insert_response",
-        percentLogging: FREQUENT_PRECENT_LOGGING,
-      }
-    );
-    const propertiesInsertResult = await this.insertProperties(properties);
-
-    if (responseInsertResult.error || propertiesInsertResult.error) {
-      return {
-        data: null,
-        error: JSON.stringify({
-          responseError: responseInsertResult.error,
-          propertiesError: propertiesInsertResult.error,
-        }),
-      };
-    }
-    return { data: null, error: null };
-  }
-
-  async insertProperties(
-    properties: Database["public"]["Tables"]["properties"]["Insert"][]
-  ): Promise<Result<null, string>> {
-    const insertResult = await this.queryTimer.withTiming(
-      this.database.from("properties").insert(properties),
-      {
-        queryName: "insert_properties",
-        percentLogging: FREQUENT_PRECENT_LOGGING,
-      }
-    );
-    if (insertResult.error) {
-      return { data: null, error: JSON.stringify(insertResult) };
-    }
-    return { data: null, error: null };
-  }
 
   async updateResponsePostgres(
     responsePayload: ResponsePayload
@@ -252,26 +175,6 @@ export class RequestResponseStore {
     }
   }
 
-  async addRequest(
-    requestData: Database["public"]["Tables"]["request"]["Insert"],
-    propertiesData: Database["public"]["Tables"]["properties"]["Insert"][],
-    responseId: string
-  ): Promise<Result<null, string>> {
-    const payload: RequestPayload = {
-      request: requestData,
-      properties: propertiesData,
-      responseId,
-    };
-
-    const res = await this.insertIntoRequest(payload);
-
-    if (res.error) {
-      console.error("Error inserting into request:", res.error);
-      return res;
-    }
-    return { data: null, error: null };
-  }
-
   async updateResponse(
     responseId: string,
     requestId: string,
@@ -310,144 +213,5 @@ export class RequestResponseStore {
 
   async waitForResponse(requestId: string) {
     await getResponse(this.database, this.queryTimer, requestId);
-  }
-
-  async putRequestProperty(
-    requestId: string,
-    newProperties: {
-      key: string;
-      value: string;
-    }[],
-    orgId: string
-  ): Promise<
-    Result<
-      {
-        request: Database["public"]["Tables"]["request"]["Row"];
-      },
-      string
-    >
-  > {
-    const request = await this.queryTimer.withTiming(
-      this.database
-        .from("request")
-        .select("*")
-        .eq("id", requestId)
-        .eq("helicone_org_id", orgId)
-        .single(),
-      {
-        queryName: "select_request_by_id",
-        percentLogging: FREQUENT_PRECENT_LOGGING,
-      }
-    );
-
-    if (request.error) {
-      return err(request.error.message);
-    }
-
-    const allProperties: Record<string, any> =
-      (request.data.properties as Record<string, any>) ??
-      ({} as Record<string, any>);
-
-    newProperties.forEach((p) => {
-      allProperties[p.key] = p.value;
-    });
-
-    await this.queryTimer.withTiming(
-      this.database
-        .from("request")
-        .update({ properties: allProperties })
-        .match({
-          id: requestId,
-        })
-        .eq("helicone_org_id", orgId),
-      {
-        queryName: "update_request_properties",
-        percentLogging: FREQUENT_PRECENT_LOGGING,
-      }
-    );
-
-    const properties: Database["public"]["Tables"]["properties"]["Insert"][] =
-      newProperties.map((p) => ({
-        request_id: requestId,
-        key: p.key,
-        value: p.value,
-        auth_hash: "",
-      }));
-
-    await this.insertProperties(properties);
-
-    const query = `
-        SELECT * 
-        FROM request_response_rmt
-        WHERE (
-          request_id={val_0: UUID} AND
-          organization_id={val_1: UUID}
-        )
-    `;
-    const { data, error } = await this.clickhouseWrapper.dbQuery(query, [
-      requestId,
-      orgId,
-    ]);
-
-    if (error || data === null || data?.length == 0) {
-      return err("No response found.");
-    }
-    const response: RequestResponseLog = data[0] as RequestResponseLog;
-
-    if (
-      response.user_id === null ||
-      response.status === null ||
-      response.model === null
-    ) {
-      return err("Missing response data.");
-    }
-
-    const { error: e } = await this.clickhouseWrapper.dbInsertClickhouse(
-      "property_with_response_v1",
-      newProperties.map((p) => {
-        return {
-          response_id: response.response_id,
-          response_created_at: response.response_created_at,
-          latency: response.latency,
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          status: response.status!,
-          completion_tokens: response.completion_tokens,
-          prompt_tokens: response.prompt_tokens,
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          model: response.model!,
-          request_id: requestId,
-          request_created_at: response.request_created_at,
-          auth_hash: "",
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          user_id: response.user_id!,
-          organization_id: orgId,
-          time_to_first_token: response.time_to_first_token,
-          property_key: p.key,
-          property_value: p.value,
-          threat: response.threat,
-          provider: response.provider,
-          country_code: response.country_code,
-        };
-      })
-    );
-    if (e) {
-      console.error("Error inserting into clickhouse:", e);
-    }
-
-    await this.clickhouseWrapper.dbInsertClickhouse(
-      "properties_v3",
-      newProperties.map((p) => {
-        return {
-          id: 1,
-          request_id: requestId,
-          key: p.key,
-          value: p.value,
-          organization_id: orgId,
-          created_at: formatTimeString(new Date().toISOString()),
-        };
-      })
-    );
-
-    return ok({ request: request.data });
   }
 }

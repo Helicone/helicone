@@ -1,7 +1,7 @@
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Database } from "../../supabase/database.types";
-import { useCallback, useEffect, useState } from "react";
+import { Database } from "../../db/database.types";
+import { useCallback, useEffect, useState, useRef } from "react";
 import Cookies from "js-cookie";
 import { OrgContextValue } from "@/components/layout/org/OrgContextValue";
 import { ORG_ID_COOKIE_KEY } from "../../lib/constants";
@@ -165,10 +165,9 @@ const useGetOrg = (orgId: string) => {
 const useGetOrgs = () => {
   const supabaseClient = useSupabaseClient<Database>();
   const user = useUser();
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isPending, refetch } = useQuery({
     queryKey: ["Organizations", user?.id ?? ""],
     queryFn: async (query) => {
-      console.log("useGetOrgs", user?.id);
       if (!user?.id) {
         return [];
       }
@@ -183,7 +182,7 @@ const useGetOrgs = () => {
       return data;
     },
     refetchOnWindowFocus: false,
-    refetchInterval: (data) => (data?.length === 0 ? 1_000 : false), // Refetch every 1 seconds if no orgs
+    refetchInterval: 10_000, // Refetch every 10 seconds
     refetchIntervalInBackground: true,
   });
 
@@ -197,7 +196,7 @@ const useGetOrgs = () => {
 
   return {
     data,
-    isLoading,
+    isPending,
     refetch,
   };
 };
@@ -269,6 +268,7 @@ const setOrgCookie = (orgId: string) => {
 const useOrgsContextManager = () => {
   const user = useUser();
   const { data: orgs, refetch } = useGetOrgs();
+  const jawn = getJawnClient();
 
   const [org, setOrg] = useState<NonNullable<typeof orgs>[number] | null>(null);
   const [renderKey, setRenderKey] = useState(0);
@@ -290,107 +290,93 @@ const useOrgsContextManager = () => {
     });
   }, [refetch]);
 
-  const [ensuringOneOrg, setEnsuringOneOrg] = useState(false);
+  const hasRunRef = useRef<string | null>(null);
+  const isProcessingRef = useRef(false);
 
   useEffect(() => {
-    if ((!orgs || orgs.length === 0) && user?.id && !ensuringOneOrg) {
-      setEnsuringOneOrg(true);
-      const jwtToken = getHeliconeCookie().data?.jwtToken;
-      const isEu = window.location.hostname.includes("eu.");
-      fetch(`/api/user/${user.id}/ensure-one-org`, {
-        method: "POST",
-        body: JSON.stringify({
-          isEu,
-        }),
-      }).then((res) => {
-        setEnsuringOneOrg(false);
-        if (res.status === 201) {
-        } else if (res.status !== 200) {
-          console.error("Failed to create org", res.json());
-        } else {
-          res.json().then((x) => {
-            fetch(
-              `${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}/v1/evaluator`,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  "helicone-authorization": JSON.stringify({
-                    _type: "jwt",
-                    token: jwtToken,
-                    orgId: x.orgId,
-                  }),
-                },
-                body: JSON.stringify({
-                  llm_template:
-                    '{\n  "messages": [\n    {\n      "role": "user",\n      "content": [\n        {\n          "type": "text",\n          "text": "Please call the scorer function and use the following context to evaluate the output.\\n\\n\\n\\nHere were the inputs into the LLM:\\n### INPUT BEGIN ###\\n<helicone-prompt-input key=\\"inputs\\" />\\n### INPUT END ###\\n\\nHere was the output of the LLM:\\n### OUTPUT BEGIN ###\\n<helicone-prompt-input key=\\"outputBody\\" />\\n### OUTPUT END ###\\n\\n\\n\\n\\n"\n        }\n      ]\n    }\n  ],\n  "max_tokens": 1024,\n  "temperature": 1,\n  "model": "gpt-3.5-turbo",\n  "tools": [\n    {\n      "type": "function",\n      "function": {\n        "name": "scorer",\n        "description": "Given the inputs as shown in the system message and the output. Please call the scorer function.",\n        "parameters": {\n          "type": "object",\n          "properties": {\n            "PackerQuality": {\n              "description": "You are an expert travel consultant who specializes in evaluating packing list recommendations. Given the travel context and the AI\'s generated packing list, score how well the packing list serves the traveler\'s needs on a scale of 1-100.\\n\\nScoring Rubric:\\n- Weather Appropriateness (25 points)\\n  • Items match destination climate\\n  • Seasonal considerations included\\n  • Layering options if needed\\n  • Weather protection items\\n\\n- Activity Coverage (25 points)\\n  • All planned activities accounted for\\n  • Appropriate gear/clothing for each activity\\n  • Safety equipment where necessary\\n  • Specialized items included\\n\\n- Essential Basics (25 points)\\n  • Core travel items covered\\n  • Toiletries completeness\\n  • Documents and money items\\n  • Electronics and chargers\\n\\n- Practicality (25 points)\\n  • Appropriate for trip duration\\n  • Not overpacked/redundant\\n  • Consideration for luggage limitations\\n  • Items are travel-friendly\\n\\nConsider both inclusion of necessary items and exclusion of unnecessary ones in your scoring. Deduct points for irrelevant items or missed essentials.",\n              "type": "number",\n              "minimum": 1,\n              "maximum": 100\n            }\n          },\n          "required": [\n            "PackerQuality"\n          ]\n        }\n      }\n    }\n  ]\n}',
-                  scoring_type: "LLM-RANGE",
-                  name: "PackerQuality",
-                }),
-              }
-            ).then(async (response) => {
-              const evaluator = await response.json();
-              if (evaluator.data?.id) {
-                await fetch(
-                  `${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}/v1/evaluator/${evaluator.data.id}/onlineEvaluators`,
-                  {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                      "helicone-authorization": JSON.stringify({
-                        _type: "jwt",
-                        token: jwtToken,
-                        orgId: x.orgId,
-                      }),
-                    },
-                    body: JSON.stringify({
-                      config: {
-                        sampleRate: 100,
-                        propertyFilters: [
-                          {
-                            key: "Helicone-Prompt-Id",
-                            value: "generate-packing-list",
-                          },
-                        ],
-                      },
-                    }),
-                  }
-                );
-              }
-            });
-
-            fetch(
-              `${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}/v1/organization/setup-demo`,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  "helicone-authorization": JSON.stringify({
-                    _type: "jwt",
-                    token: jwtToken,
-                    orgId: x.orgId,
-                  }),
-                },
-              }
-            );
-            refreshCurrentOrg();
-          });
-        }
-      });
+    if (user?.id && hasRunRef.current === user.id) {
+      return;
     }
-  }, [orgs, user?.id, refreshCurrentOrg]);
+
+    if (isProcessingRef.current) {
+      return;
+    }
+
+    if (user?.id && (!orgs || orgs.length === 0)) {
+      setTimeout(() => {
+        refetch();
+      }, 1500);
+      return;
+    }
+
+    if (
+      user?.id &&
+      !isProcessingRef.current &&
+      hasRunRef.current !== user.id &&
+      orgs &&
+      orgs.length > 0
+    ) {
+      const demoOrg = orgs?.find((org) => org.tier === "demo");
+
+      // If demo org exists and demo data is already set up, mark as complete and exit
+      if (
+        demoOrg &&
+        demoOrg.onboarding_status &&
+        typeof demoOrg.onboarding_status === "object" &&
+        (demoOrg.onboarding_status as any).demoDataSetup === true
+      ) {
+        hasRunRef.current = user.id;
+        return;
+      }
+
+      isProcessingRef.current = true;
+      hasRunRef.current = user.id;
+      const jwtToken = getHeliconeCookie().data?.jwtToken;
+      const mainOrg = orgs?.find((org) => org.is_main_org === true);
+
+      if (
+        demoOrg &&
+        demoOrg.onboarding_status &&
+        typeof demoOrg.onboarding_status === "object" &&
+        (demoOrg.onboarding_status as any).demoDataSetup === false
+      ) {
+        fetch(
+          `${process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE}/v1/organization/setup-demo`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "helicone-authorization": JSON.stringify({
+                _type: "jwt",
+                token: jwtToken,
+                orgId: demoOrg.id,
+              }),
+            },
+          }
+        );
+      }
+
+      const orgIdFromCookie = Cookies.get(ORG_ID_COOKIE_KEY);
+      const orgFromCookie = orgs?.find((org) => org.id === orgIdFromCookie);
+
+      if (!orgFromCookie && mainOrg) {
+        setOrgCookie(mainOrg.id);
+      }
+
+      refreshCurrentOrg();
+
+      setTimeout(() => {
+        isProcessingRef.current = false;
+      }, 0);
+    }
+  }, [orgs, user?.id]);
 
   useEffect(() => {
     if (user) {
-      posthog.identify(
-        user.id,
-        {
-          name: user.user_metadata?.name,
-        },
-        {
-          email: user.email,
-        }
-      );
+      posthog.identify(user.id, {
+        name: user.user_metadata?.name,
+        email: user.email,
+      });
     }
 
     if (org) {
@@ -400,6 +386,7 @@ const useOrgsContextManager = () => {
         stripe_customer_id: org.stripe_customer_id || "",
         organization_type: org.organization_type || "",
         date_joined: org.created_at || "",
+        has_onboarded: org.has_onboarded || false,
       });
 
       if (user && env("NEXT_PUBLIC_IS_ON_PREM") !== "true") {

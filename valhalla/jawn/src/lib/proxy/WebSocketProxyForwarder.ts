@@ -1,9 +1,11 @@
+import console from "console";
 import internal from "stream";
 import { WebSocket, WebSocketServer } from "ws";
 import { SocketMessage } from "../../types/realtime";
+import { safeJsonParse } from "../../utils/helpers";
 import { KafkaProducer } from "../clients/KafkaProducer";
-import { supabaseServer } from "../db/supabase";
 import { RequestWrapper } from "../requestWrapper/requestWrapper";
+import { getHeliconeAuthClient } from "../../packages/common/auth/server/AuthClientFactory";
 import { S3Client } from "../shared/db/s3Client";
 import { S3Manager } from "./S3Manager";
 import { handleSocketSession } from "./WebSocketProxyRequestHandler";
@@ -24,20 +26,78 @@ export function webSocketProxyForwarder(
   const req = requestWrapper.getRequest();
 
   wss.handleUpgrade(req, socket, head, async (clientWs) => {
-    const targetUrl =
-      "wss://api.openai.com/v1/realtime" + requestWrapper.url.search;
+    // Keep message events in memory for logging.
+    const messages: SocketMessage[] = [];
+
+    // Buffer to store early incoming messages from the client.
+    const messageBuffer: Array<{ data: ArrayBufferLike; isBinary: boolean }> =
+      [];
+
+    // Attach a temporary listener to capture messages until the target is ready.
+    const tempListener = (data: ArrayBufferLike, isBinary: boolean) => {
+      messageBuffer.push({ data, isBinary });
+      // Also log the message
+      const dataCopy = Buffer.from(data);
+      // Always convert to string for message logging
+      const message = dataCopy.toString("utf-8");
+      const content = safeJsonParse(message) ?? {};
+      messages.push({
+        type: "message",
+        content,
+        timestamp: new Date().toISOString(),
+        from: "client",
+      });
+    };
+    clientWs.on("message", tempListener);
+
+    // Create a new WebSocket connection depending on the endpoint
+    const searchParams = new URLSearchParams(requestWrapper.url.search);
+    const azureResource = searchParams.get("resource");
+    const azureDeployment = searchParams.get("deployment");
+    const azureApiVersion = "2024-10-01-preview"; // 2024-12-17 or 2024-10-01-preview
+    const isAzure = azureResource && azureDeployment;
+    const targetUrl = isAzure
+      ? `wss://${azureResource}.openai.azure.com/openai/realtime?api-version=${azureApiVersion}&deployment=${azureDeployment}`
+      : `wss://api.openai.com/v1/realtime${requestWrapper.url.search}`;
+
     const openaiWs = new WebSocket(targetUrl, {
       headers: {
-        Authorization: `${requestWrapper.getAuthorization()}`,
+        ...(isAzure
+          ? {
+              "api-key": requestWrapper.getAuthorization()?.split(" ")[1],
+            }
+          : {
+              Authorization: requestWrapper.getAuthorization(),
+            }),
         "OpenAI-Beta": "realtime=v1",
       },
     });
 
-    // Keep message events in memory
-    const messages: SocketMessage[] = [];
+    openaiWs.on("error", (error) => {
+      console.error(
+        `WebSocket connection error: ${error.message} | Type: ${
+          error.name
+        } | Code: ${(error as any).code || "N/A"} | Stack: ${
+          error.stack?.split("\n")[1]?.trim() || "N/A"
+        } | Target URL: ${targetUrl} | Headers: ${JSON.stringify({
+          Authorization: requestWrapper.getAuthorization()
+            ? "Bearer [REDACTED]"
+            : "None",
+          "OpenAI-Beta": "realtime=v1",
+        })} | Request path: ${
+          requestWrapper.url.pathname
+        } | Azure params: resource=${azureResource}, deployment=${azureDeployment} | Timestamp: ${new Date().toISOString()}`
+      );
+    });
 
-    // Link the WebSocket connections, with a callback for events
     openaiWs.on("open", () => {
+      // Remove the temporary listener and flush any buffered messages.
+      clientWs.off("message", tempListener);
+      messageBuffer.forEach(({ data, isBinary }) => {
+        openaiWs.send(data, { binary: isBinary });
+      });
+
+      // Link the WebSocket connections, with a callback for events.
       linkWebSocket({
         clientWs,
         targetWs: openaiWs,
@@ -46,7 +106,7 @@ export function webSocketProxyForwarder(
           /*                            Append Message Events                           */
           /* -------------------------------------------------------------------------- */
           if (messageType === "message") {
-            const content = typeof data === "string" ? JSON.parse(data) : data;
+            const content = safeJsonParse(data as string) ?? {};
             messages.push({
               type: messageType,
               content,
@@ -57,6 +117,7 @@ export function webSocketProxyForwarder(
             /*                            Handle Closing Event                            */
             /* -------------------------------------------------------------------------- */
           } else if (messageType === "close") {
+            const authClient = getHeliconeAuthClient();
             try {
               // 1. Handle the socket session with socket messages
               const { loggable } = await handleSocketSession(
@@ -74,7 +135,7 @@ export function webSocketProxyForwarder(
 
               // 3. Get the auth params
               const { data: authParams, error: authParamsError } =
-                await supabaseServer.authenticate(auth);
+                await authClient.authenticate(auth);
 
               if (authParamsError || !authParams) {
                 console.error("Error getting auth params", authParamsError);
@@ -83,7 +144,7 @@ export function webSocketProxyForwarder(
 
               // 4. Get the org params
               const { data: orgParams, error: orgParamsError } =
-                await supabaseServer.getOrganization(authParams);
+                await authClient.getOrganization(authParams);
 
               if (orgParamsError || !orgParams) {
                 console.error("Error getting organization", orgParamsError);
@@ -144,7 +205,7 @@ async function linkWebSocket({
       | "pong"
       | "unexpected-response",
     from: "client" | "target",
-    data: any
+    data: string | Error
   ) => Promise<void>;
 }) {
   // MESSAGE EVENTS
@@ -152,19 +213,21 @@ async function linkWebSocket({
     targetWs.send(data, { binary: isBinary });
 
     const dataCopy = Buffer.from(data);
-    const message = isBinary ? dataCopy : dataCopy.toString("utf-8");
-    await on("message", "client", message.toString());
+    // Always convert to string for consistency when sending to the callback
+    const message = dataCopy.toString("utf-8");
+    await on("message", "client", message);
   });
   targetWs.on("message", async (data: ArrayBufferLike, isBinary: boolean) => {
     clientWs.send(data, { binary: isBinary });
 
     const dataCopy = Buffer.from(data);
-    const message = isBinary ? dataCopy : dataCopy.toString("utf-8");
-    await on("message", "target", message.toString());
+    // Always convert to string for consistency when sending to the callback
+    const message = dataCopy.toString("utf-8");
+    await on("message", "target", message);
   });
 
   // CLOSE EVENTS
-  let hasLogged = false; // Flag to prevent double logging\
+  let hasLogged = false; // Flag to prevent double logging
 
   clientWs.on("close", async () => {
     if (!hasLogged) {

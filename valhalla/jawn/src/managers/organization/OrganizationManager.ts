@@ -1,7 +1,9 @@
 import { ENVIRONMENT } from "../../lib/clients/constant";
 import { Database } from "../../lib/db/database.types";
-import { AuthParams, supabaseServer } from "../../lib/db/supabase";
-import { ok, err, Result } from "../../lib/shared/result";
+import { getHeliconeAuthClient } from "../../packages/common/auth/server/AuthClientFactory";
+import { AuthParams } from "../../packages/common/auth/types";
+import { dbExecute } from "../../lib/shared/db/dbExecute";
+import { err, ok, Result } from "../../packages/common/result";
 import { OrganizationStore } from "../../lib/stores/OrganizationStore";
 import { BaseManager } from "../BaseManager";
 
@@ -17,6 +19,7 @@ export type UpdateOrganizationParams = Pick<
   | "limits"
   | "reseller_id"
   | "organization_type"
+  | "onboarding_status"
 > & {
   variant?: string;
 };
@@ -60,6 +63,18 @@ export type OrganizationOwner = {
   tier: string;
 };
 
+export type OnboardingStatus = Partial<{
+  currentStep: string;
+  selectedTier: string;
+  hasOnboarded: boolean;
+  members: any[];
+  addons: {
+    prompts: boolean;
+    experiments: boolean;
+    evals: boolean;
+  };
+}>;
+
 export class OrganizationManager extends BaseManager {
   private organizationStore: OrganizationStore;
   constructor(authParams: AuthParams) {
@@ -68,11 +83,25 @@ export class OrganizationManager extends BaseManager {
   }
 
   async getOrg() {
-    return supabaseServer.client
-      .from("organization")
-      .select("*")
-      .eq("id", this.authParams.organizationId)
-      .single();
+    try {
+      const result = await dbExecute<
+        Database["public"]["Tables"]["organization"]["Row"]
+      >(
+        `SELECT *
+         FROM organization
+         WHERE id = $1
+         LIMIT 1`,
+        [this.authParams.organizationId]
+      );
+
+      if (result.error || !result.data || result.data.length === 0) {
+        return { data: null, error: result.error ?? "Organization not found" };
+      }
+
+      return { data: result.data[0], error: null };
+    } catch (error) {
+      return { data: null, error: `Failed to get organization: ${error}` };
+    }
   }
 
   async createOrganization(
@@ -154,10 +183,23 @@ export class OrganizationManager extends BaseManager {
       return err(userIdError);
     }
     if (!userId || userId.length === 0) {
-      await supabaseServer.client.auth.signInWithOtp({ email });
-      const result = await this.organizationStore.getUserByEmail(email);
-      userId = result.data;
-      userIdError = result.error;
+      try {
+        // We still need to use the auth API for this specific function
+        const authClient = getHeliconeAuthClient();
+        const userResult = await authClient.createUser({ email, otp: true });
+        if (userResult.error) {
+          return err(userResult.error);
+        }
+
+        if (!userResult.data?.id) {
+          return err("Failed to create user");
+        }
+
+        userId = userResult.data?.id;
+        userIdError = null;
+      } catch (error) {
+        return err(`Failed to send OTP: ${error}`);
+      }
     }
 
     if (userIdError) {
@@ -393,13 +435,34 @@ export class OrganizationManager extends BaseManager {
       return err("User does not have access to get organization members");
     }
 
+    const superUsersResult = await dbExecute<{ user_id: string }>(
+      `SELECT *
+       FROM admins`,
+      []
+    );
+
+    const superUsers = superUsersResult.data || [];
+
     const { data: members, error: membersError } =
       await this.organizationStore.getOrganizationMembers(organizationId);
-
     if (membersError !== null) {
       return err(membersError);
     }
-    return ok(members);
+    if (
+      this.authParams.userId &&
+      superUsers?.some(
+        (superUser) => superUser.user_id === this.authParams.userId
+      )
+    ) {
+      return ok(members);
+    }
+
+    return ok(
+      members.filter(
+        (member) =>
+          !superUsers?.some((superUser) => superUser.user_id === member.member)
+      )
+    );
   }
 
   async setupDemo(organizationId: string): Promise<Result<null, string>> {
@@ -423,5 +486,38 @@ export class OrganizationManager extends BaseManager {
       return err(orgError ?? "Error setting up demo");
     }
     return ok(null);
+  }
+
+  async updateOnboardingStatus(
+    organizationId: string,
+    onboardingStatus: OnboardingStatus,
+    name: string,
+    hasOnboarded: boolean
+  ): Promise<Result<string, string>> {
+    if (!this.authParams.userId) return err("Unauthorized");
+
+    const hasAccess = await this.organizationStore.checkUserBelongsToOrg(
+      organizationId,
+      this.authParams.userId
+    );
+
+    if (!hasAccess) {
+      return err(
+        "User does not have access to update organization onboarding status"
+      );
+    }
+
+    const { data, error } = await this.organizationStore.updateOnboardingStatus(
+      onboardingStatus,
+      name,
+      hasOnboarded
+    );
+
+    if (error || !data) {
+      console.error(`Failed to update onboarding status: ${error}`);
+      return err(`Failed to update onboarding status: ${error}`);
+    }
+
+    return ok(data);
   }
 }

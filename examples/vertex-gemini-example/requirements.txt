@@ -1,0 +1,6 @@
+google-cloud-aiplatform>=1.36.0
+vertexai>=0.0.1
+python-dotenv>=1.0.0
+asyncio>=3.4.3
+google-api-core[grpc,async_rest]>=2.21.0
+google-auth[aiohttp]>=2.35.0 

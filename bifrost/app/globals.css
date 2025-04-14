@@ -1,6 +1,22 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Add smooth scrolling behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Add scroll margin to headings with IDs for better positioning with fixed headers */
+h1[id],
+h2[id],
+h3[id],
+h4[id],
+h5[id],
+h6[id] {
+  scroll-margin-top: 100px; /* Adjust based on your navbar height */
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -65,6 +81,17 @@
   }
 }
 
+/* Custom link styling for blog content only */
+.prose a {
+  @apply font-semibold text-sky-500 no-underline;
+  text-decoration: none !important;
+}
+
+.prose a:hover {
+  @apply underline;
+  text-decoration: underline !important;
+}
+
 @keyframes floating {
   0%,
   100% {
@@ -76,21 +103,48 @@
 }
 
 @keyframes dash {
-  0% { stroke-dashoffset: 100; }
-  100% { stroke-dashoffset: 0; }
+  0% {
+    stroke-dashoffset: 100;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
 }
 
 @keyframes moveArrow {
-  0% { offset: 0; }
-  100% { offset: 100; }
+  0% {
+    offset: 0;
+  }
+  100% {
+    offset: 100;
+  }
 }
 
 @keyframes lift {
-  0%, 15%, 40%, 65%, 90%, 100% { transform: translateY(0); }
-  5%, 10% { transform: translateY(-10px); }
-  30%, 35% { transform: translateY(-10px); }
-  55%, 60% { transform: translateY(-10px); }
-  80%, 85% { transform: translateY(-10px); }
+  0%,
+  15%,
+  40%,
+  65%,
+  90%,
+  100% {
+    transform: translateY(0);
+  }
+  5%,
+  10% {
+    transform: translateY(-10px);
+  }
+  30%,
+  35% {
+    transform: translateY(-10px);
+  }
+  55%,
+  60% {
+    transform: translateY(-10px);
+  }
+  80%,
+  85% {
+    transform: translateY(-10px);
+  }
 }
 
 @keyframes drawLine {

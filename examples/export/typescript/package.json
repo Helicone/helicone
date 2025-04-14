@@ -1,23 +1,26 @@
 {
-  "name": "prompts",
+  "name": "helicone-data-export",
   "version": "1.0.0",
-  "main": "index.js",
-  "license": "MIT",
+  "description": "A command-line tool to export request/response data from Helicone's API",
+  "main": "index.ts",
   "scripts": {
     "start": "ts-node index.ts",
-    "dev": "nodemon --exec ts-node index.ts"
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "helicone",
+    "export",
+    "data",
+    "cli"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.0"
   },
   "devDependencies": {
-    "@types/node": "^20.12.11",
-    "typescript": "^5.4.5"
-  },
-  "dependencies": {
-    "@helicone/helicone": "^2.1.18",
-    "axios": "^1.7.2",
-    "dateformat": "^5.0.3",
-    "dotenv": "^16.4.5",
-    "openai": "^4.45.0",
-    "path": "^0.12.7",
-    "xlsx": "^0.18.5"
+    "@types/node": "^20.0.0"
   }
 }

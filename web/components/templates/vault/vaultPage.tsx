@@ -1,22 +1,20 @@
 // pages/Vault.tsx
+import AuthHeader from "@/components/shared/authHeader";
+import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
+import { InfoBox } from "@/components/ui/helicone/infoBox";
+import { KeyIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import {
   DecryptedProviderKey,
   DecryptedProviderKeyMapping,
 } from "../../../services/lib/keys";
-import ThemedTable, { ThemedTableProps } from "../../shared/themed/themedTable";
-import { useVaultPage } from "./useVaultPage";
-import ThemedModal from "../../shared/themed/themedModal";
+import { useOrg } from "../../layout/org/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
-import { KeyIcon } from "@heroicons/react/24/outline";
+import ThemedModal from "../../shared/themed/themedModal";
+import ThemedTable, { ThemedTableProps } from "../../shared/themed/themedTable";
 import CreateProviderKeyModal from "./createProviderKeyModal";
 import CreateProxyKeyModal from "./createProxyKeyModal";
-import { LimitCell } from "./limitsCell";
-import { useFeatureFlags } from "../../../services/hooks/featureFlags";
-import { useOrg } from "../../layout/org/organizationContext";
-import AuthHeader from "@/components/shared/authHeader";
-import { InfoBox } from "@/components/ui/helicone/infoBox";
-import { FeatureUpgradeCard } from "@/components/shared/helicone/FeatureUpgradeCard";
+import { useVaultPage } from "./useVaultPage";
 
 const VaultPage = ({
   variant = "basic",
@@ -49,10 +47,6 @@ const VaultPage = ({
   const [isProviderOpen, setIsProviderOpen] = useState(false);
   const [isProxyOpen, setIsProxyOpen] = useState(false);
   const org = useOrg();
-  const { hasFlag: proxyKeyLimitsFlag } = useFeatureFlags(
-    "proxy_key_limits",
-    org?.currentOrg?.id || ""
-  );
 
   const deleteProviderKey = async (id: string) => {
     fetch(`/api/provider_keys/${id}/delete`, { method: "DELETE" })
@@ -93,17 +87,6 @@ const VaultPage = ({
     },
   ];
 
-  if (proxyKeyLimitsFlag) {
-    proxyKeyColumns.push({
-      name: "Limits",
-      key: "limits",
-      hidden: false,
-      className: "max-w-[200px]",
-      render: (row) => {
-        return <LimitCell limits={row.limits} />;
-      },
-    });
-  }
   if (
     org?.currentOrg?.tier !== "enterprise" &&
     org?.currentOrg?.tier !== "pro-20240913" &&
@@ -118,10 +101,11 @@ const VaultPage = ({
         </InfoBox>
         <FeatureUpgradeCard
           title="Unlock Vault"
-          description="The Free plan does not include the Vault feature, but getting access is easy."
-          infoBoxText="Use Vault to securely store and manage your API keys within Helicone."
-          documentationLink="https://docs.helicone.ai/features/vault"
+          headerTagline="The Free plan does not include the Vault feature, but getting access is easy."
           featureName="Vault"
+          icon={
+            <KeyIcon className="h-8 w-8 text-gray-900 dark:text-gray-100" />
+          }
         />
       </div>
     );

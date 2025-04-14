@@ -1,13 +1,13 @@
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import { GetServerSidePropsContext } from "next";
 import Image from "next/image";
 import { useState } from "react";
-import { ArrowPathIcon } from "@heroicons/react/24/outline";
-
-import { COMPANY_SIZES } from "../../components/templates/welcome/steps/createOrg";
 import Footer from "../../components/layout/footer";
 import NavBarV2 from "../../components/layout/navbar/navBarV2";
 import MetaData from "../../components/layout/public/authMetaData";
 import useNotification from "../../components/shared/notification/useNotification";
-import { GetServerSidePropsContext } from "next";
+
+export const COMPANY_SIZES = ["Just me", "2-5", "5-25", "25-100", "100+"];
 
 const faqs = [
   {

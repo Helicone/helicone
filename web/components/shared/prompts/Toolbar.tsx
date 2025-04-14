@@ -1,4 +1,10 @@
 "use client";
+import { Input } from "@/components/ui/input";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   CSSProperties,
   ReactNode,
@@ -8,12 +14,6 @@ import {
   useState,
 } from "react";
 import { PiArrowRightBold, PiCheckBold, PiXBold } from "react-icons/pi";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Input } from "@/components/ui/input";
 
 interface ToolbarProps {
   isVisible: boolean;
@@ -34,7 +34,7 @@ interface ToolbarProps {
     generatedText: string;
     start: number;
     end: number;
-    isLoading: boolean;
+    isPending: boolean;
   };
   selection?: {
     text: string;
@@ -224,7 +224,7 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
                       }
                     }}
                     autoFocus
-                    readOnly={pendingEdit?.isLoading}
+                    readOnly={pendingEdit?.isPending}
                     onKeyDown={(e) => {
                       // Escape key: Cancels or denies
                       if (e.key === "Escape") {
@@ -236,7 +236,7 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
                       }
 
                       // Any other key: Ignored if pending edit is loading
-                      if (pendingEdit?.isLoading) return;
+                      if (pendingEdit?.isPending) return;
 
                       // Enter key: Submits or accepts
                       if (e.key === "Enter" && !e.shiftKey) {
@@ -313,7 +313,7 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
                       return;
                     }
 
-                    if (pendingEdit?.isLoading) return;
+                    if (pendingEdit?.isPending) return;
 
                     if (e.key === "Enter") {
                       e.preventDefault();
@@ -330,18 +330,17 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
                     tools[activeInput.index].placeholder ?? "Type here..."
                   }
                   autoFocus
-                  readOnly={pendingEdit?.isLoading}
+                  readOnly={pendingEdit?.isPending}
                 />
               )}
               {activeInput.showConfirmation ? (
                 // B. Confirmation Mode
-                pendingEdit?.isLoading ? (
-                  // Loading state
+                // Loading state
+                pendingEdit?.isPending ? ( // Confirmation buttons
                   <div className="flex items-center justify-center h-full px-2.5">
                     <div className="animate-spin rounded-full h-4 w-4 border-2 border-heliblue border-t-transparent" />
                   </div>
                 ) : (
-                  // Confirmation buttons
                   <div className="flex flex-col h-full">
                     <button
                       type="button"
@@ -382,7 +381,7 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
                 const isOnly = tools.length === 1;
 
                 return (
-                  <Tooltip key={index} delayDuration={0}>
+                  <Tooltip key={index} delayDuration={100}>
                     <TooltipTrigger asChild>
                       <button
                         onClick={() => handleToolClick(tool, index)}
@@ -408,10 +407,10 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
                       className="z-[9999]"
                     >
                       <div className="flex flex-row items-center gap-1 text-sm">
-                        <span>{tool.label}</span>
+                        <span className="">{tool.label}</span>
                         {tool.hotkey && (
-                          <span className="font-bold">
-                            ⌘ {tool.hotkey.toUpperCase()}
+                          <span className="text-heliblue">
+                            ⌘{tool.hotkey.toUpperCase()}
                           </span>
                         )}
                       </div>
@@ -422,7 +421,6 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
             </div>
           )}
         </div>
-
         {/* Pending Edit Preview */}
         {pendingEdit && activeInput?.showConfirmation && (
           <div
@@ -442,7 +440,6 @@ const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
             </span>
           </div>
         )}
-
         {/* Highlight Overlay */}
         {activeInput && (
           <div className="fixed z-1 inset-0 pointer-events-none">

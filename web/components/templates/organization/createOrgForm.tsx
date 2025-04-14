@@ -360,6 +360,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                   }
                 }
               }}
+              variant="action"
             >
               {initialValues
                 ? loading

@@ -1,0 +1,25 @@
+We've enhanced our Python Asynchronous Logging integration with new methods to completely disable all logging to Helicone. This feature allows you to temporarily or permanently stop sending any data to our backend while maintaining your integration setup.
+
+### New Methods
+
+- `disable_logging()`: Completely disables all logging by shutting down the Traceloop SDK
+- `enable_logging()`: Re-enables logging if it was previously disabled
+
+This is different from the existing `disable_content_tracing()` which only omits request and response content but still sends other metrics. The new functionality gives you complete control over your data privacy and is only available when using Helicone's async integration mode.
+
+```python
+# Example usage
+from helicone_async import HeliconeAsyncLogger
+from openai import OpenAI
+
+logger = HeliconeAsyncLogger(api_key=HELICONE_API_KEY)
+logger.init()
+
+# Completely disable all logging
+logger.disable_logging()
+
+# Your OpenAI calls here - no data sent to Helicone
+
+# Later, re-enable logging if needed
+logger.enable_logging()
+```

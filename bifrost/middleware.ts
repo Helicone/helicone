@@ -2,10 +2,11 @@
 
 import { NextResponse, NextRequest } from "next/server";
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
   const pathname = url.pathname;
 
+  // Handle existing redirects first
   switch (pathname) {
     case "/dashboard":
       return NextResponse.redirect("https://us.helicone.ai/dashboard", 301);
@@ -28,9 +29,10 @@ export function middleware(request: NextRequest) {
       return NextResponse.redirect("https://us.helicone.ai/requests", 301);
     case "/roadmap":
       return NextResponse.redirect("https://us.helicone.ai/roadmap", 301);
-    default:
-      return NextResponse.next();
   }
+
+  // Continue to next middleware or page
+  return NextResponse.next();
 }
 
 export const config = {

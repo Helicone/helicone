@@ -1,7 +1,13 @@
+import { heliconeRequestToMappedContent } from "../../packages/llm-mapper/utils/getMappedContent";
 import { formatTimeString, RequestResponseRMT } from "../db/ClickhouseWrapper";
 import { Database } from "../db/database.types";
 import { S3Client } from "../shared/db/s3Client";
-import { err, ok, PromiseGenericResult, Result } from "../shared/result";
+import {
+  err,
+  ok,
+  PromiseGenericResult,
+  Result,
+} from "../../packages/common/result";
 import { LogStore } from "../stores/LogStore";
 import { VersionedRequestStore } from "../stores/request/VersionedRequestStore";
 import { AbstractLogHandler } from "./AbstractLogHandler";
@@ -9,6 +15,7 @@ import {
   ExperimentCellValue,
   HandlerContext,
   PromptRecord,
+  toHeliconeRequest,
 } from "./HandlerContext";
 
 type S3Record = {
@@ -19,14 +26,6 @@ type S3Record = {
   assets: Map<string, string>;
 };
 
-type SearchRecord = {
-  requestId: string;
-  organizationId: string;
-  requestBody: string;
-  responseBody: string;
-  model: string;
-};
-
 export type BatchPayload = {
   responses: Database["public"]["Tables"]["response"]["Insert"][];
   requests: Database["public"]["Tables"]["request"]["Insert"][];
@@ -34,7 +33,6 @@ export type BatchPayload = {
   assets: Database["public"]["Tables"]["asset"]["Insert"][];
   s3Records: S3Record[];
   requestResponseVersionedCH: RequestResponseRMT[];
-  searchRecords: Database["public"]["Tables"]["request_response_search"]["Insert"][];
   experimentCellValues: ExperimentCellValue[];
   scores: {
     organizationId: string;
@@ -42,7 +40,14 @@ export type BatchPayload = {
     scores: Record<string, number | boolean | undefined>;
     evaluatorIds: Record<string, string>;
   }[];
+  orgsToMarkAsOnboarded: Set<string>;
 };
+
+const avgTokenLength = 4;
+const maxContentLength = 2_000_000;
+const maxResponseLength = 100_000;
+const MAX_CONTENT_LENGTH = maxContentLength * avgTokenLength; // 2 MB
+const MAX_RESPONSE_LENGTH = maxResponseLength * avgTokenLength; // 100k
 
 export class LoggingHandler extends AbstractLogHandler {
   private batchPayload: BatchPayload;
@@ -66,9 +71,10 @@ export class LoggingHandler extends AbstractLogHandler {
       assets: [],
       s3Records: [],
       requestResponseVersionedCH: [],
-      searchRecords: [],
+
       experimentCellValues: [],
       scores: [],
+      orgsToMarkAsOnboarded: new Set<string>(),
     };
   }
 
@@ -80,7 +86,7 @@ export class LoggingHandler extends AbstractLogHandler {
       const assetsMapped = this.mapAssets(context).slice(0, 100);
 
       const s3RecordMapped = this.mapS3Records(context);
-      const searchRecordsMapped = this.mapSearchRecords(context);
+
       const promptMapped =
         context.message.log.request.promptId &&
         context.processedLog.request.heliconeTemplate
@@ -90,10 +96,31 @@ export class LoggingHandler extends AbstractLogHandler {
       const requestResponseVersionedCHMapped =
         this.mapRequestResponseVersionedCH(context);
 
+      if (context.orgParams && context.orgParams.has_onboarded === false) {
+        this.batchPayload.orgsToMarkAsOnboarded.add(context.orgParams.id);
+      }
+
+      // Sanitize request_body to prevent JSON parsing errors in Clickhouse
+      // Special handling for the request_body field which often contains nested JSON with escape sequences
+      const sanitizedRequestResponseVersionedCHMapped =
+        this.sanitizeJsonEscapeSequences(requestResponseVersionedCHMapped);
+
+      // Special handling for request_body to ensure it's properly sanitized
+      if (
+        typeof sanitizedRequestResponseVersionedCHMapped.request_body ===
+        "string"
+      ) {
+        sanitizedRequestResponseVersionedCHMapped.request_body =
+          sanitizedRequestResponseVersionedCHMapped.request_body.replace(
+            /[\uD800-\uDFFF]/g,
+            "\uFFFD"
+          );
+      }
+
       this.batchPayload.requests.push(requestMapped);
       this.batchPayload.responses.push(responseMapped);
       this.batchPayload.assets.push(...assetsMapped);
-      this.batchPayload.searchRecords.push(...searchRecordsMapped);
+
       if (
         context.processedLog.request.scores &&
         Object.keys(context.processedLog.request.scores).length > 0
@@ -119,7 +146,7 @@ export class LoggingHandler extends AbstractLogHandler {
       }
 
       this.batchPayload.requestResponseVersionedCH.push(
-        requestResponseVersionedCHMapped
+        sanitizedRequestResponseVersionedCHMapped
       );
 
       return await super.handle(context);
@@ -342,34 +369,6 @@ export class LoggingHandler extends AbstractLogHandler {
     return s3Record;
   }
 
-  mapSearchRecords(
-    context: HandlerContext
-  ): Database["public"]["Tables"]["request_response_search"]["Insert"][] {
-    const request = context.message.log.request;
-    const orgParams = context.orgParams;
-
-    if (
-      !orgParams?.id ||
-      !this.vectorizeModel(context.processedLog.model ?? "")
-    ) {
-      return [];
-    }
-
-    const searchRecord: Database["public"]["Tables"]["request_response_search"]["Insert"] =
-      {
-        request_id: request.id,
-        organization_id: orgParams.id,
-        request_body_vector: this.extractRequestBodyMessage(
-          context.processedLog.request.body
-        ),
-        response_body_vector: this.extractResponseBodyMessage(
-          context.processedLog.response.body
-        ),
-      };
-
-    return [searchRecord];
-  }
-
   mapAssets(
     context: HandlerContext
   ): Database["public"]["Tables"]["asset"]["Insert"][] {
@@ -416,6 +415,12 @@ export class LoggingHandler extends AbstractLogHandler {
     ) {
       return null;
     }
+    if (Array.isArray(context.processedLog.request.heliconeTemplate.template)) {
+      context.processedLog.request.heliconeTemplate.template = {
+        error: "Invalid helicone template",
+        message: "Helicone template is an array",
+      };
+    }
 
     const promptRecord: PromptRecord = {
       promptId: context.message.log.request.promptId,
@@ -425,6 +430,7 @@ export class LoggingHandler extends AbstractLogHandler {
       model: context.processedLog.model,
       heliconeTemplate: context.processedLog.request.heliconeTemplate,
       createdAt: context.message.log.request.requestCreatedAt,
+      provider: context.message.log.request.provider,
     };
 
     return promptRecord;
@@ -436,13 +442,44 @@ export class LoggingHandler extends AbstractLogHandler {
     const usage = context.usage;
     const orgParams = context.orgParams;
 
+    let requestText = "";
+    let responseText = "";
+
+    try {
+      const mappedContent = heliconeRequestToMappedContent(
+        toHeliconeRequest(context)
+      );
+
+      requestText =
+        mappedContent.preview?.fullRequestText?.() ??
+        JSON.stringify(mappedContent.raw.request);
+      responseText =
+        mappedContent.preview?.fullResponseText?.() ??
+        JSON.stringify(mappedContent.raw.response);
+
+      requestText = requestText.slice(0, MAX_CONTENT_LENGTH);
+      responseText = responseText.slice(0, MAX_RESPONSE_LENGTH);
+    } catch (error) {
+      console.error("Error mapping request/response for preview:", error);
+      // Fallback to empty strings if mapping fails
+      requestText = "";
+      responseText = "";
+    }
+
     const requestResponseLog: RequestResponseRMT = {
-      user_id: request.userId,
+      user_id:
+        typeof request.userId === "string"
+          ? request.userId
+          : String(request.userId),
       request_id: request.id,
       completion_tokens: usage.completionTokens ?? 0,
       latency: response.delayMs ?? 0,
       model: context.processedLog.model ?? "",
       prompt_tokens: usage.promptTokens ?? 0,
+      prompt_cache_write_tokens: usage.promptCacheWriteTokens ?? 0,
+      prompt_cache_read_tokens: usage.promptCacheReadTokens ?? 0,
+      prompt_audio_tokens: usage.promptAudioTokens ?? 0,
+      completion_audio_tokens: usage.completionAudioTokens ?? 0,
       request_created_at: formatTimeString(
         request.requestCreatedAt.toISOString()
       ),
@@ -455,7 +492,7 @@ export class LoggingHandler extends AbstractLogHandler {
       proxy_key_id:
         request.heliconeProxyKeyId ?? "00000000-0000-0000-0000-000000000000",
       threat: request.threat ?? false,
-      time_to_first_token: response.timeToFirstToken ?? 0,
+      time_to_first_token: Math.round(response.timeToFirstToken ?? 0),
       target_url: request.targetUrl ?? "",
       provider: request.provider ?? "",
       country_code: request.countryCode ?? "",
@@ -468,14 +505,73 @@ export class LoggingHandler extends AbstractLogHandler {
           ([key, value]) => [key, +(value ?? 0)]
         )
       ),
-      request_body:
-        this.extractRequestBodyMessage(context.processedLog.request.body) ?? "",
-      response_body:
-        this.extractResponseBodyMessage(context.processedLog.response.body) ??
-        "",
+      request_body: requestText,
+      response_body: responseText,
     };
 
     return requestResponseLog;
+  }
+
+  /**
+   * Sanitizes delay_ms to prevent PostgreSQL integer overflow
+   * PostgreSQL integer (INT) max value is 2,147,483,647
+   * @param delay_ms - The delay value to sanitize
+   * @returns A sanitized delay value that won't cause integer overflow
+   */
+  private sanitizeDelayMs(
+    delay_ms: number | null | undefined
+  ): number | null | undefined {
+    if (delay_ms === null || delay_ms === undefined) {
+      return delay_ms;
+    }
+
+    if (typeof delay_ms !== "number") {
+      return delay_ms;
+    }
+
+    // PostgreSQL integer (INT) max value is 2,147,483,647
+    const MAX_SAFE_INT = 2147483647;
+
+    if (delay_ms > MAX_SAFE_INT) {
+      console.warn(
+        `Capping delay_ms value from ${delay_ms} to ${MAX_SAFE_INT} to prevent integer overflow`
+      );
+      return MAX_SAFE_INT;
+    }
+
+    if (delay_ms < -MAX_SAFE_INT) {
+      console.warn(
+        `Capping negative delay_ms value from ${delay_ms} to ${-MAX_SAFE_INT} to prevent integer overflow`
+      );
+      return -MAX_SAFE_INT;
+    }
+
+    return delay_ms;
+  }
+
+  /**
+   * Sanitizes JSON data by removing invalid escape sequences
+   * This is needed to fix the "missing second part of surrogate pair" error
+   * @param obj - The object to sanitize
+   * @returns A sanitized copy of the object
+   */
+  private sanitizeJsonEscapeSequences<T>(obj: T): T {
+    // Create a deep copy of the object through serialization
+    // and replace any invalid surrogate pairs
+    try {
+      const sanitizedJson = JSON.stringify(obj, (_, value) => {
+        if (typeof value === "string") {
+          // Replace any lone surrogate halves with the Unicode replacement character (U+FFFD)
+          return value.replace(/[\uD800-\uDFFF]/g, "\uFFFD");
+        }
+        return value;
+      });
+      return JSON.parse(sanitizedJson);
+    } catch (error) {
+      // If any error occurs during sanitization, return the original object
+      console.warn("Failed to sanitize JSON data:", error);
+      return obj;
+    }
   }
 
   mapResponse(
@@ -485,17 +581,21 @@ export class LoggingHandler extends AbstractLogHandler {
     const processedResponse = context.processedLog.response;
     const orgParams = context.orgParams;
 
+    // Sanitize delay_ms to prevent PostgreSQL integer overflow
+    const sanitizedDelayMs = this.sanitizeDelayMs(response.delayMs);
+
     const responseInsert: Database["public"]["Tables"]["response"]["Insert"] = {
       id: response.id,
       request: context.message.log.request.id,
       helicone_org_id: orgParams?.id ?? null,
-      body: "{}",
       status: response.status,
       model: processedResponse.model,
       completion_tokens: context.usage.completionTokens,
       prompt_tokens: context.usage.promptTokens,
+      prompt_cache_write_tokens: context.usage.promptCacheWriteTokens,
+      prompt_cache_read_tokens: context.usage.promptCacheReadTokens,
       time_to_first_token: response.timeToFirstToken,
-      delay_ms: response.delayMs,
+      delay_ms: sanitizedDelayMs,
       created_at: response.responseCreatedAt.toISOString(),
     };
 
@@ -514,7 +614,6 @@ export class LoggingHandler extends AbstractLogHandler {
     const requestInsert: Database["public"]["Tables"]["request"]["Insert"] = {
       id: request.id,
       path: request.path,
-      body: "{}",
       auth_hash: "",
       user_id: request.userId ?? null,
       prompt_id: request.promptId ?? null,
@@ -522,7 +621,7 @@ export class LoggingHandler extends AbstractLogHandler {
       helicone_user: authParams?.userId ?? null,
       helicone_api_key_id: authParams?.heliconeApiKeyId ?? null,
       helicone_org_id: orgParams?.id ?? null,
-      provider: request.provider,
+      provider: request.provider ?? "",
       helicone_proxy_key_id: request.heliconeProxyKeyId ?? null,
       model: processedRequest.model,
       model_override: heliconeMeta.modelOverride ?? null,
@@ -533,79 +632,6 @@ export class LoggingHandler extends AbstractLogHandler {
     };
 
     return requestInsert;
-  }
-
-  private extractRequestBodyMessage(requestBody: any): string {
-    try {
-      let systemPrompt = "";
-      let messagesArray = requestBody?.messages;
-
-      // Handle Anthropic-style system prompt
-      if (requestBody?.system && typeof requestBody.system === "string") {
-        systemPrompt = requestBody.system;
-      }
-
-      if (!Array.isArray(messagesArray)) {
-        if (requestBody?.role && requestBody?.content) {
-          messagesArray = [requestBody];
-        } else {
-          return systemPrompt;
-        }
-      }
-
-      const allMessages = messagesArray
-        .map((message: any) => {
-          if (typeof message === "object" && message !== null) {
-            const role = message.role;
-            const content = message.content;
-
-            let processedContent = "";
-            if (Array.isArray(content)) {
-              processedContent = content
-                .map((part) => {
-                  if (part.type === "text") {
-                    return part.text;
-                  }
-                  return "";
-                })
-                .join(" ");
-            } else if (typeof content === "string") {
-              processedContent = content;
-            }
-
-            return processedContent;
-          }
-          return "";
-        })
-        .join(" ");
-
-      const fullMessage = `${systemPrompt} ${allMessages}`;
-      return this.ensureMaxVectorLength(this.cleanBody(fullMessage.trim()));
-    } catch (error) {
-      console.error("Error pulling request body messages:", error);
-      return "";
-    }
-  }
-
-  private extractResponseBodyMessage(responseBody: any): string {
-    try {
-      const choicesArray = responseBody?.choices;
-
-      if (!Array.isArray(choicesArray)) {
-        return "";
-      }
-
-      const allMessages = choicesArray
-        .map((choice) => {
-          return choice?.message?.content || "";
-        })
-        .join(" ");
-
-      return this.ensureMaxVectorLength(this.cleanBody(allMessages.trim()));
-    } catch (error) {
-      console.error("Error pulling response body messages:", error);
-      return "";
-    }
   }
 
   private ensureMaxVectorLength = (text: string): string => {

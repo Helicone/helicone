@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 const LogoBox = ({
   className,
@@ -22,10 +23,13 @@ const LogoBox = ({
           innerClassName
         )}
       >
-        <img
+        <Image
           src={imgSrc}
           alt="Logo"
           className="w-full h-full object-contain rounded-2xl"
+          width={100}
+          height={100}
+          loading="lazy"
         />
       </div>
     </div>

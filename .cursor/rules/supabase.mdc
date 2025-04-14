@@ -1,0 +1,6 @@
+---
+description: Supabase
+globs: *.ts, *sql
+alwaysApply: false
+---
+We do not like RLS and we do not want to use the webclient. Please refer to the jawn client and put all new things in controllers

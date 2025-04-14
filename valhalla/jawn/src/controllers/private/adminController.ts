@@ -11,28 +11,33 @@ import {
   Route,
   Security,
   Tags,
+  Query,
 } from "tsoa";
 import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
-import { supabaseServer } from "../../lib/db/supabase";
 import { prepareRequestAzure } from "../../lib/experiment/requestPrep/azure";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
-import { getGovernanceOrgs } from "../../lib/stores/AdminStore";
 import { JawnAuthenticatedRequest } from "../../types/request";
 import { Setting, SettingName } from "../../utils/settings";
+import Stripe from "stripe";
+import { AdminManager } from "../../managers/admin/AdminManager";
 
 export const authCheckThrow = async (userId: string | undefined) => {
   if (!userId) {
     throw new Error("Unauthorized");
   }
-  const { data, error } = await supabaseServer.client
-    .from("admins")
-    .select("*");
 
-  if (error) {
-    throw new Error(error.message);
+  const result = await dbExecute<{ user_id: string }>(
+    "SELECT user_id FROM admins WHERE user_id = $1",
+    [userId]
+  );
+
+  if (result.error) {
+    throw new Error(result.error || "Error checking authorization");
   }
 
-  const hasAdmin = data?.map((admin) => admin.user_id).includes(userId);
+  const hasAdmin = result.data
+    ?.map((admin) => admin.user_id)
+    .includes(userId as string);
 
   if (!hasAdmin) {
     throw new Error("Unauthorized");
@@ -43,179 +48,6 @@ export const authCheckThrow = async (userId: string | undefined) => {
 @Tags("Admin")
 @Security("api_key")
 export class AdminController extends Controller {
-  @Get("governance-orgs/keys")
-  public async getGovernanceOrgKeys(
-    @Request() request: JawnAuthenticatedRequest
-  ) {
-    await authCheckThrow(request.authParams.userId);
-
-    return await supabaseServer.client
-      .from("helicone_settings")
-      .select("*")
-      .eq("name", "governance_keys")
-      .single();
-  }
-
-  @Post("/governance-orgs/keys")
-  public async createGovernanceOrgKey(
-    @Request() request: JawnAuthenticatedRequest,
-    @Body()
-    body: {
-      name: string;
-      value: string;
-    }
-  ) {
-    await authCheckThrow(request.authParams.userId);
-
-    let keys: { name: string; value: string }[] = [];
-    const keysData = await supabaseServer.client
-      .from("helicone_settings")
-      .select("*")
-      .eq("name", "governance_keys");
-
-    if (keysData.error) {
-      this.setStatus(404);
-      throw new Error("Keys not found");
-    }
-
-    if (keysData.data?.[0]) {
-      keys = (keysData.data[0].settings as any).keys.filter(
-        (key: { name: string }) => key.name !== body.name
-      );
-    }
-
-    keys.push({
-      name: body.name,
-      value: body.value,
-    });
-
-    let seen = new Set();
-    keys = keys.filter((key) => {
-      if (seen.has(key.name)) {
-        return false;
-      }
-      seen.add(key.name);
-      return true;
-    });
-
-    const { data, error } = await supabaseServer.client
-      .from("helicone_settings")
-      .update({
-        settings: {
-          keys,
-        },
-      })
-      .eq("name", "governance_keys");
-
-    if (error) {
-      this.setStatus(404);
-      throw new Error("Keys not found");
-    }
-
-    return data;
-  }
-
-  @Delete("/governance-orgs/keys")
-  public async deleteGovernanceOrgKey(
-    @Request() request: JawnAuthenticatedRequest,
-    @Body() body: { name: string }
-  ) {
-    await authCheckThrow(request.authParams.userId);
-
-    const keysData = await supabaseServer.client
-      .from("helicone_settings")
-      .select("*")
-      .eq("name", "governance_keys");
-
-    if (keysData.error) {
-      this.setStatus(404);
-      throw new Error("Keys not found");
-    }
-
-    const keys = keysData.data?.[0];
-
-    const newKeys = (keys?.settings as any).keys.filter(
-      (key: { name: string }) => key.name !== body.name
-    );
-
-    const { data, error } = await supabaseServer.client
-      .from("helicone_settings")
-      .upsert({
-        name: "governance_keys",
-        settings: {
-          keys: newKeys,
-        },
-      });
-
-    if (error) {
-      this.setStatus(404);
-      throw new Error("Keys not found");
-    }
-
-    return data;
-  }
-
-  @Post("/governance-orgs/{orgId}")
-  public async governanceOrgs(
-    @Request() request: JawnAuthenticatedRequest,
-    @Path() orgId: string,
-    @Body()
-    body: {
-      limitUSD: number | null;
-      days: number | null;
-    }
-  ) {
-    await authCheckThrow(request.authParams.userId);
-
-    const org = await supabaseServer.client
-      .from("organization")
-      .update({
-        governance_settings: {
-          limitUSD: body.limitUSD,
-          days: body.days,
-        },
-      })
-      .eq("id", orgId);
-
-    if (org.error) {
-      this.setStatus(404);
-      throw new Error("Organization not found");
-    }
-
-    return org.data;
-  }
-
-  @Delete("/governance-orgs/{orgId}")
-  public async deleteGovernanceOrg(
-    @Request() request: JawnAuthenticatedRequest,
-    @Path() orgId: string
-  ) {
-    await authCheckThrow(request.authParams.userId);
-
-    const org = await supabaseServer.client
-      .from("organization")
-      .update({
-        governance_settings: null,
-      })
-      .eq("id", orgId);
-
-    if (org.error) {
-      this.setStatus(404);
-      throw new Error("Organization not found");
-    }
-
-    return org.data;
-  }
-
-  @Get("/governance-orgs")
-  @Tags("Governance Orgs")
-  @Security("api_key")
-  public async getGovernanceOrgs(@Request() request: JawnAuthenticatedRequest) {
-    await authCheckThrow(request.authParams.userId);
-
-    return await getGovernanceOrgs();
-  }
-
   @Post("/feature-flags")
   public async updateFeatureFlags(
     @Request() request: JawnAuthenticatedRequest,
@@ -678,9 +510,20 @@ export class AdminController extends Controller {
       user_id: string | null;
     }[]
   > {
-    const { data, error } = await supabaseServer.client
-      .from("admins")
-      .select("*");
+    await authCheckThrow(request.authParams.userId);
+
+    const { data } = await dbExecute<{
+      user_email: string | null;
+      id: number;
+      created_at: string;
+      user_id: string | null;
+    }>(
+      `
+      SELECT user_email, id, created_at, user_id FROM
+      admins
+      `,
+      []
+    );
 
     return data ?? [];
   }
@@ -890,15 +733,19 @@ export class AdminController extends Controller {
   ): Promise<Setting> {
     await authCheckThrow(request.authParams.userId);
 
-    const { data, error } = await supabaseServer.client
-      .from("helicone_settings")
-      .select("*")
-      .eq("name", name);
+    const { data, error } = await dbExecute<{
+      settings: Setting;
+    }>(
+      `
+      SELECT settings FROM helicone_settings WHERE name = $1
+      `,
+      [name]
+    );
 
-    if (error || data.length === 0) {
-      throw new Error(error?.message ?? "No settings found");
+    if (error || !data) {
+      throw new Error(error ?? "No settings found");
     }
-    const settings = data[0].settings;
+    const settings = data?.[0]?.settings;
 
     return JSON.parse(JSON.stringify(settings)) as Setting;
   }
@@ -943,31 +790,29 @@ export class AdminController extends Controller {
   ): Promise<void> {
     await authCheckThrow(request.authParams.userId);
 
-    const { data: currentSettings } = await supabaseServer.client
-      .from("helicone_settings")
-      .select("*")
-      .eq("name", body.name);
+    const { data: currentSettings } = await dbExecute<{
+      settings: Setting;
+    }>(
+      `
+      SELECT settings FROM helicone_settings WHERE name = $1
+      `,
+      [body.name]
+    );
 
-    if (currentSettings!.length === 0) {
-      const { error } = await supabaseServer.client
-        .from("helicone_settings")
-        .insert({
-          name: body.name,
-          settings: JSON.parse(JSON.stringify(body.settings)),
-        });
-      if (error) {
-        throw new Error(error.message);
-      }
+    if (!currentSettings) {
+      await dbExecute(
+        `
+        INSERT INTO helicone_settings (name, settings) VALUES ($1, $2)
+        `,
+        [body.name, JSON.parse(JSON.stringify(body.settings))]
+      );
     } else {
-      const { error } = await supabaseServer.client
-        .from("helicone_settings")
-        .update({
-          settings: JSON.parse(JSON.stringify(body.settings)),
-        })
-        .eq("name", body.name);
-      if (error) {
-        throw new Error(error.message);
-      }
+      await dbExecute(
+        `
+        UPDATE helicone_settings SET settings = $1 WHERE name = $2
+        `,
+        [JSON.parse(JSON.stringify(body.settings)), body.name]
+      );
     }
 
     return;
@@ -988,10 +833,15 @@ export class AdminController extends Controller {
   }> {
     await authCheckThrow(request.authParams.userId);
 
-    const { data, error } = await supabaseServer.client
-      .from("organization")
-      .select("*")
-      .ilike("name", `%${body.orgName}%`);
+    const { data } = await dbExecute<{
+      name: string;
+      id: string;
+    }>(
+      `
+      SELECT name, id FROM organization WHERE name ILIKE $1
+      `,
+      [body.orgName]
+    );
     return {
       orgs:
         data?.map((org) => ({
@@ -1045,6 +895,7 @@ export class AdminController extends Controller {
       WHERE
         o.created_at > now() - INTERVAL '${body.timeFilter}'
         AND u.email NOT LIKE '%helicone.ai%'
+        AND o.tier != 'demo'
       GROUP BY day
       ORDER BY day ASC
 
@@ -1127,21 +978,18 @@ export class AdminController extends Controller {
     await authCheckThrow(request.authParams.userId);
     const { orgId, adminIds } = body;
 
-    const { data, error } = await supabaseServer.client
-      .from("organization_member")
-      .insert(
-        adminIds.map((adminId) => ({
-          organization: orgId,
-          member: adminId,
-          org_role: "admin",
-        }))
+    for (const adminId of adminIds) {
+      const { error } = await dbExecute(
+        `
+      INSERT INTO organization_member (organization, member, org_role) VALUES ($1, $2, $3)
+      `,
+        [orgId, adminId, "admin"]
       );
 
-    if (error) {
-      throw new Error(error.message);
+      if (error) {
+        throw new Error(error);
+      }
     }
-
-    return;
   }
 
   @Post("/alert_banners")
@@ -1155,16 +1003,15 @@ export class AdminController extends Controller {
   ): Promise<void> {
     await authCheckThrow(request.authParams.userId);
 
-    const { data, error } = await supabaseServer.client
-      .from("alert_banners")
-      .insert({
-        title: body.title,
-        message: body.message,
-        active: false,
-      });
+    const { error } = await dbExecute(
+      `
+      INSERT INTO alert_banners (title, message, active) VALUES ($1, $2, $3)
+      `,
+      [body.title, body.message, false]
+    );
 
     if (error) {
-      throw new Error(error.message);
+      throw new Error(error);
     }
   }
 
@@ -1179,10 +1026,16 @@ export class AdminController extends Controller {
   ): Promise<void> {
     await authCheckThrow(request.authParams.userId);
 
-    const { data, error } = await supabaseServer.client
-      .from("alert_banners")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const { data } = await dbExecute<{
+      title: string;
+      message: string;
+      active: boolean;
+    }>(
+      `
+      SELECT * FROM alert_banners ORDER BY created_at DESC
+      `,
+      []
+    );
 
     if (body.active) {
       const activeBanner = data?.find((banner) => banner.active);
@@ -1193,16 +1046,260 @@ export class AdminController extends Controller {
       }
     }
 
-    const { data: updateData, error: updateError } = await supabaseServer.client
-      .from("alert_banners")
-      .update({
-        active: body.active,
-        updated_at: new Date().toISOString(),
-      })
-      .match({ id: body.id });
+    const { error } = await dbExecute(
+      `
+      UPDATE alert_banners SET active = $1, updated_at = $2 WHERE id = $3
+      `,
+      [body.active, new Date().toISOString(), body.id]
+    );
 
-    if (updateError) {
-      throw new Error(updateError.message);
+    if (error) {
+      throw new Error(error);
     }
+  }
+
+  @Post("/top-orgs-over-time")
+  public async getTopOrgsOverTime(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body()
+    body: {
+      timeRange: string;
+      limit: number;
+      groupBy?: string;
+    }
+  ): Promise<{
+    organizations: Array<{
+      organization_id: string;
+      organization_name: string;
+      data: Array<{
+        time: string;
+        request_count: number;
+      }>;
+    }>;
+  }> {
+    await authCheckThrow(request.authParams.userId);
+
+    // Parse time range from string to interval
+    const parseTimeRange = (rangeStr: string): string => {
+      // Maps from UI friendly names to ClickHouse interval strings
+      switch (rangeStr) {
+        case "10 minutes":
+          return "10 minute";
+        case "30 minutes":
+          return "30 minute";
+        case "1 hour":
+          return "1 hour";
+        case "3 hours":
+          return "3 hour";
+        case "12 hours":
+          return "12 hour";
+        case "1 day":
+          return "1 day";
+        case "3 days":
+          return "3 day";
+        case "7 days":
+          return "7 day";
+        case "14 days":
+          return "14 day";
+        case "30 days":
+          return "30 day";
+        default:
+          return "1 day";
+      }
+    };
+
+    const timeRangeInterval = parseTimeRange(body.timeRange || "1 day");
+    const limit = body.limit || 10;
+    let groupBy = body.groupBy;
+
+    // Automatically set appropriate groupBy based on timeRange if not provided
+    if (!groupBy) {
+      if (
+        timeRangeInterval === "10 minute" ||
+        timeRangeInterval === "30 minute" ||
+        timeRangeInterval === "1 hour"
+      ) {
+        groupBy = "minute";
+      } else if (
+        timeRangeInterval === "3 hour" ||
+        timeRangeInterval === "12 hour" ||
+        timeRangeInterval === "1 day"
+      ) {
+        groupBy = "10 minute";
+      } else if (
+        timeRangeInterval === "3 day" ||
+        timeRangeInterval === "7 day"
+      ) {
+        groupBy = "hour";
+      } else if (timeRangeInterval === "14 day") {
+        groupBy = "6 hour";
+      } else {
+        groupBy = "day";
+      }
+    }
+
+    // Function to get appropriate ClickHouse time function based on groupBy
+    const getClickhouseTimeFunction = (groupBy: string) => {
+      switch (groupBy) {
+        case "minute":
+          return "toStartOfMinute";
+        case "10 minute":
+          return `toStartOfInterval(request_created_at, INTERVAL 10 minute)`;
+        case "hour":
+          return "toStartOfHour";
+        case "6 hour":
+          return `toStartOfInterval(request_created_at, INTERVAL 6 hour)`;
+        case "day":
+          return "toStartOfDay";
+        case "week":
+          return "toStartOfWeek";
+        default:
+          return "toStartOfHour";
+      }
+    };
+
+    // Get the appropriate time function for the SQL query
+    const timeFunction = getClickhouseTimeFunction(groupBy);
+
+    // Step 1: Get the top organizations by total request count
+    const topOrgsQuery = `
+      SELECT 
+          organization_id,
+          COUNT(request_id) as request_count
+      FROM 
+          request_response_rmt
+      WHERE
+          request_created_at > now() - interval '${timeRangeInterval}'
+          AND request_created_at < now()
+      GROUP BY 
+          organization_id
+      ORDER BY 
+          request_count DESC
+      LIMIT ${limit}
+    `;
+
+    const topOrgsResult = await clickhouseDb.dbQuery<{
+      organization_id: string;
+      request_count: string;
+    }>(topOrgsQuery, []);
+
+    if (!topOrgsResult.data || topOrgsResult.data.length === 0) {
+      return { organizations: [] };
+    }
+
+    const orgIds = topOrgsResult.data.map((org) => org.organization_id);
+
+    // Step 2: Fetch organization names
+    const orgNamesQuery = `
+      SELECT id, name FROM organization WHERE id IN (${orgIds
+        .map((id) => `'${id}'`)
+        .join(",")})
+    `;
+
+    const orgNamesResult = await dbExecute<{
+      id: string;
+      name: string;
+    }>(orgNamesQuery, []);
+
+    const orgNameMap = new Map<string, string>();
+    if (orgNamesResult.data) {
+      orgNamesResult.data.forEach((org) => {
+        orgNameMap.set(org.id, org.name);
+      });
+    }
+
+    // Step 3: Get time series data for each organization with the appropriate grouping
+    const timeSeriesQuery =
+      groupBy === "10 minute" || groupBy === "6 hour"
+        ? `
+        SELECT 
+            organization_id,
+            COUNT(request_id) as request_count, 
+            toString(${timeFunction}) as time
+        FROM 
+            request_response_rmt
+        WHERE
+            request_created_at > now() - interval '${timeRangeInterval}'
+            AND organization_id IN (${orgIds.map((id) => `'${id}'`).join(",")})
+        GROUP BY 
+            organization_id, 
+            time
+        ORDER BY
+            organization_id,
+            time
+      `
+        : `
+        SELECT 
+            organization_id,
+            COUNT(request_id) as request_count, 
+            toString(${timeFunction}(request_created_at)) as time
+        FROM 
+            request_response_rmt
+        WHERE
+            request_created_at > now() - interval '${timeRangeInterval}'
+            AND organization_id IN (${orgIds.map((id) => `'${id}'`).join(",")})
+        GROUP BY 
+            organization_id, 
+            time
+        ORDER BY
+            organization_id,
+            time
+      `;
+
+    const timeSeriesResult = await clickhouseDb.dbQuery<{
+      organization_id: string;
+      request_count: string;
+      time: string;
+    }>(timeSeriesQuery, []);
+
+    if (!timeSeriesResult.data) {
+      return { organizations: [] };
+    }
+
+    // Step 4: Combine the data
+    const organizations = orgIds.map((orgId) => {
+      const orgData = timeSeriesResult
+        .data!.filter((point) => point.organization_id === orgId)
+        .map((point) => ({
+          time: point.time,
+          request_count: parseInt(point.request_count, 10),
+        }));
+
+      return {
+        organization_id: orgId,
+        organization_name: orgNameMap.get(orgId) || orgId,
+        data: orgData,
+      };
+    });
+
+    return { organizations };
+  }
+
+  /**
+   * Get all subscription data, invoices, and discounts for the admin projections page
+   * Uses caching to minimize API calls to Stripe
+   */
+  @Get("/subscription-data")
+  public async getSubscriptionData(
+    @Request() request: JawnAuthenticatedRequest,
+    @Query() forceRefresh?: boolean
+  ): Promise<{
+    subscriptions: Stripe.Subscription[];
+    invoices: Stripe.Invoice[];
+    discounts: Record<string, Stripe.Discount>;
+    upcomingInvoices: Stripe.UpcomingInvoice[];
+  }> {
+    await authCheckThrow(request.authParams.userId);
+
+    // Use AdminManager to handle Stripe API calls with rate limiting and caching
+    const adminManager = new AdminManager(request.authParams);
+    const result = await adminManager.getSubscriptionData(forceRefresh);
+
+    if (result.error || !result.data) {
+      throw new Error(result.error || "No subscription data returned");
+    }
+
+    // Return the data
+    return result.data;
   }
 }

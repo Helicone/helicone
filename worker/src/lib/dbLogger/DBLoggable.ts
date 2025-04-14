@@ -129,8 +129,6 @@ function getResponseBodyFromJSON(json: Record<string, Json>): {
   return { body: [JSON.stringify(json)], endTime: new Date() };
 }
 
-type UnPromise<T> = T extends Promise<infer U> ? U : T;
-
 export async function dbLoggableRequestFromAsyncLogModel(
   props: DBLoggableRequestFromAsyncLogModelProps
 ): Promise<DBLoggable> {
@@ -160,15 +158,17 @@ export async function dbLoggableRequestFromAsyncLogModel(
             promptMode: "deactivated",
           },
       userId: providerRequestHeaders.userId ?? undefined,
-      startTime: new Date(
-        asyncLogModel.timing.startTime.seconds * 1000 +
-          asyncLogModel.timing.startTime.milliseconds
-      ),
+      startTime: asyncLogModel.timing
+        ? new Date(
+            asyncLogModel.timing.startTime.seconds * 1000 +
+              asyncLogModel.timing.startTime.milliseconds
+          )
+        : new Date(),
       bodyText: JSON.stringify(asyncLogModel.providerRequest.json),
       path: asyncLogModel.providerRequest.url,
       targetUrl: asyncLogModel.providerRequest.url,
       properties: providerRequestHeaders.heliconeProperties,
-      isStream: asyncLogModel.providerRequest.json?.stream == true ?? false,
+      isStream: asyncLogModel.providerRequest.json?.stream == true,
       omitLog: false,
       provider,
       nodeId: requestWrapper.getNodeId(),
@@ -182,6 +182,12 @@ export async function dbLoggableRequestFromAsyncLogModel(
     response: {
       responseId: crypto.randomUUID(),
       getResponseBody: async () => {
+        if (asyncLogModel.providerResponse.textBody) {
+          return {
+            body: [asyncLogModel.providerResponse.textBody],
+            endTime: new Date(),
+          };
+        }
         return getResponseBodyFromJSON(asyncLogModel.providerResponse.json);
       },
       responseHeaders: providerResponseHeaders,
@@ -189,16 +195,22 @@ export async function dbLoggableRequestFromAsyncLogModel(
       omitLog: false,
     },
     timing: {
-      startTime: new Date(
-        asyncLogModel.timing.startTime.seconds * 1000 +
-          asyncLogModel.timing.startTime.milliseconds
-      ),
-      endTime: new Date(
-        asyncLogModel.timing.endTime.seconds * 1000 +
-          asyncLogModel.timing.endTime.milliseconds
-      ),
+      startTime: asyncLogModel.timing
+        ? new Date(
+            asyncLogModel.timing.startTime.seconds * 1000 +
+              asyncLogModel.timing.startTime.milliseconds
+          )
+        : new Date(),
+      endTime: asyncLogModel.timing
+        ? new Date(
+            asyncLogModel.timing.endTime.seconds * 1000 +
+              asyncLogModel.timing.endTime.milliseconds
+          )
+        : new Date(new Date().getTime() + 1000),
       timeToFirstToken: async () =>
-        Number(asyncLogModel.timing.timeToFirstToken) ?? null,
+        asyncLogModel.timing
+          ? Number(asyncLogModel.timing.timeToFirstToken) ?? null
+          : null,
     },
     tokenCalcUrl: env.VALHALLA_URL,
   });
@@ -631,6 +643,12 @@ export class DBLoggable {
     }
 
     const endTime = this.timing.endTime ?? responseEndTime;
+    let timeToFirstToken: number | undefined =
+      (await this.timing.timeToFirstToken()) ?? undefined;
+    if (Number.isNaN(timeToFirstToken)) {
+      timeToFirstToken = undefined;
+    }
+
     const kafkaMessage: KafkaMessage = {
       id: this.request.requestId,
       authorization: requestHeaders.heliconeAuthV2.token,
@@ -676,7 +694,7 @@ export class DBLoggable {
           id: this.response.responseId,
           status: await this.response.status(),
           bodySize: rawResponseBody.length,
-          timeToFirstToken: (await this.timing.timeToFirstToken()) ?? undefined,
+          timeToFirstToken,
           responseCreatedAt: endTime,
           delayMs: endTime.getTime() - this.timing.startTime.getTime(),
         },
@@ -736,6 +754,8 @@ export class DBLoggable {
         promptTokens,
         completionTokens,
         provider: modelRow.provider,
+        promptCacheReadTokens: 0,
+        promptCacheWriteTokens: 0,
       }) ?? 0
     );
   }

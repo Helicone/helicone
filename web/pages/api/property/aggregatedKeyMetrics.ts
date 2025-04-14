@@ -3,7 +3,7 @@ import {
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { getAggregatedKeyMetrics } from "../../../lib/api/property/aggregatedKeyMetrics";
-import { resultsAll } from "../../../lib/result";
+import { resultsAll } from "../../../packages/common/result";
 import { UnPromise } from "../../../lib/tsxHelpers";
 
 async function handler(
@@ -26,7 +26,9 @@ async function handler(
     filter,
     timeFilter,
     userData.orgId,
-    req.body.limit
+    req.body.limit,
+    req.body.sortKey,
+    req.body.sortDirection
   );
   res.status(200).json(metrics);
 }

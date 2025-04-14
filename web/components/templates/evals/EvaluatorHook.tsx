@@ -1,20 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
 import { getJawnClient } from "../../../lib/clients/jawn";
 import {
   TimeInterval,
   getTimeIntervalAgo,
 } from "../../../lib/timeCalculations/time";
-import { useDebounce } from "../../../services/hooks/debounce";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import { getRootFilterNode } from "../../../services/lib/filters/uiFilterRowTree";
-import { UIFilterRowTree } from "@/services/lib/filters/types";
 import { useOrg } from "../../layout/org/organizationContext";
-import useSearchParams, {
-  SearchParams,
-} from "../../shared/utils/useSearchParams";
-import { TimeFilter } from "@/types/timeFilter";
-import { useUIFilterConvert } from "../dashboard/useDashboardPage";
+import { SearchParams } from "../../shared/utils/useSearchParams";
 
 // Import Shadcn UI components for dropdown
 const getTimeFilterWithSearchParams = (searchParams: SearchParams) => {
@@ -40,68 +31,7 @@ const getTimeFilterWithSearchParams = (searchParams: SearchParams) => {
 };
 
 export const useEvaluators = () => {
-  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
-    getRootFilterNode()
-  );
-
-  const debouncedAdvancedFilter = useDebounce(advancedFilters, 500);
-
-  const searchParams = useSearchParams();
-
-  const getTimeFilter = useCallback(() => {
-    return getTimeFilterWithSearchParams(searchParams);
-  }, [searchParams]);
-  const [timeFilter, setTimeFilter] = useState(getTimeFilter());
   const org = useOrg();
-  const {
-    userFilters,
-    filterMap,
-    properties: { searchPropertyFilters },
-  } = useUIFilterConvert(advancedFilters, timeFilter);
-
-  const defaultEvaluators = useQuery({
-    queryKey: ["evals", org?.currentOrg?.id, timeFilter, userFilters],
-    queryFn: async (query) => {
-      const jawn = getJawnClient(org?.currentOrg?.id!);
-      const timeFilter = query.queryKey[2] as TimeFilter;
-      const filter = query.queryKey[3] as FilterNode;
-      return jawn.POST("/v1/evals/query", {
-        body: {
-          filter: filter as any,
-          timeFilter: {
-            start: timeFilter.start.toISOString(),
-            end: timeFilter.end.toISOString(),
-          },
-        },
-      });
-    },
-    refetchOnWindowFocus: false,
-    keepPreviousData: true,
-  });
-
-  const scoreDistributions = useQuery({
-    queryKey: [
-      "scoreDistributions",
-      org?.currentOrg?.id,
-      timeFilter,
-      userFilters,
-    ],
-    queryFn: async (query) => {
-      const jawn = getJawnClient(org?.currentOrg?.id!);
-      const timeFilter = query.queryKey[2] as TimeFilter;
-      const filter = query.queryKey[3] as FilterNode;
-      return jawn.POST("/v1/evals/score-distributions/query", {
-        body: {
-          filter: filter as any,
-          timeFilter: {
-            start: timeFilter.start.toISOString(),
-            end: timeFilter.end.toISOString(),
-          },
-        },
-      });
-    },
-  });
-
   const evaluators = useQuery({
     queryKey: ["evaluators", org?.currentOrg?.id],
     queryFn: async () => {
@@ -109,14 +39,6 @@ export const useEvaluators = () => {
       return jawn.POST("/v1/evaluator/query", {
         body: {},
       });
-    },
-  });
-
-  const evalScores = useQuery({
-    queryKey: ["evalScores", org?.currentOrg?.id],
-    queryFn: async () => {
-      const jawn = getJawnClient(org?.currentOrg?.id!);
-      return jawn.GET("/v1/evals/scores");
     },
   });
 
@@ -138,15 +60,6 @@ export const useEvaluators = () => {
 
   return {
     evaluators,
-    evalScores,
-    scoreDistributions,
-    defaultEvaluators,
-    timeFilter,
-    setTimeFilter,
-    filterMap,
-    advancedFilters,
-    setAdvancedFilters,
-    searchPropertyFilters,
     deleteEvaluator,
   };
 };

@@ -1,12 +1,38 @@
+import { GenerateParams } from "@/lib/api/llm/generate";
+import { getOpenAIKeyFromAdmin } from "@/lib/clients/settings";
 import { NextApiRequest, NextApiResponse } from "next";
 import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
-import { GenerateParams } from "@/lib/api/llm/generate";
 
-const openai = new OpenAI({
-  baseURL: "https://openrouter.ai/api/v1/",
-  apiKey: process.env.OPENROUTER_API_KEY,
-});
+// Cache for the OpenAI client to avoid recreating it on every request
+let openaiClient: OpenAI | null = null;
+let isOnPrem = false;
+
+// Function to get or create the OpenAI client
+async function getOpenAIClient(): Promise<OpenAI> {
+  // Return cached client if available
+  if (openaiClient) {
+    return openaiClient;
+  }
+
+  // Get API key from environment or admin settings
+  let apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) {
+    // apiKey = (await getOpenRouterKeyFromAdmin()) || "";
+    apiKey = (await getOpenAIKeyFromAdmin()) || "";
+    isOnPrem = true;
+  }
+
+  // Create and cache the client
+  openaiClient = new OpenAI({
+    baseURL: isOnPrem
+      ? "https://api.openai.com/v1/"
+      : "https://openrouter.ai/api/v1/",
+    apiKey: apiKey,
+  });
+
+  return openaiClient;
+}
 
 export default async function handler(
   req: NextApiRequest,
@@ -17,12 +43,21 @@ export default async function handler(
   }
 
   try {
+    // Get or initialize the OpenAI client
+    const openai = await getOpenAIClient();
+
     const params = req.body as GenerateParams;
     const abortController = new AbortController();
 
     const response = await openai.chat.completions.create(
       {
-        model: params.model,
+        provider: isOnPrem
+          ? undefined
+          : {
+              sort: "throughput",
+              order: ["Fireworks"],
+            },
+        model: isOnPrem ? params.model.split("/")[1] : params.model,
         messages: params.messages,
         temperature: params.temperature,
         max_tokens: params.maxTokens,
@@ -31,10 +66,13 @@ export default async function handler(
         presence_penalty: params.presencePenalty,
         stop: params.stop,
         stream: params.stream !== undefined,
+        reasoning_effort: params.reasoning_effort,
+        include_reasoning: params.includeReasoning,
+        tools: params.tools,
         ...(params.schema && {
           response_format: zodResponseFormat(params.schema, "result"),
         }),
-      },
+      } as any,
       {
         signal: abortController.signal,
       }
@@ -46,7 +84,6 @@ export default async function handler(
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("Connection", "keep-alive");
 
-      let fullResponse = "";
       const stream =
         response as unknown as AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>;
 
@@ -55,47 +92,55 @@ export default async function handler(
           // Check if request was cancelled
           if (req.headers["x-cancel"] === "1") {
             abortController.abort();
-            res.end();
-            return;
+            return; // Exit the loop and function
           }
 
-          const content = chunk?.choices?.[0]?.delta?.content;
-          if (content) {
-            fullResponse += content;
-            res.write(content);
-            // @ts-ignore - flush exists on NodeJS.ServerResponse
-            res.flush?.();
-          }
+          // Format as Server-Sent Event (SSE)
+          const chunkString = JSON.stringify(chunk);
+          const sseFormattedChunk = `data: ${chunkString}\n\n`;
+          res.write(sseFormattedChunk);
+
+          // @ts-ignore - flush exists on NodeJS.ServerResponse
+          res.flush?.(); // Ensure chunk is sent immediately
         }
-        res.end();
-        return;
       } catch (error) {
         // Handle stream interruption gracefully
+        console.error("[API Stream] Stream error:", error); // Log the error
         if (
           error instanceof Error &&
           (error.name === "ResponseAborted" || error.name === "AbortError")
         ) {
-          res.end();
-          return;
+          // Client likely disconnected or aborted, no need to throw further
+        } else {
+          // Rethrow other errors to be caught by the outer try-catch
+          throw error;
         }
-        throw error;
+      } finally {
+        // Ensure the response is always ended when the stream finishes or aborts/errors
+        if (!res.writableEnded) {
+          res.end();
+        }
       }
+      return; // Ensure we don't fall through to non-streaming logic
     }
 
-    const completionResponse =
-      response as OpenAI.Chat.Completions.ChatCompletion;
-    const content = completionResponse.choices?.[0]?.message?.content;
+    const resp = response as any;
+    const content = resp.choices?.[0]?.message?.content || ""; // Default to empty string
+    const reasoning = resp.choices?.[0]?.message?.reasoning || ""; // Default to empty string
+    const calls = resp.choices?.[0]?.message?.tool_calls || ""; // Default to empty string (or handle actual calls)
 
-    if (!content) {
-      throw new Error("Failed to generate response");
+    if (!content && !calls) {
+      // Check if both content and calls are missing
+      // Consider if an empty response should be an error or just empty strings
+      console.warn(
+        "[API] LLM call resulted in empty content and no tool calls."
+      );
+      // Returning empty object might be fine depending on requirements
+      // throw new Error("Failed to generate response content or tool calls");
     }
 
-    if (params.schema) {
-      const parsed = params.schema.parse(JSON.parse(content));
-      return res.json(parsed);
-    }
-
-    return res.json({ content });
+    // For non-streaming, always return the full object
+    return res.json({ content, reasoning, calls });
   } catch (error) {
     if (
       error instanceof Error &&

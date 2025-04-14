@@ -23,7 +23,7 @@ iconType: "solid"
   <Step title="Set API keys as environment variables">
     ```bash
     export HELICONE_API_KEY=<your Helicone API key>
-    export GOOGLE_GENERATIVE_API_KEY=<your Google Generative AI API key>
+    export GOOGLE_API_KEY=<your Google Generative AI API key>
     ```
   </Step>
   <Step title="Install necessary packages">
@@ -36,7 +36,7 @@ iconType: "solid"
     ```javascript
     const fetch = require('node-fetch');
 
-    const url = `https://gateway.helicone.ai/v1beta/models/model-name:generateContent?key=${process.env.GOOGLE_GENERATIVE_API_KEY}`;
+    const url = `https://gateway.helicone.ai/v1beta/models/model-name:generateContent?key=${process.env.GOOGLE_API_KEY}`;
 
     const headers = {
       'Content-Type': 'application/json',
@@ -75,7 +75,7 @@ iconType: "solid"
   <Step title="Set API keys as environment variables">
     ```bash
     export HELICONE_API_KEY=<your Helicone API key>
-    export GOOGLE_GENERATIVE_API_KEY=<your Google Generative AI API key>
+    export GOOGLE_API_KEY=<your Google Generative AI API key>
     ```
   </Step>
   <Step title="Install necessary packages">
@@ -84,46 +84,47 @@ iconType: "solid"
     npm install @google/generative-ai
     ```
   </Step>
-  <Step title="Import GoogleGenerativeAI and configure the client">
+  <Step title="Import and configure the client">
     ```javascript
-    import { GoogleGenerativeAI, RequestOptions } from "@google/generative-ai";
+    import { GoogleGenerativeAI } from "@google/generative-ai";
 
-    if (!process.env.GOOGLE_GENERATIVE_API_KEY) {
-      throw new Error("GOOGLE_GENERATIVE_API_KEY environment variable must be set");
+    if (!process.env.GOOGLE_API_KEY) {
+      throw new Error("GOOGLE_API_KEY environment variable must be set");
     }
 
-    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_API_KEY);
+    if (!process.env.HELICONE_API_KEY) {
+      throw new Error("HELICONE_API_KEY environment variable must be set");
+    }
 
-    const customHeaders = new Headers({
-      "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-      "Helicone-Target-URL": `https://generativelanguage.googleapis.com`,
-    });
+    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 
-    const requestOptions = {
-      customHeaders: customHeaders,
+    const modelParams = {
+      model: "gemini-2.0-flash",
+      systemInstruction: "You are a helpful assistant that can answer questions and help with tasks.",
+    };
+
+    const modelInstance = genAI.getGenerativeModel(modelParams, {
       baseUrl: "https://gateway.helicone.ai",
-    } as RequestOptions;
+      customHeaders: {
+        'Helicone-Auth': `Bearer ${process.env.HELICONE_API_KEY}`,
+        'Helicone-Target-URL': 'https://generativelanguage.googleapis.com'
+      }
+    });
     ```
 
   </Step>
-  <Step title="Get the generative model and generate content">
+  <Step title="Generate content using the model">
     ```javascript
-    const model = genAI.getGenerativeModel(
-      {
-        model: "model-name",
-      },
-      requestOptions
-    );
-
-    async function run() {
-      const prompt = "Write a story about a magic backpack.";
-      const result = await model.generateContent(prompt);
-      const response = result.response;
-      const text = await response.text();
-      console.log(text);
+    async function generateContent() {
+      try {
+        const response = await modelInstance.generateContent("Hello, world!");
+        console.log(JSON.stringify(response, null, 2));
+      } catch (error) {
+        console.error("Error generating content:", error);
+      }
     }
 
-    run();
+    generateContent();
     ```
 
   </Step>

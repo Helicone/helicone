@@ -6,3 +6,5 @@ node_modules/
 .yarn/
 
 /dist
+
+.yalc/

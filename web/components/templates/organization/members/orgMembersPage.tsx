@@ -1,5 +1,5 @@
 import { useUser } from "@supabase/auth-helpers-react";
-import { Database } from "../../../../supabase/database.types";
+import { Database } from "../../../../db/database.types";
 import {
   useGetOrgMembers,
   useGetOrgOwner,

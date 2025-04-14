@@ -115,19 +115,19 @@ export const MigrateGrowthToPro = () => {
           <Col className="gap-2">
             <Button
               onClick={() => setIsUpgradeDialogOpen(true)}
-              disabled={upgradeExistingCustomerToPro.isLoading}
+              disabled={upgradeExistingCustomerToPro.isPending}
               className="bg-blue-600 hover:bg-blue-700"
             >
-              {upgradeExistingCustomerToPro.isLoading
+              {upgradeExistingCustomerToPro.isPending
                 ? "Upgrading..."
                 : "Upgrade to Pro"}
             </Button>
             <Button
               variant="outline"
               onClick={() => setIsCancelDialogOpen(true)}
-              disabled={cancelSubscription.isLoading || isSubscriptionEnding}
+              disabled={cancelSubscription.isPending || isSubscriptionEnding}
             >
-              {cancelSubscription.isLoading
+              {cancelSubscription.isPending
                 ? "Cancelling..."
                 : "Cancel Subscription"}
             </Button>

@@ -1,5 +1,5 @@
-import { supabaseServer } from "../lib/db/supabase";
-import { Result } from "../lib/shared/result";
+import { dbExecute } from "../lib/shared/db/dbExecute";
+import { Result } from "../packages/common/result";
 import { BaseManager } from "./BaseManager";
 
 const KEYS_WHERE_ONLY_ONE_PER_ORG = ["OPEN_PIPE"];
@@ -20,33 +20,38 @@ export class VaultManager extends BaseManager {
   }): Promise<Result<{ id: string }, string>> {
     try {
       if (KEYS_WHERE_ONLY_ONE_PER_ORG.includes(params.provider)) {
-        const { data, error } = await supabaseServer.client
-          .from("provider_keys")
-          .select("id")
-          .eq("org_id", this.authParams.organizationId)
-          .eq("provider_name", params.provider)
-          .single();
-        if (data) {
+        const result = await dbExecute<{ id: string }>(
+          `SELECT id 
+           FROM provider_keys 
+           WHERE org_id = $1 
+           AND provider_name = $2
+           LIMIT 1`,
+          [this.authParams.organizationId, params.provider]
+        );
+
+        if (result.data && result.data.length > 0) {
           return { data: null, error: "Key already exists" };
         }
       }
-      const { data, error } = await supabaseServer.client
-        .from("provider_keys")
-        .insert({
-          org_id: this.authParams.organizationId,
-          provider_name: params.provider,
-          provider_key: params.key,
-          provider_key_name: params.name ?? "Untitled",
-        })
-        .select("id")
-        .single();
 
-      if (error) {
-        console.error("Failed to insert key into vault", error.message);
-        return { data: null, error: error.message };
+      const result = await dbExecute<{ id: string }>(
+        `INSERT INTO provider_keys (org_id, provider_name, provider_key, provider_key_name)
+         VALUES ($1, $2, $3, $4)
+         RETURNING id`,
+        [
+          this.authParams.organizationId,
+          params.provider,
+          params.key,
+          params.name ?? "Untitled",
+        ]
+      );
+
+      if (result.error || !result.data || result.data.length === 0) {
+        console.error("Failed to insert key into vault", result.error);
+        return { data: null, error: result.error ?? "Failed to insert key" };
       }
 
-      return { data: { id: data.id }, error: null };
+      return { data: { id: result.data[0].id }, error: null };
     } catch (error) {
       console.error("Error adding key to vault:", error);
       return { data: null, error: "Failed to add key to vault" };
@@ -57,27 +62,35 @@ export class VaultManager extends BaseManager {
     Result<DecryptedProviderKey[], string>
   > {
     try {
-      const { data, error } = await supabaseServer.client
-        .from("decrypted_provider_keys")
-        .select(
-          "id, org_id, decrypted_provider_key, provider_key_name, provider_name"
-        )
-        .eq("org_id", this.authParams.organizationId)
-        .eq("soft_delete", false)
-        .order("created_at", { ascending: false });
+      const result = await dbExecute<{
+        id: string;
+        org_id: string;
+        decrypted_provider_key: string;
+        provider_key_name: string;
+        provider_name: string;
+      }>(
+        `SELECT id, org_id, decrypted_provider_key, provider_key_name, provider_name
+         FROM decrypted_provider_keys
+         WHERE org_id = $1
+         AND soft_delete = false
+         ORDER BY created_at DESC`,
+        [this.authParams.organizationId]
+      );
 
-      if (error) {
-        console.error("Failed to retrieve provider keys", error.message);
-        return { data: null, error: error.message };
+      if (result.error) {
+        console.error("Failed to retrieve provider keys", result.error);
+        return { data: null, error: result.error };
       }
 
-      const providerKeys: DecryptedProviderKey[] = data.map((key) => ({
-        id: key.id,
-        org_id: key.org_id,
-        provider_key: key.decrypted_provider_key,
-        provider_name: key.provider_name,
-        provider_key_name: key.provider_key_name,
-      }));
+      const providerKeys: DecryptedProviderKey[] = (result.data || []).map(
+        (key) => ({
+          id: key.id,
+          org_id: key.org_id,
+          provider_key: key.decrypted_provider_key,
+          provider_name: key.provider_name,
+          provider_key_name: key.provider_key_name,
+        })
+      );
 
       return { data: providerKeys, error: null };
     } catch (error) {
@@ -90,26 +103,33 @@ export class VaultManager extends BaseManager {
     providerKeyId: string
   ): Promise<Result<DecryptedProviderKey, string>> {
     try {
-      const { data, error } = await supabaseServer.client
-        .from("decrypted_provider_keys")
-        .select(
-          "id, org_id, decrypted_provider_key, provider_key_name, provider_name"
-        )
-        .eq("id", providerKeyId)
-        .eq("soft_delete", false)
-        .single();
+      const result = await dbExecute<{
+        id: string;
+        org_id: string;
+        decrypted_provider_key: string;
+        provider_key_name: string;
+        provider_name: string;
+      }>(
+        `SELECT id, org_id, decrypted_provider_key, provider_key_name, provider_name
+         FROM decrypted_provider_keys
+         WHERE id = $1
+         AND soft_delete = false
+         LIMIT 1`,
+        [providerKeyId]
+      );
 
-      if (error) {
-        console.error("Failed to retrieve provider key", error.message);
-        return { data: null, error: error.message };
+      if (result.error || !result.data || result.data.length === 0) {
+        console.error("Failed to retrieve provider key", result.error);
+        return { data: null, error: result.error ?? "Provider key not found" };
       }
 
+      const key = result.data[0];
       const providerKey: DecryptedProviderKey = {
-        id: data.id,
-        org_id: data.org_id,
-        provider_key: data.decrypted_provider_key,
-        provider_name: data.provider_name,
-        provider_key_name: data.provider_key_name,
+        id: key.id,
+        org_id: key.org_id,
+        provider_key: key.decrypted_provider_key,
+        provider_name: key.provider_name,
+        provider_key_name: key.provider_key_name,
       };
 
       return { data: providerKey, error: null };
@@ -126,31 +146,42 @@ export class VaultManager extends BaseManager {
     active?: boolean;
   }): Promise<Result<null, string>> {
     try {
-      const updateData: {
-        provider_key?: string;
-        provider_key_name?: string;
-        active?: boolean;
-      } = {};
+      // Build the SET part of the query dynamically based on provided params
+      const updates: string[] = [];
+      const values: any[] = [];
+      let paramIndex = 1;
 
-      if (params.key) {
-        updateData.provider_key = params.key;
+      if (params.key !== undefined) {
+        updates.push(`provider_key = $${paramIndex++}`);
+        values.push(params.key);
       }
-      if (params.name) {
-        updateData.provider_key_name = params.name;
+      if (params.name !== undefined) {
+        updates.push(`provider_key_name = $${paramIndex++}`);
+        values.push(params.name);
       }
-      if (params.active) {
-        updateData.active = params.active;
+      if (params.active !== undefined) {
+        updates.push(`active = $${paramIndex++}`);
+        values.push(params.active);
       }
 
-      const { error } = await supabaseServer.client
-        .from("provider_keys")
-        .update(updateData)
-        .eq("id", params.id)
-        .eq("org_id", this.authParams.organizationId);
+      if (updates.length === 0) {
+        return { data: null, error: null }; // Nothing to update
+      }
 
-      if (error) {
-        console.error("Failed to update key in vault", error.message);
-        return { data: null, error: error.message };
+      // Add the WHERE condition parameters
+      values.push(params.id, this.authParams.organizationId);
+
+      const result = await dbExecute(
+        `UPDATE provider_keys
+         SET ${updates.join(", ")}
+         WHERE id = $${paramIndex++}
+         AND org_id = $${paramIndex}`,
+        values
+      );
+
+      if (result.error) {
+        console.error("Failed to update key in vault", result.error);
+        return { data: null, error: result.error };
       }
 
       return { data: null, error: null };

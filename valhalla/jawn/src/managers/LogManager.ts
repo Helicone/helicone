@@ -1,28 +1,27 @@
-import { RateLimitStore } from "../lib/stores/RateLimitStore";
-import { RateLimitHandler } from "../lib/handlers/RateLimitHandler";
+import * as Sentry from "@sentry/node";
+import { dataDogClient } from "../lib/clients/DataDogClient";
+import { KAFKA_ENABLED, KafkaProducer } from "../lib/clients/KafkaProducer";
 import { AuthenticationHandler } from "../lib/handlers/AuthenticationHandler";
-import { RequestBodyHandler } from "../lib/handlers/RequestBodyHandler";
-import { LoggingHandler } from "../lib/handlers/LoggingHandler";
-import { ResponseBodyHandler } from "../lib/handlers/ResponseBodyHandler";
 import {
   HandlerContext,
   KafkaMessageContents,
 } from "../lib/handlers/HandlerContext";
-import { LogStore } from "../lib/stores/LogStore";
-import { PromptHandler } from "../lib/handlers/PromptHandler";
-import { PostHogHandler } from "../lib/handlers/PostHogHandler";
-import { S3Client } from "../lib/shared/db/s3Client";
-import { S3ReaderHandler } from "../lib/handlers/S3ReaderHandler";
-import * as Sentry from "@sentry/node";
-import { VersionedRequestStore } from "../lib/stores/request/VersionedRequestStore";
-import { KafkaProducer } from "../lib/clients/KafkaProducer";
-import { WebhookHandler } from "../lib/handlers/WebhookHandler";
-import { WebhookStore } from "../lib/stores/WebhookStore";
-import { supabaseServer } from "../lib/db/supabase";
-import { dataDogClient } from "../lib/clients/DataDogClient";
+import { LoggingHandler } from "../lib/handlers/LoggingHandler";
 import { LytixHandler } from "../lib/handlers/LytixHandler";
-import { SegmentLogHandler } from "../lib/handlers/SegmentLogHandler";
 import { OnlineEvalHandler } from "../lib/handlers/OnlineEvalHandler";
+import { PostHogHandler } from "../lib/handlers/PostHogHandler";
+import { PromptHandler } from "../lib/handlers/PromptHandler";
+import { RateLimitHandler } from "../lib/handlers/RateLimitHandler";
+import { RequestBodyHandler } from "../lib/handlers/RequestBodyHandler";
+import { ResponseBodyHandler } from "../lib/handlers/ResponseBodyHandler";
+import { S3ReaderHandler } from "../lib/handlers/S3ReaderHandler";
+import { SegmentLogHandler } from "../lib/handlers/SegmentLogHandler";
+import { WebhookHandler } from "../lib/handlers/WebhookHandler";
+import { S3Client } from "../lib/shared/db/s3Client";
+import { LogStore } from "../lib/stores/LogStore";
+import { RateLimitStore } from "../lib/stores/RateLimitStore";
+import { VersionedRequestStore } from "../lib/stores/request/VersionedRequestStore";
+import { WebhookStore } from "../lib/stores/WebhookStore";
 
 export class LogManager {
   public async processLogEntry(
@@ -69,9 +68,7 @@ export class LogManager {
     const posthogHandler = new PostHogHandler();
     const lytixHandler = new LytixHandler();
 
-    const webhookHandler = new WebhookHandler(
-      new WebhookStore(supabaseServer.client)
-    );
+    const webhookHandler = new WebhookHandler(new WebhookStore());
     const segmentHandler = new SegmentLogHandler();
 
     authHandler
@@ -108,36 +105,49 @@ export class LogManager {
               messageCount: batchContext.messageCount,
             },
           });
-          console.error(
-            `Error processing request ${logMessage.log.request.id} for batch ${batchContext.batchId}: ${result.error}`
-          );
 
-          const kafkaProducer = new KafkaProducer();
-          const res = await kafkaProducer.sendMessages(
-            [logMessage],
-            "request-response-logs-prod-dlq"
-          );
-
-          if (res.error) {
-            Sentry.captureException(new Error(res.error), {
-              tags: {
-                type: "KafkaError",
-                topic: "request-response-logs-prod-dlq",
-              },
-              extra: {
-                requestId: logMessage.log.request.id,
-                responseId: logMessage.log.response.id,
-                orgId: handlerContext.orgParams?.id ?? "",
-                batchId: batchContext.batchId,
-                partition: batchContext.partition,
-                offset: batchContext.lastOffset,
-                messageCount: batchContext.messageCount,
-              },
-            });
-
-            console.error(
-              `Error sending message to DLQ: ${res.error} for request ${logMessage.log.request.id} in batch ${batchContext.batchId}`
+          if (
+            result.error ===
+            "Authentication failed: Authentication failed: No API key found"
+          ) {
+            console.log(
+              `Authentication failed: not reproducing for request ${logMessage.log.request.id} for batch ${batchContext.batchId}`
             );
+            return;
+          } else {
+            console.error(
+              `Reproducing error for request ${logMessage.log.request.id} for batch ${batchContext.batchId}: ${result.error}`
+            );
+          }
+          if (KAFKA_ENABLED) {
+            const kafkaProducer = new KafkaProducer();
+
+            const res = await kafkaProducer.sendMessages(
+              [logMessage],
+              "request-response-logs-prod-dlq"
+            );
+
+            if (res.error) {
+              Sentry.captureException(new Error(res.error), {
+                tags: {
+                  type: "KafkaError",
+                  topic: "request-response-logs-prod-dlq",
+                },
+                extra: {
+                  requestId: logMessage.log.request.id,
+                  responseId: logMessage.log.response.id,
+                  orgId: handlerContext.orgParams?.id ?? "",
+                  batchId: batchContext.batchId,
+                  partition: batchContext.partition,
+                  offset: batchContext.lastOffset,
+                  messageCount: batchContext.messageCount,
+                },
+              });
+
+              console.error(
+                `Error sending message to DLQ: ${res.error} for request ${logMessage.log.request.id} in batch ${batchContext.batchId}`
+              );
+            }
           }
         }
       })
@@ -197,25 +207,27 @@ export class LogManager {
         }`
       );
 
-      const kafkaProducer = new KafkaProducer();
-      const kafkaResult = await kafkaProducer.sendMessages(
-        logMessages,
-        "request-response-logs-prod-dlq"
-      );
+      if (KAFKA_ENABLED) {
+        const kafkaProducer = new KafkaProducer();
+        const kafkaResult = await kafkaProducer.sendMessages(
+          logMessages,
+          "request-response-logs-prod-dlq"
+        );
 
-      if (kafkaResult.error) {
-        Sentry.captureException(new Error(kafkaResult.error), {
-          tags: {
-            type: "KafkaError",
-            topic: "request-response-logs-prod-dlq",
-          },
-          extra: {
-            batchId: batchContext.batchId,
-            partition: batchContext.partition,
-            offset: batchContext.lastOffset,
-            messageCount: batchContext.messageCount,
-          },
-        });
+        if (kafkaResult.error) {
+          Sentry.captureException(new Error(kafkaResult.error), {
+            tags: {
+              type: "KafkaError",
+              topic: "request-response-logs-prod-dlq",
+            },
+            extra: {
+              batchId: batchContext.batchId,
+              partition: batchContext.partition,
+              offset: batchContext.lastOffset,
+              messageCount: batchContext.messageCount,
+            },
+          });
+        }
       }
     }
   }

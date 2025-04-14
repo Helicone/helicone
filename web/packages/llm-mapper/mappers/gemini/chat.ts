@@ -122,6 +122,12 @@ export const mapGeminiPro: MapperFn<any, any> = ({
     ? contents
     : [contents].filter(Boolean);
 
+  // Extract model from response.modelVersion if available and model is not provided or is "unknown"
+  const modelVersion =
+    (!model || model === "unknown") && response?.modelVersion
+      ? response.modelVersion
+      : model;
+
   const requestMessages = getRequestMessages(messages);
 
   response = Array.isArray(response) ? response : [response].filter(Boolean);
@@ -211,7 +217,7 @@ export const mapGeminiPro: MapperFn<any, any> = ({
 
   const schema: LlmSchema = {
     request: {
-      model: model,
+      model: modelVersion,
       prompt: null,
       max_tokens: generateConfig?.maxOutputTokens,
       temperature: generateConfig?.temperature,
@@ -233,7 +239,7 @@ export const mapGeminiPro: MapperFn<any, any> = ({
             },
           }
         : undefined,
-      model: model,
+      model: modelVersion,
     },
   };
 

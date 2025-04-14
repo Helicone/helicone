@@ -4,7 +4,7 @@ import { LightbulbIcon } from "lucide-react";
 
 export interface InfoBoxProps extends React.HTMLAttributes<HTMLDivElement> {
   icon?: React.ElementType;
-  variant?: "info" | "warning" | "success" | "error";
+  variant?: "info" | "warning" | "success" | "error" | "helicone";
 }
 
 const variantStyles = {
@@ -12,6 +12,7 @@ const variantStyles = {
   warning: "bg-yellow-50 border-l-yellow-700 text-yellow-700",
   success: "bg-green-50 border-l-green-700 text-green-700",
   error: "bg-red-50 border-l-red-700 text-red-700",
+  helicone: "bg-sky-50 border-l-sky-900 text-sky-900",
 };
 
 const InfoBox = React.forwardRef<HTMLDivElement, InfoBoxProps>(
@@ -36,7 +37,9 @@ const InfoBox = React.forwardRef<HTMLDivElement, InfoBoxProps>(
         {...props}
       >
         <Icon
-          className={`h-5 w-5 ${variant === "info" ? "text-blue-500" : ""}`}
+          className={`h-5 w-5 flex-shrink-0 ${
+            variant === "info" ? "text-blue-500" : ""
+          }`}
         />
         <div className="text-sm font-medium">{children}</div>
       </div>

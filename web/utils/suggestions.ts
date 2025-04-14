@@ -20,7 +20,7 @@ export const suggestionReducer = (
   action: SuggestionAction
 ): SuggestionState => {
   const now = Date.now();
-  console.log("Suggestion Reducer:", { action, prevState: state });
+  // console.log("Suggestion Reducer:", { action, prevState: state });
 
   const newState = (() => {
     switch (action.type) {
@@ -76,7 +76,7 @@ export const suggestionReducer = (
     return state;
   })();
 
-  console.log("New State:", newState);
+  // console.log("New State:", newState);
   return newState;
 };
 

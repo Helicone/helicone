@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useOrg } from "../../../components/layout/org/organizationContext";
 import { getJawnClient } from "../../../lib/clients/jawn";
 
@@ -79,8 +79,12 @@ const useExperiments = (
 
 const useExperimentTables = () => {
   const org = useOrg();
+  const orgId = org?.currentOrg?.id;
+
+  const queryClient = useQueryClient();
+
   const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ["experimentTables", org?.currentOrg?.id],
+    queryKey: ["experimentTables", orgId],
     queryFn: async (query) => {
       const orgId = query.queryKey[1] as string;
       const jawn = getJawnClient(orgId);
@@ -91,6 +95,18 @@ const useExperimentTables = () => {
     // refetchInterval: 5_000,
   });
 
+  const deleteExperiment = useMutation({
+    mutationFn: async (experimentId: string) => {
+      const jawnClient = getJawnClient(orgId);
+      await jawnClient.DELETE("/v2/experiment/{experimentId}", {
+        params: { path: { experimentId } },
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["experimentTables", orgId],
+      });
+    },
+  });
+
   const experiments = data?.data?.data;
 
   if (!experiments) {
@@ -99,6 +115,7 @@ const useExperimentTables = () => {
       refetch,
       isRefetching,
       experiments: [],
+      deleteExperiment,
     };
   }
 
@@ -110,6 +127,7 @@ const useExperimentTables = () => {
       ...experiment,
       model: "unknown",
     })),
+    deleteExperiment,
   };
 };
 
