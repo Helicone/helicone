@@ -1,0 +1,156 @@
+In our <a href="https://www.helicone.ai/blog/llm-observability" target="_blank" rel="noopener">previous article</a>, we explored the pillars of LLM observability and why it's crucial for building reliable AI applications. Now, let's dive into the **practical side** - how to actually implement effective monitoring for your LLM applications.
+
+![Helicone: What is LLM Observability and Monitoring](/static/blog/llm-observability-cover.webp)
+
+
+## 1. Use prompting techniques to reduce hallucinations
+
+LLMs sometimes generate outputs that sound plausible but are factually incorrect - also known as hallucination. As your app usage goes up, hallucinations can happen frequently and undermine your user's trust.
+
+![Helicone: Prompt Engineering](/static/blog/best-practices-for-llm-observability/prompt-engineering.webp)
+
+The good news is, you can mitigate this by:
+
+- Designing your prompts carefully with <a href="https://www.helicone.ai/blog/prompt-engineering-tools" target="_blank" rel="noopener">prompt engineering</a>
+- Testing prompts with other models in a <a href="https://docs.helicone.ai/features/prompts/editor" target="_blank" rel="noopener">prompt playground</a>, like above. 
+- Setting up evaluators to monitor your outputs in Helicone.
+
+## 2. Prevent prompt injections
+
+Malicious users can manipulate their inputs to trick your model into revealing sensitive information or take risky actions. We dive deeper into this topic in the <a href="https://www.helicone.ai/blog/preventing-prompt-injection" target="_blank" rel="noopener">"How to prevent prompt injections"</a> blog.
+
+**On a high level, you can prevent injections by**:
+
+- Implementing strict validation of user inputs.
+- Blocking inappropriate or malicious responses.
+- Using tools like Helicone or PromptArmor for detection.
+
+Helicone offers <a href="https://docs.helicone.ai/features/advanced-usage/llm-security" target="_blank" rel="noopener">built-in security</a> features powered by Meta's state-of-the-art security models to protect your LLM applications. You can enable LLM security with just a header:
+
+```python
+# Implementing LLM Security with Helicone
+client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": user_input}],
+    extra_headers={
+        "Helicone-LLM-Security-Enabled": "true", # Enable basic security analysis
+        "Helicone-LLM-Security-Advanced": "true" # Enable advanced security analysis
+    }
+)
+```
+
+## 3. Cache responses to reduce latency
+
+Caching stores previously generated responses, allowing applications to quickly retrieve data without additional computation.
+
+Latency can have the most impact on the user experience. Helicone allows you to cache responses on the edge, so that you can serve cached responses immediately without invoking the LLM API, reducing costs at the same time.
+
+Simply add these headers if you want to <a href="https://docs.helicone.ai/features/advanced-usage/caching" target="_blank" rel="noopener">set up caching</a> in Helicone:
+
+```python
+openai.api_base = "https://oai.helicone.ai/v1"
+
+client.chat.completions.create(
+  model="text-davinci-003",
+  prompt="Say this is a test",
+  extra_headers={
+    "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+    "Helicone-Cache-Enabled": "true", # mandatory
+    "Helicone-Cache-Bucket-Max-Size": "3", # (optional) set cache bucket size to 3
+    "Cache-Control": "max-age = 2592000", # (optional) change cache limit
+    "Helicone-Cache-Seed": "1", # (optional) add cache seed
+  }
+)
+```
+
+## 4. Monitor usage and optimize costs
+
+It's important to know exactly what might be drilling a hole in your operational cost. You can save on costs by tracking expenses for every model interaction, from the initial prompt to the final response.
+
+**You can mitigate this by**:
+
+- Monitoring LLM costs by project or user to understand spending.
+- Optimizing infrastructure and usage.
+- Fine-tuning smaller, open-source models to reduce costs.
+
+
+In Helicone, you can see the cost trend in the dashboard and a ton of other useful metrics like usage, latency, top models, and top countries. You can also <a href="https://docs.helicone.ai/features/advanced-usage/custom-properties" target="_blank" rel="noopener">add metadata to your requests</a> to track costs by project or user, and set up alerts to notify you when costs exceed a certain threshold.
+
+![Helicone: Cost Monitoring](/static/blog/best-practices-for-llm-observability/anomaly-detection.webp)
+
+For more cost optimization strategies, check out <a href="https://www.helicone.ai/blog/monitor-and-optimize-llm-costs" target="_blank" rel="noopener">how to cut LLM costs by 90%</a>.
+
+## 5. Systematically improve the prompt
+
+As models get updated, it's important to keep testing and auditing your prompts to make sure they're still performing as expected.
+
+You can either manually test your prompt using your own system, or use an experimentation tool. Here's a screenshot of what the prompt experimentation looks like in Helicone: 
+
+![Helicone: Prompt Experiment & Evaluation](/static/blog/best-practices-for-llm-observability/prompt-experiments.webp)
+
+The spreadsheet-like interface allows you to experiment with different variations of your prompt, switch models or set up different configurations to find the best performing prompt. 
+
+Once you're satisfied with the prompt, you should also consider setting up evals to help you measure quality before or after rolling it out to production.
+
+## Bonus Tip: Real-Time Alerts
+
+![Helicone: Real-Time Alerts](/static/blog/best-practices-for-llm-observability/alerts.webp)
+
+Setting up real-time alerts helps you get instant notifications on critical issues. Many LLM observability tools provide real-time alerts so that your team can respond quickly and improve the model's responsiveness.
+
+In Helicone, you can configure <a href="https://www.helicone.ai/changelog/20240910-slack-alerts" target="_blank" rel="noopener">Slack or email alerts</a> to send real-time updates by:
+
+- **Defining threshold metrics**: Add critical metrics to a watchlist and set thresholds for triggering notification events.
+- **Monitoring LLM drift**: Set up routine reports on key performance metrics to gain insight into model behavioral changes over time.
+- **Detecting anomalies**: Train robust evaluators to identify unusual patterns of behavior.
+- **Sending notifications**: Use webhooks to send alerts to dedicated communication channels.
+
+## Getting Started
+
+Now that you have a good understanding of how to implement monitoring strategies, it's time to put them into practice! 
+
+We recommend signing up with a platform mentioned above, start logging, and see how users are interacting with your LLM app.
+
+Here's how to get started:
+
+1. Create a free <a href="https://helicone.ai/signup" target="_blank" rel="noopener">Helicone account</a>
+2. Integrate using our <a href="https://docs.helicone.ai/getting-started/quick-start#quick-start" target="_blank" rel="noopener">quick start guide</a> for your preferred LLM provider
+3. Send your first request to Helicone
+4. Invite your team to collaborate and analyze data
+
+We are here to help you every step of the way! If you have any questions, please reach out to us via email at [support@helicone.ai](mailto:support@helicone.ai) or through the chat feature in our platform. Happy monitoring!
+
+### You might find these useful: 
+
+- <a href="https://www.helicone.ai/blog/llm-observability" target="_blank" rel="noopener">5 Essential Pillars for Production-Ready LLM Application</a>
+- <a href="https://www.helicone.ai/blog/how-to-reduce-llm-hallucination" target="_blank" rel="noopener">How to Reduce LLM Hallucinations</a>
+- <a href="https://www.helicone.ai/blog/test-your-llm-prompts" target="_blank" rel="noopener">How to Systematically Test Your LLM Prompts</a>
+
+<FAQ items={[
+  {
+    question: "What are the 5 pillars of LLM observability for production?",
+    answer: "The 5 pillars of LLM observability for production are: 1) Cost & Performance Monitoring to track spending and latency, 2) Evaluation & Quality Metrics to measure output quality, 3) Prompt Engineering to systematically test and refine inputs, 4) Search and Retrieval to optimize how information is retrieved and incorporated, and 5) LLM Security to protect against vulnerabilities like prompt injections."
+  },
+  {
+    question: "How can I implement caching to reduce LLM costs and latency?",
+    answer: "With Helicone, you can implement caching by simply adding headers to your requests. This allows you to serve cached responses immediately without invoking the LLM API, reducing both costs and latency. Caching is particularly effective for frequently asked questions or common interactions in your application."
+  },
+  {
+    question: "What enterprise-ready features should I look for in an LLM observability solution?",
+    answer: "Enterprise-ready LLM observability solutions should offer SOC 2 compliance, SLAs with 99.9% uptime, GDPR and HIPAA compliance, custom data retention policies, flexible deployment options (cloud or on-premise), advanced security controls, comprehensive integration capabilities, and scalability to handle enterprise-level request volumes."
+  },
+  {
+    question: "How can I prevent prompt injections in my LLM application?",
+    answer: "You can prevent prompt injections by implementing strict validation of user inputs, blocking inappropriate responses, and using Helicone's built-in security features. Helicone offers LLM security powered by Meta's security models that can be enabled with a simple header: 'Helicone-LLM-Security-Enabled: true' for basic analysis and 'Helicone-LLM-Security-Advanced: true' for advanced protection."
+  },
+  {
+    question: "How can I set up real-time alerts for my LLM application?",
+    answer: "In Helicone, you can set up real-time Slack or email alerts by defining threshold metrics for critical indicators, monitoring LLM drift through routine reports, detecting anomalies with evaluators, and sending notifications via webhooks to your team's communication channels. This helps you respond quickly to issues and maintain optimal performance."
+  },
+  {
+    question: "How quickly can I implement LLM observability with Helicone?",
+    answer: "You can implement basic LLM observability with Helicone in just 5 minutes. For OpenAI integration, simply change your baseURL to 'https://oai.helicone.ai/v1' and add your Helicone authentication header. This immediately gives you access to request logging, cost tracking, and analytics dashboards without any complex setup."
+  }
+]}/>
+
+<Questions />
