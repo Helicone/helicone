@@ -550,6 +550,11 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
+      folderName: "implementing-llm-observability-with-helicone",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "llm-observability",
     },
   },
