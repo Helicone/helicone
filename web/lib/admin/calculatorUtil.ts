@@ -47,77 +47,6 @@ export function getProductIdsFromUpcomingInvoice(
   return productIds;
 }
 
-/**
- * Calculates the discount amount for any invoice type
- */
-export function calculateDiscount(
-  invoice: Stripe.Invoice | Stripe.UpcomingInvoice,
-  discounts?: Record<string, Stripe.Discount>,
-  productId?: string
-): number {
-  let discountAmount = 0;
-  const subtotal = invoice.subtotal / 100;
-  const email = "dhill@on.life";
-
-  if (invoice.customer_email === email) {
-    console.log(`invoice.subtotal: ${subtotal}`);
-  }
-
-  // If no discounts or no discount on this invoice, return 0
-  if (!discounts || !invoice.discount) {
-    return subtotal;
-  }
-
-  if (invoice.customer_email === email) {
-    console.log(`invoice.discount: ${JSON.stringify(invoice.discount)}`);
-  }
-
-  const discountObj = invoice.discount;
-  const { coupon } = discountObj;
-
-  if (invoice.customer_email === email) {
-    console.log(`coupon: ${coupon}`);
-  }
-
-  if (coupon) {
-    // Check if discount applies to all products or specific ones
-    const hasNoProductRestrictions =
-      !coupon.applies_to ||
-      !coupon.applies_to.products ||
-      coupon.applies_to.products.length === 0;
-
-    // If productId is specified, check if discount applies to it
-    const discountAppliesToProduct =
-      hasNoProductRestrictions ||
-      (productId && coupon.applies_to?.products?.includes(productId));
-
-    if (discountAppliesToProduct) {
-      if (coupon.amount_off) {
-        // For amount-based discounts, only apply if product-specific
-        if (!hasNoProductRestrictions) {
-          discountAmount = coupon.amount_off / 100;
-        }
-      } else if (coupon.percent_off) {
-        // Always apply percentage discounts, even at subscription level
-        discountAmount = subtotal * (coupon.percent_off / 100);
-      }
-    }
-  }
-
-  if (invoice.customer_email === email) {
-    console.log(
-      `subtotal - discountAmount: ${subtotal} - ${discountAmount} = ${
-        subtotal - discountAmount
-      }`
-    );
-  }
-
-  return subtotal - discountAmount;
-}
-
-/**
- * Calculates both the original amount and the final amount after discount for an invoice
- */
 export function calculateInvoiceAmounts(
   invoice: Stripe.Invoice | Stripe.UpcomingInvoice,
   discounts?: Record<string, Stripe.Discount>,
@@ -170,7 +99,7 @@ export function calculateInvoiceAmounts(
       if (discountAppliesToProduct) {
         if (coupon.amount_off) {
           // For amount-based discounts, only apply if product-specific
-          if (!hasNoProductRestrictions) {
+          if (!hasNoProductRestrictions || amount < 1000) {
             discountAmount = coupon.amount_off / 100;
           }
         } else if (coupon.percent_off) {
