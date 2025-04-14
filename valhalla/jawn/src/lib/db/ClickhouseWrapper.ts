@@ -229,6 +229,9 @@ export interface RequestResponseRMT {
   request_body: string;
   response_body: string;
   assets: Array<string>;
+  session_id: string;
+  session_name: string;
+  session_path: string;
   updated_at?: string;
 }
 

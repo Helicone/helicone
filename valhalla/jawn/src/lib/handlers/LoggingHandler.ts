@@ -507,6 +507,9 @@ export class LoggingHandler extends AbstractLogHandler {
       ),
       request_body: requestText,
       response_body: responseText,
+      session_id: request.properties?.["Helicone-Session-Id"] ?? "",
+      session_name: request.properties?.["Helicone-Session-Name"] ?? "",
+      session_path: request.properties?.["Helicone-Session-Path"] ?? "",
     };
 
     return requestResponseLog;
