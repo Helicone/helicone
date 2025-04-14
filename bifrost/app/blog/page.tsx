@@ -225,6 +225,11 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
+      folderName: "full-guide-to-improving-ai-agents",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "agentic-rag-full-developer-guide",
     },
   },
