@@ -124,6 +124,9 @@ export function RenderMappedRequest({
             case "openai-embedding":
               return <Completion mappedRequest={mappedRequest} />;
 
+            case "openai-response":
+              return <Chat mappedRequest={mappedRequest} />;
+
             case "vector-db":
               return <VectorDB mappedRequest={mappedRequest} />;
 
