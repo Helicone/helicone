@@ -70,7 +70,7 @@ export function RenderMappedRequest({
     endIndex: number;
   };
 }) {
-  const { mode, toggleMode } = useRequestRenderModeStore();
+  const { mode, toggleMode, setMode } = useRequestRenderModeStore();
   const isShiftPressed = useShiftKeyPress();
 
   // Check if request had an error first
@@ -146,17 +146,30 @@ export function RenderMappedRequest({
 
             default:
               return (
-                <>
-                  <div className="text-sm text-gray-500">
+                <div className="flex flex-col gap-2 p-20">
+                  <div className="text-sm text-gray-500 ">
                     Unable to render this request. Please contact support at
                     (support@helicone.ai) and we can be sure to add support for
                     it. Or if you feel inclined, you can submit a PR to add
                     support for it.
                   </div>
-                  <pre>
-                    <code>{JSON.stringify(mappedRequest, null, 2)}</code>
-                  </pre>
-                </>
+                  <div className="flex flex-row gap-2 ">
+                    <Button
+                      variant={"outline"}
+                      size={"sm"}
+                      onClick={() => setMode("json")}
+                    >
+                      View in JSON mode
+                    </Button>
+                    <Button
+                      variant={"outline"}
+                      size={"sm"}
+                      onClick={() => setMode("debug")}
+                    >
+                      View in Debug mode
+                    </Button>
+                  </div>
+                </div>
               );
           }
         })()
