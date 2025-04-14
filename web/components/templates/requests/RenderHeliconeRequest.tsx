@@ -100,7 +100,10 @@ export function RenderMappedRequest({
       {mode === "debug" ? (
         <div className="p-4">
           <pre className="whitespace-pre-wrap text-sm">
-            <JsonRenderer data={JSON.parse(JSON.stringify(mappedRequest))} />
+            <JsonRenderer
+              data={JSON.parse(JSON.stringify(mappedRequest))}
+              copyButtonPosition="top-left"
+            />
           </pre>
         </div>
       ) : mode === "json" ? (

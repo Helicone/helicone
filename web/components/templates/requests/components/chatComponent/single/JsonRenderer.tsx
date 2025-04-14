@@ -22,6 +22,7 @@ interface JsonRendererProps {
   level?: number;
   isExpanded?: boolean;
   showCopyButton?: boolean;
+  copyButtonPosition?: "top-left" | "top-right";
 }
 
 interface StringRendererProps {
@@ -72,6 +73,7 @@ export const JsonRenderer: React.FC<JsonRendererProps> = ({
   level = 0,
   isExpanded = true,
   showCopyButton = true,
+  copyButtonPosition = "top-right",
 }) => {
   const shouldAutoCollapse =
     Array.isArray(data) && data.length > DEFAULT_COLLAPSE_LENGTH;
@@ -186,7 +188,11 @@ export const JsonRenderer: React.FC<JsonRendererProps> = ({
       {level === 0 && showCopyButton && (
         <button
           onClick={handleCopy}
-          className="absolute right-0 top-0 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
+          className={`absolute ${
+            copyButtonPosition === "top-left"
+              ? "left-10 top-0"
+              : "right-0 top-0"
+          } text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors`}
           title="Copy JSON"
         >
           {copied ? (
