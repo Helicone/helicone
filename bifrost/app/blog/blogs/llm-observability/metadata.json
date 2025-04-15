@@ -1,12 +1,12 @@
 {
-  "title": "What is LLM Observability and Monitoring?",
-  "title1": "What is LLM Observability and Monitoring?",
-  "title2": "What is LLM Observability and Monitoring?",
-  "description": "Learn about how LLM observability differs from traditional observability, key challenges in building with LLM and best practices for monitoring LLM applications.",
-  "images": "/static/blog/llm-observability-cover.webp",
+  "title": "LLM Observability: 5 Essential Pillars for Production-Ready AI Applications",
+  "title1": "Building Reliable LLM Applications for Production with LLM Observability",
+  "title2": "5 Best Practices to Building Reliable LLM Applications for Production",
+  "description": "Technical leads who've successfully scaled LLM applications know that robust observability is beyond just tracking costs. Learn how LLM observability differs from traditional monitoring and discover 5 practical strategies to reduce hallucinations, prevent prompt injections, and optimize costs in production.",
+  "images": "/static/blog/best-practices-for-llm-observability/llm-observability-cover.webp",
   "time": "9 minute read",
   "author": "Lina Lam",
-  "date": "October 17, 2024", 
+  "date": "April 12, 2025", 
   "badge": "Product"
  }
  

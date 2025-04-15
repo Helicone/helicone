@@ -220,6 +220,16 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "buy-vs-build-llm-observability",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "full-guide-to-improving-ai-agents",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "agentic-rag-full-developer-guide",
     },
   },
@@ -546,6 +556,11 @@ const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
       folderName: "sam-2",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "implementing-llm-observability-with-helicone",
     },
   },
   {
