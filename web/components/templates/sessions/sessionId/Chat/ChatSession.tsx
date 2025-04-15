@@ -1,3 +1,4 @@
+import { RenderHeliconeRequest } from "@/components/templates/requests/RenderHeliconeRequest";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { HeliconeRequest, MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
@@ -10,8 +11,9 @@ import { Col } from "../../../../layout/common/col";
 import { Row } from "../../../../layout/common/row";
 import FeedbackButtons from "../../../feedback/thumbsUpThumbsDown";
 import { CustomPropertiesCard } from "../../../requests/customProperties";
-import RequestDrawer from "../../../requests/RequestDrawer";
+import RequestDrawerV2 from "../../../requests/requestDrawerV2";
 import StatusBadge from "../../../requests/statusBadge";
+
 interface ChatSessionProps {
   session?: Session;
   requests: ReturnType<typeof useGetRequests>;
@@ -21,6 +23,7 @@ interface ChatSessionProps {
     originalRequest: HeliconeRequest | null;
   };
 }
+
 const ChatSession: React.FC<ChatSessionProps> = ({
   requests,
   session,
@@ -61,10 +64,10 @@ const ChatSession: React.FC<ChatSessionProps> = ({
               className="request-item mb-4 shadow-sm border-y border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950"
             >
               <div className="flex-1">
-                <RequestDrawer
-                  request={mappedRequest}
-                  onCollapse={() => {}}
-                  showCollapse={false}
+                <RenderHeliconeRequest
+                  heliconeRequest={request}
+                  hideTopBar={true}
+                  className={""}
                 />
               </div>
               <div className="lg:min-w-[350px] p-5 rounded-lg bg-slate-100 dark:bg-black">
@@ -160,7 +163,12 @@ const ChatSession: React.FC<ChatSessionProps> = ({
             </Row>
           );
         })}
-        <RequestDrawer request={requestDrawerRequest} onCollapse={() => {}} />
+        <RequestDrawerV2
+          open={open}
+          setOpen={(open) => setOpen(open)}
+          request={requestDrawerRequest}
+          properties={properties.properties}
+        />
       </div>
     </ScrollArea>
   );

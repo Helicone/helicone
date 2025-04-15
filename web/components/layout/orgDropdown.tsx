@@ -10,11 +10,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
-import { Database } from "@/db/database.types";
 import { cn } from "@/lib/utils";
+import { Database } from "@/db/database.types";
+import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-
-import { getTierDisplayInfo } from "@/utils/pricingConfigs";
+import { LogOutIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -29,8 +29,7 @@ import {
 import { UpgradeProDialog } from "../templates/organization/plan/upgradeProDialog";
 import { useOrg } from "./org/organizationContext";
 import OrgMoreDropdown from "./orgMoreDropdown";
-import { Cog6ToothIcon } from "@heroicons/react/24/outline";
-import { LogOutIcon } from "lucide-react";
+import { getTierDisplayInfo } from "@/utils/pricingConfigs";
 
 interface OrgDropdownProps {}
 

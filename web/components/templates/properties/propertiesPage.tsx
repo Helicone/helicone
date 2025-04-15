@@ -1,59 +1,40 @@
-import AuthHeader from "@/components/shared/authHeader";
-import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
-import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
+import { useEffect, useState } from "react";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
+import { LockIcon, Tag } from "lucide-react";
+import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
+import { getPropertyFiltersV2 } from "../../../services/lib/filters/frontendFilterDefs";
+import PropertyPanel from "./propertyPanel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { H3 } from "@/components/ui/typography";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
-import { LockIcon, Tag } from "lucide-react";
-import { useRouter } from "next/router";
-import { useEffect, useMemo } from "react";
-import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
-import { getPropertyFiltersV2 } from "../../../services/lib/filters/frontendFilterDefs";
-import PropertyPanel from "./propertyPanel";
+import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
+import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
+import { H3 } from "@/components/ui/typography";
+import AuthHeader from "@/components/shared/authHeader";
 
-const PropertiesPage = (props: { initialPropertyKey?: string }) => {
-  const { initialPropertyKey } = props;
+const PropertiesPage = (props: {}) => {
   const { properties, isLoading: isPropertiesLoading } =
     useGetPropertiesV2(getPropertyFiltersV2);
 
-  const router = useRouter();
-
-  // Only update URL when property is selected via UI
-  const handlePropertySelect = (property: string) => {
-    router.push(`/properties/${encodeURIComponent(property)}`);
-  };
-
-  // Determine the selected property based on initialPropertyKey or first property
-  const selectedProperty = useMemo(() => {
-    if (initialPropertyKey && properties.includes(initialPropertyKey)) {
-      return initialPropertyKey;
-    }
-    if (properties.length > 0 && !isPropertiesLoading) {
-      return properties[0];
-    }
-    return "";
-  }, [initialPropertyKey, properties, isPropertiesLoading]);
+  const [selectedProperty, setSelectedProperty] = useState<string>("");
 
   const { hasAccess, freeLimit, canCreate } = useFeatureLimit(
     "properties",
     properties.length
   );
 
-  // Redirect to root if property not found
   useEffect(() => {
     if (
-      initialPropertyKey &&
-      !isPropertiesLoading &&
+      !hasAccess &&
       properties.length > 0 &&
-      !properties.includes(initialPropertyKey)
+      selectedProperty === "" &&
+      !isPropertiesLoading
     ) {
-      router.replace("/properties");
+      setSelectedProperty(properties[0]);
     }
-  }, [initialPropertyKey, properties, isPropertiesLoading, router]);
+  }, [properties, selectedProperty, isPropertiesLoading, hasAccess]);
 
   if (isPropertiesLoading) {
     return (
@@ -148,7 +129,7 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
                           selectedProperty === property ? "default" : "ghost"
                         }
                         className="w-full justify-start font-medium h-auto py-3 rounded-none"
-                        onClick={() => handlePropertySelect(property)}
+                        onClick={() => setSelectedProperty(property)}
                       >
                         <Tag className="h-4 w-4 mr-2" />
                         <span className="truncate max-w-[250px]">

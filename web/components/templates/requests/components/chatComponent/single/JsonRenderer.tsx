@@ -7,8 +7,6 @@ import {
 } from "@heroicons/react/24/outline";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
-const DEFAULT_COLLAPSE_LENGTH = 10;
-
 type JsonValue =
   | string
   | number
@@ -22,7 +20,6 @@ interface JsonRendererProps {
   level?: number;
   isExpanded?: boolean;
   showCopyButton?: boolean;
-  copyButtonPosition?: "top-left" | "top-right";
 }
 
 interface StringRendererProps {
@@ -32,7 +29,7 @@ interface StringRendererProps {
 
 const StringRenderer: React.FC<StringRendererProps> = ({
   data,
-  maxLength = 10_000,
+  maxLength = 10000,
 }) => {
   const [expanded, setExpanded] = useState(false);
   const isTruncated = data.length > maxLength;
@@ -73,14 +70,10 @@ export const JsonRenderer: React.FC<JsonRendererProps> = ({
   level = 0,
   isExpanded = true,
   showCopyButton = true,
-  copyButtonPosition = "top-right",
 }) => {
-  const shouldAutoCollapse =
-    Array.isArray(data) && data.length > DEFAULT_COLLAPSE_LENGTH;
-  const [expanded, setExpanded] = useState(
-    shouldAutoCollapse ? false : isExpanded
-  );
+  const [expanded, setExpanded] = useState(isExpanded);
   const [copied, setCopied] = useState(false);
+  const indent = "  ".repeat(level);
 
   const handleCopy = () => {
     const jsonString = JSON.stringify(data, null, 2);
@@ -188,11 +181,7 @@ export const JsonRenderer: React.FC<JsonRendererProps> = ({
       {level === 0 && showCopyButton && (
         <button
           onClick={handleCopy}
-          className={`absolute ${
-            copyButtonPosition === "top-left"
-              ? "left-10 top-0"
-              : "right-0 top-0"
-          } text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors`}
+          className="absolute right-0 top-0 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
           title="Copy JSON"
         >
           {copied ? (
