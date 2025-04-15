@@ -212,7 +212,7 @@ export default function ThemedTable<T extends { id?: string }>(
               width: fullWidth ? "100%" : table.getCenterTotalSize(),
             }}
           >
-            <thead className="text-[12px] h-11">
+            <thead className="text-[12px]">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr
                   key={headerGroup.id}
