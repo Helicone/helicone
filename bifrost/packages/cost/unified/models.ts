@@ -69,7 +69,7 @@ export const modelMapping: CreatorModelMapping = {
         },
       ],
     },
-    "GPT-4.5 Preview": {
+    "GPT-4.1": {
       defaultTokenCost: {
         input: 0,
         output: 0,
@@ -80,15 +80,61 @@ export const modelMapping: CreatorModelMapping = {
       providers: [
         {
           provider: "OPENAI",
-          modelString: "gpt-4.5-preview",
+          modelString: "gpt-4.1",
         },
         {
           provider: "AZURE",
-          modelString: "gpt-4.5-preview",
+          modelString: "gpt-4.1",
         },
         {
           provider: "OPENROUTER",
-          modelString: "openai/gpt-4.5-preview",
+          modelString: "openai/gpt-4.1",
+        },
+      ],
+    },
+    "GPT-4.1 mini": {
+      defaultTokenCost: {
+        input: 0,
+        output: 0,
+      },
+      defaultParameters: {
+        stop: [],
+      },
+      providers: [
+        {
+          provider: "OPENAI",
+          modelString: "gpt-4.1-mini",
+        },
+        {
+          provider: "AZURE",
+          modelString: "gpt-4.1-mini",
+        },
+        {
+          provider: "OPENROUTER",
+          modelString: "openai/gpt-4.1-mini",
+        },
+      ],
+    },
+    "GPT-4.1 nano": {
+      defaultTokenCost: {
+        input: 0,
+        output: 0,
+      },
+      defaultParameters: {
+        stop: [],
+      },
+      providers: [
+        {
+          provider: "OPENAI",
+          modelString: "gpt-4.1-nano",
+        },
+        {
+          provider: "AZURE",
+          modelString: "gpt-4.1-nano",
+        },
+        {
+          provider: "OPENROUTER",
+          modelString: "openai/gpt-4.1-nano",
         },
       ],
     },
