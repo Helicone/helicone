@@ -90,6 +90,7 @@ export function withAuth<T>(
     res: NextApiResponse<T | { error: string }>
   ) => {
     const client = await getSSRHeliconeAuthClient({ ctx: { req, res } });
+
     const user = await client.getUser();
     const org = await client.getOrg();
     if (org.error || !org.data || !user.data || user.error) {
