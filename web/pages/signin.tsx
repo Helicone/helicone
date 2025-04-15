@@ -45,13 +45,15 @@ const SignIn = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unauthorized]);
 
-  if (heliconeAuthClient.user) {
-    const { pi_session, ...restQuery } = router.query;
-    router.push({
-      pathname: pi_session ? "/pi/onboarding" : "/dashboard",
-      query: router.query,
-    });
-  }
+  useEffect(() => {
+    if (heliconeAuthClient.user) {
+      const { pi_session, ...restQuery } = router.query;
+      router.push({
+        pathname: pi_session ? "/pi/onboarding" : "/dashboard",
+        query: router.query,
+      });
+    }
+  }, [router, heliconeAuthClient.user]);
 
   return (
     <PublicMetaData

@@ -43,19 +43,11 @@ export async function supabaseAuthClientFromSSRContext(
 }
 
 export class SupabaseAuthClient implements HeliconeAuthClient {
-  supabaseClient: SupabaseClient<Database>;
-  user?: HeliconeUser;
   constructor(
-    supabaseClient?: SupabaseClient<Database>,
+    private supabaseClient?: SupabaseClient<Database>,
     user?: HeliconeUser,
     private org?: { org: HeliconeOrg; role: string }
-  ) {
-    if (!supabaseClient) {
-      throw new Error("Supabase client not found");
-    }
-    this.supabaseClient = supabaseClient;
-    this.user = user;
-  }
+  ) {}
 
   async getOrg(): Promise<Result<{ org: HeliconeOrg; role: string }, string>> {
     if (!this.org) {
@@ -65,14 +57,17 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
   }
 
   async signOut(): Promise<void> {
-    await this.supabaseClient.auth.signOut({ scope: "global" });
-    await this.supabaseClient.auth.signOut({ scope: "others" });
-    await this.supabaseClient.auth.signOut({ scope: "local" });
+    await this.supabaseClient?.auth.signOut({ scope: "global" });
+    await this.supabaseClient?.auth.signOut({ scope: "others" });
+    await this.supabaseClient?.auth.signOut({ scope: "local" });
     posthog.reset();
-    await this.supabaseClient.auth.signOut();
+    await this.supabaseClient?.auth.signOut();
   }
 
   async getUser(): Promise<Result<HeliconeUser, string>> {
+    if (!this.supabaseClient) {
+      return err("Supabase client not found");
+    }
     const user = await this.supabaseClient.auth.getUser();
     if (!user.data.user) {
       return err("User not found");
@@ -85,6 +80,9 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
   }
 
   async refreshSession(): Promise<void> {
+    if (!this.supabaseClient) {
+      return;
+    }
     await this.supabaseClient.auth.refreshSession();
   }
 
@@ -97,6 +95,9 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
     password: string;
     options?: { emailRedirectTo?: string };
   }): Promise<Result<HeliconeUser, string>> {
+    if (!this.supabaseClient) {
+      return err("Supabase client not found");
+    }
     const { data: user, error: authError } =
       await this.supabaseClient.auth.signUp({
         email,
@@ -120,6 +121,9 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
     email: string;
     options?: { emailRedirectTo?: string };
   }): Promise<Result<void, string>> {
+    if (!this.supabaseClient) {
+      return err("Supabase client not found");
+    }
     const { data: user, error: authError } =
       await this.supabaseClient.auth.resetPasswordForEmail(email, {
         redirectTo: options?.emailRedirectTo,
@@ -137,6 +141,9 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
     email: string;
     password: string;
   }): Promise<Result<HeliconeUser, string>> {
+    if (!this.supabaseClient) {
+      return err("Supabase client not found");
+    }
     const { data: user, error: authError } =
       await this.supabaseClient.auth.signInWithPassword({
         email,
@@ -159,6 +166,9 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
     provider: "google" | "github";
     options?: { redirectTo?: string };
   }): Promise<Result<void, string>> {
+    if (!this.supabaseClient) {
+      return err("Supabase client not found");
+    }
     const { data, error } = await this.supabaseClient.auth.signInWithOAuth({
       provider,
       options,
@@ -174,6 +184,9 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
   }: {
     password: string;
   }): Promise<Result<void, string>> {
+    if (!this.supabaseClient) {
+      return err("Supabase client not found");
+    }
     const { data: user, error: authError } =
       await this.supabaseClient.auth.updateUser({
         password,
@@ -195,6 +208,7 @@ export function useSupabaseAuthClient(): HeliconeAuthClient {
     const orgWithRole = allOrgs.data?.data?.find(
       (orgWithRole) => orgWithRole.id === org?.currentOrg?.id
     );
+
     return new SupabaseAuthClient(
       supabaseClient,
       {

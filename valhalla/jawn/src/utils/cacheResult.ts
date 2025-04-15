@@ -28,7 +28,6 @@ export async function cacheResultCustom<T, K>(
 
   const cachedValue = await kvCache.get(cacheKey);
   if (cachedValue) {
-    console.log("Cache hit for", cacheKey);
     return cachedValue as Result<T, K>;
   }
 
@@ -63,7 +62,6 @@ export async function quickCacheResultCustom<T, K>(
   // The short cache is used to reduce really fast re-requests of the same data
   const shortCachedValue = await shortCache.get(cacheKey);
   if (shortCachedValue) {
-    console.log("Short cache hit for", cacheKey);
     return shortCachedValue as Result<T, K>;
   }
   const result = fn();
@@ -79,7 +77,6 @@ export async function quickCacheResultCustom<T, K>(
     return r;
   });
   if (cachedValue) {
-    console.log("Cache hit for", cacheKey);
     return cachedValue as Result<T, K>;
   }
 
