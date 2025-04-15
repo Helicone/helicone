@@ -6,6 +6,7 @@ pub mod rate_limit;
 pub mod retry;
 pub mod router;
 pub mod server;
+pub mod spend_control;
 
 use std::path::PathBuf;
 

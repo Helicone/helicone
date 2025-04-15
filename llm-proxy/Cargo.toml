@@ -50,10 +50,12 @@ url = { workspace = true, features = ['serde'] }
 utoipa = { workspace = true }
 uuid = { workspace = true, features = ["serde", "v7"] }
 
+wiremock = { workspace = true, optional = true }
+serde_yml = { workspace = true }
 
 [features]
 default = []
-testing = []
+testing = ["dep:wiremock"]
 
 [[test]]
 name = "default_target"

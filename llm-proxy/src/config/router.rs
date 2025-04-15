@@ -1,45 +1,52 @@
-use indexmap::IndexMap;
 use rust_decimal::Decimal;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-use super::{rate_limit::RateLimitConfig, retry::RetryConfig};
+use super::{rate_limit::RateLimitConfig, retry::RetryConfig, spend_control::SpendControlConfig};
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "kebab-case")]
 pub struct RouterConfig {
     pub cache: CacheControlConfig,
     pub fallback: FallbackConfig,
-    pub balance: LoadBalanceConfig,
+    pub balance: BalanceConfig,
     pub retries: RetryConfig,
     pub rate_limit: RateLimitConfig,
+    pub spend_control: SpendControlConfig,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "kebab-case")]
 pub struct CacheControlConfig {
-    pub max_age: u64,
-    pub max_stale: u64,
+    /// Cache-control header: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cache-Control
+    pub directive: String,
+    pub enabled: bool,
     pub buckets: u16,
     pub seed: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "kebab-case")]
 pub struct FallbackConfig {
     pub enabled: bool,
     pub order: Vec<ModelVersion>,
 }
 
-#[derive(Debug, Deserialize, Eq, PartialEq)]
-pub struct LoadBalanceConfig(pub IndexMap<Version, Weight>);
+#[derive(Debug, Deserialize, Serialize, Eq, PartialEq)]
+pub struct BalanceConfig(pub Vec<BalanceTarget>);
 
-#[derive(Debug, Deserialize, Eq, Hash, PartialEq)]
-pub enum Version {
-    Prompt(PromptVersion),
-    Model(ModelVersion),
+#[derive(Debug, Deserialize, Serialize, Eq, Hash, PartialEq)]
+#[serde(rename_all = "kebab-case")]
+pub struct BalanceTarget {
+    pub model: ModelVersion,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub prompt: Option<PromptVersion>,
+    pub weight: Decimal,
 }
 
-#[derive(Debug, Deserialize, Eq, Hash, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, Eq, Hash, PartialEq)]
 pub struct PromptVersion(pub String);
 
-#[derive(Debug, Deserialize, Eq, Hash, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, Eq, Hash, PartialEq)]
 pub struct ModelVersion(pub String);
 
 #[derive(Debug, Deserialize, Eq, Hash, PartialEq)]
@@ -47,8 +54,8 @@ pub struct Weight(pub Decimal);
 
 pub async fn test_router_config() -> RouterConfig {
     let cache = CacheControlConfig {
-        max_age: 3600,
-        max_stale: 1800,
+        directive: "max-age=3600, max-stale=1800".to_string(),
+        enabled: true,
         buckets: 10,
         seed: "test-seed".to_string(),
     };
@@ -59,7 +66,11 @@ pub async fn test_router_config() -> RouterConfig {
         order: vec![ModelVersion("claude-3-7-sonnet-latest".to_string())],
     };
 
-    let balance = LoadBalanceConfig(IndexMap::new());
+    let balance = BalanceConfig(vec![BalanceTarget {
+        model: ModelVersion("claude-3-7-sonnet-latest".to_string()),
+        prompt: None,
+        weight: Decimal::from(1),
+    }]);
     let retries = RetryConfig {
         enabled: false,
         max_retries: 3,
@@ -67,12 +78,13 @@ pub async fn test_router_config() -> RouterConfig {
 
     // Create test values for RateLimitConfig
     let rate_limit = RateLimitConfig::default();
-
+    let spend_control = SpendControlConfig::default();
     RouterConfig {
         cache,
         fallback,
         balance,
         retries,
         rate_limit,
+        spend_control,
     }
 }

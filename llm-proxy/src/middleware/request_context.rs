@@ -1,9 +1,5 @@
 use std::{
-    future::Future,
-    pin::Pin,
-    sync::Arc,
-    task::{Context, Poll},
-    time::Instant,
+    future::Future, marker::PhantomData, pin::Pin, sync::Arc, task::{Context, Poll}, time::Instant
 };
 
 use deadpool_postgres::Pool;
@@ -11,31 +7,48 @@ use http::Request;
 use isocountry::CountryCode;
 
 use crate::{
-    dispatcher::ReqBody as Body,
     error::{api::Error, database::DatabaseError},
     types::request::{Provider, RequestContext},
 };
 
 type BoxFuture<'a, T> = Pin<Box<dyn Future<Output = T> + Send + 'a>>;
 
-#[derive(Debug, Clone)]
-pub struct Service<S> {
+#[derive(Debug)]
+pub struct Service<S, ReqBody> {
     inner: S,
     pg_pool: Pool,
+    _marker: PhantomData<ReqBody>,
 }
 
-impl<S> Service<S> {
-    pub fn new(inner: S, pg_pool: Pool) -> Self {
-        Self { inner, pg_pool }
+/// A manual impl of Clone since the derived version will add a Clone bound on
+/// the ReqBody type, which isn't needed since it's just used as a marker type.
+impl<S, ReqBody> Clone for Service<S, ReqBody>
+where
+    S: Clone,
+{
+    fn clone(&self) -> Self {
+        Self {
+            inner: self.inner.clone(),
+            pg_pool: self.pg_pool.clone(),
+            _marker: PhantomData,
+        }
     }
 }
 
-impl<S> tower::Service<Request<Body>> for Service<S>
+impl<S, ReqBody> Service<S, ReqBody>
+{
+    pub fn new(inner: S, pg_pool: Pool) -> Self {
+        Self { inner, pg_pool, _marker: PhantomData }
+    }
+}
+
+impl<S, ReqBody> tower::Service<Request<ReqBody>> for Service<S, ReqBody>
 where
-    S: tower::Service<Request<Body>> + Clone + Send + Sync + 'static,
+    S: tower::Service<Request<ReqBody>> + Clone + Send + Sync + 'static,
     S::Future: Send + 'static,
     S::Response: Send + 'static,
     S::Error: Into<Error> + Send + Sync + 'static,
+    ReqBody: Send + Sync + 'static,
 {
     type Response = S::Response;
     type Error = Error;
@@ -48,7 +61,7 @@ where
         self.inner.poll_ready(cx).map_err(Into::into)
     }
 
-    fn call(&mut self, mut req: Request<Body>) -> Self::Future {
+    fn call(&mut self, mut req: Request<ReqBody>) -> Self::Future {
         let mut this = self.clone();
 
         Box::pin(async move {
@@ -59,16 +72,16 @@ where
     }
 }
 
-impl<S> Service<S>
+impl<S, ReqBody> Service<S, ReqBody>
 where
-    S: tower::Service<Request<Body>> + Clone,
+    S: tower::Service<Request<ReqBody>> + Clone,
     S::Future: Send + 'static,
     S::Response: Send + 'static,
     S::Error: Into<Error> + Send + Sync + 'static,
 {
     async fn get_context(
         &self,
-        _req: &Request<Body>,
+        _req: &Request<ReqBody>,
     ) -> Result<RequestContext, Error> {
         let client = self
             .pg_pool
@@ -113,18 +126,20 @@ where
 }
 
 #[derive(Debug, Clone)]
-pub struct Layer {
+pub struct Layer<ReqBody> {
     pg_pool: Pool,
+    _marker: PhantomData<ReqBody>,
 }
 
-impl Layer {
+impl<ReqBody> Layer<ReqBody> {
     pub fn new(pg_pool: Pool) -> Self {
-        Self { pg_pool }
+        Self { pg_pool, _marker: PhantomData }
     }
 }
 
-impl<S> tower::Layer<S> for Layer {
-    type Service = Service<S>;
+impl<S, ReqBody> tower::Layer<S> for Layer<ReqBody>
+{
+    type Service = Service<S, ReqBody>;
 
     fn layer(&self, inner: S) -> Self::Service {
         Service::new(inner, self.pg_pool.clone())

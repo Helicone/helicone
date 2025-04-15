@@ -4,13 +4,14 @@ use std::{
 };
 
 use http::Request;
+use hyper::body::Body;
 use tower::{
     Service,
     steer::{Picker, Steer},
 };
 
 use crate::{
-    dispatcher::{AiProviderDispatcher, Dispatcher, ReqBody as Body},
+    dispatcher::{AiProviderDispatcher, Dispatcher},
     registry::Registry,
     types::request::RequestContext,
 };
@@ -18,12 +19,12 @@ use crate::{
 #[derive(Clone)]
 struct RouterPicker;
 
-impl<S> Picker<S, Request<Body>> for RouterPicker
+impl<S, ReqBody> Picker<S, Request<ReqBody>> for RouterPicker
 where
-    S: AiProviderDispatcher,
+    S: AiProviderDispatcher<ReqBody>,
 {
     /// Chooses a service index based on the request's `RequestContext`.
-    fn pick(&mut self, req: &Request<Body>, services: &[S]) -> usize {
+    fn pick(&mut self, req: &Request<ReqBody>, services: &[S]) -> usize {
         let context = req.extensions().get::<Arc<RequestContext>>().unwrap();
         let target_provider = context.proxy_context.target_provider;
         let index = services
@@ -34,23 +35,39 @@ where
     }
 }
 
-#[derive(Clone)]
-pub struct Router {
-    services: Steer<Dispatcher, RouterPicker, Request<Body>>,
+pub struct Router<ReqBody> {
+    services: Steer<Dispatcher<ReqBody>, RouterPicker, Request<ReqBody>>,
 }
 
-impl Router {
-    pub fn new(registry: Registry) -> Self {
+impl<ReqBody> Clone for Router<ReqBody>
+where ReqBody: Body + Send + Sync + 'static,
+ <ReqBody as hyper::body::Body>::Error: Send + Sync + std::error::Error,
+ <ReqBody as hyper::body::Body>::Data: Send + Sync
+{
+    fn clone(&self) -> Self {
+        Self { services: self.services.clone() }
+    }
+}
+impl<ReqBody> Router<ReqBody>
+where ReqBody: Body + Send + Sync + 'static,
+ <ReqBody as hyper::body::Body>::Error: Send + Sync + std::error::Error,
+ <ReqBody as hyper::body::Body>::Data: Send + Sync
+{
+    pub fn new(registry: Registry<ReqBody>) -> Self {
         Self {
             services: Steer::new(registry.services, RouterPicker),
         }
     }
 }
 
-impl Service<Request<Body>> for Router {
-    type Response = <Dispatcher as Service<Request<Body>>>::Response;
-    type Error = <Dispatcher as Service<Request<Body>>>::Error;
-    type Future = <Dispatcher as Service<Request<Body>>>::Future;
+impl<ReqBody> Service<Request<ReqBody>> for Router<ReqBody>
+where ReqBody: Body + Send + Sync + 'static,
+ <ReqBody as hyper::body::Body>::Error: Send + Sync + std::error::Error,
+ <ReqBody as hyper::body::Body>::Data: Send + Sync
+{
+    type Response = <Dispatcher<ReqBody> as Service<Request<ReqBody>>>::Response;
+    type Error = <Dispatcher<ReqBody> as Service<Request<ReqBody>>>::Error;
+    type Future = <Dispatcher<ReqBody> as Service<Request<ReqBody>>>::Future;
 
     fn poll_ready(
         &mut self,
@@ -59,7 +76,7 @@ impl Service<Request<Body>> for Router {
         self.services.poll_ready(cx)
     }
 
-    fn call(&mut self, req: Request<Body>) -> Self::Future {
+    fn call(&mut self, req: Request<ReqBody>) -> Self::Future {
         self.services.call(req)
     }
 }

@@ -1,3 +1,4 @@
+use hyper::body::Body;
 use reqwest::Client;
 
 use crate::{config::dispatcher::DispatcherConfig, dispatcher::Dispatcher};
@@ -12,14 +13,18 @@ use crate::{config::dispatcher::DispatcherConfig, dispatcher::Dispatcher};
 /// mappings at compile time, we can simply use the
 /// [`tower::discover::ServiceList`]. For dynamic updates the
 /// [`tower::discover::Discover`] trait can be used.
-pub struct Registry {
-    pub services: Vec<Dispatcher>,
+pub struct Registry<ReqBody> {
+    pub services: Vec<Dispatcher<ReqBody>>,
 }
 
-impl Registry {
+impl<ReqBody> Registry<ReqBody>
+where ReqBody: Body + Send + Sync + 'static,
+ <ReqBody as hyper::body::Body>::Error: Send + Sync + std::error::Error,
+ <ReqBody as hyper::body::Body>::Data: Send + Sync
+{
     /// Create a [`DispatcherService`] for all providers in the
     /// [`DispatcherConfig`].
-    pub fn new(config: &DispatcherConfig) -> Registry {
+    pub fn new(config: &DispatcherConfig) -> Registry<ReqBody> {
         // *NOTE*: if you wanted to provide middleware specific to AI providers,
         // you could do so here by layering the respective dispatcher with the
         // appropriate middleware.

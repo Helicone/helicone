@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use deadpool_postgres::Pool;
 use futures::future::BoxFuture;
+use hyper::body::Body;
 use meltdown::Token;
 use minio_rsc::{Minio, provider::StaticProvider};
 use tokio::net::TcpListener;
@@ -22,18 +23,22 @@ use crate::{
 /// Type representing the middleware layers.
 /// 
 /// When adding a new middleware, you'll be required to add it to this type.
-pub type ServiceStack = RequestContextService<Router>;
+pub type ServiceStack<ReqBody> = RequestContextService<Router<ReqBody>, ReqBody>;
 
-pub struct App {
+pub struct App<ReqBody> {
     pub config: Config,
     pub minio: Option<Minio>,
     pub authed_rate_limit: Arc<AuthedLimiterConfig>,
     pub unauthed_rate_limit: Arc<UnauthedLimiterConfig>,
     pub pg_pool: Pool,
-    pub service_stack: ServiceStack,
+    pub service_stack: ServiceStack<ReqBody>,
 }
 
-impl App {
+impl<ReqBody> App<ReqBody>
+where ReqBody: Body + Send + Sync + 'static,
+ <ReqBody as hyper::body::Body>::Error: Send + Sync + std::error::Error,
+ <ReqBody as hyper::body::Body>::Data: Send + Sync
+{
     pub fn new(config: Config) -> Result<Self, error::init::Error> {
         let provider = StaticProvider::from_env();
         let minio = if let Some(provider) = provider {
@@ -61,7 +66,7 @@ impl App {
 
         let registry = Registry::new(&config.dispatcher);
         let router = Router::new(registry);
-        let service_stack: ServiceStack = ServiceBuilder::new()
+        let service_stack: ServiceStack<ReqBody> = ServiceBuilder::new()
             .layer(crate::middleware::request_context::Layer::new(
                 pg_pool.clone(),
             ))
@@ -80,7 +85,8 @@ impl App {
     }
 }
 
-impl meltdown::Service for App {
+impl meltdown::Service for App<hyper::body::Incoming>
+{
     type Future = BoxFuture<'static, Result<(), crate::error::runtime::Error>>;
 
     fn run(self, mut token: Token) -> Self::Future {

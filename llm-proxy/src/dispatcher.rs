@@ -1,13 +1,12 @@
 use std::{
-    str::FromStr,
-    sync::Arc,
-    task::{Context, Poll},
+    marker::PhantomData, str::FromStr, sync::Arc, task::{Context, Poll}
 };
 
 use bytes::Bytes;
 use futures::future::BoxFuture;
 use http::{HeaderName, HeaderValue, Request, Response};
 use http_body_util::{BodyExt, Full};
+use hyper::body::Body;
 use reqwest::Client;
 use tower::{Service, util::BoxService};
 
@@ -17,14 +16,13 @@ use crate::{
     types::request::{Provider, RequestContext},
 };
 
-pub type ReqBody = hyper::body::Incoming;
 pub type RespBody = Full<Bytes>;
 pub type DispatcherFuture =
     BoxFuture<'static, Result<Response<RespBody>, Error>>;
-pub type DispatcherService =
+pub type DispatcherService<ReqBody> =
     BoxService<Request<ReqBody>, Response<RespBody>, Error>;
 
-pub trait AiProviderDispatcher:
+pub trait AiProviderDispatcher<ReqBody>:
     Service<Request<ReqBody>, Response = Response<RespBody>, Error = Error>
     + Clone
     + Send
@@ -34,25 +32,48 @@ pub trait AiProviderDispatcher:
     fn provider(&self) -> Provider;
 }
 
-#[derive(Debug, Clone)]
-pub struct Dispatcher {
+#[derive(Debug)]
+pub struct Dispatcher<ReqBody> {
     client: Client,
     provider: Provider,
+    _marker: PhantomData<ReqBody>,
 }
 
-impl AiProviderDispatcher for Dispatcher {
+impl<ReqBody> Clone for Dispatcher<ReqBody> {
+    fn clone(&self) -> Self {
+        Self {
+            client: self.client.clone(),
+            provider: self.provider.clone(),
+            _marker: PhantomData,
+        }
+    }
+}
+
+impl<ReqBody> AiProviderDispatcher<ReqBody> for Dispatcher<ReqBody>
+where ReqBody: Body + Send + Sync + 'static,
+ <ReqBody as hyper::body::Body>::Error: Send + Sync + std::error::Error,
+ <ReqBody as hyper::body::Body>::Data: Send + Sync
+{
     fn provider(&self) -> Provider {
         self.provider
     }
 }
 
-impl Dispatcher {
+impl<ReqBody> Dispatcher<ReqBody>
+where ReqBody: Body + Send + Sync + 'static,
+ <ReqBody as hyper::body::Body>::Error: Send + Sync + std::error::Error,
+ <ReqBody as hyper::body::Body>::Data: Send + Sync
+{
     pub fn new(client: Client, provider: Provider) -> Self {
-        Self { client, provider }
+        Self { client, provider, _marker: PhantomData }
     }
 }
 
-impl Service<Request<ReqBody>> for Dispatcher {
+impl<ReqBody> Service<Request<ReqBody>> for Dispatcher<ReqBody>
+where ReqBody: Body + Send + Sync + 'static,
+ <ReqBody as hyper::body::Body>::Error: Send + Sync + std::error::Error,
+ <ReqBody as hyper::body::Body>::Data: Send + Sync
+{
     type Response = Response<RespBody>;
     type Error = Error;
     type Future = DispatcherFuture;
@@ -70,7 +91,11 @@ impl Service<Request<ReqBody>> for Dispatcher {
     }
 }
 
-impl Dispatcher {
+impl<ReqBody> Dispatcher<ReqBody>
+where ReqBody: Body + Send + Sync + 'static,
+ <ReqBody as hyper::body::Body>::Error: Send + Sync + std::error::Error,
+ <ReqBody as hyper::body::Body>::Data: Send + Sync
+{
     async fn dispatch(
         &self,
         mut req: Request<ReqBody>,
