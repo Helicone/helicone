@@ -1,6 +1,7 @@
 import { Row } from "@/components/layout/common";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
@@ -13,6 +14,7 @@ import { Session } from "../../../../lib/sessions/sessionTypes";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
 import { useGetRequests } from "../../../../services/hooks/requests";
 import { Col } from "../../../layout/common/col";
+import RequestDrawerV2 from "../../requests/requestDrawerV2";
 import { BreadCrumb } from "./breadCrumb";
 import ChatSession from "./Chat/ChatSession";
 import TreeView from "./Tree/TreeView";
@@ -237,6 +239,21 @@ export const SessionContent: React.FC<SessionContentProps> = ({
             />
           </TabsContent>
         </div>
+
+        <RequestDrawerV2
+          request={
+            requests.requests.requests?.find(
+              (r) => r.request_id === selectedRequestId
+            ) &&
+            heliconeRequestToMappedContent(
+              requests.requests.requests?.find(
+                (r) => r.request_id === selectedRequestId
+              )!
+            )
+          }
+          open={selectedRequestId !== "" && openDrawer}
+          setOpen={(open) => handleRequestIdChange("")}
+        />
       </Tabs>
     </Col>
   );

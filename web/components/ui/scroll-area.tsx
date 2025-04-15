@@ -9,7 +9,6 @@ const ScrollArea = React.forwardRef<
     showBottomGradient?: boolean;
     orientation?: "vertical" | "horizontal" | "both";
     type?: "hover" | "scroll" | "always" | "auto";
-    width?: "default" | "thin";
   }
 >(
   (
@@ -19,7 +18,6 @@ const ScrollArea = React.forwardRef<
       showBottomGradient = false,
       orientation = "vertical",
       type = "hover",
-      width,
       ...props
     },
     ref
@@ -38,11 +36,11 @@ const ScrollArea = React.forwardRef<
       )}
       {orientation === "both" ? (
         <>
-          <ScrollBar orientation="vertical" width={width} />
-          <ScrollBar orientation="horizontal" width={width} />
+          <ScrollBar orientation="vertical" />
+          <ScrollBar orientation="horizontal" />
         </>
       ) : (
-        <ScrollBar orientation={orientation} width={width} />
+        <ScrollBar orientation={orientation} />
       )}
       <ScrollAreaPrimitive.Corner />
     </ScrollAreaPrimitive.Root>
@@ -52,34 +50,24 @@ ScrollArea.displayName = ScrollAreaPrimitive.Root.displayName;
 
 const ScrollBar = React.forwardRef<
   React.ElementRef<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>,
-  React.ComponentPropsWithoutRef<
-    typeof ScrollAreaPrimitive.ScrollAreaScrollbar
-  > & {
-    width?: "default" | "thin";
-  }
->(
-  (
-    { className, orientation = "vertical", width = "default", ...props },
-    ref
-  ) => (
-    <ScrollAreaPrimitive.ScrollAreaScrollbar
-      ref={ref}
-      orientation={orientation}
-      className={cn(
-        "flex touch-none select-none transition-colors",
-        orientation === "vertical" && "h-full border-l border-l-transparent",
-        orientation === "vertical" && (width === "thin" ? "w-1.5" : "w-2.5"),
-        orientation === "horizontal" &&
-          "flex-col border-t border-t-transparent",
-        orientation === "horizontal" && (width === "thin" ? "h-1.5" : "h-2.5"),
-        className
-      )}
-      {...props}
-    >
-      <ScrollAreaPrimitive.ScrollAreaThumb className="relative flex-1 rounded-full bg-slate-200/75 dark:bg-slate-800/75" />
-    </ScrollAreaPrimitive.ScrollAreaScrollbar>
-  )
-);
+  React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>
+>(({ className, orientation = "vertical", ...props }, ref) => (
+  <ScrollAreaPrimitive.ScrollAreaScrollbar
+    ref={ref}
+    orientation={orientation}
+    className={cn(
+      "flex touch-none select-none transition-colors",
+      orientation === "vertical" &&
+        "h-full w-2.5 border-l border-l-transparent",
+      orientation === "horizontal" &&
+        "h-2.5 flex-col border-t border-t-transparent",
+      className
+    )}
+    {...props}
+  >
+    <ScrollAreaPrimitive.ScrollAreaThumb className="relative flex-1 rounded-full bg-slate-200/75 dark:bg-slate-800/75" />
+  </ScrollAreaPrimitive.ScrollAreaScrollbar>
+));
 ScrollBar.displayName = ScrollAreaPrimitive.ScrollAreaScrollbar.displayName;
 
 export { ScrollArea, ScrollBar };

@@ -30,7 +30,6 @@ export default {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         shine: "shine 2s linear infinite",
-        "fade-in": "fadeIn 0.5s ease-out forwards",
       },
       keyframes: {
         popin: {
@@ -52,10 +51,6 @@ export default {
         "accordion-up": {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
-        },
-        fadeIn: {
-          "0%": { opacity: "0" },
-          "100%": { opacity: "1" },
         },
       },
       colors: {

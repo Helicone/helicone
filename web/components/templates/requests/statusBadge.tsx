@@ -1,4 +1,4 @@
-import { Badge } from "@/components/ui/badge";
+import { clsx } from "@/components/shared/clsx";
 
 interface StatusBadgeProps {
   statusType: string;
@@ -9,93 +9,121 @@ interface StatusBadgeProps {
 const StatusBadge = (props: StatusBadgeProps) => {
   const { statusType, errorCode } = props;
 
-  let colorClass: string;
-
   switch (statusType) {
     case "cached":
-      colorClass =
-        "bg-orange-50 dark:bg-orange-900 text-orange-700 dark:text-orange-300 ring-1 ring-inset ring-orange-600/20";
       return (
-        <Badge variant="status" asPill={false} className={colorClass}>
+        <span
+          className={clsx(
+            "inline-flex items-center rounded-md bg-orange-50 dark:bg-orange-900 px-2 py-1 -my-1 text-xs font-medium text-orange-700 dark:text-orange-300 ring-1 ring-inset ring-orange-600/20",
+            props.className
+          )}
+        >
           Cached
-        </Badge>
+        </span>
       );
     case "success":
     case "COMPLETED":
-      colorClass =
-        "bg-green-50 dark:bg-green-900 text-green-700 dark:text-green-300 ring-1 ring-inset ring-green-600/20";
       return (
-        <Badge variant="status" asPill={false} className={colorClass}>
+        <span
+          className={clsx(
+            "inline-flex items-center rounded-md bg-green-50 dark:bg-green-900 px-2 py-1 -my-1 text-xs font-medium text-green-700 dark:text-green-300 ring-1 ring-inset ring-green-600/20",
+            props.className
+          )}
+        >
           Success
-        </Badge>
+        </span>
       );
     case "pending":
     case "PENDING":
-      colorClass =
-        "bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-600/20";
       return (
-        <Badge variant="status" asPill={false} className={colorClass}>
+        <span
+          className={clsx(
+            "inline-flex items-center rounded-md bg-gray-50 dark:bg-gray-900 px-2 py-1 -my-1 text-xs font-medium text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-600/20",
+            props.className
+          )}
+        >
           Pending
-        </Badge>
+        </span>
       );
     case "RUNNING":
-      colorClass =
-        "bg-blue-200 dark:bg-gray-900 text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-600/20";
       return (
-        <Badge variant="status" asPill={false} className={colorClass}>
+        <span
+          className={clsx(
+            "inline-flex items-center rounded-md bg-blue-200 dark:bg-gray-900 px-2 py-1 -my-1 text-xs font-medium text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-600/20",
+            props.className
+          )}
+        >
           Running
-        </Badge>
+        </span>
       );
 
     case "error":
       if (errorCode === -2) {
-        colorClass =
-          "bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-600/20";
         return (
-          <Badge variant="status" asPill={false} className={colorClass}>
-            Pending
-          </Badge>
+          <span
+            className={clsx(
+              "inline-flex items-center rounded-md bg-gray-50 dark:bg-gray-900 px-2 py-1 -my-1 text-xs font-medium text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-600/20",
+              props.className
+            )}
+          >
+            {`Pending`}
+          </span>
         );
       } else if (errorCode === -3) {
-        colorClass =
-          "bg-orange-50 dark:bg-orange-900 text-orange-700 dark:text-orange-300 ring-1 ring-inset ring-orange-600/20";
         return (
-          <Badge variant="status" asPill={false} className={colorClass}>
-            Cancelled
-          </Badge>
+          <span
+            className={clsx(
+              "inline-flex items-center rounded-md bg-orange-50 dark:bg-orange-900 px-2 py-1 -my-1 text-xs font-medium text-orange-700 dark:text-orange-300 ring-1 ring-inset ring-orange-600/20",
+              props.className
+            )}
+          >
+            {`Cancelled`}
+          </span>
         );
       } else if (errorCode === -1) {
-        colorClass =
-          "bg-red-50 dark:bg-red-900 text-red-700 dark:text-red-300 ring-1 ring-inset ring-red-600/20";
         return (
-          <Badge variant="status" asPill={false} className={colorClass}>
-            Timeout
-          </Badge>
+          <span
+            className={clsx(
+              "inline-flex items-center rounded-md bg-red-50 dark:bg-red-900 px-2 py-1 -my-1 text-xs font-medium text-red-700 dark:text-red-300 ring-1 ring-inset ring-red-600/20",
+              props.className
+            )}
+          >
+            {`Timeout`}
+          </span>
         );
       } else if (errorCode === -4) {
-        colorClass =
-          "bg-yellow-50 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 ring-1 ring-inset ring-red-600/20";
         return (
-          <Badge variant="status" asPill={false} className={colorClass}>
-            Threat
-          </Badge>
+          <span
+            className={clsx(
+              "inline-flex items-center rounded-md bg-yellow-50 dark:bg-yellow-900 px-2 py-1 -my-1 text-xs font-medium text-yellow-700 dark:text-yellow-300 ring-1 ring-inset ring-red-600/20",
+              props.className
+            )}
+          >
+            {`Threat`}
+          </span>
         );
       } else {
-        colorClass =
-          "bg-red-50 dark:bg-red-900 text-red-700 dark:text-red-300 ring-1 ring-inset ring-red-600/20";
         return (
-          <Badge variant="status" asPill={false} className={colorClass}>
+          <span
+            className={clsx(
+              "inline-flex items-center rounded-md bg-red-50 dark:bg-red-900 px-2 py-1 -my-1 text-xs font-medium text-red-700 dark:text-red-300 ring-1 ring-inset ring-red-600/20",
+              props.className
+            )}
+          >
             {`${errorCode} Error`}
-          </Badge>
+          </span>
         );
       }
     default:
-      colorClass =
-        "bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-600/20";
       return (
-        <Badge variant="status" asPill={false} className={colorClass}>
+        <span
+          className={clsx(
+            "inline-flex items-center rounded-md bg-gray-50 dark:bg-gray-900 px-2 py-1 -my-1 text-xs font-medium text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-600/20",
+            props.className
+          )}
+        >
           Unknown
-        </Badge>
+        </span>
       );
   }
 };
