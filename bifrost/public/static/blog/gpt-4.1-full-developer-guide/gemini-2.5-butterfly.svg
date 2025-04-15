@@ -1,0 +1,25 @@
+<svg width="200" height="150" viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="wingGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:rgb(255,165,0);stop-opacity:1" />
+      <stop offset="100%" style="stop-color:rgb(255,69,0);stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="100" cy="75" rx="8" ry="40" fill="#5A4D41" stroke="#3B312A" stroke-width="1"/>
+
+  <g id="left-wings">
+    <path d="M 100 50 Q 40 10, 40 75 Q 40 140, 100 100 Z" fill="orange" stroke="darkorange" stroke-width="2"/>
+    <path d="M 100 100 Q 60 140, 50 120 Q 40 100, 100 75 Z" fill="orangered" stroke="darkred" stroke-width="2"/>
+  </g>
+
+  <use href="#left-wings" transform="translate(200, 0) scale(-1, 1)" />
+
+  <g stroke="#3B312A" stroke-width="2" fill="none">
+    <path d="M 100 40 Q 85 20, 75 15" />
+    <circle cx="75" cy="15" r="3" fill="#3B312A"/>
+    <path d="M 100 40 Q 115 20, 125 15" />
+    <circle cx="125" cy="15" r="3" fill="#3B312A"/>
+  </g>
+
+</svg>
