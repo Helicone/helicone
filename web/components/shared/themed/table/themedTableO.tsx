@@ -20,17 +20,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useMemo, useState } from "react";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { Result } from "../../../../packages/common/result";
-import { useLocalStorage } from "../../../../services/hooks/localStorage";
 import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
 import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";
 import { SortDirection } from "../../../../services/lib/sorts/requests/sorts";
 import { clsx } from "../../clsx";
 import LoadingAnimation from "../../loadingAnimation";
-import {
-  columnDefsToDragColumnItems,
-  columnDefToDragColumnItem,
-  DragColumnItem,
-} from "./columns/DragList";
+import { DragColumnItem } from "./columns/DragList";
 import DraggableColumnHeader from "./columns/draggableColumnHeader";
 
 type CheckboxMode = "always_visible" | "on_hover" | "never";
@@ -42,6 +37,8 @@ interface ThemedTableProps<T extends { id?: string }> {
   skeletonLoading: boolean;
   dataLoading: boolean;
   tableRef?: React.MutableRefObject<any>;
+  activeColumns: DragColumnItem[];
+  setActiveColumns: (columns: DragColumnItem[]) => void;
   advancedFilters?: {
     filterMap: SingleFilterDef<any>[];
     filters: UIFilterRowTree;
@@ -109,6 +106,8 @@ export default function ThemedTable<T extends { id?: string }>(
     defaultColumns,
     skeletonLoading,
     dataLoading,
+    activeColumns,
+    setActiveColumns,
     advancedFilters,
     exportData,
     timeFilter,
@@ -132,11 +131,6 @@ export default function ThemedTable<T extends { id?: string }>(
     tableRef,
   } = props;
 
-  const [activeColumns, setActiveColumns] = useLocalStorage<DragColumnItem[]>(
-    `${id}-activeColumns`,
-    defaultColumns?.map(columnDefToDragColumnItem)
-  );
-
   const table = useReactTable({
     data: defaultData,
     columns: defaultColumns,
@@ -155,25 +149,17 @@ export default function ThemedTable<T extends { id?: string }>(
   const columns = table.getAllColumns();
 
   useEffect(() => {
-    // This is a weird hack for people migrating to a new local storage
-    if (activeColumns.length > 0 && activeColumns.every((c) => c.id === "")) {
-      setActiveColumns(columnDefsToDragColumnItems(columns));
-    }
-  }, [activeColumns, columns, setActiveColumns]);
-
-  useEffect(() => {
-    for (const column of columns) {
-      if (activeColumns.find((c) => c.name === column.id)?.shown) {
-        if (!column.getIsVisible()) {
-          column.toggleVisibility(true);
-        }
-      } else {
-        if (column.getIsVisible()) {
-          column.toggleVisibility(false);
-        }
+    const columnVisibility: { [key: string]: boolean } = {};
+    activeColumns.forEach((col) => {
+      columnVisibility[col.id] = col.shown;
+    });
+    columns.forEach((column) => {
+      if (columnVisibility[column.id] === undefined) {
+        columnVisibility[column.id] = true;
       }
-    }
-  }, [activeColumns, columns]);
+    });
+    table.setColumnVisibility(columnVisibility);
+  }, [activeColumns, columns, table]);
 
   const handleSelectAll = (checked: boolean) => {
     onSelectAll?.(checked);

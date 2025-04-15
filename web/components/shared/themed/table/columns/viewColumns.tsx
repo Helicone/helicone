@@ -1,8 +1,9 @@
-import { Menu, Transition } from "@headlessui/react";
+import { Button } from "@/components/ui/button";
 import {
-  AdjustmentsHorizontalIcon,
-  InformationCircleIcon,
-} from "@heroicons/react/24/outline";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import {
   Tooltip,
@@ -11,7 +12,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Column } from "@tanstack/react-table";
-import { Fragment, useState } from "react";
+import { useState } from "react";
+import { LuColumns3, LuInfo } from "react-icons/lu";
 import { Col } from "../../../../layout/common/col";
 import { Row } from "../../../../layout/common/row";
 import ColumnOptions from "./ColumnOptions";
@@ -20,16 +22,16 @@ import {
   DragColumnItem,
   DragList,
 } from "./DragList";
-import { Button } from "@/components/ui/button";
 
 interface ViewColumnsProps<T> {
   columns: Column<T, unknown>[];
   activeColumns: DragColumnItem[];
   setActiveColumns: (columns: DragColumnItem[]) => void;
+  isDatasetsPage?: boolean;
 }
 
 export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
-  const { columns, activeColumns, setActiveColumns } = props;
+  const { columns, activeColumns, setActiveColumns, isDatasetsPage } = props;
 
   const categories = columns.reduce(
     (acc, column) => {
@@ -46,44 +48,50 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
     string | undefined | "All columns"
   >(categories[0]);
 
+  const [open, setOpen] = useState(false);
+
   return (
-    <Menu as="div" className="relative inline-block text-left">
-      <div>
-        <Menu.Button
-          as={Button}
-          variant="ghost"
-          className="flex items-center gap-2 text-slate-700 dark:text-slate-400"
-          size="xs"
+    <TooltipProvider>
+      <DropdownMenu open={open} onOpenChange={setOpen}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="none"
+                size="none"
+                className="h-9 w-9 shrink-0 flex items-center justify-center text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800"
+              >
+                <LuColumns3 className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+          </TooltipTrigger>
+          <TooltipContent>Manage columns</TooltipContent>
+        </Tooltip>
+        <DropdownMenuContent
+          className="border border-slate-300 dark:border-slate-700 w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:w-[calc(100vw-8rem)] max-w-4xl rounded-lg bg-white dark:bg-black shadow-xl h-[66vh] overflow-hidden p-0"
+          align="center"
+          sideOffset={8}
         >
-          <AdjustmentsHorizontalIcon className="h-4 w-4" />
-        </Menu.Button>
-      </div>
-      <Transition
-        as={Fragment}
-        enter="transition ease-out duration-100"
-        enterFrom="transform opacity-0 scale-95"
-        enterTo="transform opacity-100 scale-100"
-        leave="transition ease-in duration-75"
-        leaveFrom="transform opacity-100 scale-100"
-        leaveTo="transform opacity-0 scale-95"
-      >
-        <Menu.Items className="border border-slate-300 dark:border-slate-700 absolute z-20 right-0 sm:right-0 mt-2 mx-auto w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] md:w-[calc(100vw-8rem)] max-w-4xl origin-top-right rounded-lg bg-white dark:bg-black shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none h-[66vh] overflow-hidden">
           <Row className="h-full">
             <Col className="relative flex-1 h-full p-4">
               <div className="flex flex-row items-center justify-start space-x-2 mb-4">
                 <h3 className="text-xs text-foreground font-medium">
                   Column Reorder
                 </h3>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <InformationCircleIcon className="h-5 w-5 text-muted-foreground" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>The ordering only affects your Requests table</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      className="cursor-default"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <LuInfo className="h-5 w-5 text-muted-foreground" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="left">
+                    <p>The ordering only affects your Requests table</p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
               <i className="text-xs text-slate-500">
                 Note: If something is not shown, or your columns are in an
@@ -117,9 +125,9 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() =>
-                      setActiveColumns(columnDefsToDragColumnItems(columns))
-                    }
+                    onClick={() => {
+                      setActiveColumns(columnDefsToDragColumnItems(columns));
+                    }}
                     className="text-xs"
                   >
                     Back to preset
@@ -128,11 +136,14 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() =>
+                      onClick={() => {
                         setActiveColumns(
-                          activeColumns.map((c) => ({ ...c, shown: false }))
-                        )
-                      }
+                          activeColumns.map((c) => ({
+                            ...c,
+                            shown: false,
+                          }))
+                        );
+                      }}
                       className="text-xs"
                     >
                       Deselect All
@@ -140,11 +151,11 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() =>
+                      onClick={() => {
                         setActiveColumns(
                           activeColumns.map((c) => ({ ...c, shown: true }))
-                        )
-                      }
+                        );
+                      }}
                       className="text-xs"
                     >
                       Select All
@@ -154,8 +165,8 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
               </div>
             </Col>
           </Row>
-        </Menu.Items>
-      </Transition>
-    </Menu>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </TooltipProvider>
   );
 }

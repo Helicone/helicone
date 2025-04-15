@@ -51,8 +51,12 @@ import {
 } from "../../../services/lib/sorts/requests/sorts";
 import GenericButton from "../../layout/common/button";
 import { useOrg } from "../../layout/org/organizationContext";
+import {
+  DragColumnItem,
+  columnDefToDragColumnItem,
+} from "../../shared/themed/table/columns/DragList";
 import ExportButton from "../../shared/themed/table/exportButton";
-import ThemedTable from "../../shared/themed/table/themedTable";
+import ThemedTable from "../../shared/themed/table/themedTableO";
 import ThemedModal from "../../shared/themed/themedModal";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import OnboardingFloatingPrompt from "../dashboard/OnboardingFloatingPrompt";
@@ -283,6 +287,12 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   const properties = shouldShowMockData ? mockProperties : realProperties;
   const refetch = shouldShowMockData ? () => {} : realRefetch;
   const filterMap = shouldShowMockData ? (mockFilterMap as any) : realFilterMap;
+
+  // Moved activeColumns state management here
+  const [activeColumns, setActiveColumns] = useLocalStorage<DragColumnItem[]>(
+    `requests-table-activeColumns`, // Use a unique key
+    getInitialColumns(isCached).map(columnDefToDragColumnItem) // Initialize with default columns
+  );
 
   const columnsWithProperties = useMemo(() => {
     const initialColumns = getInitialColumns(isCached);
@@ -733,30 +743,8 @@ export default function RequestsPage(props: RequestsPageV2Props) {
                 {/* Columns Configuration Button */}
                 <ViewColumns
                   columns={tableRef.current?.getAllColumns() || []}
-                  activeColumns={
-                    tableRef.current
-                      ?.getAllColumns()
-                      .filter((col: any) => col.id !== "select") // Exclude select column from management
-                      .map((col: any) => ({
-                        id: col.id,
-                        name: col.columnDef.header?.toString() || col.id,
-                        shown: col.getIsVisible(),
-                      })) || []
-                  }
-                  setActiveColumns={(columns) => {
-                    const table = tableRef.current;
-                    if (!table) return;
-
-                    // Update all column visibility states at once
-                    const visibilityState: Record<string, boolean> = {};
-                    columns.forEach((col) => {
-                      if (col.id !== "select") {
-                        // Don't modify select column visibility
-                        visibilityState[col.id] = col.shown;
-                      }
-                    });
-                    table.setColumnVisibility(visibilityState);
-                  }}
+                  activeColumns={activeColumns}
+                  setActiveColumns={setActiveColumns}
                 />
 
                 {/* Export button */}
@@ -790,6 +778,8 @@ export default function RequestsPage(props: RequestsPageV2Props) {
             <ThemedTable
               id="requests-table"
               tableRef={tableRef}
+              activeColumns={activeColumns}
+              setActiveColumns={setActiveColumns}
               highlightedIds={selectedData ? [selectedData.id] : selectedIds}
               checkboxMode={"on_hover"}
               defaultData={requests}
@@ -939,6 +929,8 @@ export default function RequestsPage(props: RequestsPageV2Props) {
       <ThemedTable
         id="requests-table"
         defaultData={requests}
+        activeColumns={activeColumns}
+        setActiveColumns={setActiveColumns}
         defaultColumns={columnsWithProperties}
         skeletonLoading={false}
         dataLoading={false}

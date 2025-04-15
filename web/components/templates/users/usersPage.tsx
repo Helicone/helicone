@@ -16,7 +16,7 @@ import {
   SortLeafRequest,
 } from "../../../services/lib/sorts/requests/sorts";
 import AuthHeader from "../../shared/authHeader";
-import ThemedTable from "../../shared/themed/table/themedTable";
+import ThemedTable from "../../shared/themed/table/themedTableOld";
 import { UpgradeProDialog } from "../organization/plan/upgradeProDialog";
 import TableFooter from "../requests/tableFooter";
 import { INITIAL_COLUMNS } from "./initialColumns";

@@ -1,17 +1,31 @@
+import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
+import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
+import GenericEmptyState from "@/components/shared/helicone/GenericEmptyState";
+import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import {
   ChevronDownIcon,
+  FlaskConical,
+  Plus,
   SquareArrowOutUpRight,
   Trash2,
-  Plus,
-  FlaskConical,
 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useJawnClient } from "../../../../../lib/clients/jawnHook";
@@ -19,22 +33,8 @@ import { useExperimentTables } from "../../../../../services/hooks/prompts/exper
 import { usePrompts } from "../../../../../services/hooks/prompts/prompts";
 import AuthHeader from "../../../../shared/authHeader";
 import useNotification from "../../../../shared/notification/useNotification";
-import ThemedTable from "../../../../shared/themed/table/themedTable";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import ThemedTable from "../../../../shared/themed/table/themedTableOld";
 import { StartFromPromptDialog } from "./components/startFromPromptDialog";
-import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
-import Link from "next/link";
-import LoadingAnimation from "@/components/shared/loadingAnimation";
-import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
-import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
-import GenericEmptyState from "@/components/shared/helicone/GenericEmptyState";
 
 const ExperimentsPage = () => {
   const jawn = useJawnClient();

@@ -18,7 +18,7 @@ import GenericButton from "../../layout/common/button";
 import { useOrg } from "../../layout/org/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
 import ExportButton from "../../shared/themed/table/exportButton";
-import ThemedTable from "../../shared/themed/table/themedTable";
+import ThemedTable from "../../shared/themed/table/themedTableOld";
 import ThemedModal from "../../shared/themed/themedModal";
 import HcBreadcrumb from "../../ui/hcBreadcrumb";
 import OpenPipeFineTuneButton from "../connections/openPipe/fineTuneDatasetButton";
