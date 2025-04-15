@@ -1,9 +1,16 @@
-import { ThumbsDown, ThumbsUp } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
+import {
+  HandThumbUpIcon,
+  HandThumbDownIcon,
+} from "@heroicons/react/24/outline";
+import {
+  HandThumbUpIcon as HTUp,
+  HandThumbDownIcon as HTDown,
+} from "@heroicons/react/24/solid";
+import { clsx } from "../../shared/clsx";
 import { useState } from "react";
-import { updateRequestFeedback } from "../../../services/lib/requests";
 import useNotification from "../../shared/notification/useNotification";
+import { updateRequestFeedback } from "../../../services/lib/requests";
+import { Row } from "../../layout/common/row";
 
 const FeedbackButtons = ({
   requestId,
@@ -42,11 +49,9 @@ const FeedbackButtons = ({
   };
 
   return (
-    <div className="flex flex-row items-center">
+    <Row className="items-center space-x-4">
       {requestFeedback.rating}
-      <Button
-        variant="ghost"
-        size="square_icon"
+      <button
         onClick={() => {
           if (requestFeedback.rating === true) {
             return;
@@ -55,16 +60,12 @@ const FeedbackButtons = ({
         }}
       >
         {requestFeedback.rating === true ? (
-          <ThumbsUp size={16} className={"text-foreground"} />
-        ) : requestFeedback.rating === null ? (
-          <ThumbsUp size={16} className="text-foreground/40" />
+          <HTUp className={clsx("h-5 w-5 text-green-500")} />
         ) : (
-          <ThumbsUp size={16} className="text-foreground/40" />
+          <HandThumbUpIcon className="h-5 w-5 text-green-500" />
         )}
-      </Button>
-      <Button
-        variant="ghost"
-        size="square_icon"
+      </button>
+      <button
         onClick={() => {
           if (requestFeedback.rating === false) {
             return;
@@ -73,14 +74,12 @@ const FeedbackButtons = ({
         }}
       >
         {requestFeedback.rating === false ? (
-          <ThumbsDown size={16} className={"text-foreground"} />
-        ) : requestFeedback.rating === null ? (
-          <ThumbsDown size={16} className="text-foreground/40" />
+          <HTDown className={clsx("h-5 w-5 text-red-500")} />
         ) : (
-          <ThumbsDown size={16} className="text-foreground/40" />
+          <HandThumbDownIcon className="h-5 w-5 text-red-500" />
         )}
-      </Button>
-    </div>
+      </button>
+    </Row>
   );
 };
 

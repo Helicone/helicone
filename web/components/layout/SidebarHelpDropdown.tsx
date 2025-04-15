@@ -38,7 +38,7 @@ const SidebarHelpDropdown = ({
 
   const [chatOpen, setChatOpen] = useState(false);
   return (
-    <div className="w-full flex flex-col items-center gap-2">
+    <div className="flex flex-col items-start w-full gap-1.5">
       <DropdownMenu
         modal={false}
         onOpenChange={
@@ -49,11 +49,11 @@ const SidebarHelpDropdown = ({
       >
         <DropdownMenuTrigger asChild>
           <Button
-            variant="outline"
-            size="none"
+            variant="ghost"
+            size="sm"
             className={clsx(
-              "h-9  flex items-center text-xs text-muted-foreground hover:text-foreground",
-              isCollapsed ? "w-9" : "w-full gap-1"
+              "flex items-center text-xs text-muted-foreground hover:text-foreground w-full h-7",
+              isCollapsed ? "justify-center px-0" : "justify-start px-2 gap-1.5"
             )}
           >
             <div className="relative flex items-center">
@@ -145,8 +145,8 @@ const SidebarHelpDropdown = ({
       </DropdownMenu>
 
       <Button
-        variant="outline"
-        size="none"
+        variant="ghost"
+        size="sm"
         onClick={() => {
           if (window.Pylon) {
             if (chatOpen) {
@@ -158,19 +158,21 @@ const SidebarHelpDropdown = ({
           }
         }}
         className={clsx(
-          "flex items-center text-xs text-muted-foreground hover:text-foreground",
-          isCollapsed ? "h-9 w-9" : "h-7 w-full gap-1",
+          "flex items-center text-xs text-muted-foreground hover:text-foreground w-full h-7",
+          isCollapsed ? "justify-center px-0" : "justify-start px-2 gap-1.5",
           chatOpen && "text-primary"
         )}
       >
-        <MessageCircleMore
-          size={12}
-          className={clsx(
-            chatOpen
-              ? "text-primary"
-              : "text-muted-foreground hover:text-primary"
-          )}
-        />
+        <div className="relative flex items-center">
+          <MessageCircleMore
+            size={12}
+            className={clsx(
+              chatOpen
+                ? "text-primary"
+                : "text-muted-foreground hover:text-primary"
+            )}
+          />
+        </div>
         {!isCollapsed && <span>Message us</span>}
       </Button>
     </div>
