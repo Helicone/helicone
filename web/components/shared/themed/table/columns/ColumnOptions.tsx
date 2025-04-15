@@ -1,16 +1,15 @@
-import React from "react";
-import { Column } from "@tanstack/react-table";
+import { CheckIcon } from "@heroicons/react/24/outline";
+import { ColumnDef } from "@tanstack/react-table";
 import { Col } from "../../../../layout/common/col";
 import { clsx } from "../../../clsx";
-import { columnDefToDragColumnItem, DragColumnItem } from "./DragList";
 import ColumnSelectButton, { ColumnViewOptions } from "./ColumnSelect";
-import { CheckIcon } from "@heroicons/react/24/outline";
+import { columnDefToDragColumnItem, DragColumnItem } from "./DragList";
 
 interface ColumnOptionsProps<T> {
   categories: string[];
   selectedCategory: string | undefined | "All columns";
   setSelectedCategory: (category: string | undefined | "All columns") => void;
-  columns: Column<T, unknown>[];
+  columns: ColumnDef<T>[];
   activeColumns: DragColumnItem[];
   setActiveColumns: (columns: DragColumnItem[]) => void;
 }
@@ -47,16 +46,13 @@ export default function ColumnOptions<T>({
               <ul className="flex flex-wrap gap-2">
                 {columns
                   .filter((column) => {
-                    if (
-                      !column.columnDef.meta?.category &&
-                      category == "Default"
-                    ) {
+                    if (!column.meta?.category && category == "Default") {
                       return true;
                     }
-                    return column.columnDef.meta?.category === category;
+                    return column.meta?.category === category;
                   })
                   .map((column) => {
-                    const header = column.columnDef.header as string;
+                    const header = column.header as string;
                     return (
                       <li key={column.id}>
                         <button
@@ -73,7 +69,7 @@ export default function ColumnOptions<T>({
                             } else {
                               setActiveColumns([
                                 ...activeColumns,
-                                columnDefToDragColumnItem(column.columnDef),
+                                columnDefToDragColumnItem(column),
                               ]);
                             }
                           }}

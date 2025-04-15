@@ -17,7 +17,7 @@ import {
 } from "@tanstack/react-table";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { Result } from "../../../../packages/common/result";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
@@ -182,8 +182,6 @@ export default function ThemedTable<T extends { id?: string }>(
   const handleRowSelect = (row: T, index: number, event: React.MouseEvent) => {
     onRowSelect?.(row, index, event);
   };
-
-  const [isPanelVisible, setIsPanelVisible] = useState(false);
 
   const sessionData = useMemo(() => {
     if (rows.length === 0) {

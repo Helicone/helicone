@@ -1,6 +1,7 @@
 import { Row } from "@/components/layout/common";
 import Header from "@/components/shared/Header";
 import LivePill from "@/components/shared/LivePill";
+import { DragColumnItem } from "@/components/shared/themed/table/columns/DragList";
 import ViewColumns from "@/components/shared/themed/table/columns/viewColumns";
 import ThemedTimeFilter from "@/components/shared/themed/themedTimeFilter";
 import { Button } from "@/components/ui/button";
@@ -32,7 +33,6 @@ import { useGetUnauthorized } from "../../../services/hooks/dashboard";
 import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
-import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   getRootFilterNode,
@@ -42,8 +42,6 @@ import {
 import {
   OrganizationFilter,
   OrganizationLayout,
-  transformFilter,
-  transformOrganizationLayoutFilters,
 } from "../../../services/lib/organization_layout/organization_layout";
 import {
   SortDirection,
@@ -96,11 +94,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     isCached = false,
     initialRequestId,
     userId,
-    evaluatorId,
     rateLimited = false,
-    currentFilter,
-    organizationLayout,
-    organizationLayoutAvailable,
   } = props;
 
   /* -------------------------------------------------------------------------- */
@@ -108,14 +102,10 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   /* -------------------------------------------------------------------------- */
   const initialLoadRef = useRef(true);
   const drawerRef = useRef<any>(null);
-  const popoverContentRef = useRef<HTMLDivElement>(null);
-  const tableRef = useRef<any>(null);
 
   /* -------------------------------------------------------------------------- */
   /*                                   STATES                                   */
   /* -------------------------------------------------------------------------- */
-  const [isFiltersPinned, setIsFiltersPinned] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [showOnboardingPopUp, setShowOnboardingPopUp] = useState(false);
   const [selectedData, setSelectedData] = useState<
@@ -126,6 +116,10 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   const [page, setPage] = useState<number>(currentPage);
   const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
     getRootFilterNode()
+  );
+  const [activeColumns, setActiveColumns] = useLocalStorage<DragColumnItem[]>(
+    `requests-table-activeColumns`,
+    []
   );
 
   // TODO: Is this efficient?
@@ -222,7 +216,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     properties: realProperties,
     refetch: realRefetch,
     filterMap: realFilterMap,
-    searchPropertyFilters: realSearchPropertyFilters,
   } = useRequestsPageV2(
     page,
     currentPageSize,
@@ -235,25 +228,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     sortLeaf,
     isCached,
     isLive
-  );
-  const [currFilter, setCurrFilter] = useState(
-    searchParams.get("filter") ?? null
-  );
-
-  const {
-    organizationLayout: orgLayout,
-    isLoading: isOrgLayoutLoading,
-    refetch: orgLayoutRefetch,
-    isRefetching: isOrgLayoutRefetching,
-  } = useOrganizationLayout(
-    orgContext?.currentOrg?.id!,
-    "requests",
-    organizationLayout
-      ? {
-          data: organizationLayout,
-          error: null,
-        }
-      : undefined
   );
 
   /* -------------------------------------------------------------------------- */
@@ -284,7 +258,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   const refetch = shouldShowMockData ? () => {} : realRefetch;
   const filterMap = shouldShowMockData ? (mockFilterMap as any) : realFilterMap;
 
-  const columnsWithProperties = useMemo(() => {
+  const allColumns = useMemo(() => {
     const initialColumns = getInitialColumns(isCached);
     return [...initialColumns].concat(
       properties.map((property) => {
@@ -311,6 +285,14 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     );
   }, [properties, isCached]);
 
+  const columnsToRender = useMemo(() => {
+    return activeColumns
+      .filter((column) => column.shown)
+      .map((column) => {
+        return allColumns.find((c) => c.id === column.id);
+      });
+  }, [allColumns, activeColumns]);
+
   const {
     selectMode: _selectMode,
     toggleSelectMode: _toggleSelectMode,
@@ -324,10 +306,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
       request.heliconeMetadata.requestId,
   });
 
-  const searchPropertyFilters = shouldShowMockData
-    ? (_property: string, _search: string) =>
-        Promise.resolve({ data: null, error: "" })
-    : realSearchPropertyFilters;
   const requestWithoutStream = requests.find((r) => {
     return (
       r.raw?.request?.stream &&
@@ -335,13 +313,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
       r.heliconeMetadata.provider === "OPENAI"
     );
   });
-
-  const transformedFilters = useMemo(() => {
-    if (orgLayout?.data?.filters) {
-      return transformOrganizationLayoutFilters(orgLayout.data.filters);
-    }
-    return [];
-  }, [orgLayout?.data?.filters]);
 
   /* -------------------------------------------------------------------------- */
   /*                                  CALLBACKS                                 */
@@ -408,10 +379,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   const userFilterMapIndex = filterMap.findIndex(
     (filter: any) => filter.label === "Helicone-Rate-Limit-Status"
   );
-
-  const handlePopoverInteraction = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-  }, []);
 
   // Update the page state and router query when the page changes
   const handlePageChange = useCallback(
@@ -494,54 +461,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
       searchParams,
     ]
   );
-
-  const onSetAdvancedFiltersHandler = useCallback(
-    (filters: UIFilterRowTree, layoutFilterId?: string | null) => {
-      const encodeFilters = (filters: UIFilterRowTree): string => {
-        const encode = (node: UIFilterRowTree): any => {
-          if (isFilterRowNode(node)) {
-            return {
-              type: "node",
-              operator: node.operator,
-              rows: node.rows.map(encode),
-            };
-          } else {
-            return {
-              type: "leaf",
-              filter: `${filterMap[node.filterMapIdx].label}:${
-                filterMap[node.filterMapIdx].operators[node.operatorIdx].label
-              }:${encodeURIComponent(node.value)}`,
-            };
-          }
-        };
-
-        return JSON.stringify(encode(filters));
-      };
-
-      setAdvancedFilters(filters);
-      if (
-        layoutFilterId === null ||
-        (isFilterRowNode(filters) && filters.rows.length === 0)
-      ) {
-        searchParams.delete("filters");
-      } else {
-        const currentAdvancedFilters = encodeFilters(filters);
-        searchParams.set("filters", currentAdvancedFilters);
-      }
-    },
-    [searchParams, filterMap]
-  );
-
-  const onLayoutFilterChange = (layoutFilter: OrganizationFilter | null) => {
-    if (layoutFilter !== null) {
-      const transformedFilter = transformFilter(layoutFilter.filter[0]);
-      onSetAdvancedFiltersHandler(transformedFilter, layoutFilter.id);
-      setCurrFilter(layoutFilter.id);
-    } else {
-      setCurrFilter(null);
-      onSetAdvancedFiltersHandler({ operator: "and", rows: [] }, null);
-    }
-  };
 
   const getDefaultValue = useCallback(() => {
     const currentTimeFilter = searchParams.get("t");
@@ -732,30 +651,10 @@ export default function RequestsPage(props: RequestsPageV2Props) {
               <div className="flex flex-row gpa-0">
                 {/* Columns Configuration Button */}
                 <ViewColumns
-                  columns={tableRef.current?.getAllColumns() || []}
-                  activeColumns={
-                    tableRef.current
-                      ?.getAllColumns()
-                      .filter((col: any) => col.id !== "select") // Exclude select column from management
-                      .map((col: any) => ({
-                        id: col.id,
-                        name: col.columnDef.header?.toString() || col.id,
-                        shown: col.getIsVisible(),
-                      })) || []
-                  }
+                  columns={allColumns}
+                  activeColumns={activeColumns}
                   setActiveColumns={(columns) => {
-                    const table = tableRef.current;
-                    if (!table) return;
-
-                    // Update all column visibility states at once
-                    const visibilityState: Record<string, boolean> = {};
-                    columns.forEach((col) => {
-                      if (col.id !== "select") {
-                        // Don't modify select column visibility
-                        visibilityState[col.id] = col.shown;
-                      }
-                    });
-                    table.setColumnVisibility(visibilityState);
+                    setActiveColumns(columns);
                   }}
                 />
 
@@ -789,11 +688,10 @@ export default function RequestsPage(props: RequestsPageV2Props) {
           ) : (
             <ThemedTable
               id="requests-table"
-              tableRef={tableRef}
               highlightedIds={selectedData ? [selectedData.id] : selectedIds}
               checkboxMode={"on_hover"}
               defaultData={requests}
-              defaultColumns={columnsWithProperties}
+              defaultColumns={columnsToRender}
               skeletonLoading={isDataLoading}
               dataLoading={isBodyLoading}
               sortable={sort}
@@ -939,7 +837,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
       <ThemedTable
         id="requests-table"
         defaultData={requests}
-        defaultColumns={columnsWithProperties}
+        defaultColumns={columnsToRender}
         skeletonLoading={false}
         dataLoading={false}
         hideHeader={true}

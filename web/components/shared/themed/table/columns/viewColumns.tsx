@@ -10,7 +10,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Column } from "@tanstack/react-table";
+import { Column, ColumnDef } from "@tanstack/react-table";
 import { Fragment, useState } from "react";
 import { Col } from "../../../../layout/common/col";
 import { Row } from "../../../../layout/common/row";
@@ -23,7 +23,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 interface ViewColumnsProps<T> {
-  columns: Column<T, unknown>[];
+  columns: ColumnDef<T>[];
   activeColumns: DragColumnItem[];
   setActiveColumns: (columns: DragColumnItem[]) => void;
 }
@@ -33,7 +33,7 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
 
   const categories = columns.reduce(
     (acc, column) => {
-      const category = column.columnDef.meta?.category;
+      const category = column.meta?.category;
       if (category && !acc.includes(category)) {
         acc.push(category);
       }
