@@ -966,7 +966,7 @@ export default function PromptEditor({
 
             const { provider: requestProvider, model: requestModel } =
               findClosestModelProvider(
-                mappedContent.schema.request.model || "gpt-4",
+                mappedContent.schema.request.model || "gpt-4o-mini",
                 mappedContent.schema.request.provider
               );
 
