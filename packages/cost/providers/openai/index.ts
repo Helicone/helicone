@@ -658,6 +658,17 @@ const costs: ModelRow[] = [
       completion_audio_token: 0.00002,
     },
   },
+    {
+    model: {
+      operator: "includes",
+      value: "o4-mini",
+    },
+    cost: {
+      prompt_token: 0.0000011,
+      completion_token: 0.0000044
+    },
+    showInPlayground: true,
+  }
 ];
 
 const modelDetails: ModelDetailsMap = {
