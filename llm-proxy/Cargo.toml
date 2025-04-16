@@ -55,7 +55,7 @@ stubr = { workspace = true, optional = true }
 
 [features]
 default = []
-testing = ["dep:wiremock"]
+testing = ["dep:stubr"]
 
 [[test]]
 name = "default_target"
