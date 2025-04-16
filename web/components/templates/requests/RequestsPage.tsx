@@ -56,7 +56,7 @@ import {
   columnDefToDragColumnItem,
 } from "../../shared/themed/table/columns/DragList";
 import ExportButton from "../../shared/themed/table/exportButton";
-import ThemedTable from "../../shared/themed/table/themedTableO";
+import ThemedTable from "../../shared/themed/table/themedTable";
 import ThemedModal from "../../shared/themed/themedModal";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import OnboardingFloatingPrompt from "../dashboard/OnboardingFloatingPrompt";
