@@ -30,7 +30,7 @@ import {
   PiCoinsBold,
   PiHandPalmBold,
   PiPaintBrushBold,
-  PiPencilBold,
+  PiPencilSimpleBold,
   PiPlugsBold,
 } from "react-icons/pi";
 import GlassHeader from "../universal/GlassHeader";
@@ -507,7 +507,7 @@ export default function ParametersPanel({
                 asPill
                 onClick={() => setIsResponseFormatEditorOpen(true)}
               >
-                <PiPencilBold className="w-4 h-4" />
+                <PiPencilSimpleBold className="w-4 h-4" />
               </Button>
             </div>
           </ParameterRow>
