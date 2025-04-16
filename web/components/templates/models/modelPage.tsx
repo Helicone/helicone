@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { ModelMetric } from "../../../lib/api/models/models";
-import { Result } from "../../../packages/common/result";
-import AuthHeader from "../../shared/authHeader";
 import {
   TimeInterval,
   getTimeIntervalAgo,
 } from "../../../lib/timeCalculations/time";
-import { useState } from "react";
-import ThemedTable from "../../shared/themed/table/themedTable";
+import { Result } from "../../../packages/common/result";
+import AuthHeader from "../../shared/authHeader";
+import ThemedTable from "../../shared/themed/table/themedTableOld";
 import { INITIAL_COLUMNS } from "./initialColumns";
 
 import useSearchParams from "../../shared/utils/useSearchParams";
