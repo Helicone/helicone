@@ -668,6 +668,17 @@ const costs: ModelRow[] = [
       completion_token: 0.0000044
     },
     showInPlayground: true,
+  },
+  {
+    model: {
+      operator: "includes",
+      value: "o4-mini-2025-04-16",
+    },
+    cost: {
+      prompt_token: 0.0000011,
+      completion_token: 0.0000044
+    },
+    showInPlayground: true,
   }
 ];
 
