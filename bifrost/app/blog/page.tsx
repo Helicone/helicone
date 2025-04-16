@@ -220,6 +220,11 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "gpt-4.1-full-developer-guide",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "buy-vs-build-llm-observability",
     },
   },
