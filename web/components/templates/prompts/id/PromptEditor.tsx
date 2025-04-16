@@ -374,6 +374,13 @@ export default function PromptEditor({
           max_tokens: templateData.max_tokens ?? undefined,
           reasoning_effort: templateData.reasoning_effort ?? undefined,
           stop: templateData.stop ?? undefined,
+          response_format:
+            templateData.response_format?.type === "json_schema"
+              ? {
+                  type: "json_schema",
+                  json_schema: templateData.response_format.json_schema,
+                }
+              : undefined,
         },
         inputs,
         evals: metadata?.evals ?? [],
@@ -721,6 +728,7 @@ export default function PromptEditor({
         template: state.messages,
       }),
     });
+    console.log("Run Template:", runTemplate);
 
     // 6. EXECUTE
     try {
@@ -971,6 +979,16 @@ export default function PromptEditor({
                   mappedContent.schema.request.temperature ?? undefined,
                 max_tokens:
                   mappedContent.schema.request.max_tokens ?? undefined,
+                response_format:
+                  mappedContent.schema.request.response_format?.type ===
+                  "json_schema"
+                    ? {
+                        type: "json_schema",
+                        json_schema:
+                          mappedContent.schema.request.response_format
+                            .json_schema,
+                      }
+                    : undefined,
                 tools: mappedContent.schema.request.tools ?? undefined,
                 reasoning_effort:
                   mappedContent.schema.request.reasoning_effort ?? undefined,

@@ -15,6 +15,7 @@ export const modelMapping: CreatorModelMapping = {
       },
       defaultParameters: {
         stop: [],
+        response_format: true,
       },
       providers: [
         {
@@ -38,6 +39,7 @@ export const modelMapping: CreatorModelMapping = {
       },
       defaultParameters: {
         stop: [],
+        response_format: true,
       },
       providers: [
         {
@@ -61,6 +63,7 @@ export const modelMapping: CreatorModelMapping = {
       },
       defaultParameters: {
         stop: [],
+        response_format: true,
       },
       providers: [
         {
@@ -76,6 +79,7 @@ export const modelMapping: CreatorModelMapping = {
       },
       defaultParameters: {
         stop: [],
+        response_format: true,
       },
       providers: [
         {
@@ -99,6 +103,7 @@ export const modelMapping: CreatorModelMapping = {
       },
       defaultParameters: {
         stop: [],
+        response_format: true,
       },
       providers: [
         {
@@ -122,6 +127,7 @@ export const modelMapping: CreatorModelMapping = {
       },
       defaultParameters: {
         stop: [],
+        response_format: true,
       },
       providers: [
         {
@@ -146,6 +152,7 @@ export const modelMapping: CreatorModelMapping = {
       defaultParameters: {
         reasoning_effort: "medium",
         stop: [],
+        response_format: true,
       },
       providers: [
         {
@@ -170,6 +177,7 @@ export const modelMapping: CreatorModelMapping = {
       defaultParameters: {
         reasoning_effort: "medium",
         stop: [],
+        response_format: true,
       },
       providers: [
         {
@@ -196,6 +204,7 @@ export const modelMapping: CreatorModelMapping = {
       defaultParameters: {
         max_tokens: 8192,
         stop: [],
+        response_format: false,
       },
       providers: [
         {
@@ -220,6 +229,7 @@ export const modelMapping: CreatorModelMapping = {
       defaultParameters: {
         max_tokens: 8192,
         stop: [],
+        response_format: false,
       },
       providers: [
         {
@@ -244,6 +254,7 @@ export const modelMapping: CreatorModelMapping = {
       defaultParameters: {
         max_tokens: 8192,
         stop: [],
+        response_format: false,
       },
       providers: [
         {
@@ -268,6 +279,7 @@ export const modelMapping: CreatorModelMapping = {
       defaultParameters: {
         max_tokens: 4096,
         stop: [],
+        response_format: false,
       },
       providers: [
         {
@@ -291,6 +303,9 @@ export const modelMapping: CreatorModelMapping = {
         input: 0,
         output: 0,
       },
+      defaultParameters: {
+        response_format: true,
+      },
       providers: [
         {
           provider: "GOOGLE_GEMINI",
@@ -310,6 +325,9 @@ export const modelMapping: CreatorModelMapping = {
       defaultTokenCost: {
         input: 0,
         output: 0,
+      },
+      defaultParameters: {
+        response_format: true,
       },
       providers: [
         {
@@ -331,6 +349,9 @@ export const modelMapping: CreatorModelMapping = {
         input: 0,
         output: 0,
       },
+      defaultParameters: {
+        response_format: true,
+      },
       providers: [
         {
           provider: "GOOGLE_GEMINI",
@@ -351,6 +372,9 @@ export const modelMapping: CreatorModelMapping = {
         input: 0,
         output: 0,
       },
+      defaultParameters: {
+        response_format: true,
+      },
       providers: [
         {
           provider: "GOOGLE_GEMINI",
@@ -366,6 +390,9 @@ export const modelMapping: CreatorModelMapping = {
       defaultTokenCost: {
         input: 0,
         output: 0,
+      },
+      defaultParameters: {
+        response_format: true,
       },
       providers: [
         {
@@ -389,6 +416,9 @@ export const modelMapping: CreatorModelMapping = {
         input: 0,
         output: 0,
       },
+      defaultParameters: {
+        response_format: false,
+      },
       providers: [
         {
           provider: "AZURE",
@@ -404,6 +434,9 @@ export const modelMapping: CreatorModelMapping = {
       defaultTokenCost: {
         input: 0,
         output: 0,
+      },
+      defaultParameters: {
+        response_format: false,
       },
       providers: [
         {
@@ -421,6 +454,9 @@ export const modelMapping: CreatorModelMapping = {
         input: 0,
         output: 0,
       },
+      defaultParameters: {
+        response_format: false,
+      },
       providers: [
         {
           provider: "AZURE",
@@ -436,6 +472,9 @@ export const modelMapping: CreatorModelMapping = {
       defaultTokenCost: {
         input: 0,
         output: 0,
+      },
+      defaultParameters: {
+        response_format: false,
       },
       providers: [
         {
@@ -457,6 +496,7 @@ export const modelMapping: CreatorModelMapping = {
       },
       defaultParameters: {
         stop: [],
+        response_format: false,
       },
       providers: [
         {
@@ -476,6 +516,7 @@ export const modelMapping: CreatorModelMapping = {
       },
       defaultParameters: {
         stop: [],
+        response_format: false,
       },
       providers: [
         {
