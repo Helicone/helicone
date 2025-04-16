@@ -658,7 +658,7 @@ const costs: ModelRow[] = [
       completion_audio_token: 0.00002,
     },
   },
-    {
+  {
     model: {
       operator: "includes",
       value: "o4-mini",
