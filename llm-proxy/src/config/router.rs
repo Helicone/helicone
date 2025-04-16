@@ -1,7 +1,10 @@
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 
-use super::{rate_limit::RateLimitConfig, retry::RetryConfig, spend_control::SpendControlConfig};
+use super::{
+    rate_limit::RateLimitConfig, retry::RetryConfig,
+    spend_control::SpendControlConfig,
+};
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "kebab-case")]

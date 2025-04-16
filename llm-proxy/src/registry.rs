@@ -18,9 +18,10 @@ pub struct Registry<ReqBody> {
 }
 
 impl<ReqBody> Registry<ReqBody>
-where ReqBody: Body + Send + Sync + 'static,
- <ReqBody as hyper::body::Body>::Error: Send + Sync + std::error::Error,
- <ReqBody as hyper::body::Body>::Data: Send + Sync
+where
+    ReqBody: Body + Send + Sync + 'static,
+    <ReqBody as hyper::body::Body>::Error: Send + Sync + std::error::Error,
+    <ReqBody as hyper::body::Body>::Data: Send + Sync,
 {
     /// Create a [`DispatcherService`] for all providers in the
     /// [`DispatcherConfig`].

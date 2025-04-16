@@ -1,8 +1,10 @@
 use http::{Request, Response};
-use wiremock::Mock;
 use tower::Service;
+use wiremock::Mock;
 
-use crate::{app::App, config::Config, dispatcher::RespBody, error::api::Error};
+use crate::{
+    app::App, config::Config, dispatcher::RespBody, error::api::Error,
+};
 
 pub struct HarnessBuilder {
     pub app: App<reqwest::Body>,
@@ -15,7 +17,10 @@ impl HarnessBuilder {
     }
 
     pub fn build(self) -> Harness {
-        Harness { app: self.app, mock: None }
+        Harness {
+            app: self.app,
+            mock: None,
+        }
     }
 }
 
@@ -30,8 +35,10 @@ impl Harness {
         HarnessBuilder { app }
     }
 
-    pub async fn call(&mut self, req: Request<reqwest::Body>) -> Result<Response<RespBody>, Error> {
+    pub async fn call(
+        &mut self,
+        req: Request<reqwest::Body>,
+    ) -> Result<Response<RespBody>, Error> {
         self.app.service_stack.call(req).await
     }
 }
-

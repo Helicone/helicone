@@ -88,3 +88,4 @@ uuid = { version = "1.10.0", features = ["serde", "v7"] }
 
 serde_yml = "0.0.12"
 wiremock = "0.6.3"
+stubr = { path = "/Users/thomasharmon/code/tmp/stubr/lib" }

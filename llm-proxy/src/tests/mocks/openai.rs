@@ -1,7 +1,8 @@
-use wiremock::{matchers::path, Mock, ResponseTemplate};
+use stubr::wiremock_rs::MockServer;
+use wiremock::{Mock, ResponseTemplate, matchers::path};
 
 pub struct OpenAiMock {
-    pub mock: Mock,
+    pub mock: MockServer,
 }
 
 impl OpenAiMock {

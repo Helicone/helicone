@@ -14,16 +14,17 @@ use crate::{
         Config,
         rate_limit::{AuthedLimiterConfig, UnauthedLimiterConfig},
     },
-    middleware::request_context::Service as RequestContextService,
     error,
+    middleware::request_context::Service as RequestContextService,
     registry::Registry,
     router::Router,
 };
 
 /// Type representing the middleware layers.
-/// 
+///
 /// When adding a new middleware, you'll be required to add it to this type.
-pub type ServiceStack<ReqBody> = RequestContextService<Router<ReqBody>, ReqBody>;
+pub type ServiceStack<ReqBody> =
+    RequestContextService<Router<ReqBody>, ReqBody>;
 
 pub struct App<ReqBody> {
     pub config: Config,
@@ -35,9 +36,10 @@ pub struct App<ReqBody> {
 }
 
 impl<ReqBody> App<ReqBody>
-where ReqBody: Body + Send + Sync + 'static,
- <ReqBody as hyper::body::Body>::Error: Send + Sync + std::error::Error,
- <ReqBody as hyper::body::Body>::Data: Send + Sync
+where
+    ReqBody: Body + Send + Sync + 'static,
+    <ReqBody as hyper::body::Body>::Error: Send + Sync + std::error::Error,
+    <ReqBody as hyper::body::Body>::Data: Send + Sync,
 {
     pub fn new(config: Config) -> Result<Self, error::init::Error> {
         let provider = StaticProvider::from_env();
@@ -63,7 +65,6 @@ where ReqBody: Body + Send + Sync + 'static,
             tokio_postgres::NoTls,
         )?;
 
-
         let registry = Registry::new(&config.dispatcher);
         let router = Router::new(registry);
         let service_stack: ServiceStack<ReqBody> = ServiceBuilder::new()
@@ -85,14 +86,14 @@ where ReqBody: Body + Send + Sync + 'static,
     }
 }
 
-impl meltdown::Service for App<hyper::body::Incoming>
-{
+impl meltdown::Service for App<hyper::body::Incoming> {
     type Future = BoxFuture<'static, Result<(), crate::error::runtime::Error>>;
 
     fn run(self, mut token: Token) -> Self::Future {
         Box::pin(async move {
-            let service_stack =
-                hyper_util::service::TowerToHyperService::new(self.service_stack);
+            let service_stack = hyper_util::service::TowerToHyperService::new(
+                self.service_stack,
+            );
 
             info!(address = %self.config.server.address, tls = %self.config.server.tls, "server starting");
             let listener = TcpListener::bind((

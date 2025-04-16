@@ -40,18 +40,22 @@ pub struct Router<ReqBody> {
 }
 
 impl<ReqBody> Clone for Router<ReqBody>
-where ReqBody: Body + Send + Sync + 'static,
- <ReqBody as hyper::body::Body>::Error: Send + Sync + std::error::Error,
- <ReqBody as hyper::body::Body>::Data: Send + Sync
+where
+    ReqBody: Body + Send + Sync + 'static,
+    <ReqBody as hyper::body::Body>::Error: Send + Sync + std::error::Error,
+    <ReqBody as hyper::body::Body>::Data: Send + Sync,
 {
     fn clone(&self) -> Self {
-        Self { services: self.services.clone() }
+        Self {
+            services: self.services.clone(),
+        }
     }
 }
 impl<ReqBody> Router<ReqBody>
-where ReqBody: Body + Send + Sync + 'static,
- <ReqBody as hyper::body::Body>::Error: Send + Sync + std::error::Error,
- <ReqBody as hyper::body::Body>::Data: Send + Sync
+where
+    ReqBody: Body + Send + Sync + 'static,
+    <ReqBody as hyper::body::Body>::Error: Send + Sync + std::error::Error,
+    <ReqBody as hyper::body::Body>::Data: Send + Sync,
 {
     pub fn new(registry: Registry<ReqBody>) -> Self {
         Self {
@@ -61,11 +65,13 @@ where ReqBody: Body + Send + Sync + 'static,
 }
 
 impl<ReqBody> Service<Request<ReqBody>> for Router<ReqBody>
-where ReqBody: Body + Send + Sync + 'static,
- <ReqBody as hyper::body::Body>::Error: Send + Sync + std::error::Error,
- <ReqBody as hyper::body::Body>::Data: Send + Sync
+where
+    ReqBody: Body + Send + Sync + 'static,
+    <ReqBody as hyper::body::Body>::Error: Send + Sync + std::error::Error,
+    <ReqBody as hyper::body::Body>::Data: Send + Sync,
 {
-    type Response = <Dispatcher<ReqBody> as Service<Request<ReqBody>>>::Response;
+    type Response =
+        <Dispatcher<ReqBody> as Service<Request<ReqBody>>>::Response;
     type Error = <Dispatcher<ReqBody> as Service<Request<ReqBody>>>::Error;
     type Future = <Dispatcher<ReqBody> as Service<Request<ReqBody>>>::Future;
 

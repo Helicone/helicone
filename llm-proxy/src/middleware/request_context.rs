@@ -1,5 +1,10 @@
 use std::{
-    future::Future, marker::PhantomData, pin::Pin, sync::Arc, task::{Context, Poll}, time::Instant
+    future::Future,
+    marker::PhantomData,
+    pin::Pin,
+    sync::Arc,
+    task::{Context, Poll},
+    time::Instant,
 };
 
 use deadpool_postgres::Pool;
@@ -35,10 +40,13 @@ where
     }
 }
 
-impl<S, ReqBody> Service<S, ReqBody>
-{
+impl<S, ReqBody> Service<S, ReqBody> {
     pub fn new(inner: S, pg_pool: Pool) -> Self {
-        Self { inner, pg_pool, _marker: PhantomData }
+        Self {
+            inner,
+            pg_pool,
+            _marker: PhantomData,
+        }
     }
 }
 
@@ -133,12 +141,14 @@ pub struct Layer<ReqBody> {
 
 impl<ReqBody> Layer<ReqBody> {
     pub fn new(pg_pool: Pool) -> Self {
-        Self { pg_pool, _marker: PhantomData }
+        Self {
+            pg_pool,
+            _marker: PhantomData,
+        }
     }
 }
 
-impl<S, ReqBody> tower::Layer<S> for Layer<ReqBody>
-{
+impl<S, ReqBody> tower::Layer<S> for Layer<ReqBody> {
     type Service = Service<S, ReqBody>;
 
     fn layer(&self, inner: S) -> Self::Service {

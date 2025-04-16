@@ -1,5 +1,8 @@
 use std::{
-    marker::PhantomData, str::FromStr, sync::Arc, task::{Context, Poll}
+    marker::PhantomData,
+    str::FromStr,
+    sync::Arc,
+    task::{Context, Poll},
 };
 
 use bytes::Bytes;
@@ -50,9 +53,10 @@ impl<ReqBody> Clone for Dispatcher<ReqBody> {
 }
 
 impl<ReqBody> AiProviderDispatcher<ReqBody> for Dispatcher<ReqBody>
-where ReqBody: Body + Send + Sync + 'static,
- <ReqBody as hyper::body::Body>::Error: Send + Sync + std::error::Error,
- <ReqBody as hyper::body::Body>::Data: Send + Sync
+where
+    ReqBody: Body + Send + Sync + 'static,
+    <ReqBody as hyper::body::Body>::Error: Send + Sync + std::error::Error,
+    <ReqBody as hyper::body::Body>::Data: Send + Sync,
 {
     fn provider(&self) -> Provider {
         self.provider
@@ -60,19 +64,25 @@ where ReqBody: Body + Send + Sync + 'static,
 }
 
 impl<ReqBody> Dispatcher<ReqBody>
-where ReqBody: Body + Send + Sync + 'static,
- <ReqBody as hyper::body::Body>::Error: Send + Sync + std::error::Error,
- <ReqBody as hyper::body::Body>::Data: Send + Sync
+where
+    ReqBody: Body + Send + Sync + 'static,
+    <ReqBody as hyper::body::Body>::Error: Send + Sync + std::error::Error,
+    <ReqBody as hyper::body::Body>::Data: Send + Sync,
 {
     pub fn new(client: Client, provider: Provider) -> Self {
-        Self { client, provider, _marker: PhantomData }
+        Self {
+            client,
+            provider,
+            _marker: PhantomData,
+        }
     }
 }
 
 impl<ReqBody> Service<Request<ReqBody>> for Dispatcher<ReqBody>
-where ReqBody: Body + Send + Sync + 'static,
- <ReqBody as hyper::body::Body>::Error: Send + Sync + std::error::Error,
- <ReqBody as hyper::body::Body>::Data: Send + Sync
+where
+    ReqBody: Body + Send + Sync + 'static,
+    <ReqBody as hyper::body::Body>::Error: Send + Sync + std::error::Error,
+    <ReqBody as hyper::body::Body>::Data: Send + Sync,
 {
     type Response = Response<RespBody>;
     type Error = Error;
@@ -92,9 +102,10 @@ where ReqBody: Body + Send + Sync + 'static,
 }
 
 impl<ReqBody> Dispatcher<ReqBody>
-where ReqBody: Body + Send + Sync + 'static,
- <ReqBody as hyper::body::Body>::Error: Send + Sync + std::error::Error,
- <ReqBody as hyper::body::Body>::Data: Send + Sync
+where
+    ReqBody: Body + Send + Sync + 'static,
+    <ReqBody as hyper::body::Body>::Error: Send + Sync + std::error::Error,
+    <ReqBody as hyper::body::Body>::Data: Send + Sync,
 {
     async fn dispatch(
         &self,
