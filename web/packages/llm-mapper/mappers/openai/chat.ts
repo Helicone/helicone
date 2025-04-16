@@ -281,6 +281,8 @@ export const mapOpenAIRequest: MapperFn<any, any> = ({
       description: tool.description || tool.function.description,
       parameters: tool.parameters || tool.function.parameters,
     })),
+    stop: request.stop,
+    response_format: request.response_format,
   };
 
   const llmSchema: LlmSchema = {
