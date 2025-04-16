@@ -352,7 +352,7 @@ export default function ThemedTable<T extends { id?: string }>(
                       },
                     }}
                   >
-                    <thead className="text-[12px] z-[2]">
+                    <thead className="text-[12px] z-[2] h-11">
                       {table.getHeaderGroups().map((headerGroup) => (
                         <tr
                           key={headerGroup.id}
