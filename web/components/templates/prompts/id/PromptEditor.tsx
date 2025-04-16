@@ -40,12 +40,7 @@ import {
 import { getMapperType } from "@/packages/llm-mapper/utils/getMapperType";
 import autoImprovePrompt from "@/prompts/auto-improve";
 import { PromptState, StateInputs } from "@/types/prompt-state";
-import {
-  $system,
-  $user,
-  findClosestModel,
-  findClosestProvider,
-} from "@/utils/generate";
+import { $system, $user, findClosestModelProvider } from "@/utils/generate";
 import {
   isLastMessageUser,
   isPrefillSupported,
@@ -356,11 +351,12 @@ export default function PromptEditor({
       // 4. Deduplicate variables
       inputs = deduplicateVariables(inputs);
 
-      // Find closest provider and model
-      const provider = findClosestProvider(
-        templateData.provider || metadata?.provider || "OPENAI"
-      );
-      const model = findClosestModel(provider, templateData.model || "gpt-4");
+      // Find closest model and provider together
+      const { provider: selectedProvider, model: selectedModel } =
+        findClosestModelProvider(
+          templateData.model || "gpt-4o-mini",
+          templateData.provider || metadata?.provider
+        );
 
       // Update state with processed data
       setState({
@@ -371,8 +367,8 @@ export default function PromptEditor({
 
         messages: stateMessages,
         parameters: {
-          provider: provider,
-          model: model,
+          provider: selectedProvider,
+          model: selectedModel,
           temperature: templateData.temperature ?? undefined,
           tools: templateData.tools ?? undefined,
           max_tokens: templateData.max_tokens ?? undefined,
@@ -959,19 +955,18 @@ export default function PromptEditor({
             const mappedContent = heliconeRequestToMappedContent(
               requestData.data
             );
-            const provider = findClosestProvider(
-              mappedContent.schema.request.provider || "OPENAI"
-            );
-            const model = findClosestModel(
-              provider,
-              mappedContent.schema.request.model || "gpt-4"
-            );
+
+            const { provider: requestProvider, model: requestModel } =
+              findClosestModelProvider(
+                mappedContent.schema.request.model || "gpt-4",
+                mappedContent.schema.request.provider
+              );
 
             setState({
               messages: mappedContent.schema.request.messages || [],
               parameters: {
-                provider: provider,
-                model: model,
+                provider: requestProvider,
+                model: requestModel,
                 temperature:
                   mappedContent.schema.request.temperature ?? undefined,
                 max_tokens:
@@ -999,19 +994,17 @@ export default function PromptEditor({
 
         case "fromPlayground":
           if (basePrompt) {
-            const provider = findClosestProvider(
-              basePrompt.metadata.provider || "OPENAI"
-            );
-            const model = findClosestModel(
-              provider,
-              basePrompt.body.model || "gpt-4o-mini"
-            );
+            const { provider: baseProvider, model: baseModel } =
+              findClosestModelProvider(
+                basePrompt.body.model || "gpt-4o-mini",
+                basePrompt.metadata.provider
+              );
 
             setState({
               messages: basePrompt.body.messages || [],
               parameters: {
-                provider: provider,
-                model: model,
+                provider: baseProvider,
+                model: baseModel,
                 temperature: basePrompt.body.temperature ?? undefined,
                 max_tokens: basePrompt.body.max_tokens ?? undefined,
                 tools: basePrompt.body.tools ?? undefined,
