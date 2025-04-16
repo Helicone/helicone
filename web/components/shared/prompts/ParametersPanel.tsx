@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -24,14 +25,17 @@ import {
 } from "packages/cost/unified/types";
 import React, { useEffect, useMemo, useState } from "react";
 import {
+  PiBracketsCurlyBold,
   PiBrainBold,
   PiCoinsBold,
   PiHandPalmBold,
   PiPaintBrushBold,
+  PiPencilBold,
   PiPlugsBold,
 } from "react-icons/pi";
 import GlassHeader from "../universal/GlassHeader";
 import ScrollableBadges from "../universal/ScrollableBadges";
+import ResponseFormatEditor from "./ResponseFormatEditor";
 
 interface ParametersPanelProps {
   parameters: StateParameters;
@@ -44,6 +48,8 @@ export default function ParametersPanel({
 }: ParametersPanelProps) {
   // State for the creator selection (purely for organization)
   const [selectedCreator, setSelectedCreator] = useState<Creator>("OpenAI");
+  const [isResponseFormatEditorOpen, setIsResponseFormatEditorOpen] =
+    useState(false);
 
   // Determine the creator based on the current provider and model
   useEffect(() => {
@@ -130,6 +136,11 @@ export default function ParametersPanel({
 
   const supportsStopSequences = useMemo(
     () => !!mergedParams?.stop,
+    [mergedParams]
+  );
+
+  const supportsResponseFormat = useMemo(
+    () => mergedParams?.response_format === true,
     [mergedParams]
   );
 
@@ -476,6 +487,32 @@ export default function ParametersPanel({
           </ParameterRow>
         )}
 
+        {/* Response Format */}
+        {supportsResponseFormat && (
+          <ParameterRow>
+            <ParameterLabel
+              icon={<PiBracketsCurlyBold className="text-secondary" />}
+            >
+              Response Format
+            </ParameterLabel>
+            <div className="flex flex-row items-center gap-2">
+              <span className="text-sm">
+                {parameters.response_format?.type === "json_schema"
+                  ? "JSON Schema"
+                  : "Text"}
+              </span>
+              <Button
+                variant="ghost"
+                size="square_icon"
+                asPill
+                onClick={() => setIsResponseFormatEditorOpen(true)}
+              >
+                <PiPencilBold className="w-4 h-4" />
+              </Button>
+            </div>
+          </ParameterRow>
+        )}
+
         {/* Stop Sequences */}
         {supportsStopSequences && (
           <div className="w-full flex flex-row items-center justify-between pl-4">
@@ -495,6 +532,20 @@ export default function ParametersPanel({
           </div>
         )}
       </div>
+
+      {/* Response Format Editor Popup */}
+      <ResponseFormatEditor
+        isOpen={isResponseFormatEditorOpen}
+        onClose={() => setIsResponseFormatEditorOpen(false)}
+        initialSchema={parameters.response_format?.json_schema}
+        onSave={(schema) => {
+          onParameterChange({
+            response_format: schema
+              ? { type: "json_schema", json_schema: schema }
+              : undefined,
+          });
+        }}
+      />
     </div>
   );
 }
