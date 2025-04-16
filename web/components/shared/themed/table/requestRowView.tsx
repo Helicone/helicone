@@ -34,7 +34,7 @@ const RequestRowView = (props: RequestRowViewProps) => {
       </ul>
       {selectedRow ? (
         <div className="flex flex-col space-y-2 w-full h-full overflow-auto">
-          <RenderMappedRequest mapperContent={selectedRow} />
+          <RenderMappedRequest mappedRequest={selectedRow} />
         </div>
       ) : (
         <div className="flex flex-col space-y-4 justify-center items-center w-full h-screen bg-white border border-gray-300 dark:bg-black dark:border-gray-700 rounded-lg">

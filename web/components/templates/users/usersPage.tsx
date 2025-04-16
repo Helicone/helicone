@@ -1,6 +1,7 @@
 import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useFilterAST } from "@/filterAST/context/filterContext";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { UserMetric } from "@/lib/api/users/UserMetric";
 import { UserGroupIcon } from "@heroicons/react/24/outline";
@@ -15,12 +16,11 @@ import {
   SortLeafRequest,
 } from "../../../services/lib/sorts/requests/sorts";
 import AuthHeader from "../../shared/authHeader";
-import ThemedTable from "../../shared/themed/table/themedTable";
+import ThemedTable from "../../shared/themed/table/themedTableOld";
 import { UpgradeProDialog } from "../organization/plan/upgradeProDialog";
 import TableFooter from "../requests/tableFooter";
 import { INITIAL_COLUMNS } from "./initialColumns";
 import { UserMetrics } from "./UserMetrics";
-import { useFilterAST } from "@/filterAST/context/filterContext";
 
 interface UsersPageV2Props {
   currentPage: number;

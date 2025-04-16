@@ -32,13 +32,13 @@ export default function DraggableColumnHeader<T>(props: {
         },
       }}
       className={clsx(
-        "text-left py-2 font-semibold text-gray-900 dark:text-gray-100 relative px-2",
+        "text-left font-semibold text-gray-900 dark:text-gray-100 relative px-2",
         index === 0 && "pl-10",
         index === totalColumns - 1 && "pr-10"
       )}
     >
       <div className="flex flex-row items-center justify-between">
-        <button className="flex flex-row items-center py-1 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 rounded-lg">
+        <button className="flex flex-row items-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 rounded-lg">
           <span className="text-gray-900 dark:text-gray-100">
             {header.isPlaceholder
               ? null
@@ -50,7 +50,7 @@ export default function DraggableColumnHeader<T>(props: {
           <div className="text-right items-center">
             <Menu as="div" className="relative text-left pl-1">
               <div className="flex items-center">
-                <Menu.Button className="hover:bg-gray-100 dark:hover:bg-gray-900  rounded-md p-1 -m-0.5">
+                <Menu.Button className="hover:bg-gray-100 dark:hover:bg-gray-900  rounded-md -m-0.5">
                   {meta.sortKey === sortable.sortKey ? (
                     sortable.sortDirection === "asc" ? (
                       <BarsArrowUpIcon
