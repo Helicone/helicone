@@ -1,0 +1,213 @@
+OpenAI has just released GPT-4.1, and in typical OpenAI fashion, they've baffled everyone with their naming scheme again. 
+
+Just when we thought we were finally moving to GPT-5, they've surprised us with GPT-4.1—a model that is in many ways an upgrade from <a href="https://www.helicone.ai/blog/gpt-4.5-benchmarks" target="_blank" rel="noopener">GPT-4.5</a>. 
+
+But naming conventions aside, this release is significant. GPT-4.1 introduces a family of three models designed specifically for developers, featuring major improvements in coding, instruction following, and long context handling.
+
+![GPT-4.1 in the API](/static/blog/gpt-4.1-full-developer-guide/gpt-4.1-in-the-api.webp)
+
+## Table Of Contents
+
+## What's New in GPT-4.1?
+
+- **A family of three non-thinking models**: GPT-4.1 (full-size), GPT-4.1 Mini (balanced), and GPT-4.1 Nano (small and fast), each targeting different use cases and price points.
+- **Massive context window**: All three models support up to **1 million tokens of context**, 8x more than GPT-4o's 128K limit. Perfect for processing entire codebases or lengthy documents.
+- **API-only release**: Unlike previous models, GPT-4.1 is exclusively available <a href="https://platform.openai.com/docs/models/gpt-4.1" target="_blank" rel="noopener">through the API</a>, not in ChatGPT's interface. 
+- **Knowledge cutoff of June 2024**: GPT-4.1 has the most recent cutoff of any OpenAI model.
+- **Lower pricing across the board**: The main GPT-4.1 model is 26% cheaper than GPT-4o, while GPT-4.1 Mini outperforms GPT-4o on many benchmarks at 83% lower cost.
+- **Developer-focused**: Built specifically for developer workflows with extensive real-world testing of coding capabilities.
+
+<BottomLine
+  title="📢 GPT-4.5 Deprecation Notice"
+  description="OpenAI is deprecating GPT-4.5, their most expensive model, in the API as GPT-4.1 offers similar or better performance at lower cost and latency. GPT-4.5 will be turned off on July 14, 2025."
+/>
+
+## GPT-4.1 Performance Benchmarks & Code Generation
+
+{/* GPT-4.1 delivers significant improvements across key metrics. Here's how it performs on benchmarks: */}
+
+### Coding Performance
+
+The coding improvements are substantial:
+
+- **SWE-bench Verified**: One test measuring ability to solve real GitHub issues in actual codebases, GPT-4.1 scored 54.6%, far outperforming GPT-4o (33.2%) and GPT-4.5 (28%).
+- **Code Diff Accuracy**: When asked to modify only specific parts of code instead of rewriting entire files, GPT-4.1 achieved 52.9% accuracy compared to GPT-4o's 18.3%.
+- **Extraneous Edits**: GPT-4.1 rarely touches files it shouldn't, with unnecessary edits dropping from 9% (with GPT-4o) to just 2%.
+- **Real-world Testing**: Windsurf, a popular coding tool, reports that GPT-4.1 scored 60% higher on their internal benchmarks and was 30% more efficient at using programming tools.
+
+### Instruction Following
+
+* **Complex Instructions**: When given difficult multi-step instructions with specific formatting requirements, GPT-4.1 correctly followed them 49% of the time compared to GPT-4o's 29%.
+* **Multi-turn Conversations**: On the MultiChallenge benchmark testing how well models maintain context through conversation, GPT-4.1 scored 38.3%, a 10.5% improvement over GPT-4o.
+* **Following Constraints**: When explicitly told what not to do, GPT-4.1 achieved 87.4% compliance on the IFEval benchmark versus 81.0% for GPT-4o.
+
+### Long Context Performance
+
+* **Context Window**: All three GPT-4.1 models can process up to 1 million tokens at once—8 times more than GPT-4o's 128K limit.
+* **Finding Specific Information**: When challenged to locate particular information in massive documents (the "needle-in-haystack" test), GPT-4.1 achieved 100% accuracy across all context lengths.
+* **Video Understanding**: On tests analyzing 30-60 minute videos without subtitles, GPT-4.1 scored 72.0%, improving 6.7% over GPT-4o.
+
+## Developer Reactions & Real-World Examples
+
+The developer community's response has been enthusiastic. One developer commented:
+
+> I just worked in cursor with it [GPT 4.1] for a few site updates…holy f**k balls
+
+Here are some real-world examples of what it can do:
+
+### FlashCard App Creation
+
+<video width="100%" controls autoplay loop>
+  <source
+    src="/static/blog/gpt-4.1-full-developer-guide/FlashCard_app_comparison.mov"
+    type="video/mp4"
+  />
+  Your browser does not support the video tag.
+</video>
+
+_Source: <a href="https://openai.com/index/gpt-4-1/" target="_blank" rel="noopener">OpenAI's official blog</a>_
+
+### Ball in a Hexagon
+
+<video width="100%" controls autoplay loop>
+  <source
+    src="/static/blog/gpt-4.1-full-developer-guide/ball-in-hexagon.mov"
+    type="video/mp4"
+  />
+  Your browser does not support the video tag.
+</video>
+
+### SVG Butterfly Comparison: GPT-4.1 vs Competitors
+
+When asked to generate an SVG butterfly, GPT-4.1's output shows impressive detail and execution compared to other leading models like Gemini 2.5 and Claude 3.7 Sonnet. 
+
+![GPT-4.1 vs Gemini 2.5 vs Claude 3.7 Butterfly SVG](/static/blog/gpt-4.1-full-developer-guide/creating-an-svg-butterfly.webp)
+
+## Comparing GPT-4.1 Models
+
+| Model | Strengths | Context Window | Input/Output Cost (per 1M) | Best Use Cases |
+|-------|-----------|----------------|-------------------------------------|--------------|
+| **GPT-4.1** | Coding, instruction following, long context | 1M tokens | $2.00 / $8.00 | Production developer workflows, complex coding |
+| **GPT-4.1 Mini** | Balanced performance at lower cost | 1M tokens | $0.40 / $1.60 | High-volume or cost-sensitive applications |
+| **GPT-4.1 Nano** | Fast responses, very affordable | 1M tokens | $0.10 / $0.40 | Classification, autocomplete, processing large docs, tasks requiring minimal latency |
+
+<BottomLine
+  title="Tip 💡"
+  description="Many users have found GPT-4.1 Mini to offer the best price-to-performance ratio among the three models, occupying the 'most attractive quadrant' on the Intelligence vs. Price chart below."
+/>
+
+## GPT-4.1 vs. Gemini 2.5 vs Claude 3.7 Sonnet
+
+When compared to other leading models, GPT-4.1 shows strong performance across the board, especially in coding tasks and long-context handling.
+
+| Model | Strengths | Context Window | Input/Output Cost (per 1M) | Best Use Case |
+|-------|-----------|----------------|-------------------------------------|--------------|
+| **GPT-4.1** | Coding, instruction following, long context | 1M tokens | $2.00 / $8.00 | Production developer workflows |
+| **GPT-4o** | General purpose capabilities | 128K tokens | $5.00 / $15.00 | Multimodal applications |
+| **o3-mini (high)** | Deep reasoning capabilities | 128K tokens | $15.00 / $75.00 | Complex problem-solving |
+| **Claude 3.7 Sonnet** | Extended thinking mode, strong visual capabilities | 200K tokens | $3.00 / $15.00 | Complex reasoning tasks, coding, design |
+| **Gemini 2.5 Pro** | Strong reasoning and multimodal | 1M tokens | $1.25 / $10.00 | Research, coding, large codebase analysis |
+
+
+![Intelligence vs. Price comparison](/static/blog/gpt-4.1-full-developer-guide/intelligence-vs-price.webp)
+
+_Source: <a href="https://artificialanalysis.ai/" target="_blank" rel="noopener">Artificial Analysis</a>_
+
+## How to Access GPT-4.1
+
+GPT-4.1 is available exclusively through the OpenAI API. Use the model string `gpt-4.1`, `gpt-4.1-mini`, or `gpt-4.1-nano` in your requests.
+
+You can easily start testing these models in the <a href="https://platform.openai.com/playground/prompts?models=gpt-4.1" target="_blank" rel="noopener">OpenAI Playground</a>.
+
+## Effective Prompting Techniques for GPT-4.1
+
+Based on OpenAI's <a href="https://cookbook.openai.com/examples/gpt4-1_prompting_guide" target="_blank" rel="noopener">official prompting guide</a>, here are the most effective techniques for getting the best results from GPT-4.1:
+
+- **Be extremely clear and specific**: GPT-4.1 follows instructions more literally than previous models. If the output is different from your expectations, a single sentence describing your desired behavior is usually enough. 
+- **Use delimiters effectively**: Markdown sections (###), XML tags, and backticks for code help structure your prompt. For document retrieval, XML tags performed best in testing.
+- **For agent workflows**: Include reminders about persistence ("keep going until the user's query is completely resolved"), tool-calling ("use your tools to read files, don't guess"), and planning ("plan extensively before each function call").
+- **For long context**: Place your most important instructions at both the beginning AND end of your prompt. 
+- **For complex reasoning**: While not a reasoning model like o3, GPT-4.1 responds well to step-by-step prompting. Try adding: "First, think carefully step by step about..." to break down complex problems.
+- **For code editing**: GPT-4.1 excels at creating code diffs rather than rewriting entire files. It's significantly better than previous models at modifying only the necessary parts of code.
+
+## How to Safely Test GPT-4.1 in Production
+
+Want to try GPT-4.1 without disrupting your existing apps? Here's how you can use Helicone to make the transition seamless:
+
+1. **Log your current model requests**: Log at least 10 logs in your Helicone dashboard. This will give you a baseline of performance.
+2. **Compare performance**: Test GPT-4.1 against your current model with identical prompts and inputs. The <a href="https://docs.helicone.ai/features/prompts/editor" target="_blank" rel="noopener">Prompt Editor</a> or <a href="https://docs.helicone.ai/features/experiments" target="_blank" rel="noopener">Experiments</a> feature are designed for this purpose. 
+3. **Analyze results**: Compare outputs, costs, and latency between your current model and GPT-4.1 side-by-side. Make sure GPT-4.1 meets your requirements with your actual production prompts.
+4. **Roll out gradually**: Shift traffic from your current model to GPT-4.1 incrementally. Make sure to monitor the performance in Helicone.
+
+You can follow <a href="https://www.helicone.ai/blog/switch-to-deepseek" target="_blank" rel="noopener">this guide</a> for more detailed instructions! 
+
+<CallToAction
+  title="Integrate Your GPT-4.1 Application with Helicone ⚡️"
+  description="Don't guess if GPT-4.1 is right for your app. Helicone lets you test with your actual production data, measure exact cost savings, and switch models with 99.99% uptime."
+  primaryButtonText="Get Started - It's Free"
+  primaryButtonLink="https://helicone.ai/signup"
+  secondaryButtonText="See Other Integrations"
+  secondaryButtonLink="https://docs.helicone.ai/getting-started/quick-start#quick-start"
+>
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="your-api-key",
+    base_url="https://oai.helicone.ai/v1",
+    default_headers={
+      "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+    }
+)
+
+response = client.chat.completions.create(
+    model="gpt-4.1", # Or "gpt-4.1-mini" or "gpt-4.1-nano"
+    messages=[
+        {"role": "user", "content": "Write a Python program that shows a ball bouncing inside a spinning hexagon."}
+    ]
+)
+print(response.choices[0].message.content)
+```
+</CallToAction>
+
+## Final Thoughts
+
+GPT-4.1 represents a significant step forward for developers using AI. Its focus on real-world utility rather than just benchmark scores makes it particularly valuable for production applications. 
+
+The introduction of GPT-4.1 Mini and Nano variants provides flexible options for different use cases and budget constraints, while the massive 1 million token context window—now quickly becoming the norm—opens new possibilities for complex application development.
+
+OpenAI has promised two new models (<a href="https://www.helicone.ai/blog/openai-o3" target="_blank" rel="noopener">o3</a> and o4-mini) will follow shortly, so stay tuned for those!
+
+### You might also like
+
+- **<a href="https://www.helicone.ai/blog/openai-realtime-api-with-helicone" target="_blank" rel="noopener">How to Monitor OpenAI's Realtime API with Helicone</a>**
+- **<a href="http://helicone.ai/blog/openai-o3" target="_blank" rel="noopener">OpenAI o3 Released: Benchmarks and Comparison to o1</a>**
+- **<a href="https://www.helicone.ai/blog/openai-deep-research" target="_blank" rel="noopener">OpenAI Deep Research & How it Compares to Perplexity</a>**
+- **<a href="https://www.helicone.ai/blog/gpt-4o-mini-vs-claude-3.5-sonnet" target="_blank" rel="noopener">GPT-4o Mini vs. Claude 3.5 Sonnet</a>**
+
+<FAQ
+  items={[
+    {
+      question: "What's the difference between GPT-4.1, GPT-4.1 Mini, and GPT-4.1 Nano?",
+      answer: "These three models offer different trade-offs between capability and cost. GPT-4.1 is the most powerful but most expensive, Mini offers a balance of strong performance at a moderate price, and Nano is the fastest and cheapest option, ideal for simpler tasks."
+    },
+    {
+      question: "Is GPT-4.1 available in ChatGPT?",
+      answer: "No, GPT-4.1 is currently only available via API. According to OpenAI, many of the improvements in instruction following, coding, and intelligence have been gradually incorporated into the latest version of GPT-4 in ChatGPT, but the full GPT-4.1 model is API-only."
+    },
+    {
+      question: "Will GPT-4.5 be available alongside GPT-4.1?",
+      answer: "No. OpenAI is deprecating GPT-4.5 in the API, with it being turned off on July 14, 2025. This is because GPT-4.1 offers similar or better performance at a lower cost and latency."
+    },
+    {
+      question: "What are the main improvements in GPT-4.1 over GPT-4o?",
+      answer: "The key improvements include a massive context window (1M tokens), better code generation (especially diff format handling), more reliable instruction following, and improved long-context comprehension at a lower price point."
+    },
+    {
+      question: "Does GPT-4.1 support vision capabilities?",
+      answer: "Yes, GPT-4.1 maintains strong vision capabilities, with the family scoring well on vision benchmarks like MMMU, MathVista, and ChartQA. GPT-4.1 Mini shows particularly strong performance on multimodal tasks relative to its size and price."
+    }
+  ]}
+/>
+
+<Questions />
