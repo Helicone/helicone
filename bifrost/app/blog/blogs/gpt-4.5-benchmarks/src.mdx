@@ -48,9 +48,7 @@ Developers find that GPT-4.5 excels at natural conversation and generating factu
 
 This makes GPT-4.5 significantly more expensive than alternatives like GPT-4o and even the pricy <a href="https://www.helicone.ai/blog/claude-3.7-benchmarks-and-examples" target="_blank" rel="noopener">Claude 3.7 Sonnet</a>, reflecting its computational demands.
 
-
 ### Design and Architecture
-
 
 OpenAI now builds better models by scaling two complementary paradigms:
 
@@ -158,6 +156,11 @@ GPT-4.5 is rolling out gradually due to GPU constraints, but here are all the wa
 
 2. **API:** Chat Completions API, Assistants API, and Batch API. The API version supports all key features including function calling and JSON mode. GPT-4.5 currently **does not** support Voice Mode, video processing, or screensharing features in ChatGPT.
 
+<BottomLine
+  title="Quick update 💡"
+  description="OpenAI has decided to phase out GPT-4.5 from its API by July 14, 2025. But no worries you can easily switch to the much cheaper and more performant GPT-4.1."
+/>
+
 <CallToAction
   title="Monitor OpenAI Models with Helicone ⚡️"
   description="Track costs, usage patterns, and performance across all OpenAI models including GPT-4.5. Get started in minutes with just a single line of code."
@@ -183,6 +186,8 @@ response = client.chat.completions.create(
 print(response.choices[0].message.content)
 ```
 </CallToAction>
+
+*To use <a href="https://www.helicone.ai/blog/gpt-4.1-full-developer-guide" target="_blank" rel="noopener">GPT-4.1</a> instead, just use `gpt-4.1` as the model string instead of `gpt-4.5-preview-2025-02-27`.*
 
 ## Some guidelines on when to use GPT-4.5
 
