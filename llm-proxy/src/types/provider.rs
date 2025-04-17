@@ -5,13 +5,14 @@ use serde::{Deserialize, Serialize};
 use super::secret::Secret;
 
 #[derive(
-    Debug, Display, Clone, Copy, Deserialize, Eq, Hash, PartialEq, Serialize,
+    Debug, Clone, Copy, Deserialize, Eq, Hash, PartialEq, Serialize, Display,
 )]
 #[serde(rename_all = "kebab-case")]
-#[display("{}", self)]
 pub enum Provider {
     #[serde(rename = "openai")]
+    #[display("openai")]
     OpenAI,
+    #[display("anthropic")]
     Anthropic,
 }
 

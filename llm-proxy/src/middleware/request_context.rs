@@ -125,6 +125,7 @@ where
             .inspect_err(|e| {
                 tracing::error!(error = ?e, "Error getting router");
             })?;
+        tracing::debug!(name = %router.name, version = %router.version, "got router");
         // TODO: will likely want to make this into one call/fetch all provider
         // keys at once since we may have multiple
         let provider_api_key = self
@@ -140,6 +141,10 @@ where
             .inspect_err(|e| {
                 tracing::error!(error = ?e, "Error getting provider key");
             })?;
+        tracing::debug!(
+            provider = %provider_api_key.provider_name,
+            "got provider key"
+        );
         let provider_api_keys = ProviderKeys::new(IndexMap::from_iter([(
             router.config.default_provider,
             provider_api_key.provider_key,
@@ -151,6 +156,7 @@ where
             .dispatcher
             .get_provider_url(router.config.default_provider)?
             .clone();
+        tracing::debug!(target_url = %target_url, "got target url");
         // TODO: this will come from parsing the prompt+headers+etc
         let helicone = crate::types::request::HeliconeContext {
             properties: None,

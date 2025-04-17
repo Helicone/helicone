@@ -23,7 +23,7 @@ where
 
     #[tracing::instrument(name = "AuthService::authorize", skip(self, request))]
     fn authorize(&mut self, mut request: Request<B>) -> Self::Future {
-        tracing::info!("AuthService::authorize");
+        tracing::debug!("AuthService::authorize");
         Box::pin(async {
             if let Some(auth_ctx) = check_auth(&request).await {
                 // Set `auth_ctx` as a request extension so it can be accessed

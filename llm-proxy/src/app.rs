@@ -1,10 +1,10 @@
-use std::sync::Arc;
+use std::{sync::Arc, time::Duration};
 
 use futures::future::BoxFuture;
 use hyper::body::Body;
 use meltdown::Token;
 use minio_rsc::{Minio, provider::StaticProvider};
-use tokio::net::TcpListener;
+use tokio::{io, net::TcpListener};
 use tower::ServiceBuilder;
 use tower_http::{
     auth::{AsyncRequireAuthorization, AsyncRequireAuthorizationLayer},
@@ -148,11 +148,11 @@ impl meltdown::Service for App<hyper::body::Incoming> {
                         let (stream, peer_addr) = match conn {
                             Ok(conn) => conn,
                             Err(e) => {
-                                tracing::error!("accept error: {}", e);
+                                handle_accept_error(e).await;
                                 continue;
                             }
                         };
-                        info!(peer_addr = %peer_addr, "accepted new connection");
+                        tracing::info!(peer_addr = %peer_addr, "accepted new connection");
                         let stream = hyper_util::rt::TokioIo::new(Box::pin(stream));
                         let conn = server.serve_connection_with_upgrades(stream, service_stack.clone());
 
@@ -160,9 +160,9 @@ impl meltdown::Service for App<hyper::body::Incoming> {
 
                         tokio::spawn(async move {
                             if let Err(err) = conn.await {
-                                tracing::error!("connection error: {}", err);
+                                tracing::error!(error = ?err, "connection error");
                             }
-                            tracing::info!("connection dropped: {}", peer_addr);
+                            tracing::trace!(peer_addr = %peer_addr, "connection completed");
                         });
                     },
 
@@ -187,4 +187,33 @@ impl meltdown::Service for App<hyper::body::Incoming> {
             Ok(())
         })
     }
+}
+
+async fn handle_accept_error(e: io::Error) {
+    if is_connection_error(&e) {
+        return;
+    }
+
+    // [From `hyper::Server` in 0.14](https://github.com/hyperium/hyper/blob/v0.14.27/src/server/tcp.rs#L186)
+    //
+    // > A possible scenario is that the process has hit the max open files
+    // > allowed, and so trying to accept a new connection will fail with
+    // > `EMFILE`. In some cases, it's preferable to just wait for some time, if
+    // > the application will likely close some files (or connections), and try
+    // > to accept the connection again. If this option is `true`, the error
+    // > will be logged at the `error` level, since it is still a big deal,
+    // > and then the listener will sleep for 1 second.
+    //
+    // hyper allowed customizing this but axum does not.
+    tracing::error!(error = ?e, "error accepting connection");
+    tokio::time::sleep(Duration::from_millis(500)).await;
+}
+
+fn is_connection_error(e: &io::Error) -> bool {
+    matches!(
+        e.kind(),
+        io::ErrorKind::ConnectionRefused
+            | io::ErrorKind::ConnectionAborted
+            | io::ErrorKind::ConnectionReset
+    )
 }
