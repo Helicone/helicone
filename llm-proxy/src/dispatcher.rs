@@ -95,8 +95,11 @@ where
         Poll::Ready(Ok(()))
     }
 
+    #[tracing::instrument(name = "Dispatcher::call", skip(self, req))]
     fn call(&mut self, req: Request<ReqBody>) -> Self::Future {
+        tracing::info!("Dispatcher::call");
         let this = self.clone();
+        tracing::debug!(uri = %req.uri(), headers = ?req.headers(), "Received request");
         Box::pin(async move { this.dispatch(req).await })
     }
 }

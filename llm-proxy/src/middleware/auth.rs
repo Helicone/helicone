@@ -10,7 +10,7 @@ use uuid::Uuid;
 use crate::types::{org::OrgId, request::AuthContext, user::UserId};
 
 #[derive(Clone, Copy)]
-struct AuthService;
+pub struct AuthService;
 
 impl<B> AsyncAuthorizeRequest<B> for AuthService
 where
@@ -21,7 +21,9 @@ where
     type Future =
         BoxFuture<'static, Result<Request<B>, Response<Self::ResponseBody>>>;
 
+    #[tracing::instrument(name = "AuthService::authorize", skip(self, request))]
     fn authorize(&mut self, mut request: Request<B>) -> Self::Future {
+        tracing::info!("AuthService::authorize");
         Box::pin(async {
             if let Some(auth_ctx) = check_auth(&request).await {
                 // Set `auth_ctx` as a request extension so it can be accessed
@@ -45,12 +47,16 @@ async fn check_auth<B>(_request: &Request<B>) -> Option<AuthContext> {
     // ...
     // for now we are mocking this just to show how layers will stack on top of
     // each other
+
+    // test@helicone.ai / org for test
     let org_id =
         Uuid::from_str("83635a30-5ba6-41a8-8cc6-fb7df941b24a").unwrap();
     let user_id =
         Uuid::from_str("f76629c5-a070-4bbc-9918-64beaea48848").unwrap();
+    // change to run locally while this is hardcoded
+    let api_key = "sk-helicone-wvdmyza-57wu7ii-rr3csyi-tox7nqy".to_string();
     Some(AuthContext {
-        api_key: "sk-helicone-wvdmyza-57wu7ii-rr3csyi-tox7nqy".to_string(),
+        api_key,
         user_id: UserId::new(user_id),
         org_id: OrgId::new(org_id),
     })

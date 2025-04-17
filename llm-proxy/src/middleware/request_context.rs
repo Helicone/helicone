@@ -74,9 +74,13 @@ where
         self.inner.poll_ready(cx).map_err(Into::into)
     }
 
+    #[tracing::instrument(
+        name = "RequestContextService::call",
+        skip(self, req)
+    )]
     fn call(&mut self, mut req: Request<ReqBody>) -> Self::Future {
+        tracing::info!("RequestContextService::call");
         let mut this = self.clone();
-
         Box::pin(async move {
             let req_ctx = Arc::new(this.get_context(&mut req).await?);
             req.extensions_mut().insert(req_ctx);
@@ -103,23 +107,24 @@ where
             .ok_or(InternalError::ExtensionNotFound("AuthContext"))?;
         // TODO: we need to have a layer to normalize request paths like slashes
         // at the end eg remove last slash in https://router.helicone.ai/router/foo123/
-        let router_id = {
-            let router_id_path = req
-                .uri()
-                .path()
-                .split('/')
-                .last()
-                .ok_or(InvalidRequestError::MissingRouterId)?;
-            Uuid::parse_str(router_id_path)
-                .map_err(InvalidRequestError::InvalidRouterId)?
-        };
+        let router_id_path = req
+            .uri()
+            .path()
+            .split('/')
+            .last()
+            .ok_or(InvalidRequestError::MissingRouterId)?;
+        let router_id = Uuid::parse_str(router_id_path)
+            .map_err(InvalidRequestError::InvalidRouterId)?;
         let mut tx = self.app_ctx.store.db.begin().await?;
         let router = self
             .app_ctx
             .store
             .router
             .get_latest_version(&mut tx, router_id)
-            .await?;
+            .await
+            .inspect_err(|e| {
+                tracing::error!(error = ?e, "Error getting router");
+            })?;
         // TODO: will likely want to make this into one call/fetch all provider
         // keys at once since we may have multiple
         let provider_api_key = self
@@ -131,7 +136,10 @@ where
                 &auth_context.org_id,
                 router.config.default_provider,
             )
-            .await?;
+            .await
+            .inspect_err(|e| {
+                tracing::error!(error = ?e, "Error getting provider key");
+            })?;
         let provider_api_keys = ProviderKeys::new(IndexMap::from_iter([(
             router.config.default_provider,
             provider_api_key.provider_key,

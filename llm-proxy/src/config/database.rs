@@ -29,8 +29,7 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             url: Secret(
-                "postgresql://helicone-db-user:helicone-db-pw@localhost:5432/\
-                 helicone-db"
+                "postgresql://postgres:postgres@localhost:54322/postgres"
                     .to_string(),
             ),
             connection_timeout: default_connection_timeout(),

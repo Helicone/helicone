@@ -4872,11 +4872,15 @@ dependencies = [
  "base64 0.22.1",
  "bitflags 2.9.0",
  "bytes",
+ "futures-util",
  "http 1.3.1",
+ "http-body 1.0.1",
+ "http-body-util",
  "mime",
  "pin-project-lite",
  "tower-layer",
  "tower-service",
+ "tracing",
  "uuid",
 ]
 

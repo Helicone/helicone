@@ -6,6 +6,10 @@ use meltdown::Token;
 use minio_rsc::{Minio, provider::StaticProvider};
 use tokio::net::TcpListener;
 use tower::ServiceBuilder;
+use tower_http::{
+    auth::{AsyncRequireAuthorization, AsyncRequireAuthorizationLayer},
+    catch_panic::{CatchPanic, CatchPanicLayer, DefaultResponseForPanic},
+};
 use tracing::info;
 
 use crate::{
@@ -14,7 +18,9 @@ use crate::{
         rate_limit::{AuthedLimiterConfig, UnauthedLimiterConfig},
     },
     error,
-    middleware::request_context::Service as RequestContextService,
+    middleware::{
+        auth::AuthService, request_context::Service as RequestContextService,
+    },
     registry::Registry,
     router::Router,
     store::StoreRealm,
@@ -23,8 +29,13 @@ use crate::{
 /// Type representing the middleware layers.
 ///
 /// When adding a new middleware, you'll be required to add it to this type.
-pub type ServiceStack<ReqBody> =
-    RequestContextService<Router<ReqBody>, ReqBody>;
+pub type ServiceStack<ReqBody> = CatchPanic<
+    AsyncRequireAuthorization<
+        RequestContextService<Router<ReqBody>, ReqBody>,
+        AuthService,
+    >,
+    DefaultResponseForPanic,
+>;
 
 pub struct AppContext {
     pub config: Config,
@@ -40,8 +51,7 @@ impl std::fmt::Debug for AppContext {
             .field("config", &self.config)
             .field("authed_rate_limit", &self.authed_rate_limit)
             .field("unauthed_rate_limit", &self.unauthed_rate_limit)
-            .field("store", &"StoreRealm") // Using a string representation since StoreRealm might not
-            // implement Debug
+            .field("store", &self.store)
             .finish()
     }
 }
@@ -93,6 +103,8 @@ where
         });
 
         let service_stack: ServiceStack<ReqBody> = ServiceBuilder::new()
+            .layer(CatchPanicLayer::new())
+            .layer(AsyncRequireAuthorizationLayer::new(AuthService))
             .layer(crate::middleware::request_context::Layer::new(
                 app_ctx.clone(),
             ))
@@ -140,6 +152,7 @@ impl meltdown::Service for App<hyper::body::Incoming> {
                                 continue;
                             }
                         };
+                        info!(peer_addr = %peer_addr, "accepted new connection");
                         let stream = hyper_util::rt::TokioIo::new(Box::pin(stream));
                         let conn = server.serve_connection_with_upgrades(stream, service_stack.clone());
 

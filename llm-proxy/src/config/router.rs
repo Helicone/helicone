@@ -11,11 +11,17 @@ use crate::types::provider::Provider;
 #[serde(rename_all = "kebab-case")]
 pub struct RouterConfig {
     pub default_provider: Provider,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub cache: Option<CacheControlConfig>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub fallback: Option<FallbackConfig>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub balance: Option<BalanceConfig>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub retries: Option<RetryConfig>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub rate_limit: Option<RateLimitConfig>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub spend_control: Option<SpendControlConfig>,
 }
 
@@ -82,8 +88,6 @@ pub fn test_router_config() -> RouterConfig {
     };
 
     // Create test values for RateLimitConfig
-    let rate_limit = RateLimitConfig::default();
-    let spend_control = SpendControlConfig::default();
     let default_provider = Provider::OpenAI;
     RouterConfig {
         default_provider,
@@ -91,8 +95,8 @@ pub fn test_router_config() -> RouterConfig {
         fallback: Some(fallback),
         balance: Some(balance),
         retries: Some(retries),
-        rate_limit: Some(rate_limit),
-        spend_control: Some(spend_control),
+        rate_limit: None,
+        spend_control: None,
     }
 }
 
