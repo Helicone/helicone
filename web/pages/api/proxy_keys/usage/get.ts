@@ -7,6 +7,7 @@ import { Result } from "../../../../packages/common/result";
 import { clickhousePriceCalc } from "../../../../packages/cost";
 import { DecryptedProviderKeyMapping } from "../../../../services/lib/keys";
 import { Permission } from "../../../../services/lib/user";
+import { LimitUsageResult } from "./LimitUsageResult";
 const generateSubquery = (
   limit: DecryptedProviderKeyMapping["limits"][number],
   index: number
@@ -30,12 +31,6 @@ const generateSubquery = (
     ) as x_${index}
   `;
 };
-
-export interface LimitUsageResult {
-  count: number;
-  cost: number;
-  limitId: string;
-}
 
 async function handler({
   req,

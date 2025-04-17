@@ -3,6 +3,7 @@ import { PromiseGenericResult } from "../result";
 export type JwtAuth = {
   _type: "jwt";
   token: string;
+  data?: any;
   orgId?: string;
 };
 export type BearerAuthProxy = {

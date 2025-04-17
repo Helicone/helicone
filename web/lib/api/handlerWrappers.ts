@@ -1,4 +1,4 @@
-import { getSSRHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
+import { getSSRHeliconeAuthClient } from "@/packages/common/auth/client/getSSRHeliconeAuthClient";
 import { HeliconeAuthClient } from "@/packages/common/auth/client/HeliconeAuthClient";
 import { HeliconeUser } from "@/packages/common/auth/types";
 import {
@@ -12,6 +12,8 @@ import { Result, err, ok } from "../../packages/common/result";
 import { FilterNode, TimeFilter } from "../../services/lib/filters/filterDefs";
 import { Permission, Role, hasPermission } from "../../services/lib/user";
 import { dbExecute } from "./db/dbExecute";
+import { auth } from "../auth";
+import { fromNodeHeaders } from "better-auth/node";
 
 export interface HandlerWrapperNext<RetVal> {
   req: NextApiRequest;
@@ -93,6 +95,7 @@ export function withAuth<T>(
 
     const user = await client.getUser();
     const org = await client.getOrg();
+
     if (org.error || !org.data || !user.data || user.error) {
       res.status(401).json({
         error: `Unauthorized: error`,
@@ -145,6 +148,7 @@ export function withAuthSSR<T>(
     context: GetServerSidePropsContext
   ): Promise<ReturnType<GetServerSideProps>> => {
     const authClient = await getSSRHeliconeAuthClient({ ctx: context });
+
     const user = await authClient.getUser();
 
     if (user.error || !user.data) {

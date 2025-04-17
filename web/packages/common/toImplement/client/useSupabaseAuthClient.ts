@@ -1,6 +1,4 @@
-import { useOrg } from "@/components/layout/org/organizationContext";
 import { Database } from "@/db/database.types";
-import { $JAWN_API } from "@/lib/clients/jawn";
 import { SupabaseServerWrapper } from "@/lib/wrappers/supabase";
 import {
   SupabaseClient,
@@ -14,13 +12,17 @@ import {
 } from "next";
 import posthog from "posthog-js";
 import { useMemo } from "react";
-import { SSRContext } from "../../auth/client/AuthClientFactory";
+import { SSRContext } from "../../auth/client/getSSRHeliconeAuthClient";
 import { HeliconeAuthClient } from "../../auth/client/HeliconeAuthClient";
 import { HeliconeOrg, HeliconeUser } from "../../auth/types";
 import { err, ok, Result } from "../../result";
 
 export async function supabaseAuthClientFromSSRContext(
-  ctx: SSRContext<NextApiRequest, NextApiResponse, GetServerSidePropsContext>
+  ctx: SSRContext<
+    NextApiRequest & { headers: Record<string, string> },
+    NextApiResponse,
+    GetServerSidePropsContext
+  >
 ) {
   const supabaseClient = new SupabaseServerWrapper(ctx);
   const user = await supabaseClient.getClient().auth.getUser();
@@ -201,32 +203,10 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
 export function useSupabaseAuthClient(): HeliconeAuthClient {
   const supabaseClient = useSupabaseClient<Database>();
   const user = useUser();
-  const org = useOrg();
-
-  const allOrgs = $JAWN_API.useQuery("get", "/v1/organization", {});
   return useMemo(() => {
-    const orgWithRole = allOrgs.data?.data?.find(
-      (orgWithRole) => orgWithRole.id === org?.currentOrg?.id
-    );
-
-    return new SupabaseAuthClient(
-      supabaseClient,
-      {
-        id: user?.id ?? "",
-        email: user?.email ?? "",
-      },
-      orgWithRole
-        ? {
-            org: orgWithRole,
-            role: orgWithRole.role,
-          }
-        : undefined
-    );
-  }, [
-    allOrgs.data?.data,
-    supabaseClient,
-    user?.id,
-    user?.email,
-    org?.currentOrg?.id,
-  ]);
+    return new SupabaseAuthClient(supabaseClient, {
+      id: user?.id ?? "",
+      email: user?.email ?? "",
+    });
+  }, [supabaseClient, user?.id, user?.email]);
 }

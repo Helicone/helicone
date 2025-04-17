@@ -35,7 +35,9 @@ export function getJawnClient(orgId?: string | "none") {
         headers,
       });
 
-      return fetch(newRequest);
+      return fetch(newRequest, {
+        credentials: "include",
+      });
     },
   });
 }

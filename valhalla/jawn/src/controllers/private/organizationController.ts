@@ -57,12 +57,15 @@ export class OrganizationController extends Controller {
       return err("Invalid auth header");
     }
 
-    const authParams = await getHeliconeAuthClient().getUser(authHeader.data);
+    const authParams = await getHeliconeAuthClient().getUser(
+      authHeader.data,
+      req.headers
+    );
     if (authParams.error || !authParams.data) {
       return err(authParams.error ?? "User not found");
     }
 
-    return await dbExecute<
+    const result = await dbExecute<
       Database["public"]["Tables"]["organization"]["Row"] & {
         role: string;
       }
@@ -74,6 +77,12 @@ export class OrganizationController extends Controller {
       `,
       [authParams.data.id]
     );
+    if (result.error) {
+      this.setStatus(500);
+      return err(result.error ?? "Error getting organizations");
+    }
+
+    return ok(result.data!);
   }
 
   @Get("/{organizationId}")

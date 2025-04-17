@@ -1,27 +1,12 @@
-import {
-  supabaseAuthClientFromSSRContext,
-  useSupabaseAuthClient,
-} from "../../toImplement/client/useSupabaseAuthClient";
-import { HeliconeAuthClient } from "./HeliconeAuthClient";
+import { env } from "next-runtime-env";
+import { useBetterAuthClient } from "../../toImplement/client/useBetterAuthClient";
+import { useSupabaseAuthClient } from "../../toImplement/client/useSupabaseAuthClient";
 
 /**
  * Use the auth client in a React component
  * @returns The auth client
  */
-export function useHeliconeAuthClient(): HeliconeAuthClient {
-  return useSupabaseAuthClient();
-}
-
-export type SSRContext<
-  NextApiRequest,
-  NextApiResponse,
-  GetServerSidePropsContext
-> = { req: NextApiRequest; res: NextApiResponse } | GetServerSidePropsContext;
-
-export async function getSSRHeliconeAuthClient({
-  ctx,
-}: {
-  ctx: SSRContext<any, any, any>;
-}): Promise<HeliconeAuthClient> {
-  return supabaseAuthClientFromSSRContext(ctx);
-}
+export const useHeliconeAuthClient =
+  env("NEXT_PUBLIC_BETTER_AUTH") === "true"
+    ? useBetterAuthClient
+    : useSupabaseAuthClient;

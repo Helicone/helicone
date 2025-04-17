@@ -14,9 +14,3 @@ Alert.getLayout = function getLayout(page: ReactElement) {
 };
 
 export default Alert;
-
-export const getServerSideProps = withAuthSSR(async (options) => {
-  return {
-    props: {},
-  };
-});
