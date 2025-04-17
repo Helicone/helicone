@@ -1,6 +1,5 @@
-import { Message } from "@/packages/llm-mapper/types";
+import { HeliconeRequest, Message } from "@/packages/llm-mapper/types";
 import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
-import { HeliconeRequest } from "../api/request/request";
 
 /**
  * Checks if a session is a realtime session based on the first request's model

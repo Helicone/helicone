@@ -28,6 +28,7 @@ export interface StateParameters {
   max_tokens?: number;
   tools?: Tool[];
   stop?: string[];
+  response_format?: { type: "json_schema"; json_schema?: object };
   // TODO: Add more parameters
 }
 

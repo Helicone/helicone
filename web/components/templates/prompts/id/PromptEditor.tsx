@@ -40,12 +40,7 @@ import {
 import { getMapperType } from "@/packages/llm-mapper/utils/getMapperType";
 import autoImprovePrompt from "@/prompts/auto-improve";
 import { PromptState, StateInputs } from "@/types/prompt-state";
-import {
-  $system,
-  $user,
-  findClosestModel,
-  findClosestProvider,
-} from "@/utils/generate";
+import { $system, $user, findClosestModelProvider } from "@/utils/generate";
 import {
   isLastMessageUser,
   isPrefillSupported,
@@ -356,11 +351,12 @@ export default function PromptEditor({
       // 4. Deduplicate variables
       inputs = deduplicateVariables(inputs);
 
-      // Find closest provider and model
-      const provider = findClosestProvider(
-        templateData.provider || metadata?.provider || "OPENAI"
-      );
-      const model = findClosestModel(provider, templateData.model || "gpt-4");
+      // Find closest model and provider together
+      const { provider: selectedProvider, model: selectedModel } =
+        findClosestModelProvider(
+          templateData.model || "gpt-4o-mini",
+          templateData.provider || metadata?.provider
+        );
 
       // Update state with processed data
       setState({
@@ -371,13 +367,20 @@ export default function PromptEditor({
 
         messages: stateMessages,
         parameters: {
-          provider: provider,
-          model: model,
+          provider: selectedProvider,
+          model: selectedModel,
           temperature: templateData.temperature ?? undefined,
           tools: templateData.tools ?? undefined,
           max_tokens: templateData.max_tokens ?? undefined,
           reasoning_effort: templateData.reasoning_effort ?? undefined,
           stop: templateData.stop ?? undefined,
+          response_format:
+            templateData.response_format?.type === "json_schema"
+              ? {
+                  type: "json_schema",
+                  json_schema: templateData.response_format.json_schema,
+                }
+              : undefined,
         },
         inputs,
         evals: metadata?.evals ?? [],
@@ -725,6 +728,7 @@ export default function PromptEditor({
         template: state.messages,
       }),
     });
+    console.log("Run Template:", runTemplate);
 
     // 6. EXECUTE
     try {
@@ -959,23 +963,32 @@ export default function PromptEditor({
             const mappedContent = heliconeRequestToMappedContent(
               requestData.data
             );
-            const provider = findClosestProvider(
-              mappedContent.schema.request.provider || "OPENAI"
-            );
-            const model = findClosestModel(
-              provider,
-              mappedContent.schema.request.model || "gpt-4"
-            );
+
+            const { provider: requestProvider, model: requestModel } =
+              findClosestModelProvider(
+                mappedContent.schema.request.model || "gpt-4o-mini",
+                mappedContent.schema.request.provider
+              );
 
             setState({
               messages: mappedContent.schema.request.messages || [],
               parameters: {
-                provider: provider,
-                model: model,
+                provider: requestProvider,
+                model: requestModel,
                 temperature:
                   mappedContent.schema.request.temperature ?? undefined,
                 max_tokens:
                   mappedContent.schema.request.max_tokens ?? undefined,
+                response_format:
+                  mappedContent.schema.request.response_format?.type ===
+                  "json_schema"
+                    ? {
+                        type: "json_schema",
+                        json_schema:
+                          mappedContent.schema.request.response_format
+                            .json_schema,
+                      }
+                    : undefined,
                 tools: mappedContent.schema.request.tools ?? undefined,
                 reasoning_effort:
                   mappedContent.schema.request.reasoning_effort ?? undefined,
@@ -999,19 +1012,17 @@ export default function PromptEditor({
 
         case "fromPlayground":
           if (basePrompt) {
-            const provider = findClosestProvider(
-              basePrompt.metadata.provider || "OPENAI"
-            );
-            const model = findClosestModel(
-              provider,
-              basePrompt.body.model || "gpt-4o-mini"
-            );
+            const { provider: baseProvider, model: baseModel } =
+              findClosestModelProvider(
+                basePrompt.body.model || "gpt-4o-mini",
+                basePrompt.metadata.provider
+              );
 
             setState({
               messages: basePrompt.body.messages || [],
               parameters: {
-                provider: provider,
-                model: model,
+                provider: baseProvider,
+                model: baseModel,
                 temperature: basePrompt.body.temperature ?? undefined,
                 max_tokens: basePrompt.body.max_tokens ?? undefined,
                 tools: basePrompt.body.tools ?? undefined,
@@ -1113,7 +1124,7 @@ export default function PromptEditor({
   return (
     <main className="relative flex flex-col h-screen">
       {/* Header */}
-      <div className="h-16 bg-slate-100 dark:bg-slate-900 flex flex-row items-center justify-between px-4 py-2.5 z-50 border-b border-slate-200 dark:border-slate-800">
+      <div className="h-16 shrink-0 bg-slate-100 dark:bg-slate-900 flex flex-row items-center justify-between px-4 py-2.5 z-50 border-b border-slate-200 dark:border-slate-800">
         {/* Left Side: Navigation */}
         <div className="flex flex-row items-center gap-2">
           {/* Back Button */}

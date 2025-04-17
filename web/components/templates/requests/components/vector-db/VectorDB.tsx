@@ -37,7 +37,6 @@ export const VectorDB = ({
 
   const content = (
     <div className="w-full border border-slate-200 dark:border-gray-700 divide-y divide-gray-300 dark:divide-gray-700 h-full">
-      <ChatTopBar {...chatTopBarProps} />
       <VectorDBContent mode={mode} mappedRequest={mappedRequest} />
     </div>
   );
