@@ -9,6 +9,126 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "google/gemini-2.5-pro",
+    },
+    cost: {
+      prompt_token: 2.5e-6,
+      completion_token: 7.5e-6,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "google/gemini-2.5-pro:free",
+    },
+    cost: {
+      prompt_token: 0.0,
+      completion_token: 0.0,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "google/gemini-2.5-flash",
+    },
+    cost: {
+      prompt_token: 1e-7,
+      completion_token: 4e-7,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "google/gemini-2.5-flash:free",
+    },
+    cost: {
+      prompt_token: 0.0,
+      completion_token: 0.0,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "openai/o4-mini-high",
+    },
+    cost: {
+      prompt_token: 1.1e-6,
+      completion_token: 4.4e-6,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "openai/o3",
+    },
+    cost: {
+      prompt_token: 1e-5,
+      completion_token: 4e-5,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "openai/o4-mini",
+    },
+    cost: {
+      prompt_token: 1.1e-6,
+      completion_token: 4.4e-6,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "qwen/qwen2.5-coder-7b-instruct",
+    },
+    cost: {
+      prompt_token: 2.0000000000000002e-7,
+      completion_token: 2.0000000000000002e-7,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "openai/gpt-4.1",
+    },
+    cost: {
+      prompt_token: 2e-6,
+      completion_token: 8e-6,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "openai/gpt-4.1-mini",
+    },
+    cost: {
+      prompt_token: 4.0000000000000003e-7,
+      completion_token: 1.6000000000000001e-6,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "openai/gpt-4.1-nano",
+    },
+    cost: {
+      prompt_token: 1.0000000000000001e-7,
+      completion_token: 4.0000000000000003e-7,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "eleutherai/llemma-7b",
+    },
+    cost: {
+      prompt_token: 8.000000000000001e-7,
+      completion_token: 1.2e-6,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
       value: "google/gemini-2.0-flash-thinking-exp:free",
     },
     cost: {
