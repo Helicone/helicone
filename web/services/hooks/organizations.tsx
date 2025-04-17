@@ -192,8 +192,6 @@ const useOrgsContextManager = () => {
   const { data: orgs, refetch } = useGetOrgs();
   const [org, setOrg] = useState<NonNullable<typeof orgs>[number] | null>(null);
   const [renderKey, setRenderKey] = useState(0);
-  const [isResellerOfCurrentCustomerOrg, setIsResellerOfCurrentOrg] =
-    useState<boolean>(false);
 
   const hasRunRef = useRef<string | null>(null);
   const isProcessingRef = useRef(false);
@@ -337,9 +335,8 @@ const useOrgsContextManager = () => {
 
   orgContextValue = {
     allOrgs: orgs ?? [],
-    currentOrg: org ?? undefined,
-    isResellerOfCurrentCustomerOrg,
-
+    currentOrg: undefined,
+    isResellerOfCurrentCustomerOrg: false,
     setCurrentOrg: (orgId) => {
       refetch().then((data) => {
         const org = data.data?.data?.find((org) => org.id === orgId);

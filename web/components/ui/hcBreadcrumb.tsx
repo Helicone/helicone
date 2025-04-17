@@ -2,10 +2,7 @@ import { ChevronRightIcon } from "@heroicons/react/20/solid";
 import { LinkIcon, ScrollTextIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import useOnboardingContext, {
-  ONBOARDING_STEPS,
-} from "../layout/onboardingContext";
+import { ONBOARDING_STEPS } from "../layout/onboardingContext";
 import { Button } from "./button";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
@@ -149,25 +146,7 @@ export default function HcBreadcrumb(props: HcBreadcrumbProps) {
   const { pages, "data-onboarding-step": onboardingStep } = props;
   // rerender if pages changes
 
-  const { isOnboardingVisible, currentStep, setCurrentStep } =
-    useOnboardingContext();
-
   const router = useRouter();
-
-  useEffect(() => {
-    if (
-      isOnboardingVisible &&
-      onboardingStep === ONBOARDING_STEPS.EXPERIMENTS_BETTER_PROMPT.stepNumber
-    ) {
-      const keydownHandler = (e: KeyboardEvent) => {
-        if (e.key === "ArrowRight" || e.key === "ArrowDown") {
-          e.preventDefault();
-          setCurrentStep(ONBOARDING_STEPS.DASHBOARD_SUCCESS.stepNumber);
-        }
-      };
-      window.addEventListener("keydown", keydownHandler);
-    }
-  }, [isOnboardingVisible, onboardingStep, setCurrentStep]);
 
   return (
     <nav
