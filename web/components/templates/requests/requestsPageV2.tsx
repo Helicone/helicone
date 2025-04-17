@@ -636,14 +636,6 @@ const RequestsPageV2 = (props: RequestsPageV2Props) => {
     [encodeFilters, searchParams]
   );
 
-  useEffect(() => {
-    if (orgContext?.currentOrg?.has_onboarded !== undefined) {
-      setShowOnboardingPopUp(!orgContext.currentOrg.has_onboarded);
-    } else {
-      orgContext?.refetchOrgs();
-    }
-  }, [orgContext, orgContext?.currentOrg?.has_onboarded]);
-
   return (
     <>
       <div className="h-screen flex flex-col">

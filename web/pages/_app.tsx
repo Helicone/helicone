@@ -95,6 +95,7 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
 
   const trackingEnabled = process.env.NEXT_PUBLIC_TRACKING_ENABLED || false;
 
+  console.log("pageProps", pageProps);
   return (
     <>
       <PHProvider>

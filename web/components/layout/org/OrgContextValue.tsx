@@ -8,7 +8,6 @@ export interface OrgContextValue {
     orgId: Database["public"]["Tables"]["organization"]["Row"]["id"]
   ) => void;
   refetchOrgs: () => void;
-  // Add to elements you want to re-render when the org changes
-  renderKey: number;
+
   isResellerOfCurrentCustomerOrg: boolean;
 }
