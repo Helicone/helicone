@@ -1,3 +1,4 @@
+import FoldedHeader from "@/components/shared/FoldedHeader";
 import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 import {
@@ -9,12 +10,14 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Small } from "@/components/ui/typography";
+import { FilterProvider } from "@/filterAST/context/filterContext";
+import { FilterASTButton } from "@/filterAST/FilterASTButton";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import { useURLParams } from "@/services/hooks/localURLParams";
 import { SortDirection } from "@/services/lib/sorts/requests/sorts";
 import { TimeFilter } from "@/types/timeFilter";
-import { ChartPieIcon, ListBulletIcon } from "@heroicons/react/24/outline";
+import { PieChart, Table } from "lucide-react";
 import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -65,12 +68,12 @@ const TABS = [
   {
     id: "sessions",
     label: "Sessions",
-    icon: <ListBulletIcon className="w-4 h-4" />,
+    icon: <Table size={16} />,
   },
   {
     id: "metrics",
     label: "Metrics",
-    icon: <ChartPieIcon className="w-4 h-4" />,
+    icon: <PieChart size={16} />,
   },
 ];
 
@@ -188,121 +191,135 @@ const SessionsPage = (props: SessionsPageProps) => {
 
   return hasSessions || isSessionsLoading ? (
     <main className="h-screen w-full">
-      <Tabs
-        value={currentTab}
-        onValueChange={(value) => setCurrentTab(value)}
-        className="w-full"
-      >
-        <header className="h-16 px-4 w-full flex flex-row items-center justify-between bg-background border-b border-border">
-          <div className="flex flex-row items-center gap-2">
-            <Small className="font-semibold">Sessions /</Small>
+      <FilterProvider>
+        <Tabs
+          value={currentTab}
+          onValueChange={(value) => setCurrentTab(value)}
+          className="w-full"
+        >
+          <FoldedHeader
+            leftSection={
+              <section className="flex flex-row items-center gap-2">
+                <Small className="font-semibold">Sessions</Small>
+                <Small className="font-semibold">/</Small>
 
-            <Select
-              value={
-                selectedName === ""
-                  ? UNNAMED_SESSION_VALUE // Map empty string to placeholder
-                  : selectedName ?? "all"
-              }
-              onValueChange={handleSelectSessionName}
-            >
-              <SelectTrigger className="w-[280px] h-8">
-                <SelectValue placeholder="Select a session" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Sessions</SelectItem>
-                {allNames.sessions.map((session) => (
-                  <SelectItem
-                    key={session.name}
-                    value={
-                      session.name === "" ? UNNAMED_SESSION_VALUE : session.name
-                    }
-                  >
-                    {session.name === "" ? "Unnamed" : session.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <ThemedTimeFilter
-              currentTimeFilter={getTimeFilterObject(
-                timeFilter.start,
-                timeFilter.end
-              )}
-              timeFilterOptions={[]}
-              onSelect={onTimeSelectHandler}
-              isFetching={isSessionsLoading}
-              defaultValue={"1m"}
-              custom={true}
-            />
-            {/* <InputWithIcon
-                  icon={MagnifyingGlassIcon}
-                  placeholder="Search session id or name..."
-                  value={sessionIdSearch ?? ""}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setSessionIdSearch(e.target.value)
+                <Select
+                  value={
+                    selectedName === ""
+                      ? UNNAMED_SESSION_VALUE // Map empty string to placeholder
+                      : selectedName ?? "all"
                   }
-                  className="w-64"
-                /> */}
-          </div>
+                  onValueChange={handleSelectSessionName}
+                >
+                  <SelectTrigger className="w-[280px] h-8">
+                    <SelectValue placeholder="Select a session" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Sessions</SelectItem>
+                    {allNames.sessions.map((session) => (
+                      <SelectItem
+                        key={session.name}
+                        value={
+                          session.name === ""
+                            ? UNNAMED_SESSION_VALUE
+                            : session.name
+                        }
+                      >
+                        {session.name === "" ? "Unnamed" : session.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
-          <div className=" flex flex-row items-center rounded-lg bg-white dark:bg-black border border-border gap-1 shadow-sm">
-            <ViewColumns
-              columns={tableRef.current?.getAllColumns() || []}
+                <ThemedTimeFilter
+                  currentTimeFilter={getTimeFilterObject(
+                    timeFilter.start,
+                    timeFilter.end
+                  )}
+                  timeFilterOptions={[]}
+                  onSelect={onTimeSelectHandler}
+                  isFetching={isSessionsLoading}
+                  defaultValue={"1m"}
+                  custom={true}
+                />
+
+                <FilterASTButton />
+              </section>
+            }
+            rightSection={
+              <section className="flex flex-row items-center gap-2">
+                <div className="h-8 flex flex-row items-center border border-border rounded-lg divide-x divide-border overflow-hidden shadow-sm">
+                  <label className="text-xs px-2 py-1">Views</label>
+
+                  <TabsList
+                    size={"sm"}
+                    variant={"secondary"}
+                    asPill={"none"}
+                    className="divide-x divide-border"
+                  >
+                    {TABS.map((tab) => (
+                      <TabsTrigger
+                        variant={"secondary"}
+                        asPill={"none"}
+                        key={tab.id}
+                        value={tab.id}
+                        className="flex items-center gap-2"
+                      >
+                        {tab.icon}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                </div>
+
+                <ViewColumns
+                  columns={tableRef.current?.getAllColumns() || []}
+                  activeColumns={activeColumns}
+                  setActiveColumns={setActiveColumns}
+                />
+              </section>
+            }
+            foldContent={
+              <div className="h-full w-full flex flex-row">
+                <p>qwjkenqwjknejkqwnejkwqnejk </p>
+              </div>
+            }
+          />
+
+          {!canCreate && (
+            <FreeTierLimitBanner
+              feature="sessions"
+              itemCount={allNames.sessions.length}
+              freeLimit={freeLimit}
+              className="w-full"
+            />
+          )}
+
+          <TabsContent value="sessions" className="w-full">
+            <ThemedTable
+              id="sessions-table"
+              tableRef={tableRef}
+              defaultData={sessions || []}
+              defaultColumns={INITIAL_COLUMNS}
+              skeletonLoading={isLoading}
+              dataLoading={isLoading}
               activeColumns={activeColumns}
               setActiveColumns={setActiveColumns}
+              rowLink={(row: TSessions) =>
+                `/sessions/${encodeURIComponent(row.session_id)}`
+              }
             />
-            <label className="text-xs px-2 py-1 border-l border-border">
-              Views
-            </label>
-            <TabsList size={"xs"} variant={"secondary"}>
-              {TABS.map((tab) => (
-                <TabsTrigger
-                  variant={"secondary"}
-                  key={tab.id}
-                  value={tab.id}
-                  className="flex items-center gap-2"
-                >
-                  {tab.icon}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </div>
-        </header>
-
-        {!canCreate && (
-          <FreeTierLimitBanner
-            feature="sessions"
-            itemCount={allNames.sessions.length}
-            freeLimit={freeLimit}
-            className="w-full"
-          />
-        )}
-
-        <TabsContent value="sessions" className="w-full">
-          <ThemedTable
-            id="sessions-table"
-            tableRef={tableRef}
-            defaultData={sessions || []}
-            defaultColumns={INITIAL_COLUMNS}
-            skeletonLoading={isLoading}
-            dataLoading={isLoading}
-            activeColumns={activeColumns}
-            setActiveColumns={setActiveColumns}
-            rowLink={(row: TSessions) =>
-              `/sessions/${encodeURIComponent(row.session_id)}`
-            }
-          />
-        </TabsContent>
-        <TabsContent value="metrics">
-          <SessionMetrics
-            selectedSession={
-              allNames.sessions.find(
-                (session) => session.name === selectedName
-              ) ?? null
-            }
-          />
-        </TabsContent>
-      </Tabs>
+          </TabsContent>
+          <TabsContent value="metrics">
+            <SessionMetrics
+              selectedSession={
+                allNames.sessions.find(
+                  (session) => session.name === selectedName
+                ) ?? null
+              }
+            />
+          </TabsContent>
+        </Tabs>
+      </FilterProvider>
     </main>
   ) : (
     <div className="flex flex-col w-full h-screen bg-background dark:bg-sidebar-background">

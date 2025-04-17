@@ -1,10 +1,9 @@
-import React from "react";
+import { CheckIcon } from "@heroicons/react/24/outline";
 import { Column } from "@tanstack/react-table";
 import { Col } from "../../../../layout/common/col";
 import { clsx } from "../../../clsx";
-import { columnDefToDragColumnItem, DragColumnItem } from "./DragList";
 import ColumnSelectButton, { ColumnViewOptions } from "./ColumnSelect";
-import { CheckIcon } from "@heroicons/react/24/outline";
+import { columnDefToDragColumnItem, DragColumnItem } from "./DragList";
 
 interface ColumnOptionsProps<T> {
   categories: string[];

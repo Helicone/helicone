@@ -1,6 +1,8 @@
 import { Row } from "@/components/layout/common";
+import FoldedHeader from "@/components/shared/FoldedHeader";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Small } from "@/components/ui/typography";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
@@ -216,6 +218,17 @@ export const SessionContent: React.FC<SessionContentProps> = ({
             </TabsList>
           </Row>
         </div>
+
+        <FoldedHeader
+          leftSection={
+            <div>
+              <Small className="font-semibold">Sessions</Small>
+              <Small className="font-semibold">/</Small>
+            </div>
+          }
+          rightSection={<div>Right Section</div>}
+          foldContent={<div>Folded Content</div>}
+        />
 
         <div className="h-full">
           <TabsContent value="tree" className="h-full">
