@@ -319,6 +319,7 @@ const PromptPlayground: React.FC<PromptPlaygroundProps> = ({
                   ))}
                 </SelectContent>
               </Select>
+
               {playgroundMode === "prompt" && (
                 <Button
                   onClick={() =>
