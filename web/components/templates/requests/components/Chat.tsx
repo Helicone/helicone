@@ -19,6 +19,15 @@ interface ChatProps {
 
 type MessageType = "image" | "tool" | "text";
 
+const isJson = (content: string) => {
+  try {
+    JSON.parse(content);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 const getMessageType = (message: Message): MessageType => {
   if (message._type === "image" && message.image_url) {
     return "image";
@@ -39,7 +48,13 @@ const renderToolMessage = (content: string, message: Message) => {
         <XSmall className="font-mono font-semibold">
           {message.tool_call_id}
         </XSmall>
-        <JsonRenderer data={JSON.parse(message.content)} />
+        <JsonRenderer
+          data={
+            isJson(message.content)
+              ? JSON.parse(message.content)
+              : message.content
+          }
+        />
       </div>
     );
   }
@@ -172,6 +187,9 @@ export default function Chat({ mappedRequest }: ChatProps) {
                       renderToolMessage(displayContent, message)
                     );
                   case "text":
+                    if (isJson(displayContent)) {
+                      return <JsonRenderer data={JSON.parse(displayContent)} />;
+                    }
                     return mode === "raw" ? (
                       <MarkdownEditor
                         language="markdown"
