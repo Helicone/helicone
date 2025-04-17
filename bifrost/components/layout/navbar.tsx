@@ -185,9 +185,8 @@ const NavLinks = () => {
         if (link.type === "dropdown") {
           return (
             <DropdownMenu
-              // key={`${link}-${i}`}
+              key={`${link.label}-${i}`}
               open={openDropdown === link.label}
-            // onOpenChange={(open) => setOpenDropdown(open ? link.label : null)}
             >
               <DropdownMenuTrigger
                 className="flex items-center gap-1 font-regular hover:text-black rounded-md px-4 py-2 focus:outline-none text-slate-700 opacity-75 cursor-pointer"
