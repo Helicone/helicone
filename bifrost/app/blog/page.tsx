@@ -217,7 +217,7 @@ export type BlogStructure =
     };
   };
 
-const blogContent: BlogStructure[] = [
+export const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
       folderName: "o3-and-o4-mini-for-developers",
