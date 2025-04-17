@@ -1,16 +1,11 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Fragment } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  ChartBarIcon,
   EnvelopeIcon,
   XMarkIcon,
-  ChevronDownIcon,
-  CalculatorIcon,
-  ArrowsPointingOutIcon,
-  ClockIcon,
   UserGroupIcon,
   NewspaperIcon,
 } from "@heroicons/react/24/outline";
@@ -19,9 +14,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { ArrowLeftRightIcon, BookIcon, Globe } from "lucide-react";
+import { BookHeart, ChevronDown, ChevronRight, Component, Earth, Gem, Github, GitMerge, HandCoins, TrendingUp } from "lucide-react";
 
 interface NavBarProps {
   stars?: number;
@@ -77,7 +73,7 @@ const MobileHeader = (props: {
           </>
         ) : (
           <XMarkIcon
-            className="w-6 h-6 text-black"
+            className="w-5 h-5 text-slate-700 stroke-[1.5px] fill-none"
             onClick={() => {
               setMenuOpen(false);
             }}
@@ -88,9 +84,33 @@ const MobileHeader = (props: {
   );
 };
 
+const MENU_ICON_CLASSES = "h-4 w-4 text-sky-500 stroke-[1.5px] fill-none m-1";
+
+// Create a new component for menu icons
+const MenuIcon = ({ children }: { children: React.ReactNode }) => (
+  <div className={MENU_ICON_CLASSES}>
+    {children}
+  </div>
+);
+
 const NavLinks = () => {
   const path = usePathname();
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout>();
+
+  const handleMouseEnter = (label: string) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    setOpenDropdown(label);
+  };
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => {
+      setOpenDropdown(null);
+    }, 150); // Small delay to make the interaction smoother
+  };
+
   const links = [
     {
       href: "https://docs.helicone.ai/",
@@ -108,19 +128,19 @@ const NavLinks = () => {
           href: "/changelog",
           label: "Changelog",
           description: "Latest updates and improvements",
-          icon: <ClockIcon className="h-6 w-6 text-sky-500" />,
-        },
-        {
-          href: "/community",
-          label: "Community",
-          description: "Join our growing developer community",
-          icon: <UserGroupIcon className="h-6 w-6 text-sky-500" />,
+          icon: <GitMerge className={MENU_ICON_CLASSES} />,
         },
         {
           href: "/blog",
           label: "Blog",
           description: "Insights on AI development and best practices",
-          icon: <BookIcon className="h-6 w-6 text-sky-500" />,
+          icon: <BookHeart className={MENU_ICON_CLASSES} />,
+        },
+        {
+          href: "/community",
+          label: "Community",
+          description: "Built for scale, security, and control",
+          icon: <Gem className={MENU_ICON_CLASSES} />,
         },
       ],
     },
@@ -132,25 +152,25 @@ const NavLinks = () => {
           href: "/open-stats",
           label: "Open Stats",
           description: "Real-time LLM usage analytics",
-          icon: <Globe className="h-6 w-6 text-sky-500" />,
+          icon: <Earth className={MENU_ICON_CLASSES} />,
         },
         {
           href: "/comparison",
           label: "Model Comparison",
           description: "Compare different LLM models and providers",
-          icon: <ArrowLeftRightIcon className="h-6 w-6 text-sky-500" />,
+          icon: <Component className={MENU_ICON_CLASSES} />,
         },
         {
           href: "/status",
           label: "Provider Status",
           description: "Check LLM provider service status",
-          icon: <ChartBarIcon className="h-6 w-6 text-sky-500" />,
+          icon: <TrendingUp className={MENU_ICON_CLASSES} />,
         },
         {
           href: "/llm-cost",
-          label: "LLM API Pricing Calculator",
+          label: "API Pricing Calculator",
           description: "Calculate and compare API costs",
-          icon: <CalculatorIcon className="h-6 w-6 text-sky-500" />,
+          icon: <HandCoins className={MENU_ICON_CLASSES} />,
         },
       ],
     },
@@ -165,37 +185,48 @@ const NavLinks = () => {
         if (link.type === "dropdown") {
           return (
             <DropdownMenu
-              key={`${link}-${i}`}
-              onOpenChange={(open) => {
-                setOpenDropdown(open ? link.label : null);
-              }}
+              // key={`${link}-${i}`}
+              open={openDropdown === link.label}
+            // onOpenChange={(open) => setOpenDropdown(open ? link.label : null)}
             >
-              <DropdownMenuTrigger className="flex items-center gap-1 font-regular hover:text-black rounded-md px-3 py-1.5 focus:outline-none text-slate-700 opacity-75">
-                {link.label}
-                <ChevronDownIcon
-                  className={`h-4 w-4 transition-transform duration-600 ${
-                    openDropdown === link.label ? "rotate-180" : ""
-                  }`}
-                />
+              <DropdownMenuTrigger
+                className="flex items-center gap-1 font-regular hover:text-black rounded-md px-4 py-2 focus:outline-none text-slate-700 opacity-75 cursor-pointer"
+                onMouseEnter={() => handleMouseEnter(link.label)}
+                onMouseLeave={handleMouseLeave}
+              >
+                <div className="flex items-center gap-1">
+                  {link.label}
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform duration-300 ${openDropdown === link.label ? "translate-y-0.5" : ""
+                      } stroke-[1.5px] fill-none`}
+                  />
+                </div>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="min-w-[240px] p-2 space-y-1.5">
+              <DropdownMenuContent
+                className="min-w-[240px]"
+                onMouseEnter={() => handleMouseEnter(link.label)}
+                onMouseLeave={handleMouseLeave}
+              >
                 {link.items?.map((item, j) => (
-                  <DropdownMenuItem key={j} asChild>
-                    <Link
-                      href={item.href}
-                      className="w-full cursor-pointer flex items-start gap-2 p-3 text-slate-700 hover:text-black"
-                    >
-                      <div className="mt-1 flex-shrink-0 p-2.5 rounded-md border border-sky-100 bg-sky-50">
-                        {item.icon}
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="font-medium">{item.label}</span>
-                        <span className="text-sm text-slate-500 font-normal">
-                          {item.description}
-                        </span>
-                      </div>
-                    </Link>
-                  </DropdownMenuItem>
+                  <Fragment key={j}>
+                    <DropdownMenuItem key={j} asChild>
+                      <Link
+                        href={item.href}
+                        className="w-full cursor-pointer flex items-start gap-2 text-slate-700 hover:text-black py-2 px-3"
+                      >
+                        <div className="flex-shrink-0 self-start">
+                          {item.icon}
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="font-medium">{item.label}</span>
+                          <span className="text-[13px] text-slate-500 font-light">
+                            {item.description}
+                          </span>
+                        </div>
+                      </Link>
+                    </DropdownMenuItem>
+                    {j < link.items.length - 1 && <DropdownMenuSeparator className="hidden lg:block" />}
+                  </Fragment>
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
@@ -217,7 +248,7 @@ const NavLinks = () => {
           </Link>
         );
       })}
-    </div>
+    </div >
   );
 };
 
@@ -227,20 +258,12 @@ const NavIcons = () => {
     {
       href: "/contact",
       label: "Contact",
-      icon: <EnvelopeIcon className="w-5 h-5" />,
+      icon: <EnvelopeIcon className={MENU_ICON_CLASSES} />,
     },
     {
       href: "https://github.com/Helicone",
       label: "GitHub",
-      icon: (
-        <svg fill="currentColor" viewBox="0 0 24 24" className="w-5 h-5">
-          <path
-            fillRule="evenodd"
-            d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
-            clipRule="evenodd"
-          />
-        </svg>
-      ),
+      icon: <Github className={MENU_ICON_CLASSES} />,
     },
   ];
   return (
@@ -271,140 +294,141 @@ const MobileNav = () => {
     setMenuOpen(false);
   }, [path]);
 
-  const mobileLinks: Array<{
-    href?: string;
+  // Define the link type
+  type NavLink = {
+    href: string;
     label: string;
-    icon?: React.ReactNode;
-    type?: "section";
-    items?: Array<{
-      href: string;
-      label: string;
-      icon: React.ReactNode;
-      description?: string;
-    }>;
-  }> = [
+    icon: React.ReactNode;
+  };
+
+  // Group the links into categories
+  const standardLinks: NavLink[] = [
     {
       href: "https://docs.helicone.ai/",
       label: "Docs",
+      icon: <BookHeart className={MENU_ICON_CLASSES} />,
     },
     {
       href: "/pricing",
       label: "Pricing",
-    },
-    {
-      type: "section",
-      label: "Tools",
-      items: [
-        {
-          href: "/open-stats",
-          label: "Open Stats",
-          icon: <Globe className="h-4 w-4 text-sky-500" />,
-        },
-        {
-          href: "/comparison",
-          label: "Model Comparison",
-          icon: <ArrowLeftRightIcon className="h-4 w-4 text-sky-500" />,
-        },
-        {
-          href: "/status",
-          label: "Provider Status",
-          icon: <ChartBarIcon className="h-4 w-4 text-sky-500" />,
-        },
-        {
-          href: "/llm-cost",
-          label: "LLM API Pricing Calculator",
-          icon: <CalculatorIcon className="h-4 w-4 text-sky-500" />,
-        },
-      ],
-    },
-    {
-      type: "section",
-      label: "Resources",
-      items: [
-        {
-          href: "/changelog",
-          label: "Changelog",
-          icon: <ClockIcon className="h-4 w-4 text-sky-500" />,
-        },
-        {
-          href: "/community",
-          label: "Community",
-          icon: <UserGroupIcon className="h-4 w-4 text-sky-500" />,
-        },
-        {
-          href: "/blog",
-          label: "Blog",
-          icon: <NewspaperIcon className="h-4 w-4 text-sky-500" />,
-        },
-      ],
+      icon: <HandCoins className={MENU_ICON_CLASSES} />,
     },
   ];
 
+  const resourcesLinks: NavLink[] = [
+    {
+      href: "/changelog",
+      label: "Changelog",
+      icon: <GitMerge className={MENU_ICON_CLASSES} />,
+    },
+    {
+      href: "/blog",
+      label: "Blog",
+      icon: <NewspaperIcon className={MENU_ICON_CLASSES} />,
+    },
+    {
+      href: "/community",
+      label: "Community",
+      icon: <Gem className={MENU_ICON_CLASSES} />,
+    },
+  ];
+
+  const toolsLinks: NavLink[] = [
+    {
+      href: "/open-stats",
+      label: "Open Stats",
+      icon: <Earth className={MENU_ICON_CLASSES} />,
+    },
+    {
+      href: "/comparison",
+      label: "Model Comparison",
+      icon: <Component className={MENU_ICON_CLASSES} />,
+    },
+    {
+      href: "/status",
+      label: "Provider Status",
+      icon: <TrendingUp className={MENU_ICON_CLASSES} />,
+    },
+    {
+      href: "/llm-cost",
+      label: "API Pricing Calculator",
+      icon: <HandCoins className={MENU_ICON_CLASSES} />,
+    },
+  ];
+
+  const additionalLinks: NavLink[] = [
+    {
+      href: "https://app.dover.com/jobs/helicone",
+      label: "Careers",
+      icon: <UserGroupIcon className={MENU_ICON_CLASSES} />,
+    },
+    {
+      href: "/contact",
+      label: "Contact",
+      icon: <EnvelopeIcon className={MENU_ICON_CLASSES} />,
+    },
+    {
+      href: "https://github.com/Helicone",
+      label: "GitHub",
+      icon: <Github className={MENU_ICON_CLASSES} />,
+    },
+  ];
+
+  // Helper function to render links
+  const renderLinks = (links: NavLink[]) => {
+    return links.map((link: NavLink, i: number) => (
+      <Link
+        key={i}
+        href={link.href}
+        className="flex items-center gap-2 group text-slate-700 hover:text-black"
+      >
+        <div className="flex-shrink-0">{link.icon}</div>
+        <div className="flex flex-col">
+          <span className="font-medium text-sm">
+            {link.label}
+          </span>
+        </div>
+        <ChevronRight className="h-4 w-4 ml-auto text-slate-400 stroke-[1.5px]" />
+      </Link>
+    ));
+  };
+
   return (
     <nav className="lg:hidden" aria-label="Global">
-      <MobileHeader menuDispatch={[menuOpen, setMenuOpen]} className="px-10" />
+      <MobileHeader menuDispatch={[menuOpen, setMenuOpen]} className="pl-2 pr-4" />
       {menuOpen && (
-        <div className="absolute top-0 right-0 bottom-0 left-0 z-10 h-screen w-full flex flex-col px-10 bg-white gap-5 ">
-          <MobileHeader menuDispatch={[menuOpen, setMenuOpen]} />
-          <div className="flex flex-col gap-3 w-full mt-2">
-            <Link
-              href="https://us.helicone.ai/signin"
-              className="text-center py-3 bg-slate-100 whitespace-nowrap rounded-md px-4 text-sm font-semibold text-black shadow-sm"
-            >
-              Sign in
-            </Link>
-            <Link
-              href="https://us.helicone.ai/signup"
-              className="text-center py-3 bg-sky-500 hover:bg-sky-600 border-2 whitespace-nowrap rounded-md px-4 text-sm font-semibold text-white shadow-sm"
-            >
-              Sign up for free
-            </Link>
+        <div className="absolute z-10 h-screen w-full flex flex-col px-5 bg-white gap-5 overflow-y-auto">
+          {/* Standard Links */}
+          <div className="flex flex-col gap-5">
+            {renderLinks(standardLinks)}
           </div>
-          <div className="flex flex-col gap-3">
-            {mobileLinks.map((link, i) => {
-              if (link.type === "section") {
-                return (
-                  <div key={i} className="flex flex-col gap-3">
-                    <p className="text-slate-700 font-medium">{link.label}</p>
-                    <div className="flex flex-col gap-3 pl-3">
-                      {link.items?.map((item, j) => (
-                        <Link
-                          key={j}
-                          href={item.href}
-                          className="flex gap-2 group"
-                        >
-                          <div className="mt-1 flex-shrink-0">{item.icon}</div>
-                          <div className="flex flex-col">
-                            <span className="text-slate-500 font-normal group-hover:text-black">
-                              {item.label}
-                            </span>
-                            <span className="text-sm text-slate-500">
-                              {item.description}
-                            </span>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                );
-              }
-              if (!link.href) return null;
-              return (
-                <Link
-                  key={i}
-                  href={link.href}
-                  className="text-slate-700 font-medium hover:text-black flex items-center gap-2"
-                >
-                  {link.icon}
-                  {link.label}
-                </Link>
-              );
-            })}
+
+          {/* Resources Section */}
+          <div className="pt-2 border-t border-slate-100">
+            <p className="text-[10px] uppercase text-slate-400 font-medium mt-2 mb-5">Resources</p>
+            <div className="flex flex-col gap-5">
+              {renderLinks(resourcesLinks)}
+            </div>
           </div>
-          <NavIcons />
+
+          {/* Tools Section */}
+          <div className="pt-2 border-t border-slate-100">
+            <p className="text-[10px] uppercase text-slate-400 font-medium mt-2 mb-5">Tools</p>
+            <div className="flex flex-col gap-5">
+              {renderLinks(toolsLinks)}
+            </div>
+          </div>
+
+          {/* Additional Links */}
+          <div className="pt-4 border-t border-slate-100 mb-10">
+            <div className="flex flex-col gap-5 mt-2">
+              {renderLinks(additionalLinks)}
+            </div>
+          </div>
         </div>
-      )}
-    </nav>
+      )
+      }
+    </nav >
   );
 };
 
@@ -468,7 +492,7 @@ const NavBar = (props: NavBarProps) => {
                 <svg
                   fill="currentColor"
                   viewBox="0 0 24 24"
-                  className="w-5 h-5"
+                  className="w-5 h-5 text-slate-700"
                 >
                   <path
                     fillRule="evenodd"
@@ -476,12 +500,12 @@ const NavBar = (props: NavBarProps) => {
                     clipRule="evenodd"
                   />
                 </svg>
-                <p className="text-sm text-[#64748B]">
+                <p className="text-sm text-slate-700">
                   {props.stars
                     ? props.stars.toLocaleString("en-US", {
-                        notation: "compact",
-                        compactDisplay: "short",
-                      })
+                      notation: "compact",
+                      compactDisplay: "short",
+                    })
                     : "0"}
                 </p>
               </Button>
@@ -499,7 +523,6 @@ const NavBar = (props: NavBarProps) => {
                 Log In
               </Button>
             </Link>
-            {/* <NavIcons /> */}
           </div>
         </div>
       </nav>
