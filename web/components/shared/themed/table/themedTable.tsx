@@ -216,7 +216,7 @@ export default function ThemedTable<T extends { id?: string }>(
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr
                   key={headerGroup.id}
-                  className="sticky top-0 bg-slate-50 dark:bg-slate-950 z-[2]"
+                  className="sticky top-0 bg-slate-50 dark:bg-slate-950 z-[2] h-11"
                 >
                   {checkboxMode !== "never" && (
                     <th>

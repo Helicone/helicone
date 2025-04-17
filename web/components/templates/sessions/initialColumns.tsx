@@ -3,6 +3,7 @@ import { getUSDateFromString } from "../../shared/utils/utils";
 
 export const INITIAL_COLUMNS: ColumnDef<any>[] = [
   {
+    id: "session_name",
     accessorKey: "session_name",
     header: "Session Name",
     cell: (info) => (
@@ -10,8 +11,10 @@ export const INITIAL_COLUMNS: ColumnDef<any>[] = [
         {info.getValue() ? `${info.getValue()}` : "No Session Name"}
       </span>
     ),
+    meta: {},
   },
   {
+    id: "session_id",
     accessorKey: "session_id",
     header: "Session ID",
     cell: (info) => (
@@ -20,44 +23,59 @@ export const INITIAL_COLUMNS: ColumnDef<any>[] = [
       </span>
     ),
     minSize: 225,
+    meta: {},
   },
   {
+    id: "created_at",
     accessorKey: "created_at",
     header: "Created At",
     cell: (info) =>
       getUSDateFromString(convertToUSDateFormat(info.getValue() as string)),
+    meta: {},
   },
   {
+    id: "latest_request_created_at",
     accessorKey: "latest_request_created_at",
     header: "Latest Request",
     cell: (info) =>
       getUSDateFromString(convertToUSDateFormat(info.getValue() as string)),
+    meta: {},
   },
   {
+    id: "total_cost",
     accessorKey: "total_cost",
     header: "Cost",
     cell: (info) => `$${Number(info.getValue()).toLocaleString()}`,
+    meta: {},
   },
   {
+    id: "prompt_tokens",
     accessorKey: "prompt_tokens",
     header: "Prompt Tokens",
     cell: (info) => Number(info.getValue()).toLocaleString(),
+    meta: {},
   },
   {
+    id: "completion_tokens",
     accessorKey: "completion_tokens",
     header: "Completion Tokens",
     cell: (info) => Number(info.getValue()).toLocaleString(),
     minSize: 200,
+    meta: {},
   },
   {
+    id: "total_tokens",
     accessorKey: "total_tokens",
     header: "Total Tokens",
     cell: (info) => Number(info.getValue()).toLocaleString(),
+    meta: {},
   },
   {
+    id: "total_requests",
     accessorKey: "total_requests",
     header: "Requests",
     cell: (info) => Number(info.getValue()).toLocaleString(),
+    meta: {},
   },
 ];
 
