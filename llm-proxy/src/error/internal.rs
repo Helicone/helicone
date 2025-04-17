@@ -1,14 +1,22 @@
 use displaydoc::Display;
 use thiserror::Error;
 
+use crate::types::provider::Provider;
+
 /// Internal errors
 #[derive(Debug, Error, Display, strum::AsRefStr)]
 pub enum InternalError {
     /// Internal error
     Internal,
-
-    /// Request context not found
-    RequestContextNotFound,
+    /// Could not deserialize {ty} due to: {error}
+    Deserialize {
+        ty: &'static str,
+        error: serde_json::Error,
+    },
+    /// Router config provider '{0}' not present in DispatcherConfig
+    ProviderNotConfigured(Provider),
+    /// Extension {0} not found
+    ExtensionNotFound(&'static str),
     /// Provider not found
     ProviderNotFound,
     /// Could not collect response body

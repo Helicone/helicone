@@ -4,10 +4,14 @@ use thiserror::Error;
 use utoipa::ToSchema;
 
 /// User errors
-#[derive(Debug, Error, Display, strum::AsRefStr, ToSchema)]
+#[derive(Debug, Error, Display, strum::AsRefStr)]
 pub enum InvalidRequestError {
     /// Resource not found
     NotFound,
+    /// Invalid router id in request path: {0}
+    InvalidRouterId(#[from] uuid::Error),
+    /// Missing router id in request path
+    MissingRouterId,
 }
 
 /// Common API errors
@@ -16,7 +20,7 @@ pub enum Error {
     /// Invalid request: {0}
     InvalidRequest(#[from] InvalidRequestError),
     /// Database error: {0}
-    Database(#[from] crate::error::database::DatabaseError),
+    Database(#[from] sqlx::Error),
     /// Minio error: {0}
     Minio(#[from] minio_rsc::error::Error),
     /// Authentication error: {0}

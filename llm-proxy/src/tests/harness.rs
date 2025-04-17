@@ -13,7 +13,7 @@ pub struct Harness {
 
 impl Harness {
     pub async fn new(config: Config) -> Self {
-        let app = App::new(config).unwrap();
+        let app = App::new(config).await.expect("failed to create app");
         let mock = Stubr::try_start("./stubs")
             .await
             .expect("couldnt start mock htttp server");

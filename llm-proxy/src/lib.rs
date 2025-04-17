@@ -6,6 +6,7 @@ pub mod mapper;
 pub mod middleware;
 pub mod registry;
 pub mod router;
+pub mod store;
 #[cfg(feature = "testing")]
 pub mod tests;
 pub mod types;

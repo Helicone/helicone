@@ -1,27 +1,32 @@
 use std::{
-    future::Future,
     marker::PhantomData,
-    pin::Pin,
     sync::Arc,
     task::{Context, Poll},
     time::Instant,
 };
 
-use deadpool_postgres::Pool;
+use futures::future::BoxFuture;
 use http::Request;
+use indexmap::IndexMap;
 use isocountry::CountryCode;
+use uuid::Uuid;
 
 use crate::{
-    error::{api::Error, database::DatabaseError},
-    types::request::{Provider, RequestContext},
+    app::AppContext,
+    error::{
+        api::{Error, InvalidRequestError},
+        internal::InternalError,
+    },
+    types::{
+        provider::ProviderKeys,
+        request::{AuthContext, RequestContext},
+    },
 };
-
-type BoxFuture<'a, T> = Pin<Box<dyn Future<Output = T> + Send + 'a>>;
 
 #[derive(Debug)]
 pub struct Service<S, ReqBody> {
     inner: S,
-    pg_pool: Pool,
+    app_ctx: Arc<AppContext>,
     _marker: PhantomData<ReqBody>,
 }
 
@@ -34,17 +39,17 @@ where
     fn clone(&self) -> Self {
         Self {
             inner: self.inner.clone(),
-            pg_pool: self.pg_pool.clone(),
+            app_ctx: Arc::clone(&self.app_ctx),
             _marker: PhantomData,
         }
     }
 }
 
 impl<S, ReqBody> Service<S, ReqBody> {
-    pub fn new(inner: S, pg_pool: Pool) -> Self {
+    pub fn new(inner: S, app_ctx: Arc<AppContext>) -> Self {
         Self {
             inner,
-            pg_pool,
+            app_ctx,
             _marker: PhantomData,
         }
     }
@@ -73,7 +78,7 @@ where
         let mut this = self.clone();
 
         Box::pin(async move {
-            let req_ctx = Arc::new(this.get_context(&req).await?);
+            let req_ctx = Arc::new(this.get_context(&mut req).await?);
             req.extensions_mut().insert(req_ctx);
             this.inner.call(req).await.map_err(Into::into)
         })
@@ -89,40 +94,71 @@ where
 {
     async fn get_context(
         &self,
-        _req: &Request<ReqBody>,
+        req: &mut Request<ReqBody>,
     ) -> Result<RequestContext, Error> {
-        let client = self
-            .pg_pool
-            .get()
-            .await
-            .map_err(DatabaseError::Connection)?;
-        let stmt = client.prepare_cached("SELECT 1 + $1").await.unwrap();
+        // AuthContext is set by the auth middleware
+        let auth_context = req
+            .extensions_mut()
+            .remove::<AuthContext>()
+            .ok_or(InternalError::ExtensionNotFound("AuthContext"))?;
+        // TODO: we need to have a layer to normalize request paths like slashes
+        // at the end eg remove last slash in https://router.helicone.ai/router/foo123/
+        let router_id = {
+            let router_id_path = req
+                .uri()
+                .path()
+                .split('/')
+                .last()
+                .ok_or(InvalidRequestError::MissingRouterId)?;
+            Uuid::parse_str(router_id_path)
+                .map_err(InvalidRequestError::InvalidRouterId)?
+        };
+        let mut tx = self.app_ctx.store.db.begin().await?;
+        let router = self
+            .app_ctx
+            .store
+            .router
+            .get_latest_version(&mut tx, router_id)
+            .await?;
+        // TODO: will likely want to make this into one call/fetch all provider
+        // keys at once since we may have multiple
+        let provider_api_key = self
+            .app_ctx
+            .store
+            .provider_keys
+            .get_provider_key(
+                &mut tx,
+                &auth_context.org_id,
+                router.config.default_provider,
+            )
+            .await?;
+        let provider_api_keys = ProviderKeys::new(IndexMap::from_iter([(
+            router.config.default_provider,
+            provider_api_key.provider_key,
+        )]));
 
-        // in a real implementation, we would fetch the router config from the
-        // database
-        let router_config = crate::config::router::test_router_config().await;
-        // let target_url =
-        // url::Url::parse("https://api.openai.com/v1/chat/completions").unwrap();
-        let target_url =
-            url::Url::parse("https://api.anthropic.com/v1/messages").unwrap();
+        let target_url = self
+            .app_ctx
+            .config
+            .dispatcher
+            .get_provider_url(router.config.default_provider)?
+            .clone();
+        // TODO: this will come from parsing the prompt+headers+etc
         let helicone = crate::types::request::HeliconeContext {
-            api_key: "test-api-key".to_string(),
-            user_id: "test-user-id".to_string(),
             properties: None,
             template_inputs: None,
         };
         let proxy_context = crate::types::request::RequestProxyContext {
             target_url,
-            target_provider: Provider::Anthropic,
-            // target_provider: Provider::OpenAI,
-            original_provider: Provider::OpenAI,
-            provider_api_key: std::env::var("ANTHROPIC_API_KEY").unwrap(),
-            // provider_api_key: std::env::var("OPENAI_API_KEY").unwrap(),
+            target_provider: router.config.default_provider,
+            original_provider: router.config.default_provider,
+            provider_api_keys,
         };
         let req_ctx = RequestContext {
-            router_config,
+            router_config: router.config,
             proxy_context,
             helicone,
+            auth_context,
             is_stream: false,
             request_id: "test-request-id".to_string(),
             country_code: CountryCode::USA,
@@ -135,14 +171,14 @@ where
 
 #[derive(Debug, Clone)]
 pub struct Layer<ReqBody> {
-    pg_pool: Pool,
+    app_ctx: Arc<AppContext>,
     _marker: PhantomData<ReqBody>,
 }
 
 impl<ReqBody> Layer<ReqBody> {
-    pub fn new(pg_pool: Pool) -> Self {
+    pub fn new(app_ctx: Arc<AppContext>) -> Self {
         Self {
-            pg_pool,
+            app_ctx,
             _marker: PhantomData,
         }
     }
@@ -152,6 +188,6 @@ impl<S, ReqBody> tower::Layer<S> for Layer<ReqBody> {
     type Service = Service<S, ReqBody>;
 
     fn layer(&self, inner: S) -> Self::Service {
-        Service::new(inner, self.pg_pool.clone())
+        Service::new(inner, self.app_ctx.clone())
     }
 }

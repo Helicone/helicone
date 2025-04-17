@@ -1,7 +1,7 @@
 #[derive(Debug, strum::AsRefStr, thiserror::Error)]
 pub enum AuthError {
     #[error(transparent)]
-    Database(#[from] tokio_postgres::Error),
+    Database(#[from] sqlx::Error),
 
     #[error(transparent)]
     Reqwest(#[from] reqwest::Error),

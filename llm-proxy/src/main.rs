@@ -35,12 +35,12 @@ async fn main() -> Result<(), llm_proxy::error::runtime::Error> {
     info!(config = ?config.clone(), "config loaded");
 
     let mut shutting_down = false;
-    let app = App::new(config.clone())?;
+    let app = App::new(config.clone()).await?;
 
     let rate_limiting_cleanup_service =
         middleware::rate_limit::service::Service::new(
-            app.authed_rate_limit.clone(),
-            app.unauthed_rate_limit.clone(),
+            app.context.authed_rate_limit.clone(),
+            app.context.unauthed_rate_limit.clone(),
             config.rate_limit.cleanup_interval,
         );
 

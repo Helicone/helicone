@@ -16,7 +16,7 @@ use tower::{Service, util::BoxService};
 use crate::{
     error::{api::Error, internal::InternalError},
     mapper::TryConvert,
-    types::request::{Provider, RequestContext},
+    types::{provider::Provider, request::RequestContext},
 };
 
 pub type RespBody = Full<Bytes>;
@@ -114,11 +114,17 @@ where
         let req_ctx = req
             .extensions()
             .get::<Arc<RequestContext>>()
-            .ok_or(InternalError::RequestContextNotFound)?;
+            .ok_or(InternalError::ExtensionNotFound("RequestContext"))?;
         let og_provider = req_ctx.proxy_context.original_provider.clone();
         let target_provider = req_ctx.proxy_context.target_provider.clone();
         let target_url = req_ctx.proxy_context.target_url.clone();
-        let provider_api_key = req_ctx.proxy_context.provider_api_key.clone();
+        let provider_api_key = req_ctx
+            .proxy_context
+            .provider_api_keys
+            .as_ref()
+            .get(&target_provider)
+            .unwrap()
+            .clone();
         {
             let r = req.headers_mut();
             r.remove(http::header::HOST);
@@ -135,7 +141,7 @@ where
             match target_provider {
                 Provider::OpenAI => {
                     let openai_auth_header =
-                        format!("Bearer {}", provider_api_key);
+                        format!("Bearer {}", provider_api_key.0);
                     r.insert(
                         http::header::AUTHORIZATION,
                         HeaderValue::from_str(&openai_auth_header).unwrap(),

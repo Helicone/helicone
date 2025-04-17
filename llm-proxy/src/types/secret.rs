@@ -17,7 +17,9 @@ use std::{
     Hash,
     serde::Deserialize,
     serde::Serialize,
+    sqlx::Type,
 )]
+#[sqlx(transparent)]
 pub struct Secret<T>(pub T);
 
 impl<T> Debug for Secret<T> {

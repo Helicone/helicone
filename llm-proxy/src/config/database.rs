@@ -8,18 +8,20 @@ use crate::types::secret::Secret;
 #[serde(default, deny_unknown_fields, rename_all = "kebab-case")]
 pub struct Config {
     pub url: Secret<String>,
-    #[serde(with = "humantime_serde", default = "default_connect_timeout")]
-    pub connect_timeout: Duration,
+    #[serde(with = "humantime_serde", default = "default_connection_timeout")]
+    pub connection_timeout: Duration,
+    #[serde(with = "humantime_serde", default = "default_idle_timeout")]
+    pub idle_timeout: Duration,
+    #[serde(default = "default_max_connections")]
+    pub max_connections: u32,
 }
 
-impl From<Config> for deadpool_postgres::Config {
+impl From<Config> for sqlx::postgres::PgPoolOptions {
     fn from(config: Config) -> Self {
-        let mut deadpool_config = deadpool_postgres::Config::new();
-
-        deadpool_config.url = Some(config.url.0);
-        deadpool_config.connect_timeout = Some(config.connect_timeout);
-
-        deadpool_config
+        sqlx::postgres::PgPoolOptions::new()
+            .acquire_timeout(config.connection_timeout)
+            .idle_timeout(config.idle_timeout)
+            .max_connections(config.max_connections)
     }
 }
 
@@ -31,11 +33,21 @@ impl Default for Config {
                  helicone-db"
                     .to_string(),
             ),
-            connect_timeout: default_connect_timeout(),
+            connection_timeout: default_connection_timeout(),
+            idle_timeout: default_idle_timeout(),
+            max_connections: default_max_connections(),
         }
     }
 }
 
-fn default_connect_timeout() -> Duration {
+fn default_max_connections() -> u32 {
+    20
+}
+
+fn default_connection_timeout() -> Duration {
     Duration::from_secs(3)
+}
+
+fn default_idle_timeout() -> Duration {
+    Duration::from_secs(60)
 }

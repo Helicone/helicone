@@ -1,6 +1,11 @@
--- give admin permissions to users
-insert into users_groups (user_id, group_id)
+insert into routers (org_id, name)
 values (
-    (select id from users where email = 'admin@grom.com'),
-    (select id from groups where name = 'admin')
-)
+    'test-org-id',
+    'travel-planner-router'
+);
+
+insert into router_versions (router_id, version)
+values (
+    (select id from routers where name = 'travel-planner-router'),
+    'v1'
+);

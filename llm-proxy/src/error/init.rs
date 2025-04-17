@@ -10,11 +10,9 @@ pub enum Error {
     /// Failed to read TLS certificate: {0}
     Tls(std::io::Error),
     /// Failed to connect to database: {0}
-    DatabaseConnection(tokio_postgres::Error),
-    /// Failed to create database pool: {0}
-    DatabasePool(#[from] deadpool_postgres::CreatePoolError),
-    /// Migration failed: {0}
-    Migrations(tokio_postgres::Error),
+    DatabaseConnection(sqlx::Error),
+    /// Migrations failed: {0}
+    Migrations(#[from] sqlx::migrate::MigrateError),
     /// Failed to bind to address: {0}
     Bind(std::io::Error),
     /// Telemetry: {0}

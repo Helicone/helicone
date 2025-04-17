@@ -1,0 +1,57 @@
+use std::str::FromStr;
+
+use bytes::Bytes;
+use futures::future::BoxFuture;
+use http::{Request, Response, StatusCode};
+use http_body_util::Full;
+use tower_http::auth::AsyncAuthorizeRequest;
+use uuid::Uuid;
+
+use crate::types::{org::OrgId, request::AuthContext, user::UserId};
+
+#[derive(Clone, Copy)]
+struct AuthService;
+
+impl<B> AsyncAuthorizeRequest<B> for AuthService
+where
+    B: Send + Sync + 'static,
+{
+    type RequestBody = B;
+    type ResponseBody = Full<Bytes>;
+    type Future =
+        BoxFuture<'static, Result<Request<B>, Response<Self::ResponseBody>>>;
+
+    fn authorize(&mut self, mut request: Request<B>) -> Self::Future {
+        Box::pin(async {
+            if let Some(auth_ctx) = check_auth(&request).await {
+                // Set `auth_ctx` as a request extension so it can be accessed
+                // by other services down the stack.
+                request.extensions_mut().insert(auth_ctx);
+
+                Ok(request)
+            } else {
+                let unauthorized_response = Response::builder()
+                    .status(StatusCode::UNAUTHORIZED)
+                    .body(Full::<Bytes>::default())
+                    .unwrap();
+
+                Err(unauthorized_response)
+            }
+        })
+    }
+}
+
+async fn check_auth<B>(_request: &Request<B>) -> Option<AuthContext> {
+    // ...
+    // for now we are mocking this just to show how layers will stack on top of
+    // each other
+    let org_id =
+        Uuid::from_str("83635a30-5ba6-41a8-8cc6-fb7df941b24a").unwrap();
+    let user_id =
+        Uuid::from_str("f76629c5-a070-4bbc-9918-64beaea48848").unwrap();
+    Some(AuthContext {
+        api_key: "sk-helicone-wvdmyza-57wu7ii-rr3csyi-tox7nqy".to_string(),
+        user_id: UserId::new(user_id),
+        org_id: OrgId::new(org_id),
+    })
+}

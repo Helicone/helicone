@@ -17,7 +17,7 @@ pub type AuthedLimiterConfig = GovernorConfig<
     governor::middleware::StateInformationMiddleware,
 >;
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
 #[serde(deny_unknown_fields, rename_all = "kebab-case")]
 pub struct RateLimitConfig {
     #[serde(default)]
@@ -66,7 +66,7 @@ impl RateLimitConfig {
     }
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
 #[serde(deny_unknown_fields, rename_all = "kebab-case")]
 pub struct LimitConfig {
     #[serde(default = "default_replenish_interval")]

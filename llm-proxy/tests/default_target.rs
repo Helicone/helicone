@@ -23,7 +23,7 @@ async fn default_target() {
     );
     let request = Request::builder()
         .method(Method::POST)
-        .uri("http://router.helicone.com/router/<slug>")
+        .uri("http://router.helicone.com/router/F432DK1PQ")
         .body(request_body)
         .unwrap();
     let response = harness.call(request).await.unwrap();

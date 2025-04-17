@@ -10,9 +10,9 @@ openai-types = { workspace = true }
 anthropic-types = { workspace = true }
 
 bytes = { workspace = true, features = ['serde'] }
+chrono = { workspace = true }
 clap = { workspace = true }
 config = { workspace = true }
-deadpool-postgres = { workspace = true }
 derive_more = { workspace = true, features = ['as_ref', 'constructor', 'debug', 'deref', 'display', 'from', 'from_str'] }
 displaydoc = { workspace = true }
 futures = { workspace = true }
@@ -36,14 +36,14 @@ serde = { workspace = true, features = ['derive', 'rc'] }
 serde_json = { workspace = true }
 serde_path_to_error = { workspace = true }
 serde_with = { workspace = true }
+sqlx = { workspace = true, features = ['default', 'runtime-tokio', 'chrono', 'postgres', 'uuid']}
 strum = { workspace = true, features = ["derive"]  }
 telemetry = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
-tokio-postgres = { workspace = true }
 tower = { workspace = true, features = ['full']}
 tower_governor = { workspace = true }
-tower-http = { workspace = true }
+tower-http = { workspace = true, features = ['default', 'auth'] }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true, features = ['env-filter', 'std'] }
 url = { workspace = true, features = ['serde'] }

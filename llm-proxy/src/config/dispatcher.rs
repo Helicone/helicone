@@ -2,11 +2,22 @@ use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use url::Url;
 
-use crate::types::request::Provider;
+use crate::{error::internal::InternalError, types::provider::Provider};
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct DispatcherConfig {
     pub provider_urls: IndexMap<Provider, Url>,
+}
+
+impl DispatcherConfig {
+    pub fn get_provider_url(
+        &self,
+        provider: Provider,
+    ) -> Result<&Url, InternalError> {
+        self.provider_urls
+            .get(&provider)
+            .ok_or(InternalError::ProviderNotConfigured(provider))
+    }
 }
 
 impl Default for DispatcherConfig {
