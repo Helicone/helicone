@@ -1,0 +1,1 @@
+RENAME TABLE request_response_rmt TO request_response_rmt_old_v1
