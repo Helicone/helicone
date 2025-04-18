@@ -150,7 +150,7 @@ const openai = new OpenAI(configuration);
         </Tabs>
       </div>
       <Link
-        href={"https://helicone.ai/community"}
+        href={"https://helicone.ai/integrations"}
         className="text-blue-500 underline text-center p-4"
         target="_blank"
         rel="noopener noreferrer"
