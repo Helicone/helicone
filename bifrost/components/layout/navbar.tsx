@@ -1,8 +1,8 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState, useRef, Fragment } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState, useRef } from "react";
+import { usePathname } from "next/navigation";
 import {
   EnvelopeIcon,
   XMarkIcon,
