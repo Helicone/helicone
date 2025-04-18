@@ -1,7 +1,7 @@
 import { GetServerSidePropsContext } from "next";
 import { ReactElement, useEffect } from "react";
 import AuthLayout from "../components/layout/auth/authLayout";
-import RequestsPageV2 from "../components/templates/requests/requestsPageV2";
+import RequestsPage from "../components/templates/requests/RequestsPage";
 import { SortDirection } from "../services/lib/sorts/requests/sorts";
 
 // Got this ugly hack from https://stackoverflow.com/questions/21926083/failed-to-execute-removechild-on-node
@@ -63,7 +63,7 @@ const RequestsV2 = (props: RequestsV2Props) => {
   }, []);
 
   return (
-    <RequestsPageV2
+    <RequestsPage
       currentPage={currentPage}
       pageSize={pageSize}
       sort={sort}

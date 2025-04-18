@@ -66,6 +66,7 @@ export default async function handler(
         presence_penalty: params.presencePenalty,
         stop: params.stop,
         stream: params.stream !== undefined,
+        response_format: params.response_format,
         reasoning_effort: params.reasoning_effort,
         include_reasoning: params.includeReasoning,
         tools: params.tools,

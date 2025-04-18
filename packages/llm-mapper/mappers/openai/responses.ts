@@ -101,9 +101,9 @@ const convertRequestInputToMessages = (
           _type: "message",
           role: msg.role,
           type: "input_text",
-          text: msg.content,
+          content: msg.content,
           id: `req-msg-${msgIdx}`,
-        };
+        } as Message;
       } else if (Array.isArray(msg.content)) {
         const contentArray = msg.content.map((content, contentIdx) => {
           const baseResponse: Message = {
@@ -326,20 +326,34 @@ export const openaiResponseMapper = new MapperBuilder<OpenAIResponseRequest>(
  * Convert response to internal Message format
  */
 const convertResponse = (responseBody: any): Message[] => {
-  if (!responseBody || !responseBody.choices) return [];
+  // Check for the 'output' array specific to the Responses API
+  if (!responseBody || !Array.isArray(responseBody.output)) return [];
 
   const messages: Message[] = [];
 
-  for (const choice of responseBody.choices) {
-    if (choice.message) {
+  // Iterate through the output array
+  responseBody.output.forEach((outputItem: any, index: number) => {
+    // Look for items of type 'message'
+    if (outputItem.type === "message" && outputItem.content) {
+      let messageText = "";
+      // The content is an array, find the 'output_text' item
+      if (Array.isArray(outputItem.content)) {
+        const textContent = outputItem.content.find(
+          (c: any) => c.type === "output_text"
+        );
+        if (textContent && textContent.text) {
+          messageText = textContent.text;
+        }
+      }
+
       messages.push({
         _type: "message",
-        role: choice.message.role || "assistant",
-        content: choice.message.content || "",
-        id: `resp-msg-${choice.index || 0}`,
+        role: outputItem.role || "assistant", // Get role from the message item
+        content: messageText,
+        id: outputItem.id || `resp-msg-${index}`, // Use ID from the output item if available
       });
     }
-  }
+  });
 
   return messages;
 };

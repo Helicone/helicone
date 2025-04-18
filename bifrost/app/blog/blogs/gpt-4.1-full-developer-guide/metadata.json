@@ -1,0 +1,11 @@
+{
+    "title": "GPT-4.1 Released: Benchmarks, Performance, and How to Safely Migrate to Production",
+    "title1": "GPT-4.1 Released: Benchmarks, Performance, and How to Safely Migrate to Production",
+    "title2": "GPT-4.1 Released: Benchmarks, Performance, and How to Safely Migrate to Production",
+    "description": "This comprehensive guide compares GPT-4.1 performance against Claude 3.7 and Gemini 2.5 Pro, analyzes real-world coding benchmarks, provides implementation strategies, and shows how to safely migrate production applications to these powerful new models.",
+    "images": "/static/blog/gpt-4.1-full-developer-guide/gpt-4.1-in-the-api.webp",
+    "time": "6 minute read",
+    "author": "Yusuf Ishola",
+    "date": "April 15, 2025", 
+    "badge": "Model Benchmarks"
+  }  

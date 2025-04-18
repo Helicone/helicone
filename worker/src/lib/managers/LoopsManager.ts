@@ -9,10 +9,6 @@ const MAX_USER_PAGES = 100;
 const MAX_USERS_PER_RUN = 100; // Limit to 100 users per execution
 const ONBOARDING_CHECK_START_DATE = new Date("2025-03-20T00:00:00Z");
 
-// PostHog API endpoints
-const POSTHOG_BATCH_API = "https://us.i.posthog.com/batch/";
-const POSTHOG_EVENT_API = "https://us.i.posthog.com/i/v0/e/";
-
 // Type definitions
 type CachedUser = {
   email: string;
@@ -36,14 +32,6 @@ type UserToProcess = {
   hasOnboarded: boolean;
   onboardingStatusChanged: boolean;
   needsUpdate: boolean;
-};
-
-type PostHogEvent = {
-  event: string;
-  distinct_id: string;
-  properties: Record<string, any>;
-  timestamp?: string;
-  groups?: Record<string, string>;
 };
 
 async function getAllUser(supabaseServer: SupabaseClient<Database>) {
@@ -128,42 +116,22 @@ async function getAllOnboardedOrgs(supabaseServer: SupabaseClient<Database>) {
 }
 
 export async function updateLoopUsers(env: Env) {
-  console.log("⭐ LOOPSMANAGER: Debug - Function started");
-
   const supabaseServer = createClient<Database>(
     env.SUPABASE_URL,
     env.SUPABASE_SERVICE_ROLE_KEY
   );
 
-  console.log("⭐ LOOPSMANAGER: Debug - About to get users and orgs");
-
   let allUsers = await getAllUser(supabaseServer);
 
   if (!allUsers || allUsers.length === 0) {
-    console.log(
-      "⭐ LOOPSMANAGER: Debug - No matching users found, exiting early"
-    );
+    console.log("LoopsManager: No matching users found, exiting early");
     return;
   }
 
   const onboardedOrgs = await getAllOnboardedOrgs(supabaseServer);
-  if (!onboardedOrgs || onboardedOrgs.length === 0) {
-    console.log("⭐ LOOPSMANAGER: Debug - No onboarded orgs found");
-  } else {
-    console.log(
-      `⭐ LOOPSMANAGER: Debug - Found ${onboardedOrgs.length} onboarded orgs`
-    );
-  }
 
   const cachedUserEmails: CachedUser[] = JSON.parse(
     (await env.UTILITY_KV.get("loop_user_emails_v10")) ?? "[]"
-  );
-
-  // Log initial stats
-  console.log(
-    `LoopsManager: Processing ${allUsers.length} users, ${
-      cachedUserEmails.length
-    } cached users, ${onboardedOrgs?.length || 0} onboarded orgs`
   );
 
   // Create fast lookup maps
@@ -300,99 +268,8 @@ export async function updateLoopUsers(env: Env) {
     }
   }
 
-  console.log(
-    `LoopsManager: Found ${usersToProcess.length} users to update (out of ${uniqueUsersMap.size} total users)`
-  );
-
   // Since we're exiting early, we don't need to slice the array anymore
   const loopsUpdates = usersToProcess;
-  const posthogEvents: PostHogEvent[] = [];
-
-  // Prepare PostHog events
-  console.log(
-    `LoopsManager: Preparing PostHog events for ${loopsUpdates.length} users`
-  );
-  console.log(
-    `LoopsManager: Users with onboarding changes: ${
-      loopsUpdates.filter((u) => u.onboardingStatusChanged).length
-    }`
-  );
-  console.log(
-    `LoopsManager: Users with hasOnboarded=true: ${
-      loopsUpdates.filter((u) => u.hasOnboarded).length
-    }`
-  );
-  console.log(
-    `LoopsManager: Users with both conditions: ${
-      loopsUpdates.filter((u) => u.onboardingStatusChanged && u.hasOnboarded)
-        .length
-    }`
-  );
-
-  // Create separate arrays for regular events and group identifies
-  const groupIdentifyEvents: any[] = [];
-
-  // Users with onboarding status changed should trigger org onboarding events
-  for (const user of loopsUpdates) {
-    if (user.id && user.onboardingStatusChanged && user.hasOnboarded) {
-      console.log(
-        `LoopsManager: Processing onboarding event for user ${user.id} (${user.email})`
-      );
-
-      // Find the organization for this user
-      const userOrg = (onboardedOrgs || []).find(
-        (org) => org.owner === user.id
-      );
-
-      if (userOrg) {
-        console.log(
-          `LoopsManager: Found organization ${userOrg.id} for user ${user.id}`
-        );
-
-        // 1. Create group identify payload
-        groupIdentifyEvents.push({
-          api_key: env.POSTHOG_API_KEY,
-          event: "$groupidentify",
-          distinct_id: user.id,
-          properties: {
-            $group_type: "organization",
-            $group_key: userOrg.id,
-            $group_set: {
-              name: user.email.split("@")[0], // Use email username as fallback org name
-              has_onboarded: true,
-              onboarded_at: new Date().toISOString(),
-            },
-          },
-        });
-
-        // 2. Create the actual onboarding event
-        posthogEvents.push({
-          event: "organization_onboarded",
-          distinct_id: user.id,
-          properties: {
-            email: user.email,
-            name: `${user.firstName} ${user.lastName}`.trim(),
-            timestamp: new Date().toISOString(),
-            $groups: {
-              organization: userOrg.id,
-            },
-          },
-        });
-
-        console.log(
-          `PostHog: Prepared organization onboarding event for org ${userOrg.id}`
-        );
-      } else {
-        console.log(
-          `LoopsManager: No organization found for user ${user.id} (${user.email})`
-        );
-      }
-    } else if (user.onboardingStatusChanged || user.hasOnboarded) {
-      console.log(
-        `LoopsManager: User ${user.id} (${user.email}) didn't meet all criteria: onboardingStatusChanged=${user.onboardingStatusChanged}, hasOnboarded=${user.hasOnboarded}`
-      );
-    }
-  }
 
   // Update local cache
   const cacheMap = new Map(cachedUserEmails.map((user) => [user.email, user]));
@@ -459,56 +336,5 @@ export async function updateLoopUsers(env: Env) {
     if (i + batchSize < loopsUpdates.length) {
       await new Promise((resolve) => setTimeout(resolve, 1000));
     }
-  }
-
-  // First send all group identify events
-  if (groupIdentifyEvents.length > 0) {
-    console.log(
-      `PostHog: Sending ${groupIdentifyEvents.length} group identify events`
-    );
-
-    for (const event of groupIdentifyEvents) {
-      try {
-        const response = await fetch(POSTHOG_EVENT_API, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(event),
-        });
-
-        console.log(`PostHog: Group identify response: ${response.status}`);
-      } catch (error) {
-        console.error(`Error sending group identify to PostHog:`, error);
-      }
-    }
-  }
-
-  // Then send all regular events
-  if (posthogEvents.length > 0) {
-    console.log(`PostHog: Sending ${posthogEvents.length} events`);
-
-    for (const event of posthogEvents) {
-      try {
-        const posthogPayload = {
-          api_key: env.POSTHOG_API_KEY,
-          event: event.event,
-          distinct_id: event.distinct_id,
-          properties: event.properties,
-        };
-
-        const response = await fetch(POSTHOG_EVENT_API, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(posthogPayload),
-        });
-
-        console.log(
-          `PostHog: Event response for ${event.event}: ${response.status}`
-        );
-      } catch (error) {
-        console.error(`Error sending event to PostHog:`, error);
-      }
-    }
-  } else {
-    console.log(`PostHog: No events to send`);
   }
 }

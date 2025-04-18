@@ -18,7 +18,7 @@ import WebSocket from "ws";
 config({ path: ".env" });
 
 // Azure vs OpenAI Usage
-const isAzure = true;
+const isAzure = false;
 const resource = process.env.AZURE_RESOURCE;
 const deployment = process.env.AZURE_DEPLOYMENT;
 
@@ -88,6 +88,10 @@ const rl = readline.createInterface({
 let mic: any = null;
 let micStream: any = null;
 let isRecording = false;
+
+// Track the last item ID for deletion
+let lastItemId = "";
+let messageCounter = 0;
 
 // Initialize microphone
 function initMicrophone() {
@@ -218,6 +222,7 @@ ws.on("open", function open() {
     JSON.stringify({
       type: "conversation.item.create",
       item: {
+        id: `item_${Date.now()}`,
         call_id: callId,
         output: "success",
         type: "function_call_output",
@@ -233,7 +238,7 @@ ws.on("open", function open() {
 
   console.log("Enter your message (or 'quit' to exit):");
   console.log(
-    "Commands: 'mic' to toggle microphone, 'update' to send session update"
+    "Commands: 'mic' to toggle microphone, 'update' to send session update, 'delete' to delete last message"
   );
   startCliLoop();
 });
@@ -294,9 +299,13 @@ function handleFunctionCall(functionCall: any) {
 
   if (name === "get_weather") {
     const parsedArgs = JSON.parse(args);
+    const functionItemId = `item_function_${Date.now()}_${messageCounter++}`;
+    lastItemId = functionItemId;
+
     const dummyResponse = {
       type: "conversation.item.create",
       item: {
+        id: functionItemId,
         type: "function_call_output",
         call_id: functionCall.call_id,
         output: JSON.stringify({
@@ -364,13 +373,116 @@ function startCliLoop() {
       return;
     }
 
+    // If input is "delete"
+    if (input.toLowerCase() === "delete") {
+      if (lastItemId) {
+        const deleteMessage = {
+          event_id: `event_${Date.now()}`,
+          type: "conversation.item.delete",
+          item_id: lastItemId,
+        };
+
+        console.log("Deleting last item with ID:", lastItemId);
+        ws.send(JSON.stringify(deleteMessage));
+        console.log("Delete message sent!");
+      } else {
+        console.log("No item to delete.");
+      }
+      return;
+    }
+
+    // If input is "delete-list"
+    if (input.toLowerCase() === "delete-list") {
+      console.log("Starting delete-list test sequence...");
+
+      // Create and delete first message
+      const msgId1 = `msg_${Date.now()}_${messageCounter++}`;
+      ws.send(
+        JSON.stringify({
+          type: "conversation.item.create",
+          item: {
+            id: msgId1,
+            type: "message",
+            role: "user",
+            content: [{ type: "input_text", text: "Test message 1" }],
+          },
+        })
+      );
+      console.log("Created message 1:", msgId1);
+
+      ws.send(
+        JSON.stringify({
+          event_id: `event_${Date.now()}`,
+          type: "conversation.item.delete",
+          item_id: msgId1,
+        })
+      );
+      console.log("Deleted message 1:", msgId1);
+
+      // Create and delete second message
+      const msgId2 = `msg_${Date.now()}_${messageCounter++}`;
+      ws.send(
+        JSON.stringify({
+          type: "conversation.item.create",
+          item: {
+            id: msgId2,
+            type: "message",
+            role: "user",
+            content: [{ type: "input_text", text: "Test message 2" }],
+          },
+        })
+      );
+      console.log("Created message 2:", msgId2);
+
+      ws.send(
+        JSON.stringify({
+          event_id: `event_${Date.now()}`,
+          type: "conversation.item.delete",
+          item_id: msgId2,
+        })
+      );
+      console.log("Deleted message 2:", msgId2);
+
+      // Create and delete third message
+      const msgId3 = `msg_${Date.now()}_${messageCounter++}`;
+      ws.send(
+        JSON.stringify({
+          type: "conversation.item.create",
+          item: {
+            id: msgId3,
+            type: "message",
+            role: "user",
+            content: [{ type: "input_text", text: "Test message 3" }],
+          },
+        })
+      );
+      console.log("Created message 3:", msgId3);
+
+      ws.send(
+        JSON.stringify({
+          event_id: `event_${Date.now()}`,
+          type: "conversation.item.delete",
+          item_id: msgId3,
+        })
+      );
+      console.log("Deleted message 3:", msgId3);
+      console.log("Delete-list test sequence completed!");
+
+      return;
+    }
+
     // Otherwise, send the message as text
     try {
+      // Generate a unique message ID
+      const messageId = `msg_${Date.now()}_${messageCounter++}`;
+      lastItemId = messageId;
+
       // Create a text message item
       ws.send(
         JSON.stringify({
           type: "conversation.item.create",
           item: {
+            id: messageId,
             type: "message",
             role: "user",
             content: [

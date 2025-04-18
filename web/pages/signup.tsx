@@ -7,7 +7,6 @@ import AuthForm from "../components/templates/auth/authForm";
 import { DEMO_EMAIL } from "../lib/constants";
 import PublicMetaData from "../components/layout/public/publicMetaData";
 import { GetServerSidePropsContext } from "next";
-import posthog from "posthog-js";
 import { InfoBanner } from "../components/shared/themed/themedDemoBanner";
 import { env } from "next-runtime-env";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
@@ -42,10 +41,6 @@ const SignUp = () => {
       <AuthForm
         handleEmailSubmit={async (email: string, password: string) => {
           const origin = window.location.origin;
-          posthog.capture("user_signed_up", {
-            method: "email",
-            email: email,
-          });
 
           const { data, error } = await heliconeAuthClient.signUp({
             email: email,

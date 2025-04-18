@@ -102,7 +102,8 @@
             "integrations/openai/langchain",
             "integrations/openai/llamaindex",
             "integrations/openai/curl",
-            "integrations/openai/assistants"
+            "integrations/openai/assistants",
+            "integrations/openai/realtime"
           ]
         },
         {
@@ -181,7 +182,8 @@
           "group": "LiteLLM",
           "pages": [
             "getting-started/integration-method/litellm-openllmetry",
-            "getting-started/integration-method/litellm"
+            "getting-started/integration-method/litellm",
+            "getting-started/integration-method/litellm-proxy"
           ]
         },
         "getting-started/integration-method/fireworks",

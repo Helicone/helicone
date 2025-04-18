@@ -6,9 +6,9 @@ While we're not yet at the level of fully autonomous "super agents" that can rep
 
 This guide compares the top open-source AI agent builders and platforms for building AI agents in 2025. 
 
-Whether you need a no-code AI agent builder for rapid prototyping or a powerful agent development framework for complex multi-agent systems, you'll find options that match your technical requirements and use case.
+{/* Whether you need a no-code AI agent builder for rapid prototyping or a powerful agent development framework for complex multi-agent systems, you'll find options that match your technical requirements and use case. */}
 
-## Table Of Contents
+{/* ## Table Of Contents */}
 
 {/* ## AI Agents — Hype vs. Reality
 
@@ -18,7 +18,7 @@ However, this doesn't mean that AI agents aren't incredibly useful today. Many p
 
 Today, we are covering top **<span style={{color: '#0ea5e9'}}>open-source frameworks & platforms</span>** for building AI agents. comparing their features, and recommending solutions for different use cases. Whether you're looking for a no-code solution or a system for managing complex multi-agent setups, you'll find something useful here. */}
 
-## What are AI agents?
+{/* ## What are AI agents?
 
 An AI agent is a software tool designed to **handle tasks autonomously**. It observes its environment, makes decisions based on data, and takes action to achieve specific goals with minimal human intervention.
 
@@ -32,26 +32,19 @@ Think of it as your code working smarter — automating processes, analyzing dat
 - Scale with your app and adapt to increased demand
 - Maintain consistent performance
 
-Real-life applications of AI agents include E-commerce agents (can shop for you), Autonomous vehicles, Customer support agents, and Sales & Marketing agents, to name just a few.
+Real-life applications of AI agents include E-commerce agents (can shop for you), Autonomous vehicles, Customer support agents, and Sales & Marketing agents, to name just a few. */}
 
-## Best Open-source Tools for Building AI Agents in 2025
+## Agent Frameworks Overview
 
-1. Dify `freemium` `no-code` `open-source`
-2. AutoGen `free` `open-source`
-3. LlamaIndex `freemium` `open-source`
-4. LangChain `freemium` `open-source`
-5. CrewAI `freemium` `open-source`
-6. Pydantic AI `free` `open-source`
-7. (Bonus) Wordware AI `freemium` `not open-source`
-
-<CallToAction
-  title="Add Observability to Your AI Agents in Minutes ⚡️"
-  description="Simply add one line of code to get full observability into your AI agent's decisions, costs, and performance. Helicone is compatible with Dify, AutoGen, LangChain, and all major agent frameworks."
-  primaryButtonText="Get Started for Free"
-  primaryButtonLink="https://helicone.ai/"
-  secondaryButtonText="See How It Works"
-  secondaryButtonLink="https://docs.helicone.ai/features/sessions"
-/>
+| Framework | Pricing | Open-Source |
+| --- | --- | --- |
+| [1. Dify](#1-dify-the-no-code-ai-agent-builder) (no-code) | freemium | ✔️ |
+| [2. AutoGen](#2-autogen-the-multi-agent-framework) | free | ✔️ |
+| [3. LlamaIndex](#3-llamaindex-data-driven-ai-agent-platform) | freemium | ✔️ |
+| [4. CrewAI](#4-crewai-role-based-ai-agent-teams) | freemium | ✔️ |
+| [5. LangChain](#5-langchain-modular-ai-agent-development-framework) | freemium | ✔️ |
+| [6. Pydantic AI](#6-pydantic-ai-simplify-building-agents-for-production) | free | ✔️ |
+| [7. Wordware AI](#7-wordware-ai-the-versatile-ai-toolkit) | freemium | ❌ |
 
 {/* ---
 
@@ -96,6 +89,15 @@ Dify AI is an open-source platform that simplifies the development of AI agents 
 | • **Beginner friendly**: Dify’s intuitive interface makes it easy for beginners and non-technical users to build AI apps.        | • **Limited customization**: While limited to pre-built components and visual workflows, users have flexibility in configuration, custom code snippets and can integrate with external APIs. |
 | • **Strong data security**: Robust encryption and protection mechanisms to ensure data confidentiality and safety.               | • **Complex data processing**: Constraints in handling intricate machine learning models or extensive computational tasks.                                                                   |
 | • **Seamless integration**: Connects with popular AI models and supports integration with external tools like Zapier, Make, etc. | • **Scalability**: While there are limitations when it comes to building highly complex or large-scale tasks, Dify is suitable for building most AI apps.                                    |
+
+<CallToAction
+  title="Debug Your Dify Agents with Helicone Observability 🔍"
+  description="Trace your AI agent's decisions and monitor its costs and performance with Sessions. Helicone is compatible with Dify and all major agent frameworks."
+  primaryButtonText="Integrate in 1 Minute"
+  primaryButtonLink="https://docs.helicone.ai/other-integrations/dify"
+  secondaryButtonText="See How Sessions Work"
+  secondaryButtonLink="https://docs.helicone.ai/features/sessions"
+/>
 
 **You might be interested in**: <a href="https://www.helicone.ai/blog/crewai-vs-dify-ai" rel="noopener" target="_blank">Deep Dive: Dify vs. CrewAI</a>.
 
@@ -157,6 +159,15 @@ LlamaIndex specializes in data integration and retrieval, making it ideal for ap
 | • **Focused on indexing and efficient retrieval**: its advanced indexing techniques ensure fast and accurate retrieval of relevant information. | • **Limited functionality:** Primarily focused on data retrieval, less suitable for complex NLP tasks.                          |
 | • **Customizable workflows:** Tailor the RAG process to specific use cases, including model options, retrieval strategy, etc.                   |                                                                                                                                 |
 
+<CallToAction
+  title="Debug Your LlamaIndex Agents with Helicone ⚡️"
+  description="Get full visibility into your AI agent's decisions, costs, and performance. Helicone is compatible with LlamaIndex."
+  primaryButtonText="Get Started for Free"
+  primaryButtonLink="https://helicone.ai/"
+  secondaryButtonText="Integrate with Helicone"
+  secondaryButtonLink="https://docs.helicone.ai/integrations/openai/llamaindex#llamaindex-integration"
+/>
+
 **You might be interested in**: <a href="https://www.helicone.ai/blog/llamaindex-vs-langchain" rel="noopener" target="_blank">Deep Dive: LlamaIndex vs. LangChain</a>.
 
 ## 4. <a href="https://www.crewai.com/" rel="noopener nofollow" target="_blank">CrewAI</a>: Role-Based AI Agent Teams
@@ -188,6 +199,15 @@ CrewAI <a href="https://docs.crewai.com/concepts/tools" rel="noopener" target="_
 | • **Role-based collaboration:** allows for defining agents with specific roles & goals. Agents work as a team and can review and improve each other's output. | • **Basic code execution:** Not as robust in handling complex code execution as some other platforms like AutoGen. |
 | • **Quick prototype & deployment:** fast set-up and highly modular design that lets you test complex agent interactions and deploy them easily.             | • **Lacks advanced features:** Less suited for highly specialized or computation-heavy tasks.                       |
 | • **Integration with LangChain**: Integrates well with LangChain and its related tools.                                                                    | • **Limited customization:** Less flexibility compared to more developer-centric platforms.                        |
+
+<CallToAction
+  title="Debug Your CrewAI Agents with Helicone ⚡️"
+  description="Get full visibility into your AI agent's decisions, costs, and performance. Helicone is compatible with CrewAI."
+  primaryButtonText="Get Started for Free"
+  primaryButtonLink="https://helicone.ai/"
+  secondaryButtonText="Integrate with Helicone"
+  secondaryButtonLink="https://docs.helicone.ai/getting-started/integration-method/crewai"
+/>
 
 **You might be interested in**: <a href="https://www.helicone.ai/blog/crewai-vs-dify-ai" rel="noopener" target="_blank">Deep Dive: CrewAI vs. Dify</a> or <a href="https://www.helicone.ai/blog/crewai-vs-autogen" rel="noopener" target="_blank">CrewAI vs. AutoGen</a>.
 
@@ -221,6 +241,15 @@ LangChain agents use the idea of **"chains"** to let you connect multiple module
 | • **User-friendly interface:** Intuitive and beginner-friendly as developers with basic knowledge of LLMs can also build an agent. | • **Steep learning curve:** Offers greater flexibility and customizability, more suitable for users of higher coding proficiency. |
 | • **Scalability:** Useful for prototyping complex AI solutions and large datasets efficiently.                                     | • **Poor documentation:** often outdated or unclear, however, has a large active community for support.                           |
 | • **Integrations:** Has many integrations which requires more coding effort, but offers flexibility for custom models.             | • **Not suitable for production environments**: due to instability and frequent changes.                                          |
+
+<CallToAction
+  title="Debug Your LangChain Agents with Helicone ⚡️"
+  description="Get full visibility into your AI agent's decisions, costs, and performance. Helicone is compatible with LangChain."
+  primaryButtonText="Get Started in 1 Minute"
+  primaryButtonLink="https://helicone.ai/"
+  secondaryButtonText="Integrate with Helicone"
+  secondaryButtonLink="https://docs.helicone.ai/integrations/openai/langchain"
+/>
 
 **You might be interested in**: <a href="https://www.helicone.ai/blog/llamaindex-vs-langchain" rel="noopener" target="_blank">Deep Dive: LlamaIndex vs. LangChain</a>.
 
@@ -347,9 +376,9 @@ With the right tool, you can build agents faster and achieve your goals more eff
 <CallToAction
   title="Debug your agentic workflows 10x faster ⚡️"
   description="Helicone helps you trace your AI agents with ease—helping you squash bugs and optimize costs. Try it today."
-  primaryButtonText="Start for free"
+  primaryButtonText="Get Started for Free"
   primaryButtonLink="https://helicone.ai/"
-  secondaryButtonText="Read the doc"
+  secondaryButtonText="How Sessions Work"
   secondaryButtonLink="https://docs.helicone.ai/features/sessions"
 />
 

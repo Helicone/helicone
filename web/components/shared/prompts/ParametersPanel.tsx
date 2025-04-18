@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -24,14 +25,17 @@ import {
 } from "packages/cost/unified/types";
 import React, { useEffect, useMemo, useState } from "react";
 import {
+  PiBracketsCurlyBold,
   PiBrainBold,
   PiCoinsBold,
   PiHandPalmBold,
   PiPaintBrushBold,
+  PiPencilSimpleBold,
   PiPlugsBold,
 } from "react-icons/pi";
 import GlassHeader from "../universal/GlassHeader";
 import ScrollableBadges from "../universal/ScrollableBadges";
+import ResponseFormatEditor from "./ResponseFormatEditor";
 
 interface ParametersPanelProps {
   parameters: StateParameters;
@@ -44,6 +48,8 @@ export default function ParametersPanel({
 }: ParametersPanelProps) {
   // State for the creator selection (purely for organization)
   const [selectedCreator, setSelectedCreator] = useState<Creator>("OpenAI");
+  const [isResponseFormatEditorOpen, setIsResponseFormatEditorOpen] =
+    useState(false);
 
   // Determine the creator based on the current provider and model
   useEffect(() => {
@@ -130,6 +136,11 @@ export default function ParametersPanel({
 
   const supportsStopSequences = useMemo(
     () => !!mergedParams?.stop,
+    [mergedParams]
+  );
+
+  const supportsResponseFormat = useMemo(
+    () => mergedParams?.response_format === true,
     [mergedParams]
   );
 
@@ -358,7 +369,7 @@ export default function ParametersPanel({
           </ParameterLabel>
           <div className="flex gap-2">
             <Select value={selectedCreator} onValueChange={handleCreatorChange}>
-              <SelectTrigger className="w-28 h-8">
+              <SelectTrigger variant="helicone" className="w-28 h-8">
                 <SelectValue placeholder="Creator" />
               </SelectTrigger>
               <SelectContent>
@@ -373,7 +384,7 @@ export default function ParametersPanel({
               value={currentModelName || ""}
               onValueChange={handleModelChange}
             >
-              <SelectTrigger className="w-44 h-8">
+              <SelectTrigger variant="helicone" className="w-36 h-8">
                 <SelectValue placeholder="Model" />
               </SelectTrigger>
               <SelectContent>
@@ -388,7 +399,7 @@ export default function ParametersPanel({
               value={parameters.provider as string}
               onValueChange={handleProviderChange}
             >
-              <SelectTrigger className="w-32 h-8">
+              <SelectTrigger variant="helicone" className="w-28 h-8">
                 <SelectValue placeholder="Provider" />
               </SelectTrigger>
               <SelectContent>
@@ -463,7 +474,7 @@ export default function ParametersPanel({
                   })
                 }
               >
-                <SelectTrigger className="w-28 h-8">
+                <SelectTrigger variant="helicone" className="w-28 h-8">
                   <SelectValue placeholder="Effort" />
                 </SelectTrigger>
                 <SelectContent>
@@ -472,6 +483,32 @@ export default function ParametersPanel({
                   <SelectItem value="high">High</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+          </ParameterRow>
+        )}
+
+        {/* Response Format */}
+        {supportsResponseFormat && (
+          <ParameterRow>
+            <ParameterLabel
+              icon={<PiBracketsCurlyBold className="text-secondary" />}
+            >
+              Response Format
+            </ParameterLabel>
+            <div className="flex flex-row items-center gap-2">
+              <span className="text-sm">
+                {parameters.response_format?.type === "json_schema"
+                  ? "JSON Schema"
+                  : "Text"}
+              </span>
+              <Button
+                variant="ghost"
+                size="square_icon"
+                asPill
+                onClick={() => setIsResponseFormatEditorOpen(true)}
+              >
+                <PiPencilSimpleBold className="w-4 h-4" />
+              </Button>
             </div>
           </ParameterRow>
         )}
@@ -495,6 +532,20 @@ export default function ParametersPanel({
           </div>
         )}
       </div>
+
+      {/* Response Format Editor Popup */}
+      <ResponseFormatEditor
+        isOpen={isResponseFormatEditorOpen}
+        onClose={() => setIsResponseFormatEditorOpen(false)}
+        initialSchema={parameters.response_format?.json_schema}
+        onSave={(schema) => {
+          onParameterChange({
+            response_format: schema
+              ? { type: "json_schema", json_schema: schema }
+              : undefined,
+          });
+        }}
+      />
     </div>
   );
 }
