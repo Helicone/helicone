@@ -121,7 +121,7 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
               </div>
             </div>
           </div>
-          {count && count?.data <= 50_000 ? (
+          {count?.data && count?.data <= 50_000 ? (
             <h1 className="text-sm text-gray-700 dark:text-gray-300">
               Your organization is currently on the free plan and within our
               free plan limits. As your company grows, you may want to consider

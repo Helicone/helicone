@@ -227,7 +227,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     isCached,
     isLive
   );
-  c;
 
   /* -------------------------------------------------------------------------- */
   /*                                    MEMOS                                   */

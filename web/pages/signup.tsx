@@ -10,6 +10,7 @@ import { GetServerSidePropsContext } from "next";
 import { InfoBanner } from "../components/shared/themed/themedDemoBanner";
 import { env } from "next-runtime-env";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
+import posthog from "posthog-js";
 
 const SignUp = () => {
   const heliconeAuthClient = useHeliconeAuthClient();
