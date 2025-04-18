@@ -60,7 +60,7 @@ const MobileHeader = (props: {
         </Link>
       </div>
       <button
-        className="transform scale-[90 %] flex flex-col gap-1 items-end justify-end gap-x-2 col-span-1 order-2 lg:order-3"
+        className="transform scale-[90%] flex flex-col gap-1 items-end justify-end gap-x-2 col-span-1 order-2 lg:order-3"
         onClick={() => {
           setMenuOpen(!menuOpen);
         }}
@@ -185,7 +185,7 @@ const NavLinks = () => {
         if (link.type === "dropdown") {
           return (
             <DropdownMenu
-              key={`${link.label}-${i}`}
+              key={link.href}
               open={openDropdown === link.label}
             >
               <DropdownMenuTrigger
@@ -207,8 +207,8 @@ const NavLinks = () => {
                 onMouseLeave={handleMouseLeave}
               >
                 {link.items?.map((item, j) => (
-                  <Fragment key={j}>
-                    <DropdownMenuItem key={j} asChild>
+                  <>
+                    <DropdownMenuItem key={item.href} asChild>
                       <Link
                         href={item.href}
                         className="w-full cursor-pointer flex items-start gap-2 text-slate-700 hover:text-black py-2 px-3"
@@ -225,7 +225,7 @@ const NavLinks = () => {
                       </Link>
                     </DropdownMenuItem>
                     {j < link.items.length - 1 && <DropdownMenuSeparator className="hidden lg:block" />}
-                  </Fragment>
+                  </ >
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
@@ -241,7 +241,7 @@ const NavLinks = () => {
                 ? "text-slate-700 font-medium"
                 : "text-slate-700 opacity-75")
             }
-            key={`${link}-${i}`}
+            key={link.href}
           >
             {link.label}
           </Link>
@@ -277,7 +277,7 @@ const NavIcons = () => {
               ? "text-black font-bold"
               : "text-gray-600 opacity-75")
           }
-          key={`${link}-${i}`}
+          key={link.href}
         >
           {link.icon}
         </Link>
@@ -462,7 +462,7 @@ const NavBar = (props: NavBarProps) => {
   return (
     <div
       ref={headerRef}
-      className="bg-white top-0 sticky z-30 border-b border-gray-200"
+      className="bg-white top-0 sticky z-30 border-b border-gray-200 mb-10"
     >
       <MobileNav />
       <nav
