@@ -115,7 +115,7 @@ export const OnboardingPopoverInside = ({
     };
     window.addEventListener("keydown", keydownHandler);
     return () => window.removeEventListener("keydown", keydownHandler);
-  }, [currentStep, next, nextOverride, delayMs]);
+  }, [currentStep, next, nextOverride, delayMs, setCurrentStep]);
 
   return (
     <>

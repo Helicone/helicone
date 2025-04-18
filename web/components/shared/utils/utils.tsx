@@ -1,7 +1,3 @@
-import { SupabaseClient } from "@supabase/supabase-js";
-import { Database } from "../../../db/database.types";
-import posthog from "posthog-js";
-
 const monthNames = [
   "Jan",
   "Feb",
@@ -23,14 +19,6 @@ const getUSDateShort = (value: string) => {
   const day = date.getDate();
   return `${month} ${day}`;
 };
-
-export async function signOut(supabaseClient: SupabaseClient<Database>) {
-  await supabaseClient.auth.signOut({ scope: "global" });
-  await supabaseClient.auth.signOut({ scope: "others" });
-  await supabaseClient.auth.signOut({ scope: "local" });
-  posthog.reset();
-  return supabaseClient.auth.signOut();
-}
 
 const getUSDate = (date: Date) => {
   const options: Intl.DateTimeFormatOptions = {
@@ -89,10 +77,10 @@ function removeLeadingWhitespace(str: string | null): string {
 }
 
 export {
-  getUSDateFromString,
-  getUSDate,
-  getUSDateShort,
   capitalizeWords,
-  removeLeadingWhitespace,
+  getUSDate,
+  getUSDateFromString,
   getUSDateMin,
+  getUSDateShort,
+  removeLeadingWhitespace,
 };

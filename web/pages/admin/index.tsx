@@ -1,17 +1,11 @@
-import { User } from "@supabase/auth-helpers-nextjs";
+import AdminPage from "@/components/templates/admin/adminPage";
 import { ReactElement } from "react";
-import { withAuthSSR } from "../../lib/api/handlerWrappers";
 import AdminLayout from "../../components/layout/admin/adminLayout";
-import AdminPage from "../../components/templates/admin/adminPage";
-import { getSupabaseServer } from "../../lib/supabaseServer";
+import { withAdminSSR } from "../../lib/api/handlerWrappers";
 
-interface AdminProps {
-  user: User;
-}
+interface AdminProps {}
 
 const Admin = (props: AdminProps) => {
-  const { user } = props;
-
   return <AdminPage />;
 };
 
@@ -21,36 +15,4 @@ Admin.getLayout = function getLayout(page: ReactElement) {
 
 export default Admin;
 
-export const getServerSideProps = withAuthSSR(async (options) => {
-  const {
-    userData: { user },
-  } = options;
-
-  const { data, error } = await getSupabaseServer().from("admins").select("*");
-
-  const admins = data?.map((admin) => admin.user_id || "") || [];
-
-  if (error) {
-    return {
-      redirect: {
-        destination: "/",
-        permanent: false,
-      },
-    };
-  }
-
-  if (!admins.includes(user?.id || "")) {
-    return {
-      redirect: {
-        destination: "/",
-        permanent: false,
-      },
-    };
-  }
-
-  return {
-    props: {
-      user,
-    },
-  };
-});
+export const getServerSideProps = withAdminSSR;

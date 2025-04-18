@@ -1,15 +1,14 @@
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Database } from "../../db/database.types";
-import { useCallback, useEffect, useState, useRef } from "react";
-import Cookies from "js-cookie";
 import { OrgContextValue } from "@/components/layout/org/OrgContextValue";
-import { ORG_ID_COOKIE_KEY } from "../../lib/constants";
-import { getJawnClient } from "../../lib/clients/jawn";
-import posthog from "posthog-js";
-import { getHeliconeCookie } from "@/lib/cookies";
-import { env } from "next-runtime-env";
 import useNotification from "@/components/shared/notification/useNotification";
+import { getHeliconeCookie } from "@/lib/cookies";
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
+import Cookies from "js-cookie";
+import { env } from "next-runtime-env";
+import posthog from "posthog-js";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { $JAWN_API, getJawnClient } from "../../lib/clients/jawn";
+import { ORG_ID_COOKIE_KEY } from "../../lib/constants";
 
 const useGetOrgMembers = (orgId: string) => {
   const jawn = getJawnClient(orgId);
@@ -137,65 +136,39 @@ const useGetOrgMembersAndOwner = (orgId: string) => {
 };
 
 const useGetOrg = (orgId: string) => {
-  const supabaseClient = useSupabaseClient<Database>();
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: ["OrganizationsId", orgId],
-    queryFn: async (query) => {
-      if (!orgId) {
-        return null;
-      }
-      const { data, error } = await supabaseClient
-        .from("organization")
-        .select(`*`)
-        .eq("soft_delete", false)
-        .eq("id", orgId)
-        .single();
-      return data as Database["public"]["Tables"]["organization"]["Row"];
+  return $JAWN_API.useQuery(
+    "get",
+    `/v1/organization/{organizationId}`,
+    {
+      params: { path: { organizationId: orgId } },
     },
-    refetchOnWindowFocus: false,
-  });
-
-  return {
-    data,
-    isLoading,
-    refetch,
-  };
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
 };
 
 const useGetOrgs = () => {
-  const supabaseClient = useSupabaseClient<Database>();
-  const user = useUser();
-  const { data, isPending, refetch } = useQuery({
-    queryKey: ["Organizations", user?.id ?? ""],
-    queryFn: async (query) => {
-      if (!user?.id) {
-        return [];
-      }
-      const { data, error } = await supabaseClient
-        .from("organization")
-        .select(`*`)
-        .eq("soft_delete", false);
-      if (error) {
-        return [];
-      }
+  const { data, isPending, refetch } = $JAWN_API.useQuery(
+    "get",
+    "/v1/organization",
+    {
+      refetchOnWindowFocus: false,
+      refetchInterval: 10_000, // Refetch every 10 seconds
+      refetchIntervalInBackground: true,
+    }
+  );
 
-      return data;
-    },
-    refetchOnWindowFocus: false,
-    refetchInterval: 10_000, // Refetch every 10 seconds
-    refetchIntervalInBackground: true,
-  });
-
-  data &&
-    data.sort((a, b) => {
+  data?.data &&
+    data.data.sort((a, b) => {
       if (a.name === b.name) {
         return a.id < b.id ? -1 : 1;
       }
-      return a.name < b.name ? -1 : 1;
+      return a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1;
     });
 
   return {
-    data,
+    data: data?.data ?? [],
     isPending,
     refetch,
   };
@@ -203,7 +176,7 @@ const useGetOrgs = () => {
 
 export const useUpdateOrgMutation = () => {
   const queryClient = useQueryClient();
-  const user = useUser();
+  const { user } = useHeliconeAuthClient();
   const { setNotification } = useNotification();
   return useMutation({
     mutationFn: async ({
@@ -266,10 +239,8 @@ const setOrgCookie = (orgId: string) => {
 };
 
 const useOrgsContextManager = () => {
-  const user = useUser();
+  const { user } = useHeliconeAuthClient();
   const { data: orgs, refetch } = useGetOrgs();
-  const jawn = getJawnClient();
-
   const [org, setOrg] = useState<NonNullable<typeof orgs>[number] | null>(null);
   const [renderKey, setRenderKey] = useState(0);
   const [isResellerOfCurrentCustomerOrg, setIsResellerOfCurrentOrg] =
@@ -277,8 +248,8 @@ const useOrgsContextManager = () => {
 
   const refreshCurrentOrg = useCallback(() => {
     refetch().then((x) => {
-      if (x.data && x.data.length > 0) {
-        const currentOrg = x.data.find(
+      if (x.data && x.data.data && x.data.data.length > 0) {
+        const currentOrg = x.data.data.find(
           (organization) => organization.id === org?.id
         );
         if (currentOrg) {
@@ -440,7 +411,7 @@ const useOrgsContextManager = () => {
     refreshCurrentOrg,
     setCurrentOrg: (orgId) => {
       refetch().then((data) => {
-        const org = data?.data?.find((org) => org.id === orgId);
+        const org = data.data?.data?.find((org) => org.id === orgId);
         if (org) {
           setOrg(org);
           setOrgCookie(org.id);
@@ -456,13 +427,13 @@ const useOrgsContextManager = () => {
 };
 
 export {
-  useGetOrgMembers,
-  useGetOrgOwner,
-  useGetOrgs,
-  useOrgsContextManager,
   setOrgCookie,
   useGetOrg,
+  useGetOrgMembers,
   useGetOrgMembersAndOwner,
-  useGetOrgSlackIntegration,
+  useGetOrgOwner,
+  useGetOrgs,
   useGetOrgSlackChannels,
+  useGetOrgSlackIntegration,
+  useOrgsContextManager,
 };

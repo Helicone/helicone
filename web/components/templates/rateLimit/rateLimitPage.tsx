@@ -1,7 +1,6 @@
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 import { BookOpenIcon } from "@heroicons/react/24/outline";
-import { useUser } from "@supabase/auth-helpers-react";
 import { AreaChart } from "@tremor/react";
 import Link from "next/link";
 import { useState } from "react";
@@ -21,6 +20,7 @@ import AuthHeader from "../../shared/authHeader";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
 import useSearchParams from "../../shared/utils/useSearchParams";
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 import RequestsPage from "../requests/RequestsPage";
 import UnauthorizedView from "../requests/UnauthorizedView";
 
@@ -33,7 +33,7 @@ const RateLimitPage = (props: {}) => {
   const { properties, isLoading: propertiesLoading } =
     useGetPropertiesV2(getPropertyFiltersV2);
   const org = useOrg();
-  const user = useUser();
+  const { user } = useHeliconeAuthClient();
   const {
     unauthorized,
     currentTier,
@@ -193,8 +193,6 @@ const RateLimitPage = (props: {}) => {
               isCustomProperty: false,
             }}
             rateLimited={true}
-            currentFilter={null}
-            organizationLayout={null}
             organizationLayoutAvailable={false}
           />
         </div>

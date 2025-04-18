@@ -24,8 +24,7 @@ Dataset.getLayout = function getLayout(page: ReactElement) {
 };
 
 export const getServerSideProps = withAuthSSR(async (options) => {
-  const { page, page_size, sortKey, sortDirection, isCustomProperty, tab } =
-    options.context.query;
+  const { page, page_size } = options.context.query;
 
   const currentPage = parseInt(page as string, 10) || 1;
   const pageSize = parseInt(page_size as string, 10) || 25;
@@ -33,7 +32,6 @@ export const getServerSideProps = withAuthSSR(async (options) => {
 
   return {
     props: {
-      user: options.userData.user,
       id,
       currentPage,
       pageSize,

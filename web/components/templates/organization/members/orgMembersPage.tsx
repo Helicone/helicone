@@ -1,17 +1,13 @@
-import { useUser } from "@supabase/auth-helpers-react";
-import { Database } from "../../../../db/database.types";
-import {
-  useGetOrgMembers,
-  useGetOrgOwner,
-} from "../../../../services/hooks/organizations";
-import { useState } from "react";
-import OrgMemberItem from "../orgMemberItem";
-import { useOrg } from "../../../layout/org/organizationContext";
-import AddMemberModal from "../addMemberModal";
-import { cn } from "@/lib/utils";
 import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
 import { Button } from "@/components/ui/button";
-
+import { cn } from "@/lib/utils";
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
+import { useState } from "react";
+import { Database } from "../../../../db/database.types";
+import { useGetOrgMembers } from "../../../../services/hooks/organizations";
+import { useOrg } from "../../../layout/org/organizationContext";
+import AddMemberModal from "../addMemberModal";
+import OrgMemberItem from "../orgMemberItem";
 interface OrgMembersPageProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
   wFull?: boolean;
@@ -21,14 +17,9 @@ const OrgMembersPage = (props: OrgMembersPageProps) => {
   const { org, wFull = false } = props;
 
   const { data, isLoading, refetch } = useGetOrgMembers(org.id);
-
-  const { data: orgOwner, isLoading: isOrgOwnerLoading } = useGetOrgOwner(
-    org.id
-  );
-
   const orgContext = useOrg();
 
-  const user = useUser();
+  const { user } = useHeliconeAuthClient();
 
   const [addOpen, setAddOpen] = useState(false);
 
@@ -90,7 +81,7 @@ const OrgMembersPage = (props: OrgMembersPageProps) => {
               </ProFeatureWrapper>
             </div>
           </div>
-          {isLoading || isOrgOwnerLoading ? (
+          {isLoading ? (
             <ul className="flex flex-col space-y-6">
               {Array.from({ length: 3 }).map((_, index) => (
                 <li

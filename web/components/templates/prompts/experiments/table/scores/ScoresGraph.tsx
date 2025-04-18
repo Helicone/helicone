@@ -54,7 +54,7 @@ const ScoresGraph = ({
 
   const chartConfig = useMemo(() => {
     return getScoreColorMapping(scoreCriterias);
-  }, [scoreCriterias]);
+  }, [getScoreColorMapping, scoreCriterias]);
 
   const chartData = useMemo(() => {
     return promptVersions.map((promptVersion) => {

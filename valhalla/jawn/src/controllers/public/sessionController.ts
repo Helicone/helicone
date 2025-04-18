@@ -86,6 +86,7 @@ export class SessionController extends Controller {
       kvCache
     );
     if (found.error) {
+      console.error("Error finding sessions", found.error);
       this.setStatus(500);
     } else {
       this.setStatus(200);

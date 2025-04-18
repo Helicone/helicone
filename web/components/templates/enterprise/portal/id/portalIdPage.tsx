@@ -31,7 +31,8 @@ interface PortalIdPageProps {
 const PortalIdPage = (props: PortalIdPageProps) => {
   const { orgId } = props;
 
-  const { data: org, isLoading, refetch } = useGetOrg(orgId || "");
+  const { data: orgData, isLoading, refetch } = useGetOrg(orgId || "");
+  const org = orgData?.data;
   const {
     data: members,
     isLoading: isMembersLoading,

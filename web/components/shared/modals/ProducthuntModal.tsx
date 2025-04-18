@@ -56,6 +56,7 @@ const ProducthuntSupportModal: React.FC<ProducthuntModalProps> = ({
           }}
           tabIndex={-1}
         >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=475050&theme=light"
             alt="Helicone&#0032;AI - Open&#0045;source&#0032;LLM&#0032;Observability&#0032;for&#0032;Developers | Product Hunt"
@@ -130,6 +131,7 @@ export const ProducthuntLaunchCard: React.FC = () => {
         target="_blank"
         rel="noopener noreferrer"
       >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=475050&theme=light"
           alt="Helicone&#0032;AI - Open&#0045;source&#0032;LLM&#0032;Observability&#0032;for&#0032;Developers | Product Hunt"
@@ -165,6 +167,7 @@ export const ProducthuntLaunchPromoCard: React.FC<{
         target="_blank"
         rel="noopener noreferrer"
       >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=475050&theme=light"
           alt="Helicone&#0032;AI - Open&#0045;source&#0032;LLM&#0032;Observability&#0032;for&#0032;Developers | Product Hunt"

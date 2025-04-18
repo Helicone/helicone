@@ -121,14 +121,6 @@ const ExperimentTable = () => {
     return () => observer.disconnect();
   }, []);
 
-  // Start animation when table becomes visible
-  useEffect(() => {
-    if (isVisible && !hasStarted) {
-      setHasStarted(true);
-      startAnimation();
-    }
-  }, [isVisible]);
-
   const animateCell = useCallback((row: number, col: number) => {
     const generateTime = Math.random() * 500 + 500;
 
@@ -208,6 +200,13 @@ const ExperimentTable = () => {
     }
     return value;
   };
+
+  useEffect(() => {
+    if (isVisible && !hasStarted) {
+      setHasStarted(true);
+      startAnimation();
+    }
+  }, [hasStarted, isVisible, startAnimation]);
 
   return (
     <div ref={tableRef} className="relative w-full h-[400px] z-[1]">

@@ -382,6 +382,7 @@ export const EmptyStateCard = ({
               </div>
             ) : (
               featureDefaults.featureImage.type === "image" && (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={featureDefaults.featureImage.content}
                   alt={featureDefaults.title}

@@ -8,10 +8,10 @@ import { SearchIcon } from "lucide-react";
 import { PiSpinnerGapBold } from "react-icons/pi";
 import useNotification from "@/components/shared/notification/useNotification";
 import { Button } from "@/components/ui/button";
-import { useUser } from "@supabase/auth-helpers-react";
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 
 const OrgAnalytics = () => {
-  const user = useUser();
+  const { user } = useHeliconeAuthClient();
   const [organizationId, setOrganizationId] = useState("");
   const [userId, setUserId] = useState("");
   const [email, setEmail] = useState("");
@@ -101,7 +101,7 @@ const OrgAnalytics = () => {
   };
   const { setNotification } = useNotification();
 
-  const { mutate: addAdminToOrg, isPending: isAddingAdminToOrg } = useMutation({
+  const { mutate: addAdminToOrg } = useMutation({
     mutationKey: ["addAdminToOrg"],
     mutationFn: async ({
       orgId,

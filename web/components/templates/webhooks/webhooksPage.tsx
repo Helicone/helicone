@@ -4,10 +4,8 @@ import {
   EyeSlashIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
-import { User, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Database } from "../../../db/database.types";
 import { useOrg } from "../../layout/org/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
 import { getUSDateFromString } from "../../shared/utils/utils";
@@ -39,12 +37,9 @@ import {
 import { getJawnClient } from "@/lib/clients/jawn";
 import { ExternalLinkIcon } from "lucide-react";
 
-interface WebhooksPageProps {
-  user: User;
-}
+interface WebhooksPageProps {}
 
 const WebhooksPage = (props: WebhooksPageProps) => {
-  const client = useSupabaseClient<Database>();
   const { setNotification } = useNotification();
   const org = useOrg();
   const [viewWebhookOpen, setViewWebhookOpen] = useState(false);

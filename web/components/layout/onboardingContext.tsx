@@ -1,5 +1,6 @@
 // Inspired by https://github.com/uixmat/onborda
 
+import { $JAWN_API } from "@/lib/clients/jawn";
 import { cn } from "@/lib/utils";
 import { BeakerIcon } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
@@ -440,15 +441,13 @@ export const OnboardingProvider = ({
   const startOnboarding = useCallback(() => {
     if (isOnboardingVisible) return;
     const setReady = async () => {
-      const countResponse = await fetch("/api/request/ch/count", {
-        method: "POST",
-        body: JSON.stringify({ filter: {} }),
-        headers: {
-          "Content-Type": "application/json",
+      const countResponse = await $JAWN_API.POST("/v1/request/count/query", {
+        body: {
+          filter: "all",
         },
       });
-      const count = await countResponse.json();
-      if (count.data && count.data > 6) {
+
+      if (countResponse?.data?.data && countResponse.data.data > 6) {
         clearInterval(interval);
         setIsOnboardingVisible(true);
         setCurrentStep(0);

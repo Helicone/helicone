@@ -157,6 +157,7 @@ const FeatureMedia = ({
   }
 
   return (
+    // eslint-disable-next-line @next/next/no-img-element
     <img
       loading="lazy"
       className="max-w-[563px] w-full aspect-[1.81/1] rounded-[18px] border border-[hsl(var(--border))] object-cover"

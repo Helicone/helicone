@@ -1,5 +1,5 @@
 // import { SparklesIcon } from "@heroicons/react/24/outline";
-import { useUser } from "@supabase/auth-helpers-react";
+
 import { useState } from "react";
 import { useOrg } from "../layout/org/organizationContext";
 import ThemedModal from "./themed/themedModal";
@@ -13,6 +13,7 @@ import {
   ORGANIZATION_ICONS,
 } from "../templates/organization/orgConstants";
 import { SparklesIcon } from "lucide-react";
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 
 interface UpgradeProModalProps {
   open: boolean;
@@ -21,7 +22,7 @@ interface UpgradeProModalProps {
 
 const UpgradeProModal = (props: UpgradeProModalProps) => {
   const { open, setOpen } = props;
-  const user = useUser();
+  const heliconeAuthClient = useHeliconeAuthClient();
   const orgContext = useOrg();
 
   const [currentMonth, setCurrentMonth] = useState(startOfMonth(new Date()));
@@ -67,7 +68,7 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
       },
       body: JSON.stringify({
         orgId: orgContext?.currentOrg?.id,
-        userEmail: user?.email,
+        userEmail: heliconeAuthClient.user?.email,
       }),
     });
 
@@ -120,7 +121,7 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
               </div>
             </div>
           </div>
-          {count && count?.data <= 50_000 ? (
+          {count?.data && count?.data <= 50_000 ? (
             <h1 className="text-sm text-gray-700 dark:text-gray-300">
               Your organization is currently on the free plan and within our
               free plan limits. As your company grows, you may want to consider

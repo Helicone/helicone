@@ -9,7 +9,6 @@ import "../node_modules/react-grid-layout/css/styles.css";
 import "../node_modules/react-resizable/css/styles.css";
 import "../styles/globals.css";
 import "../styles/index.css";
-
 import { Analytics } from "@vercel/analytics/react";
 import { NextPage } from "next";
 import posthog from "posthog-js";

@@ -68,6 +68,21 @@ export interface RequestQueryParams {
 @Tags("Request")
 @Security("api_key")
 export class RequestController extends Controller {
+  @Post("count/query")
+  public async getRequestCount(
+    @Body() requestBody: RequestQueryParams,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<number, string>> {
+    const reqManager = new RequestManager(request.authParams);
+    const count = await reqManager.getRequestCount(requestBody);
+    if (count.error) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return count;
+  }
+
   /**
    *
    * @param requestBody Request query filters

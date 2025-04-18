@@ -83,7 +83,12 @@ const ReportsModal = (props: ReportsModalProps) => {
     setSelectedSlackChannels(
       report?.active ? (report?.settings?.slack_channels as string[]) : []
     );
-  }, [open]);
+  }, [
+    open,
+    report?.active,
+    report?.settings?.emails,
+    report?.settings?.slack_channels,
+  ]);
 
   const { data: slackIntegration, isLoading: isLoadingSlackIntegration } =
     useGetOrgSlackIntegration(orgContext?.currentOrg?.id || "");
