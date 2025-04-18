@@ -22,7 +22,7 @@ pub async fn test() {
 
     let response = reqwest::Client::new()
         .post(
-            "http://localhost:5678/router/009338b1-1e21-4a7b-a066-46e6f800a4bf",
+            "http://localhost:5678/router/009338b1-1e21-4a7b-a066-46e6f800a4bf/v1/chat/completions",
         )
         .header("Content-Type", "application/json")
         .body(bytes)

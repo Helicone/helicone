@@ -12,7 +12,7 @@ use isocountry::CountryCode;
 use uuid::Uuid;
 
 use crate::{
-    app::AppContext,
+    app::AppState,
     error::{
         api::{Error, InvalidRequestError},
         internal::InternalError,
@@ -26,7 +26,7 @@ use crate::{
 #[derive(Debug)]
 pub struct Service<S, ReqBody> {
     inner: S,
-    app_ctx: Arc<AppContext>,
+    app_state: Arc<AppState>,
     _marker: PhantomData<ReqBody>,
 }
 
@@ -39,17 +39,17 @@ where
     fn clone(&self) -> Self {
         Self {
             inner: self.inner.clone(),
-            app_ctx: Arc::clone(&self.app_ctx),
+            app_state: Arc::clone(&self.app_state),
             _marker: PhantomData,
         }
     }
 }
 
 impl<S, ReqBody> Service<S, ReqBody> {
-    pub fn new(inner: S, app_ctx: Arc<AppContext>) -> Self {
+    pub fn new(inner: S, app_state: Arc<AppState>) -> Self {
         Self {
             inner,
-            app_ctx,
+            app_state,
             _marker: PhantomData,
         }
     }
@@ -105,19 +105,32 @@ where
             .extensions_mut()
             .remove::<AuthContext>()
             .ok_or(InternalError::ExtensionNotFound("AuthContext"))?;
+        tracing::info!("hi");
         // TODO: we need to have a layer to normalize request paths like slashes
         // at the end eg remove last slash in https://router.helicone.ai/router/foo123/
         let router_id_path = req
             .uri()
             .path()
             .split('/')
-            .last()
+            .nth(2)
             .ok_or(InvalidRequestError::MissingRouterId)?;
+        tracing::info!(router_id_path = %router_id_path, "got router id path");
+        
+        // Get the parts after the router ID
+        let remaining_path = req
+            .uri()
+            .path()
+            .split('/')
+            .skip(3) // Skip "", "router", and the router ID
+            .collect::<Vec<&str>>()
+            .join("/");
+        tracing::info!(remaining_path = %remaining_path, "got remaining path");
+        
         let router_id = Uuid::parse_str(router_id_path)
             .map_err(InvalidRequestError::InvalidRouterId)?;
-        let mut tx = self.app_ctx.store.db.begin().await?;
+        let mut tx = self.app_state.store.db.begin().await?;
         let router = self
-            .app_ctx
+            .app_state
             .store
             .router
             .get_latest_version(&mut tx, router_id)
@@ -129,7 +142,7 @@ where
         // TODO: will likely want to make this into one call/fetch all provider
         // keys at once since we may have multiple
         let provider_api_key = self
-            .app_ctx
+            .app_state
             .store
             .provider_keys
             .get_provider_key(
@@ -151,7 +164,7 @@ where
         )]));
 
         let target_url = self
-            .app_ctx
+            .app_state
             .config
             .dispatcher
             .get_provider_url(router.config.default_provider)?
@@ -185,14 +198,14 @@ where
 
 #[derive(Debug, Clone)]
 pub struct Layer<ReqBody> {
-    app_ctx: Arc<AppContext>,
+    app_state: Arc<AppState>,
     _marker: PhantomData<ReqBody>,
 }
 
 impl<ReqBody> Layer<ReqBody> {
-    pub fn new(app_ctx: Arc<AppContext>) -> Self {
+    pub fn new(app_state: Arc<AppState>) -> Self {
         Self {
-            app_ctx,
+            app_state,
             _marker: PhantomData,
         }
     }
@@ -202,6 +215,6 @@ impl<S, ReqBody> tower::Layer<S> for Layer<ReqBody> {
     type Service = Service<S, ReqBody>;
 
     fn layer(&self, inner: S) -> Self::Service {
-        Service::new(inner, self.app_ctx.clone())
+        Service::new(inner, self.app_state.clone())
     }
 }

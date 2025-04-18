@@ -37,7 +37,7 @@ pub type ServiceStack<ReqBody> = CatchPanic<
     DefaultResponseForPanic,
 >;
 
-pub struct AppContext {
+pub struct AppState {
     pub config: Config,
     pub minio: Option<Minio>,
     pub authed_rate_limit: Arc<AuthedLimiterConfig>,
@@ -45,9 +45,9 @@ pub struct AppContext {
     pub store: StoreRealm,
 }
 
-impl std::fmt::Debug for AppContext {
+impl std::fmt::Debug for AppState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("AppContext")
+        f.debug_struct("AppState")
             .field("config", &self.config)
             .field("authed_rate_limit", &self.authed_rate_limit)
             .field("unauthed_rate_limit", &self.unauthed_rate_limit)
@@ -57,7 +57,7 @@ impl std::fmt::Debug for AppContext {
 }
 
 pub struct App<ReqBody> {
-    pub context: Arc<AppContext>,
+    pub state: Arc<AppState>,
     pub service_stack: ServiceStack<ReqBody>,
 }
 
@@ -94,7 +94,7 @@ where
         let registry = Registry::new(&config.dispatcher);
         let router = Router::new(registry);
 
-        let app_ctx = Arc::new(AppContext {
+        let app_state = Arc::new(AppState {
             config,
             minio,
             authed_rate_limit,
@@ -106,14 +106,14 @@ where
             .layer(CatchPanicLayer::new())
             .layer(AsyncRequireAuthorizationLayer::new(AuthService))
             .layer(crate::middleware::request_context::Layer::new(
-                app_ctx.clone(),
+                app_state.clone(),
             ))
             // other middleware: rate limiting, logging, etc, etc
             // will be added here as well
             .service(router);
 
         Ok(Self {
-            context: app_ctx,
+            state: app_state,
             service_stack,
         })
     }
@@ -128,10 +128,10 @@ impl meltdown::Service for App<hyper::body::Incoming> {
                 self.service_stack,
             );
 
-            info!(address = %self.context.config.server.address, tls = %self.context.config.server.tls, "server starting");
+            info!(address = %self.state.config.server.address, tls = %self.state.config.server.tls, "server starting");
             let listener = TcpListener::bind((
-                self.context.config.server.address,
-                self.context.config.server.port,
+                self.state.config.server.address,
+                self.state.config.server.port,
             ))
             .await
             .map_err(crate::error::init::Error::Bind)?;
@@ -179,8 +179,8 @@ impl meltdown::Service for App<hyper::body::Incoming> {
                 _ = graceful.shutdown() => {
                     tracing::info!("Gracefully shutdown successfully!");
                 },
-                _ = tokio::time::sleep(self.context.config.server.shutdown_timeout) => {
-                    tracing::info!("Reached graceful shutdown timeout {:?}, aborting...", self.context.config.server.shutdown_timeout);
+                _ = tokio::time::sleep(self.state.config.server.shutdown_timeout) => {
+                    tracing::info!("Reached graceful shutdown timeout {:?}, aborting...", self.state.config.server.shutdown_timeout);
                 }
             }
 

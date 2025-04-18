@@ -1,9 +1,10 @@
 [package]
-name = "llm-proxy"
-version = "0.1.0"
-edition = "2024"
-authors = [ "Thomas Harmon <thomas.alan.harmon@gmail.com>" ]
-default-run = "llm-proxy"
+name = "rama-helicone-router"
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+publish.workspace = true
+version.workspace = true
 
 [dependencies]
 openai-types = { workspace = true }
@@ -50,14 +51,11 @@ url = { workspace = true, features = ['serde'] }
 utoipa = { workspace = true }
 uuid = { workspace = true, features = ["serde", "v7"] }
 
-rama = { workspace = true, features = ["http", "net", "tcp"] }
+rama = { workspace = true, features = ["default", "http-full", "net", "tcp", "rustls"] }
+itertools = { workspace = true }
 serde_yml = { workspace = true }
 stubr = { workspace = true, optional = true }
 
 [features]
 default = []
-testing = ["dep:stubr"]
-
-[[test]]
-name = "default_target"
-required-features = ["testing"]
+testing = []

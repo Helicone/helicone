@@ -1,0 +1,29 @@
+use displaydoc::Display;
+use rama::error::OpaqueError;
+use telemetry::TelemetryError;
+use thiserror::Error;
+
+/// Errors that can occur during initialization.
+#[derive(Debug, Error, Display)]
+pub enum InitError {
+    /// Failed to read config: {0}
+    Config(#[from] crate::config::Error),
+    /// Failed to read TLS certificate: {0}
+    Tls(OpaqueError),
+    /// Failed to connect to database: {0}
+    DatabaseConnection(sqlx::Error),
+    /// Migrations failed: {0}
+    Migrations(#[from] sqlx::migrate::MigrateError),
+    /// Failed to bind to address: {0}
+    Bind(Box<dyn std::error::Error + Send + Sync>),
+    /// Telemetry: {0}
+    Telemetry(#[from] TelemetryError),
+    /// Minio credentials not set
+    MissingMinioCredentials,
+    /// Minio client: {0}
+    MinioClient(#[from] minio_rsc::error::ValueError),
+    /// Minio migration: {0}
+    MinioMigration(minio_rsc::error::Error),
+    /// OAuth config: {0}
+    OAuthConfig(url::ParseError),
+}
