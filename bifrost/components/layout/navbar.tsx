@@ -17,7 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { BookHeart, ChevronDown, ChevronRight, Component, Earth, Gem, Github, GitMerge, HandCoins, TrendingUp } from "lucide-react";
+import { BookHeart, ChevronDown, ChevronRight, Component, Earth, Gem, Github, GitMerge, HandCoins, TrendingUp, ExternalLink } from "lucide-react";
 
 interface NavBarProps {
   stars?: number;
@@ -189,7 +189,7 @@ const NavLinks = () => {
               open={openDropdown === link.label}
             >
               <DropdownMenuTrigger
-                className="flex items-center gap-1 font-regular hover:text-black rounded-md px-4 py-2 focus:outline-none text-slate-700 opacity-75 cursor-pointer"
+                className="flex items-center gap-1 font-regular hover:text-black rounded-md px-4 py-2.5 focus:outline-none text-slate-700 opacity-75 cursor-pointer w-full"
                 onMouseEnter={() => handleMouseEnter(link.label)}
                 onMouseLeave={handleMouseLeave}
               >
@@ -289,6 +289,7 @@ const NavIcons = () => {
 const MobileNav = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const path = usePathname();
+
   useEffect(() => {
     setMenuOpen(false);
   }, [path]);
@@ -357,14 +358,14 @@ const MobileNav = () => {
 
   const additionalLinks: NavLink[] = [
     {
-      href: "https://app.dover.com/jobs/helicone",
-      label: "Careers",
-      icon: <UserGroupIcon className={MENU_ICON_CLASSES} />,
-    },
-    {
       href: "/contact",
       label: "Contact",
       icon: <EnvelopeIcon className={MENU_ICON_CLASSES} />,
+    },
+    {
+      href: "https://app.dover.com/jobs/helicone",
+      label: "Careers",
+      icon: <UserGroupIcon className={MENU_ICON_CLASSES} />,
     },
     {
       href: "https://github.com/Helicone",
@@ -375,59 +376,73 @@ const MobileNav = () => {
 
   // Helper function to render links
   const renderLinks = (links: NavLink[]) => {
-    return links.map((link: NavLink, i: number) => (
-      <Link
-        key={i}
-        href={link.href}
-        className="flex items-center gap-2 group text-slate-700 hover:text-black"
-      >
-        <div className="flex-shrink-0">{link.icon}</div>
-        <div className="flex flex-col">
-          <span className="font-medium text-sm">
-            {link.label}
-          </span>
-        </div>
-        <ChevronRight className="h-4 w-4 ml-auto text-slate-400 stroke-[1.5px]" />
-      </Link>
-    ));
+    return links.map((link: NavLink, i: number) => {
+      const isExternalLink = link.label === "Careers" || link.label === "GitHub";
+      return (
+        <Link
+          key={i}
+          href={link.href}
+          target={isExternalLink ? "_blank" : undefined}
+          rel={isExternalLink ? "noopener noreferrer" : undefined}
+          className="flex items-center group gap-1 text-slate-700 hover:text-black"
+        >
+          <div className="flex-shrink-0">{link.icon}</div>
+          <div className="flex flex-col">
+            <span className="font-medium text-sm">
+              {link.label}
+            </span>
+          </div>
+          {isExternalLink ? (
+            <ExternalLink className="h-4 w-4 ml-auto text-slate-400 stroke-[1.5px]" />
+          ) : (
+            <ChevronRight className="h-4 w-4 ml-auto text-slate-400 stroke-[1.5px]" />
+          )}
+        </Link>
+      );
+    });
   };
 
   return (
     <nav className="lg:hidden" aria-label="Global">
-      <MobileHeader menuDispatch={[menuOpen, setMenuOpen]} className="pl-2 pr-4" />
+      <div className="fixed inset-x-0 top-0 z-50 bg-white">
+        <MobileHeader menuDispatch={[menuOpen, setMenuOpen]} className="pl-2 pr-4" />
+      </div>
       {menuOpen && (
-        <div className="absolute z-10 h-screen w-full flex flex-col px-5 bg-white gap-5 overflow-y-auto">
-          {/* Standard Links */}
-          <div className="flex flex-col gap-5">
-            {renderLinks(standardLinks)}
-          </div>
+        <div className="fixed inset-0 top-[57px] z-50 bg-white">
+          <div className="h-full overflow-y-auto">
+            <div className="flex flex-col gap-2 pt-3 px-4">
+              {/* Standard Links */}
+              <div className="flex flex-col gap-4">
+                {renderLinks(standardLinks)}
+              </div>
 
-          {/* Resources Section */}
-          <div className="pt-2 border-t border-slate-100">
-            <p className="text-[10px] uppercase text-slate-400 font-medium mt-2 mb-5">Resources</p>
-            <div className="flex flex-col gap-5">
-              {renderLinks(resourcesLinks)}
-            </div>
-          </div>
+              {/* Resources Section */}
+              <div className="py-2 border-t border-slate-100">
+                <p className="text-[10px] uppercase text-slate-400 font-medium mt-2 mb-4 mx-1">Resources</p>
+                <div className="flex flex-col gap-4">
+                  {renderLinks(resourcesLinks)}
+                </div>
+              </div>
 
-          {/* Tools Section */}
-          <div className="pt-2 border-t border-slate-100">
-            <p className="text-[10px] uppercase text-slate-400 font-medium mt-2 mb-5">Tools</p>
-            <div className="flex flex-col gap-5">
-              {renderLinks(toolsLinks)}
-            </div>
-          </div>
+              {/* Tools Section */}
+              <div className="py-2 border-t border-slate-100">
+                <p className="text-[10px] uppercase text-slate-400 font-medium mt-2 mb-4 mx-1">Tools</p>
+                <div className="flex flex-col gap-4">
+                  {renderLinks(toolsLinks)}
+                </div>
+              </div>
 
-          {/* Additional Links */}
-          <div className="pt-4 border-t border-slate-100 mb-10">
-            <div className="flex flex-col gap-5 mt-2">
-              {renderLinks(additionalLinks)}
+              {/* Additional Links */}
+              <div className="py-4 border-t border-slate-100 mb-10">
+                <div className="flex flex-col gap-4">
+                  {renderLinks(additionalLinks)}
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      )
-      }
-    </nav >
+      )}
+    </nav>
   );
 };
 
