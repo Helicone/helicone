@@ -247,7 +247,6 @@ const useGetRequestCountClickhouse = (
   startDateISO: string,
   endDateISO: string
 ) => {
-<<<<<<< HEAD
   const { data, isLoading, refetch } = $JAWN_API.useQuery(
     "post",
     "/v1/request/count/query",
@@ -269,37 +268,6 @@ const useGetRequestCountClickhouse = (
               },
             },
           },
-=======
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: [`org-count`, startDateISO, endDateISO],
-    queryFn: async (query) => {
-      const startDate = query.queryKey[2];
-      const endDate = query.queryKey[3];
-
-      const data = await fetch(`/api/request/ch/count`, {
-        method: "POST",
-        body: JSON.stringify({
-          filter: {
-            left: {
-              request_response_rmt: {
-                request_created_at: {
-                  gte: startDate,
-                },
-              },
-            },
-            operator: "and",
-            right: {
-              request_response_rmt: {
-                request_created_at: {
-                  lte: endDate,
-                },
-              },
-            },
-          },
-        }),
-        headers: {
-          "Content-Type": "application/json",
->>>>>>> main
         },
       },
     },
