@@ -69,6 +69,10 @@ export const getMapperType = ({
   isAssistant?: boolean;
   targetUrl?: string | null;
 }): MapperType => {
+  if (path && path.includes("openai")) {
+    return "openai-chat";
+  }
+
   if (!model) {
     return "openai-chat";
   }
