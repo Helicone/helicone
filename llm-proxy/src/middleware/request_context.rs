@@ -115,7 +115,7 @@ where
             .nth(2)
             .ok_or(InvalidRequestError::MissingRouterId)?;
         tracing::info!(router_id_path = %router_id_path, "got router id path");
-        
+
         // Get the parts after the router ID
         let remaining_path = req
             .uri()
@@ -125,7 +125,7 @@ where
             .collect::<Vec<&str>>()
             .join("/");
         tracing::info!(remaining_path = %remaining_path, "got remaining path");
-        
+
         let router_id = Uuid::parse_str(router_id_path)
             .map_err(InvalidRequestError::InvalidRouterId)?;
         let mut tx = self.app_state.store.db.begin().await?;
