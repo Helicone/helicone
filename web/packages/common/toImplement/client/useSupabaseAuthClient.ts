@@ -43,11 +43,14 @@ export async function supabaseAuthClientFromSSRContext(
 }
 
 export class SupabaseAuthClient implements HeliconeAuthClient {
+  user: HeliconeUser | undefined;
   constructor(
     private supabaseClient?: SupabaseClient<Database>,
     user?: HeliconeUser,
     private org?: { org: HeliconeOrg; role: string }
-  ) {}
+  ) {
+    this.user = user;
+  }
 
   async getOrg(): Promise<Result<{ org: HeliconeOrg; role: string }, string>> {
     if (!this.org) {
