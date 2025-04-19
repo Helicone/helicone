@@ -1,5 +1,4 @@
 use std::{
-    marker::PhantomData,
     str::FromStr,
     sync::Arc,
     task::{Context, Poll},
@@ -7,84 +6,58 @@ use std::{
 
 use bytes::Bytes;
 use futures::future::BoxFuture;
-use http::{HeaderName, HeaderValue, Request, Response};
-use http_body_util::{BodyExt, Full};
-use hyper::body::Body;
+use http::{HeaderName, HeaderValue};
+use http_body_util::BodyExt;
 use reqwest::Client;
 use tower::{Service, util::BoxService};
 
 use crate::{
     error::{api::Error, internal::InternalError},
     mapper::TryConvert,
-    types::{provider::Provider, request::RequestContext},
+    types::{
+        model::Model, provider::Provider, request::{Request, RequestContext}, response::Response
+    },
 };
 
-pub type RespBody = Full<Bytes>;
-pub type DispatcherFuture =
-    BoxFuture<'static, Result<Response<RespBody>, Error>>;
-pub type DispatcherService<ReqBody> =
-    BoxService<Request<ReqBody>, Response<RespBody>, Error>;
+pub type DispatcherFuture = BoxFuture<'static, Result<Response, Error>>;
+pub type DispatcherService = BoxService<Request, Response, Error>;
 
-pub trait AiProviderDispatcher<ReqBody>:
-    Service<Request<ReqBody>, Response = Response<RespBody>, Error = Error>
+pub trait AiProviderDispatcher:
+    Service<Request, Response = Response, Error = Error>
     + Clone
     + Send
     + Sync
     + 'static
 {
     fn provider(&self) -> Provider;
+    fn model(&self) -> &Model;
 }
 
-#[derive(Debug)]
-pub struct Dispatcher<ReqBody> {
+#[derive(Debug, Clone)]
+pub struct Dispatcher {
     client: Client,
+    model: Model,
     provider: Provider,
-    _marker: PhantomData<ReqBody>,
 }
 
-impl<ReqBody> Clone for Dispatcher<ReqBody> {
-    fn clone(&self) -> Self {
-        Self {
-            client: self.client.clone(),
-            provider: self.provider.clone(),
-            _marker: PhantomData,
-        }
-    }
-}
-
-impl<ReqBody> AiProviderDispatcher<ReqBody> for Dispatcher<ReqBody>
-where
-    ReqBody: Body + Send + Sync + 'static,
-    <ReqBody as hyper::body::Body>::Error: Send + Sync + std::error::Error,
-    <ReqBody as hyper::body::Body>::Data: Send + Sync,
-{
+impl AiProviderDispatcher for Dispatcher {
     fn provider(&self) -> Provider {
         self.provider
     }
-}
 
-impl<ReqBody> Dispatcher<ReqBody>
-where
-    ReqBody: Body + Send + Sync + 'static,
-    <ReqBody as hyper::body::Body>::Error: Send + Sync + std::error::Error,
-    <ReqBody as hyper::body::Body>::Data: Send + Sync,
-{
-    pub fn new(client: Client, provider: Provider) -> Self {
-        Self {
-            client,
-            provider,
-            _marker: PhantomData,
-        }
+    fn model(&self) -> &Model {
+        &self.model
     }
 }
 
-impl<ReqBody> Service<Request<ReqBody>> for Dispatcher<ReqBody>
-where
-    ReqBody: Body + Send + Sync + 'static,
-    <ReqBody as hyper::body::Body>::Error: Send + Sync + std::error::Error,
-    <ReqBody as hyper::body::Body>::Data: Send + Sync,
-{
-    type Response = Response<RespBody>;
+impl Dispatcher {
+    pub fn new(client: Client, model: Model, provider: Provider) -> Self {
+        Self { client, model, provider }
+    }
+}
+
+impl Service<Request> for Dispatcher {
+    type Response = Response;
     type Error = Error;
     type Future = DispatcherFuture;
 
@@ -96,7 +69,7 @@ where
     }
 
     #[tracing::instrument(name = "Dispatcher::call", skip(self, req))]
-    fn call(&mut self, req: Request<ReqBody>) -> Self::Future {
+    fn call(&mut self, req: Request) -> Self::Future {
         tracing::info!("Dispatcher::call");
         let this = self.clone();
         tracing::debug!(uri = %req.uri(), headers = ?req.headers(), "Received request");
@@ -104,16 +77,8 @@ where
     }
 }
 
-impl<ReqBody> Dispatcher<ReqBody>
-where
-    ReqBody: Body + Send + Sync + 'static,
-    <ReqBody as hyper::body::Body>::Error: Send + Sync + std::error::Error,
-    <ReqBody as hyper::body::Body>::Data: Send + Sync,
-{
-    async fn dispatch(
-        &self,
-        mut req: Request<ReqBody>,
-    ) -> Result<Response<RespBody>, Error> {
+impl Dispatcher {
+    async fn dispatch(&self, mut req: Request) -> Result<Response, Error> {
         let req_ctx = req
             .extensions()
             .get::<Arc<RequestContext>>()
@@ -160,6 +125,9 @@ where
                         HeaderValue::from_str("2023-06-01").unwrap(),
                     );
                 }
+                _ => todo!(
+                    "only anthropic and openai are supported at the moment"
+                ),
             }
         }
         let target_uri = http::Uri::from_str(target_url.as_str()).unwrap();
@@ -179,8 +147,8 @@ where
             (Provider::OpenAI, Provider::Anthropic) => {
                 convert_openai_to_anthropic(req_body_bytes)?
             }
-            (Provider::Anthropic, Provider::OpenAI) => {
-                todo!()
+            _ => {
+                todo!("only anthropic and openai are supported at the moment")
             }
         };
         let response = self
@@ -192,28 +160,8 @@ where
             .await
             .map_err(|e| InternalError::ReqwestError(e))?;
 
-        convert_reqwest_to_http_response(response).await
+        Ok(response.into())
     }
-}
-
-async fn convert_reqwest_to_http_response(
-    response: reqwest::Response,
-) -> Result<Response<RespBody>, Error> {
-    let mut resp_builder = Response::builder()
-        .status(response.status())
-        .version(response.version());
-    for (key, value) in response.headers() {
-        resp_builder = resp_builder.header(key, value);
-    }
-    let body = response
-        .bytes()
-        .await
-        .map_err(|e| InternalError::ReqwestError(e))?;
-    let body = Full::new(body);
-    let http_resp = resp_builder
-        .body(body)
-        .map_err(|e| InternalError::HttpError(e))?;
-    Ok(http_resp)
 }
 
 fn convert_openai_to_anthropic(req_body_bytes: Bytes) -> Result<Bytes, Error> {

@@ -50,7 +50,6 @@ url = { workspace = true, features = ['serde'] }
 utoipa = { workspace = true }
 uuid = { workspace = true, features = ["serde", "v7"] }
 
-rama = { workspace = true, features = ["http", "net", "tcp"] }
 serde_yml = { workspace = true }
 stubr = { workspace = true, optional = true }
 

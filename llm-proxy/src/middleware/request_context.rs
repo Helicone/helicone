@@ -26,7 +26,7 @@ use crate::{
 #[derive(Debug)]
 pub struct Service<S, ReqBody> {
     inner: S,
-    app_state: Arc<AppState>,
+    app_state: AppState,
     _marker: PhantomData<ReqBody>,
 }
 
@@ -39,14 +39,14 @@ where
     fn clone(&self) -> Self {
         Self {
             inner: self.inner.clone(),
-            app_state: Arc::clone(&self.app_state),
+            app_state: self.app_state.clone(),
             _marker: PhantomData,
         }
     }
 }
 
 impl<S, ReqBody> Service<S, ReqBody> {
-    pub fn new(inner: S, app_state: Arc<AppState>) -> Self {
+    pub fn new(inner: S, app_state: AppState) -> Self {
         Self {
             inner,
             app_state,
@@ -128,9 +128,10 @@ where
 
         let router_id = Uuid::parse_str(router_id_path)
             .map_err(InvalidRequestError::InvalidRouterId)?;
-        let mut tx = self.app_state.store.db.begin().await?;
+        let mut tx = self.app_state.0.store.db.begin().await?;
         let router = self
             .app_state
+            .0
             .store
             .router
             .get_latest_version(&mut tx, router_id)
@@ -143,6 +144,7 @@ where
         // keys at once since we may have multiple
         let provider_api_key = self
             .app_state
+            .0
             .store
             .provider_keys
             .get_provider_key(
@@ -165,6 +167,7 @@ where
 
         let target_url = self
             .app_state
+            .0
             .config
             .dispatcher
             .get_provider_url(router.config.default_provider)?
@@ -198,12 +201,12 @@ where
 
 #[derive(Debug, Clone)]
 pub struct Layer<ReqBody> {
-    app_state: Arc<AppState>,
+    app_state: AppState,
     _marker: PhantomData<ReqBody>,
 }
 
 impl<ReqBody> Layer<ReqBody> {
-    pub fn new(app_state: Arc<AppState>) -> Self {
+    pub fn new(app_state: AppState) -> Self {
         Self {
             app_state,
             _marker: PhantomData,

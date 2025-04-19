@@ -2,6 +2,7 @@ use std::time::Instant;
 
 use indexmap::IndexMap;
 use isocountry::CountryCode;
+use reqwest::Body;
 use url::Url;
 
 use super::{
@@ -11,6 +12,8 @@ use super::{
     user::UserId,
 };
 use crate::config::router::RouterConfig;
+
+pub type Request = http::Request<Body>;
 
 pub struct HeliconeContext {
     pub properties: Option<IndexMap<String, String>>,

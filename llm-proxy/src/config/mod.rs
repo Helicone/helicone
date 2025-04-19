@@ -2,12 +2,13 @@ pub mod database;
 pub mod dispatcher;
 pub mod metrics;
 pub mod minio;
+pub mod models;
+pub mod providers;
 pub mod rate_limit;
 pub mod retry;
 pub mod router;
 pub mod server;
 pub mod spend_control;
-
 use std::path::PathBuf;
 
 use config::ConfigError;
@@ -39,6 +40,11 @@ pub struct Config {
     pub minio: self::minio::Config,
     pub rate_limit: self::rate_limit::RateLimitConfig,
     pub is_production: bool,
+    pub providers: self::providers::ProvidersConfig,
+
+    /// NOTE: In the future we will delete this field and
+    /// instead load the models from the provider's respective APIs
+    pub models: self::models::ModelsConfig,
 }
 
 impl Config {
@@ -94,6 +100,8 @@ impl Default for Config {
             minio: minio::Config::default(),
             rate_limit: rate_limit::RateLimitConfig::default(),
             is_production: false,
+            providers: providers::ProvidersConfig::default(),
+            models: models::ModelsConfig::default(),
         }
     }
 }

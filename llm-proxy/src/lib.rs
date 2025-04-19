@@ -1,5 +1,6 @@
 pub mod app;
 pub mod config;
+pub mod discover;
 pub mod dispatcher;
 pub mod error;
 pub mod mapper;

@@ -1,11 +1,14 @@
 use std::{sync::Arc, time::Duration};
 
 use futures::future::BoxFuture;
-use hyper::body::Body;
+use http::Request;
 use meltdown::Token;
 use minio_rsc::{Minio, provider::StaticProvider};
 use tokio::{io, net::TcpListener};
-use tower::ServiceBuilder;
+use tower::{
+    Service, ServiceBuilder,
+    util::{BoxCloneService, BoxService},
+};
 use tower_http::{
     auth::{AsyncRequireAuthorization, AsyncRequireAuthorizationLayer},
     catch_panic::{CatchPanic, CatchPanicLayer, DefaultResponseForPanic},
@@ -29,15 +32,18 @@ use crate::{
 /// Type representing the middleware layers.
 ///
 /// When adding a new middleware, you'll be required to add it to this type.
-pub type ServiceStack<ReqBody> = CatchPanic<
+pub type ServiceStack = CatchPanic<
     AsyncRequireAuthorization<
-        RequestContextService<Router<ReqBody>, ReqBody>,
+        RequestContextService<Router, reqwest::Body>,
         AuthService,
     >,
     DefaultResponseForPanic,
 >;
 
-pub struct AppState {
+#[derive(Debug, Clone)]
+pub struct AppState(pub Arc<InnerAppState>);
+
+pub struct InnerAppState {
     pub config: Config,
     pub minio: Option<Minio>,
     pub authed_rate_limit: Arc<AuthedLimiterConfig>,
@@ -45,7 +51,7 @@ pub struct AppState {
     pub store: StoreRealm,
 }
 
-impl std::fmt::Debug for AppState {
+impl std::fmt::Debug for InnerAppState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("AppState")
             .field("config", &self.config)
@@ -56,16 +62,82 @@ impl std::fmt::Debug for AppState {
     }
 }
 
-pub struct App<ReqBody> {
-    pub state: Arc<AppState>,
-    pub service_stack: ServiceStack<ReqBody>,
+pub(crate) struct InnerApp<ReqBody> {
+    pub state: AppState,
+    pub service_stack: BoxCloneService<
+        http::Request<ReqBody>,
+        http::Response<reqwest::Body>,
+        crate::error::api::Error,
+    >,
 }
 
-impl<ReqBody> App<ReqBody>
+impl<ReqBody> tower::Service<http::Request<ReqBody>> for InnerApp<ReqBody> {
+    type Response = http::Response<reqwest::Body>;
+    type Error = crate::error::api::Error;
+    type Future = BoxFuture<'static, Result<Self::Response, Self::Error>>;
+
+    fn poll_ready(
+        &mut self,
+        cx: &mut std::task::Context<'_>,
+    ) -> std::task::Poll<Result<(), Self::Error>> {
+        self.service_stack.poll_ready(cx)
+    }
+
+    fn call(&mut self, req: http::Request<ReqBody>) -> Self::Future {
+        self.service_stack.call(req)
+    }
+}
+
+pub struct App {
+    pub(crate) inner: InnerApp<hyper::body::Incoming>,
+}
+
+impl App {
+    pub async fn new(config: Config) -> Result<Self, error::init::Error> {
+        let inner = InnerApp::new(config).await?;
+        Ok(Self { inner })
+    }
+
+    pub fn state(&self) -> &AppState {
+        &self.inner.state
+    }
+}
+
+impl meltdown::Service for App {
+    type Future = BoxFuture<'static, Result<(), crate::error::runtime::Error>>;
+
+    fn run(self, token: Token) -> Self::Future {
+        self.inner.run(token)
+    }
+}
+
+/// Usable in the test [`Harness`](crate::tests::harness::Harness) so that we
+/// can use a high level API to write unit tests against the entire app stack.
+pub struct TestApp {
+    pub(crate) inner: InnerApp<reqwest::Body>,
+}
+
+impl TestApp {
+    pub async fn new(config: Config) -> Result<Self, error::init::Error> {
+        let inner = InnerApp::new(config).await?;
+        Ok(Self { inner })
+    }
+}
+
+/*
+
+reqs -> ProviderRouter -> ModelRouter
+
+--> Provider Discover
+--> Model Discover for the provider
+
+*/
+
+impl<ReqBody> InnerApp<ReqBody>
 where
-    ReqBody: Body + Send + Sync + 'static,
-    <ReqBody as hyper::body::Body>::Error: Send + Sync + std::error::Error,
-    <ReqBody as hyper::body::Body>::Data: Send + Sync,
+    ReqBody: hyper::body::Body + Send + Sync + 'static,
+    ReqBody::Error: Into<Box<dyn std::error::Error + Send + Sync>>,
+    bytes::Bytes: From<<ReqBody as hyper::body::Body>::Data>,
 {
     pub async fn new(config: Config) -> Result<Self, error::init::Error> {
         let provider = StaticProvider::from_env();
@@ -94,32 +166,38 @@ where
         let registry = Registry::new(&config.dispatcher);
         let router = Router::new(registry);
 
-        let app_state = Arc::new(AppState {
+        let app_state = AppState(Arc::new(InnerAppState {
             config,
             minio,
             authed_rate_limit,
             unauthed_rate_limit,
             store: StoreRealm::new(pg_pool),
-        });
+        }));
 
-        let service_stack: ServiceStack<ReqBody> = ServiceBuilder::new()
+        let service_stack = ServiceBuilder::new()
             .layer(CatchPanicLayer::new())
+            .map_request(|r: http::Request<ReqBody>| {
+                let (parts, body) = r.into_parts();
+                let body = reqwest::Body::wrap(body);
+                Request::from_parts(parts, body)
+            })
             .layer(AsyncRequireAuthorizationLayer::new(AuthService))
-            .layer(crate::middleware::request_context::Layer::new(
+            .layer(crate::middleware::request_context::Layer::<ReqBody>::new(
                 app_state.clone(),
             ))
             // other middleware: rate limiting, logging, etc, etc
             // will be added here as well
             .service(router);
 
-        Ok(Self {
-            state: app_state,
-            service_stack,
-        })
+        todo!()
+        // Ok(Self {
+        //     state: app_state,
+        //     service_stack: todo!(),
+        // })
     }
 }
 
-impl meltdown::Service for App<hyper::body::Incoming> {
+impl meltdown::Service for InnerApp<hyper::body::Incoming> {
     type Future = BoxFuture<'static, Result<(), crate::error::runtime::Error>>;
 
     fn run(self, mut token: Token) -> Self::Future {
@@ -128,10 +206,10 @@ impl meltdown::Service for App<hyper::body::Incoming> {
                 self.service_stack,
             );
 
-            info!(address = %self.state.config.server.address, tls = %self.state.config.server.tls, "server starting");
+            info!(address = %self.state.0.config.server.address, tls = %self.state.0.config.server.tls, "server starting");
             let listener = TcpListener::bind((
-                self.state.config.server.address,
-                self.state.config.server.port,
+                self.state.0.config.server.address,
+                self.state.0.config.server.port,
             ))
             .await
             .map_err(crate::error::init::Error::Bind)?;
@@ -179,8 +257,8 @@ impl meltdown::Service for App<hyper::body::Incoming> {
                 _ = graceful.shutdown() => {
                     tracing::info!("Gracefully shutdown successfully!");
                 },
-                _ = tokio::time::sleep(self.state.config.server.shutdown_timeout) => {
-                    tracing::info!("Reached graceful shutdown timeout {:?}, aborting...", self.state.config.server.shutdown_timeout);
+                _ = tokio::time::sleep(self.state.0.config.server.shutdown_timeout) => {
+                    tracing::info!("Reached graceful shutdown timeout {:?}, aborting...", self.state.0.config.server.shutdown_timeout);
                 }
             }
 

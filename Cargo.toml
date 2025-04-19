@@ -6,7 +6,7 @@ members = [
   "crates/metrics",
   "crates/telemetry",
   "llm-proxy",
-  "test", "rama-helicone-router", 
+  "test",
 ]
 resolver = "2"
 
@@ -87,7 +87,6 @@ utoipa = "5.3.1"
 uuid = { version = "1.10.0", features = ["serde", "v7"] }
 
 itertools = "0.14.0"
-rama = "0.2.0-alpha.11"
 
 serde_yml = "0.0.12"
 stubr = { path = "/Users/thomasharmon/code/tmp/stubr/lib" }

@@ -1,19 +1,21 @@
-use http::{Request, Response};
 use stubr::{Stubr, wiremock_rs::MockServer};
 use tower::Service;
 
 use crate::{
-    app::App, config::Config, dispatcher::RespBody, error::api::Error,
+    app::TestApp,
+    config::Config,
+    error::api::Error,
+    types::{request::Request, response::Response},
 };
 
 pub struct Harness {
-    pub app: App<reqwest::Body>,
+    pub app: TestApp,
     pub mock: MockServer,
 }
 
 impl Harness {
     pub async fn new(config: Config) -> Self {
-        let app = App::new(config).await.expect("failed to create app");
+        let app = TestApp::new(config).await.expect("failed to create app");
         let mock = Stubr::try_start("./stubs")
             .await
             .expect("couldnt start mock htttp server");
@@ -23,11 +25,7 @@ impl Harness {
         }
     }
 
-    pub async fn call(
-        &mut self,
-        req: Request<reqwest::Body>,
-    ) -> Result<Response<RespBody>, Error> {
-        todo!()
-        // self.app.service_stack.call(req).await
+    pub async fn call(&mut self, req: Request) -> Result<Response, Error> {
+        self.app.inner.call(req).await
     }
 }

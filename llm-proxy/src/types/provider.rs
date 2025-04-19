@@ -14,6 +14,11 @@ pub enum Provider {
     OpenAI,
     #[display("anthropic")]
     Anthropic,
+    #[display("bedrock")]
+    Bedrock,
+    #[display("vertexai")]
+    VertexAi,
+    // Ollama? (assuming this means self-hosted)
 }
 
 #[derive(Debug, Clone, AsRef)]

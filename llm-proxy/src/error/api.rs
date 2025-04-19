@@ -12,6 +12,8 @@ pub enum InvalidRequestError {
     InvalidRouterId(#[from] uuid::Error),
     /// Missing router id in request path
     MissingRouterId,
+    /// Invalid request: {0}
+    InvalidRequest(http::Error),
 }
 
 /// Common API errors
