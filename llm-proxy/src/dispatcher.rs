@@ -9,18 +9,23 @@ use futures::future::BoxFuture;
 use http::{HeaderName, HeaderValue};
 use http_body_util::BodyExt;
 use reqwest::Client;
-use tower::{Service, util::BoxService};
+use tower::{Service, ServiceBuilder};
 
 use crate::{
+    app::AppState,
     error::{api::Error, internal::InternalError},
     mapper::TryConvert,
     types::{
-        model::Model, provider::Provider, request::{Request, RequestContext}, response::Response
+        model::Model,
+        provider::Provider,
+        request::{Request, RequestContext},
+        response::Response,
     },
 };
 
 pub type DispatcherFuture = BoxFuture<'static, Result<Response, Error>>;
-pub type DispatcherService = BoxService<Request, Response, Error>;
+pub type DispatcherService =
+    crate::middleware::no_op::Service<Dispatcher, reqwest::Body>;
 
 pub trait AiProviderDispatcher:
     Service<Request, Response = Response, Error = Error>
@@ -52,7 +57,30 @@ impl AiProviderDispatcher for Dispatcher {
 
 impl Dispatcher {
     pub fn new(client: Client, model: Model, provider: Provider) -> Self {
-        Self { client, model, provider }
+        Self {
+            client,
+            model,
+            provider,
+        }
+    }
+
+    pub fn new_with_middleware(
+        app_state: AppState,
+        model: Model,
+        provider: Provider,
+    ) -> DispatcherService {
+        let service_stack = ServiceBuilder::new()
+            // just to show how we will add dispatcher-specific middleware later
+            // e.g. for model/provider specific rate limiting, we need to do
+            // that at this level rather than globally.
+            .layer(crate::middleware::no_op::Layer::<reqwest::Body>::new(
+                app_state.clone(),
+            ))
+            // other middleware: rate limiting, logging, etc, etc
+            // will be added here as well
+            .service(Dispatcher::new(Client::new(), model, provider));
+
+        service_stack
     }
 }
 

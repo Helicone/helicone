@@ -17,28 +17,22 @@ use tracing::info;
 
 use crate::{
     config::{
-        Config,
-        rate_limit::{AuthedLimiterConfig, UnauthedLimiterConfig},
-    },
-    error,
-    middleware::{
+        rate_limit::{AuthedLimiterConfig, UnauthedLimiterConfig}, Config
+    }, error, middleware::{
         auth::AuthService, request_context::Service as RequestContextService,
-    },
-    registry::Registry,
-    router::Router,
-    store::StoreRealm,
+    }, router::Router, store::StoreRealm
 };
 
 /// Type representing the middleware layers.
 ///
 /// When adding a new middleware, you'll be required to add it to this type.
-pub type ServiceStack = CatchPanic<
-    AsyncRequireAuthorization<
-        RequestContextService<Router, reqwest::Body>,
-        AuthService,
-    >,
-    DefaultResponseForPanic,
->;
+// pub type ServiceStack = CatchPanic<
+//     AsyncRequireAuthorization<
+//         RequestContextService<Router, reqwest::Body>,
+//         AuthService,
+//     >,
+//     DefaultResponseForPanic,
+// >;
 
 #[derive(Debug, Clone)]
 pub struct AppState(pub Arc<InnerAppState>);
@@ -163,9 +157,6 @@ where
             .await
             .map_err(error::init::Error::DatabaseConnection)?;
 
-        let registry = Registry::new(&config.dispatcher);
-        let router = Router::new(registry);
-
         let app_state = AppState(Arc::new(InnerAppState {
             config,
             minio,
@@ -173,6 +164,9 @@ where
             unauthed_rate_limit,
             store: StoreRealm::new(pg_pool),
         }));
+
+        let services = crate::discover::config::ConfigDiscovery::service_list(app_state.clone());
+        let router = Router::new(services);
 
         let service_stack = ServiceBuilder::new()
             .layer(CatchPanicLayer::new())

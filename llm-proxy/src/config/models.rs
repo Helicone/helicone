@@ -6,7 +6,8 @@ use crate::types::{
     provider::Provider,
 };
 
-/// This will be replaced with a dynamic discovery of models from the provider's APIs:
+/// This will be replaced with a dynamic discovery of models from the provider's
+/// APIs:
 /// - https://docs.aws.amazon.com/bedrock/latest/APIReference/API_ListFoundationModels.html#API_ListFoundationModels_ResponseSyntax
 /// - https://docs.anthropic.com/en/api/reference/models
 /// - https://docs.openai.com/api-reference/models

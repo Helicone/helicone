@@ -1,5 +1,6 @@
 use displaydoc::Display;
 use thiserror::Error;
+use tower::BoxError;
 
 use crate::types::provider::Provider;
 
@@ -29,4 +30,6 @@ pub enum InternalError {
     HttpError(#[from] http::Error),
     /// Mapper error: {0}
     MapperError(#[from] crate::mapper::error::MapperError),
+    /// Load balancer error: {0}
+    LoadBalancerError(BoxError),
 }
