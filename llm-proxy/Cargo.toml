@@ -29,6 +29,7 @@ meltdown = { workspace = true }
 minio-rsc = { workspace = true }
 opentelemetry = { workspace = true }
 opentelemetry_sdk = { workspace = true, features = ["rt-tokio"] }
+pin-project = { workspace = true }
 pin-project-lite = { workspace = true }
 reqwest = { workspace = true }
 rust_decimal = { workspace = true }

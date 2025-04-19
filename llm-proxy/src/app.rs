@@ -2,6 +2,7 @@ use std::{sync::Arc, time::Duration};
 
 use futures::future::BoxFuture;
 use http::Request;
+use http_body_util::BodyExt;
 use meltdown::Token;
 use minio_rsc::{Minio, provider::StaticProvider};
 use tokio::{io, net::TcpListener};
@@ -63,7 +64,7 @@ impl std::fmt::Debug for InnerAppState {
 
 pub(crate) struct InnerApp<ReqBody> {
     pub state: AppState,
-    pub service_stack: BoxCloneService<
+    pub service_stack: BoxService<
         http::Request<ReqBody>,
         http::Response<reqwest::Body>,
         crate::error::api::Error,
@@ -175,13 +176,14 @@ where
         );
         let router = Router::new(services);
 
+        // global middleware is applied here
         let service_stack = ServiceBuilder::new()
-            .layer(CatchPanicLayer::new())
-            .map_request(|r: http::Request<ReqBody>| {
-                let (parts, body) = r.into_parts();
-                let body = reqwest::Body::wrap(body);
-                Request::from_parts(parts, body)
-            })
+            // .layer(CatchPanicLayer::new())
+            // .map_request(|r: http::Request<ReqBody>| {
+            //     let (parts, body) = r.into_parts();
+            //     let body = reqwest::Body::wrap(body);
+            //     Request::from_parts(parts, body)
+            // })
             .layer(AsyncRequireAuthorizationLayer::new(AuthService))
             .layer(crate::middleware::request_context::Layer::<ReqBody>::new(
                 app_state.clone(),
@@ -190,11 +192,10 @@ where
             // will be added here as well
             .service(router);
 
-        todo!()
-        // Ok(Self {
-        //     state: app_state,
-        //     service_stack: todo!(),
-        // })
+        Ok(Self {
+            state: app_state,
+            service_stack: BoxService::new(service_stack),
+        })
     }
 }
 

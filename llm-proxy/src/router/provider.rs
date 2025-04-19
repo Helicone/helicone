@@ -7,21 +7,21 @@ use tower::{
 };
 
 use crate::{
-    discover::config::ServiceList,
+    discover::Discovery,
     error::internal::InternalError,
     types::{request::Request, response::Response},
 };
 
 #[derive(Debug)]
-pub struct Router {
-    pub inner: Balance<PeakEwmaDiscover<ServiceList>, Request>,
+pub struct ProviderBalancer {
+    pub inner: Balance<PeakEwmaDiscover<Discovery>, Request>,
 }
 
-impl Router {
-    pub fn new(services: ServiceList) -> Self {
+impl ProviderBalancer {
+    pub async fn new(discovery: Discovery) -> Self {
         // should be configurable
         let discover = PeakEwmaDiscover::new(
-            services,
+            discovery,
             Duration::from_secs(1),
             // 15 mins
             Duration::from_secs(900),
@@ -33,11 +33,11 @@ impl Router {
     }
 }
 
-impl tower::Service<Request> for Router {
+impl tower::Service<Request> for ProviderBalancer {
     type Response = Response;
     type Error = BoxError;
     type Future =
-        <Balance<PeakEwmaDiscover<ServiceList>, Request> as tower::Service<
+        <Balance<PeakEwmaDiscover<Discovery>, Request> as tower::Service<
             Request,
         >>::Future;
 
@@ -55,3 +55,4 @@ impl tower::Service<Request> for Router {
         self.inner.call(req)
     }
 }
+

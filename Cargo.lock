@@ -2303,6 +2303,7 @@ dependencies = [
  "openai-types",
  "opentelemetry",
  "opentelemetry_sdk",
+ "pin-project",
  "pin-project-lite",
  "reqwest",
  "rust_decimal",

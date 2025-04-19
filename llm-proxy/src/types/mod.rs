@@ -1,3 +1,4 @@
+pub mod discover;
 pub mod model;
 pub mod org;
 pub mod provider;

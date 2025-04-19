@@ -62,6 +62,7 @@ opentelemetry_sdk = { version = "0.24.1", features = ["rt-tokio"] }
 opentelemetry-appender-tracing = "0.5.0"
 opentelemetry-otlp = { version = "0.17.0" }
 opentelemetry-semantic-conventions = "0.16.0"
+pin-project = "1.1.10"
 pin-project-lite = "0.2.16"
 prometheus = { version = "0.13.4", default-features = false }
 reqwest = { version = "0.12.12", features = [ "json", "stream", "multipart", "native-tls"], default-features = false }

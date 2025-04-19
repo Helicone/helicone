@@ -1,9 +1,7 @@
 use std::str::FromStr;
 
-use bytes::Bytes;
 use futures::future::BoxFuture;
-use http::{Request, Response, StatusCode};
-use http_body_util::Full;
+use http::{Request, StatusCode};
 use tower_http::auth::AsyncAuthorizeRequest;
 use uuid::Uuid;
 
@@ -17,9 +15,11 @@ where
     B: Send + Sync + 'static,
 {
     type RequestBody = B;
-    type ResponseBody = Full<Bytes>;
-    type Future =
-        BoxFuture<'static, Result<Request<B>, Response<Self::ResponseBody>>>;
+    type ResponseBody = reqwest::Body;
+    type Future = BoxFuture<
+        'static,
+        Result<Request<B>, http::Response<Self::ResponseBody>>,
+    >;
 
     #[tracing::instrument(name = "AuthService::authorize", skip(self, request))]
     fn authorize(&mut self, mut request: Request<B>) -> Self::Future {
@@ -32,9 +32,9 @@ where
 
                 Ok(request)
             } else {
-                let unauthorized_response = Response::builder()
+                let unauthorized_response = http::Response::builder()
                     .status(StatusCode::UNAUTHORIZED)
-                    .body(Full::<Bytes>::default())
+                    .body(reqwest::Body::default())
                     .unwrap();
 
                 Err(unauthorized_response)
