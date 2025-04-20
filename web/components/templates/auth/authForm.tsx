@@ -162,7 +162,8 @@ const AuthForm = (props: AuthFormProps) => {
     };
 
     preloadImages();
-  }, []);
+    // }, []);
+  }, [centerImages, quotes]);
 
   const router = useRouter();
   useEffect(() => {
@@ -359,8 +360,8 @@ const AuthForm = (props: AuthFormProps) => {
               {authFormType === "signin"
                 ? "Sign in to your account"
                 : authFormType === "signup"
-                  ? "Create an account"
-                  : "Reset your password"}
+                ? "Create an account"
+                : "Reset your password"}
             </h2>
             {authFormType === "signup" ? (
               <p className="mt-2 text-sm text-gray-600">
@@ -375,8 +376,10 @@ const AuthForm = (props: AuthFormProps) => {
             ) : (
               <p className="mt-2 text-sm text-gray-600">
                 New to Helicone?{" "}
-                {/* Don&apos;t have an account yet?{" "} */}
-                <Link href={"/signup"} className="text-sky-500 hover:text-sky-700">
+                <Link
+                  href={"/signup"}
+                  className="text-sky-500 hover:text-sky-700"
+                >
                   Create an account here.
                 </Link>
               </p>
@@ -482,7 +485,10 @@ const AuthForm = (props: AuthFormProps) => {
 
             {authFormType === "signin" && (
               <div className="flex justify-end">
-                <Link href={"/reset"} className="text-sky-500 hover:text-sky-700 text-sm">
+                <Link
+                  href={"/reset"}
+                  className="text-sky-500 hover:text-sky-700 text-sm"
+                >
                   Forgot your password?
                 </Link>
               </div>
@@ -498,10 +504,10 @@ const AuthForm = (props: AuthFormProps) => {
               {authFormType === "signin"
                 ? "Sign in with email"
                 : authFormType === "signup"
-                  ? "Create account"
-                  : authFormType === "reset"
-                    ? "Reset password"
-                    : "Update password"}
+                ? "Create account"
+                : authFormType === "reset"
+                ? "Reset password"
+                : "Update password"}
             </Button>
           </form>
 
