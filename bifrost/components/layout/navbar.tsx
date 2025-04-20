@@ -497,6 +497,14 @@ const NavBar = (props: NavBarProps) => {
         <div className="w-full mt-4 lg:mt-0 flex gap-x-1 items-center text-sm col-span-8 lg:col-span-6 order-3 lg:order-2 justify-between">
           <NavLinks />
           <div className="flex items-center gap-x-3">
+            <Link href="/signin">
+              <Button
+                variant="ghost"
+                className="text-sm text-landing-description rounded-lg"
+              >
+                Log in
+              </Button>
+            </Link>
             <a
               href="https://github.com/helicone/helicone"
               target="_blank"
@@ -506,7 +514,7 @@ const NavBar = (props: NavBarProps) => {
                 <svg
                   fill="currentColor"
                   viewBox="0 0 24 24"
-                  className="w-5 h-5 text-slate-700"
+                  className="w-5 h-5 text-landing-description"
                 >
                   <path
                     fillRule="evenodd"
@@ -514,7 +522,7 @@ const NavBar = (props: NavBarProps) => {
                     clipRule="evenodd"
                   />
                 </svg>
-                <p className="text-sm text-slate-700">
+                <p className="text-sm text-slate-500">
                   {props.stars
                     ? props.stars.toLocaleString("en-US", {
                       notation: "compact",
@@ -532,9 +540,9 @@ const NavBar = (props: NavBarProps) => {
                 Contact us
               </Button>
             </Link>
-            <Link href="https://us.helicone.ai/signin">
+            <Link href="https://us.helicone.ai/signup">
               <Button className="text-sm text-white rounded-lg bg-brand">
-                Log In
+                Sign up
               </Button>
             </Link>
           </div>
