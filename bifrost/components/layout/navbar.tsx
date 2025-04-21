@@ -1,26 +1,5 @@
 "use client";
 
-import * as React from "react"
-import Link from "next/link";
-import Image from "next/image";
-import { cn } from "@/lib/utils";
-import { useEffect, useState, useRef } from "react";
-import { usePathname } from "next/navigation";
-import {
-  EnvelopeIcon,
-  XMarkIcon,
-  UserGroupIcon,
-  NewspaperIcon,
-} from "@heroicons/react/24/outline";
-import { Button } from "../ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import { BookHeart, ChevronDown, ChevronRight, Component, Earth, Gem, Github, GitMerge, HandCoins, TrendingUp, ExternalLink, LayoutGrid } from "lucide-react";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -29,12 +8,36 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu"
+} from "@/components/ui/navigation-menu";
+import { cn } from "@/lib/utils";
+import {
+  EnvelopeIcon,
+  NewspaperIcon,
+  UserGroupIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
+import { BookHeart, ChevronDown, ChevronRight, Component, Earth, ExternalLink, Gem, Github, GitMerge, HandCoins, LayoutGrid, TrendingUp } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import * as React from "react";
+import { useEffect, useRef, useState } from "react";
+import { BlogStructureMetaData } from "../templates/blog/getMetaData";
+import { Button } from "../ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
 
 // import { ListItem } from "@/components/ui/navigation-menu-item";
 
 interface NavBarProps {
   stars?: number;
+  featuredBlogMetadata: BlogStructureMetaData;
+  featuredBlogFolderName?: string;
 }
 
 const MobileHeader = (props: {
@@ -42,6 +45,8 @@ const MobileHeader = (props: {
   className?: string;
 }) => {
   const [menuOpen, setMenuOpen] = props.menuDispatch;
+
+
   return (
     <div
       className={
@@ -186,6 +191,8 @@ const NavLinks = () => {
       label: "Careers",
     },
   ];
+
+  // styling of the old nav
   return (
     <div className="flex gap-x-2 flex-col lg:flex-row">
       {links.map((link, i) => {
@@ -524,17 +531,19 @@ const NavBar = (props: NavBarProps) => {
     }
   }, []);
 
+
   return (
     <div
       ref={headerRef}
-      className="bg-white top-0 sticky z-30 border-b border-gray-200 mb-10"
+      className="bg-white top-0 sticky z-30 border-b border-border mb-10"
     >
       <MobileNav />
 
       <nav
-        className="gap-x-3 mx-auto lg:flex sm:px-16 lg:px-24 2xl:px-40 max-w-[2000px] items-center py-3 hidden justify-between"
+        className="gap-x-3 mx-auto lg:flex sm:px-16 lg:px-24 2xl:px-40 max-w-[2000px] items-center py-2 hidden justify-between"
         aria-label="Global"
       >
+        {/* Logo */}
         <div className="flex items-center lg:col-span-1 order-1">
           <Link href="/" className="-m-1.5 w-[154px]">
             <span className="sr-only">Helicone</span>
@@ -560,7 +569,10 @@ const NavBar = (props: NavBarProps) => {
             />
           </Link>
         </div>
+
+        {/* Nav Links */}
         <div className="w-full mt-4 lg:mt-0 flex gap-x-1 items-center text-sm col-span-8 lg:col-span-6 order-3 lg:order-2 justify-between">
+
           <NavigationMenu>
             <NavigationMenuList>
 
@@ -586,15 +598,16 @@ const NavBar = (props: NavBarProps) => {
               <NavigationMenuItem>
                 <NavigationMenuTrigger>Resources</NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid gap-3 p-4 md:w-[500px] lg:w-[600px] lg:grid-cols-[.75fr_1fr]">
+                  <ul className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
                     <li>
                       {resourcesComponents.map((component) => (
                         <ListItem
+                          icon={component.icon}
                           key={component.title}
                           title={component.title}
                           href={component.href}
                         >
-                          {component.icon}
+
                           {component.description}
                         </ListItem>
                       ))}
@@ -603,15 +616,15 @@ const NavBar = (props: NavBarProps) => {
                       <NavigationMenuLink asChild>
                         <a
                           className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
-                          href="/"
+                          href={props.featuredBlogFolderName ? `/blog/${props.featuredBlogFolderName}` : "/blog"}
                         >
                           <LayoutGrid className="h-6 w-6" />
                           <div className="mb-2 mt-4 text-lg font-medium">
-                            Helicone
                             {/* pull the latest blog */}
+                            {props.featuredBlogMetadata.title}
                           </div>
                           <p className="text-sm leading-tight text-muted-foreground">
-                            Open-source LLM observability and monitoring platform for developers
+                            {props.featuredBlogMetadata.description}
                           </p>
                         </a>
                       </NavigationMenuLink>
@@ -652,7 +665,7 @@ const NavBar = (props: NavBarProps) => {
           </NavigationMenu>
 
           {/* Old Nav Links */}
-          <NavLinks />
+          {/* <NavLinks /> */}
 
           {/* Github, contact, login */}
           <div className="flex items-center gap-x-3">
@@ -707,8 +720,8 @@ const NavBar = (props: NavBarProps) => {
 // Shadcn UI ListItem for Navigation Menu
 const ListItem = React.forwardRef<
   React.ElementRef<"a">,
-  React.ComponentPropsWithoutRef<"a">
->(({ className, title, children, ...props }, ref) => {
+  React.ComponentPropsWithoutRef<"a"> & { icon?: React.ReactNode }
+>(({ className, title, children, icon, ...props }, ref) => {
   return (
     <li>
       <NavigationMenuLink asChild>
@@ -720,10 +733,16 @@ const ListItem = React.forwardRef<
           )}
           {...props}
         >
-          <div className="text-sm font-medium leading-none">{title}</div>
-          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-            {children}
-          </p>
+          <div className="flex items-start flex-shrink-0">
+            {icon}
+            <div className="flex flex-col items-start text-sm font-medium leading-none gap-1">
+              {title}
+              <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                {children}
+              </p>
+            </div>
+          </div>
+
         </a>
       </NavigationMenuLink>
     </li>
