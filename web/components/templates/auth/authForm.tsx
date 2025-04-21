@@ -358,7 +358,7 @@ const AuthForm = (props: AuthFormProps) => {
               </p>
             ) : (
               <p className="mt-2 text-sm text-gray-600">
-                New to Helicone?{" "}
+                New to Helicone? {" "}
                 <Link
                   href={"/signup"}
                   className="text-sky-500 hover:text-sky-700"
