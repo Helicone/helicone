@@ -1,21 +1,21 @@
 use std::{
     convert::Infallible,
-    future::Ready,
+    future::{ready, Ready},
     task::{Context, Poll},
 };
 
 use tower::Service;
 
-use super::{Discovery, Key};
-use crate::app::AppState;
+use super::{Key, ProviderDiscovery};
+use crate::{app::AppState, types::model::Model};
 
 #[derive(Debug)]
 pub struct ProviderDiscoverFactory {
-    _state: AppState,
+    state: AppState,
 }
 
-impl Service<Key> for ProviderDiscoverFactory {
-    type Response = Discovery;
+impl Service<Model> for ProviderDiscoverFactory {
+    type Response = ProviderDiscovery;
     type Error = Infallible;
     type Future = Ready<Result<Self::Response, Self::Error>>;
 
@@ -26,11 +26,13 @@ impl Service<Key> for ProviderDiscoverFactory {
         Poll::Ready(Ok(()))
     }
 
-    fn call(&mut self, _key: Key) -> Self::Future {
-        // build the right Discover for this model
-        todo!()
-        // let discovery =
-        // Discovery::config(self.state.clone(), &key.model, &[key.provider]);
-        // ready(Ok(discovery))
+    fn call(&mut self, model: Model) -> Self::Future {
+        let rx = self.state.0.broadcasts.rx.entry(model).or_insert_with(|| {
+            let (tx, rx) = tokio::sync::broadcast::channel(128);
+            self.state.0.broadcasts.tx.insert(model, tx);
+            rx
+        }).resubscribe();
+        let discovery = ProviderDiscovery::config(self.state.clone(), key.model, rx);
+        ready(Ok(discovery))
     }
 }

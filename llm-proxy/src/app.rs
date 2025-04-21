@@ -3,7 +3,7 @@ use std::{sync::Arc, time::Duration};
 use futures::future::BoxFuture;
 use meltdown::Token;
 use minio_rsc::{Minio, provider::StaticProvider};
-use tokio::{io, net::TcpListener};
+use tokio::{io, net::TcpListener, sync::Mutex};
 use tower::{BoxError, ServiceBuilder, util::BoxService};
 use tower_http::{
     auth::AsyncRequireAuthorization,
@@ -45,7 +45,7 @@ pub struct InnerAppState {
     pub authed_rate_limit: Arc<AuthedLimiterConfig>,
     pub unauthed_rate_limit: Arc<UnauthedLimiterConfig>,
     pub store: StoreRealm,
-    pub broadcasts: ProviderChangeBroadcasts,
+    pub broadcasts: Mutex<ProviderChangeBroadcasts>,
 }
 
 impl std::fmt::Debug for InnerAppState {
@@ -142,7 +142,7 @@ impl App {
             authed_rate_limit,
             unauthed_rate_limit,
             store: StoreRealm::new(pg_pool),
-            broadcasts,
+            broadcasts: Mutex::new(broadcasts),
         }));
 
         let router = ModelRouter::new(app_state.clone());

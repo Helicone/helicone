@@ -81,7 +81,7 @@ impl tower::Service<Request> for ModelRouter {
         cx: &mut std::task::Context<'_>,
     ) -> std::task::Poll<Result<(), Self::Error>> {
         for balancer in self.inner.values_mut() {
-            match tower::Service::poll_ready(balancer, cx) {
+            match balancer.poll_ready(cx) {
                 Poll::Ready(Ok(())) => {}
                 Poll::Ready(Err(e)) => return Poll::Ready(Err(e)),
                 Poll::Pending => return Poll::Pending,
@@ -93,6 +93,7 @@ impl tower::Service<Request> for ModelRouter {
     fn call(&mut self, req: Request) -> Self::Future {
         if let Some(req_ctx) = req.extensions().get::<Arc<RequestContext>>() {
             let model = &req_ctx.proxy_context.target_model;
+            // do we need a ready cache?
             if let Some(balancer) = self.inner.get_mut(model) {
                 let fut = balancer.call(req);
                 ModelRouterFuture::Balanced(fut)
