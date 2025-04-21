@@ -1,0 +1,39 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Request Lifecycle Guide for LLM‑Proxy
+
+This rule explains the end‑to‑end flow of an incoming request through the proxy so that future code navigation questions can be answered quickly.
+
+## High‑level sequence
+
+1. **Server entrypoint** – `App` in [app.rs](mdc:llm-proxy/src/app.rs) builds a `ServiceStack` that Hyper drives.
+2. **Global middleware** – The stack (defined in `App::new`) applies:
+   1. `BufferLayer` (queueing)
+   2. `CatchPanic` (optional – commented)
+   3. `AuthService` via `AsyncRequireAuthorizationLayer`
+   4. `RequestContext` layer (adds `RequestContext` extension)
+3. **Model routing** – `ModelRouter` in [router/model.rs](mdc:llm-proxy/src/router/model.rs) inspects `RequestContext.proxy_context.target_model` and selects a per‑model `ProviderBalancer`.
+4. **Provider balancing** – `ProviderBalancer` in [balancer/provider.rs](mdc:llm-proxy/src/balancer/provider.rs) is a Tower `Balance` over discovered provider endpoints, choosing the healthiest target.
+5. **Endpoint discovery** – Provider lists are produced by `ProviderDiscovery` in [discover/mod.rs](mdc:llm-proxy/src/discover/mod.rs), which streams `Change<Key, DispatcherService>` updates from configuration broadcasts.
+6. **Dispatching** – The chosen endpoint is a `DispatcherService` (see [dispatcher.rs](mdc:llm-proxy/src/dispatcher.rs)) that translates the generic proxy `Request` into the concrete provider HTTP request and forwards it.
+
+## Key data structures
+
+| Concept | Definition |
+| ------- | ---------- |
+| `Request` / `Response` | [`types/request.rs`](mdc:llm-proxy/src/types/request.rs) / [`types/response.rs`](mdc:llm-proxy/src/response.rs) |
+| `RequestContext` | Holds routing & auth metadata attached in the `RequestContext` middleware. |
+| `Model` & `Provider` enums | Defined under [`types/model.rs`](mdc:llm-proxy/src/types/model.rs) and [`types/provider.rs`](mdc:llm-proxy/src/types/provider.rs). |
+| `Key` | Struct in `discover/mod.rs` that identifies a (`model`, `provider`) pair for discovery. |
+
+## Where to add new middleware
+
+- **Global (pre‑routing)** – add to the `ServiceBuilder` chain in `App::new` **before** `ModelRouter` is wrapped.
+- **Per‑model or per‑provider** – enhance `ModelRouter` or `ProviderBalancer` stacks respectively, or wrap `DispatcherService`.
+
+---
+
+Having this overview should help locate the correct module when modifying any stage of the request pipeline.
