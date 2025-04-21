@@ -1,12 +1,15 @@
-use std::{sync::Arc, time::Duration};
+use std::{sync::Arc, task::Poll, time::Duration};
 
 use futures::future::BoxFuture;
 use meltdown::Token;
 use minio_rsc::{Minio, provider::StaticProvider};
 use tokio::{io, net::TcpListener, sync::Mutex};
-use tower::{BoxError, ServiceBuilder, util::BoxService};
+use tower::{
+    BoxError, ServiceBuilder, buffer::BufferLayer, make::Shared,
+    util::BoxCloneService,
+};
 use tower_http::{
-    auth::AsyncRequireAuthorization,
+    auth::{AsyncRequireAuthorization, AsyncRequireAuthorizationLayer},
     catch_panic::{CatchPanic, DefaultResponseForPanic},
 };
 use tracing::info;
@@ -24,6 +27,8 @@ use crate::{
     router::model::ModelRouter,
     store::StoreRealm,
 };
+
+const MAX_QUEUED_REQUESTS: usize = 1024;
 
 /// Type representing the global middleware layers.
 ///
@@ -69,6 +74,7 @@ impl std::fmt::Debug for InnerAppState {
 /// The top level app used to start the hyper server.
 /// The middleware stack is as follows:
 /// -- global middleware --
+/// 0. Buffer
 /// 1. CatchPanic
 /// 2. Authn/Authz
 /// 3. Per User Rate Limit layer
@@ -86,10 +92,12 @@ impl std::fmt::Debug for InnerAppState {
 /// 11. Dispatcher
 pub struct App {
     pub state: AppState,
-    pub service_stack: BoxService<
-        crate::types::request::Request,
-        crate::types::response::Response,
-        BoxError,
+    pub service_stack: Shared<
+        BoxCloneService<
+            crate::types::request::Request,
+            crate::types::response::Response,
+            BoxError,
+        >,
     >,
 }
 
@@ -100,13 +108,18 @@ impl tower::Service<crate::types::request::Request> for App {
 
     fn poll_ready(
         &mut self,
-        cx: &mut std::task::Context<'_>,
+        _ctx: &mut std::task::Context<'_>,
     ) -> std::task::Poll<Result<(), Self::Error>> {
-        self.service_stack.poll_ready(cx)
+        Poll::Ready(Ok(()))
     }
 
     fn call(&mut self, req: crate::types::request::Request) -> Self::Future {
-        self.service_stack.call(req)
+        let mut make_svc = self.service_stack.clone();
+        Box::pin(async move {
+            let mut svc =
+                make_svc.call(()).await.expect("always valid if tests pass");
+            svc.call(req).await
+        })
     }
 }
 
@@ -149,23 +162,23 @@ impl App {
 
         // global middleware is applied here
         let service_stack = ServiceBuilder::new()
+            .layer(BufferLayer::new(8))
             // .layer(CatchPanicLayer::new())
-            // .map_request(|r: http::Request<ReqBody>| {
-            //     let (parts, body) = r.into_parts();
-            //     let body = reqwest::Body::wrap(body);
-            //     Request::from_parts(parts, body)
-            // })
-            // .layer(AsyncRequireAuthorizationLayer::new(AuthService))
-            // .layer(crate::middleware::request_context::Layer::<ReqBody>::new(
-            //     app_state.clone(),
-            // ))
+            .layer(AsyncRequireAuthorizationLayer::new(AuthService))
+            .layer(
+                crate::middleware::request_context::Layer::<reqwest::Body>::new(
+                    app_state.clone(),
+                ),
+            )
             // other middleware: rate limiting, logging, etc, etc
             // will be added here as well
+            .map_err(|e| crate::error::api::Error::Box(e))
+            .layer(BufferLayer::new(MAX_QUEUED_REQUESTS))
             .service(router);
 
         Ok(Self {
             state: app_state,
-            service_stack: BoxService::new(service_stack),
+            service_stack: Shared::new(BoxCloneService::new(service_stack)),
         })
     }
 }
@@ -187,7 +200,7 @@ impl meltdown::Service for App {
             .await
             .map_err(crate::error::init::Error::Bind)?;
             let _server = hyper_util::server::conn::auto::Builder::new(
-                hyper_util::rt::TokioExecutor::new(),
+                tokio::runtime::Handle::current(),
             );
             let graceful =
                 hyper_util::server::graceful::GracefulShutdown::new();
@@ -240,6 +253,22 @@ impl meltdown::Service for App {
     }
 }
 
+// impl<R> tower::MakeService<R> for App {
+//     type Response = App;
+//     type Error = crate::error::init::Error;
+//     type Service = App;
+//     type MakeError = crate::error::init::Error;
+//     type Future = std::future::Ready<Result<Self::Service, Self::MakeError>>;
+
+//     fn poll_ready(&mut self, cx: &mut std::task::Context<'_>) ->
+// std::task::Poll<Result<(), Self::MakeError>> {         todo!()
+//     }
+
+//     fn make_service(&mut self, target: R) -> Self::Future {
+//         todo!()
+//     }
+// }
+
 async fn handle_accept_error(e: io::Error) {
     if is_connection_error(&e) {
         return;
@@ -267,4 +296,33 @@ fn is_connection_error(e: &io::Error) -> bool {
             | io::ErrorKind::ConnectionAborted
             | io::ErrorKind::ConnectionReset
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use std::convert::Infallible;
+
+    use tower::{Service, make::Shared};
+
+    use super::*;
+
+    #[test]
+    fn test_shared_service_error_is_infallible() {
+        // This is a compile-time assertion that the Error associated type of
+        // Shared when used as a Service is Infallible
+        fn assert_shared_error_is_infallible<Req, Resp, S>(_shared: S)
+        where
+            S: Service<Req, Response = Resp, Error = Infallible>,
+        {
+            // This function doesn't need to do anything at runtime
+            // The type constraints ensure the assertion at compile time
+        }
+        let svc = ServiceBuilder::new()
+            .layer(BufferLayer::new(1))
+            .service_fn(|_: ()| async move { Ok::<(), Infallible>(()) });
+
+        let shared = Shared::new(svc);
+
+        assert_shared_error_is_infallible::<(), _, _>(shared);
+    }
 }

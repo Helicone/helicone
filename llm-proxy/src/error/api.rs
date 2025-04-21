@@ -29,6 +29,8 @@ pub enum Error {
     Authentication(#[from] crate::error::auth::AuthError),
     /// Internal error: {0}
     Internal(#[from] crate::error::internal::InternalError),
+    /// Box: {0}
+    Box(#[from] Box<dyn std::error::Error + Send + Sync>),
 }
 
 /// The struct returned to the user in the case of an internal error.

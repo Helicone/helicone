@@ -9,6 +9,8 @@ default-run = "llm-proxy"
 openai-types = { workspace = true }
 anthropic-types = { workspace = true }
 
+axum = { workspace = true }
+
 bytes = { workspace = true, features = ['serde'] }
 chrono = { workspace = true }
 clap = { workspace = true }
