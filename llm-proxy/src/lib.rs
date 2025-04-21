@@ -1,4 +1,5 @@
 pub mod app;
+pub mod balancer;
 pub mod config;
 pub mod discover;
 pub mod dispatcher;

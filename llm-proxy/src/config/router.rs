@@ -42,6 +42,12 @@ pub struct FallbackConfig {
     pub order: Vec<ModelVersion>,
 }
 
+/// When it's time to add this, we need a weighted balance
+/// impl.
+///
+/// See e.g.:
+/// https://github.com/tower-rs/tower/issues/696
+/// https://github.com/tower-rs/tower/pull/695/files
 #[derive(Debug, Deserialize, Serialize, Eq, PartialEq)]
 pub struct BalanceConfig(pub Vec<BalanceTarget>);
 

@@ -18,6 +18,7 @@ use crate::{
         internal::InternalError,
     },
     types::{
+        model::Model,
         provider::ProviderKeys,
         request::{AuthContext, RequestContext},
     },
@@ -182,6 +183,8 @@ where
             target_url,
             target_provider: router.config.default_provider,
             original_provider: router.config.default_provider,
+            original_model: Model::new("gpt4o-mini".to_string(), None),
+            target_model: Model::new("gpt4o-mini".to_string(), None),
             provider_api_keys,
         };
         let req_ctx = RequestContext {

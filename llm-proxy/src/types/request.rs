@@ -6,6 +6,7 @@ use reqwest::Body;
 use url::Url;
 
 use super::{
+    model::Model,
     org::OrgId,
     provider::{Provider, ProviderKeys},
     template::TemplateInputs,
@@ -42,5 +43,7 @@ pub struct RequestProxyContext {
     pub target_url: Url,
     pub target_provider: Provider,
     pub original_provider: Provider,
+    pub original_model: Model,
+    pub target_model: Model,
     pub provider_api_keys: ProviderKeys,
 }

@@ -39,8 +39,8 @@ async fn main() -> Result<(), llm_proxy::error::runtime::Error> {
 
     let rate_limiting_cleanup_service =
         middleware::rate_limit::service::Service::new(
-            app.state().0.authed_rate_limit.clone(),
-            app.state().0.unauthed_rate_limit.clone(),
+            app.state.0.authed_rate_limit.clone(),
+            app.state.0.unauthed_rate_limit.clone(),
             config.rate_limit.cleanup_interval,
         );
 

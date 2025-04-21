@@ -1,33 +1,33 @@
 use std::time::Duration;
 
-use tower::{
-    BoxError,
-    balance::p2c::Balance,
-    load::{CompleteOnResponse, PeakEwmaDiscover},
-};
+use tower::{BoxError, balance::p2c::Balance, load::PeakEwmaDiscover};
 
 use crate::{
-    discover::Discovery,
+    discover::ProviderDiscovery,
     error::internal::InternalError,
     types::{request::Request, response::Response},
 };
 
-#[derive(Debug)]
 pub struct ProviderBalancer {
-    pub inner: Balance<PeakEwmaDiscover<Discovery>, Request>,
+    pub inner: Balance<PeakEwmaDiscover<ProviderDiscovery>, Request>,
+}
+
+impl std::fmt::Debug for ProviderBalancer {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("ProviderBalancer").finish_non_exhaustive()
+    }
 }
 
 impl ProviderBalancer {
-    pub async fn new(discovery: Discovery) -> Self {
-        // should be configurable
+    pub fn new(discovery: ProviderDiscovery) -> ProviderBalancer {
         let discover = PeakEwmaDiscover::new(
             discovery,
             Duration::from_secs(1),
-            // 15 mins
             Duration::from_secs(900),
-            CompleteOnResponse::default(),
+            Default::default(),
         );
-        Self {
+
+        ProviderBalancer {
             inner: Balance::new(discover),
         }
     }
@@ -36,10 +36,9 @@ impl ProviderBalancer {
 impl tower::Service<Request> for ProviderBalancer {
     type Response = Response;
     type Error = BoxError;
-    type Future =
-        <Balance<PeakEwmaDiscover<Discovery>, Request> as tower::Service<
-            Request,
-        >>::Future;
+    type Future = <Balance<PeakEwmaDiscover<ProviderDiscovery>, Request> as tower::Service<
+        Request,
+    >>::Future;
 
     fn poll_ready(
         &mut self,
@@ -55,4 +54,3 @@ impl tower::Service<Request> for ProviderBalancer {
         self.inner.call(req)
     }
 }
-

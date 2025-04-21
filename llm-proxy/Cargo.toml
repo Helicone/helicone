@@ -37,11 +37,14 @@ serde = { workspace = true, features = ['derive', 'rc'] }
 serde_json = { workspace = true }
 serde_path_to_error = { workspace = true }
 serde_with = { workspace = true }
+serde_yml = { workspace = true }
 sqlx = { workspace = true, features = ['default', 'runtime-tokio', 'chrono', 'postgres', 'uuid']}
 strum = { workspace = true, features = ["derive"]  }
+stubr = { workspace = true, optional = true }
 telemetry = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
+tokio-stream = { workspace = true, features = ['sync'] }
 tower = { workspace = true, features = ['full']}
 tower_governor = { workspace = true }
 tower-http = { workspace = true, features = ['default', 'auth', 'catch-panic'] }
@@ -50,9 +53,6 @@ tracing-subscriber = { workspace = true, features = ['env-filter', 'std'] }
 url = { workspace = true, features = ['serde'] }
 utoipa = { workspace = true }
 uuid = { workspace = true, features = ["serde", "v7"] }
-
-serde_yml = { workspace = true }
-stubr = { workspace = true, optional = true }
 
 [features]
 default = []

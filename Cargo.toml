@@ -52,6 +52,7 @@ hyper = { version = "1.6.0", features = ['full'] }
 hyper-util = "0.1.11"
 indexmap = "2.8.0"
 isocountry = "0.3.2"
+itertools = "0.14.0"
 json-patch = "4.0.0"
 log-panics = { version = "2.1.0", features = ["with-backtrace"] }
 meltdown = "0.3.2"
@@ -73,10 +74,13 @@ serde_path_to_error = "0.1.17"
 serde_repr = "0.1.20"
 serde_with = "3.12.0"
 serde_yaml = "0.9.33"
+serde_yml = "0.0.12"
 sqlx = "0.8.5"
 strum = "0.27.1"
+stubr = { path = "/Users/thomasharmon/code/tmp/stubr/lib" }
 thiserror = "2.0.11"
 tokio = { version = "1.44.2", features = ['full'] }
+tokio-stream = "0.1.17"
 tower = "0.5.2"
 tower_governor = "0.7.0"
 tower-http = "0.6.2"
@@ -86,8 +90,3 @@ tracing-subscriber = "0.3.19"
 url = "2.5.4"
 utoipa = "5.3.1"
 uuid = { version = "1.10.0", features = ["serde", "v7"] }
-
-itertools = "0.14.0"
-
-serde_yml = "0.0.12"
-stubr = { path = "/Users/thomasharmon/code/tmp/stubr/lib" }

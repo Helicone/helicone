@@ -1,18 +1,13 @@
 use std::{sync::Arc, time::Duration};
 
 use futures::future::BoxFuture;
-use http::Request;
-use http_body_util::BodyExt;
 use meltdown::Token;
 use minio_rsc::{Minio, provider::StaticProvider};
 use tokio::{io, net::TcpListener};
-use tower::{
-    Service, ServiceBuilder,
-    util::{BoxCloneService, BoxService},
-};
+use tower::{BoxError, ServiceBuilder, util::BoxService};
 use tower_http::{
-    auth::{AsyncRequireAuthorization, AsyncRequireAuthorizationLayer},
-    catch_panic::{CatchPanic, CatchPanicLayer, DefaultResponseForPanic},
+    auth::AsyncRequireAuthorization,
+    catch_panic::{CatchPanic, DefaultResponseForPanic},
 };
 use tracing::info;
 
@@ -21,11 +16,12 @@ use crate::{
         Config,
         rate_limit::{AuthedLimiterConfig, UnauthedLimiterConfig},
     },
+    discover::ProviderChangeBroadcasts,
     error,
     middleware::{
         auth::AuthService, request_context::Service as RequestContextService,
     },
-    router::Router,
+    router::model::ModelRouter,
     store::StoreRealm,
 };
 
@@ -34,7 +30,7 @@ use crate::{
 /// When adding a new middleware, you'll be required to add it to this type.
 pub type ServiceStack<ReqBody> = CatchPanic<
     AsyncRequireAuthorization<
-        RequestContextService<Router, ReqBody>,
+        RequestContextService<ModelRouter, ReqBody>,
         AuthService,
     >,
     DefaultResponseForPanic,
@@ -49,31 +45,57 @@ pub struct InnerAppState {
     pub authed_rate_limit: Arc<AuthedLimiterConfig>,
     pub unauthed_rate_limit: Arc<UnauthedLimiterConfig>,
     pub store: StoreRealm,
+    pub broadcasts: ProviderChangeBroadcasts,
 }
 
 impl std::fmt::Debug for InnerAppState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let minio = if let Some(_) = &self.minio {
+            "Some(Minio)"
+        } else {
+            "None"
+        };
         f.debug_struct("AppState")
             .field("config", &self.config)
             .field("authed_rate_limit", &self.authed_rate_limit)
             .field("unauthed_rate_limit", &self.unauthed_rate_limit)
             .field("store", &self.store)
+            .field("broadcasts", &self.broadcasts)
+            .field("minio", &minio)
             .finish()
     }
 }
 
-pub(crate) struct InnerApp<ReqBody> {
+/// The top level app used to start the hyper server.
+/// The middleware stack is as follows:
+/// -- global middleware --
+/// 1. CatchPanic
+/// 2. Authn/Authz
+/// 3. Per User Rate Limit layer
+/// 4. Per Org Rate Limit layer
+/// 5. RequestContext
+/// -- model specific middleware --
+/// 6. Per model rate limit layer
+/// 7. ModelRouter
+/// -- provider specific middleware --
+/// 8. Per provider rate limit layer
+/// 9. ProviderBalancer
+/// --- model/provider specific middleware --
+/// --- none in use yet --
+/// 10. DispatcherServiceStack
+/// 11. Dispatcher
+pub struct App {
     pub state: AppState,
     pub service_stack: BoxService<
-        http::Request<ReqBody>,
-        http::Response<reqwest::Body>,
-        crate::error::api::Error,
+        crate::types::request::Request,
+        crate::types::response::Response,
+        BoxError,
     >,
 }
 
-impl<ReqBody> tower::Service<http::Request<ReqBody>> for InnerApp<ReqBody> {
-    type Response = http::Response<reqwest::Body>;
-    type Error = crate::error::api::Error;
+impl tower::Service<crate::types::request::Request> for App {
+    type Response = crate::types::response::Response;
+    type Error = BoxError;
     type Future = BoxFuture<'static, Result<Self::Response, Self::Error>>;
 
     fn poll_ready(
@@ -83,62 +105,12 @@ impl<ReqBody> tower::Service<http::Request<ReqBody>> for InnerApp<ReqBody> {
         self.service_stack.poll_ready(cx)
     }
 
-    fn call(&mut self, req: http::Request<ReqBody>) -> Self::Future {
+    fn call(&mut self, req: crate::types::request::Request) -> Self::Future {
         self.service_stack.call(req)
     }
 }
 
-pub struct App {
-    pub(crate) inner: InnerApp<hyper::body::Incoming>,
-}
-
 impl App {
-    pub async fn new(config: Config) -> Result<Self, error::init::Error> {
-        let inner = InnerApp::new(config).await?;
-        Ok(Self { inner })
-    }
-
-    pub fn state(&self) -> &AppState {
-        &self.inner.state
-    }
-}
-
-impl meltdown::Service for App {
-    type Future = BoxFuture<'static, Result<(), crate::error::runtime::Error>>;
-
-    fn run(self, token: Token) -> Self::Future {
-        self.inner.run(token)
-    }
-}
-
-/// Usable in the test [`Harness`](crate::tests::harness::Harness) so that we
-/// can use a high level API to write unit tests against the entire app stack.
-pub struct TestApp {
-    pub(crate) inner: InnerApp<reqwest::Body>,
-}
-
-impl TestApp {
-    pub async fn new(config: Config) -> Result<Self, error::init::Error> {
-        let inner = InnerApp::new(config).await?;
-        Ok(Self { inner })
-    }
-}
-
-/*
-
-reqs -> ProviderRouter -> ModelRouter
-
---> Provider Discover
---> Model Discover for the provider
-
-*/
-
-impl<ReqBody> InnerApp<ReqBody>
-where
-    ReqBody: hyper::body::Body + Send + Sync + 'static,
-    ReqBody::Error: Into<Box<dyn std::error::Error + Send + Sync>>,
-    bytes::Bytes: From<<ReqBody as hyper::body::Body>::Data>,
-{
     pub async fn new(config: Config) -> Result<Self, error::init::Error> {
         let provider = StaticProvider::from_env();
         let minio = if let Some(provider) = provider {
@@ -162,6 +134,7 @@ where
             .connect(&config.database.url.0)
             .await
             .map_err(error::init::Error::DatabaseConnection)?;
+        let broadcasts = ProviderChangeBroadcasts::new(&config);
 
         let app_state = AppState(Arc::new(InnerAppState {
             config,
@@ -169,12 +142,10 @@ where
             authed_rate_limit,
             unauthed_rate_limit,
             store: StoreRealm::new(pg_pool),
+            broadcasts,
         }));
 
-        let services = crate::discover::config::ConfigDiscovery::service_list(
-            app_state.clone(),
-        );
-        let router = Router::new(services);
+        let router = ModelRouter::new(app_state.clone());
 
         // global middleware is applied here
         let service_stack = ServiceBuilder::new()
@@ -184,10 +155,10 @@ where
             //     let body = reqwest::Body::wrap(body);
             //     Request::from_parts(parts, body)
             // })
-            .layer(AsyncRequireAuthorizationLayer::new(AuthService))
-            .layer(crate::middleware::request_context::Layer::<ReqBody>::new(
-                app_state.clone(),
-            ))
+            // .layer(AsyncRequireAuthorizationLayer::new(AuthService))
+            // .layer(crate::middleware::request_context::Layer::<ReqBody>::new(
+            //     app_state.clone(),
+            // ))
             // other middleware: rate limiting, logging, etc, etc
             // will be added here as well
             .service(router);
@@ -199,12 +170,12 @@ where
     }
 }
 
-impl meltdown::Service for InnerApp<hyper::body::Incoming> {
+impl meltdown::Service for App {
     type Future = BoxFuture<'static, Result<(), crate::error::runtime::Error>>;
 
     fn run(self, mut token: Token) -> Self::Future {
         Box::pin(async move {
-            let service_stack = hyper_util::service::TowerToHyperService::new(
+            let _service_stack = hyper_util::service::TowerToHyperService::new(
                 self.service_stack,
             );
 
@@ -215,7 +186,7 @@ impl meltdown::Service for InnerApp<hyper::body::Incoming> {
             ))
             .await
             .map_err(crate::error::init::Error::Bind)?;
-            let server = hyper_util::server::conn::auto::Builder::new(
+            let _server = hyper_util::server::conn::auto::Builder::new(
                 hyper_util::rt::TokioExecutor::new(),
             );
             let graceful =
@@ -233,17 +204,17 @@ impl meltdown::Service for InnerApp<hyper::body::Incoming> {
                             }
                         };
                         tracing::info!(peer_addr = %peer_addr, "accepted new connection");
-                        let stream = hyper_util::rt::TokioIo::new(Box::pin(stream));
-                        let conn = server.serve_connection_with_upgrades(stream, service_stack.clone());
+                        let _stream = hyper_util::rt::TokioIo::new(Box::pin(stream));
+                        // let conn = server.serve_connection_with_upgrades(stream, service_stack.clone());
 
-                        let conn = graceful.watch(conn.into_owned());
+                        // let _conn = graceful.watch(conn.into_owned());
 
-                        tokio::spawn(async move {
-                            if let Err(err) = conn.await {
-                                tracing::error!(error = ?err, "connection error");
-                            }
-                            tracing::trace!(peer_addr = %peer_addr, "connection completed");
-                        });
+                        // tokio::spawn(async move {
+                        //     if let Err(err) = conn.await {
+                        //         tracing::error!(error = ?err, "connection error");
+                        //     }
+                        //     tracing::trace!(peer_addr = %peer_addr, "connection completed");
+                        // });
                     },
 
                     _ = &mut token => {
