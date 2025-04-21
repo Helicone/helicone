@@ -1,6 +1,3 @@
-import useOnboardingContext, {
-  ONBOARDING_STEPS,
-} from "@/components/layout/onboardingContext";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { UIFilterRowTree } from "@/services/lib/filters/types";
@@ -16,34 +13,10 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import React, { useEffect, useMemo, useState } from "react";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { Result } from "../../../../packages/common/result";
-import { useLocalStorage } from "../../../../services/hooks/localStorage";
-import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
-import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";
-import { SortDirection } from "../../../../services/lib/sorts/requests/sorts";
-
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable";
-import { MappedLLMRequest } from "@/packages/llm-mapper/types";
-import { useRouter } from "next/navigation";
-import { clsx } from "../../clsx";
-import LoadingAnimation from "../../loadingAnimation";
-import { RequestViews } from "./RequestViews";
-import {
-  columnDefsToDragColumnItems,
-  columnDefToDragColumnItem,
-  DragColumnItem,
-} from "./columns/DragList";
-import DraggableColumnHeader from "./columns/draggableColumnHeader";
-import RequestRowView from "./requestRowView";
-import ThemedTableHeader from "./themedTableHeader";
 import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
 import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";
 import { SortDirection } from "../../../../services/lib/sorts/requests/sorts";
