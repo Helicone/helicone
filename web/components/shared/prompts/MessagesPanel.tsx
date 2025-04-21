@@ -135,24 +135,73 @@ export default function MessagesPanel({
             </GlassHeader>
 
             {/* Message Content */}
-            {msg._type === "contentArray" &&
-            (msg.contentArray?.[0]?._type === "function" ||
-              msg.contentArray?.[0]?._type === "functionCall") ? (
-              <FunctionCallBox message={msg} disabled={msg.idx !== undefined} />
-            ) : msg._type === "image" || msg.image_url ? (
-              <ImageBox message={msg} disabled={msg.idx !== undefined} />
-            ) : (
-              <PromptBox
-                value={heliconeToTemplateTags(msg.content || "")}
-                onChange={(content) =>
-                  onMessageChange(index, templateToHeliconeTags(content))
+            {(() => {
+              let contentComponent;
+
+              // 1. Handle Function Call (can be top-level or first item in contentArray)
+              if (
+                msg._type === "functionCall" ||
+                msg._type === "function" ||
+                (msg._type === "contentArray" &&
+                  (msg.contentArray?.[0]?._type === "function" ||
+                    msg.contentArray?.[0]?._type === "functionCall"))
+              ) {
+                contentComponent = (
+                  <FunctionCallBox
+                    message={msg}
+                    disabled={msg.idx !== undefined}
+                  />
+                );
+                // 2. Handle Image (can be top-level or first item in contentArray)
+              } else if (
+                msg._type === "image" ||
+                msg.image_url ||
+                (msg._type === "contentArray" &&
+                  (msg.contentArray?.[0]?._type === "image" ||
+                    msg.contentArray?.[0]?.image_url))
+              ) {
+                // Pass the actual image message (either top-level or the one inside contentArray)
+                const imageMessage =
+                  msg._type === "contentArray" && msg.contentArray?.[0]
+                    ? msg.contentArray[0]
+                    : msg;
+                contentComponent = (
+                  <ImageBox
+                    message={imageMessage}
+                    disabled={msg.idx !== undefined}
+                  />
+                );
+                // 3. Handle Text content (default/fallback)
+              } else {
+                // Determine the text content to display
+                let textValue = "";
+                if (msg._type === "contentArray") {
+                  // If contentArray, try to get content from the first item, otherwise fallback to top-level content
+                  textValue =
+                    msg.contentArray?.[0]?.content ?? msg.content ?? "";
+                } else {
+                  // Otherwise, just use the top-level content
+                  textValue = msg.content ?? "";
                 }
-                onVariableCreate={onVariableCreate}
-                contextText={""}
-                variables={variables}
-                disabled={msg.idx !== undefined}
-              />
-            )}
+
+                contentComponent = (
+                  <PromptBox
+                    value={heliconeToTemplateTags(textValue)}
+                    onChange={(content) =>
+                      // Update the top-level message content.
+                      // This might need future refinement if editing sub-message content is required.
+                      onMessageChange(index, templateToHeliconeTags(content))
+                    }
+                    onVariableCreate={onVariableCreate}
+                    contextText={""}
+                    variables={variables}
+                    disabled={msg.idx !== undefined}
+                  />
+                );
+              }
+
+              return contentComponent;
+            })()}
           </div>
         );
       })}

@@ -1,0 +1,39 @@
+We're thrilled to announce that Helicone now supports logging of OpenAI's Realtime API, enabling low-latency, multi-modal conversational experiences.
+
+### Seamless Integration with Helicone
+
+Integrating OpenAI's Realtime API with Helicone is as simple as ever. Following our standard one-line integration approach, you can immediately start monitoring performance, analyzing interactions, and gaining valuable insights into your real-time conversations.
+
+### How it Works
+
+Connect to the Realtime API through Helicone using your preferred provider (OpenAI or Azure). Helicone acts as a proxy, allowing you to leverage our observability features without changing your core application logic.
+
+### Example: Connecting via WebSocket (OpenAI Provider)
+
+```typescript
+// Simply swap with the following url:
+const url =
+  "wss://api.helicone.ai/v1/gateway/oai/realtime?model=gpt-4o-realtime-preview-2024-12-17";
+
+const ws = new WebSocket(url, {
+  headers: {
+    // Your OpenAI Key
+    Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+    // Your Helicone Key
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+    // Optional Helicone properties for enhanced analytics
+    "Helicone-Session-Id": `session_123`,
+    "Helicone-User-Id": "user_123",
+  },
+});
+```
+
+### Key Benefits
+
+- **Effortless Setup**: Integrate with the standard Helicone proxy URL and API key header.
+- **Real-time Monitoring**: Track latency, token usage, and other critical metrics for your real-time sessions.
+- **Session Analysis**: Utilize Helicone headers like `Helicone-Session-Id` and `Helicone-User-Id` to group and analyze conversations.
+- **Multi-modal Support**: Monitor both text and audio interactions.
+- **Provider Flexibility**: Works seamlessly with both OpenAI and Azure endpoints.
+
+Get started today by updating your WebSocket connection URL and adding your Helicone API key header. For more details, check out the full [OpenAI Realtime Integration documentation](https://docs.helicone.ai/integrations/openai/realtime).

@@ -45,11 +45,14 @@ export async function supabaseAuthClientFromSSRContext(
 }
 
 export class SupabaseAuthClient implements HeliconeAuthClient {
+  user: HeliconeUser | undefined;
   constructor(
     private supabaseClient?: SupabaseClient<Database>,
     user?: HeliconeUser,
     private org?: { org: HeliconeOrg; role: string }
-  ) {}
+  ) {
+    this.user = user;
+  }
 
   async getOrg(): Promise<Result<{ org: HeliconeOrg; role: string }, string>> {
     if (!this.org) {
@@ -66,11 +69,19 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
     await this.supabaseClient?.auth.signOut();
   }
 
+  hasSupabaseClient(): boolean {
+    if (!("supabaseClient" in this)) {
+      return false;
+    }
+
+    return !!this.supabaseClient;
+  }
+
   async getUser(): Promise<Result<HeliconeUser, string>> {
-    if (!this.supabaseClient) {
+    if (!this || !this.hasSupabaseClient()) {
       return err("Supabase client not found");
     }
-    const user = await this.supabaseClient.auth.getUser();
+    const user = await this.supabaseClient!.auth.getUser();
     if (!user.data.user) {
       return err("User not found");
     }

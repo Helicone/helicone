@@ -37,5 +37,7 @@ export const convertTestInputToHeliconeRequest = (
     properties: {},
     assets: [],
     target_url: "",
+    prompt_audio_tokens: null,
+    completion_audio_tokens: null,
   };
 };

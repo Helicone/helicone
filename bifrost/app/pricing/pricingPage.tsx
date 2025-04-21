@@ -182,7 +182,7 @@ export default function PricingPage() {
                         variant="outline"
                         className="text-slate-900 hover:text-brand"
                       >
-                        <Link href="/blog/langsmith">
+                        <Link href="/blog/langsmith-vs-helicone">
                           <BookOpenIcon className="w-4 h-4 mr-2" />
                           Read about key differences
                         </Link>

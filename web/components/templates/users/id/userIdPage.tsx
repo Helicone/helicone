@@ -1,18 +1,18 @@
-import { AreaChart } from "@tremor/react";
+import { IslandContainer } from "@/components/ui/islandContainer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useUserId } from "../../../../services/hooks/users";
-import LoadingAnimation from "../../../shared/loadingAnimation";
-import { formatNumber } from "../initialColumns";
-import StyledAreaChart from "../../dashboard/styledAreaChart";
-import RequestsPageV2 from "../../requests/requestsPageV2";
-import { ElementType } from "react";
 import {
   PresentationChartLineIcon,
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
+import { AreaChart } from "@tremor/react";
 import { useRouter } from "next/router";
+import { ElementType } from "react";
+import { useUserId } from "../../../../services/hooks/users";
+import LoadingAnimation from "../../../shared/loadingAnimation";
 import HcBreadcrumb from "../../../ui/hcBreadcrumb";
-import { IslandContainer } from "@/components/ui/islandContainer";
+import StyledAreaChart from "../../dashboard/styledAreaChart";
+import RequestsPage from "../../requests/RequestsPage";
+import { formatNumber } from "../initialColumns";
 
 interface UserIdPageProps {
   userId: string;
@@ -202,7 +202,7 @@ const UserIdPage = (props: UserIdPageProps) => {
                 </TabsContent>
                 <TabsContent value="1">
                   <div className="py-2">
-                    <RequestsPageV2
+                    <RequestsPage
                       currentPage={1}
                       pageSize={25}
                       sort={{

@@ -27,12 +27,19 @@ const SignIn = ({
   const customerPortalContent = customerPortal?.data || undefined;
   const { unauthorized } = router.query;
   useEffect(() => {
-    if (unauthorized === "true") {
+    if (
+      unauthorized === "true" &&
+      heliconeAuthClient &&
+      heliconeAuthClient.user?.id
+    ) {
+      console.log("refreshing session");
+      console.log("heliconeAuthClient", heliconeAuthClient);
+      console.log("heliconeAuthClient.user", heliconeAuthClient.user);
       heliconeAuthClient
         .refreshSession()
         .then(heliconeAuthClient.getUser)
         .then((user) => {
-          if (!user.data) {
+          if (!user.data || !user.data.id) {
             heliconeAuthClient.signOut().then(() => {
               setNotification(
                 "You have been logged out due to unauthorized access.",
@@ -41,19 +48,24 @@ const SignIn = ({
             });
           }
         });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [unauthorized]);
-
-  useEffect(() => {
-    if (heliconeAuthClient.user) {
+    } else if (heliconeAuthClient.user?.id) {
       const { pi_session, ...restQuery } = router.query;
       router.push({
         pathname: pi_session ? "/pi/onboarding" : "/dashboard",
         query: router.query,
       });
     }
-  }, [router, heliconeAuthClient.user]);
+  }, [unauthorized, heliconeAuthClient, setNotification, router]);
+
+  // useEffect(() => {
+  //   if (heliconeAuthClient.user) {
+  //     const { pi_session, ...restQuery } = router.query;
+  //     router.push({
+  //       pathname: pi_session ? "/pi/onboarding" : "/dashboard",
+  //       query: router.query,
+  //     });
+  //   }
+  // }, [router, heliconeAuthClient.user]);
 
   return (
     <PublicMetaData
@@ -63,7 +75,7 @@ const SignIn = ({
       ogImageUrl={"https://www.helicone.ai/static/helicone-og.webp"}
     >
       <div>
-        {heliconeAuthClient.user ? (
+        {heliconeAuthClient.user?.id ? (
           <div className="flex items-center justify-center h-screen flex-col">
             <LoadingAnimation />
             <h1 className="text-4xl font-semibold">Getting your dashboard</h1>

@@ -3,13 +3,13 @@ import { randomUUID } from "crypto";
 import { PromptInputRecord } from "../../controllers/public/promptController";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { S3Client } from "../../lib/shared/db/s3Client";
+import { RequestResponseBodyStore } from "../../lib/stores/request/RequestResponseBodyStore";
 import {
   Result,
   err,
   ok,
   promiseResultMap,
 } from "../../packages/common/result";
-import { RequestResponseBodyStore } from "../../lib/stores/request/RequestResponseBodyStore";
 import { BaseManager } from "../BaseManager";
 
 async function fetchImageAsBase64(url: string): Promise<string> {
@@ -329,12 +329,10 @@ export class InputsManager extends BaseManager {
         prompt_input_record.auto_prompt_inputs as auto_prompt_inputs,
         prompt_input_record.source_request as source_request,
         prompt_input_record.prompt_version as prompt_version,
-        prompt_input_record.created_at as created_at,
-        response.body as response_body
+        prompt_input_record.created_at as created_at
       FROM prompt_input_record
       left join request on prompt_input_record.source_request = request.id
-      left join response on response.request = request.id
-      WHERE  request.helicone_org_id = $1 AND
+      WHERE request.helicone_org_id = $1 AND
       prompt_input_record.prompt_version = $2
       ${
         random

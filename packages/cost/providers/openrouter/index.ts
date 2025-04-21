@@ -9,6 +9,42 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "openai/gpt-4.1",
+    },
+    cost: {
+      prompt_token: 0.000002,
+      completion_token: 0.000008,
+      prompt_cache_read_token: 0.0000005,
+    },
+    showInPlayground: true,
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "openai/gpt-4.1-mini",
+    },
+    cost: {
+      prompt_token: 0.0000004,
+      completion_token: 0.0000016,
+      prompt_cache_read_token: 0.0000001,
+    },
+    showInPlayground: true,
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "openai/gpt-4.1-nano",
+    },
+    cost: {
+      prompt_token: 0.0000001,
+      completion_token: 0.0000004,
+      prompt_cache_read_token: 0.000000025,
+    },
+    showInPlayground: true,
+  },
+  {
+    model: {
+      operator: "equals",
       value: "google/gemini-2.0-flash-thinking-exp:free",
     },
     cost: {

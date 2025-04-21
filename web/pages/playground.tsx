@@ -1,9 +1,12 @@
+import { User } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import { ReactElement } from "react";
 import AuthLayout from "../components/layout/auth/authLayout";
 import PlaygroundPage from "../components/templates/playground/playgroundPage";
 
-interface PlaygroundProps {}
+interface PlaygroundProps {
+  user: User;
+}
 
 const Playground = (props: PlaygroundProps) => {
   const router = useRouter();

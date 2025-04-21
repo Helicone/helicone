@@ -3,6 +3,7 @@ import {
   getEvaluatorUsage,
   getExperimentUsage,
 } from "@/lib/api/stripe/llmUsage";
+import { PosthogClient } from "@/lib/clients/posthogClient";
 import { getHeliconeAuthClient } from "@/packages/common/auth/server/AuthClientFactory";
 import { costOf } from "@/packages/cost";
 import { OnboardingState } from "@/services/hooks/useOrgOnboarding";
@@ -34,47 +35,6 @@ async function getUserIdFromEmail(email: string): Promise<string | null> {
   } catch (error) {
     console.error(`Error getting userId from email: ${email}`, error);
     return null;
-  }
-}
-
-async function sendPosthogEvent(
-  event: string,
-  properties: Record<string, any>,
-  userId: string,
-  orgId?: string
-) {
-  try {
-    if (!userId) {
-      console.error(
-        `Cannot send PostHog event: missing userId for event ${event}`
-      );
-      return;
-    }
-
-    const posthogPayload = {
-      api_key: process.env.NEXT_PUBLIC_POSTHOG_API_KEY,
-      event: event,
-      distinct_id: userId,
-      properties: {
-        ...properties,
-        ...(orgId ? { $groups: { organization: orgId } } : {}),
-      },
-    };
-
-    const response = await fetch(POSTHOG_EVENT_API, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(posthogPayload),
-    });
-
-    console.log(`PostHog: Event response for ${event}: ${response.status}`);
-
-    if (!response.ok) {
-      const responseText = await response.text();
-      console.error(`PostHog error: ${responseText}`);
-    }
-  } catch (error) {
-    console.error(`Error sending event to PostHog:`, error);
   }
 }
 
@@ -165,8 +125,8 @@ async function sendSubscriptionEvent(
         : "immediate";
     }
 
-    // Send the event
-    await sendPosthogEvent(
+    const analytics = PosthogClient.getInstance();
+    await analytics.captureEvent(
       eventType,
       {
         ...baseProperties,

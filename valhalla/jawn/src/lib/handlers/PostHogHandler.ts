@@ -130,6 +130,8 @@ export class PostHogHandler extends AbstractLogHandler {
         provider: modelRow.provider,
         promptCacheWriteTokens: 0,
         promptCacheReadTokens: 0,
+        promptAudioTokens: 0,
+        completionAudioTokens: 0,
       }) ?? 0
     );
   }

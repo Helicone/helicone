@@ -2,7 +2,7 @@ import useNotification from "@/components/shared/notification/useNotification";
 import { removeLeadingWhitespace } from "@/components/shared/utils/utils";
 import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { useState } from "react";
-import { ChatTopBar, PROMPT_MODES } from "./chatComponent/chatTopBar";
+import { PROMPT_MODES } from "./chatComponent/chatTopBar";
 
 interface CompletionProps {
   mappedRequest: MappedLLMRequest;
@@ -42,17 +42,6 @@ export const Completion = (props: CompletionProps) => {
   return (
     <div className="w-full flex flex-col text-left space-y-2 text-sm">
       <div className="w-full border border-slate-200 dark:border-slate-700 divide-y divide-slate-300 dark:divide-slate-700 h-full">
-        <ChatTopBar
-          allExpanded={false}
-          isModal={true}
-          requestBody={mappedRequest.raw.request}
-          requestId={mappedRequest.id}
-          setOpen={() => {}}
-          mode={mode}
-          setMode={setMode}
-          toggleAllExpanded={() => {}}
-        />
-
         {mode === "Debug" ? (
           <div
             className="bg-gray-100 dark:bg-gray-900 items-start px-4 py-4 text-left font-semibold grid grid-cols-10 gap-2 cursor-pointer"

@@ -389,10 +389,7 @@ export class AdminManager extends BaseManager {
         subscriptions: Stripe.Subscription[];
         invoices: Stripe.Invoice[];
         discounts: Record<string, Stripe.Discount>;
-        upcomingInvoices: Record<
-          string,
-          Stripe.Response<Stripe.UpcomingInvoice>
-        >;
+        upcomingInvoices: Stripe.UpcomingInvoice[];
       },
       string
     >
@@ -422,7 +419,7 @@ export class AdminManager extends BaseManager {
       subscriptions: Stripe.Subscription[];
       invoices: Stripe.Invoice[];
       discounts: Record<string, Stripe.Discount>;
-      upcomingInvoices: Record<string, Stripe.Response<Stripe.UpcomingInvoice>>;
+      upcomingInvoices: Stripe.UpcomingInvoice[];
     }>(cacheKey);
 
     if (cachedData && !forceRefresh) {
@@ -475,13 +472,11 @@ export class AdminManager extends BaseManager {
   /**
    * Fetch upcoming invoices for active subscriptions
    */
-  private async fetchUpcomingInvoices(): Promise<
-    Record<string, Stripe.Response<Stripe.UpcomingInvoice>>
-  > {
+  private async fetchUpcomingInvoices(): Promise<Stripe.UpcomingInvoice[]> {
     const cacheKey = `upcoming-invoices-${this.authParams.organizationId}`;
-    const cachedData = await adminKVCache.get<
-      Record<string, Stripe.Response<Stripe.UpcomingInvoice>>
-    >(cacheKey);
+    const cachedData = await adminKVCache.get<Stripe.UpcomingInvoice[]>(
+      cacheKey
+    );
 
     if (cachedData) {
       return cachedData;
@@ -494,7 +489,7 @@ export class AdminManager extends BaseManager {
         "[AdminManager] Error getting subscriptions:",
         subscriptionsResult.error
       );
-      return {};
+      return [];
     }
 
     // Filter active and trialing subscriptions
@@ -506,45 +501,29 @@ export class AdminManager extends BaseManager {
     // Create a concurrency limiter that allows exactly 95 simultaneous requests
     const limit = pLimit(95);
 
-    type InvoiceResult = {
-      id: string;
-      invoice: Stripe.Response<Stripe.UpcomingInvoice>;
-    } | null;
-
     // Process all subscriptions with controlled concurrency using map-reduce pattern
     const results = await Promise.all(
-      activeSubscriptions.map(
-        (subscription: Stripe.Subscription, index: number) =>
-          limit(async () => {
-            try {
-              const invoice = await this.stripe.invoices.retrieveUpcoming({
-                subscription: subscription.id,
-              });
-              return { id: subscription.id, invoice } as InvoiceResult;
-            } catch (error) {
-              console.error(
-                `Error fetching upcoming invoice for ${subscription.id}:`,
-                error
-              );
-              return null;
-            }
-          })
+      activeSubscriptions.map((subscription: Stripe.Subscription) =>
+        limit(async () => {
+          try {
+            return await this.stripe.invoices.retrieveUpcoming({
+              subscription: subscription.id,
+            });
+          } catch (error) {
+            console.error(
+              `Error fetching upcoming invoice for ${subscription.id}:`,
+              error
+            );
+            return null;
+          }
+        })
       )
     );
 
-    // Filter out failed requests and convert to record format
-    const upcomingInvoices = Object.fromEntries(
-      results
-        .filter(
-          (
-            result
-          ): result is {
-            id: string;
-            invoice: Stripe.Response<Stripe.UpcomingInvoice>;
-          } => result !== null
-        )
-        .map((result) => [result.id, result.invoice])
-    );
+    // Filter out null results and convert to plain objects to avoid Stripe Response object issues
+    const upcomingInvoices = results
+      .filter((result) => result !== null)
+      .map((invoice) => invoice as Stripe.UpcomingInvoice);
 
     await adminKVCache.set(cacheKey, upcomingInvoices);
     return upcomingInvoices;

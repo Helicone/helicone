@@ -18,6 +18,7 @@ export interface GenerateParams {
   signal?: AbortSignal;
   includeReasoning?: boolean;
   reasoning_effort?: "low" | "medium" | "high";
+  response_format?: { type: "json_schema"; json_schema?: object };
   stream?: {
     onChunk: (chunk: string) => void;
     onCompletion: () => void;

@@ -57,15 +57,15 @@ function metaDataToBlogStructure(
     authors:
       metadata.authors && metadata.authors.length > 0
         ? metadata.authors.map((author) => ({
-            name: author,
-            imageUrl: HEADSHOTS[author as keyof typeof HEADSHOTS],
-          }))
+          name: author,
+          imageUrl: HEADSHOTS[author as keyof typeof HEADSHOTS],
+        }))
         : [
-            {
-              name: metadata.author || "",
-              imageUrl: HEADSHOTS[metadata.author as keyof typeof HEADSHOTS],
-            },
-          ],
+          {
+            name: metadata.author || "",
+            imageUrl: HEADSHOTS[metadata.author as keyof typeof HEADSHOTS],
+          },
+        ],
     title: metadata.title,
     description: metadata.description,
     badgeText: metadata.badge || "insight",
@@ -212,12 +212,42 @@ type ManualBlogStructure = {
 export type BlogStructure =
   | ManualBlogStructure
   | {
-      dynmaicEntry: {
-        folderName: string;
-      };
+    dynmaicEntry: {
+      folderName: string;
     };
+  };
 
 const blogContent: BlogStructure[] = [
+  {
+    dynmaicEntry: {
+      folderName: "o3-and-o4-mini-for-developers",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "gpt-4.1-full-developer-guide",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "buy-vs-build-llm-observability",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "full-guide-to-improving-ai-agents",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "agentic-rag-full-developer-guide",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "openai-realtime-api-with-helicone",
+    },
+  },
   {
     dynmaicEntry: {
       folderName: "gemini-2.5-full-developer-guide",
@@ -485,7 +515,7 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
-      folderName: "slash-llm-cost",
+      folderName: "monitor-and-optimize-llm-costs",
     },
   },
   {
@@ -536,6 +566,11 @@ const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
       folderName: "sam-2",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "implementing-llm-observability-with-helicone",
     },
   },
   {
@@ -608,7 +643,7 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
-      folderName: "langsmith",
+      folderName: "langsmith-vs-helicone",
     },
   },
   {

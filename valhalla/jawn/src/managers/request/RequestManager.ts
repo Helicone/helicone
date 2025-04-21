@@ -436,6 +436,8 @@ export class RequestManager extends BaseManager {
             promptTokens: r.prompt_tokens ?? 0,
             promptCacheWriteTokens: r.prompt_cache_write_tokens ?? 0,
             promptCacheReadTokens: r.prompt_cache_read_tokens ?? 0,
+            promptAudioTokens: r.prompt_audio_tokens ?? 0,
+            completionAudioTokens: r.completion_audio_tokens ?? 0,
           }),
         };
       });
