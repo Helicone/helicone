@@ -29,6 +29,11 @@ export const MODEL_LIST: {
     provider: "openai",
   },
   {
+    value: "gpt-4.1",
+    label: "gpt-4.1",
+    provider: "openai",
+  },
+  {
     value: "gpt-4-0125-preview",
     label: "gpt-4-0125-preview",
     provider: "openai",
