@@ -16,7 +16,7 @@ create table "public"."account" (
     "createdAt" timestamp without time zone not null,
     "updatedAt" timestamp without time zone not null
 );
-enable row level security on "public"."account";
+alter table "public"."account" enable row level security;
 REVOKE ALL PRIVILEGES ON TABLE "public"."account"
 FROM anon;
 REVOKE ALL PRIVILEGES ON TABLE "public"."account"
@@ -33,7 +33,7 @@ create table "public"."session" (
     "userAgent" text,
     "userId" text not null
 );
-enable row level security on "public"."session";
+alter table "public"."session" enable row level security;
 REVOKE ALL PRIVILEGES ON TABLE "public"."session"
 FROM anon;
 REVOKE ALL PRIVILEGES ON TABLE "public"."session"
@@ -50,7 +50,7 @@ create table "public"."user" (
     "updatedAt" timestamp without time zone not null,
     "auth_user_id" uuid not null default gen_random_uuid()
 );
-enable row level security on "public"."user";
+alter table "public"."user" enable row level security;
 REVOKE ALL PRIVILEGES ON TABLE "public"."user"
 FROM anon;
 REVOKE ALL PRIVILEGES ON TABLE "public"."user"
@@ -65,7 +65,7 @@ create table "public"."verification" (
     "createdAt" timestamp without time zone,
     "updatedAt" timestamp without time zone
 );
-enable row level security on "public"."verification";
+alter table "public"."verification" enable row level security;
 REVOKE ALL PRIVILEGES ON TABLE "public"."verification"
 FROM anon;
 REVOKE ALL PRIVILEGES ON TABLE "public"."verification"
