@@ -43,24 +43,31 @@ npm install -g yarn
 
 ## Step 2 - Start all the services
 
-### Start Databases + Clickhouse + Minio
+### Start Databases
 
 ```bash
 python3 -m venv env
 source env/bin/activate
 pip install tabulate requests minio
-# This will start clickhouse locally
+
+# Start Clickhouse (time-series database)
 python3 clickhouse/ch_hcone.py --restart --no-password --host localhost
+
+# Start Minio (S3 compatible object storage)
 python3 minio_hcone.py --restart
+
+# Start Postgres
+docker run -d --name helicone-postgres-flyway-test -e POSTGRES_DB=helicone_test -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=testpassword -p 54388:5432 -v postgres_flyway_data:/var/lib/postgresql/data postgres:17.4
+flyway migrate -configFiles=db/flyway.conf
 ```
 
-### Start mailhog server
+### Start mailhog server (local email testing)
 
 ```bash
-docker compose up -d mailhog -p 1025:1025 -p 8025:8025
+docker run -p 1025:1025 -p 8025:8025 mailhog/mailhog
 ```
 
-### Start Jawn (Serves Web)
+### Start Jawn (Backend + Main Proxy)
 
 In a new terminal tab, run the following:
 
