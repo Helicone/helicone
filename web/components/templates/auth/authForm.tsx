@@ -162,8 +162,7 @@ const AuthForm = (props: AuthFormProps) => {
     };
 
     preloadImages();
-    // }, []);
-  }, [centerImages, quotes]);
+  }, []);
 
   const router = useRouter();
   useEffect(() => {
@@ -258,22 +257,6 @@ const AuthForm = (props: AuthFormProps) => {
           </div>
         </div>
 
-        <div className="absolute inset-0 opacity-10">
-          <svg className="h-full w-full" aria-hidden="true">
-            <defs>
-              <pattern
-                id="grid-pattern"
-                width={25}
-                height={25}
-                patternUnits="userSpaceOnUse"
-              >
-                <path d="M25 0V25M0 25H25" fill="none" stroke="white" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#grid-pattern)" />
-          </svg>
-        </div>
-
         {/* Center Image - Only shown when showQuote is false */}
         {!showQuote && isContentLoaded && (
           <div className="absolute inset-0 z-10 transition-opacity duration-300">
@@ -360,8 +343,8 @@ const AuthForm = (props: AuthFormProps) => {
               {authFormType === "signin"
                 ? "Sign in to your account"
                 : authFormType === "signup"
-                ? "Create an account"
-                : "Reset your password"}
+                  ? "Create an account"
+                  : "Reset your password"}
             </h2>
             {authFormType === "signup" ? (
               <p className="mt-2 text-sm text-gray-600">
@@ -504,10 +487,10 @@ const AuthForm = (props: AuthFormProps) => {
               {authFormType === "signin"
                 ? "Sign in with email"
                 : authFormType === "signup"
-                ? "Create account"
-                : authFormType === "reset"
-                ? "Reset password"
-                : "Update password"}
+                  ? "Create account"
+                  : authFormType === "reset"
+                    ? "Reset password"
+                    : "Update password"}
             </Button>
           </form>
 

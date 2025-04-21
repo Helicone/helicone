@@ -540,7 +540,7 @@ const NavBar = (props: NavBarProps) => {
                 Contact us
               </Button>
             </Link>
-            <Link href="https://us.helicone.ai/signup">
+            <Link href="/signup">
               <Button className="text-sm text-white rounded-lg bg-brand">
                 Sign up
               </Button>
