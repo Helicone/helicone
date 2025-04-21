@@ -18,7 +18,7 @@ Let's walk through an example using the open-source <a href="https://github.com/
 
 First, you'll need a Figma account and a personal API key.
 
-Follow <a href="https://help.figma.com/hc/en-us/articles/8085703771159-Manage-personal-access-tokens" target="_blank" rel="noopener">these instructions</a> to generate your API key. This key allows your MCP server to securely retrieve data from your Figma projects.
+Follow <a href="https://help.figma.com/hc/en-us/articles/8085703771159-Manage-personal-access-tokens" target="_blank" rel="noopener">these instructions</a> to generate your API key. 
 
 ### Step 2: Add the MCP Server to Your Environment
 
@@ -95,8 +95,6 @@ mkdir weather-mcp
 cd weather-mcp
 npm init -y
 ```
-
-This creates a new project where we'll install our MCP server code.
 
 ### Step 2: Build the Weather MCP Server
 
@@ -240,31 +238,27 @@ After the connection is established, you can now ask Cursor:
 
 ![Weather MCP Tool Test](/static/blog/building-first-mcp-for-developers/weather-mcp-test.webp)
 
-Cursor will call your custom MCP server, fetch live data, and return a natural language answer.
-
-With a working Weather MCP, you now have a foundation for connecting any real-world API to your AI agent using the MCP standard.
+Cursor will call your custom MCP server, fetch live data, and return a natural language answer. You now have a foundation for connecting any real-world API to your AI agent using the MCP standard.
 
 ## How to Add Observability to Your MCP Server with Helicone
 
 Once your MCP is running, the next step is ensuring you can monitor its performance and debug issues efficiently. That’s where Helicone comes in.
 
-Helicone provides robust observability for your LLM usage across providers like OpenAI, Claude, and Groq.
+Helicone provides robust observability for your LLM usage across providers like OpenAI, Claude, and Groq. Here's how: 
 
-Here's how to integrate Helicone with your MCP.
-
-### Step 1: Get API Keys
+### Step 1: Generate API Keys
 
 You'll need:
 
-- A Helicone API key
+- A <a href="https://us.helicone.ai/developer" target="_blank" rel="noopener">Helicone API key</a> (you will need to create an account first)
 - An LLM provider API key (we'll use Groq in this example)
+
+Save these in your `.env` file:
 
 ```bash
 GROQ_API_KEY=<your-groq-api-key>
 HELICONE_API_KEY=<your-helicone-api-key>
 ```
-
-Save these in your `.env` file:
 
 ### Step 2: Integrate Helicone with Groq
 
@@ -302,13 +296,13 @@ const completion = await groq.chat.completions.create({
 
 With this setup, all LLM requests made through your MCP will be automatically logged and tracked in Helicone without any extra instrumentation required in your request logic.
 
-Run your MCP server:
+Now, run your MCP server:
 
 ```bash
 npx tsx main.ts
 ```
 
-Alternatively, you can clone the complete repository and start your custom MCP:
+Alternatively, you can clone the complete repository like so, and start your custom MCP:
 
 ```bash
 git clone https://github.com/Yusu-f/custom-MCP-tutorial.git
@@ -324,18 +318,18 @@ npx tsx main.ts
   primaryButtonText="Start Monitoring for Free"
   primaryButtonLink="https://helicone.ai/signup"
   secondaryButtonText="Explore Integrations"
-  secondaryButtonLink="https://docs.helicone.ai/getting-started/integration-method"
+  secondaryButtonLink="https://docs.helicone.ai/integrations/openai/javascript"
 />
 
 ### Step 4: Monitor Your LLM Usage in Helicone
 
 After restarting the MCP server (use the refresh button in Cursor), your weather prompts are now routed through Helicone. Ask Cursor about a city's temperature to see the MCP in action.
 
-To see detailed aggregated data, visit your <a href="https://www.helicone.ai/" target="_blank" rel="noopener">Helicone dashboard</a>:
+**Tip:** To see detailed aggregated data, visit your <a href="https://www.helicone.ai/" target="_blank" rel="noopener">Helicone dashboard</a>:
 
 ![Helicone Dashboard](/static/blog/building-first-mcp-for-developers/helicone-dashboard.png)
 
-For detailed response/request data, check out the <a href="https://docs.helicone.ai/getting-started/requests" target="_blank" rel="noopener">Requests page</a>:
+**Another tip:** For detailed response/request data, check out the <a href="https://docs.helicone.ai/getting-started/requests" target="_blank" rel="noopener">Requests page</a>:
 
 ![Helicone Requests](/static/blog/building-first-mcp-for-developers/helicone-requests.png)
 
