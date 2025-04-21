@@ -12,14 +12,16 @@ At Helicone we believe that open-source software makes the world a better place.
 ```bash
 # Clone repository
 git clone https://github.com/Helicone/helicone.git
-cd helicone/docker
 
-# Copy environment variables
-# See below for details: https://supabase.com/docs/guides/self-hosting/docker
-cp .env.example .env
+# Close any running containers
+docker compose -f docker/docker-compose-slim.yml down -v
 
-# Startup service
-docker compose up
+# Start up the services
+docker compose -f docker/docker-compose-slim.yml up -d
+
+# Run migrations for clickhouse and postgres
+flyway migrate -configFiles=db/flyway.conf
+python3 clickhouse/ch_hcone.py --upgrade --host localhost --port 18123 --user default --no-password
 ```
 
 **Default URLs:**
