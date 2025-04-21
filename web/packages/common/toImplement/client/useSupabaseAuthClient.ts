@@ -67,11 +67,19 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
     await this.supabaseClient?.auth.signOut();
   }
 
+  hasSupabaseClient(): boolean {
+    if (!("supabaseClient" in this)) {
+      return false;
+    }
+
+    return !!this.supabaseClient;
+  }
+
   async getUser(): Promise<Result<HeliconeUser, string>> {
-    if (!this.supabaseClient) {
+    if (!this || !this.hasSupabaseClient()) {
       return err("Supabase client not found");
     }
-    const user = await this.supabaseClient.auth.getUser();
+    const user = await this.supabaseClient!.auth.getUser();
     if (!user.data.user) {
       return err("User not found");
     }
