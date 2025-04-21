@@ -15,7 +15,7 @@ export default function FoldedHeader({
   const [isFolded, setIsFolded] = useState(false);
 
   return (
-    <header className="w-full flex flex-col bg-background border-b border-border">
+    <header className="w-full flex flex-col bg-background border-b border-border shrink-0">
       {/* Header */}
       <div className="h-10 px-4 w-full flex flex-row items-center justify-between">
         {/* Left Section */}
@@ -51,7 +51,11 @@ export default function FoldedHeader({
       </div>
 
       {/* Fold */}
-      <div className={`w-full bg-muted ${isFolded ? "h-0" : "h-full"}`}>
+      <div
+        className={`w-full bg-muted border-border ${
+          isFolded ? "h-0 invisible" : "h-7 border-t"
+        }`}
+      >
         {foldContent}
       </div>
     </header>

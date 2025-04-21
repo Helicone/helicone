@@ -1,4 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
+import { formatNumber } from "../../shared/utils/formatNumber";
 import { getUSDateFromString } from "../../shared/utils/utils";
 
 export const INITIAL_COLUMNS: ColumnDef<any>[] = [
@@ -67,7 +68,7 @@ export const INITIAL_COLUMNS: ColumnDef<any>[] = [
     id: "total_tokens",
     accessorKey: "total_tokens",
     header: "Total Tokens",
-    cell: (info) => Number(info.getValue()).toLocaleString(),
+    cell: (info) => formatNumber(info.getValue() as number),
     meta: {},
   },
   {
@@ -76,6 +77,14 @@ export const INITIAL_COLUMNS: ColumnDef<any>[] = [
     header: "Requests",
     cell: (info) => Number(info.getValue()).toLocaleString(),
     meta: {},
+  },
+  {
+    accessorKey: "avg_latency",
+    header: "Avg Latency",
+    cell: (info) => {
+      const value = info.getValue() as number;
+      return value ? `${(value * 1000).toFixed(0)}ms` : "-";
+    },
   },
 ];
 
