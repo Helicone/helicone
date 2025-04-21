@@ -1,6 +1,9 @@
 "use client";
+
+import * as React from "react"
 import Link from "next/link";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
 import { useEffect, useState, useRef } from "react";
 import { usePathname } from "next/navigation";
 import {
@@ -17,7 +20,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { BookHeart, ChevronDown, ChevronRight, Component, Earth, Gem, Github, GitMerge, HandCoins, TrendingUp, ExternalLink } from "lucide-react";
+import { BookHeart, ChevronDown, ChevronRight, Component, Earth, Gem, Github, GitMerge, HandCoins, TrendingUp, ExternalLink, LayoutGrid } from "lucide-react";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+} from "@/components/ui/navigation-menu"
+
+// import { ListItem } from "@/components/ui/navigation-menu-item";
 
 interface NavBarProps {
   stars?: number;
@@ -85,13 +99,6 @@ const MobileHeader = (props: {
 };
 
 const MENU_ICON_CLASSES = "h-4 w-4 text-sky-500 stroke-[1.5px] fill-none m-1";
-
-// Create a new component for menu icons
-const MenuIcon = ({ children }: { children: React.ReactNode }) => (
-  <div className={MENU_ICON_CLASSES}>
-    {children}
-  </div>
-);
 
 const NavLinks = () => {
   const path = usePathname();
@@ -251,40 +258,41 @@ const NavLinks = () => {
   );
 };
 
-const NavIcons = () => {
-  const path = usePathname();
-  const links = [
-    {
-      href: "/contact",
-      label: "Contact",
-      icon: <EnvelopeIcon className={MENU_ICON_CLASSES} />,
-    },
-    {
-      href: "https://github.com/Helicone",
-      label: "GitHub",
-      icon: <Github className={MENU_ICON_CLASSES} />,
-    },
-  ];
-  return (
-    <div className="flex flex-row gap-x-3">
-      {links.map((link, i) => (
-        <Link
-          href={link.href}
-          className={
-            "flex flex-row items-center font-medium hover:text-black rounded-md py-1.5 focus:outline-none " +
-            " " +
-            (path === link.href
-              ? "text-black font-bold"
-              : "text-gray-600 opacity-75")
-          }
-          key={link.href}
-        >
-          {link.icon}
-        </Link>
-      ))}
-    </div>
-  );
-};
+// const NavIcons = () => {
+//   const path = usePathname();
+//   const links = [
+//     {
+//       href: "/contact",
+//       label: "Contact",
+//       icon: <EnvelopeIcon className={MENU_ICON_CLASSES} />,
+//     },
+//     {
+//       href: "https://github.com/Helicone",
+//       label: "GitHub",
+//       icon: <Github className={MENU_ICON_CLASSES} />,
+//     },
+//   ];
+//   return (
+//     <div className="flex flex-row gap-x-3">
+//       {links.map((link, i) => (
+//         <Link
+//           href={link.href}
+//           className={
+//             "flex flex-row items-center font-medium hover:text-black rounded-md py-1.5 focus:outline-none " +
+//             " " +
+//             (path === link.href
+//               ? "text-black font-bold"
+//               : "text-gray-600 opacity-75")
+//           }
+//           key={link.href}
+//         >
+//           {link.icon}
+//         </Link>
+//       ))}
+//     </div>
+//   );
+// };
+
 
 const MobileNav = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -446,6 +454,63 @@ const MobileNav = () => {
   );
 };
 
+const resourcesComponents: { title: string; href: string; description: string; icon: React.ReactNode }[] = [
+  {
+    title: "Changelog",
+    href: "/changelog",
+    description:
+      "Latest updates and improvements",
+    icon: <GitMerge className={MENU_ICON_CLASSES} />,
+  },
+  {
+    title: "Blog",
+    href: "/blog",
+    description:
+      "Insights on AI development and best practices",
+    icon: <NewspaperIcon className={MENU_ICON_CLASSES} />,
+  },
+  {
+    title: "Community",
+    href: "/community",
+    description:
+      "Built for scale, security, and control",
+    icon: <Gem className={MENU_ICON_CLASSES} />,
+  },
+
+]
+
+const toolsComponents: { title: string; href: string; description: string; icon: React.ReactNode }[] = [
+  {
+    title: "Open Stats",
+    href: "/open-stats",
+    description:
+      "Real-time LLM usage analytics",
+    icon: <Earth className={MENU_ICON_CLASSES} />,
+  },
+  {
+    title: "Model Comparison",
+    href: "/comparison",
+    description:
+      "Compare different LLM models and providers",
+    icon: <Component className={MENU_ICON_CLASSES} />,
+  },
+  {
+    title: "Provider Status",
+    href: "/status",
+    description:
+      "Check LLM provider service status",
+    icon: <TrendingUp className={MENU_ICON_CLASSES} />,
+  },
+  {
+    title: "API Pricing Calculator",
+    href: "/llm-cost",
+    description:
+      "Calculate and compare API costs",
+    icon: <HandCoins className={MENU_ICON_CLASSES} />,
+  },
+]
+
+
 const NavBar = (props: NavBarProps) => {
   const headerRef = useRef<HTMLDivElement>(null);
 
@@ -465,6 +530,7 @@ const NavBar = (props: NavBarProps) => {
       className="bg-white top-0 sticky z-30 border-b border-gray-200 mb-10"
     >
       <MobileNav />
+
       <nav
         className="gap-x-3 mx-auto lg:flex sm:px-16 lg:px-24 2xl:px-40 max-w-[2000px] items-center py-3 hidden justify-between"
         aria-label="Global"
@@ -495,7 +561,100 @@ const NavBar = (props: NavBarProps) => {
           </Link>
         </div>
         <div className="w-full mt-4 lg:mt-0 flex gap-x-1 items-center text-sm col-span-8 lg:col-span-6 order-3 lg:order-2 justify-between">
+          <NavigationMenu>
+            <NavigationMenuList>
+
+              {/* Docs */}
+              <NavigationMenuItem>
+                <Link href="https://docs.helicone.ai" legacyBehavior passHref>
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                    Docs
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+
+              {/* Pricing */}
+              <NavigationMenuItem>
+                <Link href="/pricing" legacyBehavior passHref>
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                    Pricing
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+
+              {/* Resources */}
+              <NavigationMenuItem>
+                <NavigationMenuTrigger>Resources</NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <ul className="grid gap-3 p-4 md:w-[500px] lg:w-[600px] lg:grid-cols-[.75fr_1fr]">
+                    <li>
+                      {resourcesComponents.map((component) => (
+                        <ListItem
+                          key={component.title}
+                          title={component.title}
+                          href={component.href}
+                        >
+                          {component.icon}
+                          {component.description}
+                        </ListItem>
+                      ))}
+                    </li>
+                    <li className="row-span-3">
+                      <NavigationMenuLink asChild>
+                        <a
+                          className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
+                          href="/"
+                        >
+                          <LayoutGrid className="h-6 w-6" />
+                          <div className="mb-2 mt-4 text-lg font-medium">
+                            Helicone
+                            {/* pull the latest blog */}
+                          </div>
+                          <p className="text-sm leading-tight text-muted-foreground">
+                            Open-source LLM observability and monitoring platform for developers
+                          </p>
+                        </a>
+                      </NavigationMenuLink>
+                    </li>
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+
+              {/* Tools */}
+              <NavigationMenuItem>
+                <NavigationMenuTrigger>Tools</NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <ul className="grid w-[400px] gap-3 p-4">
+                    {toolsComponents.map((component) => (
+                      <ListItem
+                        key={component.title}
+                        title={component.title}
+                        href={component.href}
+                      >
+                        {component.icon}
+                        {component.description}
+                      </ListItem>
+                    ))}
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+
+              {/* Careers */}
+              <NavigationMenuItem>
+                <Link href="https://app.dover.com/jobs/helicone" legacyBehavior passHref>
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                    Careers
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+
+            </NavigationMenuList>
+          </NavigationMenu>
+
+          {/* Old Nav Links */}
           <NavLinks />
+
+          {/* Github, contact, login */}
           <div className="flex items-center gap-x-3">
             <a
               href="https://github.com/helicone/helicone"
@@ -539,9 +698,38 @@ const NavBar = (props: NavBarProps) => {
             </Link>
           </div>
         </div>
-      </nav>
-    </div>
+      </nav >
+    </div >
   );
 };
+
+
+// Shadcn UI ListItem for Navigation Menu
+const ListItem = React.forwardRef<
+  React.ElementRef<"a">,
+  React.ComponentPropsWithoutRef<"a">
+>(({ className, title, children, ...props }, ref) => {
+  return (
+    <li>
+      <NavigationMenuLink asChild>
+        <a
+          ref={ref}
+          className={cn(
+            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+            className
+          )}
+          {...props}
+        >
+          <div className="text-sm font-medium leading-none">{title}</div>
+          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+            {children}
+          </p>
+        </a>
+      </NavigationMenuLink>
+    </li>
+  )
+})
+ListItem.displayName = "ListItem"
+
 
 export default NavBar;
