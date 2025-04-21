@@ -1,22 +1,28 @@
 Anthropic's <a href="https://www.helicone.ai/blog/mcp-full-developer-guide" target="_blank" rel="noopener">Model Context Protocol (MCP)</a> is a new standard that allows AI applications to interact directly with external tools, APIs, and services through natural language. By providing a structured, plug-and-play framework, MCP simplifies building AI agents that can perform complex actions beyond basic chat.
 
-In this guide, we'll show you how to use pre-built MCPs, build your own MCP server, and add observability with Helicone to monitor your AI usage.
+In this guide, we'll show you how to integrate pre-built MCPs, build a custom MCP server, and add observability with Helicone to monitor and optimize your AI usage.
+
+![Build Your First MCP](/static/blog/building-first-mcp-for-developers/build-first-mcp.webp)
 
 ## Table Of Contents
 
 ## How to Integrate a Pre-built MCP Into Your AI Application
 
-MCP's plug-and-play architecture lets you integrate pre-built tools into your AI environment with minimal configuration.
 
-Take the <a href="https://github.com/GLips/Figma-Context-MCP" target="_blank" rel="noopener">Figma MCP</a>—this open-source tool connects Figma files directly to **Cursor**, letting you query design specs and generate code through natural language.
+If you want to start quickly, you can connect an existing MCP server — no custom coding required.
+MCP's plug-and-play design allows you to wire up external tools in minutes.
 
-Here's how to use it.
+Let's walk through an example using the open-source <a href="https://github.com/GLips/Figma-Context-MCP" target="_blank" rel="noopener">Figma MCP</a>, which connects design files directly to your AI coding environment in Cursor.
 
-### Step 1: Get a Figma API Key
+### Step 1: Get Your Figma API Key
 
-Sign up for a Figma account and create your personal API key following the <a href="https://help.figma.com/hc/en-us/articles/8085703771159-Manage-personal-access-tokens" target="_blank" rel="noopener">instructions here</a>.
+First, you'll need a Figma account and a personal API key.
+
+Follow <a href="https://help.figma.com/hc/en-us/articles/8085703771159-Manage-personal-access-tokens" target="_blank" rel="noopener">these instructions</a> to generate your API key. This key allows your MCP server to securely retrieve data from your Figma projects.
 
 ### Step 2: Add the MCP Server to Your Environment
+
+Next, connect the Figma MCP server to Cursor.
 
 In Cursor, go to `Settings` > `MCP` > `Add new global MCP server` and paste the configuration.
 
@@ -46,33 +52,39 @@ In Cursor, go to `Settings` > `MCP` > `Add new global MCP server` and paste the 
 }
 ```
 
-### Step 3: Test Your Figma Integration
+This configuration sets up your MCP server as a local process that communicates with Cursor via standard input/output streams.
 
-After the MCP status turns green, try these prompts:
+### Step 3: Test Your Figma MCP Integration
+
+Once the MCP status turns green, you're ready to use it.
+
+Try asking Cursor:
 
 >Can you retrieve this Figma file and analyze the components in a few short sentences?
->
+
 >**[Your Figma file URL]**
 
-![Figma file analysis](/static/blog/building-first-mcp-for-developers/figma-analysis.png)
+You should see an analysis similar to this:
 
-Then try:
+![Figma file analysis](/static/blog/building-first-mcp-for-developers/figma-analysis.webp)
+
+Next, you can push it further:
 
 >Based on the chart components in this Figma file, generate reusable Tailwind + React components for a dashboard UI.
 
-![Generated components](/static/blog/building-first-mcp-for-developers/figma-analysis-2.png)
+Results: 
 
-Now that you’ve seen how easy it is to integrate a ready-made MCP like Figma's, let's dive deeper. 
+![Generated components](/static/blog/building-first-mcp-for-developers/figma-analysis-2.webp)
 
-What if you want to build your own customized MCP server?
+Now that you've seen how easy it is to integrate a ready-made MCP like Figma's, let's dive deeper: **what if you need more control or want to integrate services that don't have a pre-built MCP?**
 
-## How to Build a Custom MCP Server to Extend Your AI Application
+In the next section, we'll show you how to build your own custom MCP server from scratch.
+
+## How to Build a Custom MCP Server From Scratch
 
 Sometimes, off-the-shelf tools aren't enough. If you need deeper customization, building your own Model Context Protocol (MCP) server gives you full control over how your AI interacts with external APIs. 
 
 In this section, we'll walk you through creating a simple Weather MCP that retrieves live temperature data.
-
-{/* If you want more customization & control, you can build your own MCP. We'll build a Weather MCP that fetches current temperatures using the Open-Meteo API. */}
 
 ### Step 1: Initialize the Project
 
@@ -84,9 +96,13 @@ cd weather-mcp
 npm init -y
 ```
 
-### Step 2: Build the MCP Tool
+This creates a new project where we'll install our MCP server code.
 
-Create a file named `main.ts` with this code:
+### Step 2: Build the Weather MCP Server
+
+Now let's create the core logic for the MCP.
+
+Create a new file called `main.ts`, and add the following code:
 
 ```ts
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp";
@@ -189,6 +205,9 @@ app.listen(3000);
 console.log("Weather MCP running at http://localhost:3000/sse");
 ```
 
+**Checkpoint:** We've created a tool that takes a city name as input, fetches its coordinates, retrieves the weather, and returns a friendly natural language response.
+
+
 ### Step 3: Install Dependencies
 
 ```bash
@@ -201,7 +220,9 @@ npm install @modelcontextprotocol/sdk express zod
 npx tsx main.ts
 ```
 
-### Step 5: Test in Cursor
+You should see the Weather MCP running at `http://localhost:3000/sse`.  
+
+### Step 5: Connect Your MCP Server in Cursor
 
 Add a new global server in Cursor's MCP settings:
 
@@ -213,13 +234,17 @@ Add a new global server in Cursor's MCP settings:
 }
 ```
 
-After the connection is established, test it with a prompt about a city's temperature.
+After the connection is established, you can now ask Cursor:
 
-![Weather MCP Tool Test](/static/blog/building-first-mcp-for-developers/weather-mcp-test.png)
+>What's the weather in San Francisco?
+
+![Weather MCP Tool Test](/static/blog/building-first-mcp-for-developers/weather-mcp-test.webp)
+
+Cursor will call your custom MCP server, fetch live data, and return a natural language answer.
 
 With a working Weather MCP, you now have a foundation for connecting any real-world API to your AI agent using the MCP standard.
 
-## How to Integrate Helicone for LLM Observability
+## How to Add Observability to Your MCP Server with Helicone
 
 Once your MCP is running, the next step is ensuring you can monitor its performance and debug issues efficiently. That’s where Helicone comes in.
 
@@ -337,6 +362,16 @@ With Helicone's observability layer, you gain visibility into every underlying L
       question: "What is Model Context Protocol (MCP)?",
       answer:
         "MCP is an open connection protocol that allows AI applications to integrate with external tools, APIs, and services through a standardized interface. It enables LLMs to interact with external systems through natural language.",
+    },
+    {
+      question: "How do I integrate MCP into my AI app?",
+      answer:
+        "To integrate MCP into your AI application, you can either connect to an existing MCP server or build your own custom MCP server. Pre-built MCPs, like the Figma MCP, can be added to environments like Cursor with minimal configuration. If you need custom functionality, you can create an MCP server using the official SDK, expose it through an API endpoint, and register it inside your AI environment. Once integrated, your AI model can call external tools and services through standardized natural language prompts."
+    },
+    {
+      question: "Why is observability important when using MCP?",
+      answer:
+        "Observability is critical when using MCP because it gives you visibility into how your AI agent is interacting with external systems. By monitoring LLM requests, tool calls, latency, errors, and performance metrics, you can quickly detect issues, debug failures, optimize usage patterns, and control costs. Without observability, diagnosing problems across multiple MCP-integrated tools becomes difficult, slowing down development and risking poor user experiences.",
     },
     {
       question: "How does Helicone integrate with MCP?",

@@ -1,11 +1,11 @@
 { 
-  "title": "Step-by-Step Guide to Building Your First MCP",
-  "title1": "Building your First MCP for Developers",
-  "title2": "Building your First MCP for Developers",
-  "description": "Learn how to use MCPs, build your first MCP tool, connect it to AI applications, and integrate Helicone for powerful LLM observability in production.",
-  "images": "/static/blog/building-first-mcp-for-developers/mcp-header.webp",
+  "title": "How to Build Your First MCP Server: Full Guide for Developers",
+  "title1": "Extend Your AI Agents: Build and Deploy Your First MCP",
+  "title2": "How to Build Your First MCP Server: Full Guide for Developers",
+  "description": "Learn how to build your first Model Context Protocol (MCP) server, integrate it with AI apps like Cursor, and add Helicone observability to monitor LLM performance in production.",
+  "images": "/static/blog/building-first-mcp-for-developers/build-first-mcp.webp",
   "time": "10 minute read",
   "author": "Yusuf Ishola",
-  "date": "April 20, 2025", 
-  "badge": "Guide"
+  "date": "April 21, 2025", 
+  "badge": "Best Practices"
 }
