@@ -553,3 +553,4 @@ const NavBar = (props: NavBarProps) => {
 };
 
 export default NavBar;
+
