@@ -66,9 +66,13 @@ Now that you’ve seen how easy it is to integrate a ready-made MCP like Figma's
 
 What if you want to build your own customized MCP server?
 
-## How to Build Your Own Custom MCP Server From Scratch
+## How to Build a Custom MCP Server to Extend Your AI Application
 
-If you want more customization & control, you can build your own MCP. We'll build a Weather MCP that fetches current temperatures using the Open-Meteo API.
+Sometimes, off-the-shelf tools aren't enough. If you need deeper customization, building your own Model Context Protocol (MCP) server gives you full control over how your AI interacts with external APIs. 
+
+In this section, we'll walk you through creating a simple Weather MCP that retrieves live temperature data.
+
+{/* If you want more customization & control, you can build your own MCP. We'll build a Weather MCP that fetches current temperatures using the Open-Meteo API. */}
 
 ### Step 1: Initialize the Project
 
@@ -218,10 +222,6 @@ With a working Weather MCP, you now have a foundation for connecting any real-wo
 ## How to Integrate Helicone for LLM Observability
 
 Once your MCP is running, the next step is ensuring you can monitor its performance and debug issues efficiently. That’s where Helicone comes in.
-
-So, you've built a cool MCP and everyone's using it.
-
-But what if your MCP uses an LLM internally and you'd like to monitor its performance—that's where Helicone comes in!
 
 Helicone provides robust observability for your LLM usage across providers like OpenAI, Claude, and Groq.
 
