@@ -3,6 +3,7 @@ DO $$ BEGIN -- Try to create the HTTP extension if permissions allow
 BEGIN CREATE EXTENSION IF NOT EXISTS http;
 EXCEPTION
 WHEN insufficient_privilege THEN RAISE NOTICE 'Skipping HTTP extension creation due to insufficient privileges. Tracking functionality will be disabled.';
+WHEN feature_not_supported THEN RAISE NOTICE 'Skipping HTTP extension creation because it is not available on this system. Tracking functionality will be disabled.';
 END;
 END $$;
 -- Create system config table regardless of environment
