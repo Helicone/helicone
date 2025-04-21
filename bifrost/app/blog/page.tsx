@@ -220,6 +220,11 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "building-first-mcp-for-developers",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "o3-and-o4-mini-for-developers",
     },
   },

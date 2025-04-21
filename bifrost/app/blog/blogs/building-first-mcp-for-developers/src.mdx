@@ -1,90 +1,78 @@
-Anthropic's **Model Context Protocol (MCP)** has been a game-changer for how developers integrate tools, APIs, and services directly into AI applications. 
+Anthropic's <a href="https://www.helicone.ai/blog/mcp-full-developer-guide" target="_blank" rel="noopener">Model Context Protocol (MCP)</a> is a new standard that allows AI applications to interact directly with external tools, APIs, and services through natural language. By providing a structured, plug-and-play framework, MCP simplifies building AI agents that can perform complex actions beyond basic chat.
 
-MCP's plug-and-play architecture allows you to create AI applications that interact with external systems seamlessly.
-
-In this comprehensive guide, we'll cover how to use existing MCPs, build your own custom MCP server, and integrate Helicone for observability to monitor your AI usage.
+In this guide, we'll show you how to use pre-built MCPs, build your own MCP server, and add observability with Helicone to monitor your AI usage.
 
 ## Table Of Contents
 
-## How to Use a Prebuilt MCP
+## How to Integrate a Pre-built MCP Into Your AI Application
 
 MCP's plug-and-play architecture lets you integrate pre-built tools into your AI environment with minimal configuration.
 
-Take the Figma MCP—this open-source tool connects Figma files directly to **Cursor**, letting you query design specs and generate code through natural language.
+Take the <a href="https://github.com/GLips/Figma-Context-MCP" target="_blank" rel="noopener">Figma MCP</a>—this open-source tool connects Figma files directly to **Cursor**, letting you query design specs and generate code through natural language.
 
 Here's how to use it.
 
 ### Step 1: Get a Figma API Key
 
-Sign up for a Figma account and create your personal API key following the [instructions here](https://help.figma.com/hc/en-us/articles/8085703771159-Manage-personal-access-tokens).
+Sign up for a Figma account and create your personal API key following the <a href="https://help.figma.com/hc/en-us/articles/8085703771159-Manage-personal-access-tokens" target="_blank" rel="noopener">instructions here</a>.
 
 ### Step 2: Add the MCP Server to Your Environment
 
-Add the MCP server configuration to your AI development environment:
+In Cursor, go to `Settings` > `MCP` > `Add new global MCP server` and paste the configuration.
 
-**MacOS/Linux**
+#### MacOS/Linux
 
 ```json
 {
   "mcpServers": {
     "Framelink Figma MCP": {
       "command": "npx",
-      "args": [
-        "-y",
-        "figma-developer-mcp",
-        "--figma-api-key=YOUR-KEY",
-        "--stdio"
-      ]
+      "args": ["-y", "figma-developer-mcp", "--figma-api-key=YOUR-KEY", "--stdio"]
     }
   }
 }
 ```
 
-**Windows**
+#### Windows
 
 ```json
 {
   "mcpServers": {
     "Framelink Figma MCP": {
       "command": "cmd",
-      "args": [
-        "/c",
-        "npx",
-        "-y",
-        "figma-developer-mcp",
-        "--figma-api-key=YOUR-KEY",
-        "--stdio"
-      ]
+      "args": ["/c", "npx", "-y", "figma-developer-mcp", "--figma-api-key=YOUR-KEY", "--stdio"]
     }
   }
 }
 ```
 
-In Cursor, go to **Settings > MCP > Add new global MCP server** and paste the configuration.
-
 ### Step 3: Test Your Figma Integration
 
 After the MCP status turns green, try these prompts:
 
-**"Can you retrieve this Figma file and analyze the components in a few short sentences?**
-
-**[Your Figma file URL]"**
+>Can you retrieve this Figma file and analyze the components in a few short sentences?
+>
+>**[Your Figma file URL]**
 
 ![Figma file analysis](/static/blog/building-first-mcp-for-developers/figma-analysis.png)
 
 Then try:
 
-**"Based on the chart components in this Figma file, generate reusable Tailwind + React components for a dashboard UI."**
+>Based on the chart components in this Figma file, generate reusable Tailwind + React components for a dashboard UI.
 
 ![Generated components](/static/blog/building-first-mcp-for-developers/figma-analysis-2.png)
 
-## Creating Your Own MCP
+Now that you’ve seen how easy it is to integrate a ready-made MCP like Figma's, let's dive deeper. 
 
-Now let's build our own MCP from scratch.
+What if you want to build your own customized MCP server?
 
-We'll build a Weather MCP that fetches current temperatures using the Open-Meteo API.
+## How to Build Your Own Custom MCP Server From Scratch
+
+If you want more customization & control, you can build your own MCP. We'll build a Weather MCP that fetches current temperatures using the Open-Meteo API.
 
 ### Step 1: Initialize the Project
+
+We'll start by initializing a new Node.js project, which will serve as the base for our custom MCP server.
 
 ```bash
 mkdir weather-mcp
@@ -225,13 +213,17 @@ After the connection is established, test it with a prompt about a city's temper
 
 ![Weather MCP Tool Test](/static/blog/building-first-mcp-for-developers/weather-mcp-test.png)
 
-## Integrating Helicone for LLM Observability
+With a working Weather MCP, you now have a foundation for connecting any real-world API to your AI agent using the MCP standard.
+
+## How to Integrate Helicone for LLM Observability
+
+Once your MCP is running, the next step is ensuring you can monitor its performance and debug issues efficiently. That’s where Helicone comes in.
 
 So, you've built a cool MCP and everyone's using it.
 
 But what if your MCP uses an LLM internally and you'd like to monitor its performance—that's where Helicone comes in!
 
-**<span style={{color: '#0ea5e9'}}>Helicone</span>** provides robust observability for your LLM usage across providers like OpenAI, Claude, and Groq.
+Helicone provides robust observability for your LLM usage across providers like OpenAI, Claude, and Groq.
 
 Here's how to integrate Helicone with your MCP.
 
@@ -242,12 +234,12 @@ You'll need:
 - A Helicone API key
 - An LLM provider API key (we'll use Groq in this example)
 
-Save these in your `.env` file:
-
 ```bash
 GROQ_API_KEY=<your-groq-api-key>
 HELICONE_API_KEY=<your-helicone-api-key>
 ```
+
+Save these in your `.env` file:
 
 ### Step 2: Integrate Helicone with Groq
 
@@ -291,9 +283,7 @@ Run your MCP server:
 npx tsx main.ts
 ```
 
----
-
-Alternatively, run this code to clone the complete repository and start your custom MCP:
+Alternatively, you can clone the complete repository and start your custom MCP:
 
 ```bash
 git clone https://github.com/Yusu-f/custom-MCP-tutorial.git
@@ -316,11 +306,11 @@ npx tsx main.ts
 
 After restarting the MCP server (use the refresh button in Cursor), your weather prompts are now routed through Helicone. Ask Cursor about a city's temperature to see the MCP in action.
 
-Visit your [Helicone dashboard](https://www.helicone.ai/) to see the data:
+To see detailed aggregated data, visit your <a href="https://www.helicone.ai/" target="_blank" rel="noopener">Helicone dashboard</a>:
 
 ![Helicone Dashboard](/static/blog/building-first-mcp-for-developers/helicone-dashboard.png)
 
-For detailed analysis of individual requests, check the Requests page:
+For detailed response/request data, check out the <a href="https://docs.helicone.ai/getting-started/requests" target="_blank" rel="noopener">Requests page</a>:
 
 ![Helicone Requests](/static/blog/building-first-mcp-for-developers/helicone-requests.png)
 
