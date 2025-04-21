@@ -147,6 +147,7 @@
     "@types/uuid": "^9.0.8",
     "autoprefixer": "^10.4.16",
     "cross-env": "^7.0.3",
+    "dotenv-cli": "^8.0.0",
     "eslint": "8.47.0",
     "eslint-config-next": "13.0.5",
     "eslint-config-prettier": "^8.5.0",
