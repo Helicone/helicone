@@ -343,8 +343,8 @@ const AuthForm = (props: AuthFormProps) => {
               {authFormType === "signin"
                 ? "Sign in to your account"
                 : authFormType === "signup"
-                  ? "Create an account"
-                  : "Reset your password"}
+                ? "Create an account"
+                : "Reset your password"}
             </h2>
             {authFormType === "signup" ? (
               <p className="mt-2 text-sm text-gray-600">
@@ -358,7 +358,7 @@ const AuthForm = (props: AuthFormProps) => {
               </p>
             ) : (
               <p className="mt-2 text-sm text-gray-600">
-                New to Helicone? {" "}
+                New to Helicone?{" "}
                 <Link
                   href={"/signup"}
                   className="text-sky-500 hover:text-sky-700"
@@ -487,10 +487,10 @@ const AuthForm = (props: AuthFormProps) => {
               {authFormType === "signin"
                 ? "Sign in with email"
                 : authFormType === "signup"
-                  ? "Create account"
-                  : authFormType === "reset"
-                    ? "Reset password"
-                    : "Update password"}
+                ? "Create account"
+                : authFormType === "reset"
+                ? "Reset password"
+                : "Update password"}
             </Button>
           </form>
 
