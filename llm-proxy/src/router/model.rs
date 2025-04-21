@@ -55,6 +55,7 @@ impl ModelRouter {
                 let rx = app
                     .0
                     .broadcasts
+                    .blocking_lock()
                     .rx
                     .get(model)
                     .expect("always valid if tests pass")

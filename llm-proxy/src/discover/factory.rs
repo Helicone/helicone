@@ -1,12 +1,12 @@
 use std::{
     convert::Infallible,
-    future::{ready, Ready},
+    future::{Ready, ready},
     task::{Context, Poll},
 };
 
 use tower::Service;
 
-use super::{Key, ProviderDiscovery};
+use super::ProviderDiscovery;
 use crate::{app::AppState, types::model::Model};
 
 #[derive(Debug)]
@@ -27,12 +27,19 @@ impl Service<Model> for ProviderDiscoverFactory {
     }
 
     fn call(&mut self, model: Model) -> Self::Future {
-        let rx = self.state.0.broadcasts.rx.entry(model).or_insert_with(|| {
+        let state = self.state.clone();
+        let mut guard = state.0.broadcasts.blocking_lock();
+
+        let rx = if let Some(rx) = guard.rx.get(&model) {
+            rx.resubscribe()
+        } else {
             let (tx, rx) = tokio::sync::broadcast::channel(128);
-            self.state.0.broadcasts.tx.insert(model, tx);
+            guard.tx.insert(model.clone(), tx);
             rx
-        }).resubscribe();
-        let discovery = ProviderDiscovery::config(self.state.clone(), key.model, rx);
+        };
+
+        let discovery =
+            ProviderDiscovery::config(self.state.clone(), model, rx);
         ready(Ok(discovery))
     }
 }
