@@ -28,6 +28,9 @@ const SignIn = ({
   const { unauthorized } = router.query;
   useEffect(() => {
     if (unauthorized === "true") {
+      console.log("refreshing session");
+      console.log("heliconeAuthClient", heliconeAuthClient);
+      console.log("heliconeAuthClient.user", heliconeAuthClient.user);
       heliconeAuthClient
         .refreshSession()
         .then(heliconeAuthClient.getUser)
