@@ -1,0 +1,364 @@
+Anthropic's **Model Context Protocol (MCP)** has been a game-changer for how developers integrate tools, APIs, and services directly into AI applications. 
+
+MCP's plug-and-play architecture allows you to create AI applications that interact with external systems seamlessly.
+
+In this comprehensive guide, we'll cover how to use existing MCPs, build your own custom MCP server, and integrate Helicone for observability to monitor your AI usage.
+
+## Table Of Contents
+
+## How to Use a Prebuilt MCP
+
+MCP's plug-and-play architecture lets you integrate pre-built tools into your AI environment with minimal configuration.
+
+Take the Figma MCP—this open-source tool connects Figma files directly to **Cursor**, letting you query design specs and generate code through natural language.
+
+Here's how to use it.
+
+### Step 1: Get a Figma API Key
+
+Sign up for a Figma account and create your personal API key following the [instructions here](https://help.figma.com/hc/en-us/articles/8085703771159-Manage-personal-access-tokens).
+
+### Step 2: Add the MCP Server to Your Environment
+
+Add the MCP server configuration to your AI development environment:
+
+**MacOS/Linux**
+
+```json
+{
+  "mcpServers": {
+    "Framelink Figma MCP": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "figma-developer-mcp",
+        "--figma-api-key=YOUR-KEY",
+        "--stdio"
+      ]
+    }
+  }
+}
+```
+
+**Windows**
+
+```json
+{
+  "mcpServers": {
+    "Framelink Figma MCP": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "figma-developer-mcp",
+        "--figma-api-key=YOUR-KEY",
+        "--stdio"
+      ]
+    }
+  }
+}
+```
+
+In Cursor, go to **Settings > MCP > Add new global MCP server** and paste the configuration.
+
+### Step 3: Test Your Figma Integration
+
+After the MCP status turns green, try these prompts:
+
+**"Can you retrieve this Figma file and analyze the components in a few short sentences?**
+
+**[Your Figma file URL]"**
+
+![Figma file analysis](/static/blog/building-first-mcp-for-developers/figma-analysis.png)
+
+Then try:
+
+**"Based on the chart components in this Figma file, generate reusable Tailwind + React components for a dashboard UI."**
+
+![Generated components](/static/blog/building-first-mcp-for-developers/figma-analysis-2.png)
+
+## Creating Your Own MCP
+
+Now let's build our own MCP from scratch.
+
+We'll build a Weather MCP that fetches current temperatures using the Open-Meteo API.
+
+### Step 1: Initialize the Project
+
+```bash
+mkdir weather-mcp
+cd weather-mcp
+npm init -y
+```
+
+### Step 2: Build the MCP Tool
+
+Create a file named `main.ts` with this code:
+
+```ts
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp";
+import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse";
+import express from "express";
+import { z } from "zod";
+
+// Utility for reliable API fetching with retries
+async function fetchWithRetry(
+  url: string,
+  retries = 3,
+  timeout = 5000
+): Promise<any> {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeout);
+
+    try {
+      const res = await fetch(url, { signal: controller.signal });
+      clearTimeout(timer);
+      if (!res.ok)
+        throw new Error(`Fetch error: ${res.status} ${res.statusText}`);
+      return await res.json();
+    } catch (err) {
+      clearTimeout(timer);
+      if (attempt === retries) throw err;
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+  }
+  throw new Error("Failed after retries");
+}
+
+// Create MCP server
+const server = new McpServer({
+  name: "Weather Info MCP Server",
+  version: "1.0.0",
+});
+
+// Implement the weather tool
+server.tool("getCityTemperature", { city: z.string() }, async ({ city }) => {
+  try {
+    const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
+      city
+    )}&count=1`;
+    const geoData = await fetchWithRetry(geoUrl);
+
+    if (!geoData.results || geoData.results.length === 0) {
+      throw new Error(`City "${city}" not found.`);
+    }
+
+    const { latitude: lat, longitude: lon } = geoData.results[0];
+
+    const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
+    const weatherData = await fetchWithRetry(weatherUrl);
+
+    const temperature = weatherData.current_weather?.temperature;
+
+    if (temperature === undefined) {
+      throw new Error("Temperature data missing from weather response.");
+    }
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: `The current temperature in ${city} is ${temperature}°C.`,
+        },
+      ],
+    };
+  } catch (err: any) {
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Failed to fetch temperature for ${city}: ${
+            err.message || err
+          }`,
+        },
+      ],
+    };
+  }
+});
+
+// Set up Express and SSE transport
+const app = express();
+let transport: SSEServerTransport | null = null;
+
+app.get("/sse", (req, res) => {
+  transport = new SSEServerTransport("/messages", res);
+  server.connect(transport);
+});
+
+app.post("/messages", (req, res) => {
+  if (transport) {
+    transport.handlePostMessage(req, res);
+  }
+});
+
+app.listen(3000);
+console.log("Weather MCP running at http://localhost:3000/sse");
+```
+
+### Step 3: Install Dependencies
+
+```bash
+npm install @modelcontextprotocol/sdk express zod
+```
+
+### Step 4: Run the MCP Server
+
+```bash
+npx tsx main.ts
+```
+
+### Step 5: Test in Cursor
+
+Add a new global server in Cursor's MCP settings:
+
+```json
+{
+  "Weather MCP Server": {
+    "url": "http://localhost:3000/sse"
+  }
+}
+```
+
+After the connection is established, test it with a prompt about a city's temperature.
+
+![Weather MCP Tool Test](/static/blog/building-first-mcp-for-developers/weather-mcp-test.png)
+
+## Integrating Helicone for LLM Observability
+
+So, you've built a cool MCP and everyone's using it.
+
+But what if your MCP uses an LLM internally and you'd like to monitor its performance—that's where Helicone comes in!
+
+**<span style={{color: '#0ea5e9'}}>Helicone</span>** provides robust observability for your LLM usage across providers like OpenAI, Claude, and Groq.
+
+Here's how to integrate Helicone with your MCP.
+
+### Step 1: Get API Keys
+
+You'll need:
+
+- A Helicone API key
+- An LLM provider API key (we'll use Groq in this example)
+
+Save these in your `.env` file:
+
+```bash
+GROQ_API_KEY=<your-groq-api-key>
+HELICONE_API_KEY=<your-helicone-api-key>
+```
+
+### Step 2: Integrate Helicone with Groq
+
+Add this to your `main.ts` file:
+
+```ts
+import Groq from "groq-sdk";
+
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
+  baseURL: "https://groq.helicone.ai",
+  defaultHeaders: {
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+  },
+});
+```
+
+### Step 3: Use Groq with Helicone in Your MCP
+
+Add this code to your `server.tool` call to enhance your weather tool with AI-generated insights:
+
+```ts
+const completion = await groq.chat.completions.create({
+  messages: [
+    {
+      role: "user",
+      content: `The current temperature in ${city} is ${temperature}°C.
+      Please provide a brief, one-sentence insight about what this means for the weather in ${city}.`,
+    },
+  ],
+  model: "meta-llama/llama-4-scout-17b-16e-instruct",
+  temperature: 0.7,
+});
+```
+
+With this setup, all LLM requests made through your MCP will be automatically logged and tracked in Helicone without any extra instrumentation required in your request logic.
+
+Run your MCP server:
+
+```bash
+npx tsx main.ts
+```
+
+---
+
+Alternatively, run this code to clone the complete repository and start your custom MCP:
+
+```bash
+git clone https://github.com/rubaiat-hossain/MCP-server-experiments
+cd custom-MCP-tutorial
+npm init -y
+npm install
+npx tsx main.ts
+```
+
+<CallToAction
+  title="Get Complete Visibility Into Your LLM Usage ⚡️"
+  description="Track costs, performance metrics, and usage patterns across all major AI providers with just one line of code. Build and deploy AI-powered tools with confidence."
+  primaryButtonText="Start Monitoring for Free"
+  primaryButtonLink="https://helicone.ai/signup"
+  secondaryButtonText="Explore Integrations"
+  secondaryButtonLink="https://docs.helicone.ai/getting-started/integration-method"
+/>
+
+### Step 4: Monitor Your LLM Usage in Helicone
+
+After restarting the MCP server (use the refresh button in Cursor), your weather prompts are now routed through Helicone. Ask Cursor about a city's temperature to see the MCP in action.
+
+Visit your [Helicone dashboard](https://www.helicone.ai/) to see the data:
+
+![Helicone Dashboard](/static/blog/building-first-mcp-for-developers/helicone-dashboard.png)
+
+For detailed analysis of individual requests, check the Requests page:
+
+![Helicone Requests](/static/blog/building-first-mcp-for-developers/helicone-requests.png)
+
+<BottomLine
+  title="Pro Tip 💡"
+  description="Use Helicone's custom properties to tag your MCP requests with metadata like tool type, making it easier to filter and analyze specific MCP usage patterns."
+/>
+
+## Conclusion
+
+Anthropic's Model Context Protocol transforms how AI applications interact with external tools and services. With growing support from major players like <a href="https://techcrunch.com/2025/04/09/google-says-itll-embrace-anthropics-standard-for-connecting-ai-models-to-data/" target="_blank" rel="noopener">Google</a> and <a href="https://techcrunch.com/2025/03/26/openai-adopts-rival-anthropics-standard-for-connecting-ai-models-to-data/" target="_blank" rel="noopener">OpenAI</a>, they're quickly shaping up to be the future of enhancing LLM capabilities.
+
+With Helicone's observability layer, you gain visibility into every underlying LLM interaction, helping you optimize performance, debug issues, and control costs as you scale your MCP implementation.
+
+### You might also like
+
+- **<a href="https://www.helicone.ai/blog/mcp-full-developer-guide" target="_blank" rel="noopener">The Full Developer's Guide to Model Context Protocol</a>**
+- **<a href="https://www.helicone.ai/blog/full-guide-to-improving-ai-agents" target="_blank" rel="noopener">The Full Developer's Guide to Building Effective AI Agents</a>**
+- **<a href="https://www.helicone.ai/blog/claude-3.7-benchmarks-and-examples" target="_blank" rel="noopener">Technical Review: Claude 3.7 Sonnet & Claude Code for Developers</a>**
+
+<FAQ
+  items={[
+    {
+      question: "What is Model Context Protocol (MCP)?",
+      answer:
+        "MCP is an open connection protocol that allows AI applications to integrate with external tools, APIs, and services through a standardized interface. It enables LLMs to interact with external systems through natural language.",
+    },
+    {
+      question: "How does Helicone integrate with MCP?",
+      answer:
+        "Helicone can integrate with an MCP through its proxy. By routing LLM requests through Helicone, you can monitor and analyze all LLM interactions within your MCP tools.",
+    },
+    {
+      question: "Can I use multiple MCPs in the same application?",
+      answer:
+        "Yes, you can integrate multiple MCPs in the same application. Each MCP can provide different functionality, and you can configure your AI environment to access all of them simultaneously.",
+    },
+  ]}
+/>
+
+<Questions />

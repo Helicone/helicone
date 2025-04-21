@@ -1,0 +1,11 @@
+{ 
+  "title": "Building your First MCP for Developers",
+  "title1": "Building your First MCP for Developers",
+  "title2": "Building your First MCP for Developers",
+  "description": "Learn how to use MCPs, build your first MCP tool, connect it to AI applications, and integrate Helicone for powerful LLM observability in production.",
+  "images": "/static/blog/building-first-mcp-for-developers/mcp-header.webp",
+  "time": "10 minute read",
+  "author": "Yusuf Ishola",
+  "date": "April 20, 2025", 
+  "badge": "Guide"
+}
