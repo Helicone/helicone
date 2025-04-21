@@ -4864,6 +4864,10 @@
 					"total_tokens": {
 						"type": "number",
 						"format": "double"
+					},
+					"avg_latency": {
+						"type": "number",
+						"format": "double"
 					}
 				},
 				"required": [
@@ -4875,7 +4879,8 @@
 					"total_requests",
 					"prompt_tokens",
 					"completion_tokens",
-					"total_tokens"
+					"total_tokens",
+					"avg_latency"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -5026,6 +5031,10 @@
 					"session_count": {
 						"type": "number",
 						"format": "double"
+					},
+					"avg_latency": {
+						"type": "number",
+						"format": "double"
 					}
 				},
 				"required": [
@@ -5033,7 +5042,8 @@
 					"created_at",
 					"last_used",
 					"first_used",
-					"session_count"
+					"session_count",
+					"avg_latency"
 				],
 				"type": "object",
 				"additionalProperties": false
