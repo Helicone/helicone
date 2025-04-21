@@ -1,16 +1,21 @@
-use std::{sync::Arc, task::Poll, time::Duration};
+use std::{
+    convert::Infallible,
+    future::{Ready, ready},
+    net::SocketAddr,
+    sync::Arc,
+    task::{Context, Poll},
+};
 
+use axum_server::tls_rustls::RustlsConfig;
 use futures::future::BoxFuture;
 use meltdown::Token;
 use minio_rsc::{Minio, provider::StaticProvider};
-use tokio::{io, net::TcpListener, sync::Mutex};
+use tokio::sync::Mutex;
 use tower::{
-    BoxError, ServiceBuilder, buffer::BufferLayer, make::Shared,
-    util::BoxCloneService,
+    BoxError, ServiceBuilder, buffer::BufferLayer, util::BoxCloneService,
 };
 use tower_http::{
-    auth::{AsyncRequireAuthorization, AsyncRequireAuthorizationLayer},
-    catch_panic::{CatchPanic, DefaultResponseForPanic},
+    add_extension::AddExtension, auth::AsyncRequireAuthorizationLayer,
 };
 use tracing::info;
 
@@ -18,27 +23,27 @@ use crate::{
     config::{
         Config,
         rate_limit::{AuthedLimiterConfig, UnauthedLimiterConfig},
+        server::TlsConfig,
     },
     discover::ProviderChangeBroadcasts,
     error,
-    middleware::{
-        auth::AuthService, request_context::Service as RequestContextService,
-    },
+    middleware::auth::AuthService,
     router::model::ModelRouter,
     store::StoreRealm,
 };
 
 const MAX_QUEUED_REQUESTS: usize = 1024;
 
-/// Type representing the global middleware layers.
-///
-/// When adding a new middleware, you'll be required to add it to this type.
-pub type ServiceStack<ReqBody> = CatchPanic<
-    AsyncRequireAuthorization<
-        RequestContextService<ModelRouter, ReqBody>,
-        AuthService,
-    >,
-    DefaultResponseForPanic,
+pub type ServiceStack = BoxCloneService<
+    crate::types::request::Request,
+    crate::types::response::Response,
+    BoxError,
+>;
+
+pub type HyperServiceStack = BoxCloneService<
+    http::Request<hyper::body::Incoming>,
+    crate::types::response::Response,
+    BoxError,
 >;
 
 #[derive(Debug, Clone)]
@@ -90,15 +95,10 @@ impl std::fmt::Debug for InnerAppState {
 /// --- none in use yet --
 /// 10. DispatcherServiceStack
 /// 11. Dispatcher
+#[derive(Clone)]
 pub struct App {
     pub state: AppState,
-    pub service_stack: Shared<
-        BoxCloneService<
-            crate::types::request::Request,
-            crate::types::response::Response,
-            BoxError,
-        >,
-    >,
+    pub service_stack: ServiceStack,
 }
 
 impl tower::Service<crate::types::request::Request> for App {
@@ -108,18 +108,13 @@ impl tower::Service<crate::types::request::Request> for App {
 
     fn poll_ready(
         &mut self,
-        _ctx: &mut std::task::Context<'_>,
+        ctx: &mut Context<'_>,
     ) -> std::task::Poll<Result<(), Self::Error>> {
-        Poll::Ready(Ok(()))
+        self.service_stack.poll_ready(ctx)
     }
 
     fn call(&mut self, req: crate::types::request::Request) -> Self::Future {
-        let mut make_svc = self.service_stack.clone();
-        Box::pin(async move {
-            let mut svc =
-                make_svc.call(()).await.expect("always valid if tests pass");
-            svc.call(req).await
-        })
+        self.service_stack.call(req)
     }
 }
 
@@ -178,7 +173,7 @@ impl App {
 
         Ok(Self {
             state: app_state,
-            service_stack: Shared::new(BoxCloneService::new(service_stack)),
+            service_stack: BoxCloneService::new(service_stack),
         })
     }
 }
@@ -186,143 +181,131 @@ impl App {
 impl meltdown::Service for App {
     type Future = BoxFuture<'static, Result<(), crate::error::runtime::Error>>;
 
-    fn run(self, mut token: Token) -> Self::Future {
+    fn run(self, token: Token) -> Self::Future {
         Box::pin(async move {
-            let _service_stack = hyper_util::service::TowerToHyperService::new(
-                self.service_stack,
-            );
+            let app_state = self.state.clone();
+            let addr = SocketAddr::from((
+                app_state.0.config.server.address,
+                app_state.0.config.server.port,
+            ));
+            info!(address = %addr, tls = %app_state.0.config.server.tls, "server starting");
 
-            info!(address = %self.state.0.config.server.address, tls = %self.state.0.config.server.tls, "server starting");
-            let listener = TcpListener::bind((
-                self.state.0.config.server.address,
-                self.state.0.config.server.port,
-            ))
-            .await
-            .map_err(crate::error::init::Error::Bind)?;
-            let _server = hyper_util::server::conn::auto::Builder::new(
-                tokio::runtime::Handle::current(),
-            );
-            let graceful =
-                hyper_util::server::graceful::GracefulShutdown::new();
-            tracing::info!("server started");
+            let handle = axum_server::Handle::new();
+            let app_factory = AppFactory::new_hyper_app(self);
+            match &app_state.0.config.server.tls {
+                TlsConfig::Enabled { cert, key } => {
+                    let tls_config =
+                        RustlsConfig::from_pem_file(cert.clone(), key.clone())
+                            .await
+                            .map_err(error::init::Error::Tls)?;
 
-            loop {
-                tokio::select! {
-                    conn = listener.accept() => {
-                        let (stream, peer_addr) = match conn {
-                            Ok(conn) => conn,
-                            Err(e) => {
-                                handle_accept_error(e).await;
-                                continue;
-                            }
-                        };
-                        tracing::info!(peer_addr = %peer_addr, "accepted new connection");
-                        let _stream = hyper_util::rt::TokioIo::new(Box::pin(stream));
-                        // let conn = server.serve_connection_with_upgrades(stream, service_stack.clone());
-
-                        // let _conn = graceful.watch(conn.into_owned());
-
-                        // tokio::spawn(async move {
-                        //     if let Err(err) = conn.await {
-                        //         tracing::error!(error = ?err, "connection error");
-                        //     }
-                        //     tracing::trace!(peer_addr = %peer_addr, "connection completed");
-                        // });
-                    },
-
-                    _ = &mut token => {
-                        drop(listener);
-                        tracing::info!("Shutdown signal received, starting shutdown");
-                            break;
-                    }
+                    tokio::select! {
+                        biased;
+                        server_output = axum_server::bind_rustls(addr, tls_config)
+                            .handle(handle.clone())
+                            .serve(app_factory) => server_output.map_err(error::runtime::Error::Serve)?,
+                        _ = token => {
+                            handle.graceful_shutdown(Some(std::time::Duration::from_secs(10)));
+                        }
+                    };
+                }
+                TlsConfig::Disabled => {
+                    tokio::select! {
+                        biased;
+                        server_output = axum_server::bind(addr)
+                            .handle(handle.clone())
+                            .serve(app_factory) => server_output.map_err(error::runtime::Error::Serve)?,
+                        _ = token => {
+                            handle.graceful_shutdown(Some(std::time::Duration::from_secs(10)));
+                        }
+                    };
                 }
             }
-
-            // timeout for graceful shutdown
-            tokio::select! {
-                _ = graceful.shutdown() => {
-                    tracing::info!("Gracefully shutdown successfully!");
-                },
-                _ = tokio::time::sleep(self.state.0.config.server.shutdown_timeout) => {
-                    tracing::info!("Reached graceful shutdown timeout {:?}, aborting...", self.state.0.config.server.shutdown_timeout);
-                }
-            }
-
             Ok(())
         })
     }
 }
 
-// impl<R> tower::MakeService<R> for App {
-//     type Response = App;
-//     type Error = crate::error::init::Error;
-//     type Service = App;
-//     type MakeError = crate::error::init::Error;
-//     type Future = std::future::Ready<Result<Self::Service, Self::MakeError>>;
+#[derive(Clone)]
+pub struct HyperApp {
+    pub state: AppState,
+    pub service_stack: HyperServiceStack,
+}
 
-//     fn poll_ready(&mut self, cx: &mut std::task::Context<'_>) ->
-// std::task::Poll<Result<(), Self::MakeError>> {         todo!()
-//     }
+impl HyperApp {
+    pub fn new(app: App) -> Self {
+        let service_stack = ServiceBuilder::new()
+            .map_request(|req: http::Request<hyper::body::Incoming>| {
+                req.map(reqwest::Body::wrap)
+            })
+            .service(app.service_stack);
+        Self {
+            state: app.state,
+            service_stack: BoxCloneService::new(service_stack),
+        }
+    }
+}
 
-//     fn make_service(&mut self, target: R) -> Self::Future {
-//         todo!()
-//     }
-// }
+impl tower::Service<http::Request<hyper::body::Incoming>> for HyperApp {
+    type Response = crate::types::response::Response;
+    type Error = BoxError;
+    type Future = BoxFuture<'static, Result<Self::Response, Self::Error>>;
 
-async fn handle_accept_error(e: io::Error) {
-    if is_connection_error(&e) {
-        return;
+    fn poll_ready(
+        &mut self,
+        ctx: &mut Context<'_>,
+    ) -> std::task::Poll<Result<(), Self::Error>> {
+        self.service_stack.poll_ready(ctx)
     }
 
-    // [From `hyper::Server` in 0.14](https://github.com/hyperium/hyper/blob/v0.14.27/src/server/tcp.rs#L186)
-    //
-    // > A possible scenario is that the process has hit the max open files
-    // > allowed, and so trying to accept a new connection will fail with
-    // > `EMFILE`. In some cases, it's preferable to just wait for some time, if
-    // > the application will likely close some files (or connections), and try
-    // > to accept the connection again. If this option is `true`, the error
-    // > will be logged at the `error` level, since it is still a big deal,
-    // > and then the listener will sleep for 1 second.
-    //
-    // hyper allowed customizing this but axum does not.
-    tracing::error!(error = ?e, "error accepting connection");
-    tokio::time::sleep(Duration::from_millis(500)).await;
+    fn call(
+        &mut self,
+        req: http::Request<hyper::body::Incoming>,
+    ) -> Self::Future {
+        self.service_stack.call(req)
+    }
 }
 
-fn is_connection_error(e: &io::Error) -> bool {
-    matches!(
-        e.kind(),
-        io::ErrorKind::ConnectionRefused
-            | io::ErrorKind::ConnectionAborted
-            | io::ErrorKind::ConnectionReset
-    )
+#[derive(Clone)]
+pub struct AppFactory<S> {
+    pub state: AppState,
+    pub inner: S,
 }
 
-#[cfg(test)]
-mod tests {
-    use std::convert::Infallible;
+impl<S> AppFactory<S> {
+    pub fn new(state: AppState, inner: S) -> Self {
+        Self { state, inner }
+    }
+}
 
-    use tower::{Service, make::Shared};
-
-    use super::*;
-
-    #[test]
-    fn test_shared_service_error_is_infallible() {
-        // This is a compile-time assertion that the Error associated type of
-        // Shared when used as a Service is Infallible
-        fn assert_shared_error_is_infallible<Req, Resp, S>(_shared: S)
-        where
-            S: Service<Req, Response = Resp, Error = Infallible>,
-        {
-            // This function doesn't need to do anything at runtime
-            // The type constraints ensure the assertion at compile time
+impl AppFactory<HyperApp> {
+    pub fn new_hyper_app(app: App) -> Self {
+        Self {
+            state: app.state.clone(),
+            inner: HyperApp::new(app),
         }
+    }
+}
+
+impl<S> tower::Service<SocketAddr> for AppFactory<S>
+where
+    S: Clone,
+{
+    type Response = AddExtension<S, SocketAddr>;
+    type Error = Infallible;
+    type Future = Ready<Result<Self::Response, Self::Error>>;
+
+    fn poll_ready(
+        &mut self,
+        _ctx: &mut Context<'_>,
+    ) -> Poll<Result<(), Self::Error>> {
+        Poll::Ready(Ok(()))
+    }
+
+    fn call(&mut self, socket: SocketAddr) -> Self::Future {
         let svc = ServiceBuilder::new()
-            .layer(BufferLayer::new(1))
-            .service_fn(|_: ()| async move { Ok::<(), Infallible>(()) });
-
-        let shared = Shared::new(svc);
-
-        assert_shared_error_is_infallible::<(), _, _>(shared);
+            .layer(tower_http::add_extension::AddExtensionLayer::new(socket))
+            .service(self.inner.clone());
+        ready(Ok(svc))
     }
 }

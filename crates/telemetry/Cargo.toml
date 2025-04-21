@@ -5,7 +5,6 @@ publish = false
 version = { workspace = true }
 
 [dependencies]
-console-subscriber.workspace = true
 http.workspace = true
 log-panics.workspace = true
 opentelemetry.workspace = true
