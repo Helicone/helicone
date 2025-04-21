@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { usePathname } from "next/navigation";
 import {
   EnvelopeIcon,
@@ -17,7 +17,28 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { BookHeart, ChevronDown, ChevronRight, Component, Earth, Gem, Github, GitMerge, HandCoins, TrendingUp, ExternalLink } from "lucide-react";
+import {
+  BookHeart,
+  ChevronDown,
+  ChevronRight,
+  Component,
+  Earth,
+  Gem,
+  Github,
+  GitMerge,
+  HandCoins,
+  TrendingUp,
+  ExternalLink,
+} from "lucide-react";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+} from "../ui/navigation-menu";
 
 interface NavBarProps {
   stars?: number;
@@ -86,30 +107,8 @@ const MobileHeader = (props: {
 
 const MENU_ICON_CLASSES = "h-4 w-4 text-sky-500 stroke-[1.5px] fill-none m-1";
 
-// Create a new component for menu icons
-const MenuIcon = ({ children }: { children: React.ReactNode }) => (
-  <div className={MENU_ICON_CLASSES}>
-    {children}
-  </div>
-);
-
 const NavLinks = () => {
   const path = usePathname();
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const timeoutRef = useRef<NodeJS.Timeout>();
-
-  const handleMouseEnter = (label: string) => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    setOpenDropdown(label);
-  };
-
-  const handleMouseLeave = () => {
-    timeoutRef.current = setTimeout(() => {
-      setOpenDropdown(null);
-    }, 150); // Small delay to make the interaction smoother
-  };
 
   const links = [
     {
@@ -179,75 +178,52 @@ const NavLinks = () => {
       label: "Careers",
     },
   ];
+
   return (
-    <div className="flex gap-x-2 flex-col lg:flex-row">
-      {links.map((link, i) => {
-        if (link.type === "dropdown") {
+    <NavigationMenu>
+      <NavigationMenuList>
+        {links.map((link, i) => {
+          if (link.type === "dropdown") {
+            return (
+              <NavigationMenuItem key={i}>
+                <NavigationMenuTrigger>{link.label}</NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-1">
+                    {link.items?.map((item) => (
+                      <li key={item.href}>
+                        <NavigationMenuLink asChild>
+                          <Link
+                            href={item.href}
+                            className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                          >
+                            <div className="flex items-center gap-2">
+                              <div className="flex-shrink-0">{item.icon}</div>
+                              <div className="font-medium">{item.label}</div>
+                            </div>
+                            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground mt-1">
+                              {item.description}
+                            </p>
+                          </Link>
+                        </NavigationMenuLink>
+                      </li>
+                    ))}
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+            );
+          }
           return (
-            <DropdownMenu
-              key={link.href}
-              open={openDropdown === link.label}
-            >
-              <DropdownMenuTrigger
-                className="flex items-center gap-1 font-regular hover:text-black rounded-md px-4 py-2.5 focus:outline-none text-slate-700 opacity-75 cursor-pointer w-full"
-                onMouseEnter={() => handleMouseEnter(link.label)}
-                onMouseLeave={handleMouseLeave}
-              >
-                <div className="flex items-center gap-1">
+            <NavigationMenuItem key={i}>
+              <Link href={link.href} legacyBehavior passHref>
+                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                   {link.label}
-                  <ChevronDown
-                    className={`h-4 w-4 transition-transform duration-300 ${openDropdown === link.label ? "translate-y-0.5" : ""
-                      } stroke-[1.5px] fill-none`}
-                  />
-                </div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="min-w-[240px]"
-                onMouseEnter={() => handleMouseEnter(link.label)}
-                onMouseLeave={handleMouseLeave}
-              >
-                {link.items?.map((item, j) => (
-                  <>
-                    <DropdownMenuItem key={item.href} asChild>
-                      <Link
-                        href={item.href}
-                        className="w-full cursor-pointer flex items-start gap-2 text-slate-700 hover:text-black py-2 px-3"
-                      >
-                        <div className="flex-shrink-0 self-start">
-                          {item.icon}
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="font-medium">{item.label}</span>
-                          <span className="text-[13px] text-slate-500 font-light">
-                            {item.description}
-                          </span>
-                        </div>
-                      </Link>
-                    </DropdownMenuItem>
-                    {j < link.items.length - 1 && <DropdownMenuSeparator className="hidden lg:block" />}
-                  </ >
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+                </NavigationMenuLink>
+              </Link>
+            </NavigationMenuItem>
           );
-        }
-        return (
-          <Link
-            href={link.href}
-            className={
-              "flex flex-row items-center font-regular hover:text-black rounded-md px-3 py-1.5 focus:outline-none " +
-              " " +
-              (path === link.href
-                ? "text-slate-700 font-medium"
-                : "text-slate-700 opacity-75")
-            }
-            key={link.href}
-          >
-            {link.label}
-          </Link>
-        );
-      })}
-    </div >
+        })}
+      </NavigationMenuList>
+    </NavigationMenu>
   );
 };
 
@@ -377,7 +353,8 @@ const MobileNav = () => {
   // Helper function to render links
   const renderLinks = (links: NavLink[]) => {
     return links.map((link: NavLink, i: number) => {
-      const isExternalLink = link.label === "Careers" || link.label === "GitHub";
+      const isExternalLink =
+        link.label === "Careers" || link.label === "GitHub";
       return (
         <Link
           key={i}
@@ -388,9 +365,7 @@ const MobileNav = () => {
         >
           <div className="flex-shrink-0">{link.icon}</div>
           <div className="flex flex-col">
-            <span className="font-medium text-sm">
-              {link.label}
-            </span>
+            <span className="font-medium text-sm">{link.label}</span>
           </div>
           {isExternalLink ? (
             <ExternalLink className="h-4 w-4 ml-auto text-slate-400 stroke-[1.5px]" />
@@ -405,7 +380,10 @@ const MobileNav = () => {
   return (
     <nav className="lg:hidden" aria-label="Global">
       <div className="fixed inset-x-0 top-0 z-50 bg-white">
-        <MobileHeader menuDispatch={[menuOpen, setMenuOpen]} className="pl-2 pr-4" />
+        <MobileHeader
+          menuDispatch={[menuOpen, setMenuOpen]}
+          className="pl-2 pr-4"
+        />
       </div>
       {menuOpen && (
         <div className="fixed inset-0 top-[57px] z-50 bg-white">
@@ -418,7 +396,9 @@ const MobileNav = () => {
 
               {/* Resources Section */}
               <div className="py-2 border-t border-slate-100">
-                <p className="text-[10px] uppercase text-slate-400 font-medium mt-2 mb-4 mx-1">Resources</p>
+                <p className="text-[10px] uppercase text-slate-400 font-medium mt-2 mb-4 mx-1">
+                  Resources
+                </p>
                 <div className="flex flex-col gap-4">
                   {renderLinks(resourcesLinks)}
                 </div>
@@ -426,7 +406,9 @@ const MobileNav = () => {
 
               {/* Tools Section */}
               <div className="py-2 border-t border-slate-100">
-                <p className="text-[10px] uppercase text-slate-400 font-medium mt-2 mb-4 mx-1">Tools</p>
+                <p className="text-[10px] uppercase text-slate-400 font-medium mt-2 mb-4 mx-1">
+                  Tools
+                </p>
                 <div className="flex flex-col gap-4">
                   {renderLinks(toolsLinks)}
                 </div>
@@ -517,9 +499,9 @@ const NavBar = (props: NavBarProps) => {
                 <p className="text-sm text-slate-700">
                   {props.stars
                     ? props.stars.toLocaleString("en-US", {
-                      notation: "compact",
-                      compactDisplay: "short",
-                    })
+                        notation: "compact",
+                        compactDisplay: "short",
+                      })
                     : "0"}
                 </p>
               </Button>
