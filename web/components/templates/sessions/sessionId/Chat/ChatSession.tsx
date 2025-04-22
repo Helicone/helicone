@@ -8,10 +8,11 @@ import { useGetPropertiesV2 } from "../../../../../services/hooks/propertiesV2";
 import { useGetRequests } from "../../../../../services/hooks/requests";
 import { Col } from "../../../../layout/common/col";
 import { Row } from "../../../../layout/common/row";
-import FeedbackButtons from "../../../feedback/thumbsUpThumbsDown";
+import FeedbackAction from "../../../feedback/thumbsUpThumbsDown";
 import { CustomPropertiesCard } from "../../../requests/customProperties";
 import RequestDrawer from "../../../requests/RequestDrawer";
 import StatusBadge from "../../../requests/statusBadge";
+
 interface ChatSessionProps {
   session?: Session;
   requests: ReturnType<typeof useGetRequests>;
@@ -77,8 +78,9 @@ const ChatSession: React.FC<ChatSessionProps> = ({
                         }
                         errorCode={mappedRequest.heliconeMetadata.status.code}
                       />
-                      <FeedbackButtons
-                        requestId={mappedRequest.id}
+                      <FeedbackAction
+                        id={mappedRequest.id}
+                        type="request"
                         defaultValue={
                           mappedRequest.heliconeMetadata.scores &&
                           mappedRequest.heliconeMetadata.scores[

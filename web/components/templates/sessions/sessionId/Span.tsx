@@ -34,13 +34,11 @@ interface BarChartTrace {
 export const TraceSpan = ({
   session,
   selectedRequestIdDispatch,
-  height,
   realtimeData,
   onHighlighterChange,
 }: {
   session: Session;
   selectedRequestIdDispatch: [string, (x: string) => void];
-  height?: string;
   realtimeData?: {
     isRealtime: boolean;
     effectiveRequests: HeliconeRequest[];

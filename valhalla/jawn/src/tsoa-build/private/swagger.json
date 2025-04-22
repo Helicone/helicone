@@ -2122,6 +2122,9 @@
 						},
 						"type": "array"
 					},
+					"mime_type": {
+						"type": "string"
+					},
 					"content": {
 						"type": "string"
 					},

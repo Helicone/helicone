@@ -40,7 +40,6 @@ export function RequestNode(props: {
   closeChildren: boolean;
   setSelectedRequestId: (x: string) => void;
   level: number;
-  setShowDrawer: (x: boolean) => void;
   label?: string;
 }) {
   const {
@@ -52,7 +51,6 @@ export function RequestNode(props: {
     closeChildren,
     setSelectedRequestId,
     level,
-    setShowDrawer,
     label,
   } = props;
 
