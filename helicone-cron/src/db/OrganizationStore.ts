@@ -5,7 +5,6 @@ import { ClickhouseWrapper } from "./ClickhouseWrapper";
 import { PgWrapper } from "./PgWrapper";
 
 export type Tier = "free" | "pro" | "growth" | "enterprise";
-export type NoUsageTier = "demo" | "enterprise" | "free" | "pro";
 
 // | tier          |
 // | ------------- |
