@@ -16,7 +16,7 @@ import {
   UserGroupIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { BookHeart, ChevronDown, ChevronRight, Component, Earth, ExternalLink, Gem, Github, GitMerge, HandCoins, LayoutGrid, TrendingUp } from "lucide-react";
+import { BookHeart, ChevronRight, Component, Earth, ExternalLink, Gem, Github, GitMerge, HandCoins, TrendingUp } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -24,15 +24,8 @@ import * as React from "react";
 import { useEffect, useRef, useState } from "react";
 import { BlogStructureMetaData } from "../templates/blog/getMetaData";
 import { Button } from "../ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
+import { Separator } from "@/components/ui/separator";
 
-// import { ListItem } from "@/components/ui/navigation-menu-item";
 
 interface NavBarProps {
   stars?: number;
@@ -86,16 +79,16 @@ const MobileHeader = (props: {
       >
         {!menuOpen ? (
           <>
-            <div className="w-[1.25rem] h-[.2rem] bg-slate-800 rounded-full"></div>
-            <div className="w-[1.25rem] h-[.2rem] bg-slate-800 rounded-full"></div>
-            <div className="w-[.7rem] h-[.2rem] bg-slate-800 rounded-full"></div>
+            <div className="w-[1.25rem] h-[.2rem] bg-foreground rounded-full"></div>
+            <div className="w-[1.25rem] h-[.2rem] bg-foreground rounded-full"></div>
+            <div className="w-[.7rem] h-[.2rem] bg-foreground rounded-full"></div>
           </>
         ) : (
           <XMarkIcon
-            className="w-5 h-5 text-slate-700 stroke-[1.5px] fill-none"
-            onClick={() => {
-              setMenuOpen(false);
-            }}
+            className="w-5 h-5 text-foreground stroke-[1.5px] fill-none"
+          // onClick={() => {
+          //   setMenuOpen(false);
+          // }}
           />
         )}
       </button>
@@ -103,203 +96,8 @@ const MobileHeader = (props: {
   );
 };
 
-const MENU_ICON_CLASSES = "h-4 w-4 text-sky-500 stroke-[1.5px] fill-none m-1";
-
-const NavLinks = () => {
-  const path = usePathname();
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const timeoutRef = useRef<NodeJS.Timeout>();
-
-  const handleMouseEnter = (label: string) => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    setOpenDropdown(label);
-  };
-
-  const handleMouseLeave = () => {
-    timeoutRef.current = setTimeout(() => {
-      setOpenDropdown(null);
-    }, 150); // Small delay to make the interaction smoother
-  };
-
-  const links = [
-    {
-      href: "https://docs.helicone.ai/",
-      label: "Docs",
-    },
-    {
-      href: "/pricing",
-      label: "Pricing",
-    },
-    {
-      type: "dropdown" as const,
-      label: "Resources",
-      items: [
-        {
-          href: "/changelog",
-          label: "Changelog",
-          description: "Latest updates and improvements",
-          icon: <GitMerge className={MENU_ICON_CLASSES} />,
-        },
-        {
-          href: "/blog",
-          label: "Blog",
-          description: "Insights on AI development and best practices",
-          icon: <BookHeart className={MENU_ICON_CLASSES} />,
-        },
-        {
-          href: "/community",
-          label: "Community",
-          description: "Built for scale, security, and control",
-          icon: <Gem className={MENU_ICON_CLASSES} />,
-        },
-      ],
-    },
-    {
-      type: "dropdown" as const,
-      label: "Tools",
-      items: [
-        {
-          href: "/open-stats",
-          label: "Open Stats",
-          description: "Real-time LLM usage analytics",
-          icon: <Earth className={MENU_ICON_CLASSES} />,
-        },
-        {
-          href: "/comparison",
-          label: "Model Comparison",
-          description: "Compare different LLM models and providers",
-          icon: <Component className={MENU_ICON_CLASSES} />,
-        },
-        {
-          href: "/status",
-          label: "Provider Status",
-          description: "Check LLM provider service status",
-          icon: <TrendingUp className={MENU_ICON_CLASSES} />,
-        },
-        {
-          href: "/llm-cost",
-          label: "API Pricing Calculator",
-          description: "Calculate and compare API costs",
-          icon: <HandCoins className={MENU_ICON_CLASSES} />,
-        },
-      ],
-    },
-    {
-      href: "https://app.dover.com/jobs/helicone",
-      label: "Careers",
-    },
-  ];
-
-  // styling of the old nav
-  return (
-    <div className="flex gap-x-2 flex-col lg:flex-row">
-      {links.map((link, i) => {
-        if (link.type === "dropdown") {
-          return (
-            <DropdownMenu
-              key={link.href}
-              open={openDropdown === link.label}
-            >
-              <DropdownMenuTrigger
-                className="flex items-center gap-1 font-regular hover:text-black rounded-md px-4 py-2.5 focus:outline-none text-slate-700 opacity-75 cursor-pointer w-full"
-                onMouseEnter={() => handleMouseEnter(link.label)}
-                onMouseLeave={handleMouseLeave}
-              >
-                <div className="flex items-center gap-1">
-                  {link.label}
-                  <ChevronDown
-                    className={`h-4 w-4 transition-transform duration-300 ${openDropdown === link.label ? "translate-y-0.5" : ""
-                      } stroke-[1.5px] fill-none`}
-                  />
-                </div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="min-w-[240px]"
-                onMouseEnter={() => handleMouseEnter(link.label)}
-                onMouseLeave={handleMouseLeave}
-              >
-                {link.items?.map((item, j) => (
-                  <>
-                    <DropdownMenuItem key={item.href} asChild>
-                      <Link
-                        href={item.href}
-                        className="w-full cursor-pointer flex items-start gap-2 text-slate-700 hover:text-black py-2 px-3"
-                      >
-                        <div className="flex-shrink-0 self-start">
-                          {item.icon}
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="font-medium">{item.label}</span>
-                          <span className="text-[13px] text-slate-500 font-light">
-                            {item.description}
-                          </span>
-                        </div>
-                      </Link>
-                    </DropdownMenuItem>
-                    {j < link.items.length - 1 && <DropdownMenuSeparator className="hidden lg:block" />}
-                  </ >
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          );
-        }
-        return (
-          <Link
-            href={link.href}
-            className={
-              "flex flex-row items-center font-regular hover:text-black rounded-md px-3 py-1.5 focus:outline-none " +
-              " " +
-              (path === link.href
-                ? "text-slate-700 font-medium"
-                : "text-slate-700 opacity-75")
-            }
-            key={link.href}
-          >
-            {link.label}
-          </Link>
-        );
-      })}
-    </div >
-  );
-};
-
-// const NavIcons = () => {
-//   const path = usePathname();
-//   const links = [
-//     {
-//       href: "/contact",
-//       label: "Contact",
-//       icon: <EnvelopeIcon className={MENU_ICON_CLASSES} />,
-//     },
-//     {
-//       href: "https://github.com/Helicone",
-//       label: "GitHub",
-//       icon: <Github className={MENU_ICON_CLASSES} />,
-//     },
-//   ];
-//   return (
-//     <div className="flex flex-row gap-x-3">
-//       {links.map((link, i) => (
-//         <Link
-//           href={link.href}
-//           className={
-//             "flex flex-row items-center font-medium hover:text-black rounded-md py-1.5 focus:outline-none " +
-//             " " +
-//             (path === link.href
-//               ? "text-black font-bold"
-//               : "text-gray-600 opacity-75")
-//           }
-//           key={link.href}
-//         >
-//           {link.icon}
-//         </Link>
-//       ))}
-//     </div>
-//   );
-// };
-
+const LIST_ITEM_ICON_CLASSES = "h-5 w-5 stroke-[1.5px] fill-none";
+type LinkItem = { title: string; href: string; description: string; icon: React.ReactNode };
 
 const MobileNav = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -309,108 +107,26 @@ const MobileNav = () => {
     setMenuOpen(false);
   }, [path]);
 
-  // Define the link type
-  type NavLink = {
-    href: string;
-    label: string;
-    icon: React.ReactNode;
-  };
-
-  // Group the links into categories
-  const standardLinks: NavLink[] = [
-    {
-      href: "https://docs.helicone.ai/",
-      label: "Docs",
-      icon: <BookHeart className={MENU_ICON_CLASSES} />,
-    },
-    {
-      href: "/pricing",
-      label: "Pricing",
-      icon: <HandCoins className={MENU_ICON_CLASSES} />,
-    },
-  ];
-
-  const resourcesLinks: NavLink[] = [
-    {
-      href: "/changelog",
-      label: "Changelog",
-      icon: <GitMerge className={MENU_ICON_CLASSES} />,
-    },
-    {
-      href: "/blog",
-      label: "Blog",
-      icon: <NewspaperIcon className={MENU_ICON_CLASSES} />,
-    },
-    {
-      href: "/community",
-      label: "Community",
-      icon: <Gem className={MENU_ICON_CLASSES} />,
-    },
-  ];
-
-  const toolsLinks: NavLink[] = [
-    {
-      href: "/open-stats",
-      label: "Open Stats",
-      icon: <Earth className={MENU_ICON_CLASSES} />,
-    },
-    {
-      href: "/comparison",
-      label: "Model Comparison",
-      icon: <Component className={MENU_ICON_CLASSES} />,
-    },
-    {
-      href: "/status",
-      label: "Provider Status",
-      icon: <TrendingUp className={MENU_ICON_CLASSES} />,
-    },
-    {
-      href: "/llm-cost",
-      label: "API Pricing Calculator",
-      icon: <HandCoins className={MENU_ICON_CLASSES} />,
-    },
-  ];
-
-  const additionalLinks: NavLink[] = [
-    {
-      href: "/contact",
-      label: "Contact",
-      icon: <EnvelopeIcon className={MENU_ICON_CLASSES} />,
-    },
-    {
-      href: "https://app.dover.com/jobs/helicone",
-      label: "Careers",
-      icon: <UserGroupIcon className={MENU_ICON_CLASSES} />,
-    },
-    {
-      href: "https://github.com/Helicone",
-      label: "GitHub",
-      icon: <Github className={MENU_ICON_CLASSES} />,
-    },
-  ];
-
-  // Helper function to render links
-  const renderLinks = (links: NavLink[]) => {
-    return links.map((link: NavLink, i: number) => {
-      const isExternalLink = link.label === "Careers" || link.label === "GitHub";
+  // Helper function to render links in mobile nav
+  const renderLinks = (links: LinkItem[]) => {
+    return links.map((link: LinkItem, i: number) => {
+      const isExternalLink = link.title === "Careers" || link.title === "GitHub";
       return (
         <Link
           key={i}
           href={link.href}
           target={isExternalLink ? "_blank" : undefined}
           rel={isExternalLink ? "noopener noreferrer" : undefined}
-          className="flex items-center group gap-1 text-slate-700 hover:text-black"
+          className="flex items-center group gap-3 text-foreground"
         >
-          <div className="flex-shrink-0">{link.icon}</div>
-          <div className="flex flex-col">
-            <span className="font-medium text-sm">
-              {link.label}
-            </span>
-          </div>
+          {link.icon}
+          <span className="font-medium text-sm">
+            {link.title}
+          </span>
           {isExternalLink ? (
-            <ExternalLink className="h-4 w-4 ml-auto text-slate-400 stroke-[1.5px]" />
+            <ExternalLink className="h-4 w-4 ml-auto text-muted-foreground stroke-[1.5px]" />
           ) : (
-            <ChevronRight className="h-4 w-4 ml-auto text-slate-400 stroke-[1.5px]" />
+            <ChevronRight className="h-4 w-4 ml-auto text-muted-foreground stroke-[1.5px]" />
           )}
         </Link>
       );
@@ -419,104 +135,139 @@ const MobileNav = () => {
 
   return (
     <nav className="lg:hidden" aria-label="Global">
-      <div className="fixed inset-x-0 top-0 z-50 bg-white">
+      <div className="fixed inset-x-0 top-0 z-50 bg-background">
         <MobileHeader menuDispatch={[menuOpen, setMenuOpen]} className="pl-2 pr-4" />
       </div>
       {menuOpen && (
-        <div className="fixed inset-0 top-[57px] z-50 bg-white">
+        <div className="fixed inset-0 top-[57px] z-50 bg-background">
           <div className="h-full overflow-y-auto">
-            <div className="flex flex-col gap-2 pt-3 px-4">
-              {/* Standard Links */}
-              <div className="flex flex-col gap-4">
-                {renderLinks(standardLinks)}
-              </div>
+            <div className="flex flex-col gap-4 pt-3 px-4">
+
+              {/* Main Links */}
+              {renderLinks(mainComponents)}
+
+              <Separator />
 
               {/* Resources Section */}
-              <div className="py-2 border-t border-slate-100">
-                <p className="text-[10px] uppercase text-slate-400 font-medium mt-2 mb-4 mx-1">Resources</p>
-                <div className="flex flex-col gap-4">
-                  {renderLinks(resourcesLinks)}
-                </div>
-              </div>
+              <p className="text-[10px] uppercase text-muted-foreground font-medium">Resources</p>
+              {renderLinks(resourcesComponents)}
+
+              <Separator />
 
               {/* Tools Section */}
-              <div className="py-2 border-t border-slate-100">
-                <p className="text-[10px] uppercase text-slate-400 font-medium mt-2 mb-4 mx-1">Tools</p>
-                <div className="flex flex-col gap-4">
-                  {renderLinks(toolsLinks)}
-                </div>
-              </div>
+              <p className="text-[10px] uppercase text-muted-foreground font-medium">Tools</p>
+              {renderLinks(toolsComponents)}
+
+              <Separator />
 
               {/* Additional Links */}
-              <div className="py-4 border-t border-slate-100 mb-10">
-                <div className="flex flex-col gap-4">
-                  {renderLinks(additionalLinks)}
-                </div>
+              <div className="flex flex-col gap-4">
+                {renderLinks(additionalComponents)}
               </div>
             </div>
           </div>
         </div>
       )}
-    </nav>
+    </nav >
   );
 };
 
-const resourcesComponents: { title: string; href: string; description: string; icon: React.ReactNode }[] = [
+const resourcesComponents: LinkItem[] = [
   {
     title: "Changelog",
     href: "/changelog",
     description:
       "Latest updates and improvements",
-    icon: <GitMerge className={MENU_ICON_CLASSES} />,
+    icon: <GitMerge className={LIST_ITEM_ICON_CLASSES} />,
   },
   {
     title: "Blog",
     href: "/blog",
     description:
       "Insights on AI development and best practices",
-    icon: <NewspaperIcon className={MENU_ICON_CLASSES} />,
+    icon: <NewspaperIcon className={LIST_ITEM_ICON_CLASSES} />,
   },
   {
     title: "Community",
     href: "/community",
     description:
       "Built for scale, security, and control",
-    icon: <Gem className={MENU_ICON_CLASSES} />,
+    icon: <Gem className={LIST_ITEM_ICON_CLASSES} />,
   },
 
 ]
 
-const toolsComponents: { title: string; href: string; description: string; icon: React.ReactNode }[] = [
+const toolsComponents: LinkItem[] = [
   {
     title: "Open Stats",
     href: "/open-stats",
     description:
       "Real-time LLM usage analytics",
-    icon: <Earth className={MENU_ICON_CLASSES} />,
+    icon: <Earth className={LIST_ITEM_ICON_CLASSES} />,
   },
   {
     title: "Model Comparison",
     href: "/comparison",
     description:
-      "Compare different LLM models and providers",
-    icon: <Component className={MENU_ICON_CLASSES} />,
+      "Compare LLM models and providers",
+    icon: <Component className={LIST_ITEM_ICON_CLASSES} />,
   },
   {
     title: "Provider Status",
     href: "/status",
     description:
       "Check LLM provider service status",
-    icon: <TrendingUp className={MENU_ICON_CLASSES} />,
+    icon: <TrendingUp className={LIST_ITEM_ICON_CLASSES} />,
   },
   {
     title: "API Pricing Calculator",
     href: "/llm-cost",
     description:
       "Calculate and compare API costs",
-    icon: <HandCoins className={MENU_ICON_CLASSES} />,
+    icon: <HandCoins className={LIST_ITEM_ICON_CLASSES} />,
   },
 ]
 
+const mainComponents: LinkItem[] = [
+  {
+    title: "Docs",
+    href: "https://docs.helicone.ai/",
+    description:
+      "Integrate Helicone into your AI application",
+    icon: <BookHeart className={LIST_ITEM_ICON_CLASSES} />,
+  },
+  {
+    title: "Pricing",
+    href: "/pricing",
+    description:
+      "Simple, transparent pricing",
+    icon: <HandCoins className={LIST_ITEM_ICON_CLASSES} />,
+  },
+]
+
+const additionalComponents: LinkItem[] = [
+  {
+    title: "Contact",
+    href: "/contact",
+    description:
+      "Get in touch with us",
+    icon: <EnvelopeIcon className={LIST_ITEM_ICON_CLASSES} />,
+  },
+  {
+    title: "Careers",
+    href: "https://app.dover.com/jobs/helicone",
+    description:
+      "Join our team",
+    icon: <UserGroupIcon className={LIST_ITEM_ICON_CLASSES} />,
+  },
+  {
+    title: "GitHub",
+    href: "https://github.com/helicone/helicone",
+    description:
+      "Contribute to our project",
+    icon: <Github className={LIST_ITEM_ICON_CLASSES} />,
+  },
+]
 
 const NavBar = (props: NavBarProps) => {
   const headerRef = useRef<HTMLDivElement>(null);
@@ -535,7 +286,7 @@ const NavBar = (props: NavBarProps) => {
   return (
     <div
       ref={headerRef}
-      className="bg-white top-0 sticky z-30 border-b border-border mb-10"
+      className="bg-background top-0 sticky z-30 border-b border-border mb-10"
     >
       <MobileNav />
 
@@ -598,35 +349,33 @@ const NavBar = (props: NavBarProps) => {
               <NavigationMenuItem>
                 <NavigationMenuTrigger>Resources</NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
+                  <ul className="grid gap-3 p-3 md:w-[500px] lg:w-[600px] lg:grid-cols-[.75fr_1fr]">
                     <li>
                       {resourcesComponents.map((component) => (
                         <ListItem
-                          icon={component.icon}
                           key={component.title}
                           title={component.title}
                           href={component.href}
+                          icon={component.icon}
                         >
-
                           {component.description}
                         </ListItem>
                       ))}
                     </li>
                     <li className="row-span-3">
                       <NavigationMenuLink asChild>
-                        <a
+                        <Link
                           className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
                           href={props.featuredBlogFolderName ? `/blog/${props.featuredBlogFolderName}` : "/blog"}
                         >
-                          <LayoutGrid className="h-6 w-6" />
+                          {/* pull the latest blog */}
                           <div className="mb-2 mt-4 text-lg font-medium">
-                            {/* pull the latest blog */}
                             {props.featuredBlogMetadata.title}
                           </div>
-                          <p className="text-sm leading-tight text-muted-foreground">
+                          <p className="text-sm leading-tight text-muted-foreground line-clamp-4">
                             {props.featuredBlogMetadata.description}
                           </p>
-                        </a>
+                        </Link>
                       </NavigationMenuLink>
                     </li>
                   </ul>
@@ -637,14 +386,14 @@ const NavBar = (props: NavBarProps) => {
               <NavigationMenuItem>
                 <NavigationMenuTrigger>Tools</NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid w-[400px] gap-3 p-4">
+                  <ul className="grid w-[350px] gap-2 p-3">
                     {toolsComponents.map((component) => (
                       <ListItem
                         key={component.title}
                         title={component.title}
                         href={component.href}
+                        icon={component.icon}
                       >
-                        {component.icon}
                         {component.description}
                       </ListItem>
                     ))}
@@ -678,7 +427,7 @@ const NavBar = (props: NavBarProps) => {
                 <svg
                   fill="currentColor"
                   viewBox="0 0 24 24"
-                  className="w-5 h-5 text-slate-700"
+                  className="w-5 h-5 text-foreground"
                 >
                   <path
                     fillRule="evenodd"
@@ -686,7 +435,7 @@ const NavBar = (props: NavBarProps) => {
                     clipRule="evenodd"
                   />
                 </svg>
-                <p className="text-sm text-slate-700">
+                <p className="text-sm text-foreground">
                   {props.stars
                     ? props.stars.toLocaleString("en-US", {
                       notation: "compact",
@@ -699,13 +448,12 @@ const NavBar = (props: NavBarProps) => {
             <Link href="/contact">
               <Button
                 variant="secondary"
-                className="text-sm text-landing-description rounded-lg"
-              >
+                className="text-sm text-secondary-foreground rounded-lg">
                 Contact us
               </Button>
             </Link>
             <Link href="https://us.helicone.ai/signin">
-              <Button className="text-sm text-white rounded-lg bg-brand">
+              <Button className="text-sm text-primary-foreground rounded-lg bg-sky-500">
                 Log In
               </Button>
             </Link>
@@ -733,19 +481,18 @@ const ListItem = React.forwardRef<
           )}
           {...props}
         >
-          <div className="flex items-start flex-shrink-0">
-            {icon}
+          <div className="flex gap-3">
+            <div className="flex-shrink-0">{icon}</div>
             <div className="flex flex-col items-start text-sm font-medium leading-none gap-1">
               {title}
-              <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+              <p className="text-sm font-light leading-snug text-muted-foreground">
                 {children}
               </p>
             </div>
           </div>
-
         </a>
       </NavigationMenuLink>
-    </li>
+    </li >
   )
 })
 ListItem.displayName = "ListItem"
