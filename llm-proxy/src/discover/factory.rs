@@ -1,21 +1,22 @@
 use std::{
     convert::Infallible,
-    future::{Ready, ready},
+    future::Ready,
     task::{Context, Poll},
 };
 
 use tower::Service;
 
-use super::ProviderDiscovery;
+use super::Discovery;
 use crate::{app::AppState, types::model::Model};
 
+/// Could be used to dynamically add new regions.
 #[derive(Debug)]
-pub struct ProviderDiscoverFactory {
-    state: AppState,
+pub struct DiscoverFactory {
+    _state: AppState,
 }
 
-impl Service<Model> for ProviderDiscoverFactory {
-    type Response = ProviderDiscovery;
+impl Service<Model> for DiscoverFactory {
+    type Response = Discovery;
     type Error = Infallible;
     type Future = Ready<Result<Self::Response, Self::Error>>;
 
@@ -26,20 +27,7 @@ impl Service<Model> for ProviderDiscoverFactory {
         Poll::Ready(Ok(()))
     }
 
-    fn call(&mut self, model: Model) -> Self::Future {
-        let state = self.state.clone();
-        let mut guard = state.0.broadcasts.blocking_lock();
-
-        let rx = if let Some(rx) = guard.rx.get(&model) {
-            rx.resubscribe()
-        } else {
-            let (tx, rx) = tokio::sync::broadcast::channel(128);
-            guard.tx.insert(model.clone(), tx);
-            rx
-        };
-
-        let discovery =
-            ProviderDiscovery::config(self.state.clone(), model, rx);
-        ready(Ok(discovery))
+    fn call(&mut self, _model: Model) -> Self::Future {
+        todo!()
     }
 }

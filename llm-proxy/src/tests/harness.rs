@@ -1,5 +1,5 @@
 use stubr::{Stubr, wiremock_rs::MockServer};
-use tower::{BoxError, Service};
+use tower::Service;
 
 use crate::{
     app::App,
@@ -14,7 +14,7 @@ pub struct Harness {
 
 impl Harness {
     pub async fn new(config: Config) -> Self {
-        let app = App::new(config).await.expect("failed to create app");
+        let (app, _) = App::new(config).await.expect("failed to create app");
         let mock = Stubr::try_start("./stubs")
             .await
             .expect("couldnt start mock htttp server");
@@ -24,7 +24,7 @@ impl Harness {
         }
     }
 
-    pub async fn call(&mut self, req: Request) -> Result<Response, BoxError> {
-        self.app.call(req).await
+    pub async fn call(&mut self, req: Request) -> Response {
+        self.app.call(req).await.expect("result type is infallible")
     }
 }

@@ -3,6 +3,8 @@ use serde::Serialize;
 use thiserror::Error;
 use utoipa::ToSchema;
 
+use crate::types::response::Response;
+
 /// User errors
 #[derive(Debug, Error, Display, strum::AsRefStr)]
 pub enum InvalidRequestError {
@@ -39,4 +41,10 @@ pub enum Error {
 #[derive(Debug, Serialize, ToSchema)]
 pub struct ErrorResponse {
     pub error: String,
+}
+
+impl From<Error> for Response {
+    fn from(_error: Error) -> Self {
+        todo!()
+    }
 }

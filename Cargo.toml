@@ -32,6 +32,7 @@ telemetry = { path = "./crates/telemetry" }
 metrics = { path = "./crates/metrics" }
 llm-proxy = { path = "./llm-proxy" }
 
+axum-core = "0.5.2"
 axum-server = "0.7.2"
 
 anyhow = "1.0.97"

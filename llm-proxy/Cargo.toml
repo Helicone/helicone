@@ -9,6 +9,7 @@ default-run = "llm-proxy"
 openai-types = { workspace = true }
 anthropic-types = { workspace = true }
 
+axum-core = { workspace = true }
 axum-server = { workspace = true, features = ["tls-rustls"] }
 
 bytes = { workspace = true, features = ['serde'] }

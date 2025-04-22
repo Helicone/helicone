@@ -26,7 +26,7 @@ async fn default_target() {
         .uri("http://router.helicone.com/router/F432DK1PQ")
         .body(request_body)
         .unwrap();
-    let response = harness.call(request).await.unwrap();
+    let response = harness.call(request).await;
     assert_eq!(response.status(), StatusCode::OK);
 
     // assert that the request was proxied to the mock server

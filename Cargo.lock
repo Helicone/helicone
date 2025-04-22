@@ -2314,6 +2314,7 @@ name = "llm-proxy"
 version = "0.1.0"
 dependencies = [
  "anthropic-types",
+ "axum-core 0.5.2",
  "axum-server",
  "bytes",
  "chrono",

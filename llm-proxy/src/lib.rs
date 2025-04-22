@@ -7,7 +7,6 @@ pub mod error;
 pub mod mapper;
 pub mod middleware;
 pub mod response;
-pub mod router;
 pub mod store;
 #[cfg(feature = "testing")]
 pub mod tests;

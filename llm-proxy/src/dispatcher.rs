@@ -16,7 +16,6 @@ use crate::{
     error::{api::Error, internal::InternalError},
     mapper::TryConvert,
     types::{
-        model::Model,
         provider::Provider,
         request::{Request, RequestContext},
         response::Response,
@@ -35,13 +34,11 @@ pub trait AiProviderDispatcher:
     + 'static
 {
     fn provider(&self) -> Provider;
-    fn model(&self) -> &Model;
 }
 
 #[derive(Debug, Clone)]
 pub struct Dispatcher {
     client: Client,
-    model: Model,
     provider: Provider,
 }
 
@@ -49,24 +46,15 @@ impl AiProviderDispatcher for Dispatcher {
     fn provider(&self) -> Provider {
         self.provider
     }
-
-    fn model(&self) -> &Model {
-        &self.model
-    }
 }
 
 impl Dispatcher {
-    pub fn new(client: Client, model: Model, provider: Provider) -> Self {
-        Self {
-            client,
-            model,
-            provider,
-        }
+    pub fn new(client: Client, provider: Provider) -> Self {
+        Self { client, provider }
     }
 
     pub fn new_with_middleware(
         app_state: AppState,
-        model: Model,
         provider: Provider,
     ) -> DispatcherService {
         let service_stack = ServiceBuilder::new()
@@ -78,7 +66,7 @@ impl Dispatcher {
             ))
             // other middleware: rate limiting, logging, etc, etc
             // will be added here as well
-            .service(Dispatcher::new(Client::new(), model, provider));
+            .service(Dispatcher::new(Client::new(), provider));
 
         service_stack
     }

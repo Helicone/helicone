@@ -32,4 +32,6 @@ pub enum InternalError {
     MapperError(#[from] crate::mapper::error::MapperError),
     /// Load balancer error: {0}
     LoadBalancerError(BoxError),
+    /// Poll ready error: {0}
+    PollReadyError(BoxError),
 }
