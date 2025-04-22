@@ -26,7 +26,7 @@ export function getJawnClient(orgId?: string | "none") {
         headers["helicone-authorization"] = JSON.stringify({
           _type: "jwt",
           token: jwtToken,
-          orgId: currentOrgId,
+          orgId: currentOrgId ?? "no-org-id",
         });
       }
 
