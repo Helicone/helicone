@@ -1,5 +1,5 @@
 import { getOpenAIKeyFromAdmin } from "@/lib/clients/settings";
-import { getSSRHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
+import { getSSRHeliconeAuthClient } from "@/packages/common/auth/client/getSSRHeliconeAuthClient";
 import { NextApiRequest, NextApiResponse } from "next";
 import OpenAI from "openai";
 import {
