@@ -260,7 +260,7 @@ const SessionsPage = (props: SessionsPageProps) => {
                 }
                 onValueChange={handleSelectSessionName}
               >
-                <SelectTrigger className="w-[280px] h-8">
+                <SelectTrigger className="w-[280px] h-8 shadow-sm">
                   <SelectValue placeholder="Select a session" />
                 </SelectTrigger>
                 <SelectContent>

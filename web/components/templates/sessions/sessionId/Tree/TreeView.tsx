@@ -1,37 +1,233 @@
-import RenderHeliconeRequest from "@/components/templates/requests/RenderHeliconeRequest";
-import RequestDrawer from "@/components/templates/requests/RequestDrawer";
-import { Button } from "@/components/ui/button";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Muted } from "@/components/ui/typography";
 import { HeliconeRequest } from "@/packages/llm-mapper/types";
-import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
-import { ChevronsDownUpIcon, ChevronsUpDownIcon } from "lucide-react";
-import { useMemo, useState } from "react";
+import { CellContext, ColumnDef } from "@tanstack/react-table";
+import { formatDistanceToNow } from "date-fns";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { tracesToTreeNodeData } from "../../../../../lib/sessions/helpers";
-import { Session } from "../../../../../lib/sessions/sessionTypes";
+import {
+  Session,
+  Trace,
+  TreeNodeData,
+} from "../../../../../lib/sessions/sessionTypes";
+import { useLocalStorage } from "../../../../../services/hooks/localStorage";
 import { useGetRequests } from "../../../../../services/hooks/requests";
 import { Col } from "../../../../layout/common";
+import {
+  DragColumnItem,
+  columnDefToDragColumnItem,
+} from "../../../../shared/themed/table/columns/DragList";
+import ThemedTable from "../../../../shared/themed/table/themedTable";
+import StatusBadge from "../../../requests/statusBadge";
 import { TraceSpan } from "../Span";
-import { Tree } from "./Tree";
 
-// Custom wrapper with specific styling for RenderHeliconeRequest
-const RequestWrapper = ({ children }: { children: React.ReactNode }) => {
+// Define TableTreeNode to hold all necessary display properties
+interface TableTreeNode {
+  id: string;
+  name: string; // Group name or fallback path
+  trace?: Trace; // Keep original trace for potential reference
+  subRows?: TableTreeNode[];
+
+  // Properties populated from Trace or looked-up HeliconeRequest
+  path?: string; // Actual path for leaves
+  status?: number;
+  createdAt?: number; // Use start_unix_timestamp_ms
+  model?: string;
+  cost?: number | null;
+  latency?: number;
+  feedback?: { rating: boolean } | null;
+}
+
+// Helper function to convert TreeNodeData and lookup full request data
+function convertToTableData(
+  node: TreeNodeData,
+  allRequests: HeliconeRequest[], // Pass the full request list
+  level = 0
+): TableTreeNode {
+  const id = node.trace?.request_id ?? `group-${node.name}-${level}`;
+
+  // Find the corresponding full HeliconeRequest if this is a leaf node
+  const requestDetails = node.trace?.request_id
+    ? allRequests.find((req) => req.request_id === node.trace?.request_id)
+    : undefined;
+
+  const tableNode: TableTreeNode = {
+    id: id,
+    name: node.name,
+    trace: node.trace,
+    // Populate based on trace and requestDetails
+    path: node.trace?.path || node.name, // Use trace path or group name
+    status: requestDetails?.response_status,
+    createdAt: node.trace?.start_unix_timestamp_ms,
+    model: requestDetails?.response_model ?? undefined, // Map null model to undefined
+    latency:
+      node.trace?.end_unix_timestamp_ms && node.trace?.start_unix_timestamp_ms
+        ? node.trace.end_unix_timestamp_ms - node.trace.start_unix_timestamp_ms
+        : undefined, // Latency from trace timestamps
+  };
+
+  if (node.children && node.children.length > 0) {
+    // Recursively convert children, passing the request list down
+    tableNode.subRows = node.children.map((child: TreeNodeData) =>
+      convertToTableData(child, allRequests, level + 1)
+    );
+  }
+
+  return tableNode;
+}
+
+// Component for Model cell rendering to allow hooks
+const ModelCell = ({ getValue }: CellContext<TableTreeNode, any>) => {
+  const modelName = getValue<string | undefined | null>();
+  const [isTruncated, setIsTruncated] = useState(false);
+  const modelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = modelRef.current;
+    if (el) {
+      setIsTruncated(el.scrollWidth > el.clientWidth);
+    }
+  }, [modelName]);
+
+  if (!modelName) {
+    return <Muted>n/a</Muted>;
+  }
+
   return (
-    <div className="w-full max-w-full overflow-y-auto overflow-x-hidden">
-      <div className="min-w-0">{children}</div>
-    </div>
+    <TooltipProvider>
+      <Tooltip open={isTruncated ? undefined : false}>
+        <TooltipTrigger asChild>
+          <div
+            ref={modelRef}
+            className="truncate"
+            style={{ maxWidth: "150px" }} // Adjust max width as needed
+          >
+            {modelName}
+          </div>
+        </TooltipTrigger>
+        {isTruncated && <TooltipContent>{modelName}</TooltipContent>}
+      </Tooltip>
+    </TooltipProvider>
   );
 };
+
+// *** Define initialColumns outside the component ***
+const initialColumns: ColumnDef<TableTreeNode>[] = [
+  // 1. Path
+  {
+    accessorKey: "path",
+    header: "Path",
+    cell: (info: CellContext<TableTreeNode, any>) =>
+      info.getValue() ?? <Muted>n/a</Muted>,
+  },
+  // 2. Status
+  {
+    accessorKey: "status",
+    header: "Status",
+    cell: (info: CellContext<TableTreeNode, any>) => {
+      if (!info.row.original.trace) return null; // Don't render for group rows
+      const status = info.getValue<number | undefined | null>();
+
+      if (status === undefined || status === null) {
+        return <Muted>n/a</Muted>;
+      }
+
+      let statusType: "success" | "error" = "success";
+      if (status >= 400) {
+        statusType = "error";
+      }
+
+      return <StatusBadge statusType={statusType} errorCode={status} />;
+    },
+  },
+  // 3. Created At
+  {
+    accessorKey: "createdAt",
+    header: "Created At",
+    cell: (info: CellContext<TableTreeNode, any>) => {
+      if (!info.row.original.trace) return null; // Don't render for group rows
+      const createdAt = info.getValue();
+      if (typeof createdAt !== "number" || isNaN(createdAt)) {
+        return <Muted>n/a</Muted>;
+      }
+      const date = new Date(createdAt);
+      if (isNaN(date.getTime())) {
+        return <Muted>Invalid Date</Muted>;
+      }
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <span className="text-gray-600 dark:text-gray-400">
+                {formatDistanceToNow(date, { addSuffix: true })}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>{date.toLocaleString()}</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    },
+  },
+  // 4. Model
+  {
+    accessorKey: "model",
+    header: "Model",
+    cell: (info: CellContext<TableTreeNode, any>) => {
+      if (!info.row.original.trace) return null; // Don't render for group rows
+      return <ModelCell {...info} />;
+    },
+  },
+  // 5. Cost - Commented out
+  /*
+  {
+    accessorKey: "cost",
+    header: "Cost",
+    cell: (info: CellContext<TableTreeNode, any>) => {
+      const cost = info.getValue();
+      return cost !== undefined && cost !== null ? <>{formatNumber(cost)}</> : <Muted>n/a</Muted>;
+    },
+  },
+  */
+  // 6. Latency
+  {
+    accessorKey: "latency",
+    header: "Latency",
+    cell: (info: CellContext<TableTreeNode, any>) => {
+      if (!info.row.original.trace) return null; // Don't render for group rows
+      const duration = info.getValue();
+      return duration !== undefined ? (
+        <>{(duration / 1000).toFixed(2)}s</>
+      ) : (
+        <Muted>n/a</Muted>
+      );
+    },
+  },
+  // 7. Feedback - Commented out
+  /*
+  {
+    accessorKey: "feedback",
+    header: "Feedback",
+    cell: (info: CellContext<TableTreeNode, any>) => {
+      const feedback = info.getValue();
+      if (feedback === undefined || feedback === null) {
+        return <Muted>n/a</Muted>;
+      }
+      return feedback.rating ? <>👍</> : <>👎</>;
+    },
+  },
+  */
+];
 
 interface TreeViewProps {
   session: Session;
@@ -50,40 +246,11 @@ const TreeView: React.FC<TreeViewProps> = ({
   session,
   selectedRequestId,
   setSelectedRequestId,
-  requests,
   showSpan,
+  requests,
   realtimeData,
 }) => {
-  const [collapseAll, setCollapseAll] = useState(false);
-  const [showDrawer, setShowDrawer] = useState(false);
-
-  // Add state for highlighter range
-  const [highlighterRange, setHighlighterRange] = useState<{
-    start: number | null;
-    end: number | null;
-    active: boolean;
-  }>({
-    start: null,
-    end: null,
-    active: false,
-  });
-
-  const { isRealtime, effectiveRequests, originalRequest } = realtimeData;
-
-  // Find the request to display based on the selected ID
-  const requestIdToShow = useMemo(() => {
-    if (selectedRequestId) {
-      return selectedRequestId;
-    }
-
-    // For realtime sessions, default to the first simulated request
-    if (isRealtime && effectiveRequests.length > 0) {
-      return effectiveRequests[0].request_id;
-    }
-
-    // Otherwise use the first request from the session
-    return session.traces?.[0]?.request_id ?? null;
-  }, [selectedRequestId, isRealtime, effectiveRequests, session]);
+  const { isRealtime } = realtimeData;
 
   const onBoardingRequestTrace = useMemo(
     () =>
@@ -91,232 +258,83 @@ const TreeView: React.FC<TreeViewProps> = ({
     [session.traces]
   );
 
-  // Find the actual request to display
-  const displayedRequest = useMemo(() => {
-    if (isRealtime && session.traces.length > 0) {
-      // For realtime sessions, use the original request if available
-      if (originalRequest) {
-        return originalRequest;
-      }
-
-      // Fallback to the first effective request
-      return effectiveRequests[0];
-    }
-
-    // For normal sessions, find the request by ID
-    return effectiveRequests.find((r) => r.request_id === requestIdToShow);
-  }, [
-    effectiveRequests,
-    requestIdToShow,
-    isRealtime,
-    session.traces,
-    originalRequest,
-  ]);
-
-  const selectedRequestRole =
-    isRealtime && requestIdToShow
-      ? effectiveRequests.find((r) => r.request_id === requestIdToShow)
-          ?.properties?._helicone_realtime_role
-      : undefined;
-
   const treeData = useMemo(() => {
     if (isRealtime) return null;
     return tracesToTreeNodeData(session.traces);
   }, [isRealtime, session.traces]);
 
-  // Handle highlighter range updates
-  const handleHighlighterRangeChange = (
-    start: number | null,
-    end: number | null,
-    active: boolean
-  ) => {
-    setHighlighterRange({ start, end, active });
-  };
+  const tableData = useMemo(() => {
+    if (!treeData || !treeData.children) return [];
+    // Ensure we have the actual list of requests - use requests.requests?.requests
+    const allRequests = requests.requests?.requests ?? [];
+    // Convert tree data, passing the full request list for lookups
+    return treeData.children.map((node) =>
+      convertToTableData(node, allRequests)
+    );
+  }, [treeData, requests.requests?.requests]);
 
-  // Determine message index filter based on highlighter or single message selection
-  const messageIndexFilter = useMemo(() => {
-    if (isRealtime) {
-      if (
-        highlighterRange.active &&
-        highlighterRange.start !== null &&
-        highlighterRange.end !== null
-      ) {
-        // When highlighter is active, use its range
-        return {
-          startIndex: highlighterRange.start,
-          endIndex: highlighterRange.end,
-          isHighlighterActive: true,
-        };
-      } else if (
-        !highlighterRange.active &&
-        highlighterRange.start !== null &&
-        highlighterRange.end !== null &&
-        highlighterRange.start === highlighterRange.end
-      ) {
-        // When a single message is selected (start and end are the same)
-        return {
-          startIndex: highlighterRange.start,
-          endIndex: highlighterRange.start,
-          isHighlighterActive: false,
-        };
-      }
+  // Columns are defined outside again
+  // Remove the useMemo for columns definition
+  // const columns = useMemo(() => { ... }, [session.traces, requests.requests?.data]);
+
+  const [activeColumns, setActiveColumns] = useLocalStorage<DragColumnItem[]>(
+    `session-requests-table-activeColumns`,
+    initialColumns.map(columnDefToDragColumnItem) // Use initialColumns defined outside
+  );
+
+  const onRowSelectHandler = (row: TableTreeNode) => {
+    // Updated row type
+    // Only select actual requests (leaf nodes with a trace)
+    if (row.trace) {
+      setSelectedRequestId(row.trace.request_id);
+    } else {
+      // Optional: handle click on group row if needed (e.g., toggle expansion)
+      // React-table's expander button already handles toggling.
     }
-    return undefined;
-  }, [isRealtime, highlighterRange]);
+  };
 
   return (
     <Col className="h-full">
-      {showSpan && (
-        <ResizablePanelGroup direction="vertical" className="h-full w-full">
-          <ResizablePanel
-            defaultSize={40}
-            minSize={25}
-            className="relative bg-white dark:bg-black"
-          >
-            <TraceSpan
-              session={session}
-              selectedRequestIdDispatch={[
-                selectedRequestId,
-                setSelectedRequestId,
-              ]}
-              height="100%"
-              realtimeData={realtimeData}
-              onHighlighterChange={handleHighlighterRangeChange}
-            />
-          </ResizablePanel>
+      <ResizablePanelGroup direction="vertical" className="h-full w-full">
+        <ResizablePanel
+          defaultSize={40}
+          minSize={25}
+          className="relative bg-white dark:bg-black"
+        >
+          <TraceSpan
+            session={session}
+            selectedRequestIdDispatch={[
+              selectedRequestId,
+              setSelectedRequestId,
+            ]}
+            realtimeData={realtimeData}
+          />
+        </ResizablePanel>
 
-          <ResizableHandle />
+        <ResizableHandle />
 
-          <ResizablePanel defaultSize={60} minSize={25}>
-            <div className="h-full border-t border-slate-200 dark:border-slate-800 flex">
-              {!isRealtime && (
-                <div className="flex-shrink-0 w-[30em] h-full">
-                  <ScrollArea className="h-full">
-                    <div className="border-r border-slate-200 dark:border-slate-700 pb-10">
-                      <div className="w-full bg-slate-50 dark:bg-black flex justify-end h-10">
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                className="rounded-none"
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => setCollapseAll(!collapseAll)}
-                              >
-                                {collapseAll ? (
-                                  <ChevronsUpDownIcon width={16} height={16} />
-                                ) : (
-                                  <ChevronsDownUpIcon width={16} height={16} />
-                                )}
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              {collapseAll ? "Expand All" : "Collapse All"}
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </div>
-                      <Tree
-                        data={treeData!}
-                        className="min-h-[1000px] w-full"
-                        selectedRequestIdDispatch={[
-                          selectedRequestId,
-                          setSelectedRequestId,
-                        ]}
-                        collapseAll={collapseAll}
-                        setShowDrawer={setShowDrawer}
-                        onBoardingRequestTrace={onBoardingRequestTrace}
-                        sessionId={session.session_id}
-                        realtimeData={realtimeData}
-                      />
-                    </div>
-                  </ScrollArea>
-                </div>
-              )}
-
-              <div className="flex-grow h-full overflow-auto">
-                {displayedRequest && (
-                  <RequestWrapper>
-                    <RenderHeliconeRequest
-                      heliconeRequest={displayedRequest}
-                      messageIndexFilter={messageIndexFilter}
-                      key={`${highlighterRange.active}-${highlighterRange.start}-${highlighterRange.end}-${messageIndexFilter?.startIndex}-${messageIndexFilter?.endIndex}`}
-                    />
-                  </RequestWrapper>
-                )}
-              </div>
-            </div>
-          </ResizablePanel>
-        </ResizablePanelGroup>
-      )}
-
-      {!showSpan && (
-        <div className="h-full border-t border-r border-b border-slate-200 dark:border-slate-800 flex">
-          {!isRealtime && (
-            <div className="flex-shrink-0 w-[30em] h-full">
-              <ScrollArea className="h-full">
-                <div className="border-r border-slate-200 dark:border-slate-700 pb-10">
-                  <div className="w-full bg-slate-50 dark:bg-black flex justify-end h-10">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            className="rounded-none"
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => setCollapseAll(!collapseAll)}
-                          >
-                            {collapseAll ? (
-                              <ChevronsUpDownIcon width={16} height={16} />
-                            ) : (
-                              <ChevronsDownUpIcon width={16} height={16} />
-                            )}
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          {collapseAll ? "Expand All" : "Collapse All"}
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                  <Tree
-                    data={treeData!}
-                    className="min-h-[1000px] w-full"
-                    selectedRequestIdDispatch={[
-                      selectedRequestId,
-                      setSelectedRequestId,
-                    ]}
-                    collapseAll={collapseAll}
-                    setShowDrawer={setShowDrawer}
-                    onBoardingRequestTrace={onBoardingRequestTrace}
-                    sessionId={session.session_id}
-                    realtimeData={realtimeData}
-                  />
-                </div>
-              </ScrollArea>
-            </div>
-          )}
-
-          <div className="flex-grow h-full overflow-auto">
-            {displayedRequest && (
-              <RequestWrapper>
-                <RenderHeliconeRequest
-                  heliconeRequest={displayedRequest}
-                  messageIndexFilter={messageIndexFilter}
-                  key={`${highlighterRange.active}-${highlighterRange.start}-${highlighterRange.end}-${messageIndexFilter?.startIndex}-${messageIndexFilter?.endIndex}`}
+        <ResizablePanel defaultSize={60} minSize={25}>
+          <div className="h-full border-t border-slate-200 dark:border-slate-800 flex">
+            {!isRealtime && (
+              <div className="h-full w-full">
+                <ThemedTable
+                  id="session-requests-table"
+                  defaultData={tableData}
+                  defaultColumns={initialColumns} // Use initialColumns defined outside
+                  activeColumns={activeColumns}
+                  setActiveColumns={setActiveColumns}
+                  skeletonLoading={false} // TODO: Pass loading state if available
+                  dataLoading={false} // TODO: Pass loading state if available
+                  onRowSelect={onRowSelectHandler}
+                  highlightedIds={selectedRequestId ? [selectedRequestId] : []}
+                  fullWidth={true}
+                  checkboxMode="never"
                 />
-              </RequestWrapper>
+              </div>
             )}
           </div>
-        </div>
-      )}
-
-      {!isRealtime && showDrawer && requestIdToShow && displayedRequest && (
-        <RequestDrawer
-          request={heliconeRequestToMappedContent(displayedRequest)}
-          onCollapse={() => setShowDrawer(false)}
-        />
-      )}
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </Col>
   );
 };

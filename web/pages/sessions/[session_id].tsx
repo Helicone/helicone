@@ -42,10 +42,22 @@ const SessionDetail = ({ session_id }: { session_id: string }) => {
 
   const session = sessionFromHeliconeRequests(requests.requests.requests ?? []);
 
+  // Extract session name from requests properties
+  const sessionName = useMemo(() => {
+    const reqs = requests.requests.requests ?? [];
+    for (const req of reqs) {
+      if (req.properties && req.properties["Helicone-Session-Name"]) {
+        return req.properties["Helicone-Session-Name"] as string;
+      }
+    }
+    return "Unnamed"; // Default if not found
+  }, [requests.requests.requests]);
+
   return (
     <SessionContent
       session={session}
-      session_id={session_id as string}
+      session_id={session_id}
+      session_name={sessionName}
       requests={requests}
       isLive={isLive}
       setIsLive={setIsLive}

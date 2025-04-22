@@ -2,14 +2,17 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { UIFilterRowTree } from "@/services/lib/filters/types";
 import { TimeFilter } from "@/types/timeFilter";
+import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
 import {
   AdjustmentsHorizontalIcon,
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
 import {
   ColumnDef,
+  ExpandedState,
   flexRender,
   getCoreRowModel,
+  getExpandedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import Link from "next/link";
@@ -27,7 +30,7 @@ import DraggableColumnHeader from "./columns/draggableColumnHeader";
 
 type CheckboxMode = "always_visible" | "on_hover" | "never";
 
-interface ThemedTableProps<T extends { id?: string }> {
+interface ThemedTableProps<T extends { id?: string; subRows?: T[] }> {
   id: string;
   defaultData: T[];
   defaultColumns: ColumnDef<T>[];
@@ -94,7 +97,7 @@ interface ThemedTableProps<T extends { id?: string }> {
   rowLink?: (row: T) => string;
   showFilters?: boolean;
 }
-export default function ThemedTable<T extends { id?: string }>(
+export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
   props: ThemedTableProps<T>
 ) {
   const {
@@ -128,14 +131,20 @@ export default function ThemedTable<T extends { id?: string }>(
     tableRef,
   } = props;
 
+  const [expanded, setExpanded] = React.useState<ExpandedState>({});
+
   const table = useReactTable({
     data: defaultData,
     columns: defaultColumns,
     columnResizeMode: "onChange",
+    getSubRows: (row) => row.subRows,
     getCoreRowModel: getCoreRowModel(),
+    getExpandedRowModel: getExpandedRowModel(),
     state: {
       columnOrder: activeColumns.map((column) => column.id),
+      expanded,
     },
+    onExpandedChange: setExpanded,
   });
 
   if (tableRef) {
@@ -180,6 +189,11 @@ export default function ThemedTable<T extends { id?: string }>(
   }, [rows]);
 
   const router = useRouter();
+
+  // Function to calculate indentation padding
+  const getIndentPadding = (depth: number) => {
+    return { paddingLeft: `${depth * 1.5 + 0.5}rem` }; // 1.5rem per level + 0.5rem base
+  };
 
   return (
     <ScrollArea className="h-full w-full sentry-mask-me" orientation="both">
@@ -264,24 +278,31 @@ export default function ThemedTable<T extends { id?: string }>(
             <tbody className="text-[13px] divide-y divide-border">
               {rows.map((row, index) => (
                 <tr
-                  key={row.original?.id}
+                  key={row.id}
                   className={clsx(
-                    "hover:cursor-pointer group",
+                    "group",
+                    row.getCanExpand() && "font-semibold",
+                    row.depth > 0
+                      ? "bg-slate-50 dark:bg-slate-950/50"
+                      : "bg-white dark:bg-black",
                     checkedIds?.includes(row.original?.id ?? "")
-                      ? "bg-sky-100 border-l border-sky-500 pl-2 dark:bg-slate-800/50 dark:border-sky-900"
+                      ? clsx(
+                          "!bg-sky-100 border-l-2 border-sky-500 dark:!bg-slate-800/50 dark:border-sky-900",
+                          row.depth === 0 && "pl-1.5"
+                        )
                       : "hover:bg-sky-50 dark:hover:bg-slate-700/50",
+                    onRowSelect && "hover:cursor-pointer",
                     rowLink && "relative"
                   )}
-                  onClick={
-                    onRowSelect &&
-                    ((e: React.MouseEvent) => {
-                      handleRowSelect(row.original, index, e);
-                    })
-                  }
                 >
                   <td
                     className={clsx(
-                      "w-8 h-full px-2",
+                      "w-8 h-full px-2 sticky left-0 z-10",
+                      row.getCanExpand()
+                        ? "bg-inherit"
+                        : row.depth > 0
+                        ? "bg-slate-50 dark:bg-slate-950/50"
+                        : "bg-white dark:bg-black",
                       checkboxMode === "on_hover"
                         ? clsx(
                             "opacity-0 group-hover:opacity-100 transition-opacity duration-150",
@@ -292,8 +313,27 @@ export default function ThemedTable<T extends { id?: string }>(
                       checkboxMode === "never" && "hidden"
                     )}
                     style={{ verticalAlign: "middle" }}
+                    onClick={
+                      onRowSelect &&
+                      ((e: React.MouseEvent) => {
+                        if (
+                          e.target instanceof HTMLElement &&
+                          e.target.closest("[data-expander]")
+                        ) {
+                          return;
+                        }
+                        handleRowSelect(row.original, index, e);
+                      })
+                    }
                   >
-                    <div className="flex justify-center items-center h-full">
+                    <div
+                      className="flex justify-center items-center h-full"
+                      style={
+                        checkboxMode !== "never"
+                          ? getIndentPadding(row.depth)
+                          : {}
+                      }
+                    >
                       <Checkbox
                         variant="helicone"
                         checked={selectedIds?.includes(row.original?.id ?? "")}
@@ -302,48 +342,78 @@ export default function ThemedTable<T extends { id?: string }>(
                   </td>
                   {row.getVisibleCells().map((cell, i) => (
                     <td
-                      key={i}
+                      key={cell.id}
                       className={clsx(
-                        "py-3 px-2 text-slate-700 dark:text-slate-300",
-                        i === 0 && checkboxMode === "always_visible" && "pl-2",
-                        i === 0 && checkboxMode === "on_hover" && "pl-2",
-                        i === 0 && checkboxMode === "never" && "pl-10",
-                        // For selected rows in hover mode
-                        i === 0 &&
-                          checkboxMode === "on_hover" &&
-                          selectedIds?.includes(row.original?.id ?? "") &&
-                          "!pl-2",
+                        "py-3 px-2 text-slate-700 dark:text-slate-300 truncate",
+                        row.getCanExpand()
+                          ? "bg-inherit"
+                          : row.depth > 0
+                          ? "bg-slate-50 dark:bg-slate-950/50"
+                          : "bg-white dark:bg-black",
+                        checkedIds?.includes(row.original?.id ?? "") &&
+                          "!bg-sky-100 dark:!bg-slate-800/50",
                         i === row.getVisibleCells().length - 1 &&
-                          "pr-10 border-r border-border"
+                          "border-r border-border"
                       )}
                       style={{
+                        ...(i === 0 && checkboxMode === "never"
+                          ? getIndentPadding(row.depth)
+                          : {}),
                         maxWidth: cell.column.getSize(),
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
                       }}
+                      onClick={
+                        onRowSelect &&
+                        ((e: React.MouseEvent) => {
+                          if (
+                            i === 0 &&
+                            e.target instanceof HTMLElement &&
+                            e.target.closest("[data-expander]")
+                          ) {
+                            return;
+                          }
+                          handleRowSelect(row.original, index, e);
+                        })
+                      }
                     >
-                      {dataLoading &&
-                      (cell.column.id == "requestText" ||
-                        cell.column.id == "responseText") ? (
-                        <span
-                          className={clsx(
-                            "w-full flex flex-grow",
-                            (cell.column.id == "requestText" ||
-                              cell.column.id == "responseText") &&
-                              dataLoading
-                              ? "animate-pulse bg-slate-200 rounded-md"
-                              : "hidden"
-                          )}
-                        >
-                          &nbsp;
-                        </span>
-                      ) : (
-                        flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )
-                      )}
+                      <div className="flex items-center gap-1">
+                        {i === 0 && row.getCanExpand() && (
+                          <button
+                            {...{
+                              onClick: row.getToggleExpandedHandler(),
+                              style: { cursor: "pointer" },
+                              "data-expander": true,
+                            }}
+                            className="p-0.5"
+                          >
+                            {row.getIsExpanded() ? (
+                              <ChevronDownIcon className="h-4 w-4" />
+                            ) : (
+                              <ChevronRightIcon className="h-4 w-4" />
+                            )}
+                          </button>
+                        )}
+                        {dataLoading &&
+                        (cell.column.id == "requestText" ||
+                          cell.column.id == "responseText") ? (
+                          <span
+                            className={clsx(
+                              "w-full flex flex-grow",
+                              (cell.column.id == "requestText" ||
+                                cell.column.id == "responseText") &&
+                                dataLoading
+                                ? "animate-pulse bg-slate-200 rounded-md"
+                                : "hidden"
+                            )}
+                          >
+                            &nbsp;
+                          </span>
+                        ) : (
+                          flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )
+                        )}
+                      </div>
                     </td>
                   ))}
                   {rowLink && (

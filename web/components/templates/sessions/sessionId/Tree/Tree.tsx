@@ -20,7 +20,6 @@ export interface TreeNodeProps {
   isLastChild: boolean;
   level: number;
   collapseAll?: boolean;
-  setShowDrawer: (x: boolean) => void;
   isRequestSingleChild?: boolean;
   onBoardingRequestTrace?: Trace;
   realtimeData?: {
@@ -36,7 +35,6 @@ const TreeNode: React.FC<TreeNodeProps> = ({
   isLastChild,
   level,
   collapseAll,
-  setShowDrawer,
   isRequestSingleChild,
   onBoardingRequestTrace,
   realtimeData,
@@ -97,7 +95,6 @@ const TreeNode: React.FC<TreeNodeProps> = ({
                     : false
                 }
                 level={level + 1}
-                setShowDrawer={setShowDrawer}
                 isRequestSingleChild={node?.children?.length === 1}
                 realtimeData={realtimeData}
               />
@@ -137,7 +134,6 @@ const TreeNode: React.FC<TreeNodeProps> = ({
                           ? node.children[0].trace?.request_id ?? ""
                           : node.trace?.request_id ?? ""
                       );
-                      setShowDrawer(true);
                     }}
                   >
                     <SidebarCloseIcon className="w-4 h-4 text-slate-500" />
@@ -187,7 +183,6 @@ const TreeNode: React.FC<TreeNodeProps> = ({
             closeChildren={closeChildren}
             setSelectedRequestId={setSelectedRequestId}
             level={level}
-            setShowDrawer={setShowDrawer}
             isRequestSingleChild={isRequestSingleChild ?? false}
             label={node.children ? node.name : undefined}
           />
@@ -212,7 +207,6 @@ interface TreeProps {
   className?: string;
   selectedRequestIdDispatch: [string, (x: string) => void];
   collapseAll?: boolean;
-  setShowDrawer: (x: boolean) => void;
   onBoardingRequestTrace?: Trace;
   sessionId: string;
   isRealtime?: boolean;
@@ -228,7 +222,6 @@ export const Tree: React.FC<TreeProps> = ({
   className,
   selectedRequestIdDispatch,
   collapseAll,
-  setShowDrawer,
   onBoardingRequestTrace,
   sessionId,
   isRealtime = false,
@@ -248,10 +241,9 @@ export const Tree: React.FC<TreeProps> = ({
             node={child}
             selectedRequestIdDispatch={selectedRequestIdDispatch}
             isLastChild={!!data.children && index === data.children.length - 1}
-            onBoardingRequestTrace={onBoardingRequestTrace}
             level={0}
             collapseAll={collapseAll}
-            setShowDrawer={setShowDrawer}
+            onBoardingRequestTrace={onBoardingRequestTrace}
             realtimeData={
               realtimeData || {
                 isRealtime,
