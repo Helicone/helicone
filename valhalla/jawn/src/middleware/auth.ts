@@ -5,6 +5,7 @@ import { RequestWrapper } from "../lib/requestWrapper";
 import { AuthParams } from "../packages/common/auth/types";
 import { getHeliconeAuthClient } from "../packages/common/auth/server/AuthClientFactory";
 
+const POSTHOG_SAMPLE_RATE = 0.05;
 export const logInPostHog = (
   reqParams: {
     method: string;
@@ -16,6 +17,9 @@ export const logInPostHog = (
   },
   authParams?: AuthParams
 ) => {
+  if (Math.random() > POSTHOG_SAMPLE_RATE) {
+    return;
+  }
   const start = Date.now();
   const postHogClient = newPostHogClient();
   postHogClient?.capture({
