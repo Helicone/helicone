@@ -58,11 +58,11 @@ impl<S, ReqBody> Service<S, ReqBody> {
 
 impl<S, ReqBody> tower::Service<Request<ReqBody>> for Service<S, ReqBody>
 where
-    S: tower::Service<Request<ReqBody>> + Clone + Send + Sync + 'static,
+    S: tower::Service<Request<ReqBody>> + Clone + Send + 'static,
     S::Future: Send + 'static,
     S::Response: Send + 'static,
     S::Error: Into<Error> + Send + Sync + 'static,
-    ReqBody: Send + Sync + 'static,
+    ReqBody: Send + 'static,
 {
     type Response = S::Response;
     type Error = Error;
@@ -82,8 +82,11 @@ where
     fn call(&mut self, mut req: Request<ReqBody>) -> Self::Future {
         tracing::info!("RequestContextService::call");
         let mut this = self.clone();
+        let app_state = this.app_state.clone();
         Box::pin(async move {
-            let req_ctx = Arc::new(this.get_context(&mut req).await?);
+            let req_ctx = Arc::new(
+                Service::<S, ReqBody>::get_context(app_state, &mut req).await?,
+            );
             req.extensions_mut().insert(req_ctx);
             this.inner.call(req).await.map_err(Into::into)
         })
@@ -98,7 +101,7 @@ where
     S::Error: Into<Error> + Send + Sync + 'static,
 {
     async fn get_context(
-        &self,
+        app_state: AppState,
         req: &mut Request<ReqBody>,
     ) -> Result<RequestContext, Error> {
         // AuthContext is set by the auth middleware
@@ -129,9 +132,8 @@ where
 
         let router_id = Uuid::parse_str(router_id_path)
             .map_err(InvalidRequestError::InvalidRouterId)?;
-        let mut tx = self.app_state.0.store.db.begin().await?;
-        let router = self
-            .app_state
+        let mut tx = app_state.0.store.db.begin().await?;
+        let router = app_state
             .0
             .store
             .router
@@ -143,8 +145,7 @@ where
         tracing::debug!(name = %router.name, version = %router.version, "got router");
         // TODO: will likely want to make this into one call/fetch all provider
         // keys at once since we may have multiple
-        let provider_api_key = self
-            .app_state
+        let provider_api_key = app_state
             .0
             .store
             .provider_keys
@@ -166,8 +167,7 @@ where
             provider_api_key.provider_key,
         )]));
 
-        let target_url = self
-            .app_state
+        let target_url = app_state
             .0
             .config
             .dispatcher

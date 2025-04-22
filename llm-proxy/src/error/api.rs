@@ -1,9 +1,12 @@
+use axum_core::response::IntoResponse;
 use displaydoc::Display;
+use http::StatusCode;
 use serde::Serialize;
 use thiserror::Error;
+use tracing::debug;
 use utoipa::ToSchema;
 
-use crate::types::response::Response;
+use crate::types::{json::Json, response::Response};
 
 /// User errors
 #[derive(Debug, Error, Display, strum::AsRefStr)]
@@ -43,8 +46,78 @@ pub struct ErrorResponse {
     pub error: String,
 }
 
-impl From<Error> for Response {
-    fn from(_error: Error) -> Self {
-        todo!()
+impl IntoResponse for Error {
+    fn into_response(self) -> Response {
+        match self {
+            Error::InvalidRequest(error) => error.into_response(),
+            Error::Authentication(error) => error.into_response(),
+            Error::Internal(error) => error.into_response(),
+            Error::Database(error) => {
+                tracing::error!(error = %error, "Internal server error");
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Json(ErrorResponse {
+                        error: "Internal server error".to_string(),
+                    }),
+                )
+                    .into_response()
+            }
+            Error::Minio(error) => {
+                tracing::error!(error = %error, "Internal server error");
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Json(ErrorResponse {
+                        error: "Internal server error".to_string(),
+                    }),
+                )
+                    .into_response()
+            }
+            Error::Box(error) => {
+                tracing::error!(error = %error, "Internal server error");
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Json(ErrorResponse {
+                        error: "Internal server error".to_string(),
+                    }),
+                )
+                    .into_response()
+            }
+        }
+    }
+}
+
+impl IntoResponse for InvalidRequestError {
+    fn into_response(self) -> Response {
+        debug!(error = %self, "Invalid request");
+        match self {
+            Self::NotFound => (
+                StatusCode::NOT_FOUND,
+                Json(ErrorResponse {
+                    error: "Not found".to_string(),
+                }),
+            )
+                .into_response(),
+            Self::InvalidRouterId(_) => (
+                StatusCode::BAD_REQUEST,
+                Json(ErrorResponse {
+                    error: "Invalid router id".to_string(),
+                }),
+            )
+                .into_response(),
+            Self::MissingRouterId => (
+                StatusCode::BAD_REQUEST,
+                Json(ErrorResponse {
+                    error: "Missing router id".to_string(),
+                }),
+            )
+                .into_response(),
+            Self::InvalidRequest(_) => (
+                StatusCode::BAD_REQUEST,
+                Json(ErrorResponse {
+                    error: "Invalid request".to_string(),
+                }),
+            )
+                .into_response(),
+        }
     }
 }

@@ -6,6 +6,7 @@ use std::{
     task::{Context, Poll},
 };
 
+use axum_core::response::IntoResponse;
 use axum_server::tls_rustls::RustlsConfig;
 use futures::future::BoxFuture;
 use meltdown::Token;
@@ -69,8 +70,6 @@ impl std::fmt::Debug for InnerAppState {
             .finish()
     }
 }
-// todo: rate limit all granularities
-//
 
 /// The top level app used to start the hyper server.
 /// The middleware stack is as follows:
@@ -101,6 +100,9 @@ impl std::fmt::Debug for InnerAppState {
 /// --- none in use yet --
 /// 15. DispatcherServiceStack
 /// 16. Dispatcher
+///
+/// Ideally we could combine the rate limits into one layer
+/// instead of using tower_governor and having to split them up.
 #[derive(Clone)]
 pub struct App {
     pub state: AppState,
@@ -164,13 +166,13 @@ impl App {
         // global middleware is applied here
         let service_stack = ServiceBuilder::new()
             .layer(CatchPanicLayer::new())
-            .layer(ErrorHandlerLayer::new(crate::error::api::Error::into))
+            .layer(ErrorHandlerLayer::new(
+                crate::error::api::Error::into_response,
+            ))
             .layer(AsyncRequireAuthorizationLayer::new(AuthService))
-            .layer(
-                crate::middleware::request_context::Layer::<reqwest::Body>::new(
-                    app_state.clone(),
-                ),
-            )
+            .layer(crate::middleware::request_context::Layer::<
+                axum_core::body::Body,
+            >::new(app_state.clone()))
             // other middleware: rate limiting, logging, etc, etc
             // will be added here as well
             .map_err(|e| crate::error::api::Error::Box(e))
@@ -242,7 +244,7 @@ impl HyperApp {
     pub fn new(app: App) -> Self {
         let service_stack = ServiceBuilder::new()
             .map_request(|req: http::Request<hyper::body::Incoming>| {
-                req.map(reqwest::Body::wrap)
+                req.map(axum_core::body::Body::new)
             })
             .service(app.service_stack);
         Self {

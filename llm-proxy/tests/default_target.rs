@@ -9,7 +9,7 @@ use url::Url;
 async fn default_target() {
     let config = Config::test_config();
     let mut harness = Harness::new(config).await;
-    let request_body = reqwest::Body::from(
+    let request_body = axum_core::body::Body::from(
         serde_json::to_vec(&json!({
             "model": "gpt-4o-mini",
             "messages": [

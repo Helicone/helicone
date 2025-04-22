@@ -1,4 +1,3 @@
-//! Credits to axum/rama.
 use std::{
     convert::Infallible,
     fmt,
@@ -127,7 +126,8 @@ where
                 let error_mapper = error_mapper
                     .take()
                     .expect("future polled after completion");
-                Poll::Ready(Ok(error_mapper(error)))
+                let response = error_mapper(error);
+                Poll::Ready(Ok(response))
             }
             KindProj::Future {
                 future,
@@ -155,7 +155,7 @@ where
         + Send
         + 'static,
     S::Future: Send + 'static,
-    F: Fn(E) -> Response + Clone + Send + Sync + 'static,
+    F: Fn(E) -> Response + Clone + Send + 'static,
     ReqBody: Send + 'static,
     E: Send + 'static,
 {
@@ -169,7 +169,10 @@ where
     ) -> Poll<Result<(), Self::Error>> {
         match self.inner.poll_ready(cx) {
             Poll::Ready(Ok(())) => Poll::Ready(Ok(())),
-            Poll::Ready(Err(_)) => Poll::Ready(Ok(())),
+            Poll::Ready(Err(_)) => {
+                tracing::error!("Errored in poll ready");
+                Poll::Ready(Ok(()))
+            }
             Poll::Pending => Poll::Pending,
         }
     }

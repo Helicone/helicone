@@ -9,7 +9,6 @@ use std::{
 };
 
 use config::ConfigDiscovery;
-use derive_more::AsRef;
 use futures::Stream;
 use pin_project::pin_project;
 use tokio::sync::mpsc::Receiver;
@@ -18,35 +17,6 @@ use tower::discover::Change;
 use crate::{
     app::AppState, dispatcher::DispatcherService, types::provider::Provider,
 };
-
-#[derive(Debug, AsRef)]
-pub struct ProviderChangeBroadcasts {
-    // pub tx: HashMap<Model, Sender<Change<Key, DispatcherService>>>,
-    // pub rx: HashMap<Model, Receiver<Change<Key, DispatcherService>>>,
-}
-
-// impl ProviderChangeBroadcasts {
-//     pub fn new(config: &Config) -> Self {
-//         let mut tx_map = HashMap::new();
-//         let mut rx_map = HashMap::new();
-//         let models = config
-//             .discover
-//             .models
-//             .0
-//             .values()
-//             .flatten()
-//             .collect::<HashSet<_>>();
-//         for model in models {
-//             let (tx, rx) = broadcast::channel(128);
-//             tx_map.insert(model.clone(), tx);
-//             rx_map.insert(model.clone(), rx);
-//         }
-//         Self {
-//             tx: tx_map,
-//             rx: rx_map,
-//         }
-//     }
-// }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct Key {

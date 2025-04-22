@@ -12,10 +12,10 @@ pub struct AuthService;
 
 impl<B> AsyncAuthorizeRequest<B> for AuthService
 where
-    B: Send + Sync + 'static,
+    B: Send + 'static,
 {
     type RequestBody = B;
-    type ResponseBody = reqwest::Body;
+    type ResponseBody = axum_core::body::Body;
     type Future = BoxFuture<
         'static,
         Result<Request<B>, http::Response<Self::ResponseBody>>,
@@ -24,8 +24,8 @@ where
     #[tracing::instrument(name = "AuthService::authorize", skip(self, request))]
     fn authorize(&mut self, mut request: Request<B>) -> Self::Future {
         tracing::debug!("AuthService::authorize");
-        Box::pin(async {
-            if let Some(auth_ctx) = check_auth(&request).await {
+        Box::pin(async move {
+            if let Some(auth_ctx) = check_auth(&request) {
                 // Set `auth_ctx` as a request extension so it can be accessed
                 // by other services down the stack.
                 request.extensions_mut().insert(auth_ctx);
@@ -34,7 +34,7 @@ where
             } else {
                 let unauthorized_response = http::Response::builder()
                     .status(StatusCode::UNAUTHORIZED)
-                    .body(reqwest::Body::default())
+                    .body(axum_core::body::Body::default())
                     .unwrap();
 
                 Err(unauthorized_response)
@@ -43,7 +43,7 @@ where
     }
 }
 
-async fn check_auth<B>(_request: &Request<B>) -> Option<AuthContext> {
+fn check_auth<B>(_request: &Request<B>) -> Option<AuthContext> {
     // ...
     // for now we are mocking this just to show how layers will stack on top of
     // each other

@@ -1,8 +1,8 @@
 use std::time::Instant;
 
+use axum_core::body::Body;
 use indexmap::IndexMap;
 use isocountry::CountryCode;
-use reqwest::Body;
 use url::Url;
 
 use super::{

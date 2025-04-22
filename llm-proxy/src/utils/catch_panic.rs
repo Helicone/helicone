@@ -1,4 +1,31 @@
-//! Credits to tower-http. TODO: license
+//! Middleware to catch panics and convert them into `500 Internal Server`
+//! responses.
+//!
+//! Copyright (c) 2019-2021 Tower Contributors
+//!
+//! Permission is hereby granted, free of charge, to any
+//! person obtaining a copy of this software and associated
+//! documentation files (the "Software"), to deal in the
+//! Software without restriction, including without
+//! limitation the rights to use, copy, modify, merge,
+//! publish, distribute, sublicense, and/or sell copies of
+//! the Software, and to permit persons to whom the Software
+//! is furnished to do so, subject to the following
+//! conditions:
+//!
+//! The above copyright notice and this permission notice
+//! shall be included in all copies or substantial portions
+//! of the Software.
+//!
+//! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+//! ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+//! TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+//! PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+//! SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+//! CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+//! OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+//! IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+//! DEALINGS IN THE SOFTWARE.
 use std::{
     any::Any,
     future::Future,
@@ -80,7 +107,7 @@ impl<S, T> Service<Request> for CatchPanic<S, T>
 where
     S: Service<Request, Response = Response>,
     T: ResponseForPanic + Clone,
-    T::ResponseBody: Body<Data = Bytes> + Send + Sync + 'static,
+    T::ResponseBody: Body<Data = Bytes> + Send + 'static,
     <T::ResponseBody as Body>::Error: Into<BoxError>,
 {
     type Response = Response;
@@ -142,7 +169,7 @@ impl<F, E, T> Future for ResponseFuture<F, T>
 where
     F: Future<Output = Result<Response, E>>,
     T: ResponseForPanic,
-    T::ResponseBody: Body<Data = Bytes> + Send + Sync + 'static,
+    T::ResponseBody: Body<Data = Bytes> + Send + 'static,
     <T::ResponseBody as Body>::Error: Into<BoxError>,
 {
     type Output = Result<Response, E>;
@@ -180,13 +207,13 @@ where
 fn response_for_panic<T>(
     mut panic_handler: T,
     err: Box<dyn Any + Send + 'static>,
-) -> Response
+) -> http::Response<axum_core::body::Body>
 where
     T: ResponseForPanic,
-    T::ResponseBody: Body<Data = Bytes> + Send + Sync + 'static,
+    T::ResponseBody: Body<Data = Bytes> + Send + 'static,
     <T::ResponseBody as Body>::Error: Into<BoxError>,
 {
     panic_handler
         .response_for_panic(err)
-        .map(reqwest::Body::wrap)
+        .map(axum_core::body::Body::new)
 }
