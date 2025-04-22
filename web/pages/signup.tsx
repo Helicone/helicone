@@ -25,9 +25,16 @@ const SignUp = () => {
     }
   }, [router.query]);
 
-  if (heliconeAuthClient.user && heliconeAuthClient.user.email !== DEMO_EMAIL) {
-    router.push(`/welcome`);
-  }
+  useEffect(() => {
+    if (
+      heliconeAuthClient.user &&
+      heliconeAuthClient.user.id &&
+      heliconeAuthClient.user.email &&
+      heliconeAuthClient.user.email !== DEMO_EMAIL
+    ) {
+      router.push(`/welcome`);
+    }
+  }, [heliconeAuthClient.user, router]);
 
   return (
     <PublicMetaData
