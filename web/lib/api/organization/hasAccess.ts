@@ -1,4 +1,3 @@
-import { getSupabaseServer } from "../../supabaseServer";
 import { dbExecute } from "../db/dbExecute";
 
 async function _checkAccessToOrg(
@@ -23,11 +22,10 @@ export async function checkAccessToMutateOrg(
   orgId: string,
   userId: string
 ): Promise<boolean> {
-  const orgToCheck = await getSupabaseServer()
-    .from("organization")
-    .select("*")
-    .eq("id", orgId)
-    .single();
+  const orgToCheck = await dbExecute<{
+    id: string;
+    reseller_id: string;
+  }>("SELECT id, reseller_id FROM organization WHERE id = $1", [orgId]);
 
   if (!orgToCheck.data || orgToCheck.error !== null) {
     return false;
@@ -35,8 +33,8 @@ export async function checkAccessToMutateOrg(
   if (await _checkAccessToOrg(orgId as string, userId)) {
     return true;
   } else if (
-    orgToCheck.data.reseller_id &&
-    (await _checkAccessToOrg(orgToCheck.data.reseller_id as string, userId))
+    orgToCheck.data?.[0].reseller_id &&
+    (await _checkAccessToOrg(orgToCheck.data[0].reseller_id as string, userId))
   ) {
     return true;
   } else {

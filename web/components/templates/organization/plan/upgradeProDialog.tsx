@@ -104,7 +104,7 @@ export const UpgradeProDialog = ({
         }));
       }
     }
-  }, [open, featureName]);
+  }, [open, featureName, selectedAddons]);
 
   const subscription = useQuery({
     queryKey: ["subscription", org?.currentOrg?.id],
@@ -200,7 +200,7 @@ export const UpgradeProDialog = ({
       0
     );
     return base + extras;
-  }, [selectedAddons, seats]);
+  }, [selectedAddons, proAddon.price, seats, ADDONS]);
 
   const savings = useMemo(() => {
     const maxPrice =
@@ -209,7 +209,7 @@ export const UpgradeProDialog = ({
     const difference = maxPrice - TEAM_BUNDLE_PRICE;
     const percentage = Math.floor((difference / maxPrice) * 100);
     return percentage > 0 ? percentage : 0;
-  }, [seats]);
+  }, [seats, proAddon, otherAddons]);
 
   // Get description text with case insensitivity
   const descriptionText = featureName

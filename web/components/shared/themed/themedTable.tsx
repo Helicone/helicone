@@ -13,7 +13,7 @@ import {
   useGetOrgOwner,
 } from "../../../services/hooks/organizations";
 import { useOrg } from "../../layout/org/organizationContext";
-import { useUser } from "@supabase/auth-helpers-react";
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 
 export interface ThemedTableProps {
   columns: {
@@ -38,7 +38,7 @@ export const SecretInput = (props: {
   const [show, setShow] = useState(false);
   const { setNotification } = useNotification();
 
-  const user = useUser();
+  const { user } = useHeliconeAuthClient();
 
   const org = useOrg();
 

@@ -21,8 +21,6 @@ export default PlanSettings;
 
 export const getServerSideProps = withAuthSSR(async (options) => {
   return {
-    props: {
-      user: options.userData.user,
-    },
+    props: {},
   };
 });

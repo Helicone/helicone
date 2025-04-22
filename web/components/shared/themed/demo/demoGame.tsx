@@ -1,6 +1,6 @@
 import StartPage from "./startPage";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Resizable } from "react-resizable";
 
 const calculateInitialPosition = () => {
@@ -28,14 +28,17 @@ export const DemoGame = ({
     }
   };
 
-  const onMouseMove = (e: MouseEvent) => {
-    if (isDragging) {
-      setPosition((prev) => ({
-        x: prev.x + e.movementX,
-        y: prev.y + e.movementY,
-      }));
-    }
-  };
+  const onMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (isDragging) {
+        setPosition((prev) => ({
+          x: prev.x + e.movementX,
+          y: prev.y + e.movementY,
+        }));
+      }
+    },
+    [isDragging]
+  );
 
   const onMouseUp = () => {
     setIsDragging(false);
@@ -48,7 +51,7 @@ export const DemoGame = ({
       document.removeEventListener("mousemove", onMouseMove);
       document.removeEventListener("mouseup", onMouseUp);
     };
-  }, [isDragging]);
+  }, [isDragging, onMouseMove]);
 
   useEffect(() => {
     setPosition(calculateInitialPosition());
