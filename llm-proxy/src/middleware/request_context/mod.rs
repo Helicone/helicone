@@ -1,3 +1,5 @@
+pub mod source;
+
 use std::{
     marker::PhantomData,
     sync::Arc,

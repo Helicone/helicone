@@ -14,6 +14,10 @@ use super::{
 };
 use crate::config::router::RouterConfig;
 
+pub enum RequestContextSource {
+    Database,
+}
+
 pub type Request = http::Request<Body>;
 
 pub struct HeliconeContext {
