@@ -1,12 +1,12 @@
 import { NextFunction, Request, Response } from "express";
 import { authCheckThrow } from "../controllers/private/adminController";
-import { newPostHogClient } from "../lib/clients/postHogClient";
 import { RequestWrapper } from "../lib/requestWrapper";
 import { AuthParams } from "../packages/common/auth/types";
 import { getHeliconeAuthClient } from "../packages/common/auth/server/AuthClientFactory";
+import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
 
-const POSTHOG_SAMPLE_RATE = 0.05;
-export const logInPostHog = (
+// Replace PostHog with ClickHouse logging
+export const logHttpRequestInClickhouse = (
   reqParams: {
     method: string;
     url: string;
@@ -16,34 +16,29 @@ export const logInPostHog = (
     status: number;
   },
   authParams?: AuthParams
-) => {
-  if (Math.random() > POSTHOG_SAMPLE_RATE) {
-    return;
-  }
+): (() => void) => {
   const start = Date.now();
-  const postHogClient = newPostHogClient();
-  postHogClient?.capture({
-    distinctId: authParams?.organizationId ?? "unknown",
-    event: "jawn_http_request",
-  });
 
-  const onFinish = async () => {
-    const duration = Date.now() - start;
-
+  const onFinish = () => {
     try {
-      postHogClient?.capture({
-        distinctId: authParams?.organizationId ?? "unknown",
-        event: "jawn_http_request",
-        properties: {
+      const duration = Date.now() - start;
+      const organizationId = authParams?.organizationId ?? "unknown";
+
+      clickhouseDb.dbInsertClickhouse("jawn_http_logs", [
+        {
+          organization_id: organizationId,
           method: reqParams.method,
           url: reqParams.url,
           status: resParams.status,
           duration: duration,
-          userAgent: reqParams.userAgent,
+          user_agent: reqParams.userAgent,
+          timestamp: new Date().toISOString(),
+
+          properties: {},
         },
-      });
+      ]);
     } catch (error) {
-      console.error("Failed to capture request in PostHog:", error);
+      console.error("Failed to log request in ClickHouse:", error);
     }
   };
 
@@ -93,7 +88,7 @@ export const authMiddleware = async (
 
     (req as any).authParams = authParams.data;
 
-    const onFinish = logInPostHog(
+    const onFinish = logHttpRequestInClickhouse(
       {
         method: `${req.method}`,
         url: `${req.originalUrl}`,
