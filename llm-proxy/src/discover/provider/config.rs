@@ -11,9 +11,9 @@ use tokio::sync::mpsc::Receiver;
 use tokio_stream::wrappers::ReceiverStream;
 use tower::discover::Change;
 
-use super::Key;
 use crate::{
     app::AppState,
+    discover::Key,
     dispatcher::{Dispatcher, DispatcherService},
 };
 

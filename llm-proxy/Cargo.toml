@@ -34,6 +34,7 @@ opentelemetry = { workspace = true }
 opentelemetry_sdk = { workspace = true, features = ["rt-tokio"] }
 pin-project = { workspace = true }
 pin-project-lite = { workspace = true }
+regex = { workspace = true }
 reqwest = { workspace = true }
 rust_decimal = { workspace = true }
 serde = { workspace = true, features = ['derive', 'rc'] }

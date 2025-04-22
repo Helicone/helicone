@@ -1,6 +1,5 @@
-pub mod config;
-pub mod factory;
-pub mod monitor;
+pub mod provider;
+pub mod router;
 
 use std::{
     convert::Infallible,
@@ -8,14 +7,14 @@ use std::{
     task::{Context, Poll},
 };
 
-use config::ConfigDiscovery;
 use futures::Stream;
 use pin_project::pin_project;
 use tokio::sync::mpsc::Receiver;
 use tower::discover::Change;
 
 use crate::{
-    app::AppState, dispatcher::DispatcherService, types::provider::Provider,
+    app::AppState, discover::provider::config::ConfigDiscovery,
+    dispatcher::DispatcherService, types::provider::Provider,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]

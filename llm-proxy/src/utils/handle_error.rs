@@ -1,11 +1,11 @@
 use std::{
     convert::Infallible,
-    fmt,
     future::Future,
     pin::Pin,
     task::{Context, Poll},
 };
 
+use axum_core::response::IntoResponse;
 use futures::ready;
 use http::Request;
 use pin_project_lite::pin_project;
@@ -14,133 +14,81 @@ use tower::{Layer, Service};
 use crate::types::response::Response;
 
 /// A [`Layer`] that wraps a [`Service`] and converts errors into [`Response`]s.
-pub struct ErrorHandlerLayer<F> {
-    error_mapper: F,
-}
+#[derive(Debug, Clone)]
+pub struct ErrorHandlerLayer;
 
-impl<F: fmt::Debug> fmt::Debug for ErrorHandlerLayer<F> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.debug_struct("ErrorHandlerLayer")
-            .field("error_mapper", &self.error_mapper)
-            .finish()
-    }
-}
-
-impl<F: Clone> Clone for ErrorHandlerLayer<F> {
-    fn clone(&self) -> Self {
-        Self {
-            error_mapper: self.error_mapper.clone(),
-        }
-    }
-}
-
-impl<F> ErrorHandlerLayer<F> {
-    /// Create a new [`ErrorHandlerLayer`].
-    pub const fn new(error_mapper: F) -> Self {
-        Self { error_mapper }
-    }
-}
-
-impl<S, F: Clone> Layer<S> for ErrorHandlerLayer<F> {
-    type Service = ErrorHandler<S, F>;
+impl<S> Layer<S> for ErrorHandlerLayer
+where
+    S: tower::Service<crate::types::request::Request>,
+    S::Error: IntoResponse,
+{
+    type Service = ErrorHandler<S>;
 
     fn layer(&self, inner: S) -> Self::Service {
-        ErrorHandler::new(inner, self.error_mapper.clone())
+        ErrorHandler::new(inner)
     }
 }
 
 /// A [`Service`] adapter that handles errors by converting them into
 /// [`Response`]s.
-pub struct ErrorHandler<S, F> {
+#[derive(Debug, Clone)]
+pub struct ErrorHandler<S> {
     inner: S,
-    error_mapper: F,
 }
 
-impl<S: fmt::Debug, F: fmt::Debug> fmt::Debug for ErrorHandler<S, F> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.debug_struct("ErrorHandler")
-            .field("inner", &self.inner)
-            .field("error_mapper", &self.error_mapper)
-            .finish()
-    }
-}
-
-impl<S: Clone, F: Clone> Clone for ErrorHandler<S, F> {
-    fn clone(&self) -> Self {
-        Self {
-            inner: self.inner.clone(),
-            error_mapper: self.error_mapper.clone(),
-        }
-    }
-}
-
-impl<S, F> ErrorHandler<S, F> {
+impl<S> ErrorHandler<S>
+where
+    S: tower::Service<crate::types::request::Request>,
+    S::Error: IntoResponse,
+{
     /// Create a new [`ErrorHandler`] wrapping the given service.
-    pub const fn new(inner: S, error_mapper: F) -> Self {
-        Self {
-            inner,
-            error_mapper,
-        }
+    pub const fn new(inner: S) -> Self {
+        Self { inner }
     }
 }
 
 pin_project! {
     /// Response future for [`CatchPanic`].
-    pub struct ResponseFuture<F, E, T> {
+    pub struct ResponseFuture<F, E> {
         #[pin]
-        kind: Kind<F, E, T>,
+        kind: Kind<F, E>,
     }
 }
 
 pin_project! {
     #[project = KindProj]
-    enum Kind<F, E, T> {
+    enum Kind<F, E> {
         Errored {
             error: Option<E>,
-            error_mapper: Option<T>,
         },
         Future {
             #[pin]
             future: F,
-            error_mapper: Option<T>,
         }
     }
 }
 
-impl<F, E, T> Future for ResponseFuture<F, E, T>
+impl<F, E> Future for ResponseFuture<F, E>
 where
     F: Future<Output = Result<Response, E>>,
-    T: Fn(E) -> Response,
+    E: IntoResponse,
 {
     type Output = Result<Response, Infallible>;
 
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         let mut this = self.project();
         match this.kind.as_mut().project() {
-            KindProj::Errored {
-                error,
-                error_mapper,
-            } => {
+            KindProj::Errored { error } => {
                 let error =
                     error.take().expect("future polled after completion");
-                let error_mapper = error_mapper
-                    .take()
-                    .expect("future polled after completion");
-                let response = error_mapper(error);
+                let response = error.into_response();
                 Poll::Ready(Ok(response))
             }
-            KindProj::Future {
-                future,
-                error_mapper,
-            } => match ready!(future.poll(cx)) {
+            KindProj::Future { future } => match ready!(future.poll(cx)) {
                 Ok(res) => Poll::Ready(Ok(res)),
                 Err(svc_err) => {
-                    let error_mapper = error_mapper
-                        .take()
-                        .expect("future polled after completion");
                     this.kind.as_mut().set(Kind::Errored {
                         error: Some(svc_err),
-                        error_mapper: Some(error_mapper),
                     });
                     Poll::Pending
                 }
@@ -149,19 +97,19 @@ where
     }
 }
 
-impl<S, F, ReqBody, E> Service<Request<ReqBody>> for ErrorHandler<S, F>
+impl<S, ReqBody, E> Service<Request<ReqBody>> for ErrorHandler<S>
 where
     S: Service<Request<ReqBody>, Response = Response, Error = E>
         + Send
         + 'static,
     S::Future: Send + 'static,
-    F: Fn(E) -> Response + Clone + Send + 'static,
+    S::Error: IntoResponse,
     ReqBody: Send + 'static,
     E: Send + 'static,
 {
     type Response = Response;
     type Error = Infallible;
-    type Future = ResponseFuture<S::Future, E, F>;
+    type Future = ResponseFuture<S::Future, E>;
 
     fn poll_ready(
         &mut self,
@@ -179,12 +127,8 @@ where
 
     fn call(&mut self, req: Request<ReqBody>) -> Self::Future {
         let future = self.inner.call(req);
-        let mapper = self.error_mapper.clone();
         ResponseFuture {
-            kind: Kind::Future {
-                future,
-                error_mapper: Some(mapper),
-            },
+            kind: Kind::Future { future },
         }
     }
 }

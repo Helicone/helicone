@@ -16,8 +16,7 @@ use uuid::Uuid;
 use crate::{
     app::AppState,
     error::{
-        api::{Error, InvalidRequestError},
-        internal::InternalError,
+        api::Error, internal::InternalError, invalid_req::InvalidRequestError,
     },
     types::{
         model::Model,
@@ -112,6 +111,7 @@ where
             .remove::<AuthContext>()
             .ok_or(InternalError::ExtensionNotFound("AuthContext"))?;
         tracing::info!("hi");
+        let path = req.uri().path();
         // TODO: we need to have a layer to normalize request paths like slashes
         // at the end eg remove last slash in https://router.helicone.ai/router/foo123/
         let router_id_path = req
@@ -132,8 +132,9 @@ where
             .join("/");
         tracing::info!(remaining_path = %remaining_path, "got remaining path");
 
-        let router_id = Uuid::parse_str(router_id_path)
-            .map_err(InvalidRequestError::InvalidRouterId)?;
+        let router_id = Uuid::parse_str(router_id_path).map_err(|_| {
+            InvalidRequestError::InvalidRouterId(path.to_string())
+        })?;
         let mut tx = app_state.0.store.db.begin().await?;
         let router = app_state
             .0

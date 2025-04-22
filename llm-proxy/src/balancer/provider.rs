@@ -7,7 +7,7 @@ use tower::{
 
 use crate::{
     app::AppState,
-    discover::{Discovery, monitor::ProviderMonitor},
+    discover::{Discovery, provider::monitor::ProviderMonitor},
     error::internal::InternalError,
     types::{discover::DiscoverMode, request::Request, response::Response},
 };

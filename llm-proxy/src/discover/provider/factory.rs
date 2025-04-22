@@ -6,8 +6,7 @@ use std::{
 
 use tower::Service;
 
-use super::Discovery;
-use crate::{app::AppState, types::model::Model};
+use crate::{app::AppState, discover::Discovery, types::model::Model};
 
 /// Could be used to dynamically add new regions.
 #[derive(Debug)]

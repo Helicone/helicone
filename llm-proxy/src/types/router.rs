@@ -1,7 +1,15 @@
 use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::{config::router::RouterConfig, error::internal::InternalError};
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum RouterId {
+    Slug(Uuid),
+    Default,
+}
 
 #[derive(Debug)]
 pub struct RouterMetadata {
