@@ -1,9 +1,7 @@
 // Inspired by https://github.com/uixmat/onborda
 
 import { $JAWN_API } from "@/lib/clients/jawn";
-import { cn } from "@/lib/utils";
 import { BeakerIcon } from "@heroicons/react/24/outline";
-import { motion } from "framer-motion";
 import {
   HomeIcon,
   MessageCircleQuestionIcon,

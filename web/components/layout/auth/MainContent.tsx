@@ -1,6 +1,5 @@
 import { clsx } from "../../shared/clsx";
 import { getUSDate } from "../../shared/utils/utils";
-import OrgContext, { useOrg } from "../org/organizationContext";
 
 interface MainContentProps {
   children: React.ReactNode;

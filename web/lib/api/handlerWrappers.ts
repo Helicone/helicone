@@ -12,8 +12,6 @@ import { Result, err, ok } from "../../packages/common/result";
 import { FilterNode, TimeFilter } from "../../services/lib/filters/filterDefs";
 import { Permission, Role, hasPermission } from "../../services/lib/user";
 import { dbExecute } from "./db/dbExecute";
-import { auth } from "../auth";
-import { fromNodeHeaders } from "better-auth/node";
 
 export interface HandlerWrapperNext<RetVal> {
   req: NextApiRequest;

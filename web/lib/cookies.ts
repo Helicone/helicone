@@ -1,7 +1,6 @@
 import Cookies from "js-cookie";
-import { BETTER_AUTH_AUTH_TOKEN, SUPABASE_AUTH_TOKEN } from "./constants";
-import { Result, err, ok } from "../packages/common/result";
-import { env } from "next-runtime-env";
+import { Result, err } from "../packages/common/result";
+import { SUPABASE_AUTH_TOKEN } from "./constants";
 
 export function getHeliconeCookie(): Result<
   {

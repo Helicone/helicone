@@ -54,7 +54,7 @@ const ReportsPage = () => {
   const slackChannels: {
     id: string;
     name: string;
-  }[] = [...(slackChannelsData || [])];
+  }[] = [...(slackChannelsData?.data || [])];
 
   const [reportEnabled, setReportEnabled] = useState<boolean>(
     report?.active ? report?.active : false

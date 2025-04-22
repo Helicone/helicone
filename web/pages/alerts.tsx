@@ -1,6 +1,5 @@
 import AuthLayout from "../components/layout/auth/authLayout";
 import AlertsPage from "../components/templates/alerts/alertsPage";
-import { withAuthSSR } from "../lib/api/handlerWrappers";
 import { ReactElement } from "react";
 
 interface AlertProps {}

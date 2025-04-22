@@ -1,10 +1,6 @@
 import { ChevronRightIcon } from "@heroicons/react/20/solid";
-import { LinkIcon, ScrollTextIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ONBOARDING_STEPS } from "../layout/onboardingContext";
-import { Button } from "./button";
-import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
 interface HcBreadcrumbProps {
   pages: { name: string; href: string }[];
@@ -173,49 +169,6 @@ export default function HcBreadcrumb(props: HcBreadcrumbProps) {
             </div>
           </li>
         ))}
-        {isOnboardingVisible &&
-          currentStep ===
-            ONBOARDING_STEPS.EXPERIMENTS_BETTER_PROMPT.stepNumber && (
-            <Popover open={true}>
-              <PopoverTrigger asChild>
-                <LinkIcon
-                  data-onboarding-step={
-                    ONBOARDING_STEPS.EXPERIMENTS_BETTER_PROMPT.stepNumber
-                  }
-                  className="h-4 w-4 flex-shrink-0 text-slate-400"
-                  aria-hidden="true"
-                />
-              </PopoverTrigger>
-              <PopoverContent className="z-[10000] bg-white p-4 w-[calc(100vw-2rem)] sm:max-w-md flex flex-col gap-2 relative">
-                <div className="flex justify-between items-center">
-                  <div className="flex gap-2 items-center text-slate-900 dark:text-slate-100">
-                    <ScrollTextIcon className="h-4 w-4 flex-shrink-0" />
-                    <h3 className="font-semibold text-base">
-                      Woohoo! The new prompt is better.{" "}
-                    </h3>
-                  </div>
-                  <div className="px-3 py rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-medium">
-                    4 / 5
-                  </div>
-                </div>
-                <p className="text-slate-500 text-[13px] leading-normal">
-                  Copy the experiment URL and attach it to your GitHub PR.
-                  Reviewers will verify the results before approving and merging
-                  it to production.
-                </p>
-                <Button
-                  className="w-auto self-start bg-[#29973E] text-white text-[13px] font-semibold leading-normal mt-6 mb-8"
-                  onClick={() => {
-                    setCurrentStep(currentStep + 1);
-                    router.push("/dashboard");
-                  }}
-                >
-                  Squash and Merge
-                </Button>
-                <CubeSVG />
-              </PopoverContent>
-            </Popover>
-          )}
       </ol>
     </nav>
   );

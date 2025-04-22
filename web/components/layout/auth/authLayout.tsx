@@ -7,7 +7,6 @@ import { useMemo, useRef, useState } from "react";
 import { useAlertBanners, useChangelog } from "../../../services/hooks/admin";
 import UpgradeProModal from "../../shared/upgradeProModal";
 import { Row } from "../common";
-import { OnboardingBackground } from "../onboardingContext";
 import { useOrg } from "../org/organizationContext";
 import MetaData from "../public/authMetaData";
 import DemoModal from "./DemoModal";
