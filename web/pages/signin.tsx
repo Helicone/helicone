@@ -32,9 +32,6 @@ const SignIn = ({
       heliconeAuthClient &&
       heliconeAuthClient.user?.id
     ) {
-      console.log("refreshing session");
-      console.log("heliconeAuthClient", heliconeAuthClient);
-      console.log("heliconeAuthClient.user", heliconeAuthClient.user);
       heliconeAuthClient
         .refreshSession()
         .then(heliconeAuthClient.getUser)
@@ -56,16 +53,6 @@ const SignIn = ({
       });
     }
   }, [unauthorized, heliconeAuthClient, setNotification, router]);
-
-  // useEffect(() => {
-  //   if (heliconeAuthClient.user) {
-  //     const { pi_session, ...restQuery } = router.query;
-  //     router.push({
-  //       pathname: pi_session ? "/pi/onboarding" : "/dashboard",
-  //       query: router.query,
-  //     });
-  //   }
-  // }, [router, heliconeAuthClient.user]);
 
   return (
     <PublicMetaData
