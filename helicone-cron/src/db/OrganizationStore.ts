@@ -5,6 +5,19 @@ import { ClickhouseWrapper } from "./ClickhouseWrapper";
 import { PgWrapper } from "./PgWrapper";
 
 export type Tier = "free" | "pro" | "growth" | "enterprise";
+export type NoUsageTier = "demo" | "enterprise" | "free" | "pro";
+
+// | tier          |
+// | ------------- |
+// | pro-20250202  | // Usage tracking
+// | pro           | // No usage tracking
+// | pro-20240913  | // Usage tracking
+// | free          | // No usage tracking
+// | growth        | // Usage tracking
+// | enterprise    | // No usage tracking
+// | demo          | // No usage tracking
+// | team-20250130 | // Usage tracking
+
 export interface UsageEligibleOrgs {
   orgId: string;
   stripeSubscriptionId: string;
@@ -29,7 +42,7 @@ export class OrganizationStore {
       MAX(ou.end_date) as "latestEndTime"
     from organization as o
     left join organization_usage as ou on o.id = ou.organization_id
-      where (o.tier = 'growth' or o.tier = 'pro-20240913' or o.tier = 'pro-20250202')
+      where o.tier NOT IN ('pro', 'free', 'enterprise', 'demo')
       and o.subscription_status = 'active'
       and o.stripe_customer_id is not null
       and o.stripe_subscription_item_id is not null
