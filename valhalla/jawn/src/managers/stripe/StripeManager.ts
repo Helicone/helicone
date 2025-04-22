@@ -47,13 +47,15 @@ const getProProductPrices = async (): Promise<
         if (setting) {
           return { [productId]: setting.settings as string };
         } else {
-          // Populate with default prices
-          dbExecute(
-            `INSERT INTO helicone_settings (name, settings)
+          if (defaultPriceId) {
+            // Populate with default prices
+            dbExecute(
+              `INSERT INTO helicone_settings (name, settings)
              VALUES ($1, $2)
              ON CONFLICT (name) DO UPDATE SET settings = $2`,
-            [`price:${productId}`, JSON.stringify(defaultPriceId)]
-          );
+              [`price:${productId}`, JSON.stringify(defaultPriceId)]
+            );
+          }
         }
         return { [productId]: defaultPriceId };
       })

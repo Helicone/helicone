@@ -1,12 +1,10 @@
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { BarChart, TextInput } from "@tremor/react";
 import dateFormat from "dateformat";
 import { useEffect, useState } from "react";
 import { getJawnClient } from "../../../../lib/clients/jawn";
-import useNotification from "../../../shared/notification/useNotification";
 import { handleLogCostCalculation } from "../../../../utils/LogCostCalculation";
-import { Button } from "@/components/ui/button";
 
 interface TopOrgsProps {}
 
@@ -16,9 +14,6 @@ function formatBigNumberWithCommas(n: number) {
 
 const TopOrgs = (props: TopOrgsProps) => {
   const {} = props;
-
-  const { setNotification } = useNotification();
-  const supabaseClient = useSupabaseClient();
 
   const [timeRange, setTimeRange] = useState<{
     startDate: Date;

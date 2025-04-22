@@ -1,17 +1,16 @@
 import { cn } from "@/lib/utils";
-import Image from "next/image";
-import React, { useEffect } from "react";
-import { ChevronRightIcon, LogOut, Sun, Moon } from "lucide-react";
-import { useRouter } from "next/router";
-import { useOrg } from "../layout/org/organizationContext";
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 import {
   OnboardingStep,
   useOrgOnboarding,
 } from "@/services/hooks/useOrgOnboarding";
-import LoadingAnimation from "../shared/loadingAnimation";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import { signOut } from "../shared/utils/utils";
+import { ChevronRightIcon, LogOut, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
+import Image from "next/image";
+import { useRouter } from "next/router";
+import React, { useEffect } from "react";
+import { useOrg } from "../layout/org/organizationContext";
+import LoadingAnimation from "../shared/loadingAnimation";
 
 const BreadcrumbSeparator = () => (
   <svg
@@ -40,7 +39,7 @@ interface OnboardingHeaderProps {
 export const OnboardingHeader = ({ children }: OnboardingHeaderProps) => {
   const router = useRouter();
   const org = useOrg();
-  const supabaseClient = useSupabaseClient();
+  const heliconeAuthClient = useHeliconeAuthClient();
   const { theme, setTheme } = useTheme();
 
   const { onboardingState, draftPlan, updateCurrentStep, isLoading } =
@@ -54,7 +53,12 @@ export const OnboardingHeader = ({ children }: OnboardingHeaderProps) => {
       router.push("/dashboard");
       return;
     }
-  }, [org?.currentOrg?.has_onboarded, isLoading, router]);
+  }, [
+    org?.currentOrg?.has_onboarded,
+    isLoading,
+    router,
+    org?.currentOrg?.tier,
+  ]);
 
   const billingStep: { label: string; step: OnboardingStep }[] =
     draftPlan !== "free" ? [{ label: "Add billing", step: "BILLING" }] : [];
@@ -86,11 +90,10 @@ export const OnboardingHeader = ({ children }: OnboardingHeaderProps) => {
     }
   };
 
-  const handleSignOut = () => {
-    supabaseClient.auth.refreshSession();
-    signOut(supabaseClient).then(() => {
-      router.push("/");
-    });
+  const handleSignOut = async () => {
+    await heliconeAuthClient.refreshSession();
+    await heliconeAuthClient.signOut();
+    router.push("/");
   };
 
   const handleThemeChange = () => {
