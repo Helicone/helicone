@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 
 const EnterpriseCard: React.FC = () => {
   return (
-    <Card className="w-full h-full p-6 bg-white rounded-xl border-none shadow-none mx-auto">
+    <Card className="w-full h-full p-6 bg-background rounded-xl border-spacing-1.5 border-border md:border-transparent md:shadow-none mx-auto">
       <Col className="h-full justify-between gap-4">
         <Col className="gap-3">
           <div className="text-slate-900 text-sm font-medium leading-tight">

@@ -486,11 +486,11 @@ export default function PricingComparisonTable() {
   return (
     <div className="flex flex-col gap-6">
       <h2 className="text-black text-4xl font-bold">Compare plans</h2>
-      <div className="rounded-xl">
+      <div className="rounded-xl overflow-x-auto">
         <StickyTable>
-          <TableHeader className="sticky top-[var(--header-offset)] z-20 bg-slate-50">
-            <TableRow className="bg-slate-50 hover:bg-slate-50 border-none">
-              <TableHead className="w-[318px] p-6 bg-white rounded-tl-xl">
+          <TableHeader className="sticky top-[var(--header-offset)] z-20 bg-background">
+            <TableRow className="bg-background hover:bg-background border-none">
+              <TableHead className="w-[318px] p-6 bg-background rounded-tl-xl">
                 <div className="text-slate-900 text-lg font-semibold">
                   {/* Empty header cell */}
                 </div>
@@ -498,9 +498,8 @@ export default function PricingComparisonTable() {
               {tiers.map((tier, index) => (
                 <TableHead
                   key={tier.name}
-                  className={`py-3 px-6 ${
-                    tier.isPrimary ? "bg-sky-50" : "bg-white"
-                  } 
+                  className={`py-3 px-6 ${tier.isPrimary ? "bg-sky-50" : "bg-white"
+                    } 
                     ${index === tiers.length - 1 ? "rounded-tr-xl" : ""}`}
                 >
                   <div className="flex flex-col gap-2">
@@ -510,9 +509,8 @@ export default function PricingComparisonTable() {
                     <Link href={tier.ctaHref}>
                       <Button
                         variant={tier.isPrimary ? "default" : "secondary"}
-                        className={`w-full text-base ${
-                          tier.isPrimary ? "bg-brand text-white" : ""
-                        }`}
+                        className={`w-full text-base ${tier.isPrimary ? "bg-brand text-white" : ""
+                          }`}
                       >
                         {tier.ctaText}
                       </Button>
@@ -550,11 +548,10 @@ export default function PricingComparisonTable() {
                 <Fragment key={feature.name}>
                   <TableRow className="hover:bg-white">
                     <TableCell
-                      className={`w-[318px] px-6 py-3 ${
-                        featureIndex === group.features.length - 1
-                          ? "border-b"
-                          : ""
-                      }`}
+                      className={`w-[318px] px-6 py-3 ${featureIndex === group.features.length - 1
+                        ? "border-b"
+                        : ""
+                        }`}
                     >
                       <div className="flex flex-col">
                         <div className="flex items-center gap-2">
@@ -567,9 +564,8 @@ export default function PricingComparisonTable() {
                               className="p-1 hover:bg-slate-100 rounded-full transition-colors"
                             >
                               <ChevronDownIcon
-                                className={`w-4 h-4 text-slate-400 transition-transform ${
-                                  showUsageTiers ? "rotate-180" : ""
-                                }`}
+                                className={`w-4 h-4 text-slate-400 transition-transform ${showUsageTiers ? "rotate-180" : ""
+                                  }`}
                               />
                             </button>
                           )}
@@ -618,13 +614,11 @@ export default function PricingComparisonTable() {
                     ].map((value, index) => (
                       <TableCell
                         key={index}
-                        className={`px-6 py-3 ${
-                          index === 1 ? "bg-[#0ca5ea]/5" : ""
-                        } ${
-                          featureIndex === group.features.length - 1
+                        className={`px-6 py-3 ${index === 1 ? "bg-[#0ca5ea]/5" : ""
+                          } ${featureIndex === group.features.length - 1
                             ? "border-b"
                             : ""
-                        }`}
+                          }`}
                       >
                         {typeof value === "string" ? (
                           <div className="text-slate-500 text-sm font-medium">

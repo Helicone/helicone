@@ -24,7 +24,7 @@ import AvailableDiscounts from "../components/templates/pricing/AvailableDiscoun
 
 export default function PricingPage() {
   return (
-    <div className="bg-white text-slate-700">
+    <div className="bg-background text-slate-700">
       <div className=" mx-auto px-4 antialiased">
         <div className="flex flex-col max-w-6xl mx-auto p-4 pb-24 pt-8 sm:pb-32 lg:flex gap-20">
           <Col className="items-center gap-4">
