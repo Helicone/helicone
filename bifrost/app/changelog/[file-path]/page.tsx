@@ -71,7 +71,7 @@ export default async function Home({
                   year: "numeric",
                 })}
               </h3>
-              {content}
+              <>{content}</>
             </article>
           </div>
         </div>
