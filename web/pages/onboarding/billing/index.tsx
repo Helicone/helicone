@@ -83,7 +83,7 @@ export default function BillingPage() {
       setNotification("You've already subscribed to Helicone!", "success");
       router.replace("/onboarding/integrate");
     }
-  }, [subscription.data, router]);
+  }, [subscription.data, router, setNotification]);
 
   useEffect(() => {
     const createCheckoutSession = async () => {
@@ -118,7 +118,15 @@ export default function BillingPage() {
     // Reset client secret when dependencies change
     setClientSecret(null);
     createCheckoutSession();
-  }, [createdOrgId, draftPlan, draftMembers.length, draftAddons]); // Include all dependencies that should trigger a new checkout session
+  }, [
+    createdOrgId,
+    draftPlan,
+    draftMembers.length,
+    draftAddons,
+    isCreatingCheckout,
+    upgradeToTeamBundle,
+    upgradeToPro,
+  ]);
 
   if (subscription.isLoading) {
     return (

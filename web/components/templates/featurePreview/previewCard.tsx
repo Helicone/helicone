@@ -131,6 +131,7 @@ const FeatureMedia = ({
   }
 
   return (
+    // eslint-disable-next-line @next/next/no-img-element
     <img
       loading="lazy"
       className="flex-1 xl:max-w-[563px] max-w-full w-full rounded-2xl object-contain"
