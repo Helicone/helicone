@@ -55,7 +55,7 @@
     "react-hot-toast": "^2.4.1",
     "react-intersection-observer": "^9.16.0",
     "react-qr-code": "^2.0.15",
-    "react-simple-maps": "^1.0.0",
+    "react-simple-maps": "^3.0.0",
     "recharts": "^2.13.3",
     "rehype-autolink-headings": "^7.1.0",
     "rehype-highlight": "^7.0.1",
