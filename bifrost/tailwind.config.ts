@@ -28,6 +28,10 @@ const config: Config = {
           secondary: "#6B8C9C",
           "muted-text": "#ACB3BA",
         },
+        "helicone-primary": {
+          DEFAULT: "#0CA5EA",
+          foreground: "#FFFFFF",
+        },
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",

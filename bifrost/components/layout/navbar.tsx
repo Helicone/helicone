@@ -10,13 +10,7 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
-import {
-  EnvelopeIcon,
-  NewspaperIcon,
-  UserGroupIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
-import { BookHeart, ChevronRight, Component, Earth, ExternalLink, Gem, Github, GitMerge, HandCoins, TrendingUp } from "lucide-react";
+import { X, Briefcase, Mail, BookHeart, ChevronRight, Component, Newspaper, Earth, ExternalLink, Gem, Github, GitMerge, HandCoins, TrendingUp } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -84,16 +78,13 @@ const MobileHeader = (props: {
             <div className="w-[.7rem] h-[.2rem] bg-foreground rounded-full"></div>
           </>
         ) : (
-          <XMarkIcon
-            className="w-5 h-5 text-foreground stroke-[1.5px] fill-none"
-          />
+          <X className="w-5 h-5 text-foreground stroke-[1.5px] fill-none" />
         )}
       </button>
     </div>
   );
 };
 
-const LIST_ITEM_ICON_CLASSES = "h-5 w-5 stroke-[1.5px] fill-none";
 type LinkItem = { title: string; href: string; description: string; icon: React.ReactNode };
 
 const MobileNav = () => {
@@ -116,14 +107,14 @@ const MobileNav = () => {
           rel={isExternalLink ? "noopener noreferrer" : undefined}
           className="flex items-center group gap-3 text-foreground"
         >
-          {link.icon}
+          <span className="navbar-icon-size">{link.icon}</span>
           <span className="font-medium text-sm">
             {link.title}
           </span>
           {isExternalLink ? (
-            <ExternalLink className="h-4 w-4 ml-auto text-muted-foreground stroke-[1.5px]" />
+            <ExternalLink className="navbar-icon-size ml-auto text-muted-foreground stroke-[1.5px]" />
           ) : (
-            <ChevronRight className="h-4 w-4 ml-auto text-muted-foreground stroke-[1.5px]" />
+            <ChevronRight className="navbar-icon-size ml-auto text-muted-foreground stroke-[1.5px]" />
           )}
         </Link>
       );
@@ -171,21 +162,21 @@ const resourcesComponents: LinkItem[] = [
     href: "/changelog",
     description:
       "Latest updates and improvements",
-    icon: <GitMerge className={LIST_ITEM_ICON_CLASSES} />,
+    icon: <GitMerge className="navbar-icon-style" />,
   },
   {
     title: "Blog",
     href: "/blog",
     description:
       "Insights on AI development and best practices",
-    icon: <NewspaperIcon className={LIST_ITEM_ICON_CLASSES} />,
+    icon: <Newspaper className="navbar-icon-style" />,
   },
   {
     title: "Community",
     href: "/community",
     description:
       "Built for scale, security, and control",
-    icon: <Gem className={LIST_ITEM_ICON_CLASSES} />,
+    icon: <Gem className="navbar-icon-style" />,
   },
 
 ]
@@ -196,28 +187,28 @@ const toolsComponents: LinkItem[] = [
     href: "/open-stats",
     description:
       "Real-time LLM usage analytics",
-    icon: <Earth className={LIST_ITEM_ICON_CLASSES} />,
+    icon: <Earth className="navbar-icon-style" />,
   },
   {
     title: "Model Comparison",
     href: "/comparison",
     description:
       "Compare LLM models and providers",
-    icon: <Component className={LIST_ITEM_ICON_CLASSES} />,
+    icon: <Component className="navbar-icon-style" />,
   },
   {
     title: "Provider Status",
     href: "/status",
     description:
       "Check LLM provider service status",
-    icon: <TrendingUp className={LIST_ITEM_ICON_CLASSES} />,
+    icon: <TrendingUp className="navbar-icon-style" />,
   },
   {
     title: "API Pricing Calculator",
     href: "/llm-cost",
     description:
       "Calculate and compare API costs",
-    icon: <HandCoins className={LIST_ITEM_ICON_CLASSES} />,
+    icon: <HandCoins className="navbar-icon-style" />,
   },
 ]
 
@@ -227,14 +218,14 @@ const mainComponents: LinkItem[] = [
     href: "https://docs.helicone.ai/",
     description:
       "Integrate Helicone into your AI application",
-    icon: <BookHeart className={LIST_ITEM_ICON_CLASSES} />,
+    icon: <BookHeart className="navbar-icon-style" />,
   },
   {
     title: "Pricing",
     href: "/pricing",
     description:
       "Simple, transparent pricing",
-    icon: <HandCoins className={LIST_ITEM_ICON_CLASSES} />,
+    icon: <HandCoins className="navbar-icon-style" />,
   },
 ]
 
@@ -244,21 +235,21 @@ const additionalComponents: LinkItem[] = [
     href: "/contact",
     description:
       "Get in touch with us",
-    icon: <EnvelopeIcon className={LIST_ITEM_ICON_CLASSES} />,
+    icon: <Mail className="navbar-icon-style" />,
   },
   {
     title: "Careers",
     href: "https://app.dover.com/jobs/helicone",
     description:
       "Join our team",
-    icon: <UserGroupIcon className={LIST_ITEM_ICON_CLASSES} />,
+    icon: <Briefcase className="navbar-icon-style" />,
   },
   {
     title: "GitHub",
     href: "https://github.com/helicone/helicone",
     description:
       "Contribute to our project",
-    icon: <Github className={LIST_ITEM_ICON_CLASSES} />,
+    icon: <Github className="navbar-icon-style" />,
   },
 ]
 
@@ -342,7 +333,7 @@ const NavBar = (props: NavBarProps) => {
               <NavigationMenuItem>
                 <NavigationMenuTrigger>Resources</NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid gap-3 p-3 md:w-[500px] lg:w-[600px] lg:grid-cols-[.75fr_1fr]">
+                  <ul className="grid gap-2 p-3 md:w-[500px] lg:w-[600px] lg:grid-cols-[.75fr_1fr]">
                     <li>
                       {resourcesComponents.map((component) => (
                         <ListItem
@@ -457,7 +448,7 @@ const NavBar = (props: NavBarProps) => {
   );
 };
 
-// Shadcn UI ListItem for Navigation Menu
+// Shadcn UI ListItem for Navigation Menu for Web
 const ListItem = React.forwardRef<
   React.ElementRef<"a">,
   React.ComponentPropsWithoutRef<"a"> & { icon?: React.ReactNode }
@@ -474,7 +465,7 @@ const ListItem = React.forwardRef<
           {...props}
         >
           <div className="flex gap-3">
-            <div className="flex-shrink-0">{icon}</div>
+            <span className="navbar-icon-size">{icon}</span>
             <div className="flex flex-col items-start text-sm font-medium leading-none gap-1">
               {title}
               <p className="text-sm font-light leading-snug text-muted-foreground">

@@ -81,6 +81,15 @@ h6[id] {
   }
 }
 
+@layer components {
+  .navbar-icon-style {
+    @apply h-full w-full stroke-[1.5px] fill-none text-helicone-primary;
+  }
+  .navbar-icon-size {
+    @apply h-5 w-5;
+  }
+}
+
 /* Custom link styling for blog content only */
 .prose a {
   @apply font-semibold text-sky-500 no-underline;
