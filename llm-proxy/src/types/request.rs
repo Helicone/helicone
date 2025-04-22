@@ -1,4 +1,4 @@
-use std::time::Instant;
+use std::{sync::Arc, time::Instant};
 
 use axum_core::body::Body;
 use indexmap::IndexMap;
@@ -13,10 +13,6 @@ use super::{
     user::UserId,
 };
 use crate::config::router::RouterConfig;
-
-pub enum RequestContextSource {
-    Database,
-}
 
 pub type Request = http::Request<Body>;
 
@@ -33,7 +29,7 @@ pub struct AuthContext {
 }
 
 pub struct RequestContext {
-    pub router_config: RouterConfig,
+    pub router_config: Arc<RouterConfig>,
     pub proxy_context: RequestProxyContext,
     pub auth_context: AuthContext,
     pub helicone: HeliconeContext,

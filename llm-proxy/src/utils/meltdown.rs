@@ -10,7 +10,7 @@ use pin_project_lite::pin_project;
 use tokio::signal::unix::{SignalKind, signal};
 use tracing::info;
 
-use crate::error::runtime;
+use crate::error::runtime::RuntimeError;
 
 pin_project! {
     pub struct TaggedFuture<F> {
@@ -80,7 +80,7 @@ where
 
 pub async fn wait_for_shutdown_signals(
     mut token: Token,
-) -> Result<(), runtime::Error> {
+) -> Result<(), RuntimeError> {
     let mut sigint = signal(SignalKind::interrupt())
         .expect("failed to register SIGINT signal");
     let mut sigterm = signal(SignalKind::terminate())

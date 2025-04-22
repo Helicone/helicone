@@ -3,7 +3,6 @@ pub mod discover;
 pub mod dispatcher;
 pub mod metrics;
 pub mod minio;
-pub mod models;
 pub mod providers;
 pub mod rate_limit;
 pub mod retry;
@@ -30,7 +29,7 @@ pub enum Error {
     ),
 }
 
-#[derive(Debug, Default, Clone, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields, rename_all = "kebab-case")]
 pub struct Config {
     pub telemetry: telemetry::Config,
@@ -40,8 +39,10 @@ pub struct Config {
     pub minio: self::minio::Config,
     pub is_production: bool,
     pub rate_limit: self::rate_limit::RateLimitConfig,
+
     pub dispatcher: self::dispatcher::DispatcherConfig,
     pub discover: self::discover::DiscoverConfig,
+    pub routers: self::router::RouterConfigs,
 }
 
 impl Config {

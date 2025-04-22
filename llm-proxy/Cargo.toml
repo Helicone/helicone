@@ -15,6 +15,7 @@ bytes = { workspace = true, features = ['serde'] }
 chrono = { workspace = true }
 clap = { workspace = true }
 config = { workspace = true }
+compact_str = { workspace = true, features = ['serde'] }
 derive_more = { workspace = true, features = ['as_ref', 'constructor', 'debug', 'deref', 'display', 'from', 'from_str'] }
 displaydoc = { workspace = true }
 futures = { workspace = true }
@@ -51,7 +52,7 @@ tokio = { workspace = true }
 tokio-stream = { workspace = true, features = ['sync'] }
 tower = { workspace = true, features = ['full']}
 tower_governor = { workspace = true }
-tower-http = { workspace = true, features = ['default', 'auth', 'catch-panic', 'add-extension'] }
+tower-http = { workspace = true, features = ['default', 'auth', 'catch-panic', 'add-extension', 'normalize-path'] }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true, features = ['env-filter', 'std'] }
 url = { workspace = true, features = ['serde'] }

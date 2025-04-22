@@ -16,7 +16,7 @@ pub struct Args {
 }
 
 #[tokio::main]
-async fn main() -> Result<(), llm_proxy::error::runtime::Error> {
+async fn main() -> Result<(), llm_proxy::error::runtime::RuntimeError> {
     let args = Args::parse();
     let config = match Config::try_read(args.config) {
         Ok(config) => config,
@@ -28,20 +28,20 @@ async fn main() -> Result<(), llm_proxy::error::runtime::Error> {
     // Initialize telemetry
     let _logger_provider: opentelemetry_sdk::logs::LoggerProvider =
         telemetry::init_telemetry(&config.telemetry)
-            .map_err(llm_proxy::error::init::Error::Telemetry)
-            .map_err(llm_proxy::error::runtime::Error::Init)?;
+            .map_err(llm_proxy::error::init::InitError::Telemetry)
+            .map_err(llm_proxy::error::runtime::RuntimeError::Init)?;
 
     info!("telemetry initialized");
-    info!(config = ?config.clone(), "config loaded");
+    info!(config = ?config, "config loaded");
+    let rate_limit_cleanup_interval = config.rate_limit.cleanup_interval;
 
     let mut shutting_down = false;
-    let (app, provider_monitor) = App::new(config.clone()).await?;
-
+    let (app, provider_monitor) = App::new(config).await?;
     let rate_limiting_cleanup_service =
         middleware::rate_limit::service::Service::new(
             app.state.0.authed_rate_limit.clone(),
             app.state.0.unauthed_rate_limit.clone(),
-            config.rate_limit.cleanup_interval,
+            rate_limit_cleanup_interval,
         );
 
     let mut meltdown = Meltdown::new()

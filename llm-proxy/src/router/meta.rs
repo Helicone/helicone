@@ -13,8 +13,9 @@ use uuid::Uuid;
 use super::{Router, RouterService};
 use crate::{
     app::AppState,
-    discover::provider::monitor::ProviderMonitor,
-    error::{api::Error, invalid_req::InvalidRequestError},
+    config::server::DeploymentTarget,
+    discover::provider::monitor::ProviderMonitors,
+    error::{api::Error, init::InitError, invalid_req::InvalidRequestError},
     types::router::RouterId,
 };
 
@@ -28,16 +29,36 @@ pub struct MetaRouter {
 }
 
 impl MetaRouter {
-    pub fn default_only(app_state: AppState) -> (Self, ProviderMonitor) {
+    pub fn new(
+        app_state: AppState,
+    ) -> Result<(Self, ProviderMonitors), InitError> {
+        match app_state.0.config.server.deployment_target {
+            DeploymentTarget::Cloud => Self::from_config(app_state),
+            DeploymentTarget::Sidecar | DeploymentTarget::SelfHosted => {
+                return Err(InitError::DeploymentTargetNotSupported(
+                    app_state.0.config.server.deployment_target,
+                ));
+            }
+        }
+    }
+
+    pub fn from_config(
+        app_state: AppState,
+    ) -> Result<(Self, ProviderMonitors), InitError> {
         let regex =
             Regex::new(ROUTER_ID_REGEX).expect("always valid if tests pass");
-        let (router, monitor) = Router::new(app_state);
-        let meta_router = Self {
-            inner: HashMap::from([(RouterId::Default, router)]),
-            regex,
-        };
-
-        (meta_router, monitor)
+        let mut inner =
+            HashMap::with_capacity(app_state.0.config.routers.as_ref().len());
+        let mut monitors =
+            HashMap::with_capacity(app_state.0.config.routers.as_ref().len());
+        for router_id in app_state.0.config.routers.as_ref().keys() {
+            let (router, monitor) =
+                Router::new(router_id.clone(), app_state.clone())?;
+            monitors.insert(router_id.clone(), monitor);
+            inner.insert(router_id.clone(), router);
+        }
+        let meta_router = Self { inner, regex };
+        Ok((meta_router, ProviderMonitors::new(monitors)))
     }
 }
 
@@ -88,7 +109,7 @@ impl tower::Service<crate::types::request::Request> for MetaRouter {
                 );
                 return Either::Left(ready(Ok(error.into_response())));
             };
-            RouterId::Slug(uuid)
+            RouterId::Uuid(uuid)
         };
         let Some(router) = self.inner.get_mut(&id) else {
             let error = Error::InvalidRequest(InvalidRequestError::NotFound);

@@ -13,6 +13,7 @@ use minio_rsc::{Minio, provider::StaticProvider};
 use tower::{ServiceBuilder, util::BoxCloneService};
 use tower_http::{
     add_extension::AddExtension, auth::AsyncRequireAuthorizationLayer,
+    normalize_path::NormalizePathLayer,
 };
 use tracing::info;
 
@@ -22,8 +23,8 @@ use crate::{
         rate_limit::{AuthedLimiterConfig, UnauthedLimiterConfig},
         server::TlsConfig,
     },
-    discover::provider::monitor::ProviderMonitor,
-    error,
+    discover::provider::monitor::ProviderMonitors,
+    error::{self, init::InitError, runtime::RuntimeError},
     middleware::auth::AuthService,
     router::meta::MetaRouter,
     store::StoreRealm,
@@ -76,7 +77,7 @@ impl std::fmt::Debug for InnerAppState {
 /// 0. CatchPanic
 /// 1. HandleError
 /// 2. Authn/Authz
-/// 3. Unauthenticated and authenticated layers
+/// 3. Unauthenticated and authenticated rate limit layers
 /// 4. MetaRouter
 /// -- Router specific --
 /// 5. Per User Rate Limit layer
@@ -129,7 +130,7 @@ impl tower::Service<crate::types::request::Request> for App {
 impl App {
     pub async fn new(
         config: Config,
-    ) -> Result<(Self, ProviderMonitor), error::init::Error> {
+    ) -> Result<(Self, ProviderMonitors), InitError> {
         let provider = StaticProvider::from_env();
         let minio = if let Some(provider) = provider {
             Some(
@@ -151,7 +152,7 @@ impl App {
         let pg_pool = pg_config
             .connect(&config.database.url.0)
             .await
-            .map_err(error::init::Error::DatabaseConnection)?;
+            .map_err(error::init::InitError::DatabaseConnection)?;
 
         let app_state = AppState(Arc::new(InnerAppState {
             config,
@@ -161,12 +162,13 @@ impl App {
             store: StoreRealm::new(pg_pool),
         }));
 
-        let (router, monitor) = MetaRouter::default_only(app_state.clone());
+        let (router, monitors) = MetaRouter::new(app_state.clone())?;
 
         // global middleware is applied here
         let service_stack = ServiceBuilder::new()
             .layer(ErrorHandlerLayer)
             .layer(CatchPanicLayer::new())
+            .layer(NormalizePathLayer::trim_trailing_slash())
             .layer(AsyncRequireAuthorizationLayer::new(AuthService))
             .service(router);
 
@@ -175,12 +177,12 @@ impl App {
             service_stack: BoxCloneService::new(service_stack),
         };
 
-        Ok((app, monitor))
+        Ok((app, monitors))
     }
 }
 
 impl meltdown::Service for App {
-    type Future = BoxFuture<'static, Result<(), crate::error::runtime::Error>>;
+    type Future = BoxFuture<'static, Result<(), RuntimeError>>;
 
     fn run(self, token: Token) -> Self::Future {
         Box::pin(async move {
@@ -198,13 +200,13 @@ impl meltdown::Service for App {
                     let tls_config =
                         RustlsConfig::from_pem_file(cert.clone(), key.clone())
                             .await
-                            .map_err(error::init::Error::Tls)?;
+                            .map_err(error::init::InitError::Tls)?;
 
                     tokio::select! {
                         biased;
                         server_output = axum_server::bind_rustls(addr, tls_config)
                             .handle(handle.clone())
-                            .serve(app_factory) => server_output.map_err(error::runtime::Error::Serve)?,
+                            .serve(app_factory) => server_output.map_err(RuntimeError::Serve)?,
                         _ = token => {
                             handle.graceful_shutdown(Some(std::time::Duration::from_secs(10)));
                         }
@@ -215,7 +217,7 @@ impl meltdown::Service for App {
                         biased;
                         server_output = axum_server::bind(addr)
                             .handle(handle.clone())
-                            .serve(app_factory) => server_output.map_err(error::runtime::Error::Serve)?,
+                            .serve(app_factory) => server_output.map_err(RuntimeError::Serve)?,
                         _ = token => {
                             handle.graceful_shutdown(Some(std::time::Duration::from_secs(10)));
                         }

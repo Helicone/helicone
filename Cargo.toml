@@ -39,6 +39,7 @@ base64 = "0.22.1"
 bytes = "1.10.1"
 chrono = "0.4.40"
 clap = { version = "4.5.34", features = ["derive"] }
+compact_str = "0.9.0"
 config = "0.15.11"
 derive_builder = "0.20.2"
 derive_more = { version = "2.0.1", features = ['as_ref', 'constructor', 'debug', 'deref', 'display', 'from', 'from_str'] }

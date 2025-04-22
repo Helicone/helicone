@@ -2,9 +2,15 @@ use displaydoc::Display;
 use telemetry::TelemetryError;
 use thiserror::Error;
 
+use crate::config::server::DeploymentTarget;
+
 /// Errors that can occur during initialization.
 #[derive(Debug, Error, Display)]
-pub enum Error {
+pub enum InitError {
+    /// Default router not found
+    DefaultRouterNotFound,
+    /// Deployment target not supported: {0:?}
+    DeploymentTargetNotSupported(DeploymentTarget),
     /// Failed to read config: {0}
     Config(#[from] crate::config::Error),
     /// Failed to read TLS certificate: {0}

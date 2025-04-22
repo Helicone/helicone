@@ -50,10 +50,12 @@ impl ConfigDiscovery {
         let events = ReceiverStream::new(rx);
         let mut service_map: HashMap<Key, DispatcherService> = HashMap::new();
 
-        for prov in app.0.config.discover.providers.iter() {
-            let key = Key::new(prov.clone());
+        for (provider, _provider_config) in
+            app.0.config.discover.providers.iter()
+        {
+            let key = Key::new(provider.clone());
             let dispatcher =
-                Dispatcher::new_with_middleware(app.clone(), prov.clone());
+                Dispatcher::new_with_middleware(app.clone(), provider.clone());
             service_map.insert(key, dispatcher);
         }
 

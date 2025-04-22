@@ -1,13 +1,18 @@
 use chrono::{DateTime, Utc};
+use compact_str::CompactString;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::{config::router::RouterConfig, error::internal::InternalError};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(
+    Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, Default,
+)]
 #[serde(untagged)]
 pub enum RouterId {
-    Slug(Uuid),
+    Uuid(Uuid),
+    Named(CompactString),
+    #[default]
     Default,
 }
 

@@ -1,3 +1,6 @@
+use std::collections::HashMap;
+
+use derive_more::AsRef;
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 
@@ -5,9 +8,21 @@ use super::{
     rate_limit::RateLimitConfig, retry::RetryConfig,
     spend_control::SpendControlConfig,
 };
-use crate::types::provider::Provider;
+use crate::types::{provider::Provider, router::RouterId};
 
-#[derive(Debug, Deserialize, Serialize, Eq, PartialEq)]
+#[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq, AsRef)]
+pub struct RouterConfigs(HashMap<RouterId, RouterConfig>);
+
+impl Default for RouterConfigs {
+    fn default() -> Self {
+        Self(HashMap::from([(
+            RouterId::Default,
+            RouterConfig::default(),
+        )]))
+    }
+}
+
+#[derive(Debug, Default, Clone, Deserialize, Serialize, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 pub struct RouterConfig {
     pub default_provider: Provider,
@@ -25,7 +40,7 @@ pub struct RouterConfig {
     pub spend_control: Option<SpendControlConfig>,
 }
 
-#[derive(Debug, Deserialize, Serialize, Eq, PartialEq)]
+#[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 pub struct CacheControlConfig {
     /// Cache-control header: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cache-Control
@@ -35,7 +50,7 @@ pub struct CacheControlConfig {
     pub seed: String,
 }
 
-#[derive(Debug, Deserialize, Serialize, Eq, PartialEq)]
+#[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 pub struct FallbackConfig {
     pub enabled: bool,
@@ -48,10 +63,10 @@ pub struct FallbackConfig {
 /// See e.g.:
 /// https://github.com/tower-rs/tower/issues/696
 /// https://github.com/tower-rs/tower/pull/695/files
-#[derive(Debug, Deserialize, Serialize, Eq, PartialEq)]
+#[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
 pub struct BalanceConfig(pub Vec<BalanceTarget>);
 
-#[derive(Debug, Deserialize, Serialize, Eq, Hash, PartialEq)]
+#[derive(Debug, Clone, Deserialize, Serialize, Eq, Hash, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 pub struct BalanceTarget {
     pub model: ModelVersion,
@@ -60,13 +75,13 @@ pub struct BalanceTarget {
     pub weight: Decimal,
 }
 
-#[derive(Debug, Deserialize, Serialize, Eq, Hash, PartialEq)]
+#[derive(Debug, Clone, Deserialize, Serialize, Eq, Hash, PartialEq)]
 pub struct PromptVersion(pub String);
 
-#[derive(Debug, Deserialize, Serialize, Eq, Hash, PartialEq)]
+#[derive(Debug, Clone, Deserialize, Serialize, Eq, Hash, PartialEq)]
 pub struct ModelVersion(pub String);
 
-#[derive(Debug, Deserialize, Eq, Hash, PartialEq)]
+#[derive(Debug, Clone, Deserialize, Eq, Hash, PartialEq)]
 pub struct Weight(pub Decimal);
 
 pub fn test_router_config() -> RouterConfig {
