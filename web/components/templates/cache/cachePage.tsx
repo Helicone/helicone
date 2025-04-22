@@ -3,6 +3,7 @@ import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { IslandContainer } from "@/components/ui/islandContainer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 import {
   BanknotesIcon,
   BookOpenIcon,
@@ -10,7 +11,6 @@ import {
   ClockIcon,
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
-import { useUser } from "@supabase/auth-helpers-react";
 import { BarChart } from "@tremor/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -86,13 +86,13 @@ const CachePage = (props: CachePageProps) => {
   }>();
   const [open, setOpen] = useState<boolean>(false);
   const [openUpgradeModal, setOpenUpgradeModal] = useState<boolean>(false);
-  const user = useUser();
+  const heliconeAuthClient = useHeliconeAuthClient();
   const org = useOrg();
   const {
     unauthorized,
     currentTier,
     isLoading: isLoadingUnauthorized,
-  } = useGetUnauthorized(user?.id || "");
+  } = useGetUnauthorized(heliconeAuthClient?.user?.id || "");
 
   const hasCache = useMemo(() => {
     const cacheHits = chMetrics.totalCacheHits.data?.data;
@@ -303,8 +303,6 @@ space-y-4 py-6 bg-white dark:bg-black border border-gray-300 dark:border-gray-70
                     pageSize={pageSize}
                     sort={sort}
                     isCached={true}
-                    currentFilter={null}
-                    organizationLayout={null}
                     organizationLayoutAvailable={false}
                   />
                 )}

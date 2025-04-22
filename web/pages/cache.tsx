@@ -1,13 +1,11 @@
 import AuthLayout from "../components/layout/auth/authLayout";
 
 import { withAuthSSR } from "../lib/api/handlerWrappers";
-import { User } from "@supabase/auth-helpers-react";
 import CachePage from "../components/templates/cache/cachePage";
 import { SortDirection } from "../services/lib/sorts/requests/sorts";
 import { ReactElement } from "react";
 
 interface CacheProps {
-  user: User;
   currentPage: number;
   pageSize: number;
   sort: {
@@ -47,7 +45,6 @@ export const getServerSideProps = withAuthSSR(async (options) => {
 
   return {
     props: {
-      user: options.userData.user,
       currentPage,
       pageSize,
       sort: {

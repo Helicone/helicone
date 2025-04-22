@@ -32,19 +32,12 @@ import { useGetUnauthorized } from "../../../services/hooks/dashboard";
 import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
-import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   getRootFilterNode,
   isFilterRowNode,
   isUIFilterRow,
 } from "../../../services/lib/filters/uiFilterRowTree";
-import {
-  OrganizationFilter,
-  OrganizationLayout,
-  transformFilter,
-  transformOrganizationLayoutFilters,
-} from "../../../services/lib/organization_layout/organization_layout";
 import {
   SortDirection,
   SortLeafRequest,
@@ -88,8 +81,6 @@ interface RequestsPageV2Props {
   userId?: string;
   evaluatorId?: string;
   rateLimited?: boolean;
-  currentFilter: OrganizationFilter | null;
-  organizationLayout: OrganizationLayout | null;
   organizationLayoutAvailable: boolean;
 }
 export default function RequestsPage(props: RequestsPageV2Props) {
@@ -100,11 +91,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     isCached = false,
     initialRequestId,
     userId,
-    evaluatorId,
     rateLimited = false,
-    currentFilter,
-    organizationLayout,
-    organizationLayoutAvailable,
   } = props;
 
   /* -------------------------------------------------------------------------- */
@@ -240,25 +227,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     isCached,
     isLive
   );
-  const [currFilter, setCurrFilter] = useState(
-    searchParams.get("filter") ?? null
-  );
-
-  const {
-    organizationLayout: orgLayout,
-    isLoading: isOrgLayoutLoading,
-    refetch: orgLayoutRefetch,
-    isRefetching: isOrgLayoutRefetching,
-  } = useOrganizationLayout(
-    orgContext?.currentOrg?.id!,
-    "requests",
-    organizationLayout
-      ? {
-          data: organizationLayout,
-          error: null,
-        }
-      : undefined
-  );
 
   /* -------------------------------------------------------------------------- */
   /*                                    MEMOS                                   */
@@ -346,13 +314,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     );
   });
 
-  const transformedFilters = useMemo(() => {
-    if (orgLayout?.data?.filters) {
-      return transformOrganizationLayoutFilters(orgLayout.data.filters);
-    }
-    return [];
-  }, [orgLayout?.data?.filters]);
-
   /* -------------------------------------------------------------------------- */
   /*                                  CALLBACKS                                 */
   /* -------------------------------------------------------------------------- */
@@ -418,10 +379,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   const userFilterMapIndex = filterMap.findIndex(
     (filter: any) => filter.label === "Helicone-Rate-Limit-Status"
   );
-
-  const handlePopoverInteraction = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-  }, []);
 
   // Update the page state and router query when the page changes
   const handlePageChange = useCallback(
@@ -542,17 +499,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     [searchParams, filterMap]
   );
 
-  const onLayoutFilterChange = (layoutFilter: OrganizationFilter | null) => {
-    if (layoutFilter !== null) {
-      const transformedFilter = transformFilter(layoutFilter.filter[0]);
-      onSetAdvancedFiltersHandler(transformedFilter, layoutFilter.id);
-      setCurrFilter(layoutFilter.id);
-    } else {
-      setCurrFilter(null);
-      onSetAdvancedFiltersHandler({ operator: "and", rows: [] }, null);
-    }
-  };
-
   const getDefaultValue = useCallback(() => {
     const currentTimeFilter = searchParams.get("t");
 
@@ -627,17 +573,13 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     }
   }, [filterMap, getAdvancedFilters, isDataLoading]);
 
-  // Reset to page 1 when filters change
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedAdvancedFilter]);
-
-  // Control onboarding popup visibility based on organization status
   useEffect(() => {
     if (orgContext?.currentOrg?.has_onboarded !== undefined) {
       setShowOnboardingPopUp(!orgContext.currentOrg.has_onboarded);
+    } else {
+      orgContext?.refetchOrgs();
     }
-  }, [orgContext?.currentOrg?.has_onboarded]);
+  }, [orgContext, orgContext?.currentOrg?.has_onboarded]);
 
   // Load and display initial request data in drawer
   useEffect(() => {

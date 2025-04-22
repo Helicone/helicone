@@ -27,7 +27,7 @@ async function handler(
   const organizationId = orgIdFromBody ?? orgId;
 
   const { error, data } = await dbExecute(
-    `SELECT id FROM organization_member WHERE organization_id = $1 AND member_id = $2`,
+    `SELECT member FROM organization_member WHERE organization = $1 AND member = $2`,
     [organizationId, userId]
   );
 
