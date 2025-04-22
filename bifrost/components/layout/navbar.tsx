@@ -457,7 +457,6 @@ const NavBar = (props: NavBarProps) => {
   );
 };
 
-
 // Shadcn UI ListItem for Navigation Menu
 const ListItem = React.forwardRef<
   React.ElementRef<"a">,
