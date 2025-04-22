@@ -32,9 +32,9 @@ telemetry = { path = "./crates/telemetry" }
 metrics = { path = "./crates/metrics" }
 llm-proxy = { path = "./llm-proxy" }
 
-axum-server = "0.7.2"
-
 anyhow = "1.0.97"
+axum-core = "0.5.2"
+axum-server = "0.7.2"
 base64 = "0.22.1"
 bytes = "1.10.1"
 chrono = "0.4.40"
@@ -57,6 +57,7 @@ itertools = "0.14.0"
 json-patch = "4.0.0"
 log-panics = { version = "2.1.0", features = ["with-backtrace"] }
 meltdown = "0.3.2"
+mime = "0.3.17"
 minio-rsc = "0.2.3"
 openapiv3 = "2.0"
 opentelemetry = { version = "0.24.0" }
@@ -78,7 +79,7 @@ serde_yaml = "0.9.33"
 serde_yml = "0.0.12"
 sqlx = "0.8.5"
 strum = "0.27.1"
-stubr = { path = "/Users/thomasharmon/code/tmp/stubr/lib" }
+stubr = { git = "https://github.com/tomharmon/stubr" }
 thiserror = "2.0.11"
 tokio = { version = "1.44.2", features = ['full'] }
 tokio-stream = "0.1.17"

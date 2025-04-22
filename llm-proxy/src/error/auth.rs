@@ -1,3 +1,10 @@
+use axum_core::response::{IntoResponse, Response};
+use http::StatusCode;
+use tracing::error;
+
+use super::api::ErrorResponse;
+use crate::types::json::Json;
+
 #[derive(Debug, strum::AsRefStr, thiserror::Error)]
 pub enum AuthError {
     #[error(transparent)]
@@ -11,10 +18,28 @@ pub enum AuthError {
 
     #[error("Invalid credentials")]
     InvalidCredentials,
+}
 
-    #[error("Unauthorized: session not found")]
-    SessionNotFound,
-
-    #[error("Password reset not allowed")]
-    PasswordResetNotAllowed,
+impl IntoResponse for AuthError {
+    fn into_response(self) -> Response {
+        match self {
+            Self::InvalidCredentials => (
+                StatusCode::UNAUTHORIZED,
+                Json(ErrorResponse {
+                    error: "Invalid credentials".to_string(),
+                }),
+            )
+                .into_response(),
+            _ => {
+                error!(error = %self, "authentication error");
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Json(ErrorResponse {
+                        error: "Internal server error".to_string(),
+                    }),
+                )
+                    .into_response()
+            }
+        }
+    }
 }

@@ -7,10 +7,8 @@ use std::{
 
 use futures::Stream;
 use pin_project::pin_project;
-use tokio::sync::broadcast::Receiver;
-use tokio_stream::wrappers::{
-    BroadcastStream, errors::BroadcastStreamRecvError,
-};
+use tokio::sync::mpsc::Receiver;
+use tokio_stream::wrappers::ReceiverStream;
 use tower::discover::Change;
 
 use super::Key;
@@ -41,7 +39,7 @@ pub struct ConfigDiscovery {
     #[pin]
     initial: ServiceMap<Key, DispatcherService>,
     #[pin]
-    events: BroadcastStream<Change<Key, DispatcherService>>,
+    events: ReceiverStream<Change<Key, DispatcherService>>,
 }
 
 impl ConfigDiscovery {
@@ -49,19 +47,14 @@ impl ConfigDiscovery {
         app: AppState,
         rx: Receiver<Change<Key, DispatcherService>>,
     ) -> Self {
-        let events = BroadcastStream::new(rx);
+        let events = ReceiverStream::new(rx);
         let mut service_map: HashMap<Key, DispatcherService> = HashMap::new();
 
-        for (prov, models) in &app.0.config.discover.models.0 {
-            for m in models {
-                let key = Key::new(m.clone(), prov.clone());
-                let dispatcher = Dispatcher::new_with_middleware(
-                    app.clone(),
-                    m.clone(),
-                    prov.clone(),
-                );
-                service_map.insert(key, dispatcher);
-            }
+        for prov in app.0.config.discover.providers.iter() {
+            let key = Key::new(prov.clone());
+            let dispatcher =
+                Dispatcher::new_with_middleware(app.clone(), prov.clone());
+            service_map.insert(key, dispatcher);
         }
 
         Self {
@@ -72,8 +65,7 @@ impl ConfigDiscovery {
 }
 
 impl Stream for ConfigDiscovery {
-    type Item =
-        Result<Change<Key, DispatcherService>, BroadcastStreamRecvError>;
+    type Item = Change<Key, DispatcherService>;
 
     fn poll_next(
         self: Pin<&mut Self>,
@@ -86,10 +78,10 @@ impl Stream for ConfigDiscovery {
         {
             match change {
                 Ok(Change::Insert(key, service)) => {
-                    return Poll::Ready(Some(Ok(Change::Insert(key, service))));
+                    return Poll::Ready(Some(Change::Insert(key, service)));
                 }
                 Ok(Change::Remove(key)) => {
-                    return Poll::Ready(Some(Ok(Change::Remove(key))));
+                    return Poll::Ready(Some(Change::Remove(key)));
                 }
                 // infallible
                 Err(_) => unreachable!(),

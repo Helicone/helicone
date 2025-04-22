@@ -35,7 +35,7 @@ async fn main() -> Result<(), llm_proxy::error::runtime::Error> {
     info!(config = ?config.clone(), "config loaded");
 
     let mut shutting_down = false;
-    let app = App::new(config.clone()).await?;
+    let (app, provider_monitor) = App::new(config.clone()).await?;
 
     let rate_limiting_cleanup_service =
         middleware::rate_limit::service::Service::new(
@@ -50,6 +50,7 @@ async fn main() -> Result<(), llm_proxy::error::runtime::Error> {
             llm_proxy::utils::meltdown::wait_for_shutdown_signals,
         ))
         .register(TaggedService::new("proxy", app))
+        .register(TaggedService::new("provider-monitor", provider_monitor))
         // .register(TaggedService::new("proxy-metrics", metrics_server))
         .register(TaggedService::new(
             "rate-limit-cleanup",

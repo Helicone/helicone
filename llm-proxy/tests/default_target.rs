@@ -9,7 +9,7 @@ use url::Url;
 async fn default_target() {
     let config = Config::test_config();
     let mut harness = Harness::new(config).await;
-    let request_body = reqwest::Body::from(
+    let request_body = axum_core::body::Body::from(
         serde_json::to_vec(&json!({
             "model": "gpt-4o-mini",
             "messages": [
@@ -26,7 +26,7 @@ async fn default_target() {
         .uri("http://router.helicone.com/router/F432DK1PQ")
         .body(request_body)
         .unwrap();
-    let response = harness.call(request).await.unwrap();
+    let response = harness.call(request).await;
     assert_eq!(response.status(), StatusCode::OK);
 
     // assert that the request was proxied to the mock server

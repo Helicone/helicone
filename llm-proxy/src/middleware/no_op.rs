@@ -42,11 +42,11 @@ impl<S, ReqBody> Service<S, ReqBody> {
 
 impl<S, ReqBody> tower::Service<Request<ReqBody>> for Service<S, ReqBody>
 where
-    S: tower::Service<Request<ReqBody>> + Clone + Send + Sync + 'static,
+    S: tower::Service<Request<ReqBody>> + Clone + Send + 'static,
     S::Future: Send + 'static,
     S::Response: Send + 'static,
     S::Error: Into<Error> + Send + Sync + 'static,
-    ReqBody: Send + Sync + 'static,
+    ReqBody: Send + 'static,
 {
     type Response = S::Response;
     type Error = Error;

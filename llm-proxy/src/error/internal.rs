@@ -1,8 +1,14 @@
+use axum_core::response::{IntoResponse, Response};
 use displaydoc::Display;
+use http::StatusCode;
 use thiserror::Error;
 use tower::BoxError;
+use tracing::error;
 
-use crate::types::provider::Provider;
+use crate::{
+    error::api::ErrorResponse,
+    types::{json::Json, provider::Provider},
+};
 
 /// Internal errors
 #[derive(Debug, Error, Display, strum::AsRefStr)]
@@ -32,4 +38,19 @@ pub enum InternalError {
     MapperError(#[from] crate::mapper::error::MapperError),
     /// Load balancer error: {0}
     LoadBalancerError(BoxError),
+    /// Poll ready error: {0}
+    PollReadyError(BoxError),
+}
+
+impl IntoResponse for InternalError {
+    fn into_response(self) -> Response {
+        error!(error = %self, "internal error");
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(ErrorResponse {
+                error: "Internal Server Error".to_string(),
+            }),
+        )
+            .into_response()
+    }
 }

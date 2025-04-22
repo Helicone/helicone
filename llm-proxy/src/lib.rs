@@ -1,15 +1,14 @@
 pub mod app;
-pub mod balancer;
+pub(crate) mod balancer;
 pub mod config;
-pub mod discover;
-pub mod dispatcher;
+pub(crate) mod discover;
+pub(crate) mod dispatcher;
 pub mod error;
-pub mod mapper;
+pub(crate) mod mapper;
 pub mod middleware;
-pub mod response;
-pub mod router;
-pub mod store;
+// pub(crate) mod response;
+pub(crate) mod store;
 #[cfg(feature = "testing")]
 pub mod tests;
-pub mod types;
+pub(crate) mod types;
 pub mod utils;

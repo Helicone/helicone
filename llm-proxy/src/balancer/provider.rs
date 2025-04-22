@@ -1,15 +1,29 @@
 use std::time::Duration;
 
-use tower::{BoxError, balance::p2c::Balance, load::PeakEwmaDiscover};
-
-use crate::{
-    discover::ProviderDiscovery,
-    error::internal::InternalError,
-    types::{request::Request, response::Response},
+use tokio::sync::mpsc::channel;
+use tower::{
+    BoxError, balance::p2c::Balance, buffer::Buffer, load::PeakEwmaDiscover,
 };
 
+use crate::{
+    app::AppState,
+    discover::{Discovery, monitor::ProviderMonitor},
+    error::internal::InternalError,
+    types::{discover::DiscoverMode, request::Request, response::Response},
+};
+
+const BUFFER_SIZE: usize = 1024;
+const CHANNEL_CAPACITY: usize = 128;
+const DEFAULT_PROVIDER_RTT: Duration = Duration::from_millis(500);
+
+#[derive(Clone)]
 pub struct ProviderBalancer {
-    pub inner: Balance<PeakEwmaDiscover<ProviderDiscovery>, Request>,
+    pub inner: Buffer<
+        Request,
+        <Balance<PeakEwmaDiscover<Discovery>, Request> as tower::Service<
+            Request,
+        >>::Future,
+    >,
 }
 
 impl std::fmt::Debug for ProviderBalancer {
@@ -19,26 +33,34 @@ impl std::fmt::Debug for ProviderBalancer {
 }
 
 impl ProviderBalancer {
-    pub fn new(discovery: ProviderDiscovery) -> ProviderBalancer {
+    pub fn new(app_state: AppState) -> (ProviderBalancer, ProviderMonitor) {
+        let (tx, rx) = channel(CHANNEL_CAPACITY);
+        let discovery = match app_state.0.config.discover.discover_mode {
+            DiscoverMode::Config => Discovery::config(app_state.clone(), rx),
+        };
         let discover = PeakEwmaDiscover::new(
             discovery,
-            Duration::from_secs(1),
-            Duration::from_secs(900),
+            DEFAULT_PROVIDER_RTT,
+            app_state.0.config.discover.discover_decay,
             Default::default(),
         );
 
-        ProviderBalancer {
-            inner: Balance::new(discover),
-        }
+        let inner = Buffer::new(Balance::new(discover), BUFFER_SIZE);
+        let provider_monitor = ProviderMonitor::new(tx);
+
+        (ProviderBalancer { inner }, provider_monitor)
     }
 }
 
 impl tower::Service<Request> for ProviderBalancer {
     type Response = Response;
     type Error = BoxError;
-    type Future = <Balance<PeakEwmaDiscover<ProviderDiscovery>, Request> as tower::Service<
+    type Future = <Buffer<
         Request,
-    >>::Future;
+        <Balance<PeakEwmaDiscover<Discovery>, Request> as tower::Service<
+            Request,
+        >>::Future,
+    > as tower::Service<Request>>::Future;
 
     fn poll_ready(
         &mut self,
@@ -46,7 +68,7 @@ impl tower::Service<Request> for ProviderBalancer {
     ) -> std::task::Poll<Result<(), Self::Error>> {
         self.inner
             .poll_ready(cx)
-            .map_err(InternalError::LoadBalancerError)
+            .map_err(InternalError::PollReadyError)
             .map_err(Into::into)
     }
 

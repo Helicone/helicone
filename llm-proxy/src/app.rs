@@ -6,44 +6,41 @@ use std::{
     task::{Context, Poll},
 };
 
+use axum_core::response::IntoResponse;
 use axum_server::tls_rustls::RustlsConfig;
 use futures::future::BoxFuture;
 use meltdown::Token;
 use minio_rsc::{Minio, provider::StaticProvider};
-use tokio::sync::Mutex;
-use tower::{
-    BoxError, ServiceBuilder, buffer::BufferLayer, util::BoxCloneService,
-};
+use tower::{ServiceBuilder, util::BoxCloneService};
 use tower_http::{
     add_extension::AddExtension, auth::AsyncRequireAuthorizationLayer,
 };
 use tracing::info;
 
 use crate::{
+    balancer::provider::ProviderBalancer,
     config::{
         Config,
         rate_limit::{AuthedLimiterConfig, UnauthedLimiterConfig},
         server::TlsConfig,
     },
-    discover::ProviderChangeBroadcasts,
+    discover::monitor::ProviderMonitor,
     error,
     middleware::auth::AuthService,
-    router::model::ModelRouter,
     store::StoreRealm,
+    utils::{catch_panic::CatchPanicLayer, handle_error::ErrorHandlerLayer},
 };
-
-const MAX_QUEUED_REQUESTS: usize = 1024;
 
 pub type ServiceStack = BoxCloneService<
     crate::types::request::Request,
     crate::types::response::Response,
-    BoxError,
+    Infallible,
 >;
 
 pub type HyperServiceStack = BoxCloneService<
     http::Request<hyper::body::Incoming>,
     crate::types::response::Response,
-    BoxError,
+    Infallible,
 >;
 
 #[derive(Debug, Clone)]
@@ -55,7 +52,6 @@ pub struct InnerAppState {
     pub authed_rate_limit: Arc<AuthedLimiterConfig>,
     pub unauthed_rate_limit: Arc<UnauthedLimiterConfig>,
     pub store: StoreRealm,
-    pub broadcasts: Mutex<ProviderChangeBroadcasts>,
 }
 
 impl std::fmt::Debug for InnerAppState {
@@ -70,7 +66,6 @@ impl std::fmt::Debug for InnerAppState {
             .field("authed_rate_limit", &self.authed_rate_limit)
             .field("unauthed_rate_limit", &self.unauthed_rate_limit)
             .field("store", &self.store)
-            .field("broadcasts", &self.broadcasts)
             .field("minio", &minio)
             .finish()
     }
@@ -79,22 +74,35 @@ impl std::fmt::Debug for InnerAppState {
 /// The top level app used to start the hyper server.
 /// The middleware stack is as follows:
 /// -- global middleware --
-/// 0. Buffer
-/// 1. CatchPanic
+/// 0. CatchPanic
+/// 1. HandleError
 /// 2. Authn/Authz
 /// 3. Per User Rate Limit layer
 /// 4. Per Org Rate Limit layer
 /// 5. RequestContext
-/// -- model specific middleware --
+///    - Fetch dynamic request specific metadata
+///    - Deserialize request body based on default provider
+///    - Parse Helicone inputs
 /// 6. Per model rate limit layer
-/// 7. ModelRouter
+///    - Based on request context, rate limit based on deserialized model target
+///      from request context
+/// 7. Request/Response cache
+/// 8. Spend controls
+/// 9. A/B testing between models and prompt versions
+/// 10. Fallbacks
 /// -- provider specific middleware --
-/// 8. Per provider rate limit layer
-/// 9. ProviderBalancer
-/// --- model/provider specific middleware --
+/// 11. ProviderBalancer
+/// 12. Per provider rate limit layer
+/// 13. Mapper -- based on selected provider, map request body
+/// -- region specific middleware --
+/// 14. ProviderRegionBalancer
+/// --- region specific middleware --
 /// --- none in use yet --
-/// 10. DispatcherServiceStack
-/// 11. Dispatcher
+/// 15. DispatcherServiceStack
+/// 16. Dispatcher
+///
+/// Ideally we could combine the rate limits into one layer
+/// instead of using tower_governor and having to split them up.
 #[derive(Clone)]
 pub struct App {
     pub state: AppState,
@@ -103,7 +111,7 @@ pub struct App {
 
 impl tower::Service<crate::types::request::Request> for App {
     type Response = crate::types::response::Response;
-    type Error = BoxError;
+    type Error = Infallible;
     type Future = BoxFuture<'static, Result<Self::Response, Self::Error>>;
 
     fn poll_ready(
@@ -119,7 +127,9 @@ impl tower::Service<crate::types::request::Request> for App {
 }
 
 impl App {
-    pub async fn new(config: Config) -> Result<Self, error::init::Error> {
+    pub async fn new(
+        config: Config,
+    ) -> Result<(Self, ProviderMonitor), error::init::Error> {
         let provider = StaticProvider::from_env();
         let minio = if let Some(provider) = provider {
             Some(
@@ -142,7 +152,6 @@ impl App {
             .connect(&config.database.url.0)
             .await
             .map_err(error::init::Error::DatabaseConnection)?;
-        let broadcasts = ProviderChangeBroadcasts::new(&config);
 
         let app_state = AppState(Arc::new(InnerAppState {
             config,
@@ -150,31 +159,30 @@ impl App {
             authed_rate_limit,
             unauthed_rate_limit,
             store: StoreRealm::new(pg_pool),
-            broadcasts: Mutex::new(broadcasts),
         }));
 
-        let router = ModelRouter::new(app_state.clone());
+        let (balancer, monitor) = ProviderBalancer::new(app_state.clone());
 
         // global middleware is applied here
         let service_stack = ServiceBuilder::new()
-            .layer(BufferLayer::new(8))
-            // .layer(CatchPanicLayer::new())
+            .layer(CatchPanicLayer::new())
+            .layer(ErrorHandlerLayer::new(
+                crate::error::api::Error::into_response,
+            ))
             .layer(AsyncRequireAuthorizationLayer::new(AuthService))
-            .layer(
-                crate::middleware::request_context::Layer::<reqwest::Body>::new(
-                    app_state.clone(),
-                ),
-            )
+            .layer(crate::middleware::request_context::Layer::<
+                axum_core::body::Body,
+            >::new(app_state.clone()))
             // other middleware: rate limiting, logging, etc, etc
             // will be added here as well
             .map_err(|e| crate::error::api::Error::Box(e))
-            .layer(BufferLayer::new(MAX_QUEUED_REQUESTS))
-            .service(router);
-
-        Ok(Self {
+            .service(balancer);
+        let app = Self {
             state: app_state,
             service_stack: BoxCloneService::new(service_stack),
-        })
+        };
+
+        Ok((app, monitor))
     }
 }
 
@@ -236,7 +244,7 @@ impl HyperApp {
     pub fn new(app: App) -> Self {
         let service_stack = ServiceBuilder::new()
             .map_request(|req: http::Request<hyper::body::Incoming>| {
-                req.map(reqwest::Body::wrap)
+                req.map(axum_core::body::Body::new)
             })
             .service(app.service_stack);
         Self {
@@ -248,7 +256,7 @@ impl HyperApp {
 
 impl tower::Service<http::Request<hyper::body::Incoming>> for HyperApp {
     type Response = crate::types::response::Response;
-    type Error = BoxError;
+    type Error = Infallible;
     type Future = BoxFuture<'static, Result<Self::Response, Self::Error>>;
 
     fn poll_ready(

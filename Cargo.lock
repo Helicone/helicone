@@ -2314,6 +2314,7 @@ name = "llm-proxy"
 version = "0.1.0"
 dependencies = [
  "anthropic-types",
+ "axum-core 0.5.2",
  "axum-server",
  "bytes",
  "chrono",
@@ -2332,6 +2333,7 @@ dependencies = [
  "isocountry",
  "json-patch",
  "meltdown",
+ "mime",
  "minio-rsc",
  "openai-types",
  "opentelemetry",
@@ -4391,6 +4393,7 @@ dependencies = [
 [[package]]
 name = "stubr"
 version = "0.6.2"
+source = "git+https://github.com/tomharmon/stubr#1294a3379ab00e7c1c7c97f792fb44465f42ea05"
 dependencies = [
  "anyhow",
  "assert-json-diff",
@@ -4433,6 +4436,7 @@ dependencies = [
 [[package]]
 name = "stubr-attributes"
 version = "0.6.2"
+source = "git+https://github.com/tomharmon/stubr#1294a3379ab00e7c1c7c97f792fb44465f42ea05"
 dependencies = [
  "itertools 0.11.0",
  "proc-macro2",

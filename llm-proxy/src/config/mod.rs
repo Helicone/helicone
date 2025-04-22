@@ -33,15 +33,14 @@ pub enum Error {
 #[derive(Debug, Default, Clone, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields, rename_all = "kebab-case")]
 pub struct Config {
-    pub dispatcher: self::dispatcher::DispatcherConfig,
     pub telemetry: telemetry::Config,
-    pub server: self::server::ServerConfig,
     pub metrics_server: self::metrics::Config,
+    pub server: self::server::ServerConfig,
     pub database: self::database::Config,
     pub minio: self::minio::Config,
-    pub rate_limit: self::rate_limit::RateLimitConfig,
     pub is_production: bool,
-    pub providers: self::providers::ProvidersConfig,
+    pub rate_limit: self::rate_limit::RateLimitConfig,
+    pub dispatcher: self::dispatcher::DispatcherConfig,
     pub discover: self::discover::DiscoverConfig,
 }
 

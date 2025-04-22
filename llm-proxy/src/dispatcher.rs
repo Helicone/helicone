@@ -16,7 +16,6 @@ use crate::{
     error::{api::Error, internal::InternalError},
     mapper::TryConvert,
     types::{
-        model::Model,
         provider::Provider,
         request::{Request, RequestContext},
         response::Response,
@@ -25,60 +24,39 @@ use crate::{
 
 pub type DispatcherFuture = BoxFuture<'static, Result<Response, Error>>;
 pub type DispatcherService =
-    crate::middleware::no_op::Service<Dispatcher, reqwest::Body>;
-
-pub trait AiProviderDispatcher:
-    Service<Request, Response = Response, Error = Error>
-    + Clone
-    + Send
-    + Sync
-    + 'static
-{
-    fn provider(&self) -> Provider;
-    fn model(&self) -> &Model;
-}
+    crate::middleware::no_op::Service<Dispatcher, axum_core::body::Body>;
 
 #[derive(Debug, Clone)]
 pub struct Dispatcher {
     client: Client,
-    model: Model,
-    provider: Provider,
-}
-
-impl AiProviderDispatcher for Dispatcher {
-    fn provider(&self) -> Provider {
-        self.provider
-    }
-
-    fn model(&self) -> &Model {
-        &self.model
-    }
+    // TODO: use this
+    _provider: Provider,
 }
 
 impl Dispatcher {
-    pub fn new(client: Client, model: Model, provider: Provider) -> Self {
+    pub fn new(client: Client, provider: Provider) -> Self {
         Self {
             client,
-            model,
-            provider,
+            _provider: provider,
         }
     }
 
     pub fn new_with_middleware(
         app_state: AppState,
-        model: Model,
         provider: Provider,
     ) -> DispatcherService {
         let service_stack = ServiceBuilder::new()
             // just to show how we will add dispatcher-specific middleware later
             // e.g. for model/provider specific rate limiting, we need to do
             // that at this level rather than globally.
-            .layer(crate::middleware::no_op::Layer::<reqwest::Body>::new(
-                app_state.clone(),
-            ))
+            .layer(
+                crate::middleware::no_op::Layer::<axum_core::body::Body>::new(
+                    app_state.clone(),
+                ),
+            )
             // other middleware: rate limiting, logging, etc, etc
             // will be added here as well
-            .service(Dispatcher::new(Client::new(), model, provider));
+            .service(Dispatcher::new(Client::new(), provider));
 
         service_stack
     }
@@ -188,7 +166,14 @@ impl Dispatcher {
             .await
             .map_err(|e| InternalError::ReqwestError(e))?;
 
-        Ok(response.into())
+        let mut response_builder =
+            http::Response::builder().status(response.status());
+        *response_builder.headers_mut().unwrap() = response.headers().clone();
+        let response = response_builder
+            .body(axum_core::body::Body::from_stream(response.bytes_stream()))
+            .map_err(InternalError::HttpError)?;
+
+        Ok(response)
     }
 }
 
