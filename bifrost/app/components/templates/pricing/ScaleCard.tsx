@@ -2,8 +2,9 @@ import { Card } from "@/components/ui/card";
 import { Col } from "@/components/common/col";
 import { Row } from "@/components/common/row";
 import Link from "next/link";
-import { CheckIcon } from "@heroicons/react/24/outline";
+import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 const ScaleCard: React.FC = () => {
   return (
@@ -11,14 +12,10 @@ const ScaleCard: React.FC = () => {
       <Col className="h-full justify-between gap-4">
         <Col className="gap-3">
           <Row className="justify-between items-center">
-            <div className="text-slate-900 text-sm font-medium leading-tight">
+            <div className="text-slate-900 text-md font-medium leading-tight">
               Pro
             </div>
-            <div className="px-3 py-1 bg-brand rounded-md border-2 border-brand">
-              <div className="text-center text-white text-xs font-bold leading-[18px]">
-                POPULAR
-              </div>
-            </div>
+            <Badge variant="default">POPULAR</Badge>
           </Row>
 
           <Col className="h-full gap-2">
@@ -45,9 +42,9 @@ const ScaleCard: React.FC = () => {
             ].map((feature, index) => (
               <div key={index} className="px-2 py-1.5 flex items-start gap-2">
                 <div className="w-5 h-5 relative overflow-hidden">
-                  <CheckIcon className="w-full h-full" />
+                  <Check className="w-full h-full" />
                 </div>
-                <div className="text-slate-700 text-sm font-medium">
+                <div className="text-slate-700 text-sm font-normal">
                   {feature}
                 </div>
               </div>

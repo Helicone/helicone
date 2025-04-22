@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Col } from "@/components/common/col";
 import { Row } from "@/components/common/row";
-import { CheckIcon } from "@heroicons/react/24/outline";
+import { Check } from "lucide-react";
 import { FeatureItem } from "./FeaturedItem";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ const EnterpriseCard: React.FC = () => {
     <Card className="w-full h-full p-6 bg-background rounded-xl border-spacing-1.5 border-border md:border-transparent md:shadow-none mx-auto">
       <Col className="h-full justify-between gap-4">
         <Col className="gap-3">
-          <div className="text-slate-900 text-sm font-medium leading-tight">
+          <div className="text-slate-900 text-md font-medium leading-tight">
             Enterprise
           </div>
 
@@ -32,9 +32,9 @@ const EnterpriseCard: React.FC = () => {
             ].map((feature, index) => (
               <div key={index} className="px-2 py-1.5 flex items-start gap-2">
                 <div className="w-5 h-5 relative overflow-hidden">
-                  <CheckIcon className="w-full h-full" />
+                  <Check className="w-full h-full" />
                 </div>
-                <div className="text-slate-700 text-sm font-medium">
+                <div className="text-slate-700 text-sm font-normal">
                   {feature}
                 </div>
               </div>
@@ -44,7 +44,7 @@ const EnterpriseCard: React.FC = () => {
 
         <Link href="https://us.helicone.ai/settings/billing">
           <Button variant="secondary" className="w-full text-base py-6">
-            Get started
+            Contact sales
           </Button>
         </Link>
       </Col>

@@ -25,8 +25,8 @@ import AvailableDiscounts from "../components/templates/pricing/AvailableDiscoun
 export default function PricingPage() {
   return (
     <div className="bg-background text-slate-700">
-      <div className=" mx-auto px-4 antialiased">
-        <div className="flex flex-col max-w-6xl mx-auto p-4 pb-24 pt-8 sm:pb-32 lg:flex gap-20">
+      <div className=" mx-auto antialiased">
+        <div className="flex flex-col max-w-6xl mx-auto p-4 pb-24 pt-8 sm:pb-32 lg:flex gap-8 md:gap-16">
           <Col className="items-center gap-4">
             <span className="block sm:hidden">
               <Image
@@ -44,10 +44,10 @@ export default function PricingPage() {
                 height={100}
               />
             </span>
-            <h1 className="text-3xl sm:text-5xl font-bold tracking-tight max-w-2xl pt-8 text-center text-slate-900">
+            <h1 className="text-3xl sm:text-5xl font-bold tracking-tight max-w-2xl md:pt-8 text-center text-slate-900">
               Simple, predictable pricing
             </h1>
-            <p className="mt-4 w-full text-md sm:text-lg leading-7 max-w-xl text-center">
+            <p className="md:mt-4 w-full text-md sm:text-lg leading-7 max-w-xl text-center">
               Built to scale with you. Only pay for what you use.
             </p>
           </Col>
@@ -61,6 +61,7 @@ export default function PricingPage() {
             <TeamCard />
             <EnterpriseCard />
           </div>
+
           <CustomerHighlights />
           <PricingComparisonTable />
           <AvailableDiscounts />

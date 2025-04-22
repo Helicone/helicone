@@ -1,7 +1,8 @@
 import { Card } from "@/components/ui/card";
 import { Col } from "@/components/common/col";
 import { Row } from "@/components/common/row";
-import { CheckIcon } from "@heroicons/react/24/outline";
+import { Check } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { FeatureItem } from "./FeaturedItem";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -12,14 +13,10 @@ const TeamCard: React.FC = () => {
       <Col className="h-full justify-between gap-4">
         <Col className="gap-3">
           <Row className="justify-between items-center">
-            <div className="text-slate-900 text-sm font-medium leading-tight">
+            <div className="text-slate-900 text-md font-medium leading-tight">
               Team
             </div>
-            <div className="px-3 py-1 bg-slate-100 rounded-md">
-              <div className="text-center text-slate-500 text-xs font-bold">
-                BEST VALUE
-              </div>
-            </div>
+            <Badge variant="secondary">BEST VALUE</Badge>
           </Row>
 
           <Col className="h-full gap-2">
@@ -44,9 +41,9 @@ const TeamCard: React.FC = () => {
             ].map((feature, index) => (
               <div key={index} className="px-2 py-1.5 flex items-start gap-2">
                 <div className="w-5 h-5 relative overflow-hidden">
-                  <CheckIcon className="w-full h-full" />
+                  <Check className="w-full h-full" />
                 </div>
-                <div className="text-slate-700 text-sm font-medium">
+                <div className="text-slate-700 text-sm font-normal">
                   {feature}
                 </div>
               </div>

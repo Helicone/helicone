@@ -486,9 +486,9 @@ export default function PricingComparisonTable() {
   return (
     <div className="flex flex-col gap-6">
       <h2 className="text-black text-4xl font-bold">Compare plans</h2>
-      <div className="rounded-xl overflow-x-auto">
+      <div className="overflow-x-auto max-h-[10-vh] overflow-y-auto">
         <StickyTable>
-          <TableHeader className="sticky top-[var(--header-offset)] z-20 bg-background">
+          <TableHeader className="sticky top-0 z-20 bg-background">
             <TableRow className="bg-background hover:bg-background border-none">
               <TableHead className="w-[318px] p-6 bg-background rounded-tl-xl">
                 <div className="text-slate-900 text-lg font-semibold">
