@@ -86,9 +86,6 @@ const MobileHeader = (props: {
         ) : (
           <XMarkIcon
             className="w-5 h-5 text-foreground stroke-[1.5px] fill-none"
-          // onClick={() => {
-          //   setMenuOpen(false);
-          // }}
           />
         )}
       </button>
@@ -143,24 +140,20 @@ const MobileNav = () => {
           <div className="h-full overflow-y-auto">
             <div className="flex flex-col gap-4 pt-3 px-4">
 
-              {/* Main Links */}
               {renderLinks(mainComponents)}
 
               <Separator />
 
-              {/* Resources Section */}
               <p className="text-[10px] uppercase text-muted-foreground font-medium">Resources</p>
               {renderLinks(resourcesComponents)}
 
               <Separator />
 
-              {/* Tools Section */}
               <p className="text-[10px] uppercase text-muted-foreground font-medium">Tools</p>
               {renderLinks(toolsComponents)}
 
               <Separator />
 
-              {/* Additional Links */}
               <div className="flex flex-col gap-4">
                 {renderLinks(additionalComponents)}
               </div>
