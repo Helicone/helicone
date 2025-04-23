@@ -8,4 +8,4 @@ CREATE TABLE IF NOT EXISTS jawn_http_logs (
     timestamp DateTime64(3, 'UTC') DEFAULT now(),
     properties JSON
 ) ENGINE = MergeTree() PARTITION BY toYYYYMM(timestamp)
-ORDER BY (organization_id, timestamp) TTL date + INTERVAL 90 DAY;
+ORDER BY (organization_id, timestamp) TTL timestamp + INTERVAL 90 DAY;
