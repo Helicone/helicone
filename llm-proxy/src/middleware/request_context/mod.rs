@@ -85,9 +85,11 @@ where
     #[tracing::instrument(skip_all)]
     fn call(&mut self, mut req: Request<ReqBody>) -> Self::Future {
         tracing::info!("RequestContextService::call");
-        let mut this = self.clone();
-        let router_config = this.router_config.clone();
-        let provider_keys = this.provider_keys.clone();
+        // see: https://docs.rs/tower/latest/tower/trait.Service.html#be-careful-when-cloning-inner-services
+        let router_config = self.router_config.clone();
+        let provider_keys = self.provider_keys.clone();
+        let cloned = self.inner.clone();
+        let mut inner = std::mem::replace(&mut self.inner, cloned);
         Box::pin(async move {
             let req_ctx = Arc::new(
                 Service::<S, ReqBody>::get_context(
@@ -98,7 +100,7 @@ where
                 .await?,
             );
             req.extensions_mut().insert(req_ctx);
-            this.inner.call(req).await.map_err(Into::into)
+            inner.call(req).await.map_err(Into::into)
         })
     }
 }
@@ -115,10 +117,11 @@ where
         provider_api_keys: ProviderKeys,
         req: &mut Request<ReqBody>,
     ) -> Result<RequestContext, Error> {
-        let auth_context = req
-            .extensions_mut()
-            .remove::<AuthContext>()
-            .ok_or(InternalError::ExtensionNotFound("AuthContext"))?;
+        // let auth_context = req
+        //     .extensions_mut()
+        //     .remove::<AuthContext>()
+        //     .ok_or(InternalError::ExtensionNotFound("AuthContext"))?;
+        let auth_context = crate::middleware::auth::check_auth(req).unwrap();
         tracing::info!("hi");
 
         // TODO: this will come from parsing the prompt+headers+etc

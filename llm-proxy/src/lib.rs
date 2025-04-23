@@ -13,5 +13,3 @@ pub(crate) mod store;
 pub mod tests;
 pub(crate) mod types;
 pub mod utils;
-
-pub mod vendored;

@@ -1,12 +1,18 @@
 use std::{
-    future::{ready, Ready},
-    task::{Context, Poll}, time::Duration,
+    future::{Ready, ready},
+    task::{Context, Poll},
+    time::Duration,
 };
 
 use tokio::sync::mpsc::Receiver;
-use tower::{discover::Change, load::PeakEwmaDiscover, Service};
+use tower::{Service, discover::Change, load::PeakEwmaDiscover};
 
-use crate::{app::AppState, discover::{Discovery, Key}, dispatcher::DispatcherService, error::init::InitError};
+use crate::{
+    app::AppState,
+    discover::{Discovery, Key},
+    dispatcher::DispatcherService,
+    error::init::InitError,
+};
 
 const DEFAULT_PROVIDER_RTT: Duration = Duration::from_millis(500);
 
@@ -33,10 +39,13 @@ impl Service<Receiver<Change<Key, DispatcherService>>> for DiscoverFactory {
         Poll::Ready(Ok(()))
     }
 
-    fn call(&mut self, rx: Receiver<Change<Key, DispatcherService>>) -> Self::Future {
+    fn call(
+        &mut self,
+        rx: Receiver<Change<Key, DispatcherService>>,
+    ) -> Self::Future {
         let discovery = match Discovery::new(self.app_state.clone(), rx) {
             Ok(discovery) => discovery,
-            Err(e) => return ready(Err(e))
+            Err(e) => return ready(Err(e)),
         };
         let x = self.app_state.0.config.discover.discover_decay;
         tracing::info!(decay = ?x, "discover_decay");

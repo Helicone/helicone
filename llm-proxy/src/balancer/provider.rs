@@ -1,15 +1,16 @@
 use std::future::poll_fn;
 
 use tokio::sync::mpsc::channel;
-use tower::{
-    BoxError, load::PeakEwmaDiscover, Service
-};
+use tower::{balance::p2c::{Balance, MakeBalance}, buffer::Buffer, load::PeakEwmaDiscover, BoxError, Service};
 
 use crate::{
     app::AppState,
-    discover::{provider::{factory::DiscoverFactory, monitor::ProviderMonitor}, Discovery},
+    discover::{
+        Discovery,
+        provider::{factory::DiscoverFactory, monitor::ProviderMonitor},
+    },
     error::{init::InitError, internal::InternalError},
-    types::{request::Request, response::Response}, vendored::{balance::p2c::{Balance, MakeBalance}, buffer::Buffer},
+    types::{request::Request, response::Response},
 };
 
 const BUFFER_SIZE: usize = 1024;
@@ -39,7 +40,11 @@ impl ProviderBalancer {
         let discover_factory = DiscoverFactory::new(app_state.clone());
         let mut balance_factory = MakeBalance::new(discover_factory);
         let mut balance = balance_factory.call(rx).await?;
-        poll_fn(|cx| balance.poll_ready(cx)).await.map_err(InitError::CreateBalancer)?;
+        // TODO: do we _have_ to poll_ready here?
+        // @tom to double check
+        poll_fn(|cx| balance.poll_ready(cx))
+            .await
+            .map_err(InitError::CreateBalancer)?;
         let inner = Buffer::new(balance, BUFFER_SIZE);
         let provider_monitor = ProviderMonitor::new(tx);
         let provider_balancer = ProviderBalancer { inner };

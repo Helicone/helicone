@@ -1,12 +1,13 @@
 use std::{
     collections::HashMap,
     convert::Infallible,
-    future::{Ready, ready},
+    future::{Ready, poll_fn, ready},
     task::{Context, Poll},
 };
 
 use axum_core::response::IntoResponse;
-use futures::future::Either;
+use futures::future::{BoxFuture, Either};
+use pin_project_lite::pin_project;
 use regex::Regex;
 use uuid::Uuid;
 
@@ -15,8 +16,11 @@ use crate::{
     app::AppState,
     config::DeploymentTarget,
     discover::provider::monitor::ProviderMonitors,
-    error::{api::Error, init::InitError, invalid_req::InvalidRequestError},
-    types::router::RouterId,
+    error::{
+        api::Error, init::InitError, internal::InternalError,
+        invalid_req::InvalidRequestError,
+    },
+    types::{response::Response, router::RouterId},
 };
 
 const ROUTER_ID_REGEX: &str = r"^/router/(?P<uuid>[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})(?:/.*)?$";
@@ -69,11 +73,8 @@ impl MetaRouter {
 
 impl tower::Service<crate::types::request::Request> for MetaRouter {
     type Response = crate::types::response::Response;
-    type Error = Infallible;
-    type Future = Either<
-        Ready<Result<Self::Response, Self::Error>>,
-        <RouterService as tower::Service<crate::types::request::Request>>::Future,
-    >;
+    type Error = InternalError;
+    type Future = BoxFuture<'static, Result<Self::Response, Self::Error>>;
 
     fn poll_ready(
         &mut self,
@@ -94,42 +95,63 @@ impl tower::Service<crate::types::request::Request> for MetaRouter {
     }
 
     fn call(&mut self, req: crate::types::request::Request) -> Self::Future {
-        let path = req.uri().path();
+        let router_id_regex = self.router_id_regex.clone();
+        todo!()
 
-        let id = if let Some(captures) = self.router_id_regex.captures(path) {
-            // Matched the UUID regex
-            let Some(uuid_match) = captures.name("uuid") else {
-                // Regex matched but capture group missing? Should not happen.
-                let error = Error::InvalidRequest(
-                    InvalidRequestError::InvalidRouterId(path.to_string()),
-                );
-                return Either::Left(ready(Ok(error.into_response())));
-            };
-            let Ok(uuid) = Uuid::parse_str(uuid_match.as_str()) else {
-                // Invalid UUID format matched by regex? Should not happen.
-                let error = Error::InvalidRequest(
-                    InvalidRequestError::InvalidRouterId(path.to_string()),
-                );
-                return Either::Left(ready(Ok(error.into_response())));
-            };
-            RouterId::Uuid(uuid)
-        } else if path.starts_with("/router") {
-            RouterId::Default
-        } else {
-            // Path doesn't start with /router/ at all
-            let error = Error::InvalidRequest(InvalidRequestError::NotFound);
-            return Either::Left(ready(Ok(error.into_response())));
-        };
+        // Box::pin(async move {
+        //     let path = req.uri().path();
+        //     let id = if let Some(captures) = router_id_regex.captures(path) {
+        //         // Matched the UUID regex
+        //         let Some(uuid_match) = captures.name("uuid") else {
+        //             // Regex matched but capture group missing? Should not
+        // happen.             let error = Error::InvalidRequest(
+        //                 
+        // InvalidRequestError::InvalidRouterId(path.to_string()),
+        //             );
+        //             return Ok(error.into_response());
+        //         };
+        //         let Ok(uuid) = Uuid::parse_str(uuid_match.as_str()) else {
+        //             // Invalid UUID format matched by regex? Should not
+        // happen.             let error = Error::InvalidRequest(
+        //                 
+        // InvalidRequestError::InvalidRouterId(path.to_string()),
+        //             );
+        //             return Ok(error.into_response());
+        //         };
+        //         RouterId::Uuid(uuid)
+        //     } else if path.starts_with("/router") {
+        //         RouterId::Default
+        //     } else {
+        //         // Path doesn't start with /router/ at all
+        //         let error =
+        // Error::InvalidRequest(InvalidRequestError::NotFound);
+        //         return Ok(error.into_response());
+        //     };
 
-        // Find the router based on the determined id
-        let Some(router) = self.inner.get_mut(&id) else {
-            // RouterId::Default or a valid RouterId::Uuid doesn't exist in the
-            // map
-            let error = Error::InvalidRequest(InvalidRequestError::NotFound);
-            return Either::Left(ready(Ok(error.into_response())));
-        };
+        //     // Find the router based on the determined id
+        //     let Some(router) = self.inner.get_mut(&id) else {
+        //         // RouterId::Default or a valid RouterId::Uuid doesn't exist
+        // in the         // map
+        //         let error =
+        // Error::InvalidRequest(InvalidRequestError::NotFound);
+        //         return Ok(error.into_response());
+        //     };
+        //     // poll_fn(|cx|
+        // router.poll_ready(cx)).await.map_err(InternalError::PollReadyError)?;
 
-        Either::Right(router.call(req))
+        //     if let Ok(()) = poll_fn(|cx| router.poll_ready(cx)).await {
+        //     } else {
+        //         tracing::error!("infallible inner service errored");
+        //         unreachable!()
+        //     };
+
+        //     if let Ok(response) = router.call(req).await {
+        //         Ok(response)
+        //     } else {
+        //         tracing::error!("infallible inner service errored");
+        //         unreachable!()
+        //     }
+        // })
     }
 }
 

@@ -24,10 +24,7 @@ where
 
 impl<S> Service<S> {
     pub fn new(inner: S, app_state: AppState) -> Self {
-        Self {
-            inner,
-            app_state,
-        }
+        Self { inner, app_state }
     }
 }
 
@@ -54,9 +51,7 @@ where
     fn call(&mut self, req: Request) -> Self::Future {
         tracing::info!("NoOpService::call");
         let mut inner = self.inner.clone();
-        Box::pin(async move {
-            inner.call(req).await.map_err(Into::into)
-        })
+        Box::pin(async move { inner.call(req).await.map_err(Into::into) })
     }
 }
 
@@ -67,9 +62,7 @@ pub struct Layer {
 
 impl Layer {
     pub fn new(app_state: AppState) -> Self {
-        Self {
-            app_state,
-        }
+        Self { app_state }
     }
 }
 

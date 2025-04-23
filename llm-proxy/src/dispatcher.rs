@@ -23,8 +23,7 @@ use crate::{
 };
 
 pub type DispatcherFuture = BoxFuture<'static, Result<Response, Error>>;
-pub type DispatcherService =
-    crate::middleware::no_op::Service<Dispatcher>;
+pub type DispatcherService = crate::middleware::no_op::Service<Dispatcher>;
 
 #[derive(Debug, Clone)]
 pub struct Dispatcher {
@@ -55,9 +54,7 @@ impl Dispatcher {
             // just to show how we will add dispatcher-specific middleware later
             // e.g. for model/provider specific rate limiting, we need to do
             // that at this level rather than globally.
-            .layer(
-                crate::middleware::no_op::Layer::new(app_state.clone()),
-            )
+            .layer(crate::middleware::no_op::Layer::new(app_state.clone()))
             // other middleware: rate limiting, logging, etc, etc
             // will be added here as well
             .service(Dispatcher::new(client, app_state, provider));
@@ -81,6 +78,7 @@ impl Service<Request> for Dispatcher {
     #[tracing::instrument(name = "Dispatcher::call", skip(self, req))]
     fn call(&mut self, req: Request) -> Self::Future {
         tracing::info!("Dispatcher::call");
+        // see: https://docs.rs/tower/latest/tower/trait.Service.html#be-careful-when-cloning-inner-services
         let this = self.clone();
         let this = std::mem::replace(self, this);
         tracing::debug!(uri = %req.uri(), headers = ?req.headers(), "Received request");

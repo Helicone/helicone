@@ -19,9 +19,7 @@ use tracing::info;
 
 use crate::{
     config::{
-        Config, ProviderKeysSource,
-        rate_limit::{AuthedLimiterConfig, UnauthedLimiterConfig},
-        server::TlsConfig,
+        rate_limit::{AuthedLimiterConfig, UnauthedLimiterConfig}, server::TlsConfig, Config, ProviderKeysSource
     },
     discover::provider::monitor::ProviderMonitors,
     error::{self, init::InitError, runtime::RuntimeError},

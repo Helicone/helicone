@@ -54,7 +54,8 @@ impl Router {
             }
         };
         // TODO: how to get provider keys via discovery instead of above^
-        let (balancer, monitor) = ProviderBalancer::new(app_state.clone()).await?;
+        let (balancer, monitor) =
+            ProviderBalancer::new(app_state.clone()).await?;
         let service_stack: RouterService = ServiceBuilder::new()
             .layer(ErrorHandlerLayer)
             .layer(crate::middleware::request_context::Layer::<
