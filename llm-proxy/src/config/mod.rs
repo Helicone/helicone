@@ -40,7 +40,6 @@ pub struct Config {
     pub is_production: bool,
     pub rate_limit: self::rate_limit::RateLimitConfig,
 
-    pub dispatcher: self::dispatcher::DispatcherConfig,
     pub discover: self::discover::DiscoverConfig,
     pub routers: self::router::RouterConfigs,
 }

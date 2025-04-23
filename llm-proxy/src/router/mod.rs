@@ -75,7 +75,10 @@ impl Router {
                 Arc::new(default_router_config)
             }
         };
+        // for all providers, fetch provider keys
+        let providers = app_state.0.config.discover.providers.keys().collect::<Vec<_>>();
 
+        // TODO: how to get provider keys via discovery 
         let (balancer, monitor) = ProviderBalancer::new(app_state.clone());
         let service_stack: RouterService = ServiceBuilder::new()
             .layer(ErrorHandlerLayer)

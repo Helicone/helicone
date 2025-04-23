@@ -9,13 +9,12 @@ use futures::future::BoxFuture;
 use http::Request;
 use indexmap::IndexMap;
 use isocountry::CountryCode;
-use uuid::Uuid;
 
 use crate::{
     app::AppState,
     config::router::RouterConfig,
     error::{
-        api::Error, internal::InternalError, invalid_req::InvalidRequestError,
+        api::Error, internal::InternalError,
     },
     types::{
         model::Model,
@@ -123,7 +122,6 @@ where
             .remove::<AuthContext>()
             .ok_or(InternalError::ExtensionNotFound("AuthContext"))?;
         tracing::info!("hi");
-        let path = req.uri().path();
         let mut tx = app_state.0.store.db.begin().await?;
         // TODO: will likely want to make this into one call/fetch all provider
         // keys at once since we may have multiple
@@ -152,8 +150,11 @@ where
         let target_url = app_state
             .0
             .config
-            .dispatcher
-            .get_provider_url(router_config.default_provider)?
+            .discover
+            .providers
+            .get(&router_config.default_provider)
+            .ok_or(InternalError::ProviderNotConfigured(router_config.default_provider))?
+            .base_url
             .clone();
         tracing::debug!(target_url = %target_url, "got target url");
         // TODO: this will come from parsing the prompt+headers+etc
