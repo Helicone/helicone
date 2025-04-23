@@ -58,6 +58,7 @@ impl MetaRouter {
             monitors.insert(router_id.clone(), monitor);
             inner.insert(router_id.clone(), router);
         }
+        tracing::debug!(num_routers = inner.len(), "meta router created");
         let meta_router = Self {
             inner,
             router_id_regex,
@@ -78,6 +79,7 @@ impl tower::Service<crate::types::request::Request> for MetaRouter {
         &mut self,
         ctx: &mut Context<'_>,
     ) -> Poll<Result<(), Self::Error>> {
+        tracing::trace!("MetaRouter::poll_ready");
         let mut any_pending = false;
         for router in self.inner.values_mut() {
             if router.poll_ready(ctx).is_pending() {
@@ -111,7 +113,7 @@ impl tower::Service<crate::types::request::Request> for MetaRouter {
                 return Either::Left(ready(Ok(error.into_response())));
             };
             RouterId::Uuid(uuid)
-        } else if path.starts_with("/router/") {
+        } else if path.starts_with("/router") {
             RouterId::Default
         } else {
             // Path doesn't start with /router/ at all

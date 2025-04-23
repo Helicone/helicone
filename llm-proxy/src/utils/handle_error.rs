@@ -103,9 +103,9 @@ where
         + Send
         + 'static,
     S::Future: Send + 'static,
-    S::Error: IntoResponse,
+    S::Error: IntoResponse + std::fmt::Display,
     ReqBody: Send + 'static,
-    E: Send + 'static,
+    E: Send + 'static + std::fmt::Display,
 {
     type Response = Response;
     type Error = Infallible;
@@ -117,9 +117,9 @@ where
     ) -> Poll<Result<(), Self::Error>> {
         match self.inner.poll_ready(cx) {
             Poll::Ready(Ok(())) => Poll::Ready(Ok(())),
-            Poll::Ready(Err(_)) => {
-                tracing::error!("Errored in poll ready");
-                Poll::Ready(Ok(()))
+            Poll::Ready(Err(e)) => {
+                tracing::error!(error = %e, "Inner service poll_ready returned error");
+                Poll::Pending
             }
             Poll::Pending => Poll::Pending,
         }

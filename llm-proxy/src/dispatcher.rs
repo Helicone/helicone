@@ -24,7 +24,7 @@ use crate::{
 
 pub type DispatcherFuture = BoxFuture<'static, Result<Response, Error>>;
 pub type DispatcherService =
-    crate::middleware::no_op::Service<Dispatcher, axum_core::body::Body>;
+    crate::middleware::no_op::Service<Dispatcher>;
 
 #[derive(Debug, Clone)]
 pub struct Dispatcher {
@@ -56,9 +56,7 @@ impl Dispatcher {
             // e.g. for model/provider specific rate limiting, we need to do
             // that at this level rather than globally.
             .layer(
-                crate::middleware::no_op::Layer::<axum_core::body::Body>::new(
-                    app_state.clone(),
-                ),
+                crate::middleware::no_op::Layer::new(app_state.clone()),
             )
             // other middleware: rate limiting, logging, etc, etc
             // will be added here as well
@@ -84,6 +82,7 @@ impl Service<Request> for Dispatcher {
     fn call(&mut self, req: Request) -> Self::Future {
         tracing::info!("Dispatcher::call");
         let this = self.clone();
+        let this = std::mem::replace(self, this);
         tracing::debug!(uri = %req.uri(), headers = ?req.headers(), "Received request");
         Box::pin(async move { this.dispatch(req).await })
     }

@@ -35,7 +35,6 @@ impl Router {
         id: RouterId,
         app_state: AppState,
     ) -> Result<(Self, ProviderMonitor), InitError> {
-        tracing::trace!(id = %id, "creating router");
         let router_config = match &app_state.0.config.deployment_target {
             DeploymentTarget::Cloud | DeploymentTarget::SelfHosted => {
                 return Err(InitError::DeploymentTargetNotSupported(
@@ -69,6 +68,8 @@ impl Router {
             // will be added here as well from the router config
             // .map_err(|e| crate::error::api::Error::Box(e))
             .service(balancer);
+
+        tracing::trace!(id = %id, "router created");
 
         Ok((
             Self {

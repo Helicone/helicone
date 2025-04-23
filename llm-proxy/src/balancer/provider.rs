@@ -2,14 +2,14 @@ use std::time::Duration;
 
 use tokio::sync::mpsc::channel;
 use tower::{
-    BoxError, balance::p2c::Balance, buffer::Buffer, load::PeakEwmaDiscover,
+    BoxError, buffer::Buffer, load::PeakEwmaDiscover,
 };
 
 use crate::{
     app::AppState,
-    discover::{Discovery, provider::monitor::ProviderMonitor},
+    discover::{provider::monitor::ProviderMonitor, Discovery},
     error::{init::InitError, internal::InternalError},
-    types::{discover::DiscoverMode, request::Request, response::Response},
+    types::{discover::DiscoverMode, request::Request, response::Response}, vendored::balance::p2c::Balance,
 };
 
 const BUFFER_SIZE: usize = 1024;
@@ -71,6 +71,7 @@ impl tower::Service<Request> for ProviderBalancer {
         &mut self,
         cx: &mut std::task::Context<'_>,
     ) -> std::task::Poll<Result<(), Self::Error>> {
+        tracing::trace!("ProviderBalancer::poll_ready");
         self.inner
             .poll_ready(cx)
             .map_err(InternalError::PollReadyError)
@@ -78,6 +79,7 @@ impl tower::Service<Request> for ProviderBalancer {
     }
 
     fn call(&mut self, req: Request) -> Self::Future {
+        tracing::trace!("ProviderBalancer::call");
         self.inner.call(req)
     }
 }

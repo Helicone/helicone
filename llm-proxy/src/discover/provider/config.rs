@@ -52,7 +52,6 @@ impl ConfigDiscovery {
         app: AppState,
         rx: Receiver<Change<Key, DispatcherService>>,
     ) -> Result<Self, InitError> {
-        tracing::trace!("creating config discovery");
         let events = ReceiverStream::new(rx);
         let mut service_map: HashMap<Key, DispatcherService> = HashMap::new();
         for (provider, provider_config) in
@@ -73,6 +72,7 @@ impl ConfigDiscovery {
             );
             service_map.insert(key.clone(), dispatcher);
         }
+        tracing::trace!(service_map_len = %service_map.len(), "creating config discovery");
 
         Ok(Self {
             initial: ServiceMap::new(service_map),
@@ -88,28 +88,66 @@ impl Stream for ConfigDiscovery {
         self: Pin<&mut Self>,
         ctx: &mut Context<'_>,
     ) -> Poll<Option<Self::Item>> {
+        tracing::trace!("ConfigDiscovery::poll_next");
         let mut this = self.project();
 
-        // 1) one‑time inserts
-        if let Poll::Ready(Some(change)) = this.initial.as_mut().poll_next(ctx)
-        {
-            match change {
-                Ok(Change::Insert(key, service)) => {
-                    return Poll::Ready(Some(Change::Insert(key, service)));
-                }
-                Ok(Change::Remove(key)) => {
-                    return Poll::Ready(Some(Change::Remove(key)));
-                }
-                // infallible
-                Err(_) => unreachable!(),
+        // --- Loop to check initial stream first ---
+        // We prioritize draining the initial set of services from the config.
+        // PeakEwmaDiscover will call poll_next repeatedly until it gets Pending
+        // or None.
+        match this.initial.as_mut().poll_next(ctx) {
+            Poll::Ready(Some(Ok(change))) => {
+                // Found an initial item, handle and return it immediately.
+                tracing::trace!("yielding initial stream item");
+                return handle_change(change);
+            }
+            Poll::Ready(None) => {
+                // Initial stream is exhausted, fall through to poll events.
+                tracing::trace!("initial stream ended, polling events");
+            }
+            Poll::Pending => {
+                // Should not happen with ServiceMap, but handle
+                // defensively.
+                tracing::trace!("initial stream pending");
+                return Poll::Pending;
+            }
+            Poll::Ready(Some(Err(e))) => {
+                // ServiceMap yields Infallible
+                tracing::error!(error = %e, "Error polling initial stream");
+                // Treat error as pending for recovery
+                return Poll::Pending;
             }
         }
 
-        // 2) live events (removals / re‑inserts)
+        // --- Initial stream is done, poll live events ---
         match this.events.as_mut().poll_next(ctx) {
-            Poll::Ready(Some(change)) => Poll::Ready(Some(change)),
-            Poll::Pending => Poll::Pending,
-            Poll::Ready(None) => Poll::Ready(None), // end of stream
+            Poll::Ready(Some(change)) => {
+                tracing::trace!("yielding live event stream item");
+                handle_change(change)
+            }
+            Poll::Pending => {
+                tracing::trace!("live event stream pending");
+                Poll::Pending
+            }
+            Poll::Ready(None) => {
+                tracing::trace!("live event stream ended");
+                Poll::Ready(None) // End of combined stream
+            }
+        }
+    }
+}
+
+fn handle_change(
+    change: Change<Key, DispatcherService>,
+) -> Poll<Option<Change<Key, DispatcherService>>> {
+    match change {
+        Change::Insert(key, service) => {
+            tracing::trace!(key = ?key, "Discovered new provider");
+            Poll::Ready(Some(Change::Insert(key, service)))
+        }
+        Change::Remove(key) => {
+            tracing::trace!(key = ?key, "Removed provider");
+            Poll::Ready(Some(Change::Remove(key)))
         }
     }
 }
