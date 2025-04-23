@@ -10,14 +10,14 @@ const EnterpriseCard: React.FC = () => {
   return (
     <Card className="w-full h-full p-6 bg-background rounded-xl border-spacing-1.5 border-border md:border-transparent md:shadow-none mx-auto">
       <Col className="h-full justify-between gap-4">
-        <Col className="gap-3">
-          <div className="text-slate-900 text-md font-medium leading-tight">
-            Enterprise
-          </div>
+        <Col className="gap-6">
 
           <Col className="h-full gap-2">
-            <div className="text-slate-900 text-3xl font-bold">Contact us</div>
-            <div className="text-slate-700 text-sm font-normal">
+            <div className="text-accent-foreground text-md font-semibold leading-tight">
+              Enterprise
+            </div>
+            <div className="text-accent-foreground text-3xl font-bold">Contact us</div>
+            <div className="text-sidebar-foreground text-sm font-normal">
               Custom-built packages.
             </div>
           </Col>
@@ -30,11 +30,11 @@ const EnterpriseCard: React.FC = () => {
               "On-prem deployment",
               "Bulk cloud discounts",
             ].map((feature, index) => (
-              <div key={index} className="px-2 py-1.5 flex items-start gap-2">
-                <div className="w-5 h-5 relative overflow-hidden">
+              <div key={index} className="py-1.5 flex items-center gap-2">
+                <div className="w-4 h-4 relative overflow-hidden">
                   <Check className="w-full h-full" />
                 </div>
-                <div className="text-slate-700 text-sm font-normal">
+                <div className="text-sidebar-foreground text-sm font-normal">
                   {feature}
                 </div>
               </div>
@@ -43,7 +43,7 @@ const EnterpriseCard: React.FC = () => {
         </Col>
 
         <Link href="https://us.helicone.ai/settings/billing">
-          <Button variant="secondary" className="w-full text-base py-6">
+          <Button variant="secondary" className="w-full text-base font-semibold py-5">
             Contact sales
           </Button>
         </Link>

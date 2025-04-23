@@ -10,25 +10,25 @@ const ScaleCard: React.FC = () => {
   return (
     <Card className="w-full h-full p-6 bg-sky-50 rounded-xl border-2 border-brand mx-auto">
       <Col className="h-full justify-between gap-4">
-        <Col className="gap-3">
-          <Row className="justify-between items-center">
-            <div className="text-slate-900 text-md font-medium leading-tight">
-              Pro
-            </div>
-            <Badge variant="default">POPULAR</Badge>
-          </Row>
+        <Col className="gap-6">
 
           <Col className="h-full gap-2">
+            <Row className="justify-between items-center">
+              <div className="text-accent-foreground text-md font-semibold leading-tight">
+                Pro
+              </div>
+              <Badge variant="default">POPULAR</Badge>
+            </Row>
             <Row className="items-center gap-0.5">
-              <div className="text-sky-500 text-3xl font-bold">$20</div>
+              <div className="text-brand text-3xl font-bold">$20</div>
               <Row className="py-1 items-center gap-1">
-                <div className="text-sky-500 text-lg font-bold">/seat</div>
-                <div className="text-slate-700 text-lg font-semibold">
+                <div className="text-brand text-lg font-bold">/seat</div>
+                <div className="text-accent-foreground text-lg font-semibold">
                   per month
                 </div>
               </Row>
             </Row>
-            <div className="text-slate-700 text-sm font-normal">
+            <div className="text-sidebar-foreground text-sm font-normal">
               Starter plan for teams.
             </div>
           </Col>
@@ -40,11 +40,11 @@ const ScaleCard: React.FC = () => {
               "Core observability features",
               "Standard support",
             ].map((feature, index) => (
-              <div key={index} className="px-2 py-1.5 flex items-start gap-2">
-                <div className="w-5 h-5 relative overflow-hidden">
+              <div key={index} className="py-1.5 flex items-center gap-2">
+                <div className="w-4 h-4 relative overflow-hidden">
                   <Check className="w-full h-full" />
                 </div>
-                <div className="text-slate-700 text-sm font-normal">
+                <div className="text-sidebar-foreground text-sm font-normal">
                   {feature}
                 </div>
               </div>
@@ -53,7 +53,7 @@ const ScaleCard: React.FC = () => {
         </Col>
 
         <Link href="https://us.helicone.ai/settings/billing">
-          <Button variant="default" className="w-full text-base py-6 bg-brand">
+          <Button variant="default" className="w-full text-base font-semibold py-5 bg-brand">
             7-day free trial
           </Button>
         </Link>

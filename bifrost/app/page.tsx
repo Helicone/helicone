@@ -42,10 +42,10 @@ export default async function Home() {
   // const totalValuesData = undefined;
   const totalValuesData = response.ok
     ? ((await response.json()).data as {
-        total_requests?: number;
-        total_tokens?: number;
-        total_cost?: number;
-      })
+      total_requests?: number;
+      total_tokens?: number;
+      total_cost?: number;
+    })
     : undefined;
 
   return (
@@ -55,7 +55,7 @@ export default async function Home() {
           <Hero />
           <Prototype />
           <LazyLoadComponent fallback={<LoadingSection height="h-24" />}>
-            <Companies />
+            <Companies className="bg-[#f2f9fc] " />
           </LazyLoadComponent>
           <LazyLoadComponent fallback={<LoadingSection />}>
             <Quote />

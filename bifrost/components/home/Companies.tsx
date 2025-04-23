@@ -2,9 +2,13 @@ import { ISLAND_WIDTH } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 
-const Companies = () => {
+interface CompaniesProps {
+  className?: string;
+}
+
+const Companies = ({ className }: CompaniesProps) => {
   return (
-    <div className="bg-[#f2f9fc] pb-12">
+    <div className={cn("pb-12", className)}>
       <div className={cn(ISLAND_WIDTH, "flex flex-col gap-4 ")}>
         {/* <ul className="grid grid-cols-4 lg:grid-cols-8 gap-8 md:gap-12 px-2 md:px-8 grayscale opacity-40 items-center"> */}
         <ul className="grid grid-cols-4 lg:grid-cols-8 gap-2 lg:gap-8 px-2 md:px-8 grayscale opacity-40 items-center">

@@ -17,8 +17,8 @@ interface CustomerHighlight {
 
 const highlights: CustomerHighlight[] = [
   {
-    metric: "386 hours",
-    description: "saved by using cached responses",
+    metric: "386 hours saved",
+    description: "by using cached responses",
     logoSrc: "/static/other-logos/sunrun.webp",
     logoAlt: "sunrun",
     tier: {
@@ -28,8 +28,8 @@ const highlights: CustomerHighlight[] = [
     },
   },
   {
-    metric: "2 days",
-    description: "saved on combing through requests",
+    metric: "2 days saved",
+    description: "on combing through requests",
     logoSrc: "/static/qawolf.webp",
     logoAlt: "qawolf",
     tier: {

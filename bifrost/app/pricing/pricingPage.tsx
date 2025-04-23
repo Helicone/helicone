@@ -21,6 +21,7 @@ import PricingComparisonTable from "../components/templates/pricing/PricingCompa
 import TeamCard from "../components/templates/pricing/TeamCard";
 import CustomerHighlights from "../components/templates/pricing/CustomerHighlights";
 import AvailableDiscounts from "../components/templates/pricing/AvailableDiscounts";
+import Companies from "@/components/home/Companies";
 
 export default function PricingPage() {
   return (
@@ -44,10 +45,10 @@ export default function PricingPage() {
                 height={100}
               />
             </span>
-            <h1 className="text-3xl sm:text-5xl font-bold tracking-tight max-w-2xl md:pt-8 text-center text-slate-900">
+            <h1 className="text-3xl sm:text-5xl font-bold tracking-tight max-w-2xl md:pt-8 text-center text-accent-foreground">
               Simple, predictable pricing
             </h1>
-            <p className="md:mt-4 w-full text-md sm:text-lg leading-7 max-w-xl text-center">
+            <p className="md:mt-4 w-full text-md sm:text-lg leading-7 max-w-xl text-center text-muted-foreground">
               Built to scale with you. Only pay for what you use.
             </p>
           </Col>
@@ -63,6 +64,18 @@ export default function PricingPage() {
           </div>
 
           <CustomerHighlights />
+
+          <div className="flex mt-4 justify-center flex-col items-center gap-2">
+            <h2 className="text-lg font-semibold text-sidebar-foreground text-center leading-7">
+              Powering leading companies
+              <br />
+              <span className="text-muted-foreground">
+                from next-gen startups to enterprise
+              </span>
+            </h2>
+            <Companies />
+          </div>
+
           <PricingComparisonTable />
           <AvailableDiscounts />
           <ProductComparisonTable />
@@ -70,51 +83,36 @@ export default function PricingPage() {
           <div className="py-16 sm:p-8 flex flex-col sm:flex-row sm:justify-between">
             <div className="w-full sm:w-1/2">
               <h3 className="text-[36px] font-bold text-slate-900">
-                Frequently <br />
-                asked <br />
+                Frequently asked <br />
                 questions
               </h3>
             </div>
-            <div className="w-full sm:w-1/2 text-slate-900">
+            <div className="w-full sm:w-1/2 text-accent-foreground">
               <Accordion type="single" collapsible className="w-full">
+
                 <AccordionItem value="item-1">
                   <AccordionTrigger className="font-medium">
-                    Which Helicone plan is right for me?
+                    What do I get with the free plan?
                   </AccordionTrigger>
-                  <AccordionContent className="text-slate-600 text-sm">
-                    If you have a production ready application and you are
-                    looking to improve the quality and looking for an all-in-one
-                    observability platform; choose the Pro plan. Exploring or
-                    building a side project, the Free plan is a great start
-                    before it grows into a larger project.
-                    <br />
-                    <br />
-                    Security, on-prem, or extremely high usage, contact us for
-                    custom Enterprise pricing.
+                  <AccordionContent className="text-muted-foreground text-sm leading-6">
+                    The free plan gives you eveyrthing you need to get started: full visbility into your LLM requests, response times, prompt/response and detailed usage metrics. It's perfect for testing and building early versions of your AI app without needing a credit card.
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem value="item-2">
                   <AccordionTrigger className="font-medium">
-                    What are the limits for each plan?
+                    How is Helicone's usage-based pricing calculated?
                   </AccordionTrigger>
-                  <AccordionContent className="text-slate-600 text-sm">
-                    For the Pro plan, you have access to 10k requests per month
-                    and all features such as Playground, Cache, Exports, Evals
-                    and more. You will also be able to enable Prompts and Alerts
-                    as add-ons.
-                    <br />
-                    <br />
-                    For the Free plan, you have access to 10k requests per month
-                    for free and dashboard analytics.
+                  <AccordionContent className="text-muted-foreground text-sm leading-6">
+                    Helicone's usage-based pricing is calculated based on the number of requests you make to our API. You can find your usage in the <Link href="/settings/billing" className="underline hover:text-brand">Billing</Link> page.
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem value="item-3">
                   <AccordionTrigger className="font-medium text-left">
-                    I need more requests on the Free plan. What can I do?
+                    What happens if I exceed my request limit?
                   </AccordionTrigger>
-                  <AccordionContent className="text-slate-600 text-sm">
+                  <AccordionContent className="text-muted-foreground text-sm leading-6">
                     You can switch to the Pro plan to keep logging after 10k
                     requests per month. Don&apos;t worry, we are still logging
                     all your incoming requests, upgrade to Pro to view them.
@@ -128,21 +126,88 @@ export default function PricingPage() {
 
                 <AccordionItem value="item-4">
                   <AccordionTrigger className="font-medium">
-                    Am I eligible for any discounts?
+                    Can I switch plans or cancel anytime?
                   </AccordionTrigger>
-                  <AccordionContent className="text-slate-600 text-sm">
-                    If you are a startup under 2 years old with &lt;$5m in
-                    funding, a non-profit, an open-source company or a student,
-                    you may be eligible for discounts.{" "}
-                    <Link
-                      href="/contact"
-                      className="underline hover:text-brand"
-                    >
-                      Contact us
-                    </Link>
-                    .
+                  <AccordionContent className="text-muted-foreground text-sm">
+                    If you have a production ready application and you are
+                    looking to improve the quality and looking for an all-in-one
+                    observability platform; choose the Pro plan. Exploring or
+                    building a side project, the Free plan is a great start
+                    before it grows into a larger project.
+                    <br />
+                    <br />
+                    Security, on-prem, or extremely high usage, <Link href="/contact" className="underline hover:text-brand">contact us</Link> for
+                    custom Enterprise pricing.
                   </AccordionContent>
                 </AccordionItem>
+
+                <AccordionItem value="item-5">
+                  <AccordionTrigger className="font-medium">
+                    Does Helicone work with my LLM provider?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground text-sm leading-6">
+                    Helicone works seamlessly with providers like Together AI, DeepSeek, Fireworks, and more. Just update your base URL and add our API key.
+                    <br />
+                    <br />
+                    See our <Link href="https://docs.helicone.ai/getting-started/integration-method/gateway" className="underline hover:text-brand">Integration docs</Link> for more information.
+                  </AccordionContent>
+                </AccordionItem>
+
+                {/* <AccordionItem value="item-1">
+                  <AccordionTrigger className="font-medium">
+                    Which Helicone plan is right for me?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground text-sm">
+                    If you have a production ready application and you are
+                    looking to improve the quality and looking for an all-in-one
+                    observability platform; choose the Pro plan. Exploring or
+                    building a side project, the Free plan is a great start
+                    before it grows into a larger project.
+                    <br />
+                    <br />
+                    Security, on-prem, or extremely high usage, <Link href="/contact" className="underline hover:text-brand">contact us</Link> for
+                    custom Enterprise pricing.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="item-3">
+                  <AccordionTrigger className="font-medium">
+                    What are the limits for each plan?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground text-sm">
+                    For the Pro plan, you have access to 10k requests per month
+                    and all features such as Playground, Cache, Exports, Evals
+                    and more. You will also be able to enable Prompts and Alerts
+                    as add-ons.
+                    <br />
+                    <br />
+                    For the Free plan, you have access to 10k requests per month
+                    for free and dashboard analytics.
+                  </AccordionContent>
+                </AccordionItem> */}
+
+                <AccordionItem value="item-6">
+                  <AccordionTrigger className="font-medium">
+                    Is there a plan for teams or enterprise use?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground text-sm">
+                    If you are a startup under 2 years old with &lt;$5m in
+                    funding, a non-profit, an open-source company or a student,
+                    you may be eligible for discounts. <Link href="/contact" className="underline hover:text-brand">Contact us</Link>
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="item-7">
+                  <AccordionTrigger className="font-medium">
+                    Do you offer discounts for startups, students, or open source projects?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground text-sm">
+                    If you are a startup under 2 years old with &lt;$5m in
+                    funding, a non-profit, an open-source company or a student,
+                    you may be eligible for discounts. <Link href="/contact" className="underline hover:text-brand">Contact us</Link>
+                  </AccordionContent>
+                </AccordionItem>
+
               </Accordion>
             </div>
           </div>
@@ -196,6 +261,6 @@ export default function PricingPage() {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 }
