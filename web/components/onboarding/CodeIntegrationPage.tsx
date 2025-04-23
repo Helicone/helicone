@@ -84,7 +84,6 @@ export function CodeIntegrationPage({
   const [copied, setCopied] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [isRedirecting, setIsRedirecting] = useState(false);
-  const [isGeneratingKey, setIsGeneratingKey] = useState(false);
 
   // Add the event listening query
   const { data: hasEvent } = useQuery<Result<boolean, string>, Error>({
@@ -123,33 +122,23 @@ export function CodeIntegrationPage({
     const generateKey = async () => {
       if (!user) return;
       if (apiKey) return;
-      if (isGeneratingKey) return;
 
-      setIsGeneratingKey(true);
-      try {
-        const { res: promiseRes, apiKey: generatedApiKey } =
-          generateAPIKeyHelper(
-            "rw",
-            org?.currentOrg?.organization_type ?? "",
-            "Main",
-            window.location.hostname.includes("eu."),
-            false
-          );
+      const { res: promiseRes, apiKey: generatedApiKey } = generateAPIKeyHelper(
+        "rw",
+        org?.currentOrg?.organization_type ?? "",
+        "Main",
+        window.location.hostname.includes("eu."),
+        false
+      );
 
-        const res = await promiseRes;
+      const res = await promiseRes;
 
-        if (!res.response.ok) {
-          setNotification("Failed to generate API key", "error");
-          console.error(await res.response.text());
-        } else {
-          setApiKey(generatedApiKey);
-        }
-      } catch (error) {
-        console.error("Error generating API key:", error);
+      if (!res.response.ok) {
         setNotification("Failed to generate API key", "error");
-      } finally {
-        setIsGeneratingKey(false);
+        console.error(await res.response.text());
       }
+
+      setApiKey(generatedApiKey);
     };
 
     generateKey();
