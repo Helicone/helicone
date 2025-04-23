@@ -17,7 +17,7 @@ interface CustomerHighlight {
 
 const highlights: CustomerHighlight[] = [
   {
-    metric: "386 hours saved",
+    metric: "Saved 386 hours",
     description: "by using cached responses",
     logoSrc: "/static/other-logos/sunrun.webp",
     logoAlt: "sunrun",
@@ -28,7 +28,7 @@ const highlights: CustomerHighlight[] = [
     },
   },
   {
-    metric: "2 days saved",
+    metric: "Saved 2 days",
     description: "on combing through requests",
     logoSrc: "/static/qawolf.webp",
     logoAlt: "qawolf",
@@ -41,7 +41,7 @@ const highlights: CustomerHighlight[] = [
   },
   {
     metric: "Critical bug detected,",
-    description: "saved agent runtime by 30%",
+    description: "saving agent runtime by 30%",
     logoSrc: "/static/filevine.webp",
     logoAlt: "filevine",
     tier: {
@@ -66,16 +66,17 @@ export default function CustomerHighlights() {
               }
             `}
           >
-            <div className="flex flex-col gap-4 px-6 py-9">
+            <div className="flex flex-col-reverse gap-8 px-6 py-9">
               <div className="self-stretch">
                 <span className="text-xl text-slate-700 font-bold">
                   {highlight.metric}
                 </span>
+                <br />
                 <span className="text-xl text-slate-700">
                   {" " + highlight.description}
                 </span>
               </div>
-              <div className="w-[140px] h-auto">
+              <div className="w-[120px] h-auto">
                 <Image
                   src={highlight.logoSrc}
                   alt={highlight.logoAlt}

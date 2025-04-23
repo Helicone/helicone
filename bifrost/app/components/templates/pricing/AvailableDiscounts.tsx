@@ -5,14 +5,14 @@ import { Col } from "@/components/common/col";
 export default function AvailableDiscounts() {
   return (
     <div className="py-10 sm:p-8 grid grid-cols-1 lg:grid-cols-12 bg-white rounded-md">
-      <Col className="col-span-5 py-[24px]">
+      <Col className="col-span-5 gap-4 py-[24px]">
         <span className="text-[36px] font-bold text-slate-900">
           Available discounts
         </span>
         <Button
           asChild
-          variant={"outline"}
-          className="w-fit mt-4"
+          variant="outline"
+          className="w-fit"
         >
           <Link href="/contact">Apply here</Link>
         </Button>

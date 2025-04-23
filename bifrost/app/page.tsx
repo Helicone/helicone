@@ -4,6 +4,7 @@ import Integrations from "@/components/templates/landing/integrations";
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import LazyLoadComponent from "@/components/shared/LazyLoadComponent";
+import { cn, ISLAND_WIDTH } from "@/lib/utils";
 
 const BigDashboard = dynamic(() => import("@/components/home/BigDashboard"));
 const Companies = dynamic(() => import("@/components/home/Companies"));
@@ -55,7 +56,7 @@ export default async function Home() {
           <Hero />
           <Prototype />
           <LazyLoadComponent fallback={<LoadingSection height="h-24" />}>
-            <Companies className="bg-[#f2f9fc] " />
+            <Companies className={cn("bg-[#f2f9fc]", ISLAND_WIDTH)} />
           </LazyLoadComponent>
           <LazyLoadComponent fallback={<LoadingSection />}>
             <Quote />

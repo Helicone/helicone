@@ -276,7 +276,7 @@ const featureGroups: FeatureGroup[] = [
       },
       {
         name: "Rate limits",
-        hobby: false,
+        hobby: true,
         pro: true,
         team: true,
         enterprise: true,
