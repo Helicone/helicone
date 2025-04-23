@@ -117,10 +117,11 @@ where
         provider_api_keys: ProviderKeys,
         req: &mut Request<ReqBody>,
     ) -> Result<RequestContext, Error> {
-        let auth_context = req
-            .extensions_mut()
-            .remove::<AuthContext>()
-            .ok_or(InternalError::ExtensionNotFound("AuthContext"))?;
+        // let auth_context = req
+        //     .extensions_mut()
+        //     .remove::<AuthContext>()
+        //     .ok_or(InternalError::ExtensionNotFound("AuthContext"))?;
+        let auth_context = crate::middleware::auth::check_auth(req).unwrap();
 
         // TODO: this will come from parsing the prompt+headers+etc
         let helicone = crate::types::request::HeliconeContext {

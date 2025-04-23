@@ -180,7 +180,7 @@ impl App {
             .layer(ErrorHandlerLayer)
             .layer(CatchPanicLayer::new())
             .layer(NormalizePathLayer::trim_trailing_slash())
-            .layer(AsyncRequireAuthorizationLayer::new(AuthService))
+            // .layer(AsyncRequireAuthorizationLayer::new(AuthService))
             .service(router);
 
         let app = Self {
