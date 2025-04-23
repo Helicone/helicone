@@ -164,6 +164,13 @@ const useGetOrgs = () => {
       if (a.name === b.name) {
         return a.id < b.id ? -1 : 1;
       }
+      // put demo last
+      if (a.tier === "demo") {
+        return 1;
+      }
+      if (b.tier === "demo") {
+        return -1;
+      }
       return a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1;
     });
 
