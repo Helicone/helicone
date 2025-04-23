@@ -14,7 +14,7 @@ import { Muted } from "@/components/ui/typography";
 import { HeliconeRequest } from "@/packages/llm-mapper/types";
 import { CellContext, ColumnDef } from "@tanstack/react-table";
 import { formatDistanceToNow } from "date-fns";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { tracesToTreeNodeData } from "../../../../../lib/sessions/helpers";
 import {
   Session,
@@ -52,14 +52,14 @@ interface TableTreeNode {
 // Helper function to convert TreeNodeData and lookup full request data
 function convertToTableData(
   node: TreeNodeData,
-  allRequests: HeliconeRequest[], // Pass the full request list
+  requestMap: Map<string, HeliconeRequest>, // Use a Map for faster lookups
   level = 0
 ): TableTreeNode {
   const id = node.trace?.request_id ?? `group-${node.name}-${level}`;
 
   // Find the corresponding full HeliconeRequest if this is a leaf node
   const requestDetails = node.trace?.request_id
-    ? allRequests.find((req) => req.request_id === node.trace?.request_id)
+    ? requestMap.get(node.trace.request_id) // Use Map.get
     : undefined;
 
   const tableNode: TableTreeNode = {
@@ -80,7 +80,7 @@ function convertToTableData(
   if (node.children && node.children.length > 0) {
     // Recursively convert children, passing the request list down
     tableNode.subRows = node.children.map((child: TreeNodeData) =>
-      convertToTableData(child, allRequests, level + 1)
+      convertToTableData(child, requestMap, level + 1)
     );
   }
 
@@ -88,7 +88,7 @@ function convertToTableData(
 }
 
 // Component for Model cell rendering to allow hooks
-const ModelCell = ({ getValue }: CellContext<TableTreeNode, any>) => {
+const ModelCell = memo(({ getValue }: CellContext<TableTreeNode, any>) => {
   const modelName = getValue<string | undefined | null>();
   const [isTruncated, setIsTruncated] = useState(false);
   const modelRef = useRef<HTMLDivElement>(null);
@@ -120,7 +120,8 @@ const ModelCell = ({ getValue }: CellContext<TableTreeNode, any>) => {
       </Tooltip>
     </TooltipProvider>
   );
-};
+});
+ModelCell.displayName = "ModelCell"; // Add display name for better debugging
 
 // *** Define initialColumns outside the component ***
 const initialColumns: ColumnDef<TableTreeNode>[] = [
@@ -263,15 +264,23 @@ const TreeView: React.FC<TreeViewProps> = ({
     return tracesToTreeNodeData(session.traces);
   }, [isRealtime, session.traces]);
 
+  // Create a map for efficient request lookup
+  const requestMap = useMemo(() => {
+    const map = new Map<string, HeliconeRequest>();
+    requests.requests?.requests?.forEach((req) => {
+      if (req.request_id) {
+        map.set(req.request_id, req);
+      }
+    });
+    return map;
+  }, [requests.requests?.requests]);
+
   const tableData = useMemo(() => {
     if (!treeData || !treeData.children) return [];
-    // Ensure we have the actual list of requests - use requests.requests?.requests
-    const allRequests = requests.requests?.requests ?? [];
-    // Convert tree data, passing the full request list for lookups
-    return treeData.children.map((node) =>
-      convertToTableData(node, allRequests)
+    return treeData.children.map(
+      (node) => convertToTableData(node, requestMap) // Pass the map
     );
-  }, [treeData, requests.requests?.requests]);
+  }, [treeData, requestMap]);
 
   // Columns are defined outside again
   // Remove the useMemo for columns definition
@@ -291,6 +300,10 @@ const TreeView: React.FC<TreeViewProps> = ({
       // Optional: handle click on group row if needed (e.g., toggle expansion)
       // React-table's expander button already handles toggling.
     }
+  };
+
+  const handleToggleAllRows = (table: any) => {
+    table.toggleAllRowsExpanded();
   };
 
   return (
@@ -329,6 +342,7 @@ const TreeView: React.FC<TreeViewProps> = ({
                   highlightedIds={selectedRequestId ? [selectedRequestId] : []}
                   fullWidth={true}
                   checkboxMode="never"
+                  onToggleAllRows={handleToggleAllRows}
                 />
               </div>
             )}

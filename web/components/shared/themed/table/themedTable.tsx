@@ -1,8 +1,9 @@
+import { ONBOARDING_STEPS } from "@/components/layout/onboardingContext";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { UIFilterRowTree } from "@/services/lib/filters/types";
 import { TimeFilter } from "@/types/timeFilter";
-import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
 import {
   AdjustmentsHorizontalIcon,
   TableCellsIcon,
@@ -13,8 +14,11 @@ import {
   flexRender,
   getCoreRowModel,
   getExpandedRowModel,
+  Table as ReactTable,
+  Row,
   useReactTable,
 } from "@tanstack/react-table";
+import { ChevronDown, ChevronRight, ChevronsUpDown } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useMemo, useState } from "react";
@@ -97,7 +101,13 @@ interface ThemedTableProps<T extends { id?: string; subRows?: T[] }> {
   };
   rowLink?: (row: T) => string;
   showFilters?: boolean;
+  /**
+   * Callback function to trigger toggling the expansion state of all rows.
+   * Receives the table instance.
+   */
+  onToggleAllRows?: (table: ReactTable<T>) => void;
 }
+
 export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
   props: ThemedTableProps<T>
 ) {
@@ -130,9 +140,14 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
     search,
     rowLink,
     tableRef,
+    onToggleAllRows,
   } = props;
 
   const isShiftPressed = useShiftKeyPress();
+  const [internalExpanded, setInternalExpanded] = React.useState<ExpandedState>(
+    {}
+  );
+
   const [expanded, setExpanded] = React.useState<ExpandedState>({});
 
   const table = useReactTable({
@@ -155,6 +170,29 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
 
   const rows = table.getRowModel().rows;
   const columns = table.getAllColumns();
+
+  const topLevelPathColorMap = useMemo(() => {
+    const chartColors = [
+      "bg-chart-1",
+      "bg-chart-2",
+      "bg-chart-3",
+      "bg-chart-4",
+      "bg-chart-5",
+    ];
+    const map: Record<string, string> = {};
+    let colorIndex = 0;
+
+    rows.forEach((row) => {
+      if (row.depth === 0) {
+        const path = (row.original as any)?.path as string;
+        if (path && !(path in map)) {
+          map[path] = chartColors[colorIndex % chartColors.length];
+          colorIndex++;
+        }
+      }
+    });
+    return map;
+  }, [rows]);
 
   useEffect(() => {
     const columnVisibility: { [key: string]: boolean } = {};
@@ -183,7 +221,7 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
     if (rows.length === 0) {
       return undefined;
     }
-    // @ts-ignore
+    // @ts-ignore - Assume customProperties exists for this specific use case
     const sessionId = rows[0].original?.customProperties?.[
       "Helicone-Session-Id"
     ] as string | undefined;
@@ -191,11 +229,6 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
   }, [rows]);
 
   const router = useRouter();
-
-  // Function to calculate indentation padding
-  const getIndentPadding = (depth: number) => {
-    return { paddingLeft: `${depth * 1.5 + 0.5}rem` }; // 1.5rem per level + 0.5rem base
-  };
 
   return (
     <ScrollArea className="h-full w-full sentry-mask-me" orientation="both">
@@ -262,6 +295,19 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                           "border-r border-slate-300 dark:border-slate-700"
                       )}
                     >
+                      {index === 0 && onToggleAllRows !== undefined && (
+                        <div className="absolute left-1 top-1/2 -translate-y-1/2 z-10">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => onToggleAllRows(table)}
+                            className="h-6 w-6"
+                            aria-label={"Toggle expand all rows"}
+                          >
+                            <ChevronsUpDown className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
                       <DraggableColumnHeader
                         header={header}
                         sortable={sortable}
@@ -282,24 +328,37 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                 <tr
                   key={row.id}
                   className={clsx(
-                    "group",
-                    row.getCanExpand() && "font-semibold",
-                    row.depth > 0
-                      ? "bg-slate-50 dark:bg-slate-950/50"
-                      : "bg-white dark:bg-black",
-                    checkedIds?.includes(row.original?.id ?? "")
-                      ? clsx(
-                          "!bg-sky-100 border-l-2 border-sky-500 dark:!bg-slate-800/50 dark:border-sky-900",
-                          row.depth === 0 && "pl-1.5"
+                    "group relative",
+                    rowLink && "relative",
+                    checkedIds?.includes(row.original?.id ?? "") ||
+                      selectedIds?.includes(row.original?.id ?? "")
+                      ? "!bg-sky-100 dark:!bg-slate-800/50"
+                      : clsx(
+                          "hover:bg-sky-50 dark:hover:bg-slate-700/50",
+                          row.getCanExpand()
+                            ? "font-semibold cursor-pointer bg-muted"
+                            : row.depth > 0
+                            ? "bg-slate-50 dark:bg-slate-950/50"
+                            : "bg-white dark:bg-black"
                         )
-                      : "hover:bg-sky-50 dark:hover:bg-slate-700/50",
-                    onRowSelect && "hover:cursor-pointer",
-                    rowLink && "relative"
                   )}
+                  onClick={(e: React.MouseEvent) => {
+                    if (row.getCanExpand()) {
+                      if (
+                        e.target instanceof HTMLElement &&
+                        e.target.closest('a, button, input[type="checkbox"]')
+                      ) {
+                        return;
+                      }
+                      row.getToggleExpandedHandler()();
+                    } else if (onRowSelect) {
+                      handleRowSelect(row.original, index, e);
+                    }
+                  }}
                 >
                   <td
                     className={clsx(
-                      "w-8 h-full px-2 sticky left-0 z-10",
+                      "h-full sticky left-0 z-10",
                       row.getCanExpand()
                         ? "bg-inherit"
                         : row.depth > 0
@@ -315,27 +374,8 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                       checkboxMode === "never" && "hidden"
                     )}
                     style={{ verticalAlign: "middle" }}
-                    onClick={
-                      onRowSelect &&
-                      ((e: React.MouseEvent) => {
-                        if (
-                          e.target instanceof HTMLElement &&
-                          e.target.closest("[data-expander]")
-                        ) {
-                          return;
-                        }
-                        handleRowSelect(row.original, index, e);
-                      })
-                    }
                   >
-                    <div
-                      className="flex justify-center items-center h-full"
-                      style={
-                        checkboxMode !== "never"
-                          ? getIndentPadding(row.depth)
-                          : {}
-                      }
-                    >
+                    <div className="flex justify-center items-center h-full">
                       <Checkbox
                         variant="helicone"
                         checked={selectedIds?.includes(row.original?.id ?? "")}
@@ -346,38 +386,77 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                     <td
                       key={cell.id}
                       className={clsx(
-                        "py-3 px-2 text-slate-700 dark:text-slate-300 truncate",
-                        row.getCanExpand()
+                        "py-3 text-slate-700 dark:text-slate-300 truncate select-none",
+                        i === 0 && "pr-2",
+                        i > 0 && "px-2",
+                        i === 0 && "relative",
+                        checkedIds?.includes(row.original?.id ?? "") ||
+                          selectedIds?.includes(row.original?.id ?? "")
+                          ? "bg-inherit"
+                          : row.getCanExpand()
                           ? "bg-inherit"
                           : row.depth > 0
                           ? "bg-slate-50 dark:bg-slate-950/50"
                           : "bg-white dark:bg-black",
-                        checkedIds?.includes(row.original?.id ?? "") &&
-                          "!bg-sky-100 dark:!bg-slate-800/50",
                         i === row.getVisibleCells().length - 1 &&
                           "border-r border-border"
                       )}
                       style={{
-                        ...(i === 0 && checkboxMode === "never"
-                          ? getIndentPadding(row.depth)
-                          : {}),
                         maxWidth: cell.column.getSize(),
                       }}
-                      onClick={
-                        onRowSelect &&
-                        ((e: React.MouseEvent) => {
-                          if (
-                            i === 0 &&
-                            e.target instanceof HTMLElement &&
-                            e.target.closest("[data-expander]")
-                          ) {
-                            return;
-                          }
-                          handleRowSelect(row.original, index, e);
-                        })
-                      }
                     >
-                      <div className="flex items-center gap-1">
+                      <div
+                        className={clsx("flex items-center gap-1")}
+                        style={
+                          i === 0
+                            ? {
+                                paddingLeft: `${
+                                  row.depth * 24 +
+                                  (onToggleAllRows !== undefined ? 24 : 0) +
+                                  (row.getCanExpand() ? 0 : 8)
+                                }px`,
+                              }
+                            : {}
+                        }
+                      >
+                        {i === 0 &&
+                          (() => {
+                            const getAncestorPath = (
+                              currentRow: Row<T>
+                            ): string | undefined => {
+                              if (currentRow.depth === 0) {
+                                return (currentRow.original as any)
+                                  ?.path as string;
+                              }
+                              let currentParent = currentRow.getParentRow();
+                              while (currentParent && currentParent.depth > 0) {
+                                currentParent = currentParent.getParentRow();
+                              }
+                              return currentParent
+                                ? ((currentParent.original as any)
+                                    ?.path as string)
+                                : undefined;
+                            };
+
+                            const ancestorPath = getAncestorPath(row);
+                            const groupColorClass =
+                              (ancestorPath &&
+                                topLevelPathColorMap[ancestorPath]) ||
+                              "bg-transparent";
+
+                            if (groupColorClass !== "bg-transparent") {
+                              return (
+                                <div
+                                  className={clsx(
+                                    "absolute left-0 top-0 bottom-0 w-1 z-30",
+                                    groupColorClass
+                                  )}
+                                />
+                              );
+                            }
+                            return null;
+                          })()}
+
                         {i === 0 && row.getCanExpand() && (
                           <button
                             {...{
@@ -388,9 +467,9 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                             className="p-0.5"
                           >
                             {row.getIsExpanded() ? (
-                              <ChevronDownIcon className="h-4 w-4" />
+                              <ChevronDown className="h-4 w-4 text-muted-foreground" />
                             ) : (
-                              <ChevronRightIcon className="h-4 w-4" />
+                              <ChevronRight className="h-4 w-4 text-muted-foreground" />
                             )}
                           </button>
                         )}
@@ -445,9 +524,7 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                           pointerEvents: "auto",
                         }}
                         onClick={(e: React.MouseEvent) => {
-                          if (onRowSelect) {
-                            e.stopPropagation();
-                          }
+                          e.stopPropagation();
                         }}
                         aria-hidden="true"
                       />
