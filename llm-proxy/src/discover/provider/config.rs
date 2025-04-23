@@ -3,19 +3,24 @@ use std::{
     convert::Infallible,
     pin::Pin,
     task::{Context, Poll},
+    time::Duration,
 };
 
 use futures::Stream;
 use pin_project::pin_project;
+use reqwest::{Client, Proxy};
 use tokio::sync::mpsc::Receiver;
 use tokio_stream::wrappers::ReceiverStream;
 use tower::discover::Change;
 
-use super::Key;
 use crate::{
     app::AppState,
+    discover::Key,
     dispatcher::{Dispatcher, DispatcherService},
+    error::init::InitError,
 };
+
+const CONNECTION_TIMEOUT: Duration = Duration::from_secs(5);
 
 /// Reads available models and providers from the config file.
 ///
@@ -46,21 +51,33 @@ impl ConfigDiscovery {
     pub fn new(
         app: AppState,
         rx: Receiver<Change<Key, DispatcherService>>,
-    ) -> Self {
+    ) -> Result<Self, InitError> {
+        tracing::trace!("creating config discovery");
         let events = ReceiverStream::new(rx);
         let mut service_map: HashMap<Key, DispatcherService> = HashMap::new();
-
-        for prov in app.0.config.discover.providers.iter() {
-            let key = Key::new(prov.clone());
-            let dispatcher =
-                Dispatcher::new_with_middleware(app.clone(), prov.clone());
-            service_map.insert(key, dispatcher);
+        for (provider, provider_config) in
+            app.0.config.discover.providers.iter()
+        {
+            let key = Key::new(provider.clone());
+            let proxy = Proxy::all(provider_config.base_url.clone())
+                .map_err(InitError::CreateProxyClient)?;
+            let http_client = Client::builder()
+                .connect_timeout(CONNECTION_TIMEOUT)
+                .proxy(proxy)
+                .build()
+                .map_err(InitError::CreateProxyClient)?;
+            let dispatcher = Dispatcher::new_with_middleware(
+                http_client,
+                app.clone(),
+                provider.clone(),
+            );
+            service_map.insert(key.clone(), dispatcher);
         }
 
-        Self {
+        Ok(Self {
             initial: ServiceMap::new(service_map),
             events,
-        }
+        })
     }
 }
 

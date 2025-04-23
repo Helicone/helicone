@@ -7,8 +7,8 @@ use tower::{
 
 use crate::{
     app::AppState,
-    discover::{Discovery, monitor::ProviderMonitor},
-    error::internal::InternalError,
+    discover::{Discovery, provider::monitor::ProviderMonitor},
+    error::{init::InitError, internal::InternalError},
     types::{discover::DiscoverMode, request::Request, response::Response},
 };
 
@@ -33,10 +33,14 @@ impl std::fmt::Debug for ProviderBalancer {
 }
 
 impl ProviderBalancer {
-    pub fn new(app_state: AppState) -> (ProviderBalancer, ProviderMonitor) {
+    pub fn new(
+        app_state: AppState,
+    ) -> Result<(ProviderBalancer, ProviderMonitor), InitError> {
         let (tx, rx) = channel(CHANNEL_CAPACITY);
         let discovery = match app_state.0.config.discover.discover_mode {
-            DiscoverMode::Config => Discovery::config(app_state.clone(), rx),
+            // TODO: do we want a separate discover_mode from the deployment
+            // target?
+            DiscoverMode::Config => Discovery::config(app_state.clone(), rx)?,
         };
         let discover = PeakEwmaDiscover::new(
             discovery,
@@ -47,8 +51,9 @@ impl ProviderBalancer {
 
         let inner = Buffer::new(Balance::new(discover), BUFFER_SIZE);
         let provider_monitor = ProviderMonitor::new(tx);
+        let provider_balancer = ProviderBalancer { inner };
 
-        (ProviderBalancer { inner }, provider_monitor)
+        Ok((provider_balancer, provider_monitor))
     }
 }
 

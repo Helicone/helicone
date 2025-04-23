@@ -2,12 +2,12 @@ use displaydoc::Display;
 use telemetry::TelemetryError;
 use thiserror::Error;
 
-use crate::error::init;
+use crate::error::init::InitError;
 
 #[derive(Debug, Error, Display)]
-pub enum Error {
+pub enum RuntimeError {
     /// Init: {0}
-    Init(#[from] init::Error),
+    Init(#[from] InitError),
     /// Failed to serve: {0}
     Serve(std::io::Error),
     /// Join tokio task: {0}

@@ -6,7 +6,6 @@ use std::{
     task::{Context, Poll},
 };
 
-use axum_core::response::IntoResponse;
 use axum_server::tls_rustls::RustlsConfig;
 use futures::future::BoxFuture;
 use meltdown::Token;
@@ -14,30 +13,32 @@ use minio_rsc::{Minio, provider::StaticProvider};
 use tower::{ServiceBuilder, util::BoxCloneService};
 use tower_http::{
     add_extension::AddExtension, auth::AsyncRequireAuthorizationLayer,
+    normalize_path::NormalizePathLayer,
 };
 use tracing::info;
 
 use crate::{
-    balancer::provider::ProviderBalancer,
     config::{
-        Config,
+        Config, ProviderKeysSource,
         rate_limit::{AuthedLimiterConfig, UnauthedLimiterConfig},
         server::TlsConfig,
     },
-    discover::monitor::ProviderMonitor,
-    error,
+    discover::provider::monitor::ProviderMonitors,
+    error::{self, init::InitError, runtime::RuntimeError},
     middleware::auth::AuthService,
+    router::meta::MetaRouter,
     store::StoreRealm,
+    types::provider::ProviderKeys,
     utils::{catch_panic::CatchPanicLayer, handle_error::ErrorHandlerLayer},
 };
 
-pub type ServiceStack = BoxCloneService<
+pub type BoxedServiceStack = BoxCloneService<
     crate::types::request::Request,
     crate::types::response::Response,
     Infallible,
 >;
 
-pub type HyperServiceStack = BoxCloneService<
+pub type BoxedHyperServiceStack = BoxCloneService<
     http::Request<hyper::body::Incoming>,
     crate::types::response::Response,
     Infallible,
@@ -52,6 +53,11 @@ pub struct InnerAppState {
     pub authed_rate_limit: Arc<AuthedLimiterConfig>,
     pub unauthed_rate_limit: Arc<UnauthedLimiterConfig>,
     pub store: StoreRealm,
+
+    // the below fields should be moved to the router or org level.
+    // currently its shared across all routers and that wont work for cloud
+    // mode.
+    pub provider_keys: ProviderKeys,
 }
 
 impl std::fmt::Debug for InnerAppState {
@@ -67,46 +73,48 @@ impl std::fmt::Debug for InnerAppState {
             .field("unauthed_rate_limit", &self.unauthed_rate_limit)
             .field("store", &self.store)
             .field("minio", &minio)
+            .field("provider_keys", &self.provider_keys)
             .finish()
     }
 }
 
 /// The top level app used to start the hyper server.
 /// The middleware stack is as follows:
-/// -- global middleware --
+/// -- global --
 /// 0. CatchPanic
 /// 1. HandleError
 /// 2. Authn/Authz
-/// 3. Per User Rate Limit layer
-/// 4. Per Org Rate Limit layer
-/// 5. RequestContext
+/// 3. Unauthenticated and authenticated rate limit layers
+/// 4. MetaRouter
+/// -- Router specific --
+/// 5. Per User Rate Limit layer
+/// 6. Per Org Rate Limit layer
+/// 7. RequestContext
 ///    - Fetch dynamic request specific metadata
 ///    - Deserialize request body based on default provider
 ///    - Parse Helicone inputs
-/// 6. Per model rate limit layer
+/// 8. Per model rate limit layer
 ///    - Based on request context, rate limit based on deserialized model target
 ///      from request context
-/// 7. Request/Response cache
-/// 8. Spend controls
-/// 9. A/B testing between models and prompt versions
-/// 10. Fallbacks
+/// 9. Request/Response cache
+/// 10. Spend controls
+/// 11. A/B testing between models and prompt versions
+/// 12. Fallbacks
 /// -- provider specific middleware --
-/// 11. ProviderBalancer
-/// 12. Per provider rate limit layer
-/// 13. Mapper -- based on selected provider, map request body
-/// -- region specific middleware --
-/// 14. ProviderRegionBalancer
-/// --- region specific middleware --
-/// --- none in use yet --
-/// 15. DispatcherServiceStack
-/// 16. Dispatcher
+/// 13. ProviderBalancer
+/// 14. Per provider rate limit layer
+/// 15. Mapper
+///     - based on selected provider, map request body
+/// 16. ProviderRegionBalancer
+/// --- region specific middleware (none yet, just leaf service) --
+/// 17. Dispatcher
 ///
 /// Ideally we could combine the rate limits into one layer
 /// instead of using tower_governor and having to split them up.
 #[derive(Clone)]
 pub struct App {
     pub state: AppState,
-    pub service_stack: ServiceStack,
+    pub service_stack: BoxedServiceStack,
 }
 
 impl tower::Service<crate::types::request::Request> for App {
@@ -129,7 +137,8 @@ impl tower::Service<crate::types::request::Request> for App {
 impl App {
     pub async fn new(
         config: Config,
-    ) -> Result<(Self, ProviderMonitor), error::init::Error> {
+    ) -> Result<(Self, ProviderMonitors), InitError> {
+        tracing::trace!("creating app");
         let provider = StaticProvider::from_env();
         let minio = if let Some(provider) = provider {
             Some(
@@ -151,43 +160,40 @@ impl App {
         let pg_pool = pg_config
             .connect(&config.database.url.0)
             .await
-            .map_err(error::init::Error::DatabaseConnection)?;
-
+            .map_err(error::init::InitError::DatabaseConnection)?;
+        let provider_keys = match &config.api_keys_source {
+            ProviderKeysSource::Env => ProviderKeys::from_env(),
+        };
         let app_state = AppState(Arc::new(InnerAppState {
             config,
             minio,
             authed_rate_limit,
             unauthed_rate_limit,
             store: StoreRealm::new(pg_pool),
+            provider_keys,
         }));
 
-        let (balancer, monitor) = ProviderBalancer::new(app_state.clone());
+        let (router, monitors) = MetaRouter::new(app_state.clone())?;
 
         // global middleware is applied here
         let service_stack = ServiceBuilder::new()
+            .layer(ErrorHandlerLayer)
             .layer(CatchPanicLayer::new())
-            .layer(ErrorHandlerLayer::new(
-                crate::error::api::Error::into_response,
-            ))
+            .layer(NormalizePathLayer::trim_trailing_slash())
             .layer(AsyncRequireAuthorizationLayer::new(AuthService))
-            .layer(crate::middleware::request_context::Layer::<
-                axum_core::body::Body,
-            >::new(app_state.clone()))
-            // other middleware: rate limiting, logging, etc, etc
-            // will be added here as well
-            .map_err(|e| crate::error::api::Error::Box(e))
-            .service(balancer);
+            .service(router);
+
         let app = Self {
             state: app_state,
             service_stack: BoxCloneService::new(service_stack),
         };
 
-        Ok((app, monitor))
+        Ok((app, monitors))
     }
 }
 
 impl meltdown::Service for App {
-    type Future = BoxFuture<'static, Result<(), crate::error::runtime::Error>>;
+    type Future = BoxFuture<'static, Result<(), RuntimeError>>;
 
     fn run(self, token: Token) -> Self::Future {
         Box::pin(async move {
@@ -205,13 +211,13 @@ impl meltdown::Service for App {
                     let tls_config =
                         RustlsConfig::from_pem_file(cert.clone(), key.clone())
                             .await
-                            .map_err(error::init::Error::Tls)?;
+                            .map_err(error::init::InitError::Tls)?;
 
                     tokio::select! {
                         biased;
                         server_output = axum_server::bind_rustls(addr, tls_config)
                             .handle(handle.clone())
-                            .serve(app_factory) => server_output.map_err(error::runtime::Error::Serve)?,
+                            .serve(app_factory) => server_output.map_err(RuntimeError::Serve)?,
                         _ = token => {
                             handle.graceful_shutdown(Some(std::time::Duration::from_secs(10)));
                         }
@@ -222,7 +228,7 @@ impl meltdown::Service for App {
                         biased;
                         server_output = axum_server::bind(addr)
                             .handle(handle.clone())
-                            .serve(app_factory) => server_output.map_err(error::runtime::Error::Serve)?,
+                            .serve(app_factory) => server_output.map_err(RuntimeError::Serve)?,
                         _ = token => {
                             handle.graceful_shutdown(Some(std::time::Duration::from_secs(10)));
                         }
@@ -237,7 +243,7 @@ impl meltdown::Service for App {
 #[derive(Clone)]
 pub struct HyperApp {
     pub state: AppState,
-    pub service_stack: HyperServiceStack,
+    pub service_stack: BoxedHyperServiceStack,
 }
 
 impl HyperApp {

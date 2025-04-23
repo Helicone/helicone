@@ -2,9 +2,15 @@ use displaydoc::Display;
 use telemetry::TelemetryError;
 use thiserror::Error;
 
+use crate::config::DeploymentTarget;
+
 /// Errors that can occur during initialization.
 #[derive(Debug, Error, Display)]
-pub enum Error {
+pub enum InitError {
+    /// Default router not found
+    DefaultRouterNotFound,
+    /// Deployment target not supported: {0:?}
+    DeploymentTargetNotSupported(DeploymentTarget),
     /// Failed to read config: {0}
     Config(#[from] crate::config::Error),
     /// Failed to read TLS certificate: {0}
@@ -25,4 +31,6 @@ pub enum Error {
     MinioMigration(minio_rsc::error::Error),
     /// OAuth config: {0}
     OAuthConfig(url::ParseError),
+    /// Failed to create proxy client: {0}
+    CreateProxyClient(reqwest::Error),
 }

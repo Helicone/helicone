@@ -1,6 +1,5 @@
-pub mod config;
-pub mod factory;
-pub mod monitor;
+pub mod provider;
+pub mod router;
 
 use std::{
     convert::Infallible,
@@ -8,17 +7,19 @@ use std::{
     task::{Context, Poll},
 };
 
-use config::ConfigDiscovery;
 use futures::Stream;
 use pin_project::pin_project;
+use serde::{Deserialize, Serialize};
 use tokio::sync::mpsc::Receiver;
 use tower::discover::Change;
 
 use crate::{
-    app::AppState, dispatcher::DispatcherService, types::provider::Provider,
+    app::AppState, config::DeploymentTarget,
+    discover::provider::config::ConfigDiscovery, dispatcher::DispatcherService,
+    error::init::InitError, types::provider::Provider,
 };
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Deserialize, Serialize)]
 pub struct Key {
     pub provider: Provider,
 }
@@ -37,11 +38,23 @@ pub enum Discovery {
 }
 
 impl Discovery {
+    pub fn new(
+        app_state: AppState,
+        rx: Receiver<Change<Key, DispatcherService>>,
+    ) -> Result<Self, InitError> {
+        match app_state.0.config.deployment_target {
+            DeploymentTarget::Sidecar => Self::config(app_state, rx),
+            DeploymentTarget::Cloud | DeploymentTarget::SelfHosted => {
+                todo!("cloud and self-hosted not supported yet")
+            }
+        }
+    }
+
     pub fn config(
         app_state: AppState,
         rx: Receiver<Change<Key, DispatcherService>>,
-    ) -> Self {
-        Self::Config(ConfigDiscovery::new(app_state, rx))
+    ) -> Result<Self, InitError> {
+        Ok(Self::Config(ConfigDiscovery::new(app_state, rx)?))
     }
 }
 

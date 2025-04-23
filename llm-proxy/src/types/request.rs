@@ -1,9 +1,8 @@
-use std::time::Instant;
+use std::{sync::Arc, time::Instant};
 
 use axum_core::body::Body;
 use indexmap::IndexMap;
 use isocountry::CountryCode;
-use url::Url;
 
 use super::{
     model::Model,
@@ -13,10 +12,6 @@ use super::{
     user::UserId,
 };
 use crate::config::router::RouterConfig;
-
-pub enum RequestContextSource {
-    Database,
-}
 
 pub type Request = http::Request<Body>;
 
@@ -33,7 +28,7 @@ pub struct AuthContext {
 }
 
 pub struct RequestContext {
-    pub router_config: RouterConfig,
+    pub router_config: Arc<RouterConfig>,
     pub proxy_context: RequestProxyContext,
     pub auth_context: AuthContext,
     pub helicone: HeliconeContext,
@@ -44,10 +39,13 @@ pub struct RequestContext {
 }
 
 pub struct RequestProxyContext {
-    pub target_url: Url,
-    pub target_provider: Provider,
     pub original_provider: Provider,
     pub original_model: Model,
-    pub target_model: Model,
+    pub forced_routing: Option<ForcedRouting>,
     pub provider_api_keys: ProviderKeys,
+}
+
+pub struct ForcedRouting {
+    pub provider: Provider,
+    pub model: Model,
 }

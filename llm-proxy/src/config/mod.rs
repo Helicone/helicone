@@ -3,7 +3,6 @@ pub mod discover;
 pub mod dispatcher;
 pub mod metrics;
 pub mod minio;
-pub mod models;
 pub mod providers;
 pub mod rate_limit;
 pub mod retry;
@@ -30,7 +29,27 @@ pub enum Error {
     ),
 }
 
-#[derive(Debug, Default, Clone, Deserialize, Serialize)]
+#[derive(
+    Debug, Default, Clone, Copy, PartialEq, Eq, Deserialize, Serialize,
+)]
+#[serde(deny_unknown_fields, rename_all = "kebab-case")]
+pub enum DeploymentTarget {
+    Cloud,
+    #[default]
+    Sidecar,
+    SelfHosted,
+}
+
+#[derive(
+    Debug, Default, Clone, Copy, PartialEq, Eq, Deserialize, Serialize,
+)]
+#[serde(deny_unknown_fields, rename_all = "kebab-case")]
+pub enum ProviderKeysSource {
+    #[default]
+    Env,
+}
+
+#[derive(Debug, Default, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields, rename_all = "kebab-case")]
 pub struct Config {
     pub telemetry: telemetry::Config,
@@ -39,9 +58,14 @@ pub struct Config {
     pub database: self::database::Config,
     pub minio: self::minio::Config,
     pub is_production: bool,
+    /// Global rate limiting configuration
     pub rate_limit: self::rate_limit::RateLimitConfig,
-    pub dispatcher: self::dispatcher::DispatcherConfig,
+
+    pub deployment_target: DeploymentTarget,
+    pub api_keys_source: ProviderKeysSource,
+
     pub discover: self::discover::DiscoverConfig,
+    pub routers: self::router::RouterConfigs,
 }
 
 impl Config {
@@ -102,5 +126,23 @@ mod tests {
         // if it doesn't panic, it's good
         let _config = serde_json::to_string(&Config::default())
             .expect("default config is serializable");
+    }
+
+    #[test]
+    fn deployment_target_round_trip() {
+        let config = DeploymentTarget::Sidecar;
+        let serialized = serde_json::to_string(&config).unwrap();
+        let deserialized =
+            serde_json::from_str::<DeploymentTarget>(&serialized).unwrap();
+        assert_eq!(config, deserialized);
+    }
+
+    #[test]
+    fn provider_keys_source_round_trip() {
+        let config = ProviderKeysSource::Env;
+        let serialized = serde_json::to_string(&config).unwrap();
+        let deserialized =
+            serde_json::from_str::<ProviderKeysSource>(&serialized).unwrap();
+        assert_eq!(config, deserialized);
     }
 }

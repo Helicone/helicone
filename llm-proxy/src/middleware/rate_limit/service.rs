@@ -30,7 +30,7 @@ impl Service {
 }
 
 impl meltdown::Service for Service {
-    type Future = BoxFuture<'static, Result<(), runtime::Error>>;
+    type Future = BoxFuture<'static, Result<(), runtime::RuntimeError>>;
 
     fn run(self, mut token: Token) -> Self::Future {
         let unauthed_governor_limiter =

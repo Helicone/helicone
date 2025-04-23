@@ -2,21 +2,32 @@ use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
 
-use super::models::ModelsConfig;
+use super::providers::ProvidersConfig;
 use crate::types::discover::DiscoverMode;
 
-#[derive(Debug, Default, Clone, Deserialize, Serialize)]
+#[derive(Debug, Default, Clone, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(default, deny_unknown_fields, rename_all = "kebab-case")]
 pub struct DiscoverConfig {
     pub discover_mode: DiscoverMode,
-    pub providers: crate::config::providers::ProvidersConfig,
+    pub providers: ProvidersConfig,
     #[serde(default = "default_discover_decay", with = "humantime_serde")]
     pub discover_decay: Duration,
-    /// NOTE: In the future we will delete this field and
-    /// instead load the models from the provider's respective APIs
-    pub models: ModelsConfig,
 }
 
 fn default_discover_decay() -> Duration {
-    Duration::from_secs(600)
+    Duration::from_secs(120)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn discover_config_round_trip() {
+        let config = DiscoverConfig::default();
+        let serialized = serde_json::to_string(&config).unwrap();
+        let deserialized =
+            serde_json::from_str::<DiscoverConfig>(&serialized).unwrap();
+        assert_eq!(config, deserialized);
+    }
 }

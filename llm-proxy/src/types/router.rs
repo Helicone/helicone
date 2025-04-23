@@ -1,7 +1,29 @@
 use chrono::{DateTime, Utc};
+use compact_str::CompactString;
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::{config::router::RouterConfig, error::internal::InternalError};
+
+#[derive(
+    Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, Default,
+)]
+pub enum RouterId {
+    Uuid(Uuid),
+    Named(CompactString),
+    #[default]
+    Default,
+}
+
+impl std::fmt::Display for RouterId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            RouterId::Uuid(uuid) => write!(f, "{}", uuid),
+            RouterId::Named(name) => write!(f, "{}", name),
+            RouterId::Default => write!(f, "default"),
+        }
+    }
+}
 
 #[derive(Debug)]
 pub struct RouterMetadata {
@@ -48,5 +70,25 @@ impl TryFrom<crate::store::router::RouterRowWithVersion> for VersionedRouter {
             version: row.version,
             config,
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn router_id_round_trip() {
+        let id = RouterId::Uuid(Uuid::new_v4());
+        let serialized = serde_json::to_string(&id).unwrap();
+        let deserialized =
+            serde_json::from_str::<RouterId>(&serialized).unwrap();
+        assert_eq!(id, deserialized);
+
+        let id = RouterId::Default;
+        let serialized = serde_json::to_string(&id).unwrap();
+        let deserialized =
+            serde_json::from_str::<RouterId>(&serialized).unwrap();
+        assert_eq!(id, deserialized);
     }
 }

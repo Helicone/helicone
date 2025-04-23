@@ -6,6 +6,7 @@ pub(crate) mod dispatcher;
 pub mod error;
 pub(crate) mod mapper;
 pub mod middleware;
+pub(crate) mod router;
 // pub(crate) mod response;
 pub(crate) mod store;
 #[cfg(feature = "testing")]
