@@ -33,8 +33,11 @@ export class DemoController extends Controller {
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<OpenAI.Chat.Completions.ChatCompletion, string>> {
+    const heliconeOnHeliconeApiKey = await GET_KEY(
+      "key:helicone_on_helicone_key"
+    );
     const heliconeLogger = new HeliconeManualLogger({
-      apiKey: process.env.HELICONE_ON_HELICE_API_KEY ?? "",
+      apiKey: heliconeOnHeliconeApiKey,
     });
     const openaiKey = await GET_KEY("key:openai");
     if (!openaiKey) {
