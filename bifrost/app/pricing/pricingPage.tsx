@@ -95,16 +95,16 @@ export default function PricingPage() {
                     What do I get with the free plan?
                   </AccordionTrigger>
                   <AccordionContent className="accordion-content-style">
-                    The free plan gives you everything you need to get started. This includes full visibility into your LLM requests, response times, detailed usage metrics, and useful toolings like Sessions and Prompt Editor. It's perfect for testing and building early versions of your AI app - without needing a credit card.
+                    The free plan gives you everything you need to get started. This includes full visibility into your LLM requests, response times, detailed usage metrics, and useful toolings like Sessions and Prompt Editor. It&apos;s perfect for testing and building early versions of your AI app - without needing a credit card.
                   </AccordionContent>
                 </AccordionItem>
 
                 <AccordionItem value="item-2">
                   <AccordionTrigger className="font-medium text-left">
-                    How is Helicone's usage-based pricing calculated?
+                    How is Helicone&apos;s usage-based pricing calculated?
                   </AccordionTrigger>
                   <AccordionContent className="accordion-content-style">
-                    Helicone's usage-based pricing is calculated based on the number of requests you make to our API. You can find the rate per log under "Additional logs" in the table above.
+                    Helicone&apos;s usage-based pricing is calculated based on the number of requests you make to our API. You can find the rate per log under &quot;Additional logs&quot; in the table above.
                     <br />
                     <br />
                     You can also find your monthly usage in the <Link href="https://us.helicone.ai/settings/billing" className="underline hover:text-brand">Billing</Link> page in product.
@@ -128,7 +128,7 @@ export default function PricingPage() {
                     Can I switch plans or cancel anytime?
                   </AccordionTrigger>
                   <AccordionContent className="accordion-content-style">
-                    Yes! You can switch plans or cancel anytime - no lock-ins or long-term commitments. Add-ons are pro-rated, so you'll only pay for the time you use them. You can manage your plan directly in the <Link href="https://us.helicone.ai/settings/billing" className="underline hover:text-brand">Billing</Link> page.
+                    Yes! You can switch plans or cancel anytime - no lock-ins or long-term commitments. Add-ons are pro-rated, so you&apos;ll only pay for the time you use them. You can manage your plan directly in the <Link href="https://us.helicone.ai/settings/billing" className="underline hover:text-brand">Billing</Link> page.
                     <br />
                     <br />
                     For advanced needs like on-prem deployment, custom SLAs, or additional security requriements, <Link href="/contact" className="underline hover:text-brand">contact us</Link> about a custom Enterprise plan.
@@ -143,7 +143,7 @@ export default function PricingPage() {
                     Yes! Helicone works seamlessly with most major LLM providers out of the box, including OpenAI, Anthropic, Gemini, Vercel AI SDK, Azure, AWS Bedrock, OpenRouter, LangChain, Groq, LiteLLM, and more. Just update your base URL and add our API key.
                     <br />
                     <br />
-                    If you are using a custom model or a less-known provider, Helicone can still support it with a simple proxy setup. See our <Link href="https://docs.helicone.ai/getting-started/integration-method/gateway" className="underline hover:text-brand">Integration docs</Link> or reach out to us - we're happy to help you get set up.
+                    If you are using a custom model or a less-known provider, Helicone can still support it with a simple proxy setup. See our <Link href="https://docs.helicone.ai/getting-started/integration-method/gateway" className="underline hover:text-brand">Integration docs</Link> or reach out to us - we&apos;re happy to help you get set up.
                   </AccordionContent>
                 </AccordionItem>
 
