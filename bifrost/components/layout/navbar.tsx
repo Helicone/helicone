@@ -10,7 +10,7 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
-import { X, Briefcase, Mail, BookHeart, ChevronRight, Component, Newspaper, Earth, ExternalLink, Gem, Github, GitMerge, HandCoins, TrendingUp } from "lucide-react";
+import { X, Briefcase, Mail, BookHeart, ChevronRight, Scale, Newspaper, Earth, ExternalLink, Gem, Github, GitMerge, HandCoins, TrendingUp } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -19,6 +19,7 @@ import { useEffect, useRef, useState } from "react";
 import { BlogStructureMetaData } from "../templates/blog/getMetaData";
 import { Button } from "../ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 
 
 interface NavBarProps {
@@ -105,16 +106,18 @@ const MobileNav = () => {
           href={link.href}
           target={isExternalLink ? "_blank" : undefined}
           rel={isExternalLink ? "noopener noreferrer" : undefined}
-          className="flex items-center group gap-3 text-foreground"
+          className="flex items-center justify-between group my-0.5 text-accent-foreground"
         >
-          <span className="navbar-icon-size">{link.icon}</span>
-          <span className="font-medium text-sm">
-            {link.title}
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="navbar-icon-size flex items-center justify-center ml-1">{link.icon}</span>
+            <span className="font-medium text-sm">
+              {link.title}
+            </span>
+          </div>
           {isExternalLink ? (
-            <ExternalLink className="navbar-icon-size ml-auto text-muted-foreground stroke-[1.5px]" />
+            <ExternalLink className="size-4 text-slate-400 navbar-icon-style" />
           ) : (
-            <ChevronRight className="navbar-icon-size ml-auto text-muted-foreground stroke-[1.5px]" />
+            <ChevronRight className="size-4 text-slate-400 navbar-icon-style" />
           )}
         </Link>
       );
@@ -128,19 +131,33 @@ const MobileNav = () => {
       </div>
       {menuOpen && (
         <div className="fixed inset-0 top-[57px] z-50 bg-background">
-          <div className="h-full overflow-y-auto">
+          <div className="h-full pb-10 overflow-y-auto">
             <div className="flex flex-col gap-4 pt-3 px-4">
+
+              {/* Login and Contact Buttons */}
+              <div className="flex flex-col w-full items-center gap-4 pb-4">
+                <Link href="/signup" className="w-full">
+                  <Button variant="default" className="bg-brand w-full">
+                    Sign up
+                  </Button>
+                </Link>
+                <Link href="/signin" className="w-full">
+                  <Button variant="secondary" className="w-full">
+                    Log In
+                  </Button>
+                </Link>
+              </div>
 
               {renderLinks(mainComponents)}
 
               <Separator />
 
-              <p className="text-[10px] uppercase text-muted-foreground font-medium">Resources</p>
+              <p className="text-[10px] uppercase text-slate-400 font-medium mx-1">Resources</p>
               {renderLinks(resourcesComponents)}
 
               <Separator />
 
-              <p className="text-[10px] uppercase text-muted-foreground font-medium">Tools</p>
+              <p className="text-[10px] uppercase text-slate-400 font-medium  mx-1">Tools</p>
               {renderLinks(toolsComponents)}
 
               <Separator />
@@ -194,7 +211,7 @@ const toolsComponents: LinkItem[] = [
     href: "/comparison",
     description:
       "Compare LLM models and providers",
-    icon: <Component className="size-5 navbar-icon-style" />,
+    icon: <Scale className="size-5 navbar-icon-style" />,
   },
   {
     title: "Provider Status",
@@ -349,16 +366,22 @@ const NavBar = (props: NavBarProps) => {
                     <li className="row-span-3">
                       <NavigationMenuLink asChild>
                         <Link
-                          className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
+                          className="flex h-full w-full select-none flex-col justify-between rounded-md bg-gradient-to-b from-sky-50 to-muted/70 p-6 no-underline outline-none focus:shadow-md hover:bg-sky-100"
                           href={props.featuredBlogFolderName ? `/blog/${props.featuredBlogFolderName}` : "/blog"}
                         >
-                          {/* pull the latest blog */}
-                          <div className="mb-2 mt-4 text-lg font-medium">
-                            {props.featuredBlogMetadata.title}
+                          <Badge variant="default" className="w-fit self-start whitespace-nowrap">
+                            Latest
+                          </Badge>
+                          <div className="">
+                            {/* pull the latest blog */}
+                            <div className="mb-2 mt-4 line-clamp-2 text-lg font-medium">
+                              {props.featuredBlogMetadata.title}
+                            </div>
+                            <p className="text-sm leading-5 text-muted-foreground line-clamp-3">
+                              {props.featuredBlogMetadata.description}
+                            </p>
                           </div>
-                          <p className="text-sm leading-tight text-muted-foreground line-clamp-4">
-                            {props.featuredBlogMetadata.description}
-                          </p>
+
                         </Link>
                       </NavigationMenuLink>
                     </li>
@@ -370,7 +393,7 @@ const NavBar = (props: NavBarProps) => {
               <NavigationMenuItem>
                 <NavigationMenuTrigger>Tools</NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid w-[350px] gap-2 p-3">
+                  <ul className="grid w-[380px] gap-2 p-3">
                     {toolsComponents.map((component) => (
                       <ListItem
                         key={component.title}
@@ -437,7 +460,7 @@ const NavBar = (props: NavBarProps) => {
               </Button>
             </Link>
             <Link href="https://us.helicone.ai/signin">
-              <Button className="text-sm text-primary-foreground rounded-lg bg-sky-500">
+              <Button className="text-sm text-primary-foreground rounded-lg bg-brand">
                 Log In
               </Button>
             </Link>

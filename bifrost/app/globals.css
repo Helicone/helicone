@@ -83,7 +83,7 @@ h6[id] {
 
 @layer components {
   .navbar-icon-style {
-    @apply h-full w-full stroke-[1.5px] fill-none text-helicone-primary;
+    @apply h-full w-full stroke-[1.5px] fill-none text-brand;
   }
 }
 

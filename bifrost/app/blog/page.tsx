@@ -90,7 +90,7 @@ const RegularBlogPost: React.FC<BlogPostProps> = async ({
   return (
     <Link
       id="regular"
-      className="flex flex-col gap-4 md:gap-6 p-2 md:p-4 w-full bg-card hover:bg-accent border border-transparent hover:border-border rounded-xl pb-4 md:pb-6 transition-all duration-300"
+      className="flex flex-col gap-4 md:gap-6 p-2 md:p-4 w-full bg-white hover:bg-sky-50 border border-transparent hover:border-sky-100 rounded-xl pb-4 md:pb-6 transition-all duration-300"
       href={blog.href}
     >
       <div className="overflow-hidden rounded-xl relative group aspect-[16/9] w-full">
@@ -108,10 +108,10 @@ const RegularBlogPost: React.FC<BlogPostProps> = async ({
         <h2 className="font-bold text-lg leading-snug tracking-tight line-clamp-2">
           {blog.title}
         </h2>
-        <p className="text-muted-foreground text-sm line-clamp-2 md:line-clamp-3">
+        <p className="text-slate-500 text-sm line-clamp-2 md:line-clamp-3">
           {blog.description}
         </p>
-        <div className="flex items-center gap-2 text-muted-foreground text-sm pt-2">
+        <div className="flex items-center gap-2 text-slate-500 text-sm pt-2">
           <span>
             {blog.badgeText.charAt(0).toUpperCase() + blog.badgeText.slice(1)}
           </span>
@@ -137,7 +137,7 @@ const FeaturedBlogPost: React.FC<BlogPostProps> = async ({
   return (
     <Link
       id="featured"
-      className="flex flex-col md:flex-row items-start gap-4 md:gap-8 w-full bg-card md:bg-accent hover:bg-accent md:hover:bg-accent/80 rounded-xl p-2 md:p-6 border border-transparent md:border-border transition-all duration-300 mb-4 md:mb-6"
+      className="flex flex-col md:flex-row items-start gap-4 md:gap-8 w-full bg-white md:bg-sky-50 hover:bg-sky-50 md:hover:bg-sky-100 rounded-xl p-2 md:p-6 border border-transparent md:border-sky-100 transition-all duration-300 mb-4 md:mb-6"
       href={blog.href}
     >
       <div className="w-full md:w-1/2 overflow-hidden rounded-xl order-1 group aspect-[16/9] md:h-72 relative">
@@ -153,7 +153,7 @@ const FeaturedBlogPost: React.FC<BlogPostProps> = async ({
       </div>
       <div className="w-full md:w-1/2 h-full rounded-lg flex flex-col space-y-2 md:space-y-4 text-left order-2 md:mt-4 px-1 md:px-6">
         <div className="hidden md:flex items-center">
-          <span className="bg-primary/20 text-primary w-max items-center rounded-full px-3 py-1 text-sm font-medium">
+          <span className="bg-sky-200 text-sky-700 w-max items-center rounded-full px-3 py-1 text-sm font-medium">
             {blog.badgeText.charAt(0).toUpperCase() + blog.badgeText.slice(1)}
           </span>
         </div>
@@ -161,11 +161,11 @@ const FeaturedBlogPost: React.FC<BlogPostProps> = async ({
         <h2 className="font-bold text-lg md:text-3xl leading-snug md:leading-tight tracking-tight line-clamp-2">
           {blog.title}
         </h2>
-        <p className="text-muted-foreground md:text-muted-foreground text-sm md:text-base line-clamp-2 md:line-clamp-2">
+        <p className="text-slate-500 md:text-slate-600 text-sm md:text-base line-clamp-2 md:line-clamp-2">
           {blog.description}
         </p>
 
-        <div className="flex md:hidden items-center gap-2 text-muted-foreground text-sm pt-2">
+        <div className="flex md:hidden items-center gap-2 text-slate-500 text-sm pt-2">
           <span>
             {blog.badgeText.charAt(0).toUpperCase() + blog.badgeText.slice(1)}
           </span>
@@ -182,11 +182,11 @@ const FeaturedBlogPost: React.FC<BlogPostProps> = async ({
                   src={author.imageUrl}
                   alt={author.imageAlt || ""}
                 />
-                <span className="text-muted-foreground text-sm">{author.name}</span>
+                <span className="text-slate-500 text-sm">{author.name}</span>
               </div>
             ))}
           </div>
-          <span className="text-muted-foreground text-sm">{blog.date}</span>
+          <span className="text-slate-400 text-sm">{blog.date}</span>
         </div>
       </div>
     </Link>
@@ -803,7 +803,7 @@ export default async function Blog({
   });
 
   return (
-    <div className="w-full bg-background min-h-screen antialiased relative text-foreground">
+    <div className="w-full bg-gradient-to-b bg-white min-h-screen antialiased relative text-black">
       <div className="relative w-full flex flex-col mx-auto max-w-7xl h-full py-8 md:py-12 items-center text-center px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4">
           {/* Featured blog post */}
@@ -830,7 +830,7 @@ export default async function Blog({
             ))
           ) : (
             <div className="col-span-1 md:col-span-2 lg:col-span-3 text-center py-8">
-              <p className="text-muted-foreground">
+              <p className="text-slate-500">
                 No matching blog posts found. Try adjusting your filters.
               </p>
             </div>
