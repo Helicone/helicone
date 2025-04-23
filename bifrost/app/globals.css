@@ -85,9 +85,6 @@ h6[id] {
   .navbar-icon-style {
     @apply h-full w-full stroke-[1.5px] fill-none text-helicone-primary;
   }
-  .navbar-icon-size {
-    @apply h-5 w-5;
-  }
 }
 
 /* Custom link styling for blog content only */

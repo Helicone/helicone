@@ -162,21 +162,21 @@ const resourcesComponents: LinkItem[] = [
     href: "/changelog",
     description:
       "Latest updates and improvements",
-    icon: <GitMerge className="navbar-icon-style" />,
+    icon: <GitMerge className="size-5 navbar-icon-style" />,
   },
   {
     title: "Blog",
     href: "/blog",
     description:
       "Insights on AI development and best practices",
-    icon: <Newspaper className="navbar-icon-style" />,
+    icon: <Newspaper className="size-5 navbar-icon-style" />,
   },
   {
     title: "Community",
     href: "/community",
     description:
       "Built for scale, security, and control",
-    icon: <Gem className="navbar-icon-style" />,
+    icon: <Gem className="size-5 navbar-icon-style" />,
   },
 
 ]
@@ -187,28 +187,28 @@ const toolsComponents: LinkItem[] = [
     href: "/open-stats",
     description:
       "Real-time LLM usage analytics",
-    icon: <Earth className="navbar-icon-style" />,
+    icon: <Earth className="size-5 navbar-icon-style" />,
   },
   {
     title: "Model Comparison",
     href: "/comparison",
     description:
       "Compare LLM models and providers",
-    icon: <Component className="navbar-icon-style" />,
+    icon: <Component className="size-5 navbar-icon-style" />,
   },
   {
     title: "Provider Status",
     href: "/status",
     description:
       "Check LLM provider service status",
-    icon: <TrendingUp className="navbar-icon-style" />,
+    icon: <TrendingUp className="size-5 navbar-icon-style" />,
   },
   {
-    title: "API Pricing Calculator",
+    title: "LLM API Pricing Calculator",
     href: "/llm-cost",
     description:
       "Calculate and compare API costs",
-    icon: <HandCoins className="navbar-icon-style" />,
+    icon: <HandCoins className="size-5 navbar-icon-style" />,
   },
 ]
 
@@ -218,14 +218,14 @@ const mainComponents: LinkItem[] = [
     href: "https://docs.helicone.ai/",
     description:
       "Integrate Helicone into your AI application",
-    icon: <BookHeart className="navbar-icon-style" />,
+    icon: <BookHeart className="size-5 navbar-icon-style" />,
   },
   {
     title: "Pricing",
     href: "/pricing",
     description:
       "Simple, transparent pricing",
-    icon: <HandCoins className="navbar-icon-style" />,
+    icon: <HandCoins className="size-5 navbar-icon-style" />,
   },
 ]
 
@@ -235,21 +235,21 @@ const additionalComponents: LinkItem[] = [
     href: "/contact",
     description:
       "Get in touch with us",
-    icon: <Mail className="navbar-icon-style" />,
+    icon: <Mail className="size-5 navbar-icon-style" />,
   },
   {
     title: "Careers",
     href: "https://app.dover.com/jobs/helicone",
     description:
       "Join our team",
-    icon: <Briefcase className="navbar-icon-style" />,
+    icon: <Briefcase className="size-5 navbar-icon-style" />,
   },
   {
     title: "GitHub",
     href: "https://github.com/helicone/helicone",
     description:
       "Contribute to our project",
-    icon: <Github className="navbar-icon-style" />,
+    icon: <Github className="size-5 navbar-icon-style" />,
   },
 ]
 
