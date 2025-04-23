@@ -1,6 +1,5 @@
 use std::{
     collections::HashMap,
-    convert::Infallible,
     pin::Pin,
     task::{Context, Poll},
     time::Duration,
@@ -72,8 +71,8 @@ impl ConfigDiscovery {
             );
             service_map.insert(key.clone(), dispatcher);
         }
-        tracing::trace!(service_map_len = %service_map.len(), "creating config discovery");
 
+        tracing::trace!("Created config discovery");
         Ok(Self {
             initial: ServiceMap::new(service_map),
             events,
@@ -88,51 +87,20 @@ impl Stream for ConfigDiscovery {
         self: Pin<&mut Self>,
         ctx: &mut Context<'_>,
     ) -> Poll<Option<Self::Item>> {
-        tracing::trace!("ConfigDiscovery::poll_next");
         let mut this = self.project();
 
-        // --- Loop to check initial stream first ---
-        // We prioritize draining the initial set of services from the config.
-        // PeakEwmaDiscover will call poll_next repeatedly until it gets Pending
-        // or None.
-        match this.initial.as_mut().poll_next(ctx) {
-            Poll::Ready(Some(Ok(change))) => {
-                // Found an initial item, handle and return it immediately.
-                tracing::trace!("yielding initial stream item");
-                return handle_change(change);
-            }
-            Poll::Ready(None) => {
-                // Initial stream is exhausted, fall through to poll events.
-                tracing::trace!("initial stream ended, polling events");
-            }
-            Poll::Pending => {
-                // Should not happen with ServiceMap, but handle
-                // defensively.
-                tracing::trace!("initial stream pending");
-                return Poll::Pending;
-            }
-            Poll::Ready(Some(Err(e))) => {
-                // ServiceMap yields Infallible
-                tracing::error!(error = %e, "Error polling initial stream");
-                // Treat error as pending for recovery
-                return Poll::Pending;
-            }
+        // 1) one‑time inserts, once the ServiceMap returns
+        // `Poll::Ready(None)`, then it's done
+        if let Poll::Ready(Some(change)) = this.initial.as_mut().poll_next(ctx)
+        {
+            return handle_change(change);
         }
 
-        // --- Initial stream is done, poll live events ---
+        // 2) live events (removals / re‑inserts)
         match this.events.as_mut().poll_next(ctx) {
-            Poll::Ready(Some(change)) => {
-                tracing::trace!("yielding live event stream item");
-                handle_change(change)
-            }
-            Poll::Pending => {
-                tracing::trace!("live event stream pending");
-                Poll::Pending
-            }
-            Poll::Ready(None) => {
-                tracing::trace!("live event stream ended");
-                Poll::Ready(None) // End of combined stream
-            }
+            Poll::Ready(Some(change)) => handle_change(change),
+            Poll::Pending => Poll::Pending,
+            Poll::Ready(None) => Poll::Ready(None), // end of stream
         }
     }
 }
@@ -180,7 +148,7 @@ impl<K, V> Stream for ServiceMap<K, V>
 where
     K: std::hash::Hash + Eq + Clone,
 {
-    type Item = Result<Change<K, V>, Infallible>;
+    type Item = Change<K, V>;
 
     fn poll_next(
         self: Pin<&mut Self>,
@@ -188,7 +156,7 @@ where
     ) -> Poll<Option<Self::Item>> {
         match self.project().inner.next() {
             Some((key, service)) => {
-                Poll::Ready(Some(Ok(Change::Insert(key, service))))
+                Poll::Ready(Some(Change::Insert(key, service)))
             }
             None => Poll::Ready(None),
         }

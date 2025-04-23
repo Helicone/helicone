@@ -1,7 +1,12 @@
 use std::future::poll_fn;
 
 use tokio::sync::mpsc::channel;
-use tower::{balance::p2c::{Balance, MakeBalance}, buffer::Buffer, load::PeakEwmaDiscover, BoxError, Service};
+use tower::{
+    BoxError, Service,
+    balance::p2c::{Balance, MakeBalance},
+    buffer::Buffer,
+    load::PeakEwmaDiscover,
+};
 
 use crate::{
     app::AppState,

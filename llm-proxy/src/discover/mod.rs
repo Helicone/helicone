@@ -1,5 +1,4 @@
 pub mod provider;
-pub mod router;
 
 use std::{
     convert::Infallible,

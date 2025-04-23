@@ -47,8 +47,6 @@ impl Service<Receiver<Change<Key, DispatcherService>>> for DiscoverFactory {
             Ok(discovery) => discovery,
             Err(e) => return ready(Err(e)),
         };
-        let x = self.app_state.0.config.discover.discover_decay;
-        tracing::info!(decay = ?x, "discover_decay");
         let discovery = PeakEwmaDiscover::new(
             discovery,
             DEFAULT_PROVIDER_RTT,

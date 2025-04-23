@@ -23,7 +23,7 @@ where
 
     #[tracing::instrument(name = "AuthService::authorize", skip(self, request))]
     fn authorize(&mut self, mut request: Request<B>) -> Self::Future {
-        tracing::debug!("AuthService::authorize");
+        tracing::trace!("AuthService::authorize");
         Box::pin(async move {
             if let Some(auth_ctx) = check_auth(&request) {
                 // Set `auth_ctx` as a request extension so it can be accessed
@@ -43,7 +43,7 @@ where
     }
 }
 
-pub fn check_auth<B>(_request: &Request<B>) -> Option<AuthContext> {
+fn check_auth<B>(_request: &Request<B>) -> Option<AuthContext> {
     // ...
     // for now we are mocking this just to show how layers will stack on top of
     // each other

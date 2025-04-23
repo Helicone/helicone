@@ -105,7 +105,7 @@ impl tower::Service<crate::types::request::Request> for MetaRouter {
         //         let Some(uuid_match) = captures.name("uuid") else {
         //             // Regex matched but capture group missing? Should not
         // happen.             let error = Error::InvalidRequest(
-        //                 
+        //
         // InvalidRequestError::InvalidRouterId(path.to_string()),
         //             );
         //             return Ok(error.into_response());
@@ -113,7 +113,7 @@ impl tower::Service<crate::types::request::Request> for MetaRouter {
         //         let Ok(uuid) = Uuid::parse_str(uuid_match.as_str()) else {
         //             // Invalid UUID format matched by regex? Should not
         // happen.             let error = Error::InvalidRequest(
-        //                 
+        //
         // InvalidRequestError::InvalidRouterId(path.to_string()),
         //             );
         //             return Ok(error.into_response());
