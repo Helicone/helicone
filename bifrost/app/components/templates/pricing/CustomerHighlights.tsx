@@ -54,7 +54,7 @@ const highlights: CustomerHighlight[] = [
 
 export default function CustomerHighlights() {
   return (
-    <div className="min-h-[276px] flex items-center justify-center">
+    <div className="min-h-[200px] flex items-center justify-center">
       <div className="w-full rounded-xl flex flex-col md:flex-row border border-border">
         {highlights.map((highlight, index) => (
           <div

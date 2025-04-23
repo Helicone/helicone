@@ -81,6 +81,14 @@ h6[id] {
   }
 }
 
+  
+@layer components {
+  .accordion-content-style {
+    @apply text-muted-foreground text-sm leading-6;
+  }
+}
+
+
 /* Custom link styling for blog content only */
 .prose a {
   @apply font-semibold text-sky-500 no-underline;

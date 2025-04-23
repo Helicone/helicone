@@ -1,4 +1,3 @@
-import { ISLAND_WIDTH } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 
@@ -9,9 +8,9 @@ interface CompaniesProps {
 const Companies = ({ className }: CompaniesProps) => {
   return (
     <div className={cn("pb-12", className)}>
-      <div className={cn(ISLAND_WIDTH, "flex flex-col gap-4 ")}>
+      <div className="flex flex-col gap-4">
         {/* <ul className="grid grid-cols-4 lg:grid-cols-8 gap-8 md:gap-12 px-2 md:px-8 grayscale opacity-40 items-center"> */}
-        <ul className="grid grid-cols-4 lg:grid-cols-8 gap-2 lg:gap-8 px-2 md:px-8 grayscale opacity-40 items-center">
+        <ul className="grid grid-cols-4 lg:grid-cols-8 gap-2 lg:gap-8 grayscale opacity-40 items-center">
           {(
             [
               ["/static/togetherai.webp", "togetherai", 169, 53],

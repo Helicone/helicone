@@ -53,7 +53,7 @@ const ScaleCard: React.FC = () => {
         </Col>
 
         <Link href="https://us.helicone.ai/settings/billing">
-          <Button variant="default" className="w-full text-base font-semibold py-5 bg-brand">
+          <Button className="w-full text-base py-5 bg-brand">
             7-day free trial
           </Button>
         </Link>

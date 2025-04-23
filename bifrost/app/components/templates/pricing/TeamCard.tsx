@@ -52,7 +52,7 @@ const TeamCard: React.FC = () => {
         </Col>
 
         <Link href="https://us.helicone.ai/settings/billing">
-          <Button variant="secondary" className="w-full text-base font-semibold py-5">
+          <Button variant="secondary" className="w-full text-base py-5">
             7-day free trial
           </Button>
         </Link>

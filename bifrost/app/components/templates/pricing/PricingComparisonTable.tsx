@@ -502,8 +502,7 @@ export default function PricingComparisonTable() {
                     <Link href={tier.ctaHref}>
                       <Button
                         variant={tier.isPrimary ? "default" : "secondary"}
-                        className={`w-full text-base ${tier.isPrimary ? "bg-brand text-white" : ""
-                          }`}
+                        className={`w-full text-sm`}
                       >
                         {tier.ctaText}
                       </Button>

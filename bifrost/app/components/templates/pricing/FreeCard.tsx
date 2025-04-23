@@ -40,8 +40,8 @@ const FreeCard: React.FC = () => {
 
         <Link href="/signup">
           <Button
-            variant="secondary" className="w-full text-base font-semibold py-5">
-            Started for free
+            variant="secondary" className="w-full text-base py-5">
+            Get started for free
           </Button>
         </Link>
       </Col>
