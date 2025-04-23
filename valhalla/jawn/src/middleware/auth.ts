@@ -22,7 +22,8 @@ export const logHttpRequestInClickhouse = (
   const onFinish = () => {
     try {
       const duration = Date.now() - start;
-      const organizationId = authParams?.organizationId ?? "unknown";
+      const organizationId =
+        authParams?.organizationId ?? "00000000-0000-0000-0000-000000000000";
 
       clickhouseDb.dbInsertClickhouse("jawn_http_logs", [
         {
