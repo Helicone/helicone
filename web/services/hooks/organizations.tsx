@@ -394,13 +394,16 @@ const useOrgsContextManager = () => {
     if (orgs && orgs.length > 0) {
       const orgIdFromCookie = Cookies.get(ORG_ID_COOKIE_KEY);
       const orgFromCookie = orgs.find((org) => org.id === orgIdFromCookie);
+      const orgToUse =
+        orgFromCookie || orgs.find((org) => org.tier !== "demo") || orgs[0];
+      if (orgToUse?.tier === "demo") {
+        return;
+      }
       if (!orgFromCookie) {
         Cookies.set(ORG_ID_COOKIE_KEY, orgs[0].id, { expires: 30 });
       }
-      if (orgFromCookie?.tier === "demo") {
-        return;
-      }
-      setOrg(orgFromCookie || orgs[0]);
+
+      setOrg(orgToUse);
     }
   }, [orgs]);
 
