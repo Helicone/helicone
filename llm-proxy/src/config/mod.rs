@@ -29,6 +29,26 @@ pub enum Error {
     ),
 }
 
+#[derive(
+    Debug, Default, Clone, Copy, PartialEq, Eq, Deserialize, Serialize,
+)]
+#[serde(deny_unknown_fields, rename_all = "kebab-case")]
+pub enum DeploymentTarget {
+    Cloud,
+    #[default]
+    Sidecar,
+    SelfHosted,
+}
+
+#[derive(
+    Debug, Default, Clone, Copy, PartialEq, Eq, Deserialize, Serialize,
+)]
+#[serde(deny_unknown_fields, rename_all = "kebab-case")]
+pub enum ProviderKeysSource {
+    #[default]
+    Env,
+}
+
 #[derive(Debug, Default, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields, rename_all = "kebab-case")]
 pub struct Config {
@@ -38,7 +58,11 @@ pub struct Config {
     pub database: self::database::Config,
     pub minio: self::minio::Config,
     pub is_production: bool,
+    /// Global rate limiting configuration
     pub rate_limit: self::rate_limit::RateLimitConfig,
+
+    pub deployment_target: DeploymentTarget,
+    pub api_keys_source: ProviderKeysSource,
 
     pub discover: self::discover::DiscoverConfig,
     pub routers: self::router::RouterConfigs,

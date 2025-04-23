@@ -16,7 +16,6 @@ pub struct ProviderConfig {
     /// instead load the models from the provider's respective APIs
     pub models: Vec<Model>,
     pub base_url: Url,
-    pub api_key: Secret<String>,
 }
 
 impl Default for ProviderConfig {
@@ -42,7 +41,6 @@ fn default_openai_provider_config() -> ProviderConfig {
     ProviderConfig {
         models: default_openai_models(),
         base_url: default_openai_base_url(),
-        api_key: default_openai_api_key(),
     }
 }
 

@@ -7,22 +7,9 @@ use std::{
 
 use serde::{Deserialize, Serialize};
 
-#[derive(
-    Debug, Default, Clone, Copy, PartialEq, Eq, Deserialize, Serialize,
-)]
-#[serde(deny_unknown_fields, rename_all = "kebab-case")]
-pub enum DeploymentTarget {
-    Cloud,
-    #[default]
-    Sidecar,
-    SelfHosted,
-}
-
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields, rename_all = "kebab-case")]
 pub struct ServerConfig {
-    #[serde(default)]
-    pub deployment_target: DeploymentTarget,
     #[serde(default = "default_address")]
     pub address: IpAddr,
     #[serde(default = "default_port")]
@@ -38,7 +25,6 @@ pub struct ServerConfig {
 impl Default for ServerConfig {
     fn default() -> Self {
         Self {
-            deployment_target: DeploymentTarget::default(),
             address: default_address(),
             port: default_port(),
             tls: Default::default(),

@@ -1,14 +1,22 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, time::Duration};
 
 use derive_more::AsRef;
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 
 use super::{
-    rate_limit::RateLimitConfig, retry::RetryConfig,
+    rate_limit::RateLimitConfig,
+    retry::{RetryConfig, Strategy},
     spend_control::SpendControlConfig,
 };
-use crate::types::{provider::Provider, router::RouterId};
+use crate::{
+    discover::Key,
+    types::{
+        model::{Model, Version},
+        provider::Provider,
+        router::RouterId,
+    },
+};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq, AsRef)]
 pub struct RouterConfigs(HashMap<RouterId, RouterConfig>);
@@ -54,7 +62,15 @@ pub struct CacheControlConfig {
 #[serde(rename_all = "kebab-case")]
 pub struct FallbackConfig {
     pub enabled: bool,
-    pub order: Vec<ModelVersion>,
+    #[serde(default)]
+    pub order: Vec<FallbackTarget>,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
+#[serde(rename_all = "kebab-case")]
+pub struct FallbackTarget {
+    pub provider: Provider,
+    pub model: Model,
 }
 
 /// When it's time to add this, we need a weighted balance
@@ -64,22 +80,22 @@ pub struct FallbackConfig {
 /// https://github.com/tower-rs/tower/issues/696
 /// https://github.com/tower-rs/tower/pull/695/files
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
-pub struct BalanceConfig(pub Vec<BalanceTarget>);
+#[serde(rename_all = "kebab-case", tag = "strategy")]
+pub enum BalanceConfig {
+    Weighted { targets: Vec<BalanceTarget> },
+    P2C { targets: Vec<BalanceTarget> },
+}
 
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, Hash, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 pub struct BalanceTarget {
-    pub model: ModelVersion,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub prompt: Option<PromptVersion>,
+    #[serde(flatten)]
+    pub key: Key,
     pub weight: Decimal,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, Hash, PartialEq)]
 pub struct PromptVersion(pub String);
-
-#[derive(Debug, Clone, Deserialize, Serialize, Eq, Hash, PartialEq)]
-pub struct ModelVersion(pub String);
 
 #[derive(Debug, Clone, Deserialize, Eq, Hash, PartialEq)]
 pub struct Weight(pub Decimal);
@@ -95,17 +111,30 @@ pub fn test_router_config() -> RouterConfig {
     // Create test values for FallbackConfig
     let fallback = FallbackConfig {
         enabled: true,
-        order: vec![ModelVersion("claude-3-7-sonnet-latest".to_string())],
+        order: vec![FallbackTarget {
+            provider: Provider::OpenAI,
+            model: Model {
+                name: "claude-3-7-sonnet".to_string(),
+                version: Some(Version::Latest),
+            },
+        }],
     };
 
-    let balance = BalanceConfig(vec![BalanceTarget {
-        model: ModelVersion("claude-3-7-sonnet-latest".to_string()),
-        prompt: None,
-        weight: Decimal::from(1),
-    }]);
+    let balance = BalanceConfig::Weighted {
+        targets: vec![BalanceTarget {
+            key: Key {
+                provider: Provider::OpenAI,
+            },
+            weight: Decimal::from(1),
+        }],
+    };
     let retries = RetryConfig {
         enabled: false,
         max_retries: 3,
+        strategy: Strategy::Exponential {
+            base: Duration::from_secs(1),
+            max: Duration::from_secs(10),
+        },
     };
 
     // Create test values for RateLimitConfig

@@ -29,15 +29,20 @@ pub type DispatcherService =
 #[derive(Debug, Clone)]
 pub struct Dispatcher {
     client: Client,
-    // TODO: use this
-    _provider: Provider,
+    app_state: AppState,
+    provider: Provider,
 }
 
 impl Dispatcher {
-    pub fn new(client: Client, provider: Provider) -> Self {
+    pub fn new(
+        client: Client,
+        app_state: AppState,
+        provider: Provider,
+    ) -> Self {
         Self {
             client,
-            _provider: provider,
+            app_state,
+            provider,
         }
     }
 
@@ -56,7 +61,7 @@ impl Dispatcher {
             )
             // other middleware: rate limiting, logging, etc, etc
             // will be added here as well
-            .service(Dispatcher::new(Client::new(), provider));
+            .service(Dispatcher::new(Client::new(), app_state, provider));
 
         service_stack
     }
@@ -78,20 +83,34 @@ impl Service<Request> for Dispatcher {
     fn call(&mut self, req: Request) -> Self::Future {
         tracing::info!("Dispatcher::call");
         let this = self.clone();
+        let app_state = self.app_state.clone();
         tracing::debug!(uri = %req.uri(), headers = ?req.headers(), "Received request");
-        Box::pin(async move { this.dispatch(req).await })
+        Box::pin(async move { this.dispatch(app_state, req).await })
     }
 }
 
 impl Dispatcher {
-    async fn dispatch(&self, mut req: Request) -> Result<Response, Error> {
+    async fn dispatch(
+        &self,
+        app_state: AppState,
+        mut req: Request,
+    ) -> Result<Response, Error> {
         let req_ctx = req
             .extensions()
             .get::<Arc<RequestContext>>()
             .ok_or(InternalError::ExtensionNotFound("RequestContext"))?;
         let og_provider = req_ctx.proxy_context.original_provider.clone();
-        let target_provider = req_ctx.proxy_context.target_provider.clone();
-        let target_url = req_ctx.proxy_context.target_url.clone();
+        let target_provider = self.provider;
+        let target_url = app_state
+            .0
+            .config
+            .discover
+            .providers
+            .get(&target_provider)
+            .ok_or(InternalError::ProviderNotConfigured(target_provider))?
+            .base_url
+            .clone();
+        tracing::debug!(target_url = %target_url, "got target url");
         let provider_api_key = req_ctx
             .proxy_context
             .provider_api_keys

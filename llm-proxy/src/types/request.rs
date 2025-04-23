@@ -3,7 +3,6 @@ use std::{sync::Arc, time::Instant};
 use axum_core::body::Body;
 use indexmap::IndexMap;
 use isocountry::CountryCode;
-use url::Url;
 
 use super::{
     model::Model,
@@ -40,10 +39,13 @@ pub struct RequestContext {
 }
 
 pub struct RequestProxyContext {
-    pub target_url: Url,
-    pub target_provider: Provider,
     pub original_provider: Provider,
     pub original_model: Model,
-    pub target_model: Model,
+    pub forced_routing: Option<ForcedRouting>,
     pub provider_api_keys: ProviderKeys,
+}
+
+pub struct ForcedRouting {
+    pub provider: Provider,
+    pub model: Model,
 }

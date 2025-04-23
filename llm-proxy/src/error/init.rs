@@ -2,7 +2,7 @@ use displaydoc::Display;
 use telemetry::TelemetryError;
 use thiserror::Error;
 
-use crate::config::server::DeploymentTarget;
+use crate::config::DeploymentTarget;
 
 /// Errors that can occur during initialization.
 #[derive(Debug, Error, Display)]

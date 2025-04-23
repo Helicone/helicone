@@ -36,6 +36,8 @@ impl ProviderBalancer {
     pub fn new(app_state: AppState) -> (ProviderBalancer, ProviderMonitor) {
         let (tx, rx) = channel(CHANNEL_CAPACITY);
         let discovery = match app_state.0.config.discover.discover_mode {
+            // TODO: do we want a separate discover_mode from the deployment
+            // target?
             DiscoverMode::Config => Discovery::config(app_state.clone(), rx),
         };
         let discover = PeakEwmaDiscover::new(

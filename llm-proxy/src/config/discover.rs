@@ -15,5 +15,5 @@ pub struct DiscoverConfig {
 }
 
 fn default_discover_decay() -> Duration {
-    Duration::from_secs(600)
+    Duration::from_secs(120)
 }

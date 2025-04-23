@@ -19,7 +19,7 @@ use tracing::info;
 
 use crate::{
     config::{
-        Config,
+        Config, ProviderKeysSource,
         rate_limit::{AuthedLimiterConfig, UnauthedLimiterConfig},
         server::TlsConfig,
     },
@@ -28,6 +28,7 @@ use crate::{
     middleware::auth::AuthService,
     router::meta::MetaRouter,
     store::StoreRealm,
+    types::provider::ProviderKeys,
     utils::{catch_panic::CatchPanicLayer, handle_error::ErrorHandlerLayer},
 };
 
@@ -52,6 +53,7 @@ pub struct InnerAppState {
     pub authed_rate_limit: Arc<AuthedLimiterConfig>,
     pub unauthed_rate_limit: Arc<UnauthedLimiterConfig>,
     pub store: StoreRealm,
+    pub provider_keys: ProviderKeys,
 }
 
 impl std::fmt::Debug for InnerAppState {
@@ -67,6 +69,7 @@ impl std::fmt::Debug for InnerAppState {
             .field("unauthed_rate_limit", &self.unauthed_rate_limit)
             .field("store", &self.store)
             .field("minio", &minio)
+            .field("provider_keys", &self.provider_keys)
             .finish()
     }
 }
@@ -153,13 +156,16 @@ impl App {
             .connect(&config.database.url.0)
             .await
             .map_err(error::init::InitError::DatabaseConnection)?;
-
+        let provider_keys = match &config.api_keys_source {
+            ProviderKeysSource::Env => ProviderKeys::from_env(),
+        };
         let app_state = AppState(Arc::new(InnerAppState {
             config,
             minio,
             authed_rate_limit,
             unauthed_rate_limit,
             store: StoreRealm::new(pg_pool),
+            provider_keys,
         }));
 
         let (router, monitors) = MetaRouter::new(app_state.clone())?;

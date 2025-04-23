@@ -9,15 +9,17 @@ use std::{
 
 use futures::Stream;
 use pin_project::pin_project;
+use serde::{Deserialize, Serialize};
 use tokio::sync::mpsc::Receiver;
 use tower::discover::Change;
 
 use crate::{
-    app::AppState, discover::provider::config::ConfigDiscovery,
-    dispatcher::DispatcherService, types::provider::Provider,
+    app::AppState, config::DeploymentTarget,
+    discover::provider::config::ConfigDiscovery, dispatcher::DispatcherService,
+    types::provider::Provider,
 };
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Deserialize, Serialize)]
 pub struct Key {
     pub provider: Provider,
 }
@@ -36,6 +38,18 @@ pub enum Discovery {
 }
 
 impl Discovery {
+    pub fn new(
+        app_state: AppState,
+        rx: Receiver<Change<Key, DispatcherService>>,
+    ) -> Self {
+        match app_state.0.config.deployment_target {
+            DeploymentTarget::Sidecar => Self::config(app_state, rx),
+            DeploymentTarget::Cloud | DeploymentTarget::SelfHosted => {
+                todo!("cloud and self-hosted not supported yet")
+            }
+        }
+    }
+
     pub fn config(
         app_state: AppState,
         rx: Receiver<Change<Key, DispatcherService>>,

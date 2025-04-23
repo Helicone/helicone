@@ -20,6 +20,7 @@ derive_more = { workspace = true, features = ['as_ref', 'constructor', 'debug', 
 displaydoc = { workspace = true }
 futures = { workspace = true }
 governor = { workspace = true }
+heck = { workspace = true }
 http = { workspace = true }
 http-body-util = { workspace = true }
 humantime-serde = { workspace = true }

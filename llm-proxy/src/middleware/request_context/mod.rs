@@ -7,15 +7,12 @@ use std::{
 
 use futures::future::BoxFuture;
 use http::Request;
-use indexmap::IndexMap;
 use isocountry::CountryCode;
 
 use crate::{
     app::AppState,
     config::router::RouterConfig,
-    error::{
-        api::Error, internal::InternalError,
-    },
+    error::{api::Error, internal::InternalError},
     types::{
         model::Model,
         provider::ProviderKeys,
@@ -28,6 +25,7 @@ pub struct Service<S, ReqBody> {
     inner: S,
     app_state: AppState,
     router_config: Arc<RouterConfig>,
+    provider_keys: ProviderKeys,
     _marker: PhantomData<ReqBody>,
 }
 
@@ -42,6 +40,7 @@ where
             inner: self.inner.clone(),
             app_state: self.app_state.clone(),
             router_config: self.router_config.clone(),
+            provider_keys: self.provider_keys.clone(),
             _marker: PhantomData,
         }
     }
@@ -52,11 +51,13 @@ impl<S, ReqBody> Service<S, ReqBody> {
         inner: S,
         app_state: AppState,
         router_config: Arc<RouterConfig>,
+        provider_keys: ProviderKeys,
     ) -> Self {
         Self {
             inner,
             app_state,
             router_config,
+            provider_keys,
             _marker: PhantomData,
         }
     }
@@ -81,20 +82,17 @@ where
         self.inner.poll_ready(cx).map_err(Into::into)
     }
 
-    #[tracing::instrument(
-        name = "RequestContextService::call",
-        skip(self, req)
-    )]
+    #[tracing::instrument(skip_all)]
     fn call(&mut self, mut req: Request<ReqBody>) -> Self::Future {
         tracing::info!("RequestContextService::call");
         let mut this = self.clone();
-        let app_state = this.app_state.clone();
         let router_config = this.router_config.clone();
+        let provider_keys = this.provider_keys.clone();
         Box::pin(async move {
             let req_ctx = Arc::new(
                 Service::<S, ReqBody>::get_context(
-                    app_state,
                     router_config,
+                    provider_keys,
                     &mut req,
                 )
                 .await?,
@@ -113,8 +111,8 @@ where
     S::Error: Into<Error> + Send + Sync + 'static,
 {
     async fn get_context(
-        app_state: AppState,
         router_config: Arc<RouterConfig>,
+        provider_api_keys: ProviderKeys,
         req: &mut Request<ReqBody>,
     ) -> Result<RequestContext, Error> {
         let auth_context = req
@@ -122,52 +120,16 @@ where
             .remove::<AuthContext>()
             .ok_or(InternalError::ExtensionNotFound("AuthContext"))?;
         tracing::info!("hi");
-        let mut tx = app_state.0.store.db.begin().await?;
-        // TODO: will likely want to make this into one call/fetch all provider
-        // keys at once since we may have multiple
-        let provider_api_key = app_state
-            .0
-            .store
-            .provider_keys
-            .get_provider_key(
-                &mut tx,
-                &auth_context.org_id,
-                router_config.default_provider,
-            )
-            .await
-            .inspect_err(|e| {
-                tracing::error!(error = ?e, "Error getting provider key");
-            })?;
-        tracing::debug!(
-            provider = %provider_api_key.provider_name,
-            "got provider key"
-        );
-        let provider_api_keys = ProviderKeys::new(IndexMap::from_iter([(
-            router_config.default_provider,
-            provider_api_key.provider_key,
-        )]));
 
-        let target_url = app_state
-            .0
-            .config
-            .discover
-            .providers
-            .get(&router_config.default_provider)
-            .ok_or(InternalError::ProviderNotConfigured(router_config.default_provider))?
-            .base_url
-            .clone();
-        tracing::debug!(target_url = %target_url, "got target url");
         // TODO: this will come from parsing the prompt+headers+etc
         let helicone = crate::types::request::HeliconeContext {
             properties: None,
             template_inputs: None,
         };
         let proxy_context = crate::types::request::RequestProxyContext {
-            target_url,
-            target_provider: router_config.default_provider,
+            forced_routing: None,
             original_provider: router_config.default_provider,
             original_model: Model::new("gpt4o-mini".to_string(), None),
-            target_model: Model::new("gpt4o-mini".to_string(), None),
             provider_api_keys,
         };
         let req_ctx = RequestContext {
@@ -189,14 +151,20 @@ where
 pub struct Layer<ReqBody> {
     app_state: AppState,
     router_config: Arc<RouterConfig>,
+    provider_keys: ProviderKeys,
     _marker: PhantomData<ReqBody>,
 }
 
 impl<ReqBody> Layer<ReqBody> {
-    pub fn new(app_state: AppState, router_config: Arc<RouterConfig>) -> Self {
+    pub fn new(
+        app_state: AppState,
+        router_config: Arc<RouterConfig>,
+        provider_keys: ProviderKeys,
+    ) -> Self {
         Self {
             app_state,
             router_config,
+            provider_keys,
             _marker: PhantomData,
         }
     }
@@ -206,6 +174,11 @@ impl<S, ReqBody> tower::Layer<S> for Layer<ReqBody> {
     type Service = Service<S, ReqBody>;
 
     fn layer(&self, inner: S) -> Self::Service {
-        Service::new(inner, self.app_state.clone(), self.router_config.clone())
+        Service::new(
+            inner,
+            self.app_state.clone(),
+            self.router_config.clone(),
+            self.provider_keys.clone(),
+        )
     }
 }

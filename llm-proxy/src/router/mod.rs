@@ -11,7 +11,7 @@ use tower::ServiceBuilder;
 use crate::{
     app::AppState,
     balancer::provider::ProviderBalancer,
-    config::{router::RouterConfig, server::DeploymentTarget},
+    config::{DeploymentTarget, router::RouterConfig},
     discover::provider::monitor::ProviderMonitor,
     error::init::InitError,
     middleware::request_context,
@@ -22,25 +22,6 @@ use crate::{
 pub type RouterService = ErrorHandler<
     request_context::Service<ProviderBalancer, axum_core::body::Body>,
 >;
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum RouterConfigSource {
-    Database,
-    #[allow(dead_code)]
-    Helicone,
-    ConfigFile,
-}
-
-impl From<&DeploymentTarget> for RouterConfigSource {
-    fn from(value: &DeploymentTarget) -> Self {
-        match value {
-            DeploymentTarget::Cloud | DeploymentTarget::SelfHosted => {
-                Self::Database
-            }
-            DeploymentTarget::Sidecar => Self::ConfigFile,
-        }
-    }
-}
 
 #[derive(Debug, Clone)]
 pub struct Router {
@@ -54,17 +35,14 @@ impl Router {
         id: RouterId,
         app_state: AppState,
     ) -> Result<(Self, ProviderMonitor), InitError> {
-        let source = RouterConfigSource::from(
-            &app_state.0.config.server.deployment_target,
-        );
-        let router_config = match source {
-            RouterConfigSource::Database | RouterConfigSource::Helicone => {
+        let router_config = match &app_state.0.config.deployment_target {
+            DeploymentTarget::Cloud | DeploymentTarget::SelfHosted => {
                 return Err(InitError::DeploymentTargetNotSupported(
-                    app_state.0.config.server.deployment_target,
+                    app_state.0.config.deployment_target,
                 ));
             }
-            RouterConfigSource::ConfigFile => {
-                let default_router_config = app_state
+            DeploymentTarget::Sidecar => {
+                let router_config = app_state
                     .0
                     .config
                     .routers
@@ -72,19 +50,20 @@ impl Router {
                     .get(&RouterId::Default)
                     .ok_or(InitError::DefaultRouterNotFound)?
                     .clone();
-                Arc::new(default_router_config)
+                Arc::new(router_config)
             }
         };
-        // for all providers, fetch provider keys
-        let providers = app_state.0.config.discover.providers.keys().collect::<Vec<_>>();
-
-        // TODO: how to get provider keys via discovery 
+        // TODO: how to get provider keys via discovery instead of above^
         let (balancer, monitor) = ProviderBalancer::new(app_state.clone());
         let service_stack: RouterService = ServiceBuilder::new()
             .layer(ErrorHandlerLayer)
             .layer(crate::middleware::request_context::Layer::<
                 axum_core::body::Body,
-            >::new(app_state.clone(), router_config.clone()))
+            >::new(
+                app_state.clone(),
+                router_config.clone(),
+                app_state.0.provider_keys.clone(),
+            ))
             // other middleware: rate limiting, logging, etc, etc
             // will be added here as well from the router config
             // .map_err(|e| crate::error::api::Error::Box(e))

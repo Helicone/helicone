@@ -13,7 +13,7 @@ use uuid::Uuid;
 use super::{Router, RouterService};
 use crate::{
     app::AppState,
-    config::server::DeploymentTarget,
+    config::DeploymentTarget,
     discover::provider::monitor::ProviderMonitors,
     error::{api::Error, init::InitError, invalid_req::InvalidRequestError},
     types::router::RouterId,
@@ -32,11 +32,11 @@ impl MetaRouter {
     pub fn new(
         app_state: AppState,
     ) -> Result<(Self, ProviderMonitors), InitError> {
-        match app_state.0.config.server.deployment_target {
-            DeploymentTarget::Cloud => Self::from_config(app_state),
-            DeploymentTarget::Sidecar | DeploymentTarget::SelfHosted => {
+        match app_state.0.config.deployment_target {
+            DeploymentTarget::Sidecar => Self::from_config(app_state),
+            DeploymentTarget::Cloud | DeploymentTarget::SelfHosted => {
                 return Err(InitError::DeploymentTargetNotSupported(
-                    app_state.0.config.server.deployment_target,
+                    app_state.0.config.deployment_target,
                 ));
             }
         }
