@@ -127,4 +127,22 @@ mod tests {
         let _config = serde_json::to_string(&Config::default())
             .expect("default config is serializable");
     }
+
+    #[test]
+    fn deployment_target_round_trip() {
+        let config = DeploymentTarget::Sidecar;
+        let serialized = serde_json::to_string(&config).unwrap();
+        let deserialized =
+            serde_json::from_str::<DeploymentTarget>(&serialized).unwrap();
+        assert_eq!(config, deserialized);
+    }
+
+    #[test]
+    fn provider_keys_source_round_trip() {
+        let config = ProviderKeysSource::Env;
+        let serialized = serde_json::to_string(&config).unwrap();
+        let deserialized =
+            serde_json::from_str::<ProviderKeysSource>(&serialized).unwrap();
+        assert_eq!(config, deserialized);
+    }
 }

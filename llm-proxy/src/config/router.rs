@@ -162,4 +162,13 @@ mod tests {
             serde_json::from_str::<RouterConfig>(&serialized).unwrap();
         assert_eq!(config, deserialized);
     }
+
+    #[test]
+    fn router_configs_round_trip() {
+        let config = RouterConfigs::default();
+        let serialized = serde_json::to_string(&config).unwrap();
+        let deserialized =
+            serde_json::from_str::<RouterConfigs>(&serialized).unwrap();
+        assert_eq!(config, deserialized);
+    }
 }

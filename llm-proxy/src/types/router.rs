@@ -8,7 +8,6 @@ use crate::{config::router::RouterConfig, error::internal::InternalError};
 #[derive(
     Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, Default,
 )]
-#[serde(untagged)]
 pub enum RouterId {
     Uuid(Uuid),
     Named(CompactString),
@@ -71,5 +70,25 @@ impl TryFrom<crate::store::router::RouterRowWithVersion> for VersionedRouter {
             version: row.version,
             config,
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn router_id_round_trip() {
+        let id = RouterId::Uuid(Uuid::new_v4());
+        let serialized = serde_json::to_string(&id).unwrap();
+        let deserialized =
+            serde_json::from_str::<RouterId>(&serialized).unwrap();
+        assert_eq!(id, deserialized);
+
+        let id = RouterId::Default;
+        let serialized = serde_json::to_string(&id).unwrap();
+        let deserialized =
+            serde_json::from_str::<RouterId>(&serialized).unwrap();
+        assert_eq!(id, deserialized);
     }
 }
