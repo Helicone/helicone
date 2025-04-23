@@ -411,6 +411,20 @@ const MobileNav = () => {
         <div className="fixed inset-0 top-[57px] z-50 bg-white">
           <div className="h-full overflow-y-auto">
             <div className="flex flex-col gap-2 pt-3 px-4">
+              {/* Login and Contact Buttons */}
+              <div className="flex flex-col w-full items-center gap-4 pb-4">
+                <Link href="/signup" className="w-full">
+                  <Button variant="default" className="bg-brand w-full">
+                    Sign up
+                  </Button>
+                </Link>
+                <Link href="/signin" className="w-full">
+                  <Button variant="secondary" className="w-full">
+                    Log In
+                  </Button>
+                </Link>
+              </div>
+
               {/* Standard Links */}
               <div className="flex flex-col gap-4">
                 {renderLinks(standardLinks)}
