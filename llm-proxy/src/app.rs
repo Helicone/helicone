@@ -173,7 +173,7 @@ impl App {
             provider_keys,
         }));
 
-        let (router, monitors) = MetaRouter::new(app_state.clone())?;
+        let (router, monitors) = MetaRouter::new(app_state.clone()).await?;
 
         // global middleware is applied here
         let service_stack = ServiceBuilder::new()

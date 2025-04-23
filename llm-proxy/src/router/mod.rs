@@ -31,7 +31,7 @@ pub struct Router {
 }
 
 impl Router {
-    pub fn new(
+    pub async fn new(
         id: RouterId,
         app_state: AppState,
     ) -> Result<(Self, ProviderMonitor), InitError> {
@@ -54,7 +54,7 @@ impl Router {
             }
         };
         // TODO: how to get provider keys via discovery instead of above^
-        let (balancer, monitor) = ProviderBalancer::new(app_state.clone())?;
+        let (balancer, monitor) = ProviderBalancer::new(app_state.clone()).await?;
         let service_stack: RouterService = ServiceBuilder::new()
             .layer(ErrorHandlerLayer)
             .layer(crate::middleware::request_context::Layer::<

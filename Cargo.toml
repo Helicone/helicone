@@ -84,6 +84,7 @@ strum = "0.27.1"
 stubr = { git = "https://github.com/tomharmon/stubr" }
 thiserror = "2.0.11"
 tokio = { version = "1.44.2", features = ['full'] }
+tokio-util = "0.7.15"
 tokio-stream = "0.1.17"
 tower = "0.5.2"
 tower_governor = "0.7.0"

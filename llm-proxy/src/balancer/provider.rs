@@ -1,20 +1,19 @@
-use std::time::Duration;
+use std::future::poll_fn;
 
 use tokio::sync::mpsc::channel;
 use tower::{
-    BoxError, buffer::Buffer, load::PeakEwmaDiscover,
+    BoxError, load::PeakEwmaDiscover, Service
 };
 
 use crate::{
     app::AppState,
-    discover::{provider::monitor::ProviderMonitor, Discovery},
+    discover::{provider::{factory::DiscoverFactory, monitor::ProviderMonitor}, Discovery},
     error::{init::InitError, internal::InternalError},
-    types::{discover::DiscoverMode, request::Request, response::Response}, vendored::balance::p2c::Balance,
+    types::{request::Request, response::Response}, vendored::{balance::p2c::{Balance, MakeBalance}, buffer::Buffer},
 };
 
 const BUFFER_SIZE: usize = 1024;
 const CHANNEL_CAPACITY: usize = 128;
-const DEFAULT_PROVIDER_RTT: Duration = Duration::from_millis(500);
 
 #[derive(Clone)]
 pub struct ProviderBalancer {
@@ -33,23 +32,15 @@ impl std::fmt::Debug for ProviderBalancer {
 }
 
 impl ProviderBalancer {
-    pub fn new(
+    pub async fn new(
         app_state: AppState,
     ) -> Result<(ProviderBalancer, ProviderMonitor), InitError> {
         let (tx, rx) = channel(CHANNEL_CAPACITY);
-        let discovery = match app_state.0.config.discover.discover_mode {
-            // TODO: do we want a separate discover_mode from the deployment
-            // target?
-            DiscoverMode::Config => Discovery::config(app_state.clone(), rx)?,
-        };
-        let discover = PeakEwmaDiscover::new(
-            discovery,
-            DEFAULT_PROVIDER_RTT,
-            app_state.0.config.discover.discover_decay,
-            Default::default(),
-        );
-
-        let inner = Buffer::new(Balance::new(discover), BUFFER_SIZE);
+        let discover_factory = DiscoverFactory::new(app_state.clone());
+        let mut balance_factory = MakeBalance::new(discover_factory);
+        let mut balance = balance_factory.call(rx).await?;
+        poll_fn(|cx| balance.poll_ready(cx)).await.map_err(InitError::CreateBalancer)?;
+        let inner = Buffer::new(balance, BUFFER_SIZE);
         let provider_monitor = ProviderMonitor::new(tx);
         let provider_balancer = ProviderBalancer { inner };
 

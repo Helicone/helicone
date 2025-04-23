@@ -29,12 +29,12 @@ pub struct MetaRouter {
 }
 
 impl MetaRouter {
-    pub fn new(
+    pub async fn new(
         app_state: AppState,
     ) -> Result<(Self, ProviderMonitors), InitError> {
         tracing::trace!("creating meta router");
         match app_state.0.config.deployment_target {
-            DeploymentTarget::Sidecar => Self::from_config(app_state),
+            DeploymentTarget::Sidecar => Self::from_config(app_state).await,
             DeploymentTarget::Cloud | DeploymentTarget::SelfHosted => {
                 return Err(InitError::DeploymentTargetNotSupported(
                     app_state.0.config.deployment_target,
@@ -43,7 +43,7 @@ impl MetaRouter {
         }
     }
 
-    pub fn from_config(
+    pub async fn from_config(
         app_state: AppState,
     ) -> Result<(Self, ProviderMonitors), InitError> {
         let router_id_regex =
@@ -54,7 +54,7 @@ impl MetaRouter {
             HashMap::with_capacity(app_state.0.config.routers.as_ref().len());
         for router_id in app_state.0.config.routers.as_ref().keys() {
             let (router, monitor) =
-                Router::new(router_id.clone(), app_state.clone())?;
+                Router::new(router_id.clone(), app_state.clone()).await?;
             monitors.insert(router_id.clone(), monitor);
             inner.insert(router_id.clone(), router);
         }
