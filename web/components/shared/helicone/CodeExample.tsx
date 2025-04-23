@@ -54,6 +54,7 @@ export const CodeExample = (codeExampleKey: CodeExampleKey) => {
     <div className="w-full md:w-[568.25px] h-full relative rounded-lg overflow-hidden">
       {/* Background Image */}
       {codeExample.image && (
+        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={codeExample.image}
           alt={codeExample.alt}

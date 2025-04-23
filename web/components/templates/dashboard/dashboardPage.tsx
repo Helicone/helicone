@@ -1,9 +1,11 @@
+import { HeliconeUser } from "@/packages/common/auth/types";
+import { UIFilterRowTree } from "@/services/lib/filters/types";
+import { TimeFilter } from "@/types/timeFilter";
 import {
   ArrowPathIcon,
   ChartBarIcon,
   PresentationChartLineIcon,
 } from "@heroicons/react/24/outline";
-import { User } from "@supabase/auth-helpers-nextjs";
 import { AreaChart, BarChart, BarList, Card } from "@tremor/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
@@ -20,19 +22,11 @@ import {
 import { useGetUnauthorized } from "../../../services/hooks/dashboard";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
-import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
 import {
   filterUITreeToFilterNode,
   getRootFilterNode,
   isFilterRowNode,
 } from "../../../services/lib/filters/uiFilterRowTree";
-import { UIFilterRowTree } from "@/services/lib/filters/types";
-import {
-  OrganizationFilter,
-  OrganizationLayout,
-  transformFilter,
-  transformOrganizationLayoutFilters,
-} from "../../../services/lib/organization_layout/organization_layout";
 import { useOrg } from "../../layout/org/organizationContext";
 import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
@@ -47,28 +41,24 @@ import UpgradeProModal from "../../shared/upgradeProModal";
 import { formatLargeNumber } from "../../shared/utils/numberFormat";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import UnauthorizedView from "../requests/UnauthorizedView";
+import DashboardEmptyState from "./DashboardEmptyState";
 import { INITIAL_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
+import {
+  getMockFilterMap,
+  getMockMetrics,
+  getMockModels,
+  getMockOverTimeData,
+} from "./mockDashboardData";
 import CountryPanel from "./panels/countryPanel";
 import { ScoresPanel } from "./panels/scores/scoresPanel";
 import { QuantilesGraph } from "./quantilesGraph";
 import StyledAreaChart from "./styledAreaChart";
 import SuggestionModal from "./suggestionsModal";
 import { useDashboardPage } from "./useDashboardPage";
-import { TimeFilter } from "@/types/timeFilter";
-import DashboardEmptyState from "./DashboardEmptyState";
-import {
-  getMockMetrics,
-  getMockModels,
-  getMockOverTimeData,
-  getMockFilterMap,
-} from "./mockDashboardData";
-
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 interface DashboardPageProps {
-  user: User;
-  currentFilter: OrganizationFilter | null;
-  organizationLayout: OrganizationLayout | null;
+  user: HeliconeUser;
 }
 
 function max(arr: number[]) {
@@ -92,7 +82,7 @@ export type Loading<T> = T | "loading";
 export type DashboardMode = "requests" | "costs" | "errors";
 
 const DashboardPage = (props: DashboardPageProps) => {
-  const { user, organizationLayout } = props;
+  const { user } = props;
   const initialLoadRef = useRef(true);
 
   const searchParams = useSearchParams();
@@ -105,27 +95,6 @@ const DashboardPage = (props: DashboardPageProps) => {
   const mockMetrics = useMemo(() => getMockMetrics(), []);
   const mockFilterMap = useMemo(() => getMockFilterMap(), []);
   const mockModels = useMemo(() => getMockModels(), []);
-
-  const { organizationLayout: orgLayout, refetch: orgLayoutRefetch } =
-    useOrganizationLayout(
-      orgContext?.currentOrg?.id!,
-      "dashboard",
-      organizationLayout
-        ? {
-            data: organizationLayout,
-            error: null,
-          }
-        : undefined
-    );
-
-  const transformedFilters = useMemo(() => {
-    if (orgLayout?.data?.filters) {
-      return transformOrganizationLayoutFilters(orgLayout.data.filters);
-    }
-    return [];
-  }, [orgLayout?.data?.filters]);
-
-  const [currFilter, setCurrFilter] = useState<string | null>("");
 
   const getInterval = () => {
     const currentTimeFilter = searchParams.get("t");
@@ -475,17 +444,6 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const [openSuggestGraph, setOpenSuggestGraph] = useState(false);
 
-  const onLayoutFilterChange = (layoutFilter: OrganizationFilter | null) => {
-    if (layoutFilter !== null) {
-      const transformedFilter = transformFilter(layoutFilter.filter[0]);
-      onSetAdvancedFiltersHandler(transformedFilter, layoutFilter.id);
-      setCurrFilter(layoutFilter.id);
-    } else {
-      setCurrFilter(null);
-      onSetAdvancedFiltersHandler({ operator: "and", rows: [] }, null);
-    }
-  };
-
   return (
     <>
       <div className="px-8">
@@ -566,22 +524,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                       searchPropertyFilters: searchPropertyFilters,
                     }
               }
-              savedFilters={
-                shouldShowMockData
-                  ? undefined
-                  : {
-                      currentFilter: currFilter ?? undefined,
-                      filters:
-                        transformedFilters && orgLayout?.data?.id
-                          ? transformedFilters
-                          : undefined,
-                      onFilterChange: onLayoutFilterChange,
-                      onSaveFilterCallback: async () => {
-                        await orgLayoutRefetch();
-                      },
-                      layoutPage: "dashboard",
-                    }
-              }
+              savedFilters={undefined}
             />
             <section id="panels" className="-m-2">
               <ResponsiveGridLayout

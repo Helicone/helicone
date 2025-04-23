@@ -13,7 +13,10 @@ function isValidHeliconeAuth(auth: HeliconeAuth): boolean {
     return typeof auth.token === "string";
   }
   if (auth._type === "jwt") {
-    return typeof auth.token === "string" && typeof auth.orgId === "string";
+    if (auth.orgId && typeof auth.orgId !== "string") {
+      return false;
+    }
+    return typeof auth.token === "string";
   }
   return false;
 }

@@ -1,4 +1,3 @@
-import { SupabaseClient } from "@supabase/supabase-js";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 
 export interface Metrics {
@@ -14,9 +13,4 @@ export interface Metrics {
 
 export interface GetMetricsOptions {
   filter: FilterNode;
-}
-
-export interface AuthClient {
-  client: SupabaseClient;
-  orgId: string;
 }

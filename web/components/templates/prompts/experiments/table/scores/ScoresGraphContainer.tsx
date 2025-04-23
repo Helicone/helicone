@@ -1,9 +1,8 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import ScoresGraph from "./ScoresGraph";
 import { useExperimentScores } from "@/services/hooks/prompts/experiment-scores";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { PromptVersion } from "./PromptVersion";
-import { useOrg } from "@/components/layout/org/organizationContext";
+import ScoresGraph from "./ScoresGraph";
 
 const ScoresGraphContainer = ({
   experimentId,
@@ -14,13 +13,8 @@ const ScoresGraphContainer = ({
 }) => {
   const { fetchExperimentHypothesisScores } = useExperimentScores(experimentId);
   const queryClient = useQueryClient();
-  const org = useOrg();
 
-  const {
-    data: scores,
-    isLoading,
-    refetch,
-  } = useQuery({
+  const { data: scores, isLoading } = useQuery({
     queryKey: ["experimentScores", experimentId],
     queryFn: async () => {
       const scoresData: Record<string, any> = {};
@@ -49,6 +43,7 @@ const ScoresGraphContainer = ({
     },
     // Add these options to prevent cancellation
     staleTime: 0,
+    refetchInterval: 10_000,
     refetchOnWindowFocus: false,
   });
 
@@ -63,10 +58,6 @@ const ScoresGraphContainer = ({
       });
     }
   }, [scores, experimentId, queryClient]);
-
-  useEffect(() => {
-    refetch();
-  }, [promptVersions]);
 
   if (isLoading) {
     return <div>Loading...</div>; // Or your loading component

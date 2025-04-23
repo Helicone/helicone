@@ -17,7 +17,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useMemo } from "react";
 import { useOrg } from "./org/organizationContext";
 import clsx from "clsx";
-import { useUser } from "@supabase/auth-helpers-react";
 
 type Organization = {
   id: string;
@@ -41,7 +40,6 @@ export default function OrgMoreDropdown({
   currentOrgId?: string;
   setCurrentOrg?: (orgId: string) => void;
 }) {
-  const user = useUser();
   const orgContext = useOrg();
   const currentIcon = useMemo(
     () =>

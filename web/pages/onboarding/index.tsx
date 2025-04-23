@@ -1,26 +1,25 @@
 "use client";
-
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { useOrg } from "@/components/layout/org/organizationContext";
-import { useUser } from "@supabase/auth-helpers-react";
-import { PlanType, useOrgOnboarding } from "@/services/hooks/useOrgOnboarding";
-import React, { useEffect } from "react";
+import { MemberRole, MembersTable } from "@/components/onboarding/MembersTable";
 import { OnboardingHeader } from "@/components/onboarding/OnboardingHeader";
 import { OrganizationStep } from "@/components/onboarding/Steps/OrganizationStep";
 import { PlanStep } from "@/components/onboarding/Steps/PlanStep";
-import { MemberRole, MembersTable } from "@/components/onboarding/MembersTable";
-import { useQuery } from "@tanstack/react-query";
-import { getJawnClient } from "@/lib/clients/jawn";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Info } from "lucide-react";
 import useNotification from "@/components/shared/notification/useNotification";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { H1, Muted } from "@/components/ui/typography";
+import { getJawnClient } from "@/lib/clients/jawn";
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
+import { PlanType, useOrgOnboarding } from "@/services/hooks/useOrgOnboarding";
+import { useQuery } from "@tanstack/react-query";
+import { Info } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function OnboardingPage() {
   const router = useRouter();
   const org = useOrg();
-  const user = useUser();
+  const { user } = useHeliconeAuthClient();
   const { setNotification } = useNotification();
   const {
     onboardingState,
@@ -35,6 +34,7 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     updateCurrentStep("ORGANIZATION");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const subscription = useQuery({
