@@ -82,9 +82,6 @@ import { H1, P, Small, Muted } from "@/components/ui/typography"
 ✅ bg-primary text-primary-foreground
 ✅ bg-destructive text-destructive-foreground
 
-// you can use any of the other tailwind specified colors too like 
-text-helicone-primary 
-
 // ❌ Don't use CSS variables directly
 ❌ text-[hsl(var(--foreground))]
 ❌ bg-[hsl(var(--background))]
