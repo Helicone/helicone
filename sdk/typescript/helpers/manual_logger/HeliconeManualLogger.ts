@@ -114,7 +114,7 @@ export class HeliconeManualLogger {
    *
    * @example
    * ```typescript
-   * helicone.logSingleRequest(request, body, { "Helicone-User-Id": userId }, 1000);
+   * helicone.logSingleRequest(request, body, { additionalHeaders: { "Helicone-User-Id": userId }, latencyMs: 1000 });
    * ```
    */
   public async logSingleRequest(
