@@ -232,6 +232,17 @@ export interface RequestResponseRMT {
   updated_at?: string;
 }
 
+export interface JawnHttpLogs {
+  organization_id: string;
+  method: string;
+  url: string;
+  status: number;
+  duration: number;
+  user_agent: string;
+  timestamp: string;
+  properties: Record<string, string>;
+}
+
 export interface ClickhouseDB {
   Tables: {
     properties_v3: PropertiesV3;
@@ -241,6 +252,7 @@ export interface ClickhouseDB {
     rate_limit_log_v2: RateLimitLogV2;
     cache_hits: CacheHits;
     request_response_rmt: RequestResponseRMT;
+    jawn_http_logs: JawnHttpLogs;
   };
 }
 
