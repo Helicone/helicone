@@ -1,8 +1,9 @@
 import { autoFillInputs } from "@helicone/prompts";
-import { OPENROUTER_KEY, OPENROUTER_WORKER_URL } from "../constant";
-import { generateTempHeliconeAPIKey } from "../../experiment/tempKeys/tempAPIKey";
 import { OrganizationManager } from "../../../managers/organization/OrganizationManager";
 import { err, ok, Result } from "../../../packages/common/result";
+import { generateTempHeliconeAPIKey } from "../../experiment/tempKeys/tempAPIKey";
+import { GET_KEY, OPENROUTER_WORKER_URL } from "../constant";
+import { HeliconeManualLogger } from "@helicone/helpers";
 
 type EvaluatorScore = {
   score: number | boolean;
@@ -97,12 +98,23 @@ export class LLMAsAJudge {
       "LLMAsAJudge"
     );
 
+    const openrouterKey = await GET_KEY("key:openrouter");
+    const heliconeOnHeliconeApiKey = await GET_KEY(
+      "key:helicone_on_helicone_key"
+    );
+    const heliconeClient = new HeliconeManualLogger({
+      apiKey: heliconeOnHeliconeApiKey,
+    });
+    const builder = heliconeClient.logBuilder(requestBody, {
+      "Helicone-User-Id": this.params.organizationId,
+      "Helicone-Property-Call-Area": "LLMAsAJudge",
+    });
     const res = await heliconeApiKey.data?.with(async (apiKey) => {
       return await fetch(requestPath, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${OPENROUTER_KEY}`,
+          Authorization: `Bearer ${openrouterKey}`,
           "Helicone-Auth": `Bearer ${apiKey}`,
           "Helicone-Property-Helicone-Evaluator":
             this.params.evaluatorName ?? "deault-name",
@@ -113,10 +125,14 @@ export class LLMAsAJudge {
 
     if (!res?.ok) {
       const body = await res?.text();
+      builder.setError(body);
+      await builder.sendLog();
       console.error("error calling llm as a judge", res, body);
       throw new Error("error calling llm as a judge");
     }
     const data = await res.json();
+    builder.setResponse(JSON.stringify(data));
+    await builder.sendLog();
     return data;
   }
 
