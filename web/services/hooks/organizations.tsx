@@ -310,7 +310,9 @@ const useOrgsContextManager = () => {
       isProcessingRef.current = true;
       hasRunRef.current = user.id;
       const jwtToken = getHeliconeCookie().data?.jwtToken;
-      const mainOrg = orgs?.find((org) => org.is_main_org === true);
+      const mainOrg = orgs?.find(
+        (org) => org.is_main_org === true && org.tier !== "demo"
+      );
 
       if (
         demoOrg &&
@@ -394,6 +396,9 @@ const useOrgsContextManager = () => {
       const orgFromCookie = orgs.find((org) => org.id === orgIdFromCookie);
       if (!orgFromCookie) {
         Cookies.set(ORG_ID_COOKIE_KEY, orgs[0].id, { expires: 30 });
+      }
+      if (orgFromCookie?.tier === "demo") {
+        return;
       }
       setOrg(orgFromCookie || orgs[0]);
     }
