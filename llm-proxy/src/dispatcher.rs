@@ -6,7 +6,7 @@ use std::{
 
 use bytes::Bytes;
 use futures::future::BoxFuture;
-use http::{HeaderName, HeaderValue};
+use http::{HeaderName, HeaderValue, uri::PathAndQuery};
 use http_body_util::BodyExt;
 use reqwest::Client;
 use tower::{Service, ServiceBuilder};
@@ -29,7 +29,7 @@ pub type DispatcherService =
 #[derive(Debug, Clone)]
 pub struct Dispatcher {
     client: Client,
-    app_state: AppState,
+    _app_state: AppState,
     provider: Provider,
 }
 
@@ -41,12 +41,13 @@ impl Dispatcher {
     ) -> Self {
         Self {
             client,
-            app_state,
+            _app_state: app_state,
             provider,
         }
     }
 
     pub fn new_with_middleware(
+        client: Client,
         app_state: AppState,
         provider: Provider,
     ) -> DispatcherService {
@@ -61,7 +62,7 @@ impl Dispatcher {
             )
             // other middleware: rate limiting, logging, etc, etc
             // will be added here as well
-            .service(Dispatcher::new(Client::new(), app_state, provider));
+            .service(Dispatcher::new(client, app_state, provider));
 
         service_stack
     }
@@ -83,34 +84,29 @@ impl Service<Request> for Dispatcher {
     fn call(&mut self, req: Request) -> Self::Future {
         tracing::info!("Dispatcher::call");
         let this = self.clone();
-        let app_state = self.app_state.clone();
         tracing::debug!(uri = %req.uri(), headers = ?req.headers(), "Received request");
-        Box::pin(async move { this.dispatch(app_state, req).await })
+        Box::pin(async move { this.dispatch(req).await })
     }
 }
 
 impl Dispatcher {
-    async fn dispatch(
-        &self,
-        app_state: AppState,
-        mut req: Request,
-    ) -> Result<Response, Error> {
+    async fn dispatch(&self, mut req: Request) -> Result<Response, Error> {
         let req_ctx = req
             .extensions()
             .get::<Arc<RequestContext>>()
             .ok_or(InternalError::ExtensionNotFound("RequestContext"))?;
         let og_provider = req_ctx.proxy_context.original_provider.clone();
         let target_provider = self.provider;
-        let target_url = app_state
-            .0
-            .config
-            .discover
-            .providers
-            .get(&target_provider)
-            .ok_or(InternalError::ProviderNotConfigured(target_provider))?
-            .base_url
-            .clone();
-        tracing::debug!(target_url = %target_url, "got target url");
+        // let target_url = app_state
+        //     .0
+        //     .config
+        //     .discover
+        //     .providers
+        //     .get(&target_provider)
+        //     .ok_or(InternalError::ProviderNotConfigured(target_provider))?
+        //     .base_url
+        //     .clone();
+        // tracing::debug!(target_url = %target_url, "got target url");
         let provider_api_key = req_ctx
             .proxy_context
             .provider_api_keys
@@ -120,14 +116,14 @@ impl Dispatcher {
             .clone();
         {
             let r = req.headers_mut();
-            r.remove(http::header::HOST);
-            let host_header = match target_url.host() {
-                Some(url::Host::Domain(host)) => {
-                    HeaderValue::from_str(host).unwrap()
-                }
-                None | _ => HeaderValue::from_str("").unwrap(),
-            };
-            r.insert(http::header::HOST, host_header);
+            // r.remove(http::header::HOST);
+            // let host_header = match target_url.host() {
+            //     Some(url::Host::Domain(host)) => {
+            //         HeaderValue::from_str(host).unwrap()
+            //     }
+            //     None | _ => HeaderValue::from_str("").unwrap(),
+            // };
+            // r.insert(http::header::HOST, host_header);
             r.remove(http::header::AUTHORIZATION);
             r.remove(http::header::CONTENT_LENGTH);
             r.remove(HeaderName::from_str("helicone-api-key").unwrap());
@@ -155,10 +151,15 @@ impl Dispatcher {
                 ),
             }
         }
-        let target_uri = http::Uri::from_str(target_url.as_str()).unwrap();
-        *req.uri_mut() = target_uri;
+        // let target_uri = http::Uri::from_str(target_url.as_str()).unwrap();
+        // *req.uri_mut() = target_uri;
         let method = req.method().clone();
         let headers = req.headers().clone();
+        let path_and_query = req
+            .uri()
+            .path_and_query()
+            .cloned()
+            .unwrap_or_else(|| PathAndQuery::from_static("/"));
         let req_body_bytes = req
             .into_body()
             .collect()
@@ -178,7 +179,7 @@ impl Dispatcher {
         };
         let response = self
             .client
-            .request(method, target_url)
+            .request(method, path_and_query.as_str())
             .headers(headers)
             .body(req_body_bytes)
             .send()

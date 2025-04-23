@@ -35,6 +35,7 @@ impl Router {
         id: RouterId,
         app_state: AppState,
     ) -> Result<(Self, ProviderMonitor), InitError> {
+        tracing::trace!(id = %id, "creating router");
         let router_config = match &app_state.0.config.deployment_target {
             DeploymentTarget::Cloud | DeploymentTarget::SelfHosted => {
                 return Err(InitError::DeploymentTargetNotSupported(
@@ -54,7 +55,7 @@ impl Router {
             }
         };
         // TODO: how to get provider keys via discovery instead of above^
-        let (balancer, monitor) = ProviderBalancer::new(app_state.clone());
+        let (balancer, monitor) = ProviderBalancer::new(app_state.clone())?;
         let service_stack: RouterService = ServiceBuilder::new()
             .layer(ErrorHandlerLayer)
             .layer(crate::middleware::request_context::Layer::<

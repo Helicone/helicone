@@ -16,7 +16,7 @@ use tower::discover::Change;
 use crate::{
     app::AppState, config::DeploymentTarget,
     discover::provider::config::ConfigDiscovery, dispatcher::DispatcherService,
-    types::provider::Provider,
+    error::init::InitError, types::provider::Provider,
 };
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Deserialize, Serialize)]
@@ -41,7 +41,7 @@ impl Discovery {
     pub fn new(
         app_state: AppState,
         rx: Receiver<Change<Key, DispatcherService>>,
-    ) -> Self {
+    ) -> Result<Self, InitError> {
         match app_state.0.config.deployment_target {
             DeploymentTarget::Sidecar => Self::config(app_state, rx),
             DeploymentTarget::Cloud | DeploymentTarget::SelfHosted => {
@@ -53,8 +53,8 @@ impl Discovery {
     pub fn config(
         app_state: AppState,
         rx: Receiver<Change<Key, DispatcherService>>,
-    ) -> Self {
-        Self::Config(ConfigDiscovery::new(app_state, rx))
+    ) -> Result<Self, InitError> {
+        Ok(Self::Config(ConfigDiscovery::new(app_state, rx)?))
     }
 }
 

@@ -19,19 +19,22 @@ use crate::{
     types::router::RouterId,
 };
 
-const ROUTER_ID_REGEX: &str = r"^/router/(?P<router_id>[a-zA-Z0-9_-]+)$";
+const ROUTER_ID_REGEX: &str = r"^/router/(?P<uuid>[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})(?:/.*)?$";
+const DEFAULT_ROUTER_REGEX: &str = r"^/router/(?![0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}(?:/|$))[^/]+(?:/.*)?$";
 
 /// Currently only supports the default router
 #[derive(Debug, Clone)]
 pub struct MetaRouter {
     inner: HashMap<RouterId, Router>,
-    regex: Regex,
+    router_id_regex: Regex,
+    default_router_regex: Regex,
 }
 
 impl MetaRouter {
     pub fn new(
         app_state: AppState,
     ) -> Result<(Self, ProviderMonitors), InitError> {
+        tracing::trace!("creating meta router");
         match app_state.0.config.deployment_target {
             DeploymentTarget::Sidecar => Self::from_config(app_state),
             DeploymentTarget::Cloud | DeploymentTarget::SelfHosted => {
@@ -45,8 +48,10 @@ impl MetaRouter {
     pub fn from_config(
         app_state: AppState,
     ) -> Result<(Self, ProviderMonitors), InitError> {
-        let regex =
+        let router_id_regex =
             Regex::new(ROUTER_ID_REGEX).expect("always valid if tests pass");
+        let default_router_regex = Regex::new(DEFAULT_ROUTER_REGEX)
+            .expect("always valid if tests pass");
         let mut inner =
             HashMap::with_capacity(app_state.0.config.routers.as_ref().len());
         let mut monitors =
@@ -57,7 +62,11 @@ impl MetaRouter {
             monitors.insert(router_id.clone(), monitor);
             inner.insert(router_id.clone(), router);
         }
-        let meta_router = Self { inner, regex };
+        let meta_router = Self {
+            inner,
+            router_id_regex,
+            default_router_regex,
+        };
         Ok((meta_router, ProviderMonitors::new(monitors)))
     }
 }
@@ -89,14 +98,14 @@ impl tower::Service<crate::types::request::Request> for MetaRouter {
 
     fn call(&mut self, req: crate::types::request::Request) -> Self::Future {
         let path = req.uri().path();
-        let id = if path == "/router" {
+        let id = if self.default_router_regex.is_match(path) {
             RouterId::Default
         } else {
             // we manually handle the error here not for any particular reason
             // its just a bit tiresome to repeatedly stack the HandleError
             // layers.
             let Some(Some(router_id_match)) =
-                self.regex.captures(path).map(|c| c.name("router_id"))
+                self.router_id_regex.captures(path).map(|c| c.name("uuid"))
             else {
                 let error = Error::InvalidRequest(
                     InvalidRequestError::InvalidRouterId(path.to_string()),
@@ -126,6 +135,8 @@ mod tests {
     #[test]
     fn test_regex() {
         let regex = Regex::new(ROUTER_ID_REGEX);
+        assert!(regex.is_ok());
+        let regex = Regex::new(DEFAULT_ROUTER_REGEX);
         assert!(regex.is_ok());
     }
 }

@@ -21,9 +21,7 @@ pub async fn test() {
     let bytes = serde_json::to_vec(&openai_request).unwrap();
 
     let response = reqwest::Client::new()
-        .post(
-            "http://localhost:5678/router/009338b1-1e21-4a7b-a066-46e6f800a4bf/v1/chat/completions",
-        )
+        .post("http://localhost:5678/router/v1/chat/completions")
         .header("Content-Type", "application/json")
         .body(bytes)
         .send()

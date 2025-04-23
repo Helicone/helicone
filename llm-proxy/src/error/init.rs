@@ -31,4 +31,6 @@ pub enum InitError {
     MinioMigration(minio_rsc::error::Error),
     /// OAuth config: {0}
     OAuthConfig(url::ParseError),
+    /// Failed to create proxy client: {0}
+    CreateProxyClient(reqwest::Error),
 }

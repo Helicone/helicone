@@ -53,6 +53,10 @@ pub struct InnerAppState {
     pub authed_rate_limit: Arc<AuthedLimiterConfig>,
     pub unauthed_rate_limit: Arc<UnauthedLimiterConfig>,
     pub store: StoreRealm,
+
+    // the below fields should be moved to the router or org level.
+    // currently its shared across all routers and that wont work for cloud
+    // mode.
     pub provider_keys: ProviderKeys,
 }
 
@@ -134,6 +138,7 @@ impl App {
     pub async fn new(
         config: Config,
     ) -> Result<(Self, ProviderMonitors), InitError> {
+        tracing::trace!("creating app");
         let provider = StaticProvider::from_env();
         let minio = if let Some(provider) = provider {
             Some(
