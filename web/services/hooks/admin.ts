@@ -1,11 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Parser from "rss-parser";
-import { $JAWN_API, getJawnClient } from "../../lib/clients/jawn";
+import { getJawnClient } from "../../lib/clients/jawn";
 import { components } from "../../lib/clients/jawnTypes/private";
-
-const useAlertBanners = () => {
-  return $JAWN_API.useQuery("get", "/v1/alert-banner", {});
-};
 
 const useCreateAlertBanner = (onSuccess?: () => void) => {
   const { mutate: createBanner, isPending: isCreatingBanner } = useMutation({

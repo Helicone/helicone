@@ -1,5 +1,7 @@
 import { dbExecute } from "../shared/db/dbExecute";
 import { Result, err, ok } from "../../packages/common/result";
+import { HeliconeManualLogger } from "@helicone/helpers";
+import { GET_KEY } from "../clients/constant";
 
 interface RunnerProps {
   url: URL;
@@ -31,24 +33,38 @@ async function runWithRetry(
     promptVersionId,
     isOriginalRequest,
   } = props;
+  const heliconeOnHeliconeApiKey = await GET_KEY(
+    "key:helicone_on_helicone_key"
+  );
+  const heliconeClient = new HeliconeManualLogger({
+    apiKey: heliconeOnHeliconeApiKey,
+  });
+
+  const logBuilder = heliconeClient.logBuilder(body);
   const response = await fetch(url, {
     method: "POST",
     headers: headers,
     body: JSON.stringify(body),
   });
+  const responseBody = await response.text();
 
   if (response.status !== 200) {
-    console.error(
-      "error running operation",
-      experimentId,
-      inputRecordId,
-      promptVersionId,
-      isOriginalRequest,
-      requestId,
-      response.status
-    );
+    const error =
+      "error running operation" +
+      experimentId +
+      inputRecordId +
+      promptVersionId +
+      isOriginalRequest +
+      requestId +
+      response.status +
+      "\n" +
+      responseBody;
+    console.error(error);
+    logBuilder.setError(error);
+    await logBuilder.sendLog();
     return err("Request failed");
   }
+  logBuilder.setResponse(responseBody);
 
   const maxWaitTime = 10 * 60 * 1000; // 10 minutes in milliseconds
   let waitTime = 1000; // Start with 1 second
@@ -61,6 +77,7 @@ async function runWithRetry(
     const result = await dbOp.execute();
 
     if (!result.error) {
+      await logBuilder.sendLog();
       return ok("success");
     }
 
@@ -71,6 +88,8 @@ async function runWithRetry(
   }
 
   // If we've reached this point, all attempts have failed
+  logBuilder.setError(dbOp.errorMessage);
+  await logBuilder.sendLog();
   return err(dbOp.errorMessage);
 }
 
