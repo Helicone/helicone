@@ -1,47 +1,34 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useOrg } from "../../../components/layout/org/organizationContext";
-import { getJawnClient } from "../../../lib/clients/jawn";
+import { $JAWN_API, getJawnClient } from "../../../lib/clients/jawn";
 
 const useExperiments = (
   req: { page: number; pageSize: number },
   promptId?: string
 ) => {
-  const org = useOrg();
-  const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: [
-      "experiments",
-      org?.currentOrg?.id,
-      promptId,
-      req.page,
-      req.pageSize,
-    ],
-    queryFn: async (query) => {
-      const orgId = query.queryKey[1] as string;
-      const promptId = query.queryKey[2] as string;
-      const page = query.queryKey[3] as number;
-      const pageSize = query.queryKey[4] as number;
-      const jawn = getJawnClient(orgId);
-
-      return jawn.POST("/v1/experiment/query", {
-        body: {
-          filter: promptId
-            ? {
-                experiment: {
-                  prompt_v2: {
-                    equals: promptId,
-                  },
+  const { data, isLoading, refetch, isRefetching } = $JAWN_API.useQuery(
+    "post",
+    "/v1/experiment/query",
+    {
+      body: {
+        filter: promptId
+          ? {
+              experiment: {
+                prompt_v2: {
+                  equals: promptId,
                 },
-              }
-            : {},
-        },
-      });
+              },
+            }
+          : {},
+      },
     },
-    refetchOnWindowFocus: false,
-    // refetch every 5 seconds
-    refetchInterval: 5_000,
-  });
+    {
+      refetchOnWindowFocus: false,
+      refetchInterval: 5_000,
+    }
+  );
 
-  const experiments = data?.data?.data;
+  const experiments = data?.data;
 
   if (!experiments) {
     return {
@@ -82,19 +69,16 @@ const useExperimentTables = () => {
   const orgId = org?.currentOrg?.id;
 
   const queryClient = useQueryClient();
+  console.log("HELLO");
 
-  const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ["experimentTables", orgId],
-    queryFn: async (query) => {
-      const orgId = query.queryKey[1] as string;
-      const jawn = getJawnClient(orgId);
-
-      return jawn.GET("/v2/experiment", {});
-    },
-    refetchOnWindowFocus: false,
-    // refetchInterval: 5_000,
-  });
-
+  const { data, isLoading, refetch, isRefetching } = $JAWN_API.useQuery(
+    "get",
+    "/v2/experiment",
+    {},
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
   const deleteExperiment = useMutation({
     mutationFn: async (experimentId: string) => {
       const jawnClient = getJawnClient(orgId);
@@ -107,7 +91,7 @@ const useExperimentTables = () => {
     },
   });
 
-  const experiments = data?.data?.data;
+  const experiments = data?.data;
 
   if (!experiments) {
     return {
