@@ -1,14 +1,15 @@
 // src/users/usersController.ts
+import { HeliconeManualLogger } from "@helicone/helpers";
 import OpenAI from "openai";
-import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
-import { generateTempHeliconeAPIKey } from "../../lib/experiment/tempKeys/tempAPIKey";
-import { ok, Result } from "../../packages/common/result";
-import { JawnAuthenticatedRequest } from "../../types/request";
 import {
   ChatCompletionTool,
   ChatCompletionToolChoiceOption,
 } from "openai/resources/chat/completions";
-import { OPENAI_KEY } from "../../lib/clients/constant";
+import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
+import { GET_KEY } from "../../lib/clients/constant";
+import { generateTempHeliconeAPIKey } from "../../lib/experiment/tempKeys/tempAPIKey";
+import { ok, Result } from "../../packages/common/result";
+import { JawnAuthenticatedRequest } from "../../types/request";
 
 @Route("v1/demo")
 @Tags("Demo")
@@ -32,7 +33,11 @@ export class DemoController extends Controller {
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<OpenAI.Chat.Completions.ChatCompletion, string>> {
-    if (!OPENAI_KEY) {
+    const heliconeLogger = new HeliconeManualLogger({
+      apiKey: process.env.HELICONE_ON_HELICE_API_KEY ?? "",
+    });
+    const openaiKey = await GET_KEY("key:openai");
+    if (!openaiKey) {
       this.setStatus(500);
       return {
         error: "No OpenAI key found",
@@ -63,9 +68,11 @@ export class DemoController extends Controller {
       defaultHeaders["Helicone-Cache-Seed"] = request.authParams.userId ?? "";
     }
 
+    const requestId = crypto.randomUUID();
+
     const result = await tempAPIKey.data?.with(async (apiKey) => {
       const openai = new OpenAI({
-        apiKey: OPENAI_KEY,
+        apiKey: openaiKey,
         baseURL:
           process.env.VERCEL_ENV === "production"
             ? "https://oai.helicone.ai/v1"
@@ -82,19 +89,36 @@ export class DemoController extends Controller {
           "Helicone-Session-Id": body.sessionId ?? "",
           "Helicone-Session-Name": body.sessionName ?? "",
           "Helicone-Session-Path": body.sessionPath ?? "",
+          "Helicone-Request-Id": requestId,
         },
       });
 
-      const completion = await openai.chat.completions.create({
+      const requestBody = {
         model: "gpt-4o-mini",
         messages: body.messages,
         tools: body.tools,
         tool_choice: body.tool_choice,
         max_tokens: body.max_tokens ?? 1000,
-      });
+      } as OpenAI.Chat.Completions.ChatCompletionCreateParamsNonStreaming;
+
+      const completion = await openai.chat.completions.create(requestBody);
+
+      // Helicone on Helicone
+      await heliconeLogger.logSingleRequest(
+        requestBody,
+        JSON.stringify(completion),
+        {
+          additionalHeaders: {
+            "Helicone-User-Id": request.authParams.organizationId,
+            "Helicone-Property-Location": "demo",
+            "Helicone-Property-Remote-Request-Id": requestId,
+          },
+        }
+      );
 
       return ok(completion);
     });
+
     if (!result || result.error) {
       this.setStatus(500);
       return {
