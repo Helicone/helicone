@@ -31,7 +31,7 @@ async function getOpenAIClient(orgId: string): Promise<OpenAI> {
       : "https://openrouter.helicone.ai/api/v1/",
     apiKey: apiKey,
     defaultHeaders: {
-      "Helicone-Auth": env("TEST_HELICONE_API_KEY"),
+      "Helicone-Auth": `Bearer ${process.env.TEST_HELICONE_API_KEY || ""}`,
       "Helicone-User-Id": orgId,
       "Helicone-RateLimit-Policy": `1000;w=${24 * 60 * 60};u=request;s=user`, // 1000 requests per day
     },
