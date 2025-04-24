@@ -35,7 +35,7 @@ async function getOpenAIClient(
     defaultHeaders: {
       "Helicone-Auth": `Bearer ${process.env.TEST_HELICONE_API_KEY || ""}`,
       "Helicone-User-Id": orgId,
-      "Helicone-User-Email": userEmail,
+      "Helicone-Property-User-Email": userEmail,
       "Helicone-RateLimit-Policy": `1000;w=${24 * 60 * 60};u=request;s=user`, // 1000 requests per day
     },
   });
