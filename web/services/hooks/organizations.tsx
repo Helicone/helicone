@@ -247,7 +247,34 @@ const setOrgCookie = (orgId: string) => {
 
 const useOrgsContextManager = () => {
   const { user } = useHeliconeAuthClient();
-  const { data: orgs, refetch } = useGetOrgs();
+
+  const { data: orgs, refetch } = $JAWN_API.useQuery(
+    "get",
+    "/v1/organization",
+    {
+      refetchOnWindowFocus: false,
+      refetchInterval: 10_000, // Refetch every 10 seconds
+      refetchIntervalInBackground: true,
+    },
+    {
+      select: (data) => {
+        return data.data?.sort((a, b) => {
+          if (a.name === b.name) {
+            return a.id < b.id ? -1 : 1;
+          }
+          // put demo last
+          if (a.tier === "demo") {
+            return 1;
+          }
+          if (b.tier === "demo") {
+            return -1;
+          }
+          return a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1;
+        });
+      },
+    }
+  );
+
   const [org, setOrg] = useState<NonNullable<typeof orgs>[number] | null>(null);
   const [renderKey, setRenderKey] = useState(0);
   const [isResellerOfCurrentCustomerOrg, setIsResellerOfCurrentOrg] =
@@ -255,8 +282,8 @@ const useOrgsContextManager = () => {
 
   const refreshCurrentOrg = useCallback(() => {
     refetch().then((x) => {
-      if (x.data && x.data.data && x.data.data.length > 0) {
-        const currentOrg = x.data.data.find(
+      if (x.data && x.data && x.data.length > 0) {
+        const currentOrg = x.data.find(
           (organization) => organization.id === org?.id
         );
         if (currentOrg) {
@@ -391,7 +418,7 @@ const useOrgsContextManager = () => {
   }, [user, org?.id, org?.name, org?.tier]);
 
   useEffect(() => {
-    if (orgs && orgs.length > 0) {
+    if (orgs && orgs.length > 0 && !org) {
       const orgIdFromCookie = Cookies.get(ORG_ID_COOKIE_KEY);
       const orgFromCookie = orgs.find((org) => org.id === orgIdFromCookie);
       const orgToUse =
@@ -405,7 +432,7 @@ const useOrgsContextManager = () => {
 
       setOrg(orgToUse);
     }
-  }, [orgs]);
+  }, [org, orgs]);
 
   useEffect(() => {
     setIsResellerOfCurrentOrg(
@@ -426,7 +453,7 @@ const useOrgsContextManager = () => {
     refreshCurrentOrg,
     setCurrentOrg: (orgId) => {
       refetch().then((data) => {
-        const org = data.data?.data?.find((org) => org.id === orgId);
+        const org = data.data?.find((org) => org.id === orgId);
         if (org) {
           setOrg(org);
           setOrgCookie(org.id);
