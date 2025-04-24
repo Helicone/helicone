@@ -1,6 +1,7 @@
+import { HandlerWrapperOptions, withAuth } from "@/lib/api/handlerWrappers";
 import { GenerateParams } from "@/lib/api/llm/generate";
 import { getOpenAIKeyFromAdmin } from "@/lib/clients/settings";
-import { NextApiRequest, NextApiResponse } from "next";
+import { env } from "next-runtime-env";
 import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
 
@@ -9,7 +10,7 @@ let openaiClient: OpenAI | null = null;
 let isOnPrem = false;
 
 // Function to get or create the OpenAI client
-async function getOpenAIClient(): Promise<OpenAI> {
+async function getOpenAIClient(orgId: string): Promise<OpenAI> {
   // Return cached client if available
   if (openaiClient) {
     return openaiClient;
@@ -26,25 +27,27 @@ async function getOpenAIClient(): Promise<OpenAI> {
   // Create and cache the client
   openaiClient = new OpenAI({
     baseURL: isOnPrem
-      ? "https://api.openai.com/v1/"
-      : "https://openrouter.ai/api/v1/",
+      ? "https://oai.helicone.ai/v1/"
+      : "https://openrouter.helicone.ai/api/v1/",
     apiKey: apiKey,
+    defaultHeaders: {
+      "Helicone-Auth": env("TEST_HELICONE_API_KEY"),
+      "Helicone-User-Id": orgId,
+      "Helicone-RateLimit-Policy": `1000;w=${24 * 60 * 60};u=request;s=user`, // 1000 requests per day
+    },
   });
 
   return openaiClient;
 }
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+async function handler({ req, res, userData }: HandlerWrapperOptions<any>) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
     // Get or initialize the OpenAI client
-    const openai = await getOpenAIClient();
+    const openai = await getOpenAIClient(userData.orgId);
 
     const params = req.body as GenerateParams;
     const abortController = new AbortController();
@@ -153,3 +156,5 @@ export default async function handler(
     return res.status(500).json({ error: "Failed to generate response" });
   }
 }
+
+export default withAuth(handler);

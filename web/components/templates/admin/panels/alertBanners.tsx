@@ -7,7 +7,6 @@ import { useState } from "react";
 import useNotification from "../../../shared/notification/useNotification";
 import { Button } from "@/components/ui/button";
 import {
-  useAlertBanners,
   useCreateAlertBanner,
   useUpdateAlertBanner,
 } from "@/services/hooks/admin";
