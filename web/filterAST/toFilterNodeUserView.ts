@@ -42,6 +42,8 @@ function getFieldType(
     "average_tokens_per_request",
     "total_completion_tokens",
     "total_prompt_token",
+    "prompt_tokens",
+    "completion_tokens",
     "cost",
   ];
 
