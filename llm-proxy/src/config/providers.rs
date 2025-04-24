@@ -6,7 +6,6 @@ use url::Url;
 use crate::types::{
     model::{Model, Version},
     provider::Provider,
-    secret::Secret,
 };
 
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
@@ -50,8 +49,4 @@ fn default_openai_models() -> Vec<Model> {
 
 fn default_openai_base_url() -> Url {
     Url::parse("https://api.openai.com").unwrap()
-}
-
-fn default_openai_api_key() -> Secret<String> {
-    Secret("sk-...".to_string())
 }

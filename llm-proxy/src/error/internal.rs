@@ -40,6 +40,8 @@ pub enum InternalError {
     LoadBalancerError(BoxError),
     /// Poll ready error: {0}
     PollReadyError(BoxError),
+    /// Buffer error: {0}
+    BufferError(BoxError),
 }
 
 impl IntoResponse for InternalError {

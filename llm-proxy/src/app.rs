@@ -10,7 +10,7 @@ use axum_server::tls_rustls::RustlsConfig;
 use futures::future::BoxFuture;
 use meltdown::Token;
 use minio_rsc::{Minio, provider::StaticProvider};
-use tower::{ServiceBuilder, util::BoxCloneService};
+use tower::{ServiceBuilder, buffer::BufferLayer, util::BoxCloneService};
 use tower_http::{
     add_extension::AddExtension, auth::AsyncRequireAuthorizationLayer,
     normalize_path::NormalizePathLayer,
@@ -31,6 +31,8 @@ use crate::{
     types::provider::ProviderKeys,
     utils::{catch_panic::CatchPanicLayer, handle_error::ErrorHandlerLayer},
 };
+
+const BUFFER_SIZE: usize = 1024;
 
 pub type BoxedServiceStack = BoxCloneService<
     crate::types::request::Request,
@@ -86,7 +88,7 @@ impl std::fmt::Debug for InnerAppState {
 /// 2. Authn/Authz
 /// 3. Unauthenticated and authenticated rate limit layers
 /// 4. MetaRouter
-/// -- Router specific --
+/// -- Router specific MW, must not require Clone on inner Service --
 /// 5. Per User Rate Limit layer
 /// 6. Per Org Rate Limit layer
 /// 7. RequestContext
@@ -100,8 +102,8 @@ impl std::fmt::Debug for InnerAppState {
 /// 10. Spend controls
 /// 11. A/B testing between models and prompt versions
 /// 12. Fallbacks
-/// -- provider specific middleware --
 /// 13. ProviderBalancer
+/// -- provider specific middleware --
 /// 14. Per provider rate limit layer
 /// 15. Mapper
 ///     - based on selected provider, map request body
@@ -161,7 +163,7 @@ impl App {
             .connect(&config.database.url.0)
             .await
             .map_err(error::init::InitError::DatabaseConnection)?;
-        let provider_keys = match &config.api_keys_source {
+        let provider_keys = match &config.discover.api_keys_source {
             ProviderKeysSource::Env => ProviderKeys::from_env(),
         };
         let app_state = AppState(Arc::new(InnerAppState {
@@ -173,14 +175,18 @@ impl App {
             provider_keys,
         }));
 
-        let (router, monitors) = MetaRouter::new(app_state.clone())?;
+        let (router, monitors) = MetaRouter::new(app_state.clone()).await?;
 
         // global middleware is applied here
         let service_stack = ServiceBuilder::new()
             .layer(ErrorHandlerLayer)
             .layer(CatchPanicLayer::new())
+            .map_err(|e| crate::error::internal::InternalError::BufferError(e))
             .layer(NormalizePathLayer::trim_trailing_slash())
+            // NOTE: not sure if there is perf impact from Auth layer coming
+            // before buffer layer, but required due to Clone bound.
             .layer(AsyncRequireAuthorizationLayer::new(AuthService))
+            .layer(BufferLayer::new(BUFFER_SIZE))
             .service(router);
 
         let app = Self {

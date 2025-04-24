@@ -1,5 +1,4 @@
 pub mod provider;
-pub mod router;
 
 use std::{
     convert::Infallible,
@@ -42,6 +41,8 @@ impl Discovery {
         app_state: AppState,
         rx: Receiver<Change<Key, DispatcherService>>,
     ) -> Result<Self, InitError> {
+        // TODO: currently we also have a separate discovery_mode.
+        // we should consolidate.
         match app_state.0.config.deployment_target {
             DeploymentTarget::Sidecar => Self::config(app_state, rx),
             DeploymentTarget::Cloud | DeploymentTarget::SelfHosted => {

@@ -33,4 +33,6 @@ pub enum InitError {
     OAuthConfig(url::ParseError),
     /// Failed to create proxy client: {0}
     CreateProxyClient(reqwest::Error),
+    /// Failed to create balancer: {0}
+    CreateBalancer(tower::BoxError),
 }

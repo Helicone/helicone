@@ -19,11 +19,10 @@ use crate::{
     utils::handle_error::{ErrorHandler, ErrorHandlerLayer},
 };
 
-pub type RouterService = ErrorHandler<
-    request_context::Service<ProviderBalancer, axum_core::body::Body>,
->;
+pub type RouterService =
+    ErrorHandler<request_context::Service<ProviderBalancer>>;
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Router {
     inner: RouterService,
     _id: RouterId,
@@ -31,11 +30,10 @@ pub struct Router {
 }
 
 impl Router {
-    pub fn new(
+    pub async fn new(
         id: RouterId,
         app_state: AppState,
     ) -> Result<(Self, ProviderMonitor), InitError> {
-        tracing::trace!(id = %id, "creating router");
         let router_config = match &app_state.0.config.deployment_target {
             DeploymentTarget::Cloud | DeploymentTarget::SelfHosted => {
                 return Err(InitError::DeploymentTargetNotSupported(
@@ -55,13 +53,11 @@ impl Router {
             }
         };
         // TODO: how to get provider keys via discovery instead of above^
-        let (balancer, monitor) = ProviderBalancer::new(app_state.clone())?;
+        let (balancer, monitor) =
+            ProviderBalancer::new(app_state.clone()).await?;
         let service_stack: RouterService = ServiceBuilder::new()
             .layer(ErrorHandlerLayer)
-            .layer(crate::middleware::request_context::Layer::<
-                axum_core::body::Body,
-            >::new(
-                app_state.clone(),
+            .layer(crate::middleware::request_context::Layer::new(
                 router_config.clone(),
                 app_state.0.provider_keys.clone(),
             ))
@@ -69,6 +65,8 @@ impl Router {
             // will be added here as well from the router config
             // .map_err(|e| crate::error::api::Error::Box(e))
             .service(balancer);
+
+        tracing::trace!(id = %id, "router created");
 
         Ok((
             Self {

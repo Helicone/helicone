@@ -21,29 +21,32 @@ use crate::{
 
 const ROUTER_ID_REGEX: &str = r"^/router/(?P<uuid>[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})(?:/.*)?$";
 
-/// Currently only supports the default router
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct MetaRouter {
     inner: HashMap<RouterId, Router>,
     router_id_regex: Regex,
 }
 
 impl MetaRouter {
-    pub fn new(
+    pub async fn new(
         app_state: AppState,
     ) -> Result<(Self, ProviderMonitors), InitError> {
-        tracing::trace!("creating meta router");
-        match app_state.0.config.deployment_target {
-            DeploymentTarget::Sidecar => Self::from_config(app_state),
+        let meta_router = match app_state.0.config.deployment_target {
+            DeploymentTarget::Sidecar => Self::from_config(app_state).await,
             DeploymentTarget::Cloud | DeploymentTarget::SelfHosted => {
                 return Err(InitError::DeploymentTargetNotSupported(
                     app_state.0.config.deployment_target,
                 ));
             }
-        }
+        }?;
+        tracing::trace!(
+            num_routers = meta_router.0.inner.len(),
+            "meta router created"
+        );
+        Ok(meta_router)
     }
 
-    pub fn from_config(
+    pub async fn from_config(
         app_state: AppState,
     ) -> Result<(Self, ProviderMonitors), InitError> {
         let router_id_regex =
@@ -54,7 +57,7 @@ impl MetaRouter {
             HashMap::with_capacity(app_state.0.config.routers.as_ref().len());
         for router_id in app_state.0.config.routers.as_ref().keys() {
             let (router, monitor) =
-                Router::new(router_id.clone(), app_state.clone())?;
+                Router::new(router_id.clone(), app_state.clone()).await?;
             monitors.insert(router_id.clone(), monitor);
             inner.insert(router_id.clone(), router);
         }
@@ -64,6 +67,27 @@ impl MetaRouter {
         };
         Ok((meta_router, ProviderMonitors::new(monitors)))
     }
+
+    fn extract_router_id(&self, path: &str) -> Result<RouterId, Error> {
+        let id = if let Some(captures) = self.router_id_regex.captures(path) {
+            let Some(uuid_match) = captures.name("uuid") else {
+                return Err(Error::InvalidRequest(
+                    InvalidRequestError::InvalidRouterId(path.to_string()),
+                ));
+            };
+            let Ok(uuid) = Uuid::parse_str(uuid_match.as_str()) else {
+                return Err(Error::InvalidRequest(
+                    InvalidRequestError::InvalidRouterId(path.to_string()),
+                ));
+            };
+            RouterId::Uuid(uuid)
+        } else if path.starts_with("/router") {
+            RouterId::Default
+        } else {
+            return Err(Error::InvalidRequest(InvalidRequestError::NotFound));
+        };
+        Ok(id)
+    }
 }
 
 impl tower::Service<crate::types::request::Request> for MetaRouter {
@@ -71,13 +95,16 @@ impl tower::Service<crate::types::request::Request> for MetaRouter {
     type Error = Infallible;
     type Future = Either<
         Ready<Result<Self::Response, Self::Error>>,
-        <RouterService as tower::Service<crate::types::request::Request>>::Future,
+        <RouterService as tower::Service<
+            crate::types::request::Request,
+        >>::Future,
     >;
 
     fn poll_ready(
         &mut self,
         ctx: &mut Context<'_>,
     ) -> Poll<Result<(), Self::Error>> {
+        tracing::trace!("MetaRouter::poll_ready");
         let mut any_pending = false;
         for router in self.inner.values_mut() {
             if router.poll_ready(ctx).is_pending() {
@@ -92,42 +119,21 @@ impl tower::Service<crate::types::request::Request> for MetaRouter {
     }
 
     fn call(&mut self, req: crate::types::request::Request) -> Self::Future {
-        let path = req.uri().path();
+        let router_id = match self.extract_router_id(&req.uri().path()) {
+            Ok(id) => id,
+            Err(e) => {
+                return Either::Left(ready(Ok(e.into_response())));
+            }
+        };
 
-        let id = if let Some(captures) = self.router_id_regex.captures(path) {
-            // Matched the UUID regex
-            let Some(uuid_match) = captures.name("uuid") else {
-                // Regex matched but capture group missing? Should not happen.
-                let error = Error::InvalidRequest(
-                    InvalidRequestError::InvalidRouterId(path.to_string()),
-                );
-                return Either::Left(ready(Ok(error.into_response())));
-            };
-            let Ok(uuid) = Uuid::parse_str(uuid_match.as_str()) else {
-                // Invalid UUID format matched by regex? Should not happen.
-                let error = Error::InvalidRequest(
-                    InvalidRequestError::InvalidRouterId(path.to_string()),
-                );
-                return Either::Left(ready(Ok(error.into_response())));
-            };
-            RouterId::Uuid(uuid)
-        } else if path.starts_with("/router/") {
-            RouterId::Default
+        if let Some(router) = self.inner.get_mut(&router_id) {
+            return Either::Right(router.call(req));
         } else {
-            // Path doesn't start with /router/ at all
-            let error = Error::InvalidRequest(InvalidRequestError::NotFound);
-            return Either::Left(ready(Ok(error.into_response())));
-        };
-
-        // Find the router based on the determined id
-        let Some(router) = self.inner.get_mut(&id) else {
-            // RouterId::Default or a valid RouterId::Uuid doesn't exist in the
-            // map
-            let error = Error::InvalidRequest(InvalidRequestError::NotFound);
-            return Either::Left(ready(Ok(error.into_response())));
-        };
-
-        Either::Right(router.call(req))
+            return Either::Left(ready(Ok(Error::InvalidRequest(
+                InvalidRequestError::NotFound,
+            )
+            .into_response())));
+        }
     }
 }
 

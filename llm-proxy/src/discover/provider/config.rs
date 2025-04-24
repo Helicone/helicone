@@ -1,6 +1,5 @@
 use std::{
     collections::HashMap,
-    convert::Infallible,
     pin::Pin,
     task::{Context, Poll},
     time::Duration,
@@ -8,7 +7,7 @@ use std::{
 
 use futures::Stream;
 use pin_project::pin_project;
-use reqwest::{Client, Proxy};
+use reqwest::Client;
 use tokio::sync::mpsc::Receiver;
 use tokio_stream::wrappers::ReceiverStream;
 use tower::discover::Change;
@@ -20,14 +19,14 @@ use crate::{
     error::init::InitError,
 };
 
-const CONNECTION_TIMEOUT: Duration = Duration::from_secs(5);
+const CONNECTION_TIMEOUT: Duration = Duration::from_secs(2);
 
 /// Reads available models and providers from the config file.
 ///
 /// We can additionally dynamically remove providers from the balancer
 /// if they hit certain failure thresholds by using a layer like:
 ///
-/// ```rust
+/// ```rust,ignore
 /// #[derive(Clone)]
 /// pub struct FailureWatcherLayer {
 ///     key: usize,
@@ -52,18 +51,19 @@ impl ConfigDiscovery {
         app: AppState,
         rx: Receiver<Change<Key, DispatcherService>>,
     ) -> Result<Self, InitError> {
-        tracing::trace!("creating config discovery");
         let events = ReceiverStream::new(rx);
         let mut service_map: HashMap<Key, DispatcherService> = HashMap::new();
-        for (provider, provider_config) in
+        for (provider, _provider_config) in
             app.0.config.discover.providers.iter()
         {
             let key = Key::new(provider.clone());
-            let proxy = Proxy::all(provider_config.base_url.clone())
-                .map_err(InitError::CreateProxyClient)?;
+
+            // TODO @tom: why does adding this cause it to hang? dafuq
+            // let proxy = Proxy::all(provider_config.base_url.clone())
+            // .map_err(InitError::CreateProxyClient)?;
             let http_client = Client::builder()
                 .connect_timeout(CONNECTION_TIMEOUT)
-                .proxy(proxy)
+                // .proxy(proxy)
                 .build()
                 .map_err(InitError::CreateProxyClient)?;
             let dispatcher = Dispatcher::new_with_middleware(
@@ -74,6 +74,7 @@ impl ConfigDiscovery {
             service_map.insert(key.clone(), dispatcher);
         }
 
+        tracing::trace!("Created config discovery");
         Ok(Self {
             initial: ServiceMap::new(service_map),
             events,
@@ -90,26 +91,33 @@ impl Stream for ConfigDiscovery {
     ) -> Poll<Option<Self::Item>> {
         let mut this = self.project();
 
-        // 1) one‑time inserts
+        // 1) one‑time inserts, once the ServiceMap returns
+        // `Poll::Ready(None)`, then it's done
         if let Poll::Ready(Some(change)) = this.initial.as_mut().poll_next(ctx)
         {
-            match change {
-                Ok(Change::Insert(key, service)) => {
-                    return Poll::Ready(Some(Change::Insert(key, service)));
-                }
-                Ok(Change::Remove(key)) => {
-                    return Poll::Ready(Some(Change::Remove(key)));
-                }
-                // infallible
-                Err(_) => unreachable!(),
-            }
+            return handle_change(change);
         }
 
         // 2) live events (removals / re‑inserts)
         match this.events.as_mut().poll_next(ctx) {
-            Poll::Ready(Some(change)) => Poll::Ready(Some(change)),
+            Poll::Ready(Some(change)) => handle_change(change),
             Poll::Pending => Poll::Pending,
             Poll::Ready(None) => Poll::Ready(None), // end of stream
+        }
+    }
+}
+
+fn handle_change(
+    change: Change<Key, DispatcherService>,
+) -> Poll<Option<Change<Key, DispatcherService>>> {
+    match change {
+        Change::Insert(key, service) => {
+            tracing::trace!(key = ?key, "Discovered new provider");
+            Poll::Ready(Some(Change::Insert(key, service)))
+        }
+        Change::Remove(key) => {
+            tracing::trace!(key = ?key, "Removed provider");
+            Poll::Ready(Some(Change::Remove(key)))
         }
     }
 }
@@ -142,7 +150,7 @@ impl<K, V> Stream for ServiceMap<K, V>
 where
     K: std::hash::Hash + Eq + Clone,
 {
-    type Item = Result<Change<K, V>, Infallible>;
+    type Item = Change<K, V>;
 
     fn poll_next(
         self: Pin<&mut Self>,
@@ -150,7 +158,7 @@ where
     ) -> Poll<Option<Self::Item>> {
         match self.project().inner.next() {
             Some((key, service)) => {
-                Poll::Ready(Some(Ok(Change::Insert(key, service))))
+                Poll::Ready(Some(Change::Insert(key, service)))
             }
             None => Poll::Ready(None),
         }

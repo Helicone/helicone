@@ -2,16 +2,28 @@ use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
 
-use super::providers::ProvidersConfig;
+use super::{ProviderKeysSource, providers::ProvidersConfig};
 use crate::types::discover::DiscoverMode;
 
-#[derive(Debug, Default, Clone, Deserialize, Serialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(default, deny_unknown_fields, rename_all = "kebab-case")]
 pub struct DiscoverConfig {
+    pub api_keys_source: ProviderKeysSource,
     pub discover_mode: DiscoverMode,
     pub providers: ProvidersConfig,
     #[serde(default = "default_discover_decay", with = "humantime_serde")]
     pub discover_decay: Duration,
+}
+
+impl Default for DiscoverConfig {
+    fn default() -> Self {
+        Self {
+            api_keys_source: ProviderKeysSource::Env,
+            discover_mode: DiscoverMode::Config,
+            providers: ProvidersConfig::default(),
+            discover_decay: default_discover_decay(),
+        }
+    }
 }
 
 fn default_discover_decay() -> Duration {
