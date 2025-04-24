@@ -151,7 +151,6 @@ const useChangelog = () => {
 };
 
 export {
-  useAlertBanners,
   useChangelog,
   useCreateAlertBanner,
   useGetSetting,
