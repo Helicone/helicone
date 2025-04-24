@@ -1,5 +1,4 @@
 import { InboxArrowDownIcon } from "@heroicons/react/24/outline";
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import useNotification from "../components/shared/notification/useNotification";
@@ -10,11 +9,12 @@ import PublicMetaData from "../components/layout/public/publicMetaData";
 import { GetServerSidePropsContext } from "next";
 import { InfoBanner } from "../components/shared/themed/themedDemoBanner";
 import { env } from "next-runtime-env";
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
+
 const SignUp = () => {
-  const supabase = useSupabaseClient();
+  const heliconeAuthClient = useHeliconeAuthClient();
   const { setNotification } = useNotification();
   const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
-  const user = useUser();
   const router = useRouter();
   const { demo = "false" } = router.query;
 
@@ -25,9 +25,16 @@ const SignUp = () => {
     }
   }, [router.query]);
 
-  if (user && user.email !== DEMO_EMAIL) {
-    router.push(`/welcome`);
-  }
+  useEffect(() => {
+    if (
+      heliconeAuthClient.user &&
+      heliconeAuthClient.user.id &&
+      heliconeAuthClient.user.email &&
+      heliconeAuthClient.user.email !== DEMO_EMAIL
+    ) {
+      router.push(`/welcome`);
+    }
+  }, [heliconeAuthClient.user, router]);
 
   return (
     <PublicMetaData
@@ -42,7 +49,7 @@ const SignUp = () => {
         handleEmailSubmit={async (email: string, password: string) => {
           const origin = window.location.origin;
 
-          const { data, error } = await supabase.auth.signUp({
+          const { data, error } = await heliconeAuthClient.signUp({
             email: email,
             password: password,
             options: {
@@ -56,14 +63,13 @@ const SignUp = () => {
               "error"
             );
             console.error(error);
-            console.error(error.message);
             return;
           }
 
           setShowEmailConfirmation(true);
         }}
         handleGoogleSubmit={async () => {
-          const { error } = await supabase.auth.signInWithOAuth({
+          const { error } = await heliconeAuthClient.signInWithOAuth({
             provider: "google",
             options: {
               redirectTo: `${origin}/onboarding`,
@@ -79,7 +85,7 @@ const SignUp = () => {
           }
         }}
         handleGithubSubmit={async () => {
-          const { error } = await supabase.auth.signInWithOAuth({
+          const { error } = await heliconeAuthClient.signInWithOAuth({
             provider: "github",
             options: {
               redirectTo: `${origin}/onboarding`,

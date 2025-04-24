@@ -1,10 +1,8 @@
-import Cookies from "js-cookie";
+import { useJawnClient } from "../../../lib/clients/jawnHook";
 import { useOrg } from "../../layout/org/organizationContext";
+import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
-import { SUPABASE_AUTH_TOKEN } from "../../../lib/constants";
-import { clsx } from "../../shared/clsx";
-import { useJawnClient } from "../../../lib/clients/jawnHook";
 
 interface DeleteAlertModalProps {
   open: boolean;
@@ -29,13 +27,6 @@ const DeleteAlertModal = (props: DeleteAlertModalProps) => {
       return;
     }
     try {
-      const authFromCookie = Cookies.get(SUPABASE_AUTH_TOKEN);
-
-      if (!authFromCookie) {
-        setNotification("Please login to create an alert", "error");
-        return;
-      }
-
       const { error: deleteError } = await jawn.DELETE("/v1/alert/{alertId}", {
         params: {
           path: {

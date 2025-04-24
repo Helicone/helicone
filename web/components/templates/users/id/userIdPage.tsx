@@ -211,8 +211,6 @@ const UserIdPage = (props: UserIdPageProps) => {
                         isCustomProperty: false,
                       }}
                       userId={userId}
-                      currentFilter={null}
-                      organizationLayout={null}
                       organizationLayoutAvailable={false}
                     />
                   </div>

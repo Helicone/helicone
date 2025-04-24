@@ -4,13 +4,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import { useJawnClient } from "@/lib/clients/jawnHook";
 import { RabbitIcon, TurtleIcon } from "lucide-react";
-import { Database } from "@/db/database.types";
-import { useCallback } from "react";
-import { signOut } from "@/components/shared/utils/utils";
-import { useRouter } from "next/navigation";
 
 const OnboardingDemoModal = ({
   open,
@@ -21,13 +15,6 @@ const OnboardingDemoModal = ({
   quickStart: () => void;
   quickTour: () => void;
 }) => {
-  const jawn = useJawnClient();
-  const supabaseClient = useSupabaseClient<Database>();
-  const router = useRouter();
-  const handleSignOut = useCallback(() => {
-    signOut(supabaseClient).then(() => router.push("/"));
-  }, [supabaseClient, router]);
-
   return (
     <Dialog open={open}>
       <DialogContent

@@ -362,7 +362,7 @@ await helicone.logSingleRequest(
     input: { expression: "2 + 2" },
   },
   JSON.stringify({ result: 4 }),
-  { "Helicone-User-Id": "user-123" }
+  { additionalHeaders: { "Helicone-User-Id": "user-123" } }
 );
 
 // Log a vector database operation
@@ -379,7 +379,7 @@ await helicone.logSingleRequest(
     { id: "2", content: "Pasta recipe 2", score: 0.87 },
     { id: "3", content: "Pasta recipe 3", score: 0.82 },
   ]),
-  { "Helicone-User-Id": "user-123" }
+  { additionalHeaders: { "Helicone-User-Id": "user-123" } }
 );
 ```
 

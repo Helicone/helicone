@@ -1,14 +1,10 @@
-import { User } from "@supabase/auth-helpers-nextjs";
-import { GetServerSidePropsContext } from "next";
-
-import { ReactElement } from "react";
 import { SortDirection } from "@/services/lib/sorts/requests/sorts";
-import UsersPageV2 from "../../components/templates/users/usersPage";
+import { GetServerSidePropsContext } from "next";
+import { ReactElement } from "react";
 import AuthLayout from "../../components/layout/auth/authLayout";
-import { SupabaseServerWrapper } from "../../lib/wrappers/supabase";
+import UsersPageV2 from "../../components/templates/users/usersPage";
 
 interface UsersProps {
-  user: User;
   page: number;
   pageSize: number;
   sort: {
@@ -19,7 +15,7 @@ interface UsersProps {
 }
 
 const Users = (props: UsersProps) => {
-  const { user, page, pageSize, sort } = props;
+  const { page, pageSize, sort } = props;
 
   return <UsersPageV2 currentPage={page} pageSize={pageSize} sort={sort} />;
 };
@@ -33,20 +29,6 @@ export default Users;
 export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  const supabase = new SupabaseServerWrapper(context).getClient();
-
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  if (!session)
-    return {
-      redirect: {
-        destination: "/",
-        permanent: false,
-      },
-    };
-
   const { page, page_size, sortKey, sortDirection, isCustomProperty } =
     context.query;
 
@@ -55,8 +37,6 @@ export const getServerSideProps = async (
 
   return {
     props: {
-      initialSession: session,
-      user: session.user,
       page: currentPage,
       pageSize: pageSize,
       sort: {

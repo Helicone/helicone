@@ -32,6 +32,7 @@ export interface SettingsType {
   "openai:apiKey": ApiKey;
   "anthropic:apiKey": ApiKey;
   "openrouter:apiKey": ApiKey;
+  "togetherai:apiKey": ApiKey;
 }
 
 export type SettingName = keyof SettingsType;
