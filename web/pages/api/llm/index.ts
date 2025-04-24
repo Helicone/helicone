@@ -35,20 +35,14 @@ async function getOpenAIClient(
     [orgId]
   );
 
-  // Get API key from environment or admin settings
-  let apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey) {
-    // apiKey = (await getOpenRouterKeyFromAdmin()) || "";
-    apiKey = (await getOpenAIKeyFromAdmin()) || "";
-    isOnPrem = true;
-  }
-
   // Create and cache the client
   openaiClient = new OpenAI({
     baseURL: isOnPrem
       ? "https://oai.helicone.ai/v1/"
       : "https://openrouter.helicone.ai/api/v1/",
-    apiKey: result.data?.[0]?.decrypted_provider_key || "",
+    apiKey: process.env.NEXT_PUBLIC_IS_ON_PREM
+      ? await getOpenAIKeyFromAdmin()
+      : result.data?.[0]?.decrypted_provider_key || "",
     defaultHeaders: {
       "Helicone-Auth": `Bearer ${process.env.TEST_HELICONE_API_KEY || ""}`,
       "Helicone-User-Id": orgId,
