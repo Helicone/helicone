@@ -44,6 +44,34 @@ async function handler({ req, res, userData }: HandlerWrapperOptions<any>) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
+  if (userData.org?.tier === "FUCK_OFF") {
+    const fakeResponse: OpenAI.Chat.Completions.ChatCompletion = {
+      id: "fake_id",
+      object: "chat.completion",
+      model: "gpt-4o-mini",
+      created: Date.now(),
+      choices: [
+        {
+          logprobs: null,
+          index: 0,
+          finish_reason: "stop",
+          message: {
+            content:
+              "Hi, there how can I help you? Are you interested in learning about Helicone?",
+            role: "assistant",
+            refusal: null,
+          },
+        },
+      ],
+      usage: {
+        prompt_tokens: 0,
+        completion_tokens: 0,
+        total_tokens: 0,
+      },
+    };
+    return res.status(200).json(fakeResponse);
+  }
+
   try {
     // Get or initialize the OpenAI client
     const openai = await getOpenAIClient(userData.orgId);
