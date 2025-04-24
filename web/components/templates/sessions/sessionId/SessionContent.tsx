@@ -15,10 +15,7 @@ import { Muted, Small, XSmall } from "@/components/ui/typography";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 import { PiBroadcastBold } from "react-icons/pi";
-import {
-  getEffectiveRequests,
-  isRealtimeSession,
-} from "../../../../lib/sessions/realtimeSession";
+import { isRealtimeRequest } from "../../../../lib/sessions/realtimeSession";
 import { Session } from "../../../../lib/sessions/sessionTypes";
 import { getTimeIntervalAgo } from "../../../../lib/timeCalculations/time";
 import { useGetRequests } from "../../../../services/hooks/requests";
@@ -36,7 +33,6 @@ interface SessionContentProps {
   isLive: boolean;
   setIsLive: (isLive: boolean) => void;
 }
-
 export const SessionContent: React.FC<SessionContentProps> = ({
   session,
   session_id,
@@ -51,6 +47,25 @@ export const SessionContent: React.FC<SessionContentProps> = ({
     (requestId as string) || ""
   );
 
+  // SESSIONS DATA
+  const timeFilter = useMemo(
+    () => ({
+      start: getTimeIntervalAgo("3m"), // Use 3 months like in the page component
+      end: new Date(),
+    }),
+    []
+  );
+  const { sessions: relatedSessions, isLoading: isLoadingSessions } =
+    useSessions({
+      timeFilter,
+      sessionIdSearch: "", // Add missing required property
+      selectedName: session_name === "Unnamed" ? "" : session_name, // Handle Unnamed case
+    });
+
+  // HANDLERS
+  const handleSessionIdChange = (newSessionId: string) => {
+    router.push(`/sessions/${encodeURIComponent(newSessionId)}`);
+  };
   const handleRequestIdChange = (newRequestId: string) => {
     setSelectedRequestId(newRequestId);
     router.push(
@@ -63,49 +78,13 @@ export const SessionContent: React.FC<SessionContentProps> = ({
     );
   };
 
-  // Fetch related sessions based on the current session name
-  const timeFilter = useMemo(
-    () => ({
-      start: getTimeIntervalAgo("3m"), // Use 3 months like in the page component
-      end: new Date(),
-    }),
-    []
-  );
-
-  const { sessions: relatedSessions, isLoading: isLoadingSessions } =
-    useSessions({
-      timeFilter,
-      sessionIdSearch: "", // Add missing required property
-      selectedName: session_name === "Unnamed" ? "" : session_name, // Handle Unnamed case
-    });
-
-  // Handler for changing session via dropdown
-  const handleSessionIdChange = (newSessionId: string) => {
-    router.push(`/sessions/${encodeURIComponent(newSessionId)}`);
-  };
-
-  const startTime = useMemo(() => {
-    const dates =
-      requests.requests.requests?.map((r) => new Date(r.request_created_at)) ??
-      [];
-
-    return dates.sort((a, b) => a.getTime() - b.getTime())?.[0] ?? undefined;
-  }, [requests.requests.requests]);
-
-  const endTime = useMemo(() => {
-    const dates =
-      requests.requests.requests?.map((r) => new Date(r.request_created_at)) ??
-      [];
-
-    return dates.sort((a, b) => b.getTime() - a.getTime())?.[0] ?? undefined;
-  }, [requests.requests.requests]);
-
+  // SESSION FEEDBACK HACK
+  // Check original requests for feedback property
   const requestWithFeedback = useMemo(() => {
     return requests.requests.requests?.find(
       (r) => r.properties["Helicone-Session-Feedback"]
     );
   }, [requests.requests.requests]);
-
   const sessionFeedbackValue = useMemo(() => {
     return requestWithFeedback?.properties["Helicone-Session-Feedback"] === "1"
       ? true
@@ -114,7 +93,17 @@ export const SessionContent: React.FC<SessionContentProps> = ({
       : null;
   }, [requestWithFeedback]);
 
-  // Calculate session stats
+  // AGREGATED SESSION STATS (Derived from the processed session object)
+  const startTime = useMemo(() => {
+    return session.start_time_unix_timestamp_ms
+      ? new Date(session.start_time_unix_timestamp_ms)
+      : undefined;
+  }, [session.start_time_unix_timestamp_ms]);
+  const endTime = useMemo(() => {
+    return session.end_time_unix_timestamp_ms
+      ? new Date(session.end_time_unix_timestamp_ms)
+      : undefined;
+  }, [session.end_time_unix_timestamp_ms]);
   const promptTokens = useMemo(
     () =>
       session.traces.reduce(
@@ -125,7 +114,6 @@ export const SessionContent: React.FC<SessionContentProps> = ({
       ),
     [session.traces]
   );
-
   const completionTokens = useMemo(
     () =>
       session.traces.reduce(
@@ -137,12 +125,10 @@ export const SessionContent: React.FC<SessionContentProps> = ({
       ),
     [session.traces]
   );
-
   const totalTokens = useMemo(
     () => promptTokens + completionTokens,
     [promptTokens, completionTokens]
   );
-
   const avgLatency = useMemo(() => {
     if (!session || session.traces.length === 0) {
       return 0;
@@ -154,7 +140,6 @@ export const SessionContent: React.FC<SessionContentProps> = ({
     );
     return totalLatency / session.traces.length;
   }, [session]);
-
   const sessionStatsToDisplay = useMemo(() => {
     return [
       {
@@ -179,40 +164,11 @@ export const SessionContent: React.FC<SessionContentProps> = ({
     totalTokens,
   ]);
 
-  // Centralized realtime session handling in a single object
-  const realtimeData = useMemo(() => {
-    // Default values when loading or no data
-    if (
-      requests.requests.isLoading ||
-      !requests.requests.requests ||
-      requests.requests.requests.length === 0
-    ) {
-      return {
-        isRealtime: false,
-        effectiveRequests: [],
-        originalRequest: null,
-      };
-    }
-
-    const isRealtime = isRealtimeSession(requests.requests.requests || []);
-
-    // Get effective requests (either original or simulated realtime requests)
-    const effectiveRequests = isRealtime
-      ? getEffectiveRequests(requests.requests.requests || [])
-      : requests.requests.requests || [];
-
-    // For realtime sessions, get the original request for proper rendering
-    let originalRequest = null;
-    if (isRealtime) {
-      originalRequest = requests.requests.requests[0] || null;
-    }
-
-    return {
-      isRealtime,
-      effectiveRequests,
-      originalRequest,
-    };
-  }, [requests.requests.requests, requests.requests.isLoading]);
+  // Check if the *original* session was a realtime session
+  const isOriginalRealtime = useMemo(() => {
+    const rawRequests = requests.requests.requests ?? [];
+    return rawRequests.length === 1 && isRealtimeRequest(rawRequests[0]);
+  }, [requests.requests.requests]);
 
   return (
     <Col className="h-screen flex flex-col">
@@ -244,20 +200,19 @@ export const SessionContent: React.FC<SessionContentProps> = ({
         }
         rightSection={
           <div className="h-full flex flex-row gap-2 items-center">
-            {realtimeData.isRealtime && (
+            {isOriginalRealtime && (
               <div className="flex flex-row gap-2 items-center text-xs text-blue-500 font-semibold">
                 <PiBroadcastBold className="h-4 w-4" />
-                Realtime Sessions reconstruct a timeline using connection
-                timestamps.
+                Realtime Session (Timeline reconstructed)
               </div>
             )}
 
             <Tooltip>
               <TooltipTrigger asChild>
-                {/* TODO: Move this data to be the unified all requests data */}
-                <ExportButton rows={realtimeData.effectiveRequests} />
+                {/* Export the original, raw request data */}
+                <ExportButton rows={requests.requests.requests ?? []} />
               </TooltipTrigger>
-              <TooltipContent>Export data</TooltipContent>
+              <TooltipContent>Export raw data</TooltipContent>
             </Tooltip>
 
             <div className="h-4 w-px bg-border" />
@@ -285,14 +240,13 @@ export const SessionContent: React.FC<SessionContentProps> = ({
       />
 
       <div className="flex-1 overflow-auto">
-        {/* Ensure TreeView takes remaining space and scrolls */}
+        {/* TreeView receives the processed session */}
         <TreeView
           selectedRequestId={selectedRequestId}
           setSelectedRequestId={handleRequestIdChange}
           showSpan={true}
           session={session}
-          requests={requests}
-          realtimeData={realtimeData}
+          isOriginalRealtime={isOriginalRealtime}
         />
       </div>
     </Col>
