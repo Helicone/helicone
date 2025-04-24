@@ -103,7 +103,8 @@
             "integrations/openai/llamaindex",
             "integrations/openai/curl",
             "integrations/openai/assistants",
-            "integrations/openai/realtime"
+            "integrations/openai/realtime",
+            "integrations/openai/responses"
           ]
         },
         {
