@@ -92,7 +92,6 @@ export const useExperimentRequestData = (requestId?: string) => {
 };
 
 export const useExperimentTable = (experimentTableId: string) => {
-  console.log("experimentTableId", experimentTableId);
   const org = useOrg();
   const orgId = org?.currentOrg?.id;
   const queryClient = useQueryClient();
