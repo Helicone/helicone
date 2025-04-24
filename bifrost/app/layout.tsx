@@ -96,12 +96,12 @@ export default async function RootLayout({
           {/* Google Analytics - updated to lazyOnload strategy */}
           <Script
             id="google-analytics"
-            strategy="lazyOnload"
+            strategy="afterInteractive"
             src="https://www.googletagmanager.com/gtag/js?id=G-WGDEGPP49F"
           />
           <Script
             id="google-analytics-config"
-            strategy="lazyOnload"
+            strategy="afterInteractive"
             dangerouslySetInnerHTML={{
               __html: `
               window.dataLayer = window.dataLayer || [];
