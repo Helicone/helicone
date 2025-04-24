@@ -253,7 +253,7 @@ const useOrgsContextManager = () => {
     "/v1/organization",
     {
       refetchOnWindowFocus: false,
-      refetchInterval: 10_000, // Refetch every 10 seconds
+      refetchInterval: 2_000, // Refetch every 2 seconds
       refetchIntervalInBackground: true,
     },
     {
