@@ -90,6 +90,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import Image from "next/image";
 
 type EditorMode =
   | "fromCode"
@@ -1236,10 +1237,12 @@ export default function PromptEditor({
                 size="sm"
                 className="flex items-center gap-2"
               >
-                <img
+                <Image
                   src="/assets/home/providers/openrouter.jpg"
                   alt="OpenRouter"
                   className="h-4 w-4 rounded-sm"
+                  width={16}
+                  height={16}
                 />
                 Configure OpenRouter
               </Button>
@@ -1306,19 +1309,24 @@ export default function PromptEditor({
                 }`}
                 variant={editorMode === "fromEditor" ? "action" : "outline"}
                 size="sm"
-                disabled={!canRun || !hasOpenRouter}
+                disabled={
+                  // please forgive me for this, it is a mess just need to get something quick out - Justin
+                  (!canRun || !hasOpenRouter) &&
+                  !(state.isDirty && editorMode === "fromEditor")
+                }
                 onClick={handleSaveAndRun}
               >
-                {isStreaming ? (
-                  <PiStopBold className="h-4 w-4 mr-2" />
-                ) : (
-                  <PiPlayBold className="h-4 w-4 mr-2" />
-                )}
+                {hasOpenRouter &&
+                  (isStreaming ? (
+                    <PiStopBold className="h-4 w-4 mr-2" />
+                  ) : (
+                    <PiPlayBold className="h-4 w-4 mr-2" />
+                  ))}
                 <span className="mr-2">
                   {isStreaming
                     ? "Stop"
                     : state.isDirty && editorMode === "fromEditor"
-                    ? "Save & Run"
+                    ? `Save${hasOpenRouter ? " & Run" : ""}`
                     : "Run"}
                 </span>
                 {isStreaming && (
