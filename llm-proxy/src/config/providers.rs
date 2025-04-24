@@ -6,7 +6,6 @@ use url::Url;
 use crate::types::{
     model::{Model, Version},
     provider::Provider,
-    secret::Secret,
 };
 
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]

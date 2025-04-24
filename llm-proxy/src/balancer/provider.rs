@@ -1,10 +1,13 @@
-use std::future::poll_fn;
+use std::{
+    future::poll_fn,
+    task::{Context, Poll},
+};
 
+use pin_project_lite::pin_project;
 use tokio::sync::mpsc::channel;
 use tower::{
-    BoxError, Service,
+    Service,
     balance::p2c::{Balance, MakeBalance},
-    buffer::Buffer,
     load::PeakEwmaDiscover,
 };
 
@@ -14,21 +17,14 @@ use crate::{
         Discovery,
         provider::{factory::DiscoverFactory, monitor::ProviderMonitor},
     },
-    error::{init::InitError, internal::InternalError},
+    error::{api::Error, init::InitError, internal::InternalError},
     types::{request::Request, response::Response},
 };
 
-const BUFFER_SIZE: usize = 1024;
 const CHANNEL_CAPACITY: usize = 128;
 
-#[derive(Clone)]
 pub struct ProviderBalancer {
-    pub inner: Buffer<
-        Request,
-        <Balance<PeakEwmaDiscover<Discovery>, Request> as tower::Service<
-            Request,
-        >>::Future,
-    >,
+    pub inner: Balance<PeakEwmaDiscover<Discovery>, Request>,
 }
 
 impl std::fmt::Debug for ProviderBalancer {
@@ -50,9 +46,8 @@ impl ProviderBalancer {
         poll_fn(|cx| balance.poll_ready(cx))
             .await
             .map_err(InitError::CreateBalancer)?;
-        let inner = Buffer::new(balance, BUFFER_SIZE);
         let provider_monitor = ProviderMonitor::new(tx);
-        let provider_balancer = ProviderBalancer { inner };
+        let provider_balancer = ProviderBalancer { inner: balance };
 
         Ok((provider_balancer, provider_monitor))
     }
@@ -60,13 +55,8 @@ impl ProviderBalancer {
 
 impl tower::Service<Request> for ProviderBalancer {
     type Response = Response;
-    type Error = BoxError;
-    type Future = <Buffer<
-        Request,
-        <Balance<PeakEwmaDiscover<Discovery>, Request> as tower::Service<
-            Request,
-        >>::Future,
-    > as tower::Service<Request>>::Future;
+    type Error = Error;
+    type Future = ResponseFuture;
 
     fn poll_ready(
         &mut self,
@@ -81,6 +71,36 @@ impl tower::Service<Request> for ProviderBalancer {
 
     fn call(&mut self, req: Request) -> Self::Future {
         tracing::trace!("ProviderBalancer::call");
-        self.inner.call(req)
+        ResponseFuture {
+            future: self.inner.call(req),
+        }
+    }
+}
+
+pin_project! {
+    pub struct ResponseFuture {
+        #[pin]
+        future: <
+            Balance<PeakEwmaDiscover<Discovery>, Request> as tower::Service<
+                Request,
+            >
+        >::Future,
+    }
+}
+
+impl Future for ResponseFuture {
+    type Output = Result<Response, Error>;
+
+    fn poll(
+        self: std::pin::Pin<&mut Self>,
+        cx: &mut Context<'_>,
+    ) -> Poll<Self::Output> {
+        match self.project().future.poll(cx) {
+            Poll::Ready(Ok(res)) => Poll::Ready(Ok(res)),
+            Poll::Ready(Err(e)) => Poll::Ready(Err(Error::Internal(
+                InternalError::LoadBalancerError(e),
+            ))),
+            Poll::Pending => Poll::Pending,
+        }
     }
 }

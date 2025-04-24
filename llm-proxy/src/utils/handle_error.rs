@@ -31,9 +31,17 @@ where
 
 /// A [`Service`] adapter that handles errors by converting them into
 /// [`Response`]s.
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct ErrorHandler<S> {
     inner: S,
+}
+
+impl<S: Clone> Clone for ErrorHandler<S> {
+    fn clone(&self) -> Self {
+        Self {
+            inner: self.inner.clone(),
+        }
+    }
 }
 
 impl<S> ErrorHandler<S>

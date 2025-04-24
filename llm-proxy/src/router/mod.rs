@@ -19,11 +19,10 @@ use crate::{
     utils::handle_error::{ErrorHandler, ErrorHandlerLayer},
 };
 
-pub type RouterService = ErrorHandler<
-    request_context::Service<ProviderBalancer, axum_core::body::Body>,
->;
+pub type RouterService =
+    ErrorHandler<request_context::Service<ProviderBalancer>>;
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Router {
     inner: RouterService,
     _id: RouterId,
@@ -58,10 +57,7 @@ impl Router {
             ProviderBalancer::new(app_state.clone()).await?;
         let service_stack: RouterService = ServiceBuilder::new()
             .layer(ErrorHandlerLayer)
-            .layer(crate::middleware::request_context::Layer::<
-                axum_core::body::Body,
-            >::new(
-                app_state.clone(),
+            .layer(crate::middleware::request_context::Layer::new(
                 router_config.clone(),
                 app_state.0.provider_keys.clone(),
             ))
