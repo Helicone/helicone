@@ -1,7 +1,6 @@
 import { HandlerWrapperOptions, withAuth } from "@/lib/api/handlerWrappers";
 import { GenerateParams } from "@/lib/api/llm/generate";
 import { getOpenAIKeyFromAdmin } from "@/lib/clients/settings";
-import { env } from "next-runtime-env";
 import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
 
