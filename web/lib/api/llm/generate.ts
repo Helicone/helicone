@@ -1,4 +1,3 @@
-import { $JAWN_API } from "@/lib/clients/jawn";
 import { modelMapping } from "packages/cost/unified/models";
 import { Provider } from "packages/cost/unified/types";
 import { Message, Tool } from "packages/llm-mapper/types";
@@ -74,22 +73,24 @@ export async function generate<T extends object | undefined = undefined>(
     model: openRouterModelString,
   };
 
-  const response = await $JAWN_API.POST("/v1/llm/chat/completions", {
+  const response = await fetch("/api/llm", {
+    method: "POST",
     headers: {
+      "Content-Type": "application/json",
       "x-cancel": "0",
     },
-    body: {
+    body: JSON.stringify({
       ...modifiedParams,
       stream: !!params.stream,
-    },
+    }),
   });
 
   if (params.stream) {
-    if (!response.response.body) {
+    if (!response.body) {
       throw new Error("No response body");
     }
 
-    const reader = response.response.body.getReader();
+    const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = "";
 
@@ -174,8 +175,8 @@ export async function generate<T extends object | undefined = undefined>(
     }
   }
 
-  const data = await response.response.json();
-  if (!response.response.ok) {
+  const data = await response.json();
+  if (!response.ok) {
     throw new Error(data.error || "Failed to generate response");
   }
 
