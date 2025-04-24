@@ -132,6 +132,7 @@ export default function RequestDrawer(props: RequestDivProps) {
         value: formatDate(request.heliconeMetadata.createdAt),
       },
       { label: "Request ID", value: request.id },
+      { label: "User", value: request.heliconeMetadata.user || "Unknown" },
     ];
 
     // Token Information
@@ -501,7 +502,7 @@ export default function RequestDrawer(props: RequestDivProps) {
                         {item.label}
                       </XSmall>
 
-                      {item.label === "Request ID" ? (
+                      {item.label === "Request ID" || item.label === "User" ? (
                         <TooltipProvider>
                           <Tooltip delayDuration={100}>
                             <TooltipTrigger asChild>
