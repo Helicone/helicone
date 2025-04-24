@@ -48,15 +48,17 @@ const SessionDetail = ({ session_id }: { session_id: string }) => {
   const processedRequests = useMemo(() => {
     const rawRequests = requestsHookResult.requests.requests ?? [];
 
-    // Check if it looks like a realtime session (single request with the right model)
-    if (rawRequests.length > 0 && isRealtimeRequest(rawRequests[0])) {
-      return convertRealtimeRequestToSteps(rawRequests[0]);
-    }
-
-    // Otherwise, return the requests as is
-    return rawRequests;
+    // Iterate through all requests. If a request is realtime, convert it to steps.
+    // Otherwise, keep the original request. Flatten the result.
+    return rawRequests.flatMap((request) => {
+      if (isRealtimeRequest(request)) {
+        return convertRealtimeRequestToSteps(request);
+      } else {
+        return [request]; // Keep non-realtime requests as a single-element array for flatMap
+      }
+    });
   }, [requestsHookResult.requests.requests]);
-
+  // -> Create session object
   const session = sessionFromHeliconeRequests(processedRequests);
 
   // Extract session name from requests properties (use original requests for this)
@@ -69,10 +71,6 @@ const SessionDetail = ({ session_id }: { session_id: string }) => {
     }
     return "Unnamed"; // Default if not found
   }, [requestsHookResult.requests.requests]);
-
-  console.log("session", session);
-  console.log("processedRequests", processedRequests);
-  console.log("requestsHookResult", requestsHookResult);
 
   return (
     <SessionContent

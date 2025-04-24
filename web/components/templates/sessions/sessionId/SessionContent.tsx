@@ -174,39 +174,46 @@ export const SessionContent: React.FC<SessionContentProps> = ({
     <Col className="h-screen flex flex-col">
       <FoldedHeader
         leftSection={
-          <div className="flex flex-row gap-1 items-center">
-            <Small className="font-semibold">Sessions</Small>
-            <Small className="font-semibold">/</Small>
-            <Muted className="text-sm">{session_name}</Muted>
-            <Small className="font-semibold">/</Small>
+          <div className="flex flex-row gap-4 items-center">
+            {/* Dynamic breadcrumb */}
+            <div className="flex flex-row gap-1 items-center">
+              <Small className="font-semibold">Sessions</Small>
+              <Small className="font-semibold">/</Small>
+              <Muted className="text-sm">{session_name}</Muted>
+              <Small className="font-semibold">/</Small>
 
-            {isLoadingSessions ? (
-              <Muted className="text-sm">Loading sessions...</Muted>
-            ) : (
-              <Select value={session_id} onValueChange={handleSessionIdChange}>
-                <SelectTrigger className="w-[280px] h-8 shadow-sm">
-                  <SelectValue placeholder="Select Session ID" />
-                </SelectTrigger>
-                <SelectContent>
-                  {relatedSessions?.map((s) => (
-                    <SelectItem key={s.session_id} value={s.session_id}>
-                      {s.session_id}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          </div>
-        }
-        rightSection={
-          <div className="h-full flex flex-row gap-2 items-center">
+              {isLoadingSessions ? (
+                <Muted className="text-sm">Loading sessions...</Muted>
+              ) : (
+                <Select
+                  value={session_id}
+                  onValueChange={handleSessionIdChange}
+                >
+                  <SelectTrigger className="w-[280px] h-8 shadow-sm">
+                    <SelectValue placeholder="Select Session ID" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {relatedSessions?.map((s) => (
+                      <SelectItem key={s.session_id} value={s.session_id}>
+                        {s.session_id}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+
+            {/* Realtime session reconstruction warning) */}
             {isOriginalRealtime && (
               <div className="flex flex-row gap-2 items-center text-xs text-blue-500 font-semibold">
                 <PiBroadcastBold className="h-4 w-4" />
                 Realtime Session (Timeline reconstructed)
               </div>
             )}
-
+          </div>
+        }
+        rightSection={
+          <div className="h-full flex flex-row gap-2 items-center">
             <Tooltip>
               <TooltipTrigger asChild>
                 {/* Export the original, raw request data */}

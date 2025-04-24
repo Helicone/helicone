@@ -27,6 +27,7 @@ import {
   columnDefToDragColumnItem,
 } from "../../../../shared/themed/table/columns/DragList";
 import ThemedTable from "../../../../shared/themed/table/themedTable";
+import RequestDrawer from "../../../requests/RequestDrawer";
 import StatusBadge from "../../../requests/statusBadge";
 import { TraceSpan } from "../Span";
 
@@ -247,15 +248,44 @@ const TreeView: React.FC<TreeViewProps> = ({
     initialColumns.map(columnDefToDragColumnItem)
   );
 
+  const [drawerSize, setDrawerSize] = useLocalStorage(
+    "session-request-drawer-size",
+    0
+  );
+  const drawerRef = useRef<any>(null);
+
+  const selectedRequestData = useMemo(() => {
+    if (!selectedRequestId || !session.traces) {
+      return undefined;
+    }
+    const trace = session.traces.find(
+      (t) => t.request_id === selectedRequestId
+    );
+    if (!trace) {
+      return undefined;
+    }
+    // The Trace object already contains the MappedLLMRequest under the 'request' property
+    return trace?.request; // Return the request directly
+  }, [selectedRequestId, session.traces]);
+
   const onRowSelectHandler = (row: TableTreeNode) => {
-    // Updated row type
-    // Only select actual requests (leaf nodes with a trace)
     if (row.trace) {
       setSelectedRequestId(row.trace.request_id);
+      drawerRef.current?.expand();
+      if (drawerSize === 0) {
+        drawerRef.current?.resize(33);
+      } else {
+        drawerRef.current?.resize(drawerSize);
+      }
     } else {
       // Optional: handle click on group row if needed (e.g., toggle expansion)
       // React-table's expander button already handles toggling.
     }
+  };
+
+  const handleCollapseDrawer = () => {
+    drawerRef.current?.collapse();
+    setDrawerSize(0);
   };
 
   const handleToggleAllRows = (table: any) => {
@@ -264,42 +294,78 @@ const TreeView: React.FC<TreeViewProps> = ({
 
   return (
     <Col className="h-full">
-      <ResizablePanelGroup direction="vertical" className="h-full w-full">
-        <ResizablePanel
-          defaultSize={40}
-          minSize={25}
-          className="relative bg-white dark:bg-black"
-        >
-          <TraceSpan
-            session={session}
-            selectedRequestIdDispatch={[
-              selectedRequestId,
-              setSelectedRequestId,
-            ]}
-          />
+      <ResizablePanelGroup direction="horizontal" className="h-full w-full">
+        <ResizablePanel>
+          <ResizablePanelGroup direction="vertical" className="h-full w-full">
+            <ResizablePanel
+              defaultSize={40}
+              minSize={25}
+              className="relative bg-white dark:bg-black"
+            >
+              <TraceSpan
+                session={session}
+                selectedRequestIdDispatch={[
+                  selectedRequestId,
+                  setSelectedRequestId,
+                ]}
+              />
+            </ResizablePanel>
+
+            <ResizableHandle />
+
+            <ResizablePanel defaultSize={60} minSize={25}>
+              <div className="h-full border-t border-slate-200 dark:border-slate-800 flex">
+                <div className="h-full w-full">
+                  <ThemedTable<TableTreeNode>
+                    id="session-requests-table"
+                    defaultData={tableData}
+                    defaultColumns={initialColumns}
+                    activeColumns={activeColumns}
+                    setActiveColumns={setActiveColumns}
+                    skeletonLoading={false}
+                    dataLoading={false}
+                    onRowSelect={onRowSelectHandler}
+                    highlightedIds={
+                      selectedRequestId ? [selectedRequestId] : []
+                    }
+                    fullWidth={true}
+                    checkboxMode="never"
+                    onToggleAllRows={handleToggleAllRows}
+                  />
+                </div>
+              </div>
+            </ResizablePanel>
+          </ResizablePanelGroup>
         </ResizablePanel>
 
         <ResizableHandle />
 
-        <ResizablePanel defaultSize={60} minSize={25}>
-          <div className="h-full border-t border-slate-200 dark:border-slate-800 flex">
-            <div className="h-full w-full">
-              <ThemedTable<TableTreeNode>
-                id="session-requests-table"
-                defaultData={tableData}
-                defaultColumns={initialColumns}
-                activeColumns={activeColumns}
-                setActiveColumns={setActiveColumns}
-                skeletonLoading={false}
-                dataLoading={false}
-                onRowSelect={onRowSelectHandler}
-                highlightedIds={selectedRequestId ? [selectedRequestId] : []}
-                fullWidth={true}
-                checkboxMode="never"
-                onToggleAllRows={handleToggleAllRows}
-              />
-            </div>
-          </div>
+        <ResizablePanel
+          ref={drawerRef}
+          defaultSize={0}
+          minSize={25}
+          maxSize={75}
+          collapsible={true}
+          collapsedSize={0}
+          onCollapse={() => {
+            setDrawerSize(0);
+          }}
+          onExpand={() => {
+            drawerRef.current?.resize(drawerSize > 0 ? drawerSize : 33);
+          }}
+          onResize={(size) => {
+            if (size > 0) {
+              setDrawerSize(size);
+            }
+          }}
+          className="bg-card"
+        >
+          {selectedRequestData && (
+            <RequestDrawer
+              request={selectedRequestData}
+              onCollapse={handleCollapseDrawer}
+            />
+          )}
         </ResizablePanel>
       </ResizablePanelGroup>
     </Col>
