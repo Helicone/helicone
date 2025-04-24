@@ -58,12 +58,9 @@ pub struct Config {
     pub database: self::database::Config,
     pub minio: self::minio::Config,
     pub is_production: bool,
-    /// Global rate limiting configuration
-    pub rate_limit: self::rate_limit::RateLimitConfig,
 
     pub deployment_target: DeploymentTarget,
-    pub api_keys_source: ProviderKeysSource,
-
+    pub rate_limit: self::rate_limit::RateLimitConfig,
     pub discover: self::discover::DiscoverConfig,
     pub routers: self::router::RouterConfigs,
 }

@@ -1,6 +1,7 @@
 use http::{Method, Request, StatusCode};
 use llm_proxy::{config::Config, tests::harness::Harness};
 use serde_json::json;
+use tower::Service;
 use url::Url;
 
 /// Sending a request to https://oai.helicone.com/router/chat/<slug> should
@@ -8,6 +9,8 @@ use url::Url;
 #[tokio::test]
 async fn default_target() {
     let config = Config::test_config();
+    let _logger_provider: opentelemetry_sdk::logs::LoggerProvider =
+        telemetry::init_telemetry(&config.telemetry).unwrap();
     let mut harness = Harness::new(config).await;
     let request_body = axum_core::body::Body::from(
         serde_json::to_vec(&json!({
@@ -23,10 +26,11 @@ async fn default_target() {
     );
     let request = Request::builder()
         .method(Method::POST)
-        .uri("http://router.helicone.com/router/F432DK1PQ")
+        // default router
+        .uri("http://router.helicone.com/router")
         .body(request_body)
         .unwrap();
-    let response = harness.call(request).await;
+    let response = harness.call(request).await.unwrap();
     assert_eq!(response.status(), StatusCode::OK);
 
     // assert that the request was proxied to the mock server

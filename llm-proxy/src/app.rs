@@ -163,7 +163,7 @@ impl App {
             .connect(&config.database.url.0)
             .await
             .map_err(error::init::InitError::DatabaseConnection)?;
-        let provider_keys = match &config.api_keys_source {
+        let provider_keys = match &config.discover.api_keys_source {
             ProviderKeysSource::Env => ProviderKeys::from_env(),
         };
         let app_state = AppState(Arc::new(InnerAppState {

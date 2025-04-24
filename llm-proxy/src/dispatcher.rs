@@ -20,15 +20,17 @@ use crate::{
         request::{Request, RequestContext},
         response::Response,
     },
+    utils::handle_error::{ErrorHandler, ErrorHandlerLayer},
 };
 
 pub type DispatcherFuture = BoxFuture<'static, Result<Response, Error>>;
-pub type DispatcherService = crate::middleware::no_op::Service<Dispatcher>;
+pub type DispatcherService =
+    ErrorHandler<crate::middleware::no_op::Service<Dispatcher>>;
 
 #[derive(Debug, Clone)]
 pub struct Dispatcher {
     client: Client,
-    _app_state: AppState,
+    app_state: AppState,
     provider: Provider,
 }
 
@@ -40,7 +42,7 @@ impl Dispatcher {
     ) -> Self {
         Self {
             client,
-            _app_state: app_state,
+            app_state,
             provider,
         }
     }
@@ -51,6 +53,7 @@ impl Dispatcher {
         provider: Provider,
     ) -> DispatcherService {
         let service_stack = ServiceBuilder::new()
+            .layer(ErrorHandlerLayer)
             // just to show how we will add dispatcher-specific middleware later
             // e.g. for model/provider specific rate limiting, we need to do
             // that at this level rather than globally.
@@ -94,16 +97,6 @@ impl Dispatcher {
             .ok_or(InternalError::ExtensionNotFound("RequestContext"))?;
         let og_provider = req_ctx.proxy_context.original_provider.clone();
         let target_provider = self.provider;
-        // let target_url = app_state
-        //     .0
-        //     .config
-        //     .discover
-        //     .providers
-        //     .get(&target_provider)
-        //     .ok_or(InternalError::ProviderNotConfigured(target_provider))?
-        //     .base_url
-        //     .clone();
-        // tracing::debug!(target_url = %target_url, "got target url");
         let provider_api_key = req_ctx
             .proxy_context
             .provider_api_keys
@@ -111,16 +104,27 @@ impl Dispatcher {
             .get(&target_provider)
             .unwrap()
             .clone();
+        let provider_config = self
+            .app_state
+            .0
+            .config
+            .discover
+            .providers
+            .get(&target_provider)
+            .ok_or_else(|| {
+                InternalError::ProviderNotConfigured(target_provider)
+            })?;
+        let base_url = provider_config.base_url.clone();
         {
             let r = req.headers_mut();
-            // r.remove(http::header::HOST);
-            // let host_header = match target_url.host() {
-            //     Some(url::Host::Domain(host)) => {
-            //         HeaderValue::from_str(host).unwrap()
-            //     }
-            //     None | _ => HeaderValue::from_str("").unwrap(),
-            // };
-            // r.insert(http::header::HOST, host_header);
+            r.remove(http::header::HOST);
+            let host_header = match base_url.host() {
+                Some(url::Host::Domain(host)) => {
+                    HeaderValue::from_str(host).unwrap()
+                }
+                None | _ => HeaderValue::from_str("").unwrap(),
+            };
+            r.insert(http::header::HOST, host_header);
             r.remove(http::header::AUTHORIZATION);
             r.remove(http::header::CONTENT_LENGTH);
             r.remove(HeaderName::from_str("helicone-api-key").unwrap());
@@ -157,6 +161,18 @@ impl Dispatcher {
             .path_and_query()
             .cloned()
             .unwrap_or_else(|| PathAndQuery::from_static("/"));
+
+        // Strip the /router prefix from path_and_query if it exists
+        let path_and_query_str = path_and_query.as_str();
+        let stripped_path = if path_and_query_str.starts_with("/router") {
+            let len = "/router".len();
+            &path_and_query_str[len..]
+        } else {
+            path_and_query_str
+        };
+
+        let target_url = base_url.join(stripped_path).unwrap();
+        tracing::debug!(method = %method, target_url = %target_url, "dispatching request");
         let req_body_bytes = req
             .into_body()
             .collect()
@@ -176,12 +192,13 @@ impl Dispatcher {
         };
         let response = self
             .client
-            .request(method, path_and_query.as_str())
+            .request(method, target_url)
             .headers(headers)
             .body(req_body_bytes)
             .send()
             .await
             .map_err(|e| InternalError::ReqwestError(e))?;
+        tracing::debug!(status = %response.status(), "received response");
 
         let mut response_builder =
             http::Response::builder().status(response.status());

@@ -7,7 +7,7 @@ use std::{
 
 use futures::Stream;
 use pin_project::pin_project;
-use reqwest::{Client, Proxy};
+use reqwest::Client;
 use tokio::sync::mpsc::Receiver;
 use tokio_stream::wrappers::ReceiverStream;
 use tower::discover::Change;
@@ -19,14 +19,14 @@ use crate::{
     error::init::InitError,
 };
 
-const CONNECTION_TIMEOUT: Duration = Duration::from_secs(5);
+const CONNECTION_TIMEOUT: Duration = Duration::from_secs(2);
 
 /// Reads available models and providers from the config file.
 ///
 /// We can additionally dynamically remove providers from the balancer
 /// if they hit certain failure thresholds by using a layer like:
 ///
-/// ```rust
+/// ```rust,ignore
 /// #[derive(Clone)]
 /// pub struct FailureWatcherLayer {
 ///     key: usize,
@@ -53,15 +53,17 @@ impl ConfigDiscovery {
     ) -> Result<Self, InitError> {
         let events = ReceiverStream::new(rx);
         let mut service_map: HashMap<Key, DispatcherService> = HashMap::new();
-        for (provider, provider_config) in
+        for (provider, _provider_config) in
             app.0.config.discover.providers.iter()
         {
             let key = Key::new(provider.clone());
-            let proxy = Proxy::all(provider_config.base_url.clone())
-                .map_err(InitError::CreateProxyClient)?;
+
+            // TODO @tom: why does adding this cause it to hang? dafuq
+            // let proxy = Proxy::all(provider_config.base_url.clone())
+            // .map_err(InitError::CreateProxyClient)?;
             let http_client = Client::builder()
                 .connect_timeout(CONNECTION_TIMEOUT)
-                .proxy(proxy)
+                // .proxy(proxy)
                 .build()
                 .map_err(InitError::CreateProxyClient)?;
             let dispatcher = Dispatcher::new_with_middleware(

@@ -61,7 +61,6 @@ impl MetaRouter {
             monitors.insert(router_id.clone(), monitor);
             inner.insert(router_id.clone(), router);
         }
-        tracing::debug!(num_routers = inner.len(), "meta router created");
         let meta_router = Self {
             inner,
             router_id_regex,

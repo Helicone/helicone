@@ -1,5 +1,7 @@
+use std::convert::Infallible;
+
+use futures::future::BoxFuture;
 use stubr::{Stubr, wiremock_rs::MockServer};
-use tower::Service;
 
 use crate::{
     app::App,
@@ -23,8 +25,21 @@ impl Harness {
             mock: mock.http_server,
         }
     }
+}
 
-    pub async fn call(&mut self, req: Request) -> Response {
-        self.app.call(req).await.expect("result type is infallible")
+impl tower::Service<Request> for Harness {
+    type Response = Response;
+    type Error = Infallible;
+    type Future = BoxFuture<'static, Result<Self::Response, Self::Error>>;
+
+    fn poll_ready(
+        &mut self,
+        cx: &mut std::task::Context<'_>,
+    ) -> std::task::Poll<Result<(), Self::Error>> {
+        self.app.poll_ready(cx)
+    }
+
+    fn call(&mut self, req: Request) -> Self::Future {
+        self.app.call(req)
     }
 }
