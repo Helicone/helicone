@@ -69,7 +69,6 @@ const useExperimentTables = () => {
   const orgId = org?.currentOrg?.id;
 
   const queryClient = useQueryClient();
-  console.log("HELLO");
 
   const { data, isLoading, refetch, isRefetching } = $JAWN_API.useQuery(
     "get",
