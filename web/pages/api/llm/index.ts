@@ -9,7 +9,10 @@ let openaiClient: OpenAI | null = null;
 let isOnPrem = false;
 
 // Function to get or create the OpenAI client
-async function getOpenAIClient(orgId: string): Promise<OpenAI> {
+async function getOpenAIClient(
+  orgId: string,
+  userEmail: string
+): Promise<OpenAI> {
   // Return cached client if available
   if (openaiClient) {
     return openaiClient;
@@ -32,6 +35,7 @@ async function getOpenAIClient(orgId: string): Promise<OpenAI> {
     defaultHeaders: {
       "Helicone-Auth": `Bearer ${process.env.TEST_HELICONE_API_KEY || ""}`,
       "Helicone-User-Id": orgId,
+      "Helicone-User-Email": userEmail,
       "Helicone-RateLimit-Policy": `1000;w=${24 * 60 * 60};u=request;s=user`, // 1000 requests per day
     },
   });
@@ -74,7 +78,7 @@ async function handler({ req, res, userData }: HandlerWrapperOptions<any>) {
 
   try {
     // Get or initialize the OpenAI client
-    const openai = await getOpenAIClient(userData.orgId);
+    const openai = await getOpenAIClient(userData.orgId, userData.user?.email);
 
     const params = req.body as GenerateParams;
     const abortController = new AbortController();
