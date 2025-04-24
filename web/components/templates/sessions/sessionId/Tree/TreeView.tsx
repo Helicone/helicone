@@ -11,7 +11,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Muted } from "@/components/ui/typography";
-import { HeliconeRequest } from "@/packages/llm-mapper/types";
 import { CellContext, ColumnDef } from "@tanstack/react-table";
 import { formatDistanceToNow } from "date-fns";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
@@ -22,7 +21,6 @@ import {
   TreeNodeData,
 } from "../../../../../lib/sessions/sessionTypes";
 import { useLocalStorage } from "../../../../../services/hooks/localStorage";
-import { useGetRequests } from "../../../../../services/hooks/requests";
 import { Col } from "../../../../layout/common";
 import {
   DragColumnItem,
@@ -39,48 +37,46 @@ interface TableTreeNode {
   trace?: Trace; // Keep original trace for potential reference
   subRows?: TableTreeNode[];
 
-  // Properties populated from Trace or looked-up HeliconeRequest
+  // Properties populated directly from Trace
   path?: string; // Actual path for leaves
   status?: number;
   createdAt?: number; // Use start_unix_timestamp_ms
   model?: string;
   cost?: number | null;
   latency?: number;
-  feedback?: { rating: boolean } | null;
+  feedback?: { rating: boolean | null } | null; // Adjusted type based on HeliconeMetadata
 }
 
-// Helper function to convert TreeNodeData and lookup full request data
-function convertToTableData(
-  node: TreeNodeData,
-  requestMap: Map<string, HeliconeRequest>, // Use a Map for faster lookups
-  level = 0
-): TableTreeNode {
-  const id = node.trace?.request_id ?? `group-${node.name}-${level}`;
+// Helper function to convert TreeNodeData using only Trace data
+function convertToTableData(node: TreeNodeData, level = 0): TableTreeNode {
+  const trace = node.trace;
+  const id = trace?.request_id ?? `group-${node.name}-${level}`;
 
-  // Find the corresponding full HeliconeRequest if this is a leaf node
-  const requestDetails = node.trace?.request_id
-    ? requestMap.get(node.trace.request_id) // Use Map.get
-    : undefined;
+  // Extract data directly from the trace object
+  const latency =
+    trace?.end_unix_timestamp_ms && trace?.start_unix_timestamp_ms
+      ? trace.end_unix_timestamp_ms - trace.start_unix_timestamp_ms
+      : undefined;
 
   const tableNode: TableTreeNode = {
     id: id,
     name: node.name,
-    trace: node.trace,
-    // Populate based on trace and requestDetails
-    path: node.trace?.path || node.name, // Use trace path or group name
-    status: requestDetails?.response_status,
-    createdAt: node.trace?.start_unix_timestamp_ms,
-    model: requestDetails?.response_model ?? undefined, // Map null model to undefined
-    latency:
-      node.trace?.end_unix_timestamp_ms && node.trace?.start_unix_timestamp_ms
-        ? node.trace.end_unix_timestamp_ms - node.trace.start_unix_timestamp_ms
-        : undefined, // Latency from trace timestamps
+    trace: trace,
+    path: trace?.path || node.name, // Use trace path or group name
+    status: trace?.request.heliconeMetadata?.status?.code,
+    createdAt: trace?.start_unix_timestamp_ms,
+    model: trace?.request.model ?? undefined,
+    cost: trace?.request.heliconeMetadata?.cost,
+    latency: latency,
+    feedback: trace?.request.heliconeMetadata?.feedback
+      ? { rating: trace.request.heliconeMetadata.feedback.rating } // Map feedback structure
+      : null,
   };
 
   if (node.children && node.children.length > 0) {
-    // Recursively convert children, passing the request list down
+    // Recursively convert children
     tableNode.subRows = node.children.map((child: TreeNodeData) =>
-      convertToTableData(child, requestMap, level + 1)
+      convertToTableData(child, level + 1)
     );
   }
 
@@ -137,18 +133,10 @@ const initialColumns: ColumnDef<TableTreeNode>[] = [
     accessorKey: "status",
     header: "Status",
     cell: (info: CellContext<TableTreeNode, any>) => {
-      if (!info.row.original.trace) return null; // Don't render for group rows
+      if (!info.row.original.trace) return null;
       const status = info.getValue<number | undefined | null>();
-
-      if (status === undefined || status === null) {
-        return <Muted>n/a</Muted>;
-      }
-
-      let statusType: "success" | "error" = "success";
-      if (status >= 400) {
-        statusType = "error";
-      }
-
+      if (status === undefined || status === null) return <Muted>n/a</Muted>;
+      const statusType = status >= 400 ? "error" : "success";
       return <StatusBadge statusType={statusType} errorCode={status} />;
     },
   },
@@ -231,16 +219,11 @@ const initialColumns: ColumnDef<TableTreeNode>[] = [
 ];
 
 interface TreeViewProps {
-  session: Session;
   selectedRequestId: string;
   setSelectedRequestId: (id: string) => void;
   showSpan: boolean;
-  requests: ReturnType<typeof useGetRequests>;
-  realtimeData: {
-    isRealtime: boolean;
-    effectiveRequests: HeliconeRequest[];
-    originalRequest: HeliconeRequest | null;
-  };
+  session: Session;
+  isOriginalRealtime?: boolean;
 }
 
 const TreeView: React.FC<TreeViewProps> = ({
@@ -248,47 +231,20 @@ const TreeView: React.FC<TreeViewProps> = ({
   selectedRequestId,
   setSelectedRequestId,
   showSpan,
-  requests,
-  realtimeData,
+  isOriginalRealtime,
 }) => {
-  const { isRealtime } = realtimeData;
-
-  const onBoardingRequestTrace = useMemo(
-    () =>
-      session.traces.find((t) => t.path === "/planning/extract-travel-plan"),
-    [session.traces]
-  );
-
   const treeData = useMemo(() => {
-    if (isRealtime) return null;
     return tracesToTreeNodeData(session.traces);
-  }, [isRealtime, session.traces]);
-
-  // Create a map for efficient request lookup
-  const requestMap = useMemo(() => {
-    const map = new Map<string, HeliconeRequest>();
-    requests.requests?.requests?.forEach((req) => {
-      if (req.request_id) {
-        map.set(req.request_id, req);
-      }
-    });
-    return map;
-  }, [requests.requests?.requests]);
+  }, [session.traces]);
 
   const tableData = useMemo(() => {
     if (!treeData || !treeData.children) return [];
-    return treeData.children.map(
-      (node) => convertToTableData(node, requestMap) // Pass the map
-    );
-  }, [treeData, requestMap]);
-
-  // Columns are defined outside again
-  // Remove the useMemo for columns definition
-  // const columns = useMemo(() => { ... }, [session.traces, requests.requests?.data]);
+    return treeData.children.map((node) => convertToTableData(node));
+  }, [treeData]);
 
   const [activeColumns, setActiveColumns] = useLocalStorage<DragColumnItem[]>(
     `session-requests-table-activeColumns`,
-    initialColumns.map(columnDefToDragColumnItem) // Use initialColumns defined outside
+    initialColumns.map(columnDefToDragColumnItem)
   );
 
   const onRowSelectHandler = (row: TableTreeNode) => {
@@ -320,7 +276,6 @@ const TreeView: React.FC<TreeViewProps> = ({
               selectedRequestId,
               setSelectedRequestId,
             ]}
-            realtimeData={realtimeData}
           />
         </ResizablePanel>
 
@@ -328,24 +283,22 @@ const TreeView: React.FC<TreeViewProps> = ({
 
         <ResizablePanel defaultSize={60} minSize={25}>
           <div className="h-full border-t border-slate-200 dark:border-slate-800 flex">
-            {!isRealtime && (
-              <div className="h-full w-full">
-                <ThemedTable
-                  id="session-requests-table"
-                  defaultData={tableData}
-                  defaultColumns={initialColumns} // Use initialColumns defined outside
-                  activeColumns={activeColumns}
-                  setActiveColumns={setActiveColumns}
-                  skeletonLoading={false} // TODO: Pass loading state if available
-                  dataLoading={false} // TODO: Pass loading state if available
-                  onRowSelect={onRowSelectHandler}
-                  highlightedIds={selectedRequestId ? [selectedRequestId] : []}
-                  fullWidth={true}
-                  checkboxMode="never"
-                  onToggleAllRows={handleToggleAllRows}
-                />
-              </div>
-            )}
+            <div className="h-full w-full">
+              <ThemedTable<TableTreeNode>
+                id="session-requests-table"
+                defaultData={tableData}
+                defaultColumns={initialColumns}
+                activeColumns={activeColumns}
+                setActiveColumns={setActiveColumns}
+                skeletonLoading={false}
+                dataLoading={false}
+                onRowSelect={onRowSelectHandler}
+                highlightedIds={selectedRequestId ? [selectedRequestId] : []}
+                fullWidth={true}
+                checkboxMode="never"
+                onToggleAllRows={handleToggleAllRows}
+              />
+            </div>
           </div>
         </ResizablePanel>
       </ResizablePanelGroup>
