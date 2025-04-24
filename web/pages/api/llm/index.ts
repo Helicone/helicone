@@ -43,9 +43,47 @@ async function getOpenAIClient(
   return openaiClient;
 }
 
+// Function to verify request is coming from a browser
+function isBrowserRequest(req: any): boolean {
+  // Check for common browser headers
+  const userAgent = req.headers["user-agent"];
+  const acceptHeader = req.headers["accept"];
+  const origin = req.headers["origin"];
+  const xRequestedWith = req.headers["x-requested-with"];
+  const referer = req.headers["referer"];
+  const heliconeClient = req.headers["x-helicone-client"];
+
+  // CORS requests from browsers always have Origin header
+  const hasOrigin = !!origin;
+
+  // Regular fetch requests typically include application/json in Accept
+  const hasAcceptJson =
+    acceptHeader && acceptHeader.includes("application/json");
+
+  // Check for the custom header we set in our client code
+  const hasClientHeader = heliconeClient === "browser";
+
+  // Check for XHR indicator
+  const isXhr = xRequestedWith === "XMLHttpRequest";
+
+  // One of these indicators should be present for browser fetch requests
+  return !!(
+    userAgent &&
+    (hasClientHeader || hasOrigin || hasAcceptJson || isXhr || referer)
+  );
+}
+
 async function handler({ req, res, userData }: HandlerWrapperOptions<any>) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  // Check if the request is coming from a browser
+  if (!isBrowserRequest(req)) {
+    return res.status(403).json({
+      error:
+        "Access denied. This endpoint can only be accessed from a browser.",
+    });
   }
 
   if (userData.org?.tier === "FUCK_OFF" || !userData.orgHasOnboarded) {
