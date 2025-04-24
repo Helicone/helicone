@@ -48,7 +48,7 @@ async function handler({ req, res, userData }: HandlerWrapperOptions<any>) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  if (userData.org?.tier === "FUCK_OFF") {
+  if (userData.org?.tier === "FUCK_OFF" || !userData.orgHasOnboarded) {
     const fakeResponse: OpenAI.Chat.Completions.ChatCompletion = {
       id: "fake_id",
       object: "chat.completion",
