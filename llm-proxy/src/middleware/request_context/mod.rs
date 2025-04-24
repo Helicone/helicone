@@ -10,11 +10,11 @@ use isocountry::CountryCode;
 
 use crate::{
     config::router::RouterConfig,
-    error::api::Error,
+    error::{api::Error, internal::InternalError},
     types::{
         model::Model,
         provider::ProviderKeys,
-        request::{Request, RequestContext},
+        request::{AuthContext, Request, RequestContext},
         response::Response,
     },
 };
@@ -88,11 +88,10 @@ where
         provider_api_keys: ProviderKeys,
         req: &mut Request,
     ) -> Result<RequestContext, Error> {
-        // let auth_context = req
-        //     .extensions_mut()
-        //     .remove::<AuthContext>()
-        //     .ok_or(InternalError::ExtensionNotFound("AuthContext"))?;
-        let auth_context = crate::middleware::auth::check_auth(req).unwrap();
+        let auth_context = req
+            .extensions_mut()
+            .remove::<AuthContext>()
+            .ok_or(InternalError::ExtensionNotFound("AuthContext"))?;
 
         // TODO: this will come from parsing the prompt+headers+etc
         let helicone = crate::types::request::HeliconeContext {

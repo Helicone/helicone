@@ -43,7 +43,7 @@ where
     }
 }
 
-pub fn check_auth<B>(_request: &Request<B>) -> Option<AuthContext> {
+fn check_auth<B>(_request: &Request<B>) -> Option<AuthContext> {
     // ...
     // for now we are mocking this just to show how layers will stack on top of
     // each other

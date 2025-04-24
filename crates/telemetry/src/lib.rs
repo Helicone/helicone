@@ -115,12 +115,6 @@ fn env_filter() -> EnvFilter {
     EnvFilter::try_from_default_env()
         .unwrap_or_else(|_| EnvFilter::new("INFO"))
         .add_directive("llm_proxy=trace".parse().expect("always valid"))
-        // .add_directive("tower::buffer=trace".parse().expect("always valid"))
-        .add_directive("tower::balance=trace".parse().expect("always valid"))
-        .add_directive(
-            "tower::balance::p2c=trace".parse().expect("always valid"),
-        )
-        .add_directive("tower::discover=trace".parse().expect("always valid"))
         // these are required because of https://github.com/open-telemetry/opentelemetry-rust/issues/761
         .add_directive("hyper=error".parse().expect("always valid"))
         .add_directive("tonic=error".parse().expect("always valid"))

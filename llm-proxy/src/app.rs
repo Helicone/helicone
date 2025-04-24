@@ -182,9 +182,11 @@ impl App {
             .layer(ErrorHandlerLayer)
             .layer(CatchPanicLayer::new())
             .map_err(|e| crate::error::internal::InternalError::BufferError(e))
-            .layer(BufferLayer::new(BUFFER_SIZE))
             .layer(NormalizePathLayer::trim_trailing_slash())
-            // .layer(AsyncRequireAuthorizationLayer::new(AuthService))
+            // NOTE: not sure if there is perf impact from Auth layer coming
+            // before buffer layer, but required due to Clone bound.
+            .layer(AsyncRequireAuthorizationLayer::new(AuthService))
+            .layer(BufferLayer::new(BUFFER_SIZE))
             .service(router);
 
         let app = Self {
