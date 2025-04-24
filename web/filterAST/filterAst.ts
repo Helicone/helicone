@@ -64,8 +64,7 @@ type FilterOperator =
   | "ilike"
   | "contains"
   // Array operations
-  | "in"
-  | "is_null";
+  | "in";
 
 /**
  * Mapping of operator to display label
@@ -82,7 +81,6 @@ const FILTER_OPERATOR_LABELS: Record<FilterOperator, string> = {
   ilike: "contains (case insensitive)",
   contains: "contains",
   in: "in",
-  is_null: "is null",
 };
 
 /**
