@@ -298,6 +298,9 @@ export interface paths {
   "/v1/log/request": {
     post: operations["LogRequests"];
   };
+  "/v1/llm/chat/completions": {
+    post: operations["ChatCompletions"];
+  };
   "/v1/gov-organization/limits/member/{memberId}": {
     get: operations["GetMemberLimits"];
     post: operations["SetMemberLimits"];
@@ -16010,6 +16013,19 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["KafkaMessageContents"];
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
+      };
+    };
+  };
+  ChatCompletions: {
+    requestBody: {
+      content: {
+        "application/json": unknown;
       };
     };
     responses: {
