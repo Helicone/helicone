@@ -26,6 +26,7 @@ const operatorMap: Record<string, string> = {
   ilike: "ilike",
   contains: "contains",
   is: "equals", // Boolean operators use 'equals' in legacy format
+  is_null: "null",
 };
 
 /**
