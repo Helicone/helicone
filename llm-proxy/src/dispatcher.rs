@@ -102,7 +102,7 @@ impl Dispatcher {
             .provider_api_keys
             .as_ref()
             .get(&target_provider)
-            .unwrap()
+            .ok_or_else(|| InternalError::ProviderNotConfigured(target_provider))?
             .clone();
         let provider_config = self
             .app_state

@@ -47,7 +47,13 @@ impl ProviderKeys {
         let mut keys = IndexMap::new();
         for provider in Provider::iter() {
             let provider_str = provider.to_string().to_uppercase();
-            if let Ok(key) = std::env::var(format!("{provider_str}_API_KEY")) {
+            let env_var = format!("{provider_str}_API_KEY");
+            if let Ok(key) = std::env::var(&env_var) {
+                tracing::debug!(
+                    provider = %provider,
+                    env_var = %env_var,
+                    "Getting provider key"
+                );
                 keys.insert(provider, Secret(key));
             }
         }

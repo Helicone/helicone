@@ -166,6 +166,7 @@ impl App {
         let provider_keys = match &config.discover.api_keys_source {
             ProviderKeysSource::Env => ProviderKeys::from_env(),
         };
+        tracing::debug!("provider_keys: {:?}", provider_keys);
         let app_state = AppState(Arc::new(InnerAppState {
             config,
             minio,
@@ -323,9 +324,12 @@ where
     }
 
     fn call(&mut self, socket: SocketAddr) -> Self::Future {
+        // see: https://docs.rs/tower/latest/tower/trait.Service.html#be-careful-when-cloning-inner-services
+        let mut inner = self.inner.clone();
+        std::mem::swap(&mut self.inner, &mut inner);
         let svc = ServiceBuilder::new()
             .layer(tower_http::add_extension::AddExtensionLayer::new(socket))
-            .service(self.inner.clone());
+            .service(inner);
         ready(Ok(svc))
     }
 }
