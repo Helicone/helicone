@@ -1,3 +1,4 @@
+import { dbExecute } from "@/lib/api/db/dbExecute";
 import { HandlerWrapperOptions, withAuth } from "@/lib/api/handlerWrappers";
 import { GenerateParams } from "@/lib/api/llm/generate";
 import { getOpenAIKeyFromAdmin } from "@/lib/clients/settings";
@@ -18,6 +19,22 @@ async function getOpenAIClient(
     return openaiClient;
   }
 
+  const result = await dbExecute<{
+    id: string;
+    org_id: string;
+    decrypted_provider_key: string;
+    provider_key_name: string;
+    provider_name: string;
+  }>(
+    `SELECT id, org_id, decrypted_provider_key, provider_key_name, provider_name
+     FROM decrypted_provider_keys
+     WHERE org_id = $1
+     AND soft_delete = false
+     AND provider_name = 'OpenRouter'
+     LIMIT 1`,
+    [orgId]
+  );
+
   // Get API key from environment or admin settings
   let apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
@@ -31,12 +48,11 @@ async function getOpenAIClient(
     baseURL: isOnPrem
       ? "https://oai.helicone.ai/v1/"
       : "https://openrouter.helicone.ai/api/v1/",
-    apiKey: apiKey,
+    apiKey: result.data?.[0]?.decrypted_provider_key || "",
     defaultHeaders: {
       "Helicone-Auth": `Bearer ${process.env.TEST_HELICONE_API_KEY || ""}`,
       "Helicone-User-Id": orgId,
       "Helicone-Property-User-Email": userEmail,
-      "Helicone-RateLimit-Policy": `1000;w=${24 * 60 * 60};u=request;s=user`, // 1000 requests per day
     },
   });
 
@@ -116,6 +132,7 @@ async function handler({ req, res, userData }: HandlerWrapperOptions<any>) {
 
   try {
     // Get or initialize the OpenAI client
+
     const openai = await getOpenAIClient(userData.orgId, userData.user?.email);
 
     const params = req.body as GenerateParams;
