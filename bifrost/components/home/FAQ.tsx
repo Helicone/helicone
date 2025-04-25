@@ -12,9 +12,9 @@ const FAQ = () => {
   return (
     <div className={cn(ISLAND_WIDTH, "pt-14 sm:pt-20 pb-12 md:pb-14")}>
       <div className="flex flex-col gap-6 md:gap-10">
-        <h2 className="text-4xl sm:text-5xl font-semibold text-black">
+        {/* <h2 className="text-4xl sm:text-5xl font-semibold text-black">
           Questions &amp; Answers
-        </h2>
+        </h2> */}
         <Accordion type="multiple">
           <AccordionItem value="item-1" className="border-b-0">
             <AccordionTrigger className="text-slate-500 text-base sm:text-lg font-medium text-left">

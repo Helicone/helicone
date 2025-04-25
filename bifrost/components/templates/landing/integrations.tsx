@@ -10,7 +10,7 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import { toast, Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, ChevronRight } from "lucide-react";
 
 interface IntegrationsProps { }
 
@@ -470,7 +470,7 @@ self.model = AzureChatOpenAI(
           <Button
             className="bg-brand p-5 text-base md:text-lg md:py-4 lg:py-6 lg:px-6 lg:text-md gap-2 rounded-lg items-center z-[10]"
           >
-            Get started
+            Integrate today
             {/* <ChevronRight className="size-5 md:size-6" /> */}
           </Button>
         </Link>

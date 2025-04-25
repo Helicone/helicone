@@ -1,4 +1,7 @@
 import { cn, ISLAND_WIDTH } from "@/lib/utils";
+import Link from "next/link";
+import { Button } from "../ui/button";
+import { ArrowUpRight, ChevronRight } from "lucide-react";
 
 const floatingAnimation = "floating 3s ease-in-out infinite";
 const arrowAnimation = "dash 3s ease-in-out infinite";
@@ -2410,10 +2413,19 @@ const LLMLifecycle = () => {
             Designed for the{" "}
             <span className="text-brand">entire LLM lifecycle</span>
           </h2>
-          <p className="text-lg sm:text-xl max-w-[440px] text-wrap font-light leading-relaxed text-landing-description">
+          <p className="text-lg sm:text-xl max-w-[440px] text-wrap font-normal leading-relaxed text-muted-foreground">
             The CI workflow to take your LLM application from MVP to production,
             and from production to perfection.
           </p>
+          <Link href="https://www.helicone.ai/blog/introducing-helicone-v2" target="_blank" rel="noopener">
+            <Button
+              variant="link"
+              className="text-brand p-0 text-base md:text-lg lg:text-md gap-2 rounded-lg z-[10]"
+            >
+              How it works
+              <ChevronRight className="size-5 md:size-6" />
+            </Button>
+          </Link>
         </div>
         <SVG />
       </div>
