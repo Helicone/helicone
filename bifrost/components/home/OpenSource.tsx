@@ -322,7 +322,7 @@ const OpenSource = async () => {
           </div>
           <p className="text-base sm:text-lg max-w-[380px] text-wrap">
             The largest public AI conversation datasets consisting of all of
-            Helicone's LLM usage data. All anonymized.
+            Helicone&apos;s LLM usage data. All anonymized.
           </p>
           <OpenStatsSVG />
         </Link>
