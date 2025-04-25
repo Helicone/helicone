@@ -11,17 +11,17 @@ import {
 const FAQ = () => {
   return (
     <div className={cn(ISLAND_WIDTH, "pt-14 sm:pt-20 pb-12 md:pb-14")}>
-      <div className="flex flex-col gap-6 md:gap-10">
+      <div className="flex flex-col md:flex-row justify-between w-full gap-6 md:gap-10">
         <h2 className="text-4xl sm:text-5xl font-semibold text-black">
           Questions &amp; Answers
         </h2>
-        <Accordion type="multiple">
+        <Accordion type="multiple" className="w-full">
           <AccordionItem value="item-1" className="border-b-0">
             <AccordionTrigger className="text-foreground text-base sm:text-lg font-medium text-left">
               Will Helicone add latency to my LLM calls?
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground text-base sm:text-lg font-normal">
-              No, with our Async integration, there's zero added latency. Our Proxy integration adds under 50ms through our global Cloudflare Workers deployment.
+              No, with our Async integration, there&apos;s zero added latency. Our Proxy integration adds under 50ms through our global Cloudflare Workers deployment.
               <br />
               <br />
               We recommend using our Proxy for the simplest integration and access to gateway features like request caching, rate limiting, centralized API key management.
@@ -52,7 +52,7 @@ const FAQ = () => {
               Unlike general observability tools that treat LLMs as black boxes, Helicone is purpose-built for AI applications with specialized features like prompt version tracking, token-level cost analysis, and LLM-specific debugging tools.
               <br />
               <br />
-              We provide end-to-end visibility from user sessions to individual token decisions. Most importantly, Helicone scales with you from prototype to production without requiring changes to your monitoring approach as you grow—something traditional APM tools can't offer for LLM workflows.
+              We provide end-to-end visibility from user sessions to individual token decisions. Most importantly, Helicone scales with you from prototype to production without requiring changes to your monitoring approach as you grow—something traditional APM tools can&apos;t offer for LLM workflows.
             </AccordionContent>
           </AccordionItem>
           <hr className="my-2 border-t border-slate-200" />
@@ -79,7 +79,7 @@ const FAQ = () => {
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground text-base sm:text-lg font-normal">
 
-              Most developers integrate Helicone in under 2 minutes with two line changes—just update your base URL and add a Helicone header to your existing requests. There's no SDK required.
+              Most developers integrate Helicone in under 2 minutes with two line changes—just update your base URL and add a Helicone header to your existing requests. There&apos;s no SDK required.
               <br />
               <br />
               Our <a href="https://docs.helicone.ai/getting-started/quick-start" target="_blank" rel="noopener" className="text-brand">documentation</a> includes examples for all major providers and frameworks including OpenAI, Anthropic, LangChain, and LlamaIndex. Developers typically see their first dashboard data within 5 minutes of starting integration.
@@ -91,10 +91,10 @@ const FAQ = () => {
               Is Helicone secure and compliant for enterprise use?
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground text-base sm:text-lg font-normal">
-              Yes, Helicone is built for enterprise-grade security and compliance. We're SOC 2 Type II certified, HIPAA compliant, and implement industry best practices including end-to-end encryption, least-privilege access controls, and regular penetration testing.
+              Yes, Helicone is built for enterprise-grade security and compliance. We&apos;re SOC 2 Type II certified, HIPAA compliant, and implement industry best practices including end-to-end encryption, least-privilege access controls, and regular penetration testing.
               <br />
               <br />
-              We protect your data with the same care we'd expect for our own sensitive information. For more information, please <a href="https://helicone.ai/contact" target="_blank" rel="noopener" className="text-brand">reach out</a> to our team.
+              We protect your data with the same care we&apos;d expect for our own sensitive information. For more information, please <a href="https://helicone.ai/contact" target="_blank" rel="noopener" className="text-brand">reach out</a> to our team.
             </AccordionContent>
           </AccordionItem>
           <hr className="my-2 border-t border-slate-200" />
