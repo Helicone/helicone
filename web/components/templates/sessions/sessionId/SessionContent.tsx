@@ -164,10 +164,10 @@ export const SessionContent: React.FC<SessionContentProps> = ({
     totalTokens,
   ]);
 
-  // Check if the *original* session was a realtime session
-  const isOriginalRealtime = useMemo(() => {
+  // Check if the session contains a realtime request
+  const containsRealtime = useMemo(() => {
     const rawRequests = requests.requests.requests ?? [];
-    return rawRequests.length === 1 && isRealtimeRequest(rawRequests[0]);
+    return rawRequests.some(isRealtimeRequest);
   }, [requests.requests.requests]);
 
   return (
@@ -204,10 +204,10 @@ export const SessionContent: React.FC<SessionContentProps> = ({
             </div>
 
             {/* Realtime session reconstruction warning) */}
-            {isOriginalRealtime && (
+            {containsRealtime && (
               <div className="flex flex-row gap-2 items-center text-xs text-blue-500 font-semibold">
                 <PiBroadcastBold className="h-4 w-4" />
-                Realtime Session (Timeline reconstructed)
+                Includes reconstructed realtime requests
               </div>
             )}
           </div>
@@ -253,7 +253,7 @@ export const SessionContent: React.FC<SessionContentProps> = ({
           setSelectedRequestId={handleRequestIdChange}
           showSpan={true}
           session={session}
-          isOriginalRealtime={isOriginalRealtime}
+          isOriginalRealtime={containsRealtime}
         />
       </div>
     </Col>
