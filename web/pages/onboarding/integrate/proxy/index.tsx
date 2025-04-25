@@ -99,7 +99,9 @@ client = Anthropic(
   -H "anthropic-version: 2023-06-01" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "messages": [{"role": "user", "content": "Hello!"}]
+    "model": "claude-3-7-sonnet-20250219",
+    "messages": [{"role": "user", "content": "Hello!"}],
+    "max_tokens": 1024
   }'`,
     docsLink: "https://docs.helicone.ai/getting-started/integration/anthropic",
   },
