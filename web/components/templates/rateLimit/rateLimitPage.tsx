@@ -23,12 +23,32 @@ import useSearchParams from "../../shared/utils/useSearchParams";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 import RequestsPage from "../requests/RequestsPage";
 import UnauthorizedView from "../requests/UnauthorizedView";
+import router from "next/router";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { H2, P } from "@/components/ui/typography";
+import { useLocalStorage } from "@/services/hooks/localStorage";
+
+const TABS = [
+  {
+    id: "requests",
+    label: "Rate Limited Requests",
+  },
+  {
+    id: "rules",
+    label: "Rate Limit Rules",
+  },
+];
 
 const RateLimitPage = (props: {}) => {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>({
     start: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 7),
     end: new Date(),
   });
+  const [currentTab, useCurrentTab] = useLocalStorage<string>(
+    "rate-limit-tab",
+    "requests"
+  );
+
   const searchParams = useSearchParams();
   const { properties, isLoading: propertiesLoading } =
     useGetPropertiesV2(getPropertyFiltersV2);
@@ -94,6 +114,10 @@ const RateLimitPage = (props: {}) => {
     return currentTimeFilter || "24h";
   };
 
+  const handleCreateRateLimit = () => {
+    router.push("/settings/rate-limits");
+  };
+
   const hasRateLimitData =
     rateLimitOverTime.data?.data?.some((d) => d.count > 0) || false;
   const shouldShowUnauthorized = hasRateLimitData && unauthorized;
@@ -124,80 +148,113 @@ const RateLimitPage = (props: {}) => {
     );
   }
 
-  if (!hasRateLimitData && !isLoading) {
-    return (
-      <div className="flex flex-col w-full h-screen bg-background dark:bg-sidebar-background">
-        <div className="flex flex-1 h-full">
-          <EmptyStateCard feature="rate-limits" />
+  const renderRateLimitRequests = () => (
+    <Col className="gap-8">
+      <ThemedTimeFilter
+        currentTimeFilter={timeFilter}
+        timeFilterOptions={[
+          { key: "24h", value: "24H" },
+          { key: "7d", value: "7D" },
+          { key: "1m", value: "1M" },
+          { key: "3m", value: "3M" },
+        ]}
+        onSelect={onTimeSelectHandler}
+        isFetching={false}
+        defaultValue={getDefaultValue()}
+        custom={true}
+      />
+      <div className="h-full w-full bg-white dark:bg-gray-800 rounded-md pt-4">
+        {rateLimitOverTime.isLoading ? (
+          <LoadingAnimation height={175} width={175} />
+        ) : (
+          <AreaChart
+            className="h-[14rem]"
+            data={
+              rateLimitOverTime.data?.data?.map((d) => ({
+                time: d.time.toISOString(),
+                count: d.count,
+              })) ?? []
+            }
+            index="time"
+            categories={["count"]}
+            colors={["red"]}
+            showYAxis={false}
+            curveType="monotone"
+          />
+        )}
+      </div>
+      <div className="text-sm text-gray-500 dark:text-gray-400">
+        <RequestsPage
+          currentPage={1}
+          pageSize={25}
+          sort={{
+            sortKey: null,
+            sortDirection: null,
+            isCustomProperty: false,
+          }}
+          rateLimited={true}
+          organizationLayoutAvailable={false}
+        />
+      </div>
+    </Col>
+  );
+
+  const renderRateLimitRules = () => (
+    <Col className="gap-8">
+      <div className="flex flex-col gap-6 p-8 bg-white dark:bg-gray-800 rounded-md">
+        <div className="flex justify-between items-center">
+          <H2>Rate Limit Rules</H2>
+          <button
+            className="text-white dark:text-black bg-black dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-200 px-4 py-2 rounded-md font-medium text-sm"
+            onClick={handleCreateRateLimit}
+          >
+            Create Rate Limit
+          </button>
+        </div>
+        <P className="text-muted-foreground">
+          Create and manage rate limits for your organization. Rate limits can
+          be applied to specific keys.
+        </P>
+        <div className="border rounded-md p-6 flex flex-col items-center justify-center gap-4 bg-gray-50 dark:bg-gray-900">
+          <P className="text-center text-muted-foreground">
+            No rate limits defined yet. Create your first rate limit rule to get
+            started.
+          </P>
         </div>
       </div>
-    );
-  }
+    </Col>
+  );
 
   return (
-    <>
-      <AuthHeader
-        title={<div className="flex items-center gap-2">Rate limits</div>}
-        actions={
-          <Link
-            href="https://docs.helicone.ai/features/advanced-usage/custom-rate-limits"
-            target="_blank"
-            rel="noreferrer noopener"
-            className="w-fit flex items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-          >
-            <BookOpenIcon className="h-4 w-4" />
-          </Link>
-        }
-      />
-      <Col className="gap-8">
-        <ThemedTimeFilter
-          currentTimeFilter={timeFilter}
-          timeFilterOptions={[
-            { key: "24h", value: "24H" },
-            { key: "7d", value: "7D" },
-            { key: "1m", value: "1M" },
-            { key: "3m", value: "3M" },
-          ]}
-          onSelect={onTimeSelectHandler}
-          isFetching={false}
-          defaultValue={getDefaultValue()}
-          custom={true}
+    <Tabs
+      value={currentTab}
+      onValueChange={(value) => useCurrentTab(value)}
+      className="w-full"
+    >
+      <div>
+        <AuthHeader
+          isWithinIsland={true}
+          title={
+            <div className="flex items-center gap-2 ml-8">Rate Limits</div>
+          }
+          actions={
+            <div className="flex items-center gap-4">
+              <TabsList className="mr-8">
+                {TABS.map((tab) => (
+                  <TabsTrigger key={tab.id} value={tab.id}>
+                    {tab.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
+          }
         />
-        <div className="h-full w-full bg-white dark:bg-gray-800 rounded-md pt-4">
-          {rateLimitOverTime.isLoading ? (
-            <LoadingAnimation height={175} width={175} />
-          ) : (
-            <AreaChart
-              className="h-[14rem]"
-              data={
-                rateLimitOverTime.data?.data?.map((d) => ({
-                  time: d.time.toISOString(),
-                  count: d.count,
-                })) ?? []
-              }
-              index="time"
-              categories={["count"]}
-              colors={["red"]}
-              showYAxis={false}
-              curveType="monotone"
-            />
-          )}
-        </div>
-        <div className="text-sm text-gray-500 dark:text-gray-400">
-          <RequestsPage
-            currentPage={1}
-            pageSize={25}
-            sort={{
-              sortKey: null,
-              sortDirection: null,
-              isCustomProperty: false,
-            }}
-            rateLimited={true}
-            organizationLayoutAvailable={false}
-          />
-        </div>
-      </Col>
-    </>
+
+        <TabsContent value="requests">{renderRateLimitRequests()}</TabsContent>
+
+        <TabsContent value="rules">{renderRateLimitRules()}</TabsContent>
+      </div>
+    </Tabs>
   );
 };
 
