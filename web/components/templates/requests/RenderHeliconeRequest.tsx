@@ -146,7 +146,6 @@ export function RenderMappedRequest({
                 <Realtime
                   mappedRequest={mappedRequest}
                   className="pt-14 px-4"
-                  messageIndexFilter={messageIndexFilter}
                 />
               );
 
