@@ -48,7 +48,7 @@ const Hero = () => {
       <div className="flex flex-col md:flex-row gap-4">
         <Link href="https://us.helicone.ai/signup">
           <Button
-            className="bg-brand px-7 py-5 text-base md:text-lg md:py-4 lg:py-7 lg:px-7 lg:text-xl gap-2 rounded-lg items-center z-[10]"
+            className="bg-brand p-5 text-base md:text-lg md:py-4 lg:py-7 lg:px-7 lg:text-xl gap-2 rounded-lg items-center z-[10]"
           >
             Start monitoring
             {/* <ChevronRight className="size-5 md:size-6" /> */}
@@ -57,9 +57,9 @@ const Hero = () => {
         <Link href="/contact">
           <Button
             variant="ghost"
-            className="px-6 py-5 text-base md:text-lg md:py-4 lg:py-7 lg:px-7 lg:text-xl gap-2 rounded-lg items-center z-[10]"
+            className="p-5 text-base md:text-lg md:py-4 lg:py-7 lg:px-7 lg:text-xl gap-2 rounded-lg items-center z-[10]"
           >
-            Get a demo
+            Contact sales
             <ChevronRight className="size-5 md:size-6" />
           </Button>
         </Link>
