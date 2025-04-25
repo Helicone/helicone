@@ -31,6 +31,7 @@ export const convertRealtimeRequestToSteps = (
   const reqMessages = mappedContent.schema.request.messages || [];
   const respMessages = mappedContent.schema.response?.messages || [];
   // Filter out messages without valid timestamps, role, or content, as they cannot be sequenced
+  // *** Also filter out the "session.update" messages as they don't represent renderable steps ***
   const allMessages = [...reqMessages, ...respMessages].filter(
     (m) =>
       m.timestamp &&
@@ -55,7 +56,7 @@ export const convertRealtimeRequestToSteps = (
     const step = createSimulatedRequestStep(
       realtimeRequest,
       message,
-      index,
+      index, // Pass the index of the message to highlight
       previousStepResponseTimestampMs // Pass the end time of the previous step
     );
     simulatedSteps.push(step);
@@ -71,11 +72,12 @@ export const convertRealtimeRequestToSteps = (
 /**
  * Creates a simulated request step from a single message within a realtime request,
  * ensuring its start time is after the previous step's end time.
+ * Each step retains the original request/response bodies but gets identifying properties.
  */
 function createSimulatedRequestStep(
   originalRequest: HeliconeRequest,
-  message: Message,
-  messageIndex: number,
+  message: Message, // The specific message this step represents
+  stepIndex: number, // The chronological index of this message/step
   previousStepResponseTimestampMs: number // The end time (in ms) of the preceding step
 ): HeliconeRequest {
   // Use the message timestamp as the base request time
@@ -90,16 +92,12 @@ function createSimulatedRequestStep(
   // Set response time 100ms after the (potentially adjusted) request time
   // Add a minimum duration of 1ms in case 100ms is too short due to adjustments
   const stepResponseTimestampMs = Math.max(
-    stepRequestTimestampMs + 1000,
+    stepRequestTimestampMs + 100, // Keep a small simulated duration for the step
     stepRequestTimestampMs + 1
   );
 
-  // Create a unique ID for the simulated step
-  const simulatedId = `${originalRequest.request_id}-step-${stepRequestTimestampMs}-${messageIndex}`;
-
-  const isUser = message.role === "user";
-  const requestBodyMessages = isUser ? [message] : [];
-  const responseBodyMessages = !isUser ? [message] : [];
+  // Create a unique ID for the simulated step based on its index
+  const simulatedId = `${originalRequest.request_id}-step-${stepIndex}`;
 
   // Create the simulated request step object
   return {
@@ -110,27 +108,20 @@ function createSimulatedRequestStep(
     request_created_at: new Date(stepRequestTimestampMs).toISOString(),
     response_created_at: new Date(stepResponseTimestampMs).toISOString(),
 
-    // Assign the message to the appropriate body based on role
-    request_body: {
-      ...originalRequest.request_body,
-      messages: requestBodyMessages,
-    },
-    response_body: {
-      // Ensure response_body exists even if originally null
-      ...(originalRequest.response_body || {}),
-      messages: responseBodyMessages,
-    },
+    // *** Use original request and response bodies ***
+    // This ensures the mapper gets the full context it needs.
+    request_body: originalRequest.request_body,
+    response_body: originalRequest.response_body,
 
     // Keep original token/cost/latency data from the parent request
     // These fields are already copied by the spread operator above
 
-    // Add properties to identify this as a simulated step
-    properties: {
-      ...originalRequest.properties,
-      _helicone_simulated_realtime_step: "true",
+    // Add properties to identify this as a simulated step and its index
+    // Merge with existing request_properties
+    request_properties: {
+      ...(originalRequest.request_properties || {}),
       _helicone_realtime_original_request_id: originalRequest.request_id,
-      _helicone_realtime_step_index: messageIndex.toString(),
-      _helicone_realtime_step_role: message.role || "unknown",
+      _helicone_realtime_step_index: stepIndex.toString(), // Store the step's chronological index
     },
     // Ensure llmSchema is null for steps as it applies to the whole interaction
     llmSchema: null,

@@ -184,11 +184,7 @@ export class SessionManager {
     return resultMap(results, (x) =>
       x.map((y) => ({
         ...y,
-<<<<<<< HEAD
-=======
-        total_cost: +y.total_cost,
         avg_latency: +y.avg_latency,
->>>>>>> cebebf642 (temp)
       }))
     );
   }
