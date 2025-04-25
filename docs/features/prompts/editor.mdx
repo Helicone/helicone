@@ -1,6 +1,6 @@
 ---
 title: "Editor"
-sidebarTitle: "Editor"
+sidebarTitle: "UI Managed"
 description: "Design, version, and manage your prompts collaboratively, then [effortlessly deploy them across your app](/features/prompts/generate)."
 "twitter:title": "Prompts | Helicone OSS LLM Observability"
 ---
@@ -117,4 +117,80 @@ We're excited to launch Auto-Improve, an intelligent prompt optimization tool th
 
 ## Using Prompts in Your Code
 
-If you've created a prompt in the UI, you can use the [Generate API](/features/prompts/generate) for a simplified integration that works with multiple LLM providers.
+<Warning>
+  **API Migration Notice:** We are actively working on a new Router project that
+  will include an updated Generate API. While the previous [Generate API
+  (legacy)](/features/prompts/generate) is still functional (see the notice on
+  that page for deprecation timelines), here's a temporary way to import and use
+  your UI-managed prompts directly in your code in the meantime:
+</Warning>
+
+### For OpenAI users or Azure
+
+```tsx
+const openai = new OpenAI({
+  baseURL: "https://generate.helicone.ai/v1",
+  defaultHeaders: {
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+
+    // For Azure users
+    AZURE_API_KEY: process.env.AZURE_API_KEY,
+    AZURE_REGION: process.env.AZURE_REGION,
+    AZURE_PROJECT: process.env.AZURE_PROJECT,
+    AZURE_LOCATION: process.env.AZURE_LOCATION,
+  },
+});
+
+const response = await openai.chat.completions.create({
+  inputs: {
+    number: "world",
+  },
+  promptId: "helicone-test",
+} as any);
+```
+
+### Using API to pull down the compiled prompt templates
+
+##### Step 1: Get the compile the prompt template
+
+Bash exmaple
+
+```bash
+curl --request POST \
+  --url https://api.helicone.ai/v1/prompt/helicone-test/compile \
+  --header 'Content-Type: application/json' \
+  --header 'authorization: sk-helicone-n4vqkhi-gg6exli-teictoi-aw7azyy' \
+  --data '{
+  "filter": "all",
+  "includeExperimentVersions": false,
+  "inputs": {
+    "number": "10"
+  }
+}'
+```
+
+Javascript example with openai
+
+```tsx
+const promptTemplate = await fetch(
+  "https://api.helicone.ai/v1/prompt/helicone-test/compile",
+  {
+    method: "POST",
+    headers: {
+      authorization: "sk-helicone-n4vqkhi-gg6exli-teictoi-aw7azyy",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      filter: "all",
+      includeExperimentVersions: false,
+      inputs: { number: "10" }, // place all of your inputs here
+    }),
+  }
+).then((res) => res.json() as any);
+
+const example = (await openai.chat.completions.create({
+  ...(promptTemplate.data.prompt_compiled as any),
+  stream: false, // or true
+})) as any;
+```

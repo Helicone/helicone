@@ -249,8 +249,8 @@
           "group": "Prompts",
           "pages": [
             "features/prompts/editor",
-            "features/prompts/generate",
-            "features/prompts/import"
+            "features/prompts/import",
+            "features/prompts/generate"
           ]
         },
         "features/experiments",
