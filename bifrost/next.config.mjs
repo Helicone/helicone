@@ -33,6 +33,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "www.sequoiacap.com",
       },
+      {
+        protocol: "https",
+        hostname: "marketing-assets-helicone.s3.us-west-2.amazonaws.com"
+      }
     ],
   },
   async redirects() {
