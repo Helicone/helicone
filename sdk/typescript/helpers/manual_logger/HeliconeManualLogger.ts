@@ -109,19 +109,31 @@ export class HeliconeManualLogger {
    * @param request - The request object to log
    * @param body - The response body as a string
    * @param additionalHeaders - Additional headers to send with the request
+   * @param latencyMs - The latency of the request in milliseconds
    * @returns A Promise that resolves when logging is complete
+   *
+   * @example
+   * ```typescript
+   * helicone.logSingleRequest(request, body, { additionalHeaders: { "Helicone-User-Id": userId }, latencyMs: 1000 });
+   * ```
    */
   public async logSingleRequest(
     request: HeliconeLogRequest,
     body: string,
-    additionalHeaders?: Record<string, string>
+    options: {
+      additionalHeaders?: Record<string, string>;
+      latencyMs?: number;
+    }
   ): Promise<void> {
     const startTime = Date.now();
+    const endTime = options.latencyMs
+      ? startTime + options.latencyMs
+      : Date.now();
 
     await this.sendLog(request, body, {
       startTime,
-      endTime: Date.now(),
-      additionalHeaders,
+      endTime,
+      additionalHeaders: options.additionalHeaders,
       status: 200,
     });
   }

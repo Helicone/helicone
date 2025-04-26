@@ -3,13 +3,14 @@ import { SimpleTable } from "../../../shared/table/simpleTable";
 import { ThemedSwitch } from "../../../shared/themed/themedSwitch";
 import { getUSDate } from "../../../shared/utils/utils";
 import { useState } from "react";
-import {
-  useAlertBanners,
-  useCreateAlertBanner,
-  useUpdateAlertBanner,
-} from "../../../../services/hooks/admin";
+
 import useNotification from "../../../shared/notification/useNotification";
 import { Button } from "@/components/ui/button";
+import {
+  useCreateAlertBanner,
+  useUpdateAlertBanner,
+} from "@/services/hooks/admin";
+import { $JAWN_API } from "@/lib/clients/jawn";
 
 interface AlertBannersProps {}
 
@@ -18,7 +19,11 @@ const AlertBanners = (props: AlertBannersProps) => {
 
   const { setNotification } = useNotification();
 
-  const { data: alertBanners, refetch } = useAlertBanners();
+  const { data: alertBanners, refetch } = $JAWN_API.useQuery(
+    "get",
+    "/v1/alert-banner",
+    {}
+  );
 
   const { createBanner, isCreatingBanner } = useCreateAlertBanner(() => {
     refetch();
@@ -27,7 +32,7 @@ const AlertBanners = (props: AlertBannersProps) => {
     setNotification("Alert banner created successfully", "success");
   });
 
-  const { isUpdatingBanner, updateBanner } = useUpdateAlertBanner(() => {
+  const { updateBanner } = useUpdateAlertBanner(() => {
     refetch();
     setNotification("Alert banner updated successfully", "success");
   });

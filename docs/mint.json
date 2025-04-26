@@ -103,7 +103,8 @@
             "integrations/openai/llamaindex",
             "integrations/openai/curl",
             "integrations/openai/assistants",
-            "integrations/openai/realtime"
+            "integrations/openai/realtime",
+            "integrations/openai/responses"
           ]
         },
         {
@@ -248,8 +249,8 @@
           "group": "Prompts",
           "pages": [
             "features/prompts/editor",
-            "features/prompts/generate",
-            "features/prompts/import"
+            "features/prompts/import",
+            "features/prompts/generate"
           ]
         },
         "features/experiments",

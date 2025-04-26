@@ -1,10 +1,10 @@
+import { HeliconeManualLogger } from "@helicone/helpers";
+import { hpf } from "@helicone/prompts";
 import { OpenAI } from "openai";
 import { v4 as uuid } from "uuid";
-import { hpf } from "@helicone/prompts";
-import { HeliconeManualLogger } from "@helicone/helpers";
+import { GET_KEY } from "../clients/constant";
+import { flights, hotels } from "./onboardingVariables";
 import { examples } from "./travelExamples";
-import { OPENAI_KEY } from "../clients/constant";
-import { hotels, flights } from "./onboardingVariables";
 
 async function findAndBookFlight(
   heliconeLogger: HeliconeManualLogger,
@@ -701,24 +701,21 @@ export async function setupDemoOrganizationRequests({
     ? process.env.HELICONE_WORKER_URL + "/v1"
     : "http://localhost:8787/v1";
 
-  // const openai = new OpenAI({
-  //   apiKey: OPENAI_KEY,
-  //   baseURL: heliconeWorkerUrl,
-  //   defaultHeaders: {
-  //     "Helicone-Auth": `Bearer ${heliconeApiKey}`,
-  //   },
-  // });
+  const openaiKey = await GET_KEY("key:openai");
 
   const openai = new OpenAI({
-    apiKey: OPENAI_KEY,
+    apiKey: openaiKey,
     baseURL: heliconeWorkerUrl,
     defaultHeaders: {
       "Helicone-Auth": `Bearer ${heliconeApiKey}`,
     },
   });
 
+  const heliconeOnHeliconeApiKey = await GET_KEY(
+    "key:helicone_on_helicone_key"
+  );
   const heliconeLogger = new HeliconeManualLogger({
-    apiKey: heliconeApiKey,
+    apiKey: heliconeOnHeliconeApiKey,
     loggingEndpoint: `${
       process.env.HELICONE_API_WORKER_URL ?? "https://api.worker.helicone.ai"
     }/custom/v1/log`,

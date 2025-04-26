@@ -54,7 +54,7 @@ const response = streamText({
 });
 ```
 
-```javascript Google (Gemini)
+```javascript Google Gemini
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 
 const google = createGoogleGenerativeAI({
@@ -73,7 +73,64 @@ const response = streamText({
 });
 ```
 
+```javascript Google Vertex AI
+import { createVertex } from "@ai-sdk/google-vertex";
+import { generateText } from "ai";
+
+const location = "us-central1";
+const project = process.env.GOOGLE_PROJECT_ID;
+
+const vertex = createVertex({
+  project: project,
+  location: location,
+  baseURL: `https://gateway.helicone.ai/v1/projects/${project}/locations/${location}/publishers/google/`,
+  // You can use any Google auth method: keyFilename, credentials object, ADC, etc.
+  googleAuthOptions: {
+    keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+  },
+  headers: {
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+    "Helicone-Target-Url": `https://${location}-aiplatform.googleapis.com`,
+  },
+});
+
+// Use Vertex AI to make API calls
+const response = generateText({
+  model: vertex("gemini-1.5-flash"),
+  prompt: "Hello world",
+});
+```
+
+```javascript Google Vertex Anthropic
+import { createVertexAnthropic } from "@ai-sdk/google-vertex/anthropic";
+import { generateText } from "ai";
+
+const location = "us-east5";
+const project = process.env.GOOGLE_PROJECT_ID;
+
+const vertexAnthropic = createVertexAnthropic({
+  project: project,
+  location: location,
+  baseURL: `https://gateway.helicone.ai/v1/projects/${project}/locations/${location}/publishers/anthropic/models/`,
+  // You can use any Google auth method: keyFilename, credentials object, ADC, etc.
+  googleAuthOptions: {
+    keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+  },
+  headers: {
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+    "Helicone-Target-Url": `https://${location}-aiplatform.googleapis.com`,
+  },
+});
+
+// Use Vertex Anthropic to make API calls
+const response = generateText({
+  model: vertexAnthropic("claude-3-5-sonnet@20240620"),
+  prompt: "Hello world",
+});
+```
+
 ```javascript AWS Bedrock
+// Ensure you are using version 2.0.0 or higher of @ai-sdk/amazon-bedrock
 import { createAmazonBedrock } from "@ai-sdk/amazon-bedrock";
 
 const bedrock = createAmazonBedrock({

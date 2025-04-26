@@ -7,6 +7,7 @@ import {
   Building2,
   Flag,
   Users,
+  Settings,
 } from "lucide-react";
 import { useRouter } from "next/router";
 import {
@@ -27,6 +28,7 @@ const navigation = [
     items: [
       { name: "Dashboard", href: "/admin", icon: Home },
       { name: "On Prem", href: "/admin/on-prem", icon: Ticket },
+      { name: "Settings", href: "/admin/settings", icon: Settings },
       { name: "All Orgs", href: "/admin/stats", icon: Building2 },
       { name: "Governance", href: "/admin/governance-orgs", icon: Users },
       { name: "Metrics", href: "/admin/metrics", icon: BarChart },
