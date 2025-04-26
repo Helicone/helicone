@@ -1,9 +1,20 @@
 import { useOrg } from "@/components/layout/org/organizationContext";
-import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
-import { BookOpenIcon } from "@heroicons/react/24/outline";
-import { AreaChart } from "@tremor/react";
-import Link from "next/link";
-import { useState } from "react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  ResponsiveContainer,
+} from "recharts";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
+import { format } from "date-fns";
+import { useCallback, useMemo, useState } from "react";
 import { RequestsOverTime } from "../../../lib/timeCalculations/fetchTimeData";
 import {
   getTimeIntervalAgo,
@@ -11,12 +22,9 @@ import {
 } from "../../../lib/timeCalculations/time";
 import { Result, resultMap } from "../../../packages/common/result";
 import { useGetUnauthorized } from "../../../services/hooks/dashboard";
-import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
 import { useBackendMetricCall } from "../../../services/hooks/useBackendFunction";
 import { TimeFilter } from "../../../services/lib/filters/filterDefs";
-import { getPropertyFiltersV2 } from "../../../services/lib/filters/frontendFilterDefs";
 import { Col } from "../../layout/common/col";
-import AuthHeader from "../../shared/authHeader";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
 import useSearchParams from "../../shared/utils/useSearchParams";
@@ -26,7 +34,14 @@ import UnauthorizedView from "../requests/UnauthorizedView";
 import router from "next/router";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { H2, P } from "@/components/ui/typography";
-import { useLocalStorage } from "@/services/hooks/localStorage";
+import Header from "@/components/shared/Header";
+
+const chartConfig = {
+  count: {
+    label: "Count",
+    color: "hsl(var(--destructive))", // Use semantic red for rate limits
+  },
+} satisfies ChartConfig;
 
 const TABS = [
   {
@@ -40,18 +55,15 @@ const TABS = [
 ];
 
 const RateLimitPage = (props: {}) => {
+  const searchParams = useSearchParams();
+
   const [timeFilter, setTimeFilter] = useState<TimeFilter>({
-    start: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 7),
+    start: getTimeIntervalAgo("24h"),
     end: new Date(),
   });
-  const [currentTab, useCurrentTab] = useLocalStorage<string>(
-    "rate-limit-tab",
-    "requests"
-  );
 
-  const searchParams = useSearchParams();
-  const { properties, isLoading: propertiesLoading } =
-    useGetPropertiesV2(getPropertyFiltersV2);
+  const [currentTab, useCurrentTab] = useState<string>("requests");
+
   const org = useOrg();
   const { user } = useHeliconeAuthClient();
   const {
@@ -60,15 +72,17 @@ const RateLimitPage = (props: {}) => {
     isLoading: isAuthLoading,
   } = useGetUnauthorized(user?.id || "");
 
-  const rateLimitFilterLeaf = {
-    request_response_rmt: {
-      properties: {
-        "Helicone-Rate-Limit-Status": {
-          equals: "rate_limited",
-        },
-      },
-    },
-  };
+  // Define mock data inside component using useMemo for stability
+  const memoizedMockData = useMemo(() => {
+    const data = [];
+    const now = new Date();
+    for (let i = 12; i >= 0; i--) {
+      const time = new Date(now.getTime() - i * 5 * 60 * 1000);
+      const count = Math.floor(Math.random() * 15) + (i % 3 === 0 ? 5 : 0);
+      data.push({ time, count });
+    }
+    return data;
+  }, []); // Empty dependency array means it runs only once
 
   const rateLimitOverTime = useBackendMetricCall<
     Result<RequestsOverTime[], string>
@@ -76,7 +90,15 @@ const RateLimitPage = (props: {}) => {
     params: {
       timeFilter: timeFilter,
       userFilters: {
-        left: rateLimitFilterLeaf,
+        left: {
+          request_response_rmt: {
+            properties: {
+              "Helicone-Rate-Limit-Status": {
+                equals: "rate_limited",
+              },
+            },
+          },
+        },
         operator: "and",
         right: "all",
       },
@@ -91,55 +113,74 @@ const RateLimitPage = (props: {}) => {
     },
   });
 
-  const onTimeSelectHandler = (key: string, value: string) => {
-    if (key === "custom") {
-      const [start, end] = value.split("_");
-      setTimeFilter({
-        start: new Date(start),
-        end: new Date(end),
-      });
-      return;
-    }
-    setTimeFilter({
-      start: getTimeIntervalAgo(key as TimeInterval),
-      end: new Date(),
-    });
-  };
+  const onTimeSelectHandler = useCallback(
+    (key: string, value: string) => {
+      let newTimeFilter: TimeFilter;
+      let newTimeParamValue: string;
 
-  const getDefaultValue = () => {
+      if (key === "custom") {
+        const [start, end] = value.split("_");
+        newTimeFilter = {
+          start: new Date(start),
+          end: new Date(end),
+        };
+        newTimeParamValue = `custom_${value}`;
+      } else {
+        newTimeFilter = {
+          start: getTimeIntervalAgo(key as TimeInterval),
+          end: new Date(),
+        };
+        newTimeParamValue = key;
+      }
+
+      setTimeFilter(newTimeFilter);
+
+      router.push(
+        {
+          pathname: router.pathname,
+          query: { ...router.query, t: newTimeParamValue },
+        },
+        undefined,
+        { shallow: true }
+      );
+    },
+    [setTimeFilter, router]
+  );
+
+  const getDefaultValue = useCallback(() => {
     const currentTimeFilter = searchParams.get("t");
     if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
       return "custom";
     }
-    return currentTimeFilter || "24h";
-  };
+    const validIntervals: TimeInterval[] = [
+      "1h",
+      "24h",
+      "7d",
+      "1m",
+      "3m",
+      "all",
+    ];
+    if (
+      currentTimeFilter &&
+      validIntervals.includes(currentTimeFilter as TimeInterval)
+    ) {
+      return currentTimeFilter;
+    }
+    return "24h";
+  }, [searchParams]);
 
   const handleCreateRateLimit = () => {
     router.push("/settings/rate-limits");
   };
 
-  const hasRateLimitData =
-    rateLimitOverTime.data?.data?.some((d) => d.count > 0) || false;
+  const hasRateLimitData = false;
   const shouldShowUnauthorized = hasRateLimitData && unauthorized;
   const isOrgLoading = !org || !org.currentOrg;
   const isUserLoading = user === undefined;
-  const isLoading =
-    propertiesLoading ||
-    rateLimitOverTime.isLoading ||
-    isOrgLoading ||
-    isAuthLoading ||
-    isUserLoading;
+  const isLoading = isOrgLoading || isAuthLoading || isUserLoading;
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-        <LoadingAnimation
-          height={175}
-          width={175}
-          title="Loading rate limit data..."
-        />
-      </div>
-    );
+    return <LoadingAnimation title="Loading..." height={175} width={175} />;
   }
 
   if (shouldShowUnauthorized) {
@@ -148,56 +189,71 @@ const RateLimitPage = (props: {}) => {
     );
   }
 
-  const renderRateLimitRequests = () => (
-    <Col className="gap-8">
-      <ThemedTimeFilter
-        currentTimeFilter={timeFilter}
-        timeFilterOptions={[
-          { key: "24h", value: "24H" },
-          { key: "7d", value: "7D" },
-          { key: "1m", value: "1M" },
-          { key: "3m", value: "3M" },
-        ]}
-        onSelect={onTimeSelectHandler}
-        isFetching={false}
-        defaultValue={getDefaultValue()}
-        custom={true}
-      />
-      <div className="h-full w-full bg-white dark:bg-gray-800 rounded-md pt-4">
-        {rateLimitOverTime.isLoading ? (
-          <LoadingAnimation height={175} width={175} />
-        ) : (
-          <AreaChart
-            className="h-[14rem]"
-            data={
-              rateLimitOverTime.data?.data?.map((d) => ({
-                time: d.time.toISOString(),
-                count: d.count,
-              })) ?? []
-            }
-            index="time"
-            categories={["count"]}
-            colors={["red"]}
-            showYAxis={false}
-            curveType="monotone"
+  const renderRateLimitRequests = () => {
+    const showMockData = org?.currentOrg?.has_onboarded === false;
+    const chartData = showMockData
+      ? memoizedMockData
+      : rateLimitOverTime.data?.data ?? [];
+    const isChartLoading = showMockData ? false : rateLimitOverTime.isLoading;
+
+    return (
+      <Col>
+        <div className="h-full w-full bg-card text-card-foreground rounded-md pt-4">
+          {isChartLoading ? (
+            <div className="h-[14rem] flex items-center justify-center">
+              <LoadingAnimation height={100} width={100} />
+            </div>
+          ) : (
+            <ChartContainer config={chartConfig} className="h-[14rem] w-full">
+              <BarChart
+                accessibilityLayer
+                data={chartData}
+                margin={{ left: 12, right: 12, top: 5, bottom: 5 }}
+              >
+                <XAxis
+                  dataKey="time"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  tickFormatter={(value) => {
+                    try {
+                      const date =
+                        value instanceof Date ? value : new Date(value);
+                      return !isNaN(date.getTime())
+                        ? format(date, "MMM d, HH:mm")
+                        : "";
+                    } catch (e) {
+                      return "";
+                    }
+                  }}
+                  tickCount={7}
+                  interval="preserveStartEnd"
+                />
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent indicator="dot" hideLabel />}
+                />
+                <Bar dataKey="count" fill="var(--color-count)" radius={4} />
+              </BarChart>
+            </ChartContainer>
+          )}
+        </div>
+        <div className="text-sm text-gray-500 dark:text-gray-400 border-t">
+          <RequestsPage
+            currentPage={1}
+            pageSize={25}
+            sort={{
+              sortKey: null,
+              sortDirection: null,
+              isCustomProperty: false,
+            }}
+            rateLimited={true}
+            organizationLayoutAvailable={false}
           />
-        )}
-      </div>
-      <div className="text-sm text-gray-500 dark:text-gray-400">
-        <RequestsPage
-          currentPage={1}
-          pageSize={25}
-          sort={{
-            sortKey: null,
-            sortDirection: null,
-            isCustomProperty: false,
-          }}
-          rateLimited={true}
-          organizationLayoutAvailable={false}
-        />
-      </div>
-    </Col>
-  );
+        </div>
+      </Col>
+    );
+  };
 
   const renderRateLimitRules = () => (
     <Col className="gap-8">
@@ -232,26 +288,31 @@ const RateLimitPage = (props: {}) => {
       className="w-full"
     >
       <div>
-        <AuthHeader
-          isWithinIsland={true}
-          title={
-            <div className="flex items-center gap-2 ml-8">Rate Limits</div>
+        <Header
+          title="Rate Limits"
+          leftActions={
+            currentTab === "requests" ? (
+              <ThemedTimeFilter
+                currentTimeFilter={timeFilter}
+                timeFilterOptions={[]}
+                onSelect={onTimeSelectHandler}
+                isFetching={false}
+                defaultValue={getDefaultValue()}
+                custom={true}
+              />
+            ) : null
           }
-          actions={
-            <div className="flex items-center gap-4">
-              <TabsList className="mr-8">
-                {TABS.map((tab) => (
-                  <TabsTrigger key={tab.id} value={tab.id}>
-                    {tab.label}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </div>
-          }
+          rightActions={[
+            <TabsList className="mr-8" key="tabs-list">
+              {TABS.map((tab) => (
+                <TabsTrigger key={tab.id} value={tab.id}>
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>,
+          ]}
         />
-
         <TabsContent value="requests">{renderRateLimitRequests()}</TabsContent>
-
         <TabsContent value="rules">{renderRateLimitRules()}</TabsContent>
       </div>
     </Tabs>
