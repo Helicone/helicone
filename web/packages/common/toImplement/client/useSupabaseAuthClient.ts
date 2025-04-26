@@ -1,48 +1,14 @@
 import { Database } from "@/db/database.types";
-import { SupabaseServerWrapper } from "@/lib/wrappers/supabase";
 import {
   SupabaseClient,
   useSupabaseClient,
   useUser,
 } from "@supabase/auth-helpers-react";
-import {
-  GetServerSidePropsContext,
-  NextApiRequest,
-  NextApiResponse,
-} from "next";
 import posthog from "posthog-js";
 import { useMemo } from "react";
-import { SSRContext } from "../../auth/client/getSSRHeliconeAuthClient";
 import { HeliconeAuthClient } from "../../auth/client/HeliconeAuthClient";
 import { HeliconeOrg, HeliconeUser } from "../../auth/types";
 import { err, ok, Result } from "../../result";
-
-export async function supabaseAuthClientFromSSRContext(
-  ctx: SSRContext<
-    NextApiRequest & { headers: Record<string, string> },
-    NextApiResponse,
-    GetServerSidePropsContext
-  >
-) {
-  const supabaseClient = new SupabaseServerWrapper(ctx);
-  const user = await supabaseClient.getClient().auth.getUser();
-
-  const userAndOrg = (await supabaseClient.getUserAndOrg()).data;
-
-  return new SupabaseAuthClient(
-    supabaseClient.client,
-    {
-      email: user.data.user?.email ?? "",
-      id: user.data.user?.id ?? "",
-    },
-    userAndOrg && userAndOrg.org
-      ? {
-          org: userAndOrg.org,
-          role: userAndOrg.role,
-        }
-      : undefined
-  );
-}
 
 export class SupabaseAuthClient implements HeliconeAuthClient {
   user: HeliconeUser | undefined;
