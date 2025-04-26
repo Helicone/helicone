@@ -27,6 +27,8 @@ pub async fn test() {
         .send()
         .await
         .unwrap();
+    let headers = response.headers();
+    println!("Headers: {:?}", headers);
     let response_bytes = response.json::<serde_json::Value>().await.unwrap();
     println!("Response: {}", response_bytes);
 }

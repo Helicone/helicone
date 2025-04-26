@@ -21,9 +21,8 @@ where
         Result<Request<B>, http::Response<Self::ResponseBody>>,
     >;
 
-    #[tracing::instrument(name = "AuthService::authorize", skip(self, request))]
+    #[tracing::instrument(skip_all)]
     fn authorize(&mut self, mut request: Request<B>) -> Self::Future {
-        tracing::trace!("AuthService::authorize");
         Box::pin(async move {
             if let Some(auth_ctx) = check_auth(&request) {
                 // Set `auth_ctx` as a request extension so it can be accessed

@@ -62,7 +62,6 @@ impl tower::Service<Request> for ProviderBalancer {
         &mut self,
         cx: &mut std::task::Context<'_>,
     ) -> std::task::Poll<Result<(), Self::Error>> {
-        tracing::trace!("ProviderBalancer::poll_ready");
         self.inner
             .poll_ready(cx)
             .map_err(InternalError::PollReadyError)
@@ -70,7 +69,6 @@ impl tower::Service<Request> for ProviderBalancer {
     }
 
     fn call(&mut self, req: Request) -> Self::Future {
-        tracing::trace!("ProviderBalancer::call");
         ResponseFuture {
             future: self.inner.call(req),
         }

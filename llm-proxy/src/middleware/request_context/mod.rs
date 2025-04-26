@@ -58,9 +58,8 @@ where
         self.inner.poll_ready(cx).map_err(Into::into)
     }
 
-    #[tracing::instrument(skip_all)]
+    #[tracing::instrument(level = "debug", name = "request_context", skip_all)]
     fn call(&mut self, mut req: Request) -> Self::Future {
-        tracing::info!("RequestContextService::call");
         let router_config = self.router_config.clone();
         let provider_keys = self.provider_keys.clone();
         match Service::<S>::get_context(router_config, provider_keys, &mut req)

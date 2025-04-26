@@ -104,7 +104,6 @@ impl tower::Service<crate::types::request::Request> for MetaRouter {
         &mut self,
         ctx: &mut Context<'_>,
     ) -> Poll<Result<(), Self::Error>> {
-        tracing::trace!("MetaRouter::poll_ready");
         let mut any_pending = false;
         for router in self.inner.values_mut() {
             if router.poll_ready(ctx).is_pending() {

@@ -51,8 +51,7 @@ impl ProviderKeys {
             if let Ok(key) = std::env::var(&env_var) {
                 tracing::debug!(
                     provider = %provider,
-                    env_var = %env_var,
-                    "Getting provider key"
+                    "Got provider key"
                 );
                 keys.insert(provider, Secret(key));
             }

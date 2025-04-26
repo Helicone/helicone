@@ -43,13 +43,10 @@ where
         &mut self,
         cx: &mut Context<'_>,
     ) -> Poll<Result<(), Self::Error>> {
-        tracing::trace!("NoOpService::poll_ready");
         self.inner.poll_ready(cx).map_err(Into::into)
     }
 
-    #[tracing::instrument(name = "NoOpService::call", skip(self, req))]
     fn call(&mut self, req: Request) -> Self::Future {
-        tracing::info!("NoOpService::call");
         let mut inner = self.inner.clone();
         Box::pin(async move { inner.call(req).await.map_err(Into::into) })
     }

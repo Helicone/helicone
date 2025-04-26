@@ -6,7 +6,7 @@
 
 A configurable proxy router for LLM APIs that enables seamless request routing, caching, A/B testing, load balancing, fallbacks, retries, rate limiting, and spend controls. The goal is to offer a fast, reliable, and flexible foundation for developers building on top of multiple AI providers. Written in Rust and built upon well-established middleware patterns (via Tower), it's blazingly fast and insanely composable.
 
-Project plan: [Rust Proxy Project Plan](https://www.notion.so/Rust-Proxy-Project-Plan-1d5c78c0f25e80df9671f909f1966e8b?pvs=21) 
+Project plan: [Rust Proxy Project Plan](https://www.notion.so/Rust-Proxy-Project-Plan-1d5c78c0f25e80df9671f909f1966e8b?pvs=21)
 
 TODO: replace with Linear
 
@@ -27,7 +27,7 @@ TODO: replace with Linear
 
 ## Example Usage and Features
 
-First, the user will need to login to the Helicone dashboard at [https://helicone.ai](https://helicone.ai) and create a router, a Helicone API key, and upload their API keys from their target providers. 
+First, the user will need to login to the Helicone dashboard at [https://helicone.ai](https://helicone.ai/) and create a router, a Helicone API key, and upload their API keys from their target providers.
 
 Then the user will configure the router features which include:
 
@@ -49,7 +49,7 @@ Once the router is created, the customer can then send requests by replacing the
 from openai import OpenAI
 
 client = OpenAI(
-  base_url="https://worker.helicone.ai/router/<HELICONE_ROUTER_ID_SLUG>",
+  base_url="<https://worker.helicone.ai/router/><HELICONE_ROUTER_ID_SLUG>",
   api_key="<HELICONE_API_KEY>",
 )
 
@@ -68,6 +68,7 @@ completion = client.chat.completions.create(
 )
 
 print(completion.choices[0].message.content)
+
 ```
 
 Alternatively, users can omit the specific router ID slug to use a default router configuration:
@@ -75,9 +76,10 @@ Alternatively, users can omit the specific router ID slug to use a default route
 ```python
 # Use the default router
 client = OpenAI(
-  base_url="https://worker.helicone.ai/router", 
+  base_url="<https://worker.helicone.ai/router>",
   api_key="<HELICONE_API_KEY>",
 )
+
 ```
 
 This default router is defined in the router's configuration source. In sidecar or self-hosted mode, users can customize this default configuration. In the cloud-hosted mode (`https://router.helicone.ai`), the default router is pre-configured by Helicone to provide basic routing across multiple providers.
@@ -100,7 +102,7 @@ Screenshots of mock ups for these screens are available in the Appendix.
 
 The Helicone router can be easily deployed to the following targets:
 
-1. **Cloud mode** – Helicone runs the binary on Fly.io, pointing it at Helicone‑managed Redis/Postgres/Vault, available at [`https://router.helicone.ai`](https://router.helicone.ai) .
+1. **Cloud mode** – Helicone runs the binary on [Fly.io](http://fly.io/), pointing it at Helicone‑managed Redis/Postgres/Vault, available at [`https://router.helicone.ai`](https://router.helicone.ai/) .
 2. **Sidecar mode** – Customers run the Helicone router binary (Docker or Helm). They supply:
     - A Redis cluster they control (often co‑located for latency) for caching the `RouterConfig` and the API requests/responses if caching is enabled.
     - Optional: AWS Secrets Manager configuration
@@ -153,7 +155,7 @@ Sidecar mode:
 ```mermaid
 graph TB
     F[Client]
-    
+
     subgraph Customer Infra
         direction TB
         A[Rust Router Sidecar]
@@ -217,7 +219,6 @@ flowchart TD
     end
     MW9 --> C[Dispatch to AI Provider]
     C --> MW10[response logging]
-   
 
 ```
 
@@ -243,7 +244,7 @@ This will be implemented via a trait object so we can make the source configurab
 
 ### Versioning
 
-- Each `RouterConfig` carries a **`version` .**  A ****UUID for the version is likely sufficient since SemVer wouldn’t be very meaningful in this case.
+- Each `RouterConfig` carries a **`version` .** A ****UUID for the version is likely sufficient since SemVer wouldn’t be very meaningful in this case.
 - Configs are **immutable** once stored; “editing” creates a new version.
 - Incoming requests carry a snapshot of the active config in `Extensions`; in‑flight requests therefore finish under the exact settings they started with, even if a new config version is published mid‑flight.
 
@@ -261,52 +262,41 @@ cache:
     max-age: 3600
     max-stale: 1800
 
-default-target: "openai"
+default-provider: "openai"
 
 fallback:
   enabled: true
   order:
-    - "gpt-4-0125-preview"
-    - "claude-3-7-sonnet-latest"
+    - provider: "anthropic"
+    - provider: "bedrock"
 
 # validated that weights add up to 1.0
 # on creation and update
 balance:
-- model: gpt-4o-mini
-	references: gpt-4o-mini, gpt-4o-mini-azure
-- model: claude-3-7-sonnet-latest
-  prompt: foo-prompt-v2
-  weight: '0.3'
+  strategy: weighted
+  providers:
+		anthropic:
+			weight: '0.3'
+		openai:
+			weight: '0.7'
+      regions: ["us-east-1", "us-west-1"]
 
-models:
-- tag: gpt-4o-mini
-  slug: gpt-4o-mini-20250892
-  provider: OpenAI
-  region: default
-- tag: gpt-4o-mini-azure
-  slug: gpt-4o-mini@latest
-  provider: Azure
-  region: us-east-1
-- tag: claude-3-7-sonnet-latest
-  provider: OpenAI
-  region: default
+# Alternatively
+#balance:
+#  strategy: p2c
+#  providers:
+#		- name: anthropic
+#		- name: bedrock
+#     regions: ["us-east-1", "us-west-1"]
 
 retries:
   enabled: true
-  # more complex configurations possible in future
-  # this assumsibles a sensible default of exp. backoff
-  # and lets user simply set the max # of retries
   max_retries: 2
+  strategy: "exponential-backoff"
+  base: "100ms"
+  max: "10s"
 
-rate-limit:
-  unauthenticated:
-    replenish-interval: 10
-    quota: 25
-  authenticated:
-    replenish-interval: 2
-    quota: 50
-    
- spend-controls:
+spend-controls:
    foo-org:
      units: "USD"
      quota: 1000
@@ -315,6 +305,31 @@ rate-limit:
      units: "USD"
      quota: 500
      replenish-interval: "1 week"
+
+rate-limits:
+  # other options: requests/tokens
+  per-user:
+    units: cost
+    currency: USD
+    quota: 100
+    refresh-interval: "1 day"
+  per-org:
+    units: cost
+    currency: USD
+    quota: 1000
+    refresh-interval: "1 day"
+  per-provider:
+    units: tokens
+    quota: 1000000
+    refresh-interval: "1 day"
+  per-provider-region:
+    units: requests
+    quota: 20000
+    refresh-interval: "1 week"
+  per-model:
+    units: requests
+    quota: 1000
+    refresh-interval: "1 day"
 ```
 
 ### Router Dispatching
@@ -332,7 +347,7 @@ Once the appropriate `RouterConfig` is identified (or determined not to exist), 
 
 The router configurations would be fetched from the configured source on the first request and then would be cached in Redis. The sidecar will maintain a consistent WebSocket connection with Jawn.
 
-The sidecar would tell Jawn which `RouterConfig`s it knows in its cache (and their versions), and then Jawn would send events whenever a `RouterConfig` is updated so the sidecar can fetch the latest and update its cache. There will also be a button to “force-push” an update, in case e.g. there wasn’t an active connection with the sidecar when the router was updated. 
+The sidecar would tell Jawn which `RouterConfig`s it knows in its cache (and their versions), and then Jawn would send events whenever a `RouterConfig` is updated so the sidecar can fetch the latest and update its cache. There will also be a button to “force-push” an update, in case e.g. there wasn’t an active connection with the sidecar when the router was updated.
 
 This would be implemented as a background tokio task which opens a persistent WS to **Jawn**. A heartbeat is exchanged every 30 s; if two heartbeats are missed, the sidecar:
 
@@ -345,8 +360,6 @@ In a shit-hit-the-fan scenario, where Postgres and Redis are down, the sidecar w
 
 The proposed solution consists of a few simple steps we can take now to reduce the risk of SHTF, but not eliminate it, and a proposed future possibility to make this more bulletproof. What we can do is the following:
 
- 
-
 | Step | Where to fetch config | Why it works |
 | --- | --- | --- |
 | In memory LRU | Last N configs held in memory | For sidecar, number of configs likely low. For cloud hosted, a high N value will probably use a lot of memory. |
@@ -354,17 +367,42 @@ The proposed solution consists of a few simple steps we can take now to reduce t
 
 This is still problematic if we never created a snapshot file but it does greatly reduce the risk of a customer’s sidecar not working due to an infrastructure issue on Helicone’s end.
 
+## App configuration
+
+For an example of the configuration required for the application itself to get a sense of deployment ease, this shows the kinds of things required to be configured. Many of these will be available via sensible defaults so the real configuration will be light. To improve this section once further along in POC
+
+```yaml
+rate-limit:
+  unauthenticated:
+    replenish-interval: 10
+    quota: 25
+  authenticated:
+    replenish-interval: 2
+    quota: 50
+
+# log levels, opentelemetry exporter
+telemetry: ...
+# listen port for prometheus metrics server
+metrics-server: ...
+# listen port, shutdowns, timeout
+server: ...
+  deployment-target: "sidecar"
+database: ...
+minio: ...
+is-production: false
+```
+
 ## Load Balancing
 
 We will support the following load balancing strategies:
 
 - Latency optimized [p2c](https://www.eecs.harvard.edu/~michaelm/postscripts/handbook2001.pdf). Load can be determined via either:
-  - A moving average of the peak latency for the service.
-  - Count of in-flight requests
+    - A moving average of the peak latency for the service.
+    - Count of in-flight requests
 - Weighted strategy: This would allow targeting certain spend per provider. For example, if there are 3 services: [A, B, C] with weights [0.99, 0.005, 0.005] then a user would likely expect that (assuming everything else is equal):
-  - Service A would serve 99%
-  - Service B would serve 0.5%
-  - Service C would serve 0.5%
+    - Service A would serve 99%
+    - Service B would serve 0.5%
+    - Service C would serve 0.5%
 
 The hierarchy should be model → provider → region/deployment.
 Within a provider, we will always load balance via the latency
@@ -403,17 +441,17 @@ Srsly go read the  [`tower::Service`](https://docs.rs/tower/latest/tower/trait.
 ## Request flow
 
 1. **Authentication & Authorization:**
-    1. Leverage [tower-http::auth](https://docs.rs/tower-http) 
+    1. Leverage [tower-http::auth](https://docs.rs/tower-http)
     2. For RBAC, there is heavy inspiration we can take from [`axum-login`](https://docs.rs/axum-login/latest/axum_login/).
-    3. By default we should just proxy without checking any auth before proxying. 
+    3. By default we should just proxy without checking any auth before proxying.
         - TOM: I need to think about how to do this safely… this would mean the router ID is essentially a secret, right, since knowing someone’s router ID would then mean you would be able to use their API keys. Could we like encrypt the token with a secret only jawn knows that the sidecar fetches on startup so even if auth check fails, we validate the token is a valid one? this means the attack surface is other helicone customers that know the router ID + traceability back to the attacker?.
 2. **Rate limit middleware**
     1. Leveraging [`tower-governor`](https://docs.rs/tower_governor/latest/tower_governor/)
-    2. Configured in the UI for the router, but compatible with current Helicone feature: [docs](https://docs.helicone.ai/features/advanced-usage/custom-rate-limits). E.g.  `"Helicone-RateLimit-Policy": "[quota];w=[time_window]u=[unit];s=[segment]"`
+    2. Configured in the UI for the router, but compatible with current Helicone feature: [docs](https://docs.helicone.ai/features/advanced-usage/custom-rate-limits). E.g. `"Helicone-RateLimit-Policy": "[quota];w=[time_window]u=[unit];s=[segment]"`
         1. Note we won’t manage `u=[unit];s=[segment]` in this middleware in order to leverage `tower-governor`, instead we can manage any spend related limiting in the Spend Control layer.
     3. Use Redis
 3. **RequestContext Initialization**:
-    1. A Tower middleware extracts any custom headers (e.g. custom properties) from the request and fetches the `RouterConfig` from the database in order to build the `RequestContext` struct. 
+    1. A Tower middleware extracts any custom headers (e.g. custom properties) from the request and fetches the `RouterConfig` from the database in order to build the `RequestContext` struct.
     2. This context includes information like:
         1. `RouterConfig` (things like cache, fallback, retry config, etc),
         2. `HeliconeContext` (custom Helicone specific metadata like custom properties, prompt inputs, etc)
@@ -452,6 +490,7 @@ The `http::Request` provides [`Extensions`](https://docs.rs/http/latest/http/str
 
 ```rust
 let ctx = request.extensions().get::<RequestContext>();
+
 ```
 
 The `RequestContext` middleware fetches all the data needed to proxy the request, storing it in the request extensions. This includes the `RouterConfig` as well as other state for request processing (like the retry state).
@@ -480,6 +519,7 @@ pub struct RequestProxyContext {
     pub original_provider: Provider,
     pub provider_api_key: String,
 }
+
 ```
 
 ## Type Generation
@@ -503,7 +543,7 @@ We considered three options:
 
 1. **Path Prefix** (`/oai/router/...`) – leaks infra details into code and complicates migrations.
 2. **Env/Helm Var** – splits truth across repos and requires container restarts.
-3. **Mandatory `default_provider` in RouterConfig** – single source of truth, works for both cloud and sidecar. This is what we went with. The tradeoff comes in SHTF scenarios where DB/Redis offline, this is 
+3. **Mandatory `default_provider` in RouterConfig** – single source of truth, works for both cloud and sidecar. This is what we went with. The tradeoff comes in SHTF scenarios where DB/Redis offline, this is
 
 *Future Possibility*: ship a minimal “bootstrap blob” out‑of‑band (signed JWT) so a freshly restarted sidecar can route even if Postgres & Redis are *both* down. Out of scope for v1 but tracked in the roadmap.
 
@@ -537,29 +577,29 @@ We considered three options:
 
 Router dashboard:
 
-![Screenshot 2025-04-15 at 12.32.09 PM.png](images/Screenshot_2025-04-15_at_12.32.09_PM.png)
+![Screenshot 2025-04-15 at 12.32.09 PM.png](Rust%20Worker%201c5c78c0f25e800d862bd77bb4b576ef/Screenshot_2025-04-15_at_12.32.09_PM.png)
 
 Create router modal:
 
 [DX / UX features](https://www.notion.so/DX-UX-features-1d8c78c0f25e80758115f5b115fc105b?pvs=21)
 
-![Screenshot 2025-04-15 at 12.33.26 PM.png](images/Screenshot_2025-04-15_at_12.33.26_PM.png)
+![Screenshot 2025-04-15 at 12.33.26 PM.png](Rust%20Worker%201c5c78c0f25e800d862bd77bb4b576ef/Screenshot_2025-04-15_at_12.33.26_PM.png)
 
 Router details:
 
-![Screenshot 2025-04-15 at 12.32.47 PM.png](images/Screenshot_2025-04-15_at_12.32.47_PM.png)
+![Screenshot 2025-04-15 at 12.32.47 PM.png](Rust%20Worker%201c5c78c0f25e800d862bd77bb4b576ef/Screenshot_2025-04-15_at_12.32.47_PM.png)
 
 Router configuration:
 
-![Screenshot 2025-04-15 at 12.33.11 PM.png](images/Screenshot_2025-04-15_at_12.33.11_PM.png)
+![Screenshot 2025-04-15 at 12.33.11 PM.png](Rust%20Worker%201c5c78c0f25e800d862bd77bb4b576ef/Screenshot_2025-04-15_at_12.33.11_PM.png)
 
 Sidecar dashboard:
 
-![Screenshot 2025-04-15 at 12.33.58 PM.png](images/Screenshot_2025-04-15_at_12.33.58_PM.png)
+![Screenshot 2025-04-15 at 12.33.58 PM.png](Rust%20Worker%201c5c78c0f25e800d862bd77bb4b576ef/Screenshot_2025-04-15_at_12.33.58_PM.png)
 
 Sidecar details:
 
-![image.png](images/image.png)
+![image.png](Rust%20Worker%201c5c78c0f25e800d862bd77bb4b576ef/image.png)
 
 ## Ai-generated requirements list
 
@@ -577,8 +617,7 @@ Sidecar details:
     - Support streaming & non‑streaming LLM responses (`is_stream` flag), WebSockets.
 - **Deployment & Modes**
     - Ship as a single Rust binary usable in cloud, sidecar, or self‑hosted deployments.
-    - Sidecar mode accepts customer Redis and optional HashiCorp Vault; reuses Helicone cloud Postgres/Kafka/S3.
-    - Sidecar mode accepts customer Redis and optional HashiCorp Vault; communicates with Helicone Jawn service via mTLS for config and logging.
+    - Sidecar mode accepts customer Redis and optional HashiCorp Vault; reuses Helicone cloud Postgres/Kafka/S3.
     - Cloud mode runs on [Fly.io](http://fly.io/) with Helicone‑managed infra (`router.helicone.ai`).
     - Provide a self‑hosted mode for customers running the full Helicone stack.
 - **Developer Experience & Tooling**

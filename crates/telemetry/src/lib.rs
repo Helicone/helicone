@@ -7,7 +7,10 @@ use opentelemetry_sdk::{Resource, logs::LoggerProvider};
 use serde::{Deserialize, Serialize};
 pub use tracing_subscriber::util::TryInitError;
 use tracing_subscriber::{
-    EnvFilter, Layer, layer::SubscriberExt, util::SubscriberInitExt,
+    EnvFilter, Layer,
+    filter::{Directive, ParseError},
+    layer::SubscriberExt,
+    util::SubscriberInitExt,
 };
 
 pub use self::{
@@ -41,7 +44,7 @@ impl Default for Config {
 }
 
 fn default_service_name() -> String {
-    "rockstar-api".to_string()
+    "helicone-router".to_string()
 }
 
 fn default_otlp_exporter_endpoint() -> String {
@@ -56,6 +59,8 @@ pub enum TelemetryError {
     Metrics(#[from] opentelemetry::metrics::MetricsError),
     #[error("Logs error: {0}")]
     Logs(#[from] opentelemetry::logs::LogError),
+    #[error("Invalid log directive: {0}")]
+    InvalidLogDirective(#[from] ParseError),
     #[error("Subscriber error: {0}")]
     Subscriber(#[from] TryInitError),
     #[error("Otel http metrics error")]
@@ -83,7 +88,7 @@ pub fn init_telemetry(
         .with_line_number(true);
 
     let registry = tracing_subscriber::registry()
-        .with(env_filter())
+        .with(env_filter(config)?)
         .with(fmt_layer)
         .with(logger_layer);
 
@@ -94,7 +99,7 @@ pub fn init_telemetry(
         let tracer = tracer_provider.tracer(config.service_name.clone());
         let tracing_layer = tracing_opentelemetry::layer()
             .with_tracer(tracer)
-            .with_filter(env_filter());
+            .with_filter(env_filter(config)?);
         registry.with(tracing_layer).try_init()?;
     } else {
         registry.try_init()?;
@@ -111,15 +116,12 @@ pub fn init_telemetry(
 }
 
 // it doesn't impl clone so we need to return a new one each time
-fn env_filter() -> EnvFilter {
-    EnvFilter::try_from_default_env()
-        .unwrap_or_else(|_| EnvFilter::new("INFO"))
-        .add_directive("llm_proxy=trace".parse().expect("always valid"))
-        // these are required because of https://github.com/open-telemetry/opentelemetry-rust/issues/761
-        .add_directive("hyper=error".parse().expect("always valid"))
-        .add_directive("tonic=error".parse().expect("always valid"))
-        .add_directive("h2=error".parse().expect("always valid"))
-        .add_directive("reqwest=error".parse().expect("always valid"))
+fn env_filter(config: &Config) -> Result<EnvFilter, TelemetryError> {
+    let directive: Directive = config.logging.level.parse()?;
+    let filter = EnvFilter::builder()
+        .with_default_directive(directive)
+        .parse("")?;
+    Ok(filter)
 }
 
 fn init_logs(
