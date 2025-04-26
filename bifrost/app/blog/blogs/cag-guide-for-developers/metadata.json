@@ -1,0 +1,11 @@
+{
+  "title": "Thinking Beyond RAG: Why Context-Augmented Generation Is Changing the Game",
+  "title1": "Thinking Beyond RAG: Why Context-Augmented Generation Is Changing the Game",
+  "title2": "Thinking Beyond RAG: Why Context-Augmented Generation Is Changing the Game",
+  "description": "Learn why CAG is replacing RAG as context windows grow. Learn how to implement CAG and monitor your CAG systems with Helicone.",
+  "images": "/static/blog/context-augmented-generation/cag-cover.webp",
+  "time": "8 minute read",
+  "author": "Yusuf Ishola",
+  "date": "April 26, 2025", 
+  "badge": "guide"
+}
