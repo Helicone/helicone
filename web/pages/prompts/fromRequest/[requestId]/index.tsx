@@ -1,3 +1,4 @@
+import { GetServerSidePropsContext } from "next";
 import { ReactElement } from "react";
 import AuthLayout from "../../../../components/layout/auth/authLayout";
 import PromptEditor from "../../../../components/templates/prompts/id/PromptEditor";
@@ -11,4 +12,13 @@ export default function Page(props: PageParams) {
 
 Page.getLayout = function getLayout(page: ReactElement) {
   return <AuthLayout>{page}</AuthLayout>;
+};
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext<PageParams>
+) => {
+  return {
+    props: {
+      requestId: context.params?.requestId,
+    },
+  };
 };

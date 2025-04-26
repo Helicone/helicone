@@ -53,12 +53,7 @@ export const OnboardingHeader = ({ children }: OnboardingHeaderProps) => {
       router.push("/dashboard");
       return;
     }
-  }, [
-    org?.currentOrg?.has_onboarded,
-    isLoading,
-    router,
-    org?.currentOrg?.tier,
-  ]);
+  }, [org?.currentOrg?.has_onboarded, isLoading, router]);
 
   const billingStep: { label: string; step: OnboardingStep }[] =
     draftPlan !== "free" ? [{ label: "Add billing", step: "BILLING" }] : [];

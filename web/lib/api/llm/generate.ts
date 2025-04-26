@@ -77,7 +77,9 @@ export async function generate<T extends object | undefined = undefined>(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Accept: "application/json",
       "x-cancel": "0",
+      "x-helicone-client": "browser",
     },
     body: JSON.stringify({
       ...modifiedParams,

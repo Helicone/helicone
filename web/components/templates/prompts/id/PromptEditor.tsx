@@ -1,5 +1,4 @@
 import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
-import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import useNotification from "@/components/shared/notification/useNotification";
 import AutoImprove from "@/components/shared/prompts/AutoImprove";
@@ -81,6 +80,17 @@ import { useGetRequestWithBodies } from "../../../../services/hooks/requests";
 import DeployDialog from "./DeployDialog";
 import { useExperiment } from "./hooks";
 import PromptMetricsTab from "./PromptMetricsTab";
+import { ProviderCard } from "@/components/providers/ProviderCard";
+import { providers } from "@/data/providers";
+import { useProvider } from "@/hooks/useProvider";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import Image from "next/image";
 
 type EditorMode =
   | "fromCode"
@@ -118,6 +128,9 @@ export default function PromptEditor({
   /* -------------------------------------------------------------------------- */
   /*                                    Hooks                                   */
   /* -------------------------------------------------------------------------- */
+  const { existingKey: hasOpenRouter } = useProvider({
+    provider: providers.find((p) => p.id === "openrouter")!,
+  });
   // - Router
   const router = useRouter();
   // - Jawn Client
@@ -1216,6 +1229,39 @@ export default function PromptEditor({
 
         {/* Right Side: Actions */}
         <div className="flex flex-row items-center gap-2">
+          {/* OpenRouter Dialog */}
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <Image
+                  src="/assets/home/providers/openrouter.jpg"
+                  alt="OpenRouter"
+                  className="h-4 w-4 rounded-sm"
+                  width={16}
+                  height={16}
+                />
+                Configure OpenRouter
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-xl">
+              <DialogHeader>
+                <DialogTitle>Configure OpenRouter</DialogTitle>
+              </DialogHeader>
+              <div className="mb-4 text-sm text-muted-foreground">
+                OpenRouter provides access to multiple LLM models through a
+                single API. Set up your OpenRouter API key to unlock all
+                available models in the prompt editor.
+              </div>
+              <ProviderCard
+                provider={providers.find((p) => p.id === "openrouter")!}
+              />
+            </DialogContent>
+          </Dialog>
+
           {/* Auto-Improve Button */}
           {editorMode === "fromEditor" && (
             <Button
@@ -1253,33 +1299,34 @@ export default function PromptEditor({
           )}
 
           {/* Run & Save Button */}
-          {editorMode === "fromEditor" && state.isDirty ? (
-            <FreeTierLimitWrapper
-              feature="prompts"
-              subfeature="versions"
-              itemCount={versionCount}
-            >
+          <Tooltip delayDuration={100}>
+            <TooltipTrigger asChild>
               <Button
                 className={`${
                   isStreaming
                     ? "bg-red-500 hover:bg-red-500/90 dark:bg-red-500 dark:hover:bg-red-500/90 text-white hover:text-white"
                     : ""
                 }`}
-                variant="action"
+                variant={editorMode === "fromEditor" ? "action" : "outline"}
                 size="sm"
-                disabled={!canRun}
+                disabled={
+                  // please forgive me for this, it is a mess just need to get something quick out - Justin
+                  (!canRun || !hasOpenRouter) &&
+                  !(state.isDirty && editorMode === "fromEditor")
+                }
                 onClick={handleSaveAndRun}
               >
-                {isStreaming ? (
-                  <PiStopBold className="h-4 w-4 mr-2" />
-                ) : (
-                  <PiPlayBold className="h-4 w-4 mr-2" />
-                )}
+                {hasOpenRouter &&
+                  (isStreaming ? (
+                    <PiStopBold className="h-4 w-4 mr-2" />
+                  ) : (
+                    <PiPlayBold className="h-4 w-4 mr-2" />
+                  ))}
                 <span className="mr-2">
                   {isStreaming
                     ? "Stop"
                     : state.isDirty && editorMode === "fromEditor"
-                    ? "Save & Run"
+                    ? `Save${hasOpenRouter ? " & Run" : ""}`
                     : "Run"}
                 </span>
                 {isStreaming && (
@@ -1290,40 +1337,13 @@ export default function PromptEditor({
                   <MdKeyboardReturn className="h-4 w-4" />
                 </div>
               </Button>
-            </FreeTierLimitWrapper>
-          ) : (
-            <Button
-              className={`${
-                isStreaming
-                  ? "bg-red-500 hover:bg-red-500/90 dark:bg-red-500 dark:hover:bg-red-500/90 text-white hover:text-white"
-                  : ""
-              }`}
-              variant={editorMode === "fromEditor" ? "action" : "outline"}
-              size="sm"
-              disabled={!canRun}
-              onClick={handleSaveAndRun}
-            >
-              {isStreaming ? (
-                <PiStopBold className="h-4 w-4 mr-2" />
-              ) : (
-                <PiPlayBold className="h-4 w-4 mr-2" />
-              )}
-              <span className="mr-2">
-                {isStreaming
-                  ? "Stop"
-                  : state.isDirty && editorMode === "fromEditor"
-                  ? "Save & Run"
-                  : "Run"}
-              </span>
-              {isStreaming && (
-                <PiSpinnerGapBold className="h-4 w-4 mr-2 animate-spin" />
-              )}
-              <div className="flex items-center gap-0.5 text-sm opacity-60">
-                <PiCommandBold className="h-4 w-4" />
-                <MdKeyboardReturn className="h-4 w-4" />
-              </div>
-            </Button>
-          )}
+            </TooltipTrigger>
+            {!hasOpenRouter && (
+              <TooltipContent side="bottom">
+                Add OpenRouter API Key to use this feature
+              </TooltipContent>
+            )}
+          </Tooltip>
 
           {/* Experiment Button */}
           {promptId && (

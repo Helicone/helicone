@@ -11,22 +11,20 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { err, ok, Result, resultMap } from "../../packages/common/result";
-import { FilterNode } from "../../lib/shared/filters/filterDefs";
-import { JawnAuthenticatedRequest } from "../../types/request";
+import {
+  EvaluatorScoreResult,
+  LLMAsAJudge,
+} from "../../lib/clients/LLMAsAJudge/LLMAsAJudge";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
-import { EvaluatorManager } from "../../managers/evaluator/EvaluatorManager";
 import {
   EvaluatorConfig,
   OnlineEvalStore,
   OnlineEvaluatorByEvaluatorId,
 } from "../../lib/stores/OnlineEvalStore";
-import {
-  LLMAsAJudge,
-  EvaluatorScoreResult,
-} from "../../lib/clients/LLMAsAJudge/LLMAsAJudge";
-import { OPENAI_KEY } from "../../lib/clients/constant";
+import { EvaluatorManager } from "../../managers/evaluator/EvaluatorManager";
 import { LastMileConfigForm } from "../../managers/evaluator/types";
+import { err, ok, Result } from "../../packages/common/result";
+import { JawnAuthenticatedRequest } from "../../types/request";
 
 export interface CreateEvaluatorParams {
   scoring_type: string;

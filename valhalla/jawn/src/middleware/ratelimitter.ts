@@ -21,20 +21,6 @@ if (IS_RATE_LIMIT_ENABLED) {
       );
     },
     handler: (req, res, next) => {
-      postHogClient?.capture({
-        distinctId: "jawn-server",
-        event: "rate-limited",
-        properties: {
-          orgId:
-            (req as JawnAuthenticatedRequest)?.authParams?.organizationId ??
-            req.ip ??
-            "unknown",
-          wasRateLimited: true,
-          url: req.url,
-          method: req.method,
-          body: req.body,
-        },
-      });
       next();
     },
     store: new RedisStore({
