@@ -78,9 +78,8 @@ impl Service<Request> for Dispatcher {
         Poll::Ready(Ok(()))
     }
 
-    #[tracing::instrument(name = "Dispatcher::call", skip(self, req))]
+    #[tracing::instrument(name = "dispatcher", skip_all)]
     fn call(&mut self, req: Request) -> Self::Future {
-        tracing::info!("Dispatcher::call");
         // see: https://docs.rs/tower/latest/tower/trait.Service.html#be-careful-when-cloning-inner-services
         let this = self.clone();
         let this = std::mem::replace(self, this);
@@ -102,7 +101,9 @@ impl Dispatcher {
             .provider_api_keys
             .as_ref()
             .get(&target_provider)
-            .ok_or_else(|| InternalError::ProviderNotConfigured(target_provider))?
+            .ok_or_else(|| {
+                InternalError::ProviderNotConfigured(target_provider)
+            })?
             .clone();
         let provider_config = self
             .app_state
@@ -190,7 +191,7 @@ impl Dispatcher {
                 todo!("only anthropic and openai are supported at the moment")
             }
         };
-        let response = self
+        let mut response = self
             .client
             .request(method, target_url)
             .headers(headers)
@@ -198,7 +199,8 @@ impl Dispatcher {
             .send()
             .await
             .map_err(|e| InternalError::ReqwestError(e))?;
-        tracing::debug!(status = %response.status(), "received response");
+        let provider_request_id = response.headers_mut().remove("x-request-id");
+        tracing::debug!(provider_req_id = ?provider_request_id, status = %response.status(), "received response");
 
         let mut response_builder =
             http::Response::builder().status(response.status());

@@ -9,9 +9,9 @@ use stubr::{Stubr, wiremock_rs::MockServer};
 use tower::MakeService as _;
 
 use crate::{
-    app::{App, AppFactory},
+    app::{App, AppFactory, AppResponse},
     config::Config,
-    types::{request::Request, response::Response},
+    types::request::Request,
 };
 
 pub struct Harness {
@@ -38,7 +38,7 @@ impl Harness {
 }
 
 impl tower::Service<Request> for Harness {
-    type Response = Response;
+    type Response = AppResponse;
     type Error = Infallible;
     type Future = BoxFuture<'static, Result<Self::Response, Self::Error>>;
 

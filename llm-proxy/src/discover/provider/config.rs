@@ -58,12 +58,8 @@ impl ConfigDiscovery {
         {
             let key = Key::new(provider.clone());
 
-            // TODO @tom: why does adding this cause it to hang? dafuq
-            // let proxy = Proxy::all(provider_config.base_url.clone())
-            // .map_err(InitError::CreateProxyClient)?;
             let http_client = Client::builder()
                 .connect_timeout(CONNECTION_TIMEOUT)
-                // .proxy(proxy)
                 .build()
                 .map_err(InitError::CreateProxyClient)?;
             let dispatcher = Dispatcher::new_with_middleware(
@@ -112,7 +108,7 @@ fn handle_change(
 ) -> Poll<Option<Change<Key, DispatcherService>>> {
     match change {
         Change::Insert(key, service) => {
-            tracing::trace!(key = ?key, "Discovered new provider");
+            tracing::debug!(key = ?key, "Discovered new provider");
             Poll::Ready(Some(Change::Insert(key, service)))
         }
         Change::Remove(key) => {

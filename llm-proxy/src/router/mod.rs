@@ -93,6 +93,7 @@ impl tower::Service<crate::types::request::Request> for Router {
         self.inner.poll_ready(ctx)
     }
 
+    #[tracing::instrument(name = "router", skip_all)]
     fn call(&mut self, req: crate::types::request::Request) -> Self::Future {
         self.inner.call(req)
     }

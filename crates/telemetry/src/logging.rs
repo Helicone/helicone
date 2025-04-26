@@ -13,12 +13,16 @@ pub enum Format {
 #[serde(default, deny_unknown_fields)]
 pub struct Config {
     pub format: Format,
+    pub level: String,
 }
 
 impl Default for Config {
     fn default() -> Self {
         Self {
             format: Format::Pretty,
+            level: "info,llm_proxy=trace,hyper=error,tonic=error,h2=error,\
+                    reqwest=error"
+                .to_string(),
         }
     }
 }

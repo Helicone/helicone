@@ -10,12 +10,17 @@ use axum_server::tls_rustls::RustlsConfig;
 use futures::future::BoxFuture;
 use meltdown::Token;
 use minio_rsc::{Minio, provider::StaticProvider};
+use telemetry::tracing::MakeRequestId;
 use tower::{ServiceBuilder, buffer::BufferLayer, util::BoxCloneService};
 use tower_http::{
-    add_extension::AddExtension, auth::AsyncRequireAuthorizationLayer,
+    ServiceBuilderExt,
+    add_extension::AddExtension,
+    auth::AsyncRequireAuthorizationLayer,
+    catch_panic::CatchPanicLayer,
     normalize_path::NormalizePathLayer,
+    trace::{DefaultMakeSpan, TraceLayer},
 };
-use tracing::info;
+use tracing::{Level, info};
 
 use crate::{
     config::{
@@ -29,20 +34,31 @@ use crate::{
     router::meta::MetaRouter,
     store::StoreRealm,
     types::provider::ProviderKeys,
-    utils::{catch_panic::CatchPanicLayer, handle_error::ErrorHandlerLayer},
+    utils::{catch_panic::PanicResponder, handle_error::ErrorHandlerLayer},
 };
 
 const BUFFER_SIZE: usize = 1024;
 
-pub type BoxedServiceStack = BoxCloneService<
-    crate::types::request::Request,
-    crate::types::response::Response,
-    Infallible,
+pub type AppResponse = http::Response<
+    tower_http::body::UnsyncBoxBody<
+        bytes::Bytes,
+        Box<
+            (
+                dyn std::error::Error
+                    + std::marker::Send
+                    + std::marker::Sync
+                    + 'static
+            ),
+        >,
+    >,
 >;
+
+pub type BoxedServiceStack =
+    BoxCloneService<crate::types::request::Request, AppResponse, Infallible>;
 
 pub type BoxedHyperServiceStack = BoxCloneService<
     http::Request<hyper::body::Incoming>,
-    crate::types::response::Response,
+    AppResponse,
     Infallible,
 >;
 
@@ -120,10 +136,12 @@ pub struct App {
 }
 
 impl tower::Service<crate::types::request::Request> for App {
-    type Response = crate::types::response::Response;
+    type Response = AppResponse;
     type Error = Infallible;
     type Future = BoxFuture<'static, Result<Self::Response, Self::Error>>;
 
+    #[inline]
+    #[tracing::instrument(skip_all)]
     fn poll_ready(
         &mut self,
         ctx: &mut Context<'_>,
@@ -131,6 +149,7 @@ impl tower::Service<crate::types::request::Request> for App {
         self.service_stack.poll_ready(ctx)
     }
 
+    #[tracing::instrument(name = "app", skip_all)]
     fn call(&mut self, req: crate::types::request::Request) -> Self::Future {
         self.service_stack.call(req)
     }
@@ -166,7 +185,6 @@ impl App {
         let provider_keys = match &config.discover.api_keys_source {
             ProviderKeysSource::Env => ProviderKeys::from_env(),
         };
-        tracing::debug!("provider_keys: {:?}", provider_keys);
         let app_state = AppState(Arc::new(InnerAppState {
             config,
             minio,
@@ -180,14 +198,23 @@ impl App {
 
         // global middleware is applied here
         let service_stack = ServiceBuilder::new()
-            .layer(ErrorHandlerLayer)
-            .layer(CatchPanicLayer::new())
-            .map_err(|e| crate::error::internal::InternalError::BufferError(e))
+            .layer(CatchPanicLayer::custom(PanicResponder))
+            .set_x_request_id(MakeRequestId)
+            .layer(
+                TraceLayer::new_for_http()
+                    .make_span_with(DefaultMakeSpan::new().level(Level::INFO))
+                    .on_body_chunk(())
+                    .on_eos(()),
+            )
+            .propagate_x_request_id()
             .layer(NormalizePathLayer::trim_trailing_slash())
+            .layer(ErrorHandlerLayer)
+            .map_err(|e| crate::error::internal::InternalError::BufferError(e))
             // NOTE: not sure if there is perf impact from Auth layer coming
             // before buffer layer, but required due to Clone bound.
             .layer(AsyncRequireAuthorizationLayer::new(AuthService))
             .layer(BufferLayer::new(BUFFER_SIZE))
+            .layer(ErrorHandlerLayer)
             .service(router);
 
         let app = Self {
@@ -268,10 +295,11 @@ impl HyperApp {
 }
 
 impl tower::Service<http::Request<hyper::body::Incoming>> for HyperApp {
-    type Response = crate::types::response::Response;
+    type Response = AppResponse;
     type Error = Infallible;
     type Future = BoxFuture<'static, Result<Self::Response, Self::Error>>;
 
+    #[inline]
     fn poll_ready(
         &mut self,
         ctx: &mut Context<'_>,
@@ -316,6 +344,7 @@ where
     type Error = Infallible;
     type Future = Ready<Result<Self::Response, Self::Error>>;
 
+    #[inline]
     fn poll_ready(
         &mut self,
         _ctx: &mut Context<'_>,
