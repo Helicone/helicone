@@ -1,10 +1,11 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { ErrorBoundary } from "@/components/ui/error-boundary";
+import { $JAWN_API } from "@/lib/clients/jawn";
 import { Rocket } from "lucide-react";
 import { useRouter } from "next/router";
 import { useMemo, useRef, useState } from "react";
-import { useAlertBanners, useChangelog } from "../../../services/hooks/admin";
+import { useChangelog } from "../../../services/hooks/admin";
 import UpgradeProModal from "../../shared/upgradeProModal";
 import { Row } from "../common";
 import { useOrg } from "../org/organizationContext";
@@ -29,7 +30,11 @@ const AuthLayout = (props: AuthLayoutProps) => {
     return path.charAt(0).toUpperCase() + path.slice(1);
   }, [pathname]);
 
-  const { data: alertBanners } = useAlertBanners();
+  const { data: alertBanners } = $JAWN_API.useQuery(
+    "get",
+    "/v1/alert-banner",
+    {}
+  );
   const orgContext = useOrg();
 
   const banner = useMemo((): BannerType | null => {

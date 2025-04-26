@@ -10,7 +10,6 @@ import { GetServerSidePropsContext } from "next";
 import { InfoBanner } from "../components/shared/themed/themedDemoBanner";
 import { env } from "next-runtime-env";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
-import posthog from "posthog-js";
 
 const SignUp = () => {
   const heliconeAuthClient = useHeliconeAuthClient();
@@ -26,9 +25,16 @@ const SignUp = () => {
     }
   }, [router.query]);
 
-  if (heliconeAuthClient.user && heliconeAuthClient.user.email !== DEMO_EMAIL) {
-    router.push(`/welcome`);
-  }
+  useEffect(() => {
+    if (
+      heliconeAuthClient.user &&
+      heliconeAuthClient.user.id &&
+      heliconeAuthClient.user.email &&
+      heliconeAuthClient.user.email !== DEMO_EMAIL
+    ) {
+      router.push(`/welcome`);
+    }
+  }, [heliconeAuthClient.user, router]);
 
   return (
     <PublicMetaData
@@ -63,9 +69,6 @@ const SignUp = () => {
           setShowEmailConfirmation(true);
         }}
         handleGoogleSubmit={async () => {
-          posthog.capture("user_signed_up", {
-            method: "google",
-          });
           const { error } = await heliconeAuthClient.signInWithOAuth({
             provider: "google",
             options: {
@@ -82,9 +85,6 @@ const SignUp = () => {
           }
         }}
         handleGithubSubmit={async () => {
-          posthog.capture("user_signed_up", {
-            method: "github",
-          });
           const { error } = await heliconeAuthClient.signInWithOAuth({
             provider: "github",
             options: {

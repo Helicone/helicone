@@ -6727,7 +6727,8 @@
 					"azure:experiment",
 					"openai:apiKey",
 					"anthropic:apiKey",
-					"openrouter:apiKey"
+					"openrouter:apiKey",
+					"togetherai:apiKey"
 				],
 				"nullable": false
 			},
@@ -48562,6 +48563,82 @@
 				]
 			}
 		},
+		"/v1/admin/settings": {
+			"get": {
+				"operationId": "GetSettings",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"properties": {
+											"settings": {},
+											"name": {
+												"type": "string"
+											}
+										},
+										"required": [
+											"settings",
+											"name"
+										],
+										"type": "object"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			},
+			"post": {
+				"operationId": "UpsertSetting",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"settings": {},
+									"name": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"settings",
+									"name"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/admin/azure/run-test": {
 			"post": {
 				"operationId": "AzureTest",
@@ -48628,47 +48705,6 @@
 								},
 								"required": [
 									"requestBody"
-								],
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/admin/settings": {
-			"post": {
-				"operationId": "UpdateSetting",
-				"responses": {
-					"204": {
-						"description": "No content"
-					}
-				},
-				"tags": [
-					"Admin"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"settings": {
-										"$ref": "#/components/schemas/Setting"
-									},
-									"name": {
-										"$ref": "#/components/schemas/SettingName"
-									}
-								},
-								"required": [
-									"settings",
-									"name"
 								],
 								"type": "object"
 							}

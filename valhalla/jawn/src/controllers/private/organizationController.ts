@@ -70,7 +70,8 @@ export class OrganizationController extends Controller {
         role: string;
       }
     >(
-      `SELECT organization.*, organization_member.org_role FROM organization 
+      `SELECT DISTINCT ON (organization.id) organization.*, organization_member.org_role
+      FROM organization 
       left join organization_member on organization.id = organization_member.organization
       WHERE soft_delete = false
       and (organization_member.member = $1 or organization.owner = $1)

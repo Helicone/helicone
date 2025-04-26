@@ -1219,10 +1219,10 @@
     "@hapi/bourne" "^3.0.0"
     "@hapi/hoek" "^11.0.2"
 
-"@helicone/helpers@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@helicone/helpers/-/helpers-1.0.0.tgz#adcdfb9abb9d71901a780ccda7a1c383c4e7f24f"
-  integrity sha512-YZDGIsOe19+tADpM4ggOPsS3RmapjM8BHfaFBcpfOsNtedU/YGUmqK03wtVHjPZu0PHE9QHR/bXhiVlmTPCtvQ==
+"@helicone/helpers@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@helicone/helpers/-/helpers-1.1.0.tgz#4012a7ec8df911dea77964855f280df7cca94d41"
+  integrity sha512-TlCKpmeLDABo66ptIMWWQc2QFLoGAu1pVTm0+mVH6X3sYC92xnyP4BS6lyo+iqvkMN+W0SEYwDEthy5b2tpdXQ==
 
 "@helicone/prompts@^1.0.11":
   version "1.0.12"

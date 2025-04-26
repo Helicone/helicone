@@ -750,6 +750,59 @@ export class AdminController extends Controller {
     return JSON.parse(JSON.stringify(settings)) as Setting;
   }
 
+  @Get("/settings")
+  public async getSettings(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<
+    {
+      name: string;
+      settings: any;
+    }[]
+  > {
+    await authCheckThrow(request.authParams.userId);
+
+    const settings = await dbExecute<{
+      name: string;
+      settings: Setting;
+    }>(
+      `
+      SELECT name, settings FROM helicone_settings
+      `,
+      []
+    );
+
+    return (
+      settings.data?.map((setting) => ({
+        name: setting.name,
+        settings: JSON.parse(JSON.stringify(setting.settings)) as Setting,
+      })) ?? []
+    );
+  }
+
+  @Post("/settings")
+  public async upsertSetting(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body()
+    body: {
+      name: string;
+      settings: any;
+    }
+  ): Promise<void> {
+    await authCheckThrow(request.authParams.userId);
+
+    const { error } = await dbExecute(
+      `
+      INSERT INTO helicone_settings (name, settings) VALUES ($1, $2)
+      ON CONFLICT (name) DO UPDATE SET settings = $2
+      `,
+      [body.name, JSON.stringify(body.settings)]
+    );
+
+    if (error) {
+      throw new Error(error);
+    }
+  }
+
   @Post("/azure/run-test")
   public async azureTest(
     @Request() request: JawnAuthenticatedRequest,
@@ -777,45 +830,6 @@ export class AdminController extends Controller {
         body: JSON.stringify(body.requestBody),
       },
     };
-  }
-
-  @Post("/settings")
-  public async updateSetting(
-    @Request() request: JawnAuthenticatedRequest,
-    @Body()
-    body: {
-      name: SettingName;
-      settings: Setting;
-    }
-  ): Promise<void> {
-    await authCheckThrow(request.authParams.userId);
-
-    const { data: currentSettings } = await dbExecute<{
-      settings: Setting;
-    }>(
-      `
-      SELECT settings FROM helicone_settings WHERE name = $1
-      `,
-      [body.name]
-    );
-
-    if (!currentSettings) {
-      await dbExecute(
-        `
-        INSERT INTO helicone_settings (name, settings) VALUES ($1, $2)
-        `,
-        [body.name, JSON.parse(JSON.stringify(body.settings))]
-      );
-    } else {
-      await dbExecute(
-        `
-        UPDATE helicone_settings SET settings = $1 WHERE name = $2
-        `,
-        [JSON.parse(JSON.stringify(body.settings)), body.name]
-      );
-    }
-
-    return;
   }
 
   @Post("/orgs/query")

@@ -1,0 +1,11 @@
+{
+  "title": "Complete Guide to Monitoring Local LLMs with Llama and Open WebUI",
+  "title1": "How to Implement Effective Llama Monitoring using Helicone and Open WebUI",
+  "title2": "Run Local LLM Systems with Comprehensive Monitoring",
+  "description": "Master local LLM monitoring using Helicone with Open WebUI. This guide shows developers how to track Llama AI performance, optimize inference, and gain complete visibility into local language model behavior with a custom proxy solution.",
+  "images": "/static/blog/monitoring-local-llms/thumbnail.webp",
+  "time": "12 minute read",
+  "author": "Juliette Chevalier",
+  "date": "April 22, 2025",
+  "badge": "Frameworks & Tools"
+}

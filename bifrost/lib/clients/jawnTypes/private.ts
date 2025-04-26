@@ -366,11 +366,12 @@ export interface paths {
   "/v1/admin/settings/{name}": {
     get: operations["GetSetting"];
   };
+  "/v1/admin/settings": {
+    get: operations["GetSettings"];
+    post: operations["UpsertSetting"];
+  };
   "/v1/admin/azure/run-test": {
     post: operations["AzureTest"];
-  };
-  "/v1/admin/settings": {
-    post: operations["UpdateSetting"];
   };
   "/v1/admin/orgs/query": {
     post: operations["FindAllOrgs"];
@@ -2371,7 +2372,7 @@ Json: JsonObject;
     };
     Setting: components["schemas"]["KafkaSettings"] | components["schemas"]["AzureExperiment"] | components["schemas"]["ApiKey"];
     /** @enum {string} */
-    SettingName: "kafka:dlq" | "kafka:log" | "kafka:score" | "kafka:dlq:score" | "kafka:dlq:eu" | "kafka:log:eu" | "kafka:orgs-to-dlq" | "azure:experiment" | "openai:apiKey" | "anthropic:apiKey" | "openrouter:apiKey";
+    SettingName: "kafka:dlq" | "kafka:log" | "kafka:score" | "kafka:dlq:score" | "kafka:dlq:eu" | "kafka:log:eu" | "kafka:orgs-to-dlq" | "azure:experiment" | "openai:apiKey" | "anthropic:apiKey" | "openrouter:apiKey" | "togetherai:apiKey";
     /**
      * @description The URL interface represents an object providing static methods used for creating object URLs.
      *
@@ -15450,8 +15451,9 @@ export interface operations {
       200: {
         content: {
           "application/json": {
-            useAzureForExperiment: boolean;
-          };
+              settings: unknown;
+              name: string;
+            }[];
         };
       };
     };
@@ -16537,6 +16539,22 @@ export interface operations {
       };
     };
   };
+  UpsertSetting: {
+    requestBody: {
+      content: {
+        "application/json": {
+          settings: unknown;
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
+      };
+    };
+  };
   AzureTest: {
     requestBody: {
       content: {
@@ -16560,22 +16578,6 @@ export interface operations {
             resultText: string;
           };
         };
-      };
-    };
-  };
-  UpdateSetting: {
-    requestBody: {
-      content: {
-        "application/json": {
-          settings: components["schemas"]["Setting"];
-          name: components["schemas"]["SettingName"];
-        };
-      };
-    };
-    responses: {
-      /** @description No content */
-      204: {
-        content: never;
       };
     };
   };
