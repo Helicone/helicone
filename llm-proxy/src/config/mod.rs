@@ -110,8 +110,15 @@ impl Config {
 #[cfg(feature = "testing")]
 impl crate::tests::TestDefault for Config {
     fn test_default() -> Self {
+        let telemetry = telemetry::Config {
+            tracing: telemetry::TracingConfig {
+                enabled: false,
+                ..Default::default()
+            },
+            ..Default::default()
+        };
         Config {
-            telemetry: telemetry::Config::default(),
+            telemetry,
             metrics_server: self::metrics::Config::test_default(),
             server: self::server::ServerConfig::test_default(),
             database: self::database::Config::test_default(),
