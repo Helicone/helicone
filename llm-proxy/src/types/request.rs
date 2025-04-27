@@ -1,3 +1,4 @@
+#![allow(dead_code)] // this will be used soon...
 use std::{sync::Arc, time::Instant};
 
 use axum_core::body::Body;
