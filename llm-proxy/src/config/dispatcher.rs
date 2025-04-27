@@ -35,3 +35,10 @@ impl Default for DispatcherConfig {
         Self { provider_urls }
     }
 }
+
+#[cfg(feature = "testing")]
+impl crate::tests::TestDefault for DispatcherConfig {
+    fn test_default() -> Self {
+        Self::default()
+    }
+}

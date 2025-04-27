@@ -17,3 +17,10 @@ impl Default for Config {
         }
     }
 }
+
+#[cfg(feature = "testing")]
+impl crate::tests::TestDefault for Config {
+    fn test_default() -> Self {
+        Self::default()
+    }
+}

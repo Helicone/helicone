@@ -30,6 +30,23 @@ fn default_discover_decay() -> Duration {
     Duration::from_secs(120)
 }
 
+#[cfg(feature = "testing")]
+impl crate::tests::TestDefault for DiscoverConfig {
+    fn test_default() -> Self {
+        // SAFETY: This must only be called within the single threaded tokio
+        // runtime in tests
+        unsafe {
+            std::env::set_var("OPENAI_API_KEY", "sk-...");
+        }
+        Self {
+            api_keys_source: ProviderKeysSource::Env,
+            discover_mode: DiscoverMode::Config,
+            providers: ProvidersConfig::test_default(),
+            discover_decay: default_discover_decay(),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

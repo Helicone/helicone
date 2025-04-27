@@ -1,11 +1,14 @@
-use derive_more::Deref;
+use derive_more::{Deref, DerefMut};
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use url::Url;
 
-use crate::types::{
-    model::{Model, Version},
-    provider::Provider,
+use crate::{
+    tests::harness::MOCK_SERVER_PORT,
+    types::{
+        model::{Model, Version},
+        provider::Provider,
+    },
 };
 
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
@@ -23,7 +26,9 @@ impl Default for ProviderConfig {
     }
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq, Deref)]
+#[derive(
+    Debug, Clone, Deserialize, Serialize, Eq, PartialEq, Deref, DerefMut,
+)]
 #[serde(rename_all = "kebab-case")]
 pub struct ProvidersConfig(IndexMap<Provider, ProviderConfig>);
 
@@ -49,4 +54,20 @@ fn default_openai_models() -> Vec<Model> {
 
 fn default_openai_base_url() -> Url {
     Url::parse("https://api.openai.com").unwrap()
+}
+
+#[cfg(feature = "testing")]
+impl crate::tests::TestDefault for ProvidersConfig {
+    fn test_default() -> Self {
+        let test_openai_provider = ProviderConfig {
+            models: default_openai_models(),
+            base_url: Url::parse(&format!(
+                "http://localhost:{}",
+                MOCK_SERVER_PORT
+            ))
+            .unwrap(),
+        };
+
+        Self(IndexMap::from([(Provider::OpenAI, test_openai_provider)]))
+    }
 }

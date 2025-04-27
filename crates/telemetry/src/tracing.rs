@@ -25,14 +25,6 @@ impl tower_http::request_id::MakeRequestId for MakeRequestId {
         use opentelemetry::trace::TraceContextExt;
         use tracing::Span;
         use tracing_opentelemetry::OpenTelemetrySpanExt;
-        let context = Span::current().context();
-        let span = context.span();
-        let span_context = span.span_context();
-        tracing::info!(
-            "span_context: {:?}, is_valid: {:?}",
-            span_context,
-            span_context.is_valid()
-        );
         let trace_id =
             Span::current().context().span().span_context().trace_id();
         let header = HeaderValue::from_str(&trace_id.to_string())

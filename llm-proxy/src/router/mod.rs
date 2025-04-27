@@ -35,12 +35,12 @@ impl Router {
         app_state: AppState,
     ) -> Result<(Self, ProviderMonitor), InitError> {
         let router_config = match &app_state.0.config.deployment_target {
-            DeploymentTarget::Cloud | DeploymentTarget::SelfHosted => {
+            DeploymentTarget::Cloud | DeploymentTarget::Sidecar => {
                 return Err(InitError::DeploymentTargetNotSupported(
                     app_state.0.config.deployment_target,
                 ));
             }
-            DeploymentTarget::Sidecar => {
+            DeploymentTarget::SelfHosted => {
                 let router_config = app_state
                     .0
                     .config
@@ -86,6 +86,7 @@ impl tower::Service<crate::types::request::Request> for Router {
         crate::types::request::Request,
     >>::Future;
 
+    #[inline]
     fn poll_ready(
         &mut self,
         ctx: &mut Context<'_>,
@@ -93,7 +94,7 @@ impl tower::Service<crate::types::request::Request> for Router {
         self.inner.poll_ready(ctx)
     }
 
-    #[tracing::instrument(name = "router", skip_all)]
+    #[tracing::instrument(level = "debug", name = "router", skip_all)]
     fn call(&mut self, req: crate::types::request::Request) -> Self::Future {
         self.inner.call(req)
     }

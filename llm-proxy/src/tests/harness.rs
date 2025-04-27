@@ -7,12 +7,15 @@ use std::{
 use futures::future::BoxFuture;
 use stubr::{Stubr, wiremock_rs::MockServer};
 use tower::MakeService as _;
+use url::Url;
 
 use crate::{
     app::{App, AppFactory, AppResponse},
     config::Config,
-    types::request::Request,
+    types::{provider::Provider, request::Request},
 };
+
+pub const MOCK_SERVER_PORT: u16 = 8111;
 
 pub struct Harness {
     pub app_factory: AppFactory<App>,
@@ -21,11 +24,25 @@ pub struct Harness {
 }
 
 impl Harness {
-    pub async fn new(config: Config) -> Self {
+    pub async fn new(mut config: Config) -> Self {
+        let mock = Stubr::try_start_with(
+            "./stubs",
+            stubr::Config {
+                port: Some(MOCK_SERVER_PORT),
+                verbose: true,
+                record: true,
+                ..Default::default()
+            },
+        )
+        .await
+        .expect("couldnt start mock htttp server");
+        let openai_provider = config
+            .discover
+            .providers
+            .get_mut(&Provider::OpenAI)
+            .unwrap();
+        openai_provider.base_url = Url::parse(&mock.uri()).unwrap();
         let (app, _) = App::new(config).await.expect("failed to create app");
-        let mock = Stubr::try_start("./stubs")
-            .await
-            .expect("couldnt start mock htttp server");
         let app_factory = AppFactory::new(app.state.clone(), app);
         let socket_addr =
             SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 0);
