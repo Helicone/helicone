@@ -314,7 +314,7 @@ const Experiment = () => {
             <div className="flex items-center gap-2.5">
               <p className="text-base sm:text-xl">03</p>
               <div className="text-base sm:text-lg font-medium text-slate-700">
-                Experiment
+                Prompt Management
               </div>
             </div>
             <div className="flex flex-col gap-6">
@@ -323,8 +323,7 @@ const Experiment = () => {
                 changes to production
               </h2>
               <p className="text-lg max-w-[520px] text-muted-foreground leading-relaxed">
-                Tune your prompts and justify your iterations with quantifiable
-                data, not just “vibes”.
+                Tune your prompts and justify your iterations with quantifiable data, not just “vibes”.
               </p>
             </div>
             <div className="flex gap-3 items-center">

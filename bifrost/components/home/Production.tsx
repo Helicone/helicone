@@ -33,40 +33,15 @@ const Production = () => {
               <ArrowUpRight className="size-5 md:size-6" />
             </Button>
           </Link>
-          <Link href="https://docs.helicone.ai/features/prompts/editor" target="_blank" rel="noopener">
+          <Link href="https://www.helicone.ai/changelog/20240910-slack-alerts" target="_blank" rel="noopener">
             <Button
               variant="outline"
               className="p-5 text-base md:text-lg md:py-4 lg:py-6 lg:px-6 lg:text-md gap-2 rounded-lg items-center z-[10]"
             >
-              Set up alerts
-              {/* <ArrowUpRight className="size-5 md:size-6" /> */}
+              Alerts
+              <ArrowUpRight className="size-5 md:size-6" />
             </Button>
           </Link>
-          {/* </div> */}
-          {/* <a
-            href="https://docs.helicone.ai/features/advanced-usage/user-metrics"
-            target="_blank"
-          >
-            <Button
-              className="items-center gap-2 text-landing-secondary self-start"
-              variant="outline"
-            >
-              <ArrowUpRightIcon size={16} />
-              User Metrics
-            </Button>
-          </a> */}
-          {/* <a
-            href="https://www.helicone.ai/changelog/20240910-slack-alerts"
-            target="_blank"
-          >
-            <Button
-              className="items-center gap-2 text-landing-secondary self-start"
-              variant="outline"
-            >
-              <ArrowUpRightIcon className="w-4 h-4" />
-              Alerts
-            </Button>
-          </a> */}
         </div>
       </div>
     </div >

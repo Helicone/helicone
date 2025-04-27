@@ -389,7 +389,7 @@ self.model = AzureChatOpenAI(
               Get integrated in <span className="text-brand">seconds</span>
             </h2>
             <p className="text-lg font-normal sm:text-xl text-muted-foreground">
-              A single integration that connects seamlessly to any LLM provider and framework.{" "}
+              The simplest integration that connects seamlessly to any LLM provider and framework.{" "}
             </p>
             <div className="flex flex-col items-start gap-1">
               <div className="flex flex-wrap">
@@ -397,7 +397,7 @@ self.model = AzureChatOpenAI(
                   <div
                     key={provider.name}
                     className={cn(
-                      "size-24 rounded-md p-2.5 hover:bg-sky-50 transition-colors ease-in-out duration-200 cursor-pointer",
+                      "size-20 rounded-md p-2.5 hover:bg-sky-50 transition-colors ease-in-out duration-200 cursor-pointer",
                       selectedProvider?.name === provider.name ? "bg-sky-100" : ""
                     )}
                     onClick={() => {
@@ -471,7 +471,7 @@ self.model = AzureChatOpenAI(
             className="bg-brand p-5 text-base md:text-lg md:py-4 lg:py-6 lg:px-6 lg:text-md gap-2 rounded-lg items-center z-[10]"
           >
             Integrate today
-            {/* <ChevronRight className="size-5 md:size-6" /> */}
+            <ChevronRight className="size-5 md:size-6" />
           </Button>
         </Link>
         <Link href="https://docs.helicone.ai/getting-started/quick-start#quick-start" target="_blank" rel="noopener">
@@ -484,26 +484,6 @@ self.model = AzureChatOpenAI(
           </Button>
         </Link>
       </div>
-      {/* <div className="flex gap-4">
-        <Link href="/signup">
-          <Button
-            className="bg-brand z-[10]"
-          >
-            Get integrated
-          </Button>
-        </Link>
-        <Link
-          href="https://docs.helicone.ai/getting-started/quick-start"
-          target="_blank"
-        >
-          <Button
-            variant="ghost"
-            className="gap-2"
-          >
-            Other providers <ArrowUpRightIcon className="size-4" />
-          </Button>
-        </Link>
-      </div> */}
     </div>
   );
 };
