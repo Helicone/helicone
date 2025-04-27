@@ -1,4 +1,3 @@
-pub mod logging;
 pub mod tracing;
 
 use opentelemetry::trace::TracerProvider;
@@ -15,32 +14,39 @@ use tracing_subscriber::{
     util::SubscriberInitExt,
 };
 
-pub use self::{
-    logging::{Config as LoggingConfig, Format as LoggingFormat},
-    tracing::Config as TracingConfig,
-};
-
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields, rename_all = "kebab-case")]
 pub struct Config {
-    #[serde(default)]
-    pub logging: LoggingConfig,
-    #[serde(default)]
-    pub tracing: TracingConfig,
+    /// Logging and tracing level in the env logger format.
+    #[serde(default = "default_level")]
+    pub level: String,
     #[serde(default = "default_service_name")]
     pub service_name: String,
-    #[serde(default = "default_otlp_exporter_endpoint")]
-    pub otlp_exporter_endpoint: String,
+    #[serde(default)]
+    pub exporter: Exporter,
 }
 
 impl Default for Config {
     fn default() -> Self {
         Self {
-            logging: LoggingConfig::default(),
-            tracing: TracingConfig::default(),
+            level: default_level(),
             service_name: default_service_name(),
-            otlp_exporter_endpoint: default_otlp_exporter_endpoint()
-                .to_string(),
+            exporter: Exporter::default(),
+        }
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(deny_unknown_fields, rename_all = "kebab-case")]
+pub enum Exporter {
+    Stdout,
+    Otlp { endpoint: String },
+}
+
+impl Default for Exporter {
+    fn default() -> Self {
+        Self::Otlp {
+            endpoint: default_otlp_exporter_endpoint(),
         }
     }
 }
@@ -51,6 +57,10 @@ fn default_service_name() -> String {
 
 fn default_otlp_exporter_endpoint() -> String {
     "http://localhost:4317".to_string()
+}
+
+fn default_level() -> String {
+    "info,llm_proxy=trace".to_string()
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -75,10 +85,10 @@ fn resource(config: &Config) -> Resource {
 
 pub fn init_telemetry(
     config: &Config,
-) -> Result<(SdkLoggerProvider, Option<SdkTracerProvider>), TelemetryError> {
+) -> Result<(SdkLoggerProvider, SdkTracerProvider), TelemetryError> {
     let resource = resource(config);
 
-    let logger_provider = logger_provider(resource.clone())
+    let logger_provider = logger_provider(config, resource.clone())
         .map_err(TelemetryError::LogExporterBuild)?;
     let otel_layer =
         opentelemetry_appender_tracing::layer::OpenTelemetryTracingBridge::new(
@@ -88,32 +98,34 @@ pub fn init_telemetry(
     let filter = env_filter(config)?;
     let otel_layer = otel_layer.with_filter(filter);
 
-    let fmt_layer = tracing_subscriber::fmt::layer()
-        .pretty()
-        .with_file(true)
-        .with_line_number(true)
-        .with_filter(env_filter(config)?);
+    let fmt_layer = match config.exporter {
+        Exporter::Stdout => tracing_subscriber::fmt::layer()
+            .pretty()
+            .with_file(true)
+            .with_line_number(true)
+            .with_filter(env_filter(config)?)
+            .boxed(),
+        Exporter::Otlp { .. } => tracing_subscriber::fmt::layer()
+            .compact()
+            .with_file(true)
+            .with_line_number(true)
+            .with_filter(env_filter(config)?)
+            .boxed(),
+    };
 
     let registry = tracing_subscriber::registry()
         .with(otel_layer)
         .with(fmt_layer);
 
-    // tracing
-    let tracer_provider = if config.tracing.enabled {
-        let tracer_provider = tracer_provider(resource.clone())
-            .map_err(TelemetryError::TraceExporterBuild)?;
-        let tracer = tracer_provider.tracer(config.service_name.clone());
-        let filter = env_filter(config)?;
-        let tracing_layer = tracing_opentelemetry::layer()
-            .with_tracer(tracer)
-            .with_filter(filter);
-        registry.with(tracing_layer).try_init()?;
-        opentelemetry::global::set_tracer_provider(tracer_provider.clone());
-        Some(tracer_provider)
-    } else {
-        registry.try_init()?;
-        None
-    };
+    let tracer_provider = tracer_provider(config, resource.clone())
+        .map_err(TelemetryError::TraceExporterBuild)?;
+    let tracer = tracer_provider.tracer(config.service_name.clone());
+    let filter = env_filter(config)?;
+    let tracing_layer = tracing_opentelemetry::layer()
+        .with_tracer(tracer)
+        .with_filter(filter);
+    registry.with(tracing_layer).try_init()?;
+    opentelemetry::global::set_tracer_provider(tracer_provider.clone());
 
     log_panics::init();
 
@@ -123,7 +135,7 @@ pub fn init_telemetry(
 fn env_filter(config: &Config) -> Result<EnvFilter, TelemetryError> {
     // we purposely avoid the EnvFilter::new API so we can catch invalid
     // directives
-    let filter = EnvFilter::new(config.logging.level.clone())
+    let filter = EnvFilter::new(config.level.clone())
         // https://github.com/open-telemetry/opentelemetry-rust/issues/2877
         .add_directive("hyper=off".parse()?)
         .add_directive("tonic=off".parse()?)
@@ -133,26 +145,53 @@ fn env_filter(config: &Config) -> Result<EnvFilter, TelemetryError> {
 }
 
 fn tracer_provider(
+    config: &Config,
     resource: Resource,
 ) -> Result<SdkTracerProvider, ExporterBuildError> {
-    let exporter = SpanExporter::builder().with_tonic().build()?;
-    let provider = SdkTracerProvider::builder()
-        .with_resource(resource)
-        .with_batch_exporter(exporter)
-        .with_id_generator(RandomIdGenerator::default())
-        .with_max_events_per_span(64)
-        .with_max_attributes_per_span(16)
-        .build();
-    Ok(provider)
+    match &config.exporter {
+        Exporter::Stdout => {
+            let exporter = opentelemetry_stdout::SpanExporter::default();
+            Ok(SdkTracerProvider::builder()
+                .with_resource(resource)
+                .with_simple_exporter(exporter)
+                .with_id_generator(RandomIdGenerator::default())
+                .with_max_events_per_span(64)
+                .with_max_attributes_per_span(16)
+                .build())
+        }
+        Exporter::Otlp { .. } => {
+            let exporter = SpanExporter::builder().with_tonic().build()?;
+            let provider = SdkTracerProvider::builder()
+                .with_resource(resource)
+                .with_batch_exporter(exporter)
+                .with_id_generator(RandomIdGenerator::default())
+                .with_max_events_per_span(64)
+                .with_max_attributes_per_span(16)
+                .build();
+            Ok(provider)
+        }
+    }
 }
 
 fn logger_provider(
+    config: &Config,
     resource: Resource,
 ) -> Result<SdkLoggerProvider, ExporterBuildError> {
-    let exporter = LogExporter::builder().with_tonic().build()?;
+    match &config.exporter {
+        Exporter::Stdout => {
+            let exporter = opentelemetry_stdout::LogExporter::default();
 
-    Ok(SdkLoggerProvider::builder()
-        .with_resource(resource)
-        .with_batch_exporter(exporter)
-        .build())
+            Ok(SdkLoggerProvider::builder()
+                .with_resource(resource)
+                .with_simple_exporter(exporter)
+                .build())
+        }
+        Exporter::Otlp { .. } => {
+            let exporter = LogExporter::builder().with_tonic().build()?;
+            Ok(SdkLoggerProvider::builder()
+                .with_resource(resource)
+                .with_batch_exporter(exporter)
+                .build())
+        }
+    }
 }

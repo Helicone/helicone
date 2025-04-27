@@ -1,18 +1,5 @@
 use http::HeaderValue;
-use serde::{Deserialize, Serialize};
 use tower_http::request_id::RequestId;
-
-#[derive(Debug, Clone, Deserialize, Serialize)]
-#[serde(default, deny_unknown_fields)]
-pub struct Config {
-    pub enabled: bool,
-}
-
-impl Default for Config {
-    fn default() -> Self {
-        Self { enabled: true }
-    }
-}
 
 #[derive(Clone, Default)]
 pub struct MakeRequestId;

@@ -111,10 +111,7 @@ impl Config {
 impl crate::tests::TestDefault for Config {
     fn test_default() -> Self {
         let telemetry = telemetry::Config {
-            tracing: telemetry::TracingConfig {
-                enabled: false,
-                ..Default::default()
-            },
+            exporter: telemetry::Exporter::Stdout,
             ..Default::default()
         };
         Config {

@@ -162,7 +162,7 @@ impl App {
     pub async fn new(
         config: Config,
     ) -> Result<(Self, ProviderMonitors), InitError> {
-        tracing::trace!("creating app");
+        tracing::info!(config = ?config, "creating app");
         let provider = StaticProvider::from_env();
         let minio = if let Some(provider) = provider {
             Some(
