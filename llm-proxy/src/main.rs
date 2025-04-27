@@ -26,7 +26,7 @@ async fn main() -> Result<(), llm_proxy::error::runtime::RuntimeError> {
         }
     };
     // Initialize telemetry
-    let _logger_provider: opentelemetry_sdk::logs::LoggerProvider =
+    let (logger_provider, tracer_provider) =
         telemetry::init_telemetry(&config.telemetry)
             .map_err(llm_proxy::error::init::InitError::Telemetry)
             .map_err(llm_proxy::error::runtime::RuntimeError::Init)?;
@@ -75,7 +75,14 @@ async fn main() -> Result<(), llm_proxy::error::runtime::RuntimeError> {
     //     .shutdown()
     //     .map_err(TelemetryError::Logs)
     //     .map_err(llm_proxy::error::runtime::Error::Telemetry)?;
-    opentelemetry::global::shutdown_tracer_provider();
+    if let Err(e) = logger_provider.shutdown() {
+        println!("error shutting down logger provider: {}", e);
+    }
+    if let Some(tracer_provider) = tracer_provider {
+        if let Err(e) = tracer_provider.shutdown() {
+            println!("error shutting down tracer provider: {}", e);
+        }
+    }
 
     info!("shut down");
 

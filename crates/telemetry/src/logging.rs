@@ -20,9 +20,7 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             format: Format::Pretty,
-            level: "info,llm_proxy=trace,hyper=error,tonic=error,h2=error,\
-                    reqwest=error"
-                .to_string(),
+            level: "info,llm_proxy=trace".to_string(),
         }
     }
 }
