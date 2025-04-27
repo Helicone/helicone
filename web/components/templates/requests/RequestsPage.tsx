@@ -372,8 +372,9 @@ export default function RequestsPage(props: RequestsPageV2Props) {
 
     return getRootFilterNode();
   }, [searchParams, filterMap]);
+
   const userFilterMapIndex = filterMap.findIndex(
-    (filter: any) => filter.label === "Helicone-Rate-Limit-Status"
+    (filter: any) => filter.label?.trim() === "Helicone-Rate-Limit-Status"
   );
 
   // Update the page state and router query when the page changes
@@ -523,9 +524,11 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   useEffect(() => {
     if (rateLimited) {
       if (userFilterMapIndex === -1) {
+        console.error("Rate limit filter not found");
         return;
       }
 
+      console.log("Applying rate limit filter");
       setAdvancedFilters((prev) => {
         const newFilter: UIFilterRow = {
           filterMapIdx: userFilterMapIndex,
