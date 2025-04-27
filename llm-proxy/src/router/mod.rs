@@ -35,12 +35,12 @@ impl Router {
         app_state: AppState,
     ) -> Result<(Self, ProviderMonitor), InitError> {
         let router_config = match &app_state.0.config.deployment_target {
-            DeploymentTarget::Cloud | DeploymentTarget::SelfHosted => {
+            DeploymentTarget::Cloud | DeploymentTarget::Sidecar => {
                 return Err(InitError::DeploymentTargetNotSupported(
                     app_state.0.config.deployment_target,
                 ));
             }
-            DeploymentTarget::Sidecar => {
+            DeploymentTarget::SelfHosted => {
                 let router_config = app_state
                     .0
                     .config

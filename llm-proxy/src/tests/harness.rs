@@ -15,7 +15,7 @@ use crate::{
     types::{provider::Provider, request::Request},
 };
 
-const MOCK_SERVER_PORT: u16 = 8111;
+pub const MOCK_SERVER_PORT: u16 = 8111;
 
 pub struct Harness {
     pub app_factory: AppFactory<App>,

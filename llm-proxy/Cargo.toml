@@ -61,11 +61,9 @@ url = { workspace = true, features = ['serde'] }
 utoipa = { workspace = true }
 uuid = { workspace = true, features = ["serde", "v7"] }
 
-env_logger = { workspace = true, optional = true }
-log = "0.4"
 [features]
 default = []
-testing = ["dep:stubr", "dep:env_logger"]
+testing = ["dep:stubr"]
 
 [[test]]
 name = "default_target"

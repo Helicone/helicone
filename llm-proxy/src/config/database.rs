@@ -50,3 +50,10 @@ fn default_connection_timeout() -> Duration {
 fn default_idle_timeout() -> Duration {
     Duration::from_secs(60)
 }
+
+#[cfg(feature = "testing")]
+impl crate::tests::TestDefault for Config {
+    fn test_default() -> Self {
+        Self::default()
+    }
+}

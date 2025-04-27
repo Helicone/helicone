@@ -35,8 +35,8 @@ pub enum Error {
 #[serde(deny_unknown_fields, rename_all = "kebab-case")]
 pub enum DeploymentTarget {
     Cloud,
-    #[default]
     Sidecar,
+    #[default]
     SelfHosted,
 }
 
@@ -108,9 +108,20 @@ impl Config {
 }
 
 #[cfg(feature = "testing")]
-impl Config {
-    pub fn test_config() -> Self {
-        Config::default()
+impl crate::tests::TestDefault for Config {
+    fn test_default() -> Self {
+        Config {
+            telemetry: telemetry::Config::default(),
+            metrics_server: self::metrics::Config::test_default(),
+            server: self::server::ServerConfig::test_default(),
+            database: self::database::Config::test_default(),
+            minio: self::minio::Config::test_default(),
+            is_production: false,
+            deployment_target: DeploymentTarget::SelfHosted,
+            rate_limit: self::rate_limit::RateLimitConfig::test_default(),
+            discover: self::discover::DiscoverConfig::test_default(),
+            routers: self::router::RouterConfigs::test_default(),
+        }
     }
 }
 

@@ -44,9 +44,9 @@ impl Discovery {
         // TODO: currently we also have a separate discovery_mode.
         // we should consolidate.
         match app_state.0.config.deployment_target {
-            DeploymentTarget::Sidecar => Self::config(app_state, rx),
-            DeploymentTarget::Cloud | DeploymentTarget::SelfHosted => {
-                todo!("cloud and self-hosted not supported yet")
+            DeploymentTarget::SelfHosted => Self::config(app_state, rx),
+            DeploymentTarget::Cloud | DeploymentTarget::Sidecar => {
+                todo!("cloud and sidecar not supported yet")
             }
         }
     }

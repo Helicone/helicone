@@ -71,3 +71,10 @@ fn default_request_timeout() -> Duration {
 fn default_shutdown_timeout() -> Duration {
     Duration::from_secs(30)
 }
+
+#[cfg(feature = "testing")]
+impl crate::tests::TestDefault for ServerConfig {
+    fn test_default() -> Self {
+        Self::default()
+    }
+}

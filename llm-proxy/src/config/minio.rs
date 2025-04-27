@@ -43,3 +43,10 @@ fn default_host() -> url::Url {
 fn default_region() -> String {
     "us-west-1".to_string()
 }
+
+#[cfg(feature = "testing")]
+impl crate::tests::TestDefault for Config {
+    fn test_default() -> Self {
+        Self::default()
+    }
+}

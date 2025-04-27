@@ -1,21 +1,16 @@
-use std::{collections::HashMap, time::Duration};
+use std::collections::HashMap;
 
 use derive_more::AsRef;
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 
 use super::{
-    rate_limit::RateLimitConfig,
-    retry::{RetryConfig, Strategy},
+    rate_limit::RateLimitConfig, retry::RetryConfig,
     spend_control::SpendControlConfig,
 };
 use crate::{
     discover::Key,
-    types::{
-        model::{Model, Version},
-        provider::Provider,
-        router::RouterId,
-    },
+    types::{model::Model, provider::Provider, router::RouterId},
 };
 
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq, AsRef)]
@@ -100,59 +95,69 @@ pub struct PromptVersion(pub String);
 #[derive(Debug, Clone, Deserialize, Eq, Hash, PartialEq)]
 pub struct Weight(pub Decimal);
 
-pub fn test_router_config() -> RouterConfig {
-    let cache = CacheControlConfig {
-        directive: "max-age=3600, max-stale=1800".to_string(),
-        enabled: true,
-        buckets: 10,
-        seed: "test-seed".to_string(),
-    };
-
-    // Create test values for FallbackConfig
-    let fallback = FallbackConfig {
-        enabled: true,
-        order: vec![FallbackTarget {
-            provider: Provider::OpenAI,
-            model: Model {
-                name: "claude-3-7-sonnet".to_string(),
-                version: Some(Version::Latest),
-            },
-        }],
-    };
-
-    let balance = BalanceConfig::Weighted {
-        targets: vec![BalanceTarget {
-            key: Key {
-                provider: Provider::OpenAI,
-            },
-            weight: Decimal::from(1),
-        }],
-    };
-    let retries = RetryConfig {
-        enabled: false,
-        max_retries: 3,
-        strategy: Strategy::Exponential {
-            base: Duration::from_secs(1),
-            max: Duration::from_secs(10),
-        },
-    };
-
-    // Create test values for RateLimitConfig
-    let default_provider = Provider::OpenAI;
-    RouterConfig {
-        default_provider,
-        cache: Some(cache),
-        fallback: Some(fallback),
-        balance: Some(balance),
-        retries: Some(retries),
-        rate_limit: None,
-        spend_control: None,
+#[cfg(feature = "testing")]
+impl crate::tests::TestDefault for RouterConfigs {
+    fn test_default() -> Self {
+        Self::default()
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use std::time::Duration;
+
     use super::*;
+    use crate::{config::retry::Strategy, types::model::Version};
+
+    fn test_router_config() -> RouterConfig {
+        let cache = CacheControlConfig {
+            directive: "max-age=3600, max-stale=1800".to_string(),
+            enabled: true,
+            buckets: 10,
+            seed: "test-seed".to_string(),
+        };
+
+        // Create test values for FallbackConfig
+        let fallback = FallbackConfig {
+            enabled: true,
+            order: vec![FallbackTarget {
+                provider: Provider::OpenAI,
+                model: Model {
+                    name: "claude-3-7-sonnet".to_string(),
+                    version: Some(Version::Latest),
+                },
+            }],
+        };
+
+        let balance = BalanceConfig::Weighted {
+            targets: vec![BalanceTarget {
+                key: Key {
+                    provider: Provider::OpenAI,
+                },
+                weight: Decimal::from(1),
+            }],
+        };
+        let retries = RetryConfig {
+            enabled: false,
+            max_retries: 3,
+            strategy: Strategy::Exponential {
+                base: Duration::from_secs(1),
+                max: Duration::from_secs(10),
+            },
+        };
+
+        // Create test values for RateLimitConfig
+        let default_provider = Provider::OpenAI;
+        RouterConfig {
+            default_provider,
+            cache: Some(cache),
+            fallback: Some(fallback),
+            balance: Some(balance),
+            retries: Some(retries),
+            rate_limit: None,
+            spend_control: None,
+        }
+    }
 
     #[test]
     fn router_config_round_trip() {

@@ -3,9 +3,12 @@ use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use url::Url;
 
-use crate::types::{
-    model::{Model, Version},
-    provider::Provider,
+use crate::{
+    tests::harness::MOCK_SERVER_PORT,
+    types::{
+        model::{Model, Version},
+        provider::Provider,
+    },
 };
 
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
@@ -54,11 +57,17 @@ fn default_openai_base_url() -> Url {
 }
 
 #[cfg(feature = "testing")]
-impl crate::tests::TestDefault for ProviderConfig {
-    fn default() -> Self {
-        Self {
+impl crate::tests::TestDefault for ProvidersConfig {
+    fn test_default() -> Self {
+        let test_openai_provider = ProviderConfig {
             models: default_openai_models(),
-            base_url: default_openai_base_url(),
-        }
+            base_url: Url::parse(&format!(
+                "http://localhost:{}",
+                MOCK_SERVER_PORT
+            ))
+            .unwrap(),
+        };
+
+        Self(IndexMap::from([(Provider::OpenAI, test_openai_provider)]))
     }
 }

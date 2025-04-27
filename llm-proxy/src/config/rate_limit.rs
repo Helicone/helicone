@@ -95,3 +95,10 @@ fn default_quota() -> u32 {
 fn default_cleanup_interval() -> Duration {
     Duration::from_secs(60)
 }
+
+#[cfg(feature = "testing")]
+impl crate::tests::TestDefault for RateLimitConfig {
+    fn test_default() -> Self {
+        Self::default()
+    }
+}

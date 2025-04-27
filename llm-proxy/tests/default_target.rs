@@ -1,5 +1,8 @@
 use http::{Method, Request, StatusCode};
-use llm_proxy::{config::Config, tests::harness::Harness};
+use llm_proxy::{
+    config::Config,
+    tests::{TestDefault, harness::Harness},
+};
 use serde_json::json;
 use tower::Service;
 
@@ -7,10 +10,7 @@ use tower::Service;
 /// result in the proxied request targeting https://api.openai.com/v1/chat/completions
 #[tokio::test]
 async fn default_target() {
-    let config = Config::test_config();
-    // let _logger_provider =
-    // telemetry::init_telemetry(&config.telemetry).unwrap();
-    env_logger::init();
+    let config = Config::test_default();
     let mut harness = Harness::new(config).await;
     let request_body = axum_core::body::Body::from(
         serde_json::to_vec(&json!({
@@ -33,7 +33,7 @@ async fn default_target() {
     let response = harness.call(request).await.unwrap();
     assert_eq!(response.status(), StatusCode::OK);
 
-    // assert that the request was proxied to the mock server
+    // assert that the request was proxied to the mock server correctly
     let received_requests = harness
         .mock
         .received_requests_for("POST", "/v1/chat/completions")
