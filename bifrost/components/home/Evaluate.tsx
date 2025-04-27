@@ -24,7 +24,7 @@ const Evaluate = () => {
               <span className="text-brand">Prevent regression</span> and improve
               quality over-time
             </h2>
-            <p className="text-lg max-w-[520px] text-muted-foreground leading-relaxed">
+            <p className="text-lg max-w-[520px] text-landing-description font-light leading-relaxed">
               Monitor performance in real-time and catch regressions
               pre-deployment with LLM-as-a-judge or custom evals
             </p>

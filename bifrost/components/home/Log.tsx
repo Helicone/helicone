@@ -1,7 +1,6 @@
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRightIcon, Link } from "lucide-react";
 import { Button } from "../ui/button";
 import Image from "next/image";
-import Link from "next/link";
 
 const Log = () => {
   return (
@@ -18,21 +17,20 @@ const Log = () => {
             <h2 className="font-semibold text-4xl sm:text-5xl leading-[120%] max-w-[600px] text-wrap text-black">
               Dive deep into each trace and debug your agent with ease
             </h2>
-            <p className="text-lg max-w-[520px] text-muted-foreground leading-relaxed">
+            <p className="text-lg max-w-[520px] text-landing-description font-light leading-relaxed">
               Visualize your multi-step LLM interactions, log requests in
               real-time and pinpoint root cause of errors.
             </p>
-            <div className="inline-flex">
-              <Link href="https://docs.helicone.ai/features/sessions" target="_blank" rel="noopener">
-                <Button
-                  className="bg-brand p-5 text-base md:text-lg md:py-4 lg:py-6 lg:px-6 lg:text-md gap-2 rounded-lg items-center z-[10]"
-                >
-                  Start tracing
-                  <ArrowUpRight className="size-5 md:size-6" />
-                </Button>
-              </Link>
-            </div>
           </div>
+          <a href="https://docs.helicone.ai/features/sessions" target="_blank">
+            <Button
+              className="items-center gap-2 text-landing-secondary self-start"
+              variant="outline"
+            >
+              <ArrowUpRightIcon className="w-4 h-4" />
+              Sessions
+            </Button>
+          </a>
         </div>
         <Image
           src="/static/home/log.webp"
