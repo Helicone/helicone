@@ -1,12 +1,11 @@
-import { SSRContext } from "../../auth/client/getSSRHeliconeAuthClient";
 import { HeliconeAuthClient } from "../../auth/client/HeliconeAuthClient";
-
-export async function supabaseAuthClientFromSSRContext(
+import { SSRContext } from "../../auth/client/getSSRHeliconeAuthClient";
+export async function betterAuthClientFromSSRContext(
   ctx: SSRContext<any, any, any>
 ): Promise<any> {
   throw new Error("useSupabaseAuthClient is not implemented");
 }
 
-export function useSupabaseAuthClient(): HeliconeAuthClient {
+export function useBetterAuthClient(): HeliconeAuthClient {
   throw new Error("useSupabaseAuthClient is not implemented");
 }
