@@ -96,3 +96,5 @@ tracing-subscriber = "0.3.19"
 url = "2.5.4"
 utoipa = "5.3.1"
 uuid = { version = "1.16.0", features = ["serde", "v7"] }
+
+env_logger = "0.11.8"

@@ -51,6 +51,7 @@ where
     type Error = Error;
     type Future = Either<Ready<Result<Self::Response, Self::Error>>, S::Future>;
 
+    #[inline]
     fn poll_ready(
         &mut self,
         cx: &mut Context<'_>,

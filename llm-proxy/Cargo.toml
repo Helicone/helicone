@@ -16,7 +16,7 @@ chrono = { workspace = true }
 clap = { workspace = true }
 config = { workspace = true }
 compact_str = { workspace = true, features = ['serde'] }
-derive_more = { workspace = true, features = ['as_ref', 'constructor', 'debug', 'deref', 'display', 'from', 'from_str'] }
+derive_more = { workspace = true, features = ['as_ref', 'constructor', 'debug', 'deref', 'deref_mut', 'display', 'from', 'from_str'] }
 displaydoc = { workspace = true }
 futures = { workspace = true }
 governor = { workspace = true }
@@ -61,9 +61,11 @@ url = { workspace = true, features = ['serde'] }
 utoipa = { workspace = true }
 uuid = { workspace = true, features = ["serde", "v7"] }
 
+env_logger = { workspace = true, optional = true }
+log = "0.4"
 [features]
 default = []
-testing = ["dep:stubr"]
+testing = ["dep:stubr", "dep:env_logger"]
 
 [[test]]
 name = "default_target"

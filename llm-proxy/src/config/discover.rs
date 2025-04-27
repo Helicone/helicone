@@ -30,6 +30,18 @@ fn default_discover_decay() -> Duration {
     Duration::from_secs(120)
 }
 
+#[cfg(feature = "testing")]
+impl crate::tests::TestDefault for DiscoverConfig {
+    fn default() -> Self {
+        Self {
+            api_keys_source: ProviderKeysSource::Env,
+            discover_mode: DiscoverMode::Config,
+            providers: ProvidersConfig::default(),
+            discover_decay: default_discover_decay(),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
