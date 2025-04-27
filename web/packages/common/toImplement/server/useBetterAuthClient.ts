@@ -53,6 +53,9 @@ export async function betterAuthClientFromSSRContext(
   const userId = user.data?.id;
 
   const orgId = ctx.req?.cookies?.[ORG_ID_COOKIE_KEY] ?? "";
+  if (!orgId) {
+    throw new Error("No organization ID found");
+  }
 
   const org = await dbExecute<
     Database["public"]["Tables"]["organization"]["Row"] & {
