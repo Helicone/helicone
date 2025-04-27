@@ -485,21 +485,19 @@ fn process_schema_for_references(
                     }
 
                     // Process additional properties
-                    if let Some(additional_props) = &obj.additional_properties {
+                    if let Some(openapiv3::AdditionalProperties::Schema(
+                        schema_box_ref,
+                    )) = &obj.additional_properties
+                    {
                         // AdditionalProperties can be bool or
                         // Schema(Box<ReferenceOr<Schema>>)
-                        if let openapiv3::AdditionalProperties::Schema(
+                        // Dereference the Box first to get
+                        // ReferenceOr<Schema>, then use the standard helper
+                        extract_schema_references(
                             schema_box_ref,
-                        ) = additional_props
-                        {
-                            // Dereference the Box first to get
-                            // ReferenceOr<Schema>, then use the standard helper
-                            extract_schema_references(
-                                schema_box_ref,
-                                referenced_schemas,
-                                to_process,
-                            );
-                        }
+                            referenced_schemas,
+                            to_process,
+                        );
                     }
                 }
                 openapiv3::Type::Array(arr) => {

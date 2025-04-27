@@ -52,8 +52,6 @@ impl Dispatcher {
         app_state: AppState,
         provider: Provider,
     ) -> DispatcherService {
-        
-
         ServiceBuilder::new()
             .layer(ErrorHandlerLayer)
             // just to show how we will add dispatcher-specific middleware later
@@ -123,7 +121,7 @@ impl Dispatcher {
                 Some(url::Host::Domain(host)) => {
                     HeaderValue::from_str(host).unwrap()
                 }
-                None | _ => HeaderValue::from_str("").unwrap(),
+                _ => HeaderValue::from_str("").unwrap(),
             };
             r.insert(http::header::HOST, host_header);
             r.remove(http::header::AUTHORIZATION);

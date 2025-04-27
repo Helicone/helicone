@@ -4,10 +4,9 @@ use serde::{Deserialize, Serialize};
 use url::Url;
 
 use crate::types::{
-        model::{Model, Version},
-        provider::Provider,
-    };
-
+    model::{Model, Version},
+    provider::Provider,
+};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case")]

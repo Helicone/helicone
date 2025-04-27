@@ -104,6 +104,7 @@ impl std::fmt::Debug for InnerAppState {
 /// 2. Authn/Authz
 /// 3. Unauthenticated and authenticated rate limit layers
 /// 4. MetaRouter
+///
 /// -- Router specific MW, must not require Clone on inner Service --
 /// 5. Per User Rate Limit layer
 /// 6. Per Org Rate Limit layer
@@ -119,12 +120,14 @@ impl std::fmt::Debug for InnerAppState {
 /// 11. A/B testing between models and prompt versions
 /// 12. Fallbacks
 /// 13. ProviderBalancer
+///
 /// -- provider specific middleware --
 /// 14. Per provider rate limit layer
 /// 15. Mapper
 ///     - based on selected provider, map request body
 /// 16. ProviderRegionBalancer
-/// --- region specific middleware (none yet, just leaf service) --
+///
+/// -- region specific middleware (none yet, just leaf service) --
 /// 17. Dispatcher
 ///
 /// Ideally we could combine the rate limits into one layer
