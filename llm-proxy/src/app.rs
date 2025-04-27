@@ -199,13 +199,13 @@ impl App {
         // global middleware is applied here
         let service_stack = ServiceBuilder::new()
             .layer(CatchPanicLayer::custom(PanicResponder))
-            .set_x_request_id(MakeRequestId)
             .layer(
                 TraceLayer::new_for_http()
                     .make_span_with(DefaultMakeSpan::new().level(Level::INFO))
                     .on_body_chunk(())
                     .on_eos(()),
             )
+            .set_x_request_id(MakeRequestId)
             .propagate_x_request_id()
             .layer(NormalizePathLayer::trim_trailing_slash())
             .layer(ErrorHandlerLayer)

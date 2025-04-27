@@ -9,8 +9,8 @@ use url::Url;
 #[tokio::test]
 async fn default_target() {
     let config = Config::test_config();
-    let _logger_provider: opentelemetry_sdk::logs::LoggerProvider =
-        telemetry::init_telemetry(&config.telemetry).unwrap();
+    // let _logger_provider: opentelemetry_sdk::logs::LoggerProvider =
+    // telemetry::init_telemetry(&config.telemetry).unwrap();
     let mut harness = Harness::new(config).await;
     let request_body = axum_core::body::Body::from(
         serde_json::to_vec(&json!({
