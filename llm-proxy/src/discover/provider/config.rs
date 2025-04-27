@@ -56,7 +56,7 @@ impl ConfigDiscovery {
         for (provider, _provider_config) in
             app.0.config.discover.providers.iter()
         {
-            let key = Key::new(provider.clone());
+            let key = Key::new(*provider);
 
             let http_client = Client::builder()
                 .connect_timeout(CONNECTION_TIMEOUT)
@@ -65,7 +65,7 @@ impl ConfigDiscovery {
             let dispatcher = Dispatcher::new_with_middleware(
                 http_client,
                 app.clone(),
-                provider.clone(),
+                *provider,
             );
             service_map.insert(key.clone(), dispatcher);
         }

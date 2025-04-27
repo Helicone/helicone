@@ -80,7 +80,7 @@ pub struct InnerAppState {
 
 impl std::fmt::Debug for InnerAppState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let minio = if let Some(_) = &self.minio {
+        let minio = if self.minio.is_some() {
             "Some(Minio)"
         } else {
             "None"
@@ -209,7 +209,7 @@ impl App {
             .propagate_x_request_id()
             .layer(NormalizePathLayer::trim_trailing_slash())
             .layer(ErrorHandlerLayer)
-            .map_err(|e| crate::error::internal::InternalError::BufferError(e))
+            .map_err(crate::error::internal::InternalError::BufferError)
             // NOTE: not sure if there is perf impact from Auth layer coming
             // before buffer layer, but required due to Clone bound.
             .layer(AsyncRequireAuthorizationLayer::new(AuthService))

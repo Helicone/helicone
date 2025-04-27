@@ -52,7 +52,9 @@ impl Dispatcher {
         app_state: AppState,
         provider: Provider,
     ) -> DispatcherService {
-        let service_stack = ServiceBuilder::new()
+        
+
+        ServiceBuilder::new()
             .layer(ErrorHandlerLayer)
             // just to show how we will add dispatcher-specific middleware later
             // e.g. for model/provider specific rate limiting, we need to do
@@ -60,9 +62,7 @@ impl Dispatcher {
             .layer(crate::middleware::no_op::Layer::new(app_state.clone()))
             // other middleware: rate limiting, logging, etc, etc
             // will be added here as well
-            .service(Dispatcher::new(client, app_state, provider));
-
-        service_stack
+            .service(Dispatcher::new(client, app_state, provider))
     }
 }
 
@@ -94,7 +94,7 @@ impl Dispatcher {
             .extensions()
             .get::<Arc<RequestContext>>()
             .ok_or(InternalError::ExtensionNotFound("RequestContext"))?;
-        let og_provider = req_ctx.proxy_context.original_provider.clone();
+        let og_provider = req_ctx.proxy_context.original_provider;
         let target_provider = self.provider;
         let provider_api_key = req_ctx
             .proxy_context
@@ -198,7 +198,7 @@ impl Dispatcher {
             .body(req_body_bytes)
             .send()
             .await
-            .map_err(|e| InternalError::ReqwestError(e))?;
+            .map_err(InternalError::ReqwestError)?;
         let provider_request_id = response.headers_mut().remove("x-request-id");
         tracing::debug!(provider_req_id = ?provider_request_id, status = %response.status(), "received response");
 
@@ -220,7 +220,7 @@ fn convert_openai_to_anthropic(req_body_bytes: Bytes) -> Result<Bytes, Error> {
     .unwrap();
     let anthropic_req: anthropic_types::chat::ChatCompletionRequest =
         TryConvert::try_convert(openai_req)
-            .map_err(|e| InternalError::MapperError(e))?;
+            .map_err(InternalError::MapperError)?;
     let anthropic_req_bytes = serde_json::to_vec(&anthropic_req).unwrap();
     Ok(Bytes::from(anthropic_req_bytes))
 }

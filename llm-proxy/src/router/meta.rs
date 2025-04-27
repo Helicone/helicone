@@ -118,7 +118,7 @@ impl tower::Service<crate::types::request::Request> for MetaRouter {
     }
 
     fn call(&mut self, req: crate::types::request::Request) -> Self::Future {
-        let router_id = match self.extract_router_id(&req.uri().path()) {
+        let router_id = match self.extract_router_id(req.uri().path()) {
             Ok(id) => id,
             Err(e) => {
                 return Either::Left(ready(Ok(e.into_response())));
@@ -126,12 +126,12 @@ impl tower::Service<crate::types::request::Request> for MetaRouter {
         };
 
         if let Some(router) = self.inner.get_mut(&router_id) {
-            return Either::Right(router.call(req));
+            Either::Right(router.call(req))
         } else {
-            return Either::Left(ready(Ok(Error::InvalidRequest(
+            Either::Left(ready(Ok(Error::InvalidRequest(
                 InvalidRequestError::NotFound,
             )
-            .into_response())));
+            .into_response())))
         }
     }
 }
