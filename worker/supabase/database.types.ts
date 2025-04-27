@@ -33,6 +33,13 @@ export type Database = {
             foreignKeyName: "admins_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admins_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "users_view"
             referencedColumns: ["id"]
           },
@@ -1059,6 +1066,13 @@ export type Database = {
             foreignKeyName: "helicone_api_keys_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helicone_api_keys_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "users_view"
             referencedColumns: ["id"]
           },
@@ -1510,6 +1524,13 @@ export type Database = {
             foreignKeyName: "layout_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "layout_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "users_view"
             referencedColumns: ["id"]
           },
@@ -1577,6 +1598,53 @@ export type Database = {
           {
             foreignKeyName: "org_rate_limit_tracker_org_id_fkey"
             columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      org_rate_limits: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          id: string
+          name: string
+          organization_id: string
+          quota: number
+          segment: string
+          unit: string
+          updated_at: string
+          window_seconds: number
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          quota: number
+          segment: string
+          unit: string
+          updated_at?: string
+          window_seconds: number
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          quota?: number
+          segment?: string
+          unit?: string
+          updated_at?: string
+          window_seconds?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_rate_limits_organization_id_fkey"
+            columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organization"
             referencedColumns: ["id"]
@@ -1693,6 +1761,13 @@ export type Database = {
             foreignKeyName: "organization_owner_fkey"
             columns: ["owner"]
             isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_owner_fkey"
+            columns: ["owner"]
+            isOneToOne: false
             referencedRelation: "users_view"
             referencedColumns: ["id"]
           },
@@ -1760,6 +1835,13 @@ export type Database = {
           organization?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "organization_member_member_fkey"
+            columns: ["member"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "organization_member_member_fkey"
             columns: ["member"]
@@ -2094,6 +2176,13 @@ export type Database = {
             foreignKeyName: "properties_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "users_view"
             referencedColumns: ["id"]
           },
@@ -2141,6 +2230,27 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "provider_keys_key_id_fkey"
+            columns: ["key_id"]
+            isOneToOne: false
+            referencedRelation: "decrypted_key"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_keys_key_id_fkey"
+            columns: ["key_id"]
+            isOneToOne: false
+            referencedRelation: "key"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_keys_key_id_fkey"
+            columns: ["key_id"]
+            isOneToOne: false
+            referencedRelation: "valid_key"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "provider_keys_org_id_fkey"
             columns: ["org_id"]
             isOneToOne: false
@@ -2176,7 +2286,21 @@ export type Database = {
             foreignKeyName: "referrals_referred_user_id_fkey"
             columns: ["referred_user_id"]
             isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_referred_user_id_fkey"
+            columns: ["referred_user_id"]
+            isOneToOne: false
             referencedRelation: "users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_referrer_user_id_fkey"
+            columns: ["referrer_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
           {
@@ -2284,6 +2408,13 @@ export type Database = {
             foreignKeyName: "request_helicone_user_fkey"
             columns: ["helicone_user"]
             isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "request_helicone_user_fkey"
+            columns: ["helicone_user"]
+            isOneToOne: false
             referencedRelation: "users_view"
             referencedColumns: ["id"]
           },
@@ -2331,6 +2462,7 @@ export type Database = {
       }
       response: {
         Row: {
+          completion_audio_tokens: number | null
           completion_tokens: number | null
           created_at: string
           delay_ms: number | null
@@ -2338,6 +2470,7 @@ export type Database = {
           helicone_org_id: string | null
           id: string
           model: string | null
+          prompt_audio_tokens: number | null
           prompt_cache_read_tokens: number | null
           prompt_cache_write_tokens: number | null
           prompt_tokens: number | null
@@ -2346,6 +2479,7 @@ export type Database = {
           time_to_first_token: number | null
         }
         Insert: {
+          completion_audio_tokens?: number | null
           completion_tokens?: number | null
           created_at?: string
           delay_ms?: number | null
@@ -2353,6 +2487,7 @@ export type Database = {
           helicone_org_id?: string | null
           id?: string
           model?: string | null
+          prompt_audio_tokens?: number | null
           prompt_cache_read_tokens?: number | null
           prompt_cache_write_tokens?: number | null
           prompt_tokens?: number | null
@@ -2361,6 +2496,7 @@ export type Database = {
           time_to_first_token?: number | null
         }
         Update: {
+          completion_audio_tokens?: number | null
           completion_tokens?: number | null
           created_at?: string
           delay_ms?: number | null
@@ -2368,6 +2504,7 @@ export type Database = {
           helicone_org_id?: string | null
           id?: string
           model?: string | null
+          prompt_audio_tokens?: number | null
           prompt_cache_read_tokens?: number | null
           prompt_cache_write_tokens?: number | null
           prompt_tokens?: number | null
@@ -2503,6 +2640,27 @@ export type Database = {
           },
         ]
       }
+      system_config: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          key: string
+          value: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          key: string
+          value: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          key?: string
+          value?: string
+        }
+        Relationships: []
+      }
       user_api_keys: {
         Row: {
           api_key_hash: string
@@ -2526,6 +2684,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "user_api_keys_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "user_api_keys_user_id_fkey"
             columns: ["user_id"]
@@ -2590,6 +2755,13 @@ export type Database = {
           user?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "user_settings_user_fkey"
+            columns: ["user"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "user_settings_user_fkey"
             columns: ["user"]
@@ -2722,6 +2894,27 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "provider_keys_key_id_fkey"
+            columns: ["key_id"]
+            isOneToOne: false
+            referencedRelation: "key"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_keys_key_id_fkey"
+            columns: ["key_id"]
+            isOneToOne: false
+            referencedRelation: "decrypted_key"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_keys_key_id_fkey"
+            columns: ["key_id"]
+            isOneToOne: false
+            referencedRelation: "valid_key"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "provider_keys_org_id_fkey"
             columns: ["org_id"]
             isOneToOne: false
@@ -2806,6 +2999,104 @@ export type Database = {
         }
         Returns: string
       }
+      http: {
+        Args: {
+          request: Database["public"]["CompositeTypes"]["http_request"]
+        }
+        Returns: unknown
+      }
+      http_delete:
+        | {
+            Args: {
+              uri: string
+            }
+            Returns: unknown
+          }
+        | {
+            Args: {
+              uri: string
+              content: string
+              content_type: string
+            }
+            Returns: unknown
+          }
+      http_get:
+        | {
+            Args: {
+              uri: string
+            }
+            Returns: unknown
+          }
+        | {
+            Args: {
+              uri: string
+              data: Json
+            }
+            Returns: unknown
+          }
+      http_head: {
+        Args: {
+          uri: string
+        }
+        Returns: unknown
+      }
+      http_header: {
+        Args: {
+          field: string
+          value: string
+        }
+        Returns: Database["public"]["CompositeTypes"]["http_header"]
+      }
+      http_list_curlopt: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          curlopt: string
+          value: string
+        }[]
+      }
+      http_patch: {
+        Args: {
+          uri: string
+          content: string
+          content_type: string
+        }
+        Returns: unknown
+      }
+      http_post:
+        | {
+            Args: {
+              uri: string
+              content: string
+              content_type: string
+            }
+            Returns: unknown
+          }
+        | {
+            Args: {
+              uri: string
+              data: Json
+            }
+            Returns: unknown
+          }
+      http_put: {
+        Args: {
+          uri: string
+          content: string
+          content_type: string
+        }
+        Returns: unknown
+      }
+      http_reset_curlopt: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      http_set_curlopt: {
+        Args: {
+          curlopt: string
+          value: string
+        }
+        Returns: boolean
+      }
       insert_feedback_and_update_response: {
         Args: {
           response_id: string
@@ -2819,6 +3110,25 @@ export type Database = {
         }
         Returns: number
       }
+      urlencode:
+        | {
+            Args: {
+              data: Json
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              string: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              string: string
+            }
+            Returns: string
+          }
       verify_helicone_proxy_key: {
         Args: {
           api_key: string
@@ -2837,6 +3147,201 @@ export type Database = {
         | "INACTIVE"
         | "DECLINED"
         | "FAILED"
+    }
+    CompositeTypes: {
+      http_header: {
+        field: string
+        value: string
+      }
+      http_request: {
+        method: unknown
+        uri: string
+        headers: unknown
+        content_type: string
+        content: string
+      }
+      http_response: {
+        status: number
+        content_type: string
+        headers: unknown
+        content: string
+      }
+    }
+  }
+  storage: {
+    Tables: {
+      buckets: {
+        Row: {
+          allowed_mime_types: string[] | null
+          avif_autodetection: boolean | null
+          created_at: string | null
+          file_size_limit: number | null
+          id: string
+          name: string
+          owner: string | null
+          owner_id: string | null
+          public: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          allowed_mime_types?: string[] | null
+          avif_autodetection?: boolean | null
+          created_at?: string | null
+          file_size_limit?: number | null
+          id: string
+          name: string
+          owner?: string | null
+          owner_id?: string | null
+          public?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          allowed_mime_types?: string[] | null
+          avif_autodetection?: boolean | null
+          created_at?: string | null
+          file_size_limit?: number | null
+          id?: string
+          name?: string
+          owner?: string | null
+          owner_id?: string | null
+          public?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      migrations: {
+        Row: {
+          executed_at: string | null
+          hash: string
+          id: number
+          name: string
+        }
+        Insert: {
+          executed_at?: string | null
+          hash: string
+          id: number
+          name: string
+        }
+        Update: {
+          executed_at?: string | null
+          hash?: string
+          id?: number
+          name?: string
+        }
+        Relationships: []
+      }
+      objects: {
+        Row: {
+          bucket_id: string | null
+          created_at: string | null
+          id: string
+          last_accessed_at: string | null
+          metadata: Json | null
+          name: string | null
+          owner: string | null
+          owner_id: string | null
+          path_tokens: string[] | null
+          updated_at: string | null
+          version: string | null
+        }
+        Insert: {
+          bucket_id?: string | null
+          created_at?: string | null
+          id?: string
+          last_accessed_at?: string | null
+          metadata?: Json | null
+          name?: string | null
+          owner?: string | null
+          owner_id?: string | null
+          path_tokens?: string[] | null
+          updated_at?: string | null
+          version?: string | null
+        }
+        Update: {
+          bucket_id?: string | null
+          created_at?: string | null
+          id?: string
+          last_accessed_at?: string | null
+          metadata?: Json | null
+          name?: string | null
+          owner?: string | null
+          owner_id?: string | null
+          path_tokens?: string[] | null
+          updated_at?: string | null
+          version?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "objects_bucketId_fkey"
+            columns: ["bucket_id"]
+            isOneToOne: false
+            referencedRelation: "buckets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      can_insert_object: {
+        Args: {
+          bucketid: string
+          name: string
+          owner: string
+          metadata: Json
+        }
+        Returns: undefined
+      }
+      extension: {
+        Args: {
+          name: string
+        }
+        Returns: string
+      }
+      filename: {
+        Args: {
+          name: string
+        }
+        Returns: string
+      }
+      foldername: {
+        Args: {
+          name: string
+        }
+        Returns: unknown
+      }
+      get_size_by_bucket: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          size: number
+          bucket_id: string
+        }[]
+      }
+      search: {
+        Args: {
+          prefix: string
+          bucketname: string
+          limits?: number
+          levels?: number
+          offsets?: number
+          search?: string
+          sortcolumn?: string
+          sortorder?: string
+        }
+        Returns: {
+          name: string
+          id: string
+          updated_at: string
+          created_at: string
+          last_accessed_at: string
+          metadata: Json
+        }[]
+      }
+    }
+    Enums: {
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2924,20 +3429,5 @@ export type Enums<
   ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
     ? PublicSchema["Enums"][PublicEnumNameOrOptions]
-    : never
-
-export type CompositeTypes<
-  PublicCompositeTypeNameOrOptions extends
-    | keyof PublicSchema["CompositeTypes"]
-    | { schema: keyof Database },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database
-  }
-    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
-> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
-    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
 

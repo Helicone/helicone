@@ -302,10 +302,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
       request.heliconeMetadata.requestId,
   });
 
-  const searchPropertyFilters = shouldShowMockData
-    ? (_property: string, _search: string) =>
-        Promise.resolve({ data: null, error: "" })
-    : realSearchPropertyFilters;
   const requestWithoutStream = requests.find((r) => {
     return (
       r.raw?.request?.stream &&
