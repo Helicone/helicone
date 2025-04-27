@@ -1,4 +1,4 @@
-import { getSSRHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
+import { getSSRHeliconeAuthClient } from "@/packages/common/auth/client/getSSRHeliconeAuthClient";
 import { HeliconeAuthClient } from "@/packages/common/auth/client/HeliconeAuthClient";
 import { HeliconeUser } from "@/packages/common/auth/types";
 import {
