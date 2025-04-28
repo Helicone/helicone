@@ -250,7 +250,6 @@ const SessionNameSelection = ({
                     </span>
                   </p>
                   <p className="text-xs">
-                    Total cost $
                     <span
                       className={clsx(
                         "font-medium",
@@ -259,8 +258,9 @@ const SessionNameSelection = ({
                           : "text-slate-700 dark:text-slate-300"
                       )}
                     >
-                      {seshName.total_cost.toFixed(2)}
-                    </span>
+                      {seshName.session_count}
+                    </span>{" "}
+                    session{+seshName.session_count === 1 ? "" : "s"}
                   </p>
                 </Row>
               </Card>

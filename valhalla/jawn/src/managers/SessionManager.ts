@@ -31,7 +31,6 @@ export interface SessionResult {
 export interface SessionNameResult {
   name: string;
   created_at: string;
-  total_cost: number;
   last_used: string;
   first_used: string;
   session_count: number;
@@ -152,7 +151,6 @@ export class SessionManager {
           ? `- INTERVAL '${Math.abs(timezoneDifference)} minute'`
           : `+ INTERVAL '${timezoneDifference} minute'`
       } AS created_at,
-      ${clickhousePriceCalc("request_response_rmt")} AS total_cost,
       max(request_response_rmt.request_created_at )${
         timezoneDifference > 0
           ? `- INTERVAL '${Math.abs(timezoneDifference)} minute'`
@@ -169,6 +167,7 @@ export class SessionManager {
       has(properties, 'Helicone-Session-Id')
       AND
       ${builtFilter.filter}
+      and request_created_at > now() - interval '150 days'
     )
     GROUP BY properties['Helicone-Session-Name']
     LIMIT 50
@@ -182,7 +181,6 @@ export class SessionManager {
     return resultMap(results, (x) =>
       x.map((y) => ({
         ...y,
-        total_cost: +y.total_cost,
       }))
     );
   }
