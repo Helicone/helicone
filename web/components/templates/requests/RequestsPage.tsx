@@ -225,7 +225,8 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     },
     sortLeaf,
     isCached,
-    isLive
+    isLive,
+    rateLimited
   );
 
   /* -------------------------------------------------------------------------- */
@@ -373,10 +374,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     return getRootFilterNode();
   }, [searchParams, filterMap]);
 
-  const userFilterMapIndex = filterMap.findIndex(
-    (filter: any) => filter.label?.trim() === "Helicone-Rate-Limit-Status"
-  );
-
   // Update the page state and router query when the page changes
   const handlePageChange = useCallback(
     (newPage: number) => {
@@ -519,49 +516,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
       }
     }
   }, [router.query.page]);
-
-  // Apply rate limit filter when rateLimited is true
-  useEffect(() => {
-    if (rateLimited) {
-      if (userFilterMapIndex === -1) {
-        console.error("Rate limit filter not found");
-        return;
-      }
-
-      console.log("Applying rate limit filter");
-      setAdvancedFilters((prev) => {
-        const newFilter: UIFilterRow = {
-          filterMapIdx: userFilterMapIndex,
-          operatorIdx: 0,
-          value: "rate_limited",
-        };
-
-        if (isFilterRowNode(prev)) {
-          // Check if the rate limit filter already exists
-          const existingFilterIndex = prev.rows.findIndex(
-            (row) =>
-              isUIFilterRow(row) && row.filterMapIdx === userFilterMapIndex
-          );
-
-          if (existingFilterIndex !== -1) {
-            // Update existing filter
-            const updatedRows = [...prev.rows];
-            updatedRows[existingFilterIndex] = newFilter;
-            return { ...prev, rows: updatedRows };
-          } else {
-            // Add new filter
-            return { ...prev, rows: [...prev.rows, newFilter] };
-          }
-        } else {
-          // If prev is a single UIFilterRow, create a new UIFilterRowNode
-          return {
-            operator: "and",
-            rows: [prev, newFilter],
-          };
-        }
-      });
-    }
-  }, [userFilterMapIndex, rateLimited, setAdvancedFilters]);
 
   // Initialize advanced filters from URL on first load
   useEffect(() => {

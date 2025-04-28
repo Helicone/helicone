@@ -15,6 +15,7 @@ import Header from "@/components/shared/Header";
 import RateLimitRequestsView from "./RateLimitRequestsView";
 import RateLimitRulesView from "./RateLimitRulesView";
 import { type ChartConfig } from "@/components/ui/chart";
+import { useLocalStorage } from "../../../services/hooks/localStorage";
 
 const chartConfig = {
   count: {
@@ -34,7 +35,10 @@ const RateLimitPage = (props: {}) => {
     start: getTimeIntervalAgo("24h"),
     end: new Date(),
   });
-  const [currentTab, useCurrentTab] = useState<string>("requests");
+  const [currentTab, setCurrentTab] = useLocalStorage<string>(
+    "rateLimitPageActiveTab",
+    "requests"
+  );
   const org = useOrg();
   const { user } = useHeliconeAuthClient();
   const {
@@ -105,7 +109,7 @@ const RateLimitPage = (props: {}) => {
   return (
     <Tabs
       value={currentTab}
-      onValueChange={(value) => useCurrentTab(value)}
+      onValueChange={(value) => setCurrentTab(value)}
       className="w-full"
     >
       <div>
