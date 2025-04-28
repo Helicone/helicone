@@ -27,7 +27,6 @@ interface SessionNameSelectionProps {
   sessionNames: Array<{
     name: string;
     created_at: string;
-    total_cost: number;
     last_used: string;
     session_count: number;
   }>;
