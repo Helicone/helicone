@@ -24,10 +24,6 @@ import * as publicSwaggerDoc from "./tsoa-build/public/swagger.json";
 import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
 import { startConsumers } from "./workers/consumerInterface";
-import cookieParser from "cookie-parser";
-import { fromNodeHeaders, toNodeHandler } from "better-auth/node";
-import { betterAuthClient } from "./packages/common/toImplement/server/BetterAuthWrapper";
-import cors from "cors"; // Import the CORS middleware
 
 if (ENVIRONMENT === "production" || process.env.ENABLE_CRON_JOB === "true") {
   runMainLoops();
@@ -59,21 +55,6 @@ const allowedOriginsEnv = {
 const allowedOrigins = allowedOriginsEnv[ENVIRONMENT];
 
 const app = express();
-app.all("/api/auth/*", toNodeHandler(betterAuthClient));
-app.use(
-  cors({
-    origin: "http://localhost:3000", // Explicitly allow the frontend origin
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    credentials: true, // Allow credentials (needed for cookies)
-    allowedHeaders: [
-      "Content-Type",
-      "Authorization",
-      "Helicone-Authorization",
-      "x-vercel-set-bypass-cookie",
-      "x-vercel-protection-bypass",
-    ],
-  })
-);
 
 var rawBodySaver = function (req: any, res: any, buf: any, encoding: any) {
   if (buf && buf.length) {
@@ -169,7 +150,6 @@ unAuthenticatedRouter.use("/download/swagger.json", (req, res) => {
 //   unauthorizedCacheMiddleware("/v1/public/dataisbeautiful")
 // );
 
-v1APIRouter.use(cookieParser());
 v1APIRouter.use(authMiddleware);
 
 // Create and use the rate limiter
