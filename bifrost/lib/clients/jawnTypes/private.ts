@@ -955,6 +955,7 @@ Json: JsonObject;
       timestamp?: string;
       tool_call_id?: string;
       tool_calls?: components["schemas"]["FunctionCall"][];
+      mime_type?: string;
       content?: string;
       name?: string;
       instruction?: string;

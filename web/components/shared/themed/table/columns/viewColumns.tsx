@@ -102,7 +102,6 @@ export default function ViewColumns<T>(props: ViewColumnsProps<T>) {
                   <span className="font-bold">Back to preset</span> on the
                   bottom left of the right panel
                 </i>
-
                 <div className="overflow-y-auto h-[calc(100%-6rem)]">
                   <DragList items={activeColumns} setItems={setActiveColumns} />
                 </div>

@@ -30,6 +30,17 @@ import ThemedTable from "../../../../shared/themed/table/themedTable";
 import RequestDrawer from "../../../requests/RequestDrawer";
 import StatusBadge from "../../../requests/statusBadge";
 import { TraceSpan } from "../Span";
+import PerformanceTimeline from "../Timeline/performanceTimeLine";
+import { TimelineItem, TimelineSection } from "../lib/types";
+
+interface BarChartTrace {
+  name: string;
+  path: string;
+  start: number;
+  duration: number;
+  trace: Trace;
+  request_id: string;
+}
 
 // Define TableTreeNode to hold all necessary display properties
 interface TableTreeNode {
@@ -283,6 +294,94 @@ const TreeView: React.FC<TreeViewProps> = ({
     }
   };
 
+  const timelineData = (() => {
+    if (!session?.traces?.length) {
+      return {
+        timeRange: [0, 1] as [number, number],
+        items: [],
+        sections: [],
+      };
+    }
+
+    const startTimeMs = session.start_time_unix_timestamp_ms;
+    if (
+      startTimeMs === undefined ||
+      startTimeMs === null ||
+      isNaN(startTimeMs)
+    ) {
+      return {
+        timeRange: [0, 1] as [number, number],
+        items: [],
+        sections: [],
+      };
+    }
+
+    // Calculate spanData
+    const itemSpan = session.traces.map(
+      (trace: Trace, index: number): TimelineItem => {
+        const startMs = trace.start_unix_timestamp_ms;
+        const endMs = trace.end_unix_timestamp_ms;
+
+        if (
+          typeof startMs !== "number" ||
+          isNaN(startMs) ||
+          typeof endMs !== "number" ||
+          isNaN(endMs)
+        ) {
+          console.warn("Invalid trace timestamps found for trace:", trace);
+          return {
+            id: `Invalid ${index + 1}`,
+            section: trace.path ?? "invalid",
+            startTime: 0,
+            endTime: 0,
+            label: `Invalid ${index + 1}`,
+          };
+        }
+
+        const start = (startMs - startTimeMs) / 1000;
+        const duration = (endMs - startMs) / 1000;
+
+        let name: string | number = `${trace.path.split("/").pop() ?? "Trace"}`;
+        if (isOriginalRealtime) {
+          const role =
+            trace.request.heliconeMetadata?.customProperties
+              ?._helicone_realtime_step_role;
+          name = role ? `${role} ${index + 1}` : `Step ${index + 1}`;
+        }
+
+        return {
+          id: trace.request_id,
+          section: trace.path,
+          startTime: start,
+          endTime: start + duration,
+          label: name,
+        };
+      }
+    );
+
+    // Calculate timeRange
+    const lastItem = itemSpan[itemSpan.length - 1];
+    const maxEnd = lastItem?.endTime ?? 0;
+    const timeRange = [0, Math.max(1, maxEnd)] as [number, number];
+
+    // Calculate sections
+    const uniquePaths = Array.from(
+      new Set(session.traces.map((trace) => trace.path))
+    );
+    const sections = uniquePaths.map((path) => ({
+      id: path,
+      label: path.split("/").pop() || path,
+    })) as TimelineSection[];
+
+    return {
+      timeRange,
+      items: itemSpan,
+      sections,
+    };
+  })();
+
+  console.log(timelineData);
+
   const handleCollapseDrawer = () => {
     drawerRef.current?.collapse();
     setDrawerSize(0);
@@ -295,7 +394,11 @@ const TreeView: React.FC<TreeViewProps> = ({
   return (
     <Col className="h-full">
       <ResizablePanelGroup direction="horizontal" className="h-full w-full">
-        <ResizablePanel>
+        <ResizablePanel
+          defaultSize={40}
+          minSize={25}
+          className="relative bg-white dark:bg-black"
+        >
           <ResizablePanelGroup direction="vertical" className="h-full w-full">
             <ResizablePanel
               defaultSize={40}
@@ -309,6 +412,7 @@ const TreeView: React.FC<TreeViewProps> = ({
                   setSelectedRequestId,
                 ]}
               />
+              {/* <PerformanceTimeline data={timelineData} /> */}
             </ResizablePanel>
 
             <ResizableHandle />
