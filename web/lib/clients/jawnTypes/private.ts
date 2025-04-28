@@ -1384,8 +1384,8 @@ Json: JsonObject;
       /** Format: double */
       window_seconds: number;
       /** @enum {string} */
-      unit: "requests" | "cents";
-      segment: string;
+      unit: "request" | "cents";
+      segment?: string;
       created_at: string;
       updated_at: string;
     };
@@ -1408,8 +1408,8 @@ Json: JsonObject;
       /** Format: double */
       window_seconds: number;
       /** @enum {string} */
-      unit: "requests" | "cents";
-      segment: string;
+      unit: "request" | "cents";
+      segment?: string;
     };
     UpdateRateLimitRuleParams: {
       name?: string;
@@ -1418,7 +1418,7 @@ Json: JsonObject;
       /** Format: double */
       window_seconds?: number;
       /** @enum {string} */
-      unit?: "requests" | "cents";
+      unit?: "request" | "cents";
       segment?: string;
     };
     UpgradeToProRequest: {

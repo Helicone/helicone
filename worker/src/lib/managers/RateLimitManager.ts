@@ -1,7 +1,6 @@
 import { DBWrapper, RateLimitPolicy } from "../db/DBWrapper";
 import { RateLimitOptions } from "../clients/KVRateLimiterClient";
 import { Result, ok, err } from "../util/results";
-import { Env } from "../..";
 import { HeliconeProperties } from "../models/HeliconeProxyRequest";
 
 export class RateLimitManager {
@@ -9,7 +8,7 @@ export class RateLimitManager {
     dbWrapper: DBWrapper,
     userId: string | undefined,
     heliconeProperties: HeliconeProperties
-  ): Promise<Result<RateLimitOptions, string>> {
+  ): Promise<Result<RateLimitOptions | undefined, string>> {
     try {
       // 1. Fetch policies
       const allPoliciesResult = await dbWrapper.getAllRateLimitPolicies();
@@ -22,7 +21,7 @@ export class RateLimitManager {
       }
       const allPolicies = allPoliciesResult.data;
       if (!allPolicies || allPolicies.length === 0) {
-        return err("No rate limit policies found for the organization.");
+        return ok(undefined);
       }
 
       const requestPropertyKeys = Object.keys(heliconeProperties);
@@ -69,7 +68,7 @@ export class RateLimitManager {
       }
 
       // 5. No applicable policy found
-      return err("No applicable rate limit policy found after filtering.");
+      return ok(undefined);
     } catch (error) {
       return err(
         `Exception selecting rate limit policy: ${
@@ -86,7 +85,7 @@ export class RateLimitManager {
       quota: policy.quota,
       time_window: policy.windowSeconds,
       unit: policy.unit,
-      segment: policy.segment ?? "global",
+      segment: policy.segment ?? undefined,
     });
   }
 

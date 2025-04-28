@@ -19,7 +19,7 @@ export type RateLimitPolicy = {
   quota: number;
   unit: "request" | "cents";
   windowSeconds: number;
-  segment: string;
+  segment: string | undefined;
 };
 
 async function getHeliconeApiKeyRow(
@@ -265,7 +265,8 @@ export class DBWrapper {
         const { data, error } = await this.supabaseClient
           .from("org_rate_limits")
           .select("*")
-          .eq("organization_id", authParams.data.organizationId);
+          .eq("organization_id", authParams.data.organizationId)
+          .is("deleted_at", null);
 
         if (error !== null) {
           return err(error.message);
@@ -281,7 +282,7 @@ export class DBWrapper {
           quota: dbPolicy.quota,
           windowSeconds: dbPolicy.window_seconds,
           unit: dbPolicy.unit as "request" | "cents",
-          segment: dbPolicy.segment,
+          segment: dbPolicy.segment ?? undefined,
           name: dbPolicy.name,
         }));
 

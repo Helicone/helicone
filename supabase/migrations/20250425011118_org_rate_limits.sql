@@ -13,7 +13,7 @@ create table "public"."org_rate_limits" (
     "quota" numeric not null,
     "window_seconds" integer not null,
     "unit" text not null,
-    "segment" text not null,
+    "segment" text, -- null for global
     "deleted_at" timestamp with time zone
 );
 CREATE INDEX org_rate_limits_organization_id_idx ON public.org_rate_limits USING btree (organization_id)

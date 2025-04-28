@@ -123,10 +123,13 @@ export async function proxyForwarder(
             proxyRequest.heliconeProperties
           );
 
-          if (result.error) {
-            console.error(`RateLimitManager error: ${result.error}`);
-          } else {
+          if (!result.error && result.data) {
+            console.log(
+              `[RateLimit] Found options: ${JSON.stringify(result.data)}`
+            );
             rateLimitOptions = result.data;
+          } else if (result.error) {
+            console.error(`[RateLimit] Manager error: ${result.error}`);
           }
         }
 

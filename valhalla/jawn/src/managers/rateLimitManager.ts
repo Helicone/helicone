@@ -17,8 +17,8 @@ const RateLimitRuleSchema = z.object({
   window_seconds: z
     .number()
     .nonnegative("Window seconds must be a non-negative number"),
-  unit: z.enum(["requests", "cents"], {
-    errorMap: () => ({ message: "Unit must be 'requests' or 'cents'" }),
+  unit: z.enum(["request", "cents"], {
+    errorMap: () => ({ message: "Unit must be 'request' or 'cents'" }),
   }),
   segment: z
     .string()
@@ -33,7 +33,9 @@ const RateLimitRuleSchema = z.object({
         message:
           "Segment must be 'user', an empty string, or alphanumeric characters including underscores and hyphens",
       }
-    ),
+    )
+    .nullable()
+    .optional(),
 });
 
 // Schema for creating a new rule (all fields required from API params)
@@ -73,8 +75,8 @@ export class RateLimitManager extends BaseManager {
       name: dbRule.name,
       quota: quota,
       window_seconds: dbRule.window_seconds,
-      unit: dbRule.unit as "requests" | "cents",
-      segment: dbRule.segment,
+      unit: dbRule.unit as "request" | "cents",
+      segment: dbRule.segment ?? undefined,
       created_at: dbRule.created_at
         ? new Date(dbRule.created_at).toISOString()
         : "",

@@ -3807,7 +3807,7 @@
 					"unit": {
 						"type": "string",
 						"enum": [
-							"requests",
+							"request",
 							"cents"
 						]
 					},
@@ -3827,7 +3827,6 @@
 					"quota",
 					"window_seconds",
 					"unit",
-					"segment",
 					"created_at",
 					"updated_at"
 				],
@@ -3913,7 +3912,7 @@
 					"unit": {
 						"type": "string",
 						"enum": [
-							"requests",
+							"request",
 							"cents"
 						]
 					},
@@ -3925,8 +3924,7 @@
 					"name",
 					"quota",
 					"window_seconds",
-					"unit",
-					"segment"
+					"unit"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -3947,7 +3945,7 @@
 					"unit": {
 						"type": "string",
 						"enum": [
-							"requests",
+							"request",
 							"cents"
 						]
 					},

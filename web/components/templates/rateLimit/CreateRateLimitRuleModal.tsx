@@ -38,7 +38,7 @@ const CreateRateLimitRuleClientSchema = z.object({
   window_seconds: z
     .number()
     .nonnegative("Time Window must be a non-negative number."),
-  unit: z.enum(["requests", "cents"]),
+  unit: z.enum(["request", "cents"]),
   segment: z
     .string()
     .regex(/^[a-zA-Z0-9_-]*$/, {
@@ -51,7 +51,8 @@ const CreateRateLimitRuleClientSchema = z.object({
         message:
           "Segment must be 'user', empty (global), or a valid property key (alphanumeric/hyphen/underscore).",
       }
-    ),
+    )
+    .optional(),
 });
 
 interface CreateRateLimitRuleModalProps {
@@ -70,7 +71,7 @@ const CreateRateLimitRuleModal = ({
 
   const [name, setName] = useState("");
   const [quota, setQuota] = useState("");
-  const [unit, setUnit] = useState<"requests" | "cents">("requests");
+  const [unit, setUnit] = useState<"request" | "cents">("request");
   const [windowSeconds, setWindowSeconds] = useState("");
   const [segmentType, setSegmentType] = useState<
     "global" | "user" | "property"
@@ -107,7 +108,7 @@ const CreateRateLimitRuleModal = ({
       onOpenChange(false);
       setName("");
       setQuota("");
-      setUnit("requests");
+      setUnit("request");
       setWindowSeconds("");
       setSegmentType("global");
       setCustomPropertyKey("");
@@ -124,7 +125,7 @@ const CreateRateLimitRuleModal = ({
     const parsedQuota = parseInt(quota, 10);
     const parsedWindowSeconds = parseInt(windowSeconds, 10);
 
-    let segment = "";
+    let segment = undefined;
     if (segmentType === "user") {
       segment = "user";
     } else if (segmentType === "property") {
@@ -142,7 +143,7 @@ const CreateRateLimitRuleModal = ({
       quota: isNaN(parsedQuota) ? NaN : parsedQuota,
       window_seconds: isNaN(parsedWindowSeconds) ? NaN : parsedWindowSeconds,
       unit: unit,
-      segment: segment,
+      segment: segment ?? undefined,
     };
 
     const validationResult =
@@ -207,14 +208,14 @@ const CreateRateLimitRuleModal = ({
               />
               <Select
                 value={unit}
-                onValueChange={(value: "requests" | "cents") => setUnit(value)}
+                onValueChange={(value: "request" | "cents") => setUnit(value)}
                 disabled={mutation.isPending}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select unit" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="requests">Requests</SelectItem>
+                  <SelectItem value="request">Request</SelectItem>
                   <SelectItem value="cents">Cents</SelectItem>
                 </SelectContent>
               </Select>

@@ -1612,7 +1612,7 @@ export type Database = {
           name: string
           organization_id: string
           quota: number
-          segment: string
+          segment: string | null
           unit: string
           updated_at: string
           window_seconds: number
@@ -1624,7 +1624,7 @@ export type Database = {
           name: string
           organization_id: string
           quota: number
-          segment: string
+          segment?: string | null
           unit: string
           updated_at?: string
           window_seconds: number
@@ -1636,7 +1636,7 @@ export type Database = {
           name?: string
           organization_id?: string
           quota?: number
-          segment?: string
+          segment?: string | null
           unit?: string
           updated_at?: string
           window_seconds?: number
