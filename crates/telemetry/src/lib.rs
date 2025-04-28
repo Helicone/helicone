@@ -185,7 +185,7 @@ fn tracer_provider(
                 .with_max_attributes_per_span(16)
                 .build())
         }
-        Exporter::Otlp { .. } => {
+        Exporter::Otlp => {
             let exporter = SpanExporter::builder().with_tonic().build()?;
             let provider = SdkTracerProvider::builder()
                 .with_resource(resource)

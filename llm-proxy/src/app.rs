@@ -152,6 +152,7 @@ impl tower::Service<crate::types::request::Request> for App {
         self.service_stack.poll_ready(ctx)
     }
 
+    #[inline]
     #[tracing::instrument(name = "app", skip_all)]
     fn call(&mut self, req: crate::types::request::Request) -> Self::Future {
         self.service_stack.call(req)
@@ -310,6 +311,7 @@ impl tower::Service<http::Request<hyper::body::Incoming>> for HyperApp {
         self.service_stack.poll_ready(ctx)
     }
 
+    #[inline]
     fn call(
         &mut self,
         req: http::Request<hyper::body::Incoming>,

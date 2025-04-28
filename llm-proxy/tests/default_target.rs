@@ -11,7 +11,6 @@ use tower::Service;
 #[tokio::test]
 async fn default_target() {
     let config = Config::test_default();
-    let _logger = telemetry::init_telemetry(&config.telemetry).unwrap();
     let mut harness = Harness::new(config).await;
     let request_body = axum_core::body::Body::from(
         serde_json::to_vec(&json!({
