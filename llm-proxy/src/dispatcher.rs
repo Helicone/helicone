@@ -4,9 +4,8 @@ use std::{
     task::{Context, Poll},
 };
 
-use bytes::Bytes;
 use futures::future::BoxFuture;
-use http::{HeaderName, HeaderValue, uri::PathAndQuery};
+use http::{HeaderName, HeaderValue};
 use http_body_util::BodyExt;
 use reqwest::Client;
 use tower::{Service, ServiceBuilder};
@@ -16,11 +15,11 @@ use crate::{
     app::AppState,
     discover::Key,
     error::{api::Error, internal::InternalError},
-    middleware::mapper::TryConvert,
     types::{
         provider::Provider,
         request::{Request, RequestContext},
         response::Response,
+        router::ExtractedPathAndQuery,
     },
     utils::handle_error::{ErrorHandler, ErrorHandlerLayer},
 };
@@ -92,8 +91,8 @@ impl Dispatcher {
         let req_ctx = req
             .extensions()
             .get::<Arc<RequestContext>>()
-            .ok_or(InternalError::ExtensionNotFound("RequestContext"))?;
-        let og_provider = req_ctx.router_config.default_provider;
+            .ok_or(InternalError::ExtensionNotFound("RequestContext"))?
+            .clone();
         let target_provider = self.key.provider;
         let provider_api_key = req_ctx
             .proxy_context
@@ -156,22 +155,15 @@ impl Dispatcher {
         // *req.uri_mut() = target_uri;
         let method = req.method().clone();
         let headers = req.headers().clone();
-        let path_and_query = req
-            .uri()
-            .path_and_query()
-            .cloned()
-            .unwrap_or_else(|| PathAndQuery::from_static("/"));
+        let extracted_path_and_query = req
+            .extensions()
+            .get::<ExtractedPathAndQuery>()
+            .ok_or(Error::Internal(InternalError::ExtensionNotFound(
+                "ExtractedPathAndQuery",
+            )))?;
 
-        // Strip the /router prefix from path_and_query if it exists
-        let path_and_query_str = path_and_query.as_str();
-        let stripped_path = if path_and_query_str.starts_with("/router") {
-            let len = "/router".len();
-            &path_and_query_str[len..]
-        } else {
-            path_and_query_str
-        };
-
-        let target_url = base_url.join(stripped_path).unwrap();
+        let target_url =
+            base_url.join(extracted_path_and_query.as_str()).unwrap();
         tracing::debug!(method = %method, target_url = %target_url, "dispatching request");
         let req_body_bytes = req
             .into_body()
@@ -180,16 +172,6 @@ impl Dispatcher {
             .map_err(|e| InternalError::RequestBodyError(Box::new(e)))?
             .to_bytes();
 
-        let req_body_bytes = match (og_provider, target_provider) {
-            (Provider::OpenAI, Provider::OpenAI) => req_body_bytes,
-            (Provider::Anthropic, Provider::Anthropic) => req_body_bytes,
-            (Provider::OpenAI, Provider::Anthropic) => {
-                convert_openai_to_anthropic(req_body_bytes)?
-            }
-            _ => {
-                todo!("only anthropic and openai are supported at the moment")
-            }
-        };
         let mut response = self
             .client
             .request(method, target_url)
@@ -210,16 +192,4 @@ impl Dispatcher {
 
         Ok(response)
     }
-}
-
-fn convert_openai_to_anthropic(req_body_bytes: Bytes) -> Result<Bytes, Error> {
-    let openai_req = serde_json::from_slice::<
-        openai_types::chat::ChatCompletionRequest,
-    >(&req_body_bytes)
-    .unwrap();
-    let anthropic_req: anthropic_types::chat::ChatCompletionRequest =
-        TryConvert::try_convert(openai_req)
-            .map_err(InternalError::MapperError)?;
-    let anthropic_req_bytes = serde_json::to_vec(&anthropic_req).unwrap();
-    Ok(Bytes::from(anthropic_req_bytes))
 }

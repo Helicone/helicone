@@ -67,9 +67,9 @@ where
                     "RequestContext",
                 )))?
                 .clone();
-            let default_provider = req_ctx.router_config.default_provider;
+            let default_provider = req_ctx.router_config.providers.first();
 
-            if key.provider != default_provider {
+            if key.provider != *default_provider {
                 tracing::debug!(%default_provider, target_provider = %key.provider, "mapping request");
                 let req = map_request(key, req_ctx, req).await?;
                 inner.call(req).await.map_err(Into::into)
@@ -91,9 +91,9 @@ async fn map_request(
         .ok_or(Error::Internal(InternalError::ExtensionNotFound(
             "ExtractedPathAndQuery",
         )))?;
-    let default_provider = req_ctx.router_config.default_provider;
+    let default_provider = req_ctx.router_config.providers.first();
     let source_endpoint =
-        ApiEndpoint::new(extracted_path_and_query.clone(), default_provider)?;
+        ApiEndpoint::new(extracted_path_and_query.clone(), *default_provider)?;
     let target_endpoint = ApiEndpoint::mapped(source_endpoint, key.provider)?;
     let (parts, body) = req.into_parts();
     let body = body

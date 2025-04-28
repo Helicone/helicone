@@ -118,7 +118,7 @@ impl crate::tests::TestDefault for Config {
             telemetry,
             metrics_server: self::metrics::Config::test_default(),
             server: self::server::ServerConfig::test_default(),
-            database: self::database::Config::test_default(),
+            database: self::database::Config::default(),
             minio: self::minio::Config::test_default(),
             is_production: false,
             deployment_target: DeploymentTarget::SelfHosted,

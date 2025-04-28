@@ -69,6 +69,3 @@ testing = ["dep:stubr"]
 name = "default_target"
 required-features = ["testing"]
 
-[[test]]
-name = "mapper"
-required-features = ["testing"]

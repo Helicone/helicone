@@ -11,6 +11,7 @@ use super::{
 use crate::{
     discover::Key,
     types::{model::Model, provider::Provider, router::RouterId},
+    utils::not_empty::NonEmpty,
 };
 
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq, AsRef)]
@@ -28,7 +29,8 @@ impl Default for RouterConfigs {
 #[derive(Debug, Default, Clone, Deserialize, Serialize, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 pub struct RouterConfig {
-    pub default_provider: Provider,
+    /// First provider is the default provider
+    pub providers: NonEmpty<Provider>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub cache: Option<CacheControlConfig>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -149,7 +151,7 @@ mod tests {
         // Create test values for RateLimitConfig
         let default_provider = Provider::OpenAI;
         RouterConfig {
-            default_provider,
+            providers: NonEmpty::singleton(default_provider),
             cache: Some(cache),
             fallback: Some(fallback),
             balance: Some(balance),
