@@ -151,6 +151,7 @@ export class DBWrapper {
     this.secureCacheEnv = {
       REQUEST_CACHE_KEY: env.REQUEST_CACHE_KEY,
       SECURE_CACHE: env.SECURE_CACHE,
+      RATE_LIMIT_CACHE_KEY: env.RATE_LIMIT_CACHE_KEY,
     };
     this.atomicRateLimiter = env.RATE_LIMITER;
   }
@@ -240,6 +241,60 @@ export class DBWrapper {
 
     this.authParams = authParams.data;
     return authParams;
+  }
+
+  async getRateLimitOptions(): Promise<
+    Result<
+      {
+        name: string;
+        id: string;
+        quota: number;
+        unit: string;
+        windowSeconds: number;
+        segment: string;
+      },
+      string
+    >
+  > {
+    const authParams = await this.getAuthParams();
+    if (authParams.error !== null) {
+      return err(authParams.error);
+    }
+
+    return await getAndStoreInCache<
+      {
+        name: string;
+        id: string;
+        quota: number;
+        unit: string;
+        windowSeconds: number;
+        segment: string;
+      },
+      string
+    >(
+      `rateLimitOptions-${authParams.data.organizationId}`,
+      this.secureCacheEnv,
+      async () => {
+        const { data, error } = await this.supabaseClient
+          .from("org_rate_limits")
+          .select("*")
+          .eq("id", authParams.data.organizationId)
+          .single();
+
+        if (error !== null) {
+          return err(error.message);
+        }
+        return ok({
+          name: data?.name ?? "",
+          id: data?.id ?? "",
+          quota: data?.quota ?? 0,
+          unit: data?.unit ?? "requests",
+          windowSeconds: data?.window_seconds ?? 3600,
+          segment: data?.segment ?? "default",
+        });
+      },
+      120 // 2 minutes
+    );
   }
 
   async getOrganization(): Promise<

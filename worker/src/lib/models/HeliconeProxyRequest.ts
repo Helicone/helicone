@@ -14,6 +14,7 @@ import { MAPPERS } from "../../packages/llm-mapper/utils/getMappedContent";
 import { getMapperType } from "../../packages/llm-mapper/utils/getMapperType";
 import { RateLimitOptions } from "../clients/KVRateLimiterClient";
 import { RateLimitOptionsBuilder } from "../util/rateLimitOptions";
+import { DBWrapper } from "../db/DBWrapper";
 
 export type RetryOptions = {
   retries: number; // number of times to retry the request
@@ -142,6 +143,26 @@ export class HeliconeProxyRequestMapper {
       const queryParams = new URLSearchParams(targetUrl.search);
       // alt = sse is how Gemini determines if a request is a stream
       isStream = isStream || queryParams.get("alt") === "sse";
+    }
+
+    if (
+      this.request.heliconeHeaders.rateLimitPolicy &&
+      this.request.heliconeHeaders.heliconeAuthV2?._type === "bearer" &&
+      this.request.heliconeHeaders.heliconeAuthV2?.token.startsWith(
+        "sk-helicone-rl-"
+      )
+    ) {
+      // Rate limits are stored in the DB
+      const db = new DBWrapper(
+        this.env,
+        this.request.heliconeHeaders.heliconeAuthV2
+      );
+      const { data: rateLimitOptions, error: rateLimitOptionsError } =
+        await db.getRateLimitOptions();
+
+      if (rateLimitOptionsError !== null) {
+        this.heliconeErrors.push(rateLimitOptionsError);
+      }
     }
 
     return {

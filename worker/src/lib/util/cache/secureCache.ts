@@ -5,6 +5,7 @@ import { Result, ok } from "../results";
 export interface SecureCacheEnv {
   SECURE_CACHE: Env["SECURE_CACHE"];
   REQUEST_CACHE_KEY: Env["REQUEST_CACHE_KEY"];
+  RATE_LIMIT_CACHE_KEY: Env["RATE_LIMIT_CACHE_KEY"];
 }
 
 class InMemoryCache<T> {
@@ -105,18 +106,19 @@ export async function decrypt(
 async function storeInCache(
   key: string,
   value: string,
-  env: SecureCacheEnv
+  env: SecureCacheEnv,
+  expirationTtl?: number
 ): Promise<void> {
   const encrypted = await encrypt(value, env);
   const hashedKey = await hash(key);
+  const ttlToUse = expirationTtl ?? 600;
   try {
     await safePut({
       key: env.SECURE_CACHE,
       keyName: hashedKey,
       value: JSON.stringify(encrypted),
       options: {
-        // 10 minutes
-        expirationTtl: 600,
+        expirationTtl: ttlToUse,
       },
     });
   } catch (e) {
@@ -148,7 +150,8 @@ export async function getFromCache(
 export async function getAndStoreInCache<T, K>(
   key: string,
   env: SecureCacheEnv,
-  fn: () => Promise<Result<T, K>>
+  fn: () => Promise<Result<T, K>>,
+  expirationTtl?: number
 ): Promise<Result<T, K>> {
   const cached = await getFromCache(key, env);
   if (cached !== null) {
@@ -170,11 +173,12 @@ export async function getAndStoreInCache<T, K>(
     await storeInCache(
       key,
       JSON.stringify({ _helicone_cached_string: value.data }),
-      env
+      env,
+      expirationTtl
     );
     return value;
   } else {
-    await storeInCache(key, JSON.stringify(value.data), env);
+    await storeInCache(key, JSON.stringify(value.data), env, expirationTtl);
   }
   return value;
 }
