@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import type { TimelineItem, TimelineSection } from "../lib/types";
 import TimelineTable from "./timelineTable";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface PerformanceTimelineProps {
   data: {
@@ -19,23 +20,29 @@ export default function PerformanceTimeline({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const minimapRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [hoveredItem, setHoveredItem] = useState<TimelineItem | null>(null);
   const [hoveredSection, setHoveredSection] = useState<string | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showTooltip, setShowTooltip] = useState(false);
-  const [viewportRange, setViewportRange] = useState<[number, number]>(
-    data.timeRange
-  );
   const [isDraggingMinimap, setIsDraggingMinimap] = useState(false);
-  const [minimapHandlePosition, setMinimapHandlePosition] = useState({
-    x: 0,
-    y: 0,
-  });
+  const [showLeftScroll, setShowLeftScroll] = useState(false);
+  const [showRightScroll, setShowRightScroll] = useState(true);
+
+  // Use refs instead of state for values that don't need to trigger re-renders
+  const scrollPositionRef = useRef(0);
+  const canvasWidthRef = useRef(0);
+  const containerWidthRef = useRef(0);
+  const minimapHandlePositionRef = useRef({ x: 0, y: 0 });
 
   const { timeRange, items, sections } = data;
   const [minTime, maxTime] = timeRange;
   const timeSpan = maxTime - minTime;
-  const viewportTimeSpan = viewportRange[1] - viewportRange[0];
+
+  // Calculate the total width needed for the timeline
+  // We'll use a fixed width per millisecond to ensure consistent scaling
+  const pixelsPerMs = 0.5; // Adjust this value to change the zoom level
+  const totalTimelineWidth = timeSpan * pixelsPerMs;
 
   // Colors for different status types
   const colors = {
@@ -49,6 +56,20 @@ export default function PerformanceTimeline({
     quiz: "#f59e0b",
   };
 
+  // Update container dimensions on resize
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (containerRef.current) {
+        const width = containerRef.current.getBoundingClientRect().width;
+        containerWidthRef.current = width;
+      }
+    };
+
+    updateDimensions();
+    window.addEventListener("resize", updateDimensions);
+    return () => window.removeEventListener("resize", updateDimensions);
+  }, []);
+
   // Draw the timeline
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -57,23 +78,29 @@ export default function PerformanceTimeline({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const container = containerRef.current;
-    if (!container) return;
-
-    // Set canvas dimensions
+    // Set canvas dimensions - now using the calculated total width
     const dpr = window.devicePixelRatio || 1;
-    const rect = container.getBoundingClientRect();
-    canvas.width = rect.width * dpr;
-    canvas.height = 200 * dpr; // Fixed height for the timeline
-    canvas.style.width = `${rect.width}px`;
-    canvas.style.height = "200px";
+    const height = 200;
+    const width = totalTimelineWidth;
+
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+    canvasWidthRef.current = width;
+
     ctx.scale(dpr, dpr);
 
     // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, width, height);
 
     // Draw time markers
-    const timeMarkers = [200, 400, 600, 800, 1000, 2000, 2200, 2400];
+    const timeMarkers = [];
+    const markerInterval = 200; // ms between markers
+    for (let time = minTime; time <= maxTime; time += markerInterval) {
+      timeMarkers.push(time);
+    }
+
     const markerY = 20;
 
     ctx.font = "12px Inter, system-ui, sans-serif";
@@ -82,19 +109,16 @@ export default function PerformanceTimeline({
     ctx.lineWidth = 1;
 
     timeMarkers.forEach((time) => {
-      // Only draw markers that are within the viewport
-      if (time >= viewportRange[0] && time <= viewportRange[1]) {
-        const x = ((time - viewportRange[0]) / viewportTimeSpan) * rect.width;
+      const x = (time - minTime) * pixelsPerMs;
 
-        // Draw vertical grid line
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height / dpr);
-        ctx.stroke();
+      // Draw vertical grid line
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, height);
+      ctx.stroke();
 
-        // Draw time label
-        ctx.fillText(`${time} ms`, x + 5, markerY);
-      }
+      // Draw time label
+      ctx.fillText(`${time} ms`, x + 5, markerY);
     });
 
     // Draw timeline items
@@ -116,50 +140,37 @@ export default function PerformanceTimeline({
         colors[section.id as keyof typeof colors] || colors.default;
 
       sectionItems[section.id].forEach((item) => {
-        // Only draw items that are at least partially within the viewport
-        if (
-          item.endTime >= viewportRange[0] &&
-          item.startTime <= viewportRange[1]
-        ) {
-          const visibleStartTime = Math.max(item.startTime, viewportRange[0]);
-          const visibleEndTime = Math.min(item.endTime, viewportRange[1]);
+        const startX = (item.startTime - minTime) * pixelsPerMs;
+        const endX = (item.endTime - minTime) * pixelsPerMs;
+        const width = endX - startX;
 
-          const startX =
-            ((visibleStartTime - viewportRange[0]) / viewportTimeSpan) *
-            rect.width;
-          const endX =
-            ((visibleEndTime - viewportRange[0]) / viewportTimeSpan) *
-            rect.width;
-          const width = endX - startX;
+        // Draw bar
+        ctx.fillStyle =
+          hoveredItem?.id === item.id || hoveredSection === item.section
+            ? lightenColor(sectionColor, 0.2)
+            : sectionColor;
 
-          // Draw bar
-          ctx.fillStyle =
-            hoveredItem?.id === item.id || hoveredSection === item.section
-              ? lightenColor(sectionColor, 0.2)
-              : sectionColor;
+        ctx.beginPath();
+        ctx.roundRect(startX, currentY, width, barHeight, 4);
+        ctx.fill();
 
+        // Draw status indicator if applicable
+        if (item.status === "error") {
+          ctx.fillStyle = "#ef4444";
           ctx.beginPath();
-          ctx.roundRect(startX, currentY, width, barHeight, 4);
+          ctx.arc(endX - 8, currentY + barHeight / 2, 6, 0, Math.PI * 2);
           ctx.fill();
 
-          // Draw status indicator if applicable
-          if (item.status === "error") {
-            ctx.fillStyle = "#ef4444";
-            ctx.beginPath();
-            ctx.arc(endX - 8, currentY + barHeight / 2, 6, 0, Math.PI * 2);
-            ctx.fill();
+          ctx.fillStyle = "#ffffff";
+          ctx.font = "bold 10px Inter, system-ui, sans-serif";
+          ctx.fillText("×", endX - 10.5, currentY + barHeight / 2 + 3);
+        }
 
-            ctx.fillStyle = "#ffffff";
-            ctx.font = "bold 10px Inter, system-ui, sans-serif";
-            ctx.fillText("×", endX - 10.5, currentY + barHeight / 2 + 3);
-          }
-
-          // Draw label if there's enough space
-          if (width > 80 && item.label) {
-            ctx.fillStyle = "#ffffff";
-            ctx.font = "11px Inter, system-ui, sans-serif";
-            ctx.fillText(item.label, startX + 6, currentY + barHeight / 2 + 4);
-          }
+        // Draw label if there's enough space
+        if (width > 80 && item.label) {
+          ctx.fillStyle = "#ffffff";
+          ctx.font = "11px Inter, system-ui, sans-serif";
+          ctx.fillText(item.label, startX + 6, currentY + barHeight / 2 + 4);
         }
 
         currentY += barHeight + barSpacing;
@@ -177,12 +188,12 @@ export default function PerformanceTimeline({
     hoveredItem,
     hoveredSection,
     colors,
-    viewportRange,
-    viewportTimeSpan,
+    totalTimelineWidth,
+    pixelsPerMs,
   ]);
 
-  // Draw the minimap
-  useEffect(() => {
+  // Function to update the minimap - separated to avoid dependency issues
+  const updateMinimap = useCallback(() => {
     const minimap = minimapRef.current;
     if (!minimap) return;
 
@@ -247,45 +258,151 @@ export default function PerformanceTimeline({
       currentY += 2;
     });
 
-    // Draw viewport indicator
-    const viewportStartX = ((viewportRange[0] - minTime) / timeSpan) * 150;
-    const viewportEndX = ((viewportRange[1] - minTime) / timeSpan) * 150;
-    const viewportWidth = viewportEndX - viewportStartX;
+    // Calculate the visible portion based on scroll position
+    const scrollContainer = scrollContainerRef.current;
+    if (scrollContainer && canvasWidthRef.current > 0) {
+      const scrollLeft = scrollPositionRef.current;
+      const visibleWidth = containerWidthRef.current;
 
-    // Draw semi-transparent overlay for areas outside viewport
-    ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-    ctx.fillRect(0, 0, viewportStartX, 80);
-    ctx.fillRect(viewportEndX, 0, 150 - viewportEndX, 80);
+      const visibleStartRatio = scrollLeft / canvasWidthRef.current;
+      const visibleEndRatio = Math.min(
+        1,
+        (scrollLeft + visibleWidth) / canvasWidthRef.current
+      );
 
-    // Draw viewport borders
-    ctx.strokeStyle = "#3b82f6";
-    ctx.lineWidth = 2;
-    ctx.strokeRect(viewportStartX, 0, viewportWidth, 80);
+      const visibleStartX = visibleStartRatio * 150;
+      const visibleEndX = visibleEndRatio * 150;
+      const visibleWidth150 = visibleEndX - visibleStartX;
 
-    // Draw handle
-    ctx.fillStyle = "#ef4444";
-    ctx.beginPath();
-    ctx.arc(viewportEndX, 70, 8, 0, Math.PI * 2);
-    ctx.fill();
+      // Draw semi-transparent overlay for areas outside viewport
+      ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+      ctx.fillRect(0, 0, visibleStartX, 80);
+      ctx.fillRect(visibleEndX, 0, 150 - visibleEndX, 80);
 
-    // Draw handle border
-    ctx.strokeStyle = "#ffffff";
-    ctx.lineWidth = 2;
-    ctx.stroke();
+      // Draw viewport borders
+      ctx.strokeStyle = "#3b82f6";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(visibleStartX, 0, visibleWidth150, 80);
 
-    // IMPORTANT: We're calculating the handle position here but NOT updating state
-    // This prevents the infinite update loop
-  }, [minTime, maxTime, timeSpan, items, sections, colors, viewportRange]);
+      // Draw handle
+      ctx.fillStyle = "#ef4444";
+      ctx.beginPath();
+      ctx.arc(visibleEndX, 70, 8, 0, Math.PI * 2);
+      ctx.fill();
 
-  // Add a separate useEffect to update the minimapHandlePosition only when viewportRange changes
+      // Draw handle border
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Update handle position for dragging (using ref instead of state)
+      minimapHandlePositionRef.current = { x: visibleEndX, y: 70 };
+    }
+  }, [minTime, maxTime, timeSpan, items, sections, colors]);
+
+  // Draw the minimap initially
   useEffect(() => {
-    // Calculate handle position based on viewport
-    const viewportEndX = ((viewportRange[1] - minTime) / timeSpan) * 150;
-    setMinimapHandlePosition({ x: viewportEndX, y: 70 });
-  }, [viewportRange, minTime, timeSpan]);
+    updateMinimap();
+  }, [updateMinimap]);
 
-  // Update the mouse interaction useEffect to use the latest minimapHandlePosition
-  // without adding it to the dependency array:
+  // Handle scroll events
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
+
+    const handleScroll = () => {
+      const scrollLeft = scrollContainer.scrollLeft;
+      scrollPositionRef.current = scrollLeft;
+
+      // Update scroll indicators
+      setShowLeftScroll(scrollLeft > 0);
+      setShowRightScroll(
+        scrollLeft < canvasWidthRef.current - containerWidthRef.current - 10
+      );
+
+      // Update minimap without causing re-renders
+      updateMinimap();
+    };
+
+    scrollContainer.addEventListener("scroll", handleScroll);
+    return () => scrollContainer.removeEventListener("scroll", handleScroll);
+  }, [updateMinimap]);
+
+  // Handle mouse interactions with the main timeline
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const scrollContainer = scrollContainerRef.current;
+      if (!scrollContainer) return;
+
+      const scrollLeft = scrollContainer.scrollLeft;
+      const x = e.clientX - rect.left + scrollLeft;
+      const y = e.clientY - rect.top;
+
+      // Calculate time from x position
+      const time = minTime + x / pixelsPerMs;
+
+      // Check if mouse is over any item
+      const barHeight = 16;
+      const barSpacing = 8;
+      let currentY = 50;
+      let foundItem = null;
+      let foundSection = null;
+
+      // Check each section
+      sections.forEach((section) => {
+        const sectionItems = items.filter(
+          (item) => item.section === section.id
+        );
+
+        sectionItems.forEach((item) => {
+          const startX = (item.startTime - minTime) * pixelsPerMs;
+          const endX = (item.endTime - minTime) * pixelsPerMs;
+
+          if (
+            x >= startX &&
+            x <= endX &&
+            y >= currentY &&
+            y <= currentY + barHeight
+          ) {
+            foundItem = item;
+            foundSection = section.id;
+            setTooltipPosition({
+              x: e.clientX,
+              y: e.clientY,
+            });
+          }
+
+          currentY += barHeight + barSpacing;
+        });
+
+        currentY += 10; // Extra spacing between sections
+      });
+
+      setHoveredItem(foundItem);
+      setHoveredSection(foundSection);
+      setShowTooltip(!!foundItem);
+    };
+
+    const handleMouseLeave = () => {
+      setHoveredItem(null);
+      setHoveredSection(null);
+      setShowTooltip(false);
+    };
+
+    canvas.addEventListener("mousemove", handleMouseMove);
+    canvas.addEventListener("mouseleave", handleMouseLeave);
+
+    return () => {
+      canvas.removeEventListener("mousemove", handleMouseMove);
+      canvas.removeEventListener("mouseleave", handleMouseLeave);
+    };
+  }, [minTime, items, sections, pixelsPerMs]);
+
+  // Handle mouse interactions with the minimap
   useEffect(() => {
     const minimap = minimapRef.current;
     if (!minimap) return;
@@ -295,13 +412,10 @@ export default function PerformanceTimeline({
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
 
-      // Get the current handle position (don't use state directly to avoid dependency)
-      const handleX = ((viewportRange[1] - minTime) / timeSpan) * 150;
-      const handleY = 70;
-
       // Check if clicking on the handle
+      const handlePos = minimapHandlePositionRef.current;
       const distance = Math.sqrt(
-        Math.pow(x - handleX, 2) + Math.pow(y - handleY, 2)
+        Math.pow(x - handlePos.x, 2) + Math.pow(y - handlePos.y, 2)
       );
 
       if (distance <= 12) {
@@ -309,15 +423,17 @@ export default function PerformanceTimeline({
       } else {
         // Check if clicking on the minimap area
         if (x >= 0 && x <= 150 && y >= 0 && y <= 80) {
-          // Calculate new viewport center
-          const clickedTime = minTime + (x / 150) * timeSpan;
-          const halfViewportSpan = viewportTimeSpan / 2;
+          // Calculate the position in the timeline
+          const clickedRatio = x / 150;
+          const scrollTarget = clickedRatio * canvasWidthRef.current;
 
-          // Set new viewport range centered on click position
-          setViewportRange([
-            Math.max(minTime, clickedTime - halfViewportSpan),
-            Math.min(maxTime, clickedTime + halfViewportSpan),
-          ]);
+          // Scroll to that position
+          if (scrollContainerRef.current) {
+            scrollContainerRef.current.scrollTo({
+              left: scrollTarget - containerWidthRef.current / 2,
+              behavior: "smooth",
+            });
+          }
         }
       }
     };
@@ -327,27 +443,14 @@ export default function PerformanceTimeline({
         const rect = minimap.getBoundingClientRect();
         const x = Math.max(0, Math.min(150, e.clientX - rect.left));
 
-        // Calculate new time based on drag position
-        const newTime = minTime + (x / 150) * timeSpan;
+        // Calculate the position in the timeline
+        const dragRatio = x / 150;
+        const scrollTarget = dragRatio * canvasWidthRef.current;
 
-        // Calculate how much to move the viewport
-        const currentViewportWidth = viewportRange[1] - viewportRange[0];
-
-        // Set new viewport range
-        const newStart = viewportRange[0];
-        let newEnd = newTime;
-
-        // Ensure viewport width stays consistent
-        if (newEnd < newStart + currentViewportWidth * 0.2) {
-          newEnd = newStart + currentViewportWidth * 0.2;
+        // Scroll to that position
+        if (scrollContainerRef.current) {
+          scrollContainerRef.current.scrollLeft = scrollTarget;
         }
-
-        // Ensure we don't go beyond the max time
-        if (newEnd > maxTime) {
-          newEnd = maxTime;
-        }
-
-        setViewportRange([newStart, newEnd]);
       }
     };
 
@@ -364,14 +467,26 @@ export default function PerformanceTimeline({
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [
-    isDraggingMinimap,
-    minTime,
-    maxTime,
-    timeSpan,
-    viewportRange,
-    viewportTimeSpan,
-  ]);
+  }, [isDraggingMinimap]);
+
+  // Handle scroll button clicks
+  const handleScrollLeft = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({
+        left: -containerWidthRef.current / 2,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const handleScrollRight = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({
+        left: containerWidthRef.current / 2,
+        behavior: "smooth",
+      });
+    }
+  };
 
   // Helper function to lighten a color
   function lightenColor(color: string, amount: number): string {
@@ -397,7 +512,33 @@ export default function PerformanceTimeline({
         ref={containerRef}
         className="relative border border-gray-200 rounded-lg overflow-hidden bg-white"
       >
-        <canvas ref={canvasRef} className="w-full cursor-pointer" />
+        {/* Scroll container */}
+        <div
+          ref={scrollContainerRef}
+          className="overflow-x-auto w-full scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
+          style={{ height: "200px" }}
+        >
+          <canvas ref={canvasRef} className="cursor-pointer" />
+        </div>
+
+        {/* Scroll indicators */}
+        {showLeftScroll && (
+          <button
+            className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-1 shadow-md z-10 opacity-80 hover:opacity-100"
+            onClick={handleScrollLeft}
+          >
+            <ChevronLeft size={20} />
+          </button>
+        )}
+
+        {showRightScroll && (
+          <button
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-1 shadow-md z-10 opacity-80 hover:opacity-100"
+            onClick={handleScrollRight}
+          >
+            <ChevronRight size={20} />
+          </button>
+        )}
 
         {/* Minimap in bottom right corner */}
         <div className="absolute bottom-4 right-4 z-10">

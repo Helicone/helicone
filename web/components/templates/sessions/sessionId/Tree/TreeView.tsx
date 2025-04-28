@@ -405,14 +405,14 @@ const TreeView: React.FC<TreeViewProps> = ({
               minSize={25}
               className="relative bg-white dark:bg-black"
             >
-              <TraceSpan
+              {/* <TraceSpan
                 session={session}
                 selectedRequestIdDispatch={[
                   selectedRequestId,
                   setSelectedRequestId,
                 ]}
-              />
-              {/* <PerformanceTimeline data={timelineData} /> */}
+              /> */}
+              <PerformanceTimeline data={timelineData} />
             </ResizablePanel>
 
             <ResizableHandle />
