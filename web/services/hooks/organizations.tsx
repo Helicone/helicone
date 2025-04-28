@@ -94,7 +94,7 @@ const useGetOrgs = () => {
     {},
     {
       refetchOnWindowFocus: false,
-      // refetchInterval: 10_000, // <-- Temporarily comment out
+      refetchInterval: 10_000,
       refetchIntervalInBackground: true,
       retry: (failureCount, error) => {
         return failureCount < 3;
