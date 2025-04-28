@@ -541,12 +541,12 @@ export const OnboardingProvider = ({
   };
 
   useEffect(() => {
-    window.addEventListener("scroll", updatePointerPosition);
-    window.addEventListener("resize", updatePointerPosition);
-    return () => {
-      window.removeEventListener("scroll", updatePointerPosition);
-      window.removeEventListener("resize", updatePointerPosition);
-    };
+    // window.addEventListener("scroll", updatePointerPosition);
+    // window.addEventListener("resize", updatePointerPosition);
+    // return () => {
+    //   window.removeEventListener("scroll", updatePointerPosition);
+    //   window.removeEventListener("resize", updatePointerPosition);
+    // };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStep, isOnboardingVisible]);
 

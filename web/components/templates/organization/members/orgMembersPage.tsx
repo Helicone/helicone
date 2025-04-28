@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 import { useState } from "react";
 import { Database } from "../../../../db/database.types";
-import { useGetOrgMembers } from "../../../../services/hooks/organizations";
+import { useGetOrgMembers } from "@/services/hooks/useGetOrgMembers";
 import { useOrg } from "../../../layout/org/organizationContext";
 import AddMemberModal from "../addMemberModal";
 import OrgMemberItem from "../orgMemberItem";

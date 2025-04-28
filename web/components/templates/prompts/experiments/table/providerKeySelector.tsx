@@ -24,7 +24,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useCallback, useState } from "react";
 import { Result } from "../../../../../packages/common/result";
-import { useGetOrgMembers } from "../../../../../services/hooks/organizations";
+import { useGetOrgMembers } from "@/services/hooks/useGetOrgMembers";
 import { DecryptedProviderKey } from "../../../../../services/lib/keys";
 import { useOrg } from "../../../../layout/org/organizationContext";
 import { clsx } from "../../../../shared/clsx";

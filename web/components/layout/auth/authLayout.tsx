@@ -78,6 +78,9 @@ const AuthLayout = (props: AuthLayoutProps) => {
 
   return (
     <MetaData title={currentPage}>
+      <div className="flex flex-col gap-2 w-full items-center justify-center">
+        <div>lkdfj{JSON.stringify(orgContext?.currentOrg)}</div>
+      </div>
       <div>
         <DemoModal />
 
@@ -112,7 +115,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
           </div>
         </Row>
       </div>
-
       <UpgradeProModal open={open} setOpen={setOpen} />
       {/* <AcceptTermsModal /> */}
     </MetaData>

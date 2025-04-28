@@ -1,19 +1,17 @@
+import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
+import { $JAWN_API } from "@/lib/clients/jawn";
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 import {
   EyeIcon,
   EyeSlashIcon,
   PencilIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
-import { clsx } from "../clsx";
 import { useState } from "react";
-import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
-import useNotification from "../notification/useNotification";
-import {
-  useGetOrgMembers,
-  useGetOrgOwner,
-} from "../../../services/hooks/organizations";
+import { useGetOrgMembers } from "@/services/hooks/useGetOrgMembers";
 import { useOrg } from "../../layout/org/organizationContext";
-import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
+import { clsx } from "../clsx";
+import useNotification from "../notification/useNotification";
 
 export interface ThemedTableProps {
   columns: {
@@ -46,8 +44,15 @@ export const SecretInput = (props: {
     org?.currentOrg?.id || ""
   );
 
-  const { data: orgOwner, isLoading: isOrgOwnerLoading } = useGetOrgOwner(
-    org?.currentOrg?.id || ""
+  const { data: orgOwner, isLoading: isOrgOwnerLoading } = $JAWN_API.useQuery(
+    "get",
+    "/v1/organization/{organizationId}/owner",
+    {
+      params: { path: { organizationId: org?.currentOrg?.id || "" } },
+    },
+    {
+      refetchOnWindowFocus: false,
+    }
   );
 
   const isOwner = org?.currentOrg?.owner === user?.id;

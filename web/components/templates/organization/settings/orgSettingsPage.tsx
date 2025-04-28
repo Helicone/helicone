@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useUpdateOrgMutation } from "@/services/hooks/organizations";
 import { useEffect, useState } from "react";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
 import { Database } from "../../../../db/database.types";
@@ -14,10 +13,73 @@ import { Separator } from "@/components/ui/separator";
 import { CopyIcon } from "lucide-react";
 import useNotification from "@/components/shared/notification/useNotification";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
+import { useMutation } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { getJawnClient } from "@/lib/clients/jawn";
 interface OrgSettingsPageProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
   variant?: "organization" | "reseller";
 }
+
+const useUpdateOrgMutation = () => {
+  const queryClient = useQueryClient();
+  const { user } = useHeliconeAuthClient();
+  const { setNotification } = useNotification();
+  return useMutation({
+    mutationFn: async ({
+      orgId,
+      name,
+      color,
+      icon,
+      variant,
+      orgProviderKey,
+      limits,
+      resellerId,
+      organizationType,
+    }: {
+      orgId: string;
+      name: string;
+      color: string;
+      icon: string;
+      variant: string;
+      orgProviderKey?: string;
+      limits?: any;
+      resellerId?: string;
+      organizationType?: string;
+    }) => {
+      const jawn = getJawnClient(orgId);
+      const { data, error } = await jawn.POST(
+        "/v1/organization/{organizationId}/update",
+        {
+          params: { path: { organizationId: orgId } },
+          body: {
+            name,
+            color,
+            icon,
+            variant,
+            ...(variant === "reseller" && {
+              org_provider_key: orgProviderKey,
+              limits,
+              reseller_id: resellerId,
+              organization_type: organizationType,
+            }),
+          },
+        }
+      );
+    },
+    onSuccess: () => {
+      setNotification("Organization updated", "success");
+      queryClient.invalidateQueries({
+        queryKey: ["Organizations", user?.id ?? ""],
+        refetchType: "all",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["OrganizationsId"],
+        refetchType: "all",
+      });
+    },
+  });
+};
 
 const OrgSettingsPage = (props: OrgSettingsPageProps) => {
   const { org, variant = "organization" } = props;

@@ -97,13 +97,11 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
 
   return (
     <>
-      <PHProvider>
-        <SupabaseProvider>
-          <QueryClientProvider client={queryClient}>
-            <NotificationProvider>
-              <DndProvider backend={HTML5Backend}>
-                <OrgContextProvider>
-                  <FilterProvider>
+      <SupabaseProvider>
+        <QueryClientProvider client={queryClient}>
+          <OrgContextProvider>
+            fdkj
+            {/* <FilterProvider>
                     <ThemeProvider attribute="class" defaultTheme="light">
                       <TooltipProvider>
                         <div className={inter.className}>
@@ -112,13 +110,11 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
                       </TooltipProvider>
                     </ThemeProvider>
                   </FilterProvider>
-                  <Notification />
-                </OrgContextProvider>
-              </DndProvider>
-            </NotificationProvider>
-          </QueryClientProvider>
-        </SupabaseProvider>
-      </PHProvider>
+                  <Notification /> */}
+          </OrgContextProvider>
+        </QueryClientProvider>
+      </SupabaseProvider>
+
       {trackingEnabled && <Analytics />}
       {trackingEnabled && (
         <Script

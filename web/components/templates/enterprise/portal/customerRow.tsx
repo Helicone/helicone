@@ -4,7 +4,7 @@ import { AreaChart } from "@tremor/react";
 import { getUSDateFromString } from "../../../shared/utils/utils";
 import { Fragment, useState } from "react";
 import { clsx } from "../../../shared/clsx";
-import { useGetOrgMembers } from "../../../../services/hooks/organizations";
+import { useGetOrgMembers } from "@/services/hooks/useGetOrgMembers";
 import { formatISO } from "date-fns";
 import { useRequestsOverTime } from "../../organization/plan/renderOrgPlan";
 import { useOrg } from "../../../layout/org/organizationContext";

@@ -4,6 +4,11 @@ import { OrgContextValue } from "./OrgContextValue";
 
 const OrgContext = createContext<OrgContextValue | null>(null);
 
+// const useOrgsContextManager2 = () => {
+//   console.log("useOrgsContextManager2");
+//   return "hello";
+// };
+
 export const OrgContextProvider = ({ children }: { children: ReactNode }) => {
   const orgContextValue = useOrgsContextManager();
   return (

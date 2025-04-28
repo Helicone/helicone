@@ -135,15 +135,15 @@ const DesktopSidebar = ({
       `${sidebarWidth}px`
     );
 
-    // Add event listeners
-    window.addEventListener("resize", calculateAvailableSpace);
-    window.addEventListener("keydown", handleKeyDown);
+    // // Add event listeners
+    // window.addEventListener("resize", calculateAvailableSpace);
+    // window.addEventListener("keydown", handleKeyDown);
 
-    // Remove event listeners on cleanup
-    return () => {
-      window.removeEventListener("resize", calculateAvailableSpace);
-      window.removeEventListener("keydown", handleKeyDown);
-    };
+    // // Remove event listeners on cleanup
+    // return () => {
+    //   window.removeEventListener("resize", calculateAvailableSpace);
+    //   window.removeEventListener("keydown", handleKeyDown);
+    // };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isCollapsed, expandedItems, setIsCollapsed, setTheme, theme]);
 

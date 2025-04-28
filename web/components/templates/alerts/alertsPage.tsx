@@ -7,7 +7,7 @@ import ThemedTable from "../../shared/themed/themedTable";
 import { Database } from "../../../db/database.types";
 import { getUSDate } from "../../shared/utils/utils";
 import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
-import { useGetOrgSlackChannels } from "@/services/hooks/organizations";
+import { useGetOrgSlackChannels } from "@/services/hooks/slack";
 import { alertTimeWindows } from "./constant";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";

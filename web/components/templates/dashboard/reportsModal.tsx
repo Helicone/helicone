@@ -4,11 +4,9 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Switch } from "@/components/ui/switch";
 import { MultiSelect, MultiSelectItem } from "@tremor/react";
 import { useOrg } from "@/components/layout/org/organizationContext";
-import {
-  useGetOrgMembers,
-  useGetOrgSlackChannels,
-  useGetOrgSlackIntegration,
-} from "@/services/hooks/organizations";
+import { useGetOrgMembers } from "@/services/hooks/useGetOrgMembers";
+import { useGetOrgSlackIntegration } from "@/services/hooks/slack";
+import { useGetOrgSlackChannels } from "@/services/hooks/slack";
 import { Button } from "@/components/ui/button";
 import { getHeliconeCookie } from "@/lib/cookies";
 import useNotification from "@/components/shared/notification/useNotification";

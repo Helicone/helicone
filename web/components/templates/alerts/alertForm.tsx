@@ -1,10 +1,8 @@
 import { FormEvent, useMemo, useState } from "react";
 import { useOrg } from "../../layout/org/organizationContext";
-import {
-  useGetOrgMembers,
-  useGetOrgSlackChannels,
-  useGetOrgSlackIntegration,
-} from "../../../services/hooks/organizations";
+import { useGetOrgMembers } from "@/services/hooks/useGetOrgMembers";
+import { useGetOrgSlackIntegration } from "@/services/hooks/slack";
+import { useGetOrgSlackChannels } from "@/services/hooks/slack";
 import useNotification from "../../shared/notification/useNotification";
 import {
   MultiSelect,

@@ -1,28 +1,26 @@
 import {
-  useGetOrg,
-  useGetOrgMembers,
-} from "../../../../../services/hooks/organizations";
-import { OrgLimits } from "../../../organization/createOrgForm";
-import { getUSDateFromString } from "../../../../shared/utils/utils";
-import { clsx } from "../../../../shared/clsx";
-import OrgMembersPage from "../../../organization/members/orgMembersPage";
-import { AreaChart } from "@tremor/react";
-import { useState } from "react";
-import LoadingAnimation from "../../../../shared/loadingAnimation";
-import ProviderKeyList from "./providerKeyList";
-import { useOrg } from "../../../../layout/org/organizationContext";
-import { useRouter } from "next/router";
-import { DeleteOrgModal } from "../../../organization/deleteOrgModal";
-import EditCustomerOrgModal from "../editCustomerOrgModal";
-import HcBreadcrumb from "../../../../ui/hcBreadcrumb";
-import { formatISO } from "date-fns";
-import { useRequestsOverTime } from "../../../organization/plan/renderOrgPlan";
-import StyledAreaChart from "../../../dashboard/styledAreaChart";
-import {
   ORGANIZATION_COLORS,
   ORGANIZATION_ICONS,
 } from "@/components/templates/organization/orgConstants";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { $JAWN_API } from "@/lib/clients/jawn";
+import { AreaChart } from "@tremor/react";
+import { formatISO } from "date-fns";
+import { useRouter } from "next/router";
+import { useState } from "react";
+import { useGetOrgMembers } from "@/services/hooks/useGetOrgMembers";
+import { useOrg } from "../../../../layout/org/organizationContext";
+import { clsx } from "../../../../shared/clsx";
+import LoadingAnimation from "../../../../shared/loadingAnimation";
+import { getUSDateFromString } from "../../../../shared/utils/utils";
+import HcBreadcrumb from "../../../../ui/hcBreadcrumb";
+import StyledAreaChart from "../../../dashboard/styledAreaChart";
+import { OrgLimits } from "../../../organization/createOrgForm";
+import { DeleteOrgModal } from "../../../organization/deleteOrgModal";
+import OrgMembersPage from "../../../organization/members/orgMembersPage";
+import { useRequestsOverTime } from "../../../organization/plan/renderOrgPlan";
+import EditCustomerOrgModal from "../editCustomerOrgModal";
+import ProviderKeyList from "./providerKeyList";
 
 interface PortalIdPageProps {
   orgId: string | null;
@@ -31,7 +29,21 @@ interface PortalIdPageProps {
 const PortalIdPage = (props: PortalIdPageProps) => {
   const { orgId } = props;
 
-  const { data: orgData, isLoading, refetch } = useGetOrg(orgId || "");
+  const {
+    data: orgData,
+    isLoading,
+    refetch,
+  } = $JAWN_API.useQuery(
+    "get",
+    `/v1/organization/{organizationId}`,
+    {
+      params: { path: { organizationId: orgId } },
+    },
+    {
+      refetchOnWindowFocus: false,
+      retry: true,
+    }
+  );
   const org = orgData?.data;
   const {
     data: members,

@@ -4,11 +4,9 @@ import { Switch } from "@/components/ui/switch";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { getHeliconeCookie } from "@/lib/cookies";
 import { useGetReport } from "@/services/hooks/dashboard";
-import {
-  useGetOrgMembers,
-  useGetOrgSlackChannels,
-  useGetOrgSlackIntegration,
-} from "@/services/hooks/organizations";
+import { useGetOrgMembers } from "@/services/hooks/useGetOrgMembers";
+import { useGetOrgSlackIntegration } from "@/services/hooks/slack";
+import { useGetOrgSlackChannels } from "@/services/hooks/slack";
 import { MultiSelect, MultiSelectItem } from "@tremor/react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import useNotification from "../../shared/notification/useNotification";
