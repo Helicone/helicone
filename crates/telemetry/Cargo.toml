@@ -10,7 +10,6 @@ log-panics.workspace = true
 opentelemetry.workspace = true
 opentelemetry_sdk.workspace = true
 opentelemetry-semantic-conventions.workspace = true
-opentelemetry-stdout = { workspace = true }
 opentelemetry-otlp = { workspace = true, features = ['default', 'grpc-tonic'] }
 opentelemetry-appender-tracing.workspace = true
 serde.workspace = true

@@ -42,6 +42,7 @@ impl Harness {
             .get_mut(&Provider::OpenAI)
             .unwrap();
         openai_provider.base_url = Url::parse(&mock.uri()).unwrap();
+        tracing::info!(db_url = config.database.url.0, "db url");
         let (app, _) = App::new(config).await.expect("failed to create app");
         let app_factory = AppFactory::new(app.state.clone(), app);
         let socket_addr =

@@ -40,23 +40,18 @@ impl Default for Config {
 #[serde(deny_unknown_fields, rename_all = "kebab-case")]
 pub enum Exporter {
     Stdout,
-    Otlp { endpoint: String },
+    // This should be configured for http://localhost:4317
+    Otlp,
 }
 
 impl Default for Exporter {
     fn default() -> Self {
-        Self::Otlp {
-            endpoint: default_otlp_exporter_endpoint(),
-        }
+        Self::Stdout
     }
 }
 
 fn default_service_name() -> String {
     "helicone-router".to_string()
-}
-
-fn default_otlp_exporter_endpoint() -> String {
-    "http://localhost:4317".to_string()
 }
 
 fn default_level() -> String {
@@ -85,34 +80,38 @@ fn resource(config: &Config) -> Resource {
 
 pub fn init_telemetry(
     config: &Config,
+) -> Result<(Option<SdkLoggerProvider>, SdkTracerProvider), TelemetryError> {
+    let resource = resource(config);
+    match config.exporter {
+        Exporter::Stdout => {
+            let tracer_provider = init_stdout(resource, config)?;
+            Ok((None, tracer_provider))
+        }
+        Exporter::Otlp => {
+            let (logger_provider, tracer_provider) = init_otlp(config)?;
+            Ok((Some(logger_provider), tracer_provider))
+        }
+    }
+}
+
+fn init_otlp(
+    config: &Config,
 ) -> Result<(SdkLoggerProvider, SdkTracerProvider), TelemetryError> {
     let resource = resource(config);
-
-    let logger_provider = logger_provider(config, resource.clone())
+    let logger_provider = logger_provider(resource.clone())
         .map_err(TelemetryError::LogExporterBuild)?;
     let otel_layer =
         opentelemetry_appender_tracing::layer::OpenTelemetryTracingBridge::new(
             &logger_provider,
         );
-    // https://github.com/open-telemetry/opentelemetry-rust/issues/2877
     let filter = env_filter(config)?;
     let otel_layer = otel_layer.with_filter(filter);
-
-    let fmt_layer = match config.exporter {
-        Exporter::Stdout => tracing_subscriber::fmt::layer()
-            .pretty()
-            .with_file(true)
-            .with_line_number(true)
-            .with_filter(env_filter(config)?)
-            .boxed(),
-        Exporter::Otlp { .. } => tracing_subscriber::fmt::layer()
-            .compact()
-            .with_file(true)
-            .with_line_number(true)
-            .with_filter(env_filter(config)?)
-            .boxed(),
-    };
-
+    let fmt_layer = tracing_subscriber::fmt::layer()
+        .compact()
+        .with_file(true)
+        .with_line_number(true)
+        .with_filter(env_filter(config)?)
+        .boxed();
     let registry = tracing_subscriber::registry()
         .with(otel_layer)
         .with(fmt_layer);
@@ -130,6 +129,33 @@ pub fn init_telemetry(
     log_panics::init();
 
     Ok((logger_provider, tracer_provider))
+}
+
+fn init_stdout(
+    resource: Resource,
+    config: &Config,
+) -> Result<SdkTracerProvider, TelemetryError> {
+    let fmt_layer = tracing_subscriber::fmt::layer()
+        .pretty()
+        .with_file(true)
+        .with_line_number(true)
+        .with_filter(env_filter(config)?)
+        .boxed();
+    let registry = tracing_subscriber::registry().with(fmt_layer);
+
+    let tracer_provider = tracer_provider(config, resource.clone())
+        .map_err(TelemetryError::TraceExporterBuild)?;
+    let tracer = tracer_provider.tracer(config.service_name.clone());
+    let filter = env_filter(config)?;
+    let tracing_layer = tracing_opentelemetry::layer()
+        .with_tracer(tracer)
+        .with_filter(filter);
+    registry.with(tracing_layer).try_init()?;
+    opentelemetry::global::set_tracer_provider(tracer_provider.clone());
+
+    log_panics::init();
+
+    Ok(tracer_provider)
 }
 
 fn env_filter(config: &Config) -> Result<EnvFilter, TelemetryError> {
@@ -150,10 +176,10 @@ fn tracer_provider(
 ) -> Result<SdkTracerProvider, ExporterBuildError> {
     match &config.exporter {
         Exporter::Stdout => {
-            let exporter = opentelemetry_stdout::SpanExporter::default();
             Ok(SdkTracerProvider::builder()
                 .with_resource(resource)
-                .with_simple_exporter(exporter)
+                // we don't need an exporter here for stdout since we really
+                // just want the tracer to generate trace ids
                 .with_id_generator(RandomIdGenerator::default())
                 .with_max_events_per_span(64)
                 .with_max_attributes_per_span(16)
@@ -174,24 +200,11 @@ fn tracer_provider(
 }
 
 fn logger_provider(
-    config: &Config,
     resource: Resource,
 ) -> Result<SdkLoggerProvider, ExporterBuildError> {
-    match &config.exporter {
-        Exporter::Stdout => {
-            let exporter = opentelemetry_stdout::LogExporter::default();
-
-            Ok(SdkLoggerProvider::builder()
-                .with_resource(resource)
-                .with_simple_exporter(exporter)
-                .build())
-        }
-        Exporter::Otlp { .. } => {
-            let exporter = LogExporter::builder().with_tonic().build()?;
-            Ok(SdkLoggerProvider::builder()
-                .with_resource(resource)
-                .with_batch_exporter(exporter)
-                .build())
-        }
-    }
+    let exporter = LogExporter::builder().with_tonic().build()?;
+    Ok(SdkLoggerProvider::builder()
+        .with_resource(resource)
+        .with_batch_exporter(exporter)
+        .build())
 }
