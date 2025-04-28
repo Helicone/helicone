@@ -37,7 +37,6 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { MappedLLMRequest } from "@/packages/llm-mapper/types";
-import { useRouter, useSearchParams } from "next/navigation";
 import { RequestViews } from "./RequestViews";
 
 type CheckboxMode = "always_visible" | "on_hover" | "never";
