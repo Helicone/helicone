@@ -20,7 +20,7 @@ docker compose -f docker/docker-compose-slim.yml down -v
 docker compose -f docker/docker-compose-slim.yml up -d
 
 # Run migrations for clickhouse and postgres
-flyway migrate -configFiles=db/flyway.conf
+flyway migrate -configFiles=supabase/flyway.conf
 python3 clickhouse/ch_hcone.py --upgrade --host localhost --port 18123 --user default --no-password
 ```
 
@@ -28,6 +28,7 @@ python3 clickhouse/ch_hcone.py --upgrade --host localhost --port 18123 --user de
 
 - Helicone Webpage: localhost:3000
 - Helicone Worker: localhost:8787 (See known issues below)
+- Temp mailer: http://localhost:8025/
 
 ## KNOWN ISSUES
 

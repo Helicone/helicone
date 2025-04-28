@@ -15,7 +15,7 @@ export function getJawnClient(orgId?: string | "none") {
     fetch: (request: Request) => {
       // Read cookies on each request to get latest values
       const currentOrgId = orgId || Cookies.get(ORG_ID_COOKIE_KEY);
-      const jwtToken = getHeliconeCookie().data?.jwtToken;
+      const jwtToken = getHeliconeCookie().data?.jwtToken ?? "";
 
       // Get existing headers
       const existingHeaders = Object.fromEntries(request.headers.entries());

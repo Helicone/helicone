@@ -8,4 +8,4 @@ CREATE TABLE IF NOT EXISTS jawn_http_logs (
     created_at DateTime64(3, 'UTC') DEFAULT now(),
     properties Map(String, String)
 ) ENGINE = MergeTree() PARTITION BY toYYYYMM(created_at)
-ORDER BY (organization_id, created_at) TTL toDateTime(created_at) + INTERVAL 90 DAY SETTINGS allow_experimental_json_type = 1;
+ORDER BY (organization_id, created_at) TTL toDateTime(created_at) + INTERVAL 90 DAY;
