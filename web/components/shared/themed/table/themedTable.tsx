@@ -1,6 +1,3 @@
-import useOnboardingContext, {
-  ONBOARDING_STEPS,
-} from "@/components/layout/onboardingContext";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { UIFilterRowTree } from "@/services/lib/filters/types";
@@ -16,7 +13,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import React, { useEffect, useMemo, useState } from "react";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { Result } from "../../../../packages/common/result";
@@ -182,26 +179,7 @@ export default function ThemedTable<T extends { id?: string }>(
     return { sessionId };
   }, [rows]);
 
-  const { currentStep, isOnboardingVisible, setOnClickElement } =
-    useOnboardingContext();
-
   const router = useRouter();
-  const searchParams = useSearchParams();
-  useEffect(() => {
-    if (
-      id === "requests-table" &&
-      isOnboardingVisible &&
-      currentStep === ONBOARDING_STEPS.REQUESTS_DRAWER.stepNumber
-    ) {
-      setOnClickElement(
-        () => () =>
-          router.push(
-            `/sessions/${encodeURIComponent(sessionData?.sessionId || "")}`
-          )
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOnboardingVisible, currentStep]);
 
   return (
     <ScrollArea className="h-full w-full sentry-mask-me" orientation="both">

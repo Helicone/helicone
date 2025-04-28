@@ -38,6 +38,10 @@ const AlertsPage = (props: AlertsPageProps) => {
   const { data: slackChannelsData, isLoading: isLoadingSlackChannels } =
     useGetOrgSlackChannels(orgContext?.currentOrg?.id || "");
 
+  const slackChannels: {
+    id: string;
+    name: string;
+  }[] = [...(slackChannelsData?.data || [])];
   // Free tier limit checks
   const alertCount = alerts?.length || 0;
   const {
@@ -193,7 +197,7 @@ const AlertsPage = (props: AlertsPageProps) => {
                     {key.slack_channels
                       .map(
                         (channel) =>
-                          slackChannelsData?.find(
+                          slackChannels?.find(
                             (slackChannel) => slackChannel.id === channel
                           )?.name
                       )

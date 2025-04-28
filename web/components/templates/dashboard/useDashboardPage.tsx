@@ -18,7 +18,7 @@ import { ThreatsOverTime } from "../../../lib/api/metrics/getThreatsOverTime";
 import { TimeToFirstToken } from "../../../lib/api/metrics/getTimeToFirstToken";
 import { UsersOverTime } from "../../../lib/api/metrics/getUsersOverTime";
 import { UnPromise } from "../../../lib/tsxHelpers";
-import { TokensOverTime } from "../../../pages/api/metrics/tokensOverTime";
+import { TokensOverTime } from "@/pages/api/metrics/TokensOverTimeType";
 import { useModels } from "../../../services/hooks/models";
 import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
 import {

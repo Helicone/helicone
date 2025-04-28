@@ -1,9 +1,7 @@
 // Inspired by https://github.com/uixmat/onborda
 
 import { $JAWN_API } from "@/lib/clients/jawn";
-import { cn } from "@/lib/utils";
 import { BeakerIcon } from "@heroicons/react/24/outline";
-import { motion } from "framer-motion";
 import {
   HomeIcon,
   MessageCircleQuestionIcon,
@@ -584,58 +582,6 @@ export const OnboardingProvider = ({
     >
       {children}
     </OnboardingContext.Provider>
-  );
-};
-
-export const OnboardingBackground = () => {
-  const {
-    isOnboardingVisible,
-    elementPointerPosition,
-    onClickElement,
-    currentStep,
-  } = useOnboardingContext();
-
-  if (
-    !isOnboardingVisible ||
-    currentStep === ONBOARDING_STEPS.DASHBOARD_SUCCESS.stepNumber
-  )
-    return null;
-  return (
-    <div className="absolute inset-0 z-[9998] pointer-events-auto">
-      <motion.div
-        className={cn(
-          "absolute z-[9999]",
-          onClickElement !== null && onClickElement !== undefined
-            ? "cursor-pointer"
-            : ""
-        )}
-        onClick={onClickElement}
-        initial={
-          elementPointerPosition
-            ? {
-                left: elementPointerPosition?.x,
-                top: elementPointerPosition?.y,
-                width: elementPointerPosition?.width,
-                height: elementPointerPosition?.height,
-              }
-            : {}
-        }
-        animate={
-          elementPointerPosition
-            ? {
-                left: elementPointerPosition?.x,
-                top: elementPointerPosition?.y,
-                width: elementPointerPosition?.width,
-                height: elementPointerPosition?.height,
-              }
-            : {}
-        }
-        style={{
-          boxShadow: "0 0 300vw 300vh rgba(0, 0, 0, 0.5)",
-          zIndex: 9999,
-        }}
-      />
-    </div>
   );
 };
 
