@@ -107,15 +107,14 @@ export async function proxyForwarder(
   }
 
   let rate_limited = false;
-  if (proxyRequest.rateLimitOptions || proxyRequest.isRateLimitedKey) {
+  let finalRateLimitOptions = proxyRequest.rateLimitOptions;
+  if (finalRateLimitOptions || proxyRequest.isRateLimitedKey) {
     const { data: auth, error: authError } = await request.auth();
     if (authError === null) {
       const db = new DBWrapper(env, auth);
       const { data: orgData, error: orgError } = await db.getAuthParams();
       if (orgError === null && orgData?.organizationId) {
-        let rateLimitOptions = proxyRequest.rateLimitOptions;
-
-        if (!rateLimitOptions && proxyRequest.isRateLimitedKey) {
+        if (!finalRateLimitOptions && proxyRequest.isRateLimitedKey) {
           const rateLimitManager = new RateLimitManager();
           const result = await rateLimitManager.getRateLimitOptionsForKey(
             db,
@@ -127,25 +126,25 @@ export async function proxyForwarder(
             console.log(
               `[RateLimit] Found options: ${JSON.stringify(result.data)}`
             );
-            rateLimitOptions = result.data;
+            finalRateLimitOptions = result.data;
           } else if (result.error) {
             console.error(`[RateLimit] Manager error: ${result.error}`);
           }
         }
 
-        if (rateLimitOptions) {
+        if (finalRateLimitOptions) {
           const rateLimitCheckResult = await checkRateLimit({
             organizationId: orgData.organizationId,
             heliconeProperties: proxyRequest.heliconeProperties,
             rateLimitKV: env.RATE_LIMIT_KV,
-            rateLimitOptions: rateLimitOptions,
+            rateLimitOptions: finalRateLimitOptions,
             userId: proxyRequest.userId,
             cost: 0,
           });
 
           responseBuilder.addRateLimitHeaders(
             rateLimitCheckResult,
-            rateLimitOptions
+            finalRateLimitOptions
           );
 
           if (rateLimitCheckResult.status === "rate_limited") {
@@ -367,13 +366,13 @@ export async function proxyForwarder(
     }
     const db = new DBWrapper(env, auth);
     const { data: orgData, error: orgError } = await db.getAuthParams();
-    if (proxyRequest && proxyRequest.rateLimitOptions && !orgError) {
+    if (proxyRequest && finalRateLimitOptions && !orgError) {
       await updateRateLimitCounter({
         organizationId: orgData?.organizationId,
         heliconeProperties:
           proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
         rateLimitKV: env.RATE_LIMIT_KV,
-        rateLimitOptions: proxyRequest.rateLimitOptions,
+        rateLimitOptions: finalRateLimitOptions,
         userId: proxyRequest.userId,
         cost: res.data?.cost ?? 0,
       });
