@@ -5017,10 +5017,6 @@
 					"created_at": {
 						"type": "string"
 					},
-					"total_cost": {
-						"type": "number",
-						"format": "double"
-					},
 					"last_used": {
 						"type": "string"
 					},
@@ -5035,7 +5031,6 @@
 				"required": [
 					"name",
 					"created_at",
-					"total_cost",
 					"last_used",
 					"first_used",
 					"session_count"

@@ -1609,7 +1609,6 @@ const models: TsoaRoute.Models = {
         "properties": {
             "name": {"dataType":"string","required":true},
             "created_at": {"dataType":"string","required":true},
-            "total_cost": {"dataType":"double","required":true},
             "last_used": {"dataType":"string","required":true},
             "first_used": {"dataType":"string","required":true},
             "session_count": {"dataType":"double","required":true},
