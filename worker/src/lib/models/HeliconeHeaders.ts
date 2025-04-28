@@ -1,4 +1,5 @@
 import { Headers } from "@cloudflare/workers-types";
+import { HELICONE_RATE_LIMITED_API_KEY_REGEX } from "../util/apiKeyRegex";
 
 type Nullable<T> = T | null;
 
@@ -259,7 +260,13 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   }
 
   determineBearerKeyType(bearerKey: string): HeliconeBearerKeyType {
-    if (bearerKey.startsWith("sk-helicone-rl-")) {
+    // Extract the key without Bearer prefix if present
+    const key = bearerKey.replace("Bearer ", "").trim();
+
+    // Check if key matches any rate-limited pattern
+    if (
+      HELICONE_RATE_LIMITED_API_KEY_REGEX.some((pattern) => pattern.test(key))
+    ) {
       return "rate-limited";
     }
 

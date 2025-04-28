@@ -35,17 +35,20 @@ export const useKeys = () => {
       permission,
       keyName,
       isEu,
+      enableRateLimit,
     }: {
       permission: "rw" | "w";
       keyName: string;
       isEu: boolean;
+      enableRateLimit?: boolean;
     }) => {
       const { res, apiKey } = generateAPIKeyHelper(
         permission,
         org?.currentOrg?.organization_type!,
         keyName,
         isEu,
-        useGovernance
+        useGovernance,
+        enableRateLimit
       );
       return { res: await res, apiKey };
     },

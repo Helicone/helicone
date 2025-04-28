@@ -6,6 +6,13 @@ import { FormEvent, useState } from "react";
 import useNotification from "../../../shared/notification/useNotification";
 import ThemedModal from "../../../shared/themed/themedModal";
 import { useKeys } from "../useKeys";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { InfoIcon } from "lucide-react";
 
 interface AddKeyModalProps {
   open: boolean;
@@ -31,17 +38,23 @@ const AddKeyModal = (props: AddKeyModalProps) => {
       "key-read"
     ) as HTMLInputElement;
 
+    const rateLimit = event.currentTarget.elements.namedItem(
+      "rate-limit"
+    ) as HTMLInputElement;
+
     if (!keyName || keyName.value === "") {
       setNotification("Please enter in a key name", "error");
       return;
     }
 
     const permission = keyPermissions.checked ? "rw" : "w";
+    const enableRateLimit = rateLimit.checked;
 
     const { res, apiKey } = await addKey.mutateAsync({
       permission,
       keyName: keyName.value,
       isEu: window.location.hostname.includes("eu."),
+      enableRateLimit,
     });
     if (res.response.ok) {
       setReturnedKey(apiKey);
@@ -111,6 +124,64 @@ const AddKeyModal = (props: AddKeyModalProps) => {
                 </label>
               </li>
             </ul>
+          </div>
+
+          <div className="w-full space-y-1.5 text-sm">
+            <label htmlFor="rate-limit" className="text-gray-500">
+              Rate Limiting
+            </label>
+            <div className="flex items-start">
+              <div className="flex items-center h-5">
+                <input
+                  id="rate-limit"
+                  name="rate-limit"
+                  type="checkbox"
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+              </div>
+              <div className="ml-3 text-sm">
+                <div className="flex items-center gap-1">
+                  <label
+                    htmlFor="rate-limit"
+                    className="font-medium text-gray-700 dark:text-gray-300"
+                  >
+                    Enable UI rate limits
+                  </label>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <InfoIcon className="h-4 w-4 text-gray-500 cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs">
+                        <p>
+                          This will prefix the key with "rl-" and apply rate
+                          limits configured in the dashboard.{" "}
+                          <a
+                            href="/docs/rate-limiting"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline"
+                          >
+                            View documentation
+                          </a>
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                  May affect request latency.{" "}
+                  <a
+                    href="/docs/rate-limiting#performance"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 hover:underline"
+                  >
+                    Learn more
+                  </a>
+                </p>
+              </div>
+            </div>
           </div>
 
           <div className="flex justify-end gap-2">
