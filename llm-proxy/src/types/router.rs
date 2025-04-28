@@ -26,6 +26,7 @@ impl std::fmt::Display for RouterId {
 }
 
 #[derive(Debug)]
+#[allow(dead_code)]
 pub struct RouterMetadata {
     pub id: Uuid,
     pub name: String,

@@ -3,12 +3,9 @@ use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use url::Url;
 
-use crate::{
-    tests::harness::MOCK_SERVER_PORT,
-    types::{
-        model::{Model, Version},
-        provider::Provider,
-    },
+use crate::types::{
+    model::{Model, Version},
+    provider::Provider,
 };
 
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
@@ -63,7 +60,7 @@ impl crate::tests::TestDefault for ProvidersConfig {
             models: default_openai_models(),
             base_url: Url::parse(&format!(
                 "http://localhost:{}",
-                MOCK_SERVER_PORT
+                crate::tests::harness::MOCK_SERVER_PORT,
             ))
             .unwrap(),
         };

@@ -50,7 +50,7 @@ fn main() -> Result<()> {
         })?;
 
     let mut schema: OpenAPI =
-        if args.input.extension().map_or(false, |ext| ext == "json") {
+        if args.input.extension().is_some_and(|ext| ext == "json") {
             serde_json::from_str(&schema_content)
                 .with_context(|| "Failed to parse OpenAPI schema as JSON")?
         } else {
@@ -72,7 +72,7 @@ fn main() -> Result<()> {
 
     // Write the filtered schema to the output file
     let output_content =
-        if args.output.extension().map_or(false, |ext| ext == "json") {
+        if args.output.extension().is_some_and(|ext| ext == "json") {
             serde_json::to_string_pretty(&schema).with_context(|| {
                 "Failed to serialize filtered schema to JSON"
             })?
@@ -116,7 +116,7 @@ fn filter_schema(schema: &mut OpenAPI, config: &Config) -> Result<()> {
         let mut filtered_path_item = path_item.as_item().unwrap().clone();
 
         // Check GET operations
-        if let Some(_) = &filtered_path_item.get {
+        if filtered_path_item.get.is_some() {
             if !should_keep_operation(path, "get", &paths_to_keep) {
                 filtered_path_item.get = None;
             } else {
@@ -125,7 +125,7 @@ fn filter_schema(schema: &mut OpenAPI, config: &Config) -> Result<()> {
         }
 
         // Check POST operations
-        if let Some(_) = &filtered_path_item.post {
+        if filtered_path_item.post.is_some() {
             if !should_keep_operation(path, "post", &paths_to_keep) {
                 filtered_path_item.post = None;
             } else {
@@ -134,7 +134,7 @@ fn filter_schema(schema: &mut OpenAPI, config: &Config) -> Result<()> {
         }
 
         // Check PUT operations
-        if let Some(_) = &filtered_path_item.put {
+        if filtered_path_item.put.is_some() {
             if !should_keep_operation(path, "put", &paths_to_keep) {
                 filtered_path_item.put = None;
             } else {
@@ -143,7 +143,7 @@ fn filter_schema(schema: &mut OpenAPI, config: &Config) -> Result<()> {
         }
 
         // Check DELETE operations
-        if let Some(_) = &filtered_path_item.delete {
+        if filtered_path_item.delete.is_some() {
             if !should_keep_operation(path, "delete", &paths_to_keep) {
                 filtered_path_item.delete = None;
             } else {
@@ -152,7 +152,7 @@ fn filter_schema(schema: &mut OpenAPI, config: &Config) -> Result<()> {
         }
 
         // Check PATCH operations
-        if let Some(_) = &filtered_path_item.patch {
+        if filtered_path_item.patch.is_some() {
             if !should_keep_operation(path, "patch", &paths_to_keep) {
                 filtered_path_item.patch = None;
             } else {
@@ -485,21 +485,19 @@ fn process_schema_for_references(
                     }
 
                     // Process additional properties
-                    if let Some(additional_props) = &obj.additional_properties {
+                    if let Some(openapiv3::AdditionalProperties::Schema(
+                        schema_box_ref,
+                    )) = &obj.additional_properties
+                    {
                         // AdditionalProperties can be bool or
                         // Schema(Box<ReferenceOr<Schema>>)
-                        if let openapiv3::AdditionalProperties::Schema(
+                        // Dereference the Box first to get
+                        // ReferenceOr<Schema>, then use the standard helper
+                        extract_schema_references(
                             schema_box_ref,
-                        ) = additional_props
-                        {
-                            // Dereference the Box first to get
-                            // ReferenceOr<Schema>, then use the standard helper
-                            extract_schema_references(
-                                &**schema_box_ref,
-                                referenced_schemas,
-                                to_process,
-                            );
-                        }
+                            referenced_schemas,
+                            to_process,
+                        );
                     }
                 }
                 openapiv3::Type::Array(arr) => {
@@ -549,7 +547,7 @@ fn process_schema_for_references(
         }
         openapiv3::SchemaKind::Not { not } => {
             // 'not' is Box<ReferenceOr<Schema>>. Dereference the Box first.
-            extract_schema_references(&**not, referenced_schemas, to_process);
+            extract_schema_references(not, referenced_schemas, to_process);
         }
         openapiv3::SchemaKind::Any(_) => {} /* Any schema type doesn't have
                                              * specific references */
@@ -570,5 +568,5 @@ fn should_keep_operation(
 
     paths_to_keep
         .get(&normalized_path)
-        .map_or(false, |allowed_method| allowed_method == method)
+        .is_some_and(|allowed_method| allowed_method == method)
 }

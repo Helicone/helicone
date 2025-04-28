@@ -54,6 +54,16 @@ fn default_idle_timeout() -> Duration {
 #[cfg(feature = "testing")]
 impl crate::tests::TestDefault for Config {
     fn test_default() -> Self {
-        Self::default()
+        Self {
+            // default url is different bc we use supabase and that uses port
+            // 54322
+            url: Secret(
+                "postgresql://postgres:postgres@localhost:5432/postgres"
+                    .to_string(),
+            ),
+            connection_timeout: default_connection_timeout(),
+            idle_timeout: default_idle_timeout(),
+            max_connections: default_max_connections(),
+        }
     }
 }

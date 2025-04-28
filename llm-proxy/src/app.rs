@@ -80,7 +80,7 @@ pub struct InnerAppState {
 
 impl std::fmt::Debug for InnerAppState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let minio = if let Some(_) = &self.minio {
+        let minio = if self.minio.is_some() {
             "Some(Minio)"
         } else {
             "None"
@@ -104,6 +104,7 @@ impl std::fmt::Debug for InnerAppState {
 /// 2. Authn/Authz
 /// 3. Unauthenticated and authenticated rate limit layers
 /// 4. MetaRouter
+///
 /// -- Router specific MW, must not require Clone on inner Service --
 /// 5. Per User Rate Limit layer
 /// 6. Per Org Rate Limit layer
@@ -119,12 +120,14 @@ impl std::fmt::Debug for InnerAppState {
 /// 11. A/B testing between models and prompt versions
 /// 12. Fallbacks
 /// 13. ProviderBalancer
+///
 /// -- provider specific middleware --
 /// 14. Per provider rate limit layer
 /// 15. Mapper
 ///     - based on selected provider, map request body
 /// 16. ProviderRegionBalancer
-/// --- region specific middleware (none yet, just leaf service) --
+///
+/// -- region specific middleware (none yet, just leaf service) --
 /// 17. Dispatcher
 ///
 /// Ideally we could combine the rate limits into one layer
@@ -149,6 +152,7 @@ impl tower::Service<crate::types::request::Request> for App {
         self.service_stack.poll_ready(ctx)
     }
 
+    #[inline]
     #[tracing::instrument(name = "app", skip_all)]
     fn call(&mut self, req: crate::types::request::Request) -> Self::Future {
         self.service_stack.call(req)
@@ -159,7 +163,7 @@ impl App {
     pub async fn new(
         config: Config,
     ) -> Result<(Self, ProviderMonitors), InitError> {
-        tracing::trace!("creating app");
+        tracing::info!(config = ?config, "creating app");
         let provider = StaticProvider::from_env();
         let minio = if let Some(provider) = provider {
             Some(
@@ -209,7 +213,7 @@ impl App {
             .propagate_x_request_id()
             .layer(NormalizePathLayer::trim_trailing_slash())
             .layer(ErrorHandlerLayer)
-            .map_err(|e| crate::error::internal::InternalError::BufferError(e))
+            .map_err(crate::error::internal::InternalError::BufferError)
             // NOTE: not sure if there is perf impact from Auth layer coming
             // before buffer layer, but required due to Clone bound.
             .layer(AsyncRequireAuthorizationLayer::new(AuthService))
@@ -307,6 +311,7 @@ impl tower::Service<http::Request<hyper::body::Incoming>> for HyperApp {
         self.service_stack.poll_ready(ctx)
     }
 
+    #[inline]
     fn call(
         &mut self,
         req: http::Request<hyper::body::Incoming>,

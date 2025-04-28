@@ -58,6 +58,7 @@ impl tower::Service<Request> for ProviderBalancer {
     type Error = Error;
     type Future = ResponseFuture;
 
+    #[inline]
     fn poll_ready(
         &mut self,
         cx: &mut std::task::Context<'_>,

@@ -94,6 +94,7 @@ impl tower::Service<crate::types::request::Request> for Router {
         self.inner.poll_ready(ctx)
     }
 
+    #[inline]
     #[tracing::instrument(level = "debug", name = "router", skip_all)]
     fn call(&mut self, req: crate::types::request::Request) -> Self::Future {
         self.inner.call(req)

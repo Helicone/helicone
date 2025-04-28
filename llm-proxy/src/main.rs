@@ -32,7 +32,6 @@ async fn main() -> Result<(), llm_proxy::error::runtime::RuntimeError> {
             .map_err(llm_proxy::error::runtime::RuntimeError::Init)?;
 
     info!("telemetry initialized");
-    info!(config = ?config, "config loaded");
     let rate_limit_cleanup_interval = config.rate_limit.cleanup_interval;
 
     let mut shutting_down = false;
@@ -75,13 +74,13 @@ async fn main() -> Result<(), llm_proxy::error::runtime::RuntimeError> {
     //     .shutdown()
     //     .map_err(TelemetryError::Logs)
     //     .map_err(llm_proxy::error::runtime::Error::Telemetry)?;
-    if let Err(e) = logger_provider.shutdown() {
-        println!("error shutting down logger provider: {}", e);
-    }
-    if let Some(tracer_provider) = tracer_provider {
-        if let Err(e) = tracer_provider.shutdown() {
-            println!("error shutting down tracer provider: {}", e);
+    if let Some(logger_provider) = logger_provider {
+        if let Err(e) = logger_provider.shutdown() {
+            println!("error shutting down logger provider: {}", e);
         }
+    }
+    if let Err(e) = tracer_provider.shutdown() {
+        println!("error shutting down tracer provider: {}", e);
     }
 
     info!("shut down");
