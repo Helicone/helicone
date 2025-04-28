@@ -1,20 +1,19 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { OrgContextValue } from "@/components/layout/org/OrgContextValue";
 import useNotification from "@/components/shared/notification/useNotification";
-import { getHeliconeCookie } from "@/lib/cookies";
+import { Database } from "@/db/database.types";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
+import { HeliconeUser } from "@/packages/common/auth/types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Cookies from "js-cookie";
 import { env } from "next-runtime-env";
 import posthog from "posthog-js";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo } from "react";
 import {
   $JAWN_API,
   $JAWN_API_WITH_ORG,
   getJawnClient,
 } from "../../lib/clients/jawn";
 import { ORG_ID_COOKIE_KEY } from "../../lib/constants";
-import { HeliconeUser } from "@/packages/common/auth/types";
-import { Database } from "@/db/database.types";
 
 const useGetOrgMembers = (orgId: string) => {
   const { data, isLoading, refetch } = $JAWN_API.useQuery(
