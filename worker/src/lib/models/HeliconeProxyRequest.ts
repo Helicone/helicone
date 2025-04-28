@@ -31,6 +31,7 @@ export interface HeliconeProxyRequest {
   provider: Provider;
   tokenCalcUrl: Env["TOKEN_COUNT_URL"];
   rateLimitOptions: Nullable<RateLimitOptions>;
+  isRateLimitedKey: boolean;
   retryOptions: IHeliconeHeaders["retryHeaders"];
   omitOptions: IHeliconeHeaders["omitHeaders"];
 
@@ -145,30 +146,13 @@ export class HeliconeProxyRequestMapper {
       isStream = isStream || queryParams.get("alt") === "sse";
     }
 
-    if (
-      this.request.heliconeHeaders.rateLimitPolicy &&
-      this.request.heliconeHeaders.heliconeAuthV2?._type === "bearer" &&
-      this.request.heliconeHeaders.heliconeAuthV2?.token.startsWith(
-        "sk-helicone-rl-"
-      )
-    ) {
-      // Rate limits are stored in the DB
-      const db = new DBWrapper(
-        this.env,
-        this.request.heliconeHeaders.heliconeAuthV2
-      );
-      const { data: rateLimitOptions, error: rateLimitOptionsError } =
-        await db.getRateLimitOptions();
-
-      if (rateLimitOptionsError !== null) {
-        this.heliconeErrors.push(rateLimitOptionsError);
-      }
-    }
-
     return {
       data: {
         heliconePromptTemplate: await this.getHeliconeTemplate(),
         rateLimitOptions: this.rateLimitOptions(),
+        isRateLimitedKey:
+          this.request.heliconeHeaders.heliconeAuthV2?.keyType ===
+          "rate-limited",
         requestJson: requestJson,
         retryOptions: this.request.heliconeHeaders.retryHeaders,
         provider: this.provider,

@@ -13,6 +13,15 @@ export interface InternalAuthParams {
   heliconeApiKeyId?: number;
 }
 
+export type RateLimitPolicy = {
+  name: string;
+  id: string;
+  quota: number;
+  unit: "request" | "cents";
+  windowSeconds: number;
+  segment: string;
+};
+
 async function getHeliconeApiKeyRow(
   dbClient: SupabaseClient<Database>,
   heliconeApi: string
@@ -243,55 +252,40 @@ export class DBWrapper {
     return authParams;
   }
 
-  async getRateLimitOptions(): Promise<
-    Result<
-      {
-        name: string;
-        id: string;
-        quota: number;
-        unit: string;
-        windowSeconds: number;
-        segment: string;
-      },
-      string
-    >
-  > {
+  async getAllRateLimitPolicies(): Promise<Result<RateLimitPolicy[], string>> {
     const authParams = await this.getAuthParams();
     if (authParams.error !== null) {
       return err(authParams.error);
     }
 
-    return await getAndStoreInCache<
-      {
-        name: string;
-        id: string;
-        quota: number;
-        unit: string;
-        windowSeconds: number;
-        segment: string;
-      },
-      string
-    >(
+    return await getAndStoreInCache<RateLimitPolicy[], string>(
       `rateLimitOptions-${authParams.data.organizationId}`,
       this.secureCacheEnv,
       async () => {
         const { data, error } = await this.supabaseClient
           .from("org_rate_limits")
           .select("*")
-          .eq("id", authParams.data.organizationId)
-          .single();
+          .eq("organization_id", authParams.data.organizationId);
 
         if (error !== null) {
           return err(error.message);
         }
-        return ok({
-          name: data?.name ?? "",
-          id: data?.id ?? "",
-          quota: data?.quota ?? 0,
-          unit: data?.unit ?? "requests",
-          windowSeconds: data?.window_seconds ?? 3600,
-          segment: data?.segment ?? "default",
-        });
+
+        if (!data) {
+          return ok([]);
+        }
+
+        const mappedData: RateLimitPolicy[] = data.map((dbPolicy) => ({
+          id: dbPolicy.id,
+          organization_id: dbPolicy.organization_id,
+          quota: dbPolicy.quota,
+          windowSeconds: dbPolicy.window_seconds,
+          unit: dbPolicy.unit as "request" | "cents",
+          segment: dbPolicy.segment,
+          name: dbPolicy.name,
+        }));
+
+        return ok(mappedData);
       },
       120 // 2 minutes
     );

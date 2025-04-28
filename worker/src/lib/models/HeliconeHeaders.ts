@@ -11,6 +11,8 @@ export type HeliconeFallback = {
   bodyKeyOverride?: object;
 };
 
+export type HeliconeBearerKeyType = "standard" | "rate-limited";
+
 export interface IHeliconeHeaders {
   heliconeAuth: Nullable<string>;
   heliconeAuthV2: Nullable<{
@@ -77,6 +79,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     _type: "jwt" | "bearer";
     token: string;
     orgId?: string;
+    keyType?: HeliconeBearerKeyType;
   }>;
   rateLimitPolicy: Nullable<string>;
   featureFlags: {
@@ -225,6 +228,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     _type: "jwt" | "bearer";
     token: string;
     orgId?: string;
+    keyType?: HeliconeBearerKeyType;
   }> {
     const heliconeAuth = this.headers.get("helicone-auth");
 
@@ -232,6 +236,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       return {
         _type: "bearer",
         token: heliconeAuth,
+        keyType: this.determineBearerKeyType(heliconeAuth),
       };
     }
     const heliconeAuthFallback = this.headers.get("authorization");
@@ -239,6 +244,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       return {
         _type: "bearer",
         token: heliconeAuthFallback,
+        keyType: this.determineBearerKeyType(heliconeAuthFallback),
       };
     }
     const heliconeAuthJWT = this.headers.get("helicone-jwt");
@@ -250,6 +256,14 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       };
     }
     return null;
+  }
+
+  determineBearerKeyType(bearerKey: string): HeliconeBearerKeyType {
+    if (bearerKey.startsWith("sk-helicone-rl-")) {
+      return "rate-limited";
+    }
+
+    return "standard";
   }
 
   setModelOverride(modelOverride: string | null) {
