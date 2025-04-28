@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import { HeliconeAuthClient } from "../../auth/client/HeliconeAuthClient";
 import { authClient, heliconeAuthClientFromSession } from "./betterAuthHelper";
-import { useOrg } from "@/components/layout/org/organizationContext";
 
 export function useBetterAuthClient(): HeliconeAuthClient {
   const session = authClient.useSession();

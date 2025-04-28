@@ -7,7 +7,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Cookies from "js-cookie";
 import { env } from "next-runtime-env";
 import posthog from "posthog-js";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   $JAWN_API,
   $JAWN_API_WITH_ORG,
@@ -233,6 +233,9 @@ const setOrgCookie = (orgId: string) => {
 };
 
 const useOrgsContextManager = (): OrgContextValue => {
+  const [selectedOrgId, setSelectedOrgId] = useState<string | undefined>(
+    undefined
+  );
   const { user } = useHeliconeAuthClient();
   const { data: orgs, refetch } = $JAWN_API.useQuery(
     "get",
@@ -276,12 +279,14 @@ const useOrgsContextManager = (): OrgContextValue => {
   const org = useMemo(() => {
     if (orgs && orgs.length > 0) {
       const orgIdFromCookie = Cookies.get(ORG_ID_COOKIE_KEY);
-      const org = orgs?.find((org) => org.id === orgIdFromCookie) || orgs?.[0];
+      const org =
+        orgs?.find((org) => org.id === (selectedOrgId || orgIdFromCookie)) ||
+        orgs?.[0];
       setOrgCookie(org.id);
       return org;
     }
     return undefined;
-  }, [orgs]);
+  }, [orgs, selectedOrgId]);
 
   useEffect(() => {
     if (user && org) {
@@ -315,7 +320,7 @@ const useOrgsContextManager = (): OrgContextValue => {
       orgs?.find((x) => x.id === org.reseller_id)
     ),
     setCurrentOrg: (orgId) => {
-      setOrgCookie(orgId);
+      setSelectedOrgId(orgId);
       refetch();
     },
     refetchOrgs: refetch,
