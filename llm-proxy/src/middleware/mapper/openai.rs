@@ -1,4 +1,4 @@
-use crate::mapper::{Convert, TryConvert, error::MapperError};
+use crate::middleware::mapper::{Convert, TryConvert, error::MapperError};
 
 impl Convert<openai_types::chat::Role> for anthropic_types::chat::Role {
     fn convert(value: openai_types::chat::Role) -> Self {

@@ -40,8 +40,6 @@ pub struct RequestContext {
 }
 
 pub struct RequestProxyContext {
-    pub original_provider: Provider,
-    pub original_model: Model,
     pub forced_routing: Option<ForcedRouting>,
     pub provider_api_keys: ProviderKeys,
 }

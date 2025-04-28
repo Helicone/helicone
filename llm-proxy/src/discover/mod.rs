@@ -18,7 +18,7 @@ use crate::{
     error::init::InitError, types::provider::Provider,
 };
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash, Deserialize, Serialize)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash, Deserialize, Serialize)]
 pub struct Key {
     pub provider: Provider,
 }

@@ -6,10 +6,8 @@ use llm_proxy::{
 use serde_json::json;
 use tower::Service;
 
-/// Sending a request to https://localhost/router should
-/// result in the proxied request targeting https://api.openai.com/v1/chat/completions
 #[tokio::test]
-async fn default_target() {
+async fn mapper() {
     let config = Config::test_default();
     let mut harness = Harness::new(config).await;
     let request_body = axum_core::body::Body::from(

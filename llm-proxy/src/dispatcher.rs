@@ -10,11 +10,13 @@ use http::{HeaderName, HeaderValue, uri::PathAndQuery};
 use http_body_util::BodyExt;
 use reqwest::Client;
 use tower::{Service, ServiceBuilder};
+use tower_http::add_extension::{AddExtension, AddExtensionLayer};
 
 use crate::{
     app::AppState,
+    discover::Key,
     error::{api::Error, internal::InternalError},
-    mapper::TryConvert,
+    middleware::mapper::TryConvert,
     types::{
         provider::Provider,
         request::{Request, RequestContext},
@@ -24,43 +26,42 @@ use crate::{
 };
 
 pub type DispatcherFuture = BoxFuture<'static, Result<Response, Error>>;
-pub type DispatcherService =
-    ErrorHandler<crate::middleware::no_op::Service<Dispatcher>>;
+pub type DispatcherService = ErrorHandler<
+    AddExtension<crate::middleware::mapper::Service<Dispatcher>, Key>,
+>;
 
+/// Leaf service that dispatches requests to the correct provider.
 #[derive(Debug, Clone)]
 pub struct Dispatcher {
     client: Client,
     app_state: AppState,
-    provider: Provider,
+    key: Key,
 }
 
 impl Dispatcher {
-    pub fn new(
-        client: Client,
-        app_state: AppState,
-        provider: Provider,
-    ) -> Self {
+    pub fn new(client: Client, app_state: AppState, key: Key) -> Self {
         Self {
             client,
             app_state,
-            provider,
+            key,
         }
     }
 
     pub fn new_with_middleware(
         client: Client,
         app_state: AppState,
-        provider: Provider,
+        key: Key,
     ) -> DispatcherService {
         ServiceBuilder::new()
             .layer(ErrorHandlerLayer)
+            .layer(AddExtensionLayer::new(key))
             // just to show how we will add dispatcher-specific middleware later
             // e.g. for model/provider specific rate limiting, we need to do
             // that at this level rather than globally.
-            .layer(crate::middleware::no_op::Layer::new(app_state.clone()))
+            .layer(crate::middleware::mapper::Layer)
             // other middleware: rate limiting, logging, etc, etc
             // will be added here as well
-            .service(Dispatcher::new(client, app_state, provider))
+            .service(Dispatcher::new(client, app_state, key))
     }
 }
 
@@ -92,8 +93,8 @@ impl Dispatcher {
             .extensions()
             .get::<Arc<RequestContext>>()
             .ok_or(InternalError::ExtensionNotFound("RequestContext"))?;
-        let og_provider = req_ctx.proxy_context.original_provider;
-        let target_provider = self.provider;
+        let og_provider = req_ctx.router_config.default_provider;
+        let target_provider = self.key.provider;
         let provider_api_key = req_ctx
             .proxy_context
             .provider_api_keys

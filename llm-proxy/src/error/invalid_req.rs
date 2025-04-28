@@ -1,42 +1,48 @@
 use axum_core::response::IntoResponse;
 use displaydoc::Display;
-use http::StatusCode;
+use http::{StatusCode, uri::InvalidUri};
 use thiserror::Error;
 use tracing::debug;
 
 use crate::{
     error::api::ErrorResponse,
-    types::{json::Json, response::Response},
+    types::{json::Json, provider::Provider, response::Response},
 };
 
 /// User errors
 #[derive(Debug, Error, Display, strum::AsRefStr)]
 pub enum InvalidRequestError {
-    /// Resource not found
-    NotFound,
-    /// Invalid router id in request path: {0}
-    InvalidRouterId(String),
+    /// Resource not found: {0}
+    NotFound(String),
+    /// Unsupported provider: {0}
+    UnsupportedProvider(Provider),
+    /// Router id not found: {0}
+    RouterIdNotFound(String),
     /// Missing router id in request path
     MissingRouterId,
     /// Invalid request: {0}
     InvalidRequest(http::Error),
+    /// Invalid request uri: {0}
+    InvalidUri(#[from] InvalidUri),
+    /// Invalid request body: {0}
+    InvalidRequestBody(#[from] serde_json::Error),
 }
 
 impl IntoResponse for InvalidRequestError {
     fn into_response(self) -> Response {
         debug!(error = %self, "Invalid request");
         match self {
-            Self::NotFound => (
+            Self::NotFound(path) => (
                 StatusCode::NOT_FOUND,
                 Json(ErrorResponse {
-                    error: "Not found".to_string(),
+                    error: format!("Not found: {}", path),
                 }),
             )
                 .into_response(),
-            Self::InvalidRouterId(_) => (
-                StatusCode::BAD_REQUEST,
+            Self::RouterIdNotFound(router_id) => (
+                StatusCode::NOT_FOUND,
                 Json(ErrorResponse {
-                    error: "Invalid router id".to_string(),
+                    error: format!("Router id not found: {}", router_id),
                 }),
             )
                 .into_response(),
@@ -47,10 +53,24 @@ impl IntoResponse for InvalidRequestError {
                 }),
             )
                 .into_response(),
-            Self::InvalidRequest(_) => (
+            Self::InvalidRequest(_) | Self::InvalidUri(_) => (
                 StatusCode::BAD_REQUEST,
                 Json(ErrorResponse {
                     error: "Invalid request".to_string(),
+                }),
+            )
+                .into_response(),
+            Self::UnsupportedProvider(provider) => (
+                StatusCode::BAD_REQUEST,
+                Json(ErrorResponse {
+                    error: format!("Unsupported provider: {}", provider),
+                }),
+            )
+                .into_response(),
+            Self::InvalidRequestBody(e) => (
+                StatusCode::BAD_REQUEST,
+                Json(ErrorResponse {
+                    error: format!("Invalid request body: {}", e),
                 }),
             )
                 .into_response(),

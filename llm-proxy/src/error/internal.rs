@@ -26,8 +26,8 @@ pub enum InternalError {
     ExtensionNotFound(&'static str),
     /// Provider not found
     ProviderNotFound,
-    /// Could not collect response body
-    CollectBodyError,
+    /// Could not collect response body: {0}
+    CollectBodyError(axum_core::Error),
     /// Could not process request body: {0}
     RequestBodyError(Box<dyn std::error::Error + Send + Sync>),
     /// Reqwest error: {0}
@@ -35,7 +35,7 @@ pub enum InternalError {
     /// Http error: {0}
     HttpError(#[from] http::Error),
     /// Mapper error: {0}
-    MapperError(#[from] crate::mapper::error::MapperError),
+    MapperError(#[from] crate::middleware::mapper::error::MapperError),
     /// Load balancer error: {0}
     LoadBalancerError(BoxError),
     /// Poll ready error: {0}

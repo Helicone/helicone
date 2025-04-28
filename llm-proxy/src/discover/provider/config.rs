@@ -65,9 +65,9 @@ impl ConfigDiscovery {
             let dispatcher = Dispatcher::new_with_middleware(
                 http_client,
                 app.clone(),
-                *provider,
+                key.clone(),
             );
-            service_map.insert(key.clone(), dispatcher);
+            service_map.insert(key, dispatcher);
         }
 
         tracing::trace!("Created config discovery");

@@ -132,6 +132,26 @@ impl std::fmt::Debug for InnerAppState {
 ///
 /// Ideally we could combine the rate limits into one layer
 /// instead of using tower_governor and having to split them up.
+///
+///
+/// For request processing, we need to use some dynamically added
+/// request extensions. We try to aggregate most of this into the
+/// `RequestContext` struct to keep things simple but for some things
+/// we will use separate types to avoid needing to use `Option`s in
+/// the `RequestContext` struct.
+///
+/// Required request extensions:
+/// - `AuthContext`
+///    - Added by the auth layer
+///    - Removed by the request context layer and aggregated into the
+///      `Arc<RequestContext>`
+/// - `Arc<RequestContext>`
+///   - Added by the request context layer
+/// - `Key`
+///   - Added by the AddExtensionLayer in the dispatcher service stack
+/// - `ExtractedPathAndQuery`
+///   - Added by the MetaRouter
+///   - Used by the Mapper layer
 #[derive(Clone)]
 pub struct App {
     pub state: AppState,
@@ -213,10 +233,10 @@ impl App {
             .propagate_x_request_id()
             .layer(NormalizePathLayer::trim_trailing_slash())
             .layer(ErrorHandlerLayer)
-            .map_err(crate::error::internal::InternalError::BufferError)
             // NOTE: not sure if there is perf impact from Auth layer coming
             // before buffer layer, but required due to Clone bound.
             .layer(AsyncRequireAuthorizationLayer::new(AuthService))
+            .map_err(crate::error::internal::InternalError::BufferError)
             .layer(BufferLayer::new(BUFFER_SIZE))
             .layer(ErrorHandlerLayer)
             .service(router);

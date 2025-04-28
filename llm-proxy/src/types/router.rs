@@ -1,9 +1,34 @@
+use std::str::FromStr;
+
 use chrono::{DateTime, Utc};
 use compact_str::CompactString;
+use derive_more::{AsRef, Deref};
+use http::uri::PathAndQuery;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::{config::router::RouterConfig, error::internal::InternalError};
+use crate::{
+    config::router::RouterConfig,
+    error::{internal::InternalError, invalid_req::InvalidRequestError},
+};
+
+#[derive(Debug, Deref, Clone, PartialEq, Eq, Hash, AsRef)]
+pub struct ExtractedPathAndQuery(PathAndQuery);
+
+impl ExtractedPathAndQuery {
+    pub fn into_inner(self) -> PathAndQuery {
+        self.0
+    }
+}
+
+impl TryFrom<&str> for ExtractedPathAndQuery {
+    type Error = InvalidRequestError;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        let path_and_query = PathAndQuery::from_str(value)?;
+        Ok(Self(path_and_query))
+    }
+}
 
 #[derive(
     Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, Default,
@@ -91,5 +116,16 @@ mod tests {
         let deserialized =
             serde_json::from_str::<RouterId>(&serialized).unwrap();
         assert_eq!(id, deserialized);
+    }
+
+    #[test]
+    fn extracted_path_and_query_try_from_str() {
+        let path_and_query =
+            ExtractedPathAndQuery::try_from("/v1/chat/completions").unwrap();
+        assert_eq!(path_and_query.as_str(), "/v1/chat/completions");
+        let path_and_query =
+            ExtractedPathAndQuery::try_from("/v1/chat/completions?key=value")
+                .unwrap();
+        assert_eq!(path_and_query.as_str(), "/v1/chat/completions?key=value");
     }
 }
