@@ -26,7 +26,7 @@ const useRequestsPageV2 = (
   sortLeaf: SortLeafRequest,
   isCached: boolean,
   isLive: boolean,
-  rateLimited: boolean
+  rateLimited?: boolean
 ) => {
   const filterStore = useFilterAST();
   const [timeFilter] = useState<TimeFilter>({

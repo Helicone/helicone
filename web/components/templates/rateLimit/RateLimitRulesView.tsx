@@ -180,7 +180,7 @@ const RateLimitRulesView = () => {
 
                     let unitElement: React.ReactNode = (
                       <Badge variant="outline">
-                        {rule.unit === "requests"
+                        {rule.unit === "request"
                           ? "Requests"
                           : rule.unit === "cents"
                           ? "Cents"

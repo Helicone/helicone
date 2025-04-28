@@ -154,8 +154,8 @@ const AddKeyModal = (props: AddKeyModalProps) => {
                       </TooltipTrigger>
                       <TooltipContent className="max-w-xs">
                         <p>
-                          This will prefix the key with "rl-" and apply rate
-                          limits configured in the dashboard.{" "}
+                          This will prefix the key with &quot;rl-&quot; and
+                          apply rate limits configured in the dashboard.{" "}
                           <a
                             href="/docs/rate-limiting"
                             target="_blank"

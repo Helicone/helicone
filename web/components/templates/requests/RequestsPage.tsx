@@ -18,11 +18,7 @@ import FilterASTButton from "@/filterAST/FilterASTButton";
 import { HeliconeRequest, MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
 import { useGetRequestWithBodies } from "@/services/hooks/requests";
-import {
-  UIFilterRow,
-  UIFilterRowNode,
-  UIFilterRowTree,
-} from "@/services/lib/filters/types";
+import { UIFilterRowNode, UIFilterRowTree } from "@/services/lib/filters/types";
 import { TimeFilter } from "@/types/timeFilter";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -36,7 +32,6 @@ import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   getRootFilterNode,
   isFilterRowNode,
-  isUIFilterRow,
 } from "../../../services/lib/filters/uiFilterRowTree";
 import {
   SortDirection,
