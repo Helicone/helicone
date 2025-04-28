@@ -22,7 +22,7 @@ export interface RateLimitRuleView {
   quota: number;
   window_seconds: number;
   unit: "request" | "cents";
-  segment: string | undefined;
+  segment?: string;
   created_at: string;
   updated_at: string;
 }
@@ -32,7 +32,7 @@ export interface CreateRateLimitRuleParams {
   quota: number;
   window_seconds: number;
   unit: "request" | "cents";
-  segment: string | undefined;
+  segment?: string;
 }
 
 export interface UpdateRateLimitRuleParams

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { z } from "zod";
 import { $JAWN_API } from "@/lib/clients/jawn";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -25,14 +25,17 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { P } from "@/components/ui/typography";
 import { components } from "@/lib/clients/jawnTypes/private"; // Import generated types
+import { Result } from "@/packages/common/result"; // <-- Add Result import
 
 // Use generated types instead of manual definitions
 type CreateRateLimitPayload =
   components["schemas"]["CreateRateLimitRuleParams"];
+type UpdateRateLimitPayload =
+  components["schemas"]["UpdateRateLimitRuleParams"];
 type RateLimitRuleView = components["schemas"]["RateLimitRuleView"];
 
-// Zod schema for client-side validation (mirrors backend)
-const CreateRateLimitRuleClientSchema = z.object({
+// Zod schema for client-side validation (mirrors backend, suitable for both)
+const RateLimitRuleClientSchema = z.object({
   name: z.string().min(1, "Rule Name is required."),
   quota: z.number().nonnegative("Quota must be a non-negative number."),
   window_seconds: z
@@ -41,34 +44,37 @@ const CreateRateLimitRuleClientSchema = z.object({
   unit: z.enum(["request", "cents"]),
   segment: z
     .string()
-    .regex(/^[a-zA-Z0-9_-]*$/, {
-      message:
-        "Segment property key must be alphanumeric characters including underscores and hyphens.",
-    })
+    .optional() // Keep optional
     .refine(
-      (val) => val === "" || val === "user" || /^[a-zA-Z0-9_-]+$/.test(val),
+      (val) =>
+        val === undefined || // Allow undefined (global)
+        val === "user" ||
+        /^[a-zA-Z0-9_-]+$/.test(val || ""), // Allow user or valid key
       {
         message:
           "Segment must be 'user', empty (global), or a valid property key (alphanumeric/hyphen/underscore).",
       }
-    )
-    .optional(),
+    ),
 });
 
-interface CreateRateLimitRuleModalProps {
+interface RateLimitRuleModalProps {
   open: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onSuccess: (newRule: RateLimitRuleView) => void;
+  onSuccess: (rule: RateLimitRuleView) => void;
+  rule?: RateLimitRuleView; // <-- Make rule prop optional
 }
 
-const CreateRateLimitRuleModal = ({
+const RateLimitRuleModal = ({
   open,
   onOpenChange,
   onSuccess,
-}: CreateRateLimitRuleModalProps) => {
+  rule, // <-- Destructure optional rule
+}: RateLimitRuleModalProps) => {
   const queryClient = useQueryClient();
   const org = useOrg();
+  const isEditMode = !!rule; // Determine mode based on rule prop
 
+  // State variables (from original Create modal)
   const [name, setName] = useState("");
   const [quota, setQuota] = useState("");
   const [unit, setUnit] = useState<"request" | "cents">("request");
@@ -79,53 +85,100 @@ const CreateRateLimitRuleModal = ({
   const [customPropertyKey, setCustomPropertyKey] = useState("");
   const [error, setError] = useState<string | null>(null);
 
+  // Effect to initialize/reset state based on mode
+  useEffect(() => {
+    if (open) {
+      if (isEditMode && rule) {
+        // Initialize state for Edit mode
+        setName(rule.name);
+        setQuota(String(rule.quota));
+        setUnit(rule.unit);
+        setWindowSeconds(String(rule.window_seconds));
+
+        if (rule.segment === "user") {
+          setSegmentType("user");
+          setCustomPropertyKey("");
+        } else if (rule.segment) {
+          setSegmentType("property");
+          setCustomPropertyKey(rule.segment);
+        } else {
+          setSegmentType("global");
+          setCustomPropertyKey("");
+        }
+        setError(null); // Clear previous errors
+      } else {
+        // Reset state for Create mode or when closing
+        setName("");
+        setQuota("");
+        setUnit("request");
+        setWindowSeconds("");
+        setSegmentType("global");
+        setCustomPropertyKey("");
+        setError(null);
+      }
+    }
+  }, [open, rule, isEditMode]); // Rerun when modal opens or rule changes
+
+  // Combined Mutation for Create and Edit
   const mutation = useMutation<
-    RateLimitRuleView,
+    Result<RateLimitRuleView | null, string>, // Return type matches Jawn PUT/POST
     Error,
-    CreateRateLimitPayload
+    CreateRateLimitPayload | UpdateRateLimitPayload // Input type depends on mode
   >({
     mutationFn: async (
-      data: CreateRateLimitPayload
-    ): Promise<RateLimitRuleView> => {
-      const resp = await $JAWN_API.POST("/v1/rate-limits", {
-        body: data,
-      });
+      data: CreateRateLimitPayload | UpdateRateLimitPayload
+    ): Promise<Result<RateLimitRuleView | null, string>> => {
+      let resp;
+      if (isEditMode && rule) {
+        // Edit Mode - Use PUT
+        resp = await $JAWN_API.PUT("/v1/rate-limits/{ruleId}", {
+          params: { path: { ruleId: rule.id } },
+          body: data as UpdateRateLimitPayload, // Cast to Update type
+        });
+      } else {
+        // Create Mode - Use POST
+        resp = await $JAWN_API.POST("/v1/rate-limits", {
+          body: data as CreateRateLimitPayload, // Cast to Create type
+        });
+      }
 
-      if (resp.error || !resp.data.data) {
-        console.error("Failed to create rate limit rule:", resp.error);
+      if (resp.error || !resp.data?.data) {
+        console.error("Failed to save rate limit rule:", resp.error);
         throw new Error(
-          resp.error || "An error occurred while creating the rule."
+          resp.error || "An error occurred while saving the rule."
         );
       }
 
-      return resp.data.data as RateLimitRuleView;
+      // Ensure return type matches expected Result structure
+      return resp.data as Result<RateLimitRuleView | null, string>;
     },
-    onSuccess: (newRuleData) => {
-      queryClient.invalidateQueries({
-        queryKey: ["rateLimits", org?.currentOrg?.id],
-      });
-      onSuccess(newRuleData);
-      onOpenChange(false);
-      setName("");
-      setQuota("");
-      setUnit("request");
-      setWindowSeconds("");
-      setSegmentType("global");
-      setCustomPropertyKey("");
-      setError(null);
+    onSuccess: (resultData) => {
+      // Check if data exists in the result (should for success)
+      if (resultData?.data) {
+        queryClient.invalidateQueries({
+          queryKey: ["rateLimits", org?.currentOrg?.id],
+        });
+        onSuccess(resultData.data); // Pass the created/updated rule data
+        onOpenChange(false); // Close modal on success
+      } else {
+        // Handle unexpected success case where data might be null/undefined
+        console.warn("Rate limit rule saved, but no data returned.");
+        setError("Rule saved, but failed to retrieve updated data.");
+        onOpenChange(false); // Still close modal
+      }
     },
     onError: (error: Error) => {
       setError(error.message ?? "An unknown error occurred.");
     },
   });
 
-  const handleCreate = () => {
+  const handleSubmit = () => {
     setError(null);
 
     const parsedQuota = parseInt(quota, 10);
     const parsedWindowSeconds = parseInt(windowSeconds, 10);
 
-    let segment = undefined;
+    let segment: string | undefined;
     if (segmentType === "user") {
       segment = "user";
     } else if (segmentType === "property") {
@@ -138,20 +191,23 @@ const CreateRateLimitRuleModal = ({
       segment = customPropertyKey.trim();
     }
 
-    const formData: CreateRateLimitPayload = {
+    // Prepare data using the schema structure expected by the API
+    const formData = {
       name: name.trim(),
-      quota: isNaN(parsedQuota) ? NaN : parsedQuota,
-      window_seconds: isNaN(parsedWindowSeconds) ? NaN : parsedWindowSeconds,
+      quota: isNaN(parsedQuota) ? undefined : parsedQuota, // Use undefined if NaN for Zod
+      window_seconds: isNaN(parsedWindowSeconds)
+        ? undefined
+        : parsedWindowSeconds, // Use undefined if NaN
       unit: unit,
-      segment: segment ?? undefined,
+      segment: segment,
     };
 
-    const validationResult =
-      CreateRateLimitRuleClientSchema.safeParse(formData);
+    // Validate using Zod
+    const validationResult = RateLimitRuleClientSchema.safeParse(formData);
 
     if (!validationResult.success) {
       const formattedErrors = validationResult.error.errors
-        .map((e) => e.message)
+        .map((e) => `${e.path.join(".")} (${e.code}): ${e.message}`) // More detailed error
         .join("\n");
       setError(formattedErrors);
       return;
@@ -160,9 +216,10 @@ const CreateRateLimitRuleModal = ({
     mutation.mutate(validationResult.data);
   };
 
+  // Use the passed-in handler, but clear errors when closing
   const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
-      setError(null);
+      setError(null); // Clear errors when closing
     }
     onOpenChange(isOpen);
   };
@@ -171,10 +228,14 @@ const CreateRateLimitRuleModal = ({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[525px]">
         <DialogHeader>
-          <DialogTitle>Create New Rate Limit Rule</DialogTitle>
+          {/* Conditional Title/Description */}
+          <DialogTitle>
+            {isEditMode ? "Edit Rate Limit Rule" : "Create New Rate Limit Rule"}
+          </DialogTitle>
           <DialogDescription>
-            Define a specific rate limit constraint. Requests must satisfy all
-            applicable active rules.
+            {isEditMode
+              ? "Modify the details of this rate limit rule."
+              : "Define a specific rate limit constraint. Requests must satisfy all applicable active rules."}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -215,7 +276,7 @@ const CreateRateLimitRuleModal = ({
                   <SelectValue placeholder="Select unit" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="request">Request</SelectItem>
+                  <SelectItem value="request">Requests</SelectItem>
                   <SelectItem value="cents">Cents</SelectItem>
                 </SelectContent>
               </Select>
@@ -248,7 +309,7 @@ const CreateRateLimitRuleModal = ({
                 onValueChange={(value: "global" | "user" | "property") => {
                   setSegmentType(value);
                   if (value !== "property") {
-                    setCustomPropertyKey("");
+                    setCustomPropertyKey(""); // Reset custom key if not property type
                   }
                 }}
                 disabled={mutation.isPending}
@@ -258,7 +319,8 @@ const CreateRateLimitRuleModal = ({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="global">All Requests (Global)</SelectItem>
-                  <SelectItem value="user">Each User</SelectItem>
+                  <SelectItem value="user">Each User ID</SelectItem>{" "}
+                  {/* Updated label */}
                   <SelectItem value="property">Custom Property</SelectItem>
                 </SelectContent>
               </Select>
@@ -275,14 +337,16 @@ const CreateRateLimitRuleModal = ({
                 value={customPropertyKey}
                 onChange={(e) => setCustomPropertyKey(e.target.value)}
                 className="col-span-3"
-                placeholder='e.g., "organization_id" or "feature-flag"'
+                placeholder='e.g., "customerId" or "X-Feature-Flag"'
                 disabled={mutation.isPending}
               />
             </div>
           )}
         </div>
         {error && (
-          <div className="px-6 pb-2 text-sm text-destructive">
+          <div className="px-4 pb-2 text-sm text-destructive">
+            {" "}
+            {/* Adjusted padding */}
             <P className="font-semibold mb-1">Error</P>
             <pre className="whitespace-pre-wrap font-sans">{error}</pre>
           </div>
@@ -297,10 +361,17 @@ const CreateRateLimitRuleModal = ({
           </Button>
           <Button
             type="submit"
-            onClick={handleCreate}
-            disabled={mutation.isPending}
+            onClick={handleSubmit}
+            disabled={mutation.isPending || !name || !quota || !windowSeconds} // Ensuring this line is correct
           >
-            {mutation.isPending ? "Creating..." : "Create Rule"}
+            {/* Conditional Button Text */}
+            {mutation.isPending
+              ? isEditMode
+                ? "Saving..."
+                : "Creating..."
+              : isEditMode
+              ? "Save Changes"
+              : "Create Rule"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -308,4 +379,4 @@ const CreateRateLimitRuleModal = ({
   );
 };
 
-export default CreateRateLimitRuleModal;
+export default RateLimitRuleModal; // <-- Renamed export

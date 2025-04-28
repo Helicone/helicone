@@ -161,7 +161,11 @@ export class RateLimitManager extends BaseManager {
     }
 
     // Map validated API params to DB Update type for the store
-    const dbParams: UpdateOrgRateLimitDBStore = validatedParams;
+    const dbParams: UpdateOrgRateLimitDBStore = {
+      ...validatedParams,
+      segment:
+        validatedParams.segment === undefined ? null : validatedParams.segment,
+    };
 
     const result = await this.rateLimitStore.updateRateLimit(
       ruleId,
