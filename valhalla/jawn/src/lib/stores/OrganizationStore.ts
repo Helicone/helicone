@@ -559,17 +559,28 @@ export class OrganizationStore extends BaseStore {
     const tempKey: Result<BaseTempKey, string> =
       await generateTempHeliconeAPIKey(organizationId);
 
+    const hasBeenSetup = await dbExecute<{ demoDataSetup: boolean }>(
+      `select onboarding_status->>'demoDataSetup' as demoDataSetup from organization where id = $1`,
+      [organizationId]
+    );
+
+    if (
+      hasBeenSetup.error ||
+      !hasBeenSetup.data ||
+      hasBeenSetup.data.length === 0
+    ) {
+      return err("Organization not found");
+    }
+
+    if (hasBeenSetup.data[0].demoDataSetup) {
+      return ok(null);
+    }
+
     if (tempKey.error) {
       return err(tempKey.error);
     }
 
     try {
-      await tempKey.data?.with(async (apiKey) => {
-        await setupDemoOrganizationRequests({
-          heliconeApiKey: apiKey,
-        });
-      });
-
       const result = await dbExecute<{ id: string }>(
         `UPDATE organization 
          SET onboarding_status = COALESCE(onboarding_status, '{}'::jsonb) || '{"demoDataSetup": true}'::jsonb
@@ -581,6 +592,12 @@ export class OrganizationStore extends BaseStore {
       if (result.error || !result.data || result.data.length === 0) {
         return err("Failed to update organization onboarding status");
       }
+
+      await tempKey.data?.with(async (apiKey) => {
+        await setupDemoOrganizationRequests({
+          heliconeApiKey: apiKey,
+        });
+      });
 
       return ok(null);
     } catch (error) {

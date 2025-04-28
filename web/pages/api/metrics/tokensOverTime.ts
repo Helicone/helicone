@@ -2,20 +2,13 @@ import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-
 import { getXOverTime } from "../../../lib/api/metrics/getXOverTime";
 import { DataOverTimeRequest } from "../../../lib/api/metrics/timeDataHandlerWrapper";
-
 import { Result, resultMap } from "../../../packages/common/result";
 import { MetricsBackendBody } from "../../../services/hooks/useBackendFunction";
+import { TokensOverTime } from "./TokensOverTimeType";
 
-export interface TokensOverTime {
-  prompt_tokens: number;
-  completion_tokens: number;
-  time: Date;
-}
-
-export async function getTokensOverTime(
+async function getTokensOverTime(
   data: DataOverTimeRequest
 ): Promise<Result<TokensOverTime[], string>> {
   const res = await getXOverTime<{

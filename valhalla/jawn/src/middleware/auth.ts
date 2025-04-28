@@ -63,14 +63,17 @@ export const authMiddleware = async (
   try {
     const request = new RequestWrapper(req);
     const authorization = request.authHeader();
+
     if (authorization.error) {
       res.status(401).json({
         error: authorization.error,
       });
       return;
     }
+
     const authParams = await getHeliconeAuthClient().authenticate(
-      authorization.data!
+      authorization.data!,
+      req.headers
     );
 
     if (

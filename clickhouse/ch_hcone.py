@@ -11,7 +11,8 @@ from yarl import URL
 
 file_dir = os.path.dirname(os.path.realpath(__file__))
 schema_dir = os.path.join(file_dir, "migrations")
-all_schemas = [os.path.join(schema_dir, file) for file in os.listdir(schema_dir)]
+all_schemas = [os.path.join(schema_dir, file)
+               for file in os.listdir(schema_dir)]
 
 
 def schema_sort_key(filename):
@@ -41,7 +42,8 @@ def run_curl_command(query, host, port, user=None, password=None, migration_file
             f"echo \"{query}\" | curl {auth} '{base_url}' --data-binary @-"
         ).strip()
 
-    result = subprocess.run(curl_cmd, shell=True, capture_output=True, text=True)
+    result = subprocess.run(curl_cmd, shell=True,
+                            capture_output=True, text=True)
     if result.returncode != 0:
         print("Error running query")
         print("STDOUT:", result.stdout)
@@ -105,7 +107,8 @@ def run_migrations(host, port, retries=5, user=None, password=None):
                 run_migrations(host, port, retries, user, password)
             break
         else:
-            mark_migration_as_applied(migration_name, host, port, user, password)
+            mark_migration_as_applied(
+                migration_name, host, port, user, password)
 
     print("Finished running migrations")
 
@@ -138,12 +141,16 @@ def main():
         envhost = str(url.host)
         envport = str(url.port) if url.port else envport
 
-    parser.add_argument("--version", action="version", version="%(prog)s 0.1.0")
-    parser.add_argument("--migrate", action="store_true", help="Run migrations")
+    parser.add_argument("--version", action="version",
+                        version="%(prog)s 0.1.0")
+    parser.add_argument("--migrate", action="store_true",
+                        help="Run migrations")
     parser.add_argument("--start", action="store_true", help="Start services")
     parser.add_argument("--stop", action="store_true", help="Stop services")
-    parser.add_argument("--restart", action="store_true", help="Restart services")
-    parser.add_argument("--upgrade", action="store_true", help="Apply all migrations")
+    parser.add_argument("--restart", action="store_true",
+                        help="Restart services")
+    parser.add_argument("--upgrade", action="store_true",
+                        help="Apply all migrations")
     parser.add_argument(
         "--host", default=envhost or "localhost", help="ClickHouse server host"
     )
@@ -167,7 +174,8 @@ def main():
     password = os.getenv("CLICKHOUSE_PASSWORD")
 
     if args.user and not password and not args.no_password:
-        password = getpass.getpass(prompt="Enter password for ClickHouse server user: ")
+        password = getpass.getpass(
+            prompt="Enter password for ClickHouse server user: ")
 
     print(f"""
     Running:
@@ -189,7 +197,8 @@ def main():
             print("Failed to start services")
         else:
             create_migration_table(args.host, args.port, args.user, password)
-            run_migrations(args.host, args.port, user=args.user, password=password)
+            run_migrations(args.host, args.port,
+                           user=args.user, password=password)
             print(f"""
 Test query by running:
 echo 'SELECT 1' | curl '{get_host(args.host)}:{args.port}/' --data-binary @-
