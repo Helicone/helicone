@@ -57,6 +57,7 @@ pub struct Config {
     pub server: self::server::ServerConfig,
     pub database: self::database::Config,
     pub minio: self::minio::Config,
+    pub dispatcher: self::dispatcher::DispatcherConfig,
     pub is_production: bool,
     /// *ALL* supported providers.
     pub providers: self::providers::ProvidersConfig,
@@ -115,6 +116,8 @@ impl crate::tests::TestDefault for Config {
     fn test_default() -> Self {
         let telemetry = telemetry::Config {
             exporter: telemetry::Exporter::Stdout,
+            level: "info,llm_proxy=info,tower::balance=trace,tower::load=trace"
+                .to_string(),
             ..Default::default()
         };
         Config {
@@ -123,6 +126,7 @@ impl crate::tests::TestDefault for Config {
             server: self::server::ServerConfig::test_default(),
             database: self::database::Config::default(),
             minio: self::minio::Config::test_default(),
+            dispatcher: self::dispatcher::DispatcherConfig::test_default(),
             is_production: false,
             providers: self::providers::ProvidersConfig::default(),
             deployment_target: DeploymentTarget::SelfHosted,

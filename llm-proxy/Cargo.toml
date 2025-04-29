@@ -16,6 +16,7 @@ chrono = { workspace = true }
 clap = { workspace = true }
 config = { workspace = true }
 compact_str = { workspace = true, features = ['serde'] }
+derive_builder = { workspace = true }
 derive_more = { workspace = true, features = ['as_ref', 'constructor', 'debug', 'deref', 'deref_mut', 'display', 'from', 'from_str'] }
 displaydoc = { workspace = true }
 futures = { workspace = true }

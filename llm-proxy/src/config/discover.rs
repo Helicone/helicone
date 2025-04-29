@@ -15,6 +15,8 @@ pub struct DiscoverConfig {
     pub discover_mode: DiscoverMode,
     #[serde(default = "default_discover_decay", with = "humantime_serde")]
     pub discover_decay: Duration,
+    #[serde(default = "default_rtt", with = "humantime_serde")]
+    pub default_rtt: Duration,
 }
 
 impl DiscoverConfig {
@@ -34,12 +36,17 @@ impl Default for DiscoverConfig {
             api_keys_source: ProviderKeysSource::Env,
             discover_mode: DiscoverMode::Config,
             discover_decay: default_discover_decay(),
+            default_rtt: default_rtt(),
         }
     }
 }
 
 fn default_discover_decay() -> Duration {
     Duration::from_secs(30)
+}
+
+fn default_rtt() -> Duration {
+    Duration::from_secs(1)
 }
 
 #[cfg(feature = "testing")]
@@ -55,6 +62,7 @@ impl crate::tests::TestDefault for DiscoverConfig {
             api_keys_source: ProviderKeysSource::Env,
             discover_mode: DiscoverMode::Config,
             discover_decay: Duration::from_millis(100),
+            default_rtt: Duration::from_millis(10),
         }
     }
 }

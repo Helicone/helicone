@@ -2307,6 +2307,7 @@ dependencies = [
  "clap",
  "compact_str",
  "config",
+ "derive_builder",
  "derive_more",
  "displaydoc",
  "futures",

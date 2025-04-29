@@ -7,7 +7,7 @@ use std::{
 use futures::future::BoxFuture;
 use tower::MakeService as _;
 
-use super::mock::Mock;
+use super::mock::{Mock, MockArgs};
 use crate::{
     app::{App, AppFactory, AppResponse},
     config::Config,
@@ -16,28 +16,15 @@ use crate::{
 
 pub const MOCK_SERVER_PORT: u16 = 8111;
 
+#[derive(Default)]
 pub struct HarnessBuilder {
-    openai_latency: Option<u64>,
-    anthropic_latency: Option<u64>,
+    mock_args: Option<MockArgs>,
     config: Option<Config>,
 }
 
 impl HarnessBuilder {
-    fn new() -> Self {
-        Self {
-            openai_latency: None,
-            anthropic_latency: None,
-            config: None,
-        }
-    }
-
-    pub fn with_openai_latency(mut self, latency: u64) -> Self {
-        self.openai_latency = Some(latency);
-        self
-    }
-
-    pub fn with_anthropic_latency(mut self, latency: u64) -> Self {
-        self.anthropic_latency = Some(latency);
+    pub fn with_mock_args(mut self, mock_args: MockArgs) -> Self {
+        self.mock_args = Some(mock_args);
         self
     }
 
@@ -47,14 +34,9 @@ impl HarnessBuilder {
     }
 
     pub async fn build(self) -> Harness {
-        let mut config = self.config.unwrap();
-        let mock = Mock::new_with_latency(
-            &mut config.providers,
-            self.openai_latency,
-            self.anthropic_latency,
-        )
-        .await;
-        Harness::new(mock, config).await
+        let config = self.config.expect("config is required");
+        let mock_args = self.mock_args.expect("mock args are required");
+        Harness::new(mock_args, config).await
     }
 }
 pub struct Harness {
@@ -64,7 +46,8 @@ pub struct Harness {
 }
 
 impl Harness {
-    async fn new(mock: Mock, config: Config) -> Self {
+    async fn new(mock_args: MockArgs, mut config: Config) -> Self {
+        let mock = Mock::new(&mut config.providers, mock_args).await;
         let (app, _) = App::new(config).await.expect("failed to create app");
         let app_factory = AppFactory::new(app.state.clone(), app);
         let socket_addr =
@@ -77,7 +60,7 @@ impl Harness {
     }
 
     pub fn builder() -> HarnessBuilder {
-        HarnessBuilder::new()
+        HarnessBuilder::default()
     }
 }
 

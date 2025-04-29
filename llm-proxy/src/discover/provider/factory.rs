@@ -2,7 +2,6 @@ use std::{
     future::{Ready, ready},
     sync::Arc,
     task::{Context, Poll},
-    time::Duration,
 };
 
 use tokio::sync::mpsc::Receiver;
@@ -15,8 +14,6 @@ use crate::{
     dispatcher::DispatcherService,
     error::init::InitError,
 };
-
-const DEFAULT_PROVIDER_RTT: Duration = Duration::from_millis(500);
 
 #[derive(Debug)]
 pub struct DiscoverFactory {
@@ -59,7 +56,7 @@ impl Service<Receiver<Change<Key, DispatcherService>>> for DiscoverFactory {
         };
         let discovery = PeakEwmaDiscover::new(
             discovery,
-            DEFAULT_PROVIDER_RTT,
+            self.app_state.0.config.discover.default_rtt,
             self.app_state.0.config.discover.discover_decay,
             Default::default(),
         );

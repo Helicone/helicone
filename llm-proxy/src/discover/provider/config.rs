@@ -3,7 +3,6 @@ use std::{
     pin::Pin,
     sync::Arc,
     task::{Context, Poll},
-    time::Duration,
 };
 
 use futures::Stream;
@@ -20,8 +19,6 @@ use crate::{
     dispatcher::{Dispatcher, DispatcherService},
     error::init::InitError,
 };
-
-const CONNECTION_TIMEOUT: Duration = Duration::from_secs(2);
 
 /// Reads available models and providers from the config file.
 ///
@@ -60,7 +57,8 @@ impl ConfigDiscovery {
             let key = Key::new(*provider);
 
             let http_client = Client::builder()
-                .connect_timeout(CONNECTION_TIMEOUT)
+                .connect_timeout(app.0.config.dispatcher.connection_timeout)
+                .timeout(app.0.config.dispatcher.timeout)
                 .build()
                 .map_err(InitError::CreateProxyClient)?;
             let dispatcher =
@@ -85,8 +83,8 @@ impl Stream for ConfigDiscovery {
     ) -> Poll<Option<Self::Item>> {
         let mut this = self.project();
 
-        // 1) one‑time inserts, once the ServiceMap returns
-        // `Poll::Ready(None)`, then it's done
+        // 1) one‑time inserts, once the ServiceMap returns `Poll::Ready(None)`,
+        //    then the service map is empty
         if let Poll::Ready(Some(change)) = this.initial.as_mut().poll_next(ctx)
         {
             return handle_change(change);
@@ -96,7 +94,7 @@ impl Stream for ConfigDiscovery {
         match this.events.as_mut().poll_next(ctx) {
             Poll::Ready(Some(change)) => handle_change(change),
             Poll::Pending => Poll::Pending,
-            Poll::Ready(None) => Poll::Ready(None), // end of stream
+            Poll::Ready(None) => Poll::Ready(None),
         }
     }
 }
