@@ -1,4 +1,3 @@
-import { TimeIncrement } from "@/lib/timeCalculations/fetchTimeData";
 import { getTimeInterval } from "@/lib/timeCalculations/time";
 import { getTimeMap } from "@/lib/timeCalculations/constants";
 

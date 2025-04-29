@@ -1,5 +1,5 @@
 import { useOrg } from "@/components/layout/org/organizationContext";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { RequestsOverTime } from "../../../lib/timeCalculations/fetchTimeData";
 import {
   getTimeInterval,
@@ -17,7 +17,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/shared/Header";
 import RateLimitRequestsView from "./RateLimitRequestsView";
 import RateLimitRulesView from "./RateLimitRulesView";
-import { type ChartConfig } from "@/components/ui/chart";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 import {
   Tooltip,
@@ -26,10 +25,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { InfoIcon } from "lucide-react";
-import { Small } from "@/components/ui/typography";
-import ThemedTimeFilter from "@/components/shared/themed/themedTimeFilter";
 import { TimeInterval } from "@/lib/timeCalculations/time";
-import { useRouter } from "next/router";
 
 const TABS = [
   { id: "requests", label: "Rate Limited Requests" },
