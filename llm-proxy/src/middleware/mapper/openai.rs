@@ -41,11 +41,11 @@ impl<'a>
         Self::Error,
     > {
         let target_provider = Provider::Anthropic;
-        // TODO: would be nice to remove the clone in the .get() call here
         let model = self
             .model_mappings
             .as_ref()
-            .get(&(target_provider, value.model.clone()))
+            .get(&target_provider)
+            .and_then(|m| m.get(&value.model))
             .ok_or_else(|| {
                 MapperError::NoModelMapping(
                     target_provider,

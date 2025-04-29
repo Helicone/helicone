@@ -73,3 +73,6 @@ testing = ["dep:stubr", "dep:serial_test"]
 name = "default_target"
 required-features = ["testing"]
 
+[[test]]
+name = "mapper"
+required-features = ["testing"]

@@ -10,5 +10,5 @@ pub(crate) mod router;
 pub(crate) mod store;
 #[cfg(feature = "testing")]
 pub mod tests;
-pub(crate) mod types;
+pub mod types;
 pub mod utils;

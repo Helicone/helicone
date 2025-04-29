@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use derive_more::AsRef;
+use derive_more::{AsMut, AsRef};
 use nonempty_collections::{NEVec, nev};
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
@@ -15,8 +15,14 @@ use crate::{
     types::{model::Model, provider::Provider, router::RouterId},
 };
 
-#[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq, AsRef)]
+#[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq, AsRef, AsMut)]
 pub struct RouterConfigs(HashMap<RouterId, RouterConfig>);
+
+impl RouterConfigs {
+    pub fn new(configs: HashMap<RouterId, RouterConfig>) -> Self {
+        Self(configs)
+    }
+}
 
 impl Default for RouterConfigs {
     fn default() -> Self {
