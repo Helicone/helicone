@@ -14,6 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    - name: Temporarily modify the rust toolchain version
+      run: rustup override set nightly
+    - name: Output rust version for educational purposes
+      run: rustup --version
     - name: Format
       run: cargo +nightly fmt --check
   clippy:
