@@ -260,17 +260,20 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   }
 
   determineBearerKeyType(bearerKey: string): HeliconeBearerKeyType {
-    // Extract the key without Bearer prefix if present
-    const key = bearerKey.replace("Bearer ", "").trim();
+    try {
+      const key = bearerKey.replace("Bearer ", "").trim();
 
-    // Check if key matches any rate-limited pattern
-    if (
-      HELICONE_RATE_LIMITED_API_KEY_REGEX.some((pattern) => pattern.test(key))
-    ) {
-      return "rate-limited";
+      if (
+        HELICONE_RATE_LIMITED_API_KEY_REGEX.some((pattern) => pattern.test(key))
+      ) {
+        return "rate-limited";
+      }
+
+      return "standard";
+    } catch (e) {
+      console.error(`Error determining bearer key type: ${e}`);
+      return "standard";
     }
-
-    return "standard";
   }
 
   setModelOverride(modelOverride: string | null) {
