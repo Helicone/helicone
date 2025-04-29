@@ -102,7 +102,7 @@ export default function PerformanceTimeline({
     const barHeight = 4;
     const barSpacing = 2;
     let currentY = 10;
-    const minimapPadding = 20; // Add padding to minimap
+    const minimapPadding = 8; // Add padding to minimap
     const minimapContentWidth = 150 - minimapPadding * 2; // Adjust content width for padding
 
     // Group items by section
@@ -170,19 +170,7 @@ export default function PerformanceTimeline({
       // Update handle position for dragging (using ref instead of state)
       minimapHandlePositionRef.current = { x: visibleEndX, y: 70 };
     }
-  }, [
-    minTime,
-    timeSpan,
-    items,
-    sections,
-    colors,
-    minimapRef,
-    scrollContainerRef,
-    canvasWidthRef,
-    containerWidthRef,
-    scrollPositionRef,
-    minimapHandlePositionRef,
-  ]);
+  }, [sections, items, colors, minTime, timeSpan, ENDING_PADDING]);
 
   // Helper function to lighten a color - Restore inside component scope
   function lightenColor(color: string, amount: number): string {
@@ -388,7 +376,7 @@ export default function PerformanceTimeline({
       canvas.removeEventListener("mousemove", handleMouseMove);
       canvas.removeEventListener("mouseleave", handleMouseLeave);
     };
-  }, [minTime, items, sections, PIXELPERMS]); // Keep dependencies, add calculateTooltipPosition
+  }, [minTime, items, sections, PIXELPERMS]);
 
   // Draw the minimap initially
   useEffect(() => {
