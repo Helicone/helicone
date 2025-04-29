@@ -156,7 +156,21 @@ export const mapGeminiPro: MapperFn<any, any> = ({
       ? response.modelVersion
       : model;
 
-  const requestMessages = getRequestMessages(messages);
+  // Extract system instruction
+  const systemInstructionText = request?.systemInstruction?.parts?.[0]?.text;
+  const systemMessage: Message | null = systemInstructionText
+    ? {
+        _type: "message",
+        role: "system",
+        content: systemInstructionText,
+      }
+    : null;
+
+  const userMessages = getRequestMessages(messages);
+
+  const requestMessages = systemMessage
+    ? [systemMessage, ...userMessages]
+    : userMessages;
 
   response = Array.isArray(response) ? response : [response].filter(Boolean);
 
