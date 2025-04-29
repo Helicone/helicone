@@ -14,6 +14,7 @@ import {
   getSmartTickFormatter,
   getTooltipTimeFormatter,
 } from "./timeFormatters";
+import { EMPTY_STATE_PAGES } from "../requests/RequestsEmptyState";
 
 const chartConfig = {
   count: {
@@ -30,14 +31,17 @@ interface RateLimitRequestsViewProps {
   isLoading: boolean;
   chartData: Array<{ time: Date; count: number }>;
   timeFilter: TimeFilter;
+  onConfigureClick?: () => void;
+  emptyStateIsVisible: boolean;
 }
 
 const RateLimitRequestsView = ({
   isLoading,
   chartData,
   timeFilter,
+  onConfigureClick,
+  emptyStateIsVisible,
 }: RateLimitRequestsViewProps) => {
-  // Create date references for formatting
   const start = useMemo(() => timeFilter.start || new Date(0), [timeFilter]);
   const end = useMemo(() => timeFilter.end || new Date(), [timeFilter]);
 
@@ -107,6 +111,11 @@ const RateLimitRequestsView = ({
           sort={{ sortKey: null, sortDirection: null, isCustomProperty: false }}
           rateLimited={true}
           organizationLayoutAvailable={false}
+          emptyStateOptions={{
+            options: EMPTY_STATE_PAGES["rate-limits"],
+            onPrimaryActionClick: onConfigureClick,
+            isVisible: emptyStateIsVisible,
+          }}
         />
       </div>
     </Col>

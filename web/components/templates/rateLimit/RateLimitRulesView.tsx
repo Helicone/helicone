@@ -1,6 +1,6 @@
 import { P } from "@/components/ui/typography";
 import { Col } from "../../layout/common/col";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import RateLimitRuleModal from "./RateLimitRuleModal";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useOrg } from "@/components/layout/org/organizationContext";
@@ -36,7 +36,13 @@ type RateLimitRuleView = components["schemas"]["RateLimitRuleView"];
 type UpdateRateLimitRuleParams =
   components["schemas"]["UpdateRateLimitRuleParams"];
 
-const RateLimitRulesView = () => {
+interface RateLimitRulesViewProps {
+  triggerOpenCreateModal?: number;
+}
+
+const RateLimitRulesView = (props: RateLimitRulesViewProps) => {
+  const { triggerOpenCreateModal } = props;
+
   const org = useOrg();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -77,6 +83,13 @@ const RateLimitRulesView = () => {
     },
     // onError handled by try/catch in handleDelete
   });
+
+  // Effect to open create modal when trigger prop changes
+  useEffect(() => {
+    if (triggerOpenCreateModal && triggerOpenCreateModal > 0) {
+      setIsCreateModalOpen(true);
+    }
+  }, [triggerOpenCreateModal]);
 
   const rules = data?.data?.data;
   const apiError = data?.data?.error;

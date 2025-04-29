@@ -47,7 +47,6 @@ import ExportButton from "../../shared/themed/table/exportButton";
 import ThemedTable from "../../shared/themed/table/themedTable";
 import ThemedModal from "../../shared/themed/themedModal";
 import useSearchParams from "../../shared/utils/useSearchParams";
-import OnboardingFloatingPrompt from "../dashboard/OnboardingFloatingPrompt";
 import NewDataset from "../datasets/NewDataset";
 import { getInitialColumns } from "./initialColumns";
 import {
@@ -57,7 +56,10 @@ import {
   getMockRequests,
 } from "./mockRequestsData";
 import RequestDrawer from "./RequestDrawer";
-import RequestsEmptyState from "./RequestsEmptyState";
+import RequestsEmptyState, {
+  EMPTY_STATE_PAGES,
+  RequestsPageEmptyStateOptions,
+} from "./RequestsEmptyState";
 import StreamWarning from "./StreamWarning";
 import TableFooter from "./tableFooter";
 import UnauthorizedView from "./UnauthorizedView";
@@ -77,7 +79,9 @@ interface RequestsPageV2Props {
   evaluatorId?: string;
   rateLimited?: boolean;
   organizationLayoutAvailable: boolean;
+  emptyStateOptions?: RequestsPageEmptyStateOptions;
 }
+
 export default function RequestsPage(props: RequestsPageV2Props) {
   const {
     currentPage,
@@ -87,6 +91,11 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     initialRequestId,
     userId,
     rateLimited = false,
+    organizationLayoutAvailable,
+    emptyStateOptions = {
+      options: EMPTY_STATE_PAGES.requests,
+      isVisible: true,
+    },
   } = props;
 
   /* -------------------------------------------------------------------------- */
@@ -94,16 +103,12 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   /* -------------------------------------------------------------------------- */
   const initialLoadRef = useRef(true);
   const drawerRef = useRef<any>(null);
-  const popoverContentRef = useRef<HTMLDivElement>(null);
   const tableRef = useRef<any>(null);
 
   /* -------------------------------------------------------------------------- */
   /*                                   STATES                                   */
   /* -------------------------------------------------------------------------- */
-  const [isFiltersPinned, setIsFiltersPinned] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [showOnboardingPopUp, setShowOnboardingPopUp] = useState(false);
   const [selectedData, setSelectedData] = useState<
     MappedLLMRequest | undefined
   >(undefined);
@@ -227,16 +232,25 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   /* -------------------------------------------------------------------------- */
   /*                                    MEMOS                                   */
   /* -------------------------------------------------------------------------- */
-  // Track whether we should show mock data (for users who haven't onboarded)
   const shouldShowMockData = useMemo(() => {
-    // Return undefined if org data isn't loaded yet
+    const showMockData = emptyStateOptions.isVisible === true;
+
     if (orgContext?.currentOrg === undefined) {
       return undefined;
     }
-    return orgContext?.currentOrg?.has_onboarded === false;
+    return orgContext?.currentOrg?.has_onboarded === false && showMockData;
   }, [orgContext?.currentOrg]);
-  // Create mock data with useMemo to avoid recreating on every render
-  const mockRequests = useMemo(() => getMockRequests(pageSize), [pageSize]);
+
+  const mockRequests = useMemo(() => {
+    const shouldForceRateLimitMock =
+      emptyStateOptions?.options === EMPTY_STATE_PAGES["rate-limits"];
+
+    return getMockRequests(
+      pageSize,
+      shouldForceRateLimitMock ? 429 : undefined
+    );
+  }, [pageSize, emptyStateOptions]);
+
   const mockFilterMap = useMemo(() => getMockFilterMap(), []);
   const mockProperties = useMemo(() => getMockProperties(), []);
   const mockCount = useMemo(() => getMockRequestCount(), []);
@@ -521,14 +535,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     }
   }, [filterMap, getAdvancedFilters, isDataLoading]);
 
-  useEffect(() => {
-    if (orgContext?.currentOrg?.has_onboarded !== undefined) {
-      setShowOnboardingPopUp(!orgContext.currentOrg.has_onboarded);
-    } else {
-      orgContext?.refetchOrgs();
-    }
-  }, [orgContext, orgContext?.currentOrg?.has_onboarded]);
-
   // Load and display initial request data in drawer
   useEffect(() => {
     if (initialRequest.data?.data && !selectedData) {
@@ -807,14 +813,14 @@ export default function RequestsPage(props: RequestsPageV2Props) {
           }}
         />
       </ThemedModal>
-      <OnboardingFloatingPrompt
-        open={showOnboardingPopUp}
-        setOpen={setShowOnboardingPopUp}
-      />
     </main>
   ) : (
     <div className="animate-fade-in">
-      <RequestsEmptyState isVisible={true} />
+      <RequestsEmptyState
+        isVisible={emptyStateOptions.isVisible ?? true}
+        options={emptyStateOptions.options}
+        onClickHandler={emptyStateOptions.onPrimaryActionClick}
+      />
 
       <ThemedTable
         id="requests-table"

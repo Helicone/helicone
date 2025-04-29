@@ -1,5 +1,5 @@
 import { useOrg } from "@/components/layout/org/organizationContext";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { RequestsOverTime } from "../../../lib/timeCalculations/fetchTimeData";
 import {
   getTimeInterval,
@@ -26,6 +26,8 @@ import {
 } from "@/components/ui/tooltip";
 import { InfoIcon } from "lucide-react";
 import { TimeInterval } from "@/lib/timeCalculations/time";
+import { useQuery } from "@tanstack/react-query";
+import { $JAWN_API } from "@/lib/clients/jawn";
 
 const TABS = [
   { id: "requests", label: "Rate Limited Requests" },
@@ -71,6 +73,8 @@ const RateLimitPage = (props: {}) => {
     "rateLimitPageActiveTab",
     "requests"
   );
+  const [triggerOpenCreateRuleModal, setTriggerOpenCreateRuleModal] =
+    useState(0);
   const org = useOrg();
   const { user } = useHeliconeAuthClient();
   const {
@@ -139,7 +143,29 @@ const RateLimitPage = (props: {}) => {
     },
   });
 
-  const showMockData = org?.currentOrg?.has_onboarded === false;
+  // Fetch Rate Limit Rules (using shared query key)
+  const rulesQuery = useQuery({
+    queryKey: ["rateLimits", org?.currentOrg?.id],
+    queryFn: async () => {
+      if (!org?.currentOrg?.id) {
+        return null;
+      }
+      const response = await $JAWN_API.GET("/v1/rate-limits");
+      return response;
+    },
+    enabled: !!org?.currentOrg?.id,
+  });
+
+  const rulesCount = rulesQuery.data?.data?.data?.length ?? 0;
+  const totalRateLimitedRequests = rateLimitOverTime.data?.data?.reduce(
+    (sum, d) => sum + d.count,
+    0
+  );
+  const shouldShowEmptyState =
+    rulesCount === 0 && totalRateLimitedRequests === 0;
+  const showMockData =
+    org?.currentOrg?.has_onboarded === false && shouldShowEmptyState;
+
   const chartData = showMockData
     ? memoizedMockData
     : rateLimitOverTime.data?.data ?? [];
@@ -150,6 +176,11 @@ const RateLimitPage = (props: {}) => {
   const isOrgLoading = !org || !org.currentOrg;
   const isUserLoading = user === undefined;
   const isLoading = isOrgLoading || isAuthLoading || isUserLoading;
+
+  const handleConfigureClick = () => {
+    setCurrentTab("rules");
+    setTriggerOpenCreateRuleModal((prev) => prev + 1);
+  };
 
   if (isLoading) {
     return <LoadingAnimation title="Loading..." height={175} width={175} />;
@@ -230,10 +261,14 @@ const RateLimitPage = (props: {}) => {
             isLoading={isChartLoading}
             chartData={chartData}
             timeFilter={urlTimeFilter}
+            onConfigureClick={handleConfigureClick}
+            emptyStateIsVisible={shouldShowEmptyState}
           />
         </TabsContent>
         <TabsContent value="rules">
-          <RateLimitRulesView />
+          <RateLimitRulesView
+            triggerOpenCreateModal={triggerOpenCreateRuleModal}
+          />
         </TabsContent>
       </div>
     </Tabs>
