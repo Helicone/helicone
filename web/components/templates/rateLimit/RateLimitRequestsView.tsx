@@ -1,37 +1,69 @@
-import { BarChart, Bar, XAxis } from "recharts";
+import { BarChart, Bar, XAxis, CartesianGrid } from "recharts";
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { format } from "date-fns";
 import { TimeFilter } from "../../../services/lib/filters/filterDefs";
 import { Col } from "../../layout/common/col";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import RequestsPage from "../requests/RequestsPage";
+import { useMemo } from "react";
+import {
+  getSmartTickFormatter,
+  getTooltipTimeFormatter,
+} from "./timeFormatters";
+
+const chartConfig = {
+  count: {
+    label: "Rate Limit Count",
+    color: "rgb(226, 54, 112)",
+  },
+  time: {
+    label: "Time",
+    color: "rgb(226, 54, 112)",
+  },
+} satisfies ChartConfig;
 
 interface RateLimitRequestsViewProps {
   isLoading: boolean;
-  // Ensure data type matches what's passed (using Date for time)
   chartData: Array<{ time: Date; count: number }>;
-  chartConfig: ChartConfig;
   timeFilter: TimeFilter;
 }
 
 const RateLimitRequestsView = ({
   isLoading,
   chartData,
-  chartConfig,
   timeFilter,
 }: RateLimitRequestsViewProps) => {
-  // Calculate duration for date formatting
-  const durationMs = timeFilter.end.getTime() - timeFilter.start.getTime();
-  const isMultiDay = durationMs >= 24 * 60 * 60 * 1000;
+  // Create date references for formatting
+  const start = useMemo(() => timeFilter.start || new Date(0), [timeFilter]);
+  const end = useMemo(() => timeFilter.end || new Date(), [timeFilter]);
+
+  // Format data for the chart
+  const formattedChartData = useMemo(() => {
+    return chartData.map((item) => ({
+      time: new Date(item.time).getTime(),
+      count: item.count,
+      count_original: item.count,
+    }));
+  }, [chartData]);
+
+  // Get smart formatters based on time range
+  const tickFormatter = useMemo(
+    () => getSmartTickFormatter(start, end),
+    [start, end]
+  );
+
+  const tooltipFormatter = useMemo(
+    () => getTooltipTimeFormatter(start, end),
+    [start, end]
+  );
 
   return (
     <Col>
-      <div className="h-full w-full bg-card text-card-foreground rounded-md pt-4">
+      <div className="h-full w-full bg-card text-card-foreground rounded-md pt-6 pr-6 pl-6">
         {isLoading ? (
           <div className="h-[14rem] flex items-center justify-center">
             <LoadingAnimation height={100} width={100} />
@@ -40,32 +72,30 @@ const RateLimitRequestsView = ({
           <ChartContainer config={chartConfig} className="h-[14rem] w-full">
             <BarChart
               accessibilityLayer
-              data={chartData}
-              margin={{ left: 12, right: 12, top: 5, bottom: 5 }}
+              data={formattedChartData}
+              barSize={20}
+              barGap={5}
+              margin={{ left: 30, right: 30, top: 20, bottom: 20 }}
             >
+              <CartesianGrid vertical={false} />
               <XAxis
                 dataKey="time"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={10}
-                tickFormatter={(value) => {
-                  try {
-                    const date =
-                      value instanceof Date ? value : new Date(value);
-                    return !isNaN(date.getTime())
-                      ? format(date, isMultiDay ? "MMM d, HH:mm" : "HH:mm")
-                      : "";
-                  } catch (e) {
-                    return "";
-                  }
-                }}
-                interval="preserveStartEnd"
+                scale="time"
+                type="number"
+                domain={["auto", "auto"]}
+                tickFormatter={tickFormatter}
               />
               <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent indicator="dot" hideLabel />}
+                content={
+                  <ChartTooltipContent labelFormatter={tooltipFormatter} />
+                }
               />
-              <Bar dataKey="count" fill="var(--color-count)" radius={4} />
+              <Bar
+                dataKey="count"
+                fill="var(--color-count)"
+                radius={4}
+                name="count"
+              />
             </BarChart>
           </ChartContainer>
         )}
