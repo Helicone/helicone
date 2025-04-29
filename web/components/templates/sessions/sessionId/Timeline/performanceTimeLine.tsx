@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef, useEffect, useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
-import type { TimelineItem, TimelineSection } from "../lib/types";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import type { TimelineItem, TimelineSection } from "../lib/types";
+import { ColorContext } from "../Tree/TreeView";
 
 interface PerformanceTimelineProps {
   data: {
@@ -40,17 +41,6 @@ const MINIMAP_CONSTANTS = {
   BAR_SPACING: 2,
 } as const;
 
-const STATUS_COLORS = {
-  success: "#4ade80",
-  error: "#ef4444",
-  default: "#3b82f6",
-  abstract: "#94a3b8",
-  outline: "#f97316",
-  introduction: "#8b5cf6",
-  "key technologies": "#ec4899",
-  quiz: "#f59e0b",
-} as const;
-
 // Helper functions
 function lightenColor(color: string, amount: number): string {
   // Convert hex to RGB
@@ -80,34 +70,6 @@ function getItemsGroupedBySection(
     );
   });
   return sectionItems;
-}
-
-function findHoveredItem(
-  y: number,
-  sections: TimelineSection[],
-  items: TimelineItem[],
-  currentY = TIMELINE_CONSTANTS.INITIAL_Y
-): { item: TimelineItem | null; section: string | null } {
-  let foundItem = null;
-  let foundSection = null;
-
-  sections.forEach((section) => {
-    const sectionItems = items.filter((item) => item.section === section.id);
-
-    sectionItems.forEach((item) => {
-      const itemRowTop = currentY;
-      const itemRowBottom = currentY + TIMELINE_CONSTANTS.BAR_HEIGHT;
-
-      if (y >= itemRowTop && y <= itemRowBottom) {
-        foundItem = item;
-        foundSection = section.id;
-      }
-      currentY = itemRowBottom + TIMELINE_CONSTANTS.BAR_SPACING;
-    });
-    currentY += TIMELINE_CONSTANTS.SECTION_SPACING;
-  });
-
-  return { item: foundItem, section: foundSection };
 }
 
 // Canvas drawing timeline markers with lines
@@ -151,16 +113,15 @@ function drawTimelineItems(
   minTime: number,
   hoveredItem: TimelineItem | null,
   hoveredSection: string | null,
-  colors: typeof STATUS_COLORS,
-  pixelsPerMs: number
+  pixelsPerMs: number,
+  colors: Record<string, string>
 ) {
   let currentY = TIMELINE_CONSTANTS.INITIAL_Y;
   const sectionItems = getItemsGroupedBySection(items, sections);
   const MINIMUM_BAR_WIDTH = 4; // Ensure bars are always at least 6px wide
 
   sections.forEach((section) => {
-    const sectionColor =
-      colors[section.id as keyof typeof colors] || colors.default;
+    const sectionColor = colors[section.id] || "black";
 
     sectionItems[section.id].forEach((item) => {
       const startX = (item.startTime - minTime) * pixelsPerMs;
@@ -281,7 +242,6 @@ function createMouseMoveHandler(
 
     const canvasRect = canvas.getBoundingClientRect();
     const y = e.clientY - canvasRect.top;
-    const x = e.clientX - canvasRect.left + scrollContainer.scrollLeft;
 
     // Improved item detection that's more forgiving with vertical position
     const extendedRowHeight =
@@ -292,7 +252,6 @@ function createMouseMoveHandler(
     let currentY = TIMELINE_CONSTANTS.INITIAL_Y;
 
     // Group items by section
-    const sectionItems = getItemsGroupedBySection(items, sections);
 
     // Find the hovered section and item based on Y position
     sections.forEach((section) => {
@@ -360,6 +319,8 @@ export default function PerformanceTimeline({
   const containerWidthRef = useRef(0);
   const pixelsPerMsRef = useRef(0);
   const minimapHandlePositionRef = useRef({ x: 0, y: 0 });
+
+  const { colors } = useContext(ColorContext);
   const { timeRange, items, sections } = data;
 
   const [minTime, maxTime] = timeRange;
@@ -381,9 +342,6 @@ export default function PerformanceTimeline({
       Math.min(TIMELINE_CONSTANTS.MAX_PIXELS_PER_MS, optimalPixelsPerMs)
     );
   }, [timeSpan]);
-
-  // Colors for different status types
-  const colors = STATUS_COLORS;
 
   // Function to update the minimap
   const updateMinimap = useCallback(() => {
@@ -432,8 +390,7 @@ export default function PerformanceTimeline({
 
     // Draw items for each section
     sections.forEach((section) => {
-      const sectionColor =
-        colors[section.id as keyof typeof colors] || colors.default;
+      const sectionColor = colors[section.id] || "black";
 
       sectionItems[section.id].forEach((item) => {
         const startX =
@@ -556,8 +513,8 @@ export default function PerformanceTimeline({
       minTime,
       hoveredItem,
       hoveredSection,
-      colors,
-      pixelsPerMs
+      pixelsPerMs,
+      colors
     );
 
     // Update minimap to reflect new canvas

@@ -63,6 +63,7 @@ export const tracesToFolderNodes = (traces: Trace[]): FolderNode[] => {
       if (!folderMap[currentPath]) {
         const newFolder: FolderNode = {
           folderName: part,
+          currentPath: currentPath,
           children: [],
         };
         folderMap[currentPath] = newFolder;
@@ -134,6 +135,7 @@ export const tracesToTreeNodeData = (traces: Trace[]): TreeNodeData => {
     return {
       name: folder.folderName,
       duration: `${(latestFolder(folder) - earliestFolder(folder)) / 1000}s`,
+      currentPath: folder.currentPath,
       children: folder.children.map((child) => {
         if ("folderName" in child) {
           return folderToTreeNode(child);
@@ -146,6 +148,7 @@ export const tracesToTreeNodeData = (traces: Trace[]): TreeNodeData => {
               1000
             }s`,
             properties: child.properties,
+            currentPath: child.path,
           } as TreeNodeData;
         }
       }),

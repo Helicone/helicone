@@ -13,7 +13,14 @@ import {
 import { Muted } from "@/components/ui/typography";
 import { CellContext, ColumnDef } from "@tanstack/react-table";
 import { formatDistanceToNow } from "date-fns";
-import { memo, useEffect, useMemo, useRef, useState } from "react";
+import {
+  createContext,
+  memo,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { tracesToTreeNodeData } from "../../../../../lib/sessions/helpers";
 import {
   Session,
@@ -29,18 +36,8 @@ import {
 import ThemedTable from "../../../../shared/themed/table/themedTable";
 import RequestDrawer from "../../../requests/RequestDrawer";
 import StatusBadge from "../../../requests/statusBadge";
-import { TraceSpan } from "../Span";
 import PerformanceTimeline from "../Timeline/performanceTimeLine";
 import { TimelineItem, TimelineSection } from "../lib/types";
-
-interface BarChartTrace {
-  name: string;
-  path: string;
-  start: number;
-  duration: number;
-  trace: Trace;
-  request_id: string;
-}
 
 // Define TableTreeNode to hold all necessary display properties
 interface TableTreeNode {
@@ -57,6 +54,7 @@ interface TableTreeNode {
   cost?: number | null;
   latency?: number;
   feedback?: { rating: boolean | null } | null; // Adjusted type based on HeliconeMetadata
+  currentPath: string;
 }
 
 // Helper function to convert TreeNodeData using only Trace data
@@ -83,6 +81,7 @@ function convertToTableData(node: TreeNodeData, level = 0): TableTreeNode {
     feedback: trace?.request.heliconeMetadata?.feedback
       ? { rating: trace.request.heliconeMetadata.feedback.rating } // Map feedback structure
       : null,
+    currentPath: node.currentPath ?? "",
   };
 
   if (node.children && node.children.length > 0) {
@@ -130,6 +129,57 @@ const ModelCell = memo(({ getValue }: CellContext<TableTreeNode, any>) => {
   );
 });
 ModelCell.displayName = "ModelCell"; // Add display name for better debugging
+
+type ColorMap = Record<string, string>;
+
+interface ColorContextType {
+  colors: ColorMap;
+  setColors: React.Dispatch<React.SetStateAction<ColorMap>>;
+}
+
+// Create the context outside the component
+export const ColorContext = createContext<ColorContextType>({
+  colors: {},
+  setColors: () => {},
+});
+
+function setPathColor(
+  treeData: TreeNodeData,
+  setColors: React.Dispatch<React.SetStateAction<ColorMap>>,
+  colors: ColorMap,
+  parentColor: string | null = null
+) {
+  if (treeData.children && treeData.children.length > 0) {
+    treeData.children.forEach((child) => {
+      // For top-level children (when parentColor is null), generate a new color
+      if (parentColor === null) {
+        let randomColor;
+        do {
+          randomColor =
+            "#" +
+            Math.floor(Math.random() * 16777215)
+              .toString(16)
+              .padStart(6, "0");
+        } while (Object.values(colors).includes(randomColor));
+
+        setColors((prev) => ({
+          ...prev,
+          [child.currentPath]: randomColor,
+        }));
+
+        setPathColor(child, setColors, colors, randomColor);
+      } else {
+        // For non-top-level children, use the parent's color
+        setColors((prev) => ({
+          ...prev,
+          [child.currentPath]: parentColor,
+        }));
+
+        setPathColor(child, setColors, colors, parentColor);
+      }
+    });
+  }
+}
 
 // *** Define initialColumns outside the component ***
 const initialColumns: ColumnDef<TableTreeNode>[] = [
@@ -233,7 +283,6 @@ const initialColumns: ColumnDef<TableTreeNode>[] = [
 interface TreeViewProps {
   selectedRequestId: string;
   setSelectedRequestId: (id: string) => void;
-  showSpan: boolean;
   session: Session;
   isOriginalRealtime?: boolean;
 }
@@ -242,9 +291,10 @@ const TreeView: React.FC<TreeViewProps> = ({
   session,
   selectedRequestId,
   setSelectedRequestId,
-  showSpan,
   isOriginalRealtime,
 }) => {
+  const [colors, setColors] = useState<ColorMap>({});
+
   const treeData = useMemo(() => {
     return tracesToTreeNodeData(session.traces);
   }, [session.traces]);
@@ -389,88 +439,87 @@ const TreeView: React.FC<TreeViewProps> = ({
     table.toggleAllRowsExpanded();
   };
 
+  useEffect(() => {
+    setPathColor(treeData, setColors, colors);
+  }, [treeData]);
+
   return (
-    <Col className="h-full">
-      <ResizablePanelGroup direction="horizontal" className="h-full w-full">
-        <ResizablePanel
-          defaultSize={40}
-          minSize={25}
-          className="relative bg-white dark:bg-black"
-        >
-          <ResizablePanelGroup direction="vertical" className="h-full w-full">
-            <ResizablePanel
-              defaultSize={40}
-              minSize={25}
-              className="relative bg-white dark:bg-black"
-            >
-              {/* <TraceSpan
-                session={session}
-                selectedRequestIdDispatch={[
-                  selectedRequestId,
-                  setSelectedRequestId,
-                ]}
-              /> */}
-              <PerformanceTimeline data={timelineData} />
-            </ResizablePanel>
+    <ColorContext.Provider value={{ colors, setColors }}>
+      <Col className="h-full">
+        <ResizablePanelGroup direction="horizontal" className="h-full w-full">
+          <ResizablePanel
+            defaultSize={40}
+            minSize={25}
+            className="relative bg-white dark:bg-black"
+          >
+            <ResizablePanelGroup direction="vertical" className="h-full w-full">
+              <ResizablePanel
+                defaultSize={40}
+                minSize={25}
+                className="relative bg-white dark:bg-black"
+              >
+                <PerformanceTimeline data={timelineData} />
+              </ResizablePanel>
 
-            <ResizableHandle />
+              <ResizableHandle />
 
-            <ResizablePanel defaultSize={60} minSize={25}>
-              <div className="h-full border-t border-slate-200 dark:border-slate-800 flex">
-                <div className="h-full w-full">
-                  <ThemedTable<TableTreeNode>
-                    id="session-requests-table"
-                    defaultData={tableData}
-                    defaultColumns={initialColumns}
-                    activeColumns={activeColumns}
-                    setActiveColumns={setActiveColumns}
-                    skeletonLoading={false}
-                    dataLoading={false}
-                    onRowSelect={onRowSelectHandler}
-                    highlightedIds={
-                      selectedRequestId ? [selectedRequestId] : []
-                    }
-                    fullWidth={true}
-                    checkboxMode="never"
-                    onToggleAllRows={handleToggleAllRows}
-                  />
+              <ResizablePanel defaultSize={60} minSize={25}>
+                <div className="h-full border-t border-slate-200 dark:border-slate-800 flex">
+                  <div className="h-full w-full">
+                    <ThemedTable<TableTreeNode>
+                      id="session-requests-table"
+                      defaultData={tableData}
+                      defaultColumns={initialColumns}
+                      activeColumns={activeColumns}
+                      setActiveColumns={setActiveColumns}
+                      skeletonLoading={false}
+                      dataLoading={false}
+                      onRowSelect={onRowSelectHandler}
+                      highlightedIds={
+                        selectedRequestId ? [selectedRequestId] : []
+                      }
+                      fullWidth={true}
+                      checkboxMode="never"
+                      onToggleAllRows={handleToggleAllRows}
+                    />
+                  </div>
                 </div>
-              </div>
-            </ResizablePanel>
-          </ResizablePanelGroup>
-        </ResizablePanel>
+              </ResizablePanel>
+            </ResizablePanelGroup>
+          </ResizablePanel>
 
-        <ResizableHandle />
+          <ResizableHandle />
 
-        <ResizablePanel
-          ref={drawerRef}
-          defaultSize={0}
-          minSize={25}
-          maxSize={75}
-          collapsible={true}
-          collapsedSize={0}
-          onCollapse={() => {
-            setDrawerSize(0);
-          }}
-          onExpand={() => {
-            drawerRef.current?.resize(drawerSize > 0 ? drawerSize : 33);
-          }}
-          onResize={(size) => {
-            if (size > 0) {
-              setDrawerSize(size);
-            }
-          }}
-          className="bg-card"
-        >
-          {selectedRequestData && (
-            <RequestDrawer
-              request={selectedRequestData}
-              onCollapse={handleCollapseDrawer}
-            />
-          )}
-        </ResizablePanel>
-      </ResizablePanelGroup>
-    </Col>
+          <ResizablePanel
+            ref={drawerRef}
+            defaultSize={0}
+            minSize={25}
+            maxSize={75}
+            collapsible={true}
+            collapsedSize={0}
+            onCollapse={() => {
+              setDrawerSize(0);
+            }}
+            onExpand={() => {
+              drawerRef.current?.resize(drawerSize > 0 ? drawerSize : 33);
+            }}
+            onResize={(size) => {
+              if (size > 0) {
+                setDrawerSize(size);
+              }
+            }}
+            className="bg-card"
+          >
+            {selectedRequestData && (
+              <RequestDrawer
+                request={selectedRequestData}
+                onCollapse={handleCollapseDrawer}
+              />
+            )}
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      </Col>
+    </ColorContext.Provider>
   );
 };
 

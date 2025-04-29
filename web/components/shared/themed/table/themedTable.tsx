@@ -1,4 +1,4 @@
-import { ONBOARDING_STEPS } from "@/components/layout/onboardingContext";
+import { ColorContext } from "@/components/templates/sessions/sessionId/Tree/TreeView";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -15,13 +15,11 @@ import {
   getCoreRowModel,
   getExpandedRowModel,
   Table as ReactTable,
-  Row,
   useReactTable,
 } from "@tanstack/react-table";
 import { ChevronDown, ChevronRight, ChevronsUpDown } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { Result } from "../../../../packages/common/result";
 import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
@@ -111,40 +109,24 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
   props: ThemedTableProps<T>
 ) {
   const {
-    id,
     defaultData,
     defaultColumns,
     skeletonLoading,
     dataLoading,
     activeColumns,
-    setActiveColumns,
-    advancedFilters,
-    exportData,
-    timeFilter,
     sortable,
     onRowSelect,
-    hideHeader,
     noDataCTA,
-    onDataSet: onDataSet,
-    savedFilters,
     highlightedIds: checkedIds,
     checkboxMode = "never",
-    customButtons,
     children,
     onSelectAll,
     selectedIds,
-    selectedRows,
     fullWidth = false,
-    isDatasetsPage,
-    search,
     rowLink,
     tableRef,
     onToggleAllRows,
   } = props;
-
-  const [internalExpanded, setInternalExpanded] = React.useState<ExpandedState>(
-    {}
-  );
 
   const [expanded, setExpanded] = React.useState<ExpandedState>({});
 
@@ -169,29 +151,6 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
   const rows = table.getRowModel().rows;
   const columns = table.getAllColumns();
 
-  const topLevelPathColorMap = useMemo(() => {
-    const chartColors = [
-      "bg-chart-1",
-      "bg-chart-2",
-      "bg-chart-3",
-      "bg-chart-4",
-      "bg-chart-5",
-    ];
-    const map: Record<string, string> = {};
-    let colorIndex = 0;
-
-    rows.forEach((row) => {
-      if (row.depth === 0) {
-        const path = (row.original as any)?.path as string;
-        if (path && !(path in map)) {
-          map[path] = chartColors[colorIndex % chartColors.length];
-          colorIndex++;
-        }
-      }
-    });
-    return map;
-  }, [rows]);
-
   useEffect(() => {
     const columnVisibility: { [key: string]: boolean } = {};
     activeColumns.forEach((col) => {
@@ -213,20 +172,7 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
     onRowSelect?.(row, index, event);
   };
 
-  const [isPanelVisible, setIsPanelVisible] = useState(false);
-
-  const sessionData = useMemo(() => {
-    if (rows.length === 0) {
-      return undefined;
-    }
-    // @ts-ignore - Assume customProperties exists for this specific use case
-    const sessionId = rows[0].original?.customProperties?.[
-      "Helicone-Session-Id"
-    ] as string | undefined;
-    return { sessionId };
-  }, [rows]);
-
-  const router = useRouter();
+  const { colors } = useContext(ColorContext);
 
   return (
     <ScrollArea className="h-full w-full sentry-mask-me" orientation="both">
@@ -419,36 +365,16 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                       >
                         {i === 0 &&
                           (() => {
-                            const getAncestorPath = (
-                              currentRow: Row<T>
-                            ): string | undefined => {
-                              if (currentRow.depth === 0) {
-                                return (currentRow.original as any)
-                                  ?.path as string;
-                              }
-                              let currentParent = currentRow.getParentRow();
-                              while (currentParent && currentParent.depth > 0) {
-                                currentParent = currentParent.getParentRow();
-                              }
-                              return currentParent
-                                ? ((currentParent.original as any)
-                                    ?.path as string)
-                                : undefined;
-                            };
-
-                            const ancestorPath = getAncestorPath(row);
                             const groupColorClass =
-                              (ancestorPath &&
-                                topLevelPathColorMap[ancestorPath]) ||
-                              "bg-transparent";
+                              (colors[
+                                (row.original as any).currentPath
+                              ] as string) || "bg-transparent";
 
                             if (groupColorClass !== "bg-transparent") {
                               return (
                                 <div
-                                  className={clsx(
-                                    "absolute left-0 top-0 bottom-0 w-1 z-30",
-                                    groupColorClass
-                                  )}
+                                  className="absolute left-0 top-0 bottom-0 w-1 z-30"
+                                  style={{ backgroundColor: groupColorClass }}
                                 />
                               );
                             }
