@@ -15,7 +15,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Format
-      run: cargo fmt --check
+      run: cargo +nightly fmt --check
   clippy:
     runs-on: ubuntu-latest
     steps:
