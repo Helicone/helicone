@@ -48,7 +48,7 @@ pub struct RouterConfig {
 impl Default for RouterConfig {
     fn default() -> Self {
         Self {
-            providers: NEVec::new(Provider::OpenAI),
+            providers: nev![Provider::OpenAI, Provider::Anthropic],
             cache: None,
             fallback: None,
             balance: BalanceConfig::p2c_all_providers(),
@@ -75,7 +75,7 @@ impl RouterConfig {
             }
         };
         if let Some(provider) = unsupported_provider {
-            return Err(ProviderError::ProviderNotSupported(*provider));
+            return Err(ProviderError::ProviderNotConfigured(*provider));
         }
 
         // check that all providers in the fallback config are in the providers
@@ -86,7 +86,7 @@ impl RouterConfig {
                 .iter()
                 .find(|target| !self.providers.contains(&target.provider))
             {
-                return Err(ProviderError::ProviderNotSupported(
+                return Err(ProviderError::ProviderNotConfigured(
                     unsupported_provider.provider,
                 ));
             }
