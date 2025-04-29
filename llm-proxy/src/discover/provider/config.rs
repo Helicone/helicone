@@ -1,6 +1,7 @@
 use std::{
     collections::HashMap,
     pin::Pin,
+    sync::Arc,
     task::{Context, Poll},
     time::Duration,
 };
@@ -14,6 +15,7 @@ use tower::discover::Change;
 
 use crate::{
     app::AppState,
+    config::router::RouterConfig,
     discover::Key,
     dispatcher::{Dispatcher, DispatcherService},
     error::init::InitError,
@@ -49,13 +51,12 @@ pub struct ConfigDiscovery {
 impl ConfigDiscovery {
     pub fn new(
         app: AppState,
+        router_config: Arc<RouterConfig>,
         rx: Receiver<Change<Key, DispatcherService>>,
     ) -> Result<Self, InitError> {
         let events = ReceiverStream::new(rx);
         let mut service_map: HashMap<Key, DispatcherService> = HashMap::new();
-        for (provider, _provider_config) in
-            app.0.config.discover.providers.iter()
-        {
+        for provider in router_config.providers.iter() {
             let key = Key::new(*provider);
 
             let http_client = Client::builder()

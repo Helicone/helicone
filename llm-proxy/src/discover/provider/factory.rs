@@ -1,5 +1,6 @@
 use std::{
     future::{Ready, ready},
+    sync::Arc,
     task::{Context, Poll},
     time::Duration,
 };
@@ -9,6 +10,7 @@ use tower::{Service, discover::Change, load::PeakEwmaDiscover};
 
 use crate::{
     app::AppState,
+    config::router::RouterConfig,
     discover::{Discovery, Key},
     dispatcher::DispatcherService,
     error::init::InitError,
@@ -19,11 +21,15 @@ const DEFAULT_PROVIDER_RTT: Duration = Duration::from_millis(500);
 #[derive(Debug)]
 pub struct DiscoverFactory {
     app_state: AppState,
+    router_config: Arc<RouterConfig>,
 }
 
 impl DiscoverFactory {
-    pub fn new(app_state: AppState) -> Self {
-        Self { app_state }
+    pub fn new(app_state: AppState, router_config: Arc<RouterConfig>) -> Self {
+        Self {
+            app_state,
+            router_config,
+        }
     }
 }
 
@@ -43,7 +49,11 @@ impl Service<Receiver<Change<Key, DispatcherService>>> for DiscoverFactory {
         &mut self,
         rx: Receiver<Change<Key, DispatcherService>>,
     ) -> Self::Future {
-        let discovery = match Discovery::new(self.app_state.clone(), rx) {
+        let discovery = match Discovery::new(
+            self.app_state.clone(),
+            self.router_config.clone(),
+            rx,
+        ) {
             Ok(discovery) => discovery,
             Err(e) => return ready(Err(e)),
         };

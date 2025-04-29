@@ -107,7 +107,6 @@ impl Dispatcher {
             .app_state
             .0
             .config
-            .discover
             .providers
             .get(&target_provider)
             .ok_or_else(|| {

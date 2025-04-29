@@ -23,6 +23,9 @@ impl Default for ProviderConfig {
     }
 }
 
+/// Map of *ALL* supported providers.
+///
+/// In order to configure subsets of providers use
 #[derive(
     Debug, Clone, Deserialize, Serialize, Eq, PartialEq, Deref, DerefMut,
 )]
@@ -31,40 +34,26 @@ pub struct ProvidersConfig(IndexMap<Provider, ProviderConfig>);
 
 impl Default for ProvidersConfig {
     fn default() -> Self {
-        Self(IndexMap::from([(
-            Provider::OpenAI,
-            default_openai_provider_config(),
-        )]))
+        Self(IndexMap::from([
+            (Provider::OpenAI, default_openai_provider_config()),
+            (Provider::Anthropic, default_anthropic_provider_config()),
+        ]))
     }
 }
 
 fn default_openai_provider_config() -> ProviderConfig {
     ProviderConfig {
-        models: default_openai_models(),
-        base_url: default_openai_base_url(),
+        models: vec![Model::new("gpt-4o".to_string(), Some(Version::Latest))],
+        base_url: Url::parse("https://api.openai.com").unwrap(),
     }
 }
 
-fn default_openai_models() -> Vec<Model> {
-    vec![Model::new("gpt-4o".to_string(), Some(Version::Latest))]
-}
-
-fn default_openai_base_url() -> Url {
-    Url::parse("https://api.openai.com").unwrap()
-}
-
-#[cfg(feature = "testing")]
-impl crate::tests::TestDefault for ProvidersConfig {
-    fn test_default() -> Self {
-        let test_openai_provider = ProviderConfig {
-            models: default_openai_models(),
-            base_url: Url::parse(&format!(
-                "http://localhost:{}",
-                crate::tests::harness::MOCK_SERVER_PORT,
-            ))
-            .unwrap(),
-        };
-
-        Self(IndexMap::from([(Provider::OpenAI, test_openai_provider)]))
+fn default_anthropic_provider_config() -> ProviderConfig {
+    ProviderConfig {
+        models: vec![Model::new(
+            "claude-3-7-sonnet".to_string(),
+            Some(Version::Latest),
+        )],
+        base_url: Url::parse("https://api.openai.com").unwrap(),
     }
 }

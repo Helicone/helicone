@@ -52,9 +52,11 @@ impl Router {
                 Arc::new(router_config)
             }
         };
+        router_config.validate()?;
         // TODO: how to get provider keys via discovery instead of above^
         let (balancer, monitor) =
-            ProviderBalancer::new(app_state.clone()).await?;
+            ProviderBalancer::new(app_state.clone(), router_config.clone())
+                .await?;
         let service_stack: RouterService = ServiceBuilder::new()
             .layer(ErrorHandlerLayer)
             .layer(crate::middleware::request_context::Layer::new(

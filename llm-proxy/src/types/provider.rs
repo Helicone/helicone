@@ -3,9 +3,10 @@ use std::sync::Arc;
 use derive_more::{AsRef, Display};
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
-use strum::{EnumIter, IntoEnumIterator};
+use strum::EnumIter;
 
 use super::secret::Secret;
+use crate::{config::router::BalanceConfig, error::provider::ProviderError};
 
 #[derive(
     Debug,
@@ -43,20 +44,33 @@ impl ProviderKeys {
         Self(Arc::new(keys))
     }
 
-    pub fn from_env() -> Self {
+    pub fn from_env(
+        balance_config: &BalanceConfig,
+    ) -> Result<Self, ProviderError> {
         let mut keys = IndexMap::new();
-        for provider in Provider::iter() {
+        let providers: Vec<Provider> = match balance_config {
+            BalanceConfig::Weighted { targets } => {
+                targets.iter().map(|t| t.key.provider).collect()
+            }
+            BalanceConfig::P2C { targets } => {
+                targets.iter().map(|provider| *provider).collect()
+            }
+        };
+
+        for provider in providers {
             let provider_str = provider.to_string().to_uppercase();
             let env_var = format!("{provider_str}_API_KEY");
             if let Ok(key) = std::env::var(&env_var) {
-                tracing::debug!(
+                tracing::trace!(
                     provider = %provider,
                     "Got provider key"
                 );
                 keys.insert(provider, Secret(key));
+            } else {
+                return Err(ProviderError::ApiKeyNotFound(provider));
             }
         }
 
-        Self(Arc::new(keys))
+        Ok(Self(Arc::new(keys)))
     }
 }

@@ -58,7 +58,10 @@ pub struct Config {
     pub database: self::database::Config,
     pub minio: self::minio::Config,
     pub is_production: bool,
+    /// *ALL* supported providers.
+    pub providers: self::providers::ProvidersConfig,
 
+    // ---- configs below here are more deployment specific ----
     pub deployment_target: DeploymentTarget,
     pub rate_limit: self::rate_limit::RateLimitConfig,
     pub discover: self::discover::DiscoverConfig,
@@ -121,6 +124,7 @@ impl crate::tests::TestDefault for Config {
             database: self::database::Config::default(),
             minio: self::minio::Config::test_default(),
             is_production: false,
+            providers: self::providers::ProvidersConfig::default(),
             deployment_target: DeploymentTarget::SelfHosted,
             rate_limit: self::rate_limit::RateLimitConfig::test_default(),
             discover: self::discover::DiscoverConfig::test_default(),

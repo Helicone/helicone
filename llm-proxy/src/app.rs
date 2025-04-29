@@ -24,7 +24,7 @@ use tracing::{Level, info};
 
 use crate::{
     config::{
-        Config, ProviderKeysSource,
+        Config,
         rate_limit::{AuthedLimiterConfig, UnauthedLimiterConfig},
         server::TlsConfig,
     },
@@ -33,7 +33,7 @@ use crate::{
     middleware::auth::AuthService,
     router::meta::MetaRouter,
     store::StoreRealm,
-    types::provider::ProviderKeys,
+    types::{provider::ProviderKeys, router::RouterId},
     utils::{catch_panic::PanicResponder, handle_error::ErrorHandlerLayer},
 };
 
@@ -206,9 +206,14 @@ impl App {
             .connect(&config.database.url.0)
             .await
             .map_err(error::init::InitError::DatabaseConnection)?;
-        let provider_keys = match &config.discover.api_keys_source {
-            ProviderKeysSource::Env => ProviderKeys::from_env(),
-        };
+        // TODO: remove this expect
+        let balance_config = &config
+            .routers
+            .as_ref()
+            .get(&RouterId::Default)
+            .expect("default router not found")
+            .balance;
+        let provider_keys = config.discover.provider_keys(balance_config)?;
         let app_state = AppState(Arc::new(InnerAppState {
             config,
             minio,

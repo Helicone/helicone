@@ -36,11 +36,8 @@ impl Harness {
         )
         .await
         .expect("couldnt start mock htttp server");
-        let openai_provider = config
-            .discover
-            .providers
-            .get_mut(&Provider::OpenAI)
-            .unwrap();
+        let openai_provider =
+            config.providers.get_mut(&Provider::OpenAI).unwrap();
         openai_provider.base_url = Url::parse(&mock.uri()).unwrap();
         let (app, _) = App::new(config).await.expect("failed to create app");
         let app_factory = AppFactory::new(app.state.clone(), app);
