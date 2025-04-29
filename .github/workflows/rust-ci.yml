@@ -14,8 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - name: Temporarily modify the rust toolchain version
-      run: rustup override set nightly
+    - name: Use nightly rustfmt
+      run: rustup override set nightly && rustup component add --toolchain nightly-x86_64-unknown-linux-gnu rustfmt
     - name: Output rust version for educational purposes
       run: rustup --version
     - name: Format
