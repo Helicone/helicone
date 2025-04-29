@@ -33,6 +33,7 @@ client = OpenAI(
   -H "Helicone-Auth: Bearer ${key}" \\
   -H "Content-Type: application/json" \\
   -d '{
+    "model": "gpt-4o-mini",
     "messages": [{"role": "user", "content": "Hello!"}]
   }'`,
     docsLink: "https://docs.helicone.ai/getting-started/integration/openai",
@@ -69,6 +70,7 @@ client = OpenAI(
   -H "Helicone-OpenAI-Api-Base: https://{{RESOURCE_NAME}}.openai.azure.com" \\
   -H "Content-Type: application/json" \\
   -d '{
+    "model": "gpt-4o-mini",
     "messages": [{"role": "user", "content": "Hello!"}]
   }'`,
     docsLink: "https://docs.helicone.ai/getting-started/integration/azure",
