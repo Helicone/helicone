@@ -8,16 +8,11 @@ import {
 import { dbExecute } from "../shared/db/dbExecute";
 import { Database } from "../db/database.types";
 
-// Define the structure for org_rate_limits table data
-// Aligning with the database schema
-// Using Database types directly
 type OrgRateLimitDB = Database["public"]["Tables"]["org_rate_limits"]["Row"];
 
-// Type for creating a new org rate limit rule
 type CreateOrgRateLimitDB =
   Database["public"]["Tables"]["org_rate_limits"]["Insert"];
 
-// Type for updating an org rate limit rule (all fields optional except org_id)
 type UpdateOrgRateLimitDB = Partial<
   Omit<CreateOrgRateLimitDB, "organization_id">
 >;
@@ -48,26 +43,6 @@ export class RateLimitStore {
           ORDER BY created_at DESC
       `;
     return await dbExecute<OrgRateLimitDB>(query, [organizationId]);
-  }
-
-  async getRateLimitById(
-    ruleId: string,
-    organizationId: string
-  ): Promise<Result<OrgRateLimitDB, string>> {
-    const query = `
-          SELECT * FROM org_rate_limits
-          WHERE id = $1
-          AND organization_id = $2
-          AND deleted_at IS NULL
-      `;
-    const result = await dbExecute<OrgRateLimitDB>(query, [
-      ruleId,
-      organizationId,
-    ]);
-    if (result.error || !result.data || result.data.length === 0) {
-      return err(result.error || "Rate limit rule not found");
-    }
-    return ok(result.data[0]);
   }
 
   async createRateLimit(

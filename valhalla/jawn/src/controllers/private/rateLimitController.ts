@@ -60,23 +60,6 @@ export class RateLimitController extends Controller {
     return ok(result.data);
   }
 
-  @Get("/{ruleId}")
-  public async getRateLimit(
-    @Path() ruleId: string,
-    @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<RateLimitRuleView, string>> {
-    const rateLimitManager = new RateLimitManager(request.authParams);
-    const result = await rateLimitManager.getRateLimitById(ruleId);
-
-    if (result.error || !result.data) {
-      this.setStatus(result.error === "Rate limit rule not found" ? 404 : 500);
-      return err(
-        result.error || "Failed to fetch rate limit rule or no data found"
-      );
-    }
-    return ok(result.data);
-  }
-
   @Post("/")
   public async createRateLimit(
     @Body() params: CreateRateLimitRuleParams,

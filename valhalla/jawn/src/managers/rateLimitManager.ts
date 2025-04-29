@@ -38,23 +38,16 @@ const RateLimitRuleSchema = z.object({
     .optional(),
 });
 
-// Schema for creating a new rule (all fields required from API params)
-const CreateRateLimitRuleSchema = RateLimitRuleSchema.extend({
-  // Ensure CreateRateLimitRuleParams matches the expected structure
-});
+const CreateRateLimitRuleSchema = RateLimitRuleSchema.extend({});
 
-// Schema for updating a rule (all fields optional)
 const UpdateRateLimitRuleSchema = RateLimitRuleSchema.partial();
 
-// Use types generated from DB schema
 type OrgRateLimitDB = Database["public"]["Tables"]["org_rate_limits"]["Row"];
 type CreateOrgRateLimitDB =
   Database["public"]["Tables"]["org_rate_limits"]["Insert"];
 type UpdateOrgRateLimitDBStore = Partial<
   Omit<CreateOrgRateLimitDB, "organization_id">
 >;
-
-// const MIN_WINDOW_SECONDS = 60; // Removed to match worker parser
 
 export class RateLimitManager extends BaseManager {
   private rateLimitStore: RateLimitStore;
@@ -86,7 +79,6 @@ export class RateLimitManager extends BaseManager {
     };
   }
 
-  // Returns API View type
   async getOrgRateLimits(): Promise<Result<RateLimitRuleView[], string>> {
     const result = await this.rateLimitStore.getRateLimitsByOrgId(
       this.authParams.organizationId
@@ -97,25 +89,9 @@ export class RateLimitManager extends BaseManager {
     return ok(result.data.map(this.mapDbToView));
   }
 
-  // Returns API View type
-  async getRateLimitById(
-    ruleId: string
-  ): Promise<Result<RateLimitRuleView, string>> {
-    const result = await this.rateLimitStore.getRateLimitById(
-      ruleId,
-      this.authParams.organizationId
-    );
-    if (result.error || !result.data) {
-      return err(result.error || "Failed to fetch rate limit rule");
-    }
-    return ok(this.mapDbToView(result.data));
-  }
-
-  // Accepts API Params, Returns API View type
   async createRateLimit(
-    params: CreateRateLimitRuleParams // Use API type for input
+    params: CreateRateLimitRuleParams
   ): Promise<Result<RateLimitRuleView, string>> {
-    // Validate input using Zod schema
     const validationResult = CreateRateLimitRuleSchema.safeParse(params);
     if (!validationResult.success) {
       return err(

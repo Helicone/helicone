@@ -197,7 +197,6 @@ export interface paths {
     post: operations["CreateRateLimit"];
   };
   "/v1/rate-limits/{ruleId}": {
-    get: operations["GetRateLimit"];
     put: operations["UpdateRateLimit"];
     delete: operations["DeleteRateLimit"];
   };
@@ -15526,21 +15525,6 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["CreateRateLimitRuleParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_RateLimitRuleView.string_"];
-        };
-      };
-    };
-  };
-  GetRateLimit: {
-    parameters: {
-      path: {
-        ruleId: string;
       };
     };
     responses: {
