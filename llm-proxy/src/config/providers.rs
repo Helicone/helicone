@@ -1,4 +1,4 @@
-use derive_more::{Deref, DerefMut};
+use derive_more::{AsRef, Deref, DerefMut};
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use url::Url;
@@ -27,10 +27,21 @@ impl Default for ProviderConfig {
 ///
 /// In order to configure subsets of providers use
 #[derive(
-    Debug, Clone, Deserialize, Serialize, Eq, PartialEq, Deref, DerefMut,
+    Debug, Clone, Deserialize, Serialize, Eq, PartialEq, Deref, DerefMut, AsRef,
 )]
 #[serde(rename_all = "kebab-case")]
 pub struct ProvidersConfig(IndexMap<Provider, ProviderConfig>);
+
+impl ProvidersConfig {
+    /// Creates a new ProvidersConfig from an iterator of (Provider,
+    /// ProviderConfig) pairs
+    pub fn from_iter<I>(iter: I) -> Self
+    where
+        I: IntoIterator<Item = (Provider, ProviderConfig)>,
+    {
+        Self(IndexMap::from_iter(iter))
+    }
+}
 
 impl Default for ProvidersConfig {
     fn default() -> Self {

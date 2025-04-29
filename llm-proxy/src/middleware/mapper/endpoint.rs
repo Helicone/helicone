@@ -1,6 +1,7 @@
+use http::uri::PathAndQuery;
+
 use crate::{
-    error::invalid_req::InvalidRequestError,
-    types::{provider::Provider, router::ExtractedPathAndQuery},
+    error::invalid_req::InvalidRequestError, types::provider::Provider,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -11,7 +12,7 @@ pub enum ApiEndpoint {
 
 impl ApiEndpoint {
     pub fn new(
-        path: ExtractedPathAndQuery,
+        path: PathAndQuery,
         provider: Provider,
     ) -> Result<Self, InvalidRequestError> {
         match provider {
@@ -56,11 +57,21 @@ pub enum OpenAI {
     LegacyCompletions,
 }
 
-impl TryFrom<ExtractedPathAndQuery> for OpenAI {
+impl OpenAI {
+    pub fn path(&self) -> &str {
+        match self {
+            Self::ChatCompletions => "/v1/chat/completions",
+            Self::LegacyCompletions => "/v1/completions",
+            Self::Responses => "/v1/responses",
+        }
+    }
+}
+
+impl TryFrom<PathAndQuery> for OpenAI {
     type Error = InvalidRequestError;
 
-    fn try_from(value: ExtractedPathAndQuery) -> Result<Self, Self::Error> {
-        match value.as_ref().path() {
+    fn try_from(value: PathAndQuery) -> Result<Self, Self::Error> {
+        match value.path() {
             "/v1/chat/completions" => return Ok(Self::ChatCompletions),
             "/v1/completions" => return Ok(Self::LegacyCompletions),
             path => Err(InvalidRequestError::NotFound(path.to_string())),
@@ -83,11 +94,20 @@ pub enum Anthropic {
     LegacyCompletions,
 }
 
-impl TryFrom<ExtractedPathAndQuery> for Anthropic {
+impl Anthropic {
+    pub fn path(&self) -> &str {
+        match self {
+            Self::Messages => "/v1/messages",
+            Self::LegacyCompletions => "/v1/completions",
+        }
+    }
+}
+
+impl TryFrom<PathAndQuery> for Anthropic {
     type Error = InvalidRequestError;
 
-    fn try_from(value: ExtractedPathAndQuery) -> Result<Self, Self::Error> {
-        match value.as_ref().path() {
+    fn try_from(value: PathAndQuery) -> Result<Self, Self::Error> {
+        match value.path() {
             "/v1/messages" => return Ok(Self::Messages),
             "/v1/completions" => return Ok(Self::LegacyCompletions),
             path => Err(InvalidRequestError::NotFound(path.to_string())),

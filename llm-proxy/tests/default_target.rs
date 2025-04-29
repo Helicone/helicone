@@ -11,7 +11,7 @@ use tower::Service;
 #[tokio::test]
 async fn default_target() {
     let config = Config::test_default();
-    let mut harness = Harness::new(config).await;
+    let mut harness = Harness::builder().with_config(config).build().await;
     let request_body = axum_core::body::Body::from(
         serde_json::to_vec(&json!({
             "model": "gpt-4o-mini",
@@ -36,6 +36,7 @@ async fn default_target() {
     // assert that the request was proxied to the mock server correctly
     let received_requests = harness
         .mock
+        .openai_mock
         .received_requests_for("POST", "/v1/chat/completions")
         .await
         .expect("no requests received");

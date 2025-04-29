@@ -159,7 +159,20 @@ pub struct Weight(pub Decimal);
 #[cfg(feature = "testing")]
 impl crate::tests::TestDefault for RouterConfigs {
     fn test_default() -> Self {
-        Self::default()
+        Self(HashMap::from([(
+            RouterId::Default,
+            RouterConfig {
+                providers: nev![Provider::OpenAI],
+                cache: None,
+                fallback: None,
+                balance: BalanceConfig::P2C {
+                    targets: nev![Provider::OpenAI],
+                },
+                retries: None,
+                rate_limit: None,
+                spend_control: None,
+            },
+        )]))
     }
 }
 

@@ -39,7 +39,7 @@ impl Default for DiscoverConfig {
 }
 
 fn default_discover_decay() -> Duration {
-    Duration::from_secs(120)
+    Duration::from_secs(30)
 }
 
 #[cfg(feature = "testing")]
@@ -49,11 +49,12 @@ impl crate::tests::TestDefault for DiscoverConfig {
         // runtime in tests
         unsafe {
             std::env::set_var("OPENAI_API_KEY", "sk-...");
+            std::env::set_var("ANTHROPIC_API_KEY", "sk-...");
         }
         Self {
             api_keys_source: ProviderKeysSource::Env,
             discover_mode: DiscoverMode::Config,
-            discover_decay: default_discover_decay(),
+            discover_decay: Duration::from_millis(100),
         }
     }
 }

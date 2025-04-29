@@ -15,6 +15,11 @@ use crate::{
 pub enum InternalError {
     /// Internal error
     Internal,
+    /// Could not serialize {ty} due to: {error}
+    Serialize {
+        ty: &'static str,
+        error: serde_json::Error,
+    },
     /// Could not deserialize {ty} due to: {error}
     Deserialize {
         ty: &'static str,
@@ -42,6 +47,8 @@ pub enum InternalError {
     PollReadyError(BoxError),
     /// Buffer error: {0}
     BufferError(BoxError),
+    /// Invalid URI: {0}
+    InvalidUri(#[from] http::uri::InvalidUri),
 }
 
 impl IntoResponse for InternalError {

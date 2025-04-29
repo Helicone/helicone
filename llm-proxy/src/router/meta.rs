@@ -7,6 +7,7 @@ use std::{
 
 use axum_core::response::IntoResponse;
 use futures::future::Either;
+use http::uri::PathAndQuery;
 use regex::Regex;
 use uuid::Uuid;
 
@@ -16,7 +17,7 @@ use crate::{
     config::DeploymentTarget,
     discover::provider::monitor::ProviderMonitors,
     error::{api::Error, init::InitError, invalid_req::InvalidRequestError},
-    types::router::{ExtractedPathAndQuery, RouterId},
+    types::router::RouterId,
 };
 
 // Regex matching API calls (/v1/...)
@@ -82,7 +83,7 @@ impl MetaRouter {
     fn extract_router_id_and_path(
         &self,
         path: &str,
-    ) -> Result<(RouterId, ExtractedPathAndQuery), Error> {
+    ) -> Result<(RouterId, PathAndQuery), Error> {
         if let Some(captures) = self.router_id_regex.captures(path) {
             let router_id = if let Some(id_match) = captures.name("router_id") {
                 let id_str = id_match.as_str();
@@ -109,7 +110,11 @@ impl MetaRouter {
                     path.to_string(),
                 )))
             } else {
-                Ok((router_id, ExtractedPathAndQuery::try_from(api_path)?))
+                Ok((
+                    router_id,
+                    PathAndQuery::try_from(api_path)
+                        .map_err(InvalidRequestError::from)?,
+                ))
             }
         } else {
             Err(Error::InvalidRequest(InvalidRequestError::NotFound(
@@ -233,7 +238,7 @@ mod tests {
             meta_router.extract_router_id_and_path(&path).unwrap(),
             (
                 RouterId::Uuid(uuid),
-                ExtractedPathAndQuery::try_from(expected_api_path).unwrap()
+                PathAndQuery::try_from(expected_api_path).unwrap()
             )
         );
 
@@ -244,7 +249,7 @@ mod tests {
             meta_router.extract_router_id_and_path(path).unwrap(),
             (
                 RouterId::Named("my_named_router".into()),
-                ExtractedPathAndQuery::try_from(expected_api_path).unwrap()
+                PathAndQuery::try_from(expected_api_path).unwrap()
             )
         );
 
@@ -255,7 +260,7 @@ mod tests {
             meta_router.extract_router_id_and_path(path).unwrap(),
             (
                 RouterId::Named("my-router-with-hyphens".into()),
-                ExtractedPathAndQuery::try_from(expected_api_path).unwrap()
+                PathAndQuery::try_from(expected_api_path).unwrap()
             )
         );
 
@@ -266,7 +271,7 @@ mod tests {
             meta_router.extract_router_id_and_path(path).unwrap(),
             (
                 RouterId::Default,
-                ExtractedPathAndQuery::try_from(expected_api_path).unwrap()
+                PathAndQuery::try_from(expected_api_path).unwrap()
             )
         );
 
@@ -304,7 +309,7 @@ mod tests {
             meta_router.extract_router_id_and_path(path).unwrap(),
             (
                 RouterId::Named("not-a-uuid".into()),
-                ExtractedPathAndQuery::try_from(expected_api_path).unwrap()
+                PathAndQuery::try_from(expected_api_path).unwrap()
             )
         );
 
@@ -315,7 +320,7 @@ mod tests {
             meta_router.extract_router_id_and_path(path).unwrap(),
             (
                 RouterId::Named("my-router-with-hyphens".into()),
-                ExtractedPathAndQuery::try_from(expected_api_path).unwrap()
+                PathAndQuery::try_from(expected_api_path).unwrap()
             )
         );
 
@@ -355,7 +360,7 @@ mod tests {
             meta_router.extract_router_id_and_path(path).unwrap(),
             (
                 RouterId::Default,
-                ExtractedPathAndQuery::try_from(expected_api_path).unwrap()
+                PathAndQuery::try_from(expected_api_path).unwrap()
             )
         );
 
@@ -366,7 +371,7 @@ mod tests {
             meta_router.extract_router_id_and_path(&path).unwrap(),
             (
                 RouterId::Uuid(uuid),
-                ExtractedPathAndQuery::try_from(expected_api_path).unwrap()
+                PathAndQuery::try_from(expected_api_path).unwrap()
             )
         );
 
@@ -377,7 +382,7 @@ mod tests {
             meta_router.extract_router_id_and_path(path).unwrap(),
             (
                 RouterId::Named("my_router".into()),
-                ExtractedPathAndQuery::try_from(expected_api_path).unwrap()
+                PathAndQuery::try_from(expected_api_path).unwrap()
             )
         );
 
@@ -388,7 +393,7 @@ mod tests {
             meta_router.extract_router_id_and_path(path).unwrap(),
             (
                 RouterId::Default,
-                ExtractedPathAndQuery::try_from(expected_api_path).unwrap()
+                PathAndQuery::try_from(expected_api_path).unwrap()
             )
         );
 
@@ -399,7 +404,7 @@ mod tests {
             meta_router.extract_router_id_and_path(&path).unwrap(),
             (
                 RouterId::Uuid(uuid),
-                ExtractedPathAndQuery::try_from(expected_api_path).unwrap()
+                PathAndQuery::try_from(expected_api_path).unwrap()
             )
         );
 
@@ -410,7 +415,7 @@ mod tests {
             meta_router.extract_router_id_and_path(path).unwrap(),
             (
                 RouterId::Named("named_id".into()),
-                ExtractedPathAndQuery::try_from(expected_api_path).unwrap()
+                PathAndQuery::try_from(expected_api_path).unwrap()
             )
         );
 
@@ -463,7 +468,7 @@ mod tests {
             meta_router.extract_router_id_and_path(path).unwrap(),
             (
                 RouterId::Default,
-                ExtractedPathAndQuery::try_from(expected_api_path).unwrap()
+                PathAndQuery::try_from(expected_api_path).unwrap()
             )
         );
 
@@ -474,7 +479,7 @@ mod tests {
             meta_router.extract_router_id_and_path(&path).unwrap(),
             (
                 RouterId::Uuid(uuid),
-                ExtractedPathAndQuery::try_from(expected_api_path).unwrap()
+                PathAndQuery::try_from(expected_api_path).unwrap()
             )
         );
 
@@ -485,7 +490,7 @@ mod tests {
             meta_router.extract_router_id_and_path(path).unwrap(),
             (
                 RouterId::Named("named_id".into()),
-                ExtractedPathAndQuery::try_from(expected_api_path).unwrap()
+                PathAndQuery::try_from(expected_api_path).unwrap()
             )
         );
     }

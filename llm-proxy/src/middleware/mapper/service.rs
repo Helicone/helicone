@@ -5,6 +5,7 @@ use std::{
 
 use bytes::Bytes;
 use futures::future::BoxFuture;
+use http::uri::PathAndQuery;
 use http_body_util::BodyExt;
 
 use crate::{
@@ -16,10 +17,7 @@ use crate::{
         TryConvert,
         endpoint::{Anthropic, ApiEndpoint, OpenAI},
     },
-    types::{
-        request::{Request, RequestContext},
-        router::ExtractedPathAndQuery,
-    },
+    types::request::{Request, RequestContext},
 };
 
 #[derive(Debug, Clone)]
@@ -56,7 +54,6 @@ where
         let mut inner = self.inner.clone();
         std::mem::swap(&mut self.inner, &mut inner);
         Box::pin(async move {
-            // RouterId + Provider -> ApiEndpoint
             let key = req.extensions_mut().remove::<Key>().ok_or(
                 Error::Internal(InternalError::ExtensionNotFound("Key")),
             )?;
@@ -83,15 +80,14 @@ where
 async fn map_request(
     key: Key,
     req_ctx: Arc<RequestContext>,
-    req: Request,
+    mut req: Request,
 ) -> Result<Request, Error> {
-    let extracted_path_and_query = req
-        .extensions()
-        .get::<ExtractedPathAndQuery>()
-        .ok_or(Error::Internal(InternalError::ExtensionNotFound(
-            "ExtractedPathAndQuery",
-        )))?;
+    let extracted_path_and_query =
+        req.extensions_mut().remove::<PathAndQuery>().ok_or(
+            Error::Internal(InternalError::ExtensionNotFound("PathAndQuery")),
+        )?;
     let default_provider = req_ctx.router_config.providers.first();
+    // TODO: remove clones
     let source_endpoint =
         ApiEndpoint::new(extracted_path_and_query.clone(), *default_provider)?;
     let target_endpoint = ApiEndpoint::mapped(source_endpoint, key.provider)?;
@@ -102,11 +98,24 @@ async fn map_request(
         .map_err(InternalError::CollectBodyError)?
         .to_bytes();
 
-    let body = match (source_endpoint, target_endpoint) {
+    let (body, target_path_and_query) = match (source_endpoint, target_endpoint)
+    {
         (ApiEndpoint::OpenAI(source), ApiEndpoint::Anthropic(target)) => {
             tracing::trace!(source = ?source, target = ?target, "mapping request body");
             match (source, target) {
                 (OpenAI::ChatCompletions, Anthropic::Messages) => {
+                    let target_path_and_query =
+                        if let Some(query) = extracted_path_and_query.query() {
+                            PathAndQuery::try_from(format!(
+                                "{}?{}",
+                                target.path(),
+                                query
+                            ))
+                            .map_err(InternalError::InvalidUri)?
+                        } else {
+                            PathAndQuery::try_from(target.path())
+                                .map_err(InternalError::InvalidUri)?
+                        };
                     let body = serde_json::from_slice::<
                         openai_types::chat::ChatCompletionRequest,
                     >(&body)
@@ -115,8 +124,14 @@ async fn map_request(
                     TryConvert::try_convert(body)
                         .map_err(InternalError::MapperError)?;
                     let anthropic_req_bytes =
-                        serde_json::to_vec(&anthropic_req).unwrap();
-                    Bytes::from(anthropic_req_bytes)
+                        serde_json::to_vec(&anthropic_req).map_err(|e| {
+                            InternalError::Serialize {
+                            ty: "anthropic_types::chat::ChatCompletionRequest",
+                            error: e,
+                        }
+                        })?;
+                    let body = Bytes::from(anthropic_req_bytes);
+                    (body, target_path_and_query)
                 }
                 _ => {
                     todo!()
@@ -127,7 +142,9 @@ async fn map_request(
             todo!()
         }
     };
-    let req = Request::from_parts(parts, axum_core::body::Body::from(body));
+    let mut req = Request::from_parts(parts, axum_core::body::Body::from(body));
+    tracing::debug!(target_path_and_query = ?target_path_and_query, "inserting target path and query");
+    req.extensions_mut().insert(target_path_and_query);
     Ok(req)
 }
 

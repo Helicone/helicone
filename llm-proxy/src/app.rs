@@ -149,7 +149,7 @@ impl std::fmt::Debug for InnerAppState {
 ///   - Added by the request context layer
 /// - `Key`
 ///   - Added by the AddExtensionLayer in the dispatcher service stack
-/// - `ExtractedPathAndQuery`
+/// - `PathAndQuery`
 ///   - Added by the MetaRouter
 ///   - Used by the Mapper layer
 #[derive(Clone)]

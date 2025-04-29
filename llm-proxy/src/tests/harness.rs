@@ -5,49 +5,79 @@ use std::{
 };
 
 use futures::future::BoxFuture;
-use stubr::{Stubr, wiremock_rs::MockServer};
 use tower::MakeService as _;
-use url::Url;
 
+use super::mock::Mock;
 use crate::{
     app::{App, AppFactory, AppResponse},
     config::Config,
-    types::{provider::Provider, request::Request},
+    types::request::Request,
 };
 
 pub const MOCK_SERVER_PORT: u16 = 8111;
 
+pub struct HarnessBuilder {
+    openai_latency: Option<u64>,
+    anthropic_latency: Option<u64>,
+    config: Option<Config>,
+}
+
+impl HarnessBuilder {
+    fn new() -> Self {
+        Self {
+            openai_latency: None,
+            anthropic_latency: None,
+            config: None,
+        }
+    }
+
+    pub fn with_openai_latency(mut self, latency: u64) -> Self {
+        self.openai_latency = Some(latency);
+        self
+    }
+
+    pub fn with_anthropic_latency(mut self, latency: u64) -> Self {
+        self.anthropic_latency = Some(latency);
+        self
+    }
+
+    pub fn with_config(mut self, config: Config) -> Self {
+        self.config = Some(config);
+        self
+    }
+
+    pub async fn build(self) -> Harness {
+        let mut config = self.config.unwrap();
+        let mock = Mock::new_with_latency(
+            &mut config.providers,
+            self.openai_latency,
+            self.anthropic_latency,
+        )
+        .await;
+        Harness::new(mock, config).await
+    }
+}
 pub struct Harness {
     pub app_factory: AppFactory<App>,
-    pub mock: MockServer,
+    pub mock: Mock,
     pub socket_addr: SocketAddr,
 }
 
 impl Harness {
-    pub async fn new(mut config: Config) -> Self {
-        let mock = Stubr::try_start_with(
-            "./stubs",
-            stubr::Config {
-                port: Some(MOCK_SERVER_PORT),
-                verbose: true,
-                record: true,
-                ..Default::default()
-            },
-        )
-        .await
-        .expect("couldnt start mock htttp server");
-        let openai_provider =
-            config.providers.get_mut(&Provider::OpenAI).unwrap();
-        openai_provider.base_url = Url::parse(&mock.uri()).unwrap();
+    async fn new(mock: Mock, config: Config) -> Self {
         let (app, _) = App::new(config).await.expect("failed to create app");
         let app_factory = AppFactory::new(app.state.clone(), app);
         let socket_addr =
             SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 0);
         Self {
             app_factory,
-            mock: mock.http_server,
+            mock,
             socket_addr,
         }
+    }
+
+    pub fn builder() -> HarnessBuilder {
+        HarnessBuilder::new()
     }
 }
 

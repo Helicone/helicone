@@ -5,7 +5,7 @@ use std::{
 };
 
 use futures::future::BoxFuture;
-use http::{HeaderName, HeaderValue};
+use http::{HeaderName, HeaderValue, uri::PathAndQuery};
 use http_body_util::BodyExt;
 use reqwest::Client;
 use tower::{Service, ServiceBuilder};
@@ -19,7 +19,6 @@ use crate::{
         provider::Provider,
         request::{Request, RequestContext},
         response::Response,
-        router::ExtractedPathAndQuery,
     },
     utils::handle_error::{ErrorHandler, ErrorHandlerLayer},
 };
@@ -154,13 +153,14 @@ impl Dispatcher {
         let headers = req.headers().clone();
         let extracted_path_and_query = req
             .extensions()
-            .get::<ExtractedPathAndQuery>()
-            .ok_or(Error::Internal(InternalError::ExtensionNotFound(
-                "ExtractedPathAndQuery",
-            )))?;
+            .get::<PathAndQuery>()
+            .ok_or(Error::Internal(
+            InternalError::ExtensionNotFound("PathAndQuery"),
+        ))?;
 
-        let target_url =
-            base_url.join(extracted_path_and_query.as_str()).unwrap();
+        let target_url = base_url
+            .join(extracted_path_and_query.as_str())
+            .expect("PathAndQuery joined with valid url will always succeed");
         tracing::debug!(method = %method, target_url = %target_url, "dispatching request");
         let req_body_bytes = req
             .into_body()
