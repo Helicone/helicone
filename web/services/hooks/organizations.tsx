@@ -244,12 +244,8 @@ const useOrgsContextManager = (): OrgContextValue => {
     {
       refetchOnWindowFocus: true,
       refetchInterval: (selectedOrgsData) => {
-        if (
-          selectedOrgsData &&
-          Array.isArray(selectedOrgsData) &&
-          selectedOrgsData.length === 0
-        ) {
-          return 10; // 10 ms
+        if (orgs?.length === 0) {
+          return 10;
         }
         return false;
       },
