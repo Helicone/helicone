@@ -9,6 +9,7 @@ import { useMemo } from "react";
 import { HeliconeAuthClient } from "../../auth/client/HeliconeAuthClient";
 import { HeliconeOrg, HeliconeUser } from "../../auth/types";
 import { err, ok, Result } from "../../result";
+import { clearSupabaseCookies, setOrgCookie } from "../helpers/setOrgCookie";
 
 export class SupabaseAuthClient implements HeliconeAuthClient {
   user: HeliconeUser | undefined;
@@ -28,6 +29,8 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
   }
 
   async signOut(): Promise<void> {
+    setOrgCookie("none");
+    clearSupabaseCookies();
     await this.supabaseClient?.auth.signOut({ scope: "global" });
     await this.supabaseClient?.auth.signOut({ scope: "others" });
     await this.supabaseClient?.auth.signOut({ scope: "local" });
@@ -120,6 +123,8 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
     email: string;
     password: string;
   }): Promise<Result<HeliconeUser, string>> {
+    clearSupabaseCookies();
+    setOrgCookie("none");
     if (!this.supabaseClient) {
       return err("Supabase client not found");
     }
@@ -145,6 +150,8 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
     provider: "google" | "github";
     options?: { redirectTo?: string };
   }): Promise<Result<void, string>> {
+    clearSupabaseCookies();
+    setOrgCookie("none");
     if (!this.supabaseClient) {
       return err("Supabase client not found");
     }
