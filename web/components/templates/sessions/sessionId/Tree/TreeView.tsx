@@ -380,8 +380,6 @@ const TreeView: React.FC<TreeViewProps> = ({
     };
   })();
 
-  console.log(timelineData);
-
   const handleCollapseDrawer = () => {
     drawerRef.current?.collapse();
     setDrawerSize(0);

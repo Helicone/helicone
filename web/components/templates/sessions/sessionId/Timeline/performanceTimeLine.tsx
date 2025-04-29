@@ -3,7 +3,6 @@
 import { useRef, useEffect, useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import type { TimelineItem, TimelineSection } from "../lib/types";
-import TimelineTable from "./timelineTable";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface PerformanceTimelineProps {
@@ -22,12 +21,15 @@ interface TooltipPosition {
 // Constants
 const TIMELINE_CONSTANTS = {
   HEIGHT: 400,
-  PIXELS_PER_MS: 1.2,
-  BAR_HEIGHT: 16,
-  BAR_SPACING: 8,
-  SECTION_SPACING: 10,
+  // Allow more compression with smaller MIN_PIXELS_PER_MS
+  MIN_PIXELS_PER_MS: 0.02, // Lower minimum scale to allow more compression for long timelines
+  MAX_PIXELS_PER_MS: 1.0, // Reduce max scale to prevent excessive spreading
+  BAR_HEIGHT: 14, // Slightly smaller bars to fit more vertically
+  BAR_SPACING: 6, // Slightly less spacing to fit more vertically
+  SECTION_SPACING: 8, // Slightly less section spacing
   MARKER_INTERVAL: 200,
-  INITIAL_Y: 50,
+  INITIAL_Y: 24, // Start closer to the top
+  PADDING_RIGHT: 100, // Lower padding to maximize horizontal space
 } as const;
 
 const MINIMAP_CONSTANTS = {
@@ -113,25 +115,27 @@ function drawTimeMarkers(
   ctx: CanvasRenderingContext2D,
   minTime: number,
   maxTime: number,
-  height: number
+  height: number,
+  pixelsPerMs: number
 ) {
+  // Dynamically calculate marker interval based on scale
+  const optimalMarkerCount = 5; // Target number of markers
+  const timeSpan = maxTime - minTime;
+  const markerInterval = Math.ceil(timeSpan / optimalMarkerCount / 100) * 100; // Round to nearest 100ms
+
   const timeMarkers = [];
-  for (
-    let time = minTime;
-    time <= maxTime;
-    time += TIMELINE_CONSTANTS.MARKER_INTERVAL
-  ) {
+  for (let time = minTime; time <= maxTime; time += markerInterval) {
     timeMarkers.push(time);
   }
 
   const markerY = 20;
-  ctx.font = "12px Inter, system-ui, sans-serif"; // fint the right font
+  ctx.font = "12px Inter, system-ui, sans-serif";
   ctx.fillStyle = "#64748b";
   ctx.strokeStyle = "#e2e8f0";
   ctx.lineWidth = 1;
 
   timeMarkers.forEach((time) => {
-    const x = (time - minTime) * TIMELINE_CONSTANTS.PIXELS_PER_MS;
+    const x = (time - minTime) * pixelsPerMs;
     ctx.beginPath();
     ctx.moveTo(x, 0);
     ctx.lineTo(x, height);
@@ -147,25 +151,42 @@ function drawTimelineItems(
   minTime: number,
   hoveredItem: TimelineItem | null,
   hoveredSection: string | null,
-  colors: typeof STATUS_COLORS
+  colors: typeof STATUS_COLORS,
+  pixelsPerMs: number
 ) {
   let currentY = TIMELINE_CONSTANTS.INITIAL_Y;
   const sectionItems = getItemsGroupedBySection(items, sections);
+  const MINIMUM_BAR_WIDTH = 4; // Ensure bars are always at least 6px wide
 
   sections.forEach((section) => {
     const sectionColor =
       colors[section.id as keyof typeof colors] || colors.default;
 
     sectionItems[section.id].forEach((item) => {
-      const startX =
-        (item.startTime - minTime) * TIMELINE_CONSTANTS.PIXELS_PER_MS;
-      const endX = (item.endTime - minTime) * TIMELINE_CONSTANTS.PIXELS_PER_MS;
-      const itemWidth = endX - startX;
+      const startX = (item.startTime - minTime) * pixelsPerMs;
+      const endX = (item.endTime - minTime) * pixelsPerMs;
+      // Ensure the bar has a minimum width to be visible
+      const itemWidth = Math.max(MINIMUM_BAR_WIDTH, endX - startX);
 
-      ctx.fillStyle =
-        hoveredItem?.id === item.id || hoveredSection === item.section
-          ? lightenColor(sectionColor, 0.2)
-          : sectionColor;
+      // Check if this row is hovered (either the item or its section)
+      const isRowHovered =
+        hoveredItem?.id === item.id || hoveredSection === item.section;
+
+      // Draw row highlight if hovered
+      if (isRowHovered) {
+        ctx.fillStyle = "rgba(229, 231, 235, 0.5)"; // Light grey with transparency
+        ctx.fillRect(
+          0, // Start from left edge
+          currentY - 1, // Slightly above the bar
+          ctx.canvas.width, // Span the entire width
+          TIMELINE_CONSTANTS.BAR_HEIGHT + 2 // Slightly taller than the bar
+        );
+      }
+
+      // Draw the actual bar
+      ctx.fillStyle = isRowHovered
+        ? lightenColor(sectionColor, 0.3) // More pronounced lightening when hovered
+        : sectionColor;
 
       ctx.beginPath();
       ctx.roundRect(
@@ -173,16 +194,28 @@ function drawTimelineItems(
         currentY,
         itemWidth,
         TIMELINE_CONSTANTS.BAR_HEIGHT,
-        4
+        3 // Slightly smaller corner radius
       );
       ctx.fill();
 
-      if (item.status === "error") {
-        drawErrorIndicator(ctx, endX, currentY);
+      // Add border to make small bars more visible
+      if (itemWidth < 10) {
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
       }
 
-      if (itemWidth > 80 && item.label) {
-        drawItemLabel(ctx, item.label, startX, currentY);
+      if (item.status === "error") {
+        drawErrorIndicator(
+          ctx,
+          Math.max(endX, startX + MINIMUM_BAR_WIDTH),
+          currentY
+        );
+      }
+
+      // Only draw label if there's enough space - with min width reduced
+      if (itemWidth > 30 && item.label) {
+        drawItemLabel(ctx, item.label, startX, currentY, itemWidth);
       }
 
       currentY +=
@@ -211,11 +244,25 @@ function drawItemLabel(
   ctx: CanvasRenderingContext2D,
   label: string,
   x: number,
-  y: number
+  y: number,
+  width: number
 ) {
   ctx.fillStyle = "#ffffff";
-  ctx.font = "11px Inter, system-ui, sans-serif";
-  ctx.fillText(label, x + 6, y + TIMELINE_CONSTANTS.BAR_HEIGHT / 2 + 4);
+  ctx.font = "10px Inter, system-ui, sans-serif"; // Slightly smaller font
+
+  // Adapt label length to available width
+  let displayLabel = label;
+  if (width < 100 && label.length > 10) {
+    displayLabel = label.substring(0, 8) + "...";
+  } else if (width < 200 && label.length > 15) {
+    displayLabel = label.substring(0, 13) + "...";
+  }
+
+  ctx.fillText(
+    displayLabel,
+    x + 4, // Less padding
+    y + TIMELINE_CONSTANTS.BAR_HEIGHT / 2 + 3
+  );
 }
 
 // Event handler factories
@@ -234,12 +281,38 @@ function createMouseMoveHandler(
 
     const canvasRect = canvas.getBoundingClientRect();
     const y = e.clientY - canvasRect.top;
+    const x = e.clientX - canvasRect.left + scrollContainer.scrollLeft;
 
-    const { item: foundItem, section: foundSection } = findHoveredItem(
-      y,
-      sections,
-      items
-    );
+    // Improved item detection that's more forgiving with vertical position
+    const extendedRowHeight =
+      TIMELINE_CONSTANTS.BAR_HEIGHT + TIMELINE_CONSTANTS.BAR_SPACING;
+
+    let foundItem = null;
+    let foundSection = null;
+    let currentY = TIMELINE_CONSTANTS.INITIAL_Y;
+
+    // Group items by section
+    const sectionItems = getItemsGroupedBySection(items, sections);
+
+    // Find the hovered section and item based on Y position
+    sections.forEach((section) => {
+      const sectionStartY = currentY;
+      const sectionItems = items.filter((item) => item.section === section.id);
+      const sectionHeight = sectionItems.length * extendedRowHeight;
+
+      // If cursor is within this section's Y-range
+      if (y >= sectionStartY && y < sectionStartY + sectionHeight) {
+        foundSection = section.id;
+
+        // Calculate which row within the section is being hovered
+        const rowIndex = Math.floor((y - sectionStartY) / extendedRowHeight);
+        if (rowIndex >= 0 && rowIndex < sectionItems.length) {
+          foundItem = sectionItems[rowIndex];
+        }
+      }
+
+      currentY += sectionHeight + TIMELINE_CONSTANTS.SECTION_SPACING;
+    });
 
     setHoveredItem(foundItem);
     setHoveredSection(foundSection);
@@ -266,9 +339,6 @@ function createMouseLeaveHandler(
 export default function PerformanceTimeline({
   data,
 }: PerformanceTimelineProps) {
-  // Add timeline height constant
-  const ENDING_PADDING = TIMELINE_CONSTANTS.PIXELS_PER_MS * 100; // Scale padding with zoom level - 100ms worth of padding
-
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const minimapRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -288,21 +358,34 @@ export default function PerformanceTimeline({
   const scrollPositionRef = useRef(0);
   const canvasWidthRef = useRef(0);
   const containerWidthRef = useRef(0);
+  const pixelsPerMsRef = useRef(0);
   const minimapHandlePositionRef = useRef({ x: 0, y: 0 });
   const { timeRange, items, sections } = data;
 
   const [minTime, maxTime] = timeRange;
   const timeSpan = maxTime - minTime;
-  const totalTimelineWidth =
-    timeSpan * TIMELINE_CONSTANTS.PIXELS_PER_MS + ENDING_PADDING; // Add padding to total width
 
-  // Calculate the total width needed for the timeline
-  // We'll use a fixed width per millisecond to ensure consistent scaling
+  // Calculate dynamic pixelsPerMs to fit the timeline in the container
+  const calculatePixelsPerMs = useCallback(() => {
+    if (containerWidthRef.current === 0 || timeSpan === 0)
+      return TIMELINE_CONSTANTS.MIN_PIXELS_PER_MS;
+
+    // Calculate optimal pixels per ms to fit timeline within container width
+    // with minimal padding on the right
+    const availableWidth = containerWidthRef.current - 50; // Reduce padding to use more space
+    const optimalPixelsPerMs = availableWidth / timeSpan;
+
+    // Constrain to min/max values to prevent extreme scaling
+    return Math.max(
+      TIMELINE_CONSTANTS.MIN_PIXELS_PER_MS,
+      Math.min(TIMELINE_CONSTANTS.MAX_PIXELS_PER_MS, optimalPixelsPerMs)
+    );
+  }, [timeSpan]);
 
   // Colors for different status types
   const colors = STATUS_COLORS;
 
-  // Function to update the minimap - Restore this function
+  // Function to update the minimap
   const updateMinimap = useCallback(() => {
     const minimap = minimapRef.current;
     if (!minimap) return;
@@ -324,11 +407,11 @@ export default function PerformanceTimeline({
     ctx.clearRect(10, 0, width, height);
 
     // Draw background
-    ctx.fillStyle = "#f1f5f9"; // Example color
+    ctx.fillStyle = "#f1f5f9";
     ctx.fillRect(0, 0, 150, 80);
 
     // Draw border
-    ctx.strokeStyle = "#cbd5e1"; // Example color
+    ctx.strokeStyle = "#cbd5e1";
     ctx.lineWidth = 1;
     ctx.strokeRect(0, 0, 150, 80);
 
@@ -336,8 +419,8 @@ export default function PerformanceTimeline({
     const barHeight = MINIMAP_CONSTANTS.BAR_HEIGHT;
     const barSpacing = MINIMAP_CONSTANTS.BAR_SPACING;
     let currentY = 10;
-    const minimapPadding = MINIMAP_CONSTANTS.PADDING; // Add padding to minimap
-    const minimapContentWidth = MINIMAP_CONSTANTS.WIDTH - minimapPadding * 2; // Adjust content width for padding
+    const minimapPadding = MINIMAP_CONSTANTS.PADDING;
+    const minimapContentWidth = MINIMAP_CONSTANTS.WIDTH - minimapPadding * 2;
 
     // Group items by section
     const sectionItems: Record<string, TimelineItem[]> = {};
@@ -384,9 +467,8 @@ export default function PerformanceTimeline({
       const scrollLeft = scrollPositionRef.current;
       const visibleWidth = containerWidthRef.current;
 
-      // Calculate ratios including the padding
-      const totalWidth =
-        timeSpan * TIMELINE_CONSTANTS.PIXELS_PER_MS + ENDING_PADDING;
+      // Calculate ratios based on total canvas width
+      const totalWidth = canvasWidthRef.current;
       const visibleStartRatio = scrollLeft / totalWidth;
       const visibleEndRatio = Math.min(
         1,
@@ -402,10 +484,10 @@ export default function PerformanceTimeline({
       ctx.fillRect(0, 0, visibleStartX, 80);
       ctx.fillRect(visibleEndX, 0, 150 - visibleEndX, 80);
 
-      // Update handle position for dragging (using ref instead of state)
+      // Update handle position for dragging
       minimapHandlePositionRef.current = { x: visibleEndX, y: 70 };
     }
-  }, [sections, items, colors, minTime, timeSpan, ENDING_PADDING]);
+  }, [sections, items, colors, minTime, timeSpan]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -417,34 +499,54 @@ export default function PerformanceTimeline({
       if (container) {
         const width = container.getBoundingClientRect().width;
         containerWidthRef.current = width;
+
+        // Recalculate pixels per ms based on new container width
+        pixelsPerMsRef.current = calculatePixelsPerMs();
+
+        // Redraw canvas with new dimensions
+        drawCanvas();
       }
     };
-    updateDimensions(); // Initial dimensions
+
+    // Initial dimensions
+    updateDimensions();
     window.addEventListener("resize", updateDimensions);
+
+    return () => window.removeEventListener("resize", updateDimensions);
+  }, [calculatePixelsPerMs]);
+
+  // Draw the canvas based on current dimensions and scale
+  const drawCanvas = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    // Use the current pixelsPerMs value
+    const pixelsPerMs = pixelsPerMsRef.current;
+
     // Set canvas dimensions
     const dpr = window.devicePixelRatio || 1;
     const height = TIMELINE_CONSTANTS.HEIGHT;
-    // Calculate total width based on time span and pixel density
-    const width = totalTimelineWidth; // This is timeSpan * PIXELPERMS + ENDING_PADDING
-    console.log("width", width);
+
+    // Calculate total width based on time span and current scale
+    const totalWidth =
+      timeSpan * pixelsPerMs + TIMELINE_CONSTANTS.PADDING_RIGHT;
+    canvasWidthRef.current = totalWidth;
 
     // Set both the canvas buffer size and display size
-    canvas.width = width * dpr;
+    canvas.width = totalWidth * dpr;
     canvas.height = height * dpr;
-    canvas.style.width = `${width}px`;
+    canvas.style.width = `${totalWidth}px`;
     canvas.style.height = `${height}px`;
-    canvasWidthRef.current = width;
     ctx.scale(dpr, dpr);
 
     // Clear canvas
-    ctx.clearRect(0, 0, width, height);
+    ctx.clearRect(0, 0, totalWidth, height);
 
     // Draw time markers
-    drawTimeMarkers(ctx, minTime, maxTime, height);
+    drawTimeMarkers(ctx, minTime, maxTime, height, pixelsPerMs);
 
     // Draw timeline items
     drawTimelineItems(
@@ -454,10 +556,12 @@ export default function PerformanceTimeline({
       minTime,
       hoveredItem,
       hoveredSection,
-      colors
+      colors,
+      pixelsPerMs
     );
 
-    return () => window.removeEventListener("resize", updateDimensions);
+    // Update minimap to reflect new canvas
+    updateMinimap();
   }, [
     minTime,
     maxTime,
@@ -467,12 +571,17 @@ export default function PerformanceTimeline({
     hoveredItem,
     hoveredSection,
     colors,
-    totalTimelineWidth,
-    TIMELINE_CONSTANTS.PIXELS_PER_MS,
-    TIMELINE_CONSTANTS.HEIGHT,
+    updateMinimap,
   ]);
 
-  // Original useEffect for mouse move handling (now inside the other effect)
+  // Draw the canvas when dependencies change
+  useEffect(() => {
+    // Calculate initial pixels per ms
+    pixelsPerMsRef.current = calculatePixelsPerMs();
+    drawCanvas();
+  }, [calculatePixelsPerMs, drawCanvas]);
+
+  // Handle mouse move events
   useEffect(() => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
@@ -503,12 +612,7 @@ export default function PerformanceTimeline({
       canvas.removeEventListener("mousemove", handleMouseMove);
       canvas.removeEventListener("mouseleave", handleMouseLeave);
     };
-  }, [minTime, items, sections, TIMELINE_CONSTANTS.PIXELS_PER_MS]);
-
-  // Draw the minimap initially
-  useEffect(() => {
-    updateMinimap();
-  }, [updateMinimap]);
+  }, [minTime, items, sections]);
 
   // Handle scroll events
   useEffect(() => {
@@ -532,37 +636,6 @@ export default function PerformanceTimeline({
     scrollContainer.addEventListener("scroll", handleScroll);
     return () => scrollContainer.removeEventListener("scroll", handleScroll);
   }, [updateMinimap]);
-
-  // Handle mouse interactions with the main timeline
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const handleMouseMove = createMouseMoveHandler(
-      canvas,
-      scrollContainerRef.current,
-      sections,
-      items,
-      setHoveredItem,
-      setHoveredSection,
-      setTooltipPosition,
-      setShowTooltip
-    );
-
-    const handleMouseLeave = createMouseLeaveHandler(
-      setHoveredItem,
-      setHoveredSection,
-      setShowTooltip
-    );
-
-    canvas.addEventListener("mousemove", handleMouseMove);
-    canvas.addEventListener("mouseleave", handleMouseLeave);
-
-    return () => {
-      canvas.removeEventListener("mousemove", handleMouseMove);
-      canvas.removeEventListener("mouseleave", handleMouseLeave);
-    };
-  }, [minTime, items, sections, TIMELINE_CONSTANTS.PIXELS_PER_MS]);
 
   // Handle mouse interactions with the minimap
   useEffect(() => {
@@ -656,10 +729,10 @@ export default function PerformanceTimeline({
         ref={containerRef}
         className="relative border border-gray-200 rounded-lg overflow-hidden bg-white"
       >
-        {/* Scroll container */}
+        {/* Scroll container - updated with overflow-y */}
         <div
           ref={scrollContainerRef}
-          className="overflow-x-auto w-full scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
+          className="overflow-x-auto overflow-y-auto max-h-[500px] w-full scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
           style={{ height: `${TIMELINE_CONSTANTS.HEIGHT}px` }}
         >
           <canvas ref={canvasRef} className="cursor-pointer" />
@@ -732,15 +805,6 @@ export default function PerformanceTimeline({
           </div>
         )}
       </div>
-
-      <TimelineTable
-        sections={sections}
-        items={items}
-        hoveredSection={hoveredSection}
-        hoveredItem={hoveredItem}
-        onHoverItem={setHoveredItem}
-        onHoverSection={setHoveredSection}
-      />
     </div>
   );
 }
