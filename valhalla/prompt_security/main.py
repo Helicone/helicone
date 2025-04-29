@@ -16,10 +16,12 @@ MAX_CHUNKS = 8
 AVERAGE_TOKEN_LENGTH = 4
 MARGIN_OF_ERROR = 0.20
 MAX_TEXT_LENGTH = int(
-    MAX_TOKENS_PER_CHUNK * AVERAGE_TOKEN_LENGTH * MAX_CHUNKS * (1 + MARGIN_OF_ERROR)
+    MAX_TOKENS_PER_CHUNK * AVERAGE_TOKEN_LENGTH *
+    MAX_CHUNKS * (1 + MARGIN_OF_ERROR)
 )
 
-prompt_guard_model_path = os.path.join(os.path.dirname(__file__), "prompt-guard-86m")
+prompt_guard_model_path = os.path.join(
+    os.path.dirname(__file__), "prompt-guard-86m")
 
 
 def download_prompt_guard_model():
@@ -57,7 +59,8 @@ def download_prompt_guard_model():
                 Bucket="helicone-llm-models",
                 Key="prompt-guard-86m.tar.gz",
                 Filename="prompt-guard-86m.tar.gz",
-                Callback=lambda bytes_transferred: pbar.update(bytes_transferred),
+                Callback=lambda bytes_transferred: pbar.update(
+                    bytes_transferred),
             )
 
         print("Downloaded prompt-guard-86m.tar.gz")
@@ -134,11 +137,13 @@ class PromptGuardModel(BaseSecurityModel):
         # More efficient text splitting using character count instead of words
         max_length = MAX_TOKENS_PER_CHUNK
         text_length = len(text)
-        n_chunks = min(MAX_CHUNKS, (text_length + max_length - 1) // max_length)
+        n_chunks = min(MAX_CHUNKS, (text_length +
+                       max_length - 1) // max_length)
         chunk_size = (text_length + n_chunks - 1) // n_chunks
 
         # Create chunks based on character count
-        chunks = [text[i : i + chunk_size] for i in range(0, text_length, chunk_size)]
+        chunks = [text[i: i + chunk_size]
+                  for i in range(0, text_length, chunk_size)]
 
         # Parallel tokenization of chunks
         tokenized_chunks = [self._tokenize_chunk(chunk) for chunk in chunks]
@@ -175,7 +180,27 @@ class PromptGuardModel(BaseSecurityModel):
 
 # Initialize model globally with 6 workers (half of available cores)
 cpu_count = os.cpu_count() or 8
-global_model = PromptGuardModel(num_workers=cpu_count // 2).load_model()
+# Remove global initialization here
+# global_model = PromptGuardModel(num_workers=cpu_count // 2).load_model()
+global_model = None
+
+
+@app.on_event("startup")
+async def startup_event():
+    """Download and load the model on startup."""
+    global global_model
+    try:
+        print("Downloading model on startup...")
+        download_prompt_guard_model()
+        print("Loading model...")
+        global_model = PromptGuardModel(
+            num_workers=cpu_count // 2).load_model()
+        print("Model loaded successfully.")
+    except Exception as e:
+        print(f"FATAL: Error during model initialization: {str(e)}")
+        # Optionally, exit the application if the model fails to load
+        # import sys
+        # sys.exit(1)
 
 
 @app.post("/check_security")
@@ -183,6 +208,11 @@ async def check_security(request: TextRequest):
     """
     Check text for both jailbreak and indirect injection attempts using the specified model
     """
+    if global_model is None:
+        raise HTTPException(
+            status_code=503, detail="Model not loaded. Service is starting up."
+        )
+
     try:
         if len(request.text) > MAX_TEXT_LENGTH:
             request.text = request.text[:MAX_TEXT_LENGTH]
@@ -194,11 +224,13 @@ async def check_security(request: TextRequest):
 
 
 if __name__ == "__main__":
-    try:
-        download_prompt_guard_model()
-    except Exception as e:
-        print(f"Error downloading model: {str(e)}")
+    # Remove download call from here, it's now in startup event
+    # try:
+    #     download_prompt_guard_model()
+    # except Exception as e:
+    #     print(f"Error downloading model: {str(e)}")
 
     import uvicorn
 
+    # Uvicorn will automatically run the startup event
     uvicorn.run(app, host="0.0.0.0", port=9001)
