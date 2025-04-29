@@ -4,6 +4,7 @@ import { getJawnClient } from "@/lib/clients/jawn";
 import { generateAPIKeyHelper } from "@/utils/generateAPIKeyHelper";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/router";
+import { $JAWN_API_WITH_ORG } from "@/lib/clients/jawn";
 
 export const useKeys = () => {
   const org = useOrg();
@@ -63,14 +64,16 @@ export const useKeys = () => {
 
   const deleteKey = useMutation({
     mutationFn: (apiKeyId: string) => {
-      const jawn = getJawnClient(org?.currentOrg?.id);
-      return jawn.DELETE("/v1/api-keys/{apiKeyId}", {
-        params: {
-          path: {
-            apiKeyId: Number(apiKeyId),
+      return $JAWN_API_WITH_ORG(org?.currentOrg?.id).DELETE(
+        "/v1/api-keys/{apiKeyId}",
+        {
+          params: {
+            path: {
+              apiKeyId: Number(apiKeyId),
+            },
           },
-        },
-      });
+        }
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
