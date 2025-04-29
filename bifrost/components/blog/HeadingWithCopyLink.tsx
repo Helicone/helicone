@@ -55,7 +55,7 @@ export const HeadingWithCopyLink: React.FC<HeadingWithCopyLinkProps> = ({
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="size-4 shrink-0"
+                    className="size-4 shrink-0 hidden sm:inline-flex"
                     onClick={(e) => {
                         e.stopPropagation();
                         copyAndJump();
