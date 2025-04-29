@@ -19,13 +19,255 @@ interface TooltipPosition {
   y: number;
 }
 
+// Constants
+const TIMELINE_CONSTANTS = {
+  HEIGHT: 400,
+  PIXELS_PER_MS: 1.2,
+  BAR_HEIGHT: 16,
+  BAR_SPACING: 8,
+  SECTION_SPACING: 10,
+  MARKER_INTERVAL: 200,
+  INITIAL_Y: 50,
+} as const;
+
+const MINIMAP_CONSTANTS = {
+  WIDTH: 150,
+  HEIGHT: 80,
+  PADDING: 8,
+  BAR_HEIGHT: 4,
+  BAR_SPACING: 2,
+} as const;
+
+const STATUS_COLORS = {
+  success: "#4ade80",
+  error: "#ef4444",
+  default: "#3b82f6",
+  abstract: "#94a3b8",
+  outline: "#f97316",
+  introduction: "#8b5cf6",
+  "key technologies": "#ec4899",
+  quiz: "#f59e0b",
+} as const;
+
+// Helper functions
+function lightenColor(color: string, amount: number): string {
+  // Convert hex to RGB
+  let r = Number.parseInt(color.slice(1, 3), 16);
+  let g = Number.parseInt(color.slice(3, 5), 16);
+  let b = Number.parseInt(color.slice(5, 7), 16);
+
+  // Lighten
+  r = Math.min(255, Math.round(r + (255 - r) * amount));
+  g = Math.min(255, Math.round(g + (255 - g) * amount));
+  b = Math.min(255, Math.round(b + (255 - b) * amount));
+
+  // Convert back to hex
+  return `#${r.toString(16).padStart(2, "0")}${g
+    .toString(16)
+    .padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+}
+
+function getItemsGroupedBySection(
+  items: TimelineItem[],
+  sections: TimelineSection[]
+) {
+  const sectionItems: Record<string, TimelineItem[]> = {};
+  sections.forEach((section) => {
+    sectionItems[section.id] = items.filter(
+      (item) => item.section === section.id
+    );
+  });
+  return sectionItems;
+}
+
+function findHoveredItem(
+  y: number,
+  sections: TimelineSection[],
+  items: TimelineItem[],
+  currentY = TIMELINE_CONSTANTS.INITIAL_Y
+): { item: TimelineItem | null; section: string | null } {
+  let foundItem = null;
+  let foundSection = null;
+
+  sections.forEach((section) => {
+    const sectionItems = items.filter((item) => item.section === section.id);
+
+    sectionItems.forEach((item) => {
+      const itemRowTop = currentY;
+      const itemRowBottom = currentY + TIMELINE_CONSTANTS.BAR_HEIGHT;
+
+      if (y >= itemRowTop && y <= itemRowBottom) {
+        foundItem = item;
+        foundSection = section.id;
+      }
+      currentY = itemRowBottom + TIMELINE_CONSTANTS.BAR_SPACING;
+    });
+    currentY += TIMELINE_CONSTANTS.SECTION_SPACING;
+  });
+
+  return { item: foundItem, section: foundSection };
+}
+
+// Canvas drawing timeline markers with lines
+function drawTimeMarkers(
+  ctx: CanvasRenderingContext2D,
+  minTime: number,
+  maxTime: number,
+  height: number
+) {
+  const timeMarkers = [];
+  for (
+    let time = minTime;
+    time <= maxTime;
+    time += TIMELINE_CONSTANTS.MARKER_INTERVAL
+  ) {
+    timeMarkers.push(time);
+  }
+
+  const markerY = 20;
+  ctx.font = "12px Inter, system-ui, sans-serif"; // fint the right font
+  ctx.fillStyle = "#64748b";
+  ctx.strokeStyle = "#e2e8f0";
+  ctx.lineWidth = 1;
+
+  timeMarkers.forEach((time) => {
+    const x = (time - minTime) * TIMELINE_CONSTANTS.PIXELS_PER_MS;
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, height);
+    ctx.stroke();
+    ctx.fillText(`${time} ms`, x + 5, markerY);
+  });
+}
+
+function drawTimelineItems(
+  ctx: CanvasRenderingContext2D,
+  items: TimelineItem[],
+  sections: TimelineSection[],
+  minTime: number,
+  hoveredItem: TimelineItem | null,
+  hoveredSection: string | null,
+  colors: typeof STATUS_COLORS
+) {
+  let currentY = TIMELINE_CONSTANTS.INITIAL_Y;
+  const sectionItems = getItemsGroupedBySection(items, sections);
+
+  sections.forEach((section) => {
+    const sectionColor =
+      colors[section.id as keyof typeof colors] || colors.default;
+
+    sectionItems[section.id].forEach((item) => {
+      const startX =
+        (item.startTime - minTime) * TIMELINE_CONSTANTS.PIXELS_PER_MS;
+      const endX = (item.endTime - minTime) * TIMELINE_CONSTANTS.PIXELS_PER_MS;
+      const itemWidth = endX - startX;
+
+      ctx.fillStyle =
+        hoveredItem?.id === item.id || hoveredSection === item.section
+          ? lightenColor(sectionColor, 0.2)
+          : sectionColor;
+
+      ctx.beginPath();
+      ctx.roundRect(
+        startX,
+        currentY,
+        itemWidth,
+        TIMELINE_CONSTANTS.BAR_HEIGHT,
+        4
+      );
+      ctx.fill();
+
+      if (item.status === "error") {
+        drawErrorIndicator(ctx, endX, currentY);
+      }
+
+      if (itemWidth > 80 && item.label) {
+        drawItemLabel(ctx, item.label, startX, currentY);
+      }
+
+      currentY +=
+        TIMELINE_CONSTANTS.BAR_HEIGHT + TIMELINE_CONSTANTS.BAR_SPACING;
+    });
+
+    currentY += TIMELINE_CONSTANTS.SECTION_SPACING;
+  });
+}
+
+function drawErrorIndicator(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number
+) {
+  ctx.fillStyle = "#ef4444";
+  ctx.beginPath();
+  ctx.arc(x - 8, y + TIMELINE_CONSTANTS.BAR_HEIGHT / 2, 6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 10px Inter, system-ui, sans-serif";
+  ctx.fillText("×", x - 10.5, y + TIMELINE_CONSTANTS.BAR_HEIGHT / 2 + 3);
+}
+
+function drawItemLabel(
+  ctx: CanvasRenderingContext2D,
+  label: string,
+  x: number,
+  y: number
+) {
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "11px Inter, system-ui, sans-serif";
+  ctx.fillText(label, x + 6, y + TIMELINE_CONSTANTS.BAR_HEIGHT / 2 + 4);
+}
+
+// Event handler factories
+function createMouseMoveHandler(
+  canvas: HTMLCanvasElement,
+  scrollContainer: HTMLDivElement | null,
+  sections: TimelineSection[],
+  items: TimelineItem[],
+  setHoveredItem: (item: TimelineItem | null) => void,
+  setHoveredSection: (section: string | null) => void,
+  setTooltipPosition: (position: TooltipPosition) => void,
+  setShowTooltip: (show: boolean) => void
+) {
+  return (e: MouseEvent) => {
+    if (!scrollContainer) return;
+
+    const canvasRect = canvas.getBoundingClientRect();
+    const y = e.clientY - canvasRect.top;
+
+    const { item: foundItem, section: foundSection } = findHoveredItem(
+      y,
+      sections,
+      items
+    );
+
+    setHoveredItem(foundItem);
+    setHoveredSection(foundSection);
+    setTooltipPosition({
+      x: e.clientX,
+      y: e.clientY,
+    });
+    setShowTooltip(!!foundItem);
+  };
+}
+
+function createMouseLeaveHandler(
+  setHoveredItem: (item: TimelineItem | null) => void,
+  setHoveredSection: (section: string | null) => void,
+  setShowTooltip: (show: boolean) => void
+) {
+  return () => {
+    setHoveredItem(null);
+    setHoveredSection(null);
+    setShowTooltip(false);
+  };
+}
+
 export default function PerformanceTimeline({
   data,
 }: PerformanceTimelineProps) {
   // Add timeline height constant
-  const TIMELINE_HEIGHT = 400; // Adjust this value to change the height
-  const PIXELPERMS = 1.2; // Adjust this value to change the zoom level
-  const ENDING_PADDING = PIXELPERMS * 100; // Scale padding with zoom level - 100ms worth of padding
+  const ENDING_PADDING = TIMELINE_CONSTANTS.PIXELS_PER_MS * 100; // Scale padding with zoom level - 100ms worth of padding
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const minimapRef = useRef<HTMLCanvasElement>(null);
@@ -51,22 +293,14 @@ export default function PerformanceTimeline({
 
   const [minTime, maxTime] = timeRange;
   const timeSpan = maxTime - minTime;
-  const totalTimelineWidth = timeSpan * PIXELPERMS + ENDING_PADDING; // Add padding to total width
+  const totalTimelineWidth =
+    timeSpan * TIMELINE_CONSTANTS.PIXELS_PER_MS + ENDING_PADDING; // Add padding to total width
 
   // Calculate the total width needed for the timeline
   // We'll use a fixed width per millisecond to ensure consistent scaling
 
   // Colors for different status types
-  const colors = {
-    success: "#4ade80",
-    error: "#ef4444",
-    default: "#3b82f6",
-    abstract: "#94a3b8",
-    outline: "#f97316",
-    introduction: "#8b5cf6",
-    "key technologies": "#ec4899",
-    quiz: "#f59e0b",
-  };
+  const colors = STATUS_COLORS;
 
   // Function to update the minimap - Restore this function
   const updateMinimap = useCallback(() => {
@@ -78,8 +312,8 @@ export default function PerformanceTimeline({
 
     // Set minimap dimensions
     const dpr = window.devicePixelRatio || 1;
-    const width = 150 * dpr;
-    const height = 80 * dpr;
+    const width = MINIMAP_CONSTANTS.WIDTH * dpr;
+    const height = MINIMAP_CONSTANTS.HEIGHT * dpr;
     minimap.width = width;
     minimap.height = height;
     minimap.style.width = "150px";
@@ -99,11 +333,11 @@ export default function PerformanceTimeline({
     ctx.strokeRect(0, 0, 150, 80);
 
     // Draw timeline items in minimap with padding
-    const barHeight = 4;
-    const barSpacing = 2;
+    const barHeight = MINIMAP_CONSTANTS.BAR_HEIGHT;
+    const barSpacing = MINIMAP_CONSTANTS.BAR_SPACING;
     let currentY = 10;
-    const minimapPadding = 8; // Add padding to minimap
-    const minimapContentWidth = 150 - minimapPadding * 2; // Adjust content width for padding
+    const minimapPadding = MINIMAP_CONSTANTS.PADDING; // Add padding to minimap
+    const minimapContentWidth = MINIMAP_CONSTANTS.WIDTH - minimapPadding * 2; // Adjust content width for padding
 
     // Group items by section
     const sectionItems: Record<string, TimelineItem[]> = {};
@@ -151,7 +385,8 @@ export default function PerformanceTimeline({
       const visibleWidth = containerWidthRef.current;
 
       // Calculate ratios including the padding
-      const totalWidth = timeSpan * PIXELPERMS + ENDING_PADDING;
+      const totalWidth =
+        timeSpan * TIMELINE_CONSTANTS.PIXELS_PER_MS + ENDING_PADDING;
       const visibleStartRatio = scrollLeft / totalWidth;
       const visibleEndRatio = Math.min(
         1,
@@ -171,24 +406,6 @@ export default function PerformanceTimeline({
       minimapHandlePositionRef.current = { x: visibleEndX, y: 70 };
     }
   }, [sections, items, colors, minTime, timeSpan, ENDING_PADDING]);
-
-  // Helper function to lighten a color - Restore inside component scope
-  function lightenColor(color: string, amount: number): string {
-    // Convert hex to RGB
-    let r = Number.parseInt(color.slice(1, 3), 16);
-    let g = Number.parseInt(color.slice(3, 5), 16);
-    let b = Number.parseInt(color.slice(5, 7), 16);
-
-    // Lighten
-    r = Math.min(255, Math.round(r + (255 - r) * amount));
-    g = Math.min(255, Math.round(g + (255 - g) * amount));
-    b = Math.min(255, Math.round(b + (255 - b) * amount));
-
-    // Convert back to hex
-    return `#${r.toString(16).padStart(2, "0")}${g
-      .toString(16)
-      .padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
-  }
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -210,9 +427,12 @@ export default function PerformanceTimeline({
 
     // Set canvas dimensions
     const dpr = window.devicePixelRatio || 1;
-    const height = TIMELINE_HEIGHT;
-    const width = totalTimelineWidth;
+    const height = TIMELINE_CONSTANTS.HEIGHT;
+    // Calculate total width based on time span and pixel density
+    const width = totalTimelineWidth; // This is timeSpan * PIXELPERMS + ENDING_PADDING
+    console.log("width", width);
 
+    // Set both the canvas buffer size and display size
     canvas.width = width * dpr;
     canvas.height = height * dpr;
     canvas.style.width = `${width}px`;
@@ -224,76 +444,18 @@ export default function PerformanceTimeline({
     ctx.clearRect(0, 0, width, height);
 
     // Draw time markers
-    const timeMarkers = [];
-    const markerInterval = 200;
-    for (let time = minTime; time <= maxTime; time += markerInterval) {
-      timeMarkers.push(time);
-    }
-    const markerY = 20;
-    ctx.font = "12px Inter, system-ui, sans-serif";
-    ctx.fillStyle = "#64748b";
-    ctx.strokeStyle = "#e2e8f0";
-    ctx.lineWidth = 1;
-    timeMarkers.forEach((time) => {
-      const x = (time - minTime) * PIXELPERMS;
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, height);
-      ctx.stroke();
-      ctx.fillText(`${time} ms`, x + 5, markerY);
-    });
+    drawTimeMarkers(ctx, minTime, maxTime, height);
 
     // Draw timeline items
-    const barHeight = 16;
-    const barSpacing = 8;
-    let currentY = 50;
-
-    const sectionItems: Record<string, TimelineItem[]> = {};
-    sections.forEach((section) => {
-      sectionItems[section.id] = items.filter(
-        (item) => item.section === section.id
-      );
-    });
-
-    sections.forEach((section) => {
-      const sectionColor =
-        colors[section.id as keyof typeof colors] || colors.default;
-
-      sectionItems[section.id].forEach((item) => {
-        const startX = (item.startTime - minTime) * PIXELPERMS;
-        const endX = (item.endTime - minTime) * PIXELPERMS;
-        const itemWidth = endX - startX;
-
-        ctx.fillStyle =
-          hoveredItem?.id === item.id || hoveredSection === item.section
-            ? lightenColor(sectionColor, 0.2)
-            : sectionColor;
-
-        ctx.beginPath();
-        ctx.roundRect(startX, currentY, itemWidth, barHeight, 4);
-        ctx.fill();
-
-        if (item.status === "error") {
-          ctx.fillStyle = "#ef4444";
-          ctx.beginPath();
-          ctx.arc(endX - 8, currentY + barHeight / 2, 6, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.fillStyle = "#ffffff";
-          ctx.font = "bold 10px Inter, system-ui, sans-serif";
-          ctx.fillText("×", endX - 10.5, currentY + barHeight / 2 + 3);
-        }
-
-        if (itemWidth > 80 && item.label) {
-          ctx.fillStyle = "#ffffff";
-          ctx.font = "11px Inter, system-ui, sans-serif";
-          ctx.fillText(item.label, startX + 6, currentY + barHeight / 2 + 4);
-        }
-
-        currentY += barHeight + barSpacing;
-      });
-
-      currentY += 10;
-    });
+    drawTimelineItems(
+      ctx,
+      items,
+      sections,
+      minTime,
+      hoveredItem,
+      hoveredSection,
+      colors
+    );
 
     return () => window.removeEventListener("resize", updateDimensions);
   }, [
@@ -306,8 +468,8 @@ export default function PerformanceTimeline({
     hoveredSection,
     colors,
     totalTimelineWidth,
-    PIXELPERMS,
-    TIMELINE_HEIGHT,
+    TIMELINE_CONSTANTS.PIXELS_PER_MS,
+    TIMELINE_CONSTANTS.HEIGHT,
   ]);
 
   // Original useEffect for mouse move handling (now inside the other effect)
@@ -317,57 +479,22 @@ export default function PerformanceTimeline({
     const scrollContainer = scrollContainerRef.current;
     if (!canvas || !container || !scrollContainer) return;
 
-    const handleMouseMove = (e: MouseEvent) => {
-      const canvasRect = canvas.getBoundingClientRect();
-      const containerRect = container.getBoundingClientRect();
-      const scrollLeft = scrollContainer.scrollLeft;
-      const x = e.clientX - canvasRect.left + scrollLeft; // Keep x for potential future use, but not for hover check
-      const y = e.clientY - canvasRect.top;
+    const handleMouseMove = createMouseMoveHandler(
+      canvas,
+      scrollContainer,
+      sections,
+      items,
+      setHoveredItem,
+      setHoveredSection,
+      setTooltipPosition,
+      setShowTooltip
+    );
 
-      const barHeight = 16;
-      const barSpacing = 8;
-      let currentY = 50;
-      let foundItem = null;
-      let foundSection = null;
-
-      // Iterate through sections to track the correct Y position
-      sections.forEach((section) => {
-        const sectionItems = items.filter(
-          (item) => item.section === section.id
-        );
-
-        sectionItems.forEach((item) => {
-          const itemRowTop = currentY;
-          const itemRowBottom = currentY + barHeight;
-
-          // Check only if the mouse Y is within the item's row boundaries
-          if (y >= itemRowTop && y <= itemRowBottom) {
-            foundItem = item;
-            foundSection = section.id;
-            const position = calculateTooltipPosition(
-              e.clientX,
-              e.clientY,
-              containerRect
-            );
-            setTooltipPosition(position);
-            // Note: If items could overlap vertically, the last match wins.
-            // If we want the first match, we could add a check here and break loops.
-          }
-          currentY = itemRowBottom + barSpacing; // Move Y to the start of the next item row
-        });
-        currentY += 10; // Add extra spacing between sections
-      });
-
-      setHoveredItem(foundItem);
-      setHoveredSection(foundSection);
-      setShowTooltip(!!foundItem);
-    };
-
-    const handleMouseLeave = () => {
-      setHoveredItem(null);
-      setHoveredSection(null);
-      setShowTooltip(false);
-    };
+    const handleMouseLeave = createMouseLeaveHandler(
+      setHoveredItem,
+      setHoveredSection,
+      setShowTooltip
+    );
 
     canvas.addEventListener("mousemove", handleMouseMove);
     canvas.addEventListener("mouseleave", handleMouseLeave);
@@ -376,7 +503,7 @@ export default function PerformanceTimeline({
       canvas.removeEventListener("mousemove", handleMouseMove);
       canvas.removeEventListener("mouseleave", handleMouseLeave);
     };
-  }, [minTime, items, sections, PIXELPERMS]);
+  }, [minTime, items, sections, TIMELINE_CONSTANTS.PIXELS_PER_MS]);
 
   // Draw the minimap initially
   useEffect(() => {
@@ -411,56 +538,22 @@ export default function PerformanceTimeline({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      const scrollContainer = scrollContainerRef.current;
-      if (!scrollContainer) return;
+    const handleMouseMove = createMouseMoveHandler(
+      canvas,
+      scrollContainerRef.current,
+      sections,
+      items,
+      setHoveredItem,
+      setHoveredSection,
+      setTooltipPosition,
+      setShowTooltip
+    );
 
-      const scrollLeft = scrollContainer.scrollLeft;
-      const x = e.clientX - rect.left + scrollLeft;
-      const y = e.clientY - rect.top;
-
-      // Check if mouse is over any item
-      const barHeight = 16;
-      const barSpacing = 8;
-      let currentY = 50;
-      let foundItem = null;
-      let foundSection = null;
-
-      // Check each section
-      sections.forEach((section) => {
-        const sectionItems = items.filter(
-          (item) => item.section === section.id
-        );
-
-        sectionItems.forEach((item) => {
-          if (y >= currentY && y <= currentY + barHeight) {
-            foundItem = item;
-            foundSection = section.id;
-            const position = calculateTooltipPosition(
-              e.clientX,
-              e.clientY,
-              rect
-            );
-            setTooltipPosition(position);
-          }
-
-          currentY += barHeight + barSpacing;
-        });
-
-        currentY += 10; // Extra spacing between sections
-      });
-
-      setHoveredItem(foundItem);
-      setHoveredSection(foundSection);
-      setShowTooltip(!!foundItem);
-    };
-
-    const handleMouseLeave = () => {
-      setHoveredItem(null);
-      setHoveredSection(null);
-      setShowTooltip(false);
-    };
+    const handleMouseLeave = createMouseLeaveHandler(
+      setHoveredItem,
+      setHoveredSection,
+      setShowTooltip
+    );
 
     canvas.addEventListener("mousemove", handleMouseMove);
     canvas.addEventListener("mouseleave", handleMouseLeave);
@@ -469,7 +562,7 @@ export default function PerformanceTimeline({
       canvas.removeEventListener("mousemove", handleMouseMove);
       canvas.removeEventListener("mouseleave", handleMouseLeave);
     };
-  }, [minTime, items, sections, PIXELPERMS]);
+  }, [minTime, items, sections, TIMELINE_CONSTANTS.PIXELS_PER_MS]);
 
   // Handle mouse interactions with the minimap
   useEffect(() => {
@@ -567,7 +660,7 @@ export default function PerformanceTimeline({
         <div
           ref={scrollContainerRef}
           className="overflow-x-auto w-full scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
-          style={{ height: `${TIMELINE_HEIGHT}px` }}
+          style={{ height: `${TIMELINE_CONSTANTS.HEIGHT}px` }}
         >
           <canvas ref={canvasRef} className="cursor-pointer" />
         </div>
@@ -604,11 +697,12 @@ export default function PerformanceTimeline({
 
         {showTooltip && hoveredItem && (
           <div
-            className="absolute z-20 bg-white border border-gray-200 rounded-md shadow-lg p-3 text-sm"
+            className="fixed z-20 bg-white border border-gray-200 rounded-md shadow-lg p-3 text-sm"
             style={{
               left: `${tooltipPosition.x}px`,
               top: `${tooltipPosition.y}px`,
               width: "250px",
+              transform: "translate(15px, 15px)", // Small offset from cursor
               pointerEvents: "none",
             }}
           >
@@ -650,63 +744,3 @@ export default function PerformanceTimeline({
     </div>
   );
 }
-
-const calculateTooltipPosition = (
-  cursorX: number, // Mouse X relative to viewport
-  cursorY: number, // Mouse Y relative to viewport
-  containerRect: DOMRect, // Container's bounding rect
-  tooltipWidth: number = 250, // Tooltip dimensions
-  tooltipHeight: number = 120, // Adjust if your tooltip content varies significantly
-  padding: number = 15 // Space between cursor and tooltip
-): TooltipPosition => {
-  // Calculate cursor position relative to the container's top-left corner
-  const cursorRelativeToContainerX = cursorX - containerRect.left;
-  const cursorRelativeToContainerY = cursorY - containerRect.top;
-
-  // Get container dimensions
-  const containerWidth = containerRect.width;
-  const containerHeight = containerRect.height; // Use the actual container height
-
-  // Default position: right and below cursor, relative to container
-  let finalX = cursorRelativeToContainerX + padding;
-  let finalY = cursorRelativeToContainerY + padding;
-
-  // Adjust horizontal position (X)
-  // If showing right goes off-screen right...
-  if (finalX + tooltipWidth > containerWidth) {
-    // Try showing left of the cursor instead
-    finalX = cursorRelativeToContainerX - tooltipWidth - padding;
-    // If showing left *also* goes off-screen left (e.g., narrow container)...
-    if (finalX < 0) {
-      // Pin to the left edge
-      finalX = 0;
-      // As a last resort if it *still* overflows (tooltip wider than container), pin to right edge
-      if (finalX + tooltipWidth > containerWidth) {
-        finalX = Math.max(0, containerWidth - tooltipWidth); // Ensure it doesn't become negative
-      }
-    }
-  }
-  // Ensure it didn't somehow end up off-screen left with the default placement
-  finalX = Math.max(0, finalX);
-
-  // Adjust vertical position (Y)
-  // If showing below goes off-screen bottom...
-  if (finalY + tooltipHeight > containerHeight) {
-    // Try showing above the cursor instead
-    finalY = cursorRelativeToContainerY - tooltipHeight - padding;
-    // If showing above *also* goes off-screen top...
-    if (finalY < 0) {
-      // Pin to the top edge
-      finalY = 0;
-      // As a last resort if it *still* overflows (tooltip taller than container), pin to bottom edge
-      if (finalY + tooltipHeight > containerHeight) {
-        finalY = Math.max(0, containerHeight - tooltipHeight); // Ensure it doesn't become negative
-      }
-    }
-  }
-  // Ensure it didn't somehow end up off-screen top with the default placement
-  finalY = Math.max(0, finalY);
-
-  // Return position relative to the container
-  return { x: finalX, y: finalY };
-};
