@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Check, Link as LinkIcon } from 'lucide-react';
+import { Check, Link } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Button } from '../ui/button';
 
 interface HeadingWithCopyLinkProps {
     level: 1 | 2 | 3 | 4 | 5 | 6;
@@ -20,19 +20,25 @@ export const HeadingWithCopyLink: React.FC<HeadingWithCopyLinkProps> = ({
 }) => {
     const [isHovered, setIsHovered] = useState(false);
     const [copied, setCopied] = useState(false);
-
     const HeadingTag = `h${level}` as keyof JSX.IntrinsicElements;
 
-    const copyLink = async () => {
-        if (!id || copied) return;
-        const url = `${window.location.origin}${window.location.pathname}#${id}`;
+    const copyAndJump = async () => {
+        if (!id) return;
+
+        const anchor = `#${id}`;
         try {
-            await navigator.clipboard.writeText(url);
+            await navigator.clipboard.writeText(anchor);
             setCopied(true);
-            setIsHovered(false);
             setTimeout(() => setCopied(false), 1500);
         } catch (err) {
             console.error('Failed to copy link: ', err);
+        }
+
+        // Jump to the element
+        const element = document.getElementById(id);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+            window.history.replaceState(null, '', anchor);
         }
     };
 
@@ -40,27 +46,28 @@ export const HeadingWithCopyLink: React.FC<HeadingWithCopyLinkProps> = ({
         <HeadingTag
             id={id}
             className={cn("relative flex items-center gap-2 cursor-pointer group", className)}
-            onClick={id ? copyLink : undefined}
-            onMouseEnter={() => id && setIsHovered(true)}
+            onClick={copyAndJump}
+            onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
-            title={id ? "Copy link to heading" : undefined}
         >
             {children}
             {id && (
-                <TooltipProvider delayDuration={0}>
-                    <Tooltip open={copied}>
-                        <TooltipTrigger asChild>
-                            <div className="size-4 shrink-0">
-                                {copied ? (
-                                    <Check className="size-full text-brand" />
-                                ) : isHovered ? (
-                                    <LinkIcon className="size-full text-muted-foreground" />
-                                ) : null}
-                            </div>
-                        </TooltipTrigger>
-                        <TooltipContent side="right">Copied!</TooltipContent>
-                    </Tooltip>
-                </TooltipProvider>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-4 shrink-0"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        copyAndJump();
+                    }}
+                    aria-label="Copy link to section"
+                >
+                    {copied ? (
+                        <Check className="size-full text-muted-foreground" />
+                    ) : isHovered ? (
+                        <Link className="size-full text-muted-foreground" />
+                    ) : null}
+                </Button>
             )}
         </HeadingTag>
     );
