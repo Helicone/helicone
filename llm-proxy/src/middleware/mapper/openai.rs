@@ -1,4 +1,18 @@
-use crate::middleware::mapper::{Convert, TryConvert, error::MapperError};
+use crate::{
+    config::model_mapping::ModelMappingConfig,
+    middleware::mapper::{Convert, TryConvert, error::MapperError},
+    types::provider::Provider,
+};
+
+pub struct OpenAiConverter<'a> {
+    model_mappings: &'a ModelMappingConfig,
+}
+
+impl<'a> OpenAiConverter<'a> {
+    pub fn new(model_mappings: &'a ModelMappingConfig) -> Self {
+        Self { model_mappings }
+    }
+}
 
 impl Convert<openai_types::chat::Role> for anthropic_types::chat::Role {
     fn convert(value: openai_types::chat::Role) -> Self {
@@ -11,14 +25,34 @@ impl Convert<openai_types::chat::Role> for anthropic_types::chat::Role {
     }
 }
 
-impl TryConvert<openai_types::chat::ChatCompletionRequest>
-    for anthropic_types::chat::ChatCompletionRequest
+impl<'a>
+    TryConvert<
+        openai_types::chat::ChatCompletionRequest,
+        anthropic_types::chat::ChatCompletionRequest,
+    > for OpenAiConverter<'a>
 {
     type Error = MapperError;
 
     fn try_convert(
+        &self,
         value: openai_types::chat::ChatCompletionRequest,
-    ) -> std::result::Result<Self, Self::Error> {
+    ) -> std::result::Result<
+        anthropic_types::chat::ChatCompletionRequest,
+        Self::Error,
+    > {
+        let target_provider = Provider::Anthropic;
+        // TODO: would be nice to remove the clone in the .get() call here
+        let model = self
+            .model_mappings
+            .as_ref()
+            .get(&(target_provider, value.model.clone()))
+            .ok_or_else(|| {
+                MapperError::NoModelMapping(
+                    target_provider,
+                    value.model.clone(),
+                )
+            })?
+            .clone();
         let system = if let Some(message) = value.messages.first() {
             if message.role == openai_types::chat::Role::System {
                 Some(message.content.clone())
@@ -44,9 +78,9 @@ impl TryConvert<openai_types::chat::ChatCompletionRequest>
                 },
             );
         }
-        Ok(Self {
+        Ok(anthropic_types::chat::ChatCompletionRequest {
             messages,
-            model: String::from("claude-3-7-sonnet-latest"),
+            model,
             temperature: value.temperature,
             max_tokens: value.max_tokens.unwrap_or(u32::MAX),
             system,

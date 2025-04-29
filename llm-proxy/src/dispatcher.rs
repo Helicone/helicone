@@ -57,7 +57,7 @@ impl Dispatcher {
             // just to show how we will add dispatcher-specific middleware later
             // e.g. for model/provider specific rate limiting, we need to do
             // that at this level rather than globally.
-            .layer(crate::middleware::mapper::Layer)
+            .layer(crate::middleware::mapper::Layer::new(app_state.clone()))
             // other middleware: rate limiting, logging, etc, etc
             // will be added here as well
             .service(Dispatcher::new(client, app_state, key))

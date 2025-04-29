@@ -22,6 +22,7 @@
 //! TryFrom req path to some struct/enum that represents an Ai Api Endpoint,
 //! this struct then helps us deserialize to the correct type and then
 //! call the TryConvert fn.
+pub mod anthropic;
 pub mod endpoint;
 pub mod error;
 pub mod openai;
@@ -31,10 +32,13 @@ pub use self::service::*;
 
 /// TryFrom but allows us to implement it for foreign types, so we can maintain
 /// boundaries between our business logic and the provider types.
-pub trait TryConvert<Source>: Sized {
+pub trait TryConvert<Source, Target>: Sized {
     type Error;
 
-    fn try_convert(value: Source) -> std::result::Result<Self, Self::Error>;
+    fn try_convert(
+        &self,
+        value: Source,
+    ) -> std::result::Result<Target, Self::Error>;
 }
 
 pub trait Convert<Source>: Sized {

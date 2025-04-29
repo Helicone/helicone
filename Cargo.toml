@@ -72,6 +72,7 @@ prometheus = { version = "0.13.4", default-features = false }
 regex = "1.11.1"
 reqwest = { version = "0.12.15", features = [ "json", "stream", "multipart", "native-tls"], default-features = false }
 rust_decimal = "1.37.1"
+semver = "1.0.26"
 serde = { version = "1.0.219", features = ["derive", "rc"] }
 serde_json = "1.0.140"
 serde_path_to_error = "0.1.17"

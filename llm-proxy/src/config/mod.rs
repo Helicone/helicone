@@ -3,6 +3,7 @@ pub mod discover;
 pub mod dispatcher;
 pub mod metrics;
 pub mod minio;
+pub mod model_mapping;
 pub mod providers;
 pub mod rate_limit;
 pub mod retry;
@@ -58,6 +59,7 @@ pub struct Config {
     pub database: self::database::Config,
     pub minio: self::minio::Config,
     pub dispatcher: self::dispatcher::DispatcherConfig,
+    pub model_mappings: self::model_mapping::ModelMappingConfig,
     pub is_production: bool,
     /// *ALL* supported providers.
     pub providers: self::providers::ProvidersConfig,
@@ -126,6 +128,7 @@ impl crate::tests::TestDefault for Config {
             server: self::server::ServerConfig::test_default(),
             database: self::database::Config::default(),
             minio: self::minio::Config::test_default(),
+            model_mappings: self::model_mapping::ModelMappingConfig::default(),
             dispatcher: self::dispatcher::DispatcherConfig::test_default(),
             is_production: false,
             providers: self::providers::ProvidersConfig::default(),
