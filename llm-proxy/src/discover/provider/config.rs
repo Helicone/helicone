@@ -63,11 +63,8 @@ impl ConfigDiscovery {
                 .connect_timeout(CONNECTION_TIMEOUT)
                 .build()
                 .map_err(InitError::CreateProxyClient)?;
-            let dispatcher = Dispatcher::new_with_middleware(
-                http_client,
-                app.clone(),
-                key.clone(),
-            );
+            let dispatcher =
+                Dispatcher::new_with_middleware(http_client, app.clone(), key);
             service_map.insert(key, dispatcher);
         }
 

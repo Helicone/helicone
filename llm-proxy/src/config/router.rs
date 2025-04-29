@@ -222,7 +222,7 @@ mod tests {
             providers,
             cache: Some(cache),
             fallback: Some(fallback),
-            balance: balance,
+            balance,
             retries: Some(retries),
             rate_limit: None,
             spend_control: None,

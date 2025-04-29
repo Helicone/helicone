@@ -285,7 +285,7 @@ mod tests {
         // Default without /v1 segment or trailing /
         let path = "/router";
         assert!(matches!(
-            meta_router.extract_router_id_and_path(&path),
+            meta_router.extract_router_id_and_path(path),
             Err(Error::InvalidRequest(InvalidRequestError::NotFound(_)))
         ));
 

@@ -32,12 +32,10 @@ impl Default for ProviderConfig {
 #[serde(rename_all = "kebab-case")]
 pub struct ProvidersConfig(IndexMap<Provider, ProviderConfig>);
 
-impl ProvidersConfig {
-    /// Creates a new ProvidersConfig from an iterator of (Provider,
-    /// ProviderConfig) pairs
-    pub fn from_iter<I>(iter: I) -> Self
+impl FromIterator<(Provider, ProviderConfig)> for ProvidersConfig {
+    fn from_iter<T>(iter: T) -> Self
     where
-        I: IntoIterator<Item = (Provider, ProviderConfig)>,
+        T: IntoIterator<Item = (Provider, ProviderConfig)>,
     {
         Self(IndexMap::from_iter(iter))
     }

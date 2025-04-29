@@ -9,6 +9,7 @@ use tower::Service;
 /// Sending a request to https://localhost/router should
 /// result in the proxied request targeting https://api.openai.com/v1/chat/completions
 #[tokio::test]
+#[serial_test::serial(default_mock)]
 async fn default_target() {
     let config = Config::test_default();
     let mut harness = Harness::builder().with_config(config).build().await;

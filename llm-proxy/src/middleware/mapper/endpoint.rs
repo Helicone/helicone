@@ -72,8 +72,8 @@ impl TryFrom<PathAndQuery> for OpenAI {
 
     fn try_from(value: PathAndQuery) -> Result<Self, Self::Error> {
         match value.path() {
-            "/v1/chat/completions" => return Ok(Self::ChatCompletions),
-            "/v1/completions" => return Ok(Self::LegacyCompletions),
+            "/v1/chat/completions" => Ok(Self::ChatCompletions),
+            "/v1/completions" => Ok(Self::LegacyCompletions),
             path => Err(InvalidRequestError::NotFound(path.to_string())),
         }
     }
@@ -108,8 +108,8 @@ impl TryFrom<PathAndQuery> for Anthropic {
 
     fn try_from(value: PathAndQuery) -> Result<Self, Self::Error> {
         match value.path() {
-            "/v1/messages" => return Ok(Self::Messages),
-            "/v1/completions" => return Ok(Self::LegacyCompletions),
+            "/v1/messages" => Ok(Self::Messages),
+            "/v1/completions" => Ok(Self::LegacyCompletions),
             path => Err(InvalidRequestError::NotFound(path.to_string())),
         }
     }

@@ -52,9 +52,7 @@ impl ProviderKeys {
             BalanceConfig::Weighted { targets } => {
                 targets.iter().map(|t| t.key.provider).collect()
             }
-            BalanceConfig::P2C { targets } => {
-                targets.iter().map(|provider| *provider).collect()
-            }
+            BalanceConfig::P2C { targets } => targets.iter().copied().collect(),
         };
 
         for provider in providers {

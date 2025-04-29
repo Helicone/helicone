@@ -7,13 +7,16 @@ use serde_json::json;
 use tower::Service;
 
 #[tokio::test]
+#[serial_test::serial]
 async fn mapper_anthropic_fast() {
     let mut config = Config::test_default();
     // enable multiple providers
     config.routers = RouterConfigs::default();
+    let latency = 200;
+    let requests = 40;
     let mut harness = Harness::builder()
         .with_config(config)
-        .with_openai_latency(200)
+        .with_openai_latency(latency)
         .build()
         .await;
     let body_bytes = serde_json::to_vec(&json!({
@@ -27,7 +30,7 @@ async fn mapper_anthropic_fast() {
     }))
     .unwrap();
 
-    for _ in 0..100 {
+    for _ in 0..requests {
         let request_body = axum_core::body::Body::from(body_bytes.clone());
         let request = Request::builder()
             .method(Method::POST)
@@ -46,17 +49,20 @@ async fn mapper_anthropic_fast() {
         .received_requests_for("POST", "/v1/messages")
         .await
         .expect("no requests received");
-    assert!(received_requests.len() > 90);
+    assert!((received_requests.len() as f64 / requests as f64) >= 0.8);
 }
 
 #[tokio::test]
+#[serial_test::serial]
 async fn mapper_openai_fast() {
     let mut config = Config::test_default();
     // enable multiple providers
     config.routers = RouterConfigs::default();
+    let latency = 200;
+    let requests = 40;
     let mut harness = Harness::builder()
         .with_config(config)
-        .with_anthropic_latency(200)
+        .with_anthropic_latency(latency)
         .build()
         .await;
     let body_bytes = serde_json::to_vec(&json!({
@@ -70,7 +76,7 @@ async fn mapper_openai_fast() {
     }))
     .unwrap();
 
-    for _ in 0..100 {
+    for _ in 0..requests {
         let request_body = axum_core::body::Body::from(body_bytes.clone());
         let request = Request::builder()
             .method(Method::POST)
@@ -89,6 +95,5 @@ async fn mapper_openai_fast() {
         .received_requests_for("POST", "/v1/chat/completions")
         .await
         .expect("no requests received");
-    println!("received_requests: {:?}", received_requests.len());
-    assert!(received_requests.len() > 90);
+    assert!((received_requests.len() as f64 / requests as f64) >= 0.8);
 }

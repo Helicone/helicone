@@ -69,9 +69,9 @@ where
             if key.provider != *default_provider {
                 tracing::debug!(%default_provider, target_provider = %key.provider, "mapping request");
                 let req = map_request(key, req_ctx, req).await?;
-                inner.call(req).await.map_err(Into::into)
+                inner.call(req).await
             } else {
-                inner.call(req).await.map_err(Into::into)
+                inner.call(req).await
             }
         })
     }
