@@ -249,7 +249,7 @@ const useOrgsContextManager = (): OrgContextValue => {
           !selectedOrgsData.state.data?.data ||
           selectedOrgsData.state.data?.data?.length === 0
         ) {
-          return 10;
+          return 1_000;
         }
         return false;
       },
