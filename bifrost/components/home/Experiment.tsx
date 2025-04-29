@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ISLAND_WIDTH } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
-import { ArrowUpRight, ArrowUpRightIcon, PlusIcon } from "lucide-react";
+import { ArrowUpRight, ArrowUpRightIcon, ChevronRight, PlusIcon } from "lucide-react";
 import {
   Table,
   TableHeader,
@@ -314,7 +314,7 @@ const Experiment = () => {
             <div className="flex items-center gap-2.5">
               <p className="text-base sm:text-xl">03</p>
               <div className="text-base sm:text-lg font-medium text-slate-700">
-                Prompt Management
+                Prompt & Experimentation
               </div>
             </div>
             <div className="flex flex-col gap-6">
@@ -327,28 +327,22 @@ const Experiment = () => {
               </p>
             </div>
             <div className="flex gap-3 items-center">
-              <div className="inline-flex">
-                <Link href="https://docs.helicone.ai/features/prompts/editor" target="_blank" rel="noopener">
-                  <Button
-                    className="bg-brand p-5 text-base md:text-lg md:py-4 lg:py-6 lg:px-6 lg:text-md gap-2 rounded-lg items-center z-[10]"
-                  >
-                    Try Prompt Editor
-                    <ArrowUpRight className="size-5 md:size-6" />
-                  </Button>
-                </Link>
-              </div>
-              {/* <a
-                href="https://docs.helicone.ai/features/prompts"
-                target="_blank"
-              >
+              <Link href="https://docs.helicone.ai/features/prompts/editor" target="_blank" rel="noopener">
                 <Button
-                  className="items-center gap-2 text-landing-secondary self-start"
-                  variant="outline"
+                  className="bg-brand p-5 text-base md:text-lg md:py-4 lg:py-6 lg:px-6 lg:text-md gap-2 rounded-lg items-center z-[10]"
                 >
-                  <ArrowUpRightIcon className="w-4 h-4" />
-                  Prompts
+                  Try Prompt Editor
                 </Button>
-              </a> */}
+              </Link>
+              <Link href="https://docs.helicone.ai/features/experiments" target="_blank" rel="noopener">
+                <Button
+                  variant="ghost"
+                  className="p-5 text-base md:text-lg md:py-4 lg:py-6 lg:px-6 lg:text-md gap-2 rounded-lg items-center z-[10]"
+                >
+                  Experiments
+                  <ArrowUpRight className="size-5 md:size-6" />
+                </Button>
+              </Link>
             </div>
           </div>
           <ExperimentTable />

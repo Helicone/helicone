@@ -51,7 +51,7 @@ const Hero = () => {
             className="bg-brand p-5 text-base md:text-lg md:py-4 lg:py-7 lg:px-7 lg:text-xl gap-2 rounded-lg items-center z-[10]"
           >
             Start monitoring
-            {/* <ChevronRight className="size-5 md:size-6" /> */}
+            <ChevronRight className="size-5 md:size-6" />
           </Button>
         </Link>
         <Link href="/contact">

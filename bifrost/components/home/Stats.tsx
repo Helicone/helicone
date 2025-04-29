@@ -80,26 +80,14 @@ const Stats = ({
         <div className="flex gap-2 items-center md:gap-4">
           <Link href="https://us.helicone.ai/open-stats" target="_blank" rel="noopener">
             <Button
-              variant="outline"
-              className="bg-transparent hover:bg-brand hover:border-brand hover:text-white p-5 text-base md:text-2xl md:py-4 lg:py-6 lg:px-6 lg:text-md gap-2 rounded-lg items-center z-[10]"
+              variant="ghost"
+              className="hover:bg-brand hover:border-brand hover:text-white p-5 text-base md:text-2xl md:py-4 lg:py-6 lg:px-6 lg:text-md gap-2 rounded-lg items-center z-[10]"
             >
-              Live Stats
+              Live
               <ArrowUpRight className="size-5 md:size-6" />
             </Button>
           </Link>
         </div>
-
-        {/* <a
-          href="https://us.helicone.ai/open-stats"
-          className="hidden xl:block"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <ArrowUpRightIcon
-            className="w-10 h-10 text-muted-foreground"
-            strokeWidth={2}
-          />
-        </a> */}
       </div>
     </div>
   );

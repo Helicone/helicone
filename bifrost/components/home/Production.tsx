@@ -25,7 +25,7 @@ const Production = () => {
           </p>
         </div>
         <div className="flex gap-3 items-center z-[20]">
-          <Link href="https://docs.helicone.ai/features/prompts/editor" target="_blank" rel="noopener">
+          <Link href="https://docs.helicone.ai/features/advanced-usage/user-metrics" target="_blank" rel="noopener">
             <Button
               className="bg-brand p-5 text-base md:text-lg md:py-4 lg:py-6 lg:px-6 lg:text-md gap-2 rounded-lg items-center z-[10]"
             >
@@ -35,7 +35,7 @@ const Production = () => {
           </Link>
           <Link href="https://www.helicone.ai/changelog/20240910-slack-alerts" target="_blank" rel="noopener">
             <Button
-              variant="outline"
+              variant="ghost"
               className="p-5 text-base md:text-lg md:py-4 lg:py-6 lg:px-6 lg:text-md gap-2 rounded-lg items-center z-[10]"
             >
               Alerts
