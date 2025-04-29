@@ -14,6 +14,7 @@ import { MAPPERS } from "../../packages/llm-mapper/utils/getMappedContent";
 import { getMapperType } from "../../packages/llm-mapper/utils/getMapperType";
 import { RateLimitOptions } from "../clients/KVRateLimiterClient";
 import { RateLimitOptionsBuilder } from "../util/rateLimitOptions";
+import { DBWrapper } from "../db/DBWrapper";
 
 export type RetryOptions = {
   retries: number; // number of times to retry the request
@@ -30,6 +31,7 @@ export interface HeliconeProxyRequest {
   provider: Provider;
   tokenCalcUrl: Env["TOKEN_COUNT_URL"];
   rateLimitOptions: Nullable<RateLimitOptions>;
+  isRateLimitedKey: boolean;
   retryOptions: IHeliconeHeaders["retryHeaders"];
   omitOptions: IHeliconeHeaders["omitHeaders"];
 
@@ -148,6 +150,9 @@ export class HeliconeProxyRequestMapper {
       data: {
         heliconePromptTemplate: await this.getHeliconeTemplate(),
         rateLimitOptions: this.rateLimitOptions(),
+        isRateLimitedKey:
+          this.request.heliconeHeaders.heliconeAuthV2?.keyType ===
+          "rate-limited",
         requestJson: requestJson,
         retryOptions: this.request.heliconeHeaders.retryHeaders,
         provider: this.provider,
