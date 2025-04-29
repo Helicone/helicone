@@ -13,6 +13,7 @@ use tower_http::add_extension::{AddExtension, AddExtensionLayer};
 
 use crate::{
     app::AppState,
+    config::providers::DEFAULT_ANTHROPIC_VERSION,
     discover::Key,
     error::{api::Error, internal::InternalError},
     types::{
@@ -135,13 +136,20 @@ impl Dispatcher {
                     );
                 }
                 Provider::Anthropic => {
+                    let version = provider_config
+                        .version
+                        .as_ref()
+                        .map(|s| s.as_str())
+                        .unwrap_or(DEFAULT_ANTHROPIC_VERSION);
                     r.insert(
                         HeaderName::from_str("x-api-key").unwrap(),
-                        HeaderValue::from_str(&provider_api_key).unwrap(),
+                        HeaderValue::from_str(&provider_api_key)
+                            .map_err(InternalError::InvalidHeader)?,
                     );
                     r.insert(
                         HeaderName::from_str("anthropic-version").unwrap(),
-                        HeaderValue::from_str("2023-06-01").unwrap(),
+                        HeaderValue::from_str(&version)
+                            .map_err(InternalError::InvalidHeader)?,
                     );
                 }
                 _ => todo!(

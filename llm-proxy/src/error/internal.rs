@@ -49,6 +49,8 @@ pub enum InternalError {
     BufferError(BoxError),
     /// Invalid URI: {0}
     InvalidUri(#[from] http::uri::InvalidUri),
+    /// Invalid header: {0}
+    InvalidHeader(#[from] http::header::InvalidHeaderValue),
 }
 
 impl IntoResponse for InternalError {

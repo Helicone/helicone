@@ -15,6 +15,7 @@ pub struct ProviderConfig {
     /// instead load the models from the provider's respective APIs
     pub models: Vec<Model>,
     pub base_url: Url,
+    pub version: Option<String>,
 }
 
 impl Default for ProviderConfig {
@@ -54,6 +55,7 @@ fn default_openai_provider_config() -> ProviderConfig {
     ProviderConfig {
         models: vec![Model::new("gpt-4o".to_string(), Some(Version::Latest))],
         base_url: Url::parse("https://api.openai.com").unwrap(),
+        version: None,
     }
 }
 
@@ -64,5 +66,8 @@ fn default_anthropic_provider_config() -> ProviderConfig {
             Some(Version::Latest),
         )],
         base_url: Url::parse("https://api.anthropic.com").unwrap(),
+        version: Some(DEFAULT_ANTHROPIC_VERSION.to_string()),
     }
 }
+
+pub const DEFAULT_ANTHROPIC_VERSION: &str = "2023-06-01";

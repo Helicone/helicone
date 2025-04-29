@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use derive_more::{AsRef, Display};
+use derive_more::AsRef;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use strum::EnumIter;
@@ -18,22 +18,28 @@ use crate::{config::router::BalanceConfig, error::provider::ProviderError};
     Hash,
     PartialEq,
     Serialize,
-    Display,
     EnumIter,
 )]
 #[serde(rename_all = "kebab-case")]
 pub enum Provider {
     #[default]
     #[serde(rename = "openai")]
-    #[display("openai")]
     OpenAI,
-    #[display("anthropic")]
     Anthropic,
-    #[display("bedrock")]
     Bedrock,
-    #[display("vertexai")]
     VertexAi,
     // Ollama? (assuming this means self-hosted)
+}
+
+impl std::fmt::Display for Provider {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Provider::OpenAI => write!(f, "openai"),
+            Provider::Anthropic => write!(f, "anthropic"),
+            Provider::Bedrock => write!(f, "bedrock"),
+            Provider::VertexAi => write!(f, "vertexai"),
+        }
+    }
 }
 
 #[derive(Debug, Clone, AsRef)]
