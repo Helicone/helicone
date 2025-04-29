@@ -221,6 +221,16 @@ export type BlogStructure =
 const blogContent: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "implement-and-monitor-cag",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "helicone-vs-galileo",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "building-first-mcp-for-developers",
     },
   },

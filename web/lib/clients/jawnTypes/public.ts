@@ -1820,8 +1820,6 @@ Json: JsonObject;
     SessionNameResult: {
       name: string;
       created_at: string;
-      /** Format: double */
-      total_cost: number;
       last_used: string;
       first_used: string;
       /** Format: double */

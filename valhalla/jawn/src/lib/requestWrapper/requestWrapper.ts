@@ -5,14 +5,7 @@
 
 import { HeliconeHeaders } from "../../../../../shared/proxy/heliconeHeaders";
 import { HeliconeAuth } from "../../../../../shared/proxy/types/heliconeAuth";
-import { supabaseServer } from "../db/supabase";
-import {
-  Result,
-  err,
-  map,
-  mapPostgrestErr,
-  ok,
-} from "../../packages/common/result";
+import { Result, err, ok } from "../../packages/common/result";
 
 import { Request } from "express";
 import { usageLimitManager } from "../../managers/UsageLimitManager";
@@ -21,9 +14,9 @@ import { parseJSXObject } from "@helicone/prompts";
 import { Headers } from "node-fetch";
 import { Readable as ReadableStream } from "stream";
 import { getAndStoreInCache } from "../cache/staticMemCache";
+import { Database } from "../db/database.types";
 import { hashAuth } from "../db/hash";
 import { dbExecute } from "../shared/db/dbExecute";
-import { Database } from "../db/database.types";
 
 export type RequestHandlerType =
   | "proxy_only"

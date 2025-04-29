@@ -30,9 +30,6 @@ import DraggableColumnHeader from "./columns/draggableColumnHeader";
 import RequestRowView from "./requestRowView";
 import ThemedTableHeader from "./themedTableHeader";
 
-import useOnboardingContext, {
-  ONBOARDING_STEPS,
-} from "@/components/layout/onboardingContext";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   ResizableHandle,
@@ -40,7 +37,6 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { MappedLLMRequest } from "@/packages/llm-mapper/types";
-import { useRouter, useSearchParams } from "next/navigation";
 import { RequestViews } from "./RequestViews";
 
 type CheckboxMode = "always_visible" | "on_hover" | "never";
@@ -225,27 +221,6 @@ export default function ThemedTable<T extends { id?: string }>(
     ] as string | undefined;
     return { sessionId };
   }, [rows]);
-
-  const { currentStep, isOnboardingVisible, setOnClickElement } =
-    useOnboardingContext();
-
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  useEffect(() => {
-    if (
-      id === "requests-table" &&
-      isOnboardingVisible &&
-      currentStep === ONBOARDING_STEPS.REQUESTS_DRAWER.stepNumber
-    ) {
-      setOnClickElement(
-        () => () =>
-          router.push(
-            `/sessions/${encodeURIComponent(sessionData?.sessionId || "")}`
-          )
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOnboardingVisible, currentStep]);
 
   return (
     <div className="h-full flex flex-col border-slate-300 dark:border-slate-700 divide-y divide-slate-300 dark:divide-slate-700">
@@ -552,18 +527,14 @@ export default function ThemedTable<T extends { id?: string }>(
         </ResizablePanel>
         {rightPanel && (
           <>
-            {isOnboardingVisible && currentStep === 1 ? (
-              <div className="h-full w-1/2">{rightPanel}</div>
-            ) : (
-              <>
-                <ResizableHandle withHandle />
-                <ResizablePanel minSize={25} maxSize={75} defaultSize={75}>
-                  <div className="h-full flex-shrink-0 flex flex-col">
-                    {rightPanel}
-                  </div>
-                </ResizablePanel>
-              </>
-            )}
+            <>
+              <ResizableHandle withHandle />
+              <ResizablePanel minSize={25} maxSize={75} defaultSize={75}>
+                <div className="h-full flex-shrink-0 flex flex-col">
+                  {rightPanel}
+                </div>
+              </ResizablePanel>
+            </>
           </>
         )}
       </ResizablePanelGroup>
