@@ -105,9 +105,8 @@ const RateLimitRuleModal = ({
           setSegmentType("global");
           setCustomPropertyKey("");
         }
-        setError(null); // Clear previous errors
+        setError(null);
       } else {
-        // Reset state for Create mode or when closing
         setName("");
         setQuota("");
         setUnit("request");
@@ -117,9 +116,8 @@ const RateLimitRuleModal = ({
         setError(null);
       }
     }
-  }, [open, rule, isEditMode]); // Rerun when modal opens or rule changes
+  }, [open, rule, isEditMode]);
 
-  // Combined Mutation for Create and Edit
   const mutation = useMutation<
     Result<RateLimitRuleView | null, string>, // Return type matches Jawn PUT/POST
     Error,
