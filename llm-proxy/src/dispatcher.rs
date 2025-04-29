@@ -81,7 +81,7 @@ impl Service<Request> for Dispatcher {
         // see: https://docs.rs/tower/latest/tower/trait.Service.html#be-careful-when-cloning-inner-services
         let this = self.clone();
         let this = std::mem::replace(self, this);
-        tracing::debug!(uri = %req.uri(), headers = ?req.headers(), "Received request");
+        tracing::debug!(uri = %req.uri(), headers = ?req.headers(), key = ?self.key, "Received request");
         Box::pin(async move { this.dispatch(req).await })
     }
 }
@@ -150,8 +150,6 @@ impl Dispatcher {
                 ),
             }
         }
-        // let target_uri = http::Uri::from_str(target_url.as_str()).unwrap();
-        // *req.uri_mut() = target_uri;
         let method = req.method().clone();
         let headers = req.headers().clone();
         let extracted_path_and_query = req

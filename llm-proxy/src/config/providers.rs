@@ -54,6 +54,6 @@ fn default_anthropic_provider_config() -> ProviderConfig {
             "claude-3-7-sonnet".to_string(),
             Some(Version::Latest),
         )],
-        base_url: Url::parse("https://api.openai.com").unwrap(),
+        base_url: Url::parse("https://api.anthropic.com").unwrap(),
     }
 }
