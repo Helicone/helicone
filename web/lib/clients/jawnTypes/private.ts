@@ -192,6 +192,14 @@ export interface paths {
   "/v1/settings/query": {
     get: operations["GetSettings"];
   };
+  "/v1/rate-limits": {
+    get: operations["GetRateLimits"];
+    post: operations["CreateRateLimit"];
+  };
+  "/v1/rate-limits/{ruleId}": {
+    put: operations["UpdateRateLimit"];
+    delete: operations["DeleteRateLimit"];
+  };
   "/v1/stripe/subscription/cost-for-prompts": {
     get: operations["GetCostForPrompts"];
   };
@@ -1367,6 +1375,51 @@ Json: JsonObject;
       error: null;
     };
     "Result_PromptVersionResultFilled.string_": components["schemas"]["ResultSuccess_PromptVersionResultFilled_"] | components["schemas"]["ResultError_string_"];
+    RateLimitRuleView: {
+      id: string;
+      name: string;
+      /** Format: double */
+      quota: number;
+      /** Format: double */
+      window_seconds: number;
+      /** @enum {string} */
+      unit: "request" | "cents";
+      segment?: string;
+      created_at: string;
+      updated_at: string;
+    };
+    "ResultSuccess_RateLimitRuleView-Array_": {
+      data: components["schemas"]["RateLimitRuleView"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_RateLimitRuleView-Array.string_": components["schemas"]["ResultSuccess_RateLimitRuleView-Array_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_RateLimitRuleView_: {
+      data: components["schemas"]["RateLimitRuleView"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_RateLimitRuleView.string_": components["schemas"]["ResultSuccess_RateLimitRuleView_"] | components["schemas"]["ResultError_string_"];
+    CreateRateLimitRuleParams: {
+      name: string;
+      /** Format: double */
+      quota: number;
+      /** Format: double */
+      window_seconds: number;
+      /** @enum {string} */
+      unit: "request" | "cents";
+      segment?: string;
+    };
+    UpdateRateLimitRuleParams: {
+      name?: string;
+      /** Format: double */
+      quota?: number;
+      /** Format: double */
+      window_seconds?: number;
+      /** @enum {string} */
+      unit?: "request" | "cents";
+      segment?: string;
+    };
     UpgradeToProRequest: {
       addons?: {
         evals?: boolean;
@@ -15454,6 +15507,66 @@ export interface operations {
               settings: unknown;
               name: string;
             }[];
+        };
+      };
+    };
+  };
+  GetRateLimits: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_RateLimitRuleView-Array.string_"];
+        };
+      };
+    };
+  };
+  CreateRateLimit: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateRateLimitRuleParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_RateLimitRuleView.string_"];
+        };
+      };
+    };
+  };
+  UpdateRateLimit: {
+    parameters: {
+      path: {
+        ruleId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateRateLimitRuleParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_RateLimitRuleView.string_"];
+        };
+      };
+    };
+  };
+  DeleteRateLimit: {
+    parameters: {
+      path: {
+        ruleId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };

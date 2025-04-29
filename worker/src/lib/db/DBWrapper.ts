@@ -13,6 +13,17 @@ export interface InternalAuthParams {
   heliconeApiKeyId?: number;
 }
 
+export type RateLimitPolicy = {
+  name: string;
+  id: string;
+  quota: number;
+  unit: "request" | "cents";
+  windowSeconds: number;
+  segment: string | undefined;
+};
+
+const RATE_LIMIT_CACHE_TTL = 120; // 2 minutes
+
 async function getHeliconeApiKeyRow(
   dbClient: SupabaseClient<Database>,
   heliconeApi: string
@@ -211,7 +222,6 @@ export class DBWrapper {
       return err(org.error.message);
     }
 
-    const tier = org.data.tier ?? "free";
     return ok({
       organizationId: internalAuthParams.data.organizationId,
       userId: internalAuthParams.data.userId,
@@ -240,6 +250,46 @@ export class DBWrapper {
 
     this.authParams = authParams.data;
     return authParams;
+  }
+
+  async getAllRateLimitPolicies(): Promise<Result<RateLimitPolicy[], string>> {
+    const authParams = await this.getAuthParams();
+    if (authParams.error !== null) {
+      return err(authParams.error);
+    }
+
+    return await getAndStoreInCache<RateLimitPolicy[], string>(
+      `rateLimitOptions-${authParams.data.organizationId}`,
+      this.secureCacheEnv,
+      async () => {
+        const { data, error } = await this.supabaseClient
+          .from("org_rate_limits")
+          .select("*")
+          .eq("organization_id", authParams.data.organizationId)
+          .is("deleted_at", null);
+
+        if (error !== null) {
+          return err(error.message);
+        }
+
+        if (!data) {
+          return ok([]);
+        }
+
+        const mappedData: RateLimitPolicy[] = data.map((dbPolicy) => ({
+          id: dbPolicy.id,
+          organization_id: dbPolicy.organization_id,
+          quota: dbPolicy.quota,
+          windowSeconds: dbPolicy.window_seconds,
+          unit: dbPolicy.unit as "request" | "cents",
+          segment: dbPolicy.segment ?? undefined,
+          name: dbPolicy.name,
+        }));
+
+        return ok(mappedData);
+      },
+      RATE_LIMIT_CACHE_TTL
+    );
   }
 
   async getOrganization(): Promise<
