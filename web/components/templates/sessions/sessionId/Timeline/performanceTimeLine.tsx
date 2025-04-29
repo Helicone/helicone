@@ -24,6 +24,8 @@ export default function PerformanceTimeline({
 }: PerformanceTimelineProps) {
   // Add timeline height constant
   const TIMELINE_HEIGHT = 400; // Adjust this value to change the height
+  const PIXELPERMS = 1.2; // Adjust this value to change the zoom level
+  const ENDING_PADDING = PIXELPERMS * 100; // Scale padding with zoom level - 100ms worth of padding
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const minimapRef = useRef<HTMLCanvasElement>(null);
@@ -45,15 +47,14 @@ export default function PerformanceTimeline({
   const canvasWidthRef = useRef(0);
   const containerWidthRef = useRef(0);
   const minimapHandlePositionRef = useRef({ x: 0, y: 0 });
-
   const { timeRange, items, sections } = data;
+
   const [minTime, maxTime] = timeRange;
   const timeSpan = maxTime - minTime;
+  const totalTimelineWidth = timeSpan * PIXELPERMS + ENDING_PADDING; // Add padding to total width
 
   // Calculate the total width needed for the timeline
   // We'll use a fixed width per millisecond to ensure consistent scaling
-  const pixelsPerMs = 0.5; // Adjust this value to change the zoom level
-  const totalTimelineWidth = timeSpan * pixelsPerMs;
 
   // Colors for different status types
   const colors = {
@@ -86,7 +87,7 @@ export default function PerformanceTimeline({
     ctx.scale(dpr, dpr);
 
     // Clear minimap
-    ctx.clearRect(0, 0, width, height);
+    ctx.clearRect(10, 0, width, height);
 
     // Draw background
     ctx.fillStyle = "#f1f5f9"; // Example color
@@ -97,10 +98,12 @@ export default function PerformanceTimeline({
     ctx.lineWidth = 1;
     ctx.strokeRect(0, 0, 150, 80);
 
-    // Draw timeline items in minimap
+    // Draw timeline items in minimap with padding
     const barHeight = 4;
     const barSpacing = 2;
     let currentY = 10;
+    const minimapPadding = 20; // Add padding to minimap
+    const minimapContentWidth = 150 - minimapPadding * 2; // Adjust content width for padding
 
     // Group items by section
     const sectionItems: Record<string, TimelineItem[]> = {};
@@ -116,8 +119,12 @@ export default function PerformanceTimeline({
         colors[section.id as keyof typeof colors] || colors.default;
 
       sectionItems[section.id].forEach((item) => {
-        const startX = ((item.startTime - minTime) / timeSpan) * 150;
-        const endX = ((item.endTime - minTime) / timeSpan) * 150;
+        const startX =
+          ((item.startTime - minTime) / timeSpan) * minimapContentWidth +
+          minimapPadding;
+        const endX =
+          ((item.endTime - minTime) / timeSpan) * minimapContentWidth +
+          minimapPadding;
         const width = Math.max(1, endX - startX); // Ensure minimum width
 
         // Draw bar
@@ -143,43 +150,28 @@ export default function PerformanceTimeline({
       const scrollLeft = scrollPositionRef.current;
       const visibleWidth = containerWidthRef.current;
 
-      const visibleStartRatio = scrollLeft / canvasWidthRef.current;
+      // Calculate ratios including the padding
+      const totalWidth = timeSpan * PIXELPERMS + ENDING_PADDING;
+      const visibleStartRatio = scrollLeft / totalWidth;
       const visibleEndRatio = Math.min(
         1,
-        (scrollLeft + visibleWidth) / canvasWidthRef.current
+        (scrollLeft + visibleWidth) / totalWidth
       );
 
+      // Apply the ratios to minimap width (150px)
       const visibleStartX = visibleStartRatio * 150;
       const visibleEndX = visibleEndRatio * 150;
-      const visibleWidth150 = visibleEndX - visibleStartX;
 
       // Draw semi-transparent overlay for areas outside viewport
-      ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+      ctx.fillStyle = "rgb(255, 255, 255)";
       ctx.fillRect(0, 0, visibleStartX, 80);
       ctx.fillRect(visibleEndX, 0, 150 - visibleEndX, 80);
-
-      // Draw viewport borders
-      ctx.strokeStyle = "#3b82f6"; // Example color
-      ctx.lineWidth = 2;
-      ctx.strokeRect(visibleStartX, 0, visibleWidth150, 80);
-
-      // Draw handle
-      ctx.fillStyle = "#ef4444"; // Example color
-      ctx.beginPath();
-      ctx.arc(visibleEndX, 70, 8, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Draw handle border
-      ctx.strokeStyle = "#ffffff"; // Example color
-      ctx.lineWidth = 2;
-      ctx.stroke();
 
       // Update handle position for dragging (using ref instead of state)
       minimapHandlePositionRef.current = { x: visibleEndX, y: 70 };
     }
   }, [
     minTime,
-    maxTime,
     timeSpan,
     items,
     sections,
@@ -255,7 +247,7 @@ export default function PerformanceTimeline({
     ctx.strokeStyle = "#e2e8f0";
     ctx.lineWidth = 1;
     timeMarkers.forEach((time) => {
-      const x = (time - minTime) * pixelsPerMs;
+      const x = (time - minTime) * PIXELPERMS;
       ctx.beginPath();
       ctx.moveTo(x, 0);
       ctx.lineTo(x, height);
@@ -280,8 +272,8 @@ export default function PerformanceTimeline({
         colors[section.id as keyof typeof colors] || colors.default;
 
       sectionItems[section.id].forEach((item) => {
-        const startX = (item.startTime - minTime) * pixelsPerMs;
-        const endX = (item.endTime - minTime) * pixelsPerMs;
+        const startX = (item.startTime - minTime) * PIXELPERMS;
+        const endX = (item.endTime - minTime) * PIXELPERMS;
         const itemWidth = endX - startX;
 
         ctx.fillStyle =
@@ -326,7 +318,7 @@ export default function PerformanceTimeline({
     hoveredSection,
     colors,
     totalTimelineWidth,
-    pixelsPerMs,
+    PIXELPERMS,
     TIMELINE_HEIGHT,
   ]);
 
@@ -396,7 +388,7 @@ export default function PerformanceTimeline({
       canvas.removeEventListener("mousemove", handleMouseMove);
       canvas.removeEventListener("mouseleave", handleMouseLeave);
     };
-  }, [minTime, items, sections, pixelsPerMs, calculateTooltipPosition]); // Keep dependencies, add calculateTooltipPosition
+  }, [minTime, items, sections, PIXELPERMS]); // Keep dependencies, add calculateTooltipPosition
 
   // Draw the minimap initially
   useEffect(() => {
@@ -440,9 +432,6 @@ export default function PerformanceTimeline({
       const x = e.clientX - rect.left + scrollLeft;
       const y = e.clientY - rect.top;
 
-      // Calculate time from x position
-      const time = minTime + x / pixelsPerMs;
-
       // Check if mouse is over any item
       const barHeight = 16;
       const barSpacing = 8;
@@ -457,15 +446,7 @@ export default function PerformanceTimeline({
         );
 
         sectionItems.forEach((item) => {
-          const startX = (item.startTime - minTime) * pixelsPerMs;
-          const endX = (item.endTime - minTime) * pixelsPerMs;
-
-          if (
-            x >= startX &&
-            x <= endX &&
-            y >= currentY &&
-            y <= currentY + barHeight
-          ) {
+          if (y >= currentY && y <= currentY + barHeight) {
             foundItem = item;
             foundSection = section.id;
             const position = calculateTooltipPosition(
@@ -500,7 +481,7 @@ export default function PerformanceTimeline({
       canvas.removeEventListener("mousemove", handleMouseMove);
       canvas.removeEventListener("mouseleave", handleMouseLeave);
     };
-  }, [minTime, items, sections, pixelsPerMs]);
+  }, [minTime, items, sections, PIXELPERMS]);
 
   // Handle mouse interactions with the minimap
   useEffect(() => {
@@ -622,11 +603,11 @@ export default function PerformanceTimeline({
           </button>
         )}
 
-        {/* Minimap in bottom right corner */}
-        <div className="absolute bottom-4 right-4 z-10">
+        {/* Minimap in top right corner */}
+        <div className="absolute top-6 right-4 z-10">
           <canvas
             ref={minimapRef}
-            className="w-[150px] h-[80px] cursor-pointer shadow-lg rounded-md"
+            className="w-[150px] h-[80px] cursor-pointer shadow-lg"
             style={{
               cursor: isDraggingMinimap ? "grabbing" : "grab",
             }}
