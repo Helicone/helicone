@@ -1,4 +1,5 @@
 import GlassHeader from "@/components/shared/universal/GlassHeader";
+import { JsonRenderer } from "@/components/templates/requests/components/chatComponent/single/JsonRenderer";
 import {
   Tooltip,
   TooltipContent,
@@ -21,7 +22,6 @@ import {
   PiTextTBold,
 } from "react-icons/pi";
 import ReactMarkdown from "react-markdown";
-import { JsonRenderer } from "./chatComponent/single/JsonRenderer";
 
 type MessageType =
   | "text"
@@ -36,12 +36,36 @@ interface RealtimeProps {
     startIndex: number;
     endIndex: number;
   };
-  className?: string;
 }
+
+// Helper function to determine the default expansion state for deleted messages
+const calculateDefaultExpandedStates = (
+  messages: any[]
+): { [key: string]: boolean } => {
+  const states: { [key: string]: boolean } = {};
+  messages.forEach((message, idx) => {
+    const messageKey = `${idx}-${message.timestamp}`; // Use index within the current filtered list + timestamp
+    if (message.deleted === true) {
+      // Check if it's the last message OR the next message is not an assistant message or is also deleted
+      if (
+        idx === messages.length - 1 ||
+        messages[idx + 1].role === "user" ||
+        messages[idx + 1].deleted === true
+      ) {
+        // Default to collapsed
+        states[messageKey] = false;
+      } else {
+        // Default to expanded (it's deleted and the next is an assistant non-deleted message)
+        states[messageKey] = true;
+      }
+    }
+  });
+  return states;
+};
+
 export const Realtime: React.FC<RealtimeProps> = ({
   mappedRequest,
   messageIndexFilter,
-  className,
 }) => {
   // Get all messages sorted by timestamp
   const sortedMessages = [
@@ -103,6 +127,35 @@ export const Realtime: React.FC<RealtimeProps> = ({
     return sortedMessages;
   }, [sortedMessages, messageIndexFilter]);
 
+  // State to manage the expansion of deleted messages
+  const [deletedMessageStates, setDeletedMessageStates] = useState<{
+    [key: string]: boolean;
+  }>({});
+
+  // Effect to update deleted message states when filters change, preserving user interactions
+  useEffect(() => {
+    const newDefaultStates = calculateDefaultExpandedStates(filteredMessages);
+
+    setDeletedMessageStates((prevStates) => {
+      const nextStates: { [key: string]: boolean } = {};
+      filteredMessages.forEach((message, idx) => {
+        const key = `${idx}-${message.timestamp}`;
+        if (message.deleted === true) {
+          // If the state for this key exists in the previous state (user might have toggled it), keep it.
+          // Otherwise, use the newly calculated default state.
+          nextStates[key] =
+            key in prevStates ? prevStates[key] : newDefaultStates[key];
+        }
+      });
+      return nextStates;
+    });
+  }, [filteredMessages]); // Re-run only when filteredMessages change
+
+  // Toggle function remains the same
+  const toggleDeletedMessage = (key: string) => {
+    setDeletedMessageStates((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
   // Get information about the active filter for display
   const filterInfo = useMemo(() => {
     if (
@@ -139,11 +192,7 @@ export const Realtime: React.FC<RealtimeProps> = ({
   };
 
   return (
-    <div
-      className={`w-full flex flex-col gap-4 ${
-        filterInfo ? "" : "pt-4"
-      } ${className}`}
-    >
+    <div className={`w-full flex flex-col gap-4 ${filterInfo ? "" : "pt-4"}`}>
       {/* Filter Indicator */}
       {filterInfo && (
         <GlassHeader className="h-14 px-4 flex-shrink-0">
@@ -168,81 +217,179 @@ export const Realtime: React.FC<RealtimeProps> = ({
             ? new Date(message.timestamp).toLocaleTimeString()
             : null;
           const messageType = getMessageType(message);
-          console.log(messageType);
+          const isDeleted = message.deleted === true;
+          const messageKey = `${idx}-${message.timestamp}`; // Use index within the current filtered list + timestamp
+          const isDeletedExpanded = deletedMessageStates[messageKey] ?? false; // Use state, default to false if not set
 
           return (
             <div
-              key={`${idx}-${message.timestamp}`}
-              className={`flex flex-col p-4 ${
-                isUser ? "items-end" : "items-start"
-              } mb-4 w-full`}
+              key={messageKey} // Key remains the same
+              className={`flex flex-col px-4 pb-4 mb-4 w-full 
+                ${isUser ? "items-end" : "items-start"} `}
             >
-              <div className="flex flex-col gap-1 max-w-[80%]">
-                {/* Message Info */}
-                <div
-                  className={`flex items-center space-x-2 text-xs text-secondary ${
-                    isUser ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  <span>{`${isUser ? "User" : "Assistant"} ${
-                    isTranscript ? "(Transcript)" : ""
-                  }`}</span>
-                  {timestamp && (
-                    <>
-                      <span className="text-tertiary">•</span>
-                      <ModailityIcon type={messageType} />
-                      <span className="text-tertiary">•</span>
-                      <span>{timestamp}</span>
-                    </>
-                  )}
-                </div>
+              {isDeleted ? (
+                // Collapsible structure for deleted messages
+                <div className="flex flex-col gap-1 max-w-[80%] w-full">
+                  {/* Clickable Header */}
+                  <div
+                    className={`flex items-center space-x-2 text-xs text-secondary cursor-pointer select-none 
+                      ${isUser ? "justify-end" : "justify-start"} 
+                      ${isDeletedExpanded ? "" : "opacity-50"}`}
+                    onClick={() => toggleDeletedMessage(messageKey)}
+                  >
+                    <PiCaretDownBold
+                      className={`w-4 h-4 transition-transform duration-200 ${
+                        isDeletedExpanded ? "rotate-180" : ""
+                      }`}
+                    />
+                    <span>
+                      {`${isUser ? "User" : "Assistant"} 
+                        ${isTranscript ? "(Transcript)" : ""}
+                        ${isDeleted ? "(Deleted)" : ""}`}
+                    </span>
+                    {timestamp && (
+                      <>
+                        <span className="text-tertiary">•</span>
+                        <ModailityIcon type={messageType} />
+                        <span className="text-tertiary">•</span>
+                        <span>{timestamp}</span>
+                      </>
+                    )}
+                  </div>
 
-                {/* Message Content */}
-                <div
-                  className={`rounded-lg p-3 ${
-                    isUser
-                      ? `${
-                          messageType === "session" ||
-                          messageType === "functionCall"
-                            ? "bg-blue-500 dark:bg-blue-700 text-white border-4 border-blue-400 dark:border-blue-600"
-                            : messageType === "functionOutput"
-                            ? "bg-slate-100 dark:bg-slate-900 border-4 border-slate-50 dark:border-slate-950"
-                            : "bg-blue-500 dark:bg-blue-700 text-white"
-                        }`
-                      : `bg-slate-100 dark:bg-slate-900 ${
-                          messageType === "session" ||
-                          messageType === "functionCall" ||
-                          messageType === "functionOutput"
-                            ? "border-4 border-slate-50 dark:border-slate-950"
-                            : ""
-                        }`
-                  }`}
-                >
-                  {messageType === "functionCall" && message.tool_calls ? (
-                    <FunctionCallContent
-                      tool_call_id={message.tool_call_id}
-                      tool_call={message.tool_calls[0]}
-                    />
-                  ) : messageType === "functionOutput" && message.tool_calls ? (
-                    <FunctionOutputContent
-                      tool_call_id={message.tool_call_id}
-                      tool_call={message.tool_calls[0]}
-                    />
-                  ) : messageType === "session" ? (
-                    <SessionUpdate content={message.content || ""} />
-                  ) : (
-                    <div className="whitespace-pre-wrap break-words">
-                      {message.content || ""}
-                      {messageType === "audio" && message.audio_data && (
-                        <AudioPlayer
-                          audioData={message.audio_data}
-                          isUserMessage={isUser}
-                        />
-                      )}
+                  {/* Collapsible Content */}
+                  <div
+                    className={`overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${
+                      isDeletedExpanded
+                        ? "max-h-[1000px] opacity-100" // Use a large max-h
+                        : "max-h-0 opacity-0"
+                    }`}
+                  >
+                    <div className="pt-1">
+                      {" "}
+                      {/* Add slight padding */}
+                      <div
+                        className={`rounded-lg p-3 ${
+                          isUser
+                            ? `${
+                                messageType === "session" ||
+                                messageType === "functionCall"
+                                  ? "bg-blue-500 dark:bg-blue-700 text-white border-4 border-blue-400 dark:border-blue-600"
+                                  : messageType === "functionOutput"
+                                  ? "bg-slate-100 dark:bg-slate-900 border-4 border-slate-50 dark:border-slate-950"
+                                  : "bg-blue-500 dark:bg-blue-700 text-white"
+                              }`
+                            : `bg-slate-100 dark:bg-slate-900 ${
+                                messageType === "session" ||
+                                messageType === "functionCall" ||
+                                messageType === "functionOutput"
+                                  ? "border-4 border-slate-50 dark:border-slate-950"
+                                  : ""
+                              }`
+                        }`}
+                      >
+                        {/* Existing content rendering logic */}
+                        {messageType === "functionCall" &&
+                        message.tool_calls ? (
+                          <FunctionCallContent
+                            tool_call_id={message.tool_call_id}
+                            tool_call={message.tool_calls[0]}
+                          />
+                        ) : messageType === "functionOutput" &&
+                          message.tool_calls ? (
+                          <FunctionOutputContent
+                            tool_call_id={message.tool_call_id}
+                            tool_call={message.tool_calls[0]}
+                          />
+                        ) : messageType === "session" ? (
+                          <SessionUpdate content={message.content || ""} />
+                        ) : (
+                          <div className="whitespace-pre-wrap break-words">
+                            {message.content || ""}
+                            {messageType === "audio" && message.audio_data && (
+                              <AudioPlayer
+                                audioData={message.audio_data}
+                                isUserMessage={isUser}
+                              />
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  )}
+                  </div>
                 </div>
-              </div>
+              ) : (
+                // Original structure for non-deleted messages
+                <div className="flex flex-col gap-1 max-w-[80%]">
+                  {/* Message Info */}
+                  <div
+                    className={`flex items-center space-x-2 text-xs text-secondary ${
+                      isUser ? "justify-end" : "justify-start"
+                    }`}
+                  >
+                    <span>
+                      {`${isUser ? "User" : "Assistant"} 
+                        ${isTranscript ? "(Transcript)" : ""}`}
+                    </span>
+                    {timestamp && (
+                      <>
+                        <span className="text-tertiary">•</span>
+                        <ModailityIcon type={messageType} />
+                        <span className="text-tertiary">•</span>
+                        <span>{timestamp}</span>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Message Content */}
+                  <div
+                    className={`rounded-lg p-3 ${
+                      isUser
+                        ? `${
+                            messageType === "session" ||
+                            messageType === "functionCall"
+                              ? "bg-blue-500 dark:bg-blue-700 text-white border-4 border-blue-400 dark:border-blue-600"
+                              : messageType === "functionOutput"
+                              ? "bg-slate-100 dark:bg-slate-900 border-4 border-slate-50 dark:border-slate-950"
+                              : "bg-blue-500 dark:bg-blue-700 text-white"
+                          }`
+                        : `bg-slate-100 dark:bg-slate-900 ${
+                            messageType === "session" ||
+                            messageType === "functionCall" ||
+                            messageType === "functionOutput"
+                              ? "border-4 border-slate-50 dark:border-slate-950"
+                              : ""
+                          }`
+                    }`}
+                  >
+                    {/* Existing content rendering logic */}
+                    {messageType === "functionCall" && message.tool_calls ? (
+                      <FunctionCallContent
+                        tool_call_id={message.tool_call_id}
+                        tool_call={message.tool_calls[0]}
+                      />
+                    ) : messageType === "functionOutput" &&
+                      message.tool_calls ? (
+                      <FunctionOutputContent
+                        tool_call_id={message.tool_call_id}
+                        tool_call={message.tool_calls[0]}
+                      />
+                    ) : messageType === "session" ? (
+                      <SessionUpdate content={message.content || ""} />
+                    ) : (
+                      <div className="whitespace-pre-wrap break-words">
+                        {message.content || ""}
+                        {messageType === "audio" && message.audio_data && (
+                          <AudioPlayer
+                            audioData={message.audio_data}
+                            isUserMessage={isUser}
+                          />
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}
@@ -309,6 +456,15 @@ type SessionUpdateData = {
   voice?: string;
   tools?: Array<{ name: string }>;
   instructions?: string;
+  input_audio_format?: string;
+  input_audio_noise_reduction?: object | null;
+  input_audio_transcription?: object | null;
+  max_response_output_tokens?: number | "inf";
+  model?: string;
+  output_audio_format?: string;
+  temperature?: number;
+  tool_choice?: string;
+  turn_detection?: object | null;
 };
 const parseSessionUpdate = (
   content: string | undefined
