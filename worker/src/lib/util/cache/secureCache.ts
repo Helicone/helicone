@@ -5,7 +5,6 @@ import { Result, ok } from "../results";
 export interface SecureCacheEnv {
   SECURE_CACHE: Env["SECURE_CACHE"];
   REQUEST_CACHE_KEY: Env["REQUEST_CACHE_KEY"];
-  RATE_LIMIT_CACHE_KEY: Env["RATE_LIMIT_CACHE_KEY"];
 }
 
 class InMemoryCache<T> {

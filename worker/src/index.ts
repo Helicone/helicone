@@ -81,7 +81,6 @@ export interface BASE_Env {
   HELICONE_MANUAL_ACCESS_KEY: string;
   ORG_IDS?: string;
   PERCENT_LOG_KAFKA?: string;
-  RATE_LIMIT_CACHE_KEY: string;
   SENTRY_API_KEY: string;
   SENTRY_PROJECT_ID: string;
   WORKER_DEFINED_REDIRECT_URL?: string;

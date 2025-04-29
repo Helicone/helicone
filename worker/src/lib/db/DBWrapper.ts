@@ -22,6 +22,8 @@ export type RateLimitPolicy = {
   segment: string | undefined;
 };
 
+const RATE_LIMIT_CACHE_TTL = 120; // 2 minutes
+
 async function getHeliconeApiKeyRow(
   dbClient: SupabaseClient<Database>,
   heliconeApi: string
@@ -160,7 +162,6 @@ export class DBWrapper {
     this.secureCacheEnv = {
       REQUEST_CACHE_KEY: env.REQUEST_CACHE_KEY,
       SECURE_CACHE: env.SECURE_CACHE,
-      RATE_LIMIT_CACHE_KEY: env.RATE_LIMIT_CACHE_KEY,
     };
     this.atomicRateLimiter = env.RATE_LIMITER;
   }
@@ -221,7 +222,6 @@ export class DBWrapper {
       return err(org.error.message);
     }
 
-    const tier = org.data.tier ?? "free";
     return ok({
       organizationId: internalAuthParams.data.organizationId,
       userId: internalAuthParams.data.userId,
@@ -288,7 +288,7 @@ export class DBWrapper {
 
         return ok(mappedData);
       },
-      120 // 2 minutes
+      RATE_LIMIT_CACHE_TTL
     );
   }
 

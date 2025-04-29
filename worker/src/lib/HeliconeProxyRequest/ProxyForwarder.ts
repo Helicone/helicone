@@ -123,9 +123,6 @@ export async function proxyForwarder(
           );
 
           if (!result.error && result.data) {
-            console.log(
-              `[RateLimit] Found options: ${JSON.stringify(result.data)}`
-            );
             finalRateLimitOptions = result.data;
           } else if (result.error) {
             console.error(`[RateLimit] Manager error: ${result.error}`);
