@@ -1,5 +1,11 @@
+use std::str::FromStr;
+
 use chrono::{DateTime, NaiveDate, TimeZone, Utc};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
+
+use crate::middleware::mapper::error::MapperError;
+
+use super::provider::Provider;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Version {
@@ -22,15 +28,23 @@ impl Model {
     pub fn new(name: String, version: Option<Version>) -> Self {
         Self { name, version }
     }
+
+    pub fn provider(&self) -> Option<Provider> {
+        if self.name.as_str().starts_with("gpt-") || self.name.as_str().starts_with("o") {
+            Some(Provider::OpenAI)
+        } else if self.name.as_str().starts_with("claude-") {
+            Some(Provider::Anthropic)
+        } else {
+            None
+        }
+    }
 }
 
-impl<'de> Deserialize<'de> for Model {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let s = String::deserialize(deserializer)?;
-        let mut name = s.clone(); // Default to full string as name
+impl FromStr for Model {
+    type Err = MapperError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let mut name = s.to_string(); // Default to full string as name
         let mut version: Option<Version> = None;
 
         // Iterate through separators from right-to-left
@@ -38,9 +52,7 @@ impl<'de> Deserialize<'de> for Model {
             if ch == '-' || ch == '@' {
                 // Check for trailing separator
                 if idx == s.len() - 1 {
-                    return Err(serde::de::Error::custom(
-                        "Invalid model name: trailing separator",
-                    ));
+                    return Err(MapperError::InvalidModelName(name));
                 }
 
                 let candidate = &s[idx + 1..];
@@ -74,6 +86,16 @@ impl<'de> Deserialize<'de> for Model {
         // `name` remains the original string `s`, and `version` remains `None`.
 
         Ok(Model { name, version })
+    }
+}
+
+impl<'de> Deserialize<'de> for Model {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let s = String::deserialize(deserializer)?;
+        Model::from_str(&s).map_err(serde::de::Error::custom)
     }
 }
 

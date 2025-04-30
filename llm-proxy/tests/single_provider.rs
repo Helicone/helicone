@@ -60,11 +60,12 @@ async fn anthropic() {
     let router_config = RouterConfigs::new(HashMap::from([(
         RouterId::Default,
         RouterConfig {
-            providers: nev![Provider::OpenAI],
+            request_style: Provider::OpenAI,
+            providers: nev![Provider::Anthropic],
             cache: None,
             fallback: None,
             balance: BalanceConfig::P2C {
-                targets: nev![Provider::OpenAI],
+                targets: nev![Provider::Anthropic],
             },
             retries: None,
             rate_limit: None,
@@ -73,6 +74,37 @@ async fn anthropic() {
     )]));
     config.routers = router_config;
     let mut harness = Harness::builder().with_config(config).build().await;
+    let request_body = axum_core::body::Body::from(
+        serde_json::to_vec(&json!({
+            "model": "claude-3-5-sonnet-20240620",
+            "messages": [
+                {
+                    "role": "user",
+                    "content": "Hello, world!"
+                }
+            ]
+        }))
+        .unwrap(),
+    );
+    let request = Request::builder()
+        .method(Method::POST)
+        // default router
+        .uri("http://router.helicone.com/router/v1/chat/completions")
+        .body(request_body)
+        .unwrap();
+    let response = harness.call(request).await.unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+
+    // assert that the request was proxied to the mock server correctly
+    let received_requests = harness
+        .mock
+        .anthropic_mock
+        .received_requests_for("POST", "/v1/messages")
+        .await
+        .expect("no requests received");
+    assert_eq!(received_requests.len(), 1);
+
+    // test that using an openai model name works as well
     let request_body = axum_core::body::Body::from(
         serde_json::to_vec(&json!({
             "model": "gpt-4o-mini",
@@ -101,5 +133,5 @@ async fn anthropic() {
         .received_requests_for("POST", "/v1/messages")
         .await
         .expect("no requests received");
-    assert_eq!(received_requests.len(), 1);
+    assert_eq!(received_requests.len(), 2);
 }

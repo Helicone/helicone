@@ -37,4 +37,6 @@ pub enum InitError {
     CreateBalancer(tower::BoxError),
     /// Provider error: {0}
     ProviderError(#[from] crate::error::provider::ProviderError),
+    /// Invalid model mapping config: {0}
+    InvalidModelMappingConfig(crate::middleware::mapper::error::MapperError),
 }

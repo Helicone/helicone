@@ -36,7 +36,7 @@ impl Default for RouterConfigs {
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 pub struct RouterConfig {
-    /// First provider is the default provider
+    pub request_style: Provider,
     pub providers: NEVec<Provider>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub cache: Option<CacheControlConfig>,
@@ -54,6 +54,7 @@ pub struct RouterConfig {
 impl Default for RouterConfig {
     fn default() -> Self {
         Self {
+            request_style: Provider::OpenAI,
             providers: nev![Provider::OpenAI, Provider::Anthropic],
             cache: None,
             fallback: None,
@@ -168,6 +169,7 @@ impl crate::tests::TestDefault for RouterConfigs {
         Self(HashMap::from([(
             RouterId::Default,
             RouterConfig {
+                request_style: Provider::OpenAI,
                 providers: nev![Provider::OpenAI],
                 cache: None,
                 fallback: None,
@@ -225,6 +227,7 @@ mod tests {
         };
 
         RouterConfig {
+            request_style: Provider::OpenAI,
             providers,
             cache: Some(cache),
             fallback: Some(fallback),

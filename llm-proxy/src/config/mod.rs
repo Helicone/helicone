@@ -59,6 +59,11 @@ pub struct Config {
     pub database: self::database::Config,
     pub minio: self::minio::Config,
     pub dispatcher: self::dispatcher::DispatcherConfig,
+    /// A mapping of source models to target models.
+    /// 
+    /// Prefer to use the [`ModelMapper`](self::model_mapping::ModelMapper) type
+    /// from the `AppState` instead since it has stronger typing than the config type,
+    /// since YAML requires strings for keys.
     pub model_mappings: self::model_mapping::ModelMappingConfig,
     pub is_production: bool,
     /// *ALL* supported providers.

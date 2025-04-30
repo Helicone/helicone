@@ -70,7 +70,7 @@ default = []
 testing = ["dep:stubr", "dep:serial_test"]
 
 [[test]]
-name = "default_target"
+name = "single_provider"
 required-features = ["testing"]
 
 [[test]]

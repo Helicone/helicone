@@ -25,9 +25,9 @@ impl ApiEndpoint {
     /// the corresponding endpoint for the target provider
     pub fn new(
         path: &PathAndQuery,
-        target_provider: Provider,
+        provider: Provider,
     ) -> Result<Self, InvalidRequestError> {
-        match target_provider {
+        match provider {
             Provider::OpenAI => Ok(Self::OpenAI(OpenAI::try_from(path)?)),
             Provider::Anthropic => {
                 Ok(Self::Anthropic(Anthropic::try_from(path)?))
@@ -61,7 +61,7 @@ impl ApiEndpoint {
         path_and_query: &PathAndQuery,
         target_endpoint: ApiEndpoint,
     ) -> Result<(Bytes, PathAndQuery), Error> {
-        let model_mappings = &app_state.0.config.model_mappings;
+        let model_mapper = &app_state.0.model_mapper;
         let target_path_and_query = if let Some(query_params) = path_and_query.query() {
             format!("{}?{}", target_endpoint.path(), query_params)
         } else {
@@ -71,7 +71,7 @@ impl ApiEndpoint {
         let (body, target_path_and_query) = match (self, target_endpoint) {
             (ApiEndpoint::OpenAI(source), ApiEndpoint::Anthropic(target)) => {
                 tracing::trace!(source = ?source, target = ?target, "mapping request body");
-                let converter = OpenAiConverter::new(model_mappings);
+                let converter = OpenAiConverter::new(model_mapper);
                 match (source, target) {
                     (OpenAI::ChatCompletions, Anthropic::Messages) => {
                         let body = serde_json::from_slice::<
@@ -101,7 +101,7 @@ impl ApiEndpoint {
             }
             (ApiEndpoint::Anthropic(source), ApiEndpoint::OpenAI(target)) => {
                 tracing::trace!(source = ?source, target = ?target, "mapping request body");
-                let converter = AnthropicConverter::new(model_mappings);
+                let converter = AnthropicConverter::new(model_mapper);
                 match (source, target) {
                     (Anthropic::Messages, OpenAI::ChatCompletions) => {
                         let body = serde_json::from_slice::<
@@ -177,6 +177,7 @@ impl TryFrom<&PathAndQuery> for OpenAI {
     type Error = InvalidRequestError;
 
     fn try_from(value: &PathAndQuery) -> Result<Self, Self::Error> {
+        tracing::debug!(value = ?value.path(), "trying to convert path and query to openai");
         match value.path() {
             // openai URLs
             "/v1/chat/completions" => Ok(Self::ChatCompletions),
@@ -184,7 +185,10 @@ impl TryFrom<&PathAndQuery> for OpenAI {
             // anthropic URLs
             "/v1/messages" => Ok(Self::ChatCompletions),
             "/v1/complete" => Ok(Self::LegacyCompletions),
-            path => Err(InvalidRequestError::NotFound(path.to_string())),
+            path => {
+                tracing::warn!(path = %path, "unsupported openai path");
+                Err(InvalidRequestError::NotFound(path.to_string()))
+            }
         }
     }
 }
@@ -218,7 +222,7 @@ impl TryFrom<&PathAndQuery> for Anthropic {
     type Error = InvalidRequestError;
 
     fn try_from(value: &PathAndQuery) -> Result<Self, Self::Error> {
-        tracing::debug!(value = ?value, "trying to convert path and query to anthropic");
+        tracing::debug!(value = ?value.path(), "trying to convert path and query to anthropic");
         match value.path() {
             // anthropic URLs
             "/v1/messages" => Ok(Self::Messages),
@@ -226,7 +230,10 @@ impl TryFrom<&PathAndQuery> for Anthropic {
             // openai URLs
             "/v1/chat/completions" => Ok(Self::Messages),
             "/v1/completions" => Ok(Self::LegacyCompletions),
-            path => Err(InvalidRequestError::NotFound(path.to_string())),
+            path => {
+                tracing::warn!(path = %path, "unsupported anthropic path");
+                Err(InvalidRequestError::NotFound(path.to_string()))
+            }
         }
     }
 }

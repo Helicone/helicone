@@ -7,7 +7,7 @@ use std::{
 use futures::future::BoxFuture;
 use tower::MakeService as _;
 
-use super::mock::{Mock, MockArgs};
+use super::mock::{Mock, MockArgs, MockArgsBuilder};
 use crate::{
     app::{App, AppFactory, AppResponse},
     config::Config,
@@ -35,7 +35,7 @@ impl HarnessBuilder {
 
     pub async fn build(self) -> Harness {
         let config = self.config.expect("config is required");
-        let mock_args = self.mock_args.expect("mock args are required");
+        let mock_args = self.mock_args.unwrap_or_else(|| MockArgsBuilder::default().build().unwrap());
         Harness::new(mock_args, config).await
     }
 }

@@ -24,9 +24,7 @@ use tracing::{Level, info};
 
 use crate::{
     config::{
-        Config,
-        rate_limit::{AuthedLimiterConfig, UnauthedLimiterConfig},
-        server::TlsConfig,
+        model_mapping::ModelMapper, rate_limit::{AuthedLimiterConfig, UnauthedLimiterConfig}, server::TlsConfig, Config
     },
     discover::provider::monitor::ProviderMonitors,
     error::{self, init::InitError, runtime::RuntimeError},
@@ -71,7 +69,7 @@ pub struct InnerAppState {
     pub authed_rate_limit: Arc<AuthedLimiterConfig>,
     pub unauthed_rate_limit: Arc<UnauthedLimiterConfig>,
     pub store: StoreRealm,
-
+    pub model_mapper: ModelMapper,
     // the below fields should be moved to the router or org level.
     // currently its shared across all routers and that wont work for cloud
     // mode.
@@ -214,6 +212,7 @@ impl App {
             .expect("default router not found")
             .balance;
         let provider_keys = config.discover.provider_keys(balance_config)?;
+        let model_mapper = config.model_mappings.clone().try_into()?;
         let app_state = AppState(Arc::new(InnerAppState {
             config,
             minio,
@@ -221,6 +220,7 @@ impl App {
             unauthed_rate_limit,
             store: StoreRealm::new(pg_pool),
             provider_keys,
+            model_mapper,
         }));
 
         let (router, monitors) = MetaRouter::new(app_state.clone()).await?;

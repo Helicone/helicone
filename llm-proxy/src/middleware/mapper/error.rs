@@ -10,6 +10,8 @@ pub enum MapperError {
     ChatConversion(ChatConversion),
     /// No model mapping found for provider: {0} and model: {1}
     NoModelMapping(Provider, String),
+    /// Invalid model name: {0}
+    InvalidModelName(String),
 }
 
 /// Error types that can occur when mapping requests between providers for chat

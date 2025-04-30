@@ -1,15 +1,17 @@
+use std::str::FromStr;
+
 use super::{Convert, TryConvert, error::MapperError};
 use crate::{
-    config::model_mapping::ModelMappingConfig, types::provider::Provider,
+    config::model_mapping::ModelMapper, types::{model::Model, provider::Provider},
 };
 
 pub struct AnthropicConverter<'a> {
-    model_mappings: &'a ModelMappingConfig,
+    model_mapper: &'a ModelMapper,
 }
 
 impl<'a> AnthropicConverter<'a> {
-    pub fn new(model_mappings: &'a ModelMappingConfig) -> Self {
-        Self { model_mappings }
+    pub fn new(model_mapper: &'a ModelMapper) -> Self {
+        Self { model_mapper }
     }
 }
 
@@ -40,18 +42,17 @@ impl<'a>
         Self::Error,
     > {
         let target_provider = Provider::OpenAI;
-        let model = self
-            .model_mappings
-            .as_ref()
-            .get(&target_provider)
-            .and_then(|m| m.get(&value.model))
-            .ok_or_else(|| {
-                MapperError::NoModelMapping(
-                    target_provider,
-                    value.model.clone(),
-                )
-            })?
-            .clone();
+        let mut source_model = Model::from_str(&value.model)?;
+        // atm, we don't care about the version of the model when mapping between providers
+        source_model.version = None;
+        let model = self.model_mapper.get(&target_provider, &source_model).ok_or_else(|| {
+            MapperError::NoModelMapping(
+                target_provider,
+                source_model.name.clone(),
+            )
+        })?;
+
+        tracing::debug!(source_model = ?value.model, target_model = ?model, source_provider = %Provider::Anthropic, target_provider = %Provider::OpenAI, "mapped model");
         let mut messages = Vec::with_capacity(value.messages.len());
         if let Some(system_prompt) = value.system {
             messages.push(openai_types::chat::ChatCompletionRequestMessage {
@@ -67,7 +68,7 @@ impl<'a>
         }
         Ok(openai_types::chat::ChatCompletionRequest {
             messages,
-            model,
+            model: model.name,
             temperature: value.temperature,
             max_tokens: Some(value.max_tokens),
         })
