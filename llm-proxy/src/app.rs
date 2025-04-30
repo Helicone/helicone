@@ -24,7 +24,8 @@ use tracing::{Level, info};
 
 use crate::{
     config::{
-        Config, ProviderKeysSource,
+        Config,
+        model_mapping::ModelMapper,
         rate_limit::{AuthedLimiterConfig, UnauthedLimiterConfig},
         server::TlsConfig,
     },
@@ -33,7 +34,7 @@ use crate::{
     middleware::auth::AuthService,
     router::meta::MetaRouter,
     store::StoreRealm,
-    types::provider::ProviderKeys,
+    types::{provider::ProviderKeys, router::RouterId},
     utils::{catch_panic::PanicResponder, handle_error::ErrorHandlerLayer},
 };
 
@@ -71,7 +72,7 @@ pub struct InnerAppState {
     pub authed_rate_limit: Arc<AuthedLimiterConfig>,
     pub unauthed_rate_limit: Arc<UnauthedLimiterConfig>,
     pub store: StoreRealm,
-
+    pub model_mapper: ModelMapper,
     // the below fields should be moved to the router or org level.
     // currently its shared across all routers and that wont work for cloud
     // mode.
@@ -132,6 +133,26 @@ impl std::fmt::Debug for InnerAppState {
 ///
 /// Ideally we could combine the rate limits into one layer
 /// instead of using tower_governor and having to split them up.
+///
+///
+/// For request processing, we need to use some dynamically added
+/// request extensions. We try to aggregate most of this into the
+/// `RequestContext` struct to keep things simple but for some things
+/// we will use separate types to avoid needing to use `Option`s in
+/// the `RequestContext` struct.
+///
+/// Required request extensions:
+/// - `AuthContext`
+///    - Added by the auth layer
+///    - Removed by the request context layer and aggregated into the
+///      `Arc<RequestContext>`
+/// - `Arc<RequestContext>`
+///   - Added by the request context layer
+/// - `Key`
+///   - Added by the AddExtensionLayer in the dispatcher service stack
+/// - `PathAndQuery`
+///   - Added by the MetaRouter
+///   - Used by the Mapper layer
 #[derive(Clone)]
 pub struct App {
     pub state: AppState,
@@ -186,9 +207,15 @@ impl App {
             .connect(&config.database.url.0)
             .await
             .map_err(error::init::InitError::DatabaseConnection)?;
-        let provider_keys = match &config.discover.api_keys_source {
-            ProviderKeysSource::Env => ProviderKeys::from_env(),
-        };
+        // TODO: remove this expect
+        let balance_config = &config
+            .routers
+            .as_ref()
+            .get(&RouterId::Default)
+            .expect("default router not found")
+            .balance;
+        let provider_keys = config.discover.provider_keys(balance_config)?;
+        let model_mapper = config.model_mappings.clone().try_into()?;
         let app_state = AppState(Arc::new(InnerAppState {
             config,
             minio,
@@ -196,6 +223,7 @@ impl App {
             unauthed_rate_limit,
             store: StoreRealm::new(pg_pool),
             provider_keys,
+            model_mapper,
         }));
 
         let (router, monitors) = MetaRouter::new(app_state.clone()).await?;
@@ -213,10 +241,10 @@ impl App {
             .propagate_x_request_id()
             .layer(NormalizePathLayer::trim_trailing_slash())
             .layer(ErrorHandlerLayer)
-            .map_err(crate::error::internal::InternalError::BufferError)
             // NOTE: not sure if there is perf impact from Auth layer coming
             // before buffer layer, but required due to Clone bound.
             .layer(AsyncRequireAuthorizationLayer::new(AuthService))
+            .map_err(crate::error::internal::InternalError::BufferError)
             .layer(BufferLayer::new(BUFFER_SIZE))
             .layer(ErrorHandlerLayer)
             .service(router);

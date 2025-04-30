@@ -1,38 +1,21 @@
-use indexmap::IndexMap;
-use serde::{Deserialize, Serialize};
-use url::Url;
+use std::time::Duration;
 
-use crate::{error::internal::InternalError, types::provider::Provider};
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct DispatcherConfig {
-    pub provider_urls: IndexMap<Provider, Url>,
-}
-
-impl DispatcherConfig {
-    pub fn get_provider_url(
-        &self,
-        provider: Provider,
-    ) -> Result<&Url, InternalError> {
-        self.provider_urls
-            .get(&provider)
-            .ok_or(InternalError::ProviderNotConfigured(provider))
-    }
+    #[serde(default = "default_timeout", with = "humantime_serde")]
+    pub timeout: Duration,
+    #[serde(default = "default_connection_timeout", with = "humantime_serde")]
+    pub connection_timeout: Duration,
 }
 
 impl Default for DispatcherConfig {
     fn default() -> Self {
-        let provider_urls = IndexMap::from([
-            (
-                Provider::OpenAI,
-                Url::parse("https://api.openai.com").unwrap(),
-            ),
-            (
-                Provider::Anthropic,
-                Url::parse("https://api.anthropic.com").unwrap(),
-            ),
-        ]);
-        Self { provider_urls }
+        Self {
+            timeout: default_timeout(),
+            connection_timeout: default_connection_timeout(),
+        }
     }
 }
 
@@ -41,4 +24,12 @@ impl crate::tests::TestDefault for DispatcherConfig {
     fn test_default() -> Self {
         Self::default()
     }
+}
+
+fn default_timeout() -> Duration {
+    Duration::from_secs(240)
+}
+
+fn default_connection_timeout() -> Duration {
+    Duration::from_secs(10)
 }

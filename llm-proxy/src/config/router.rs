@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
-use derive_more::AsRef;
+use derive_more::{AsMut, AsRef};
+use nonempty_collections::{NEVec, nev};
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 
@@ -10,11 +11,18 @@ use super::{
 };
 use crate::{
     discover::Key,
+    error::provider::ProviderError,
     types::{model::Model, provider::Provider, router::RouterId},
 };
 
-#[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq, AsRef)]
+#[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq, AsRef, AsMut)]
 pub struct RouterConfigs(HashMap<RouterId, RouterConfig>);
+
+impl RouterConfigs {
+    pub fn new(configs: HashMap<RouterId, RouterConfig>) -> Self {
+        Self(configs)
+    }
+}
 
 impl Default for RouterConfigs {
     fn default() -> Self {
@@ -25,22 +33,74 @@ impl Default for RouterConfigs {
     }
 }
 
-#[derive(Debug, Default, Clone, Deserialize, Serialize, Eq, PartialEq)]
+#[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 pub struct RouterConfig {
-    pub default_provider: Provider,
+    pub request_style: Provider,
+    pub providers: NEVec<Provider>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub cache: Option<CacheControlConfig>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub fallback: Option<FallbackConfig>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub balance: Option<BalanceConfig>,
+    pub balance: BalanceConfig,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub retries: Option<RetryConfig>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub rate_limit: Option<RateLimitConfig>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub spend_control: Option<SpendControlConfig>,
+}
+
+impl Default for RouterConfig {
+    fn default() -> Self {
+        Self {
+            request_style: Provider::OpenAI,
+            providers: nev![Provider::OpenAI, Provider::Anthropic],
+            cache: None,
+            fallback: None,
+            balance: BalanceConfig::p2c_all_providers(),
+            retries: None,
+            rate_limit: None,
+            spend_control: None,
+        }
+    }
+}
+
+impl RouterConfig {
+    pub fn validate(&self) -> Result<(), ProviderError> {
+        // TODO: when we add support for weighted balancing, we need to validate
+        // it adds up to 100%
+        let unsupported_provider = match &self.balance {
+            BalanceConfig::Weighted { targets } => targets
+                .iter()
+                .find(|target| !self.providers.contains(&target.key.provider))
+                .map(|target| &target.key.provider),
+            BalanceConfig::P2C { targets } => {
+                targets.iter().find(|target_provider| {
+                    !self.providers.contains(target_provider)
+                })
+            }
+        };
+        if let Some(provider) = unsupported_provider {
+            return Err(ProviderError::ProviderNotConfigured(*provider));
+        }
+
+        // check that all providers in the fallback config are in the providers
+        // list
+        if let Some(fallback_config) = &self.fallback {
+            if let Some(unsupported_provider) = fallback_config
+                .order
+                .iter()
+                .find(|target| !self.providers.contains(&target.provider))
+            {
+                return Err(ProviderError::ProviderNotConfigured(
+                    unsupported_provider.provider,
+                ));
+            }
+        }
+
+        Ok(())
+    }
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
@@ -77,8 +137,16 @@ pub struct FallbackTarget {
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case", tag = "strategy")]
 pub enum BalanceConfig {
-    Weighted { targets: Vec<BalanceTarget> },
-    P2C { targets: Vec<BalanceTarget> },
+    Weighted { targets: NEVec<BalanceTarget> },
+    P2C { targets: NEVec<Provider> },
+}
+
+impl BalanceConfig {
+    pub fn p2c_all_providers() -> Self {
+        Self::P2C {
+            targets: nev![Provider::OpenAI, Provider::Anthropic],
+        }
+    }
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, Hash, PartialEq)]
@@ -98,13 +166,29 @@ pub struct Weight(pub Decimal);
 #[cfg(feature = "testing")]
 impl crate::tests::TestDefault for RouterConfigs {
     fn test_default() -> Self {
-        Self::default()
+        Self(HashMap::from([(
+            RouterId::Default,
+            RouterConfig {
+                request_style: Provider::OpenAI,
+                providers: nev![Provider::OpenAI],
+                cache: None,
+                fallback: None,
+                balance: BalanceConfig::P2C {
+                    targets: nev![Provider::OpenAI],
+                },
+                retries: None,
+                rate_limit: None,
+                spend_control: None,
+            },
+        )]))
     }
 }
 
 #[cfg(test)]
 mod tests {
     use std::time::Duration;
+
+    use nonempty_collections::nev;
 
     use super::*;
     use crate::{config::retry::Strategy, types::model::Version};
@@ -129,13 +213,9 @@ mod tests {
             }],
         };
 
-        let balance = BalanceConfig::Weighted {
-            targets: vec![BalanceTarget {
-                key: Key {
-                    provider: Provider::OpenAI,
-                },
-                weight: Decimal::from(1),
-            }],
+        let providers = nev![Provider::OpenAI, Provider::Anthropic];
+        let balance = BalanceConfig::P2C {
+            targets: providers.clone(),
         };
         let retries = RetryConfig {
             enabled: false,
@@ -146,13 +226,12 @@ mod tests {
             },
         };
 
-        // Create test values for RateLimitConfig
-        let default_provider = Provider::OpenAI;
         RouterConfig {
-            default_provider,
+            request_style: Provider::OpenAI,
+            providers,
             cache: Some(cache),
             fallback: Some(fallback),
-            balance: Some(balance),
+            balance,
             retries: Some(retries),
             rate_limit: None,
             spend_control: None,

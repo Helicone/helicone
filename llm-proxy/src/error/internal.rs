@@ -15,19 +15,24 @@ use crate::{
 pub enum InternalError {
     /// Internal error
     Internal,
+    /// Could not serialize {ty} due to: {error}
+    Serialize {
+        ty: &'static str,
+        error: serde_json::Error,
+    },
     /// Could not deserialize {ty} due to: {error}
     Deserialize {
         ty: &'static str,
         error: serde_json::Error,
     },
-    /// Router config provider '{0}' not present in DispatcherConfig
+    /// Router config provider '{0}' not present in ProvidersConfig
     ProviderNotConfigured(Provider),
     /// Extension {0} not found
     ExtensionNotFound(&'static str),
     /// Provider not found
     ProviderNotFound,
-    /// Could not collect response body
-    CollectBodyError,
+    /// Could not collect response body: {0}
+    CollectBodyError(axum_core::Error),
     /// Could not process request body: {0}
     RequestBodyError(Box<dyn std::error::Error + Send + Sync>),
     /// Reqwest error: {0}
@@ -35,13 +40,17 @@ pub enum InternalError {
     /// Http error: {0}
     HttpError(#[from] http::Error),
     /// Mapper error: {0}
-    MapperError(#[from] crate::mapper::error::MapperError),
+    MapperError(#[from] crate::middleware::mapper::error::MapperError),
     /// Load balancer error: {0}
     LoadBalancerError(BoxError),
     /// Poll ready error: {0}
     PollReadyError(BoxError),
     /// Buffer error: {0}
     BufferError(BoxError),
+    /// Invalid URI: {0}
+    InvalidUri(#[from] http::uri::InvalidUri),
+    /// Invalid header: {0}
+    InvalidHeader(#[from] http::header::InvalidHeaderValue),
 }
 
 impl IntoResponse for InternalError {

@@ -5,52 +5,64 @@ use std::{
 };
 
 use futures::future::BoxFuture;
-use stubr::{Stubr, wiremock_rs::MockServer};
 use tower::MakeService as _;
-use url::Url;
 
+use super::mock::{Mock, MockArgs, MockArgsBuilder};
 use crate::{
     app::{App, AppFactory, AppResponse},
     config::Config,
-    types::{provider::Provider, request::Request},
+    types::request::Request,
 };
 
 pub const MOCK_SERVER_PORT: u16 = 8111;
 
+#[derive(Default)]
+pub struct HarnessBuilder {
+    mock_args: Option<MockArgs>,
+    config: Option<Config>,
+}
+
+impl HarnessBuilder {
+    pub fn with_mock_args(mut self, mock_args: MockArgs) -> Self {
+        self.mock_args = Some(mock_args);
+        self
+    }
+
+    pub fn with_config(mut self, config: Config) -> Self {
+        self.config = Some(config);
+        self
+    }
+
+    pub async fn build(self) -> Harness {
+        let config = self.config.expect("config is required");
+        let mock_args = self
+            .mock_args
+            .unwrap_or_else(|| MockArgsBuilder::default().build().unwrap());
+        Harness::new(mock_args, config).await
+    }
+}
 pub struct Harness {
     pub app_factory: AppFactory<App>,
-    pub mock: MockServer,
+    pub mock: Mock,
     pub socket_addr: SocketAddr,
 }
 
 impl Harness {
-    pub async fn new(mut config: Config) -> Self {
-        let mock = Stubr::try_start_with(
-            "./stubs",
-            stubr::Config {
-                port: Some(MOCK_SERVER_PORT),
-                verbose: true,
-                record: true,
-                ..Default::default()
-            },
-        )
-        .await
-        .expect("couldnt start mock htttp server");
-        let openai_provider = config
-            .discover
-            .providers
-            .get_mut(&Provider::OpenAI)
-            .unwrap();
-        openai_provider.base_url = Url::parse(&mock.uri()).unwrap();
+    async fn new(mock_args: MockArgs, mut config: Config) -> Self {
+        let mock = Mock::new(&mut config.providers, mock_args).await;
         let (app, _) = App::new(config).await.expect("failed to create app");
         let app_factory = AppFactory::new(app.state.clone(), app);
         let socket_addr =
             SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 0);
         Self {
             app_factory,
-            mock: mock.http_server,
+            mock,
             socket_addr,
         }
+    }
+
+    pub fn builder() -> HarnessBuilder {
+        HarnessBuilder::default()
     }
 }
 

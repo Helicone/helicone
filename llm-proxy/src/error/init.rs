@@ -35,4 +35,8 @@ pub enum InitError {
     CreateProxyClient(reqwest::Error),
     /// Failed to create balancer: {0}
     CreateBalancer(tower::BoxError),
+    /// Provider error: {0}
+    ProviderError(#[from] crate::error::provider::ProviderError),
+    /// Invalid model mapping config: {0}
+    InvalidModelMappingConfig(crate::middleware::mapper::error::MapperError),
 }

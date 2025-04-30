@@ -1,0 +1,81 @@
+use std::str::FromStr;
+
+use super::{Convert, TryConvert, error::MapperError};
+use crate::{
+    config::model_mapping::ModelMapper,
+    types::{model::Model, provider::Provider},
+};
+
+pub struct AnthropicConverter<'a> {
+    model_mapper: &'a ModelMapper,
+}
+
+impl<'a> AnthropicConverter<'a> {
+    pub fn new(model_mapper: &'a ModelMapper) -> Self {
+        Self { model_mapper }
+    }
+}
+
+impl Convert<anthropic_types::chat::Role> for openai_types::chat::Role {
+    fn convert(value: anthropic_types::chat::Role) -> Self {
+        match value {
+            anthropic_types::chat::Role::System => Self::System,
+            anthropic_types::chat::Role::User => Self::User,
+            anthropic_types::chat::Role::Assistant => Self::Assistant,
+            anthropic_types::chat::Role::Developer => Self::Developer,
+        }
+    }
+}
+
+impl
+    TryConvert<
+        anthropic_types::chat::ChatCompletionRequest,
+        openai_types::chat::ChatCompletionRequest,
+    > for AnthropicConverter<'_>
+{
+    type Error = MapperError;
+
+    fn try_convert(
+        &self,
+        value: anthropic_types::chat::ChatCompletionRequest,
+    ) -> std::result::Result<
+        openai_types::chat::ChatCompletionRequest,
+        Self::Error,
+    > {
+        let target_provider = Provider::OpenAI;
+        let mut source_model = Model::from_str(&value.model)?;
+        // atm, we don't care about the version of the model when mapping
+        // between providers
+        source_model.version = None;
+        let model = self
+            .model_mapper
+            .get(&target_provider, &source_model)
+            .ok_or_else(|| {
+                MapperError::NoModelMapping(
+                    target_provider,
+                    source_model.name.clone(),
+                )
+            })?;
+
+        tracing::debug!(source_model = ?value.model, target_model = ?model, source_provider = %Provider::Anthropic, target_provider = %Provider::OpenAI, "mapped model");
+        let mut messages = Vec::with_capacity(value.messages.len());
+        if let Some(system_prompt) = value.system {
+            messages.push(openai_types::chat::ChatCompletionRequestMessage {
+                role: openai_types::chat::Role::System,
+                content: system_prompt,
+            });
+        }
+        for message in value.messages {
+            messages.push(openai_types::chat::ChatCompletionRequestMessage {
+                role: openai_types::chat::Role::convert(message.role),
+                content: message.content,
+            });
+        }
+        Ok(openai_types::chat::ChatCompletionRequest {
+            messages,
+            model: model.name,
+            temperature: value.temperature,
+            max_tokens: Some(value.max_tokens),
+        })
+    }
+}

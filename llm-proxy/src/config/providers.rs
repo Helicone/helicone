@@ -1,4 +1,4 @@
-use derive_more::{Deref, DerefMut};
+use derive_more::{AsRef, Deref, DerefMut};
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use url::Url;
@@ -15,6 +15,7 @@ pub struct ProviderConfig {
     /// instead load the models from the provider's respective APIs
     pub models: Vec<Model>,
     pub base_url: Url,
+    pub version: Option<String>,
 }
 
 impl Default for ProviderConfig {
@@ -23,48 +24,50 @@ impl Default for ProviderConfig {
     }
 }
 
+/// Map of *ALL* supported providers.
+///
+/// In order to configure subsets of providers use
 #[derive(
-    Debug, Clone, Deserialize, Serialize, Eq, PartialEq, Deref, DerefMut,
+    Debug, Clone, Deserialize, Serialize, Eq, PartialEq, Deref, DerefMut, AsRef,
 )]
 #[serde(rename_all = "kebab-case")]
 pub struct ProvidersConfig(IndexMap<Provider, ProviderConfig>);
 
+impl FromIterator<(Provider, ProviderConfig)> for ProvidersConfig {
+    fn from_iter<T>(iter: T) -> Self
+    where
+        T: IntoIterator<Item = (Provider, ProviderConfig)>,
+    {
+        Self(IndexMap::from_iter(iter))
+    }
+}
+
 impl Default for ProvidersConfig {
     fn default() -> Self {
-        Self(IndexMap::from([(
-            Provider::OpenAI,
-            default_openai_provider_config(),
-        )]))
+        Self(IndexMap::from([
+            (Provider::OpenAI, default_openai_provider_config()),
+            (Provider::Anthropic, default_anthropic_provider_config()),
+        ]))
     }
 }
 
 fn default_openai_provider_config() -> ProviderConfig {
     ProviderConfig {
-        models: default_openai_models(),
-        base_url: default_openai_base_url(),
+        models: vec![Model::new("gpt-4o".to_string(), Some(Version::Latest))],
+        base_url: Url::parse("https://api.openai.com").unwrap(),
+        version: None,
     }
 }
 
-fn default_openai_models() -> Vec<Model> {
-    vec![Model::new("gpt-4o".to_string(), Some(Version::Latest))]
-}
-
-fn default_openai_base_url() -> Url {
-    Url::parse("https://api.openai.com").unwrap()
-}
-
-#[cfg(feature = "testing")]
-impl crate::tests::TestDefault for ProvidersConfig {
-    fn test_default() -> Self {
-        let test_openai_provider = ProviderConfig {
-            models: default_openai_models(),
-            base_url: Url::parse(&format!(
-                "http://localhost:{}",
-                crate::tests::harness::MOCK_SERVER_PORT,
-            ))
-            .unwrap(),
-        };
-
-        Self(IndexMap::from([(Provider::OpenAI, test_openai_provider)]))
+fn default_anthropic_provider_config() -> ProviderConfig {
+    ProviderConfig {
+        models: vec![Model::new(
+            "claude-3-7-sonnet".to_string(),
+            Some(Version::Latest),
+        )],
+        base_url: Url::parse("https://api.anthropic.com").unwrap(),
+        version: Some(DEFAULT_ANTHROPIC_VERSION.to_string()),
     }
 }
+
+pub const DEFAULT_ANTHROPIC_VERSION: &str = "2023-06-01";

@@ -3,6 +3,7 @@ pub mod provider;
 use std::{
     convert::Infallible,
     pin::Pin,
+    sync::Arc,
     task::{Context, Poll},
 };
 
@@ -13,12 +14,15 @@ use tokio::sync::mpsc::Receiver;
 use tower::discover::Change;
 
 use crate::{
-    app::AppState, config::DeploymentTarget,
-    discover::provider::config::ConfigDiscovery, dispatcher::DispatcherService,
-    error::init::InitError, types::provider::Provider,
+    app::AppState,
+    config::{DeploymentTarget, router::RouterConfig},
+    discover::provider::config::ConfigDiscovery,
+    dispatcher::DispatcherService,
+    error::init::InitError,
+    types::provider::Provider,
 };
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash, Deserialize, Serialize)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash, Deserialize, Serialize)]
 pub struct Key {
     pub provider: Provider,
 }
@@ -39,23 +43,19 @@ pub enum Discovery {
 impl Discovery {
     pub fn new(
         app_state: AppState,
+        router_config: Arc<RouterConfig>,
         rx: Receiver<Change<Key, DispatcherService>>,
     ) -> Result<Self, InitError> {
         // TODO: currently we also have a separate discovery_mode.
         // we should consolidate.
         match app_state.0.config.deployment_target {
-            DeploymentTarget::SelfHosted => Self::config(app_state, rx),
+            DeploymentTarget::SelfHosted => Ok(Self::Config(
+                ConfigDiscovery::new(app_state, router_config, rx)?,
+            )),
             DeploymentTarget::Cloud | DeploymentTarget::Sidecar => {
                 todo!("cloud and sidecar not supported yet")
             }
         }
-    }
-
-    pub fn config(
-        app_state: AppState,
-        rx: Receiver<Change<Key, DispatcherService>>,
-    ) -> Result<Self, InitError> {
-        Ok(Self::Config(ConfigDiscovery::new(app_state, rx)?))
     }
 }
 

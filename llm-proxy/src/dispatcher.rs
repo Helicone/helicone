@@ -4,17 +4,18 @@ use std::{
     task::{Context, Poll},
 };
 
-use bytes::Bytes;
 use futures::future::BoxFuture;
 use http::{HeaderName, HeaderValue, uri::PathAndQuery};
 use http_body_util::BodyExt;
 use reqwest::Client;
 use tower::{Service, ServiceBuilder};
+use tower_http::add_extension::{AddExtension, AddExtensionLayer};
 
 use crate::{
     app::AppState,
+    config::providers::DEFAULT_ANTHROPIC_VERSION,
+    discover::Key,
     error::{api::Error, internal::InternalError},
-    mapper::TryConvert,
     types::{
         provider::Provider,
         request::{Request, RequestContext},
@@ -24,43 +25,40 @@ use crate::{
 };
 
 pub type DispatcherFuture = BoxFuture<'static, Result<Response, Error>>;
-pub type DispatcherService =
-    ErrorHandler<crate::middleware::no_op::Service<Dispatcher>>;
+pub type DispatcherService = AddExtension<
+    ErrorHandler<crate::middleware::mapper::Service<Dispatcher>>,
+    Key,
+>;
 
+/// Leaf service that dispatches requests to the correct provider.
 #[derive(Debug, Clone)]
 pub struct Dispatcher {
     client: Client,
     app_state: AppState,
-    provider: Provider,
+    key: Key,
 }
 
 impl Dispatcher {
-    pub fn new(
-        client: Client,
-        app_state: AppState,
-        provider: Provider,
-    ) -> Self {
+    pub fn new(client: Client, app_state: AppState, key: Key) -> Self {
         Self {
             client,
             app_state,
-            provider,
+            key,
         }
     }
 
     pub fn new_with_middleware(
         client: Client,
         app_state: AppState,
-        provider: Provider,
+        key: Key,
     ) -> DispatcherService {
         ServiceBuilder::new()
+            .layer(AddExtensionLayer::new(key))
             .layer(ErrorHandlerLayer)
-            // just to show how we will add dispatcher-specific middleware later
-            // e.g. for model/provider specific rate limiting, we need to do
-            // that at this level rather than globally.
-            .layer(crate::middleware::no_op::Layer::new(app_state.clone()))
+            .layer(crate::middleware::mapper::Layer::new(app_state.clone()))
             // other middleware: rate limiting, logging, etc, etc
             // will be added here as well
-            .service(Dispatcher::new(client, app_state, provider))
+            .service(Dispatcher::new(client, app_state, key))
     }
 }
 
@@ -81,7 +79,7 @@ impl Service<Request> for Dispatcher {
         // see: https://docs.rs/tower/latest/tower/trait.Service.html#be-careful-when-cloning-inner-services
         let this = self.clone();
         let this = std::mem::replace(self, this);
-        tracing::debug!(uri = %req.uri(), headers = ?req.headers(), "Received request");
+        tracing::debug!(uri = %req.uri(), headers = ?req.headers(), key = ?self.key, "Received request");
         Box::pin(async move { this.dispatch(req).await })
     }
 }
@@ -91,9 +89,9 @@ impl Dispatcher {
         let req_ctx = req
             .extensions()
             .get::<Arc<RequestContext>>()
-            .ok_or(InternalError::ExtensionNotFound("RequestContext"))?;
-        let og_provider = req_ctx.proxy_context.original_provider;
-        let target_provider = self.provider;
+            .ok_or(InternalError::ExtensionNotFound("RequestContext"))?
+            .clone();
+        let target_provider = self.key.provider;
         let provider_api_key = req_ctx
             .proxy_context
             .provider_api_keys
@@ -107,7 +105,6 @@ impl Dispatcher {
             .app_state
             .0
             .config
-            .discover
             .providers
             .get(&target_provider)
             .ok_or_else(|| {
@@ -137,13 +134,19 @@ impl Dispatcher {
                     );
                 }
                 Provider::Anthropic => {
+                    let version = provider_config
+                        .version
+                        .as_deref()
+                        .unwrap_or(DEFAULT_ANTHROPIC_VERSION);
                     r.insert(
                         HeaderName::from_str("x-api-key").unwrap(),
-                        HeaderValue::from_str(&provider_api_key).unwrap(),
+                        HeaderValue::from_str(&provider_api_key)
+                            .map_err(InternalError::InvalidHeader)?,
                     );
                     r.insert(
                         HeaderName::from_str("anthropic-version").unwrap(),
-                        HeaderValue::from_str("2023-06-01").unwrap(),
+                        HeaderValue::from_str(version)
+                            .map_err(InternalError::InvalidHeader)?,
                     );
                 }
                 _ => todo!(
@@ -151,26 +154,18 @@ impl Dispatcher {
                 ),
             }
         }
-        // let target_uri = http::Uri::from_str(target_url.as_str()).unwrap();
-        // *req.uri_mut() = target_uri;
         let method = req.method().clone();
         let headers = req.headers().clone();
-        let path_and_query = req
-            .uri()
-            .path_and_query()
-            .cloned()
-            .unwrap_or_else(|| PathAndQuery::from_static("/"));
+        let extracted_path_and_query = req
+            .extensions()
+            .get::<PathAndQuery>()
+            .ok_or(Error::Internal(
+            InternalError::ExtensionNotFound("PathAndQuery"),
+        ))?;
 
-        // Strip the /router prefix from path_and_query if it exists
-        let path_and_query_str = path_and_query.as_str();
-        let stripped_path = if path_and_query_str.starts_with("/router") {
-            let len = "/router".len();
-            &path_and_query_str[len..]
-        } else {
-            path_and_query_str
-        };
-
-        let target_url = base_url.join(stripped_path).unwrap();
+        let target_url = base_url
+            .join(extracted_path_and_query.as_str())
+            .expect("PathAndQuery joined with valid url will always succeed");
         tracing::debug!(method = %method, target_url = %target_url, "dispatching request");
         let req_body_bytes = req
             .into_body()
@@ -179,16 +174,6 @@ impl Dispatcher {
             .map_err(|e| InternalError::RequestBodyError(Box::new(e)))?
             .to_bytes();
 
-        let req_body_bytes = match (og_provider, target_provider) {
-            (Provider::OpenAI, Provider::OpenAI) => req_body_bytes,
-            (Provider::Anthropic, Provider::Anthropic) => req_body_bytes,
-            (Provider::OpenAI, Provider::Anthropic) => {
-                convert_openai_to_anthropic(req_body_bytes)?
-            }
-            _ => {
-                todo!("only anthropic and openai are supported at the moment")
-            }
-        };
         let mut response = self
             .client
             .request(method, target_url)
@@ -209,16 +194,4 @@ impl Dispatcher {
 
         Ok(response)
     }
-}
-
-fn convert_openai_to_anthropic(req_body_bytes: Bytes) -> Result<Bytes, Error> {
-    let openai_req = serde_json::from_slice::<
-        openai_types::chat::ChatCompletionRequest,
-    >(&req_body_bytes)
-    .unwrap();
-    let anthropic_req: anthropic_types::chat::ChatCompletionRequest =
-        TryConvert::try_convert(openai_req)
-            .map_err(InternalError::MapperError)?;
-    let anthropic_req_bytes = serde_json::to_vec(&anthropic_req).unwrap();
-    Ok(Bytes::from(anthropic_req_bytes))
 }

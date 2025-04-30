@@ -12,7 +12,6 @@ use crate::{
     config::router::RouterConfig,
     error::{api::Error, internal::InternalError},
     types::{
-        model::Model,
         provider::ProviderKeys,
         request::{AuthContext, Request, RequestContext},
         response::Response,
@@ -100,8 +99,6 @@ where
         };
         let proxy_context = crate::types::request::RequestProxyContext {
             forced_routing: None,
-            original_provider: router_config.default_provider,
-            original_model: Model::new("gpt4o-mini".to_string(), None),
             provider_api_keys,
         };
         let req_ctx = RequestContext {

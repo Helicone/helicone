@@ -3,6 +3,7 @@ pub mod discover;
 pub mod dispatcher;
 pub mod metrics;
 pub mod minio;
+pub mod model_mapping;
 pub mod providers;
 pub mod rate_limit;
 pub mod retry;
@@ -57,8 +58,18 @@ pub struct Config {
     pub server: self::server::ServerConfig,
     pub database: self::database::Config,
     pub minio: self::minio::Config,
+    pub dispatcher: self::dispatcher::DispatcherConfig,
+    /// A mapping of source models to target models.
+    ///
+    /// Prefer to use the [`ModelMapper`](self::model_mapping::ModelMapper)
+    /// type from the `AppState` instead since it has stronger typing than
+    /// the config type, since YAML requires strings for keys.
+    pub model_mappings: self::model_mapping::ModelMappingConfig,
     pub is_production: bool,
+    /// *ALL* supported providers.
+    pub providers: self::providers::ProvidersConfig,
 
+    // ---- configs below here are more deployment specific ----
     pub deployment_target: DeploymentTarget,
     pub rate_limit: self::rate_limit::RateLimitConfig,
     pub discover: self::discover::DiscoverConfig,
@@ -112,15 +123,19 @@ impl crate::tests::TestDefault for Config {
     fn test_default() -> Self {
         let telemetry = telemetry::Config {
             exporter: telemetry::Exporter::Stdout,
+            level: "info,llm_proxy=trace".to_string(),
             ..Default::default()
         };
         Config {
             telemetry,
             metrics_server: self::metrics::Config::test_default(),
             server: self::server::ServerConfig::test_default(),
-            database: self::database::Config::test_default(),
+            database: self::database::Config::default(),
             minio: self::minio::Config::test_default(),
+            model_mappings: self::model_mapping::ModelMappingConfig::default(),
+            dispatcher: self::dispatcher::DispatcherConfig::test_default(),
             is_production: false,
+            providers: self::providers::ProvidersConfig::default(),
             deployment_target: DeploymentTarget::SelfHosted,
             rate_limit: self::rate_limit::RateLimitConfig::test_default(),
             discover: self::discover::DiscoverConfig::test_default(),

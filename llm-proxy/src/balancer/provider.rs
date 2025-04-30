@@ -1,5 +1,6 @@
 use std::{
     future::poll_fn,
+    sync::Arc,
     task::{Context, Poll},
 };
 
@@ -13,6 +14,7 @@ use tower::{
 
 use crate::{
     app::AppState,
+    config::router::RouterConfig,
     discover::{
         Discovery,
         provider::{factory::DiscoverFactory, monitor::ProviderMonitor},
@@ -36,9 +38,11 @@ impl std::fmt::Debug for ProviderBalancer {
 impl ProviderBalancer {
     pub async fn new(
         app_state: AppState,
+        router_config: Arc<RouterConfig>,
     ) -> Result<(ProviderBalancer, ProviderMonitor), InitError> {
         let (tx, rx) = channel(CHANNEL_CAPACITY);
-        let discover_factory = DiscoverFactory::new(app_state.clone());
+        let discover_factory =
+            DiscoverFactory::new(app_state.clone(), router_config);
         let mut balance_factory = MakeBalance::new(discover_factory);
         let mut balance = balance_factory.call(rx).await?;
         // TODO: do we _have_ to poll_ready here?

@@ -16,6 +16,7 @@ chrono = { workspace = true }
 clap = { workspace = true }
 config = { workspace = true }
 compact_str = { workspace = true, features = ['serde'] }
+derive_builder = { workspace = true }
 derive_more = { workspace = true, features = ['as_ref', 'constructor', 'debug', 'deref', 'deref_mut', 'display', 'from', 'from_str'] }
 displaydoc = { workspace = true }
 futures = { workspace = true }
@@ -32,6 +33,7 @@ json-patch = { workspace = true }
 meltdown = { workspace = true }
 mime = { workspace = true }
 minio-rsc = { workspace = true }
+nonempty-collections = { workspace = true, features = ["serde"] }
 opentelemetry = { workspace = true }
 opentelemetry_sdk = { workspace = true, features = ["rt-tokio"] }
 pin-project = { workspace = true }
@@ -39,11 +41,13 @@ pin-project-lite = { workspace = true }
 regex = { workspace = true }
 reqwest = { workspace = true }
 rust_decimal = { workspace = true }
+semver = { workspace = true }
 serde = { workspace = true, features = ['derive', 'rc'] }
 serde_json = { workspace = true }
 serde_path_to_error = { workspace = true }
 serde_with = { workspace = true }
 serde_yml = { workspace = true }
+serial_test = { workspace = true, optional = true }
 sqlx = { workspace = true, features = ['default', 'runtime-tokio', 'chrono', 'postgres', 'uuid']}
 strum = { workspace = true, features = ["derive"]  }
 stubr = { workspace = true, optional = true }
@@ -63,8 +67,12 @@ uuid = { workspace = true, features = ["serde", "v7"] }
 
 [features]
 default = []
-testing = ["dep:stubr"]
+testing = ["dep:stubr", "dep:serial_test"]
 
 [[test]]
-name = "default_target"
+name = "single_provider"
+required-features = ["testing"]
+
+[[test]]
+name = "mapper"
 required-features = ["testing"]

@@ -2,17 +2,32 @@ use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
 
-use super::{ProviderKeysSource, providers::ProvidersConfig};
-use crate::types::discover::DiscoverMode;
+use super::{ProviderKeysSource, router::BalanceConfig};
+use crate::{
+    error::provider::ProviderError,
+    types::{discover::DiscoverMode, provider::ProviderKeys},
+};
 
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(default, deny_unknown_fields, rename_all = "kebab-case")]
 pub struct DiscoverConfig {
     pub api_keys_source: ProviderKeysSource,
     pub discover_mode: DiscoverMode,
-    pub providers: ProvidersConfig,
     #[serde(default = "default_discover_decay", with = "humantime_serde")]
     pub discover_decay: Duration,
+    #[serde(default = "default_rtt", with = "humantime_serde")]
+    pub default_rtt: Duration,
+}
+
+impl DiscoverConfig {
+    pub fn provider_keys(
+        &self,
+        balance_config: &BalanceConfig,
+    ) -> Result<ProviderKeys, ProviderError> {
+        match self.api_keys_source {
+            ProviderKeysSource::Env => ProviderKeys::from_env(balance_config),
+        }
+    }
 }
 
 impl Default for DiscoverConfig {
@@ -20,14 +35,18 @@ impl Default for DiscoverConfig {
         Self {
             api_keys_source: ProviderKeysSource::Env,
             discover_mode: DiscoverMode::Config,
-            providers: ProvidersConfig::default(),
             discover_decay: default_discover_decay(),
+            default_rtt: default_rtt(),
         }
     }
 }
 
 fn default_discover_decay() -> Duration {
-    Duration::from_secs(120)
+    Duration::from_secs(30)
+}
+
+fn default_rtt() -> Duration {
+    Duration::from_secs(1)
 }
 
 #[cfg(feature = "testing")]
@@ -37,12 +56,13 @@ impl crate::tests::TestDefault for DiscoverConfig {
         // runtime in tests
         unsafe {
             std::env::set_var("OPENAI_API_KEY", "sk-...");
+            std::env::set_var("ANTHROPIC_API_KEY", "sk-...");
         }
         Self {
             api_keys_source: ProviderKeysSource::Env,
             discover_mode: DiscoverMode::Config,
-            providers: ProvidersConfig::test_default(),
-            discover_decay: default_discover_decay(),
+            discover_decay: Duration::from_millis(100),
+            default_rtt: Duration::from_millis(10),
         }
     }
 }
