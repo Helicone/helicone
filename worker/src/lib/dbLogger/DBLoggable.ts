@@ -378,6 +378,10 @@ export class DBLoggable {
     };
   }
 
+  async getStatus() {
+    return await this.response.status();
+  }
+
   async getResponse() {
     const { body: responseBody, endTime: responseEndTime } =
       await this.response.getResponseBody();
