@@ -157,7 +157,7 @@ export function RequestNode(props: {
             )}
           </Tooltip>
           <span className="text-slate-400 dark:text-slate-600 text-[11px] whitespace-nowrap">
-            {isRequestSingleChild ? "" : `(${node.duration})`}
+            {isRequestSingleChild ? "" : `(${node.latency})`}
           </span>
         </Row>
         <Row className="flex-shrink-0 items-center gap-2">

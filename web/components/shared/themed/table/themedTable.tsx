@@ -1,4 +1,7 @@
-import { ColorContext } from "@/components/templates/sessions/sessionId/Tree/TreeView";
+import {
+  ColorContext,
+  TableTreeNode,
+} from "@/components/templates/sessions/sessionId/Tree/TreeView";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -20,7 +23,7 @@ import {
 } from "@tanstack/react-table";
 import { ChevronDown, ChevronRight, ChevronsUpDown } from "lucide-react";
 import Link from "next/link";
-import React, { useContext, useEffect, useMemo } from "react";
+import React, { useContext, useEffect } from "react";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { Result } from "../../../../packages/common/result";
 import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
@@ -33,7 +36,7 @@ import DraggableColumnHeader from "./columns/draggableColumnHeader";
 
 type CheckboxMode = "always_visible" | "on_hover" | "never";
 
-interface ThemedTableProps<T extends { id?: string; subRows?: T[] }> {
+interface ThemedTableProps<T extends TableTreeNode> {
   id: string;
   defaultData: T[];
   defaultColumns: ColumnDef<T>[];
@@ -106,9 +109,7 @@ interface ThemedTableProps<T extends { id?: string; subRows?: T[] }> {
   onToggleAllRows?: (table: ReactTable<T>) => void;
 }
 
-export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
-  props: ThemedTableProps<T>
-) {
+export default function ThemedTable<TableTreeNode>(props: ThemedTableProps<T>) {
   const {
     defaultData,
     defaultColumns,
@@ -284,19 +285,28 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                   className={clsx(
                     "group relative",
                     rowLink && "relative",
-                    checkedIds?.includes(row.original?.id ?? "") ||
-                      selectedIds?.includes(row.original?.id ?? "")
-                      ? "!bg-sky-100 dark:!bg-slate-800/50"
-                      : clsx(
-                          "hover:bg-sky-50 dark:hover:bg-slate-700/50",
-                          row.getCanExpand()
-                            ? "font-semibold cursor-pointer bg-muted"
-                            : row.depth > 0
-                            ? "bg-slate-50 dark:bg-slate-950/50"
-                            : "bg-white dark:bg-black"
-                        )
+                    // Determine background color based on selection state
+                    (() => {
+                      if (
+                        checkedIds?.includes(row.original?.id ?? "") ||
+                        selectedIds?.includes(row.original?.id ?? "")
+                      ) {
+                        return "!bg-sky-100 dark:!bg-slate-800/50";
+                      }
+
+                      const hoverClass =
+                        "hover:bg-sky-50 dark:hover:bg-slate-700/50";
+
+                      if (row.getCanExpand()) {
+                        return `${hoverClass} font-semibold cursor-pointer bg-muted`;
+                      } else if (row.depth > 0) {
+                        return `${hoverClass} bg-slate-50 dark:bg-slate-950/50`;
+                      } else {
+                        return `${hoverClass} bg-white dark:bg-black`;
+                      }
+                    })()
                   )}
-                  onClick={(e: React.MouseEvent) => {
+                  onClick={(e) => {
                     if (row.getCanExpand()) {
                       if (
                         e.target instanceof HTMLElement &&
@@ -340,18 +350,21 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                     <td
                       key={cell.id}
                       className={clsx(
-                        "py-3 text-slate-700 dark:text-slate-300 truncate select-none",
-                        i === 0 && "pr-2",
-                        i > 0 && "px-2",
-                        i === 0 && "relative",
-                        checkedIds?.includes(row.original?.id ?? "") ||
-                          selectedIds?.includes(row.original?.id ?? "")
-                          ? "bg-inherit"
-                          : row.getCanExpand()
-                          ? "bg-inherit"
-                          : row.depth > 0
-                          ? "bg-slate-50 dark:bg-slate-950/50"
-                          : "bg-white dark:bg-black",
+                        "text-slate-700 dark:text-slate-300 truncate select-none",
+                        i === 0 ? "pr-2 relative" : "py-1",
+                        (() => {
+                          if (
+                            checkedIds?.includes(row.original?.id ?? "") ||
+                            selectedIds?.includes(row.original?.id ?? "") ||
+                            row.getCanExpand()
+                          ) {
+                            return "bg-inherit";
+                          } else if (row.depth > 0) {
+                            return "bg-slate-50 dark:bg-slate-950/50";
+                          } else {
+                            return "bg-white dark:bg-black";
+                          }
+                        })(),
                         i === row.getVisibleCells().length - 1 &&
                           "border-r border-border"
                       )}
@@ -360,7 +373,7 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                       }}
                     >
                       <div
-                        className={clsx("flex items-center gap-1")}
+                        className="flex items-center gap-1"
                         style={
                           i === 0
                             ? {
@@ -370,7 +383,7 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                                   (row.getCanExpand() ? 0 : 8)
                                 }px`,
                               }
-                            : {}
+                            : undefined
                         }
                       >
                         {i === 0 &&
@@ -390,7 +403,6 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                             }
                             return null;
                           })()}
-
                         {i === 0 && row.getCanExpand() && (
                           <button
                             {...{
@@ -406,6 +418,11 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                               <ChevronRight className="h-4 w-4 text-muted-foreground" />
                             )}
                           </button>
+                        )}
+                        {i === 0 && !row.getCanExpand() && (
+                          <span className="inline-block mr-1 px-2 py-1 bg-sky-200 text-blue-800 rounded text-xs whitespace-nowrap">
+                            {row.original?.name}
+                          </span>
                         )}
                         {dataLoading &&
                         (cell.column.id == "requestText" ||
@@ -427,6 +444,9 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                             cell.column.columnDef.cell,
                             cell.getContext()
                           )
+                        )}
+                        {i == 0 && row.getParentRow() === undefined && (
+                          <span className="w-2 h-2 ml-2 rounded-full bg-red-600" />
                         )}
                       </div>
                     </td>

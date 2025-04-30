@@ -139,20 +139,28 @@ export default function PerformanceTimeline({
       if (itemsInSection.length > 0) {
         itemsInSection.forEach((item) => {
           // Use main canvas scale for relative X positioning
+          // Get the current scale factor for time-to-pixels conversion
           const mainPixelsPerMs = pixelsPerMsRef.current;
+
+          // Calculate item's start position in the main timeline (in pixels)
           const logicalStartX =
             mainPixelsPerMs > 0
               ? (item.startTime - minTime) * mainPixelsPerMs
               : 0;
+
+          // Calculate item's end position in the main timeline (in pixels)
           const logicalEndX =
             mainPixelsPerMs > 0
               ? (item.endTime - minTime) * mainPixelsPerMs
               : 0;
+
+          // Calculate width, ensuring it's at least 1 pixel when scaled
           const logicalWidth = Math.max(
             1 / xScale,
             logicalEndX - logicalStartX
           );
 
+          // Scale the positions to fit in the minimap and add padding
           const startX = logicalStartX * xScale + padding;
           const width = logicalWidth * xScale;
 
@@ -540,7 +548,7 @@ function drawTimeMarkers(
     ctx.moveTo(x, 0);
     ctx.lineTo(x, height);
     ctx.stroke();
-    ctx.fillText(`${time} ms`, x + 5, markerY);
+    ctx.fillText(`${time} s`, x + 5, markerY);
   });
 
   // 2. Draw the horizontal line UNDER the markers

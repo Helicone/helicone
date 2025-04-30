@@ -36,11 +36,11 @@ import {
 import ThemedTable from "../../../../shared/themed/table/themedTable";
 import RequestDrawer from "../../../requests/RequestDrawer";
 import StatusBadge from "../../../requests/statusBadge";
-import PerformanceTimeline from "../Timeline/performanceTimeLine";
 import { TimelineItem, TimelineSection } from "../lib/types";
+import PerformanceTimeline from "../Timeline/PerformanceTimeLine";
 
 // Define TableTreeNode to hold all necessary display properties
-interface TableTreeNode {
+export interface TableTreeNode {
   id: string;
   name: string; // Group name or fallback path
   trace?: Trace; // Keep original trace for potential reference

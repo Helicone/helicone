@@ -125,7 +125,7 @@ export const latestFolder = (folder: FolderNode): number => {
 export const tracesToTreeNodeData = (traces: Trace[]): TreeNodeData => {
   if (traces.length === 0) {
     return {
-      duration: "0s",
+      latency: "0s",
       name: "",
       currentPath: "",
     };
@@ -135,7 +135,7 @@ export const tracesToTreeNodeData = (traces: Trace[]): TreeNodeData => {
   const folderToTreeNode = (folder: FolderNode): TreeNodeData => {
     return {
       name: folder.folderName,
-      duration: `${(latestFolder(folder) - earliestFolder(folder)) / 1000}s`,
+      latency: `${(latestFolder(folder) - earliestFolder(folder)) / 1000}s`,
       currentPath: folder.currentPath,
       children: folder.children.map((child) => {
         if ("folderName" in child) {
@@ -144,7 +144,7 @@ export const tracesToTreeNodeData = (traces: Trace[]): TreeNodeData => {
           return {
             trace: child,
             name: "LLM",
-            duration: `${
+            latency: `${
               (child.end_unix_timestamp_ms - child.start_unix_timestamp_ms) /
               1000
             }s`,

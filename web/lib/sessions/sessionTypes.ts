@@ -34,7 +34,7 @@ export type NodeType = "Session" | "Chain" | "Tool" | "LLM" | string;
 
 export interface TreeNodeData {
   name: NodeType;
-  duration: string;
+  latency?: number;
   trace?: Trace;
   children?: TreeNodeData[];
   currentPath: string;
