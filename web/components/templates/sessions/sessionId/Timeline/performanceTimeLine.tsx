@@ -9,7 +9,7 @@ interface PerformanceTimelineProps {
     items: TimelineItem[];
     sections: TimelineSection[];
   };
-  onItemClick?: React.Dispatch<React.SetStateAction<string | null>>;
+  onItemClick?: (item: string) => void;
 }
 
 interface TooltipPosition {
@@ -711,7 +711,6 @@ function createMouseMoveHandler(
 
       // If cursor is within this section's Y-range
       if (y >= sectionStartY && y < sectionStartY + sectionHeight) {
-        // Calculate which row within the section is being hovered
         const rowIndex = Math.floor((y - sectionStartY) / extendedRowHeight);
         if (rowIndex >= 0 && rowIndex < sectionItems.length) {
           foundItem = sectionItems[rowIndex];

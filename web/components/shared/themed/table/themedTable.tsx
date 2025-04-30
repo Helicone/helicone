@@ -166,12 +166,14 @@ export default function ThemedTable<TableTreeNode>(props: ThemedTableProps<T>) {
   const rowsById = Object.values(table.getRowModel().rowsById);
 
   useEffect(() => {
+    console.log("all checkedIds", checkedIds);
     rowsById.forEach((row) => {
-      if (selectedIds?.includes(row.original?.id ?? "")) {
+      if (checkedIds?.includes(row.original?.id ?? "")) {
+        console.log("checkedIds", row.original?.id, checkedIds);
         expandRow(row);
       }
     });
-  }, [selectedIds]);
+  }, [checkedIds]);
 
   useEffect(() => {
     const columnVisibility: { [key: string]: boolean } = {};

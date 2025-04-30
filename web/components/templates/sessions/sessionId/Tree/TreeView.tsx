@@ -57,18 +57,10 @@ export interface TableTreeNode {
   currentPath: string;
 }
 
-const getRequestId = (
-  trace: Trace | undefined,
-  node: TreeNodeData,
-  level: number
-) => {
-  return trace?.request_id ?? `group-${node.name}-${level}`;
-};
-
 // Helper function to convert TreeNodeData using only Trace data
 function convertToTableData(node: TreeNodeData, level = 0): TableTreeNode {
   const trace = node.trace;
-  const id = getRequestId(trace, node, level);
+  const id = trace?.request_id ?? `group-${node.name}-${level}`;
 
   // Extract data directly from the trace object
   const latency =
@@ -93,7 +85,6 @@ function convertToTableData(node: TreeNodeData, level = 0): TableTreeNode {
   };
 
   if (node.children && node.children.length > 0) {
-    // Recursively convert children
     tableNode.subRows = node.children.map((child: TreeNodeData) =>
       convertToTableData(child, level + 1)
     );
@@ -150,42 +141,48 @@ export const ColorContext = createContext<ColorContextType>({
   setColors: () => {},
 });
 
-function setPathColor(
+function setAllPathColor(
   treeData: TreeNodeData,
   setColors: React.Dispatch<React.SetStateAction<ColorMap>>,
   colors: ColorMap,
   parentColor: string | null = null
 ) {
-  if (treeData.children && treeData.children.length > 0) {
-    treeData.children.forEach((child) => {
-      // For top-level children (when parentColor is null), generate a new color
-      if (parentColor === null) {
-        let randomColor: string;
-        do {
-          randomColor =
-            "#" +
-            Math.floor(Math.random() * 16777215)
-              .toString(16)
-              .padStart(6, "0");
-        } while (Object.values(colors).includes(randomColor));
+  // Skip if node has no children
+  if (!treeData.children?.length) return;
 
-        setColors((prev) => ({
-          ...prev,
-          [child.currentPath]: randomColor,
-        }));
+  for (const child of treeData.children) {
+    if (parentColor === null) {
+      // For top-level nodes, generate a unique color
+      const randomColor = generateUniqueColor(colors);
+      setColors((prev) => ({
+        ...prev,
+        [child.currentPath]: randomColor,
+      }));
+      setAllPathColor(child, setColors, colors, randomColor);
+    } else {
+      // For nested nodes, inherit parent's color
+      setColors((prev) => ({
+        ...prev,
+        [child.currentPath]: parentColor,
+      }));
 
-        setPathColor(child, setColors, colors, randomColor);
-      } else {
-        // For non-top-level children, use the parent's color
-        setColors((prev) => ({
-          ...prev,
-          [child.currentPath]: parentColor,
-        }));
-
-        setPathColor(child, setColors, colors, parentColor);
-      }
-    });
+      setAllPathColor(child, setColors, colors, parentColor);
+    }
   }
+}
+
+function generateUniqueColor(existingColors: ColorMap): string {
+  // Generate a random hex color not already in use
+  let color;
+  const usedColors = Object.values(existingColors);
+  do {
+    const randomHex = Math.floor(Math.random() * 0xffffff)
+      .toString(16)
+      .padStart(6, "0");
+    color = `#${randomHex}`;
+  } while (usedColors.includes(color));
+
+  return color;
 }
 
 // *** Define initialColumns outside the component ***
@@ -300,6 +297,9 @@ const TreeView: React.FC<TreeViewProps> = ({
   setSelectedRequestId,
   isOriginalRealtime,
 }) => {
+  const [highlightedItemId, setHighlightedItemId] = useState<string | null>(
+    null
+  );
   const [colors, setColors] = useState<ColorMap>({});
 
   const treeData = useMemo(() => {
@@ -322,7 +322,6 @@ const TreeView: React.FC<TreeViewProps> = ({
   );
   const drawerRef = useRef<any>(null);
 
-  const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const selectedRequestData = useMemo(() => {
     if (!selectedRequestId || !session.traces) {
       return undefined;
@@ -449,7 +448,7 @@ const TreeView: React.FC<TreeViewProps> = ({
   };
 
   useEffect(() => {
-    setPathColor(treeData, setColors, colors);
+    setAllPathColor(treeData, setColors, colors);
   }, [treeData]);
 
   return (
@@ -469,7 +468,7 @@ const TreeView: React.FC<TreeViewProps> = ({
               >
                 <PerformanceTimeline
                   data={timelineData}
-                  onItemClick={setSelectedItem}
+                  onItemClick={setHighlightedItemId}
                 />
               </ResizablePanel>
 
@@ -478,7 +477,7 @@ const TreeView: React.FC<TreeViewProps> = ({
               <ResizablePanel defaultSize={60} minSize={25}>
                 <div className="h-full border-t border-slate-200 dark:border-slate-800 flex">
                   <div className="h-full w-full">
-                    <ThemedTable<TableTreeNode>
+                    <ThemedTable
                       id="session-requests-table"
                       defaultData={tableData}
                       defaultColumns={initialColumns}
@@ -488,12 +487,12 @@ const TreeView: React.FC<TreeViewProps> = ({
                       dataLoading={false}
                       onRowSelect={onRowSelectHandler}
                       highlightedIds={
-                        selectedRequestId ? [selectedRequestId] : []
+                        highlightedItemId ? [highlightedItemId] : []
                       }
                       fullWidth={true}
                       checkboxMode="never"
                       onToggleAllRows={handleToggleAllRows}
-                      selectedIds={selectedItem ? [selectedItem] : []}
+                      selectedIds={selectedRequestId ? [selectedRequestId] : []}
                     />
                   </div>
                 </div>
