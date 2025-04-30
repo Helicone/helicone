@@ -127,6 +127,7 @@ export const tracesToTreeNodeData = (traces: Trace[]): TreeNodeData => {
     return {
       duration: "0s",
       name: "",
+      currentPath: "",
     };
   }
   const folderNodes = tracesToFolderNodes(traces);

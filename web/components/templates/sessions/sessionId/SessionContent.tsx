@@ -251,7 +251,6 @@ export const SessionContent: React.FC<SessionContentProps> = ({
         <TreeView
           selectedRequestId={selectedRequestId}
           setSelectedRequestId={handleRequestIdChange}
-          showSpan={true}
           session={session}
           isOriginalRealtime={containsRealtime}
         />

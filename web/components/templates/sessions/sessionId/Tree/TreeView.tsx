@@ -57,10 +57,18 @@ interface TableTreeNode {
   currentPath: string;
 }
 
+const getRequestId = (
+  trace: Trace | undefined,
+  node: TreeNodeData,
+  level: number
+) => {
+  return trace?.request_id ?? `group-${node.name}-${level}`;
+};
+
 // Helper function to convert TreeNodeData using only Trace data
 function convertToTableData(node: TreeNodeData, level = 0): TableTreeNode {
   const trace = node.trace;
-  const id = trace?.request_id ?? `group-${node.name}-${level}`;
+  const id = getRequestId(trace, node, level);
 
   // Extract data directly from the trace object
   const latency =
@@ -153,7 +161,7 @@ function setPathColor(
     treeData.children.forEach((child) => {
       // For top-level children (when parentColor is null), generate a new color
       if (parentColor === null) {
-        let randomColor;
+        let randomColor: string;
         do {
           randomColor =
             "#" +

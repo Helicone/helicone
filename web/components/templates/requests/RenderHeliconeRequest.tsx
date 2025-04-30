@@ -142,12 +142,7 @@ export function RenderMappedRequest({
               );
 
             case "openai-realtime":
-              return (
-                <Realtime
-                  mappedRequest={mappedRequest}
-                  className="pt-14 px-4"
-                />
-              );
+              return <Realtime mappedRequest={mappedRequest} />;
 
             default:
               return (
