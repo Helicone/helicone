@@ -3,12 +3,18 @@ use std::{collections::HashMap, str::FromStr};
 use derive_more::AsRef;
 use serde::{Deserialize, Serialize};
 
-use crate::{error::init::InitError, types::{model::{Model, Version}, provider::Provider}};
+use crate::{
+    error::init::InitError,
+    types::{
+        model::{Model, Version},
+        provider::Provider,
+    },
+};
 
 // HashMap<TargetProvider, HashMap<SourceModel, TargetModel>>
 /// A deserializable model mapping config. Strings are used for the keys
 /// since YAML requires strings for keys.
-/// 
+///
 /// The types in the hashmaps could be viewed as:
 /// `HashMap<TargetProvider, HashMap<SourceModel, TargetModel>>`
 #[derive(Debug, Clone, Deserialize, Serialize, AsRef)]
@@ -18,13 +24,16 @@ pub struct ModelMappingConfig(HashMap<Provider, HashMap<String, String>>);
 pub struct ModelMapper(HashMap<Provider, HashMap<Model, Model>>);
 
 impl ModelMapper {
-    pub fn get(&self, target_provider: &Provider, source_model: &Model) -> Option<Model> {
+    pub fn get(
+        &self,
+        target_provider: &Provider,
+        source_model: &Model,
+    ) -> Option<Model> {
         let model_provider = source_model.provider();
         if model_provider.map_or(false, |p| p == *target_provider) {
             Some(source_model.clone())
         } else {
-            self
-                .0
+            self.0
                 .get(&target_provider)
                 .and_then(|m| m.get(source_model))
                 .cloned()
@@ -40,8 +49,10 @@ impl TryFrom<ModelMappingConfig> for ModelMapper {
         for (provider, mapping) in value.as_ref() {
             let mut provider_mapper = HashMap::new();
             for (source_model, target_model) in mapping {
-                let source_model = Model::from_str(&source_model).map_err(InitError::InvalidModelMappingConfig)?;
-                let mut target_model = Model::from_str(&target_model).map_err(InitError::InvalidModelMappingConfig)?;
+                let source_model = Model::from_str(&source_model)
+                    .map_err(InitError::InvalidModelMappingConfig)?;
+                let mut target_model = Model::from_str(&target_model)
+                    .map_err(InitError::InvalidModelMappingConfig)?;
                 target_model.version = Some(Version::Latest);
                 provider_mapper.insert(source_model, target_model);
             }

@@ -24,7 +24,10 @@ use tracing::{Level, info};
 
 use crate::{
     config::{
-        model_mapping::ModelMapper, rate_limit::{AuthedLimiterConfig, UnauthedLimiterConfig}, server::TlsConfig, Config
+        Config,
+        model_mapping::ModelMapper,
+        rate_limit::{AuthedLimiterConfig, UnauthedLimiterConfig},
+        server::TlsConfig,
     },
     discover::provider::monitor::ProviderMonitors,
     error::{self, init::InitError, runtime::RuntimeError},

@@ -62,12 +62,15 @@ impl ApiEndpoint {
         target_endpoint: ApiEndpoint,
     ) -> Result<(Bytes, PathAndQuery), Error> {
         let model_mapper = &app_state.0.model_mapper;
-        let target_path_and_query = if let Some(query_params) = path_and_query.query() {
-            format!("{}?{}", target_endpoint.path(), query_params)
-        } else {
-            target_endpoint.path().to_string()
-        };
-        let target_path_and_query = PathAndQuery::from_str(&target_path_and_query).map_err(InternalError::InvalidUri)?;
+        let target_path_and_query =
+            if let Some(query_params) = path_and_query.query() {
+                format!("{}?{}", target_endpoint.path(), query_params)
+            } else {
+                target_endpoint.path().to_string()
+            };
+        let target_path_and_query =
+            PathAndQuery::from_str(&target_path_and_query)
+                .map_err(InternalError::InvalidUri)?;
         let (body, target_path_and_query) = match (self, target_endpoint) {
             (ApiEndpoint::OpenAI(source), ApiEndpoint::Anthropic(target)) => {
                 tracing::trace!(source = ?source, target = ?target, "mapping request body");
@@ -92,6 +95,9 @@ impl ApiEndpoint {
                         (body, target_path_and_query)
                     }
                     _ => {
+                        tracing::warn!(
+                            "Currently only /v1/chat/completions is supported"
+                        );
                         todo!(
                             "Currently only /v1/chat/completions is supported \
                              for openai"
@@ -104,24 +110,36 @@ impl ApiEndpoint {
                 let converter = AnthropicConverter::new(model_mapper);
                 match (source, target) {
                     (Anthropic::Messages, OpenAI::ChatCompletions) => {
+                        tracing::trace!("about to deserialize");
                         let body = serde_json::from_slice::<
                             anthropic_types::chat::ChatCompletionRequest,
-                        >(&body)
-                        .map_err(InvalidRequestError::InvalidRequestBody)?;
+                        >(&body);
+                        if let Err(e) = &body {
+                            tracing::error!(error = ?e, "error deserializing");
+                            // return Err(InvalidRequestError::InvalidRequestBody(e));
+                        }
+                        let body = body
+                            .map_err(InvalidRequestError::InvalidRequestBody)?;
+                        tracing::trace!("about to convert");
                         let openai_req: openai_types::chat::ChatCompletionRequest =
                         converter.try_convert(body)
                             .map_err(InternalError::MapperError)?;
+                        tracing::trace!("about to serialize");
                         let openai_req_bytes = serde_json::to_vec(&openai_req)
                             .map_err(|e| {
                                 InternalError::Serialize {
-                            ty: "anthropic_types::chat::ChatCompletionRequest",
-                            error: e,
-                        }
+                                    ty: "anthropic_types::chat::ChatCompletionRequest",
+                                    error: e,
+                                }
                             })?;
+                        tracing::trace!("about to convert to bytes");
                         let body = Bytes::from(openai_req_bytes);
                         (body, target_path_and_query)
                     }
                     _ => {
+                        tracing::warn!(
+                            "Currently only /v1/chat/completions is supported"
+                        );
                         todo!(
                             "Currently only /v1/chat/completions is supported \
                              for openai at the moment"
@@ -130,6 +148,10 @@ impl ApiEndpoint {
                 }
             }
             _ => {
+                tracing::warn!(
+                    "Only mapping between openai and anthropic is supported \
+                     at the moment"
+                );
                 todo!(
                     "only mapping between openai and anthropic is supported \
                      at the moment"

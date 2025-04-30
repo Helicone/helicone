@@ -3,9 +3,8 @@ use std::str::FromStr;
 use chrono::{DateTime, NaiveDate, TimeZone, Utc};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
-use crate::middleware::mapper::error::MapperError;
-
 use super::provider::Provider;
+use crate::middleware::mapper::error::MapperError;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Version {
@@ -30,7 +29,9 @@ impl Model {
     }
 
     pub fn provider(&self) -> Option<Provider> {
-        if self.name.as_str().starts_with("gpt-") || self.name.as_str().starts_with("o") {
+        if self.name.as_str().starts_with("gpt-")
+            || self.name.as_str().starts_with("o")
+        {
             Some(Provider::OpenAI)
         } else if self.name.as_str().starts_with("claude-") {
             Some(Provider::Anthropic)

@@ -60,10 +60,10 @@ pub struct Config {
     pub minio: self::minio::Config,
     pub dispatcher: self::dispatcher::DispatcherConfig,
     /// A mapping of source models to target models.
-    /// 
-    /// Prefer to use the [`ModelMapper`](self::model_mapping::ModelMapper) type
-    /// from the `AppState` instead since it has stronger typing than the config type,
-    /// since YAML requires strings for keys.
+    ///
+    /// Prefer to use the [`ModelMapper`](self::model_mapping::ModelMapper)
+    /// type from the `AppState` instead since it has stronger typing than
+    /// the config type, since YAML requires strings for keys.
     pub model_mappings: self::model_mapping::ModelMappingConfig,
     pub is_production: bool,
     /// *ALL* supported providers.
@@ -123,8 +123,7 @@ impl crate::tests::TestDefault for Config {
     fn test_default() -> Self {
         let telemetry = telemetry::Config {
             exporter: telemetry::Exporter::Stdout,
-            level: "info,llm_proxy=trace"
-                .to_string(),
+            level: "info,llm_proxy=trace".to_string(),
             ..Default::default()
         };
         Config {

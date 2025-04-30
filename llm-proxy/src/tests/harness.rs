@@ -35,7 +35,9 @@ impl HarnessBuilder {
 
     pub async fn build(self) -> Harness {
         let config = self.config.expect("config is required");
-        let mock_args = self.mock_args.unwrap_or_else(|| MockArgsBuilder::default().build().unwrap());
+        let mock_args = self
+            .mock_args
+            .unwrap_or_else(|| MockArgsBuilder::default().build().unwrap());
         Harness::new(mock_args, config).await
     }
 }

@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use crate::{
     config::model_mapping::ModelMapper,
-    middleware::mapper::{error::MapperError, Convert, TryConvert},
+    middleware::mapper::{Convert, TryConvert, error::MapperError},
     types::{model::Model, provider::Provider},
 };
 
@@ -44,14 +44,18 @@ impl<'a>
     > {
         let target_provider = Provider::Anthropic;
         let mut source_model = Model::from_str(&value.model)?;
-        // atm, we don't care about the version of the model when mapping between providers
+        // atm, we don't care about the version of the model when mapping
+        // between providers
         source_model.version = None;
-        let model = self.model_mapper.get(&target_provider, &source_model).ok_or_else(|| {
-            MapperError::NoModelMapping(
-                target_provider,
-                source_model.name.clone(),
-            )
-        })?;
+        let model = self
+            .model_mapper
+            .get(&target_provider, &source_model)
+            .ok_or_else(|| {
+                MapperError::NoModelMapping(
+                    target_provider,
+                    source_model.name.clone(),
+                )
+            })?;
         tracing::debug!(source_model = ?value.model, target_model = ?model, source_provider = %Provider::OpenAI, target_provider = %Provider::Anthropic, "mapped model");
         let system = if let Some(message) = value.messages.first() {
             if message.role == openai_types::chat::Role::System {

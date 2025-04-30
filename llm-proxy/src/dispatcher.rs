@@ -25,8 +25,9 @@ use crate::{
 };
 
 pub type DispatcherFuture = BoxFuture<'static, Result<Response, Error>>;
-pub type DispatcherService = ErrorHandler<
-    AddExtension<crate::middleware::mapper::Service<Dispatcher>, Key>,
+pub type DispatcherService = AddExtension<
+    ErrorHandler<crate::middleware::mapper::Service<Dispatcher>>,
+    Key,
 >;
 
 /// Leaf service that dispatches requests to the correct provider.
@@ -52,11 +53,8 @@ impl Dispatcher {
         key: Key,
     ) -> DispatcherService {
         ServiceBuilder::new()
-            .layer(ErrorHandlerLayer)
             .layer(AddExtensionLayer::new(key))
-            // just to show how we will add dispatcher-specific middleware later
-            // e.g. for model/provider specific rate limiting, we need to do
-            // that at this level rather than globally.
+            .layer(ErrorHandlerLayer)
             .layer(crate::middleware::mapper::Layer::new(app_state.clone()))
             // other middleware: rate limiting, logging, etc, etc
             // will be added here as well
