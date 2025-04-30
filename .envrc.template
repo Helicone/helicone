@@ -1,6 +1,6 @@
-export DATABASE_URL="postgresql://helicone-db-user:helicone-db-pw@localhost:5432/helicone-db"
-# export MINIO_ACCESS_KEY="helicone-minioadmin"
-# export MINIO_SECRET_KEY="helicone-minioadmin-pw"
-# export SQLX_OFFLINE=true
+export DATABASE_URL="postgresql://postgres:postgres@localhost:54322/postgres"
+export MINIO_ACCESS_KEY="minioadmin"
+export MINIO_SECRET_KEY="minioadmin"
 export OPENAI_API_KEY="sk-..."
 export ANTHROPIC_API_KEY="sk-..."
+# export SQLX_OFFLINE=true

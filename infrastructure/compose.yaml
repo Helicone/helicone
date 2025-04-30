@@ -72,38 +72,6 @@ services:
     networks:
       - traces
 
-  # postgres:
-  #   image: postgres:16.4-alpine
-  #   restart: always
-  #   environment:
-  #     POSTGRES_DB: helicone-db
-  #     POSTGRES_USER: helicone-db-user
-  #     POSTGRES_PASSWORD: helicone-db-pw
-  #     # Uncomment to enable debug logging
-  #     # POSTGRES_LOGGING: true
-  #     # POSTGRES_LOG_STATEMENT: all
-  #     # POSTGRES_LOG_DURATION: true
-  #   ports:
-  #     - "54322:5432"
-  #   volumes:
-  #     - postgres-data:/var/lib/postgresql/data
-
-  # minio:
-  #   image: quay.io/minio/minio
-  #   command: server /data
-  #   ports:
-  #     - "5532:5532"
-  #     - "5533:5533"
-  #   volumes:
-  #     - minio-data:/data
-  #   environment:
-  #     MINIO_ROOT_USER: helicone-minioadmin
-  #     MINIO_ROOT_PASSWORD: helicone-minioadmin-pw
-  #     MINIO_DEFAULT_BUCKETS: helicone-images-dev
-  #     MINIO_PROMETHEUS_AUTH_TYPE: "public"
-  #     MINIO_ADDRESS: ":5532"
-  #     MINIO_CONSOLE_ADDRESS: ":5533"
-  
   redis:
     image: redis:6.2.6-alpine
     restart: always
