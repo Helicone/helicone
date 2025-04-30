@@ -135,7 +135,8 @@ impl Dispatcher {
                 }
                 Provider::Anthropic => {
                     let version = provider_config
-                        .version.as_deref()
+                        .version
+                        .as_deref()
                         .unwrap_or(DEFAULT_ANTHROPIC_VERSION);
                     r.insert(
                         HeaderName::from_str("x-api-key").unwrap(),
