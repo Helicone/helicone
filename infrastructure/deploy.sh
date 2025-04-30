@@ -37,7 +37,6 @@ help() {
   echo " - loki"
   echo " - grafana"
   echo " - postgres"
-  echo " - minio"
   echo " - redis"
   echo
   echo "Options:"
@@ -86,9 +85,6 @@ case "${1:-}" in
   postgres)
     APP_DIR="infrastructure/postgres"
     ;;
-  minio)
-    APP_DIR="infrastructure/minio"
-    ;;
   redis)
     APP_DIR="infrastructure/redis"
     ;;
@@ -135,9 +131,6 @@ case "${1:-}" in
     ;;
   postgres)
     image_label=$(get_dir_hash "infrastructure/postgres")
-    ;;
-  minio)
-    image_label=$(get_dir_hash "infrastructure/minio")
     ;;
 esac
 
