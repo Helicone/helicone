@@ -23,7 +23,7 @@ import {
 } from "@tanstack/react-table";
 import { ChevronDown, ChevronRight, ChevronsUpDown } from "lucide-react";
 import Link from "next/link";
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useMemo } from "react";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { Result } from "../../../../packages/common/result";
 import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
@@ -132,6 +132,17 @@ export default function ThemedTable<TableTreeNode>(props: ThemedTableProps<T>) {
 
   const [expanded, setExpanded] = React.useState<ExpandedState>(true);
 
+  const descendantErrorMap = useMemo(() => {
+    const map = new Map<string, boolean>();
+    defaultData.forEach((topLevelNode) => {
+      // Assuming TableTreeNode has an 'id' property
+      if (topLevelNode.id) {
+        map.set(topLevelNode.id, hasDescendant4xxError(topLevelNode, true));
+      }
+    });
+    return map;
+  }, [defaultData]); // Recalculate only when data changes
+
   const table = useReactTable({
     data: defaultData,
     columns: defaultColumns,
@@ -179,7 +190,11 @@ export default function ThemedTable<TableTreeNode>(props: ThemedTableProps<T>) {
     onSelectAll?.(checked);
   };
 
-  const handleRowSelect = (row: T, index: number, event: React.MouseEvent) => {
+  const handleRowSelect = (
+    row: TableTreeNode,
+    index: number,
+    event: React.MouseEvent
+  ) => {
     onRowSelect?.(row, index, event);
   };
 
@@ -389,9 +404,8 @@ export default function ThemedTable<TableTreeNode>(props: ThemedTableProps<T>) {
                         {i === 0 &&
                           (() => {
                             const groupColorClass =
-                              (colors[
-                                (row.original as any).currentPath
-                              ] as string) || "bg-transparent";
+                              colors[row.original.currentPath] ||
+                              "bg-transparent";
 
                             if (groupColorClass !== "bg-transparent") {
                               return (
@@ -445,9 +459,15 @@ export default function ThemedTable<TableTreeNode>(props: ThemedTableProps<T>) {
                             cell.getContext()
                           )
                         )}
-                        {i == 0 && row.getParentRow() === undefined && (
-                          <span className="w-2 h-2 ml-2 rounded-full bg-red-600" />
-                        )}
+                        {i === 0 &&
+                          row.getParentRow() === undefined &&
+                          descendantErrorMap.get(row.original.id ?? "") ===
+                            true && (
+                            <span
+                              title="Contains descendant 4xx error"
+                              className="w-2 h-2 ml-2 rounded-full bg-red-600 shrink-0"
+                            />
+                          )}
                       </div>
                     </td>
                   ))}
@@ -492,6 +512,33 @@ export default function ThemedTable<TableTreeNode>(props: ThemedTableProps<T>) {
       </div>
     </ScrollArea>
   );
+}
+
+// Helper function to check for descendant 4xx errors
+// Assumes T extends TableTreeNode and has subRows & status
+function hasDescendant4xxError<T extends TableTreeNode>(
+  node: T,
+  isTopLevel: boolean
+): boolean {
+  // Use type assertion if subRows isn't directly on TableTreeNode but expected
+
+  if (!node.subRows || node.subRows.length === 0) {
+    // Base case: Check self only if not top-level
+    if (!isTopLevel) {
+      return false;
+    }
+  }
+
+  for (const child of node.subRows ?? []) {
+    const childStatus = child.status;
+    if (childStatus && childStatus >= 400) return true;
+
+    if (hasDescendant4xxError(child, false)) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 function expandRow(row: Row<any>) {
