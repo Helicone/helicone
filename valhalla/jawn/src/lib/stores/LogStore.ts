@@ -102,23 +102,25 @@ export class LogStore {
         }
 
         // Insert into the 'response' table with conflict resolution
-        if (payload.responses && payload.responses.length > 0) {
-          const filteredResponses = this.filterDuplicateResponses(
-            payload.responses
-          );
 
-          try {
-            if (filteredResponses && filteredResponses.length > 0) {
-              const insertResponse =
-                pgp.helpers.insert(filteredResponses, responseColumns) +
-                onConflictResponse;
-              await t.none(insertResponse);
-            }
-          } catch (error) {
-            console.error("Error inserting response", error);
-            throw error;
-          }
-        }
+        // temp disable insert response
+        // if (payload.responses && payload.responses.length > 0) {
+        //   const filteredResponses = this.filterDuplicateResponses(
+        //     payload.responses
+        //   );
+
+        //   try {
+        //     if (filteredResponses && filteredResponses.length > 0) {
+        //       const insertResponse =
+        //         pgp.helpers.insert(filteredResponses, responseColumns) +
+        //         onConflictResponse;
+        //       await t.none(insertResponse);
+        //     }
+        //   } catch (error) {
+        //     console.error("Error inserting response", error);
+        //     throw error;
+        //   }
+        // }
 
         if (
           payload.orgsToMarkAsOnboarded &&
