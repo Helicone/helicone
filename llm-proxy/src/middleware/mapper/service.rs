@@ -138,7 +138,6 @@ async fn map_request(
     let source_endpoint =
         ApiEndpoint::new(&extracted_path_and_query, request_style)?;
     let target_endpoint = ApiEndpoint::mapped(source_endpoint, key.provider)?;
-    tracing::trace!(source_endpoint = ?source_endpoint, target_endpoint = ?target_endpoint, "endpoints to map");
     let (parts, body) = req.into_parts();
     let body = body
         .collect()
@@ -152,7 +151,9 @@ async fn map_request(
         target_endpoint,
     )?;
     let mut req = Request::from_parts(parts, axum_core::body::Body::from(body));
-    tracing::trace!(target_path_and_query = ?target_path_and_query, "inserting target path and query");
+    tracing::trace!(
+        source_endpoint = ?source_endpoint, target_endpoint = ?target_endpoint,
+        target_path_and_query = ?target_path_and_query, "mapped request");
     req.extensions_mut().insert(target_path_and_query);
     Ok(req)
 }

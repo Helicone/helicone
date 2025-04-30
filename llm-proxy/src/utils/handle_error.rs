@@ -1,6 +1,7 @@
 use std::{
     convert::Infallible,
     future::Future,
+    marker::PhantomData,
     pin::Pin,
     task::{Context, Poll},
 };
@@ -59,20 +60,8 @@ pin_project! {
     /// Response future for [`CatchPanic`].
     pub struct ResponseFuture<F, E> {
         #[pin]
-        kind: Kind<F, E>,
-    }
-}
-
-pin_project! {
-    #[project = KindProj]
-    enum Kind<F, E> {
-        Errored {
-            error: Option<E>,
-        },
-        Future {
-            #[pin]
-            future: F,
-        }
+        inner: F,
+        _marker: PhantomData<E>,
     }
 }
 
@@ -84,23 +73,13 @@ where
     type Output = Result<Response, Infallible>;
 
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
-        let mut this = self.project();
-        match this.kind.as_mut().project() {
-            KindProj::Errored { error } => {
-                let error =
-                    error.take().expect("future polled after completion");
-                let response = error.into_response();
+        let this = self.project();
+        match ready!(this.inner.poll(cx)) {
+            Ok(res) => Poll::Ready(Ok(res)),
+            Err(svc_err) => {
+                let response = svc_err.into_response();
                 Poll::Ready(Ok(response))
             }
-            KindProj::Future { future } => match ready!(future.poll(cx)) {
-                Ok(res) => Poll::Ready(Ok(res)),
-                Err(svc_err) => {
-                    this.kind.as_mut().set(Kind::Errored {
-                        error: Some(svc_err),
-                    });
-                    Poll::Pending
-                }
-            },
         }
     }
 }
@@ -136,7 +115,8 @@ where
     fn call(&mut self, req: Request<ReqBody>) -> Self::Future {
         let future = self.inner.call(req);
         ResponseFuture {
-            kind: Kind::Future { future },
+            inner: future,
+            _marker: PhantomData,
         }
     }
 }

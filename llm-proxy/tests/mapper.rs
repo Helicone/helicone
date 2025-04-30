@@ -2,9 +2,7 @@ use http::{Method, Request, StatusCode};
 use llm_proxy::{
     config::{Config, router::RouterConfigs},
     tests::{TestDefault, harness::Harness, mock::MockArgsBuilder},
-    types::{provider::Provider, router::RouterId},
 };
-use nonempty_collections::nev;
 use serde_json::json;
 use tower::Service;
 
@@ -84,14 +82,6 @@ async fn mapper_anthropic_slow() {
     // enable multiple providers, test_default for RouterConfig has only a
     // single provider
     config.routers = RouterConfigs::default();
-    let _logger = telemetry::init_telemetry(&config.telemetry).unwrap();
-    // enable multiple providers
-    let mut router_configs = RouterConfigs::default();
-    let default_router_config =
-        router_configs.as_mut().get_mut(&RouterId::Default).unwrap();
-    default_router_config.providers =
-        nev![Provider::Anthropic, Provider::OpenAI];
-    config.routers = router_configs;
     let latency = 10;
     let requests = 10;
     let mock_args = MockArgsBuilder::default()

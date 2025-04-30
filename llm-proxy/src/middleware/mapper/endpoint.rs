@@ -113,13 +113,8 @@ impl ApiEndpoint {
                         tracing::trace!("about to deserialize");
                         let body = serde_json::from_slice::<
                             anthropic_types::chat::ChatCompletionRequest,
-                        >(&body);
-                        if let Err(e) = &body {
-                            tracing::error!(error = ?e, "error deserializing");
-                            // return Err(InvalidRequestError::InvalidRequestBody(e));
-                        }
-                        let body = body
-                            .map_err(InvalidRequestError::InvalidRequestBody)?;
+                        >(&body)
+                        .map_err(InvalidRequestError::InvalidRequestBody)?;
                         tracing::trace!("about to convert");
                         let openai_req: openai_types::chat::ChatCompletionRequest =
                         converter.try_convert(body)
