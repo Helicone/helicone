@@ -12,6 +12,7 @@ interface PerformanceTimelineProps {
     items: TimelineItem[];
     sections: TimelineSection[];
   };
+  onItemClick?: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 interface TooltipPosition {
@@ -297,6 +298,7 @@ function createMouseLeaveHandler(
 
 export default function PerformanceTimeline({
   data,
+  onItemClick,
 }: PerformanceTimelineProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const minimapRef = useRef<HTMLCanvasElement>(null);
@@ -564,12 +566,22 @@ export default function PerformanceTimeline({
 
     canvas.addEventListener("mousemove", handleMouseMove);
     canvas.addEventListener("mouseleave", handleMouseLeave);
+    canvas.addEventListener("click", (e) => {
+      if (hoveredItem && onItemClick) {
+        onItemClick(hoveredItem.id);
+      }
+    });
 
     return () => {
       canvas.removeEventListener("mousemove", handleMouseMove);
       canvas.removeEventListener("mouseleave", handleMouseLeave);
+      canvas.removeEventListener("click", (e) => {
+        if (hoveredItem && onItemClick) {
+          onItemClick(hoveredItem.id);
+        }
+      });
     };
-  }, [minTime, items, sections]);
+  }, [minTime, items, sections, hoveredItem, onItemClick]);
 
   // Handle scroll events
   useEffect(() => {

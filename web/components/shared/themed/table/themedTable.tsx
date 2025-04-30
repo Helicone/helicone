@@ -15,11 +15,12 @@ import {
   getCoreRowModel,
   getExpandedRowModel,
   Table as ReactTable,
+  Row,
   useReactTable,
 } from "@tanstack/react-table";
 import { ChevronDown, ChevronRight, ChevronsUpDown } from "lucide-react";
 import Link from "next/link";
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useMemo } from "react";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { Result } from "../../../../packages/common/result";
 import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
@@ -150,6 +151,15 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
 
   const rows = table.getRowModel().rows;
   const columns = table.getAllColumns();
+  const rowsById = Object.values(table.getRowModel().rowsById);
+
+  useEffect(() => {
+    rowsById.forEach((row) => {
+      if (selectedIds?.includes(row.original?.id ?? "")) {
+        expandRow(row);
+      }
+    });
+  }, [selectedIds]);
 
   useEffect(() => {
     const columnVisibility: { [key: string]: boolean } = {};
@@ -462,4 +472,17 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
       </div>
     </ScrollArea>
   );
+}
+
+function expandRow(row: Row<any>) {
+  if (row.getCanExpand()) {
+    row.getToggleExpandedHandler()();
+  }
+
+  console.log(row, "help");
+
+  const parentRow = row.getParentRow();
+  if (parentRow) {
+    expandRow(parentRow);
+  }
 }

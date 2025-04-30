@@ -323,6 +323,7 @@ const TreeView: React.FC<TreeViewProps> = ({
   );
   const drawerRef = useRef<any>(null);
 
+  const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const selectedRequestData = useMemo(() => {
     if (!selectedRequestId || !session.traces) {
       return undefined;
@@ -466,7 +467,10 @@ const TreeView: React.FC<TreeViewProps> = ({
                 minSize={25}
                 className="relative bg-white dark:bg-black"
               >
-                <PerformanceTimeline data={timelineData} />
+                <PerformanceTimeline
+                  data={timelineData}
+                  onItemClick={setSelectedItem}
+                />
               </ResizablePanel>
 
               <ResizableHandle />
@@ -489,6 +493,7 @@ const TreeView: React.FC<TreeViewProps> = ({
                       fullWidth={true}
                       checkboxMode="never"
                       onToggleAllRows={handleToggleAllRows}
+                      selectedIds={selectedItem ? [selectedItem] : []}
                     />
                   </div>
                 </div>
