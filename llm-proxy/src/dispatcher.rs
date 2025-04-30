@@ -135,9 +135,7 @@ impl Dispatcher {
                 }
                 Provider::Anthropic => {
                     let version = provider_config
-                        .version
-                        .as_ref()
-                        .map(|s| s.as_str())
+                        .version.as_deref()
                         .unwrap_or(DEFAULT_ANTHROPIC_VERSION);
                     r.insert(
                         HeaderName::from_str("x-api-key").unwrap(),
@@ -146,7 +144,7 @@ impl Dispatcher {
                     );
                     r.insert(
                         HeaderName::from_str("anthropic-version").unwrap(),
-                        HeaderValue::from_str(&version)
+                        HeaderValue::from_str(version)
                             .map_err(InternalError::InvalidHeader)?,
                     );
                 }

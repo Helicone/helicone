@@ -79,7 +79,7 @@ impl ApiEndpoint {
                     (OpenAI::ChatCompletions, Anthropic::Messages) => {
                         let body = serde_json::from_slice::<
                             openai_types::chat::ChatCompletionRequest,
-                        >(&body)
+                        >(body)
                         .map_err(InvalidRequestError::InvalidRequestBody)?;
                         let anthropic_req: anthropic_types::chat::ChatCompletionRequest =
                         converter.try_convert(body)
@@ -113,7 +113,7 @@ impl ApiEndpoint {
                         tracing::trace!("about to deserialize");
                         let body = serde_json::from_slice::<
                             anthropic_types::chat::ChatCompletionRequest,
-                        >(&body)
+                        >(body)
                         .map_err(InvalidRequestError::InvalidRequestBody)?;
                         tracing::trace!("about to convert");
                         let openai_req: openai_types::chat::ChatCompletionRequest =

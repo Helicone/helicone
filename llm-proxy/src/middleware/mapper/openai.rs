@@ -27,11 +27,11 @@ impl Convert<openai_types::chat::Role> for anthropic_types::chat::Role {
     }
 }
 
-impl<'a>
+impl
     TryConvert<
         openai_types::chat::ChatCompletionRequest,
         anthropic_types::chat::ChatCompletionRequest,
-    > for OpenAiConverter<'a>
+    > for OpenAiConverter<'_>
 {
     type Error = MapperError;
 
