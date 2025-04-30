@@ -118,7 +118,7 @@ impl crate::tests::TestDefault for Config {
     fn test_default() -> Self {
         let telemetry = telemetry::Config {
             exporter: telemetry::Exporter::Stdout,
-            level: "info,llm_proxy=info,tower::balance=trace,tower::load=trace"
+            level: "info,llm_proxy=trace"
                 .to_string(),
             ..Default::default()
         };

@@ -1,6 +1,5 @@
 use std::{
-    sync::Arc,
-    task::{Context, Poll},
+    str::FromStr, sync::Arc, task::{Context, Poll}
 };
 
 use futures::future::BoxFuture;
@@ -66,10 +65,12 @@ where
             let default_provider = req_ctx.router_config.providers.first();
 
             if key.provider != *default_provider {
-                tracing::debug!(%default_provider, target_provider = %key.provider, "mapping request");
+                tracing::debug!(%default_provider, target_provider = %key.provider, "mapping request body");
                 let req = map_request(app_state, req_ctx, key, req).await?;
                 inner.call(req).await
             } else {
+                tracing::debug!(%default_provider, target_provider = %key.provider, "mapping request url");
+                let req = map_request_url(req_ctx, key, req).await?;
                 inner.call(req).await
             }
         })
@@ -82,22 +83,25 @@ async fn map_request(
     key: Key,
     mut req: Request,
 ) -> Result<Request, Error> {
+    tracing::debug!("about to extract path and query");
     let extracted_path_and_query =
         req.extensions_mut().remove::<PathAndQuery>().ok_or(
             Error::Internal(InternalError::ExtensionNotFound("PathAndQuery")),
         )?;
     let default_provider = req_ctx.router_config.providers.first();
-    // TODO: remove clones
+    tracing::debug!(extracted_path_and_query = ?extracted_path_and_query, default_provider = ?default_provider, "extracted path and query");
     let source_endpoint =
         ApiEndpoint::new(&extracted_path_and_query, *default_provider)?;
     let target_endpoint = ApiEndpoint::mapped(source_endpoint, key.provider)?;
+    tracing::debug!(source_endpoint = ?source_endpoint, target_endpoint = ?target_endpoint, "endpoints");
     let (parts, body) = req.into_parts();
+    tracing::debug!("collecting body");
     let body = body
         .collect()
         .await
         .map_err(InternalError::CollectBodyError)?
         .to_bytes();
-
+    tracing::debug!("body collected");
     let (body, target_path_and_query) = source_endpoint.map(
         &app_state,
         &body,
@@ -105,6 +109,34 @@ async fn map_request(
         target_endpoint,
     )?;
     let mut req = Request::from_parts(parts, axum_core::body::Body::from(body));
+    tracing::debug!(target_path_and_query = ?target_path_and_query, "inserting target path and query");
+    req.extensions_mut().insert(target_path_and_query);
+    Ok(req)
+}
+
+async fn map_request_url(
+    req_ctx: Arc<RequestContext>,
+    key: Key,
+    mut req: Request,
+) -> Result<Request, Error> {
+    tracing::debug!("about to extract path and query");
+    let extracted_path_and_query =
+        req.extensions_mut().remove::<PathAndQuery>().ok_or(
+            Error::Internal(InternalError::ExtensionNotFound("PathAndQuery")),
+        )?;
+    tracing::debug!(extracted_path_and_query = ?extracted_path_and_query, "extracted path and query");
+    let default_provider = req_ctx.router_config.providers.first();
+    let source_endpoint =
+        ApiEndpoint::new(&extracted_path_and_query, *default_provider)?;
+    let target_endpoint = ApiEndpoint::mapped(source_endpoint, key.provider)?;
+    tracing::debug!(source_endpoint = ?source_endpoint, target_endpoint = ?target_endpoint, "endpoints");
+    let target_path_and_query = if let Some(query_params) = extracted_path_and_query.query() {
+        format!("{}?{}", target_endpoint.path(), query_params)
+    } else {
+        target_endpoint.path().to_string()
+    };
+    let target_path_and_query = PathAndQuery::from_str(&target_path_and_query).map_err(InternalError::InvalidUri)?;
+
     tracing::debug!(target_path_and_query = ?target_path_and_query, "inserting target path and query");
     req.extensions_mut().insert(target_path_and_query);
     Ok(req)
