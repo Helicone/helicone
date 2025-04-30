@@ -479,8 +479,6 @@ function expandRow(row: Row<any>) {
     row.getToggleExpandedHandler()();
   }
 
-  console.log(row, "help");
-
   const parentRow = row.getParentRow();
   if (parentRow) {
     expandRow(parentRow);

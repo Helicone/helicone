@@ -418,10 +418,11 @@ const TreeView: React.FC<TreeViewProps> = ({
       }
     );
 
-    // Calculate timeRange
     const lastItem = itemSpan[itemSpan.length - 1];
-    const maxEnd = lastItem?.endTime ?? 0;
-    const timeRange = [0, Math.max(1, maxEnd)] as [number, number];
+    const timeRange: [number, number] = [
+      0,
+      Math.max(1, lastItem?.endTime ?? 0),
+    ];
 
     // Calculate sections
     const uniquePaths = Array.from(

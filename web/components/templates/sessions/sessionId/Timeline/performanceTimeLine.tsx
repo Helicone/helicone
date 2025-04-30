@@ -1,7 +1,4 @@
-"use client";
-
 import { cn } from "@/lib/utils";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import type { TimelineItem, TimelineSection } from "../lib/types";
 import { ColorContext } from "../Tree/TreeView";
@@ -29,7 +26,7 @@ const TIMELINE_CONSTANTS = {
   BAR_SPACING: 6, // Slightly less spacing to fit more vertically
   SECTION_SPACING: 8, // Slightly less section spacing
   MARKER_INTERVAL: 200,
-  INITIAL_Y: 24, // Start closer to the top
+  INITIAL_Y: 28, // Start closer to the top
   PADDING_RIGHT: 100, // Lower padding to maximize horizontal space
 } as const;
 
@@ -37,8 +34,8 @@ const MINIMAP_CONSTANTS = {
   WIDTH: 150,
   HEIGHT: 80,
   PADDING: 8,
-  BAR_HEIGHT: 4,
-  BAR_SPACING: 2,
+  BAR_HEIGHT: 2, // Make minimap bars smaller
+  BAR_SPACING: 1, // Tighter spacing in minimap
 } as const;
 
 export default function PerformanceTimeline({
@@ -56,8 +53,6 @@ export default function PerformanceTimeline({
   });
   const [showTooltip, setShowTooltip] = useState(false);
   const [isDraggingMinimap, setIsDraggingMinimap] = useState(false);
-  const [showLeftScroll, setShowLeftScroll] = useState(false);
-  const [showRightScroll, setShowRightScroll] = useState(true);
 
   // Use refs instead of state for values that don't need to trigger re-renders
   const scrollPositionRef = useRef(0);
@@ -70,6 +65,7 @@ export default function PerformanceTimeline({
   const { timeRange, items, sections } = data;
 
   const [minTime, maxTime] = timeRange;
+
   const timeSpan = maxTime - minTime;
 
   // Calculate dynamic pixelsPerMs to fit the timeline in the container
@@ -92,115 +88,122 @@ export default function PerformanceTimeline({
   // Function to update the minimap
   const updateMinimap = useCallback(() => {
     const minimap = minimapRef.current;
-    if (!minimap) return;
-
+    const scrollContainer = scrollContainerRef.current;
+    if (!minimap || !scrollContainer) return;
     const ctx = minimap.getContext("2d");
     if (!ctx) return;
 
-    // Set minimap dimensions
+    // Setup
     const dpr = window.devicePixelRatio || 1;
-    const width = MINIMAP_CONSTANTS.WIDTH * dpr;
-    const height = MINIMAP_CONSTANTS.HEIGHT * dpr;
-    minimap.width = width;
-    minimap.height = height;
-    minimap.style.width = "150px";
-    minimap.style.height = "80px";
+    const minimapWidthPx = MINIMAP_CONSTANTS.WIDTH;
+    const minimapHeightPx = MINIMAP_CONSTANTS.HEIGHT;
+    minimap.width = minimapWidthPx * dpr;
+    minimap.height = minimapHeightPx * dpr;
+    minimap.style.width = `${minimapWidthPx}px`;
+    minimap.style.height = `${minimapHeightPx}px`;
     ctx.scale(dpr, dpr);
-
-    // Clear minimap
-    ctx.clearRect(10, 0, width, height);
-
-    // Draw background
+    ctx.clearRect(0, 0, minimapWidthPx, minimapHeightPx);
     ctx.fillStyle = "#f1f5f9";
-    ctx.fillRect(0, 0, 150, 80);
+    ctx.fillRect(0, 0, minimapWidthPx, minimapHeightPx);
+
+    // Get scroll/content dimensions
+    const scrollableWidth = scrollContainer.scrollWidth;
+    const scrollableHeight = scrollContainer.scrollHeight;
+    if (scrollableWidth <= 0 || scrollableHeight <= 0) {
+      ctx.strokeStyle = "#cbd5e1";
+      ctx.lineWidth = 1 / dpr;
+      ctx.strokeRect(0, 0, minimapWidthPx, minimapHeightPx);
+      return;
+    }
+
+    // Calculate scales
+    const padding = 5;
+    const availableMinimapWidth = minimapWidthPx - 2 * padding;
+    const availableMinimapHeight = minimapHeightPx - 2 * padding;
+    const xScale = availableMinimapWidth / scrollableWidth;
+    const yScale = availableMinimapHeight / scrollableHeight;
+
+    // Draw scaled items
+    const minimapBarHeight = Math.max(
+      1,
+      TIMELINE_CONSTANTS.BAR_HEIGHT * yScale
+    );
+    const minimapBarSpacing = TIMELINE_CONSTANTS.BAR_SPACING * yScale;
+    const minimapSectionSpacing = TIMELINE_CONSTANTS.SECTION_SPACING * yScale;
+    let scaledCurrentY = TIMELINE_CONSTANTS.INITIAL_Y * yScale + padding;
+    const sectionItems = getItemsGroupedBySection(items, sections);
+
+    sections.forEach((section) => {
+      const sectionColor = colors[section.id] || "black";
+      const itemsInSection = sectionItems[section.id];
+      if (itemsInSection.length > 0) {
+        itemsInSection.forEach((item) => {
+          // Use main canvas scale for relative X positioning
+          const mainPixelsPerMs = pixelsPerMsRef.current;
+          const logicalStartX =
+            mainPixelsPerMs > 0
+              ? (item.startTime - minTime) * mainPixelsPerMs
+              : 0;
+          const logicalEndX =
+            mainPixelsPerMs > 0
+              ? (item.endTime - minTime) * mainPixelsPerMs
+              : 0;
+          const logicalWidth = Math.max(
+            1 / xScale,
+            logicalEndX - logicalStartX
+          );
+
+          const startX = logicalStartX * xScale + padding;
+          const width = logicalWidth * xScale;
+
+          ctx.fillStyle = sectionColor;
+          ctx.beginPath();
+          ctx.rect(
+            startX,
+            scaledCurrentY,
+            Math.max(1, width),
+            minimapBarHeight
+          );
+          ctx.fill();
+          scaledCurrentY += minimapBarHeight + minimapBarSpacing;
+        });
+        scaledCurrentY += minimapSectionSpacing;
+      }
+    });
+
+    // Draw viewport indicator
+    const scrollLeft = scrollContainer.scrollLeft;
+    const scrollTop = scrollContainer.scrollTop;
+    const visibleWidth = scrollContainer.clientWidth;
+    const visibleHeight = scrollContainer.clientHeight;
+    const viewportX = scrollLeft * xScale + padding;
+    const viewportY = scrollTop * yScale + padding;
+    const viewportWidth = visibleWidth * xScale;
+    const viewportHeight = visibleHeight * yScale;
+
+    ctx.strokeStyle = "#0ea5e9";
+    ctx.lineWidth = 2 / dpr;
+    ctx.strokeRect(viewportX, viewportY, viewportWidth, viewportHeight);
+    ctx.fillStyle = "rgba(14, 165, 233, 0.15)";
+    ctx.fillRect(viewportX, viewportY, viewportWidth, viewportHeight);
+    minimapHandlePositionRef.current = {
+      x: viewportX + viewportWidth / 2,
+      y: viewportY + viewportHeight / 2,
+    };
 
     // Draw border
     ctx.strokeStyle = "#cbd5e1";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(0, 0, 150, 80);
-
-    // Draw timeline items in minimap with padding
-    const barHeight = MINIMAP_CONSTANTS.BAR_HEIGHT;
-    const barSpacing = MINIMAP_CONSTANTS.BAR_SPACING;
-    let currentY = 10;
-    const minimapPadding = MINIMAP_CONSTANTS.PADDING;
-    const minimapContentWidth = MINIMAP_CONSTANTS.WIDTH - minimapPadding * 2;
-
-    // Group items by section
-    const sectionItems: Record<string, TimelineItem[]> = {};
-    sections.forEach((section) => {
-      sectionItems[section.id] = items.filter(
-        (item) => item.section === section.id
-      );
-    });
-
-    // Draw items for each section
-    sections.forEach((section) => {
-      const sectionColor = colors[section.id] || "black";
-
-      sectionItems[section.id].forEach((item) => {
-        const startX =
-          ((item.startTime - minTime) / timeSpan) * minimapContentWidth +
-          minimapPadding;
-        const endX =
-          ((item.endTime - minTime) / timeSpan) * minimapContentWidth +
-          minimapPadding;
-        const width = Math.max(1, endX - startX); // Ensure minimum width
-
-        // Draw bar
-        ctx.fillStyle = sectionColor;
-        ctx.beginPath();
-        ctx.roundRect(startX, currentY, width, barHeight, 2);
-        ctx.fill();
-
-        currentY += barHeight + barSpacing;
-      });
-
-      // Add extra spacing between sections
-      currentY += 2;
-    });
-
-    // Calculate the visible portion based on scroll position
-    const scrollContainer = scrollContainerRef.current;
-    if (
-      scrollContainer &&
-      canvasWidthRef.current > 0 &&
-      containerWidthRef.current > 0
-    ) {
-      const scrollLeft = scrollPositionRef.current;
-      const visibleWidth = containerWidthRef.current;
-
-      // Calculate ratios based on total canvas width
-      const totalWidth = canvasWidthRef.current;
-      const visibleStartRatio = scrollLeft / totalWidth;
-      const visibleEndRatio = Math.min(
-        1,
-        (scrollLeft + visibleWidth) / totalWidth
-      );
-
-      // Apply the ratios to minimap width (150px)
-      const visibleStartX = visibleStartRatio * 150;
-      const visibleEndX = visibleEndRatio * 150;
-
-      // Draw semi-transparent overlay for areas outside viewport
-      ctx.fillStyle = "rgb(255, 255, 255)";
-      ctx.fillRect(0, 0, visibleStartX, 80);
-      ctx.fillRect(visibleEndX, 0, 150 - visibleEndX, 80);
-
-      // Update handle position for dragging
-      minimapHandlePositionRef.current = { x: visibleEndX, y: 70 };
-    }
-  }, [sections, items, colors, minTime, timeSpan]);
+    ctx.lineWidth = 1 / dpr;
+    ctx.strokeRect(0, 0, minimapWidthPx, minimapHeightPx);
+  }, [sections, items, colors, minTime]);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    const container = containerRef.current;
-
-    if (!canvas || !container) return;
+    if (!canvasRef.current || containerRef.current) return;
 
     const updateDimensions = () => {
-      if (container) {
-        const width = container.getBoundingClientRect().width;
+      if (containerRef.current) {
+        console.log("johnlegends", containerRef.current);
+        const width = containerRef.current.getBoundingClientRect().width;
         containerWidthRef.current = width;
 
         // Recalculate pixels per ms based on new container width
@@ -218,29 +221,25 @@ export default function PerformanceTimeline({
     return () => window.removeEventListener("resize", updateDimensions);
   }, [calculatePixelsPerMs]);
 
-  // Draw the canvas based on current dimensions and scale
+  // Draw the main canvas
   const drawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Use the current pixelsPerMs value
     const pixelsPerMs = pixelsPerMsRef.current;
-
-    // Calculate dimensions using the new function
-    const [totalWidth, height] = calculateCanvasDimensions(
+    const timeSpan = maxTime - minTime;
+    const [contentWidth, height] = calculateCanvasDimensions(
       timeSpan,
       pixelsPerMs,
       items,
       sections
     );
 
-    // Store the width for later use
+    const totalWidth = Math.max(contentWidth, containerWidthRef.current);
     canvasWidthRef.current = totalWidth;
 
-    // Set both the canvas buffer size and display size
     const dpr = window.devicePixelRatio || 1;
     canvas.width = totalWidth * dpr;
     canvas.height = height * dpr;
@@ -251,10 +250,10 @@ export default function PerformanceTimeline({
     // Clear canvas
     ctx.clearRect(0, 0, totalWidth, height);
 
-    // Draw time markers
-    drawTimeMarkers(ctx, minTime, maxTime, height, pixelsPerMs);
+    // 1. Draw time markers FIRST
+    drawTimeMarkers(ctx, minTime, maxTime, height, pixelsPerMs, totalWidth);
 
-    // Draw timeline items
+    // 3. Draw timeline items
     drawTimelineItems(
       ctx,
       items,
@@ -265,8 +264,7 @@ export default function PerformanceTimeline({
       colors
     );
 
-    // Update minimap to reflect new canvas
-    updateMinimap();
+    updateMinimap(); // Call directly
   }, [
     minTime,
     maxTime,
@@ -309,7 +307,7 @@ export default function PerformanceTimeline({
 
     canvas.addEventListener("mousemove", handleMouseMove);
     canvas.addEventListener("mouseleave", handleMouseLeave);
-    canvas.addEventListener("click", (e) => {
+    canvas.addEventListener("click", () => {
       if (hoveredItem && onItemClick) {
         onItemClick(hoveredItem.id);
       }
@@ -318,7 +316,7 @@ export default function PerformanceTimeline({
     return () => {
       canvas.removeEventListener("mousemove", handleMouseMove);
       canvas.removeEventListener("mouseleave", handleMouseLeave);
-      canvas.removeEventListener("click", (e) => {
+      canvas.removeEventListener("click", () => {
         if (hoveredItem && onItemClick) {
           onItemClick(hoveredItem.id);
         }
@@ -326,28 +324,19 @@ export default function PerformanceTimeline({
     };
   }, [minTime, items, sections, hoveredItem, onItemClick]);
 
-  // Handle scroll events
+  // Effect for main scroll container events
   useEffect(() => {
     const scrollContainer = scrollContainerRef.current;
     if (!scrollContainer) return;
-
     const handleScroll = () => {
-      const scrollLeft = scrollContainer.scrollLeft;
-      scrollPositionRef.current = scrollLeft;
-
-      // Update scroll indicators
-      setShowLeftScroll(scrollLeft > 0);
-      setShowRightScroll(
-        scrollLeft < canvasWidthRef.current - containerWidthRef.current - 10
-      );
-
-      // Update minimap without causing re-renders
-      updateMinimap();
+      scrollPositionRef.current = scrollContainer.scrollLeft;
+      // updateMinimap called here will use the timeSpan captured
+      // when the updateMinimap callback was created by drawCanvas
+      updateMinimap(); // Pass the current timespan explicitly
     };
-
     scrollContainer.addEventListener("scroll", handleScroll);
     return () => scrollContainer.removeEventListener("scroll", handleScroll);
-  }, [updateMinimap]);
+  }, [updateMinimap, minTime, maxTime]); // Depend on updateMinimap and the time bounds
 
   // Handle mouse interactions with the minimap
   useEffect(() => {
@@ -355,54 +344,49 @@ export default function PerformanceTimeline({
     if (!minimap) return;
 
     const handleMouseDown = (e: MouseEvent) => {
+      setIsDraggingMinimap(true);
+      handleMinimapClick(e);
+      e.preventDefault();
+    };
+
+    const handleMinimapClick = (e: MouseEvent) => {
+      const scrollContainer = scrollContainerRef.current;
+      if (!minimap || !scrollContainer) return;
+
       const rect = minimap.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
 
-      // Check if clicking on the handle
-      const handlePos = minimapHandlePositionRef.current;
-      const distance = Math.sqrt(
-        Math.pow(x - handlePos.x, 2) + Math.pow(y - handlePos.y, 2)
-      );
+      const minimapWidth = MINIMAP_CONSTANTS.WIDTH;
+      const minimapHeight = MINIMAP_CONSTANTS.HEIGHT;
+      const clampedX = Math.max(0, Math.min(x, minimapWidth));
+      const clampedY = Math.max(0, Math.min(y, minimapHeight));
 
-      if (distance <= 12) {
-        setIsDraggingMinimap(true);
-      } else {
-        // Check if clicking on the minimap area
-        if (x >= 0 && x <= 150 && y >= 0 && y <= 80) {
-          // Calculate the position in the timeline
-          const clickedRatio = x / 150;
-          const scrollTarget = clickedRatio * canvasWidthRef.current;
+      const xRatio = clampedX / minimapWidth;
+      const yRatio = clampedY / minimapHeight;
 
-          // Scroll to that position
-          if (scrollContainerRef.current) {
-            scrollContainerRef.current.scrollTo({
-              left: scrollTarget - containerWidthRef.current / 2,
-              behavior: "smooth",
-            });
-          }
-        }
-      }
+      const scrollableWidth = scrollContainer.scrollWidth;
+      const scrollableHeight = scrollContainer.scrollHeight;
+      const targetScrollX = xRatio * scrollableWidth;
+      const targetScrollY = yRatio * scrollableHeight;
+
+      scrollContainer.scrollTo({
+        left: Math.max(0, targetScrollX - scrollContainer.clientWidth / 2),
+        top: Math.max(0, targetScrollY - scrollContainer.clientHeight / 2),
+        behavior: "auto",
+      });
     };
 
     const handleMouseMove = (e: MouseEvent) => {
       if (isDraggingMinimap) {
-        const rect = minimap.getBoundingClientRect();
-        const x = Math.max(0, Math.min(150, e.clientX - rect.left));
-
-        // Calculate the position in the timeline
-        const dragRatio = x / 150;
-        const scrollTarget = dragRatio * canvasWidthRef.current;
-
-        // Scroll to that position
-        if (scrollContainerRef.current) {
-          scrollContainerRef.current.scrollLeft = scrollTarget;
-        }
+        handleMinimapClick(e);
       }
     };
 
     const handleMouseUp = () => {
-      setIsDraggingMinimap(false);
+      if (isDraggingMinimap) {
+        setIsDraggingMinimap(false);
+      }
     };
 
     minimap.addEventListener("mousedown", handleMouseDown);
@@ -417,103 +401,80 @@ export default function PerformanceTimeline({
   }, [isDraggingMinimap]);
 
   // Handle scroll button clicks
-  const handleScrollLeft = () => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({
-        left: -containerWidthRef.current / 2,
-        behavior: "smooth",
-      });
-    }
-  };
-
-  const handleScrollRight = () => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({
-        left: containerWidthRef.current / 2,
-        behavior: "smooth",
-      });
-    }
-  };
 
   return (
-    <div className="w-full">
+    <div
+      ref={containerRef}
+      className="relative border border-gray-200 rounded-lg overflow-hidden bg-white"
+    >
+      {/* Scroll container - updated with overflow-y */}
       <div
-        ref={containerRef}
-        className="relative border border-gray-200 rounded-lg overflow-hidden bg-white"
+        ref={scrollContainerRef}
+        className="overflow-x-auto overflow-y-auto max-h-[400px] w-full scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
       >
-        {/* Scroll container - updated with overflow-y */}
-        <div
-          ref={scrollContainerRef}
-          className="overflow-x-auto overflow-y-auto max-h-[500px] w-full scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
-        >
-          <canvas ref={canvasRef} className="cursor-pointer" />
-        </div>
+        <canvas ref={canvasRef} className="cursor-pointer" />
+      </div>
 
-        {/* Scroll indicators */}
-        {showLeftScroll && (
-          <button
-            className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-1 shadow-md z-10 opacity-80 hover:opacity-100"
-            onClick={handleScrollLeft}
-          >
-            <ChevronLeft size={20} />
-          </button>
-        )}
+      {/* Minimap in top right corner */}
+      <div className="absolute top-6 right-4 z-10">
+        <canvas
+          ref={minimapRef}
+          className="w-[150px] h-[80px] cursor-pointer shadow-lg"
+          style={{
+            cursor: isDraggingMinimap ? "grabbing" : "grab",
+          }}
+        />
+      </div>
 
-        {showRightScroll && (
-          <button
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-1 shadow-md z-10 opacity-80 hover:opacity-100"
-            onClick={handleScrollRight}
-          >
-            <ChevronRight size={20} />
-          </button>
-        )}
+      {showTooltip && hoveredItem && (
+        <ToolTipComponent
+          hoveredItem={hoveredItem}
+          tooltipPosition={tooltipPosition}
+        />
+      )}
+    </div>
+  );
+}
 
-        {/* Minimap in top right corner */}
-        <div className="absolute top-6 right-4 z-10">
-          <canvas
-            ref={minimapRef}
-            className="w-[150px] h-[80px] cursor-pointer shadow-lg"
-            style={{
-              cursor: isDraggingMinimap ? "grabbing" : "grab",
-            }}
-          />
-        </div>
-
-        {showTooltip && hoveredItem && (
-          <div
-            className="fixed z-20 bg-white border border-gray-200 rounded-md shadow-lg p-3 text-sm"
-            style={{
-              left: `${tooltipPosition.x}px`,
-              top: `${tooltipPosition.y}px`,
-              width: "250px",
-              transform: "translate(15px, 15px)", // Small offset from cursor
-              pointerEvents: "none",
-            }}
-          >
-            <div className="font-medium">{hoveredItem.label || "Task"}</div>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-1">
-              <div className="text-gray-500">Model:</div>
-              <div>{hoveredItem.model || "N/A"}</div>
-              <div className="text-gray-500">Cost:</div>
-              <div>${hoveredItem.cost?.toFixed(5) || "0.00000"}</div>
-              <div className="text-gray-500">Duration:</div>
-              <div>{hoveredItem.endTime - hoveredItem.startTime} ms</div>
-              {hoveredItem.status && (
-                <>
-                  <div className="text-gray-500">Status:</div>
-                  <div
-                    className={cn(
-                      hoveredItem.status === "success"
-                        ? "text-green-600"
-                        : "text-red-600"
-                    )}
-                  >
-                    {hoveredItem.status}
-                  </div>
-                </>
+function ToolTipComponent({
+  hoveredItem,
+  tooltipPosition,
+}: {
+  hoveredItem: TimelineItem;
+  tooltipPosition: TooltipPosition;
+}) {
+  return (
+    <div
+      className="fixed z-20 bg-white border border-gray-200 rounded-md shadow-lg p-3 text-sm"
+      style={{
+        left: `${tooltipPosition.x}px`,
+        top: `${tooltipPosition.y}px`,
+        width: "250px",
+        transform: "translate(16px, 8px)", // Small offset from cursor
+        pointerEvents: "none",
+      }}
+    >
+      <div className="font-medium">{hoveredItem.label || "Task"}</div>
+      <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-1">
+        <div className="text-gray-500">Model:</div>
+        <div>{hoveredItem.model || "N/A"}</div>
+        <div className="text-gray-500">Cost:</div>
+        <div>${hoveredItem.cost?.toFixed(5) || "0.00000"}</div>
+        <div className="text-gray-500">Duration:</div>
+        <div>{hoveredItem.endTime - hoveredItem.startTime} ms</div>
+        {hoveredItem.status && (
+          <>
+            <div className="text-gray-500">Status:</div>
+            <div
+              className={cn(
+                hoveredItem.status === "success"
+                  ? "text-green-600"
+                  : "text-red-600"
               )}
+            >
+              {hoveredItem.status}
             </div>
-          </div>
+          </>
         )}
       </div>
     </div>
@@ -557,24 +518,22 @@ function drawTimeMarkers(
   minTime: number,
   maxTime: number,
   height: number,
-  pixelsPerMs: number
+  pixelsPerMs: number,
+  totalWidth: number
 ) {
-  // Dynamically calculate marker interval based on scale
-  const optimalMarkerCount = 5; // Target number of markers
   const timeSpan = maxTime - minTime;
-  const markerInterval = Math.ceil(timeSpan / optimalMarkerCount / 100) * 100; // Round to nearest 100ms
-
+  if (timeSpan <= 0 || pixelsPerMs <= 0) return;
+  const optimalMarkerCount = 5;
+  const markerInterval = Math.ceil(timeSpan / optimalMarkerCount / 100) * 100;
   const timeMarkers = [];
   for (let time = minTime; time <= maxTime; time += markerInterval) {
     timeMarkers.push(time);
   }
-
   const markerY = 20;
   ctx.font = "12px Inter, system-ui, sans-serif";
   ctx.fillStyle = "#64748b";
   ctx.strokeStyle = "#e2e8f0";
   ctx.lineWidth = 1;
-
   timeMarkers.forEach((time) => {
     const x = (time - minTime) * pixelsPerMs;
     ctx.beginPath();
@@ -583,6 +542,16 @@ function drawTimeMarkers(
     ctx.stroke();
     ctx.fillText(`${time} ms`, x + 5, markerY);
   });
+
+  // 2. Draw the horizontal line UNDER the markers
+  const lineY =
+    TIMELINE_CONSTANTS.INITIAL_Y - TIMELINE_CONSTANTS.SECTION_SPACING / 2;
+  ctx.beginPath();
+  ctx.moveTo(0, lineY); // Start slightly offset for crispness
+  ctx.lineTo(totalWidth, lineY); // Draw across the entire width
+  ctx.strokeStyle = "#e2e8f0"; // Use a light gray color (same as markers)
+  ctx.lineWidth = 1; // Standard line width
+  ctx.stroke();
 }
 
 function drawTimelineItems(
@@ -770,9 +739,6 @@ function calculateCanvasDimensions(
   items: TimelineItem[],
   sections: TimelineSection[]
 ): [number, number] {
-  // Calculate width
-  const totalWidth = timeSpan * pixelsPerMs + TIMELINE_CONSTANTS.PADDING_RIGHT;
-
   // Calculate height
   let totalHeight = TIMELINE_CONSTANTS.INITIAL_Y;
   const sectionItems = getItemsGroupedBySection(items, sections);
@@ -787,12 +753,12 @@ function calculateCanvasDimensions(
       totalHeight += TIMELINE_CONSTANTS.SECTION_SPACING;
     }
   });
-
-  // Add padding at the bottom
-  totalHeight += 40;
-
-  // Ensure minimum height
+  totalHeight += 40; // Padding
   const finalHeight = Math.max(totalHeight, 400);
 
-  return [totalWidth, finalHeight];
+  // Calculate width based on time
+  const contentWidth =
+    timeSpan * pixelsPerMs + TIMELINE_CONSTANTS.PADDING_RIGHT;
+
+  return [contentWidth, finalHeight];
 }
