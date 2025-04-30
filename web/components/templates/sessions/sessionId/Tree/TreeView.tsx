@@ -145,7 +145,6 @@ interface ColorContextType {
   setColors: React.Dispatch<React.SetStateAction<ColorMap>>;
 }
 
-// Create the context outside the component
 export const ColorContext = createContext<ColorContextType>({
   colors: {},
   setColors: () => {},

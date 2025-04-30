@@ -476,7 +476,7 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
 
 function expandRow(row: Row<any>) {
   if (row.getCanExpand()) {
-    row.getToggleExpandedHandler()();
+    row.toggleExpanded(true);
   }
 
   const parentRow = row.getParentRow();

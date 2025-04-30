@@ -461,7 +461,7 @@ function ToolTipComponent({
         <div className="text-gray-500">Cost:</div>
         <div>${hoveredItem.cost?.toFixed(5) || "0.00000"}</div>
         <div className="text-gray-500">Duration:</div>
-        <div>{hoveredItem.endTime - hoveredItem.startTime} ms</div>
+        <div>{hoveredItem.endTime - hoveredItem.startTime} s</div>
         {hoveredItem.status && (
           <>
             <div className="text-gray-500">Status:</div>
