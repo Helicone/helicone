@@ -21,7 +21,13 @@ docker compose -f docker/docker-compose-slim.yml up -d
 
 # Run migrations for clickhouse and postgres
 flyway migrate -configFiles=supabase/flyway.conf
-python3 clickhouse/ch_hcone.py --upgrade --host localhost --port 18123 --user default --no-password
+# install python requirements
+cd clickhouse
+# create python virtual env
+python3 -m venv env
+source ./env/bin/activate
+pip install -r requirements.txt
+python3 ch_hcone.py --upgrade --host localhost --port 18123 --user default --no-password
 ```
 
 **Default URLs:**
