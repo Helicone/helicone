@@ -22,7 +22,6 @@ interface TooltipPosition {
 
 // Constants
 const TIMELINE_CONSTANTS = {
-  HEIGHT: 400,
   // Allow more compression with smaller MIN_PIXELS_PER_MS
   MIN_PIXELS_PER_MS: 0.02, // Lower minimum scale to allow more compression for long timelines
   MAX_PIXELS_PER_MS: 1.0, // Reduce max scale to prevent excessive spreading
@@ -42,260 +41,6 @@ const MINIMAP_CONSTANTS = {
   BAR_SPACING: 2,
 } as const;
 
-// Helper functions
-function lightenColor(color: string, amount: number): string {
-  // Convert hex to RGB
-  let r = Number.parseInt(color.slice(1, 3), 16);
-  let g = Number.parseInt(color.slice(3, 5), 16);
-  let b = Number.parseInt(color.slice(5, 7), 16);
-
-  // Lighten
-  r = Math.min(255, Math.round(r + (255 - r) * amount));
-  g = Math.min(255, Math.round(g + (255 - g) * amount));
-  b = Math.min(255, Math.round(b + (255 - b) * amount));
-
-  // Convert back to hex
-  return `#${r.toString(16).padStart(2, "0")}${g
-    .toString(16)
-    .padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
-}
-
-function getItemsGroupedBySection(
-  items: TimelineItem[],
-  sections: TimelineSection[]
-) {
-  const sectionItems: Record<string, TimelineItem[]> = {};
-  sections.forEach((section) => {
-    sectionItems[section.id] = items.filter(
-      (item) => item.section === section.id
-    );
-  });
-  return sectionItems;
-}
-
-// Canvas drawing timeline markers with lines
-function drawTimeMarkers(
-  ctx: CanvasRenderingContext2D,
-  minTime: number,
-  maxTime: number,
-  height: number,
-  pixelsPerMs: number
-) {
-  // Dynamically calculate marker interval based on scale
-  const optimalMarkerCount = 5; // Target number of markers
-  const timeSpan = maxTime - minTime;
-  const markerInterval = Math.ceil(timeSpan / optimalMarkerCount / 100) * 100; // Round to nearest 100ms
-
-  const timeMarkers = [];
-  for (let time = minTime; time <= maxTime; time += markerInterval) {
-    timeMarkers.push(time);
-  }
-
-  const markerY = 20;
-  ctx.font = "12px Inter, system-ui, sans-serif";
-  ctx.fillStyle = "#64748b";
-  ctx.strokeStyle = "#e2e8f0";
-  ctx.lineWidth = 1;
-
-  timeMarkers.forEach((time) => {
-    const x = (time - minTime) * pixelsPerMs;
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, height);
-    ctx.stroke();
-    ctx.fillText(`${time} ms`, x + 5, markerY);
-  });
-}
-
-function drawTimelineItems(
-  ctx: CanvasRenderingContext2D,
-  items: TimelineItem[],
-  sections: TimelineSection[],
-  minTime: number,
-  hoveredItem: TimelineItem | null,
-  hoveredSection: string | null,
-  pixelsPerMs: number,
-  colors: Record<string, string>
-) {
-  let currentY = TIMELINE_CONSTANTS.INITIAL_Y;
-  const sectionItems = getItemsGroupedBySection(items, sections);
-  const MINIMUM_BAR_WIDTH = 4; // Ensure bars are always at least 6px wide
-
-  sections.forEach((section) => {
-    const sectionColor = colors[section.id] || "black";
-
-    sectionItems[section.id].forEach((item) => {
-      const startX = (item.startTime - minTime) * pixelsPerMs;
-      const endX = (item.endTime - minTime) * pixelsPerMs;
-      // Ensure the bar has a minimum width to be visible
-      const itemWidth = Math.max(MINIMUM_BAR_WIDTH, endX - startX);
-
-      // Check if this row is hovered (either the item or its section)
-      const isRowHovered =
-        hoveredItem?.id === item.id || hoveredSection === item.section;
-
-      // Draw row highlight if hovered
-      if (isRowHovered) {
-        ctx.fillStyle = "rgba(229, 231, 235, 0.5)"; // Light grey with transparency
-        ctx.fillRect(
-          0, // Start from left edge
-          currentY - 1, // Slightly above the bar
-          ctx.canvas.width, // Span the entire width
-          TIMELINE_CONSTANTS.BAR_HEIGHT + 2 // Slightly taller than the bar
-        );
-      }
-
-      // Draw the actual bar
-      ctx.fillStyle = isRowHovered
-        ? lightenColor(sectionColor, 0.3) // More pronounced lightening when hovered
-        : sectionColor;
-
-      ctx.beginPath();
-      ctx.roundRect(
-        startX,
-        currentY,
-        itemWidth,
-        TIMELINE_CONSTANTS.BAR_HEIGHT,
-        3 // Slightly smaller corner radius
-      );
-      ctx.fill();
-
-      // Add border to make small bars more visible
-      if (itemWidth < 10) {
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
-        ctx.lineWidth = 0.5;
-        ctx.stroke();
-      }
-
-      if (item.status === "error") {
-        drawErrorIndicator(
-          ctx,
-          Math.max(endX, startX + MINIMUM_BAR_WIDTH),
-          currentY
-        );
-      }
-
-      // Only draw label if there's enough space - with min width reduced
-      if (itemWidth > 30 && item.label) {
-        drawItemLabel(ctx, item.label, startX, currentY, itemWidth);
-      }
-
-      currentY +=
-        TIMELINE_CONSTANTS.BAR_HEIGHT + TIMELINE_CONSTANTS.BAR_SPACING;
-    });
-
-    currentY += TIMELINE_CONSTANTS.SECTION_SPACING;
-  });
-}
-
-function drawErrorIndicator(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number
-) {
-  ctx.fillStyle = "#ef4444";
-  ctx.beginPath();
-  ctx.arc(x - 8, y + TIMELINE_CONSTANTS.BAR_HEIGHT / 2, 6, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 10px Inter, system-ui, sans-serif";
-  ctx.fillText("×", x - 10.5, y + TIMELINE_CONSTANTS.BAR_HEIGHT / 2 + 3);
-}
-
-function drawItemLabel(
-  ctx: CanvasRenderingContext2D,
-  label: string,
-  x: number,
-  y: number,
-  width: number
-) {
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "10px Inter, system-ui, sans-serif"; // Slightly smaller font
-
-  // Adapt label length to available width
-  let displayLabel = label;
-  if (width < 100 && label.length > 10) {
-    displayLabel = label.substring(0, 8) + "...";
-  } else if (width < 200 && label.length > 15) {
-    displayLabel = label.substring(0, 13) + "...";
-  }
-
-  ctx.fillText(
-    displayLabel,
-    x + 4, // Less padding
-    y + TIMELINE_CONSTANTS.BAR_HEIGHT / 2 + 3
-  );
-}
-
-// Event handler factories
-function createMouseMoveHandler(
-  canvas: HTMLCanvasElement,
-  scrollContainer: HTMLDivElement | null,
-  sections: TimelineSection[],
-  items: TimelineItem[],
-  setHoveredItem: (item: TimelineItem | null) => void,
-  setHoveredSection: (section: string | null) => void,
-  setTooltipPosition: (position: TooltipPosition) => void,
-  setShowTooltip: (show: boolean) => void
-) {
-  return (e: MouseEvent) => {
-    if (!scrollContainer) return;
-
-    const canvasRect = canvas.getBoundingClientRect();
-    const y = e.clientY - canvasRect.top;
-
-    // Improved item detection that's more forgiving with vertical position
-    const extendedRowHeight =
-      TIMELINE_CONSTANTS.BAR_HEIGHT + TIMELINE_CONSTANTS.BAR_SPACING;
-
-    let foundItem = null;
-    let foundSection = null;
-    let currentY = TIMELINE_CONSTANTS.INITIAL_Y;
-
-    // Group items by section
-
-    // Find the hovered section and item based on Y position
-    sections.forEach((section) => {
-      const sectionStartY = currentY;
-      const sectionItems = items.filter((item) => item.section === section.id);
-      const sectionHeight = sectionItems.length * extendedRowHeight;
-
-      // If cursor is within this section's Y-range
-      if (y >= sectionStartY && y < sectionStartY + sectionHeight) {
-        foundSection = section.id;
-
-        // Calculate which row within the section is being hovered
-        const rowIndex = Math.floor((y - sectionStartY) / extendedRowHeight);
-        if (rowIndex >= 0 && rowIndex < sectionItems.length) {
-          foundItem = sectionItems[rowIndex];
-        }
-      }
-
-      currentY += sectionHeight + TIMELINE_CONSTANTS.SECTION_SPACING;
-    });
-
-    setHoveredItem(foundItem);
-    setHoveredSection(foundSection);
-    setTooltipPosition({
-      x: e.clientX,
-      y: e.clientY,
-    });
-    setShowTooltip(!!foundItem);
-  };
-}
-
-function createMouseLeaveHandler(
-  setHoveredItem: (item: TimelineItem | null) => void,
-  setHoveredSection: (section: string | null) => void,
-  setShowTooltip: (show: boolean) => void
-) {
-  return () => {
-    setHoveredItem(null);
-    setHoveredSection(null);
-    setShowTooltip(false);
-  };
-}
-
 export default function PerformanceTimeline({
   data,
   onItemClick,
@@ -305,7 +50,6 @@ export default function PerformanceTimeline({
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [hoveredItem, setHoveredItem] = useState<TimelineItem | null>(null);
-  const [hoveredSection, setHoveredSection] = useState<string | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState<TooltipPosition>({
     x: 0,
     y: 0,
@@ -485,16 +229,19 @@ export default function PerformanceTimeline({
     // Use the current pixelsPerMs value
     const pixelsPerMs = pixelsPerMsRef.current;
 
-    // Set canvas dimensions
-    const dpr = window.devicePixelRatio || 1;
-    const height = TIMELINE_CONSTANTS.HEIGHT;
+    // Calculate dimensions using the new function
+    const [totalWidth, height] = calculateCanvasDimensions(
+      timeSpan,
+      pixelsPerMs,
+      items,
+      sections
+    );
 
-    // Calculate total width based on time span and current scale
-    const totalWidth =
-      timeSpan * pixelsPerMs + TIMELINE_CONSTANTS.PADDING_RIGHT;
+    // Store the width for later use
     canvasWidthRef.current = totalWidth;
 
     // Set both the canvas buffer size and display size
+    const dpr = window.devicePixelRatio || 1;
     canvas.width = totalWidth * dpr;
     canvas.height = height * dpr;
     canvas.style.width = `${totalWidth}px`;
@@ -514,7 +261,6 @@ export default function PerformanceTimeline({
       sections,
       minTime,
       hoveredItem,
-      hoveredSection,
       pixelsPerMs,
       colors
     );
@@ -528,7 +274,6 @@ export default function PerformanceTimeline({
     items,
     sections,
     hoveredItem,
-    hoveredSection,
     colors,
     updateMinimap,
   ]);
@@ -553,14 +298,12 @@ export default function PerformanceTimeline({
       sections,
       items,
       setHoveredItem,
-      setHoveredSection,
       setTooltipPosition,
       setShowTooltip
     );
 
     const handleMouseLeave = createMouseLeaveHandler(
       setHoveredItem,
-      setHoveredSection,
       setShowTooltip
     );
 
@@ -702,7 +445,6 @@ export default function PerformanceTimeline({
         <div
           ref={scrollContainerRef}
           className="overflow-x-auto overflow-y-auto max-h-[500px] w-full scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
-          style={{ height: `${TIMELINE_CONSTANTS.HEIGHT}px` }}
         >
           <canvas ref={canvasRef} className="cursor-pointer" />
         </div>
@@ -776,4 +518,281 @@ export default function PerformanceTimeline({
       </div>
     </div>
   );
+}
+
+// Helper functions
+function lightenColor(color: string, amount: number): string {
+  // Convert hex to RGB
+  let r = Number.parseInt(color.slice(1, 3), 16);
+  let g = Number.parseInt(color.slice(3, 5), 16);
+  let b = Number.parseInt(color.slice(5, 7), 16);
+
+  // Lighten
+  r = Math.min(255, Math.round(r + (255 - r) * amount));
+  g = Math.min(255, Math.round(g + (255 - g) * amount));
+  b = Math.min(255, Math.round(b + (255 - b) * amount));
+
+  // Convert back to hex
+  return `#${r.toString(16).padStart(2, "0")}${g
+    .toString(16)
+    .padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+}
+
+function getItemsGroupedBySection(
+  items: TimelineItem[],
+  sections: TimelineSection[]
+) {
+  const sectionItems: Record<string, TimelineItem[]> = {};
+  sections.forEach((section) => {
+    sectionItems[section.id] = items.filter(
+      (item) => item.section === section.id
+    );
+  });
+  return sectionItems;
+}
+
+// Canvas drawing timeline markers with lines
+function drawTimeMarkers(
+  ctx: CanvasRenderingContext2D,
+  minTime: number,
+  maxTime: number,
+  height: number,
+  pixelsPerMs: number
+) {
+  // Dynamically calculate marker interval based on scale
+  const optimalMarkerCount = 5; // Target number of markers
+  const timeSpan = maxTime - minTime;
+  const markerInterval = Math.ceil(timeSpan / optimalMarkerCount / 100) * 100; // Round to nearest 100ms
+
+  const timeMarkers = [];
+  for (let time = minTime; time <= maxTime; time += markerInterval) {
+    timeMarkers.push(time);
+  }
+
+  const markerY = 20;
+  ctx.font = "12px Inter, system-ui, sans-serif";
+  ctx.fillStyle = "#64748b";
+  ctx.strokeStyle = "#e2e8f0";
+  ctx.lineWidth = 1;
+
+  timeMarkers.forEach((time) => {
+    const x = (time - minTime) * pixelsPerMs;
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, height);
+    ctx.stroke();
+    ctx.fillText(`${time} ms`, x + 5, markerY);
+  });
+}
+
+function drawTimelineItems(
+  ctx: CanvasRenderingContext2D,
+  items: TimelineItem[],
+  sections: TimelineSection[],
+  minTime: number,
+  hoveredItem: TimelineItem | null,
+  pixelsPerMs: number,
+  colors: Record<string, string>
+) {
+  let currentY = TIMELINE_CONSTANTS.INITIAL_Y;
+  const sectionItems = getItemsGroupedBySection(items, sections);
+  const MINIMUM_BAR_WIDTH = 4; // Ensure bars are always at least 6px wide
+
+  sections.forEach((section) => {
+    const sectionColor = colors[section.id] || "black";
+
+    sectionItems[section.id].forEach((item) => {
+      const startX = (item.startTime - minTime) * pixelsPerMs;
+      const endX = (item.endTime - minTime) * pixelsPerMs;
+      // Ensure the bar has a minimum width to be visible
+      const itemWidth = Math.max(MINIMUM_BAR_WIDTH, endX - startX);
+
+      // Check if this row is hovered
+      const isRowHovered = hoveredItem?.id === item.id;
+
+      // Draw row highlight if hovered
+      if (isRowHovered) {
+        ctx.fillStyle = "rgba(229, 231, 235, 0.5)"; // Light grey with transparency
+        ctx.fillRect(
+          0, // Start from left edge
+          currentY - 1, // Slightly above the bar
+          ctx.canvas.width, // Span the entire width
+          TIMELINE_CONSTANTS.BAR_HEIGHT + 2 // Slightly taller than the bar
+        );
+      }
+
+      // Draw the actual bar
+      ctx.fillStyle = isRowHovered
+        ? lightenColor(sectionColor, 0.3) // More pronounced lightening when hovered
+        : sectionColor;
+
+      ctx.beginPath();
+      ctx.roundRect(
+        startX,
+        currentY,
+        itemWidth,
+        TIMELINE_CONSTANTS.BAR_HEIGHT,
+        3 // Slightly smaller corner radius
+      );
+      ctx.fill();
+
+      // Add border to make small bars more visible
+      if (itemWidth < 10) {
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+
+      if (item.status === "error") {
+        drawErrorIndicator(
+          ctx,
+          Math.max(endX, startX + MINIMUM_BAR_WIDTH),
+          currentY
+        );
+      }
+
+      // Only draw label if there's enough space - with min width reduced
+      if (itemWidth > 30 && item.label) {
+        drawItemLabel(ctx, item.label, startX, currentY, itemWidth);
+      }
+
+      currentY +=
+        TIMELINE_CONSTANTS.BAR_HEIGHT + TIMELINE_CONSTANTS.BAR_SPACING;
+    });
+
+    currentY += TIMELINE_CONSTANTS.SECTION_SPACING;
+  });
+}
+
+function drawErrorIndicator(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number
+) {
+  ctx.fillStyle = "#ef4444";
+  ctx.beginPath();
+  ctx.arc(x - 8, y + TIMELINE_CONSTANTS.BAR_HEIGHT / 2, 6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 10px Inter, system-ui, sans-serif";
+  ctx.fillText("×", x - 10.5, y + TIMELINE_CONSTANTS.BAR_HEIGHT / 2 + 3);
+}
+
+function drawItemLabel(
+  ctx: CanvasRenderingContext2D,
+  label: string,
+  x: number,
+  y: number,
+  width: number
+) {
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "10px Inter, system-ui, sans-serif"; // Slightly smaller font
+
+  // Adapt label length to available width
+  let displayLabel = label;
+  if (width < 100 && label.length > 10) {
+    displayLabel = label.substring(0, 8) + "...";
+  } else if (width < 200 && label.length > 15) {
+    displayLabel = label.substring(0, 13) + "...";
+  }
+
+  ctx.fillText(
+    displayLabel,
+    x + 4, // Less padding
+    y + TIMELINE_CONSTANTS.BAR_HEIGHT / 2 + 3
+  );
+}
+
+// Event handler factories
+function createMouseMoveHandler(
+  canvas: HTMLCanvasElement,
+  scrollContainer: HTMLDivElement | null,
+  sections: TimelineSection[],
+  items: TimelineItem[],
+  setHoveredItem: (item: TimelineItem | null) => void,
+  setTooltipPosition: (position: TooltipPosition) => void,
+  setShowTooltip: (show: boolean) => void
+) {
+  return (e: MouseEvent) => {
+    if (!scrollContainer) return;
+
+    const canvasRect = canvas.getBoundingClientRect();
+    const y = e.clientY - canvasRect.top;
+
+    // Improved item detection that's more forgiving with vertical position
+    const extendedRowHeight =
+      TIMELINE_CONSTANTS.BAR_HEIGHT + TIMELINE_CONSTANTS.BAR_SPACING;
+
+    let foundItem = null;
+    let currentY = TIMELINE_CONSTANTS.INITIAL_Y;
+
+    // Find the hovered item based on Y position
+    sections.forEach((section) => {
+      const sectionStartY = currentY;
+      const sectionItems = items.filter((item) => item.section === section.id);
+      const sectionHeight = sectionItems.length * extendedRowHeight;
+
+      // If cursor is within this section's Y-range
+      if (y >= sectionStartY && y < sectionStartY + sectionHeight) {
+        // Calculate which row within the section is being hovered
+        const rowIndex = Math.floor((y - sectionStartY) / extendedRowHeight);
+        if (rowIndex >= 0 && rowIndex < sectionItems.length) {
+          foundItem = sectionItems[rowIndex];
+        }
+      }
+
+      currentY += sectionHeight + TIMELINE_CONSTANTS.SECTION_SPACING;
+    });
+
+    setHoveredItem(foundItem);
+    setTooltipPosition({
+      x: e.clientX,
+      y: e.clientY,
+    });
+    setShowTooltip(!!foundItem);
+  };
+}
+
+function createMouseLeaveHandler(
+  setHoveredItem: (item: TimelineItem | null) => void,
+  setShowTooltip: (show: boolean) => void
+) {
+  return () => {
+    setHoveredItem(null);
+    setShowTooltip(false);
+  };
+}
+
+// Create a new function to calculate dimensions
+function calculateCanvasDimensions(
+  timeSpan: number,
+  pixelsPerMs: number,
+  items: TimelineItem[],
+  sections: TimelineSection[]
+): [number, number] {
+  // Calculate width
+  const totalWidth = timeSpan * pixelsPerMs + TIMELINE_CONSTANTS.PADDING_RIGHT;
+
+  // Calculate height
+  let totalHeight = TIMELINE_CONSTANTS.INITIAL_Y;
+  const sectionItems = getItemsGroupedBySection(items, sections);
+
+  sections.forEach((section) => {
+    const itemsCount = sectionItems[section.id].length;
+    totalHeight +=
+      itemsCount *
+      (TIMELINE_CONSTANTS.BAR_HEIGHT + TIMELINE_CONSTANTS.BAR_SPACING);
+
+    if (itemsCount > 0) {
+      totalHeight += TIMELINE_CONSTANTS.SECTION_SPACING;
+    }
+  });
+
+  // Add padding at the bottom
+  totalHeight += 40;
+
+  // Ensure minimum height
+  const finalHeight = Math.max(totalHeight, 400);
+
+  return [totalWidth, finalHeight];
 }

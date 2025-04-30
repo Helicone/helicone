@@ -129,7 +129,7 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
     onToggleAllRows,
   } = props;
 
-  const [expanded, setExpanded] = React.useState<ExpandedState>({});
+  const [expanded, setExpanded] = React.useState<ExpandedState>(true);
 
   const table = useReactTable({
     data: defaultData,
