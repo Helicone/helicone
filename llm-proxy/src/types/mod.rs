@@ -1,3 +1,4 @@
+pub mod body;
 pub mod discover;
 pub mod json;
 pub mod model;

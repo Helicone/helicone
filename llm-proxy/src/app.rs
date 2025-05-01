@@ -246,7 +246,6 @@ impl App {
             .layer(AsyncRequireAuthorizationLayer::new(AuthService))
             .map_err(crate::error::internal::InternalError::BufferError)
             .layer(BufferLayer::new(BUFFER_SIZE))
-            .layer(ErrorHandlerLayer)
             .service(router);
 
         let app = Self {
