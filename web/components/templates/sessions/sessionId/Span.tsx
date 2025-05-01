@@ -3,7 +3,14 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Clock4Icon } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  MutableRefObject,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { PiSplitHorizontalBold } from "react-icons/pi";
 import {
   Bar,
@@ -20,6 +27,7 @@ import {
 import { Session, Trace } from "../../../../lib/sessions/sessionTypes";
 import { Col } from "../../../layout/common/col";
 import { ColorContext } from "./SessionContent";
+import { useLocalStorage } from "@/services/hooks/localStorage";
 
 const ROUNDED_RADIUS = 1;
 const BAR_SIZE = 25; // Increased from 30 to 50
@@ -37,10 +45,12 @@ export const TraceSpan = ({
   selectedRequestIdDispatch,
   isOriginalRealtime,
   onHighlighterChange,
+  drawerRef,
 }: {
   session: Session;
   selectedRequestIdDispatch: [string, (x: string) => void];
   isOriginalRealtime?: boolean;
+  drawerRef: MutableRefObject<any>;
   onHighlighterChange?: (
     start: number | null,
     end: number | null,
@@ -50,6 +60,7 @@ export const TraceSpan = ({
   const [selectedRequestId, setSelectedRequestId] = selectedRequestIdDispatch;
   const { theme } = useTheme();
   const { colors } = useContext(ColorContext);
+  const [drawerSize] = useLocalStorage("session-request-drawer-size", 0);
 
   // Highlighter state
   const [highlighterActive, setHighlighterActive] = useState(false);
@@ -662,7 +673,6 @@ export const TraceSpan = ({
                       onClick={() => {
                         if (highlighterActive) return;
                         setSelectedRequestId(entry.request_id);
-
                         // Notify parent about the selected message range
                         if (onHighlighterChange && index !== undefined) {
                           onHighlighterChange(index, index, false);
@@ -708,6 +718,12 @@ export const TraceSpan = ({
                     onClick={() => {
                       if (highlighterActive) return;
                       setSelectedRequestId(entry.request_id);
+                      drawerRef.current?.expand();
+                      if (drawerSize === 0) {
+                        drawerRef.current?.resize(33);
+                      } else {
+                        drawerRef.current?.resize(drawerSize);
+                      }
 
                       if (onHighlighterChange) {
                         onHighlighterChange(index, index, false);

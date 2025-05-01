@@ -206,13 +206,10 @@ export const SessionContent: React.FC<SessionContentProps> = ({
   }, [requests.requests.requests]);
 
   useEffect(() => {
-    console.log("session", session);
     const treeData = tracesToTreeNodeData(session.traces);
-    console.log(treeData);
     setColors(
       getAllPathColors(treeData, {}, null, treeData.children?.length ?? 0)
     );
-    console.log("colors", colors);
   }, [session]);
 
   return (
