@@ -14,22 +14,6 @@ export class SQSProducerImpl implements MessageProducer {
       !env.AWS_SECRET_ACCESS_KEY ||
       !env.REQUEST_LOGS_QUEUE_URL
     ) {
-      if (!env.AWS_REGION) {
-        console.log("AWS_REGION is not set, using eu-west-1");
-        // env.AWS_REGION = "eu-west-1";
-      }
-      if (!env.AWS_ACCESS_KEY_ID) {
-        console.log("AWS_ACCESS_KEY_ID is not set, using eu-west-1");
-        // env.AWS_ACCESS_KEY_ID = "eu-west-1";
-      }
-      if (!env.AWS_SECRET_ACCESS_KEY) {
-        console.log("AWS_SECRET_ACCESS_KEY is not set, using eu-west-1");
-        // env.AWS_SECRET_ACCESS_KEY = "eu-west-1";
-      }
-      if (!env.REQUEST_LOGS_QUEUE_URL) {
-        console.log("REQUEST_LOGS_QUEUE_URL is not set, using eu-west-1");
-        // env.REQUEST_LOGS_QUEUE_URL = "eu-west-1";
-      }
       throw new Error(
         "Required AWS SQS environment variables are not set, SQSProducer will not be initialized."
       );
@@ -58,10 +42,8 @@ export class SQSProducerImpl implements MessageProducer {
           MessageBody: JSON.stringify(msg),
         });
 
-        const response = await this.sqs.send(command);
-        console.log(
-          `Message sent to SQS, response: ${JSON.stringify(response)}`
-        );
+        await this.sqs.send(command);
+
         return ok(null);
       } catch (error: any) {
         console.log(`SQS attempt ${attempts + 1} failed: ${error.message}`);

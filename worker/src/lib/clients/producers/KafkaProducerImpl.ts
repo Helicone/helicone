@@ -36,14 +36,9 @@ export class KafkaProducerImpl implements MessageProducer {
           value: JSON.stringify(msg),
         });
 
-        const res = await producer.produce(
-          "request-response-logs-prod",
-          message,
-          {
-            key: msg.log.request.id,
-          }
-        );
-        console.log(`Produced message, response: ${JSON.stringify(res)}`);
+        await producer.produce("request-response-logs-prod", message, {
+          key: msg.log.request.id,
+        });
 
         return ok(null);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
