@@ -1,6 +1,7 @@
 import { SendMessageCommand, SQSClient } from "@aws-sdk/client-sqs";
 import { Env } from "../../..";
 import { MessageData, MessageProducer } from "./types";
+import { Result, err, ok } from "../../util/results";
 
 export class SQSProducerImpl implements MessageProducer {
   private sqs: SQSClient;
@@ -45,7 +46,7 @@ export class SQSProducerImpl implements MessageProducer {
     this.queueUrl = env.REQUEST_LOGS_QUEUE_URL;
   }
 
-  async sendMessage(msg: MessageData) {
+  async sendMessage(msg: MessageData): Promise<Result<null, string>> {
     let attempts = 0;
     const maxAttempts = 3;
     const timeout = 1000;
@@ -61,16 +62,18 @@ export class SQSProducerImpl implements MessageProducer {
         console.log(
           `Message sent to SQS, response: ${JSON.stringify(response)}`
         );
-        return;
+        return ok(null);
       } catch (error: any) {
         console.log(`SQS attempt ${attempts + 1} failed: ${error.message}`);
         attempts++;
         if (attempts < maxAttempts) {
           await new Promise((resolve) => setTimeout(resolve, timeout));
         } else {
-          throw new Error(`Failed to send message to SQS: ${error.message}`);
+          console.error(`Failed to send message to SQS: ${error.message}`);
+          return err(`Failed to send message to SQS: ${error.message}`);
         }
       }
     }
+    return err(`Failed to send message to SQS`);
   }
 }

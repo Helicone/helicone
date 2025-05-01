@@ -1,8 +1,9 @@
 import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 import { Provider } from "../../..";
+import { Result } from "../../util/results";
 
 export interface MessageProducer {
-  sendMessage(msg: MessageData): Promise<void>;
+  sendMessage(msg: MessageData): Promise<Result<null, string>>;
 }
 
 export type HeliconeMeta = {

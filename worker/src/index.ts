@@ -14,7 +14,7 @@ import { ReportStore } from "./lib/db/ReportStore";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
-export type Provider = ProviderName | "CUSTOM";
+export type Provider = ProviderName | "CUSTOM" | "VAPI";
 
 export interface EU_Env {
   EU_CLICKHOUSE_HOST: string;

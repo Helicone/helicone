@@ -1,6 +1,7 @@
 import { Kafka } from "@upstash/kafka";
 import { Env } from "../../..";
 import { MessageData, MessageProducer } from "./types";
+import { err, ok, Result } from "../../util/results";
 
 export class KafkaProducerImpl implements MessageProducer {
   private kafka: Kafka;
@@ -22,7 +23,7 @@ export class KafkaProducerImpl implements MessageProducer {
     });
   }
 
-  async sendMessage(msg: MessageData) {
+  async sendMessage(msg: MessageData): Promise<Result<null, string>> {
     const producer = this.kafka.producer();
 
     let attempts = 0;
@@ -43,8 +44,8 @@ export class KafkaProducerImpl implements MessageProducer {
           }
         );
         console.log(`Produced message, response: ${JSON.stringify(res)}`);
-        return;
 
+        return ok(null);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         console.log(`Attempt ${attempts + 1} failed: ${error.message}`);
@@ -52,9 +53,10 @@ export class KafkaProducerImpl implements MessageProducer {
         if (attempts < maxAttempts) {
           await new Promise((resolve) => setTimeout(resolve, timeout));
         } else {
-          console.error(`Failed to produce message: ${error.message}`);
+          return err(`Failed to produce message: ${error.message}`);
         }
       }
     }
+    return err(`Failed to produce message`);
   }
 }
