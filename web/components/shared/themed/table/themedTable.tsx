@@ -19,8 +19,7 @@ import {
 } from "@tanstack/react-table";
 import { ChevronDown, ChevronRight, ChevronsUpDown } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { Result } from "../../../../packages/common/result";
 import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
@@ -110,40 +109,24 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
   props: ThemedTableProps<T>
 ) {
   const {
-    id,
     defaultData,
     defaultColumns,
     skeletonLoading,
     dataLoading,
     activeColumns,
-    setActiveColumns,
-    advancedFilters,
-    exportData,
-    timeFilter,
     sortable,
     onRowSelect,
-    hideHeader,
     noDataCTA,
-    onDataSet: onDataSet,
-    savedFilters,
     highlightedIds: checkedIds,
     checkboxMode = "never",
-    customButtons,
     children,
     onSelectAll,
     selectedIds,
-    selectedRows,
     fullWidth = false,
-    isDatasetsPage,
-    search,
     rowLink,
     tableRef,
     onToggleAllRows,
   } = props;
-
-  const [internalExpanded, setInternalExpanded] = React.useState<ExpandedState>(
-    {}
-  );
 
   const [expanded, setExpanded] = React.useState<ExpandedState>({});
 
@@ -212,21 +195,6 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
     onRowSelect?.(row, index, event);
   };
 
-  const [isPanelVisible, setIsPanelVisible] = useState(false);
-
-  const sessionData = useMemo(() => {
-    if (rows.length === 0) {
-      return undefined;
-    }
-    // @ts-ignore - Assume customProperties exists for this specific use case
-    const sessionId = rows[0].original?.customProperties?.[
-      "Helicone-Session-Id"
-    ] as string | undefined;
-    return { sessionId };
-  }, [rows]);
-
-  const router = useRouter();
-
   return (
     <ScrollArea className="h-full w-full sentry-mask-me" orientation="both">
       {children && <div className="flex-shrink-0">{children}</div>}
@@ -263,7 +231,7 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                 >
                   {checkboxMode !== "never" && (
                     <th>
-                      <div className="flex justify-center items-center h-full">
+                      <div className="flex justify-center items-center h-full ml-2">
                         <Checkbox
                           variant="helicone"
                           onCheckedChange={handleSelectAll}

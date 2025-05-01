@@ -28,8 +28,7 @@ import {
 } from "../../../../shared/themed/table/columns/DragList";
 import RequestDrawer from "../../../requests/RequestDrawer";
 import StatusBadge from "../../../requests/statusBadge";
-import { TimelineItem, TimelineSection } from "../lib/types";
-import TimelineTable from "../Timeline/timelineTable";
+import SessionTimelineTable from "../Timeline/SessionTimelineTable";
 import { TraceSpan } from "../Span";
 
 // Define TableTreeNode to hold all necessary display properties
@@ -56,10 +55,6 @@ function convertToTableData(node: TreeNodeData, level = 0): TableTreeNode {
   const id = trace?.request_id ?? `group-${node.name}-${level}`;
 
   // Extract data directly from the trace object
-  const latency =
-    trace?.end_unix_timestamp_ms && trace?.start_unix_timestamp_ms
-      ? trace.end_unix_timestamp_ms - trace.start_unix_timestamp_ms
-      : undefined;
 
   const tableNode: TableTreeNode = {
     id: id,
@@ -70,7 +65,7 @@ function convertToTableData(node: TreeNodeData, level = 0): TableTreeNode {
     createdAt: trace?.start_unix_timestamp_ms,
     model: trace?.request.model ?? undefined,
     cost: trace?.request.heliconeMetadata?.cost,
-    latency: latency,
+    latency: node.latency,
     feedback: trace?.request.heliconeMetadata?.feedback
       ? { rating: trace.request.heliconeMetadata.feedback.rating } // Map feedback structure
       : null,
@@ -232,7 +227,6 @@ const TreeView: React.FC<TreeViewProps> = ({
   session,
   selectedRequestId,
   setSelectedRequestId,
-  isOriginalRealtime,
 }) => {
   const treeData = useMemo(() => {
     return tracesToTreeNodeData(session.traces);
@@ -321,7 +315,7 @@ const TreeView: React.FC<TreeViewProps> = ({
             <ResizablePanel defaultSize={60} minSize={25}>
               <div className="h-full border-t border-slate-200 dark:border-slate-800 flex">
                 <div className="h-full w-full">
-                  <TimelineTable
+                  <SessionTimelineTable
                     id="session-requests-table"
                     defaultData={tableData}
                     defaultColumns={initialColumns}

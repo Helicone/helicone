@@ -224,7 +224,6 @@ const useGetRequests = (
       queryFn: async (query) => {
         const advancedFilter = query.queryKey[3];
         const isCached = query.queryKey[5];
-        console.log(advancedFilter, "advancedFilter");
         const processedFilter = processFilter(advancedFilter);
         return await fetch("/api/request/count", {
           method: "POST",

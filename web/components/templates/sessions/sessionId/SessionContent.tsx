@@ -36,30 +36,6 @@ export const ColorContext = createContext<ColorContextType>({
   colors: {},
 });
 
-function getAllPathColors(
-  treeData: TreeNodeData,
-  colors: ColorMap,
-  parentColor: string | null = null,
-  parentCount: number = 0
-): ColorMap {
-  // Skip if node has no children
-  if (!treeData.children?.length) return colors;
-
-  for (const child of treeData.children) {
-    if (parentColor === null) {
-      // For top-level nodes, generate a unique color
-      const randomColor = generateUniqueColor(colors);
-      colors[child.currentPath] = randomColor;
-      getAllPathColors(child, colors, randomColor);
-    } else {
-      // For nested nodes, inherit parent's color
-      colors[child.currentPath] = parentColor;
-      getAllPathColors(child, colors, parentColor);
-    }
-  }
-  return colors;
-}
-
 interface SessionContentProps {
   session: Session;
   session_id: string;
@@ -77,7 +53,7 @@ export const SessionContent: React.FC<SessionContentProps> = ({
   const router = useRouter();
   const [colors, setColors] = useState<ColorMap>({});
 
-  const { view, requestId } = router.query;
+  const { _, requestId } = router.query;
   const [selectedRequestId, setSelectedRequestId] = useState<string>(
     (requestId as string) || ""
   );
@@ -121,11 +97,11 @@ export const SessionContent: React.FC<SessionContentProps> = ({
     );
   }, [requests.requests.requests]);
   const sessionFeedbackValue = useMemo(() => {
-    return requestWithFeedback?.properties["Helicone-Session-Feedback"] === "1"
-      ? true
-      : requestWithFeedback?.properties["Helicone-Session-Feedback"] === "0"
-      ? false
-      : null;
+    const feedback =
+      requestWithFeedback?.properties["Helicone-Session-Feedback"];
+    if (feedback === "1") return true;
+    if (feedback === "0") return false;
+    return null;
   }, [requestWithFeedback]);
 
   // AGREGATED SESSION STATS (Derived from the processed session object)
@@ -207,9 +183,7 @@ export const SessionContent: React.FC<SessionContentProps> = ({
 
   useEffect(() => {
     const treeData = tracesToTreeNodeData(session.traces);
-    setColors(
-      getAllPathColors(treeData, {}, null, treeData.children?.length ?? 0)
-    );
+    setColors(getAllPathColors(treeData, {}, null));
   }, [session]);
 
   return (
@@ -303,20 +277,43 @@ export const SessionContent: React.FC<SessionContentProps> = ({
   );
 };
 
-function generateUniqueColor(
-  existingColors: ColorMap,
-  parentCount: number = 0
-): string {
+function getAllPathColors(
+  treeData: TreeNodeData,
+  colors: ColorMap,
+  parentColor: string | null = null
+): ColorMap {
+  // Skip if node has no children
+  if (!treeData.children?.length) return colors;
+
+  for (const child of treeData.children) {
+    if (parentColor === null) {
+      // For top-level nodes, generate a unique color
+      const randomColor = generateUniqueColor(colors);
+      colors[child.currentPath] = randomColor;
+      getAllPathColors(child, colors, randomColor);
+    } else {
+      // For nested nodes, inherit parent's color
+      colors[child.currentPath] = parentColor;
+      getAllPathColors(child, colors, parentColor);
+    }
+  }
+  return colors;
+}
+
+function generateUniqueColor(existingColors: ColorMap): string {
   // Get the count of existing colors to use as an index for deterministic generation
   const colorIndex = Object.keys(existingColors).length;
 
   const goldenRatioConjugate = 0.618033988749895;
 
-  let hue = ((colorIndex + parentCount * 0.1) * goldenRatioConjugate) % 1;
+  // Use only colorIndex for deterministic color generation
+  let hue = (colorIndex * goldenRatioConjugate) % 1;
 
   // Keep colors in the light spectrum
   const saturation = 0.7; // 70% saturation for vibrant but not overwhelming colors
-  const lightness = 0.8 - (parentCount * 0.05 > 0.3 ? 0.3 : parentCount * 0.05); // Adjust lightness based on depth
+
+  const depthFactor = Math.min(0.3, (colorIndex % 6) * 0.05);
+  const lightness = 0.8 - depthFactor; // Keep colors light but with some variation
 
   // Convert HSL to hex
   let r, g, b;

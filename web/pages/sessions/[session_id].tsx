@@ -15,7 +15,6 @@ const SessionDetail = ({ session_id }: { session_id: string }) => {
   }, []);
 
   const [isLive, setIsLive] = useState(false);
-
   const requestsHookResult = useGetRequests(
     1,
     1000,

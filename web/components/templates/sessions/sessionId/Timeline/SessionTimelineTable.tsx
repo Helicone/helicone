@@ -111,7 +111,9 @@ interface ThemedTableProps<TableTreeNode> {
   onToggleAllRows?: (table: ReactTable<TableTreeNode>) => void;
 }
 
-export default function TimelineTable(props: ThemedTableProps<TableTreeNode>) {
+export default function SessionTimelineTable(
+  props: ThemedTableProps<TableTreeNode>
+) {
   const {
     defaultData,
     defaultColumns,

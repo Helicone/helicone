@@ -480,6 +480,7 @@ export const TraceSpan = ({
 
     // Set the request ID
     setSelectedRequestId(clickedData.request_id);
+    openDrawer(drawerRef, drawerSize);
 
     // Notify parent about the selected message range
     if (onHighlighterChange) {
@@ -718,13 +719,6 @@ export const TraceSpan = ({
                     onClick={() => {
                       if (highlighterActive) return;
                       setSelectedRequestId(entry.request_id);
-                      drawerRef.current?.expand();
-                      if (drawerSize === 0) {
-                        drawerRef.current?.resize(33);
-                      } else {
-                        drawerRef.current?.resize(drawerSize);
-                      }
-
                       if (onHighlighterChange) {
                         onHighlighterChange(index, index, false);
                       }
@@ -840,3 +834,12 @@ export const TraceSpan = ({
     </div>
   );
 };
+
+function openDrawer(drawerRef: MutableRefObject<any>, drawerSize: number) {
+  drawerRef.current?.expand();
+  if (drawerSize === 0) {
+    drawerRef.current?.resize(33);
+  } else {
+    drawerRef.current?.resize(drawerSize);
+  }
+}
