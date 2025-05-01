@@ -1,5 +1,5 @@
 import { Env } from "../../..";
-import { DualWriteProducer } from "./DaulProducer";
+import { DualWriteProducer } from "./DualProducer";
 import { KafkaProducerImpl } from "./KafkaProducerImpl";
 import { SQSProducerImpl } from "./SQSProducer";
 import { MessageData, MessageProducer } from "./types";
@@ -58,7 +58,7 @@ export class HeliconeProducer {
       return;
     }
     console.log("Sending message to HeliconeProducer");
-    this.producer.sendMessage(msg);
+    return this.producer.sendMessage(msg);
   }
 
   async sendMessageHttp(msg: MessageData) {

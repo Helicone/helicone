@@ -61,6 +61,7 @@ export class SQSProducerImpl implements MessageProducer {
         console.log(
           `Message sent to SQS, response: ${JSON.stringify(response)}`
         );
+        return;
       } catch (error: any) {
         console.log(`SQS attempt ${attempts + 1} failed: ${error.message}`);
         attempts++;

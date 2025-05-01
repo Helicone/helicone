@@ -43,6 +43,7 @@ export class KafkaProducerImpl implements MessageProducer {
           }
         );
         console.log(`Produced message, response: ${JSON.stringify(res)}`);
+        return;
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
