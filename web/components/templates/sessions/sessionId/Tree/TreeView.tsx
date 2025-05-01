@@ -37,7 +37,7 @@ import ThemedTable from "../../../../shared/themed/table/themedTable";
 import RequestDrawer from "../../../requests/RequestDrawer";
 import StatusBadge from "../../../requests/statusBadge";
 import { TimelineItem, TimelineSection } from "../lib/types";
-import PerformanceTimeline from "../Timeline/PerformanceTimeLine";
+import PerformanceTimeline from "../Timeline/performanceTimeLine";
 
 // Define TableTreeNode to hold all necessary display properties
 export interface TableTreeNode {
@@ -468,7 +468,9 @@ const TreeView: React.FC<TreeViewProps> = ({
               >
                 <PerformanceTimeline
                   data={timelineData}
-                  onItemClick={setHighlightedItemId}
+                  onItemClick={(id) => {
+                    setSelectedRequestId(id);
+                  }}
                 />
               </ResizablePanel>
 
@@ -487,7 +489,7 @@ const TreeView: React.FC<TreeViewProps> = ({
                       dataLoading={false}
                       onRowSelect={onRowSelectHandler}
                       highlightedIds={
-                        highlightedItemId ? [highlightedItemId] : []
+                        selectedRequestId ? [selectedRequestId] : []
                       }
                       fullWidth={true}
                       checkboxMode="never"

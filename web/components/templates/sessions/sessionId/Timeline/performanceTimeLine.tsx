@@ -313,22 +313,21 @@ export default function PerformanceTimeline({
       setShowTooltip
     );
 
-    canvas.addEventListener("mousemove", handleMouseMove);
-    canvas.addEventListener("mouseleave", handleMouseLeave);
-    canvas.addEventListener("click", () => {
+    // Create a named function for the click handler so we can properly remove it
+    const handleClick = () => {
       if (hoveredItem && onItemClick) {
         onItemClick(hoveredItem.id);
       }
-    });
+    };
+
+    canvas.addEventListener("mousemove", handleMouseMove);
+    canvas.addEventListener("mouseleave", handleMouseLeave);
+    canvas.addEventListener("click", handleClick);
 
     return () => {
       canvas.removeEventListener("mousemove", handleMouseMove);
       canvas.removeEventListener("mouseleave", handleMouseLeave);
-      canvas.removeEventListener("click", () => {
-        if (hoveredItem && onItemClick) {
-          onItemClick(hoveredItem.id);
-        }
-      });
+      canvas.removeEventListener("click", handleClick);
     };
   }, [minTime, items, sections, hoveredItem, onItemClick]);
 
