@@ -18,7 +18,7 @@ const Log = () => {
             <h2 className="font-semibold text-4xl sm:text-5xl leading-[120%] max-w-[600px] text-wrap text-black">
               Trace and debug your agent with ease
             </h2>
-            <p className="text-lg max-w-[520px] text-muted-foreground leading-relaxed">
+            <p className="text-lg max-w-[520px] text-landing-description font-light leading-relaxed">
               Visualize your multi-step LLM interactions, log requests in
               real-time and pinpoint root cause of errors.
             </p>
@@ -27,6 +27,7 @@ const Log = () => {
                 <Button
                   variant="landing_primary"
                   size="landing_page"
+                  className="bg-brand p-5 text-base md:text-lg md:py-4 lg:py-6 lg:px-6 lg:text-md gap-2 rounded-lg items-center z-[10]"
                 >
                   Start tracing
                   <ArrowUpRight className="size-5 md:size-6" />

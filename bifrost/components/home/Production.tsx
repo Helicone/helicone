@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, ArrowUpRightIcon } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
 import { ISLAND_WIDTH } from "@/lib/utils";
@@ -19,7 +19,7 @@ const Production = () => {
             Turn complexity and abstraction{" "}
             <span className="text-brand">to actionable insights</span>
           </h2>
-          <p className="text-lg max-w-[520px] text-muted-foreground leading-relaxed">
+          <p className="text-lg max-w-[520px] text-landing-description font-light leading-relaxed">
             Unified insights across all providers to quickly detect
             hallucinations, abuse and performance issues.
           </p>

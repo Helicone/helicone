@@ -28,7 +28,7 @@ const buttonVariants = cva(
         icon: "h-9 w-9",
         sm_sleek: "h-6 rounded-md px-3 text-xs",
         md_sleek: "h-8 rounded-md px-3 text-xs",
-        landing_page: "h-10 rounded-lg px-5 text-base items-center gap-2",
+        landing_page: "h-10 sm:h-12 rounded-lg px-5 text-base items-center gap-2",
       },
     },
     defaultVariants: {

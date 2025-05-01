@@ -1,6 +1,6 @@
 import { ISLAND_WIDTH } from "@/lib/utils";
 import { cn } from "@/lib/utils";
-import { ChevronRight, ChevronRightIcon } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import LogoBox from "./LogoBox";
 import Link from "next/link";
 import Image from "next/image";

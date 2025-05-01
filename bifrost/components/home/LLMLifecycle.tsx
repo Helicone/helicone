@@ -1,7 +1,7 @@
 import { cn, ISLAND_WIDTH } from "@/lib/utils";
 import Link from "next/link";
 import { Button } from "../ui/button";
-import { ArrowUpRight, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 const floatingAnimation = "floating 3s ease-in-out infinite";
 const arrowAnimation = "dash 3s ease-in-out infinite";
@@ -2413,7 +2413,7 @@ const LLMLifecycle = () => {
             Designed for the{" "}
             <span className="text-brand">entire LLM lifecycle</span>
           </h2>
-          <p className="text-lg sm:text-xl max-w-[440px] text-wrap font-normal leading-relaxed text-muted-foreground">
+          <p className="text-lg sm:text-xl max-w-[440px] text-wrap font-light leading-relaxed text-landing-description">
             The CI workflow to take your LLM application from MVP to production,
             and from production to perfection.
           </p>

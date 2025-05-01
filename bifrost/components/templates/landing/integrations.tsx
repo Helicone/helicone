@@ -245,21 +245,6 @@ self.model = AzureChatOpenAI(
         href: "https://docs.helicone.ai/integrations/gemini/api/curl",
       },
       {
-        name: "Vercel AI SDK",
-        logo: (
-          <div className="p-3">
-            <Image
-              src={"/static/vercel.webp"}
-              alt={"Vercel AI"}
-              width={2048}
-              height={2048}
-            />
-          </div>
-        ),
-        integrations: {},
-        href: "https://docs.helicone.ai/getting-started/integration-method/vercelai",
-      },
-      {
         name: "OpenRouter",
         logo: (
           <div className="p-3">
@@ -292,6 +277,21 @@ self.model = AzureChatOpenAI(
           },
         },
         href: "https://docs.helicone.ai/getting-started/integration-method/openrouter",
+      },
+      {
+        name: "Vercel AI SDK",
+        logo: (
+          <div className="p-3">
+            <Image
+              src={"/static/vercel.webp"}
+              alt={"Vercel AI"}
+              width={2048}
+              height={2048}
+            />
+          </div>
+        ),
+        integrations: {},
+        href: "https://docs.helicone.ai/getting-started/integration-method/vercelai",
       },
       {
         name: "TogetherAI",
@@ -465,12 +465,11 @@ self.model = AzureChatOpenAI(
         </div>
         <Toaster />
       </div>
-      <div className="flex gap-2 items-center md:gap-4">
+      <div className="flex flex-col sm:flex-row gap-2 items-start md:gap-4">
         <Link href="/signup">
           <Button
             variant="landing_primary"
             size="landing_page"
-          // className="bg-brand p-5 text-base md:text-lg md:py-4 lg:py-6 lg:px-6 lg:text-md gap-2 rounded-lg items-center z-[10]"
           >
             Integrate today
             <ChevronRight className="size-5 md:size-6" />
@@ -478,9 +477,8 @@ self.model = AzureChatOpenAI(
         </Link>
         <Link href="https://docs.helicone.ai/getting-started/quick-start#quick-start" target="_blank" rel="noopener">
           <Button
-            variant="landing_ghost"
+            variant="ghost"
             size="landing_page"
-          // className="p-5 text-base md:text-lg md:py-4 lg:py-6 lg:px-6 lg:text-md gap-2 rounded-lg items-center z-[10]"
           >
             Other providers
             <ArrowUpRight className="size-4 md:size-6" />

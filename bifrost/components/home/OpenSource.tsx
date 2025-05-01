@@ -1,7 +1,7 @@
 import { ISLAND_WIDTH } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
-import { ArrowUpRightIcon } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 import ContributorsImg from "@/public/static/home/community.webp";
 import DeployImg from "@/public/static/deploy-cube.png";
@@ -251,7 +251,7 @@ const OpenSource = async () => {
             </p>
             <span className="text-brand text-base sm:text-lg font-medium flex items-center gap-1">
               Fork Helicone
-              <ArrowUpRightIcon className="w-4 h-4" />
+              <ArrowUpRight className="size-5 md:size-6" />
             </span>
           </div>
           <Image src={ContributorsImg} alt="Contributors" className="w-full" />
@@ -271,7 +271,7 @@ const OpenSource = async () => {
             </p>
             <span className="text-brand text-base sm:text-lg font-medium flex items-center gap-1">
               Get in touch
-              <ArrowUpRightIcon className="w-4 h-4" />
+              <ArrowUpRight className="w-4 h-4" />
             </span>
           </div>
           <Image
@@ -292,7 +292,7 @@ const OpenSource = async () => {
                 <h3 className="text-xl sm:text-2xl font-semibold text-black">
                   API Cost Calculator
                 </h3>
-                <ArrowUpRightIcon className="w-4 h-4 text-brand" />
+                <ArrowUpRight className="w-4 h-4 text-brand" />
               </div>
             </div>
             <p className="text-base sm:text-lg max-w-[486px] text-wrap">
@@ -317,7 +317,7 @@ const OpenSource = async () => {
               <h3 className="text-xl sm:text-2xl font-semibold text-black">
                 Open Stats
               </h3>
-              <ArrowUpRightIcon className="w-4 h-4 text-brand" />
+              <ArrowUpRight className="w-4 h-4 text-brand" />
             </div>
           </div>
           <p className="text-base sm:text-lg max-w-[380px] text-wrap">
