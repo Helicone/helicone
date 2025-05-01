@@ -1,7 +1,3 @@
-import {
-  ColorContext,
-  TableTreeNode,
-} from "@/components/templates/sessions/sessionId/Tree/TreeView";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -23,7 +19,8 @@ import {
 } from "@tanstack/react-table";
 import { ChevronDown, ChevronRight, ChevronsUpDown } from "lucide-react";
 import Link from "next/link";
-import React, { useContext, useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import React, { useEffect, useMemo, useState } from "react";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { Result } from "../../../../packages/common/result";
 import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
@@ -36,7 +33,7 @@ import DraggableColumnHeader from "./columns/draggableColumnHeader";
 
 type CheckboxMode = "always_visible" | "on_hover" | "never";
 
-interface ThemedTableProps<T extends TableTreeNode> {
+interface ThemedTableProps<T extends { id?: string; subRows?: T[] }> {
   id: string;
   defaultData: T[];
   defaultColumns: ColumnDef<T>[];
@@ -109,39 +106,46 @@ interface ThemedTableProps<T extends TableTreeNode> {
   onToggleAllRows?: (table: ReactTable<T>) => void;
 }
 
-export default function ThemedTable<TableTreeNode>(props: ThemedTableProps<T>) {
+export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
+  props: ThemedTableProps<T>
+) {
   const {
+    id,
     defaultData,
     defaultColumns,
     skeletonLoading,
     dataLoading,
     activeColumns,
+    setActiveColumns,
+    advancedFilters,
+    exportData,
+    timeFilter,
     sortable,
     onRowSelect,
+    hideHeader,
     noDataCTA,
+    onDataSet: onDataSet,
+    savedFilters,
     highlightedIds: checkedIds,
     checkboxMode = "never",
+    customButtons,
     children,
     onSelectAll,
     selectedIds,
+    selectedRows,
     fullWidth = false,
+    isDatasetsPage,
+    search,
     rowLink,
     tableRef,
     onToggleAllRows,
   } = props;
 
-  const [expanded, setExpanded] = React.useState<ExpandedState>(true);
+  const [internalExpanded, setInternalExpanded] = React.useState<ExpandedState>(
+    {}
+  );
 
-  const descendantErrorMap = useMemo(() => {
-    const map = new Map<string, boolean>();
-    defaultData.forEach((topLevelNode) => {
-      // Assuming TableTreeNode has an 'id' property
-      if (topLevelNode.id) {
-        map.set(topLevelNode.id, hasDescendant4xxError(topLevelNode, true));
-      }
-    });
-    return map;
-  }, [defaultData]); // Recalculate only when data changes
+  const [expanded, setExpanded] = React.useState<ExpandedState>({});
 
   const table = useReactTable({
     data: defaultData,
@@ -163,17 +167,29 @@ export default function ThemedTable<TableTreeNode>(props: ThemedTableProps<T>) {
 
   const rows = table.getRowModel().rows;
   const columns = table.getAllColumns();
-  const rowsById = Object.values(table.getRowModel().rowsById);
 
-  useEffect(() => {
-    console.log("all checkedIds", checkedIds);
-    rowsById.forEach((row) => {
-      if (checkedIds?.includes(row.original?.id ?? "")) {
-        console.log("checkedIds", row.original?.id, checkedIds);
-        expandRow(row);
+  const topLevelPathColorMap = useMemo(() => {
+    const chartColors = [
+      "bg-chart-1",
+      "bg-chart-2",
+      "bg-chart-3",
+      "bg-chart-4",
+      "bg-chart-5",
+    ];
+    const map: Record<string, string> = {};
+    let colorIndex = 0;
+
+    rows.forEach((row) => {
+      if (row.depth === 0) {
+        const path = (row.original as any)?.path as string;
+        if (path && !(path in map)) {
+          map[path] = chartColors[colorIndex % chartColors.length];
+          colorIndex++;
+        }
       }
     });
-  }, [checkedIds]);
+    return map;
+  }, [rows]);
 
   useEffect(() => {
     const columnVisibility: { [key: string]: boolean } = {};
@@ -192,15 +208,24 @@ export default function ThemedTable<TableTreeNode>(props: ThemedTableProps<T>) {
     onSelectAll?.(checked);
   };
 
-  const handleRowSelect = (
-    row: TableTreeNode,
-    index: number,
-    event: React.MouseEvent
-  ) => {
+  const handleRowSelect = (row: T, index: number, event: React.MouseEvent) => {
     onRowSelect?.(row, index, event);
   };
 
-  const { colors } = useContext(ColorContext);
+  const [isPanelVisible, setIsPanelVisible] = useState(false);
+
+  const sessionData = useMemo(() => {
+    if (rows.length === 0) {
+      return undefined;
+    }
+    // @ts-ignore - Assume customProperties exists for this specific use case
+    const sessionId = rows[0].original?.customProperties?.[
+      "Helicone-Session-Id"
+    ] as string | undefined;
+    return { sessionId };
+  }, [rows]);
+
+  const router = useRouter();
 
   return (
     <ScrollArea className="h-full w-full sentry-mask-me" orientation="both">
@@ -302,28 +327,19 @@ export default function ThemedTable<TableTreeNode>(props: ThemedTableProps<T>) {
                   className={clsx(
                     "group relative",
                     rowLink && "relative",
-                    // Determine background color based on selection state
-                    (() => {
-                      if (
-                        checkedIds?.includes(row.original?.id ?? "") ||
-                        selectedIds?.includes(row.original?.id ?? "")
-                      ) {
-                        return "!bg-sky-100 dark:!bg-slate-800/50";
-                      }
-
-                      const hoverClass =
-                        "hover:bg-sky-50 dark:hover:bg-slate-700/50";
-
-                      if (row.getCanExpand()) {
-                        return `${hoverClass} font-semibold cursor-pointer bg-muted`;
-                      } else if (row.depth > 0) {
-                        return `${hoverClass} bg-slate-50 dark:bg-slate-950/50`;
-                      } else {
-                        return `${hoverClass} bg-white dark:bg-black`;
-                      }
-                    })()
+                    checkedIds?.includes(row.original?.id ?? "") ||
+                      selectedIds?.includes(row.original?.id ?? "")
+                      ? "!bg-sky-100 dark:!bg-slate-800/50"
+                      : clsx(
+                          "hover:bg-sky-50 dark:hover:bg-slate-700/50",
+                          row.getCanExpand()
+                            ? "font-semibold cursor-pointer bg-muted"
+                            : row.depth > 0
+                            ? "bg-slate-50 dark:bg-slate-950/50"
+                            : "bg-white dark:bg-black"
+                        )
                   )}
-                  onClick={(e) => {
+                  onClick={(e: React.MouseEvent) => {
                     if (row.getCanExpand()) {
                       if (
                         e.target instanceof HTMLElement &&
@@ -367,21 +383,18 @@ export default function ThemedTable<TableTreeNode>(props: ThemedTableProps<T>) {
                     <td
                       key={cell.id}
                       className={clsx(
-                        "text-slate-700 dark:text-slate-300 truncate select-none",
-                        i === 0 ? "pr-2 relative" : "py-1",
-                        (() => {
-                          if (
-                            checkedIds?.includes(row.original?.id ?? "") ||
-                            selectedIds?.includes(row.original?.id ?? "") ||
-                            row.getCanExpand()
-                          ) {
-                            return "bg-inherit";
-                          } else if (row.depth > 0) {
-                            return "bg-slate-50 dark:bg-slate-950/50";
-                          } else {
-                            return "bg-white dark:bg-black";
-                          }
-                        })(),
+                        "py-3 text-slate-700 dark:text-slate-300 truncate select-none",
+                        i === 0 && "pr-2",
+                        i > 0 && "px-2",
+                        i === 0 && "relative",
+                        checkedIds?.includes(row.original?.id ?? "") ||
+                          selectedIds?.includes(row.original?.id ?? "")
+                          ? "bg-inherit"
+                          : row.getCanExpand()
+                          ? "bg-inherit"
+                          : row.depth > 0
+                          ? "bg-slate-50 dark:bg-slate-950/50"
+                          : "bg-white dark:bg-black",
                         i === row.getVisibleCells().length - 1 &&
                           "border-r border-border"
                       )}
@@ -390,7 +403,7 @@ export default function ThemedTable<TableTreeNode>(props: ThemedTableProps<T>) {
                       }}
                     >
                       <div
-                        className="flex items-center gap-1"
+                        className={clsx("flex items-center gap-1")}
                         style={
                           i === 0
                             ? {
@@ -400,25 +413,47 @@ export default function ThemedTable<TableTreeNode>(props: ThemedTableProps<T>) {
                                   (row.getCanExpand() ? 0 : 8)
                                 }px`,
                               }
-                            : undefined
+                            : {}
                         }
                       >
                         {i === 0 &&
                           (() => {
+                            const getAncestorPath = (
+                              currentRow: Row<T>
+                            ): string | undefined => {
+                              if (currentRow.depth === 0) {
+                                return (currentRow.original as any)
+                                  ?.path as string;
+                              }
+                              let currentParent = currentRow.getParentRow();
+                              while (currentParent && currentParent.depth > 0) {
+                                currentParent = currentParent.getParentRow();
+                              }
+                              return currentParent
+                                ? ((currentParent.original as any)
+                                    ?.path as string)
+                                : undefined;
+                            };
+
+                            const ancestorPath = getAncestorPath(row);
                             const groupColorClass =
-                              colors[row.original.currentPath] ||
+                              (ancestorPath &&
+                                topLevelPathColorMap[ancestorPath]) ||
                               "bg-transparent";
 
                             if (groupColorClass !== "bg-transparent") {
                               return (
                                 <div
-                                  className="absolute left-0 top-0 bottom-0 w-1 z-30"
-                                  style={{ backgroundColor: groupColorClass }}
+                                  className={clsx(
+                                    "absolute left-0 top-0 bottom-0 w-1 z-30",
+                                    groupColorClass
+                                  )}
                                 />
                               );
                             }
                             return null;
                           })()}
+
                         {i === 0 && row.getCanExpand() && (
                           <button
                             {...{
@@ -434,11 +469,6 @@ export default function ThemedTable<TableTreeNode>(props: ThemedTableProps<T>) {
                               <ChevronRight className="h-4 w-4 text-muted-foreground" />
                             )}
                           </button>
-                        )}
-                        {i === 0 && !row.getCanExpand() && (
-                          <span className="inline-block mr-1 px-2 py-1 bg-sky-200 text-blue-800 rounded text-xs whitespace-nowrap">
-                            {row.original?.name}
-                          </span>
                         )}
                         {dataLoading &&
                         (cell.column.id == "requestText" ||
@@ -461,15 +491,6 @@ export default function ThemedTable<TableTreeNode>(props: ThemedTableProps<T>) {
                             cell.getContext()
                           )
                         )}
-                        {i === 0 &&
-                          row.getParentRow() === undefined &&
-                          descendantErrorMap.get(row.original.id ?? "") ===
-                            true && (
-                            <span
-                              title="Contains descendant 4xx error"
-                              className="w-2 h-2 ml-2 rounded-full bg-red-600 shrink-0"
-                            />
-                          )}
                       </div>
                     </td>
                   ))}
@@ -514,42 +535,4 @@ export default function ThemedTable<TableTreeNode>(props: ThemedTableProps<T>) {
       </div>
     </ScrollArea>
   );
-}
-
-// Helper function to check for descendant 4xx errors
-// Assumes T extends TableTreeNode and has subRows & status
-function hasDescendant4xxError<T extends TableTreeNode>(
-  node: T,
-  isTopLevel: boolean
-): boolean {
-  // Use type assertion if subRows isn't directly on TableTreeNode but expected
-
-  if (!node.subRows || node.subRows.length === 0) {
-    // Base case: Check self only if not top-level
-    if (!isTopLevel) {
-      return false;
-    }
-  }
-
-  for (const child of node.subRows ?? []) {
-    const childStatus = child.status;
-    if (childStatus && childStatus >= 400) return true;
-
-    if (hasDescendant4xxError(child, false)) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-function expandRow(row: Row<any>) {
-  if (row.getCanExpand()) {
-    row.toggleExpanded(true);
-  }
-
-  const parentRow = row.getParentRow();
-  if (parentRow) {
-    expandRow(parentRow);
-  }
 }

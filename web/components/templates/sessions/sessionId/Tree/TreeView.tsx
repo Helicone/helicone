@@ -33,11 +33,11 @@ import {
   DragColumnItem,
   columnDefToDragColumnItem,
 } from "../../../../shared/themed/table/columns/DragList";
-import ThemedTable from "../../../../shared/themed/table/themedTable";
 import RequestDrawer from "../../../requests/RequestDrawer";
 import StatusBadge from "../../../requests/statusBadge";
 import { TimelineItem, TimelineSection } from "../lib/types";
-import PerformanceTimeline from "../Timeline/performanceTimeLine";
+import PerformanceTimeline from "../Timeline/PerformanceTimeLine";
+import TimelineTable from "../Timeline/timelineTable";
 
 // Define TableTreeNode to hold all necessary display properties
 export interface TableTreeNode {
@@ -297,9 +297,6 @@ const TreeView: React.FC<TreeViewProps> = ({
   setSelectedRequestId,
   isOriginalRealtime,
 }) => {
-  const [highlightedItemId, setHighlightedItemId] = useState<string | null>(
-    null
-  );
   const [colors, setColors] = useState<ColorMap>({});
 
   const treeData = useMemo(() => {
@@ -479,7 +476,7 @@ const TreeView: React.FC<TreeViewProps> = ({
               <ResizablePanel defaultSize={60} minSize={25}>
                 <div className="h-full border-t border-slate-200 dark:border-slate-800 flex">
                   <div className="h-full w-full">
-                    <ThemedTable
+                    <TimelineTable
                       id="session-requests-table"
                       defaultData={tableData}
                       defaultColumns={initialColumns}
