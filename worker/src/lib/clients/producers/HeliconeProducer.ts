@@ -57,7 +57,7 @@ export class HeliconeProducer {
       await this.sendMessageHttp(msg);
       return;
     }
-    return this.producer.sendMessage(msg);
+    this.producer.sendMessage(msg);
   }
 
   async sendMessageHttp(msg: MessageData) {

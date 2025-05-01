@@ -2,7 +2,7 @@ import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 import { Provider } from "../../..";
 
 export interface MessageProducer {
-  sendMessage(msg: MessageData): Promise<any>;
+  sendMessage(msg: MessageData): Promise<void>;
 }
 
 export type HeliconeMeta = {
