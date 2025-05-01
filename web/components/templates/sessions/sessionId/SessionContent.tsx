@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Muted, Small, XSmall } from "@/components/ui/typography";
 import { useRouter } from "next/router";
-import { createContext, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PiBroadcastBold } from "react-icons/pi";
 import { isRealtimeRequest } from "../../../../lib/sessions/realtimeSession";
 import { Session, TreeNodeData } from "../../../../lib/sessions/sessionTypes";
@@ -25,16 +25,7 @@ import ExportButton from "../../../shared/themed/table/exportButton";
 import FeedbackAction from "../../feedback/thumbsUpThumbsDown";
 import TreeView from "./Tree/TreeView";
 import { tracesToTreeNodeData } from "@/lib/sessions/helpers";
-
-type ColorMap = Record<string, string>;
-
-interface ColorContextType {
-  colors: ColorMap;
-}
-
-export const ColorContext = createContext<ColorContextType>({
-  colors: {},
-});
+import { useColorMapStore, ColorMap } from "@/store/features/sessions/colorMap";
 
 interface SessionContentProps {
   session: Session;
@@ -51,7 +42,7 @@ export const SessionContent: React.FC<SessionContentProps> = ({
   requests,
 }) => {
   const router = useRouter();
-  const [colors, setColors] = useState<ColorMap>({});
+  const { colorMap, setColorMap } = useColorMapStore();
 
   const { _, requestId } = router.query;
   const [selectedRequestId, setSelectedRequestId] = useState<string>(
@@ -183,97 +174,95 @@ export const SessionContent: React.FC<SessionContentProps> = ({
 
   useEffect(() => {
     const treeData = tracesToTreeNodeData(session.traces);
-    setColors(getAllPathColors(treeData, {}, null));
+    setColorMap(getAllPathColors(treeData, {}, null));
   }, [session]);
 
   return (
-    <ColorContext.Provider value={{ colors }}>
-      <Col className="h-screen flex flex-col">
-        <FoldedHeader
-          leftSection={
-            <div className="flex flex-row gap-4 items-center">
-              {/* Dynamic breadcrumb */}
-              <div className="flex flex-row gap-1 items-center">
-                <Small className="font-semibold">Sessions</Small>
-                <Small className="font-semibold">/</Small>
-                <Muted className="text-sm">{session_name}</Muted>
-                <Small className="font-semibold">/</Small>
+    <Col className="h-screen flex flex-col">
+      <FoldedHeader
+        leftSection={
+          <div className="flex flex-row gap-4 items-center">
+            {/* Dynamic breadcrumb */}
+            <div className="flex flex-row gap-1 items-center">
+              <Small className="font-semibold">Sessions</Small>
+              <Small className="font-semibold">/</Small>
+              <Muted className="text-sm">{session_name}</Muted>
+              <Small className="font-semibold">/</Small>
 
-                {isLoadingSessions ? (
-                  <Muted className="text-sm">Loading sessions...</Muted>
-                ) : (
-                  <Select
-                    value={session_id}
-                    onValueChange={handleSessionIdChange}
-                  >
-                    <SelectTrigger className="w-[280px] h-8 shadow-sm">
-                      <SelectValue placeholder="Select Session ID" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {relatedSessions?.map((s) => (
-                        <SelectItem key={s.session_id} value={s.session_id}>
-                          {s.session_id}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              </div>
-
-              {/* Realtime session reconstruction warning) */}
-              {containsRealtime && (
-                <div className="flex flex-row gap-2 items-center text-xs text-blue-500 font-semibold">
-                  <PiBroadcastBold className="h-4 w-4" />
-                  Includes reconstructed realtime requests
-                </div>
+              {isLoadingSessions ? (
+                <Muted className="text-sm">Loading sessions...</Muted>
+              ) : (
+                <Select
+                  value={session_id}
+                  onValueChange={handleSessionIdChange}
+                >
+                  <SelectTrigger className="w-[280px] h-8 shadow-sm">
+                    <SelectValue placeholder="Select Session ID" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {relatedSessions?.map((s) => (
+                      <SelectItem key={s.session_id} value={s.session_id}>
+                        {s.session_id}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               )}
             </div>
-          }
-          rightSection={
-            <div className="h-full flex flex-row gap-2 items-center">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  {/* Export the original, raw request data */}
-                  <ExportButton rows={requests.requests.requests ?? []} />
-                </TooltipTrigger>
-                <TooltipContent>Export raw data</TooltipContent>
-              </Tooltip>
 
-              <div className="h-4 w-px bg-border" />
+            {/* Realtime session reconstruction warning) */}
+            {containsRealtime && (
+              <div className="flex flex-row gap-2 items-center text-xs text-blue-500 font-semibold">
+                <PiBroadcastBold className="h-4 w-4" />
+                Includes reconstructed realtime requests
+              </div>
+            )}
+          </div>
+        }
+        rightSection={
+          <div className="h-full flex flex-row gap-2 items-center">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                {/* Export the original, raw request data */}
+                <ExportButton rows={requests.requests.requests ?? []} />
+              </TooltipTrigger>
+              <TooltipContent>Export raw data</TooltipContent>
+            </Tooltip>
 
-              <FeedbackAction
-                id={session_id}
-                type="session"
-                defaultValue={sessionFeedbackValue}
-              />
-            </div>
-          }
-          foldContent={
-            <div className="h-full flex flex-row items-center divide-x divide-border">
-              {sessionStatsToDisplay.map((stat) => (
-                <div
-                  key={stat.label}
-                  className="flex flex-row gap-1 items-center px-4"
-                >
-                  <XSmall className="font-medium">{stat.label}</XSmall>
-                  <Muted className="text-xs">{stat.value}</Muted>
-                </div>
-              ))}
-            </div>
-          }
+            <div className="h-4 w-px bg-border" />
+
+            <FeedbackAction
+              id={session_id}
+              type="session"
+              defaultValue={sessionFeedbackValue}
+            />
+          </div>
+        }
+        foldContent={
+          <div className="h-full flex flex-row items-center divide-x divide-border">
+            {sessionStatsToDisplay.map((stat) => (
+              <div
+                key={stat.label}
+                className="flex flex-row gap-1 items-center px-4"
+              >
+                <XSmall className="font-medium">{stat.label}</XSmall>
+                <Muted className="text-xs">{stat.value}</Muted>
+              </div>
+            ))}
+          </div>
+        }
+      />
+
+      <div className="flex-1 overflow-auto">
+        {/* TreeView receives the processed session */}
+        <TreeView
+          selectedRequestId={selectedRequestId}
+          setSelectedRequestId={handleRequestIdChange}
+          session={session}
+          isOriginalRealtime={containsRealtime}
         />
-
-        <div className="flex-1 overflow-auto">
-          {/* TreeView receives the processed session */}
-          <TreeView
-            selectedRequestId={selectedRequestId}
-            setSelectedRequestId={handleRequestIdChange}
-            session={session}
-            isOriginalRealtime={containsRealtime}
-          />
-        </div>
-      </Col>
-    </ColorContext.Provider>
+      </div>
+    </Col>
   );
 };
 

@@ -20,7 +20,7 @@ import {
 } from "@tanstack/react-table";
 import { ChevronDown, ChevronRight, ChevronsUpDown } from "lucide-react";
 import Link from "next/link";
-import React, { useContext, useEffect, useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { TimeInterval } from "../../../../../lib/timeCalculations/time";
 import { Result } from "../../../../../packages/common/result";
 import { SingleFilterDef } from "../../../../../services/lib/filters/frontendFilterDefs";
@@ -30,7 +30,7 @@ import { DragColumnItem } from "@/components/shared/themed/table/columns/DragLis
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import DraggableColumnHeader from "@/components/shared/themed/table/columns/draggableColumnHeader";
 import { clsx } from "@/components/shared/clsx";
-import { ColorContext } from "../SessionContent";
+import { useColorMapStore } from "@/store/features/sessions/colorMap";
 
 type CheckboxMode = "always_visible" | "on_hover" | "never";
 
@@ -203,7 +203,7 @@ export default function SessionTimelineTable(
     onRowSelect?.(row, index, event);
   };
 
-  const { colors } = useContext(ColorContext);
+  const { getColor } = useColorMapStore();
 
   return (
     <ScrollArea className="h-full w-full sentry-mask-me" orientation="both">
@@ -409,7 +409,7 @@ export default function SessionTimelineTable(
                         {i === 0 &&
                           (() => {
                             const groupColorClass =
-                              colors[row.original.currentPath] ||
+                              getColor(row.original.currentPath) ||
                               "bg-transparent";
 
                             if (groupColorClass !== "bg-transparent") {

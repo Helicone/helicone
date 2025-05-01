@@ -6,7 +6,6 @@ import { useTheme } from "next-themes";
 import {
   MutableRefObject,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useState,
@@ -26,8 +25,8 @@ import {
 } from "recharts";
 import { Session, Trace } from "../../../../lib/sessions/sessionTypes";
 import { Col } from "../../../layout/common/col";
-import { ColorContext } from "./SessionContent";
 import { useLocalStorage } from "@/services/hooks/localStorage";
+import { useColorMapStore } from "@/store/features/sessions/colorMap";
 
 const ROUNDED_RADIUS = 1;
 const BAR_SIZE = 25; // Increased from 30 to 50
@@ -59,7 +58,7 @@ export const TraceSpan = ({
 }) => {
   const [selectedRequestId, setSelectedRequestId] = selectedRequestIdDispatch;
   const { theme } = useTheme();
-  const { colors } = useContext(ColorContext);
+  const { getColor } = useColorMapStore();
   const [drawerSize] = useLocalStorage("session-request-drawer-size", 0);
 
   // Highlighter state
@@ -686,7 +685,7 @@ export const TraceSpan = ({
                 }}
               />
               {spanData.map((entry, index) => {
-                const color = colors[entry.path];
+                const color = getColor(entry.path);
                 // Determine if this bar is in the highlighter range
                 const isInHighlighter =
                   highlighterActive &&

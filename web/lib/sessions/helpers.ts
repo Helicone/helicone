@@ -131,7 +131,6 @@ export const tracesToTreeNodeData = (traces: Trace[]): TreeNodeData => {
     };
   }
   const folderNodes = tracesToFolderNodes(traces);
-  console.log(folderNodes);
   const folderToTreeNode = (folder: FolderNode): TreeNodeData => {
     return {
       name: folder.folderName,
