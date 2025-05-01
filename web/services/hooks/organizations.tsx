@@ -240,18 +240,29 @@ const useOrgsContextManager = (): OrgContextValue => {
   const { data: orgs, refetch } = $JAWN_API.useQuery(
     "get",
     "/v1/organization",
+    {},
     {
+      enabled: !!user?.id,
       refetchOnWindowFocus: true,
-      refetchInterval: 2_000, // Refetch every 2 seconds
+      refetchInterval: (selectedOrgsData) => {
+        console.log("selectedOrgsData", selectedOrgsData);
+        if (!user?.id) {
+          return 1_000;
+        }
+        if (
+          !selectedOrgsData.state.data?.data ||
+          selectedOrgsData.state.data?.data?.length === 0
+        ) {
+          return 1_000;
+        }
+        return false;
+      },
       refetchIntervalInBackground: false,
-    },
-    {
       select: (data) => {
         return data.data?.sort((a, b) => {
           if (a.name === b.name) {
             return a.id < b.id ? -1 : 1;
           }
-          // put demo last
           if (a.tier === "demo") {
             return 1;
           }
@@ -293,23 +304,6 @@ const useOrgsContextManager = (): OrgContextValue => {
       identifyUserOrg(org, user);
     }
   }, [user, org]);
-
-  useEffect(() => {
-    if (orgs && orgs.length > 0 && !org) {
-      const orgIdFromCookie = Cookies.get(ORG_ID_COOKIE_KEY);
-      const orgFromCookie = orgs.find((org) => org.id === orgIdFromCookie);
-      const orgToUse =
-        orgFromCookie || orgs.find((org) => org.tier !== "demo") || orgs[0];
-      if (orgToUse?.tier === "demo") {
-        return;
-      }
-      if (!orgFromCookie) {
-        Cookies.set(ORG_ID_COOKIE_KEY, orgs[0].id, { expires: 30 });
-      }
-
-      setOrgCookie(orgToUse.id);
-    }
-  }, [org, orgs]);
 
   return {
     allOrgs: orgs ?? [],

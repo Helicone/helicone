@@ -1,37 +1,80 @@
 import { useOrg } from "@/components/layout/org/organizationContext";
-import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
-import { BookOpenIcon } from "@heroicons/react/24/outline";
-import { AreaChart } from "@tremor/react";
-import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { RequestsOverTime } from "../../../lib/timeCalculations/fetchTimeData";
 import {
+  getTimeInterval,
   getTimeIntervalAgo,
-  TimeInterval,
 } from "../../../lib/timeCalculations/time";
 import { Result, resultMap } from "../../../packages/common/result";
 import { useGetUnauthorized } from "../../../services/hooks/dashboard";
-import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
 import { useBackendMetricCall } from "../../../services/hooks/useBackendFunction";
-import { TimeFilter } from "../../../services/lib/filters/filterDefs";
-import { getPropertyFiltersV2 } from "../../../services/lib/filters/frontendFilterDefs";
-import { Col } from "../../layout/common/col";
-import AuthHeader from "../../shared/authHeader";
+import { TimeFilter } from "@/types/timeFilter";
 import LoadingAnimation from "../../shared/loadingAnimation";
-import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
-import RequestsPage from "../requests/RequestsPage";
 import UnauthorizedView from "../requests/UnauthorizedView";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Header from "@/components/shared/Header";
+import RateLimitRequestsView from "./RateLimitRequestsView";
+import RateLimitRulesView from "./RateLimitRulesView";
+import { useLocalStorage } from "../../../services/hooks/localStorage";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { InfoIcon } from "lucide-react";
+import { TimeInterval } from "@/lib/timeCalculations/time";
+import { useQuery } from "@tanstack/react-query";
+import { $JAWN_API } from "@/lib/clients/jawn";
+
+const TABS = [
+  { id: "requests", label: "Rate Limited Requests" },
+  { id: "rules", label: "Rate Limit Rules" },
+];
+
+// Helper function to parse URL param into TimeFilter object
+// TODO: Extract this to a shared utility
+const getTimeFilterFromParam = (paramValue: string | null): TimeFilter => {
+  const defaultValue: TimeFilter = {
+    start: getTimeIntervalAgo("24h"),
+    end: new Date(),
+  };
+
+  if (!paramValue) {
+    return defaultValue;
+  }
+
+  if (paramValue.startsWith("custom_")) {
+    const parts = paramValue.split("_");
+    if (parts.length === 3) {
+      const start = new Date(parts[1]);
+      const end = new Date(parts[2]);
+      if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+        return { start, end };
+      }
+    }
+  } else {
+    try {
+      const start = getTimeIntervalAgo(paramValue as TimeInterval);
+      return { start, end: new Date() };
+    } catch (e) {
+      // Ignore invalid interval string, fall through to default
+    }
+  }
+
+  return defaultValue;
+};
 
 const RateLimitPage = (props: {}) => {
-  const [timeFilter, setTimeFilter] = useState<TimeFilter>({
-    start: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 7),
-    end: new Date(),
-  });
   const searchParams = useSearchParams();
-  const { properties, isLoading: propertiesLoading } =
-    useGetPropertiesV2(getPropertyFiltersV2);
+  const [currentTab, setCurrentTab] = useLocalStorage<string>(
+    "rateLimitPageActiveTab",
+    "requests"
+  );
+  const [triggerOpenCreateRuleModal, setTriggerOpenCreateRuleModal] =
+    useState(0);
   const org = useOrg();
   const { user } = useHeliconeAuthClient();
   const {
@@ -40,164 +83,195 @@ const RateLimitPage = (props: {}) => {
     isLoading: isAuthLoading,
   } = useGetUnauthorized(user?.id || "");
 
-  const rateLimitFilterLeaf = {
-    request_response_rmt: {
-      properties: {
-        "Helicone-Rate-Limit-Status": {
-          equals: "rate_limited",
+  const urlTimeFilter = useMemo(() => {
+    const timeParam = searchParams.get("t");
+    const result = getTimeFilterFromParam(timeParam);
+    return {
+      start: result.start,
+      end: result.end,
+    };
+  }, [searchParams.get("t")]);
+
+  const timeIncrement = useMemo(
+    () => getTimeInterval(urlTimeFilter),
+    [urlTimeFilter]
+  );
+
+  const timeZoneDifference = useMemo(() => new Date().getTimezoneOffset(), []);
+
+  const backendParams = useMemo(
+    () => ({
+      timeFilter: urlTimeFilter,
+      userFilters: {
+        left: {
+          request_response_rmt: {
+            properties: {
+              "Helicone-Rate-Limit-Status": { equals: "rate_limited" },
+            },
+          },
         },
+        operator: "and" as const, // Ensure const for type stability
+        right: "all" as const,
       },
-    },
-  };
+      timeZoneDifference,
+      dbIncrement: timeIncrement,
+    }),
+    [urlTimeFilter, timeIncrement, timeZoneDifference]
+  );
+
+  const memoizedMockData = useMemo(() => {
+    const data = [];
+    const now = new Date();
+    for (let i = 12; i >= 0; i--) {
+      const time = new Date(now.getTime() - i * 5 * 60 * 1000);
+      const count = Math.floor(Math.random() * 15) + (i % 3 === 0 ? 5 : 0);
+      data.push({ time, count });
+    }
+    return data;
+  }, []);
 
   const rateLimitOverTime = useBackendMetricCall<
     Result<RequestsOverTime[], string>
   >({
-    params: {
-      timeFilter: timeFilter,
-      userFilters: {
-        left: rateLimitFilterLeaf,
-        operator: "and",
-        right: "all",
-      },
-      timeZoneDifference: 0,
-    },
+    params: backendParams, // <-- Use memoized params
     endpoint: "/api/metrics/requestOverTime",
     key: "requestOverTime",
     postProcess: (data) => {
       return resultMap(data, (d) =>
-        d.map((d) => ({ count: +d.count, time: new Date(d.time) }))
+        d.map((item) => ({ count: +item.count, time: new Date(item.time) }))
       );
     },
   });
 
-  const onTimeSelectHandler = (key: string, value: string) => {
-    if (key === "custom") {
-      const [start, end] = value.split("_");
-      setTimeFilter({
-        start: new Date(start),
-        end: new Date(end),
-      });
-      return;
-    }
-    setTimeFilter({
-      start: getTimeIntervalAgo(key as TimeInterval),
-      end: new Date(),
-    });
-  };
+  // Fetch Rate Limit Rules (using shared query key)
+  const rulesQuery = useQuery({
+    queryKey: ["rateLimits", org?.currentOrg?.id],
+    queryFn: async () => {
+      if (!org?.currentOrg?.id) {
+        return null;
+      }
+      const response = await $JAWN_API.GET("/v1/rate-limits");
+      return response;
+    },
+    enabled: !!org?.currentOrg?.id,
+  });
 
-  const getDefaultValue = () => {
-    const currentTimeFilter = searchParams.get("t");
-    if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
-      return "custom";
-    }
-    return currentTimeFilter || "24h";
-  };
+  const rulesCount = rulesQuery.data?.data?.data?.length ?? 0;
+  const totalRateLimitedRequests = rateLimitOverTime.data?.data?.reduce(
+    (sum, d) => sum + d.count,
+    0
+  );
+  const shouldShowEmptyState =
+    rulesCount === 0 && totalRateLimitedRequests === 0;
+  const showMockData =
+    org?.currentOrg?.has_onboarded === false && shouldShowEmptyState;
 
-  const hasRateLimitData =
-    rateLimitOverTime.data?.data?.some((d) => d.count > 0) || false;
+  const chartData = showMockData
+    ? memoizedMockData
+    : rateLimitOverTime.data?.data ?? [];
+  const isChartLoading = showMockData ? false : rateLimitOverTime.isLoading;
+
+  const hasRateLimitData = false;
   const shouldShowUnauthorized = hasRateLimitData && unauthorized;
   const isOrgLoading = !org || !org.currentOrg;
   const isUserLoading = user === undefined;
-  const isLoading =
-    propertiesLoading ||
-    rateLimitOverTime.isLoading ||
-    isOrgLoading ||
-    isAuthLoading ||
-    isUserLoading;
+  const isLoading = isOrgLoading || isAuthLoading || isUserLoading;
+
+  const handleConfigureClick = () => {
+    setCurrentTab("rules");
+    setTriggerOpenCreateRuleModal((prev) => prev + 1);
+  };
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-        <LoadingAnimation
-          height={175}
-          width={175}
-          title="Loading rate limit data..."
-        />
-      </div>
-    );
+    return <LoadingAnimation title="Loading..." height={175} width={175} />;
   }
-
   if (shouldShowUnauthorized) {
     return (
       <UnauthorizedView currentTier={currentTier || ""} pageType="ratelimit" />
     );
   }
 
-  if (!hasRateLimitData && !isLoading) {
-    return (
-      <div className="flex flex-col w-full h-screen bg-background dark:bg-sidebar-background">
-        <div className="flex flex-1 h-full">
-          <EmptyStateCard feature="rate-limits" />
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <>
-      <AuthHeader
-        title={<div className="flex items-center gap-2">Rate limits</div>}
-        actions={
-          <Link
-            href="https://docs.helicone.ai/features/advanced-usage/custom-rate-limits"
-            target="_blank"
-            rel="noreferrer noopener"
-            className="w-fit flex items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-          >
-            <BookOpenIcon className="h-4 w-4" />
-          </Link>
-        }
-      />
-      <Col className="gap-8">
-        <ThemedTimeFilter
-          currentTimeFilter={timeFilter}
-          timeFilterOptions={[
-            { key: "24h", value: "24H" },
-            { key: "7d", value: "7D" },
-            { key: "1m", value: "1M" },
-            { key: "3m", value: "3M" },
+    <Tabs
+      value={currentTab}
+      onValueChange={(value) => setCurrentTab(value)}
+      className="w-full"
+    >
+      <div>
+        <Header
+          title="Rate Limits"
+          leftActions={
+            currentTab === "rules" ? (
+              <div className="flex items-center gap-1.5 ml-4">
+                <TooltipProvider key="rules-tooltip">
+                  <Tooltip delayDuration={100}>
+                    <TooltipTrigger asChild className="flex items-center">
+                      <InfoIcon className="h-4 w-4 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs text-sm" side="bottom">
+                      <p className="mb-2">
+                        Only one rate limit rule applies per request, based on
+                        the following priority:
+                      </p>
+                      <p className="font-medium mb-1">
+                        Rule Priority & Sorting
+                      </p>
+                      <p>
+                        Rules are automatically sorted by application priority:
+                      </p>
+                      <ul className="list-disc pl-4 mt-1 text-xs space-y-0.5">
+                        <li>
+                          <span className="font-semibold">Segment:</span>{" "}
+                          Property rules apply first, then User, then Global.
+                        </li>
+                        <li>
+                          <span className="font-semibold">
+                            Restrictiveness:
+                          </span>{" "}
+                          Within the same Segment & Unit, the rule with the
+                          lowest effective quota (quota / time window) applies
+                          first.
+                        </li>
+                      </ul>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            ) : (
+              <></>
+            )
+          }
+          rightActions={[
+            <div
+              key="header-right-wrapper"
+              className="flex items-center justify-end w-full gap-4"
+            >
+              <TabsList>
+                {TABS.map((tab) => (
+                  <TabsTrigger key={tab.id} value={tab.id}>
+                    {tab.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>,
           ]}
-          onSelect={onTimeSelectHandler}
-          isFetching={false}
-          defaultValue={getDefaultValue()}
-          custom={true}
         />
-        <div className="h-full w-full bg-white dark:bg-gray-800 rounded-md pt-4">
-          {rateLimitOverTime.isLoading ? (
-            <LoadingAnimation height={175} width={175} />
-          ) : (
-            <AreaChart
-              className="h-[14rem]"
-              data={
-                rateLimitOverTime.data?.data?.map((d) => ({
-                  time: d.time.toISOString(),
-                  count: d.count,
-                })) ?? []
-              }
-              index="time"
-              categories={["count"]}
-              colors={["red"]}
-              showYAxis={false}
-              curveType="monotone"
-            />
-          )}
-        </div>
-        <div className="text-sm text-gray-500 dark:text-gray-400">
-          <RequestsPage
-            currentPage={1}
-            pageSize={25}
-            sort={{
-              sortKey: null,
-              sortDirection: null,
-              isCustomProperty: false,
-            }}
-            rateLimited={true}
-            organizationLayoutAvailable={false}
+        <TabsContent value="requests">
+          <RateLimitRequestsView
+            isLoading={isChartLoading}
+            chartData={chartData}
+            timeFilter={urlTimeFilter}
+            onConfigureClick={handleConfigureClick}
+            emptyStateIsVisible={shouldShowEmptyState}
           />
-        </div>
-      </Col>
-    </>
+        </TabsContent>
+        <TabsContent value="rules">
+          <RateLimitRulesView
+            triggerOpenCreateModal={triggerOpenCreateRuleModal}
+          />
+        </TabsContent>
+      </div>
+    </Tabs>
   );
 };
 
