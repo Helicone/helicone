@@ -300,7 +300,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   }, [properties, isCached]);
 
   const {
-    selectMode: _selectMode,
+    selectMode,
     toggleSelectMode: _toggleSelectMode,
     selectedIds,
     toggleSelection,
@@ -716,7 +716,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
               onSelectAll={selectAll}
               selectedIds={selectedIds}
             >
-              {_selectMode && (
+              {selectMode && (
                 <Row className="gap-5 items-center w-full justify-between bg-white dark:bg-black p-5">
                   <div className="flex flex-row gap-2 items-center">
                     <span className="text-sm font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">
