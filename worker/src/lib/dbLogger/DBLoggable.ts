@@ -603,7 +603,7 @@ export class DBLoggable {
       clickhouse: ClickhouseClientWrapper;
       queue: RequestResponseStore;
       requestResponseManager: RequestResponseManager;
-      kafkaProducer: HeliconeProducer;
+      producer: HeliconeProducer;
     },
     authParams: AuthParams,
     S3_ENABLED: Env["S3_ENABLED"],
@@ -703,7 +703,7 @@ export class DBLoggable {
     };
 
     // Send to Kafka or REST if not enabled
-    await db.kafkaProducer.sendMessage(kafkaMessage);
+    await db.producer.sendMessage(kafkaMessage);
 
     return ok(null);
   }
