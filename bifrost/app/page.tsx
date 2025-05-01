@@ -1,5 +1,6 @@
 import Hero from "@/components/home/Hero";
 import { Layout } from "@/app/components/Layout";
+import "./globals.css";
 import Integrations from "@/components/templates/landing/integrations";
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
@@ -42,10 +43,10 @@ export default async function Home() {
   // const totalValuesData = undefined;
   const totalValuesData = response.ok
     ? ((await response.json()).data as {
-        total_requests?: number;
-        total_tokens?: number;
-        total_cost?: number;
-      })
+      total_requests?: number;
+      total_tokens?: number;
+      total_cost?: number;
+    })
     : undefined;
 
   return (

@@ -4,7 +4,7 @@ import { ISLAND_WIDTH } from "@/lib/utils";
 import Link from "next/link";
 // import { humanReadableNumber } from "@/app/utils/formattingUtils";
 import { cn } from "@/lib/utils";
-import { ArrowUpRight, ArrowUpRightIcon, ChevronRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "../ui/button";
 
@@ -81,6 +81,7 @@ const Stats = ({
           <Link href="https://us.helicone.ai/open-stats" target="_blank" rel="noopener">
             <Button
               variant="ghost"
+              size="landing_page"
               className="hover:bg-brand hover:border-brand hover:text-white p-5 text-base md:text-2xl md:py-4 lg:py-6 lg:px-6 lg:text-md gap-2 rounded-lg items-center z-[10]"
             >
               Live

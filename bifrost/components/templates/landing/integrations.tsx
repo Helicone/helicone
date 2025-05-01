@@ -468,7 +468,9 @@ self.model = AzureChatOpenAI(
       <div className="flex gap-2 items-center md:gap-4">
         <Link href="/signup">
           <Button
-            className="bg-brand p-5 text-base md:text-lg md:py-4 lg:py-6 lg:px-6 lg:text-md gap-2 rounded-lg items-center z-[10]"
+            variant="landing_primary"
+            size="landing_page"
+          // className="bg-brand p-5 text-base md:text-lg md:py-4 lg:py-6 lg:px-6 lg:text-md gap-2 rounded-lg items-center z-[10]"
           >
             Integrate today
             <ChevronRight className="size-5 md:size-6" />
@@ -476,8 +478,9 @@ self.model = AzureChatOpenAI(
         </Link>
         <Link href="https://docs.helicone.ai/getting-started/quick-start#quick-start" target="_blank" rel="noopener">
           <Button
-            variant="ghost"
-            className="p-5 text-base md:text-lg md:py-4 lg:py-6 lg:px-6 lg:text-md gap-2 rounded-lg items-center z-[10]"
+            variant="landing_ghost"
+            size="landing_page"
+          // className="p-5 text-base md:text-lg md:py-4 lg:py-6 lg:px-6 lg:text-md gap-2 rounded-lg items-center z-[10]"
           >
             Other providers
             <ArrowUpRight className="size-4 md:size-6" />

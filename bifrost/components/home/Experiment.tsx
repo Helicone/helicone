@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ISLAND_WIDTH } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
-import { ArrowUpRight, ArrowUpRightIcon, ChevronRight, PlusIcon } from "lucide-react";
+import { ArrowUpRight, PlusIcon } from "lucide-react";
 import {
   Table,
   TableHeader,
@@ -322,25 +322,26 @@ const Experiment = () => {
                 Push <span className="text-brand">high-quality</span> prompt
                 changes to production
               </h2>
-              <p className="text-lg max-w-[520px] text-muted-foreground leading-relaxed">
-                Tune your prompts and justify your iterations with quantifiable data, not just “vibes”.
+              <p className="text-lg max-w-[520px] text-landing-description font-light leading-relaxed">
+                Tune your prompts and justify your iterations with quantifiable
+                data, not just “vibes”.
               </p>
             </div>
             <div className="flex gap-3 items-center">
               <Link href="https://docs.helicone.ai/features/prompts/editor" target="_blank" rel="noopener">
                 <Button
-                  className="bg-brand p-5 text-base md:text-lg md:py-4 lg:py-6 lg:px-6 lg:text-md gap-2 rounded-lg items-center z-[10]"
-                >
+                  variant="landing_primary"
+                  size="landing_page">
                   Try Prompt Editor
                 </Button>
               </Link>
               <Link href="https://docs.helicone.ai/features/experiments" target="_blank" rel="noopener">
                 <Button
                   variant="ghost"
-                  className="p-5 text-base md:text-lg md:py-4 lg:py-6 lg:px-6 lg:text-md gap-2 rounded-lg items-center z-[10]"
+                  size="landing_page"
                 >
                   Experiments
-                  <ArrowUpRight className="size-5 md:size-6" />
+                  <ArrowUpRight className="size-5" />
                 </Button>
               </Link>
             </div>

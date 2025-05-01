@@ -3,7 +3,7 @@ import { ISLAND_WIDTH } from "@/lib/utils";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
-import { ArrowUpRight, ArrowUpRightIcon, ChevronRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { useState } from "react";
 import { XIcon, PlusIcon } from "lucide-react";
 import EvaluateSVG from "@/public/static/home/evaluate";
@@ -25,7 +25,7 @@ const Evaluate = () => {
               <span className="text-brand">Prevent regression</span> and improve
               quality over-time
             </h2>
-            <p className="text-lg max-w-[520px] text-muted-foreground leading-relaxed">
+            <p className="text-lg max-w-[520px] text-landing-description font-light leading-relaxed">
               Monitor performance in real-time and catch regressions
               pre-deployment with LLM-as-a-judge or custom evals
             </p>
@@ -34,19 +34,19 @@ const Evaluate = () => {
             <Link href="https://docs.helicone.ai/features/advanced-usage/scores" target="_blank" rel="noopener">
               <Button
                 variant="outline"
-                className="bp-5 text-base md:text-lg md:py-4 lg:py-6 lg:px-6 lg:text-md gap-2 rounded-lg items-center z-[10]"
+                size="landing_page"
               >
                 Scores
-                <ArrowUpRight className="size-5 md:size-6" />
+                <ArrowUpRight className="size-5" />
               </Button>
             </Link>
             <Link href="https://docs.helicone.ai/features/webhooks" target="_blank" rel="noopener">
               <Button
                 variant="outline"
-                className="bp-5 text-base md:text-lg md:py-4 lg:py-6 lg:px-6 lg:text-md gap-2 rounded-lg items-center z-[10]"
+                size="landing_page"
               >
                 Webhooks
-                <ArrowUpRight className="size-5 md:size-6" />
+                <ArrowUpRight className="size-5" />
               </Button>
             </Link>
           </div>
