@@ -11,7 +11,7 @@ import { AsyncLogModel, validateAsyncLogModel } from "../models/AsyncLog";
 import { DBQueryTimer } from "../util/loggers/DBQueryTimer";
 import { S3Client } from "../clients/S3Client";
 import { RequestResponseManager } from "./RequestResponseManager";
-import { KafkaProducer } from "../clients/KafkaProducer";
+import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
 import { parseJSXObject } from "@helicone/prompts";
 import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 
@@ -110,7 +110,7 @@ export async function logAsync(
         ),
         createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY)
       ),
-      kafkaProducer: new KafkaProducer(env),
+      kafkaProducer: new HeliconeProducer(env),
     },
     env.S3_ENABLED ?? "true",
     heliconeHeaders
