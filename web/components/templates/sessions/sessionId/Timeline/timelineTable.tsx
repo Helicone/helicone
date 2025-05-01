@@ -1,7 +1,4 @@
-import {
-  ColorContext,
-  TableTreeNode,
-} from "@/components/templates/sessions/sessionId/Tree/TreeView";
+import { TableTreeNode } from "@/components/templates/sessions/sessionId/Tree/TreeView";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -33,6 +30,7 @@ import { DragColumnItem } from "@/components/shared/themed/table/columns/DragLis
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import DraggableColumnHeader from "@/components/shared/themed/table/columns/draggableColumnHeader";
 import { clsx } from "@/components/shared/clsx";
+import { ColorContext } from "../SessionContent";
 
 type CheckboxMode = "always_visible" | "on_hover" | "never";
 
@@ -415,7 +413,7 @@ export default function TimelineTable(props: ThemedTableProps<TableTreeNode>) {
                             if (groupColorClass !== "bg-transparent") {
                               return (
                                 <div
-                                  className="absolute left-0 top-0 bottom-0 w-1 z-30"
+                                  className="absolute left-0 top-0 bottom-0 w-1 z-9"
                                   style={{ backgroundColor: groupColorClass }}
                                 />
                               );

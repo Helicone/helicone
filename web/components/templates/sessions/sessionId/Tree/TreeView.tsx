@@ -36,8 +36,8 @@ import {
 import RequestDrawer from "../../../requests/RequestDrawer";
 import StatusBadge from "../../../requests/statusBadge";
 import { TimelineItem, TimelineSection } from "../lib/types";
-import PerformanceTimeline from "../Timeline/PerformanceTimeLine";
 import TimelineTable from "../Timeline/timelineTable";
+import { TraceSpan } from "../Span";
 
 // Define TableTreeNode to hold all necessary display properties
 export interface TableTreeNode {
@@ -128,62 +128,6 @@ const ModelCell = memo(({ getValue }: CellContext<TableTreeNode, any>) => {
   );
 });
 ModelCell.displayName = "ModelCell"; // Add display name for better debugging
-
-type ColorMap = Record<string, string>;
-
-interface ColorContextType {
-  colors: ColorMap;
-  setColors: React.Dispatch<React.SetStateAction<ColorMap>>;
-}
-
-export const ColorContext = createContext<ColorContextType>({
-  colors: {},
-  setColors: () => {},
-});
-
-function setAllPathColor(
-  treeData: TreeNodeData,
-  setColors: React.Dispatch<React.SetStateAction<ColorMap>>,
-  colors: ColorMap,
-  parentColor: string | null = null
-) {
-  // Skip if node has no children
-  if (!treeData.children?.length) return;
-
-  for (const child of treeData.children) {
-    if (parentColor === null) {
-      // For top-level nodes, generate a unique color
-      const randomColor = generateUniqueColor(colors);
-      setColors((prev) => ({
-        ...prev,
-        [child.currentPath]: randomColor,
-      }));
-      setAllPathColor(child, setColors, colors, randomColor);
-    } else {
-      // For nested nodes, inherit parent's color
-      setColors((prev) => ({
-        ...prev,
-        [child.currentPath]: parentColor,
-      }));
-
-      setAllPathColor(child, setColors, colors, parentColor);
-    }
-  }
-}
-
-function generateUniqueColor(existingColors: ColorMap): string {
-  // Generate a random hex color not already in use
-  let color;
-  const usedColors = Object.values(existingColors);
-  do {
-    const randomHex = Math.floor(Math.random() * 0xffffff)
-      .toString(16)
-      .padStart(6, "0");
-    color = `#${randomHex}`;
-  } while (usedColors.includes(color));
-
-  return color;
-}
 
 // *** Define initialColumns outside the component ***
 const initialColumns: ColumnDef<TableTreeNode>[] = [
@@ -444,93 +388,88 @@ const TreeView: React.FC<TreeViewProps> = ({
     table.toggleAllRowsExpanded();
   };
 
-  useEffect(() => {
-    setAllPathColor(treeData, setColors, colors);
-  }, [treeData]);
-
   return (
-    <ColorContext.Provider value={{ colors, setColors }}>
-      <Col className="h-full">
-        <ResizablePanelGroup direction="horizontal" className="h-full w-full">
-          <ResizablePanel
-            defaultSize={40}
-            minSize={25}
-            className="relative bg-white dark:bg-black"
-          >
-            <ResizablePanelGroup direction="vertical" className="h-full w-full">
-              <ResizablePanel
-                defaultSize={40}
-                minSize={25}
-                className="relative bg-white dark:bg-black"
-              >
-                <PerformanceTimeline
-                  data={timelineData}
-                  onItemClick={(id) => {
-                    setSelectedRequestId(id);
-                  }}
-                />
-              </ResizablePanel>
-
-              <ResizableHandle />
-
-              <ResizablePanel defaultSize={60} minSize={25}>
-                <div className="h-full border-t border-slate-200 dark:border-slate-800 flex">
-                  <div className="h-full w-full">
-                    <TimelineTable
-                      id="session-requests-table"
-                      defaultData={tableData}
-                      defaultColumns={initialColumns}
-                      activeColumns={activeColumns}
-                      setActiveColumns={setActiveColumns}
-                      skeletonLoading={false}
-                      dataLoading={false}
-                      onRowSelect={onRowSelectHandler}
-                      highlightedIds={
-                        selectedRequestId ? [selectedRequestId] : []
-                      }
-                      fullWidth={true}
-                      checkboxMode="never"
-                      onToggleAllRows={handleToggleAllRows}
-                      selectedIds={selectedRequestId ? [selectedRequestId] : []}
-                    />
-                  </div>
-                </div>
-              </ResizablePanel>
-            </ResizablePanelGroup>
-          </ResizablePanel>
-
-          <ResizableHandle />
-
-          <ResizablePanel
-            ref={drawerRef}
-            defaultSize={0}
-            minSize={25}
-            maxSize={75}
-            collapsible={true}
-            collapsedSize={0}
-            onCollapse={() => {
-              setDrawerSize(0);
-            }}
-            onExpand={() => {
-              drawerRef.current?.resize(drawerSize > 0 ? drawerSize : 33);
-            }}
-            onResize={(size) => {
-              if (size > 0) {
-                setDrawerSize(size);
-              }
-            }}
-            className="bg-card"
-          >
-            {selectedRequestData && (
-              <RequestDrawer
-                request={selectedRequestData}
-                onCollapse={handleCollapseDrawer}
+    <Col className="h-full">
+      <ResizablePanelGroup direction="horizontal" className="h-full w-full">
+        <ResizablePanel
+          defaultSize={40}
+          minSize={25}
+          className="relative bg-white dark:bg-black"
+        >
+          <ResizablePanelGroup direction="vertical" className="h-full w-full">
+            <ResizablePanel
+              defaultSize={40}
+              minSize={25}
+              className="relative bg-white dark:bg-black"
+            >
+              <TraceSpan
+                session={session}
+                selectedRequestIdDispatch={[
+                  selectedRequestId,
+                  setSelectedRequestId,
+                ]}
               />
-            )}
-          </ResizablePanel>
-        </ResizablePanelGroup>
-      </Col>
-    </ColorContext.Provider>
+            </ResizablePanel>
+
+            <ResizableHandle />
+
+            <ResizablePanel defaultSize={60} minSize={25}>
+              <div className="h-full border-t border-slate-200 dark:border-slate-800 flex">
+                <div className="h-full w-full">
+                  <TimelineTable
+                    id="session-requests-table"
+                    defaultData={tableData}
+                    defaultColumns={initialColumns}
+                    activeColumns={activeColumns}
+                    setActiveColumns={setActiveColumns}
+                    skeletonLoading={false}
+                    dataLoading={false}
+                    onRowSelect={onRowSelectHandler}
+                    highlightedIds={
+                      selectedRequestId ? [selectedRequestId] : []
+                    }
+                    fullWidth={true}
+                    checkboxMode="never"
+                    onToggleAllRows={handleToggleAllRows}
+                    selectedIds={selectedRequestId ? [selectedRequestId] : []}
+                  />
+                </div>
+              </div>
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        </ResizablePanel>
+
+        <ResizableHandle />
+
+        <ResizablePanel
+          ref={drawerRef}
+          defaultSize={0}
+          minSize={25}
+          maxSize={75}
+          collapsible={true}
+          collapsedSize={0}
+          onCollapse={() => {
+            setDrawerSize(0);
+          }}
+          onExpand={() => {
+            drawerRef.current?.resize(drawerSize > 0 ? drawerSize : 33);
+          }}
+          onResize={(size) => {
+            if (size > 0) {
+              setDrawerSize(size);
+            }
+          }}
+          className="bg-card"
+        >
+          {selectedRequestData && (
+            <RequestDrawer
+              request={selectedRequestData}
+              onCollapse={handleCollapseDrawer}
+            />
+          )}
+        </ResizablePanel>
+      </ResizablePanelGroup>
+    </Col>
   );
 };
 

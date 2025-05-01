@@ -13,10 +13,10 @@ import {
 } from "@/components/ui/tooltip";
 import { Muted, Small, XSmall } from "@/components/ui/typography";
 import { useRouter } from "next/router";
-import { useMemo, useState } from "react";
+import { createContext, useEffect, useMemo, useState } from "react";
 import { PiBroadcastBold } from "react-icons/pi";
 import { isRealtimeRequest } from "../../../../lib/sessions/realtimeSession";
-import { Session } from "../../../../lib/sessions/sessionTypes";
+import { Session, TreeNodeData } from "../../../../lib/sessions/sessionTypes";
 import { getTimeIntervalAgo } from "../../../../lib/timeCalculations/time";
 import { useGetRequests } from "../../../../services/hooks/requests";
 import { useSessions } from "../../../../services/hooks/sessions";
@@ -24,6 +24,41 @@ import { Col } from "../../../layout/common/col";
 import ExportButton from "../../../shared/themed/table/exportButton";
 import FeedbackAction from "../../feedback/thumbsUpThumbsDown";
 import TreeView from "./Tree/TreeView";
+import { tracesToTreeNodeData } from "@/lib/sessions/helpers";
+
+type ColorMap = Record<string, string>;
+
+interface ColorContextType {
+  colors: ColorMap;
+}
+
+export const ColorContext = createContext<ColorContextType>({
+  colors: {},
+});
+
+function getAllPathColors(
+  treeData: TreeNodeData,
+  colors: ColorMap,
+  parentColor: string | null = null,
+  parentCount: number = 0
+): ColorMap {
+  // Skip if node has no children
+  if (!treeData.children?.length) return colors;
+
+  for (const child of treeData.children) {
+    if (parentColor === null) {
+      // For top-level nodes, generate a unique color
+      const randomColor = generateUniqueColor(colors);
+      colors[child.currentPath] = randomColor;
+      getAllPathColors(child, colors, randomColor);
+    } else {
+      // For nested nodes, inherit parent's color
+      colors[child.currentPath] = parentColor;
+      getAllPathColors(child, colors, parentColor);
+    }
+  }
+  return colors;
+}
 
 interface SessionContentProps {
   session: Session;
@@ -38,10 +73,10 @@ export const SessionContent: React.FC<SessionContentProps> = ({
   session_id,
   session_name,
   requests,
-  isLive,
-  setIsLive,
 }) => {
   const router = useRouter();
+  const [colors, setColors] = useState<ColorMap>({});
+
   const { view, requestId } = router.query;
   const [selectedRequestId, setSelectedRequestId] = useState<string>(
     (requestId as string) || ""
@@ -170,91 +205,147 @@ export const SessionContent: React.FC<SessionContentProps> = ({
     return rawRequests.some(isRealtimeRequest);
   }, [requests.requests.requests]);
 
-  return (
-    <Col className="h-screen flex flex-col">
-      <FoldedHeader
-        leftSection={
-          <div className="flex flex-row gap-4 items-center">
-            {/* Dynamic breadcrumb */}
-            <div className="flex flex-row gap-1 items-center">
-              <Small className="font-semibold">Sessions</Small>
-              <Small className="font-semibold">/</Small>
-              <Muted className="text-sm">{session_name}</Muted>
-              <Small className="font-semibold">/</Small>
+  useEffect(() => {
+    console.log("session", session);
+    const treeData = tracesToTreeNodeData(session.traces);
+    console.log(treeData);
+    setColors(
+      getAllPathColors(treeData, {}, null, treeData.children?.length ?? 0)
+    );
+    console.log("colors", colors);
+  }, [session]);
 
-              {isLoadingSessions ? (
-                <Muted className="text-sm">Loading sessions...</Muted>
-              ) : (
-                <Select
-                  value={session_id}
-                  onValueChange={handleSessionIdChange}
-                >
-                  <SelectTrigger className="w-[280px] h-8 shadow-sm">
-                    <SelectValue placeholder="Select Session ID" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {relatedSessions?.map((s) => (
-                      <SelectItem key={s.session_id} value={s.session_id}>
-                        {s.session_id}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+  return (
+    <ColorContext.Provider value={{ colors }}>
+      <Col className="h-screen flex flex-col">
+        <FoldedHeader
+          leftSection={
+            <div className="flex flex-row gap-4 items-center">
+              {/* Dynamic breadcrumb */}
+              <div className="flex flex-row gap-1 items-center">
+                <Small className="font-semibold">Sessions</Small>
+                <Small className="font-semibold">/</Small>
+                <Muted className="text-sm">{session_name}</Muted>
+                <Small className="font-semibold">/</Small>
+
+                {isLoadingSessions ? (
+                  <Muted className="text-sm">Loading sessions...</Muted>
+                ) : (
+                  <Select
+                    value={session_id}
+                    onValueChange={handleSessionIdChange}
+                  >
+                    <SelectTrigger className="w-[280px] h-8 shadow-sm">
+                      <SelectValue placeholder="Select Session ID" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {relatedSessions?.map((s) => (
+                        <SelectItem key={s.session_id} value={s.session_id}>
+                          {s.session_id}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
+
+              {/* Realtime session reconstruction warning) */}
+              {containsRealtime && (
+                <div className="flex flex-row gap-2 items-center text-xs text-blue-500 font-semibold">
+                  <PiBroadcastBold className="h-4 w-4" />
+                  Includes reconstructed realtime requests
+                </div>
               )}
             </div>
+          }
+          rightSection={
+            <div className="h-full flex flex-row gap-2 items-center">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  {/* Export the original, raw request data */}
+                  <ExportButton rows={requests.requests.requests ?? []} />
+                </TooltipTrigger>
+                <TooltipContent>Export raw data</TooltipContent>
+              </Tooltip>
 
-            {/* Realtime session reconstruction warning) */}
-            {containsRealtime && (
-              <div className="flex flex-row gap-2 items-center text-xs text-blue-500 font-semibold">
-                <PiBroadcastBold className="h-4 w-4" />
-                Includes reconstructed realtime requests
-              </div>
-            )}
-          </div>
-        }
-        rightSection={
-          <div className="h-full flex flex-row gap-2 items-center">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                {/* Export the original, raw request data */}
-                <ExportButton rows={requests.requests.requests ?? []} />
-              </TooltipTrigger>
-              <TooltipContent>Export raw data</TooltipContent>
-            </Tooltip>
+              <div className="h-4 w-px bg-border" />
 
-            <div className="h-4 w-px bg-border" />
-
-            <FeedbackAction
-              id={session_id}
-              type="session"
-              defaultValue={sessionFeedbackValue}
-            />
-          </div>
-        }
-        foldContent={
-          <div className="h-full flex flex-row items-center divide-x divide-border">
-            {sessionStatsToDisplay.map((stat) => (
-              <div
-                key={stat.label}
-                className="flex flex-row gap-1 items-center px-4"
-              >
-                <XSmall className="font-medium">{stat.label}</XSmall>
-                <Muted className="text-xs">{stat.value}</Muted>
-              </div>
-            ))}
-          </div>
-        }
-      />
-
-      <div className="flex-1 overflow-auto">
-        {/* TreeView receives the processed session */}
-        <TreeView
-          selectedRequestId={selectedRequestId}
-          setSelectedRequestId={handleRequestIdChange}
-          session={session}
-          isOriginalRealtime={containsRealtime}
+              <FeedbackAction
+                id={session_id}
+                type="session"
+                defaultValue={sessionFeedbackValue}
+              />
+            </div>
+          }
+          foldContent={
+            <div className="h-full flex flex-row items-center divide-x divide-border">
+              {sessionStatsToDisplay.map((stat) => (
+                <div
+                  key={stat.label}
+                  className="flex flex-row gap-1 items-center px-4"
+                >
+                  <XSmall className="font-medium">{stat.label}</XSmall>
+                  <Muted className="text-xs">{stat.value}</Muted>
+                </div>
+              ))}
+            </div>
+          }
         />
-      </div>
-    </Col>
+
+        <div className="flex-1 overflow-auto">
+          {/* TreeView receives the processed session */}
+          <TreeView
+            selectedRequestId={selectedRequestId}
+            setSelectedRequestId={handleRequestIdChange}
+            session={session}
+            isOriginalRealtime={containsRealtime}
+          />
+        </div>
+      </Col>
+    </ColorContext.Provider>
   );
 };
+
+function generateUniqueColor(
+  existingColors: ColorMap,
+  parentCount: number = 0
+): string {
+  // Get the count of existing colors to use as an index for deterministic generation
+  const colorIndex = Object.keys(existingColors).length;
+
+  const goldenRatioConjugate = 0.618033988749895;
+
+  let hue = ((colorIndex + parentCount * 0.1) * goldenRatioConjugate) % 1;
+
+  // Keep colors in the light spectrum
+  const saturation = 0.7; // 70% saturation for vibrant but not overwhelming colors
+  const lightness = 0.8 - (parentCount * 0.05 > 0.3 ? 0.3 : parentCount * 0.05); // Adjust lightness based on depth
+
+  // Convert HSL to hex
+  let r, g, b;
+
+  const hue2rgb = (p: number, q: number, t: number) => {
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    if (t < 1 / 6) return p + (q - p) * 6 * t;
+    if (t < 1 / 2) return q;
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+    return p;
+  };
+
+  const q =
+    lightness < 0.5
+      ? lightness * (1 + saturation)
+      : lightness + saturation - lightness * saturation;
+  const p = 2 * lightness - q;
+  r = hue2rgb(p, q, hue + 1 / 3);
+  g = hue2rgb(p, q, hue);
+  b = hue2rgb(p, q, hue - 1 / 3);
+
+  const toHex = (x: number) => {
+    const hex = Math.round(x * 255).toString(16);
+    return hex.length === 1 ? "0" + hex : hex;
+  };
+
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
