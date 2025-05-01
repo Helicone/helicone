@@ -24,7 +24,10 @@ import { parseOpenAIStream } from "./streamParsers/openAIStreamParser";
 
 import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 import { costOfPrompt } from "../../packages/cost";
-import { KafkaMessage, KafkaProducer } from "../clients/KafkaProducer";
+import {
+  KafkaMessage,
+  HeliconeProducerLegacyWrapper,
+} from "../clients/KafkaProducer";
 
 export interface DBLoggableProps {
   response: {
@@ -513,7 +516,7 @@ export class DBLoggable {
       clickhouse: ClickhouseClientWrapper;
       queue: RequestResponseStore;
       requestResponseManager: RequestResponseManager;
-      kafkaProducer: KafkaProducer;
+      kafkaProducer: HeliconeProducerLegacyWrapper;
     },
     S3_ENABLED: Env["S3_ENABLED"],
     requestHeaders?: HeliconeHeaders
@@ -602,7 +605,7 @@ export class DBLoggable {
       clickhouse: ClickhouseClientWrapper;
       queue: RequestResponseStore;
       requestResponseManager: RequestResponseManager;
-      kafkaProducer: KafkaProducer;
+      kafkaProducer: HeliconeProducerLegacyWrapper;
     },
     authParams: AuthParams,
     S3_ENABLED: Env["S3_ENABLED"],

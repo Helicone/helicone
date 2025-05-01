@@ -84,6 +84,13 @@ export interface BASE_Env {
   SENTRY_API_KEY: string;
   SENTRY_PROJECT_ID: string;
   WORKER_DEFINED_REDIRECT_URL?: string;
+  // AWS SQS Configuration
+  AWS_REGION?: string;
+  AWS_ACCESS_KEY_ID?: string;
+  AWS_SECRET_ACCESS_KEY?: string;
+  REQUEST_LOGS_QUEUE_URL?: string;
+  HELICONE_SCORES_QUEUE_URL?: string;
+  QUEUE_PROVIDER?: "kafka" | "sqs" | "dual";
 }
 export type Env = BASE_Env & EU_Env;
 
