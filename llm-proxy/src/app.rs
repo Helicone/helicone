@@ -4,12 +4,13 @@ use std::{
     net::SocketAddr,
     sync::Arc,
     task::{Context, Poll},
+    time::Duration,
 };
 
 use axum_server::tls_rustls::RustlsConfig;
 use futures::future::BoxFuture;
 use meltdown::Token;
-use minio_rsc::{Minio, provider::StaticProvider};
+use reqwest::Client;
 use telemetry::tracing::MakeRequestId;
 use tower::{ServiceBuilder, buffer::BufferLayer, util::BoxCloneService};
 use tower_http::{
@@ -25,6 +26,7 @@ use tracing::{Level, info};
 use crate::{
     config::{
         Config,
+        minio::Minio,
         model_mapping::ModelMapper,
         rate_limit::{AuthedLimiterConfig, UnauthedLimiterConfig},
         server::TlsConfig,
@@ -39,6 +41,7 @@ use crate::{
 };
 
 const BUFFER_SIZE: usize = 1024;
+const JAWN_CONNECT_TIMEOUT: Duration = Duration::from_secs(10);
 
 pub type AppResponse = http::Response<
     tower_http::body::UnsyncBoxBody<
@@ -66,9 +69,11 @@ pub type BoxedHyperServiceStack = BoxCloneService<
 #[derive(Debug, Clone)]
 pub struct AppState(pub Arc<InnerAppState>);
 
+#[derive(Debug)]
 pub struct InnerAppState {
     pub config: Config,
-    pub minio: Option<Minio>,
+    pub minio: Minio,
+    pub jawn_client: Client,
     pub authed_rate_limit: Arc<AuthedLimiterConfig>,
     pub unauthed_rate_limit: Arc<UnauthedLimiterConfig>,
     pub store: StoreRealm,
@@ -77,24 +82,6 @@ pub struct InnerAppState {
     // currently its shared across all routers and that wont work for cloud
     // mode.
     pub provider_keys: ProviderKeys,
-}
-
-impl std::fmt::Debug for InnerAppState {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let minio = if self.minio.is_some() {
-            "Some(Minio)"
-        } else {
-            "None"
-        };
-        f.debug_struct("AppState")
-            .field("config", &self.config)
-            .field("authed_rate_limit", &self.authed_rate_limit)
-            .field("unauthed_rate_limit", &self.unauthed_rate_limit)
-            .field("store", &self.store)
-            .field("minio", &minio)
-            .field("provider_keys", &self.provider_keys)
-            .finish()
-    }
 }
 
 /// The top level app used to start the hyper server.
@@ -185,19 +172,8 @@ impl App {
         config: Config,
     ) -> Result<(Self, ProviderMonitors), InitError> {
         tracing::info!(config = ?config, "creating app");
-        let provider = StaticProvider::from_env();
-        let minio = if let Some(provider) = provider {
-            Some(
-                Minio::builder()
-                    .endpoint(config.minio.host.clone())
-                    .provider(provider)
-                    // we don't need TLS since this is only within the cluster
-                    .secure(false)
-                    .build()?,
-            )
-        } else {
-            None
-        };
+        tracing::info!(access_key = %config.minio.access_key.0, "access key");
+        let minio = Minio::new(config.minio.clone())?;
         let unauthed_rate_limit =
             Arc::new(config.rate_limit.unauthed_limiter());
         let authed_rate_limit = Arc::new(config.rate_limit.authed_limiter());
@@ -207,15 +183,19 @@ impl App {
             .connect(&config.database.url.0)
             .await
             .map_err(error::init::InitError::DatabaseConnection)?;
-        // TODO: remove this expect
         let balance_config = &config
             .routers
             .as_ref()
             .get(&RouterId::Default)
-            .expect("default router not found")
+            .ok_or(InitError::DefaultRouterNotFound)?
             .balance;
         let provider_keys = config.discover.provider_keys(balance_config)?;
         let model_mapper = config.model_mappings.clone().try_into()?;
+        let jawn_client = Client::builder()
+            .tcp_nodelay(true)
+            .connect_timeout(JAWN_CONNECT_TIMEOUT)
+            .build()
+            .map_err(error::init::InitError::CreateReqwestClient)?;
         let app_state = AppState(Arc::new(InnerAppState {
             config,
             minio,
@@ -224,6 +204,7 @@ impl App {
             store: StoreRealm::new(pg_pool),
             provider_keys,
             model_mapper,
+            jawn_client,
         }));
 
         let (router, monitors) = MetaRouter::new(app_state.clone()).await?;

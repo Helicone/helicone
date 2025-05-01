@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     error::init::InitError,
     types::{
-        model::{Model, Version},
+        model::{Model, ModelName, Version},
         provider::Provider,
     },
 };
@@ -20,8 +20,8 @@ use crate::{
 #[derive(Debug, Clone, Deserialize, Serialize, AsRef)]
 pub struct ModelMappingConfig(HashMap<Provider, HashMap<String, String>>);
 
-#[derive(Debug, Clone)]
-pub struct ModelMapper(HashMap<Provider, HashMap<Model, Model>>);
+#[derive(Debug)]
+pub struct ModelMapper(HashMap<Provider, HashMap<ModelName<'static>, Model>>);
 
 impl ModelMapper {
     pub fn get(
@@ -33,9 +33,10 @@ impl ModelMapper {
         if model_provider == Some(*target_provider) {
             Some(source_model.clone())
         } else {
+            let model = ModelName::borrowed(source_model.name.as_str());
             self.0
                 .get(target_provider)
-                .and_then(|m| m.get(source_model))
+                .and_then(|m| m.get(&model))
                 .cloned()
         }
     }
@@ -51,10 +52,11 @@ impl TryFrom<ModelMappingConfig> for ModelMapper {
             for (source_model, target_model) in mapping {
                 let source_model = Model::from_str(source_model)
                     .map_err(InitError::InvalidModelMappingConfig)?;
+                let source_model_name = ModelName::owned(source_model.name);
                 let mut target_model = Model::from_str(target_model)
                     .map_err(InitError::InvalidModelMappingConfig)?;
                 target_model.version = Some(Version::Latest);
-                provider_mapper.insert(source_model, target_model);
+                provider_mapper.insert(source_model_name, target_model);
             }
             mapper.insert(*provider, provider_mapper);
         }

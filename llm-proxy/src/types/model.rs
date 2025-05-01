@@ -1,6 +1,7 @@
-use std::str::FromStr;
+use std::{borrow::Cow, str::FromStr};
 
 use chrono::{DateTime, NaiveDate, TimeZone, Utc};
+use derive_more::AsRef;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 use super::provider::Provider;
@@ -15,6 +16,19 @@ pub enum Version {
         deserialize_with = "crate::utils::deserialize_from_str"
     )]
     Semver(semver::Version),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, AsRef)]
+pub struct ModelName<'a>(Cow<'a, str>);
+
+impl<'a> ModelName<'a> {
+    pub fn borrowed(name: &'a str) -> Self {
+        Self(Cow::Borrowed(name))
+    }
+
+    pub fn owned(name: String) -> Self {
+        Self(Cow::Owned(name))
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

@@ -2,11 +2,12 @@ use std::{
     future::{Ready, ready},
     sync::Arc,
     task::{Context, Poll},
-    time::Instant,
 };
 
+use chrono::Utc;
 use futures::future::Either;
 use isocountry::CountryCode;
+use uuid::Uuid;
 
 use crate::{
     config::router::RouterConfig,
@@ -107,9 +108,9 @@ where
             helicone,
             auth_context,
             is_stream: false,
-            request_id: "test-request-id".to_string(),
+            request_id: Uuid::new_v4(),
             country_code: CountryCode::USA,
-            start_time: Instant::now(),
+            start_time: Utc::now(),
         };
 
         Ok(req_ctx)

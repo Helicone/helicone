@@ -115,6 +115,8 @@ where
 
             if key.provider != request_style {
                 tracing::trace!(%request_style, target_provider = %key.provider, "mapping request body");
+                // TODO: can improve performance by calling map_request on
+                // thread pool
                 let req =
                     map_request(app_state, request_style, key, req).await?;
                 inner.call(req).await

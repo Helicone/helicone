@@ -43,10 +43,7 @@ impl
         Self::Error,
     > {
         let target_provider = Provider::Anthropic;
-        let mut source_model = Model::from_str(&value.model)?;
-        // atm, we don't care about the version of the model when mapping
-        // between providers
-        source_model.version = None;
+        let source_model = Model::from_str(&value.model)?;
         let model = self
             .model_mapper
             .get(&target_provider, &source_model)

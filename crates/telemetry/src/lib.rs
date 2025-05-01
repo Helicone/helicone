@@ -1,11 +1,11 @@
 pub mod tracing;
 
-use opentelemetry::trace::TracerProvider;
+use opentelemetry::{TraceId, trace::TracerProvider};
 use opentelemetry_otlp::{ExporterBuildError, LogExporter, SpanExporter};
 use opentelemetry_sdk::{
     Resource,
     logs::SdkLoggerProvider,
-    trace::{RandomIdGenerator, SdkTracerProvider},
+    trace::{IdGenerator, SdkTracerProvider},
 };
 use serde::{Deserialize, Serialize};
 pub use tracing_subscriber::util::TryInitError;
@@ -13,6 +13,7 @@ use tracing_subscriber::{
     EnvFilter, Layer, filter::ParseError, layer::SubscriberExt,
     util::SubscriberInitExt,
 };
+use uuid::Uuid;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields, rename_all = "kebab-case")]
@@ -180,7 +181,7 @@ fn tracer_provider(
                 .with_resource(resource)
                 // we don't need an exporter here for stdout since we really
                 // just want the tracer to generate trace ids
-                .with_id_generator(RandomIdGenerator::default())
+                .with_id_generator(UuidGenerator)
                 .with_max_events_per_span(64)
                 .with_max_attributes_per_span(16)
                 .build())
@@ -190,7 +191,7 @@ fn tracer_provider(
             let provider = SdkTracerProvider::builder()
                 .with_resource(resource)
                 .with_batch_exporter(exporter)
-                .with_id_generator(RandomIdGenerator::default())
+                .with_id_generator(UuidGenerator)
                 .with_max_events_per_span(64)
                 .with_max_attributes_per_span(16)
                 .build();
@@ -207,4 +208,17 @@ fn logger_provider(
         .with_resource(resource)
         .with_batch_exporter(exporter)
         .build())
+}
+
+#[derive(Debug)]
+pub struct UuidGenerator;
+
+impl IdGenerator for UuidGenerator {
+    fn new_trace_id(&self) -> opentelemetry::TraceId {
+        TraceId::from(Uuid::new_v4().as_u128())
+    }
+
+    fn new_span_id(&self) -> opentelemetry::SpanId {
+        opentelemetry::SpanId::from(Uuid::new_v4().as_u64_pair().0)
+    }
 }

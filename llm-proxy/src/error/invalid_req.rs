@@ -6,7 +6,7 @@ use tracing::debug;
 
 use crate::{
     error::api::ErrorResponse,
-    types::{json::Json, provider::Provider, response::Response},
+    types::{json::Json, provider::Provider},
 };
 
 /// User errors
@@ -29,7 +29,7 @@ pub enum InvalidRequestError {
 }
 
 impl IntoResponse for InvalidRequestError {
-    fn into_response(self) -> Response {
+    fn into_response(self) -> axum_core::response::Response {
         debug!(error = %self, "Invalid request");
         match self {
             Self::NotFound(path) => (

@@ -1,0 +1,193 @@
+use std::{sync::Arc, time::Duration};
+
+use bytes::Bytes;
+use chrono::Utc;
+use http::{HeaderMap, StatusCode};
+use http_body_util::BodyExt;
+use indexmap::IndexMap;
+use rusty_s3::S3Action;
+use url::Url;
+
+use crate::{
+    app::AppState,
+    discover::Key,
+    error::logger::LoggerError,
+    types::{
+        body::BodyReader,
+        logger::{
+            HeliconeLogMetadata, Log, LogMessageBuilder, RequestLogBuilder,
+            ResponseLogBuilder, S3Log,
+        },
+        request::RequestContext,
+    },
+};
+
+const PUT_OBJECT_SIGN_DURATION: Duration = Duration::from_secs(120);
+
+#[derive(Debug)]
+pub struct LoggerService {
+    app_state: AppState,
+    req_ctx: Arc<RequestContext>,
+    response_body: BodyReader,
+    request_body: Bytes,
+    target_url: Url,
+    request_headers: HeaderMap,
+    response_status: StatusCode,
+    /// backend provider that was used to fulfill the request
+    service: Key,
+}
+
+impl LoggerService {
+    pub fn new(
+        app_state: AppState,
+        req_ctx: Arc<RequestContext>,
+        target_url: Url,
+        request_headers: HeaderMap,
+        request_body: Bytes,
+        response_status: StatusCode,
+        response_body: BodyReader,
+        service: Key,
+    ) -> Self {
+        Self {
+            app_state,
+            req_ctx,
+            response_body,
+            request_body,
+            target_url,
+            request_headers,
+            response_status,
+            service,
+        }
+    }
+
+    #[tracing::instrument(skip_all)]
+    async fn log_bodies(
+        app_state: &AppState,
+        req_ctx: &Arc<RequestContext>,
+        request_body: Bytes,
+        response_body: Bytes,
+    ) -> Result<(), LoggerError> {
+        tracing::debug!("logging bodies to s3");
+        let auth_ctx = &req_ctx.auth_context;
+        let object_path = format!(
+            "organizations/{}/requests/{}/raw_request_response_body",
+            auth_ctx.org_id.as_ref(),
+            req_ctx.request_id
+        );
+        let action = app_state.0.minio.put_object(&object_path);
+        let signed_url = action.sign(PUT_OBJECT_SIGN_DURATION);
+
+        let s3_log = S3Log::new(request_body, response_body);
+        let _resp = app_state
+            .0
+            .minio
+            .client
+            .put(signed_url)
+            .json(&s3_log)
+            .send()
+            .await
+            .map_err(|e| {
+                tracing::debug!(error = %e, "failed to send request to S3");
+                LoggerError::FailedToSendRequest(e)
+            })?
+            .error_for_status()
+            .map_err(|e| {
+                tracing::error!(error = %e, "failed to log bodies in S3");
+                LoggerError::ResponseError(e)
+            })?;
+        Ok(())
+    }
+
+    #[tracing::instrument(skip_all)]
+    pub async fn log(mut self) -> Result<(), LoggerError> {
+        let response_body = self
+            .response_body
+            .collect()
+            .await
+            .inspect_err(|_| tracing::error!("infallible errored"))
+            .expect("infallible never errors")
+            .to_bytes();
+        let req_body_len = self.request_body.len();
+        let resp_body_len = response_body.len();
+        LoggerService::log_bodies(
+            &self.app_state,
+            &self.req_ctx,
+            self.request_body,
+            response_body,
+        )
+        .await?;
+
+        let helicone_metadata =
+            HeliconeLogMetadata::from_headers(&mut self.request_headers)?;
+        let req_path = self.target_url.path().to_string();
+        let request_log = RequestLogBuilder::default()
+            .id(self.req_ctx.request_id)
+            .user_id(self.req_ctx.auth_context.user_id.clone())
+            .properties(IndexMap::new())
+            .target_url(self.target_url)
+            .provider(self.service.provider)
+            .body_size(req_body_len as f64)
+            .path(req_path)
+            .request_created_at(self.req_ctx.start_time)
+            .is_stream(false)
+            .build()
+            .map_err(|e| {
+                tracing::error!(error = %e, "failed to build request log message");
+                LoggerError::LogMessageBuilder(e.into())
+            })?;
+        let response_log = ResponseLogBuilder::default()
+            .id(self.req_ctx.request_id)
+            .status(self.response_status.as_u16() as f64)
+            .body_size(resp_body_len as f64)
+            .response_created_at(Utc::now())
+            .delay_ms(0.0)
+            .build()
+            .map_err(|e| {
+                tracing::error!(error = %e, "failed to build response log message");
+                LoggerError::LogMessageBuilder(e.into())
+            })?;
+        let log = Log::new(request_log, response_log);
+        let log_message = LogMessageBuilder::default()
+            .authorization(self.req_ctx.auth_context.api_key.clone())
+            .helicone_meta(helicone_metadata)
+            .log(log)
+            .build()
+            .map_err(|e| {
+                tracing::error!(error = %e, "failed to build log message");
+                LoggerError::LogMessageBuilder(e.into())
+            })?;
+
+        let helicone_url = self
+            .app_state
+            .0
+            .config
+            .helicone
+            .base_url
+            .join("/v1/log/request")?;
+
+        let cloned_json = serde_json::to_string_pretty(&log_message).unwrap();
+        tracing::debug!(json = %cloned_json, "log message");
+
+        let helicone_response = self
+            .app_state
+            .0
+            .jawn_client
+            .post(helicone_url)
+            .json(&log_message)
+            .header("authorization", format!("Bearer {}", self.req_ctx.auth_context.api_key))
+            .send()
+            .await
+            .map_err(|e| {
+                tracing::debug!(error = %e, "failed to send request to helicone");
+                LoggerError::FailedToSendRequest(e)
+            })?
+            .error_for_status()
+            .map_err(|e| {
+                tracing::error!(error = %e, "failed to log request to helicone");
+                LoggerError::ResponseError(e)
+            })?;
+        tracing::debug!(status = %helicone_response.status(), "got response from helicone log endpoint");
+
+        Ok(())
+    }
+}

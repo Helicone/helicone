@@ -1,6 +1,14 @@
+# for local development+sqlx, not required if SQLX_OFFLINE=true
 export DATABASE_URL="postgresql://postgres:postgres@localhost:54322/postgres"
-export MINIO_ACCESS_KEY="minioadmin"
-export MINIO_SECRET_KEY="minioadmin"
+# export SQLX_OFFLINE=true
+
+# for the app
+export PROXY__DATABASE__URL="postgresql://postgres:postgres@localhost:54322/postgres"
+export PROXY__MINIO__ACCESS_KEY="minioadmin"
+export PROXY__MINIO__SECRET_KEY="minioadmin"
+export PROXY__HELICONE__API_KEY="sk-helicone-..."
 export OPENAI_API_KEY="sk-..."
 export ANTHROPIC_API_KEY="sk-..."
-# export SQLX_OFFLINE=true
+
+# for the `test` cargo package, local development
+export HELICONE_API_KEY="sk-helicone-..."

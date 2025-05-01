@@ -12,7 +12,7 @@ anthropic-types = { workspace = true }
 axum-core = { workspace = true }
 axum-server = { workspace = true, features = ["tls-rustls"] }
 bytes = { workspace = true, features = ['serde'] }
-chrono = { workspace = true }
+chrono = { workspace = true, features = ['default', 'serde'] }
 clap = { workspace = true }
 config = { workspace = true }
 compact_str = { workspace = true, features = ['serde'] }
@@ -32,7 +32,6 @@ isocountry = { workspace = true }
 json-patch = { workspace = true }
 meltdown = { workspace = true }
 mime = { workspace = true }
-minio-rsc = { workspace = true }
 nonempty-collections = { workspace = true, features = ["serde"] }
 opentelemetry = { workspace = true }
 opentelemetry_sdk = { workspace = true, features = ["rt-tokio"] }
@@ -41,6 +40,7 @@ pin-project-lite = { workspace = true }
 regex = { workspace = true }
 reqwest = { workspace = true }
 rust_decimal = { workspace = true }
+rusty-s3 = { workspace = true }
 semver = { workspace = true }
 serde = { workspace = true, features = ['derive', 'rc'] }
 serde_json = { workspace = true }
