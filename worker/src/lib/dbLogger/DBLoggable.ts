@@ -514,7 +514,7 @@ export class DBLoggable {
       clickhouse: ClickhouseClientWrapper;
       queue: RequestResponseStore;
       requestResponseManager: RequestResponseManager;
-      kafkaProducer: HeliconeProducer;
+      producer: HeliconeProducer;
     },
     S3_ENABLED: Env["S3_ENABLED"],
     requestHeaders?: HeliconeHeaders

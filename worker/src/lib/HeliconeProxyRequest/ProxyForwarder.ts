@@ -352,7 +352,7 @@ export async function proxyForwarder(
           ),
           createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY)
         ),
-        kafkaProducer: new HeliconeProducer(env),
+        producer: new HeliconeProducer(env),
       },
       env.S3_ENABLED ?? "true",
       proxyRequest?.requestWrapper.heliconeHeaders
