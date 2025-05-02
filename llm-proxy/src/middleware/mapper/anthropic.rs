@@ -54,7 +54,7 @@ impl
                 )
             })?;
 
-        tracing::trace!(source_model = ?value, target_model = ?model, "mapped model");
+        tracing::trace!(source_model = ?source_model, target_model = ?model, "mapped model");
         let mut messages = Vec::with_capacity(value.messages.len());
         if let Some(system_prompt) = value.system {
             messages.push(openai_types::chat::ChatCompletionRequestMessage {

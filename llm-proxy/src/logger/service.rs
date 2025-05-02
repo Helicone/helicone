@@ -101,6 +101,7 @@ impl LoggerService {
 
     #[tracing::instrument(skip_all)]
     pub async fn log(mut self) -> Result<(), LoggerError> {
+        tracing::trace!("logging request");
         let response_body = self
             .response_body
             .collect()

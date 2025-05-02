@@ -53,7 +53,7 @@ impl
                     source_model.name.clone(),
                 )
             })?;
-        tracing::trace!(source_model = ?value, target_model = ?model, "mapped model");
+        tracing::trace!(source_model = ?source_model, target_model = ?model, "mapped model");
         let system = if let Some(message) = value.messages.first() {
             if message.role == openai_types::chat::Role::System {
                 Some(message.content.clone())
