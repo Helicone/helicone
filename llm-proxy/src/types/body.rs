@@ -16,7 +16,7 @@ pub struct Body {
 }
 
 impl Body {
-    pub fn new(
+    pub fn wrap_stream(
         stream: impl Stream<Item = Result<Bytes, reqwest::Error>> + Send + 'static,
     ) -> (reqwest::Body, BodyReader) {
         // unbounded channel is okay since we limit memory usage higher in the

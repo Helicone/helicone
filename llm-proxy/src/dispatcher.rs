@@ -199,18 +199,18 @@ impl Dispatcher {
             http::Response::builder().status(resp_status);
         *response_builder.headers_mut().unwrap() = response.headers().clone();
         let (user_resp_body, body_reader) =
-            crate::types::body::Body::new(response.bytes_stream());
+            crate::types::body::Body::wrap_stream(response.bytes_stream());
 
-        let response_logger = LoggerService::new(
-            self.app_state.clone(),
-            req_ctx,
-            target_url,
-            headers,
-            req_body_bytes,
-            resp_status,
-            body_reader,
-            self.key,
-        );
+        let response_logger = LoggerService::builder()
+            .app_state(self.app_state.clone())
+            .req_ctx(req_ctx)
+            .target_url(target_url)
+            .request_headers(headers)
+            .request_body(req_body_bytes)
+            .response_status(resp_status)
+            .response_body(body_reader)
+            .service(self.key)
+            .build();
 
         tokio::spawn(async move {
             if let Err(e) = response_logger.log().await {

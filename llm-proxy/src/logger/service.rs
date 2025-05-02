@@ -6,6 +6,7 @@ use http::{HeaderMap, StatusCode};
 use http_body_util::BodyExt;
 use indexmap::IndexMap;
 use rusty_s3::S3Action;
+use typed_builder::TypedBuilder;
 use url::Url;
 
 use crate::{
@@ -15,8 +16,8 @@ use crate::{
     types::{
         body::BodyReader,
         logger::{
-            HeliconeLogMetadata, Log, LogMessageBuilder, RequestLogBuilder,
-            ResponseLogBuilder, S3Log,
+            HeliconeLogMetadata, Log, LogMessage, RequestLog, ResponseLog,
+            S3Log,
         },
         request::RequestContext,
     },
@@ -24,7 +25,7 @@ use crate::{
 
 const PUT_OBJECT_SIGN_DURATION: Duration = Duration::from_secs(120);
 
-#[derive(Debug)]
+#[derive(Debug, TypedBuilder)]
 pub struct LoggerService {
     app_state: AppState,
     req_ctx: Arc<RequestContext>,
@@ -38,28 +39,6 @@ pub struct LoggerService {
 }
 
 impl LoggerService {
-    pub fn new(
-        app_state: AppState,
-        req_ctx: Arc<RequestContext>,
-        target_url: Url,
-        request_headers: HeaderMap,
-        request_body: Bytes,
-        response_status: StatusCode,
-        response_body: BodyReader,
-        service: Key,
-    ) -> Self {
-        Self {
-            app_state,
-            req_ctx,
-            response_body,
-            request_body,
-            target_url,
-            request_headers,
-            response_status,
-            service,
-        }
-    }
-
     #[tracing::instrument(skip_all)]
     async fn log_bodies(
         app_state: &AppState,
@@ -122,7 +101,7 @@ impl LoggerService {
         let helicone_metadata =
             HeliconeLogMetadata::from_headers(&mut self.request_headers)?;
         let req_path = self.target_url.path().to_string();
-        let request_log = RequestLogBuilder::default()
+        let request_log = RequestLog::builder()
             .id(self.req_ctx.request_id)
             .user_id(self.req_ctx.auth_context.user_id.clone())
             .properties(IndexMap::new())
@@ -132,32 +111,20 @@ impl LoggerService {
             .path(req_path)
             .request_created_at(self.req_ctx.start_time)
             .is_stream(false)
-            .build()
-            .map_err(|e| {
-                tracing::error!(error = %e, "failed to build request log message");
-                LoggerError::LogMessageBuilder(e.into())
-            })?;
-        let response_log = ResponseLogBuilder::default()
+            .build();
+        let response_log = ResponseLog::builder()
             .id(self.req_ctx.request_id)
             .status(self.response_status.as_u16() as f64)
             .body_size(resp_body_len as f64)
             .response_created_at(Utc::now())
             .delay_ms(0.0)
-            .build()
-            .map_err(|e| {
-                tracing::error!(error = %e, "failed to build response log message");
-                LoggerError::LogMessageBuilder(e.into())
-            })?;
+            .build();
         let log = Log::new(request_log, response_log);
-        let log_message = LogMessageBuilder::default()
+        let log_message = LogMessage::builder()
             .authorization(self.req_ctx.auth_context.api_key.clone())
             .helicone_meta(helicone_metadata)
             .log(log)
-            .build()
-            .map_err(|e| {
-                tracing::error!(error = %e, "failed to build log message");
-                LoggerError::LogMessageBuilder(e.into())
-            })?;
+            .build();
 
         let helicone_url = self
             .app_state

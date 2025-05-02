@@ -1,8 +1,8 @@
 use chrono::{DateTime, Utc};
-use derive_builder::Builder;
 use http::HeaderMap;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize, Serializer};
+use typed_builder::TypedBuilder;
 use url::Url;
 use uuid::Uuid;
 
@@ -73,9 +73,8 @@ impl HeliconeLogMetadata {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Builder)]
+#[derive(Debug, Serialize, Deserialize, TypedBuilder)]
 #[serde(rename_all = "camelCase")]
-#[builder(pattern = "owned")]
 pub struct RequestLog {
     pub id: Uuid,
     pub user_id: UserId,
@@ -128,9 +127,8 @@ where
     serializer.serialize_str(&value.to_string().to_uppercase())
 }
 
-#[derive(Debug, Serialize, Deserialize, Default, Builder)]
+#[derive(Debug, Serialize, Deserialize, Default, TypedBuilder)]
 #[serde(rename_all = "camelCase")]
-#[builder(pattern = "owned")]
 pub struct ResponseLog {
     pub id: Uuid,
     pub status: f64,
@@ -155,9 +153,8 @@ impl Log {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Builder)]
+#[derive(Debug, Serialize, Deserialize, TypedBuilder)]
 #[serde(rename_all = "camelCase")]
-#[builder(pattern = "owned")]
 pub struct LogMessage {
     pub authorization: String,
     pub helicone_meta: HeliconeLogMetadata,

@@ -112,7 +112,6 @@ dependencies = [
 name = "anthropic-types"
 version = "0.1.0"
 dependencies = [
- "derive_builder",
  "futures",
  "reqwest",
  "serde",
@@ -120,6 +119,7 @@ dependencies = [
  "serde_repr",
  "serde_with",
  "thiserror 2.0.12",
+ "typed-builder",
  "url",
 ]
 
@@ -959,37 +959,6 @@ checksum = "9c9e6a11ca8224451684bc0d7d5a7adbf8f2fd6887261a1cfc3c0432f9d4068e"
 dependencies = [
  "powerfmt",
  "serde",
-]
-
-[[package]]
-name = "derive_builder"
-version = "0.20.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "507dfb09ea8b7fa618fcf76e953f4f5e192547945816d5358edffe39f6f94947"
-dependencies = [
- "derive_builder_macro",
-]
-
-[[package]]
-name = "derive_builder_core"
-version = "0.20.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2d5bcf7b024d6835cfb3d473887cd966994907effbe9227e8c8219824d06c4e8"
-dependencies = [
- "darling",
- "proc-macro2",
- "quote",
- "syn 2.0.101",
-]
-
-[[package]]
-name = "derive_builder_macro"
-version = "0.20.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ab63b0e2bf4d5928aff72e83a7dace85d7bba5fe12dcc3c5a572d78caffd3f3c"
-dependencies = [
- "derive_builder_core",
- "syn 2.0.101",
 ]
 
 [[package]]
@@ -2276,7 +2245,6 @@ dependencies = [
  "clap",
  "compact_str",
  "config",
- "derive_builder",
  "derive_more",
  "displaydoc",
  "futures",
@@ -2322,6 +2290,7 @@ dependencies = [
  "tower_governor",
  "tracing",
  "tracing-subscriber",
+ "typed-builder",
  "url",
  "utoipa",
  "uuid",
@@ -2590,7 +2559,6 @@ checksum = "42f5e15c9953c5e4ccceeb2e7382a716482c34515315f7b03532b8b4e8393d2d"
 name = "openai-types"
 version = "0.1.0"
 dependencies = [
- "derive_builder",
  "futures",
  "reqwest",
  "serde",
@@ -2598,6 +2566,7 @@ dependencies = [
  "serde_repr",
  "serde_with",
  "thiserror 2.0.12",
+ "typed-builder",
  "url",
 ]
 
@@ -5005,6 +4974,26 @@ name = "try-lock"
 version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e421abadd41a4225275504ea4d6566923418b7f05506fbc9c0fe86ba7396114b"
+
+[[package]]
+name = "typed-builder"
+version = "0.21.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ce63bcaf7e9806c206f7d7b9c1f38e0dce8bb165a80af0898161058b19248534"
+dependencies = [
+ "typed-builder-macro",
+]
+
+[[package]]
+name = "typed-builder-macro"
+version = "0.21.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "60d8d828da2a3d759d3519cdf29a5bac49c77d039ad36d0782edadbf9cd5415b"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.101",
+]
 
 [[package]]
 name = "typenum"

@@ -15,5 +15,5 @@
 - Run an HTTP request against the router: `cargo run -p test`, this is the
   package in `test/src/main.rs` and will eventually be removed or upgraded
   to a CLI.
-- Run unit + integration tests: `cargo t --test --all-features`. Requires
+- Run unit + integration tests: `cargo t --tests --all-features`. Requires
   a postgres database to be running for integration tests.
