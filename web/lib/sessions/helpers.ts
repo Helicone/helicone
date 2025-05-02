@@ -1,5 +1,6 @@
 import {
   FolderNode,
+  HeliconeRequestType,
   Session,
   Trace,
   TraceNode,
@@ -126,14 +127,14 @@ export const tracesToTreeNodeData = (traces: Trace[]): TreeNodeData => {
   if (traces.length === 0) {
     return {
       latency: 0,
-      name: "",
+      subPathName: "",
       currentPath: "",
     };
   }
   const folderNodes = tracesToFolderNodes(traces);
   const folderToTreeNode = (folder: FolderNode): TreeNodeData => {
     return {
-      name: folder.folderName,
+      subPathName: folder.folderName,
       latency: Math.round(
         (latestFolder(folder) - earliestFolder(folder)) / 1000
       ),
@@ -145,12 +146,12 @@ export const tracesToTreeNodeData = (traces: Trace[]): TreeNodeData => {
           return {
             trace: child,
             currentPath: child.path,
-            name: "LLM",
             latency:
               child?.end_unix_timestamp_ms && child?.start_unix_timestamp_ms
                 ? child.end_unix_timestamp_ms - child.start_unix_timestamp_ms
                 : 0,
             properties: child.properties,
+            heliconeRequestType: getHeliconeRequestType(child),
           };
         }
       }),
@@ -159,3 +160,11 @@ export const tracesToTreeNodeData = (traces: Trace[]): TreeNodeData => {
 
   return folderToTreeNode(folderNodes[0]);
 };
+
+function getHeliconeRequestType(trace: Trace): HeliconeRequestType {
+  return trace.request.model.startsWith("tool:")
+    ? "Tool"
+    : trace.request.model.startsWith("vector_db")
+    ? "VectorDB"
+    : "LLM";
+}

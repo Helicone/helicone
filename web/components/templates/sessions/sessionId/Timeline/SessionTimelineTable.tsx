@@ -31,6 +31,7 @@ import LoadingAnimation from "@/components/shared/loadingAnimation";
 import DraggableColumnHeader from "@/components/shared/themed/table/columns/draggableColumnHeader";
 import { clsx } from "@/components/shared/clsx";
 import { useColorMapStore } from "@/store/features/sessions/colorMap";
+import { HeliconeRequestType } from "@/lib/sessions/sessionTypes";
 
 type CheckboxMode = "always_visible" | "on_hover" | "never";
 
@@ -369,7 +370,7 @@ export default function SessionTimelineTable(
                     <td
                       key={cell.id}
                       className={clsx(
-                        "text-slate-700 dark:text-slate-300 truncate select-none",
+                        "text-slate-700 dark:text-slate-300 truncate select-none pl-1",
                         i === 0 ? "pr-2 relative" : "py-1",
                         (() => {
                           if (
@@ -392,7 +393,7 @@ export default function SessionTimelineTable(
                       }}
                     >
                       <div
-                        className="flex items-center gap-1"
+                        className="flex items-center gap-1 my-1"
                         style={
                           i === 0
                             ? {
@@ -408,7 +409,7 @@ export default function SessionTimelineTable(
                         {i === 0 &&
                           (() => {
                             const groupColorClass =
-                              getColor(row.original.currentPath) ||
+                              getColor(row.original.completePath) ||
                               "bg-transparent";
 
                             if (groupColorClass !== "bg-transparent") {
@@ -438,8 +439,19 @@ export default function SessionTimelineTable(
                           </button>
                         )}
                         {i === 0 && !row.getCanExpand() && (
-                          <span className="inline-block mr-1 px-2 py-1 bg-sky-200 text-blue-800 rounded text-xs whitespace-nowrap">
-                            {row.original?.name}
+                          <span
+                            className={clsx(
+                              "flex-shrink-0 px-2 py-1 mr-4 my-1 text-xs font-medium rounded-md whitespace-nowrap",
+                              REQUEST_TYPE_CONFIG[
+                                row.original.heliconeRequestType!
+                              ].bgColor
+                            )}
+                          >
+                            {
+                              REQUEST_TYPE_CONFIG[
+                                row.original!.heliconeRequestType!
+                              ].displayName
+                            }
                           </span>
                         )}
                         {dataLoading &&
@@ -468,7 +480,7 @@ export default function SessionTimelineTable(
                           descendantErrorMap.get(row.original.id ?? "") ===
                             true && (
                             <span
-                              title="Contains descendant 4xx error"
+                              title="Contains descendant error"
                               className="w-2 h-2 ml-2 rounded-full bg-red-600 shrink-0"
                             />
                           )}
@@ -517,6 +529,26 @@ export default function SessionTimelineTable(
     </ScrollArea>
   );
 }
+
+const REQUEST_TYPE_CONFIG: Record<
+  HeliconeRequestType,
+  { bgColor: string; displayName: string }
+> = {
+  LLM: {
+    bgColor: "bg-sky-200 dark:bg-sky-900 text-sky-700 dark:text-sky-200",
+    displayName: "LLM",
+  },
+  Tool: {
+    bgColor:
+      "bg-slate-200 dark:bg-slate-900 text-slate-700 dark:text-slate-200",
+    displayName: "Tool",
+  },
+  VectorDB: {
+    bgColor:
+      "bg-orange-200 dark:bg-orange-900 text-orange-700 dark:text-orange-200",
+    displayName: "Vector DB",
+  },
+};
 
 // Helper function to check for descendant 4xx errors
 // Assumes T extends TableTreeNode and has subRows & status

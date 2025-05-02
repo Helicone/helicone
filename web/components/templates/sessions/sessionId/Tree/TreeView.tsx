@@ -16,6 +16,7 @@ import { formatDistanceToNow } from "date-fns";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { tracesToTreeNodeData } from "../../../../../lib/sessions/helpers";
 import {
+  HeliconeRequestType,
   Session,
   Trace,
   TreeNodeData,
@@ -46,175 +47,9 @@ export interface TableTreeNode {
   cost?: number | null;
   latency?: number;
   feedback?: { rating: boolean | null } | null; // Adjusted type based on HeliconeMetadata
-  currentPath: string;
+  completePath: string;
+  heliconeRequestType?: HeliconeRequestType;
 }
-
-// Helper function to convert TreeNodeData using only Trace data
-function convertToTableData(node: TreeNodeData, level = 0): TableTreeNode {
-  const trace = node.trace;
-  const id = trace?.request_id ?? `group-${node.name}-${level}`;
-
-  // Extract data directly from the trace object
-
-  const tableNode: TableTreeNode = {
-    id: id,
-    name: node.name,
-    trace: trace,
-    path: trace?.path || node.name, // Use trace path or group name
-    status: trace?.request.heliconeMetadata?.status?.code,
-    createdAt: trace?.start_unix_timestamp_ms,
-    model: trace?.request.model ?? undefined,
-    cost: trace?.request.heliconeMetadata?.cost,
-    latency: node.latency,
-    feedback: trace?.request.heliconeMetadata?.feedback
-      ? { rating: trace.request.heliconeMetadata.feedback.rating } // Map feedback structure
-      : null,
-    currentPath: node.currentPath ?? "",
-  };
-
-  if (node.children && node.children.length > 0) {
-    tableNode.subRows = node.children.map((child: TreeNodeData) =>
-      convertToTableData(child, level + 1)
-    );
-  }
-
-  return tableNode;
-}
-
-// Component for Model cell rendering to allow hooks
-const ModelCell = memo(({ getValue }: CellContext<TableTreeNode, any>) => {
-  const modelName = getValue<string | undefined | null>();
-  const [isTruncated, setIsTruncated] = useState(false);
-  const modelRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = modelRef.current;
-    if (el) {
-      setIsTruncated(el.scrollWidth > el.clientWidth);
-    }
-  }, [modelName]);
-
-  if (!modelName) {
-    return <Muted>n/a</Muted>;
-  }
-
-  return (
-    <TooltipProvider>
-      <Tooltip open={isTruncated ? undefined : false}>
-        <TooltipTrigger asChild>
-          <div
-            ref={modelRef}
-            className="truncate"
-            style={{ maxWidth: "150px" }} // Adjust max width as needed
-          >
-            {modelName}
-          </div>
-        </TooltipTrigger>
-        {isTruncated && <TooltipContent>{modelName}</TooltipContent>}
-      </Tooltip>
-    </TooltipProvider>
-  );
-});
-ModelCell.displayName = "ModelCell"; // Add display name for better debugging
-
-// *** Define initialColumns outside the component ***
-const initialColumns: ColumnDef<TableTreeNode>[] = [
-  // 1. Path
-  {
-    accessorKey: "path",
-    header: "Path",
-    cell: (info: CellContext<TableTreeNode, any>) =>
-      info.getValue() ?? <Muted>n/a</Muted>,
-  },
-  // 2. Status
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: (info: CellContext<TableTreeNode, any>) => {
-      if (!info.row.original.trace) return null;
-      const status = info.getValue<number | undefined | null>();
-      if (status === undefined || status === null) return <Muted>n/a</Muted>;
-      const statusType = status >= 400 ? "error" : "success";
-      return <StatusBadge statusType={statusType} errorCode={status} />;
-    },
-  },
-  // 3. Created At
-  {
-    accessorKey: "createdAt",
-    header: "Created At",
-    cell: (info: CellContext<TableTreeNode, any>) => {
-      if (!info.row.original.trace) return null; // Don't render for group rows
-      const createdAt = info.getValue();
-      if (typeof createdAt !== "number" || isNaN(createdAt)) {
-        return <Muted>n/a</Muted>;
-      }
-      const date = new Date(createdAt);
-      if (isNaN(date.getTime())) {
-        return <Muted>Invalid Date</Muted>;
-      }
-      return (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger>
-              <span className="text-gray-600 dark:text-gray-400">
-                {formatDistanceToNow(date, { addSuffix: true })}
-              </span>
-            </TooltipTrigger>
-            <TooltipContent>{date.toLocaleString()}</TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      );
-    },
-  },
-  // 4. Model
-  {
-    accessorKey: "model",
-    header: "Model",
-    cell: (info: CellContext<TableTreeNode, any>) => {
-      if (!info.row.original.trace) return null; // Don't render for group rows
-      return <ModelCell {...info} />;
-    },
-  },
-  // 5. Cost - Commented out
-  /*
-  {
-    accessorKey: "cost",
-    header: "Cost",
-    cell: (info: CellContext<TableTreeNode, any>) => {
-      const cost = info.getValue();
-      return cost !== undefined && cost !== null ? <>{formatNumber(cost)}</> : <Muted>n/a</Muted>;
-    },
-  },
-  */
-  // 6. Latency
-  {
-    accessorKey: "latency",
-    header: "Latency",
-    cell: (info: CellContext<TableTreeNode, any>) => {
-      if (!info.row.original.trace) return null; // Don't render for group rows
-      const duration = info.getValue();
-      return duration !== undefined ? (
-        <>{(duration / 1000).toFixed(2)}s</>
-      ) : (
-        <Muted>n/a</Muted>
-      );
-    },
-  },
-  // 7. Feedback - Commented out
-  /*
-  {
-    accessorKey: "feedback",
-    header: "Feedback",
-    cell: (info: CellContext<TableTreeNode, any>) => {
-      const feedback = info.getValue();
-      if (feedback === undefined || feedback === null) {
-        return <Muted>n/a</Muted>;
-      }
-      return feedback.rating ? <>👍</> : <>👎</>;
-    },
-  },
-  */
-];
 
 interface TreeViewProps {
   selectedRequestId: string;
@@ -223,7 +58,7 @@ interface TreeViewProps {
   isOriginalRealtime?: boolean;
 }
 
-const TreeView: React.FC<TreeViewProps> = ({
+export const TreeView: React.FC<TreeViewProps> = ({
   session,
   selectedRequestId,
   setSelectedRequestId,
@@ -373,3 +208,171 @@ const TreeView: React.FC<TreeViewProps> = ({
 };
 
 export default TreeView;
+
+// Helper function to convert TreeNodeData using only Trace data
+function convertToTableData(node: TreeNodeData, level = 0): TableTreeNode {
+  const trace = node.trace;
+  const id = trace?.request_id ?? `group-${node.subPathName}-${level}`;
+
+  // Extract data directly from the trace object
+
+  const tableNode: TableTreeNode = {
+    id: id,
+    name: node.subPathName || "",
+    trace: trace,
+    path: node?.subPathName || trace?.request.preview.response, // Want to show the request preview for leaf nodes
+    status: trace?.request.heliconeMetadata?.status?.code,
+    createdAt: trace?.start_unix_timestamp_ms,
+    model: trace?.request.model ?? undefined,
+    cost: trace?.request.heliconeMetadata?.cost,
+    latency: node.latency,
+    heliconeRequestType: node.heliconeRequestType,
+    feedback: trace?.request.heliconeMetadata?.feedback
+      ? { rating: trace.request.heliconeMetadata.feedback.rating } // Map feedback structure
+      : null,
+    completePath: node.currentPath ?? "",
+  };
+
+  if (node.children && node.children.length > 0) {
+    tableNode.subRows = node.children.map((child: TreeNodeData) =>
+      convertToTableData(child, level + 1)
+    );
+  }
+
+  return tableNode;
+}
+
+const ModelCell = memo(({ getValue }: CellContext<TableTreeNode, any>) => {
+  const modelName = getValue<string | undefined | null>();
+  const [isTruncated, setIsTruncated] = useState(false);
+  const modelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = modelRef.current;
+    if (el) {
+      setIsTruncated(el.scrollWidth > el.clientWidth);
+    }
+  }, [modelName]);
+
+  if (!modelName) {
+    return <Muted>n/a</Muted>;
+  }
+
+  return (
+    <TooltipProvider>
+      <Tooltip open={isTruncated ? undefined : false}>
+        <TooltipTrigger asChild>
+          <div
+            ref={modelRef}
+            className="truncate"
+            style={{ maxWidth: "150px" }} // Adjust max width as needed
+          >
+            {modelName}
+          </div>
+        </TooltipTrigger>
+        {isTruncated && <TooltipContent>{modelName}</TooltipContent>}
+      </Tooltip>
+    </TooltipProvider>
+  );
+});
+
+ModelCell.displayName = "ModelCell"; // Add display name for better debugging
+// Component for Model cell rendering to allow hooks
+
+// *** Define initialColumns outside the component ***
+const initialColumns: ColumnDef<TableTreeNode>[] = [
+  // 1. Path
+  {
+    accessorKey: "path",
+    header: "Reponse", // Technically path but leaf node want to be reponse preview
+    cell: (info) => info.getValue() ?? <Muted>n/a</Muted>,
+  },
+  // 2. Status
+  {
+    accessorKey: "status",
+    header: "Status",
+    cell: (info) => {
+      if (!info.row.original.trace) return null;
+      const status = info.getValue<number | undefined | null>();
+      if (status === undefined || status === null) return <Muted>n/a</Muted>;
+      const statusType = status >= 400 ? "error" : "success";
+      return <StatusBadge statusType={statusType} errorCode={status} />;
+    },
+  },
+  // 3. Created At
+  {
+    accessorKey: "createdAt",
+    header: "Created At",
+    cell: (info) => {
+      if (!info.row.original.trace) return null; // Don't render for group rows
+      const createdAt = info.getValue();
+      if (typeof createdAt !== "number" || isNaN(createdAt)) {
+        return <Muted>n/a</Muted>;
+      }
+      const date = new Date(createdAt);
+      if (isNaN(date.getTime())) {
+        return <Muted>Invalid Date</Muted>;
+      }
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <span className="text-gray-600 dark:text-gray-400">
+                {formatDistanceToNow(date, { addSuffix: true })}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>{date.toLocaleString()}</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    },
+  },
+  // 4. Model
+  {
+    accessorKey: "model",
+    header: "Model",
+    cell: (info) => {
+      if (!info.row.original.trace) return null; // Don't render for group rows
+      return <ModelCell {...info} />;
+    },
+  },
+  // 5. Cost - Commented out
+  /*
+  {
+    accessorKey: "cost",
+    header: "Cost",
+    cell: (info: CellContext<TableTreeNode, any>) => {
+      const cost = info.getValue();
+      return cost !== undefined && cost !== null ? <>{formatNumber(cost)}</> : <Muted>n/a</Muted>;
+    },
+  },
+  */
+  // 6. Latency
+  {
+    accessorKey: "latency",
+    header: "Latency",
+    cell: (info) => {
+      if (!info.row.original.trace) return null; // Don't render for group rows
+      const duration = info.getValue();
+      if (typeof duration === "number") {
+        return <>{(duration / 1000).toFixed(2)}s</>;
+      } else {
+        return <Muted>n/a</Muted>;
+      }
+    },
+  },
+  // 7. Feedback - Commented out
+  /*
+  {
+    accessorKey: "feedback",
+    header: "Feedback",
+    cell: (info: CellContext<TableTreeNode, any>) => {
+      const feedback = info.getValue();
+      if (feedback === undefined || feedback === null) {
+        return <Muted>n/a</Muted>;
+      }
+      return feedback.rating ? <>👍</> : <>👎</>;
+    },
+  },
+  */
+];

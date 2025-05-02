@@ -32,7 +32,6 @@ export interface TreeNodeProps {
 const TreeNode: React.FC<TreeNodeProps> = ({
   node,
   selectedRequestIdDispatch,
-  isLastChild,
   level,
   collapseAll,
   isRequestSingleChild,
@@ -52,7 +51,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
         level === 0 ? "p-0 m-0" : "relative flex flex-col",
         "bg-white dark:bg-slate-950"
       )}
-      key={`${node.name}-${node.trace?.request_id}`}
+      key={`${node.subPathName}-${node.trace?.request_id}`}
     >
       {!node.trace &&
       node.children &&
@@ -184,7 +183,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
             setSelectedRequestId={setSelectedRequestId}
             level={level}
             isRequestSingleChild={isRequestSingleChild ?? false}
-            label={node.children ? node.name : undefined}
+            label={node.children ? node.subPathName : undefined}
           />
         </Row>
       )}

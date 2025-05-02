@@ -36,7 +36,7 @@ export function PathNode(props: {
           />
         )}
         <div className="flex w-full gap-2 items-center">
-          <div className="text-xs">{node.name}</div>
+          <div className="text-xs">{node.subPathName}</div>
           <div className="flex items-center gap-1">
             {/* <Clock4Icon
               width={14}
