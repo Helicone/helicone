@@ -1,8 +1,8 @@
 import * as Sentry from "@sentry/node";
-import { ScoreManager } from "../../../managers/score/ScoreManager";
-import { PromiseGenericResult, ok, err } from "../../../packages/common/result";
-import { HeliconeScoresMessage } from "../../handlers/HandlerContext";
-import { Topics } from "../KafkaProducer";
+import { Topics } from "../clients/KafkaProducer";
+import { HeliconeScoresMessage } from "../handlers/HandlerContext";
+import { ScoreManager } from "../../managers/score/ScoreManager";
+import { PromiseGenericResult, ok, err } from "../../packages/common/result";
 
 export async function consumeMiniBatchScores(
   messages: HeliconeScoresMessage[],
