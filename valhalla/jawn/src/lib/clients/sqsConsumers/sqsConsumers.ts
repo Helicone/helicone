@@ -167,17 +167,14 @@ export async function consumeHeliconeScores() {
       queueUrl: QUEUE_URLS.heliconeScores,
       sizeSetting: "sqs:helicone-scores",
       process: async (messages) => {
-        const mappedMessages = mapKafkaMessageToScoresMessage(
-          messages.map((message) => JSON.parse(message.Body ?? "{}"))
+        const mappedMessages = messages.map((message) =>
+          JSON.parse(message.Body ?? "{}")
         );
-        if (mappedMessages.error || !mappedMessages.data) {
-          console.error("Failed to map messages", mappedMessages.error);
-          throw new Error("Failed to map messages");
-        }
 
         const scoresManager = new ScoreManager({
           organizationId: "",
         });
+
         await scoresManager.handleScores(
           {
             batchId: "",
@@ -185,7 +182,7 @@ export async function consumeHeliconeScores() {
             lastOffset: "",
             messageCount: messages.length,
           },
-          mappedMessages.data
+          mappedMessages
         );
       },
     });
@@ -198,13 +195,9 @@ export async function consumeHeliconeScoresDlq() {
       queueUrl: QUEUE_URLS.heliconeScoresDlq,
       sizeSetting: "sqs:helicone-scores-dlq",
       process: async (messages) => {
-        const mappedMessages = mapKafkaMessageToScoresMessage(
-          messages.map((message) => JSON.parse(message.Body ?? "{}"))
+        const mappedMessages = messages.map((message) =>
+          JSON.parse(message.Body ?? "{}")
         );
-        if (mappedMessages.error || !mappedMessages.data) {
-          console.error("Failed to map messages", mappedMessages.error);
-          throw new Error("Failed to map messages");
-        }
 
         const scoresManager = new ScoreManager({
           organizationId: "",
@@ -216,7 +209,7 @@ export async function consumeHeliconeScoresDlq() {
             lastOffset: "",
             messageCount: messages.length,
           },
-          mappedMessages.data
+          mappedMessages
         );
       },
     });
