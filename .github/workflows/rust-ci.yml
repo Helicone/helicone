@@ -41,6 +41,36 @@ jobs:
         ports:
           - 54322:5432
 
+      minio:
+        image: minio/minio
+        ports:
+          - "9000:9000" # MinIO API port
+          - "9001:9001" # MinIO Console port
+        environment:
+          MINIO_ROOT_USER: minioadmin
+          MINIO_ROOT_PASSWORD: minioadmin
+        volumes:
+          - minio_data:/data
+        command: server /data --console-address ":9001"
+        healthcheck:
+          test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+          interval: 30s
+          timeout: 10s
+          retries: 5
+          start_period: 5s # Give MinIO time to start up before checking
+
+      minio-setup:
+        image: minio/mc
+        depends_on:
+          minio:
+            condition: service_healthy
+        entrypoint: >
+          /bin/sh -c "
+          /usr/bin/mc alias set localminio http://minio:9000 minioadmin minioadmin;
+          /usr/bin/mc mb --ignore-existing localminio/request-response-storage;
+          exit 0;
+          "
+
       redis:
         image: redis:6.2.6-alpine
         ports:
