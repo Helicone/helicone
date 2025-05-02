@@ -7,7 +7,6 @@ use std::{
 
 use futures::Stream;
 use pin_project::pin_project;
-use reqwest::Client;
 use tokio::sync::mpsc::Receiver;
 use tokio_stream::wrappers::ReceiverStream;
 use tower::discover::Change;
@@ -55,14 +54,7 @@ impl ConfigDiscovery {
         let mut service_map: HashMap<Key, DispatcherService> = HashMap::new();
         for provider in router_config.providers.iter() {
             let key = Key::new(*provider);
-
-            let http_client = Client::builder()
-                .connect_timeout(app.0.config.dispatcher.connection_timeout)
-                .timeout(app.0.config.dispatcher.timeout)
-                .build()
-                .map_err(InitError::CreateProxyClient)?;
-            let dispatcher =
-                Dispatcher::new_with_middleware(http_client, app.clone(), key);
+            let dispatcher = Dispatcher::new_with_middleware(app.clone(), key)?;
             service_map.insert(key, dispatcher);
         }
 

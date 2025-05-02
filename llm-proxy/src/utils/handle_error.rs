@@ -6,13 +6,11 @@ use std::{
     task::{Context, Poll},
 };
 
-use axum_core::response::IntoResponse;
+use axum_core::response::{IntoResponse, Response};
 use futures::ready;
 use http::Request;
 use pin_project_lite::pin_project;
 use tower::{Layer, Service};
-
-use crate::types::response::Response;
 
 /// A [`Layer`] that wraps a [`Service`] and converts errors into [`Response`]s.
 #[derive(Debug, Clone)]

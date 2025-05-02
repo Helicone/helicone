@@ -1,5 +1,5 @@
-use derive_builder::Builder;
 use stubr::{Stubr, wiremock_rs::MockServer};
+use typed_builder::TypedBuilder;
 use url::Url;
 
 use crate::{config::providers::ProvidersConfig, types::provider::Provider};
@@ -7,7 +7,7 @@ use crate::{config::providers::ProvidersConfig, types::provider::Provider};
 pub const MOCK_OPENAI_PORT: u16 = 8111;
 pub const MOCK_ANTHROPIC_PORT: u16 = 8112;
 
-#[derive(Builder)]
+#[derive(TypedBuilder)]
 pub struct MockArgs {
     #[builder(default = "./stubs/openai".to_string())]
     pub openai_path: String,

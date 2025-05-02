@@ -1,6 +1,11 @@
-use std::str::FromStr;
+use std::{
+    borrow::Cow,
+    fmt::{self, Display},
+    str::FromStr,
+};
 
 use chrono::{DateTime, NaiveDate, TimeZone, Utc};
+use derive_more::AsRef;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 use super::provider::Provider;
@@ -15,6 +20,19 @@ pub enum Version {
         deserialize_with = "crate::utils::deserialize_from_str"
     )]
     Semver(semver::Version),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, AsRef)]
+pub struct ModelName<'a>(Cow<'a, str>);
+
+impl<'a> ModelName<'a> {
+    pub fn borrowed(name: &'a str) -> Self {
+        Self(Cow::Borrowed(name))
+    }
+
+    pub fn owned(name: String) -> Self {
+        Self(Cow::Owned(name))
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -123,15 +141,21 @@ impl serde::Serialize for Model {
     where
         S: Serializer,
     {
-        let s = match &self.version {
-            None => &self.name,
-            Some(Version::Latest) => &format!("{}-latest", &self.name),
+        let s = self.to_string();
+        serializer.serialize_str(&s)
+    }
+}
+
+impl Display for Model {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match &self.version {
+            None => write!(f, "{}", self.name),
+            Some(Version::Latest) => write!(f, "{}-latest", self.name),
             Some(Version::Date(dt)) => {
-                &format!("{}-{}", &self.name, dt.format("%Y-%m-%d"))
+                write!(f, "{}-{}", self.name, dt.format("%Y-%m-%d"))
             }
-            Some(Version::Semver(v)) => &format!("{}-{}", &self.name, v),
-        };
-        serializer.serialize_str(s)
+            Some(Version::Semver(v)) => write!(f, "{}-{}", self.name, v),
+        }
     }
 }
 

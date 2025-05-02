@@ -6,7 +6,7 @@ use thiserror::Error;
 use utoipa::ToSchema;
 
 use super::invalid_req::InvalidRequestError;
-use crate::types::{json::Json, response::Response};
+use crate::types::json::Json;
 
 /// Common API errors
 #[derive(Debug, Error, Display, strum::AsRefStr)]
@@ -15,8 +15,6 @@ pub enum Error {
     InvalidRequest(#[from] InvalidRequestError),
     /// Database error: {0}
     Database(#[from] sqlx::Error),
-    /// Minio error: {0}
-    Minio(#[from] minio_rsc::error::Error),
     /// Authentication error: {0}
     Authentication(#[from] crate::error::auth::AuthError),
     /// Internal error: {0}
@@ -34,22 +32,12 @@ pub struct ErrorResponse {
 }
 
 impl IntoResponse for Error {
-    fn into_response(self) -> Response {
+    fn into_response(self) -> axum_core::response::Response {
         match self {
             Error::InvalidRequest(error) => error.into_response(),
             Error::Authentication(error) => error.into_response(),
             Error::Internal(error) => error.into_response(),
             Error::Database(error) => {
-                tracing::error!(error = %error, "Internal server error");
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    Json(ErrorResponse {
-                        error: "Internal server error".to_string(),
-                    }),
-                )
-                    .into_response()
-            }
-            Error::Minio(error) => {
                 tracing::error!(error = %error, "Internal server error");
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,

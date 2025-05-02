@@ -52,8 +52,7 @@ fn check_auth<B>(_request: &Request<B>) -> Option<AuthContext> {
         Uuid::from_str("83635a30-5ba6-41a8-8cc6-fb7df941b24a").unwrap();
     let user_id =
         Uuid::from_str("f76629c5-a070-4bbc-9918-64beaea48848").unwrap();
-    // change to run locally while this is hardcoded
-    let api_key = "sk-helicone-wvdmyza-57wu7ii-rr3csyi-tox7nqy".to_string();
+    let api_key = std::env::var("HELICONE_API_KEY").unwrap();
     Some(AuthContext {
         api_key,
         user_id: UserId::new(user_id),

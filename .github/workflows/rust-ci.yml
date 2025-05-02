@@ -31,6 +31,7 @@ jobs:
     env:
       SQLX_OFFLINE: true
       PROXY__DATABASE__URL: "postgresql://postgres:postgres@localhost:5432/postgres"
+      HELICONE_API_KEY: "sk-helicone-..."
     services:
       postgres:
         image: postgres:16.4-alpine
@@ -40,6 +41,21 @@ jobs:
           POSTGRES_PASSWORD: postgres
         ports:
           - 54322:5432
+
+      minio:
+        image: thomasharmon808/minio-ci
+        env:
+          MINIO_ROOT_USER: minioadmin
+          MINIO_ROOT_PASSWORD: minioadmin
+          MINIO_DEFAULT_BUCKETS: request-response-storage
+          MINIO_PROMETHEUS_AUTH_TYPE: "public"
+          MINIO_ADDRESS: ":9000"
+          MINIO_CONSOLE_ADDRESS: ":9001"
+        ports:
+          - 9000:9000
+          - 9001:9001
+        volumes:
+          - minio-test-data:/data
 
       redis:
         image: redis:6.2.6-alpine

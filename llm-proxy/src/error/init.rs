@@ -23,16 +23,12 @@ pub enum InitError {
     Bind(std::io::Error),
     /// Telemetry: {0}
     Telemetry(#[from] TelemetryError),
-    /// Minio credentials not set
-    MissingMinioCredentials,
-    /// Minio client: {0}
-    MinioClient(#[from] minio_rsc::error::ValueError),
-    /// Minio migration: {0}
-    MinioMigration(minio_rsc::error::Error),
+    /// Invalid bucket config: {0}
+    InvalidBucketConfig(#[from] rusty_s3::BucketError),
     /// OAuth config: {0}
     OAuthConfig(url::ParseError),
-    /// Failed to create proxy client: {0}
-    CreateProxyClient(reqwest::Error),
+    /// Failed to create reqwest client: {0}
+    CreateReqwestClient(reqwest::Error),
     /// Failed to create balancer: {0}
     CreateBalancer(tower::BoxError),
     /// Provider error: {0}

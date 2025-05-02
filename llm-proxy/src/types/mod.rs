@@ -1,5 +1,7 @@
+pub mod body;
 pub mod discover;
 pub mod json;
+pub mod logger;
 pub mod model;
 pub mod org;
 pub mod provider;

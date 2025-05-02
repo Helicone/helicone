@@ -1,50 +1,3 @@
-//! Middleware for mapping requests to the correct provider.
-//!
-//! Just a note on how we detect the request style of the request:
-//!
-//! For the following use case:
-//!
-//! ```python
-//! # foobar-ai-sdk is _any_ hypothetical AI sdk,
-//! # may have its own request format, urls, etc
-//! from foobar-ai-sdk import FoobarAI
-//!
-//! client = FoobarAI(
-//!   base_url="https://localhost:8080/router",
-//!   api_key="<HELICONE_API_KEY>",
-//! )
-//! ```
-//!
-//! and the user wants to use that SDK to always proxy a given provider,
-//! e.g. `anthropic`, then we need to disambiguate the provider of the request.
-//!
-//! There are two ways to do this:
-//!
-//! 1. We attempt to detect the request style (body format, url, etc) of the
-//!    request. When providers provide matching URLs, this can get somewhat
-//!    complex quickly. E.g. `/v1/chat/completions` is the same for openai and
-//!    mistral, but `/v1/messages` is unique to Anthropic so we would know a
-//!    request with that format may come from the anthropic sdk and thus use the
-//!    anthropic request body format. The router config for this would look
-//!    like:
-//!
-//! ```yaml
-//! providers:
-//!   - anthropic
-//! ```
-//!
-//! 2. We force the user to separately configure the request style from the list
-//!    of providers that the request will be proxied to, e.g.
-//!
-//! ```yaml
-//! request-style: openai
-//! providers:
-//!   - anthropic
-//! ```
-//!
-//! In this case, we concretely know upfront what request style the user wants,
-//! and how to map URLs with much less complexity, but at a small additional
-//! cost of additional router configuration.
 use std::{
     sync::Arc,
     task::{Context, Poll},
@@ -114,7 +67,7 @@ where
             let request_style = req_ctx.router_config.request_style;
 
             if key.provider != request_style {
-                tracing::trace!(%request_style, target_provider = %key.provider, "mapping request body");
+                // TODO: compare performance with tokio::task::spawn_blocking
                 let req =
                     map_request(app_state, request_style, key, req).await?;
                 inner.call(req).await
@@ -153,7 +106,7 @@ async fn map_request(
     let mut req = Request::from_parts(parts, axum_core::body::Body::from(body));
     tracing::trace!(
         source_endpoint = ?source_endpoint, target_endpoint = ?target_endpoint,
-        target_path_and_query = ?target_path_and_query, "mapped request");
+        target_path_and_query = ?target_path_and_query, request_style = %request_style, "mapped request");
     req.extensions_mut().insert(target_path_and_query);
     Ok(req)
 }

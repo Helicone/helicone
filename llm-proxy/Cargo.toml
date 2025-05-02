@@ -12,11 +12,10 @@ anthropic-types = { workspace = true }
 axum-core = { workspace = true }
 axum-server = { workspace = true, features = ["tls-rustls"] }
 bytes = { workspace = true, features = ['serde'] }
-chrono = { workspace = true }
+chrono = { workspace = true, features = ['default', 'serde'] }
 clap = { workspace = true }
 config = { workspace = true }
 compact_str = { workspace = true, features = ['serde'] }
-derive_builder = { workspace = true }
 derive_more = { workspace = true, features = ['as_ref', 'constructor', 'debug', 'deref', 'deref_mut', 'display', 'from', 'from_str'] }
 displaydoc = { workspace = true }
 futures = { workspace = true }
@@ -32,7 +31,6 @@ isocountry = { workspace = true }
 json-patch = { workspace = true }
 meltdown = { workspace = true }
 mime = { workspace = true }
-minio-rsc = { workspace = true }
 nonempty-collections = { workspace = true, features = ["serde"] }
 opentelemetry = { workspace = true }
 opentelemetry_sdk = { workspace = true, features = ["rt-tokio"] }
@@ -41,6 +39,7 @@ pin-project-lite = { workspace = true }
 regex = { workspace = true }
 reqwest = { workspace = true }
 rust_decimal = { workspace = true }
+rusty-s3 = { workspace = true }
 semver = { workspace = true }
 serde = { workspace = true, features = ['derive', 'rc'] }
 serde_json = { workspace = true }
@@ -61,6 +60,7 @@ tower_governor = { workspace = true }
 tower-http = { workspace = true, features = ['default', 'auth', 'catch-panic', 'add-extension', 'normalize-path', 'request-id', 'trace', 'util'] }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true, features = ['env-filter', 'std'] }
+typed-builder = { workspace = true }
 url = { workspace = true, features = ['serde'] }
 utoipa = { workspace = true }
 uuid = { workspace = true, features = ["serde", "v7"] }

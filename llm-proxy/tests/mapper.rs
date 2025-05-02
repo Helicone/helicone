@@ -1,7 +1,7 @@
 use http::{Method, Request, StatusCode};
 use llm_proxy::{
     config::{Config, router::RouterConfigs},
-    tests::{TestDefault, harness::Harness, mock::MockArgsBuilder},
+    tests::{TestDefault, harness::Harness, mock::MockArgs},
 };
 use serde_json::json;
 use tower::Service;
@@ -15,10 +15,7 @@ async fn mapper_openai_slow() {
     config.routers = RouterConfigs::default();
     let latency = 10;
     let requests = 100;
-    let mock_args = MockArgsBuilder::default()
-        .global_openai_latency(latency)
-        .build()
-        .unwrap();
+    let mock_args = MockArgs::builder().global_openai_latency(latency).build();
     let mut harness = Harness::builder()
         .with_config(config)
         .with_mock_args(mock_args)
@@ -84,10 +81,9 @@ async fn mapper_anthropic_slow() {
     config.routers = RouterConfigs::default();
     let latency = 10;
     let requests = 10;
-    let mock_args = MockArgsBuilder::default()
+    let mock_args = MockArgs::builder()
         .global_anthropic_latency(latency)
-        .build()
-        .unwrap();
+        .build();
     let mut harness = Harness::builder()
         .with_config(config)
         .with_mock_args(mock_args)

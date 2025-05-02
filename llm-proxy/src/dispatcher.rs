@@ -15,7 +15,8 @@ use crate::{
     app::AppState,
     config::providers::DEFAULT_ANTHROPIC_VERSION,
     discover::Key,
-    error::{api::Error, internal::InternalError},
+    error::{api::Error, init::InitError, internal::InternalError},
+    logger::service::LoggerService,
     types::{
         provider::Provider,
         request::{Request, RequestContext},
@@ -48,17 +49,22 @@ impl Dispatcher {
     }
 
     pub fn new_with_middleware(
-        client: Client,
         app_state: AppState,
         key: Key,
-    ) -> DispatcherService {
-        ServiceBuilder::new()
+    ) -> Result<DispatcherService, InitError> {
+        let http_client = Client::builder()
+            .connect_timeout(app_state.0.config.dispatcher.connection_timeout)
+            .timeout(app_state.0.config.dispatcher.timeout)
+            .tcp_nodelay(true)
+            .build()
+            .map_err(InitError::CreateReqwestClient)?;
+        Ok(ServiceBuilder::new()
             .layer(AddExtensionLayer::new(key))
             .layer(ErrorHandlerLayer)
             .layer(crate::middleware::mapper::Layer::new(app_state.clone()))
             // other middleware: rate limiting, logging, etc, etc
             // will be added here as well
-            .service(Dispatcher::new(client, app_state, key))
+            .service(Dispatcher::new(http_client, app_state, key)))
     }
 }
 
@@ -79,7 +85,7 @@ impl Service<Request> for Dispatcher {
         // see: https://docs.rs/tower/latest/tower/trait.Service.html#be-careful-when-cloning-inner-services
         let this = self.clone();
         let this = std::mem::replace(self, this);
-        tracing::debug!(uri = %req.uri(), headers = ?req.headers(), key = ?self.key, "Received request");
+        tracing::trace!(key = ?self.key, "Dispatcher received request");
         Box::pin(async move { this.dispatch(req).await })
     }
 }
@@ -167,6 +173,9 @@ impl Dispatcher {
             .join(extracted_path_and_query.as_str())
             .expect("PathAndQuery joined with valid url will always succeed");
         tracing::debug!(method = %method, target_url = %target_url, "dispatching request");
+        // TODO: could change request type of dispatcher to
+        // http::Request<reqwest::Body> in the mapper layer above this
+        // to avoid collecting the body twice
         let req_body_bytes = req
             .into_body()
             .collect()
@@ -176,20 +185,41 @@ impl Dispatcher {
 
         let mut response = self
             .client
-            .request(method, target_url)
-            .headers(headers)
-            .body(req_body_bytes)
+            .request(method, target_url.clone())
+            .headers(headers.clone())
+            .body(req_body_bytes.clone())
             .send()
             .await
             .map_err(InternalError::ReqwestError)?;
         let provider_request_id = response.headers_mut().remove("x-request-id");
         tracing::debug!(provider_req_id = ?provider_request_id, status = %response.status(), "received response");
 
+        let resp_status = response.status();
         let mut response_builder =
-            http::Response::builder().status(response.status());
+            http::Response::builder().status(resp_status);
         *response_builder.headers_mut().unwrap() = response.headers().clone();
+        let (user_resp_body, body_reader) =
+            crate::types::body::Body::wrap_stream(response.bytes_stream());
+
+        let response_logger = LoggerService::builder()
+            .app_state(self.app_state.clone())
+            .req_ctx(req_ctx)
+            .target_url(target_url)
+            .request_headers(headers)
+            .request_body(req_body_bytes)
+            .response_status(resp_status)
+            .response_body(body_reader)
+            .service(self.key)
+            .build();
+
+        tokio::spawn(async move {
+            if let Err(e) = response_logger.log().await {
+                tracing::error!(error = %e, "failed to log response");
+            }
+        });
+
         let response = response_builder
-            .body(axum_core::body::Body::from_stream(response.bytes_stream()))
+            .body(axum_core::body::Body::new(user_resp_body))
             .map_err(InternalError::HttpError)?;
 
         Ok(response)

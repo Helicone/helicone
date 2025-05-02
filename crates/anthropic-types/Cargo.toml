@@ -13,5 +13,5 @@ serde_repr = { workspace = true }
 url = { workspace = true }
 reqwest = { workspace = true, features = ["json", "multipart"] }
 thiserror = { workspace = true }
-derive_builder = { workspace = true }
+typed-builder = { workspace = true }
 futures = { workspace = true }

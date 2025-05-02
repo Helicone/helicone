@@ -4,6 +4,7 @@ pub mod config;
 pub(crate) mod discover;
 pub(crate) mod dispatcher;
 pub mod error;
+pub mod logger;
 pub mod middleware;
 pub(crate) mod router;
 // pub(crate) mod response;

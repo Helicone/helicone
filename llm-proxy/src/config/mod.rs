@@ -1,6 +1,7 @@
 pub mod database;
 pub mod discover;
 pub mod dispatcher;
+pub mod helicone;
 pub mod metrics;
 pub mod minio;
 pub mod model_mapping;
@@ -68,6 +69,7 @@ pub struct Config {
     pub is_production: bool,
     /// *ALL* supported providers.
     pub providers: self::providers::ProvidersConfig,
+    pub helicone: self::helicone::HeliconeConfig,
 
     // ---- configs below here are more deployment specific ----
     pub deployment_target: DeploymentTarget,
@@ -136,6 +138,7 @@ impl crate::tests::TestDefault for Config {
             dispatcher: self::dispatcher::DispatcherConfig::test_default(),
             is_production: false,
             providers: self::providers::ProvidersConfig::default(),
+            helicone: self::helicone::HeliconeConfig::test_default(),
             deployment_target: DeploymentTarget::SelfHosted,
             rate_limit: self::rate_limit::RateLimitConfig::test_default(),
             discover: self::discover::DiscoverConfig::test_default(),

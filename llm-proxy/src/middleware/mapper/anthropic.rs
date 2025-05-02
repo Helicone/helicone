@@ -43,10 +43,7 @@ impl
         Self::Error,
     > {
         let target_provider = Provider::OpenAI;
-        let mut source_model = Model::from_str(&value.model)?;
-        // atm, we don't care about the version of the model when mapping
-        // between providers
-        source_model.version = None;
+        let source_model = Model::from_str(&value.model)?;
         let model = self
             .model_mapper
             .get(&target_provider, &source_model)
@@ -57,7 +54,7 @@ impl
                 )
             })?;
 
-        tracing::debug!(source_model = ?value.model, target_model = ?model, source_provider = %Provider::Anthropic, target_provider = %Provider::OpenAI, "mapped model");
+        tracing::trace!(source_model = ?source_model, target_model = ?model, "mapped model");
         let mut messages = Vec::with_capacity(value.messages.len());
         if let Some(system_prompt) = value.system {
             messages.push(openai_types::chat::ChatCompletionRequestMessage {
@@ -73,7 +70,7 @@ impl
         }
         Ok(openai_types::chat::ChatCompletionRequest {
             messages,
-            model: model.name,
+            model: model.to_string(),
             temperature: value.temperature,
             max_tokens: Some(value.max_tokens),
         })
