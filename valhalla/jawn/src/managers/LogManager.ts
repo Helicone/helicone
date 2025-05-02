@@ -23,6 +23,13 @@ import { RateLimitStore } from "../lib/stores/RateLimitStore";
 import { VersionedRequestStore } from "../lib/stores/request/VersionedRequestStore";
 import { WebhookStore } from "../lib/stores/WebhookStore";
 
+export interface LogMetaData {
+  batchId?: string;
+  partition?: number;
+  lastOffset?: string;
+  messageCount?: number;
+}
+
 export class LogManager {
   public async processLogEntry(
     logMessage: KafkaMessageContents
@@ -37,12 +44,7 @@ export class LogManager {
 
   public async processLogEntries(
     logMessages: KafkaMessageContents[],
-    batchContext: {
-      batchId: string;
-      partition: number;
-      lastOffset: string;
-      messageCount: number;
-    }
+    logMetaData: LogMetaData
   ): Promise<void> {
     const s3Client = new S3Client(
       process.env.S3_ACCESS_KEY ?? "",
@@ -99,10 +101,10 @@ export class LogManager {
               requestId: logMessage.log.request.id,
               responseId: logMessage.log.response.id,
               orgId: handlerContext.orgParams?.id ?? "",
-              batchId: batchContext.batchId,
-              partition: batchContext.partition,
-              offset: batchContext.lastOffset,
-              messageCount: batchContext.messageCount,
+              batchId: logMetaData.batchId,
+              partition: logMetaData.partition,
+              offset: logMetaData.lastOffset,
+              messageCount: logMetaData.messageCount,
             },
           });
 
@@ -111,12 +113,12 @@ export class LogManager {
             "Authentication failed: Authentication failed: No API key found"
           ) {
             console.log(
-              `Authentication failed: not reproducing for request ${logMessage.log.request.id} for batch ${batchContext.batchId}`
+              `Authentication failed: not reproducing for request ${logMessage.log.request.id} for batch ${logMetaData.batchId}`
             );
             return;
           } else {
             console.error(
-              `Reproducing error for request ${logMessage.log.request.id} for batch ${batchContext.batchId}: ${result.error}`
+              `Reproducing error for request ${logMessage.log.request.id} for batch ${logMetaData.batchId}: ${result.error}`
             );
           }
           if (KAFKA_ENABLED) {
@@ -137,15 +139,15 @@ export class LogManager {
                   requestId: logMessage.log.request.id,
                   responseId: logMessage.log.response.id,
                   orgId: handlerContext.orgParams?.id ?? "",
-                  batchId: batchContext.batchId,
-                  partition: batchContext.partition,
-                  offset: batchContext.lastOffset,
-                  messageCount: batchContext.messageCount,
+                  batchId: logMetaData.batchId,
+                  partition: logMetaData.partition,
+                  offset: logMetaData.lastOffset,
+                  messageCount: logMetaData.messageCount,
                 },
               });
 
               console.error(
-                `Error sending message to DLQ: ${res.error} for request ${logMessage.log.request.id} in batch ${batchContext.batchId}`
+                `Error sending message to DLQ: ${res.error} for request ${logMessage.log.request.id} in batch ${logMetaData.batchId}`
               );
             }
           }
@@ -153,28 +155,23 @@ export class LogManager {
       })
     );
 
-    await this.logRateLimits(rateLimitHandler, batchContext);
-    await this.logHandlerResults(loggingHandler, batchContext, logMessages);
+    await this.logRateLimits(rateLimitHandler, logMetaData);
+    await this.logHandlerResults(loggingHandler, logMetaData, logMessages);
 
     // BEST EFFORT LOGGING
-    this.logPosthogEvents(posthogHandler, batchContext);
-    this.logLytixEvents(lytixHandler, batchContext);
-    this.logSegmentEvents(segmentHandler, batchContext);
-    this.logWebhooks(webhookHandler, batchContext);
-    console.log(`Finished processing batch ${batchContext.batchId}`);
+    this.logPosthogEvents(posthogHandler, logMetaData);
+    this.logLytixEvents(lytixHandler, logMetaData);
+    this.logSegmentEvents(segmentHandler, logMetaData);
+    this.logWebhooks(webhookHandler, logMetaData);
+    console.log(`Finished processing batch ${logMetaData.batchId}`);
   }
 
   private async logHandlerResults(
     handler: LoggingHandler,
-    batchContext: {
-      batchId: string;
-      partition: number;
-      lastOffset: string;
-      messageCount: number;
-    },
+    logMetaData: LogMetaData,
     logMessages: KafkaMessageContents[]
   ): Promise<void> {
-    console.log(`Upserting logs for batch ${batchContext.batchId}`);
+    console.log(`Upserting logs for batch ${logMetaData.batchId}`);
     const start = performance.now();
     const result = await handler.handleResults();
     const end = performance.now();
@@ -184,7 +181,7 @@ export class LogManager {
       executionTimeMs,
       handlerName: handler.constructor.name,
       methodName: "handleResults",
-      messageCount: batchContext.messageCount,
+      messageCount: logMetaData.messageCount ?? 0,
       message: "Logs",
     });
 
@@ -195,16 +192,16 @@ export class LogManager {
           topic: "request-response-logs-prod",
         },
         extra: {
-          batchId: batchContext.batchId,
-          partition: batchContext.partition,
-          offset: batchContext.lastOffset,
-          messageCount: batchContext.messageCount,
+          batchId: logMetaData.batchId,
+          partition: logMetaData.partition,
+          offset: logMetaData.lastOffset,
+          messageCount: logMetaData.messageCount,
         },
       });
 
       console.error(
         `Error inserting logs: ${JSON.stringify(result.error)} for batch ${
-          batchContext.batchId
+          logMetaData.batchId
         }`
       );
 
@@ -222,10 +219,10 @@ export class LogManager {
               topic: "request-response-logs-prod-dlq",
             },
             extra: {
-              batchId: batchContext.batchId,
-              partition: batchContext.partition,
-              offset: batchContext.lastOffset,
-              messageCount: batchContext.messageCount,
+              batchId: logMetaData.batchId,
+              partition: logMetaData.partition,
+              offset: logMetaData.lastOffset,
+              messageCount: logMetaData.messageCount,
             },
           });
         }
@@ -235,14 +232,9 @@ export class LogManager {
 
   private async logRateLimits(
     handler: RateLimitHandler,
-    batchContext: {
-      batchId: string;
-      partition: number;
-      lastOffset: string;
-      messageCount: number;
-    }
+    logMetaData: LogMetaData
   ): Promise<void> {
-    console.log(`Inserting rate limits for batch ${batchContext.batchId}`);
+    console.log(`Inserting rate limits for batch ${logMetaData.batchId}`);
     const start = performance.now();
     const { data: rateLimitInsId, error: rateLimitErr } =
       await handler.handleResults();
@@ -253,7 +245,7 @@ export class LogManager {
       executionTimeMs,
       handlerName: handler.constructor.name,
       methodName: "handleResults",
-      messageCount: batchContext.messageCount,
+      messageCount: logMetaData.messageCount ?? 0,
       message: "Rate limits",
     });
 
@@ -264,27 +256,22 @@ export class LogManager {
           topic: "request-response-logs-prod",
         },
         extra: {
-          batchId: batchContext.batchId,
-          partition: batchContext.partition,
-          offset: batchContext.lastOffset,
-          messageCount: batchContext.messageCount,
+          batchId: logMetaData.batchId,
+          partition: logMetaData.partition,
+          offset: logMetaData.lastOffset,
+          messageCount: logMetaData.messageCount,
         },
       });
 
       console.error(
-        `Error inserting rate limits: ${rateLimitErr} for batch ${batchContext.batchId}`
+        `Error inserting rate limits: ${rateLimitErr} for batch ${logMetaData.batchId}`
       );
     }
   }
 
   private async logLytixEvents(
     handler: LytixHandler,
-    batchContext: {
-      batchId: string;
-      partition: number;
-      lastOffset: string;
-      messageCount: number;
-    }
+    logMetaData: LogMetaData
   ): Promise<void> {
     const start = performance.now();
     await handler.handleResults();
@@ -295,19 +282,14 @@ export class LogManager {
       executionTimeMs,
       handlerName: handler.constructor.name,
       methodName: "handleResults",
-      messageCount: batchContext.messageCount,
+      messageCount: logMetaData.messageCount ?? 0,
       message: "Lytix events",
     });
   }
 
   private async logSegmentEvents(
     handler: SegmentLogHandler,
-    batchContext: {
-      batchId: string;
-      partition: number;
-      lastOffset: string;
-      messageCount: number;
-    }
+    logMetaData: LogMetaData
   ): Promise<void> {
     const start = performance.now();
     await handler.handleResults();
@@ -318,19 +300,14 @@ export class LogManager {
       executionTimeMs,
       handlerName: handler.constructor.name,
       methodName: "handleResults",
-      messageCount: batchContext.messageCount,
+      messageCount: logMetaData.messageCount ?? 0,
       message: "Segment events",
     });
   }
 
   private async logPosthogEvents(
     handler: PostHogHandler,
-    batchContext: {
-      batchId: string;
-      partition: number;
-      lastOffset: string;
-      messageCount: number;
-    }
+    logMetaData: LogMetaData
   ): Promise<void> {
     const start = performance.now();
     await handler.handleResults();
@@ -341,19 +318,14 @@ export class LogManager {
       executionTimeMs,
       handlerName: handler.constructor.name,
       methodName: "handleResults",
-      messageCount: batchContext.messageCount,
+      messageCount: logMetaData.messageCount ?? 0,
       message: "Posthog events",
     });
   }
 
   private async logWebhooks(
     handler: WebhookHandler,
-    batchContext: {
-      batchId: string;
-      partition: number;
-      lastOffset: string;
-      messageCount: number;
-    }
+    logMetaData: LogMetaData
   ): Promise<void> {
     const start = performance.now();
     await handler.handleResults();
@@ -364,7 +336,7 @@ export class LogManager {
       executionTimeMs,
       handlerName: handler.constructor.name,
       methodName: "handleResults",
-      messageCount: batchContext.messageCount,
+      messageCount: logMetaData.messageCount ?? 0,
       message: "Webhooks",
     });
   }
