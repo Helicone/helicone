@@ -7,28 +7,18 @@ import {
 import { LogManager } from "../../../managers/LogManager";
 import { ScoreManager } from "../../../managers/score/ScoreManager";
 import { SettingsManager } from "../../../utils/settings";
-import { mapDlqKafkaMessageToMessage } from "../../consumer/helpers/mapDlqKafkaMessageToMessage";
-import {
-  mapKafkaMessageToMessage,
-  mapMessageDates,
-} from "../../consumer/helpers/mapKafkaMessageToMessage";
-import { mapKafkaMessageToScoresMessage } from "../../consumer/helpers/mapKafkaMessageToScoresMessage";
+import { mapMessageDates } from "../../consumer/helpers/mapKafkaMessageToMessage";
+import { QUEUE_URLS } from "../../producers/sqsTypes";
 
 // do not go above 10, this is the max sqs can handle
 const MAX_NUMBER_OF_MESSAGES = 10;
-const QUEUE_NAMES = {
+export const QUEUE_NAMES = {
   requestResponseLogs: "request-response-logs-queue",
   heliconeScores: "helicone-scores-queue",
   requestResponseLogsDlq: "request-response-logs-dlq",
   heliconeScoresDlq: "helicone-scores-dlq",
 } as const;
 
-const QUEUE_URLS = {
-  requestResponseLogs: `https://sqs.${process.env.AWS_REGION}.amazonaws.com/${process.env.AWS_ACCOUNT_ID}/${QUEUE_NAMES.requestResponseLogs}`,
-  heliconeScores: `https://sqs.${process.env.AWS_REGION}.amazonaws.com/${process.env.AWS_ACCOUNT_ID}/${QUEUE_NAMES.heliconeScores}`,
-  requestResponseLogsDlq: `https://sqs.${process.env.AWS_REGION}.amazonaws.com/${process.env.AWS_ACCOUNT_ID}/${QUEUE_NAMES.requestResponseLogsDlq}`,
-  heliconeScoresDlq: `https://sqs.${process.env.AWS_REGION}.amazonaws.com/${process.env.AWS_ACCOUNT_ID}/${QUEUE_NAMES.heliconeScoresDlq}`,
-} as const;
 const SQS_CLIENT = new SQSClient({
   region: process.env.AWS_REGION,
 });
