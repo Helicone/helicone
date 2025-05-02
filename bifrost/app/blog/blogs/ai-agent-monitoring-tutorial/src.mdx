@@ -1,8 +1,6 @@
-Complex AI agents are transforming how users interact with data and services, with increasing complexity and sophistication.
+**Time to complete: ~30 minutes**
 
-As AI agents become more common and more complex, it's essential to understand how they behave to deploy them reliably in production.
-
-AI agent observability tools like Helicone have stepped up to meet this complex challenge, providing comprehensive visibility into every step of an agent's workflow, from the initial user query to the final response.
+Your AI agent worked perfectly in testing, but now in production it's making bizarre recommendations and you have no idea why. Sound familiar? As AI agents grow increasingly complex, the black box problem is becoming the number one obstacle to reliable deployment.
 
 In this first part of our two-part series on AI agent observability, we'll build a financial research assistant that demonstrates the key components of a modern AI agent. In part two, we'll explore how to effectively monitor it with Helicone's agentic AI observability features.
 
@@ -16,7 +14,7 @@ Before we dive in, you'll need:
 - **<a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">OpenAI API</a>** key
 - **<a href="https://www.alphavantage.co/support/#api-key" target="_blank" rel="noopener">Alpha Vantage API key</a>** (free tier available)
 
-### Quick Start
+## Quick Start
 
 Want to skip ahead and try the code immediately? Clone the GitHub repository and run the code:
 
@@ -41,16 +39,16 @@ npm start
 
 This gives you the basic version of the financial assistant. 
 
-In Part 2, we'll show you how to add comprehensive monitoring to your AI agent with Helicone's Sessions feature.
+In part 2, we'll show you how to add comprehensive monitoring to your AI agent with Helicone's Sessions feature.
 
-## What We're Building
+## How We'll Build Our Financial Assistant
 
 Our financial assistant does two things:
 
 1. Fetches real-time price information and news for specific tickers
 2. Uses RAG to answer questions about financial concepts
 
-The agent intelligently determines which approach to take for each query.
+The agent intelligently determines which approach to take for each query - a pattern applicable to many domains beyond finance, including customer support, healthcare, and legal applications.
 
 ## Key Components of Our AI Agent
 
@@ -112,6 +110,8 @@ async function initializeVectorStore() {
 const results = await vectorStore.similaritySearch(query, 2);
 ```
 
+This RAG implementation provides domain-specific knowledge to the agent, but as we'll see later, without proper monitoring, it can be difficult to detect when the system is operating outside its knowledge boundaries.
+
 ### 3. External API Integration
 
 For stock queries, such as real-time price information or news, we connect to the Alpha Vantage API:
@@ -141,6 +141,8 @@ async function getStockData(ticker) {
   }
 }
 ```
+
+By connecting to external APIs, we can access real-time data that the underlying LLM doesn't have access to.
 
 ### 4. Multi-Step Processing
 
@@ -193,32 +195,37 @@ npm start
 
 ![What is halal investing?](/static/blog/ai-agent-monitoring-tutorial/halal-investing.webp)
 
-Looks like our financial assistant is working as expected...or is it?
+Looks like our financial assistant successfully fetched Tesla's stock data... or did it? 
 
-The second prompt's term "halal investing" is not in our knowledge base—so the agent is responding with information it shouldn't really "have"—in effect, **hallucinating**.
+There's an issue with the second query. 
+
+The term "halal investing" is not in our knowledge base, yet the agent confidently responded with a detailed answer. This is a perfect example of <a href="https://www.helicone.ai/blog/how-to-reduce-llm-hallucination" target="_blank" rel="noopener">hallucination</a> that would be nearly impossible to detect without proper monitoring.
 
 ## Debugging our Financial Assistant 
 
-To debug our financial assistant, we need to understand what's going on inside it—and we can achieve this with proper AI agent observability.
+Looking at our implementation, there are several blind spots that could potentially cause issues:
 
-And Helicone is an excellent tool for that!
+- **Hallucinations**: Our agent provided information about halal investing despite not having this in its knowledge base - how do we detect this?
+- **Cost Visibility**: How many tokens is each component of our agent consuming? Which queries are most expensive?
+- **Latency Issues**: If the agent becomes slow, which step is causing the bottleneck?
+- **Error Patterns**: Are certain types of queries consistently failing? Where in the pipeline do these failures occur?
 
-In Part 2, we'll add Helicone to our financial assistant to gain comprehensive visibility into every step of the process and resolve the issues in our current implementation.
+In Part 2, we'll add Helicone to our financial assistant to gain comprehensive visibility into every step of the process. Here's a preview of what you'll be able to see:
 
-We'll monitor each step of the agent's workflow, resolve the bugs, and gain insights into other useful metrics such as cost, latency, and error rates.
+![Using Helicone Sessions to Debug AI Agents](/static/blog/ai-agent-monitoring-tutorial/sessions-ai-agent.webp)
 
-Stay tuned for Part 2!
+We'll monitor each step of the agent's workflow, resolve bugs, and gain insights into useful metrics like cost, latency, and error rates.
+
+Stay tuned!
 
 <CallToAction
-  title="Take Control of Your AI Agents with Helicone ⚡️"
-  description="Stop building in the dark with AI. Get complete visibility into every step of your AI workflows, track costs down to the penny, and debug complex issues in minutes instead of days."
+  title="Observe Your AI Agents with Helicone ⚡️"
+  description="Stop building with AI in the dark. Get complete visibility into every step of your AI workflows, track costs down to the penny, and debug complex issues in minutes instead of days."
   primaryButtonText="Start Monitoring for Free"
   primaryButtonLink="https://helicone.ai/signup"
-  secondaryButtonText="Explore Advanced Features"
+  secondaryButtonText="How Debugging Works"
   secondaryButtonLink="https://docs.helicone.ai/features/sessions"
 />
-
----
 
 ### You might also like:
 
