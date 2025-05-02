@@ -8,7 +8,10 @@ import { LogManager } from "../../../managers/LogManager";
 import { ScoreManager } from "../../../managers/score/ScoreManager";
 import { SettingsManager } from "../../../utils/settings";
 import { mapDlqKafkaMessageToMessage } from "../../consumer/helpers/mapDlqKafkaMessageToMessage";
-import { mapKafkaMessageToMessage } from "../../consumer/helpers/mapKafkaMessageToMessage";
+import {
+  mapKafkaMessageToMessage,
+  mapMessageDates,
+} from "../../consumer/helpers/mapKafkaMessageToMessage";
 import { mapKafkaMessageToScoresMessage } from "../../consumer/helpers/mapKafkaMessageToScoresMessage";
 
 // do not go above 10, this is the max sqs can handle
@@ -130,16 +133,12 @@ export async function consumeRequestResponseLogs() {
       queueUrl: QUEUE_URLS.requestResponseLogs,
       sizeSetting: "sqs:request-response-logs",
       process: async (messages) => {
-        const mappedMessages = mapKafkaMessageToMessage(
-          messages.map((message) => JSON.parse(message.Body ?? "{}"))
+        const mappedMessages = messages.map((message) =>
+          mapMessageDates(JSON.parse(message.Body ?? "{}"))
         );
-        if (mappedMessages.error || !mappedMessages.data) {
-          console.error("Failed to map messages", mappedMessages.error);
-          throw new Error("Failed to map messages");
-        }
 
         const logManager = new LogManager();
-        await logManager.processLogEntries(mappedMessages.data, {});
+        await logManager.processLogEntries(mappedMessages, {});
       },
     });
   }
@@ -151,16 +150,12 @@ export async function consumeRequestResponseLogsDlq() {
       queueUrl: QUEUE_URLS.requestResponseLogsDlq,
       sizeSetting: "sqs:request-response-logs-dlq",
       process: async (messages) => {
-        const mappedMessages = mapDlqKafkaMessageToMessage(
-          messages.map((message) => JSON.parse(message.Body ?? "{}"))
+        const mappedMessages = messages.map((message) =>
+          mapMessageDates(JSON.parse(message.Body ?? "{}"))
         );
-        if (mappedMessages.error || !mappedMessages.data) {
-          console.error("Failed to map messages", mappedMessages.error);
-          throw new Error("Failed to map messages");
-        }
 
         const logManager = new LogManager();
-        await logManager.processLogEntries(mappedMessages.data, {});
+        await logManager.processLogEntries(mappedMessages, {});
       },
     });
   }
