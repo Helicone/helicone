@@ -1,6 +1,9 @@
 import * as Sentry from "@sentry/node";
 import { dataDogClient } from "../lib/clients/DataDogClient";
-import { KAFKA_ENABLED, HeliconeProducer } from "../lib/clients/KafkaProducer";
+import {
+  KAFKA_ENABLED,
+  HeliconeProducer,
+} from "../lib/clients/HeliconeQuequeProducer";
 import { AuthenticationHandler } from "../lib/handlers/AuthenticationHandler";
 import {
   HandlerContext,

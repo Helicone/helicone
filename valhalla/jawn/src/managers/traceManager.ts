@@ -1,5 +1,5 @@
 import type { Log, KafkaMessageContents } from "../lib/handlers/HandlerContext";
-import { HeliconeProducer } from "../lib/clients/KafkaProducer";
+import { HeliconeProducer } from "../lib/clients/HeliconeQuequeProducer";
 import { S3Client } from "../lib/shared/db/s3Client";
 import { randomUUID } from "crypto";
 import { AuthParams } from "../packages/common/auth/types";

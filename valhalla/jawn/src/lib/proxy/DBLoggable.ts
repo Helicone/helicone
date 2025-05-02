@@ -3,7 +3,7 @@ import { Provider } from "../../packages/llm-mapper/types";
 import { PromptSettings } from "../requestWrapper/requestWrapper";
 import { err, ok } from "../../packages/common/result";
 import { HeliconeProxyRequest } from "./HeliconeProxyRequest";
-import { HeliconeProducer } from "../clients/KafkaProducer";
+import { HeliconeProducer } from "../clients/HeliconeQuequeProducer";
 import { AuthParams } from "../../packages/common/auth/types";
 import { OrgParams } from "../../packages/common/auth/types";
 import { S3Manager } from "./S3Manager";

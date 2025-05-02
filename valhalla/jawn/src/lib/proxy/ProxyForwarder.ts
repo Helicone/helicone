@@ -1,6 +1,6 @@
 import { Response } from "node-fetch";
 import { Provider } from "../../packages/llm-mapper/types";
-import { HeliconeProducer } from "../clients/KafkaProducer";
+import { HeliconeProducer } from "../clients/HeliconeQuequeProducer";
 import { RequestWrapper } from "../requestWrapper/requestWrapper";
 import { getHeliconeAuthClient } from "../../packages/common/auth/server/AuthClientFactory";
 import { S3Client } from "../shared/db/s3Client";
