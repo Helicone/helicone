@@ -1,16 +1,16 @@
 import * as Sentry from "@sentry/node";
 import { ScoreManager } from "../../managers/score/ScoreManager";
 import { PromiseGenericResult, err, ok } from "../../packages/common/result";
-import { Topics } from "../clients/KafkaProducer";
-import { HeliconeScoresMessage } from "../handlers/HandlerContext";
 
+import { HeliconeScoresMessage } from "../handlers/HandlerContext";
+import { QueueTopics } from "../producers/types";
 export async function consumeMiniBatchScores(
   messages: HeliconeScoresMessage[],
   firstOffset: string,
   lastOffset: string,
   miniBatchId: string,
   batchPartition: number,
-  topic: Topics
+  topic: QueueTopics
 ): PromiseGenericResult<string> {
   console.log(
     `Received mini batch with ${messages.length} messages. Mini batch ID: ${miniBatchId}. Topic: ${topic}`

@@ -1,16 +1,16 @@
+import { SettingsManager } from "../../../utils/settings";
+import { consumeMiniBatch } from "../../consumer/consumeMiniBatch";
 import { generateKafkaAdmin, generateKafkaConsumer } from "./client";
 import {
   DLQ_MESSAGES_PER_MINI_BATCH,
-  SCORES_MESSAGES_PER_MINI_BATCH,
   MESSAGES_PER_MINI_BATCH,
+  SCORES_MESSAGES_PER_MINI_BATCH,
 } from "./constant";
-import { SettingsManager } from "../../../utils/settings";
-import { consumeMiniBatch } from "../../consumer/consumeMiniBatch";
 
-import { mapKafkaMessageToMessage } from "../../consumer/helpers/mapKafkaMessageToMessage";
 import { consumeMiniBatchScores } from "../../consumer/consumeMiniBatchScores";
-import { mapKafkaMessageToScoresMessage } from "../../consumer/helpers/mapKafkaMessageToScoresMessage";
 import { mapDlqKafkaMessageToMessage } from "../../consumer/helpers/mapDlqKafkaMessageToMessage";
+import { mapKafkaMessageToMessage } from "../../consumer/helpers/mapKafkaMessageToMessage";
+import { mapKafkaMessageToScoresMessage } from "../../consumer/helpers/mapKafkaMessageToScoresMessage";
 
 const KAFKA_CREDS = JSON.parse(process.env.KAFKA_CREDS ?? "{}");
 const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
