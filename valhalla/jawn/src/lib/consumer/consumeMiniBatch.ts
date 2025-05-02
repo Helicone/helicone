@@ -1,8 +1,8 @@
 import * as Sentry from "@sentry/node";
 import { LogManager } from "../../managers/LogManager";
 import { PromiseGenericResult, err, ok } from "../../packages/common/result";
-import { Topics } from "../clients/KafkaProducer";
 import { KafkaMessageContents } from "../handlers/HandlerContext";
+import { QueueTopics } from "../producers/types";
 
 export async function consumeMiniBatch(
   messages: KafkaMessageContents[],
@@ -10,7 +10,7 @@ export async function consumeMiniBatch(
   lastOffset: string,
   miniBatchId: string,
   batchPartition: number,
-  topic: Topics
+  topic: QueueTopics
 ): PromiseGenericResult<string> {
   console.log(
     `Received mini batch with ${messages.length} messages. Mini batch ID: ${miniBatchId}. Topic: ${topic}`

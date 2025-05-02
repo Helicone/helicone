@@ -13,6 +13,8 @@ export type ScoreTopics = "helicone-scores-prod" | "helicone-scores-prod-dlq";
 export type RequestResponseTopics =
   | "request-response-logs-prod-dlq"
   | "request-response-logs-prod";
+export type QueueTopics = RequestResponseTopics | ScoreTopics;
+
 export type QueuePayload =
   | {
       msgs: KafkaMessageContents[];

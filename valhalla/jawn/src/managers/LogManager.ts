@@ -1,9 +1,6 @@
 import * as Sentry from "@sentry/node";
 import { dataDogClient } from "../lib/clients/DataDogClient";
-import {
-  KAFKA_ENABLED,
-  HeliconeProducer,
-} from "../lib/clients/HeliconeQuequeProducer";
+import { HeliconeQueueProducer } from "../lib/clients/HeliconeQuequeProducer";
 import { AuthenticationHandler } from "../lib/handlers/AuthenticationHandler";
 import {
   HandlerContext,
@@ -25,6 +22,7 @@ import { LogStore } from "../lib/stores/LogStore";
 import { RateLimitStore } from "../lib/stores/RateLimitStore";
 import { VersionedRequestStore } from "../lib/stores/request/VersionedRequestStore";
 import { WebhookStore } from "../lib/stores/WebhookStore";
+import { KAFKA_ENABLED } from "../lib/producers/KafkaProducerImpl";
 
 export interface LogMetaData {
   batchId?: string;
@@ -125,7 +123,7 @@ export class LogManager {
             );
           }
           if (KAFKA_ENABLED) {
-            const kafkaProducer = new HeliconeProducer();
+            const kafkaProducer = new HeliconeQueueProducer();
 
             const res = await kafkaProducer.sendMessages(
               [logMessage],
@@ -209,7 +207,7 @@ export class LogManager {
       );
 
       if (KAFKA_ENABLED) {
-        const kafkaProducer = new HeliconeProducer();
+        const kafkaProducer = new HeliconeQueueProducer();
         const kafkaResult = await kafkaProducer.sendMessages(
           logMessages,
           "request-response-logs-prod-dlq"

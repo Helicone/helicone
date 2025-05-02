@@ -1,5 +1,5 @@
 import { HeliconeHeaders } from "../../../../shared/proxy/heliconeHeaders";
-import { HeliconeProducer } from "../lib/clients/HeliconeQuequeProducer";
+import { HeliconeQueueProducer } from "../lib/clients/HeliconeQuequeProducer";
 import type { KafkaMessageContents } from "../lib/handlers/HandlerContext";
 import { S3Client } from "../lib/shared/db/s3Client";
 import { AuthParams } from "../packages/common/auth/types";
@@ -114,7 +114,7 @@ export class CustomTraceManager {
   }
 
   private async sendLogToKafka(kafkaMessage: KafkaMessageContents) {
-    const kafkaProducer = new HeliconeProducer();
+    const kafkaProducer = new HeliconeQueueProducer();
     await kafkaProducer.sendMessages(
       [kafkaMessage],
       "request-response-logs-prod"
