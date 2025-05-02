@@ -28,6 +28,7 @@ export interface EU_Env {
   EU_UPSTASH_KAFKA_USERNAME: string;
   EU_SECURE_CACHE: KVNamespace;
   EU_REQUEST_LOGS_QUEUE_URL: string;
+  EU_AWS_REGION?: "eu-west-1";
 }
 export interface BASE_Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
@@ -143,7 +144,7 @@ async function modifyEnvBasedOnPath(
       SECURE_CACHE: env.EU_SECURE_CACHE,
       REQUEST_LOGS_QUEUE_URL: env.EU_REQUEST_LOGS_QUEUE_URL,
       S3_REGION: "eu-west-1",
-      AWS_REGION: "eu-west-1",
+      AWS_REGION: env.EU_AWS_REGION ?? "eu-west-1",
     };
   }
 
