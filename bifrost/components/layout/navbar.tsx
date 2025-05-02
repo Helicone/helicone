@@ -86,7 +86,14 @@ const MobileHeader = (props: {
   );
 };
 
-type LinkItem = { title: string; href: string; description: string; icon: React.ReactNode };
+type LinkItem = {
+  title: string; link: {
+    href: string;
+    isExternal: boolean;
+  };
+  description: string;
+  icon: React.ReactNode;
+};
 
 const MobileNav = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -99,11 +106,11 @@ const MobileNav = () => {
   // Helper function to render links in mobile nav
   const renderLinks = (links: LinkItem[]) => {
     return links.map((link: LinkItem, i: number) => {
-      const isExternalLink = link.title === "Careers" || link.title === "GitHub";
+      const isExternalLink = link.link.isExternal;
       return (
         <Link
           key={i}
-          href={link.href}
+          href={link.link.href}
           target={isExternalLink ? "_blank" : undefined}
           rel={isExternalLink ? "noopener noreferrer" : undefined}
           className="flex items-center justify-between group my-0.5 text-accent-foreground"
@@ -176,21 +183,30 @@ const MobileNav = () => {
 const resourcesComponents: LinkItem[] = [
   {
     title: "Changelog",
-    href: "/changelog",
+    link: {
+      href: "/changelog",
+      isExternal: false,
+    },
     description:
       "Latest updates and improvements",
     icon: <GitMerge className="size-5 navbar-icon-style" />,
   },
   {
     title: "Blog",
-    href: "/blog",
+    link: {
+      href: "/blog",
+      isExternal: false,
+    },
     description:
       "Insights on AI development and best practices",
     icon: <Newspaper className="size-5 navbar-icon-style" />,
   },
   {
     title: "Community",
-    href: "/community",
+    link: {
+      href: "/community",
+      isExternal: false,
+    },
     description:
       "Built for scale, security, and control",
     icon: <Gem className="size-5 navbar-icon-style" />,
@@ -201,28 +217,40 @@ const resourcesComponents: LinkItem[] = [
 const toolsComponents: LinkItem[] = [
   {
     title: "Open Stats",
-    href: "/open-stats",
+    link: {
+      href: "/open-stats",
+      isExternal: false,
+    },
     description:
       "Real-time LLM usage analytics",
     icon: <Earth className="size-5 navbar-icon-style" />,
   },
   {
     title: "Model Comparison",
-    href: "/comparison",
+    link: {
+      href: "/comparison",
+      isExternal: false,
+    },
     description:
       "Compare LLM models and providers",
     icon: <Scale className="size-5 navbar-icon-style" />,
   },
   {
     title: "Provider Status",
-    href: "/status",
+    link: {
+      href: "/status",
+      isExternal: false,
+    },
     description:
       "Check LLM provider service status",
     icon: <TrendingUp className="size-5 navbar-icon-style" />,
   },
   {
     title: "LLM API Pricing Calculator",
-    href: "/llm-cost",
+    link: {
+      href: "/llm-cost",
+      isExternal: false,
+    },
     description:
       "Calculate and compare API costs",
     icon: <HandCoins className="size-5 navbar-icon-style" />,
@@ -232,14 +260,20 @@ const toolsComponents: LinkItem[] = [
 const mainComponents: LinkItem[] = [
   {
     title: "Docs",
-    href: "https://docs.helicone.ai/",
+    link: {
+      href: "https://docs.helicone.ai/",
+      isExternal: true,
+    },
     description:
       "Integrate Helicone into your AI application",
     icon: <BookHeart className="size-5 navbar-icon-style" />,
   },
   {
     title: "Pricing",
-    href: "/pricing",
+    link: {
+      href: "/pricing",
+      isExternal: false,
+    },
     description:
       "Simple, transparent pricing",
     icon: <HandCoins className="size-5 navbar-icon-style" />,
@@ -249,21 +283,30 @@ const mainComponents: LinkItem[] = [
 const additionalComponents: LinkItem[] = [
   {
     title: "Contact",
-    href: "/contact",
+    link: {
+      href: "/contact",
+      isExternal: false,
+    },
     description:
       "Get in touch with us",
     icon: <Mail className="size-5 navbar-icon-style" />,
   },
   {
     title: "Careers",
-    href: "https://app.dover.com/jobs/helicone",
+    link: {
+      href: "https://app.dover.com/jobs/helicone",
+      isExternal: true,
+    },
     description:
       "Join our team",
     icon: <Briefcase className="size-5 navbar-icon-style" />,
   },
   {
     title: "GitHub",
-    href: "https://github.com/helicone/helicone",
+    link: {
+      href: "https://github.com/helicone/helicone",
+      isExternal: true,
+    },
     description:
       "Contribute to our project",
     icon: <Github className="size-5 navbar-icon-style" />,
@@ -356,7 +399,7 @@ const NavBar = (props: NavBarProps) => {
                         <ListItem
                           key={component.title}
                           title={component.title}
-                          href={component.href}
+                          href={component.link.href}
                           icon={component.icon}
                         >
                           {component.description}
@@ -398,7 +441,7 @@ const NavBar = (props: NavBarProps) => {
                       <ListItem
                         key={component.title}
                         title={component.title}
-                        href={component.href}
+                        href={component.link.href}
                         icon={component.icon}
                       >
                         {component.description}
