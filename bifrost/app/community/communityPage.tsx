@@ -5,12 +5,10 @@ import { useState } from "react";
 import { Customers } from "./customers";
 import { Integrations } from "./integrations";
 import { Projects } from "./projects";
-
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { Sparkles } from "lucide-react";
 export default function CommunityPage() {
-  const TABS = ["Projects", "Integrations", "Customers"] as const;
-
-  const [selectedTab, setSelectedTab] =
-    useState<(typeof TABS)[number]>("Projects");
 
   return (
     <div className="w-full bg-white h-full antialiased relative text-black mb-[24px]">
@@ -22,32 +20,34 @@ export default function CommunityPage() {
           height={100}
         />
         <h1 className="text-3xl sm:text-5xl font-bold tracking-tight max-w-4xl">
-          Community
+          Customer Stories
         </h1>
         <p className="mt-[12px] text-sm sm:text-lg text-gray-700">
-          All projects and companies we love who are using Helicone, and cool
-          integrations.
+          Leading companies using Helicone to optimize and scale their AI
+          applications.
         </p>
-        <div className="mt-[24px] mb-[24px] flex flex-row h-[34px] text-gray-500 rounded-md bg-[#F0F9FF] md:bg-transparent md:gap-5">
-          {TABS.map((tab, i) => (
-            <button
-              key={`${tab}-${i}`}
-              className={clsx(
-                "w-full h-full flex justify-items-center items-center text-sm px-[24px] font-semibold shadow-sm text-center my-auto ",
-                selectedTab === tab
-                  ? "bg-sky-500 hover:bg-sky-600 border-2 border-sky-700 text-white rounded-md"
-                  : "text-sky-500 hover:bg-sky-100 bg-[#F0F9FF] rounded-md"
-              )}
-              onClick={() => setSelectedTab(tab)}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
 
-        {selectedTab === "Projects" && <Projects />}
-        {selectedTab === "Integrations" && <Integrations />}
-        {selectedTab === "Customers" && <Customers />}
+        {/* <Projects /> */}
+
+        <h2 className="text-3xl font-semibold tracking-tight max-w-4xl">
+          Community Projects
+        </h2>
+        <p className="mt-[12px] text-sm sm:text-lg text-gray-700">
+          Products built with Helicone, by our amazing community of developers.
+        </p>
+        <Button variant="outline" asChild>
+          <Link
+            href="https://forms.gle/WpTEEE6vVdQccprD9"
+            target="_blank"
+            rel="noopener"
+            className="flex items-center"
+          >
+            <Sparkles className="size-4 mr-2" />
+            Share Your Project
+          </Link>
+        </Button>
+        <Projects />
+
       </div>
     </div>
   );

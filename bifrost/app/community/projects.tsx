@@ -377,23 +377,6 @@ export function Projects() {
   // );
   return (
     <div>
-      {/* Submit a project banner */}
-      <div className="flex justify-center mt-[24px] mb-[8px] space-x-2">
-        <div className="flex flex-col items-center sm:flex-row justify-center space-x-2 py-4 px-6 sm:px-16 bg-sky-50 border border-sky-100 rounded-md">
-          <SparklesIcon className="h-5 w-5 text-sky-500" />
-          <div className="text-sm text-sky-500 font-semibold text-center sm:text-left">
-            Using Helicone? We want to know what you are building!
-          </div>
-          <Link
-            href={"https://forms.gle/WpTEEE6vVdQccprD9"}
-            className=" text-sm text-sky-500 sm:whitespace-nowrap"
-          >
-            <u className="hover:text-sky-500">Fill out this form</u> to be
-            featured.
-          </Link>
-        </div>
-      </div>
-
       {/* Project grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
         {projects.map((project, i) => {
@@ -404,26 +387,16 @@ export function Projects() {
             >
               <Link
                 id="featured"
-                className="flex flex-col gap-4 w-full h-full hover:bg-sky-50 rounded-lg p-4 col-span-2 md:col-span-1 mt-2"
+                className="flex flex-col gap-4 w-full h-full hover:bg-brand/10 rounded-lg p-4 col-span-2 md:col-span-1 mt-2"
                 href={project.href}
                 key={i}
                 target="_blank"
               >
-                {/*eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={project.imageHref}
-                  alt={project.title}
-                  width={400}
-                  height={250}
-                  style={{
-                    objectFit: "cover",
-                  }}
-                  className="rounded-lg h-64 sm:h-56 md:h-44 w-full border border-gray-200"
-                />
 
                 {/* Overlay for tags and description */}
-                <div className="w-full h-fit rounded-lg flex flex-col text-left">
+                <div className="w-full h-fit rounded-lg flex flex-col text-left gap-4">
                   <div className="flex items-center gap-2">
+
                     {/* Industry tag */}
                     {project.tags.map((tag, index) => (
                       <span
@@ -443,21 +416,21 @@ export function Projects() {
                       </span>
                     )}
                   </div>
-                  <h2 className="font-semibold text-md pt-2 text-gray-700">
-                    {project.title}
-                  </h2>
-                  <p className="text-gray-500 text-sm">{project.description}</p>
-                  <br></br>
-                  <p className="text-sky-500 text-sm font-medium">
-                    {'"'}
-                    {project.usage}
-                    {'"'}
-                  </p>
+                  <div className="flex flex-col gap-2">
+                    <h2 className="font-semibold text-md text-accent-foreground">
+                      {project.title}
+                    </h2>
+                    <p className="text-muted-foreground text-sm font-normal leading-normal">
+                      {'"'}
+                      {project.usage}
+                      {'"'}
+                    </p>
+                  </div>
                 </div>
               </Link>
 
               {/* Creators tag */}
-              <div className={clsx("flex items-center")}>
+              {/* <div className={clsx("flex items-center")}>
                 {project.creators.map((creator, i) => (
                   <div key={i} className="flex items-center px-4 py-1">
                     <a
@@ -475,7 +448,7 @@ export function Projects() {
                     </a>
                   </div>
                 ))}
-              </div>
+              </div> */}
             </div>
           );
         })}
