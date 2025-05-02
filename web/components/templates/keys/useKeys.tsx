@@ -4,6 +4,7 @@ import { getJawnClient } from "@/lib/clients/jawn";
 import { generateAPIKeyHelper } from "@/utils/generateAPIKeyHelper";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/router";
+import { $JAWN_API } from "@/lib/clients/jawn";
 
 export const useKeys = () => {
   const org = useOrg();
@@ -35,17 +36,20 @@ export const useKeys = () => {
       permission,
       keyName,
       isEu,
+      enableRateLimit,
     }: {
       permission: "rw" | "w";
       keyName: string;
       isEu: boolean;
+      enableRateLimit?: boolean;
     }) => {
       const { res, apiKey } = generateAPIKeyHelper(
         permission,
         org?.currentOrg?.organization_type!,
         keyName,
         isEu,
-        useGovernance
+        useGovernance,
+        enableRateLimit
       );
       return { res: await res, apiKey };
     },
@@ -63,8 +67,7 @@ export const useKeys = () => {
 
   const deleteKey = useMutation({
     mutationFn: (apiKeyId: string) => {
-      const jawn = getJawnClient(org?.currentOrg?.id);
-      return jawn.DELETE("/v1/api-keys/{apiKeyId}", {
+      return $JAWN_API.DELETE("/v1/api-keys/{apiKeyId}", {
         params: {
           path: {
             apiKeyId: Number(apiKeyId),

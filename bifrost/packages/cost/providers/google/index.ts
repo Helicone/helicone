@@ -129,11 +129,41 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "includes",
+      value: "gemini-2.0-flash",
+    },
+    cost: {
+      prompt_token: 0.0000001,
+      completion_token: 0.0000004,
+    },
+  },
+  {
+    model: {
+      operator: "includes",
       value: "gemini-2.0-flash-lite",
     },
     cost: {
       prompt_token: 0.000000075,
       completion_token: 0.0000003,
+    },
+  },
+  {
+    model: {
+      operator: "includes",
+      value: "gemini-2.5-pro-preview",
+    },
+    cost: {
+      prompt_token: 0.00000125,
+      completion_token: 0.00001,
+    },
+  },
+  {
+    model: {
+      operator: "includes",
+      value: "gemini-2.5-flash-preview",
+    },
+    cost: {
+      prompt_token: 0.00000015,
+      completion_token: 0.0000006,
     },
   },
 ];

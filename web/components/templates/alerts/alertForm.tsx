@@ -95,7 +95,7 @@ const AlertForm = (props: AlertFormProps) => {
   const slackChannels: {
     id: string;
     name: string;
-  }[] = [...(slackChannelsData || [])];
+  }[] = [...(slackChannelsData?.data || [])];
 
   const handleCreateAlert = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

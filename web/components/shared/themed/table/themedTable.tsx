@@ -1,6 +1,3 @@
-import useOnboardingContext, {
-  ONBOARDING_STEPS,
-} from "@/components/layout/onboardingContext";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { UIFilterRowTree } from "@/services/lib/filters/types";
@@ -16,7 +13,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import React, { useEffect, useMemo, useState } from "react";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { Result } from "../../../../packages/common/result";
@@ -27,6 +24,7 @@ import { clsx } from "../../clsx";
 import LoadingAnimation from "../../loadingAnimation";
 import { DragColumnItem } from "./columns/DragList";
 import DraggableColumnHeader from "./columns/draggableColumnHeader";
+import useShiftKeyPress from "@/services/hooks/isShiftPressed";
 
 type CheckboxMode = "always_visible" | "on_hover" | "never";
 
@@ -131,6 +129,8 @@ export default function ThemedTable<T extends { id?: string }>(
     tableRef,
   } = props;
 
+  const isShiftPressed = useShiftKeyPress();
+
   const table = useReactTable({
     data: defaultData,
     columns: defaultColumns,
@@ -182,26 +182,7 @@ export default function ThemedTable<T extends { id?: string }>(
     return { sessionId };
   }, [rows]);
 
-  const { currentStep, isOnboardingVisible, setOnClickElement } =
-    useOnboardingContext();
-
   const router = useRouter();
-  const searchParams = useSearchParams();
-  useEffect(() => {
-    if (
-      id === "requests-table" &&
-      isOnboardingVisible &&
-      currentStep === ONBOARDING_STEPS.REQUESTS_DRAWER.stepNumber
-    ) {
-      setOnClickElement(
-        () => () =>
-          router.push(
-            `/sessions/${encodeURIComponent(sessionData?.sessionId || "")}`
-          )
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOnboardingVisible, currentStep]);
 
   return (
     <ScrollArea className="h-full w-full sentry-mask-me" orientation="both">
@@ -287,19 +268,17 @@ export default function ThemedTable<T extends { id?: string }>(
               {rows.map((row, index) => (
                 <tr
                   key={row.original?.id}
+                  data-state={row.getIsSelected() && "selected"}
+                  onClick={(e) => handleRowSelect(row.original, index, e)}
                   className={clsx(
-                    "hover:cursor-pointer group",
-                    checkedIds?.includes(row.original?.id ?? "")
-                      ? "bg-sky-100 border-l border-sky-500 pl-2 dark:bg-slate-800/50 dark:border-sky-900"
-                      : "hover:bg-sky-50 dark:hover:bg-slate-700/50",
-                    rowLink && "relative"
+                    isShiftPressed && "select-none",
+                    (checkedIds?.includes(row.original?.id ?? "") ||
+                      selectedIds?.includes(row.original?.id ?? "")) &&
+                      "bg-sky-50 dark:bg-sky-950",
+                    checkboxMode === "on_hover"
+                      ? "cursor-pointer group"
+                      : "cursor-default"
                   )}
-                  onClick={
-                    onRowSelect &&
-                    ((e: React.MouseEvent) => {
-                      handleRowSelect(row.original, index, e);
-                    })
-                  }
                 >
                   <td
                     className={clsx(

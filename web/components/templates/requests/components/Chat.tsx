@@ -6,7 +6,7 @@ import { MappedLLMRequest, Message } from "@/packages/llm-mapper/types";
 import { useRequestRenderModeStore } from "@/store/requestRenderModeStore";
 import Image from "next/image";
 import { useMemo, useState } from "react";
-import { LuChevronDown } from "react-icons/lu";
+import { LuChevronDown, LuFileText } from "react-icons/lu";
 import { PiToolboxBold } from "react-icons/pi";
 import ReactMarkdown from "react-markdown";
 import { JsonRenderer } from "./chatComponent/single/JsonRenderer";
@@ -17,7 +17,7 @@ interface ChatProps {
   mappedRequest: MappedLLMRequest;
 }
 
-type MessageType = "image" | "tool" | "text";
+type MessageType = "image" | "tool" | "text" | "pdf";
 
 const isJson = (content: string) => {
   try {
@@ -29,15 +29,30 @@ const isJson = (content: string) => {
 };
 
 const getMessageType = (message: Message): MessageType => {
+  // Check for file type first
+  if (message._type === "file" && message.content && message.mime_type) {
+    if (message.mime_type.startsWith("image/")) {
+      return "image";
+    } else if (message.mime_type === "application/pdf") {
+      return "pdf";
+    }
+    // Potentially handle other file types here later
+  }
+
+  // Check for image URL if _type is image (legacy or non-base64 images)
   if (message._type === "image" && message.image_url) {
     return "image";
   }
-  if (message.role === "tool" || message._type === "function") {
+
+  // Then check for tool types
+  if (
+    message.role === "tool" ||
+    message._type === "function" ||
+    (message.tool_calls && message.tool_calls.length > 0)
+  ) {
     return "tool";
   }
-  if (message.tool_calls && message.tool_calls.length > 0) {
-    return "tool";
-  }
+  // Default to text
   return "text";
 };
 
@@ -111,14 +126,20 @@ export default function Chat({ mappedRequest }: ChatProps) {
     const responseMessages = mappedRequest.schema.response?.messages ?? [];
     const allMessages = [...requestMessages, ...responseMessages];
 
-    // Flatten contentArray messages
+    // Flatten contentArray messages, preserving the parent role
     return allMessages.reduce<Message[]>((acc, message) => {
       if (
         message._type === "contentArray" &&
         Array.isArray(message.contentArray)
       ) {
-        return [...acc, ...message.contentArray];
+        // Map over the contentArray and assign the parent message's role to each part
+        const flattenedParts = message.contentArray.map((part) => ({
+          ...part,
+          role: message.role || part.role, // Use parent role, fallback to part's own role if parent is missing
+        }));
+        return [...acc, ...flattenedParts];
       }
+      // If not a contentArray or it's empty, just add the message itself
       return [...acc, message];
     }, []);
   }, [mappedRequest]);
@@ -160,15 +181,44 @@ export default function Chat({ mappedRequest }: ChatProps) {
               {(() => {
                 switch (messageType) {
                   case "image":
+                    let imageSrc = message.image_url; // Default to URL
+                    if (
+                      message.content &&
+                      message.mime_type?.startsWith("image/")
+                    ) {
+                      // Use mime_type to construct the data URI
+                      imageSrc = `data:${message.mime_type};base64,${message.content}`;
+                    } else if (message.content && !message.mime_type) {
+                      // Fallback for older data where mime_type might be missing - assume png
+                      console.warn(
+                        "Image message missing mime_type, assuming image/png"
+                      );
+                      imageSrc = `data:image/png;base64,${message.content}`;
+                    }
+
                     return (
-                      <div className="relative w-full max-w-2xl h-[400px] my-4">
-                        <Image
-                          src={message.image_url!}
-                          alt="Generated image"
-                          fill
-                          className="rounded-lg object-contain"
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        />
+                      imageSrc && (
+                        <div className="relative w-full max-w-md h-[400px] my-4">
+                          <Image
+                            src={imageSrc}
+                            alt="Input image"
+                            fill
+                            className="rounded-lg object-contain border border-border"
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          />
+                        </div>
+                      )
+                    );
+                  case "pdf":
+                    // Display info indicating a PDF file is present
+                    const filename = message.filename || "PDF File";
+                    return (
+                      <div className="flex items-center gap-2 p-4 bg-muted rounded-lg border border-dashed border-border my-4">
+                        <LuFileText className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                        <span className="text-sm text-muted-foreground">
+                          {filename} (Base64 Encoded PDF - Preview/Download not
+                          available)
+                        </span>
                       </div>
                     );
                   case "tool":
@@ -214,7 +264,7 @@ export default function Chat({ mappedRequest }: ChatProps) {
                 }
               })()}
 
-              {isLongMessage && message._type !== "image" && (
+              {isLongMessage && !["image", "pdf"].includes(messageType) && (
                 <Button
                   variant={"none"}
                   size={"sm"}

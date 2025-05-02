@@ -132,6 +132,7 @@ export default function RequestDrawer(props: RequestDivProps) {
         value: formatDate(request.heliconeMetadata.createdAt),
       },
       { label: "Request ID", value: request.id },
+      { label: "User", value: request.heliconeMetadata.user || "Unknown" },
     ];
 
     // Token Information
@@ -348,7 +349,7 @@ export default function RequestDrawer(props: RequestDivProps) {
       <section className="h-full min-h-full w-full flex flex-col">
         {/* Header */}
         <header className="h-fit w-full flex flex-col pt-2 border-b border-border bg-card">
-          {/* Top Row */}
+          {/* First Top Row */}
           <div className="h-8 w-full shrink-0 flex flex-row justify-between items-center gap-2 px-4">
             {/* Left Side */}
             <div className="flex flex-row items-center gap-3 overflow-hidden">
@@ -466,20 +467,18 @@ export default function RequestDrawer(props: RequestDivProps) {
               {/* Session */}
               {specialProperties.sessionId && (
                 <Link
-                  className="text-secondary hover:underline hover:text-primary"
+                  className="text-secondary hover:underline hover:text-primary text-xs truncate"
                   href={`/sessions/${specialProperties.sessionId}`}
                 >
                   {specialProperties.sessionName ||
                     (specialProperties.sessionId && (
-                      <span className="text-xs">
+                      <span>
                         {specialProperties.sessionName ||
                           specialProperties.sessionId}
                       </span>
                     ))}
                   {specialProperties.sessionPath && (
-                    <span className="text-xs">
-                      {specialProperties.sessionPath}
-                    </span>
+                    <span>{specialProperties.sessionPath}</span>
                   )}
                 </Link>
               )}
@@ -501,7 +500,7 @@ export default function RequestDrawer(props: RequestDivProps) {
                         {item.label}
                       </XSmall>
 
-                      {item.label === "Request ID" ? (
+                      {item.label === "Request ID" || item.label === "User" ? (
                         <TooltipProvider>
                           <Tooltip delayDuration={100}>
                             <TooltipTrigger asChild>

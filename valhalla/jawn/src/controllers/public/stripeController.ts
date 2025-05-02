@@ -339,7 +339,7 @@ export class StripeController extends Controller {
     const result = await stripeManager.getSubscription();
 
     if (result.error) {
-      this.setStatus(400);
+      // this.setStatus(400);
       console.error(result.error);
       return null;
     }

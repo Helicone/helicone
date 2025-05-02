@@ -10,6 +10,9 @@ WORKDIR /usr/src/app/valhalla/prompt_security
 SHELL ["/bin/bash", "-c"]
 RUN apt-get update && apt-get install -y python3-venv python3
 RUN python3 -m venv venv
+# Install supervisor
+RUN apt-get update && apt-get install -y supervisor
+
 
 # Install FFMEG and FFPROBE
 RUN apt-get install -y ffmpeg
@@ -59,8 +62,6 @@ ENV NORMAL_WORKER_COUNT=3
 ENV CSB_API_KEY="1234567890"
 ENV ENABLE_PROMPT_SECURITY="true"
 
-# Install supervisor
-RUN apt-get update && apt-get install -y supervisor
 
 
 # Add supervisor configuration

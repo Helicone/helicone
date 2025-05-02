@@ -36,7 +36,7 @@ type BlogPostProps = {
 
 type UnPromise<T> = T extends Promise<infer U> ? U : T;
 
-const HEADSHOTS = {
+export const HEADSHOTS = {
   "Cole Gottdank": "/static/blog/colegottdank-headshot.webp",
   "Lina Lam": "/static/blog/linalam-headshot.webp",
   "Stefan Bokarev": "/static/blog/stefanbokarev-headshot.webp",
@@ -44,6 +44,7 @@ const HEADSHOTS = {
   "Scott Nguyen": "/static/blog/scottnguyen-headshot.webp",
   "Kavin Desi": "/static/blog/kavin-headshot.webp",
   "Yusuf Ishola": "/static/blog/yusuf-headshot.webp",
+  "Juliette Chevalier": "/static/blog/juliette-headshot.webp"
 };
 
 function metaDataToBlogStructure(
@@ -220,7 +221,22 @@ export type BlogStructure =
 export const BLOG_CONTENT: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "implement-and-monitor-cag",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "helicone-vs-galileo",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "building-first-mcp-for-developers",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "monitoring-local-llms",
     },
   },
   {
@@ -618,7 +634,7 @@ export const BLOG_CONTENT: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
-      folderName: "custom-properties",
+      folderName: "how-to-track-llm-user-feedback",
     },
   },
   {

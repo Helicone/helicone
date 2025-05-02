@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import NavBar from "@/components/layout/navbar";
-import Footer from "@/components/layout/footer";
 import "@mintlify/mdx/dist/styles.css";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -10,7 +8,7 @@ import { PHProvider } from "./providers";
 import dynamic from "next/dynamic";
 import Script from "next/script";
 import Head from "next/head";
-import { Layout } from "./components/Layout";
+
 const PostHogPageView = dynamic(() => import("./PostHogPageView"), {
   ssr: false,
 });
@@ -88,7 +86,7 @@ export default async function RootLayout({
           {/* rb2b script - moved to lazyOnload strategy */}
           <Script
             id="rb2b-snippet"
-            strategy="lazyOnload"
+            strategy="afterInteractive"
             dangerouslySetInnerHTML={{
               __html: `!function(){var reb2b=window.reb2b=window.reb2b||[];if(reb2b.invoked)return;reb2b.invoked=true;reb2b.methods=["identify","collect"];reb2b.factory=function(method){return function(){var args=Array.prototype.slice.call(arguments);args.unshift(method);reb2b.push(args);return reb2b;}};for(var i=0;i<reb2b.methods.length;i++){var key=reb2b.methods[i];reb2b[key]=reb2b.factory(key);}reb2b.load=function(key){var script=document.createElement("script");script.type="text/javascript";script.async=true;script.src="https://s3-us-west-2.amazonaws.com/b2bjsstore/b/"+key+"/LNKLDHM4VMOJ.js.gz";var first=document.getElementsByTagName("script")[0];first.parentNode.insertBefore(script,first);};reb2b.SNIPPET_VERSION="1.0.1";reb2b.load("LNKLDHM4VMOJ");}();`,
             }}
@@ -96,12 +94,12 @@ export default async function RootLayout({
           {/* Google Analytics - updated to lazyOnload strategy */}
           <Script
             id="google-analytics"
-            strategy="lazyOnload"
+            strategy="afterInteractive"
             src="https://www.googletagmanager.com/gtag/js?id=G-WGDEGPP49F"
           />
           <Script
             id="google-analytics-config"
-            strategy="lazyOnload"
+            strategy="afterInteractive"
             dangerouslySetInnerHTML={{
               __html: `
               window.dataLayer = window.dataLayer || [];

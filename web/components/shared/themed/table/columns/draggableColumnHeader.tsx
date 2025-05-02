@@ -16,15 +16,16 @@ export default function DraggableColumnHeader<T>(props: {
     | undefined;
   index: number;
   totalColumns: number;
+  className?: string;
 }) {
-  const { header, sortable, index, totalColumns } = props;
+  const { header, sortable, index, totalColumns, className } = props;
   const router = useRouter();
 
   const meta = header.column.columnDef?.meta as any;
   const hasSortKey = meta?.sortKey !== undefined;
 
   return (
-    <th
+    <div
       {...{
         colSpan: header.colSpan,
         style: {
@@ -34,7 +35,8 @@ export default function DraggableColumnHeader<T>(props: {
       className={clsx(
         "text-left font-semibold text-gray-900 dark:text-gray-100 relative px-2",
         index === 0 && "pl-10",
-        index === totalColumns - 1 && "pr-10"
+        index === totalColumns - 1 && "pr-10",
+        className
       )}
     >
       <div className="flex flex-row items-center justify-between">
@@ -154,6 +156,6 @@ export default function DraggableColumnHeader<T>(props: {
           )}
         />
       </button>
-    </th>
+    </div>
   );
 }

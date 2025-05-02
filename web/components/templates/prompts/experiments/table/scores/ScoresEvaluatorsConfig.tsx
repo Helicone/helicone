@@ -1,7 +1,5 @@
 import { Col, Row } from "@/components/layout/common";
-import useOnboardingContext, {
-  ONBOARDING_STEPS,
-} from "@/components/layout/onboardingContext";
+import { ONBOARDING_STEPS } from "@/components/layout/onboardingContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -53,42 +51,7 @@ const ScoresEvaluatorsConfig = memo(
       }
     }, [runEvaluators.isError]);
 
-    const {
-      isOnboardingVisible,
-      currentStep,
-      setOnClickElement,
-      setCurrentStep,
-    } = useOnboardingContext();
     const [selectOpen, setSelectOpen] = useState(false);
-
-    useEffect(() => {
-      if (
-        isOnboardingVisible &&
-        currentStep === ONBOARDING_STEPS.EXPERIMENTS_CLICK_ADD_EVAL.stepNumber
-      ) {
-        setOnClickElement(() => () => {
-          setCurrentStep(ONBOARDING_STEPS.EXPERIMENTS_SPECIFIC_EVAL.stepNumber);
-          setSelectOpen(true);
-        });
-
-        const keydownHandler = (e: KeyboardEvent) => {
-          if (e.key === "ArrowRight" || e.key === "ArrowDown") {
-            e.preventDefault();
-            setCurrentStep(
-              ONBOARDING_STEPS.EXPERIMENTS_SPECIFIC_EVAL.stepNumber
-            );
-            setSelectOpen(true);
-          }
-        };
-        window.addEventListener("keydown", keydownHandler);
-        return () => window.removeEventListener("keydown", keydownHandler);
-      } else if (
-        isOnboardingVisible &&
-        currentStep === ONBOARDING_STEPS.EXPERIMENTS_SPECIFIC_EVAL.stepNumber
-      ) {
-        setOnClickElement(() => () => {});
-      }
-    }, [isOnboardingVisible, currentStep, setOnClickElement, setCurrentStep]);
 
     return (
       <Row className={cn("gap-2 items-center w-full", "mx-6")}>
@@ -112,16 +75,6 @@ const ScoresEvaluatorsConfig = memo(
             }
           >
             <SelectValue placeholder="Select an evaluator" />
-            {isOnboardingVisible &&
-              currentStep ===
-                ONBOARDING_STEPS.EXPERIMENTS_CLICK_ADD_EVAL.stepNumber && (
-                <div className="absolute right-1/2 top-1/2 translate-x-2 -translate-y-1/2">
-                  <span className="relative flex h-3 w-3">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-sky-500"></span>
-                  </span>
-                </div>
-              )}
           </SelectTrigger>
 
           <SelectContent>
