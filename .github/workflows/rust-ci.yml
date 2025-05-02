@@ -31,6 +31,7 @@ jobs:
     env:
       SQLX_OFFLINE: true
       PROXY__DATABASE__URL: "postgresql://postgres:postgres@localhost:5432/postgres"
+      HELICONE_API_KEY: "sk-helicone-..."
     services:
       postgres:
         image: postgres:16.4-alpine
@@ -42,34 +43,19 @@ jobs:
           - 54322:5432
 
       minio:
-        image: minio/minio
-        ports:
-          - "9000:9000" # MinIO API port
-          - "9001:9001" # MinIO Console port
-        environment:
+        image: thomasharmon808/minio-ci
+        env:
           MINIO_ROOT_USER: minioadmin
           MINIO_ROOT_PASSWORD: minioadmin
+          MINIO_DEFAULT_BUCKETS: request-response-storage
+          MINIO_PROMETHEUS_AUTH_TYPE: "public"
+          MINIO_ADDRESS: ":9000"
+          MINIO_CONSOLE_ADDRESS: ":9001"
+        ports:
+          - 9000:9000
+          - 9001:9001
         volumes:
-          - minio_data:/data
-        command: server /data --console-address ":9001"
-        healthcheck:
-          test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-          interval: 30s
-          timeout: 10s
-          retries: 5
-          start_period: 5s # Give MinIO time to start up before checking
-
-      minio-setup:
-        image: minio/mc
-        depends_on:
-          minio:
-            condition: service_healthy
-        entrypoint: >
-          /bin/sh -c "
-          /usr/bin/mc alias set localminio http://minio:9000 minioadmin minioadmin;
-          /usr/bin/mc mb --ignore-existing localminio/request-response-storage;
-          exit 0;
-          "
+          - minio-test-data:/data
 
       redis:
         image: redis:6.2.6-alpine
