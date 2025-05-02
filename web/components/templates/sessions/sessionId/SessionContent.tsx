@@ -12,11 +12,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Muted, Small, XSmall } from "@/components/ui/typography";
+import { tracesToTreeNodeData } from "@/lib/sessions/helpers";
+import { useColorMapStore } from "@/store/features/sessions/colorMap";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
 import { PiBroadcastBold } from "react-icons/pi";
 import { isRealtimeRequest } from "../../../../lib/sessions/realtimeSession";
-import { Session, TreeNodeData } from "../../../../lib/sessions/sessionTypes";
+import { Session } from "../../../../lib/sessions/sessionTypes";
 import { getTimeIntervalAgo } from "../../../../lib/timeCalculations/time";
 import { useGetRequests } from "../../../../services/hooks/requests";
 import { useSessions } from "../../../../services/hooks/sessions";
@@ -24,8 +26,6 @@ import { Col } from "../../../layout/common/col";
 import ExportButton from "../../../shared/themed/table/exportButton";
 import FeedbackAction from "../../feedback/thumbsUpThumbsDown";
 import TreeView from "./Tree/TreeView";
-import { tracesToTreeNodeData } from "@/lib/sessions/helpers";
-import { useColorMapStore, ColorMap } from "@/store/features/sessions/colorMap";
 
 interface SessionContentProps {
   session: Session;
@@ -42,7 +42,7 @@ export const SessionContent: React.FC<SessionContentProps> = ({
   requests,
 }) => {
   const router = useRouter();
-  const { colorMap, setColorMap } = useColorMapStore();
+  const { initializeColorMap } = useColorMapStore();
 
   const { _, requestId } = router.query;
   const [selectedRequestId, setSelectedRequestId] = useState<string>(
@@ -173,9 +173,11 @@ export const SessionContent: React.FC<SessionContentProps> = ({
   }, [requests.requests.requests]);
 
   useEffect(() => {
-    const treeData = tracesToTreeNodeData(session.traces);
-    setColorMap(getAllPathColors(treeData, {}, null));
-  }, [session]);
+    if (session?.traces?.length > 0) {
+      const treeData = tracesToTreeNodeData(session.traces);
+      initializeColorMap(treeData);
+    }
+  }, [session.traces, initializeColorMap]);
 
   return (
     <Col className="h-screen flex flex-col">
@@ -265,70 +267,3 @@ export const SessionContent: React.FC<SessionContentProps> = ({
     </Col>
   );
 };
-
-function getAllPathColors(
-  treeData: TreeNodeData,
-  colors: ColorMap,
-  parentColor: string | null = null
-): ColorMap {
-  // Skip if node has no children
-  if (!treeData.children?.length) return colors;
-
-  for (const child of treeData.children) {
-    if (parentColor === null) {
-      // For top-level nodes, generate a unique color
-      const randomColor = generateUniqueColor(colors);
-      colors[child.currentPath] = randomColor;
-      getAllPathColors(child, colors, randomColor);
-    } else {
-      // For nested nodes, inherit parent's color
-      colors[child.currentPath] = parentColor;
-      getAllPathColors(child, colors, parentColor);
-    }
-  }
-  return colors;
-}
-
-function generateUniqueColor(existingColors: ColorMap): string {
-  // Get the count of existing colors to use as an index for deterministic generation
-  const colorIndex = Object.keys(existingColors).length;
-
-  const goldenRatioConjugate = 0.618033988749895;
-
-  // Use only colorIndex for deterministic color generation
-  let hue = (colorIndex * goldenRatioConjugate) % 1;
-
-  // Keep colors in the light spectrum
-  const saturation = 0.7; // 70% saturation for vibrant but not overwhelming colors
-
-  const depthFactor = Math.min(0.3, (colorIndex % 6) * 0.05);
-  const lightness = 0.8 - depthFactor; // Keep colors light but with some variation
-
-  // Convert HSL to hex
-  let r, g, b;
-
-  const hue2rgb = (p: number, q: number, t: number) => {
-    if (t < 0) t += 1;
-    if (t > 1) t -= 1;
-    if (t < 1 / 6) return p + (q - p) * 6 * t;
-    if (t < 1 / 2) return q;
-    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-    return p;
-  };
-
-  const q =
-    lightness < 0.5
-      ? lightness * (1 + saturation)
-      : lightness + saturation - lightness * saturation;
-  const p = 2 * lightness - q;
-  r = hue2rgb(p, q, hue + 1 / 3);
-  g = hue2rgb(p, q, hue);
-  b = hue2rgb(p, q, hue - 1 / 3);
-
-  const toHex = (x: number) => {
-    const hex = Math.round(x * 255).toString(16);
-    return hex.length === 1 ? "0" + hex : hex;
-  };
-
-  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
-}
