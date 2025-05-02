@@ -18,23 +18,8 @@ export class SQSProducer implements MessageProducer {
   private sqs: SQSClient;
 
   constructor() {
-    if (
-      !process.env.AWS_REGION ||
-      !process.env.AWS_ACCESS_KEY_ID ||
-      !process.env.AWS_SECRET_ACCESS_KEY ||
-      !process.env.REQUEST_LOGS_QUEUE_URL
-    ) {
-      throw new Error(
-        "Required AWS SQS environment variables are not set, SQSProducer will not be initialized."
-      );
-    }
-
     this.sqs = new SQSClient({
       region: process.env.AWS_REGION,
-      credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-      },
     });
   }
 
@@ -65,7 +50,11 @@ export class SQSProducer implements MessageProducer {
             })),
           });
 
-          await this.sqs.send(command);
+          const res = await this.sqs.send(command);
+          if ((res.Failed?.length ?? 0) > 0) {
+            console.error(`Failed to send message to SQS: ${res.Failed}`);
+            return err(`Failed to send message to SQS: ${res.Failed}`);
+          }
         }
 
         return ok("Success");
