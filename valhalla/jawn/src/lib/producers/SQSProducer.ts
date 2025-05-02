@@ -1,21 +1,18 @@
-import {
-  SendMessageBatchCommand,
-  SendMessageCommand,
-  SQSClient,
-} from "@aws-sdk/client-sqs";
-import { QueuePayload } from "./types";
-import { RequestResponseTopics } from "./types";
-import { MessageProducer } from "./types";
-import {
-  err,
-  ok,
-  PromiseGenericResult,
-  Result,
-} from "../../packages/common/result";
+import { SendMessageBatchCommand, SQSClient } from "@aws-sdk/client-sqs";
+import { err, ok, PromiseGenericResult } from "../../packages/common/result";
 import {
   HeliconeScoresMessage,
   KafkaMessageContents,
 } from "../handlers/HandlerContext";
+import { MessageProducer, QueuePayload, QueueTopics } from "./types";
+import { QUEUE_URLS } from "./sqsTypes";
+
+const TOPIC_TO_SQS_QUEUE_MAP: Record<QueueTopics, string> = {
+  "request-response-logs-prod": QUEUE_URLS.requestResponseLogs,
+  "request-response-logs-prod-dlq": QUEUE_URLS.requestResponseLogsDlq,
+  "helicone-scores-prod": QUEUE_URLS.heliconeScores,
+  "helicone-scores-prod-dlq": QUEUE_URLS.heliconeScoresDlq,
+} as const;
 
 export class SQSProducer implements MessageProducer {
   private sqs: SQSClient;
@@ -57,7 +54,7 @@ export class SQSProducer implements MessageProducer {
           msgs = msgs.slice(batchSize);
 
           const command = new SendMessageBatchCommand({
-            QueueUrl: this.queueUrl,
+            QueueUrl: TOPIC_TO_SQS_QUEUE_MAP[topic],
             Entries: batches.map((msg) => ({
               Id:
                 topic === "request-response-logs-prod" ||
