@@ -53,7 +53,7 @@ impl
                     source_model.name.clone(),
                 )
             })?;
-        tracing::debug!(source_model = ?value.model, target_model = ?model, source_provider = %Provider::OpenAI, target_provider = %Provider::Anthropic, "mapped model");
+        tracing::trace!(source_model = ?value, target_model = ?model, "mapped model");
         let system = if let Some(message) = value.messages.first() {
             if message.role == openai_types::chat::Role::System {
                 Some(message.content.clone())
@@ -81,7 +81,7 @@ impl
         }
         Ok(anthropic_types::chat::ChatCompletionRequest {
             messages,
-            model: model.name,
+            model: model.to_string(),
             temperature: value.temperature,
             max_tokens: value.max_tokens.unwrap_or(u32::MAX),
             system,

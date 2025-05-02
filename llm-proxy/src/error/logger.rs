@@ -17,4 +17,6 @@ pub enum LoggerError {
     LogMessageBuilder(BoxError),
     /// Invalid url: {0}
     InvalidUrl(#[from] url::ParseError),
+    /// Unable to convert body to utf8: {0}
+    BodyNotUtf8(#[from] std::string::FromUtf8Error),
 }

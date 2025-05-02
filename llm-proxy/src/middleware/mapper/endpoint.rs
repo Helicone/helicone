@@ -21,13 +21,11 @@ pub enum ApiEndpoint {
 }
 
 impl ApiEndpoint {
-    /// Given a path and query (which could've been for *ANY* provider), return
-    /// the corresponding endpoint for the target provider
     pub fn new(
         path: &PathAndQuery,
-        provider: Provider,
+        request_style: Provider,
     ) -> Result<Self, InvalidRequestError> {
-        match provider {
+        match request_style {
             Provider::OpenAI => Ok(Self::OpenAI(OpenAI::try_from(path)?)),
             Provider::Anthropic => {
                 Ok(Self::Anthropic(Anthropic::try_from(path)?))
@@ -73,7 +71,6 @@ impl ApiEndpoint {
                 .map_err(InternalError::InvalidUri)?;
         let (body, target_path_and_query) = match (self, target_endpoint) {
             (ApiEndpoint::OpenAI(source), ApiEndpoint::Anthropic(target)) => {
-                tracing::trace!(source = ?source, target = ?target, "mapping request body");
                 let converter = OpenAiConverter::new(model_mapper);
                 match (source, target) {
                     (OpenAI::ChatCompletions, Anthropic::Messages) => {
@@ -189,19 +186,13 @@ impl OpenAI {
     }
 }
 
-/// Converts a path and query (for *ANY* provider) to an openai endpoint
 impl TryFrom<&PathAndQuery> for OpenAI {
     type Error = InvalidRequestError;
 
     fn try_from(value: &PathAndQuery) -> Result<Self, Self::Error> {
-        tracing::debug!(value = ?value.path(), "trying to convert path and query to openai");
         match value.path() {
-            // openai URLs
             "/v1/chat/completions" => Ok(Self::ChatCompletions),
             "/v1/completions" => Ok(Self::LegacyCompletions),
-            // anthropic URLs
-            "/v1/messages" => Ok(Self::ChatCompletions),
-            "/v1/complete" => Ok(Self::LegacyCompletions),
             path => {
                 tracing::warn!(path = %path, "unsupported openai path");
                 Err(InvalidRequestError::NotFound(path.to_string()))
@@ -234,19 +225,13 @@ impl Anthropic {
     }
 }
 
-/// Converts a path and query (for *ANY* provider) to an anthropic endpoint
 impl TryFrom<&PathAndQuery> for Anthropic {
     type Error = InvalidRequestError;
 
     fn try_from(value: &PathAndQuery) -> Result<Self, Self::Error> {
-        tracing::debug!(value = ?value.path(), "trying to convert path and query to anthropic");
         match value.path() {
-            // anthropic URLs
             "/v1/messages" => Ok(Self::Messages),
             "/v1/complete" => Ok(Self::LegacyCompletions),
-            // openai URLs
-            "/v1/chat/completions" => Ok(Self::Messages),
-            "/v1/completions" => Ok(Self::LegacyCompletions),
             path => {
                 tracing::warn!(path = %path, "unsupported anthropic path");
                 Err(InvalidRequestError::NotFound(path.to_string()))

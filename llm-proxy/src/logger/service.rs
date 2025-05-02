@@ -67,7 +67,6 @@ impl LoggerService {
         request_body: Bytes,
         response_body: Bytes,
     ) -> Result<(), LoggerError> {
-        tracing::debug!("logging bodies to s3");
         let auth_ctx = &req_ctx.auth_context;
         let object_path = format!(
             "organizations/{}/requests/{}/raw_request_response_body",
@@ -76,6 +75,8 @@ impl LoggerService {
         );
         let action = app_state.0.minio.put_object(&object_path);
         let signed_url = action.sign(PUT_OBJECT_SIGN_DURATION);
+        let request_body = String::from_utf8(request_body.to_vec())?;
+        let response_body = String::from_utf8(response_body.to_vec())?;
 
         let s3_log = S3Log::new(request_body, response_body);
         let _resp = app_state
@@ -165,10 +166,7 @@ impl LoggerService {
             .base_url
             .join("/v1/log/request")?;
 
-        let cloned_json = serde_json::to_string_pretty(&log_message).unwrap();
-        tracing::debug!(json = %cloned_json, "log message");
-
-        let helicone_response = self
+        let _helicone_response = self
             .app_state
             .0
             .jawn_client
@@ -186,7 +184,6 @@ impl LoggerService {
                 tracing::error!(error = %e, "failed to log request to helicone");
                 LoggerError::ResponseError(e)
             })?;
-        tracing::debug!(status = %helicone_response.status(), "got response from helicone log endpoint");
 
         Ok(())
     }

@@ -1,4 +1,3 @@
-use bytes::Bytes;
 use chrono::{DateTime, Utc};
 use derive_builder::Builder;
 use http::HeaderMap;
@@ -12,12 +11,12 @@ use crate::error::logger::LoggerError;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct S3Log {
-    pub request: Bytes,
-    pub response: Bytes,
+    pub request: String,
+    pub response: String,
 }
 
 impl S3Log {
-    pub fn new(request: Bytes, response: Bytes) -> Self {
+    pub fn new(request: String, response: String) -> Self {
         Self { request, response }
     }
 }

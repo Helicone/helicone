@@ -1,4 +1,8 @@
-use std::{borrow::Cow, str::FromStr};
+use std::{
+    borrow::Cow,
+    fmt::{self, Display},
+    str::FromStr,
+};
 
 use chrono::{DateTime, NaiveDate, TimeZone, Utc};
 use derive_more::AsRef;
@@ -137,15 +141,21 @@ impl serde::Serialize for Model {
     where
         S: Serializer,
     {
-        let s = match &self.version {
-            None => &self.name,
-            Some(Version::Latest) => &format!("{}-latest", &self.name),
+        let s = self.to_string();
+        serializer.serialize_str(&s)
+    }
+}
+
+impl Display for Model {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match &self.version {
+            None => write!(f, "{}", self.name),
+            Some(Version::Latest) => write!(f, "{}-latest", self.name),
             Some(Version::Date(dt)) => {
-                &format!("{}-{}", &self.name, dt.format("%Y-%m-%d"))
+                write!(f, "{}-{}", self.name, dt.format("%Y-%m-%d"))
             }
-            Some(Version::Semver(v)) => &format!("{}-{}", &self.name, v),
-        };
-        serializer.serialize_str(s)
+            Some(Version::Semver(v)) => write!(f, "{}-{}", self.name, v),
+        }
     }
 }
 
