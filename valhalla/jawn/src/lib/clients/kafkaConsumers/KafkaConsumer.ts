@@ -11,7 +11,7 @@ import {
   err,
   ok,
 } from "../../../packages/common/result";
-import { Topics } from "../KafkaProducer";
+import { ProducerTopics, RequestResponseTopics } from "../../producers/types";
 import { generateKafkaAdmin, generateKafkaConsumer } from "./client";
 import {
   DLQ_MESSAGES_PER_MINI_BATCH,
@@ -604,7 +604,7 @@ async function consumeMiniBatch(
   lastOffset: string,
   miniBatchId: string,
   batchPartition: number,
-  topic: Topics
+  topic: RequestResponseTopics
 ): PromiseGenericResult<string> {
   console.log(
     `Received mini batch with ${messages.length} messages. Mini batch ID: ${miniBatchId}. Topic: ${topic}`
@@ -644,7 +644,7 @@ async function consumeMiniBatchScores(
   lastOffset: string,
   miniBatchId: string,
   batchPartition: number,
-  topic: Topics
+  topic: ProducerTopics
 ): PromiseGenericResult<string> {
   console.log(
     `Received mini batch with ${messages.length} messages. Mini batch ID: ${miniBatchId}. Topic: ${topic}`

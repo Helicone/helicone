@@ -1,39 +1,35 @@
-import { Kafka } from "@upstash/kafka";
+import { LogManager } from "../../managers/LogManager";
+import { PromiseGenericResult, ok } from "../../packages/common/result";
 import {
   HeliconeScoresMessage,
   KafkaMessageContents,
 } from "../handlers/HandlerContext";
-import { PromiseGenericResult, err, ok } from "../../packages/common/result";
-import { LogManager } from "../../managers/LogManager";
+import { DualWriteProducer } from "../producers/DualProducer";
+import { KafkaProducer } from "../producers/KafkaProducerImpl";
+import { SQSProducer } from "../producers/SQSProducer";
+import {
+  MessageProducer,
+  RequestResponseTopics,
+  ScoreTopics,
+} from "../producers/types";
 
-const KAFKA_CREDS = JSON.parse(process.env.KAFKA_CREDS ?? "{}");
-export const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
-const KAFKA_URL = KAFKA_CREDS?.UPSTASH_KAFKA_URL;
-const KAFKA_USERNAME = KAFKA_CREDS?.UPSTASH_KAFKA_USERNAME;
-const KAFKA_PASSWORD = KAFKA_CREDS?.UPSTASH_KAFKA_PASSWORD;
+class MessageProducerFactory {
+  static createProducer(): MessageProducer | null {
+    const queueProvider = process.env.QUEUE_PROVIDER;
+    if (queueProvider === "dual") {
+      return new DualWriteProducer(new KafkaProducer(), new SQSProducer());
+    } else if (queueProvider === "sqs") {
+      return new SQSProducer();
+    }
+    return new KafkaProducer();
+  }
+}
 
-export type Topics =
-  | "request-response-logs-prod-dlq"
-  | "request-response-logs-prod"
-  | "helicone-scores-prod"
-  | "helicone-scores-prod-dlq";
-
-export class KafkaProducer {
-  private kafka: Kafka | null = null;
+export class HeliconeQueueProducer {
+  private producer: MessageProducer | null = null;
 
   constructor() {
-    if (!KAFKA_ENABLED || !KAFKA_URL || !KAFKA_USERNAME || !KAFKA_PASSWORD) {
-      console.log(
-        "Required Kafka environment variables are not set, KafkaProducer will not be initialized."
-      );
-      return;
-    }
-
-    this.kafka = new Kafka({
-      url: KAFKA_URL,
-      username: KAFKA_USERNAME,
-      password: KAFKA_PASSWORD,
-    });
+    this.producer = MessageProducerFactory.createProducer();
   }
 
   async sendMessageHttp(msg: KafkaMessageContents) {
@@ -54,94 +50,34 @@ export class KafkaProducer {
 
   async sendMessages(
     msgs: KafkaMessageContents[],
-    topic: Topics
+    topic: RequestResponseTopics
   ): PromiseGenericResult<string> {
-    if (!this.kafka) {
+    if (!this.producer) {
       for (const msg of msgs) {
         await this.sendMessageHttp(msg);
       }
       return ok("Kafka is not initialized");
     }
 
-    const producer = this.kafka.producer();
-
-    let attempts = 0;
-    const maxAttempts = 3;
-    const timeout = 1000;
-
-    while (attempts < maxAttempts) {
-      try {
-        let data = msgs.map((msg) => {
-          return {
-            value: JSON.stringify({ value: JSON.stringify(msg) }),
-            topic: topic,
-            key: msg.log.request.id,
-          };
-        });
-
-        const res = await producer.produceMany(data);
-
-        console.log(`Produced ${msgs.length} messages to ${topic}`);
-        return ok(`Produced ${res.length} messages`);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (error: any) {
-        console.log(`Attempt ${attempts + 1} failed: ${error.message}`);
-        attempts++;
-        if (attempts < maxAttempts) {
-          await new Promise((resolve) => setTimeout(resolve, timeout));
-        } else {
-          return err("Failed to produce messages");
-        }
-      }
-    }
-
-    return err(`Failed to produce messages after ${maxAttempts} attempts`);
+    return this.producer.sendMessages({
+      msgs,
+      topic,
+    });
   }
 
   async sendScoresMessage(
     scoresMessages: HeliconeScoresMessage[],
-    topic: Topics
+    topic: ScoreTopics
   ): PromiseGenericResult<string> {
-    if (!this.kafka) {
+    if (!this.producer) {
       return ok("Kafka is not initialized");
     }
 
-    const producer = this.kafka.producer();
-
-    let attempts = 0;
-    const maxAttempts = 3;
-    const timeout = 1000;
-
-    while (attempts < maxAttempts) {
-      try {
-        const data = scoresMessages.map((msg) => {
-          return {
-            value: JSON.stringify({ value: JSON.stringify(msg) }),
-            topic: topic,
-            key: msg.requestId,
-          };
-        });
-
-        const res = await producer.produceMany(data);
-
-        console.log(`Produced ${scoresMessages.length} messages to ${topic}`);
-        return ok(`Produced ${res.length} messages`);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (error: any) {
-        console.log(`Attempt ${attempts + 1} failed: ${error.message}`);
-        attempts++;
-        if (attempts < maxAttempts) {
-          await new Promise((resolve) => setTimeout(resolve, timeout));
-        } else {
-          return err("Failed to produce scores message");
-        }
-      }
-    }
-
-    return err(
-      `Failed to produce scores message after ${maxAttempts} attempts`
-    );
+    return this.producer.sendMessages({
+      msgs: scoresMessages,
+      topic,
+    });
   }
 
-  public isKafkaEnabled = (): boolean => this.kafka !== null;
+  public isQueueEnabled = (): boolean => this.producer !== null;
 }

@@ -1,6 +1,6 @@
 import * as Sentry from "@sentry/node";
 import { dataDogClient } from "../lib/clients/DataDogClient";
-import { KAFKA_ENABLED, KafkaProducer } from "../lib/clients/KafkaProducer";
+import { KAFKA_ENABLED, HeliconeProducer } from "../lib/clients/KafkaProducer";
 import { AuthenticationHandler } from "../lib/handlers/AuthenticationHandler";
 import {
   HandlerContext,
@@ -120,7 +120,7 @@ export class LogManager {
             );
           }
           if (KAFKA_ENABLED) {
-            const kafkaProducer = new KafkaProducer();
+            const kafkaProducer = new HeliconeProducer();
 
             const res = await kafkaProducer.sendMessages(
               [logMessage],
@@ -209,7 +209,7 @@ export class LogManager {
       );
 
       if (KAFKA_ENABLED) {
-        const kafkaProducer = new KafkaProducer();
+        const kafkaProducer = new HeliconeProducer();
         const kafkaResult = await kafkaProducer.sendMessages(
           logMessages,
           "request-response-logs-prod-dlq"
