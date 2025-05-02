@@ -1,25 +1,16 @@
-import * as Sentry from "@sentry/node";
-import { KafkaMessage } from "kafkajs";
-import { LogManager } from "../../../managers/LogManager";
-import {
-  HeliconeScoresMessage,
-  KafkaMessageContents,
-} from "../../handlers/HandlerContext";
-import {
-  GenericResult,
-  PromiseGenericResult,
-  err,
-  ok,
-} from "../../../packages/common/result";
-import { ProducerTopics, RequestResponseTopics } from "../../producers/types";
+import { SettingsManager } from "../../../utils/settings";
+import { consumeMiniBatch } from "../../consumer/consumeMiniBatch";
 import { generateKafkaAdmin, generateKafkaConsumer } from "./client";
 import {
   DLQ_MESSAGES_PER_MINI_BATCH,
-  SCORES_MESSAGES_PER_MINI_BATCH,
   MESSAGES_PER_MINI_BATCH,
+  SCORES_MESSAGES_PER_MINI_BATCH,
 } from "./constant";
-import { SettingsManager } from "../../../utils/settings";
-import { ScoreManager } from "../../../managers/score/ScoreManager";
+
+import { consumeMiniBatchScores } from "../../consumer/consumeMiniBatchScores";
+import { mapDlqKafkaMessageToMessage } from "../../consumer/helpers/mapDlqKafkaMessageToMessage";
+import { mapKafkaMessageToMessage } from "../../consumer/helpers/mapKafkaMessageToMessage";
+import { mapKafkaMessageToScoresMessage } from "../../consumer/helpers/mapKafkaMessageToScoresMessage";
 
 const KAFKA_CREDS = JSON.parse(process.env.KAFKA_CREDS ?? "{}");
 const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
@@ -207,65 +198,6 @@ export const consume = async ({
     },
   });
 };
-function mapKafkaMessageToMessage(
-  kafkaMessage: KafkaMessage[]
-): GenericResult<KafkaMessageContents[]> {
-  const messages: KafkaMessageContents[] = [];
-  for (const message of kafkaMessage) {
-    if (message.value) {
-      try {
-        const kafkaValue = JSON.parse(message.value.toString());
-        const parsedMsg = JSON.parse(kafkaValue.value) as KafkaMessageContents;
-        messages.push(mapMessageDates(parsedMsg));
-      } catch (error) {
-        return err(`Failed to parse message: ${error}`);
-      }
-    } else {
-      return err("Message value is empty");
-    }
-  }
-
-  return ok(messages);
-}
-
-function mapKafkaMessageToScoresMessage(
-  kafkaMessage: KafkaMessage[]
-): GenericResult<HeliconeScoresMessage[]> {
-  const messages: HeliconeScoresMessage[] = [];
-  for (const message of kafkaMessage) {
-    if (message.value) {
-      try {
-        const kafkaValue = JSON.parse(message.value.toString());
-        const parsedMsg = JSON.parse(kafkaValue.value) as HeliconeScoresMessage;
-        messages.push(parsedMsg);
-      } catch (error) {
-        return err(`Failed to parse message: ${error}`);
-      }
-    } else {
-      return err("Message value is empty");
-    }
-  }
-
-  return ok(messages);
-}
-
-function mapMessageDates(message: KafkaMessageContents): KafkaMessageContents {
-  return {
-    ...message,
-    log: {
-      ...message.log,
-      request: {
-        ...message.log.request,
-        requestCreatedAt: new Date(message.log.request.requestCreatedAt),
-      },
-      response: {
-        ...message.log.response,
-        responseCreatedAt: new Date(message.log.response.responseCreatedAt),
-      },
-    },
-  };
-}
-
 export const consumeDlq = async () => {
   const dlqConsumer = generateKafkaConsumer("jawn-consumer-local-01");
   if (KAFKA_ENABLED && !dlqConsumer) {
@@ -576,112 +508,6 @@ export const consumeScoresDlq = async () => {
     },
   });
 };
-
-function mapDlqKafkaMessageToMessage(
-  kafkaMessage: KafkaMessage[]
-): GenericResult<KafkaMessageContents[]> {
-  const messages: KafkaMessageContents[] = [];
-  for (const message of kafkaMessage) {
-    if (message.value) {
-      try {
-        const kafkaValue = JSON.parse(message.value.toString());
-        const parsedMsg = JSON.parse(kafkaValue.value) as KafkaMessageContents;
-        messages.push(mapMessageDates(parsedMsg));
-      } catch (error) {
-        return err(`Failed to parse message: ${error}`);
-      }
-    } else {
-      return err("Message value is empty");
-    }
-  }
-
-  return ok(messages);
-}
-
-async function consumeMiniBatch(
-  messages: KafkaMessageContents[],
-  firstOffset: string,
-  lastOffset: string,
-  miniBatchId: string,
-  batchPartition: number,
-  topic: RequestResponseTopics
-): PromiseGenericResult<string> {
-  console.log(
-    `Received mini batch with ${messages.length} messages. Mini batch ID: ${miniBatchId}. Topic: ${topic}`
-  );
-
-  const logManager = new LogManager();
-
-  try {
-    await logManager.processLogEntries(messages, {
-      batchId: miniBatchId,
-      partition: batchPartition,
-      lastOffset: lastOffset,
-      messageCount: messages.length,
-    });
-    return ok(miniBatchId);
-  } catch (error) {
-    // TODO: Should we skip or fail the batch?
-    Sentry.captureException(error, {
-      tags: {
-        type: "ConsumeError",
-        topic: topic,
-      },
-      extra: {
-        batchId: batchPartition,
-        partition: batchPartition,
-        offset: firstOffset,
-        messageCount: messages.length,
-      },
-    });
-    return err(`Failed to process batch ${miniBatchId}, error: ${error}`);
-  }
-}
-
-async function consumeMiniBatchScores(
-  messages: HeliconeScoresMessage[],
-  firstOffset: string,
-  lastOffset: string,
-  miniBatchId: string,
-  batchPartition: number,
-  topic: ProducerTopics
-): PromiseGenericResult<string> {
-  console.log(
-    `Received mini batch with ${messages.length} messages. Mini batch ID: ${miniBatchId}. Topic: ${topic}`
-  );
-
-  const scoresManager = new ScoreManager({
-    organizationId: "",
-  });
-
-  try {
-    await scoresManager.handleScores(
-      {
-        batchId: miniBatchId,
-        partition: batchPartition,
-        lastOffset: lastOffset,
-        messageCount: messages.length,
-      },
-      messages
-    );
-    return ok(miniBatchId);
-  } catch (error) {
-    // TODO: Should we skip or fail the batch?
-    Sentry.captureException(error, {
-      tags: {
-        type: "ConsumeError",
-        topic: topic,
-      },
-      extra: {
-        batchId: batchPartition,
-        partition: batchPartition,
-        offset: firstOffset,
-        messageCount: messages.length,
-      },
-    });
-    return err(`Failed to process batch ${miniBatchId}, error: ${error}`);
-  }
-}
 
 function createMiniBatches<T>(array: T[], batchSize: number): T[][] {
   const batches: T[][] = [];
