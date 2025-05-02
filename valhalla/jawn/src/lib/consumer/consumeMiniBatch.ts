@@ -2,7 +2,11 @@ import * as Sentry from "@sentry/node";
 import { LogManager } from "../../managers/LogManager";
 import { PromiseGenericResult, ok, err } from "../../packages/common/result";
 import { KafkaMessageContents } from "../handlers/HandlerContext";
+<<<<<<< Updated upstream
 import { Topics } from "../clients/KafkaProducer";
+=======
+import { Topics } from "../clients/HeliconeQuequeProducer";
+>>>>>>> Stashed changes
 
 export async function consumeMiniBatch(
   messages: KafkaMessageContents[],
