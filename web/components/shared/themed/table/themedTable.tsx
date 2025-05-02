@@ -29,7 +29,6 @@ import { clsx } from "../../clsx";
 import LoadingAnimation from "../../loadingAnimation";
 import { DragColumnItem } from "./columns/DragList";
 import DraggableColumnHeader from "./columns/draggableColumnHeader";
-import useShiftKeyPress from "@/services/hooks/isShiftPressed";
 
 type CheckboxMode = "always_visible" | "on_hover" | "never";
 

@@ -172,13 +172,6 @@ export const SessionContent: React.FC<SessionContentProps> = ({
     return rawRequests.some(isRealtimeRequest);
   }, [requests.requests.requests]);
 
-  useEffect(() => {
-    if (session?.traces?.length > 0) {
-      const treeData = tracesToTreeNodeData(session.traces);
-      initializeColorMap(treeData);
-    }
-  }, [session.traces, initializeColorMap]);
-
   return (
     <Col className="h-screen flex flex-col">
       <FoldedHeader

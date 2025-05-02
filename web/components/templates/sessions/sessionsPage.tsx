@@ -244,7 +244,7 @@ const SessionsPage = (props: SessionsPageProps) => {
       <Tabs
         value={currentTab}
         onValueChange={(value) => setCurrentTab(value)}
-        className="w-full h-full flex flex-col"
+        className="w-full h-full flex flex-col gap-4"
       >
         <FoldedHeader
           leftSection={

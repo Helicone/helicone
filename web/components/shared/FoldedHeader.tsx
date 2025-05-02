@@ -17,7 +17,7 @@ export default function FoldedHeader({
   return (
     <header className="w-full flex flex-col bg-background border-b border-border shrink-0">
       {/* Header */}
-      <div className="h-10 px-4 w-full flex flex-row items-center justify-between">
+      <div className="h-10 px-4 w-full flex flex-row items-center justify-between my-2">
         {/* Left Section */}
         {leftSection}
 
@@ -27,7 +27,7 @@ export default function FoldedHeader({
             className={`flex items-start border-border p-2 ${
               isFolded
                 ? "h-8 bg-slate-50 dark:bg-slate-950 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg border"
-                : "h-10 bg-muted rounded-t-lg border-t border-x -mb-2"
+                : "h-8 bg-muted rounded-lg border"
             }`}
             onClick={() => setIsFolded(!isFolded)}
           >
@@ -44,7 +44,6 @@ export default function FoldedHeader({
               </div>
             )}
           </button>
-
           {/* Right Section */}
           {rightSection}
         </section>
@@ -52,7 +51,9 @@ export default function FoldedHeader({
 
       {/* Fold */}
       <div
-        className={`w-full bg-muted border-border ${
+        className={`${
+          !isFolded ? "py-2" : "py-0"
+        } flex flex-1 w-full bg-muted border-border ${
           isFolded ? "h-0 invisible" : "h-7 border-t"
         }`}
       >

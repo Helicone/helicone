@@ -172,11 +172,10 @@ export default function SessionTimelineTable(
   useEffect(() => {
     rowsById.forEach((row) => {
       if (checkedIds?.includes(row.original?.id ?? "")) {
-        console.log("checkedIds", row.original?.id, checkedIds);
         expandRow(row);
       }
     });
-  }, [checkedIds]);
+  }, [checkedIds, rowsById]);
 
   useEffect(() => {
     const columnVisibility: { [key: string]: boolean } = {};
