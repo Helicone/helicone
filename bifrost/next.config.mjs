@@ -72,6 +72,11 @@ const nextConfig = {
         destination: "/blog/langsmith-vs-helicone",
         permanent: true,
       },
+      {
+        source: "/blog/custom-properties",
+        destination: "/blog/how-to-track-llm-user-feedback",
+        permanent: true,
+      },
     ];
   },
   async headers() {
