@@ -43,20 +43,22 @@ const pullMessages = async ({
   count: number;
   accumulatedMessages: SQSMessage[];
 }) => {
-  const command = new ReceiveMessageCommand({
-    QueueUrl: queueUrl,
-    MaxNumberOfMessages: count,
-  });
-  const result = await sqs.send(command);
-  if (result.Messages === undefined || result.Messages.length === 0) {
-    return accumulatedMessages;
+  let remaining = count;
+  let messages = [...accumulatedMessages];
+
+  while (remaining > 0) {
+    const command = new ReceiveMessageCommand({
+      QueueUrl: queueUrl,
+      MaxNumberOfMessages: remaining,
+    });
+    const result = await sqs.send(command);
+    if (result.Messages === undefined || result.Messages.length === 0) {
+      break;
+    }
+    messages = [...messages, ...result.Messages];
+    remaining -= result.Messages.length;
   }
-  return pullMessages({
-    sqs,
-    queueUrl,
-    count: count - result.Messages.length,
-    accumulatedMessages: [...accumulatedMessages, ...result.Messages],
-  });
+  return messages;
 };
 
 async function withMessages({
