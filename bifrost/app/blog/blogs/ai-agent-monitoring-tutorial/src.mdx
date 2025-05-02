@@ -27,7 +27,7 @@ npm install
 Create a `.env` file with your API keys
 
 ```bash
-OPENAI_API_KEY=your_openai_key_here 
+OPENAI_API_KEY=your_openai_key_here
 ALPHA_VANTAGE_API_KEY=your_alpha_vantage_key_here
 ```
 
@@ -110,7 +110,7 @@ async function initializeVectorStore() {
 const results = await vectorStore.similaritySearch(query, 2);
 ```
 
-This RAG implementation provides domain-specific knowledge to the agent, but as we'll see later, without proper monitoring, it can be difficult to detect when the system is operating outside its knowledge boundaries.
+This RAG implementation provides domain-specific knowledge to the agent. However, as we'll see later, without proper monitoring, detecting when the system operates outside its knowledge boundaries can be difficult.
 
 ### 3. External API Integration
 
@@ -195,7 +195,7 @@ npm start
 
 ![What is halal investing?](/static/blog/ai-agent-monitoring-tutorial/halal-investing.webp)
 
-Looks like our financial assistant successfully fetched Tesla's stock data... or did it? 
+It looks like our financial assistant successfully fetched Tesla's stock data... or did it? 
 
 There's an issue with the second query. 
 
@@ -210,7 +210,7 @@ Looking at our implementation, there are several blind spots that could potentia
 - **Latency Issues**: If the agent becomes slow, which step is causing the bottleneck?
 - **Error Patterns**: Are certain types of queries consistently failing? Where in the pipeline do these failures occur?
 
-In Part 2, we'll add Helicone to our financial assistant to gain comprehensive visibility into every step of the process. Here's a preview of what you'll be able to see:
+In Part 2, we'll add Helicone to our financial assistant to gain comprehensive visibility into every step of the process. Here's a preview of what you can see:
 
 ![Using Helicone Sessions to Debug AI Agents](/static/blog/ai-agent-monitoring-tutorial/sessions-ai-agent.webp)
 
@@ -220,7 +220,7 @@ Stay tuned!
 
 <CallToAction
   title="Observe Your AI Agents with Helicone ⚡️"
-  description="Stop building with AI in the dark. Get complete visibility into every step of your AI workflows, track costs down to the penny, and debug complex issues in minutes instead of days."
+  description="Stop building AI in the dark. Get complete visibility into every step of your AI workflows, track costs down to the penny, and debug complex issues in minutes instead of days."
   primaryButtonText="Start Monitoring for Free"
   primaryButtonLink="https://helicone.ai/signup"
   secondaryButtonText="How Debugging Works"
