@@ -20,6 +20,7 @@ export interface Session {
 
 export interface FolderNode {
   folderName: string;
+  currentPath: string;
   children: (FolderNode | Trace)[];
 }
 
@@ -33,7 +34,8 @@ export type NodeType = "Session" | "Chain" | "Tool" | "LLM" | string;
 
 export interface TreeNodeData {
   name: NodeType;
-  duration: string;
+  latency?: number;
   trace?: Trace;
   children?: TreeNodeData[];
+  currentPath: string;
 }

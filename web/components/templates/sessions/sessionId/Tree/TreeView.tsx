@@ -26,13 +26,13 @@ import {
   DragColumnItem,
   columnDefToDragColumnItem,
 } from "../../../../shared/themed/table/columns/DragList";
-import ThemedTable from "../../../../shared/themed/table/themedTable";
 import RequestDrawer from "../../../requests/RequestDrawer";
 import StatusBadge from "../../../requests/statusBadge";
+import SessionTimelineTable from "../Timeline/SessionTimelineTable";
 import { TraceSpan } from "../Span";
 
 // Define TableTreeNode to hold all necessary display properties
-interface TableTreeNode {
+export interface TableTreeNode {
   id: string;
   name: string; // Group name or fallback path
   trace?: Trace; // Keep original trace for potential reference
@@ -46,6 +46,7 @@ interface TableTreeNode {
   cost?: number | null;
   latency?: number;
   feedback?: { rating: boolean | null } | null; // Adjusted type based on HeliconeMetadata
+  currentPath: string;
 }
 
 // Helper function to convert TreeNodeData using only Trace data
@@ -54,10 +55,6 @@ function convertToTableData(node: TreeNodeData, level = 0): TableTreeNode {
   const id = trace?.request_id ?? `group-${node.name}-${level}`;
 
   // Extract data directly from the trace object
-  const latency =
-    trace?.end_unix_timestamp_ms && trace?.start_unix_timestamp_ms
-      ? trace.end_unix_timestamp_ms - trace.start_unix_timestamp_ms
-      : undefined;
 
   const tableNode: TableTreeNode = {
     id: id,
@@ -68,14 +65,14 @@ function convertToTableData(node: TreeNodeData, level = 0): TableTreeNode {
     createdAt: trace?.start_unix_timestamp_ms,
     model: trace?.request.model ?? undefined,
     cost: trace?.request.heliconeMetadata?.cost,
-    latency: latency,
+    latency: node.latency,
     feedback: trace?.request.heliconeMetadata?.feedback
       ? { rating: trace.request.heliconeMetadata.feedback.rating } // Map feedback structure
       : null,
+    currentPath: node.currentPath ?? "",
   };
 
   if (node.children && node.children.length > 0) {
-    // Recursively convert children
     tableNode.subRows = node.children.map((child: TreeNodeData) =>
       convertToTableData(child, level + 1)
     );
@@ -222,7 +219,6 @@ const initialColumns: ColumnDef<TableTreeNode>[] = [
 interface TreeViewProps {
   selectedRequestId: string;
   setSelectedRequestId: (id: string) => void;
-  showSpan: boolean;
   session: Session;
   isOriginalRealtime?: boolean;
 }
@@ -231,8 +227,6 @@ const TreeView: React.FC<TreeViewProps> = ({
   session,
   selectedRequestId,
   setSelectedRequestId,
-  showSpan,
-  isOriginalRealtime,
 }) => {
   const treeData = useMemo(() => {
     return tracesToTreeNodeData(session.traces);
@@ -295,7 +289,11 @@ const TreeView: React.FC<TreeViewProps> = ({
   return (
     <Col className="h-full">
       <ResizablePanelGroup direction="horizontal" className="h-full w-full">
-        <ResizablePanel>
+        <ResizablePanel
+          defaultSize={40}
+          minSize={25}
+          className="relative bg-white dark:bg-black"
+        >
           <ResizablePanelGroup direction="vertical" className="h-full w-full">
             <ResizablePanel
               defaultSize={40}
@@ -308,6 +306,7 @@ const TreeView: React.FC<TreeViewProps> = ({
                   selectedRequestId,
                   setSelectedRequestId,
                 ]}
+                drawerRef={drawerRef}
               />
             </ResizablePanel>
 
@@ -316,7 +315,7 @@ const TreeView: React.FC<TreeViewProps> = ({
             <ResizablePanel defaultSize={60} minSize={25}>
               <div className="h-full border-t border-slate-200 dark:border-slate-800 flex">
                 <div className="h-full w-full">
-                  <ThemedTable<TableTreeNode>
+                  <SessionTimelineTable
                     id="session-requests-table"
                     defaultData={tableData}
                     defaultColumns={initialColumns}
@@ -331,6 +330,7 @@ const TreeView: React.FC<TreeViewProps> = ({
                     fullWidth={true}
                     checkboxMode="never"
                     onToggleAllRows={handleToggleAllRows}
+                    selectedIds={selectedRequestId ? [selectedRequestId] : []}
                   />
                 </div>
               </div>

@@ -63,6 +63,7 @@ export const tracesToFolderNodes = (traces: Trace[]): FolderNode[] => {
       if (!folderMap[currentPath]) {
         const newFolder: FolderNode = {
           folderName: part,
+          currentPath: currentPath,
           children: [],
         };
         folderMap[currentPath] = newFolder;
@@ -124,29 +125,33 @@ export const latestFolder = (folder: FolderNode): number => {
 export const tracesToTreeNodeData = (traces: Trace[]): TreeNodeData => {
   if (traces.length === 0) {
     return {
-      duration: "0s",
+      latency: 0,
       name: "",
+      currentPath: "",
     };
   }
   const folderNodes = tracesToFolderNodes(traces);
-
   const folderToTreeNode = (folder: FolderNode): TreeNodeData => {
     return {
       name: folder.folderName,
-      duration: `${(latestFolder(folder) - earliestFolder(folder)) / 1000}s`,
+      latency: Math.round(
+        (latestFolder(folder) - earliestFolder(folder)) / 1000
+      ),
+      currentPath: folder.currentPath,
       children: folder.children.map((child) => {
         if ("folderName" in child) {
           return folderToTreeNode(child);
         } else {
           return {
             trace: child,
+            currentPath: child.path,
             name: "LLM",
-            duration: `${
-              (child.end_unix_timestamp_ms - child.start_unix_timestamp_ms) /
-              1000
-            }s`,
+            latency:
+              child?.end_unix_timestamp_ms && child?.start_unix_timestamp_ms
+                ? child.end_unix_timestamp_ms - child.start_unix_timestamp_ms
+                : 0,
             properties: child.properties,
-          } as TreeNodeData;
+          };
         }
       }),
     };

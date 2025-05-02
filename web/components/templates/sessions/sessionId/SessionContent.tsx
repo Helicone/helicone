@@ -12,8 +12,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Muted, Small, XSmall } from "@/components/ui/typography";
+import { tracesToTreeNodeData } from "@/lib/sessions/helpers";
+import { useColorMapStore } from "@/store/features/sessions/colorMap";
 import { useRouter } from "next/router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PiBroadcastBold } from "react-icons/pi";
 import { isRealtimeRequest } from "../../../../lib/sessions/realtimeSession";
 import { Session } from "../../../../lib/sessions/sessionTypes";
@@ -38,11 +40,11 @@ export const SessionContent: React.FC<SessionContentProps> = ({
   session_id,
   session_name,
   requests,
-  isLive,
-  setIsLive,
 }) => {
   const router = useRouter();
-  const { view, requestId } = router.query;
+  const { initializeColorMap } = useColorMapStore();
+
+  const { _, requestId } = router.query;
   const [selectedRequestId, setSelectedRequestId] = useState<string>(
     (requestId as string) || ""
   );
@@ -86,11 +88,11 @@ export const SessionContent: React.FC<SessionContentProps> = ({
     );
   }, [requests.requests.requests]);
   const sessionFeedbackValue = useMemo(() => {
-    return requestWithFeedback?.properties["Helicone-Session-Feedback"] === "1"
-      ? true
-      : requestWithFeedback?.properties["Helicone-Session-Feedback"] === "0"
-      ? false
-      : null;
+    const feedback =
+      requestWithFeedback?.properties["Helicone-Session-Feedback"];
+    if (feedback === "1") return true;
+    if (feedback === "0") return false;
+    return null;
   }, [requestWithFeedback]);
 
   // AGREGATED SESSION STATS (Derived from the processed session object)
@@ -169,6 +171,13 @@ export const SessionContent: React.FC<SessionContentProps> = ({
     const rawRequests = requests.requests.requests ?? [];
     return rawRequests.some(isRealtimeRequest);
   }, [requests.requests.requests]);
+
+  useEffect(() => {
+    if (session?.traces?.length > 0) {
+      const treeData = tracesToTreeNodeData(session.traces);
+      initializeColorMap(treeData);
+    }
+  }, [session.traces, initializeColorMap]);
 
   return (
     <Col className="h-screen flex flex-col">
@@ -251,7 +260,6 @@ export const SessionContent: React.FC<SessionContentProps> = ({
         <TreeView
           selectedRequestId={selectedRequestId}
           setSelectedRequestId={handleRequestIdChange}
-          showSpan={true}
           session={session}
           isOriginalRealtime={containsRealtime}
         />

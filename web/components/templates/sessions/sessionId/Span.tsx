@@ -3,7 +3,13 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Clock4Icon } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  MutableRefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { PiSplitHorizontalBold } from "react-icons/pi";
 import {
   Bar,
@@ -19,8 +25,11 @@ import {
 } from "recharts";
 import { Session, Trace } from "../../../../lib/sessions/sessionTypes";
 import { Col } from "../../../layout/common/col";
-import { clsx } from "../../../shared/clsx";
+import { useLocalStorage } from "@/services/hooks/localStorage";
+import { useColorMapStore } from "@/store/features/sessions/colorMap";
 
+const ROUNDED_RADIUS = 1;
+const BAR_SIZE = 25; // Increased from 30 to 50
 interface BarChartTrace {
   name: string;
   path: string;
@@ -35,10 +44,12 @@ export const TraceSpan = ({
   selectedRequestIdDispatch,
   isOriginalRealtime,
   onHighlighterChange,
+  drawerRef,
 }: {
   session: Session;
   selectedRequestIdDispatch: [string, (x: string) => void];
   isOriginalRealtime?: boolean;
+  drawerRef: MutableRefObject<any>;
   onHighlighterChange?: (
     start: number | null,
     end: number | null,
@@ -47,6 +58,8 @@ export const TraceSpan = ({
 }) => {
   const [selectedRequestId, setSelectedRequestId] = selectedRequestIdDispatch;
   const { theme } = useTheme();
+  const { getColor } = useColorMapStore();
+  const [drawerSize] = useLocalStorage("session-request-drawer-size", 0);
 
   // Highlighter state
   const [highlighterActive, setHighlighterActive] = useState(false);
@@ -109,16 +122,12 @@ export const TraceSpan = ({
     });
   }, [session, isOriginalRealtime]);
 
-  const roundedRadius = 5;
-
   const domain = useMemo(() => {
     if (spanData.length === 0) return [0, 1]; // Default domain if no data
     const lastItem = spanData[spanData.length - 1];
     const maxEnd = (lastItem?.start ?? 0) + (lastItem?.duration ?? 0);
     return [0, Math.max(1, maxEnd)]; // Ensure domain is at least 1s
   }, [spanData]);
-
-  const barSize = 35; // Increased from 30 to 50
 
   // Track the last valid chart dimensions for consistent calculations
   const [lastChartDimensions, setLastChartDimensions] = useState<{
@@ -470,6 +479,7 @@ export const TraceSpan = ({
 
     // Set the request ID
     setSelectedRequestId(clickedData.request_id);
+    openDrawer(drawerRef, drawerSize);
 
     // Notify parent about the selected message range
     if (onHighlighterChange) {
@@ -492,12 +502,12 @@ export const TraceSpan = ({
       <ScrollArea>
         <ResponsiveContainer
           width="100%"
-          height={Math.max(300, spanData.length * barSize)}
+          height={Math.max(300, spanData.length * BAR_SIZE)}
         >
           <BarChart
             data={spanData}
             layout="vertical"
-            barSize={barSize}
+            barSize={BAR_SIZE}
             margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
             onClick={handleBarClick}
             onMouseDown={handleMouseDown}
@@ -593,10 +603,10 @@ export const TraceSpan = ({
               fill="rgba(0,0,0,0)"
               isAnimationActive={false}
               radius={[
-                roundedRadius,
-                roundedRadius,
-                roundedRadius,
-                roundedRadius,
+                ROUNDED_RADIUS,
+                ROUNDED_RADIUS,
+                ROUNDED_RADIUS,
+                ROUNDED_RADIUS,
               ]} // Rounded corners
             >
               {spanData.map((entry, index) => (
@@ -608,17 +618,17 @@ export const TraceSpan = ({
               stackId="a"
               isAnimationActive={false}
               radius={[
-                roundedRadius,
-                roundedRadius,
-                roundedRadius,
-                roundedRadius,
+                ROUNDED_RADIUS,
+                ROUNDED_RADIUS,
+                ROUNDED_RADIUS,
+                ROUNDED_RADIUS,
               ]} // Rounded corners
             >
               <LabelList
                 dataKey="name"
                 position="insideLeft"
                 content={(props) => {
-                  const { x, y, width, height, value, index } = props;
+                  const { x, y, height, value, index } = props;
                   if (index === undefined || !spanData[index]) return null;
                   const entry = spanData[index];
 
@@ -663,7 +673,6 @@ export const TraceSpan = ({
                       onClick={() => {
                         if (highlighterActive) return;
                         setSelectedRequestId(entry.request_id);
-
                         // Notify parent about the selected message range
                         if (onHighlighterChange && index !== undefined) {
                           onHighlighterChange(index, index, false);
@@ -676,6 +685,7 @@ export const TraceSpan = ({
                 }}
               />
               {spanData.map((entry, index) => {
+                const color = getColor(entry.path);
                 // Determine if this bar is in the highlighter range
                 const isInHighlighter =
                   highlighterActive &&
@@ -690,17 +700,24 @@ export const TraceSpan = ({
                 return (
                   <Cell
                     key={`colored-cell-${index}`}
-                    className={clsx(
-                      isInHighlighter || isIndividuallySelected
-                        ? "fill-sky-200 hover:fill-sky-200/50 dark:fill-sky-700 dark:hover:fill-sky-700/50 hover:cursor-pointer"
-                        : "fill-sky-100 hover:fill-sky-50 dark:fill-sky-800 dark:hover:fill-sky-800/50 hover:cursor-pointer"
-                    )}
-                    strokeWidth={1}
-                    stroke={theme === "dark" ? "#0369a1" : "#bae6fd"}
+                    className="cursor-pointer transition-colors duration-150"
+                    style={{
+                      fill:
+                        isInHighlighter || isIndividuallySelected
+                          ? color
+                          : color,
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.fill = `${color}80`; // 50% opacity (approx.)
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.fill = color;
+                    }}
+                    strokeWidth={2}
+                    stroke={color}
                     onClick={() => {
                       if (highlighterActive) return;
                       setSelectedRequestId(entry.request_id);
-
                       if (onHighlighterChange) {
                         onHighlighterChange(index, index, false);
                       }
@@ -816,3 +833,12 @@ export const TraceSpan = ({
     </div>
   );
 };
+
+function openDrawer(drawerRef: MutableRefObject<any>, drawerSize: number) {
+  drawerRef.current?.expand();
+  if (drawerSize === 0) {
+    drawerRef.current?.resize(33);
+  } else {
+    drawerRef.current?.resize(drawerSize);
+  }
+}
