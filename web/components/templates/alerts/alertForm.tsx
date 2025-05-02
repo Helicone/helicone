@@ -1,6 +1,5 @@
 import { FormEvent, useMemo, useState } from "react";
 import { useOrg } from "../../layout/org/organizationContext";
-import { useUser } from "@supabase/auth-helpers-react";
 import {
   useGetOrgMembers,
   useGetOrgSlackChannels,
@@ -74,7 +73,6 @@ const AlertForm = (props: AlertFormProps) => {
   );
 
   const orgContext = useOrg();
-  const user = useUser();
 
   const { data, isLoading, refetch } = useGetOrgMembers(
     orgContext?.currentOrg?.id || ""

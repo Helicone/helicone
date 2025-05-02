@@ -29,7 +29,7 @@ const extractOperatorAndValueFromAnOperator = (
       value: operator[key as keyof typeof operator],
     };
   }
-  throw new Error(`Invalid operator ${operator}`);
+  throw new Error(`Invalid operator ${JSON.stringify(operator)}`);
 };
 
 function easyKeyMappings<T extends keyof TablesAndViews>(
