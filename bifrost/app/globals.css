@@ -81,6 +81,12 @@ h6[id] {
   }
 }
 
+@layer components {
+  .navbar-icon-style {
+    @apply h-full w-full stroke-[1.5px] fill-none text-brand;
+  }
+}
+
 /* Custom link styling for blog content only */
 .prose a {
   @apply font-semibold text-sky-500 no-underline;
