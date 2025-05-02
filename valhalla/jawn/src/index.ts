@@ -120,7 +120,7 @@ if (KAFKA_ENABLED) {
   });
   startSQSConsumers({
     dlqCount: 0,
-    normalCount: 1,
+    normalCount: 0,
     scoresCount: 0,
     scoresDlqCount: 0,
     backFillCount: 0,
