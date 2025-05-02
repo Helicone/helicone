@@ -172,6 +172,11 @@ export const SessionContent: React.FC<SessionContentProps> = ({
     return rawRequests.some(isRealtimeRequest);
   }, [requests.requests.requests]);
 
+  useEffect(() => {
+    const traceData = tracesToTreeNodeData(session.traces);
+    initializeColorMap(traceData);
+  }, [session.traces, initializeColorMap]);
+
   return (
     <Col className="h-screen flex flex-col">
       <FoldedHeader
@@ -249,7 +254,6 @@ export const SessionContent: React.FC<SessionContentProps> = ({
       />
 
       <div className="flex-1 overflow-auto">
-        {/* TreeView receives the processed session */}
         <TreeView
           selectedRequestId={selectedRequestId}
           setSelectedRequestId={handleRequestIdChange}

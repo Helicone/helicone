@@ -95,12 +95,11 @@ const SessionsPage = (props: SessionsPageProps) => {
     end: new Date(),
   });
 
-  const [sessionIdSearch, setSessionIdSearch] = useURLParams<
-    string | undefined
-  >("session-search", undefined);
-  const [sessionNameSearch, setSessionNameSearch] = useState<
-    string | undefined
-  >(undefined);
+  const [sessionIdSearch] = useURLParams<string | undefined>(
+    "session-search",
+    undefined
+  );
+  const [sessionNameSearch] = useState<string | undefined>(undefined);
 
   const debouncedSessionNameSearch = useDebounce(sessionNameSearch, 500);
 
@@ -244,7 +243,7 @@ const SessionsPage = (props: SessionsPageProps) => {
       <Tabs
         value={currentTab}
         onValueChange={(value) => setCurrentTab(value)}
-        className="w-full h-full flex flex-col gap-4"
+        className="w-full h-full flex flex-col"
       >
         <FoldedHeader
           leftSection={
