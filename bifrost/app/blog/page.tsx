@@ -371,6 +371,16 @@ export const BLOG_CONTENT: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
+      folderName: "prompt-thinking-models",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "switch-to-deepseek",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "preventing-prompt-injection",
     },
   },
@@ -600,6 +610,7 @@ export const BLOG_CONTENT: BlogStructure[] = [
     },
   },
   {
+<<<<<<< HEAD
     dynmaicEntry: {
       folderName: "llm-observability",
     },
@@ -608,6 +619,23 @@ export const BLOG_CONTENT: BlogStructure[] = [
     dynmaicEntry: {
       folderName: "best-langsmith-alternatives",
     },
+=======
+    title: "Compare: The Best LangSmith Alternatives & Competitors",
+    description:
+      "Observability tools allow developers to monitor, analyze, and optimize AI model performance, which helps overcome the 'black box' nature of LLMs. But which LangSmith alternative is the best in 2024? We will shed some light.",
+    badgeText: "compare",
+    date: "July 10, 2024",
+    href: "/blog/best-langsmith-alternatives",
+    imageUrl: "/static/blog/best-langsmith-alternatives/langsmith-cover.webp",
+    authors: [
+      {
+        name: "Lina Lam",
+        imageUrl: "/static/blog/linalam-headshot.webp",
+        imageAlt: "Lina Lam's headshot",
+      },
+    ],
+    time: "8 minute read",
+>>>>>>> 0aef00d3a (added cover image to when to switch to deepseek)
   },
   {
     title:

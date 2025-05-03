@@ -1,15 +1,30 @@
 The release of DeepSeek R1 model, a new class of language models designed to reason more effectively than their predecessors, has sparked significant interest in thinking models.
 
+<<<<<<< HEAD
 These models effectively internalize the <a href="https://www.helicone.ai/blog/chain-of-thought-prompting" target="_blank" rel="noopener">Chain-of-Thought</a> prompting process that was first popularized by Google researchers in a 2022 <a href="https://arxiv.org/pdf/2201.11903" target="_blank" rel="noopener">paper</a>. Unlike traditional LLMs—which require CoT to "reason"—they handle reasoning natively, which often leads to better results.
 
 ![How to Prompt Thinking Models like DeepSeek R1 and OpenAI o1/o3](/static/blog/prompt-thinking-models/cover.webp)
+=======
+![Thinking Models](/static/blog/blog/prompt-thinking-models/cover.webp)
+
+These models effectively internalize the <a href="https://www.datacamp.com/tutorial/chain-of-thought-prompting" target="_blank" rel="noopener">Chain-of-Thought prompting</a> process that was first popularized by Google researchers in a <a href="https://arxiv.org/pdf/2201.11903" target="_blank" rel="noopener">2022 paper</a>. Unlike traditional LLMs—which require CoT to "reason"—they handle reasoning natively, which often leads to better results.
+
+However, their reasoning ability also means you need to prompt them differently for the best results, and **most people get it wrong**.
+>>>>>>> 0aef00d3a (added cover image to when to switch to deepseek)
 
 However, their reasoning ability also means you need to prompt them differently for the best results, and **most people get it wrong**.
 
+<<<<<<< HEAD
 ## Key Takeaways
+=======
+## Prompt Thinking Models Like a Pro
+
+Thinking models require a different approach compared to standard LLMs.
+>>>>>>> 0aef00d3a (added cover image to when to switch to deepseek)
 
 Prompting DeepSeek R1, OpenAI o3, and other thinking models requires a different approach compared to standard LLMs. Here are some best practices for prompting reasoning models:
 
+<<<<<<< HEAD
 {/* ### ✅ DOs
 
 - Use minimal prompting to let the model think independently.
@@ -18,6 +33,22 @@ Prompting DeepSeek R1, OpenAI o3, and other thinking models requires a different
 - Use ensembling for highly complex tasks requiring high accuracy.
 
 ### ❌ DON'Ts
+=======
+### ✅ DOs
+
+- **Use minimal prompting** to let the model think independently.
+- **Encourage more reasoning** for better performance at complex tasks by prompting for additional processing time.
+  {/* - **Use structured prompts** when necessary for consistency. */}
+- **Use <a href="https://www.promptlayer.com/glossary/prompt-ensembling" target="_blank" rel="noopener">ensembling</a>** for highly complex tasks requiring high accuracy.
+
+### ❌ DON’Ts
+
+- **Avoid few-shot and CoT prompting.** Unlike traditional LLMs, thinking models perform worse when overloaded with examples or asked to "reason" step-by-step.
+- **Don’t use thinking models for structured outputs** unless absolutely necessary. They perform worse with structured outputs than traditional models.
+- **Avoid overloading the model with unnecessary details.** More context isn’t always better.
+
+Most of these insights come from <a href="https://arxiv.org/pdf/2411.03590" target="_blank" rel="noopener">research</a> carried out by OpenAI and Microsoft as well as our own personal experience.
+>>>>>>> 0aef00d3a (added cover image to when to switch to deepseek)
 
 - Avoid <a href="https://docs.helicone.ai/guides/prompt-engineering/implement-few-shot-learning" target="_blank" rel="noopener">few-shot</a> and <a href="https://docs.helicone.ai/guides/prompt-engineering/use-chain-of-thought-prompting" target="_blank" rel="noopener">CoT prompting</a>. Unlike traditional LLMs, thinking models perform worse when overloaded with examples or asked to "reason" step-by-step.
 - Don't use thinking models for structured outputs unless absolutely necessary. They perform worse with structured outputs than traditional models.
@@ -70,6 +101,11 @@ Thinking models use **reasoning tokens**, which allow them to internally process
 Encouraging longer reasoning helps with **multi-step problems**, improving accuracy significantly.
 
 ## 3. Avoid Few-Shot and Chain-of-Thought Prompting
+<<<<<<< HEAD
+=======
+
+Traditional few-shot (where you give a bunch of examples) and CoT prompting strategies **reduce performance** for thinking models.
+>>>>>>> 0aef00d3a (added cover image to when to switch to deepseek)
 
 Traditional <a href="https://docs.helicone.ai/guides/prompt-engineering/implement-few-shot-learning" target="_blank" rel="noopener">few-shot</a> (where you give a bunch of examples) and <a href="https://www.helicone.ai/blog/chain-of-thought-prompting" target="_blank" rel="noopener">CoT</a> prompting strategies **reduce performance** for thinking models.
 
@@ -94,6 +130,11 @@ Now answer this: What is the capital of Canada?
 For thinking models, **zero-shot prompts worked better than few-shot prompts**.
 
 ## 4. Use Thinking Models for Complex Multi-Step Tasks
+<<<<<<< HEAD
+=======
+
+Thinking models perform best on tasks that require **five or more steps**.
+>>>>>>> 0aef00d3a (added cover image to when to switch to deepseek)
 
 Thinking models perform best on tasks that require five or more steps.
 
@@ -114,6 +155,7 @@ If a task is highly structured or simple, a regular LLM like GPT-4 may be a bett
   description="To check how many steps a problem requires, you can prompt the web version of a reasoning model to see how many reasoning steps it takes."
 />
 
+<<<<<<< HEAD
 ## 5. Use Delimiters to Structure Prompts for Consistent Outputs
 
 For regular LLMs, developers typically use delimiters like triple quotation marks, XML tags, or section titles to clearly define distinct sections of the input. This makes it easier for the model to interpret the information correctly.
@@ -125,6 +167,11 @@ Thinking models, however, struggle with structured outputs but can be guided to 
 Text: The mitochondrion is the powerhouse of the cell. It produces ATP, the energy currency of the cell, through cellular respiration.
 
 ---
+=======
+## 5. Structure Prompts for Consistent Outputs
+
+Thinking models struggle with structured outputs but can be guided to maintain consistency.
+>>>>>>> 0aef00d3a (added cover image to when to switch to deepseek)
 
 ❌ Summarize this: The mitochondrion is the powerhouse of the cell. It produces ATP, the energy currency of the cell, through cellular respiration.
 ```
@@ -132,6 +179,11 @@ Text: The mitochondrion is the powerhouse of the cell. It produces ATP, the ener
 If structured output is critical, you're better off using a standard LLM instead of a thinking model.
 
 ## 6. Use Ensembling for Highly Complex Tasks
+<<<<<<< HEAD
+=======
+
+For high-stakes or complex problems, ensembling improves performance.
+>>>>>>> 0aef00d3a (added cover image to when to switch to deepseek)
 
 For high-stakes or complex problems, <a href="https://learnprompting.org/docs/reliability/ensembling?srsltid=AfmBOoq6mZKnNKbpT0FaWFvGFOaY7NEFy8720oKFuc9ItxSE_zGOHV54" target="_blank" rel="noopener noreferrer">ensembling</a> improves performance.
 
@@ -177,15 +229,26 @@ Unlike with traditional Chain-of-Thought, CoD prompts reasoning models to limit 
 CoD can reduce token usage by up to a whopping **80%** while maintaining similar accuracy to the normal reasoning method.
 
 <CallToAction
+<<<<<<< HEAD
   title="Monitor your LLM application with Helicone 💡"
   description="Get full visibility into your thinking models, get detailed cost and latency metrics, and more with Helicone. Get started in 5 minutes."
+=======
+  title="Observe your Thinking Models with Helicone"
+  description="If you'd like full visibility into what your models have been thinking about, you need Helicone. Get started in as little as 5 minutes."
+>>>>>>> 0aef00d3a (added cover image to when to switch to deepseek)
   primaryButtonText="Get Started for Free"
   primaryButtonLink="https://helicone.ai/"
   secondaryButtonText="Contact Us"
   secondaryButtonLink="https://helicone.ai/contact"
 />
 
+<<<<<<< HEAD
 ## Summary
+=======
+## Conclusion
+
+Prompting thinking models like DeepSeek R1 and <a href="https://www.helicone.ai/blog/openai-o1-and-chatgpt-pro" target="_blank" rel="noopener">OpenAI o1</a> requires a different mindset and approach.
+>>>>>>> 0aef00d3a (added cover image to when to switch to deepseek)
 
 Unlike standard LLMs, prompting thinking models like DeepSeek R1 and OpenAI o1 and o3 requires a different mindset and approach. In summary:
 
