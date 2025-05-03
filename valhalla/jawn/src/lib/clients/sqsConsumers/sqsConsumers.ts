@@ -85,9 +85,9 @@ async function withMessages({
     const deletePromises = [];
     for (let i = 0; i < messages.length; i += 10) {
       const batch = messages.slice(i, i + 10);
-      const entries = batch.map((msg, idx) => ({
-        Id: `${i + idx}`,
-        ReceiptHandle: msg.ReceiptHandle!,
+      const entries = batch.map((msg) => ({
+        Id: msg.MessageId,
+        ReceiptHandle: msg.ReceiptHandle,
       }));
 
       const deleteCommand = new DeleteMessageBatchCommand({
