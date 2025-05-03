@@ -12,13 +12,6 @@ import { QUEUE_URLS } from "../../producers/sqsTypes";
 
 // do not go above 10, this is the max sqs can handle
 const MAX_NUMBER_OF_MESSAGES = 10;
-export const QUEUE_NAMES = {
-  requestResponseLogs: "request-response-logs-queue",
-  heliconeScores: "helicone-scores-queue",
-  requestResponseLogsDlq: "request-response-logs-dlq",
-  heliconeScoresDlq: "helicone-scores-dlq",
-} as const;
-
 const SQS_CLIENT = new SQSClient({
   region: process.env.AWS_REGION,
 });
