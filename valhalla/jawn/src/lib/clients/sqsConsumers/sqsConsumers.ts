@@ -22,26 +22,24 @@ const pullMessages = async ({
   sqs,
   queueUrl,
   count,
-  accumulatedMessages = [],
 }: {
   sqs: SQSClient;
   queueUrl: string;
   count: number;
-  accumulatedMessages: SQSMessage[];
 }) => {
   let remaining = count;
-  let messages = [...accumulatedMessages];
+  let messages: SQSMessage[] = [];
 
   while (remaining > 0) {
     const command = new ReceiveMessageCommand({
       QueueUrl: queueUrl,
-      MaxNumberOfMessages: remaining,
+      MaxNumberOfMessages: Math.min(remaining, MAX_NUMBER_OF_MESSAGES),
     });
     const result = await sqs.send(command);
     if (result.Messages === undefined || result.Messages.length === 0) {
       break;
     }
-    messages = [...messages, ...result.Messages];
+    messages = messages.concat(result.Messages);
     remaining -= result.Messages.length;
   }
   return messages;
