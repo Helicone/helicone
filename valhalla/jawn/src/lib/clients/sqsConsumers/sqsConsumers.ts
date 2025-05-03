@@ -69,7 +69,6 @@ async function withMessages({
     sqs: SQS_CLIENT,
     queueUrl,
     count,
-    accumulatedMessages: [],
   });
 
   if (messages.length === 0) {
