@@ -31,9 +31,11 @@ const pullMessages = async ({
   let messages: SQSMessage[] = [];
 
   while (remaining > 0) {
+    const isFirst = messages.length === 0;
     const command = new ReceiveMessageCommand({
       QueueUrl: queueUrl,
       MaxNumberOfMessages: Math.min(remaining, MAX_NUMBER_OF_MESSAGES),
+      WaitTimeSeconds: isFirst ? 5 : 0,
     });
     const result = await sqs.send(command);
     if (result.Messages === undefined || result.Messages.length === 0) {
