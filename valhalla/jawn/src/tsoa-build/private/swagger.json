@@ -2122,6 +2122,9 @@
 						},
 						"type": "array"
 					},
+					"mime_type": {
+						"type": "string"
+					},
 					"content": {
 						"type": "string"
 					},
@@ -6896,7 +6899,11 @@
 					"openai:apiKey",
 					"anthropic:apiKey",
 					"openrouter:apiKey",
-					"togetherai:apiKey"
+					"togetherai:apiKey",
+					"sqs:request-response-logs",
+					"sqs:helicone-scores",
+					"sqs:request-response-logs-dlq",
+					"sqs:helicone-scores-dlq"
 				],
 				"nullable": false
 			},

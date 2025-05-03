@@ -24,7 +24,7 @@ import { RegisterRoutes as registerPublicTSOARoutes } from "./tsoa-build/public/
 import * as publicSwaggerDoc from "./tsoa-build/public/swagger.json";
 import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
-import { startConsumers } from "./workers/consumerInterface";
+import { startConsumers, startSQSConsumers } from "./workers/consumerInterface";
 
 if (ENVIRONMENT === "production" || process.env.ENABLE_CRON_JOB === "true") {
   runMainLoops();
@@ -116,6 +116,13 @@ if (KAFKA_ENABLED) {
     normalCount: NORMAL_WORKER_COUNT,
     scoresCount: SCORES_WORKER_COUNT,
     scoresDlqCount: SCORES_WORKER_COUNT,
+    backFillCount: 0,
+  });
+  startSQSConsumers({
+    dlqCount: 0,
+    normalCount: 0,
+    scoresCount: 0,
+    scoresDlqCount: 0,
     backFillCount: 0,
   });
 }

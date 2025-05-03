@@ -3,7 +3,7 @@ import internal from "stream";
 import { WebSocket, WebSocketServer } from "ws";
 import { SocketMessage } from "../../types/realtime";
 import { safeJsonParse } from "../../utils/helpers";
-import { KafkaProducer } from "../clients/KafkaProducer";
+import { HeliconeQueueProducer } from "../clients/HeliconeQuequeProducer";
 import { RequestWrapper } from "../requestWrapper/requestWrapper";
 import { getHeliconeAuthClient } from "../../packages/common/auth/server/AuthClientFactory";
 import { S3Client } from "../shared/db/s3Client";
@@ -164,7 +164,7 @@ export function webSocketProxyForwarder(
                         "us-west-2"
                     )
                   ),
-                  kafkaProducer: new KafkaProducer(),
+                  kafkaProducer: new HeliconeQueueProducer(),
                 },
                 authParams,
                 orgParams,
