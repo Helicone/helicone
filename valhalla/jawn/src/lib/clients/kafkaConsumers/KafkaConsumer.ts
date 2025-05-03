@@ -117,6 +117,8 @@ export const consume = async ({
             MESSAGES_PER_MINI_BATCH;
 
           if (miniBatchSize <= 0) {
+            // sleep for 10 second
+            await new Promise((resolve) => setTimeout(resolve, 10_000));
             return;
           }
 
@@ -247,6 +249,8 @@ export const consumeDlq = async () => {
         messagesPerMiniBatchSetting?.miniBatchSize ??
         DLQ_MESSAGES_PER_MINI_BATCH;
       if (miniBatchSize <= 0) {
+        // sleep for 10 second
+        await new Promise((resolve) => setTimeout(resolve, 10_000));
         return;
       }
 
@@ -351,6 +355,8 @@ export const consumeScores = async () => {
             SCORES_MESSAGES_PER_MINI_BATCH;
 
           if (miniBatchSize <= 0) {
+            // sleep for 10 second
+            await new Promise((resolve) => setTimeout(resolve, 10_000));
             return;
           }
 
@@ -456,6 +462,8 @@ export const consumeScoresDlq = async () => {
             DLQ_MESSAGES_PER_MINI_BATCH;
 
           if (miniBatchSize <= 0) {
+            // sleep for 10 second
+            await new Promise((resolve) => setTimeout(resolve, 10_000));
             return;
           }
 
