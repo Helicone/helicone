@@ -136,7 +136,6 @@ export default function SessionTimelineTable(
   } = props;
 
   const [expanded, setExpanded] = React.useState<ExpandedState>(true);
-
   const descendantErrorMap = useMemo(() => {
     const map = new Map<string, boolean>();
     defaultData.forEach((topLevelNode) => {
@@ -176,7 +175,7 @@ export default function SessionTimelineTable(
         expandRow(row);
       }
     });
-  }, [checkedIds, rowsById]);
+  }, [checkedIds]);
 
   useEffect(() => {
     const columnVisibility: { [key: string]: boolean } = {};
@@ -423,20 +422,13 @@ export default function SessionTimelineTable(
                             return null;
                           })()}
                         {i === 0 && row.getCanExpand() && (
-                          <button
-                            {...{
-                              onClick: row.getToggleExpandedHandler(),
-                              style: { cursor: "pointer" },
-                              "data-expander": true,
-                            }}
-                            className="p-0.5"
-                          >
+                          <>
                             {row.getIsExpanded() ? (
                               <ChevronDown className="h-4 w-4 text-muted-foreground" />
                             ) : (
                               <ChevronRight className="h-4 w-4 text-muted-foreground" />
                             )}
-                          </button>
+                          </>
                         )}
                         {i === 0 && !row.getCanExpand() && (
                           <span
