@@ -20,6 +20,7 @@ export interface Session {
 
 export interface FolderNode {
   folderName: string;
+  currentPath: string;
   children: (FolderNode | Trace)[];
 }
 
@@ -29,11 +30,13 @@ export interface TraceNode {
   parents: TraceNode[];
 }
 
-export type NodeType = "Session" | "Chain" | "Tool" | "LLM" | string;
+export type HeliconeRequestType = "Tool" | "LLM" | "VectorDB";
 
 export interface TreeNodeData {
-  name: NodeType;
-  duration: string;
+  subPathName?: string;
+  latency?: number;
   trace?: Trace;
   children?: TreeNodeData[];
+  currentPath: string;
+  heliconeRequestType?: HeliconeRequestType;
 }

@@ -245,7 +245,6 @@ const useOrgsContextManager = (): OrgContextValue => {
       enabled: !!user?.id,
       refetchOnWindowFocus: true,
       refetchInterval: (selectedOrgsData) => {
-        console.log("selectedOrgsData", selectedOrgsData);
         if (!user?.id) {
           return 1_000;
         }

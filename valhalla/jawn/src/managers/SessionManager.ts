@@ -3,10 +3,10 @@ import {
   SessionQueryParams,
 } from "../controllers/public/sessionController";
 import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
-import { AuthParams } from "../packages/common/auth/types";
 import { dbExecute } from "../lib/shared/db/dbExecute";
 import { filterListToTree, FilterNode } from "../lib/shared/filters/filterDefs";
 import { buildFilterWithAuthClickHouse } from "../lib/shared/filters/filters";
+import { AuthParams } from "../packages/common/auth/types";
 import { err, ok, Result, resultMap } from "../packages/common/result";
 import { clickhousePriceCalc } from "../packages/cost";
 import { isValidTimeZoneDifference } from "../utils/helpers";
@@ -26,6 +26,7 @@ export interface SessionResult {
   prompt_tokens: number;
   completion_tokens: number;
   total_tokens: number;
+  avg_latency: number;
 }
 
 export interface SessionNameResult {
@@ -34,6 +35,7 @@ export interface SessionNameResult {
   last_used: string;
   first_used: string;
   session_count: number;
+  avg_latency: number;
 }
 
 export interface SessionMetrics {
@@ -151,6 +153,7 @@ export class SessionManager {
           ? `- INTERVAL '${Math.abs(timezoneDifference)} minute'`
           : `+ INTERVAL '${timezoneDifference} minute'`
       } AS created_at,
+      avg(request_response_rmt.latency) as avg_latency,
       max(request_response_rmt.request_created_at )${
         timezoneDifference > 0
           ? `- INTERVAL '${Math.abs(timezoneDifference)} minute'`
@@ -181,6 +184,7 @@ export class SessionManager {
     return resultMap(results, (x) =>
       x.map((y) => ({
         ...y,
+        avg_latency: +y.avg_latency,
       }))
     );
   }
@@ -278,6 +282,7 @@ export class SessionManager {
       max(request_response_rmt.request_created_at) + INTERVAL ${timezoneDifference} MINUTE AS latest_request_created_at,
       properties['Helicone-Session-Id'] as session_id,
       properties['Helicone-Session-Name'] as session_name,
+      avg(request_response_rmt.latency) as avg_latency,
       ${clickhousePriceCalc("request_response_rmt")} AS total_cost,
       count(*) AS total_requests,
       sum(request_response_rmt.prompt_tokens) AS prompt_tokens,
@@ -307,6 +312,7 @@ export class SessionManager {
         completion_tokens: +y.completion_tokens,
         prompt_tokens: +y.prompt_tokens,
         total_tokens: +y.total_tokens,
+        avg_latency: +y.avg_latency,
       }))
     );
   }
