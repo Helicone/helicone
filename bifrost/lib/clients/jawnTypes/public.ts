@@ -1785,6 +1785,8 @@ Json: JsonObject;
       completion_tokens: number;
       /** Format: double */
       total_tokens: number;
+      /** Format: double */
+      avg_latency: number;
     };
     "ResultSuccess_SessionResult-Array_": {
       data: components["schemas"]["SessionResult"][];
@@ -1825,6 +1827,8 @@ Json: JsonObject;
       first_used: string;
       /** Format: double */
       session_count: number;
+      /** Format: double */
+      avg_latency: number;
     };
     "ResultSuccess_SessionNameResult-Array_": {
       data: components["schemas"]["SessionNameResult"][];

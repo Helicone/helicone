@@ -34,7 +34,7 @@ import ThemedModal from "../../shared/themed/themedModal";
 import { formatNumber } from "../../shared/utils/formatNumber";
 import { Badge } from "../../ui/badge";
 import NewDataset from "../datasets/NewDataset";
-import FeedbackButtons from "../feedback/thumbsUpThumbsDown";
+import FeedbackAction from "../feedback/thumbsUpThumbsDown";
 import { RenderMappedRequest } from "./RenderHeliconeRequest";
 import ScrollableBadges from "./ScrollableBadges";
 import StatusBadge from "./statusBadge";
@@ -651,8 +651,9 @@ export default function RequestDrawer(props: RequestDivProps) {
               </Button>
             </div>
 
-            <FeedbackButtons
-              requestId={request.id}
+            <FeedbackAction
+              id={request.id}
+              type="request"
               defaultValue={
                 request.heliconeMetadata.scores &&
                 request.heliconeMetadata.scores["helicone-score-feedback"]
