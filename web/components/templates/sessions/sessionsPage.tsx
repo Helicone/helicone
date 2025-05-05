@@ -17,7 +17,7 @@ import { useURLParams } from "@/services/hooks/localURLParams";
 import { SortDirection } from "@/services/lib/sorts/requests/sorts";
 import { TimeFilter } from "@/types/timeFilter";
 import { PieChart, Table } from "lucide-react";
-import { useRouter } from "next/router";
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   getTimeIntervalAgo,
@@ -34,7 +34,6 @@ import ThemedTable from "../../shared/themed/table/themedTable";
 import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
 import { INITIAL_COLUMNS } from "./initialColumns";
 import SessionMetrics from "./SessionMetrics";
-import Link from "next/link";
 
 interface SessionsPageProps {
   currentPage: number;
