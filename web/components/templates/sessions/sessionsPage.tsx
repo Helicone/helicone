@@ -271,7 +271,7 @@ const SessionsPage = (props: SessionsPageProps) => {
                     role="combobox"
                     aria-expanded={open}
                   >
-                    {selectedName === "" ? UNNAMED_SESSION_VALUE : selectedName ?? "all"}
+                    {selectedName === "" ? UNNAMED_SESSION_VALUE : selectedName ?? "All"}
                     <ChevronDown className="ml-2 h-3 w-3 shrink-0 opacity-50 " />
                   </Button>
                 </PopoverTrigger>
