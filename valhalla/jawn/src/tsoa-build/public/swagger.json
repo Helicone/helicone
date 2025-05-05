@@ -5173,6 +5173,60 @@
 					}
 				]
 			},
+			"TimeFilterMs": {
+				"properties": {
+					"startTimeUnixMs": {
+						"type": "number",
+						"format": "double"
+					},
+					"endTimeUnixMs": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"startTimeUnixMs",
+					"endTimeUnixMs"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"SessionMetricsQueryParams": {
+				"properties": {
+					"nameContains": {
+						"type": "string"
+					},
+					"timezoneDifference": {
+						"type": "number",
+						"format": "double"
+					},
+					"pSize": {
+						"type": "string",
+						"enum": [
+							"p50",
+							"p75",
+							"p95",
+							"p99",
+							"p99.9"
+						]
+					},
+					"useInterquartile": {
+						"type": "boolean"
+					},
+					"timeFilter": {
+						"$ref": "#/components/schemas/TimeFilterMs"
+					},
+					"filter": {
+						"$ref": "#/components/schemas/SessionFilterNode"
+					}
+				},
+				"required": [
+					"nameContains",
+					"timezoneDifference"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"MetricsData": {
 				"properties": {
 					"totalRequests": {
@@ -12629,7 +12683,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/SessionNameQueryParams"
+								"$ref": "#/components/schemas/SessionMetricsQueryParams"
 							}
 						}
 					}

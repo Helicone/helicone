@@ -20,8 +20,8 @@ import { Col } from "../../layout/common/col";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import { formatLargeNumber } from "../../shared/utils/numberFormat";
 
-import { INITIAL_LAYOUT, MD_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
 import { Responsive, WidthProvider } from "react-grid-layout";
+import { INITIAL_LAYOUT, MD_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
 type SessionResult = ReturnType<typeof useSessionNames>["sessions"][number];
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
