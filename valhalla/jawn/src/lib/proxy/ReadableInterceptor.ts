@@ -43,13 +43,12 @@ export class ReadableInterceptor {
     };
 
     const onChunk = (chunk: Uint8Array) => {
-      console.log("Received chunk of size:", chunk.length);
       if (this.isStream && this.firstChunkTimeUnix === null) {
         this.firstChunkTimeUnix = Date.now();
       }
 
       this.responseBody += this.decoder.decode(chunk, { stream: true });
-    };
+    };     
 
     stream.on("data", onChunk);
     stream.on("end", () => onDone("done"));
