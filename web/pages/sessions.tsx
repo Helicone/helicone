@@ -18,14 +18,12 @@ interface SessionsProps {
 const Sessions = (props: SessionsProps) => {
   const { currentPage, pageSize, sort, defaultIndex } = props;
   return (
-    <>
-      <SessionsPage
-        currentPage={currentPage}
-        pageSize={pageSize}
-        sort={sort}
-        defaultIndex={defaultIndex}
-      />
-    </>
+    <SessionsPage
+      currentPage={currentPage}
+      pageSize={pageSize}
+      sort={sort}
+      defaultIndex={defaultIndex}
+    />
   );
 };
 

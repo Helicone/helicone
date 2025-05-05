@@ -1554,6 +1554,7 @@ const models: TsoaRoute.Models = {
             "prompt_tokens": {"dataType":"double","required":true},
             "completion_tokens": {"dataType":"double","required":true},
             "total_tokens": {"dataType":"double","required":true},
+            "avg_latency": {"dataType":"double","required":true},
         },
         "additionalProperties": false,
     },
@@ -1612,6 +1613,7 @@ const models: TsoaRoute.Models = {
             "last_used": {"dataType":"string","required":true},
             "first_used": {"dataType":"string","required":true},
             "session_count": {"dataType":"double","required":true},
+            "avg_latency": {"dataType":"double","required":true},
         },
         "additionalProperties": false,
     },
@@ -1663,6 +1665,28 @@ const models: TsoaRoute.Models = {
     "Result_SessionMetrics.string_": {
         "dataType": "refAlias",
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_SessionMetrics_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "TimeFilterMs": {
+        "dataType": "refObject",
+        "properties": {
+            "startTimeUnixMs": {"dataType":"double","required":true},
+            "endTimeUnixMs": {"dataType":"double","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "SessionMetricsQueryParams": {
+        "dataType": "refObject",
+        "properties": {
+            "nameContains": {"dataType":"string","required":true},
+            "timezoneDifference": {"dataType":"double","required":true},
+            "pSize": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["p50"]},{"dataType":"enum","enums":["p75"]},{"dataType":"enum","enums":["p95"]},{"dataType":"enum","enums":["p99"]},{"dataType":"enum","enums":["p99.9"]}]},
+            "useInterquartile": {"dataType":"boolean"},
+            "timeFilter": {"ref":"TimeFilterMs"},
+            "filter": {"ref":"SessionFilterNode"},
+        },
+        "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "MetricsData": {
@@ -5926,7 +5950,7 @@ export function RegisterRoutes(app: Router) {
 
             async function SessionController_getMetrics(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
-                    requestBody: {"in":"body","name":"requestBody","required":true,"ref":"SessionNameQueryParams"},
+                    requestBody: {"in":"body","name":"requestBody","required":true,"ref":"SessionMetricsQueryParams"},
                     request: {"in":"request","name":"request","required":true,"dataType":"object"},
             };
 

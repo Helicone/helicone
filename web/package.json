@@ -123,7 +123,7 @@
     "stripe": "^17.6.0",
     "tailwind-merge": "^2.5.2",
     "vaul": "^1.1.2",
-    "zustand": "^5.0.1"
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@graphql-eslint/eslint-plugin": "^3.17.0",

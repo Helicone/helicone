@@ -6,19 +6,21 @@ import { cn } from "@/lib/utils";
 
 const Tabs = TabsPrimitive.Root;
 
-const tabsListVariants = cva("inline-flex items-center justify-center p-0.5", {
+const tabsListVariants = cva("inline-flex items-center justify-center", {
   variants: {
     variant: {
-      default: "bg-slate-200 dark:bg-slate-800",
+      default: "bg-slate-200 dark:bg-slate-800 p-0.5",
       secondary: "bg-white dark:bg-slate-950 dark:text-slate-400",
     },
     size: {
       default: "text-sm h-9",
+      sm: "text-xs h-8",
       xs: "text-xs h-7",
     },
     asPill: {
       true: "rounded-full",
       false: "rounded-lg",
+      none: "rounded-none",
     },
   },
   defaultVariants: {
@@ -58,6 +60,7 @@ const tabsTriggerVariants = cva(
         true: "first:rounded-l-full last:rounded-r-full [&:not(:first-child):not(:last-child)]:rounded-none",
         false:
           "first:rounded-l-md last:rounded-r-md [&:not(:first-child):not(:last-child)]:rounded-none",
+        none: "rounded-none",
       },
     },
     defaultVariants: {

@@ -1785,6 +1785,8 @@ Json: JsonObject;
       completion_tokens: number;
       /** Format: double */
       total_tokens: number;
+      /** Format: double */
+      avg_latency: number;
     };
     "ResultSuccess_SessionResult-Array_": {
       data: components["schemas"]["SessionResult"][];
@@ -1825,6 +1827,8 @@ Json: JsonObject;
       first_used: string;
       /** Format: double */
       session_count: number;
+      /** Format: double */
+      avg_latency: number;
     };
     "ResultSuccess_SessionNameResult-Array_": {
       data: components["schemas"]["SessionNameResult"][];
@@ -1851,6 +1855,22 @@ Json: JsonObject;
       error: null;
     };
     "Result_SessionMetrics.string_": components["schemas"]["ResultSuccess_SessionMetrics_"] | components["schemas"]["ResultError_string_"];
+    TimeFilterMs: {
+      /** Format: double */
+      startTimeUnixMs: number;
+      /** Format: double */
+      endTimeUnixMs: number;
+    };
+    SessionMetricsQueryParams: {
+      nameContains: string;
+      /** Format: double */
+      timezoneDifference: number;
+      /** @enum {string} */
+      pSize?: "p50" | "p75" | "p95" | "p99" | "p99.9";
+      useInterquartile?: boolean;
+      timeFilter?: components["schemas"]["TimeFilterMs"];
+      filter?: components["schemas"]["SessionFilterNode"];
+    };
     MetricsData: {
       /** Format: double */
       totalRequests: number;
@@ -4313,7 +4333,7 @@ export interface operations {
   GetMetrics: {
     requestBody: {
       content: {
-        "application/json": components["schemas"]["SessionNameQueryParams"];
+        "application/json": components["schemas"]["SessionMetricsQueryParams"];
       };
     };
     responses: {

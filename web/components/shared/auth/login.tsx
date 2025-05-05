@@ -45,6 +45,7 @@ const Login = (props: LoginProps) => {
     }
 
     setLoading(true);
+
     const { data: user, error: authError } = await heliconeAuthClient.signUp({
       email,
       password,
