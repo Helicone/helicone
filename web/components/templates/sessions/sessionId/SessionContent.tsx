@@ -26,6 +26,7 @@ import { Col } from "../../../layout/common/col";
 import ExportButton from "../../../shared/themed/table/exportButton";
 import FeedbackAction from "../../feedback/thumbsUpThumbsDown";
 import TreeView from "./Tree/TreeView";
+import Link from "next/link";
 
 interface SessionContentProps {
   session: Session;
@@ -184,7 +185,9 @@ export const SessionContent: React.FC<SessionContentProps> = ({
           <div className="flex flex-row gap-4 items-center">
             {/* Dynamic breadcrumb */}
             <div className="flex flex-row gap-1 items-center">
-              <Small className="font-semibold">Sessions</Small>
+              <Link href="/sessions" className="no-underline">
+                <Small className="font-semibold">Sessions</Small>
+              </Link>
               <Small className="font-semibold">/</Small>
               <Muted className="text-sm">{session_name}</Muted>
               <Small className="font-semibold">/</Small>

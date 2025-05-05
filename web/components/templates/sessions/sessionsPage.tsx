@@ -17,7 +17,7 @@ import { useURLParams } from "@/services/hooks/localURLParams";
 import { SortDirection } from "@/services/lib/sorts/requests/sorts";
 import { TimeFilter } from "@/types/timeFilter";
 import { PieChart, Table } from "lucide-react";
-import { useRouter } from "next/router";
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   getTimeIntervalAgo,
@@ -62,7 +62,6 @@ type TSessions = {
   total_tokens: number;
   avg_latency: number;
 };
-type SessionResult = ReturnType<typeof useSessionNames>["sessions"][number];
 
 const TABS = [
   {
@@ -78,8 +77,6 @@ const TABS = [
 ];
 
 const SessionsPage = (props: SessionsPageProps) => {
-  const { sort } = props;
-  const router = useRouter();
   const tableRef = useRef<any>(null);
 
   // State for active columns
@@ -111,7 +108,7 @@ const SessionsPage = (props: SessionsPageProps) => {
     undefined
   );
 
-  const { sessions, isLoading, hasSessions, refetch } = useSessions({
+  const { sessions, isLoading, hasSessions } = useSessions({
     timeFilter,
     sessionIdSearch: debouncedSessionIdSearch ?? "",
     selectedName,
@@ -163,7 +160,6 @@ const SessionsPage = (props: SessionsPageProps) => {
   };
 
   const isSessionsLoading = isLoading || allNames.isLoading || names.isLoading;
-  const combinedLoading = isSessionsLoading || refetch;
 
   // Helper function to get TimeFilter object
   const getTimeFilterObject = (start: Date, end: Date): TimeFilter => ({
@@ -248,7 +244,9 @@ const SessionsPage = (props: SessionsPageProps) => {
         <FoldedHeader
           leftSection={
             <section className="flex flex-row items-center gap-2">
-              <Small className="font-semibold">Sessions</Small>
+              <Link href="/sessions" className="no-underline">
+                <Small className="font-semibold">Sessions</Small>
+              </Link>
               <Small className="font-semibold">/</Small>
 
               <Select
