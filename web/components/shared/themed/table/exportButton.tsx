@@ -28,8 +28,11 @@ interface ExportButtonProps<T> {
   className?: string;
 }
 
-export default function ExportButton<T>(props: ExportButtonProps<T>) {
-  const { rows, fetchRows, format: initialFormat = "CSV", className } = props;
+export default function ExportButton<T>({
+  rows,
+  fetchRows,
+  format: initialFormat = "CSV",
+}: ExportButtonProps<T>) {
   const [format, setFormat] = useState(initialFormat);
   const [open, setOpen] = useState(false);
   const [downloadingCSV, setDownloadingCSV] = useState(false);
