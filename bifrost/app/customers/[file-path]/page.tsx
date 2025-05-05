@@ -11,8 +11,8 @@ import remarkToc from "remark-toc";
 import rehypeHighlight from "rehype-highlight";
 import rehypeSlug from "rehype-slug";
 import "highlight.js/styles/atom-one-dark.css";
-import { Button } from "@/components/ui/button";
-import { Check, ChevronRight, ChevronLeft, Globe } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
+import { OtherCaseStudies } from "@/components/customers/OtherCaseStudies";
 
 export default async function Home({
   params,
@@ -62,9 +62,26 @@ export default async function Home({
             <ChevronLeft className="size-4 group-hover:-translate-x-0.5 transition-transform" />
             <span className="text-sm font-medium">All stories</span>
           </Link>
-          <section className="rounded-xl overflow-hidden">
-            <div className="bg-sky-50 p-4 space-y-2 border border-sky-100 shadow-sm">
-              <div className="flex flex-col items-left gap-4">
+          <section className="flex flex-col gap-6 overflow-hidden">
+            <div className="flex flex-col gap-1 px-2">
+              <p className="text-muted-foreground text-sm font-medium">Customer since</p>
+              <span className="text-accent-foreground text-sm font-medium">
+                {new Date(metadata.customerSince).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+              </span>
+            </div>
+            <div className="flex flex-col gap-1 px-2">
+              <p className="text-muted-foreground text-sm font-medium">Website</p>
+              <a
+                href={`https://${String(metadata.url)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-accent-foreground text-sm font-medium hover:underline"
+              >
+                {String(metadata.url)}
+              </a>
+            </div>
+            <div className="bg-slate-50 px-3 py-5 space-y-2 border-2 border-slate-100 shadow-sm rounded-lg">
+              <div className="flex flex-col items-left gap-4 grayscale">
                 <Image
                   src={metadata.logo}
                   alt={metadata.title}
@@ -81,64 +98,16 @@ export default async function Home({
         </div>
         <article className="prose w-full h-full">
           <h1 className="text-bold text-sky-500">{String(metadata.title)}</h1>
-
-          {/* Desktop date display */}
-          <div className="hidden md:flex items-center gap-2 -mt-4 mb-8">
-            <div className="flex items-center gap-2">
-              <p className="text-muted-foreground text-sm font-medium">Customer since</p>
-              <span className="text-muted-foreground text-sm font-medium">
-                {new Date(metadata.customerSince).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
-              </span>
-              <Globe className="size-4 text-muted-foreground" />
-              <span className="text-muted-foreground text-sm font-medium">
-                {String(metadata.url)}
-              </span>
-            </div>
+          <div className="w-full my-8 bg-slate-100 p-4 rounded-xl border-2 border-slate-100">
+            <Image
+              src={metadata.logo}
+              alt={`${metadata.title} logo`}
+              width={500} // Base width for optimization, aspect ratio will override visual height
+              height={333} // Base height corresponding to 2/3 of width for optimization
+              className="w-1/3 object-contain mx-auto aspect-[3/3]"
+              priority
+            />
           </div>
-
-          {/* Mobile view for author info
-          <div className="flex md:hidden items-center gap-2 -mt-8 -mb-6">
-            <div className="flex items-center justify-between w-full">
-              <div className="flex items-center gap-2">
-                {metadata.authors && metadata.authors.length > 0 ? (
-                  <>
-                    {metadata.authors.map((author, i) => (
-                      <div key={i} className="flex items-center gap-2">
-                        {/* <img
-                          src={HEADSHOTS[author as keyof typeof HEADSHOTS]}
-                          alt={`${author}'s headshot`}
-                          className="w-8 h-8 rounded-full"
-                        /> 
-          <span className="text-slate-500 text-sm font-medium">
-            {author}
-            {i < (metadata.authors?.length ?? 0) - 1 && ","}
-          </span>
-      </div>
-                    ))}
-      <span className="text-slate-400 text-sm font-medium">
-        · {String(metadata.date)}
-      </span>
-    </>
-  ) : (
-    <>
-      {/* <img
-                      src={HEADSHOTS[metadata.author as keyof typeof HEADSHOTS]}
-                      alt={`${metadata.author}'s headshot`}
-                      className="w-8 h-8 rounded-full"
-                    /> 
-      <span className="text-slate-600 text-sm font-medium">
-        {metadata.author}
-      </span>
-      <span className="text-slate-400 text-sm font-medium">
-        · {String(metadata.date)}
-      </span>
-    </>
-  )
-}
-              </div >
-            </div >
-          </div > */}
-
           <RemoteMdxPage mdxSource={mdxSource} />
         </article >
       </div >

@@ -83,7 +83,7 @@ export async function CaseStudies() {
   return (
     <div className="w-full bg-gradient-to-b bg-white min-h-screen antialiased relative text-black">
       <div className="relative w-full flex flex-col mx-auto max-w-7xl h-full py-8 md:py-12 items-center text-center px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-1 lg:gap-6">
           {customersWithMetadata.map((customer) => (
             <Link
               key={customer.dynamicEntry?.folderName}

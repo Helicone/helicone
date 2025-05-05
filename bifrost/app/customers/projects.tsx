@@ -148,7 +148,7 @@ const projects: Project[] = [
     ],
     imageHref: "/static/community/projects/dating-studio.webp",
     tags: [TAGS.tech],
-    href: "https://about.dating.studio/extension",
+    href: "https://dating.studio/",
   },
   {
     title: "Open Council Network",
