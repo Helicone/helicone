@@ -106,7 +106,7 @@ const SessionsPage = (props: SessionsPageProps) => {
   );
 
   const [open, setOpen] = useState(false);
-  const [sessionNameSearch] = useState<string | undefined>(undefined);
+  const [sessionNameSearch, setSessionNameSearch] = useState<string | undefined>(undefined);
 
   const debouncedSessionNameSearch = useDebounce(sessionNameSearch, 500);
 
@@ -279,14 +279,14 @@ const SessionsPage = (props: SessionsPageProps) => {
                   <Command>
                     <CommandInput
                       placeholder="Search sessions..."
+                      onChangeCapture={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        setSessionNameSearch(e.target.value);
+                      }}
                     />
                     <CommandEmpty>No results found.</CommandEmpty>
 
                     <CommandList>
-                      {allNames.sessions
-                        .filter(session =>
-                          session.name.toLowerCase().includes((sessionNameSearch || '').toLowerCase())
-                        )
+                      {names.sessions
                         .sort((a, b) => 
                           new Date(b.last_used).getTime() - new Date(a.last_used).getTime()
                         )
