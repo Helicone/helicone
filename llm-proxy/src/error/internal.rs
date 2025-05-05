@@ -51,6 +51,8 @@ pub enum InternalError {
     InvalidUri(#[from] http::uri::InvalidUri),
     /// Invalid header: {0}
     InvalidHeader(#[from] http::header::InvalidHeaderValue),
+    /// Failed to complete mapping task: {0}
+    MappingTaskError(tokio::task::JoinError),
 }
 
 impl IntoResponse for InternalError {

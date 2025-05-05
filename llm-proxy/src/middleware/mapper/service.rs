@@ -67,9 +67,14 @@ where
             let request_style = req_ctx.router_config.request_style;
 
             if key.provider != request_style {
-                // TODO: compare performance with tokio::task::spawn_blocking
-                let req =
-                    map_request(app_state, request_style, key, req).await?;
+                // serialization/deserialization should be done on a dedicated
+                // thread
+                let req = tokio::task::spawn_blocking(move || async move {
+                    map_request(app_state, request_style, key, req).await
+                })
+                .await
+                .map_err(InternalError::MappingTaskError)?
+                .await?;
                 inner.call(req).await
             } else {
                 inner.call(req).await

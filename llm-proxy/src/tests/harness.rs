@@ -49,7 +49,7 @@ pub struct Harness {
 
 impl Harness {
     async fn new(mock_args: MockArgs, mut config: Config) -> Self {
-        let mock = Mock::new(&mut config.providers, mock_args).await;
+        let mock = Mock::new(&mut config, mock_args).await;
         let (app, _) = App::new(config).await.expect("failed to create app");
         let app_factory = AppFactory::new(app.state.clone(), app);
         let socket_addr =
