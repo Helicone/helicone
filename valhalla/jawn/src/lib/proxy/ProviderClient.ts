@@ -51,10 +51,6 @@ export async function callProvider(props: CallProps) {
   init.headers.delete("host");
   init.headers.delete("Content-Encoding");
 
-  console.log(`Type of body: ${typeof body}`);
-  console.log(`Fetching ${targetUrl.href}`);
-  console.log(`Init: ${JSON.stringify(init)}`);
-
   const result = await fetch(targetUrl.href, init);
   result.headers.delete("Content-Encoding");
   return result;

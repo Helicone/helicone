@@ -355,6 +355,7 @@ export const FeatureUpgradeCard: React.FC<FeatureUpgradeCardProps> = ({
       {featureImage && (
         <div className="w-full">
           {featureImage.type === "image" ? (
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={featureImage.content as string}
               alt="Feature preview"

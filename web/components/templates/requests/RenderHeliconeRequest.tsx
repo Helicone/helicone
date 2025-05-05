@@ -5,6 +5,10 @@ import { HeliconeRequest, MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { getMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
 import { getMapperTypeFromHeliconeRequest } from "@/packages/llm-mapper/utils/getMapperType";
 import useShiftKeyPress from "@/services/hooks/isShiftPressed";
+import {
+  MODE_LABELS,
+  useRequestRenderModeStore,
+} from "@/store/requestRenderModeStore";
 import { useMemo } from "react";
 import { LuChevronsLeftRight } from "react-icons/lu";
 import { Assistant } from "./components/assistant/Assistant";
@@ -16,10 +20,6 @@ import Json from "./components/Json";
 import { Realtime } from "./components/Realtime";
 import { Tool } from "./components/tool/Tool";
 import { VectorDB } from "./components/vector-db/VectorDB";
-import {
-  MODE_LABELS,
-  useRequestRenderModeStore,
-} from "@/store/requestRenderModeStore";
 
 export default function RenderHeliconeRequest({
   heliconeRequest,
@@ -145,7 +145,6 @@ export function RenderMappedRequest({
               return (
                 <Realtime
                   mappedRequest={mappedRequest}
-                  className="pt-14 px-4"
                   messageIndexFilter={messageIndexFilter}
                 />
               );

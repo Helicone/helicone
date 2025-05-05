@@ -1,9 +1,9 @@
 import { autoFillInputs } from "@helicone/prompts";
 import { PreparedRequest, PreparedRequestArgs } from "./PreparedRequest";
-import { OPENAI_KEY } from "../../clients/constant";
 
 function prepareRequestAzure(
   requestPath: string,
+  openaiKey: string,
   apiKey: string,
   requestId: string,
   columnId?: string,
@@ -16,7 +16,7 @@ function prepareRequestAzure(
   let headers: { [key: string]: string } = {
     "Content-Type": "application/json",
     "Helicone-Request-Id": requestId,
-    Authorization: `Bearer ${OPENAI_KEY}`,
+    Authorization: `Bearer ${openaiKey}`,
     "Helicone-Auth": `Bearer ${apiKey}`,
     Accept: "application/json",
     "Accept-Encoding": "",
@@ -83,7 +83,11 @@ export function prepareRequestOpenAIOnPremFull({
   columnId,
   rowIndex,
   experimentId,
+  openaiKey,
 }: PreparedRequestArgs): PreparedRequest {
+  if (!openaiKey) {
+    throw new Error("OpenAI key is required");
+  }
   const newRequestBody = autoFillInputs({
     template: template ?? {},
     inputs: inputs ?? {},
@@ -97,6 +101,7 @@ export function prepareRequestOpenAIOnPremFull({
 
   const { url: fetchUrl, headers } = prepareRequestAzure(
     requestPath ?? "",
+    openaiKey,
     apiKey,
     requestId,
     columnId,

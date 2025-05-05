@@ -1,0 +1,96 @@
+import { betterAuth } from "better-auth";
+import { Pool } from "pg";
+import nodemailer from "nodemailer";
+
+// Create a reusable transporter object using the default SMTP transport
+// Configure for MailHog in development, or your actual email service in production
+const transporter = nodemailer.createTransport({
+  host:
+    process.env.NODE_ENV === "development"
+      ? process.env.SMTP_HOST ?? "localhost"
+      : process.env.SMTP_HOST,
+  port:
+    process.env.NODE_ENV === "development"
+      ? 1025
+      : parseInt(process.env.SMTP_PORT || "587"),
+  secure:
+    process.env.NODE_ENV === "development"
+      ? false
+      : process.env.SMTP_SECURE === "true", // true for 465, false for other ports
+  auth:
+    process.env.NODE_ENV === "development"
+      ? undefined
+      : {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+  // In development with MailHog, TLS verification is not needed
+  tls:
+    process.env.NODE_ENV === "development"
+      ? { rejectUnauthorized: false }
+      : undefined,
+});
+
+export const auth = betterAuth({
+  database: new Pool({
+    connectionString: process.env.DATABASE_URL,
+  }),
+  emailAndPassword: {
+    enabled: true,
+    autoSignIn: false,
+  },
+  emailVerification: {
+    sendOnSignUp: true,
+    // Define the function to send the verification email
+    sendVerificationEmail: async ({ user, url }, request) => {
+      console.log("Sending verification email to", user.email);
+      // Define your email content using the provided HTML template
+      const emailHtml = `
+<div style="width: 100%; background-color: #ffffff">
+  <div style="margin: 0px auto; padding: 16px; width: 512px">
+    <img width="160" alt="Helicone Logo" src="https://us.helicone.ai/_next/image?url=%2Fstatic%2Flogo-no-border.png&w=384&q=75">
+    <p style="font-size: 16px;">Hey there 👋,</p> <!-- Removed extra </h1> -->
+    <p style="font-size: 16px;">Thank you for joining our community of thousands of developers. To get started, please click the button below:</p>
+    <!-- Use the 'url' variable provided by better-auth -->
+    <a style="margin: 16px 0px; display: inline-block; background-color: #0CA5E9; color: #ffffff; font-size: 12px; font-weight: bold; text-decoration: none; padding: 8px 16px; border-radius: 8px; border: 2px solid #036aa1" href="${url}">Start Building</a>
+    
+    <div>
+      <h3>Tips and Tricks 🪄</h3>
+      <ul>
+        <li>Use <a href="https://docs.helicone.ai/features/advanced-usage/custom-properties" target="_blank" rel="noopener noreferrer">custom properties</a> to segment requests by categories / labels</li>
+        <li>Leverage <a href="https://docs.helicone.ai/features/advanced-usage/caching" target="_blank" rel="noopener noreferrer">caching</a> to save money on development costs with LLMs</li>
+        <li>Utilize <a href="https://docs.helicone.ai/features/prompts/intro" target="_blank" rel="noopener noreferrer">prompt templates</a> to visualize and experiment with prompt versions and iterations</li>
+      </ul> <!-- Corrected closing tag -->
+    </div>
+    
+    <div style="border-top: 1px solid #cccccc; padding: 16px 0px; font-size: 12px;">
+      <p style="margin: 0;">If you have any questions or need assistance, please don't hesitate to contact us at sales@helicone.com</p>
+      <p style="margin: 0;">Happy Building!</p>
+      <p style="margin: 0;">The Helicone Team</p>
+    </div>
+  </div>
+</div>
+      `;
+
+      // Send mail with defined transport object
+      try {
+        const info = await transporter.sendMail({
+          from: '"Helicone" <no-reply@helicone.ai>', // Sender address
+          to: user.email, // List of receivers
+          subject: "Verify your email address", // Subject line
+          html: emailHtml, // html body
+        });
+
+        console.log("Verification email sent: %s", info.messageId);
+        // In development, you can also log the URL for easy access:
+        if (process.env.NODE_ENV === "development") {
+          console.log("Verification URL: ", url);
+        }
+      } catch (error) {
+        console.error("Error sending verification email:", error);
+        // Optionally, re-throw the error or handle it as needed
+        // throw error;
+      }
+    },
+  },
+});

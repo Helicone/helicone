@@ -1,12 +1,10 @@
 import AuthLayout from "../components/layout/auth/authLayout";
 import { withAuthSSR } from "../lib/api/handlerWrappers";
-import { User } from "@supabase/auth-helpers-react";
 import { SortDirection } from "../services/lib/sorts/requests/sorts";
 import { ReactElement } from "react";
 import SessionsPage from "../components/templates/sessions/sessionsPage";
 
 interface SessionsProps {
-  user: User;
   currentPage: number;
   pageSize: number;
   sort: {
@@ -20,14 +18,12 @@ interface SessionsProps {
 const Sessions = (props: SessionsProps) => {
   const { currentPage, pageSize, sort, defaultIndex } = props;
   return (
-    <>
-      <SessionsPage
-        currentPage={currentPage}
-        pageSize={pageSize}
-        sort={sort}
-        defaultIndex={defaultIndex}
-      />
-    </>
+    <SessionsPage
+      currentPage={currentPage}
+      pageSize={pageSize}
+      sort={sort}
+      defaultIndex={defaultIndex}
+    />
   );
 };
 
@@ -46,7 +42,6 @@ export const getServerSideProps = withAuthSSR(async (options) => {
 
   return {
     props: {
-      user: options.userData.user,
       currentPage,
       pageSize,
       sort: {

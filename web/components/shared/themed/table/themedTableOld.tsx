@@ -30,9 +30,6 @@ import DraggableColumnHeader from "./columns/draggableColumnHeader";
 import RequestRowView from "./requestRowView";
 import ThemedTableHeader from "./themedTableHeader";
 
-import useOnboardingContext, {
-  ONBOARDING_STEPS,
-} from "@/components/layout/onboardingContext";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   ResizableHandle,
@@ -40,8 +37,8 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { MappedLLMRequest } from "@/packages/llm-mapper/types";
-import { useRouter, useSearchParams } from "next/navigation";
 import { RequestViews } from "./RequestViews";
+import useShiftKeyPress from "@/services/hooks/isShiftPressed";
 
 type CheckboxMode = "always_visible" | "on_hover" | "never";
 
@@ -151,6 +148,7 @@ export default function ThemedTable<T extends { id?: string }>(
     rowLink,
     showFilters,
   } = props;
+  const isShiftPressed = useShiftKeyPress();
 
   const [view, setView] = useLocalStorage<RequestViews>("view", "table");
 
@@ -225,27 +223,6 @@ export default function ThemedTable<T extends { id?: string }>(
     ] as string | undefined;
     return { sessionId };
   }, [rows]);
-
-  const { currentStep, isOnboardingVisible, setOnClickElement } =
-    useOnboardingContext();
-
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  useEffect(() => {
-    if (
-      id === "requests-table" &&
-      isOnboardingVisible &&
-      currentStep === ONBOARDING_STEPS.REQUESTS_DRAWER.stepNumber
-    ) {
-      setOnClickElement(
-        () => () =>
-          router.push(
-            `/sessions/${encodeURIComponent(sessionData?.sessionId || "")}`
-          )
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOnboardingVisible, currentStep]);
 
   return (
     <div className="h-full flex flex-col border-slate-300 dark:border-slate-700 divide-y divide-slate-300 dark:divide-slate-700">
@@ -417,19 +394,19 @@ export default function ThemedTable<T extends { id?: string }>(
                       {rows.map((row, index) => (
                         <tr
                           key={row.original?.id}
-                          className={clsx(
-                            "hover:cursor-pointer group",
-                            checkedIds?.includes(row.original?.id ?? "")
-                              ? "bg-sky-100 border-l border-sky-500 pl-2 dark:bg-slate-800/50 dark:border-sky-900"
-                              : "hover:bg-sky-50 dark:hover:bg-slate-700/50",
-                            rowLink && "relative"
-                          )}
-                          onClick={
-                            onRowSelect &&
-                            ((e: React.MouseEvent) => {
-                              handleRowSelect(row.original, index, e);
-                            })
+                          data-state={row.getIsSelected() && "selected"}
+                          onClick={(e) =>
+                            handleRowSelect(row.original, index, e)
                           }
+                          className={clsx(
+                            isShiftPressed && "select-none",
+                            (checkedIds?.includes(row.original?.id ?? "") ||
+                              selectedIds?.includes(row.original?.id ?? "")) &&
+                              "bg-sky-50 dark:bg-sky-950",
+                            checkboxMode === "on_hover"
+                              ? "cursor-pointer group"
+                              : "cursor-default"
+                          )}
                         >
                           <td
                             className={clsx(
@@ -552,18 +529,14 @@ export default function ThemedTable<T extends { id?: string }>(
         </ResizablePanel>
         {rightPanel && (
           <>
-            {isOnboardingVisible && currentStep === 1 ? (
-              <div className="h-full w-1/2">{rightPanel}</div>
-            ) : (
-              <>
-                <ResizableHandle withHandle />
-                <ResizablePanel minSize={25} maxSize={75} defaultSize={75}>
-                  <div className="h-full flex-shrink-0 flex flex-col">
-                    {rightPanel}
-                  </div>
-                </ResizablePanel>
-              </>
-            )}
+            <>
+              <ResizableHandle withHandle />
+              <ResizablePanel minSize={25} maxSize={75} defaultSize={75}>
+                <div className="h-full flex-shrink-0 flex flex-col">
+                  {rightPanel}
+                </div>
+              </ResizablePanel>
+            </>
           </>
         )}
       </ResizablePanelGroup>

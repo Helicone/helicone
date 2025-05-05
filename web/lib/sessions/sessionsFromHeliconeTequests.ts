@@ -17,21 +17,33 @@ export function sessionFromHeliconeRequests(
     };
   }
 
-  const firstRequest = requests[requests.length - 1];
-  const lastRequest = requests[0];
+  // Sort the requests by creation time ascending to ensure correct session boundaries
+  // and trace order, especially crucial for simulated realtime steps.
+  const sortedRequests = [...requests].sort((a, b) => {
+    const timeA = a.request_created_at
+      ? new Date(a.request_created_at).getTime()
+      : 0;
+    const timeB = b.request_created_at
+      ? new Date(b.request_created_at).getTime()
+      : 0;
+    return timeA - timeB;
+  });
+
+  const firstRequest = sortedRequests[0];
+  const lastRequest = sortedRequests[sortedRequests.length - 1];
 
   return {
     start_time_unix_timestamp_ms: new Date(
       firstRequest.request_created_at
     ).getTime(),
     end_time_unix_timestamp_ms: new Date(
-      lastRequest.response_created_at ?? Date.now().toString()
+      lastRequest.response_created_at ?? lastRequest.request_created_at // Fallback to request time if response time is missing
     ).getTime(),
     session_id: firstRequest.request_properties?.[
       "Helicone-Session-Id"
     ] as string,
     session_tags: [],
-    session_cost_usd: requests
+    session_cost_usd: sortedRequests // Use sortedRequests here
       .map((r) =>
         modelCost({
           model: r.model_override ?? r.request_model ?? r.response_model ?? "",
@@ -40,20 +52,20 @@ export function sessionFromHeliconeRequests(
           sum_prompt_tokens: r.prompt_tokens ?? 0,
           prompt_cache_write_tokens: r.prompt_cache_write_tokens ?? 0,
           prompt_cache_read_tokens: r.prompt_cache_read_tokens ?? 0,
-          sum_tokens: r.completion_tokens ?? 0 + (r.prompt_tokens ?? 0),
+          sum_tokens: (r.completion_tokens ?? 0) + (r.prompt_tokens ?? 0), // Fixed sum logic
           prompt_audio_tokens: r.prompt_audio_tokens ?? 0,
           completion_audio_tokens: r.completion_audio_tokens ?? 0,
         })
       )
       .reduce((a, b) => a + b, 0),
-    traces: requests
+    traces: sortedRequests // Use sortedRequests here
       .map((request) => {
         const x: Trace = {
           start_unix_timestamp_ms: new Date(
             request.request_created_at
           ).getTime(),
           end_unix_timestamp_ms: new Date(
-            request.response_created_at ?? Date.now().toString()
+            request.response_created_at ?? request.request_created_at // Fallback to request time if response time is missing
           ).getTime(),
           properties: Object.entries(request.request_properties ?? {})
             .filter(([key]) => key.startsWith("Helicone-") === false)
@@ -68,7 +80,6 @@ export function sessionFromHeliconeRequests(
           request: heliconeRequestToMappedContent(request),
         };
         return x;
-      })
-      .sort((a, b) => a.start_unix_timestamp_ms - b.start_unix_timestamp_ms),
+      }),
   };
 }

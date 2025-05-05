@@ -20,7 +20,7 @@ function processFilter(filter: any): any {
   const result: any = Array.isArray(filter) ? [] : {};
 
   for (const key in filter) {
-    if (key === "gte" || key === "lte") {
+    if (key === "gte" || key === "lte" || key === "gt" || key === "lt") {
       result[key] = formatDateForClickHouse(new Date(filter[key]));
     } else if (typeof filter[key] === "object") {
       result[key] = processFilter(filter[key]);
@@ -247,41 +247,33 @@ const useGetRequestCountClickhouse = (
   startDateISO: string,
   endDateISO: string
 ) => {
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: [`org-count`, startDateISO, endDateISO],
-    queryFn: async (query) => {
-      const startDate = query.queryKey[2];
-      const endDate = query.queryKey[3];
-
-      const data = await fetch(`/api/request/ch/count`, {
-        method: "POST",
-        body: JSON.stringify({
-          filter: {
-            left: {
-              request_response_rmt: {
-                request_created_at: {
-                  gte: startDate,
-                },
-              },
-            },
-            operator: "and",
-            right: {
-              request_response_rmt: {
-                request_created_at: {
-                  lte: endDate,
-                },
+  const { data, isLoading, refetch } = $JAWN_API.useQuery(
+    "post",
+    "/v1/request/count/query",
+    {
+      body: {
+        filter: {
+          left: {
+            request_response_rmt: {
+              request_created_at: {
+                gte: startDateISO,
               },
             },
           },
-        }),
-        headers: {
-          "Content-Type": "application/json",
+          operator: "and",
+          right: {
+            request_response_rmt: {
+              request_created_at: {
+                lte: endDateISO,
+              },
+            },
+          },
         },
-      }).then((res) => res.json());
-      return data;
+      },
     },
-    refetchOnWindowFocus: false,
-  });
+    { refetchOnWindowFocus: false }
+  );
+
   return {
     count: data,
     isLoading,

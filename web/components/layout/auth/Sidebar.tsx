@@ -1,11 +1,4 @@
 /* eslint-disable @next/next/no-img-element */
-
-import { useUser } from "@supabase/auth-helpers-react";
-import { useRouter } from "next/router";
-import { useMemo } from "react";
-import DesktopSidebar from "./DesktopSidebar";
-import { ChangelogItem, NavigationItem } from "./types";
-
 import {
   ArchiveIcon,
   BellIcon,
@@ -22,7 +15,10 @@ import {
   UsersIcon,
   Webhook,
 } from "lucide-react";
-import { useOrg } from "../org/organizationContext";
+import { useRouter } from "next/router";
+import { useMemo } from "react";
+import DesktopSidebar from "./DesktopSidebar";
+import { ChangelogItem, NavigationItem } from "./types";
 
 interface SidebarProps {
   setOpen: (open: boolean) => void;
@@ -33,8 +29,7 @@ interface SidebarProps {
 const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
   const router = useRouter();
   const { pathname } = router;
-  const user = useUser();
-  const org = useOrg();
+
   const NAVIGATION: NavigationItem[] = useMemo(
     () => [
       {

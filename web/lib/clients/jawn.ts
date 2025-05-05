@@ -15,7 +15,7 @@ export function getJawnClient(orgId?: string | "none") {
     fetch: (request: Request) => {
       // Read cookies on each request to get latest values
       const currentOrgId = orgId || Cookies.get(ORG_ID_COOKIE_KEY);
-      const jwtToken = getHeliconeCookie().data?.jwtToken;
+      const jwtToken = getHeliconeCookie().data?.jwtToken ?? "";
 
       // Get existing headers
       const existingHeaders = Object.fromEntries(request.headers.entries());
@@ -26,7 +26,7 @@ export function getJawnClient(orgId?: string | "none") {
         headers["helicone-authorization"] = JSON.stringify({
           _type: "jwt",
           token: jwtToken,
-          orgId: currentOrgId,
+          orgId: currentOrgId ?? "no-org-id",
         });
       }
 
@@ -35,10 +35,26 @@ export function getJawnClient(orgId?: string | "none") {
         headers,
       });
 
-      return fetch(newRequest);
+      return fetch(newRequest, {
+        credentials: "include",
+      });
     },
   });
 }
 
-export const $JAWN_API = createQueryClient<allPaths>(getJawnClient());
+const jawnClient = getJawnClient();
+
+export const $JAWN_API = {
+  ...jawnClient,
+  ...createQueryClient<allPaths>(jawnClient),
+};
+
+export const $JAWN_API_WITH_ORG = (orgId?: string | "none") => {
+  const client = getJawnClient(orgId);
+  return {
+    ...client,
+    ...createQueryClient<allPaths>(client),
+  };
+};
+
 export type ClientType = ReturnType<typeof getJawnClient>;
