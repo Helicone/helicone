@@ -1,4 +1,6 @@
+import { Button } from "@/components/ui/button";
 import { clsx } from "@/utils/clsx";
+import { ArrowUpRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 
 interface ProjectTag {
@@ -346,6 +348,51 @@ const projects: Project[] = [
 ];
 
 export function Projects() {
+  // interface ProjectFilterProps {
+  //   tags: string[];
+  // }
+
+  // const ProjectFilter = ({ tags }: ProjectFilterProps) => {
+  //   const router = useRouter();
+  //   const pathname = usePathname();
+
+  //   const handleFilterChange = (tag: string) => {
+  //     const current = new URLSearchParams(Array.from(searchParams.entries())); // -> has to use this form
+
+  //     if (tag.toLowerCase() === "all") {
+  //       current.delete("tag");
+  //     } else {
+  //       current.set("tag", tag);
+  //     }
+
+  //     // cast to string
+  //     const search = current.toString();
+  //     // or const query = `${'?'.repeat(search.length && 1)}${search}`;
+  //     const query = search ? `?${search}` : "";
+
+  //     router.push(`${pathname}${query}`);
+  //   };
+
+  //   return (
+  //     <div className="flex flex-wrap justify-center gap-2 my-6">
+  //       {Object.values(TAGS).map((tag) => (
+  //         <Button
+  //           key={tag.name}
+  //           variant={activeTag === tag.name.toLowerCase() ? "default" : "outline"}
+  //           onClick={() => handleFilterChange(tag.name)}
+  //           className={clsx(
+  //             "capitalize rounded-full px-4 py-1 text-sm",
+  //             activeTag === tag.name.toLowerCase()
+  //               ? "bg-sky-600 text-white hover:bg-sky-700"
+  //               : "text-gray-700 border-gray-300 hover:bg-gray-100"
+  //           )}
+  //         >
+  //           {tag.name}
+  //         </Button>
+  //       ))}
+  //     </div>
+  //   );
+  // }
   // return (
   //   <div>
   //     <div className="md:gap-2 md:flex-row md:justify-start sm:items-start flex flex-col justify-start items-start  bg-[#F0F9FF] border-[#0CA5E9] border border-opacity-20 rounded-lg mx-[12px] p-[24px] mt-[24px]">
@@ -376,8 +423,30 @@ export function Projects() {
   // );
   return (
     <div>
+      <div className="relative w-full  flex flex-col gap-4 items-center">
+        <h2 className="text-3xl font-semibold tracking-tight max-w-4xl">
+          Community Projects
+        </h2>
+        <p className="mt-[12px] text-sm sm:text-lg text-gray-700">
+          Products built with Helicone, by our amazing community of developers.
+        </p>
+        <Button variant="outline" asChild className="w-fit">
+          <Link
+            href="https://forms.gle/WpTEEE6vVdQccprD9"
+            target="_blank"
+            rel="noopener"
+          >
+            <Sparkles className="size-4 mr-2" />
+            Share Your Project
+          </Link>
+        </Button>
+      </div>
+
+      {/* Project filters */}
+      {/* <ProjectFilter tags={allTags} /> */}
+
       {/* Project grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mx-auto max-w-5xl">
         {projects.map((project, i) => {
           return (
             <div
@@ -386,7 +455,7 @@ export function Projects() {
             >
               <Link
                 id="featured"
-                className="flex flex-col gap-4 w-full h-full hover:bg-brand/10 rounded-lg p-4 col-span-2 md:col-span-1 mt-2"
+                className="flex flex-col gap-4 w-full h-full bg-gray-50 hover:bg-brand/10 rounded-lg p-4 col-span-2 md:col-span-1 mt-2 group"
                 href={project.href}
                 key={i}
                 target="_blank"
@@ -394,26 +463,29 @@ export function Projects() {
 
                 {/* Overlay for tags and description */}
                 <div className="w-full h-fit rounded-lg flex flex-col text-left gap-4">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 overflow-hidden">
+                      {/* Industry tag */}
+                      {project.tags.map((tag, index) => (
+                        <span
+                          key={index}
+                          className={clsx(
+                            "bg-sky-50 text-sky-700 ring-sky-600/10 w-max items-center rounded-lg px-2 py-1 text-xs font-medium ring-1 ring-inset"
+                          )}
+                        >
+                          {tag.name}
+                        </span>
+                      ))}
 
-                    {/* Industry tag */}
-                    {project.tags.map((tag, index) => (
-                      <span
-                        key={index}
-                        className={clsx(
-                          "bg-sky-50 text-sky-700 ring-sky-600/10 w-max items-center rounded-lg px-2 py-1 text-xs font-medium ring-1 ring-inset"
-                        )}
-                      >
-                        {tag.name}
-                      </span>
-                    ))}
-
-                    {/* Open Source tag */}
-                    {project.isOpenSourced && (
-                      <span className="bg-sky-500 bg-opacity-10 text-sky-500 rounded-md px-2 py-1 text-xs font-semibold">
-                        Open-source
-                      </span>
-                    )}
+                      {/* Open Source tag */}
+                      {project.isOpenSourced && (
+                        <span className="bg-sky-500 bg-opacity-10 text-sky-500 rounded-md px-2 py-1 text-xs font-semibold">
+                          Open-source
+                        </span>
+                      )}
+                    </div>
+                    {/* Make arrow appear on hover */}
+                    <ArrowUpRight className="size-4 text-accent-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
                   </div>
                   <div className="flex flex-col gap-2">
                     <h2 className="font-semibold text-md text-accent-foreground">
@@ -427,27 +499,6 @@ export function Projects() {
                   </div>
                 </div>
               </Link>
-
-              {/* Creators tag */}
-              {/* <div className={clsx("flex items-center")}>
-                {project.creators.map((creator, i) => (
-                  <div key={i} className="flex items-center px-4 py-1">
-                    <a
-                      href={creator.href || undefined}
-                      target={creator.href ? "_blank" : undefined}
-                      rel={creator.href ? "noopener noreferrer" : undefined}
-                      className={clsx(
-                        "text-xs font-medium",
-                        creator.href
-                          ? "text-sky-500 hover:underline"
-                          : "text-gray-500"
-                      )}
-                    >
-                      {creator.name}
-                    </a>
-                  </div>
-                ))}
-              </div> */}
             </div>
           );
         })}

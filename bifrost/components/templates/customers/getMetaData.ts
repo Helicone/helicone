@@ -7,8 +7,9 @@ export interface CaseStudyStructureMetaData {
   logo: string;
   href: string;
   url: string;
-  partnerSince: string;
+  customerSince: string;
   isOpenSourced?: true;
+  date?: string;
 }
 
 export async function getMetadata(

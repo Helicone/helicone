@@ -1,0 +1,41 @@
+## Pinpointing Erroneous Request in Complex AI Workflows
+
+Tusk builds advanced AI tools that involve lengthy chains of LLM calls working together to process code, analyze files, and generate responses. 
+
+When customer report issues, the team needs to **quickly identify exactly where and why something went wrong in their complex AI workflow**.
+
+> We have PostHog alerts for whenever there are events, for example, a customer reports bugs or something. When we actually look at logs, we basically have a button that goes to the Helicone session. 
+> — Jun Yu, Tusk
+
+> We usually look at sessions to determine where exactly something might have gone wrong. The tree helps narrow stuff down as well.
+> — Jun Yu, Tusk
+
+The challenge was **efficiently pinpointing the source of errors** or unexpected outputs within extensive workflows, like context errors. 
+
+Before having a structured way to visualize their AI pipelines, the team struggled to pinpoint which specific request in a chain of dozens or hundreds contained issues like context length errors, status code failures, or LLM hallucinations.
+
+## Debugging Breakthrough with Helicone Sessions
+
+Implementing Helicone's Sessions feature transformed Tusk’s debugging workflow. The hierarchical tree visualization allows them to navigate through complex request chains, quickly isolating problematic sections through a structured view that mirrors their application's logic.
+
+This visibility is critical for prompt debugging—whether investigating context length issues, unexpected LLM outputs, or API errors. Sessions provides the comprehensive view they need to see the entire request flow while allowing them to drill down to specific problem areas.
+
+> It's nice to be able to collapse everything and then be like, 'Okay, we think the error is in this part,' and expand that and look there. Sessions helps us locate where the issue is using the paths.
+> — Jun Yu, Tusk
+
+## Helicone's Impact on Tusk's Workflow 
+
+For Tusk’s engineering team, Sessions has become an essential debugging tool:
+
+| Before Helicone | With Helicone Sessions |
+| --------------- | ---------------------- |
+| Difficulty locating which part of a complex flow contained errors | Tree visualization that allows quick navigation to specific sections where errors occurred |
+| Limited context about what happened before and after an error | Complete flow visibility showing the entire sequence of LLM calls |
+| Manual inspection of individual requests without contextual organization | Hierarchical path structure that organizes requests by their logical relationship |
+| Time-consuming process to identify which specific file or prompt caused an issue | Ability to trace exactly which paths and file references led to failed requests |
+
+Helicone's Sessions feature has become a core part of Dust's debugging infrastructure, giving them the visibility they need to maintain reliable AI systems while continuously improving their pipeline.
+
+## Bring Clarity to Your LLM Workflows
+
+Want to debug complex AI processes like Tusk? Try Helicone free today and see how Sessions can transform your development workflow.

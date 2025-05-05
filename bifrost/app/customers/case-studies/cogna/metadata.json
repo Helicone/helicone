@@ -1,0 +1,9 @@
+{
+  "title": "Building-AI-powered Software Synthesis with Helicone",
+  "description": "Cogna builds enterprise software synthesis tools that automatically generate custom applications from specifications. Their process relies on complex chains of LLM calls working in concert to create different components of an application simultaneously.",
+  "logo": "/static/customers/cogna.webp",
+  "url": "cogna.co",
+  "customerSince": "2025-03-18",
+  "isOpenSourced": false,
+  "date": "2025-03-18"
+}
