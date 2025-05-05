@@ -48,6 +48,7 @@ const SignUp = () => {
       <AuthForm
         handleEmailSubmit={async (email: string, password: string) => {
           const origin = window.location.origin;
+          console.log("signing up");
 
           const { data, error } = await heliconeAuthClient.signUp({
             email: email,
