@@ -13,8 +13,12 @@ At Helicone we believe that open-source software makes the world a better place.
 # Clone repository
 git clone https://github.com/Helicone/helicone.git
 
+cd docker
+
+# NOTE: to pull the latest changes and migrations run `docker compose build`
+
 # Start up the services
-docker compose up -d # NOTE: the initial build will take a while ~5 minutes, but subseqent builds will be a lot faster
+docker compose up -d # NOTE: the initial build will take a while ~5 minutes, but subsequent builds will be a lot faster
 ```
 
 **Default URLs:**
