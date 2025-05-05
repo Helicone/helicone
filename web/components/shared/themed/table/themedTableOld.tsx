@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/resizable";
 import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { RequestViews } from "./RequestViews";
+import useShiftKeyPress from "@/services/hooks/isShiftPressed";
 
 type CheckboxMode = "always_visible" | "on_hover" | "never";
 
@@ -147,6 +148,7 @@ export default function ThemedTable<T extends { id?: string }>(
     rowLink,
     showFilters,
   } = props;
+  const isShiftPressed = useShiftKeyPress();
 
   const [view, setView] = useLocalStorage<RequestViews>("view", "table");
 
@@ -392,19 +394,19 @@ export default function ThemedTable<T extends { id?: string }>(
                       {rows.map((row, index) => (
                         <tr
                           key={row.original?.id}
-                          className={clsx(
-                            "hover:cursor-pointer group",
-                            checkedIds?.includes(row.original?.id ?? "")
-                              ? "bg-sky-100 border-l border-sky-500 pl-2 dark:bg-slate-800/50 dark:border-sky-900"
-                              : "hover:bg-sky-50 dark:hover:bg-slate-700/50",
-                            rowLink && "relative"
-                          )}
-                          onClick={
-                            onRowSelect &&
-                            ((e: React.MouseEvent) => {
-                              handleRowSelect(row.original, index, e);
-                            })
+                          data-state={row.getIsSelected() && "selected"}
+                          onClick={(e) =>
+                            handleRowSelect(row.original, index, e)
                           }
+                          className={clsx(
+                            isShiftPressed && "select-none",
+                            (checkedIds?.includes(row.original?.id ?? "") ||
+                              selectedIds?.includes(row.original?.id ?? "")) &&
+                              "bg-sky-50 dark:bg-sky-950",
+                            checkboxMode === "on_hover"
+                              ? "cursor-pointer group"
+                              : "cursor-default"
+                          )}
                         >
                           <td
                             className={clsx(

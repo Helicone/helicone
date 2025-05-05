@@ -65,8 +65,34 @@ const calculateDefaultExpandedStates = (
 
 export const Realtime: React.FC<RealtimeProps> = ({
   mappedRequest,
-  messageIndexFilter,
+  messageIndexFilter: propMessageIndexFilter,
 }) => {
+  // Derive messageIndexFilter from metadata if not provided
+  const derivedMessageIndexFilter = useMemo(() => {
+    if (propMessageIndexFilter) {
+      return propMessageIndexFilter; // Use prop if available
+    }
+
+    const stepIndexStr =
+      mappedRequest.heliconeMetadata?.customProperties
+        ?._helicone_realtime_step_index;
+    if (stepIndexStr) {
+      const stepIndex = parseInt(stepIndexStr, 10);
+      if (!isNaN(stepIndex)) {
+        // Create a filter for the single step index
+        return {
+          startIndex: stepIndex,
+          endIndex: stepIndex,
+        };
+      }
+    }
+
+    return undefined; // No filter derived
+  }, [
+    propMessageIndexFilter,
+    mappedRequest.heliconeMetadata?.customProperties,
+  ]);
+
   // Get all messages sorted by timestamp
   const sortedMessages = [
     ...(mappedRequest.schema.request?.messages || []),
@@ -95,9 +121,9 @@ export const Realtime: React.FC<RealtimeProps> = ({
 
   // Filter messages based on the provided index filter
   const filteredMessages = useMemo(() => {
-    // If we have a message index filter, use that
-    if (messageIndexFilter) {
-      const { startIndex, endIndex } = messageIndexFilter;
+    // Use the derived filter
+    if (derivedMessageIndexFilter) {
+      const { startIndex, endIndex } = derivedMessageIndexFilter;
 
       // Filter by message index
       if (typeof startIndex === "number") {
@@ -125,7 +151,7 @@ export const Realtime: React.FC<RealtimeProps> = ({
 
     // If no filter, return all messages
     return sortedMessages;
-  }, [sortedMessages, messageIndexFilter]);
+  }, [sortedMessages, derivedMessageIndexFilter]);
 
   // State to manage the expansion of deleted messages
   const [deletedMessageStates, setDeletedMessageStates] = useState<{
@@ -158,12 +184,13 @@ export const Realtime: React.FC<RealtimeProps> = ({
 
   // Get information about the active filter for display
   const filterInfo = useMemo(() => {
+    // Use the derived filter
     if (
-      messageIndexFilter &&
-      typeof messageIndexFilter.startIndex === "number"
+      derivedMessageIndexFilter &&
+      typeof derivedMessageIndexFilter.startIndex === "number"
     ) {
-      const startIndex = messageIndexFilter.startIndex;
-      const endIndex = messageIndexFilter.endIndex;
+      const startIndex = derivedMessageIndexFilter.startIndex;
+      const endIndex = derivedMessageIndexFilter.endIndex;
 
       // Simple filter info that just shows the index range
       return {
@@ -174,7 +201,7 @@ export const Realtime: React.FC<RealtimeProps> = ({
     }
 
     return null;
-  }, [messageIndexFilter]);
+  }, [derivedMessageIndexFilter]);
 
   // Always get the last session update from all messages, not just filtered ones
   const lastMsg = sortedMessages.findLast((msg) => msg._type === "message");

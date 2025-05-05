@@ -28,9 +28,6 @@ export default function DraggableColumnHeader<T>(props: {
     <div
       {...{
         colSpan: header.colSpan,
-        style: {
-          width: header.getSize(),
-        },
       }}
       className={clsx(
         "text-left font-semibold text-gray-900 dark:text-gray-100 relative px-2",

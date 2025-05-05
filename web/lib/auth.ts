@@ -7,7 +7,7 @@ import nodemailer from "nodemailer";
 const transporter = nodemailer.createTransport({
   host:
     process.env.NODE_ENV === "development"
-      ? "localhost"
+      ? process.env.SMTP_HOST ?? "localhost"
       : process.env.SMTP_HOST,
   port:
     process.env.NODE_ENV === "development"
