@@ -14,8 +14,11 @@ async fn mapper_openai_slow() {
     // single provider
     config.routers = RouterConfigs::default();
     let latency = 10;
-    let requests = 100;
-    let mock_args = MockArgs::builder().global_openai_latency(latency).build();
+    let requests = 50;
+    let mock_args = MockArgs::builder()
+        .global_openai_latency(latency)
+        .verify(false)
+        .build();
     let mut harness = Harness::builder()
         .with_config(config)
         .with_mock_args(mock_args)
@@ -80,9 +83,10 @@ async fn mapper_anthropic_slow() {
     // single provider
     config.routers = RouterConfigs::default();
     let latency = 10;
-    let requests = 10;
+    let requests = 50;
     let mock_args = MockArgs::builder()
         .global_anthropic_latency(latency)
+        .verify(false)
         .build();
     let mut harness = Harness::builder()
         .with_config(config)

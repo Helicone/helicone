@@ -76,3 +76,7 @@ required-features = ["testing"]
 [[test]]
 name = "mapper"
 required-features = ["testing"]
+
+[[test]]
+name = "logger"
+required-features = ["testing"]

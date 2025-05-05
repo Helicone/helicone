@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use http::{Method, Request, StatusCode};
 use llm_proxy::{
@@ -6,7 +6,7 @@ use llm_proxy::{
         Config,
         router::{BalanceConfig, RouterConfig, RouterConfigs},
     },
-    tests::{TestDefault, harness::Harness},
+    tests::{TestDefault, harness::Harness, mock::MockArgs},
     types::{provider::Provider, router::RouterId},
 };
 use nonempty_collections::nev;
@@ -19,7 +19,16 @@ use tower::Service;
 #[serial_test::serial(default_mock)]
 async fn openai() {
     let config = Config::test_default();
-    let mut harness = Harness::builder().with_config(config).build().await;
+    let mock_args = MockArgs::builder()
+        .stubs_in_scope(HashSet::from([
+            "success:openai:chat_completion".to_string()
+        ]))
+        .build();
+    let mut harness = Harness::builder()
+        .with_config(config)
+        .with_mock_args(mock_args)
+        .build()
+        .await;
     let request_body = axum_core::body::Body::from(
         serde_json::to_vec(&json!({
             "model": "gpt-4o-mini",
@@ -41,21 +50,15 @@ async fn openai() {
     let response = harness.call(request).await.unwrap();
     assert_eq!(response.status(), StatusCode::OK);
 
-    // assert that the request was proxied to the mock server correctly
-    let received_requests = harness
-        .mock
-        .openai_mock
-        .received_requests_for("POST", "/v1/chat/completions")
-        .await
-        .expect("no requests received");
-    assert_eq!(received_requests.len(), 1);
+    // technically verification happens on drop but we do it here to be explicit
+    harness.mock.openai_mock.verify().await;
 }
 
 /// Sending a request to https://localhost/router should
 /// result in the proxied request targeting https://api.openai.com/v1/chat/completions
 #[tokio::test]
 #[serial_test::serial(default_mock)]
-async fn anthropic() {
+async fn anthropic_with_openai_request_style() {
     let mut config = Config::test_default();
     let router_config = RouterConfigs::new(HashMap::from([(
         RouterId::Default,
@@ -73,7 +76,16 @@ async fn anthropic() {
         },
     )]));
     config.routers = router_config;
-    let mut harness = Harness::builder().with_config(config).build().await;
+    let mock_args = MockArgs::builder()
+        .stubs_in_scope(HashSet::from([
+            "success:anthropic:messages".to_string()
+        ]))
+        .build();
+    let mut harness = Harness::builder()
+        .with_config(config)
+        .with_mock_args(mock_args)
+        .build()
+        .await;
     let request_body = axum_core::body::Body::from(
         serde_json::to_vec(&json!({
             "model": "claude-3-5-sonnet-20240620",
@@ -96,13 +108,12 @@ async fn anthropic() {
     assert_eq!(response.status(), StatusCode::OK);
 
     // assert that the request was proxied to the mock server correctly
-    let received_requests = harness
+    harness.mock.anthropic_mock.verify().await;
+    harness
         .mock
         .anthropic_mock
-        .received_requests_for("POST", "/v1/messages")
-        .await
-        .expect("no requests received");
-    assert_eq!(received_requests.len(), 1);
+        .set_expectation("success:anthropic:messages", 2.into())
+        .await;
 
     // test that using an openai model name works as well
     let request_body = axum_core::body::Body::from(
@@ -127,13 +138,93 @@ async fn anthropic() {
     assert_eq!(response.status(), StatusCode::OK);
 
     // assert that the request was proxied to the mock server correctly
-    let received_requests = harness
+    harness.mock.anthropic_mock.verify().await;
+}
+
+#[tokio::test]
+#[serial_test::serial(default_mock)]
+async fn anthropic_with_anthropic_request_style() {
+    let mut config = Config::test_default();
+    let router_config = RouterConfigs::new(HashMap::from([(
+        RouterId::Default,
+        RouterConfig {
+            request_style: Provider::OpenAI,
+            providers: nev![Provider::Anthropic],
+            cache: None,
+            fallback: None,
+            balance: BalanceConfig::P2C {
+                targets: nev![Provider::Anthropic],
+            },
+            retries: None,
+            rate_limit: None,
+            spend_control: None,
+        },
+    )]));
+    config.routers = router_config;
+    let mock_args = MockArgs::builder()
+        .stubs_in_scope(HashSet::from([
+            "success:anthropic:messages".to_string()
+        ]))
+        .build();
+    let mut harness = Harness::builder()
+        .with_config(config)
+        .with_mock_args(mock_args)
+        .build()
+        .await;
+    let request_body = axum_core::body::Body::from(
+        serde_json::to_vec(&json!({
+            "model": "claude-3-5-sonnet-20240620",
+            "messages": [
+                {
+                    "role": "user",
+                    "content": "Hello, world!"
+                }
+            ]
+        }))
+        .unwrap(),
+    );
+    let request = Request::builder()
+        .method(Method::POST)
+        // default router
+        .uri("http://router.helicone.com/router/v1/chat/completions")
+        .body(request_body)
+        .unwrap();
+    let response = harness.call(request).await.unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+
+    // assert that the request was proxied to the mock server correctly
+    harness.mock.anthropic_mock.verify().await;
+    // update the expectation to 2 requests
+    harness
         .mock
         .anthropic_mock
-        .received_requests_for("POST", "/v1/messages")
-        .await
-        .expect("no requests received");
-    assert_eq!(received_requests.len(), 2);
+        .set_expectation("success:anthropic:messages", 2.into())
+        .await;
+
+    // test that using an openai model name works as well
+    let request_body = axum_core::body::Body::from(
+        serde_json::to_vec(&json!({
+            "model": "gpt-4o-mini",
+            "messages": [
+                {
+                    "role": "user",
+                    "content": "Hello, world!"
+                }
+            ]
+        }))
+        .unwrap(),
+    );
+    let request = Request::builder()
+        .method(Method::POST)
+        // default router
+        .uri("http://router.helicone.com/router/v1/chat/completions")
+        .body(request_body)
+        .unwrap();
+    let response = harness.call(request).await.unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+
+    // assert that the request was proxied to the mock server correctly
+    harness.mock.anthropic_mock.verify().await;
 }
 
 /// Sending a request to https://localhost/router should
@@ -158,7 +249,16 @@ async fn anthropic_request_style() {
         },
     )]));
     config.routers = router_config;
-    let mut harness = Harness::builder().with_config(config).build().await;
+    let mock_args = MockArgs::builder()
+        .stubs_in_scope(HashSet::from([
+            "success:openai:chat_completion".to_string()
+        ]))
+        .build();
+    let mut harness = Harness::builder()
+        .with_config(config)
+        .with_mock_args(mock_args)
+        .build()
+        .await;
     let request_body = axum_core::body::Body::from(
         serde_json::to_vec(&json!({
             "model": "gpt-4o-mini",
@@ -180,13 +280,5 @@ async fn anthropic_request_style() {
         .unwrap();
     let response = harness.call(request).await.unwrap();
     assert_eq!(response.status(), StatusCode::OK);
-
-    // assert that the request was proxied to the mock server correctly
-    let received_requests = harness
-        .mock
-        .openai_mock
-        .received_requests_for("POST", "/v1/chat/completions")
-        .await
-        .expect("no requests received");
-    assert_eq!(received_requests.len(), 1);
+    harness.mock.openai_mock.verify().await;
 }
