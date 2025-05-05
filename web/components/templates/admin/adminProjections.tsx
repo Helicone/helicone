@@ -1,26 +1,20 @@
-import React, { useState, useMemo, useEffect } from "react";
-import { useJawnClient } from "@/lib/clients/jawnHook";
+import { InvoiceTable, SortConfig } from "@/components/admin/InvoiceTable";
+import { RevenueChart } from "@/components/admin/RevenueChart";
 import {
-  MOCK_INVOICES,
   MOCK_DISCOUNTS,
+  MOCK_INVOICES,
   MOCK_UPCOMING_INVOICES,
 } from "@/components/layout/admin/mockStripeData";
-import type Stripe from "stripe";
 import {
+  InvoiceData,
+  MonthlyRevenueData,
   RawStripeData,
   RevenueCalculator,
-  MonthlyRevenueData,
-  InvoiceData,
 } from "@/lib/admin/RevenueCalculator";
-import {
-  getStripeLink,
-  truncateID,
-  formatCurrency,
-  formatMonthKey,
-} from "@/lib/uiUtils";
-import { RevenueChart } from "@/components/admin/RevenueChart";
-import { ArrowUp, ArrowDown } from "lucide-react";
-import { InvoiceTable, SortConfig } from "@/components/admin/InvoiceTable";
+import { useJawnClient } from "@/lib/clients/jawnHook";
+import { formatMonthKey } from "@/lib/uiUtils";
+import { useEffect, useMemo, useState } from "react";
+import type Stripe from "stripe";
 
 // Type for the API response
 interface SubscriptionDataResponse {

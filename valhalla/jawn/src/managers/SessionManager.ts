@@ -1,11 +1,13 @@
 import {
   SessionNameQueryParams,
   SessionQueryParams,
+  SessionMetricsQueryParams,
 } from "../controllers/public/sessionController";
 import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
 import { dbExecute } from "../lib/shared/db/dbExecute";
 import { filterListToTree, FilterNode } from "../lib/shared/filters/filterDefs";
 import { buildFilterWithAuthClickHouse } from "../lib/shared/filters/filters";
+import { TimeFilterMs } from "../lib/shared/filters/timeFilter";
 import { AuthParams } from "../packages/common/auth/types";
 import { err, ok, Result, resultMap } from "../packages/common/result";
 import { clickhousePriceCalc } from "../packages/cost";
@@ -48,10 +50,33 @@ export class SessionManager {
   constructor(private authParams: AuthParams) {}
 
   async getMetrics(
-    requestBody: SessionNameQueryParams
+    requestBody: SessionMetricsQueryParams
   ): Promise<Result<SessionMetrics, string>> {
-    const { nameContains, timezoneDifference, useInterquartile, pSize } =
-      requestBody;
+    const {
+      nameContains,
+      timezoneDifference,
+      useInterquartile,
+      pSize,
+      timeFilter,
+      filter,
+    } = requestBody;
+
+    const filters: FilterNode[] = [
+      ...(timeFilter ? timeFilterNodes(timeFilter) : []),
+      ...(filter ? [filter] : []),
+    ];
+
+    if (nameContains) {
+      filters.push({
+        request_response_rmt: {
+          properties: {
+            "Helicone-Session-Name": {
+              equals: nameContains,
+            },
+          },
+        },
+      });
+    }
 
     if (!isValidTimeZoneDifference(timezoneDifference)) {
       return err("Invalid timezone difference");
@@ -59,17 +84,7 @@ export class SessionManager {
 
     const builtFilter = await buildFilterWithAuthClickHouse({
       org_id: this.authParams.organizationId,
-      filter: nameContains
-        ? {
-            request_response_rmt: {
-              properties: {
-                "Helicone-Session-Name": {
-                  ilike: `%${nameContains}%`,
-                },
-              },
-            },
-          }
-        : "all",
+      filter: filterListToTree(filters, "and"),
       argsAcc: [],
     });
 
@@ -78,8 +93,8 @@ export class SessionManager {
         { key: "properties['Helicone-Session-Name']", alias: "session_name" },
         { key: "properties['Helicone-Session-Id']", alias: "session_id" },
       ],
-      pSize: requestBody.pSize ?? "p75",
-      useInterquartile: requestBody.useInterquartile ?? false,
+      pSize: pSize ?? "p75",
+      useInterquartile: useInterquartile ?? false,
       builtFilter,
       aggregateFunction: "count(*)",
     });
@@ -204,23 +219,7 @@ export class SessionManager {
       return err("Invalid timezone difference");
     }
 
-    const filters: FilterNode[] = [
-      {
-        request_response_rmt: {
-          request_created_at: {
-            gt: new Date(timeFilter.startTimeUnixMs),
-          },
-        },
-      },
-      {
-        request_response_rmt: {
-          request_created_at: {
-            lt: new Date(timeFilter.endTimeUnixMs),
-          },
-        },
-      },
-      filterTree,
-    ];
+    const filters: FilterNode[] = [...timeFilterNodes(timeFilter), filterTree];
 
     if (nameEquals) {
       filters.push({
@@ -353,3 +352,25 @@ export class SessionManager {
     }
   }
 }
+
+const timeFilterNodes = (timeFilter: TimeFilterMs): FilterNode[] => {
+  if (!timeFilter) {
+    return [];
+  }
+  return [
+    {
+      request_response_rmt: {
+        request_created_at: {
+          gt: new Date(timeFilter.startTimeUnixMs),
+        },
+      },
+    },
+    {
+      request_response_rmt: {
+        request_created_at: {
+          lt: new Date(timeFilter.endTimeUnixMs),
+        },
+      },
+    },
+  ];
+};
