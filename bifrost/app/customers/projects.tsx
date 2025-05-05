@@ -175,7 +175,7 @@ const projects: Project[] = [
 
 export function Projects() {
   return (
-    <div className="flex flex-col max-w-7xl mx-auto gap-8 py-16">
+    <div className="flex flex-col max-w-5xl mx-auto gap-8 py-16">
       <div className="relative w-full flex flex-col gap-4 items-center">
         <h2 className="text-3xl font-bold tracking-tight">
           Community Projects
@@ -231,7 +231,7 @@ export function Projects() {
                       {/* Make arrow appear on hover */}
                       <ArrowUpRight className="size-4 text-accent-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
                     </div>
-                    <p className="text-muted-foreground text-md font-normal leading-normal">
+                    <p className="text-muted-foreground text-sm font-normal leading-normal">
                       {'"'}
                       {project.usage}
                       {'"'}

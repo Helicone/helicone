@@ -1,6 +1,7 @@
 import { getMetadata } from "@/components/templates/customers/getMetaData";
 import Link from "next/link";
 import Image from "next/image";
+import { ChevronRight } from "lucide-react";
 
 interface CaseStudy {
   title: string;
@@ -20,9 +21,9 @@ type UnPromise<T> = T extends Promise<infer U> ? U : T;
 function metaDataToCaseStudyStructure(
   folderName: string,
   metadata: UnPromise<ReturnType<typeof getMetadata>>
-): CaseStudy {
+): Omit<CaseStudy, "dynamicEntry"> {
   if (!metadata) {
-    throw new Error("Metadata is null");
+    throw new Error(`Metadata is null for folder: ${folderName}`);
   }
   return {
     title: metadata.title,
@@ -31,74 +32,60 @@ function metaDataToCaseStudyStructure(
     url: metadata.url,
     customerSince: metadata.customerSince,
     isOpenSourced: metadata.isOpenSourced,
-    date: metadata?.date ?? "",
+    date: metadata?.date || "",
   };
 }
 
-export type CaseStudyStructure =
-  {
-    dynamicEntry: {
-      folderName: string;
-    };
+function formatCustomerSince(date: string) {
+  return new Date(date).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+  });
+}
+
+export type CaseStudyStructure = {
+  dynamicEntry: {
+    folderName: string;
   };
+};
 
 const caseStudies: CaseStudyStructure[] = [
-  {
-    dynamicEntry: {
-      folderName: "cogna",
-    },
-  },
-  {
-    dynamicEntry: {
-      folderName: "usetusk",
-    },
-  },
-  {
-    dynamicEntry: {
-      folderName: "wordware",
-    },
-  },
+  { dynamicEntry: { folderName: "cogna" } },
+  { dynamicEntry: { folderName: "usetusk" } },
+  { dynamicEntry: { folderName: "wordware" } },
 ];
 
 export async function CaseStudies() {
-  // Load metadata for all dynamic entries first
-  const dynamicMetadata = new Map();
-
-  for (const customer of caseStudies) {
-    if (customer.dynamicEntry) {
-      const metadata = await getMetadata(customer.dynamicEntry.folderName);
-      dynamicMetadata.set(customer.dynamicEntry.folderName, metadata);
-    }
-  }
-
-  // Transform caseStudies to include metadata
-  const customersWithMetadata = caseStudies.map(customer => {
-    const metadata = dynamicMetadata.get(customer.dynamicEntry.folderName);
-    return {
-      ...metaDataToCaseStudyStructure(customer.dynamicEntry.folderName, metadata),
-      dynamicEntry: customer.dynamicEntry // Keep the dynamicEntry for the key/href
-    };
-  });
+  const customersWithMetadata: CaseStudy[] = await Promise.all(
+    caseStudies.map(async ({ dynamicEntry }) => {
+      const metadata = await getMetadata(dynamicEntry.folderName);
+      return {
+        ...metaDataToCaseStudyStructure(dynamicEntry.folderName, metadata),
+        dynamicEntry,
+      };
+    })
+  );
 
   return (
-    <div className="w-full bg-gradient-to-b min-h-screen antialiased relative text-black">
-      <div className="relative w-full flex flex-col mx-auto max-w-7xl h-full py-8 md:py-12 items-center text-center px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-1 lg:gap-6">
+    <div className="w-full bg-gradient-to-b min-h-screen antialiased relative text-accent-foreground">
+      <div className="relative w-full flex flex-col mx-auto max-w-5xl h-full py-8 md:py-12 items-center text-center px-4 sm:px-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {customersWithMetadata.map((customer) => (
             <Link
               key={customer.dynamicEntry?.folderName}
               href={`/customers/${customer.dynamicEntry?.folderName}`}
-              className="flex flex-col gap-4 md:gap-6 p-2 md:p-4 w-full  hover:bg-sky-100 rounded-xl transition-all duration-300 text-left"
+              className="flex flex-col gap-2 p-4 sm:gap sm:p-2 w-full  hover:bg-sky-50 rounded-xl transition-all duration-300 text-left group"
             >
-              <div className="overflow-hidden rounded-xl relative group aspect-[16/9] w-full bg-slate-100 flex items-center justify-center">
+
+              {/* Logo */}
+              <div className="overflow-hidden rounded-xl relative group aspect-[16/9] w-full bg-slate-100 flex items-center justify-center group-hover:bg-sky-100 transition-all duration-300">
                 {customer.logo ? (
                   <Image
                     src={customer.logo}
                     alt={`${customer.title} logo`}
                     width={120}
-                    height={56}
-                    style={{ objectFit: "contain" }}
-                    className="object-contain transform group-hover:scale-105 transition-transform duration-300 max-h-full max-w-full grayscale group-hover:grayscale-0"
+                    height={64}
+                    className="object-contain transform group-hover:scale-110 transition-transform duration-300 max-h-full max-w-full grayscale group-hover:grayscale-0"
                   />
                 ) : (
                   <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500">
@@ -107,13 +94,18 @@ export async function CaseStudies() {
                 )}
               </div>
 
-              <div className="w-full h-fit flex flex-col space-y-2 px-2">
+              {/* Content */}
+              <div className="w-full h-fit flex flex-col gap-2 p-2">
                 <h2 className="font-bold text-lg leading-snug tracking-tight line-clamp-2">
                   {customer.title}
                 </h2>
-                <div className="flex items-center gap-2 text-slate-500 text-sm pt-2">
-                  <span>Customer since {new Date(customer.customerSince).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}</span>
-                </div>
+                <span className="text-muted-foreground text-sm">
+                  Customer since {formatCustomerSince(customer.customerSince)}
+                </span>
+                <span className="flex items-center text-accent-foreground text-sm font-medium pt-2">
+                  Read story
+                  <ChevronRight className="size-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
+                </span>
               </div>
             </Link>
           ))}
