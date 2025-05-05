@@ -103,7 +103,10 @@ const SessionDetails = ({
         />
       </TabsContent>
       <TabsContent value="metrics">
-        <SessionMetrics selectedSession={selectedSession} />
+        <SessionMetrics
+          selectedSession={selectedSession}
+          timeFilter={timeFilter}
+        />
       </TabsContent>
     </Col>
   );

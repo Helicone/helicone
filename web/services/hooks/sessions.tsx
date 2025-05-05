@@ -4,16 +4,14 @@ import { getJawnClient } from "../../lib/clients/jawn";
 import { useFilterAST } from "@/filterAST/context/filterContext";
 import { toFilterNode } from "@/filterAST/toFilterNode";
 import { FilterExpression } from "@/filterAST/filterAst";
+import { TimeFilter } from "@/types/timeFilter";
 
 const useSessions = ({
   timeFilter,
   sessionIdSearch,
   selectedName,
 }: {
-  timeFilter: {
-    start: Date;
-    end: Date;
-  };
+  timeFilter: TimeFilter;
   sessionIdSearch: string;
   selectedName?: string;
 }) => {
@@ -30,10 +28,7 @@ const useSessions = ({
     ],
     queryFn: async (query) => {
       const orgId = query.queryKey[1] as string;
-      const timeFilter = query.queryKey[2] as {
-        start: Date;
-        end: Date;
-      };
+      const timeFilter = query.queryKey[2] as TimeFilter;
 
       const sessionIdSearch = query.queryKey[3] as string;
       const nameEquals = query.queryKey[4] as string;
@@ -118,9 +113,11 @@ const useSessionNames = (sessionNameSearch: string) => {
 const useSessionMetrics = (
   sessionNameSearch: string,
   pSize: "p50" | "p75" | "p95" | "p99" | "p99.9",
-  useInterquartile: boolean
+  useInterquartile: boolean,
+  timeFilter: TimeFilter
 ) => {
   const org = useOrg();
+  const filterStore = useFilterAST();
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: [
       "session-metrics",
@@ -128,6 +125,8 @@ const useSessionMetrics = (
       sessionNameSearch,
       pSize,
       useInterquartile,
+      timeFilter,
+      filterStore.store.filter,
     ],
     queryFn: async (query) => {
       const orgId = query.queryKey[1] as string;
@@ -139,6 +138,8 @@ const useSessionMetrics = (
         | "p99"
         | "p99.9";
       const useInterquartile = query.queryKey[4] as boolean;
+      const timeFilter = query.queryKey[5] as TimeFilter;
+      const filter = query.queryKey[6] as FilterExpression;
       const timezoneDifference = new Date().getTimezoneOffset();
 
       const jawnClient = getJawnClient(orgId);
@@ -148,6 +149,11 @@ const useSessionMetrics = (
           timezoneDifference,
           pSize,
           useInterquartile,
+          timeFilter: {
+            endTimeUnixMs: timeFilter.end.getTime(),
+            startTimeUnixMs: timeFilter.start.getTime(),
+          },
+          filter: filter ? (toFilterNode(filter) as any) : "all",
         },
       });
       if (result.error || result.data.error) {
