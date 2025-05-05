@@ -6,7 +6,8 @@ export function generateAPIKeyHelper(
   organization_type: string,
   keyName: string,
   isEu: boolean,
-  governance: boolean
+  governance: boolean,
+  enableRateLimit?: boolean
 ) {
   const apiKeyPrefix = permission === "rw" ? "sk" : "pk";
 
@@ -14,7 +15,7 @@ export function generateAPIKeyHelper(
     organization_type === "customer" ? "" : "-helicone"
   }${isEu ? "-eu" : ""}${organization_type === "customer" ? "-cp" : ""}${
     governance ? "-gov" : ""
-  }-${generateApiKey({
+  }${enableRateLimit ? "-rl" : ""}-${generateApiKey({
     method: "base32",
     dashes: true,
   }).toString()}`.toLowerCase();

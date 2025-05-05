@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "@aws-crypto/sha256-js": "^5.2.0",
+    "@aws-sdk/client-sqs": "^3.799.0",
     "@clickhouse/client-common": "^0.2.1",
     "@clickhouse/client-web": "^0.2.2",
     "@cloudflare/itty-router-openapi": "^1.0.7",

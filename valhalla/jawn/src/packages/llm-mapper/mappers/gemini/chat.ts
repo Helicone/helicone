@@ -83,31 +83,59 @@ const getResponseText = (responseBody: any, statusCode: number = 200) => {
 
 const getRequestMessages = (contents: any[]): Message[] => {
   return contents
-    .map((content: any) => {
-      if (!content) return [];
+    .map((content: any): Message | null => {
+      if (!content) return null;
 
       const parts = Array.isArray(content.parts)
         ? content.parts
         : [content.parts].filter(Boolean);
 
-      // Find text and image parts
-      const textParts = parts.filter(
-        (part: any) => part && typeof part.text === "string"
-      );
-      const imagePart = parts.find(
-        (part: any) => part && part.inlineData?.data
-      );
+      if (parts.length === 0) return null;
 
-      return [
-        {
+      const mappedParts: Message[] = parts
+        .map((part: any): Message | null => {
+          if (!part) return null;
+
+          if (typeof part.text === "string") {
+            return {
+              _type: "message",
+              role: content.role || "user", // Role applied at part level for simplicity, will be overridden if contentArray
+              content: part.text,
+            };
+          } else if (part.inlineData?.data) {
+            // Assuming inlineData.data contains the base64 string
+            return {
+              // NOTE: Setting _type to "file" now as it could be image, pdf, etc.
+              // The UI will use mime_type to determine specific rendering.
+              _type: "file",
+              role: content.role || "user", // Role applied at part level
+              content: part.inlineData.data, // Store base64 here
+              mime_type: part.inlineData?.mime_type, // Corrected field name to snake_case
+            };
+          }
+          // Handle other potential part types like functionCall if needed later
+          return null;
+        })
+        .filter((part: Message | null): part is Message => part !== null);
+
+      if (mappedParts.length === 0) {
+        return null; // No mappable parts found
+      } else if (mappedParts.length === 1) {
+        // If only one part, return it directly, keeping its original _type and role
+        return mappedParts[0];
+      } else {
+        // If multiple parts (e.g., text + image), create a contentArray
+        return {
+          _type: "contentArray",
           role: content.role || "user",
-          content: textParts.map((part: any) => part.text).join(" "),
-          _type: (imagePart ? "image" : "message") as "image" | "message",
-          image_url: imagePart?.inlineData?.data,
-        },
-      ];
+          contentArray: mappedParts.map((part: Message) => ({
+            ...part,
+            role: undefined, // Role is defined on the parent contentArray message
+          })),
+        };
+      }
     })
-    .flat();
+    .filter((message): message is Message => message !== null);
 };
 
 export const mapGeminiPro: MapperFn<any, any> = ({
@@ -128,7 +156,21 @@ export const mapGeminiPro: MapperFn<any, any> = ({
       ? response.modelVersion
       : model;
 
-  const requestMessages = getRequestMessages(messages);
+  // Extract system instruction
+  const systemInstructionText = request?.systemInstruction?.parts?.[0]?.text;
+  const systemMessage: Message | null = systemInstructionText
+    ? {
+        _type: "message",
+        role: "system",
+        content: systemInstructionText,
+      }
+    : null;
+
+  const userMessages = getRequestMessages(messages);
+
+  const requestMessages = systemMessage
+    ? [systemMessage, ...userMessages]
+    : userMessages;
 
   response = Array.isArray(response) ? response : [response].filter(Boolean);
 

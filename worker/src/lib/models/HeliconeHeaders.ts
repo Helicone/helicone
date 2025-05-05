@@ -1,4 +1,5 @@
 import { Headers } from "@cloudflare/workers-types";
+import { HELICONE_RATE_LIMITED_API_KEY_REGEX } from "../util/apiKeyRegex";
 
 type Nullable<T> = T | null;
 
@@ -10,6 +11,8 @@ export type HeliconeFallback = {
   onCodes: HeliconeFallbackCode[];
   bodyKeyOverride?: object;
 };
+
+export type HeliconeBearerKeyType = "standard" | "rate-limited";
 
 export interface IHeliconeHeaders {
   heliconeAuth: Nullable<string>;
@@ -77,6 +80,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     _type: "jwt" | "bearer";
     token: string;
     orgId?: string;
+    keyType?: HeliconeBearerKeyType;
   }>;
   rateLimitPolicy: Nullable<string>;
   featureFlags: {
@@ -225,6 +229,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     _type: "jwt" | "bearer";
     token: string;
     orgId?: string;
+    keyType?: HeliconeBearerKeyType;
   }> {
     const heliconeAuth = this.headers.get("helicone-auth");
 
@@ -232,6 +237,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       return {
         _type: "bearer",
         token: heliconeAuth,
+        keyType: this.determineBearerKeyType(heliconeAuth),
       };
     }
     const heliconeAuthFallback = this.headers.get("authorization");
@@ -239,6 +245,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       return {
         _type: "bearer",
         token: heliconeAuthFallback,
+        keyType: this.determineBearerKeyType(heliconeAuthFallback),
       };
     }
     const heliconeAuthJWT = this.headers.get("helicone-jwt");
@@ -250,6 +257,23 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       };
     }
     return null;
+  }
+
+  determineBearerKeyType(bearerKey: string): HeliconeBearerKeyType {
+    try {
+      const key = bearerKey.replace("Bearer ", "").trim();
+
+      if (
+        HELICONE_RATE_LIMITED_API_KEY_REGEX.some((pattern) => pattern.test(key))
+      ) {
+        return "rate-limited";
+      }
+
+      return "standard";
+    } catch (e) {
+      console.error(`Error determining bearer key type: ${e}`);
+      return "standard";
+    }
   }
 
   setModelOverride(modelOverride: string | null) {

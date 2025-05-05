@@ -1,0 +1,262 @@
+In today's AI-driven landscape, learning how to effectively track LLM user feedback is crucial for improving performance and driving higher user satisfaction. 
+
+Every user interaction provides valuable insights that can help you refine your AI's responses to better serve your customers' needs.
+
+![Tracking User Feedback to Improve LLM Applications with Custom Properties](/static/blog/custom-properties/cover.webp)
+
+In this article, we will show you how to use LLM feedback tracking tools like Helicone to collect, analyze, and implement user feedback for continuous improvement of your AI applications.
+
+## Table of Contents
+
+## Why is Tracking User Feedback Critical for LLM Applications?
+
+Creating a continuous user feedback loop is essential for any successful software application. This applies to LLM applications as well. 
+
+Collecting LLM user feedback creates a virtuous cycle of improvement through five critical stages:
+
+1. **User Interaction** - Users engage with your LLM application
+2. **Feedback Collection** - You gather structured data on response quality. 
+3. **Pattern Analysis** - You identify trends and opportunities for improvement
+4. **Dataset Creation** - You create specialized training datasets based on feedback
+5. **Prompt Optimization** - You fine-tune your models or update your prompts accordingly
+
+This systematic approach is useful for building better AI products while reducing costs associated with poor user experiences. 
+
+A <a href="https://arxiv.org/html/2504.05522v2" target="_blank" rel="noopener">study published by Google DeepMind</a> in April 2024 showed that aligning LLM outputs with user feedback led to a significant increase in positive user interactions, as evidenced by a larger positive playback rate gain. 
+
+Other studies also showed that incorporating user feedback into LLM application development leads to more efficient customer service operations. For example, Gorgias reported a <a href="https://www.gorgias.com/blog/automation-impact-on-cx-data" target="_blank" rel="noopener">52% faster resolution</a> of support tickets. Meanwhile, KPMG's Global CEE Report 2023-24 reported a <a href="https://assets.kpmg.com/content/dam/kpmg/nl/pdf/2024/services/global-cee-report-2023-24.pdf" target="_blank" rel="noopener">30% reduction in operational costs</a>.
+
+## The Feedback Collection Framework 
+
+Helicone, an open-source observability platform for LLM applications, provides several powerful methods to gather, organize, and analyze user feedback for your LLM applications.
+
+### Method 1: Implementing the Feedback API
+
+The most direct way to log user feedback is through Helicone's dedicated Feedback API:
+
+```python
+import requests
+
+# First, make your LLM call
+response = client.chat.completions.create(
+    model="gpt-4",
+    messages=[{"role": "user", "content": "Write a short poem about AI"}],
+    extra_headers={
+        "Helicone-Auth": f"Bearer {HELICONE_API_KEY}"
+    }
+)
+
+# Get the Helicone request ID
+helicone_id = response.response.headers.get("helicone-id")
+
+# Log user feedback (true for positive, false for negative)
+
+feedback_url = f"https://api.helicone.ai/v1/request/{helicone_id}/feedback"
+headers = {
+    "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+    "Content-Type": "application/json"
+}
+data = {
+    "rating": True  # True for positive, False for negative
+}
+
+requests.post(feedback_url, headers=headers, json=data)
+```
+
+This approach allows you to capture binary feedback (positive/negative) that's directly tied to specific LLM interactions, creating a clear connection between user sentiment and actual LLM responses.
+
+### Method 2: Using Custom Properties
+
+For more nuanced feedback collection, Helicone's <a href="https://docs.helicone.ai/features/advanced-usage/custom-properties" target="_blank" rel="noopener">custom properties</a> allows you to attach custom metadata to your LLM requests. 
+
+Simply add a Helicone auth-header, then a header for each custom property you want to track:
+
+```python
+client.chat.completions.create(
+    model="gpt-4",
+    messages=[{"role": "user", "content": "Write a product description for a coffee maker"}],
+    extra_headers={
+        "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+        "Helicone-Property-Feedback-Rating": "4",  # On a scale of 1-5
+        "Helicone-Property-Feedback-Comment": "Good but too lengthy",
+        "Helicone-Property-User-Type": "content-marketer"
+    }
+)
+```
+
+Custom properties help you:
+
+- **Capture numeric ratings** beyond binary feedback
+- **Include qualitative feedback comments**
+- **Segment feedback** by user types, features, or use cases
+- **Track performance across different environments** (development, staging, production)
+
+### Method 3: Advanced User Metrics Tracking
+
+To go one step further, you can monitor your users' interactions with your AI models to gain deeper insights into usage patterns and their satisfaction levels. 
+
+Tracking user metrics in Helicone is similar to tracking custom properties. Simply add a Helicone auth-header (if you haven't already), then the header `helicone-user-id: <user_id>` for the user you want to track. 
+
+```python
+client.chat.completions.create(
+    model="gpt-4",
+    messages=[{"role": "user", "content": "Summarize this article about AI trends"}],
+    extra_headers={
+        "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+        "Helicone-User-Id": "user_12345"  # Associate request with specific user
+    }
+)
+```
+
+By tracking <a href="https://docs.helicone.ai/features/advanced-usage/user-metrics" target="_blank" rel="noopener">user metrics</a>, you can:
+
+- **Analyze per-user request volumes and frequencies**
+- **Track costs** associated with individual users
+- **Identify power users** and their behavior patterns
+- **Detect usage anomalies** that might indicate problems
+- **Correlate feedback with usage intensity**
+
+This user-level data provides you with the **context and granularity** to interpret the feedback collected and prioritize improvements that benefit your most valuable users.
+
+<BottomLine
+  title="Pro Tip 💡"
+  description="By combining multiple custom properties, you can create a rich feedback dataset. For example, setting up three custom properties - user role, feature used, and satisfaction rating - gives you powerful insights into which features work best for different user segments."
+/>
+
+## Turning User Feedback into Training Datasets
+
+Once you've collected sufficient feedback, you now have valuable training data for improving your LLM applications. Let's look at how: 
+
+### Step 1: Filtering and Exporting Your Feedback Data
+
+First, filter your LLM request data based on factors such as:
+
+- Positive vs. negative feedback
+- Specific feature usage
+- User segments
+- Time periods
+
+This specialized dataset represents real-world interactions, which can now be exported from Helicone's dashboard or API to drive meaningful, targeted improvements.
+
+### Step 2: Identifying Actionable Insights
+
+With data in hand, analyze your feedback data to identify:
+
+- Common pain points or issues associated with negative feedback
+- Highly successful interactions from positive feedback
+- How performance varies across different user segments
+- Feature-specific feedback patterns
+
+The goal is to discover actionable insights that can guide very specific optimization efforts.
+
+### Step 3: Creating Specialized Training Datasets
+
+Based on your analysis, create specialized datasets tailored to your specific improvement goals.
+
+Here's a video on how to create a dataset using Helicone's UI - you can also create a dataset programmatically for more advanced use cases.
+
+<video width="100%" controls autoplay loop>
+  <source
+    src="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/dataset-creation-helicone.mp4"
+    type="video/mp4"
+  />
+  Your browser does not support the video tag.
+</video>
+
+## Success Stories
+
+### Journalist AI: Subscription-Based Feedback Segmentation
+
+![Journalist AI](/static/blog/custom-properties/journalist-ai-banner.webp)
+
+<a href="https://tryjournalist.com/" target="_blank" rel="noopener noreferrer">Journalist AI</a> is a platform that automates content creation for writers. They use Custom Properties to segment feedback by subscription plan.
+
+Their feedback collection strategy helps them:
+
+- **Compare content satisfaction** between free and paid users
+- **Identify which features drive paid subscriptions**
+- **Track costs-to-value ratio** for different user tiers
+- **Target marketing efforts** for high-value features
+
+This approach has allowed them to increase their premium conversion rate by 22% in just three months.
+
+### Greptile: Repository-Specific Performance Tracking
+
+<a href="https://www.greptile.com/" target="_blank" rel="noopener noreferrer">Greptile</a> helps users search and analyze text data from various sources. They use custom properties to track feedback by repository:
+
+![Greptile](/static/blog/custom-properties/greptile-banner.webp)
+
+This strategic approach allows them to:
+
+- **Measure satisfaction with results** from different data sources
+- **Track performance metrics** (latency, costs) by repository
+- **Identify which repositories need quality improvements**
+- **Understand user search patterns** across data sources
+
+Since implementing repository-specific tracking, they've been able to optimize their system for specific data sources, improving both response quality and speed.
+
+## Implementation Best Practices
+
+To maximize the value of your feedback collection:
+
+1. **Be consistent with property naming** - Use standardized naming conventions for Custom Properties
+2. **Collect feedback at the right time** - Ask for feedback immediately after users interact with AI responses when the experience is fresh
+3. **Keep the feedback process simple** - High completion rates come from easy, frictionless feedback mechanisms
+4. **Balance quantitative and qualitative data** - Numbers tell you what's happening; comments tell you why
+5. **Acknowledge and reward user contributions** - Let users know when their feedback has led to specific improvements
+
+Going beyond feedback collection? We recommend reading <a href="https://www.helicone.ai/blog/implementing-llm-observability-with-helicone" target="_blank" rel="noopener">how to implement LLM observability for production</a>.
+
+<CallToAction
+  title="Turn User Feedback Into Tangible LLM Improvements ⚡️"
+  description="Stop guessing what users want. Find out what's working, what's failing, and where to focus development efforts with Helicone's user response tracking and feedback tooling."
+  primaryButtonText="Collect Feedback Today"
+  primaryButtonLink="https://helicone.ai/signup"
+  secondaryButtonText="View Docs"
+  secondaryButtonLink="https://docs.helicone.ai/features/advanced-usage/feedback"
+/>
+
+## Useful Resources
+
+- <a
+    href="https://docs.helicone.ai/features/advanced-usage/custom-properties"
+    target="_blank"
+    rel="noopener"
+  >
+    Doc: Setting up Custom Properties
+  </a>
+- <a
+    href="https://docs.helicone.ai/use-cases/segmentation"
+    target="_blank"
+    rel="noopener"
+  >
+    Doc: Using Custom Properties for Segmentation
+  </a>
+- <a
+    href="https://www.helicone.ai/blog/implementing-llm-observability-with-helicone"
+    target="_blank"
+    rel="noopener"
+  >
+    How to Implement LLM Observability for Production with Helicone
+  </a>
+
+<FAQ
+  items={[
+    {
+      question:
+        "What's the difference between the Feedback API and Custom Properties?",
+      answer:
+        "The Feedback API provides a structured way to collect binary feedback (positive/negative) linked directly to specific requests. Custom Properties offer more flexibility, allowing you to attach any metadata including numeric ratings, comments, user segments, and more to your LLM requests.",
+    },
+    {
+      question: "Can I update feedback after it's been submitted?",
+      answer:
+        "Yes! You can update feedback for a request by making a PUT request to the feedback endpoint with the request ID and your updated rating or by updating Custom Properties post-request.",
+    },
+    {
+      question: "How can I export feedback data for analysis?",
+      answer:
+        "Helicone provides export options through both the dashboard UI and API. You can export filtered data in CSV or JSON formats for further analysis in your preferred tools.",
+    },
+  ]}
+/>
