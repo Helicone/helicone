@@ -35,6 +35,7 @@ services:
       args:
         NEXT_PUBLIC_HELICONE_JAWN_SERVICE: ${JAWN_PUBLIC_URL}
         NEXT_PUBLIC_BETTER_AUTH: "true"
+        NODE_ENV: development
     ports:
       - 3000:3000
     volumes:
@@ -53,6 +54,7 @@ services:
       NEXT_PUBLIC_BETTER_AUTH: "true"
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
       SMTP_SECURE: false
+      NODE_ENV: development
 
   db:
     image: postgres:17.4 # You can choose a specific version
