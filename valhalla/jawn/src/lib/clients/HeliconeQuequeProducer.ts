@@ -20,8 +20,11 @@ class MessageProducerFactory {
       return new DualWriteProducer(new KafkaProducer(), new SQSProducer());
     } else if (queueProvider === "sqs") {
       return new SQSProducer();
+    } else if (queueProvider === "kafka") {
+      return new KafkaProducer();
     }
-    return new KafkaProducer();
+
+    return null;
   }
 }
 
