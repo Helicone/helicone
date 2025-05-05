@@ -28,135 +28,6 @@ interface AuthFormProps {
   customerPortalContent?: CustomerPortalContent;
 }
 
-// Define background style options
-type BackgroundStyle = {
-  gradient: string;
-  pattern: React.ReactNode;
-  accentColor: string;
-};
-
-const backgroundStyles: BackgroundStyle[] = [
-  {
-    gradient: "bg-gradient-to-br from-slate-500 to-slate-300",
-    pattern: (
-      <svg className="h-full w-full" aria-hidden="true">
-        <defs>
-          <pattern
-            id="grid-pattern-1"
-            width={25}
-            height={25}
-            patternUnits="userSpaceOnUse"
-          >
-            <path d="M25 0V25M0 25H25" fill="none" stroke="white" />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#grid-pattern-1)" />
-      </svg>
-    ),
-    accentColor: "text-blue-600 hover:text-blue-800",
-  },
-  {
-    gradient: "bg-gradient-to-br from-purple-500 to-pink-500",
-    pattern: (
-      <svg className="h-full w-full" aria-hidden="true">
-        <defs>
-          <pattern
-            id="grid-pattern-2"
-            width={20}
-            height={20}
-            patternUnits="userSpaceOnUse"
-          >
-            <circle cx="10" cy="10" r="2" fill="white" />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#grid-pattern-2)" />
-      </svg>
-    ),
-    accentColor: "text-purple-600 hover:text-purple-800",
-  },
-  {
-    gradient: "bg-gradient-to-br from-emerald-500 to-teal-400",
-    pattern: (
-      <svg className="h-full w-full" aria-hidden="true">
-        <defs>
-          <pattern
-            id="grid-pattern-3"
-            width={30}
-            height={30}
-            patternUnits="userSpaceOnUse"
-          >
-            <path
-              d="M15 0L30 15L15 30L0 15Z"
-              fill="none"
-              stroke="white"
-              strokeWidth="1"
-            />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#grid-pattern-3)" />
-      </svg>
-    ),
-    accentColor: "text-emerald-600 hover:text-emerald-800",
-  },
-  {
-    gradient: "bg-gradient-to-br from-indigo-600 to-blue-400",
-    pattern: (
-      <svg className="h-full w-full" aria-hidden="true">
-        <defs>
-          <pattern
-            id="grid-pattern-4"
-            width={40}
-            height={40}
-            patternUnits="userSpaceOnUse"
-          >
-            <path
-              d="M0 20H40M20 0V40"
-              fill="none"
-              stroke="white"
-              strokeWidth="0.5"
-            />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#grid-pattern-4)" />
-      </svg>
-    ),
-    accentColor: "text-indigo-600 hover:text-indigo-800",
-  },
-  {
-    gradient: "bg-gradient-to-br from-rose-500 to-orange-400",
-    pattern: (
-      <svg className="h-full w-full" aria-hidden="true">
-        <defs>
-          <pattern
-            id="grid-pattern-5"
-            width={35}
-            height={35}
-            patternUnits="userSpaceOnUse"
-          >
-            <rect
-              width="35"
-              height="35"
-              fill="none"
-              stroke="white"
-              strokeWidth="0.5"
-            />
-            <circle
-              cx="17.5"
-              cy="17.5"
-              r="5"
-              fill="none"
-              stroke="white"
-              strokeWidth="0.5"
-            />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#grid-pattern-5)" />
-      </svg>
-    ),
-    accentColor: "text-rose-600 hover:text-rose-800",
-  },
-];
-
 const AuthForm = (props: AuthFormProps) => {
   const {
     handleEmailSubmit,
@@ -167,9 +38,6 @@ const AuthForm = (props: AuthFormProps) => {
   } = props;
 
   const [acceptedTerms, setAcceptedTerms] = useState(false);
-  const [selectedBackground, setSelectedBackground] = useState<BackgroundStyle>(
-    backgroundStyles[0]
-  );
 
   // Array of images to randomly select from
   const centerImages = [
@@ -280,9 +148,6 @@ const AuthForm = (props: AuthFormProps) => {
 
       await Promise.all([...imagePromises, ...quoteImagePromises]);
 
-      const randomBgIndex = Math.floor(Math.random() * backgroundStyles.length);
-      setSelectedBackground(backgroundStyles[randomBgIndex]);
-
       const randomImgIndex = Math.floor(Math.random() * centerImages.length);
       setSelectedImage(centerImages[randomImgIndex]);
 
@@ -392,11 +257,6 @@ const AuthForm = (props: AuthFormProps) => {
           </div>
         </div>
 
-        {/* Decorative pattern */}
-        <div className="absolute inset-0 opacity-10">
-          {selectedBackground.pattern}
-        </div>
-
         {/* Center Image - Only shown when showQuote is false */}
         {!showQuote && isContentLoaded && (
           <div className="absolute inset-0 z-10 transition-opacity duration-300">
@@ -491,16 +351,19 @@ const AuthForm = (props: AuthFormProps) => {
                 Already have an account?{" "}
                 <Link
                   href={"/signin"}
-                  className={selectedBackground.accentColor}
+                  className="text-sky-500 hover:text-sky-700"
                 >
                   Sign in here.
                 </Link>
               </p>
             ) : (
               <p className="mt-2 text-sm text-gray-600">
-                Don&apos;t have an account?{" "}
-                <Link href={"/signup"} className={"text-sky-500"}>
-                  Sign up here.
+                New to Helicone?{" "}
+                <Link
+                  href={"/signup"}
+                  className="text-sky-500 hover:text-sky-700"
+                >
+                  Create an account here.
                 </Link>
               </p>
             )}
@@ -583,18 +446,18 @@ const AuthForm = (props: AuthFormProps) => {
                     setAcceptedTerms(checked as boolean)
                   }
                 />
-                <label htmlFor="terms" className="text-xs text-gray-600">
+                <label htmlFor="terms" className="text-sm text-gray-600">
                   I accept the{" "}
                   <Link
                     href={"/terms"}
-                    className={selectedBackground.accentColor}
+                    className="text-sky-500 hover:text-sky-700"
                   >
                     Terms of Service
                   </Link>{" "}
                   and{" "}
                   <Link
                     href={"/privacy"}
-                    className={selectedBackground.accentColor}
+                    className="text-sky-500 hover:text-sky-700"
                   >
                     Privacy Policy
                   </Link>
@@ -605,7 +468,10 @@ const AuthForm = (props: AuthFormProps) => {
 
             {authFormType === "signin" && (
               <div className="flex justify-end">
-                <Link href={"/reset"} className={"text-sky-500 text-sm"}>
+                <Link
+                  href={"/reset"}
+                  className="text-sky-500 hover:text-sky-700 text-sm"
+                >
                   Forgot your password?
                 </Link>
               </div>
