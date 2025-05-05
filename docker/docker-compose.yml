@@ -26,6 +26,8 @@ services:
           "CLICKHOUSE_PASSWORD": "${CLICKHOUSE_PASSWORD}"
         }
       VERCEL_ENV: ${VERCEL_ENV}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      SUPABASE_DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
 
   web:
     container_name: helicone-web-local
