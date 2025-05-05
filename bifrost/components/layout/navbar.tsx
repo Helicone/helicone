@@ -473,11 +473,11 @@ const NavBar = (props: NavBarProps) => {
               target="_blank"
               rel="noreferrer"
             >
-              <Button variant="ghost" className="gap-x-2 rounded-lg">
+              <Button variant="outline" className="gap-x-2 rounded-lg">
                 <svg
                   fill="currentColor"
                   viewBox="0 0 24 24"
-                  className="w-5 h-5 text-accent-foreground"
+                  className="w-5 h-5 text-foreground"
                 >
                   <path
                     fillRule="evenodd"
@@ -485,7 +485,7 @@ const NavBar = (props: NavBarProps) => {
                     clipRule="evenodd"
                   />
                 </svg>
-                <p className="text-sm text-accent-foreground">
+                <p className="text-sm text-foreground">
                   {props.stars
                     ? props.stars.toLocaleString("en-US", {
                       notation: "compact",
@@ -495,25 +495,16 @@ const NavBar = (props: NavBarProps) => {
                 </p>
               </Button>
             </a>
-            <Link href="/signin">
-              <Button
-                variant="secondary"
-                className="text-sm rounded-lg"
-              >
-                Log in
-              </Button>
-            </Link>
-
             <Link href="/contact">
               <Button
-                variant="outline"
-                className="text-sm rounded-lg">
+                variant="secondary"
+                className="text-sm text-secondary-foreground rounded-lg">
                 Contact us
               </Button>
             </Link>
-            <Link href="/signup">
-              <Button className="text-sm rounded-lg bg-brand">
-                Sign up
+            <Link href="https://us.helicone.ai/signin">
+              <Button className="text-sm text-primary-foreground rounded-lg bg-brand">
+                Log In
               </Button>
             </Link>
           </div>
@@ -557,4 +548,3 @@ ListItem.displayName = "ListItem"
 
 
 export default NavBar;
-
