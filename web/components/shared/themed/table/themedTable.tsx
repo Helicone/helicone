@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { UIFilterRowTree } from "@/services/lib/filters/types";
@@ -8,13 +9,17 @@ import {
 } from "@heroicons/react/24/outline";
 import {
   ColumnDef,
+  ExpandedState,
   flexRender,
   getCoreRowModel,
+  getExpandedRowModel,
+  Table as ReactTable,
+  Row,
   useReactTable,
 } from "@tanstack/react-table";
+import { ChevronDown, ChevronRight, ChevronsUpDown } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { Result } from "../../../../packages/common/result";
 import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
@@ -24,11 +29,10 @@ import { clsx } from "../../clsx";
 import LoadingAnimation from "../../loadingAnimation";
 import { DragColumnItem } from "./columns/DragList";
 import DraggableColumnHeader from "./columns/draggableColumnHeader";
-import useShiftKeyPress from "@/services/hooks/isShiftPressed";
 
 type CheckboxMode = "always_visible" | "on_hover" | "never";
 
-interface ThemedTableProps<T extends { id?: string }> {
+interface ThemedTableProps<T extends { id?: string; subRows?: T[] }> {
   id: string;
   defaultData: T[];
   defaultColumns: ColumnDef<T>[];
@@ -94,51 +98,50 @@ interface ThemedTableProps<T extends { id?: string }> {
   };
   rowLink?: (row: T) => string;
   showFilters?: boolean;
+  /**
+   * Callback function to trigger toggling the expansion state of all rows.
+   * Receives the table instance.
+   */
+  onToggleAllRows?: (table: ReactTable<T>) => void;
 }
-export default function ThemedTable<T extends { id?: string }>(
+
+export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
   props: ThemedTableProps<T>
 ) {
   const {
-    id,
     defaultData,
     defaultColumns,
     skeletonLoading,
     dataLoading,
     activeColumns,
-    setActiveColumns,
-    advancedFilters,
-    exportData,
-    timeFilter,
     sortable,
     onRowSelect,
-    hideHeader,
     noDataCTA,
-    onDataSet: onDataSet,
-    savedFilters,
     highlightedIds: checkedIds,
     checkboxMode = "never",
-    customButtons,
     children,
     onSelectAll,
     selectedIds,
-    selectedRows,
     fullWidth = false,
-    isDatasetsPage,
-    search,
     rowLink,
     tableRef,
+    onToggleAllRows,
   } = props;
 
-  const isShiftPressed = useShiftKeyPress();
+  const [expanded, setExpanded] = React.useState<ExpandedState>({});
 
   const table = useReactTable({
     data: defaultData,
     columns: defaultColumns,
     columnResizeMode: "onChange",
+    getSubRows: (row) => row.subRows,
     getCoreRowModel: getCoreRowModel(),
+    getExpandedRowModel: getExpandedRowModel(),
     state: {
       columnOrder: activeColumns.map((column) => column.id),
+      expanded,
     },
+    onExpandedChange: setExpanded,
   });
 
   if (tableRef) {
@@ -147,6 +150,29 @@ export default function ThemedTable<T extends { id?: string }>(
 
   const rows = table.getRowModel().rows;
   const columns = table.getAllColumns();
+
+  const topLevelPathColorMap = useMemo(() => {
+    const chartColors = [
+      "bg-chart-1",
+      "bg-chart-2",
+      "bg-chart-3",
+      "bg-chart-4",
+      "bg-chart-5",
+    ];
+    const map: Record<string, string> = {};
+    let colorIndex = 0;
+
+    rows.forEach((row) => {
+      if (row.depth === 0) {
+        const path = (row.original as any)?.path as string;
+        if (path && !(path in map)) {
+          map[path] = chartColors[colorIndex % chartColors.length];
+          colorIndex++;
+        }
+      }
+    });
+    return map;
+  }, [rows]);
 
   useEffect(() => {
     const columnVisibility: { [key: string]: boolean } = {};
@@ -168,21 +194,6 @@ export default function ThemedTable<T extends { id?: string }>(
   const handleRowSelect = (row: T, index: number, event: React.MouseEvent) => {
     onRowSelect?.(row, index, event);
   };
-
-  const [isPanelVisible, setIsPanelVisible] = useState(false);
-
-  const sessionData = useMemo(() => {
-    if (rows.length === 0) {
-      return undefined;
-    }
-    // @ts-ignore
-    const sessionId = rows[0].original?.customProperties?.[
-      "Helicone-Session-Id"
-    ] as string | undefined;
-    return { sessionId };
-  }, [rows]);
-
-  const router = useRouter();
 
   return (
     <ScrollArea className="h-full w-full sentry-mask-me" orientation="both">
@@ -212,15 +223,15 @@ export default function ThemedTable<T extends { id?: string }>(
               width: fullWidth ? "100%" : table.getCenterTotalSize(),
             }}
           >
-            <thead className="text-[12px] h-11">
+            <thead className="text-[12px]">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr
                   key={headerGroup.id}
-                  className="sticky top-0 bg-slate-50 dark:bg-slate-950 z-[2]"
+                  className="sticky top-0 bg-slate-50 dark:bg-slate-950 z-[2] h-11"
                 >
                   {checkboxMode !== "never" && (
                     <th>
-                      <div className="flex justify-center items-center h-full">
+                      <div className="flex justify-center items-center h-full ml-2">
                         <Checkbox
                           variant="helicone"
                           onCheckedChange={handleSelectAll}
@@ -249,6 +260,19 @@ export default function ThemedTable<T extends { id?: string }>(
                           "border-r border-slate-300 dark:border-slate-700"
                       )}
                     >
+                      {index === 0 && onToggleAllRows !== undefined && (
+                        <div className="absolute left-1 top-1/2 -translate-y-1/2 z-10">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => onToggleAllRows(table)}
+                            className="h-6 w-6"
+                            aria-label={"Toggle expand all rows"}
+                          >
+                            <ChevronsUpDown className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
                       <DraggableColumnHeader
                         header={header}
                         sortable={sortable}
@@ -267,22 +291,44 @@ export default function ThemedTable<T extends { id?: string }>(
             <tbody className="text-[13px] divide-y divide-border">
               {rows.map((row, index) => (
                 <tr
-                  key={row.original?.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  onClick={(e) => handleRowSelect(row.original, index, e)}
+                  key={row.id}
                   className={clsx(
-                    isShiftPressed && "select-none",
-                    (checkedIds?.includes(row.original?.id ?? "") ||
-                      selectedIds?.includes(row.original?.id ?? "")) &&
-                      "bg-sky-50 dark:bg-sky-950",
-                    checkboxMode === "on_hover"
-                      ? "cursor-pointer group"
-                      : "cursor-default"
+                    "group relative",
+                    rowLink && "relative",
+                    checkedIds?.includes(row.original?.id ?? "") ||
+                      selectedIds?.includes(row.original?.id ?? "")
+                      ? "!bg-sky-100 dark:!bg-slate-800/50"
+                      : clsx(
+                          "hover:bg-sky-50 dark:hover:bg-slate-700/50",
+                          row.getCanExpand()
+                            ? "font-semibold cursor-pointer bg-muted"
+                            : row.depth > 0
+                            ? "bg-slate-50 dark:bg-slate-950/50"
+                            : "bg-white dark:bg-black"
+                        )
                   )}
+                  onClick={(e: React.MouseEvent) => {
+                    if (row.getCanExpand()) {
+                      if (
+                        e.target instanceof HTMLElement &&
+                        e.target.closest('a, button, input[type="checkbox"]')
+                      ) {
+                        return;
+                      }
+                      row.getToggleExpandedHandler()();
+                    } else if (onRowSelect) {
+                      handleRowSelect(row.original, index, e);
+                    }
+                  }}
                 >
                   <td
                     className={clsx(
-                      "w-8 h-full px-2",
+                      "h-full sticky left-0 z-10",
+                      row.getCanExpand()
+                        ? "bg-inherit"
+                        : row.depth > 0
+                        ? "bg-slate-50 dark:bg-slate-950/50"
+                        : "bg-white dark:bg-black",
                       checkboxMode === "on_hover"
                         ? clsx(
                             "opacity-0 group-hover:opacity-100 transition-opacity duration-150",
@@ -303,48 +349,117 @@ export default function ThemedTable<T extends { id?: string }>(
                   </td>
                   {row.getVisibleCells().map((cell, i) => (
                     <td
-                      key={i}
+                      key={cell.id}
                       className={clsx(
-                        "py-3 px-2 text-slate-700 dark:text-slate-300",
-                        i === 0 && checkboxMode === "always_visible" && "pl-2",
-                        i === 0 && checkboxMode === "on_hover" && "pl-2",
-                        i === 0 && checkboxMode === "never" && "pl-10",
-                        // For selected rows in hover mode
-                        i === 0 &&
-                          checkboxMode === "on_hover" &&
-                          selectedIds?.includes(row.original?.id ?? "") &&
-                          "!pl-2",
+                        "py-3 text-slate-700 dark:text-slate-300 truncate select-none",
+                        i === 0 && "pr-2",
+                        i > 0 && "px-2",
+                        i === 0 && "relative",
+                        checkedIds?.includes(row.original?.id ?? "") ||
+                          selectedIds?.includes(row.original?.id ?? "")
+                          ? "bg-inherit"
+                          : row.getCanExpand()
+                          ? "bg-inherit"
+                          : row.depth > 0
+                          ? "bg-slate-50 dark:bg-slate-950/50"
+                          : "bg-white dark:bg-black",
                         i === row.getVisibleCells().length - 1 &&
-                          "pr-10 border-r border-border"
+                          "border-r border-border"
                       )}
                       style={{
                         maxWidth: cell.column.getSize(),
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
                       }}
                     >
-                      {dataLoading &&
-                      (cell.column.id == "requestText" ||
-                        cell.column.id == "responseText") ? (
-                        <span
-                          className={clsx(
-                            "w-full flex flex-grow",
-                            (cell.column.id == "requestText" ||
-                              cell.column.id == "responseText") &&
-                              dataLoading
-                              ? "animate-pulse bg-slate-200 rounded-md"
-                              : "hidden"
-                          )}
-                        >
-                          &nbsp;
-                        </span>
-                      ) : (
-                        flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )
-                      )}
+                      <div
+                        className={clsx("flex items-center gap-1")}
+                        style={
+                          i === 0
+                            ? {
+                                paddingLeft: `${
+                                  row.depth * 24 +
+                                  (onToggleAllRows !== undefined ? 24 : 0) +
+                                  (row.getCanExpand() ? 0 : 8)
+                                }px`,
+                              }
+                            : {}
+                        }
+                      >
+                        {i === 0 &&
+                          (() => {
+                            const getAncestorPath = (
+                              currentRow: Row<T>
+                            ): string | undefined => {
+                              if (currentRow.depth === 0) {
+                                return (currentRow.original as any)
+                                  ?.path as string;
+                              }
+                              let currentParent = currentRow.getParentRow();
+                              while (currentParent && currentParent.depth > 0) {
+                                currentParent = currentParent.getParentRow();
+                              }
+                              return currentParent
+                                ? ((currentParent.original as any)
+                                    ?.path as string)
+                                : undefined;
+                            };
+
+                            const ancestorPath = getAncestorPath(row);
+                            const groupColorClass =
+                              (ancestorPath &&
+                                topLevelPathColorMap[ancestorPath]) ||
+                              "bg-transparent";
+
+                            if (groupColorClass !== "bg-transparent") {
+                              return (
+                                <div
+                                  className={clsx(
+                                    "absolute left-0 top-0 bottom-0 w-1 z-30",
+                                    groupColorClass
+                                  )}
+                                />
+                              );
+                            }
+                            return null;
+                          })()}
+
+                        {i === 0 && row.getCanExpand() && (
+                          <button
+                            {...{
+                              onClick: row.getToggleExpandedHandler(),
+                              style: { cursor: "pointer" },
+                              "data-expander": true,
+                            }}
+                            className="p-0.5"
+                          >
+                            {row.getIsExpanded() ? (
+                              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                            )}
+                          </button>
+                        )}
+                        {dataLoading &&
+                        (cell.column.id == "requestText" ||
+                          cell.column.id == "responseText") ? (
+                          <span
+                            className={clsx(
+                              "w-full flex flex-grow",
+                              (cell.column.id == "requestText" ||
+                                cell.column.id == "responseText") &&
+                                dataLoading
+                                ? "animate-pulse bg-slate-200 rounded-md"
+                                : "hidden"
+                            )}
+                          >
+                            &nbsp;
+                          </span>
+                        ) : (
+                          flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )
+                        )}
+                      </div>
                     </td>
                   ))}
                   {rowLink && (
@@ -374,9 +489,7 @@ export default function ThemedTable<T extends { id?: string }>(
                           pointerEvents: "auto",
                         }}
                         onClick={(e: React.MouseEvent) => {
-                          if (onRowSelect) {
-                            e.stopPropagation();
-                          }
+                          e.stopPropagation();
                         }}
                         aria-hidden="true"
                       />

@@ -10,7 +10,22 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
-import { X, Briefcase, Mail, BookHeart, ChevronRight, Scale, Newspaper, Earth, ExternalLink, Gem, Github, GitMerge, HandCoins, TrendingUp } from "lucide-react";
+import {
+  X,
+  Briefcase,
+  Mail,
+  BookHeart,
+  ChevronRight,
+  Scale,
+  Newspaper,
+  Earth,
+  ExternalLink,
+  Gem,
+  Github,
+  GitMerge,
+  HandCoins,
+  TrendingUp,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -20,7 +35,6 @@ import { BlogStructureMetaData } from "../templates/blog/getMetaData";
 import { Button } from "../ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-
 
 interface NavBarProps {
   stars?: number;
@@ -33,7 +47,6 @@ const MobileHeader = (props: {
   className?: string;
 }) => {
   const [menuOpen, setMenuOpen] = props.menuDispatch;
-
 
   return (
     <div
@@ -87,7 +100,8 @@ const MobileHeader = (props: {
 };
 
 type LinkItem = {
-  title: string; link: {
+  title: string;
+  link: {
     href: string;
     isExternal: boolean;
   };
@@ -116,10 +130,10 @@ const MobileNav = () => {
           className="flex items-center justify-between group my-0.5 text-accent-foreground"
         >
           <div className="flex items-center gap-3">
-            <span className="navbar-icon-size flex items-center justify-center ml-1">{link.icon}</span>
-            <span className="font-medium text-sm">
-              {link.title}
+            <span className="navbar-icon-size flex items-center justify-center ml-1">
+              {link.icon}
             </span>
+            <span className="font-medium text-sm">{link.title}</span>
           </div>
           {isExternalLink ? (
             <ExternalLink className="size-4 text-slate-400 navbar-icon-style" />
@@ -134,13 +148,15 @@ const MobileNav = () => {
   return (
     <nav className="lg:hidden" aria-label="Global">
       <div className="fixed inset-x-0 top-0 z-50 bg-background">
-        <MobileHeader menuDispatch={[menuOpen, setMenuOpen]} className="pl-2 pr-4" />
+        <MobileHeader
+          menuDispatch={[menuOpen, setMenuOpen]}
+          className="pl-2 pr-4"
+        />
       </div>
       {menuOpen && (
         <div className="fixed inset-0 top-[57px] z-50 bg-background">
           <div className="h-full pb-10 overflow-y-auto">
             <div className="flex flex-col gap-4 pt-3 px-4">
-
               {/* Login and Contact Buttons */}
               <div className="flex flex-col w-full items-center gap-4 pb-4">
                 <Link href="/signup" className="w-full">
@@ -159,12 +175,16 @@ const MobileNav = () => {
 
               <Separator />
 
-              <p className="text-[10px] uppercase text-slate-400 font-medium mx-1">Resources</p>
+              <p className="text-[10px] uppercase text-slate-400 font-medium mx-1">
+                Resources
+              </p>
               {renderLinks(resourcesComponents)}
 
               <Separator />
 
-              <p className="text-[10px] uppercase text-slate-400 font-medium  mx-1">Tools</p>
+              <p className="text-[10px] uppercase text-slate-400 font-medium  mx-1">
+                Tools
+              </p>
               {renderLinks(toolsComponents)}
 
               <Separator />
@@ -176,7 +196,7 @@ const MobileNav = () => {
           </div>
         </div>
       )}
-    </nav >
+    </nav>
   );
 };
 
@@ -197,8 +217,7 @@ const resourcesComponents: LinkItem[] = [
       href: "/changelog",
       isExternal: false,
     },
-    description:
-      "Latest updates and improvements",
+    description: "Latest updates and improvements",
     icon: <GitMerge className="size-5 navbar-icon-style" />,
   },
   {
@@ -207,11 +226,9 @@ const resourcesComponents: LinkItem[] = [
       href: "/blog",
       isExternal: false,
     },
-    description:
-      "Insights on AI development and best practices",
+    description: "Insights on AI development and best practices",
     icon: <Newspaper className="size-5 navbar-icon-style" />,
   },
-]
 
 const toolsComponents: LinkItem[] = [
   {
@@ -220,8 +237,7 @@ const toolsComponents: LinkItem[] = [
       href: "/open-stats",
       isExternal: false,
     },
-    description:
-      "Real-time LLM usage analytics",
+    description: "Real-time LLM usage analytics",
     icon: <Earth className="size-5 navbar-icon-style" />,
   },
   {
@@ -230,8 +246,7 @@ const toolsComponents: LinkItem[] = [
       href: "/comparison",
       isExternal: false,
     },
-    description:
-      "Compare LLM models and providers",
+    description: "Compare LLM models and providers",
     icon: <Scale className="size-5 navbar-icon-style" />,
   },
   {
@@ -240,8 +255,7 @@ const toolsComponents: LinkItem[] = [
       href: "/status",
       isExternal: false,
     },
-    description:
-      "Check LLM provider service status",
+    description: "Check LLM provider service status",
     icon: <TrendingUp className="size-5 navbar-icon-style" />,
   },
   {
@@ -250,11 +264,10 @@ const toolsComponents: LinkItem[] = [
       href: "/llm-cost",
       isExternal: false,
     },
-    description:
-      "Calculate and compare API costs",
+    description: "Calculate and compare API costs",
     icon: <HandCoins className="size-5 navbar-icon-style" />,
   },
-]
+];
 
 const mainComponents: LinkItem[] = [
   {
@@ -263,8 +276,7 @@ const mainComponents: LinkItem[] = [
       href: "https://docs.helicone.ai/",
       isExternal: true,
     },
-    description:
-      "Integrate Helicone into your AI application",
+    description: "Integrate Helicone into your AI application",
     icon: <BookHeart className="size-5 navbar-icon-style" />,
   },
   {
@@ -273,11 +285,10 @@ const mainComponents: LinkItem[] = [
       href: "/pricing",
       isExternal: false,
     },
-    description:
-      "Simple, transparent pricing",
+    description: "Simple, transparent pricing",
     icon: <HandCoins className="size-5 navbar-icon-style" />,
   },
-]
+];
 
 const additionalComponents: LinkItem[] = [
   {
@@ -286,8 +297,7 @@ const additionalComponents: LinkItem[] = [
       href: "/contact",
       isExternal: false,
     },
-    description:
-      "Get in touch with us",
+    description: "Get in touch with us",
     icon: <Mail className="size-5 navbar-icon-style" />,
   },
   {
@@ -296,8 +306,7 @@ const additionalComponents: LinkItem[] = [
       href: "https://app.dover.com/jobs/helicone",
       isExternal: true,
     },
-    description:
-      "Join our team",
+    description: "Join our team",
     icon: <Briefcase className="size-5 navbar-icon-style" />,
   },
   {
@@ -306,11 +315,10 @@ const additionalComponents: LinkItem[] = [
       href: "https://github.com/helicone/helicone",
       isExternal: true,
     },
-    description:
-      "Contribute to our project",
+    description: "Contribute to our project",
     icon: <Github className="size-5 navbar-icon-style" />,
   },
-]
+];
 
 const NavBar = (props: NavBarProps) => {
   const headerRef = useRef<HTMLDivElement>(null);
@@ -324,7 +332,6 @@ const NavBar = (props: NavBarProps) => {
       );
     }
   }, []);
-
 
   return (
     <div
@@ -366,10 +373,8 @@ const NavBar = (props: NavBarProps) => {
 
         {/* Nav Links */}
         <div className="w-full mt-4 lg:mt-0 flex gap-x-1 items-center text-sm col-span-8 lg:col-span-6 order-3 lg:order-2 justify-between">
-
           <NavigationMenu>
             <NavigationMenuList>
-
               {/* Docs */}
               <NavigationMenuItem>
                 <Link href="https://docs.helicone.ai" legacyBehavior passHref>
@@ -409,9 +414,16 @@ const NavBar = (props: NavBarProps) => {
                       <NavigationMenuLink asChild>
                         <Link
                           className="flex h-full w-full select-none flex-col justify-between rounded-md bg-gradient-to-b from-sky-50 to-muted/70 p-6 no-underline outline-none focus:shadow-md hover:bg-sky-100"
-                          href={props.featuredBlogFolderName ? `/blog/${props.featuredBlogFolderName}` : "/blog"}
+                          href={
+                            props.featuredBlogFolderName
+                              ? `/blog/${props.featuredBlogFolderName}`
+                              : "/blog"
+                          }
                         >
-                          <Badge variant="default" className="w-fit self-start whitespace-nowrap">
+                          <Badge
+                            variant="default"
+                            className="w-fit self-start whitespace-nowrap"
+                          >
                             Latest
                           </Badge>
                           <div className="">
@@ -423,7 +435,6 @@ const NavBar = (props: NavBarProps) => {
                               {props.featuredBlogMetadata.description}
                             </p>
                           </div>
-
                         </Link>
                       </NavigationMenuLink>
                     </li>
@@ -452,13 +463,16 @@ const NavBar = (props: NavBarProps) => {
 
               {/* Careers */}
               <NavigationMenuItem>
-                <Link href="https://app.dover.com/jobs/helicone" legacyBehavior passHref>
+                <Link
+                  href="https://app.dover.com/jobs/helicone"
+                  legacyBehavior
+                  passHref
+                >
                   <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                     Careers
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
-
             </NavigationMenuList>
           </NavigationMenu>
 
@@ -472,11 +486,11 @@ const NavBar = (props: NavBarProps) => {
               target="_blank"
               rel="noreferrer"
             >
-              <Button variant="outline" className="gap-x-2 rounded-lg">
+              <Button variant="ghost" className="gap-x-2 rounded-lg">
                 <svg
                   fill="currentColor"
                   viewBox="0 0 24 24"
-                  className="w-5 h-5 text-foreground"
+                  className="w-5 h-5 text-accent-foreground"
                 >
                   <path
                     fillRule="evenodd"
@@ -484,12 +498,12 @@ const NavBar = (props: NavBarProps) => {
                     clipRule="evenodd"
                   />
                 </svg>
-                <p className="text-sm text-foreground">
+                <p className="text-sm text-accent-foreground">
                   {props.stars
                     ? props.stars.toLocaleString("en-US", {
-                      notation: "compact",
-                      compactDisplay: "short",
-                    })
+                        notation: "compact",
+                        compactDisplay: "short",
+                      })
                     : "0"}
                 </p>
               </Button>
@@ -497,7 +511,8 @@ const NavBar = (props: NavBarProps) => {
             <Link href="/contact">
               <Button
                 variant="secondary"
-                className="text-sm text-secondary-foreground rounded-lg">
+                className="text-sm text-secondary-foreground rounded-lg"
+              >
                 Contact us
               </Button>
             </Link>
@@ -508,8 +523,8 @@ const NavBar = (props: NavBarProps) => {
             </Link>
           </div>
         </div>
-      </nav >
-    </div >
+      </nav>
+    </div>
   );
 };
 
@@ -540,10 +555,9 @@ const ListItem = React.forwardRef<
           </div>
         </a>
       </NavigationMenuLink>
-    </li >
-  )
-})
-ListItem.displayName = "ListItem"
-
+    </li>
+  );
+});
+ListItem.displayName = "ListItem";
 
 export default NavBar;

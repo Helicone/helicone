@@ -465,43 +465,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     ]
   );
 
-  const onSetAdvancedFiltersHandler = useCallback(
-    (filters: UIFilterRowTree, layoutFilterId?: string | null) => {
-      const encodeFilters = (filters: UIFilterRowTree): string => {
-        const encode = (node: UIFilterRowTree): any => {
-          if (isFilterRowNode(node)) {
-            return {
-              type: "node",
-              operator: node.operator,
-              rows: node.rows.map(encode),
-            };
-          } else {
-            return {
-              type: "leaf",
-              filter: `${filterMap[node.filterMapIdx].label}:${
-                filterMap[node.filterMapIdx].operators[node.operatorIdx].label
-              }:${encodeURIComponent(node.value)}`,
-            };
-          }
-        };
-
-        return JSON.stringify(encode(filters));
-      };
-
-      setAdvancedFilters(filters);
-      if (
-        layoutFilterId === null ||
-        (isFilterRowNode(filters) && filters.rows.length === 0)
-      ) {
-        searchParams.delete("filters");
-      } else {
-        const currentAdvancedFilters = encodeFilters(filters);
-        searchParams.set("filters", currentAdvancedFilters);
-      }
-    },
-    [searchParams, filterMap]
-  );
-
   const getDefaultValue = useCallback(() => {
     const currentTimeFilter = searchParams.get("t");
 

@@ -6,6 +6,8 @@ import { FAQ } from "./components/blog/FAQ";
 import { ReactNode } from "react";
 import NextImage from "next/image";
 import { OtherCaseStudies } from "@/components/customers/OtherCaseStudies";
+import { HeadingWithCopyLink } from "@/components/blog/HeadingWithCopyLink";
+
 const ResponsiveTable = ({ children }: { children: ReactNode }) => {
   return <div className="overflow-x-auto w-full">{children}</div>;
 };
@@ -13,6 +15,12 @@ const ResponsiveTable = ({ children }: { children: ReactNode }) => {
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
     ...components,
+    h1: (props) => <HeadingWithCopyLink level={1} {...props} />,
+    h2: (props) => <HeadingWithCopyLink level={2} {...props} />,
+    h3: (props) => <HeadingWithCopyLink level={3} {...props} />,
+    h4: (props) => <HeadingWithCopyLink level={4} {...props} />,
+    h5: (props) => <HeadingWithCopyLink level={5} {...props} />,
+    h6: (props) => <HeadingWithCopyLink level={6} {...props} />,
     CallToAction: CallToAction,
     BottomLine: BottomLine,
     Questions: Questions,

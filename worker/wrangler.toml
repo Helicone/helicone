@@ -133,7 +133,7 @@ SUPABASE_URL = "https://bolqqmqbrciybnypvklh.supabase.co"
 CLICKHOUSE_HOST = "https://p76qbrlulo.us-east-1.aws.clickhouse.cloud:8443"
 VAULT_ENABLED = "true"
 DATADOG_ENABLED = "true"
-QUEUE_PROVIDER = "dual"
+QUEUE_PROVIDER = "sqs"
 
 
 [env.production_staging]

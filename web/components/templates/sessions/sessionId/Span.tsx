@@ -3,7 +3,13 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Clock4Icon } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  MutableRefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { PiSplitHorizontalBold } from "react-icons/pi";
 import {
   Bar,
@@ -11,41 +17,39 @@ import {
   CartesianGrid,
   Cell,
   LabelList,
+  Tooltip as RechartsTooltip,
   ReferenceArea,
   ResponsiveContainer,
-  Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
-import { HeliconeRequest } from "../../../../lib/api/request/request";
 import { Session, Trace } from "../../../../lib/sessions/sessionTypes";
 import { Col } from "../../../layout/common/col";
-import { clsx } from "../../../shared/clsx";
+import { useLocalStorage } from "@/services/hooks/localStorage";
+import { useColorMapStore } from "@/store/features/sessions/colorMap";
 
+const ROUNDED_RADIUS = 1;
+const BAR_SIZE = 25; // Increased from 30 to 50
 interface BarChartTrace {
   name: string;
   path: string;
   start: number;
   duration: number;
-  trace: Trace | HeliconeRequest;
+  trace: Trace;
   request_id: string;
 }
 
 export const TraceSpan = ({
   session,
   selectedRequestIdDispatch,
-  height,
-  realtimeData,
+  isOriginalRealtime,
   onHighlighterChange,
+  drawerRef,
 }: {
   session: Session;
   selectedRequestIdDispatch: [string, (x: string) => void];
-  height?: string;
-  realtimeData?: {
-    isRealtime: boolean;
-    effectiveRequests: HeliconeRequest[];
-    originalRequest: HeliconeRequest | null;
-  };
+  isOriginalRealtime?: boolean;
+  drawerRef: MutableRefObject<any>;
   onHighlighterChange?: (
     start: number | null,
     end: number | null,
@@ -54,10 +58,8 @@ export const TraceSpan = ({
 }) => {
   const [selectedRequestId, setSelectedRequestId] = selectedRequestIdDispatch;
   const { theme } = useTheme();
-
-  // Extract values from realtimeData or use defaults
-  const isRealtime = realtimeData?.isRealtime || false;
-  const effectiveRequests = realtimeData?.effectiveRequests || [];
+  const { getColor } = useColorMapStore();
+  const [drawerSize] = useLocalStorage("session-request-drawer-size", 0);
 
   // Highlighter state
   const [highlighterActive, setHighlighterActive] = useState(false);
@@ -70,54 +72,62 @@ export const TraceSpan = ({
   const [dragStartX, setDragStartX] = useState<number | null>(null);
   const [initialDragMovement, setInitialDragMovement] = useState(false);
 
-  const spanData: BarChartTrace[] = isRealtime
-    ? // For realtime sessions, create span data from timestamps in the requests
-      effectiveRequests.map((request, index) => {
-        const timestamp = new Date(request.request_created_at).getTime();
-        const startTimeMs = session.start_time_unix_timestamp_ms;
+  const spanData: BarChartTrace[] = useMemo(() => {
+    if (!session || !session.traces) return [];
+    const startTimeMs = session.start_time_unix_timestamp_ms;
+    if (startTimeMs === undefined || startTimeMs === null || isNaN(startTimeMs))
+      return [];
 
-        // For visualization purposes, space out the requests slightly
-        const start = (timestamp - startTimeMs) / 1000;
+    return session.traces.map((trace: Trace, index: number): BarChartTrace => {
+      const startMs = trace.start_unix_timestamp_ms;
+      const endMs = trace.end_unix_timestamp_ms;
 
-        // Simplified naming - just use role or message number
-        const role =
-          request.properties._helicone_realtime_role || `Message ${index + 1}`;
-
+      if (
+        typeof startMs !== "number" ||
+        isNaN(startMs) ||
+        typeof endMs !== "number" ||
+        isNaN(endMs)
+      ) {
+        console.warn("Invalid trace timestamps found for trace:", trace);
+        // Return a valid BarChartTrace object even for invalid data
         return {
-          name: role,
-          path: request.request_path || role || "message",
-          start,
-          duration: 0.5,
-          trace: request,
-          request_id: request.request_id,
+          name: `Invalid ${index + 1}`,
+          path: trace.path ?? "invalid",
+          start: 0,
+          duration: 0,
+          trace: trace, // Keep the original trace for potential debugging
+          request_id: trace.request_id ?? `invalid-${index}`,
         };
-      })
-    : // For normal sessions, use the trace data
-      session.traces.map((trace) => ({
-        name: `${trace.path.split("/").pop() ?? ""}`,
+      }
+
+      const start = (startMs - startTimeMs) / 1000;
+      const duration = (endMs - startMs) / 1000;
+
+      let name: string | number = `${trace.path.split("/").pop() ?? "Trace"}`;
+      if (isOriginalRealtime) {
+        const role =
+          trace.request.heliconeMetadata?.customProperties
+            ?._helicone_realtime_step_role;
+        name = role ? `${role} ${index + 1}` : `Step ${index + 1}`;
+      }
+
+      return {
+        name: `${name}`,
         path: trace.path ?? "",
-        start:
-          (trace.start_unix_timestamp_ms -
-            session.start_time_unix_timestamp_ms) /
-          1000,
-        duration:
-          (trace.end_unix_timestamp_ms - trace.start_unix_timestamp_ms) / 1000,
+        start: Math.max(0, start),
+        duration: Math.max(0.01, duration),
         trace: trace,
         request_id: trace.request_id,
-      }));
+      };
+    });
+  }, [session, isOriginalRealtime]);
 
-  const roundedRadius = 5;
-
-  const domain = useMemo(
-    () => [
-      0,
-      (spanData?.[spanData.length - 1]?.duration ?? 0) +
-        (spanData?.[spanData.length - 1]?.start ?? 0),
-    ],
-    [spanData]
-  );
-
-  const barSize = 35; // Increased from 30 to 50
+  const domain = useMemo(() => {
+    if (spanData.length === 0) return [0, 1]; // Default domain if no data
+    const lastItem = spanData[spanData.length - 1];
+    const maxEnd = (lastItem?.start ?? 0) + (lastItem?.duration ?? 0);
+    return [0, Math.max(1, maxEnd)]; // Ensure domain is at least 1s
+  }, [spanData]);
 
   // Track the last valid chart dimensions for consistent calculations
   const [lastChartDimensions, setLastChartDimensions] = useState<{
@@ -469,6 +479,7 @@ export const TraceSpan = ({
 
     // Set the request ID
     setSelectedRequestId(clickedData.request_id);
+    openDrawer(drawerRef, drawerSize);
 
     // Notify parent about the selected message range
     if (onHighlighterChange) {
@@ -489,15 +500,14 @@ export const TraceSpan = ({
       id="sessions-trace-span"
     >
       <ScrollArea>
-        {/* Removed fixed height to allow component to fill available space */}
         <ResponsiveContainer
           width="100%"
-          height={Math.max(300, spanData.length * barSize)}
+          height={Math.max(300, spanData.length * BAR_SIZE)}
         >
           <BarChart
             data={spanData}
             layout="vertical"
-            barSize={barSize}
+            barSize={BAR_SIZE}
             margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
             onClick={handleBarClick}
             onMouseDown={handleMouseDown}
@@ -537,7 +547,7 @@ export const TraceSpan = ({
               }}
               domain={[0, spanData.length]}
             />
-            <Tooltip
+            <RechartsTooltip
               cursor={{
                 fill: highlighterActive
                   ? "transparent"
@@ -547,17 +557,15 @@ export const TraceSpan = ({
               }}
               content={(props) => {
                 const { payload } = props;
-
-                // Don't render tooltip content when highlighter is active
                 if (highlighterActive) return null;
 
-                const traceData: BarChartTrace = payload?.[0]?.payload;
-                if (!traceData) return null;
+                const traceData: BarChartTrace | undefined =
+                  payload?.[0]?.payload;
+                if (!traceData || !traceData.trace) return null;
 
-                const createdAt = isRealtime
-                  ? (traceData.trace as HeliconeRequest).request_created_at
-                  : (traceData.trace as Trace).request.heliconeMetadata
-                      .createdAt;
+                // Access data directly from the trace object
+                const createdAt = traceData.trace.start_unix_timestamp_ms;
+                const duration = traceData.duration;
 
                 return (
                   <Col className="gap-2 rounded glass border border-slate-200 dark:border-slate-800 z-50 p-2">
@@ -574,13 +582,15 @@ export const TraceSpan = ({
                           className="text-slate-500 dark:text-slate-400"
                         />
                         <p className="text-xs font-normal text-slate-500 dark:text-slate-400">
-                          {traceData?.duration}s
+                          {duration?.toFixed(2)}s
                         </p>
                       </Row>
                     </Row>
                     <p className="text-xs font-normal text-slate-500 dark:text-slate-400">
                       <span className="font-semibold">Start:</span>{" "}
-                      {new Date(createdAt).toLocaleString()}
+                      {typeof createdAt === "number"
+                        ? new Date(createdAt).toLocaleString()
+                        : "N/A"}
                     </p>
                   </Col>
                 );
@@ -593,10 +603,10 @@ export const TraceSpan = ({
               fill="rgba(0,0,0,0)"
               isAnimationActive={false}
               radius={[
-                roundedRadius,
-                roundedRadius,
-                roundedRadius,
-                roundedRadius,
+                ROUNDED_RADIUS,
+                ROUNDED_RADIUS,
+                ROUNDED_RADIUS,
+                ROUNDED_RADIUS,
               ]} // Rounded corners
             >
               {spanData.map((entry, index) => (
@@ -608,25 +618,25 @@ export const TraceSpan = ({
               stackId="a"
               isAnimationActive={false}
               radius={[
-                roundedRadius,
-                roundedRadius,
-                roundedRadius,
-                roundedRadius,
+                ROUNDED_RADIUS,
+                ROUNDED_RADIUS,
+                ROUNDED_RADIUS,
+                ROUNDED_RADIUS,
               ]} // Rounded corners
             >
               <LabelList
                 dataKey="name"
                 position="insideLeft"
                 content={(props) => {
-                  const { x, y, width, height, value, index } = props;
-                  const entry = spanData[index ?? 0];
+                  const { x, y, height, value, index } = props;
+                  if (index === undefined || !spanData[index]) return null;
+                  const entry = spanData[index];
 
                   // Determine if this bar is selected based on highlighter or individual selection
                   const isInHighlighter =
                     highlighterActive &&
                     highlighterStart !== null &&
                     highlighterEnd !== null &&
-                    index !== undefined &&
                     entry.start <= highlighterEnd &&
                     entry.start + entry.duration >= highlighterStart;
 
@@ -644,14 +654,12 @@ export const TraceSpan = ({
                           ? y + height / 2
                           : y
                       }
-                      fill={
+                      className={
                         isSelected
                           ? theme === "dark"
-                            ? "#0ea5e9"
-                            : "#0369A1"
-                          : theme === "dark"
-                          ? "#cbd5e1"
-                          : "#334155"
+                            ? "fill-sky-500"
+                            : "fill-sky-700"
+                          : "fill-card-foreground"
                       }
                       opacity={isSelected ? 1 : 0.7}
                       textAnchor="start"
@@ -663,10 +671,8 @@ export const TraceSpan = ({
                       onClick={() => {
                         if (highlighterActive) return;
                         setSelectedRequestId(entry.request_id);
-
                         // Notify parent about the selected message range
                         if (onHighlighterChange && index !== undefined) {
-                          // Set both start and end to the same index to indicate a single message
                           onHighlighterChange(index, index, false);
                         }
                       }}
@@ -677,34 +683,26 @@ export const TraceSpan = ({
                 }}
               />
               {spanData.map((entry, index) => {
+                const color = getColor(entry.path);
                 // Determine if this bar is in the highlighter range
-                const isInHighlighter =
-                  highlighterActive &&
-                  highlighterStart !== null &&
-                  highlighterEnd !== null &&
-                  entry.start <= highlighterEnd &&
-                  entry.start + entry.duration >= highlighterStart;
-
-                const isIndividuallySelected =
-                  !highlighterActive && entry.request_id === selectedRequestId;
 
                 return (
                   <Cell
                     key={`colored-cell-${index}`}
-                    className={clsx(
-                      isInHighlighter || isIndividuallySelected
-                        ? "fill-sky-200 hover:fill-sky-200/50 dark:fill-sky-700 dark:hover:fill-sky-700/50 hover:cursor-pointer"
-                        : "fill-sky-100 hover:fill-sky-50 dark:fill-sky-800 dark:hover:fill-sky-800/50 hover:cursor-pointer"
-                    )}
-                    strokeWidth={1}
-                    stroke={theme === "dark" ? "#0369a1" : "#bae6fd"}
+                    className="cursor-pointer transition-colors duration-150"
+                    style={{ fill: color }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.fill = `${color}80`; // 50% opacity (approx.)
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.fill = color;
+                    }}
+                    strokeWidth={2}
+                    stroke={color}
                     onClick={() => {
                       if (highlighterActive) return;
                       setSelectedRequestId(entry.request_id);
-
-                      // Notify parent about the selected message range
                       if (onHighlighterChange) {
-                        // Set both start and end to the same index to indicate a single message
                         onHighlighterChange(index, index, false);
                       }
                     }}
@@ -800,7 +798,7 @@ export const TraceSpan = ({
       </ResponsiveContainer>
 
       {/* Highlighter Controls */}
-      {isRealtime && (
+      {isOriginalRealtime && (
         <Button
           variant={highlighterActive ? "default" : "glass"}
           size="sm"
@@ -819,3 +817,12 @@ export const TraceSpan = ({
     </div>
   );
 };
+
+function openDrawer(drawerRef: MutableRefObject<any>, drawerSize: number) {
+  drawerRef.current?.expand();
+  if (drawerSize === 0) {
+    drawerRef.current?.resize(33);
+  } else {
+    drawerRef.current?.resize(drawerSize);
+  }
+}

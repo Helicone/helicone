@@ -120,6 +120,7 @@ export default function PromptEditor({
   /* -------------------------------------------------------------------------- */
   const [state, setState] = useState<PromptState | null>(null);
   const [isAutoImproveOpen, setIsAutoImproveOpen] = useState(false);
+  const [isOpenRouterDialogOpen, setIsOpenRouterDialogOpen] = useState(false);
   const [isImproving, setIsImproving] = useState(false);
   const messagesScrollRef = useRef<CustomScrollbarRef>(null);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -1230,7 +1231,10 @@ export default function PromptEditor({
         {/* Right Side: Actions */}
         <div className="flex flex-row items-center gap-2">
           {/* OpenRouter Dialog */}
-          <Dialog>
+          <Dialog
+            open={isOpenRouterDialogOpen}
+            onOpenChange={setIsOpenRouterDialogOpen}
+          >
             <DialogTrigger asChild>
               <Button
                 variant="outline"
@@ -1299,7 +1303,7 @@ export default function PromptEditor({
           )}
 
           {/* Run & Save Button */}
-          <Tooltip delayDuration={100}>
+          <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 className={`${
@@ -1311,10 +1315,13 @@ export default function PromptEditor({
                 size="sm"
                 disabled={
                   // please forgive me for this, it is a mess just need to get something quick out - Justin
-                  (!canRun || !hasOpenRouter) &&
-                  !(state.isDirty && editorMode === "fromEditor")
+                  !canRun && !(state.isDirty && editorMode === "fromEditor")
                 }
-                onClick={handleSaveAndRun}
+                onClick={
+                  hasOpenRouter
+                    ? handleSaveAndRun
+                    : () => setIsOpenRouterDialogOpen(true)
+                }
               >
                 {hasOpenRouter &&
                   (isStreaming ? (

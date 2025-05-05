@@ -1,8 +1,9 @@
 "use client";
 import { ISLAND_WIDTH } from "@/lib/utils";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
-import { ArrowUpRightIcon } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { useState } from "react";
 import { XIcon, PlusIcon } from "lucide-react";
 import EvaluateSVG from "@/public/static/home/evaluate";
@@ -30,30 +31,24 @@ const Evaluate = () => {
             </p>
           </div>
           <div className="flex gap-3 items-center">
-            <a
-              href="https://docs.helicone.ai/features/advanced-usage/scores"
-              target="_blank"
-            >
+            <Link href="https://docs.helicone.ai/features/advanced-usage/scores" target="_blank" rel="noopener">
               <Button
-                className="items-center gap-2 text-landing-secondary self-start"
                 variant="outline"
+                size="landing_page"
               >
-                <ArrowUpRightIcon className="w-4 h-4" />
                 Scores
+                <ArrowUpRight className="size-5" />
               </Button>
-            </a>
-            <a
-              href="https://docs.helicone.ai/features/webhooks"
-              target="_blank"
-            >
+            </Link>
+            <Link href="https://docs.helicone.ai/features/webhooks" target="_blank" rel="noopener">
               <Button
-                className="items-center gap-2 text-landing-secondary self-start"
                 variant="outline"
+                size="landing_page"
               >
-                <ArrowUpRightIcon className="w-4 h-4" />
                 Webhooks
+                <ArrowUpRight className="size-5" />
               </Button>
-            </a>
+            </Link>
           </div>
           <div
             className={cn(

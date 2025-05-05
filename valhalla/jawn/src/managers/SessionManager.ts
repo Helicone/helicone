@@ -1,12 +1,14 @@
 import {
   SessionNameQueryParams,
   SessionQueryParams,
+  SessionMetricsQueryParams,
 } from "../controllers/public/sessionController";
 import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
-import { AuthParams } from "../packages/common/auth/types";
 import { dbExecute } from "../lib/shared/db/dbExecute";
 import { filterListToTree, FilterNode } from "../lib/shared/filters/filterDefs";
 import { buildFilterWithAuthClickHouse } from "../lib/shared/filters/filters";
+import { TimeFilterMs } from "../lib/shared/filters/timeFilter";
+import { AuthParams } from "../packages/common/auth/types";
 import { err, ok, Result, resultMap } from "../packages/common/result";
 import { clickhousePriceCalc } from "../packages/cost";
 import { isValidTimeZoneDifference } from "../utils/helpers";
@@ -26,6 +28,7 @@ export interface SessionResult {
   prompt_tokens: number;
   completion_tokens: number;
   total_tokens: number;
+  avg_latency: number;
 }
 
 export interface SessionNameResult {
@@ -34,6 +37,7 @@ export interface SessionNameResult {
   last_used: string;
   first_used: string;
   session_count: number;
+  avg_latency: number;
 }
 
 export interface SessionMetrics {
@@ -46,10 +50,33 @@ export class SessionManager {
   constructor(private authParams: AuthParams) {}
 
   async getMetrics(
-    requestBody: SessionNameQueryParams
+    requestBody: SessionMetricsQueryParams
   ): Promise<Result<SessionMetrics, string>> {
-    const { nameContains, timezoneDifference, useInterquartile, pSize } =
-      requestBody;
+    const {
+      nameContains,
+      timezoneDifference,
+      useInterquartile,
+      pSize,
+      timeFilter,
+      filter,
+    } = requestBody;
+
+    const filters: FilterNode[] = [
+      ...(timeFilter ? timeFilterNodes(timeFilter) : []),
+      ...(filter ? [filter] : []),
+    ];
+
+    if (nameContains) {
+      filters.push({
+        request_response_rmt: {
+          properties: {
+            "Helicone-Session-Name": {
+              equals: nameContains,
+            },
+          },
+        },
+      });
+    }
 
     if (!isValidTimeZoneDifference(timezoneDifference)) {
       return err("Invalid timezone difference");
@@ -57,17 +84,7 @@ export class SessionManager {
 
     const builtFilter = await buildFilterWithAuthClickHouse({
       org_id: this.authParams.organizationId,
-      filter: nameContains
-        ? {
-            request_response_rmt: {
-              properties: {
-                "Helicone-Session-Name": {
-                  ilike: `%${nameContains}%`,
-                },
-              },
-            },
-          }
-        : "all",
+      filter: filterListToTree(filters, "and"),
       argsAcc: [],
     });
 
@@ -76,8 +93,8 @@ export class SessionManager {
         { key: "properties['Helicone-Session-Name']", alias: "session_name" },
         { key: "properties['Helicone-Session-Id']", alias: "session_id" },
       ],
-      pSize: requestBody.pSize ?? "p75",
-      useInterquartile: requestBody.useInterquartile ?? false,
+      pSize: pSize ?? "p75",
+      useInterquartile: useInterquartile ?? false,
       builtFilter,
       aggregateFunction: "count(*)",
     });
@@ -151,6 +168,7 @@ export class SessionManager {
           ? `- INTERVAL '${Math.abs(timezoneDifference)} minute'`
           : `+ INTERVAL '${timezoneDifference} minute'`
       } AS created_at,
+      avg(request_response_rmt.latency) as avg_latency,
       max(request_response_rmt.request_created_at )${
         timezoneDifference > 0
           ? `- INTERVAL '${Math.abs(timezoneDifference)} minute'`
@@ -181,6 +199,7 @@ export class SessionManager {
     return resultMap(results, (x) =>
       x.map((y) => ({
         ...y,
+        avg_latency: +y.avg_latency,
       }))
     );
   }
@@ -200,23 +219,7 @@ export class SessionManager {
       return err("Invalid timezone difference");
     }
 
-    const filters: FilterNode[] = [
-      {
-        request_response_rmt: {
-          request_created_at: {
-            gt: new Date(timeFilter.startTimeUnixMs),
-          },
-        },
-      },
-      {
-        request_response_rmt: {
-          request_created_at: {
-            lt: new Date(timeFilter.endTimeUnixMs),
-          },
-        },
-      },
-      filterTree,
-    ];
+    const filters: FilterNode[] = [...timeFilterNodes(timeFilter), filterTree];
 
     if (nameEquals) {
       filters.push({
@@ -278,6 +281,7 @@ export class SessionManager {
       max(request_response_rmt.request_created_at) + INTERVAL ${timezoneDifference} MINUTE AS latest_request_created_at,
       properties['Helicone-Session-Id'] as session_id,
       properties['Helicone-Session-Name'] as session_name,
+      avg(request_response_rmt.latency) as avg_latency,
       ${clickhousePriceCalc("request_response_rmt")} AS total_cost,
       count(*) AS total_requests,
       sum(request_response_rmt.prompt_tokens) AS prompt_tokens,
@@ -307,6 +311,7 @@ export class SessionManager {
         completion_tokens: +y.completion_tokens,
         prompt_tokens: +y.prompt_tokens,
         total_tokens: +y.total_tokens,
+        avg_latency: +y.avg_latency,
       }))
     );
   }
@@ -347,3 +352,25 @@ export class SessionManager {
     }
   }
 }
+
+const timeFilterNodes = (timeFilter: TimeFilterMs): FilterNode[] => {
+  if (!timeFilter) {
+    return [];
+  }
+  return [
+    {
+      request_response_rmt: {
+        request_created_at: {
+          gt: new Date(timeFilter.startTimeUnixMs),
+        },
+      },
+    },
+    {
+      request_response_rmt: {
+        request_created_at: {
+          lt: new Date(timeFilter.endTimeUnixMs),
+        },
+      },
+    },
+  ];
+};

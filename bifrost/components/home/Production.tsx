@@ -1,4 +1,5 @@
-import { ArrowUpRightIcon } from "lucide-react";
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
 import { ISLAND_WIDTH } from "@/lib/utils";
@@ -15,8 +16,8 @@ const Production = () => {
         </div>
         <div className="flex flex-col items-start md:items-end gap-6 text-left md:text-right">
           <h2 className="font-semibold text-4xl sm:text-5xl leading-[120%] max-w-[800px] text-wrap text-black">
-            Turn complexity and abstraction to{" "}
-            <span className="text-brand">actionable insights</span>
+            Turn complexity and abstraction{" "}
+            <span className="text-brand">to actionable insights</span>
           </h2>
           <p className="text-lg max-w-[520px] text-landing-description font-light leading-relaxed">
             Unified insights across all providers to quickly detect
@@ -24,33 +25,27 @@ const Production = () => {
           </p>
         </div>
         <div className="flex gap-3 items-center z-[20]">
-          <a
-            href="https://docs.helicone.ai/features/advanced-usage/user-metrics"
-            target="_blank"
-          >
+          <Link href="https://docs.helicone.ai/features/advanced-usage/user-metrics" target="_blank" rel="noopener">
             <Button
-              className="items-center gap-2 text-landing-secondary self-start"
-              variant="outline"
+              variant="landing_primary"
+              size="landing_page"
             >
-              <ArrowUpRightIcon size={16} />
-              User Metrics
+              Track user metrics
+              <ArrowUpRight className="size-5 md:size-6" />
             </Button>
-          </a>
-          <a
-            href="https://www.helicone.ai/changelog/20240910-slack-alerts"
-            target="_blank"
-          >
+          </Link>
+          <Link href="https://www.helicone.ai/changelog/20240910-slack-alerts" target="_blank" rel="noopener">
             <Button
-              className="items-center gap-2 text-landing-secondary self-start"
-              variant="outline"
+              variant="ghost"
+              size="landing_page"
             >
-              <ArrowUpRightIcon className="w-4 h-4" />
               Alerts
+              <ArrowUpRight className="size-5 md:size-6" />
             </Button>
-          </a>
+          </Link>
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 

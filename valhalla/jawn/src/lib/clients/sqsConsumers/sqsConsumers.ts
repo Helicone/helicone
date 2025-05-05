@@ -12,13 +12,6 @@ import { QUEUE_URLS } from "../../producers/sqsTypes";
 
 // do not go above 10, this is the max sqs can handle
 const MAX_NUMBER_OF_MESSAGES = 10;
-export const QUEUE_NAMES = {
-  requestResponseLogs: "request-response-logs-queue",
-  heliconeScores: "helicone-scores-queue",
-  requestResponseLogsDlq: "request-response-logs-dlq",
-  heliconeScoresDlq: "helicone-scores-dlq",
-} as const;
-
 const SQS_CLIENT = new SQSClient({
   region: process.env.AWS_REGION,
 });
@@ -29,26 +22,26 @@ const pullMessages = async ({
   sqs,
   queueUrl,
   count,
-  accumulatedMessages = [],
 }: {
   sqs: SQSClient;
   queueUrl: string;
   count: number;
-  accumulatedMessages: SQSMessage[];
 }) => {
   let remaining = count;
-  let messages = [...accumulatedMessages];
+  let messages: SQSMessage[] = [];
 
   while (remaining > 0) {
+    const isFirst = messages.length === 0;
     const command = new ReceiveMessageCommand({
       QueueUrl: queueUrl,
-      MaxNumberOfMessages: remaining,
+      MaxNumberOfMessages: Math.min(remaining, MAX_NUMBER_OF_MESSAGES),
+      WaitTimeSeconds: isFirst ? 5 : 0,
     });
     const result = await sqs.send(command);
     if (result.Messages === undefined || result.Messages.length === 0) {
       break;
     }
-    messages = [...messages, ...result.Messages];
+    messages = messages.concat(result.Messages);
     remaining -= result.Messages.length;
   }
   return messages;
@@ -78,10 +71,10 @@ async function withMessages({
     sqs: SQS_CLIENT,
     queueUrl,
     count,
-    accumulatedMessages: [],
   });
 
   if (messages.length === 0) {
+    await new Promise((resolve) => setTimeout(resolve, 10_000));
     console.log("No messages to process");
     return;
   }
@@ -92,9 +85,9 @@ async function withMessages({
     const deletePromises = [];
     for (let i = 0; i < messages.length; i += 10) {
       const batch = messages.slice(i, i + 10);
-      const entries = batch.map((msg, idx) => ({
-        Id: `${i + idx}`,
-        ReceiptHandle: msg.ReceiptHandle!,
+      const entries = batch.map((msg) => ({
+        Id: msg.MessageId,
+        ReceiptHandle: msg.ReceiptHandle,
       }));
 
       const deleteCommand = new DeleteMessageBatchCommand({
