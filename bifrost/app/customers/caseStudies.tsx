@@ -31,12 +31,11 @@ function metaDataToCaseStudyStructure(
     logo: metadata.logo,
     url: metadata.url,
     customerSince: metadata.customerSince,
-    isOpenSourced: metadata.isOpenSourced,
     date: metadata?.date || "",
   };
 }
 
-function formatCustomerSince(date: string) {
+export function formatCustomerSince(date: string) {
   return new Date(date).toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",

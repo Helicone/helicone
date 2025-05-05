@@ -1,4 +1,4 @@
-import { getMetadata } from "@/components/templates/customers/getMetaData";
+import { getMetadata, CaseStudyStructureMetaData } from "@/components/templates/customers/getMetaData";
 import { promises as fs } from "fs";
 import { serialize } from "next-mdx-remote/serialize";
 import Link from "next/link";
@@ -13,6 +13,7 @@ import rehypeSlug from "rehype-slug";
 import "highlight.js/styles/atom-one-dark.css";
 import { ChevronLeft } from "lucide-react";
 import { OtherCaseStudies } from "@/components/customers/OtherCaseStudies";
+import { formatCustomerSince } from "../caseStudies";
 
 export default async function Home({
   params,
@@ -51,10 +52,24 @@ export default async function Home({
     notFound();
   }
 
+  // Fetch metadata for related studies
+  let relatedStudiesData: CaseStudyStructureMetaData[] = [];
+  if (metadata && Array.isArray(metadata.relatedStudies)) {
+    const results = await Promise.all(
+      metadata.relatedStudies
+        .map(slug => getMetadata(slug)) // Fetch metadata for each slug
+    );
+    relatedStudiesData = results.filter((study): study is CaseStudyStructureMetaData => study !== null); // Filter out nulls and type guard
+  }
+
   return (
     <div className="w-full bg-white h-full antialiased relative">
-      <div className="flex flex-col md:flex-row items-start w-full mx-auto max-w-5xl py-16 px-4 md:py-24 relative gap-8">
-        <div className="hidden md:flex w-56 h-full flex-col space-y-6 md:sticky top-16 md-top-32">
+      <div className="flex flex-col sm:flex-row items-start w-full mx-auto max-w-5xl py-16 px-4 md:py-24 relative gap-8">
+
+        {/* Left Column */}
+        <div className="hidden sm:flex flex-col sm:sticky w-56 h-full gap-6 top-24 md-top-32">
+
+          {/* Back to all stories */}
           <Link
             href="/customers"
             className="flex items-center gap-1.5 text-slate-600 hover:text-slate-700 transition-colors group"
@@ -62,11 +77,13 @@ export default async function Home({
             <ChevronLeft className="size-4 group-hover:-translate-x-0.5 transition-transform" />
             <span className="text-sm font-medium">All stories</span>
           </Link>
+
+          {/* Customer info */}
           <section className="flex flex-col gap-6 overflow-hidden">
             <div className="flex flex-col gap-1 px-2">
               <p className="text-muted-foreground text-sm font-medium">Customer since</p>
               <span className="text-accent-foreground text-sm font-medium">
-                {new Date(metadata.customerSince).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                {formatCustomerSince(metadata.customerSince)}
               </span>
             </div>
             <div className="flex flex-col gap-1 px-2">
@@ -96,8 +113,12 @@ export default async function Home({
             </div>
           </section>
         </div>
+
+        {/* Right Column */}
         <article className="prose w-full h-full">
-          <h1 className="text-bold text-sky-500">{String(metadata.title)}</h1>
+          <h1 className="text-bold text-brand">{String(metadata.title)}</h1>
+
+          {/* Customer logo */}
           <div className="w-full my-8 bg-slate-100 p-4 rounded-xl border-2 border-slate-100">
             <Image
               src={metadata.logo}
@@ -108,7 +129,8 @@ export default async function Home({
               priority
             />
           </div>
-          <RemoteMdxPage mdxSource={mdxSource} />
+          {/* Pass related studies data to the MDX renderer */}
+          <RemoteMdxPage mdxSource={mdxSource} relatedStudiesData={relatedStudiesData} />
         </article >
       </div >
     </div >

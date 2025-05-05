@@ -2,14 +2,15 @@ import { promises as fs } from "fs";
 import path from "path";
 
 export interface CaseStudyStructureMetaData {
+  company: string;
   title: string;
   description: string;
   logo: string;
-  href: string;
   url: string;
   customerSince: string;
-  isOpenSourced?: true;
+  isOpenSourced?: boolean;
   date?: string;
+  relatedStudies?: string[];
 }
 
 export async function getMetadata(

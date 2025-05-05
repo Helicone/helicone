@@ -210,7 +210,7 @@ export function Projects() {
             >
               <Link
                 id="featured"
-                className="flex flex-col gap-4 w-full h-full bg-gray-50 hover:bg-brand/10 transition-all duration-200 rounded-lg py-6 px-5 group"
+                className="flex flex-col gap-4 w-full h-full bg-gray-50 hover:bg-brand/10 transition-all duration-200 rounded-xl py-6 px-5 group"
                 href={project.href}
                 key={i}
                 target="_blank"
@@ -218,13 +218,13 @@ export function Projects() {
                 {/* Each Project card */}
                 <div className="flex flex-col justify-between h-full w-full text-left gap-8">
                   {/* Image and usage */}
-                  <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-6">
                     <div className="flex items-start justify-between">
 
                       <Image
                         src={project.imageHref}
                         alt={project.title}
-                        width={160}
+                        width={150}
                         height={100}
                         className="grayscale object-contain"
                       />
