@@ -1,9 +1,10 @@
 import { ISLAND_WIDTH } from "@/lib/utils";
 import { cn } from "@/lib/utils";
-import { ChevronRightIcon } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import LogoBox from "./LogoBox";
 import Link from "next/link";
 import Image from "next/image";
+import { Button } from "../ui/button";
 
 const Hero = () => {
   return (
@@ -44,15 +45,26 @@ const Hero = () => {
         </span>
         production-ready LLM applications.
       </p>
-      <Link href="https://us.helicone.ai/signup">
-        <button className="bg-brand py-3 px-6 lg:py-[18px] lg:px-9 text-base lg:text-[22px] 2xl:text-[26px] font-normal flex gap-3 rounded-lg text-white self-start items-center z-[10]">
-          Get started for free
-          <ChevronRightIcon
-            className="w-5 sm:w-7 h-5 sm:h-7"
-            strokeWidth={2.33}
-          />
-        </button>
-      </Link>
+      <div className="flex flex-col md:flex-row gap-4">
+        <Link href="https://us.helicone.ai/signup">
+          <Button
+            className="bg-brand p-5 text-base md:text-lg md:py-4 lg:py-7 lg:px-7 lg:text-xl gap-2 rounded-lg items-center z-[10]"
+          >
+            Start monitoring
+            <ChevronRight className="size-5 md:size-6" />
+          </Button>
+        </Link>
+        <Link href="/contact">
+          <Button
+            variant="ghost"
+            className="p-5 text-base md:text-lg md:py-4 lg:py-7 lg:px-7 lg:text-xl gap-2 rounded-lg items-center z-[10]"
+          >
+            Contact sales
+            <ChevronRight className="size-5 md:size-6" />
+          </Button>
+        </Link>
+      </div>
+
 
       {/* LogoBox components already have 'hidden lg:block' class built-in */}
       <div className="hidden lg:block" aria-hidden="true">
