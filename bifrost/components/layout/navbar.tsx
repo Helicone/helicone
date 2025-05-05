@@ -229,6 +229,7 @@ const resourcesComponents: LinkItem[] = [
     description: "Insights on AI development and best practices",
     icon: <Newspaper className="size-5 navbar-icon-style" />,
   },
+];
 
 const toolsComponents: LinkItem[] = [
   {
@@ -501,9 +502,9 @@ const NavBar = (props: NavBarProps) => {
                 <p className="text-sm text-accent-foreground">
                   {props.stars
                     ? props.stars.toLocaleString("en-US", {
-                        notation: "compact",
-                        compactDisplay: "short",
-                      })
+                      notation: "compact",
+                      compactDisplay: "short",
+                    })
                     : "0"}
                 </p>
               </Button>
