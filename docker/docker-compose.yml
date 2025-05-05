@@ -137,6 +137,21 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+  migrations:
+    build:
+      context: ../
+      dockerfile: docker/dockerfiles/dockerfile_migrations
+
+    depends_on:
+      db:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+    environment:
+      DB_HOST: db:5432
+    volumes:
+      - ../supabase:/app/supabase
+      - ../clickhouse:/app/clickhouse
 
 volumes:
   postgres_flyway_data:
