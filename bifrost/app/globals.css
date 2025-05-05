@@ -98,6 +98,15 @@ h6[id] {
   text-decoration: underline !important;
 }
 
+
+.prose blockquote {
+  border-left: 3px solid #ccc; /* Example: Add a grey left border */
+  padding-left: 1rem;
+  margin-left: 0;
+  margin-right: 0;
+  color: #555; /* Example: Change text color */
+}
+
 @keyframes floating {
   0%,
   100% {

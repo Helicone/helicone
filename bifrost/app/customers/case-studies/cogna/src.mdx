@@ -1,53 +1,60 @@
-import { OtherCaseStudies } from "@/components/customers/OtherCaseStudies";
+Cogna builds sophisticated enterprise software synthesis tools that automatically generate custom applications from specifications. Their development process involves intricate chains of LLM calls working simultaneously, to create the necessary components of an application.
 
-Cogna builds enterprise software synthesis tools that automatically generate custom applications from specifications. Their process relies on complex chains of LLM calls working in concert to create different components of an application simultaneously.
-
-## Visualizing Complex LLM Workflows
+## The Challenge: Complexity in LLM Application Development
 
 The challenge was tracking what's happening across these complex workflows. When something fails, pinpointing exactly where and why became a time-consuming process involving manual inspection of individual requests.
 
-> We're building a tool that can automatically generate custom applications from specifications. It's a complex process that requires a lot of LLM calls working in concert to create different components of an application simultaneously.
-> — Ed, Cogna
-
 > Our product generates software with LLMs for enterprise customers. Sometimes we'll synthesize multiple files in a multi-step process, and they'd be interleaved.
-> — Ed, Cogna
 
-## Common LLM Failure Patterns
+— Ed, Co-founder & CTO, Cogna
 
-1. The LLM includes something in the prompt that shouldn't be there, like accidentally iterating over a string and dumping each character on a new line.
-2. The formatting of the LLM's response is messed up, not matching what was expected.
-3. The LLM provides too much or the wrong context in the prompt, leading to an incorrect or incomplete response.
-4. The LLM indicates it's unsure or doesn't know how to handle the prompt, rather than providing a useful response.→ becomes apologetic
-5. The LLM's response fails validation checks, such as type errors in the generated code.
+The technical complexity created a critical visibility problem:
+
+- **Interleaved processes**: Multiple LLM calls generating different components simultaneously
+- **Opaque relationships**: No way to track dependencies between sequential LLM calls
+- **Difficult debugging**: When failures occurred, engineers spent up to 4 hours manually inspecting individual requests
+- **Slow iteration cycles**: Prompt improvements took days instead of hours due to debugging friction
 
 ## Debugging with Sessions Tree View
 
 > Before Sessions, it was very difficult to tell what request was for what file when processes were interleaved. Sessions helps with that because you have a tree structure.
-> — Ed, Cogna
+
+— Ed, Cogna
 
 Helicone's Session provided a tree-like visualization that mirrors Cogna's application structure, making the entire debugging process transparent. Cogna was able to see the relationships between different requests, rather than just a linear list, and more easily debug issues with the prompts being used. 
 
 This visibility is critical for prompt debugging—one of Cogna's most common use cases. Whether it's identifying formatting issues, excessive context, or insufficient prompt information, Sessions provides the context developers need.
 
 
-## Impact and Efficiency
+## Common LLM Failure Patterns & Resolution with Sessions
+
+Cogna identified five primary failure patterns in their LLM workflows:
+
+### 1. Prompt Formatting Issues
+**Problem:** 
+1. The LLM includes something in the prompt that shouldn't be there, like accidentally iterating over a string and dumping each character on a new line.
+2. The formatting of the LLM's response is messed up, not matching what was expected.
+3. The LLM provides too much or the wrong context in the prompt, leading to an incorrect or incomplete response.
+4. The LLM indicates it's unsure or doesn't know how to handle the prompt, rather than providing a useful response.→ becomes apologetic
+5. The LLM's response fails validation checks, such as type errors in the generated code.
+
+## Helicone's Impact
 
 For Cogna's engineers, Sessions transformed prompt debugging from a pain point to a streamlined process:
 
-| Before Helicone | With Helicone Sessions |
-| --------------- | ---------------------- |
-| Manual filtering through individual requests | Few-click navigation to specific components that failed validation |
-| Difficulty identifying where failures occurred | Immediate visibility into problematic subtrees |
-| Confusion about which request affected which file | The complete session history provides full context for understanding and pinpointing errors |
-| Time-consuming debugging cycles | Faster feedback loop when modifying and testing prompts |
+| Aspects | Before Helicone | With Helicone Sessions |
+| ------- | --------------- | ---------------------- |
+| **Initial Investigation** | 30-45 minutes manually filtering through individual requests | 1-2 minutes navigating to the relevant subtree |
+| **Error localization** | Required examining isolated requests | Few clicks to identify exactly where validation failed |
+| **Context understanding** | Relied on timestamps and guesswork | Complete session history with parent-child relationships |
+| **Knowledge sharing** | Difficult to share debugging information with team members | Simple URL sharing of specific session views |
+| **Root cause analysis** | Often inconclusive or incomplete | Comprehensive view of the entire process flow |
+
 
 > When something fails, I know it failed somewhere in this particular subtree. I navigate using Sessions, look at the prompts and responses, and iterate right away.
-> — Ed, Cogna
 
----
+— Ed, Cogna
 
 ### Bring Clarity to Your LLM Workflows
 
-Want to visualize and debug complex AI agent processes like Cogna? Try <a href="https://www.helicone.ai/signup" target="_blank" rel="noopener noreferrer">Helicone</a> free today and see how Sessions can transform your development workflow.
-
-<OtherCaseStudies />
+Want to visualize and debug complex AI agent processes like Cogna? <a href="https://www.helicone.ai/signup" target="_blank" rel="noopener noreferrer">Try Helicone for free</a> and see how Sessions can transform your development workflow.

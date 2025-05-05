@@ -131,6 +131,8 @@ export default async function Home({
           </div>
           {/* Pass related studies data to the MDX renderer */}
           <RemoteMdxPage mdxSource={mdxSource} relatedStudiesData={relatedStudiesData} />
+
+          <OtherCaseStudies caseStudies={relatedStudiesData} />
         </article >
       </div >
     </div >

@@ -50,7 +50,7 @@ export type CaseStudyStructure = {
 
 const caseStudies: CaseStudyStructure[] = [
   { dynamicEntry: { folderName: "cogna" } },
-  { dynamicEntry: { folderName: "usetusk" } },
+  { dynamicEntry: { folderName: "tusk" } },
   { dynamicEntry: { folderName: "wordware" } },
 ];
 
