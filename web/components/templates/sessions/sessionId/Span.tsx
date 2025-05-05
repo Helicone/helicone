@@ -654,14 +654,12 @@ export const TraceSpan = ({
                           ? y + height / 2
                           : y
                       }
-                      fill={
+                      className={
                         isSelected
                           ? theme === "dark"
-                            ? "#0ea5e9"
-                            : "#0369A1"
-                          : theme === "dark"
-                          ? "#cbd5e1"
-                          : "#334155"
+                            ? "fill-sky-500"
+                            : "fill-sky-700"
+                          : "fill-card-foreground"
                       }
                       opacity={isSelected ? 1 : 0.7}
                       textAnchor="start"
@@ -687,26 +685,12 @@ export const TraceSpan = ({
               {spanData.map((entry, index) => {
                 const color = getColor(entry.path);
                 // Determine if this bar is in the highlighter range
-                const isInHighlighter =
-                  highlighterActive &&
-                  highlighterStart !== null &&
-                  highlighterEnd !== null &&
-                  entry.start <= highlighterEnd &&
-                  entry.start + entry.duration >= highlighterStart;
-
-                const isIndividuallySelected =
-                  !highlighterActive && entry.request_id === selectedRequestId;
 
                 return (
                   <Cell
                     key={`colored-cell-${index}`}
                     className="cursor-pointer transition-colors duration-150"
-                    style={{
-                      fill:
-                        isInHighlighter || isIndividuallySelected
-                          ? color
-                          : color,
-                    }}
+                    style={{ fill: color }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.fill = `${color}80`; // 50% opacity (approx.)
                     }}
