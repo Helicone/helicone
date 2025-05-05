@@ -57,12 +57,15 @@ export class OrganizationController extends Controller {
       return err("Invalid auth header");
     }
 
-    const authParams = await getHeliconeAuthClient().getUser(authHeader.data);
+    const authParams = await getHeliconeAuthClient().getUser(
+      authHeader.data,
+      req.headers
+    );
     if (authParams.error || !authParams.data) {
       return err(authParams.error ?? "User not found");
     }
 
-    return await dbExecute<
+    const result = await dbExecute<
       Database["public"]["Tables"]["organization"]["Row"] & {
         role: string;
       }
@@ -75,6 +78,12 @@ export class OrganizationController extends Controller {
       `,
       [authParams.data.id]
     );
+    if (result.error) {
+      this.setStatus(500);
+      return err(result.error ?? "Error getting organizations");
+    }
+
+    return ok(result.data!);
   }
 
   @Get("/{organizationId}")
@@ -502,9 +511,29 @@ export class OrganizationController extends Controller {
   ): Promise<Result<null, string>> {
     const organizationManager = new OrganizationManager(request.authParams);
 
-    const result = await organizationManager.setupDemo(
-      request.authParams.organizationId ?? ""
+    const demoOrg = await dbExecute<
+      Database["public"]["Tables"]["organization"]["Row"]
+    >(
+      `SELECT DISTINCT ON (organization.id) organization.* 
+      FROM organization 
+      left join organization_member on organization.id = organization_member.organization
+      WHERE tier = 'demo' 
+      and coalesce((onboarding_status->>'demoDataSetup')::boolean, false) != true
+      and (organization_member.member = $1 or organization.owner = $1)
+      limit 1
+      `,
+      [request.authParams.userId]
     );
+
+    if (demoOrg.error || !demoOrg.data) {
+      return err(demoOrg.error ?? "Error getting demo organization");
+    }
+
+    if (demoOrg.data.length === 0) {
+      return err("No demo organization found");
+    }
+
+    const result = await organizationManager.setupDemo(demoOrg.data[0].id);
     if (result.error) {
       this.setStatus(500);
       console.error(result.error);

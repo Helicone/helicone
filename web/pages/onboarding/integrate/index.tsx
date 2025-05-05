@@ -26,7 +26,7 @@ export default function IntegratePage() {
     if (org?.currentOrg?.id) {
       updateCurrentStep("INTEGRATION");
     }
-  }, [org?.currentOrg?.id, updateCurrentStep]);
+  }, [org?.currentOrg?.id]);
 
   const handleDoItLater = () => {
     setIsRedirecting(true);

@@ -1,18 +1,16 @@
 FROM node:20
 
-COPY ./package.json /app/web/package.json
-COPY ./yarn.lock /app/web/yarn.lock
-
 WORKDIR /app/web
 
-RUN yarn
+# We'll mount the local directory at runtime,
+# but install dependencies in the container initially
+COPY ./package.json ./yarn.lock ./
+RUN yarn install
 
-
-COPY . /app/web
-RUN find /app/web -name ".env.*" -exec rm {} \;
-
-RUN rm .env.* || true
+# Set environment for development
+ENV NODE_ENV=development
 
 EXPOSE 3000
 
-CMD ["yarn", "dev:local"]
+# Command will be overridden in docker-compose.yml
+CMD ["yarn", "dev:local", "-p", "3000"]

@@ -36,7 +36,7 @@ type BlogPostProps = {
 
 type UnPromise<T> = T extends Promise<infer U> ? U : T;
 
-const HEADSHOTS = {
+export const HEADSHOTS = {
   "Cole Gottdank": "/static/blog/colegottdank-headshot.webp",
   "Lina Lam": "/static/blog/linalam-headshot.webp",
   "Stefan Bokarev": "/static/blog/stefanbokarev-headshot.webp",
@@ -44,6 +44,7 @@ const HEADSHOTS = {
   "Scott Nguyen": "/static/blog/scottnguyen-headshot.webp",
   "Kavin Desi": "/static/blog/kavin-headshot.webp",
   "Yusuf Ishola": "/static/blog/yusuf-headshot.webp",
+  "Juliette Chevalier": "/static/blog/juliette-headshot.webp"
 };
 
 function metaDataToBlogStructure(
@@ -217,10 +218,25 @@ export type BlogStructure =
     };
   };
 
-const blogContent: BlogStructure[] = [
+export const BLOG_CONTENT: BlogStructure[] = [
+  {
+    dynmaicEntry: {
+      folderName: "implement-and-monitor-cag",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "helicone-vs-galileo",
+    },
+  },
   {
     dynmaicEntry: {
       folderName: "building-first-mcp-for-developers",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "monitoring-local-llms",
     },
   },
   {
@@ -618,7 +634,7 @@ const blogContent: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
-      folderName: "custom-properties",
+      folderName: "how-to-track-llm-user-feedback",
     },
   },
   {
@@ -756,7 +772,7 @@ export default async function Blog({
   // Load metadata for all dynamic entries first
   const dynamicMetadata = new Map();
 
-  for (const blog of blogContent) {
+  for (const blog of BLOG_CONTENT) {
     if ("dynmaicEntry" in blog) {
       const metadata = await getMetadata(blog.dynmaicEntry.folderName);
       dynamicMetadata.set(blog.dynmaicEntry.folderName, metadata);
@@ -766,7 +782,7 @@ export default async function Blog({
   // Extract unique badge values from blog content
   const allBadges = Array.from(
     new Set(
-      blogContent.map((blog) => {
+      BLOG_CONTENT.map((blog) => {
         if ("dynmaicEntry" in blog) {
           const metadata = dynamicMetadata.get(blog.dynmaicEntry.folderName);
           return (metadata?.badge || "insight").toLowerCase();
@@ -777,10 +793,10 @@ export default async function Blog({
   );
 
   // Always keep featured post visible
-  const featuredPost = blogContent[0];
+  const featuredPost = BLOG_CONTENT[0];
 
   // Filter the remaining posts based on URL parameters
-  const filteredPosts = blogContent.slice(1).filter((blog) => {
+  const filteredPosts = BLOG_CONTENT.slice(1).filter((blog) => {
     let badgeText = "";
     let title = "";
 

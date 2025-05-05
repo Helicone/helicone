@@ -80,14 +80,16 @@ h6[id] {
     @apply bg-background text-foreground;
   }
 }
-
   
 @layer components {
   .accordion-content-style {
     @apply text-muted-foreground text-sm leading-6;
   }
-}
 
+  .navbar-icon-style {
+    @apply h-full w-full stroke-[1.5px] fill-none text-brand;
+  }
+}
 
 /* Custom link styling for blog content only */
 .prose a {

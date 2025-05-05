@@ -12,6 +12,7 @@ import {
 import { supabaseUrl as serverSupabaseUrl } from "../supabaseServer";
 import { ORG_ID_COOKIE_KEY } from "../constants";
 import { Result, ok } from "../../packages/common/result";
+import { dbExecute } from "../api/db/dbExecute";
 
 export type SSRContext<T> =
   | { req: NextApiRequest; res: NextApiResponse<T> }
@@ -53,10 +54,17 @@ export class SupabaseServerWrapper<T> {
     if (!user.data || !user.data.user) {
       return { error: "Unauthorized User", data: null };
     }
-    const orgAccessCheck = await this.client
-      .from("organization")
-      .select("*")
-      .eq("id", this.ctx.req.cookies[ORG_ID_COOKIE_KEY] || "");
+
+    const orgAccessCheck = await dbExecute<
+      Database["public"]["Tables"]["organization"]["Row"]
+    >(
+      `SELECT * FROM organization 
+      LEFT JOIN organization_member ON organization.id = organization_member.organization
+      WHERE organization.id = $1
+      and (organization_member.member = $2 or organization.owner = $2)
+      `,
+      [this.ctx.req.cookies[ORG_ID_COOKIE_KEY] ?? "", user.data.user.id]
+    );
 
     if (orgAccessCheck.data?.length === 0) {
       // maybe then we should call the create dummy org api

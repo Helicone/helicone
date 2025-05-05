@@ -13,17 +13,7 @@ import "highlight.js/styles/atom-one-dark.css";
 import { Button } from "@/components/ui/button";
 import { Check, ChevronRight, ChevronLeft } from "lucide-react";
 import { TwitterShareButton } from "@/components/blog/TwitterShareButton";
-
-// Define headshots mapping
-const HEADSHOTS = {
-  "Cole Gottdank": "/static/blog/colegottdank-headshot.webp",
-  "Lina Lam": "/static/blog/linalam-headshot.webp",
-  "Stefan Bokarev": "/static/blog/stefanbokarev-headshot.webp",
-  "Justin Torre": "/static/blog/justintorre-headshot.webp",
-  "Scott Nguyen": "/static/blog/scottnguyen-headshot.webp",
-  "Kavin Desi": "/static/blog/kavin-headshot.webp",
-  "Yusuf Ishola": "/static/blog/yusuf-headshot.webp",
-};
+import { HEADSHOTS } from "../page";
 
 export default async function Home({
   params,

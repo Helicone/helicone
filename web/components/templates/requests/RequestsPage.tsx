@@ -18,11 +18,7 @@ import FilterASTButton from "@/filterAST/FilterASTButton";
 import { HeliconeRequest, MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
 import { useGetRequestWithBodies } from "@/services/hooks/requests";
-import {
-  UIFilterRow,
-  UIFilterRowNode,
-  UIFilterRowTree,
-} from "@/services/lib/filters/types";
+import { UIFilterRowNode, UIFilterRowTree } from "@/services/lib/filters/types";
 import { TimeFilter } from "@/types/timeFilter";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -36,7 +32,6 @@ import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   getRootFilterNode,
   isFilterRowNode,
-  isUIFilterRow,
 } from "../../../services/lib/filters/uiFilterRowTree";
 import {
   SortDirection,
@@ -52,7 +47,6 @@ import ExportButton from "../../shared/themed/table/exportButton";
 import ThemedTable from "../../shared/themed/table/themedTable";
 import ThemedModal from "../../shared/themed/themedModal";
 import useSearchParams from "../../shared/utils/useSearchParams";
-import OnboardingFloatingPrompt from "../dashboard/OnboardingFloatingPrompt";
 import NewDataset from "../datasets/NewDataset";
 import { getInitialColumns } from "./initialColumns";
 import {
@@ -62,7 +56,10 @@ import {
   getMockRequests,
 } from "./mockRequestsData";
 import RequestDrawer from "./RequestDrawer";
-import RequestsEmptyState from "./RequestsEmptyState";
+import RequestsEmptyState, {
+  EMPTY_STATE_PAGES,
+  RequestsPageEmptyStateOptions,
+} from "./RequestsEmptyState";
 import StreamWarning from "./StreamWarning";
 import TableFooter from "./tableFooter";
 import UnauthorizedView from "./UnauthorizedView";
@@ -82,7 +79,9 @@ interface RequestsPageV2Props {
   evaluatorId?: string;
   rateLimited?: boolean;
   organizationLayoutAvailable: boolean;
+  emptyStateOptions?: RequestsPageEmptyStateOptions;
 }
+
 export default function RequestsPage(props: RequestsPageV2Props) {
   const {
     currentPage,
@@ -92,6 +91,11 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     initialRequestId,
     userId,
     rateLimited = false,
+    organizationLayoutAvailable,
+    emptyStateOptions = {
+      options: EMPTY_STATE_PAGES.requests,
+      isVisible: true,
+    },
   } = props;
 
   /* -------------------------------------------------------------------------- */
@@ -99,16 +103,12 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   /* -------------------------------------------------------------------------- */
   const initialLoadRef = useRef(true);
   const drawerRef = useRef<any>(null);
-  const popoverContentRef = useRef<HTMLDivElement>(null);
   const tableRef = useRef<any>(null);
 
   /* -------------------------------------------------------------------------- */
   /*                                   STATES                                   */
   /* -------------------------------------------------------------------------- */
-  const [isFiltersPinned, setIsFiltersPinned] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [showOnboardingPopUp, setShowOnboardingPopUp] = useState(false);
   const [selectedData, setSelectedData] = useState<
     MappedLLMRequest | undefined
   >(undefined);
@@ -225,22 +225,32 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     },
     sortLeaf,
     isCached,
-    isLive
+    isLive,
+    rateLimited
   );
 
   /* -------------------------------------------------------------------------- */
   /*                                    MEMOS                                   */
   /* -------------------------------------------------------------------------- */
-  // Track whether we should show mock data (for users who haven't onboarded)
   const shouldShowMockData = useMemo(() => {
-    // Return undefined if org data isn't loaded yet
+    const showMockData = emptyStateOptions.isVisible === true;
+
     if (orgContext?.currentOrg === undefined) {
       return undefined;
     }
-    return orgContext?.currentOrg?.has_onboarded === false;
+    return orgContext?.currentOrg?.has_onboarded === false && showMockData;
   }, [orgContext?.currentOrg]);
-  // Create mock data with useMemo to avoid recreating on every render
-  const mockRequests = useMemo(() => getMockRequests(pageSize), [pageSize]);
+
+  const mockRequests = useMemo(() => {
+    const shouldForceRateLimitMock =
+      emptyStateOptions?.options === EMPTY_STATE_PAGES["rate-limits"];
+
+    return getMockRequests(
+      pageSize,
+      shouldForceRateLimitMock ? 429 : undefined
+    );
+  }, [pageSize, emptyStateOptions]);
+
   const mockFilterMap = useMemo(() => getMockFilterMap(), []);
   const mockProperties = useMemo(() => getMockProperties(), []);
   const mockCount = useMemo(() => getMockRequestCount(), []);
@@ -290,7 +300,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   }, [properties, isCached]);
 
   const {
-    selectMode: _selectMode,
+    selectMode,
     toggleSelectMode: _toggleSelectMode,
     selectedIds,
     toggleSelection,
@@ -302,10 +312,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
       request.heliconeMetadata.requestId,
   });
 
-  const searchPropertyFilters = shouldShowMockData
-    ? (_property: string, _search: string) =>
-        Promise.resolve({ data: null, error: "" })
-    : realSearchPropertyFilters;
   const requestWithoutStream = requests.find((r) => {
     return (
       r.raw?.request?.stream &&
@@ -376,9 +382,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
 
     return getRootFilterNode();
   }, [searchParams, filterMap]);
-  const userFilterMapIndex = filterMap.findIndex(
-    (filter: any) => filter.label === "Helicone-Rate-Limit-Status"
-  );
 
   // Update the page state and router query when the page changes
   const handlePageChange = useCallback(
@@ -462,43 +465,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     ]
   );
 
-  const onSetAdvancedFiltersHandler = useCallback(
-    (filters: UIFilterRowTree, layoutFilterId?: string | null) => {
-      const encodeFilters = (filters: UIFilterRowTree): string => {
-        const encode = (node: UIFilterRowTree): any => {
-          if (isFilterRowNode(node)) {
-            return {
-              type: "node",
-              operator: node.operator,
-              rows: node.rows.map(encode),
-            };
-          } else {
-            return {
-              type: "leaf",
-              filter: `${filterMap[node.filterMapIdx].label}:${
-                filterMap[node.filterMapIdx].operators[node.operatorIdx].label
-              }:${encodeURIComponent(node.value)}`,
-            };
-          }
-        };
-
-        return JSON.stringify(encode(filters));
-      };
-
-      setAdvancedFilters(filters);
-      if (
-        layoutFilterId === null ||
-        (isFilterRowNode(filters) && filters.rows.length === 0)
-      ) {
-        searchParams.delete("filters");
-      } else {
-        const currentAdvancedFilters = encodeFilters(filters);
-        searchParams.set("filters", currentAdvancedFilters);
-      }
-    },
-    [searchParams, filterMap]
-  );
-
   const getDefaultValue = useCallback(() => {
     const currentTimeFilter = searchParams.get("t");
 
@@ -523,47 +489,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     }
   }, [router.query.page]);
 
-  // Apply rate limit filter when rateLimited is true
-  useEffect(() => {
-    if (rateLimited) {
-      if (userFilterMapIndex === -1) {
-        return;
-      }
-
-      setAdvancedFilters((prev) => {
-        const newFilter: UIFilterRow = {
-          filterMapIdx: userFilterMapIndex,
-          operatorIdx: 0,
-          value: "rate_limited",
-        };
-
-        if (isFilterRowNode(prev)) {
-          // Check if the rate limit filter already exists
-          const existingFilterIndex = prev.rows.findIndex(
-            (row) =>
-              isUIFilterRow(row) && row.filterMapIdx === userFilterMapIndex
-          );
-
-          if (existingFilterIndex !== -1) {
-            // Update existing filter
-            const updatedRows = [...prev.rows];
-            updatedRows[existingFilterIndex] = newFilter;
-            return { ...prev, rows: updatedRows };
-          } else {
-            // Add new filter
-            return { ...prev, rows: [...prev.rows, newFilter] };
-          }
-        } else {
-          // If prev is a single UIFilterRow, create a new UIFilterRowNode
-          return {
-            operator: "and",
-            rows: [prev, newFilter],
-          };
-        }
-      });
-    }
-  }, [userFilterMapIndex, rateLimited, setAdvancedFilters]);
-
   // Initialize advanced filters from URL on first load
   useEffect(() => {
     if (initialLoadRef.current && filterMap.length > 0 && !isDataLoading) {
@@ -572,14 +497,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
       initialLoadRef.current = false;
     }
   }, [filterMap, getAdvancedFilters, isDataLoading]);
-
-  useEffect(() => {
-    if (orgContext?.currentOrg?.has_onboarded !== undefined) {
-      setShowOnboardingPopUp(!orgContext.currentOrg.has_onboarded);
-    } else {
-      orgContext?.refetchOrgs();
-    }
-  }, [orgContext, orgContext?.currentOrg?.has_onboarded]);
 
   // Load and display initial request data in drawer
   useEffect(() => {
@@ -762,7 +679,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
               onSelectAll={selectAll}
               selectedIds={selectedIds}
             >
-              {_selectMode && (
+              {selectMode && (
                 <Row className="gap-5 items-center w-full justify-between bg-white dark:bg-black p-5">
                   <div className="flex flex-row gap-2 items-center">
                     <span className="text-sm font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">
@@ -859,14 +776,14 @@ export default function RequestsPage(props: RequestsPageV2Props) {
           }}
         />
       </ThemedModal>
-      <OnboardingFloatingPrompt
-        open={showOnboardingPopUp}
-        setOpen={setShowOnboardingPopUp}
-      />
     </main>
   ) : (
     <div className="animate-fade-in">
-      <RequestsEmptyState isVisible={true} />
+      <RequestsEmptyState
+        isVisible={emptyStateOptions.isVisible ?? true}
+        options={emptyStateOptions.options}
+        onClickHandler={emptyStateOptions.onPrimaryActionClick}
+      />
 
       <ThemedTable
         id="requests-table"

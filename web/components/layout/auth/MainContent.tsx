@@ -1,6 +1,5 @@
 import { clsx } from "../../shared/clsx";
 import { getUSDate } from "../../shared/utils/utils";
-import OrgContext, { useOrg } from "../org/organizationContext";
 
 interface MainContentProps {
   children: React.ReactNode;
@@ -19,8 +18,6 @@ export interface BannerType {
 }
 
 const MainContent = ({ children, banner, pathname }: MainContentProps) => {
-  const org = useOrg();
-
   return (
     <div className={clsx("flex flex-1 flex-col")}>
       <main className="flex-1">
@@ -57,14 +54,9 @@ const MainContent = ({ children, banner, pathname }: MainContentProps) => {
           </div>
         )}
         <div className={clsx("bg-background h-full min-h-screen")}>
-          <OrgContext.Provider value={org}>
-            <div
-              className="mr-auto w-full min-h-screen"
-              key={`${pathname}-${org?.renderKey}`}
-            >
-              {children}
-            </div>
-          </OrgContext.Provider>
+          <div className="mr-auto w-full min-h-screen" key={`${pathname}`}>
+            {children}
+          </div>
         </div>
       </main>
     </div>

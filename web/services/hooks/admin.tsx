@@ -3,20 +3,6 @@ import Parser from "rss-parser";
 import { $JAWN_API, getJawnClient } from "../../lib/clients/jawn";
 import { components } from "../../lib/clients/jawnTypes/private";
 
-const useAlertBanners = () => {
-  const {
-    data: alertBanners,
-    isLoading: isAlertBannersLoading,
-    refetch,
-  } = $JAWN_API.useQuery("get", "/v1/alert-banner", {});
-
-  return {
-    alertBanners,
-    isAlertBannersLoading,
-    refetch,
-  };
-};
-
 const useCreateAlertBanner = (onSuccess?: () => void) => {
   const { mutate: createBanner, isPending: isCreatingBanner } =
     $JAWN_API.useMutation("post", "/v1/admin/alert_banners", {
@@ -154,7 +140,6 @@ const useChangelog = () => {
 };
 
 export {
-  useAlertBanners,
   useChangelog,
   useCreateAlertBanner,
   useGetSetting,

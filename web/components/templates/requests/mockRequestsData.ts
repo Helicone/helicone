@@ -49,7 +49,10 @@ export const getMockFilterMap = () => {
 };
 
 // Generate a realistic-looking mock request
-const generateMockRequest = (id: string): MappedLLMRequest => {
+const generateMockRequest = (
+  id: string,
+  forceStatusCode?: number
+): MappedLLMRequest => {
   const models = ["gpt-4", "gpt-3.5-turbo", "claude-2", "llama-2"];
   const modelIndex = Math.floor(Math.random() * models.length);
   const model = models[modelIndex];
@@ -62,7 +65,11 @@ const generateMockRequest = (id: string): MappedLLMRequest => {
     return 500;
   };
 
-  const statusCode = randomStatusCode();
+  const statusCode = forceStatusCode ?? randomStatusCode();
+  const getStatusType = (code: number): "success" | "error" => {
+    return code >= 200 && code < 300 ? "success" : "error";
+  };
+
   const timeOffset = Math.floor(Math.random() * 12 * 60 * 60 * 1000); // Random time within 12 hours
   const time = new Date(Date.now() - timeOffset);
   const isStream = Math.random() > 0.7; // 30% chance of being a stream
@@ -258,7 +265,7 @@ const generateMockRequest = (id: string): MappedLLMRequest => {
       user: `user-${Math.floor(Math.random() * 999)}`,
       status: {
         code: statusCode,
-        statusType: statusCode === 200 ? "success" : "error",
+        statusType: getStatusType(statusCode),
       },
       customProperties: {
         source: ["web", "mobile", "api"][Math.floor(Math.random() * 3)],
@@ -281,9 +288,12 @@ const generateMockRequest = (id: string): MappedLLMRequest => {
 };
 
 // Generate mock requests data
-export const getMockRequests = (count: number = 25): MappedLLMRequest[] => {
+export const getMockRequests = (
+  count: number = 25,
+  forceStatusCode?: number
+): MappedLLMRequest[] => {
   return Array.from({ length: count }, (_, i) =>
-    generateMockRequest(`mock-req-${i}`)
+    generateMockRequest(`mock-req-${i}`, forceStatusCode)
   );
 };
 

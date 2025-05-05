@@ -1,7 +1,7 @@
 import * as Sentry from "@sentry/node";
 import { validate as uuidValidate } from "uuid";
 import { dataDogClient } from "../../lib/clients/DataDogClient";
-import { KafkaProducer } from "../../lib/clients/KafkaProducer";
+import { HeliconeQueueProducer } from "../../lib/clients/HeliconeQuequeProducer";
 import { HeliconeScoresMessage } from "../../lib/handlers/HandlerContext";
 import { AuthParams } from "../../packages/common/auth/types";
 import { DelayedOperationService } from "../../lib/shared/delayedOperationService";
@@ -49,12 +49,12 @@ export function mapScores(scores: Scores): Score[] {
 
 export class ScoreManager extends BaseManager {
   private scoreStore: ScoreStore;
-  private kafkaProducer: KafkaProducer;
+  private kafkaProducer: HeliconeQueueProducer;
 
   constructor(authParams: AuthParams) {
     super(authParams);
     this.scoreStore = new ScoreStore(authParams.organizationId);
-    this.kafkaProducer = new KafkaProducer();
+    this.kafkaProducer = new HeliconeQueueProducer();
   }
   private getDefaultDelayMs(): number {
     return process.env.NODE_ENV === "production" ? 10 * 60 * 1000 : 0; // 10 minutes in milliseconds
@@ -89,7 +89,7 @@ export class ScoreManager extends BaseManager {
     scoresMessage: HeliconeScoresMessage[],
     delayMs?: number
   ): Promise<Result<null, string>> {
-    if (!this.kafkaProducer.isKafkaEnabled()) {
+    if (!this.kafkaProducer.isQueueEnabled()) {
       console.log("Kafka is not enabled. Using score manager");
 
       // run it immediately once
@@ -286,7 +286,7 @@ export class ScoreManager extends BaseManager {
         }`
       );
 
-      const kafkaProducer = new KafkaProducer();
+      const kafkaProducer = new HeliconeQueueProducer();
       const kafkaResult = await kafkaProducer.sendScoresMessage(
         scoresMessages,
         "helicone-scores-prod-dlq"

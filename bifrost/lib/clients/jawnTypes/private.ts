@@ -192,6 +192,14 @@ export interface paths {
   "/v1/settings/query": {
     get: operations["GetSettings"];
   };
+  "/v1/rate-limits": {
+    get: operations["GetRateLimits"];
+    post: operations["CreateRateLimit"];
+  };
+  "/v1/rate-limits/{ruleId}": {
+    put: operations["UpdateRateLimit"];
+    delete: operations["DeleteRateLimit"];
+  };
   "/v1/stripe/subscription/cost-for-prompts": {
     get: operations["GetCostForPrompts"];
   };
@@ -366,11 +374,12 @@ export interface paths {
   "/v1/admin/settings/{name}": {
     get: operations["GetSetting"];
   };
+  "/v1/admin/settings": {
+    get: operations["GetSettings"];
+    post: operations["UpsertSetting"];
+  };
   "/v1/admin/azure/run-test": {
     post: operations["AzureTest"];
-  };
-  "/v1/admin/settings": {
-    post: operations["UpdateSetting"];
   };
   "/v1/admin/orgs/query": {
     post: operations["FindAllOrgs"];
@@ -954,6 +963,7 @@ Json: JsonObject;
       timestamp?: string;
       tool_call_id?: string;
       tool_calls?: components["schemas"]["FunctionCall"][];
+      mime_type?: string;
       content?: string;
       name?: string;
       instruction?: string;
@@ -1366,6 +1376,51 @@ Json: JsonObject;
       error: null;
     };
     "Result_PromptVersionResultFilled.string_": components["schemas"]["ResultSuccess_PromptVersionResultFilled_"] | components["schemas"]["ResultError_string_"];
+    RateLimitRuleView: {
+      id: string;
+      name: string;
+      /** Format: double */
+      quota: number;
+      /** Format: double */
+      window_seconds: number;
+      /** @enum {string} */
+      unit: "request" | "cents";
+      segment?: string;
+      created_at: string;
+      updated_at: string;
+    };
+    "ResultSuccess_RateLimitRuleView-Array_": {
+      data: components["schemas"]["RateLimitRuleView"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_RateLimitRuleView-Array.string_": components["schemas"]["ResultSuccess_RateLimitRuleView-Array_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_RateLimitRuleView_: {
+      data: components["schemas"]["RateLimitRuleView"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_RateLimitRuleView.string_": components["schemas"]["ResultSuccess_RateLimitRuleView_"] | components["schemas"]["ResultError_string_"];
+    CreateRateLimitRuleParams: {
+      name: string;
+      /** Format: double */
+      quota: number;
+      /** Format: double */
+      window_seconds: number;
+      /** @enum {string} */
+      unit: "request" | "cents";
+      segment?: string;
+    };
+    UpdateRateLimitRuleParams: {
+      name?: string;
+      /** Format: double */
+      quota?: number;
+      /** Format: double */
+      window_seconds?: number;
+      /** @enum {string} */
+      unit?: "request" | "cents";
+      segment?: string;
+    };
     UpgradeToProRequest: {
       addons?: {
         evals?: boolean;
@@ -2371,7 +2426,7 @@ Json: JsonObject;
     };
     Setting: components["schemas"]["KafkaSettings"] | components["schemas"]["AzureExperiment"] | components["schemas"]["ApiKey"];
     /** @enum {string} */
-    SettingName: "kafka:dlq" | "kafka:log" | "kafka:score" | "kafka:dlq:score" | "kafka:dlq:eu" | "kafka:log:eu" | "kafka:orgs-to-dlq" | "azure:experiment" | "openai:apiKey" | "anthropic:apiKey" | "openrouter:apiKey";
+    SettingName: "kafka:dlq" | "kafka:log" | "kafka:score" | "kafka:dlq:score" | "kafka:dlq:eu" | "kafka:log:eu" | "kafka:orgs-to-dlq" | "azure:experiment" | "openai:apiKey" | "anthropic:apiKey" | "openrouter:apiKey" | "togetherai:apiKey" | "sqs:request-response-logs" | "sqs:helicone-scores" | "sqs:request-response-logs-dlq" | "sqs:helicone-scores-dlq";
     /**
      * @description The URL interface represents an object providing static methods used for creating object URLs.
      *
@@ -15450,8 +15505,69 @@ export interface operations {
       200: {
         content: {
           "application/json": {
-            useAzureForExperiment: boolean;
-          };
+              settings: unknown;
+              name: string;
+            }[];
+        };
+      };
+    };
+  };
+  GetRateLimits: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_RateLimitRuleView-Array.string_"];
+        };
+      };
+    };
+  };
+  CreateRateLimit: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateRateLimitRuleParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_RateLimitRuleView.string_"];
+        };
+      };
+    };
+  };
+  UpdateRateLimit: {
+    parameters: {
+      path: {
+        ruleId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateRateLimitRuleParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_RateLimitRuleView.string_"];
+        };
+      };
+    };
+  };
+  DeleteRateLimit: {
+    parameters: {
+      path: {
+        ruleId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };
@@ -16537,6 +16653,22 @@ export interface operations {
       };
     };
   };
+  UpsertSetting: {
+    requestBody: {
+      content: {
+        "application/json": {
+          settings: unknown;
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
+      };
+    };
+  };
   AzureTest: {
     requestBody: {
       content: {
@@ -16560,22 +16692,6 @@ export interface operations {
             resultText: string;
           };
         };
-      };
-    };
-  };
-  UpdateSetting: {
-    requestBody: {
-      content: {
-        "application/json": {
-          settings: components["schemas"]["Setting"];
-          name: components["schemas"]["SettingName"];
-        };
-      };
-    };
-    responses: {
-      /** @description No content */
-      204: {
-        content: never;
       };
     };
   };

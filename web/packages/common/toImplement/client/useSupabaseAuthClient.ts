@@ -1,53 +1,23 @@
-import { useOrg } from "@/components/layout/org/organizationContext";
 import { Database } from "@/db/database.types";
-import { $JAWN_API } from "@/lib/clients/jawn";
-import { SupabaseServerWrapper } from "@/lib/wrappers/supabase";
 import {
   SupabaseClient,
   useSupabaseClient,
   useUser,
 } from "@supabase/auth-helpers-react";
-import {
-  GetServerSidePropsContext,
-  NextApiRequest,
-  NextApiResponse,
-} from "next";
 import posthog from "posthog-js";
 import { useMemo } from "react";
-import { SSRContext } from "../../auth/client/AuthClientFactory";
 import { HeliconeAuthClient } from "../../auth/client/HeliconeAuthClient";
 import { HeliconeOrg, HeliconeUser } from "../../auth/types";
 import { err, ok, Result } from "../../result";
-
-export async function supabaseAuthClientFromSSRContext(
-  ctx: SSRContext<NextApiRequest, NextApiResponse, GetServerSidePropsContext>
-) {
-  const supabaseClient = new SupabaseServerWrapper(ctx);
-  const user = await supabaseClient.getClient().auth.getUser();
-
-  const userAndOrg = (await supabaseClient.getUserAndOrg()).data;
-
-  return new SupabaseAuthClient(
-    supabaseClient.client,
-    {
-      email: user.data.user?.email ?? "",
-      id: user.data.user?.id ?? "",
-    },
-    userAndOrg && userAndOrg.org
-      ? {
-          org: userAndOrg.org,
-          role: userAndOrg.role,
-        }
-      : undefined
-  );
-}
+import { QueryClient, useQueryClient } from "@tanstack/react-query";
 
 export class SupabaseAuthClient implements HeliconeAuthClient {
   user: HeliconeUser | undefined;
   constructor(
     private supabaseClient?: SupabaseClient<Database>,
     user?: HeliconeUser,
-    private org?: { org: HeliconeOrg; role: string }
+    private org?: { org: HeliconeOrg; role: string },
+    private queryClient?: QueryClient
   ) {
     this.user = user;
   }
@@ -60,6 +30,10 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
   }
 
   async signOut(): Promise<void> {
+    if (this.queryClient) {
+      this.queryClient.clear();
+    }
+
     await this.supabaseClient?.auth.signOut({ scope: "global" });
     await this.supabaseClient?.auth.signOut({ scope: "others" });
     await this.supabaseClient?.auth.signOut({ scope: "local" });
@@ -152,6 +126,9 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
     email: string;
     password: string;
   }): Promise<Result<HeliconeUser, string>> {
+    if (this.queryClient) {
+      this.queryClient.clear();
+    }
     if (!this.supabaseClient) {
       return err("Supabase client not found");
     }
@@ -177,6 +154,10 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
     provider: "google" | "github";
     options?: { redirectTo?: string };
   }): Promise<Result<void, string>> {
+    if (this.queryClient) {
+      this.queryClient.clear();
+    }
+
     if (!this.supabaseClient) {
       return err("Supabase client not found");
     }
@@ -212,32 +193,17 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
 export function useSupabaseAuthClient(): HeliconeAuthClient {
   const supabaseClient = useSupabaseClient<Database>();
   const user = useUser();
-  const org = useOrg();
+  const queryClient = useQueryClient();
 
-  const allOrgs = $JAWN_API.useQuery("get", "/v1/organization", {});
   return useMemo(() => {
-    const orgWithRole = allOrgs.data?.data?.find(
-      (orgWithRole) => orgWithRole.id === org?.currentOrg?.id
-    );
-
     return new SupabaseAuthClient(
       supabaseClient,
       {
         id: user?.id ?? "",
         email: user?.email ?? "",
       },
-      orgWithRole
-        ? {
-            org: orgWithRole,
-            role: orgWithRole.role,
-          }
-        : undefined
+      undefined,
+      queryClient
     );
-  }, [
-    allOrgs.data?.data,
-    supabaseClient,
-    user?.id,
-    user?.email,
-    org?.currentOrg?.id,
-  ]);
+  }, [supabaseClient, user?.id, user?.email, queryClient]);
 }

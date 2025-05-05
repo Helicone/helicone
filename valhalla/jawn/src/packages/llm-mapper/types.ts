@@ -144,6 +144,7 @@ export type Message = {
   instruction?: string;
   name?: string;
   content?: string;
+  mime_type?: string; // Added to store MIME type for base64 content
   tool_calls?: FunctionCall[]; // only used if _type is functionCall
   tool_call_id?: string;
   timestamp?: string; // For realtime API

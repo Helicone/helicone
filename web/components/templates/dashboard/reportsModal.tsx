@@ -99,7 +99,7 @@ const ReportsModal = (props: ReportsModalProps) => {
   const slackChannels: {
     id: string;
     name: string;
-  }[] = [...(slackChannelsData || [])];
+  }[] = [...(slackChannelsData?.data || [])];
 
   const handleCustomizeReports = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
