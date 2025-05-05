@@ -25,13 +25,7 @@ WORKDIR /app
 # Create a script to run migrations
 RUN echo '#!/bin/sh \n\
     echo "Running PostgreSQL migrations..." \n\
-    # Set default if DB_HOST is not provided \n\
-    DB_HOST=${DB_HOST:-localhost:54388} \n\
-    \n\
-    # Create a temporary config file with the correct DB_HOST \n\
-    sed "s|\\${DB_HOST:localhost:54388}|$DB_HOST|g" /app/supabase/flyway.conf > /tmp/flyway.conf \n\
-    \n\
-    flyway migrate -configFiles=/tmp/flyway.conf \n\
+    flyway migrate -configFiles=/app/supabase/flyway.conf \n\
     echo "PostgreSQL migrations completed" \n\
     \n\
     echo "Running ClickHouse migrations..." \n\
