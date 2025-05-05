@@ -177,11 +177,13 @@ export function Projects() {
   return (
     <div className="flex flex-col max-w-7xl mx-auto gap-8 py-16">
       <div className="relative w-full flex flex-col gap-4 items-center">
-        <h2 className="text-3xl font-semibold tracking-tight">
+        <h2 className="text-3xl font-bold tracking-tight">
           Community Projects
         </h2>
-        <p className="mt-[12px] text-sm sm:text-lg text-gray-700">
-          Products built with Helicone, by our amazing community of developers.
+        <p className="text-sm sm:text-lg text-center text-accent-foreground">
+          Products built with Helicone, by our amazing
+          <br />
+          community of developers.
         </p>
         <Button variant="outline" asChild className="w-fit">
           <Link
