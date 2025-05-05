@@ -468,24 +468,16 @@ const NavBar = (props: NavBarProps) => {
 
           {/* Github, contact, login */}
           <div className="flex items-center gap-x-3">
-            <Link href="/signin">
-              <Button
-                variant="ghost"
-                className="text-sm text-landing-description rounded-lg"
-              >
-                Log in
-              </Button>
-            </Link>
             <a
               href="https://github.com/helicone/helicone"
               target="_blank"
               rel="noreferrer"
             >
-              <Button variant="outline" className="gap-x-2 rounded-lg">
+              <Button variant="ghost" className="gap-x-2 rounded-lg">
                 <svg
                   fill="currentColor"
                   viewBox="0 0 24 24"
-                  className="w-5 h-5 text-landing-description"
+                  className="w-5 h-5 text-accent-foreground"
                 >
                   <path
                     fillRule="evenodd"
@@ -493,7 +485,7 @@ const NavBar = (props: NavBarProps) => {
                     clipRule="evenodd"
                   />
                 </svg>
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-accent-foreground">
                   {props.stars
                     ? props.stars.toLocaleString("en-US", {
                       notation: "compact",
@@ -503,15 +495,24 @@ const NavBar = (props: NavBarProps) => {
                 </p>
               </Button>
             </a>
-            <Link href="/contact">
+            <Link href="/signin">
               <Button
                 variant="secondary"
-                className="text-sm text-secondary-foreground rounded-lg">
+                className="text-sm rounded-lg"
+              >
+                Log in
+              </Button>
+            </Link>
+
+            <Link href="/contact">
+              <Button
+                variant="outline"
+                className="text-sm rounded-lg">
                 Contact us
               </Button>
             </Link>
             <Link href="/signup">
-              <Button className="text-sm text-white rounded-lg bg-brand">
+              <Button className="text-sm rounded-lg bg-brand">
                 Sign up
               </Button>
             </Link>
