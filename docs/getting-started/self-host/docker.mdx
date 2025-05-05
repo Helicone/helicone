@@ -15,16 +15,6 @@ git clone https://github.com/Helicone/helicone.git
 
 # Start up the services
 docker compose up -d # NOTE: the initial build will take a while ~5 minutes, but subseqent builds will be a lot faster
-
-# Run migrations for clickhouse and postgres
-# install flyway (brew install flyway)
-flyway migrate -configFiles=supabase/flyway.conf
-
-# install clickhouse (brew install clickhouse)
-python3 -m venv venv
-source venv/bin/activate
-pip install tabulate requests
-python3 clickhouse/ch_hcone.py --upgrade --host localhost --port 18123 --user default --no-password
 ```
 
 **Default URLs:**
