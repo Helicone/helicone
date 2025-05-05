@@ -31,10 +31,7 @@ services:
     container_name: helicone-web-local
     build:
       context: ../web
-      dockerfile: ../docker/dockerfiles/dockerfile_web
-      args:
-        NEXT_PUBLIC_HELICONE_JAWN_SERVICE: ${JAWN_PUBLIC_URL}
-        NEXT_PUBLIC_BETTER_AUTH: "true"
+      dockerfile: ../docker/dockerfiles/dockerfile_web_dev
     ports:
       - 3000:3000
     volumes:
@@ -53,6 +50,7 @@ services:
       NEXT_PUBLIC_BETTER_AUTH: "true"
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
       SMTP_SECURE: false
+    command: yarn dev:local -p 3000
 
   db:
     image: postgres:17.4 # You can choose a specific version
@@ -137,6 +135,19 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  migrations:
+    build:
+      context: ../
+      dockerfile: docker/dockerfiles/dockerfile_migrations
+    depends_on:
+      db:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+    volumes:
+      - ../supabase:/app/supabase
+      - ../clickhouse:/app/clickhouse
 
 volumes:
   postgres_flyway_data:
