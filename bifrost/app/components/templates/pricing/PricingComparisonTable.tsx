@@ -85,13 +85,6 @@ const featureGroups: FeatureGroup[] = [
         team: "5",
         enterprise: "Unlimited",
       },
-      {
-        name: "Key vault",
-        hobby: true,
-        pro: true,
-        team: true,
-        enterprise: true,
-      },
     ],
   },
   {
@@ -221,7 +214,7 @@ const featureGroups: FeatureGroup[] = [
         enterprise: true,
       },
       {
-        name: "• LLM-as-a-judge, Python, LastMile AI",
+        name: "• LLM-as-a-judge",
         hobby: false,
         pro: "Included",
         team: true,
@@ -491,8 +484,9 @@ export default function PricingComparisonTable() {
               {tiers.map((tier, index) => (
                 <TableHead
                   key={tier.name}
-                  className={`py-3 px-6 ${tier.isPrimary ? "bg-sky-50" : "bg-white"
-                    } 
+                  className={`py-3 px-6 ${
+                    tier.isPrimary ? "bg-sky-50" : "bg-white"
+                  } 
                     ${index === tiers.length - 1 ? "rounded-tr-xl" : ""}`}
                 >
                   <div className="flex flex-col gap-2">
@@ -540,10 +534,11 @@ export default function PricingComparisonTable() {
                 <Fragment key={feature.name}>
                   <TableRow className="hover:bg-white">
                     <TableCell
-                      className={`w-[318px] px-6 py-3 ${featureIndex === group.features.length - 1
-                        ? "border-b"
-                        : ""
-                        }`}
+                      className={`w-[318px] px-6 py-3 ${
+                        featureIndex === group.features.length - 1
+                          ? "border-b"
+                          : ""
+                      }`}
                     >
                       <div className="flex flex-col">
                         <div className="flex items-center gap-2">
@@ -556,8 +551,9 @@ export default function PricingComparisonTable() {
                               className="p-1 hover:bg-slate-100 rounded-full transition-colors"
                             >
                               <ChevronDownIcon
-                                className={`w-4 h-4 text-slate-400 transition-transform ${showUsageTiers ? "rotate-180" : ""
-                                  }`}
+                                className={`w-4 h-4 text-slate-400 transition-transform ${
+                                  showUsageTiers ? "rotate-180" : ""
+                                }`}
                               />
                             </button>
                           )}
@@ -606,11 +602,13 @@ export default function PricingComparisonTable() {
                     ].map((value, index) => (
                       <TableCell
                         key={index}
-                        className={`px-6 py-3 ${index === 1 ? "bg-[#0ca5ea]/5" : ""
-                          } ${featureIndex === group.features.length - 1
+                        className={`px-6 py-3 ${
+                          index === 1 ? "bg-[#0ca5ea]/5" : ""
+                        } ${
+                          featureIndex === group.features.length - 1
                             ? "border-b"
                             : ""
-                          }`}
+                        }`}
                       >
                         {typeof value === "string" ? (
                           <div className="text-slate-500 text-sm font-medium">
