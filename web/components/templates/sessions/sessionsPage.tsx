@@ -287,6 +287,9 @@ const SessionsPage = (props: SessionsPageProps) => {
                         .filter(session =>
                           session.name.toLowerCase().includes((sessionNameSearch || '').toLowerCase())
                         )
+                        .sort((a, b) => 
+                          new Date(b.last_used).getTime() - new Date(a.last_used).getTime()
+                        )
                         .map((session) => (
                           <CommandItem
                             key={session.name}
