@@ -1,11 +1,11 @@
 {
-    "title": "Step-by-Step Guide to Building & Optimizing AI Agents—Part 1",
-    "title1": "Step-by-Step Guide to Building & Optimizing AI Agents—Part 1",
-    "title2": "Step-by-Step Guide to Building & Optimizing AI Agents—Part 1",
+    "title": "Step-by-Step Guide to Building & Optimizing AI Agents: Part 1",
+    "title1": "Step-by-Step Guide to Building & Optimizing AI Agents: Part 1",
+    "title2": "Step-by-Step Guide to Building & Optimizing AI Agents: Part 1",
     "description": "Building bug-free and efficient AI agents requires robust monitoring. In this first part of our two-part guide, we'll build a simple AI agent and optimize it's performance by leveraging Helicone's agentic AI observability features.",
     "images": "/static/blog/ai-agent-monitoring-tutorial/cover.webp",
     "time": "10 minute read",
-    "author": "Yusu",
+    "author": "Yusuf",
     "date": "April 29, 2025",
     "badge": "guide"
   }

@@ -1,10 +1,8 @@
-Complex AI agents are transforming how users interact with data and services, with increasing complexity and sophistication.
-
-As AI agents become more common and more complex, it's essential to understand how they behave to deploy them reliably in production.
+AI agents are transforming how users interact with data and services, with increasing complexity and sophistication. As such, it's essential to understand how they behave to deploy them reliably in production.
 
 AI agent observability tools like Helicone have stepped up to meet this complex challenge, providing comprehensive visibility into every step of an agent's workflow, from the initial user query to the final response.
 
-In this first part of our two-part series on AI agent observability, we'll build a financial research assistant that demonstrates the key components of a modern AI agent. In part two, we'll explore how to effectively monitor it with Helicone's agentic AI observability features.
+In this first part of our **two-part series** on AI agent observability, we'll build a financial research assistant that demonstrates the key components of a modern AI agent. In part two, we'll explore how to effectively monitor it with Helicone's agentic AI observability features.
 
 Let's get started!
 
@@ -15,6 +13,7 @@ Before we dive in, you'll need:
 - **<a href="https://nodejs.org/" target="_blank" rel="noopener">Node.js 16+</a>** installed on your machine
 - **<a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">OpenAI API</a>** key
 - **<a href="https://www.alphavantage.co/support/#api-key" target="_blank" rel="noopener">Alpha Vantage API key</a>** (free tier available)
+- **<a href="https://helicone.ai/signup" target="_blank" rel="noopener">Helicone API key (free tier available)</a>**
 
 ### Quick Start
 
@@ -31,6 +30,7 @@ Create a `.env` file with your API keys
 ```bash
 OPENAI_API_KEY=your_openai_key_here 
 ALPHA_VANTAGE_API_KEY=your_alpha_vantage_key_here
+HELICONE_API_KEY=your_helicone_key_here
 ```
 
 Run the assistant
@@ -39,9 +39,9 @@ Run the assistant
 npm start
 ```
 
-This gives you the basic version of the financial assistant. 
+This gives you the basic version of the financial assistant with basic Helicone monitoring.
 
-In Part 2, we'll show you how to add comprehensive monitoring to your AI agent with Helicone's Sessions feature.
+In Part 2, we'll show you how to add more comprehensive monitoring to your AI agent with Helicone's Sessions feature.
 
 ## What We're Building
 
@@ -90,7 +90,21 @@ async function routeQuery(query) {
 
 This router is responsible for determining whether we need to fetch stock data or search our knowledge base for financial terms.
 
-### 2. RAG for Financial Concepts
+### 2. Basic Helicone Monitoring
+
+The financial assistant uses Helicone's basic monitoring to track the cost, latency, and error rate of our LLM calls.
+
+```javascript
+  const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+    baseURL: "https://oai.helicone.ai/v1",
+    defaultHeaders: {
+      "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+    },
+  });
+```
+
+### 3. RAG for Financial Concepts
 
 For popular financial term queries, we use a vector store to retrieve relevant information:
 
@@ -112,7 +126,7 @@ async function initializeVectorStore() {
 const results = await vectorStore.similaritySearch(query, 2);
 ```
 
-### 3. External API Integration
+### 4. External API Integration
 
 For stock queries, such as real-time price information or news, we connect to the Alpha Vantage API:
 
@@ -185,17 +199,23 @@ Run the following command to start the assistant:
 npm start
 ```
 
-> Prompt: "What is tesla's stock price?"
+> Prompt: What is tesla's stock price?
 
-![What is Tesla's stock price?](/static/blog/ai-agent-monitoring-tutorial/tesla-stock-price.webp)
+Result:
 
-> Prompt: "What is halal investing"
+![What is Tesla's stock price?](/static/blog/ai-agent-monitoring-tutorial/tesla-prompt.webp)
 
-![What is halal investing?](/static/blog/ai-agent-monitoring-tutorial/halal-investing.webp)
+> Prompt: What is halal investing
 
-Looks like our financial assistant is working as expected...or is it?
+Result:
 
-The second prompt's term "halal investing" is not in our knowledge base—so the agent is responding with information it shouldn't really "have"—in effect, **hallucinating**.
+![What is halal investing?](/static/blog/ai-agent-monitoring-tutorial/halal-investing-prompt-1.webp)
+
+![What is halal investing?](/static/blog/ai-agent-monitoring-tutorial/halal-investing-prompt-2.webp)
+
+Looks like our financial assistant is working as expected...**or is it?**
+
+The second prompt's term **"halal investing"** is not in our knowledge base—so the agent is responding with information it shouldn't really "have"—in effect, **hallucinating**.
 
 ## Debugging our Financial Assistant 
 
@@ -203,11 +223,11 @@ To debug our financial assistant, we need to understand what's going on inside i
 
 And Helicone is an excellent tool for that!
 
-In Part 2, we'll add Helicone to our financial assistant to gain comprehensive visibility into every step of the process and resolve the issues in our current implementation.
+In Part 2, we'll add advanced Helicone monitoring to our financial assistant to gain comprehensive visibility into every step of our agent's workflow and resolve the issues in our current implementation.
 
-We'll monitor each step of the agent's workflow, resolve the bugs, and gain insights into other useful metrics such as cost, latency, and error rates.
+We'll also gain insights into other useful metrics such as cost, latency, and error rates.
 
-Stay tuned for Part 2!
+Stay tuned for <a href="https://www.helicone.ai/blog/ai-agent-monitoring-tutorial-part-2" target="_blank" rel="noopener">Part 2!</a>
 
 <CallToAction
   title="Take Control of Your AI Agents with Helicone ⚡️"
@@ -222,6 +242,7 @@ Stay tuned for Part 2!
 
 ### You might also like:
 
+- **<a href="https://www.helicone.ai/blog/ai-agent-monitoring-tutorial-part-2" target="_blank" rel="noopener">Step-by-Step Guide to Building & Optimizing AI Agents: Part 2</a>**
 - **<a href="https://www.helicone.ai/blog/debugging-chatbots-and-ai-agents-with-sessions" target="_blank" rel="noopener">Debugging RAG Chatbots and AI Agents with Sessions</a>**
 - **<a href="https://www.helicone.ai/blog/full-guide-to-improving-ai-agents" target="_blank" rel="noopener">The Full Developer's Guide to Building Effective AI Agents</a>**
 - **<a href="https://www.helicone.ai/blog/agentic-rag-full-developer-guide" target="_blank" rel="noopener">Building Agentic RAG Systems: A Developer's Guide to Smarter Information Retrieval</a>**
