@@ -1,12 +1,7 @@
-import React, { useState, useMemo } from "react";
 import { InvoiceData } from "@/lib/admin/RevenueCalculator";
-import {
-  getStripeLink,
-  truncateID,
-  formatCurrency,
-  formatMonthKey,
-} from "@/lib/uiUtils";
-import { ArrowUp, ArrowDown } from "lucide-react";
+import { formatCurrency, getStripeLink, truncateID } from "@/lib/uiUtils";
+import { ArrowDown, ArrowUp } from "lucide-react";
+import React, { useMemo } from "react";
 
 // Define Sort Configuration Type
 export interface SortConfig {
