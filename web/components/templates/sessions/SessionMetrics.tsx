@@ -22,12 +22,14 @@ import { formatLargeNumber } from "../../shared/utils/numberFormat";
 
 import { Responsive, WidthProvider } from "react-grid-layout";
 import { INITIAL_LAYOUT, MD_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
+import { TimeFilter } from "@/types/timeFilter";
 type SessionResult = ReturnType<typeof useSessionNames>["sessions"][number];
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 interface SessionMetricsProps {
   selectedSession: SessionResult | null;
+  timeFilter: TimeFilter;
 }
 
 interface ChartProps {
@@ -74,7 +76,10 @@ const Chart: React.FC<ChartProps> = ({
   </Card>
 );
 
-const SessionMetrics = ({ selectedSession }: SessionMetricsProps) => {
+const SessionMetrics = ({
+  selectedSession,
+  timeFilter,
+}: SessionMetricsProps) => {
   const [pSize, setPSize] = useLocalStorage<
     "p50" | "p75" | "p95" | "p99" | "p99.9"
   >("session-details-pSize", "p75");
@@ -83,7 +88,8 @@ const SessionMetrics = ({ selectedSession }: SessionMetricsProps) => {
   const { metrics, isLoading } = useSessionMetrics(
     selectedSession?.name ?? "",
     pSize,
-    useInterquartile
+    useInterquartile,
+    timeFilter
   );
 
   return (
