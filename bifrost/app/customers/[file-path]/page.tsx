@@ -114,27 +114,31 @@ export default async function Home({
           </section>
         </div>
 
-        {/* Right Column */}
-        <article className="prose w-full h-full">
-          <h1 className="text-bold text-brand">{String(metadata.title)}</h1>
+        {/* Right Column Container */}
+        <div className="flex flex-col w-full gap-8 md:gap-12">
+          {/* Main Content */}
+          <article className="prose h-full">
+            <h1 className="text-bold text-brand">{String(metadata.title)}</h1>
 
-          {/* Customer logo */}
-          <div className="w-full my-8 bg-slate-100 p-4 rounded-xl border-2 border-slate-100">
-            <Image
-              src={metadata.logo}
-              alt={`${metadata.title} logo`}
-              width={500} // Base width for optimization, aspect ratio will override visual height
-              height={333} // Base height corresponding to 2/3 of width for optimization
-              className="w-1/3 object-contain mx-auto aspect-[3/3]"
-              priority
-            />
-          </div>
-          {/* Pass related studies data to the MDX renderer */}
-          <RemoteMdxPage mdxSource={mdxSource} relatedStudiesData={relatedStudiesData} />
+            {/* Customer logo */}
+            <div className="w-full my-8 bg-slate-100 p-4 rounded-xl border-2 border-slate-100">
+              <Image
+                src={metadata.logo}
+                alt={`${metadata.title} logo`}
+                width={500} // Base width for optimization, aspect ratio will override visual height
+                height={333} // Base height corresponding to 2/3 of width for optimization
+                className="w-1/3 object-contain mx-auto aspect-[3/3]"
+                priority
+              />
+            </div>
+            {/* Pass related studies data to the MDX renderer */}
+            <RemoteMdxPage mdxSource={mdxSource} relatedStudiesData={relatedStudiesData} />
+          </article >
 
+          {/* Related Stories (Outside Prose) */}
           <OtherCaseStudies caseStudies={relatedStudiesData} />
-        </article >
-      </div >
-    </div >
+        </div>
+      </div>
+    </div>
   );
 }
