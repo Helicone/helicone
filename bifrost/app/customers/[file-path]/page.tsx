@@ -13,7 +13,7 @@ import rehypeSlug from "rehype-slug";
 import "highlight.js/styles/atom-one-dark.css";
 import { ChevronLeft } from "lucide-react";
 import { OtherCaseStudies } from "@/components/customers/OtherCaseStudies";
-import { formatCustomerSince, formatLastUpdated } from "../caseStudies";
+import { formatCustomerSince, formatLastUpdated } from "@/components/customers/CaseStudies";
 
 export default async function Home({
   params,
