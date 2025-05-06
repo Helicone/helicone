@@ -2,6 +2,8 @@ import { Metadata } from "next";
 import { CaseStudies } from "@/components/customers/CaseStudies";
 import { Projects } from "@/components/customers/Projects";
 import Image from "next/image";
+import { CaseStudiesCTA } from "@/components/customers/CaseStudiesCTA";
+
 export const metadata: Metadata = {
   title: "Helicone Customers | AI Companies & Integrations",
   description:
@@ -47,6 +49,7 @@ export default function Page() {
       </div>
       <CaseStudies />
       <Projects />
+      <CaseStudiesCTA />
     </div>
   );
 }
