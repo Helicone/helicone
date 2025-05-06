@@ -176,6 +176,10 @@ test("cost calc snapshot test", () => {
         "provider": "OPENAI"
     },
     {
+        "name": "o3-2025-04-16",
+        "provider": "OPENAI"
+    },
+    {
         "name": "gpt-4.1",
         "provider": "OPENAI"
     },
@@ -376,6 +380,10 @@ test("cost calc snapshot test", () => {
         "provider": "AZURE"
     },
     {
+        "name": "o3-2025-04-16",
+        "provider": "AZURE"
+    },
+    {
         "name": "gpt-4.1",
         "provider": "AZURE"
     },
@@ -501,6 +509,7 @@ WHEN (request_response_rmt.model ILIKE 'o1-2024-12-17') THEN 15000 * request_res
 WHEN (request_response_rmt.model ILIKE 'o1') THEN 15000 * request_response_rmt.prompt_tokens + 60000 * request_response_rmt.completion_tokens + 15000 * request_response_rmt.prompt_audio_tokens + 60000 * request_response_rmt.completion_audio_tokens + 15000 * request_response_rmt.prompt_cache_write_tokens + 15000 * request_response_rmt.prompt_cache_read_tokens
 WHEN (request_response_rmt.model ILIKE 'o3-mini') THEN 1100 * request_response_rmt.prompt_tokens + 4400 * request_response_rmt.completion_tokens + 1100 * request_response_rmt.prompt_audio_tokens + 4400 * request_response_rmt.completion_audio_tokens + 1100 * request_response_rmt.prompt_cache_write_tokens + 1100 * request_response_rmt.prompt_cache_read_tokens
 WHEN (request_response_rmt.model ILIKE 'o3-mini-2025-01-31') THEN 1100 * request_response_rmt.prompt_tokens + 4400 * request_response_rmt.completion_tokens + 1100 * request_response_rmt.prompt_audio_tokens + 4400 * request_response_rmt.completion_audio_tokens + 1100 * request_response_rmt.prompt_cache_write_tokens + 1100 * request_response_rmt.prompt_cache_read_tokens
+WHEN (request_response_rmt.model ILIKE 'o3-2025-04-16') THEN 10000 * request_response_rmt.prompt_tokens + 40000 * request_response_rmt.completion_tokens + 10000 * request_response_rmt.prompt_audio_tokens + 40000 * request_response_rmt.completion_audio_tokens + 10000 * request_response_rmt.prompt_cache_write_tokens + 2500 * request_response_rmt.prompt_cache_read_tokens
 WHEN (request_response_rmt.model ILIKE 'gpt-4.1') THEN 2000 * request_response_rmt.prompt_tokens + 8000 * request_response_rmt.completion_tokens + 2000 * request_response_rmt.prompt_audio_tokens + 8000 * request_response_rmt.completion_audio_tokens + 2000 * request_response_rmt.prompt_cache_write_tokens + 500 * request_response_rmt.prompt_cache_read_tokens
 WHEN (request_response_rmt.model ILIKE 'gpt-4.1-2025-04-14') THEN 2000 * request_response_rmt.prompt_tokens + 8000 * request_response_rmt.completion_tokens + 2000 * request_response_rmt.prompt_audio_tokens + 8000 * request_response_rmt.completion_audio_tokens + 2000 * request_response_rmt.prompt_cache_write_tokens + 500 * request_response_rmt.prompt_cache_read_tokens
 WHEN (request_response_rmt.model ILIKE 'gpt-4.1-mini') THEN 400 * request_response_rmt.prompt_tokens + 1600 * request_response_rmt.completion_tokens + 400 * request_response_rmt.prompt_audio_tokens + 1600 * request_response_rmt.completion_audio_tokens + 400 * request_response_rmt.prompt_cache_write_tokens + 100 * request_response_rmt.prompt_cache_read_tokens
@@ -689,7 +698,10 @@ WHEN (request_response_rmt.model ILIKE '%claude-3-5-haiku%') THEN 800 * request_
 WHEN (request_response_rmt.model ILIKE '%claude-3-5-sonnet%') THEN 3000 * request_response_rmt.prompt_tokens + 15000 * request_response_rmt.completion_tokens + 3000 * request_response_rmt.prompt_audio_tokens + 15000 * request_response_rmt.completion_audio_tokens + 3000 * request_response_rmt.prompt_cache_write_tokens + 3000 * request_response_rmt.prompt_cache_read_tokens
 WHEN (request_response_rmt.model ILIKE '%claude-3-7-sonnet%') THEN 3000 * request_response_rmt.prompt_tokens + 15000 * request_response_rmt.completion_tokens + 3000 * request_response_rmt.prompt_audio_tokens + 15000 * request_response_rmt.completion_audio_tokens + 3000 * request_response_rmt.prompt_cache_write_tokens + 3000 * request_response_rmt.prompt_cache_read_tokens
 
+WHEN (request_response_rmt.model ILIKE '%gemini-2.0-flash%') THEN 100 * request_response_rmt.prompt_tokens + 400 * request_response_rmt.completion_tokens + 100 * request_response_rmt.prompt_audio_tokens + 400 * request_response_rmt.completion_audio_tokens + 100 * request_response_rmt.prompt_cache_write_tokens + 100 * request_response_rmt.prompt_cache_read_tokens
 WHEN (request_response_rmt.model ILIKE '%gemini-2.0-flash-lite%') THEN 75 * request_response_rmt.prompt_tokens + 300 * request_response_rmt.completion_tokens + 75 * request_response_rmt.prompt_audio_tokens + 300 * request_response_rmt.completion_audio_tokens + 75 * request_response_rmt.prompt_cache_write_tokens + 75 * request_response_rmt.prompt_cache_read_tokens
+WHEN (request_response_rmt.model ILIKE '%gemini-2.5-pro-preview%') THEN 1250 * request_response_rmt.prompt_tokens + 10000 * request_response_rmt.completion_tokens + 1250 * request_response_rmt.prompt_audio_tokens + 10000 * request_response_rmt.completion_audio_tokens + 1250 * request_response_rmt.prompt_cache_write_tokens + 1250 * request_response_rmt.prompt_cache_read_tokens
+WHEN (request_response_rmt.model ILIKE '%gemini-2.5-flash-preview%') THEN 150 * request_response_rmt.prompt_tokens + 600 * request_response_rmt.completion_tokens + 150 * request_response_rmt.prompt_audio_tokens + 600 * request_response_rmt.completion_audio_tokens + 150 * request_response_rmt.prompt_cache_write_tokens + 150 * request_response_rmt.prompt_cache_read_tokens
   ELSE 0
 END
 )
@@ -1155,6 +1167,7 @@ WHEN (request_response_rmt.model ILIKE 'o1-2024-12-17') THEN 15000 * request_res
 WHEN (request_response_rmt.model ILIKE 'o1') THEN 15000 * request_response_rmt.prompt_tokens + 60000 * request_response_rmt.completion_tokens + 15000 * request_response_rmt.prompt_audio_tokens + 60000 * request_response_rmt.completion_audio_tokens + 15000 * request_response_rmt.prompt_cache_write_tokens + 15000 * request_response_rmt.prompt_cache_read_tokens
 WHEN (request_response_rmt.model ILIKE 'o3-mini') THEN 1100 * request_response_rmt.prompt_tokens + 4400 * request_response_rmt.completion_tokens + 1100 * request_response_rmt.prompt_audio_tokens + 4400 * request_response_rmt.completion_audio_tokens + 1100 * request_response_rmt.prompt_cache_write_tokens + 1100 * request_response_rmt.prompt_cache_read_tokens
 WHEN (request_response_rmt.model ILIKE 'o3-mini-2025-01-31') THEN 1100 * request_response_rmt.prompt_tokens + 4400 * request_response_rmt.completion_tokens + 1100 * request_response_rmt.prompt_audio_tokens + 4400 * request_response_rmt.completion_audio_tokens + 1100 * request_response_rmt.prompt_cache_write_tokens + 1100 * request_response_rmt.prompt_cache_read_tokens
+WHEN (request_response_rmt.model ILIKE 'o3-2025-04-16') THEN 10000 * request_response_rmt.prompt_tokens + 40000 * request_response_rmt.completion_tokens + 10000 * request_response_rmt.prompt_audio_tokens + 40000 * request_response_rmt.completion_audio_tokens + 10000 * request_response_rmt.prompt_cache_write_tokens + 2500 * request_response_rmt.prompt_cache_read_tokens
 WHEN (request_response_rmt.model ILIKE 'gpt-4.1') THEN 2000 * request_response_rmt.prompt_tokens + 8000 * request_response_rmt.completion_tokens + 2000 * request_response_rmt.prompt_audio_tokens + 8000 * request_response_rmt.completion_audio_tokens + 2000 * request_response_rmt.prompt_cache_write_tokens + 500 * request_response_rmt.prompt_cache_read_tokens
 WHEN (request_response_rmt.model ILIKE 'gpt-4.1-2025-04-14') THEN 2000 * request_response_rmt.prompt_tokens + 8000 * request_response_rmt.completion_tokens + 2000 * request_response_rmt.prompt_audio_tokens + 8000 * request_response_rmt.completion_audio_tokens + 2000 * request_response_rmt.prompt_cache_write_tokens + 500 * request_response_rmt.prompt_cache_read_tokens
 WHEN (request_response_rmt.model ILIKE 'gpt-4.1-mini') THEN 400 * request_response_rmt.prompt_tokens + 1600 * request_response_rmt.completion_tokens + 400 * request_response_rmt.prompt_audio_tokens + 1600 * request_response_rmt.completion_audio_tokens + 400 * request_response_rmt.prompt_cache_write_tokens + 100 * request_response_rmt.prompt_cache_read_tokens
