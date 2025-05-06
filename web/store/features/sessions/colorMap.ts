@@ -8,7 +8,7 @@ interface ColorMapStore {
   colorMap: ColorMap;
   setColorMap: (colorMap: ColorMap) => void;
   setColor: (path: string, color: string) => void;
-  getColor: (path: string, isDarkMode: boolean) => string;
+  getColor: (path: string, isDarkMode?: boolean) => string;
   initializeColorMap: (treeData: TreeNodeData) => void;
 }
 
@@ -19,7 +19,7 @@ export const useColorMapStore = create<ColorMapStore>((set, get) => ({
     set((state) => ({
       colorMap: { ...state.colorMap, [path]: color },
     })),
-  getColor: (path: string, isDarkMode: boolean) => {
+  getColor: (path: string, isDarkMode = false) => {
     const baseColor = get().colorMap[path] || SKY_BLUE;
     return adjustColorForTheme(baseColor, isDarkMode);
   },
