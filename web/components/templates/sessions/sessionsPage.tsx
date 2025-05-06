@@ -361,7 +361,7 @@ const SessionsPage = (props: SessionsPageProps) => {
                       asPill={"none"}
                       key={tab.id}
                       value={tab.id}
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 dark:bg-sidebar-background"
                     >
                       {tab.icon}
                     </TabsTrigger>
@@ -381,7 +381,7 @@ const SessionsPage = (props: SessionsPageProps) => {
               {statsToDisplay.map((stat) => (
                 <div
                   key={stat.label}
-                  className="flex flex-row gap-1 items-center px-4"
+                  className="flex flex-row gap-1 items-center px-4 dark:border-purple-500"
                 >
                   <XSmall className="font-medium">{stat.label}</XSmall>
                   <Muted className="text-xs">{stat.value}</Muted>
