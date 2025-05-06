@@ -8,7 +8,7 @@ interface ColorMapStore {
   colorMap: ColorMap;
   setColorMap: (colorMap: ColorMap) => void;
   setColor: (path: string, color: string) => void;
-  getColor: (path: string) => string;
+  getColor: (path: string, isDarkMode: boolean) => string;
   initializeColorMap: (treeData: TreeNodeData) => void;
 }
 
@@ -19,7 +19,10 @@ export const useColorMapStore = create<ColorMapStore>((set, get) => ({
     set((state) => ({
       colorMap: { ...state.colorMap, [path]: color },
     })),
-  getColor: (path: string) => get().colorMap[path] || SKY_BLUE,
+  getColor: (path: string, isDarkMode: boolean) => {
+    const baseColor = get().colorMap[path] || SKY_BLUE;
+    return adjustColorForTheme(baseColor, isDarkMode);
+  },
   initializeColorMap: (treeData: TreeNodeData) => {
     const newColorMap = setAllPathColors(treeData, {}, null);
     set({ colorMap: newColorMap });
@@ -47,6 +50,26 @@ function setAllPathColors(
     }
   }
   return colors;
+}
+
+const toHex = (n: number) => {
+  const hex = n.toString(16);
+  return hex.length === 1 ? "0" + hex : hex;
+};
+
+function adjustColorForTheme(color: string, isDarkMode: boolean): string {
+  if (!isDarkMode) return color;
+  const r = parseInt(color.slice(1, 3), 16);
+  const g = parseInt(color.slice(3, 5), 16);
+  const b = parseInt(color.slice(5, 7), 16);
+
+  // darken by reducing each part by 30%
+  const darkenFactor = 0.7;
+  const newR = Math.round(r * darkenFactor);
+  const newG = Math.round(g * darkenFactor);
+  const newB = Math.round(b * darkenFactor);
+
+  return `#${toHex(newR)}${toHex(newG)}${toHex(newB)}`;
 }
 
 function generateUniqueColor(existingColors: ColorMap): string {

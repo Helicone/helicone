@@ -683,13 +683,14 @@ export const TraceSpan = ({
                 }}
               />
               {spanData.map((entry, index) => {
-                const color = getColor(entry.path);
+                const isDark = theme === "dark";
+                const color = getColor(entry.path, isDark);
                 // Determine if this bar is in the highlighter range
 
                 return (
                   <Cell
                     key={`colored-cell-${index}`}
-                    className="cursor-pointer transition-colors duration-150"
+                    className="cursor-pointer transition-colors duration-150 black"
                     style={{ fill: color }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.fill = `${color}80`; // 50% opacity (approx.)
