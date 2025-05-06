@@ -1632,6 +1632,15 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_SessionNameResult-Array_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "TimeFilterMs": {
+        "dataType": "refObject",
+        "properties": {
+            "startTimeUnixMs": {"dataType":"double","required":true},
+            "endTimeUnixMs": {"dataType":"double","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "SessionNameQueryParams": {
         "dataType": "refObject",
         "properties": {
@@ -1639,6 +1648,8 @@ const models: TsoaRoute.Models = {
             "timezoneDifference": {"dataType":"double","required":true},
             "pSize": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["p50"]},{"dataType":"enum","enums":["p75"]},{"dataType":"enum","enums":["p95"]},{"dataType":"enum","enums":["p99"]},{"dataType":"enum","enums":["p99.9"]}]},
             "useInterquartile": {"dataType":"boolean"},
+            "timeFilter": {"ref":"TimeFilterMs"},
+            "filter": {"ref":"SessionFilterNode"},
         },
         "additionalProperties": false,
     },
@@ -1665,15 +1676,6 @@ const models: TsoaRoute.Models = {
     "Result_SessionMetrics.string_": {
         "dataType": "refAlias",
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_SessionMetrics_"},{"ref":"ResultError_string_"}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "TimeFilterMs": {
-        "dataType": "refObject",
-        "properties": {
-            "startTimeUnixMs": {"dataType":"double","required":true},
-            "endTimeUnixMs": {"dataType":"double","required":true},
-        },
-        "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "SessionMetricsQueryParams": {
