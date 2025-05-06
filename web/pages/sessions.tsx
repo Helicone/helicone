@@ -36,8 +36,15 @@ Sessions.getLayout = function getLayout(page: ReactElement) {
 export default Sessions;
 
 export const getServerSideProps = withAuthSSR(async (options) => {
-  const { page, page_size, sortKey, sortDirection, isCustomProperty, tab, name } =
-    options.context.query;
+  const {
+    page,
+    page_size,
+    sortKey,
+    sortDirection,
+    isCustomProperty,
+    tab,
+    name,
+  } = options.context.query;
 
   const currentPage = parseInt(page as string, 10) || 1;
   const pageSize = parseInt(page_size as string, 10) || 10;
