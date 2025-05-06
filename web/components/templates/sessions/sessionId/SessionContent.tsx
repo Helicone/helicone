@@ -189,7 +189,9 @@ export const SessionContent: React.FC<SessionContentProps> = ({
                 <Small className="font-semibold">Sessions</Small>
               </Link>
               <Small className="font-semibold">/</Small>
-              <Muted className="text-sm">{session_name}</Muted>
+              <Link href={`/sessions?name=${encodeURIComponent(session_name)}`} className="no-underline">
+                <Muted className="text-sm">{session_name}</Muted>
+              </Link>
               <Small className="font-semibold">/</Small>
 
               {isLoadingSessions ? (
