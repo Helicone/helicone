@@ -125,7 +125,26 @@ export default async function Home({
           {/* Main Content */}
           <article className="prose h-full">
             <h1 className="text-bold text-brand">{String(metadata.title)}</h1>
-
+            {/* Mobile View for Customer Info */}
+            <div className="flex sm:hidden gap-4 overflow-hidden -mt-8 -mb-6 ">
+              {/* Customer info */}
+              <div className="flex items-center gap-2">
+                <p className="text-muted-foreground text-sm font-medium">
+                  Customer since</p>
+                <span className="text-accent-foreground text-sm font-medium">
+                  {formatCustomerSince(metadata.customerSince)}
+                </span>
+                ·
+                <a
+                  href={`https://${String(metadata.url)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-accent-foreground text-sm font-medium hover:underline"
+                >
+                  {String(metadata.url)}
+                </a>
+              </div>
+            </div>
             {/* Customer logo */}
             <div className="w-full my-8 bg-slate-100 p-4 rounded-xl border-2 border-slate-100">
               <Image
