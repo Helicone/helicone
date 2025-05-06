@@ -92,10 +92,7 @@ const SessionsPage = (props: SessionsPageProps) => {
     columnDefsToDragColumnItems(INITIAL_COLUMNS)
   );
 
-  const [timeFilter, setTimeFilter] = useState<{
-    start: Date;
-    end: Date;
-  }>({
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>({
     start: getTimeIntervalAgo("1m"),
     end: new Date(),
   });
@@ -425,6 +422,7 @@ const SessionsPage = (props: SessionsPageProps) => {
                 (session) => session.name === selectedName
               ) ?? null
             }
+            timeFilter={timeFilter}
           />
         </TabsContent>
       </Tabs>
