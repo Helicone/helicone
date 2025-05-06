@@ -1,5 +1,5 @@
 import { getEnv } from "../../toImplement/helpers/getEnv";
-import { supabaseAuthClientFromSSRContext } from "../../toImplement/client/useSupabaseAuthClient";
+import { supabaseAuthClientFromSSRContext } from "../../toImplement/client/supabaseAuthClientFromSSRContext";
 import { betterAuthClientFromSSRContext } from "../../toImplement/server/useBetterAuthClient";
 import { HeliconeAuthClient } from "./HeliconeAuthClient";
 

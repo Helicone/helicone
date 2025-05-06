@@ -9,7 +9,7 @@ import {
 
 export type GenericHeaders = Record<string, string | string[] | undefined>;
 export interface HeliconeAuthClient {
-  authenticate: (auth: HeliconeAuth, headers?: GenericHeaders) => AuthResult;
+  authenticate: (auth: HeliconeAuth, header?: GenericHeaders) => AuthResult;
   getOrganization: (authParams: AuthParams) => OrgResult;
   getUser: (auth: JwtAuth, headers?: GenericHeaders) => HeliconeUserResult;
   createUser: ({

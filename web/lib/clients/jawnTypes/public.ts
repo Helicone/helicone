@@ -1836,12 +1836,6 @@ Json: JsonObject;
       error: null;
     };
     "Result_SessionNameResult-Array.string_": components["schemas"]["ResultSuccess_SessionNameResult-Array_"] | components["schemas"]["ResultError_string_"];
-    TimeFilterMs: {
-      /** Format: double */
-      startTimeUnixMs: number;
-      /** Format: double */
-      endTimeUnixMs: number;
-    };
     SessionNameQueryParams: {
       nameContains: string;
       /** Format: double */
@@ -1849,8 +1843,6 @@ Json: JsonObject;
       /** @enum {string} */
       pSize?: "p50" | "p75" | "p95" | "p99" | "p99.9";
       useInterquartile?: boolean;
-      timeFilter?: components["schemas"]["TimeFilterMs"];
-      filter?: components["schemas"]["SessionFilterNode"];
     };
     SessionMetrics: {
       session_count: components["schemas"]["HistogramRow"][];
@@ -1863,6 +1855,12 @@ Json: JsonObject;
       error: null;
     };
     "Result_SessionMetrics.string_": components["schemas"]["ResultSuccess_SessionMetrics_"] | components["schemas"]["ResultError_string_"];
+    TimeFilterMs: {
+      /** Format: double */
+      startTimeUnixMs: number;
+      /** Format: double */
+      endTimeUnixMs: number;
+    };
     SessionMetricsQueryParams: {
       nameContains: string;
       /** Format: double */

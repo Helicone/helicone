@@ -1,6 +1,6 @@
 import { getEnv } from "../../toImplement/helpers/getEnv";
 import { supabaseAuthClientFromSSRContext } from "../../toImplement/client/useSupabaseAuthClient";
-import { betterAuthClientFromSSRContext } from "../../toImplement/server/useBetterAuthClient";
+import { betterAuthClientFromSSRContext } from "../../toImplement/client/useBetterAuthClient";
 import { HeliconeAuthClient } from "./HeliconeAuthClient";
 
 export async function getSSRHeliconeAuthClient({
