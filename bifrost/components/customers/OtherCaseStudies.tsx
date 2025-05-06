@@ -25,7 +25,7 @@ export function OtherCaseStudies({ caseStudies }: OtherCaseStudiesProps) {
         {caseStudies.map((study, index) => (
           <CustomerCard
             key={index}
-            href={`/customers/${study.company}`}
+            href={`/customers/${study.company.toLowerCase()}`}
             logo={study.logo}
             title={study.title}
           />
