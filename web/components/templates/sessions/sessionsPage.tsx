@@ -106,7 +106,9 @@ const SessionsPage = (props: SessionsPageProps) => {
   );
 
   const [open, setOpen] = useState(false);
-  const [sessionNameSearch, setSessionNameSearch] = useState<string | undefined>(undefined);
+  const [sessionNameSearch, setSessionNameSearch] = useState<
+    string | undefined
+  >(undefined);
 
   const debouncedSessionNameSearch = useDebounce(sessionNameSearch, 500);
 
@@ -260,10 +262,11 @@ const SessionsPage = (props: SessionsPageProps) => {
               <Small className="font-semibold">/</Small>
 
               <Popover open={open} onOpenChange={setOpen}>
-                <PopoverTrigger asChild
+                <PopoverTrigger
+                  asChild
                   className={cn(
                     "flex h-8 w-[280px] items-center justify-between rounded-md border border-sky-200 bg-white px-3 py-2 text-xs ring-offset-white placeholder:text-slate-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:bg-sidebar-background",
-                    "focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 dark:focus:ring-slate-300",
+                    "focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 dark:focus:ring-slate-300"
                   )}
                 >
                   <Button
@@ -271,7 +274,9 @@ const SessionsPage = (props: SessionsPageProps) => {
                     role="combobox"
                     aria-expanded={open}
                   >
-                    {selectedName === "" ? UNNAMED_SESSION_VALUE : selectedName ?? "All"}
+                    {selectedName === ""
+                      ? UNNAMED_SESSION_VALUE
+                      : selectedName ?? "All"}
                     <ChevronDown className="ml-2 h-3 w-3 shrink-0 opacity-50 " />
                   </Button>
                 </PopoverTrigger>
@@ -279,7 +284,9 @@ const SessionsPage = (props: SessionsPageProps) => {
                   <Command>
                     <CommandInput
                       placeholder="Search sessions..."
-                      onChangeCapture={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      onChangeCapture={(
+                        e: React.ChangeEvent<HTMLInputElement>
+                      ) => {
                         setSessionNameSearch(e.target.value);
                       }}
                     />
@@ -287,27 +294,39 @@ const SessionsPage = (props: SessionsPageProps) => {
 
                     <CommandList>
                       {names.sessions
-                        .sort((a, b) => 
-                          new Date(b.last_used).getTime() - new Date(a.last_used).getTime()
+                        .sort(
+                          (a, b) =>
+                            new Date(b.last_used).getTime() -
+                            new Date(a.last_used).getTime()
                         )
                         .map((session) => (
                           <CommandItem
                             key={session.name}
-                            value={session.name === "" ? UNNAMED_SESSION_VALUE : session.name}
+                            value={
+                              session.name === ""
+                                ? UNNAMED_SESSION_VALUE
+                                : session.name
+                            }
                             onSelect={() => {
                               setOpen(false);
-                              handleSelectSessionName(session.name === "" ? UNNAMED_SESSION_VALUE : session.name);
+                              handleSelectSessionName(
+                                session.name === ""
+                                  ? UNNAMED_SESSION_VALUE
+                                  : session.name
+                              );
                             }}
                           >
                             <Check
                               className={cn(
                                 "mr-2 h-3 w-3",
-                                selectedName === session.name ? "opacity-100" : "opacity-0"
+                                selectedName === session.name
+                                  ? "opacity-100"
+                                  : "opacity-0"
                               )}
                             />
                             {session.name === "" ? "Unnamed" : session.name}
                           </CommandItem>
-                      ))}
+                        ))}
                     </CommandList>
                   </Command>
                 </PopoverContent>
