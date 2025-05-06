@@ -102,13 +102,17 @@ h6[id] {
   text-decoration: underline !important;
 }
 
-
+/* Custom blockquote styling for blog content */
 .prose blockquote {
-  border-left: 3px solid #ccc; /* Example: Add a grey left border */
-  padding-left: 1rem;
-  margin-left: 0;
-  margin-right: 0;
-  color: #555; /* Example: Change text color */
+  @apply text-center text-xl font-sans not-italic; /* Center, large text, medium weight, normal style */
+  @apply border-none p-0 mx-auto max-w-lg mt-16; /* Center block, remove border/padding, set max width */
+  color: inherit; /* Inherit text color */
+}
+
+/* Style for the citation (assuming it's the last paragraph inside or a paragraph directly following the blockquote) */
+.prose blockquote p:last-child:not(:first-child),
+.prose blockquote + p {
+    @apply block text-center text-base font-normal mt-2 mb-14 text-muted-foreground; /* Smaller, centered, muted */
 }
 
 @keyframes floating {

@@ -13,7 +13,7 @@ import rehypeSlug from "rehype-slug";
 import "highlight.js/styles/atom-one-dark.css";
 import { ChevronLeft } from "lucide-react";
 import { OtherCaseStudies } from "@/components/customers/OtherCaseStudies";
-import { formatCustomerSince } from "../caseStudies";
+import { formatCustomerSince, formatLastUpdated } from "../caseStudies";
 
 export default async function Home({
   params,
@@ -96,6 +96,12 @@ export default async function Home({
               >
                 {String(metadata.url)}
               </a>
+            </div>
+            <div className="flex flex-col gap-1 px-2">
+              <p className="text-muted-foreground text-sm font-medium">Written on</p>
+              <span className="text-accent-foreground text-sm font-medium">
+                {formatLastUpdated(metadata.date ? metadata.date : "") || ""}
+              </span>
             </div>
             <div className="bg-slate-50 px-3 py-5 space-y-2 border-2 border-slate-100 shadow-sm rounded-lg">
               <div className="flex flex-col items-left gap-4 grayscale">

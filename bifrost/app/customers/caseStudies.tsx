@@ -40,6 +40,13 @@ export function formatCustomerSince(date: string) {
   });
 }
 
+export function formatLastUpdated(date: string) {
+  return new Date(date).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
 export type CaseStudyStructure = {
   dynamicEntry: {
     folderName: string;
