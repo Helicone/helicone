@@ -52,6 +52,7 @@ interface SessionsPageProps {
     isCustomProperty: boolean;
   };
   defaultIndex: number;
+  selectedName?: string;
 }
 
 // Define a constant for the unnamed session value
@@ -114,7 +115,7 @@ const SessionsPage = (props: SessionsPageProps) => {
 
   const debouncedSessionIdSearch = useDebounce(sessionIdSearch, 500); // 0.5 seconds
   const [selectedName, setSelectedName] = useState<string | undefined>(
-    undefined
+    props.selectedName
   );
 
   const { sessions, isLoading, hasSessions } = useSessions({
