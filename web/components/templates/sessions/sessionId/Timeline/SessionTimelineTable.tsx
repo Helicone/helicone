@@ -408,7 +408,8 @@ export default function SessionTimelineTable(
                         {i === 0 &&
                           (() => {
                             const groupColorClass =
-                              getColor(row.original.completePath) || "transparent";
+                              getColor(row.original.completePath) ||
+                              "transparent";
 
                             if (groupColorClass !== "bg-transparent") {
                               return (
