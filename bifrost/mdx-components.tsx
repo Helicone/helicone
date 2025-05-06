@@ -5,7 +5,6 @@ import { Questions } from "@/components/blog/Questions";
 import { FAQ } from "./components/blog/FAQ";
 import { ReactNode } from "react";
 import NextImage from "next/image";
-import { OtherCaseStudies } from "@/components/customers/OtherCaseStudies";
 import { HeadingWithCopyLink } from "@/components/blog/HeadingWithCopyLink";
 
 const ResponsiveTable = ({ children }: { children: ReactNode }) => {
@@ -25,7 +24,6 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     BottomLine: BottomLine,
     Questions: Questions,
     FAQ: FAQ,
-    OtherCaseStudies: OtherCaseStudies,
     table: (props) => (
       <ResponsiveTable>
         <table {...props} />
