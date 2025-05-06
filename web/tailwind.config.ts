@@ -251,6 +251,10 @@ export default {
       variants: ["hover", "ui-selected"],
     },
     {
+      pattern: /^(bg-chart-[1-9]|bg-chart-10)$/,
+      variants: ["hover"],
+    },
+    {
       pattern: /^(fill-chart-[1-9]|fill-chart-10)$/,
       variants: ["hover"],
     },
