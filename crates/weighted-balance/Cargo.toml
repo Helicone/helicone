@@ -1,0 +1,19 @@
+[package]
+name = "weighted-balance"
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+publish.workspace = true
+version.workspace = true
+
+[dependencies]
+futures = { workspace = true }
+pin-project-lite = { workspace = true }
+rand = { workspace = true }
+tower = { workspace = true }
+tokio = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+
+[dev-dependencies]
+tokio-test = { workspace = true }
