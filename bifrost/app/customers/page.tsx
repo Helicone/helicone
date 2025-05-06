@@ -33,7 +33,7 @@ export default function Page() {
     <div className="w-full h-full flex flex-col antialiased relative gap-2">
       <div className="flex flex-col gap-4 w-full h-full justify-center pt-8 items-center text-center px-2 sm:px-2 lg:px-0">
         <Image
-          src={"/static/community/shiny-cube.webp"}
+          src={"/static/customers/shiny-cube.webp"}
           alt={"shiny-cube"}
           width={200}
           height={200}
