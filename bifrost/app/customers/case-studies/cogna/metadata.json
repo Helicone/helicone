@@ -1,11 +1,11 @@
 {
   "company": "Cogna",
-  "title": "Building-AI-powered Software Synthesis with Helicone",
-  "description": "Cogna builds enterprise software synthesis tools that automatically generate custom applications from specifications.",
+  "title": "Visualizing Complex LLM Workflows",
+  "description": "Cogna uses Helicone Sessions to visualize and debug complex LLM chains that power their enterprise software synthesis platform.",
   "logo": "/static/customers/cogna.webp",
   "url": "cogna.co",
-  "customerSince": "2025-03-18",
+  "customerSince": "2024-05-23",
   "isOpenSourced": false,
-  "date": "2025-03-18",
+  "date": "2025-05-06",
   "relatedStudies": ["tusk", "wordware"]
 }

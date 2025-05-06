@@ -16,9 +16,9 @@ export function OtherCaseStudies({ caseStudies }: OtherCaseStudiesProps) {
     <section className="w-full max-w-4xl mx-auto flex flex-col gap-2 mb-6">
 
       {/* Title */}
-      <h3 className="font-bold text-2xl text-accent-foreground">
-        Related stories
-      </h3>
+      {/* <h3 className="font-bold text-2xl text-accent-foreground ml-2">
+        Related Stories
+      </h3> */}
 
       {/* Grid of case studies */}
       <div className="grid grid-cols-1 sm:grid-cols-2">

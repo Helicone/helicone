@@ -1,42 +1,39 @@
-Cogna builds sophisticated enterprise software synthesis tools that automatically generate custom applications from specifications. Their development process involves intricate chains of LLM calls working simultaneously, to create the necessary components of an application.
-
-## The Challenge: Complexity in LLM Application Development
-
-The challenge was tracking what's happening across these complex workflows. When something fails, pinpointing exactly where and why became a time-consuming process involving manual inspection of individual requests.
+Cogna builds enterprise software synthesis tools that automatically generate custom applications from specifications. Their process relies on complex chains of LLM calls working in concert to create different components of an application simultaneously.
 
 > Our product generates software with LLMs for enterprise customers. Sometimes we'll synthesize multiple files in a multi-step process, and they'd be interleaved.
 
-— Ed, Co-founder & CTO, Cogna
+— Edward Ayers, Research Engineer, Cogna
 
-The technical complexity created a critical visibility problem:
+## The Challenge: Debugging Multi-Step LLM Processes
 
-- **Interleaved processes**: Multiple LLM calls generating different components simultaneously
-- **Opaque relationships**: No way to track dependencies between sequential LLM calls
-- **Difficult debugging**: When failures occurred, engineers spent up to 4 hours manually inspecting individual requests
-- **Slow iteration cycles**: Prompt improvements took days instead of hours due to debugging friction
+When building LLM-powered applications, Cogna's team frequently encounters these challenges:
+
+1. **Formatting issues or unexpected content in prompts** - This includes problems with prompt construction that lead to unexpected outputs.
+2. **Response quality issues** - This includes LLM responses indicating a lack of context or an inability to complete tasks.
+3. **Multi-step coordination problems** - The team also experienced difficulty tracking interrelated LLM calls across complex workflows.
+4. **Validation failures** - This also involved generated code failing quality checks, such as type validation.
+5. **Debugging complexity** - Finally, they faced challenges in identifying where in a multi-step process a failure occurred.
 
 ## Debugging with Sessions Tree View
 
 > Before Sessions, it was very difficult to tell what request was for what file when processes were interleaved. Sessions helps with that because you have a tree structure.
 
-— Ed, Cogna
+— Edward Ayers, Cogna
 
-Helicone's Session provided a tree-like visualization that mirrors Cogna's application structure, making the entire debugging process transparent. Cogna was able to see the relationships between different requests, rather than just a linear list, and more easily debug issues with the prompts being used. 
+Helicone's <a href="https://docs.helicone.ai/features/sessions#sessions" target="_blank" rel="noopener noreferrer">Sessions</a> provided a tree-like visualization that mirrors Cogna's application structure, making the entire debugging process more transparent. 
 
-This visibility is critical for prompt debugging—one of Cogna's most common use cases. Whether it's identifying formatting issues, excessive context, or insufficient prompt information, Sessions provides the context developers need.
+Cogna's team can now see the relationships between different requests, rather than just a linear list, and more easily debug issues with the prompts being used.
 
+This visibility is critical for prompt debugging—one of Cogna's most common use cases. Whether it's identifying formatting issues, response quality problems, or tracing multi-step processes, Sessions provides the context developers need.
 
-## Common LLM Failure Patterns & Resolution with Sessions
+## Cogna's Current Workflow in Helicone
 
-Cogna identified five primary failure patterns in their LLM workflows:
+Cogna's debugging process with Helicone focuses on:
 
-### 1. Prompt Formatting Issues
-**Problem:** 
-1. The LLM includes something in the prompt that shouldn't be there, like accidentally iterating over a string and dumping each character on a new line.
-2. The formatting of the LLM's response is messed up, not matching what was expected.
-3. The LLM provides too much or the wrong context in the prompt, leading to an incorrect or incomplete response.
-4. The LLM indicates it's unsure or doesn't know how to handle the prompt, rather than providing a useful response.→ becomes apologetic
-5. The LLM's response fails validation checks, such as type errors in the generated code.
+- Using Sessions to organize multi-step LLM processes into navigable tree structures
+- Examining prompts and responses to identify issues
+- Using internal tooling to re-run specific parts of a session once problems are identified
+- Maintaining prompts in version-controlled source code
 
 ## Helicone's Impact
 
@@ -44,16 +41,15 @@ For Cogna's engineers, Sessions transformed prompt debugging from a pain point t
 
 | Aspects | Before Helicone | With Helicone Sessions |
 | ------- | --------------- | ---------------------- |
-| **Initial Investigation** | 30-45 minutes manually filtering through individual requests | 1-2 minutes navigating to the relevant subtree |
-| **Error localization** | Required examining isolated requests | Few clicks to identify exactly where validation failed |
+| **Investigation** | 30-45 minutes manually filtering through individual requests | 1-2 minutes navigating to the relevant subtree |
+| **Locating errors** | Required examining isolated requests | Few clicks to identify exactly where validation failed |
 | **Context understanding** | Relied on timestamps and guesswork | Complete session history with parent-child relationships |
 | **Knowledge sharing** | Difficult to share debugging information with team members | Simple URL sharing of specific session views |
-| **Root cause analysis** | Often inconclusive or incomplete | Comprehensive view of the entire process flow |
 
 
 > When something fails, I know it failed somewhere in this particular subtree. I navigate using Sessions, look at the prompts and responses, and iterate right away.
 
-— Ed, Cogna
+— Edward Ayers, Cogna
 
 ### Bring Clarity to Your LLM Workflows
 
