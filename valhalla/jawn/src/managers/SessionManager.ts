@@ -138,25 +138,33 @@ export class SessionManager {
   async getSessionNames(
     requestBody: SessionNameQueryParams
   ): Promise<Result<SessionNameResult[], string>> {
-    const { nameContains, timezoneDifference } = requestBody;
+    const { nameContains, timezoneDifference, timeFilter, filter } =
+      requestBody;
 
     if (!isValidTimeZoneDifference(timezoneDifference)) {
       return err("Invalid timezone difference");
     }
 
+    const filters: FilterNode[] = [
+      ...(timeFilter ? timeFilterNodes(timeFilter) : []),
+      ...(filter ? [filter] : []),
+    ];
+
+    if (nameContains) {
+      filters.push({
+        request_response_rmt: {
+          properties: {
+            "Helicone-Session-Name": {
+              equals: nameContains,
+            },
+          },
+        },
+      });
+    }
+
     const builtFilter = await buildFilterWithAuthClickHouse({
       org_id: this.authParams.organizationId,
-      filter: nameContains
-        ? {
-            request_response_rmt: {
-              properties: {
-                "Helicone-Session-Name": {
-                  ilike: `%${nameContains}%`,
-                },
-              },
-            },
-          }
-        : "all",
+      filter: filterListToTree(filters, "and"),
       argsAcc: [],
     });
 
