@@ -21,18 +21,18 @@ const MainContent = ({ children, banner, pathname }: MainContentProps) => {
   return (
     <div className={clsx("flex flex-1 flex-col")}>
       <main className="flex-1">
-        {banner && (
+        {(banner || true) && (
           <div className="bg-slate-50">
             <div
               className={clsx(
                 "w-full bg-sky-500 p-2 text-white flex items-center justify-center gap-2",
-                banner.onClick &&
+                banner?.onClick &&
                   "cursor-pointer hover:bg-sky-600 transition-colors"
               )}
-              onClick={banner.onClick}
-              role={banner.onClick ? "button" : undefined}
+              onClick={banner?.onClick}
+              role={banner?.onClick ? "button" : undefined}
             >
-              {banner.updated_at && (
+              {banner?.updated_at && (
                 <>
                   <span className="text-sky-100 text-xs font-normal">
                     {getUSDate(new Date(banner.updated_at))}
@@ -41,7 +41,9 @@ const MainContent = ({ children, banner, pathname }: MainContentProps) => {
                 </>
               )}
 
-              <p className="text-sm font-semibold">{banner.title}</p>
+              <p className="text-sm font-semibold">
+                {"Maintenance US Cluster"}
+              </p>
               <svg
                 viewBox="0 0 2 2"
                 className="inline h-0.5 w-0.5 fill-current"
@@ -49,7 +51,11 @@ const MainContent = ({ children, banner, pathname }: MainContentProps) => {
               >
                 <circle cx={1} cy={1} r={1} />
               </svg>
-              <p className="text-sm text-gray-100">{banner.message}</p>
+              <p className="text-sm text-gray-100">
+                {
+                  "No services or APIs will be affected, no logs will be lost, we are doing a server restart."
+                }
+              </p>
             </div>
           </div>
         )}

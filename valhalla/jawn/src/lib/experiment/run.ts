@@ -17,14 +17,6 @@ import {
 import { BaseTempKey } from "./tempKeys/baseTempKey";
 import { generateTempHeliconeAPIKey } from "./tempKeys/tempAPIKey";
 
-export const IS_ON_PREM =
-  process.env.AZURE_BASE_URL &&
-  process.env.AZURE_API_VERSION &&
-  process.env.AZURE_DEPLOYMENT_NAME &&
-  process.env.OPENAI_API_KEY
-    ? true
-    : false;
-
 async function isOnPrem(): Promise<boolean> {
   const settingsManager = new SettingsManager();
   const azureSettings = await settingsManager.getSetting("azure:experiment");
