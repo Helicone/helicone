@@ -45,12 +45,12 @@ const StringRenderer: React.FC<StringRendererProps> = ({
         !showRawString ? "whitespace-pre-wrap" : ""
       }`}
     >
-        {(() => {
+      {(() => {
         if (expanded || !isTruncated) {
           return showRawString ? `"${data.replace(/\n/g, "\\n")}"` : data;
         } else {
-          return showRawString 
-            ? `"${data.slice(0, maxLength).replace(/\n/g, "\\n")}"` 
+          return showRawString
+            ? `"${data.slice(0, maxLength).replace(/\n/g, "\\n")}"`
             : data.slice(0, maxLength);
         }
       })()}
