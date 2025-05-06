@@ -109,7 +109,7 @@ For popular financial term queries, we use a vector store to retrieve relevant i
 const resultsWithScores = await vectorStore.similaritySearchWithScore(query, 2);
 
 // Check if we have relevant results with good similarity scores
-if (resultsWithScores.length === 0 || resultsWithScores[0][1] < 0.8) {
+if (resultsWithScores.length === 0 || resultsWithScores[0][1] < 0.7) {
   console.log("No relevant financial terms found in the knowledge base.");
   return { 
     found: false,
