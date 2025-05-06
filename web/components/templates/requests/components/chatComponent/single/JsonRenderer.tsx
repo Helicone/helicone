@@ -40,12 +40,18 @@ const StringRenderer: React.FC<StringRendererProps> = ({
   const isTruncated = data.length > maxLength;
 
   return (
-    <span className={`text-violet-600 dark:text-violet-400 ${!showRawString ? 'whitespace-pre-wrap' : ''}`}>
-      {expanded || !isTruncated ? (
-        showRawString ? `"${data.replace(/\n/g, "\\n")}"` : data
-      ) : (
-        showRawString ? `"${data.slice(0, maxLength).replace(/\n/g, "\\n")}"` : data.slice(0, maxLength)
-      )}
+    <span
+      className={`text-violet-600 dark:text-violet-400 ${
+        !showRawString ? "whitespace-pre-wrap" : ""
+      }`}
+    >
+      {expanded || !isTruncated
+        ? showRawString
+          ? `"${data.replace(/\n/g, "\\n")}"`
+          : data
+        : showRawString
+        ? `"${data.slice(0, maxLength).replace(/\n/g, "\\n")}"`
+        : data.slice(0, maxLength)}
       {isTruncated && !expanded && (
         <span className="text-slate-400 dark:text-slate-500">...</span>
       )}
