@@ -48,6 +48,8 @@ export interface SessionNameQueryParams {
   timezoneDifference: number;
   pSize?: "p50" | "p75" | "p95" | "p99" | "p99.9";
   useInterquartile?: boolean;
+  timeFilter?: TimeFilterMs; // TODO: after deploy backend and frontend it should always be present
+  filter?: SessionFilterNode; // TODO: after deploy backend and frontend it should always be present
 }
 
 export interface SessionMetricsQueryParams {
