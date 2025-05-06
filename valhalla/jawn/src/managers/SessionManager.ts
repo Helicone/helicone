@@ -4,7 +4,7 @@ import {
   SessionMetricsQueryParams,
 } from "../controllers/public/sessionController";
 import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
-import { dbExecute } from "../lib/shared/db/dbExecute";
+import { dbExecute, printRunnableQuery } from "../lib/shared/db/dbExecute";
 import { filterListToTree, FilterNode } from "../lib/shared/filters/filterDefs";
 import { buildFilterWithAuthClickHouse } from "../lib/shared/filters/filters";
 import { TimeFilterMs } from "../lib/shared/filters/timeFilter";
@@ -15,6 +15,8 @@ import { isValidTimeZoneDifference } from "../utils/helpers";
 import {
   getHistogramRowOnKeys,
   HistogramRow,
+  getAveragePerSession,
+  AverageRow,
 } from "./helpers/percentileDistributions";
 import { RequestManager } from "./request/RequestManager";
 
@@ -44,6 +46,11 @@ export interface SessionMetrics {
   session_count: HistogramRow[];
   session_duration: HistogramRow[];
   session_cost: HistogramRow[];
+  average: {
+    session_count: AverageRow[];
+    session_duration: AverageRow[];
+    session_cost: AverageRow[];
+  };
 }
 
 export class SessionManager {
@@ -124,14 +131,45 @@ export class SessionManager {
       aggregateFunction: clickhousePriceCalc("request_response_rmt"),
     });
 
+    const averageResults = await Promise.all([
+      getAveragePerSession({
+        key: { key: "properties['Helicone-Session-Id']", alias: "cost" },
+        builtFilter,
+        aggregateFunction: clickhousePriceCalc("request_response_rmt"),
+      }),
+      getAveragePerSession({
+        key: { key: "properties['Helicone-Session-Id']", alias: "duration" },
+        builtFilter,
+        aggregateFunction:
+          "dateDiff('second', min(request_response_rmt.request_created_at), max(request_response_rmt.request_created_at))",
+      }),
+      getAveragePerSession({
+        key: { key: "properties['Helicone-Session-Id']", alias: "count" },
+        builtFilter,
+        aggregateFunction: "count(*)",
+      }),
+    ]);
+
     if (sessionCostData.error) {
       return sessionCostData;
+    }
+
+    // Check for errors in each average result
+    for (const result of averageResults) {
+      if (result.error) {
+        return result;
+      }
     }
 
     return ok({
       session_count: histogramData.data!,
       session_duration: sessionDurationData.data!,
       session_cost: sessionCostData.data!,
+      average: {
+        session_cost: averageResults[0].data!,
+        session_duration: averageResults[1].data!,
+        session_count: averageResults[2].data!,
+      },
     });
   }
 

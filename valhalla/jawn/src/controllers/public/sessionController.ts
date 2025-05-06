@@ -13,6 +13,7 @@ import { KVCache } from "../../lib/cache/kvCache";
 import { FilterLeafSubset } from "../../lib/shared/filters/filterDefs";
 import {
   SessionManager,
+  SessionMetrics,
   SessionNameResult,
   SessionResult,
 } from "../../managers/SessionManager";
@@ -145,7 +146,7 @@ export class SessionController extends Controller {
     @Body()
     requestBody: SessionMetricsQueryParams,
     @Request() request: JawnAuthenticatedRequest
-  ) {
+  ): Promise<Result<SessionMetrics, string>> {
     const sessionManager = new SessionManager(request.authParams);
 
     const result = await sessionManager.getMetrics(requestBody);

@@ -5138,6 +5138,19 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"AverageRow": {
+				"properties": {
+					"average": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"average"
+				],
+				"type": "object",
+				"additionalProperties": {}
+			},
 			"SessionMetrics": {
 				"properties": {
 					"session_count": {
@@ -5157,12 +5170,41 @@
 							"$ref": "#/components/schemas/HistogramRow"
 						},
 						"type": "array"
+					},
+					"average": {
+						"properties": {
+							"session_cost": {
+								"items": {
+									"$ref": "#/components/schemas/AverageRow"
+								},
+								"type": "array"
+							},
+							"session_duration": {
+								"items": {
+									"$ref": "#/components/schemas/AverageRow"
+								},
+								"type": "array"
+							},
+							"session_count": {
+								"items": {
+									"$ref": "#/components/schemas/AverageRow"
+								},
+								"type": "array"
+							}
+						},
+						"required": [
+							"session_cost",
+							"session_duration",
+							"session_count"
+						],
+						"type": "object"
 					}
 				},
 				"required": [
 					"session_count",
 					"session_duration",
-					"session_cost"
+					"session_cost",
+					"average"
 				],
 				"type": "object",
 				"additionalProperties": false
