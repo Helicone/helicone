@@ -74,13 +74,25 @@ const useSessions = ({
   };
 };
 
-const useSessionNames = (sessionNameSearch: string) => {
+const useSessionNames = (
+  sessionNameSearch: string,
+  timeFilter?: TimeFilter
+) => {
   const org = useOrg();
+  const filterStore = useFilterAST();
   const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ["sessions", org?.currentOrg?.id, sessionNameSearch],
+    queryKey: [
+      "sessions",
+      org?.currentOrg?.id,
+      sessionNameSearch,
+      timeFilter,
+      filterStore.store.filter,
+    ],
     queryFn: async (query) => {
       const orgId = query.queryKey[1] as string;
       const sessionNameSearch = query.queryKey[2] as string;
+      const timeFilter = query.queryKey[3] as TimeFilter | undefined;
+      const filter = query.queryKey[4] as FilterExpression;
       const timezoneDifference = new Date().getTimezoneOffset();
 
       const jawnClient = getJawnClient(orgId);
@@ -88,6 +100,13 @@ const useSessionNames = (sessionNameSearch: string) => {
         body: {
           nameContains: sessionNameSearch,
           timezoneDifference,
+          timeFilter: timeFilter
+            ? {
+                endTimeUnixMs: timeFilter.end.getTime(),
+                startTimeUnixMs: timeFilter.start.getTime(),
+              }
+            : undefined,
+          filter: filter ? (toFilterNode(filter) as any) : "all",
         },
       });
       if (result.error || result.data.error) {
