@@ -109,8 +109,8 @@ const SessionsPage = (props: SessionsPageProps) => {
 
   const debouncedSessionNameSearch = useDebounce(sessionNameSearch, 500);
 
-  const names = useSessionNames(debouncedSessionNameSearch ?? "");
-  const allNames = useSessionNames("");
+  const names = useSessionNames(debouncedSessionNameSearch ?? "", timeFilter);
+  const allNames = useSessionNames("", timeFilter);
 
   const debouncedSessionIdSearch = useDebounce(sessionIdSearch, 500); // 0.5 seconds
   const [selectedName, setSelectedName] = useState<string | undefined>(
