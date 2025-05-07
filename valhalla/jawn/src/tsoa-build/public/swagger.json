@@ -5149,7 +5149,7 @@
 					"average"
 				],
 				"type": "object",
-				"additionalProperties": {}
+				"additionalProperties": false
 			},
 			"SessionMetrics": {
 				"properties": {

@@ -1855,7 +1855,6 @@ Json: JsonObject;
     AverageRow: {
       /** Format: double */
       average: number;
-      [key: string]: unknown;
     };
     SessionMetrics: {
       session_count: components["schemas"]["HistogramRow"][];

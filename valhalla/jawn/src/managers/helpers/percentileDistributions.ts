@@ -93,7 +93,6 @@ export interface KeyDefinition {
 }
 
 export interface AverageRow {
-  [key: string]: any;
   average: number;
 }
 
