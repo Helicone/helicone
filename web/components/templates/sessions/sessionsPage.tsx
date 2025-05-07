@@ -417,6 +417,21 @@ const SessionsPage = (props: SessionsPageProps) => {
           }
           rightSection={
             <section className="flex flex-row items-center gap-2">
+              <div className="flex flex-row items-center gap-2 bg-sky-200 rounded-lg">
+                {selectedIds.length > 0 && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <ExportButton
+                      rows={[]}
+                      fetchRows={onFetchBulkSessions}
+                    />
+                  </TooltipTrigger>
+                    <TooltipContent>Export raw data</TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
+
+
               <div className="h-8 flex flex-row items-center border border-border rounded-lg divide-x divide-border overflow-hidden shadow-sm">
                 <label className="text-xs px-2 py-1">Views</label>
 
@@ -439,16 +454,6 @@ const SessionsPage = (props: SessionsPageProps) => {
                   ))}
                 </TabsList>
               </div>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <ExportButton
-                    rows={[]}
-                    fetchRows={onFetchBulkSessions}
-                  />
-                </TooltipTrigger>
-                <TooltipContent>Export raw data</TooltipContent>
-              </Tooltip>
 
               <ViewColumns
                 columns={tableRef.current?.getAllColumns() || []}
