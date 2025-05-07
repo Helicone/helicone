@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/select";
 import { formatSeconds } from "@/lib/sql/timeHelpers";
 import { useLocalStorage } from "@/services/hooks/localStorage";
-import { BarChart, Card, Title } from "@tremor/react";
+import { BarChart, Card } from "@tremor/react";
 import { useState } from "react";
 import {
   useSessionMetrics,
@@ -20,9 +20,9 @@ import { Col } from "../../layout/common/col";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import { formatLargeNumber } from "../../shared/utils/numberFormat";
 
+import { TimeFilter } from "@/types/timeFilter";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import { INITIAL_LAYOUT, MD_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
-import { TimeFilter } from "@/types/timeFilter";
 type SessionResult = ReturnType<typeof useSessionNames>["sessions"][number];
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
