@@ -1,20 +1,24 @@
 use std::{
     collections::HashMap,
+    hash::Hash,
     pin::Pin,
     sync::Arc,
     task::{Context, Poll},
 };
 
 use futures::Stream;
+use nonempty_collections::NEVec;
 use pin_project::pin_project;
+use rust_decimal::prelude::ToPrimitive;
 use tokio::sync::mpsc::Receiver;
 use tokio_stream::wrappers::ReceiverStream;
 use tower::discover::Change;
+use weighted_balance::weight::Weight;
 
 use crate::{
     app::AppState,
-    config::router::RouterConfig,
-    discover::provider::Key,
+    config::router::{BalanceTarget, RouterConfig},
+    discover::{provider::Key, weighted::WeightedKey},
     dispatcher::{Dispatcher, DispatcherService},
     error::init::InitError,
 };
@@ -37,14 +41,14 @@ use crate::{
 /// the layer would then send `Change::Remove` events to this discovery struct
 #[derive(Debug)]
 #[pin_project]
-pub struct ConfigDiscovery {
+pub struct ConfigDiscovery<K> {
     #[pin]
-    initial: ServiceMap<Key, DispatcherService>,
+    initial: ServiceMap<K, DispatcherService>,
     #[pin]
-    events: ReceiverStream<Change<Key, DispatcherService>>,
+    events: ReceiverStream<Change<K, DispatcherService>>,
 }
 
-impl ConfigDiscovery {
+impl ConfigDiscovery<Key> {
     pub fn new(
         app: &AppState,
         router_config: &Arc<RouterConfig>,
@@ -67,8 +71,42 @@ impl ConfigDiscovery {
     }
 }
 
-impl Stream for ConfigDiscovery {
-    type Item = Change<Key, DispatcherService>;
+impl ConfigDiscovery<WeightedKey> {
+    pub fn new_weighted(
+        app: &AppState,
+        weighted_balance_targets: NEVec<BalanceTarget>,
+        rx: Receiver<Change<WeightedKey, DispatcherService>>,
+    ) -> Result<Self, InitError> {
+        let events = ReceiverStream::new(rx);
+        let mut service_map: HashMap<WeightedKey, DispatcherService> =
+            HashMap::new();
+
+        for target in weighted_balance_targets {
+            let weight = Weight::from(
+                target
+                    .weight
+                    .to_f64()
+                    .ok_or(InitError::InvalidWeight(target.provider))?,
+            );
+            let key = WeightedKey::new(target.provider, weight);
+            let dispatcher =
+                Dispatcher::new_with_middleware(app.clone(), key.provider)?;
+            service_map.insert(key, dispatcher);
+        }
+
+        tracing::debug!("Created config provider discovery");
+        Ok(Self {
+            initial: ServiceMap::new(service_map),
+            events,
+        })
+    }
+}
+
+impl<K> Stream for ConfigDiscovery<K>
+where
+    K: Hash + Eq + Clone + std::fmt::Debug,
+{
+    type Item = Change<K, DispatcherService>;
 
     fn poll_next(
         self: Pin<&mut Self>,
@@ -92,9 +130,12 @@ impl Stream for ConfigDiscovery {
     }
 }
 
-fn handle_change(
-    change: Change<Key, DispatcherService>,
-) -> Poll<Option<Change<Key, DispatcherService>>> {
+fn handle_change<K>(
+    change: Change<K, DispatcherService>,
+) -> Poll<Option<Change<K, DispatcherService>>>
+where
+    K: std::fmt::Debug,
+{
     match change {
         Change::Insert(key, service) => {
             tracing::debug!(key = ?key, "Discovered new provider");

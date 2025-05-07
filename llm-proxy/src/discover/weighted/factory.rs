@@ -1,6 +1,5 @@
 use std::{
     future::{Ready, ready},
-    sync::Arc,
     task::{Context, Poll},
 };
 
@@ -9,32 +8,19 @@ use tower::{Service, discover::Change};
 use weighted_balance::weight::WeightedDiscover;
 
 use crate::{
-    app::AppState,
-    config::router::{BalanceConfig, RouterConfig},
-    discover::weighted::{WeightedKey, discover::Discovery},
+    config::router::BalanceConfig,
+    discover::{
+        provider::{discover::Discovery, factory::DiscoverFactory},
+        weighted::WeightedKey,
+    },
     dispatcher::DispatcherService,
     error::init::InitError,
 };
 
-#[derive(Debug)]
-pub struct DiscoverFactory {
-    app_state: AppState,
-    router_config: Arc<RouterConfig>,
-}
-
-impl DiscoverFactory {
-    pub fn new(app_state: AppState, router_config: Arc<RouterConfig>) -> Self {
-        Self {
-            app_state,
-            router_config,
-        }
-    }
-}
-
 impl Service<Receiver<Change<WeightedKey, DispatcherService>>>
     for DiscoverFactory
 {
-    type Response = WeightedDiscover<Discovery>;
+    type Response = WeightedDiscover<Discovery<WeightedKey>>;
     type Error = InitError;
     type Future = Ready<Result<Self::Response, Self::Error>>;
 
@@ -55,7 +41,7 @@ impl Service<Receiver<Change<WeightedKey, DispatcherService>>>
                 return ready(Err(InitError::InvalidBalancerInitialization));
             }
         };
-        let discovery = match Discovery::new(
+        let discovery = match Discovery::new_weighted(
             &self.app_state,
             weighted_balance_targets,
             rx,

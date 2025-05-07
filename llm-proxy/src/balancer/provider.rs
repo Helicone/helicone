@@ -14,8 +14,10 @@ use crate::{
     app::AppState,
     config::router::{BalanceConfig, RouterConfig},
     discover::{
-        provider::{self, monitor::ProviderMonitor},
-        weighted,
+        provider::{
+            Key, discover, factory::DiscoverFactory, monitor::ProviderMonitor,
+        },
+        weighted::WeightedKey,
     },
     error::{api::Error, init::InitError, internal::InternalError},
     types::{request::Request, response::Response},
@@ -25,10 +27,10 @@ const CHANNEL_CAPACITY: usize = 128;
 
 #[derive(Debug)]
 pub enum ProviderBalancer {
-    PeakEwma(Balance<PeakEwmaDiscover<provider::discover::Discovery>, Request>),
+    PeakEwma(Balance<PeakEwmaDiscover<discover::Discovery<Key>>, Request>),
     Weighted(
         WeightedBalance<
-            WeightedDiscover<weighted::discover::Discovery>,
+            WeightedDiscover<discover::Discovery<WeightedKey>>,
             Request,
         >,
     ),
@@ -55,10 +57,8 @@ impl ProviderBalancer {
     ) -> Result<(ProviderBalancer, ProviderMonitor), InitError> {
         tracing::debug!("Creating weighted balancer");
         let (tx, rx) = channel(CHANNEL_CAPACITY);
-        let discover_factory = weighted::factory::DiscoverFactory::new(
-            app_state.clone(),
-            router_config,
-        );
+        let discover_factory =
+            DiscoverFactory::new(app_state.clone(), router_config);
         let mut balance_factory =
             weighted_balance::balance::make::MakeBalance::new(discover_factory);
         let mut balance = balance_factory.call(rx).await?;
@@ -79,10 +79,8 @@ impl ProviderBalancer {
     ) -> Result<(ProviderBalancer, ProviderMonitor), InitError> {
         tracing::debug!("Creating peak ewma p2c balancer");
         let (tx, rx) = channel(CHANNEL_CAPACITY);
-        let discover_factory = provider::factory::DiscoverFactory::new(
-            app_state.clone(),
-            router_config,
-        );
+        let discover_factory =
+            DiscoverFactory::new(app_state.clone(), router_config);
         let mut balance_factory =
             tower::balance::p2c::MakeBalance::new(discover_factory);
         let mut balance = balance_factory.call(rx).await?;
@@ -135,7 +133,7 @@ pin_project! {
         PeakEwma {
             #[pin]
             future: <
-                Balance<PeakEwmaDiscover<provider::discover::Discovery>, Request> as tower::Service<
+                Balance<PeakEwmaDiscover<discover::Discovery<Key>>, Request> as tower::Service<
                     Request,
                 >
             >::Future,
@@ -143,7 +141,7 @@ pin_project! {
         Weighted {
             #[pin]
             future: <
-                WeightedBalance<WeightedDiscover<weighted::discover::Discovery>, Request> as tower::Service<
+                WeightedBalance<WeightedDiscover<discover::Discovery<WeightedKey>>, Request> as tower::Service<
                     Request,
                 >
             >::Future,
