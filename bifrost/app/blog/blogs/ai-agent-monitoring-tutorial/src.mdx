@@ -100,29 +100,21 @@ const openai = new OpenAI({
 });
 ```
 
-### 3. RAG for Financial Concepts
+### 3. RAG & External API access
 
-For popular financial term queries, we use a vector store to retrieve relevant information:
+For popular financial term queries, we use a vector store to retrieve relevant information, while for stock queries, such as real-time price information or news, we connect to the Alpha Vantage API:
 
 ```javascript
-// In the searchFinancialTerms function
-const resultsWithScores = await vectorStore.similaritySearchWithScore(query, 2);
+async function searchFinancialTerms(query, vectorStore) {
+  console.log("Searching for financial term definitions in knowledge base...");
+  
+  // Get relevant documents from vector store with similarity scores
+  const resultsWithScores = await vectorStore.similaritySearchWithScore(query, 2);
 
-// Check if we have relevant results with good similarity scores
-if (resultsWithScores.length === 0 || resultsWithScores[0][1] < 0.7) {
-  console.log("No relevant financial terms found in the knowledge base.");
-  return { 
-    found: false,
-    message: "No relevant financial terms found in the knowledge base."
-  };
+  ...
+
 }
 ```
-
-This RAG implementation provides domain-specific knowledge to the agent. However, as we'll see later, without proper monitoring, detecting when the system operates outside its knowledge boundaries can be difficult.
-
-### 4. External API Integration
-
-For stock queries, such as real-time price information or news, we connect to the Alpha Vantage API:
 
 ```javascript
 async function getStockData(ticker) {
@@ -130,68 +122,55 @@ async function getStockData(ticker) {
     const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${ticker}&apikey=${ALPHA_VANTAGE_API_KEY}`;
     const response = await axios.get(url);
     
-    if (response.data['Global Quote'] && Object.keys(response.data['Global Quote']).length > 0) {
-      const quote = response.data['Global Quote'];
-      return {
-        symbol: ticker.toUpperCase(),
-        price: parseFloat(quote['05. price']),
-        change: parseFloat(quote['09. change']),
-        changePercent: quote['10. change percent'],
-        volume: parseInt(quote['06. volume']),
-        latestTradingDay: quote['07. latest trading day']
-      };
-    } else {
-      return { error: `No data found for ticker ${ticker}` };
-    }
-  } catch (error) {
-    console.error('Error fetching stock data:', error);
-    return { error: `Failed to get stock data for ${ticker}` };
+    ...
   }
 }
 ```
 
-By connecting to external APIs, we can access real-time data that the underlying LLM doesn't have access to.
+The RAG implementation provides domain-specific knowledge to the agent. However, as we'll see later, without proper monitoring, detecting when the system operates outside its knowledge boundaries can be difficult.
 
-### 5. Multi-Step Processing
+### 4. Minimal Agent Loop (Tool Calling)
 
-The main `processQuery` function orchestrates the entire workflow:
+Looking at the provided code, here's the appropriate update for Section 4:
+
+### 4. Minimal Agent Loop (Tool Calling)
+
+We expose three tools to the LLM:
+
+- `getStockData`: Retrieves current price and market information for a specific ticker
+- `getStockNews`: Fetches the latest news articles related to a stock ticker
+- `searchFinancialTerms`: Queries our vector database for information about financial concepts
+
+The LLM may call a tool, receive its output as feedback, and then answer the user.
 
 ```javascript
-// Get response from LLM on how to process query
-const initialResponse = await openai.chat.completions.create({
-  model: "gpt-3.5-turbo",
-  messages,
-  tools,
-  temperature: 0.1,
-});
-
-const initialMessage = initialResponse.choices[0].message;
-
 // Check if the model wants to call a function
-if (initialMessage.tool_calls) {
-  console.log("Model requested tool calls:", initialMessage.tool_calls);
-  
+if (initialMessage.tool_calls) {    
   // Create an array to store messages for this interaction
   const messageHistory = [...messages, initialMessage];
   
   // Process each tool call
   for (const toolCall of initialMessage.tool_calls) {
-    ...
+    // Execute the appropriate function based on the call
+    // ...
+    
+    // Add the function response to the message history
+    messageHistory.push({
+      role: "tool",
+      tool_call_id: toolCall.id,
+      name: functionName,
+      content: JSON.stringify(functionResponse)
+    });
   }
   
   // Get a final response from the model with the function results
-  console.log("Getting final response with tool results...");
   const finalResponse = await openai.chat.completions.create({
     model: "gpt-3.5-turbo",
     messages: messageHistory,
     temperature: 0.1,
   });
-  
-  return finalResponse.choices[0].message.content;
 }
 ```
-
-This approach allows the model to decide which tools to use, call them, and then use their output to generate a final response.
 
 ## Testing our Financial Assistant
 
