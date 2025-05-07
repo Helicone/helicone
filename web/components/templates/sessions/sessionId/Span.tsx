@@ -657,8 +657,8 @@ export const TraceSpan = ({
                       className={
                         isSelected
                           ? theme === "dark"
-                            ? "fill-sky-500"
-                            : "fill-sky-700"
+                            ? "fill-white"
+                            : "fill-black"
                           : "fill-card-foreground"
                       }
                       opacity={isSelected ? 1 : 0.7}
