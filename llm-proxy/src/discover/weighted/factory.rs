@@ -5,12 +5,13 @@ use std::{
 };
 
 use tokio::sync::mpsc::Receiver;
-use tower::{Service, discover::Change, load::PeakEwmaDiscover};
+use tower::{Service, discover::Change};
+use weighted_balance::weight::WeightedDiscover;
 
 use crate::{
     app::AppState,
-    config::router::RouterConfig,
-    discover::provider::{Key, discover::Discovery},
+    config::router::{BalanceConfig, RouterConfig},
+    discover::weighted::{WeightedKey, discover::Discovery},
     dispatcher::DispatcherService,
     error::init::InitError,
 };
@@ -30,8 +31,10 @@ impl DiscoverFactory {
     }
 }
 
-impl Service<Receiver<Change<Key, DispatcherService>>> for DiscoverFactory {
-    type Response = PeakEwmaDiscover<Discovery>;
+impl Service<Receiver<Change<WeightedKey, DispatcherService>>>
+    for DiscoverFactory
+{
+    type Response = WeightedDiscover<Discovery>;
     type Error = InitError;
     type Future = Ready<Result<Self::Response, Self::Error>>;
 
@@ -44,23 +47,23 @@ impl Service<Receiver<Change<Key, DispatcherService>>> for DiscoverFactory {
 
     fn call(
         &mut self,
-        rx: Receiver<Change<Key, DispatcherService>>,
+        rx: Receiver<Change<WeightedKey, DispatcherService>>,
     ) -> Self::Future {
+        let weighted_balance_targets = match &self.router_config.balance {
+            BalanceConfig::Weighted { targets } => targets.clone(),
+            BalanceConfig::P2C { .. } => {
+                return ready(Err(InitError::InvalidBalancerInitialization));
+            }
+        };
         let discovery = match Discovery::new(
             self.app_state.clone(),
-            self.router_config.clone(),
+            weighted_balance_targets,
             rx,
         ) {
             Ok(discovery) => discovery,
             Err(e) => return ready(Err(e)),
         };
-        let discovery = PeakEwmaDiscover::new(
-            discovery,
-            self.app_state.0.config.discover.default_rtt,
-            self.app_state.0.config.discover.discover_decay,
-            Default::default(),
-        );
-
+        let discovery = WeightedDiscover::new(discovery);
         ready(Ok(discovery))
     }
 }

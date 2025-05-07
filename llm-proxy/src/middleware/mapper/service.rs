@@ -9,7 +9,6 @@ use http_body_util::BodyExt;
 
 use crate::{
     app::AppState,
-    discover::Key,
     error::{api::Error, internal::InternalError},
     middleware::mapper::endpoint::ApiEndpoint,
     types::{
@@ -54,8 +53,8 @@ where
         let mut inner = self.inner.clone();
         std::mem::swap(&mut self.inner, &mut inner);
         Box::pin(async move {
-            let key = req.extensions_mut().remove::<Key>().ok_or(
-                Error::Internal(InternalError::ExtensionNotFound("Key")),
+            let provider = req.extensions_mut().remove::<Provider>().ok_or(
+                Error::Internal(InternalError::ExtensionNotFound("Provider")),
             )?;
             let req_ctx = req
                 .extensions()
@@ -65,12 +64,17 @@ where
                 )))?
                 .clone();
             let request_style = req_ctx.router_config.request_style;
+            tracing::trace!(
+                request_style = %request_style,
+                provider = %provider,
+                "Mapper"
+            );
 
-            if key.provider != request_style {
+            if provider != request_style {
                 // serialization/deserialization should be done on a dedicated
                 // thread
                 let req = tokio::task::spawn_blocking(move || async move {
-                    map_request(app_state, request_style, key, req).await
+                    map_request(app_state, request_style, provider, req).await
                 })
                 .await
                 .map_err(InternalError::MappingTaskError)?
@@ -86,7 +90,7 @@ where
 async fn map_request(
     app_state: AppState,
     request_style: Provider,
-    key: Key,
+    provider: Provider,
     mut req: Request,
 ) -> Result<Request, Error> {
     let extracted_path_and_query =
@@ -95,7 +99,7 @@ async fn map_request(
         )?;
     let source_endpoint =
         ApiEndpoint::new(&extracted_path_and_query, request_style)?;
-    let target_endpoint = ApiEndpoint::mapped(source_endpoint, key.provider)?;
+    let target_endpoint = ApiEndpoint::mapped(source_endpoint, provider)?;
     let (parts, body) = req.into_parts();
     let body = body
         .collect()
@@ -111,7 +115,7 @@ async fn map_request(
     let mut req = Request::from_parts(parts, axum_core::body::Body::from(body));
     tracing::trace!(
         source_endpoint = ?source_endpoint, target_endpoint = ?target_endpoint,
-        target_path_and_query = ?target_path_and_query, request_style = %request_style, "mapped request");
+        target_path_and_query = ?target_path_and_query, "mapped request");
     req.extensions_mut().insert(target_path_and_query);
     Ok(req)
 }

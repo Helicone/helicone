@@ -51,7 +51,7 @@ impl MetaRouter {
                 ));
             }
         }?;
-        tracing::trace!(
+        tracing::info!(
             num_routers = meta_router.0.inner.len(),
             "meta router created"
         );
@@ -162,6 +162,11 @@ impl tower::Service<crate::types::request::Request> for MetaRouter {
                     return Either::Left(ready(Ok(e.into_response())));
                 }
             };
+        tracing::trace!(
+            router_id = router_id.to_string(),
+            api_path = api_path.to_string(),
+            "MetaRouter received request"
+        );
         if let Some(router) = self.inner.get_mut(&router_id) {
             req.extensions_mut().insert(api_path);
             Either::Right(router.call(req))

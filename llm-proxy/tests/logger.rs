@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::HashMap;
 
 use http::{Method, Request, StatusCode};
 use http_body_util::BodyExt;
@@ -14,10 +14,10 @@ use tower::Service;
 async fn request_response_logger() {
     let config = Config::test_default();
     let mock_args = MockArgs::builder()
-        .stubs_in_scope(HashSet::from([
-            "success:openai:chat_completion".to_string(),
-            "success:minio:upload_request".to_string(),
-            "success:jawn:log_request".to_string(),
+        .stubs(HashMap::from([
+            ("success:openai:chat_completion", 1.into()),
+            ("success:minio:upload_request", 1.into()),
+            ("success:jawn:log_request", 1.into()),
         ]))
         .build();
     let mut harness = Harness::builder()

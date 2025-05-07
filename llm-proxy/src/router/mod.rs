@@ -68,7 +68,7 @@ impl Router {
             // .map_err(|e| crate::error::api::Error::Box(e))
             .service(balancer);
 
-        tracing::trace!(id = %id, "router created");
+        tracing::info!(id = %id, "router created");
 
         Ok((
             Self {

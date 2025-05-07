@@ -10,7 +10,6 @@ use super::{
     spend_control::SpendControlConfig,
 };
 use crate::{
-    discover::Key,
     error::provider::ProviderError,
     types::{model::Model, provider::Provider, router::RouterId},
 };
@@ -73,8 +72,8 @@ impl RouterConfig {
         let unsupported_provider = match &self.balance {
             BalanceConfig::Weighted { targets } => targets
                 .iter()
-                .find(|target| !self.providers.contains(&target.key.provider))
-                .map(|target| &target.key.provider),
+                .find(|target| !self.providers.contains(&target.provider))
+                .map(|target| &target.provider),
             BalanceConfig::P2C { targets } => {
                 targets.iter().find(|target_provider| {
                     !self.providers.contains(target_provider)
@@ -152,16 +151,12 @@ impl BalanceConfig {
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, Hash, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 pub struct BalanceTarget {
-    #[serde(flatten)]
-    pub key: Key,
+    pub provider: Provider,
     pub weight: Decimal,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, Hash, PartialEq)]
 pub struct PromptVersion(pub String);
-
-#[derive(Debug, Clone, Deserialize, Eq, Hash, PartialEq)]
-pub struct Weight(pub Decimal);
 
 #[cfg(feature = "testing")]
 impl crate::tests::TestDefault for RouterConfigs {

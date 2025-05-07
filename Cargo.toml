@@ -6,7 +6,7 @@ members = [
   "crates/metrics",
   "crates/telemetry",
   "llm-proxy",
-  "test",
+  "test", "crates/weighted-balance",
 ]
 resolver = "2"
 
@@ -30,6 +30,7 @@ anthropic-types = { path = "./crates/anthropic-types" }
 telemetry = { path = "./crates/telemetry" }
 metrics = { path = "./crates/metrics" }
 llm-proxy = { path = "./llm-proxy" }
+weighted-balance = { path = "./crates/weighted-balance" }
 
 anyhow = "1.0.98"
 axum-core = "0.5.2"
@@ -67,6 +68,7 @@ opentelemetry-semantic-conventions = "0.29.0"
 pin-project = "1.1.10"
 pin-project-lite = "0.2.16"
 prometheus = { version = "0.14.0", default-features = false }
+rand = "0.9.1"
 regex = "1.11.1"
 reqwest = { version = "0.12.15", features = [ "json", "stream", "multipart", "native-tls"], default-features = false }
 rust_decimal = "1.37.1"
@@ -87,6 +89,7 @@ stubr = { git = "https://github.com/tomharmon/stubr" }
 thiserror = "2.0.12"
 tokio = { version = "1.44.2", features = ['full'] }
 tokio-stream = "0.1.17"
+tokio-test = "0.4.4"
 tokio-util = "0.7.15"
 tower = "0.5.2"
 tower_governor = "0.7.0"

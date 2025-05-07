@@ -135,8 +135,10 @@ pub struct InnerAppState {
 ///      `Arc<RequestContext>`
 /// - `Arc<RequestContext>`
 ///   - Added by the request context layer
-/// - `Key`
+///   - Used by many layers
+/// - `Provider`
 ///   - Added by the AddExtensionLayer in the dispatcher service stack
+///   - Used by the Mapper layer
 /// - `PathAndQuery`
 ///   - Added by the MetaRouter
 ///   - Used by the Mapper layer
@@ -163,6 +165,7 @@ impl tower::Service<crate::types::request::Request> for App {
     #[inline]
     #[tracing::instrument(name = "app", skip_all)]
     fn call(&mut self, req: crate::types::request::Request) -> Self::Future {
+        tracing::trace!(uri = %req.uri(), "App received request");
         self.service_stack.call(req)
     }
 }
@@ -172,7 +175,6 @@ impl App {
         config: Config,
     ) -> Result<(Self, ProviderMonitors), InitError> {
         tracing::info!(config = ?config, "creating app");
-        tracing::info!(access_key = %config.minio.access_key.0, "access key");
         let minio = Minio::new(config.minio.clone())?;
         let unauthed_rate_limit =
             Arc::new(config.rate_limit.unauthed_limiter());
@@ -180,8 +182,7 @@ impl App {
         let pg_config =
             sqlx::postgres::PgPoolOptions::from(config.database.clone());
         let pg_pool = pg_config
-            .connect(&config.database.url.0)
-            .await
+            .connect_lazy(&config.database.url.0)
             .map_err(error::init::InitError::DatabaseConnection)?;
         let balance_config = &config
             .routers
@@ -294,13 +295,14 @@ pub struct HyperApp {
 
 impl HyperApp {
     pub fn new(app: App) -> Self {
+        let state = app.state.clone();
         let service_stack = ServiceBuilder::new()
             .map_request(|req: http::Request<hyper::body::Incoming>| {
                 req.map(axum_core::body::Body::new)
             })
-            .service(app.service_stack);
+            .service(app);
         Self {
-            state: app.state,
+            state,
             service_stack: BoxCloneService::new(service_stack),
         }
     }
@@ -320,12 +322,10 @@ impl tower::Service<http::Request<hyper::body::Incoming>> for HyperApp {
     }
 
     #[inline]
-    #[tracing::instrument(name = "app", skip_all)]
     fn call(
         &mut self,
         req: http::Request<hyper::body::Incoming>,
     ) -> Self::Future {
-        tracing::trace!(uri = %req.uri(), "App received request");
         self.service_stack.call(req)
     }
 }

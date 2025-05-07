@@ -1,4 +1,5 @@
 use http::{Method, Request, StatusCode};
+use http_body_util::BodyExt;
 use llm_proxy::{
     config::{Config, router::RouterConfigs},
     tests::{TestDefault, harness::Harness, mock::MockArgs},
@@ -8,13 +9,13 @@ use tower::Service;
 
 #[tokio::test]
 #[serial_test::serial]
-async fn mapper_openai_slow() {
+async fn openai_slow() {
     let mut config = Config::test_default();
     // enable multiple providers, test_default for RouterConfig has only a
     // single provider
     config.routers = RouterConfigs::default();
-    let latency = 10;
-    let requests = 50;
+    let latency = 100;
+    let requests = 10;
     let mock_args = MockArgs::builder()
         .global_openai_latency(latency)
         .verify(false)
@@ -45,6 +46,7 @@ async fn mapper_openai_slow() {
             .unwrap();
         let response = harness.call(request).await.unwrap();
         assert_eq!(response.status(), StatusCode::OK);
+        let _response_body = response.into_body().collect().await.unwrap();
     }
 
     let anthropic_received_requests = harness
@@ -77,7 +79,7 @@ async fn mapper_openai_slow() {
 
 #[tokio::test]
 #[serial_test::serial]
-async fn mapper_anthropic_slow() {
+async fn anthropic_slow() {
     let mut config = Config::test_default();
     // enable multiple providers, test_default for RouterConfig has only a
     // single provider

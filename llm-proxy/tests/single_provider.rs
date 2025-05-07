@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 use http::{Method, Request, StatusCode};
 use llm_proxy::{
@@ -20,9 +20,10 @@ use tower::Service;
 async fn openai() {
     let config = Config::test_default();
     let mock_args = MockArgs::builder()
-        .stubs_in_scope(HashSet::from([
-            "success:openai:chat_completion".to_string()
-        ]))
+        .stubs(HashMap::from([(
+            "success:openai:chat_completion",
+            1.into(),
+        )]))
         .build();
     let mut harness = Harness::builder()
         .with_config(config)
@@ -77,9 +78,7 @@ async fn anthropic_with_openai_request_style() {
     )]));
     config.routers = router_config;
     let mock_args = MockArgs::builder()
-        .stubs_in_scope(HashSet::from([
-            "success:anthropic:messages".to_string()
-        ]))
+        .stubs(HashMap::from([("success:anthropic:messages", 1.into())]))
         .build();
     let mut harness = Harness::builder()
         .with_config(config)
@@ -162,9 +161,7 @@ async fn anthropic_with_anthropic_request_style() {
     )]));
     config.routers = router_config;
     let mock_args = MockArgs::builder()
-        .stubs_in_scope(HashSet::from([
-            "success:anthropic:messages".to_string()
-        ]))
+        .stubs(HashMap::from([("success:anthropic:messages", 1.into())]))
         .build();
     let mut harness = Harness::builder()
         .with_config(config)
@@ -250,9 +247,10 @@ async fn anthropic_request_style() {
     )]));
     config.routers = router_config;
     let mock_args = MockArgs::builder()
-        .stubs_in_scope(HashSet::from([
-            "success:openai:chat_completion".to_string()
-        ]))
+        .stubs(HashMap::from([(
+            "success:openai:chat_completion",
+            1.into(),
+        )]))
         .build();
     let mut harness = Harness::builder()
         .with_config(config)

@@ -6,22 +6,40 @@ use tokio::sync::mpsc::Sender;
 use tower::discover::Change;
 use tracing::info;
 
+use super::Key;
 use crate::{
-    discover::Key, dispatcher::DispatcherService, error::runtime,
-    types::router::RouterId,
+    discover::weighted::WeightedKey, dispatcher::DispatcherService,
+    error::runtime, types::router::RouterId,
 };
+
+pub enum ProviderMonitor {
+    Weighted(ProviderMonitorInner<WeightedKey>),
+    P2C(ProviderMonitorInner<Key>),
+}
+
+impl ProviderMonitor {
+    pub fn weighted(
+        tx: Sender<Change<WeightedKey, DispatcherService>>,
+    ) -> Self {
+        Self::Weighted(ProviderMonitorInner::new(tx))
+    }
+
+    pub fn p2c(tx: Sender<Change<Key, DispatcherService>>) -> Self {
+        Self::P2C(ProviderMonitorInner::new(tx))
+    }
+}
 
 /// Could monitor health from URLs like:
 ///
 /// https://status.openai.com/proxy/status.openai.com
 ///
 /// or more creative methods if required.
-pub struct ProviderMonitor {
-    _tx: Sender<Change<Key, DispatcherService>>,
+pub struct ProviderMonitorInner<K> {
+    _tx: Sender<Change<K, DispatcherService>>,
 }
 
-impl ProviderMonitor {
-    pub fn new(tx: Sender<Change<Key, DispatcherService>>) -> Self {
+impl<K> ProviderMonitorInner<K> {
+    pub fn new(tx: Sender<Change<K, DispatcherService>>) -> Self {
         Self { _tx: tx }
     }
 }
