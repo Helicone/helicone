@@ -391,6 +391,11 @@ export const BLOG_CONTENT: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
+      folderName: "llm-caching",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "gpt-4o-mini-vs-claude-3.5-sonnet",
     },
   },
