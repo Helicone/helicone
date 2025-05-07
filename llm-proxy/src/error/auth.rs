@@ -22,24 +22,23 @@ pub enum AuthError {
 
 impl IntoResponse for AuthError {
     fn into_response(self) -> Response {
-        match self {
-            Self::InvalidCredentials => (
+        if let Self::InvalidCredentials = self {
+            (
                 StatusCode::UNAUTHORIZED,
                 Json(ErrorResponse {
                     error: "Invalid credentials".to_string(),
                 }),
             )
-                .into_response(),
-            _ => {
-                error!(error = %self, "authentication error");
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    Json(ErrorResponse {
-                        error: "Internal server error".to_string(),
-                    }),
-                )
-                    .into_response()
-            }
+                .into_response()
+        } else {
+            error!(error = %self, "authentication error");
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ErrorResponse {
+                    error: "Internal server error".to_string(),
+                }),
+            )
+                .into_response()
         }
     }
 }

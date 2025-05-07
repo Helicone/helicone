@@ -16,7 +16,7 @@ use serde::{Deserialize, Serialize};
     about = "Filter an OpenAPI schema based on a YAML configuration"
 )]
 struct Args {
-    /// Path to input OpenAPI schema file
+    /// Path to input `OpenAPI` schema file
     #[arg(short, long)]
     input: PathBuf,
 
@@ -24,7 +24,7 @@ struct Args {
     #[arg(short, long)]
     config: PathBuf,
 
-    /// Path to output the filtered OpenAPI schema
+    /// Path to output the filtered `OpenAPI` schema
     #[arg(short, long)]
     output: PathBuf,
 }
@@ -68,7 +68,7 @@ fn main() -> Result<()> {
         .with_context(|| "Failed to parse config file")?;
 
     // Filter the schema
-    filter_schema(&mut schema, &config)?;
+    filter_schema(&mut schema, &config);
 
     // Write the filtered schema to the output file
     let output_content =
@@ -93,7 +93,7 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn filter_schema(schema: &mut OpenAPI, config: &Config) -> Result<()> {
+fn filter_schema(schema: &mut OpenAPI, config: &Config) {
     // Create a set of paths to keep
     let mut paths_to_keep = HashMap::new();
 
@@ -117,46 +117,46 @@ fn filter_schema(schema: &mut OpenAPI, config: &Config) -> Result<()> {
 
         // Check GET operations
         if filtered_path_item.get.is_some() {
-            if !should_keep_operation(path, "get", &paths_to_keep) {
-                filtered_path_item.get = None;
-            } else {
+            if should_keep_operation(path, "get", &paths_to_keep) {
                 keep_path = true;
+            } else {
+                filtered_path_item.get = None;
             }
         }
 
         // Check POST operations
         if filtered_path_item.post.is_some() {
-            if !should_keep_operation(path, "post", &paths_to_keep) {
-                filtered_path_item.post = None;
-            } else {
+            if should_keep_operation(path, "post", &paths_to_keep) {
                 keep_path = true;
+            } else {
+                filtered_path_item.post = None;
             }
         }
 
         // Check PUT operations
         if filtered_path_item.put.is_some() {
-            if !should_keep_operation(path, "put", &paths_to_keep) {
-                filtered_path_item.put = None;
-            } else {
+            if should_keep_operation(path, "put", &paths_to_keep) {
                 keep_path = true;
+            } else {
+                filtered_path_item.put = None;
             }
         }
 
         // Check DELETE operations
         if filtered_path_item.delete.is_some() {
-            if !should_keep_operation(path, "delete", &paths_to_keep) {
-                filtered_path_item.delete = None;
-            } else {
+            if should_keep_operation(path, "delete", &paths_to_keep) {
                 keep_path = true;
+            } else {
+                filtered_path_item.delete = None;
             }
         }
 
         // Check PATCH operations
         if filtered_path_item.patch.is_some() {
-            if !should_keep_operation(path, "patch", &paths_to_keep) {
-                filtered_path_item.patch = None;
-            } else {
+            if should_keep_operation(path, "patch", &paths_to_keep) {
                 keep_path = true;
+            } else {
+                filtered_path_item.patch = None;
             }
         }
 
@@ -175,7 +175,7 @@ fn filter_schema(schema: &mut OpenAPI, config: &Config) -> Result<()> {
     // DEBUG: Log the paths that were kept
     println!("DEBUG: Kept paths after filtering:");
     for path in schema.paths.paths.keys() {
-        println!("  - {}", path);
+        println!("  - {path}");
     }
 
     // Now find and keep only the schema components that are referenced by the
@@ -188,13 +188,13 @@ fn filter_schema(schema: &mut OpenAPI, config: &Config) -> Result<()> {
         // filtering
         println!("DEBUG: Original component schemas:");
         for key in schema.components.as_ref().unwrap().schemas.keys() {
-            println!("  - {}", key);
+            println!("  - {key}");
         }
         println!(
             "DEBUG: Final used schemas identified (including dependencies):"
         );
         for schema_name in &used_schemas {
-            println!("  - {}", schema_name);
+            println!("  - {schema_name}");
         }
 
         // Clone the schema components to avoid borrow issues
@@ -222,12 +222,11 @@ fn filter_schema(schema: &mut OpenAPI, config: &Config) -> Result<()> {
         // Update the components
         schema.components = Some(components);
     }
-
-    Ok(())
 }
 
 /// Find all schemas referenced in the paths section and resolve nested
 /// references
+#[allow(clippy::too_many_lines)]
 fn find_referenced_schemas(schema: &OpenAPI) -> HashSet<String> {
     let mut referenced_schemas = HashSet::new();
     let mut to_process = VecDeque::new();
@@ -363,11 +362,11 @@ fn find_referenced_schemas(schema: &OpenAPI) -> HashSet<String> {
     // DEBUG: Log initial schemas found directly from paths/operations
     println!("DEBUG: Initial schemas directly referenced:");
     for schema_name in &referenced_schemas {
-        println!("  - {}", schema_name);
+        println!("  - {schema_name}");
     }
     println!("DEBUG: Initial queue for dependency checking:");
     for schema_name in &to_process {
-        println!("  - {}", schema_name);
+        println!("  - {schema_name}");
     }
 
     // Process all the referenced schemas to find their dependencies
@@ -404,7 +403,7 @@ fn find_referenced_schemas(schema: &OpenAPI) -> HashSet<String> {
     // DEBUG: Log final set of schemas after dependency traversal
     println!("DEBUG: Final set of referenced schemas after traversal:");
     for schema_name in &referenced_schemas {
-        println!("  - {}", schema_name);
+        println!("  - {schema_name}");
     }
 
     referenced_schemas

@@ -16,6 +16,7 @@ pub struct S3Log {
 }
 
 impl S3Log {
+    #[must_use]
     pub fn new(request: String, response: String) -> Self {
         Self { request, response }
     }
@@ -41,7 +42,7 @@ impl HeliconeLogMetadata {
     pub fn from_headers(headers: &mut HeaderMap) -> Result<Self, LoggerError> {
         let model_override = headers
             .remove("x-helicone-model-override")
-            .map(|v| v.to_str().map(|s| s.to_owned()))
+            .map(|v| v.to_str().map(std::borrow::ToOwned::to_owned))
             .transpose()?;
         let omit_request_log =
             headers.get("x-helicone-omit-request-log").is_some();
@@ -51,15 +52,15 @@ impl HeliconeLogMetadata {
             headers.remove("x-helicone-webhook-enabled").is_some();
         let posthog_api_key = headers
             .remove("x-helicone-posthog-api-key")
-            .map(|v| v.to_str().map(|s| s.to_owned()))
+            .map(|v| v.to_str().map(std::borrow::ToOwned::to_owned))
             .transpose()?;
         let posthog_host = headers
             .remove("x-helicone-posthog-host")
-            .map(|v| v.to_str().map(|s| s.to_owned()))
+            .map(|v| v.to_str().map(std::borrow::ToOwned::to_owned))
             .transpose()?;
         let lytix_key = headers
             .remove("x-helicone-lytix-key")
-            .map(|v| v.to_str().map(|s| s.to_owned()))
+            .map(|v| v.to_str().map(std::borrow::ToOwned::to_owned))
             .transpose()?;
         Ok(Self {
             model_override,
@@ -117,6 +118,7 @@ pub struct RequestLog {
     pub experiment_row_index: Option<String>,
 }
 
+#[allow(clippy::trivially_copy_pass_by_ref)]
 fn serialize_uppercase<S>(
     value: &Provider,
     serializer: S,
@@ -148,6 +150,7 @@ pub struct Log {
 }
 
 impl Log {
+    #[must_use]
     pub fn new(request: RequestLog, response: ResponseLog) -> Self {
         Self { request, response }
     }

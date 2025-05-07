@@ -18,6 +18,7 @@ use crate::{
 pub struct RouterConfigs(HashMap<RouterId, RouterConfig>);
 
 impl RouterConfigs {
+    #[must_use]
     pub fn new(configs: HashMap<RouterId, RouterConfig>) -> Self {
         Self(configs)
     }
@@ -105,7 +106,7 @@ impl RouterConfig {
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 pub struct CacheControlConfig {
-    /// Cache-control header: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cache-Control
+    /// Cache-control header: <https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cache-Control>
     pub directive: String,
     pub enabled: bool,
     pub buckets: u16,
@@ -131,8 +132,8 @@ pub struct FallbackTarget {
 /// impl.
 ///
 /// See e.g.:
-/// https://github.com/tower-rs/tower/issues/696
-/// https://github.com/tower-rs/tower/pull/695/files
+/// <https://github.com/tower-rs/tower/issues/696>
+/// <https://github.com/tower-rs/tower/pull/695/files>
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case", tag = "strategy")]
 pub enum BalanceConfig {
@@ -141,6 +142,7 @@ pub enum BalanceConfig {
 }
 
 impl BalanceConfig {
+    #[must_use]
     pub fn p2c_all_providers() -> Self {
         Self::P2C {
             targets: nev![Provider::OpenAI, Provider::Anthropic],

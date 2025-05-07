@@ -5,7 +5,11 @@ use std::{
 };
 
 use tokio::sync::mpsc::Receiver;
-use tower::{Service, discover::Change, load::PeakEwmaDiscover};
+use tower::{
+    Service,
+    discover::Change,
+    load::{CompleteOnResponse, PeakEwmaDiscover},
+};
 
 use crate::{
     app::AppState,
@@ -17,8 +21,8 @@ use crate::{
 
 #[derive(Debug)]
 pub struct DiscoverFactory {
-    app_state: AppState,
-    router_config: Arc<RouterConfig>,
+    pub(crate) app_state: AppState,
+    pub(crate) router_config: Arc<RouterConfig>,
 }
 
 impl DiscoverFactory {
@@ -31,7 +35,7 @@ impl DiscoverFactory {
 }
 
 impl Service<Receiver<Change<Key, DispatcherService>>> for DiscoverFactory {
-    type Response = PeakEwmaDiscover<Discovery>;
+    type Response = PeakEwmaDiscover<Discovery<Key>>;
     type Error = InitError;
     type Future = Ready<Result<Self::Response, Self::Error>>;
 
@@ -46,19 +50,16 @@ impl Service<Receiver<Change<Key, DispatcherService>>> for DiscoverFactory {
         &mut self,
         rx: Receiver<Change<Key, DispatcherService>>,
     ) -> Self::Future {
-        let discovery = match Discovery::new(
-            self.app_state.clone(),
-            self.router_config.clone(),
-            rx,
-        ) {
-            Ok(discovery) => discovery,
-            Err(e) => return ready(Err(e)),
-        };
+        let discovery =
+            match Discovery::new(&self.app_state, &self.router_config, rx) {
+                Ok(discovery) => discovery,
+                Err(e) => return ready(Err(e)),
+            };
         let discovery = PeakEwmaDiscover::new(
             discovery,
             self.app_state.0.config.discover.default_rtt,
             self.app_state.0.config.discover.discover_decay,
-            Default::default(),
+            CompleteOnResponse::default(),
         );
 
         ready(Ok(discovery))

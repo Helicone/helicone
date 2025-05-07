@@ -1,34 +1,42 @@
 use std::{
     convert::Infallible,
+    hash::Hash,
     pin::Pin,
     sync::Arc,
     task::{Context, Poll},
 };
 
 use futures::Stream;
+use nonempty_collections::NEVec;
 use pin_project::pin_project;
 use tokio::sync::mpsc::Receiver;
 use tower::discover::Change;
 
 use crate::{
     app::AppState,
-    config::{DeploymentTarget, router::RouterConfig},
-    discover::provider::{Key, config::ConfigDiscovery},
+    config::{
+        DeploymentTarget,
+        router::{BalanceTarget, RouterConfig},
+    },
+    discover::{
+        provider::{Key, config::ConfigDiscovery},
+        weighted::WeightedKey,
+    },
     dispatcher::DispatcherService,
     error::init::InitError,
 };
 
-/// Discover endpoints keyed by [`Key`].
+/// Discover endpoints keyed by [`K`].
 #[derive(Debug)]
 #[pin_project(project = DiscoveryProj)]
-pub enum Discovery {
-    Config(#[pin] ConfigDiscovery),
+pub enum Discovery<K> {
+    Config(#[pin] ConfigDiscovery<K>),
 }
 
-impl Discovery {
+impl Discovery<Key> {
     pub fn new(
-        app_state: AppState,
-        router_config: Arc<RouterConfig>,
+        app_state: &AppState,
+        router_config: &Arc<RouterConfig>,
         rx: Receiver<Change<Key, DispatcherService>>,
     ) -> Result<Self, InitError> {
         // TODO: currently we also have a separate discovery_mode.
@@ -44,8 +52,34 @@ impl Discovery {
     }
 }
 
-impl Stream for Discovery {
-    type Item = Result<Change<Key, DispatcherService>, Infallible>;
+impl Discovery<WeightedKey> {
+    pub fn new_weighted(
+        app_state: &AppState,
+        weighted_balance_targets: NEVec<BalanceTarget>,
+        rx: Receiver<Change<WeightedKey, DispatcherService>>,
+    ) -> Result<Self, InitError> {
+        // TODO: currently we also have a separate discovery_mode.
+        // we should consolidate.
+        match app_state.0.config.deployment_target {
+            DeploymentTarget::SelfHosted => {
+                Ok(Self::Config(ConfigDiscovery::new_weighted(
+                    app_state,
+                    weighted_balance_targets,
+                    rx,
+                )?))
+            }
+            DeploymentTarget::Cloud | DeploymentTarget::Sidecar => {
+                todo!("cloud and sidecar not supported yet")
+            }
+        }
+    }
+}
+
+impl<K> Stream for Discovery<K>
+where
+    K: Hash + Eq + Clone + std::fmt::Debug,
+{
+    type Item = Result<Change<K, DispatcherService>, Infallible>;
 
     fn poll_next(
         self: Pin<&mut Self>,

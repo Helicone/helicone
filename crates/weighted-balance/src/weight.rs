@@ -36,7 +36,7 @@ impl AsRef<u32> for Weight {
 impl Weight {
     /// Minimum Weight
     pub const MIN: Weight = Weight(0);
-    /// Unit of Weight - what 1.0_f64 corresponds to
+    /// Unit of Weight - what `1.0_f64` corresponds to
     pub const UNIT: Weight = Weight(10_000);
     /// Maximum Weight
     pub const MAX: Weight = Weight(u32::MAX);
@@ -55,14 +55,15 @@ impl From<f64> for Weight {
         } else if w.is_infinite() {
             Self::MAX
         } else {
-            Weight((w * (Weight::UNIT.0 as f64)).round() as u32)
+            #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+            Weight((w * f64::from(Weight::UNIT.0)).round() as u32)
         }
     }
 }
 
 impl From<Weight> for f64 {
     fn from(w: Weight) -> f64 {
-        (w.0 as f64) / (Weight::UNIT.0 as f64)
+        f64::from(w.0) / f64::from(Weight::UNIT.0)
     }
 }
 
@@ -82,6 +83,7 @@ impl ops::Div<Weight> for f64 {
 impl ops::Div<Weight> for usize {
     type Output = f64;
 
+    #[allow(clippy::cast_precision_loss)]
     fn div(self, w: Weight) -> f64 {
         (self as f64) / w
     }
@@ -170,7 +172,7 @@ where
         self: Pin<&mut Self>,
         cx: &mut Context<'_>,
     ) -> Poll<Option<Self::Item>> {
-        use self::Change::*;
+        use self::Change::{Insert, Remove};
 
         let this = self.project();
         let change =
@@ -189,7 +191,7 @@ where
 
 #[test]
 fn div_min() {
-    assert_eq!(10.0 / Weight::MIN, f64::INFINITY);
-    assert_eq!(10 / Weight::MIN, f64::INFINITY);
-    assert_eq!(0 / Weight::MIN, f64::INFINITY);
+    assert!((10.0 / Weight::MIN).is_infinite());
+    assert!((10 / Weight::MIN).is_infinite());
+    assert!((0 / Weight::MIN).is_infinite());
 }

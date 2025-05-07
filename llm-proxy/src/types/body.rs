@@ -71,6 +71,7 @@ pub struct BodyReader {
 }
 
 impl BodyReader {
+    #[must_use]
     pub fn new(rx: UnboundedReceiver<Bytes>, size_hint: SizeHint) -> Self {
         Self {
             rx,

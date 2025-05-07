@@ -6,6 +6,7 @@ use uuid::Uuid;
 pub struct UserId(Uuid);
 
 impl UserId {
+    #[must_use]
     pub fn new(id: Uuid) -> Self {
         Self(id)
     }

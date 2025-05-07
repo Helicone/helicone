@@ -87,7 +87,7 @@ pub async fn wait_for_shutdown_signals(
         .expect("failed to register SIGTERM signal");
 
     tokio::select! {
-        _ = &mut token => {
+        () = &mut token => {
             info!("Shutdown signal received, starting shutdown");
         },
         _ = sigint.recv() => {

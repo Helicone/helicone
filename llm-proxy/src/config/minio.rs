@@ -95,6 +95,7 @@ impl Minio {
         })
     }
 
+    #[must_use]
     pub fn put_object<'obj, 'client>(
         &'client self,
         object: &'obj str,

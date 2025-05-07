@@ -7,3 +7,6 @@ version = { workspace = true }
 [dependencies]
 heck.workspace = true
 prometheus.workspace = true
+
+[lints]
+workspace = true

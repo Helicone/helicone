@@ -26,10 +26,12 @@ pub enum Version {
 pub struct ModelName<'a>(Cow<'a, str>);
 
 impl<'a> ModelName<'a> {
+    #[must_use]
     pub fn borrowed(name: &'a str) -> Self {
         Self(Cow::Borrowed(name))
     }
 
+    #[must_use]
     pub fn owned(name: String) -> Self {
         Self(Cow::Owned(name))
     }
@@ -42,13 +44,15 @@ pub struct Model {
 }
 
 impl Model {
+    #[must_use]
     pub fn new(name: String, version: Option<Version>) -> Self {
         Self { name, version }
     }
 
+    #[must_use]
     pub fn provider(&self) -> Option<Provider> {
         if self.name.as_str().starts_with("gpt-")
-            || self.name.as_str().starts_with("o")
+            || self.name.as_str().starts_with('o')
         {
             Some(Provider::OpenAI)
         } else if self.name.as_str().starts_with("claude-") {

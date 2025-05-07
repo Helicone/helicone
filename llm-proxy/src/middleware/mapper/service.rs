@@ -70,7 +70,9 @@ where
                 "Mapper"
             );
 
-            if provider != request_style {
+            if provider == request_style {
+                inner.call(req).await
+            } else {
                 // serialization/deserialization should be done on a dedicated
                 // thread
                 let req = tokio::task::spawn_blocking(move || async move {
@@ -79,8 +81,6 @@ where
                 .await
                 .map_err(InternalError::MappingTaskError)?
                 .await?;
-                inner.call(req).await
-            } else {
                 inner.call(req).await
             }
         })
@@ -126,6 +126,7 @@ pub struct Layer {
 }
 
 impl Layer {
+    #[must_use]
     pub fn new(app_state: AppState) -> Self {
         Self { app_state }
     }

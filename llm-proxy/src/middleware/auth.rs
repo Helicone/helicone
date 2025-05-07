@@ -43,6 +43,7 @@ where
     }
 }
 
+#[allow(clippy::unnecessary_wraps)]
 fn check_auth<B>(_request: &Request<B>) -> Option<AuthContext> {
     // ...
     // for now we are mocking this just to show how layers will stack on top of

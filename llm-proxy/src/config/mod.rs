@@ -108,6 +108,7 @@ impl Config {
         Ok(config)
     }
 
+    #[must_use]
     pub fn telemetry() -> telemetry::Config {
         config::Config::builder()
             .add_source(
@@ -115,7 +116,7 @@ impl Config {
                     .separator("__"),
             )
             .build()
-            .and_then(|config| config.try_deserialize())
+            .and_then(config::Config::try_deserialize)
             .unwrap_or_default()
     }
 }

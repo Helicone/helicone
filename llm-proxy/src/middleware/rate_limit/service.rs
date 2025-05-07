@@ -16,6 +16,7 @@ pub struct Service {
 }
 
 impl Service {
+    #[must_use]
     pub fn new(
         authed_rate_limit: Arc<AuthedLimiterConfig>,
         unauthed_rate_limit: Arc<UnauthedLimiterConfig>,
@@ -41,11 +42,11 @@ impl meltdown::Service for Service {
             tokio::task::spawn_blocking(move || async move {
                 loop {
                     tokio::select! {
-                        _ = tokio::time::sleep(cleanup_interval) => {
+                        () = tokio::time::sleep(cleanup_interval) => {
                             unauthed_governor_limiter.retain_recent();
                             authed_governor_limiter.retain_recent();
                         }
-                        _ = &mut token => {
+                        () = &mut token => {
                             info!(name = "rate-limiting-cleanup-task", "task shutting down");
                             break;
                         }

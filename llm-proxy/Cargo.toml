@@ -70,6 +70,9 @@ uuid = { workspace = true, features = ["serde", "v7"] }
 default = []
 testing = ["dep:stubr", "dep:serial_test"]
 
+[lints]
+workspace = true
+
 [[test]]
 name = "single_provider"
 required-features = ["testing"]

@@ -19,3 +19,6 @@ tracing-opentelemetry.workspace = true
 tracing-subscriber.workspace = true
 thiserror = { workspace = true }
 uuid = { workspace = true }
+
+[lints]
+workspace = true

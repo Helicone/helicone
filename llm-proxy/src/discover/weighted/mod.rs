@@ -2,8 +2,6 @@ use weighted_balance::weight::{HasWeight, Weight};
 
 use crate::types::provider::Provider;
 
-pub mod config;
-pub mod discover;
 pub mod factory;
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]

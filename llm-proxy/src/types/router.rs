@@ -1,5 +1,4 @@
 use chrono::{DateTime, Utc};
-use compact_str::CompactString;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -10,7 +9,6 @@ use crate::{config::router::RouterConfig, error::internal::InternalError};
 )]
 pub enum RouterId {
     Uuid(Uuid),
-    Named(CompactString),
     #[default]
     Default,
 }
@@ -18,8 +16,7 @@ pub enum RouterId {
 impl std::fmt::Display for RouterId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            RouterId::Uuid(uuid) => write!(f, "{}", uuid),
-            RouterId::Named(name) => write!(f, "{}", name),
+            RouterId::Uuid(uuid) => write!(f, "{uuid}"),
             RouterId::Default => write!(f, "default"),
         }
     }

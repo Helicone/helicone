@@ -45,6 +45,7 @@ impl Default for RateLimitConfig {
 }
 
 impl RateLimitConfig {
+    #[must_use]
     pub fn unauthed_limiter(&self) -> UnauthedLimiterConfig {
         GovernorConfigBuilder::default()
             .per_second(self.unauthenticated.replenish_interval.into())
@@ -55,6 +56,7 @@ impl RateLimitConfig {
             .unwrap()
     }
 
+    #[must_use]
     pub fn authed_limiter(&self) -> AuthedLimiterConfig {
         GovernorConfigBuilder::default()
             .per_second(self.authenticated.replenish_interval.into())

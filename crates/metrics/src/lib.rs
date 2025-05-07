@@ -1,6 +1,5 @@
 use std::{future::Future, ops::Deref};
 
-use heck::ToSnakeCase;
 pub use prometheus::TEXT_FORMAT as CONTENT_TYPE;
 use prometheus::{
     Error, IntCounterVec, IntGaugeVec, TextEncoder, core::Collector,
@@ -8,6 +7,8 @@ use prometheus::{
 };
 
 /// Gathers all metrics and returns them in their text format.
+#[must_use]
+#[allow(clippy::missing_panics_doc)] // never actually panics
 pub fn gather() -> String {
     TextEncoder
         .encode_to_string(&prometheus::gather())
@@ -26,6 +27,7 @@ impl<const N: usize> Event<N> {
     ///
     /// This will panic if an event with the given name has already been
     /// registered.
+    #[must_use]
     pub fn register(
         namespace: Option<&str>,
         name: &str,
@@ -47,7 +49,7 @@ impl<const N: usize> Event<N> {
         labels: [&str; N],
     ) -> Result<Self, Error> {
         let namespace = namespace
-            .map(|s| s.to_snake_case())
+            .map(heck::ToSnakeCase::to_snake_case)
             .map(|n| format!("{n}_"))
             .unwrap_or_default();
         let count = register_int_counter_vec!(
@@ -79,6 +81,7 @@ impl<const N: usize> Operation<N> {
     ///
     /// This will panic if an operation with the given name has already been
     /// registered.
+    #[must_use]
     pub fn register(
         namespace: Option<&str>,
         name: &str,
@@ -100,7 +103,7 @@ impl<const N: usize> Operation<N> {
         labels: [&str; N],
     ) -> Result<Self, Error> {
         let namespace = namespace
-            .map(|s| s.to_snake_case())
+            .map(heck::ToSnakeCase::to_snake_case)
             .map(|n| format!("{n}_"))
             .unwrap_or_default();
         let hit_count = register_int_counter_vec!(
@@ -158,7 +161,7 @@ impl<const N: usize> Operation<N> {
         // TODO: Is it possible to avoid this allocation? We know the length
         // statically (N + 1).
         let labels = [labels.as_slice(), [error].as_slice()].concat();
-        self.error_count.with_label_values(&labels).inc()
+        self.error_count.with_label_values(&labels).inc();
     }
 }
 

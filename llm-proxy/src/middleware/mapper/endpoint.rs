@@ -72,67 +72,64 @@ impl ApiEndpoint {
         let (body, target_path_and_query) = match (self, target_endpoint) {
             (ApiEndpoint::OpenAI(source), ApiEndpoint::Anthropic(target)) => {
                 let converter = OpenAiConverter::new(model_mapper);
-                match (source, target) {
-                    (OpenAI::ChatCompletions, Anthropic::Messages) => {
-                        let body = serde_json::from_slice::<
-                            openai_types::chat::ChatCompletionRequest,
-                        >(body)
-                        .map_err(InvalidRequestError::InvalidRequestBody)?;
-                        let anthropic_req: anthropic_types::chat::ChatCompletionRequest =
-                        converter.try_convert(body)
-                            .map_err(InternalError::MapperError)?;
-                        let anthropic_req_bytes = serde_json::to_vec(
-                            &anthropic_req,
-                        )
-                        .map_err(|e| InternalError::Serialize {
-                            ty: "anthropic_types::chat::ChatCompletionRequest",
-                            error: e,
+                if let (OpenAI::ChatCompletions, Anthropic::Messages) =
+                    (source, target)
+                {
+                    let body = serde_json::from_slice::<
+                        openai_types::chat::ChatCompletionRequest,
+                    >(body)
+                    .map_err(InvalidRequestError::InvalidRequestBody)?;
+                    let anthropic_req: anthropic_types::chat::ChatCompletionRequest =
+                    converter.try_convert(body)
+                        .map_err(InternalError::MapperError)?;
+                    let anthropic_req_bytes =
+                        serde_json::to_vec(&anthropic_req).map_err(|e| {
+                            InternalError::Serialize {
+                        ty: "anthropic_types::chat::ChatCompletionRequest",
+                        error: e,
+                    }
                         })?;
-                        let body = Bytes::from(anthropic_req_bytes);
-                        (body, target_path_and_query)
-                    }
-                    _ => {
-                        tracing::warn!(
-                            "Currently only /v1/chat/completions is supported"
-                        );
-                        todo!(
-                            "Currently only /v1/chat/completions is supported \
-                             for openai"
-                        )
-                    }
+                    let body = Bytes::from(anthropic_req_bytes);
+                    (body, target_path_and_query)
+                } else {
+                    tracing::warn!(
+                        "Currently only /v1/chat/completions is supported"
+                    );
+                    todo!(
+                        "Currently only /v1/chat/completions is supported for \
+                         openai"
+                    )
                 }
             }
             (ApiEndpoint::Anthropic(source), ApiEndpoint::OpenAI(target)) => {
                 tracing::trace!(source = ?source, target = ?target, "mapping request body");
                 let converter = AnthropicConverter::new(model_mapper);
-                match (source, target) {
-                    (Anthropic::Messages, OpenAI::ChatCompletions) => {
-                        let body = serde_json::from_slice::<
-                            anthropic_types::chat::ChatCompletionRequest,
-                        >(body)
-                        .map_err(InvalidRequestError::InvalidRequestBody)?;
-                        let openai_req: openai_types::chat::ChatCompletionRequest =
-                        converter.try_convert(body)
+                if let (Anthropic::Messages, OpenAI::ChatCompletions) =
+                    (source, target)
+                {
+                    let body = serde_json::from_slice::<
+                        anthropic_types::chat::ChatCompletionRequest,
+                    >(body)
+                    .map_err(InvalidRequestError::InvalidRequestBody)?;
+                    let openai_req: openai_types::chat::ChatCompletionRequest =
+                        converter
+                            .try_convert(body)
                             .map_err(InternalError::MapperError)?;
-                        let openai_req_bytes = serde_json::to_vec(&openai_req)
-                            .map_err(|e| {
-                                InternalError::Serialize {
-                                    ty: "anthropic_types::chat::ChatCompletionRequest",
-                                    error: e,
-                                }
-                            })?;
-                        let body = Bytes::from(openai_req_bytes);
-                        (body, target_path_and_query)
-                    }
-                    _ => {
-                        tracing::warn!(
-                            "Currently only /v1/chat/completions is supported"
-                        );
-                        todo!(
-                            "Currently only /v1/chat/completions is supported \
-                             for openai at the moment"
-                        )
-                    }
+                    let openai_req_bytes = serde_json::to_vec(&openai_req)
+                        .map_err(|e| InternalError::Serialize {
+                            ty: "anthropic_types::chat::ChatCompletionRequest",
+                            error: e,
+                        })?;
+                    let body = Bytes::from(openai_req_bytes);
+                    (body, target_path_and_query)
+                } else {
+                    tracing::warn!(
+                        "Currently only /v1/chat/completions is supported"
+                    );
+                    todo!(
+                        "Currently only /v1/chat/completions is supported for \
+                         openai at the moment"
+                    )
                 }
             }
             _ => {
@@ -150,6 +147,7 @@ impl ApiEndpoint {
         Ok((body, target_path_and_query))
     }
 
+    #[must_use]
     pub fn provider(&self) -> Provider {
         match self {
             Self::OpenAI(_) => Provider::OpenAI,
@@ -157,6 +155,7 @@ impl ApiEndpoint {
         }
     }
 
+    #[must_use]
     pub fn path(&self) -> &str {
         match self {
             Self::OpenAI(openai) => openai.path(),
@@ -173,6 +172,7 @@ pub enum OpenAI {
 }
 
 impl OpenAI {
+    #[must_use]
     pub fn path(&self) -> &str {
         match self {
             Self::ChatCompletions => "/v1/chat/completions",
@@ -213,6 +213,7 @@ pub enum Anthropic {
 }
 
 impl Anthropic {
+    #[must_use]
     pub fn path(&self) -> &str {
         match self {
             Self::Messages => "/v1/messages",
@@ -239,8 +240,7 @@ impl TryFrom<&PathAndQuery> for Anthropic {
 impl From<OpenAI> for Anthropic {
     fn from(value: OpenAI) -> Self {
         match value {
-            OpenAI::ChatCompletions => Self::Messages,
-            OpenAI::Responses => Self::Messages,
+            OpenAI::ChatCompletions | OpenAI::Responses => Self::Messages,
             OpenAI::LegacyCompletions => Self::LegacyCompletions,
         }
     }
