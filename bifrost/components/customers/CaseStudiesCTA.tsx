@@ -1,16 +1,12 @@
-"use client";
-
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import Link from "next/link";
-import { useState } from "react";
 import { ISLAND_WIDTH } from "@/lib/utils";
 import Image from "next/image";
-import { ChevronRight, ChevronRight as ChevronRightIcon } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 
 export const CaseStudiesCTA = () => {
-  const [isHovered, setIsHovered] = useState(false);
 
   return (
     <div className="bg-gradient-to-b from-white to-[#F2F9FC] h-[80vh] relative overflow-hidden flex flex-col">
@@ -34,13 +30,9 @@ export const CaseStudiesCTA = () => {
           <Button
             size="lg"
             className="mx-auto font-medium py-8 px-9 text-2xl bg-brand hover:bg-brand/90 text-white rounded-lg flex items-center gap-2"
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
           >
             Try Helicone for free
-            {isHovered && (
-              <ChevronRight />
-            )}
+            <ChevronRight />
           </Button>
         </Link>
       </div>
