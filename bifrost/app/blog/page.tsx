@@ -226,6 +226,11 @@ export const BLOG_CONTENT: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
+      folderName: "self-hosting-journey",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "implement-and-monitor-cag",
     },
   },

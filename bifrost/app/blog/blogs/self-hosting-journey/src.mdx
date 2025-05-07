@@ -1,0 +1,165 @@
+After a month of engineering work, we're excited to share a big milestone in our journey: **a complete revamp of our self-hosting solution!**
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/4AbyR3Q2EgU?si=C__p8deWUqWh0Xaq" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+## The Problem: "Too Onerous"
+
+Self-hosting has been part of our offering since we launched Helicone two years ago.
+
+However, we recently received feedback that hit home - a potential customer told us our deployment was "too onerous" compared to competitors. **They passed on using our solution.**
+
+![Customer Screenshot](/static/blog/self-hosting-journey/screenshot.png)
+
+And they were right.
+
+Our original self-hosting architecture required managing twelve separate containers with complex configuration requirements.
+
+For large enterprise clients with dedicated DevOps teams, this might be manageable, but it created an unnecessary barrier for many organizations who needed to keep their LLM data within their own infrastructure.
+
+<CallToAction
+  title="Helicone's Cloud is HIPAA, SOC 2, and GDPR-Compliant"
+  description="Keep your LLM data entirely within your infrastructure while gaining comprehensive observability with Helicone."
+  primaryButtonText="Compare plans"
+  primaryButtonLink="https://www.helicone.ai/pricing"
+  secondaryButtonText="15-minute compliance consultation"
+  secondaryButtonLink="https://www.helicone.ai/contact"
+/>
+
+## The Solution: One Month of Focused Engineering
+
+We decided to tackle this challenge head-on.
+
+Over the course of one month, our engineering team completely rebuilt our self-hosting architecture, **reducing it from twelve containers to just four.**
+
+The result? What once took days to set up now takes minutes.
+
+```bash
+git clone https://github.com/Helicone/helicone.git
+cd docker
+docker compose up -d
+```
+
+That's it. Your Helicone dashboard is now available at `localhost:3000`.
+
+## The Technical Journey
+
+### Moving Away from Supabase
+
+The biggest architectural change was **moving away from Supabase for our self-hosting solution.**
+
+When we first built Helicone, we chose Supabase to help us move quickly from zero to one. It was an excellent tool for getting started quickly.
+
+However, Supabase comes bundled with multiple services, many of which weren't necessary for our core functionality. This added complexity to our deployment process and increased the resource requirements for self-hosting.
+
+We spent a significant portion of the month rewriting our backend to eliminate this dependency, replacing it with simpler, more focused components.
+
+### Architecture Simplification
+
+Our new architecture consists of just four essential services:
+
+1. **Main Application Container**: Handles the core Helicone functionality
+2. **ClickHouse Database**: For fast, efficient storage and querying of LLM request data
+3. **Authorization Container**: Manages user authentication and access control
+4. **Mailer Container**: Handles email notifications
+
+This streamlined approach not only simplifies deployment but also reduces resource requirements.
+
+**A T2 medium EC2 instance is sufficient to handle about 90% of typical workloads - easily scaling up to a million logs per day.**
+
+<video width="100%" controls autoplay loop>
+  <source
+    src="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/SH%20docker%20demo.mp4"
+    type="video/mp4"
+  />
+  Your browser does not support the video tag.
+</video>
+
+## Scaling Considerations
+
+While the Docker Compose setup is perfect for most use cases, we've also developed Helm charts for organizations needing enterprise-level scalability.
+
+These charts allow you to connect Helicone to an Aurora database or a dedicated ClickHouse cluster, enabling horizontal scaling for organizations processing billions of logs.
+
+For context, you'd typically need this level of scaling **when you're spending around $100,000 per month on OpenAI or similar services** - a good problem to have!
+
+## Lessons Learned
+
+This project reinforced some valuable engineering principles:
+
+1. **The 90-10 solution**: As a startup, we always try to optimize for speed to market. However, this experience reminded us that sometimes taking a bit more time upfront can save significant effort later.
+2. **Custom interfaces**: One thing that would have helped us tremendously would have been wrapping our services within our own custom interfaces that we could re-implement later. This would have made the transition away from Supabase much smoother.
+3. **Choose infrastructure wisely**: In retrospect, simply using AWS Aurora from the start wouldn't have been much more effort than integrating with Supabase, but would have saved us significant re-architecting work.
+
+## Who Benefits from Self-Hosting?
+
+Self-hosting is particularly valuable for:
+
+- **Security-conscious organizations**: Companies that need complete control over their data environment
+- **Privacy-focused teams**: Organizations working with sensitive information that cannot leave their infrastructure
+- **Regulated industries**: Financial services, healthcare, and government agencies with strict data residency requirements
+
+## Continuous Improvement
+
+We're committed to keeping our self-hosted solution up to date. Our Docker images are updated multiple times per week and published to our [Docker Hub](https://hub.docker.com/u/helicone).
+
+For users who have deployed using our instructions, staying current is as simple as:
+
+```bash
+git pull
+cd docker
+docker compose up -d
+```
+
+For Helm chart users, the latest containers are published to Docker Hub regularly.
+
+## What Helicone Enables
+
+Beyond just observability, self-hosted Helicone provides four key capabilities:
+
+1. **Comprehensive Observability**: Track metrics, monitor costs, and analyze agentic sessions step-by-step
+2. **Governance Layer**: Add caching, rate limiting, and other controls to your LLM usage
+3. **Experimentation**: Test production data in a playground environment to compare models and optimize prompts
+4. **Performance**: Instant aggregation and visualization of metrics, even with billions of logs
+
+## Try It Today
+
+<CallToAction
+  title="Deploy Helicone Self-Hosting Today"
+  description="Keep your LLM data entirely within your infrastructure while gaining comprehensive observability."
+  primaryButtonText="Get started"
+  primaryButtonLink="https://docs.helicone.ai/getting-started/self-host/docker"
+  secondaryButtonText="Talk to an expert"
+  secondaryButtonLink="https://www.helicone.ai/contact"
+/>
+
+Whether you're handling sensitive financial records, HIPAA-protected healthcare data, or just want complete control over your LLM analytics, our new self-hosting solution makes it easier than ever to bring Helicone's capabilities within your own security perimeter.
+
+We're proud of how far we've come and excited to make Helicone more accessible to teams that prioritize data sovereignty without sacrificing powerful observability.
+
+Visit our [documentation](https://docs.helicone.ai/getting-started/self-host/docker) to get started, or [reach out to our team](https://helicone.ai/contact) for guidance on optimal configuration for your specific needs.
+
+### You might find these useful
+- <a href="https://www.helicone.ai/blog/slash-llm-cost" target="_blank" rel="noopener">5 Powerful Techniques to Slash Your LLM Costs</a>
+- <a href="https://www.helicone.ai/blog/monitoring-local-llms" target="_blank" rel="noopener">Complete Guide to Monitoring Local LLMs with Llama and Open WebUI</a>
+- <a href="https://www.helicone.ai/blog/test-your-llm-prompts" target="_blank" rel="noopener">How to Test Your LLM Prompts (with Helicone)</a>
+
+<FAQ items={[
+  {
+    question: "Is Helicone Self-Hosting compatible with all LLM providers?",
+    answer: "Yes, Helicone Self-Hosting works with all major LLM providers including OpenAI, Anthropic, Gemini, as well as open-source models you may be running locally."
+  },
+  {
+    question: "What are the infrastructure requirements for self-hosting Helicone?",
+    answer: "Helicone Self-Hosting is designed to be lightweight and can run on modest hardware. For most implementations, a T2 medium-sized EC2 instance is sufficient."
+  },
+  {
+    question: "Does self-hosting impact any features compared to the cloud version?",
+    answer: "No, Helicone Self-Hosting provides all the core observability features of the cloud version, including request tracking, cost optimization, and analytics. The only difference is that everything runs within your own infrastructure and you need to maintain it as it upgrades."
+  },
+  {
+    question: "How can I update my self-hosted Helicone when new updates are released?",
+    answer: "Almost every week we release a new version of Helicone which you can find in our Docker Hub repository: https://hub.docker.com/u/helicone. You can easily update your self-hosted Helicone by pulling the latest changes from our GitHub repository and rebuilding the containers."
+  }
+]} />
+
+<Questions />
