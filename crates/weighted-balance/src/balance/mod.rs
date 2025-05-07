@@ -1,5 +1,5 @@
 //! Copyright (c) 2019 Tower Contributors
-//! 
+//!
 //! Permission is hereby granted, free of charge, to any
 //! person obtaining a copy of this software and associated
 //! documentation files (the "Software"), to deal in the
@@ -9,11 +9,11 @@
 //! the Software, and to permit persons to whom the Software
 //! is furnished to do so, subject to the following
 //! conditions:
-//! 
+//!
 //! The above copyright notice and this permission notice
 //! shall be included in all copies or substantial portions
 //! of the Software.
-//! 
+//!
 //! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
 //! ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
 //! TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
@@ -23,28 +23,33 @@
 //! OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 //! IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 //! DEALINGS IN THE SOFTWARE.
+pub mod make;
 
-use rand::rngs::ThreadRng;
-use tower::discover::{Change, Discover};
-use tower::load::Load;
-use tower::ready_cache::{error::Failed, ReadyCache};
-use futures::ready;
-use futures::future::{self, TryFutureExt};
-use std::hash::Hash;
-use std::marker::PhantomData;
 use std::{
     fmt,
+    hash::Hash,
+    marker::PhantomData,
     pin::Pin,
     task::{Context, Poll},
 };
-use tower::Service;
+
+use futures::{
+    future::{self, TryFutureExt},
+    ready,
+};
+use rand::{SeedableRng, rngs::SmallRng};
+use tower::{
+    Service,
+    discover::{Change, Discover},
+    ready_cache::{ReadyCache, error::Failed},
+};
 use tracing::{debug, trace};
 
-use crate::load::weight::{HasWeight, Weight};
+use crate::weight::HasWeight;
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    #[error("load balancer discovery error: {0}")]
+    #[error("weighted balancer discovery error: {0}")]
     Discover(tower::BoxError),
 }
 
@@ -52,9 +57,10 @@ pub enum Error {
 ///
 /// See the [module-level documentation](..) for details.
 ///
-/// Note that [`WeightedBalance`] requires that the [`Discover`] you use is [`Unpin`] in order to implement
-/// [`Service`]. This is because it needs to be accessed from [`Service::poll_ready`], which takes
-/// `&mut self`. You can achieve this easily by wrapping your [`Discover`] in [`Box::pin`] before you
+/// Note that [`WeightedBalance`] requires that the [`Discover`] you use is
+/// [`Unpin`] in order to implement [`Service`]. This is because it needs to be
+/// accessed from [`Service::poll_ready`], which takes `&mut self`. You can
+/// achieve this easily by wrapping your [`Discover`] in [`Box::pin`] before you
 /// construct the [`WeightedBalance`] instance. For more details, see [#319].
 ///
 /// [`Box::pin`]: std::boxed::Box::pin()
@@ -69,7 +75,7 @@ where
     services: ReadyCache<D::Key, D::Service, Req>,
     ready_index: Option<usize>,
 
-    rng: ThreadRng,
+    rng: SmallRng,
 
     _req: PhantomData<Req>,
 }
@@ -95,11 +101,10 @@ where
     D::Service: Service<Req>,
     <D::Service as Service<Req>>::Error: Into<tower::BoxError>,
 {
-    /// Constructs a load balancer that uses operating system entropy.
     pub fn new(discover: D) -> Self {
         tracing::trace!("WeightedBalance::new");
         Self {
-            rng: rand::rng(),
+            rng: SmallRng::from_rng(&mut rand::rng()),
             discover,
             services: ReadyCache::default(),
             ready_index: None,
@@ -124,8 +129,7 @@ where
     D: Discover + Unpin,
     D::Key: Hash + Clone + HasWeight,
     D::Error: Into<tower::BoxError>,
-    D::Service: Service<Req> + Load,
-    <D::Service as Load>::Metric: std::ops::Div<Weight, Output = <D::Service as Load>::Metric> + std::fmt::Debug,
+    D::Service: Service<Req>,
     <D::Service as Service<Req>>::Error: Into<tower::BoxError>,
 {
     /// Polls `discover` for updates, adding new items to `not_ready`.
@@ -183,43 +187,36 @@ where
         );
     }
 
-    /// Performs P2C on inner services to find a suitable endpoint.
-    fn p2c_ready_index(&mut self) -> Option<usize> {
+    fn ready_index(&mut self) -> Option<usize> {
         match self.services.ready_len() {
             0 => None,
             1 => Some(0),
             len => {
                 // todo: remove unwraps
                 let sample_fn = |idx| {
-                    let (key, _service) = self.services.get_ready_index(idx).expect("invalid index");
-                    key.weight()
+                    let (key, _service) = self
+                        .services
+                        .get_ready_index(idx)
+                        .expect("invalid index");
+                    let weight = key.weight();
+                    tracing::trace!(weight = ?weight, idx = %idx, "sampling weight");
+                    weight
                 };
-                let sample = rand::seq::index::sample_weighted(&mut self.rng, len, sample_fn, 2).unwrap();
-                let aidx = sample.index(0);
-                let bidx = sample.index(1);
+                // TODO: decide ideal impl, remove unwrap
+                // alternatively we could use rand::distributions::WeightedIndex
+                let sample = rand::seq::index::sample_weighted(
+                    &mut self.rng,
+                    len,
+                    sample_fn,
+                    1,
+                )
+                .unwrap();
+                let chosen = sample.index(0);
 
-                let aload = self.ready_index_load(aidx as usize);
-                let bload = self.ready_index_load(bidx as usize);
-                let chosen = if aload <= bload { aidx } else { bidx };
-
-                trace!(
-                    a.index = aidx,
-                    a.load = ?aload,
-                    b.index = bidx,
-                    b.load = ?bload,
-                    chosen = if chosen == aidx { "a" } else { "b" },
-                    "p2c",
-                );
+                trace!(chosen = chosen, "p2c",);
                 Some(chosen as usize)
             }
         }
-    }
-
-    /// Accesses a ready endpoint by index and returns its current load.
-    fn ready_index_load(&self, index: usize) -> <D::Service as Load>::Metric {
-        let (key, svc) = self.services.get_ready_index(index).expect("invalid index");
-        let weight = key.weight();
-        svc.load() / weight
     }
 }
 
@@ -228,8 +225,7 @@ where
     D: Discover + Unpin,
     D::Key: Hash + Clone + HasWeight,
     D::Error: Into<tower::BoxError>,
-    D::Service: Service<Req> + Load,
-    <D::Service as Load>::Metric: std::ops::Div<Weight, Output = <D::Service as Load>::Metric> + std::fmt::Debug,
+    D::Service: Service<Req>,
     <D::Service as Service<Req>>::Error: Into<tower::BoxError>,
 {
     type Response = <D::Service as Service<Req>>::Response;
@@ -239,7 +235,10 @@ where
         fn(<D::Service as Service<Req>>::Error) -> tower::BoxError,
     >;
 
-    fn poll_ready(&mut self, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+    fn poll_ready(
+        &mut self,
+        cx: &mut Context<'_>,
+    ) -> Poll<Result<(), Self::Error>> {
         tracing::trace!("WeightedBalance::poll_ready");
         // `ready_index` may have already been set by a prior invocation. These
         // updates cannot disturb the order of existing ready services.
@@ -261,7 +260,8 @@ where
                         return Poll::Ready(Ok(()));
                     }
                     Ok(false) => {
-                        // The service is no longer ready. Try to find a new one.
+                        // The service is no longer ready. Try to find a new
+                        // one.
                         trace!("ready service became unavailable");
                     }
                     Err(Failed(_, error)) => {
@@ -272,9 +272,7 @@ where
                 }
             }
 
-            // Select a new service by comparing two at random and using the
-            // lesser-loaded service.
-            self.ready_index = self.p2c_ready_index();
+            self.ready_index = self.ready_index();
             if self.ready_index.is_none() {
                 debug_assert_eq!(self.services.ready_len(), 0);
                 // We have previously registered interest in updates from

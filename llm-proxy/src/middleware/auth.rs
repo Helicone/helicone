@@ -23,6 +23,7 @@ where
 
     #[tracing::instrument(skip_all)]
     fn authorize(&mut self, mut request: Request<B>) -> Self::Future {
+        tracing::trace!("Auth middleware");
         Box::pin(async move {
             if let Some(auth_ctx) = check_auth(&request) {
                 // Set `auth_ctx` as a request extension so it can be accessed

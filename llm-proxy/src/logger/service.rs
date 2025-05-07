@@ -11,7 +11,6 @@ use url::Url;
 
 use crate::{
     app::AppState,
-    discover::Key,
     error::logger::LoggerError,
     types::{
         body::BodyReader,
@@ -19,6 +18,7 @@ use crate::{
             HeliconeLogMetadata, Log, LogMessage, RequestLog, ResponseLog,
             S3Log,
         },
+        provider::Provider,
         request::RequestContext,
     },
 };
@@ -34,8 +34,7 @@ pub struct LoggerService {
     target_url: Url,
     request_headers: HeaderMap,
     response_status: StatusCode,
-    /// backend provider that was used to fulfill the request
-    service: Key,
+    provider: Provider,
 }
 
 impl LoggerService {
@@ -106,7 +105,7 @@ impl LoggerService {
             .user_id(self.req_ctx.auth_context.user_id.clone())
             .properties(IndexMap::new())
             .target_url(self.target_url)
-            .provider(self.service.provider)
+            .provider(self.provider)
             .body_size(req_body_len as f64)
             .path(req_path)
             .request_created_at(self.req_ctx.start_time)

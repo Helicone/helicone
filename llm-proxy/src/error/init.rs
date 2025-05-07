@@ -2,7 +2,7 @@ use displaydoc::Display;
 use telemetry::TelemetryError;
 use thiserror::Error;
 
-use crate::config::DeploymentTarget;
+use crate::{config::DeploymentTarget, types::provider::Provider};
 
 /// Errors that can occur during initialization.
 #[derive(Debug, Error, Display)]
@@ -35,4 +35,8 @@ pub enum InitError {
     ProviderError(#[from] crate::error::provider::ProviderError),
     /// Invalid model mapping config: {0}
     InvalidModelMappingConfig(crate::middleware::mapper::error::MapperError),
+    /// Invalid weight for provider: {0}
+    InvalidWeight(Provider),
+    /// Attempted to create a weighted balancer with P2C config
+    InvalidBalancerInitialization,
 }

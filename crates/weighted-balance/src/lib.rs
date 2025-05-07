@@ -1,2 +1,2 @@
 pub mod balance;
-pub mod load;
+pub mod weight;

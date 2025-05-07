@@ -14,7 +14,6 @@ use tower_http::add_extension::{AddExtension, AddExtensionLayer};
 use crate::{
     app::AppState,
     config::providers::DEFAULT_ANTHROPIC_VERSION,
-    discover::Key,
     error::{api::Error, init::InitError, internal::InternalError},
     logger::service::LoggerService,
     types::{
@@ -28,7 +27,7 @@ use crate::{
 pub type DispatcherFuture = BoxFuture<'static, Result<Response, Error>>;
 pub type DispatcherService = AddExtension<
     ErrorHandler<crate::middleware::mapper::Service<Dispatcher>>,
-    Key,
+    Provider,
 >;
 
 /// Leaf service that dispatches requests to the correct provider.
@@ -36,21 +35,25 @@ pub type DispatcherService = AddExtension<
 pub struct Dispatcher {
     client: Client,
     app_state: AppState,
-    key: Key,
+    provider: Provider,
 }
 
 impl Dispatcher {
-    pub fn new(client: Client, app_state: AppState, key: Key) -> Self {
+    pub fn new(
+        client: Client,
+        app_state: AppState,
+        provider: Provider,
+    ) -> Self {
         Self {
             client,
             app_state,
-            key,
+            provider,
         }
     }
 
     pub fn new_with_middleware(
         app_state: AppState,
-        key: Key,
+        provider: Provider,
     ) -> Result<DispatcherService, InitError> {
         let http_client = Client::builder()
             .connect_timeout(app_state.0.config.dispatcher.connection_timeout)
@@ -59,12 +62,12 @@ impl Dispatcher {
             .build()
             .map_err(InitError::CreateReqwestClient)?;
         Ok(ServiceBuilder::new()
-            .layer(AddExtensionLayer::new(key))
+            .layer(AddExtensionLayer::new(provider))
             .layer(ErrorHandlerLayer)
             .layer(crate::middleware::mapper::Layer::new(app_state.clone()))
             // other middleware: rate limiting, logging, etc, etc
             // will be added here as well
-            .service(Dispatcher::new(http_client, app_state, key)))
+            .service(Dispatcher::new(http_client, app_state, provider)))
     }
 }
 
@@ -85,7 +88,7 @@ impl Service<Request> for Dispatcher {
         // see: https://docs.rs/tower/latest/tower/trait.Service.html#be-careful-when-cloning-inner-services
         let this = self.clone();
         let this = std::mem::replace(self, this);
-        tracing::trace!(key = ?self.key, "Dispatcher received request");
+        tracing::trace!(provider = ?self.provider, "Dispatcher received request");
         Box::pin(async move { this.dispatch(req).await })
     }
 }
@@ -97,7 +100,7 @@ impl Dispatcher {
             .get::<Arc<RequestContext>>()
             .ok_or(InternalError::ExtensionNotFound("RequestContext"))?
             .clone();
-        let target_provider = self.key.provider;
+        let target_provider = self.provider;
         let provider_api_key = req_ctx
             .proxy_context
             .provider_api_keys
@@ -209,7 +212,7 @@ impl Dispatcher {
             .request_body(req_body_bytes)
             .response_status(resp_status)
             .response_body(body_reader)
-            .service(self.key)
+            .provider(target_provider)
             .build();
 
         tokio::spawn(async move {

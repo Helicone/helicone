@@ -1,20 +1,22 @@
 use std::{
     collections::HashMap,
     pin::Pin,
-    sync::Arc,
     task::{Context, Poll},
 };
 
 use futures::Stream;
+use nonempty_collections::NEVec;
 use pin_project::pin_project;
+use rust_decimal::prelude::ToPrimitive;
 use tokio::sync::mpsc::Receiver;
 use tokio_stream::wrappers::ReceiverStream;
 use tower::discover::Change;
+use weighted_balance::weight::Weight;
 
 use crate::{
     app::AppState,
-    config::router::RouterConfig,
-    discover::provider::Key,
+    config::router::BalanceTarget,
+    discover::{provider::config::ServiceMap, weighted::WeightedKey},
     dispatcher::{Dispatcher, DispatcherService},
     error::init::InitError,
 };
@@ -39,21 +41,29 @@ use crate::{
 #[pin_project]
 pub struct ConfigDiscovery {
     #[pin]
-    initial: ServiceMap<Key, DispatcherService>,
+    initial: ServiceMap<WeightedKey, DispatcherService>,
     #[pin]
-    events: ReceiverStream<Change<Key, DispatcherService>>,
+    events: ReceiverStream<Change<WeightedKey, DispatcherService>>,
 }
 
 impl ConfigDiscovery {
     pub fn new(
         app: AppState,
-        router_config: Arc<RouterConfig>,
-        rx: Receiver<Change<Key, DispatcherService>>,
+        weighted_balance_targets: NEVec<BalanceTarget>,
+        rx: Receiver<Change<WeightedKey, DispatcherService>>,
     ) -> Result<Self, InitError> {
         let events = ReceiverStream::new(rx);
-        let mut service_map: HashMap<Key, DispatcherService> = HashMap::new();
-        for provider in router_config.providers.iter() {
-            let key = Key::new(*provider);
+        let mut service_map: HashMap<WeightedKey, DispatcherService> =
+            HashMap::new();
+
+        for target in weighted_balance_targets {
+            let weight = Weight::from(
+                target
+                    .weight
+                    .to_f64()
+                    .ok_or(InitError::InvalidWeight(target.provider))?,
+            );
+            let key = WeightedKey::new(target.provider, weight);
             let dispatcher =
                 Dispatcher::new_with_middleware(app.clone(), key.provider)?;
             service_map.insert(key, dispatcher);
@@ -68,7 +78,7 @@ impl ConfigDiscovery {
 }
 
 impl Stream for ConfigDiscovery {
-    type Item = Change<Key, DispatcherService>;
+    type Item = Change<WeightedKey, DispatcherService>;
 
     fn poll_next(
         self: Pin<&mut Self>,
@@ -93,8 +103,8 @@ impl Stream for ConfigDiscovery {
 }
 
 fn handle_change(
-    change: Change<Key, DispatcherService>,
-) -> Poll<Option<Change<Key, DispatcherService>>> {
+    change: Change<WeightedKey, DispatcherService>,
+) -> Poll<Option<Change<WeightedKey, DispatcherService>>> {
     match change {
         Change::Insert(key, service) => {
             tracing::debug!(key = ?key, "Discovered new provider");
@@ -103,49 +113,6 @@ fn handle_change(
         Change::Remove(key) => {
             tracing::debug!(key = ?key, "Removed provider");
             Poll::Ready(Some(Change::Remove(key)))
-        }
-    }
-}
-
-/// Static service discovery based on a predetermined map of services.
-///
-/// [`ServiceMap`] is created with an initial map of services. The discovery
-/// process will yield this map once and do nothing after.
-#[derive(Debug)]
-#[pin_project]
-pub(crate) struct ServiceMap<K, V> {
-    inner: std::collections::hash_map::IntoIter<K, V>,
-}
-
-impl<K, V> ServiceMap<K, V>
-where
-    K: std::hash::Hash + Eq,
-{
-    pub fn new<Request>(services: HashMap<K, V>) -> ServiceMap<K, V>
-    where
-        V: tower::Service<Request>,
-    {
-        ServiceMap {
-            inner: services.into_iter(),
-        }
-    }
-}
-
-impl<K, V> Stream for ServiceMap<K, V>
-where
-    K: std::hash::Hash + Eq + Clone,
-{
-    type Item = Change<K, V>;
-
-    fn poll_next(
-        self: Pin<&mut Self>,
-        _: &mut Context<'_>,
-    ) -> Poll<Option<Self::Item>> {
-        match self.project().inner.next() {
-            Some((key, service)) => {
-                Poll::Ready(Some(Change::Insert(key, service)))
-            }
-            None => Poll::Ready(None),
         }
     }
 }

@@ -4,20 +4,18 @@ use std::{
     task::{Context, Poll},
 };
 
+use futures::Future;
 use pin_project_lite::pin_project;
 use tokio::sync::mpsc::channel;
-use tower::{
-    Service,
-    balance::p2c::{Balance, MakeBalance},
-    load::PeakEwmaDiscover,
-};
+use tower::{Service, balance::p2c::Balance, load::PeakEwmaDiscover};
+use weighted_balance::{balance::WeightedBalance, weight::WeightedDiscover};
 
 use crate::{
     app::AppState,
-    config::router::RouterConfig,
+    config::router::{BalanceConfig, RouterConfig},
     discover::{
-        Discovery,
-        provider::{factory::DiscoverFactory, monitor::ProviderMonitor},
+        provider::{self, monitor::ProviderMonitor},
+        weighted,
     },
     error::{api::Error, init::InitError, internal::InternalError},
     types::{request::Request, response::Response},
@@ -25,14 +23,15 @@ use crate::{
 
 const CHANNEL_CAPACITY: usize = 128;
 
-pub struct ProviderBalancer {
-    pub inner: Balance<PeakEwmaDiscover<Discovery>, Request>,
-}
-
-impl std::fmt::Debug for ProviderBalancer {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("ProviderBalancer").finish_non_exhaustive()
-    }
+#[derive(Debug)]
+pub enum ProviderBalancer {
+    PeakEwma(Balance<PeakEwmaDiscover<provider::discover::Discovery>, Request>),
+    Weighted(
+        WeightedBalance<
+            WeightedDiscover<weighted::discover::Discovery>,
+            Request,
+        >,
+    ),
 }
 
 impl ProviderBalancer {
@@ -40,18 +39,60 @@ impl ProviderBalancer {
         app_state: AppState,
         router_config: Arc<RouterConfig>,
     ) -> Result<(ProviderBalancer, ProviderMonitor), InitError> {
+        match &router_config.balance {
+            BalanceConfig::Weighted { .. } => {
+                Self::weighted(app_state, router_config).await
+            }
+            BalanceConfig::P2C { .. } => {
+                Self::peak_ewma(app_state, router_config).await
+            }
+        }
+    }
+
+    async fn weighted(
+        app_state: AppState,
+        router_config: Arc<RouterConfig>,
+    ) -> Result<(ProviderBalancer, ProviderMonitor), InitError> {
+        tracing::debug!("Creating weighted balancer");
         let (tx, rx) = channel(CHANNEL_CAPACITY);
-        let discover_factory =
-            DiscoverFactory::new(app_state.clone(), router_config);
-        let mut balance_factory = MakeBalance::new(discover_factory);
+        let discover_factory = weighted::factory::DiscoverFactory::new(
+            app_state.clone(),
+            router_config,
+        );
+        let mut balance_factory =
+            weighted_balance::balance::make::MakeBalance::new(discover_factory);
         let mut balance = balance_factory.call(rx).await?;
         // TODO: do we _have_ to poll_ready here?
         // @tom to double check
         poll_fn(|cx| balance.poll_ready(cx))
             .await
             .map_err(InitError::CreateBalancer)?;
-        let provider_monitor = ProviderMonitor::new(tx);
-        let provider_balancer = ProviderBalancer { inner: balance };
+        let provider_monitor = ProviderMonitor::weighted(tx);
+        let provider_balancer = ProviderBalancer::Weighted(balance);
+
+        Ok((provider_balancer, provider_monitor))
+    }
+
+    async fn peak_ewma(
+        app_state: AppState,
+        router_config: Arc<RouterConfig>,
+    ) -> Result<(ProviderBalancer, ProviderMonitor), InitError> {
+        tracing::debug!("Creating peak ewma p2c balancer");
+        let (tx, rx) = channel(CHANNEL_CAPACITY);
+        let discover_factory = provider::factory::DiscoverFactory::new(
+            app_state.clone(),
+            router_config,
+        );
+        let mut balance_factory =
+            tower::balance::p2c::MakeBalance::new(discover_factory);
+        let mut balance = balance_factory.call(rx).await?;
+        // TODO: do we _have_ to poll_ready here?
+        // @tom to double check
+        poll_fn(|cx| balance.poll_ready(cx))
+            .await
+            .map_err(InitError::CreateBalancer)?;
+        let provider_monitor = ProviderMonitor::p2c(tx);
+        let provider_balancer = ProviderBalancer::PeakEwma(balance);
 
         Ok((provider_balancer, provider_monitor))
     }
@@ -67,27 +108,46 @@ impl tower::Service<Request> for ProviderBalancer {
         &mut self,
         cx: &mut std::task::Context<'_>,
     ) -> std::task::Poll<Result<(), Self::Error>> {
-        self.inner
-            .poll_ready(cx)
-            .map_err(InternalError::PollReadyError)
-            .map_err(Into::into)
+        match self {
+            ProviderBalancer::PeakEwma(inner) => inner.poll_ready(cx),
+            ProviderBalancer::Weighted(inner) => inner.poll_ready(cx),
+        }
+        .map_err(InternalError::PollReadyError)
+        .map_err(Into::into)
     }
 
     fn call(&mut self, req: Request) -> Self::Future {
-        ResponseFuture {
-            future: self.inner.call(req),
+        tracing::trace!("ProviderBalancer");
+        match self {
+            ProviderBalancer::PeakEwma(inner) => ResponseFuture::PeakEwma {
+                future: inner.call(req),
+            },
+            ProviderBalancer::Weighted(inner) => ResponseFuture::Weighted {
+                future: inner.call(req),
+            },
         }
     }
 }
 
 pin_project! {
-    pub struct ResponseFuture {
-        #[pin]
-        future: <
-            Balance<PeakEwmaDiscover<Discovery>, Request> as tower::Service<
-                Request,
-            >
-        >::Future,
+    #[project = EnumProj]
+    pub enum ResponseFuture {
+        PeakEwma {
+            #[pin]
+            future: <
+                Balance<PeakEwmaDiscover<provider::discover::Discovery>, Request> as tower::Service<
+                    Request,
+                >
+            >::Future,
+        },
+        Weighted {
+            #[pin]
+            future: <
+                WeightedBalance<WeightedDiscover<weighted::discover::Discovery>, Request> as tower::Service<
+                    Request,
+                >
+            >::Future,
+        },
     }
 }
 
@@ -98,12 +158,21 @@ impl Future for ResponseFuture {
         self: std::pin::Pin<&mut Self>,
         cx: &mut Context<'_>,
     ) -> Poll<Self::Output> {
-        match self.project().future.poll(cx) {
-            Poll::Ready(Ok(res)) => Poll::Ready(Ok(res)),
-            Poll::Ready(Err(e)) => Poll::Ready(Err(Error::Internal(
-                InternalError::LoadBalancerError(e),
-            ))),
-            Poll::Pending => Poll::Pending,
+        match self.project() {
+            EnumProj::PeakEwma { future } => match future.poll(cx) {
+                Poll::Ready(Ok(res)) => Poll::Ready(Ok(res)),
+                Poll::Ready(Err(e)) => Poll::Ready(Err(Error::Internal(
+                    InternalError::LoadBalancerError(e),
+                ))),
+                Poll::Pending => Poll::Pending,
+            },
+            EnumProj::Weighted { future } => match future.poll(cx) {
+                Poll::Ready(Ok(res)) => Poll::Ready(Ok(res)),
+                Poll::Ready(Err(e)) => Poll::Ready(Err(Error::Internal(
+                    InternalError::LoadBalancerError(e),
+                ))),
+                Poll::Pending => Poll::Pending,
+            },
         }
     }
 }
