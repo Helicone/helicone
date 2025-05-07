@@ -4,9 +4,9 @@ compatibility_date = "2022-11-29"
 compatibility_flags = [
 	"transformstream_enable_standard_constructor",
 	"streams_enable_constructors",
+  "nodejs_compat"
 ]
 logpush = true
-node_compat = true
 
 durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" },
