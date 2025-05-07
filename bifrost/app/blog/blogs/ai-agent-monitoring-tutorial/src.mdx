@@ -12,7 +12,7 @@ Let's get started!
 
 ## Prerequisites
 
-Before we dive in, you'll need:
+Before we dive in, you'll need: 
 
 - **<a href="https://nodejs.org/" target="_blank" rel="noopener">Node.js 16+</a>** installed on your machine
 - **<a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">OpenAI API</a>** key
@@ -133,10 +133,6 @@ The RAG implementation provides domain-specific knowledge to the agent. However,
 
 ### 4. Minimal Agent Loop (Tool Calling)
 
-Looking at the provided code, here's the appropriate update for Section 4:
-
-### 4. Minimal Agent Loop (Tool Calling)
-
 We expose three tools to the LLM:
 
 - `getStockData`: Retrieves current price and market information for a specific ticker
@@ -174,7 +170,7 @@ if (initialMessage.tool_calls) {
 }
 ```
 
-## Testing our Financial Assistant
+## Testing Our Financial Assistant
 
 Now, let's take our financial assistant for a spin!
 
@@ -190,13 +186,13 @@ We can view the results of our queries in the **Helicone dashboard**.
 
 Result:
 
-![What is Tesla's stock price?](/static/blog/ai-agent-monitoring-tutorial/tesla-prompt.webp)
+![Example of a financial research assistant responding to the prompt 'What is Tesla's stock price?' displaying the stock information.](/static/blog/ai-agent-monitoring-tutorial/tesla-prompt.webp)
 
 > Prompt: What is halal investing
 
 Result:
 
-![What is halal investing?](/static/blog/ai-agent-monitoring-tutorial/halal-investing-prompt.webp)
+![Example of an AI agent hallucination, where the financial assistant responds to 'What is halal investing?' with an incorrect answer, highlighting the need for AI monitoring.](/static/blog/ai-agent-monitoring-tutorial/halal-investing-prompt.webp)
 
 It looks like our financial assistant works fine...**or does it?**
 
@@ -204,9 +200,9 @@ There's an issue with the second query.
 
 The term **"halal investing"** is not in our knowledge base, yet the agent confidently responded with a detailed answer. 
 
-This is a perfect example of <a href="https://www.helicone.ai/blog/how-to-reduce-llm-hallucination" target="_blank" rel="noopener">hallucination</a> that would be nearly impossible to detect in a production app without proper monitoring.
+This is a perfect example of <a href="https://www.helicone.ai/blog/how-to-reduce-llm-hallucination" target="_blank" rel="noopener">Learn more about LLM hallucination</a> that would be nearly impossible to detect in a production app without proper monitoring.
 
-## Debugging our Financial Assistant 
+## Debugging Our Financial Assistant 
 
 Looking at our implementation, there are several blind spots that could potentially cause issues:
 
@@ -215,9 +211,9 @@ Looking at our implementation, there are several blind spots that could potentia
 - **Latency Issues**: If the agent becomes slow, which step is causing the bottleneck?
 - **Error Patterns**: Are certain types of queries consistently failing? Where in the pipeline do these failures occur?
 
-In <a href="https://www.helicone.ai/blog/ai-agent-monitoring-tutorial-part-2" target="_blank" rel="noopener">Part 2</a>, we'll add Helicone to our financial assistant to gain comprehensive visibility into every step of the process. Here's a preview of what you can see:
+In <a href="https://www.helicone.ai/blog/ai-agent-monitoring-tutorial-part-2" target="_blank" rel="noopener">Read Part 2 of this tutorial on AI agent monitoring</a>, we'll add Helicone to our financial assistant to gain comprehensive visibility into every step of the process. Here's a preview of what you can see:
 
-![Using Helicone Sessions to Debug AI Agents](/static/blog/ai-agent-monitoring-tutorial/sessions-ai-agent.webp)
+![Helicone dashboard showcasing the Sessions feature for debugging AI agents, demonstrating AI observability and agent monitoring capabilities.](/static/blog/ai-agent-monitoring-tutorial/sessions-ai-agent.webp)
 
 We'll monitor each step of the agent's workflow, resolve bugs, and gain insights into useful metrics like cost, latency, and error rates.
 
@@ -234,7 +230,7 @@ Stay tuned!
 
 ### You might also like:
 
-- **<a href="https://www.helicone.ai/blog/ai-agent-monitoring-tutorial-part-2" target="_blank" rel="noopener">Step-by-Step Guide to Building & Optimizing AI Agents: Part 2</a>**
+- **<a href="https://www.helicone.ai/blog/ai-agent-monitoring-tutorial-part-2" target="_blank" rel="noopener">Read Part 2 of our guide to building and optimizing AI agents</a>**
 - **<a href="https://www.helicone.ai/blog/debugging-chatbots-and-ai-agents-with-sessions" target="_blank" rel="noopener">Debugging RAG Chatbots and AI Agents with Sessions</a>**
 - **<a href="https://www.helicone.ai/blog/full-guide-to-improving-ai-agents" target="_blank" rel="noopener">The Full Developer's Guide to Building Effective AI Agents</a>**
 - **<a href="https://www.helicone.ai/blog/agentic-rag-full-developer-guide" target="_blank" rel="noopener">Building Agentic RAG Systems: A Developer's Guide to Smarter Information Retrieval</a>**
