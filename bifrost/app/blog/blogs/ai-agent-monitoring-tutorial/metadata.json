@@ -3,7 +3,7 @@
     "title1": "Building and Monitoring AI Agents (Part 1): A Step-by-Step Guide",
     "title2": "Building and Monitoring AI Agents (Part 1): A Step-by-Step Guide",
     "description": "Building reliable AI agents requires robust monitoring and observability. In this tutorial, we'll build a simple financial research assistant and optimize its performance using Helicone's agentic AI observability features.",
-    "images": "/static/blog/ai-agent-monitoring-tutorial/cover.webp",
+    "images": "/static/blog/ai-agent-monitoring-tutorial/building-and-monitoring-ai-agents.webp",
     "time": "10 minute read",
     "author": "Yusuf Ishola",
     "date": "May 2, 2025",
