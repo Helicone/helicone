@@ -22,8 +22,9 @@ export function CustomerCard({ href, logo, title, subtitle }: CustomerCardProps)
                     <Image
                         src={logo}
                         alt={`${title} logo`}
-                        width={120}
-                        height={64}
+                        width={250}
+                        height={250}
+                        quality={95}
                         className="object-contain transform group-hover:scale-105 transition-transform duration-300 max-h-full w-2/5 grayscale group-hover:grayscale-0"
                     />
                 ) : (
