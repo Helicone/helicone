@@ -608,8 +608,10 @@ export default function RequestDrawer(props: RequestDivProps) {
           </div>
         </header>
 
-        {/* Mapped Request */}
-        <RenderMappedRequest mappedRequest={request} />
+        <div className="p-4 h-full w-full overflow-auto bg-card">
+          {/* Mapped Request */}
+          <RenderMappedRequest mappedRequest={request} />
+        </div>
 
         {/* Footer */}
         <footer className="w-full flex flex-col gap-2 py-3 border-t border-border bg-card">
