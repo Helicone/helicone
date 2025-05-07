@@ -633,7 +633,6 @@ export const TraceSpan = ({
                   if (index === undefined || !spanData[index]) return null;
                   const entry = spanData[index];
 
-                  // Determine if this bar is selected based on highlighter or individual selection
                   const isInHighlighter =
                     highlighterActive &&
                     highlighterStart !== null &&
