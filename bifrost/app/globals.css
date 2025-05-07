@@ -102,6 +102,19 @@ h6[id] {
   text-decoration: underline !important;
 }
 
+/* Custom blockquote styling for blog content */
+.prose blockquote {
+  @apply text-center text-xl font-sans not-italic; /* Center, large text, medium weight, normal style */
+  @apply border-none p-0 mx-auto max-w-lg mt-16; /* Center block, remove border/padding, set max width */
+  color: inherit; /* Inherit text color */
+}
+
+/* Style for the citation (assuming it's the last paragraph inside or a paragraph directly following the blockquote) */
+.prose blockquote p:last-child:not(:first-child),
+.prose blockquote + p {
+    @apply block text-center text-base font-normal mt-2 mb-14 text-muted-foreground; /* Smaller, centered, muted */
+}
+
 @keyframes floating {
   0%,
   100% {
