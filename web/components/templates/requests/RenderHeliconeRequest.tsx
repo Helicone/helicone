@@ -83,7 +83,7 @@ export function RenderMappedRequest({
   return (
     <ScrollArea
       orientation="vertical"
-      className={`h-full w-full relative bg-card ${className} [&>div>div[style]]:!block`}
+      className={`h-full w-full relative ${className} [&>div>div[style]]:!block  border border-border rounded-lg bg-sidebar-background`}
     >
       <Button
         variant={"outline"}
