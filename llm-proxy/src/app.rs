@@ -7,7 +7,7 @@ use std::{
     time::Duration,
 };
 
-use axum_server::tls_rustls::RustlsConfig;
+use axum_server::{accept::NoDelayAcceptor, tls_rustls::RustlsConfig};
 use futures::future::BoxFuture;
 use meltdown::Token;
 use reqwest::Client;
@@ -263,6 +263,8 @@ impl meltdown::Service for App {
                     tokio::select! {
                         biased;
                         server_output = axum_server::bind_rustls(addr, tls_config)
+                            // https://brooker.co.za/blog/2024/05/09/nagle.html
+                            .acceptor(NoDelayAcceptor)
                             .handle(handle.clone())
                             .serve(app_factory) => server_output.map_err(RuntimeError::Serve)?,
                         () = token => {
