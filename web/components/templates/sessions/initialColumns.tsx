@@ -1,7 +1,3 @@
-import { ColumnDef } from "@tanstack/react-table";
-import { formatNumber } from "../../shared/utils/formatNumber";
-import { getUSDateFromString } from "../../shared/utils/utils";
-
 export const getColumns = () => {
   const columns = [
     "session_name",
@@ -9,25 +5,25 @@ export const getColumns = () => {
     "created_at",
     "latest_request_created_at",
     "total_cost",
-    "prompt_tokens", 
+    "prompt_tokens",
     "completion_tokens",
     "total_tokens",
     "total_requests",
-    "avg_latency"
-  ]
+    "avg_latency",
+  ];
   return columns.map((property) => {
     return {
       id: property,
       accessorFn: (row: any) => {
         const value = row.metadata ? row.metadata[property] : "";
-        return value
+        return value;
       },
       cell: ({ row }: any) => {
         return row.original.metadata[property];
-      }
-    }
-  })
-}
+      },
+    };
+  });
+};
 
 const convertToUSDateFormat = (date: string) => {
   const dateObj = new Date(date);

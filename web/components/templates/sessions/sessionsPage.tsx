@@ -39,7 +39,7 @@ import {
 } from "../../../lib/timeCalculations/time";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useSessionNames, useSessions } from "../../../services/hooks/sessions";
-import { getRequestsByIds, getRequestsByIdsWithBodies } from "../../../services/hooks/requests";
+import { getRequestsByIdsWithBodies } from "../../../services/hooks/requests";
 import {
   columnDefsToDragColumnItems,
   DragColumnItem,
@@ -50,8 +50,6 @@ import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
 import { getColumns } from "./initialColumns";
 import SessionMetrics from "./SessionMetrics";
 import { cn } from "@/lib/utils";
-import { Blaka_Ink } from "next/font/google";
-import { consoleIntegration } from "@sentry/nextjs";
 
 interface SessionsPageProps {
   currentPage: number;
@@ -82,7 +80,7 @@ type TSessions = {
     completion_tokens: number;
     total_tokens: number;
     avg_latency: number;
-  }
+  };
 };
 
 const TABS = [
@@ -179,9 +177,9 @@ const SessionsPage = (props: SessionsPageProps) => {
     hasAccess,
   ]);
 
-  const [selectedData, setSelectedData] = useState<
-    TSessions | undefined
-  >(undefined);
+  const [selectedData, setSelectedData] = useState<TSessions | undefined>(
+    undefined
+  );
   const [selectedDataIndex, setSelectedDataIndex] = useState<number>();
 
   const {
@@ -235,12 +233,12 @@ const SessionsPage = (props: SessionsPageProps) => {
     if (selectedIds.length === 0) {
       const data = await getRequestsByIdsWithBodies(
         sessionsWithId.map((session) => session.metadata.session_id)
-      )
+      );
       return data;
     }
     const data = await getRequestsByIdsWithBodies(selectedIds);
     return data;
-  }
+  };
 
   const onRowSelectHandler = useCallback(
     (row: TSessions, index: number, event?: React.MouseEvent) => {
@@ -256,12 +254,7 @@ const SessionsPage = (props: SessionsPageProps) => {
         setSelectedData(row);
       }
     },
-    [
-      isShiftPressed,
-      toggleSelection,
-      setSelectedDataIndex,
-      setSelectedData
-    ]
+    [isShiftPressed, toggleSelection, setSelectedDataIndex, setSelectedData]
   );
 
   // Calculate aggregated stats
@@ -421,16 +414,12 @@ const SessionsPage = (props: SessionsPageProps) => {
                 {selectedIds.length > 0 && (
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <ExportButton
-                      rows={[]}
-                      fetchRows={onFetchBulkSessions}
-                    />
-                  </TooltipTrigger>
+                      <ExportButton rows={[]} fetchRows={onFetchBulkSessions} />
+                    </TooltipTrigger>
                     <TooltipContent>Export raw data</TooltipContent>
                   </Tooltip>
                 )}
               </div>
-
 
               <div className="h-8 flex flex-row items-center border border-border rounded-lg divide-x divide-border overflow-hidden shadow-sm">
                 <label className="text-xs px-2 py-1">Views</label>
