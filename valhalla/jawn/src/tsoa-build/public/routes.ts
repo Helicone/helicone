@@ -1654,12 +1654,21 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "AverageRow": {
+        "dataType": "refObject",
+        "properties": {
+            "average": {"dataType":"double","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "SessionMetrics": {
         "dataType": "refObject",
         "properties": {
             "session_count": {"dataType":"array","array":{"dataType":"refObject","ref":"HistogramRow"},"required":true},
             "session_duration": {"dataType":"array","array":{"dataType":"refObject","ref":"HistogramRow"},"required":true},
             "session_cost": {"dataType":"array","array":{"dataType":"refObject","ref":"HistogramRow"},"required":true},
+            "average": {"dataType":"nestedObjectLiteral","nestedProperties":{"session_cost":{"dataType":"array","array":{"dataType":"refObject","ref":"AverageRow"},"required":true},"session_duration":{"dataType":"array","array":{"dataType":"refObject","ref":"AverageRow"},"required":true},"session_count":{"dataType":"array","array":{"dataType":"refObject","ref":"AverageRow"},"required":true}},"required":true},
         },
         "additionalProperties": false,
     },

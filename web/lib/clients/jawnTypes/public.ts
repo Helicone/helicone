@@ -1852,10 +1852,19 @@ Json: JsonObject;
       timeFilter?: components["schemas"]["TimeFilterMs"];
       filter?: components["schemas"]["SessionFilterNode"];
     };
+    AverageRow: {
+      /** Format: double */
+      average: number;
+    };
     SessionMetrics: {
       session_count: components["schemas"]["HistogramRow"][];
       session_duration: components["schemas"]["HistogramRow"][];
       session_cost: components["schemas"]["HistogramRow"][];
+      average: {
+        session_cost: components["schemas"]["AverageRow"][];
+        session_duration: components["schemas"]["AverageRow"][];
+        session_count: components["schemas"]["AverageRow"][];
+      };
     };
     ResultSuccess_SessionMetrics_: {
       data: components["schemas"]["SessionMetrics"];
