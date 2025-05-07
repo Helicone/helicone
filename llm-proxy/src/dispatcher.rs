@@ -94,6 +94,7 @@ impl Service<Request> for Dispatcher {
 }
 
 impl Dispatcher {
+    #[allow(clippy::too_many_lines)]
     async fn dispatch(&self, mut req: Request) -> Result<Response, Error> {
         let req_ctx = req
             .extensions()

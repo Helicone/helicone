@@ -92,7 +92,7 @@ where
         f.debug_struct("WeightedBalance")
             .field("discover", &self.discover)
             .field("services", &self.services)
-            .finish()
+            .finish_non_exhaustive()
     }
 }
 
@@ -199,8 +199,8 @@ where
                         .services
                         .get_ready_index(idx)
                         .expect("invalid index");
-                    let weight = key.weight();
-                    weight
+
+                    key.weight()
                 };
                 // TODO: decide ideal impl, remove unwrap
                 // alternatively we could use rand::distributions::WeightedIndex

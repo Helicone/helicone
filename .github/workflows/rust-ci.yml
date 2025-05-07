@@ -25,7 +25,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Clippy
-      run: cargo clippy
+      run: cargo ci-clippy
   test:
     runs-on: ubuntu-latest
     env:

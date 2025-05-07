@@ -27,7 +27,7 @@ impl Default for ServerConfig {
         Self {
             address: default_address(),
             port: default_port(),
-            tls: Default::default(),
+            tls: TlsConfig::default(),
             request_timeout: default_request_timeout(),
             shutdown_timeout: default_shutdown_timeout(),
         }

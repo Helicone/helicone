@@ -28,7 +28,7 @@ pub enum Discovery {
 
 impl Discovery {
     pub fn new(
-        app_state: AppState,
+        app_state: &AppState,
         weighted_balance_targets: NEVec<BalanceTarget>,
         rx: Receiver<Change<WeightedKey, DispatcherService>>,
     ) -> Result<Self, InitError> {

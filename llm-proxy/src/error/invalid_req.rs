@@ -35,14 +35,14 @@ impl IntoResponse for InvalidRequestError {
             Self::NotFound(path) => (
                 StatusCode::NOT_FOUND,
                 Json(ErrorResponse {
-                    error: format!("Not found: {}", path),
+                    error: format!("Not found: {path}"),
                 }),
             )
                 .into_response(),
             Self::RouterIdNotFound(router_id) => (
                 StatusCode::NOT_FOUND,
                 Json(ErrorResponse {
-                    error: format!("Router id not found: {}", router_id),
+                    error: format!("Router id not found: {router_id}"),
                 }),
             )
                 .into_response(),
@@ -63,14 +63,14 @@ impl IntoResponse for InvalidRequestError {
             Self::UnsupportedProvider(provider) => (
                 StatusCode::BAD_REQUEST,
                 Json(ErrorResponse {
-                    error: format!("Unsupported provider: {}", provider),
+                    error: format!("Unsupported provider: {provider}"),
                 }),
             )
                 .into_response(),
             Self::InvalidRequestBody(e) => (
                 StatusCode::BAD_REQUEST,
                 Json(ErrorResponse {
-                    error: format!("Invalid request body: {}", e),
+                    error: format!("Invalid request body: {e}"),
                 }),
             )
                 .into_response(),

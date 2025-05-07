@@ -31,7 +31,7 @@ impl ProviderMonitor {
 
 /// Could monitor health from URLs like:
 ///
-/// https://status.openai.com/proxy/status.openai.com
+/// <https://status.openai.com/proxy/status.openai.com>
 ///
 /// or more creative methods if required.
 pub struct ProviderMonitorInner<K> {

@@ -25,7 +25,7 @@ pub enum InternalError {
         ty: &'static str,
         error: serde_json::Error,
     },
-    /// Router config provider '{0}' not present in ProvidersConfig
+    /// Router config provider '{0}' not present in `ProvidersConfig`
     ProviderNotConfigured(Provider),
     /// Extension {0} not found
     ExtensionNotFound(&'static str),

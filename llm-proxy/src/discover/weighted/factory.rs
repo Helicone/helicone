@@ -56,7 +56,7 @@ impl Service<Receiver<Change<WeightedKey, DispatcherService>>>
             }
         };
         let discovery = match Discovery::new(
-            self.app_state.clone(),
+            &self.app_state,
             weighted_balance_targets,
             rx,
         ) {

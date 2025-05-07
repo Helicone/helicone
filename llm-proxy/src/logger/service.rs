@@ -78,6 +78,7 @@ impl LoggerService {
     }
 
     #[tracing::instrument(skip_all)]
+    #[allow(clippy::cast_precision_loss)]
     pub async fn log(mut self) -> Result<(), LoggerError> {
         tracing::trace!("logging request");
         let response_body = self
@@ -113,7 +114,7 @@ impl LoggerService {
             .build();
         let response_log = ResponseLog::builder()
             .id(self.req_ctx.request_id)
-            .status(self.response_status.as_u16() as f64)
+            .status(f64::from(self.response_status.as_u16()))
             .body_size(resp_body_len as f64)
             .response_created_at(Utc::now())
             .delay_ms(0.0)

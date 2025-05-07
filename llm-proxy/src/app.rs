@@ -87,16 +87,16 @@ pub struct InnerAppState {
 /// The top level app used to start the hyper server.
 /// The middleware stack is as follows:
 /// -- global --
-/// 0. CatchPanic
-/// 1. HandleError
+/// 0. `CatchPanic`
+/// 1. `HandleError`
 /// 2. Authn/Authz
 /// 3. Unauthenticated and authenticated rate limit layers
-/// 4. MetaRouter
+/// 4. `MetaRouter`
 ///
 /// -- Router specific MW, must not require Clone on inner Service --
 /// 5. Per User Rate Limit layer
 /// 6. Per Org Rate Limit layer
-/// 7. RequestContext
+/// 7. `RequestContext`
 ///    - Fetch dynamic request specific metadata
 ///    - Deserialize request body based on default provider
 ///    - Parse Helicone inputs
@@ -107,19 +107,19 @@ pub struct InnerAppState {
 /// 10. Spend controls
 /// 11. A/B testing between models and prompt versions
 /// 12. Fallbacks
-/// 13. ProviderBalancer
+/// 13. `ProviderBalancer`
 ///
 /// -- provider specific middleware --
 /// 14. Per provider rate limit layer
 /// 15. Mapper
 ///     - based on selected provider, map request body
-/// 16. ProviderRegionBalancer
+/// 16. `ProviderRegionBalancer`
 ///
 /// -- region specific middleware (none yet, just leaf service) --
 /// 17. Dispatcher
 ///
 /// Ideally we could combine the rate limits into one layer
-/// instead of using tower_governor and having to split them up.
+/// instead of using `tower_governor` and having to split them up.
 ///
 ///
 /// For request processing, we need to use some dynamically added
@@ -137,10 +137,10 @@ pub struct InnerAppState {
 ///   - Added by the request context layer
 ///   - Used by many layers
 /// - `Provider`
-///   - Added by the AddExtensionLayer in the dispatcher service stack
+///   - Added by the `AddExtensionLayer` in the dispatcher service stack
 ///   - Used by the Mapper layer
 /// - `PathAndQuery`
-///   - Added by the MetaRouter
+///   - Added by the `MetaRouter`
 ///   - Used by the Mapper layer
 #[derive(Clone)]
 pub struct App {
@@ -265,7 +265,7 @@ impl meltdown::Service for App {
                         server_output = axum_server::bind_rustls(addr, tls_config)
                             .handle(handle.clone())
                             .serve(app_factory) => server_output.map_err(RuntimeError::Serve)?,
-                        _ = token => {
+                        () = token => {
                             handle.graceful_shutdown(Some(std::time::Duration::from_secs(10)));
                         }
                     };
@@ -276,7 +276,7 @@ impl meltdown::Service for App {
                         server_output = axum_server::bind(addr)
                             .handle(handle.clone())
                             .serve(app_factory) => server_output.map_err(RuntimeError::Serve)?,
-                        _ = token => {
+                        () = token => {
                             handle.graceful_shutdown(Some(std::time::Duration::from_secs(10)));
                         }
                     };
@@ -294,6 +294,7 @@ pub struct HyperApp {
 }
 
 impl HyperApp {
+    #[must_use]
     pub fn new(app: App) -> Self {
         let state = app.state.clone();
         let service_stack = ServiceBuilder::new()
@@ -343,6 +344,7 @@ impl<S> AppFactory<S> {
 }
 
 impl AppFactory<HyperApp> {
+    #[must_use]
     pub fn new_hyper_app(app: App) -> Self {
         Self {
             state: app.state.clone(),

@@ -46,13 +46,13 @@ pub struct ConfigDiscovery {
 
 impl ConfigDiscovery {
     pub fn new(
-        app: AppState,
-        router_config: Arc<RouterConfig>,
+        app: &AppState,
+        router_config: &Arc<RouterConfig>,
         rx: Receiver<Change<Key, DispatcherService>>,
     ) -> Result<Self, InitError> {
         let events = ReceiverStream::new(rx);
         let mut service_map: HashMap<Key, DispatcherService> = HashMap::new();
-        for provider in router_config.providers.iter() {
+        for provider in &router_config.providers {
             let key = Key::new(*provider);
             let dispatcher =
                 Dispatcher::new_with_middleware(app.clone(), key.provider)?;

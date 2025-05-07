@@ -23,7 +23,7 @@ impl ResponseForPanic for PanicResponder {
                 "Service panicked but `CatchPanic` was unable to downcast the \
                  panic info"
             );
-        };
+        }
         InternalError::Internal.into_response()
     }
 }

@@ -48,7 +48,7 @@ pub struct ConfigDiscovery {
 
 impl ConfigDiscovery {
     pub fn new(
-        app: AppState,
+        app: &AppState,
         weighted_balance_targets: NEVec<BalanceTarget>,
         rx: Receiver<Change<WeightedKey, DispatcherService>>,
     ) -> Result<Self, InitError> {

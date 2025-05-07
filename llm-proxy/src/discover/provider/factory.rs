@@ -5,7 +5,11 @@ use std::{
 };
 
 use tokio::sync::mpsc::Receiver;
-use tower::{Service, discover::Change, load::PeakEwmaDiscover};
+use tower::{
+    Service,
+    discover::Change,
+    load::{CompleteOnResponse, PeakEwmaDiscover},
+};
 
 use crate::{
     app::AppState,
@@ -47,8 +51,8 @@ impl Service<Receiver<Change<Key, DispatcherService>>> for DiscoverFactory {
         rx: Receiver<Change<Key, DispatcherService>>,
     ) -> Self::Future {
         let discovery = match Discovery::new(
-            self.app_state.clone(),
-            self.router_config.clone(),
+            &self.app_state,
+            &self.router_config,
             rx,
         ) {
             Ok(discovery) => discovery,
@@ -58,7 +62,7 @@ impl Service<Receiver<Change<Key, DispatcherService>>> for DiscoverFactory {
             discovery,
             self.app_state.0.config.discover.default_rtt,
             self.app_state.0.config.discover.discover_decay,
-            Default::default(),
+            CompleteOnResponse::default(),
         );
 
         ready(Ok(discovery))

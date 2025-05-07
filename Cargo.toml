@@ -23,6 +23,11 @@ lto = true
 codegen-units = 1
 strip = true
 
+[workspace.lints.clippy]
+all = { level = "deny", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+missing_errors_doc = { level = "allow" }
+missing_panics_doc = { level = "allow" }
 
 [workspace.dependencies]
 openai-types = { path = "./crates/openai-types" }

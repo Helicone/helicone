@@ -27,8 +27,8 @@ pub enum Discovery {
 
 impl Discovery {
     pub fn new(
-        app_state: AppState,
-        router_config: Arc<RouterConfig>,
+        app_state: &AppState,
+        router_config: &Arc<RouterConfig>,
         rx: Receiver<Change<Key, DispatcherService>>,
     ) -> Result<Self, InitError> {
         // TODO: currently we also have a separate discovery_mode.

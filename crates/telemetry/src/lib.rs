@@ -79,13 +79,17 @@ fn resource(config: &Config) -> Resource {
         .build()
 }
 
+/// Initialize telemetry with the given config.
+///
+/// # Errors
+/// If any of the configuration is invalid.
 pub fn init_telemetry(
     config: &Config,
 ) -> Result<(Option<SdkLoggerProvider>, SdkTracerProvider), TelemetryError> {
     let resource = resource(config);
     match config.exporter {
         Exporter::Stdout => {
-            let tracer_provider = init_stdout(resource, config)?;
+            let tracer_provider = init_stdout(&resource, config)?;
             Ok((None, tracer_provider))
         }
         Exporter::Otlp => {
@@ -133,7 +137,7 @@ fn init_otlp(
 }
 
 fn init_stdout(
-    resource: Resource,
+    resource: &Resource,
     config: &Config,
 ) -> Result<SdkTracerProvider, TelemetryError> {
     let fmt_layer = tracing_subscriber::fmt::layer()

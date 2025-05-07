@@ -21,7 +21,7 @@ async fn main() -> Result<(), llm_proxy::error::runtime::RuntimeError> {
     let config = match Config::try_read(args.config) {
         Ok(config) => config,
         Err(error) => {
-            eprintln!("failed to read config: {}", error);
+            eprintln!("failed to read config: {error}");
             std::process::exit(1);
         }
     };
@@ -76,11 +76,11 @@ async fn main() -> Result<(), llm_proxy::error::runtime::RuntimeError> {
     //     .map_err(llm_proxy::error::runtime::Error::Telemetry)?;
     if let Some(logger_provider) = logger_provider {
         if let Err(e) = logger_provider.shutdown() {
-            println!("error shutting down logger provider: {}", e);
+            println!("error shutting down logger provider: {e}");
         }
     }
     if let Err(e) = tracer_provider.shutdown() {
-        println!("error shutting down tracer provider: {}", e);
+        println!("error shutting down tracer provider: {e}");
     }
 
     info!("shut down");

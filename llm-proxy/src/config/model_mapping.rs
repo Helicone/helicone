@@ -24,6 +24,7 @@ pub struct ModelMappingConfig(HashMap<Provider, HashMap<String, String>>);
 pub struct ModelMapper(HashMap<Provider, HashMap<ModelName<'static>, Model>>);
 
 impl ModelMapper {
+    #[must_use]
     pub fn get(
         &self,
         target_provider: &Provider,

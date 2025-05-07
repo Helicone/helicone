@@ -11,6 +11,7 @@ pub struct OpenAiConverter<'a> {
 }
 
 impl<'a> OpenAiConverter<'a> {
+    #[must_use]
     pub fn new(model_mapper: &'a ModelMapper) -> Self {
         Self { model_mapper }
     }

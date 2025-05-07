@@ -124,6 +124,7 @@ pub struct Layer {
 }
 
 impl Layer {
+    #[must_use]
     pub fn new(
         router_config: Arc<RouterConfig>,
         provider_keys: ProviderKeys,

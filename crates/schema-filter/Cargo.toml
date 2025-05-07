@@ -13,3 +13,6 @@ serde_json = { workspace = true }
 openapiv3 = { workspace = true }
 anyhow = { workspace = true }
 indexmap = { workspace = true }
+
+[lints]
+workspace = true

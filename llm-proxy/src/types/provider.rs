@@ -46,6 +46,7 @@ impl std::fmt::Display for Provider {
 pub struct ProviderKeys(Arc<IndexMap<Provider, Secret<String>>>);
 
 impl ProviderKeys {
+    #[must_use]
     pub fn new(keys: IndexMap<Provider, Secret<String>>) -> Self {
         Self(Arc::new(keys))
     }
