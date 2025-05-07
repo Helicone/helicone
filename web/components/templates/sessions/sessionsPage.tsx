@@ -362,7 +362,7 @@ const SessionsPage = (props: SessionsPageProps) => {
                       asPill={"none"}
                       key={tab.id}
                       value={tab.id}
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 bg-sidebar-background dark:bg-sidebar-foreground"
                     >
                       {tab.icon}
                     </TabsTrigger>

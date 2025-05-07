@@ -409,13 +409,12 @@ export default function SessionTimelineTable(
                           (() => {
                             const groupColorClass =
                               getColor(row.original.completePath) ||
-                              "bg-transparent";
+                              "transparent";
 
                             if (groupColorClass !== "bg-transparent") {
                               return (
                                 <div
-                                  className="absolute left-0 top-0 bottom-0 w-1 z-9"
-                                  style={{ backgroundColor: groupColorClass }}
+                                  className={`absolute left-0 top-0 bottom-0 w-1 z-9 bg-${groupColorClass}`}
                                 />
                               );
                             }

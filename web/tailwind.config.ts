@@ -257,6 +257,18 @@ export default {
       pattern:
         /^(fill-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-(?:50|100|200|300|400|500|600|700|800|900|950))$/,
     },
+    {
+      pattern: /^(bg-chart-[1-9]|bg-chart-10)$/,
+      variants: ["hover"],
+    },
+    {
+      pattern: /^(fill-chart-[1-9]|fill-chart-10)$/,
+      variants: ["hover"],
+    },
+    {
+      pattern: /^(stroke-chart-[1-9]|stroke-chart-10)$/,
+      variants: ["hover"],
+    },
   ],
   plugins: [
     require("tailwind-scrollbar"),
