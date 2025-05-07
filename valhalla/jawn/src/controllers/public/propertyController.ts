@@ -39,25 +39,17 @@ export class PropertyController extends Controller {
     requestBody: {},
     @Request() request: JawnAuthenticatedRequest
   ) {
-    const builtFilter = await buildFilterWithAuthClickHouse({
-      org_id: request.authParams.organizationId,
-      argsAcc: [],
-      filter: "all",
-    });
-
     const query = `
-    SELECT DISTINCT arrayJoin(mapKeys(properties)) AS property
-    FROM request_response_rmt
+    SELECT *
+    FROM org_properties FINAL
     WHERE (
-      ${builtFilter.filter}
+      organization_id = {val_0: UUID}
     )
   `;
 
-    return await quickCacheResultCustom(
-      "v1/property/query" + request.authParams.organizationId,
-      async () => await dbQueryClickhouse<Property>(query, builtFilter.argsAcc),
-      longCache
-    );
+    return await dbQueryClickhouse<Property>(query, [
+      request.authParams.organizationId,
+    ]);
   }
 
   // Gets all possible values for a property
