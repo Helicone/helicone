@@ -107,16 +107,13 @@ impl ApiEndpoint {
                 let converter = AnthropicConverter::new(model_mapper);
                 match (source, target) {
                     (Anthropic::Messages, OpenAI::ChatCompletions) => {
-                        tracing::trace!("about to deserialize");
                         let body = serde_json::from_slice::<
                             anthropic_types::chat::ChatCompletionRequest,
                         >(body)
                         .map_err(InvalidRequestError::InvalidRequestBody)?;
-                        tracing::trace!("about to convert");
                         let openai_req: openai_types::chat::ChatCompletionRequest =
                         converter.try_convert(body)
                             .map_err(InternalError::MapperError)?;
-                        tracing::trace!("about to serialize");
                         let openai_req_bytes = serde_json::to_vec(&openai_req)
                             .map_err(|e| {
                                 InternalError::Serialize {
@@ -124,7 +121,6 @@ impl ApiEndpoint {
                                     error: e,
                                 }
                             })?;
-                        tracing::trace!("about to convert to bytes");
                         let body = Bytes::from(openai_req_bytes);
                         (body, target_path_and_query)
                     }

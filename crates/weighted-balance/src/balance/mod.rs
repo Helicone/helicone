@@ -51,6 +51,8 @@ use crate::weight::HasWeight;
 pub enum Error {
     #[error("weighted balancer discovery error: {0}")]
     Discover(tower::BoxError),
+    #[error("weighted balancer failed to sample: {0}")]
+    SampleFailed(#[from] rand::distr::weighted::Error),
 }
 
 /// Efficiently distributes requests across an arbitrary number of services.
@@ -187,19 +189,17 @@ where
         );
     }
 
-    fn ready_index(&mut self) -> Option<usize> {
+    fn ready_index(&mut self) -> Result<Option<usize>, Error> {
         match self.services.ready_len() {
-            0 => None,
-            1 => Some(0),
+            0 => Ok(None),
+            1 => Ok(Some(0)),
             len => {
-                // todo: remove unwraps
                 let sample_fn = |idx| {
                     let (key, _service) = self
                         .services
                         .get_ready_index(idx)
                         .expect("invalid index");
                     let weight = key.weight();
-                    tracing::trace!(weight = ?weight, idx = %idx, "sampling weight");
                     weight
                 };
                 // TODO: decide ideal impl, remove unwrap
@@ -209,12 +209,11 @@ where
                     len,
                     sample_fn,
                     1,
-                )
-                .unwrap();
+                )?;
                 let chosen = sample.index(0);
 
-                trace!(chosen = chosen, "p2c",);
-                Some(chosen as usize)
+                trace!(chosen = chosen, "p2c");
+                Ok(Some(chosen as usize))
             }
         }
     }
@@ -272,7 +271,7 @@ where
                 }
             }
 
-            self.ready_index = self.ready_index();
+            self.ready_index = self.ready_index()?;
             if self.ready_index.is_none() {
                 debug_assert_eq!(self.services.ready_len(), 0);
                 // We have previously registered interest in updates from
