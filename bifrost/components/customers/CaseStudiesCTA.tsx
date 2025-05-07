@@ -13,23 +13,23 @@ export const CaseStudiesCTA = () => {
 
       <div className="flex flex-col justify-center items-center gap-6 md:gap-12 z-[10] h-full w-full relative">
         <div className="flex flex-col items-center text-wrap text-4xl md:text-5xl font-semibold text-slate-500 leading-snug z-[10]">
-          <div className="flex flex-wrap gap-x-3 gap-y-1 items-center justify-center ">
+          <div className="flex flex-wrap gap-x-3 gap-y-1 items-center justify-center">
             <div
               className={cn(
-                "bg-[#E7F6FD] border-[3px] border-brand rounded-2xl py-2 xl:py-4 px-7 text-brand transition-transform duration-1000",
+                "bg-[#E7F6FD] border-[3px] border-brand rounded-2xl py-2 xl:py-4 px-4 sm:px-7 text-brand transition-transform duration-1000 text-3xl sm:text-4xl md:text-5xl",
                 "rotate-[-3deg]"
               )}
             >
               <h2>Actionable</h2>
             </div>
-            <h2>insights</h2>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl">insights</h2>
+            <h2 className="w-full text-center text-3xl sm:text-4xl md:text-5xl">for your AI applications</h2>
           </div>
-          <h2>for your AI applications</h2>
         </div>
         <Link href="https://us.helicone.ai/signup" className="z-[10]">
           <Button
             size="lg"
-            className="mx-auto font-medium py-8 px-9 text-2xl bg-brand hover:bg-brand/90 text-white rounded-lg flex items-center gap-2"
+            className="mx-auto font-medium py-8 px-6 sm:px-9 text-2xl bg-brand hover:bg-brand/90 text-white rounded-lg flex items-center gap-2"
           >
             Try Helicone for free
             <ChevronRight />
