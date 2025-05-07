@@ -17,9 +17,11 @@ export class PostHogHandler extends AbstractLogHandler {
     super();
   }
 
-  public async handle(context: HandlerContext): PromiseGenericResult<string> {
+  public async _handleWithoutTiming(
+    context: HandlerContext
+  ): PromiseGenericResult<string> {
     if (!context.message.heliconeMeta.posthogApiKey) {
-      return await super.handle(context);
+      return await super.handleNext(context);
     }
 
     const usage = context.usage;
@@ -43,7 +45,7 @@ export class PostHogHandler extends AbstractLogHandler {
       createdAt: context.message.log.request.requestCreatedAt,
     });
 
-    return await super.handle(context);
+    return await super.handleNext(context);
   }
 
   public async handleResults(): PromiseGenericResult<string> {
