@@ -1,6 +1,8 @@
 import { Row } from "@/components/layout/common";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useLocalStorage } from "@/services/hooks/localStorage";
+import { useColorMapStore } from "@/store/features/sessions/colorMap";
 import { Clock4Icon } from "lucide-react";
 import { useTheme } from "next-themes";
 import {
@@ -25,8 +27,6 @@ import {
 } from "recharts";
 import { Session, Trace } from "../../../../lib/sessions/sessionTypes";
 import { Col } from "../../../layout/common/col";
-import { useLocalStorage } from "@/services/hooks/localStorage";
-import { useColorMapStore } from "@/store/features/sessions/colorMap";
 
 const ROUNDED_RADIUS = 1;
 const BAR_SIZE = 25; // Increased from 30 to 50
@@ -37,6 +37,7 @@ interface BarChartTrace {
   duration: number;
   trace: Trace;
   request_id: string;
+  status: number;
 }
 
 export const TraceSpan = ({
@@ -88,8 +89,6 @@ export const TraceSpan = ({
         typeof endMs !== "number" ||
         isNaN(endMs)
       ) {
-        console.warn("Invalid trace timestamps found for trace:", trace);
-        // Return a valid BarChartTrace object even for invalid data
         return {
           name: `Invalid ${index + 1}`,
           path: trace.path ?? "invalid",
@@ -97,6 +96,7 @@ export const TraceSpan = ({
           duration: 0,
           trace: trace, // Keep the original trace for potential debugging
           request_id: trace.request_id ?? `invalid-${index}`,
+          status: trace?.request.heliconeMetadata?.status?.code,
         };
       }
 
@@ -118,6 +118,7 @@ export const TraceSpan = ({
         duration: Math.max(0.01, duration),
         trace: trace,
         request_id: trace.request_id,
+        status: trace.request.heliconeMetadata?.status?.code,
       };
     });
   }, [session, isOriginalRealtime]);
@@ -680,6 +681,18 @@ export const TraceSpan = ({
                       {value}
                     </text>
                   );
+                }}
+              />
+              {/* Show error status codes (400+) as labels */}
+              <LabelList
+                dataKey="status"
+                position="left"
+                style={{
+                  fontSize: "8px",
+                  fontWeight: "80",
+                }}
+                formatter={(status: number) => {
+                  return status >= 400 && status < 500 ? "❌" : "";
                 }}
               />
               {spanData.map((entry, index) => {
