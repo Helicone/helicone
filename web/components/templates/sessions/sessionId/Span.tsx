@@ -1,6 +1,8 @@
 import { Row } from "@/components/layout/common";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useLocalStorage } from "@/services/hooks/localStorage";
+import { useColorMapStore } from "@/store/features/sessions/colorMap";
 import { Clock4Icon } from "lucide-react";
 import { useTheme } from "next-themes";
 import {
@@ -25,8 +27,6 @@ import {
 } from "recharts";
 import { Session, Trace } from "../../../../lib/sessions/sessionTypes";
 import { Col } from "../../../layout/common/col";
-import { useLocalStorage } from "@/services/hooks/localStorage";
-import { useColorMapStore } from "@/store/features/sessions/colorMap";
 
 const ROUNDED_RADIUS = 1;
 const BAR_SIZE = 25; // Increased from 30 to 50
@@ -37,6 +37,7 @@ interface BarChartTrace {
   duration: number;
   trace: Trace;
   request_id: string;
+  status: number;
 }
 
 export const TraceSpan = ({
@@ -88,8 +89,6 @@ export const TraceSpan = ({
         typeof endMs !== "number" ||
         isNaN(endMs)
       ) {
-        console.warn("Invalid trace timestamps found for trace:", trace);
-        // Return a valid BarChartTrace object even for invalid data
         return {
           name: `Invalid ${index + 1}`,
           path: trace.path ?? "invalid",
@@ -97,6 +96,7 @@ export const TraceSpan = ({
           duration: 0,
           trace: trace, // Keep the original trace for potential debugging
           request_id: trace.request_id ?? `invalid-${index}`,
+          status: trace?.request.heliconeMetadata?.status?.code,
         };
       }
 
@@ -118,6 +118,7 @@ export const TraceSpan = ({
         duration: Math.max(0.01, duration),
         trace: trace,
         request_id: trace.request_id,
+        status: trace.request.heliconeMetadata?.status?.code,
       };
     });
   }, [session, isOriginalRealtime]);
@@ -632,7 +633,6 @@ export const TraceSpan = ({
                   if (index === undefined || !spanData[index]) return null;
                   const entry = spanData[index];
 
-                  // Determine if this bar is selected based on highlighter or individual selection
                   const isInHighlighter =
                     highlighterActive &&
                     highlighterStart !== null &&
@@ -654,14 +654,12 @@ export const TraceSpan = ({
                           ? y + height / 2
                           : y
                       }
-                      fill={
+                      className={
                         isSelected
                           ? theme === "dark"
-                            ? "#0ea5e9"
-                            : "#0369A1"
-                          : theme === "dark"
-                          ? "#cbd5e1"
-                          : "#334155"
+                            ? "fill-white"
+                            : "fill-black"
+                          : "fill-card-foreground"
                       }
                       opacity={isSelected ? 1 : 0.7}
                       textAnchor="start"
@@ -684,37 +682,31 @@ export const TraceSpan = ({
                   );
                 }}
               />
+              {/* Show error status codes (400+) as labels */}
+              <LabelList
+                dataKey="status"
+                position="left"
+                style={{
+                  fontSize: "8px",
+                  fontWeight: "80",
+                }}
+                formatter={(status: number) => {
+                  return status >= 400 && status < 500 ? "❌" : "";
+                }}
+              />
               {spanData.map((entry, index) => {
                 const color = getColor(entry.path);
-                // Determine if this bar is in the highlighter range
-                const isInHighlighter =
-                  highlighterActive &&
-                  highlighterStart !== null &&
-                  highlighterEnd !== null &&
-                  entry.start <= highlighterEnd &&
-                  entry.start + entry.duration >= highlighterStart;
-
-                const isIndividuallySelected =
-                  !highlighterActive && entry.request_id === selectedRequestId;
-
                 return (
                   <Cell
                     key={`colored-cell-${index}`}
-                    className="cursor-pointer transition-colors duration-150"
-                    style={{
-                      fill:
-                        isInHighlighter || isIndividuallySelected
-                          ? color
-                          : color,
-                    }}
+                    className={`cursor-pointer transition-colors duration-150 fill-${color} stroke-${color}`}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.fill = `${color}80`; // 50% opacity (approx.)
+                      e.currentTarget.style.opacity = "0.5";
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.fill = color;
+                      e.currentTarget.style.opacity = "1";
                     }}
                     strokeWidth={2}
-                    stroke={color}
                     onClick={() => {
                       if (highlighterActive) return;
                       setSelectedRequestId(entry.request_id);

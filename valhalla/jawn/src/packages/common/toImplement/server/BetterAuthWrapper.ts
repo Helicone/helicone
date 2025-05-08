@@ -37,6 +37,7 @@ export class BetterAuthWrapper implements HeliconeAuthClient {
       return err("No headers provided");
     }
     const hds = fromNodeHeaders(headers);
+
     const session = await betterAuthClient.api.getSession({
       headers: hds,
     });

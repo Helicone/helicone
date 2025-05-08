@@ -1,4 +1,5 @@
 import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
+import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
 import { err, ok, Result } from "../../packages/common/result";
 
 export type PSize = "p50" | "p75" | "p95" | "p99" | "p99.9";
@@ -24,19 +25,13 @@ export async function getHistogramRowOnKeys({
   builtFilter,
   aggregateFunction,
 }: {
-  keys: {
-    key: string;
-    alias: string;
-  }[];
+  keys: KeyDefinition[];
   pSize: PSize;
   useInterquartile: boolean;
-  // WARNING: This is a filter that is applied to the request_response_rmt table, can be SQL injection, make sure to sanitize
-  builtFilter: {
-    filter: string;
-    argsAcc: any[];
-  };
+  builtFilter: Awaited<ReturnType<typeof buildFilterWithAuthClickHouse>>;
   aggregateFunction: string;
 }): Promise<Result<HistogramRow[], string>> {
+  const { filter, argsAcc } = builtFilter;
   const upperPercentile = SIZES_TO_PERCENTILES[pSize ?? "p75"];
   const lowerPercentile = useInterquartile
     ? (1 - parseFloat(upperPercentile)).toString()
@@ -53,14 +48,17 @@ export async function getHistogramRowOnKeys({
       ? `${metric} BETWEEN lower_bound AND upper_bound`
       : `${metric} <= p_value`;
 
+  const keySelects = keys.map((k) => `${k.key} AS ${k.alias}`).join(", ");
+  const keyGroupBys = keys.map((k) => k.alias).join(", ");
+
   const query = `
       WITH request_counts AS (
         SELECT
-          ${keys.map((k) => `${k.key} AS ${k.alias}`).join(", ")},
+          ${keySelects},
           ${aggregateFunction} AS agg_value
         FROM request_response_rmt
-        WHERE ${builtFilter.filter}
-        GROUP BY ${keys.map((k) => k.key).join(", ")}
+        WHERE ${filter}
+        GROUP BY ${keyGroupBys} 
       ),
       percentiles AS (
         SELECT
@@ -75,7 +73,7 @@ export async function getHistogramRowOnKeys({
 
   const requestCount = await clickhouseDb.dbQuery<{
     hist: [number, number, number];
-  }>(query, builtFilter.argsAcc);
+  }>(query, argsAcc);
   if (!requestCount?.data) {
     return err("No request count found");
   }
@@ -87,4 +85,44 @@ export async function getHistogramRowOnKeys({
       value: row.hist[2],
     }))
   );
+}
+
+export interface KeyDefinition {
+  key: string;
+  alias: string;
+}
+
+export interface AverageRow {
+  average: number;
+}
+
+export interface GetAverageOnKeysOptions {
+  key: KeyDefinition;
+  builtFilter: Awaited<ReturnType<typeof buildFilterWithAuthClickHouse>>;
+  aggregateFunction?: string;
+}
+
+export async function getAveragePerSession({
+  key,
+  builtFilter,
+  aggregateFunction,
+}: GetAverageOnKeysOptions): Promise<Result<AverageRow[], string>> {
+  const { filter, argsAcc } = builtFilter;
+
+  const query = `
+  SELECT avg(${key.alias}) as average
+    FROM
+    (
+      SELECT ${aggregateFunction} as ${key.alias}
+      FROM request_response_rmt
+      WHERE ${filter}
+      GROUP BY ${key.key}
+    )
+  `;
+
+  const res = await clickhouseDb.dbQuery<AverageRow>(query, argsAcc);
+  if (res.error) {
+    return res;
+  }
+  return ok(res.data!);
 }

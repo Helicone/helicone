@@ -6,7 +6,7 @@ services:
     container_name: helicone-jawn
     build:
       context: ../
-      dockerfile: valhalla/dockerfile
+      dockerfile: valhalla/dockerfile_dev
     restart: unless-stopped
     ports:
       - ${JAWN_PORT}:${JAWN_PORT}
@@ -26,12 +26,23 @@ services:
           "CLICKHOUSE_PASSWORD": "${CLICKHOUSE_PASSWORD}"
         }
       VERCEL_ENV: ${VERCEL_ENV}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      SUPABASE_DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+
+    volumes:
+      - ../valhalla:/app/valhalla
+      - ../shared:/app/shared
+      - /app/valhalla/node_modules
+
+    working_dir: /app/valhalla/jawn
+    command: yarn dev
 
   web:
     container_name: helicone-web-local
     build:
       context: ../web
       dockerfile: ../docker/dockerfiles/dockerfile_web_dev
+
     ports:
       - 3000:3000
     volumes:
@@ -50,6 +61,7 @@ services:
       NEXT_PUBLIC_BETTER_AUTH: "true"
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
       SMTP_SECURE: false
+      NODE_ENV: development
     command: yarn dev:local -p 3000
 
   db:
@@ -135,7 +147,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-
   migrations:
     build:
       context: ../
@@ -145,6 +156,10 @@ services:
         condition: service_healthy
       clickhouse:
         condition: service_healthy
+    environment:
+      FLYWAY_URL: jdbc:postgresql://db:5432/helicone_test
+      FLYWAY_USER: postgres
+      FLYWAY_PASSWORD: testpassword
     volumes:
       - ../supabase:/app/supabase
       - ../clickhouse:/app/clickhouse

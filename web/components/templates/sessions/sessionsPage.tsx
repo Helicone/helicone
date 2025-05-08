@@ -1,13 +1,20 @@
 import FoldedHeader from "@/components/shared/FoldedHeader";
 import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
+import { ChevronDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Command,
+  CommandEmpty,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Muted, Small, XSmall } from "@/components/ui/typography";
 import { FilterASTButton } from "@/filterAST/FilterASTButton";
@@ -16,8 +23,8 @@ import { useLocalStorage } from "@/services/hooks/localStorage";
 import { useURLParams } from "@/services/hooks/localURLParams";
 import { SortDirection } from "@/services/lib/sorts/requests/sorts";
 import { TimeFilter } from "@/types/timeFilter";
-import { PieChart, Table } from "lucide-react";
-import { useRouter } from "next/router";
+import { PieChart, Table, Check } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   getTimeIntervalAgo,
@@ -34,6 +41,7 @@ import ThemedTable from "../../shared/themed/table/themedTable";
 import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
 import { INITIAL_COLUMNS } from "./initialColumns";
 import SessionMetrics from "./SessionMetrics";
+import { cn } from "@/lib/utils";
 
 interface SessionsPageProps {
   currentPage: number;
@@ -44,6 +52,7 @@ interface SessionsPageProps {
     isCustomProperty: boolean;
   };
   defaultIndex: number;
+  selectedName?: string;
 }
 
 // Define a constant for the unnamed session value
@@ -62,7 +71,6 @@ type TSessions = {
   total_tokens: number;
   avg_latency: number;
 };
-type SessionResult = ReturnType<typeof useSessionNames>["sessions"][number];
 
 const TABS = [
   {
@@ -78,8 +86,6 @@ const TABS = [
 ];
 
 const SessionsPage = (props: SessionsPageProps) => {
-  const { sort } = props;
-  const router = useRouter();
   const tableRef = useRef<any>(null);
 
   // State for active columns
@@ -87,10 +93,7 @@ const SessionsPage = (props: SessionsPageProps) => {
     columnDefsToDragColumnItems(INITIAL_COLUMNS)
   );
 
-  const [timeFilter, setTimeFilter] = useState<{
-    start: Date;
-    end: Date;
-  }>({
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>({
     start: getTimeIntervalAgo("1m"),
     end: new Date(),
   });
@@ -99,19 +102,23 @@ const SessionsPage = (props: SessionsPageProps) => {
     "session-search",
     undefined
   );
-  const [sessionNameSearch] = useState<string | undefined>(undefined);
+
+  const [open, setOpen] = useState(false);
+  const [sessionNameSearch, setSessionNameSearch] = useState<
+    string | undefined
+  >(undefined);
 
   const debouncedSessionNameSearch = useDebounce(sessionNameSearch, 500);
 
-  const names = useSessionNames(debouncedSessionNameSearch ?? "");
-  const allNames = useSessionNames("");
+  const names = useSessionNames(debouncedSessionNameSearch ?? "", timeFilter);
+  const allNames = useSessionNames("", timeFilter);
 
   const debouncedSessionIdSearch = useDebounce(sessionIdSearch, 500); // 0.5 seconds
   const [selectedName, setSelectedName] = useState<string | undefined>(
-    undefined
+    props.selectedName
   );
 
-  const { sessions, isLoading, hasSessions, refetch } = useSessions({
+  const { sessions, isLoading, hasSessions } = useSessions({
     timeFilter,
     sessionIdSearch: debouncedSessionIdSearch ?? "",
     selectedName,
@@ -163,7 +170,6 @@ const SessionsPage = (props: SessionsPageProps) => {
   };
 
   const isSessionsLoading = isLoading || allNames.isLoading || names.isLoading;
-  const combinedLoading = isSessionsLoading || refetch;
 
   // Helper function to get TimeFilter object
   const getTimeFilterObject = (start: Date, end: Date): TimeFilter => ({
@@ -248,36 +254,81 @@ const SessionsPage = (props: SessionsPageProps) => {
         <FoldedHeader
           leftSection={
             <section className="flex flex-row items-center gap-2">
-              <Small className="font-semibold">Sessions</Small>
+              <Link href="/sessions" className="no-underline">
+                <Small className="font-semibold">Sessions</Small>
+              </Link>
               <Small className="font-semibold">/</Small>
 
-              <Select
-                value={
-                  selectedName === ""
-                    ? UNNAMED_SESSION_VALUE // Map empty string to placeholder
-                    : selectedName ?? "all"
-                }
-                onValueChange={handleSelectSessionName}
-              >
-                <SelectTrigger className="w-[280px] h-8 shadow-sm">
-                  <SelectValue placeholder="Select a session" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Sessions</SelectItem>
-                  {allNames.sessions.map((session) => (
-                    <SelectItem
-                      key={session.name}
-                      value={
-                        session.name === ""
-                          ? UNNAMED_SESSION_VALUE
-                          : session.name
-                      }
-                    >
-                      {session.name === "" ? "Unnamed" : session.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger
+                  asChild
+                  className={cn(
+                    "flex h-8 w-[280px] items-center justify-between rounded-md border border-sky-200 bg-white px-3 py-2 text-xs ring-offset-white placeholder:text-slate-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:bg-sidebar-background",
+                    "focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 dark:focus:ring-slate-300"
+                  )}
+                >
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={open}
+                  >
+                    {selectedName === ""
+                      ? UNNAMED_SESSION_VALUE
+                      : selectedName ?? "All"}
+                    <ChevronDown className="ml-2 h-3 w-3 shrink-0 opacity-50 " />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[280px] p-0">
+                  <Command>
+                    <CommandInput
+                      placeholder="Search sessions..."
+                      onChangeCapture={(
+                        e: React.ChangeEvent<HTMLInputElement>
+                      ) => {
+                        setSessionNameSearch(e.target.value);
+                      }}
+                    />
+                    <CommandEmpty>No results found.</CommandEmpty>
+
+                    <CommandList>
+                      {names.sessions
+                        .sort(
+                          (a, b) =>
+                            new Date(b.last_used).getTime() -
+                            new Date(a.last_used).getTime()
+                        )
+                        .map((session) => (
+                          <CommandItem
+                            key={session.name}
+                            value={
+                              session.name === ""
+                                ? UNNAMED_SESSION_VALUE
+                                : session.name
+                            }
+                            onSelect={() => {
+                              setOpen(false);
+                              handleSelectSessionName(
+                                session.name === ""
+                                  ? UNNAMED_SESSION_VALUE
+                                  : session.name
+                              );
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-3 w-3",
+                                selectedName === session.name
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
+                            {session.name === "" ? "Unnamed" : session.name}
+                          </CommandItem>
+                        ))}
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
 
               <ThemedTimeFilter
                 currentTimeFilter={getTimeFilterObject(
@@ -311,7 +362,7 @@ const SessionsPage = (props: SessionsPageProps) => {
                       asPill={"none"}
                       key={tab.id}
                       value={tab.id}
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 bg-sidebar-background dark:bg-sidebar-foreground"
                     >
                       {tab.icon}
                     </TabsTrigger>
@@ -372,6 +423,7 @@ const SessionsPage = (props: SessionsPageProps) => {
                 (session) => session.name === selectedName
               ) ?? null
             }
+            timeFilter={timeFilter}
           />
         </TabsContent>
       </Tabs>

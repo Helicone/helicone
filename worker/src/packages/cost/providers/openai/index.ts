@@ -564,6 +564,18 @@ const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "o3-2025-04-16",
+    },
+    cost: {
+      prompt_token: 0.00001,
+      completion_token: 0.00004,
+      prompt_cache_read_token: 0.0000025,
+    },
+    showInPlayground: true,
+  },
+  {
+    model: {
+      operator: "equals",
       value: "gpt-4.1",
     },
     cost: {

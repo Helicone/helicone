@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/select";
 import { formatSeconds } from "@/lib/sql/timeHelpers";
 import { useLocalStorage } from "@/services/hooks/localStorage";
-import { BarChart, Card, Title } from "@tremor/react";
+import { BarChart, Card } from "@tremor/react";
 import { useState } from "react";
 import {
   useSessionMetrics,
@@ -20,18 +20,21 @@ import { Col } from "../../layout/common/col";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import { formatLargeNumber } from "../../shared/utils/numberFormat";
 
-import { INITIAL_LAYOUT, MD_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
+import { TimeFilter } from "@/types/timeFilter";
 import { Responsive, WidthProvider } from "react-grid-layout";
+import { INITIAL_LAYOUT, MD_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
 type SessionResult = ReturnType<typeof useSessionNames>["sessions"][number];
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 interface SessionMetricsProps {
   selectedSession: SessionResult | null;
+  timeFilter: TimeFilter;
 }
 
 interface ChartProps {
   title: string;
+  subtitle?: string;
   data: any[];
   category: string;
   color: string;
@@ -50,9 +53,15 @@ const Chart: React.FC<ChartProps> = ({
   valueFormatter,
   isLoading,
   xAxisLabel,
+  subtitle,
 }) => (
   <Card>
-    <Title>{title}</Title>
+    <p className="text-slate-500 text-sm">{title}</p>
+    {subtitle && (
+      <p className="text-slate-950 dark:text-slate-50 text-xl font-semibold">
+        {subtitle}
+      </p>
+    )}
     {isLoading ? (
       <div className="h-64">
         <LoadingAnimation height={200} width={200} />
@@ -74,7 +83,10 @@ const Chart: React.FC<ChartProps> = ({
   </Card>
 );
 
-const SessionMetrics = ({ selectedSession }: SessionMetricsProps) => {
+const SessionMetrics = ({
+  selectedSession,
+  timeFilter,
+}: SessionMetricsProps) => {
   const [pSize, setPSize] = useLocalStorage<
     "p50" | "p75" | "p95" | "p99" | "p99.9"
   >("session-details-pSize", "p75");
@@ -83,7 +95,8 @@ const SessionMetrics = ({ selectedSession }: SessionMetricsProps) => {
   const { metrics, isLoading } = useSessionMetrics(
     selectedSession?.name ?? "",
     pSize,
-    useInterquartile
+    useInterquartile,
+    timeFilter
   );
 
   return (
@@ -145,12 +158,17 @@ const SessionMetrics = ({ selectedSession }: SessionMetricsProps) => {
         cols={gridCols}
         rowHeight={96}
         resizeHandles={["e", "w"]}
-        onLayoutChange={(currentLayout, allLayouts) => {}}
       >
         <div key="requests-count-distribution">
           <Chart
             title="Requests count distribution"
-            data={metrics.session_count.map((sessionCount) => {
+            subtitle={getSubtitle(
+              isLoading,
+              metrics?.average.session_count[0]?.average,
+              "requests / session",
+              2
+            )}
+            data={(metrics?.session_count || []).map((sessionCount) => {
               const start = Math.ceil(Number(sessionCount.range_start ?? 0));
               const end = Math.floor(Number(sessionCount.range_end ?? 0));
               return {
@@ -170,7 +188,14 @@ const SessionMetrics = ({ selectedSession }: SessionMetricsProps) => {
         <div key="cost-distribution">
           <Chart
             title="Cost distribution"
-            data={metrics.session_cost.map((sessionCost) => {
+            subtitle={getSubtitle(
+              isLoading,
+              metrics?.average.session_cost[0]?.average,
+              " / session",
+              5,
+              "$"
+            )}
+            data={(metrics?.session_cost || []).map((sessionCost) => {
               const start = Number(sessionCost.range_start ?? 0);
               const end = Number(sessionCost.range_end ?? 0);
               return {
@@ -193,7 +218,13 @@ const SessionMetrics = ({ selectedSession }: SessionMetricsProps) => {
         <div key="duration-distribution">
           <Chart
             title="Duration distribution"
-            data={metrics.session_duration.map((sessionDuration) => {
+            subtitle={getSubtitle(
+              isLoading,
+              metrics?.average.session_duration[0]?.average,
+              "seconds / session",
+              3
+            )}
+            data={(metrics?.session_duration || []).map((sessionDuration) => {
               const start = Math.round(
                 Number(sessionDuration.range_start ?? 0)
               );
@@ -221,3 +252,19 @@ const SessionMetrics = ({ selectedSession }: SessionMetricsProps) => {
 };
 
 export default SessionMetrics;
+
+const getSubtitle = (
+  isLoading: boolean,
+  averageMetric: number | undefined,
+  unit: string,
+  toFixedValue: number,
+  prefix: string = ""
+) => {
+  if (isLoading) {
+    return "Loading...";
+  }
+  if (averageMetric === undefined) {
+    return `Average: N/A ${unit}`;
+  }
+  return `Average: ${prefix}${averageMetric.toFixed(toFixedValue)} ${unit}`;
+};

@@ -221,6 +221,11 @@ export type BlogStructure =
 export const BLOG_CONTENT: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "self-hosting-launch",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "implement-and-monitor-cag",
     },
   },

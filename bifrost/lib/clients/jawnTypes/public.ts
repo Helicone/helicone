@@ -1836,6 +1836,12 @@ Json: JsonObject;
       error: null;
     };
     "Result_SessionNameResult-Array.string_": components["schemas"]["ResultSuccess_SessionNameResult-Array_"] | components["schemas"]["ResultError_string_"];
+    TimeFilterMs: {
+      /** Format: double */
+      startTimeUnixMs: number;
+      /** Format: double */
+      endTimeUnixMs: number;
+    };
     SessionNameQueryParams: {
       nameContains: string;
       /** Format: double */
@@ -1843,11 +1849,22 @@ Json: JsonObject;
       /** @enum {string} */
       pSize?: "p50" | "p75" | "p95" | "p99" | "p99.9";
       useInterquartile?: boolean;
+      timeFilter?: components["schemas"]["TimeFilterMs"];
+      filter?: components["schemas"]["SessionFilterNode"];
+    };
+    AverageRow: {
+      /** Format: double */
+      average: number;
     };
     SessionMetrics: {
       session_count: components["schemas"]["HistogramRow"][];
       session_duration: components["schemas"]["HistogramRow"][];
       session_cost: components["schemas"]["HistogramRow"][];
+      average: {
+        session_cost: components["schemas"]["AverageRow"][];
+        session_duration: components["schemas"]["AverageRow"][];
+        session_count: components["schemas"]["AverageRow"][];
+      };
     };
     ResultSuccess_SessionMetrics_: {
       data: components["schemas"]["SessionMetrics"];
@@ -1855,6 +1872,16 @@ Json: JsonObject;
       error: null;
     };
     "Result_SessionMetrics.string_": components["schemas"]["ResultSuccess_SessionMetrics_"] | components["schemas"]["ResultError_string_"];
+    SessionMetricsQueryParams: {
+      nameContains: string;
+      /** Format: double */
+      timezoneDifference: number;
+      /** @enum {string} */
+      pSize?: "p50" | "p75" | "p95" | "p99" | "p99.9";
+      useInterquartile?: boolean;
+      timeFilter?: components["schemas"]["TimeFilterMs"];
+      filter?: components["schemas"]["SessionFilterNode"];
+    };
     MetricsData: {
       /** Format: double */
       totalRequests: number;
@@ -4317,7 +4344,7 @@ export interface operations {
   GetMetrics: {
     requestBody: {
       content: {
-        "application/json": components["schemas"]["SessionNameQueryParams"];
+        "application/json": components["schemas"]["SessionMetricsQueryParams"];
       };
     };
     responses: {

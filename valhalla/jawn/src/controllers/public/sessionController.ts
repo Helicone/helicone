@@ -1,25 +1,26 @@
 import {
-  Route,
-  Tags,
-  Security,
-  Controller,
   Body,
+  Controller,
+  Get,
+  Path,
   Post,
   Request,
-  Path,
-  Get,
+  Route,
+  Security,
+  Tags,
 } from "tsoa";
-import { err, ok, Result } from "../../packages/common/result";
-import { JawnAuthenticatedRequest } from "../../types/request";
+import { KVCache } from "../../lib/cache/kvCache";
+import { FilterLeafSubset } from "../../lib/shared/filters/filterDefs";
 import {
   SessionManager,
+  SessionMetrics,
   SessionNameResult,
   SessionResult,
 } from "../../managers/SessionManager";
-import { KVCache } from "../../lib/cache/kvCache";
+import { err, ok, Result } from "../../packages/common/result";
+import { JawnAuthenticatedRequest } from "../../types/request";
 import { cacheResultCustom } from "../../utils/cacheResult";
-import { result } from "lodash";
-import { FilterLeafSubset } from "../../lib/shared/filters/filterDefs";
+import { TimeFilterMs } from "../../lib/shared/filters/timeFilter";
 
 export type SessionFilterBranch = {
   left: SessionFilterNode;
@@ -48,6 +49,17 @@ export interface SessionNameQueryParams {
   timezoneDifference: number;
   pSize?: "p50" | "p75" | "p95" | "p99" | "p99.9";
   useInterquartile?: boolean;
+  timeFilter?: TimeFilterMs; // TODO: after deploy backend and frontend it should always be present
+  filter?: SessionFilterNode; // TODO: after deploy backend and frontend it should always be present
+}
+
+export interface SessionMetricsQueryParams {
+  nameContains: string;
+  timezoneDifference: number;
+  pSize?: "p50" | "p75" | "p95" | "p99" | "p99.9";
+  useInterquartile?: boolean;
+  timeFilter?: TimeFilterMs; // TODO: after deploy backend and frontend it should always be present
+  filter?: SessionFilterNode; // TODO: after deploy backend and frontend it should always be present
 }
 
 const kvCache = new KVCache(60 * 1000); // 5 minutes
@@ -132,12 +144,13 @@ export class SessionController extends Controller {
   @Post("metrics/query")
   public async getMetrics(
     @Body()
-    requestBody: SessionNameQueryParams,
+    requestBody: SessionMetricsQueryParams,
     @Request() request: JawnAuthenticatedRequest
-  ) {
+  ): Promise<Result<SessionMetrics, string>> {
     const sessionManager = new SessionManager(request.authParams);
 
     const result = await sessionManager.getMetrics(requestBody);
+
     if (result.error || !result.data) {
       this.setStatus(500);
     } else {

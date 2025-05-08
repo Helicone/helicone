@@ -1,0 +1,56 @@
+Cogna builds enterprise software synthesis tools that automatically generate custom applications from specifications. Their process relies on complex chains of LLM calls working in concert to create different components of an application simultaneously.
+
+> Our product generates software with LLMs for enterprise customers. Sometimes we'll synthesize multiple files in a multi-step process, and they'd be interleaved.
+
+— Edward Ayers, Research Engineer, Cogna
+
+## The Challenge: Debugging Multi-Step LLM Processes
+
+When building LLM-powered applications, Cogna's team frequently encounters these challenges:
+
+1. **Formatting issues or unexpected content in prompts** - This includes problems with prompt construction that lead to unexpected outputs.
+2. **Response quality issues** - This includes LLM responses indicating a lack of context or an inability to complete tasks.
+3. **Multi-step coordination problems** - The team also experienced difficulty tracking interrelated LLM calls across complex workflows.
+4. **Validation failures** - This also involved generated code failing quality checks, such as type validation.
+5. **Debugging complexity** - Finally, they faced challenges in identifying where in a multi-step process a failure occurred.
+
+## Debugging with Sessions Tree View
+
+> Before Sessions, it was very difficult to tell what request was for what file when processes were interleaved. Sessions helps with that because you have a tree structure.
+
+— Edward Ayers, Cogna
+
+Helicone's <a href="https://docs.helicone.ai/features/sessions#sessions" target="_blank" rel="noopener noreferrer">Sessions</a> provided a tree-like visualization that mirrors Cogna's application structure, making the entire debugging process more transparent. 
+
+Cogna's team can now see the relationships between different requests, rather than just a linear list, and more easily debug issues with the prompts being used.
+
+This visibility is critical for prompt debugging—one of Cogna's most common use cases. Whether it's identifying formatting issues, response quality problems, or tracing multi-step processes, Sessions provides the context developers need.
+
+## Cogna's Current Workflow in Helicone
+
+Cogna's debugging process with Helicone focuses on:
+
+- Using Sessions to organize multi-step LLM processes into navigable tree structures
+- Examining prompts and responses to identify issues
+- Using internal tooling to re-run specific parts of a session once problems are identified
+- Maintaining prompts in version-controlled source code
+
+## Helicone's Impact
+
+For Cogna's engineers, Sessions transformed prompt debugging from a pain point to a streamlined process:
+
+| Aspects | Before Helicone | With Helicone Sessions |
+| ------- | --------------- | ---------------------- |
+| **Investigation** | 30-45 minutes manually filtering through individual requests | 1-2 minutes navigating to the relevant subtree |
+| **Locating errors** | Required examining isolated requests | Few clicks to identify exactly where validation failed |
+| **Context understanding** | Relied on timestamps and guesswork | Complete session history with parent-child relationships |
+| **Knowledge sharing** | Difficult to share debugging information with team members | Simple URL sharing of specific session views |
+
+
+> When something fails, I know it failed somewhere in this particular subtree. I navigate using Sessions, look at the prompts and responses, and iterate right away.
+
+— Edward Ayers, Cogna
+
+### Bring Clarity to Your LLM Workflows
+
+Want to visualize and debug complex AI agent processes like Cogna? <a href="https://www.helicone.ai/signup" target="_blank" rel="noopener noreferrer">Try Helicone for free</a> and see how Sessions can transform your development workflow.
