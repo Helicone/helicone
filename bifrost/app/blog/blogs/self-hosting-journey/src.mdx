@@ -1,5 +1,7 @@
 After a month of engineering work, we're excited to share a big milestone in our journey: **a complete revamp of our self-hosting solution!**
 
+Learn more about how to <a href="https://docs.helicone.ai/getting-started/self-host/docker" target="_blank" rel="noopener noreferrer">self-host Helicone here</a>.
+
 <iframe width="560" height="315" src="https://www.youtube.com/embed/4AbyR3Q2EgU?si=C__p8deWUqWh0Xaq" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 ## The Problem: "Too Onerous"
@@ -8,7 +10,7 @@ Self-hosting has been part of our offering since we launched Helicone two years 
 
 However, we recently received feedback that hit home - a potential customer told us our deployment was "too onerous" compared to competitors. **They passed on using our solution.**
 
-![Customer Screenshot](/static/blog/self-hosting-journey/screenshot.png)
+![Customer Screenshot](/static/blog/self-hosting-journey/screenshot.webp)
 
 And they were right.
 
@@ -41,6 +43,8 @@ docker compose up -d
 
 That's it. Your Helicone dashboard is now available at `localhost:3000`.
 
+-- To learn more about how to self-host Helicone, check out our <a href="https://docs.helicone.ai/getting-started/self-host/docker" target="_blank" rel="noopener noreferrer">documentation</a>.
+
 ## The Technical Journey
 
 ### Moving Away from Supabase
@@ -48,6 +52,9 @@ That's it. Your Helicone dashboard is now available at `localhost:3000`.
 The biggest architectural change was **moving away from Supabase for our self-hosting solution.**
 
 When we first built Helicone, we chose Supabase to help us move quickly from zero to one. It was an excellent tool for getting started quickly.
+
+> When building stuff, you're a startup and you just want to move really quickly. We always take the 90-10 solution.
+- Justin Torre, CEO of Helicone
 
 However, Supabase comes bundled with multiple services, many of which weren't necessary for our core functionality. This added complexity to our deployment process and increased the resource requirements for self-hosting.
 
@@ -80,6 +87,9 @@ While the Docker Compose setup is perfect for most use cases, we've also develop
 
 These charts allow you to connect Helicone to an Aurora database or a dedicated ClickHouse cluster, enabling horizontal scaling for organizations processing billions of logs.
 
+> We spent a lot of time working on performance and making sure that when you load up Helicone and it's instant. If you have millions or billions of logs, which some of our customers do, all of those metrics and all those filters get aggregated instantaneously, materialized really quickly.
+- Justin Torre, CEO of Helicone
+
 For context, you'd typically need this level of scaling **when you're spending around $100,000 per month on OpenAI or similar services** - a good problem to have!
 
 ## Lessons Learned
@@ -100,7 +110,7 @@ Self-hosting is particularly valuable for:
 
 ## Continuous Improvement
 
-We're committed to keeping our self-hosted solution up to date. Our Docker images are updated multiple times per week and published to our [Docker Hub](https://hub.docker.com/u/helicone).
+We're committed to keeping our self-hosted solution up to date. Our Docker images are updated multiple times per week and published to our <a href="https://hub.docker.com/u/helicone" target="_blank" rel="noopener noreferrer">Docker Hub</a>.
 
 For users who have deployed using our instructions, staying current is as simple as:
 
@@ -136,7 +146,7 @@ Whether you're handling sensitive financial records, HIPAA-protected healthcare 
 
 We're proud of how far we've come and excited to make Helicone more accessible to teams that prioritize data sovereignty without sacrificing powerful observability.
 
-Visit our [documentation](https://docs.helicone.ai/getting-started/self-host/docker) to get started, or [reach out to our team](https://helicone.ai/contact) for guidance on optimal configuration for your specific needs.
+Visit our <a href="https://docs.helicone.ai/getting-started/self-host/docker" target="_blank" rel="noopener noreferrer">documentation</a> to get started, or <a href="https://helicone.ai/contact" target="_blank" rel="noopener noreferrer">reach out to our team</a> for guidance on optimal configuration for your specific needs.
 
 ### You might find these useful
 - <a href="https://www.helicone.ai/blog/slash-llm-cost" target="_blank" rel="noopener">5 Powerful Techniques to Slash Your LLM Costs</a>
