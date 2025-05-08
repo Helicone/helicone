@@ -7,6 +7,7 @@ use std::{
 use futures::future::BoxFuture;
 use http::{HeaderName, HeaderValue, uri::PathAndQuery};
 use http_body_util::BodyExt;
+use opentelemetry::KeyValue;
 use reqwest::Client;
 use tower::{Service, ServiceBuilder};
 use tower_http::add_extension::{AddExtension, AddExtensionLayer};
@@ -64,7 +65,7 @@ impl Dispatcher {
             .map_err(InitError::CreateReqwestClient)?;
         Ok(ServiceBuilder::new()
             .layer(AddExtensionLayer::new(provider))
-            .layer(ErrorHandlerLayer)
+            .layer(ErrorHandlerLayer::new(app_state.clone()))
             .layer(crate::middleware::mapper::Layer::new(app_state.clone()))
             // other middleware: rate limiting, logging, etc, etc
             // will be added here as well
@@ -217,10 +218,17 @@ impl Dispatcher {
             .provider(target_provider)
             .build();
 
+        let app_state = self.app_state.clone();
         tokio::spawn(
             async move {
                 if let Err(e) = response_logger.log().await {
                     tracing::error!(error = %e, "failed to log response");
+                    let error_str = e.as_ref().to_string();
+                    app_state
+                        .0
+                        .metrics
+                        .error_count
+                        .add(1, &[KeyValue::new("type", error_str)]);
                 }
             }
             .instrument(tracing::Span::current()),

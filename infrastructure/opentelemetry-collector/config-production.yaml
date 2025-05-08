@@ -13,6 +13,10 @@ exporters:
     endpoint: http://rockstar-loki.internal:3100/otlp
     tls:
       insecure: true
+  otlphttp/prom:
+    endpoint: http://helicone-router-prometheus:9090/api/v1/otlp
+    tls:
+      insecure: true
 
 extensions:
   health_check:
@@ -42,6 +46,13 @@ service:
         - batch
       exporters:
         - otlp
+    metrics:
+      receivers:
+        - otlp
+      processors:
+        - batch
+      exporters:
+        - otlphttp/prom
     logs:
       receivers:
         - otlp

@@ -26,7 +26,7 @@ async fn main() -> Result<(), llm_proxy::error::runtime::RuntimeError> {
         }
     };
     // Initialize telemetry
-    let (logger_provider, tracer_provider) =
+    let (logger_provider, tracer_provider, metrics_provider) =
         telemetry::init_telemetry(&config.telemetry)
             .map_err(llm_proxy::error::init::InitError::Telemetry)
             .map_err(llm_proxy::error::runtime::RuntimeError::Init)?;
@@ -69,11 +69,6 @@ async fn main() -> Result<(), llm_proxy::error::runtime::RuntimeError> {
         }
     }
 
-    // TODO: why does this hang?
-    // logger_provider
-    //     .shutdown()
-    //     .map_err(TelemetryError::Logs)
-    //     .map_err(llm_proxy::error::runtime::Error::Telemetry)?;
     if let Some(logger_provider) = logger_provider {
         if let Err(e) = logger_provider.shutdown() {
             println!("error shutting down logger provider: {e}");
@@ -81,6 +76,11 @@ async fn main() -> Result<(), llm_proxy::error::runtime::RuntimeError> {
     }
     if let Err(e) = tracer_provider.shutdown() {
         println!("error shutting down tracer provider: {e}");
+    }
+    if let Some(metrics_provider) = metrics_provider {
+        if let Err(e) = metrics_provider.shutdown() {
+            println!("error shutting down metrics provider: {e}");
+        }
     }
 
     info!("shut down");
