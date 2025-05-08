@@ -7,12 +7,15 @@ import { DBLoggable } from "./DBLoggable";
 
 export async function handleSocketSession(
   messages: SocketMessage[],
-  requestWrapper: RequestWrapper
+  requestWrapper: RequestWrapper,
+  requestId?: string,
 ): Promise<{
   loggable: DBLoggable;
   response: Response;
 }> {
-  const requestId = crypto.randomUUID();
+  if (!requestId) {
+    requestId = crypto.randomUUID();
+  }
   const responseId = crypto.randomUUID();
 
   const startTime = new Date(
