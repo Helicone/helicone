@@ -95,8 +95,8 @@ export const Realtime: React.FC<RealtimeProps> = ({
   ]);
 
   // Get all messages sorted by timestamp
-  const sortedMessages = useMemo(() => 
-    getSortedMessagesFromMappedRequest(mappedRequest),
+  const sortedMessages = useMemo(
+    () => getSortedMessagesFromMappedRequest(mappedRequest),
     [mappedRequest]
   );
 
@@ -155,8 +155,8 @@ export const Realtime: React.FC<RealtimeProps> = ({
     [key: string]: boolean;
   }>({});
 
-  const defaultDeletedStates = useMemo(() => 
-    calculateDefaultExpandedStates(filteredMessages),
+  const defaultDeletedStates = useMemo(
+    () => calculateDefaultExpandedStates(filteredMessages),
     [filteredMessages]
   );
 
