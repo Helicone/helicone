@@ -27,7 +27,6 @@ function processFilter(filter: any): any {
   const result: any = Array.isArray(filter) ? [] : {};
   for (const key in filter) {
     const isDate = isISODateString(filter[key]);
-    console.log("DATE", isDate, filter[key])
     if (typeof filter[key] === "object") {
       result[key] = processFilter(filter[key]);
     } else if (isDate) {
