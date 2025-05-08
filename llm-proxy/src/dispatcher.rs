@@ -10,6 +10,7 @@ use http_body_util::BodyExt;
 use reqwest::Client;
 use tower::{Service, ServiceBuilder};
 use tower_http::add_extension::{AddExtension, AddExtensionLayer};
+use tracing::Instrument;
 
 use crate::{
     app::AppState,
@@ -88,7 +89,7 @@ impl Service<Request> for Dispatcher {
         // see: https://docs.rs/tower/latest/tower/trait.Service.html#be-careful-when-cloning-inner-services
         let this = self.clone();
         let this = std::mem::replace(self, this);
-        tracing::trace!(provider = ?self.provider, "Dispatcher received request");
+        tracing::trace!(provider = ?this.provider, "Dispatcher received request");
         Box::pin(async move { this.dispatch(req).await })
     }
 }
@@ -216,11 +217,14 @@ impl Dispatcher {
             .provider(target_provider)
             .build();
 
-        tokio::spawn(async move {
-            if let Err(e) = response_logger.log().await {
-                tracing::error!(error = %e, "failed to log response");
+        tokio::spawn(
+            async move {
+                if let Err(e) = response_logger.log().await {
+                    tracing::error!(error = %e, "failed to log response");
+                }
             }
-        });
+            .instrument(tracing::Span::current()),
+        );
 
         let response = response_builder
             .body(axum_core::body::Body::new(user_resp_body))

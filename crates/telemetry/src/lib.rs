@@ -1,3 +1,4 @@
+pub mod make_span;
 pub mod tracing;
 
 use opentelemetry::{TraceId, trace::TracerProvider};
@@ -37,18 +38,13 @@ impl Default for Config {
     }
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Default, Clone, Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields, rename_all = "kebab-case")]
 pub enum Exporter {
     Stdout,
-    // This should be configured for http://localhost:4317
     Otlp,
-}
-
-impl Default for Exporter {
-    fn default() -> Self {
-        Self::Stdout
-    }
+    #[default]
+    Both,
 }
 
 fn default_service_name() -> String {
@@ -96,6 +92,11 @@ pub fn init_telemetry(
             let (logger_provider, tracer_provider) = init_otlp(config)?;
             Ok((Some(logger_provider), tracer_provider))
         }
+        Exporter::Both => {
+            let (logger_provider, tracer_provider) =
+                init_otlp_with_stdout(config)?;
+            Ok((Some(logger_provider), tracer_provider))
+        }
     }
 }
 
@@ -111,15 +112,6 @@ fn init_otlp(
         );
     let filter = env_filter(config)?;
     let otel_layer = otel_layer.with_filter(filter);
-    let fmt_layer = tracing_subscriber::fmt::layer()
-        .compact()
-        .with_file(true)
-        .with_line_number(true)
-        .with_filter(env_filter(config)?)
-        .boxed();
-    let registry = tracing_subscriber::registry()
-        .with(otel_layer)
-        .with(fmt_layer);
 
     let tracer_provider = tracer_provider(config, resource.clone())
         .map_err(TelemetryError::TraceExporterBuild)?;
@@ -128,7 +120,52 @@ fn init_otlp(
     let tracing_layer = tracing_opentelemetry::layer()
         .with_tracer(tracer)
         .with_filter(filter);
-    registry.with(tracing_layer).try_init()?;
+
+    tracing_subscriber::registry()
+        .with(tracing_layer)
+        .with(otel_layer)
+        .try_init()?;
+
+    opentelemetry::global::set_tracer_provider(tracer_provider.clone());
+
+    log_panics::init();
+
+    Ok((logger_provider, tracer_provider))
+}
+
+fn init_otlp_with_stdout(
+    config: &Config,
+) -> Result<(SdkLoggerProvider, SdkTracerProvider), TelemetryError> {
+    let resource = resource(config);
+    let logger_provider = logger_provider(resource.clone())
+        .map_err(TelemetryError::LogExporterBuild)?;
+    let otel_layer =
+        opentelemetry_appender_tracing::layer::OpenTelemetryTracingBridge::new(
+            &logger_provider,
+        );
+    let filter = env_filter(config)?;
+    let otel_layer = otel_layer.with_filter(filter);
+
+    let tracer_provider = tracer_provider(config, resource.clone())
+        .map_err(TelemetryError::TraceExporterBuild)?;
+    let tracer = tracer_provider.tracer(config.service_name.clone());
+    let filter = env_filter(config)?;
+    let tracing_layer = tracing_opentelemetry::layer()
+        .with_tracer(tracer)
+        .with_filter(filter);
+
+    let logger_layer = tracing_subscriber::fmt::layer()
+        .pretty()
+        .with_file(true)
+        .with_line_number(true)
+        .with_filter(env_filter(config)?);
+
+    tracing_subscriber::registry()
+        .with(logger_layer)
+        .with(tracing_layer)
+        .with(otel_layer)
+        .try_init()?;
+
     opentelemetry::global::set_tracer_provider(tracer_provider.clone());
 
     log_panics::init();
@@ -144,8 +181,7 @@ fn init_stdout(
         .pretty()
         .with_file(true)
         .with_line_number(true)
-        .with_filter(env_filter(config)?)
-        .boxed();
+        .with_filter(env_filter(config)?);
     let registry = tracing_subscriber::registry().with(fmt_layer);
 
     let tracer_provider = tracer_provider(config, resource.clone())
@@ -190,7 +226,7 @@ fn tracer_provider(
                 .with_max_attributes_per_span(16)
                 .build())
         }
-        Exporter::Otlp => {
+        Exporter::Otlp | Exporter::Both => {
             let exporter = SpanExporter::builder().with_tonic().build()?;
             let provider = SdkTracerProvider::builder()
                 .with_resource(resource)
