@@ -1,0 +1,43 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Code Conventions and Best Practices
+
+This document outlines the code conventions and best practices used in the LLM Proxy codebase.
+
+## Rust Conventions
+
+- Use the 2024 edition of Rust as specified in [Cargo.toml](mdc:Cargo.toml)
+- Follow the formatting rules in [rustfmt.toml](mdc:rustfmt.toml)
+- Use clippy lints defined in the workspace configuration:
+  - All clippy lints are set to "deny"
+  - Pedantic lints are set to "warn"
+
+## Error Handling
+
+- Use `thiserror` for defining error types
+- Use `anyhow` for internal error propagation
+- Structured errors in [llm-proxy/src/error/](mdc:llm-proxy/src/error/)
+
+## Type Definitions
+
+- Leverage Rust's type system for safety
+- Provider-specific types in separate crates:
+  - [crates/openai-types/](mdc:crates/openai-types/)
+  - [crates/anthropic-types/](mdc:crates/anthropic-types/)
+- Common types in [llm-proxy/src/types/](mdc:llm-proxy/src/types/)
+
+## Testing Approaches
+
+- Unit tests alongside the code they test
+- Integration tests in separate directories
+- Use the `serial_test` crate for tests that can't run in parallel
+- Leverage the test utilities in [llm-proxy/src/tests/](mdc:llm-proxy/src/tests/)
+
+## Dependency Management
+
+- Common dependencies are defined at the workspace level
+- Version pinning for all dependencies
+- Minimal dependency usage with feature flags when appropriate

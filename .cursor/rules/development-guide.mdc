@@ -1,0 +1,43 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Development Guide
+
+This document provides guidance for developing and testing the LLM Proxy.
+
+## Setup
+
+1. Install Rust: https://www.rust-lang.org/tools/install
+2. Install direnv: https://direnv.net
+3. Configure environment variables:
+   - Copy [.envrc.template](mdc:.envrc.template) to `.envrc`
+   - Fill out the required API keys and configuration
+
+## Running Locally
+
+- Start the router: `cargo run`
+- Test with a sample request: `cargo run -p test`
+
+## File Structure Conventions
+
+### Main Application
+- [llm-proxy/src/main.rs](mdc:llm-proxy/src/main.rs) - Application entry point
+- [llm-proxy/src/lib.rs](mdc:llm-proxy/src/lib.rs) - Library exports
+
+### Tests
+- [llm-proxy/tests/](mdc:llm-proxy/tests/) - Integration tests
+- [llm-proxy/src/tests/](mdc:llm-proxy/src/tests/) - Test utilities
+- Unit tests are typically located alongside the code they test
+
+## Testing
+
+- Run tests: `cargo test --all-features`
+- Integration tests require a PostgreSQL database
+
+## Crate Organization
+
+- Core application logic is in the [llm-proxy/](mdc:llm-proxy/) directory
+- Supporting libraries are in the [crates/](mdc:crates/) directory
+- External dependencies are defined in the root [Cargo.toml](mdc:Cargo.toml)

@@ -1,0 +1,39 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# API Workflow and Patterns
+
+This document outlines common patterns and the request workflow in the LLM Proxy.
+
+## Request Flow
+
+1. API request received by [llm-proxy/src/app.rs](mdc:llm-proxy/src/app.rs)
+2. Middleware processing in [llm-proxy/src/middleware/](mdc:llm-proxy/src/middleware/)
+3. Routing via [llm-proxy/src/router/](mdc:llm-proxy/src/router/)
+4. Request dispatching in [llm-proxy/src/dispatcher.rs](mdc:llm-proxy/src/dispatcher.rs)
+5. Provider selection via [llm-proxy/src/balancer/](mdc:llm-proxy/src/balancer/)
+6. Provider-specific handling using types from:
+   - [crates/openai-types/](mdc:crates/openai-types/)
+   - [crates/anthropic-types/](mdc:crates/anthropic-types/)
+7. Response processing and return
+
+## Common Patterns
+
+### Error Handling
+
+- Errors are defined in [llm-proxy/src/error/](mdc:llm-proxy/src/error/)
+- Use the `anyhow` crate for internal errors
+- Return structured errors to API clients
+
+### Configuration
+
+- Configuration is loaded from files and environment variables
+- See [llm-proxy/src/config/](mdc:llm-proxy/src/config/) for details
+
+### Testing
+
+- Unit tests alongside code
+- Integration tests in [llm-proxy/tests/](mdc:llm-proxy/tests/)
+- Mock services for external APIs in [llm-proxy/stubs/](mdc:llm-proxy/stubs/)
