@@ -6,24 +6,28 @@ import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 // => Valid, for e.g messages that can be displayed as a row in Sessions, separately.
 // => Invalid, e.g "session.update" messages, are not renderable steps. (though, I think it should be.)
 // note: We should render session.update messages, its important information.
-export const getSortedMessagesFromMappedRequest = (mappedRequest: MappedLLMRequest) => {
+export const getSortedMessagesFromMappedRequest = (
+  mappedRequest: MappedLLMRequest
+) => {
   const messages = [
     ...(mappedRequest.schema.request?.messages || []),
     ...(mappedRequest.schema.response?.messages || []),
-  ]
+  ];
 
-  return messages.filter(
-    (m) =>
-      m.timestamp &&
-      m.role &&
-      m.content &&
-      !isNaN(new Date(m.timestamp).getTime())
-  ).sort((a, b) => {
-    const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
-    const timeB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
-    return timeA - timeB;
-  });
-}
+  return messages
+    .filter(
+      (m) =>
+        m.timestamp &&
+        m.role &&
+        m.content &&
+        !isNaN(new Date(m.timestamp).getTime())
+    )
+    .sort((a, b) => {
+      const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+      const timeB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+      return timeA - timeB;
+    });
+};
 
 /**
  * Checks if a HeliconeRequest represents a realtime session based on its model name.
@@ -51,7 +55,7 @@ export const convertRealtimeRequestToSteps = (
 
   const mappedContent = heliconeRequestToMappedContent(realtimeRequest);
   const sortedMessages = getSortedMessagesFromMappedRequest(mappedContent);
-  
+
   const simulatedSteps: HeliconeRequest[] = [];
   let previousStepResponseTimestampMs = 0; // Track the end time of the last created step
 
