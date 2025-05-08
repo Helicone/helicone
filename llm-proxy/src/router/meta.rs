@@ -277,6 +277,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::too_many_lines)]
     fn test_extract_router_id_and_path() {
         let meta_router = MetaRouter {
             inner: HashMap::new(),

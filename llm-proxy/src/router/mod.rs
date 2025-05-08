@@ -58,7 +58,7 @@ impl Router {
             ProviderBalancer::new(app_state.clone(), router_config.clone())
                 .await?;
         let service_stack: RouterService = ServiceBuilder::new()
-            .layer(ErrorHandlerLayer)
+            .layer(ErrorHandlerLayer::new(app_state.clone()))
             .layer(crate::middleware::request_context::Layer::new(
                 router_config.clone(),
                 app_state.0.provider_keys.clone(),

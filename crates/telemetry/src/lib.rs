@@ -1,11 +1,15 @@
 pub mod make_span;
 pub mod tracing;
 
-use opentelemetry::{TraceId, trace::TracerProvider};
-use opentelemetry_otlp::{ExporterBuildError, LogExporter, SpanExporter};
+use opentelemetry::{TraceId, global, trace::TracerProvider};
+use opentelemetry_otlp::{
+    ExporterBuildError, LogExporter, MetricExporter, SpanExporter,
+    WithExportConfig,
+};
 use opentelemetry_sdk::{
     Resource,
     logs::SdkLoggerProvider,
+    metrics::SdkMeterProvider,
     trace::{IdGenerator, SdkTracerProvider},
 };
 use serde::{Deserialize, Serialize};
@@ -26,6 +30,8 @@ pub struct Config {
     pub service_name: String,
     #[serde(default)]
     pub exporter: Exporter,
+    #[serde(default = "default_otlp_endpoint")]
+    pub otlp_endpoint: String,
 }
 
 impl Default for Config {
@@ -34,6 +40,7 @@ impl Default for Config {
             level: default_level(),
             service_name: default_service_name(),
             exporter: Exporter::default(),
+            otlp_endpoint: default_otlp_endpoint(),
         }
     }
 }
@@ -55,12 +62,18 @@ fn default_level() -> String {
     "info,llm_proxy=trace".to_string()
 }
 
+fn default_otlp_endpoint() -> String {
+    "http://localhost:4317/v1/metrics".to_string()
+}
+
 #[derive(Debug, thiserror::Error)]
 pub enum TelemetryError {
     #[error("Log exporter build error: {0}")]
     LogExporterBuild(ExporterBuildError),
     #[error("Trace exporter build error: {0}")]
     TraceExporterBuild(ExporterBuildError),
+    #[error("Metric exporter build error: {0}")]
+    MetricExporterBuild(ExporterBuildError),
     #[error("Invalid log directive: {0}")]
     InvalidLogDirective(#[from] ParseError),
     #[error("Subscriber error: {0}")]
@@ -77,34 +90,59 @@ fn resource(config: &Config) -> Resource {
 
 /// Initialize telemetry with the given config.
 ///
+/// # Notes
+/// - The reason the `TracerProvider` is not optional is because without it we
+///   don't generate trace ids, which is useful to have when
+///   debugging/developing.
+///
 /// # Errors
 /// If any of the configuration is invalid.
 pub fn init_telemetry(
     config: &Config,
-) -> Result<(Option<SdkLoggerProvider>, SdkTracerProvider), TelemetryError> {
+) -> Result<
+    (
+        Option<SdkLoggerProvider>,
+        SdkTracerProvider,
+        Option<SdkMeterProvider>,
+    ),
+    TelemetryError,
+> {
     let resource = resource(config);
     match config.exporter {
         Exporter::Stdout => {
             let tracer_provider = init_stdout(&resource, config)?;
-            Ok((None, tracer_provider))
+            Ok((None, tracer_provider, None))
         }
         Exporter::Otlp => {
-            let (logger_provider, tracer_provider) = init_otlp(config)?;
-            Ok((Some(logger_provider), tracer_provider))
+            let (logger_provider, tracer_provider, metrics_provider) =
+                init_otlp(config)?;
+            Ok((
+                Some(logger_provider),
+                tracer_provider,
+                Some(metrics_provider),
+            ))
         }
         Exporter::Both => {
-            let (logger_provider, tracer_provider) =
+            let (logger_provider, tracer_provider, metrics_provider) =
                 init_otlp_with_stdout(config)?;
-            Ok((Some(logger_provider), tracer_provider))
+            Ok((
+                Some(logger_provider),
+                tracer_provider,
+                Some(metrics_provider),
+            ))
         }
     }
 }
 
 fn init_otlp(
     config: &Config,
-) -> Result<(SdkLoggerProvider, SdkTracerProvider), TelemetryError> {
+) -> Result<
+    (SdkLoggerProvider, SdkTracerProvider, SdkMeterProvider),
+    TelemetryError,
+> {
     let resource = resource(config);
-    let logger_provider = logger_provider(resource.clone())
+    // logging
+    let logger_provider = logger_provider(config, resource.clone())
         .map_err(TelemetryError::LogExporterBuild)?;
     let otel_layer =
         opentelemetry_appender_tracing::layer::OpenTelemetryTracingBridge::new(
@@ -113,6 +151,7 @@ fn init_otlp(
     let filter = env_filter(config)?;
     let otel_layer = otel_layer.with_filter(filter);
 
+    // tracing
     let tracer_provider = tracer_provider(config, resource.clone())
         .map_err(TelemetryError::TraceExporterBuild)?;
     let tracer = tracer_provider.tracer(config.service_name.clone());
@@ -126,18 +165,26 @@ fn init_otlp(
         .with(otel_layer)
         .try_init()?;
 
-    opentelemetry::global::set_tracer_provider(tracer_provider.clone());
+    // metrics
+    let metrics_provider = metrics_provider(config, resource.clone())
+        .map_err(TelemetryError::MetricExporterBuild)?;
+
+    global::set_meter_provider(metrics_provider.clone());
+    global::set_tracer_provider(tracer_provider.clone());
 
     log_panics::init();
 
-    Ok((logger_provider, tracer_provider))
+    Ok((logger_provider, tracer_provider, metrics_provider))
 }
 
 fn init_otlp_with_stdout(
     config: &Config,
-) -> Result<(SdkLoggerProvider, SdkTracerProvider), TelemetryError> {
+) -> Result<
+    (SdkLoggerProvider, SdkTracerProvider, SdkMeterProvider),
+    TelemetryError,
+> {
     let resource = resource(config);
-    let logger_provider = logger_provider(resource.clone())
+    let logger_provider = logger_provider(config, resource.clone())
         .map_err(TelemetryError::LogExporterBuild)?;
     let otel_layer =
         opentelemetry_appender_tracing::layer::OpenTelemetryTracingBridge::new(
@@ -166,17 +213,22 @@ fn init_otlp_with_stdout(
         .with(otel_layer)
         .try_init()?;
 
-    opentelemetry::global::set_tracer_provider(tracer_provider.clone());
+    // metrics
+    let metrics_provider = metrics_provider(config, resource.clone())
+        .map_err(TelemetryError::MetricExporterBuild)?;
 
+    global::set_meter_provider(metrics_provider.clone());
+    global::set_tracer_provider(tracer_provider.clone());
     log_panics::init();
 
-    Ok((logger_provider, tracer_provider))
+    Ok((logger_provider, tracer_provider, metrics_provider))
 }
 
 fn init_stdout(
     resource: &Resource,
     config: &Config,
 ) -> Result<SdkTracerProvider, TelemetryError> {
+    // logging
     let fmt_layer = tracing_subscriber::fmt::layer()
         .pretty()
         .with_file(true)
@@ -184,6 +236,7 @@ fn init_stdout(
         .with_filter(env_filter(config)?);
     let registry = tracing_subscriber::registry().with(fmt_layer);
 
+    // tracing
     let tracer_provider = tracer_provider(config, resource.clone())
         .map_err(TelemetryError::TraceExporterBuild)?;
     let tracer = tracer_provider.tracer(config.service_name.clone());
@@ -227,7 +280,10 @@ fn tracer_provider(
                 .build())
         }
         Exporter::Otlp | Exporter::Both => {
-            let exporter = SpanExporter::builder().with_tonic().build()?;
+            let exporter = SpanExporter::builder()
+                .with_tonic()
+                .with_endpoint(config.otlp_endpoint.clone())
+                .build()?;
             let provider = SdkTracerProvider::builder()
                 .with_resource(resource)
                 .with_batch_exporter(exporter)
@@ -241,12 +297,30 @@ fn tracer_provider(
 }
 
 fn logger_provider(
+    config: &Config,
     resource: Resource,
 ) -> Result<SdkLoggerProvider, ExporterBuildError> {
-    let exporter = LogExporter::builder().with_tonic().build()?;
+    let exporter = LogExporter::builder()
+        .with_tonic()
+        .with_endpoint(config.otlp_endpoint.clone())
+        .build()?;
     Ok(SdkLoggerProvider::builder()
         .with_resource(resource)
         .with_batch_exporter(exporter)
+        .build())
+}
+
+fn metrics_provider(
+    config: &Config,
+    resource: Resource,
+) -> Result<SdkMeterProvider, ExporterBuildError> {
+    let exporter = MetricExporter::builder()
+        .with_tonic()
+        .with_endpoint(config.otlp_endpoint.clone())
+        .build()?;
+    Ok(SdkMeterProvider::builder()
+        .with_periodic_exporter(exporter)
+        .with_resource(resource)
         .build())
 }
 

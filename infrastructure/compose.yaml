@@ -24,10 +24,11 @@ services:
       - traces
 
   prometheus:
-    image: prom/prometheus:v2.54.1
+    image: prom/prometheus:v3.3.1
     command:
       - --config.file=/etc/config.yaml
       - --web.enable-remote-write-receiver
+      - --web.enable-otlp-receiver
       - --enable-feature=exemplar-storage
     volumes:
       - ./prometheus/config-local.yaml:/etc/config.yaml:ro

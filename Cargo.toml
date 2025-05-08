@@ -3,7 +3,6 @@ members = [
   "crates/anthropic-types",
   "crates/openai-types",
   "crates/schema-filter",
-  "crates/metrics",
   "crates/telemetry",
   "llm-proxy",
   "test", "crates/weighted-balance",
@@ -33,7 +32,6 @@ missing_panics_doc = { level = "allow" }
 openai-types = { path = "./crates/openai-types" }
 anthropic-types = { path = "./crates/anthropic-types" }
 telemetry = { path = "./crates/telemetry" }
-metrics = { path = "./crates/metrics" }
 llm-proxy = { path = "./llm-proxy" }
 weighted-balance = { path = "./crates/weighted-balance" }
 
@@ -72,7 +70,6 @@ opentelemetry-otlp = { version = "0.29.0" }
 opentelemetry-semantic-conventions = "0.29.0"
 pin-project = "1.1.10"
 pin-project-lite = "0.2.16"
-prometheus = { version = "0.14.0", default-features = false }
 rand = "0.9.1"
 regex = "1.11.1"
 reqwest = { version = "0.12.15", features = [ "json", "stream", "multipart", "native-tls"], default-features = false }
@@ -98,6 +95,7 @@ tokio-test = "0.4.4"
 tokio-util = "0.7.15"
 tower = "0.5.2"
 tower_governor = "0.7.0"
+# TODO: once version 0.6.3 is published, switch off of git
 tower-http = { version = "0.6.2", git = "https://github.com/tower-rs/tower-http.git", branch = "main" }
 tracing = "0.1.41"
 tracing-opentelemetry = "0.30.0"

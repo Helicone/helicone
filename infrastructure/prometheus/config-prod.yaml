@@ -10,18 +10,18 @@ scrape_configs:
   - job_name: tempo
     static_configs:
       - targets:
-          - rockstar-tempo.internal:3200
+          - helicone-router-tempo.internal:3200
   - job_name: loki
     static_configs:
       - targets:
-          - rockstar-loki.internal:3100
+          - helicone-router-loki.internal:3100
   - job_name: minio
     metrics_path: /minio/v2/metrics/cluster
     scheme: https
     static_configs:
       - targets:
-          - rockstar-minio.internal:5532
-  - job_name: rockstar-api
-    static_configs:
-      - targets:
-          - rockstar-api.internal:5679
+          - helicone-router-minio.internal:5532
+
+storage:
+  tsdb:
+    out_of_order_time_window: 30m

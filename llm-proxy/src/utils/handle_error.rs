@@ -9,12 +9,24 @@ use std::{
 use axum_core::response::{IntoResponse, Response};
 use futures::ready;
 use http::Request;
+use opentelemetry::KeyValue;
 use pin_project_lite::pin_project;
 use tower::{Layer, Service};
 
+use crate::app::AppState;
+
 /// A [`Layer`] that wraps a [`Service`] and converts errors into [`Response`]s.
 #[derive(Debug, Clone)]
-pub struct ErrorHandlerLayer;
+pub struct ErrorHandlerLayer {
+    app_state: AppState,
+}
+
+impl ErrorHandlerLayer {
+    #[must_use]
+    pub fn new(app_state: AppState) -> Self {
+        Self { app_state }
+    }
+}
 
 impl<S> Layer<S> for ErrorHandlerLayer
 where
@@ -24,7 +36,7 @@ where
     type Service = ErrorHandler<S>;
 
     fn layer(&self, inner: S) -> Self::Service {
-        ErrorHandler::new(inner)
+        ErrorHandler::new(inner, self.app_state.clone())
     }
 }
 
@@ -33,12 +45,14 @@ where
 #[derive(Debug)]
 pub struct ErrorHandler<S> {
     inner: S,
+    app_state: AppState,
 }
 
 impl<S: Clone> Clone for ErrorHandler<S> {
     fn clone(&self) -> Self {
         Self {
             inner: self.inner.clone(),
+            app_state: self.app_state.clone(),
         }
     }
 }
@@ -49,8 +63,8 @@ where
     S::Error: IntoResponse,
 {
     /// Create a new [`ErrorHandler`] wrapping the given service.
-    pub const fn new(inner: S) -> Self {
-        Self { inner }
+    pub const fn new(inner: S, app_state: AppState) -> Self {
+        Self { inner, app_state }
     }
 }
 
@@ -59,6 +73,7 @@ pin_project! {
     pub struct ResponseFuture<F, E> {
         #[pin]
         inner: F,
+        app_state: AppState,
         _marker: PhantomData<E>,
     }
 }
@@ -66,7 +81,7 @@ pin_project! {
 impl<F, E> Future for ResponseFuture<F, E>
 where
     F: Future<Output = Result<Response, E>>,
-    E: IntoResponse,
+    E: IntoResponse + AsRef<str>,
 {
     type Output = Result<Response, Infallible>;
 
@@ -75,6 +90,12 @@ where
         match ready!(this.inner.poll(cx)) {
             Ok(res) => Poll::Ready(Ok(res)),
             Err(svc_err) => {
+                let error_str = svc_err.as_ref().to_string();
+                this.app_state
+                    .0
+                    .metrics
+                    .error_count
+                    .add(1, &[KeyValue::new("type", error_str)]);
                 let response = svc_err.into_response();
                 Poll::Ready(Ok(response))
             }
@@ -90,7 +111,7 @@ where
     S::Future: Send + 'static,
     S::Error: IntoResponse + std::fmt::Display,
     ReqBody: Send + 'static,
-    E: Send + 'static + std::fmt::Display,
+    E: Send + 'static + std::fmt::Display + AsRef<str>,
 {
     type Response = Response;
     type Error = Infallible;
@@ -111,9 +132,11 @@ where
     }
 
     fn call(&mut self, req: Request<ReqBody>) -> Self::Future {
+        let app_state = self.app_state.clone();
         let future = self.inner.call(req);
         ResponseFuture {
             inner: future,
+            app_state,
             _marker: PhantomData,
         }
     }

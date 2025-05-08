@@ -10,7 +10,7 @@ use std::{
 use axum_server::{accept::NoDelayAcceptor, tls_rustls::RustlsConfig};
 use futures::future::BoxFuture;
 use meltdown::Token;
-use opentelemetry::trace::TraceContextExt;
+use opentelemetry::{global, trace::TraceContextExt};
 use reqwest::Client;
 use telemetry::{make_span::SpanFactory, tracing::MakeRequestId};
 use tower::{ServiceBuilder, buffer::BufferLayer, util::BoxCloneService};
@@ -32,6 +32,7 @@ use crate::{
     },
     discover::provider::monitor::ProviderMonitors,
     error::{self, init::InitError, runtime::RuntimeError},
+    metrics::{self, Metrics},
     middleware::auth::AuthService,
     router::meta::MetaRouter,
     store::StoreRealm,
@@ -77,6 +78,7 @@ pub struct InnerAppState {
     pub unauthed_rate_limit: Arc<UnauthedLimiterConfig>,
     pub store: StoreRealm,
     pub model_mapper: ModelMapper,
+    pub metrics: Metrics,
     // the below fields should be moved to the router or org level.
     // currently its shared across all routers and that wont work for cloud
     // mode.
@@ -198,6 +200,12 @@ impl App {
             .connect_timeout(JAWN_CONNECT_TIMEOUT)
             .build()
             .map_err(error::init::InitError::CreateReqwestClient)?;
+
+        // If global meter is not set, opentelemetry defaults to a
+        // NoopMeterProvider
+        let meter = global::meter("helicone-router");
+        let metrics = metrics::Metrics::new(&meter);
+
         let app_state = AppState(Arc::new(InnerAppState {
             config,
             minio,
@@ -207,6 +215,7 @@ impl App {
             provider_keys,
             model_mapper,
             jawn_client,
+            metrics,
         }));
 
         let (router, monitors) = MetaRouter::new(app_state.clone()).await?;
@@ -223,7 +232,7 @@ impl App {
             .set_x_request_id(MakeRequestId)
             .propagate_x_request_id()
             .layer(NormalizePathLayer::trim_trailing_slash())
-            .layer(ErrorHandlerLayer)
+            .layer(ErrorHandlerLayer::new(app_state.clone()))
             // NOTE: not sure if there is perf impact from Auth layer coming
             // before buffer layer, but required due to Clone bound.
             .layer(AsyncRequireAuthorizationLayer::new(AuthService))
