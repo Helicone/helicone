@@ -6,7 +6,7 @@ use tracing::debug;
 
 use crate::{
     error::api::ErrorResponse,
-    types::{json::Json, provider::Provider},
+    types::{json::Json, provider::InferenceProvider},
 };
 
 /// User errors
@@ -15,7 +15,7 @@ pub enum InvalidRequestError {
     /// Resource not found: {0}
     NotFound(String),
     /// Unsupported provider: {0}
-    UnsupportedProvider(Provider),
+    UnsupportedProvider(InferenceProvider),
     /// Router id not found: {0}
     RouterIdNotFound(String),
     /// Missing router id in request path

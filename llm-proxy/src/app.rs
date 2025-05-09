@@ -26,7 +26,6 @@ use crate::{
     config::{
         Config,
         minio::Minio,
-        model_mapping::ModelMapper,
         rate_limit::{AuthedLimiterConfig, UnauthedLimiterConfig},
         server::TlsConfig,
     },
@@ -77,7 +76,6 @@ pub struct InnerAppState {
     pub authed_rate_limit: Arc<AuthedLimiterConfig>,
     pub unauthed_rate_limit: Arc<UnauthedLimiterConfig>,
     pub store: StoreRealm,
-    pub model_mapper: ModelMapper,
     pub metrics: Metrics,
     // the below fields should be moved to the router or org level.
     // currently its shared across all routers and that wont work for cloud
@@ -194,7 +192,6 @@ impl App {
             .ok_or(InitError::DefaultRouterNotFound)?
             .balance;
         let provider_keys = config.discover.provider_keys(balance_config)?;
-        let model_mapper = config.model_mappings.clone().try_into()?;
         let jawn_client = Client::builder()
             .tcp_nodelay(true)
             .connect_timeout(JAWN_CONNECT_TIMEOUT)
@@ -213,7 +210,6 @@ impl App {
             unauthed_rate_limit,
             store: StoreRealm::new(pg_pool),
             provider_keys,
-            model_mapper,
             jawn_client,
             metrics,
         }));

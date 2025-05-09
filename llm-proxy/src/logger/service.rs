@@ -18,7 +18,7 @@ use crate::{
             HeliconeLogMetadata, Log, LogMessage, RequestLog, ResponseLog,
             S3Log,
         },
-        provider::Provider,
+        provider::InferenceProvider,
         request::RequestContext,
     },
 };
@@ -34,7 +34,7 @@ pub struct LoggerService {
     target_url: Url,
     request_headers: HeaderMap,
     response_status: StatusCode,
-    provider: Provider,
+    provider: InferenceProvider,
 }
 
 impl LoggerService {

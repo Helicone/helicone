@@ -1,19 +1,16 @@
 use derive_more::{AsRef, Deref, DerefMut};
-use indexmap::IndexMap;
+use indexmap::{IndexMap, IndexSet};
 use serde::{Deserialize, Serialize};
 use url::Url;
 
-use crate::types::{
-    model::{Model, Version},
-    provider::Provider,
-};
+use crate::types::{model::ModelName, provider::InferenceProvider};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 pub struct ProviderConfig {
     /// NOTE: In the future we can delete this field and
     /// instead load the models from the provider's respective APIs
-    pub models: Vec<Model>,
+    pub models: IndexSet<ModelName<'static>>,
     pub base_url: Url,
     pub version: Option<String>,
 }
@@ -31,12 +28,12 @@ impl Default for ProviderConfig {
     Debug, Clone, Deserialize, Serialize, Eq, PartialEq, Deref, DerefMut, AsRef,
 )]
 #[serde(rename_all = "kebab-case")]
-pub struct ProvidersConfig(IndexMap<Provider, ProviderConfig>);
+pub struct ProvidersConfig(IndexMap<InferenceProvider, ProviderConfig>);
 
-impl FromIterator<(Provider, ProviderConfig)> for ProvidersConfig {
+impl FromIterator<(InferenceProvider, ProviderConfig)> for ProvidersConfig {
     fn from_iter<T>(iter: T) -> Self
     where
-        T: IntoIterator<Item = (Provider, ProviderConfig)>,
+        T: IntoIterator<Item = (InferenceProvider, ProviderConfig)>,
     {
         Self(IndexMap::from_iter(iter))
     }
@@ -45,15 +42,26 @@ impl FromIterator<(Provider, ProviderConfig)> for ProvidersConfig {
 impl Default for ProvidersConfig {
     fn default() -> Self {
         Self(IndexMap::from([
-            (Provider::OpenAI, default_openai_provider_config()),
-            (Provider::Anthropic, default_anthropic_provider_config()),
+            (InferenceProvider::OpenAI, default_openai_provider_config()),
+            (
+                InferenceProvider::Anthropic,
+                default_anthropic_provider_config(),
+            ),
         ]))
     }
 }
 
 fn default_openai_provider_config() -> ProviderConfig {
     ProviderConfig {
-        models: vec![Model::new("gpt-4o".to_string(), Some(Version::Latest))],
+        models: IndexSet::from([
+            ModelName::borrowed("gpt-4o"),
+            ModelName::borrowed("gpt-4o-mini"),
+            ModelName::borrowed("gpt-4.1"),
+            ModelName::borrowed("gpt-4.5"),
+            ModelName::borrowed("o1"),
+            ModelName::borrowed("o3"),
+            ModelName::borrowed("o4-mini"),
+        ]),
         base_url: Url::parse("https://api.openai.com").unwrap(),
         version: None,
     }
@@ -61,10 +69,11 @@ fn default_openai_provider_config() -> ProviderConfig {
 
 fn default_anthropic_provider_config() -> ProviderConfig {
     ProviderConfig {
-        models: vec![Model::new(
-            "claude-3-7-sonnet".to_string(),
-            Some(Version::Latest),
-        )],
+        models: IndexSet::from([
+            ModelName::borrowed("claude-3-5-sonnet"),
+            ModelName::borrowed("claude-3-7-sonnet"),
+            ModelName::borrowed("claude-3-haiku"),
+        ]),
         base_url: Url::parse("https://api.anthropic.com").unwrap(),
         version: Some(DEFAULT_ANTHROPIC_VERSION.to_string()),
     }

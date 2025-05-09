@@ -3,16 +3,16 @@ use std::str::FromStr;
 use super::{Convert, TryConvert, error::MapperError};
 use crate::{
     config::model_mapping::ModelMapper,
-    types::{model::Model, provider::Provider},
+    types::{model::Model, provider::InferenceProvider},
 };
 
 pub struct AnthropicConverter<'a> {
-    model_mapper: &'a ModelMapper,
+    model_mapper: &'a ModelMapper<'a>,
 }
 
 impl<'a> AnthropicConverter<'a> {
     #[must_use]
-    pub fn new(model_mapper: &'a ModelMapper) -> Self {
+    pub fn new(model_mapper: &'a ModelMapper<'a>) -> Self {
         Self { model_mapper }
     }
 }
@@ -43,17 +43,9 @@ impl
         openai_types::chat::ChatCompletionRequest,
         Self::Error,
     > {
-        let target_provider = Provider::OpenAI;
+        let target_provider = InferenceProvider::OpenAI;
         let source_model = Model::from_str(&value.model)?;
-        let model = self
-            .model_mapper
-            .get(&target_provider, &source_model)
-            .ok_or_else(|| {
-                MapperError::NoModelMapping(
-                    target_provider,
-                    source_model.name.clone(),
-                )
-            })?;
+        let model = self.model_mapper.get(&target_provider, &source_model)?;
 
         tracing::trace!(source_model = ?source_model, target_model = ?model, "mapped model");
         let mut messages = Vec::with_capacity(value.messages.len());
@@ -71,7 +63,7 @@ impl
         }
         Ok(openai_types::chat::ChatCompletionRequest {
             messages,
-            model: model.to_string(),
+            model: model.as_ref().to_string(),
             temperature: value.temperature,
             max_tokens: Some(value.max_tokens),
         })

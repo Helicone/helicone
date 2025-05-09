@@ -11,7 +11,7 @@ use super::{
 };
 use crate::{
     error::provider::ProviderError,
-    types::{model::Model, provider::Provider, router::RouterId},
+    types::{model::Model, provider::InferenceProvider, router::RouterId},
 };
 
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq, AsRef, AsMut)]
@@ -36,8 +36,8 @@ impl Default for RouterConfigs {
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 pub struct RouterConfig {
-    pub request_style: Provider,
-    pub providers: NEVec<Provider>,
+    pub request_style: InferenceProvider,
+    pub providers: NEVec<InferenceProvider>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub cache: Option<CacheControlConfig>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -54,8 +54,11 @@ pub struct RouterConfig {
 impl Default for RouterConfig {
     fn default() -> Self {
         Self {
-            request_style: Provider::OpenAI,
-            providers: nev![Provider::OpenAI, Provider::Anthropic],
+            request_style: InferenceProvider::OpenAI,
+            providers: nev![
+                InferenceProvider::OpenAI,
+                InferenceProvider::Anthropic
+            ],
             cache: None,
             fallback: None,
             balance: BalanceConfig::p2c_all_providers(),
@@ -124,7 +127,7 @@ pub struct FallbackConfig {
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 pub struct FallbackTarget {
-    pub provider: Provider,
+    pub provider: InferenceProvider,
     pub model: Model,
 }
 
@@ -138,14 +141,17 @@ pub struct FallbackTarget {
 #[serde(rename_all = "kebab-case", tag = "strategy")]
 pub enum BalanceConfig {
     Weighted { targets: NEVec<BalanceTarget> },
-    P2C { targets: NEVec<Provider> },
+    P2C { targets: NEVec<InferenceProvider> },
 }
 
 impl BalanceConfig {
     #[must_use]
     pub fn p2c_all_providers() -> Self {
         Self::P2C {
-            targets: nev![Provider::OpenAI, Provider::Anthropic],
+            targets: nev![
+                InferenceProvider::OpenAI,
+                InferenceProvider::Anthropic
+            ],
         }
     }
 }
@@ -153,7 +159,7 @@ impl BalanceConfig {
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, Hash, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 pub struct BalanceTarget {
-    pub provider: Provider,
+    pub provider: InferenceProvider,
     pub weight: Decimal,
 }
 
@@ -166,12 +172,12 @@ impl crate::tests::TestDefault for RouterConfigs {
         Self(HashMap::from([(
             RouterId::Default,
             RouterConfig {
-                request_style: Provider::OpenAI,
-                providers: nev![Provider::OpenAI],
+                request_style: InferenceProvider::OpenAI,
+                providers: nev![InferenceProvider::OpenAI],
                 cache: None,
                 fallback: None,
                 balance: BalanceConfig::P2C {
-                    targets: nev![Provider::OpenAI],
+                    targets: nev![InferenceProvider::OpenAI],
                 },
                 retries: None,
                 rate_limit: None,
@@ -202,7 +208,7 @@ mod tests {
         let fallback = FallbackConfig {
             enabled: true,
             order: vec![FallbackTarget {
-                provider: Provider::OpenAI,
+                provider: InferenceProvider::OpenAI,
                 model: Model {
                     name: "claude-3-7-sonnet".to_string(),
                     version: Some(Version::Latest),
@@ -210,7 +216,8 @@ mod tests {
             }],
         };
 
-        let providers = nev![Provider::OpenAI, Provider::Anthropic];
+        let providers =
+            nev![InferenceProvider::OpenAI, InferenceProvider::Anthropic];
         let balance = BalanceConfig::P2C {
             targets: providers.clone(),
         };
@@ -224,7 +231,7 @@ mod tests {
         };
 
         RouterConfig {
-            request_style: Provider::OpenAI,
+            request_style: InferenceProvider::OpenAI,
             providers,
             cache: Some(cache),
             fallback: Some(fallback),

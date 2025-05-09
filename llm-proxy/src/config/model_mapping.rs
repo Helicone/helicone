@@ -1,68 +1,85 @@
-use std::{collections::HashMap, str::FromStr};
+use std::collections::HashMap;
 
 use derive_more::AsRef;
+use indexmap::IndexSet;
 use serde::{Deserialize, Serialize};
 
+use super::providers::ProvidersConfig;
 use crate::{
-    error::init::InitError,
+    app::AppState,
+    middleware::mapper::error::MapperError,
     types::{
-        model::{Model, ModelName, Version},
-        provider::Provider,
+        model::{Model, ModelName},
+        provider::InferenceProvider,
     },
 };
 
-// HashMap<TargetProvider, HashMap<SourceModel, TargetModel>>
-/// A deserializable model mapping config. Strings are used for the keys
-/// since YAML requires strings for keys.
-///
-/// The types in the hashmaps could be viewed as:
-/// `HashMap<TargetProvider, HashMap<SourceModel, TargetModel>>`
 #[derive(Debug, Clone, Deserialize, Serialize, AsRef)]
-pub struct ModelMappingConfig(HashMap<Provider, HashMap<String, String>>);
+pub struct ModelMappingConfig(HashMap<InferenceProvider, ProviderModelMapping>);
 
-#[derive(Debug)]
-pub struct ModelMapper(HashMap<Provider, HashMap<ModelName<'static>, Model>>);
+#[derive(Debug, Clone, Deserialize, Serialize, AsRef)]
+pub struct ProviderModelMapping {
+    pub models: HashMap<ModelName<'static>, IndexSet<ModelName<'static>>>,
+}
 
-impl ModelMapper {
+#[derive(Debug, Clone)]
+pub struct ModelMapper<'a> {
+    default_model_mapping: &'a ModelMappingConfig,
+    provider_config: &'a ProvidersConfig,
+}
+
+impl<'a> ModelMapper<'a> {
     #[must_use]
-    pub fn get(
-        &self,
-        target_provider: &Provider,
-        source_model: &Model,
-    ) -> Option<Model> {
-        let model_provider = source_model.provider();
-        if model_provider == Some(*target_provider) {
-            Some(source_model.clone())
-        } else {
-            let model = ModelName::borrowed(source_model.name.as_str());
-            self.0
-                .get(target_provider)
-                .and_then(|m| m.get(&model))
-                .cloned()
+    pub fn new(app_state: &'a AppState) -> Self {
+        Self {
+            default_model_mapping: &app_state.0.config.default_model_mapping,
+            provider_config: &app_state.0.config.providers,
         }
     }
 }
 
-impl TryFrom<ModelMappingConfig> for ModelMapper {
-    type Error = InitError;
+impl<'a> ModelMapper<'a> {
+    pub fn get<'b>(
+        &'a self,
+        target_provider: &'b InferenceProvider,
+        source_model: &'b Model,
+    ) -> Result<ModelName<'b>, MapperError>
+    where
+        'b: 'a,
+    {
+        let target_provider_config = self
+            .provider_config
+            .get(target_provider)
+            .ok_or(MapperError::NoProviderConfig(*target_provider))?;
+        let source_model_name = ModelName::from_model(source_model);
 
-    fn try_from(value: ModelMappingConfig) -> Result<Self, Self::Error> {
-        let mut mapper = HashMap::new();
-        for (provider, mapping) in value.as_ref() {
-            let mut provider_mapper = HashMap::new();
-            for (source_model, target_model) in mapping {
-                let source_model = Model::from_str(source_model)
-                    .map_err(InitError::InvalidModelMappingConfig)?;
-                let source_model_name = ModelName::owned(source_model.name);
-                let mut target_model = Model::from_str(target_model)
-                    .map_err(InitError::InvalidModelMappingConfig)?;
-                target_model.version = Some(Version::Latest);
-                provider_mapper.insert(source_model_name, target_model);
-            }
-            mapper.insert(*provider, provider_mapper);
+        if target_provider_config.models.contains(&source_model_name) {
+            return Ok(source_model_name);
         }
 
-        Ok(ModelMapper(mapper))
+        let mapping_config = &self.default_model_mapping;
+        let candidate_models = mapping_config
+            .0
+            .get(target_provider)
+            .and_then(|m| m.models.get(&source_model_name))
+            .ok_or_else(|| {
+                MapperError::NoModelMapping(
+                    *target_provider,
+                    source_model.name.clone(),
+                )
+            })?;
+
+        let target_model = candidate_models
+            .iter()
+            .find(|m| target_provider_config.models.contains(*m))
+            .ok_or_else(|| {
+                MapperError::NoModelMapping(
+                    *target_provider,
+                    source_model.name.clone(),
+                )
+            })?;
+
+        Ok(target_model.clone())
     }
 }
 
@@ -70,22 +87,46 @@ impl Default for ModelMappingConfig {
     fn default() -> Self {
         Self(HashMap::from([
             (
-                Provider::Anthropic,
-                HashMap::from([
-                    ("gpt-4o-mini".to_string(), "claude-3-5-haiku".to_string()),
-                    (
-                        "gpt-4.1-mini".to_string(),
-                        "claude-3-5-haiku".to_string(),
-                    ),
-                    ("gpt-4o".to_string(), "claude-3-7-sonnet".to_string()),
-                ]),
+                InferenceProvider::Anthropic,
+                ProviderModelMapping {
+                    models: HashMap::from([
+                        (
+                            ModelName::borrowed("gpt-4o-mini"),
+                            IndexSet::from([ModelName::borrowed(
+                                "claude-3-haiku",
+                            )]),
+                        ),
+                        (
+                            ModelName::borrowed("gpt-4o"),
+                            IndexSet::from([ModelName::borrowed(
+                                "claude-3-7-sonnet",
+                            )]),
+                        ),
+                    ]),
+                },
             ),
             (
-                Provider::OpenAI,
-                HashMap::from([
-                    ("claude-3-5-haiku".to_string(), "gpt-4o-mini".to_string()),
-                    ("claude-3-7-sonnet".to_string(), "gpt-4o".to_string()),
-                ]),
+                InferenceProvider::OpenAI,
+                ProviderModelMapping {
+                    models: HashMap::from([
+                        (
+                            ModelName::borrowed("claude-3-haiku"),
+                            IndexSet::from([ModelName::borrowed(
+                                "gpt-4o-mini",
+                            )]),
+                        ),
+                        (
+                            ModelName::borrowed("claude-3-7-sonnet"),
+                            IndexSet::from([ModelName::borrowed("gpt-4o")]),
+                        ),
+                        (
+                            ModelName::borrowed("claude-3-5-sonnet"),
+                            IndexSet::from([ModelName::borrowed(
+                                "gpt-4o-mini",
+                            )]),
+                        ),
+                    ]),
+                },
             ),
         ]))
     }

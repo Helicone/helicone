@@ -8,7 +8,6 @@ use chrono::{DateTime, NaiveDate, TimeZone, Utc};
 use derive_more::AsRef;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
-use super::provider::Provider;
 use crate::middleware::mapper::error::MapperError;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -22,7 +21,7 @@ pub enum Version {
     Semver(semver::Version),
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, AsRef)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, AsRef, Serialize, Deserialize)]
 pub struct ModelName<'a>(Cow<'a, str>);
 
 impl<'a> ModelName<'a> {
@@ -34,6 +33,11 @@ impl<'a> ModelName<'a> {
     #[must_use]
     pub fn owned(name: String) -> Self {
         Self(Cow::Owned(name))
+    }
+
+    #[must_use]
+    pub fn from_model(model: &'a Model) -> Self {
+        Self(Cow::Borrowed(model.name.as_str()))
     }
 }
 
@@ -47,19 +51,6 @@ impl Model {
     #[must_use]
     pub fn new(name: String, version: Option<Version>) -> Self {
         Self { name, version }
-    }
-
-    #[must_use]
-    pub fn provider(&self) -> Option<Provider> {
-        if self.name.as_str().starts_with("gpt-")
-            || self.name.as_str().starts_with('o')
-        {
-            Some(Provider::OpenAI)
-        } else if self.name.as_str().starts_with("claude-") {
-            Some(Provider::Anthropic)
-        } else {
-            None
-        }
     }
 }
 

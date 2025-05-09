@@ -1,17 +1,17 @@
 use weighted_balance::weight::{HasWeight, Weight};
 
-use crate::types::provider::Provider;
+use crate::types::provider::InferenceProvider;
 
 pub mod factory;
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 pub struct WeightedKey {
-    pub provider: Provider,
+    pub provider: InferenceProvider,
     pub weight: Weight,
 }
 
 impl WeightedKey {
-    pub fn new(provider: Provider, weight: Weight) -> Self {
+    pub fn new(provider: InferenceProvider, weight: Weight) -> Self {
         Self { provider, weight }
     }
 }

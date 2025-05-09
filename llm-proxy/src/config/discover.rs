@@ -2,11 +2,20 @@ use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
 
-use super::{ProviderKeysSource, router::BalanceConfig};
+use super::router::BalanceConfig;
 use crate::{
     error::provider::ProviderError,
     types::{discover::DiscoverMode, provider::ProviderKeys},
 };
+
+#[derive(
+    Debug, Default, Clone, Copy, PartialEq, Eq, Deserialize, Serialize,
+)]
+#[serde(deny_unknown_fields, rename_all = "kebab-case")]
+pub enum ProviderKeysSource {
+    #[default]
+    Env,
+}
 
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(default, deny_unknown_fields, rename_all = "kebab-case")]

@@ -3,15 +3,15 @@ pub mod discover;
 pub mod factory;
 pub mod monitor;
 
-use crate::types::provider::Provider;
+use crate::types::provider::InferenceProvider;
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 pub struct Key {
-    pub provider: Provider,
+    pub provider: InferenceProvider,
 }
 
 impl Key {
-    pub fn new(provider: Provider) -> Self {
+    pub fn new(provider: InferenceProvider) -> Self {
         Self { provider }
     }
 }

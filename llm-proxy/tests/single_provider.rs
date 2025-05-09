@@ -7,7 +7,7 @@ use llm_proxy::{
         router::{BalanceConfig, RouterConfig, RouterConfigs},
     },
     tests::{TestDefault, harness::Harness, mock::MockArgs},
-    types::{provider::Provider, router::RouterId},
+    types::{provider::InferenceProvider, router::RouterId},
 };
 use nonempty_collections::nev;
 use serde_json::json;
@@ -64,12 +64,12 @@ async fn anthropic_with_openai_request_style() {
     let router_config = RouterConfigs::new(HashMap::from([(
         RouterId::Default,
         RouterConfig {
-            request_style: Provider::OpenAI,
-            providers: nev![Provider::Anthropic],
+            request_style: InferenceProvider::OpenAI,
+            providers: nev![InferenceProvider::Anthropic],
             cache: None,
             fallback: None,
             balance: BalanceConfig::P2C {
-                targets: nev![Provider::Anthropic],
+                targets: nev![InferenceProvider::Anthropic],
             },
             retries: None,
             rate_limit: None,
@@ -147,12 +147,12 @@ async fn anthropic_with_anthropic_request_style() {
     let router_config = RouterConfigs::new(HashMap::from([(
         RouterId::Default,
         RouterConfig {
-            request_style: Provider::OpenAI,
-            providers: nev![Provider::Anthropic],
+            request_style: InferenceProvider::OpenAI,
+            providers: nev![InferenceProvider::Anthropic],
             cache: None,
             fallback: None,
             balance: BalanceConfig::P2C {
-                targets: nev![Provider::Anthropic],
+                targets: nev![InferenceProvider::Anthropic],
             },
             retries: None,
             rate_limit: None,
@@ -233,12 +233,12 @@ async fn anthropic_request_style() {
     let router_config = RouterConfigs::new(HashMap::from([(
         RouterId::Default,
         RouterConfig {
-            request_style: Provider::Anthropic,
-            providers: nev![Provider::OpenAI],
+            request_style: InferenceProvider::Anthropic,
+            providers: nev![InferenceProvider::OpenAI],
             cache: None,
             fallback: None,
             balance: BalanceConfig::P2C {
-                targets: nev![Provider::OpenAI],
+                targets: nev![InferenceProvider::OpenAI],
             },
             retries: None,
             rate_limit: None,
