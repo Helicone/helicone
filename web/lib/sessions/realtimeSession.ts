@@ -19,7 +19,6 @@ export const getSortedMessagesFromMappedRequest = (
       (m) =>
         m.timestamp &&
         m.role &&
-        m.content &&
         !isNaN(new Date(m.timestamp).getTime())
     )
     .sort((a, b) => {
@@ -109,9 +108,17 @@ function createSimulatedRequestStep(
   // Create a unique ID for the simulated step based on its index
   const simulatedId = `${originalRequest.request_id}-step-${stepIndex}`;
 
-  const fullPath = (originalRequest.request_properties?.["Helicone-Session-Path"] ?? "/Realtime-Session") + (
-    message.role === "user" || message.role === "assistant" ? ("/" + message.role) : "other"
-  );
+  const getMessagePath = (request: HeliconeRequest, message: Message) => {
+    let base = request.request_properties?.["Helicone-Session-Path"];
+    if (message._type === "functionCall" || message._type === "function") {
+      return base ? base + "-Tool" : "/Tool";
+    } else if (message.role === "user" || message.role === "assistant") {
+      const role = message.role?.charAt(0).toUpperCase() + message.role?.slice(1);
+      return base ? base + `-${role}` : `/${role}`;
+    } else {
+      return base ? base + "-Other" : "/Other";
+    }
+  }
 
   // Create the simulated request step object
   return {
@@ -127,7 +134,7 @@ function createSimulatedRequestStep(
     request_body: originalRequest.request_body,
     response_body: originalRequest.response_body,
 
-    request_path: fullPath,
+    request_path: getMessagePath(originalRequest, message),
 
     // Keep original token/cost/latency data from the parent request
     // These fields are already copied by the spread operator above
@@ -136,7 +143,7 @@ function createSimulatedRequestStep(
     // Merge with existing request_properties
     request_properties: {
       ...(originalRequest.request_properties || {}),
-      "Helicone-Session-Path": fullPath,
+      "Helicone-Session-Path": getMessagePath(originalRequest, message),
       _helicone_realtime_original_request_id: originalRequest.request_id,
       _helicone_realtime_step_index: stepIndex.toString(), // Store the step's chronological index
     },
