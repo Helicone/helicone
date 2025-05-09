@@ -62,6 +62,7 @@ export function RenderMappedRequest({
   mappedRequest,
   className,
   messageIndexFilter,
+  onRequestSelect,
 }: {
   mappedRequest: MappedLLMRequest;
   className?: string;
@@ -69,6 +70,7 @@ export function RenderMappedRequest({
     startIndex: number;
     endIndex: number;
   };
+  onRequestSelect?: (request_id: string) => void;
 }) {
   const { mode, toggleMode, setMode } = useRequestRenderModeStore();
   const isShiftPressed = useShiftKeyPress();
@@ -146,6 +148,7 @@ export function RenderMappedRequest({
                 <Realtime
                   mappedRequest={mappedRequest}
                   messageIndexFilter={messageIndexFilter}
+                  onRequestSelect={onRequestSelect}
                 />
               );
 
