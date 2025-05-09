@@ -16,10 +16,7 @@ export const getSortedMessagesFromMappedRequest = (
 
   return messages
     .filter(
-      (m) =>
-        m.timestamp &&
-        m.role &&
-        !isNaN(new Date(m.timestamp).getTime())
+      (m) => m.timestamp && m.role && !isNaN(new Date(m.timestamp).getTime())
     )
     .sort((a, b) => {
       const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
@@ -113,12 +110,13 @@ function createSimulatedRequestStep(
     if (message._type === "functionCall" || message._type === "function") {
       return base ? base + "-Tool" : "/Tool";
     } else if (message.role === "user" || message.role === "assistant") {
-      const role = message.role?.charAt(0).toUpperCase() + message.role?.slice(1);
+      const role =
+        message.role?.charAt(0).toUpperCase() + message.role?.slice(1);
       return base ? base + `-${role}` : `/${role}`;
     } else {
       return base ? base + "-Other" : "/Other";
     }
-  }
+  };
 
   // Create the simulated request step object
   return {
