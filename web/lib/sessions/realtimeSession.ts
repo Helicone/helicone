@@ -92,7 +92,9 @@ function createSimulatedRequestStep(
   previousStepResponseTimestampMs: number // The end time (in ms) of the preceding step
 ): HeliconeRequest {
   // Use the message timestamp as the base request time
-  const baseRequestTimestampMs = new Date(message.start_timestamp ?? message.timestamp!).getTime();
+  const baseRequestTimestampMs = new Date(
+    message.start_timestamp ?? message.timestamp!
+  ).getTime();
 
   // Ensure the current step starts at least 1ms after the previous step ended
   const stepRequestTimestampMs = Math.max(
