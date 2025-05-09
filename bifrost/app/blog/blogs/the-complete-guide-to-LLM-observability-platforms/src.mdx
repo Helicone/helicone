@@ -1,6 +1,8 @@
-Building production-grade AI applications requires more than just crafting the perfect prompt. As your LLM applications scale, **monitoring, debugging, and optimizing them becomes essential**. 
+Building production-grade AI applications requires more than just crafting the perfect prompt. As your LLM applications scale, **monitoring, debugging, and optimizing them become essential**. 
 
 This is where LLM observability platforms come in.
+
+![LLM Observability Platforms Comparison of 2025](/static/blog/the-complete-guide-to-LLM-observability-platforms/llm-observability-platforms.webp)
 
 But with so many options available, which one should you choose? This guide compares the best LLM monitoring tools to help you make an informed decision.
 
@@ -8,9 +10,9 @@ But with so many options available, which one should you choose? This guide comp
 
 ## Introduction to LLM Observability Platforms
 
-LLM observability platforms provide insights into how your AI applications are performing. They help you track costs, latency, token usage, and provide tools for debugging issues. 
+LLM observability platforms are tools that provide insights into how your AI applications are performing. They help you track costs, latency, token usage, and provide tools for debugging workflow issues. When we discuss <a href="https://www.helicone.ai/blog/llm-observability#what-is-llm-observability" target="_blank" rel="noopener">LLM observability</a>, it covers aspects like prompt engineering, LLM tracing, and evaluating the LLM outputs.   
 
-As LLMs become increasingly central to production applications, these tools have evolved from nice-to-haves to **mission-critical** infrastructure.
+As LLMs become increasingly central to production applications, these tools have **evolved from nice-to-haves to mission-critical infrastructure**.
 
 The right observability platform can:
 
@@ -22,46 +24,46 @@ The right observability platform can:
 
 ## Key Evaluation Criteria for LLM Observability Tools
 
-When choosing an LLM observability platform, consider these key factors:
+When choosing an LLM observability platform, consider these critical factors:
 
-### 1. Setup and Integration
+### 1. Ease of Setup & Time-to-Value
 
 - **Ease of integration**: How quickly can you get started?
 - **Integration methods**: Proxy-based, SDK-based, or both?
 - **Supported providers**: Which LLM providers and frameworks are supported?
 
-### 2. Feature Set
+### 2. Feature Completeness 
 
-- **Monitoring**: Request logging, cost tracking, latency monitoring, AI Agent observability, etc.
-- **Evaluation & Debugging**: Tracing and visualization of LLM workflows, prompt testing & experimentation, scoring, etc.
-- **Optimization**: Caching, Gateways, etc.
+- **Monitoring**: Request logging, cost tracking, latency monitoring, AI agent observability, user tracking etc.
+- **Evaluation & Debugging**: LLM tracing tools, session visualization, prompt testing, scoring, etc.
+- **Optimization**: Caching, Gateways, prompt versioning, experiment, etc.
 - **Security**: API key management, rate limiting, threat detection, self-hosting, etc.
 
 ### 3. Technical Considerations
 
 - **Scalability**: Can it handle your traffic volume?
-- **Self-hosting options**: Can you deploy on your infrastructure?
+- **Self-hosting options**: Can you deploy it on your infrastructure?
 - **Data privacy**: How is your data protected?
 - **Latency impact**: How much overhead does it add?
 
 ### 4. Business Factors
 
 - **Pricing model**: Per-seat, per-request, or hybrid?
-- **Transparency**: Is pricing clear and predictable?
-- **Support options**: What level of support is available?
-- **Community**: Is there an active community around the tool?
+- **ROI timeline**: How quickly does it pay for itself?
+- **Support quality**: How quickly can you get support?
+- **Product roadmap**: What pace are features being added? Do they align with your needs?
 
 ## Types of LLM Observability Solutions
 
-The market for LLM observability has evolved into distinct categories, here's what you need to know:
+The market for LLM observability has evolved into distinct categories. Here's what you need to know:
 
-| **Category**                             | **Examples**                           | **Pros**                                                                                                                        | **Cons**                                                                                                 |
-| ---------------------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| **LLM-Specific Observability Platforms** | **<span style={{color: '#0ea5e9'}}>Helicone</span>**, LangSmith, Langfuse          | - Purpose-built for LLM workflows  <br/> - Deep integration with LLM providers <br/> - Specialized features for prompt management | - May lack broader application monitoring capabilities <br/> - Newer platforms with evolving feature sets |
-| **General AI Observability Platforms**   | Arize Phoenix, Weights & Biases, Comet | - Support for both traditional ML and LLMs <br/> - More mature evaluation capabilities <br/> - Broader ecosystem integration      | - Less specialized for LLM-specific workflows <br/> - Often more complex to set up                        |
-| **LLM Gateways with Observability**      | Portkey, OpenRouter, **<span style={{color: '#0ea5e9'}}>Helicone</span>**          | - Combined routing and observability <br/> - Model fallback capabilities <br/> - Provider-agnostic                                | - May prioritize routing over deep observability <br/> - Often less robust analytics                      |
+| **Category** | **Examples** | **Best for** | **Pros** | **Cons** |
+|--------------|--------------|----------|----------|----------|
+| **LLM-Specific Observability Platforms** | **<span style={{color: '#0ea5e9'}}>Helicone</span>**, LangSmith, Langfuse | Teams building dedicated LLM applications | • Purpose-built for LLM workflows<br/>• Deep integration with LLM providers<br/>• Specialized features for prompt management | • May lack broader application monitoring capabilities<br/>• Newer platforms with evolving feature sets |
+| **General AI Observability Platforms** | Arize Phoenix, Weights & Biases, Comet | Organizations with diverse ML/AI deployments | • Support for both traditional ML and LLMs<br/>• More mature evaluation capabilities<br/>• Broader ecosystem integration | • Less specialized for LLM-specific workflows<br/>• Often more complex to set up |
+| **LLM Gateways with Observability** | Portkey, OpenRouter, **<span style={{color: '#0ea5e9'}}>Helicone</span>** | Teams needing flexibility across multiple LLM providers | • Combined routing and observability<br/>• Model fallback capabilities<br/>• Provider-agnostic | • May prioritize routing over deep observability<br/>• Often less robust analytics |
 
-## Comparing Major LLM Observability Tools
+## Comparing Top LLM Observability Tools
 
 ### At a Glance
 
@@ -69,200 +71,232 @@ Below is a quick comparison of the major competitors in the LLM observability sp
 
 | Feature | Helicone | LangSmith | Langfuse | Braintrust | Arize Phoenix | HoneyHive | Traceloop | Portkey | Galileo | W&B |
 |---------|----------|-----------|----------|------------|---------------|-----------|-----------|---------|---------|-----|
-| **Open Source** | ✅ | ❌ | ✅ | 🟠 (AI proxy) | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
-| **Integration Method** | Proxy + SDK | SDK | SDK (primarily) | SDK | SDK | SDK | SDK | Proxy + SDK | SDK | SDK |
-| **One-Line Setup** | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
-| **Self-Hosting** | ✅ | ✅ (Enterprise) | ✅ | ✅ | ❌ | ❌ | ✅ | ✅ | ✅ (Enterprise) | ❌ |
+| **Open-Source** | ✅ | ❌ | ✅ | 🟠 (AI proxy) | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ |
+| **Integration Method** | Proxy, or SDK | SDK | SDK (primarily) | SDK | SDK | SDK | SDK | Proxy + SDK | SDK | SDK |
+| **Self-Hosting** | ✅ | ✅ (Enterprise plan only) | ✅ | ✅ | ❌ | ❌ | ✅ | ✅ | ✅ (Enterprise) | ❌ |
 | **Cost Tracking** | Advanced | Basic | Basic | Basic | Basic | Basic | Limited | Advanced | Basic | Basic |
 | **Caching** | ✅ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
 | **Prompt Management** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **In-built Security** | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ |
+| **Built-in Security** | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ |
 | **Evaluation** | Basic | Advanced | Basic | Advanced | Advanced | Advanced | Basic | Basic | Advanced | Basic |
-| **Multi-modal Tracing Support** | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ |
+| **Multi-modal Tracing** | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ |
+| **Best For** | Fast integration & advanced routing | LangChain workflows | Complex tracing | Evalaution-first approach | Model quality analytics | Human-in-the-loop evaluation | OpenTelemetry-based observability | Routing & gateway capabilities | Enterprise evaluation | ML ecosystem users |
 
-<BottomLine
-  title="Key Helicone Difference 💡"
-  description="Helicone focuses on delivering comprehensive observability with a minimal setup, and offers essential features like caching and threat detection and prevention out of the box—all in a user-friendly interface appealing to both technical and non-technical team members."
-/>
+### What makes Helicone different?
+
+Helicone is designed for the **fastest time-to-value** with immediate cost savings. While other platforms may require days of integration work, Helicone can be implemented in minutes with a single line change to your base URL. 
+
+Teams choose Helicone when they need comprehensive observability with minimal engineering investment and want features that directly impact the bottom line, like built-in caching that can reduce API costs by 20-30%.
+
 
 ## Detailed Feature Comparison
 
-Let's dive deeper into how Helicone compares with specific competitors to find the best AI observability tools. But first,
+Let's dive deeper into how these platforms compare. 
 
-## What is Helicone?
+### Helicone: The Developer-First LLM Observability Platform
 
-![Helicone Dashboard](/static/blog/comparisons/helicone-dashboard.webp)
+![Helicone Dashboard](/static/blog/the-complete-guide-to-LLM-observability-platforms/helicone-dashboard.webp)
 
-Helicone is an open-source AI observability platform designed to help teams monitor, debug, and optimize their AI applications with minimal setup. 
+Helicone is an open-source AI observability platform designed to help teams monitor, debug, and optimize their AI applications with minimal setup. Unlike solutions that require extensive SDK integration, Helicone can be implemented with a simple URL change in most cases.
 
-At its core, Helicone serves as a way to gain a comprehensive view of your LLM-specific AI operations.
+### Key Differentiators
 
-### Key Features
+- **One-Line Integration**: Get started in under 30 minutes by simply changing your API base URL. Here's an example of using Helicone with OpenAI:
 
-- **One-Line Integration**: Get started in minutes by simply changing your API base URL
-- **Cost Optimization**: Built-in caching can reduce API costs by 20-30%
-- **Usage Analytics**: Track token usage, latency, and costs across users and features
-- **Sessions**: For AI agent observability and visualizing multi-step LLM workflows
-- **Prompt Management**: Version, test, and experiment with prompts through an intuitive UI
-- **Security Features**: API key management, rate limiting, and threat detection
-- **Gateway Capabilities**: Route between different LLM providers with failover support
+  ```python
+  client = OpenAI(
+    api_key="your-api-key-here", 
+    base_url="https://oai.helicone.ai/v1",  # Change your base URL
+    default_headers= {  
+      "Helicone-Auth": f"Bearer {HELICONE_API_KEY}", # add this header
+    }
+  )
+  ```
 
-Helicone's distributed architecture (using Cloudflare Workers, ClickHouse, and Kafka) is designed for high scalability, having processed over 2 billion LLM interactions. The platform supports both cloud usage and self-hosting, with straightforward deployment options via Docker, Kubernetes, or manual setup.
+- **Cost Monitoring & Optimization**: API costs are calculated automatically as requests are sent. Using built-in <a href="https://docs.helicone.ai/features/advanced-usage/caching" target="_blank" rel="noopener">caching</a> can reduce API costs by 20-30%. 
+  ```python
+  # Enable caching with a simple header
+  client.chat.completions.create(
+      model="text-davinci-003",
+      prompt="How do I cache with helicone?",
+      extra_headers={
+        "Helicone-Cache-Enabled": "true", 
+      }
+  )
+  ```
+- **Comprehensive Analytics**: Track token usage, latency, and costs across users and features.
+- **AI Agent Observability**: Visualize complex multi-step AI workflows with session tracing.
+- **Advanced Gateway Capabilities**: Route between different LLM providers with failover support.
+- **Self-Hosting**: Deploy on your infrastructure with Docker, Kubernetes, or manual setup.
 
-What sets Helicone apart is its balance of technical depth and accessibility. While providing sophisticated observability tools for developers, it also offers intuitive dashboards that business stakeholders can use to track costs and performance, making it valuable for cross-functional teams.
+> Probably the most impactful one-line change I've seen applied to our codebase.
 
-### Helicone vs LangSmith
+— Nishant Shukla, Senior Director of AI, QA Wolf
 
-LangSmith is developed by the team behind LangChain and excels at tracing complex LangChain workflows.
+### Architectural Advantage
+
+Helicone's distributed architecture (using Cloudflare Workers, ClickHouse, and Kafka) is designed for high scalability, having processed over 2 billion LLM interactions. The platform maintains an average added latency of just 50-80ms, negligible for most applications.
+
+This architecture enables Helicone to support both cloud usage and <a href="https://www.helicone.ai/blog/self-hosting-launch" target="_blank" rel="noopener">self-hosting</a>, with straightforward deployment options via Docker, Kubernetes, or manual setup.
+
+
+## Helicone vs. Common Alternatives
+
+### Helicone vs. LangSmith
+
+LangSmith, developed by the team behind LangChain, excels at tracing complex LangChain workflows.
 
 **Key differences**:
 
-- Helicone offers proxy-based integration; LangSmith requires SDK integration
-- Helicone is fully open-source; LangSmith is proprietary
-- Helicone provides built-in caching; LangSmith does not (though LangChain does)
-- LangSmith has deeper LangChain integration
+- Helicone offers proxy-based integration; LangSmith requires SDK integration.
+- Helicone is fully open-source; LangSmith is proprietary.
+- Helicone provides built-in caching; LangSmith does not (though LangChain does).
+- LangSmith has deeper LangChain integration.
 
-<a href="/blog/langsmith-vs-helicone" target="_blank" rel="noopener">Read full comparison: Helicone vs LangSmith</a>
+**Read full comparison:** <a href="/blog/langsmith-vs-helicone" target="_blank" rel="noopener">Helicone vs LangSmith</a>
 
-### Helicone vs Langfuse
+<BottomLine
+  title="💡 Bottom Line"
+  description="Helicone is best for rapid implementation and cost reduction. LangSmith is great for deep LangChain integration. "
+/>
 
-Langfuse is another open-source observability platform with a strong focus on tracing.
+### Helicone vs. Langfuse
+
+Langfuse is another open-source observability platform with a strong focus on LLM tracing.
 
 **Key differences**:
 
-- Helicone uses a distributed architecture (ClickHouse, Kafka); Langfuse uses a centralized PostgreSQL database
-- Helicone offers proxy-based integration; Langfuse is SDK-based
-- Helicone has built-in caching; Langfuse does not
-- Langfuse has more detailed tracing for complex workflows
+- Helicone uses a distributed architecture (ClickHouse, Kafka); Langfuse uses a centralized PostgreSQL database.
+- Helicone offers proxy-based integration; Langfuse is SDK-based.
+- Helicone has built-in caching; Langfuse does not.
+- Langfuse has more detailed tracing for complex workflows.
 
-<a href="/blog/best-langfuse-alternatives" target="_blank" rel="noopener">Read full comparison: Helicone vs Langfuse</a>
+**Read full comparison:** <a href="/blog/best-langfuse-alternatives" target="_blank" rel="noopener">Helicone vs Langfuse</a>
 
-### Helicone vs Braintrust
+### Helicone vs. Braintrust
 
 Braintrust focuses on LLM evaluation with an emphasis on enterprise use cases.
 
 **Key differences**:
 
-- Helicone provides comprehensive observability; Braintrust specializes in evaluation
-- Helicone offers a one-line proxy integration; Braintrust requires SDK integration
-- Helicone has more extensive observability features; Braintrust excels at advanced evaluations
-- Helicone provides flexible pricing; Braintrust is enterprise-focused
+- Helicone provides comprehensive observability; Braintrust specializes in evaluation.
+- Helicone offers a one-line proxy integration; Braintrust requires SDK integration.
+- Helicone has more extensive observability features; Braintrust excels at advanced evaluations.
+- Helicone provides flexible pricing; Braintrust is enterprise-focused.
 
-<a href="/blog/braintrust-alternatives" target="_blank" rel="noopener">Read full comparison: Helicone vs Braintrust</a>
+**Read full comparison:** <a href="/blog/braintrust-alternatives" target="_blank" rel="noopener">Helicone vs Braintrust</a>
 
-### Helicone vs Arize Phoenix
+### Helicone vs. Arize Phoenix
 
 Arize Phoenix focuses on evaluation and model performance monitoring.
 
 **Key differences**:
 
-- Helicone supports self-hosting; Arize Phoenix does not
-- Helicone provides comprehensive observability features; Arize focuses on evaluation metrics
-- Helicone has better cost-tracking features
-- Helicone offers one-line integration; Arize requires more setup
-- Arize provides stronger evaluation capabilities; Helicone offers more operational metrics
+- Helicone supports self-hosting; Arize Phoenix does not.
+- Helicone provides comprehensive observability features; Arize focuses on evaluation metrics.
+- Helicone has better cost-tracking features.
+- Helicone offers one-line integration; Arize requires more setup.
+- Arize provides stronger evaluation capabilities; Helicone offers more operational metrics.
 
-<a href="/blog/best-arize-alternatives" target="_blank" rel="noopener">Read full comparison: Helicone vs Arize Phoenix</a>
+**Read full comparison:** <a href="/blog/best-arize-alternatives" target="_blank" rel="noopener">Helicone vs Arize Phoenix</a>
 
-### Helicone vs HoneyHive
+### Helicone vs. HoneyHive
 
 HoneyHive specializes in human-in-the-loop evaluation of LLM outputs.
 
 **Key differences**:
 
-- Helicone is open-source; HoneyHive is proprietary
-- Helicone provides built-in caching; HoneyHive does not
-- Helicone focuses more on observability; HoneyHive focuses on evaluation
-- HoneyHive has stronger tools for human evaluation; Helicone focuses on automated metrics
+- Helicone is open-source; HoneyHive is proprietary.
+- Helicone provides built-in caching; HoneyHive does not.
+- Helicone focuses more on observability; HoneyHive focuses on evaluation.
+- HoneyHive has stronger tools for human evaluation; Helicone focuses on automated metrics.
 
-<a href="/blog/helicone-vs-honeyhive" target="_blank" rel="noopener">Read full comparison: Helicone vs HoneyHive</a>
+**Read full comparison:** <a href="/blog/helicone-vs-honeyhive" target="_blank" rel="noopener">Helicone vs HoneyHive</a>
 
-### Helicone vs Traceloop (OpenLLMetry)
+### Helicone vs. Traceloop (OpenLLMetry)
 
 Traceloop provides observability through OpenTelemetry standards.
 
 **Key differences**:
 
-- Helicone offers proxy-based integration; Traceloop is SDK-based
-- Helicone provides built-in caching and cost optimization; Traceloop does not
-- Helicone has more comprehensive security features; Traceloop has stronger OpenTelemetry integration
-- Helicone has a more user-friendly UI; Traceloop is more developer-focused
+- Helicone offers proxy-based integration; Traceloop is SDK-based.
+- Helicone provides built-in caching and cost optimization; Traceloop does not.
+- Helicone has more comprehensive security features; Traceloop has stronger OpenTelemetry integration.
+- Helicone has a more user-friendly UI; Traceloop is more developer-focused.
 
-<a href="/blog/helicone-vs-traceloop" target="_blank" rel="noopener">Read full comparison: Helicone vs Traceloop</a>
+**Read full comparison:** <a href="/blog/helicone-vs-traceloop" target="_blank" rel="noopener">Helicone vs Traceloop</a>
 
-### Helicone vs Galileo
+### Helicone vs. Galileo
 
 Galileo specializes in evaluation intelligence and LLM guardrails.
 
 **Key differences**:
 
-- Helicone is open-source; Galileo is proprietary
-- Helicone offers proxy-based integration; Galileo requires SDK integration
-- Helicone provides built-in caching; Galileo does not
-- Galileo excels at evaluation metrics and guardrails; Helicone offers more comprehensive observability
-- Helicone has more flexible pricing; Galileo is enterprise-focused
+- Helicone is open-source; Galileo is proprietary.
+- Helicone offers proxy-based integration; Galileo requires SDK integration.
+- Helicone provides built-in caching; Galileo does not.
+- Galileo excels at evaluation metrics and guardrails; Helicone offers more comprehensive observability.
+- Helicone has more flexible pricing; Galileo is enterprise-focused.
 
-<a href="/blog/helicone-vs-galileo" target="_blank" rel="noopener">Read full comparison: Helicone vs Galileo</a>
+**Read full comparison:** <a href="/blog/helicone-vs-galileo" target="_blank" rel="noopener">Helicone vs Galileo</a>
 
-### Helicone vs Weights & Biases
+### Helicone vs. Weights & Biases
 
 Weights & Biases is a mature ML platform that has expanded to support LLMs.
 
 **Key differences**:
 
-- Helicone is purpose-built for LLMs; W&B is broad ML infrastructure
-- Helicone offers simple integration; W&B requires more setup
-- Helicone has specialized LLM features; W&B has stronger experiment tracking
-- Helicone provides more accessible pricing; W&B can become expensive at scale
+- Helicone is purpose-built for LLMs; W&B is broad ML infrastructure.
+- Helicone offers simple integration; W&B requires more setup.
+- Helicone has specialized LLM features; W&B has stronger experiment tracking.
+- Helicone provides more accessible pricing; W&B can become expensive at scale.
 
-<a href="/blog/weights-and-biases" target="_blank" rel="noopener">Read full comparison: Helicone vs Weights & Biases</a>
+**Read full comparison:** <a href="/blog/weights-and-biases" target="_blank" rel="noopener">Helicone vs Weights & Biases</a>
 
-### Helicone vs Portkey
+### Helicone vs. Portkey
 
 Portkey is an LLM gateway that includes observability features.
 
 **Key differences**:
 
-- Helicone focuses on observability; Portkey emphasizes routing
-- Helicone provides more detailed analytics; Portkey offers stronger failover capabilities
-- Helicone has a more intuitive UI; Portkey has richer prompt management
-- Both offer caching and routing capabilities
+- Helicone focuses on observability; Portkey emphasizes routing.
+- Helicone provides more detailed analytics; Portkey offers stronger failover capabilities.
+- Helicone has a more intuitive UI; Portkey has richer prompt management.
+- Both offer caching and routing capabilities.
 
-<a href="/blog/portkey-vs-helicone" target="_blank" rel="noopener">Read full comparison: Helicone vs Portkey</a>
+**Read full comparison:** <a href="/blog/portkey-vs-helicone" target="_blank" rel="noopener">Helicone vs Portkey</a>
 
-### Helicone vs Comet
+### Helicone vs. Comet
 
 Comet provides comprehensive ML experiment tracking with LLM features.
 
 **Key differences**:
 
-- Helicone is specialized for LLM observability; Comet covers broader ML tracking
-- Helicone offers one-line integration; Comet requires more code changes
-- Helicone provides built-in caching; Comet focuses on evaluation
-- Comet has stronger evaluation automation; Helicone offers more operational insights
+- Helicone is specialized for LLM observability; Comet covers broader ML tracking.
+- Helicone offers one-line integration; Comet requires more code changes.
+- Helicone provides built-in caching; Comet focuses on evaluation.
+- Comet has stronger evaluation automation; Helicone offers more operational insights.
 
-<a href="/blog/helicone-vs-comet" target="_blank" rel="noopener">Read full comparison: Helicone vs Comet</a>
+**Read full comparison:** <a href="/blog/helicone-vs-comet" target="_blank" rel="noopener">Helicone vs Comet</a>
 
 <CallToAction
-  title="See the Helicone difference for yourself?"
-  description="Try Helicone for free and compare against your current observability solution. Get started in minutes with one line of code."
+  title="See the Helicone difference for yourself!"
+  description="Try Helicone for free and compare it against your current observability solution. Get started in minutes with one line of code."
   primaryButtonText="Start Free Trial"
   primaryButtonLink="https://www.helicone.ai/signup"
   secondaryButtonText="Schedule a Demo"
   secondaryButtonLink="https://www.helicone.ai/contact"
 />
 
-## Best Use Cases for Different Platforms: Quick Selection Guide
+## How to Choose: Decision Framework
 
-![Quick LLM Observability Tool Selection Guide](/static/blog/the-complete-guide-to-LLM-observability-platforms/selection-guide-simple.png)
+Choosing the right observability platform depends on your specific needs and constraints. Use this decision framework to guide your selection:
 
-{/* ![Quick LLM Observability Tool Selection Guide](/static/blog/the-complete-guide-to-LLM-observability-platforms/selection-guide-detailed.png) */}
-
-{/* We could use either the detailed one or the simple one. Was trying to get the detailed one to look right in draw.io but was taking a bit of time (figured you'd just redraw in helicone style anyway). Ping me for the outline if you want us to go with that */}
+![LLM Observability Tool Selection Guide](/static/blog/the-complete-guide-to-LLM-observability-platforms/llm-observability-platform-selection-guide.webp)
 
 | **Platform**         | **Choose if you:**                                                                                                                                                                                                                                                                                                                                                                                |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Helicone**         | - Need minimal integration effort (one-line setup) <br/> - Want comprehensive observability with cost optimization <br/> - Require [easy-to-setup self-hosting](https://www.helicone.ai/blog/self-hosting-launch) <br/> - Need support for multiple LLM providers <br/> - Want both technical and business analytics in one platform <br/> - Need routing capabilities between different LLM providers |
+| **Helicone**         | - Need minimal integration effort (one-line setup) <br/> - Want comprehensive observability with cost optimization <br/> - Require <a href="https://www.helicone.ai/blog/self-hosting-launch" target="_blank" rel="noopener">easy-to-set-up self-hosting</a> <br/> - Need support for multiple LLM providers <br/> - Want both technical and business analytics in one platform <br/> - Need routing capabilities between different LLM providers |
 | **LangSmith**        | - Are heavily invested in the LangChain ecosystem <br/> - Need deep tracing for complex LangChain workflows <br/> - Prefer an SDK-based approach with detailed function-level tracing                                                                                                                                                                                                               |
 | **Langfuse**         | - Prefer open-source with simple self-hosting <br/> - Need detailed tracing for complex workflows <br/> - Are comfortable with an SDK-based approach <br/> - Want flexible community support                                                                                                                                                                                                         |
 | **Braintrust**       | - Focus primarily on LLM evaluation <br/> - Need enterprise-grade evaluation tools <br/> - Want specialized test case management <br/> - Need to implement advanced prompt iteration capabilities <br/> - Want CI/CD integration for LLM testing                                                                                                                                                      |
@@ -280,18 +314,64 @@ Comet provides comprehensive ML experiment tracking with LLM features.
 
 ## Implementation Considerations
 
-Here's what to carefully consider before you go ahead actually implementing any observability solution:
+Here's what to carefully consider before you implement any observability solution:
 
-| **Consideration Area**          | **Aspect**                         | **Things to Consider**                                                                                                                         |
-| ------------------------------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| **1. Integration Approach**     | Proxy-based        | Do you want minimal code changes and API-level integration? Can you tolerate slight latency for added features like caching and rate limiting? |
-|                                 | SDK-based | Are you able to modify your codebase? Do you need fine-grained control for complex workflows? Is low latency critical?                         |
-| **2. Data Privacy & Security**  | Self-hosting                       | Do you need full control over data infrastructure for compliance or regulatory reasons?                                                        |
-|                                 | Data retention                     | What duration of data storage aligns with your compliance or operational needs?                                                                |
-|                                 | PII handling                       | Are there mechanisms in place to redact, encrypt, or limit access to sensitive user data?                                                      |
-|                                 | Compliance                         | Does the platform meet certifications like SOC 2, HIPAA, or GDPR that your organization requires?                                              |
+### 1. Integration Approach
+
+| **Aspect**                         | **Things to Consider**                                                                                                                         |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Proxy-based        | Do you want minimal code changes and API-level integration? Can you tolerate slight latency for added features like caching and rate limiting? |
+| SDK-based | Are you able to modify your codebase? Do you need fine-grained control for complex workflows? Is low latency critical?                         |
+
+### 2. Data Privacy & Security
+
+| **Aspect**                         | **Things to Consider**                                                                                                                         |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Self-hosting                       | Do you need full control over your data infrastructure for compliance or regulatory reasons?                                                        |
+| Data retention                     | What duration of data storage aligns with your compliance or operational needs?                                                                |
+| PII handling                       | Are there mechanisms in place to redact, encrypt, or limit access to sensitive user data?                                                      |
+| Compliance                         | Does the platform meet certifications like SOC 2, HIPAA, or GDPR that your organization requires?                                              |
+
+### 3. Scalability Requirements
+
+| **Aspect**                         | **Things to Consider**                                                                                                                         |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Current volume                     | Can the platform handle your current request load reliably?                                                                                    |
+| Growth projection                  | Will the observability platform scale with your expected growth in usage?                                                                           |
+| Traffic patterns                   | Does the platform accommodate both steady and spiky workloads effectively?                                                                     |
+| Geographic distribution            | Do you need observability infrastructure that supports multi-region or global deployments?                                                     |
+
+
+### 4. Team Structure
+
+
+| **Aspect**                         | **Things to Consider**                                                                                                                         |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Technical expertise                | Does your team have the technical depth for complex integrations, or is ease-of-use more important?                                            |
+| Collaboration needs                | Which roles (e.g., devs, PMs, ops) need access to observability insights?                                                                      |
+| Dashboard requirements             | Should the UI cater to technical users, business stakeholders, or both?                                                                        |
+
+### 5. Cost Considerations
+
+| **Aspect**                         | **Things to Consider**                                                                                                                         |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Platform pricing                   | What pricing model (seats vs. volume) aligns with your team structure and usage patterns?                                                      |
+| Implementation costs               | How much developer time will be required for integration?                                                                                      |
+| Maintenance costs                  | What ongoing resources are needed to maintain the integration?                                                                                 |
+| Cost savings potential             | Does it offer features like caching to significantly reduce costs?                         | */}
+
+
+
+{/* | **Aspect**                         | **Things to Consider**                                                                                                                         |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Proxy-based        | Do you want minimal code changes and API-level integration? Can you tolerate slight latency for added features like caching and rate limiting? |
+| SDK-based | Are you able to modify your codebase? Do you need fine-grained control for complex workflows? Is low latency critical?                         |
+| Self-hosting                       | Do you need full control over your data infrastructure for compliance or regulatory reasons?                                                        |
+| Data retention                     | What duration of data storage aligns with your compliance or operational needs?                                                                |
+| PII handling                       | Are there mechanisms in place to redact, encrypt, or limit access to sensitive user data?                                                      |
+| Compliance                         | Does the platform meet certifications like SOC 2, HIPAA, or GDPR that your organization requires?                                              |
 | **3. Scalability Requirements** | Current volume                     | Can the platform handle your current request load reliably?                                                                                    |
-|                                 | Growth projection                  | Will the observability platform scale with expected growth in usage?                                                                           |
+|                                 | Growth projection                  | Will the observability platform scale with your expected growth in usage?                                                                           |
 |                                 | Traffic patterns                   | Does the platform accommodate both steady and spiky workloads effectively?                                                                     |
 |                                 | Geographic distribution            | Do you need observability infrastructure that supports multi-region or global deployments?                                                     |
 | **4. Team Structure**           | Technical expertise                | Does your team have the technical depth for complex integrations, or is ease-of-use more important?                                            |
@@ -300,11 +380,11 @@ Here's what to carefully consider before you go ahead actually implementing any 
 | **5. Cost Considerations**      | Platform pricing                   | What pricing model (seats vs. volume) aligns with your team structure and usage patterns?                                                      |
 |                                 | Implementation costs               | How much developer time will be required for integration?                                                                                      |
 |                                 | Maintenance costs                  | What ongoing resources are needed to maintain the integration?                                                                                 |
-|                                 | Cost savings potential             | Does it offer features like caching to significantly reduce costs?                         |
+|                                 | Cost savings potential             | Does it offer features like caching to significantly reduce costs?                         | */}
 
 <BottomLine
-  title="Evaluation Tip 💡"
-  description="When evaluating platforms, consider starting with a proof of concept on a single application or workflow. This allows you to measure real-world impact before scaling to your entire organization. This is especially effective when trying out platforms with a simple integration process like Helicone."
+  title="💡 Evaluation Tips"
+  description="When evaluating platforms, consider starting with a proof of concept on a single application or workflow. This allows you to measure real-world impact before scaling to your entire organization. This approach is especially effective when trying out platforms with a simple integration process, like Helicone."
 />
 
 ## Conclusion
@@ -316,20 +396,20 @@ Ultimately, your choice should be guided by your specific requirements, team str
 <FAQ 
   items={[
     {
-      question: "What is LLM observability and why is it important?",
+      question: "What is LLM observability, and why is it important?",
       answer: "LLM observability refers to the ability to monitor, analyze, and debug LLM applications. It's important because it helps teams understand how their AI applications are performing, identify issues before users do, optimize costs, and improve the quality of outputs."
     },
     {
       question: "How much does an LLM observability platform typically cost?",
-      answer: "Pricing varies widely. Most platforms offer free tiers for low volumes (5,000-10,000 requests per month). Paid plans typically range from $20-50 per seat per month, plus volume-based pricing. Helicone offers a transparent pricing model starting at $20/seat/month with a 10,000 request free tier."
+      answer: "Pricing varies widely. Most platforms offer free tiers for low volumes (5,000-10,000 requests per month). Paid plans typically range from $20-50 per seat per month, plus volume-based pricing. Helicone offers a transparent pricing model starting at $20/seat/month with a 10,000-request free tier."
     },
     {
       question: "Can LLM observability platforms reduce my API costs?",
-      answer: "Yes, platforms with caching capabilities like Helicone can reduce API costs by 20-30% by reusing responses for similar requests. Other cost-saving features include prompt optimization through testing and experimentation."
+      answer: "Yes, platforms with caching capabilities, like Helicone, can reduce API costs by 20-30% by reusing responses for similar requests. Other cost-saving features include prompt optimization through testing and experimentation."
     },
     {
       question: "Do I need to modify my code to use an LLM observability platform?",
-      answer: "It depends on the platform. Proxy-based solutions like Helicone require minimal code changes (often just changing a base URL), while SDK-based solutions require decorating functions or adding specific logging calls throughout your code."
+      answer: "It depends on the platform. Proxy-based solutions, like Helicone, require minimal code changes (often just changing a base URL), while SDK-based solutions require decorating functions or adding specific logging calls throughout your code."
     },
     {
       question: "How do I choose between a proxy-based and SDK-based approach?",
@@ -345,7 +425,7 @@ Ultimately, your choice should be guided by your specific requirements, team str
     },
     {
       question: "Can I self-host my LLM observability platform?",
-      answer: "Some platforms like Helicone and Langfuse offer self-hosting options. This keeps your data within your infrastructure and provides more control. Helicone simplifies self-hosting through Docker, Kubernetes, or manual setup options."
+      answer: "Some platforms, like Helicone and Langfuse, offer self-hosting options. This keeps your data within your infrastructure and provides more control. Helicone simplifies self-hosting through Docker, Kubernetes, or manual setup options."
     }
   ]}
 />
