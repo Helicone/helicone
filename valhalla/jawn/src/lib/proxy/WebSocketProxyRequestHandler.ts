@@ -96,7 +96,7 @@ export async function handleSocketSession(
           body: safeJSONStringify(responseBody),
           endTime,
         }),
-        status: async () => 200,
+        status: async () => 200, // always set to 200 (For live session updates, we upsert continually on Clickhouse which requires status not to change)
         responseHeaders,
         omitLog: requestWrapper.heliconeHeaders.omitHeaders.omitResponse,
       },
