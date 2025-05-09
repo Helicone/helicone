@@ -74,8 +74,6 @@ export const convertRealtimeRequestToSteps = (
     ).getTime();
   });
 
-  console.log("simulatedSteps", simulatedSteps);
-
   return simulatedSteps;
 };
 
@@ -111,6 +109,10 @@ function createSimulatedRequestStep(
   // Create a unique ID for the simulated step based on its index
   const simulatedId = `${originalRequest.request_id}-step-${stepIndex}`;
 
+  const fullPath = (originalRequest.request_properties?.["Helicone-Session-Path"] ?? "/Realtime-Session") + (
+    message.role === "user" || message.role === "assistant" ? ("/" + message.role) : "other"
+  );
+
   // Create the simulated request step object
   return {
     ...originalRequest, // Copy all base properties from the original request
@@ -125,6 +127,8 @@ function createSimulatedRequestStep(
     request_body: originalRequest.request_body,
     response_body: originalRequest.response_body,
 
+    request_path: fullPath,
+
     // Keep original token/cost/latency data from the parent request
     // These fields are already copied by the spread operator above
 
@@ -132,6 +136,7 @@ function createSimulatedRequestStep(
     // Merge with existing request_properties
     request_properties: {
       ...(originalRequest.request_properties || {}),
+      "Helicone-Session-Path": fullPath,
       _helicone_realtime_original_request_id: originalRequest.request_id,
       _helicone_realtime_step_index: stepIndex.toString(), // Store the step's chronological index
     },
