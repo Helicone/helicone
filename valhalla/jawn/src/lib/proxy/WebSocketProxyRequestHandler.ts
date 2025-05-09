@@ -7,12 +7,15 @@ import { DBLoggable } from "./DBLoggable";
 
 export async function handleSocketSession(
   messages: SocketMessage[],
-  requestWrapper: RequestWrapper
+  requestWrapper: RequestWrapper,
+  requestId?: string,
 ): Promise<{
   loggable: DBLoggable;
   response: Response;
 }> {
-  const requestId = crypto.randomUUID();
+  if (!requestId) {
+    requestId = crypto.randomUUID();
+  }
   const responseId = crypto.randomUUID();
 
   const startTime = new Date(
@@ -93,7 +96,7 @@ export async function handleSocketSession(
           body: safeJSONStringify(responseBody),
           endTime,
         }),
-        status: async () => 200,
+        status: async () => 200, // always set to 200 (For live session updates, we upsert continually on Clickhouse which requires status not to change)
         responseHeaders,
         omitLog: requestWrapper.heliconeHeaders.omitHeaders.omitResponse,
       },

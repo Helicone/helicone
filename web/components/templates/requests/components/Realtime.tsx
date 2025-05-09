@@ -22,6 +22,7 @@ import {
   PiTextTBold,
 } from "react-icons/pi";
 import ReactMarkdown from "react-markdown";
+import { getSortedMessagesFromMappedRequest } from "@/lib/sessions/realtimeSession";
 
 type MessageType =
   | "text"
@@ -97,19 +98,10 @@ export const Realtime: React.FC<RealtimeProps> = ({
   ]);
 
   // Get all messages sorted by timestamp
-  const sortedMessages = useMemo(() => {
-    return [
-      ...(mappedRequest.schema.request?.messages || []),
-      ...(mappedRequest.schema.response?.messages || []),
-    ].sort((a, b) => {
-      const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
-      const timeB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
-      return timeA - timeB;
-    });
-  }, [
-    mappedRequest.schema.request?.messages,
-    mappedRequest.schema.response?.messages,
-  ]);
+  const sortedMessages = useMemo(
+    () => getSortedMessagesFromMappedRequest(mappedRequest),
+    [mappedRequest]
+  );
 
   // Define getMessageType function before using it
   const getMessageType = (message: any): MessageType => {
@@ -166,10 +158,13 @@ export const Realtime: React.FC<RealtimeProps> = ({
     [key: string]: boolean;
   }>({});
 
+  const defaultDeletedStates = useMemo(
+    () => calculateDefaultExpandedStates(filteredMessages),
+    [filteredMessages]
+  );
+
   // Effect to update deleted message states when filters change, preserving user interactions
   useEffect(() => {
-    const newDefaultStates = calculateDefaultExpandedStates(filteredMessages);
-
     setDeletedMessageStates((prevStates) => {
       const nextStates: { [key: string]: boolean } = {};
       filteredMessages.forEach((message, idx) => {
@@ -178,12 +173,12 @@ export const Realtime: React.FC<RealtimeProps> = ({
           // If the state for this key exists in the previous state (user might have toggled it), keep it.
           // Otherwise, use the newly calculated default state.
           nextStates[key] =
-            key in prevStates ? prevStates[key] : newDefaultStates[key];
+            key in prevStates ? prevStates[key] : defaultDeletedStates[key];
         }
       });
       return nextStates;
     });
-  }, [filteredMessages]); // Re-run only when filteredMessages change
+  }, [filteredMessages, defaultDeletedStates]); // Only depend on filtered messages and default states
 
   // Toggle function remains the same
   const toggleDeletedMessage = (key: string) => {
