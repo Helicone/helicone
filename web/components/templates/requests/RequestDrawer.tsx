@@ -44,9 +44,10 @@ interface RequestDivProps {
   onNavigate?: (direction: "prev" | "next") => void;
   request?: MappedLLMRequest;
   showCollapse?: boolean;
+  onRequestSelect?: (request_id: string) => void;
 }
 export default function RequestDrawer(props: RequestDivProps) {
-  const { onCollapse, onNavigate, request, showCollapse = true } = props;
+  const { onCollapse, onNavigate, request, showCollapse = true, onRequestSelect } = props;
 
   const { setNotification } = useNotification();
   const router = useRouter();
@@ -610,7 +611,10 @@ export default function RequestDrawer(props: RequestDivProps) {
 
         <div className="p-4 h-full w-full overflow-auto bg-card">
           {/* Mapped Request */}
-          <RenderMappedRequest mappedRequest={request} />
+          <RenderMappedRequest 
+            mappedRequest={request} 
+            onRequestSelect={onRequestSelect}
+          />
         </div>
 
         {/* Footer */}
