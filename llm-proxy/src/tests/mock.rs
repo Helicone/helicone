@@ -7,7 +7,7 @@ use stubr::{
 use typed_builder::TypedBuilder;
 use url::Url;
 
-use crate::{config::Config, types::provider::Provider};
+use crate::{config::Config, types::provider::InferenceProvider};
 
 #[derive(TypedBuilder)]
 pub struct MockArgs {
@@ -42,7 +42,7 @@ impl Mock {
         .await;
         config
             .providers
-            .get_mut(&Provider::OpenAI)
+            .get_mut(&InferenceProvider::OpenAI)
             .unwrap()
             .base_url = Url::parse(&openai_mock.uri()).unwrap();
 
@@ -55,7 +55,7 @@ impl Mock {
         .await;
         config
             .providers
-            .get_mut(&Provider::Anthropic)
+            .get_mut(&InferenceProvider::Anthropic)
             .unwrap()
             .base_url = Url::parse(&anthropic_mock.uri()).unwrap();
 

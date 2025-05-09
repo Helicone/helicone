@@ -5,13 +5,14 @@ use http::uri::PathAndQuery;
 
 use crate::{
     app::AppState,
+    config::model_mapping::ModelMapper,
     error::{
         api::Error, internal::InternalError, invalid_req::InvalidRequestError,
     },
     middleware::mapper::{
         TryConvert, anthropic::AnthropicConverter, openai::OpenAiConverter,
     },
-    types::provider::Provider,
+    types::provider::InferenceProvider,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -23,11 +24,13 @@ pub enum ApiEndpoint {
 impl ApiEndpoint {
     pub fn new(
         path: &PathAndQuery,
-        request_style: Provider,
+        request_style: InferenceProvider,
     ) -> Result<Self, InvalidRequestError> {
         match request_style {
-            Provider::OpenAI => Ok(Self::OpenAI(OpenAI::try_from(path)?)),
-            Provider::Anthropic => {
+            InferenceProvider::OpenAI => {
+                Ok(Self::OpenAI(OpenAI::try_from(path)?))
+            }
+            InferenceProvider::Anthropic => {
                 Ok(Self::Anthropic(Anthropic::try_from(path)?))
             }
             unsupported => {
@@ -39,13 +42,13 @@ impl ApiEndpoint {
 
     pub fn mapped(
         source_endpoint: ApiEndpoint,
-        target_provider: Provider,
+        target_provider: InferenceProvider,
     ) -> Result<Self, InvalidRequestError> {
         match (source_endpoint, target_provider) {
-            (Self::OpenAI(source), Provider::Anthropic) => {
+            (Self::OpenAI(source), InferenceProvider::Anthropic) => {
                 Ok(Self::Anthropic(Anthropic::from(source)))
             }
-            (Self::Anthropic(source), Provider::OpenAI) => {
+            (Self::Anthropic(source), InferenceProvider::OpenAI) => {
                 Ok(Self::OpenAI(OpenAI::from(source)))
             }
             _ => Err(InvalidRequestError::UnsupportedProvider(target_provider)),
@@ -59,7 +62,7 @@ impl ApiEndpoint {
         path_and_query: &PathAndQuery,
         target_endpoint: ApiEndpoint,
     ) -> Result<(Bytes, PathAndQuery), Error> {
-        let model_mapper = &app_state.0.model_mapper;
+        let model_mapper = ModelMapper::new(app_state);
         let target_path_and_query =
             if let Some(query_params) = path_and_query.query() {
                 format!("{}?{}", target_endpoint.path(), query_params)
@@ -71,7 +74,7 @@ impl ApiEndpoint {
                 .map_err(InternalError::InvalidUri)?;
         let (body, target_path_and_query) = match (self, target_endpoint) {
             (ApiEndpoint::OpenAI(source), ApiEndpoint::Anthropic(target)) => {
-                let converter = OpenAiConverter::new(model_mapper);
+                let converter = OpenAiConverter::new(&model_mapper);
                 if let (OpenAI::ChatCompletions, Anthropic::Messages) =
                     (source, target)
                 {
@@ -103,7 +106,7 @@ impl ApiEndpoint {
             }
             (ApiEndpoint::Anthropic(source), ApiEndpoint::OpenAI(target)) => {
                 tracing::trace!(source = ?source, target = ?target, "mapping request body");
-                let converter = AnthropicConverter::new(model_mapper);
+                let converter = AnthropicConverter::new(&model_mapper);
                 if let (Anthropic::Messages, OpenAI::ChatCompletions) =
                     (source, target)
                 {
@@ -148,10 +151,10 @@ impl ApiEndpoint {
     }
 
     #[must_use]
-    pub fn provider(&self) -> Provider {
+    pub fn provider(&self) -> InferenceProvider {
         match self {
-            Self::OpenAI(_) => Provider::OpenAI,
-            Self::Anthropic(_) => Provider::Anthropic,
+            Self::OpenAI(_) => InferenceProvider::OpenAI,
+            Self::Anthropic(_) => InferenceProvider::Anthropic,
         }
     }
 

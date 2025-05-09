@@ -2,7 +2,6 @@ pub mod database;
 pub mod discover;
 pub mod dispatcher;
 pub mod helicone;
-pub mod metrics;
 pub mod minio;
 pub mod model_mapping;
 pub mod providers;
@@ -42,40 +41,29 @@ pub enum DeploymentTarget {
     SelfHosted,
 }
 
-#[derive(
-    Debug, Default, Clone, Copy, PartialEq, Eq, Deserialize, Serialize,
-)]
-#[serde(deny_unknown_fields, rename_all = "kebab-case")]
-pub enum ProviderKeysSource {
-    #[default]
-    Env,
-}
-
 #[derive(Debug, Default, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields, rename_all = "kebab-case")]
 pub struct Config {
     pub telemetry: telemetry::Config,
-    pub metrics_server: self::metrics::Config,
     pub server: self::server::ServerConfig,
     pub database: self::database::Config,
     pub minio: self::minio::Config,
     pub dispatcher: self::dispatcher::DispatcherConfig,
-    /// A mapping of source models to target models.
-    ///
-    /// Prefer to use the [`ModelMapper`](self::model_mapping::ModelMapper)
-    /// type from the `AppState` instead since it has stronger typing than
-    /// the config type, since YAML requires strings for keys.
-    pub model_mappings: self::model_mapping::ModelMappingConfig,
-    pub is_production: bool,
-    /// *ALL* supported providers.
+    /// *ALL* supported providers, independent of router configuration.
     pub providers: self::providers::ProvidersConfig,
-    pub helicone: self::helicone::HeliconeConfig,
-
-    // ---- configs below here are more deployment specific ----
-    pub deployment_target: DeploymentTarget,
-    pub rate_limit: self::rate_limit::RateLimitConfig,
     pub discover: self::discover::DiscoverConfig,
+    /// If a request is made with a model that is not in the `RouterConfig`
+    /// model mapping, then we fallback to this.
+    pub default_model_mapping: self::model_mapping::ModelMappingConfig,
     pub routers: self::router::RouterConfigs,
+    // TODO: only have this field for CloudHosted mode, (maybe a struct enum
+    // for deployment_target?), so cloud hosted mode can support a global
+    // rate limit. self hosted and sidecar will simply have rate limits on
+    // router level
+    pub rate_limit: self::rate_limit::RateLimitConfig,
+    pub deployment_target: DeploymentTarget,
+    pub is_production: bool,
+    pub helicone: self::helicone::HeliconeConfig,
 }
 
 impl Config {
@@ -126,19 +114,17 @@ impl crate::tests::TestDefault for Config {
     fn test_default() -> Self {
         let telemetry = telemetry::Config {
             exporter: telemetry::Exporter::Stdout,
-            level: "info,llm_proxy=trace,tower::load::peak_ewma=trace,\
-                    tower::balance=trace,stubr=trace"
-                .to_string(),
+            level: "info,llm_proxy=trace".to_string(),
             ..Default::default()
         };
         Config {
             telemetry,
-            metrics_server: self::metrics::Config::test_default(),
             server: self::server::ServerConfig::test_default(),
             database: self::database::Config::default(),
             minio: self::minio::Config::test_default(),
-            model_mappings: self::model_mapping::ModelMappingConfig::default(),
             dispatcher: self::dispatcher::DispatcherConfig::test_default(),
+            default_model_mapping:
+                self::model_mapping::ModelMappingConfig::default(),
             is_production: false,
             providers: self::providers::ProvidersConfig::default(),
             helicone: self::helicone::HeliconeConfig::test_default(),
@@ -167,15 +153,6 @@ mod tests {
         let serialized = serde_json::to_string(&config).unwrap();
         let deserialized =
             serde_json::from_str::<DeploymentTarget>(&serialized).unwrap();
-        assert_eq!(config, deserialized);
-    }
-
-    #[test]
-    fn provider_keys_source_round_trip() {
-        let config = ProviderKeysSource::Env;
-        let serialized = serde_json::to_string(&config).unwrap();
-        let deserialized =
-            serde_json::from_str::<ProviderKeysSource>(&serialized).unwrap();
         assert_eq!(config, deserialized);
     }
 }

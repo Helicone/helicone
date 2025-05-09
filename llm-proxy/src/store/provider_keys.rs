@@ -3,7 +3,7 @@ use uuid::Uuid;
 
 use crate::{
     error::api::Error,
-    types::{org::OrgId, provider::Provider, secret::Secret},
+    types::{org::OrgId, provider::InferenceProvider, secret::Secret},
 };
 
 #[derive(Debug, sqlx::FromRow)]
@@ -23,7 +23,7 @@ impl ProviderKeyStore {
         &self,
         tx: &mut Transaction<'_, Postgres>,
         org_id: &OrgId,
-        provider: Provider,
+        provider: InferenceProvider,
     ) -> Result<ProviderKeyRow, Error> {
         // not sure how derive_more serializes it tbh
         tracing::info!("serialized provider: {}", provider.to_string());

@@ -8,7 +8,7 @@ use llm_proxy::{
         router::{BalanceConfig, BalanceTarget, RouterConfig, RouterConfigs},
     },
     tests::{TestDefault, harness::Harness, mock::MockArgs},
-    types::{provider::Provider, router::RouterId},
+    types::{provider::InferenceProvider, router::RouterId},
 };
 use nonempty_collections::nev;
 use rust_decimal::Decimal;
@@ -22,11 +22,11 @@ async fn weighted_balancer_anthropic_preferred() {
     let balance_config = BalanceConfig::Weighted {
         targets: nev![
             BalanceTarget {
-                provider: Provider::OpenAI,
+                provider: InferenceProvider::OpenAI,
                 weight: Decimal::try_from(0.25).unwrap(),
             },
             BalanceTarget {
-                provider: Provider::Anthropic,
+                provider: InferenceProvider::Anthropic,
                 weight: Decimal::try_from(0.75).unwrap(),
             },
         ],
@@ -99,11 +99,11 @@ async fn weighted_balancer_openai_preferred() {
     let balance_config = BalanceConfig::Weighted {
         targets: nev![
             BalanceTarget {
-                provider: Provider::OpenAI,
+                provider: InferenceProvider::OpenAI,
                 weight: Decimal::try_from(0.75).unwrap(),
             },
             BalanceTarget {
-                provider: Provider::Anthropic,
+                provider: InferenceProvider::Anthropic,
                 weight: Decimal::try_from(0.25).unwrap(),
             },
         ],
@@ -176,11 +176,11 @@ async fn weighted_balancer_anthropic_heavily_preferred() {
     let balance_config = BalanceConfig::Weighted {
         targets: nev![
             BalanceTarget {
-                provider: Provider::OpenAI,
+                provider: InferenceProvider::OpenAI,
                 weight: Decimal::try_from(0.05).unwrap(),
             },
             BalanceTarget {
-                provider: Provider::Anthropic,
+                provider: InferenceProvider::Anthropic,
                 weight: Decimal::try_from(0.95).unwrap(),
             },
         ],

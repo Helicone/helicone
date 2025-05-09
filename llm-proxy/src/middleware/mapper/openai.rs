@@ -3,16 +3,16 @@ use std::str::FromStr;
 use crate::{
     config::model_mapping::ModelMapper,
     middleware::mapper::{Convert, TryConvert, error::MapperError},
-    types::{model::Model, provider::Provider},
+    types::{model::Model, provider::InferenceProvider},
 };
 
 pub struct OpenAiConverter<'a> {
-    model_mapper: &'a ModelMapper,
+    model_mapper: &'a ModelMapper<'a>,
 }
 
 impl<'a> OpenAiConverter<'a> {
     #[must_use]
-    pub fn new(model_mapper: &'a ModelMapper) -> Self {
+    pub fn new(model_mapper: &'a ModelMapper<'a>) -> Self {
         Self { model_mapper }
     }
 }
@@ -43,17 +43,9 @@ impl
         anthropic_types::chat::ChatCompletionRequest,
         Self::Error,
     > {
-        let target_provider = Provider::Anthropic;
+        let target_provider = InferenceProvider::Anthropic;
         let source_model = Model::from_str(&value.model)?;
-        let model = self
-            .model_mapper
-            .get(&target_provider, &source_model)
-            .ok_or_else(|| {
-                MapperError::NoModelMapping(
-                    target_provider,
-                    source_model.name.clone(),
-                )
-            })?;
+        let model = self.model_mapper.get(&target_provider, &source_model)?;
         tracing::trace!(source_model = ?source_model, target_model = ?model, "mapped model");
         let system = if let Some(message) = value.messages.first() {
             if message.role == openai_types::chat::Role::System {
@@ -82,7 +74,7 @@ impl
         }
         Ok(anthropic_types::chat::ChatCompletionRequest {
             messages,
-            model: model.to_string(),
+            model: model.as_ref().to_string(),
             temperature: value.temperature,
             max_tokens: value.max_tokens.unwrap_or(u32::MAX),
             system,

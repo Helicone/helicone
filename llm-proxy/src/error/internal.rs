@@ -7,7 +7,7 @@ use tracing::error;
 
 use crate::{
     error::api::ErrorResponse,
-    types::{json::Json, provider::Provider},
+    types::{json::Json, provider::InferenceProvider},
 };
 
 /// Internal errors
@@ -26,7 +26,7 @@ pub enum InternalError {
         error: serde_json::Error,
     },
     /// Router config provider '{0}' not present in `ProvidersConfig`
-    ProviderNotConfigured(Provider),
+    ProviderNotConfigured(InferenceProvider),
     /// Extension {0} not found
     ExtensionNotFound(&'static str),
     /// Provider not found

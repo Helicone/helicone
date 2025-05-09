@@ -6,7 +6,7 @@ use typed_builder::TypedBuilder;
 use url::Url;
 use uuid::Uuid;
 
-use super::{provider::Provider, user::UserId};
+use super::{provider::InferenceProvider, user::UserId};
 use crate::error::logger::LoggerError;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -95,7 +95,7 @@ pub struct RequestLog {
     pub helicone_proxy_key_id: Option<String>,
     pub target_url: Url,
     #[serde(serialize_with = "serialize_uppercase")]
-    pub provider: Provider,
+    pub provider: InferenceProvider,
     pub body_size: f64,
     pub path: String,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -120,7 +120,7 @@ pub struct RequestLog {
 
 #[allow(clippy::trivially_copy_pass_by_ref)]
 fn serialize_uppercase<S>(
-    value: &Provider,
+    value: &InferenceProvider,
     serializer: S,
 ) -> Result<S::Ok, S::Error>
 where

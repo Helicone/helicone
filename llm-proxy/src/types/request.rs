@@ -10,7 +10,7 @@ use uuid::Uuid;
 use super::{
     model::Model,
     org::OrgId,
-    provider::{Provider, ProviderKeys},
+    provider::{InferenceProvider, ProviderKeys},
     template::TemplateInputs,
     user::UserId,
 };
@@ -51,6 +51,6 @@ pub struct RequestProxyContext {
 
 #[derive(Debug)]
 pub struct ForcedRouting {
-    pub provider: Provider,
+    pub provider: InferenceProvider,
     pub model: Model,
 }

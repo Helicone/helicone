@@ -12,7 +12,7 @@ use crate::{
     error::{api::Error, internal::InternalError},
     middleware::mapper::endpoint::ApiEndpoint,
     types::{
-        provider::Provider,
+        provider::InferenceProvider,
         request::{Request, RequestContext},
     },
 };
@@ -53,9 +53,12 @@ where
         let mut inner = self.inner.clone();
         std::mem::swap(&mut self.inner, &mut inner);
         Box::pin(async move {
-            let provider = req.extensions_mut().remove::<Provider>().ok_or(
-                Error::Internal(InternalError::ExtensionNotFound("Provider")),
-            )?;
+            let provider = req
+                .extensions_mut()
+                .remove::<InferenceProvider>()
+                .ok_or(Error::Internal(
+                InternalError::ExtensionNotFound("Provider"),
+            ))?;
             let req_ctx = req
                 .extensions()
                 .get::<Arc<RequestContext>>()
@@ -89,8 +92,8 @@ where
 
 async fn map_request(
     app_state: AppState,
-    request_style: Provider,
-    provider: Provider,
+    request_style: InferenceProvider,
+    provider: InferenceProvider,
     mut req: Request,
 ) -> Result<Request, Error> {
     let extracted_path_and_query =

@@ -19,7 +19,7 @@ use crate::{
     error::{api::Error, init::InitError, internal::InternalError},
     logger::service::LoggerService,
     types::{
-        provider::Provider,
+        provider::InferenceProvider,
         request::{Request, RequestContext},
         response::Response,
     },
@@ -29,7 +29,7 @@ use crate::{
 pub type DispatcherFuture = BoxFuture<'static, Result<Response, Error>>;
 pub type DispatcherService = AddExtension<
     ErrorHandler<crate::middleware::mapper::Service<Dispatcher>>,
-    Provider,
+    InferenceProvider,
 >;
 
 /// Leaf service that dispatches requests to the correct provider.
@@ -37,14 +37,14 @@ pub type DispatcherService = AddExtension<
 pub struct Dispatcher {
     client: Client,
     app_state: AppState,
-    provider: Provider,
+    provider: InferenceProvider,
 }
 
 impl Dispatcher {
     pub fn new(
         client: Client,
         app_state: AppState,
-        provider: Provider,
+        provider: InferenceProvider,
     ) -> Self {
         Self {
             client,
@@ -55,7 +55,7 @@ impl Dispatcher {
 
     pub fn new_with_middleware(
         app_state: AppState,
-        provider: Provider,
+        provider: InferenceProvider,
     ) -> Result<DispatcherService, InitError> {
         let http_client = Client::builder()
             .connect_timeout(app_state.0.config.dispatcher.connection_timeout)
@@ -137,7 +137,7 @@ impl Dispatcher {
             r.remove(http::header::CONTENT_LENGTH);
             r.remove(HeaderName::from_str("helicone-api-key").unwrap());
             match target_provider {
-                Provider::OpenAI => {
+                InferenceProvider::OpenAI => {
                     let openai_auth_header =
                         format!("Bearer {}", provider_api_key.0);
                     r.insert(
@@ -145,7 +145,7 @@ impl Dispatcher {
                         HeaderValue::from_str(&openai_auth_header).unwrap(),
                     );
                 }
-                Provider::Anthropic => {
+                InferenceProvider::Anthropic => {
                     let version = provider_config
                         .version
                         .as_deref()
