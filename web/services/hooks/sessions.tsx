@@ -187,11 +187,7 @@ const useSessionMetrics = (
   });
 
   return {
-    metrics: data?.data?.data || {
-      session_count: [],
-      session_duration: [],
-      session_cost: [],
-    },
+    metrics: data?.data?.data,
     refetch,
     isLoading,
     isRefetching,

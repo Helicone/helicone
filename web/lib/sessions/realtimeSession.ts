@@ -19,8 +19,8 @@ export const getSortedMessagesFromMappedRequest = (
       (m) =>
         m.timestamp &&
         m.role &&
-        !isNaN(new Date(m.timestamp).getTime()) &&
-        m.role !== "session.update"
+        m.content &&
+        !isNaN(new Date(m.timestamp).getTime())
     )
     .sort((a, b) => {
       const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
@@ -56,7 +56,6 @@ export const convertRealtimeRequestToSteps = (
   const mappedContent = heliconeRequestToMappedContent(realtimeRequest);
   const sortedMessages = getSortedMessagesFromMappedRequest(mappedContent);
 
-  console.log("sortedMessages", sortedMessages);
   const simulatedSteps: HeliconeRequest[] = [];
   let previousStepResponseTimestampMs = 0; // Track the end time of the last created step
 

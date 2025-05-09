@@ -16,10 +16,15 @@ import {
   MessageCircleMore,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaDiscord } from "react-icons/fa6";
 import { ChangelogItem } from "./auth/types";
+import { useOrg } from "./org/organizationContext";
+import Intercom from "@intercom/messenger-js-sdk";
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
+import { usePathname } from "next/navigation";
 
+export const INTERCOM_APP_ID = "mna0ba2h";
 const SidebarHelpDropdown = ({
   changelog,
   handleChangelogClick,
@@ -37,6 +42,24 @@ const SidebarHelpDropdown = ({
     changelog.length > 0 && latestChangelogSeen !== changelog[0].title;
 
   const [chatOpen, setChatOpen] = useState(false);
+  const orgContext = useOrg();
+  const heliconeAuthClient = useHeliconeAuthClient();
+  Intercom({
+    app_id: INTERCOM_APP_ID,
+    user_id: heliconeAuthClient.user?.id,
+    name: orgContext?.currentOrg?.name,
+    email: heliconeAuthClient.user?.email,
+  });
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (pathname?.includes("dashboard")) {
+      // Only want to show on dashboard for now
+      Intercom({ app_id: INTERCOM_APP_ID, hide_default_launcher: false });
+    } else {
+      Intercom({ app_id: INTERCOM_APP_ID, hide_default_launcher: true });
+    }
+  }, [pathname]);
   return (
     <div className="w-full flex flex-col items-center gap-2">
       <DropdownMenu
@@ -148,14 +171,11 @@ const SidebarHelpDropdown = ({
         variant="outline"
         size="none"
         onClick={() => {
-          if (window.Pylon) {
-            if (chatOpen) {
-              window.Pylon("hide");
-            } else {
-              window.Pylon("show");
-            }
-            setChatOpen(!chatOpen);
-          }
+          setChatOpen(!chatOpen);
+          Intercom({
+            app_id: INTERCOM_APP_ID,
+            hide_default_launcher: !chatOpen,
+          });
         }}
         className={clsx(
           "flex items-center text-xs text-muted-foreground hover:text-foreground",
@@ -171,7 +191,7 @@ const SidebarHelpDropdown = ({
               : "text-muted-foreground hover:text-primary"
           )}
         />
-        {!isCollapsed && <span>Message us</span>}
+        {!isCollapsed && <div>Message us</div>}
       </Button>
     </div>
   );

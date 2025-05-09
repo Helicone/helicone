@@ -208,6 +208,17 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
     // Create updated field with default operator
     const defaultOperator = filterDef.operators[0] || "eq";
 
+    const defaultValue = (() => {
+      switch (filterDef.type) {
+        case "number":
+          return 0;
+        case "boolean":
+          return true;
+        default:
+          return "";
+      }
+    })();
+
     // Create updated condition with new field and default operator
     const updated: ConditionExpression = {
       ...condition,
@@ -217,7 +228,7 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
         table: filterDef.table,
       },
       operator: defaultOperator,
-      value: "", // Reset value since field changed
+      value: defaultValue, // Reset value since field changed
     };
 
     filterStore.updateFilterExpression(path, updated);
