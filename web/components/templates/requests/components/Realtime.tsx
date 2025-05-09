@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/tooltip";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { MappedLLMRequest } from "@/packages/llm-mapper/types";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import {
   PiCaretDownBold,
   PiDownloadBold,
@@ -67,6 +67,9 @@ export const Realtime: React.FC<RealtimeProps> = ({
   mappedRequest,
   messageIndexFilter: propMessageIndexFilter,
 }) => {
+  const messageToScrollToRef = useRef<HTMLDivElement>(null);
+  const [shouldScroll, setShouldScroll] = useState(true);
+
   // Derive messageIndexFilter from metadata if not provided
   const derivedMessageIndexFilter = useMemo(() => {
     if (propMessageIndexFilter) {
@@ -94,14 +97,16 @@ export const Realtime: React.FC<RealtimeProps> = ({
   ]);
 
   // Get all messages sorted by timestamp
-  const sortedMessages = [
-    ...(mappedRequest.schema.request?.messages || []),
-    ...(mappedRequest.schema.response?.messages || []),
-  ].sort((a, b) => {
-    const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
-    const timeB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
-    return timeA - timeB;
-  });
+  const sortedMessages = useMemo(() => {
+    return [
+      ...(mappedRequest.schema.request?.messages || []),
+      ...(mappedRequest.schema.response?.messages || []),
+    ].sort((a, b) => {
+      const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+      const timeB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+      return timeA - timeB;
+    });
+  }, [mappedRequest.schema.request?.messages, mappedRequest.schema.response?.messages]);
 
   // Define getMessageType function before using it
   const getMessageType = (message: any): MessageType => {
@@ -218,6 +223,12 @@ export const Realtime: React.FC<RealtimeProps> = ({
     return icons[type];
   };
 
+  useEffect(() => {
+    if (messageToScrollToRef.current && filterInfo?.isFiltered && shouldScroll) {
+      messageToScrollToRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [filterInfo?.isFiltered, filteredMessages, shouldScroll]);
+
   return (
     <div className={`w-full flex flex-col gap-4 ${filterInfo ? "" : "pt-4"}`}>
       {/* Filter Indicator */}
@@ -237,7 +248,7 @@ export const Realtime: React.FC<RealtimeProps> = ({
 
       {/* Messages Section */}
       <div className="gap-4">
-        {filteredMessages.map((message, idx) => {
+        {sortedMessages.map((message, idx) => {
           const isUser = message.role === "user";
           const isTranscript = message._type === "audio" && message.content;
           const timestamp = message.timestamp
@@ -248,11 +259,19 @@ export const Realtime: React.FC<RealtimeProps> = ({
           const messageKey = `${idx}-${message.timestamp}`; // Use index within the current filtered list + timestamp
           const isDeletedExpanded = deletedMessageStates[messageKey] ?? false; // Use state, default to false if not set
 
+          const shouldScrollToThisMessage = filterInfo?.isFiltered && 
+            idx >= (filterInfo.startIndex || 0) && 
+            idx <= (filterInfo.endIndex || filterInfo.startIndex || 0);
+
+          const isFilteredMessage = !filterInfo?.isFiltered || shouldScrollToThisMessage;
+
           return (
             <div
-              key={messageKey} // Key remains the same
+              key={messageKey}
+              ref={shouldScrollToThisMessage ? messageToScrollToRef : null}
               className={`flex flex-col px-4 pb-4 mb-4 w-full 
-                ${isUser ? "items-end" : "items-start"} `}
+                ${isUser ? "items-end" : "items-start"}
+                ${isFilteredMessage ? "" : "opacity-25"}`}
             >
               {isDeleted ? (
                 // Collapsible structure for deleted messages
