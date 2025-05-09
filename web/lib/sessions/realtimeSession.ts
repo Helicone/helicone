@@ -16,10 +16,7 @@ export const getSortedMessagesFromMappedRequest = (
 
   return messages
     .filter(
-      (m) =>
-        m.timestamp &&
-        m.role &&
-        !isNaN(new Date(m.timestamp).getTime())
+      (m) => m.timestamp && m.role && !isNaN(new Date(m.timestamp).getTime())
     )
     .sort((a, b) => {
       const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
@@ -91,7 +88,9 @@ function createSimulatedRequestStep(
   previousStepResponseTimestampMs: number // The end time (in ms) of the preceding step
 ): HeliconeRequest {
   // Use the message timestamp as the base request time
-  const baseRequestTimestampMs = new Date(message.start_timestamp ?? message.timestamp!).getTime();
+  const baseRequestTimestampMs = new Date(
+    message.start_timestamp ?? message.timestamp!
+  ).getTime();
 
   // Ensure the current step starts at least 1ms after the previous step ended
   const stepRequestTimestampMs = Math.max(
@@ -103,7 +102,7 @@ function createSimulatedRequestStep(
   // Add a minimum duration of 1ms in case 100ms is too short due to adjustments
   const stepResponseTimestampMs = Math.max(
     stepRequestTimestampMs + 1,
-    new Date(message.timestamp!).getTime(),
+    new Date(message.timestamp!).getTime()
   );
 
   // Create a unique ID for the simulated step based on its index
