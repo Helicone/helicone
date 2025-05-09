@@ -231,6 +231,7 @@ const SessionsPage = (props: SessionsPageProps) => {
 
   const onFetchBulkSessions = async () => {
     if (selectedIds.length === 0) {
+      // then download for all rows
       const data = await getRequestsByIdsWithBodies(
         sessionsWithId.map((session) => session.metadata.session_id)
       );

@@ -282,48 +282,6 @@ const useGetRequestCountClickhouse = (
   };
 };
 
-const getRequestsByIds = async (sessionIds: string[]) => {
-  const filter = sessionIds.reduce((acc: any, sessionId, index) => {
-    const currentCondition = {
-      request_response_rmt: {
-        properties: {
-          "Helicone-Session-Id": {
-            equals: sessionId,
-          },
-        },
-      },
-    };
-
-    if (index === 0) return currentCondition;
-
-    return {
-      left: acc,
-      operator: "or" as const,
-      right: currentCondition,
-    };
-  }, {});
-
-  try {
-    const response = await $JAWN_API.POST("/v1/request/query-clickhouse", {
-      body: {
-        filter,
-        offset: 0,
-        limit: MAX_EXPORT_ROWS,
-        sort: {
-          created_at: "desc",
-        },
-        isCached: false,
-      },
-    });
-
-    console.log("Requests by session IDs:", response.data);
-    return response.data?.data ?? [];
-  } catch (error) {
-    console.error("Error fetching requests by session IDs:", error);
-    throw error;
-  }
-};
-
 const getRequestsByIdsWithBodies = async (sessionIds: string[]) => {
   const filter = sessionIds.reduce((acc: any, sessionId, index) => {
     const currentCondition = {
@@ -413,4 +371,4 @@ const getRequestsByIdsWithBodies = async (sessionIds: string[]) => {
   }
 };
 
-export { useGetRequestCountClickhouse, useGetRequests, getRequestsByIds, getRequestsByIdsWithBodies };
+export { useGetRequestCountClickhouse, useGetRequests, getRequestsByIdsWithBodies };
