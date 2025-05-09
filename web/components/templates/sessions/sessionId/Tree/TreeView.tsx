@@ -352,7 +352,6 @@ const initialColumns: ColumnDef<TableTreeNode>[] = [
     accessorKey: "latency",
     header: "Latency",
     cell: (info) => {
-      if (!info.row.original.trace) return null; // Don't render for group rows
       const duration = info.getValue();
       if (typeof duration === "number") {
         return <>{(duration / 1000).toFixed(2)}s</>;
