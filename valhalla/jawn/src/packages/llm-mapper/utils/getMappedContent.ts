@@ -168,7 +168,9 @@ const messageToText = (message: Message): string => {
   text += message.content?.trim() ?? "";
   message.tool_calls?.forEach((toolCall) => {
     text += JSON.stringify(toolCall.arguments).trim();
-    text += JSON.stringify(toolCall.name).trim();
+    if (toolCall.name) {
+      text += JSON.stringify(toolCall.name).trim();
+    }
   });
   text += message.role ?? "";
   text += message.name ?? "";

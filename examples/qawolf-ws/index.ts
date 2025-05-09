@@ -33,7 +33,9 @@ const ws = new WebSocket(url, {
     Authorization: `Bearer ${apiKey}`,
     "Helicone-Auth": "Bearer " + process.env.HELICONE_API_KEY,
     // + Any Helicone properties here:
+    "Helicone-Session-Name": "QAWOLF-Live-Updates",
     "Helicone-Session-Id": `session_${Date.now()}`,
+    "Helicone-Session-Path": "/realtime-session",
     "Helicone-User-Id": "qawolf",
   },
 });
