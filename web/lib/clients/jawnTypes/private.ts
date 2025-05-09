@@ -1138,6 +1138,7 @@ Json: JsonObject;
       type?: "input_image" | "input_text" | "input_file";
       audio_data?: string;
       image_url?: string;
+      start_timestamp?: string;
       timestamp?: string;
       tool_call_id?: string;
       tool_calls?: components["schemas"]["FunctionCall"][];
