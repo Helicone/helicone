@@ -106,7 +106,10 @@ export const Realtime: React.FC<RealtimeProps> = ({
       const timeB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
       return timeA - timeB;
     });
-  }, [mappedRequest.schema.request?.messages, mappedRequest.schema.response?.messages]);
+  }, [
+    mappedRequest.schema.request?.messages,
+    mappedRequest.schema.response?.messages,
+  ]);
 
   // Define getMessageType function before using it
   const getMessageType = (message: any): MessageType => {
@@ -224,8 +227,15 @@ export const Realtime: React.FC<RealtimeProps> = ({
   };
 
   useEffect(() => {
-    if (messageToScrollToRef.current && filterInfo?.isFiltered && shouldScroll) {
-      messageToScrollToRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (
+      messageToScrollToRef.current &&
+      filterInfo?.isFiltered &&
+      shouldScroll
+    ) {
+      messageToScrollToRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
     }
   }, [filterInfo?.isFiltered, filteredMessages, shouldScroll]);
 
@@ -259,11 +269,13 @@ export const Realtime: React.FC<RealtimeProps> = ({
           const messageKey = `${idx}-${message.timestamp}`; // Use index within the current filtered list + timestamp
           const isDeletedExpanded = deletedMessageStates[messageKey] ?? false; // Use state, default to false if not set
 
-          const shouldScrollToThisMessage = filterInfo?.isFiltered && 
-            idx >= (filterInfo.startIndex || 0) && 
+          const shouldScrollToThisMessage =
+            filterInfo?.isFiltered &&
+            idx >= (filterInfo.startIndex || 0) &&
             idx <= (filterInfo.endIndex || filterInfo.startIndex || 0);
 
-          const isFilteredMessage = !filterInfo?.isFiltered || shouldScrollToThisMessage;
+          const isFilteredMessage =
+            !filterInfo?.isFiltered || shouldScrollToThisMessage;
 
           return (
             <div
