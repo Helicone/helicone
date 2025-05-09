@@ -7,6 +7,7 @@ import { Result } from "../../packages/common/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { placeAssetIdValues } from "../lib/requestTraverseHelper";
 import { SortLeafRequest } from "../lib/sorts/requests/sorts";
+import { MAX_EXPORT_ROWS } from "@/lib/constants";
 
 function formatDateForClickHouse(date: Date): string {
   return date.toISOString().slice(0, 19).replace("T", " ");
@@ -307,7 +308,7 @@ const getRequestsByIds = async (sessionIds: string[]) => {
       body: {
         filter,
         offset: 0,
-        limit: 500,
+        limit: MAX_EXPORT_ROWS,
         sort: {
           created_at: "desc",
         },
@@ -349,7 +350,7 @@ const getRequestsByIdsWithBodies = async (sessionIds: string[]) => {
       body: {
         filter,
         offset: 0,
-        limit: 500,
+        limit: MAX_EXPORT_ROWS,
         sort: {
           created_at: "desc",
         },
