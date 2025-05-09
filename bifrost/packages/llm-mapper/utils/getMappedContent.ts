@@ -241,12 +241,24 @@ const sanitizeMappedContent = (
       },
     },
     preview: {
-      request: mappedContent.preview.request
-        ?.replaceAll("\n", " ")
-        .slice(0, MAX_PREVIEW_LENGTH),
-      response: mappedContent.preview.response
-        ?.replaceAll("\n", " ")
-        .slice(0, MAX_PREVIEW_LENGTH),
+      request:
+        typeof mappedContent.preview.request === "string"
+          ? mappedContent.preview.request
+              .replaceAll("\n", " ")
+              .slice(0, MAX_PREVIEW_LENGTH)
+          : String(mappedContent.preview.request || "").slice(
+              0,
+              MAX_PREVIEW_LENGTH
+            ),
+      response:
+        typeof mappedContent.preview.response === "string"
+          ? mappedContent.preview.response
+              .replaceAll("\n", " ")
+              .slice(0, MAX_PREVIEW_LENGTH)
+          : String(mappedContent.preview.response || "").slice(
+              0,
+              MAX_PREVIEW_LENGTH
+            ),
       concatenatedMessages:
         sanitizeMessages(mappedContent.preview.concatenatedMessages) ?? [],
       fullRequestText: (preview?: boolean) => {
