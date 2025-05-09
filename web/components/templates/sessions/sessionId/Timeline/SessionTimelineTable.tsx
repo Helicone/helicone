@@ -1,8 +1,14 @@
+import { clsx } from "@/components/shared/clsx";
+import LoadingAnimation from "@/components/shared/loadingAnimation";
+import DraggableColumnHeader from "@/components/shared/themed/table/columns/draggableColumnHeader";
+import { DragColumnItem } from "@/components/shared/themed/table/columns/DragList";
 import { TableTreeNode } from "@/components/templates/sessions/sessionId/Tree/TreeView";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { HeliconeRequestType } from "@/lib/sessions/sessionTypes";
 import { UIFilterRowTree } from "@/services/lib/filters/types";
+import { useColorMapStore } from "@/store/features/sessions/colorMap";
 import { TimeFilter } from "@/types/timeFilter";
 import {
   AdjustmentsHorizontalIcon,
@@ -26,12 +32,6 @@ import { Result } from "../../../../../packages/common/result";
 import { SingleFilterDef } from "../../../../../services/lib/filters/frontendFilterDefs";
 import { OrganizationFilter } from "../../../../../services/lib/organization_layout/organization_layout";
 import { SortDirection } from "../../../../../services/lib/sorts/requests/sorts";
-import { DragColumnItem } from "@/components/shared/themed/table/columns/DragList";
-import LoadingAnimation from "@/components/shared/loadingAnimation";
-import DraggableColumnHeader from "@/components/shared/themed/table/columns/draggableColumnHeader";
-import { clsx } from "@/components/shared/clsx";
-import { useColorMapStore } from "@/store/features/sessions/colorMap";
-import { HeliconeRequestType } from "@/lib/sessions/sessionTypes";
 
 type CheckboxMode = "always_visible" | "on_hover" | "never";
 
@@ -370,7 +370,7 @@ export default function SessionTimelineTable(
                       key={cell.id}
                       className={clsx(
                         "text-slate-700 dark:text-slate-300 truncate select-none pl-1",
-                        i === 0 ? "pr-2 relative" : "py-1",
+                        cell.column.id === "path" ? "pr-2 relative" : "py-1",
                         (() => {
                           if (
                             checkedIds?.includes(row.original?.id ?? "") ||
@@ -405,46 +405,56 @@ export default function SessionTimelineTable(
                             : undefined
                         }
                       >
-                        {i === 0 &&
+                        {cell.column.id === "path" &&
                           (() => {
+                            // Group color indicator
                             const groupColorClass =
                               getColor(row.original.completePath) ||
                               "transparent";
-
-                            if (groupColorClass !== "bg-transparent") {
-                              return (
+                            const colorBar =
+                              groupColorClass !== "bg-transparent" ? (
                                 <div
                                   className={`absolute left-0 top-0 bottom-0 w-1 z-9 bg-${groupColorClass}`}
                                 />
-                              );
-                            }
-                            return null;
+                              ) : null;
+
+                            // Expansion chevron for expandable rows
+                            const expansionChevron = row.getCanExpand() && (
+                              <>
+                                {row.getIsExpanded() ? (
+                                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                ) : (
+                                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                )}
+                              </>
+                            );
+
+                            // Request type badge for leaf nodes
+                            const requestTypeBadge = !row.getCanExpand() && (
+                              <span
+                                className={clsx(
+                                  "flex-shrink-0 px-2 py-1 mr-4 my-1 text-xs font-medium rounded-md whitespace-nowrap",
+                                  REQUEST_TYPE_CONFIG[
+                                    row.original.heliconeRequestType!
+                                  ].bgColor
+                                )}
+                              >
+                                {
+                                  REQUEST_TYPE_CONFIG[
+                                    row.original!.heliconeRequestType!
+                                  ].displayName
+                                }
+                              </span>
+                            );
+
+                            return (
+                              <>
+                                {colorBar}
+                                {expansionChevron}
+                                {requestTypeBadge}
+                              </>
+                            );
                           })()}
-                        {i === 0 && row.getCanExpand() && (
-                          <>
-                            {row.getIsExpanded() ? (
-                              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                            ) : (
-                              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                            )}
-                          </>
-                        )}
-                        {i === 0 && !row.getCanExpand() && (
-                          <span
-                            className={clsx(
-                              "flex-shrink-0 px-2 py-1 mr-4 my-1 text-xs font-medium rounded-md whitespace-nowrap",
-                              REQUEST_TYPE_CONFIG[
-                                row.original.heliconeRequestType!
-                              ].bgColor
-                            )}
-                          >
-                            {
-                              REQUEST_TYPE_CONFIG[
-                                row.original!.heliconeRequestType!
-                              ].displayName
-                            }
-                          </span>
-                        )}
                         {dataLoading &&
                         (cell.column.id == "requestText" ||
                           cell.column.id == "responseText") ? (
@@ -461,12 +471,14 @@ export default function SessionTimelineTable(
                             &nbsp;
                           </span>
                         ) : (
-                          flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )
+                          <div className="pl-2">
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </div>
                         )}
-                        {i === 0 &&
+                        {cell.column.id === "path" &&
                           row.getParentRow() === undefined &&
                           descendantErrorMap.get(row.original.id ?? "") ===
                             true && (
