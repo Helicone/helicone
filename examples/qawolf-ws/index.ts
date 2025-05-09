@@ -33,7 +33,7 @@ const ws = new WebSocket(url, {
     Authorization: `Bearer ${apiKey}`,
     "Helicone-Auth": "Bearer " + process.env.HELICONE_API_KEY,
     // + Any Helicone properties here:
-    "Helicone-Session-Name": "QAWOLF-Live-Updates",
+    "Helicone-Session-Name": "QAWOLF-Live-Updates-Final",
     "Helicone-Session-Id": `session_${Date.now()}`,
     "Helicone-Session-Path": "/realtime-session",
     "Helicone-User-Id": "qawolf",
@@ -64,15 +64,70 @@ const sessionUpdate = {
       {
         type: "function",
         name: "get_weather",
-        description: "Get the current weather...",
+        description: "Get the current weather for a location with detailed information",
         parameters: {
           type: "object",
           properties: {
-            location: { type: "string" },
+            location: { 
+              type: "string",
+              description: "The city and country/state to get weather for"
+            },
+            units: { 
+              type: "string",
+              enum: ["celsius", "fahrenheit"],
+              description: "Temperature units to return"
+            }
           },
           required: ["location"],
         },
       },
+      {
+        type: "function",
+        name: "get_stock_price",
+        description: "Get the current stock price for a given ticker symbol",
+        parameters: {
+          type: "object",
+          properties: {
+            symbol: { 
+              type: "string",
+              description: "The stock ticker symbol (e.g. AAPL, GOOGL)"
+            },
+            exchange: {
+              type: "string",
+              enum: ["NYSE", "NASDAQ"],
+              description: "The stock exchange"
+            }
+          },
+          required: ["symbol"],
+        },
+      },
+      {
+        type: "function",
+        name: "calculate_mortgage",
+        description: "Calculate monthly mortgage payments based on loan details",
+        parameters: {
+          type: "object",
+          properties: {
+            principal: { 
+              type: "number",
+              description: "The loan amount in dollars"
+            },
+            annual_interest_rate: {
+              type: "number",
+              description: "Annual interest rate as a percentage (e.g. 5.5 for 5.5%)"
+            },
+            loan_term_years: {
+              type: "number",
+              description: "The length of the loan in years"
+            },
+            down_payment: {
+              type: "number",
+              description: "Down payment amount in dollars (optional)",
+            }
+          },
+          required: ["principal", "annual_interest_rate", "loan_term_years"],
+        },
+      }
     ],
     tool_choice: "auto",
     temperature: 0.8,
@@ -298,38 +353,79 @@ ws.on("message", function incoming(message: WebSocket.RawData) {
 // Function call handler
 function handleFunctionCall(functionCall: any) {
   const { name, arguments: args } = functionCall;
+  const parsedArgs = JSON.parse(args);
+  const functionItemId = `item_function_${Date.now()}_${messageCounter++}`;
+  lastItemId = functionItemId;
 
-  if (name === "get_weather") {
-    const parsedArgs = JSON.parse(args);
-    const functionItemId = `item_function_${Date.now()}_${messageCounter++}`;
-    lastItemId = functionItemId;
+  let response;
 
-    const dummyResponse = {
-      type: "conversation.item.create",
-      item: {
-        id: functionItemId,
-        type: "function_call_output",
-        call_id: functionCall.call_id,
-        output: JSON.stringify({
-          temperature: 72,
-          conditions: "sunny",
-          location: parsedArgs.location,
-        }),
-      },
-    };
+  switch (name) {
+    case "get_weather":
+      response = {
+        temperature: parsedArgs.units === "celsius" ? 22 : 72,
+        conditions: "sunny",
+        location: parsedArgs.location,
+        humidity: 45,
+        wind_speed: 10,
+        units: parsedArgs.units || "fahrenheit"
+      };
+      break;
 
-    console.log(
-      "\nSending function response:",
-      inspect(dummyResponse, { colors: true, depth: null })
-    );
-    ws.send(JSON.stringify(dummyResponse));
-    ws.send(
-      JSON.stringify({
-        type: "response.create",
-        response: {},
-      })
-    );
+    case "get_stock_price":
+      response = {
+        symbol: parsedArgs.symbol,
+        price: 150.25,
+        exchange: parsedArgs.exchange || "NASDAQ",
+        change_percent: 2.5,
+        volume: 1000000,
+        timestamp: new Date().toISOString()
+      };
+      break;
+
+    case "calculate_mortgage":
+      const principal = parsedArgs.principal - (parsedArgs.down_payment || 0);
+      const monthlyRate = (parsedArgs.annual_interest_rate / 100) / 12;
+      const totalPayments = parsedArgs.loan_term_years * 12;
+      
+      const monthlyPayment = principal * 
+        (monthlyRate * Math.pow(1 + monthlyRate, totalPayments)) / 
+        (Math.pow(1 + monthlyRate, totalPayments) - 1);
+
+      response = {
+        monthly_payment: Math.round(monthlyPayment * 100) / 100,
+        total_payments: totalPayments,
+        total_interest: Math.round((monthlyPayment * totalPayments - principal) * 100) / 100,
+        principal_amount: principal,
+        down_payment: parsedArgs.down_payment || 0
+      };
+      break;
+
+    default:
+      console.error("Unknown function:", name);
+      return;
   }
+
+  const dummyResponse = {
+    type: "conversation.item.create",
+    item: {
+      id: functionItemId,
+      type: "function_call_output",
+      call_id: functionCall.call_id,
+      output: JSON.stringify(response),
+    },
+  };
+
+  console.log(
+    "\nSending function response:",
+    inspect(dummyResponse, { colors: true, depth: null })
+  );
+  ws.send(JSON.stringify(dummyResponse));
+  ws.send(
+    JSON.stringify({
+      type: "response.create",
+      response: {},
+    })
+  );
 }
 
 ws.on("error", function error(err: Error) {
