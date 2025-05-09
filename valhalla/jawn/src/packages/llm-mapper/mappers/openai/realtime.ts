@@ -246,6 +246,9 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
     }
   });
 
+  let userTentativeMessage : Message | null = null;
+  let targetTentativeMessage : Message | null = null;
+
   return groupedMessages
     .map((msg: SocketMessage) => {
       // Only process specific message types that we want to show
@@ -253,16 +256,16 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
       const item = msg.content?.item;
 
       switch (msg.content.type) {
-        // -> User: Audio (Combined buffer)
-        case "input_audio_buffer.combined":
-          return {
-            role: "user",
-            _type: "audio",
-            content: "", // No transcript available at this point
-            audio_data: msg.content.audio || "",
-            timestamp: msg.timestamp,
-          };
-
+        case "input_audio_buffer.speech_started":
+          if (!userTentativeMessage) {
+            userTentativeMessage = {
+              role: "user",
+              _type: "audio",
+              content: "",
+              start_timestamp: msg.timestamp,
+            }
+          }
+          break;
         case "response.create":
           // -> User: Text
           return msg.content?.response?.instructions
@@ -273,9 +276,19 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
                 timestamp: msg.timestamp,
               }
             : null;
-
+        case "response.created":
+          if (!targetTentativeMessage) {
+            targetTentativeMessage = {
+              role: msg.from === "target" ? "assistant" : "user",
+              _type: "audio",
+              start_timestamp: msg.timestamp,
+            }
+          }
+          break;
         case "conversation.item.input_audio_transcription.completed":
           // -> User: Audio (transcript)
+          const startTimestamp = userTentativeMessage?.start_timestamp ?? msg.timestamp;
+          userTentativeMessage = null;
           return msg.content?.transcript
             ? {
                 role: "user",
@@ -283,6 +296,7 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
                 content: msg.content.transcript,
                 audio_data: msg.content.item?.content?.[0]?.audio || null,
                 timestamp: msg.timestamp,
+                start_timestamp: startTimestamp,
               }
             : null;
 
@@ -291,13 +305,15 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
             // -> Assistant: Text or Audio
             const content = output.content[0];
             if (!content.text && !content.transcript) return null;
-
+            const startTimestamp = targetTentativeMessage?.start_timestamp ?? msg.timestamp;
+            targetTentativeMessage = null;
             return {
               role: "assistant",
               _type: content.text ? "text" : "audio",
               content: content.text || content.transcript || "",
               audio_data: content.audio,
               timestamp: msg.timestamp,
+              start_timestamp: startTimestamp,
             };
           }
 
