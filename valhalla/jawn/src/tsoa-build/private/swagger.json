@@ -2761,6 +2761,9 @@
 					"image_url": {
 						"type": "string"
 					},
+					"start_timestamp": {
+						"type": "string"
+					},
 					"timestamp": {
 						"type": "string"
 					},

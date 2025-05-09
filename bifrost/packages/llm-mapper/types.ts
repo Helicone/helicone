@@ -148,6 +148,7 @@ export type Message = {
   tool_calls?: FunctionCall[]; // only used if _type is functionCall
   tool_call_id?: string;
   timestamp?: string; // For realtime API
+  start_timestamp?: string; // For realtime API (creation)
   image_url?: string;
   audio_data?: string; // Base64 encoded audio data
   type?: "input_image" | "input_text" | "input_file";

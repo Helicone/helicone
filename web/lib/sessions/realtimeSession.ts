@@ -74,6 +74,8 @@ export const convertRealtimeRequestToSteps = (
     ).getTime();
   });
 
+  console.log("simulatedSteps", simulatedSteps);
+
   return simulatedSteps;
 };
 
@@ -89,7 +91,9 @@ function createSimulatedRequestStep(
   previousStepResponseTimestampMs: number // The end time (in ms) of the preceding step
 ): HeliconeRequest {
   // Use the message timestamp as the base request time
-  const baseRequestTimestampMs = new Date(message.timestamp!).getTime();
+  const baseRequestTimestampMs = new Date(
+    message.start_timestamp ?? message.timestamp!
+  ).getTime();
 
   // Ensure the current step starts at least 1ms after the previous step ended
   const stepRequestTimestampMs = Math.max(
@@ -100,8 +104,8 @@ function createSimulatedRequestStep(
   // Set response time 100ms after the (potentially adjusted) request time
   // Add a minimum duration of 1ms in case 100ms is too short due to adjustments
   const stepResponseTimestampMs = Math.max(
-    stepRequestTimestampMs + 100, // Keep a small simulated duration for the step
-    stepRequestTimestampMs + 1
+    stepRequestTimestampMs + 1,
+    new Date(message.timestamp!).getTime()
   );
 
   // Create a unique ID for the simulated step based on its index
