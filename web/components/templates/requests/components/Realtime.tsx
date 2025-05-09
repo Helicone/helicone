@@ -81,8 +81,6 @@ export const Realtime: React.FC<RealtimeProps> = ({
     const stepIndexStr =
       mappedRequest.heliconeMetadata?.customProperties
         ?._helicone_realtime_step_index;
-    console.log(stepIndexStr);
-    console.log(mappedRequest);
     if (stepIndexStr) {
       const stepIndex = parseInt(stepIndexStr, 10);
       if (!isNaN(stepIndex)) {
