@@ -2,84 +2,302 @@ use std::str::FromStr;
 
 use super::model::ModelMapper;
 use crate::{
-    middleware::mapper::{Convert, TryConvert, error::MapperError},
+    middleware::mapper::{TryConvert, error::MapperError},
     types::{model::Model, provider::InferenceProvider},
 };
 
-pub struct OpenAiConverter<'a> {
-    model_mapper: &'a ModelMapper<'a>,
+pub struct ToOpenAiConverter {
+    model_mapper: ModelMapper,
 }
 
-impl<'a> OpenAiConverter<'a> {
+impl ToOpenAiConverter {
     #[must_use]
-    pub fn new(model_mapper: &'a ModelMapper<'a>) -> Self {
+    pub fn new(model_mapper: ModelMapper) -> Self {
         Self { model_mapper }
-    }
-}
-
-impl Convert<openai_types::chat::Role> for anthropic_types::chat::Role {
-    fn convert(value: openai_types::chat::Role) -> Self {
-        match value {
-            openai_types::chat::Role::System => Self::System,
-            openai_types::chat::Role::User => Self::User,
-            openai_types::chat::Role::Assistant => Self::Assistant,
-            openai_types::chat::Role::Developer => Self::Developer,
-        }
     }
 }
 
 impl
     TryConvert<
-        openai_types::chat::ChatCompletionRequest,
-        anthropic_types::chat::ChatCompletionRequest,
-    > for OpenAiConverter<'_>
+        anthropic_ai_sdk::types::message::CreateMessageParams,
+        async_openai::types::CreateChatCompletionRequest,
+    > for ToOpenAiConverter
 {
     type Error = MapperError;
 
+    #[allow(clippy::too_many_lines)]
     fn try_convert(
         &self,
-        value: openai_types::chat::ChatCompletionRequest,
+        value: anthropic_ai_sdk::types::message::CreateMessageParams,
     ) -> std::result::Result<
-        anthropic_types::chat::ChatCompletionRequest,
+        async_openai::types::CreateChatCompletionRequest,
         Self::Error,
     > {
-        let target_provider = InferenceProvider::Anthropic;
+        use anthropic_ai_sdk::types::message as anthropic;
+        use async_openai::types as openai;
+        let target_provider = InferenceProvider::OpenAI;
         let source_model = Model::from_str(&value.model)?;
         let target_model = self
             .model_mapper
             .map_model(&target_provider, &source_model)?;
+
         tracing::trace!(source_model = ?source_model, target_model = ?target_model, "mapped model");
-        let system = if let Some(message) = value.messages.first() {
-            if message.role == openai_types::chat::Role::System {
-                Some(message.content.clone())
-            } else {
-                None
+        let reasoning_effort = if let Some(thinking) = value.thinking {
+            match thinking {
+                anthropic::ThinkingConfig::Enabled { budget_tokens } => {
+                    let reasoning_budget =
+                        f64::from(budget_tokens) / f64::from(value.max_tokens);
+                    match reasoning_budget {
+                        reasoning_budget if reasoning_budget < 0.33 => {
+                            Some(openai::ReasoningEffort::Low)
+                        }
+                        reasoning_budget if reasoning_budget < 0.66 => {
+                            Some(openai::ReasoningEffort::Medium)
+                        }
+                        reasoning_budget if reasoning_budget <= 1.0 => {
+                            Some(openai::ReasoningEffort::High)
+                        }
+                        _ => Some(openai::ReasoningEffort::Medium),
+                    }
+                }
+                anthropic::ThinkingConfig::Disabled => None,
             }
         } else {
             None
         };
-        let mut messages = Vec::with_capacity(value.messages.len());
-        for message in value.messages {
-            match message.role {
-                openai_types::chat::Role::System
-                | openai_types::chat::Role::Developer => {
-                    continue;
+
+        let max_completion_tokens = Some(value.max_tokens);
+        let stop = value.stop_sequences.map(openai::Stop::StringArray);
+        let stream = value.stream;
+        let stream_options = if stream.is_some_and(|s| s) {
+            Some(openai::ChatCompletionStreamOptions {
+                include_usage: true,
+            })
+        } else {
+            None
+        };
+        let temperature = value.temperature;
+        let top_p = value.top_p;
+        let (tool_choice, parallel_tool_calls): (
+            Option<openai::ChatCompletionToolChoiceOption>,
+            Option<bool>,
+        ) = match value.tool_choice {
+            Some(tool_choice) => match tool_choice {
+                anthropic::ToolChoice::Auto {
+                    disable_parallel_tool_use,
+                } => (
+                    Some(openai::ChatCompletionToolChoiceOption::Auto),
+                    disable_parallel_tool_use,
+                ),
+                anthropic::ToolChoice::None => {
+                    (Some(openai::ChatCompletionToolChoiceOption::None), None)
                 }
-                _ => {}
-            }
-            messages.push(
-                anthropic_types::chat::ChatCompletionRequestMessage {
-                    role: anthropic_types::chat::Role::convert(message.role),
-                    content: message.content.clone(),
-                },
-            );
+                anthropic::ToolChoice::Any {
+                    disable_parallel_tool_use,
+                } => (
+                    Some(openai::ChatCompletionToolChoiceOption::Required),
+                    disable_parallel_tool_use,
+                ),
+                anthropic::ToolChoice::Tool {
+                    name,
+                    disable_parallel_tool_use,
+                } => {
+                    let named_tool_choice =
+                        openai::ChatCompletionNamedToolChoice {
+                            r#type: openai::ChatCompletionToolType::Function,
+                            function: openai::FunctionName {
+                                name: name.clone(),
+                            },
+                        };
+                    (
+                        Some(openai::ChatCompletionToolChoiceOption::Named(
+                            named_tool_choice,
+                        )),
+                        disable_parallel_tool_use,
+                    )
+                }
+            },
+            None => (None, None),
+        };
+        let tools: Option<Vec<openai::ChatCompletionTool>> =
+            if let Some(tools) = value.tools {
+                let mapped_tools: Vec<_> = tools
+                    .into_iter()
+                    .filter_map(|tool| match tool {
+                        anthropic::Tool::Custom {
+                            name,
+                            description,
+                            input_schema,
+                            ..
+                        } => Some(openai::ChatCompletionTool {
+                            r#type: openai::ChatCompletionToolType::Function,
+                            function: openai::FunctionObject {
+                                name,
+                                description,
+                                parameters: Some(input_schema),
+                                strict: None,
+                            },
+                        }),
+                        _ => None,
+                    })
+                    .collect();
+
+                Some(mapped_tools)
+            } else {
+                None
+            };
+        let mut metadata = value.metadata;
+        let user = metadata
+            .as_mut()
+            .and_then(|metadata| metadata.fields.remove("user_id"));
+        let metadata = match metadata {
+            Some(metadata) => Some(
+                serde_json::to_value(metadata)
+                    .map_err(|_| MapperError::InvalidRequest)?,
+            ),
+            None => None,
+        };
+
+        let mut messages: Vec<openai::ChatCompletionRequestMessage> =
+            Vec::with_capacity(value.messages.len());
+        if let Some(system_prompt) = value.system {
+            messages.push(openai::ChatCompletionRequestMessage::Developer(openai::ChatCompletionRequestDeveloperMessage {
+                content: openai::ChatCompletionRequestDeveloperMessageContent::Text(system_prompt),
+                name: None,
+            }));
         }
-        Ok(anthropic_types::chat::ChatCompletionRequest {
+        for message in value.messages {
+            let mapped_message: openai::ChatCompletionRequestMessage =
+                match message.role {
+                    anthropic::Role::Assistant => {
+                        let mapped_content: openai::ChatCompletionRequestAssistantMessageContent = match message.content {
+                        anthropic::MessageContent::Text { content } => {
+                            openai::ChatCompletionRequestAssistantMessageContent::Text(content)
+                        }
+                        anthropic::MessageContent::Blocks { content } => {
+                            let blocks = content.into_iter().filter_map(|block| {
+                                match block {
+                                    anthropic::ContentBlock::Text { text, .. } => {
+                                        Some(openai::ChatCompletionRequestAssistantMessageContentPart::Text(openai::ChatCompletionRequestMessageContentPartText {
+                                            text
+                                        }))
+                                    },
+                                    anthropic::ContentBlock::Image { .. } |
+                                    anthropic::ContentBlock::ToolUse { .. } |
+                                    anthropic::ContentBlock::ToolResult { .. } |
+                                    anthropic::ContentBlock::ServerToolUse { .. } |
+                                    anthropic::ContentBlock::WebSearchToolResult { .. } |
+                                    anthropic::ContentBlock::Thinking { .. } |
+                                    anthropic::ContentBlock::RedactedThinking { .. } => {
+                                        None
+                                    }
+                                }
+                            }).collect();
+                            openai::ChatCompletionRequestAssistantMessageContent::Array(blocks)
+                        }
+                    };
+                        #[allow(deprecated)]
+                        openai::ChatCompletionRequestMessage::Assistant(
+                            openai::ChatCompletionRequestAssistantMessage {
+                                content: Some(mapped_content),
+                                tool_calls: None,
+                                refusal: None,
+                                name: None,
+                                audio: None,
+                                function_call: None,
+                            },
+                        )
+                    }
+                    anthropic::Role::User => {
+                        let content: openai::ChatCompletionRequestUserMessageContent  = match message.content {
+                        anthropic::MessageContent::Text { content } => {
+                            openai::ChatCompletionRequestUserMessageContent::Text(content)
+                        }
+                        anthropic::MessageContent::Blocks { content } => {
+                            let blocks = content.into_iter().filter_map(|block| {
+                                match block {
+                                    anthropic::ContentBlock::Text { text, .. } => {
+                                        Some(openai::ChatCompletionRequestUserMessageContentPart::Text(openai::ChatCompletionRequestMessageContentPartText {
+                                            text,
+                                        }))
+                                    },
+                                    anthropic::ContentBlock::Image { source } => {
+                                        let image_url = match source {
+                                            anthropic::ImageSource::Base64 { media_type: _, data } => {
+                                                openai::ImageUrl {
+                                                    url: data,
+                                                    detail: None,
+                                                }
+                                            },
+                                            anthropic::ImageSource::Url { url } => {
+                                                openai::ImageUrl {
+                                                    url,
+                                                    detail: None,
+                                                }
+                                            },
+                                        };
+                                        Some(openai::ChatCompletionRequestUserMessageContentPart::ImageUrl(openai::ChatCompletionRequestMessageContentPartImage {
+                                            image_url,
+                                        }))
+                                    },
+                                    anthropic::ContentBlock::ToolUse { .. } |
+                                    anthropic::ContentBlock::ToolResult { .. } |
+                                    anthropic::ContentBlock::ServerToolUse { .. } |
+                                    anthropic::ContentBlock::WebSearchToolResult { .. } |
+                                    anthropic::ContentBlock::Thinking { .. } |
+                                    anthropic::ContentBlock::RedactedThinking { .. } => {
+                                        None
+                                    }
+                                }
+                            }).collect();
+                            openai::ChatCompletionRequestUserMessageContent::Array(blocks)
+                        }
+                    };
+                        openai::ChatCompletionRequestMessage::User(
+                            openai::ChatCompletionRequestUserMessage {
+                                content,
+                                name: None,
+                            },
+                        )
+                    }
+                };
+            messages.push(mapped_message);
+        }
+
+        #[allow(deprecated)]
+        let request = async_openai::types::CreateChatCompletionRequest {
             messages,
             model: target_model.as_ref().to_string(),
-            temperature: value.temperature,
-            max_tokens: value.max_tokens.unwrap_or(u32::MAX),
-            system,
-        })
+            store: None,
+            reasoning_effort,
+            metadata,
+            parallel_tool_calls,
+            stop,
+            stream,
+            stream_options,
+            temperature,
+            top_p,
+            tools,
+            tool_choice,
+            user,
+            max_completion_tokens,
+            max_tokens: None,
+            frequency_penalty: None,
+            logit_bias: None,
+            logprobs: None,
+            n: None,
+            modalities: None,
+            presence_penalty: None,
+            prediction: None,
+            response_format: None,
+            seed: None,
+            service_tier: None,
+            top_logprobs: None,
+            audio: None,
+            function_call: None,
+            functions: None,
+        };
+
+        Ok(request)
     }
 }

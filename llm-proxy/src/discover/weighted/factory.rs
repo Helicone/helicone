@@ -35,15 +35,18 @@ impl Service<Receiver<Change<WeightedKey, DispatcherService>>>
         &mut self,
         rx: Receiver<Change<WeightedKey, DispatcherService>>,
     ) -> Self::Future {
-        let weighted_balance_targets = match &self.router_config.balance {
-            BalanceConfig::Weighted { targets } => targets.clone(),
+        match &self.router_config.balance {
+            BalanceConfig::Weighted { .. } => {}
             BalanceConfig::P2C { .. } => {
-                return ready(Err(InitError::InvalidBalancerInitialization));
+                return ready(Err(InitError::InvalidWeightedBalancer(
+                    "P2C balancer not supported for weighted discovery"
+                        .to_string(),
+                )));
             }
-        };
+        }
         let discovery = match Discovery::new_weighted(
             &self.app_state,
-            weighted_balance_targets,
+            &self.router_config,
             rx,
         ) {
             Ok(discovery) => discovery,

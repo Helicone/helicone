@@ -8,10 +8,9 @@ use http::uri::PathAndQuery;
 use http_body_util::BodyExt;
 
 use crate::{
-    app::AppState,
-    config::router::RouterConfig,
+    endpoints::ApiEndpoint,
     error::{api::Error, internal::InternalError},
-    middleware::mapper::endpoint::ApiEndpoint,
+    middleware::mapper::registry::EndpointConverterRegistry,
     types::{
         provider::InferenceProvider,
         request::{Request, RequestContext},
@@ -21,12 +20,11 @@ use crate::{
 #[derive(Debug, Clone)]
 pub struct Service<S> {
     inner: S,
-    app_state: AppState,
 }
 
 impl<S> Service<S> {
-    pub fn new(inner: S, app_state: AppState) -> Self {
-        Self { inner, app_state }
+    pub fn new(inner: S) -> Self {
+        Self { inner }
     }
 }
 
@@ -50,21 +48,27 @@ where
 
     #[tracing::instrument(name = "mapper", skip_all)]
     fn call(&mut self, mut req: Request) -> Self::Future {
-        let app_state = self.app_state.clone();
         let mut inner = self.inner.clone();
         std::mem::swap(&mut self.inner, &mut inner);
         Box::pin(async move {
-            let provider = req
+            let provider = *req
                 .extensions_mut()
-                .remove::<InferenceProvider>()
-                .ok_or(Error::Internal(
-                InternalError::ExtensionNotFound("Provider"),
-            ))?;
+                .get::<InferenceProvider>()
+                .ok_or(Error::Internal(InternalError::ExtensionNotFound(
+                    "Provider",
+                )))?;
             let req_ctx = req
                 .extensions()
                 .get::<Arc<RequestContext>>()
                 .ok_or(Error::Internal(InternalError::ExtensionNotFound(
                     "RequestContext",
+                )))?
+                .clone();
+            let converter_registry = req
+                .extensions()
+                .get::<EndpointConverterRegistry>()
+                .ok_or(Error::Internal(InternalError::ExtensionNotFound(
+                    "EndpointConverterRegistry",
                 )))?
                 .clone();
             let request_style = req_ctx.router_config.request_style;
@@ -73,8 +77,6 @@ where
                 provider = %provider,
                 "Mapper"
             );
-            let router_config = req_ctx.router_config.clone();
-
             if provider == request_style {
                 inner.call(req).await
             } else {
@@ -82,8 +84,7 @@ where
                 // thread
                 let req = tokio::task::spawn_blocking(move || async move {
                     map_request(
-                        app_state,
-                        router_config,
+                        converter_registry,
                         request_style,
                         provider,
                         req,
@@ -100,8 +101,7 @@ where
 }
 
 async fn map_request(
-    app_state: AppState,
-    router_config: Arc<RouterConfig>,
+    converter_registry: EndpointConverterRegistry,
     request_style: InferenceProvider,
     provider: InferenceProvider,
     mut req: Request,
@@ -120,8 +120,7 @@ async fn map_request(
         .map_err(InternalError::CollectBodyError)?
         .to_bytes();
     let (body, target_path_and_query) = source_endpoint.map(
-        &app_state,
-        &router_config,
+        &converter_registry,
         &body,
         &extracted_path_and_query,
         target_endpoint,
@@ -135,21 +134,12 @@ async fn map_request(
 }
 
 #[derive(Debug, Clone)]
-pub struct Layer {
-    app_state: AppState,
-}
-
-impl Layer {
-    #[must_use]
-    pub fn new(app_state: AppState) -> Self {
-        Self { app_state }
-    }
-}
+pub struct Layer;
 
 impl<S> tower::Layer<S> for Layer {
     type Service = Service<S>;
 
     fn layer(&self, inner: S) -> Self::Service {
-        Service::new(inner, self.app_state.clone())
+        Service::new(inner)
     }
 }

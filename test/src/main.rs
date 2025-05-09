@@ -15,7 +15,7 @@ pub async fn test() {
         "max_tokens": 400
     });
 
-    let openai_request: openai_types::chat::ChatCompletionRequest =
+    let openai_request: async_openai::types::CreateChatCompletionRequest =
         serde_json::from_value(openai_request_body).unwrap();
 
     let bytes = serde_json::to_vec(&openai_request).unwrap();

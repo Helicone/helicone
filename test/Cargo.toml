@@ -6,10 +6,9 @@ authors.workspace = true
 license.workspace = true
 
 [dependencies]
+async-openai = { workspace = true }
 llm-proxy = { workspace = true }
 tokio = { workspace = true }
-openai-types = { workspace = true }
-anthropic-types = { workspace = true }
 serde_json = { workspace = true }
 reqwest = { workspace = true, features = ["json", "rustls-tls"] }
 thiserror = { workspace = true }

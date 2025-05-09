@@ -23,13 +23,23 @@
 //! this struct then helps us deserialize to the correct type and then
 //! call the `TryConvert` fn.
 pub mod anthropic;
-pub mod endpoint;
 pub mod error;
 pub mod model;
 pub mod openai;
+pub mod registry;
 pub mod service;
 
+use bytes::Bytes;
+use error::MapperError;
+use serde::{Serialize, de::DeserializeOwned};
+
 pub use self::service::*;
+use crate::{
+    endpoints::Endpoint,
+    error::{
+        api::Error, internal::InternalError, invalid_req::InvalidRequestError,
+    },
+};
 
 /// `TryFrom` but allows us to implement it for foreign types, so we can
 /// maintain boundaries between our business logic and the provider types.
@@ -44,4 +54,47 @@ pub trait TryConvert<Source, Target>: Sized {
 
 pub trait Convert<Source>: Sized {
     fn convert(value: Source) -> Self;
+}
+
+pub trait EndpointConverter {
+    /// Convert a request body to a target request body with raw bytes.
+    fn convert(&self, req_body_bytes: &Bytes) -> Result<Bytes, Error>;
+}
+
+pub struct TypedEndpointConverter<S, T, C>
+where
+    S: Endpoint,
+    T: Endpoint,
+    C: TryConvert<S::RequestBody, T::RequestBody>,
+{
+    converter: C,
+    _phantom: std::marker::PhantomData<(S, T)>,
+}
+
+impl<S, T, C> EndpointConverter for TypedEndpointConverter<S, T, C>
+where
+    S: Endpoint,
+    S::RequestBody: DeserializeOwned,
+    T: Endpoint,
+    T::RequestBody: Serialize,
+    C: TryConvert<S::RequestBody, T::RequestBody>,
+    <C as TryConvert<S::RequestBody, T::RequestBody>>::Error: Into<MapperError>,
+{
+    fn convert(&self, bytes: &Bytes) -> Result<Bytes, Error> {
+        let source_request: S::RequestBody = serde_json::from_slice(bytes)
+            .map_err(InvalidRequestError::InvalidRequestBody)?;
+        let target_request: T::RequestBody = self
+            .converter
+            .try_convert(source_request)
+            .map_err(|e| InternalError::MapperError(e.into()))?;
+        let target_bytes =
+            serde_json::to_vec(&target_request).map_err(|e| {
+                InternalError::Serialize {
+                    ty: std::any::type_name::<T::RequestBody>(),
+                    error: e,
+                }
+            })?;
+
+        Ok(Bytes::from(target_bytes))
+    }
 }

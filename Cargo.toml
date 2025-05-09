@@ -1,7 +1,5 @@
 [workspace]
 members = [
-  "crates/anthropic-types",
-  "crates/openai-types",
   "crates/schema-filter",
   "crates/telemetry",
   "llm-proxy",
@@ -29,13 +27,14 @@ missing_errors_doc = { level = "allow" }
 missing_panics_doc = { level = "allow" }
 
 [workspace.dependencies]
-openai-types = { path = "./crates/openai-types" }
-anthropic-types = { path = "./crates/anthropic-types" }
 telemetry = { path = "./crates/telemetry" }
 llm-proxy = { path = "./llm-proxy" }
 weighted-balance = { path = "./crates/weighted-balance" }
 
+# TODO: @tom: submit upstream PR
+anthropic-ai-sdk = { version = "0.2.2", git = "https://github.com/tomharmon/anthropic-sdk-rs.git", branch = "add-serde-impls" }
 anyhow = "1.0.98"
+async-openai = "0.28.1"
 axum-core = "0.5.2"
 axum-server = "0.7.2"
 base64 = "0.22.1"
