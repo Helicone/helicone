@@ -12,18 +12,25 @@ function formatDateForClickHouse(date: Date): string {
   return date.toISOString().slice(0, 19).replace("T", " ");
 }
 
+function isISODateString(value: any): boolean {
+  if (typeof value !== "string") return false;
+  // match: 2025-04-08T00:32:56.000Z
+  const isoDateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/;
+  return isoDateRegex.test(value) && !isNaN(Date.parse(value));
+}
+
 function processFilter(filter: any): any {
   if (typeof filter !== "object" || filter === null) {
     return filter;
   }
 
   const result: any = Array.isArray(filter) ? [] : {};
-
   for (const key in filter) {
-    if (key === "gte" || key === "lte" || key === "gt" || key === "lt") {
-      result[key] = formatDateForClickHouse(new Date(filter[key]));
-    } else if (typeof filter[key] === "object") {
+    const isDate = isISODateString(filter[key]);
+    if (typeof filter[key] === "object") {
       result[key] = processFilter(filter[key]);
+    } else if (isDate) {
+      result[key] = formatDateForClickHouse(new Date(filter[key]));
     } else {
       result[key] = filter[key];
     }
