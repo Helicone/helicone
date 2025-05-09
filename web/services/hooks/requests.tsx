@@ -7,6 +7,7 @@ import { Result } from "../../packages/common/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { placeAssetIdValues } from "../lib/requestTraverseHelper";
 import { SortLeafRequest } from "../lib/sorts/requests/sorts";
+import { MAX_EXPORT_ROWS } from "@/lib/constants";
 
 function formatDateForClickHouse(date: Date): string {
   return date.toISOString().slice(0, 19).replace("T", " ");
@@ -288,4 +289,93 @@ const useGetRequestCountClickhouse = (
   };
 };
 
-export { useGetRequestCountClickhouse, useGetRequests };
+const getRequestsByIdsWithBodies = async (sessionIds: string[]) => {
+  const filter = sessionIds.reduce((acc: any, sessionId, index) => {
+    const currentCondition = {
+      request_response_rmt: {
+        properties: {
+          "Helicone-Session-Id": {
+            equals: sessionId,
+          },
+        },
+      },
+    };
+
+    if (index === 0) return currentCondition;
+
+    return {
+      left: acc,
+      operator: "or" as const,
+      right: currentCondition,
+    };
+  }, {});
+
+  try {
+    const response = await $JAWN_API.POST("/v1/request/query-clickhouse", {
+      body: {
+        filter,
+        offset: 0,
+        limit: MAX_EXPORT_ROWS,
+        sort: {
+          created_at: "desc",
+        },
+        isCached: false,
+      },
+    });
+
+    const requests = response.data?.data ?? [];
+    
+    const requestsWithBodies = await Promise.all(
+      requests.map(async (request) => {
+        if (requestBodyCache.has(request.request_id)) {
+          const bodyContent = requestBodyCache.get(request.request_id);
+          return {
+            ...request,
+            request_body: bodyContent?.request,
+            response_body: bodyContent?.response,
+          };
+        }
+
+        if (!request.signed_body_url) return request;
+
+        try {
+          const contentResponse = await fetch(request.signed_body_url);
+          if (!contentResponse.ok) {
+            console.error(
+              `Error fetching request body: ${contentResponse.status}`
+            );
+            return request;
+          }
+
+          const text = await contentResponse.text();
+          let content = JSON.parse(text);
+
+          if (request.asset_urls) {
+            content = placeAssetIdValues(request.asset_urls, content);
+          }
+
+          requestBodyCache.set(request.request_id, content);
+          if (requestBodyCache.size > 10_000) {
+            requestBodyCache.clear();
+          }
+
+          return {
+            ...request,
+            request_body: content.request,
+            response_body: content.response,
+          };
+        } catch (error) {
+          console.error("Error processing request body:", error);
+          return request;
+        }
+      })
+    );
+
+    return requestsWithBodies;
+  } catch (error) {
+    console.error("Error fetching requests by session IDs with bodies:", error);
+    throw error;
+  }
+};
+
+export { useGetRequestCountClickhouse, useGetRequests, getRequestsByIdsWithBodies };
