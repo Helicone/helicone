@@ -78,12 +78,11 @@ export const Realtime: React.FC<RealtimeProps> = ({
     if (propMessageIndexFilter) {
       return propMessageIndexFilter; // Use prop if available
     }
-;
     const stepIndexStr =
       mappedRequest.heliconeMetadata?.customProperties
         ?._helicone_realtime_step_index;
-    console.log(stepIndexStr)
-    console.log(mappedRequest)
+    console.log(stepIndexStr);
+    console.log(mappedRequest);
     if (stepIndexStr) {
       const stepIndex = parseInt(stepIndexStr, 10);
       if (!isNaN(stepIndex)) {
@@ -283,10 +282,22 @@ export const Realtime: React.FC<RealtimeProps> = ({
               className={`flex flex-col px-4 pb-4 mb-4 w-full 
                 ${isUser ? "items-end" : "items-start"}
                 ${isFilteredMessage ? "" : "opacity-25"}
-                ${onRequestSelect ? "hover:cursor-pointer hover:bg-accent/50" : ""}`}
+                ${
+                  onRequestSelect
+                    ? "hover:cursor-pointer hover:bg-accent/50"
+                    : ""
+                }`}
               onClick={() => {
-                if (filterInfo?.isFiltered && filterInfo?.startIndex === filterInfo?.endIndex) {
-                  onRequestSelect?.(mappedRequest.id.replace(`-step-${filterInfo?.startIndex}`, `-step-${idx}`)) 
+                if (
+                  filterInfo?.isFiltered &&
+                  filterInfo?.startIndex === filterInfo?.endIndex
+                ) {
+                  onRequestSelect?.(
+                    mappedRequest.id.replace(
+                      `-step-${filterInfo?.startIndex}`,
+                      `-step-${idx}`
+                    )
+                  );
                 }
               }}
             >

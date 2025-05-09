@@ -104,7 +104,7 @@ export const TreeView: React.FC<TreeViewProps> = ({
     } else {
       drawerRef.current?.resize(drawerSize);
     }
-  }
+  };
 
   const onRowSelectHandler = (row: TableTreeNode) => {
     if (row.trace) {
