@@ -9,7 +9,7 @@ use llm_proxy::{
     tests::{TestDefault, harness::Harness, mock::MockArgs},
     types::{provider::InferenceProvider, router::RouterId},
 };
-use nonempty_collections::nev;
+use nonempty_collections::nes;
 use serde_json::json;
 use tower::Service;
 
@@ -65,15 +65,10 @@ async fn anthropic_with_openai_request_style() {
         RouterId::Default,
         RouterConfig {
             request_style: InferenceProvider::OpenAI,
-            providers: nev![InferenceProvider::Anthropic],
-            cache: None,
-            fallback: None,
             balance: BalanceConfig::P2C {
-                targets: nev![InferenceProvider::Anthropic],
+                targets: nes![InferenceProvider::Anthropic],
             },
-            retries: None,
-            rate_limit: None,
-            spend_control: None,
+            ..Default::default()
         },
     )]));
     config.routers = router_config;
@@ -148,15 +143,10 @@ async fn anthropic_with_anthropic_request_style() {
         RouterId::Default,
         RouterConfig {
             request_style: InferenceProvider::OpenAI,
-            providers: nev![InferenceProvider::Anthropic],
-            cache: None,
-            fallback: None,
             balance: BalanceConfig::P2C {
-                targets: nev![InferenceProvider::Anthropic],
+                targets: nes![InferenceProvider::Anthropic],
             },
-            retries: None,
-            rate_limit: None,
-            spend_control: None,
+            ..Default::default()
         },
     )]));
     config.routers = router_config;
@@ -234,15 +224,10 @@ async fn anthropic_request_style() {
         RouterId::Default,
         RouterConfig {
             request_style: InferenceProvider::Anthropic,
-            providers: nev![InferenceProvider::OpenAI],
-            cache: None,
-            fallback: None,
             balance: BalanceConfig::P2C {
-                targets: nev![InferenceProvider::OpenAI],
+                targets: nes![InferenceProvider::OpenAI],
             },
-            retries: None,
-            rate_limit: None,
-            spend_control: None,
+            ..Default::default()
         },
     )]));
     config.routers = router_config;

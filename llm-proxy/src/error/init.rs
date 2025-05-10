@@ -35,6 +35,8 @@ pub enum InitError {
     ProviderError(#[from] crate::error::provider::ProviderError),
     /// Invalid model mapping config: {0}
     InvalidModelMappingConfig(crate::middleware::mapper::error::MapperError),
+    /// Invalid balance config
+    InvalidBalanceConfig,
     /// Invalid weight for provider: {0}
     InvalidWeight(InferenceProvider),
     /// Attempted to create a weighted balancer with P2C config

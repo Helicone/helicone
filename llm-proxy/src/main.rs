@@ -1,9 +1,7 @@
 use std::path::PathBuf;
 
 use clap::Parser;
-use llm_proxy::{
-    app::App, config::Config, middleware, utils::meltdown::TaggedService,
-};
+use llm_proxy::{app::App, config::Config, utils::meltdown::TaggedService};
 use meltdown::Meltdown;
 use tracing::info;
 
@@ -32,16 +30,15 @@ async fn main() -> Result<(), llm_proxy::error::runtime::RuntimeError> {
             .map_err(llm_proxy::error::runtime::RuntimeError::Init)?;
 
     info!("telemetry initialized");
-    let rate_limit_cleanup_interval = config.rate_limit.cleanup_interval;
-
     let mut shutting_down = false;
     let (app, provider_monitor) = App::new(config).await?;
-    let rate_limiting_cleanup_service =
-        middleware::rate_limit::service::Service::new(
-            app.state.0.authed_rate_limit.clone(),
-            app.state.0.unauthed_rate_limit.clone(),
-            rate_limit_cleanup_interval,
-        );
+    // let rate_limit_cleanup_interval = config.rate_limit.cleanup_interval;
+    // let rate_limiting_cleanup_service =
+    //     middleware::rate_limit::service::Service::new(
+    //         app.state.0.authed_rate_limit.clone(),
+    //         app.state.0.unauthed_rate_limit.clone(),
+    //         rate_limit_cleanup_interval,
+    //     );
 
     let mut meltdown = Meltdown::new()
         .register(TaggedService::new(
@@ -49,12 +46,11 @@ async fn main() -> Result<(), llm_proxy::error::runtime::RuntimeError> {
             llm_proxy::utils::meltdown::wait_for_shutdown_signals,
         ))
         .register(TaggedService::new("proxy", app))
-        .register(TaggedService::new("provider-monitor", provider_monitor))
-        // .register(TaggedService::new("proxy-metrics", metrics_server))
-        .register(TaggedService::new(
-            "rate-limit-cleanup",
-            rate_limiting_cleanup_service,
-        ));
+        .register(TaggedService::new("provider-monitor", provider_monitor));
+    // .register(TaggedService::new(
+    //     "rate-limit-cleanup",
+    //     rate_limiting_cleanup_service,
+    // ));
 
     while let Some((service, result)) = meltdown.next().await {
         match result {

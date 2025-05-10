@@ -9,6 +9,7 @@ use http_body_util::BodyExt;
 
 use crate::{
     app::AppState,
+    config::router::RouterConfig,
     error::{api::Error, internal::InternalError},
     middleware::mapper::endpoint::ApiEndpoint,
     types::{
@@ -72,6 +73,7 @@ where
                 provider = %provider,
                 "Mapper"
             );
+            let router_config = req_ctx.router_config.clone();
 
             if provider == request_style {
                 inner.call(req).await
@@ -79,7 +81,14 @@ where
                 // serialization/deserialization should be done on a dedicated
                 // thread
                 let req = tokio::task::spawn_blocking(move || async move {
-                    map_request(app_state, request_style, provider, req).await
+                    map_request(
+                        app_state,
+                        router_config,
+                        request_style,
+                        provider,
+                        req,
+                    )
+                    .await
                 })
                 .await
                 .map_err(InternalError::MappingTaskError)?
@@ -92,6 +101,7 @@ where
 
 async fn map_request(
     app_state: AppState,
+    router_config: Arc<RouterConfig>,
     request_style: InferenceProvider,
     provider: InferenceProvider,
     mut req: Request,
@@ -111,6 +121,7 @@ async fn map_request(
         .to_bytes();
     let (body, target_path_and_query) = source_endpoint.map(
         &app_state,
+        &router_config,
         &body,
         &extracted_path_and_query,
         target_endpoint,

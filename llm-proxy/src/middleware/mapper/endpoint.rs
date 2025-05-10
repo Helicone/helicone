@@ -5,12 +5,13 @@ use http::uri::PathAndQuery;
 
 use crate::{
     app::AppState,
-    config::model_mapping::ModelMapper,
+    config::router::RouterConfig,
     error::{
         api::Error, internal::InternalError, invalid_req::InvalidRequestError,
     },
     middleware::mapper::{
-        TryConvert, anthropic::AnthropicConverter, openai::OpenAiConverter,
+        TryConvert, anthropic::AnthropicConverter, model::ModelMapper,
+        openai::OpenAiConverter,
     },
     types::provider::InferenceProvider,
 };
@@ -58,11 +59,12 @@ impl ApiEndpoint {
     pub fn map(
         &self,
         app_state: &AppState,
+        router_config: &RouterConfig,
         body: &Bytes,
         path_and_query: &PathAndQuery,
         target_endpoint: ApiEndpoint,
     ) -> Result<(Bytes, PathAndQuery), Error> {
-        let model_mapper = ModelMapper::new(app_state);
+        let model_mapper = ModelMapper::new(app_state, router_config);
         let target_path_and_query =
             if let Some(query_params) = path_and_query.query() {
                 format!("{}?{}", target_endpoint.path(), query_params)

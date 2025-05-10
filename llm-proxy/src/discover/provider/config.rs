@@ -7,7 +7,7 @@ use std::{
 };
 
 use futures::Stream;
-use nonempty_collections::NEVec;
+use nonempty_collections::NESet;
 use pin_project::pin_project;
 use rust_decimal::prelude::ToPrimitive;
 use tokio::sync::mpsc::Receiver;
@@ -56,8 +56,9 @@ impl ConfigDiscovery<Key> {
     ) -> Result<Self, InitError> {
         let events = ReceiverStream::new(rx);
         let mut service_map: HashMap<Key, DispatcherService> = HashMap::new();
-        for provider in &router_config.providers {
-            let key = Key::new(*provider);
+        let providers = router_config.balance.providers();
+        for provider in providers {
+            let key = Key::new(provider);
             let dispatcher =
                 Dispatcher::new_with_middleware(app.clone(), key.provider)?;
             service_map.insert(key, dispatcher);
@@ -74,7 +75,7 @@ impl ConfigDiscovery<Key> {
 impl ConfigDiscovery<WeightedKey> {
     pub fn new_weighted(
         app: &AppState,
-        weighted_balance_targets: NEVec<BalanceTarget>,
+        weighted_balance_targets: NESet<BalanceTarget>,
         rx: Receiver<Change<WeightedKey, DispatcherService>>,
     ) -> Result<Self, InitError> {
         let events = ReceiverStream::new(rx);

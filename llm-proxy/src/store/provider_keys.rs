@@ -18,7 +18,6 @@ pub struct ProviderKeyRow {
 pub struct ProviderKeyStore;
 
 impl ProviderKeyStore {
-    // TODO: we need to link the provider key to the router config
     pub async fn get_provider_key(
         &self,
         tx: &mut Transaction<'_, Postgres>,
@@ -28,8 +27,6 @@ impl ProviderKeyStore {
         // not sure how derive_more serializes it tbh
         tracing::info!("serialized provider: {}", provider.to_string());
 
-        // TODO: the decrypted_ view doesn't inherit the same constraints,
-        // we should fix in helicone repo side and remove the `!`
         let row = sqlx::query_as!(
             ProviderKeyRow,
             r#"

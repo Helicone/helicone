@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use super::{Convert, TryConvert, error::MapperError};
 use crate::{
-    config::model_mapping::ModelMapper,
+    middleware::mapper::model::ModelMapper,
     types::{model::Model, provider::InferenceProvider},
 };
 
@@ -45,9 +45,11 @@ impl
     > {
         let target_provider = InferenceProvider::OpenAI;
         let source_model = Model::from_str(&value.model)?;
-        let model = self.model_mapper.get(&target_provider, &source_model)?;
+        let target_model = self
+            .model_mapper
+            .map_model(&target_provider, &source_model)?;
 
-        tracing::trace!(source_model = ?source_model, target_model = ?model, "mapped model");
+        tracing::trace!(source_model = ?source_model, target_model = ?target_model, "mapped model");
         let mut messages = Vec::with_capacity(value.messages.len());
         if let Some(system_prompt) = value.system {
             messages.push(openai_types::chat::ChatCompletionRequestMessage {
@@ -63,7 +65,7 @@ impl
         }
         Ok(openai_types::chat::ChatCompletionRequest {
             messages,
-            model: model.as_ref().to_string(),
+            model: target_model.as_ref().to_string(),
             temperature: value.temperature,
             max_tokens: Some(value.max_tokens),
         })

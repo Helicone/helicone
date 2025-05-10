@@ -10,7 +10,7 @@ use llm_proxy::{
     tests::{TestDefault, harness::Harness, mock::MockArgs},
     types::{provider::InferenceProvider, router::RouterId},
 };
-use nonempty_collections::nev;
+use nonempty_collections::nes;
 use rust_decimal::Decimal;
 use serde_json::json;
 use tower::Service;
@@ -20,7 +20,7 @@ use tower::Service;
 async fn weighted_balancer_anthropic_preferred() {
     let mut config = Config::test_default();
     let balance_config = BalanceConfig::Weighted {
-        targets: nev![
+        targets: nes![
             BalanceTarget {
                 provider: InferenceProvider::OpenAI,
                 weight: Decimal::try_from(0.25).unwrap(),
@@ -97,7 +97,7 @@ async fn weighted_balancer_anthropic_preferred() {
 async fn weighted_balancer_openai_preferred() {
     let mut config = Config::test_default();
     let balance_config = BalanceConfig::Weighted {
-        targets: nev![
+        targets: nes![
             BalanceTarget {
                 provider: InferenceProvider::OpenAI,
                 weight: Decimal::try_from(0.75).unwrap(),
@@ -174,7 +174,7 @@ async fn weighted_balancer_openai_preferred() {
 async fn weighted_balancer_anthropic_heavily_preferred() {
     let mut config = Config::test_default();
     let balance_config = BalanceConfig::Weighted {
-        targets: nev![
+        targets: nes![
             BalanceTarget {
                 provider: InferenceProvider::OpenAI,
                 weight: Decimal::try_from(0.05).unwrap(),

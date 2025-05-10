@@ -202,8 +202,9 @@ where
 
                     key.weight()
                 };
-                // TODO: decide ideal impl, remove unwrap
-                // alternatively we could use rand::distributions::WeightedIndex
+                // NOTE: This is O(n) over number of services, but it can
+                // be made to O(1) using precomputed probability tables as
+                // described here: https://www.keithschwarz.com/darts-dice-coins/
                 let sample = rand::seq::index::sample_weighted(
                     &mut self.rng,
                     len,

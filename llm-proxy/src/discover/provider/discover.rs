@@ -7,7 +7,7 @@ use std::{
 };
 
 use futures::Stream;
-use nonempty_collections::NEVec;
+use nonempty_collections::NESet;
 use pin_project::pin_project;
 use tokio::sync::mpsc::Receiver;
 use tower::discover::Change;
@@ -45,7 +45,7 @@ impl Discovery<Key> {
             DeploymentTarget::SelfHosted => Ok(Self::Config(
                 ConfigDiscovery::new(app_state, router_config, rx)?,
             )),
-            DeploymentTarget::Cloud | DeploymentTarget::Sidecar => {
+            DeploymentTarget::Cloud { .. } | DeploymentTarget::Sidecar => {
                 todo!("cloud and sidecar not supported yet")
             }
         }
@@ -55,7 +55,7 @@ impl Discovery<Key> {
 impl Discovery<WeightedKey> {
     pub fn new_weighted(
         app_state: &AppState,
-        weighted_balance_targets: NEVec<BalanceTarget>,
+        weighted_balance_targets: NESet<BalanceTarget>,
         rx: Receiver<Change<WeightedKey, DispatcherService>>,
     ) -> Result<Self, InitError> {
         // TODO: currently we also have a separate discovery_mode.
@@ -68,7 +68,7 @@ impl Discovery<WeightedKey> {
                     rx,
                 )?))
             }
-            DeploymentTarget::Cloud | DeploymentTarget::Sidecar => {
+            DeploymentTarget::Cloud { .. } | DeploymentTarget::Sidecar => {
                 todo!("cloud and sidecar not supported yet")
             }
         }

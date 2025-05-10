@@ -25,6 +25,7 @@
 pub mod anthropic;
 pub mod endpoint;
 pub mod error;
+pub mod model;
 pub mod openai;
 pub mod service;
 

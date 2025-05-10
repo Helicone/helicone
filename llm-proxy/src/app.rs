@@ -23,12 +23,7 @@ use tracing::{Level, Span, info};
 use tracing_opentelemetry::OpenTelemetrySpanExt;
 
 use crate::{
-    config::{
-        Config,
-        minio::Minio,
-        rate_limit::{AuthedLimiterConfig, UnauthedLimiterConfig},
-        server::TlsConfig,
-    },
+    config::{Config, minio::Minio, server::TlsConfig},
     discover::provider::monitor::ProviderMonitors,
     error::{self, init::InitError, runtime::RuntimeError},
     metrics::{self, Metrics},
@@ -73,8 +68,6 @@ pub struct InnerAppState {
     pub config: Config,
     pub minio: Minio,
     pub jawn_client: Client,
-    pub authed_rate_limit: Arc<AuthedLimiterConfig>,
-    pub unauthed_rate_limit: Arc<UnauthedLimiterConfig>,
     pub store: StoreRealm,
     pub metrics: Metrics,
     // the below fields should be moved to the router or org level.
@@ -141,6 +134,9 @@ pub struct InnerAppState {
 /// - `PathAndQuery`
 ///   - Added by the `MetaRouter`
 ///   - Used by the Mapper layer
+/// - `RouterConfig`
+///   - Added by the `MetaRouter`
+///   - Used by the Mapper layer
 #[derive(Clone)]
 pub struct App {
     pub state: AppState,
@@ -177,9 +173,6 @@ impl App {
     ) -> Result<(Self, ProviderMonitors), InitError> {
         tracing::info!(config = ?config, "creating app");
         let minio = Minio::new(config.minio.clone())?;
-        let unauthed_rate_limit =
-            Arc::new(config.rate_limit.unauthed_limiter());
-        let authed_rate_limit = Arc::new(config.rate_limit.authed_limiter());
         let pg_config =
             sqlx::postgres::PgPoolOptions::from(config.database.clone());
         let pg_pool = pg_config
@@ -206,8 +199,6 @@ impl App {
         let app_state = AppState(Arc::new(InnerAppState {
             config,
             minio,
-            authed_rate_limit,
-            unauthed_rate_limit,
             store: StoreRealm::new(pg_pool),
             provider_keys,
             jawn_client,
