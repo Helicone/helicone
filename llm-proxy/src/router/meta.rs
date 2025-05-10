@@ -49,9 +49,9 @@ impl MetaRouter {
     ) -> Result<(Self, ProviderMonitors), InitError> {
         let meta_router = match app_state.0.config.deployment_target {
             DeploymentTarget::SelfHosted => Self::from_config(app_state).await,
-            DeploymentTarget::Cloud | DeploymentTarget::Sidecar => {
+            DeploymentTarget::Cloud { .. } | DeploymentTarget::Sidecar => {
                 return Err(InitError::DeploymentTargetNotSupported(
-                    app_state.0.config.deployment_target,
+                    app_state.0.config.deployment_target.clone(),
                 ));
             }
         }?;

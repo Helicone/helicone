@@ -8,7 +8,7 @@ use crate::types::{model::ModelName, provider::InferenceProvider};
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 pub struct ProviderConfig {
-    /// NOTE: In the future we can delete this field and
+    /// NOTE: In the future we can delete the `model` field and
     /// instead load the models from the provider's respective APIs
     pub models: IndexSet<ModelName<'static>>,
     pub base_url: Url,

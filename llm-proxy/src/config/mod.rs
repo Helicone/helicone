@@ -16,6 +16,7 @@ use config::ConfigError;
 use displaydoc::Display;
 use json_patch::merge;
 use serde::{Deserialize, Serialize};
+use strum::IntoStaticStr;
 use thiserror::Error;
 
 #[derive(Debug, Error, Display)]
@@ -31,11 +32,13 @@ pub enum Error {
 }
 
 #[derive(
-    Debug, Default, Clone, Copy, PartialEq, Eq, Deserialize, Serialize,
+    Debug, Default, Clone, PartialEq, Eq, Deserialize, Serialize, IntoStaticStr,
 )]
 #[serde(deny_unknown_fields, rename_all = "kebab-case")]
 pub enum DeploymentTarget {
-    Cloud,
+    Cloud {
+        global_rate_limits: self::rate_limit::RateLimitConfig,
+    },
     Sidecar,
     #[default]
     SelfHosted,
@@ -56,11 +59,6 @@ pub struct Config {
     /// model mapping, then we fallback to this.
     pub default_model_mapping: self::model_mapping::ModelMappingConfig,
     pub routers: self::router::RouterConfigs,
-    // TODO: only have this field for CloudHosted mode, (maybe a struct enum
-    // for deployment_target?), so cloud hosted mode can support a global
-    // rate limit. self hosted and sidecar will simply have rate limits on
-    // router level
-    pub rate_limit: self::rate_limit::RateLimitConfig,
     pub deployment_target: DeploymentTarget,
     pub is_production: bool,
     pub helicone: self::helicone::HeliconeConfig,
@@ -95,18 +93,6 @@ impl Config {
             .map_err(Box::new)?;
         Ok(config)
     }
-
-    #[must_use]
-    pub fn telemetry() -> telemetry::Config {
-        config::Config::builder()
-            .add_source(
-                config::Environment::with_prefix("PROXY__TELEMETRY")
-                    .separator("__"),
-            )
-            .build()
-            .and_then(config::Config::try_deserialize)
-            .unwrap_or_default()
-    }
 }
 
 #[cfg(feature = "testing")]
@@ -129,7 +115,6 @@ impl crate::tests::TestDefault for Config {
             providers: self::providers::ProvidersConfig::default(),
             helicone: self::helicone::HeliconeConfig::test_default(),
             deployment_target: DeploymentTarget::SelfHosted,
-            rate_limit: self::rate_limit::RateLimitConfig::test_default(),
             discover: self::discover::DiscoverConfig::test_default(),
             routers: self::router::RouterConfigs::test_default(),
         }

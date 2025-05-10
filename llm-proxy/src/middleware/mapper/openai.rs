@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
+use super::model::ModelMapper;
 use crate::{
-    config::model_mapping::ModelMapper,
     middleware::mapper::{Convert, TryConvert, error::MapperError},
     types::{model::Model, provider::InferenceProvider},
 };
@@ -45,8 +45,10 @@ impl
     > {
         let target_provider = InferenceProvider::Anthropic;
         let source_model = Model::from_str(&value.model)?;
-        let model = self.model_mapper.get(&target_provider, &source_model)?;
-        tracing::trace!(source_model = ?source_model, target_model = ?model, "mapped model");
+        let target_model = self
+            .model_mapper
+            .map_model(&target_provider, &source_model)?;
+        tracing::trace!(source_model = ?source_model, target_model = ?target_model, "mapped model");
         let system = if let Some(message) = value.messages.first() {
             if message.role == openai_types::chat::Role::System {
                 Some(message.content.clone())
@@ -74,7 +76,7 @@ impl
         }
         Ok(anthropic_types::chat::ChatCompletionRequest {
             messages,
-            model: model.as_ref().to_string(),
+            model: target_model.as_ref().to_string(),
             temperature: value.temperature,
             max_tokens: value.max_tokens.unwrap_or(u32::MAX),
             system,

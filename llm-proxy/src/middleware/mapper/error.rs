@@ -12,8 +12,10 @@ pub enum MapperError {
     NoModelMapping(InferenceProvider, String),
     /// Invalid model name: {0}
     InvalidModelName(String),
-    /// No provider config found for provider: {0}
+    /// No global provider config found for provider: {0}
     NoProviderConfig(InferenceProvider),
+    /// Provider not enabled in router config: {0}
+    ProviderNotEnabled(InferenceProvider),
 }
 
 /// Error types that can occur when mapping requests between providers for chat

@@ -35,9 +35,9 @@ impl Router {
         app_state: AppState,
     ) -> Result<(Self, ProviderMonitor), InitError> {
         let router_config = match &app_state.0.config.deployment_target {
-            DeploymentTarget::Cloud | DeploymentTarget::Sidecar => {
+            DeploymentTarget::Cloud { .. } | DeploymentTarget::Sidecar => {
                 return Err(InitError::DeploymentTargetNotSupported(
-                    app_state.0.config.deployment_target,
+                    app_state.0.config.deployment_target.clone(),
                 ));
             }
             DeploymentTarget::SelfHosted => {
@@ -53,7 +53,6 @@ impl Router {
             }
         };
         router_config.validate()?;
-        // TODO: how to get provider keys via discovery instead of above^
         let (balancer, monitor) =
             ProviderBalancer::new(app_state.clone(), router_config.clone())
                 .await?;

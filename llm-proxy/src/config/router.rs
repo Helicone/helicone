@@ -1,16 +1,17 @@
 use std::collections::HashMap;
 
 use derive_more::{AsMut, AsRef};
-use nonempty_collections::{NEVec, nev};
+use indexmap::IndexSet;
+use nonempty_collections::{NESet, nes};
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 
 use super::{
-    rate_limit::RateLimitConfig, retry::RetryConfig,
-    spend_control::SpendControlConfig,
+    model_mapping::ModelMappingConfig, rate_limit::RateLimitConfig,
+    retry::RetryConfig, spend_control::SpendControlConfig,
 };
 use crate::{
-    error::provider::ProviderError,
+    error::{init::InitError, provider::ProviderError},
     types::{model::Model, provider::InferenceProvider, router::RouterId},
 };
 
@@ -37,7 +38,7 @@ impl Default for RouterConfigs {
 #[serde(rename_all = "kebab-case")]
 pub struct RouterConfig {
     pub request_style: InferenceProvider,
-    pub providers: NEVec<InferenceProvider>,
+    pub model_mappings: ModelMappingConfig,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub cache: Option<CacheControlConfig>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -55,10 +56,7 @@ impl Default for RouterConfig {
     fn default() -> Self {
         Self {
             request_style: InferenceProvider::OpenAI,
-            providers: nev![
-                InferenceProvider::OpenAI,
-                InferenceProvider::Anthropic
-            ],
+            model_mappings: ModelMappingConfig::default(),
             cache: None,
             fallback: None,
             balance: BalanceConfig::p2c_all_providers(),
@@ -70,22 +68,16 @@ impl Default for RouterConfig {
 }
 
 impl RouterConfig {
-    pub fn validate(&self) -> Result<(), ProviderError> {
-        // TODO: when we add support for weighted balancing, we need to validate
-        // it adds up to 100%
-        let unsupported_provider = match &self.balance {
-            BalanceConfig::Weighted { targets } => targets
-                .iter()
-                .find(|target| !self.providers.contains(&target.provider))
-                .map(|target| &target.provider),
-            BalanceConfig::P2C { targets } => {
-                targets.iter().find(|target_provider| {
-                    !self.providers.contains(target_provider)
-                })
+    pub fn validate(&self) -> Result<(), InitError> {
+        let providers = self.balance.providers();
+        match &self.balance {
+            BalanceConfig::Weighted { targets } => {
+                let total = targets.iter().map(|t| t.weight).sum::<Decimal>();
+                if total != Decimal::from(1) {
+                    return Err(InitError::InvalidBalanceConfig);
+                }
             }
-        };
-        if let Some(provider) = unsupported_provider {
-            return Err(ProviderError::ProviderNotConfigured(*provider));
+            BalanceConfig::P2C { .. } => {}
         }
 
         // check that all providers in the fallback config are in the providers
@@ -94,11 +86,12 @@ impl RouterConfig {
             if let Some(unsupported_provider) = fallback_config
                 .order
                 .iter()
-                .find(|target| !self.providers.contains(&target.provider))
+                .find(|target| !providers.contains(&target.provider))
             {
                 return Err(ProviderError::ProviderNotConfigured(
                     unsupported_provider.provider,
-                ));
+                )
+                .into());
             }
         }
 
@@ -131,27 +124,31 @@ pub struct FallbackTarget {
     pub model: Model,
 }
 
-/// When it's time to add this, we need a weighted balance
-/// impl.
-///
-/// See e.g.:
-/// <https://github.com/tower-rs/tower/issues/696>
-/// <https://github.com/tower-rs/tower/pull/695/files>
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case", tag = "strategy")]
 pub enum BalanceConfig {
-    Weighted { targets: NEVec<BalanceTarget> },
-    P2C { targets: NEVec<InferenceProvider> },
+    Weighted { targets: NESet<BalanceTarget> },
+    P2C { targets: NESet<InferenceProvider> },
 }
 
 impl BalanceConfig {
     #[must_use]
     pub fn p2c_all_providers() -> Self {
         Self::P2C {
-            targets: nev![
+            targets: nes![
                 InferenceProvider::OpenAI,
                 InferenceProvider::Anthropic
             ],
+        }
+    }
+
+    #[must_use]
+    pub fn providers(&self) -> IndexSet<InferenceProvider> {
+        match self {
+            Self::Weighted { targets } => {
+                targets.iter().map(|t| t.provider).collect()
+            }
+            Self::P2C { targets } => targets.iter().copied().collect(),
         }
     }
 }
@@ -173,11 +170,11 @@ impl crate::tests::TestDefault for RouterConfigs {
             RouterId::Default,
             RouterConfig {
                 request_style: InferenceProvider::OpenAI,
-                providers: nev![InferenceProvider::OpenAI],
+                model_mappings: ModelMappingConfig::default(),
                 cache: None,
                 fallback: None,
                 balance: BalanceConfig::P2C {
-                    targets: nev![InferenceProvider::OpenAI],
+                    targets: nes![InferenceProvider::OpenAI],
                 },
                 retries: None,
                 rate_limit: None,
@@ -190,8 +187,6 @@ impl crate::tests::TestDefault for RouterConfigs {
 #[cfg(test)]
 mod tests {
     use std::time::Duration;
-
-    use nonempty_collections::nev;
 
     use super::*;
     use crate::{config::retry::Strategy, types::model::Version};
@@ -216,10 +211,11 @@ mod tests {
             }],
         };
 
-        let providers =
-            nev![InferenceProvider::OpenAI, InferenceProvider::Anthropic];
         let balance = BalanceConfig::P2C {
-            targets: providers.clone(),
+            targets: nes![
+                InferenceProvider::OpenAI,
+                InferenceProvider::Anthropic
+            ],
         };
         let retries = RetryConfig {
             enabled: false,
@@ -232,7 +228,7 @@ mod tests {
 
         RouterConfig {
             request_style: InferenceProvider::OpenAI,
-            providers,
+            model_mappings: ModelMappingConfig::default(),
             cache: Some(cache),
             fallback: Some(fallback),
             balance,
