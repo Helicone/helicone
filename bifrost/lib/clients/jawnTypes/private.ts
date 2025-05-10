@@ -1126,6 +1126,9 @@ Json: JsonObject;
       arguments: components["schemas"]["Record_string.any_"];
     };
     Message: {
+      ending_event_id?: string;
+      trigger_event_id?: string;
+      start_timestamp?: string;
       deleted?: boolean;
       contentArray?: components["schemas"]["Message"][];
       /** Format: double */
@@ -1138,7 +1141,6 @@ Json: JsonObject;
       type?: "input_image" | "input_text" | "input_file";
       audio_data?: string;
       image_url?: string;
-      start_timestamp?: string;
       timestamp?: string;
       tool_call_id?: string;
       tool_calls?: components["schemas"]["FunctionCall"][];

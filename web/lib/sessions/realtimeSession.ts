@@ -19,9 +19,10 @@ export const getSortedMessagesFromMappedRequest = (
       (m) => m.timestamp && m.role && !isNaN(new Date(m.timestamp).getTime())
     )
     .sort((a, b) => {
-      const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
-      const timeB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
-      return timeA - timeB;
+      return (
+        new Date((a?.start_timestamp ?? a?.timestamp) || 0).getTime() -
+        new Date((b?.start_timestamp ?? b?.timestamp) || 0).getTime()
+      );
     });
 };
 
@@ -90,10 +91,7 @@ function createSimulatedRequestStep(
   ).getTime();
 
   // Ensure the current step starts at least 1ms after the previous step ended
-  const stepRequestTimestampMs = Math.max(
-    baseRequestTimestampMs,
-    previousStepResponseTimestampMs + 1 // Add 1ms to ensure it's strictly after
-  );
+  const stepRequestTimestampMs = Math.max(baseRequestTimestampMs, 0);
 
   // Set response time 100ms after the (potentially adjusted) request time
   // Add a minimum duration of 1ms in case 100ms is too short due to adjustments

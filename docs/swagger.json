@@ -2111,6 +2111,15 @@
 			},
 			"Message": {
 				"properties": {
+					"ending_event_id": {
+						"type": "string"
+					},
+					"trigger_event_id": {
+						"type": "string"
+					},
+					"start_timestamp": {
+						"type": "string"
+					},
 					"deleted": {
 						"type": "boolean"
 					},
@@ -2148,9 +2157,6 @@
 						"type": "string"
 					},
 					"image_url": {
-						"type": "string"
-					},
-					"start_timestamp": {
 						"type": "string"
 					},
 					"timestamp": {
