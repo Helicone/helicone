@@ -187,11 +187,6 @@ const groupAudioBufferMessages = (
   let currentAudioGroup: SocketMessage[] = [];
   let targetAudioGroup: SocketMessage[] = [];
 
-  let currentAudioBuffers = {
-    "user": "",
-    "assistant": ""
-  }
-
   // First pass: identify groups of audio buffer messages
   for (let i = 0; i < messages.length; i++) {
     const msg = messages[i];
@@ -211,9 +206,6 @@ const groupAudioBufferMessages = (
     ) {
       result.push(combineAudioBuffers(currentAudioGroup, "audio", "input_audio_buffer.combined"));
       currentAudioGroup = []; // Reset the group
-    } else {
-      // For all other message types, just add them directly
-      // result.push(msg);
     }
     result.push(msg);
   }
