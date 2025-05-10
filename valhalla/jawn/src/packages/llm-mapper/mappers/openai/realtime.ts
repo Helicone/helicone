@@ -261,6 +261,7 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
   let targetTentativeMessage : Message | null = null;
   let userAudioTentativeMessage : Message | null = null;
   let targetAudioTentativeMessage : Message | null = null;
+  let message: Message | null = null;
 
   return groupedMessages
     .map((msg: SocketMessage) => {
@@ -276,6 +277,7 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
               _type: "audio",
               content: "",
               start_timestamp: msg.timestamp,
+              trigger_event_id: msg.content.type,
             }
           }
           break;
@@ -287,40 +289,44 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
               content: "",
               audio_data: "",
               start_timestamp: msg.timestamp,
+              trigger_event_id: msg.content.type,
             }
           }
           break;
         case "input_audio_buffer.combined":
-          const userAudioStartTimestamp = userAudioTentativeMessage?.start_timestamp ?? msg.timestamp;
-          userAudioTentativeMessage = null;
-          return {
+          message = {
+            ...userAudioTentativeMessage,
             role: "user",
             _type: "audio",
             content: "Input Audio",
             audio_data: msg.content.audio,
             timestamp: msg.timestamp,
-            start_timestamp: userAudioStartTimestamp,
-          }
+            ending_event_id: msg.content.type,
+          };
+          userAudioTentativeMessage = null;
+          return message;
         case "response.audio.delta":
           if (!targetAudioTentativeMessage) {
             targetAudioTentativeMessage = {
               role: "assistant",
               _type: "audio",
               start_timestamp: msg.timestamp,
+              trigger_event_id: msg.content.type,
             }
           }
           break;
         case "response.audio.combined":
-          const assistantAudioStartTimestamp = targetAudioTentativeMessage?.start_timestamp ?? msg.timestamp;
-          targetAudioTentativeMessage = null;
-          return {
+          message = {
+            ...targetAudioTentativeMessage,
             role: "assistant",
             _type: "audio",
             content: "Assistant Audio",
             audio_data: msg.content.audio,
             timestamp: msg.timestamp,
-            start_timestamp: assistantAudioStartTimestamp,
-          }
+            ending_event_id: msg.content.type,
+          };
+          targetAudioTentativeMessage = null;
+          return message;
         case "response.create":
           // -> User: Text
           return msg.content?.response?.instructions
@@ -337,39 +343,42 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
               role: msg.from === "target" ? "assistant" : "user",
               _type: "audio",
               start_timestamp: msg.timestamp,
+              trigger_event_id: msg.content.type,
             }
           }
           break;
         case "conversation.item.input_audio_transcription.completed":
           // -> User: Audio (transcript)
-          const transcriptionStartTimestamp = userTentativeMessage?.start_timestamp ?? msg.timestamp;
-          userTentativeMessage = null;
-          return msg.content?.transcript
+          message = msg.content?.transcript
             ? {
+                ...userTentativeMessage,
                 role: "user",
                 _type: "audio",
                 content: msg.content.transcript,
-                audio_data: msg.content.item?.content?.[0]?.audio || null,
+                audio_data: msg.content.item?.content?.[0]?.audio || undefined,
                 timestamp: msg.timestamp,
-                start_timestamp: transcriptionStartTimestamp,
+                ending_event_id: msg.content.type,
               }
             : null;
+          userTentativeMessage = null;
+          return message;
 
         case "response.done":
           if (output?.content?.[0]) {
             // -> Assistant: Text or Audio
             const content = output.content[0];
             if (!content.text && !content.transcript) return null;
-            const startTimestamp = targetTentativeMessage?.start_timestamp ?? msg.timestamp;
-            targetTentativeMessage = null;
-            return {
+            const message = {
+              ...targetTentativeMessage,
               role: "assistant",
               _type: content.text ? "text" : "audio",
               content: content.text || content.transcript || "",
               audio_data: content.audio,
               timestamp: msg.timestamp,
-              start_timestamp: startTimestamp,
+              ending_event_id: msg.content.type,
             };
+            targetTentativeMessage = null;
+            return message;
           }
 
           if (
@@ -482,7 +491,7 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
     .sort(
       // Sort by timestamp
       (a, b) =>
-        new Date((a?.start_timestamp ?? a?.timestamp) || 0).getTime() -
-        new Date((b?.start_timestamp ?? b?.timestamp) || 0).getTime()
+        new Date(((a as Message)?.start_timestamp ?? a?.timestamp) || 0).getTime() -
+        new Date(((b as Message)?.start_timestamp ?? b?.timestamp) || 0).getTime()
     ) as Message[];
 };

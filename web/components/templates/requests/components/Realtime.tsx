@@ -460,6 +460,19 @@ export const Realtime: React.FC<RealtimeProps> = ({
                       </div>
                     )}
                   </div>
+                  <div
+                    className={`flex items-center space-x-2 text-xs text-secondary ${
+                      isUser ? "justify-end" : "justify-start"
+                    }`}
+                  >
+                    <span className="text-tertiary">
+                      {message.trigger_event_id && message.ending_event_id && (
+                        <>
+                          {`${message.trigger_event_id} -> ${message.ending_event_id}`}
+                        </>
+                      )}
+                    </span>
+                  </div>
                 </div>
               )}
             </div>
