@@ -124,7 +124,7 @@ export const mapRealtimeRequest: MapperFn<any, any> = ({
   model,
 }) => {
   const requestMessages = mapRealtimeMessages(request?.messages || []);
-  const responseMessages: Message[] = []; //mapRealtimeMessages(response?.messages || []);
+  const responseMessages = mapRealtimeMessages(response?.messages || []);
   const allMessages = [...requestMessages, ...responseMessages];
 
   const llmSchema: LlmSchema = {
@@ -276,9 +276,17 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
       const output = msg.content?.response?.output?.[0];
       const item = msg.content?.item;
 
-      console.log("msg", msg.content.type, "timestamp", msg.timestamp);
-
       switch (msg.content.type) {
+        case "input_audio_buffer.speech_started":
+          if (!userTentativeMessage) {
+            userTentativeMessage = {
+              role: "user",
+              _type: "audio",
+              content: "",
+              start_timestamp: msg.timestamp,
+            }
+          }
+          break;
         case "input_audio_buffer.append":
           if (!userAudioTentativeMessage) {
             userAudioTentativeMessage = {
@@ -362,8 +370,6 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
             if (!content.text && !content.transcript) return null;
             const startTimestamp = targetTentativeMessage?.start_timestamp ?? msg.timestamp;
             targetTentativeMessage = null;
-            console.log("msg.timestamp", msg.timestamp, "startTimestamp", startTimestamp);
-            console.log("content:", content);
             return {
               role: "assistant",
               _type: content.text ? "text" : "audio",

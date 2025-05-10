@@ -45,10 +45,11 @@ type RealtimeMessage = {
     | "response.audio_transcript.done"
     | "response.audio.delta" // SHOW: Combine with others to get full assistant audio data
     | "response.audio.done"
+    | "response.audio.combined" // Custom type for combined audio buffers (assistant audio)
     | "response.function_call_arguments.delta"
     | "response.function_call_arguments.done"
     | "rate_limits.updated"
-    | "input_audio_buffer.combined"; // Custom type for combined audio buffers
+    | "input_audio_buffer.combined"; // Custom type for combined audio buffers (user audio)
 
   // With type "response.create"
   response?: {
@@ -147,59 +148,77 @@ export const mapRealtimeRequest: MapperFn<any, any> = ({
   };
 };
 
+
+const combineAudioBuffers = (audioBuffer: SocketMessage[], audio_key: "audio" | "delta", type: RealtimeMessage["type"]) => {
+  // When we hit a commit, we create a combined message from all appends in the current group
+  const firstMsg = audioBuffer[0];
+  const lastMsg = audioBuffer[audioBuffer.length - 1];
+
+  // Properly combine audio buffers - this is safer than just joining strings
+  // First, collect all base64 audio chunks
+  const audioChunks = audioBuffer
+    .map((m) => m.content[audio_key] || "")
+    .filter((chunk) => chunk.length > 0);
+
+  // If we have valid chunks, combine them
+  let combinedAudio = "";
+  if (audioChunks.length > 0) {
+    combinedAudio = audioChunks.join("");
+  }
+
+  const combinedMsg: SocketMessage = {
+    type: firstMsg.type,
+    from: lastMsg.from,
+    timestamp: lastMsg.timestamp,
+    content: {
+      type: type,
+      audio: combinedAudio,
+    },
+  };
+
+  return combinedMsg;
+}
+
 // Helper function to group audio buffer append messages
 const groupAudioBufferMessages = (
   messages: SocketMessage[]
 ): SocketMessage[] => {
   const result: SocketMessage[] = [];
   let currentAudioGroup: SocketMessage[] = [];
+  let targetAudioGroup: SocketMessage[] = [];
+
+  let currentAudioBuffers = {
+    "user": "",
+    "assistant": ""
+  }
 
   // First pass: identify groups of audio buffer messages
   for (let i = 0; i < messages.length; i++) {
     const msg = messages[i];
 
-    if (msg.content.type === "input_audio_buffer.append") {
+    if (msg.content.type === "response.audio.delta") {
+      targetAudioGroup.push(msg);
+    } else if (msg.content.type === "response.audio.done" &&
+      targetAudioGroup.length > 0
+    ) {
+      result.push(combineAudioBuffers(targetAudioGroup, "delta", "response.audio.combined"));
+      targetAudioGroup = [];
+    } else if (msg.content.type === "input_audio_buffer.append") {
       currentAudioGroup.push(msg);
     } else if (
       msg.content.type === "input_audio_buffer.commit" &&
       currentAudioGroup.length > 0
     ) {
-      // When we hit a commit, we create a combined message from all appends in the current group
-      const firstMsg = currentAudioGroup[0];
-
-      // Properly combine audio buffers - this is safer than just joining strings
-      // First, collect all base64 audio chunks
-      const audioChunks = currentAudioGroup
-        .map((m) => m.content.audio || "")
-        .filter((chunk) => chunk.length > 0);
-
-      // If we have valid chunks, combine them
-      let combinedAudio = "";
-      if (audioChunks.length > 0) {
-        combinedAudio = audioChunks.join("");
-      }
-
-      const combinedMsg: SocketMessage = {
-        type: firstMsg.type,
-        from: firstMsg.from,
-        timestamp: firstMsg.timestamp, // Use timestamp from first message
-        content: {
-          type: "input_audio_buffer.combined", // New type to identify combined messages
-          audio: combinedAudio,
-        },
-      };
-
-      result.push(combinedMsg);
+      result.push(combineAudioBuffers(currentAudioGroup, "audio", "input_audio_buffer.combined"));
       currentAudioGroup = []; // Reset the group
-
-      // We don't add the commit message itself as we don't process it in the mapper
     } else {
       // For all other message types, just add them directly
-      result.push(msg);
+      // result.push(msg);
     }
+    result.push(msg);
   }
 
-  // Add any remaining audio buffer messages that weren't committed
+  // Add any remaining input audio buffer messages that weren't committed
   if (currentAudioGroup.length > 0) {
     const firstMsg = currentAudioGroup[0];
 
@@ -248,6 +267,8 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
 
   let userTentativeMessage : Message | null = null;
   let targetTentativeMessage : Message | null = null;
+  let userAudioTentativeMessage : Message | null = null;
+  let targetAudioTentativeMessage : Message | null = null;
 
   return groupedMessages
     .map((msg: SocketMessage) => {
@@ -266,6 +287,48 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
             }
           }
           break;
+        case "input_audio_buffer.append":
+          if (!userAudioTentativeMessage) {
+            userAudioTentativeMessage = {
+              role: "user",
+              _type: "audio",
+              content: "",
+              audio_data: "",
+              start_timestamp: msg.timestamp,
+            }
+          }
+          break;
+        case "input_audio_buffer.combined":
+          const userAudioStartTimestamp = userAudioTentativeMessage?.start_timestamp ?? msg.timestamp;
+          userAudioTentativeMessage = null;
+          return {
+            role: "user",
+            _type: "audio",
+            content: "Input Audio",
+            audio_data: msg.content.audio,
+            timestamp: msg.timestamp,
+            start_timestamp: userAudioStartTimestamp,
+          }
+        case "response.audio.delta":
+          if (!targetAudioTentativeMessage) {
+            targetAudioTentativeMessage = {
+              role: "assistant",
+              _type: "audio",
+              start_timestamp: msg.timestamp,
+            }
+          }
+          break;
+        case "response.audio.combined":
+          const assistantAudioStartTimestamp = targetAudioTentativeMessage?.start_timestamp ?? msg.timestamp;
+          targetAudioTentativeMessage = null;
+          return {
+            role: "assistant",
+            _type: "audio",
+            content: "Assistant Audio",
+            audio_data: msg.content.audio,
+            timestamp: msg.timestamp,
+            start_timestamp: assistantAudioStartTimestamp,
+          }
         case "response.create":
           // -> User: Text
           return msg.content?.response?.instructions
@@ -287,7 +350,7 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
           break;
         case "conversation.item.input_audio_transcription.completed":
           // -> User: Audio (transcript)
-          const startTimestamp = userTentativeMessage?.start_timestamp ?? msg.timestamp;
+          const transcriptionStartTimestamp = userTentativeMessage?.start_timestamp ?? msg.timestamp;
           userTentativeMessage = null;
           return msg.content?.transcript
             ? {
@@ -296,7 +359,7 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
                 content: msg.content.transcript,
                 audio_data: msg.content.item?.content?.[0]?.audio || null,
                 timestamp: msg.timestamp,
-                start_timestamp: startTimestamp,
+                start_timestamp: transcriptionStartTimestamp,
               }
             : null;
 
@@ -427,7 +490,7 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
     .sort(
       // Sort by timestamp
       (a, b) =>
-        new Date(a?.timestamp || 0).getTime() -
-        new Date(b?.timestamp || 0).getTime()
+        new Date((a?.start_timestamp ?? a?.timestamp) || 0).getTime() -
+        new Date((b?.start_timestamp ?? b?.timestamp) || 0).getTime()
     ) as Message[];
 };
