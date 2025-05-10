@@ -1055,6 +1055,7 @@ Json: JsonObject;
       session_total_requests?: components["schemas"]["Partial_NumberOperators_"];
       session_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
       session_latest_request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      session_tag?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
     "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": {
