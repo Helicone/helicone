@@ -13,7 +13,7 @@ import { useLocalStorage } from "@/services/hooks/localStorage";
 import { useCreatePrompt } from "@/services/hooks/prompts/prompts";
 import { formatDate } from "@/utils/date";
 import { useQuery } from "@tanstack/react-query";
-import { FlaskConicalIcon } from "lucide-react";
+import { FlaskConicalIcon, ListTreeIcon, ScrollTextIcon, UserIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -357,7 +357,7 @@ export default function RequestDrawer(props: RequestDivProps) {
         {/* Header */}
         <header className="h-fit w-full flex flex-col pt-2 border-b border-border bg-card">
           {/* First Top Row */}
-          <div className="h-8 w-full shrink-0 flex flex-row justify-between items-center gap-2 px-4">
+          <div className="h-8 w-full shrink-0 flex flex-row justify-between items-center gap-2 px-2">
             {/* Left Side */}
             <div className="flex flex-row items-center gap-3 overflow-hidden">
               {/* Hide Drawer */}
@@ -368,7 +368,7 @@ export default function RequestDrawer(props: RequestDivProps) {
                       <Button
                         variant={"none"}
                         size={"square_icon"}
-                        className="w-fit text-muted-foreground hover:text-primary"
+                        className="w-fit text-muted-foreground hover:text-primary pl-2"
                         onClick={onCollapse}
                       >
                         <LuPanelRightClose className="w-4 h-4" />
@@ -450,43 +450,42 @@ export default function RequestDrawer(props: RequestDivProps) {
 
           {/* Second Top Row */}
           {Object.values(specialProperties).some((value) => value) && (
-            <div className="h-8 w-full flex flex-row gap-4 items-center px-4 shrink-0">
+            <div className="h-8 w-full flex flex-row gap-2 items-center px-2 shrink-0">
               {/* User */}
-              {specialProperties.userId && (
+              {(specialProperties.userId || true) && (
                 <Link
-                  className="text-secondary hover:underline hover:text-primary"
+                  className="inline-flex text-secondary px-1.5 py-1 hover:bg-accent flex items-center gap-2 rounded-md"
                   href={`/users/${specialProperties.userId}`}
                 >
-                  <XSmall>{specialProperties.userId}</XSmall>
-                </Link>
-              )}
-
-              {/* Prompt */}
-              {specialProperties.promptId && (
-                <Link
-                  className="text-secondary hover:underline hover:text-primary"
-                  href={`/prompts/${promptDataQuery.data?.id}`}
-                >
-                  <XSmall>{specialProperties.promptId}</XSmall>
+                  <UserIcon className="h-4 w-4" />
+                  <XSmall>{specialProperties.userId ?? "Bruh"}</XSmall>
                 </Link>
               )}
 
               {/* Session */}
               {specialProperties.sessionId && (
                 <Link
-                  className="text-secondary hover:underline hover:text-primary text-xs truncate"
+                  className="inline-flex text-secondary px-2 py-1 -ml-1 hover:bg-accent flex items-center gap-2 rounded-md"
                   href={`/sessions/${specialProperties.sessionId}`}
                 >
-                  {specialProperties.sessionName ||
-                    (specialProperties.sessionId && (
-                      <span>
-                        {specialProperties.sessionName ||
-                          specialProperties.sessionId}
-                      </span>
-                    ))}
-                  {specialProperties.sessionPath && (
-                    <span>{specialProperties.sessionPath}</span>
-                  )}
+                  <ListTreeIcon className="h-4 w-4" />
+                  <XSmall>
+                    {specialProperties.sessionName || specialProperties.sessionId}
+                    {specialProperties.sessionPath && (
+                      <span>{specialProperties.sessionPath}</span>
+                    )}
+                  </XSmall>
+                </Link>
+              )}
+
+              {/* Prompt */}
+              {specialProperties.promptId && (
+                <Link
+                  className="inline-flex text-secondary px-2 py-1 -ml-1 hover:bg-accent flex items-center gap-2 rounded-md"
+                  href={`/prompts/${promptDataQuery.data?.id}`}
+                >
+                  <ScrollTextIcon className="h-4 w-4" />
+                  <XSmall>{specialProperties.promptId}</XSmall>
                 </Link>
               )}
             </div>
