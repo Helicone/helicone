@@ -236,6 +236,11 @@ export const BLOG_CONTENT: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
+      folderName: "ai-agent-monitoring-tutorial",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "implement-and-monitor-cag",
     },
   },
