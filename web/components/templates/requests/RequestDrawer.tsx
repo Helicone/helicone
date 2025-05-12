@@ -22,6 +22,7 @@ import {
   LuChevronUp,
   LuPanelRightClose,
   LuPlus,
+  LuCopy,
 } from "react-icons/lu";
 import { PiPlayBold } from "react-icons/pi";
 import {
@@ -38,6 +39,7 @@ import FeedbackAction from "../feedback/thumbsUpThumbsDown";
 import { RenderMappedRequest } from "./RenderHeliconeRequest";
 import ScrollableBadges from "./ScrollableBadges";
 import StatusBadge from "./statusBadge";
+import { Eye } from "lucide-react";
 
 interface RequestDivProps {
   onCollapse: () => void;
@@ -349,6 +351,61 @@ export default function RequestDrawer(props: RequestDivProps) {
     [org?.currentOrg?.id, request, setNotification]
   );
 
+  const RequestDescTooltip = (props: {
+    displayText: string;
+    icon: React.ReactNode;
+    href?: string;
+    copyText?: string;
+    truncateLength?: number;
+  }) => {
+    const { displayText, icon, copyText, href, truncateLength = 18 } = props;
+    return (
+      <TooltipProvider>
+        <Tooltip delayDuration={150}>
+          <TooltipTrigger asChild>
+            <div
+              className="inline-flex text-secondary px-2 py-1 -ml-1 hover:bg-accent flex items-center gap-2 rounded-md cursor-pointer"
+            >
+              {icon}
+              <XSmall>
+                <span className="truncate">{
+                  displayText.length > truncateLength ?
+                    displayText.slice(0, truncateLength) + "..." :
+                    displayText
+                }</span>
+              </XSmall>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" align="start" className="p-0">
+            <div className="flex flex-col w-full">
+              {copyText && 
+                <button
+                  className="flex items-center justify-between gap-2 p-2 hover:bg-accent text-left"
+                  onClick={() => {
+                    navigator.clipboard.writeText(copyText);
+                    setNotification("Copied to clipboard", "success");
+                  }}
+                >
+                  <span className="text-xs">Copy ID</span>
+                  <LuCopy className="h-3 w-3" />
+                </button>
+              }
+              {href &&
+                <Link
+                  href={href}
+                  className="flex items-center justify-between gap-2 p-2 hover:bg-accent text-left"
+                >
+                  <span className="text-xs">View</span>
+                  <Eye className="h-3 w-3" />
+                </Link>
+              }
+            </div>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    )
+  }
+
   if (!request) {
     return null;
   } else
@@ -452,41 +509,33 @@ export default function RequestDrawer(props: RequestDivProps) {
           {Object.values(specialProperties).some((value) => value) && (
             <div className="h-8 w-full flex flex-row gap-2 items-center px-2 shrink-0">
               {/* User */}
-              {(specialProperties.userId || true) && (
-                <Link
-                  className="inline-flex text-secondary px-1.5 py-1 hover:bg-accent flex items-center gap-2 rounded-md"
+              {specialProperties.userId && (
+                <RequestDescTooltip
+                  displayText={specialProperties.userId}
+                  icon={<UserIcon className="h-4 w-4" />}
+                  copyText={specialProperties.userId}
                   href={`/users/${specialProperties.userId}`}
-                >
-                  <UserIcon className="h-4 w-4" />
-                  <XSmall>{specialProperties.userId ?? "Bruh"}</XSmall>
-                </Link>
+                />
               )}
 
               {/* Session */}
-              {specialProperties.sessionId && (
-                <Link
-                  className="inline-flex text-secondary px-2 py-1 -ml-1 hover:bg-accent flex items-center gap-2 rounded-md"
+              {specialProperties.sessionId && specialProperties.sessionName && (
+                <RequestDescTooltip
+                  displayText={specialProperties.sessionPath}
+                  icon={<ListTreeIcon className="h-4 w-4" />}
+                  copyText={specialProperties.sessionId}
                   href={`/sessions/${specialProperties.sessionId}`}
-                >
-                  <ListTreeIcon className="h-4 w-4" />
-                  <XSmall>
-                    {specialProperties.sessionName || specialProperties.sessionId}
-                    {specialProperties.sessionPath && (
-                      <span>{specialProperties.sessionPath}</span>
-                    )}
-                  </XSmall>
-                </Link>
+                />
               )}
 
               {/* Prompt */}
               {specialProperties.promptId && (
-                <Link
-                  className="inline-flex text-secondary px-2 py-1 -ml-1 hover:bg-accent flex items-center gap-2 rounded-md"
+                <RequestDescTooltip
+                  displayText={specialProperties.promptId}
+                  icon={<ScrollTextIcon className="h-4 w-4" />}
+                  copyText={specialProperties.promptId}
                   href={`/prompts/${promptDataQuery.data?.id}`}
-                >
-                  <ScrollTextIcon className="h-4 w-4" />
-                  <XSmall>{specialProperties.promptId}</XSmall>
-                </Link>
+                />
               )}
             </div>
           )}
