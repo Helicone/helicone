@@ -171,13 +171,13 @@ export default function Chat({ mappedRequest }: ChatProps) {
             className="w-full flex flex-col border-b border-border"
           >
             {/* Message Role Header */}
-            <header className="h-12 w-full flex flex-row items-center justify-between shrink-0 px-4 sticky top-0 bg-sidebar-background dark:bg-black z-10 border-b border-border ">
+            <header className="h-12 w-full flex flex-row items-center justify-between px-4 sticky top-0 bg-sidebar-background dark:bg-black z-10">
               <h2 className="text-secondary font-medium capitalize text-sm">
                 {message.role}
               </h2>
             </header>
 
-            <div className="w-full flex flex-col relative p-4">
+            <div className="w-full flex flex-col relative px-4 pb-4 pt-0">
               {(() => {
                 switch (messageType) {
                   case "image":
