@@ -242,7 +242,7 @@ export default function RequestDrawer(props: RequestDivProps) {
   const specialProperties = useMemo(() => {
     return {
       userId:
-        request?.heliconeMetadata.customProperties?.["Helicone-User-Id"] ??
+        request?.heliconeMetadata.user ??
         undefined,
       promptId:
         request?.heliconeMetadata.customProperties?.["Helicone-Prompt-Id"] ??
