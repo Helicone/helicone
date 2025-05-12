@@ -641,7 +641,9 @@ export default function RequestsPage(props: RequestsPageV2Props) {
                   tableRef={tableRef}
                   activeColumns={activeColumns}
                   setActiveColumns={setActiveColumns}
-                  highlightedIds={selectedData ? [selectedData.id] : selectedIds}
+                  highlightedIds={
+                    selectedData ? [selectedData.id] : selectedIds
+                  }
                   checkboxMode={"on_hover"}
                   defaultData={requests}
                   defaultColumns={columnsWithProperties}
@@ -706,7 +708,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
                   )}
                 </ThemedTable>
               </div>
-              
+
               <div className="flex-shrink-0">
                 <TableFooter
                   currentPage={page}
@@ -802,7 +804,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
           hideHeader={true}
           checkboxMode={"never"}
         />
-        
+
         <TableFooter
           currentPage={page}
           pageSize={pageSize}

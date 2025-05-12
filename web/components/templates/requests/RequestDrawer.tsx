@@ -13,7 +13,12 @@ import { useLocalStorage } from "@/services/hooks/localStorage";
 import { useCreatePrompt } from "@/services/hooks/prompts/prompts";
 import { formatDate } from "@/utils/date";
 import { useQuery } from "@tanstack/react-query";
-import { FlaskConicalIcon, ListTreeIcon, ScrollTextIcon, UserIcon } from "lucide-react";
+import {
+  FlaskConicalIcon,
+  ListTreeIcon,
+  ScrollTextIcon,
+  UserIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -241,9 +246,7 @@ export default function RequestDrawer(props: RequestDivProps) {
   // Get Helicone Special Properties
   const specialProperties = useMemo(() => {
     return {
-      userId:
-        request?.heliconeMetadata.user ??
-        undefined,
+      userId: request?.heliconeMetadata.user ?? undefined,
       promptId:
         request?.heliconeMetadata.customProperties?.["Helicone-Prompt-Id"] ??
         undefined,
@@ -363,22 +366,20 @@ export default function RequestDrawer(props: RequestDivProps) {
       <TooltipProvider>
         <Tooltip delayDuration={150}>
           <TooltipTrigger asChild>
-            <div
-              className="inline-flex text-secondary px-2 py-1 -ml-1 hover:bg-accent flex items-center gap-2 rounded-md cursor-pointer"
-            >
+            <div className="inline-flex text-secondary px-2 py-1 -ml-1 hover:bg-accent flex items-center gap-2 rounded-md cursor-pointer">
               {icon}
               <XSmall>
-                <span className="truncate">{
-                  displayText.length > truncateLength ?
-                    displayText.slice(0, truncateLength) + "..." :
-                    displayText
-                }</span>
+                <span className="truncate">
+                  {displayText.length > truncateLength
+                    ? displayText.slice(0, truncateLength) + "..."
+                    : displayText}
+                </span>
               </XSmall>
             </div>
           </TooltipTrigger>
           <TooltipContent side="bottom" align="start" className="p-0">
             <div className="flex flex-col w-full">
-              {copyText && 
+              {copyText && (
                 <button
                   className="flex items-center justify-between gap-2 p-2 hover:bg-accent text-left"
                   onClick={() => {
@@ -389,8 +390,8 @@ export default function RequestDrawer(props: RequestDivProps) {
                   <span className="text-xs">Copy ID</span>
                   <LuCopy className="h-3 w-3" />
                 </button>
-              }
-              {href &&
+              )}
+              {href && (
                 <Link
                   href={href}
                   className="flex items-center justify-between gap-2 p-2 hover:bg-accent text-left"
@@ -398,13 +399,13 @@ export default function RequestDrawer(props: RequestDivProps) {
                   <span className="text-xs">View</span>
                   <Eye className="h-3 w-3" />
                 </Link>
-              }
+              )}
             </div>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
-    )
-  }
+    );
+  };
 
   if (!request) {
     return null;
