@@ -1,17 +1,12 @@
 use std::{collections::HashMap, sync::Arc};
 
-use serde::{Serialize, de::DeserializeOwned};
-
 use super::{
-    EndpointConverter, TryConvert, TypedEndpointConverter,
-    anthropic::ToAnthropicConverter, error::MapperError, model::ModelMapper,
-    openai::ToOpenAiConverter,
+    EndpointConverter, TypedEndpointConverter, anthropic::ToAnthropicConverter,
+    model::ModelMapper, openai::ToOpenAiConverter,
 };
 use crate::{
     config::router::RouterConfig,
-    endpoints::{
-        self, ApiEndpoint, Endpoint, anthropic::Anthropic, openai::OpenAI,
-    },
+    endpoints::{self, ApiEndpoint, anthropic::Anthropic, openai::OpenAI},
     types::provider::InferenceProvider,
 };
 
@@ -69,7 +64,7 @@ impl EndpointConverterRegistryInner {
         if request_style == InferenceProvider::OpenAI
             && providers.contains(&InferenceProvider::Anthropic)
         {
-            registry.register_converter::<_, _, _>(
+            registry.register_converter(
                 ApiEndpoint::OpenAI(OpenAI::chat_completions()),
                 ApiEndpoint::Anthropic(Anthropic::messages()),
                 TypedEndpointConverter {
@@ -83,11 +78,11 @@ impl EndpointConverterRegistryInner {
         } else if request_style == InferenceProvider::Anthropic
             && providers.contains(&InferenceProvider::OpenAI)
         {
-            registry.register_converter::<_, _, _>(
+            registry.register_converter(
                 ApiEndpoint::Anthropic(Anthropic::messages()),
                 ApiEndpoint::OpenAI(OpenAI::chat_completions()),
                 TypedEndpointConverter {
-                    converter: ToOpenAiConverter::new(model_mapper.clone()),
+                    converter: ToOpenAiConverter::new(model_mapper),
                     _phantom: std::marker::PhantomData::<(
                         endpoints::anthropic::Messages,
                         endpoints::openai::ChatCompletions,
@@ -99,19 +94,13 @@ impl EndpointConverterRegistryInner {
         registry
     }
 
-    fn register_converter<S, T, C>(
+    fn register_converter<C>(
         &mut self,
         source_endpoint: ApiEndpoint,
         target_endpoint: ApiEndpoint,
-        converter: TypedEndpointConverter<S, T, C>,
+        converter: C,
     ) where
-        S: Endpoint + Send + Sync + 'static,
-        S::RequestBody: DeserializeOwned,
-        T: Endpoint + Send + Sync + 'static,
-        T::RequestBody: Serialize,
-        C: TryConvert<S::RequestBody, T::RequestBody> + Send + Sync + 'static,
-        <C as TryConvert<S::RequestBody, T::RequestBody>>::Error:
-            Into<MapperError>,
+        C: EndpointConverter + Send + Sync + 'static,
     {
         self.converters
             .insert((source_endpoint, target_endpoint), Box::new(converter));

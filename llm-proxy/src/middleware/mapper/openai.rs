@@ -6,6 +6,8 @@ use crate::{
     types::{model::Model, provider::InferenceProvider},
 };
 
+const ANTHROPIC_MESSAGE_TYPE: &str = "message";
+
 pub struct ToOpenAiConverter {
     model_mapper: ModelMapper,
 }
@@ -299,5 +301,94 @@ impl
         };
 
         Ok(request)
+    }
+}
+
+impl
+    TryConvert<
+        async_openai::types::CreateChatCompletionResponse,
+        anthropic_ai_sdk::types::message::CreateMessageResponse,
+    > for ToOpenAiConverter
+{
+    type Error = MapperError;
+
+    #[allow(clippy::too_many_lines)]
+    fn try_convert(
+        &self,
+        mut value: async_openai::types::CreateChatCompletionResponse,
+    ) -> std::result::Result<
+        anthropic_ai_sdk::types::message::CreateMessageResponse,
+        Self::Error,
+    > {
+        use anthropic_ai_sdk::types::message as anthropic;
+        let id = value.id;
+        let model = value.model;
+        let role = anthropic::Role::Assistant;
+        // not exposed by OpenAI
+        let stop_sequence: Option<String> = None;
+        // For Messages, this is always "message"
+        let type_ = ANTHROPIC_MESSAGE_TYPE.to_string();
+        let usage = value.usage.map_or(
+            anthropic::Usage {
+                input_tokens: 0,
+                output_tokens: 0,
+                cache_creation_input_tokens: None,
+                cache_read_input_tokens: None,
+                server_tool_use: None,
+            },
+            |usage| {
+                let cache_creation_input_tokens = usage
+                    .prompt_tokens_details
+                    .and_then(|details| details.cached_tokens);
+                anthropic::Usage {
+                    input_tokens: usage.prompt_tokens,
+                    output_tokens: usage.completion_tokens,
+                    cache_creation_input_tokens,
+                    cache_read_input_tokens: None,
+                    server_tool_use: None,
+                }
+            },
+        );
+
+        let openai_message = value.choices.remove(0);
+        let stop_reason = if openai_message.message.refusal.is_some() {
+            Some(anthropic::StopReason::Refusal)
+        } else {
+            None
+        };
+        let mut content: Vec<anthropic::ContentBlock> = Vec::new();
+
+        if let Some(tool_uses) = openai_message.message.tool_calls {
+            for tool_use in tool_uses {
+                if let Ok(input) =
+                    serde_json::from_str(&tool_use.function.arguments)
+                {
+                    let tool_use = anthropic::ContentBlock::ToolUse {
+                        id: tool_use.id,
+                        name: tool_use.function.name,
+                        input,
+                    };
+                    content.push(tool_use);
+                }
+            }
+        }
+        if let Some(text) = openai_message.message.content {
+            let text = anthropic::ContentBlock::Text {
+                text,
+                citations: None,
+            };
+            content.push(text);
+        }
+
+        Ok(anthropic::CreateMessageResponse {
+            content,
+            id,
+            model,
+            role,
+            stop_reason,
+            stop_sequence,
+            type_,
+            usage,
+        })
     }
 }

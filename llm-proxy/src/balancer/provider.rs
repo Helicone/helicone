@@ -1,5 +1,4 @@
 use std::{
-    future::poll_fn,
     sync::Arc,
     task::{Context, Poll},
 };
@@ -61,12 +60,8 @@ impl ProviderBalancer {
             DiscoverFactory::new(app_state.clone(), router_config);
         let mut balance_factory =
             weighted_balance::balance::make::MakeBalance::new(discover_factory);
-        let mut balance = balance_factory.call(rx).await?;
+        let balance = balance_factory.call(rx).await?;
         // TODO: do we _have_ to poll_ready here?
-        // @tom to double check
-        poll_fn(|cx| balance.poll_ready(cx))
-            .await
-            .map_err(InitError::CreateBalancer)?;
         let provider_monitor = ProviderMonitor::weighted(tx);
         let provider_balancer = ProviderBalancer::Weighted(balance);
 
@@ -83,12 +78,8 @@ impl ProviderBalancer {
             DiscoverFactory::new(app_state.clone(), router_config);
         let mut balance_factory =
             tower::balance::p2c::MakeBalance::new(discover_factory);
-        let mut balance = balance_factory.call(rx).await?;
+        let balance = balance_factory.call(rx).await?;
         // TODO: do we _have_ to poll_ready here?
-        // @tom to double check
-        poll_fn(|cx| balance.poll_ready(cx))
-            .await
-            .map_err(InitError::CreateBalancer)?;
         let provider_monitor = ProviderMonitor::p2c(tx);
         let provider_balancer = ProviderBalancer::PeakEwma(balance);
 

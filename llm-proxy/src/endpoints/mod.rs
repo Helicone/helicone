@@ -8,17 +8,11 @@ pub trait Endpoint {
     type ResponseBody;
 }
 
-use std::str::FromStr;
-
-use bytes::Bytes;
 use http::uri::PathAndQuery;
 
 use crate::{
     endpoints::{anthropic::Anthropic, openai::OpenAI},
-    error::{
-        api::Error, internal::InternalError, invalid_req::InvalidRequestError,
-    },
-    middleware::mapper::registry::EndpointConverterRegistry,
+    error::invalid_req::InvalidRequestError,
     types::provider::InferenceProvider,
 };
 
@@ -60,33 +54,6 @@ impl ApiEndpoint {
             }
             _ => Err(InvalidRequestError::UnsupportedProvider(target_provider)),
         }
-    }
-
-    pub fn map(
-        &self,
-        converter_registry: &EndpointConverterRegistry,
-        body: &Bytes,
-        path_and_query: &PathAndQuery,
-        target_endpoint: ApiEndpoint,
-    ) -> Result<(Bytes, PathAndQuery), Error> {
-        let target_path_and_query =
-            if let Some(query_params) = path_and_query.query() {
-                format!("{}?{}", target_endpoint.path(), query_params)
-            } else {
-                target_endpoint.path().to_string()
-            };
-        let target_path_and_query =
-            PathAndQuery::from_str(&target_path_and_query)
-                .map_err(InternalError::InvalidUri)?;
-
-        let converter = converter_registry
-            .get_converter(self, &target_endpoint)
-            .ok_or_else(|| {
-                InternalError::InvalidConverter(*self, target_endpoint)
-            })?;
-
-        let bytes = converter.convert(body)?;
-        Ok((bytes, target_path_and_query))
     }
 
     #[must_use]
