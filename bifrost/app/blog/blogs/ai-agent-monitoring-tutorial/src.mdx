@@ -113,8 +113,7 @@ async function searchFinancialTerms(query, vectorStore) {
   // Get relevant documents from vector store with similarity scores
   const resultsWithScores = await vectorStore.similaritySearchWithScore(query, 2);
 
-  ...
-
+  // Process results... 
 }
 ```
 
@@ -129,7 +128,7 @@ async function getStockData(ticker) {
 }
 ```
 
-The RAG implementation provides domain-specific knowledge to the agent. However, as we'll see later, without proper monitoring, detecting when the system operates outside its knowledge boundaries can be difficult.
+The RAG implementation provides domain-specific knowledge to the agent. However, as we'll see later, without proper monitoring, detecting what's causing the system to fail when it does might be difficult/
 
 ### 4. Minimal Agent Loop (Tool Calling)
 
@@ -141,32 +140,43 @@ We expose three tools to the LLM:
 
 The LLM may call a tool, receive its output as feedback, and then answer the user.
 
+The loop allows our agent call tools and process results for as long as needed to generate an appropriate response:
+
 ```javascript
-// Check if the model wants to call a function
-if (initialMessage.tool_calls) {    
-  // Create an array to store messages for this interaction
-  const messageHistory = [...messages, initialMessage];
+async function processQuery(userQuery, vectorStore) {
+  let messages = [
+    {
+      role: "system",
+      content: `You're a financial assistant. Use tools when needed. If you have enough information to answer, reply normally.`
+    },
+    { role: "user", content: userQuery }
+  ];
   
-  // Process each tool call
-  for (const toolCall of initialMessage.tool_calls) {
-    // Execute the appropriate function based on the call
-    // ...
-    
-    // Add the function response to the message history
-    messageHistory.push({
-      role: "tool",
-      tool_call_id: toolCall.id,
-      name: functionName,
-      content: JSON.stringify(functionResponse)
-    });
+  // Add chat history for context if available
+  if (chatHistory.length > 0) {
+    messages.splice(1, 0, ...chatHistory);
   }
   
-  // Get a final response from the model with the function results
-  const finalResponse = await openai.chat.completions.create({
-    model: "gpt-3.5-turbo",
-    messages: messageHistory,
-    temperature: 0.1,
-  });
+  while (true) {
+    console.log("Sending query to OpenAI...");
+    const llmResp = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      tools,
+      messages,
+      temperature: 0.1,
+    });
+    
+    const msg = llmResp.choices[0].message;
+    
+    if (msg.tool_calls && msg.tool_calls.length > 0) {
+      // Execute the helper and push message into history...
+
+      continue;
+    }
+    
+    // No tool call → LLM has produced the final answer
+    return msg.content;
+  }
 }
 ```
 
@@ -188,25 +198,25 @@ Result:
 
 ![Example of a financial research assistant responding to the prompt 'What is Tesla's stock price?' displaying the stock information.](/static/blog/ai-agent-monitoring-tutorial/tesla-prompt.webp)
 
-> Prompt: What is halal investing
+> Prompt: What is GreenEnergy's profit margin?
 
 Result:
 
-![Example of an AI agent hallucination, where the financial assistant responds to 'What is halal investing?' with an incorrect answer, highlighting the need for AI monitoring.](/static/blog/ai-agent-monitoring-tutorial/halal-investing-prompt.webp)
+![Example of an AI agent failing to retrieve information about GreenEnergy's profit margin despite having it in the knowledge base.](/static/blog/ai-agent-monitoring-tutorial/greenenergy-profit-margin.webp)
 
-It looks like our financial assistant works fine...**or does it?**
+It looks like there's an issue with our agent!
 
-There's an issue with the second query. 
+It can't find the profit margin of GreenEnergy despite it being in our knowledge base.
 
-The term **"halal investing"** is not in our knowledge base, yet the agent confidently responded with a detailed answer. 
+Something is obviously wrong with our RAG implementation—but what?
 
-This is a perfect example of <a href="https://www.helicone.ai/blog/how-to-reduce-llm-hallucination" target="_blank" rel="noopener">Learn more about LLM hallucination</a> that would be nearly impossible to detect in a production app without proper monitoring.
+This is where **observability** comes in!
 
 ## Debugging Our Financial Assistant 
 
 Looking at our implementation, there are several blind spots that could potentially cause issues:
 
-- **Hallucinations**: Our agent provided information about halal investing despite not having this in its knowledge base - how do we detect this?
+- **Hallucinations and retrieval issues**: Our agent failed to answer the query related GreenEnergy despite having the requisite information—how do we pinpoint the problem?
 - **Cost Visibility**: How many tokens is each component of our agent consuming? Which queries are most expensive?
 - **Latency Issues**: If the agent becomes slow, which step is causing the bottleneck?
 - **Error Patterns**: Are certain types of queries consistently failing? Where in the pipeline do these failures occur?
