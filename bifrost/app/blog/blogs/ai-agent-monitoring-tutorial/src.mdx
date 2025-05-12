@@ -90,7 +90,7 @@ This approach allows the model to decide which functions to call based on the us
 
 ### 2. Basic Helicone Monitoring
 
-The financial assistant uses Helicone's basic monitoring to track the cost, latency, and error rate of our LLM calls.
+The financial assistant uses Helicone's basic monitoring to track the cost, latency, and error rate of our LLM calls. You can create an account for free <a href="https://www.helicone.ai/signup" target="_blank" rel="noopener">here</a>. 
 
 ```javascript
 const openai = new OpenAI({
@@ -128,7 +128,7 @@ async function getStockData(ticker) {
 }
 ```
 
-The RAG implementation provides domain-specific knowledge to the agent. However, as we'll see later, without proper monitoring, detecting what's causing the system to fail when it does might be difficult/
+The RAG implementation provides domain-specific knowledge to the agent. However, as we'll see later, **without proper monitoring**, detecting what's causing the system to fail when it does might be difficult. 
 
 ### 4. Minimal Agent Loop (Tool Calling)
 
@@ -140,7 +140,7 @@ We expose three tools to the LLM:
 
 The LLM may call a tool, receive its output as feedback, and then answer the user.
 
-The loop allows our agent call tools and process results for as long as needed to generate an appropriate response:
+The loop allows our agent to call tools and process results for as long as needed to generate an appropriate response:
 
 ```javascript
 async function processQuery(userQuery, vectorStore) {
@@ -216,7 +216,7 @@ This is where **observability** comes in!
 
 Looking at our implementation, there are several blind spots that could potentially cause issues:
 
-- **Hallucinations and retrieval issues**: Our agent failed to answer the query related GreenEnergy despite having the requisite information—how do we pinpoint the problem?
+- **Hallucinations and retrieval issues**: Our agent failed to answer the query related to GreenEnergy despite having the requisite information—how do we pinpoint the problem?
 - **Cost Visibility**: How many tokens is each component of our agent consuming? Which queries are most expensive?
 - **Latency Issues**: If the agent becomes slow, which step is causing the bottleneck?
 - **Error Patterns**: Are certain types of queries consistently failing? Where in the pipeline do these failures occur?
@@ -234,7 +234,7 @@ Stay tuned!
   description="Stop building AI in the dark. Get complete visibility into every step of your AI workflows, track costs down to the penny, and debug complex issues in minutes instead of days."
   primaryButtonText="Start Monitoring for Free"
   primaryButtonLink="https://helicone.ai/signup"
-  secondaryButtonText="How Debugging Works"
+  secondaryButtonText="See How Debugging Works"
   secondaryButtonLink="https://docs.helicone.ai/features/sessions"
 />
 
