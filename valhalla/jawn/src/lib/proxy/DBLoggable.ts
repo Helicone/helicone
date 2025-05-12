@@ -94,6 +94,10 @@ export class DBLoggable {
     this.timing = props.timing;
   }
 
+  async getRequestId() {
+    return this.request.requestId;
+  }
+
   async log(
     db: {
       s3Manager: S3Manager;

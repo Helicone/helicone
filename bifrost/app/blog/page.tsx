@@ -226,6 +226,16 @@ export const BLOG_CONTENT: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
+      folderName: "self-hosting-journey",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "the-complete-guide-to-LLM-observability-platforms",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "implement-and-monitor-cag",
     },
   },

@@ -1126,6 +1126,9 @@ Json: JsonObject;
       arguments: components["schemas"]["Record_string.any_"];
     };
     Message: {
+      ending_event_id?: string;
+      trigger_event_id?: string;
+      start_timestamp?: string;
       deleted?: boolean;
       contentArray?: components["schemas"]["Message"][];
       /** Format: double */

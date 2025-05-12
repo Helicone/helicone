@@ -13,7 +13,7 @@ import {
 import { Muted } from "@/components/ui/typography";
 import { CellContext, ColumnDef } from "@tanstack/react-table";
 import { formatDistanceToNow } from "date-fns";
-import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { tracesToTreeNodeData } from "../../../../../lib/sessions/helpers";
 import {
   HeliconeRequestType,
@@ -97,15 +97,19 @@ export const TreeView: React.FC<TreeViewProps> = ({
     return trace?.request; // Return the request directly
   }, [selectedRequestId, session.traces]);
 
+  const resizeDrawer = () => {
+    drawerRef.current?.expand();
+    if (drawerSize === 0) {
+      drawerRef.current?.resize(33);
+    } else {
+      drawerRef.current?.resize(drawerSize);
+    }
+  };
+
   const onRowSelectHandler = (row: TableTreeNode) => {
     if (row.trace) {
       setSelectedRequestId(row.trace.request_id);
-      drawerRef.current?.expand();
-      if (drawerSize === 0) {
-        drawerRef.current?.resize(33);
-      } else {
-        drawerRef.current?.resize(drawerSize);
-      }
+      resizeDrawer();
     } else {
       // Optional: handle click on group row if needed (e.g., toggle expansion)
       // React-table's expander button already handles toggling.
@@ -120,6 +124,12 @@ export const TreeView: React.FC<TreeViewProps> = ({
   const handleToggleAllRows = (table: any) => {
     table.toggleAllRowsExpanded();
   };
+
+  // Handle message selection
+  const handleRequestSelect = useCallback((request_id: string) => {
+    setSelectedRequestId(request_id);
+    resizeDrawer();
+  }, []);
 
   return (
     <Col className="h-full">
@@ -199,6 +209,7 @@ export const TreeView: React.FC<TreeViewProps> = ({
             <RequestDrawer
               request={selectedRequestData}
               onCollapse={handleCollapseDrawer}
+              onRequestSelect={handleRequestSelect}
             />
           )}
         </ResizablePanel>
@@ -352,7 +363,6 @@ const initialColumns: ColumnDef<TableTreeNode>[] = [
     accessorKey: "latency",
     header: "Latency",
     cell: (info) => {
-      if (!info.row.original.trace) return null; // Don't render for group rows
       const duration = info.getValue();
       if (typeof duration === "number") {
         return <>{(duration / 1000).toFixed(2)}s</>;

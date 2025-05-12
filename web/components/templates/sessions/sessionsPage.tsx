@@ -24,14 +24,22 @@ import { useURLParams } from "@/services/hooks/localURLParams";
 import { SortDirection } from "@/services/lib/sorts/requests/sorts";
 import { TimeFilter } from "@/types/timeFilter";
 import { PieChart, Table, Check } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import ExportButton from "../../shared/themed/table/exportButton";
+import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   getTimeIntervalAgo,
   TimeInterval,
 } from "../../../lib/timeCalculations/time";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useSessionNames, useSessions } from "../../../services/hooks/sessions";
+import { getRequestsByIdsWithBodies } from "../../../services/hooks/requests";
 import {
   columnDefsToDragColumnItems,
   DragColumnItem,
@@ -39,7 +47,7 @@ import {
 import ViewColumns from "../../shared/themed/table/columns/viewColumns";
 import ThemedTable from "../../shared/themed/table/themedTable";
 import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
-import { INITIAL_COLUMNS } from "./initialColumns";
+import { getColumns } from "./initialColumns";
 import SessionMetrics from "./SessionMetrics";
 import { cn } from "@/lib/utils";
 
@@ -60,16 +68,19 @@ const UNNAMED_SESSION_VALUE = "__helicone_unnamed_session__";
 
 // Moved from SessionDetails.tsx
 type TSessions = {
-  created_at: string;
-  latest_request_created_at: string;
-  session_id: string;
-  session_name: string;
-  total_cost: number;
-  total_requests: number;
-  prompt_tokens: number;
-  completion_tokens: number;
-  total_tokens: number;
-  avg_latency: number;
+  id: string;
+  metadata: {
+    created_at: string;
+    latest_request_created_at: string;
+    session_name: string;
+    session_id: string;
+    total_cost: number;
+    total_requests: number;
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+    avg_latency: number;
+  };
 };
 
 const TABS = [
@@ -90,7 +101,7 @@ const SessionsPage = (props: SessionsPageProps) => {
 
   // State for active columns
   const [activeColumns, setActiveColumns] = useState<DragColumnItem[]>(
-    columnDefsToDragColumnItems(INITIAL_COLUMNS)
+    columnDefsToDragColumnItems(getColumns())
   );
 
   const [timeFilter, setTimeFilter] = useState<TimeFilter>({
@@ -123,6 +134,13 @@ const SessionsPage = (props: SessionsPageProps) => {
     sessionIdSearch: debouncedSessionIdSearch ?? "",
     selectedName,
   });
+
+  const sessionsWithId = useMemo(() => {
+    return sessions.map((session) => ({
+      metadata: session,
+      id: session.session_id,
+    }));
+  }, [sessions]);
 
   const { canCreate, freeLimit } = useFeatureLimit(
     "sessions",
@@ -159,6 +177,23 @@ const SessionsPage = (props: SessionsPageProps) => {
     hasAccess,
   ]);
 
+  const [selectedData, setSelectedData] = useState<TSessions | undefined>(
+    undefined
+  );
+  const [selectedDataIndex, setSelectedDataIndex] = useState<number>();
+
+  const {
+    selectMode,
+    toggleSelectMode: _toggleSelectMode,
+    selectedIds,
+    toggleSelection,
+    selectAll,
+    isShiftPressed,
+  } = useSelectMode({
+    items: sessionsWithId,
+    getItemId: (session: TSessions) => session.id,
+  });
+
   const handleSelectSessionName = (value: string) => {
     if (value === "all") {
       setSelectedName(undefined);
@@ -193,6 +228,35 @@ const SessionsPage = (props: SessionsPageProps) => {
       });
     }
   };
+
+  const onFetchBulkSessions = async () => {
+    if (selectedIds.length === 0) {
+      // then download for all rows
+      const data = await getRequestsByIdsWithBodies(
+        sessionsWithId.map((session) => session.metadata.session_id)
+      );
+      return data;
+    }
+    const data = await getRequestsByIdsWithBodies(selectedIds);
+    return data;
+  };
+
+  const onRowSelectHandler = useCallback(
+    (row: TSessions, index: number, event?: React.MouseEvent) => {
+      // bit of a hack since pre-existing table behavior is noop
+      let isCheckboxClick =
+        event?.target instanceof HTMLElement &&
+        (event.target.tagName.toLowerCase() === "button" ||
+          event.target.closest("button") !== null);
+      if (isShiftPressed || event?.metaKey || isCheckboxClick) {
+        toggleSelection(row);
+      } else {
+        setSelectedDataIndex(index);
+        setSelectedData(row);
+      }
+    },
+    [isShiftPressed, toggleSelection, setSelectedDataIndex, setSelectedData]
+  );
 
   // Calculate aggregated stats
   const aggregatedStats = useMemo(() => {
@@ -347,6 +411,17 @@ const SessionsPage = (props: SessionsPageProps) => {
           }
           rightSection={
             <section className="flex flex-row items-center gap-2">
+              <div className="flex flex-row items-center gap-2 bg-sky-200 rounded-lg">
+                {selectedIds.length > 0 && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <ExportButton rows={[]} fetchRows={onFetchBulkSessions} />
+                    </TooltipTrigger>
+                    <TooltipContent>Export raw data</TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
+
               <div className="h-8 flex flex-row items-center border border-border rounded-lg divide-x divide-border overflow-hidden shadow-sm">
                 <label className="text-xs px-2 py-1">Views</label>
 
@@ -405,15 +480,20 @@ const SessionsPage = (props: SessionsPageProps) => {
           <ThemedTable
             id="sessions-table"
             tableRef={tableRef}
-            defaultData={sessions || []}
-            defaultColumns={INITIAL_COLUMNS}
+            defaultData={sessionsWithId}
+            defaultColumns={getColumns()}
             skeletonLoading={isLoading}
             dataLoading={isLoading}
             activeColumns={activeColumns}
             setActiveColumns={setActiveColumns}
             rowLink={(row: TSessions) =>
-              `/sessions/${encodeURIComponent(row.session_id)}`
+              `/sessions/${encodeURIComponent(row.id)}`
             }
+            checkboxMode={"on_hover"}
+            highlightedIds={selectedData ? [selectedData.id] : selectedIds}
+            onRowSelect={onRowSelectHandler}
+            onSelectAll={selectAll}
+            selectedIds={selectedIds}
           />
         </TabsContent>
         <TabsContent value="metrics">
