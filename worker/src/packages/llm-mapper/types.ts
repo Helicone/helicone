@@ -148,7 +148,6 @@ export type Message = {
   tool_calls?: FunctionCall[]; // only used if _type is functionCall
   tool_call_id?: string;
   timestamp?: string; // For realtime API
-  start_timestamp?: string; // For realtime API (creation)
   image_url?: string;
   audio_data?: string; // Base64 encoded audio data
   type?: "input_image" | "input_text" | "input_file";
@@ -159,6 +158,11 @@ export type Message = {
   idx?: number; // Index of an auto prompt input message
   contentArray?: Message[];
   deleted?: boolean; // For realtime API (conversation.item.delete)
+
+  // For realtime API
+  start_timestamp?: string; // For realtime API (creation)
+  trigger_event_id?: string; // event id that sets start_timestamp (e.g response.created)
+  ending_event_id?: string; // event id that sets timestamp (e.g response.done) for realtime API only
 };
 
 export type Response = {
