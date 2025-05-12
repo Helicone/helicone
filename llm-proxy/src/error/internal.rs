@@ -6,6 +6,7 @@ use tower::BoxError;
 use tracing::error;
 
 use crate::{
+    endpoints::ApiEndpoint,
     error::api::ErrorResponse,
     types::{json::Json, provider::InferenceProvider},
 };
@@ -53,6 +54,8 @@ pub enum InternalError {
     InvalidHeader(#[from] http::header::InvalidHeaderValue),
     /// Failed to complete mapping task: {0}
     MappingTaskError(tokio::task::JoinError),
+    /// Converter not present for {0:?} -> {1:?}
+    InvalidConverter(ApiEndpoint, ApiEndpoint),
 }
 
 impl IntoResponse for InternalError {

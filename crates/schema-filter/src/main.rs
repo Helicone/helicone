@@ -51,11 +51,37 @@ fn main() -> Result<()> {
 
     let mut schema: OpenAPI =
         if args.input.extension().is_some_and(|ext| ext == "json") {
-            serde_json::from_str(&schema_content)
-                .with_context(|| "Failed to parse OpenAPI schema as JSON")?
+            let jd = &mut serde_json::Deserializer::from_str(&schema_content);
+            let result: Result<OpenAPI, _> =
+                serde_path_to_error::deserialize(jd);
+            match result {
+                Ok(schema) => schema,
+                Err(err) => {
+                    let path = err.path().to_string();
+                    return Err(err).with_context(|| {
+                        format!(
+                            "Failed to parse OpenAPI schema as JSON, with \
+                             error at path: {path}"
+                        )
+                    });
+                }
+            }
         } else {
-            serde_yaml::from_str(&schema_content)
-                .with_context(|| "Failed to parse OpenAPI schema as YAML")?
+            let jd = serde_yaml::Deserializer::from_str(&schema_content);
+            let result: Result<OpenAPI, _> =
+                serde_path_to_error::deserialize(jd);
+            match result {
+                Ok(schema) => schema,
+                Err(err) => {
+                    let path = err.path().to_string();
+                    return Err(err).with_context(|| {
+                        format!(
+                            "Failed to parse OpenAPI schema as YAML, with \
+                             error at path: {path}"
+                        )
+                    });
+                }
+            }
         };
 
     // Read the config file

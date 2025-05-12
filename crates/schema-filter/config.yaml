@@ -6,3 +6,6 @@ providers:
       url: /completions
     - method: post
       url: /responses
+  anthropic:
+    - method: post
+      url: /v1/messages

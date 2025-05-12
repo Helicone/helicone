@@ -4,15 +4,14 @@ use std::{
     task::{Context, Poll},
 };
 
-use futures::future::BoxFuture;
 use http::{HeaderName, HeaderValue, uri::PathAndQuery};
 use http_body_util::BodyExt;
 use opentelemetry::KeyValue;
 use reqwest::Client;
-use tower::{Service, ServiceBuilder};
-use tower_http::add_extension::{AddExtension, AddExtensionLayer};
+use tower::Service;
 use tracing::Instrument;
 
+use super::DispatcherFuture;
 use crate::{
     app::AppState,
     config::providers::DEFAULT_ANTHROPIC_VERSION,
@@ -23,57 +22,31 @@ use crate::{
         request::{Request, RequestContext},
         response::Response,
     },
-    utils::handle_error::{ErrorHandler, ErrorHandlerLayer},
 };
 
-pub type DispatcherFuture = BoxFuture<'static, Result<Response, Error>>;
-pub type DispatcherService = AddExtension<
-    ErrorHandler<crate::middleware::mapper::Service<Dispatcher>>,
-    InferenceProvider,
->;
-
-/// Leaf service that dispatches requests to the correct provider.
 #[derive(Debug, Clone)]
-pub struct Dispatcher {
+pub struct AnthropicDispatcher {
     client: Client,
     app_state: AppState,
-    provider: InferenceProvider,
 }
 
-impl Dispatcher {
-    pub fn new(
-        client: Client,
-        app_state: AppState,
-        provider: InferenceProvider,
-    ) -> Self {
-        Self {
-            client,
-            app_state,
-            provider,
-        }
-    }
-
-    pub fn new_with_middleware(
-        app_state: AppState,
-        provider: InferenceProvider,
-    ) -> Result<DispatcherService, InitError> {
+impl AnthropicDispatcher {
+    pub fn new(app_state: AppState) -> Result<Self, InitError> {
         let http_client = Client::builder()
             .connect_timeout(app_state.0.config.dispatcher.connection_timeout)
             .timeout(app_state.0.config.dispatcher.timeout)
             .tcp_nodelay(true)
             .build()
             .map_err(InitError::CreateReqwestClient)?;
-        Ok(ServiceBuilder::new()
-            .layer(AddExtensionLayer::new(provider))
-            .layer(ErrorHandlerLayer::new(app_state.clone()))
-            .layer(crate::middleware::mapper::Layer::new(app_state.clone()))
-            // other middleware: rate limiting, logging, etc, etc
-            // will be added here as well
-            .service(Dispatcher::new(http_client, app_state, provider)))
+
+        Ok(Self {
+            client: http_client,
+            app_state,
+        })
     }
 }
 
-impl Service<Request> for Dispatcher {
+impl Service<Request> for AnthropicDispatcher {
     type Response = Response;
     type Error = Error;
     type Future = DispatcherFuture;
@@ -90,12 +63,12 @@ impl Service<Request> for Dispatcher {
         // see: https://docs.rs/tower/latest/tower/trait.Service.html#be-careful-when-cloning-inner-services
         let this = self.clone();
         let this = std::mem::replace(self, this);
-        tracing::trace!(provider = ?this.provider, "Dispatcher received request");
+        tracing::trace!(provider = ?InferenceProvider::Anthropic, "Dispatcher received request");
         Box::pin(async move { this.dispatch(req).await })
     }
 }
 
-impl Dispatcher {
+impl AnthropicDispatcher {
     #[allow(clippy::too_many_lines)]
     async fn dispatch(&self, mut req: Request) -> Result<Response, Error> {
         let req_ctx = req
@@ -103,7 +76,7 @@ impl Dispatcher {
             .get::<Arc<RequestContext>>()
             .ok_or(InternalError::ExtensionNotFound("RequestContext"))?
             .clone();
-        let target_provider = self.provider;
+        let target_provider = InferenceProvider::Anthropic;
         let provider_api_key = req_ctx
             .proxy_context
             .provider_api_keys
@@ -136,35 +109,20 @@ impl Dispatcher {
             r.remove(http::header::AUTHORIZATION);
             r.remove(http::header::CONTENT_LENGTH);
             r.remove(HeaderName::from_str("helicone-api-key").unwrap());
-            match target_provider {
-                InferenceProvider::OpenAI => {
-                    let openai_auth_header =
-                        format!("Bearer {}", provider_api_key.0);
-                    r.insert(
-                        http::header::AUTHORIZATION,
-                        HeaderValue::from_str(&openai_auth_header).unwrap(),
-                    );
-                }
-                InferenceProvider::Anthropic => {
-                    let version = provider_config
-                        .version
-                        .as_deref()
-                        .unwrap_or(DEFAULT_ANTHROPIC_VERSION);
-                    r.insert(
-                        HeaderName::from_str("x-api-key").unwrap(),
-                        HeaderValue::from_str(&provider_api_key)
-                            .map_err(InternalError::InvalidHeader)?,
-                    );
-                    r.insert(
-                        HeaderName::from_str("anthropic-version").unwrap(),
-                        HeaderValue::from_str(version)
-                            .map_err(InternalError::InvalidHeader)?,
-                    );
-                }
-                _ => todo!(
-                    "only anthropic and openai are supported at the moment"
-                ),
-            }
+            let version = provider_config
+                .version
+                .as_deref()
+                .unwrap_or(DEFAULT_ANTHROPIC_VERSION);
+            r.insert(
+                HeaderName::from_str("x-api-key").unwrap(),
+                HeaderValue::from_str(&provider_api_key)
+                    .map_err(InternalError::InvalidHeader)?,
+            );
+            r.insert(
+                HeaderName::from_str("anthropic-version").unwrap(),
+                HeaderValue::from_str(version)
+                    .map_err(InternalError::InvalidHeader)?,
+            );
         }
         let method = req.method().clone();
         let headers = req.headers().clone();

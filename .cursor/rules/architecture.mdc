@@ -1,6 +1,6 @@
 ---
-description:
-globs:
+description: 
+globs: 
 alwaysApply: false
 ---
 # LLM Proxy Architecture
@@ -11,23 +11,21 @@ This document outlines the architecture of the LLM Proxy system.
 
 ### Server and Routing
 - [llm-proxy/src/app.rs](mdc:llm-proxy/src/app.rs) - Main application server setup
-- [llm-proxy/src/router/](mdc:llm-proxy/src/router/) - API request routing logic
+- [llm-proxy/src/router/](mdc:llm-proxy/src/router) - API request routing logic
 - [llm-proxy/src/dispatcher.rs](mdc:llm-proxy/src/dispatcher.rs) - Dispatches requests to appropriate providers
 
 ### Provider Integration
-- [llm-proxy/src/balancer/](mdc:llm-proxy/src/balancer/) - Load balancing between different LLM providers
-- [crates/openai-types/](mdc:crates/openai-types/) - OpenAI API type definitions
-- [crates/anthropic-types/](mdc:crates/anthropic-types/) - Anthropic API type definitions
+- [llm-proxy/src/balancer/](mdc:llm-proxy/src/balancer) - Load balancing between different LLM providers
 
 ### Configuration and Error Handling
-- [llm-proxy/src/config/](mdc:llm-proxy/src/config/) - Application configuration
-- [llm-proxy/src/error/](mdc:llm-proxy/src/error/) - Error handling and reporting
+- [llm-proxy/src/config/](mdc:llm-proxy/src/config) - Application configuration
+- [llm-proxy/src/error/](mdc:llm-proxy/src/error) - Error handling and reporting
 
 ### Middleware and Utils
-- [llm-proxy/src/middleware/](mdc:llm-proxy/src/middleware/) - HTTP middleware components
-- [llm-proxy/src/utils/](mdc:llm-proxy/src/utils/) - Utility functions and helpers
+- [llm-proxy/src/middleware/](mdc:llm-proxy/src/middleware) - HTTP middleware components
+- [llm-proxy/src/utils/](mdc:llm-proxy/src/utils) - Utility functions and helpers
 
 ### Observability
-- [llm-proxy/src/logger/](mdc:llm-proxy/src/logger/) - Logging infrastructure
-- [crates/telemetry/](mdc:crates/telemetry/) - Telemetry for tracing and metrics
-- [crates/metrics/](mdc:crates/metrics/) - Metrics collection and reporting
+- [llm-proxy/src/logger/](mdc:llm-proxy/src/logger) - Logging infrastructure
+- [crates/telemetry/](mdc:crates/telemetry) - Telemetry for tracing and metrics
+- [crates/metrics/](mdc:crates/metrics) - Metrics collection and reporting

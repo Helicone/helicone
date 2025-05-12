@@ -1,6 +1,6 @@
 ---
-description:
-globs:
+description: 
+globs: 
 alwaysApply: false
 ---
 # Code Conventions and Best Practices
@@ -19,22 +19,19 @@ This document outlines the code conventions and best practices used in the LLM P
 
 - Use `thiserror` for defining error types
 - Use `anyhow` for internal error propagation
-- Structured errors in [llm-proxy/src/error/](mdc:llm-proxy/src/error/)
+- Structured errors in [llm-proxy/src/error/](mdc:llm-proxy/src/error)
 
 ## Type Definitions
 
 - Leverage Rust's type system for safety
-- Provider-specific types in separate crates:
-  - [crates/openai-types/](mdc:crates/openai-types/)
-  - [crates/anthropic-types/](mdc:crates/anthropic-types/)
-- Common types in [llm-proxy/src/types/](mdc:llm-proxy/src/types/)
+- Common types in [llm-proxy/src/types/](mdc:llm-proxy/src/types)
 
 ## Testing Approaches
 
 - Unit tests alongside the code they test
 - Integration tests in separate directories
 - Use the `serial_test` crate for tests that can't run in parallel
-- Leverage the test utilities in [llm-proxy/src/tests/](mdc:llm-proxy/src/tests/)
+- Leverage the test utilities in [llm-proxy/src/tests/](mdc:llm-proxy/src/tests)
 
 ## Dependency Management
 

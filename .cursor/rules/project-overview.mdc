@@ -1,6 +1,6 @@
 ---
-description:
-globs:
+description: 
+globs: 
 alwaysApply: false
 ---
 # LLM Proxy Project Overview
@@ -12,14 +12,12 @@ This project is a Rust-based LLM (Large Language Model) proxy/router service tha
 - [llm-proxy/src/main.rs](mdc:llm-proxy/src/main.rs) - Main entry point for the application
 - [llm-proxy/src/lib.rs](mdc:llm-proxy/src/lib.rs) - Exposes the main modules of the application
 - [llm-proxy/src/app.rs](mdc:llm-proxy/src/app.rs) - Core application setup and HTTP server
-- [llm-proxy/src/router/](mdc:llm-proxy/src/router/) - Contains routing logic for API requests
-- [llm-proxy/src/config/](mdc:llm-proxy/src/config/) - Configuration handling
-- [crates/](mdc:crates/) - Contains smaller crates for specific functionality
+- [llm-proxy/src/router/](mdc:llm-proxy/src/router) - Contains routing logic for API requests
+- [llm-proxy/src/config/](mdc:llm-proxy/src/config) - Configuration handling
+- [crates/](mdc:crates) - Contains smaller crates for specific functionality
 
 ## Specialized Crates
 
-- [crates/openai-types/](mdc:crates/openai-types/) - Types for OpenAI API requests/responses
-- [crates/anthropic-types/](mdc:crates/anthropic-types/) - Types for Anthropic API requests/responses
-- [crates/telemetry/](mdc:crates/telemetry/) - Telemetry and logging infrastructure
-- [crates/metrics/](mdc:crates/metrics/) - Metrics collection and reporting
-- [crates/weighted-balance/](mdc:crates/weighted-balance/) - Load balancing logic for LLM providers
+- [crates/telemetry/](mdc:crates/telemetry) - Telemetry and logging infrastructure
+- [crates/metrics/](mdc:crates/metrics) - Metrics collection and reporting
+- [crates/weighted-balance/](mdc:crates/weighted-balance) - Load balancing logic for LLM providers

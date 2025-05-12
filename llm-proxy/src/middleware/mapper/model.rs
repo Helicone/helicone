@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::{
     app::AppState,
     config::{
@@ -11,28 +13,29 @@ use crate::{
     },
 };
 
-#[derive(Debug)]
-pub struct ModelMapper<'a> {
-    default_model_mapping: &'a ModelMappingConfig,
-    providers_config: &'a ProvidersConfig,
-    router_config: &'a RouterConfig,
+#[derive(Debug, Clone)]
+pub struct ModelMapper {
+    app_state: AppState,
+    router_config: Arc<RouterConfig>,
 }
 
-impl<'a> ModelMapper<'a> {
+impl ModelMapper {
     #[must_use]
-    pub fn new(
-        app_state: &'a AppState,
-        router_config: &'a RouterConfig,
-    ) -> Self {
+    pub fn new(app_state: AppState, router_config: Arc<RouterConfig>) -> Self {
         Self {
-            default_model_mapping: &app_state.0.config.default_model_mapping,
-            providers_config: &app_state.0.config.providers,
+            app_state,
             router_config,
         }
     }
-}
 
-impl<'a> ModelMapper<'a> {
+    fn default_model_mapping(&self) -> &ModelMappingConfig {
+        &self.app_state.0.config.default_model_mapping
+    }
+
+    fn providers_config(&self) -> &ProvidersConfig {
+        &self.app_state.0.config.providers
+    }
+
     /// Map a model to a new model name for a target provider.
     ///
     /// If the source model is offered by the target provider, return the source
@@ -41,7 +44,7 @@ impl<'a> ModelMapper<'a> {
     /// global config. (maybe we should put usage of the default mapping
     /// behind a flag so its up to the user,  although declaring mappings
     /// for _every_ model seems onerous)
-    pub fn map_model<'b>(
+    pub fn map_model<'a, 'b>(
         &'a self,
         target_provider: &'b InferenceProvider,
         source_model: &'b Model,
@@ -50,7 +53,7 @@ impl<'a> ModelMapper<'a> {
         'b: 'a,
     {
         let target_provider_models = &self
-            .providers_config
+            .providers_config()
             .get(target_provider)
             .ok_or(MapperError::NoProviderConfig(*target_provider))?
             .models;
@@ -76,7 +79,7 @@ impl<'a> ModelMapper<'a> {
         }
         // if that doesn't have a mapping, use the default model mapping
         let default_mapping = self
-            .default_model_mapping
+            .default_model_mapping()
             .as_ref()
             .get(&source_model_name)
             .iter()

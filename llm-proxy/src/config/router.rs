@@ -37,6 +37,7 @@ impl Default for RouterConfigs {
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 pub struct RouterConfig {
+    #[serde(default = "default_request_style")]
     pub request_style: InferenceProvider,
     pub model_mappings: ModelMappingConfig,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -67,6 +68,10 @@ impl Default for RouterConfig {
     }
 }
 
+fn default_request_style() -> InferenceProvider {
+    InferenceProvider::OpenAI
+}
+
 impl RouterConfig {
     pub fn validate(&self) -> Result<(), InitError> {
         let providers = self.balance.providers();
@@ -74,7 +79,9 @@ impl RouterConfig {
             BalanceConfig::Weighted { targets } => {
                 let total = targets.iter().map(|t| t.weight).sum::<Decimal>();
                 if total != Decimal::from(1) {
-                    return Err(InitError::InvalidBalanceConfig);
+                    return Err(InitError::InvalidWeightedBalancer(format!(
+                        "Balance weights dont sum to 1: {total}"
+                    )));
                 }
             }
             BalanceConfig::P2C { .. } => {}

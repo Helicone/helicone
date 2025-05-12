@@ -7,7 +7,6 @@ use std::{
 };
 
 use futures::Stream;
-use nonempty_collections::NESet;
 use pin_project::pin_project;
 use rust_decimal::prelude::ToPrimitive;
 use tokio::sync::mpsc::Receiver;
@@ -17,7 +16,7 @@ use weighted_balance::weight::Weight;
 
 use crate::{
     app::AppState,
-    config::router::{BalanceTarget, RouterConfig},
+    config::router::{BalanceConfig, RouterConfig},
     discover::{provider::Key, weighted::WeightedKey},
     dispatcher::{Dispatcher, DispatcherService},
     error::init::InitError,
@@ -60,7 +59,7 @@ impl ConfigDiscovery<Key> {
         for provider in providers {
             let key = Key::new(provider);
             let dispatcher =
-                Dispatcher::new_with_middleware(app.clone(), key.provider)?;
+                Dispatcher::new(app.clone(), router_config, key.provider)?;
             service_map.insert(key, dispatcher);
         }
 
@@ -75,9 +74,18 @@ impl ConfigDiscovery<Key> {
 impl ConfigDiscovery<WeightedKey> {
     pub fn new_weighted(
         app: &AppState,
-        weighted_balance_targets: NESet<BalanceTarget>,
+        router_config: &Arc<RouterConfig>,
         rx: Receiver<Change<WeightedKey, DispatcherService>>,
     ) -> Result<Self, InitError> {
+        let weighted_balance_targets = match &router_config.balance {
+            BalanceConfig::Weighted { targets } => targets,
+            BalanceConfig::P2C { .. } => {
+                return Err(InitError::InvalidWeightedBalancer(
+                    "P2C balancer not supported for weighted discovery"
+                        .to_string(),
+                ));
+            }
+        };
         let events = ReceiverStream::new(rx);
         let mut service_map: HashMap<WeightedKey, DispatcherService> =
             HashMap::new();
@@ -91,7 +99,7 @@ impl ConfigDiscovery<WeightedKey> {
             );
             let key = WeightedKey::new(target.provider, weight);
             let dispatcher =
-                Dispatcher::new_with_middleware(app.clone(), key.provider)?;
+                Dispatcher::new(app.clone(), router_config, key.provider)?;
             service_map.insert(key, dispatcher);
         }
 

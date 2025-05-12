@@ -7,17 +7,13 @@ use std::{
 };
 
 use futures::Stream;
-use nonempty_collections::NESet;
 use pin_project::pin_project;
 use tokio::sync::mpsc::Receiver;
 use tower::discover::Change;
 
 use crate::{
     app::AppState,
-    config::{
-        DeploymentTarget,
-        router::{BalanceTarget, RouterConfig},
-    },
+    config::{DeploymentTarget, router::RouterConfig},
     discover::{
         provider::{Key, config::ConfigDiscovery},
         weighted::WeightedKey,
@@ -55,19 +51,15 @@ impl Discovery<Key> {
 impl Discovery<WeightedKey> {
     pub fn new_weighted(
         app_state: &AppState,
-        weighted_balance_targets: NESet<BalanceTarget>,
+        router_config: &Arc<RouterConfig>,
         rx: Receiver<Change<WeightedKey, DispatcherService>>,
     ) -> Result<Self, InitError> {
         // TODO: currently we also have a separate discovery_mode.
         // we should consolidate.
         match app_state.0.config.deployment_target {
-            DeploymentTarget::SelfHosted => {
-                Ok(Self::Config(ConfigDiscovery::new_weighted(
-                    app_state,
-                    weighted_balance_targets,
-                    rx,
-                )?))
-            }
+            DeploymentTarget::SelfHosted => Ok(Self::Config(
+                ConfigDiscovery::new_weighted(app_state, router_config, rx)?,
+            )),
             DeploymentTarget::Cloud { .. } | DeploymentTarget::Sidecar => {
                 todo!("cloud and sidecar not supported yet")
             }
