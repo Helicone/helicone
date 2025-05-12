@@ -10,6 +10,7 @@ use crate::{
 };
 
 const DEFAULT_MAX_TOKENS: u32 = 1000;
+const OPENAI_CHAT_COMPLETION_OBJECT: &str = "chat.completion";
 
 pub struct ToAnthropicConverter {
     model_mapper: ModelMapper,
@@ -254,5 +255,127 @@ impl
             metadata,
             thinking: None,
         })
+    }
+}
+
+impl
+    TryConvert<
+        anthropic_ai_sdk::types::message::CreateMessageResponse,
+        async_openai::types::CreateChatCompletionResponse,
+    > for ToAnthropicConverter
+{
+    type Error = MapperError;
+
+    #[allow(clippy::too_many_lines)]
+    fn try_convert(
+        &self,
+        value: anthropic_ai_sdk::types::message::CreateMessageResponse,
+    ) -> std::result::Result<
+        async_openai::types::CreateChatCompletionResponse,
+        Self::Error,
+    > {
+        use anthropic_ai_sdk::types::message as anthropic;
+        use async_openai::types as openai;
+        let id = value.id;
+        let model = value.model;
+
+        let created = 0;
+        let object = OPENAI_CHAT_COMPLETION_OBJECT.to_string();
+
+        let prompt_tokens_details = value
+            .usage
+            .cache_creation_input_tokens
+            .map(|cache_creation_input_tokens| openai::PromptTokensDetails {
+                cached_tokens: Some(cache_creation_input_tokens),
+                audio_tokens: None,
+            });
+
+        let usage = openai::CompletionUsage {
+            prompt_tokens: value.usage.input_tokens,
+            completion_tokens: value.usage.output_tokens,
+            total_tokens: value.usage.input_tokens + value.usage.output_tokens,
+            prompt_tokens_details,
+            completion_tokens_details: None,
+        };
+
+        let mut tool_calls: Vec<openai::ChatCompletionMessageToolCall> =
+            Vec::new();
+        let mut content = None;
+        for anthropic_content in value.content {
+            match anthropic_content {
+                anthropic::ContentBlock::ToolUse { id, name, input } => {
+                    tool_calls.push(openai::ChatCompletionMessageToolCall {
+                        id: id.clone(),
+                        r#type: openai::ChatCompletionToolType::Function,
+                        function: openai::FunctionCall {
+                            name: name.clone(),
+                            arguments: serde_json::to_string(&input)?,
+                        },
+                    });
+                }
+                anthropic::ContentBlock::ToolResult {
+                    tool_use_id,
+                    content,
+                } => tool_calls.push(openai::ChatCompletionMessageToolCall {
+                    id: tool_use_id.clone(),
+                    r#type: openai::ChatCompletionToolType::Function,
+                    function: openai::FunctionCall {
+                        name: tool_use_id.clone(),
+                        arguments: serde_json::to_string(&content)?,
+                    },
+                }),
+                anthropic::ContentBlock::ServerToolUse { id, name, input } => {
+                    tool_calls.push(openai::ChatCompletionMessageToolCall {
+                        id: id.clone(),
+                        r#type: openai::ChatCompletionToolType::Function,
+                        function: openai::FunctionCall {
+                            name: name.clone(),
+                            arguments: serde_json::to_string(&input)?,
+                        },
+                    });
+                }
+                anthropic::ContentBlock::Text { text, .. } => {
+                    content = Some(text.clone());
+                }
+                anthropic::ContentBlock::WebSearchToolResult { .. }
+                | anthropic::ContentBlock::Image { .. }
+                | anthropic::ContentBlock::Thinking { .. }
+                | anthropic::ContentBlock::RedactedThinking { .. } => {}
+            }
+        }
+        let tool_calls = if tool_calls.is_empty() {
+            None
+        } else {
+            Some(tool_calls)
+        };
+
+        #[allow(deprecated)]
+        let message = openai::ChatCompletionResponseMessage {
+            content,
+            refusal: None,
+            tool_calls,
+            role: openai::Role::Assistant,
+            function_call: None,
+            audio: None,
+        };
+
+        let choice = openai::ChatChoice {
+            index: 0,
+            message,
+            finish_reason: None,
+            logprobs: None,
+        };
+
+        let response = openai::CreateChatCompletionResponse {
+            choices: vec![choice],
+            id,
+            created,
+            model,
+            object,
+            usage: Some(usage),
+            service_tier: None,
+            system_fingerprint: None,
+        };
+        Ok(response)
     }
 }

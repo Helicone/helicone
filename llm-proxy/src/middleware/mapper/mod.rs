@@ -58,29 +58,55 @@ pub trait Convert<Source>: Sized {
 
 pub trait EndpointConverter {
     /// Convert a request body to a target request body with raw bytes.
-    fn convert(&self, req_body_bytes: &Bytes) -> Result<Bytes, Error>;
+    fn convert_req_body(&self, req_body_bytes: &Bytes) -> Result<Bytes, Error>;
+    /// Convert a response body to a target response body with raw bytes.
+    fn convert_resp_body(
+        &self,
+        resp_body_bytes: &Bytes,
+    ) -> Result<Bytes, Error>;
 }
 
 pub struct TypedEndpointConverter<S, T, C>
 where
     S: Endpoint,
     T: Endpoint,
-    C: TryConvert<S::RequestBody, T::RequestBody>,
+    C: TryConvert<S::RequestBody, T::RequestBody>
+        + TryConvert<T::ResponseBody, S::ResponseBody>,
 {
     converter: C,
     _phantom: std::marker::PhantomData<(S, T)>,
+}
+
+impl<S, T, C> TypedEndpointConverter<S, T, C>
+where
+    S: Endpoint,
+    T: Endpoint,
+    C: TryConvert<S::RequestBody, T::RequestBody>,
+    C: TryConvert<T::ResponseBody, S::ResponseBody>,
+{
+    pub fn new(converter: C) -> Self {
+        Self {
+            converter,
+            _phantom: std::marker::PhantomData,
+        }
+    }
 }
 
 impl<S, T, C> EndpointConverter for TypedEndpointConverter<S, T, C>
 where
     S: Endpoint,
     S::RequestBody: DeserializeOwned,
+    S::ResponseBody: Serialize,
     T: Endpoint,
+    T::ResponseBody: DeserializeOwned,
     T::RequestBody: Serialize,
     C: TryConvert<S::RequestBody, T::RequestBody>,
+    C: TryConvert<T::ResponseBody, S::ResponseBody>,
     <C as TryConvert<S::RequestBody, T::RequestBody>>::Error: Into<MapperError>,
+    <C as TryConvert<T::ResponseBody, S::ResponseBody>>::Error:
+        Into<MapperError>,
 {
-    fn convert(&self, bytes: &Bytes) -> Result<Bytes, Error> {
+    fn convert_req_body(&self, bytes: &Bytes) -> Result<Bytes, Error> {
         let source_request: S::RequestBody = serde_json::from_slice(bytes)
             .map_err(InvalidRequestError::InvalidRequestBody)?;
         let target_request: T::RequestBody = self
@@ -91,6 +117,24 @@ where
             serde_json::to_vec(&target_request).map_err(|e| {
                 InternalError::Serialize {
                     ty: std::any::type_name::<T::RequestBody>(),
+                    error: e,
+                }
+            })?;
+
+        Ok(Bytes::from(target_bytes))
+    }
+
+    fn convert_resp_body(&self, bytes: &Bytes) -> Result<Bytes, Error> {
+        let source_response: T::ResponseBody = serde_json::from_slice(bytes)
+            .map_err(InvalidRequestError::InvalidRequestBody)?;
+        let target_response: S::ResponseBody = self
+            .converter
+            .try_convert(source_response)
+            .map_err(|e| InternalError::MapperError(e.into()))?;
+        let target_bytes =
+            serde_json::to_vec(&target_response).map_err(|e| {
+                InternalError::Serialize {
+                    ty: std::any::type_name::<T::ResponseBody>(),
                     error: e,
                 }
             })?;

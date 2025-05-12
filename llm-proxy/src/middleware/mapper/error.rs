@@ -18,4 +18,6 @@ pub enum MapperError {
     ProviderNotEnabled(InferenceProvider),
     /// Invalid request body
     InvalidRequest,
+    /// Serde error: {0}
+    SerdeError(#[from] serde_json::Error),
 }

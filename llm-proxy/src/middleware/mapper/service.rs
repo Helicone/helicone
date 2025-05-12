@@ -1,4 +1,5 @@
 use std::{
+    str::FromStr,
     sync::Arc,
     task::{Context, Poll},
 };
@@ -14,6 +15,7 @@ use crate::{
     types::{
         provider::InferenceProvider,
         request::{Request, RequestContext},
+        response::Response,
     },
 };
 
@@ -30,9 +32,11 @@ impl<S> Service<S> {
 
 impl<S> tower::Service<Request> for Service<S>
 where
-    S: tower::Service<Request, Error = Error> + Clone + Send + 'static,
+    S: tower::Service<Request, Response = Response, Error = Error>
+        + Clone
+        + Send
+        + 'static,
     S::Future: Send + 'static,
-    S::Response: Send + 'static,
 {
     type Response = S::Response;
     type Error = Error;
@@ -64,13 +68,6 @@ where
                     "RequestContext",
                 )))?
                 .clone();
-            let converter_registry = req
-                .extensions()
-                .get::<EndpointConverterRegistry>()
-                .ok_or(Error::Internal(InternalError::ExtensionNotFound(
-                    "EndpointConverterRegistry",
-                )))?
-                .clone();
             let request_style = req_ctx.router_config.request_style;
             tracing::trace!(
                 request_style = %request_style,
@@ -80,13 +77,32 @@ where
             if provider == request_style {
                 inner.call(req).await
             } else {
+                let converter_registry = req
+                    .extensions()
+                    .get::<EndpointConverterRegistry>()
+                    .ok_or(Error::Internal(InternalError::ExtensionNotFound(
+                        "EndpointConverterRegistry",
+                    )))?
+                    .clone();
+                let extracted_path_and_query = req
+                    .extensions_mut()
+                    .remove::<PathAndQuery>()
+                    .ok_or(Error::Internal(
+                        InternalError::ExtensionNotFound("PathAndQuery"),
+                    ))?;
+                let source_endpoint =
+                    ApiEndpoint::new(&extracted_path_and_query, request_style)?;
+                let target_endpoint =
+                    ApiEndpoint::mapped(source_endpoint, provider)?;
                 // serialization/deserialization should be done on a dedicated
                 // thread
+                let converter_registry_cloned = converter_registry.clone();
                 let req = tokio::task::spawn_blocking(move || async move {
                     map_request(
-                        converter_registry,
-                        request_style,
-                        provider,
+                        converter_registry_cloned,
+                        &source_endpoint,
+                        &target_endpoint,
+                        &extracted_path_and_query,
                         req,
                     )
                     .await
@@ -94,7 +110,21 @@ where
                 .await
                 .map_err(InternalError::MappingTaskError)?
                 .await?;
-                inner.call(req).await
+                let response = inner.call(req).await?;
+                let response =
+                    tokio::task::spawn_blocking(move || async move {
+                        map_response(
+                            converter_registry,
+                            &target_endpoint,
+                            &source_endpoint,
+                            response,
+                        )
+                        .await
+                    })
+                    .await
+                    .map_err(InternalError::MappingTaskError)?
+                    .await?;
+                Ok(response)
             }
         })
     }
@@ -102,34 +132,65 @@ where
 
 async fn map_request(
     converter_registry: EndpointConverterRegistry,
-    request_style: InferenceProvider,
-    provider: InferenceProvider,
-    mut req: Request,
+    source_endpoint: &ApiEndpoint,
+    target_endpoint: &ApiEndpoint,
+    target_path_and_query: &PathAndQuery,
+    req: Request,
 ) -> Result<Request, Error> {
-    let extracted_path_and_query =
-        req.extensions_mut().remove::<PathAndQuery>().ok_or(
-            Error::Internal(InternalError::ExtensionNotFound("PathAndQuery")),
-        )?;
-    let source_endpoint =
-        ApiEndpoint::new(&extracted_path_and_query, request_style)?;
-    let target_endpoint = ApiEndpoint::mapped(source_endpoint, provider)?;
     let (parts, body) = req.into_parts();
     let body = body
         .collect()
         .await
         .map_err(InternalError::CollectBodyError)?
         .to_bytes();
-    let (body, target_path_and_query) = source_endpoint.map(
-        &converter_registry,
-        &body,
-        &extracted_path_and_query,
-        target_endpoint,
-    )?;
+    let target_path_and_query =
+        if let Some(query_params) = target_path_and_query.query() {
+            format!("{}?{}", target_endpoint.path(), query_params)
+        } else {
+            target_endpoint.path().to_string()
+        };
+    let target_path_and_query = PathAndQuery::from_str(&target_path_and_query)
+        .map_err(InternalError::InvalidUri)?;
+
+    let converter = converter_registry
+        .get_converter(source_endpoint, target_endpoint)
+        .ok_or_else(|| {
+            InternalError::InvalidConverter(*source_endpoint, *target_endpoint)
+        })?;
+
+    let body = converter.convert_req_body(&body)?;
     let mut req = Request::from_parts(parts, axum_core::body::Body::from(body));
     tracing::trace!(
         source_endpoint = ?source_endpoint, target_endpoint = ?target_endpoint,
         target_path_and_query = ?target_path_and_query, "mapped request");
     req.extensions_mut().insert(target_path_and_query);
+    Ok(req)
+}
+
+async fn map_response(
+    converter_registry: EndpointConverterRegistry,
+    source_endpoint: &ApiEndpoint,
+    target_endpoint: &ApiEndpoint,
+    resp: Response,
+) -> Result<Response, Error> {
+    let (parts, body) = resp.into_parts();
+    // NOTE: collecting the body here also will send it to the async task for
+    // logging
+    let body = body
+        .collect()
+        .await
+        .map_err(InternalError::CollectBodyError)?
+        .to_bytes();
+
+    let converter = converter_registry
+        .get_converter(target_endpoint, source_endpoint)
+        .ok_or_else(|| {
+            InternalError::InvalidConverter(*target_endpoint, *source_endpoint)
+        })?;
+
+    let body = converter.convert_resp_body(&body)?;
+    let req = Response::from_parts(parts, axum_core::body::Body::from(body));
+    tracing::trace!("mapped response");
     Ok(req)
 }
 
