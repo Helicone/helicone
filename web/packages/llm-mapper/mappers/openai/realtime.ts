@@ -161,10 +161,7 @@ const combineAudioBuffers = (audioBuffer: SocketMessage[], audio_key: "audio" | 
     .filter((chunk) => chunk.length > 0);
 
   // If we have valid chunks, combine them
-  let combinedAudio = "";
-  if (audioChunks.length > 0) {
-    combinedAudio = audioChunks.join("");
-  }
+  let combinedAudio = audioChunks.join("");
 
   const combinedMsg: SocketMessage = {
     type: firstMsg.type,
