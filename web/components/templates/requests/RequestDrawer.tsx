@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import {
   LuChevronDown,
   LuChevronUp,
@@ -354,6 +354,42 @@ export default function RequestDrawer(props: RequestDivProps) {
     [org?.currentOrg?.id, request, setNotification]
   );
 
+  // Tracking the width of the container holding the 3 RequestDescTooltips to dynamically truncate length
+  const [descContainerWidth, setDescContainerWidth] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setDescContainerWidth(entry.contentRect.width);
+      }
+    });
+
+    resizeObserver.observe(containerRef.current);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
+
+  const MINIMUM_TRUNCATE_LENGTH = 3;
+  const MAXIMUM_TRUNCATE_LENGTH = 30;
+  const CHARACTER_WIDTH = 4;
+  const ITEM_COUNT = 3;
+  const RESERVED_WIDTH = 300;
+  const dynamicTruncateLength = useMemo(() => {
+    const availableWidth = descContainerWidth - RESERVED_WIDTH;
+    const approximateCharsPerItem = Math.floor(
+      availableWidth / (ITEM_COUNT * CHARACTER_WIDTH)
+    );
+    return Math.max(
+      MINIMUM_TRUNCATE_LENGTH,
+      Math.min(approximateCharsPerItem, MAXIMUM_TRUNCATE_LENGTH)
+    );
+  }, [descContainerWidth]);
+
   const RequestDescTooltip = (props: {
     displayText: string;
     icon: React.ReactNode;
@@ -377,7 +413,7 @@ export default function RequestDrawer(props: RequestDivProps) {
               </XSmall>
             </div>
           </TooltipTrigger>
-          <TooltipContent side="bottom" align="start" className="p-0">
+          <TooltipContent side="bottom" align="start" className="p-0 ml-2">
             <div className="flex flex-col w-full">
               {copyText && (
                 <button
@@ -508,7 +544,10 @@ export default function RequestDrawer(props: RequestDivProps) {
 
           {/* Second Top Row */}
           {Object.values(specialProperties).some((value) => value) && (
-            <div className="h-8 w-full flex flex-row gap-2 items-center px-2 shrink-0">
+            <div
+              ref={containerRef}
+              className="h-8 w-full flex flex-row gap-2 items-center px-2.5 shrink-0"
+            >
               {/* User */}
               {specialProperties.userId && (
                 <RequestDescTooltip
@@ -516,6 +555,7 @@ export default function RequestDrawer(props: RequestDivProps) {
                   icon={<UserIcon className="h-4 w-4" />}
                   copyText={specialProperties.userId}
                   href={`/users/${specialProperties.userId}`}
+                  truncateLength={dynamicTruncateLength}
                 />
               )}
 
@@ -526,6 +566,7 @@ export default function RequestDrawer(props: RequestDivProps) {
                   icon={<ListTreeIcon className="h-4 w-4" />}
                   copyText={specialProperties.sessionId}
                   href={`/sessions/${specialProperties.sessionId}`}
+                  truncateLength={dynamicTruncateLength}
                 />
               )}
 
@@ -536,6 +577,7 @@ export default function RequestDrawer(props: RequestDivProps) {
                   icon={<ScrollTextIcon className="h-4 w-4" />}
                   copyText={specialProperties.promptId}
                   href={`/prompts/${promptDataQuery.data?.id}`}
+                  truncateLength={dynamicTruncateLength}
                 />
               )}
             </div>
