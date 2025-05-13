@@ -39,14 +39,11 @@ jobs:
       - name: Set Image Tag
         id: set-tag
         run: |
-          # Generate a random hash (8 characters)
-          RANDOM_HASH=$(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 8 | head -n 1)
-
           # Get current date in YYYYMMDD format
           CURRENT_DATE=$(date +'%Y%m%d-%H%M%S')
 
           # Combine them to create the tag
-          TAG="${RANDOM_HASH}-${CURRENT_DATE}"
+          TAG="${CURRENT_DATE}"
 
           # If version was provided, use that instead
           if [ -n "${{ github.event.inputs.version }}" ]; then
