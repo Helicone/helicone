@@ -1337,6 +1337,8 @@ Json: JsonObject;
       assets: string[];
       target_url: string;
       model: string;
+      cache_reference_id: string | null;
+      cache_enabled: boolean;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];
@@ -1763,6 +1765,13 @@ Json: JsonObject;
         id: string;
       };
       request: {
+        cacheReferenceId?: string;
+        cacheControl?: string;
+        /** Format: double */
+        cacheBucketMaxSize?: number;
+        /** Format: double */
+        cacheSeed?: number;
+        cacheEnabled?: boolean;
         experimentRowIndex?: string;
         experimentColumnId?: string;
         heliconeTemplate?: components["schemas"]["TemplateWithInputs"];

@@ -847,6 +847,8 @@ const models: TsoaRoute.Models = {
             "assets": {"dataType":"array","array":{"dataType":"string"},"required":true},
             "target_url": {"dataType":"string","required":true},
             "model": {"dataType":"string","required":true},
+            "cache_reference_id": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "cache_enabled": {"dataType":"boolean","required":true},
         },
         "additionalProperties": false,
     },

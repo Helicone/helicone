@@ -16,6 +16,7 @@ import { PromptSettings, RequestWrapper } from "../RequestWrapper";
 import { INTERNAL_ERRORS } from "../util/constants";
 import { withTimeout } from "../util/helpers";
 import { Result, err, ok } from "../util/results";
+import { CacheSettings } from "../util/cache/cacheSettings";
 import {
   anthropicAIStream,
   getModel,
@@ -26,6 +27,8 @@ import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 import { costOfPrompt } from "../../packages/cost";
 import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
 import { MessageData } from "../clients/producers/types";
+
+const DEFAULT_UUID = "00000000-0000-0000-0000-000000000000";
 
 export interface DBLoggableProps {
   response: {
@@ -517,7 +520,8 @@ export class DBLoggable {
       producer: HeliconeProducer;
     },
     S3_ENABLED: Env["S3_ENABLED"],
-    requestHeaders?: HeliconeHeaders
+    requestHeaders?: HeliconeHeaders,
+    cacheSettings?: CacheSettings
   ): Promise<
     Result<
       {
@@ -569,7 +573,7 @@ export class DBLoggable {
       console.error(`Error checking rate limit: ${e}`);
     }
 
-    await this.useKafka(db, authParams, S3_ENABLED, requestHeaders);
+    await this.useKafka(db, authParams, S3_ENABLED, requestHeaders, cacheSettings);
 
     // THIS IS ONLY USED FOR COST CALCULATION ON RATELIMITING
     const readResponse = await this.readResponse();
@@ -607,7 +611,8 @@ export class DBLoggable {
     },
     authParams: AuthParams,
     S3_ENABLED: Env["S3_ENABLED"],
-    requestHeaders?: HeliconeHeaders
+    requestHeaders?: HeliconeHeaders,
+    cacheSettings?: CacheSettings
   ): Promise<Result<null, string>> {
     if (
       !authParams?.organizationId ||
@@ -673,6 +678,14 @@ export class DBLoggable {
             this.request.promptSettings.promptMode === "production"
               ? this.request.promptSettings.promptId
               : "",
+          cacheReferenceId:
+            cacheSettings?.shouldReadFromCache
+              ? requestHeaders.requestId
+              : DEFAULT_UUID,
+          cacheEnabled: requestHeaders.cacheHeaders.cacheEnabled ?? undefined,
+          cacheSeed: requestHeaders.cacheHeaders.cacheSeed ?? undefined,
+          cacheBucketMaxSize: requestHeaders.cacheHeaders.cacheBucketMaxSize ?? undefined,
+          cacheControl: requestHeaders.cacheHeaders.cacheControl ?? undefined,
           promptVersion: this.request.promptSettings.promptVersion,
           properties: this.request.properties,
           heliconeApiKeyId: authParams.heliconeApiKeyId, // If undefined, proxy key id must be present

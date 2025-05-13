@@ -269,11 +269,11 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   // Moved activeColumns state management here
   const [activeColumns, setActiveColumns] = useLocalStorage<DragColumnItem[]>(
     `requests-table-activeColumns`, // Use a unique key
-    getInitialColumns(isCached).map(columnDefToDragColumnItem) // Initialize with default columns
+    getInitialColumns().map(columnDefToDragColumnItem) // Initialize with default columns
   );
 
   const columnsWithProperties = useMemo(() => {
-    const initialColumns = getInitialColumns(isCached);
+    const initialColumns = getInitialColumns();
     return [...initialColumns].concat(
       properties.map((property) => {
         return {

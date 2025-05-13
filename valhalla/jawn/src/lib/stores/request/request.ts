@@ -26,6 +26,7 @@ import {
 } from "../../../packages/cost";
 
 const MAX_TOTAL_BODY_SIZE = 1024 * 1024;
+const DEFAULT_UUID = "00000000-0000-0000-0000-000000000000";
 
 export interface HeliconeRequestAsset {
   assetUrl: string;
@@ -196,7 +197,9 @@ export async function getRequestsClickhouseNoSort(
       scores,
       properties,
       assets as asset_ids,
-      target_url
+      target_url,
+      cache_reference_id,
+      cache_enabled
     FROM request_response_rmt
     WHERE (
       (${builtFilter.filter})
@@ -231,7 +234,6 @@ export async function getRequestsClickhouse(
   limit: number,
   sort: SortLeafRequest
 ): Promise<Result<HeliconeRequest[], string>> {
-  console.log("getRequestsClickhouse");
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
   }
@@ -269,6 +271,8 @@ export async function getRequestsClickhouse(
       properties,
       assets as asset_ids,
       target_url,
+      cache_reference_id,
+      cache_enabled,
       ${clickhousePriceCalcNonAggregated("request_response_rmt")} as cost_usd
     FROM request_response_rmt FINAL
     WHERE (
@@ -495,7 +499,9 @@ async function mapLLMCalls(
         const { data: signedBodyUrl, error: signedBodyUrlErr } =
           await s3Client.getRequestResponseBodySignedUrl(
             orgId,
-            heliconeRequest.request_id
+            heliconeRequest.cache_reference_id === DEFAULT_UUID 
+            ? heliconeRequest.request_id 
+            : (heliconeRequest.cache_reference_id ?? heliconeRequest.request_id)
           );
 
         if (signedBodyUrlErr || !signedBodyUrl) {

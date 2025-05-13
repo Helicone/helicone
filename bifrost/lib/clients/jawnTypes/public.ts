@@ -1317,6 +1317,8 @@ export interface components {
       assets: string[];
       target_url: string;
       model: string;
+      cache_reference_id: string | null;
+      cache_enabled: boolean;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];

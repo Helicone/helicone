@@ -2891,6 +2891,13 @@
 					},
 					"model": {
 						"type": "string"
+					},
+					"cache_reference_id": {
+						"type": "string",
+						"nullable": true
+					},
+					"cache_enabled": {
+						"type": "boolean"
 					}
 				},
 				"required": [
@@ -2926,7 +2933,9 @@
 					"properties",
 					"assets",
 					"target_url",
-					"model"
+					"model",
+					"cache_reference_id",
+					"cache_enabled"
 				],
 				"type": "object",
 				"additionalProperties": false

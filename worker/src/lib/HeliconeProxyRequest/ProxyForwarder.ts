@@ -93,6 +93,7 @@ export async function proxyForwarder(
                 env,
                 new ClickhouseClientWrapper(env),
                 orgData.organizationId,
+                proxyRequest.userId ?? null,
                 provider,
                 (request.cf?.country as string) ?? null
               )

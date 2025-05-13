@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { Env, hash } from "../../..";
 import { HeliconeProxyRequest } from "../../models/HeliconeProxyRequest";
-import { ClickhouseClientWrapper } from "../../db/ClickhouseWrapper";
+import { ClickhouseClientWrapper, RequestResponseRMT } from "../../db/ClickhouseWrapper";
 import { Database } from "../../../../supabase/database.types";
 import { safePut } from "../../safePut";
 const CACHE_BACKOFF_RETRIES = 5;
@@ -115,6 +115,7 @@ export async function recordCacheHit(
   env: Env,
   clickhouseDb: ClickhouseClientWrapper,
   organizationId: string,
+  userId: string | null,
   provider: string,
   countryCode: string | null
 ): Promise<void> {
@@ -129,48 +130,48 @@ export async function recordCacheHit(
     env.SUPABASE_SERVICE_ROLE_KEY
   );
 
-  // const { error } = await dbClient
-  //   .from("cache_hits")
-  //   .insert({ request_id: requestId, organization_id: organizationId });
+  let { data: rowContents, error: rowContentsError } = await clickhouseDb.dbQuery<RequestResponseRMT>(
+    `
+      SELECT *
+      FROM request_response_rmt
+      WHERE request_id = {val_0: UUID}
+      ORDER BY updated_at DESC
+      LIMIT 1
+    `, // don't need to filter by organization_id or provider because we're using the request_id (?)
+    [requestId, organizationId, provider]
+  );
 
-  // if (error) {
-  //   console.error(error);
-  // }
-
-  const { data: response, error: responseError } = await dbClient
-    .from("response")
-    .select("*")
-    .eq("request", requestId)
-    .single();
-
-  if (responseError) {
-    console.error(responseError);
+  if (rowContents?.length === 0) {
+    console.error("No row contents found in cache hit", requestId);
+    return;
   }
 
-  const model = (response?.body as { model: string })?.model ?? null;
-  const promptTokens = response?.prompt_tokens ?? 0;
-  const completionTokens = response?.completion_tokens ?? 0;
-  const latency = response?.delay_ms ?? 0;
-
+  const row = rowContents?.[0];
   if (organizationId !== "ba195205-9d19-42de-9317-b479c20ed6ae") {
-    const { error: clickhouseError } = await clickhouseDb.dbInsertClickhouse(
-      "cache_hits",
-      [
+    if (row) {
+      const cacheHitStartTime = performance.now();
+
+      const { error: clickhouseError } = await clickhouseDb.dbInsertClickhouse("request_response_rmt", [
         {
-          request_id: requestId,
+          ...row,
+          response_created_at: new Date().toISOString().replace('Z', '').replace('T', ' '),
+          latency: Math.round(performance.now() - cacheHitStartTime), // not a good way to calculate
+          request_id: crypto.randomUUID(),
+          user_id: userId ?? "",
           organization_id: organizationId,
-          prompt_tokens: promptTokens,
-          completion_tokens: completionTokens,
-          model: model ?? "",
-          latency: latency,
-          created_at: null,
-          provider,
-          country_code: countryCode,
-        },
-      ]
-    );
-    if (clickhouseError) {
-      console.error(clickhouseError);
+          time_to_first_token: 0, // Cache hits have instant first token (lol no they dont???)
+          country_code: countryCode ?? row.country_code ?? "",
+          properties: {
+            ...row.properties,
+            "Original-Response-Latency": row.latency.toString(),
+          },
+          cache_reference_id: requestId,
+          cache_enabled: true,
+        }
+      ]);
+      if (clickhouseError) {
+        console.error("Error inserting cache hit into Clickhouse:", clickhouseError);
+      }
     }
   }
 }

@@ -208,6 +208,8 @@ type HeliconeMetadata = {
   requestId: string;
   path: string;
   countryCode: string | null;
+  cacheEnabled: boolean;
+  cacheReferenceId: string | null;
   createdAt: string;
   totalTokens: number | null;
   promptTokens: number | null;
@@ -336,4 +338,6 @@ export interface HeliconeRequest {
   assets: Array<string>;
   target_url: string;
   model: string;
+  cache_reference_id: string | null;
+  cache_enabled: boolean;
 }
