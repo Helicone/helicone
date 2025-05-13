@@ -34,16 +34,43 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v3
         with:
-        ref: "main"
+          ref: "main"
 
       - name: Set Image Tag
         id: set-tag
         run: |
+          # Generate a random hash (8 characters)
+          RANDOM_HASH=$(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 8 | head -n 1)
+
+          # Get current date in YYYYMMDD format
+          CURRENT_DATE=$(date +'%Y%m%d-%H%M%S')
+
+          # Combine them to create the tag
+          TAG="${RANDOM_HASH}-${CURRENT_DATE}"
+
+          # If version was provided, use that instead
           if [ -n "${{ github.event.inputs.version }}" ]; then
-            echo "tag=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
-          else
-            echo "tag=${GITHUB_SHA::8}" >> $GITHUB_OUTPUT
+            TAG="${{ github.event.inputs.version }}"
           fi
+
+          # Set the output variable
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+
+          # Print for logging
+          echo "Generated tag: ${TAG}"
+
+      - name: Create GitHub Tag
+        run: |
+          # Configure Git
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+          # Create and push the tag
+          TAG_NAME="deploy-${{ steps.set-tag.outputs.tag }}"
+          TAG_MESSAGE="Deployment to ${{ github.event.inputs.environment }} by @${{ github.actor }}"
+
+          git tag -a ${TAG_NAME} -m "${TAG_MESSAGE}"
+          git push origin ${TAG_NAME}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -75,8 +102,8 @@ jobs:
         if: ${{ github.event.inputs.environment == 'all' || github.event.inputs.environment == 'us' }}
         uses: docker/build-push-action@v4
         with:
-          context: ./vahalla # Changed to point to your backend directory
-          file: dockerfile # Changed to point to dockerfile in backend directory
+          context: ./vahalla
+          file: dockerfile
           platforms: linux/amd64
           push: true
           tags: |
