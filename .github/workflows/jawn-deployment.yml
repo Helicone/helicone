@@ -87,7 +87,7 @@ jobs:
         if: ${{ github.event.inputs.environment == 'all' || github.event.inputs.environment == 'eu' }}
         uses: docker/build-push-action@v4
         with:
-          context: ./helicone/vahalla
+          context: ./vahalla
           file: dockerfile
           platforms: linux/amd64
           push: true
