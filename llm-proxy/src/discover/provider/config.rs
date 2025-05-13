@@ -19,7 +19,8 @@ use crate::{
     config::router::{BalanceConfig, RouterConfig},
     discover::{provider::Key, weighted::WeightedKey},
     dispatcher::{Dispatcher, DispatcherService},
-    error::init::InitError,
+    error::{init::InitError, provider::ProviderError},
+    types::provider::ProviderKeys,
 };
 
 /// Reads available models and providers from the config file.
@@ -51,6 +52,7 @@ impl ConfigDiscovery<Key> {
     pub fn new(
         app: &AppState,
         router_config: &Arc<RouterConfig>,
+        provider_keys: &ProviderKeys,
         rx: Receiver<Change<Key, DispatcherService>>,
     ) -> Result<Self, InitError> {
         let events = ReceiverStream::new(rx);
@@ -58,8 +60,17 @@ impl ConfigDiscovery<Key> {
         let providers = router_config.balance.providers();
         for provider in providers {
             let key = Key::new(provider);
-            let dispatcher =
-                Dispatcher::new(app.clone(), router_config, key.provider)?;
+            let api_key = provider_keys
+                .as_ref()
+                .get(&key.provider)
+                .ok_or(ProviderError::ApiKeyNotFound(key.provider))?
+                .clone();
+            let dispatcher = Dispatcher::new(
+                app.clone(),
+                router_config,
+                key.provider,
+                &api_key,
+            )?;
             service_map.insert(key, dispatcher);
         }
 
@@ -75,6 +86,7 @@ impl ConfigDiscovery<WeightedKey> {
     pub fn new_weighted(
         app: &AppState,
         router_config: &Arc<RouterConfig>,
+        provider_keys: &ProviderKeys,
         rx: Receiver<Change<WeightedKey, DispatcherService>>,
     ) -> Result<Self, InitError> {
         let weighted_balance_targets = match &router_config.balance {
@@ -87,8 +99,7 @@ impl ConfigDiscovery<WeightedKey> {
             }
         };
         let events = ReceiverStream::new(rx);
-        let mut service_map: HashMap<WeightedKey, DispatcherService> =
-            HashMap::new();
+        let mut service_map = HashMap::new();
 
         for target in weighted_balance_targets {
             let weight = Weight::from(
@@ -98,8 +109,17 @@ impl ConfigDiscovery<WeightedKey> {
                     .ok_or(InitError::InvalidWeight(target.provider))?,
             );
             let key = WeightedKey::new(target.provider, weight);
-            let dispatcher =
-                Dispatcher::new(app.clone(), router_config, key.provider)?;
+            let api_key = provider_keys
+                .as_ref()
+                .get(&key.provider)
+                .ok_or(ProviderError::ApiKeyNotFound(key.provider))?
+                .clone();
+            let dispatcher = Dispatcher::new(
+                app.clone(),
+                router_config,
+                key.provider,
+                &api_key,
+            )?;
             service_map.insert(key, dispatcher);
         }
 

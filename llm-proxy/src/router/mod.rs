@@ -46,13 +46,18 @@ impl Router {
                     .config
                     .routers
                     .as_ref()
-                    .get(&RouterId::Default)
+                    .get(&id)
                     .ok_or(InitError::DefaultRouterNotFound)?
                     .clone();
                 Arc::new(router_config)
             }
         };
         router_config.validate()?;
+        let provider_keys = app_state
+            .0
+            .config
+            .discover
+            .provider_keys(&router_config.balance)?;
         let (balancer, monitor) =
             ProviderBalancer::new(app_state.clone(), router_config.clone())
                 .await?;
@@ -60,7 +65,8 @@ impl Router {
             .layer(ErrorHandlerLayer::new(app_state.clone()))
             .layer(crate::middleware::request_context::Layer::new(
                 router_config.clone(),
-                app_state.0.provider_keys.clone(),
+                // TODO: we can remove this
+                provider_keys,
             ))
             // other middleware: rate limiting, logging, etc, etc
             // will be added here as well from the router config

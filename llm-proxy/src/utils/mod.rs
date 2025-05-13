@@ -4,10 +4,12 @@ pub mod meltdown;
 
 use std::{fmt, fmt::Display, marker::PhantomData, str::FromStr};
 
+use http::HeaderValue;
 use serde::{
     Deserializer, Serializer,
     de::{Error as DeError, Visitor},
 };
+use url::Url;
 
 pub fn deserialize_from_str<'de, T, D>(deserializer: D) -> Result<T, D::Error>
 where
@@ -47,4 +49,17 @@ where
     S: Serializer,
 {
     serializer.serialize_str(&value.to_string())
+}
+
+pub(crate) fn host_header(url: &Url) -> HeaderValue {
+    match url.host() {
+        Some(url::Host::Domain(host)) => HeaderValue::from_str(host).unwrap(),
+        Some(url::Host::Ipv4(host)) => {
+            HeaderValue::from_str(host.to_string().as_str()).unwrap()
+        }
+        Some(url::Host::Ipv6(host)) => {
+            HeaderValue::from_str(host.to_string().as_str()).unwrap()
+        }
+        _ => HeaderValue::from_str("").unwrap(),
+    }
 }

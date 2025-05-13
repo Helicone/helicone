@@ -18,6 +18,7 @@ config = { workspace = true }
 compact_str = { workspace = true, features = ['serde'] }
 derive_more = { workspace = true, features = ['as_ref', 'constructor', 'debug', 'deref', 'deref_mut', 'display', 'from', 'from_str'] }
 displaydoc = { workspace = true }
+eventsource-stream = { workspace = true }
 futures = { workspace = true }
 governor = { workspace = true }
 heck = { workspace = true }
@@ -38,6 +39,7 @@ pin-project = { workspace = true }
 pin-project-lite = { workspace = true }
 regex = { workspace = true }
 reqwest = { workspace = true }
+reqwest-eventsource = { workspace = true }
 rust_decimal = { workspace = true }
 rusty-s3 = { workspace = true }
 semver = { workspace = true }

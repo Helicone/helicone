@@ -73,9 +73,9 @@ impl MetaRouter {
             HashMap::with_capacity(app_state.0.config.routers.as_ref().len());
         for router_id in app_state.0.config.routers.as_ref().keys() {
             let (router, monitor) =
-                Router::new(router_id.clone(), app_state.clone()).await?;
-            monitors.insert(router_id.clone(), monitor);
-            inner.insert(router_id.clone(), router);
+                Router::new(*router_id, app_state.clone()).await?;
+            monitors.insert(*router_id, monitor);
+            inner.insert(*router_id, router);
         }
         let meta_router = Self {
             inner,
