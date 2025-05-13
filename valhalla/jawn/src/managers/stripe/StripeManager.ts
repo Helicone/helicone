@@ -145,9 +145,32 @@ export class StripeManager extends BaseManager {
     events: StripeMeterEvent[]
   ): Promise<Result<string, string>> {
     try {
-      const emptyObject = await this.stripe.v2.billing.meterEventStream.create({
-        events: events,
-      });
+      // First create a meter event session to get an auth token
+      const meterEventSession =
+        await this.stripe.v2.billing.meterEventSession.create();
+
+      // Use a direct fetch to the meter events stream endpoint with the auth token
+      // The endpoint is different from the standard Stripe API endpoint
+      const response = await fetch(
+        "https://meter-events.stripe.com/v2/billing/meter_event_stream",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${meterEventSession.authentication_token}`,
+            "Content-Type": "application/json",
+            "Stripe-Version": "2025-03-31.preview",
+          },
+          body: JSON.stringify({ events }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(
+          `Error response from Stripe: ${response.status} ${errorText}`
+        );
+      }
+
       return ok("Success");
     } catch (error) {
       return err(`Error tracking stripe meter: ${error}`);
