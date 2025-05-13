@@ -4,7 +4,9 @@ version: "3.8"
 services:
   jawn:
     container_name: helicone-jawn
-    image: helicone/jawn:latest
+    build:
+      context: ../
+      dockerfile: valhalla/dockerfile
     restart: unless-stopped
     ports:
       - ${JAWN_PORT}:${JAWN_PORT}
@@ -29,7 +31,13 @@ services:
 
   web:
     container_name: helicone-web-local
-    image: helicone/web:latest
+    build:
+      context: ../web
+      dockerfile: ../docker/dockerfiles/dockerfile_web
+      args:
+        NEXT_PUBLIC_HELICONE_JAWN_SERVICE: ${JAWN_PUBLIC_URL}
+        NEXT_PUBLIC_BETTER_AUTH: "true"
+        NODE_ENV: development
     ports:
       - 3000:3000
     volumes:
@@ -87,11 +95,11 @@ services:
       - minio_data:/data
     command: server /data --console-address ":9001"
     healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 5s
+      start_period: 5s # Give MinIO time to start up before checking
 
   minio-setup:
     image: minio/mc:RELEASE.2025-04-08T15-39-49Z
@@ -133,9 +141,10 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-
   migrations:
-    image: helicone/migrations:latest
+    build:
+      context: ../
+      dockerfile: docker/dockerfiles/dockerfile_migrations
     depends_on:
       db:
         condition: service_healthy
