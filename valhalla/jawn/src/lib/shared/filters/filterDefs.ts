@@ -207,6 +207,7 @@ interface SessionsRequestResponseRMTToOperators {
   session_total_requests: SingleKey<NumberOperators>;
   session_created_at: SingleKey<TimestampOperatorsTyped>;
   session_latest_request_created_at: SingleKey<TimestampOperatorsTyped>;
+  session_tag: SingleKey<TextOperators>;
 }
 
 export type FilterLeafRequestResponseLog =

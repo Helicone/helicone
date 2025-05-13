@@ -63,12 +63,12 @@ copy_llm_mapper() {
 
 # Function to copy the common/auth/server to jawn
 copy_common() {
-    echo "Copying common/auth/server to jawn and web..."
+    echo "Copying common/ to jawn and web..."
     
     # Define destinations
     destinations=(
-        "../valhalla/jawn/src/packages/common/auth"
-        "../web/packages/common/auth"
+        "../valhalla/jawn/src/packages/common"
+        "../web/packages/common"
     )
     
     # Remove and recreate directories
@@ -79,7 +79,7 @@ copy_common() {
     
     # Copy files to all destinations
     for dest in "${destinations[@]}"; do
-        rsync -a --exclude="toImplement" common/auth/ "$dest"
+        rsync -a --exclude="toImplement" common/ "$dest"
         echo "Copied to $dest"
     done
 }
