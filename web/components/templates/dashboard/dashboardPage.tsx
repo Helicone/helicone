@@ -55,22 +55,6 @@ interface DashboardPageProps {
   user: HeliconeUser;
 }
 
-function max(arr: number[]) {
-  return arr.reduce((p, c) => (p > c ? p : c), 0);
-}
-
-export function formatNumberString(
-  numString: string,
-  minimumFractionDigits?: boolean
-) {
-  const num = parseFloat(numString);
-  if (minimumFractionDigits) {
-    return num.toLocaleString("en-US", { minimumFractionDigits: 2 });
-  } else {
-    return num.toLocaleString("en-US");
-  }
-}
-
 export type Loading<T> = T | "loading";
 
 export type DashboardMode = "requests" | "costs" | "errors";
@@ -809,3 +793,19 @@ const DashboardPage = (props: DashboardPageProps) => {
 };
 
 export default DashboardPage;
+
+function max(arr: number[]) {
+  return arr.reduce((p, c) => (p > c ? p : c), 0);
+}
+
+export function formatNumberString(
+  numString: string,
+  minimumFractionDigits?: boolean
+) {
+  const num = parseFloat(numString);
+  if (minimumFractionDigits) {
+    return num.toLocaleString("en-US", { minimumFractionDigits: 2 });
+  } else {
+    return num.toLocaleString("en-US");
+  }
+}
