@@ -27,8 +27,7 @@ import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 import { costOfPrompt } from "../../packages/cost";
 import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
 import { MessageData } from "../clients/producers/types";
-
-const DEFAULT_UUID = "00000000-0000-0000-0000-000000000000";
+import { DEFAULT_UUID } from "../../packages/llm-mapper/types";
 
 export interface DBLoggableProps {
   response: {

@@ -24,9 +24,9 @@ import {
   clickhousePriceCalc,
   clickhousePriceCalcNonAggregated,
 } from "../../../packages/cost";
+import { DEFAULT_UUID } from "../../../packages/llm-mapper/types";
 
 const MAX_TOTAL_BODY_SIZE = 1024 * 1024;
-const DEFAULT_UUID = "00000000-0000-0000-0000-000000000000";
 
 export interface HeliconeRequestAsset {
   assetUrl: string;

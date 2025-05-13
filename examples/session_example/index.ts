@@ -19,7 +19,7 @@ async function fullReq() {
   const chatCompletion = await openai.chat.completions.create(
     {
       messages: [
-        { role: "user", content: "Who is the president of the United States?" },
+        { role: "user", content: "Who is the prime minister of Canada?" },
       ],
       model: "gpt-3.5-turbo",
     },
