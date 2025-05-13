@@ -381,8 +381,13 @@ export default function RequestDrawer(props: RequestDivProps) {
   const RESERVED_WIDTH = 300;
   const dynamicTruncateLength = useMemo(() => {
     const availableWidth = descContainerWidth - RESERVED_WIDTH;
-    const approximateCharsPerItem = Math.floor(availableWidth / (ITEM_COUNT * CHARACTER_WIDTH));
-    return Math.max(MINIMUM_TRUNCATE_LENGTH, Math.min(approximateCharsPerItem, MAXIMUM_TRUNCATE_LENGTH));
+    const approximateCharsPerItem = Math.floor(
+      availableWidth / (ITEM_COUNT * CHARACTER_WIDTH)
+    );
+    return Math.max(
+      MINIMUM_TRUNCATE_LENGTH,
+      Math.min(approximateCharsPerItem, MAXIMUM_TRUNCATE_LENGTH)
+    );
   }, [descContainerWidth]);
 
   const RequestDescTooltip = (props: {
@@ -539,7 +544,7 @@ export default function RequestDrawer(props: RequestDivProps) {
 
           {/* Second Top Row */}
           {Object.values(specialProperties).some((value) => value) && (
-            <div 
+            <div
               ref={containerRef}
               className="h-8 w-full flex flex-row gap-2 items-center px-2.5 shrink-0"
             >
