@@ -24,6 +24,16 @@ export const MODEL_LIST: {
     provider: "openai",
   },
   {
+    value: "gpt-o3",
+    label: "gpt-o3",
+    provider: "openai",
+  },
+  {
+    value: "gpt-o4-mini",
+    label: "gpt-o4-mini",
+    provider: "openai",
+  },
+  {
     value: "gpt-4o-mini",
     label: "gpt-4o-mini",
     provider: "openai",
