@@ -1,3 +1,4 @@
+import { TagType } from "../../../packages/common/sessions/tags";
 import {
   AllOperators,
   AnyOperator,
@@ -266,7 +267,9 @@ const whereKeyMappings: KeyMappings = {
     result_request_id: "experiment_v2_hypothesis_run.result_request_id",
   }),
   sessions_request_response_rmt:
-    easyKeyMappings<"sessions_request_response_rmt">({}),
+    easyKeyMappings<"sessions_request_response_rmt">({
+      session_tag: "tag",
+    }),
 
   // Deprecated
   values: NOT_IMPLEMENTED,
@@ -377,11 +380,10 @@ export function buildFilterLeaf(
     return argPlaceHolder(argsAcc.length - 1, value);
   };
 
-  const filters: string[] = [];
-
-  for (const _tableKey in filter) {
+  const filters = Object.keys(filter).reduce<string[]>((acc, _tableKey) => {
     const tableKey = _tableKey as keyof typeof filter;
     const table = filter[tableKey];
+    // table is {session_tag: { equals: "test" }} tableKey is sessions_request_response_rmt
     const mapper = keyMappings[tableKey] as KeyMapper<typeof table>;
 
     const {
@@ -391,27 +393,43 @@ export function buildFilterLeaf(
     } = mapper(table, placeValueSafely);
 
     if (!column) {
-      continue;
+      return acc;
     }
 
+    const tagFilter =
+      column === "tag" && tableKey === "sessions_request_response_rmt"; // Tag is a column in tags
     const sqlOperator = operatorToSql(operatorKey);
 
-    if (operatorKey === "not-equals" && value === "null") {
-      filters.push(`${column} is not null`);
-    } else if (operatorKey === "equals" && value === "null") {
-      filters.push(`${column} is null`);
-    } else {
-      if (operatorKey === "contains" || operatorKey === "not-contains") {
-        filters.push(`${column} ${sqlOperator} '%' || ${value}::text || '%'`);
-      } else if (operatorKey === "vector-contains") {
-        filters.push(
-          `${column} ${sqlOperator} plainto_tsquery('helicone_search_config', ${value}::text)`
-        );
-      } else {
-        filters.push(`${column} ${sqlOperator} ${value}`);
-      }
+    // TODO: (Justin) not sure if I should set a limit here
+    // Add special check for session_tag
+    if (tagFilter) {
+      const subQuery = `
+        SELECT entity_id
+        FROM tags
+        WHERE tag ${sqlOperator} ${value}
+        AND entity_type = '${TagType.SESSION}'
+      `;
+
+      return [...acc, `properties['Helicone-Session-Id'] IN (${subQuery})`];
     }
-  }
+
+    const filterClause = (() => {
+      switch (true) {
+        case operatorKey === "not-equals" && value === "null":
+          return `${column} is not null`;
+        case operatorKey === "equals" && value === "null":
+          return `${column} is null`;
+        case operatorKey === "contains" || operatorKey === "not-contains":
+          return `${column} ${sqlOperator} '%' || ${value}::text || '%'`;
+        case operatorKey === "vector-contains":
+          return `${column} ${sqlOperator} plainto_tsquery('helicone_search_config', ${value}::text)`;
+        default:
+          return `${column} ${sqlOperator} ${value}`;
+      }
+    })();
+
+    return [...acc, filterClause];
+  }, []);
 
   return {
     filters,

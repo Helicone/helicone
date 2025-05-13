@@ -178,4 +178,40 @@ export class SessionController extends Controller {
     }
     return result;
   }
+
+  @Get("/{sessionId}/tag")
+  public async getSessionTag(
+    @Path() sessionId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<string | null, string>> {
+    const sessionManager = new SessionManager(request.authParams);
+
+    const result = await sessionManager.getSessionTag(sessionId);
+    if (result.error) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
+  @Post("/{sessionId}/tag")
+  public async updateSessionTag(
+    @Path() sessionId: string,
+    @Body() requestBody: { tag: string },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const sessionManager = new SessionManager(request.authParams);
+
+    const result = await sessionManager.updateSessionTag(
+      sessionId,
+      requestBody.tag
+    );
+    if (result.error) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
 }
