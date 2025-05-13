@@ -103,7 +103,7 @@ export async function callProvider(props: CallProps): Promise<Response> {
     headersWithExtra = joinHeaders(removedHeaders, props.extraHeaders);
   }
 
-  if (originalUrl.host.includes("localhost")) {
+  if (originalUrl.host.includes("localhost") || originalUrl.host.includes("127.0.0.1")) {
     headersWithExtra.set("Accept-Encoding", "Identity");
   }
 
