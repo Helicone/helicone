@@ -67,17 +67,7 @@ export async function proxyForwarder(
   }
 
   if (cacheSettings.shouldReadFromCache) {
-    const { data, error } = await handleProxyRequest(
-      proxyRequest,
-      rate_limited ? responseBuilder.buildRateLimitedResponse() : undefined
-    );
-    if (error !== null) {
-      return responseBuilder.build({
-        body: error,
-        status: 500,
-      });
-    }
-    const { loggable, response } = data;
+
     const { data: auth, error: authError } = await request.auth();
     if (authError == null) {
       const db = new DBWrapper(env, auth);
