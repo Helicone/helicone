@@ -99,7 +99,7 @@ jobs:
         if: ${{ github.event.inputs.environment == 'all' || github.event.inputs.environment == 'us' }}
         uses: docker/build-push-action@v4
         with:
-          context: ./vahalla
+          context: ./valhalla
           file: dockerfile
           platforms: linux/amd64
           push: true
@@ -111,7 +111,7 @@ jobs:
         if: ${{ github.event.inputs.environment == 'all' || github.event.inputs.environment == 'eu' }}
         uses: docker/build-push-action@v4
         with:
-          context: ./vahalla
+          context: ./valhalla
           file: dockerfile
           platforms: linux/amd64
           push: true
