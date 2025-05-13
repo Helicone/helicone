@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useMemo, useState, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   LuChevronDown,
   LuChevronUp,
@@ -372,7 +372,7 @@ export default function RequestDrawer(props: RequestDivProps) {
     return () => {
       resizeObserver.disconnect();
     };
-  }, []);
+  }, [containerRef.current]);
 
   const MINIMUM_TRUNCATE_LENGTH = 3;
   const MAXIMUM_TRUNCATE_LENGTH = 30;
@@ -381,13 +381,8 @@ export default function RequestDrawer(props: RequestDivProps) {
   const RESERVED_WIDTH = 300;
   const dynamicTruncateLength = useMemo(() => {
     const availableWidth = descContainerWidth - RESERVED_WIDTH;
-    const approximateCharsPerItem = Math.floor(
-      availableWidth / (ITEM_COUNT * CHARACTER_WIDTH)
-    );
-    return Math.max(
-      MINIMUM_TRUNCATE_LENGTH,
-      Math.min(approximateCharsPerItem, MAXIMUM_TRUNCATE_LENGTH)
-    );
+    const approximateCharsPerItem = Math.floor(availableWidth / (ITEM_COUNT * CHARACTER_WIDTH));
+    return Math.max(MINIMUM_TRUNCATE_LENGTH, Math.min(approximateCharsPerItem, MAXIMUM_TRUNCATE_LENGTH));
   }, [descContainerWidth]);
 
   const RequestDescTooltip = (props: {
@@ -544,7 +539,7 @@ export default function RequestDrawer(props: RequestDivProps) {
 
           {/* Second Top Row */}
           {Object.values(specialProperties).some((value) => value) && (
-            <div
+            <div 
               ref={containerRef}
               className="h-8 w-full flex flex-row gap-2 items-center px-2.5 shrink-0"
             >
