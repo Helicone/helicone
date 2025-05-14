@@ -83,10 +83,17 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
             </th>
             <th
               className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-              onClick={() => onSort("amountAfterDiscount")} // We know this column sorts by amount
+              onClick={() => onSort("amountAfterProcessing")} // We know this column sorts by amount
             >
               Amount
-              {renderSortIcon("amountAfterDiscount")}
+              {renderSortIcon("amountAfterProcessing")}
+            </th>
+            <th
+              className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+              onClick={() => onSort("refundAmount")}
+            >
+              Refunded
+              {renderSortIcon("refundAmount")}
             </th>
             <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Customer
@@ -138,7 +145,16 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
                 )}
               </td>
               <td className="px-3 py-2 whitespace-nowrap text-sm">
-                {formatCurrency(invoice.amountAfterDiscount)}
+                {formatCurrency(invoice.amountAfterProcessing)}
+              </td>
+              <td className="px-3 py-2 whitespace-nowrap text-sm">
+                {invoice.refundAmount > 0 ? (
+                  <span className="text-destructive font-medium">
+                    {formatCurrency(invoice.refundAmount)}
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground">-</span>
+                )}
               </td>
               <td className="px-3 py-2 whitespace-nowrap text-sm">
                 {invoice.customerEmail}
