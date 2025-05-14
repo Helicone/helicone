@@ -2458,6 +2458,9 @@
 					},
 					"session_latest_request_created_at": {
 						"$ref": "#/components/schemas/Partial_TimestampOperatorsTyped_"
+					},
+					"session_tag": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
 					}
 				},
 				"type": "object",

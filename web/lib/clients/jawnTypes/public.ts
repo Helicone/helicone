@@ -293,6 +293,10 @@ export interface paths {
   "/v1/session/{sessionId}/feedback": {
     post: operations["UpdateSessionFeedback"];
   };
+  "/v1/session/{sessionId}/tag": {
+    get: operations["GetSessionTag"];
+    post: operations["UpdateSessionTag"];
+  };
   "/v1/public/status/provider": {
     get: operations["GetAllProviderStatus"];
   };
@@ -1028,6 +1032,7 @@ export interface components {
       session_total_requests?: components["schemas"]["Partial_NumberOperators_"];
       session_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
       session_latest_request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      session_tag?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description Make all properties in T optional */
     Partial_CacheHitsTableToOperators_: {
@@ -1887,6 +1892,12 @@ Json: JsonObject;
       timeFilter?: components["schemas"]["TimeFilterMs"];
       filter?: components["schemas"]["SessionFilterNode"];
     };
+    "ResultSuccess_string-or-null_": {
+      data: string | null;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_string-or-null.string_": components["schemas"]["ResultSuccess_string-or-null_"] | components["schemas"]["ResultError_string_"];
     MetricsData: {
       /** Format: double */
       totalRequests: number;
@@ -4371,6 +4382,43 @@ export interface operations {
       content: {
         "application/json": {
           rating: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetSessionTag: {
+    parameters: {
+      path: {
+        sessionId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string-or-null.string_"];
+        };
+      };
+    };
+  };
+  UpdateSessionTag: {
+    parameters: {
+      path: {
+        sessionId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          tag: string;
         };
       };
     };

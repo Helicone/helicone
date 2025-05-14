@@ -24,10 +24,11 @@ import { useGetRequests } from "../../../../services/hooks/requests";
 import { useSessions } from "../../../../services/hooks/sessions";
 import { Col } from "../../../layout/common/col";
 import ExportButton from "../../../shared/themed/table/exportButton";
-import FeedbackAction from "../../feedback/thumbsUpThumbsDown";
 import TreeView from "./Tree/TreeView";
-import Link from "next/link";
 
+import { TagType } from "@/packages/common/sessions/tags";
+import Link from "next/link";
+import { SessionTag } from "../../feedback/sessionTag";
 interface SessionContentProps {
   session: Session;
   session_id: string;
@@ -80,21 +81,6 @@ export const SessionContent: React.FC<SessionContentProps> = ({
       { shallow: true }
     );
   };
-
-  // SESSION FEEDBACK HACK
-  // Check original requests for feedback property
-  const requestWithFeedback = useMemo(() => {
-    return requests.requests.requests?.find(
-      (r) => r.properties["Helicone-Session-Feedback"]
-    );
-  }, [requests.requests.requests]);
-  const sessionFeedbackValue = useMemo(() => {
-    const feedback =
-      requestWithFeedback?.properties["Helicone-Session-Feedback"];
-    if (feedback === "1") return true;
-    if (feedback === "0") return false;
-    return null;
-  }, [requestWithFeedback]);
 
   // AGREGATED SESSION STATS (Derived from the processed session object)
   const startTime = useMemo(() => {
@@ -239,11 +225,7 @@ export const SessionContent: React.FC<SessionContentProps> = ({
 
             <div className="h-4 w-px bg-border" />
 
-            <FeedbackAction
-              id={session_id}
-              type="session"
-              defaultValue={sessionFeedbackValue}
-            />
+            <SessionTag id={session_id} type={TagType.SESSION} />
           </div>
         }
         foldContent={
