@@ -49,6 +49,7 @@ export const getInitialColumns = (): ColumnDef<MappedLLMRequest>[] => [
     cell: (info) => {
       const status = info.row.original.heliconeMetadata.status;
       const isCached =
+        info.row.original.heliconeMetadata.cacheReferenceId &&
         info.row.original.heliconeMetadata.cacheReferenceId !== DEFAULT_UUID;
 
       if (!status) {
