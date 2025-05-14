@@ -134,25 +134,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_GITHUB_ACTIONS_SECRET_KEY }}
           aws-region: ${{ env.US_REGION }}
 
-      - name: Update US Task Definition
-        id: task-def-us
-        run: |
-          # Get the current task definition
-          aws ecs describe-task-definition \
-            --task-definition valhalla_jawn_production \
-            --query 'taskDefinition' > task-definition.json
-
-          # Update the image in the container definition
-          jq --arg IMAGE "${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.US_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:us-${{ needs.build_and_push.outputs.image_tag }}" \
-            '.containerDefinitions[0].image = $IMAGE' task-definition.json > updated-task-definition.json
-
-          # Register the new task definition
-          NEW_TASK_DEF=$(aws ecs register-task-definition \
-            --cli-input-json file://updated-task-definition.json \
-            --query 'taskDefinition.taskDefinitionArn' --output text)
-
-          echo "task_def_arn=${NEW_TASK_DEF}" >> $GITHUB_OUTPUT
-
       - name: Deploy to US ECS
         run: |
           aws deploy create-deployment \
@@ -182,25 +163,6 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_GITHUB_ACTIONS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_GITHUB_ACTIONS_SECRET_KEY }}
           aws-region: ${{ env.EU_REGION }}
-
-      - name: Update EU Task Definition
-        id: task-def-eu
-        run: |
-          # Get the current task definition
-          aws ecs describe-task-definition \
-            --task-definition eu_valhalla_jawn_production \
-            --query 'taskDefinition' > task-definition.json
-
-          # Update the image in the container definition
-          jq --arg IMAGE "${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.US_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:eu-${{ needs.build_and_push.outputs.image_tag }}" \
-            '.containerDefinitions[0].image = $IMAGE' task-definition.json > updated-task-definition.json
-
-          # Register the new task definition
-          NEW_TASK_DEF=$(aws ecs register-task-definition \
-            --cli-input-json file://updated-task-definition.json \
-            --query 'taskDefinition.taskDefinitionArn' --output text)
-
-          echo "task_def_arn=${NEW_TASK_DEF}" >> $GITHUB_OUTPUT
 
       - name: Deploy to EU ECS
         run: |
