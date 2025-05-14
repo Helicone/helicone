@@ -63,6 +63,11 @@ const nextConfig = {
         permanent: true,
       },
       {
+        source: "/community",
+        destination: "/customers",
+        permanent: true,
+      },
+      {
         source: "/blog/slash-llm-cost",
         destination: "/blog/monitor-and-optimize-llm-costs",
         permanent: true,
