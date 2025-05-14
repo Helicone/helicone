@@ -290,7 +290,11 @@ export class AdminManager extends BaseManager {
               gte: chunk.start,
               lt: chunk.end,
             },
-            expand: ["data.subscription", "data.discounts"],
+            expand: [
+              "data.subscription",
+              "data.discounts",
+              "data.charge.refunds",
+            ],
             limit: 100,
           }),
         lastId ? { starting_after: lastId } : {}

@@ -53,7 +53,8 @@ export function calculateInvoiceAmounts(
   productId?: string
 ): {
   amount: number;
-  amountAfterDiscount: number;
+  amountAfterProcessing: number;
+  refundAmount: number;
 } {
   // Calculate the original amount (product-specific if productId is provided)
   let amount = 0;
@@ -143,9 +144,21 @@ export function calculateInvoiceAmounts(
     }
   });
 
-  // Return both values
+  // Calculate refund amount if available
+  let refundAmount = 0;
+
+  // Check if this is a regular invoice with an expanded charge
+  if ("charge" in invoice && invoice.charge) {
+    // If charge is expanded to an object with refunds
+    if (typeof invoice.charge !== "string" && invoice.charge.refunds) {
+      refundAmount = (invoice.charge.amount_refunded || 0) / 100;
+    }
+  }
+
+  // Return values - calculate final amount after both discounts and refunds
   return {
     amount,
-    amountAfterDiscount: Math.max(0, amount - discountAmount),
+    amountAfterProcessing: Math.max(0, amount - discountAmount - refundAmount),
+    refundAmount,
   };
 }
