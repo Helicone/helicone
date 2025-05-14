@@ -61,7 +61,6 @@ impl ProviderBalancer {
         let mut balance_factory =
             weighted_balance::balance::make::MakeBalance::new(discover_factory);
         let balance = balance_factory.call(rx).await?;
-        // TODO: do we _have_ to poll_ready here?
         let provider_monitor = ProviderMonitor::weighted(tx);
         let provider_balancer = ProviderBalancer::Weighted(balance);
 
@@ -79,7 +78,6 @@ impl ProviderBalancer {
         let mut balance_factory =
             tower::balance::p2c::MakeBalance::new(discover_factory);
         let balance = balance_factory.call(rx).await?;
-        // TODO: do we _have_ to poll_ready here?
         let provider_monitor = ProviderMonitor::p2c(tx);
         let provider_balancer = ProviderBalancer::PeakEwma(balance);
 

@@ -34,7 +34,8 @@ weighted-balance = { path = "./crates/weighted-balance" }
 # TODO: @tom: submit upstream PR
 anthropic-ai-sdk = { version = "0.2.2", git = "https://github.com/tomharmon/anthropic-sdk-rs.git", branch = "add-serde-impls" }
 anyhow = "1.0.98"
-async-openai = "0.28.1"
+# TODO: @tom: submit upstream PR
+async-openai = { version = "0.28.1", git = "https://github.com/tomharmon/async-openai.git", branch = "task/optional-backoff" }
 axum-core = "0.5.2"
 axum-server = "0.7.2"
 base64 = "0.22.1"
@@ -45,6 +46,7 @@ compact_str = "0.9.0"
 config = "0.15.11"
 derive_more = { version = "2.0.1", features = ['as_ref', 'constructor', 'debug', 'deref', 'display', 'from', 'from_str'] }
 displaydoc = "0.2.5"
+eventsource-stream = "0.2.3"
 futures = "0.3.31"
 governor = "0.8.1"
 heck = "0.5.0"
@@ -72,6 +74,7 @@ pin-project-lite = "0.2.16"
 rand = "0.9.1"
 regex = "1.11.1"
 reqwest = { version = "0.12.15", features = [ "json", "stream", "multipart", "native-tls"], default-features = false }
+reqwest-eventsource = "0.6.0"
 rust_decimal = "1.37.1"
 rusty-s3 = "0.7.0"
 semver = "1.0.26"

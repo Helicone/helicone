@@ -5,9 +5,12 @@ use url::Url;
 
 use crate::types::{model::ModelName, provider::InferenceProvider};
 
+/// Global configuration for providers, shared across all routers.
+///
+/// For router-specific provider configuration, see [`RouterProviderConfgi`]
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case")]
-pub struct ProviderConfig {
+pub struct GlobalProviderConfig {
     /// NOTE: In the future we can delete the `model` field and
     /// instead load the models from the provider's respective APIs
     pub models: IndexSet<ModelName<'static>>,
@@ -15,7 +18,7 @@ pub struct ProviderConfig {
     pub version: Option<String>,
 }
 
-impl Default for ProviderConfig {
+impl Default for GlobalProviderConfig {
     fn default() -> Self {
         default_openai_provider_config()
     }
@@ -28,12 +31,14 @@ impl Default for ProviderConfig {
     Debug, Clone, Deserialize, Serialize, Eq, PartialEq, Deref, DerefMut, AsRef,
 )]
 #[serde(rename_all = "kebab-case")]
-pub struct ProvidersConfig(IndexMap<InferenceProvider, ProviderConfig>);
+pub struct ProvidersConfig(IndexMap<InferenceProvider, GlobalProviderConfig>);
 
-impl FromIterator<(InferenceProvider, ProviderConfig)> for ProvidersConfig {
+impl FromIterator<(InferenceProvider, GlobalProviderConfig)>
+    for ProvidersConfig
+{
     fn from_iter<T>(iter: T) -> Self
     where
-        T: IntoIterator<Item = (InferenceProvider, ProviderConfig)>,
+        T: IntoIterator<Item = (InferenceProvider, GlobalProviderConfig)>,
     {
         Self(IndexMap::from_iter(iter))
     }
@@ -51,8 +56,8 @@ impl Default for ProvidersConfig {
     }
 }
 
-fn default_openai_provider_config() -> ProviderConfig {
-    ProviderConfig {
+fn default_openai_provider_config() -> GlobalProviderConfig {
+    GlobalProviderConfig {
         models: IndexSet::from([
             ModelName::borrowed("gpt-4o"),
             ModelName::borrowed("gpt-4o-mini"),
@@ -67,8 +72,8 @@ fn default_openai_provider_config() -> ProviderConfig {
     }
 }
 
-fn default_anthropic_provider_config() -> ProviderConfig {
-    ProviderConfig {
+fn default_anthropic_provider_config() -> GlobalProviderConfig {
+    GlobalProviderConfig {
         models: IndexSet::from([
             ModelName::borrowed("claude-3-5-sonnet"),
             ModelName::borrowed("claude-3-7-sonnet"),

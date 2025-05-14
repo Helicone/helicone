@@ -5,7 +5,7 @@ use uuid::Uuid;
 use crate::{config::router::RouterConfig, error::internal::InternalError};
 
 #[derive(
-    Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, Default,
+    Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, Default,
 )]
 pub enum RouterId {
     Uuid(Uuid),

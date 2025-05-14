@@ -13,13 +13,14 @@ use tower::discover::Change;
 
 use crate::{
     app::AppState,
-    config::{DeploymentTarget, router::RouterConfig},
+    config::router::RouterConfig,
     discover::{
         provider::{Key, config::ConfigDiscovery},
         weighted::WeightedKey,
     },
     dispatcher::DispatcherService,
     error::init::InitError,
+    types::discover::DiscoverMode,
 };
 
 /// Discover endpoints keyed by [`K`].
@@ -35,15 +36,18 @@ impl Discovery<Key> {
         router_config: &Arc<RouterConfig>,
         rx: Receiver<Change<Key, DispatcherService>>,
     ) -> Result<Self, InitError> {
-        // TODO: currently we also have a separate discovery_mode.
-        // we should consolidate.
-        match app_state.0.config.deployment_target {
-            DeploymentTarget::SelfHosted => Ok(Self::Config(
-                ConfigDiscovery::new(app_state, router_config, rx)?,
-            )),
-            DeploymentTarget::Cloud { .. } | DeploymentTarget::Sidecar => {
-                todo!("cloud and sidecar not supported yet")
-            }
+        let provider_keys = app_state
+            .0
+            .config
+            .discover
+            .provider_keys(&router_config.balance)?;
+        match app_state.0.config.discover.discover_mode {
+            DiscoverMode::Config => Ok(Self::Config(ConfigDiscovery::new(
+                app_state,
+                router_config,
+                &provider_keys,
+                rx,
+            )?)),
         }
     }
 }
@@ -54,14 +58,19 @@ impl Discovery<WeightedKey> {
         router_config: &Arc<RouterConfig>,
         rx: Receiver<Change<WeightedKey, DispatcherService>>,
     ) -> Result<Self, InitError> {
-        // TODO: currently we also have a separate discovery_mode.
-        // we should consolidate.
-        match app_state.0.config.deployment_target {
-            DeploymentTarget::SelfHosted => Ok(Self::Config(
-                ConfigDiscovery::new_weighted(app_state, router_config, rx)?,
-            )),
-            DeploymentTarget::Cloud { .. } | DeploymentTarget::Sidecar => {
-                todo!("cloud and sidecar not supported yet")
+        let provider_keys = app_state
+            .0
+            .config
+            .discover
+            .provider_keys(&router_config.balance)?;
+        match app_state.0.config.discover.discover_mode {
+            DiscoverMode::Config => {
+                Ok(Self::Config(ConfigDiscovery::new_weighted(
+                    app_state,
+                    router_config,
+                    &provider_keys,
+                    rx,
+                )?))
             }
         }
     }

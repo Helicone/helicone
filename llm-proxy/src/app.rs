@@ -30,7 +30,6 @@ use crate::{
     middleware::auth::AuthService,
     router::meta::MetaRouter,
     store::StoreRealm,
-    types::{provider::ProviderKeys, router::RouterId},
     utils::{catch_panic::PanicResponder, handle_error::ErrorHandlerLayer},
 };
 
@@ -70,10 +69,6 @@ pub struct InnerAppState {
     pub jawn_client: Client,
     pub store: StoreRealm,
     pub metrics: Metrics,
-    // the below fields should be moved to the router or org level.
-    // currently its shared across all routers and that wont work for cloud
-    // mode.
-    pub provider_keys: ProviderKeys,
 }
 
 /// The top level app used to start the hyper server.
@@ -178,13 +173,6 @@ impl App {
         let pg_pool = pg_config
             .connect_lazy(&config.database.url.0)
             .map_err(error::init::InitError::DatabaseConnection)?;
-        let balance_config = &config
-            .routers
-            .as_ref()
-            .get(&RouterId::Default)
-            .ok_or(InitError::DefaultRouterNotFound)?
-            .balance;
-        let provider_keys = config.discover.provider_keys(balance_config)?;
         let jawn_client = Client::builder()
             .tcp_nodelay(true)
             .connect_timeout(JAWN_CONNECT_TIMEOUT)
@@ -200,7 +188,6 @@ impl App {
             config,
             minio,
             store: StoreRealm::new(pg_pool),
-            provider_keys,
             jawn_client,
             metrics,
         }));
