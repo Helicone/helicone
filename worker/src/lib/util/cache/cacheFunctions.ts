@@ -4,6 +4,7 @@ import { HeliconeProxyRequest } from "../../models/HeliconeProxyRequest";
 import { ClickhouseClientWrapper, RequestResponseRMT } from "../../db/ClickhouseWrapper";
 import { Database } from "../../../../supabase/database.types";
 import { safePut } from "../../safePut";
+import { DBLoggable } from "../../dbLogger/DBLoggable";
 const CACHE_BACKOFF_RETRIES = 5;
 
 function isGoogleAuthHeader(value: string): boolean {
@@ -110,6 +111,8 @@ export async function saveToCache(options: SaveToCacheOptions): Promise<void> {
   await saveToCacheBackoff(options);
 }
 
+// Direct inserts of cache to request_response_rmt is deprecated,
+// keep here for now but its not used in ProxyForwarder currently
 export async function recordCacheHit(
   headers: Headers,
   env: Env,
@@ -117,7 +120,7 @@ export async function recordCacheHit(
   organizationId: string,
   userId: string | null,
   provider: string,
-  countryCode: string | null
+  countryCode: string | null,
 ): Promise<void> {
   const requestId = headers.get("helicone-id");
   if (!requestId) {

@@ -12,14 +12,14 @@ async function fullReq() {
     defaultHeaders: {
       "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
       "Helicone-Cache-Enabled": "true",
-      "Helicone-Cache-Bucket-Max-Size": "10",
+      "Helicone-Cache-Bucket-Max-Size": "3",
     },
   });
 
   const chatCompletion = await openai.chat.completions.create(
     {
       messages: [
-        { role: "user", content: "Who is the prime minister of Canada?" },
+        { role: "user", content: "Who is John Wick?" },
       ],
       model: "gpt-3.5-turbo",
     },
