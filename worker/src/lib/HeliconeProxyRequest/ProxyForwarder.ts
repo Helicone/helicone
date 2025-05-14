@@ -10,7 +10,7 @@ import { RequestWrapper } from "../RequestWrapper";
 import { ResponseBuilder } from "../ResponseBuilder";
 import {
   getCachedResponse,
-  recordCacheHit,
+  recordCacheHitDeprecated,
   saveToCache,
 } from "../util/cache/cacheFunctions";
 import { CacheSettings, getCacheSettings } from "../util/cache/cacheSettings";
@@ -107,18 +107,18 @@ export async function proxyForwarder(
               cachedResponse,
               cacheSettings // send them cache settings hehe
             ));
-            // Old Implementation, direct inserts (deprecate later):
-            // ctx.waitUntil(
-            //   recordCacheHit(
-            //     cachedResponse.headers,
-            //     env,
-            //     new ClickhouseClientWrapper(env),
-            //     orgData.organizationId,
-            //     proxyRequest.userId ?? null,
-            //     provider,
-            //     (request.cf?.country as string) ?? null,
-            //   )
-            // );
+            
+            // --OLD CACHE--:for backwards compatibility, record cache hit in cache_hits table as well
+            ctx.waitUntil(
+              recordCacheHitDeprecated(
+                cachedResponse.headers,
+                env,
+                new ClickhouseClientWrapper(env),
+                orgData.organizationId,
+                provider,
+                (request.cf?.country as string) ?? null,
+              )
+            );
             return response;
           }
         } catch (error) {

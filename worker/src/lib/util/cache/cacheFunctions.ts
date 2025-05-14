@@ -178,6 +178,73 @@ export async function recordCacheHit(
     }
   }
 }
+
+// --OLD CACHE--: function to record cache hit in cache_hits table (for backwards compatibility)
+export async function recordCacheHitDeprecated(
+  headers: Headers,
+  env: Env,
+  clickhouseDb: ClickhouseClientWrapper,
+  organizationId: string,
+  provider: string,
+  countryCode: string | null
+): Promise<void> {
+  const requestId = headers.get("helicone-id");
+  if (!requestId) {
+    console.error("No request id found in cache hit");
+    return;
+  }
+  // Dual writing for now
+  const dbClient = createClient<Database>(
+    env.SUPABASE_URL,
+    env.SUPABASE_SERVICE_ROLE_KEY
+  );
+
+  // const { error } = await dbClient
+  //   .from("cache_hits")
+  //   .insert({ request_id: requestId, organization_id: organizationId });
+
+  // if (error) {
+  //   console.error(error);
+  // }
+
+  const { data: response, error: responseError } = await dbClient
+    .from("response")
+    .select("*")
+    .eq("request", requestId)
+    .single();
+
+  if (responseError) {
+    console.error(responseError);
+  }
+
+  const model = (response?.body as { model: string })?.model ?? null;
+  const promptTokens = response?.prompt_tokens ?? 0;
+  const completionTokens = response?.completion_tokens ?? 0;
+  const latency = response?.delay_ms ?? 0;
+
+  if (organizationId !== "ba195205-9d19-42de-9317-b479c20ed6ae") {
+    const { error: clickhouseError } = await clickhouseDb.dbInsertClickhouse(
+      "cache_hits",
+      [
+        {
+          request_id: requestId,
+          organization_id: organizationId,
+          prompt_tokens: promptTokens,
+          completion_tokens: completionTokens,
+          model: model ?? "",
+          latency: latency,
+          created_at: null,
+          provider,
+          country_code: countryCode,
+        },
+      ]
+    );
+    if (clickhouseError) {
+      console.error(clickhouseError);
+    }
+  }
+}
+
 export async function getCachedResponse(
   request: HeliconeProxyRequest,
   settings: { bucketSize: number },
