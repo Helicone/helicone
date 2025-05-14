@@ -105,7 +105,7 @@ jobs:
           push: true
           tags: |
             ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.US_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:us-${{ steps.set-tag.outputs.tag }}
-            ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.US_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:us-latest
+            ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.US_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:us
 
       - name: Build and push EU image
         if: ${{ github.event.inputs.environment == 'all' || github.event.inputs.environment == 'eu' }}
@@ -117,7 +117,7 @@ jobs:
           push: true
           tags: |
             ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.US_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:eu-${{ steps.set-tag.outputs.tag }}
-            ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.US_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:eu-latest
+            ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.US_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:eu
 
   deploy_us:
     name: Deploy to US
