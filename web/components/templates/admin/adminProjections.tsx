@@ -429,7 +429,7 @@ const AdminProjections = () => {
                         {revenueData.billedInvoices.length > 0
                           ? `$${revenueData.billedInvoices
                               .reduce(
-                                (sum, inv) => sum + inv.amountAfterDiscount,
+                                (sum, inv) => sum + inv.amountAfterProcessing,
                                 0
                               )
                               .toFixed(2)} total`
@@ -473,7 +473,7 @@ const AdminProjections = () => {
                         {revenueData.upcomingInvoices.length > 0
                           ? `$${revenueData.upcomingInvoices
                               .reduce(
-                                (sum, inv) => sum + inv.amountAfterDiscount,
+                                (sum, inv) => sum + inv.amountAfterProcessing,
                                 0
                               )
                               .toFixed(2)} projected`
