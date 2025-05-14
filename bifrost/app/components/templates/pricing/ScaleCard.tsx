@@ -11,7 +11,6 @@ const ScaleCard: React.FC = () => {
     <Card className="w-full h-full p-6 bg-sky-50 rounded-xl border-2 border-brand mx-auto">
       <Col className="h-full justify-between gap-4">
         <Col className="gap-6">
-
           <Col className="h-full gap-2">
             <Row className="justify-between items-center">
               <div className="text-accent-foreground text-md font-semibold leading-tight">
@@ -36,7 +35,7 @@ const ScaleCard: React.FC = () => {
           <Col>
             {[
               "Everything in Hobby",
-              "No usage limit",
+              "Scale beyond 10k requests",
               "Core observability features",
               "Standard support",
             ].map((feature, index) => (
@@ -51,6 +50,10 @@ const ScaleCard: React.FC = () => {
             ))}
           </Col>
         </Col>
+
+        <div className="text-xs text-muted-foreground mt-2">
+          * Usage-based pricing applies
+        </div>
 
         <Link href="https://us.helicone.ai/settings/billing">
           <Button className="w-full text-base py-5 bg-brand">
