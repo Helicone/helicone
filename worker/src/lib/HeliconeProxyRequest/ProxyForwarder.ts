@@ -109,16 +109,16 @@ export async function proxyForwarder(
             ));
             
             // --OLD CACHE--:for backwards compatibility, record cache hit in cache_hits table as well
-            ctx.waitUntil(
-              recordCacheHitDeprecated(
-                cachedResponse.headers,
-                env,
-                new ClickhouseClientWrapper(env),
-                orgData.organizationId,
-                provider,
-                (request.cf?.country as string) ?? null,
-              )
-            );
+            // ctx.waitUntil(
+            //   recordCacheHitDeprecated(
+            //     cachedResponse.headers,
+            //     env,
+            //     new ClickhouseClientWrapper(env),
+            //     orgData.organizationId,
+            //     provider,
+            //     (request.cf?.country as string) ?? null,
+            //   )
+            // );
             return response;
           }
         } catch (error) {
