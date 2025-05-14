@@ -2,10 +2,10 @@ use async_openai::types::{
     ChatCompletionRequestDeveloperMessageContent, ChatCompletionRequestMessage,
     ChatCompletionRequestSystemMessageContent,
     ChatCompletionRequestSystemMessageContentPart, CreateChatCompletionRequest,
-    CreateChatCompletionResponse,
+    CreateChatCompletionResponse, CreateChatCompletionStreamResponse,
 };
 
-use crate::endpoints::Endpoint;
+use crate::endpoints::{Endpoint, StreamRequest};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct ChatCompletions;
@@ -14,6 +14,13 @@ impl Endpoint for ChatCompletions {
     const PATH: &'static str = "/v1/chat/completions";
     type RequestBody = CreateChatCompletionRequest;
     type ResponseBody = CreateChatCompletionResponse;
+    type StreamResponseBody = CreateChatCompletionStreamResponse;
+}
+
+impl StreamRequest for CreateChatCompletionRequest {
+    fn is_stream(&self) -> bool {
+        self.stream.unwrap_or(false)
+    }
 }
 
 pub(crate) fn system_prompt(

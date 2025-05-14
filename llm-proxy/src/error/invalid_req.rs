@@ -26,6 +26,8 @@ pub enum InvalidRequestError {
     InvalidUri(#[from] InvalidUri),
     /// Invalid request body: {0}
     InvalidRequestBody(#[from] serde_json::Error),
+    /// Upstream 4xx error: {0}
+    Provider4xxError(StatusCode),
 }
 
 impl IntoResponse for InvalidRequestError {
@@ -71,6 +73,13 @@ impl IntoResponse for InvalidRequestError {
                 StatusCode::BAD_REQUEST,
                 Json(ErrorResponse {
                     error: format!("Invalid request body: {e}"),
+                }),
+            )
+                .into_response(),
+            Self::Provider4xxError(status) => (
+                status,
+                Json(ErrorResponse {
+                    error: format!("Upstream 4xx error: {status}"),
                 }),
             )
                 .into_response(),

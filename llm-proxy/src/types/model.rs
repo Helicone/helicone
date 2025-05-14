@@ -39,6 +39,17 @@ impl<'a> ModelName<'a> {
     pub fn from_model(model: &'a Model) -> Self {
         Self(Cow::Borrowed(model.name.as_str()))
     }
+
+    #[must_use]
+    pub fn into_latest(&self) -> Model {
+        Model::new(self.0.clone(), Some(Version::Latest))
+    }
+}
+
+impl std::fmt::Display for ModelName<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -49,8 +60,11 @@ pub struct Model {
 
 impl Model {
     #[must_use]
-    pub fn new(name: String, version: Option<Version>) -> Self {
-        Self { name, version }
+    pub fn new<S: Into<String>>(name: S, version: Option<Version>) -> Self {
+        Self {
+            name: name.into(),
+            version,
+        }
     }
 }
 

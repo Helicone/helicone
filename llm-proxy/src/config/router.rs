@@ -212,7 +212,7 @@ mod tests {
             order: vec![FallbackTarget {
                 provider: InferenceProvider::OpenAI,
                 model: Model {
-                    name: "claude-3-7-sonnet".to_string(),
+                    name: "claude-3-7-sonnet-latest".to_string(),
                     version: Some(Version::Latest),
                 },
             }],

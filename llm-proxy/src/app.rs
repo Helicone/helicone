@@ -132,6 +132,9 @@ pub struct InnerAppState {
 /// - `RouterConfig`
 ///   - Added by the `MetaRouter`
 ///   - Used by the Mapper layer
+/// - `StreamContext`
+///   - Added by the `Mapper` layer
+///   - Used by the Dispatcher layer
 #[derive(Clone)]
 pub struct App {
     pub state: AppState,

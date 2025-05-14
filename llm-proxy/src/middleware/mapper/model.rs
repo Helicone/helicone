@@ -44,14 +44,11 @@ impl ModelMapper {
     /// global config. (maybe we should put usage of the default mapping
     /// behind a flag so its up to the user,  although declaring mappings
     /// for _every_ model seems onerous)
-    pub fn map_model<'a, 'b>(
-        &'a self,
-        target_provider: &'b InferenceProvider,
-        source_model: &'b Model,
-    ) -> Result<ModelName<'b>, MapperError>
-    where
-        'b: 'a,
-    {
+    pub fn map_model(
+        &self,
+        source_model: &Model,
+        target_provider: &InferenceProvider,
+    ) -> Result<Model, MapperError> {
         let target_provider_models = &self
             .providers_config()
             .get(target_provider)
@@ -59,7 +56,7 @@ impl ModelMapper {
             .models;
         let source_model_name = ModelName::from_model(source_model);
         if target_provider_models.contains(&source_model_name) {
-            return Ok(source_model_name);
+            return Ok(source_model.clone());
         }
         // otherwise, use the model mapping from router config
         if let Some(router_model_mapping) = self
@@ -74,7 +71,7 @@ impl ModelMapper {
                 .iter()
                 .find(|m| target_provider_models.contains(*m));
             if let Some(target_model) = target_model {
-                return Ok(target_model.clone());
+                return Ok(target_model.into_latest());
             }
         }
         // if that doesn't have a mapping, use the default model mapping
@@ -89,6 +86,6 @@ impl ModelMapper {
                 *target_provider,
                 source_model.name.clone(),
             ))?;
-        Ok(default_mapping.clone())
+        Ok(default_mapping.into_latest())
     }
 }

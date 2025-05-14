@@ -46,7 +46,7 @@ fn main() -> Result<()> {
     // Read the OpenAPI schema
     let schema_content =
         fs::read_to_string(&args.input).with_context(|| {
-            format!("Failed to read schema file at {:?}", args.input)
+            format!("Failed to read schema file at {}", args.input.display())
         })?;
 
     let mut schema: OpenAPI =
@@ -87,7 +87,7 @@ fn main() -> Result<()> {
     // Read the config file
     let config_content =
         fs::read_to_string(&args.config).with_context(|| {
-            format!("Failed to read config file at {:?}", args.config)
+            format!("Failed to read config file at {}", args.config.display())
         })?;
 
     let config: Config = serde_yaml::from_str(&config_content)
@@ -109,12 +109,15 @@ fn main() -> Result<()> {
         };
 
     fs::write(&args.output, output_content).with_context(|| {
-        format!("Failed to write filtered schema to {:?}", args.output)
+        format!(
+            "Failed to write filtered schema to {}",
+            args.output.display()
+        )
     })?;
 
     println!(
-        "Successfully filtered schema and wrote to {:?}",
-        args.output
+        "Successfully filtered schema and wrote to {}",
+        args.output.display()
     );
     Ok(())
 }

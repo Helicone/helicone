@@ -56,6 +56,10 @@ pub enum InternalError {
     MappingTaskError(tokio::task::JoinError),
     /// Converter not present for {0:?} -> {1:?}
     InvalidConverter(ApiEndpoint, ApiEndpoint),
+    /// Stream error: {0}
+    StreamError(String),
+    /// Upstream 5xx error: {0}
+    Provider5xxError(StatusCode),
 }
 
 impl IntoResponse for InternalError {

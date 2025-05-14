@@ -107,7 +107,6 @@ where
             proxy_context,
             helicone,
             auth_context,
-            is_stream: false,
             request_id: Uuid::new_v4(),
             country_code: CountryCode::USA,
             start_time: Utc::now(),

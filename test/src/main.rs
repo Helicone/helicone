@@ -1,4 +1,7 @@
+use futures::StreamExt;
+
 pub async fn test() {
+    let is_stream = true;
     let openai_request_body = serde_json::json!({
         "model": "gpt-4o-mini",
         "messages": [
@@ -12,7 +15,8 @@ pub async fn test() {
                 "content": "hello world"
             }
         ],
-        "max_tokens": 400
+        "max_tokens": 400,
+        "stream": is_stream
     });
 
     let openai_request: async_openai::types::CreateChatCompletionRequest =
@@ -27,10 +31,20 @@ pub async fn test() {
         .send()
         .await
         .unwrap();
-    let headers = response.headers();
-    println!("Headers: {:?}", headers);
-    let response_bytes = response.json::<serde_json::Value>().await.unwrap();
-    println!("Response: {}", response_bytes);
+    println!("Status: {}", response.status());
+    if is_stream {
+        let mut body_stream = response.bytes_stream();
+        while let Some(Ok(chunk)) = body_stream.next().await {
+            let json =
+                serde_json::from_slice::<serde_json::Value>(&chunk).unwrap();
+            let pretty_json = serde_json::to_string_pretty(&json).unwrap();
+            println!("Chunk: {}", pretty_json);
+        }
+    } else {
+        let response_bytes =
+            response.json::<serde_json::Value>().await.unwrap();
+        println!("Response: {}", response_bytes);
+    }
 }
 
 #[tokio::main]

@@ -82,7 +82,7 @@ async fn anthropic_with_openai_request_style() {
         .await;
     let request_body = axum_core::body::Body::from(
         serde_json::to_vec(&json!({
-            "model": "claude-3-5-sonnet-20240620",
+            "model": "claude-3-5-sonnet-latest",
             "messages": [
                 {
                     "role": "user",
@@ -160,7 +160,7 @@ async fn anthropic_with_anthropic_request_style() {
         .await;
     let request_body = axum_core::body::Body::from(
         serde_json::to_vec(&json!({
-            "model": "claude-3-5-sonnet-20240620",
+            "model": "claude-3-5-sonnet-latest",
             "messages": [
                 {
                     "role": "user",

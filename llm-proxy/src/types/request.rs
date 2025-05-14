@@ -37,10 +37,14 @@ pub struct RequestContext {
     pub proxy_context: RequestProxyContext,
     pub auth_context: AuthContext,
     pub helicone: HeliconeContext,
-    pub is_stream: bool,
     pub start_time: DateTime<Utc>,
     pub request_id: Uuid,
     pub country_code: CountryCode,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct StreamContext {
+    pub is_stream: bool,
 }
 
 #[derive(Debug)]
