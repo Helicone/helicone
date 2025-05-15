@@ -218,7 +218,7 @@ export async function recordCacheHitDeprecated(
     console.error(responseError);
   }
 
-  const model = (response?.body as { model: string })?.model ?? null;
+  const model = response?.model;
   const promptTokens = response?.prompt_tokens ?? 0;
   const completionTokens = response?.completion_tokens ?? 0;
   const latency = response?.delay_ms ?? 0;
