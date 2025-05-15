@@ -4,6 +4,7 @@ import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   buildFilterWithAuth,
   buildFilterWithAuthClickHouse,
+  buildFilterWithAuthClickHouseCacheHits,
 } from "../../../services/lib/filters/filters";
 import {
   SortLeafRequest,
@@ -256,7 +257,7 @@ export async function getRequestCachedCountClickhouse(
   org_id: string,
   filter: FilterNode
 ): Promise<Result<number, string>> {
-  const builtFilter = await buildFilterWithAuthClickHouse({
+  const builtFilter = await buildFilterWithAuthClickHouseCacheHits({
     org_id,
     argsAcc: [],
     filter,
