@@ -169,7 +169,9 @@ ORDER BY ${dateTrunc} ASC ${fill}
 
 // --OLD CACHE--: backwards compatibility, we read from both cache_hits
 // and request_response_rmt.
-export async function getXOverTimeCacheHitsDeprecated<T extends { count: number }>(
+export async function getXOverTimeCacheHitsDeprecated<
+  T extends { count: number }
+>(
   { timeFilter, orgId, dbIncrement, timeZoneDifference }: DataOverTimeRequest,
   countColumn: string,
   groupByColumns: string[] = [],
@@ -389,7 +391,7 @@ SELECT * FROM rmt
   // --OLD CACHE--: backwards compatibility, we read from both cache_hits
   // and request_response_rmt by mapping both
   const dateCountMap = new Map<string, number>();
-  
+
   // counts from request_response_rmt
   rmtResult.data.forEach((r) => {
     const date = moment.utc(r.created_at_trunc).format("YYYY-MM-DD HH:mm:ss");
@@ -404,16 +406,20 @@ SELECT * FROM rmt
   });
 
   // convert back to array format
-  const combinedData = Array.from(dateCountMap.entries()).map(([date, count]) => ({
-    created_at_trunc: new Date(
-      moment.utc(date, "YYYY-MM-DD HH:mm:ss").toDate().getTime() +
-        request.timeZoneDifference * 60 * 1000
-    ),
-    count,
-  })) as (T & { created_at_trunc: Date })[];
+  const combinedData = Array.from(dateCountMap.entries()).map(
+    ([date, count]) => ({
+      created_at_trunc: new Date(
+        moment.utc(date, "YYYY-MM-DD HH:mm:ss").toDate().getTime() +
+          request.timeZoneDifference * 60 * 1000
+      ),
+      count,
+    })
+  ) as (T & { created_at_trunc: Date })[];
 
   // sort by date
-  combinedData.sort((a, b) => a.created_at_trunc.getTime() - b.created_at_trunc.getTime());
+  combinedData.sort(
+    (a, b) => a.created_at_trunc.getTime() - b.created_at_trunc.getTime()
+  );
 
   return {
     data: combinedData,

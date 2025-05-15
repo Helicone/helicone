@@ -58,7 +58,10 @@ export async function getCacheCountClickhouse(
 
   return resultMap(rmtResult, (rmt) => {
     const rmtCount = +rmt[0].count;
-    const deprecatedCount = deprecatedResult.error || deprecatedResult.data === null ? 0 : +deprecatedResult.data;
+    const deprecatedCount =
+      deprecatedResult.error || deprecatedResult.data === null
+        ? 0
+        : +deprecatedResult.data;
     return rmtCount + deprecatedCount;
   });
 }
@@ -115,14 +118,17 @@ export async function getModelMetricsClickhouse(
     AND cache_reference_id != '${DEFAULT_UUID}'
   group by model, provider`;
 
-  const rmtResult = await dbQueryClickhouse<ModelMetrics>(query, builtFilter.argsAcc);
+  const rmtResult = await dbQueryClickhouse<ModelMetrics>(
+    query,
+    builtFilter.argsAcc
+  );
   const deprecatedResult = await getModelMetricsDeprecated(orgId, filter);
 
   return resultMap(rmtResult, (rmt) => {
     const deprecatedMetrics = deprecatedResult.data ?? [];
-    
+
     const metricsMap = new Map<string, ModelMetrics>();
-    
+
     rmt.forEach((metric) => {
       const key = `${metric.model}-${metric.provider}`;
       metricsMap.set(key, metric);
@@ -135,13 +141,24 @@ export async function getModelMetricsClickhouse(
         metricsMap.set(key, {
           model: metric.model,
           provider: metric.provider,
-          sum_completion_tokens: (existing.sum_completion_tokens || 0) + (metric.sum_completion_tokens || 0),
-          sum_prompt_tokens: (existing.sum_prompt_tokens || 0) + (metric.sum_prompt_tokens || 0),
+          sum_completion_tokens:
+            (existing.sum_completion_tokens || 0) +
+            (metric.sum_completion_tokens || 0),
+          sum_prompt_tokens:
+            (existing.sum_prompt_tokens || 0) + (metric.sum_prompt_tokens || 0),
           sum_tokens: (existing.sum_tokens || 0) + (metric.sum_tokens || 0),
-          prompt_cache_write_tokens: (existing.prompt_cache_write_tokens || 0) + (metric.prompt_cache_write_tokens || 0),
-          prompt_cache_read_tokens: (existing.prompt_cache_read_tokens || 0) + (metric.prompt_cache_read_tokens || 0),
-          prompt_audio_tokens: (existing.prompt_audio_tokens || 0) + (metric.prompt_audio_tokens || 0),
-          completion_audio_tokens: (existing.completion_audio_tokens || 0) + (metric.completion_audio_tokens || 0),
+          prompt_cache_write_tokens:
+            (existing.prompt_cache_write_tokens || 0) +
+            (metric.prompt_cache_write_tokens || 0),
+          prompt_cache_read_tokens:
+            (existing.prompt_cache_read_tokens || 0) +
+            (metric.prompt_cache_read_tokens || 0),
+          prompt_audio_tokens:
+            (existing.prompt_audio_tokens || 0) +
+            (metric.prompt_audio_tokens || 0),
+          completion_audio_tokens:
+            (existing.completion_audio_tokens || 0) +
+            (metric.completion_audio_tokens || 0),
         });
       } else {
         metricsMap.set(key, metric);
@@ -166,7 +183,10 @@ export async function getTimeSavedDeprecated(
   from cache_hits
   where (${builtFilter.filter})
   `;
-  return dbQueryClickhouse<{ total_latency_ms: number }>(query, builtFilter.argsAcc);
+  return dbQueryClickhouse<{ total_latency_ms: number }>(
+    query,
+    builtFilter.argsAcc
+  );
 }
 
 export async function getTimeSavedClickhouse(
@@ -204,7 +224,9 @@ export async function getTimeSavedClickhouse(
 
   return resultMap(rmtResult, (rmt) => {
     const rmtLatency = +(rmt[0]?.total_latency_ms ?? 0);
-    const deprecatedLatency = +(deprecatedResult.data?.[0]?.total_latency_ms ?? 0);
+    const deprecatedLatency = +(
+      deprecatedResult.data?.[0]?.total_latency_ms ?? 0
+    );
     return rmtLatency / 1000 + deprecatedLatency / 1000;
   });
 }
@@ -350,17 +372,23 @@ export async function getTopRequestsClickhouse(
   const deprecatedResult = await getTopRequestsDeprecated(orgId, filter);
 
   return resultMap(rmtResult, (rmt) => {
-    const deprecatedRequests = deprecatedResult.error || !deprecatedResult.data ? [] : deprecatedResult.data;
-    
-    const requestMap = new Map<string, {
-      request_id: string;
-      count: number;
-      first_used: Date;
-      last_used: Date;
-      model: string;
-      prompt: string;
-      response: string;
-    }>();
+    const deprecatedRequests =
+      deprecatedResult.error || !deprecatedResult.data
+        ? []
+        : deprecatedResult.data;
+
+    const requestMap = new Map<
+      string,
+      {
+        request_id: string;
+        count: number;
+        first_used: Date;
+        last_used: Date;
+        model: string;
+        prompt: string;
+        response: string;
+      }
+    >();
 
     rmt.forEach((request) => {
       requestMap.set(request.request_id, {
@@ -377,8 +405,18 @@ export async function getTopRequestsClickhouse(
         requestMap.set(request.request_id, {
           ...request,
           count: +existing.count + +request.count,
-          first_used: new Date(Math.min(existing.first_used.getTime(), new Date(request.first_used).getTime())),
-          last_used: new Date(Math.max(existing.last_used.getTime(), new Date(request.last_used).getTime())),
+          first_used: new Date(
+            Math.min(
+              existing.first_used.getTime(),
+              new Date(request.first_used).getTime()
+            )
+          ),
+          last_used: new Date(
+            Math.max(
+              existing.last_used.getTime(),
+              new Date(request.last_used).getTime()
+            )
+          ),
         });
       } else {
         requestMap.set(request.request_id, {
@@ -392,7 +430,7 @@ export async function getTopRequestsClickhouse(
 
     const mergedRequests = Array.from(requestMap.values());
     mergedRequests.sort((a, b) => b.count - a.count);
-    
+
     return mergedRequests.slice(0, 10);
   });
 }
