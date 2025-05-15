@@ -59,11 +59,12 @@ export const SessionContent: React.FC<SessionContentProps> = ({
     }),
     []
   );
+
   const { sessions: relatedSessions, isLoading: isLoadingSessions } =
     useSessions({
       timeFilter,
-      sessionIdSearch: "", // Add missing required property
-      selectedName: session_name === "Unnamed" ? "" : session_name, // Handle Unnamed case
+      sessionIdSearch: session_id,
+      selectedName: session_name === "Unnamed" ? "" : session_name,
     });
 
   // HANDLERS
