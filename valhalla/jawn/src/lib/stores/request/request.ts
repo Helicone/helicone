@@ -306,9 +306,7 @@ export async function getRequestsCachedClickhouse(
   filter: FilterNode,
   offset: number,
   limit: number,
-  sort: SortLeafRequest,
-  isPartOfExperiment?: boolean,
-  isScored?: boolean
+  sort: SortLeafRequest
 ): Promise<Result<HeliconeRequest[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
@@ -335,7 +333,7 @@ export async function getRequestsCachedClickhouse(
     rmt.response_id,
           map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as response_body,
     rmt.response_created_at,
-    rmt.status AS response_status,
+    toInt32(rmt.status) AS response_status,
     rmt.request_id,
           map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as request_body,
     rmt.request_created_at,
@@ -353,7 +351,9 @@ export async function getRequestsCachedClickhouse(
     rmt.properties,
     rmt.assets as asset_ids,
     ch.created_at AS cache_hit_created_at,
-    ch.latency AS cache_hit_latency
+    ch.latency AS cache_hit_latency,
+    rmt.cache_reference_id,
+    rmt.cache_enabled
   FROM request_response_rmt rmt
   INNER JOIN cache_hits ch ON rmt.request_id = ch.request_id
   WHERE rmt.organization_id = '${orgId}'

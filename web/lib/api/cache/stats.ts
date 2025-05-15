@@ -179,7 +179,6 @@ export async function getTimeSavedClickhouse(
     argsAcc: [],
   });
   const query = `
-  -- Get all cache hits and join with their original requests to get the original latency
   WITH cache_hits AS (
     SELECT 
       request_id,
@@ -194,7 +193,7 @@ export async function getTimeSavedClickhouse(
   FROM cache_hits ch
   LEFT JOIN request_response_rmt original 
     ON ch.cache_reference_id = original.request_id
-  WHERE original.cache_reference_id = '${DEFAULT_UUID}'  -- ensure we get the original request
+  WHERE original.cache_reference_id = '${DEFAULT_UUID}'
   `;
 
   const rmtResult = await dbQueryClickhouse<{

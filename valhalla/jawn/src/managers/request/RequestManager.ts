@@ -498,9 +498,7 @@ export class RequestManager extends BaseManager {
           filter,
           offset,
           limit,
-          sort,
-          isPartOfExperiment,
-          isScored
+          sort
         )
       : sort.created_at === "desc"
       ? await getRequestsClickhouseNoSort(
