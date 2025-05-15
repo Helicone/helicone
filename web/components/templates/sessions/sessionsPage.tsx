@@ -63,9 +63,6 @@ interface SessionsPageProps {
   selectedName?: string;
 }
 
-// Define a constant for the unnamed session value
-export const UNNAMED_SESSION_VALUE = "__helicone_unnamed_session__";
-
 // Moved from SessionDetails.tsx
 type TSessions = {
   id: string;
@@ -162,7 +159,7 @@ const SessionsPage = (props: SessionsPageProps) => {
     });
 
   const handleSelectSessionName = (value: string) => {
-    if (value === UNNAMED_SESSION_VALUE || value === "all") {
+    if (value === "" || value === "all") {
       setSelectedName(""); // Map placeholder back to empty string
     } else {
       setSelectedName(value);
@@ -326,18 +323,10 @@ const SessionsPage = (props: SessionsPageProps) => {
                         .map((session) => (
                           <CommandItem
                             key={session.name}
-                            value={
-                              session.name === ""
-                                ? UNNAMED_SESSION_VALUE
-                                : session.name
-                            }
+                            value={session.name}
                             onSelect={() => {
                               setOpen(false);
-                              handleSelectSessionName(
-                                session.name === ""
-                                  ? UNNAMED_SESSION_VALUE
-                                  : session.name
-                              );
+                              handleSelectSessionName(session.name);
                             }}
                           >
                             <Check
