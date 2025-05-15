@@ -50,7 +50,7 @@ export default function TableFooter(props: TableFooterProps) {
     }
   }, [debouncedPage, currentPage, onPageChange]);
   return (
-    <footer className="flex flex-row gap-4 items-center w-full justify-between text-xs px-4 py-2 bg-slate-100 dark:bg-slate-900 border-t border-border">
+    <footer className="flex flex-row gap-4 items-center w-full justify-between text-xs px-4 py-3.5 bg-slate-100 dark:bg-slate-900 border-t border-border">
       {/* Left Actions */}
       <div className="flex flex-row gap-1 items-center">
         <p className="text-muted-foreground font-medium hidden sm:block">

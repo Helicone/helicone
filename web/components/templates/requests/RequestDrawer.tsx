@@ -13,15 +13,21 @@ import { useLocalStorage } from "@/services/hooks/localStorage";
 import { useCreatePrompt } from "@/services/hooks/prompts/prompts";
 import { formatDate } from "@/utils/date";
 import { useQuery } from "@tanstack/react-query";
-import { FlaskConicalIcon } from "lucide-react";
+import {
+  FlaskConicalIcon,
+  ListTreeIcon,
+  ScrollTextIcon,
+  UserIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   LuChevronDown,
   LuChevronUp,
   LuPanelRightClose,
   LuPlus,
+  LuCopy,
 } from "react-icons/lu";
 import { PiPlayBold } from "react-icons/pi";
 import {
@@ -38,6 +44,7 @@ import FeedbackAction from "../feedback/thumbsUpThumbsDown";
 import { RenderMappedRequest } from "./RenderHeliconeRequest";
 import ScrollableBadges from "./ScrollableBadges";
 import StatusBadge from "./statusBadge";
+import { Eye } from "lucide-react";
 
 interface RequestDivProps {
   onCollapse: () => void;
@@ -239,9 +246,7 @@ export default function RequestDrawer(props: RequestDivProps) {
   // Get Helicone Special Properties
   const specialProperties = useMemo(() => {
     return {
-      userId:
-        request?.heliconeMetadata.customProperties?.["Helicone-User-Id"] ??
-        undefined,
+      userId: request?.heliconeMetadata.user ?? undefined,
       promptId:
         request?.heliconeMetadata.customProperties?.["Helicone-Prompt-Id"] ??
         undefined,
@@ -349,6 +354,95 @@ export default function RequestDrawer(props: RequestDivProps) {
     [org?.currentOrg?.id, request, setNotification]
   );
 
+  // Tracking the width of the container holding the 3 RequestDescTooltips to dynamically truncate length
+  const [descContainerWidth, setDescContainerWidth] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setDescContainerWidth(entry.contentRect.width);
+      }
+    });
+
+    resizeObserver.observe(containerRef.current);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [containerRef.current]);
+
+  const MINIMUM_TRUNCATE_LENGTH = 3;
+  const MAXIMUM_TRUNCATE_LENGTH = 30;
+  const CHARACTER_WIDTH = 4;
+  const ITEM_COUNT = 3;
+  const RESERVED_WIDTH = 300;
+  const dynamicTruncateLength = useMemo(() => {
+    const availableWidth = descContainerWidth - RESERVED_WIDTH;
+    const approximateCharsPerItem = Math.floor(
+      availableWidth / (ITEM_COUNT * CHARACTER_WIDTH)
+    );
+    return Math.max(
+      MINIMUM_TRUNCATE_LENGTH,
+      Math.min(approximateCharsPerItem, MAXIMUM_TRUNCATE_LENGTH)
+    );
+  }, [descContainerWidth]);
+
+  const RequestDescTooltip = (props: {
+    displayText: string;
+    icon: React.ReactNode;
+    href?: string;
+    copyText?: string;
+    truncateLength?: number;
+  }) => {
+    const { displayText, icon, copyText, href, truncateLength = 18 } = props;
+    return (
+      <TooltipProvider>
+        <Tooltip delayDuration={150}>
+          <TooltipTrigger asChild>
+            <div className="inline-flex text-secondary px-2 py-1 -ml-1 hover:bg-accent flex items-center gap-2 rounded-md cursor-pointer">
+              {icon}
+              <XSmall>
+                <span className="truncate">
+                  {displayText.length > truncateLength
+                    ? displayText.slice(0, truncateLength) + "..."
+                    : displayText}
+                </span>
+              </XSmall>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" align="start" className="p-0 ml-2">
+            <div className="flex flex-col w-full">
+              {copyText && (
+                <button
+                  className="flex items-center justify-between gap-2 p-2 hover:bg-accent text-left"
+                  onClick={() => {
+                    navigator.clipboard.writeText(copyText);
+                    setNotification("Copied to clipboard", "success");
+                  }}
+                >
+                  <span className="text-xs">Copy ID</span>
+                  <LuCopy className="h-3 w-3" />
+                </button>
+              )}
+              {href && (
+                <Link
+                  href={href}
+                  className="flex items-center justify-between gap-2 p-2 hover:bg-accent text-left"
+                >
+                  <span className="text-xs">View</span>
+                  <Eye className="h-3 w-3" />
+                </Link>
+              )}
+            </div>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  };
+
   if (!request) {
     return null;
   } else
@@ -357,7 +451,7 @@ export default function RequestDrawer(props: RequestDivProps) {
         {/* Header */}
         <header className="h-fit w-full flex flex-col pt-2 border-b border-border bg-card">
           {/* First Top Row */}
-          <div className="h-8 w-full shrink-0 flex flex-row justify-between items-center gap-2 px-4">
+          <div className="h-8 w-full shrink-0 flex flex-row justify-between items-center gap-2 px-2">
             {/* Left Side */}
             <div className="flex flex-row items-center gap-3 overflow-hidden">
               {/* Hide Drawer */}
@@ -368,7 +462,7 @@ export default function RequestDrawer(props: RequestDivProps) {
                       <Button
                         variant={"none"}
                         size={"square_icon"}
-                        className="w-fit text-muted-foreground hover:text-primary"
+                        className="w-fit text-muted-foreground hover:text-primary pl-2"
                         onClick={onCollapse}
                       >
                         <LuPanelRightClose className="w-4 h-4" />
@@ -450,44 +544,41 @@ export default function RequestDrawer(props: RequestDivProps) {
 
           {/* Second Top Row */}
           {Object.values(specialProperties).some((value) => value) && (
-            <div className="h-8 w-full flex flex-row gap-4 items-center px-4 shrink-0">
+            <div
+              ref={containerRef}
+              className="h-8 w-full flex flex-row gap-2 items-center px-2.5 shrink-0"
+            >
               {/* User */}
               {specialProperties.userId && (
-                <Link
-                  className="text-secondary hover:underline hover:text-primary"
+                <RequestDescTooltip
+                  displayText={specialProperties.userId}
+                  icon={<UserIcon className="h-4 w-4" />}
+                  copyText={specialProperties.userId}
                   href={`/users/${specialProperties.userId}`}
-                >
-                  <XSmall>{specialProperties.userId}</XSmall>
-                </Link>
+                  truncateLength={dynamicTruncateLength}
+                />
+              )}
+
+              {/* Session */}
+              {specialProperties.sessionId && specialProperties.sessionName && (
+                <RequestDescTooltip
+                  displayText={specialProperties.sessionPath}
+                  icon={<ListTreeIcon className="h-4 w-4" />}
+                  copyText={specialProperties.sessionId}
+                  href={`/sessions/${specialProperties.sessionId}`}
+                  truncateLength={dynamicTruncateLength}
+                />
               )}
 
               {/* Prompt */}
               {specialProperties.promptId && (
-                <Link
-                  className="text-secondary hover:underline hover:text-primary"
+                <RequestDescTooltip
+                  displayText={specialProperties.promptId}
+                  icon={<ScrollTextIcon className="h-4 w-4" />}
+                  copyText={specialProperties.promptId}
                   href={`/prompts/${promptDataQuery.data?.id}`}
-                >
-                  <XSmall>{specialProperties.promptId}</XSmall>
-                </Link>
-              )}
-
-              {/* Session */}
-              {specialProperties.sessionId && (
-                <Link
-                  className="text-secondary hover:underline hover:text-primary text-xs truncate"
-                  href={`/sessions/${specialProperties.sessionId}`}
-                >
-                  {specialProperties.sessionName ||
-                    (specialProperties.sessionId && (
-                      <span>
-                        {specialProperties.sessionName ||
-                          specialProperties.sessionId}
-                      </span>
-                    ))}
-                  {specialProperties.sessionPath && (
-                    <span>{specialProperties.sessionPath}</span>
-                  )}
-                </Link>
+                  truncateLength={dynamicTruncateLength}
+                />
               )}
             </div>
           )}
@@ -616,8 +707,8 @@ export default function RequestDrawer(props: RequestDivProps) {
             />
           </div>
 
-          {/* Main Content */}
-          <div className="p-4 bg-card">
+          <div className="p-3 h-full w-full overflow-auto bg-card">
+            {/* Mapped Request */}
             <RenderMappedRequest
               mappedRequest={request}
               onRequestSelect={onRequestSelect}
