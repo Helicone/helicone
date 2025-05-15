@@ -111,6 +111,7 @@ export async function saveToCache(options: SaveToCacheOptions): Promise<void> {
   await saveToCacheBackoff(options);
 }
 
+// --OLD CACHE--
 // Direct inserts of cache to request_response_rmt is deprecated,
 // keep here for now but its not used in ProxyForwarder currently
 export async function recordCacheHit(

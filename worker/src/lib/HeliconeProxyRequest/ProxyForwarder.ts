@@ -391,6 +391,19 @@ export async function proxyForwarder(
     if (res.error !== null) {
       console.error("Error logging", res.error);
     }
+
+    const db = new DBWrapper(env, auth);
+    const { data: orgData, error: orgError } = await db.getAuthParams();
+    if (proxyRequest && finalRateLimitOptions && !orgError) {
+      await updateRateLimitCounter({
+        organizationId: orgData?.organizationId,
+        heliconeProperties:
+          proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
+        rateLimitKV: env.RATE_LIMIT_KV,
+        rateLimitOptions: finalRateLimitOptions,
+        userId: proxyRequest.userId,
+        cost: res.data?.cost ?? 0,
+    });
     
     if (incurRateLimit) {
       const db = new DBWrapper(env, auth);
