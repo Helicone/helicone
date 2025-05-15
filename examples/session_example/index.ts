@@ -5,38 +5,6 @@ require("dotenv").config({
 import { randomUUID } from "crypto";
 import { OpenAI } from "openai"
 
-async function fullReq() {
-  const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-    baseURL: process.env.HELICONE_BASE_URL ?? "https://oai.helicone.ai/v1",
-    defaultHeaders: {
-      "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-      "Helicone-Cache-Enabled": "true",
-      "Helicone-Cache-Bucket-Max-Size": "3",
-    },
-  });
-
-  const chatCompletion = await openai.chat.completions.create(
-    {
-      messages: [
-        { role: "user", content: "Who is John Wick?" },
-      ],
-      model: "gpt-3.5-turbo",
-    },
-    {
-      headers: {
-        "Helicone-Session-Id": "Test-Session",
-        "Helicone-Session-Path": "/bruh/bruh-again-wow",
-        "Helicone-Session-Name": "Test-Session-Name",
-        "Helicone-User-Id": "charlie@helicone.ai",
-        "Helicone-Prompt-Id": "Test-Prompt-Id",
-      },
-    }
-  );
-
-  console.log(chatCompletion.choices[0].message.content);
-};
-
 async function main() {
   const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
@@ -168,5 +136,4 @@ async function main() {
   );
 }
 
-// main();
-fullReq();
+main();

@@ -10,7 +10,6 @@ import { RequestWrapper } from "../RequestWrapper";
 import { ResponseBuilder } from "../ResponseBuilder";
 import {
   getCachedResponse,
-  recordCacheHitDeprecated,
   saveToCache,
 } from "../util/cache/cacheFunctions";
 import { CacheSettings, getCacheSettings } from "../util/cache/cacheSettings";
@@ -108,17 +107,6 @@ export async function proxyForwarder(
               cacheSettings // send them cache settings hehe
             ));
             
-            // --OLD CACHE--:for backwards compatibility, record cache hit in cache_hits table as well
-            // ctx.waitUntil(
-            //   recordCacheHitDeprecated(
-            //     cachedResponse.headers,
-            //     env,
-            //     new ClickhouseClientWrapper(env),
-            //     orgData.organizationId,
-            //     provider,
-            //     (request.cf?.country as string) ?? null,
-            //   )
-            // );
             return response;
           }
         } catch (error) {
@@ -392,19 +380,6 @@ export async function proxyForwarder(
       console.error("Error logging", res.error);
     }
 
-    const db = new DBWrapper(env, auth);
-    const { data: orgData, error: orgError } = await db.getAuthParams();
-    if (proxyRequest && finalRateLimitOptions && !orgError) {
-      await updateRateLimitCounter({
-        organizationId: orgData?.organizationId,
-        heliconeProperties:
-          proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
-        rateLimitKV: env.RATE_LIMIT_KV,
-        rateLimitOptions: finalRateLimitOptions,
-        userId: proxyRequest.userId,
-        cost: res.data?.cost ?? 0,
-    });
-    
     if (incurRateLimit) {
       const db = new DBWrapper(env, auth);
       const { data: orgData, error: orgError } = await db.getAuthParams();
