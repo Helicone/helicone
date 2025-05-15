@@ -177,7 +177,9 @@ export const SessionContent: React.FC<SessionContentProps> = ({
               </Link>
               <Small className="font-semibold">/</Small>
               <Link
-                href={`/sessions?name=${encodeURIComponent(session_name)}`}
+                href={`/sessions?name=${encodeURIComponent(
+                  session_name === "Unnamed" ? "" : session_name
+                )}`}
                 className="no-underline"
               >
                 <Muted className="text-sm">{session_name}</Muted>

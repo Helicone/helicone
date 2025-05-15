@@ -32,7 +32,7 @@ import {
 import ExportButton from "../../shared/themed/table/exportButton";
 import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   getTimeIntervalAgo,
   TimeInterval,
@@ -64,7 +64,7 @@ interface SessionsPageProps {
 }
 
 // Define a constant for the unnamed session value
-const UNNAMED_SESSION_VALUE = "__helicone_unnamed_session__";
+export const UNNAMED_SESSION_VALUE = "__helicone_unnamed_session__";
 
 // Moved from SessionDetails.tsx
 type TSessions = {
@@ -151,53 +151,18 @@ const SessionsPage = (props: SessionsPageProps) => {
     (typeof TABS)[number]["id"]
   >("session-details-tab", "sessions");
 
-  const { hasAccess } = useFeatureLimit("sessions", allNames.sessions.length);
-
-  useEffect(() => {
-    if (
-      !hasAccess &&
-      hasSessions &&
-      selectedName === undefined &&
-      !allNames.isLoading
-    ) {
-      const sortedSessions = [...allNames.sessions].sort(
-        (a, b) =>
-          new Date(b.last_used).getTime() - new Date(a.last_used).getTime()
-      );
-
-      if (sortedSessions.length > 0) {
-        setSelectedName(sortedSessions[0].name);
-      }
-    }
-  }, [
-    hasSessions,
-    allNames.sessions,
-    allNames.isLoading,
-    selectedName,
-    hasAccess,
-  ]);
-
   const [selectedData, setSelectedData] = useState<TSessions | undefined>(
     undefined
   );
-  const [selectedDataIndex, setSelectedDataIndex] = useState<number>();
 
-  const {
-    selectMode,
-    toggleSelectMode: _toggleSelectMode,
-    selectedIds,
-    toggleSelection,
-    selectAll,
-    isShiftPressed,
-  } = useSelectMode({
-    items: sessionsWithId,
-    getItemId: (session: TSessions) => session.id,
-  });
+  const { selectedIds, toggleSelection, selectAll, isShiftPressed } =
+    useSelectMode({
+      items: sessionsWithId,
+      getItemId: (session: TSessions) => session.id,
+    });
 
   const handleSelectSessionName = (value: string) => {
-    if (value === "all") {
-      setSelectedName(undefined);
-    } else if (value === UNNAMED_SESSION_VALUE) {
+    if (value === UNNAMED_SESSION_VALUE || value === "all") {
       setSelectedName(""); // Map placeholder back to empty string
     } else {
       setSelectedName(value);
@@ -251,11 +216,10 @@ const SessionsPage = (props: SessionsPageProps) => {
       if (isShiftPressed || event?.metaKey || isCheckboxClick) {
         toggleSelection(row);
       } else {
-        setSelectedDataIndex(index);
         setSelectedData(row);
       }
     },
-    [isShiftPressed, toggleSelection, setSelectedDataIndex, setSelectedData]
+    [isShiftPressed, toggleSelection, setSelectedData]
   );
 
   // Calculate aggregated stats
@@ -336,9 +300,7 @@ const SessionsPage = (props: SessionsPageProps) => {
                     role="combobox"
                     aria-expanded={open}
                   >
-                    {selectedName === ""
-                      ? UNNAMED_SESSION_VALUE
-                      : selectedName ?? "All"}
+                    {selectedName === "" ? "Unnamed" : selectedName ?? "All"}
                     <ChevronDown className="ml-2 h-3 w-3 shrink-0 opacity-50 " />
                   </Button>
                 </PopoverTrigger>
