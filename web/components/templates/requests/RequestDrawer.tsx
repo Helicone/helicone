@@ -707,12 +707,13 @@ export default function RequestDrawer(props: RequestDivProps) {
             />
           </div>
 
-        <div className="p-3 h-full w-full overflow-auto bg-card">
-          {/* Mapped Request */}
-          <RenderMappedRequest
-            mappedRequest={request}
-            onRequestSelect={onRequestSelect}
-          />
+          <div className="p-3 h-full w-full overflow-auto bg-card">
+            {/* Mapped Request */}
+            <RenderMappedRequest
+              mappedRequest={request}
+              onRequestSelect={onRequestSelect}
+            />
+          </div>
         </div>
 
         {/* Footer */}
