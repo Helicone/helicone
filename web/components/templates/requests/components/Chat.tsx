@@ -238,7 +238,11 @@ export default function Chat({ mappedRequest }: ChatProps) {
                     );
                   case "text":
                     if (isJson(displayContent)) {
-                      return <JsonRenderer data={JSON.parse(displayContent)} />;
+                      return (
+                        <div className="text-sm">
+                          <JsonRenderer data={JSON.parse(displayContent)} />
+                        </div>
+                      );
                     }
                     return mode === "raw" ? (
                       <MarkdownEditor

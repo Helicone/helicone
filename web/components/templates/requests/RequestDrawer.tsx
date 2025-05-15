@@ -706,7 +706,7 @@ export default function RequestDrawer(props: RequestDivProps) {
           </div>
         </header>
 
-        <div className="p-4 h-full w-full overflow-auto bg-card">
+        <div className="p-3 h-full w-full overflow-auto bg-card">
           {/* Mapped Request */}
           <RenderMappedRequest
             mappedRequest={request}
