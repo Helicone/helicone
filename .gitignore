@@ -24,5 +24,6 @@ lastmile/
 rosebud/
 
 .env.*
+!.env.example
 
 dev.vars.*

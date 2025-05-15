@@ -14,6 +14,10 @@ import { Result, err, ok } from "../../packages/common/result";
 import { costOf } from "../../packages/cost";
 import { BaseManager } from "../BaseManager";
 import { OrganizationManager } from "../organization/OrganizationManager";
+import { KVCache } from "../../lib/cache/kvCache";
+import { cacheResultCustom } from "../../utils/cacheResult";
+type StripeMeterEvent = Stripe.V2.Billing.MeterEventStreamCreateParams.Event;
+const cache = new KVCache(60 * 1000); // 1 hour
 
 const DEFAULT_PRODUCT_PRICES = {
   "request-volume": process.env.PRICE_PROD_REQUEST_VOLUME_ID!, //(This is just growth)
@@ -24,6 +28,28 @@ const DEFAULT_PRODUCT_PRICES = {
   evals: process.env.PRICE_PROD_EVALS_ID!,
   team_bundle: process.env.PRICE_PROD_TEAM_BUNDLE_ID!,
 } as const;
+
+const getMeterId = async (
+  meterName: "stripe:trace-meter-id"
+): Promise<Result<string, string>> => {
+  const result = await dbExecute<{ name: string; settings: any }>(
+    `SELECT * FROM helicone_settings where name = $1`,
+    [meterName]
+  );
+
+  if (result.error) {
+    return err(`Error fetching meter id: ${result.error}`);
+  }
+
+  if (
+    !result.data?.[0]?.settings?.meterId ||
+    typeof result.data?.[0]?.settings?.meterId !== "string"
+  ) {
+    return err("Meter id not found");
+  }
+
+  return ok(result.data[0].settings.meterId);
+};
 
 const getProProductPrices = async (): Promise<
   typeof DEFAULT_PRODUCT_PRICES
@@ -81,7 +107,7 @@ export class StripeManager extends BaseManager {
   constructor(authParams: AuthParams) {
     super(authParams);
     this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-      apiVersion: "2024-06-20",
+      apiVersion: "2025-02-24.acacia",
     });
   }
 
@@ -113,6 +139,42 @@ export class StripeManager extends BaseManager {
     }
 
     return ok(COST_OF_PROMPTS);
+  }
+
+  public async trackStripeMeter(
+    events: StripeMeterEvent[]
+  ): Promise<Result<string, string>> {
+    try {
+      // First create a meter event session to get an auth token
+      const meterEventSession =
+        await this.stripe.v2.billing.meterEventSession.create();
+
+      // Use a direct fetch to the meter events stream endpoint with the auth token
+      // The endpoint is different from the standard Stripe API endpoint
+      const response = await fetch(
+        "https://meter-events.stripe.com/v2/billing/meter_event_stream",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${meterEventSession.authentication_token}`,
+            "Content-Type": "application/json",
+            "Stripe-Version": "2025-03-31.preview",
+          },
+          body: JSON.stringify({ events }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(
+          `Error response from Stripe: ${response.status} ${errorText}`
+        );
+      }
+
+      return ok("Success");
+    } catch (error) {
+      return err(`Error tracking stripe meter: ${error}`);
+    }
   }
 
   public async getCostForEvals(): Promise<Result<number, string>> {

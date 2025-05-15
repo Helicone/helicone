@@ -22,7 +22,7 @@ export class AdminManager extends BaseManager {
   constructor(authParams: AuthParams) {
     super(authParams);
     this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-      apiVersion: "2024-06-20",
+      apiVersion: "2025-02-24.acacia",
     });
   }
 
@@ -290,7 +290,11 @@ export class AdminManager extends BaseManager {
               gte: chunk.start,
               lt: chunk.end,
             },
-            expand: ["data.subscription"],
+            expand: [
+              "data.subscription",
+              "data.discounts",
+              "data.charge.refunds",
+            ],
             limit: 100,
           }),
         lastId ? { starting_after: lastId } : {}

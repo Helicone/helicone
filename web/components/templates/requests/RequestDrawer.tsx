@@ -646,30 +646,32 @@ export default function RequestDrawer(props: RequestDivProps) {
                   ))}
                 </div>
               </div>
+            </div>
+          )}
+        </header>
 
-              {/* Request Parameters */}
-              {requestDetails.parameterInfo.length > 0 && (
-                <div className="w-full flex flex-col gap-2 pt-4 border-t border-border px-4">
-                  {requestDetails.parameterInfo.map((item) => (
-                    <div
-                      key={item.label}
-                      className="grid grid-cols-[auto,1fr] gap-x-4 items-start"
-                    >
-                      <XSmall className="text-muted-foreground text-nowrap">
-                        {item.label}
-                      </XSmall>
-                      <XSmall className="truncate min-w-0 text-right">
-                        {item.value}
-                      </XSmall>
-                    </div>
-                  ))}
+        <div className="h-full w-full overflow-auto">
+          {/* Request Parameters - Moved out of header */}
+          {showDetails && requestDetails.parameterInfo.length > 0 && (
+            <div className="w-full flex flex-col gap-2 px-4 py-3 bg-card border-b border-border">
+              {requestDetails.parameterInfo.map((item) => (
+                <div
+                  key={item.label}
+                  className="grid grid-cols-[auto,1fr] gap-x-4 items-start"
+                >
+                  <XSmall className="text-muted-foreground text-nowrap">
+                    {item.label}
+                  </XSmall>
+                  <XSmall className="truncate min-w-0 text-right">
+                    {item.value}
+                  </XSmall>
                 </div>
-              )}
+              ))}
             </div>
           )}
 
           {/* Properties and Scores */}
-          <div className="w-full flex flex-col divide-y divide-border">
+          <div className="w-full flex flex-col divide-y divide-border bg-card border-b border-border">
             {/* Properties */}
             <ScrollableBadges
               className="px-4"
@@ -704,7 +706,6 @@ export default function RequestDrawer(props: RequestDivProps) {
               }}
             />
           </div>
-        </header>
 
         <div className="p-3 h-full w-full overflow-auto bg-card">
           {/* Mapped Request */}

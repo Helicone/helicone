@@ -45,6 +45,19 @@ npm install -g wrangler
 npm install -g yarn
 ```
 
+### Set environment variables
+```bash
+cd valhalla/jawn
+cp .env.example .env
+```
+
+```
+cd web
+cp .env.example .env
+```
+
+Take a look at the environment files you just copied. You'll want to comment out the parts under "Self-Hosting", and keep the ones under "Manual Hosting".
+
 ## Step 2 - Start all the services
 
 ### Start Supabase
@@ -59,6 +72,8 @@ supabase start
 python3 -m venv env
 source env/bin/activate
 pip install tabulate requests minio
+pip install -r clickhouse/requirements.txt
+
 # This will start clickhouse locally
 python3 clickhouse/ch_hcone.py --restart --no-password --host localhost
 python3 minio_hcone.py --restart
@@ -70,11 +85,8 @@ python3 minio_hcone.py --restart
 # Install worker dependencies
 cd worker
 yarn
-```
 
-```bash
-# Start OpenAI Proxy Worker
-npx wrangler dev --local --var WORKER_TYPE:OPENAI_PROXY --port 8787 --test-scheduled
+./run_all_workers.sh
 ```
 
 ### Start Jawn (Serves Web)
