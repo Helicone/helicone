@@ -90,7 +90,7 @@ export function RenderMappedRequest({
       <Button
         variant={"outline"}
         size={"sm"}
-        className="flex felx-row gap-1 absolute top-2 right-4 z-20"
+        className="flex felx-row gap-1 absolute top-2 right-2 z-20"
         onClick={() => toggleMode(isShiftPressed)}
       >
         <XSmall className="text-secondary font-medium">

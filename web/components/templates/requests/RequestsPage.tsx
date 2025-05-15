@@ -627,82 +627,100 @@ export default function RequestsPage(props: RequestsPageV2Props) {
           }
         />
       )}
-      <ResizablePanelGroup direction="horizontal">
+      <ResizablePanelGroup direction="horizontal" className="flex-grow flex">
         {/* Requests Table */}
-        <ResizablePanel>
+        <ResizablePanel className="flex flex-col">
           {/* Requests Table */}
           {unauthorized ? (
             <UnauthorizedView currentTier={currentTier || ""} />
           ) : (
-            <ThemedTable
-              id="requests-table"
-              tableRef={tableRef}
-              activeColumns={activeColumns}
-              setActiveColumns={setActiveColumns}
-              highlightedIds={selectedData ? [selectedData.id] : selectedIds}
-              checkboxMode={"on_hover"}
-              defaultData={requests}
-              defaultColumns={columnsWithProperties}
-              skeletonLoading={isDataLoading}
-              dataLoading={isBodyLoading}
-              sortable={sort}
-              exportData={requests.map((request) => {
-                const flattenedRequest: any = {};
-                Object.entries(request).forEach(([key, value]) => {
-                  // key is properties and value is not null
-                  if (
-                    key === "customProperties" &&
-                    value !== null &&
-                    value !== undefined
-                  ) {
-                    Object.entries(value).forEach(([key, value]) => {
-                      if (value !== null) {
+            <>
+              <div className="flex-grow overflow-auto">
+                <ThemedTable
+                  id="requests-table"
+                  tableRef={tableRef}
+                  activeColumns={activeColumns}
+                  setActiveColumns={setActiveColumns}
+                  highlightedIds={
+                    selectedData ? [selectedData.id] : selectedIds
+                  }
+                  checkboxMode={"on_hover"}
+                  defaultData={requests}
+                  defaultColumns={columnsWithProperties}
+                  skeletonLoading={isDataLoading}
+                  dataLoading={isBodyLoading}
+                  sortable={sort}
+                  exportData={requests.map((request) => {
+                    const flattenedRequest: any = {};
+                    Object.entries(request).forEach(([key, value]) => {
+                      // key is properties and value is not null
+                      if (
+                        key === "customProperties" &&
+                        value !== null &&
+                        value !== undefined
+                      ) {
+                        Object.entries(value).forEach(([key, value]) => {
+                          if (value !== null) {
+                            flattenedRequest[key] = value;
+                          }
+                        });
+                      } else {
                         flattenedRequest[key] = value;
                       }
                     });
-                  } else {
-                    flattenedRequest[key] = value;
+                    return flattenedRequest;
+                  })}
+                  timeFilter={
+                    !userId
+                      ? {
+                          currentTimeFilter: timeRange,
+                          defaultValue: "1m",
+                          onTimeSelectHandler: onTimeSelectHandler,
+                        }
+                      : undefined
                   }
-                });
-                return flattenedRequest;
-              })}
-              timeFilter={
-                !userId
-                  ? {
-                      currentTimeFilter: timeRange,
-                      defaultValue: "1m",
-                      onTimeSelectHandler: onTimeSelectHandler,
-                    }
-                  : undefined
-              }
-              onRowSelect={onRowSelectHandler}
-              onSelectAll={selectAll}
-              selectedIds={selectedIds}
-            >
-              {selectMode && (
-                <Row className="gap-5 items-center w-full justify-between bg-white dark:bg-black p-5">
-                  <div className="flex flex-row gap-2 items-center">
-                    <span className="text-sm font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">
-                      Request Selection:
-                    </span>
-                    <span className="text-sm p-2 rounded-md font-medium bg-[#F1F5F9] dark:bg-slate-900 text-[#1876D2] dark:text-slate-100 whitespace-nowrap">
-                      {selectedIds.length} selected
-                    </span>
-                  </div>
-                  {selectedIds.length > 0 && (
-                    <GenericButton
-                      onClick={() => {
-                        setModalOpen(true);
-                      }}
-                      icon={
-                        <LuPlus className="h-5 w-5 text-slate-900 dark:text-slate-100" />
-                      }
-                      text="Add to dataset"
-                    />
+                  onRowSelect={onRowSelectHandler}
+                  onSelectAll={selectAll}
+                  selectedIds={selectedIds}
+                >
+                  {selectMode && (
+                    <Row className="gap-5 items-center w-full justify-between bg-white dark:bg-black p-5">
+                      <div className="flex flex-row gap-2 items-center">
+                        <span className="text-sm font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">
+                          Request Selection:
+                        </span>
+                        <span className="text-sm p-2 rounded-md font-medium bg-[#F1F5F9] dark:bg-slate-900 text-[#1876D2] dark:text-slate-100 whitespace-nowrap">
+                          {selectedIds.length} selected
+                        </span>
+                      </div>
+                      {selectedIds.length > 0 && (
+                        <GenericButton
+                          onClick={() => {
+                            setModalOpen(true);
+                          }}
+                          icon={
+                            <LuPlus className="h-5 w-5 text-slate-900 dark:text-slate-100" />
+                          }
+                          text="Add to dataset"
+                        />
+                      )}
+                    </Row>
                   )}
-                </Row>
-              )}
-            </ThemedTable>
+                </ThemedTable>
+              </div>
+
+              <div className="flex-shrink-0">
+                <TableFooter
+                  currentPage={page}
+                  pageSize={pageSize}
+                  isCountLoading={isCountLoading}
+                  count={count || 0}
+                  onPageChange={(n) => handlePageChange(n)}
+                  onPageSizeChange={(n) => setCurrentPageSize(n)}
+                  pageSizeOptions={[25, 50, 100, 250, 500]}
+                />
+              </div>
+            </>
           )}
         </ResizablePanel>
 
@@ -756,17 +774,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
         </ResizablePanel>
       </ResizablePanelGroup>
 
-      {/* Table Footer */}
-      <TableFooter
-        currentPage={page}
-        pageSize={pageSize}
-        isCountLoading={isCountLoading}
-        count={count || 0}
-        onPageChange={(n) => handlePageChange(n)}
-        onPageSizeChange={(n) => setCurrentPageSize(n)}
-        pageSizeOptions={[25, 50, 100, 250, 500]}
-      />
-
       {/* Floating Elements */}
       <ThemedModal open={modalOpen} setOpen={setModalOpen}>
         <NewDataset
@@ -785,17 +792,29 @@ export default function RequestsPage(props: RequestsPageV2Props) {
         onClickHandler={emptyStateOptions.onPrimaryActionClick}
       />
 
-      <ThemedTable
-        id="requests-table"
-        defaultData={requests}
-        activeColumns={activeColumns}
-        setActiveColumns={setActiveColumns}
-        defaultColumns={columnsWithProperties}
-        skeletonLoading={false}
-        dataLoading={false}
-        hideHeader={true}
-        checkboxMode={"never"}
-      />
+      <div className="flex-grow flex flex-col">
+        <ThemedTable
+          id="requests-table"
+          defaultData={requests}
+          activeColumns={activeColumns}
+          setActiveColumns={setActiveColumns}
+          defaultColumns={columnsWithProperties}
+          skeletonLoading={false}
+          dataLoading={false}
+          hideHeader={true}
+          checkboxMode={"never"}
+        />
+
+        <TableFooter
+          currentPage={page}
+          pageSize={pageSize}
+          isCountLoading={false}
+          count={count || 0}
+          onPageChange={(n) => handlePageChange(n)}
+          onPageSizeChange={(n) => setCurrentPageSize(n)}
+          pageSizeOptions={[25, 50, 100, 250, 500]}
+        />
+      </div>
     </div>
   );
 }
