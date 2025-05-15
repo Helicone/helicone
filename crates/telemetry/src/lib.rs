@@ -260,6 +260,7 @@ fn env_filter(config: &Config) -> Result<EnvFilter, TelemetryError> {
         .add_directive("hyper=off".parse()?)
         .add_directive("tonic=off".parse()?)
         .add_directive("h2=off".parse()?)
+        .add_directive("opentelemetry_sdk=off".parse()?)
         .add_directive("reqwest=off".parse()?);
     Ok(filter)
 }

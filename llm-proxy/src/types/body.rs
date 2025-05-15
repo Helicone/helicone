@@ -28,8 +28,13 @@ impl Body {
         // stack by limiting concurrency and request/response body size.
         let (tx, rx) = mpsc::unbounded_channel();
         let s = stream.map(move |b| {
-            if let Ok(b) = &b {
-                if let Err(e) = tx.send(b.clone()) {
+            match &b {
+                Ok(b) => {
+                    if let Err(e) = tx.send(b.clone()) {
+                        tracing::error!(error = %e, "BodyReader dropped before stream ended");
+                    }
+                }
+                Err(e) => {
                     tracing::error!(error = %e, "BodyReader dropped before stream ended");
                 }
             }

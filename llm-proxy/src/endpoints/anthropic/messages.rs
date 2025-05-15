@@ -4,14 +4,13 @@ use anthropic_ai_sdk::types::message::{
 
 use crate::endpoints::{Endpoint, StreamRequest};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub struct Messages;
 
 impl Endpoint for Messages {
     const PATH: &'static str = "/v1/messages";
     type RequestBody = CreateMessageParams;
     type ResponseBody = CreateMessageResponse;
-    // TODO: support anthropic streams
     type StreamResponseBody = message::StreamEvent;
 }
 

@@ -3,10 +3,13 @@ use std::sync::Arc;
 use derive_more::AsRef;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
-use strum::EnumIter;
+use strum::{EnumIter, IntoEnumIterator};
 
 use super::secret::Secret;
-use crate::{config::router::BalanceConfig, error::provider::ProviderError};
+use crate::{
+    config::balance::BalanceConfig, endpoints::ApiEndpoint,
+    error::provider::ProviderError,
+};
 
 #[derive(
     Debug,
@@ -66,6 +69,25 @@ pub enum InferenceProvider {
     // Ollama
 }
 
+impl InferenceProvider {
+    #[must_use]
+    pub fn endpoints(&self) -> Vec<ApiEndpoint> {
+        match self {
+            InferenceProvider::OpenAI => {
+                crate::endpoints::openai::OpenAI::iter()
+                    .map(ApiEndpoint::OpenAI)
+                    .collect()
+            }
+            InferenceProvider::Anthropic => {
+                crate::endpoints::anthropic::Anthropic::iter()
+                    .map(ApiEndpoint::Anthropic)
+                    .collect()
+            }
+            InferenceProvider::Bedrock | InferenceProvider::VertexAi => vec![],
+        }
+    }
+}
+
 impl std::fmt::Display for InferenceProvider {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -91,12 +113,7 @@ impl ProviderKeys {
     ) -> Result<Self, ProviderError> {
         tracing::debug!("Discovering provider keys");
         let mut keys = IndexMap::new();
-        let providers: Vec<InferenceProvider> = match balance_config {
-            BalanceConfig::Weighted { targets } => {
-                targets.iter().map(|t| t.provider).collect()
-            }
-            BalanceConfig::P2C { targets } => targets.iter().copied().collect(),
-        };
+        let providers = balance_config.providers();
 
         for provider in providers {
             let provider_str = provider.to_string().to_uppercase();

@@ -2363,7 +2363,6 @@ dependencies = [
  "nonempty-collections",
  "opentelemetry",
  "opentelemetry_sdk",
- "pin-project",
  "pin-project-lite",
  "regex",
  "reqwest",

@@ -92,8 +92,10 @@ where
                 .ok_or(Error::Internal(InternalError::ExtensionNotFound(
                     "PathAndQuery",
                 )))?;
-            let source_endpoint =
-                ApiEndpoint::new(&extracted_path_and_query, request_style)?;
+            let source_endpoint = ApiEndpoint::new(
+                extracted_path_and_query.path(),
+                request_style,
+            )?;
             if provider == request_style {
                 // even though we don't need to map the request body, we still
                 // need to deserialize the body in order to extract the `stream`
@@ -191,6 +193,7 @@ async fn map_request(
         target_path_and_query = ?target_path_and_query, "mapped request");
     req.extensions_mut().insert(target_path_and_query);
     req.extensions_mut().insert(stream_ctx);
+    req.extensions_mut().insert(*target_endpoint);
     Ok(req)
 }
 
@@ -221,6 +224,7 @@ async fn map_request_no_op(
     let mut req = Request::from_parts(parts, axum_core::body::Body::from(body));
     req.extensions_mut().insert(target_path_and_query);
     req.extensions_mut().insert(stream_ctx);
+    req.extensions_mut().insert(*target_endpoint);
     Ok(req)
 }
 

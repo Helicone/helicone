@@ -24,7 +24,9 @@ use tracing_opentelemetry::OpenTelemetrySpanExt;
 
 use crate::{
     config::{Config, minio::Minio, server::TlsConfig},
-    discover::provider::monitor::ProviderMonitors,
+    discover::monitor::health::{
+        EndpointMetricsRegistry, provider::HealthMonitorMap,
+    },
     error::{self, init::InitError, runtime::RuntimeError},
     metrics::{self, Metrics},
     middleware::auth::AuthService,
@@ -68,7 +70,11 @@ pub struct InnerAppState {
     pub minio: Minio,
     pub jawn_client: Client,
     pub store: StoreRealm,
+    /// Top level metrics which are exported to OpenTelemetry.
     pub metrics: Metrics,
+    /// Metrics to track provider health and rate limits.
+    pub endpoint_metrics: EndpointMetricsRegistry,
+    pub health_monitor: HealthMonitorMap,
 }
 
 /// The top level app used to start the hyper server.
@@ -120,21 +126,22 @@ pub struct InnerAppState {
 ///    - Added by the auth layer
 ///    - Removed by the request context layer and aggregated into the
 ///      `Arc<RequestContext>`
-/// - `Arc<RequestContext>`
-///   - Added by the request context layer
-///   - Used by many layers
-/// - `Provider`
-///   - Added by the `AddExtensionLayer` in the dispatcher service stack
-///   - Used by the Mapper layer
 /// - `PathAndQuery`
 ///   - Added by the `MetaRouter`
 ///   - Used by the Mapper layer
+/// - `Arc<RequestContext>`
+///   - Added by the request context layer
+///   - Used by many layers
 /// - `RouterConfig`
-///   - Added by the `MetaRouter`
+///   - Added by the request context layer
 ///   - Used by the Mapper layer
-/// - `StreamContext`
+/// - `StreamContext`, `ApiEndpoint`
 ///   - Added by the `Mapper` layer
 ///   - Used by the Dispatcher layer
+/// - `Provider`
+///   - Added by the `AddExtensionLayer` in the dispatcher service stack
+///   - Value is driven by the `Key` type used by the `Discovery` impl.
+///   - Used by the Mapper layer
 #[derive(Clone)]
 pub struct App {
     pub state: AppState,
@@ -166,9 +173,7 @@ impl tower::Service<crate::types::request::Request> for App {
 }
 
 impl App {
-    pub async fn new(
-        config: Config,
-    ) -> Result<(Self, ProviderMonitors), InitError> {
+    pub async fn new(config: Config) -> Result<Self, InitError> {
         tracing::info!(config = ?config, "creating app");
         let minio = Minio::new(config.minio.clone())?;
         let pg_config =
@@ -186,6 +191,8 @@ impl App {
         // NoopMeterProvider
         let meter = global::meter("helicone-router");
         let metrics = metrics::Metrics::new(&meter);
+        let endpoint_metrics = EndpointMetricsRegistry::default();
+        let health_monitor = HealthMonitorMap::default();
 
         let app_state = AppState(Arc::new(InnerAppState {
             config,
@@ -193,9 +200,11 @@ impl App {
             store: StoreRealm::new(pg_pool),
             jawn_client,
             metrics,
+            endpoint_metrics,
+            health_monitor,
         }));
 
-        let (router, monitors) = MetaRouter::new(app_state.clone()).await?;
+        let router = MetaRouter::new(app_state.clone()).await?;
 
         // global middleware is applied here
         let service_stack = ServiceBuilder::new()
@@ -215,6 +224,7 @@ impl App {
             .layer(AsyncRequireAuthorizationLayer::new(AuthService))
             .map_err(crate::error::internal::InternalError::BufferError)
             .layer(BufferLayer::new(BUFFER_SIZE))
+            .layer(ErrorHandlerLayer::new(app_state.clone()))
             .service(router);
 
         let app = Self {
@@ -222,7 +232,7 @@ impl App {
             service_stack: BoxCloneService::new(service_stack),
         };
 
-        Ok((app, monitors))
+        Ok(app)
     }
 }
 

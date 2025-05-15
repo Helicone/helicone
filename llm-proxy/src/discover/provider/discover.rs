@@ -7,7 +7,7 @@ use std::{
 };
 
 use futures::Stream;
-use pin_project::pin_project;
+use pin_project_lite::pin_project;
 use tokio::sync::mpsc::Receiver;
 use tower::discover::Change;
 
@@ -23,11 +23,15 @@ use crate::{
     types::discover::DiscoverMode,
 };
 
-/// Discover endpoints keyed by [`K`].
-#[derive(Debug)]
-#[pin_project(project = DiscoveryProj)]
-pub enum Discovery<K> {
-    Config(#[pin] ConfigDiscovery<K>),
+pin_project! {
+    /// Discover endpoints keyed by [`K`].
+    #[derive(Debug)]
+    #[project = DiscoveryProj]
+    pub enum Discovery<K> {
+        Config {
+            #[pin] inner: ConfigDiscovery<K>,
+        },
+    }
 }
 
 impl Discovery<Key> {
@@ -42,12 +46,14 @@ impl Discovery<Key> {
             .discover
             .provider_keys(&router_config.balance)?;
         match app_state.0.config.discover.discover_mode {
-            DiscoverMode::Config => Ok(Self::Config(ConfigDiscovery::new(
-                app_state,
-                router_config,
-                &provider_keys,
-                rx,
-            )?)),
+            DiscoverMode::Config => Ok(Self::Config {
+                inner: ConfigDiscovery::new(
+                    app_state,
+                    router_config,
+                    &provider_keys,
+                    rx,
+                )?,
+            }),
         }
     }
 }
@@ -64,14 +70,14 @@ impl Discovery<WeightedKey> {
             .discover
             .provider_keys(&router_config.balance)?;
         match app_state.0.config.discover.discover_mode {
-            DiscoverMode::Config => {
-                Ok(Self::Config(ConfigDiscovery::new_weighted(
+            DiscoverMode::Config => Ok(Self::Config {
+                inner: ConfigDiscovery::new_weighted(
                     app_state,
                     router_config,
                     &provider_keys,
                     rx,
-                )?))
-            }
+                )?,
+            }),
         }
     }
 }
@@ -87,8 +93,8 @@ where
         ctx: &mut Context<'_>,
     ) -> Poll<Option<Self::Item>> {
         match self.project() {
-            DiscoveryProj::Config(config) => {
-                config.poll_next(ctx).map(|p| p.map(Result::Ok))
+            DiscoveryProj::Config { inner } => {
+                inner.poll_next(ctx).map(|p| p.map(Result::Ok))
             }
         }
     }

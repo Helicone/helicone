@@ -1,7 +1,7 @@
 pub mod app;
 pub(crate) mod balancer;
 pub mod config;
-pub(crate) mod discover;
+pub mod discover;
 pub(crate) mod dispatcher;
 pub mod endpoints;
 pub mod error;

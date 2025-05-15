@@ -25,6 +25,7 @@ all = { level = "deny", priority = -1 }
 pedantic = { level = "warn", priority = -1 }
 missing_errors_doc = { level = "allow" }
 missing_panics_doc = { level = "allow" }
+struct_field_names = { level = "allow" }
 
 [workspace.dependencies]
 telemetry = { path = "./crates/telemetry" }
@@ -70,7 +71,6 @@ opentelemetry_sdk = { version = "0.29.0", features = ["rt-tokio"] }
 opentelemetry-appender-tracing = "0.29.1"
 opentelemetry-otlp = { version = "0.29.0" }
 opentelemetry-semantic-conventions = "0.29.0"
-pin-project = "1.1.10"
 pin-project-lite = "0.2.16"
 rand = "0.9.1"
 regex = "1.11.1"

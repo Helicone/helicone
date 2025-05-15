@@ -22,6 +22,7 @@ use crate::{
         anthropic_client::Client as AnthropicClient,
         openai_client::Client as OpenAIClient,
     },
+    endpoints::ApiEndpoint,
     error::{api::Error, init::InitError, internal::InternalError},
     logger::service::LoggerService,
     middleware::mapper::{
@@ -65,7 +66,7 @@ impl Client {
         let event_source = request_builder
             .body(body)
             .eventsource()
-            .map_err(|e| InternalError::StreamError(e.to_string()))?;
+            .map_err(|e| InternalError::RequestBodyError(Box::new(e)))?;
         Ok(sse_stream(event_source))
     }
 }
@@ -173,6 +174,10 @@ impl Dispatcher {
             .get::<Arc<RequestContext>>()
             .ok_or(InternalError::ExtensionNotFound("RequestContext"))?
             .clone();
+        let api_endpoint = *req
+            .extensions()
+            .get::<ApiEndpoint>()
+            .ok_or(InternalError::ExtensionNotFound("ApiEndpoint"))?;
         let target_provider = self.provider;
         let provider_config = self
             .app_state
@@ -220,12 +225,48 @@ impl Dispatcher {
             .request(method, target_url.clone())
             .headers(headers.clone());
 
+        let metrics_for_stream = self.app_state.0.endpoint_metrics.clone();
+        let endpoint_metrics = self
+            .app_state
+            .0
+            .endpoint_metrics
+            .endpoint_metrics(api_endpoint)?;
+        endpoint_metrics.incr_req_count();
+
         let (mut response, body_reader): (
             http::Response<crate::types::body::Body>,
             crate::types::body::BodyReader,
         ) = if stream_ctx.is_stream {
             let response_stream =
-                Client::sse_stream(request_builder, req_body_bytes.clone())?;
+                Client::sse_stream(request_builder, req_body_bytes.clone())?
+                    .map_err(move |e| {
+                        if let InternalError::StreamError(error) = &e {
+                            match &**error {
+                            reqwest_eventsource::Error::StreamEnded
+                            | reqwest_eventsource::Error::Transport(..) => {
+                                if let Ok(endpoint_metrics) = metrics_for_stream
+                                    .endpoint_metrics(api_endpoint)
+                                {
+                                    endpoint_metrics
+                                        .incr_remote_internal_error_count();
+                                }
+                            }
+                            reqwest_eventsource::Error::InvalidStatusCode(
+                                status_code,
+                                ..,
+                            ) if status_code.is_server_error() => {
+                                if let Ok(endpoint_metrics) = metrics_for_stream
+                                    .endpoint_metrics(api_endpoint)
+                                {
+                                    endpoint_metrics
+                                        .incr_remote_internal_error_count();
+                                }
+                            }
+                            _ => {}
+                        }
+                        }
+                        e
+                    });
             let mut resp_builder = http::Response::builder();
             *resp_builder.headers_mut().unwrap() = stream_response_headers();
             resp_builder = resp_builder.status(StatusCode::OK);
@@ -298,6 +339,9 @@ impl Dispatcher {
             }
             .instrument(tracing::Span::current()),
         );
+        if response.status().is_server_error() {
+            endpoint_metrics.incr_remote_internal_error_count();
+        }
 
         response.error_for_status()
     }

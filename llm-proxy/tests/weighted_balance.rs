@@ -5,8 +5,10 @@ use http_body_util::BodyExt;
 use llm_proxy::{
     config::{
         Config,
-        router::{BalanceConfig, BalanceTarget, RouterConfig, RouterConfigs},
+        balance::{BalanceConfig, BalanceConfigInner, BalanceTarget},
+        router::{RouterConfig, RouterConfigs},
     },
+    endpoints::EndpointType,
     tests::{TestDefault, harness::Harness, mock::MockArgs},
     types::{provider::InferenceProvider, router::RouterId},
 };
@@ -19,18 +21,21 @@ use tower::Service;
 #[serial_test::serial]
 async fn weighted_balancer_anthropic_preferred() {
     let mut config = Config::test_default();
-    let balance_config = BalanceConfig::Weighted {
-        targets: nes![
-            BalanceTarget {
-                provider: InferenceProvider::OpenAI,
-                weight: Decimal::try_from(0.25).unwrap(),
-            },
-            BalanceTarget {
-                provider: InferenceProvider::Anthropic,
-                weight: Decimal::try_from(0.75).unwrap(),
-            },
-        ],
-    };
+    let balance_config = BalanceConfig::from(HashMap::from([(
+        EndpointType::Chat,
+        BalanceConfigInner::Weighted {
+            targets: nes![
+                BalanceTarget {
+                    provider: InferenceProvider::OpenAI,
+                    weight: Decimal::try_from(0.25).unwrap(),
+                },
+                BalanceTarget {
+                    provider: InferenceProvider::Anthropic,
+                    weight: Decimal::try_from(0.75).unwrap(),
+                },
+            ],
+        },
+    )]));
     config.routers = RouterConfigs::new(HashMap::from([(
         RouterId::Default,
         RouterConfig {
@@ -84,7 +89,7 @@ async fn weighted_balancer_anthropic_preferred() {
     // to the async task and awaiting it in the test.
     //
     // but this is totes good for now
-    tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+    tokio::time::sleep(std::time::Duration::from_millis(100)).await;
 
     harness.mock.jawn_mock.verify().await;
     harness.mock.minio_mock.verify().await;
@@ -96,18 +101,21 @@ async fn weighted_balancer_anthropic_preferred() {
 #[serial_test::serial]
 async fn weighted_balancer_openai_preferred() {
     let mut config = Config::test_default();
-    let balance_config = BalanceConfig::Weighted {
-        targets: nes![
-            BalanceTarget {
-                provider: InferenceProvider::OpenAI,
-                weight: Decimal::try_from(0.75).unwrap(),
-            },
-            BalanceTarget {
-                provider: InferenceProvider::Anthropic,
-                weight: Decimal::try_from(0.25).unwrap(),
-            },
-        ],
-    };
+    let balance_config = BalanceConfig::from(HashMap::from([(
+        EndpointType::Chat,
+        BalanceConfigInner::Weighted {
+            targets: nes![
+                BalanceTarget {
+                    provider: InferenceProvider::OpenAI,
+                    weight: Decimal::try_from(0.75).unwrap(),
+                },
+                BalanceTarget {
+                    provider: InferenceProvider::Anthropic,
+                    weight: Decimal::try_from(0.25).unwrap(),
+                },
+            ],
+        },
+    )]));
     config.routers = RouterConfigs::new(HashMap::from([(
         RouterId::Default,
         RouterConfig {
@@ -161,7 +169,7 @@ async fn weighted_balancer_openai_preferred() {
     // to the async task and awaiting it in the test.
     //
     // but this is totes good for now
-    tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+    tokio::time::sleep(std::time::Duration::from_millis(100)).await;
 
     harness.mock.jawn_mock.verify().await;
     harness.mock.minio_mock.verify().await;
@@ -173,18 +181,21 @@ async fn weighted_balancer_openai_preferred() {
 #[serial_test::serial]
 async fn weighted_balancer_anthropic_heavily_preferred() {
     let mut config = Config::test_default();
-    let balance_config = BalanceConfig::Weighted {
-        targets: nes![
-            BalanceTarget {
-                provider: InferenceProvider::OpenAI,
-                weight: Decimal::try_from(0.05).unwrap(),
-            },
-            BalanceTarget {
-                provider: InferenceProvider::Anthropic,
-                weight: Decimal::try_from(0.95).unwrap(),
-            },
-        ],
-    };
+    let balance_config = BalanceConfig::from(HashMap::from([(
+        EndpointType::Chat,
+        BalanceConfigInner::Weighted {
+            targets: nes![
+                BalanceTarget {
+                    provider: InferenceProvider::OpenAI,
+                    weight: Decimal::try_from(0.05).unwrap(),
+                },
+                BalanceTarget {
+                    provider: InferenceProvider::Anthropic,
+                    weight: Decimal::try_from(0.95).unwrap(),
+                },
+            ],
+        },
+    )]));
     config.routers = RouterConfigs::new(HashMap::from([(
         RouterId::Default,
         RouterConfig {
@@ -238,7 +249,7 @@ async fn weighted_balancer_anthropic_heavily_preferred() {
     // to the async task and awaiting it in the test.
     //
     // but this is totes good for now
-    tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+    tokio::time::sleep(std::time::Duration::from_millis(100)).await;
 
     harness.mock.jawn_mock.verify().await;
     harness.mock.minio_mock.verify().await;

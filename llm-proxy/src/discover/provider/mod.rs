@@ -1,17 +1,24 @@
 pub mod config;
 pub mod discover;
 pub mod factory;
-pub mod monitor;
 
-use crate::types::provider::InferenceProvider;
+use crate::{endpoints::EndpointType, types::provider::InferenceProvider};
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 pub struct Key {
     pub provider: InferenceProvider,
+    pub endpoint_type: EndpointType,
 }
 
 impl Key {
-    pub fn new(provider: InferenceProvider) -> Self {
-        Self { provider }
+    #[must_use]
+    pub fn new(
+        provider: InferenceProvider,
+        endpoint_type: EndpointType,
+    ) -> Self {
+        Self {
+            provider,
+            endpoint_type,
+        }
     }
 }

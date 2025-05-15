@@ -4,12 +4,12 @@ use http::{Method, Request, StatusCode};
 use llm_proxy::{
     config::{
         Config,
-        router::{BalanceConfig, RouterConfig, RouterConfigs},
+        balance::BalanceConfig,
+        router::{RouterConfig, RouterConfigs},
     },
     tests::{TestDefault, harness::Harness, mock::MockArgs},
     types::{provider::InferenceProvider, router::RouterId},
 };
-use nonempty_collections::nes;
 use serde_json::json;
 use tower::Service;
 
@@ -65,9 +65,7 @@ async fn anthropic_with_openai_request_style() {
         RouterId::Default,
         RouterConfig {
             request_style: InferenceProvider::OpenAI,
-            balance: BalanceConfig::P2C {
-                targets: nes![InferenceProvider::Anthropic],
-            },
+            balance: BalanceConfig::anthropic_chat(),
             ..Default::default()
         },
     )]));
@@ -143,9 +141,7 @@ async fn anthropic_with_anthropic_request_style() {
         RouterId::Default,
         RouterConfig {
             request_style: InferenceProvider::OpenAI,
-            balance: BalanceConfig::P2C {
-                targets: nes![InferenceProvider::Anthropic],
-            },
+            balance: BalanceConfig::anthropic_chat(),
             ..Default::default()
         },
     )]));
@@ -224,9 +220,7 @@ async fn anthropic_request_style() {
         RouterId::Default,
         RouterConfig {
             request_style: InferenceProvider::Anthropic,
-            balance: BalanceConfig::P2C {
-                targets: nes![InferenceProvider::OpenAI],
-            },
+            balance: BalanceConfig::openai_chat(),
             ..Default::default()
         },
     )]));

@@ -1,7 +1,11 @@
 use std::path::PathBuf;
 
 use clap::Parser;
-use llm_proxy::{app::App, config::Config, utils::meltdown::TaggedService};
+use llm_proxy::{
+    app::App, config::Config,
+    discover::monitor::health::provider::HealthMonitor,
+    utils::meltdown::TaggedService,
+};
 use meltdown::Meltdown;
 use tracing::info;
 
@@ -31,7 +35,7 @@ async fn main() -> Result<(), llm_proxy::error::runtime::RuntimeError> {
 
     info!("telemetry initialized");
     let mut shutting_down = false;
-    let (app, provider_monitor) = App::new(config).await?;
+    let app = App::new(config).await?;
     // let rate_limit_cleanup_interval = config.rate_limit.cleanup_interval;
     // let rate_limiting_cleanup_service =
     //     middleware::rate_limit::service::Service::new(
@@ -40,13 +44,18 @@ async fn main() -> Result<(), llm_proxy::error::runtime::RuntimeError> {
     //         rate_limit_cleanup_interval,
     //     );
 
+    let health_monitor = HealthMonitor::new(app.state.clone());
+
     let mut meltdown = Meltdown::new()
         .register(TaggedService::new(
             "shutdown-signals",
             llm_proxy::utils::meltdown::wait_for_shutdown_signals,
         ))
         .register(TaggedService::new("proxy", app))
-        .register(TaggedService::new("provider-monitor", provider_monitor));
+        .register(TaggedService::new(
+            "provider-health-monitor",
+            health_monitor,
+        ));
     // .register(TaggedService::new(
     //     "rate-limit-cleanup",
     //     rate_limiting_cleanup_service,

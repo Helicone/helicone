@@ -1,7 +1,6 @@
 pub mod catch_panic;
 pub mod handle_error;
 pub mod meltdown;
-pub mod try_map_frame;
 
 use std::{fmt, fmt::Display, marker::PhantomData, str::FromStr};
 

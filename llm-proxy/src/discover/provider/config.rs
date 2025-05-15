@@ -7,7 +7,7 @@ use std::{
 };
 
 use futures::Stream;
-use pin_project::pin_project;
+use pin_project_lite::pin_project;
 use rust_decimal::prelude::ToPrimitive;
 use tokio::sync::mpsc::Receiver;
 use tokio_stream::wrappers::ReceiverStream;
@@ -16,36 +16,37 @@ use weighted_balance::weight::Weight;
 
 use crate::{
     app::AppState,
-    config::router::{BalanceConfig, RouterConfig},
+    config::{balance::BalanceConfigInner, router::RouterConfig},
     discover::{provider::Key, weighted::WeightedKey},
     dispatcher::{Dispatcher, DispatcherService},
     error::{init::InitError, provider::ProviderError},
     types::provider::ProviderKeys,
 };
 
-/// Reads available models and providers from the config file.
-///
-/// We can additionally dynamically remove providers from the balancer
-/// if they hit certain failure thresholds by using a layer like:
-///
-/// ```rust,ignore
-/// #[derive(Clone)]
-/// pub struct FailureWatcherLayer {
-///     key: usize,
-///     registry: tokio::sync::watch::Sender<HashMap<usize, DispatcherService>>,
-///     failure_limit: u32,
-///     window: Duration,
-/// }
-/// ```
-///
-/// the layer would then send `Change::Remove` events to this discovery struct
-#[derive(Debug)]
-#[pin_project]
-pub struct ConfigDiscovery<K> {
-    #[pin]
-    initial: ServiceMap<K, DispatcherService>,
-    #[pin]
-    events: ReceiverStream<Change<K, DispatcherService>>,
+pin_project! {
+    /// Reads available models and providers from the config file.
+    ///
+    /// We can additionally dynamically remove providers from the balancer
+    /// if they hit certain failure thresholds by using a layer like:
+    ///
+    /// ```rust,ignore
+    /// #[derive(Clone)]
+    /// pub struct FailureWatcherLayer {
+    ///     key: usize,
+    ///     registry: tokio::sync::watch::Sender<HashMap<usize, DispatcherService>>,
+    ///     failure_limit: u32,
+    ///     window: Duration,
+    /// }
+    /// ```
+    ///
+    /// the layer would then send `Change::Remove` events to this discovery struct
+    #[derive(Debug)]
+    pub struct ConfigDiscovery<K> {
+        #[pin]
+        initial: ServiceMap<K, DispatcherService>,
+        #[pin]
+        events: ReceiverStream<Change<K, DispatcherService>>,
+    }
 }
 
 impl ConfigDiscovery<Key> {
@@ -57,21 +58,23 @@ impl ConfigDiscovery<Key> {
     ) -> Result<Self, InitError> {
         let events = ReceiverStream::new(rx);
         let mut service_map: HashMap<Key, DispatcherService> = HashMap::new();
-        let providers = router_config.balance.providers();
-        for provider in providers {
-            let key = Key::new(provider);
-            let api_key = provider_keys
-                .as_ref()
-                .get(&key.provider)
-                .ok_or(ProviderError::ApiKeyNotFound(key.provider))?
-                .clone();
-            let dispatcher = Dispatcher::new(
-                app.clone(),
-                router_config,
-                key.provider,
-                &api_key,
-            )?;
-            service_map.insert(key, dispatcher);
+        for (endpoint_type, balance_config) in router_config.balance.as_ref() {
+            let providers = balance_config.providers();
+            for provider in providers {
+                let key = Key::new(provider, *endpoint_type);
+                let api_key = provider_keys
+                    .as_ref()
+                    .get(&key.provider)
+                    .ok_or(ProviderError::ApiKeyNotFound(key.provider))?
+                    .clone();
+                let dispatcher = Dispatcher::new(
+                    app.clone(),
+                    router_config,
+                    key.provider,
+                    &api_key,
+                )?;
+                service_map.insert(key, dispatcher);
+            }
         }
 
         tracing::debug!("Created config provider discovery");
@@ -89,39 +92,41 @@ impl ConfigDiscovery<WeightedKey> {
         provider_keys: &ProviderKeys,
         rx: Receiver<Change<WeightedKey, DispatcherService>>,
     ) -> Result<Self, InitError> {
-        let weighted_balance_targets = match &router_config.balance {
-            BalanceConfig::Weighted { targets } => targets,
-            BalanceConfig::P2C { .. } => {
-                return Err(InitError::InvalidWeightedBalancer(
-                    "P2C balancer not supported for weighted discovery"
-                        .to_string(),
-                ));
-            }
-        };
-        let events = ReceiverStream::new(rx);
         let mut service_map = HashMap::new();
-
-        for target in weighted_balance_targets {
-            let weight = Weight::from(
-                target
-                    .weight
-                    .to_f64()
-                    .ok_or(InitError::InvalidWeight(target.provider))?,
-            );
-            let key = WeightedKey::new(target.provider, weight);
-            let api_key = provider_keys
-                .as_ref()
-                .get(&key.provider)
-                .ok_or(ProviderError::ApiKeyNotFound(key.provider))?
-                .clone();
-            let dispatcher = Dispatcher::new(
-                app.clone(),
-                router_config,
-                key.provider,
-                &api_key,
-            )?;
-            service_map.insert(key, dispatcher);
+        for (endpoint_type, balance_config) in router_config.balance.as_ref() {
+            let weighted_balance_targets = match balance_config {
+                BalanceConfigInner::Weighted { targets } => targets,
+                BalanceConfigInner::P2C { .. } => {
+                    return Err(InitError::InvalidWeightedBalancer(
+                        "P2C balancer not supported for weighted discovery"
+                            .to_string(),
+                    ));
+                }
+            };
+            for target in weighted_balance_targets {
+                let weight = Weight::from(
+                    target
+                        .weight
+                        .to_f64()
+                        .ok_or(InitError::InvalidWeight(target.provider))?,
+                );
+                let key =
+                    WeightedKey::new(target.provider, *endpoint_type, weight);
+                let api_key = provider_keys
+                    .as_ref()
+                    .get(&key.provider)
+                    .ok_or(ProviderError::ApiKeyNotFound(key.provider))?
+                    .clone();
+                let dispatcher = Dispatcher::new(
+                    app.clone(),
+                    router_config,
+                    key.provider,
+                    &api_key,
+                )?;
+                service_map.insert(key, dispatcher);
+            }
         }
+        let events = ReceiverStream::new(rx);
 
         tracing::debug!("Created config provider discovery");
         Ok(Self {
@@ -177,14 +182,15 @@ where
     }
 }
 
-/// Static service discovery based on a predetermined map of services.
-///
-/// [`ServiceMap`] is created with an initial map of services. The discovery
-/// process will yield this map once and do nothing after.
-#[derive(Debug)]
-#[pin_project]
-pub(crate) struct ServiceMap<K, V> {
-    inner: std::collections::hash_map::IntoIter<K, V>,
+pin_project! {
+    /// Static service discovery based on a predetermined map of services.
+    ///
+    /// [`ServiceMap`] is created with an initial map of services. The discovery
+    /// process will yield this map once and do nothing after.
+    #[derive(Debug)]
+    pub(crate) struct ServiceMap<K, V> {
+        inner: std::collections::hash_map::IntoIter<K, V>,
+    }
 }
 
 impl<K, V> ServiceMap<K, V>
