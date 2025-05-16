@@ -1043,6 +1043,7 @@ Json: JsonObject;
       scores_column?: components["schemas"]["Partial_TextOperators_"];
       request_body?: components["schemas"]["Partial_VectorOperators_"];
       response_body?: components["schemas"]["Partial_VectorOperators_"];
+      cache_enabled?: components["schemas"]["Partial_BooleanOperators_"];
     };
     /** @description Make all properties in T optional */
     Partial_SessionsRequestResponseRMTToOperators_: {
