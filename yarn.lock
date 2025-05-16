@@ -994,9 +994,9 @@
     "@babel/helper-validator-identifier" "^7.27.1"
 
 "@better-auth/cli@^1.2.7":
-  version "1.2.7"
-  resolved "https://registry.yarnpkg.com/@better-auth/cli/-/cli-1.2.7.tgz#c333a5876c60dcfad719d7511e650c83e6d6bbc5"
-  integrity sha512-nO5xD/cRfiVNpsXYEQsgURH2tuTyZkDlkmyqiLndreYvxKySCLuB/V1mWVmpjE4zbITe4PRJ8UYCKH4u2dsSCA==
+  version "1.2.8"
+  resolved "https://registry.yarnpkg.com/@better-auth/cli/-/cli-1.2.8.tgz#611522f92c6b03473c23a3820e732e8988cb62a1"
+  integrity sha512-Hb2DMxtvgqc/F/6lloSqU9GikWMtBU6CUlILp+IrAtIm/NH+CuS33LBC9raE8+fcoHvWrBY8WOX5/taoIlGTyw==
   dependencies:
     "@babel/preset-react" "^7.26.3"
     "@babel/preset-typescript" "^7.26.0"
@@ -1005,7 +1005,7 @@
     "@prisma/client" "^5.22.0"
     "@types/better-sqlite3" "^7.6.12"
     "@types/prompts" "^2.4.9"
-    better-auth "1.2.7"
+    better-auth "1.2.8"
     better-sqlite3 "^11.6.0"
     c12 "^2.0.1"
     chalk "^5.3.0"
@@ -1022,10 +1022,10 @@
     yocto-spinner "^0.1.1"
     zod "^3.23.8"
 
-"@better-auth/utils@0.2.4":
-  version "0.2.4"
-  resolved "https://registry.yarnpkg.com/@better-auth/utils/-/utils-0.2.4.tgz#55c13e14fb2daa92c6d15de4a42804279636d5e0"
-  integrity sha512-ayiX87Xd5sCHEplAdeMgwkA0FgnXsEZBgDn890XHHwSWNqqRZDYOq3uj2Ei2leTv1I2KbG5HHn60Ah1i2JWZjQ==
+"@better-auth/utils@0.2.5":
+  version "0.2.5"
+  resolved "https://registry.yarnpkg.com/@better-auth/utils/-/utils-0.2.5.tgz#449af26c1fe9a798baee7825ff329d91cf40f07f"
+  integrity sha512-uI2+/8h/zVsH8RrYdG8eUErbuGBk16rZKQfz8CjxQOyCE6v7BqFYEbFwvOkvl1KbUdxhqOnXp78+uE5h8qVEgQ==
   dependencies:
     typescript "^5.8.2"
     uncrypto "^0.1.3"
@@ -1117,7 +1117,7 @@
   resolved "https://registry.yarnpkg.com/@discoveryjs/json-ext/-/json-ext-0.5.7.tgz#1d572bfbbe14b7704e0ba0f39b74815b84870d70"
   integrity sha512-dBVuXR082gk3jsFp7Rd/JI4kytwGHecnCoTtXFb7DB6CNHp4rg5k1bhg0nWdLGLnOV71lmDzGQaLMy8iPLY0pw==
 
-"@emnapi/core@^1.4.0":
+"@emnapi/core@^1.4.3":
   version "1.4.3"
   resolved "https://registry.yarnpkg.com/@emnapi/core/-/core-1.4.3.tgz#9ac52d2d5aea958f67e52c40a065f51de59b77d6"
   integrity sha512-4m62DuCE07lw01soJwPiBGC0nAww0Q+RY70VZ+n49yDIO13yyinhbWCeNnaob0lakDtWQzSdtNWzJeOJt2ma+g==
@@ -1125,7 +1125,7 @@
     "@emnapi/wasi-threads" "1.0.2"
     tslib "^2.4.0"
 
-"@emnapi/runtime@^1.4.0":
+"@emnapi/runtime@^1.4.3":
   version "1.4.3"
   resolved "https://registry.yarnpkg.com/@emnapi/runtime/-/runtime-1.4.3.tgz#c0564665c80dc81c448adac23f9dfbed6c838f7d"
   integrity sha512-pBPWdu6MLKROBX05wSNKcNb++m5Er+KQ9QkB+WVM+pW2Kx9hoSrVTnu3BdkI5eBLZoKu/J6mW/B6i6bJB2ytXQ==
@@ -1621,12 +1621,12 @@
     lilconfig "^2.1.0"
 
 "@napi-rs/wasm-runtime@^0.2.9":
-  version "0.2.9"
-  resolved "https://registry.yarnpkg.com/@napi-rs/wasm-runtime/-/wasm-runtime-0.2.9.tgz#7278122cf94f3b36d8170a8eee7d85356dfa6a96"
-  integrity sha512-OKRBiajrrxB9ATokgEQoG87Z25c67pCpYcCwmXYX8PBftC9pBfN18gnm/fh1wurSLEKIAt+QRFLFCQISrb66Jg==
+  version "0.2.10"
+  resolved "https://registry.yarnpkg.com/@napi-rs/wasm-runtime/-/wasm-runtime-0.2.10.tgz#f3b7109419c6670000b2401e0c778b98afc25f84"
+  integrity sha512-bCsCyeZEwVErsGmyPNSzwfwFn4OdxBj0mmv6hOFucB/k81Ojdu68RbZdxYsRQUPc9l6SU5F/cG+bXgWs3oUgsQ==
   dependencies:
-    "@emnapi/core" "^1.4.0"
-    "@emnapi/runtime" "^1.4.0"
+    "@emnapi/core" "^1.4.3"
+    "@emnapi/runtime" "^1.4.3"
     "@tybys/wasm-util" "^0.9.0"
 
 "@next/bundle-analyzer@^14.2.23":
@@ -5185,12 +5185,12 @@ before-after-hook@^2.2.0:
   resolved "https://registry.yarnpkg.com/before-after-hook/-/before-after-hook-2.2.3.tgz#c51e809c81a4e354084422b9b26bad88249c517c"
   integrity sha512-NzUnlZexiaH/46WDhANlyR2bXRopNg4F/zuSA3OpZnllCUgRaOF2znDioDWrmbNVsuZk6l9pMquQB38cfBZwkQ==
 
-better-auth@1.2.7, better-auth@^1.2.7:
-  version "1.2.7"
-  resolved "https://registry.yarnpkg.com/better-auth/-/better-auth-1.2.7.tgz#a61e6292dd60d445eaabddfbecf19469d85ecde1"
-  integrity sha512-2hCB263GSrgetsMUZw8vv9O1e4S4AlYJW3P4e8bX9u3Q3idv4u9BzDFCblpTLuL4YjYovghMCN0vurAsctXOAQ==
+better-auth@1.2.8, better-auth@^1.2.7:
+  version "1.2.8"
+  resolved "https://registry.yarnpkg.com/better-auth/-/better-auth-1.2.8.tgz#a131098e54d2dd1e19a7d236921ea51b47a40eec"
+  integrity sha512-y8ry7ZW3/3ZIr82Eo1zUDtMzdoQlFnwNuZ0+b0RxoNZgqmvgTIc/0tCDC7NDJerqSu4UCzer0dvYxBsv3WMIGg==
   dependencies:
-    "@better-auth/utils" "0.2.4"
+    "@better-auth/utils" "0.2.5"
     "@better-fetch/fetch" "^1.1.18"
     "@noble/ciphers" "^0.6.0"
     "@noble/hashes" "^1.6.1"
@@ -5199,7 +5199,7 @@ better-auth@1.2.7, better-auth@^1.2.7:
     better-call "^1.0.8"
     defu "^6.1.4"
     jose "^5.9.6"
-    kysely "^0.27.6"
+    kysely "^0.28.1"
     nanostores "^0.11.3"
     zod "^3.24.1"
 
@@ -7646,10 +7646,10 @@ kleur@^3.0.3:
   resolved "https://registry.yarnpkg.com/kleur/-/kleur-3.0.3.tgz#a79c9ecc86ee1ce3fa6206d1216c501f147fc07e"
   integrity sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w==
 
-kysely@^0.27.6:
-  version "0.27.6"
-  resolved "https://registry.yarnpkg.com/kysely/-/kysely-0.27.6.tgz#b2a908e160e510f9945586ca9de1616c187a2a8e"
-  integrity sha512-FIyV/64EkKhJmjgC0g2hygpBv5RNWVPyNCqSAD7eTCv6eFWNIi4PN1UvdSJGicN/o35bnevgis4Y0UDC0qi8jQ==
+kysely@^0.28.1:
+  version "0.28.2"
+  resolved "https://registry.yarnpkg.com/kysely/-/kysely-0.28.2.tgz#1a4ff83cedf2b259a151ab9c42ad28bcac6c2f98"
+  integrity sha512-4YAVLoF0Sf0UTqlhgQMFU9iQECdah7n+13ANkiuVfRvlK+uI0Etbgd7bVP36dKlG+NXWbhGua8vnGt+sdhvT7A==
 
 language-subtag-registry@^0.3.20:
   version "0.3.23"
@@ -8577,9 +8577,9 @@ oniguruma-to-es@^4.3.3:
     regex-recursion "^6.0.2"
 
 openai@^4.68.4, openai@^4.78.1:
-  version "4.98.0"
-  resolved "https://registry.yarnpkg.com/openai/-/openai-4.98.0.tgz#81d8228e06e5d9195bac3b170af42a5454391999"
-  integrity sha512-TmDKur1WjxxMPQAtLG5sgBSCJmX7ynTsGmewKzoDwl1fRxtbLOsiR0FA/AOAAtYUmP6azal+MYQuOENfdU+7yg==
+  version "4.99.0"
+  resolved "https://registry.yarnpkg.com/openai/-/openai-4.99.0.tgz#11fd7861f6156ac31258bee7e446d8a0a16627f1"
+  integrity sha512-E2bd6ghsKF6iV6B4vuhREtdpeB/8dNUnWcPIt5VmnM019/mXxOdqisnIcn4e1zWt1H8BpeMY2HwKJ3UIin6baA==
   dependencies:
     "@types/node" "^18.11.18"
     "@types/node-fetch" "^2.6.4"
