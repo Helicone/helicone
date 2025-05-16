@@ -32,6 +32,16 @@ import DraggableColumnHeader from "./columns/draggableColumnHeader";
 
 type CheckboxMode = "always_visible" | "on_hover" | "never";
 
+function ConditionalLink<T>({
+  children,
+  href,
+}: {
+  children: React.ReactNode;
+  href?: string | undefined;
+}) {
+  return href ? <Link href={href}>{children}</Link> : children;
+}
+
 interface ThemedTableProps<T extends { id?: string; subRows?: T[] }> {
   id: string;
   defaultData: T[];
@@ -370,131 +380,103 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                         maxWidth: cell.column.getSize(),
                       }}
                     >
-                      <div
-                        className={clsx("flex items-center gap-1")}
-                        style={
-                          i === 0
-                            ? {
-                                paddingLeft: `${
-                                  row.depth * 24 +
-                                  (onToggleAllRows !== undefined ? 24 : 0) +
-                                  (row.getCanExpand() ? 0 : 8)
-                                }px`,
-                              }
-                            : {}
-                        }
-                      >
-                        {i === 0 &&
-                          (() => {
-                            const getAncestorPath = (
-                              currentRow: Row<T>
-                            ): string | undefined => {
-                              if (currentRow.depth === 0) {
-                                return (currentRow.original as any)
-                                  ?.path as string;
-                              }
-                              let currentParent = currentRow.getParentRow();
-                              while (currentParent && currentParent.depth > 0) {
-                                currentParent = currentParent.getParentRow();
-                              }
-                              return currentParent
-                                ? ((currentParent.original as any)
-                                    ?.path as string)
-                                : undefined;
-                            };
+                      <ConditionalLink href={rowLink?.(row.original)}>
+                        <div
+                          className={clsx("flex items-center gap-1")}
+                          style={
+                            i === 0
+                              ? {
+                                  paddingLeft: `${
+                                    row.depth * 24 +
+                                    (onToggleAllRows !== undefined ? 24 : 0) +
+                                    (row.getCanExpand() ? 0 : 8)
+                                  }px`,
+                                }
+                              : {}
+                          }
+                        >
+                          {i === 0 &&
+                            (() => {
+                              const getAncestorPath = (
+                                currentRow: Row<T>
+                              ): string | undefined => {
+                                if (currentRow.depth === 0) {
+                                  return (currentRow.original as any)
+                                    ?.path as string;
+                                }
+                                let currentParent = currentRow.getParentRow();
+                                while (
+                                  currentParent &&
+                                  currentParent.depth > 0
+                                ) {
+                                  currentParent = currentParent.getParentRow();
+                                }
+                                return currentParent
+                                  ? ((currentParent.original as any)
+                                      ?.path as string)
+                                  : undefined;
+                              };
 
-                            const ancestorPath = getAncestorPath(row);
-                            const groupColorClass =
-                              (ancestorPath &&
-                                topLevelPathColorMap[ancestorPath]) ||
-                              "bg-transparent";
+                              const ancestorPath = getAncestorPath(row);
+                              const groupColorClass =
+                                (ancestorPath &&
+                                  topLevelPathColorMap[ancestorPath]) ||
+                                "bg-transparent";
 
-                            if (groupColorClass !== "bg-transparent") {
-                              return (
-                                <div
-                                  className={clsx(
-                                    "absolute left-0 top-0 bottom-0 w-1 z-30",
-                                    groupColorClass
-                                  )}
-                                />
-                              );
-                            }
-                            return null;
-                          })()}
+                              if (groupColorClass !== "bg-transparent") {
+                                return (
+                                  <div
+                                    className={clsx(
+                                      "absolute left-0 top-0 bottom-0 w-1 z-30",
+                                      groupColorClass
+                                    )}
+                                  />
+                                );
+                              }
+                              return null;
+                            })()}
 
-                        {i === 0 && row.getCanExpand() && (
-                          <button
-                            {...{
-                              onClick: row.getToggleExpandedHandler(),
-                              style: { cursor: "pointer" },
-                              "data-expander": true,
-                            }}
-                            className="p-0.5"
-                          >
-                            {row.getIsExpanded() ? (
-                              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                            ) : (
-                              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                            )}
-                          </button>
-                        )}
-                        {dataLoading &&
-                        (cell.column.id == "requestText" ||
-                          cell.column.id == "responseText") ? (
-                          <span
-                            className={clsx(
-                              "w-full flex flex-grow",
-                              (cell.column.id == "requestText" ||
-                                cell.column.id == "responseText") &&
-                                dataLoading
-                                ? "animate-pulse bg-slate-200 rounded-md"
-                                : "hidden"
-                            )}
-                          >
-                            &nbsp;
-                          </span>
-                        ) : (
-                          flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )
-                        )}
-                      </div>
+                          {i === 0 && row.getCanExpand() && (
+                            <button
+                              {...{
+                                onClick: row.getToggleExpandedHandler(),
+                                style: { cursor: "pointer" },
+                                "data-expander": true,
+                              }}
+                              className="p-0.5"
+                            >
+                              {row.getIsExpanded() ? (
+                                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                              ) : (
+                                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                              )}
+                            </button>
+                          )}
+                          {dataLoading &&
+                          (cell.column.id == "requestText" ||
+                            cell.column.id == "responseText") ? (
+                            <span
+                              className={clsx(
+                                "w-full flex flex-grow",
+                                (cell.column.id == "requestText" ||
+                                  cell.column.id == "responseText") &&
+                                  dataLoading
+                                  ? "animate-pulse bg-slate-200 rounded-md"
+                                  : "hidden"
+                              )}
+                            >
+                              &nbsp;
+                            </span>
+                          ) : (
+                            flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )
+                          )}
+                        </div>
+                      </ConditionalLink>
                     </td>
                   ))}
-                  {rowLink && (
-                    <td
-                      className="p-0 m-0 border-0"
-                      style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        padding: 0,
-                        margin: 0,
-                        border: "none",
-                        background: "transparent",
-                        pointerEvents: "none",
-                        zIndex: 2,
-                      }}
-                    >
-                      <Link
-                        href={rowLink(row.original)}
-                        style={{
-                          display: "block",
-                          width: "100%",
-                          height: "100%",
-                          opacity: 0,
-                          pointerEvents: "auto",
-                        }}
-                        onClick={(e: React.MouseEvent) => {
-                          e.stopPropagation();
-                        }}
-                        aria-hidden="true"
-                      />
-                    </td>
-                  )}
                 </tr>
               ))}
             </tbody>
