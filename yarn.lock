@@ -7760,7 +7760,14 @@ loose-envify@^1.1.0, loose-envify@^1.4.0:
   dependencies:
     js-tokens "^3.0.0 || ^4.0.0"
 
-lottie-web@^5.12.2:
+lottie-react@^2.4.1:
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/lottie-react/-/lottie-react-2.4.1.tgz#4bd3f2a8a5e48edbd43c05ca5080fdd50f049d31"
+  integrity sha512-LQrH7jlkigIIv++wIyrOYFLHSKQpEY4zehPicL9bQsrt1rnoKRYCYgpCUe5maqylNtacy58/sQDZTkwMcTRxZw==
+  dependencies:
+    lottie-web "^5.10.2"
+
+lottie-web@^5.10.2, lottie-web@^5.12.2:
   version "5.12.2"
   resolved "https://registry.yarnpkg.com/lottie-web/-/lottie-web-5.12.2.tgz#579ca9fe6d3fd9e352571edd3c0be162492f68e5"
   integrity sha512-uvhvYPC8kGPjXT3MyKMrL3JitEAmDMp30lVkuq/590Mw9ok6pWcFCwXJveo0t5uqYw1UREQHofD+jVpdjBv8wg==
@@ -9173,6 +9180,11 @@ rc@^1.2.7:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
+re-resizable@^6.11.2:
+  version "6.11.2"
+  resolved "https://registry.yarnpkg.com/re-resizable/-/re-resizable-6.11.2.tgz#2e8f7119ca3881d5b5aea0ffa014a80e5c1252b3"
+  integrity sha512-2xI2P3OHs5qw7K0Ud1aLILK6MQxW50TcO+DetD9eIV58j84TqYeHoZcL9H4GXFXXIh7afhH8mv5iUCXII7OW7A==
+
 react-day-picker@8.10.1, react-day-picker@^8.10.1:
   version "8.10.1"
   resolved "https://registry.yarnpkg.com/react-day-picker/-/react-day-picker-8.10.1.tgz#4762ec298865919b93ec09ba69621580835b8e80"
@@ -9259,7 +9271,7 @@ react-is@^18.3.1:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-18.3.1.tgz#e83557dc12eae63a99e003a46388b1dcbb44db7e"
   integrity sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==
 
-react-lottie@^1.2.4:
+react-lottie@^1.2.10:
   version "1.2.10"
   resolved "https://registry.yarnpkg.com/react-lottie/-/react-lottie-1.2.10.tgz#399f78a448a7833b2380d74fc489ecf15f8d18c7"
   integrity sha512-x0eWX3Z6zSx1XM5QSjnLupc6D22LlMCB0PH06O/N/epR2hsLaj1Vxd9RtMnbbEHjJ/qlsgHJ6bpN3vnZI92hjw==
