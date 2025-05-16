@@ -18,6 +18,14 @@ import { env } from "next-runtime-env";
 import { FilterProvider } from "@/filterAST/context/filterContext";
 import Notification from "@/components/shared/notification/Notification";
 
+
+declare global {
+  interface Window {
+    pylon?: any;
+    Pylon?: any;
+  }
+}
+
 export function PHProvider({ children }: { children: React.ReactNode }) {
   if (
     typeof window !== "undefined" &&
