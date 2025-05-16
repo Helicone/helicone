@@ -32,7 +32,7 @@ import {
 import ExportButton from "../../shared/themed/table/exportButton";
 import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   getTimeIntervalAgo,
   TimeInterval,
@@ -50,6 +50,7 @@ import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
 import { getColumns } from "./initialColumns";
 import SessionMetrics from "./SessionMetrics";
 import { cn } from "@/lib/utils";
+import { EMPTY_SESSION_NAME } from "./sessionId/SessionContent";
 
 interface SessionsPageProps {
   currentPage: number;
@@ -62,9 +63,6 @@ interface SessionsPageProps {
   defaultIndex: number;
   selectedName?: string;
 }
-
-// Define a constant for the unnamed session value
-const UNNAMED_SESSION_VALUE = "__helicone_unnamed_session__";
 
 // Moved from SessionDetails.tsx
 type TSessions = {
@@ -151,53 +149,18 @@ const SessionsPage = (props: SessionsPageProps) => {
     (typeof TABS)[number]["id"]
   >("session-details-tab", "sessions");
 
-  const { hasAccess } = useFeatureLimit("sessions", allNames.sessions.length);
-
-  useEffect(() => {
-    if (
-      !hasAccess &&
-      hasSessions &&
-      selectedName === undefined &&
-      !allNames.isLoading
-    ) {
-      const sortedSessions = [...allNames.sessions].sort(
-        (a, b) =>
-          new Date(b.last_used).getTime() - new Date(a.last_used).getTime()
-      );
-
-      if (sortedSessions.length > 0) {
-        setSelectedName(sortedSessions[0].name);
-      }
-    }
-  }, [
-    hasSessions,
-    allNames.sessions,
-    allNames.isLoading,
-    selectedName,
-    hasAccess,
-  ]);
-
   const [selectedData, setSelectedData] = useState<TSessions | undefined>(
     undefined
   );
-  const [selectedDataIndex, setSelectedDataIndex] = useState<number>();
 
-  const {
-    selectMode,
-    toggleSelectMode: _toggleSelectMode,
-    selectedIds,
-    toggleSelection,
-    selectAll,
-    isShiftPressed,
-  } = useSelectMode({
-    items: sessionsWithId,
-    getItemId: (session: TSessions) => session.id,
-  });
+  const { selectedIds, toggleSelection, selectAll, isShiftPressed } =
+    useSelectMode({
+      items: sessionsWithId,
+      getItemId: (session: TSessions) => session.id,
+    });
 
   const handleSelectSessionName = (value: string) => {
-    if (value === "all") {
-      setSelectedName(undefined);
-    } else if (value === UNNAMED_SESSION_VALUE) {
+    if (value === "" || value === "all") {
       setSelectedName(""); // Map placeholder back to empty string
     } else {
       setSelectedName(value);
@@ -251,11 +214,10 @@ const SessionsPage = (props: SessionsPageProps) => {
       if (isShiftPressed || event?.metaKey || isCheckboxClick) {
         toggleSelection(row);
       } else {
-        setSelectedDataIndex(index);
         setSelectedData(row);
       }
     },
-    [isShiftPressed, toggleSelection, setSelectedDataIndex, setSelectedData]
+    [isShiftPressed, toggleSelection, setSelectedData]
   );
 
   // Calculate aggregated stats
@@ -337,7 +299,7 @@ const SessionsPage = (props: SessionsPageProps) => {
                     aria-expanded={open}
                   >
                     {selectedName === ""
-                      ? UNNAMED_SESSION_VALUE
+                      ? EMPTY_SESSION_NAME
                       : selectedName ?? "All"}
                     <ChevronDown className="ml-2 h-3 w-3 shrink-0 opacity-50 " />
                   </Button>
@@ -364,18 +326,10 @@ const SessionsPage = (props: SessionsPageProps) => {
                         .map((session) => (
                           <CommandItem
                             key={session.name}
-                            value={
-                              session.name === ""
-                                ? UNNAMED_SESSION_VALUE
-                                : session.name
-                            }
+                            value={session.name}
                             onSelect={() => {
                               setOpen(false);
-                              handleSelectSessionName(
-                                session.name === ""
-                                  ? UNNAMED_SESSION_VALUE
-                                  : session.name
-                              );
+                              handleSelectSessionName(session.name);
                             }}
                           >
                             <Check
@@ -386,7 +340,9 @@ const SessionsPage = (props: SessionsPageProps) => {
                                   : "opacity-0"
                               )}
                             />
-                            {session.name === "" ? "Unnamed" : session.name}
+                            {session.name === ""
+                              ? EMPTY_SESSION_NAME
+                              : session.name}
                           </CommandItem>
                         ))}
                     </CommandList>
