@@ -10,6 +10,11 @@ configureRuntimeEnv();
 const nextConfig = {
   reactStrictMode: false,
   swcMinify: true,
+  transpilePackages: [
+    "@helicone-package/common",
+    "@helicone-package/cost",
+    "@helicone-package/llm-mapper",
+  ],
   webpack: (config) => {
     config.module.rules.push({
       test: /\.(graphql|gql)$/,

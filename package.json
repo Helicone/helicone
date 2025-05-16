@@ -1,0 +1,22 @@
+{
+  "name": "helicone-monorepo",
+  "private": true,
+  "workspaces": [
+    "web",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "yarn workspace helicone dev",
+    "dev:local": "yarn workspace helicone dev:local",
+    "dev:better-auth": "yarn workspace helicone dev:better-auth",
+    "dev:preview": "yarn workspace helicone dev:preview",
+    "build": "yarn workspace helicone build",
+    "build:web": "yarn workspace helicone build",
+    "lint": "yarn workspace helicone lint",
+    "lint-fix": "yarn workspace helicone lint-fix",
+    "test": "yarn workspace helicone test"
+  },
+  "engines": {
+    "node": "=20"
+  }
+}
