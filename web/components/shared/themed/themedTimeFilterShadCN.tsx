@@ -53,42 +53,44 @@ export function ThemedTimeFilterShadCN({
     }
   }, [initialDateRange]);
 
+  const tomorrow = new Date();
+  tomorrow.setHours(tomorrow.getHours() + 24);
   const predefinedRanges = [
     {
       label: "1h",
-      value: () => ({ from: addHours(new Date(), -1), to: new Date() }),
+      value: () => ({ from: addHours(new Date(), -1), to: tomorrow }),
     },
     {
       label: "3h",
-      value: () => ({ from: addHours(new Date(), -3), to: new Date() }),
+      value: () => ({ from: addHours(new Date(), -3), to: tomorrow }),
     },
     {
       label: "12h",
-      value: () => ({ from: addHours(new Date(), -12), to: new Date() }),
+      value: () => ({ from: addHours(new Date(), -12), to: tomorrow }),
     },
     {
       label: "1d",
-      value: () => ({ from: addDays(new Date(), -1), to: new Date() }),
+      value: () => ({ from: addDays(new Date(), -1), to: tomorrow }),
     },
     {
       label: "3d",
-      value: () => ({ from: addDays(new Date(), -3), to: new Date() }),
+      value: () => ({ from: addDays(new Date(), -3), to: tomorrow }),
     },
     {
       label: "7d",
-      value: () => ({ from: addDays(new Date(), -7), to: new Date() }),
+      value: () => ({ from: addDays(new Date(), -7), to: tomorrow }),
     },
     {
       label: "30d",
-      value: () => ({ from: addDays(new Date(), -30), to: new Date() }),
+      value: () => ({ from: addDays(new Date(), -30), to: tomorrow }),
     },
     {
       label: "90d",
-      value: () => ({ from: addDays(new Date(), -90), to: new Date() }),
+      value: () => ({ from: addDays(new Date(), -90), to: tomorrow }),
     },
     {
       label: "1y",
-      value: () => ({ from: addDays(new Date(), -365), to: new Date() }),
+      value: () => ({ from: addDays(new Date(), -365), to: tomorrow }),
     },
   ];
 
@@ -152,6 +154,7 @@ export function ThemedTimeFilterShadCN({
 
   const handlePredefinedRange = (rangeFunc: () => DateRange) => {
     const newRange = rangeFunc();
+    console.log(newRange);
     handleDateChange(newRange);
   };
 
