@@ -1,4 +1,4 @@
-import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+import { DEFAULT_UUID, MappedLLMRequest } from "@/packages/llm-mapper/types";
 
 // Simple mock filter map with just the properties we need for display
 export const getMockFilterMap = () => {
@@ -257,6 +257,8 @@ const generateMockRequest = (
       requestId: id,
       path: "/v1/chat/completions",
       countryCode: "US",
+      cacheEnabled: false,
+      cacheReferenceId: DEFAULT_UUID,
       createdAt: time.toISOString(),
       totalTokens: totalTokens,
       promptTokens: promptTokens,
