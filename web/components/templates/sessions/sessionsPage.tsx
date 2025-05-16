@@ -50,6 +50,7 @@ import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
 import { getColumns } from "./initialColumns";
 import SessionMetrics from "./SessionMetrics";
 import { cn } from "@/lib/utils";
+import { EMPTY_SESSION_NAME } from "./sessionId/SessionContent";
 
 interface SessionsPageProps {
   currentPage: number;
@@ -297,7 +298,9 @@ const SessionsPage = (props: SessionsPageProps) => {
                     role="combobox"
                     aria-expanded={open}
                   >
-                    {selectedName === "" ? "Unnamed" : selectedName ?? "All"}
+                    {selectedName === ""
+                      ? EMPTY_SESSION_NAME
+                      : selectedName ?? "All"}
                     <ChevronDown className="ml-2 h-3 w-3 shrink-0 opacity-50 " />
                   </Button>
                 </PopoverTrigger>
@@ -337,7 +340,9 @@ const SessionsPage = (props: SessionsPageProps) => {
                                   : "opacity-0"
                               )}
                             />
-                            {session.name === "" ? "Unnamed" : session.name}
+                            {session.name === ""
+                              ? EMPTY_SESSION_NAME
+                              : session.name}
                           </CommandItem>
                         ))}
                     </CommandList>
