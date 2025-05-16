@@ -1,5 +1,5 @@
 ---
-title: "OpenAI LangChain Integration"
+title: "LangChain OpenAI"
 sidebarTitle: "LangChain"
 description: "Use LangChain to integrate OpenAI with Helicone to log your OpenAI usage."
 "twitter:title": "OpenAI Langchain Integration - Helicone OSS LLM Observability"
@@ -7,64 +7,76 @@ icon: "bird"
 iconType: "solid"
 ---
 
+import { strings } from "/snippets/strings.mdx";
+
+## {strings.howToIntegrate}
+
 <Steps>
-  <Step title="Create an account + Generate an API Key">
-    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
-    can generate an [API key](https://helicone.ai/developer).
+  <Step title={strings.generateKey}>
+    <div dangerouslySetInnerHTML={{ __html: strings.generateKeyInstructions }} />
   </Step>
-  <Step title="Set HELICONE_API_KEY as an environment variable">
-```typescript
-export HELICONE_API_KEY=<your API key>
-```
+
+  <Step title={strings.setApiKey}>
+    ```bash
+    HELICONE_API_KEY=<your-helicone-api-key>
+    OPENAI_API_KEY=<your-openai-api-key>
+    ```
   </Step>
-  <Step title="Modify the API base and add the `Helicone-Auth` header">
-<CodeGroup>
 
-```typescript example.ts
-const llm = new OpenAI({
-  modelName: "gpt-3.5-turbo",
-  configuration: {
-    basePath: "https://oai.helicone.ai/v1",
-    defaultHeaders: {
-      "Helicone-Auth": `Bearer HELICONE_API_KEY`,
-    },
-  },
-});
-```
+  <Step title={strings.modifyBasePath}>
+    <CodeGroup>
+      ```javascript javascript
+      import { OpenAI } from "@langchain/openai";
 
-```python example.py
-# Option 1
-openai.api_base = "https://oai.helicone.ai/v1"
-llm = ChatOpenAI(
-    openai_api_key='<>',
-    model_kwargs={
-      "extra_headers":{
-        "Helicone-Auth": f"Bearer {HELICONE_API_KEY}"
-      }
-    }
-)
+      const llm = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+        baseURL: "https://oai.helicone.ai/v1",
+        defaultHeaders: {
+          "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`
+        }
+      });
+      ```
 
-# Option 2
-llm = ChatOpenAI(
-    openai_api_key='<>',
-    model_kwargs={
-      "extra_headers":{
-        "Helicone-Auth": f"Bearer {HELICONE_API_KEY}"
-      }
-    },
-    openai_api_base="https://oai.helicone.ai/v1",
-)
+      ```python python
+      from langchain_openai import OpenAI
+      from dotenv import load_dotenv
+      import os
 
-```
+      load_dotenv()
 
-</CodeGroup>
+      llm = OpenAI(
+        api_key=os.getenv("OPENAI_API_KEY"),
+        base_url="https://oai.helicone.ai/v1",
+        default_headers={
+          "Helicone-Auth": f"Bearer {os.getenv('HELICONE_API_KEY')}"
+        }
+      )
+      ```
+    </CodeGroup>
+  </Step>
 
+  <Step title={strings.useTheSDK("LangChain")}>
+    <CodeGroup>
+      ```javascript javascript
+      const response = await llm.invoke("What is the meaning of life?");
+      console.log(response);
+      ```
+
+      ```python python
+      response = llm.invoke("What is the meaning of life?")
+      print(response)
+      ```
+    </CodeGroup>
+  </Step>
+
+  <Step title={strings.verifyInHelicone}>
+    <div dangerouslySetInnerHTML={{ __html: strings.verifyInHeliconeDesciption("OpenAI") }} />
   </Step>
 </Steps>
 
-### Related Guides
+## {strings.relatedGuides}
 
-<CardGroup cols={1}>
+<CardGroup cols={2}>
   <Card
     title="Building a chatbot with OpenAI structured outputs"
     icon="lightbulb"
@@ -72,7 +84,15 @@ llm = ChatOpenAI(
     iconType="light"
     vertical
   >
-    This step-by-step guide covers function calling, response formatting and
-    monitoring with Helicone.
+    {strings.chatbotCookbookDescription}
+  </Card>
+  <Card
+    title="Trace, replay, and debug LLM sessions"
+    icon="arrows-rotate"
+    href="/guides/cookbooks/replay-llm-sessions"
+    iconType="light"
+    vertical
+  >
+    {strings.replayLlmSessionsCookbookDescription}
   </Card>
 </CardGroup>

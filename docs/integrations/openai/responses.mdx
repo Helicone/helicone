@@ -1,83 +1,60 @@
 ---
-title: "OpenAI Responses Integration"
+title: "OpenAI Responses API"
 sidebarTitle: "Responses"
-description: "Integrate OpenAI Responses with Helicone to monitor and analyze your model's responses."
+description: "Integrate OpenAI Responses API with Helicone to monitor and analyze your model's responses."
 "twitter:title": "OpenAI Responses Integration - Helicone OSS LLM Observability"
 icon: "plug"
 iconType: "solid"
 ---
 
-## Introduction
+import { strings } from "/snippets/strings.mdx";
 
 OpenAI Responses enable you to provide text or image inputs to generate text or JSON outputs by calling your own custom code or use built-in tools like web search or file search. By integrating them with Helicone, you can monitor performance, analyze interactions, and gain valuable insights into your responses.
 
-## Integration Steps
+## {strings.howToIntegrate}
 
 <Steps>
-  <Step title="Create an Account and Generate an API Key">
-    Log into [Helicone](https://www.helicone.ai) or create a new account. Once logged in, generate a [Helicone API key](https://helicone.ai/developer).
-
-    <Note>
-      Keep your API keys secure and do not expose them publicly.
-    </Note>
-
+  <Step title={strings.generateKey}>
+    <div dangerouslySetInnerHTML={{ __html: strings.generateKeyInstructions }} />
   </Step>
 
-  <Step title="Set Environment Variables">
-    Set your OpenAI and Helicone API keys as environment variables:
-
-    ```bash
-    export OPENAI_API_KEY=<your-openai-api-key>
-    export HELICONE_API_KEY=<your-helicone-api-key>
+  <Step title={strings.setApiKey}>
+    ```javascript
+    HELICONE_API_KEY=<your-helicone-api-key>
+    OPENAI_API_KEY=<your-openai-api-key>
     ```
-
   </Step>
 
-  <Step title="Install the OpenAI SDK">
-    If you haven't already, install the OpenAI SDK:
-
-    ```bash
-    npm install openai
-    ```
-
-  </Step>
-
-  <Step title="Configure the OpenAI Client to Use Helicone Proxy">
-    Modify your OpenAI client configuration to route requests through the Helicone proxy and include the `Helicone-Auth` header:
-
-    ```typescript
+  <Step title={strings.modifyBasePath}>
+    ```javascript
     import OpenAI from "openai";
 
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
       baseURL: "https://oai.helicone.ai/v1",
       defaultHeaders: {
-        "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-      },
+        "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`
+      }
     });
     ```
-
   </Step>
 
-  <Step title="Start Using OpenAI Responses API with Helicone">
-    With the above setup, any calls to OpenAI Responses API will automatically be logged and monitored by Helicone. You can now implement your responses without any additional configuration.
-
-    Here's a basic example of creating and using a response for different types of inputs and tools:
-
+  <Step title={strings.startUsing("OpenAI Responses API")}>
     <Note>
       Replace the response's model, input, and output with content relevant to your application.
     </Note>
 
-    ```typescript
-    // Text input response
+    <CodeGroup>
+    ```javascript text
     const textInputResponse = await openai.responses.create({
         model: "gpt-4.1",
-        input: "Tell me a three sentence bedtime story about a unicorn."
+        input: "What is the meaning of life?"
     });
 
     console.log(textInputResponse);
+    ```
 
-    // Image input response
+    ```javascript image
     const imageInputResponse = await openai.responses.create({
         model: "gpt-4.1",
         input: [
@@ -96,8 +73,18 @@ OpenAI Responses enable you to provide text or image inputs to generate text or 
     });
 
     console.log(imageInputResponse);
+    ```
 
-    // Web search tool usage
+    ```javascript json
+    const jsonInputResponse = await openai.responses.create({
+      model: "gpt-4.1",
+      input: { name: "John", age: 30 }
+    });
+
+    console.log(jsonInputResponse);
+    ```
+
+    ```javascript web-search
     const webSearchResponse = await openai.responses.create({
       model: "gpt-4.1",
       tools: [{ type: "web_search_preview" }],
@@ -105,8 +92,9 @@ OpenAI Responses enable you to provide text or image inputs to generate text or 
     });
 
     console.log(webSearchResponse);
+    ```
 
-    // File search tool usage
+    ```javascript file-search
     const fileSearchResponse = await openai.responses.create({
       model: "gpt-4.1",
       tools: [{
@@ -118,8 +106,9 @@ OpenAI Responses enable you to provide text or image inputs to generate text or 
     });
 
     console.log(fileSearchResponse);
+    ```
 
-    // Streaming response
+    ```javascript streaming
     const streamingResponse = await openai.responses.create({
       model: "gpt-4.1",
       instructions: "You are a helpful assistant.",
@@ -128,10 +117,11 @@ OpenAI Responses enable you to provide text or image inputs to generate text or 
     });
 
     for await (const event of streamingResponse) {
-        console.log(event);
+      console.log(event);
     }
+    ```
 
-    // Function calling response
+    ```javascript function-calling
     const tools = [
       {
         type: "function" as const,
@@ -153,15 +143,16 @@ OpenAI Responses enable you to provide text or image inputs to generate text or 
     ];
 
     const functionCallingResponse = await openai.responses.create({
-        model: "gpt-4.1",
-        tools: tools,
-        input: "What is the weather like in Boston today?",
-        tool_choice: "auto",
+      model: "gpt-4.1",
+      tools: tools,
+      input: "What is the weather like in Boston today?",
+      tool_choice: "auto"
     });
 
     console.log(functionCallingResponse);
+    ```
 
-    // Reasoning response
+    ```javascript reasoning
     const reasoningResponse = await openai.responses.create({
       model: "o3-mini",
       input: "How much wood would a woodchuck chuck?",
@@ -172,18 +163,17 @@ OpenAI Responses enable you to provide text or image inputs to generate text or 
 
     console.log(reasoningResponse);
     ```
+    </CodeGroup>
+  </Step>
+
+  <Step title={strings.verifyInHelicone}>
+    <div dangerouslySetInnerHTML={{ __html: strings.verifyInHeliconeDesciption("OpenAI Responses API") }} />
   </Step>
 </Steps>
 
-<Note>
-  You can also include session headers in each request to have more granular
-  control over session tracking. This approach is especially useful if you want
-  to handle sessions dynamically or manage multiple sessions concurrently.
-</Note>
+## {strings.relatedGuides}
 
-### Related Guides
-
-<CardGroup cols={1}>
+<CardGroup cols={2}>
   <Card
     title="Building a chatbot with OpenAI structured outputs"
     icon="lightbulb"
@@ -191,7 +181,16 @@ OpenAI Responses enable you to provide text or image inputs to generate text or 
     iconType="light"
     vertical
   >
-    This step-by-step guide covers function calling, response formatting and
-    monitoring with Helicone.
+    {strings.chatbotCookbookDescription}
+  </Card>
+  <Card
+    title="Use Chain-of-Thought Prompting"
+    icon="stairs"
+    href="/guides/prompt-engineering/use-chain-of-thought-prompting"
+    iconType="light"
+    vertical
+    >
+
+    {strings.chainOfThoughtPromptingCookbookDescription}
   </Card>
 </CardGroup>

@@ -94,15 +94,6 @@
                 "integrations/bedrock/python"
               ]
             },
-            {
-              "group": "Azure OpenAI",
-              "pages": [
-                "integrations/azure/javascript",
-                "integrations/azure/python",
-                "integrations/azure/langchain",
-                "integrations/azure/curl"
-              ]
-            },
             "getting-started/integration-method/anyscale",
             "getting-started/integration-method/deepinfra",
             "getting-started/integration-method/deepseek",
@@ -161,9 +152,17 @@
                 "integrations/openai/langchain",
                 "integrations/openai/llamaindex",
                 "integrations/openai/curl",
-                "integrations/openai/assistants",
                 "integrations/openai/realtime",
-                "integrations/openai/responses"
+                "integrations/openai/responses",
+                {
+                  "group": "Azure OpenAI",
+                  "pages": [
+                    "integrations/azure/javascript",
+                    "integrations/azure/python",
+                    "integrations/azure/langchain",
+                    "integrations/azure/curl"
+                  ]
+                }
               ]
             },
             {

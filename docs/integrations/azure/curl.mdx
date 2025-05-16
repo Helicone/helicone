@@ -1,5 +1,5 @@
 ---
-title: "Azure OpenAI cURL Integration"
+title: "Azure OpenAI with cURL"
 sidebarTitle: "cURL"
 description: "Use cURL to integrate Azure OpenAI with Helicone to log your Azure OpenAI usage."
 "twitter:title": "Azure-OpenAI cURL Integration - Helicone OSS LLM Observability"
@@ -7,17 +7,17 @@ icon: "code"
 iconType: "solid"
 ---
 
+import ModelOverride from "/snippets/model-override.mdx";
+import { strings } from "/snippets/strings.mdx";
+
+## {strings.howToIntegrate}
+
 <Steps>
-  <Step title="Create an account + Generate an API Key">
-    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
-    can generate an [API key](https://helicone.ai/developer).
+  <Step title={strings.generateKey}>
+    <div dangerouslySetInnerHTML={{ __html: strings.generateKeyInstructions }} />
   </Step>
-    <Step title="Modify the API base and add the `Helicone-Auth` header">
 
-    <Note>
-    Please ensure to replace API keys with your own.
-    </Note>
-
+  <Step title={strings.modifyBasePath}>
     ```bash
     curl --request POST \
         --url https://oai.helicone.ai/openai/deployments/DEPLOYMENTNAME/chat/completions?api-version=[API_VERSION] \
@@ -37,6 +37,32 @@ iconType: "solid"
             "model": "gpt-3.5-turbo-0613"
         }'
     ```
+  </Step>
 
+  <Step title={strings.verifyInHelicone}>
+    <div dangerouslySetInnerHTML={{ __html: strings.verifyInHeliconeDesciption("Azure OpenAI") }} />
   </Step>
 </Steps>
+
+## {strings.relatedGuides}
+
+<CardGroup cols={2}>
+  <Card
+    title="Building a chatbot with OpenAI structured outputs"
+    icon="lightbulb"
+    href="/guides/cookbooks/openai-structured-outputs"
+    iconType="light"
+    vertical
+  >
+    {strings.chatbotCookbookDescription}
+  </Card>
+  <Card
+    title="How to Prompt Thinking Models"
+    icon="brain"
+    href="/guides/cookbooks/prompt-thinking-models"
+    iconType="light"
+    vertical
+  >
+    {strings.howToPromptThinkingModelsCookbookDescription}
+  </Card>
+</CardGroup>
