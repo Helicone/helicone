@@ -14,13 +14,13 @@ export default function RootLayout({
   children,
   params,
 }: {
-  children: React.ReactNode,
+  children: React.ReactNode;
   params: any;
 }) {
   const trackingEnabled = process.env.NEXT_PUBLIC_TRACKING_ENABLED === "true";
 
   const pathname = params?.pathname || "";
-  const isOpenStatsPage = pathname === "/open-stats"
+  const isOpenStatsPage = pathname === "/open-stats";
 
   return (
     <html lang="en">
@@ -30,12 +30,9 @@ export default function RootLayout({
       </head>
       <body className={isOpenStatsPage ? "open-stats-body" : ""}>
         <Providers>
-          <div className={inter.className}>
-            {children}
-          </div>
+          <div className={inter.className}>{children}</div>
         </Providers>
-        
-        
+
         {trackingEnabled && <Analytics />}
         {trackingEnabled && (
           <Script
@@ -64,5 +61,5 @@ export default function RootLayout({
         <ToasterProvider />
       </body>
     </html>
-  )
+  );
 }

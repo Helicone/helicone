@@ -18,7 +18,6 @@ import { env } from "next-runtime-env";
 import { FilterProvider } from "@/filterAST/context/filterContext";
 import Notification from "@/components/shared/notification/Notification";
 
-
 declare global {
   interface Window {
     pylon?: any;
@@ -75,7 +74,6 @@ export function SupabaseProvider({
   );
 }
 
-
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
 
@@ -98,5 +96,5 @@ export function Providers({ children }: { children: React.ReactNode }) {
         </QueryClientProvider>
       </SupabaseProvider>
     </PHProvider>
-  )
+  );
 }
