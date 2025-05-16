@@ -1,6 +1,7 @@
 pub mod catch_panic;
 pub mod handle_error;
 pub mod meltdown;
+pub mod try_map_frame;
 
 use std::{fmt, fmt::Display, marker::PhantomData, str::FromStr};
 
@@ -10,6 +11,25 @@ use serde::{
     de::{Error as DeError, Visitor},
 };
 use url::Url;
+
+use crate::error::{internal::InternalError, invalid_req::InvalidRequestError};
+
+pub trait ResponseExt: Sized {
+    fn error_for_status(self) -> Result<Self, crate::error::api::Error>;
+}
+
+impl<B> ResponseExt for http::Response<B> {
+    fn error_for_status(self) -> Result<Self, crate::error::api::Error> {
+        let status = self.status();
+        if status.is_client_error() {
+            Err(InvalidRequestError::Provider4xxError(status).into())
+        } else if status.is_server_error() {
+            Err(InternalError::Provider5xxError(status).into())
+        } else {
+            Ok(self)
+        }
+    }
+}
 
 pub fn deserialize_from_str<'de, T, D>(deserializer: D) -> Result<T, D::Error>
 where

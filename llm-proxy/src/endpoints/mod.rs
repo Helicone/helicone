@@ -6,6 +6,9 @@ pub trait Endpoint {
     const PATH: &'static str;
     type RequestBody;
     type ResponseBody;
+    /// To support streaming response body types with different
+    /// concrete type than the regular response body type.
+    type StreamResponseBody;
 }
 
 use http::uri::PathAndQuery;
@@ -15,6 +18,10 @@ use crate::{
     error::invalid_req::InvalidRequestError,
     types::provider::InferenceProvider,
 };
+
+pub trait StreamRequest {
+    fn is_stream(&self) -> bool;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ApiEndpoint {

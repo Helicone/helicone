@@ -77,7 +77,7 @@ fn default_anthropic_provider_config() -> GlobalProviderConfig {
         models: IndexSet::from([
             ModelName::borrowed("claude-3-5-sonnet"),
             ModelName::borrowed("claude-3-7-sonnet"),
-            ModelName::borrowed("claude-3-haiku"),
+            ModelName::borrowed("claude-3-5-haiku"),
         ]),
         base_url: Url::parse("https://api.anthropic.com").unwrap(),
         version: Some(DEFAULT_ANTHROPIC_VERSION.to_string()),

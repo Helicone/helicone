@@ -20,4 +20,8 @@ pub enum MapperError {
     InvalidRequest,
     /// Serde error: {0}
     SerdeError(#[from] serde_json::Error),
+    /// Underlying stream error: {0}
+    StreamError(String),
+    /// Empty response body
+    EmptyResponseBody,
 }

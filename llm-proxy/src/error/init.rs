@@ -11,8 +11,6 @@ pub enum InitError {
     DefaultRouterNotFound,
     /// Deployment target not supported: {0:?}
     DeploymentTargetNotSupported(DeploymentTarget),
-    /// Failed to read config: {0}
-    Config(#[from] crate::config::Error),
     /// Failed to read TLS certificate: {0}
     Tls(std::io::Error),
     /// Failed to connect to database: {0}
@@ -33,8 +31,6 @@ pub enum InitError {
     CreateBalancer(tower::BoxError),
     /// Provider error: {0}
     ProviderError(#[from] crate::error::provider::ProviderError),
-    /// Invalid model mapping config: {0}
-    InvalidModelMappingConfig(crate::middleware::mapper::error::MapperError),
     /// Invalid weight for provider: {0}
     InvalidWeight(InferenceProvider),
     /// Invalid weighted balancer: {0}
