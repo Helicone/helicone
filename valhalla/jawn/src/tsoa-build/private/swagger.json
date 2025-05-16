@@ -2425,9 +2425,6 @@
 					},
 					"response_body": {
 						"$ref": "#/components/schemas/Partial_VectorOperators_"
-					},
-					"cache_enabled": {
-						"$ref": "#/components/schemas/Partial_BooleanOperators_"
 					}
 				},
 				"type": "object",
@@ -3508,13 +3505,6 @@
 					},
 					"model": {
 						"type": "string"
-					},
-					"cache_reference_id": {
-						"type": "string",
-						"nullable": true
-					},
-					"cache_enabled": {
-						"type": "boolean"
 					}
 				},
 				"required": [
@@ -3550,9 +3540,7 @@
 					"properties",
 					"assets",
 					"target_url",
-					"model",
-					"cache_reference_id",
-					"cache_enabled"
+					"model"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -5199,23 +5187,6 @@
 					},
 					"request": {
 						"properties": {
-							"cacheReferenceId": {
-								"type": "string"
-							},
-							"cacheControl": {
-								"type": "string"
-							},
-							"cacheBucketMaxSize": {
-								"type": "number",
-								"format": "double"
-							},
-							"cacheSeed": {
-								"type": "number",
-								"format": "double"
-							},
-							"cacheEnabled": {
-								"type": "boolean"
-							},
 							"experimentRowIndex": {
 								"type": "string"
 							},

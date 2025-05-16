@@ -27,15 +27,11 @@ function processFilter(filter: any): any {
 
   const result: any = Array.isArray(filter) ? [] : {};
   for (const key in filter) {
-    const isDateISO = isISODateString(filter[key]);
-    const isDate = (filter[key] instanceof Date && !isNaN(filter[key].getTime()));
-    
-    if (typeof filter[key] === "object" && !isDate) {
+    const isDate = isISODateString(filter[key]);
+    if (typeof filter[key] === "object") {
       result[key] = processFilter(filter[key]);
-    } else if (isDate || isDateISO) {
-      const dateToFormat = isDateISO ? new Date(filter[key]) : filter[key];
-      const formattedDate = formatDateForClickHouse(dateToFormat);
-      result[key] = formattedDate;
+    } else if (isDate) {
+      result[key] = formatDateForClickHouse(new Date(filter[key]));
     } else {
       result[key] = filter[key];
     }

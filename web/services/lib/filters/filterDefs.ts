@@ -193,7 +193,6 @@ interface RequestResponseVersionedToOperators {
   };
   request_body: SingleKey<VectorOperators>;
   response_body: SingleKey<VectorOperators>;
-  cache_enabled: SingleKey<BooleanOperators>;
   "helicone-score-feedback": SingleKey<BooleanOperators>;
 }
 

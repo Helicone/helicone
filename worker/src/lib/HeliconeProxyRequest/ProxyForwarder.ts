@@ -8,9 +8,12 @@ import {
 } from "../clients/KVRateLimiterClient";
 import { RequestWrapper } from "../RequestWrapper";
 import { ResponseBuilder } from "../ResponseBuilder";
-import { getCachedResponse, saveToCache } from "../util/cache/cacheFunctions";
-import { CacheSettings, getCacheSettings } from "../util/cache/cacheSettings";
-import { HeliconeHeaders } from "../models/HeliconeHeaders";
+import {
+  getCachedResponse,
+  recordCacheHit,
+  saveToCache,
+} from "../util/cache/cacheFunctions";
+import { getCacheSettings } from "../util/cache/cacheSettings";
 import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
 import { RequestResponseStore } from "../db/RequestResponseStore";
 import { Valhalla } from "../db/valhalla";
@@ -84,28 +87,17 @@ export async function proxyForwarder(
             cacheSettings.cacheSeed
           );
           if (cachedResponse) {
-            const { data, error } = await handleProxyRequest(
-              proxyRequest,
-              cachedResponse // Pass the cached response directly
-            );
-            if (error !== null) {
-              return responseBuilder.build({
-                body: error,
-                status: 500,
-              });
-            }
-            const { loggable, response } = data;
             ctx.waitUntil(
-              log(
-                loggable,
-                "false", // don't push body to S3
-                false, // don't rate limit cache hit
-                cachedResponse,
-                cacheSettings // send them cache settings hehe
+              recordCacheHit(
+                cachedResponse.headers,
+                env,
+                new ClickhouseClientWrapper(env),
+                orgData.organizationId,
+                provider,
+                (request.cf?.country as string) ?? null
               )
             );
-
-            return response;
+            return cachedResponse;
           }
         } catch (error) {
           console.error("Error getting cached response", error);
@@ -322,13 +314,7 @@ export async function proxyForwarder(
     responseBuilder.setHeader("Helicone-Cache", "MISS");
   }
 
-  async function log(
-    loggable: DBLoggable,
-    S3_ENABLED?: Env["S3_ENABLED"],
-    incurRateLimit = true,
-    cachedResponse?: Response,
-    cacheSettings?: CacheSettings
-  ) {
+  async function log(loggable: DBLoggable) {
     const { data: auth, error: authError } = await request.auth();
 
     if (authError !== null) {
@@ -368,30 +354,25 @@ export async function proxyForwarder(
         ),
         producer: new HeliconeProducer(env),
       },
-      S3_ENABLED ?? env.S3_ENABLED ?? "true",
-      proxyRequest?.requestWrapper.heliconeHeaders,
-      cachedResponse ? cachedResponse.headers : undefined,
-      cacheSettings ?? undefined
+      env.S3_ENABLED ?? "true",
+      proxyRequest?.requestWrapper.heliconeHeaders
     );
 
     if (res.error !== null) {
       console.error("Error logging", res.error);
     }
-
-    if (incurRateLimit) {
-      const db = new DBWrapper(env, auth);
-      const { data: orgData, error: orgError } = await db.getAuthParams();
-      if (proxyRequest && finalRateLimitOptions && !orgError) {
-        await updateRateLimitCounter({
-          organizationId: orgData?.organizationId,
-          heliconeProperties:
-            proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
-          rateLimitKV: env.RATE_LIMIT_KV,
-          rateLimitOptions: finalRateLimitOptions,
-          userId: proxyRequest.userId,
-          cost: res.data?.cost ?? 0,
-        });
-      }
+    const db = new DBWrapper(env, auth);
+    const { data: orgData, error: orgError } = await db.getAuthParams();
+    if (proxyRequest && finalRateLimitOptions && !orgError) {
+      await updateRateLimitCounter({
+        organizationId: orgData?.organizationId,
+        heliconeProperties:
+          proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
+        rateLimitKV: env.RATE_LIMIT_KV,
+        rateLimitOptions: finalRateLimitOptions,
+        userId: proxyRequest.userId,
+        cost: res.data?.cost ?? 0,
+      });
     }
   }
 

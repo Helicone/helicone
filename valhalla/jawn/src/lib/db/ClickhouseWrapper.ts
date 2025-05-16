@@ -230,8 +230,6 @@ export interface RequestResponseRMT {
   response_body: string;
   assets: Array<string>;
   updated_at?: string;
-  cache_reference_id?: string;
-  cache_enabled: boolean;
 }
 
 export interface JawnHttpLogs {

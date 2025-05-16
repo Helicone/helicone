@@ -1,4 +1,4 @@
-import { DEFAULT_UUID, MappedLLMRequest } from "@/packages/llm-mapper/types";
+import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 
 // Simple mock filter map with just the properties we need for display
 export const getMockFilterMap = () => {
@@ -283,8 +283,6 @@ const generateMockRequest = (
       provider: "OPENAI",
       timeToFirstToken: Math.floor(Math.random() * 500) + 100,
       scores: scores,
-      cacheEnabled: false,
-      cacheReferenceId: DEFAULT_UUID,
     },
   };
 };
