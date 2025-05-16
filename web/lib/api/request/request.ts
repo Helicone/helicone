@@ -228,7 +228,7 @@ export async function getRequestCount(
 export async function getRequestCountClickhouse(
   org_id: string,
   filter: FilterNode,
-  isCached: boolean
+  isCached = false
 ): Promise<Result<number, string>> {
   const builtFilter = await buildFilterWithAuthClickHouse({
     org_id,
