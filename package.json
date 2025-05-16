@@ -6,6 +6,7 @@
     "packages/*"
   ],
   "scripts": {
+    "install:web": "yarn workspace web install",
     "dev": "yarn workspace helicone dev",
     "dev:local": "yarn workspace helicone dev:local",
     "dev:better-auth": "yarn workspace helicone dev:better-auth",
