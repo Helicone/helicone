@@ -87,7 +87,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             <DndProvider backend={HTML5Backend}>
               <OrgContextProvider>
                 <FilterProvider>
-                  <ThemeProvider>
+                  <ThemeProvider attribute="class" defaultTheme="light">
                     {children}
                   </ThemeProvider>
                 </FilterProvider>
