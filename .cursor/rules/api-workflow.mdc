@@ -21,7 +21,6 @@ This document outlines common patterns and the request workflow in the LLM Proxy
 ### Error Handling
 
 - Errors are defined in [llm-proxy/src/error/](mdc:llm-proxy/src/error)
-- Use the `anyhow` crate for internal errors
 - Return structured errors to API clients
 
 ### Configuration
