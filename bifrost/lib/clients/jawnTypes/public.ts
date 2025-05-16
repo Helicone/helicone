@@ -217,18 +217,6 @@ export interface paths {
   "/v2/experiment/{experimentId}/{requestId}/{scoreKey}": {
     get: operations["GetExperimentScore"];
   };
-  "/v1/trace/custom/v1/log": {
-    post: operations["LogCustomTraceLegacy"];
-  };
-  "/v1/trace/custom/log": {
-    post: operations["LogCustomTrace"];
-  };
-  "/v1/trace/log": {
-    post: operations["LogTrace"];
-  };
-  "/v1/trace/log-python": {
-    post: operations["LogPythonTrace"];
-  };
   "/v1/stripe/subscription/cost-for-prompts": {
     get: operations["GetCostForPrompts"];
   };
@@ -277,6 +265,18 @@ export interface paths {
   };
   "/v1/stripe/webhook": {
     post: operations["HandleStripeWebhook"];
+  };
+  "/v1/trace/custom/v1/log": {
+    post: operations["LogCustomTraceLegacy"];
+  };
+  "/v1/trace/custom/log": {
+    post: operations["LogCustomTrace"];
+  };
+  "/v1/trace/log": {
+    post: operations["LogTrace"];
+  };
+  "/v1/trace/log-python": {
+    post: operations["LogPythonTrace"];
   };
   "/v1/session/has-session": {
     get: operations["HasSession"];
@@ -717,6 +717,7 @@ export interface components {
       scores_column?: components["schemas"]["Partial_TextOperators_"];
       request_body?: components["schemas"]["Partial_VectorOperators_"];
       response_body?: components["schemas"]["Partial_VectorOperators_"];
+      cache_enabled?: components["schemas"]["Partial_BooleanOperators_"];
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
     "Pick_FilterLeaf.user_metrics-or-request_response_rmt_": {
@@ -1322,6 +1323,8 @@ export interface components {
       assets: string[];
       target_url: string;
       model: string;
+      cache_reference_id: string | null;
+      cache_enabled: boolean;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];
@@ -1687,6 +1690,41 @@ Json: JsonObject;
       error: null;
     };
     "Result_ScoreV2-or-null.string_": components["schemas"]["ResultSuccess_ScoreV2-or-null_"] | components["schemas"]["ResultError_string_"];
+    UpgradeToProRequest: {
+      addons?: {
+        evals?: boolean;
+        experiments?: boolean;
+        prompts?: boolean;
+        alerts?: boolean;
+      };
+      /** Format: double */
+      seats?: number;
+      /** @enum {string} */
+      ui_mode?: "embedded" | "hosted";
+    };
+    UpgradeToTeamBundleRequest: {
+      /** @enum {string} */
+      ui_mode?: "embedded" | "hosted";
+    };
+    LLMUsage: {
+      model: string;
+      provider: string;
+      /** Format: double */
+      prompt_tokens: number;
+      /** Format: double */
+      completion_tokens: number;
+      /** Format: double */
+      total_count: number;
+      /** Format: double */
+      amount: number;
+      description: string;
+      totalCost: {
+        /** Format: double */
+        prompt_token: number;
+        /** Format: double */
+        completion_token: number;
+      };
+    };
     OTELTrace: {
       resourceSpans: {
           scopeSpans: {
@@ -1742,41 +1780,6 @@ Json: JsonObject;
               }[];
           };
         }[];
-    };
-    UpgradeToProRequest: {
-      addons?: {
-        evals?: boolean;
-        experiments?: boolean;
-        prompts?: boolean;
-        alerts?: boolean;
-      };
-      /** Format: double */
-      seats?: number;
-      /** @enum {string} */
-      ui_mode?: "embedded" | "hosted";
-    };
-    UpgradeToTeamBundleRequest: {
-      /** @enum {string} */
-      ui_mode?: "embedded" | "hosted";
-    };
-    LLMUsage: {
-      model: string;
-      provider: string;
-      /** Format: double */
-      prompt_tokens: number;
-      /** Format: double */
-      completion_tokens: number;
-      /** Format: double */
-      total_count: number;
-      /** Format: double */
-      amount: number;
-      description: string;
-      totalCost: {
-        /** Format: double */
-        prompt_token: number;
-        /** Format: double */
-        completion_token: number;
-      };
     };
     SessionResult: {
       created_at: string;
@@ -4014,58 +4017,6 @@ export interface operations {
       };
     };
   };
-  LogCustomTraceLegacy: {
-    requestBody: {
-      content: {
-        "application/json": unknown;
-      };
-    };
-    responses: {
-      /** @description No content */
-      204: {
-        content: never;
-      };
-    };
-  };
-  LogCustomTrace: {
-    requestBody: {
-      content: {
-        "application/json": unknown;
-      };
-    };
-    responses: {
-      /** @description No content */
-      204: {
-        content: never;
-      };
-    };
-  };
-  LogTrace: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["OTELTrace"];
-      };
-    };
-    responses: {
-      /** @description No content */
-      204: {
-        content: never;
-      };
-    };
-  };
-  LogPythonTrace: {
-    requestBody: {
-      content: {
-        "application/json": unknown;
-      };
-    };
-    responses: {
-      /** @description No content */
-      204: {
-        content: never;
-      };
-    };
-  };
   GetCostForPrompts: {
     responses: {
       /** @description Ok */
@@ -4303,6 +4254,58 @@ export interface operations {
     };
   };
   HandleStripeWebhook: {
+    requestBody: {
+      content: {
+        "application/json": unknown;
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
+      };
+    };
+  };
+  LogCustomTraceLegacy: {
+    requestBody: {
+      content: {
+        "application/json": unknown;
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
+      };
+    };
+  };
+  LogCustomTrace: {
+    requestBody: {
+      content: {
+        "application/json": unknown;
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
+      };
+    };
+  };
+  LogTrace: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OTELTrace"];
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
+      };
+    };
+  };
+  LogPythonTrace: {
     requestBody: {
       content: {
         "application/json": unknown;
