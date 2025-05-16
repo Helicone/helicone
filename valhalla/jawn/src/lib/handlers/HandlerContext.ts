@@ -44,11 +44,6 @@ export type Log = {
     heliconeTemplate?: TemplateWithInputs;
     experimentColumnId?: string;
     experimentRowIndex?: string;
-    cacheEnabled?: boolean;
-    cacheSeed?: number;
-    cacheBucketMaxSize?: number;
-    cacheControl?: string;
-    cacheReferenceId?: string;
   };
   response: {
     id: string;
@@ -180,7 +175,5 @@ export const toHeliconeRequest = (context: HandlerContext): HeliconeRequest => {
     assets: [],
     target_url: context.message.log.request.targetUrl,
     model: context.processedLog.model ?? "",
-    cache_reference_id: context.message.log.request.cacheReferenceId ?? null,
-    cache_enabled: context.message.log.request.cacheEnabled ?? false,
   };
 };

@@ -5,8 +5,6 @@ export const convertTestInputToHeliconeRequest = (
   testInput: TestInput
 ): HeliconeRequest => {
   return {
-    cache_enabled: false,
-    cache_reference_id: null,
     asset_ids: [],
     asset_urls: {},
     helicone_user: null,

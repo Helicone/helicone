@@ -643,9 +643,6 @@
 					},
 					"response_body": {
 						"$ref": "#/components/schemas/Partial_VectorOperators_"
-					},
-					"cache_enabled": {
-						"$ref": "#/components/schemas/Partial_BooleanOperators_"
 					}
 				},
 				"type": "object",
@@ -2897,13 +2894,6 @@
 					},
 					"model": {
 						"type": "string"
-					},
-					"cache_reference_id": {
-						"type": "string",
-						"nullable": true
-					},
-					"cache_enabled": {
-						"type": "boolean"
 					}
 				},
 				"required": [
@@ -2939,9 +2929,7 @@
 					"properties",
 					"assets",
 					"target_url",
-					"model",
-					"cache_reference_id",
-					"cache_enabled"
+					"model"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -4543,111 +4531,6 @@
 					}
 				]
 			},
-			"UpgradeToProRequest": {
-				"properties": {
-					"addons": {
-						"properties": {
-							"evals": {
-								"type": "boolean"
-							},
-							"experiments": {
-								"type": "boolean"
-							},
-							"prompts": {
-								"type": "boolean"
-							},
-							"alerts": {
-								"type": "boolean"
-							}
-						},
-						"type": "object"
-					},
-					"seats": {
-						"type": "number",
-						"format": "double"
-					},
-					"ui_mode": {
-						"type": "string",
-						"enum": [
-							"embedded",
-							"hosted"
-						]
-					}
-				},
-				"type": "object",
-				"additionalProperties": false
-			},
-			"UpgradeToTeamBundleRequest": {
-				"properties": {
-					"ui_mode": {
-						"type": "string",
-						"enum": [
-							"embedded",
-							"hosted"
-						]
-					}
-				},
-				"type": "object",
-				"additionalProperties": false
-			},
-			"LLMUsage": {
-				"properties": {
-					"model": {
-						"type": "string"
-					},
-					"provider": {
-						"type": "string"
-					},
-					"prompt_tokens": {
-						"type": "number",
-						"format": "double"
-					},
-					"completion_tokens": {
-						"type": "number",
-						"format": "double"
-					},
-					"total_count": {
-						"type": "number",
-						"format": "double"
-					},
-					"amount": {
-						"type": "number",
-						"format": "double"
-					},
-					"description": {
-						"type": "string"
-					},
-					"totalCost": {
-						"properties": {
-							"prompt_token": {
-								"type": "number",
-								"format": "double"
-							},
-							"completion_token": {
-								"type": "number",
-								"format": "double"
-							}
-						},
-						"required": [
-							"prompt_token",
-							"completion_token"
-						],
-						"type": "object"
-					}
-				},
-				"required": [
-					"model",
-					"provider",
-					"prompt_tokens",
-					"completion_tokens",
-					"total_count",
-					"amount",
-					"description",
-					"totalCost"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
 			"OTELTrace": {
 				"properties": {
 					"resourceSpans": {
@@ -4857,6 +4740,111 @@
 					"resourceSpans"
 				],
 				"type": "object"
+			},
+			"UpgradeToProRequest": {
+				"properties": {
+					"addons": {
+						"properties": {
+							"evals": {
+								"type": "boolean"
+							},
+							"experiments": {
+								"type": "boolean"
+							},
+							"prompts": {
+								"type": "boolean"
+							},
+							"alerts": {
+								"type": "boolean"
+							}
+						},
+						"type": "object"
+					},
+					"seats": {
+						"type": "number",
+						"format": "double"
+					},
+					"ui_mode": {
+						"type": "string",
+						"enum": [
+							"embedded",
+							"hosted"
+						]
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"UpgradeToTeamBundleRequest": {
+				"properties": {
+					"ui_mode": {
+						"type": "string",
+						"enum": [
+							"embedded",
+							"hosted"
+						]
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"LLMUsage": {
+				"properties": {
+					"model": {
+						"type": "string"
+					},
+					"provider": {
+						"type": "string"
+					},
+					"prompt_tokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"completion_tokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"total_count": {
+						"type": "number",
+						"format": "double"
+					},
+					"amount": {
+						"type": "number",
+						"format": "double"
+					},
+					"description": {
+						"type": "string"
+					},
+					"totalCost": {
+						"properties": {
+							"prompt_token": {
+								"type": "number",
+								"format": "double"
+							},
+							"completion_token": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"prompt_token",
+							"completion_token"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"model",
+					"provider",
+					"prompt_tokens",
+					"completion_tokens",
+					"total_count",
+					"amount",
+					"description",
+					"totalCost"
+				],
+				"type": "object",
+				"additionalProperties": false
 			},
 			"SessionResult": {
 				"properties": {
@@ -11839,6 +11827,116 @@
 				]
 			}
 		},
+		"/v1/trace/custom/v1/log": {
+			"post": {
+				"operationId": "LogCustomTraceLegacy",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Trace"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {}
+						}
+					}
+				}
+			}
+		},
+		"/v1/trace/custom/log": {
+			"post": {
+				"operationId": "LogCustomTrace",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Trace"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {}
+						}
+					}
+				}
+			}
+		},
+		"/v1/trace/log": {
+			"post": {
+				"operationId": "LogTrace",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Trace"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/OTELTrace"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/trace/log-python": {
+			"post": {
+				"operationId": "LogPythonTrace",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Trace"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {}
+						}
+					}
+				}
+			}
+		},
 		"/v1/stripe/subscription/cost-for-prompts": {
 			"get": {
 				"operationId": "GetCostForPrompts",
@@ -12532,116 +12630,6 @@
 				},
 				"tags": [
 					"Stripe"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {}
-						}
-					}
-				}
-			}
-		},
-		"/v1/trace/custom/v1/log": {
-			"post": {
-				"operationId": "LogCustomTraceLegacy",
-				"responses": {
-					"204": {
-						"description": "No content"
-					}
-				},
-				"tags": [
-					"Trace"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {}
-						}
-					}
-				}
-			}
-		},
-		"/v1/trace/custom/log": {
-			"post": {
-				"operationId": "LogCustomTrace",
-				"responses": {
-					"204": {
-						"description": "No content"
-					}
-				},
-				"tags": [
-					"Trace"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {}
-						}
-					}
-				}
-			}
-		},
-		"/v1/trace/log": {
-			"post": {
-				"operationId": "LogTrace",
-				"responses": {
-					"204": {
-						"description": "No content"
-					}
-				},
-				"tags": [
-					"Trace"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/OTELTrace"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/trace/log-python": {
-			"post": {
-				"operationId": "LogPythonTrace",
-				"responses": {
-					"204": {
-						"description": "No content"
-					}
-				},
-				"tags": [
-					"Trace"
 				],
 				"security": [
 					{
