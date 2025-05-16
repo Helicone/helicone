@@ -229,8 +229,6 @@ export class ScoreStore extends BaseStore {
             response_body: row.response_body,
             assets: row.assets,
             scores: validScores,
-            cache_enabled: row.cache_enabled,
-            cache_reference_id: row.cache_reference_id,
           },
         ];
       })
