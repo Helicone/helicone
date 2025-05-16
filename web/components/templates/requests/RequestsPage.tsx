@@ -133,15 +133,16 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   const { unauthorized, currentTier } = useGetUnauthorized(userId || "");
   const initialRequest = useGetRequestWithBodies(initialRequestId || "");
 
+  const cacheFilter: FilterNode = isCached
+    ? {
+        request_response_rmt: {
+          cache_enabled: {
+            equals: true,
+          },
+        },
+      }
+    : "all";
 
-  const cacheFilter: FilterNode = isCached ? {
-    "request_response_rmt": {
-      "cache_enabled": {
-        equals: true,
-      },
-    },
-  } : "all";
-  
   // filter when custom is not selected
   const defaultFilter = useMemo<FilterNode>(() => {
     const currentTimeFilter = searchParams.get("t");
@@ -150,8 +151,8 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     );
     return {
       left: {
-        "request_response_rmt": {
-          "request_created_at": {
+        request_response_rmt: {
+          request_created_at: {
             gte: new Date(timeIntervalDate),
           },
         },
@@ -170,8 +171,8 @@ export default function RequestsPage(props: RequestsPageV2Props) {
 
       const filter: FilterNode = {
         left: {
-          "request_response_rmt": {
-            "request_created_at": {
+          request_response_rmt: {
+            request_created_at: {
               gte: new Date(start),
             },
           },
@@ -179,8 +180,8 @@ export default function RequestsPage(props: RequestsPageV2Props) {
         operator: "and",
         right: {
           left: {
-            "request_response_rmt": {
-              "request_created_at": {
+            request_response_rmt: {
+              request_created_at: {
                 lte: new Date(end),
               },
             },
@@ -221,7 +222,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   const sortLeaf: SortLeafRequest = getSortLeaf(
     sort.sortKey,
     sort.sortDirection,
-    sort.isCustomProperty,
+    sort.isCustomProperty
   );
   const {
     count: realCount,
@@ -424,8 +425,8 @@ export default function RequestsPage(props: RequestsPageV2Props) {
         const [start, end] = value.split("_");
         const filter: FilterNode = {
           left: {
-            "request_response_rmt": {
-              "request_created_at": {
+            request_response_rmt: {
+              request_created_at: {
                 gte: new Date(start),
               },
             },
@@ -433,8 +434,8 @@ export default function RequestsPage(props: RequestsPageV2Props) {
           operator: "and",
           right: {
             left: {
-              "request_response_rmt": {
-                "request_created_at": {
+              request_response_rmt: {
+                request_created_at: {
                   lte: new Date(end),
                 },
               },
@@ -446,8 +447,8 @@ export default function RequestsPage(props: RequestsPageV2Props) {
         setTimeFilter(filter);
       } else {
         setTimeFilter({
-          "request_response_rmt": {
-            "request_created_at": {
+          request_response_rmt: {
+            request_created_at: {
               gte: new Date(getTimeIntervalAgo(key)),
             },
           },
@@ -854,7 +855,7 @@ function getTimeIntervalAgo(interval: TimeInterval): Date {
 function getSortLeaf(
   sortKey: string | null,
   sortDirection: SortDirection | null,
-  isCustomProperty: boolean,
+  isCustomProperty: boolean
 ): SortLeafRequest {
   if (sortKey && sortDirection && isCustomProperty) {
     return {

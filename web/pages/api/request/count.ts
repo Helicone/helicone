@@ -1,7 +1,5 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import {
-  getRequestCountClickhouse,
-} from "../../../lib/api/request/request";
+import { getRequestCountClickhouse } from "../../../lib/api/request/request";
 
 import {
   HandlerWrapperOptions,

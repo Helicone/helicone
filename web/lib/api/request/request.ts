@@ -4,7 +4,6 @@ import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   buildFilterWithAuth,
   buildFilterWithAuthClickHouse,
-  buildFilterWithAuthClickHouseCacheHits,
 } from "../../../services/lib/filters/filters";
 import {
   SortLeafRequest,
@@ -229,7 +228,7 @@ export async function getRequestCount(
 export async function getRequestCountClickhouse(
   org_id: string,
   filter: FilterNode,
-  isCached: boolean,
+  isCached: boolean
 ): Promise<Result<number, string>> {
   const builtFilter = await buildFilterWithAuthClickHouse({
     org_id,
@@ -242,7 +241,7 @@ SELECT
   count(DISTINCT request_response_rmt.request_id) as count
 from request_response_rmt FINAL
 WHERE (${builtFilter.filter})
-${isCached ? "AND cache_enabled = 1" : ''}
+${isCached ? "AND cache_enabled = 1" : ""}
 `;
   const { data, error } = await dbQueryClickhouse<{ count: number }>(
     query,
