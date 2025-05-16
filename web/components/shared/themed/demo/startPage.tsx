@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Lottie from "react-lottie";
+import Lottie from "lottie-react";
 import * as guesswho from "../../../../public/lottie/guesswho.json";
 import * as notebook from "../../../../public/lottie/notebook.json";
 import GuessWhoGame from "./guessWho";
@@ -49,13 +49,9 @@ const StartPage = () => {
             >
               <div className="w-16 h-16 flex-shrink-0 bg-indigo-100 rounded-full flex items-center justify-center">
                 <Lottie
-                  options={{
-                    loop: true,
-                    autoplay: true,
-                    animationData: game.animation,
-                  }}
-                  height={50}
-                  width={50}
+                  animationData={game.animation}
+                  style={{ height: 50, width: 50 }}
+                  loop={true}
                 />
               </div>
               <div>
@@ -75,17 +71,11 @@ const StartPage = () => {
     return (
       <div className="flex flex-col items-center justify-center h-full bg-gray-50">
         <Lottie
-          options={{
-            loop: true,
-            autoplay: true,
-            animationData: DEMO_GAMES.find((g) => g.id === currentDemo)
-              ?.animation,
-          }}
-          height={200}
-          width={300}
-          isStopped={false}
-          isPaused={false}
-          isClickToPauseDisabled={true}
+          animationData={
+            DEMO_GAMES.find((g) => g.id === currentDemo)?.animation
+          }
+          style={{ height: 200, width: 300 }}
+          loop={true}
         />
         <p className="mt-4 text-lg font-medium text-gray-600">
           Loading {DEMO_GAMES.find((g) => g.id === currentDemo)?.name}...

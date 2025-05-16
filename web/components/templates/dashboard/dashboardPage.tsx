@@ -7,7 +7,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { AreaChart, BarChart, BarList, Card } from "@tremor/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Responsive, WidthProvider } from "react-grid-layout";
+import { Responsive, ResponsiveProps, WidthProvider } from "react-grid-layout";
 import {
   getIncrementAsMinutes,
   getTimeMap,
@@ -49,7 +49,9 @@ import { QuantilesGraph } from "./quantilesGraph";
 import StyledAreaChart from "./styledAreaChart";
 import SuggestionModal from "./suggestionsModal";
 import { useDashboardPage } from "./useDashboardPage";
-const ResponsiveGridLayout = WidthProvider(Responsive);
+const ResponsiveGridLayout = WidthProvider(Responsive) as React.ComponentType<
+  ResponsiveProps & { children?: React.ReactNode }
+>;
 
 interface DashboardPageProps {
   user: HeliconeUser;

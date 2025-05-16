@@ -1,0 +1,14 @@
+{
+  "name": "helicone-monorepo",
+  "private": true,
+  "workspaces": [
+    "web",
+    "packages/*"
+  ],
+  "scripts": {
+    "build:web": "yarn workspace helicone build"
+  },
+  "engines": {
+    "node": "=20"
+  }
+}
