@@ -8,10 +8,7 @@ import {
 } from "../clients/KVRateLimiterClient";
 import { RequestWrapper } from "../RequestWrapper";
 import { ResponseBuilder } from "../ResponseBuilder";
-import {
-  getCachedResponse,
-  saveToCache,
-} from "../util/cache/cacheFunctions";
+import { getCachedResponse, saveToCache } from "../util/cache/cacheFunctions";
 import { CacheSettings, getCacheSettings } from "../util/cache/cacheSettings";
 import { HeliconeHeaders } from "../models/HeliconeHeaders";
 import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
@@ -67,7 +64,6 @@ export async function proxyForwarder(
   }
 
   if (cacheSettings.shouldReadFromCache) {
-
     const { data: auth, error: authError } = await request.auth();
     if (authError == null) {
       const db = new DBWrapper(env, auth);
@@ -90,7 +86,7 @@ export async function proxyForwarder(
           if (cachedResponse) {
             const { data, error } = await handleProxyRequest(
               proxyRequest,
-              cachedResponse  // Pass the cached response directly
+              cachedResponse // Pass the cached response directly
             );
             if (error !== null) {
               return responseBuilder.build({
@@ -99,14 +95,16 @@ export async function proxyForwarder(
               });
             }
             const { loggable, response } = data;
-            ctx.waitUntil(log(
-              loggable,
-              "false", // don't push body to S3
-              false, // don't rate limit cache hit
-              cachedResponse,
-              cacheSettings // send them cache settings hehe
-            ));
-            
+            ctx.waitUntil(
+              log(
+                loggable,
+                "false", // don't push body to S3
+                false, // don't rate limit cache hit
+                cachedResponse,
+                cacheSettings // send them cache settings hehe
+              )
+            );
+
             return response;
           }
         } catch (error) {
@@ -327,7 +325,7 @@ export async function proxyForwarder(
   async function log(
     loggable: DBLoggable,
     S3_ENABLED?: Env["S3_ENABLED"],
-    incurRateLimit: boolean = true,
+    incurRateLimit = true,
     cachedResponse?: Response,
     cacheSettings?: CacheSettings
   ) {

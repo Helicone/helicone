@@ -573,7 +573,14 @@ export class DBLoggable {
       console.error(`Error checking rate limit: ${e}`);
     }
 
-    await this.useKafka(db, authParams, S3_ENABLED, requestHeaders, cachedHeaders, cacheSettings);
+    await this.useKafka(
+      db,
+      authParams,
+      S3_ENABLED,
+      requestHeaders,
+      cachedHeaders,
+      cacheSettings
+    );
 
     // THIS IS ONLY USED FOR COST CALCULATION ON RATELIMITING
     const readResponse = await this.readResponse();
@@ -656,9 +663,10 @@ export class DBLoggable {
       timeToFirstToken = undefined;
     }
 
-    const cacheReferenceId = cacheSettings?.shouldReadFromCache && cachedHeaders
-      ? cachedHeaders.get("Helicone-Id")
-      : DEFAULT_UUID;
+    const cacheReferenceId =
+      cacheSettings?.shouldReadFromCache && cachedHeaders
+        ? cachedHeaders.get("Helicone-Id")
+        : DEFAULT_UUID;
 
     const kafkaMessage: MessageData = {
       id: this.request.requestId,
@@ -686,7 +694,8 @@ export class DBLoggable {
           cacheReferenceId: cacheReferenceId ?? DEFAULT_UUID,
           cacheEnabled: requestHeaders.cacheHeaders.cacheEnabled ?? undefined,
           cacheSeed: requestHeaders.cacheHeaders.cacheSeed ?? undefined,
-          cacheBucketMaxSize: requestHeaders.cacheHeaders.cacheBucketMaxSize ?? undefined,
+          cacheBucketMaxSize:
+            requestHeaders.cacheHeaders.cacheBucketMaxSize ?? undefined,
           cacheControl: requestHeaders.cacheHeaders.cacheControl ?? undefined,
           promptVersion: this.request.promptSettings.promptVersion,
           properties: this.request.properties,
@@ -773,7 +782,7 @@ export class DBLoggable {
         promptCacheWriteTokens: 0,
         promptCacheReadTokens: 0,
         promptAudioTokens: 0,
-        completionAudioTokens: 0
+        completionAudioTokens: 0,
       }) ?? 0
     );
   }
