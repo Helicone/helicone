@@ -29,6 +29,8 @@ import TreeView from "./Tree/TreeView";
 import { TagType } from "@/packages/common/sessions/tags";
 import Link from "next/link";
 import { SessionTag } from "../../feedback/sessionTag";
+
+export const EMPTY_SESSION_NAME = "Unnamed";
 interface SessionContentProps {
   session: Session;
   session_id: string;
@@ -64,7 +66,7 @@ export const SessionContent: React.FC<SessionContentProps> = ({
     useSessions({
       timeFilter,
       sessionIdSearch: session_id,
-      selectedName: session_name === "Unnamed" ? "" : session_name,
+      selectedName: session_name === EMPTY_SESSION_NAME ? "" : session_name,
     });
 
   // HANDLERS
@@ -177,7 +179,11 @@ export const SessionContent: React.FC<SessionContentProps> = ({
               </Link>
               <Small className="font-semibold">/</Small>
               <Link
-                href={`/sessions?name=${encodeURIComponent(session_name)}`}
+                href={
+                  session_name === EMPTY_SESSION_NAME
+                    ? "/sessions"
+                    : `/sessions?name=${encodeURIComponent(session_name)}`
+                }
                 className="no-underline"
               >
                 <Muted className="text-sm">{session_name}</Muted>
