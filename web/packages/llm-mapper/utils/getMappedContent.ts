@@ -65,8 +65,6 @@ const metaDataFromHeliconeRequest = (
   return {
     requestId: heliconeRequest.request_id,
     countryCode: heliconeRequest.country_code,
-    cacheEnabled: heliconeRequest.cache_enabled ?? false,
-    cacheReferenceId: heliconeRequest.cache_reference_id ?? null,
     cost: modelCost({
       provider: heliconeRequest.provider,
       model: model,

@@ -206,10 +206,6 @@ export interface RequestResponseRMT {
   status: number;
   completion_tokens: number;
   prompt_tokens: number;
-  prompt_cache_write_tokens: number;
-  prompt_cache_read_tokens: number;
-  prompt_audio_tokens: number;
-  completion_audio_tokens: number;
   model: string;
   request_id: string;
   request_created_at: string;
@@ -220,15 +216,8 @@ export interface RequestResponseRMT {
   time_to_first_token: number;
   provider: string;
   country_code: string;
-  target_url: string;
+  created_at?: string;
   properties: Record<string, string>;
-  scores: Record<string, number>;
-  request_body: string;
-  response_body: string;
-  assets: Array<string>;
-  updated_at?: string;
-  cache_reference_id?: string;
-  cache_enabled: boolean;
 }
 
 export interface ClickhouseDB {

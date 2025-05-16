@@ -43,12 +43,6 @@ export interface IHeliconeHeaders {
     promptMode: Nullable<string>;
     promptVersion: Nullable<string>;
   };
-  cacheHeaders: {
-    cacheEnabled: Nullable<boolean>;
-    cacheSeed: Nullable<number>;
-    cacheBucketMaxSize: Nullable<number>;
-    cacheControl: Nullable<string>;
-  };
   promptName: Nullable<string>;
   userId: Nullable<string>;
   omitHeaders: {
@@ -110,12 +104,6 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     promptMode: Nullable<string>;
     promptVersion: Nullable<string>;
   };
-  cacheHeaders: {
-    cacheEnabled: Nullable<boolean>;
-    cacheSeed: Nullable<number>;
-    cacheBucketMaxSize: Nullable<number>;
-    cacheControl: Nullable<string>;
-  };
   promptName: Nullable<string>;
   userId: Nullable<string>;
   omitHeaders: { omitResponse: boolean; omitRequest: boolean };
@@ -160,12 +148,6 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       promptMode: heliconeHeaders.promptHeaders.promptMode,
       promptVersion: heliconeHeaders.promptHeaders.promptVersion,
     };
-    this.cacheHeaders = {
-      cacheEnabled: heliconeHeaders.cacheHeaders.cacheEnabled,
-      cacheSeed: heliconeHeaders.cacheHeaders.cacheSeed,
-      cacheBucketMaxSize: heliconeHeaders.cacheHeaders.cacheBucketMaxSize,
-      cacheControl: heliconeHeaders.cacheHeaders.cacheControl,
-    }
     this.promptName = heliconeHeaders.promptName;
     this.omitHeaders = heliconeHeaders.omitHeaders;
     this.sessionHeaders = heliconeHeaders.sessionHeaders;
@@ -318,12 +300,6 @@ export class HeliconeHeaders implements IHeliconeHeaders {
         promptMode: this.headers.get("Helicone-Prompt-Mode") ?? null,
         promptVersion: this.headers.get("Helicone-Prompt-Version") ?? null,
       },
-      cacheHeaders: {
-        cacheEnabled: this.headers.get("Helicone-Cache-Enabled") === "true" ? true : false,
-        cacheSeed: this.headers.get("Helicone-Cache-Seed") ? parseInt(this.headers.get("Helicone-Cache-Seed") ?? "0") : null,
-        cacheBucketMaxSize: this.headers.get("Helicone-Cache-Bucket-Max-Size") ? parseInt(this.headers.get("Helicone-Cache-Bucket-Max-Size") ?? "0") : null,
-        cacheControl: this.headers.get("Helicone-Cache-Control") ?? null,
-      },
       promptName: this.headers.get("Helicone-Prompt-Name") ?? null,
       userId: this.headers.get("Helicone-User-Id") ?? null,
       omitHeaders: {
@@ -437,22 +413,6 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     if (heliconeHeaders.experimentHeaders.experimentId) {
       heliconePropertyHeaders["Helicone-Experiment-Id"] =
         heliconeHeaders.experimentHeaders.experimentId;
-    }
-
-    if (heliconeHeaders.cacheHeaders.cacheEnabled) {
-      heliconePropertyHeaders["Helicone-Cache-Enabled"] = heliconeHeaders.cacheHeaders.cacheEnabled.toString();
-    }
-
-    if (heliconeHeaders.cacheHeaders.cacheSeed) {
-      heliconePropertyHeaders["Helicone-Cache-Seed"] = heliconeHeaders.cacheHeaders.cacheSeed.toString();
-    }
-
-    if (heliconeHeaders.cacheHeaders.cacheBucketMaxSize) {
-      heliconePropertyHeaders["Helicone-Cache-Bucket-Max-Size"] = heliconeHeaders.cacheHeaders.cacheBucketMaxSize.toString();
-    }
-
-    if (heliconeHeaders.cacheHeaders.cacheControl) {
-      heliconePropertyHeaders["Helicone-Cache-Control"] = heliconeHeaders.cacheHeaders.cacheControl;
     }
 
     return heliconePropertyHeaders;
