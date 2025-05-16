@@ -133,44 +133,65 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   const { unauthorized, currentTier } = useGetUnauthorized(userId || "");
   const initialRequest = useGetRequestWithBodies(initialRequestId || "");
 
+
+  const cacheFilter: FilterNode = isCached ? {
+    "request_response_rmt": {
+      "cache_enabled": {
+        equals: true,
+      },
+    },
+  } : "all";
+  
+  // filter when custom is not selected
+  const defaultFilter = useMemo<FilterNode>(() => {
+    const currentTimeFilter = searchParams.get("t");
+    const timeIntervalDate = getTimeIntervalAgo(
+      (currentTimeFilter as TimeInterval) || "1m"
+    );
+    return {
+      left: {
+        "request_response_rmt": {
+          "request_created_at": {
+            gte: new Date(timeIntervalDate),
+          },
+        },
+      },
+      operator: "and",
+      right: cacheFilter,
+    };
+  }, [cacheFilter]);
+
   // TODO: Move this to a better place or turn into callback
   const getTimeFilter = () => {
     const currentTimeFilter = searchParams.get("t");
-    const tableName = getTableName(isCached);
-    const createdAtColumn = getCreatedAtColumn(isCached);
 
     if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
       const [_, start, end] = currentTimeFilter.split("_");
 
       const filter: FilterNode = {
         left: {
-          [tableName]: {
-            [createdAtColumn]: {
-              gte: new Date(start).toISOString(),
+          "request_response_rmt": {
+            "request_created_at": {
+              gte: new Date(start),
             },
           },
         },
         operator: "and",
         right: {
-          [tableName]: {
-            [createdAtColumn]: {
-              lte: new Date(end).toISOString(),
+          left: {
+            "request_response_rmt": {
+              "request_created_at": {
+                lte: new Date(end),
+              },
             },
           },
+          operator: "and",
+          right: cacheFilter,
         },
       };
       return filter;
     } else {
-      const timeIntervalDate = getTimeIntervalAgo(
-        (currentTimeFilter as TimeInterval) || "1m"
-      );
-      return {
-        [tableName]: {
-          [createdAtColumn]: {
-            gte: new Date(timeIntervalDate).toISOString(),
-          },
-        },
-      };
+      return defaultFilter;
     }
   };
   const getTimeRange = () => {
@@ -201,7 +222,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     sort.sortKey,
     sort.sortDirection,
     sort.isCustomProperty,
-    isCached
   );
   const {
     count: realCount,
@@ -400,33 +420,35 @@ export default function RequestsPage(props: RequestsPageV2Props) {
 
   const onTimeSelectHandler = useCallback(
     (key: TimeInterval, value: string) => {
-      const tableName = getTableName(isCached);
-      const createdAtColumn = getCreatedAtColumn(isCached);
       if (key === "custom") {
         const [start, end] = value.split("_");
         const filter: FilterNode = {
           left: {
-            [tableName]: {
-              [createdAtColumn]: {
-                gte: new Date(start).toISOString(),
+            "request_response_rmt": {
+              "request_created_at": {
+                gte: new Date(start),
               },
             },
           },
           operator: "and",
           right: {
-            [tableName]: {
-              [createdAtColumn]: {
-                lte: new Date(end).toISOString(),
+            left: {
+              "request_response_rmt": {
+                "request_created_at": {
+                  lte: new Date(end),
+                },
               },
             },
+            operator: "and",
+            right: cacheFilter,
           },
         };
         setTimeFilter(filter);
       } else {
         setTimeFilter({
-          [tableName]: {
-            [createdAtColumn]: {
-              gte: new Date(getTimeIntervalAgo(key)).toISOString(),
+          "request_response_rmt": {
+            "request_created_at": {
+              gte: new Date(getTimeIntervalAgo(key)),
             },
           },
         });
@@ -833,11 +855,7 @@ function getSortLeaf(
   sortKey: string | null,
   sortDirection: SortDirection | null,
   isCustomProperty: boolean,
-  isCached: boolean
 ): SortLeafRequest {
-  if (isCached && sortKey === "created_at") {
-    sortKey = "cache_created_at";
-  }
   if (sortKey && sortDirection && isCustomProperty) {
     return {
       properties: {
@@ -848,19 +866,9 @@ function getSortLeaf(
     return {
       [sortKey]: sortDirection,
     };
-  } else if (isCached) {
-    return {
-      cache_created_at: "desc",
-    };
   } else {
     return {
       created_at: "desc",
     };
   }
-}
-function getTableName(isCached: boolean): string {
-  return isCached ? "cache_hits" : "request_response_rmt";
-}
-function getCreatedAtColumn(isCached: boolean): string {
-  return isCached ? "created_at" : "request_created_at";
 }

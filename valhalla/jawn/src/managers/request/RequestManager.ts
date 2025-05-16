@@ -12,7 +12,6 @@ import {
   getRequestAsset,
   getRequests,
   getRequestsCached,
-  getRequestsCachedClickhouse,
   getRequestsClickhouse,
   getRequestsClickhouseNoSort,
 } from "../../lib/stores/request/request";
@@ -481,8 +480,6 @@ export class RequestManager extends BaseManager {
       sort = {
         created_at: "desc",
       },
-      isCached,
-      isPartOfExperiment,
       isScored,
     } = params;
 
@@ -491,16 +488,8 @@ export class RequestManager extends BaseManager {
     if (isScored !== undefined) {
       newFilter = this.addScoreFilterClickhouse(isScored, newFilter);
     }
-
-    const requests = isCached
-      ? await getRequestsCachedClickhouse(
-          this.authParams.organizationId,
-          filter,
-          offset,
-          limit,
-          sort
-        )
-      : sort.created_at === "desc"
+    
+    const requests = sort.created_at === "desc"
       ? await getRequestsClickhouseNoSort(
           this.authParams.organizationId,
           newFilter,
