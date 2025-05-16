@@ -1,4 +1,4 @@
-import { Toaster } from "@/components/ui/sonner";
+import { ToasterProvider } from "./toaster-provider";
 import Script from "next/script";
 import { Inter } from "next/font/google";
 import "../node_modules/react-grid-layout/css/styles.css";
@@ -61,7 +61,7 @@ export default function RootLayout({
             }}
           />
         )}
-        <Toaster />
+        <ToasterProvider />
       </body>
     </html>
   )
