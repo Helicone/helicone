@@ -16,6 +16,7 @@ import {
 import { TimeIncrement } from "../../timeCalculations/fetchTimeData";
 import { dbQueryClickhouse, printRunnableQuery } from "../db/dbExecute";
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
+import { DEFAULT_UUID } from "@/packages/llm-mapper/types";
 
 function convertDbIncrement(dbIncrement: TimeIncrement): string {
   return dbIncrement === "min" ? "MINUTE" : dbIncrement;
@@ -166,7 +167,11 @@ ORDER BY ${dateTrunc} ASC ${fill}
   );
 }
 
-export async function getXOverTimeCacheHits<T>(
+// --OLD CACHE--: backwards compatibility, we read from both cache_hits
+// and request_response_rmt.
+export async function getXOverTimeCacheHitsDeprecated<
+  T extends { count: number }
+>(
   { timeFilter, orgId, dbIncrement, timeZoneDifference }: DataOverTimeRequest,
   countColumn: string,
   groupByColumns: string[] = [],
@@ -181,7 +186,7 @@ export async function getXOverTimeCacheHits<T>(
 > {
   const startDate = new Date(timeFilter.start);
   const endDate = new Date(timeFilter.end);
-  const timeFilterNode: FilterNode = {
+  const timeFilterNodeCache: FilterNode = {
     left: {
       cache_hits: {
         created_at: {
@@ -198,7 +203,6 @@ export async function getXOverTimeCacheHits<T>(
     },
     operator: "and",
   };
-  const filter: FilterNode = timeFilterNode;
 
   if (!isValidTimeFilter(timeFilter)) {
     return { data: null, error: "Invalid time filter" };
@@ -209,20 +213,23 @@ export async function getXOverTimeCacheHits<T>(
   if (!isValidTimeZoneDifference(timeZoneDifference)) {
     return { data: null, error: "Invalid time zone difference" };
   }
-  const { filter: builtFilter, argsAcc: builtFilterArgsAcc } =
+
+  const { filter: builtFilterCache, argsAcc: builtFilterArgsAccCache } =
     await buildFilterWithAuthClickHouseCacheHits({
       org_id: orgId,
-      filter,
+      filter: timeFilterNodeCache,
       argsAcc: [],
     });
-  const { fill, argsAcc } = buildFill(
+
+  const { fill: fillCache, argsAcc: argsAccCache } = buildFill(
     startDate,
     endDate,
     dbIncrement,
     timeZoneDifference,
-    builtFilterArgsAcc
+    builtFilterArgsAccCache
   );
-  const dateTrunc = buildDateTrunc(
+
+  const dateTruncCache = buildDateTrunc(
     dbIncrement,
     timeZoneDifference,
     "created_at"
@@ -230,35 +237,194 @@ export async function getXOverTimeCacheHits<T>(
 
   const query = `
 SELECT
-  ${dateTrunc} as created_at_trunc,
+  ${dateTruncCache} as created_at_trunc,
   ${groupByColumns.concat([countColumn]).join(", ")}
 FROM cache_hits
 WHERE (
-  ${builtFilter}
+  ${builtFilterCache}
 )
-GROUP BY ${groupByColumns.concat([dateTrunc]).join(", ")}
-ORDER BY ${dateTrunc} ASC ${fill}
+GROUP BY ${groupByColumns.concat([dateTruncCache]).join(", ")}
+ORDER BY ${dateTruncCache} ASC ${fillCache}
 `;
 
   if (printQuery) {
-    await printRunnableQuery(query, argsAcc);
+    printRunnableQuery(query, argsAccCache);
   }
 
   type ResultType = T & {
     created_at_trunc: Date;
   };
-  return resultMap(await dbQueryClickhouse<ResultType>(query, argsAcc), (d) =>
-    d.map((r) => ({
-      ...r,
-      created_at_trunc: new Date(
-        moment
-          .utc(r.created_at_trunc, "YYYY-MM-DD HH:mm:ss")
-          .toDate()
-          .getTime() +
-          timeZoneDifference * 60 * 1000
-      ),
-    }))
+  return resultMap(
+    await dbQueryClickhouse<ResultType>(query, argsAccCache),
+    (d) =>
+      d.map((r) => ({
+        ...r,
+        created_at_trunc: new Date(
+          moment
+            .utc(r.created_at_trunc, "YYYY-MM-DD HH:mm:ss")
+            .toDate()
+            .getTime() +
+            timeZoneDifference * 60 * 1000
+        ),
+      }))
   );
+}
+
+export async function getXOverTimeCacheHits<T extends { count: number }>(
+  request: DataOverTimeRequest,
+  countColumn: string,
+  groupByColumns: string[] = [],
+  printQuery = false
+): Promise<
+  Result<
+    (T & {
+      created_at_trunc: Date;
+    })[],
+    string
+  >
+> {
+  const startDate = new Date(request.timeFilter.start);
+  const endDate = new Date(request.timeFilter.end);
+  const timeFilterNodeRmt: FilterNode = {
+    left: {
+      request_response_rmt: {
+        request_created_at: {
+          gte: startDate,
+        },
+      },
+    },
+    right: {
+      request_response_rmt: {
+        request_created_at: {
+          lte: endDate,
+        },
+      },
+    },
+    operator: "and",
+  };
+
+  if (!isValidTimeFilter(request.timeFilter)) {
+    return { data: null, error: "Invalid time filter" };
+  }
+  if (!isValidTimeIncrement(request.dbIncrement)) {
+    return { data: null, error: "Invalid time increment" };
+  }
+  if (!isValidTimeZoneDifference(request.timeZoneDifference)) {
+    return { data: null, error: "Invalid time zone difference" };
+  }
+
+  const { filter: builtFilterRmt, argsAcc: builtFilterArgsAccRmt } =
+    await buildFilterWithAuthClickHouse({
+      org_id: request.orgId,
+      filter: timeFilterNodeRmt,
+      argsAcc: [],
+    });
+
+  const { fill: fillRmt, argsAcc: argsAccRmt } = buildFill(
+    startDate,
+    endDate,
+    request.dbIncrement,
+    request.timeZoneDifference,
+    builtFilterArgsAccRmt
+  );
+
+  const dateTruncRmt = buildDateTrunc(
+    request.dbIncrement,
+    request.timeZoneDifference,
+    "request_created_at"
+  );
+
+  // deprecated cache hits
+  const deprecatedResult = await getXOverTimeCacheHitsDeprecated<T>(
+    request,
+    countColumn,
+    groupByColumns,
+    printQuery
+  );
+
+  if (deprecatedResult.error) {
+    return deprecatedResult;
+  }
+
+  const queryRmt = `
+WITH rmt AS (
+  SELECT
+    ${dateTruncRmt} as created_at_trunc,
+    ${groupByColumns.concat([countColumn]).join(", ")}
+  FROM request_response_rmt
+  WHERE (
+    ${builtFilterRmt}
+    AND cache_reference_id != '${DEFAULT_UUID}'
+  )
+  GROUP BY ${groupByColumns.concat([dateTruncRmt]).join(", ")}
+  ORDER BY ${dateTruncRmt} ASC ${fillRmt}
+)
+SELECT * FROM rmt
+`;
+
+  if (printQuery) {
+    printRunnableQuery(queryRmt, argsAccRmt);
+  }
+
+  type ResultType = T & {
+    created_at_trunc: Date;
+  };
+
+  const rmtResult = resultMap(
+    await dbQueryClickhouse<ResultType>(queryRmt, argsAccRmt),
+    (d) =>
+      d.map((r) => ({
+        ...r,
+        created_at_trunc: new Date(
+          moment
+            .utc(r.created_at_trunc, "YYYY-MM-DD HH:mm:ss")
+            .toDate()
+            .getTime() +
+            request.timeZoneDifference * 60 * 1000
+        ),
+      }))
+  );
+  if (rmtResult.error || !rmtResult.data || !deprecatedResult.data) {
+    return rmtResult;
+  }
+
+  // --OLD CACHE--: backwards compatibility, we read from both cache_hits
+  // and request_response_rmt by mapping both
+  const dateCountMap = new Map<string, number>();
+
+  // counts from request_response_rmt
+  rmtResult.data.forEach((r) => {
+    const date = moment.utc(r.created_at_trunc).format("YYYY-MM-DD HH:mm:ss");
+    dateCountMap.set(date, Number(r.count));
+  });
+
+  // counts from deprecated cache_hits
+  deprecatedResult.data.forEach((r) => {
+    const date = moment.utc(r.created_at_trunc).format("YYYY-MM-DD HH:mm:ss");
+    const existingCount = dateCountMap.get(date) || 0;
+    dateCountMap.set(date, existingCount + Number(r.count));
+  });
+
+  // convert back to array format
+  const combinedData = Array.from(dateCountMap.entries()).map(
+    ([date, count]) => ({
+      created_at_trunc: new Date(
+        moment.utc(date, "YYYY-MM-DD HH:mm:ss").toDate().getTime() +
+          request.timeZoneDifference * 60 * 1000
+      ),
+      count,
+    })
+  ) as (T & { created_at_trunc: Date })[];
+
+  // sort by date
+  combinedData.sort(
+    (a, b) => a.created_at_trunc.getTime() - b.created_at_trunc.getTime()
+  );
+
+  return {
+    data: combinedData,
+    error: null,
+  };
 }
 
 export async function getXOverTimeRateLimit<T>(

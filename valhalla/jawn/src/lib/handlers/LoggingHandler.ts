@@ -507,6 +507,8 @@ export class LoggingHandler extends AbstractLogHandler {
       ),
       request_body: requestText,
       response_body: responseText,
+      cache_reference_id: context.message.log.request.cacheReferenceId ?? undefined,
+      cache_enabled: context.message.log.request.cacheEnabled ?? false,
     };
 
     return requestResponseLog;

@@ -3,7 +3,7 @@ require("dotenv").config({
 });
 
 import { randomUUID } from "crypto";
-import { OpenAI } from "openai";
+import { OpenAI } from "openai"
 
 async function main() {
   const openai = new OpenAI({
