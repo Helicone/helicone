@@ -1,5 +1,6 @@
-import PublicMetaData from "../components/layout/public/publicMetaData";
-import InvalidPage from "../components/shared/errors/invalid";
+"use client";
+import PublicMetaData from "@/components/layout/public/publicMetaData";
+import InvalidPage from "@/components/shared/errors/invalid";
 
 const ErrorPage = () => {
   return (
