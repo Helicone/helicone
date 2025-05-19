@@ -21,6 +21,7 @@ export function useSelectMode<T>({ items, getItemId }: UseSelectModeProps<T>) {
 
   const toggleSelection = useCallback(
     (item: T) => {
+      console.log(item, "item");
       const id = getItemId(item);
       setSelectedIds((prevSelectedIds) => {
         if (prevSelectedIds.includes(id)) {

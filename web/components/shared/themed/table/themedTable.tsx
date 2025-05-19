@@ -157,6 +157,7 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
 
   const rows = table.getRowModel().rows;
   const columns = table.getAllColumns();
+  console.log("lol", rows);
 
   const topLevelPathColorMap = useMemo(() => {
     const chartColors = [

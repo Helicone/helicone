@@ -82,6 +82,11 @@ interface RequestsPageV2Props {
   emptyStateOptions?: RequestsPageEmptyStateOptions;
 }
 
+type TRequest = {
+  id: string;
+  metadata: MappedLLMRequest;
+};
+
 export default function RequestsPage(props: RequestsPageV2Props) {
   const {
     currentPage,
@@ -301,15 +306,16 @@ export default function RequestsPage(props: RequestsPageV2Props) {
 
   const {
     selectMode,
-    toggleSelectMode: _toggleSelectMode,
     selectedIds,
     toggleSelection,
     selectAll,
     isShiftPressed,
-  } = useSelectMode({
-    items: requests,
-    getItemId: (request: MappedLLMRequest) =>
-      request.heliconeMetadata.requestId,
+  } = useSelectMode<TRequest>({
+    items: requests.map((request, index) => ({
+      id: index.toString(),
+      metadata: request,
+    })),
+    getItemId: (request) => request.id,
   });
 
   const requestWithoutStream = requests.find((r) => {
@@ -447,7 +453,10 @@ export default function RequestsPage(props: RequestsPageV2Props) {
         (event.target.tagName.toLowerCase() === "button" ||
           event.target.closest("button") !== null);
       if (isShiftPressed || event?.metaKey || isCheckboxClick) {
-        toggleSelection(row);
+        toggleSelection({
+          id: index.toString(),
+          metadata: row,
+        });
         return;
       } else {
         setSelectedDataIndex(index);
@@ -641,9 +650,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
                   tableRef={tableRef}
                   activeColumns={activeColumns}
                   setActiveColumns={setActiveColumns}
-                  highlightedIds={
-                    selectedData ? [selectedData.id] : selectedIds
-                  }
                   checkboxMode={"on_hover"}
                   defaultData={requests}
                   defaultColumns={columnsWithProperties}
@@ -777,7 +783,9 @@ export default function RequestsPage(props: RequestsPageV2Props) {
       {/* Floating Elements */}
       <ThemedModal open={modalOpen} setOpen={setModalOpen}>
         <NewDataset
-          request_ids={selectedIds}
+          request_ids={requests
+            .filter((request) => selectedIds.includes(request.id))
+            .map((request) => request.id)}
           onComplete={() => {
             setModalOpen(false);
           }}
