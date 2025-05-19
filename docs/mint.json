@@ -502,10 +502,6 @@
       ]
     },
     {
-      "group": "Log",
-      "pages": ["rest/log/post-v1logrequest"]
-    },
-    {
       "group": "Property",
       "pages": ["rest/property/post-v1propertyquery"]
     },
@@ -538,11 +534,6 @@
       "group": "Dashboard",
       "pages": ["rest/dashboard/post-v1dashboardscoresquery"]
     },
-    {
-      "group": "Settings",
-      "pages": ["rest/settings/get-v1settingsquery"]
-    },
-
     {
       "group": "Session",
       "pages": [
