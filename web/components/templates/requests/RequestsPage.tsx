@@ -326,6 +326,12 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     );
   });
 
+  const selectedRequestIds = useMemo(() => {
+    return requests
+      .filter((_, index) => selectedIds.includes(index.toString()))
+      .map((request) => request.id);
+  }, [requests, selectedIds]);
+
   /* -------------------------------------------------------------------------- */
   /*                                  CALLBACKS                                 */
   /* -------------------------------------------------------------------------- */
@@ -618,7 +624,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
                 {/* Export button */}
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <ExportButton rows={requests} />
+                    <ExportButton rows={selectedRequestIds} />
                   </TooltipTrigger>
                   <TooltipContent>Export data</TooltipContent>
                 </Tooltip>
@@ -783,9 +789,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
       {/* Floating Elements */}
       <ThemedModal open={modalOpen} setOpen={setModalOpen}>
         <NewDataset
-          request_ids={requests
-            .filter((request) => selectedIds.includes(request.id))
-            .map((request) => request.id)}
+          request_ids={selectedRequestIds}
           onComplete={() => {
             setModalOpen(false);
           }}
