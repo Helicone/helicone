@@ -53,6 +53,19 @@ run_command() {
   fi
 }
 
+# Function to create ECR repository if it doesn't exist
+create_ecr_repo() {
+  local repo_name=$1
+  echo "Checking if repository $repo_name exists..."
+  if ! aws ecr describe-repositories --repository-names "$repo_name" --region "$AWS_REGION" &>/dev/null; then
+    echo "Creating repository $repo_name..."
+    run_command aws ecr create-repository \
+      --repository-name "$repo_name" \
+      --image-scanning-configuration scanOnPush=true \
+      --region "$AWS_REGION"
+  fi
+}
+
 # Login to ECR
 echo "Logging in to ECR..."
 run_command aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
@@ -72,6 +85,12 @@ IMAGES=(
   "helicone/clickhouse-migration-runner:../clickhouse"
   "helicone/jawn:.."
 )
+
+# Create ECR repositories first
+for IMAGE_INFO in "${IMAGES[@]}"; do
+  IFS=':' read -r IMAGE_NAME _ <<< "$IMAGE_INFO"
+  create_ecr_repo "$IMAGE_NAME"
+done
 
 # Process each image
 for IMAGE_INFO in "${IMAGES[@]}"; do
