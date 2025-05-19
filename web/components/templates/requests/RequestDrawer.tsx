@@ -46,6 +46,60 @@ import ScrollableBadges from "./ScrollableBadges";
 import StatusBadge from "./statusBadge";
 import { Eye } from "lucide-react";
 
+const RequestDescTooltip = (props: {
+  displayText: string;
+  icon: React.ReactNode;
+  href?: string;
+  copyText?: string;
+  truncateLength?: number;
+}) => {
+  const { displayText, icon, copyText, href, truncateLength = 18 } = props;
+  const { setNotification } = useNotification();
+  return (
+    <TooltipProvider>
+      <Tooltip delayDuration={150}>
+        <TooltipTrigger asChild>
+          <div className="text-secondary px-2 py-1 -ml-1 hover:bg-accent flex items-center gap-2 rounded-md cursor-pointer">
+            {icon}
+            <XSmall>
+              <span className="truncate">
+                {displayText.length > truncateLength
+                  ? displayText.slice(0, truncateLength) + "..."
+                  : displayText}
+              </span>
+            </XSmall>
+          </div>
+        </TooltipTrigger>
+        <TooltipContent side="bottom" align="start" className="p-0 ml-2">
+          <div className="flex flex-col w-full">
+            {copyText && (
+              <button
+                className="flex items-center justify-between gap-2 p-2 hover:bg-accent text-left"
+                onClick={() => {
+                  navigator.clipboard.writeText(copyText);
+                  setNotification("Copied to clipboard", "success");
+                }}
+              >
+                <span className="text-xs">Copy ID</span>
+                <LuCopy className="h-3 w-3" />
+              </button>
+            )}
+            {href && (
+              <Link
+                href={href}
+                className="flex items-center justify-between gap-2 p-2 hover:bg-accent text-left"
+              >
+                <span className="text-xs">View</span>
+                <Eye className="h-3 w-3" />
+              </Link>
+            )}
+          </div>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+};
+
 interface RequestDivProps {
   onCollapse: () => void;
   onNavigate?: (direction: "prev" | "next") => void;
@@ -390,59 +444,6 @@ export default function RequestDrawer(props: RequestDivProps) {
     );
   }, [descContainerWidth]);
 
-  const RequestDescTooltip = (props: {
-    displayText: string;
-    icon: React.ReactNode;
-    href?: string;
-    copyText?: string;
-    truncateLength?: number;
-  }) => {
-    const { displayText, icon, copyText, href, truncateLength = 18 } = props;
-    return (
-      <TooltipProvider>
-        <Tooltip delayDuration={150}>
-          <TooltipTrigger asChild>
-            <div className="inline-flex text-secondary px-2 py-1 -ml-1 hover:bg-accent flex items-center gap-2 rounded-md cursor-pointer">
-              {icon}
-              <XSmall>
-                <span className="truncate">
-                  {displayText.length > truncateLength
-                    ? displayText.slice(0, truncateLength) + "..."
-                    : displayText}
-                </span>
-              </XSmall>
-            </div>
-          </TooltipTrigger>
-          <TooltipContent side="bottom" align="start" className="p-0 ml-2">
-            <div className="flex flex-col w-full">
-              {copyText && (
-                <button
-                  className="flex items-center justify-between gap-2 p-2 hover:bg-accent text-left"
-                  onClick={() => {
-                    navigator.clipboard.writeText(copyText);
-                    setNotification("Copied to clipboard", "success");
-                  }}
-                >
-                  <span className="text-xs">Copy ID</span>
-                  <LuCopy className="h-3 w-3" />
-                </button>
-              )}
-              {href && (
-                <Link
-                  href={href}
-                  className="flex items-center justify-between gap-2 p-2 hover:bg-accent text-left"
-                >
-                  <span className="text-xs">View</span>
-                  <Eye className="h-3 w-3" />
-                </Link>
-              )}
-            </div>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    );
-  };
-
   if (!request) {
     return null;
   } else
@@ -562,7 +563,10 @@ export default function RequestDrawer(props: RequestDivProps) {
               {/* Session */}
               {specialProperties.sessionId && specialProperties.sessionName && (
                 <RequestDescTooltip
-                  displayText={specialProperties.sessionPath}
+                  displayText={
+                    specialProperties.sessionPath ??
+                    specialProperties.sessionName
+                  }
                   icon={<ListTreeIcon className="h-4 w-4" />}
                   copyText={specialProperties.sessionId}
                   href={`/sessions/${specialProperties.sessionId}`}
