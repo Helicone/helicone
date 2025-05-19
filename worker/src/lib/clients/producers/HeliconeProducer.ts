@@ -57,11 +57,10 @@ export class HeliconeProducer {
       await this.sendMessageHttp(msg);
       return;
     }
-    console.log("Sending message to HeliconeProducer");
     return this.producer.sendMessage(msg);
   }
 
-  async sendMessageHttp(msg: MessageData) {
+  private async sendMessageHttp(msg: MessageData) {
     try {
       const result = await fetch(`${this.VALHALLA_URL}/v1/log/request`, {
         method: "POST",

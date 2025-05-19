@@ -1043,6 +1043,7 @@ Json: JsonObject;
       scores_column?: components["schemas"]["Partial_TextOperators_"];
       request_body?: components["schemas"]["Partial_VectorOperators_"];
       response_body?: components["schemas"]["Partial_VectorOperators_"];
+      cache_enabled?: components["schemas"]["Partial_BooleanOperators_"];
     };
     /** @description Make all properties in T optional */
     Partial_SessionsRequestResponseRMTToOperators_: {
@@ -1338,6 +1339,8 @@ Json: JsonObject;
       assets: string[];
       target_url: string;
       model: string;
+      cache_reference_id: string | null;
+      cache_enabled: boolean;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];
@@ -1764,6 +1767,13 @@ Json: JsonObject;
         id: string;
       };
       request: {
+        cacheReferenceId?: string;
+        cacheControl?: string;
+        /** Format: double */
+        cacheBucketMaxSize?: number;
+        /** Format: double */
+        cacheSeed?: number;
+        cacheEnabled?: boolean;
         experimentRowIndex?: string;
         experimentColumnId?: string;
         heliconeTemplate?: components["schemas"]["TemplateWithInputs"];
