@@ -552,7 +552,7 @@ export default function RequestDrawer(props: RequestDivProps) {
               {/* User */}
               {specialProperties.userId && (
                 <RequestDescTooltip
-                  displayText={specialProperties.userId ?? ""}
+                  displayText={specialProperties.userId}
                   icon={<UserIcon className="h-4 w-4" />}
                   copyText={specialProperties.userId}
                   href={`/users/${specialProperties.userId}`}
