@@ -10,10 +10,10 @@ import { getJawnClient } from "@/lib/clients/jawn";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { useLocalStorage } from "@/services/hooks/localStorage";
-import { useCreatePrompt } from "@/services/hooks/prompts/prompts";
 import { formatDate } from "@/utils/date";
 import { useQuery } from "@tanstack/react-query";
 import {
+  Eye,
   FlaskConicalIcon,
   ListTreeIcon,
   ScrollTextIcon,
@@ -25,9 +25,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   LuChevronDown,
   LuChevronUp,
+  LuCopy,
   LuPanelRightClose,
   LuPlus,
-  LuCopy,
 } from "react-icons/lu";
 import { PiPlayBold } from "react-icons/pi";
 import {
@@ -44,7 +44,6 @@ import FeedbackAction from "../feedback/thumbsUpThumbsDown";
 import { RenderMappedRequest } from "./RenderHeliconeRequest";
 import ScrollableBadges from "./ScrollableBadges";
 import StatusBadge from "./statusBadge";
-import { Eye } from "lucide-react";
 
 interface RequestDivProps {
   onCollapse: () => void;
@@ -64,7 +63,6 @@ export default function RequestDrawer(props: RequestDivProps) {
 
   const { setNotification } = useNotification();
   const router = useRouter();
-  const createPrompt = useCreatePrompt();
   const org = useOrg();
   const jawn = useJawnClient();
 
@@ -565,7 +563,9 @@ export default function RequestDrawer(props: RequestDivProps) {
                   displayText={specialProperties.sessionPath}
                   icon={<ListTreeIcon className="h-4 w-4" />}
                   copyText={specialProperties.sessionId}
-                  href={`/sessions/${specialProperties.sessionId}`}
+                  href={`/sessions/${encodeURIComponent(
+                    specialProperties.sessionName
+                  )}/${specialProperties.sessionId}`}
                   truncateLength={dynamicTruncateLength}
                 />
               )}
