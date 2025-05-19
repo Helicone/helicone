@@ -7,6 +7,7 @@ import CostPill from "./costPill";
 import { COUTNRY_CODE_DIRECTORY } from "./countryCodeDirectory";
 import ModelPill from "./modelPill";
 import StatusBadge from "./statusBadge";
+import { DEFAULT_UUID } from "@/packages/llm-mapper/types";
 
 function formatNumber(num: number) {
   const numParts = num.toString().split(".");
@@ -25,9 +26,7 @@ function formatNumber(num: number) {
   }
 }
 
-export const getInitialColumns: (
-  isCached?: boolean
-) => ColumnDef<MappedLLMRequest>[] = (isCached = false) => [
+export const getInitialColumns = (): ColumnDef<MappedLLMRequest>[] => [
   {
     id: "createdAt",
     accessorKey: "createdAt",
@@ -48,6 +47,9 @@ export const getInitialColumns: (
     header: "Status",
     cell: (info) => {
       const status = info.row.original.heliconeMetadata.status;
+      const isCached =
+        info.row.original.heliconeMetadata.cacheReferenceId &&
+        info.row.original.heliconeMetadata.cacheReferenceId !== DEFAULT_UUID;
 
       if (!status) {
         return <span>{JSON.stringify(status)}</span>;
@@ -60,6 +62,16 @@ export const getInitialColumns: (
           errorCode={code}
         />
       );
+    },
+    size: 100,
+  },
+  {
+    id: "cacheEnabled",
+    accessorKey: "cacheEnabled",
+    header: "Cache Enabled",
+    cell: (info) => {
+      const cacheEnabled = info.row.original.heliconeMetadata.cacheEnabled;
+      return cacheEnabled ? <span>Yes</span> : <span>No</span>;
     },
     size: 100,
   },
@@ -134,14 +146,18 @@ export const getInitialColumns: (
     id: "latency",
     accessorKey: "latency",
     header: "Latency",
-    cell: (info) => (
-      <span>
-        {isCached
-          ? 0
-          : Number(info.row.original.heliconeMetadata.latency) / 1000}
-        s
-      </span>
-    ),
+    cell: (info) => {
+      const isCached =
+        info.row.original.heliconeMetadata.cacheReferenceId !== DEFAULT_UUID;
+      return (
+        <span>
+          {isCached
+            ? 0
+            : Number(info.row.original.heliconeMetadata.latency) / 1000}
+          s
+        </span>
+      );
+    },
     meta: {
       sortKey: "latency",
     },
@@ -162,6 +178,8 @@ export const getInitialColumns: (
     cell: (info) => {
       const statusCode = info.row.original.heliconeMetadata.status.code;
       const num = Number(info.row.original.heliconeMetadata.cost);
+      const isCached =
+        info.row.original.heliconeMetadata.cacheReferenceId !== DEFAULT_UUID;
 
       if (Number(num) === 0 && !isCached && statusCode === 200) {
         return <CostPill />;
