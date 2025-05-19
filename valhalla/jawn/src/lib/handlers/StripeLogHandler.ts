@@ -47,6 +47,10 @@ export class StripeLogHandler extends AbstractLogHandler {
       return await super.handle(context);
     }
 
+    if (context.message.log.request.cacheReferenceId) {
+      return await super.handle(context);
+    }
+
     const stripe_customer_id = await cacheResultCustom(
       "stripe_customer_id_" + organizationId,
       async () => getStripeCustomerId(organizationId),
