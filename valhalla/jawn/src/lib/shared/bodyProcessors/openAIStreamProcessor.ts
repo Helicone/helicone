@@ -68,8 +68,12 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
         "usage" in consolidatedData
           ? {
               totalTokens: consolidatedData.usage?.total_tokens,
-              completionTokens: consolidatedData.usage?.completion_tokens,
-              promptTokens: consolidatedData.usage?.prompt_tokens,
+              completionTokens:
+                consolidatedData.usage?.completion_tokens ||
+                consolidatedData.usage?.output_tokens,
+              promptTokens:
+                consolidatedData.usage?.prompt_tokens ||
+                consolidatedData.usage?.input_tokens,
               heliconeCalculated:
                 consolidatedData.usage?.helicone_calculated ?? false,
             }

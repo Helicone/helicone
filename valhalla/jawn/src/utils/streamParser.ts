@@ -1,10 +1,14 @@
 export function consolidateTextFields(responseBody: any[]): any {
   try {
+    console.log("responseBody", responseBody[responseBody.length - 1]);
     const consolidated = responseBody.reduce((acc, cur) => {
       if (!cur) {
         return acc;
       } else if (cur?.usage) {
         return recursivelyConsolidate(acc, { usage: cur.usage });
+      } else if (cur?.response?.usage) {
+        // for response api streaming
+        return recursivelyConsolidate(acc, { usage: cur.response.usage });
       } else if (acc?.choices === undefined) {
         return cur;
       } else {
