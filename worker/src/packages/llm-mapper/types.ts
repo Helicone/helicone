@@ -1,5 +1,7 @@
 import { ProviderName } from "../cost/providers/mappings";
 
+export const DEFAULT_UUID = "00000000-0000-0000-0000-000000000000";
+
 export type MapperType =
   | "openai-chat"
   | "openai-response"
@@ -208,6 +210,8 @@ type HeliconeMetadata = {
   requestId: string;
   path: string;
   countryCode: string | null;
+  cacheEnabled: boolean;
+  cacheReferenceId: string | null;
   createdAt: string;
   totalTokens: number | null;
   promptTokens: number | null;
@@ -336,4 +340,6 @@ export interface HeliconeRequest {
   assets: Array<string>;
   target_url: string;
   model: string;
+  cache_reference_id: string | null;
+  cache_enabled: boolean;
 }
