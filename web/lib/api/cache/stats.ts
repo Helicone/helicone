@@ -30,7 +30,10 @@ export async function getCacheCountClickhouse(
   where ${builtFilter.filter}
     AND cache_reference_id != '${DEFAULT_UUID}'`;
 
-  const queryResult = await dbQueryClickhouse<{ count: number }>(query, builtFilter.argsAcc);
+  const queryResult = await dbQueryClickhouse<{ count: number }>(
+    query,
+    builtFilter.argsAcc
+  );
   return resultMap(queryResult, (results) => Number(results[0].count));
 }
 
@@ -63,12 +66,15 @@ export async function getModelMetricsClickhouse(
     builtFilter.argsAcc
   );
 
-  return resultMap(rmtResult, (metrics) => 
+  return resultMap(rmtResult, (metrics) =>
     Object.values(
-      metrics.reduce((acc, metric) => ({
-        ...acc,
-        [`${metric.model}-${metric.provider}`]: metric
-      }), {} as Record<string, ModelMetrics>)
+      metrics.reduce(
+        (acc, metric) => ({
+          ...acc,
+          [`${metric.model}-${metric.provider}`]: metric,
+        }),
+        {} as Record<string, ModelMetrics>
+      )
     )
   );
 }
@@ -100,8 +106,14 @@ export async function getTimeSavedClickhouse(
   WHERE original.cache_reference_id = '${DEFAULT_UUID}'
   `;
 
-  const queryResult = await dbQueryClickhouse<{ total_latency_ms: number }>(query, builtFilter.argsAcc);
-  return resultMap(queryResult, (results) => Number(results[0]?.total_latency_ms ?? 0) / 1000);
+  const queryResult = await dbQueryClickhouse<{ total_latency_ms: number }>(
+    query,
+    builtFilter.argsAcc
+  );
+  return resultMap(
+    queryResult,
+    (results) => Number(results[0]?.total_latency_ms ?? 0) / 1000
+  );
 }
 
 export async function getTopModelUsageClickhouse(
@@ -195,9 +207,9 @@ export async function getTopRequestsClickhouse(
     response: string;
   }>(query, builtFilter.argsAcc);
 
-  return resultMap(rmtResult, (requests) => 
+  return resultMap(rmtResult, (requests) =>
     requests
-      .map(request => ({
+      .map((request) => ({
         ...request,
         count: Number(request.count),
         first_used: new Date(request.first_used),

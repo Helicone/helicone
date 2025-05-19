@@ -3,7 +3,6 @@ import moment from "moment";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   buildFilterWithAuthClickHouse,
-  buildFilterWithAuthClickHouseCacheHits,
   buildFilterWithAuthClickHouseRateLimits,
   clickhouseParam,
 } from "../../../services/lib/filters/filters";
@@ -255,7 +254,10 @@ SELECT * FROM rmt
     created_at_trunc: Date;
   };
 
-  const adjustTimeForTimezone = (date: string | Date, timeZoneOffset: number) => {
+  const adjustTimeForTimezone = (
+    date: string | Date,
+    timeZoneOffset: number
+  ) => {
     const utcDate = moment.utc(date, "YYYY-MM-DD HH:mm:ss").toDate();
     return new Date(utcDate.getTime() + timeZoneOffset * 60 * 1000);
   };
@@ -276,19 +278,25 @@ SELECT * FROM rmt
     return metricsResult;
   }
 
-  const formattedMetrics = metricsResult.data
-    .reduce((acc, record) => {
-      const dateKey = moment.utc(record.created_at_trunc).format("YYYY-MM-DD HH:mm:ss");
-      acc.set(dateKey, Number(record.count));
-      return acc;
-    }, new Map<string, number>());
+  const formattedMetrics = metricsResult.data.reduce((acc, record) => {
+    const dateKey = moment
+      .utc(record.created_at_trunc)
+      .format("YYYY-MM-DD HH:mm:ss");
+    acc.set(dateKey, Number(record.count));
+    return acc;
+  }, new Map<string, number>());
 
   const timeSeriesData = Array.from(formattedMetrics.entries())
     .map(([dateStr, count]) => ({
-      created_at_trunc: adjustTimeForTimezone(dateStr, request.timeZoneDifference),
+      created_at_trunc: adjustTimeForTimezone(
+        dateStr,
+        request.timeZoneDifference
+      ),
       count,
     }))
-    .sort((a, b) => a.created_at_trunc.getTime() - b.created_at_trunc.getTime()) as (T & { created_at_trunc: Date })[];
+    .sort(
+      (a, b) => a.created_at_trunc.getTime() - b.created_at_trunc.getTime()
+    ) as (T & { created_at_trunc: Date })[];
 
   return {
     data: timeSeriesData,
