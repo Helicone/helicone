@@ -1,6 +1,5 @@
 export function consolidateTextFields(responseBody: any[]): any {
   try {
-    console.log("responseBody", responseBody[responseBody.length - 1]);
     const consolidated = responseBody.reduce((acc, cur) => {
       if (!cur) {
         return acc;
