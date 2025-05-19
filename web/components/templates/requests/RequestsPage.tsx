@@ -96,7 +96,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     initialRequestId,
     userId,
     rateLimited = false,
-    organizationLayoutAvailable,
     emptyStateOptions = {
       options: EMPTY_STATE_PAGES.requests,
       isVisible: true,
@@ -218,7 +217,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     properties: realProperties,
     refetch: realRefetch,
     filterMap: realFilterMap,
-    searchPropertyFilters: realSearchPropertyFilters,
   } = useRequestsPageV2(
     page,
     currentPageSize,
@@ -326,10 +324,10 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     );
   });
 
-  const selectedRequestIds = useMemo(() => {
-    return requests
-      .filter((_, index) => selectedIds.includes(index.toString()))
-      .map((request) => request.id);
+  const selectedRequests = useMemo(() => {
+    return requests.filter((_, index) =>
+      selectedIds.includes(index.toString())
+    );
   }, [requests, selectedIds]);
 
   /* -------------------------------------------------------------------------- */
@@ -624,7 +622,13 @@ export default function RequestsPage(props: RequestsPageV2Props) {
                 {/* Export button */}
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <ExportButton rows={selectedRequestIds} />
+                    <ExportButton
+                      rows={
+                        selectedRequests.length > 0
+                          ? selectedRequests
+                          : requests
+                      }
+                    />
                   </TooltipTrigger>
                   <TooltipContent>Export data</TooltipContent>
                 </Tooltip>
@@ -789,7 +793,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
       {/* Floating Elements */}
       <ThemedModal open={modalOpen} setOpen={setModalOpen}>
         <NewDataset
-          request_ids={selectedRequestIds}
+          request_ids={selectedRequests.map((request) => request.id)}
           onComplete={() => {
             setModalOpen(false);
           }}
