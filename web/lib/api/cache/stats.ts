@@ -30,7 +30,10 @@ export async function getCacheCountClickhouse(
   where ${builtFilter.filter}
     AND cache_reference_id != '${DEFAULT_UUID}'`;
 
-  const queryResult = await dbQueryClickhouse<{ count: number }>(query, builtFilter.argsAcc);
+  const queryResult = await dbQueryClickhouse<{ count: number }>(
+    query,
+    builtFilter.argsAcc
+  );
   return resultMap(queryResult, (results) => Number(results[0].count));
 }
 
@@ -63,12 +66,15 @@ export async function getModelMetricsClickhouse(
     builtFilter.argsAcc
   );
 
-  return resultMap(rmtResult, (metrics) => 
+  return resultMap(rmtResult, (metrics) =>
     Object.values(
-      metrics.reduce((acc, metric) => ({
-        ...acc,
-        [`${metric.model}-${metric.provider}`]: metric
-      }), {} as Record<string, ModelMetrics>)
+      metrics.reduce(
+        (acc, metric) => ({
+          ...acc,
+          [`${metric.model}-${metric.provider}`]: metric,
+        }),
+        {} as Record<string, ModelMetrics>
+      )
     )
   );
 }
@@ -85,23 +91,33 @@ export async function getTimeSavedClickhouse(
   const query = `
   WITH cache_hits AS (
     SELECT 
-      request_id,
+      count (*) as count,
       cache_reference_id,
-      latency
     FROM request_response_rmt
     WHERE (${builtFilter.filter})
       AND cache_reference_id != '${DEFAULT_UUID}'
+      AND request_created_at > now() - interval '30 days'
+      AND cache_enabled = true
+    GROUP BY cache_reference_id
   )
   SELECT 
-    sum(original.latency) as total_latency_ms
+    sum(request_response_rmt.latency) as total_latency_ms
   FROM cache_hits ch
-  LEFT JOIN request_response_rmt original 
-    ON ch.cache_reference_id = original.request_id
-  WHERE original.cache_reference_id = '${DEFAULT_UUID}'
+  LEFT JOIN request_response_rmt
+    ON ch.cache_reference_id = request_response_rmt.request_id
+  WHERE request_response_rmt.cache_reference_id = '${DEFAULT_UUID}'
+  AND request_created_at > now() - interval '90 days'
+  AND ${builtFilter.filter}
   `;
 
-  const queryResult = await dbQueryClickhouse<{ total_latency_ms: number }>(query, builtFilter.argsAcc);
-  return resultMap(queryResult, (results) => Number(results[0]?.total_latency_ms ?? 0) / 1000);
+  const queryResult = await dbQueryClickhouse<{ total_latency_ms: number }>(
+    query,
+    builtFilter.argsAcc
+  );
+  return resultMap(
+    queryResult,
+    (results) => Number(results[0]?.total_latency_ms ?? 0) / 1000
+  );
 }
 
 export async function getTopModelUsageClickhouse(
@@ -168,20 +184,23 @@ export async function getTopRequestsClickhouse(
     FROM request_response_rmt
     WHERE ${builtFilter.filter}
       AND cache_reference_id != '${DEFAULT_UUID}'
+      AND request_created_at > now() - interval '30 days'
     GROUP BY cache_reference_id
+    LIMIT 10
   )
   SELECT 
-    orig.request_id,
+    request_response_rmt.request_id,
     ch.count,
     ch.first_hit as first_used,
     ch.last_hit as last_used,
-    orig.model,
-    orig.request_body as prompt,
-    orig.response_body as response
+    request_response_rmt.model,
+    request_response_rmt.request_body as prompt,
+    request_response_rmt.response_body as response
   FROM cache_hits ch
-  JOIN request_response_rmt orig 
-    ON ch.cache_reference_id = orig.request_id
-  WHERE orig.cache_reference_id = '${DEFAULT_UUID}'
+  JOIN request_response_rmt 
+    ON ch.cache_reference_id = request_response_rmt.request_id
+  WHERE request_response_rmt.cache_reference_id = '${DEFAULT_UUID}'
+  AND ${builtFilter.filter}
   ORDER BY count DESC
   LIMIT 10`;
 
@@ -195,9 +214,9 @@ export async function getTopRequestsClickhouse(
     response: string;
   }>(query, builtFilter.argsAcc);
 
-  return resultMap(rmtResult, (requests) => 
+  return resultMap(rmtResult, (requests) =>
     requests
-      .map(request => ({
+      .map((request) => ({
         ...request,
         count: Number(request.count),
         first_used: new Date(request.first_used),
