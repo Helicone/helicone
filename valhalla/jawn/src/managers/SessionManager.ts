@@ -3,13 +3,14 @@ import {
   SessionQueryParams,
   SessionMetricsQueryParams,
 } from "../controllers/public/sessionController";
-import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
+import { clickhouseDb, Tags } from "../lib/db/ClickhouseWrapper";
 import { dbExecute, printRunnableQuery } from "../lib/shared/db/dbExecute";
 import { filterListToTree, FilterNode } from "../lib/shared/filters/filterDefs";
 import { buildFilterWithAuthClickHouse } from "../lib/shared/filters/filters";
 import { TimeFilterMs } from "../lib/shared/filters/timeFilter";
 import { AuthParams } from "../packages/common/auth/types";
 import { err, ok, Result, resultMap } from "../packages/common/result";
+import { TagType } from "../packages/common/sessions/tags";
 import { clickhousePriceCalc } from "../packages/cost";
 import { isValidTimeZoneDifference } from "../utils/helpers";
 import {
@@ -341,8 +342,7 @@ export class SessionManager {
         )
     )
     GROUP BY properties['Helicone-Session-Id'], properties['Helicone-Session-Name']
-    HAVING (${havingFilter.filter})
-    ORDER BY created_at DESC
+    ORDER BY created_at DESC -- TODO: REMOVE FOR TEST
     LIMIT 50
     `;
 
@@ -394,6 +394,66 @@ export class SessionManager {
       return ok(null);
     } catch (error) {
       console.error("Error updating session feedback:", error);
+      return err(String(error));
+    }
+  }
+
+  async getSessionTag(
+    sessionId: string
+  ): Promise<Result<string | null, string>> {
+    try {
+      const query = `
+        SELECT tag 
+        FROM tags 
+        WHERE entity_id = {val_0: String} AND entity_type = {val_1: String} AND organization_id = {val_2: String}
+        GROUP BY tag 
+        ORDER BY max(created_at) DESC
+      `;
+
+      const result = await clickhouseDb.dbQuery<{ tag: string }>(query, [
+        sessionId,
+        TagType.SESSION,
+        this.authParams.organizationId,
+      ]);
+
+      if (result.error) {
+        return err(result.error ?? "No tag found");
+      }
+
+      if (!result.data || result.data.length === 0) {
+        return ok(null);
+      }
+
+      return ok(result.data[0].tag);
+    } catch (error) {
+      console.error("Error getting session tag:", error);
+      return err(String(error));
+    }
+  }
+
+  async updateSessionTag(
+    sessionId: string,
+    tag: string
+  ): Promise<Result<null, string>> {
+    try {
+      const valuesToInsert: Tags = {
+        organization_id: this.authParams.organizationId,
+        entity_type: TagType.SESSION,
+        entity_id: sessionId,
+        tag: tag,
+      };
+
+      const insertResult = await clickhouseDb.dbInsertClickhouse("tags", [
+        valuesToInsert,
+      ]);
+
+      if (insertResult.error) {
+        return err(insertResult.error ?? "Could not update session tag");
+      }
+
+      return ok(null); // Successfully inserted
+    } catch (error) {
+      console.error("Error updating session tag:", error);
       return err(String(error));
     }
   }

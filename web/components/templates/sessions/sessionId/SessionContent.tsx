@@ -24,10 +24,13 @@ import { useGetRequests } from "../../../../services/hooks/requests";
 import { useSessions } from "../../../../services/hooks/sessions";
 import { Col } from "../../../layout/common/col";
 import ExportButton from "../../../shared/themed/table/exportButton";
-import FeedbackAction from "../../feedback/thumbsUpThumbsDown";
 import TreeView from "./Tree/TreeView";
-import Link from "next/link";
 
+import { TagType } from "@/packages/common/sessions/tags";
+import Link from "next/link";
+import { SessionTag } from "../../feedback/sessionTag";
+
+export const EMPTY_SESSION_NAME = "Unnamed";
 interface SessionContentProps {
   session: Session;
   session_id: string;
@@ -58,11 +61,12 @@ export const SessionContent: React.FC<SessionContentProps> = ({
     }),
     []
   );
+
   const { sessions: relatedSessions, isLoading: isLoadingSessions } =
     useSessions({
       timeFilter,
-      sessionIdSearch: "", // Add missing required property
-      selectedName: session_name === "Unnamed" ? "" : session_name, // Handle Unnamed case
+      sessionIdSearch: session_id,
+      selectedName: session_name === EMPTY_SESSION_NAME ? "" : session_name,
     });
 
   // HANDLERS
@@ -80,21 +84,6 @@ export const SessionContent: React.FC<SessionContentProps> = ({
       { shallow: true }
     );
   };
-
-  // SESSION FEEDBACK HACK
-  // Check original requests for feedback property
-  const requestWithFeedback = useMemo(() => {
-    return requests.requests.requests?.find(
-      (r) => r.properties["Helicone-Session-Feedback"]
-    );
-  }, [requests.requests.requests]);
-  const sessionFeedbackValue = useMemo(() => {
-    const feedback =
-      requestWithFeedback?.properties["Helicone-Session-Feedback"];
-    if (feedback === "1") return true;
-    if (feedback === "0") return false;
-    return null;
-  }, [requestWithFeedback]);
 
   // AGREGATED SESSION STATS (Derived from the processed session object)
   const startTime = useMemo(() => {
@@ -190,7 +179,11 @@ export const SessionContent: React.FC<SessionContentProps> = ({
               </Link>
               <Small className="font-semibold">/</Small>
               <Link
-                href={`/sessions?name=${encodeURIComponent(session_name)}`}
+                href={
+                  session_name === EMPTY_SESSION_NAME
+                    ? "/sessions"
+                    : `/sessions?name=${encodeURIComponent(session_name)}`
+                }
                 className="no-underline"
               >
                 <Muted className="text-sm">{session_name}</Muted>
@@ -239,11 +232,7 @@ export const SessionContent: React.FC<SessionContentProps> = ({
 
             <div className="h-4 w-px bg-border" />
 
-            <FeedbackAction
-              id={session_id}
-              type="session"
-              defaultValue={sessionFeedbackValue}
-            />
+            <SessionTag id={session_id} type={TagType.SESSION} />
           </div>
         }
         foldContent={
