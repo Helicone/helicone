@@ -285,8 +285,6 @@ const generateMockRequest = (
       provider: "OPENAI",
       timeToFirstToken: Math.floor(Math.random() * 500) + 100,
       scores: scores,
-      cacheEnabled: false,
-      cacheReferenceId: DEFAULT_UUID,
     },
   };
 };
