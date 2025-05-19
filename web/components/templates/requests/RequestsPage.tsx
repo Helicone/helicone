@@ -82,6 +82,11 @@ interface RequestsPageV2Props {
   emptyStateOptions?: RequestsPageEmptyStateOptions;
 }
 
+type TRequest = {
+  id: string;
+  metadata: MappedLLMRequest;
+};
+
 export default function RequestsPage(props: RequestsPageV2Props) {
   const {
     currentPage,
@@ -91,7 +96,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     initialRequestId,
     userId,
     rateLimited = false,
-    organizationLayoutAvailable,
     emptyStateOptions = {
       options: EMPTY_STATE_PAGES.requests,
       isVisible: true,
@@ -234,7 +238,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     properties: realProperties,
     refetch: realRefetch,
     filterMap: realFilterMap,
-    searchPropertyFilters: realSearchPropertyFilters,
   } = useRequestsPageV2(
     page,
     currentPageSize,
@@ -322,15 +325,16 @@ export default function RequestsPage(props: RequestsPageV2Props) {
 
   const {
     selectMode,
-    toggleSelectMode: _toggleSelectMode,
     selectedIds,
     toggleSelection,
     selectAll,
     isShiftPressed,
-  } = useSelectMode({
-    items: requests,
-    getItemId: (request: MappedLLMRequest) =>
-      request.heliconeMetadata.requestId,
+  } = useSelectMode<TRequest>({
+    items: requests.map((request, index) => ({
+      id: index.toString(),
+      metadata: request,
+    })),
+    getItemId: (request) => request.id,
   });
 
   const requestWithoutStream = requests.find((r) => {
@@ -340,6 +344,12 @@ export default function RequestsPage(props: RequestsPageV2Props) {
       r.heliconeMetadata.provider === "OPENAI"
     );
   });
+
+  const selectedRequests = useMemo(() => {
+    return requests.filter((_, index) =>
+      selectedIds.includes(index.toString())
+    );
+  }, [requests, selectedIds]);
 
   /* -------------------------------------------------------------------------- */
   /*                                  CALLBACKS                                 */
@@ -470,7 +480,10 @@ export default function RequestsPage(props: RequestsPageV2Props) {
         (event.target.tagName.toLowerCase() === "button" ||
           event.target.closest("button") !== null);
       if (isShiftPressed || event?.metaKey || isCheckboxClick) {
-        toggleSelection(row);
+        toggleSelection({
+          id: index.toString(),
+          metadata: row,
+        });
         return;
       } else {
         setSelectedDataIndex(index);
@@ -632,7 +645,13 @@ export default function RequestsPage(props: RequestsPageV2Props) {
                 {/* Export button */}
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <ExportButton rows={requests} />
+                    <ExportButton
+                      rows={
+                        selectedRequests.length > 0
+                          ? selectedRequests
+                          : requests
+                      }
+                    />
                   </TooltipTrigger>
                   <TooltipContent>Export data</TooltipContent>
                 </Tooltip>
@@ -662,7 +681,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
               tableRef={tableRef}
               activeColumns={activeColumns}
               setActiveColumns={setActiveColumns}
-              highlightedIds={selectedData ? [selectedData.id] : selectedIds}
               checkboxMode={"on_hover"}
               defaultData={requests}
               defaultColumns={columnsWithProperties}
@@ -793,7 +811,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
       {/* Floating Elements */}
       <ThemedModal open={modalOpen} setOpen={setModalOpen}>
         <NewDataset
-          request_ids={selectedIds}
+          request_ids={selectedRequests.map((request) => request.id)}
           onComplete={() => {
             setModalOpen(false);
           }}
