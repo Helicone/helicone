@@ -257,6 +257,8 @@ const generateMockRequest = (
       requestId: id,
       path: "/v1/chat/completions",
       countryCode: "US",
+      cacheEnabled: false,
+      cacheReferenceId: DEFAULT_UUID,
       createdAt: time.toISOString(),
       totalTokens: totalTokens,
       promptTokens: promptTokens,
@@ -283,8 +285,6 @@ const generateMockRequest = (
       provider: "OPENAI",
       timeToFirstToken: Math.floor(Math.random() * 500) + 100,
       scores: scores,
-      cacheEnabled: false,
-      cacheReferenceId: DEFAULT_UUID,
     },
   };
 };
