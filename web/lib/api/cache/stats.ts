@@ -91,19 +91,23 @@ export async function getTimeSavedClickhouse(
   const query = `
   WITH cache_hits AS (
     SELECT 
-      request_id,
+      count (*) as count,
       cache_reference_id,
-      latency
     FROM request_response_rmt
     WHERE (${builtFilter.filter})
       AND cache_reference_id != '${DEFAULT_UUID}'
+      AND request_created_at > now() - interval '30 days'
+      AND cache_enabled = true
+    GROUP BY cache_reference_id
   )
   SELECT 
-    sum(original.latency) as total_latency_ms
+    sum(request_response_rmt.latency) as total_latency_ms
   FROM cache_hits ch
-  LEFT JOIN request_response_rmt original 
-    ON ch.cache_reference_id = original.request_id
-  WHERE original.cache_reference_id = '${DEFAULT_UUID}'
+  LEFT JOIN request_response_rmt
+    ON ch.cache_reference_id = request_response_rmt.request_id
+  WHERE request_response_rmt.cache_reference_id = '${DEFAULT_UUID}'
+  AND request_created_at > now() - interval '90 days'
+  AND ${builtFilter.filter}
   `;
 
   const queryResult = await dbQueryClickhouse<{ total_latency_ms: number }>(
@@ -180,20 +184,23 @@ export async function getTopRequestsClickhouse(
     FROM request_response_rmt
     WHERE ${builtFilter.filter}
       AND cache_reference_id != '${DEFAULT_UUID}'
+      AND request_created_at > now() - interval '30 days'
     GROUP BY cache_reference_id
+    LIMIT 10
   )
   SELECT 
-    orig.request_id,
+    request_response_rmt.request_id,
     ch.count,
     ch.first_hit as first_used,
     ch.last_hit as last_used,
-    orig.model,
-    orig.request_body as prompt,
-    orig.response_body as response
+    request_response_rmt.model,
+    request_response_rmt.request_body as prompt,
+    request_response_rmt.response_body as response
   FROM cache_hits ch
-  JOIN request_response_rmt orig 
-    ON ch.cache_reference_id = orig.request_id
-  WHERE orig.cache_reference_id = '${DEFAULT_UUID}'
+  JOIN request_response_rmt 
+    ON ch.cache_reference_id = request_response_rmt.request_id
+  WHERE request_response_rmt.cache_reference_id = '${DEFAULT_UUID}'
+  AND ${builtFilter.filter}
   ORDER BY count DESC
   LIMIT 10`;
 
