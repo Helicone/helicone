@@ -40,6 +40,9 @@ FROM (
         response_body,
         model,
         provider
-    FROM request_response_rmt LEFT JOIN request_response_rmt original ON request_response_rmt.cache_reference_id = original.request_id
-    WHERE original.latency is NOT NULL 
+    FROM request_response_rmt
+    LEFT JOIN request_response_rmt original ON request_response_rmt.cache_reference_id = original.request_id
+    WHERE request_id != '00000000-0000-0000-0000-000000000000' 
+    AND request_created_at >= '2025-05-20 21:52:00'
+    AND original.request_created_at >= '2025-05-20 21:52:00'
 ) GROUP BY organization_id, date, hour, request_id, model
