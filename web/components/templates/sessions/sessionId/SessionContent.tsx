@@ -26,7 +26,7 @@ import { Col } from "../../../layout/common/col";
 import ExportButton from "../../../shared/themed/table/exportButton";
 import TreeView from "./Tree/TreeView";
 
-import { TagType } from "@/packages/common/sessions/tags";
+import { TagType } from "@helicone-package/common/sessions/tags";
 import Link from "next/link";
 import { SessionTag } from "../../feedback/sessionTag";
 

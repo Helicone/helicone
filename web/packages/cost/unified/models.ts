@@ -386,6 +386,29 @@ export const modelMapping: CreatorModelMapping = {
         },
       ],
     },
+    "Gemini 1.5 Flash": {
+      defaultTokenCost: {
+        input: 0,
+        output: 0,
+      },
+      defaultParameters: {
+        response_format: true,
+      },
+      providers: [
+        {
+          provider: "GOOGLE_GEMINI",
+          modelString: "gemini-1.5-flash",
+        },
+        {
+          provider: "GOOGLE_VERTEXAI",
+          modelString: "gemini-1.5-flash",
+        },
+        {
+          provider: "OPENROUTER",
+          modelString: "google/gemini-flash-1.5",
+        },
+      ],
+    },
     "Gemini 1.5 Pro": {
       defaultTokenCost: {
         input: 0,

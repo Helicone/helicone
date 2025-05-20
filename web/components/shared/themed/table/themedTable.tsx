@@ -83,7 +83,6 @@ interface ThemedTableProps<T extends { id?: string; subRows?: T[] }> {
     onSaveFilterCallback?: () => void;
     layoutPage: "dashboard" | "requests";
   };
-  highlightedIds?: string[];
   /**
    * Controls the visibility of checkboxes in the table
    * - "always_visible": Checkboxes are always shown
@@ -127,7 +126,6 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
     sortable,
     onRowSelect,
     noDataCTA,
-    highlightedIds: checkedIds,
     checkboxMode = "never",
     children,
     onSelectAll,
@@ -139,7 +137,6 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
   } = props;
 
   const [expanded, setExpanded] = React.useState<ExpandedState>({});
-
   const table = useReactTable({
     data: defaultData,
     columns: defaultColumns,
@@ -305,8 +302,7 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                   className={clsx(
                     "group relative",
                     rowLink && "relative",
-                    checkedIds?.includes(row.original?.id ?? "") ||
-                      selectedIds?.includes(row.original?.id ?? "")
+                    selectedIds?.includes(row.id ?? "")
                       ? "!bg-sky-100 dark:!bg-slate-800/50"
                       : clsx(
                           "hover:bg-sky-50 dark:hover:bg-slate-700/50",
@@ -342,7 +338,7 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                       checkboxMode === "on_hover"
                         ? clsx(
                             "opacity-0 group-hover:opacity-100 transition-opacity duration-150",
-                            selectedIds?.includes(row.original?.id ?? "") &&
+                            selectedIds?.includes(row.id ?? "") &&
                               "!opacity-100"
                           )
                         : "",
@@ -353,7 +349,7 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                     <div className="flex justify-center items-center h-full">
                       <Checkbox
                         variant="helicone"
-                        checked={selectedIds?.includes(row.original?.id ?? "")}
+                        checked={selectedIds?.includes(row.id ?? "")}
                       />
                     </div>
                   </td>
@@ -365,8 +361,7 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                         i === 0 && "pr-2",
                         i > 0 && "px-2",
                         i === 0 && "relative",
-                        checkedIds?.includes(row.original?.id ?? "") ||
-                          selectedIds?.includes(row.original?.id ?? "")
+                        selectedIds?.includes(row.id ?? "")
                           ? "bg-inherit"
                           : row.getCanExpand()
                           ? "bg-inherit"
