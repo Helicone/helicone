@@ -3,6 +3,7 @@ import {
   buildFilterWithAuth,
   buildFilterWithAuthClickHouse,
   buildFilterWithAuthClickHouseCacheHits,
+  buildFilterWithAuthClickHouseCacheMetrics,
 } from "../../../services/lib/filters/filters";
 import { Result, resultMap } from "../../../packages/common/result";
 import {
@@ -18,17 +19,16 @@ export async function getCacheCountClickhouse(
   orgId: string,
   filter: FilterNode
 ): Promise<Result<number, string>> {
-  const builtFilter = await buildFilterWithAuthClickHouse({
+  const builtFilter = await buildFilterWithAuthClickHouseCacheMetrics({
     org_id: orgId,
     filter,
     argsAcc: [],
   });
 
   const query = `
-  select count(*) as count 
-  from request_response_rmt 
-  where ${builtFilter.filter}
-    AND cache_reference_id != '${DEFAULT_UUID}'`;
+  select sum(cache_hit_count) as count 
+  from cache_metrics 
+  where ${builtFilter.filter}`;
 
   const queryResult = await dbQueryClickhouse<{ count: number }>(
     query,
@@ -41,25 +41,27 @@ export async function getModelMetricsClickhouse(
   orgId: string,
   filter: FilterNode
 ): Promise<Result<ModelMetrics[], string>> {
-  const builtFilter = await buildFilterWithAuthClickHouse({
+  const builtFilter = await buildFilterWithAuthClickHouseCacheMetrics({
     org_id: orgId,
     filter,
     argsAcc: [],
   });
+
+
   const query = `
-  select model, 
-    provider,
-    sum(completion_tokens) as sum_completion_tokens, 
-    sum(prompt_tokens) as sum_prompt_tokens, 
-    sum(completion_tokens + prompt_tokens) as sum_tokens,
-    sum(prompt_cache_write_tokens) as prompt_cache_write_tokens,
-    sum(prompt_cache_read_tokens) as prompt_cache_read_tokens,
-    sum(prompt_audio_tokens) as prompt_audio_tokens,
-    sum(completion_audio_tokens) as completion_audio_tokens
-  from request_response_rmt 
-  where (${builtFilter.filter})
-    AND cache_reference_id != '${DEFAULT_UUID}'
-  group by model, provider`;
+  SELECT
+    provider,    
+    model,
+    sum(saved_completion_tokens) as sum_completion_tokens,
+    sum(saved_prompt_tokens) as sum_prompt_tokens,
+    sum(saved_completion_tokens + saved_prompt_tokens) as sum_tokens,
+    sum(saved_prompt_cache_write_tokens) as prompt_cache_write_tokens,
+    sum(saved_prompt_cache_read_tokens) as prompt_cache_read_tokens,
+    sum(saved_prompt_audio_tokens) as prompt_audio_tokens,
+    sum(saved_completion_audio_tokens) as completion_audio_tokens
+  FROM cache_metrics
+  WHERE (${builtFilter.filter})
+  GROUP BY model, provider`;
 
   const rmtResult = await dbQueryClickhouse<ModelMetrics>(
     query,
@@ -83,33 +85,17 @@ export async function getTimeSavedClickhouse(
   orgId: string,
   filter: FilterNode
 ) {
-  const builtFilter = await buildFilterWithAuthClickHouse({
+  const builtFilter = await buildFilterWithAuthClickHouseCacheMetrics({
     org_id: orgId,
     filter,
     argsAcc: [],
-  });
+  })
   const query = `
-  WITH cache_hits AS (
-    SELECT 
-      count (*) as count,
-      cache_reference_id,
-    FROM request_response_rmt
-    WHERE (${builtFilter.filter})
-      AND cache_reference_id != '${DEFAULT_UUID}'
-      AND request_created_at > now() - interval '30 days'
-      AND cache_enabled = true
-    GROUP BY cache_reference_id
-  )
-  SELECT 
-    sum(request_response_rmt.latency) as total_latency_ms
-  FROM cache_hits ch
-  LEFT JOIN request_response_rmt
-    ON ch.cache_reference_id = request_response_rmt.request_id
-  WHERE request_response_rmt.cache_reference_id = '${DEFAULT_UUID}'
-  AND request_created_at > now() - interval '90 days'
-  AND ${builtFilter.filter}
+  SELECT sum(saved_latency_ms) as total_latency_ms
+  FROM cache_metrics
+  WHERE (${builtFilter.filter})
+  AND date > now() - interval '30 days'
   `;
-
   const queryResult = await dbQueryClickhouse<{ total_latency_ms: number }>(
     query,
     builtFilter.argsAcc
@@ -168,41 +154,27 @@ export async function getTopRequestsClickhouse(
   orgId: string,
   filter: FilterNode
 ) {
-  const builtFilter = await buildFilterWithAuthClickHouse({
+  const builtFilter = await buildFilterWithAuthClickHouseCacheMetrics({
     org_id: orgId,
     filter,
     argsAcc: [],
   });
 
   const query = `
-  WITH cache_hits AS (
-    SELECT 
-      cache_reference_id,
-      count(*) as count,
-      min(request_created_at) as first_hit,
-      max(request_created_at) as last_hit
-    FROM request_response_rmt
-    WHERE ${builtFilter.filter}
-      AND cache_reference_id != '${DEFAULT_UUID}'
-      AND request_created_at > now() - interval '30 days'
-    GROUP BY cache_reference_id
-    LIMIT 10
-  )
-  SELECT 
-    request_response_rmt.request_id,
-    ch.count,
-    ch.first_hit as first_used,
-    ch.last_hit as last_used,
-    request_response_rmt.model,
-    request_response_rmt.request_body as prompt,
-    request_response_rmt.response_body as response
-  FROM cache_hits ch
-  JOIN request_response_rmt 
-    ON ch.cache_reference_id = request_response_rmt.request_id
-  WHERE request_response_rmt.cache_reference_id = '${DEFAULT_UUID}'
-  AND ${builtFilter.filter}
-  ORDER BY count DESC
-  LIMIT 10`;
+  SELECT
+    request_id,
+    sum(cache_hit_count) as count,
+    min(first_hit) as first_used,
+    max(last_hit) as last_used,
+    any(model) as model,
+    any(request_body) as prompt,
+    any(response_body) as response
+  FROM cache_metrics
+  WHERE ${builtFilter.filter}
+    AND date > now() - interval '30 days'
+  GROUP BY request_id
+  LIMIT 10
+  `;
 
   const rmtResult = await dbQueryClickhouse<{
     request_id: string;

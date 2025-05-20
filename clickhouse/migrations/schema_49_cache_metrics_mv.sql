@@ -6,6 +6,8 @@ SELECT
     date,
     hour,
     request_id,
+    model,
+    any(provider) as provider,
     count() AS cache_hit_count,
     sum(latency) AS saved_latency_ms,
     sum(original_completion_tokens) AS saved_completion_tokens,
@@ -13,7 +15,12 @@ SELECT
     sum(original_completion_audio_tokens) AS saved_completion_audio_tokens,
     sum(original_prompt_audio_tokens) AS saved_prompt_audio_tokens,
     sum(original_prompt_cache_write_tokens) AS saved_prompt_cache_write_tokens,
-    sum(original_prompt_cache_read_tokens) AS saved_prompt_cache_read_tokens
+    sum(original_prompt_cache_read_tokens) AS saved_prompt_cache_read_tokens,
+
+    min(request_created_at) AS first_hit,
+    max(request_created_at) AS last_hit,
+    any(request_body) as request_body,
+    any(response_body) as response_body
 FROM (
     SELECT
         organization_id,
@@ -26,7 +33,13 @@ FROM (
         original.completion_audio_tokens AS original_completion_audio_tokens,
         original.prompt_audio_tokens AS original_prompt_audio_tokens,
         original.prompt_cache_write_tokens AS original_prompt_cache_write_tokens,
-        original.prompt_cache_read_tokens AS original_prompt_cache_read_tokens
+        original.prompt_cache_read_tokens AS original_prompt_cache_read_tokens,
+
+        request_created_at,
+        request_body,
+        response_body,
+        model,
+        provider
     FROM request_response_rmt LEFT JOIN request_response_rmt original ON request_response_rmt.cache_reference_id = original.request_id
     WHERE original.latency is NOT NULL 
-) GROUP BY organization_id, date, hour, request_id
+) GROUP BY organization_id, date, hour, request_id, model
