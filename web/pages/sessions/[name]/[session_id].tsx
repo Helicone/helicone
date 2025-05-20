@@ -1,6 +1,10 @@
 import { ReactElement, useMemo, useState } from "react";
 import AuthLayout from "../../../components/layout/auth/authLayout";
-import { SessionContent } from "../../../components/templates/sessions/sessionId/SessionContent";
+import {
+  EMPTY_SESSION_NAME,
+  HELICONE_EMPTY_SESSION_NAME,
+  SessionContent,
+} from "../../../components/templates/sessions/sessionId/SessionContent";
 import { withAuthSSR } from "../../../lib/api/handlerWrappers";
 import {
   convertRealtimeRequestToSteps,
@@ -9,7 +13,7 @@ import {
 import { sessionFromHeliconeRequests } from "../../../lib/sessions/sessionsFromHeliconeTequests";
 import { useGetRequests } from "../../../services/hooks/requests";
 
-const SessionDetail = ({
+export const SessionDetail = ({
   session_id,
   session_name,
 }: {
@@ -32,7 +36,7 @@ const SessionDetail = ({
               equals: session_id as string,
             },
             "Helicone-Session-Name": {
-              equals: session_name as string,
+              equals: session_name as string, // A hackright now but users that actually name it "Unnamed" will specifically filter the ones that are ""
             },
           },
         },

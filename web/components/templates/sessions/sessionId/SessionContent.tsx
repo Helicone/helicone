@@ -31,6 +31,8 @@ import Link from "next/link";
 import { SessionTag } from "../../feedback/sessionTag";
 
 export const EMPTY_SESSION_NAME = "Unnamed";
+export const HELICONE_EMPTY_SESSION_NAME = "";
+
 interface SessionContentProps {
   session: Session;
   session_id: string;
