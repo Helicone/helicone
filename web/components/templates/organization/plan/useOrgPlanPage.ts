@@ -1,5 +1,5 @@
 import { UseQueryResult } from "@tanstack/react-query";
-import { Result, resultMap } from "@helicone-package/common/result";
+import { Result, resultMap } from "@/packages/common/result";
 import { TimeIncrement } from "../../../../lib/timeCalculations/fetchTimeData";
 import { RateLimitOverTime } from "../../../../pages/api/metrics/RateLimitOverTime";
 import { useBackendMetricCall } from "../../../../services/hooks/useBackendFunction";

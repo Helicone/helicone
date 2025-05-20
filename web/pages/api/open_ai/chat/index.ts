@@ -8,7 +8,7 @@ import {
   ChatCompletionTool,
 } from "openai/resources/chat";
 import { DEMO_EMAIL } from "../../../../lib/constants";
-import { Result } from "@helicone-package/common/result";
+import { Result } from "@/packages/common/result";
 
 export default async function handler(
   req: NextApiRequest,

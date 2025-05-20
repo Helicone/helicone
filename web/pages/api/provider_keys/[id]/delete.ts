@@ -3,7 +3,7 @@ import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../../lib/api/handlerWrappers";
-import { Result } from "@helicone-package/common/result";
+import { Result } from "@/packages/common/result";
 import { Permission } from "../../../../services/lib/user";
 
 async function handler({

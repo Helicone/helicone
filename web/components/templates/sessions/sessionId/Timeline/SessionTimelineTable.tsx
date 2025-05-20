@@ -28,7 +28,7 @@ import { ChevronDown, ChevronRight, ChevronsUpDown } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useMemo } from "react";
 import { TimeInterval } from "../../../../../lib/timeCalculations/time";
-import { Result } from "@helicone-package/common/result";
+import { Result } from "@/packages/common/result";
 import { SingleFilterDef } from "../../../../../services/lib/filters/frontendFilterDefs";
 import { OrganizationFilter } from "../../../../../services/lib/organization_layout/organization_layout";
 import { SortDirection } from "../../../../../services/lib/sorts/requests/sorts";
