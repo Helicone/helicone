@@ -2,7 +2,7 @@ import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { Result } from "../../../packages/common/result";
+import { Result } from "@/packages/common/result";
 import {
   DecryptedProviderKey,
   getDecryptedProviderKeysByOrgId,

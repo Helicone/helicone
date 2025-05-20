@@ -1,6 +1,6 @@
-import { modelMapping } from "packages/cost/unified/models";
-import { Provider } from "packages/cost/unified/types";
-import { Message, Tool } from "packages/llm-mapper/types";
+import { modelMapping } from "@helicone-package/cost/unified/models";
+import { Provider } from "@helicone-package/cost/unified/types";
+import { Message, Tool } from "@helicone-package/llm-mapper/types";
 import { z } from "zod";
 
 export interface GenerateParams {

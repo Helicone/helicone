@@ -1,5 +1,5 @@
-import { clickhousePriceCalc } from "../../../packages/cost";
-import { Result, resultMap } from "../../../packages/common/result";
+import { clickhousePriceCalc } from "@helicone-package/cost";
+import { Result, resultMap } from "@/packages/common/result";
 import { getXOverTime } from "./getXOverTime";
 
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";

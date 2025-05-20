@@ -1,5 +1,5 @@
 import { JsonRenderer } from "@/components/templates/requests/components/chatComponent/single/JsonRenderer";
-import { Message } from "packages/llm-mapper/types";
+import { Message } from "@helicone-package/llm-mapper/types";
 
 interface FunctionCallBoxProps {
   message: Message;

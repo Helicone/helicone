@@ -17,7 +17,7 @@ import {
 import { Column } from "@tanstack/react-table";
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
-import { Result } from "../../../../packages/common/result";
+import { Result } from "../@helicone-package/common/result";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
 import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";
