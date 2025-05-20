@@ -1,0 +1,6 @@
+{
+  "name": "@helicone-package/llm-mapper",
+  "types": "./",
+  "sideEffects": false,
+  "version": "1.0.0"
+}

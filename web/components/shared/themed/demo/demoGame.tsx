@@ -1,7 +1,7 @@
 import StartPage from "./startPage";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Resizable } from "react-resizable";
+import { Resizable } from "re-resizable";
 
 const calculateInitialPosition = () => {
   if (typeof window === "undefined") return { x: 20, y: 20 }; // Default for SSR
@@ -57,25 +57,23 @@ export const DemoGame = ({
     setPosition(calculateInitialPosition());
   }, []);
 
-  const onResize = (
-    event: React.SyntheticEvent,
-    { size }: { size: { width: number; height: number } }
-  ) => {
-    setSize({ width: size.width, height: size.height });
-  };
-
   useEffect(() => {
     setPosition(calculateInitialPosition());
   }, []);
 
   return (
     <Resizable
-      width={size.width}
-      height={size.height}
-      onResize={onResize}
-      minConstraints={[300, 400]}
-      maxConstraints={[800, 800]}
-      handle={<div className="react-resizable-handle resize-handle" />}
+      size={{ width: size.width, height: size.height }}
+      onResizeStop={(e, direction, ref, d) => {
+        setSize({
+          width: size.width + d.width,
+          height: size.height + d.height,
+        });
+      }}
+      minWidth={300}
+      minHeight={400}
+      maxWidth={800}
+      maxHeight={800}
     >
       <div
         style={{
