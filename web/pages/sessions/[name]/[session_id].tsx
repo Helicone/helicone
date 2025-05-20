@@ -2,7 +2,6 @@ import { ReactElement, useMemo, useState } from "react";
 import AuthLayout from "../../../components/layout/auth/authLayout";
 import {
   EMPTY_SESSION_NAME,
-  HELICONE_EMPTY_SESSION_NAME,
   SessionContent,
 } from "../../../components/templates/sessions/sessionId/SessionContent";
 import { withAuthSSR } from "../../../lib/api/handlerWrappers";
@@ -36,7 +35,10 @@ export const SessionDetail = ({
               equals: session_id as string,
             },
             "Helicone-Session-Name": {
-              equals: session_name as string, // A hackright now but users that actually name it "Unnamed" will specifically filter the ones that are ""
+              equals:
+                session_name === EMPTY_SESSION_NAME
+                  ? ""
+                  : (session_name as string), // A hackright now but users that actually name it "Unnamed" will specifically filter the ones that are ""
             },
           },
         },
