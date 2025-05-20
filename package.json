@@ -2,6 +2,7 @@
   "name": "helicone-monorepo",
   "private": true,
   "workspaces": [
+    "bifrost",
     "web",
     "packages/*"
   ],
