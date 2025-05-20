@@ -17,6 +17,8 @@ import {
   PromptRecord,
   toHeliconeRequest,
 } from "./HandlerContext";
+import { DEFAULT_UUID } from "../../packages/llm-mapper/types";
+
 
 type S3Record = {
   requestId: string;
@@ -472,14 +474,14 @@ export class LoggingHandler extends AbstractLogHandler {
           ? request.userId
           : String(request.userId),
       request_id: request.id,
-      completion_tokens: usage.completionTokens ?? 0,
+      completion_tokens: context.message.log.request.cacheReferenceId != DEFAULT_UUID ? 0 : usage.completionTokens ?? 0,
       latency: response.delayMs ?? 0,
       model: context.processedLog.model ?? "",
-      prompt_tokens: usage.promptTokens ?? 0,
-      prompt_cache_write_tokens: usage.promptCacheWriteTokens ?? 0,
-      prompt_cache_read_tokens: usage.promptCacheReadTokens ?? 0,
-      prompt_audio_tokens: usage.promptAudioTokens ?? 0,
-      completion_audio_tokens: usage.completionAudioTokens ?? 0,
+      prompt_tokens: context.message.log.request.cacheReferenceId != DEFAULT_UUID ? 0 : usage.promptTokens ?? 0,
+      prompt_cache_write_tokens: context.message.log.request.cacheReferenceId != DEFAULT_UUID ? 0 : usage.promptCacheWriteTokens ?? 0,
+      prompt_cache_read_tokens: context.message.log.request.cacheReferenceId != DEFAULT_UUID ? 0 : usage.promptCacheReadTokens ?? 0,
+      prompt_audio_tokens: context.message.log.request.cacheReferenceId != DEFAULT_UUID ? 0 : usage.promptAudioTokens ?? 0,
+      completion_audio_tokens: context.message.log.request.cacheReferenceId != DEFAULT_UUID ? 0 : usage.completionAudioTokens ?? 0,
       request_created_at: formatTimeString(
         request.requestCreatedAt.toISOString()
       ),
