@@ -30,17 +30,21 @@ export const SessionDetail = ({
     {
       left: {
         request_response_rmt: {
-          properties: {
-            "Helicone-Session-Id": {
-              equals: session_id as string,
-            },
-            "Helicone-Session-Name": {
-              equals:
-                session_name === EMPTY_SESSION_NAME
-                  ? ""
-                  : (session_name as string), // A hackright now but users that actually name it "Unnamed" will specifically filter the ones that are ""
-            },
-          },
+          properties:
+            session_name !== EMPTY_SESSION_NAME
+              ? {
+                  "Helicone-Session-Id": {
+                    equals: session_id as string,
+                  },
+                  "Helicone-Session-Name": {
+                    equals: session_name as string,
+                  },
+                }
+              : {
+                  "Helicone-Session-Id": {
+                    equals: session_id as string,
+                  },
+                },
         },
       },
       operator: "and",
