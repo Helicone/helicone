@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
-import { providers } from "@/packages/cost/providers/mappings";
+import { providers } from "@helicone-package/cost/providers/mappings";
 
 interface RelatedComparisonsProps {
   modelA: string;

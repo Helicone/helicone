@@ -1,15 +1,21 @@
 import { ReactElement, useMemo, useState } from "react";
-import AuthLayout from "../../components/layout/auth/authLayout";
-import { SessionContent } from "../../components/templates/sessions/sessionId/SessionContent";
-import { withAuthSSR } from "../../lib/api/handlerWrappers";
+import AuthLayout from "../../../components/layout/auth/authLayout";
+import { SessionContent } from "../../../components/templates/sessions/sessionId/SessionContent";
+import { withAuthSSR } from "../../../lib/api/handlerWrappers";
 import {
   convertRealtimeRequestToSteps,
   isRealtimeRequest,
-} from "../../lib/sessions/realtimeSession";
-import { sessionFromHeliconeRequests } from "../../lib/sessions/sessionsFromHeliconeTequests";
-import { useGetRequests } from "../../services/hooks/requests";
+} from "../../../lib/sessions/realtimeSession";
+import { sessionFromHeliconeRequests } from "../../../lib/sessions/sessionsFromHeliconeTequests";
+import { useGetRequests } from "../../../services/hooks/requests";
 
-const SessionDetail = ({ session_id }: { session_id: string }) => {
+const SessionDetail = ({
+  session_id,
+  session_name,
+}: {
+  session_id: string;
+  session_name: string;
+}) => {
   const ThreeMonthsAgo = useMemo(() => {
     return new Date(Date.now() - 30 * 24 * 60 * 60 * 1000 * 3);
   }, []);
@@ -24,6 +30,9 @@ const SessionDetail = ({ session_id }: { session_id: string }) => {
           properties: {
             "Helicone-Session-Id": {
               equals: session_id as string,
+            },
+            "Helicone-Session-Name": {
+              equals: session_name as string,
             },
           },
         },
@@ -58,25 +67,13 @@ const SessionDetail = ({ session_id }: { session_id: string }) => {
       }
     });
   }, [requestsHookResult.requests.requests]);
-  // -> Create session object
+
   const session = sessionFromHeliconeRequests(processedRequests);
-
-  // Extract session name from requests properties (use original requests for this)
-  const sessionName = useMemo(() => {
-    const reqs = requestsHookResult.requests.requests ?? [];
-    for (const req of reqs) {
-      if (req.properties && req.properties["Helicone-Session-Name"]) {
-        return req.properties["Helicone-Session-Name"] as string;
-      }
-    }
-    return "Unnamed"; // Default if not found
-  }, [requestsHookResult.requests.requests]);
-
   return (
     <SessionContent
       session={session}
       session_id={session_id}
-      session_name={sessionName}
+      session_name={session_name}
       requests={requestsHookResult}
       isLive={isLive}
       setIsLive={setIsLive}
@@ -91,14 +88,22 @@ SessionDetail.getLayout = function getLayout(page: ReactElement) {
 export default SessionDetail;
 
 export const getServerSideProps = withAuthSSR(async (options) => {
-  const session_id = options.context.query.session_id;
+  const { session_id, name: session_name } = options.context.query;
+
   const decodedSessionId =
     typeof session_id === "string"
       ? decodeURIComponent(session_id)
       : session_id;
+
+  const decodedSessionName =
+    typeof session_name === "string"
+      ? decodeURIComponent(session_name)
+      : session_name;
+
   return {
     props: {
       session_id: decodedSessionId,
+      session_name: decodedSessionName,
     },
   };
 });

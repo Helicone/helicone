@@ -3,7 +3,6 @@ import moment from "moment";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   buildFilterWithAuthClickHouse,
-  buildFilterWithAuthClickHouseCacheHits,
   buildFilterWithAuthClickHouseRateLimits,
   clickhouseParam,
 } from "../../../services/lib/filters/filters";
@@ -16,6 +15,7 @@ import {
 import { TimeIncrement } from "../../timeCalculations/fetchTimeData";
 import { dbQueryClickhouse, printRunnableQuery } from "../db/dbExecute";
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
+import { DEFAULT_UUID } from "@/packages/llm-mapper/types";
 
 function convertDbIncrement(dbIncrement: TimeIncrement): string {
   return dbIncrement === "min" ? "MINUTE" : dbIncrement;
@@ -166,8 +166,8 @@ ORDER BY ${dateTrunc} ASC ${fill}
   );
 }
 
-export async function getXOverTimeCacheHits<T>(
-  { timeFilter, orgId, dbIncrement, timeZoneDifference }: DataOverTimeRequest,
+export async function getXOverTimeCacheHits<T extends { count: number }>(
+  request: DataOverTimeRequest,
   countColumn: string,
   groupByColumns: string[] = [],
   printQuery = false
@@ -179,86 +179,129 @@ export async function getXOverTimeCacheHits<T>(
     string
   >
 > {
-  const startDate = new Date(timeFilter.start);
-  const endDate = new Date(timeFilter.end);
-  const timeFilterNode: FilterNode = {
+  const startDate = new Date(request.timeFilter.start);
+  const endDate = new Date(request.timeFilter.end);
+  const timeFilterNodeRmt: FilterNode = {
     left: {
-      cache_hits: {
-        created_at: {
+      request_response_rmt: {
+        request_created_at: {
           gte: startDate,
         },
       },
     },
     right: {
-      cache_hits: {
-        created_at: {
+      request_response_rmt: {
+        request_created_at: {
           lte: endDate,
         },
       },
     },
     operator: "and",
   };
-  const filter: FilterNode = timeFilterNode;
 
-  if (!isValidTimeFilter(timeFilter)) {
+  if (!isValidTimeFilter(request.timeFilter)) {
     return { data: null, error: "Invalid time filter" };
   }
-  if (!isValidTimeIncrement(dbIncrement)) {
+  if (!isValidTimeIncrement(request.dbIncrement)) {
     return { data: null, error: "Invalid time increment" };
   }
-  if (!isValidTimeZoneDifference(timeZoneDifference)) {
+  if (!isValidTimeZoneDifference(request.timeZoneDifference)) {
     return { data: null, error: "Invalid time zone difference" };
   }
-  const { filter: builtFilter, argsAcc: builtFilterArgsAcc } =
-    await buildFilterWithAuthClickHouseCacheHits({
-      org_id: orgId,
-      filter,
+
+  const { filter: builtFilterRmt, argsAcc: builtFilterArgsAccRmt } =
+    await buildFilterWithAuthClickHouse({
+      org_id: request.orgId,
+      filter: timeFilterNodeRmt,
       argsAcc: [],
     });
-  const { fill, argsAcc } = buildFill(
+
+  const { fill: fillRmt, argsAcc: argsAccRmt } = buildFill(
     startDate,
     endDate,
-    dbIncrement,
-    timeZoneDifference,
-    builtFilterArgsAcc
-  );
-  const dateTrunc = buildDateTrunc(
-    dbIncrement,
-    timeZoneDifference,
-    "created_at"
+    request.dbIncrement,
+    request.timeZoneDifference,
+    builtFilterArgsAccRmt
   );
 
-  const query = `
-SELECT
-  ${dateTrunc} as created_at_trunc,
-  ${groupByColumns.concat([countColumn]).join(", ")}
-FROM cache_hits
-WHERE (
-  ${builtFilter}
+  const dateTruncRmt = buildDateTrunc(
+    request.dbIncrement,
+    request.timeZoneDifference,
+    "request_created_at"
+  );
+
+  const queryRmt = `
+WITH rmt AS (
+  SELECT
+    ${dateTruncRmt} as created_at_trunc,
+    ${groupByColumns.concat([countColumn]).join(", ")}
+  FROM request_response_rmt
+  WHERE (
+    ${builtFilterRmt}
+    AND cache_reference_id != '${DEFAULT_UUID}'
+  )
+  GROUP BY ${groupByColumns.concat([dateTruncRmt]).join(", ")}
+  ORDER BY ${dateTruncRmt} ASC ${fillRmt}
 )
-GROUP BY ${groupByColumns.concat([dateTrunc]).join(", ")}
-ORDER BY ${dateTrunc} ASC ${fill}
+SELECT * FROM rmt
 `;
 
   if (printQuery) {
-    await printRunnableQuery(query, argsAcc);
+    printRunnableQuery(queryRmt, argsAccRmt);
   }
 
   type ResultType = T & {
     created_at_trunc: Date;
   };
-  return resultMap(await dbQueryClickhouse<ResultType>(query, argsAcc), (d) =>
-    d.map((r) => ({
-      ...r,
-      created_at_trunc: new Date(
-        moment
-          .utc(r.created_at_trunc, "YYYY-MM-DD HH:mm:ss")
-          .toDate()
-          .getTime() +
-          timeZoneDifference * 60 * 1000
-      ),
-    }))
+
+  const adjustTimeForTimezone = (
+    date: string | Date,
+    timeZoneOffset: number
+  ) => {
+    const utcDate = moment.utc(date, "YYYY-MM-DD HH:mm:ss").toDate();
+    return new Date(utcDate.getTime() + timeZoneOffset * 60 * 1000);
+  };
+
+  const metricsResult = resultMap(
+    await dbQueryClickhouse<ResultType>(queryRmt, argsAccRmt),
+    (records) =>
+      records.map((record) => ({
+        ...record,
+        created_at_trunc: adjustTimeForTimezone(
+          record.created_at_trunc,
+          request.timeZoneDifference
+        ),
+      }))
   );
+
+  if (metricsResult.error || !metricsResult.data) {
+    return metricsResult;
+  }
+
+  const formattedMetrics = metricsResult.data.reduce((acc, record) => {
+    const dateKey = moment
+      .utc(record.created_at_trunc)
+      .format("YYYY-MM-DD HH:mm:ss");
+    acc.set(dateKey, Number(record.count));
+    return acc;
+  }, new Map<string, number>());
+
+  const timeSeriesData = Array.from(formattedMetrics.entries())
+    .map(([dateStr, count]) => ({
+      created_at_trunc: adjustTimeForTimezone(
+        dateStr,
+        request.timeZoneDifference
+      ),
+      count,
+    }))
+    .sort(
+      (a, b) => a.created_at_trunc.getTime() - b.created_at_trunc.getTime()
+    ) as (T & { created_at_trunc: Date })[];
+
+  return {
+    data: timeSeriesData,
+    error: null,
+  };
 }
 
 export async function getXOverTimeRateLimit<T>(

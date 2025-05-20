@@ -81,12 +81,13 @@
             {
               "group": "Anthropic",
               "pages": [
+                "integrations/anthropic/curl",
                 "integrations/anthropic/javascript",
-                "integrations/anthropic/python",
                 "integrations/anthropic/langchain",
-                "integrations/anthropic/curl"
+                "integrations/anthropic/python"
               ]
             },
+            "getting-started/integration-method/anyscale",
             {
               "group": "AWS Bedrock",
               "pages": [
@@ -94,42 +95,26 @@
                 "integrations/bedrock/python"
               ]
             },
-            {
-              "group": "Azure OpenAI",
-              "pages": [
-                "integrations/azure/javascript",
-                "integrations/azure/python",
-                "integrations/azure/langchain",
-                "integrations/azure/curl"
-              ]
-            },
-            "getting-started/integration-method/anyscale",
+
             "getting-started/integration-method/deepinfra",
             "getting-started/integration-method/deepseek",
-            "getting-started/integration-method/hyperbolic",
-            "getting-started/integration-method/mistral",
-            "getting-started/integration-method/nebius",
-            "getting-started/integration-method/novita",
-            "getting-started/integration-method/perplexity",
-            "getting-started/integration-method/together",
-            "getting-started/integration-method/x",
             {
               "group": "Gemini",
               "pages": [
                 {
                   "group": "API",
                   "pages": [
+                    "integrations/gemini/api/curl",
                     "integrations/gemini/api/javascript",
-                    "integrations/gemini/api/python",
-                    "integrations/gemini/api/curl"
+                    "integrations/gemini/api/python"
                   ]
                 },
                 {
                   "group": "Vertex AI (Enterprise)",
                   "pages": [
+                    "integrations/gemini/vertex/curl",
                     "integrations/gemini/vertex/javascript",
-                    "integrations/gemini/vertex/python",
-                    "integrations/gemini/vertex/curl"
+                    "integrations/gemini/vertex/python"
                   ]
                 }
               ]
@@ -137,9 +122,9 @@
             {
               "group": "Groq",
               "pages": [
+                "integrations/groq/curl",
                 "integrations/groq/javascript",
-                "integrations/groq/python",
-                "integrations/groq/curl"
+                "integrations/groq/python"
               ]
             },
             {
@@ -149,6 +134,10 @@
                 "integrations/instructor/python"
               ]
             },
+            "getting-started/integration-method/hyperbolic",
+            "getting-started/integration-method/mistral",
+            "getting-started/integration-method/nebius",
+            "getting-started/integration-method/novita",
             {
               "group": "Ollama",
               "pages": ["integrations/ollama/javascript"]
@@ -156,22 +145,33 @@
             {
               "group": "OpenAI",
               "pages": [
+                "integrations/openai/curl",
                 "integrations/openai/javascript",
-                "integrations/openai/python",
                 "integrations/openai/langchain",
                 "integrations/openai/llamaindex",
-                "integrations/openai/curl",
-                "integrations/openai/assistants",
+                "integrations/openai/python",
                 "integrations/openai/realtime",
-                "integrations/openai/responses"
+                "integrations/openai/responses",
+                {
+                  "group": "Azure OpenAI",
+                  "pages": [
+                    "integrations/azure/curl",
+                    "integrations/azure/javascript",
+                    "integrations/azure/langchain",
+                    "integrations/azure/python"
+                  ]
+                }
               ]
             },
+            "getting-started/integration-method/perplexity",
+            "getting-started/integration-method/together",
+            "getting-started/integration-method/x",
             {
               "group": "Tools",
               "pages": [
-                "integrations/tools/python",
+                "integrations/tools/curl",
                 "integrations/tools/javascript",
-                "integrations/tools/curl"
+                "integrations/tools/python"
               ]
             }
           ]
@@ -203,16 +203,16 @@
             {
               "group": "Upstash",
               "pages": [
-                "other-integrations/upstash-qstash",
-                "other-integrations/upstash-rag"
+                "other-integrations/upstash-rag",
+                "other-integrations/upstash-qstash"
               ]
             },
             {
               "group": "Vector DB",
               "pages": [
-                "integrations/vectordb/python",
+                "integrations/vectordb/curl",
                 "integrations/vectordb/javascript",
-                "integrations/vectordb/curl"
+                "integrations/vectordb/python"
               ]
             },
             "getting-started/integration-method/vercelai"
@@ -248,10 +248,7 @@
         "features/advanced-usage/feedback",
         {
           "group": "Webhooks",
-          "pages": [
-            "features/webhooks",
-            "features/webhooks-testing"
-          ]
+          "pages": ["features/webhooks", "features/webhooks-testing"]
         }
       ]
     },

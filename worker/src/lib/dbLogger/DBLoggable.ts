@@ -16,6 +16,7 @@ import { PromptSettings, RequestWrapper } from "../RequestWrapper";
 import { INTERNAL_ERRORS } from "../util/constants";
 import { withTimeout } from "../util/helpers";
 import { Result, err, ok } from "../util/results";
+import { CacheSettings } from "../util/cache/cacheSettings";
 import {
   anthropicAIStream,
   getModel,
@@ -26,6 +27,7 @@ import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 import { costOfPrompt } from "../../packages/cost";
 import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
 import { MessageData } from "../clients/producers/types";
+import { DEFAULT_UUID } from "../../packages/llm-mapper/types";
 
 export interface DBLoggableProps {
   response: {
@@ -517,7 +519,9 @@ export class DBLoggable {
       producer: HeliconeProducer;
     },
     S3_ENABLED: Env["S3_ENABLED"],
-    requestHeaders?: HeliconeHeaders
+    requestHeaders?: HeliconeHeaders,
+    cachedHeaders?: Headers,
+    cacheSettings?: CacheSettings
   ): Promise<
     Result<
       {
@@ -569,7 +573,14 @@ export class DBLoggable {
       console.error(`Error checking rate limit: ${e}`);
     }
 
-    await this.useKafka(db, authParams, S3_ENABLED, requestHeaders);
+    await this.useKafka(
+      db,
+      authParams,
+      S3_ENABLED,
+      requestHeaders,
+      cachedHeaders,
+      cacheSettings
+    );
 
     // THIS IS ONLY USED FOR COST CALCULATION ON RATELIMITING
     const readResponse = await this.readResponse();
@@ -607,7 +618,9 @@ export class DBLoggable {
     },
     authParams: AuthParams,
     S3_ENABLED: Env["S3_ENABLED"],
-    requestHeaders?: HeliconeHeaders
+    requestHeaders?: HeliconeHeaders,
+    cachedHeaders?: Headers,
+    cacheSettings?: CacheSettings
   ): Promise<Result<null, string>> {
     if (
       !authParams?.organizationId ||
@@ -650,6 +663,11 @@ export class DBLoggable {
       timeToFirstToken = undefined;
     }
 
+    const cacheReferenceId =
+      cacheSettings?.shouldReadFromCache && cachedHeaders
+        ? cachedHeaders.get("Helicone-Id")
+        : DEFAULT_UUID;
+
     const kafkaMessage: MessageData = {
       id: this.request.requestId,
       authorization: requestHeaders.heliconeAuthV2.token,
@@ -673,6 +691,12 @@ export class DBLoggable {
             this.request.promptSettings.promptMode === "production"
               ? this.request.promptSettings.promptId
               : "",
+          cacheReferenceId: cacheReferenceId ?? DEFAULT_UUID,
+          cacheEnabled: requestHeaders.cacheHeaders.cacheEnabled ?? undefined,
+          cacheSeed: requestHeaders.cacheHeaders.cacheSeed ?? undefined,
+          cacheBucketMaxSize:
+            requestHeaders.cacheHeaders.cacheBucketMaxSize ?? undefined,
+          cacheControl: requestHeaders.cacheHeaders.cacheControl ?? undefined,
           promptVersion: this.request.promptSettings.promptVersion,
           properties: this.request.properties,
           heliconeApiKeyId: authParams.heliconeApiKeyId, // If undefined, proxy key id must be present
@@ -755,8 +779,10 @@ export class DBLoggable {
         promptTokens,
         completionTokens,
         provider: modelRow.provider,
-        promptCacheReadTokens: 0,
         promptCacheWriteTokens: 0,
+        promptCacheReadTokens: 0,
+        promptAudioTokens: 0,
+        completionAudioTokens: 0,
       }) ?? 0
     );
   }

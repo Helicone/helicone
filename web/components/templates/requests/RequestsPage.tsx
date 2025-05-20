@@ -82,6 +82,11 @@ interface RequestsPageV2Props {
   emptyStateOptions?: RequestsPageEmptyStateOptions;
 }
 
+type TRequest = {
+  id: string;
+  metadata: MappedLLMRequest;
+};
+
 export default function RequestsPage(props: RequestsPageV2Props) {
   const {
     currentPage,
@@ -91,7 +96,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     initialRequestId,
     userId,
     rateLimited = false,
-    organizationLayoutAvailable,
     emptyStateOptions = {
       options: EMPTY_STATE_PAGES.requests,
       isVisible: true,
@@ -133,44 +137,66 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   const { unauthorized, currentTier } = useGetUnauthorized(userId || "");
   const initialRequest = useGetRequestWithBodies(initialRequestId || "");
 
+  const cacheFilter: FilterNode = isCached
+    ? {
+        request_response_rmt: {
+          cache_enabled: {
+            equals: true,
+          },
+        },
+      }
+    : "all";
+
+  // filter when custom is not selected
+  const defaultFilter = useMemo<FilterNode>(() => {
+    const currentTimeFilter = searchParams.get("t");
+    const timeIntervalDate = getTimeIntervalAgo(
+      (currentTimeFilter as TimeInterval) || "1m"
+    );
+    return {
+      left: {
+        request_response_rmt: {
+          request_created_at: {
+            gte: new Date(timeIntervalDate),
+          },
+        },
+      },
+      operator: "and",
+      right: cacheFilter,
+    };
+  }, [cacheFilter]);
+
   // TODO: Move this to a better place or turn into callback
   const getTimeFilter = () => {
     const currentTimeFilter = searchParams.get("t");
-    const tableName = getTableName(isCached);
-    const createdAtColumn = getCreatedAtColumn(isCached);
 
     if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
       const [_, start, end] = currentTimeFilter.split("_");
 
       const filter: FilterNode = {
         left: {
-          [tableName]: {
-            [createdAtColumn]: {
-              gte: new Date(start).toISOString(),
+          request_response_rmt: {
+            request_created_at: {
+              gte: new Date(start),
             },
           },
         },
         operator: "and",
         right: {
-          [tableName]: {
-            [createdAtColumn]: {
-              lte: new Date(end).toISOString(),
+          left: {
+            request_response_rmt: {
+              request_created_at: {
+                lte: new Date(end),
+              },
             },
           },
+          operator: "and",
+          right: cacheFilter,
         },
       };
       return filter;
     } else {
-      const timeIntervalDate = getTimeIntervalAgo(
-        (currentTimeFilter as TimeInterval) || "1m"
-      );
-      return {
-        [tableName]: {
-          [createdAtColumn]: {
-            gte: new Date(timeIntervalDate).toISOString(),
-          },
-        },
-      };
+      return defaultFilter;
     }
   };
   const getTimeRange = () => {
@@ -200,8 +226,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   const sortLeaf: SortLeafRequest = getSortLeaf(
     sort.sortKey,
     sort.sortDirection,
-    sort.isCustomProperty,
-    isCached
+    sort.isCustomProperty
   );
   const {
     count: realCount,
@@ -213,7 +238,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     properties: realProperties,
     refetch: realRefetch,
     filterMap: realFilterMap,
-    searchPropertyFilters: realSearchPropertyFilters,
   } = useRequestsPageV2(
     page,
     currentPageSize,
@@ -269,11 +293,11 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   // Moved activeColumns state management here
   const [activeColumns, setActiveColumns] = useLocalStorage<DragColumnItem[]>(
     `requests-table-activeColumns`, // Use a unique key
-    getInitialColumns(isCached).map(columnDefToDragColumnItem) // Initialize with default columns
+    getInitialColumns().map(columnDefToDragColumnItem) // Initialize with default columns
   );
 
   const columnsWithProperties = useMemo(() => {
-    const initialColumns = getInitialColumns(isCached);
+    const initialColumns = getInitialColumns();
     return [...initialColumns].concat(
       properties.map((property) => {
         return {
@@ -301,15 +325,16 @@ export default function RequestsPage(props: RequestsPageV2Props) {
 
   const {
     selectMode,
-    toggleSelectMode: _toggleSelectMode,
     selectedIds,
     toggleSelection,
     selectAll,
     isShiftPressed,
-  } = useSelectMode({
-    items: requests,
-    getItemId: (request: MappedLLMRequest) =>
-      request.heliconeMetadata.requestId,
+  } = useSelectMode<TRequest>({
+    items: requests.map((request, index) => ({
+      id: index.toString(),
+      metadata: request,
+    })),
+    getItemId: (request) => request.id,
   });
 
   const requestWithoutStream = requests.find((r) => {
@@ -319,6 +344,12 @@ export default function RequestsPage(props: RequestsPageV2Props) {
       r.heliconeMetadata.provider === "OPENAI"
     );
   });
+
+  const selectedRequests = useMemo(() => {
+    return requests.filter((_, index) =>
+      selectedIds.includes(index.toString())
+    );
+  }, [requests, selectedIds]);
 
   /* -------------------------------------------------------------------------- */
   /*                                  CALLBACKS                                 */
@@ -400,33 +431,35 @@ export default function RequestsPage(props: RequestsPageV2Props) {
 
   const onTimeSelectHandler = useCallback(
     (key: TimeInterval, value: string) => {
-      const tableName = getTableName(isCached);
-      const createdAtColumn = getCreatedAtColumn(isCached);
       if (key === "custom") {
         const [start, end] = value.split("_");
         const filter: FilterNode = {
           left: {
-            [tableName]: {
-              [createdAtColumn]: {
-                gte: new Date(start).toISOString(),
+            request_response_rmt: {
+              request_created_at: {
+                gte: new Date(start),
               },
             },
           },
           operator: "and",
           right: {
-            [tableName]: {
-              [createdAtColumn]: {
-                lte: new Date(end).toISOString(),
+            left: {
+              request_response_rmt: {
+                request_created_at: {
+                  lte: new Date(end),
+                },
               },
             },
+            operator: "and",
+            right: cacheFilter,
           },
         };
         setTimeFilter(filter);
       } else {
         setTimeFilter({
-          [tableName]: {
-            [createdAtColumn]: {
-              gte: new Date(getTimeIntervalAgo(key)).toISOString(),
+          request_response_rmt: {
+            request_created_at: {
+              gte: new Date(getTimeIntervalAgo(key)),
             },
           },
         });
@@ -447,7 +480,10 @@ export default function RequestsPage(props: RequestsPageV2Props) {
         (event.target.tagName.toLowerCase() === "button" ||
           event.target.closest("button") !== null);
       if (isShiftPressed || event?.metaKey || isCheckboxClick) {
-        toggleSelection(row);
+        toggleSelection({
+          id: index.toString(),
+          metadata: row,
+        });
         return;
       } else {
         setSelectedDataIndex(index);
@@ -609,7 +645,13 @@ export default function RequestsPage(props: RequestsPageV2Props) {
                 {/* Export button */}
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <ExportButton rows={requests} />
+                    <ExportButton
+                      rows={
+                        selectedRequests.length > 0
+                          ? selectedRequests
+                          : requests
+                      }
+                    />
                   </TooltipTrigger>
                   <TooltipContent>Export data</TooltipContent>
                 </Tooltip>
@@ -627,100 +669,81 @@ export default function RequestsPage(props: RequestsPageV2Props) {
           }
         />
       )}
-      <ResizablePanelGroup direction="horizontal" className="flex-grow flex">
+      <ResizablePanelGroup direction="horizontal">
         {/* Requests Table */}
-        <ResizablePanel className="flex flex-col">
+        <ResizablePanel>
           {/* Requests Table */}
           {unauthorized ? (
             <UnauthorizedView currentTier={currentTier || ""} />
           ) : (
-            <>
-              <div className="flex-grow overflow-auto">
-                <ThemedTable
-                  id="requests-table"
-                  tableRef={tableRef}
-                  activeColumns={activeColumns}
-                  setActiveColumns={setActiveColumns}
-                  highlightedIds={
-                    selectedData ? [selectedData.id] : selectedIds
-                  }
-                  checkboxMode={"on_hover"}
-                  defaultData={requests}
-                  defaultColumns={columnsWithProperties}
-                  skeletonLoading={isDataLoading}
-                  dataLoading={isBodyLoading}
-                  sortable={sort}
-                  exportData={requests.map((request) => {
-                    const flattenedRequest: any = {};
-                    Object.entries(request).forEach(([key, value]) => {
-                      // key is properties and value is not null
-                      if (
-                        key === "customProperties" &&
-                        value !== null &&
-                        value !== undefined
-                      ) {
-                        Object.entries(value).forEach(([key, value]) => {
-                          if (value !== null) {
-                            flattenedRequest[key] = value;
-                          }
-                        });
-                      } else {
+            <ThemedTable
+              id="requests-table"
+              tableRef={tableRef}
+              activeColumns={activeColumns}
+              setActiveColumns={setActiveColumns}
+              checkboxMode={"on_hover"}
+              defaultData={requests}
+              defaultColumns={columnsWithProperties}
+              skeletonLoading={isDataLoading}
+              dataLoading={isBodyLoading}
+              sortable={sort}
+              exportData={requests.map((request) => {
+                const flattenedRequest: any = {};
+                Object.entries(request).forEach(([key, value]) => {
+                  // key is properties and value is not null
+                  if (
+                    key === "customProperties" &&
+                    value !== null &&
+                    value !== undefined
+                  ) {
+                    Object.entries(value).forEach(([key, value]) => {
+                      if (value !== null) {
                         flattenedRequest[key] = value;
                       }
                     });
-                    return flattenedRequest;
-                  })}
-                  timeFilter={
-                    !userId
-                      ? {
-                          currentTimeFilter: timeRange,
-                          defaultValue: "1m",
-                          onTimeSelectHandler: onTimeSelectHandler,
-                        }
-                      : undefined
+                  } else {
+                    flattenedRequest[key] = value;
                   }
-                  onRowSelect={onRowSelectHandler}
-                  onSelectAll={selectAll}
-                  selectedIds={selectedIds}
-                >
-                  {selectMode && (
-                    <Row className="gap-5 items-center w-full justify-between bg-white dark:bg-black p-5">
-                      <div className="flex flex-row gap-2 items-center">
-                        <span className="text-sm font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">
-                          Request Selection:
-                        </span>
-                        <span className="text-sm p-2 rounded-md font-medium bg-[#F1F5F9] dark:bg-slate-900 text-[#1876D2] dark:text-slate-100 whitespace-nowrap">
-                          {selectedIds.length} selected
-                        </span>
-                      </div>
-                      {selectedIds.length > 0 && (
-                        <GenericButton
-                          onClick={() => {
-                            setModalOpen(true);
-                          }}
-                          icon={
-                            <LuPlus className="h-5 w-5 text-slate-900 dark:text-slate-100" />
-                          }
-                          text="Add to dataset"
-                        />
-                      )}
-                    </Row>
+                });
+                return flattenedRequest;
+              })}
+              timeFilter={
+                !userId
+                  ? {
+                      currentTimeFilter: timeRange,
+                      defaultValue: "1m",
+                      onTimeSelectHandler: onTimeSelectHandler,
+                    }
+                  : undefined
+              }
+              onRowSelect={onRowSelectHandler}
+              onSelectAll={selectAll}
+              selectedIds={selectedIds}
+            >
+              {selectMode && (
+                <Row className="gap-5 items-center w-full justify-between bg-white dark:bg-black p-5">
+                  <div className="flex flex-row gap-2 items-center">
+                    <span className="text-sm font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">
+                      Request Selection:
+                    </span>
+                    <span className="text-sm p-2 rounded-md font-medium bg-[#F1F5F9] dark:bg-slate-900 text-[#1876D2] dark:text-slate-100 whitespace-nowrap">
+                      {selectedIds.length} selected
+                    </span>
+                  </div>
+                  {selectedIds.length > 0 && (
+                    <GenericButton
+                      onClick={() => {
+                        setModalOpen(true);
+                      }}
+                      icon={
+                        <LuPlus className="h-5 w-5 text-slate-900 dark:text-slate-100" />
+                      }
+                      text="Add to dataset"
+                    />
                   )}
-                </ThemedTable>
-              </div>
-
-              <div className="flex-shrink-0">
-                <TableFooter
-                  currentPage={page}
-                  pageSize={pageSize}
-                  isCountLoading={isCountLoading}
-                  count={count || 0}
-                  onPageChange={(n) => handlePageChange(n)}
-                  onPageSizeChange={(n) => setCurrentPageSize(n)}
-                  pageSizeOptions={[25, 50, 100, 250, 500]}
-                />
-              </div>
-            </>
+                </Row>
+              )}
+            </ThemedTable>
           )}
         </ResizablePanel>
 
@@ -774,10 +797,21 @@ export default function RequestsPage(props: RequestsPageV2Props) {
         </ResizablePanel>
       </ResizablePanelGroup>
 
+      {/* Table Footer */}
+      <TableFooter
+        currentPage={page}
+        pageSize={pageSize}
+        isCountLoading={isCountLoading}
+        count={count || 0}
+        onPageChange={(n) => handlePageChange(n)}
+        onPageSizeChange={(n) => setCurrentPageSize(n)}
+        pageSizeOptions={[25, 50, 100, 250, 500]}
+      />
+
       {/* Floating Elements */}
       <ThemedModal open={modalOpen} setOpen={setModalOpen}>
         <NewDataset
-          request_ids={selectedIds}
+          request_ids={selectedRequests.map((request) => request.id)}
           onComplete={() => {
             setModalOpen(false);
           }}
@@ -792,29 +826,17 @@ export default function RequestsPage(props: RequestsPageV2Props) {
         onClickHandler={emptyStateOptions.onPrimaryActionClick}
       />
 
-      <div className="flex-grow flex flex-col">
-        <ThemedTable
-          id="requests-table"
-          defaultData={requests}
-          activeColumns={activeColumns}
-          setActiveColumns={setActiveColumns}
-          defaultColumns={columnsWithProperties}
-          skeletonLoading={false}
-          dataLoading={false}
-          hideHeader={true}
-          checkboxMode={"never"}
-        />
-
-        <TableFooter
-          currentPage={page}
-          pageSize={pageSize}
-          isCountLoading={false}
-          count={count || 0}
-          onPageChange={(n) => handlePageChange(n)}
-          onPageSizeChange={(n) => setCurrentPageSize(n)}
-          pageSizeOptions={[25, 50, 100, 250, 500]}
-        />
-      </div>
+      <ThemedTable
+        id="requests-table"
+        defaultData={requests}
+        activeColumns={activeColumns}
+        setActiveColumns={setActiveColumns}
+        defaultColumns={columnsWithProperties}
+        skeletonLoading={false}
+        dataLoading={false}
+        hideHeader={true}
+        checkboxMode={"never"}
+      />
     </div>
   );
 }
@@ -851,12 +873,8 @@ function getTimeIntervalAgo(interval: TimeInterval): Date {
 function getSortLeaf(
   sortKey: string | null,
   sortDirection: SortDirection | null,
-  isCustomProperty: boolean,
-  isCached: boolean
+  isCustomProperty: boolean
 ): SortLeafRequest {
-  if (isCached && sortKey === "created_at") {
-    sortKey = "cache_created_at";
-  }
   if (sortKey && sortDirection && isCustomProperty) {
     return {
       properties: {
@@ -867,19 +885,9 @@ function getSortLeaf(
     return {
       [sortKey]: sortDirection,
     };
-  } else if (isCached) {
-    return {
-      cache_created_at: "desc",
-    };
   } else {
     return {
       created_at: "desc",
     };
   }
-}
-function getTableName(isCached: boolean): string {
-  return isCached ? "cache_hits" : "request_response_rmt";
-}
-function getCreatedAtColumn(isCached: boolean): string {
-  return isCached ? "created_at" : "request_created_at";
 }
