@@ -3,7 +3,7 @@ import {
   withAuth,
 } from "../../../../lib/api/handlerWrappers";
 import { getRequestCountClickhouse } from "../../../../lib/api/request/request";
-import { Result } from "../@helicone-package/common/result";
+import { Result } from "@helicone-package/common/result";
 import { FilterNode } from "../../../../services/lib/filters/filterDefs";
 
 async function handler({

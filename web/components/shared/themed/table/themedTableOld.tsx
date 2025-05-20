@@ -13,7 +13,7 @@ import {
 import Link from "next/link";
 import React, { useEffect, useMemo, useState } from "react";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
-import { Result } from "../@helicone-package/common/result";
+import { Result } from "@helicone-package/common/result";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
 import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
 import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";

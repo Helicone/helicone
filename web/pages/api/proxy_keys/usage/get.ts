@@ -3,8 +3,8 @@ import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../../lib/api/handlerWrappers";
-import { Result } from "../@helicone-package/common/result";
-import { clickhousePriceCalc } from "../@helicone-package/cost";
+import { Result } from "@helicone-package/common/result";
+import { clickhousePriceCalc } from "@helicone-package/cost";
 import { DecryptedProviderKeyMapping } from "../../../../services/lib/keys";
 import { Permission } from "../../../../services/lib/user";
 import { LimitUsageResult } from "./LimitUsageResult";
