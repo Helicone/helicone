@@ -1,7 +1,6 @@
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   buildFilterWithAuth,
-  buildFilterWithAuthClickHouse,
   buildFilterWithAuthClickHouseCacheHits,
   buildFilterWithAuthClickHouseCacheMetrics,
 } from "../../../services/lib/filters/filters";
@@ -13,7 +12,6 @@ import {
 import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
 import { ModelMetrics } from "../metrics/modelMetrics";
 import { DataOverTimeRequest } from "../metrics/timeDataHandlerWrapper";
-import { DEFAULT_UUID } from "@/packages/llm-mapper/types";
 
 export async function getCacheCountClickhouse(
   orgId: string,
@@ -46,7 +44,6 @@ export async function getModelMetricsClickhouse(
     filter,
     argsAcc: [],
   });
-
 
   const query = `
   SELECT
@@ -89,7 +86,7 @@ export async function getTimeSavedClickhouse(
     org_id: orgId,
     filter,
     argsAcc: [],
-  })
+  });
   const query = `
   SELECT sum(saved_latency_ms) as total_latency_ms
   FROM cache_metrics
