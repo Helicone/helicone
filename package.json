@@ -3,7 +3,8 @@
   "private": true,
   "workspaces": [
     "web",
-    "packages/*"
+    "packages/*",
+    "bifrost"
   ],
   "scripts": {
     "build:web": "yarn workspace helicone build"

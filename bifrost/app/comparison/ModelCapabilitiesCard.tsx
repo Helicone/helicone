@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { ModelDetails } from "@/packages/cost/interfaces/Cost";
+import { ModelDetails } from "@helicone-package/cost/interfaces/Cost";
 import Link from "next/link";
 
 interface ModelCapabilitiesCardProps {
