@@ -63,8 +63,8 @@ impl<B> MakeSpan<B> for SpanFactory {
         let parent_cx = extract_context_from_request(request);
         span.set_parent(parent_cx);
 
-        let trace_id =
-            Span::current().context().span().span_context().trace_id();
+
+        let trace_id = span.context().span().span_context().trace_id();
 
         let serialized_trace_id = trace_id.to_string();
         span.record("trace_id", &serialized_trace_id);
@@ -78,10 +78,4 @@ fn extract_context_from_request<B>(req: &Request<B>) -> Context {
     })
 }
 
-/// Utility function to inject context into mutable request headers
-pub fn inject_context_into_request<B>(cx: &Context, req: &mut Request<B>) {
-    global::get_text_map_propagator(|propagator| {
-        propagator.inject_context(cx, &mut HeaderInjector(req.headers_mut()))
-    });
-}
 

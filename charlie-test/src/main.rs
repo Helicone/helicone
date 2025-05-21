@@ -11,8 +11,9 @@ use opentelemetry_http::{Bytes, HeaderInjector};
 use opentelemetry_sdk::{
     logs::SdkLoggerProvider, propagation::TraceContextPropagator, trace::SdkTracerProvider,
 };
-use opentelemetry_stdout::{LogExporter, SpanExporter};
+use opentelemetry_otlp::{SpanExporter,WithExportConfig};
 use tracing::info;
+use opentelemetry_stdout::LogExporter;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 fn init_tracer() -> SdkTracerProvider {
@@ -20,7 +21,12 @@ fn init_tracer() -> SdkTracerProvider {
     // Install stdout exporter pipeline to be able to retrieve the collected spans.
     // For the demonstration, use `Sampler::AlwaysOn` sampler to sample all traces.
     let provider = SdkTracerProvider::builder()
-        .with_simple_exporter(SpanExporter::default())
+        .with_batch_exporter(
+            SpanExporter::builder()
+            .with_tonic()
+            .with_endpoint("http://localhost:4317/v1/metrics")
+            .build().unwrap()
+        )
         .build();
 
     global::set_tracer_provider(provider.clone());
@@ -84,7 +90,7 @@ async fn main() -> std::result::Result<(), Box<dyn std::error::Error + Send + Sy
     send_request(
         "http://localhost:5678/router/v1/chat/completions",
         r#"{
-            "model": "gpt-3.5-turbo",
+            "model": "gpt-4o-mini",
             "messages": [
                 {
                     "role": "user",
@@ -92,7 +98,7 @@ async fn main() -> std::result::Result<(), Box<dyn std::error::Error + Send + Sy
                 }
             ]
         }"#,
-        "server_health_check",
+        "greptile",
     )
     .await?;
 

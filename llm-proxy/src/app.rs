@@ -12,7 +12,7 @@ use futures::future::BoxFuture;
 use meltdown::Token;
 use opentelemetry::{global, };
 use reqwest::Client;
-use telemetry::{make_span::SpanFactory, tracing::MakeRequestId};
+use telemetry::{context_injection::ContextInjectionLayer, make_span::SpanFactory, tracing::MakeRequestId};
 use tower::{ServiceBuilder, buffer::BufferLayer, util::BoxCloneService};
 use tower_http::{
     ServiceBuilderExt, add_extension::AddExtension,
@@ -20,7 +20,6 @@ use tower_http::{
     normalize_path::NormalizePathLayer, trace::TraceLayer,
 };
 use tracing::{Level, Span, info};
-use tracing_opentelemetry::OpenTelemetrySpanExt;
 
 use crate::{
     config::{Config, minio::Minio, server::TlsConfig},

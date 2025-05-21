@@ -218,11 +218,6 @@ impl<K> ProviderMonitorInner<K> {
             match grace_period {
                 GracePeriod::Requests { min_requests } => {
                     if requests < *min_requests {
-                        trace!(
-                            provider = ?provider,
-                            endpoint = ?endpoint,
-                            "Not enough requests to check health, skipping"
-                        );
                         continue;
                     }
                 }

@@ -1,5 +1,6 @@
 pub mod make_span;
 pub mod tracing;
+pub mod context_injection;
 
 use opentelemetry::{
     TraceId, global,
