@@ -5,6 +5,7 @@ use opentelemetry::{
     trace::{SpanKind, TraceContextExt, Tracer},
     Context,
 };
+use opentelemetry::trace::Span;
 use opentelemetry_appender_tracing::layer::OpenTelemetryTracingBridge;
 use opentelemetry_http::{Bytes, HeaderInjector};
 use opentelemetry_sdk::{
@@ -52,6 +53,9 @@ async fn send_request(
         .span_builder(String::from(span_name))
         .with_kind(SpanKind::Client)
         .start(&tracer);
+
+    let span_context = span.span_context();
+    tracing::error!("trace_id: {:?}", span_context.trace_id());
     let cx = Context::current_with_span(span);
 
     let mut req = hyper::Request::builder().uri(url);
@@ -61,6 +65,8 @@ async fn send_request(
     req.headers_mut()
         .unwrap()
         .insert("baggage", "is_synthetic=true".parse().unwrap());
+
+    tracing::error!("request-lol: {:?}", req);
     let res = client
         .request(req.body(Full::new(Bytes::from(body_content.to_string())))?)
         .await?;

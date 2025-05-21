@@ -74,7 +74,7 @@ fn default_otlp_endpoint() -> String {
 }
 
 fn default_propagate_traces() -> bool {
-    false
+    true
 }
 
 #[derive(Debug, thiserror::Error)]
