@@ -1,0 +1,60 @@
+---
+title: "Featherless AI Integration"
+sidebarTitle: "Featherless AI"
+description: "Connect Helicone with Novita AI, a platform that provides powerful LLM models including DeepSeek, Llama, Mistral, Qwen and more."
+"twitter:title": "Featherless AI Integration - Helicone OSS LLM Observability"
+---
+
+You can follow their documentation here: [https://featherless.ai/docs/getting-started](https://featherless.ai/docs/getting-started)
+
+# Gateway Integration
+
+<Steps>
+  <Step title="Create a Helicone account">
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+  </Step>
+  <Step title="Create a Featherless AI account">
+    Log into [Featherless AI](https://featherless.ai) or create an account. Once you have an account, you
+    can generate an API key from your dashboard.
+  </Step>
+  <Step title="Set HELICONE_API_KEY and FEATHERLESS_API_KEY as environment variable">
+```javascript
+HELICONE_API_KEY=<your API key>
+FEATHERLESS_API_KEY=<your API key>
+```
+  </Step>
+  <Step title="Modify the base URL and add Auth headers">
+
+Replace the following Featherless AI URL with the Helicone Gateway URL:
+
+`https://api.featherless.ai` -> `https://featherless.helicone.ai`
+
+and then add the following authentication headers:
+
+```javascript
+Authorization: Bearer <your API key>
+```
+
+</Step>
+</Steps>
+
+Now you can access all the models on Featherless AI with a simple fetch call:
+
+## Example
+
+```bash
+curl \
+  --header 'Authorization: Bearer <FEATHERLESS_API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "model": "deepseek-ai/DeepSeek-R1",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the capital of France?"
+      }
+    ]
+}' \
+  --url https://featherless.helicone.ai/v3/chat/completions
+```
