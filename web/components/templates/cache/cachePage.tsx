@@ -212,6 +212,10 @@ const CachePage = (props: CachePageProps) => {
             <TabsContent value="0">
               <div className="flex flex-col xl:flex-row gap-4 w-full py-4">
                 <div className="flex flex-col space-y-4 w-full xl:w-1/2">
+                  <div className="w-full border border-orange-300 dark:border-orange-700 bg-orange-50 dark:bg-orange-950 p-4 text-sm rounded-lg text-orange-800 dark:text-orange-200">
+                    We reworked our caching system on May 19th, 2025. Reach out
+                    to us to restore any cache data prior to the change.
+                  </div>
                   <ul className="flex flex-col sm:flex-row items-center gap-4 w-full">
                     {metrics.map((metric, i) => (
                       <li
