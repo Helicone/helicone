@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
 
-use super::router::BalanceConfig;
+use super::{balance::BalanceConfig, monitor::MonitorConfig};
 use crate::{
     error::provider::ProviderError,
     types::{discover::DiscoverMode, provider::ProviderKeys},
@@ -20,12 +20,16 @@ pub enum ProviderKeysSource {
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(default, deny_unknown_fields, rename_all = "kebab-case")]
 pub struct DiscoverConfig {
+    #[serde(default = "default_api_keys_source")]
     pub api_keys_source: ProviderKeysSource,
+    #[serde(default = "default_discover_mode")]
     pub discover_mode: DiscoverMode,
     #[serde(default = "default_discover_decay", with = "humantime_serde")]
     pub discover_decay: Duration,
     #[serde(default = "default_rtt", with = "humantime_serde")]
     pub default_rtt: Duration,
+    #[serde(default)]
+    pub monitor: MonitorConfig,
 }
 
 impl DiscoverConfig {
@@ -42,12 +46,21 @@ impl DiscoverConfig {
 impl Default for DiscoverConfig {
     fn default() -> Self {
         Self {
-            api_keys_source: ProviderKeysSource::Env,
-            discover_mode: DiscoverMode::Config,
+            api_keys_source: default_api_keys_source(),
+            discover_mode: default_discover_mode(),
             discover_decay: default_discover_decay(),
             default_rtt: default_rtt(),
+            monitor: MonitorConfig::default(),
         }
     }
+}
+
+fn default_discover_mode() -> DiscoverMode {
+    DiscoverMode::Config
+}
+
+fn default_api_keys_source() -> ProviderKeysSource {
+    ProviderKeysSource::Env
 }
 
 fn default_discover_decay() -> Duration {
@@ -72,6 +85,7 @@ impl crate::tests::TestDefault for DiscoverConfig {
             discover_mode: DiscoverMode::Config,
             discover_decay: Duration::from_millis(100),
             default_rtt: Duration::from_millis(10),
+            monitor: MonitorConfig::test_default(),
         }
     }
 }

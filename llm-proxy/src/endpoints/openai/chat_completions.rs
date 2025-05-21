@@ -7,7 +7,7 @@ use async_openai::types::{
 
 use crate::endpoints::{Endpoint, StreamRequest};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub struct ChatCompletions;
 
 impl Endpoint for ChatCompletions {

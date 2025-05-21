@@ -18,7 +18,6 @@ This document outlines the code conventions and best practices used in the LLM P
 ## Error Handling
 
 - Use `thiserror` for defining error types
-- Use `anyhow` for internal error propagation
 - Structured errors in [llm-proxy/src/error/](mdc:llm-proxy/src/error)
 
 ## Type Definitions

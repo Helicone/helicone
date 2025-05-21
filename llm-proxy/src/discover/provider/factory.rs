@@ -26,6 +26,7 @@ pub struct DiscoverFactory {
 }
 
 impl DiscoverFactory {
+    #[must_use]
     pub fn new(app_state: AppState, router_config: Arc<RouterConfig>) -> Self {
         Self {
             app_state,

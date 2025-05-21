@@ -16,7 +16,7 @@ primary_region = 'sjc'
 
 [[services]]
   protocol = 'tcp'
-  internal_port = 3000
+  internal_port = 3010
 
   [[services.ports]]
     port = 443
@@ -43,5 +43,5 @@ primary_region = 'sjc'
   cpus = 1
 
 [[metrics]]
-  port = 3000
+  port = 3010
   path = '/metrics'

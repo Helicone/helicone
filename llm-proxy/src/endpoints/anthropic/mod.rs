@@ -1,11 +1,10 @@
 pub mod messages;
-use http::uri::PathAndQuery;
 
-use super::Endpoint;
+use super::{Endpoint, EndpointType};
 pub use crate::endpoints::anthropic::messages::Messages;
 use crate::error::invalid_req::InvalidRequestError;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, strum::EnumIter)]
 pub enum Anthropic {
     Messages(Messages),
 }
@@ -22,13 +21,20 @@ impl Anthropic {
     pub fn messages() -> Self {
         Self::Messages(Messages)
     }
+
+    #[must_use]
+    pub fn endpoint_type(&self) -> EndpointType {
+        match self {
+            Self::Messages(_) => EndpointType::Chat,
+        }
+    }
 }
 
-impl TryFrom<&PathAndQuery> for Anthropic {
+impl TryFrom<&str> for Anthropic {
     type Error = InvalidRequestError;
 
-    fn try_from(value: &PathAndQuery) -> Result<Self, Self::Error> {
-        match value.path() {
+    fn try_from(path: &str) -> Result<Self, Self::Error> {
+        match path {
             Messages::PATH => Ok(Self::Messages(Messages)),
             path => {
                 tracing::warn!(path = %path, "unsupported anthropic path");

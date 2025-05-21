@@ -1,0 +1,10 @@
+{
+  "id":"error:anthropic:messages",
+  "request":{
+    "method":"POST",
+    "url":"/v1/messages"
+  },
+  "response":{
+    "status":500
+  }
+}

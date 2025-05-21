@@ -57,9 +57,11 @@ pub enum InternalError {
     /// Converter not present for {0:?} -> {1:?}
     InvalidConverter(ApiEndpoint, ApiEndpoint),
     /// Stream error: {0}
-    StreamError(String),
+    StreamError(Box<reqwest_eventsource::Error>),
     /// Upstream 5xx error: {0}
     Provider5xxError(StatusCode),
+    /// Metrics not configured for: {0:?}
+    MetricsNotConfigured(ApiEndpoint),
 }
 
 impl IntoResponse for InternalError {

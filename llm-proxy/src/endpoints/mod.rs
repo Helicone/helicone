@@ -2,6 +2,14 @@ pub mod anthropic;
 pub mod mappings;
 pub mod openai;
 
+use serde::{Deserialize, Serialize};
+
+use crate::{
+    endpoints::{anthropic::Anthropic, openai::OpenAI},
+    error::invalid_req::InvalidRequestError,
+    types::provider::InferenceProvider,
+};
+
 pub trait Endpoint {
     const PATH: &'static str;
     type RequestBody;
@@ -10,14 +18,6 @@ pub trait Endpoint {
     /// concrete type than the regular response body type.
     type StreamResponseBody;
 }
-
-use http::uri::PathAndQuery;
-
-use crate::{
-    endpoints::{anthropic::Anthropic, openai::OpenAI},
-    error::invalid_req::InvalidRequestError,
-    types::provider::InferenceProvider,
-};
 
 pub trait StreamRequest {
     fn is_stream(&self) -> bool;
@@ -31,7 +31,7 @@ pub enum ApiEndpoint {
 
 impl ApiEndpoint {
     pub fn new(
-        path: &PathAndQuery,
+        path: &str,
         request_style: InferenceProvider,
     ) -> Result<Self, InvalidRequestError> {
         match request_style {
@@ -78,4 +78,20 @@ impl ApiEndpoint {
             Self::Anthropic(anthropic) => anthropic.path(),
         }
     }
+
+    #[must_use]
+    pub fn endpoint_type(&self) -> EndpointType {
+        match self {
+            Self::OpenAI(openai) => openai.endpoint_type(),
+            Self::Anthropic(anthropic) => anthropic.endpoint_type(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum EndpointType {
+    Chat,
+    Image,
+    Audio,
 }

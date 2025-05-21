@@ -55,7 +55,7 @@ async fn request_response_logger() {
     // to the async task and awaiting it in the test.
     //
     // but this is totes good for now
-    tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+    tokio::time::sleep(std::time::Duration::from_millis(100)).await;
 
     harness.mock.jawn_mock.verify().await;
     harness.mock.minio_mock.verify().await;

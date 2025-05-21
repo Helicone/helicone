@@ -1,14 +1,15 @@
 use std::collections::HashMap;
 
 use derive_more::{AsMut, AsRef};
-use indexmap::IndexSet;
-use nonempty_collections::{NESet, nes};
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 
 use super::{
-    model_mapping::ModelMappingConfig, rate_limit::RateLimitConfig,
-    retry::RetryConfig, spend_control::SpendControlConfig,
+    balance::{BalanceConfig, BalanceConfigInner},
+    model_mapping::ModelMappingConfig,
+    rate_limit::RateLimitConfig,
+    retry::RetryConfig,
+    spend_control::SpendControlConfig,
 };
 use crate::{
     error::{init::InitError, provider::ProviderError},
@@ -60,7 +61,7 @@ impl Default for RouterConfig {
             model_mappings: ModelMappingConfig::default(),
             cache: None,
             fallback: None,
-            balance: BalanceConfig::p2c_all_providers(),
+            balance: BalanceConfig::default(),
             retries: None,
             rate_limit: None,
             spend_control: None,
@@ -75,16 +76,19 @@ fn default_request_style() -> InferenceProvider {
 impl RouterConfig {
     pub fn validate(&self) -> Result<(), InitError> {
         let providers = self.balance.providers();
-        match &self.balance {
-            BalanceConfig::Weighted { targets } => {
-                let total = targets.iter().map(|t| t.weight).sum::<Decimal>();
-                if total != Decimal::from(1) {
-                    return Err(InitError::InvalidWeightedBalancer(format!(
-                        "Balance weights dont sum to 1: {total}"
-                    )));
+        for balance_config in self.balance.0.values() {
+            match balance_config {
+                BalanceConfigInner::Weighted { targets } => {
+                    let total =
+                        targets.iter().map(|t| t.weight).sum::<Decimal>();
+                    if total != Decimal::from(1) {
+                        return Err(InitError::InvalidWeightedBalancer(
+                            format!("Balance weights dont sum to 1: {total}"),
+                        ));
+                    }
                 }
+                BalanceConfigInner::P2C { .. } => {}
             }
-            BalanceConfig::P2C { .. } => {}
         }
 
         // check that all providers in the fallback config are in the providers
@@ -131,42 +135,6 @@ pub struct FallbackTarget {
     pub model: Model,
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
-#[serde(rename_all = "kebab-case", tag = "strategy")]
-pub enum BalanceConfig {
-    Weighted { targets: NESet<BalanceTarget> },
-    P2C { targets: NESet<InferenceProvider> },
-}
-
-impl BalanceConfig {
-    #[must_use]
-    pub fn p2c_all_providers() -> Self {
-        Self::P2C {
-            targets: nes![
-                InferenceProvider::OpenAI,
-                InferenceProvider::Anthropic
-            ],
-        }
-    }
-
-    #[must_use]
-    pub fn providers(&self) -> IndexSet<InferenceProvider> {
-        match self {
-            Self::Weighted { targets } => {
-                targets.iter().map(|t| t.provider).collect()
-            }
-            Self::P2C { targets } => targets.iter().copied().collect(),
-        }
-    }
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize, Eq, Hash, PartialEq)]
-#[serde(rename_all = "kebab-case")]
-pub struct BalanceTarget {
-    pub provider: InferenceProvider,
-    pub weight: Decimal,
-}
-
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, Hash, PartialEq)]
 pub struct PromptVersion(pub String);
 
@@ -180,9 +148,14 @@ impl crate::tests::TestDefault for RouterConfigs {
                 model_mappings: ModelMappingConfig::default(),
                 cache: None,
                 fallback: None,
-                balance: BalanceConfig::P2C {
-                    targets: nes![InferenceProvider::OpenAI],
-                },
+                balance: BalanceConfig(HashMap::from([(
+                    crate::endpoints::EndpointType::Chat,
+                    BalanceConfigInner::P2C {
+                        targets: nonempty_collections::nes![
+                            InferenceProvider::OpenAI
+                        ],
+                    },
+                )])),
                 retries: None,
                 rate_limit: None,
                 spend_control: None,
@@ -218,12 +191,7 @@ mod tests {
             }],
         };
 
-        let balance = BalanceConfig::P2C {
-            targets: nes![
-                InferenceProvider::OpenAI,
-                InferenceProvider::Anthropic
-            ],
-        };
+        let balance = BalanceConfig::p2c_all_providers();
         let retries = RetryConfig {
             enabled: false,
             max_retries: 3,

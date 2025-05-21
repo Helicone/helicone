@@ -26,7 +26,7 @@ pub(super) fn sse_stream(mut event_source: EventSource) -> SSEStream {
             match ev {
                 Err(e) => {
                     if let Err(_e) =
-                        tx.send(Err(InternalError::StreamError(e.to_string())))
+                        tx.send(Err(InternalError::StreamError(Box::new(e))))
                     {
                         // rx dropped
                         break;

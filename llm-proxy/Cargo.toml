@@ -36,7 +36,6 @@ mime = { workspace = true }
 nonempty-collections = { workspace = true, features = ["serde"] }
 opentelemetry = { workspace = true }
 opentelemetry_sdk = { workspace = true, features = ["rt-tokio"] }
-pin-project = { workspace = true }
 pin-project-lite = { workspace = true }
 regex = { workspace = true }
 reqwest = { workspace = true }
@@ -91,4 +90,8 @@ required-features = ["testing"]
 
 [[test]]
 name = "weighted_balance"
+required-features = ["testing"]
+
+[[test]]
+name = "health_monitor"
 required-features = ["testing"]

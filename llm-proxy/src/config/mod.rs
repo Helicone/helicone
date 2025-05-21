@@ -1,9 +1,11 @@
+pub mod balance;
 pub mod database;
 pub mod discover;
 pub mod dispatcher;
 pub mod helicone;
 pub mod minio;
 pub mod model_mapping;
+pub mod monitor;
 pub mod providers;
 pub mod rate_limit;
 pub mod retry;
@@ -100,7 +102,7 @@ impl crate::tests::TestDefault for Config {
     fn test_default() -> Self {
         let telemetry = telemetry::Config {
             exporter: telemetry::Exporter::Stdout,
-            level: "info,llm_proxy=trace".to_string(),
+            level: "info,llm_proxy=debug,llm_proxy::discover=trace".to_string(),
             ..Default::default()
         };
         Config {
