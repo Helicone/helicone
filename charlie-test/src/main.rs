@@ -48,7 +48,7 @@ async fn send_request(
     span_name: &str,
 ) -> std::result::Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
     let client = Client::builder(TokioExecutor::new()).build_http();
-    let tracer = global::tracer("example/client");
+    let tracer = global::tracer("");
     let span = tracer
         .span_builder(String::from(span_name))
         .with_kind(SpanKind::Client)

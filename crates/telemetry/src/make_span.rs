@@ -1,5 +1,6 @@
 use http::Request;
-use opentelemetry::trace::TraceContextExt;
+use opentelemetry::{global, trace::TraceContextExt, Context};
+use opentelemetry_http::{HeaderExtractor, HeaderInjector};
 use tower_http::trace::MakeSpan;
 use tracing::{Level, Span};
 use tracing_opentelemetry::OpenTelemetrySpanExt;
@@ -37,9 +38,7 @@ impl Default for SpanFactory {
 }
 
 impl<B> MakeSpan<B> for SpanFactory {
-    fn make_span(&mut self, _request: &Request<B>) -> Span {
-        let trace_id =
-            Span::current().context().span().span_context().trace_id();
+    fn make_span(&mut self, request: &Request<B>) -> Span {
         // This ugly macro is needed, unfortunately, because `tracing::span!`
         // required the level argument to be static. Meaning we can't just pass
         // `self.level`.
@@ -48,17 +47,41 @@ impl<B> MakeSpan<B> for SpanFactory {
                 tracing::span!(
                     $level,
                     "request",
-                    trace_id = %trace_id,
+                    trace_id = tracing::field::Empty,
                 )
             }
         }
 
-        match self.level {
+        let span = match self.level {
             Level::ERROR => make_span!(Level::ERROR),
             Level::WARN => make_span!(Level::WARN),
             Level::INFO => make_span!(Level::INFO),
             Level::DEBUG => make_span!(Level::DEBUG),
             Level::TRACE => make_span!(Level::TRACE),
-        }
+        };
+
+        let parent_cx = extract_context_from_request(request);
+        span.set_parent(parent_cx);
+
+        let trace_id =
+            Span::current().context().span().span_context().trace_id();
+
+        let serialized_trace_id = trace_id.to_string();
+        span.record("trace_id", &serialized_trace_id);
+        span
     }
 }
+
+fn extract_context_from_request<B>(req: &Request<B>) -> Context {
+    global::get_text_map_propagator(|propagator| {
+        propagator.extract(&HeaderExtractor(req.headers()))
+    })
+}
+
+/// Utility function to inject context into mutable request headers
+pub fn inject_context_into_request<B>(cx: &Context, req: &mut Request<B>) {
+    global::get_text_map_propagator(|propagator| {
+        propagator.inject_context(cx, &mut HeaderInjector(req.headers_mut()))
+    });
+}
+
