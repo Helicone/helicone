@@ -438,9 +438,11 @@ const SessionsPage = (props: SessionsPageProps) => {
             activeColumns={activeColumns}
             setActiveColumns={setActiveColumns}
             rowLink={(row: TSessions) =>
-              `/sessions/${encodeURIComponent(
+              `/sessions/${
                 row.metadata.session_name
-              )}/${encodeURIComponent(row.metadata.session_id)}`
+                  ? encodeURIComponent(row.metadata.session_name)
+                  : EMPTY_SESSION_NAME
+              }/${encodeURIComponent(row.metadata.session_id)}`
             }
             checkboxMode={"on_hover"}
             onRowSelect={onRowSelectHandler}
