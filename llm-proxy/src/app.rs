@@ -12,7 +12,7 @@ use futures::future::BoxFuture;
 use meltdown::Token;
 use opentelemetry::{global, };
 use reqwest::Client;
-use telemetry::{context_injection::ContextInjectionLayer, make_span::SpanFactory, tracing::MakeRequestId};
+use telemetry::{make_span::SpanFactory, tracing::MakeRequestId};
 use tower::{ServiceBuilder, buffer::BufferLayer, util::BoxCloneService};
 use tower_http::{
     ServiceBuilderExt, add_extension::AddExtension,

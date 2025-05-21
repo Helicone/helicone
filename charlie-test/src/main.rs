@@ -90,7 +90,7 @@ async fn main() -> std::result::Result<(), Box<dyn std::error::Error + Send + Sy
     send_request(
         "http://localhost:5678/router/v1/chat/completions",
         r#"{
-            "model": "gpt-4o-mini",
+            "model": "gpt-3.5-turbo",
             "messages": [
                 {
                     "role": "user",

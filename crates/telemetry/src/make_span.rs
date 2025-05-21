@@ -1,6 +1,6 @@
 use http::Request;
 use opentelemetry::{global, trace::TraceContextExt, Context};
-use opentelemetry_http::{HeaderExtractor, HeaderInjector};
+use opentelemetry_http::{HeaderExtractor};
 use tower_http::trace::MakeSpan;
 use tracing::{Level, Span};
 use tracing_opentelemetry::OpenTelemetrySpanExt;

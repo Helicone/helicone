@@ -42,16 +42,18 @@ async fn openai() {
         }))
         .unwrap(),
     );
+
+    let request_id = "00000000000000000000000000000000";
     let request = Request::builder()
         .method(Method::POST)
         // default router
         .uri("http://router.helicone.com/router/v1/chat/completions")
-        .header("traceparent", "00-00000000000000000000000000000000-0000000000000000-00")
+        .header("traceparent", format!("00-{}-7a085853722dc6d2-00", request_id, request_id))
         .body(request_body)
         .unwrap();
     let response = harness.call(request).await.unwrap();
     assert_eq!(response.status(), StatusCode::OK);
-    assert_eq!(response.headers().get("x-request-id").unwrap(), "00-00000000000000000000000000000000-0000000000000000-00");
+    assert_eq!(response.headers().get("x-request-id").unwrap(), request_id);
 
     // technically verification happens on drop but we do it here to be explicit
     harness.mock.openai_mock.verify().await;
