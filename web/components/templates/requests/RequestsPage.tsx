@@ -719,6 +719,8 @@ export default function RequestsPage(props: RequestsPageV2Props) {
               onRowSelect={onRowSelectHandler}
               onSelectAll={selectAll}
               selectedIds={selectedIds}
+              // only for request page
+              currentRow={selectedData}
             >
               {selectMode && (
                 <Row className="gap-5 items-center w-full justify-between bg-white dark:bg-black p-5">
