@@ -148,7 +148,6 @@ const AlertsPage = (props: AlertsPageProps) => {
               },
             ]}
             rows={alerts?.map((key) => {
-              console.log(key);
               return {
                 ...key,
                 key_name: <P className="font-semibold">{key.name}</P>,
