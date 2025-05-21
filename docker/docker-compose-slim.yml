@@ -13,6 +13,11 @@ services:
       - "54388:5432" # Map host port 54388 to container port 5432
     volumes:
       - postgres_flyway_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   mailhog:
     image: mailhog/mailhog
@@ -21,6 +26,23 @@ services:
       - "1025:1025" # SMTP port
       - "8025:8025" # Web UI port
 
+      
+  migrations:
+    build:
+      context: ../
+      dockerfile: docker/dockerfiles/dockerfile_migrations
+    depends_on:
+      postgres-flyway-test:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+    environment:
+      FLYWAY_URL: jdbc:postgresql://postgres-flyway-test:5432/helicone_test
+      FLYWAY_USER: postgres
+      FLYWAY_PASSWORD: testpassword
+    volumes:
+      - ../supabase:/app/supabase
+      - ../clickhouse:/app/clickhouse
   minio:
     image: minio/minio
     container_name: helicone-minio-server
@@ -68,6 +90,11 @@ services:
       # Default user is 'default', no password set initially based on --no-password
       CLICKHOUSE_DEFAULT_USER: default
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--spider", "http://localhost:8123/ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_flyway_data:
