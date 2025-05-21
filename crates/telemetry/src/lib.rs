@@ -1,7 +1,10 @@
 pub mod make_span;
 pub mod tracing;
 
-use opentelemetry::{TraceId, global, trace::TracerProvider};
+use opentelemetry::{
+    TraceId, global,
+    trace::{TracerProvider, noop::NoopTextMapPropagator},
+};
 use opentelemetry_otlp::{
     ExporterBuildError, LogExporter, MetricExporter, SpanExporter,
     WithExportConfig,
@@ -10,6 +13,7 @@ use opentelemetry_sdk::{
     Resource,
     logs::SdkLoggerProvider,
     metrics::SdkMeterProvider,
+    propagation::TraceContextPropagator,
     trace::{IdGenerator, SdkTracerProvider},
 };
 use serde::{Deserialize, Serialize};
@@ -32,6 +36,8 @@ pub struct Config {
     pub exporter: Exporter,
     #[serde(default = "default_otlp_endpoint")]
     pub otlp_endpoint: String,
+    #[serde(default = "default_propogate_traces")]
+    pub propogate_traces: bool,
 }
 
 impl Default for Config {
@@ -41,6 +47,7 @@ impl Default for Config {
             service_name: default_service_name(),
             exporter: Exporter::default(),
             otlp_endpoint: default_otlp_endpoint(),
+            propogate_traces: default_propogate_traces(),
         }
     }
 }
@@ -64,6 +71,10 @@ fn default_level() -> String {
 
 fn default_otlp_endpoint() -> String {
     "http://localhost:4317/v1/metrics".to_string()
+}
+
+fn default_propogate_traces() -> bool {
+    false
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -108,6 +119,13 @@ pub fn init_telemetry(
     TelemetryError,
 > {
     let resource = resource(config);
+
+    // if config.propogate_traces {
+    //     global::set_text_map_propagator(TraceContextPropagator::new());
+    // } else {
+    //     global::set_text_map_propagator(NoopTextMapPropagator::new());
+    // }
+
     match config.exporter {
         Exporter::Stdout => {
             let tracer_provider = init_stdout(&resource, config)?;

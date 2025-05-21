@@ -215,7 +215,10 @@ impl App {
                     .on_body_chunk(())
                     .on_eos(()),
             )
-            .set_x_request_id(MakeRequestId)
+            .set_x_request_id(MakeRequestId::new(
+                app_state.0.config.telemetry.propagate_traces,
+                app_state.0.config.service_name.clone(),
+            ))
             .propagate_x_request_id()
             .layer(NormalizePathLayer::trim_trailing_slash())
             .layer(ErrorHandlerLayer::new(app_state.clone()))
