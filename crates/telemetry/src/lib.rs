@@ -36,8 +36,8 @@ pub struct Config {
     pub exporter: Exporter,
     #[serde(default = "default_otlp_endpoint")]
     pub otlp_endpoint: String,
-    #[serde(default = "default_propogate_traces")]
-    pub propogate_traces: bool,
+    #[serde(default = "default_propagate_traces")]
+    pub propagate: bool,
 }
 
 impl Default for Config {
@@ -47,7 +47,7 @@ impl Default for Config {
             service_name: default_service_name(),
             exporter: Exporter::default(),
             otlp_endpoint: default_otlp_endpoint(),
-            propogate_traces: default_propogate_traces(),
+            propagate: default_propagate_traces(),
         }
     }
 }
@@ -73,7 +73,7 @@ fn default_otlp_endpoint() -> String {
     "http://localhost:4317/v1/metrics".to_string()
 }
 
-fn default_propogate_traces() -> bool {
+fn default_propagate_traces() -> bool {
     false
 }
 
@@ -120,11 +120,11 @@ pub fn init_telemetry(
 > {
     let resource = resource(config);
 
-    // if config.propogate_traces {
-    //     global::set_text_map_propagator(TraceContextPropagator::new());
-    // } else {
-    //     global::set_text_map_propagator(NoopTextMapPropagator::new());
-    // }
+    if config.propagate {
+        global::set_text_map_propagator(TraceContextPropagator::new());
+    } else {
+        global::set_text_map_propagator(NoopTextMapPropagator::new());
+    }
 
     match config.exporter {
         Exporter::Stdout => {

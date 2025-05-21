@@ -5,6 +5,7 @@ members = [
     "llm-proxy",
     "test",
     "crates/weighted-balance",
+    "charlie-test",
 ]
 resolver = "2"
 
@@ -81,6 +82,7 @@ opentelemetry-appender-tracing = "0.29.1"
 opentelemetry-otlp = { version = "0.29.0" }
 opentelemetry-semantic-conventions = "0.29.0"
 opentelemetry-http = "0.29.0"
+opentelemetry-stdout = { version = "0.29.0" }
 pin-project-lite = "0.2.16"
 rand = "0.9.1"
 regex = "1.11.1"
