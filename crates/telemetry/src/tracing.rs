@@ -53,12 +53,14 @@ impl tower_http::request_id::MakeRequestId for MakeRequestId {
             let tracer_provider = global::tracer_provider();
             let tracer = tracer_provider.tracer(self.service_name.clone());
             let parent_cx = extract_context_from_request(&request);
+            println!("parent_cx: {:?}", parent_cx);
             let span = tracer
                 .span_builder(SERVICE_NAME)
                 .with_kind(SpanKind::Server)
                 .start_with_context(&tracer, &parent_cx);
 
             let trace_id = span.span_context().trace_id();
+            println!("trace_id: {}", trace_id);
             let header = HeaderValue::from_str(&trace_id.to_string())
                 .expect("traceid can always be a header");
             Some(RequestId::new(header))

@@ -7,20 +7,7 @@ publish = false
 autobenches = false
 default-run = "charlie-test"
 
-[[bin]] # Bin to run the http server
-name = "http-server"
-path = "src/server.rs"
-doc = false
-bench = false
-
-[[bin]] # Bin to run the client
-name = "http-client"
-path = "src/client.rs"
-doc = false
-bench = false
-
 [dependencies]
-http = { workspace = true }
 http-body-util = { workspace = true }
 hyper = { workspace = true, features = ["full"] }
 hyper-util = { workspace = true, features = ["full"] }
@@ -31,10 +18,6 @@ opentelemetry-http = { workspace = true }
 opentelemetry-stdout = { workspace = true, features = ["trace", "logs"] }
 opentelemetry-semantic-conventions = { workspace = true }
 opentelemetry-appender-tracing = { workspace = true }
-tracing = { workspace = true, features = ["std"] }
-tracing-subscriber = { workspace = true, features = [
-    "env-filter",
-    "registry",
-    "std",
-    "fmt",
-] }
+tracing = { workspace = true, features = ["std"]}
+tracing-subscriber = { workspace = true, features = ["env-filter","registry", "std", "fmt"] }
+http = { workspace = true }
