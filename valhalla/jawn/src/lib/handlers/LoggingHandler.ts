@@ -167,7 +167,11 @@ export class LoggingHandler extends AbstractLogHandler {
       }
     >
   > {
-    const pgResult = await this.logStore.insertLogBatch(this.batchPayload);
+    const [pgResult, s3Result, chResult] = await Promise.all([
+      this.logStore.insertLogBatch(this.batchPayload),
+      this.uploadToS3(),
+      this.logToClickhouse(),
+    ]);
 
     if (pgResult.error) {
       return err({
@@ -175,15 +179,11 @@ export class LoggingHandler extends AbstractLogHandler {
       });
     }
 
-    const s3Result = await this.uploadToS3();
-
     if (s3Result.error) {
       return err({
         s3Error: `Error inserting logs to S3: ${s3Result.error}`,
       });
     }
-
-    const chResult = await this.logToClickhouse();
 
     if (chResult.error) {
       return err({
@@ -507,6 +507,8 @@ export class LoggingHandler extends AbstractLogHandler {
       ),
       request_body: requestText,
       response_body: responseText,
+      cache_reference_id: context.message.log.request.cacheReferenceId ?? undefined,
+      cache_enabled: context.message.log.request.cacheEnabled ?? false,
     };
 
     return requestResponseLog;

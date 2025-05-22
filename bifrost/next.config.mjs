@@ -33,6 +33,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "www.sequoiacap.com",
       },
+      {
+        protocol: "https",
+        hostname: "marketing-assets-helicone.s3.us-west-2.amazonaws.com"
+      }
     ],
   },
   async redirects() {
@@ -59,6 +63,11 @@ const nextConfig = {
         permanent: true,
       },
       {
+        source: "/community",
+        destination: "/customers",
+        permanent: true,
+      },
+      {
         source: "/blog/slash-llm-cost",
         destination: "/blog/monitor-and-optimize-llm-costs",
         permanent: true,
@@ -66,6 +75,11 @@ const nextConfig = {
       {
         source: "/blog/langsmith",
         destination: "/blog/langsmith-vs-helicone",
+        permanent: true,
+      },
+      {
+        source: "/blog/custom-properties",
+        destination: "/blog/how-to-track-llm-user-feedback",
         permanent: true,
       },
     ];

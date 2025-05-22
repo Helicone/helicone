@@ -1,7 +1,7 @@
 import {
   parentModelNames,
   providers,
-} from "@/packages/cost/providers/mappings";
+} from "@helicone-package/cost/providers/mappings";
 import { ModelComparisonPage } from "../ModelComparisonPage";
 import QueryProvider from "../QueryProvider";
 import Banner from "@/app/components/templates/Banner";

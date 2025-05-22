@@ -1,5 +1,7 @@
 import { ProviderName } from "../cost/providers/mappings";
 
+export const DEFAULT_UUID = "00000000-0000-0000-0000-000000000000";
+
 export type MapperType =
   | "openai-chat"
   | "openai-response"
@@ -144,6 +146,7 @@ export type Message = {
   instruction?: string;
   name?: string;
   content?: string;
+  mime_type?: string; // Added to store MIME type for base64 content
   tool_calls?: FunctionCall[]; // only used if _type is functionCall
   tool_call_id?: string;
   timestamp?: string; // For realtime API
@@ -157,6 +160,11 @@ export type Message = {
   idx?: number; // Index of an auto prompt input message
   contentArray?: Message[];
   deleted?: boolean; // For realtime API (conversation.item.delete)
+
+  // For realtime API
+  start_timestamp?: string; // For realtime API (creation)
+  trigger_event_id?: string; // event id that sets start_timestamp (e.g response.created)
+  ending_event_id?: string; // event id that sets timestamp (e.g response.done) for realtime API only
 };
 
 export type Response = {
@@ -202,6 +210,8 @@ type HeliconeMetadata = {
   requestId: string;
   path: string;
   countryCode: string | null;
+  cacheEnabled: boolean;
+  cacheReferenceId: string | null;
   createdAt: string;
   totalTokens: number | null;
   promptTokens: number | null;
@@ -330,4 +340,6 @@ export interface HeliconeRequest {
   assets: Array<string>;
   target_url: string;
   model: string;
+  cache_reference_id: string | null;
+  cache_enabled: boolean;
 }

@@ -1,6 +1,4 @@
-import useOnboardingContext, {
-  ONBOARDING_STEPS,
-} from "@/components/layout/onboardingContext";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { UIFilterRowTree } from "@/services/lib/filters/types";
@@ -11,13 +9,17 @@ import {
 } from "@heroicons/react/24/outline";
 import {
   ColumnDef,
+  ExpandedState,
   flexRender,
   getCoreRowModel,
+  getExpandedRowModel,
+  Table as ReactTable,
+  Row,
   useReactTable,
 } from "@tanstack/react-table";
+import { ChevronDown, ChevronRight, ChevronsUpDown } from "lucide-react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { Result } from "../../../../packages/common/result";
 import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
@@ -30,7 +32,17 @@ import DraggableColumnHeader from "./columns/draggableColumnHeader";
 
 type CheckboxMode = "always_visible" | "on_hover" | "never";
 
-interface ThemedTableProps<T extends { id?: string }> {
+function ConditionalLink<T>({
+  children,
+  href,
+}: {
+  children: React.ReactNode;
+  href?: string | undefined;
+}) {
+  return href ? <Link href={href}>{children}</Link> : children;
+}
+
+interface ThemedTableProps<T extends { id?: string; subRows?: T[] }> {
   id: string;
   defaultData: T[];
   defaultColumns: ColumnDef<T>[];
@@ -71,7 +83,6 @@ interface ThemedTableProps<T extends { id?: string }> {
     onSaveFilterCallback?: () => void;
     layoutPage: "dashboard" | "requests";
   };
-  highlightedIds?: string[];
   /**
    * Controls the visibility of checkboxes in the table
    * - "always_visible": Checkboxes are always shown
@@ -96,49 +107,48 @@ interface ThemedTableProps<T extends { id?: string }> {
   };
   rowLink?: (row: T) => string;
   showFilters?: boolean;
+  /**
+   * Callback function to trigger toggling the expansion state of all rows.
+   * Receives the table instance.
+   */
+  onToggleAllRows?: (table: ReactTable<T>) => void;
 }
-export default function ThemedTable<T extends { id?: string }>(
+
+export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
   props: ThemedTableProps<T>
 ) {
   const {
-    id,
     defaultData,
     defaultColumns,
     skeletonLoading,
     dataLoading,
     activeColumns,
-    setActiveColumns,
-    advancedFilters,
-    exportData,
-    timeFilter,
     sortable,
     onRowSelect,
-    hideHeader,
     noDataCTA,
-    onDataSet: onDataSet,
-    savedFilters,
-    highlightedIds: checkedIds,
     checkboxMode = "never",
-    customButtons,
     children,
     onSelectAll,
     selectedIds,
-    selectedRows,
     fullWidth = false,
-    isDatasetsPage,
-    search,
     rowLink,
     tableRef,
+    onToggleAllRows,
   } = props;
 
+  const [expanded, setExpanded] = React.useState<ExpandedState>({});
   const table = useReactTable({
     data: defaultData,
     columns: defaultColumns,
     columnResizeMode: "onChange",
+    getSubRows: (row) => row.subRows,
     getCoreRowModel: getCoreRowModel(),
+    getExpandedRowModel: getExpandedRowModel(),
     state: {
       columnOrder: activeColumns.map((column) => column.id),
+      expanded,
     },
+    onExpandedChange: setExpanded,
   });
 
   if (tableRef) {
@@ -147,6 +157,29 @@ export default function ThemedTable<T extends { id?: string }>(
 
   const rows = table.getRowModel().rows;
   const columns = table.getAllColumns();
+
+  const topLevelPathColorMap = useMemo(() => {
+    const chartColors = [
+      "bg-chart-1",
+      "bg-chart-2",
+      "bg-chart-3",
+      "bg-chart-4",
+      "bg-chart-5",
+    ];
+    const map: Record<string, string> = {};
+    let colorIndex = 0;
+
+    rows.forEach((row) => {
+      if (row.depth === 0) {
+        const path = (row.original as any)?.path as string;
+        if (path && !(path in map)) {
+          map[path] = chartColors[colorIndex % chartColors.length];
+          colorIndex++;
+        }
+      }
+    });
+    return map;
+  }, [rows]);
 
   useEffect(() => {
     const columnVisibility: { [key: string]: boolean } = {};
@@ -168,40 +201,6 @@ export default function ThemedTable<T extends { id?: string }>(
   const handleRowSelect = (row: T, index: number, event: React.MouseEvent) => {
     onRowSelect?.(row, index, event);
   };
-
-  const [isPanelVisible, setIsPanelVisible] = useState(false);
-
-  const sessionData = useMemo(() => {
-    if (rows.length === 0) {
-      return undefined;
-    }
-    // @ts-ignore
-    const sessionId = rows[0].original?.customProperties?.[
-      "Helicone-Session-Id"
-    ] as string | undefined;
-    return { sessionId };
-  }, [rows]);
-
-  const { currentStep, isOnboardingVisible, setOnClickElement } =
-    useOnboardingContext();
-
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  useEffect(() => {
-    if (
-      id === "requests-table" &&
-      isOnboardingVisible &&
-      currentStep === ONBOARDING_STEPS.REQUESTS_DRAWER.stepNumber
-    ) {
-      setOnClickElement(
-        () => () =>
-          router.push(
-            `/sessions/${encodeURIComponent(sessionData?.sessionId || "")}`
-          )
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOnboardingVisible, currentStep]);
 
   return (
     <ScrollArea className="h-full w-full sentry-mask-me" orientation="both">
@@ -231,15 +230,15 @@ export default function ThemedTable<T extends { id?: string }>(
               width: fullWidth ? "100%" : table.getCenterTotalSize(),
             }}
           >
-            <thead className="text-[12px] h-11">
+            <thead className="text-[12px]">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr
                   key={headerGroup.id}
-                  className="sticky top-0 bg-slate-50 dark:bg-slate-950 z-[2]"
+                  className="sticky top-0 bg-slate-50 dark:bg-slate-950 z-[2] h-11"
                 >
                   {checkboxMode !== "never" && (
                     <th>
-                      <div className="flex justify-center items-center h-full">
+                      <div className="flex justify-center items-center h-full ml-2">
                         <Checkbox
                           variant="helicone"
                           onCheckedChange={handleSelectAll}
@@ -268,6 +267,19 @@ export default function ThemedTable<T extends { id?: string }>(
                           "border-r border-slate-300 dark:border-slate-700"
                       )}
                     >
+                      {index === 0 && onToggleAllRows !== undefined && (
+                        <div className="absolute left-1 top-1/2 -translate-y-1/2 z-10">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => onToggleAllRows(table)}
+                            className="h-6 w-6"
+                            aria-label={"Toggle expand all rows"}
+                          >
+                            <ChevronsUpDown className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
                       <DraggableColumnHeader
                         header={header}
                         sortable={sortable}
@@ -286,28 +298,47 @@ export default function ThemedTable<T extends { id?: string }>(
             <tbody className="text-[13px] divide-y divide-border">
               {rows.map((row, index) => (
                 <tr
-                  key={row.original?.id}
+                  key={row.id}
                   className={clsx(
-                    "hover:cursor-pointer group",
-                    checkedIds?.includes(row.original?.id ?? "")
-                      ? "bg-sky-100 border-l border-sky-500 pl-2 dark:bg-slate-800/50 dark:border-sky-900"
-                      : "hover:bg-sky-50 dark:hover:bg-slate-700/50",
-                    rowLink && "relative"
+                    "group relative",
+                    rowLink && "relative",
+                    selectedIds?.includes(row.id ?? "")
+                      ? "!bg-sky-100 dark:!bg-slate-800/50"
+                      : clsx(
+                          "hover:bg-sky-50 dark:hover:bg-slate-700/50",
+                          row.getCanExpand()
+                            ? "font-semibold cursor-pointer bg-muted"
+                            : row.depth > 0
+                            ? "bg-slate-50 dark:bg-slate-950/50"
+                            : "bg-white dark:bg-black"
+                        )
                   )}
-                  onClick={
-                    onRowSelect &&
-                    ((e: React.MouseEvent) => {
+                  onClick={(e: React.MouseEvent) => {
+                    if (row.getCanExpand()) {
+                      if (
+                        e.target instanceof HTMLElement &&
+                        e.target.closest('a, button, input[type="checkbox"]')
+                      ) {
+                        return;
+                      }
+                      row.getToggleExpandedHandler()();
+                    } else if (onRowSelect) {
                       handleRowSelect(row.original, index, e);
-                    })
-                  }
+                    }
+                  }}
                 >
                   <td
                     className={clsx(
-                      "w-8 h-full px-2",
+                      "h-full sticky left-0 z-10",
+                      row.getCanExpand()
+                        ? "bg-inherit"
+                        : row.depth > 0
+                        ? "bg-slate-50 dark:bg-slate-950/50"
+                        : "bg-white dark:bg-black",
                       checkboxMode === "on_hover"
                         ? clsx(
                             "opacity-0 group-hover:opacity-100 transition-opacity duration-150",
-                            selectedIds?.includes(row.original?.id ?? "") &&
+                            selectedIds?.includes(row.id ?? "") &&
                               "!opacity-100"
                           )
                         : "",
@@ -318,91 +349,129 @@ export default function ThemedTable<T extends { id?: string }>(
                     <div className="flex justify-center items-center h-full">
                       <Checkbox
                         variant="helicone"
-                        checked={selectedIds?.includes(row.original?.id ?? "")}
+                        checked={selectedIds?.includes(row.id ?? "")}
                       />
                     </div>
                   </td>
                   {row.getVisibleCells().map((cell, i) => (
                     <td
-                      key={i}
+                      key={cell.id}
                       className={clsx(
-                        "py-3 px-2 text-slate-700 dark:text-slate-300",
-                        i === 0 && checkboxMode === "always_visible" && "pl-2",
-                        i === 0 && checkboxMode === "on_hover" && "pl-2",
-                        i === 0 && checkboxMode === "never" && "pl-10",
-                        // For selected rows in hover mode
-                        i === 0 &&
-                          checkboxMode === "on_hover" &&
-                          selectedIds?.includes(row.original?.id ?? "") &&
-                          "!pl-2",
+                        "py-3 text-slate-700 dark:text-slate-300 truncate select-none",
+                        i === 0 && "pr-2",
+                        i > 0 && "px-2",
+                        i === 0 && "relative",
+                        selectedIds?.includes(row.id ?? "")
+                          ? "bg-inherit"
+                          : row.getCanExpand()
+                          ? "bg-inherit"
+                          : row.depth > 0
+                          ? "bg-slate-50 dark:bg-slate-950/50"
+                          : "bg-white dark:bg-black",
                         i === row.getVisibleCells().length - 1 &&
-                          "pr-10 border-r border-border"
+                          "border-r border-border"
                       )}
                       style={{
                         maxWidth: cell.column.getSize(),
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
                       }}
                     >
-                      {dataLoading &&
-                      (cell.column.id == "requestText" ||
-                        cell.column.id == "responseText") ? (
-                        <span
-                          className={clsx(
-                            "w-full flex flex-grow",
-                            (cell.column.id == "requestText" ||
-                              cell.column.id == "responseText") &&
-                              dataLoading
-                              ? "animate-pulse bg-slate-200 rounded-md"
-                              : "hidden"
-                          )}
+                      <ConditionalLink href={rowLink?.(row.original)}>
+                        <div
+                          className={clsx("flex items-center gap-1")}
+                          style={
+                            i === 0
+                              ? {
+                                  paddingLeft: `${
+                                    row.depth * 24 +
+                                    (onToggleAllRows !== undefined ? 24 : 0) +
+                                    (row.getCanExpand() ? 0 : 8)
+                                  }px`,
+                                }
+                              : {}
+                          }
                         >
-                          &nbsp;
-                        </span>
-                      ) : (
-                        flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )
-                      )}
+                          {i === 0 &&
+                            (() => {
+                              const getAncestorPath = (
+                                currentRow: Row<T>
+                              ): string | undefined => {
+                                if (currentRow.depth === 0) {
+                                  return (currentRow.original as any)
+                                    ?.path as string;
+                                }
+                                let currentParent = currentRow.getParentRow();
+                                while (
+                                  currentParent &&
+                                  currentParent.depth > 0
+                                ) {
+                                  currentParent = currentParent.getParentRow();
+                                }
+                                return currentParent
+                                  ? ((currentParent.original as any)
+                                      ?.path as string)
+                                  : undefined;
+                              };
+
+                              const ancestorPath = getAncestorPath(row);
+                              const groupColorClass =
+                                (ancestorPath &&
+                                  topLevelPathColorMap[ancestorPath]) ||
+                                "bg-transparent";
+
+                              if (groupColorClass !== "bg-transparent") {
+                                return (
+                                  <div
+                                    className={clsx(
+                                      "absolute left-0 top-0 bottom-0 w-1 z-30",
+                                      groupColorClass
+                                    )}
+                                  />
+                                );
+                              }
+                              return null;
+                            })()}
+
+                          {i === 0 && row.getCanExpand() && (
+                            <button
+                              {...{
+                                onClick: row.getToggleExpandedHandler(),
+                                style: { cursor: "pointer" },
+                                "data-expander": true,
+                              }}
+                              className="p-0.5"
+                            >
+                              {row.getIsExpanded() ? (
+                                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                              ) : (
+                                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                              )}
+                            </button>
+                          )}
+                          {dataLoading &&
+                          (cell.column.id == "requestText" ||
+                            cell.column.id == "responseText") ? (
+                            <span
+                              className={clsx(
+                                "w-full flex flex-grow",
+                                (cell.column.id == "requestText" ||
+                                  cell.column.id == "responseText") &&
+                                  dataLoading
+                                  ? "animate-pulse bg-slate-200 rounded-md"
+                                  : "hidden"
+                              )}
+                            >
+                              &nbsp;
+                            </span>
+                          ) : (
+                            flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )
+                          )}
+                        </div>
+                      </ConditionalLink>
                     </td>
                   ))}
-                  {rowLink && (
-                    <td
-                      className="p-0 m-0 border-0"
-                      style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        padding: 0,
-                        margin: 0,
-                        border: "none",
-                        background: "transparent",
-                        pointerEvents: "none",
-                        zIndex: 2,
-                      }}
-                    >
-                      <Link
-                        href={rowLink(row.original)}
-                        style={{
-                          display: "block",
-                          width: "100%",
-                          height: "100%",
-                          opacity: 0,
-                          pointerEvents: "auto",
-                        }}
-                        onClick={(e: React.MouseEvent) => {
-                          if (onRowSelect) {
-                            e.stopPropagation();
-                          }
-                        }}
-                        aria-hidden="true"
-                      />
-                    </td>
-                  )}
                 </tr>
               ))}
             </tbody>

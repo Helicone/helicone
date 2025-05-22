@@ -142,7 +142,9 @@ export default async function Home() {
                       <div className="bg-gray-200 w-full flex items-center justify-center"></div>
                     )}
                   </Link>
-                  <p className="text-base">{content}</p>
+                  <p className="text-base">
+                    <>{content}</>
+                  </p>
                 </article>
               </div>
             )

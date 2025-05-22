@@ -1,4 +1,3 @@
-import { useUser } from "@supabase/auth-helpers-react";
 import { useState } from "react";
 import { getJawnClient } from "../../../lib/clients/jawn";
 import { DEMO_EMAIL } from "../../../lib/constants";
@@ -18,6 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 
 interface CreateOrgFormProps {
   variant?: "organization" | "reseller";
@@ -78,7 +78,7 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
       : ORGANIZATION_ICONS[0]
   );
 
-  const user = useUser();
+  const { user } = useHeliconeAuthClient();
   const orgContext = useOrg();
   const { setNotification } = useNotification();
   const [providerKey, setProviderKey] = useState(

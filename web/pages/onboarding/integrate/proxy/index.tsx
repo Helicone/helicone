@@ -33,6 +33,7 @@ client = OpenAI(
   -H "Helicone-Auth: Bearer ${key}" \\
   -H "Content-Type: application/json" \\
   -d '{
+    "model": "gpt-4o-mini",
     "messages": [{"role": "user", "content": "Hello!"}]
   }'`,
     docsLink: "https://docs.helicone.ai/getting-started/integration/openai",
@@ -69,6 +70,7 @@ client = OpenAI(
   -H "Helicone-OpenAI-Api-Base: https://{{RESOURCE_NAME}}.openai.azure.com" \\
   -H "Content-Type: application/json" \\
   -d '{
+    "model": "gpt-4o-mini",
     "messages": [{"role": "user", "content": "Hello!"}]
   }'`,
     docsLink: "https://docs.helicone.ai/getting-started/integration/azure",
@@ -99,7 +101,9 @@ client = Anthropic(
   -H "anthropic-version: 2023-06-01" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "messages": [{"role": "user", "content": "Hello!"}]
+    "model": "claude-3-7-sonnet-20250219",
+    "messages": [{"role": "user", "content": "Hello!"}],
+    "max_tokens": 1024
   }'`,
     docsLink: "https://docs.helicone.ai/getting-started/integration/anthropic",
   },

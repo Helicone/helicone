@@ -20,6 +20,7 @@ import { LuDownload } from "react-icons/lu";
 import { clsx } from "../../clsx";
 import useNotification from "../../notification/useNotification";
 import ThemedModal from "../themedModal";
+import { MAX_EXPORT_ROWS } from "@/lib/constants";
 
 interface ExportButtonProps<T> {
   rows: T[];
@@ -28,8 +29,11 @@ interface ExportButtonProps<T> {
   className?: string;
 }
 
-export default function ExportButton<T>(props: ExportButtonProps<T>) {
-  const { rows, fetchRows, format: initialFormat = "CSV", className } = props;
+export default function ExportButton<T>({
+  rows,
+  fetchRows,
+  format: initialFormat = "CSV",
+}: ExportButtonProps<T>) {
   const [format, setFormat] = useState(initialFormat);
   const [open, setOpen] = useState(false);
   const [downloadingCSV, setDownloadingCSV] = useState(false);
@@ -109,8 +113,9 @@ export default function ExportButton<T>(props: ExportButtonProps<T>) {
                 Export {format}
               </p>
               <p className="text-sm sm:text-md text-gray-500">
-                Exporting is limited to 500 rows due to the huge amounts of data
-                in the requests. For larger exports, please use our{" "}
+                Exporting is limited to {MAX_EXPORT_ROWS} rows due to the huge
+                amounts of data in the requests. For larger exports, please use
+                our{" "}
                 <Link
                   href="https://docs.helicone.ai/helicone-api/getting-started"
                   target="_blank"

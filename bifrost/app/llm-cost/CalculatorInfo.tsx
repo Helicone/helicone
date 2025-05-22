@@ -1,4 +1,4 @@
-import { providers } from "@/packages/cost/providers/mappings";
+import { providers } from "@helicone-package/cost/providers/mappings";
 import {
   Accordion,
   AccordionItem,

@@ -18,4 +18,6 @@ export interface PreparedRequestArgs {
   rowIndex?: number;
   experimentId?: string;
   model?: string;
+  openaiKey?: string;
+  openrouterKey?: string;
 }

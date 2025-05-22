@@ -8,5 +8,6 @@ export interface Trace {
 
 export interface FolderNode {
   folderName: string;
+  currentPath: string;
   children: (FolderNode | Trace)[];
 }

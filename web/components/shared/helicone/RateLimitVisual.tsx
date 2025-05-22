@@ -7,6 +7,7 @@ export const RateLimitVisual = () => {
   return (
     <div className="w-full md:w-[568.25px] h-[346.64px] relative rounded-xl bg-[hsl(var(--card))]">
       {/* Background Image with floating elements */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/static/featureUpgrade/custom-rate-limit.webp"
         alt="Rate limit background"

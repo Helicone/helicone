@@ -191,15 +191,15 @@ export const RenderWithPrettyInputKeys = (props: {
 const ChatRow = (props: ChatRowProps) => {
   const { index, message, callback, deleteRow } = props;
 
-  // on the initial render, if the current message is empty, set the mode to editing
+  const [currentMessage, setCurrentMessage] =
+    useState<ExtendedMessage>(message);
+
   useEffect(() => {
     if (currentMessage.content === "") {
       setIsEditing(true);
     }
-  }, []);
+  }, [currentMessage?.content]);
 
-  const [currentMessage, setCurrentMessage] =
-    useState<ExtendedMessage>(message);
   const [minimize, setMinimize] = useState(false);
 
   const [role, setRole] = useState<
@@ -310,6 +310,7 @@ const ChatRow = (props: ChatRowProps) => {
                   {extractKey(item.image_url.url)}
                 </div>
               ) : (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={item.image_url.url}
                   alt={""}
@@ -318,6 +319,7 @@ const ChatRow = (props: ChatRowProps) => {
                 />
               )
             ) : item.image ? (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={URL.createObjectURL(item.image)}
                 alt={""}

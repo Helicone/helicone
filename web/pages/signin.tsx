@@ -1,15 +1,13 @@
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import LoadingAnimation from "@/components/shared/loadingAnimation";
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
+import { GetServerSidePropsContext } from "next";
+import { env } from "next-runtime-env";
 import { useRouter } from "next/router";
+import { useEffect } from "react";
+import PublicMetaData from "../components/layout/public/publicMetaData";
 import useNotification from "../components/shared/notification/useNotification";
 import AuthForm from "../components/templates/auth/authForm";
-import { GetServerSidePropsContext } from "next";
-import { isCustomerDomain } from "../lib/customerPortalHelpers";
-import { getSupabaseServer } from "../lib/supabaseServer";
-import { Result, err, ok } from "../packages/common/result";
-import PublicMetaData from "../components/layout/public/publicMetaData";
-import { useEffect } from "react";
-import LoadingAnimation from "@/components/shared/loadingAnimation";
-import { env } from "next-runtime-env";
+import { Result } from "../packages/common/result";
 
 const SignIn = ({
   customerPortal,
@@ -22,36 +20,39 @@ const SignIn = ({
     string
   >;
 }) => {
-  const user = useUser();
+  const heliconeAuthClient = useHeliconeAuthClient();
   const router = useRouter();
-  const supabase = useSupabaseClient();
   const { setNotification } = useNotification();
 
   const customerPortalContent = customerPortal?.data || undefined;
   const { unauthorized } = router.query;
   useEffect(() => {
-    if (unauthorized === "true") {
-      supabase.auth.refreshSession().then((session) => {
-        if (!session.data.session?.user) {
-          supabase.auth.signOut().then(() => {
-            setNotification(
-              "You have been logged out due to unauthorized access.",
-              "error"
-            );
-          });
-        }
+    if (
+      unauthorized === "true" &&
+      heliconeAuthClient &&
+      heliconeAuthClient.user?.id
+    ) {
+      heliconeAuthClient
+        .refreshSession()
+        .then(heliconeAuthClient.getUser)
+        .then((user) => {
+          if (!user.data || !user.data.id) {
+            heliconeAuthClient.signOut().then(() => {
+              setNotification(
+                "You have been logged out due to unauthorized access.",
+                "error"
+              );
+            });
+          }
+        });
+    } else if (heliconeAuthClient.user?.id) {
+      const { pi_session, ...restQuery } = router.query;
+      router.push({
+        pathname: pi_session ? "/pi/onboarding" : "/dashboard",
+        query: router.query,
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [unauthorized]);
-
-  if (user) {
-    const { pi_session, ...restQuery } = router.query;
-    router.push({
-      pathname: pi_session ? "/pi/onboarding" : "/dashboard",
-      query: router.query,
-    });
-  }
+  }, [unauthorized, heliconeAuthClient, setNotification, router]);
 
   return (
     <PublicMetaData
@@ -61,7 +62,7 @@ const SignIn = ({
       ogImageUrl={"https://www.helicone.ai/static/helicone-og.webp"}
     >
       <div>
-        {user ? (
+        {heliconeAuthClient.user?.id ? (
           <div className="flex items-center justify-center h-screen flex-col">
             <LoadingAnimation />
             <h1 className="text-4xl font-semibold">Getting your dashboard</h1>
@@ -69,10 +70,11 @@ const SignIn = ({
         ) : (
           <AuthForm
             handleEmailSubmit={async (email: string, password: string) => {
-              const { data, error } = await supabase.auth.signInWithPassword({
-                email: email,
-                password: password,
-              });
+              const { data, error } =
+                await heliconeAuthClient.signInWithPassword({
+                  email: email,
+                  password: password,
+                });
 
               if (error) {
                 setNotification("Error logging in. Please try again.", "error");
@@ -83,7 +85,7 @@ const SignIn = ({
               router.push("/dashboard");
             }}
             handleGoogleSubmit={async () => {
-              const { error } = await supabase.auth.signInWithOAuth({
+              const { error } = await heliconeAuthClient.signInWithOAuth({
                 provider: "google",
               });
               if (error) {
@@ -94,7 +96,7 @@ const SignIn = ({
               setNotification("Successfully signed in.", "success");
             }}
             handleGithubSubmit={async () => {
-              const { error } = await supabase.auth.signInWithOAuth({
+              const { error } = await heliconeAuthClient.signInWithOAuth({
                 provider: "github",
               });
               if (error) {
@@ -120,30 +122,6 @@ export const getServerSideProps = async (
     return {
       props: {},
     };
-  }
-
-  if (isCustomerDomain(context.req.headers.host ?? "")) {
-    const org = await getSupabaseServer()
-      .from("organization")
-      .select("*")
-      .eq("domain", context.req.headers.host ?? "")
-      .single();
-    if (org.data) {
-      return {
-        props: {
-          customerPortal: ok({
-            domain: org.data.domain,
-            logo: org.data.logo_path,
-          }),
-        },
-      };
-    } else {
-      return {
-        props: {
-          customerPortal: err("no org found"),
-        },
-      };
-    }
   }
 
   // if the base path contains localhost or contains vercel, do nothing

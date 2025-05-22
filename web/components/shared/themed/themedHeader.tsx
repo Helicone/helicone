@@ -1,20 +1,15 @@
-import { UIFilterRowTree } from "@/services/lib/filters/types";
+import FilterASTButton from "@/filterAST/FilterASTButton";
 import { TimeFilter } from "@/types/timeFilter";
 import { Menu } from "@headlessui/react";
 import { ArrowDownTrayIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useState } from "react";
 import { UserMetric } from "../../../lib/api/users/UserMetric";
-import { Result } from "../../../packages/common/result";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
 import { FilterLeaf } from "../../../services/lib/filters/filterDefs";
-import {
-  ColumnType,
-  SingleFilterDef,
-} from "../../../services/lib/filters/frontendFilterDefs";
+import { ColumnType } from "../../../services/lib/filters/frontendFilterDefs";
 import { OrganizationFilter } from "../../../services/lib/organization_layout/organization_layout";
 import { SortDirection } from "../../../services/lib/sorts/requests/sorts";
-import FilterASTButton from "@/filterAST/FilterASTButton";
 import { clsx } from "../clsx";
 import ThemedModal from "./themedModal";
 import { ThemedMultiSelect } from "./themedMultiSelect";
@@ -60,15 +55,6 @@ interface ThemedHeaderProps {
     onTimeSelectHandler: (key: TimeInterval, value: string) => void;
     defaultTimeFilter: TimeInterval;
   };
-  advancedFilter?: {
-    filterMap: SingleFilterDef<any>[];
-    onAdvancedFilter: (filters: UIFilterRowTree) => void;
-    filters: UIFilterRowTree;
-    searchPropertyFilters: (
-      property: string,
-      search: string
-    ) => Promise<Result<void, string>>;
-  };
   savedFilters?: {
     filters?: OrganizationFilter[];
     currentFilter?: string;
@@ -83,24 +69,12 @@ const notificationMethods = [
   { id: "all", title: "All event properties", filtered: false },
 ];
 
-const countFilters = (filters: UIFilterRowTree): number => {
-  if ("operator" in filters) {
-    return filters.rows.reduce((acc, row) => acc + countFilters(row), 0);
-  } else {
-    return 1;
-  }
-};
-
-export default function ThemedHeader(props: ThemedHeaderProps) {
-  const {
-    isFetching,
-    editColumns,
-    timeFilter,
-    advancedFilter,
-    csvExport,
-    savedFilters,
-  } = props;
-
+export default function ThemedHeader({
+  isFetching,
+  editColumns,
+  timeFilter,
+  csvExport,
+}: ThemedHeaderProps) {
   const [exportFiltered, setExportFiltered] = useState(false);
 
   return (
@@ -125,65 +99,63 @@ export default function ThemedHeader(props: ThemedHeaderProps) {
               />
             )}
           </div>
-          {(advancedFilter || editColumns || csvExport) && (
-            <div className="flex flex-wrap space-x-2 items-center">
-              {advancedFilter && <FilterASTButton />}
-              {editColumns && (
-                <ThemedMultiSelect
-                  columns={editColumns.columns.map((col) => ({
-                    active: col.active,
-                    label: col.label,
-                    value: col.label,
-                  }))}
-                  buttonLabel="Columns"
-                  deselectAll={() => {
-                    const newColumns = [...editColumns.columns];
+          <div className="flex flex-wrap space-x-2 items-center">
+            <FilterASTButton />
+            {editColumns && (
+              <ThemedMultiSelect
+                columns={editColumns.columns.map((col) => ({
+                  active: col.active,
+                  label: col.label,
+                  value: col.label,
+                }))}
+                buttonLabel="Columns"
+                deselectAll={() => {
+                  const newColumns = [...editColumns.columns];
 
-                    newColumns.forEach((col) => {
-                      col.active = false;
-                    });
+                  newColumns.forEach((col) => {
+                    col.active = false;
+                  });
 
-                    editColumns.onColumnCallback(newColumns);
-                  }}
-                  selectAll={() => {
-                    const newColumns = [...editColumns.columns];
+                  editColumns.onColumnCallback(newColumns);
+                }}
+                selectAll={() => {
+                  const newColumns = [...editColumns.columns];
 
-                    newColumns.forEach((col) => {
-                      col.active = true;
-                    });
+                  newColumns.forEach((col) => {
+                    col.active = true;
+                  });
 
-                    editColumns.onColumnCallback(newColumns);
-                  }}
-                  onSelect={(value) => {
-                    const newColumns = [...editColumns.columns];
-                    const col = newColumns.find((col) => col.label === value);
-                    if (!col) return;
-                    col.active = !col.active;
+                  editColumns.onColumnCallback(newColumns);
+                }}
+                onSelect={(value) => {
+                  const newColumns = [...editColumns.columns];
+                  const col = newColumns.find((col) => col.label === value);
+                  if (!col) return;
+                  col.active = !col.active;
 
-                    editColumns.onColumnCallback(newColumns);
-                  }}
-                />
-              )}
-              {csvExport && (
-                <div className="mx-auto flex text-sm">
-                  <Menu as="div" className="relative inline-block">
-                    <button
-                      onClick={() => csvExport.setOpenExport(true)}
-                      className="border border-gray-300 rounded-lg px-2.5 py-1.5 bg-white hover:bg-sky-50 flex flex-row items-center gap-2"
-                    >
-                      <ArrowDownTrayIcon
-                        className="h-5 w-5 text-gray-900"
-                        aria-hidden="true"
-                      />
-                      <p className="text-sm font-medium text-gray-900 hidden sm:block">
-                        Export
-                      </p>
-                    </button>
-                  </Menu>
-                </div>
-              )}
-            </div>
-          )}
+                  editColumns.onColumnCallback(newColumns);
+                }}
+              />
+            )}
+            {csvExport && (
+              <div className="mx-auto flex text-sm">
+                <Menu as="div" className="relative inline-block">
+                  <button
+                    onClick={() => csvExport.setOpenExport(true)}
+                    className="border border-gray-300 rounded-lg px-2.5 py-1.5 bg-white hover:bg-sky-50 flex flex-row items-center gap-2"
+                  >
+                    <ArrowDownTrayIcon
+                      className="h-5 w-5 text-gray-900"
+                      aria-hidden="true"
+                    />
+                    <p className="text-sm font-medium text-gray-900 hidden sm:block">
+                      Export
+                    </p>
+                  </button>
+                </Menu>
+              </div>
+            )}
+          </div>
         </div>
       </div>
       {csvExport && (

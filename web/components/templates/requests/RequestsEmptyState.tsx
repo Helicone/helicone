@@ -6,12 +6,34 @@ import { useOrgOnboarding } from "@/services/hooks/useOrgOnboarding";
 import { ArrowRight } from "lucide-react";
 import { useRouter } from "next/router";
 
+export interface EmptyStatePage {
+  title: string;
+  description: string;
+  cta?: {
+    primary?: {
+      text: string;
+      link?: string;
+      onClick?: boolean;
+      showPlusIcon?: boolean;
+    };
+    secondary?: {
+      text: string;
+      link: string;
+      openInNewTab?: boolean;
+    };
+  };
+}
+
 interface RequestsEmptyStateProps {
   isVisible: boolean;
+  options: EmptyStatePage;
+  onClickHandler?: () => void;
 }
 
 export default function RequestsEmptyState({
   isVisible,
+  options,
+  onClickHandler,
 }: RequestsEmptyStateProps) {
   const router = useRouter();
   const orgContext = useOrg();
@@ -28,12 +50,47 @@ export default function RequestsEmptyState({
     }
   };
 
-  const handleQuickStart = () => {
+  const handlePrimaryAction = () => {
+    if (options.cta?.primary?.onClick) {
+      // The component using the empty state needs to handle the onClick via onClickHandler
+      if (onClickHandler) {
+        onClickHandler();
+      }
+      return;
+    }
+
+    if (options.cta?.primary?.link) {
+      router.push(options.cta.primary.link);
+      return;
+    }
+
+    // Default fallback to onboarding flow
     const currentStep = onboardingState?.currentStep || "ORGANIZATION";
     if (currentStep === "EVENT") {
       router.push("/onboarding/integrate");
     } else {
       router.push(STEP_ROUTES[currentStep]);
+    }
+  };
+
+  const handleSecondaryAction = () => {
+    const secondaryCta = options.cta?.secondary;
+    if (!secondaryCta) return;
+
+    const link = secondaryCta.link;
+
+    if (link === "#tryDemo") {
+      handleDemoClick();
+      return;
+    }
+
+    if (secondaryCta.openInNewTab) {
+      window.open(link, "_blank", "noopener,noreferrer");
+      return;
+    }
+
+    if (link) {
+      router.push(link);
     }
   };
 
@@ -73,20 +130,26 @@ export default function RequestsEmptyState({
             {/* Sidebar offset container - no transform on small screens, offset on medium+ */}
             <div className="w-full max-w-3xl flex flex-col gap-6 items-center md:translate-x-[calc(var(--sidebar-width,0px)/2)]">
               <div className="flex flex-col gap-2 text-center w-full">
-                <H2>Integrate to see your requests</H2>
+                <H2>{options.title}</H2>
                 <Large className="max-w-lg lg:max-w-3xl mx-auto">
-                  This is a preview. Integrate your LLM app with Helicone to see
-                  your actual requests.
+                  {options.description}
                 </Large>
               </div>
 
               <div className="flex gap-4 justify-center">
-                <Button variant="outline" onClick={handleDemoClick}>
-                  Try Demo
-                </Button>
-                <Button variant="action" onClick={handleQuickStart}>
-                  Quick Start <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
+                {options.cta?.secondary && (
+                  <Button variant="outline" onClick={handleSecondaryAction}>
+                    {options.cta.secondary.text}
+                  </Button>
+                )}
+                {options.cta?.primary && (
+                  <Button variant="action" onClick={handlePrimaryAction}>
+                    {options.cta.primary.text}
+                    {!options.cta.primary.showPlusIcon && (
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    )}
+                  </Button>
+                )}
               </div>
             </div>
           </div>
@@ -109,20 +172,26 @@ export default function RequestsEmptyState({
             {/* Sidebar offset container - no transform on small screens, offset on medium+ */}
             <div className="w-full max-w-3xl flex flex-col gap-6 items-center md:translate-x-[calc(var(--sidebar-width,0px)/2)]">
               <div className="flex flex-col gap-2 text-center w-full">
-                <H2>Integrate to see your requests</H2>
+                <H2>{options.title}</H2>
                 <Large className="max-w-lg lg:max-w-3xl mx-auto">
-                  This is a preview. Integrate your LLM app with Helicone to see
-                  your actual requests.
+                  {options.description}
                 </Large>
               </div>
 
               <div className="flex gap-4 justify-center">
-                <Button variant="outline" onClick={handleDemoClick}>
-                  Try Demo
-                </Button>
-                <Button variant="action" onClick={handleQuickStart}>
-                  Quick Start <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
+                {options.cta?.secondary && (
+                  <Button variant="outline" onClick={handleSecondaryAction}>
+                    {options.cta.secondary.text}
+                  </Button>
+                )}
+                {options.cta?.primary && (
+                  <Button variant="action" onClick={handlePrimaryAction}>
+                    {options.cta.primary.text}
+                    {!options.cta.primary.showPlusIcon && (
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    )}
+                  </Button>
+                )}
               </div>
             </div>
           </div>
@@ -131,3 +200,44 @@ export default function RequestsEmptyState({
     </div>
   );
 }
+
+// Define and export the combined options interface here
+export interface RequestsPageEmptyStateOptions {
+  options: EmptyStatePage;
+  onPrimaryActionClick?: () => void;
+  isVisible?: boolean;
+}
+
+export const EMPTY_STATE_PAGES: Record<string, EmptyStatePage> = {
+  requests: {
+    title: "Integrate to see your requests",
+    description:
+      "This is a preview. Integrate your LLM app with Helicone to see your actual requests.",
+    cta: {
+      primary: {
+        text: "Quick Start",
+        link: "/onboarding/integrate",
+      },
+      secondary: {
+        text: "Try Demo",
+        link: "#tryDemo",
+      },
+    },
+  },
+  "rate-limits": {
+    title: "Configure Rate Limits",
+    description:
+      "Protect your LLM applications by setting up rate limits. Configure via the UI or directly in your code.",
+    cta: {
+      primary: {
+        text: "Configure Rate Limits",
+        onClick: true,
+      },
+      secondary: {
+        text: "View Docs",
+        link: "https://docs.helicone.ai/features/advanced-usage/custom-rate-limits",
+        openInNewTab: true,
+      },
+    },
+  },
+};

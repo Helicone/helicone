@@ -5,11 +5,10 @@ import { AppProps } from "next/app";
 import { ReactElement, ReactNode, useState } from "react";
 import Notification from "../components/shared/notification/Notification";
 import { NotificationProvider } from "../components/shared/notification/NotificationContext";
-import "../node_modules/react-grid-layout/css/styles.css";
-import "../node_modules/react-resizable/css/styles.css";
+import "react-grid-layout/css/styles.css";
+import "react-resizable/css/styles.css";
 import "../styles/globals.css";
 import "../styles/index.css";
-
 import { Analytics } from "@vercel/analytics/react";
 import { NextPage } from "next";
 import posthog from "posthog-js";

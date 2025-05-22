@@ -1,5 +1,5 @@
 import { getAnthropicKeyFromAdmin } from "@/lib/clients/settings";
-import { getSSRHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
+import { getSSRHeliconeAuthClient } from "@/packages/common/auth/client/getSSRHeliconeAuthClient";
 import Anthropic from "@anthropic-ai/sdk";
 import { NextApiRequest, NextApiResponse } from "next";
 

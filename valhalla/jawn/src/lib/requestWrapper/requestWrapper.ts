@@ -5,14 +5,7 @@
 
 import { HeliconeHeaders } from "../../../../../shared/proxy/heliconeHeaders";
 import { HeliconeAuth } from "../../../../../shared/proxy/types/heliconeAuth";
-import { supabaseServer } from "../db/supabase";
-import {
-  Result,
-  err,
-  map,
-  mapPostgrestErr,
-  ok,
-} from "../../packages/common/result";
+import { Result, err, ok } from "../../packages/common/result";
 
 import { Request } from "express";
 import { usageLimitManager } from "../../managers/UsageLimitManager";
@@ -21,9 +14,26 @@ import { parseJSXObject } from "@helicone/prompts";
 import { Headers } from "node-fetch";
 import { Readable as ReadableStream } from "stream";
 import { getAndStoreInCache } from "../cache/staticMemCache";
+import { Database } from "../db/database.types";
 import { hashAuth } from "../db/hash";
 import { dbExecute } from "../shared/db/dbExecute";
-import { Database } from "../db/database.types";
+
+export const HELICONE_RATE_LIMITED_API_KEY_REGEX = [
+  /^sk-helicone-rl-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
+  /^pk-helicone-rl-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
+  /^pk-helicone-eu-rl-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
+  /^sk-helicone-eu-rl-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
+];
+
+export const HELICONE_API_KEY_REGEX = [
+  /^sk-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
+  /^sk-helicone-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
+  /^pk-helicone-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
+  /^pk-helicone-eu-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
+  /^sk-helicone-eu-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
+  /^[sp]k(-helicone)?(-eu)?(-cp)?-\w{7}-\w{7}-\w{7}-\w{7}$/,
+  ...HELICONE_RATE_LIMITED_API_KEY_REGEX,
+];
 
 export type RequestHandlerType =
   | "proxy_only"
@@ -312,19 +322,9 @@ export class RequestWrapper {
     }
 
     const apiKey = heliconeAuth.replace("Bearer ", "").trim();
-    const apiKeyPattern =
-      /^sk-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/;
-    const apiKeyPatternV2 =
-      /^sk-helicone-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/;
-    const apiKeyPatternV3 =
-      /^sk-helicone-cp-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/;
 
     if (
-      !(
-        apiKeyPattern.test(apiKey) ||
-        apiKeyPatternV2.test(apiKey) ||
-        apiKeyPatternV3.test(apiKey)
-      )
+      !HELICONE_API_KEY_REGEX.map((regex) => regex.test(apiKey)).some(Boolean)
     ) {
       return err("API Key is not well formed");
     }

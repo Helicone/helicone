@@ -1,29 +1,21 @@
 import { uuid } from "uuidv4";
 import { Result, err, ok } from "../../packages/common/result";
 
+import { getAllSignedURLsFromInputs } from "../../managers/inputs/InputsManager";
+import { SettingsManager } from "../../utils/settings";
+import { GET_KEY, OPENROUTER_WORKER_URL } from "../clients/constant";
+import { dbExecute } from "../shared/db/dbExecute";
 import { Experiment, ExperimentDatasetRow } from "../stores/experimentStore";
-import { BaseTempKey } from "./tempKeys/baseTempKey";
 import { runHypothesis } from "./hypothesisRunner";
-import { generateTempHeliconeAPIKey } from "./tempKeys/tempAPIKey";
+import { prepareRequestAzureFull as prepareRequestAzureOnPremFull } from "./requestPrep/azure";
+import { prepareRequestOpenAIOnPremFull } from "./requestPrep/openai";
+import { prepareRequestOpenRouterFull } from "./requestPrep/openRouter";
 import {
   PreparedRequest,
   PreparedRequestArgs,
 } from "./requestPrep/PreparedRequest";
-import { getAllSignedURLsFromInputs } from "../../managers/inputs/InputsManager";
-import { prepareRequestOpenRouterFull } from "./requestPrep/openRouter";
-import { prepareRequestAzureFull as prepareRequestAzureOnPremFull } from "./requestPrep/azure";
-import { OPENROUTER_KEY, OPENROUTER_WORKER_URL } from "../clients/constant";
-import { SettingsManager } from "../../utils/settings";
-import { prepareRequestOpenAIOnPremFull } from "./requestPrep/openai";
-import { dbExecute } from "../shared/db/dbExecute";
-
-export const IS_ON_PREM =
-  process.env.AZURE_BASE_URL &&
-  process.env.AZURE_API_VERSION &&
-  process.env.AZURE_DEPLOYMENT_NAME &&
-  process.env.OPENAI_API_KEY
-    ? true
-    : false;
+import { BaseTempKey } from "./tempKeys/baseTempKey";
+import { generateTempHeliconeAPIKey } from "./tempKeys/tempAPIKey";
 
 async function isOnPrem(): Promise<boolean> {
   const settingsManager = new SettingsManager();
@@ -45,9 +37,17 @@ async function prepareRequest(
   if (await isOnPrem()) {
     return await prepareRequestAzureOnPremFull(args);
   } else if (provider === "OPENAI") {
-    return prepareRequestOpenAIOnPremFull(args);
+    const openaiKey = await GET_KEY("key:openai");
+    return prepareRequestOpenAIOnPremFull({
+      ...args,
+      openaiKey,
+    });
   } else {
-    return prepareRequestOpenRouterFull(args);
+    const openrouterKey = await GET_KEY("key:openrouter");
+    return prepareRequestOpenRouterFull({
+      ...args,
+      openrouterKey,
+    });
   }
 }
 
@@ -174,10 +174,11 @@ export async function run(
       );
     }
 
+    const openrouterKey = await GET_KEY("key:openrouter");
     const preparedRequest = await prepareRequest(
       {
         template: promptVersion.helicone_template,
-        providerKey: OPENROUTER_KEY,
+        providerKey: openrouterKey,
         secretKey,
         inputs: inputs,
         autoInputs:

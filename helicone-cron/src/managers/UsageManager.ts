@@ -43,23 +43,19 @@ export class UsageManager {
     endDate.setMinutes(endDate.getMinutes() - 5);
 
     try {
-      if (!org.latestEndTime) {
-        // Get current period start date from stripe
-        const subscription = await this.stripeClient.getSubscriptionById(
-          org.stripeSubscriptionId
+      // Get current period start date from stripe
+      const subscription = await this.stripeClient.getSubscriptionById(
+        org.stripeSubscriptionId
+      );
+
+      if (subscription.error || !subscription.data) {
+        throw new Error(
+          `Failed to get subscription from Stripe. ${subscription.error}`
         );
-
-        if (subscription.error || !subscription.data) {
-          throw new Error(
-            `Failed to get subscription from Stripe. ${subscription.error}`
-          );
-        }
-
-        subscription.data.start_date;
-        startDate = new Date(subscription.data.current_period_start * 1000);
-      } else {
-        startDate = new Date(org.latestEndTime);
       }
+
+      subscription.data.start_date;
+      startDate = new Date(subscription.data.current_period_start * 1000);
 
       const requestCountResult =
         await this.requestResponseStore.getRequestCountByOrgId(
@@ -81,6 +77,7 @@ export class UsageManager {
           stripeSubscriptionItemId: org.stripeSubscriptionItemId,
           quantity: requestQuantity,
           startDate: startDate,
+          endDate: endDate,
         });
 
       if (usageRecordErr || !usageRecord) {
@@ -122,19 +119,21 @@ export class UsageManager {
     stripeSubscriptionItemId,
     quantity,
     startDate,
+    endDate,
   }: {
     orgId: string;
     stripeSubscriptionItemId: string;
     quantity: number;
     startDate: Date;
+    endDate: Date;
   }): Promise<Result<string, string>> {
     try {
       const usageRecord = await this.stripeClient.addUsageRecord({
         subscriptionItemId: stripeSubscriptionItemId,
         quantity: quantity,
         timestamp: "now",
-        action: "increment",
-        idempotencyKey: `${orgId}-${startDate.toISOString()}`,
+        action: "set",
+        idempotencyKey: `${orgId}-${startDate.toISOString()}-${endDate.toISOString()}`,
       });
 
       if (usageRecord.error || !usageRecord.data) {

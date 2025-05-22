@@ -4,8 +4,6 @@ import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
 import AlertForm, { AlertRequest } from "./alertForm";
 
-import Cookies from "js-cookie";
-import { SUPABASE_AUTH_TOKEN } from "../../../lib/constants";
 import { Database } from "../../../db/database.types";
 
 interface EditAlertModalProps {
@@ -22,12 +20,6 @@ export const EditAlertModal = (props: EditAlertModalProps) => {
   const jawn = useJawnClient();
 
   const handleEditAlert = async (req: AlertRequest) => {
-    const authFromCookie = Cookies.get(SUPABASE_AUTH_TOKEN);
-    if (!authFromCookie) {
-      setNotification("Please login to create an alert", "error");
-      return;
-    }
-
     const { error } = await jawn.POST("/v1/alert/create", {
       body: {
         name: req.name,

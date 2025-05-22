@@ -42,7 +42,11 @@ export function prepareRequestOpenRouterFull({
   requestId,
   experimentId,
   model,
+  openrouterKey,
 }: PreparedRequestArgs): PreparedRequest {
+  if (!openrouterKey) {
+    throw new Error("OpenRouter key is required");
+  }
   const newRequestBody = autoFillInputs({
     template: template ?? {},
     inputs: inputs ?? {},

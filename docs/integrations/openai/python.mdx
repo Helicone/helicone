@@ -1,5 +1,5 @@
 ---
-title: "OpenAI Python SDK Integration"
+title: "OpenAI Python SDK"
 sidebarTitle: "Python"
 description: "Use OpenAI's Python SDK to integrate with Helicone to log your OpenAI usage."
 "twitter:title": "OpenAI Python SDK Integration - Helicone OSS LLM Observability"
@@ -7,85 +7,64 @@ icon: "python"
 iconType: "solid"
 ---
 
-## Proxy Integration (recommended)
+import { strings } from "/snippets/strings.mdx";
+
+## {strings.howToIntegrate}
 
 <Steps>
-  <Step title="Create an account + Generate an API Key">
-    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
-    can generate an [API key](https://helicone.ai/developer).
+  <Step title={strings.generateKey}>
+    <div dangerouslySetInnerHTML={{ __html: strings.generateKeyInstructions }} />
   </Step>
-  <Step title="Set HELICONE_API_KEY as an environment variable">
-```Python
-export HELICONE_API_KEY=<your API key>
-```
 
+  <Step title={strings.setApiKey}>
+    ```bash
+    HELICONE_API_KEY=<your-helicone-api-key>
+    OPENAI_API_KEY=<your-openai-api-key>
+    ```
   </Step>
-  <Step title="Modify the base path and add a Helicone-Auth header">
-<CodeGroup>
 
-```Python OpenAI v1+
-client = OpenAI(
-  api_key="your-api-key-here",  # Replace with your OpenAI API key
-  base_url="https://oai.helicone.ai/v1",  # Set the API endpoint
-  default_headers= {  # Optionally set default headers or set per request (see below)
-    "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
-  }
-)
-```
+  <Step title={strings.modifyBasePath}>
+    <CodeGroup>
+      ```python OpenAI v1+
+      from openai import OpenAI
+      from dotenv import load_dotenv
+      import os
 
-</CodeGroup>
+      load_dotenv()
+
+      helicone_api_key = os.getenv("HELICONE_API_KEY")
+      openai_api_key = os.getenv("OPENAI_API_KEY")
+
+      client = OpenAI(
+        api_key=openai_api_key,
+        base_url="https://oai.helicone.ai/v1",
+        default_headers={
+          "Helicone-Auth": f"Bearer {helicone_api_key}"
+        }
+      )
+      ```
+    </CodeGroup>
+  </Step>
+
+  <Step title={strings.useTheSDK("OpenAI")}>
+    ```python
+    chat_completion = client.chat.completions.create(
+      model="gpt-4o-mini",
+      messages=[{"role": "user", "content": "What is the meaning of life?"}]
+    )
+
+    print(chat_completion.choices[0].message.content)
+    ```
+  </Step>
+
+  <Step title={strings.verifyInHelicone}>
+    <div dangerouslySetInnerHTML={{ __html: strings.verifyInHeliconeDesciption("OpenAI") }} />
   </Step>
 </Steps>
 
-## Package Integration
+## {strings.relatedGuides}
 
-<Steps>
-  <Step title="Create an account + Generate an API Key">
-    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
-    can generate an [API key](https://helicone.ai/developer).
-  </Step>
-  <Step title="Set HELICONE_API_KEY as an environment variable">
-
-```Python
-export HELICONE_API_KEY=<your API key>
-```
-
-  </Step>
-  <Step title="Install the Helicone package">
-
-```Python
-pip install helicone
-```
-
-  </Step>
-  <Step title="Modify OpenAI import to use Helicone">
-
-```Python
-from helicone.openai_proxy import openai # replace `import openai` with this line
-```
-
-  </Step>
-  <Step title="That's it! You're ready to start logging with Helicone. Here's an example of using Helicone along with our advanced features as parameters">
-
-```Python
-import OpenAI from "openai";
-
-const openai = new OpenAI({
-    apiKey: request.env.OPENAI_API_KEY,
-    baseURL: "https://oai.helicone.ai/v1",
-    defaultHeaders: {
-        "Helicone-Auth": `Bearer ${request.env.HELICONE_API_KEY}`,
-    },
-});
-
-```
-
-  </Step>
-</Steps>
-
-### Related Guides
-
-<CardGroup cols={1}>
+<CardGroup cols={2}>
   <Card
     title="Building a chatbot with OpenAI structured outputs"
     icon="lightbulb"
@@ -93,7 +72,15 @@ const openai = new OpenAI({
     iconType="light"
     vertical
   >
-    This step-by-step guide covers function calling, response formatting and
-    monitoring with Helicone.
+    {strings.chatbotCookbookDescription}
+  </Card>
+  <Card
+    title="How to Prompt Thinking Models Effectively"
+    icon="arrows-rotate"
+    href="/guides/cookbooks/prompt-thinking-models"
+    iconType="light"
+    vertical
+  >
+    {strings.howToPromptThinkingModelsCookbookDescription}
   </Card>
 </CardGroup>

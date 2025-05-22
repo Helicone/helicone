@@ -1,19 +1,55 @@
-import AuthHeader from "@/components/shared/authHeader";
+import FoldedHeader from "@/components/shared/FoldedHeader";
 import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Muted, Small, XSmall } from "@/components/ui/typography";
+import { FilterASTButton } from "@/filterAST/FilterASTButton";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
+import { cn } from "@/lib/utils";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import { useURLParams } from "@/services/hooks/localURLParams";
 import { SortDirection } from "@/services/lib/sorts/requests/sorts";
-import { ChartPieIcon, ListBulletIcon } from "@heroicons/react/24/outline";
-import { useEffect, useState } from "react";
-import { getTimeIntervalAgo } from "../../../lib/timeCalculations/time";
+import { TimeFilter } from "@/types/timeFilter";
+import { Check, ChevronDown, PieChart, Table } from "lucide-react";
+import Link from "next/link";
+import { useCallback, useMemo, useRef, useState } from "react";
+import {
+  getTimeIntervalAgo,
+  TimeInterval,
+} from "../../../lib/timeCalculations/time";
+import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
 import { useDebounce } from "../../../services/hooks/debounce";
+import { getRequestsByIdsWithBodies } from "../../../services/hooks/requests";
 import { useSessionNames, useSessions } from "../../../services/hooks/sessions";
-import { Row } from "../../layout/common/row";
-import SessionNameSelection from "./nameSelection";
-import SessionDetails from "./sessionDetails";
+import {
+  columnDefsToDragColumnItems,
+  DragColumnItem,
+} from "../../shared/themed/table/columns/DragList";
+import ViewColumns from "../../shared/themed/table/columns/viewColumns";
+import ExportButton from "../../shared/themed/table/exportButton";
+import ThemedTable from "../../shared/themed/table/themedTable";
+import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
+import { getColumns } from "./initialColumns";
+import { EMPTY_SESSION_NAME } from "./sessionId/SessionContent";
+import SessionMetrics from "./SessionMetrics";
 
 interface SessionsPageProps {
   currentPage: number;
@@ -24,47 +60,70 @@ interface SessionsPageProps {
     isCustomProperty: boolean;
   };
   defaultIndex: number;
+  selectedName?: string;
 }
+
+// Moved from SessionDetails.tsx
+export type TSessions = {
+  id: string;
+  metadata: {
+    created_at: string;
+    latest_request_created_at: string;
+    session_name: string;
+    session_id: string;
+    total_cost: number;
+    total_requests: number;
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+    avg_latency: number;
+  };
+};
 
 const TABS = [
   {
     id: "sessions",
     label: "Sessions",
-    icon: <ListBulletIcon className="w-4 h-4" />,
+    icon: <Table size={16} />,
   },
   {
     id: "metrics",
     label: "Metrics",
-    icon: <ChartPieIcon className="w-4 h-4" />,
+    icon: <PieChart size={16} />,
   },
 ];
 
 const SessionsPage = (props: SessionsPageProps) => {
-  const { sort } = props;
+  const tableRef = useRef<any>(null);
 
-  const [timeFilter, setTimeFilter] = useState<{
-    start: Date;
-    end: Date;
-  }>({
+  // State for active columns
+  const [activeColumns, setActiveColumns] = useState<DragColumnItem[]>(
+    columnDefsToDragColumnItems(getColumns())
+  );
+
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>({
     start: getTimeIntervalAgo("1m"),
     end: new Date(),
   });
 
-  const [sessionIdSearch, setSessionIdSearch] = useURLParams<
-    string | undefined
-  >("session-search", undefined);
+  const [sessionIdSearch] = useURLParams<string | undefined>(
+    "session-search",
+    undefined
+  );
+
+  const [open, setOpen] = useState(false);
   const [sessionNameSearch, setSessionNameSearch] = useState<
     string | undefined
   >(undefined);
 
   const debouncedSessionNameSearch = useDebounce(sessionNameSearch, 500);
 
-  const names = useSessionNames(debouncedSessionNameSearch ?? "");
-  const allNames = useSessionNames("");
+  const names = useSessionNames(debouncedSessionNameSearch ?? "", timeFilter);
+  const allNames = useSessionNames("", timeFilter);
 
   const debouncedSessionIdSearch = useDebounce(sessionIdSearch, 500); // 0.5 seconds
   const [selectedName, setSelectedName] = useState<string | undefined>(
-    undefined
+    props.selectedName
   );
 
   const { sessions, isLoading, hasSessions } = useSessions({
@@ -72,6 +131,13 @@ const SessionsPage = (props: SessionsPageProps) => {
     sessionIdSearch: debouncedSessionIdSearch ?? "",
     selectedName,
   });
+
+  const sessionsWithId = useMemo(() => {
+    return sessions.map((session, index) => ({
+      metadata: session,
+      id: index.toString(),
+    }));
+  }, [sessions]);
 
   const { canCreate, freeLimit } = useFeatureLimit(
     "sessions",
@@ -82,114 +148,326 @@ const SessionsPage = (props: SessionsPageProps) => {
     (typeof TABS)[number]["id"]
   >("session-details-tab", "sessions");
 
-  const { hasAccess } = useFeatureLimit("sessions", allNames.sessions.length);
+  const { selectedIds, toggleSelection, selectAll, isShiftPressed } =
+    useSelectMode({
+      items: sessionsWithId,
+      getItemId: (session: TSessions) => session.id,
+    });
 
-  useEffect(() => {
-    if (
-      !hasAccess &&
-      hasSessions &&
-      selectedName === undefined &&
-      !allNames.isLoading
-    ) {
-      const sortedSessions = [...allNames.sessions].sort(
-        (a, b) =>
-          new Date(b.last_used).getTime() - new Date(a.last_used).getTime()
-      );
-
-      if (sortedSessions.length > 0) {
-        setSelectedName(sortedSessions[0].name);
-      }
+  const handleSelectSessionName = (value: string) => {
+    if (value === "" || value === "all") {
+      setSelectedName(""); // Map placeholder back to empty string
+    } else {
+      setSelectedName(value);
     }
-  }, [
-    hasSessions,
-    allNames.sessions,
-    allNames.isLoading,
-    selectedName,
-    hasAccess,
-  ]);
+  };
 
-  return (
-    <Tabs
-      value={currentTab}
-      onValueChange={(value) => setCurrentTab(value)}
-      className="w-full"
-    >
-      <div>
-        {hasSessions || isLoading ? (
-          <>
-            <AuthHeader
-              isWithinIsland={true}
-              title={
-                <div className="flex items-center gap-2 ml-8">Sessions</div>
-              }
-              actions={
-                <TabsList className="grid w-full grid-cols-2 mr-8">
+  const isSessionsLoading = isLoading || allNames.isLoading || names.isLoading;
+
+  // Helper function to get TimeFilter object
+  const getTimeFilterObject = (start: Date, end: Date): TimeFilter => ({
+    start,
+    end,
+  });
+
+  // Callback for ThemedTimeFilter - Moved inside the component
+  const onTimeSelectHandler = (key: string, value: string) => {
+    if (key === "custom") {
+      const [startDate, endDate] = value.split("_");
+      setTimeFilter({
+        start: new Date(startDate),
+        end: new Date(endDate),
+      });
+    } else {
+      // Cast key to TimeInterval for getTimeIntervalAgo
+      setTimeFilter({
+        start: getTimeIntervalAgo(key as TimeInterval),
+        end: new Date(),
+      });
+    }
+  };
+
+  const onFetchBulkSessions = async () => {
+    // Download all sessions if no sessions are selected
+    if (!selectedIds.length) {
+      const data = await getRequestsByIdsWithBodies(sessionsWithId);
+      return data;
+    }
+
+    const filteredSessions = sessionsWithId.filter((session) =>
+      selectedIds.includes(session.id)
+    );
+
+    return await getRequestsByIdsWithBodies(filteredSessions);
+  };
+
+  const onRowSelectHandler = useCallback(
+    (row: TSessions, index: number, event?: React.MouseEvent) => {
+      // bit of a hack since pre-existing table behavior is noop
+      let isCheckboxClick =
+        event?.target instanceof HTMLElement &&
+        (event.target.tagName.toLowerCase() === "button" ||
+          event.target.closest("button") !== null);
+      if (isShiftPressed || event?.metaKey || isCheckboxClick) {
+        toggleSelection(row);
+      }
+    },
+    [isShiftPressed, toggleSelection]
+  );
+
+  // Calculate aggregated stats
+  const aggregatedStats = useMemo(() => {
+    if (!sessions || sessions.length === 0) {
+      return {
+        lastUsed: "-",
+        avgCost: "-",
+        avgLatency: "-",
+        totalCost: "-",
+        totalSessions: 0,
+        createdOn: "-",
+      };
+    }
+
+    const totalCost = sessions.reduce((sum, s) => sum + s.total_cost, 0);
+    const avgCost = totalCost / sessions.length;
+    const lastUsed = new Date(
+      Math.max(
+        ...sessions.map((s) => new Date(s.latest_request_created_at).getTime())
+      )
+    ).toLocaleString();
+    const createdOn = new Date(
+      Math.min(...sessions.map((s) => new Date(s.created_at).getTime()))
+    ).toLocaleDateString();
+
+    // Calculate simple average of session average latencies
+    const totalAvgLatency = sessions.reduce((sum, s) => sum + s.avg_latency, 0);
+    const avgLatency =
+      sessions.length > 0 ? totalAvgLatency / sessions.length : 0;
+
+    return {
+      lastUsed,
+      avgCost: `$${avgCost.toFixed(4)}`,
+      avgLatency: `${(avgLatency * 1000).toFixed(0)}ms`,
+      totalCost: `$${totalCost.toFixed(4)}`,
+      totalSessions: sessions.length,
+      createdOn,
+    };
+  }, [sessions]);
+  const statsToDisplay = [
+    { label: "Last Used", value: aggregatedStats.lastUsed },
+    { label: "Avg Cost", value: aggregatedStats.avgCost },
+    { label: "Avg Latency", value: aggregatedStats.avgLatency },
+    { label: "Total Cost", value: aggregatedStats.totalCost },
+    {
+      label: "Total Sessions",
+      value: aggregatedStats.totalSessions.toString(),
+    },
+    { label: "Created On", value: aggregatedStats.createdOn },
+  ];
+
+  return hasSessions || isSessionsLoading ? (
+    <main className="h-screen flex flex-col w-full animate-fade-in">
+      <Tabs
+        value={currentTab}
+        onValueChange={(value) => setCurrentTab(value)}
+        className="w-full h-full flex flex-col"
+      >
+        <FoldedHeader
+          leftSection={
+            <section className="flex flex-row items-center gap-2">
+              <Link href="/sessions" className="no-underline">
+                <Small className="font-semibold">Sessions</Small>
+              </Link>
+              <Small className="font-semibold">/</Small>
+
+              <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger
+                  asChild
+                  className={cn(
+                    "flex h-8 w-[280px] items-center justify-between rounded-md border border-sky-200 bg-white px-3 py-2 text-xs ring-offset-white placeholder:text-slate-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:bg-sidebar-background",
+                    "focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 dark:focus:ring-slate-300"
+                  )}
+                >
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={open}
+                  >
+                    {selectedName === ""
+                      ? EMPTY_SESSION_NAME
+                      : selectedName ?? "All"}
+                    <ChevronDown className="ml-2 h-3 w-3 shrink-0 opacity-50 " />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[280px] p-0">
+                  <Command>
+                    <CommandInput
+                      placeholder="Search sessions..."
+                      onChangeCapture={(
+                        e: React.ChangeEvent<HTMLInputElement>
+                      ) => {
+                        setSessionNameSearch(e.target.value);
+                      }}
+                    />
+                    <CommandEmpty>No results found.</CommandEmpty>
+
+                    <CommandList>
+                      {names.sessions
+                        .sort(
+                          (a, b) =>
+                            new Date(b.last_used).getTime() -
+                            new Date(a.last_used).getTime()
+                        )
+                        .map((session) => (
+                          <CommandItem
+                            key={session.name}
+                            value={session.name}
+                            onSelect={() => {
+                              setOpen(false);
+                              handleSelectSessionName(session.name);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-3 w-3",
+                                selectedName === session.name
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
+                            {session.name === ""
+                              ? EMPTY_SESSION_NAME
+                              : session.name}
+                          </CommandItem>
+                        ))}
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+
+              <ThemedTimeFilter
+                currentTimeFilter={getTimeFilterObject(
+                  timeFilter.start,
+                  timeFilter.end
+                )}
+                timeFilterOptions={[]}
+                onSelect={onTimeSelectHandler}
+                isFetching={isSessionsLoading}
+                defaultValue={"1m"}
+                custom={true}
+              />
+
+              <FilterASTButton />
+            </section>
+          }
+          rightSection={
+            <section className="flex flex-row items-center gap-2">
+              <div className="flex flex-row items-center gap-2 bg-sky-200 rounded-lg">
+                {selectedIds.length > 0 && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <ExportButton rows={[]} fetchRows={onFetchBulkSessions} />
+                    </TooltipTrigger>
+                    <TooltipContent>Export raw data</TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
+
+              <div className="h-8 flex flex-row items-center border border-border rounded-lg divide-x divide-border overflow-hidden shadow-sm">
+                <label className="text-xs px-2 py-1">Views</label>
+
+                <TabsList
+                  size={"sm"}
+                  variant={"secondary"}
+                  asPill={"none"}
+                  className="divide-x divide-border"
+                >
                   {TABS.map((tab) => (
                     <TabsTrigger
+                      variant={"secondary"}
+                      asPill={"none"}
                       key={tab.id}
                       value={tab.id}
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 bg-sidebar-background dark:bg-sidebar-foreground"
                     >
                       {tab.icon}
-                      {tab.label}
                     </TabsTrigger>
                   ))}
                 </TabsList>
-              }
-            />
+              </div>
 
-            {!canCreate && (
-              <FreeTierLimitBanner
-                feature="sessions"
-                itemCount={allNames.sessions.length}
-                freeLimit={freeLimit}
-                className="w-full"
+              <ViewColumns
+                columns={tableRef.current?.getAllColumns() || []}
+                activeColumns={activeColumns}
+                setActiveColumns={setActiveColumns}
               />
-            )}
-
-            <Row className="border-t border-slate-200 dark:border-slate-800">
-              <SessionNameSelection
-                sessionNameSearch={sessionNameSearch}
-                selectedName={selectedName}
-                setSessionNameSearch={setSessionNameSearch}
-                setSelectedName={setSelectedName}
-                sessionNames={names.sessions}
-                totalSessionCount={allNames.totalCount}
-              />
-              <SessionDetails
-                currentTab={currentTab}
-                selectedSession={
-                  names.sessions.find(
-                    (session) => session.name === selectedName
-                  ) ?? null
-                }
-                sessionIdSearch={sessionIdSearch ?? ""}
-                setSessionIdSearch={setSessionIdSearch}
-                sessions={sessions}
-                isLoading={
-                  isLoading ||
-                  allNames.isLoading ||
-                  allNames.isRefetching ||
-                  isLoading ||
-                  names.isLoading ||
-                  names.isRefetching
-                }
-                sort={sort}
-                timeFilter={timeFilter}
-                setTimeFilter={setTimeFilter}
-                setInterval={() => {}}
-              />
-            </Row>
-          </>
-        ) : (
-          <div className="flex flex-col w-full h-screen bg-background dark:bg-sidebar-background">
-            <div className="flex flex-1 h-full">
-              <EmptyStateCard feature="sessions" />
+            </section>
+          }
+          foldContent={
+            <div className="h-full flex flex-row items-center divide-x divide-border">
+              {statsToDisplay.map((stat) => (
+                <div
+                  key={stat.label}
+                  className="flex flex-row gap-1 items-center px-4"
+                >
+                  <XSmall className="font-medium">{stat.label}</XSmall>
+                  <Muted className="text-xs">{stat.value}</Muted>
+                </div>
+              ))}
             </div>
-          </div>
+          }
+        />
+
+        {!canCreate && (
+          <FreeTierLimitBanner
+            feature="sessions"
+            itemCount={allNames.sessions.length}
+            freeLimit={freeLimit}
+            className="w-full"
+          />
         )}
+
+        <TabsContent value="sessions" className="h-full w-full">
+          <ThemedTable
+            id="sessions-table"
+            tableRef={tableRef}
+            defaultData={sessionsWithId}
+            defaultColumns={getColumns()}
+            skeletonLoading={isLoading}
+            dataLoading={isLoading}
+            activeColumns={activeColumns}
+            setActiveColumns={setActiveColumns}
+            rowLink={(row: TSessions) =>
+              `/sessions/${
+                row.metadata.session_name
+                  ? encodeURIComponent(row.metadata.session_name)
+                  : EMPTY_SESSION_NAME
+              }/${encodeURIComponent(row.metadata.session_id)}`
+            }
+            checkboxMode={"on_hover"}
+            onRowSelect={onRowSelectHandler}
+            onSelectAll={selectAll}
+            selectedIds={selectedIds}
+          />
+        </TabsContent>
+        <TabsContent value="metrics">
+          <SessionMetrics
+            selectedSession={
+              allNames.sessions.find(
+                (session) => session.name === selectedName
+              ) ?? null
+            }
+            timeFilter={timeFilter}
+          />
+        </TabsContent>
+      </Tabs>
+    </main>
+  ) : (
+    <div className="flex flex-col w-full h-screen bg-background dark:bg-sidebar-background">
+      <div className="flex flex-1 h-full">
+        <EmptyStateCard feature="sessions" />
       </div>
-    </Tabs>
+    </div>
   );
 };
 

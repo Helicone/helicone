@@ -1,5 +1,5 @@
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 import { ArrowPathIcon, InboxArrowDownIcon } from "@heroicons/react/24/outline";
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { BsGoogle } from "react-icons/bs";
@@ -31,10 +31,8 @@ const Login = (props: LoginProps) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [showSignedUpConfirmation, setShowSignedUpConfirmation] =
     useState<boolean>(false);
-
-  const supabaseClient = useSupabaseClient();
+  const heliconeAuthClient = useHeliconeAuthClient();
   const router = useRouter();
-  const user = useUser();
 
   const signUpHandler = async (email: string, password: string) => {
     if (email === "") {
@@ -47,7 +45,8 @@ const Login = (props: LoginProps) => {
     }
 
     setLoading(true);
-    const { data: user, error: authError } = await supabaseClient.auth.signUp({
+
+    const { data: user, error: authError } = await heliconeAuthClient.signUp({
       email,
       password,
       options: {
@@ -56,7 +55,7 @@ const Login = (props: LoginProps) => {
     });
 
     if (authError) {
-      setAuthError(authError.message);
+      setAuthError(authError);
       setLoading(false);
       return;
     }
@@ -118,13 +117,16 @@ const Login = (props: LoginProps) => {
                         return;
                       }
                       setLoading(true);
-                      supabaseClient.auth
-                        .resetPasswordForEmail(email, {
-                          redirectTo: `${window.location.origin}/reset`,
+                      heliconeAuthClient
+                        .resetPassword({
+                          email,
+                          options: {
+                            emailRedirectTo: `${window.location.origin}/reset`,
+                          },
                         })
                         .then((res) => {
                           if (res.error) {
-                            setAuthError(res.error.message);
+                            setAuthError(res.error);
                           } else {
                             setAuthError(
                               `If an account exists with email (${email}), you will receive an email with a link to reset your password.`
@@ -213,14 +215,14 @@ const Login = (props: LoginProps) => {
                           }
                           setLoading(true);
 
-                          supabaseClient.auth
+                          heliconeAuthClient
                             .signInWithPassword({
                               email,
                               password,
                             })
                             .then((res) => {
                               if (res.error) {
-                                setAuthError(res.error.message);
+                                setAuthError(res.error);
                               } else {
                                 router.push("/dashboard");
                               }
@@ -249,11 +251,11 @@ const Login = (props: LoginProps) => {
                       onClick={async () => {
                         setLoading(true);
                         const { data, error } =
-                          await supabaseClient.auth.signInWithOAuth({
+                          await heliconeAuthClient.signInWithOAuth({
                             provider: "google",
                           });
                         if (error) {
-                          setAuthError(error.message);
+                          setAuthError(error);
                         }
 
                         setLoading(false);

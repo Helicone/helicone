@@ -194,8 +194,8 @@ function transformInvoiceData(
 
     // Only include if in our date range
     if (monthBuckets[monthKey]) {
-      monthBuckets[monthKey].billed += invoice.amountAfterDiscount;
-      monthBuckets[monthKey].total += invoice.amountAfterDiscount;
+      monthBuckets[monthKey].billed += invoice.amountAfterProcessing;
+      monthBuckets[monthKey].total += invoice.amountAfterProcessing;
     }
   });
 
@@ -205,8 +205,8 @@ function transformInvoiceData(
   ).padStart(2, "0")}`;
   upcomingInvoices.forEach((invoice) => {
     if (monthBuckets[currentMonthKey]) {
-      monthBuckets[currentMonthKey].upcoming += invoice.amountAfterDiscount;
-      monthBuckets[currentMonthKey].total += invoice.amountAfterDiscount;
+      monthBuckets[currentMonthKey].upcoming += invoice.amountAfterProcessing;
+      monthBuckets[currentMonthKey].total += invoice.amountAfterProcessing;
     }
   });
 
