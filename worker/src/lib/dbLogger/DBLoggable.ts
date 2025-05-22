@@ -242,6 +242,10 @@ export class DBLoggable {
     return await this.response.getResponseBody();
   }
 
+  getTimingStart(): number {
+    return this.timing.startTime.getTime();
+  }
+
   async tokenCounter(text: string): Promise<number> {
     return getTokenCount(text, this.provider, this.tokenCalcUrl);
   }
@@ -715,13 +719,15 @@ export class DBLoggable {
           experimentRowIndex:
             requestHeaders.experimentHeaders.rowIndex ?? undefined,
         },
+
         response: {
           id: this.response.responseId,
           status: await this.response.status(),
           bodySize: rawResponseBody.length,
           timeToFirstToken,
           responseCreatedAt: endTime,
-          delayMs: endTime.getTime() - this.timing.startTime.getTime(),
+          delayMs: cacheReferenceId == DEFAULT_UUID ? endTime.getTime() - this.timing.startTime.getTime() : 0,
+          cachedLatency: cacheReferenceId == DEFAULT_UUID ? 0 : Number(cachedHeaders?.get("Helicone-Cache-Latency")) ?? 0,
         },
       },
     };
