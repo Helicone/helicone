@@ -4,10 +4,13 @@ import Integrations from "@/components/templates/landing/integrations";
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import LazyLoadComponent from "@/components/shared/LazyLoadComponent";
-import { cn, ISLAND_WIDTH } from "@/lib/utils";
+import { cn, ISLAND_WIDTH, ISLAND_WIDTH_V2 } from "@/lib/utils";
 
 const BigDashboard = dynamic(() => import("@/components/home/BigDashboard"));
 const Companies = dynamic(() => import("@/components/home/Companies"));
+const CompaniesLanding = dynamic(
+  () => import("@/components/home/CompaniesLanding")
+);
 const CTA = dynamic(() => import("@/components/home/CTA"));
 const Evaluate = dynamic(() => import("@/components/home/Evaluate"));
 const Experiment = dynamic(() => import("@/components/home/Experiment"));
@@ -51,41 +54,13 @@ export default async function Home() {
 
   return (
     <Layout>
-      <main className="bg-white text-landing-description relative">
-        {/* Grid overlay */}
-        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-          {/* Horizontal lines */}
-          <div className="absolute top-0 left-0 right-0 h-full flex flex-col">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div
-                key={`h-line-${i}`}
-                className="flex-1 border-t border-slate-200"
-              />
-            ))}
-          </div>
-
-          {/* Vertical lines */}
-          <div className="absolute top-0 left-0 bottom-0 w-full flex flex-row max-w-7xl mx-auto right-0 left-0">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div
-                key={`v-line-${i}`}
-                className="flex-1 border-l border-slate-200"
-              />
-            ))}
-            <div className="w-0 border-l border-slate-200"></div>
-          </div>
-
-          {/* Curved decorative lines */}
-          <div className="absolute top-0 right-0 w-[600px] h-[600px] border-l border-t border-slate-200 rounded-bl-[600px]"></div>
-          <div className="absolute bottom-[30%] left-0 w-[400px] h-[400px] border-r border-b border-slate-200 rounded-tl-[400px]"></div>
-        </div>
-
-        <div className="relative z-10">
-          <Hero />
-          <Prototype />
-          <div className="max-w-7xl mx-auto">
+      <main className="bg-white bg-[size:24px_24px] bg-[linear-gradient(rgba(12,165,234,0.07)_1px,transparent_1px),linear-gradient(90deg,rgba(12,165,234,0.07)_1px,transparent_1px)] text-landing-description">
+        <div className="flex flex-col gap-10">
+          <div className="md:max-w-5xl max-w-7xl mx-auto w-full">
+            <Hero className="" />
+            <Prototype />
             <LazyLoadComponent fallback={<LoadingSection height="h-24" />}>
-              <Companies className={cn(ISLAND_WIDTH)} />
+              <CompaniesLanding />
             </LazyLoadComponent>
             <LazyLoadComponent fallback={<LoadingSection />}>
               <Quote />

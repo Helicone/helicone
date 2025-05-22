@@ -1,64 +1,187 @@
-import { ISLAND_WIDTH } from "@/lib/utils";
+"use client";
 import { cn } from "@/lib/utils";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "../ui/button";
+import { H1, P, Small } from "@/components/ui/typography";
+import { useState, useEffect } from "react";
 
-const Hero = () => {
+// Import pixel font - add to <head> in layout component if needed
+// import { Press_Start_2P } from 'next/font/google';
+// const pixelFont = Press_Start_2P({ weight: '400', subsets: ['latin'] });
+
+const Hero = ({ className }: { className?: string }) => {
+  const [cursorVisible, setCursorVisible] = useState(true);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [typedText, setTypedText] = useState("");
+  const [isLampOn, setIsLampOn] = useState(false);
+
+  const terminalSteps = [
+    { text: "// Add Helicone to your OpenAI client", typing: true },
+    { text: "import OpenAI from 'openai';", typing: true },
+    { text: "", typing: false },
+    { text: "const openai = new OpenAI({", typing: true },
+    { text: "  apiKey: OPENAI_API_KEY,", typing: true },
+    {
+      text: "  baseURL: `https://oai.helicone.ai/v1/${HELICONE_API_KEY}/`",
+      typing: true,
+    },
+    { text: "});", typing: true },
+    { text: "", typing: false },
+    {
+      text: "// Now all your requests are logged automatically!",
+      typing: true,
+    },
+    {
+      text: "const chatCompletion = await openai.chat.completions.create({",
+      typing: true,
+    },
+    { text: "  model: 'gpt-3.5-turbo',", typing: true },
+    {
+      text: "  messages: [{ role: 'user', content: 'Hello!' }],",
+      typing: true,
+    },
+    { text: "});", typing: true },
+  ];
+
+  // Blinking cursor effect
+  useEffect(() => {
+    const cursorInterval = setInterval(() => {
+      setCursorVisible((prev) => !prev);
+    }, 530);
+    return () => clearInterval(cursorInterval);
+  }, []);
+
+  // Typing effect
+  useEffect(() => {
+    if (currentStep >= terminalSteps.length) return;
+
+    const currentStepData = terminalSteps[currentStep];
+
+    if (!currentStepData.typing) {
+      // Skip typing animation for non-typing steps
+      setTypedText("");
+      setCurrentStep((prev) => prev + 1);
+      return;
+    }
+
+    if (typedText.length < currentStepData.text.length) {
+      const timeout = setTimeout(() => {
+        setTypedText(currentStepData.text.substring(0, typedText.length + 1));
+      }, 30);
+      return () => clearTimeout(timeout);
+    } else {
+      const timeout = setTimeout(() => {
+        setTypedText("");
+        setCurrentStep((prev) => prev + 1);
+      }, 500);
+      return () => clearTimeout(timeout);
+    }
+  }, [currentStep, typedText]);
+
   return (
-    <div
+    <section
       className={cn(
-        "flex flex-col items-center text-center justify-center h-auto lg:h-[60vh] relative",
-        "max-w-7xl mx-auto px-4 sm:px-8 md:px-12 lg:px-6"
+        "relative py-12 lg:py-16",
+        "bg-[size:24px_24px]",
+        className
       )}
     >
-      <div className="flex flex-wrap justify-center gap-x-12 gap-y-4 items-center mt-12 lg:mt-0 mb-12">
-        <div className="flex items-center gap-2 text-sm font-medium whitespace-nowrap">
-          <p>Backed by</p>
-          <Image
-            src="/static/home/yc-logo.webp"
-            alt="Y Combinator"
-            className="w-24 h-auto"
-            width={96}
-            height={24}
-            priority
-          />
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center mb-12">
+          <div className="flex flex-col gap-8">
+            <div>
+              <h1
+                className="font-mono text-5xl md:text-6xl font-bold leading-tight tracking-tight text-black"
+                // style={{ textShadow: "2px 2px 0px rgba(12,165,234,0.2)" }}
+              >
+                <span
+                  className="block mb-3 uppercase tracking-wide"
+                  style={{ letterSpacing: "0.05em" }}
+                >
+                  The
+                </span>
+                <span
+                  className="text-[#0ca5ea] uppercase tracking-wide"
+                  style={{ letterSpacing: "0.05em" }}
+                >
+                  Observability
+                </span>
+                <span
+                  className="block mt-3 uppercase tracking-wide"
+                  style={{ letterSpacing: "0.05em" }}
+                >
+                  Engine for LLMs
+                </span>
+              </h1>
+
+              <p
+                className="font-mono text-xl md:text-2xl text-black/80 mt-8 max-w-xl"
+                style={{ letterSpacing: "0.02em" }}
+              >
+                Get instant visibility into your AI interactions
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-4">
+              <Link href="https://us.helicone.ai/signup">
+                <Button
+                  variant="landing_primary"
+                  size="landing_page"
+                  className="bg-[#0ca5ea] hover:bg-[#0990d3] text-white font-mono uppercase tracking-wider rounded-sm px-8 py-4 text-lg"
+                  onMouseEnter={() => setIsLampOn(true)}
+                  onMouseLeave={() => setIsLampOn(false)}
+                >
+                  Start Debugging
+                  <ChevronRight className="size-5" />
+                </Button>
+              </Link>
+
+              <Small className="text-black/70 text-base font-mono uppercase tracking-wide">
+                Start with one line of code
+              </Small>
+            </div>
+          </div>
+
+          <div className="flex justify-center md:justify-end relative">
+            {/* Lamp off (default) */}
+            <Image
+              src="/static/home/lamp.png"
+              alt="Lamp illustration"
+              width={400}
+              height={400}
+              className={cn(
+                "w-auto h-auto grayscale absolute",
+                isLampOn ? "opacity-0" : "opacity-100"
+              )}
+              style={{ transform: "scaleX(-1)" }}
+              priority
+            />
+
+            {/* Lamp on (hover) */}
+            <Image
+              src="/static/home/lamp2.png"
+              alt="Lamp illustration (on)"
+              width={400}
+              height={400}
+              className={cn(
+                "w-auto h-auto grayscale absolute",
+                isLampOn ? "opacity-100" : "opacity-0"
+              )}
+              style={{ transform: "scaleX(-1)" }}
+              priority
+            />
+
+            {/* Spacer to maintain layout */}
+            <div className="w-[400px] h-[400px]" />
+          </div>
         </div>
-        <Image
-          src="/static/home/productoftheday.webp"
-          alt="Product of the Day"
-          className="w-32 h-auto"
-          width={128}
-          height={32}
-          priority
-        />
+
+        {/* Terminal section - keep or update as needed */}
+        {/* ... existing terminal code ... */}
       </div>
-      <h1 className="text-5xl sm:text-7xl md:text-[76px] font-semibold mb-3 max-w-3xl mx-auto text-wrap text-black z-[10]">
-        Complete visibility into your <span className="text-brand">AI app</span>
-      </h1>
-      <p className="text-lg sm:text-xl 2xl:text-2xl text-landing-secondary font-light mb-6 lg:mb-8 max-w-2xl mx-auto z-[10]">
-        The observability platform built for fast-growing AI startups to
-        monitor, debug, and scale with confidence.
-      </p>
-      <div className="flex flex-col md:flex-row gap-4 mb-20">
-        <Link href="https://us.helicone.ai/signup">
-          <Button className="bg-brand p-5 text-base md:text-lg md:py-4 lg:py-7 lg:px-7 lg:text-xl gap-2 rounded-lg items-center z-[10]">
-            Start monitoring
-            <ChevronRight className="size-5 md:size-6" />
-          </Button>
-        </Link>
-        <Link href="/contact">
-          <Button
-            variant="ghost"
-            className="p-5 text-base md:text-lg md:py-4 lg:py-7 lg:px-7 lg:text-xl gap-2 rounded-lg items-center z-[10]"
-          >
-            Contact sales
-            <ChevronRight className="size-5 md:size-6" />
-          </Button>
-        </Link>
-      </div>
-    </div>
+    </section>
   );
 };
 

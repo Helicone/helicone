@@ -9,7 +9,7 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import { cn } from "@/lib/utils";
+import { cn, ISLAND_WIDTH_V2 } from "@/lib/utils";
 import {
   X,
   Briefcase,
@@ -207,8 +207,7 @@ const resourcesComponents: LinkItem[] = [
       href: "/customers",
       isExternal: false,
     },
-    description:
-      "Built for scale, security, and control",
+    description: "Built for scale, security, and control",
     icon: <Gem className="size-5 navbar-icon-style" />,
   },
   {
@@ -337,12 +336,15 @@ const NavBar = (props: NavBarProps) => {
   return (
     <div
       ref={headerRef}
-      className="bg-background top-0 sticky z-30 border-b border-border mb-10"
+      className="bg-background top-0 sticky z-30 border-b border-border"
     >
       <MobileNav />
 
       <nav
-        className="gap-x-3 mx-auto lg:flex sm:px-16 lg:px-24 2xl:px-40 max-w-[2000px] items-center py-2 hidden justify-between"
+        className={cn(
+          "gap-x-3 mx-auto lg:flex items-center py-2 hidden justify-between",
+          ISLAND_WIDTH_V2
+        )}
         aria-label="Global"
       >
         {/* Logo */}
@@ -502,9 +504,9 @@ const NavBar = (props: NavBarProps) => {
                 <p className="text-sm text-accent-foreground">
                   {props.stars
                     ? props.stars.toLocaleString("en-US", {
-                      notation: "compact",
-                      compactDisplay: "short",
-                    })
+                        notation: "compact",
+                        compactDisplay: "short",
+                      })
                     : "0"}
                 </p>
               </Button>
