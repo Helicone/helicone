@@ -1,4 +1,4 @@
-import { ClickHouseClient, createClient, ClickHouseSettings } from "@clickhouse/client";
+import { ClickHouseClient, createClient, ClickHouseSettings, DataFormat } from "@clickhouse/client";
 import { Result } from "../../packages/common/result";
 
 interface ClickhouseEnv {
@@ -44,17 +44,17 @@ export class ClickhouseClientWrapper {
   async dbInsertClickhouseWithFunctions<T extends keyof ClickhouseDB["Tables"]>(
     table: T,
     fieldsString: string,
-    valuesString: string,
+    valuesString: string[],
   ): Promise<Result<string, string>> {
     const commandSettings: ClickHouseSettings = {
+      async_insert: 1,
       wait_end_of_query: 1,
     };
 
     const insertQuery = `
       INSERT INTO ${table}
         (${fieldsString})
-      SELECT
-        ${valuesString}
+      SELECT ${valuesString.join('\nUNION ALL\nSELECT ')}
     `;
 
     try {
