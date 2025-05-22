@@ -15,7 +15,7 @@ import {
   getRequestsClickhouse,
   getRequestsClickhouseNoSort,
 } from "../../lib/stores/request/request";
-import { costOfPrompt } from "../../packages/cost";
+import { costOfPrompt } from "@helicone-package/cost";
 import { HeliconeRequest } from "../../packages/llm-mapper/types";
 import { cacheResultCustom } from "../../utils/cacheResult";
 import { BaseManager } from "../BaseManager";
@@ -488,21 +488,22 @@ export class RequestManager extends BaseManager {
     if (isScored !== undefined) {
       newFilter = this.addScoreFilterClickhouse(isScored, newFilter);
     }
-    
-    const requests = sort.created_at === "desc"
-      ? await getRequestsClickhouseNoSort(
-          this.authParams.organizationId,
-          newFilter,
-          offset,
-          limit
-        )
-      : await getRequestsClickhouse(
-          this.authParams.organizationId,
-          newFilter,
-          offset,
-          limit,
-          sort
-        );
+
+    const requests =
+      sort.created_at === "desc"
+        ? await getRequestsClickhouseNoSort(
+            this.authParams.organizationId,
+            newFilter,
+            offset,
+            limit
+          )
+        : await getRequestsClickhouse(
+            this.authParams.organizationId,
+            newFilter,
+            offset,
+            limit,
+            sort
+          );
 
     return resultMap(requests, (req) => {
       const seen = new Set();

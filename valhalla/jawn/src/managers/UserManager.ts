@@ -12,7 +12,7 @@ import {
 } from "../lib/shared/filters/filters";
 import { ok, Result, resultMap } from "../packages/common/result";
 import { SortDirection } from "../lib/shared/sorts/requests/sorts";
-import { clickhousePriceCalc } from "../packages/cost";
+import { clickhousePriceCalc } from "@helicone-package/cost";
 import { cacheResultCustom } from "../utils/cacheResult";
 import { BaseManager } from "./BaseManager";
 import {

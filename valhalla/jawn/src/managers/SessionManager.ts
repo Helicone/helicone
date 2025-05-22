@@ -11,7 +11,7 @@ import { TimeFilterMs } from "../lib/shared/filters/timeFilter";
 import { AuthParams } from "../packages/common/auth/types";
 import { err, ok, Result, resultMap } from "../packages/common/result";
 import { TagType } from "../packages/common/sessions/tags";
-import { clickhousePriceCalc } from "../packages/cost";
+import { clickhousePriceCalc } from "@helicone-package/cost";
 import { isValidTimeZoneDifference } from "../utils/helpers";
 import {
   getHistogramRowOnKeys,

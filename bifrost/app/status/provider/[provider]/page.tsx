@@ -1,6 +1,5 @@
 import { ProviderStatusPage } from "@/app/status/ProviderStatusPage";
 import { Suspense } from "react";
-import { ProviderStatusInfoSkeleton } from "@/app/status/SkeletonLoaders";
 
 const PROVIDERS = [
   "OPENAI",
