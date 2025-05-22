@@ -173,10 +173,8 @@ export const getInitialColumns = (): ColumnDef<MappedLLMRequest>[] => [
 
       if (Number(num) === 0 && !isCached && statusCode === 200) {
         return <CostPill />;
-      } else if (Number(num) > 0) {
-        return <span>${formatNumber(num)}</span>;
       }
-      return <span></span>;
+      return <span>${formatNumber(num)}</span>;
     },
     meta: {
       sortKey: "cost_usd",

@@ -1,6 +1,6 @@
 import {
-  ClickhouseDB,
   RequestResponseRMT,
+  CacheMetricSMT,
   clickhouseDb,
 } from "../../db/ClickhouseWrapper";
 import { dbExecute } from "../../shared/db/dbExecute";
@@ -29,6 +29,21 @@ export class VersionedRequestStore {
 
     if (result.error || !result.data) {
       return err(`Error inserting request response logs: ${result.error}`);
+    }
+
+    return ok(result.data);
+  }
+
+  async insertCacheMetricVersioned(
+    cacheMetricLog: CacheMetricSMT[]
+  ): PromiseGenericResult<string> {
+    const result = await clickhouseDb.dbInsertClickhouse(
+      "cache_metrics",
+      cacheMetricLog
+    );
+
+    if (result.error || !result.data) {
+      return err(`Error inserting cache metric logs: ${result.error}`);
     }
 
     return ok(result.data);

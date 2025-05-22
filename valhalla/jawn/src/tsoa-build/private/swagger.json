@@ -5164,6 +5164,10 @@
 				"properties": {
 					"response": {
 						"properties": {
+							"cachedLatency": {
+								"type": "number",
+								"format": "double"
+							},
 							"delayMs": {
 								"type": "number",
 								"format": "double"
