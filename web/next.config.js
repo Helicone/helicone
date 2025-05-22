@@ -36,6 +36,10 @@ const nextConfig = {
   async rewrites() {
     return [
       {
+        source: "/:any*",
+        destination: "/static-shell",
+      },
+      {
         source: "/ingest/:path*",
         destination: "https://app.posthog.com/:path*",
       },

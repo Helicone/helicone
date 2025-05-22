@@ -2,7 +2,7 @@ import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { Session, SessionContextProvider } from "@supabase/auth-helpers-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppProps } from "next/app";
-import { ReactElement, ReactNode, useState } from "react";
+import { ReactElement, ReactNode, useEffect, useState } from "react";
 import Notification from "../components/shared/notification/Notification";
 import { NotificationProvider } from "../components/shared/notification/NotificationContext";
 import "react-grid-layout/css/styles.css";
@@ -94,6 +94,13 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
   const getLayout = Component.getLayout ?? ((page) => page);
 
   const trackingEnabled = process.env.NEXT_PUBLIC_TRACKING_ENABLED || false;
+
+  const [render, setRender] = useState(false);
+  useEffect(() => {
+    setRender(true);
+  }, []);
+
+  if (!render) return null;
 
   return (
     <>
