@@ -10,7 +10,7 @@ use std::{
 use axum_server::{accept::NoDelayAcceptor, tls_rustls::RustlsConfig};
 use futures::future::BoxFuture;
 use meltdown::Token;
-use opentelemetry::{global, trace::TraceContextExt};
+use opentelemetry::global;
 use reqwest::Client;
 use telemetry::{make_span::SpanFactory, tracing::MakeRequestId};
 use tower::{ServiceBuilder, buffer::BufferLayer, util::BoxCloneService};
@@ -19,8 +19,7 @@ use tower_http::{
     auth::AsyncRequireAuthorizationLayer, catch_panic::CatchPanicLayer,
     normalize_path::NormalizePathLayer, trace::TraceLayer,
 };
-use tracing::{Level, Span, info};
-use tracing_opentelemetry::OpenTelemetrySpanExt;
+use tracing::{Level, info};
 
 use crate::{
     config::{Config, minio::Minio, server::TlsConfig},
@@ -163,11 +162,8 @@ impl tower::Service<crate::types::request::Request> for App {
     }
 
     #[inline]
-    #[tracing::instrument(name = "app", skip_all)]
     fn call(&mut self, req: crate::types::request::Request) -> Self::Future {
-        let trace_id =
-            Span::current().context().span().span_context().trace_id();
-        tracing::trace!(uri = %req.uri(), method = %req.method(), version = ?req.version(), trace_id = %trace_id, "App received request");
+        tracing::trace!(uri = %req.uri(), method = %req.method(), version = ?req.version(), "App received request");
         self.service_stack.call(req)
     }
 }
@@ -211,7 +207,10 @@ impl App {
             .layer(CatchPanicLayer::custom(PanicResponder))
             .layer(
                 TraceLayer::new_for_http()
-                    .make_span_with(SpanFactory::new().level(Level::INFO))
+                    .make_span_with(SpanFactory::new(
+                        Level::INFO,
+                        app_state.0.config.telemetry.propagate,
+                    ))
                     .on_body_chunk(())
                     .on_eos(()),
             )

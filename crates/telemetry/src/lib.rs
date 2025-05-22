@@ -1,7 +1,10 @@
 pub mod make_span;
 pub mod tracing;
-
-use opentelemetry::{TraceId, global, trace::TracerProvider};
+pub mod utils;
+use opentelemetry::{
+    TraceId, global,
+    trace::{TracerProvider, noop::NoopTextMapPropagator},
+};
 use opentelemetry_otlp::{
     ExporterBuildError, LogExporter, MetricExporter, SpanExporter,
     WithExportConfig,
@@ -10,6 +13,7 @@ use opentelemetry_sdk::{
     Resource,
     logs::SdkLoggerProvider,
     metrics::SdkMeterProvider,
+    propagation::TraceContextPropagator,
     trace::{IdGenerator, SdkTracerProvider},
 };
 use serde::{Deserialize, Serialize};
@@ -18,6 +22,7 @@ use tracing_subscriber::{
     EnvFilter, Layer, filter::ParseError, layer::SubscriberExt,
     util::SubscriberInitExt,
 };
+use utils::default_true;
 use uuid::Uuid;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -32,6 +37,8 @@ pub struct Config {
     pub exporter: Exporter,
     #[serde(default = "default_otlp_endpoint")]
     pub otlp_endpoint: String,
+    #[serde(default = "default_true")]
+    pub propagate: bool,
 }
 
 impl Default for Config {
@@ -41,6 +48,7 @@ impl Default for Config {
             service_name: default_service_name(),
             exporter: Exporter::default(),
             otlp_endpoint: default_otlp_endpoint(),
+            propagate: default_true(),
         }
     }
 }
@@ -108,6 +116,13 @@ pub fn init_telemetry(
     TelemetryError,
 > {
     let resource = resource(config);
+
+    if config.propagate {
+        global::set_text_map_propagator(TraceContextPropagator::new());
+    } else {
+        global::set_text_map_propagator(NoopTextMapPropagator::new());
+    }
+
     match config.exporter {
         Exporter::Stdout => {
             let tracer_provider = init_stdout(&resource, config)?;

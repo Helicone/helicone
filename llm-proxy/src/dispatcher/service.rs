@@ -237,6 +237,7 @@ impl Dispatcher {
             http::Response<crate::types::body::Body>,
             crate::types::body::BodyReader,
         ) = if stream_ctx.is_stream {
+            // TODO: add better error handling/logging
             let response_stream =
                 Client::sse_stream(request_builder, req_body_bytes.clone())?
                     .map_err(move |e| {
@@ -289,20 +290,49 @@ impl Dispatcher {
                 .send()
                 .await
                 .map_err(InternalError::ReqwestError)?;
-            let mut resp_builder =
-                http::Response::builder().status(response.status());
+            let status = response.status();
+            let mut resp_builder = http::Response::builder().status(status);
             *resp_builder.headers_mut().unwrap() = response.headers().clone();
-            let (user_resp_body, body_reader) =
-                crate::types::body::Body::wrap_stream(
-                    response
-                        .bytes_stream()
-                        .map_err(InternalError::ReqwestError),
-                    stream_ctx.is_stream,
-                );
-            let response = resp_builder
-                .body(user_resp_body)
-                .map_err(InternalError::HttpError)?;
-            (response, body_reader)
+            // this if block is compiled out in release builds
+            cfg_if::cfg_if! {
+                if #[cfg(debug_assertions)] {
+                    if status.is_server_error() || status.is_client_error() {
+                        let body = response.text().await.map_err(InternalError::ReqwestError)?;
+                        tracing::error!(body = %body, "received error response");
+                        let bytes = bytes::Bytes::from(body);
+                        let stream = futures::stream::once(futures::future::ok::<_, InternalError>(bytes));
+                        let (error_body, error_reader) = crate::types::body::Body::wrap_stream(stream, false);
+                        let response = resp_builder
+                            .body(error_body)
+                            .map_err(InternalError::HttpError)?;
+                        (response, error_reader)
+                    } else {
+                        let (user_resp_body, body_reader) =
+                            crate::types::body::Body::wrap_stream(
+                                response
+                                    .bytes_stream()
+                                    .map_err(InternalError::ReqwestError),
+                                stream_ctx.is_stream,
+                            );
+                        let response = resp_builder
+                            .body(user_resp_body)
+                            .map_err(InternalError::HttpError)?;
+                        (response, body_reader)
+                    }
+                } else {
+                    let (user_resp_body, body_reader) =
+                        crate::types::body::Body::wrap_stream(
+                            response
+                                .bytes_stream()
+                                .map_err(InternalError::ReqwestError),
+                            stream_ctx.is_stream,
+                        );
+                    let response = resp_builder
+                        .body(user_resp_body)
+                        .map_err(InternalError::HttpError)?;
+                    (response, body_reader)
+                }
+            }
         };
         let provider_request_id = {
             let headers = response.headers_mut();

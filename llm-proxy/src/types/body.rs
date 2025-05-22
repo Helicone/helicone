@@ -18,6 +18,10 @@ pub struct Body {
 }
 
 impl Body {
+    pub fn new(inner: reqwest::Body) -> Self {
+        Self { inner }
+    }
+
     /// `append_newlines` is used to support LLM response logging with Helicone
     /// for streaming responses.
     pub fn wrap_stream(
