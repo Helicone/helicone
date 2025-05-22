@@ -40,22 +40,22 @@ export default async function ModelCostPage({
     if (!providerExists) {
       notFound();
     }
-
-    return (
-      <>
-        <div className="container mx-auto py-8">
-          <ModelPriceCalculator
-            model={decodedModel}
-            provider={decodedProvider}
-            initialCostData={initialCostData}
-            defaultInputTokens={DEFAULT_INPUT_TOKENS}
-            defaultOutputTokens={DEFAULT_OUTPUT_TOKENS}
-            providerWithModels={providerWithModels}
-          />
-        </div>
-      </>
-    );
   }
+
+  return (
+    <>
+      <div className="container mx-auto py-8">
+        <ModelPriceCalculator
+          model={decodedModel}
+          provider={decodedProvider}
+          initialCostData={initialCostData}
+          defaultInputTokens={DEFAULT_INPUT_TOKENS}
+          defaultOutputTokens={DEFAULT_OUTPUT_TOKENS}
+          providerWithModels={providerWithModels}
+        />
+      </div>
+    </>
+  );
 }
 
 export async function generateStaticParams() {
