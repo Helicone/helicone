@@ -9,8 +9,7 @@ import {
   ProviderWithModels,
 } from "../../../../utils";
 import { notFound } from "next/navigation";
-import { Metadata } from "next";
-import { providers } from "@/../packages/cost/providers/mappings";
+import { providers } from "@helicone-package/cost/providers/mappings";
 
 export default async function ModelCostPage({
   params,

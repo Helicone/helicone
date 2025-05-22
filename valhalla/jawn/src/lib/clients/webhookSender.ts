@@ -2,7 +2,7 @@ import { Database } from "../db/database.types";
 import { createHmac } from "crypto";
 import { PromiseGenericResult, ok } from "../../packages/common/result";
 import { S3Client } from "../shared/db/s3Client";
-import { modelCost } from "../../packages/cost/costCalc";
+import { modelCost } from "@helicone-package/cost/costCalc";
 import { WebhookConfig } from "../shared/types";
 
 export type WebhookPayload = {

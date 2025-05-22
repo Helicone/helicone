@@ -1,3 +1,11 @@
+import { clickhousePriceCalcNonAggregated } from "@helicone-package/cost";
+import { Result, err, ok, resultMap } from "../../../packages/common/result";
+import {
+  DEFAULT_UUID,
+  HeliconeRequest,
+} from "../../../packages/llm-mapper/types";
+import { dbExecute, dbQueryClickhouse } from "../../shared/db/dbExecute";
+import { S3Client } from "../../shared/db/s3Client";
 import { FilterNode } from "../../shared/filters/filterDefs";
 import {
   buildFilterWithAuth,
@@ -9,22 +17,6 @@ import {
   buildRequestSort,
   buildRequestSortClickhouse,
 } from "../../shared/sorts/requests/sorts";
-import { Result, resultMap, ok, err } from "../../../packages/common/result";
-import {
-  dbExecute,
-  dbQueryClickhouse,
-  printRunnableQuery,
-} from "../../shared/db/dbExecute";
-import { LlmSchema } from "../../shared/requestResponseModel";
-import { mapGeminiPro } from "./mappers";
-import { S3Client } from "../../shared/db/s3Client";
-import { Provider } from "../../../packages/llm-mapper/types";
-import { HeliconeRequest } from "../../../packages/llm-mapper/types";
-import {
-  clickhousePriceCalc,
-  clickhousePriceCalcNonAggregated,
-} from "../../../packages/cost";
-import { DEFAULT_UUID } from "../../../packages/llm-mapper/types";
 
 const MAX_TOTAL_BODY_SIZE = 1024 * 1024;
 
@@ -413,9 +405,9 @@ async function mapLLMCalls(
         const { data: signedBodyUrl, error: signedBodyUrlErr } =
           await s3Client.getRequestResponseBodySignedUrl(
             orgId,
-            heliconeRequest.cache_reference_id === DEFAULT_UUID 
-            ? heliconeRequest.request_id 
-            : (heliconeRequest.cache_reference_id ?? heliconeRequest.request_id)
+            heliconeRequest.cache_reference_id === DEFAULT_UUID
+              ? heliconeRequest.request_id
+              : heliconeRequest.cache_reference_id ?? heliconeRequest.request_id
           );
 
         if (signedBodyUrlErr || !signedBodyUrl) {
