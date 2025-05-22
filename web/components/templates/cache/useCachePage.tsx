@@ -73,9 +73,9 @@ export const useCachePageClickHouse = ({
     return x.isLoading || x.isFetching;
   }
 
-  const isAnyLoading = false;
-  Object.values(overTimeData).some(isLoading) ||
-    Object.values(metrics).some(isLoading);
+  const isAnyLoading =
+    Object.values(overTimeData).some((x) => isLoading(x)) ||
+    Object.values(metrics).some((x) => isLoading(x));
 
   return {
     overTimeData,

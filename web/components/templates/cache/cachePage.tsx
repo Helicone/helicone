@@ -97,12 +97,13 @@ const CachePage = (props: CachePageProps) => {
   } = useGetUnauthorized(heliconeAuthClient?.user?.id || "");
 
   const hasCache = useMemo(() => {
+    if (isAnyLoading) return null;
     const cacheHits = chMetrics.totalCacheHits.data?.data;
     if (cacheHits === undefined || cacheHits === null) {
       return false;
     }
     return +cacheHits > 0;
-  }, [chMetrics.totalCacheHits.data?.data]);
+  }, [chMetrics.totalCacheHits.data?.data, isAnyLoading]);
 
   const shouldShowUnauthorized = hasCache && unauthorized;
 
@@ -120,7 +121,7 @@ const CachePage = (props: CachePageProps) => {
     return null;
   }
 
-  if (!hasCache && !isLoading) {
+  if (hasCache === false) {
     return (
       <div className="flex flex-col w-full h-screen bg-background dark:bg-sidebar-background">
         <div className="flex flex-1 h-full">
