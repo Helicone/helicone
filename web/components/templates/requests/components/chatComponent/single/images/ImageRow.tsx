@@ -2,7 +2,7 @@ import React from "react";
 import { RenderWithPrettyInputKeys } from "../../../../../playground/chatRow";
 
 import { ImageItem } from "./ImageItem";
-import { Message } from "@/packages/llm-mapper/types";
+import { Message } from "@helicone-package/llm-mapper/types";
 
 export const ImageRow: React.FC<{
   message: Message;

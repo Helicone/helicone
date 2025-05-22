@@ -1,5 +1,5 @@
 import { UseQueryResult } from "@tanstack/react-query";
-import { Result, resultMap } from "../../../packages/common/result";
+import { Result, resultMap } from "@/packages/common/result";
 import {
   BackendMetricsCall,
   useBackendMetricCall,

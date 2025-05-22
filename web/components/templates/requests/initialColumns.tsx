@@ -1,4 +1,4 @@
-import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+import { MappedLLMRequest } from "@helicone-package/llm-mapper/types";
 import { HandThumbDownIcon, HandThumbUpIcon } from "@heroicons/react/24/solid";
 import { ColumnDef } from "@tanstack/react-table";
 import { clsx } from "../../shared/clsx";
@@ -7,7 +7,7 @@ import CostPill from "./costPill";
 import { COUTNRY_CODE_DIRECTORY } from "./countryCodeDirectory";
 import ModelPill from "./modelPill";
 import StatusBadge from "./statusBadge";
-import { DEFAULT_UUID } from "@/packages/llm-mapper/types";
+import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
 
 function formatNumber(num: number) {
   const numParts = num.toString().split(".");
@@ -62,16 +62,6 @@ export const getInitialColumns = (): ColumnDef<MappedLLMRequest>[] => [
           errorCode={code}
         />
       );
-    },
-    size: 100,
-  },
-  {
-    id: "cacheEnabled",
-    accessorKey: "cacheEnabled",
-    header: "Cache Enabled",
-    cell: (info) => {
-      const cacheEnabled = info.row.original.heliconeMetadata.cacheEnabled;
-      return cacheEnabled ? <span>Yes</span> : <span>No</span>;
     },
     size: 100,
   },
@@ -250,5 +240,15 @@ export const getInitialColumns = (): ColumnDef<MappedLLMRequest>[] => [
       );
     },
     minSize: 200,
+  },
+  {
+    id: "cacheEnabled",
+    accessorKey: "cacheEnabled",
+    header: "Cache Enabled",
+    cell: (info) => {
+      const cacheEnabled = info.row.original.heliconeMetadata.cacheEnabled;
+      return cacheEnabled ? <span>Yes</span> : <span>No</span>;
+    },
+    size: 100,
   },
 ];

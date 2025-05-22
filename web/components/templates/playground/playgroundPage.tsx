@@ -19,7 +19,7 @@ import {
 import {
   playgroundModels as PLAYGROUND_MODELS,
   playgroundModels,
-} from "../../../packages/cost/providers/mappings";
+} from "@helicone-package/cost/providers/mappings";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { usePlaygroundPage } from "../../../services/hooks/playground";
 import AuthHeader from "../../shared/authHeader";

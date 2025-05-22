@@ -1,6 +1,6 @@
 import useNotification from "@/components/shared/notification/useNotification";
 import { removeLeadingWhitespace } from "@/components/shared/utils/utils";
-import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+import { MappedLLMRequest } from "@helicone-package/llm-mapper/types";
 import { useState } from "react";
 import { PROMPT_MODES } from "./chatComponent/chatTopBar";
 

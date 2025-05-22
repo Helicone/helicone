@@ -180,7 +180,7 @@ const AlertsPage = (props: AlertsPageProps) => {
                       <span>{`${key.threshold}%`}</span>
                     )}
                     {key.metric === "cost" && (
-                      <span>{`$${key.threshold.toFixed(2)}`}</span>
+                      <span>{`$${Number(key.threshold).toFixed(2)}`}</span>
                     )}
                   </P>
                 ),

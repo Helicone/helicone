@@ -5,7 +5,7 @@ import {
   getTimeInterval,
   getTimeIntervalAgo,
 } from "../../../lib/timeCalculations/time";
-import { Result, resultMap } from "../../../packages/common/result";
+import { Result, resultMap } from "@/packages/common/result";
 import { useGetUnauthorized } from "../../../services/hooks/dashboard";
 import { useBackendMetricCall } from "../../../services/hooks/useBackendFunction";
 import { TimeFilter } from "@/types/timeFilter";

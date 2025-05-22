@@ -28,6 +28,7 @@ import RequestsPage from "../requests/RequestsPage";
 import UnauthorizedView from "../requests/UnauthorizedView";
 import { formatNumber } from "../users/initialColumns";
 import { useCachePageClickHouse } from "./useCachePage";
+import { formatTimeSaved } from "@/lib/timeCalculations/time";
 
 interface CachePageProps {
   currentPage: number;
@@ -147,7 +148,7 @@ const CachePage = (props: CachePageProps) => {
     {
       id: "time-saved",
       label: "Total Time Saved",
-      value: `${chMetrics.timeSaved.data?.data ?? 0} s`,
+      value: formatTimeSaved(chMetrics.timeSaved.data?.data ?? 0),
       isLoading: isAnyLoading,
       icon: ClockIcon,
     },

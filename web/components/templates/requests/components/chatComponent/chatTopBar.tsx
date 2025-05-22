@@ -1,4 +1,4 @@
-import { LLMRequestBody } from "@/packages/llm-mapper/types";
+import { LLMRequestBody } from "@helicone-package/llm-mapper/types";
 import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import {
   ArrowsPointingOutIcon,

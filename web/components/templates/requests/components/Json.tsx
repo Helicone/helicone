@@ -1,4 +1,4 @@
-import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+import { MappedLLMRequest } from "@helicone-package/llm-mapper/types";
 import { JsonRenderer } from "./chatComponent/single/JsonRenderer";
 
 interface JsonProps {

@@ -3,7 +3,7 @@ import {
   FilterNode,
 } from "../../../services/lib/filters/filterDefs";
 import { buildFilterWithAuthClickHousePropertiesV2 } from "../../../services/lib/filters/filters";
-import { Result } from "../../../packages/common/result";
+import { Result } from "@/packages/common/result";
 import { dbQueryClickhouse } from "../db/dbExecute";
 
 export interface PropertyParam {

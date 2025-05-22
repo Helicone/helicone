@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { cn } from "@/lib/utils";
-import { LLMRequestBody } from "@/packages/llm-mapper/types";
+import { LLMRequestBody } from "@helicone-package/llm-mapper/types";
 import {
   DocumentTextIcon,
   EyeIcon,
