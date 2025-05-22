@@ -121,6 +121,7 @@ export const GeoMetricMap = ({
             });
           }}
         >
+          {/* @ts-expect-error - react-simple-maps types are not compatible with React 18 */}
           <ComposableMap
             width={800}
             height={400}
