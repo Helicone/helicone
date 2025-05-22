@@ -12,6 +12,7 @@ async-openai = { workspace = true }
 axum-core = { workspace = true }
 axum-server = { workspace = true, features = ["tls-rustls"] }
 bytes = { workspace = true, features = ['serde'] }
+cfg-if = { workspace = true }
 chrono = { workspace = true, features = ['default', 'serde'] }
 clap = { workspace = true }
 config = { workspace = true }
@@ -94,8 +95,4 @@ required-features = ["testing"]
 
 [[test]]
 name = "health_monitor"
-required-features = ["testing"]
-
-[[test]]
-name = "trace_propagation"
 required-features = ["testing"]

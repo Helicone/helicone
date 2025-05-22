@@ -62,11 +62,16 @@ async fn send_request(
         .with_kind(SpanKind::Client)
         .start(&tracer);
 
+    let span_id = span.span_context().span_id().to_string();
     let span_context = span.span_context();
-    tracing::error!("trace_id: {:?}", span_context.trace_id());
+    info!(
+        trace_id = span_context.trace_id().to_string(),
+        span_id = span_id,
+        "client trace_id"
+    );
     let cx = Context::current_with_span(span);
 
-    let mut req = hyper::Request::builder().uri(url);
+    let mut req = hyper::Request::builder().uri(url).method("POST");
     global::get_text_map_propagator(|propagator| {
         propagator.inject_context(
             &cx,
@@ -77,12 +82,13 @@ async fn send_request(
         .unwrap()
         .insert("baggage", "is_synthetic=true".parse().unwrap());
 
-    tracing::error!("request-lol: {:?}", req);
     let res = client
         .request(req.body(Full::new(Bytes::from(body_content.to_string())))?)
         .await?;
 
-    info!(name: "ResponseReceived", status = res.status().to_string(), message = "Response received");
+    let x_req_id = res.headers().get("x-request-id").unwrap().to_str().unwrap();
+
+    info!(name: "ResponseReceived", status = res.status().to_string(), message = "Response received", x_req_id = x_req_id);
 
     Ok(())
 }
@@ -96,13 +102,18 @@ async fn main()
     send_request(
         "http://localhost:5678/router/v1/chat/completions",
         r#"{
-            "model": "gpt-3.5-turbo",
+            "model": "gpt-4o-mini",
             "messages": [
                 {
+                    "role": "system",
+                    "content": "You are a helpful assistant that can answer questions and help with tasks."
+                },
+                {
                     "role": "user",
-                    "content": "Hello, world!"
+                    "content": "hello world"
                 }
-            ]
+            ],
+            "max_tokens": 400
         }"#,
         "greptile",
     )
