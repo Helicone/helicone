@@ -1,8 +1,7 @@
 import AuthLayout from "../components/layout/auth/authLayout";
-
 import { ReactElement } from "react";
 import RateLimitPage from "../components/templates/rateLimit/rateLimitPage";
-import { withAuthSSR } from "../lib/api/handlerWrappers";
+import { GetServerSidePropsContext } from "next";
 
 const RateLimit = (props: {}) => {
   return (
@@ -18,8 +17,10 @@ RateLimit.getLayout = function getLayout(page: ReactElement) {
 
 export default RateLimit;
 
-export const getServerSideProps = withAuthSSR(async (options) => {
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
   return {
     props: {},
   };
-});
+};

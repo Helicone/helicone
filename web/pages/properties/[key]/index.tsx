@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
 import AuthLayout from "../../../components/layout/auth/authLayout";
 import PropertiesPage from "../../../components/templates/properties/propertiesPage";
-import { withAuthSSR } from "../../../lib/api/handlerWrappers";
+import { GetServerSidePropsContext } from "next";
 
 interface PropertiesProps {
   initialPropertyKey: string;
@@ -19,9 +19,9 @@ Properties.getLayout = function getLayout(page: ReactElement) {
 
 export default Properties;
 
-export const getServerSideProps = withAuthSSR(async (options) => {
-  const { context } = options;
-
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
   const { key } = context.params as { key: string };
   const initialPropertyKey = decodeURIComponent(key);
 
@@ -30,4 +30,4 @@ export const getServerSideProps = withAuthSSR(async (options) => {
       initialPropertyKey,
     },
   };
-});
+};

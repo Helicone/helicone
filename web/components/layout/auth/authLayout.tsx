@@ -4,7 +4,7 @@ import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { $JAWN_API } from "@/lib/clients/jawn";
 import { Rocket } from "lucide-react";
 import { useRouter } from "next/router";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 import { useChangelog } from "../../../services/hooks/admin";
 import UpgradeProModal from "../../shared/upgradeProModal";
 import { Row } from "../common";
@@ -13,6 +13,7 @@ import MetaData from "../public/authMetaData";
 import DemoModal from "./DemoModal";
 import MainContent, { BannerType } from "./MainContent";
 import Sidebar from "./Sidebar";
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -24,6 +25,23 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const { pathname } = router;
 
   const [open, setOpen] = useState(false);
+  
+  const auth = useHeliconeAuthClient();
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const user = await auth.getUser();
+        if (user.error || !user.data) {
+          router.push("/signin?unauthorized=true");
+        }
+      } catch (error) {
+        console.error("Authentication error:", error);
+        router.push("/signin?unauthorized=true");
+      }
+    };
+    
+    checkAuth();
+  }, [router]);
 
   const currentPage = useMemo(() => {
     const path = pathname.split("/")[1];
