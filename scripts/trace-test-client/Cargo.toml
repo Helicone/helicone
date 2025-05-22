@@ -1,11 +1,11 @@
 [package]
-name = "charlie-test"
+name = "trace-test-client"
 version = "0.1.0"
 edition = { workspace = true }
 license = "Apache-2.0"
 publish = false
 autobenches = false
-default-run = "charlie-test"
+default-run = "trace-test-client"
 
 [dependencies]
 http-body-util = { workspace = true }

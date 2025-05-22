@@ -3,9 +3,9 @@ members = [
     "crates/schema-filter",
     "crates/telemetry",
     "llm-proxy",
-    "test",
     "crates/weighted-balance",
-    "charlie-test",
+    "scripts/test",
+    "scripts/trace-test-client",
 ]
 resolver = "2"
 
