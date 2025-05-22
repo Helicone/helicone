@@ -66,16 +66,6 @@ export const getInitialColumns = (): ColumnDef<MappedLLMRequest>[] => [
     size: 100,
   },
   {
-    id: "cacheEnabled",
-    accessorKey: "cacheEnabled",
-    header: "Cache Enabled",
-    cell: (info) => {
-      const cacheEnabled = info.row.original.heliconeMetadata.cacheEnabled;
-      return cacheEnabled ? <span>Yes</span> : <span>No</span>;
-    },
-    size: 100,
-  },
-  {
     id: "requestText",
     accessorKey: "requestText",
     header: "Request",
@@ -252,5 +242,15 @@ export const getInitialColumns = (): ColumnDef<MappedLLMRequest>[] => [
       );
     },
     minSize: 200,
+  },
+  {
+    id: "cacheEnabled",
+    accessorKey: "cacheEnabled",
+    header: "Cache Enabled",
+    cell: (info) => {
+      const cacheEnabled = info.row.original.heliconeMetadata.cacheEnabled;
+      return cacheEnabled ? <span>Yes</span> : <span>No</span>;
+    },
+    size: 100,
   },
 ];
