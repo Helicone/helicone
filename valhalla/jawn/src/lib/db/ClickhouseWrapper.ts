@@ -1,4 +1,4 @@
-import { ClickHouseClient, createClient } from "@clickhouse/client";
+import { ClickHouseClient, createClient, ClickHouseSettings } from "@clickhouse/client";
 import { Result } from "../../packages/common/result";
 
 interface ClickhouseEnv {
@@ -16,6 +16,60 @@ export class ClickhouseClientWrapper {
       username: env.CLICKHOUSE_USER,
       password: env.CLICKHOUSE_PASSWORD,
     });
+  }
+
+  public formatClickhouseValue(value: any): string {
+    if (value === null || value === undefined) {
+      return 'NULL';
+    } else if (isClickhouseFunction(value)) {
+      return value.content;
+    } else if (typeof value === 'number') {
+      return value.toString();
+    } else if (typeof value === 'string') {
+      return `'${value.replace(/'/g, "\\'")}'`;
+    }
+    return value;
+  }
+
+  public buildClickhouseValues(record: Record<string, any>): string {
+    return Object.values(record)
+      .map(value => this.formatClickhouseValue(value))
+      .join(', ');
+  }
+
+  public buildClickhouseColumns(record: Record<string, any>): string {
+    return Object.keys(record).join(', ');
+  }
+
+  async dbInsertClickhouseWithFunctions<T extends keyof ClickhouseDB["Tables"]>(
+    table: T,
+    fieldsString: string,
+    valuesString: string,
+  ): Promise<Result<string, string>> {
+    const commandSettings: ClickHouseSettings = {
+      wait_end_of_query: 1,
+    };
+
+    const insertQuery = `
+      INSERT INTO ${table}
+        (${fieldsString})
+      SELECT
+        ${valuesString}
+    `;
+
+    try {
+      const queryResult = await this.clickHouseClient.query({
+        query: insertQuery,
+        clickhouse_settings: commandSettings,
+      });
+      return { data: queryResult.query_id, error: null };
+    } catch (err) {
+      console.error("dbInsertClickhouseError", err);
+      return {
+        data: null,
+        error: JSON.stringify(err),
+      };
+    }
   }
 
   async dbInsertClickhouse<T extends keyof ClickhouseDB["Tables"]>(
@@ -103,6 +157,17 @@ export function formatTimeString(timeString: string): string {
 }
 
 type Nullable<T> = T | null;
+
+
+// Usage example: countState(1) which is required for counting AggregateFunctions in CH
+// Can create { content: "countState(1)" } as ClickhouseFunction
+export interface ClickhouseFunction {
+  content: string;
+}
+
+export function isClickhouseFunction(value: any): value is ClickhouseFunction {
+  return value && typeof value === 'object' && 'content' in value;
+}
 
 interface PropertiesV3 {
   id: number;
@@ -234,6 +299,31 @@ export interface RequestResponseRMT {
   cache_enabled: boolean;
 }
 
+export interface CacheMetricSMT {
+  organization_id: string;
+  date: string;
+  hour: number;
+  request_id: string;
+  model: string;
+  provider: string;
+  cache_hit_count: ClickhouseFunction;
+  
+  // Saving metrics
+  saved_latency_ms: number;
+  saved_completion_tokens: number;
+  saved_prompt_tokens: number;
+  saved_completion_audio_tokens: number;
+  saved_prompt_audio_tokens: number;
+  saved_prompt_cache_write_tokens: number;
+  saved_prompt_cache_read_tokens: number;
+
+  last_hit: string;
+  first_hit: string;
+
+  request_body: string;
+  response_body: string;
+}
+
 export interface JawnHttpLogs {
   organization_id: string;
   method: string;
@@ -259,6 +349,7 @@ export interface ClickhouseDB {
     properties_v3: PropertiesV3;
     property_with_response_v1: PropertyWithResponseV1;
     request_response_versioned: RequestResponseVersioned;
+    cache_metrics: CacheMetricSMT;
     rate_limit_log: RateLimitLog;
     rate_limit_log_v2: RateLimitLogV2;
     cache_hits: CacheHits;
