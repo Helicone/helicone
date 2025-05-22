@@ -5,6 +5,51 @@ require("dotenv").config({
 import { randomUUID } from "crypto";
 import { OpenAI } from "openai";
 
+import { HeliconeManualLogger } from "@helicone/helpers";
+
+async function manualLoggerTest() {
+  const heliconeLogger = new HeliconeManualLogger({
+    apiKey: process.env.HELICONE_API_KEY ?? "", // Can be set as env variable
+    headers: {},
+    loggingEndpoint: `${process.env.HELICONE_BASE_LOGGING_URL}`
+  });
+
+  const reqBody = {
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the meaning of life, the universe, and everything?"
+      }
+    ],
+    "model": "grok-3",
+    "stream": false,
+    "temperature": 0.7
+  };
+
+  const res = await heliconeLogger.logRequest(
+    reqBody,
+    async (resultRecorder) => {
+      const r = await fetch("https://api.x.ai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.XAI_API_KEY}`
+        },
+        body: JSON.stringify(reqBody)
+      });
+      const resBody = await r.json();
+      resultRecorder.appendResults(resBody as any);
+      return resBody;
+    },
+    {
+      "Helicone-Session-Id": "123",
+      "Helicone-Session-Name": "test",
+    }
+  );
+
+  console.log(res);
+}
+
 async function main() {
   const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
@@ -22,7 +67,7 @@ async function main() {
       messages: [
         {
           role: "user",
-          content: "Generate an abstract for a course on space.",
+          content: "whats good shawty bobfbe",
         },
       ],
       model: "gpt-4",
@@ -32,6 +77,8 @@ async function main() {
         "Helicone-Session-Id": session,
         "Helicone-Session-Name": sessionName,
         "Helicone-Session-Path": "/abstract",
+        "Helicone-Cache-Enabled": "true",
+        "Helicone-Cache-Max-Bucket-Size": "3",
       },
     }
   );
@@ -136,4 +183,5 @@ async function main() {
   );
 }
 
-main();
+manualLoggerTest();
+// main();

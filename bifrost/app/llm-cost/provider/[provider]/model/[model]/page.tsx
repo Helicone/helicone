@@ -10,7 +10,6 @@ import {
 } from "../../../../utils";
 import { notFound } from "next/navigation";
 import { providers } from "@helicone-package/cost/providers/mappings";
-
 export default async function ModelCostPage({
   params,
 }: {
@@ -22,16 +21,13 @@ export default async function ModelCostPage({
   const { provider, model } = params;
   const decodedModel = decodeURIComponent(model || "");
   const decodedProvider = decodeURIComponent(provider || "");
-
   const initialCostData = getInitialCostData();
   const providerWithModels = getProviderWithModelsData(initialCostData);
-
   const modelExists = initialCostData.some(
     (d: CostData) =>
       d.provider.toLowerCase() === decodedProvider.toLowerCase() &&
       d.model.toLowerCase() === decodedModel.toLowerCase()
   );
-
   if (!modelExists) {
     const providerExists = providerWithModels.some(
       (p: ProviderWithModels) =>
