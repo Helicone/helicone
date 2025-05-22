@@ -12,7 +12,6 @@ import {
 import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
 import { ModelMetrics } from "../metrics/modelMetrics";
 import { DataOverTimeRequest } from "../metrics/timeDataHandlerWrapper";
-import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
 
 export async function getCacheCountClickhouse(
   orgId: string,
