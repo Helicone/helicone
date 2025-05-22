@@ -40,6 +40,11 @@ export async function dbQueryClickhouse<T>(
   try {
     const query_params = paramsToValues(parameters);
 
+    console.log({
+      host: process.env.CLICKHOUSE_HOST ?? "http://localhost:18123",
+      username: process.env.CLICKHOUSE_USER ?? "default",
+      password: process.env.CLICKHOUSE_PASSWORD ?? "",
+    });
     const client = clickhouseCreateClient({
       host: process.env.CLICKHOUSE_HOST ?? "http://localhost:18123",
       username: process.env.CLICKHOUSE_USER ?? "default",

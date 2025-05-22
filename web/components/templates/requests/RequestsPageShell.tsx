@@ -1,4 +1,4 @@
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router";
 import RequestsPage from "@/components/templates/requests/RequestsPage";
 import { SortDirection } from "@/services/lib/sorts/requests/sorts";
 import { useEffect } from "react";

@@ -7,7 +7,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ChevronDownIcon } from "lucide-react";
 import Link from "next/link";
-import { NavLink } from "react-router-dom";
+import { NavLink } from "react-router";
 
 interface NavigationItem {
   name: string;
@@ -44,7 +44,7 @@ const NavItem: React.FC<NavItemProps> = ({
     return (
       <Tooltip delayDuration={0}>
         <TooltipTrigger asChild>
-          {["/requests", "/dashboard"].includes(link.href) ? (
+          {["/requests", "/dashboard", "/sessions"].includes(link.href) ? (
             <NavLink
               to={link.href}
               className={cn(
@@ -105,7 +105,7 @@ const NavItem: React.FC<NavItemProps> = ({
 
   return (
     <div className={cn(isSubItem)}>
-      {["/requests", "/dashboard"].includes(link.href) ? (
+      {["/requests", "/dashboard", "/sessions"].includes(link.href) ? (
         <NavLink
           to={link.href}
           className={cn(

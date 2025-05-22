@@ -6,6 +6,7 @@
     "node": "=20"
   },
   "scripts": {
+    "dev:no-turbo": "next dev -p 3000",
     "dev:local": "next dev --turbo -p 3000",
     "dev": "vercel env pull .env && next dev --turbo -p 3000",
     "dev:better-auth": "npx dotenv -e .env.better-auth -- next dev --turbo -p 3000",
@@ -121,8 +122,7 @@
     "react-lottie": "^1.2.10",
     "react-markdown": "^9.0.3",
     "react-resizable-panels": "^2.1.7",
-    "react-router": "6.21.3",
-    "react-router-dom": "6.21.3",
+    "react-router": "^7.6.0",
     "react-simple-code-editor": "^0.13.1",
     "recharts": "^2.13.3",
     "rss-parser": "^3.13.0",
