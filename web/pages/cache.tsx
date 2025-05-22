@@ -41,7 +41,7 @@ export const getServerSideProps = withAuthSSR(async (options) => {
     options.context.query;
 
   const currentPage = parseInt(page as string, 10) || 1;
-  const pageSize = parseInt(page_size as string, 10) || 10;
+  const pageSize = parseInt(page_size as string, 10) || 25;
 
   return {
     props: {

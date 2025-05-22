@@ -6,7 +6,7 @@ CREATE TABLE cache_metrics
   request_id UUID,
   model String,
   provider String,
-  cache_hit_count AggregateFunction(count, UInt64),
+  cache_hit_count SimpleAggregateFunction(sum, UInt64),
   
   -- SAVING METRICS
   saved_latency_ms SimpleAggregateFunction(sum, UInt64),

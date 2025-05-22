@@ -24,7 +24,7 @@ export async function getCacheCountClickhouse(
   });
 
   const query = `
-  select countMerge(cache_hit_count) as count 
+  select sum(cache_hit_count) as count 
   from cache_metrics 
   where ${builtFilter.filter}`;
 
@@ -160,7 +160,7 @@ export async function getTopRequestsClickhouse(
   const query = `
   SELECT
     request_id,
-    countMerge(cache_hit_count) as count,
+    sum(cache_hit_count) as count,
     min(first_hit) as first_used,
     max(last_hit) as last_used,
     any(model) as model,

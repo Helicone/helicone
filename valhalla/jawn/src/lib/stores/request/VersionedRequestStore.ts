@@ -37,10 +37,9 @@ export class VersionedRequestStore {
   async insertCacheMetricVersioned(
     cacheMetricLog: CacheMetricSMT[]
   ): PromiseGenericResult<string> {
-    const result = await clickhouseDb.dbInsertClickhouseWithFunctions(
+    const result = await clickhouseDb.dbInsertClickhouse(
       "cache_metrics",
-      clickhouseDb.buildClickhouseColumns(cacheMetricLog[0]),
-      cacheMetricLog.map(log => clickhouseDb.buildClickhouseValues(log))
+      cacheMetricLog
     );
 
     if (result.error || !result.data) {

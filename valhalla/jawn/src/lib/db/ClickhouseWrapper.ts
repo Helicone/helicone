@@ -18,60 +18,6 @@ export class ClickhouseClientWrapper {
     });
   }
 
-  public formatClickhouseValue(value: any): string {
-    if (value === null || value === undefined) {
-      return 'NULL';
-    } else if (isClickhouseFunction(value)) {
-      return value.content;
-    } else if (typeof value === 'number') {
-      return value.toString();
-    } else if (typeof value === 'string') {
-      return `'${value.replace(/'/g, "\\'")}'`;
-    }
-    return value;
-  }
-
-  public buildClickhouseValues(record: Record<string, any>): string {
-    return Object.values(record)
-      .map(value => this.formatClickhouseValue(value))
-      .join(', ');
-  }
-
-  public buildClickhouseColumns(record: Record<string, any>): string {
-    return Object.keys(record).join(', ');
-  }
-
-  async dbInsertClickhouseWithFunctions<T extends keyof ClickhouseDB["Tables"]>(
-    table: T,
-    fieldsString: string,
-    valuesString: string[],
-  ): Promise<Result<string, string>> {
-    const commandSettings: ClickHouseSettings = {
-      async_insert: 1,
-      wait_end_of_query: 1,
-    };
-
-    const insertQuery = `
-      INSERT INTO ${table}
-        (${fieldsString})
-      SELECT ${valuesString.join('\nUNION ALL\nSELECT ')}
-    `;
-
-    try {
-      const queryResult = await this.clickHouseClient.query({
-        query: insertQuery,
-        clickhouse_settings: commandSettings,
-      });
-      return { data: queryResult.query_id, error: null };
-    } catch (err) {
-      console.error("dbInsertClickhouseError", err);
-      return {
-        data: null,
-        error: JSON.stringify(err),
-      };
-    }
-  }
-
   async dbInsertClickhouse<T extends keyof ClickhouseDB["Tables"]>(
     table: T,
     values: ClickhouseDB["Tables"][T][]
@@ -306,7 +252,7 @@ export interface CacheMetricSMT {
   request_id: string;
   model: string;
   provider: string;
-  cache_hit_count: ClickhouseFunction;
+  cache_hit_count: number;
   
   // Saving metrics
   saved_latency_ms: number;

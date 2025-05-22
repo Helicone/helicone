@@ -528,7 +528,7 @@ export class LoggingHandler extends AbstractLogHandler {
       request_id: context.message.log.request.cacheReferenceId ?? DEFAULT_UUID,
       model: context.processedLog.model ?? "",
       provider: request.provider ?? "",
-      cache_hit_count: { content: "countState(1)" } as ClickhouseFunction,
+      cache_hit_count: 1,
       saved_latency_ms: context.message.log.response.cachedLatency ?? 0,
       saved_completion_tokens: usage.completionTokens ?? 0,
       saved_prompt_tokens: usage.promptTokens ?? 0,
