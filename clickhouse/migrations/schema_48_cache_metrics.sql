@@ -1,4 +1,4 @@
-CREATE TABLE cache_metrics
+CREATE TABLE IF NOT EXISTS cache_metrics
 (
   organization_id UUID,
   date Date,
