@@ -1,31 +1,32 @@
 use http_body_util::Full;
 use hyper_util::{client::legacy::Client, rt::TokioExecutor};
 use opentelemetry::{
-    global,
-    trace::{SpanKind, TraceContextExt, Tracer},
-    Context,
+    Context, global,
+    trace::{Span, SpanKind, TraceContextExt, Tracer},
 };
-use opentelemetry::trace::Span;
 use opentelemetry_appender_tracing::layer::OpenTelemetryTracingBridge;
 use opentelemetry_http::{Bytes, HeaderInjector};
+use opentelemetry_otlp::{SpanExporter, WithExportConfig};
 use opentelemetry_sdk::{
-    logs::SdkLoggerProvider, propagation::TraceContextPropagator, trace::SdkTracerProvider,
+    logs::SdkLoggerProvider, propagation::TraceContextPropagator,
+    trace::SdkTracerProvider,
 };
-use opentelemetry_otlp::{SpanExporter,WithExportConfig};
-use tracing::info;
 use opentelemetry_stdout::LogExporter;
+use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 fn init_tracer() -> SdkTracerProvider {
     global::set_text_map_propagator(TraceContextPropagator::new());
-    // Install stdout exporter pipeline to be able to retrieve the collected spans.
-    // For the demonstration, use `Sampler::AlwaysOn` sampler to sample all traces.
+    // Install stdout exporter pipeline to be able to retrieve the collected
+    // spans. For the demonstration, use `Sampler::AlwaysOn` sampler to
+    // sample all traces.
     let provider = SdkTracerProvider::builder()
         .with_batch_exporter(
             SpanExporter::builder()
-            .with_tonic()
-            .with_endpoint("http://localhost:4317/v1/metrics")
-            .build().unwrap()
+                .with_tonic()
+                .with_endpoint("http://localhost:4317/v1/metrics")
+                .build()
+                .unwrap(),
         )
         .build();
 
@@ -52,7 +53,8 @@ async fn send_request(
     url: &str,
     body_content: &str,
     span_name: &str,
-) -> std::result::Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
+) -> std::result::Result<(), Box<dyn std::error::Error + Send + Sync + 'static>>
+{
     let client = Client::builder(TokioExecutor::new()).build_http();
     let tracer = global::tracer("");
     let span = tracer
@@ -66,7 +68,10 @@ async fn send_request(
 
     let mut req = hyper::Request::builder().uri(url);
     global::get_text_map_propagator(|propagator| {
-        propagator.inject_context(&cx, &mut HeaderInjector(req.headers_mut().unwrap()))
+        propagator.inject_context(
+            &cx,
+            &mut HeaderInjector(req.headers_mut().unwrap()),
+        )
     });
     req.headers_mut()
         .unwrap()
@@ -83,7 +88,8 @@ async fn send_request(
 }
 
 #[tokio::main]
-async fn main() -> std::result::Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
+async fn main()
+-> std::result::Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
     let tracer_provider = init_tracer();
     let logger_provider = init_logs();
 
