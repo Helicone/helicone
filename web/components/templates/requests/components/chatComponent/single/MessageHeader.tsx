@@ -1,6 +1,6 @@
 import React from "react";
 import RoleButton from "../../../../playground/new/roleButton";
-import { Message } from "@/packages/llm-mapper/types";
+import { Message } from "@helicone-package/llm-mapper/types";
 
 interface MessageHeaderProps {
   message: Message;

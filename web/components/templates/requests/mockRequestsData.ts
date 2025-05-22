@@ -1,4 +1,7 @@
-import { DEFAULT_UUID, MappedLLMRequest } from "@/packages/llm-mapper/types";
+import {
+  DEFAULT_UUID,
+  MappedLLMRequest,
+} from "@helicone-package/llm-mapper/types";
 
 // Simple mock filter map with just the properties we need for display
 export const getMockFilterMap = () => {

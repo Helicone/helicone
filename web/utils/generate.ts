@@ -1,7 +1,7 @@
-import { modelMapping } from "packages/cost/unified/models";
-import { providerConfigs } from "packages/cost/unified/providers";
-import { Creator, Provider } from "packages/cost/unified/types";
-import { Message } from "packages/llm-mapper/types";
+import { modelMapping } from "@helicone-package/cost/unified/models";
+import { providerConfigs } from "@helicone-package/cost/unified/providers";
+import { Creator, Provider } from "@helicone-package/cost/unified/types";
+import { Message } from "@helicone-package/llm-mapper/types";
 import findBestMatch from "string-similarity-js";
 
 /**

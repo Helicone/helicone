@@ -1,5 +1,5 @@
 import { UseQueryResult } from "@tanstack/react-query";
-import { Result, resultMap } from "../../../packages/common/result";
+import { Result, resultMap } from "@/packages/common/result";
 
 import { getAggregatedKeyMetrics } from "../../../lib/api/property/aggregatedKeyMetrics";
 import { UnPromise } from "../../../lib/tsxHelpers";

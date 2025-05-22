@@ -1,4 +1,4 @@
-import { Message } from "@/packages/llm-mapper/types";
+import { Message } from "@helicone-package/llm-mapper/types";
 import React, { useRef } from "react";
 import { PROMPT_MODES } from "../chatTopBar";
 import { AutoInputMessage } from "./AutoInputMessage";

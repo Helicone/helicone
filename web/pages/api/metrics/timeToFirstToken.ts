@@ -6,7 +6,7 @@ import {
   getTimeToFirstToken,
   TimeToFirstToken,
 } from "../../../lib/api/metrics/getTimeToFirstToken";
-import { Result } from "../../../packages/common/result";
+import { Result } from "@/packages/common/result";
 import { MetricsBackendBody } from "../../../services/hooks/useBackendFunction";
 
 async function handler(

@@ -2,7 +2,7 @@ import { useOrg } from "@/components/layout/org/organizationContext";
 import { $JAWN_API, getJawnClient } from "@/lib/clients/jawn";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { Result } from "../../packages/common/result";
+import { Result } from "@/packages/common/result";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 
 const useGetUnauthorized = (userId: string) => {
