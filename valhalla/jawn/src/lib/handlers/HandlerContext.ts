@@ -145,6 +145,7 @@ export type ExperimentCellValue = {
 };
 
 export const toHeliconeRequest = (context: HandlerContext): HeliconeRequest => {
+  const isCacheHit = context.message.log.request.cacheReferenceId != DEFAULT_UUID;
   return {
     request_body: context.processedLog.request.body,
     response_body: context.processedLog.response.body,
@@ -167,13 +168,13 @@ export const toHeliconeRequest = (context: HandlerContext): HeliconeRequest => {
     time_to_first_token: context.message.log.response.timeToFirstToken ?? null,
     
     // We don't track tokens on cache hits, since cost is 0
-    total_tokens: context.message.log.request.cacheReferenceId != DEFAULT_UUID ? 0 : context.usage.totalTokens ?? null,
-    prompt_tokens: context.message.log.request.cacheReferenceId != DEFAULT_UUID ? 0 : context.usage.promptTokens ?? null,
-    completion_tokens: context.message.log.request.cacheReferenceId != DEFAULT_UUID ? 0 : context.usage.completionTokens ?? null,
-    prompt_cache_write_tokens: context.message.log.request.cacheReferenceId != DEFAULT_UUID ? 0 : context.usage.promptCacheWriteTokens ?? null,
-    prompt_cache_read_tokens: context.message.log.request.cacheReferenceId != DEFAULT_UUID ? 0 : context.usage.promptCacheReadTokens ?? null,
-    prompt_audio_tokens: context.message.log.request.cacheReferenceId != DEFAULT_UUID ? 0 : context.usage.promptAudioTokens ?? null,
-    completion_audio_tokens: context.message.log.request.cacheReferenceId != DEFAULT_UUID ? 0 : context.usage.completionAudioTokens ?? null,
+    total_tokens: isCacheHit ? 0 : context.usage.totalTokens ?? null,
+    prompt_tokens: isCacheHit ? 0 : context.usage.promptTokens ?? null,
+    completion_tokens: isCacheHit ? 0 : context.usage.completionTokens ?? null,
+    prompt_cache_write_tokens: isCacheHit ? 0 : context.usage.promptCacheWriteTokens ?? null,
+    prompt_cache_read_tokens: isCacheHit ? 0 : context.usage.promptCacheReadTokens ?? null,
+    prompt_audio_tokens: isCacheHit ? 0 : context.usage.promptAudioTokens ?? null,
+    completion_audio_tokens: isCacheHit ? 0 : context.usage.completionAudioTokens ?? null,
     
 
     prompt_id: context.message.log.request.promptId ?? null,

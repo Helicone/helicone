@@ -1,5 +1,5 @@
 import { heliconeRequestToMappedContent } from "../../packages/llm-mapper/utils/getMappedContent";
-import { CacheMetricSMT, formatTimeString, RequestResponseRMT, ClickhouseFunction } from "../db/ClickhouseWrapper";
+import { CacheMetricSMT, formatTimeString, RequestResponseRMT } from "../db/ClickhouseWrapper";
 import { Database } from "../db/database.types";
 import { S3Client } from "../shared/db/s3Client";
 import {

@@ -727,7 +727,13 @@ export class DBLoggable {
           timeToFirstToken,
           responseCreatedAt: endTime,
           delayMs: cacheReferenceId == DEFAULT_UUID ? endTime.getTime() - this.timing.startTime.getTime() : 0,
-          cachedLatency: cacheReferenceId == DEFAULT_UUID ? 0 : Number(cachedHeaders?.get("Helicone-Cache-Latency")) ?? 0,
+          cachedLatency: cacheReferenceId == DEFAULT_UUID ? 0 : (() => {
+            try {
+              return Number(cachedHeaders?.get("Helicone-Cache-Latency")) || 0;
+            } catch {
+              return 0;
+            }
+          })(),
         },
       },
     };

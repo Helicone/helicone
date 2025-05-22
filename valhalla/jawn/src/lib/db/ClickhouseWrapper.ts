@@ -104,17 +104,6 @@ export function formatTimeString(timeString: string): string {
 
 type Nullable<T> = T | null;
 
-
-// Usage example: countState(1) which is required for counting AggregateFunctions in CH
-// Can create { content: "countState(1)" } as ClickhouseFunction
-export interface ClickhouseFunction {
-  content: string;
-}
-
-export function isClickhouseFunction(value: any): value is ClickhouseFunction {
-  return value && typeof value === 'object' && 'content' in value;
-}
-
 interface PropertiesV3 {
   id: number;
   created_at: string;
