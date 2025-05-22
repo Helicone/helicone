@@ -465,20 +465,22 @@ export class LoggingHandler extends AbstractLogHandler {
     const orgParams = context.orgParams;
     const { requestText, responseText } = this.requestResponseTextFromContext(context);
 
+    const isCacheHit = context.message.log.request.cacheReferenceId != DEFAULT_UUID;
+
     const requestResponseLog: RequestResponseRMT = {
       user_id:
         typeof request.userId === "string"
           ? request.userId
           : String(request.userId),
       request_id: request.id,
-      completion_tokens: context.message.log.request.cacheReferenceId != DEFAULT_UUID ? 0 : usage.completionTokens ?? 0,
+      completion_tokens: isCacheHit ? 0 : usage.completionTokens ?? 0,
       latency: response.delayMs ?? 0,
       model: context.processedLog.model ?? "",
-      prompt_tokens: context.message.log.request.cacheReferenceId != DEFAULT_UUID ? 0 : usage.promptTokens ?? 0,
-      prompt_cache_write_tokens: context.message.log.request.cacheReferenceId != DEFAULT_UUID ? 0 : usage.promptCacheWriteTokens ?? 0,
-      prompt_cache_read_tokens: context.message.log.request.cacheReferenceId != DEFAULT_UUID ? 0 : usage.promptCacheReadTokens ?? 0,
-      prompt_audio_tokens: context.message.log.request.cacheReferenceId != DEFAULT_UUID ? 0 : usage.promptAudioTokens ?? 0,
-      completion_audio_tokens: context.message.log.request.cacheReferenceId != DEFAULT_UUID ? 0 : usage.completionAudioTokens ?? 0,
+      prompt_tokens: isCacheHit ? 0 : usage.promptTokens ?? 0,
+      prompt_cache_write_tokens: isCacheHit ? 0 : usage.promptCacheWriteTokens ?? 0,
+      prompt_cache_read_tokens: isCacheHit ? 0 : usage.promptCacheReadTokens ?? 0,
+      prompt_audio_tokens: isCacheHit ? 0 : usage.promptAudioTokens ?? 0,
+      completion_audio_tokens: isCacheHit ? 0 : usage.completionAudioTokens ?? 0,
       request_created_at: formatTimeString(
         request.requestCreatedAt.toISOString()
       ),
