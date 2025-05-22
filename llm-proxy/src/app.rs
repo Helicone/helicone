@@ -10,7 +10,7 @@ use std::{
 use axum_server::{accept::NoDelayAcceptor, tls_rustls::RustlsConfig};
 use futures::future::BoxFuture;
 use meltdown::Token;
-use opentelemetry::{global};
+use opentelemetry::global;
 use reqwest::Client;
 use telemetry::{make_span::SpanFactory, tracing::MakeRequestId};
 use tower::{ServiceBuilder, buffer::BufferLayer, util::BoxCloneService};
@@ -207,7 +207,10 @@ impl App {
             .layer(CatchPanicLayer::custom(PanicResponder))
             .layer(
                 TraceLayer::new_for_http()
-                    .make_span_with(SpanFactory::new().level(Level::INFO))
+                    .make_span_with(SpanFactory::new(
+                        Level::INFO,
+                        app_state.0.config.telemetry.propagate,
+                    ))
                     .on_body_chunk(())
                     .on_eos(()),
             )

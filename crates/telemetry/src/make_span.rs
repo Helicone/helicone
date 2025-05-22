@@ -1,6 +1,6 @@
 use http::Request;
-use opentelemetry::{global, trace::TraceContextExt, Context};
-use opentelemetry_http::{HeaderExtractor};
+use opentelemetry::{Context, global, trace::TraceContextExt};
+use opentelemetry_http::HeaderExtractor;
 use tower_http::trace::MakeSpan;
 use tracing::{Level, Span};
 use tracing_opentelemetry::OpenTelemetrySpanExt;
@@ -8,14 +8,16 @@ use tracing_opentelemetry::OpenTelemetrySpanExt;
 #[derive(Debug, Clone)]
 pub struct SpanFactory {
     level: Level,
+    propagate_traces: bool,
 }
 
 impl SpanFactory {
     /// Create a new `SpanFactory`.
     #[must_use]
-    pub fn new() -> Self {
+    pub fn new(level: Level, propagate_traces: bool) -> Self {
         Self {
-            level: Level::DEBUG,
+            level,
+            propagate_traces,
         }
     }
 
@@ -33,7 +35,7 @@ impl SpanFactory {
 
 impl Default for SpanFactory {
     fn default() -> Self {
-        Self::new()
+        Self::new(Level::DEBUG, true)
     }
 }
 
@@ -49,7 +51,7 @@ impl<B> MakeSpan<B> for SpanFactory {
                     "request",
                     trace_id = tracing::field::Empty,
                 )
-            }
+            };
         }
 
         let span = match self.level {
@@ -60,14 +62,16 @@ impl<B> MakeSpan<B> for SpanFactory {
             Level::TRACE => make_span!(Level::TRACE),
         };
 
-        let parent_cx = extract_context_from_request(request);
-        span.set_parent(parent_cx);
+        if self.propagate_traces {
+            let parent_cx = extract_context_from_request(request);
 
+            span.set_parent(parent_cx);
+            span.record(
+                "trace_id",
+                span.context().span().span_context().trace_id().to_string(),
+            );
+        }
 
-        let trace_id = span.context().span().span_context().trace_id();
-
-        let serialized_trace_id = trace_id.to_string();
-        span.record("trace_id", &serialized_trace_id);
         span
     }
 }
@@ -77,5 +81,3 @@ fn extract_context_from_request<B>(req: &Request<B>) -> Context {
         propagator.extract(&HeaderExtractor(req.headers()))
     })
 }
-
-

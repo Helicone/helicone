@@ -1,7 +1,6 @@
 pub mod make_span;
 pub mod tracing;
-pub mod context_injection;
-
+pub mod utils;
 use opentelemetry::{
     TraceId, global,
     trace::{TracerProvider, noop::NoopTextMapPropagator},
@@ -23,6 +22,7 @@ use tracing_subscriber::{
     EnvFilter, Layer, filter::ParseError, layer::SubscriberExt,
     util::SubscriberInitExt,
 };
+use utils::default_propagate_traces;
 use uuid::Uuid;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -72,10 +72,6 @@ fn default_level() -> String {
 
 fn default_otlp_endpoint() -> String {
     "http://localhost:4317/v1/metrics".to_string()
-}
-
-fn default_propagate_traces() -> bool {
-    true
 }
 
 #[derive(Debug, thiserror::Error)]
