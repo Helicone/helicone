@@ -22,7 +22,7 @@ use tracing_subscriber::{
     EnvFilter, Layer, filter::ParseError, layer::SubscriberExt,
     util::SubscriberInitExt,
 };
-use utils::default_propagate_traces;
+use utils::default_true;
 use uuid::Uuid;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -37,7 +37,7 @@ pub struct Config {
     pub exporter: Exporter,
     #[serde(default = "default_otlp_endpoint")]
     pub otlp_endpoint: String,
-    #[serde(default = "default_propagate_traces")]
+    #[serde(default = "default_true")]
     pub propagate: bool,
 }
 
@@ -48,7 +48,7 @@ impl Default for Config {
             service_name: default_service_name(),
             exporter: Exporter::default(),
             otlp_endpoint: default_otlp_endpoint(),
-            propagate: default_propagate_traces(),
+            propagate: default_true(),
         }
     }
 }

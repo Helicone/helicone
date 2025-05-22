@@ -66,11 +66,12 @@ impl<B> MakeSpan<B> for SpanFactory {
             let parent_cx = extract_context_from_request(request);
 
             span.set_parent(parent_cx);
-            span.record(
-                "trace_id",
-                span.context().span().span_context().trace_id().to_string(),
-            );
         }
+
+        span.record(
+            "trace_id",
+            span.context().span().span_context().trace_id().to_string(),
+        );
 
         span
     }

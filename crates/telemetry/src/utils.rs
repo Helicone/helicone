@@ -1,3 +1,3 @@
-pub(crate) fn default_propagate_traces() -> bool {
+pub(crate) fn default_true() -> bool {
     true
 }
