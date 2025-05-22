@@ -146,14 +146,6 @@ const processToolResponse = (msg: any): Message => {
     content: toolResponseMsg.content || "",
     _type: "function",
     name: msg.name,
-    tool_calls: [
-      {
-        name: msg.name,
-        arguments: {
-          query_result: msg.content,
-        },
-      },
-    ],
   };
 };
 

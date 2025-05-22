@@ -15,6 +15,8 @@ const MESSAGE_LENGTH_THRESHOLD = 1000; // Characters before truncating
 
 interface ChatProps {
   mappedRequest: MappedLLMRequest;
+  playgroundMode?: boolean;
+  onChatChange?: (mappedRequest: MappedLLMRequest) => void;
 }
 
 type MessageType = "image" | "tool" | "text" | "pdf";
@@ -56,20 +58,59 @@ const getMessageType = (message: Message): MessageType => {
   return "text";
 };
 
-const renderToolMessage = (content: string, message: Message) => {
+const renderToolMessage = (
+  content: string,
+  message: Message,
+  playgroundMode: boolean,
+  mappedRequest?: MappedLLMRequest,
+  messageIndex?: number,
+  onChatChange?: (mappedRequest: MappedLLMRequest) => void
+) => {
   if (message.tool_call_id && message.content) {
     return (
       <div className="flex flex-col gap-2 p-4 bg-muted rounded-lg text-xs">
         <XSmall className="font-mono font-semibold">
           {message.tool_call_id}
         </XSmall>
-        <JsonRenderer
-          data={
-            isJson(message.content)
-              ? JSON.parse(message.content)
-              : message.content
-          }
-        />
+        {!playgroundMode ? (
+          <JsonRenderer
+            data={
+              isJson(message.content)
+                ? JSON.parse(message.content)
+                : message.content
+            }
+          />
+        ) : (
+          <MarkdownEditor
+            language="markdown"
+            setText={(text) => {
+              if (!mappedRequest || !onChatChange || !messageIndex) {
+                return;
+              }
+              onChatChange?.({
+                ...mappedRequest,
+                schema: {
+                  ...mappedRequest.schema,
+                  request: {
+                    ...mappedRequest.schema.request,
+                    messages: mappedRequest.schema.request?.messages?.map(
+                      (message, messageIndex) => {
+                        if (messageIndex === messageIndex) {
+                          return {
+                            ...message,
+                            content: text,
+                          };
+                        }
+                        return message;
+                      }
+                    ),
+                  },
+                },
+              });
+            }}
+            text={message.content}
+          />
+        )}
       </div>
     );
   }
@@ -93,7 +134,61 @@ const renderToolMessage = (content: string, message: Message) => {
               <PiToolboxBold className="text-muted-foreground" />
               <XSmall className="font-mono font-semibold">{tool.name}</XSmall>
             </div>
-            <JsonRenderer data={tool.arguments} showCopyButton={false} />
+            {!playgroundMode ? (
+              <JsonRenderer data={tool.arguments} showCopyButton={false} />
+            ) : (
+              <MarkdownEditor
+                language="markdown"
+                setText={(text) => {
+                  if (!mappedRequest || !onChatChange || !messageIndex) {
+                    console.log(
+                      "no mappedRequest or onChatChange or messageIndex"
+                    );
+                    return;
+                  }
+                  onChatChange?.({
+                    ...mappedRequest,
+                    schema: {
+                      ...mappedRequest.schema,
+                      request: {
+                        ...mappedRequest.schema.request,
+                        messages: mappedRequest.schema.request?.messages?.map(
+                          (message, mappedMessageIndex) => {
+                            if (mappedMessageIndex === messageIndex) {
+                              return {
+                                ...message,
+                                tool_calls:
+                                  mappedRequest.schema.request?.messages?.[
+                                    messageIndex
+                                  ]?.tool_calls?.map(
+                                    (toolCall, toolCallIndex) => {
+                                      if (toolCallIndex === index) {
+                                        return {
+                                          ...toolCall,
+                                          arguments: (() => {
+                                            try {
+                                              return JSON.parse(text);
+                                            } catch {
+                                              return {};
+                                            }
+                                          })(),
+                                        };
+                                      }
+                                      return toolCall;
+                                    }
+                                  ),
+                              };
+                            }
+                            return message;
+                          }
+                        ),
+                      },
+                    },
+                  });
+                }}
+                text={JSON.stringify(tool.arguments, null, 2)}
+              />
+            )}
           </div>
         ))}
       </div>
@@ -115,7 +210,11 @@ const renderToolMessage = (content: string, message: Message) => {
   }
 };
 
-export default function Chat({ mappedRequest }: ChatProps) {
+export default function Chat({
+  mappedRequest,
+  playgroundMode = false,
+  onChatChange,
+}: ChatProps) {
   const [expandedMessages, setExpandedMessages] = useState<
     Record<number, boolean>
   >({});
@@ -124,25 +223,29 @@ export default function Chat({ mappedRequest }: ChatProps) {
   const messages = useMemo(() => {
     const requestMessages = mappedRequest.schema.request?.messages ?? [];
     const responseMessages = mappedRequest.schema.response?.messages ?? [];
-    const allMessages = [...requestMessages, ...responseMessages];
+    const allMessages = playgroundMode
+      ? requestMessages
+      : [...requestMessages, ...responseMessages];
 
     // Flatten contentArray messages, preserving the parent role
-    return allMessages.reduce<Message[]>((acc, message) => {
-      if (
-        message._type === "contentArray" &&
-        Array.isArray(message.contentArray)
-      ) {
-        // Map over the contentArray and assign the parent message's role to each part
-        const flattenedParts = message.contentArray.map((part) => ({
-          ...part,
-          role: message.role || part.role, // Use parent role, fallback to part's own role if parent is missing
-        }));
-        return [...acc, ...flattenedParts];
-      }
-      // If not a contentArray or it's empty, just add the message itself
-      return [...acc, message];
-    }, []);
-  }, [mappedRequest]);
+    return playgroundMode
+      ? allMessages
+      : allMessages.reduce<Message[]>((acc, message) => {
+          if (
+            message._type === "contentArray" &&
+            Array.isArray(message.contentArray)
+          ) {
+            // Map over the contentArray and assign the parent message's role to each part
+            const flattenedParts = message.contentArray.map((part) => ({
+              ...part,
+              role: message.role || part.role, // Use parent role, fallback to part's own role if parent is missing
+            }));
+            return [...acc, ...flattenedParts];
+          }
+          // If not a contentArray or it's empty, just add the message itself
+          return [...acc, message];
+        }, []);
+  }, [mappedRequest, playgroundMode]);
 
   const toggleMessage = (index: number) => {
     setExpandedMessages((prev) => ({
@@ -222,7 +325,7 @@ export default function Chat({ mappedRequest }: ChatProps) {
                       </div>
                     );
                   case "tool":
-                    return mode === "raw" ? (
+                    return mode === "raw" || !playgroundMode ? (
                       <MarkdownEditor
                         language="json"
                         setText={() => {}}
@@ -234,27 +337,60 @@ export default function Chat({ mappedRequest }: ChatProps) {
                         disabled
                       />
                     ) : (
-                      renderToolMessage(displayContent, message)
+                      renderToolMessage(
+                        displayContent,
+                        message,
+                        playgroundMode,
+                        mappedRequest,
+                        index,
+                        onChatChange
+                      )
                     );
                   case "text":
-                    if (isJson(displayContent)) {
+                    if (isJson(displayContent) && !playgroundMode) {
                       return (
                         <div className="text-sm">
                           <JsonRenderer data={JSON.parse(displayContent)} />
                         </div>
                       );
                     }
-                    return mode === "raw" ? (
+                    return mode === "raw" || playgroundMode ? (
                       <MarkdownEditor
                         language="markdown"
-                        setText={() => {}}
+                        setText={
+                          playgroundMode
+                            ? (text) => {
+                                onChatChange?.({
+                                  ...mappedRequest,
+                                  schema: {
+                                    ...mappedRequest.schema,
+                                    request: {
+                                      ...mappedRequest.schema.request,
+                                      messages:
+                                        mappedRequest.schema.request?.messages?.map(
+                                          (message, messageIndex) => {
+                                            if (messageIndex === index) {
+                                              return {
+                                                ...message,
+                                                content: text,
+                                              };
+                                            }
+                                            return message;
+                                          }
+                                        ),
+                                    },
+                                  },
+                                });
+                              }
+                            : () => {}
+                        }
                         className="border-none"
                         text={
                           typeof displayContent === "string"
                             ? displayContent
                             : JSON.stringify(displayContent)
                         }
-                        disabled
+                        disabled={!playgroundMode}
                       />
                     ) : (
                       <ReactMarkdown

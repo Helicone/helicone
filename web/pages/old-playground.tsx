@@ -1,17 +1,22 @@
+import { User } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import { ReactElement } from "react";
 import AuthLayout from "../components/layout/auth/authLayout";
 import PlaygroundPage from "../components/templates/playground/playgroundPage";
 
-const Playground = () => {
+interface PlaygroundProps {
+  user: User;
+}
+
+const Playground = (props: PlaygroundProps) => {
   const router = useRouter();
 
-  const { requestId } = router.query;
+  const { request } = router.query;
 
   return (
     <div className="flex flex-col">
       <PlaygroundPage
-        requestId={requestId as string | undefined}
+        request={request as string | undefined}
         showNewButton={true}
       />
     </div>
