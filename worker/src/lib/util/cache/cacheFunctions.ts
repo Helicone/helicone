@@ -46,6 +46,7 @@ interface SaveToCacheOptions {
   request: HeliconeProxyRequest;
   response: Response;
   responseBody: string[];
+  responseLatencyMs: number;
   cacheControl: string;
   settings: { bucketSize: number };
   cacheKv: KVNamespace;
@@ -78,6 +79,7 @@ async function trySaveToCache(options: SaveToCacheOptions) {
         keyName: await kvKeyFromRequest(request, freeIndexes[0], cacheSeed),
         value: JSON.stringify({
           headers: Object.fromEntries(response.headers.entries()),
+          latency: options.responseLatencyMs,
           body: responseBody,
         }),
         options: {
@@ -128,6 +130,7 @@ export async function getCachedResponse(
     ])) as {
       requests: {
         headers: Record<string, string>;
+        latency: number;
         body: string[];
       }[];
       freeIndexes: number[];
@@ -144,6 +147,9 @@ export async function getCachedResponse(
         "Helicone-Cache-Bucket-Idx",
         cacheIdx.toString()
       );
+      cachedResponseHeaders.append(
+        "Helicone-Cache-Latency", randomCache.latency ? randomCache.latency.toString() : "0"
+      )
 
       const cachedStream = new ReadableStream({
         start(controller) {
@@ -188,6 +194,7 @@ async function getMaxCachedResponses(
       const requestCache = await kvKeyFromRequest(request, idx, cacheSeed);
       return cacheKv.get<{
         headers: Record<string, string>;
+        latency: number;
         body: string[];
       }>(requestCache, { type: "json" });
     })
@@ -196,6 +203,7 @@ async function getMaxCachedResponses(
   return {
     requests: previouslyCachedReqs.filter((r) => r !== null) as {
       headers: Record<string, string>;
+      latency: number;
       body: string[];
     }[],
     freeIndexes: previouslyCachedReqs

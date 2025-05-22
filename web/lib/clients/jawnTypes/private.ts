@@ -1755,6 +1755,8 @@ Json: JsonObject;
     Log: {
       response: {
         /** Format: double */
+        cachedLatency?: number;
+        /** Format: double */
         delayMs: number;
         /** Format: date-time */
         responseCreatedAt: string;
