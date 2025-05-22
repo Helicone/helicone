@@ -175,6 +175,9 @@ export class LogManager {
     stripeLogHandler: StripeLogHandler,
     logMetaData: LogMetaData
   ): Promise<void> {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return;
+    }
     const start = performance.now();
     await stripeLogHandler.handleResults();
     const end = performance.now();
@@ -223,8 +226,7 @@ export class LogManager {
       });
 
       console.error(
-        `Error inserting logs: ${JSON.stringify(result.error)} for batch ${
-          logMetaData.batchId
+        `Error inserting logs: ${JSON.stringify(result.error)} for batch ${logMetaData.batchId
         }`
       );
 
