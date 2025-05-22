@@ -10,7 +10,7 @@ use std::{
 use axum_server::{accept::NoDelayAcceptor, tls_rustls::RustlsConfig};
 use futures::future::BoxFuture;
 use meltdown::Token;
-use opentelemetry::{global, };
+use opentelemetry::{global};
 use reqwest::Client;
 use telemetry::{make_span::SpanFactory, tracing::MakeRequestId};
 use tower::{ServiceBuilder, buffer::BufferLayer, util::BoxCloneService};
@@ -19,7 +19,7 @@ use tower_http::{
     auth::AsyncRequireAuthorizationLayer, catch_panic::CatchPanicLayer,
     normalize_path::NormalizePathLayer, trace::TraceLayer,
 };
-use tracing::{Level, Span, info};
+use tracing::{Level, info};
 
 use crate::{
     config::{Config, minio::Minio, server::TlsConfig},
@@ -211,10 +211,7 @@ impl App {
                     .on_body_chunk(())
                     .on_eos(()),
             )
-            .set_x_request_id(MakeRequestId::new(
-                app_state.0.config.telemetry.propagate,
-                app_state.0.config.telemetry.service_name.clone(),
-            ))
+            .set_x_request_id(MakeRequestId)
             .propagate_x_request_id()
             .layer(NormalizePathLayer::trim_trailing_slash())
             .layer(ErrorHandlerLayer::new(app_state.clone()))
