@@ -1,53 +1,79 @@
-import { Row } from "@/components/layout/common";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { EyeIcon, EyeOffIcon } from "lucide-react";
-import { useRouter } from "next/router";
-import { useMemo, useState } from "react";
-import { PiBroadcastBold } from "react-icons/pi";
+import FoldedHeader from "@/components/shared/FoldedHeader";
 import {
-  getEffectiveRequests,
-  isRealtimeSession,
-} from "../../../../lib/sessions/realtimeSession";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Muted, Small, XSmall } from "@/components/ui/typography";
+import { tracesToTreeNodeData } from "@/lib/sessions/helpers";
+import { useColorMapStore } from "@/store/features/sessions/colorMap";
+import { useRouter } from "next/router";
+import { useEffect, useMemo, useState } from "react";
+import { PiBroadcastBold } from "react-icons/pi";
+import { isRealtimeRequest } from "../../../../lib/sessions/realtimeSession";
 import { Session } from "../../../../lib/sessions/sessionTypes";
-import { useLocalStorage } from "../../../../services/hooks/localStorage";
+import { getTimeIntervalAgo } from "../../../../lib/timeCalculations/time";
 import { useGetRequests } from "../../../../services/hooks/requests";
+import { useSessions } from "../../../../services/hooks/sessions";
 import { Col } from "../../../layout/common/col";
-import { BreadCrumb } from "./breadCrumb";
-import ChatSession from "./Chat/ChatSession";
+import ExportButton from "../../../shared/themed/table/exportButton";
 import TreeView from "./Tree/TreeView";
+
+import { TagType } from "@helicone-package/common/sessions/tags";
+import Link from "next/link";
+import { SessionTag } from "../../feedback/sessionTag";
+
+export const EMPTY_SESSION_NAME = "__unnamed_helicone_session__";
 
 interface SessionContentProps {
   session: Session;
   session_id: string;
+  session_name: string;
   requests: ReturnType<typeof useGetRequests>;
   isLive: boolean;
   setIsLive: (isLive: boolean) => void;
 }
-export const TABS = [
-  {
-    id: "tree",
-    label: "Tree",
-  },
-  {
-    id: "chat",
-    label: "Chat",
-  },
-] as const;
 export const SessionContent: React.FC<SessionContentProps> = ({
   session,
   session_id,
+  session_name,
   requests,
-  isLive,
-  setIsLive,
 }) => {
   const router = useRouter();
-  const { view, requestId } = router.query;
+  const { initializeColorMap } = useColorMapStore();
 
+  const { _, requestId } = router.query;
   const [selectedRequestId, setSelectedRequestId] = useState<string>(
     (requestId as string) || ""
   );
 
+  // SESSIONS DATA
+  const timeFilter = useMemo(
+    () => ({
+      start: getTimeIntervalAgo("3m"), // Use 3 months like in the page component
+      end: new Date(),
+    }),
+    []
+  );
+
+  const { sessions: relatedSessions, isLoading: isLoadingSessions } =
+    useSessions({
+      timeFilter,
+      sessionIdSearch: session_id,
+      selectedName: session_name === EMPTY_SESSION_NAME ? "" : session_name,
+    });
+
+  // HANDLERS
+  const handleSessionIdChange = (newSessionId: string) => {
+    router.push(`/sessions/${encodeURIComponent(newSessionId)}`);
+  };
   const handleRequestIdChange = (newRequestId: string) => {
     setSelectedRequestId(newRequestId);
     router.push(
@@ -60,184 +86,179 @@ export const SessionContent: React.FC<SessionContentProps> = ({
     );
   };
 
-  const [openDrawer, setOpenDrawer] = useState(false);
-
-  const [currentTopView, setCurrentTopView] = useLocalStorage(
-    "currentTopView",
-    (view as (typeof TABS)[number]["id"]) ?? "tree"
-  );
-
+  // AGREGATED SESSION STATS (Derived from the processed session object)
   const startTime = useMemo(() => {
-    const dates =
-      requests.requests.requests?.map((r) => new Date(r.request_created_at)) ??
-      [];
-
-    return dates.sort((a, b) => a.getTime() - b.getTime())?.[0] ?? undefined;
-  }, [requests.requests.requests]);
-
+    return session.start_time_unix_timestamp_ms
+      ? new Date(session.start_time_unix_timestamp_ms)
+      : undefined;
+  }, [session.start_time_unix_timestamp_ms]);
   const endTime = useMemo(() => {
-    const dates =
-      requests.requests.requests?.map((r) => new Date(r.request_created_at)) ??
-      [];
-
-    return dates.sort((a, b) => b.getTime() - a.getTime())?.[0] ?? undefined;
-  }, [requests.requests.requests]);
-
-  const requestWithFeedback = useMemo(() => {
-    return requests.requests.requests?.find(
-      (r) => r.properties["Helicone-Session-Feedback"]
+    return session.end_time_unix_timestamp_ms
+      ? new Date(session.end_time_unix_timestamp_ms)
+      : undefined;
+  }, [session.end_time_unix_timestamp_ms]);
+  const promptTokens = useMemo(
+    () =>
+      session.traces.reduce(
+        (acc, trace) =>
+          acc +
+          (parseInt(`${trace?.request?.heliconeMetadata?.promptTokens}`) || 0),
+        0
+      ),
+    [session.traces]
+  );
+  const completionTokens = useMemo(
+    () =>
+      session.traces.reduce(
+        (acc, trace) =>
+          acc +
+          (parseInt(`${trace?.request?.heliconeMetadata?.completionTokens}`) ||
+            0),
+        0
+      ),
+    [session.traces]
+  );
+  const totalTokens = useMemo(
+    () => promptTokens + completionTokens,
+    [promptTokens, completionTokens]
+  );
+  const avgLatency = useMemo(() => {
+    if (!session || session.traces.length === 0) {
+      return 0;
+    }
+    const totalLatency = session.traces.reduce(
+      (acc, trace) =>
+        acc + (trace.end_unix_timestamp_ms - trace.start_unix_timestamp_ms),
+      0
     );
+    return totalLatency / session.traces.length;
+  }, [session]);
+  const sessionStatsToDisplay = useMemo(() => {
+    return [
+      {
+        label: "Start Time",
+        value: startTime ? startTime.toLocaleString() : "-",
+      },
+      { label: "End Time", value: endTime ? endTime.toLocaleString() : "-" },
+      {
+        label: "Cost",
+        value: `$${(session.session_cost_usd ?? 0).toFixed(4)}`,
+      },
+      { label: "Avg Latency", value: `${avgLatency.toFixed(0)}ms` },
+      { label: "Requests", value: session.traces.length.toString() },
+      { label: "Tokens", value: totalTokens.toString() },
+    ];
+  }, [
+    startTime,
+    endTime,
+    session.session_cost_usd,
+    avgLatency,
+    session.traces.length,
+    totalTokens,
+  ]);
+
+  // Check if the session contains a realtime request
+  const containsRealtime = useMemo(() => {
+    const rawRequests = requests.requests.requests ?? [];
+    return rawRequests.some(isRealtimeRequest);
   }, [requests.requests.requests]);
 
-  const [showSpan, setShowSpan] = useLocalStorage("showSpan-TreeView", true);
-
-  // Centralized realtime session handling in a single object
-  const realtimeData = useMemo(() => {
-    // Default values when loading or no data
-    if (
-      requests.requests.isLoading ||
-      !requests.requests.requests ||
-      requests.requests.requests.length === 0
-    ) {
-      return {
-        isRealtime: false,
-        effectiveRequests: [],
-        originalRequest: null,
-      };
-    }
-
-    const isRealtime = isRealtimeSession(requests.requests.requests || []);
-
-    // Get effective requests (either original or simulated realtime requests)
-    const effectiveRequests = isRealtime
-      ? getEffectiveRequests(requests.requests.requests || [])
-      : requests.requests.requests || [];
-
-    // For realtime sessions, get the original request for proper rendering
-    let originalRequest = null;
-    if (isRealtime) {
-      originalRequest = requests.requests.requests[0] || null;
-    }
-
-    return {
-      isRealtime,
-      effectiveRequests,
-      originalRequest,
-    };
-  }, [requests.requests.requests, requests.requests.isLoading]);
+  useEffect(() => {
+    const traceData = tracesToTreeNodeData(session.traces);
+    initializeColorMap(traceData);
+  }, [session.traces, initializeColorMap]);
 
   return (
-    <Col className="h-screen">
-      <Tabs
-        value={currentTopView}
-        onValueChange={(tab) =>
-          setCurrentTopView(tab as (typeof TABS)[number]["id"])
-        }
-        className="flex flex-col h-full"
-      >
-        {/* Header */}
-        <div className="h-16 flex flex-row gap-4 items-center justify-between border-b border-slate-200 dark:border-slate-800 sticky bg-slate-100 dark:bg-slate-900 z-10 p-4">
-          <BreadCrumb
-            // @ts-ignore
-            users={session.traces
-              .map((trace) => trace.request.heliconeMetadata.user)
-              .filter((user) => user !== "" && user != null)}
-            models={session.traces.map((trace) => trace.request.model ?? "")}
-            promptTokens={session.traces.reduce(
-              (acc, trace) =>
-                acc +
-                (parseInt(
-                  `${trace?.request?.heliconeMetadata?.promptTokens}`
-                ) || 0),
-              0
-            )}
-            completionTokens={session.traces.reduce(
-              (acc, trace) =>
-                acc +
-                (parseInt(
-                  `${trace?.request?.heliconeMetadata?.completionTokens}`
-                ) || 0),
-              0
-            )}
-            sessionId={session_id as string}
-            numTraces={session.traces.length}
-            sessionCost={session.session_cost_usd}
-            startTime={startTime}
-            endTime={endTime}
-            sessionFeedback={
-              requestWithFeedback?.properties["Helicone-Session-Feedback"] ===
-              "1"
-                ? true
-                : requestWithFeedback?.properties[
-                    "Helicone-Session-Feedback"
-                  ] === "0"
-                ? false
-                : null
-            }
-            isLive={isLive}
-            setIsLive={setIsLive}
-          />
-          {realtimeData.isRealtime && (
-            <div className="flex flex-row gap-2 items-center text-xs text-blue-500 font-semibold">
-              <PiBroadcastBold className="h-4 w-4" />
-              Realtime Sessions reconstruct a timeline using connection
-              timestamps.
-            </div>
-          )}
-          <Row className="gap-2 items-center">
-            {currentTopView === "tree" &&
-              (showSpan ? (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="font-medium flex items-center gap-1"
-                  onClick={() => setShowSpan(!showSpan)}
-                >
-                  <EyeOffIcon width={16} height={16} />
-                  Hide Span
-                </Button>
+    <Col className="h-screen flex flex-col">
+      <FoldedHeader
+        leftSection={
+          <div className="flex flex-row gap-4 items-center">
+            {/* Dynamic breadcrumb */}
+            <div className="flex flex-row gap-1 items-center">
+              <Link href="/sessions" className="no-underline">
+                <Small className="font-semibold">Sessions</Small>
+              </Link>
+              <Small className="font-semibold">/</Small>
+              <Link
+                href={
+                  session_name === EMPTY_SESSION_NAME
+                    ? "/sessions"
+                    : `/sessions?name=${encodeURIComponent(session_name)}`
+                }
+                className="no-underline"
+              >
+                <Muted className="text-sm">{session_name}</Muted>
+              </Link>
+              <Small className="font-semibold">/</Small>
+
+              {isLoadingSessions ? (
+                <Muted className="text-sm">Loading sessions...</Muted>
               ) : (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="font-medium flex items-center gap-1"
-                  onClick={() => setShowSpan(!showSpan)}
+                <Select
+                  value={session_id}
+                  onValueChange={handleSessionIdChange}
                 >
-                  <EyeIcon width={16} height={16} />
-                  Show Span
-                </Button>
-              ))}
-            <TabsList variant="default">
-              {TABS.map((tab) => (
-                <TabsTrigger variant="default" key={tab.id} value={tab.id}>
-                  {tab.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Row>
-        </div>
+                  <SelectTrigger className="w-[280px] h-8 shadow-sm">
+                    <SelectValue placeholder="Select Session ID" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {relatedSessions?.map((s) => (
+                      <SelectItem key={s.session_id} value={s.session_id}>
+                        {s.session_id}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
 
-        <div className="h-full">
-          <TabsContent value="tree" className="h-full">
-            <TreeView
-              selectedRequestId={selectedRequestId}
-              setSelectedRequestId={handleRequestIdChange}
-              showSpan={showSpan}
-              session={session}
-              requests={requests}
-              realtimeData={realtimeData}
-            />
-          </TabsContent>
+            {/* Realtime session reconstruction warning) */}
+            {containsRealtime && (
+              <div className="flex flex-row gap-2 items-center text-xs text-blue-500 font-semibold">
+                <PiBroadcastBold className="h-4 w-4" />
+                Includes reconstructed realtime requests
+              </div>
+            )}
+          </div>
+        }
+        rightSection={
+          <div className="h-full flex flex-row gap-2 items-center">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                {/* Export the original, raw request data */}
+                <ExportButton rows={requests.requests.requests ?? []} />
+              </TooltipTrigger>
+              <TooltipContent>Export raw data</TooltipContent>
+            </Tooltip>
 
-          <TabsContent value="chat" className="h-full">
-            <ChatSession
-              session={session}
-              requests={requests}
-              realtimeData={realtimeData}
-            />
-          </TabsContent>
-        </div>
-      </Tabs>
+            <div className="h-4 w-px bg-border" />
+
+            <SessionTag id={session_id} type={TagType.SESSION} />
+          </div>
+        }
+        foldContent={
+          <div className="h-full flex flex-row items-center divide-x divide-border">
+            {sessionStatsToDisplay.map((stat) => (
+              <div
+                key={stat.label}
+                className="flex flex-row gap-1 items-center px-4"
+              >
+                <XSmall className="font-medium">{stat.label}</XSmall>
+                <Muted className="text-xs">{stat.value}</Muted>
+              </div>
+            ))}
+          </div>
+        }
+      />
+
+      <div className="flex-1 overflow-auto">
+        <TreeView
+          selectedRequestId={selectedRequestId}
+          setSelectedRequestId={handleRequestIdChange}
+          session={session}
+          isOriginalRealtime={containsRealtime}
+        />
+      </div>
     </Col>
   );
 };

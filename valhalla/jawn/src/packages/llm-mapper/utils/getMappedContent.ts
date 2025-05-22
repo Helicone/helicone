@@ -65,6 +65,8 @@ const metaDataFromHeliconeRequest = (
   return {
     requestId: heliconeRequest.request_id,
     countryCode: heliconeRequest.country_code,
+    cacheEnabled: heliconeRequest.cache_enabled ?? false,
+    cacheReferenceId: heliconeRequest.cache_reference_id ?? null,
     cost: modelCost({
       provider: heliconeRequest.provider,
       model: model,
@@ -161,27 +163,21 @@ const getUnsanitizedMappedContent = ({
 };
 
 const messageToText = (message: Message): string => {
-  try {
-    let text = "";
-    message.contentArray?.forEach((message) => {
-      text += messageToText(message).trim();
-    });
-    text += message.content?.trim() ?? "";
-    message.tool_calls?.forEach((toolCall) => {
-      text += JSON.stringify(toolCall.arguments).trim();
+  let text = "";
+  message.contentArray?.forEach((message) => {
+    text += messageToText(message).trim();
+  });
+  text += message.content?.trim() ?? "";
+  message.tool_calls?.forEach((toolCall) => {
+    text += JSON.stringify(toolCall.arguments).trim();
+    if (toolCall.name) {
       text += JSON.stringify(toolCall.name).trim();
-    });
-    text += message.role ?? "";
-    text += message.name ?? "";
-    text += message.tool_call_id ?? "";
-    return text.trim();
-  } catch (e) {
-    try {
-      return JSON.stringify(message);
-    } catch (e) {
-      return "";
     }
-  }
+  });
+  text += message.role ?? "";
+  text += message.name ?? "";
+  text += message.tool_call_id ?? "";
+  return text.trim();
 };
 
 const messagesToText = (messages: Message[]): string => {
@@ -249,12 +245,24 @@ const sanitizeMappedContent = (
       },
     },
     preview: {
-      request: mappedContent.preview.request
-        ?.replaceAll("\n", " ")
-        .slice(0, MAX_PREVIEW_LENGTH),
-      response: mappedContent.preview.response
-        ?.replaceAll("\n", " ")
-        .slice(0, MAX_PREVIEW_LENGTH),
+      request:
+        typeof mappedContent.preview.request === "string"
+          ? mappedContent.preview.request
+              .replaceAll("\n", " ")
+              .slice(0, MAX_PREVIEW_LENGTH)
+          : String(mappedContent.preview.request || "").slice(
+              0,
+              MAX_PREVIEW_LENGTH
+            ),
+      response:
+        typeof mappedContent.preview.response === "string"
+          ? mappedContent.preview.response
+              .replaceAll("\n", " ")
+              .slice(0, MAX_PREVIEW_LENGTH)
+          : String(mappedContent.preview.response || "").slice(
+              0,
+              MAX_PREVIEW_LENGTH
+            ),
       concatenatedMessages:
         sanitizeMessages(mappedContent.preview.concatenatedMessages) ?? [],
       fullRequestText: (preview?: boolean) => {

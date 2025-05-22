@@ -5,6 +5,10 @@ import { HeliconeRequest, MappedLLMRequest } from "@/packages/llm-mapper/types";
 import { getMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
 import { getMapperTypeFromHeliconeRequest } from "@/packages/llm-mapper/utils/getMapperType";
 import useShiftKeyPress from "@/services/hooks/isShiftPressed";
+import {
+  MODE_LABELS,
+  useRequestRenderModeStore,
+} from "@/store/requestRenderModeStore";
 import { useMemo } from "react";
 import { LuChevronsLeftRight } from "react-icons/lu";
 import { Assistant } from "./components/assistant/Assistant";
@@ -16,10 +20,6 @@ import Json from "./components/Json";
 import { Realtime } from "./components/Realtime";
 import { Tool } from "./components/tool/Tool";
 import { VectorDB } from "./components/vector-db/VectorDB";
-import {
-  MODE_LABELS,
-  useRequestRenderModeStore,
-} from "@/store/requestRenderModeStore";
 
 export default function RenderHeliconeRequest({
   heliconeRequest,
@@ -62,6 +62,7 @@ export function RenderMappedRequest({
   mappedRequest,
   className,
   messageIndexFilter,
+  onRequestSelect,
 }: {
   mappedRequest: MappedLLMRequest;
   className?: string;
@@ -69,6 +70,7 @@ export function RenderMappedRequest({
     startIndex: number;
     endIndex: number;
   };
+  onRequestSelect?: (request_id: string) => void;
 }) {
   const { mode, toggleMode, setMode } = useRequestRenderModeStore();
   const isShiftPressed = useShiftKeyPress();
@@ -83,12 +85,12 @@ export function RenderMappedRequest({
   return (
     <ScrollArea
       orientation="vertical"
-      className={`h-full w-full relative bg-card ${className} [&>div>div[style]]:!block`}
+      className={`h-full w-full relative ${className} [&>div>div[style]]:!block  border border-border rounded-lg bg-sidebar-background`}
     >
       <Button
         variant={"outline"}
         size={"sm"}
-        className="flex felx-row gap-1 absolute top-2 right-4 z-20"
+        className="flex felx-row gap-1 absolute top-2 right-2 z-20"
         onClick={() => toggleMode(isShiftPressed)}
       >
         <XSmall className="text-secondary font-medium">
@@ -145,8 +147,8 @@ export function RenderMappedRequest({
               return (
                 <Realtime
                   mappedRequest={mappedRequest}
-                  className="pt-14 px-4"
                   messageIndexFilter={messageIndexFilter}
+                  onRequestSelect={onRequestSelect}
                 />
               );
 

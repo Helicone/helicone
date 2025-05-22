@@ -73,12 +73,199 @@
       ]
     },
     {
-      "group": "Dev Integrations",
+      "group": "Integrations",
       "pages": [
         {
-          "group": "Generic Gateway",
-          "pages": ["getting-started/integration-method/gateway"]
+          "group": "LLM & Inference Providers",
+          "pages": [
+            {
+              "group": "Anthropic",
+              "pages": [
+                "integrations/anthropic/curl",
+                "integrations/anthropic/javascript",
+                "integrations/anthropic/langchain",
+                "integrations/anthropic/python"
+              ]
+            },
+            "getting-started/integration-method/anyscale",
+            {
+              "group": "AWS Bedrock",
+              "pages": [
+                "integrations/bedrock/javascript",
+                "integrations/bedrock/python"
+              ]
+            },
+
+            "getting-started/integration-method/deepinfra",
+            "getting-started/integration-method/deepseek",
+            {
+              "group": "Gemini",
+              "pages": [
+                {
+                  "group": "API",
+                  "pages": [
+                    "integrations/gemini/api/curl",
+                    "integrations/gemini/api/javascript",
+                    "integrations/gemini/api/python"
+                  ]
+                },
+                {
+                  "group": "Vertex AI (Enterprise)",
+                  "pages": [
+                    "integrations/gemini/vertex/curl",
+                    "integrations/gemini/vertex/javascript",
+                    "integrations/gemini/vertex/python"
+                  ]
+                }
+              ]
+            },
+            {
+              "group": "Groq",
+              "pages": [
+                "integrations/groq/curl",
+                "integrations/groq/javascript",
+                "integrations/groq/python"
+              ]
+            },
+            {
+              "group": "Instructor",
+              "pages": [
+                "integrations/instructor/javascript",
+                "integrations/instructor/python"
+              ]
+            },
+            "getting-started/integration-method/hyperbolic",
+            "getting-started/integration-method/mistral",
+            "getting-started/integration-method/nebius",
+            "getting-started/integration-method/novita",
+            {
+              "group": "Ollama",
+              "pages": ["integrations/ollama/javascript"]
+            },
+            {
+              "group": "OpenAI",
+              "pages": [
+                "integrations/openai/curl",
+                "integrations/openai/javascript",
+                "integrations/openai/langchain",
+                "integrations/openai/llamaindex",
+                "integrations/openai/python",
+                "integrations/openai/realtime",
+                "integrations/openai/responses",
+                {
+                  "group": "Azure OpenAI",
+                  "pages": [
+                    "integrations/azure/curl",
+                    "integrations/azure/javascript",
+                    "integrations/azure/langchain",
+                    "integrations/azure/python"
+                  ]
+                }
+              ]
+            },
+            "getting-started/integration-method/perplexity",
+            "getting-started/integration-method/together",
+            "getting-started/integration-method/x",
+            {
+              "group": "Tools",
+              "pages": [
+                "integrations/tools/curl",
+                "integrations/tools/javascript",
+                "integrations/tools/python"
+              ]
+            }
+          ]
         },
+        {
+          "group": "Frameworks & Libraries",
+          "pages": [
+            "other-integrations/bubble",
+            "getting-started/integration-method/crewai",
+            "other-integrations/dify",
+            "other-integrations/embedchain",
+            "other-integrations/firecrawl",
+            "getting-started/integration-method/fireworks",
+            "other-integrations/langgraph",
+            {
+              "group": "LiteLLM",
+              "pages": [
+                "getting-started/integration-method/litellm-openllmetry",
+                "getting-started/integration-method/litellm",
+                "getting-started/integration-method/litellm-proxy"
+              ]
+            },
+            "other-integrations/meta-gpt",
+            "other-integrations/open-devin",
+            "other-integrations/open-webui",
+            "getting-started/integration-method/openrouter",
+            "other-integrations/ragas",
+            "getting-started/integration-method/posthog",
+            {
+              "group": "Upstash",
+              "pages": [
+                "other-integrations/upstash-rag",
+                "other-integrations/upstash-qstash"
+              ]
+            },
+            {
+              "group": "Vector DB",
+              "pages": [
+                "integrations/vectordb/curl",
+                "integrations/vectordb/javascript",
+                "integrations/vectordb/python"
+              ]
+            },
+            "getting-started/integration-method/vercelai"
+          ]
+        }
+      ]
+    },
+    {
+      "group": "Tracing",
+      "pages": [
+        "features/advanced-usage/caching",
+        "features/advanced-usage/custom-properties",
+        "features/customer-portal",
+        "features/advanced-usage/omit-logs",
+        "features/sessions",
+        "features/advanced-usage/user-metrics"
+      ]
+    },
+    {
+      "group": "Prompt Engineering",
+      "pages": [
+        "features/experiments",
+        "features/fine-tuning",
+        {
+          "group": "Prompts",
+          "pages": [
+            "features/prompts/editor",
+            "features/prompts/generate",
+            "features/prompts/import"
+          ]
+        },
+        "features/advanced-usage/scores",
+        "features/advanced-usage/feedback",
+        {
+          "group": "Webhooks",
+          "pages": ["features/webhooks", "features/webhooks-testing"]
+        }
+      ]
+    },
+    {
+      "group": "AI Gateway",
+      "pages": [
+        "features/advanced-usage/custom-rate-limits",
+        "getting-started/integration-method/gateway-fallbacks",
+        "features/advanced-usage/llm-security",
+        "features/advanced-usage/moderations",
+        "features/advanced-usage/retries",
+        "features/advanced-usage/vault"
+      ]
+    },
+    {
+      "group": "References",
+      "pages": [
         {
           "group": "Async Logging",
           "pages": [
@@ -87,202 +274,24 @@
               "group": "Manual Logger",
               "pages": [
                 "getting-started/integration-method/custom",
-                "getting-started/integration-method/manual-logger-typescript",
+                "getting-started/integration-method/manual-logger-curl",
                 "getting-started/integration-method/manual-logger-python",
-                "getting-started/integration-method/manual-logger-curl"
+                "getting-started/integration-method/manual-logger-typescript"
               ]
             }
           ]
         },
-        {
-          "group": "OpenAI",
-          "pages": [
-            "integrations/openai/javascript",
-            "integrations/openai/python",
-            "integrations/openai/langchain",
-            "integrations/openai/llamaindex",
-            "integrations/openai/curl",
-            "integrations/openai/assistants",
-            "integrations/openai/realtime",
-            "integrations/openai/responses"
-          ]
-        },
-        {
-          "group": "Azure OpenAI",
-          "pages": [
-            "integrations/azure/javascript",
-            "integrations/azure/python",
-            "integrations/azure/langchain",
-            "integrations/azure/curl"
-          ]
-        },
-        {
-          "group": "Anthropic",
-          "pages": [
-            "integrations/anthropic/javascript",
-            "integrations/anthropic/python",
-            "integrations/anthropic/langchain",
-            "integrations/anthropic/curl"
-          ]
-        },
-        {
-          "group": "Ollama",
-          "pages": ["integrations/ollama/javascript"]
-        },
-        {
-          "group": "AWS Bedrock",
-          "pages": [
-            "integrations/bedrock/javascript",
-            "integrations/bedrock/python"
-          ]
-        },
-        {
-          "group": "Gemini",
-          "pages": [
-            {
-              "group": "API",
-              "pages": [
-                "integrations/gemini/api/javascript",
-                "integrations/gemini/api/python",
-                "integrations/gemini/api/curl"
-              ]
-            },
-            {
-              "group": "Vertex AI (Enterprise)",
-              "pages": [
-                "integrations/gemini/vertex/javascript",
-                "integrations/gemini/vertex/python",
-                "integrations/gemini/vertex/curl"
-              ]
-            }
-          ]
-        },
-        "getting-started/integration-method/vercelai",
-        "getting-started/integration-method/anyscale",
-        "getting-started/integration-method/together",
-        "getting-started/integration-method/hyperbolic",
-        {
-          "group": "Groq",
-          "pages": [
-            "integrations/groq/javascript",
-            "integrations/groq/python",
-            "integrations/groq/curl"
-          ]
-        },
-        {
-          "group": "Instructor",
-          "pages": [
-            "integrations/instructor/javascript",
-            "integrations/instructor/python"
-          ]
-        },
-        "getting-started/integration-method/deepinfra",
-        "getting-started/integration-method/openrouter",
-        "getting-started/integration-method/crewai",
-        {
-          "group": "LiteLLM",
-          "pages": [
-            "getting-started/integration-method/litellm-openllmetry",
-            "getting-started/integration-method/litellm",
-            "getting-started/integration-method/litellm-proxy"
-          ]
-        },
-        "getting-started/integration-method/fireworks",
-        "getting-started/integration-method/deepseek",
-        "getting-started/integration-method/mistral",
-        "getting-started/integration-method/perplexity",
-        "getting-started/integration-method/nebius",
-        "getting-started/integration-method/novita",
-        "getting-started/integration-method/x",
-        {
-          "group": "Vector DB",
-          "pages": [
-            "integrations/vectordb/python",
-            "integrations/vectordb/javascript",
-            "integrations/vectordb/curl"
-          ]
-        },
-        {
-          "group": "Tools",
-          "pages": [
-            "integrations/tools/python",
-            "integrations/tools/javascript",
-            "integrations/tools/curl"
-          ]
-        }
-      ]
-    },
-    {
-      "group": "Other Integrations",
-      "pages": [
-        "other-integrations/langgraph",
-        "other-integrations/ragas",
-        "other-integrations/open-webui",
-        "other-integrations/meta-gpt",
-        "other-integrations/open-devin",
-        "other-integrations/embedchain",
-        "other-integrations/dify",
-        {
-          "group": "Upstash",
-          "pages": [
-            "other-integrations/upstash-qstash",
-            "other-integrations/upstash-rag"
-          ]
-        },
-        "other-integrations/firecrawl",
-        "other-integrations/bubble",
-        "getting-started/integration-method/posthog"
-      ]
-    },
-    {
-      "group": "Features",
-      "pages": [
-        {
-          "group": "Evaluation",
-          "pages": [
-            "features/advanced-usage/feedback",
-            "features/advanced-usage/scores"
-          ]
-        },
-        "features/sessions",
-        {
-          "group": "Prompts",
-          "pages": [
-            "features/prompts/editor",
-            "features/prompts/import",
-            "features/prompts/generate"
-          ]
-        },
-        "features/experiments",
-        {
-          "group": "Webhooks",
-          "pages": ["features/webhooks", "features/webhooks-testing"]
-        },
-
-        "features/advanced-usage/custom-properties",
-        "features/advanced-usage/caching",
-        "features/advanced-usage/omit-logs",
-        "features/advanced-usage/user-metrics",
-        "features/fine-tuning",
-        "getting-started/integration-method/gateway-fallbacks",
-        "features/advanced-usage/retries",
-        "features/advanced-usage/custom-rate-limits",
-        "features/advanced-usage/vault",
-        "features/advanced-usage/moderations",
-        "features/advanced-usage/llm-security",
-        "features/customer-portal"
-      ]
-    },
-    {
-      "group": "References",
-      "pages": [
-        "references/proxy-vs-async",
-        "references/availability",
-        "references/latency-affect",
-        "references/data-autonomy",
-        "references/open-source",
         "references/how-we-calculate-cost",
-        "helicone-headers/header-directory"
+        "references/data-autonomy",
+        {
+          "group": "Generic Gateway",
+          "pages": ["getting-started/integration-method/gateway"]
+        },
+        "helicone-headers/header-directory",
+        "references/latency-affect",
+        "references/open-source",
+        "references/proxy-vs-async",
+        "references/availability"
       ]
     },
     {
@@ -292,21 +301,21 @@
         {
           "group": "Cookbooks",
           "pages": [
-            "guides/cookbooks/prompt-thinking-models",
-            "guides/cookbooks/fine-tune",
-            "guides/cookbooks/openai-structured-outputs",
-            "guides/cookbooks/experiments",
-            "guides/cookbooks/getting-user-requests",
-            "guides/cookbooks/getting-sessions",
-            "guides/cookbooks/etl",
-            "guides/cookbooks/replay-session",
-            "guides/cookbooks/predefining-request-id",
-            "guides/cookbooks/environment-tracking",
-            "guides/cookbooks/segmentation",
-            "guides/cookbooks/github-actions",
             "guides/cookbooks/debugging",
+            "guides/cookbooks/environment-tracking",
+            "guides/cookbooks/etl",
+            "guides/cookbooks/experiments",
+            "guides/cookbooks/fine-tune",
+            "guides/cookbooks/getting-sessions",
+            "guides/cookbooks/getting-user-requests",
+            "guides/cookbooks/github-actions",
             "guides/cookbooks/labeling-request-data",
-            "guides/cookbooks/manual-logger-streaming"
+            "guides/cookbooks/manual-logger-streaming",
+            "guides/cookbooks/openai-structured-outputs",
+            "guides/cookbooks/predefining-request-id",
+            "guides/cookbooks/prompt-thinking-models",
+            "guides/cookbooks/replay-session",
+            "guides/cookbooks/segmentation"
           ]
         },
         {
@@ -314,14 +323,14 @@
           "pages": [
             "guides/prompt-engineering/overview",
             "guides/prompt-engineering/be-specific-and-clear",
-            "guides/prompt-engineering/use-structured-formats",
-            "guides/prompt-engineering/leverage-role-playing",
             "guides/prompt-engineering/implement-few-shot-learning",
-            "guides/prompt-engineering/use-constrained-outputs",
+            "guides/prompt-engineering/leverage-role-playing",
             "guides/prompt-engineering/use-chain-of-thought-prompting",
-            "guides/prompt-engineering/use-thread-of-thought-prompting",
+            "guides/prompt-engineering/use-constrained-outputs",
             "guides/prompt-engineering/use-least-to-most-prompting",
-            "guides/prompt-engineering/use-meta-prompting"
+            "guides/prompt-engineering/use-meta-prompting",
+            "guides/prompt-engineering/use-structured-formats",
+            "guides/prompt-engineering/use-thread-of-thought-prompting"
           ]
         }
       ]
@@ -333,8 +342,8 @@
         {
           "group": "Use Cases",
           "pages": [
-            "guides/applications/resell-a-model",
-            "guides/applications/bill-by-usage"
+            "guides/applications/bill-by-usage",
+            "guides/applications/resell-a-model"
           ]
         }
       ]
@@ -346,21 +355,21 @@
         {
           "group": "Categories",
           "pages": [
-            "faq/tag/platform",
-            "faq/tag/security",
             "faq/tag/concepts",
-            "faq/tag/fine-tuning"
+            "faq/tag/fine-tuning",
+            "faq/tag/platform",
+            "faq/tag/security"
           ]
         },
         {
           "group": "",
           "pages": [
-            "faq/openai-fine-tuning-api",
-            "faq/llm-fine-tuning-time",
-            "faq/rag-vs-fine-tuning",
             "faq/compliance",
             "faq/enable-stream-usage",
             "faq/how-encryption-works",
+            "faq/llm-fine-tuning-time",
+            "faq/openai-fine-tuning-api",
+            "faq/rag-vs-fine-tuning",
             "faq/secret-vs-public-key",
             "faq/soc2"
           ]
@@ -491,10 +500,6 @@
       ]
     },
     {
-      "group": "Log",
-      "pages": ["rest/log/post-v1logrequest"]
-    },
-    {
       "group": "Property",
       "pages": ["rest/property/post-v1propertyquery"]
     },
@@ -527,11 +532,6 @@
       "group": "Dashboard",
       "pages": ["rest/dashboard/post-v1dashboardscoresquery"]
     },
-    {
-      "group": "Settings",
-      "pages": ["rest/settings/get-v1settingsquery"]
-    },
-
     {
       "group": "Session",
       "pages": [

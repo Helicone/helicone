@@ -20,6 +20,8 @@ type CourseParts =
   | "sectionTitles"
   | "sectionContent";
 
+export const SESSION_NAME = "Course Generator";
+
 export const CourseGenerator: React.FC = () => {
   const jawn = useJawnClient();
   const { user } = useHeliconeAuthClient();
@@ -248,7 +250,7 @@ export const CourseGenerator: React.FC = () => {
           promptId: `Course-Generator-${part}`,
           userEmail: user?.email ?? "no-email",
           sessionId,
-          sessionName: "Course Generator",
+          sessionName: SESSION_NAME,
           sessionPath,
           tools,
           tool_choice: {

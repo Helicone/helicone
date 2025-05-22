@@ -242,9 +242,12 @@ const useOrgsContextManager = (): OrgContextValue => {
     "/v1/organization",
     {},
     {
+      enabled: !!user?.id,
       refetchOnWindowFocus: true,
       refetchInterval: (selectedOrgsData) => {
-        console.log("selectedOrgsData", selectedOrgsData);
+        if (!user?.id) {
+          return 1_000;
+        }
         if (
           !selectedOrgsData.state.data?.data ||
           selectedOrgsData.state.data?.data?.length === 0

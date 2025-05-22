@@ -54,11 +54,13 @@ export const heliconeAuthClientFromSession = (
 
     async signUp(params): Promise<Result<HeliconeUser, string>> {
       try {
+        console.log("sign up params", params);
         const result = await authClient.signUp.email({
           email: params.email,
           password: params.password,
           name: "",
         });
+        console.log("sign up result", result);
         if (result.data) {
           return ok({
             id: result.data.user.id,

@@ -113,6 +113,16 @@ Use headers to add Custom Properties to your LLM requests.
   </Step>
 </Steps>
 
+### Special Case: Helicone-User-Id
+
+While most custom properties can be defined freely, `Helicone-User-Id` is a **reserved header** for attributing requests to individual users. It enables per-user metrics such as request volume, cost, and behavior, visible in the **Users** tab of your dashboard.
+
+```bash
+-H 'Helicone-User-Id: "alicebob@gmail.com"' # Special case for user-level attribution
+```
+
+Refer to [User Metrics Documentation](https://docs.helicone.ai/features/advanced-usage/user-metrics#option-2-sending-the-user-id-via-helicone) for implementation details.
+
 ### Updating Custom Properties After Request
 
 You can also update Custom Properties post-request submission by making a PUT request to a designated API endpoint.

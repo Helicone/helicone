@@ -96,7 +96,7 @@ async function handler({ req, res, userData }: HandlerWrapperOptions<any>) {
     });
   }
 
-  if (userData.org?.tier === "FUCK_OFF" || !userData.orgHasOnboarded) {
+  if (userData.org?.tier === "FUCK_OFF") {
     const fakeResponse: OpenAI.Chat.Completions.ChatCompletion = {
       id: "fake_id",
       object: "chat.completion",

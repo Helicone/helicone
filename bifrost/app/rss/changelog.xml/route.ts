@@ -3,7 +3,7 @@ import RSS from "rss";
 import fs from "fs";
 import { getCompiledServerMdx } from "@mintlify/mdx";
 import { getMetadata } from "@/components/templates/blog/getMetaData";
-
+import React from "react";
 export async function GET() {
   const ReactDOMServer = (await import("react-dom/server")).default;
   const changelogFolder = path.join(
@@ -85,6 +85,7 @@ export async function GET() {
         : undefined,
       custom_elements: [
         {
+          // @ts-expect-error - ReactDOMServer.renderToStaticMarkup is not typed
           "content:encoded": ReactDOMServer.renderToStaticMarkup(mdx.content),
         },
       ],

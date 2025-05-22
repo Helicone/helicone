@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { useRouter } from "next/navigation";
-import { parentModelNames } from "@/packages/cost/providers/mappings";
+import { parentModelNames } from "@helicone-package/cost/providers/mappings";
 import { useState } from "react";
 
 interface ModelSelectorProps {

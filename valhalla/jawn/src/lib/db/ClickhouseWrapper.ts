@@ -230,6 +230,8 @@ export interface RequestResponseRMT {
   response_body: string;
   assets: Array<string>;
   updated_at?: string;
+  cache_reference_id?: string;
+  cache_enabled: boolean;
 }
 
 export interface JawnHttpLogs {
@@ -243,6 +245,15 @@ export interface JawnHttpLogs {
   properties: Record<string, string>;
 }
 
+export interface Tags {
+  organization_id: string;
+  entity_type: string;
+  entity_id: string;
+  tag: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface ClickhouseDB {
   Tables: {
     properties_v3: PropertiesV3;
@@ -252,6 +263,7 @@ export interface ClickhouseDB {
     rate_limit_log_v2: RateLimitLogV2;
     cache_hits: CacheHits;
     request_response_rmt: RequestResponseRMT;
+    tags: Tags;
     jawn_http_logs: JawnHttpLogs;
   };
 }

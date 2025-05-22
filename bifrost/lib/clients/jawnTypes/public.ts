@@ -217,18 +217,6 @@ export interface paths {
   "/v2/experiment/{experimentId}/{requestId}/{scoreKey}": {
     get: operations["GetExperimentScore"];
   };
-  "/v1/trace/custom/v1/log": {
-    post: operations["LogCustomTraceLegacy"];
-  };
-  "/v1/trace/custom/log": {
-    post: operations["LogCustomTrace"];
-  };
-  "/v1/trace/log": {
-    post: operations["LogTrace"];
-  };
-  "/v1/trace/log-python": {
-    post: operations["LogPythonTrace"];
-  };
   "/v1/stripe/subscription/cost-for-prompts": {
     get: operations["GetCostForPrompts"];
   };
@@ -278,6 +266,18 @@ export interface paths {
   "/v1/stripe/webhook": {
     post: operations["HandleStripeWebhook"];
   };
+  "/v1/trace/custom/v1/log": {
+    post: operations["LogCustomTraceLegacy"];
+  };
+  "/v1/trace/custom/log": {
+    post: operations["LogCustomTrace"];
+  };
+  "/v1/trace/log": {
+    post: operations["LogTrace"];
+  };
+  "/v1/trace/log-python": {
+    post: operations["LogPythonTrace"];
+  };
   "/v1/session/has-session": {
     get: operations["HasSession"];
   };
@@ -292,6 +292,10 @@ export interface paths {
   };
   "/v1/session/{sessionId}/feedback": {
     post: operations["UpdateSessionFeedback"];
+  };
+  "/v1/session/{sessionId}/tag": {
+    get: operations["GetSessionTag"];
+    post: operations["UpdateSessionTag"];
   };
   "/v1/public/status/provider": {
     get: operations["GetAllProviderStatus"];
@@ -713,6 +717,7 @@ export interface components {
       scores_column?: components["schemas"]["Partial_TextOperators_"];
       request_body?: components["schemas"]["Partial_VectorOperators_"];
       response_body?: components["schemas"]["Partial_VectorOperators_"];
+      cache_enabled?: components["schemas"]["Partial_BooleanOperators_"];
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
     "Pick_FilterLeaf.user_metrics-or-request_response_rmt_": {
@@ -1028,6 +1033,7 @@ export interface components {
       session_total_requests?: components["schemas"]["Partial_NumberOperators_"];
       session_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
       session_latest_request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      session_tag?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description Make all properties in T optional */
     Partial_CacheHitsTableToOperators_: {
@@ -1106,6 +1112,9 @@ export interface components {
       arguments: components["schemas"]["Record_string.any_"];
     };
     Message: {
+      ending_event_id?: string;
+      trigger_event_id?: string;
+      start_timestamp?: string;
       deleted?: boolean;
       contentArray?: components["schemas"]["Message"][];
       /** Format: double */
@@ -1121,6 +1130,7 @@ export interface components {
       timestamp?: string;
       tool_call_id?: string;
       tool_calls?: components["schemas"]["FunctionCall"][];
+      mime_type?: string;
       content?: string;
       name?: string;
       instruction?: string;
@@ -1313,6 +1323,8 @@ export interface components {
       assets: string[];
       target_url: string;
       model: string;
+      cache_reference_id: string | null;
+      cache_enabled: boolean;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];
@@ -1678,6 +1690,41 @@ Json: JsonObject;
       error: null;
     };
     "Result_ScoreV2-or-null.string_": components["schemas"]["ResultSuccess_ScoreV2-or-null_"] | components["schemas"]["ResultError_string_"];
+    UpgradeToProRequest: {
+      addons?: {
+        evals?: boolean;
+        experiments?: boolean;
+        prompts?: boolean;
+        alerts?: boolean;
+      };
+      /** Format: double */
+      seats?: number;
+      /** @enum {string} */
+      ui_mode?: "embedded" | "hosted";
+    };
+    UpgradeToTeamBundleRequest: {
+      /** @enum {string} */
+      ui_mode?: "embedded" | "hosted";
+    };
+    LLMUsage: {
+      model: string;
+      provider: string;
+      /** Format: double */
+      prompt_tokens: number;
+      /** Format: double */
+      completion_tokens: number;
+      /** Format: double */
+      total_count: number;
+      /** Format: double */
+      amount: number;
+      description: string;
+      totalCost: {
+        /** Format: double */
+        prompt_token: number;
+        /** Format: double */
+        completion_token: number;
+      };
+    };
     OTELTrace: {
       resourceSpans: {
           scopeSpans: {
@@ -1734,41 +1781,6 @@ Json: JsonObject;
           };
         }[];
     };
-    UpgradeToProRequest: {
-      addons?: {
-        evals?: boolean;
-        experiments?: boolean;
-        prompts?: boolean;
-        alerts?: boolean;
-      };
-      /** Format: double */
-      seats?: number;
-      /** @enum {string} */
-      ui_mode?: "embedded" | "hosted";
-    };
-    UpgradeToTeamBundleRequest: {
-      /** @enum {string} */
-      ui_mode?: "embedded" | "hosted";
-    };
-    LLMUsage: {
-      model: string;
-      provider: string;
-      /** Format: double */
-      prompt_tokens: number;
-      /** Format: double */
-      completion_tokens: number;
-      /** Format: double */
-      total_count: number;
-      /** Format: double */
-      amount: number;
-      description: string;
-      totalCost: {
-        /** Format: double */
-        prompt_token: number;
-        /** Format: double */
-        completion_token: number;
-      };
-    };
     SessionResult: {
       created_at: string;
       latest_request_created_at: string;
@@ -1784,6 +1796,8 @@ Json: JsonObject;
       completion_tokens: number;
       /** Format: double */
       total_tokens: number;
+      /** Format: double */
+      avg_latency: number;
     };
     "ResultSuccess_SessionResult-Array_": {
       data: components["schemas"]["SessionResult"][];
@@ -1824,6 +1838,8 @@ Json: JsonObject;
       first_used: string;
       /** Format: double */
       session_count: number;
+      /** Format: double */
+      avg_latency: number;
     };
     "ResultSuccess_SessionNameResult-Array_": {
       data: components["schemas"]["SessionNameResult"][];
@@ -1831,6 +1847,12 @@ Json: JsonObject;
       error: null;
     };
     "Result_SessionNameResult-Array.string_": components["schemas"]["ResultSuccess_SessionNameResult-Array_"] | components["schemas"]["ResultError_string_"];
+    TimeFilterMs: {
+      /** Format: double */
+      startTimeUnixMs: number;
+      /** Format: double */
+      endTimeUnixMs: number;
+    };
     SessionNameQueryParams: {
       nameContains: string;
       /** Format: double */
@@ -1838,11 +1860,22 @@ Json: JsonObject;
       /** @enum {string} */
       pSize?: "p50" | "p75" | "p95" | "p99" | "p99.9";
       useInterquartile?: boolean;
+      timeFilter?: components["schemas"]["TimeFilterMs"];
+      filter?: components["schemas"]["SessionFilterNode"];
+    };
+    AverageRow: {
+      /** Format: double */
+      average: number;
     };
     SessionMetrics: {
       session_count: components["schemas"]["HistogramRow"][];
       session_duration: components["schemas"]["HistogramRow"][];
       session_cost: components["schemas"]["HistogramRow"][];
+      average: {
+        session_cost: components["schemas"]["AverageRow"][];
+        session_duration: components["schemas"]["AverageRow"][];
+        session_count: components["schemas"]["AverageRow"][];
+      };
     };
     ResultSuccess_SessionMetrics_: {
       data: components["schemas"]["SessionMetrics"];
@@ -1850,6 +1883,22 @@ Json: JsonObject;
       error: null;
     };
     "Result_SessionMetrics.string_": components["schemas"]["ResultSuccess_SessionMetrics_"] | components["schemas"]["ResultError_string_"];
+    SessionMetricsQueryParams: {
+      nameContains: string;
+      /** Format: double */
+      timezoneDifference: number;
+      /** @enum {string} */
+      pSize?: "p50" | "p75" | "p95" | "p99" | "p99.9";
+      useInterquartile?: boolean;
+      timeFilter?: components["schemas"]["TimeFilterMs"];
+      filter?: components["schemas"]["SessionFilterNode"];
+    };
+    "ResultSuccess_string-or-null_": {
+      data: string | null;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_string-or-null.string_": components["schemas"]["ResultSuccess_string-or-null_"] | components["schemas"]["ResultError_string_"];
     MetricsData: {
       /** Format: double */
       totalRequests: number;
@@ -3968,58 +4017,6 @@ export interface operations {
       };
     };
   };
-  LogCustomTraceLegacy: {
-    requestBody: {
-      content: {
-        "application/json": unknown;
-      };
-    };
-    responses: {
-      /** @description No content */
-      204: {
-        content: never;
-      };
-    };
-  };
-  LogCustomTrace: {
-    requestBody: {
-      content: {
-        "application/json": unknown;
-      };
-    };
-    responses: {
-      /** @description No content */
-      204: {
-        content: never;
-      };
-    };
-  };
-  LogTrace: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["OTELTrace"];
-      };
-    };
-    responses: {
-      /** @description No content */
-      204: {
-        content: never;
-      };
-    };
-  };
-  LogPythonTrace: {
-    requestBody: {
-      content: {
-        "application/json": unknown;
-      };
-    };
-    responses: {
-      /** @description No content */
-      204: {
-        content: never;
-      };
-    };
-  };
   GetCostForPrompts: {
     responses: {
       /** @description Ok */
@@ -4269,6 +4266,58 @@ export interface operations {
       };
     };
   };
+  LogCustomTraceLegacy: {
+    requestBody: {
+      content: {
+        "application/json": unknown;
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
+      };
+    };
+  };
+  LogCustomTrace: {
+    requestBody: {
+      content: {
+        "application/json": unknown;
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
+      };
+    };
+  };
+  LogTrace: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OTELTrace"];
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
+      };
+    };
+  };
+  LogPythonTrace: {
+    requestBody: {
+      content: {
+        "application/json": unknown;
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
+      };
+    };
+  };
   HasSession: {
     responses: {
       /** @description Ok */
@@ -4312,7 +4361,7 @@ export interface operations {
   GetMetrics: {
     requestBody: {
       content: {
-        "application/json": components["schemas"]["SessionNameQueryParams"];
+        "application/json": components["schemas"]["SessionMetricsQueryParams"];
       };
     };
     responses: {
@@ -4334,6 +4383,43 @@ export interface operations {
       content: {
         "application/json": {
           rating: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetSessionTag: {
+    parameters: {
+      path: {
+        sessionId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string-or-null.string_"];
+        };
+      };
+    };
+  };
+  UpdateSessionTag: {
+    parameters: {
+      path: {
+        sessionId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          tag: string;
         };
       };
     };

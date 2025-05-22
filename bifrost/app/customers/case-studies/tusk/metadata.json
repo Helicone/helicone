@@ -1,0 +1,11 @@
+{
+  "company": "Tusk",
+  "title": "Streamlining AI Debug Workflows with Helicone",
+  "description": "Tusk uses Helicone Sessions to quickly navigate complex LLM chains in their AI test generation platform, enabling them to debug and pinpoint failures.",
+  "logo": "/static/customers/case-studies/usetusk.webp",
+  "url": "usetusk.ai",
+  "customerSince": "2024-08-27",
+  "isOpenSourced": false,
+  "date": "2025-05-06",
+  "relatedStudies": ["cogna", "wordware"]
+}

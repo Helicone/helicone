@@ -114,7 +114,7 @@ export class SegmentLogHandler extends AbstractLogHandler {
 
     if (segmentConfig.error) {
       // console.error(segmentConfig.error);
-      return ok("no segment config found");
+      return await super.handle(context);
     }
 
     const segmentEvent = this.mapSegmentEvent(

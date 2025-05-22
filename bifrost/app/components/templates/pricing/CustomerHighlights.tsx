@@ -17,8 +17,8 @@ interface CustomerHighlight {
 
 const highlights: CustomerHighlight[] = [
   {
-    metric: "386 hours",
-    description: "saved by using cached responses",
+    metric: "Saved 386 hours",
+    description: "by using cached responses",
     logoSrc: "/static/other-logos/sunrun.webp",
     logoAlt: "sunrun",
     tier: {
@@ -28,8 +28,8 @@ const highlights: CustomerHighlight[] = [
     },
   },
   {
-    metric: "2 days",
-    description: "saved on combing through requests",
+    metric: "Saved 2 days",
+    description: "on combing through requests",
     logoSrc: "/static/qawolf.webp",
     logoAlt: "qawolf",
     tier: {
@@ -41,7 +41,7 @@ const highlights: CustomerHighlight[] = [
   },
   {
     metric: "Critical bug detected,",
-    description: "saved agent runtime by 30%",
+    description: "saving agent runtime by 30%",
     logoSrc: "/static/filevine.webp",
     logoAlt: "filevine",
     tier: {
@@ -54,29 +54,29 @@ const highlights: CustomerHighlight[] = [
 
 export default function CustomerHighlights() {
   return (
-    <div className="min-h-[276px] flex items-center justify-center py-4">
-      <div className="w-full rounded-xl flex flex-col md:flex-row border border-slate-200">
+    <div className="min-h-[200px] flex items-center justify-center">
+      <div className="w-full rounded-xl flex flex-col md:flex-row border border-border">
         {highlights.map((highlight, index) => (
           <div
             key={index}
             className={`flex-1 flex flex-col justify-between items-start
-              ${
-                index !== highlights.length - 1
-                  ? "border-b md:border-b-0 md:border-r border-slate-200"
-                  : ""
+              ${index !== highlights.length - 1
+                ? "border-b md:border-b-0 md:border-r border-border"
+                : ""
               }
             `}
           >
-            <div className="px-6 py-9">
+            <div className="flex flex-col-reverse gap-8 px-6 py-9">
               <div className="self-stretch">
                 <span className="text-xl text-slate-700 font-bold">
                   {highlight.metric}
                 </span>
+                <br />
                 <span className="text-xl text-slate-700">
                   {" " + highlight.description}
                 </span>
               </div>
-              <div className="mt-6 h-[43px] w-[175px]">
+              <div className="w-[120px] h-auto">
                 <Image
                   src={highlight.logoSrc}
                   alt={highlight.logoAlt}
@@ -85,9 +85,9 @@ export default function CustomerHighlights() {
                 />
               </div>
             </div>
-            <div className="w-full border-t border-slate-200">
+            <div className="w-full border-t border-border">
               <div className="px-6 py-4 flex justify-between items-center">
-                <span className="text-slate-900 font-medium">
+                <span className="text-primary font-medium">
                   {highlight.tier.name}
                 </span>
                 <Button

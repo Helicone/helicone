@@ -10,13 +10,16 @@ import { HeliconeAuthClient } from "../../auth/client/HeliconeAuthClient";
 import { HeliconeOrg, HeliconeUser } from "../../auth/types";
 import { err, ok, Result } from "../../result";
 import { clearSupabaseCookies, setOrgCookie } from "../helpers/setOrgCookie";
+import { QueryClient, useQueryClient } from "@tanstack/react-query";
+
 
 export class SupabaseAuthClient implements HeliconeAuthClient {
   user: HeliconeUser | undefined;
   constructor(
     private supabaseClient?: SupabaseClient<Database>,
     user?: HeliconeUser,
-    private org?: { org: HeliconeOrg; role: string }
+    private org?: { org: HeliconeOrg; role: string },
+    private queryClient?: QueryClient
   ) {
     this.user = user;
   }
@@ -31,6 +34,10 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
   async signOut(): Promise<void> {
     setOrgCookie("none");
     clearSupabaseCookies();
+    if (this.queryClient) {
+      this.queryClient.clear();
+    }
+
     await this.supabaseClient?.auth.signOut({ scope: "global" });
     await this.supabaseClient?.auth.signOut({ scope: "others" });
     await this.supabaseClient?.auth.signOut({ scope: "local" });
@@ -123,8 +130,11 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
     email: string;
     password: string;
   }): Promise<Result<HeliconeUser, string>> {
-    clearSupabaseCookies();
-    setOrgCookie("none");
+
+    if (this.queryClient) {
+      this.queryClient.clear();
+    }
+
     if (!this.supabaseClient) {
       return err("Supabase client not found");
     }
@@ -150,8 +160,11 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
     provider: "google" | "github";
     options?: { redirectTo?: string };
   }): Promise<Result<void, string>> {
-    clearSupabaseCookies();
-    setOrgCookie("none");
+
+    if (this.queryClient) {
+      this.queryClient.clear();
+    }
+
     if (!this.supabaseClient) {
       return err("Supabase client not found");
     }
@@ -187,10 +200,17 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
 export function useSupabaseAuthClient(): HeliconeAuthClient {
   const supabaseClient = useSupabaseClient<Database>();
   const user = useUser();
+  const queryClient = useQueryClient();
+
   return useMemo(() => {
-    return new SupabaseAuthClient(supabaseClient, {
-      id: user?.id ?? "",
-      email: user?.email ?? "",
-    });
-  }, [supabaseClient, user?.id, user?.email]);
+    return new SupabaseAuthClient(
+      supabaseClient,
+      {
+        id: user?.id ?? "",
+        email: user?.email ?? "",
+      },
+      undefined,
+      queryClient
+    );
+  }, [supabaseClient, user?.id, user?.email, queryClient]);
 }
