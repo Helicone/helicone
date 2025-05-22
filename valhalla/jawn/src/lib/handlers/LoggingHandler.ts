@@ -351,12 +351,14 @@ export class LoggingHandler extends AbstractLogHandler {
         return err(`Error inserting request response logs: ${result.error}`);
       }
 
-      const cacheResult = await this.requestStore.insertCacheMetricVersioned(
-        this.batchPayload.cacheMetricCH
-      );
+      if (this.batchPayload.cacheMetricCH.length > 0) {
+        const cacheResult = await this.requestStore.insertCacheMetricVersioned(
+          this.batchPayload.cacheMetricCH
+        );
 
-      if (cacheResult.error) {
-        return err(`Error inserting cache metric logs: ${cacheResult.error}`);
+        if (cacheResult.error) {
+          return err(`Error inserting cache metric logs: ${cacheResult.error}`);
+        }
       }
 
       return ok("All logs inserted successfully.");

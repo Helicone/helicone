@@ -148,7 +148,7 @@ export async function getCachedResponse(
         cacheIdx.toString()
       );
       cachedResponseHeaders.append(
-        "Helicone-Cache-Latency", randomCache.latency.toString()
+        "Helicone-Cache-Latency", randomCache.latency ? randomCache.latency.toString() : "0"
       )
 
       const cachedStream = new ReadableStream({
