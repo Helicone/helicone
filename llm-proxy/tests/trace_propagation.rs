@@ -17,7 +17,7 @@ use tower::Service;
 /// result in the proxied request targeting https://api.openai.com/v1/chat/completions
 #[tokio::test]
 #[serial_test::serial(default_mock)]
-async fn openai() {
+async fn trace_propagation() {
     let config = Config::test_default();
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([(
@@ -48,7 +48,7 @@ async fn openai() {
         .method(Method::POST)
         // default router
         .uri("http://router.helicone.com/router/v1/chat/completions")
-        .header("traceparent", format!("00-{}-7a085853722dc6d2-00", request_id, request_id))
+        .header("traceparent", format!("00-{}-7a085853722dc6d2-00", request_id))
         .body(request_body)
         .unwrap();
     let response = harness.call(request).await.unwrap();
