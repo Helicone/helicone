@@ -3,7 +3,6 @@
 import { cn, ISLAND_WIDTH } from "@/lib/utils";
 import { CircleStackIcon, TableCellsIcon } from "@heroicons/react/24/outline";
 import {
-  BeakerIcon,
   ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -22,7 +21,7 @@ import Image from "next/image";
 
 const IMG_PATH = {
   dashboard: "/static/home/dashboard.webp",
-  requests: "/static/home/requests.webp",
+  requests: "/static/home/requestsv3.webp",
   sessions: "/static/home/sessions.webp",
 };
 
@@ -32,36 +31,38 @@ const Prototype = () => {
   >("dashboard");
 
   return (
-    <div className=" bg-gradient-to-b from-white from-50% via-[#f2f9fc80] via-[61%] to-[#f2f9fc]">
-      <div className={cn(ISLAND_WIDTH, "py-12")}>
-        <div className="bg-white rounded-[20px] p-1 lg:p-3 border border-[#D1D5DC] aspect-[2/1] shadow-md">
-          <div className="hidden lg:grid w-full h-full bg-[#f8fafc] border border-[#f0f0f0] rounded-xl grid-cols-6">
-            <PrototypeSidebar
-              openedPage={openedPage}
-              setOpenedPage={setOpenedPage}
-            />
-            <div className="col-span-5">
+    <div className="bg-white -mt-20">
+      <div className="w-full flex flex-col">
+        <div className="w-full max-w-7xl mx-auto px-0 relative z-10 bg-white">
+          <div className="border-t border-l border-r border-slate-200 p-0">
+            <div className="hidden lg:grid w-full h-full grid-cols-6">
+              <PrototypeSidebar
+                openedPage={openedPage}
+                setOpenedPage={setOpenedPage}
+              />
+              <div className="col-span-5 border-l border-slate-200 bg-[#f9fbfc]">
+                <Image
+                  src={IMG_PATH[openedPage]}
+                  alt={openedPage}
+                  width={1000}
+                  height={500}
+                  quality={100}
+                  className="w-full h-full object-contain"
+                  priority
+                />
+              </div>
+            </div>
+            <div className="block lg:hidden">
               <Image
-                src={IMG_PATH[openedPage]}
-                alt={openedPage}
-                width={1000}
-                height={500}
-                quality={100}
+                src="/static/home/mobile/dashboard_with_sidebar.webp"
+                alt="dashboard"
+                width={1200}
+                height={600}
+                quality={90}
                 className="w-full h-full object-contain"
                 priority
               />
             </div>
-          </div>
-          <div className="block lg:hidden">
-            <Image
-              src="/static/home/mobile/dashboard_with_sidebar.webp"
-              alt="dashboard"
-              width={1200}
-              height={600}
-              quality={90}
-              className="w-full h-full object-contain"
-              priority
-            />
           </div>
         </div>
       </div>
@@ -77,10 +78,10 @@ const PrototypeSidebar = ({
   setOpenedPage: (page: "dashboard" | "requests" | "sessions") => void;
 }) => {
   return (
-    <div className="bg-white border-r border-[#e5e7eb] h-full flex-1 rounded-l-xl overflow-y-auto">
-      <div className="w-full flex flex-col h-full border-r dark:border-slate-800 px-2">
-        <div className="flex-grow overflow-y-auto pb-14">
-          <div className="flex items-center justify-between gap-2 h-14 border-b dark:border-slate-800 mx-1">
+    <div className="bg-white h-full flex-1 rounded-l-xl overflow-y-auto">
+      <div className="w-full flex flex-col h-full px-2">
+        <div className="flex-grow overflow-y-hidden pb-14">
+          <div className="flex items-center justify-between gap-2 h-14 mx-1">
             <Button
               variant="ghost"
               className="flex items-center justify-start w-full p-2 truncate"
@@ -237,34 +238,6 @@ const PrototypeSidebar = ({
                     <div className="flex items-center">
                       <TestTube2Icon className="mr-2 h-4 w-4" />
                       Playground
-                    </div>
-                  </div>
-                  <div
-                    className={cn(
-                      buttonVariants({
-                        variant: "ghost",
-                        size: "sm",
-                      }),
-                      "justify-start w-full text-[12px] h-8 px-2"
-                    )}
-                  >
-                    <div className="flex items-center">
-                      <BeakerIcon className="mr-2 h-4 w-4" />
-                      Experiments
-                    </div>
-                  </div>
-                  <div
-                    className={cn(
-                      buttonVariants({
-                        variant: "ghost",
-                        size: "sm",
-                      }),
-                      "justify-start w-full text-[12px] h-8 px-2"
-                    )}
-                  >
-                    <div className="flex items-center">
-                      <SparklesIcon className="mr-2 h-4 w-4" />
-                      Evaluators
                     </div>
                   </div>
                   <div
