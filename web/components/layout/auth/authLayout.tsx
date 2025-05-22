@@ -25,7 +25,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const { pathname } = router;
 
   const [open, setOpen] = useState(false);
-  
+
   const auth = useHeliconeAuthClient();
   useEffect(() => {
     const checkAuth = async () => {
@@ -39,7 +39,7 @@ const AuthLayout = (props: AuthLayoutProps) => {
         router.push("/signin?unauthorized=true");
       }
     };
-    
+
     checkAuth();
   }, [router]);
 
