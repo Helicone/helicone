@@ -81,100 +81,46 @@ const Hero = ({ className }: { className?: string }) => {
   }, [currentStep, typedText]);
 
   return (
-    <section
-      className={cn(
-        "relative py-12 lg:py-16",
-        "bg-[size:24px_24px]",
-        className
-      )}
-    >
+    <section className={cn("relative pt-12 pb-6 lg:pt-20", className)}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center mb-12">
-          <div className="flex flex-col gap-8">
-            <div>
-              <h1
-                className="font-mono text-5xl md:text-6xl font-bold leading-tight tracking-tight text-black"
-                // style={{ textShadow: "2px 2px 0px rgba(12,165,234,0.2)" }}
-              >
-                <span
-                  className="block mb-3 uppercase tracking-wide"
-                  style={{ letterSpacing: "0.05em" }}
-                >
-                  The
+        <div className="flex flex-col items-center text-center max-w-3xl mx-auto mb-12">
+          <div className="flex flex-col gap-10 items-center">
+            <div className="space-y-6">
+              <h1 className="text-center space-y-4">
+                <span className="block text-4xl md:text-5xl font-normal tracking-normal text-slate-800">
+                  LLM
                 </span>
-                <span
-                  className="text-[#0ca5ea] uppercase tracking-wide"
-                  style={{ letterSpacing: "0.05em" }}
-                >
+                <span className="block text-5xl md:text-6xl font-bold tracking-tight text-brand">
                   Observability
                 </span>
-                <span
-                  className="block mt-3 uppercase tracking-wide"
-                  style={{ letterSpacing: "0.05em" }}
-                >
-                  Engine for LLMs
+                <span className="block text-4xl md:text-5xl font-normal tracking-normal text-slate-800">
+                  at Scale
                 </span>
               </h1>
 
-              <p
-                className="font-mono text-xl md:text-2xl text-black/80 mt-8 max-w-xl"
-                style={{ letterSpacing: "0.02em" }}
-              >
+              <p className="text-xl text-slate-700 max-w-2xl mx-auto leading-relaxed">
                 Get instant visibility into your AI interactions
               </p>
             </div>
 
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-5 items-center">
               <Link href="https://us.helicone.ai/signup">
                 <Button
                   variant="landing_primary"
                   size="landing_page"
-                  className="bg-[#0ca5ea] hover:bg-[#0990d3] text-white font-mono uppercase tracking-wider rounded-sm px-8 py-4 text-lg"
+                  className="bg-brand hover:bg-brand/90 text-white font-medium tracking-wide rounded px-8 py-4 text-lg shadow-sm"
                   onMouseEnter={() => setIsLampOn(true)}
                   onMouseLeave={() => setIsLampOn(false)}
                 >
                   Start Debugging
-                  <ChevronRight className="size-5" />
+                  <ChevronRight className="size-5 ml-1" />
                 </Button>
               </Link>
 
-              <Small className="text-black/70 text-base font-mono uppercase tracking-wide">
+              <Small className="text-slate-500 font-normal">
                 Start with one line of code
               </Small>
             </div>
-          </div>
-
-          <div className="flex justify-center md:justify-end relative">
-            {/* Lamp off (default) */}
-            <Image
-              src="/static/home/lamp.png"
-              alt="Lamp illustration"
-              width={400}
-              height={400}
-              className={cn(
-                "w-auto h-auto grayscale absolute",
-                isLampOn ? "opacity-0" : "opacity-100"
-              )}
-              style={{ transform: "scaleX(-1)" }}
-              priority
-            />
-
-            {/* Lamp on (hover) */}
-            <Image
-              src="/static/home/lamp2.png"
-              alt="Lamp illustration (on)"
-              width={400}
-              height={400}
-              className={cn(
-                "w-auto h-auto grayscale absolute",
-                isLampOn ? "opacity-100" : "opacity-0"
-              )}
-              style={{ transform: "scaleX(-1)" }}
-              priority
-            />
-
-            {/* Spacer to maintain layout */}
-            <div className="w-[400px] h-[400px]" />
           </div>
         </div>
 

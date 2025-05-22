@@ -54,11 +54,32 @@ export default async function Home() {
 
   return (
     <Layout>
-      <main className="bg-white bg-[size:24px_24px] bg-[linear-gradient(rgba(12,165,234,0.07)_1px,transparent_1px),linear-gradient(90deg,rgba(12,165,234,0.07)_1px,transparent_1px)] text-landing-description">
-        <div className="flex flex-col gap-10">
+      {/* Background for Hero and Prototype only */}
+      <div
+        className="relative w-full"
+        style={{
+          backgroundImage: "url('/static/home/clouds6.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
+        {/* Semi-transparent overlay */}
+        <div className="absolute inset-0 bg-white opacity-60 z-0"></div>
+
+        {/* Content for Hero and Prototype with full width but centered content */}
+        <div className="relative z-10">
           <div className="md:max-w-5xl max-w-7xl mx-auto w-full">
             <Hero className="" />
             <Prototype />
+          </div>
+        </div>
+      </div>
+
+      {/* Rest of content without the clouds background */}
+      <main className="bg-white text-landing-description">
+        <div className="flex flex-col gap-10">
+          <div className="md:max-w-5xl max-w-7xl mx-auto w-full">
             <LazyLoadComponent fallback={<LoadingSection height="h-24" />}>
               <CompaniesLanding />
             </LazyLoadComponent>
@@ -71,13 +92,13 @@ export default async function Home() {
             <LazyLoadComponent fallback={<LoadingSection />}>
               <Quote2 />
             </LazyLoadComponent>
-            <LazyLoadComponent fallback={<LoadingSection />}>
+            {/* <LazyLoadComponent fallback={<LoadingSection />}>
               <LLMLifecycle />
             </LazyLoadComponent>
             <LazyLoadComponent fallback={<LoadingSection />}>
               <Log />
-            </LazyLoadComponent>
-            <LazyLoadComponent fallback={<LoadingSection />}>
+            </LazyLoadComponent> */}
+            {/* <LazyLoadComponent fallback={<LoadingSection />}>
               <Evaluate />
             </LazyLoadComponent>
             <LazyLoadComponent fallback={<LoadingSection />}>
@@ -85,7 +106,7 @@ export default async function Home() {
             </LazyLoadComponent>
             <LazyLoadComponent fallback={<LoadingSection />}>
               <Production />
-            </LazyLoadComponent>
+            </LazyLoadComponent> */}
             <LazyLoadComponent fallback={<LoadingSection height="h-[40rem]" />}>
               <BigDashboard />
             </LazyLoadComponent>
