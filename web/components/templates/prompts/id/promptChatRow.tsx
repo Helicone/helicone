@@ -14,7 +14,7 @@ import RoleButton from "../../playground/new/roleButton";
 
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { Message } from "@/packages/llm-mapper/types";
+import { Message } from "@helicone-package/llm-mapper/types";
 import { ClipboardIcon, EyeIcon, EyeOffIcon } from "lucide-react";
 import { enforceString } from "../../../../lib/helpers/typeEnforcers";
 import MarkdownEditor from "../../../shared/markdownEditor";

@@ -1,4 +1,4 @@
-import { costOfPrompt } from "../../../packages/cost";
+import { costOfPrompt } from "@helicone-package/cost";
 import { ModelMetrics } from "./modelMetrics";
 
 export function modelCost(modelRow: ModelMetrics): number {

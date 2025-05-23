@@ -1,4 +1,4 @@
-import { costOfPrompt } from "../../packages/cost";
+import { costOfPrompt } from "@helicone-package/cost";
 import {
   HeliconeRequestResponseToPosthog,
   PostHogEvent,

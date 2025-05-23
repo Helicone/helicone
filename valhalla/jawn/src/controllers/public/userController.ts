@@ -9,7 +9,7 @@ import {
 import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
 import { Result } from "../../packages/common/result";
 import { PSize, SortLeafUsers, UserManager } from "../../managers/UserManager";
-import { clickhousePriceCalc } from "../../packages/cost";
+import { clickhousePriceCalc } from "@helicone-package/cost";
 import { JawnAuthenticatedRequest } from "../../types/request";
 
 export interface UserQueryParams {

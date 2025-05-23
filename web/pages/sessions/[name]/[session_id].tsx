@@ -4,7 +4,7 @@ import {
   EMPTY_SESSION_NAME,
   SessionContent,
 } from "../../../components/templates/sessions/sessionId/SessionContent";
-import { withAuthSSR } from "../../../lib/api/handlerWrappers";
+import { GetServerSidePropsContext } from "next";
 import {
   convertRealtimeRequestToSteps,
   isRealtimeRequest,
@@ -97,8 +97,10 @@ SessionDetail.getLayout = function getLayout(page: ReactElement) {
 
 export default SessionDetail;
 
-export const getServerSideProps = withAuthSSR(async (options) => {
-  const { session_id, name: session_name } = options.context.query;
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  const { session_id, name: session_name } = context.query;
 
   const decodedSessionId =
     typeof session_id === "string"
@@ -116,4 +118,4 @@ export const getServerSideProps = withAuthSSR(async (options) => {
       session_name: decodedSessionName,
     },
   };
-});
+};

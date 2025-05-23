@@ -303,6 +303,7 @@ export async function proxyForwarder(
               request: proxyRequest,
               response,
               responseBody: responseBody.body,
+              responseLatencyMs: responseBody.endTime.getTime() - loggable.getTimingStart(),
               cacheControl: cacheSettings.cacheControl,
               settings: cacheSettings.bucketSettings,
               cacheKv: env.CACHE_KV,

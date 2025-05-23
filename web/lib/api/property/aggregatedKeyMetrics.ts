@@ -1,8 +1,8 @@
-import { clickhousePriceCalc } from "../../../packages/cost";
+import { clickhousePriceCalc } from "@helicone-package/cost";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import { timeFilterToFilterNode } from "@/services/lib/filters/helpers/filterFunctions";
 import { buildFilterWithAuthClickHousePropertiesV2 } from "../../../services/lib/filters/filters";
-import { resultMap } from "../../../packages/common/result";
+import { resultMap } from "@/packages/common/result";
 import { dbQueryClickhouse } from "../db/dbExecute";
 
 export async function getAggregatedKeyMetrics(

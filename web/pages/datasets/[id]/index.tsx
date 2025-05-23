@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
 import AuthLayout from "../../../components/layout/auth/authLayout";
 import DatasetIdPage from "../../../components/templates/datasets/datasetsIdPage";
-import { withAuthSSR } from "../../../lib/api/handlerWrappers";
+import { GetServerSidePropsContext } from "next";
 
 interface DatasetProps {
   id: string;
@@ -23,12 +23,14 @@ Dataset.getLayout = function getLayout(page: ReactElement) {
   return <AuthLayout>{page}</AuthLayout>;
 };
 
-export const getServerSideProps = withAuthSSR(async (options) => {
-  const { page, page_size } = options.context.query;
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  const { page, page_size } = context.query;
 
   const currentPage = parseInt(page as string, 10) || 1;
   const pageSize = parseInt(page_size as string, 10) || 25;
-  const id = options.context.params?.id as string;
+  const id = context.params?.id as string;
 
   return {
     props: {
@@ -37,4 +39,4 @@ export const getServerSideProps = withAuthSSR(async (options) => {
       pageSize,
     },
   };
-});
+};

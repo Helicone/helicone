@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Result } from "../../packages/common/result";
+import { Result } from "@/packages/common/result";
 import { TimeIncrement } from "../../lib/timeCalculations/fetchTimeData";
 import { Quantiles } from "../../lib/api/metrics/quantilesCalc";
 import { FilterNode } from "../lib/filters/filterDefs";

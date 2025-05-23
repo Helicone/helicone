@@ -1,6 +1,6 @@
-import { HeliconeRequest, Message } from "@/packages/llm-mapper/types";
-import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
-import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+import { HeliconeRequest, Message } from "@helicone-package/llm-mapper/types";
+import { heliconeRequestToMappedContent } from "@helicone-package/llm-mapper/utils/getMappedContent";
+import { MappedLLMRequest } from "@helicone-package/llm-mapper/types";
 
 // Given a mapped request, return a sorted array of "valid" messages.
 // => Valid, for e.g messages that can be displayed as a row in Sessions, separately.

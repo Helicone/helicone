@@ -1,5 +1,5 @@
-import { providerConfigs } from "@/packages/cost/unified/providers";
-import { Provider, ProviderConfig } from "@/packages/cost/unified/types";
+import { providerConfigs } from "@helicone-package/cost/unified/providers";
+import { Provider, ProviderConfig } from "@helicone-package/cost/unified/types";
 import { StateInputs, StateParameters } from "@/types/prompt-state";
 
 /**

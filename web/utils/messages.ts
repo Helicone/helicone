@@ -1,5 +1,5 @@
-import { Provider } from "packages/cost/unified/types";
-import { Message } from "packages/llm-mapper/types";
+import { Provider } from "@helicone-package/cost/unified/types";
+import { Message } from "@helicone-package/llm-mapper/types";
 
 export function isLastMessageUser(messages: Message[]): boolean {
   return messages?.at(-1)?.role === "user";

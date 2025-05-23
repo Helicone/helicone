@@ -15,7 +15,7 @@ import { RequestManager } from "../../managers/request/RequestManager";
 import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
 import { timeFilterToFilterNode } from "../../lib/shared/filters/filterDefs";
 import { dbExecute, dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
-import { clickhousePriceCalc } from "../../packages/cost";
+import { clickhousePriceCalc } from "@helicone-package/cost";
 import {
   DataOverTimeRequest,
   getXOverTime,
