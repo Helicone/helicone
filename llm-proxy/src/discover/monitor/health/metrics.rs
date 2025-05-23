@@ -1,4 +1,6 @@
-use std::{collections::HashMap, sync::Arc, time::Duration};
+use std::{sync::Arc, time::Duration};
+
+use rustc_hash::FxHashMap as HashMap;
 
 use crate::{
     endpoints::{
@@ -33,7 +35,7 @@ impl EndpointMetricsRegistry {
 
 impl Default for EndpointMetricsRegistry {
     fn default() -> Self {
-        let mut inner = HashMap::new();
+        let mut inner = HashMap::default();
         inner.insert(
             ApiEndpoint::OpenAI(OpenAI::ChatCompletions(ChatCompletions)),
             EndpointMetrics::default(),

@@ -41,6 +41,7 @@ pin-project-lite = { workspace = true }
 regex = { workspace = true }
 reqwest = { workspace = true }
 reqwest-eventsource = { workspace = true }
+rustc-hash = { workspace = true }
 rust_decimal = { workspace = true }
 rusty-s3 = { workspace = true }
 semver = { workspace = true }

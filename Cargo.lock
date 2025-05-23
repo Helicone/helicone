@@ -2371,6 +2371,7 @@ dependencies = [
  "reqwest",
  "reqwest-eventsource",
  "rust_decimal",
+ "rustc-hash 2.1.1",
  "rusty-s3",
  "semver",
  "serde",

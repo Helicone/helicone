@@ -1,13 +1,10 @@
 //! Dynamically remove inference providers that fail health checks
-use std::{
-    collections::{HashMap, HashSet},
-    sync::Arc,
-    time::Duration,
-};
+use std::{sync::Arc, time::Duration};
 
 use futures::future::{self, BoxFuture};
 use meltdown::Token;
 use rust_decimal::prelude::ToPrimitive;
+use rustc_hash::{FxHashMap as HashMap, FxHashSet as HashSet};
 use tokio::{
     sync::{RwLock, mpsc::Sender},
     time,
@@ -183,7 +180,7 @@ impl<K> ProviderMonitorInner<K> {
             tx,
             router_config,
             app_state,
-            unhealthy_keys: HashSet::new(),
+            unhealthy_keys: HashSet::default(),
         }
     }
 

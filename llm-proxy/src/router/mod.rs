@@ -1,7 +1,6 @@
 pub mod meta;
 
 use std::{
-    collections::HashMap,
     future::{Ready, ready},
     sync::Arc,
     task::{Context, Poll},
@@ -9,6 +8,7 @@ use std::{
 
 use futures::future::Either;
 use http::uri::PathAndQuery;
+use rustc_hash::FxHashMap as HashMap;
 use tower::ServiceBuilder;
 
 use crate::{
@@ -58,7 +58,7 @@ impl Router {
         };
         router_config.validate()?;
 
-        let mut inner = HashMap::new();
+        let mut inner = HashMap::default();
         for (endpoint_type, balance_config) in router_config.balance.as_ref() {
             let balancer = ProviderBalancer::new(
                 app_state.clone(),

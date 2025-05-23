@@ -1,4 +1,6 @@
-use std::{collections::HashMap, sync::Arc};
+use std::sync::Arc;
+
+use rustc_hash::FxHashMap as HashMap;
 
 use super::{
     EndpointConverter, NoOpConverter, TypedEndpointConverter,
@@ -84,7 +86,7 @@ impl EndpointConverterRegistryInner {
     #[allow(clippy::too_many_lines)]
     fn new(router_config: &RouterConfig, model_mapper: ModelMapper) -> Self {
         let mut registry = Self {
-            converters: HashMap::new(),
+            converters: HashMap::default(),
         };
         let providers = router_config.balance.providers();
         let request_style = router_config.request_style;

@@ -1,5 +1,4 @@
 use std::{
-    collections::HashMap,
     future::{Ready, ready},
     task::{Context, Poll},
 };
@@ -8,6 +7,7 @@ use axum_core::response::IntoResponse;
 use futures::future::Either;
 use http::uri::PathAndQuery;
 use regex::Regex;
+use rustc_hash::FxHashMap as HashMap;
 use uuid::Uuid;
 
 use super::Router;
@@ -61,8 +61,7 @@ impl MetaRouter {
     pub async fn from_config(app_state: AppState) -> Result<Self, InitError> {
         let router_id_regex =
             Regex::new(ROUTER_ID_REGEX).expect("always valid if tests pass");
-        let mut inner =
-            HashMap::with_capacity(app_state.0.config.routers.as_ref().len());
+        let mut inner = HashMap::default();
         for router_id in app_state.0.config.routers.as_ref().keys() {
             let router = Router::new(*router_id, app_state.clone()).await?;
             inner.insert(*router_id, router);
