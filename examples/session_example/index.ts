@@ -67,7 +67,7 @@ async function main() {
       messages: [
         {
           role: "user",
-          content: "whats good shawty bobfbe",
+          content: "Generate an abstract for a course on space.",
         },
       ],
       model: "gpt-4",
@@ -183,5 +183,5 @@ async function main() {
   );
 }
 
-manualLoggerTest();
-// main();
+// manualLoggerTest();
+main();
