@@ -1,69 +1,68 @@
-import { NextRouter, useRouter } from "next/router";
-import { ParsedUrlQuery } from "querystring";
+import {
+  useSearchParams as useReactRouterSearchParams,
+  useNavigate,
+} from "react-router";
 
 const useSearchParams = () => {
-  const router = useRouter();
+  const [searchParams, setSearchParams] = useReactRouterSearchParams();
+  const navigate = useNavigate();
 
-  const searchParams = new SearchParams(router);
-
-  return searchParams;
+  return new SearchParams(searchParams, setSearchParams, navigate);
 };
 
 export class SearchParams {
-  router: NextRouter;
-  query: ParsedUrlQuery;
+  private searchParams: URLSearchParams;
+  private setSearchParams: (params: URLSearchParams) => void;
+  private navigate: ReturnType<typeof useNavigate>;
 
-  constructor(router: NextRouter) {
-    this.router = router;
-    this.query = router.query;
+  constructor(
+    searchParams: URLSearchParams,
+    setSearchParams: (params: URLSearchParams) => void,
+    navigate: ReturnType<typeof useNavigate>
+  ) {
+    this.searchParams = searchParams;
+    this.setSearchParams = setSearchParams;
+    this.navigate = navigate;
   }
 
   has(key: string) {
-    return this.query.hasOwnProperty(key);
+    return this.searchParams.has(key);
   }
 
   get(key: string) {
-    if (this.has(key)) {
-      return (this.query[key] as string) || "";
-    }
-    return null;
+    return this.searchParams.get(key);
   }
 
   set(key: string, value: string) {
-    this.router.replace(
-      {
-        query: { ...this.router.query, [key]: value },
-      },
-      undefined,
-      { shallow: true }
-    );
+    const newParams = new URLSearchParams(this.searchParams);
+    newParams.set(key, value);
+    this.setSearchParams(newParams);
   }
 
   delete(key: string) {
-    const { [key]: _, ...rest } = this.query;
-    this.router.replace(
-      {
-        query: rest,
-      },
-      undefined,
-      { shallow: true }
-    );
+    const newParams = new URLSearchParams(this.searchParams);
+    newParams.delete(key);
+    this.setSearchParams(newParams);
   }
 
   getAll() {
-    return this.query;
+    const result: Record<string, string> = {};
+    this.searchParams.forEach((value, key) => {
+      result[key] = value;
+    });
+    return result;
   }
 
   keys() {
-    return Object.keys(this.query);
+    return Array.from(this.searchParams.keys());
   }
 
   values() {
-    return Object.values(this.query);
+    return Array.from(this.searchParams.values());
   }
 
   toString() {
-    return JSON.stringify(this.query);
+    return this.searchParams.toString();
   }
 }
 

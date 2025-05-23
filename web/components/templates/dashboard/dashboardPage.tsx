@@ -1,4 +1,3 @@
-import { HeliconeUser } from "@/packages/common/auth/types";
 import { TimeFilter } from "@/types/timeFilter";
 import {
   ArrowPathIcon,

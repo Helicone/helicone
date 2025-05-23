@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { H2, Large } from "@/components/ui/typography";
 import { ArrowRight } from "lucide-react";
-import { useRouter } from "next/router";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { useOrgOnboarding } from "@/services/hooks/useOrgOnboarding";
 import { STEP_ROUTES } from "@/components/onboarding/OnboardingHeader";
+import { useNavigate } from "react-router";
 
 interface DashboardEmptyStateProps {
   isVisible: boolean;
@@ -13,8 +13,8 @@ interface DashboardEmptyStateProps {
 export default function DashboardEmptyState({
   isVisible,
 }: DashboardEmptyStateProps) {
-  const router = useRouter();
   const orgContext = useOrg();
+  const navigate = useNavigate();
   const { onboardingState } = useOrgOnboarding(
     orgContext?.currentOrg?.id || ""
   );
@@ -31,9 +31,9 @@ export default function DashboardEmptyState({
   const handleQuickStart = () => {
     const currentStep = onboardingState?.currentStep || "ORGANIZATION";
     if (currentStep === "EVENT") {
-      router.push("/onboarding/integrate");
+      navigate("/onboarding/integrate");
     } else {
-      router.push(STEP_ROUTES[currentStep]);
+      navigate(STEP_ROUTES[currentStep]);
     }
   };
 

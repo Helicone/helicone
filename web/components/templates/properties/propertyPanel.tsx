@@ -1,4 +1,3 @@
-import { useRouter } from "next/router";
 import { usePropertyCard } from "./useProperty";
 import { useState } from "react";
 import {
@@ -38,6 +37,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { H3, P } from "@/components/ui/typography";
+import { useNavigate } from "react-router";
 
 interface PropertyPanelProps {
   property: string;
@@ -48,7 +48,6 @@ const PropertyPanel = (props: PropertyPanelProps) => {
   const searchParams = useSearchParams();
 
   const [showMore, setShowMore] = useState(false);
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
 
   const getInterval = () => {
@@ -122,6 +121,8 @@ const PropertyPanel = (props: PropertyPanelProps) => {
       return propertyValueData?.slice(0, 10);
     }
   };
+
+  const navigate = useNavigate();
 
   const cleanedValueData = getPropertyValueData();
 
@@ -378,13 +379,9 @@ const PropertyPanel = (props: PropertyPanelProps) => {
                                         })
                                       );
 
-                                    router.push({
-                                      pathname: "/requests",
-                                      query: {
-                                        t: "3m",
-                                        filters: currentAdvancedFilters,
-                                      },
-                                    });
+                                    navigate(
+                                      `/requests?t=3m&filters=${currentAdvancedFilters}`
+                                    );
                                   }}
                                 >
                                   {propertyValue.property_value}

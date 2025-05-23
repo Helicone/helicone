@@ -9,23 +9,18 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { H3 } from "@/components/ui/typography";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { LockIcon, Tag } from "lucide-react";
-import { useRouter } from "next/router";
 import { useEffect, useMemo } from "react";
 import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
 import { getPropertyFiltersV2 } from "../../../services/lib/filters/frontendFilterDefs";
 import PropertyPanel from "./propertyPanel";
+import { NavLink, useNavigate, useParams } from "react-router";
 
-const PropertiesPage = (props: { initialPropertyKey?: string }) => {
-  const { initialPropertyKey } = props;
+const PropertiesPage = () => {
+  const { key: initialPropertyKey } = useParams();
   const { properties, isLoading: isPropertiesLoading } =
     useGetPropertiesV2(getPropertyFiltersV2);
 
-  const router = useRouter();
-
-  // Only update URL when property is selected via UI
-  const handlePropertySelect = (property: string) => {
-    router.push(`/properties/${encodeURIComponent(property)}`);
-  };
+  const navigate = useNavigate();
 
   // Determine the selected property based on initialPropertyKey or first property
   const selectedProperty = useMemo(() => {
@@ -51,9 +46,9 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
       properties.length > 0 &&
       !properties.includes(initialPropertyKey)
     ) {
-      router.replace("/properties");
+      navigate("/properties", { replace: true });
     }
-  }, [initialPropertyKey, properties, isPropertiesLoading, router]);
+  }, [initialPropertyKey, properties, isPropertiesLoading, navigate]);
 
   if (isPropertiesLoading) {
     return (
@@ -143,18 +138,21 @@ const PropertiesPage = (props: { initialPropertyKey?: string }) => {
                         </Button>
                       </FreeTierLimitWrapper>
                     ) : (
-                      <Button
-                        variant={
-                          selectedProperty === property ? "default" : "ghost"
-                        }
-                        className="w-full justify-start font-medium h-auto py-3 rounded-none"
-                        onClick={() => handlePropertySelect(property)}
+                      <NavLink
+                        to={`/properties/${encodeURIComponent(property)}`}
                       >
-                        <Tag className="h-4 w-4 mr-2" />
-                        <span className="truncate max-w-[250px]">
-                          {property}
-                        </span>
-                      </Button>
+                        <Button
+                          variant={
+                            selectedProperty === property ? "default" : "ghost"
+                          }
+                          className="w-full justify-start font-medium h-auto py-3 rounded-none"
+                        >
+                          <Tag className="h-4 w-4 mr-2" />
+                          <span className="truncate max-w-[250px]">
+                            {property}
+                          </span>
+                        </Button>
+                      </NavLink>
                     )}
                   </div>
                 );

@@ -5,7 +5,6 @@ import {
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
 import { AreaChart } from "@tremor/react";
-import { useRouter } from "next/router";
 import { ElementType } from "react";
 import { useUserId } from "../../../../services/hooks/users";
 import LoadingAnimation from "../../../shared/loadingAnimation";
@@ -13,11 +12,7 @@ import HcBreadcrumb from "../../../ui/hcBreadcrumb";
 import StyledAreaChart from "../../dashboard/styledAreaChart";
 import RequestsPage from "../../requests/RequestsPage";
 import { formatNumber } from "../initialColumns";
-
-interface UserIdPageProps {
-  userId: string;
-  defaultIndex?: number;
-}
+import { useNavigate, useParams, useSearchParams } from "react-router";
 
 const tabs: {
   id: number;
@@ -36,11 +31,15 @@ const tabs: {
   },
 ];
 
-const UserIdPage = (props: UserIdPageProps) => {
-  const { userId, defaultIndex = 0 } = props;
+const UserIdPage = () => {
+  const { id: userId } = useParams();
+  const [searchParams] = useSearchParams();
+  const defaultIndex = parseInt(searchParams.get("tab") ?? "0");
+  const navigate = useNavigate();
 
-  const { user, isLoading, costOverTime, requestOverTime } = useUserId(userId);
-  const router = useRouter();
+  const { user, isLoading, costOverTime, requestOverTime } = useUserId(
+    userId ?? ""
+  );
 
   return (
     <IslandContainer className=" py-10">
@@ -53,7 +52,7 @@ const UserIdPage = (props: UserIdPageProps) => {
             },
             {
               href: `/users/${userId}`,
-              name: userId,
+              name: userId ?? "",
             },
             // {},
           ]}
@@ -144,15 +143,8 @@ const UserIdPage = (props: UserIdPageProps) => {
                       key={tab.id}
                       value={tab.id.toString()}
                       onClick={() => {
-                        const { id, page, t } = router.query;
-                        router.replace(
-                          {
-                            pathname: `/users/[id]`,
-                            query: { id, page, t, tab: tab.id },
-                          },
-                          undefined,
-                          { shallow: true }
-                        );
+                        searchParams.set("tab", tab.id.toString());
+                        navigate(`/users/${userId}?${searchParams.toString()}`);
                       }}
                       className="flex items-center gap-2"
                     >

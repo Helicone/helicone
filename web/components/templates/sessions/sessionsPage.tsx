@@ -30,7 +30,6 @@ import { useURLParams } from "@/services/hooks/localURLParams";
 import { SortDirection } from "@/services/lib/sorts/requests/sorts";
 import { TimeFilter } from "@/types/timeFilter";
 import { Check, ChevronDown, PieChart, Table } from "lucide-react";
-import Link from "next/link";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
   getTimeIntervalAgo,
@@ -51,6 +50,7 @@ import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
 import { getColumns } from "./initialColumns";
 import { EMPTY_SESSION_NAME } from "./sessionId/SessionContent";
 import SessionMetrics from "./SessionMetrics";
+import { NavLink } from "react-router";
 
 interface SessionsPageProps {
   currentPage: number;
@@ -284,9 +284,9 @@ const SessionsPage = (props: SessionsPageProps) => {
         <FoldedHeader
           leftSection={
             <section className="flex flex-row items-center gap-2">
-              <Link href="/sessions" className="no-underline">
+              <NavLink to="/sessions" className="no-underline">
                 <Small className="font-semibold">Sessions</Small>
-              </Link>
+              </NavLink>
               <Small className="font-semibold">/</Small>
 
               <Popover open={open} onOpenChange={setOpen}>

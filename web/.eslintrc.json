@@ -1,8 +1,7 @@
 {
   "extends": ["next/core-web-vitals", "plugin:prettier/recommended"],
-
   "ignorePatterns": ["lib/clients/jawnTypes/*.ts"],
-  "plugins": ["unused-imports"],
+  "plugins": ["unused-imports", "custom-rules"],
   "parserOptions": {
     "ecmaVersion": 13
   },
@@ -10,6 +9,8 @@
     "unused-imports/no-unused-imports": "error",
     "no-unused-vars": "warn",
     "no-undef": "warn",
-    "no-console": "warn"
+    "no-console": "warn",
+    "custom-rules/no-next-link": "error",
+    "custom-rules/no-next-router": "error"
   }
 }

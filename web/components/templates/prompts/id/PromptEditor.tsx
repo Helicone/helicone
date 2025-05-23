@@ -56,8 +56,6 @@ import {
 } from "@/utils/variables";
 import { autoFillInputs } from "@helicone/prompts";
 import { FlaskConicalIcon } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/router";
 import { LLMRequestBody, Message } from "@helicone-package/llm-mapper/types";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MdKeyboardReturn } from "react-icons/md";
@@ -91,6 +89,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import Image from "next/image";
+import { NavLink, useNavigate } from "react-router";
 
 type EditorMode =
   | "fromCode"
@@ -133,7 +132,7 @@ export default function PromptEditor({
     provider: providers.find((p) => p.id === "openrouter")!,
   });
   // - Router
-  const router = useRouter();
+  const navigate = useNavigate();
   // - Jawn Client
   const jawnClient = useJawnClient();
   // - Request Data
@@ -953,13 +952,13 @@ export default function PromptEditor({
       const res = await createPrompt(prompt, metadata);
       if (res?.id) {
         setNotification("Prompt created successfully", "success");
-        router.push(`/prompts/${res.id}`);
+        navigate(`/prompts/${res.id}`);
       }
     } catch (error) {
       console.error("Error creating prompt:", error);
       setNotification("Failed to create prompt", "error");
     }
-  }, [state, withinPromptsLimit, createPrompt, router, setNotification]);
+  }, [state, withinPromptsLimit, createPrompt, navigate, setNotification]);
 
   /* -------------------------------------------------------------------------- */
   /*                                   Effects                                  */
@@ -1143,12 +1142,12 @@ export default function PromptEditor({
         <div className="flex flex-row items-center gap-2">
           {/* Back Button */}
           {promptId && (
-            <Link
+            <NavLink
               className="text-base text-slate-500 hover:text-heliblue"
-              href="/prompts"
+              to="/prompts"
             >
               <PiCaretLeftBold />
-            </Link>
+            </NavLink>
           )}
           {/* Version Selector */}
           {promptId && (
@@ -1167,12 +1166,12 @@ export default function PromptEditor({
 
           {/* From Request: ID Label */}
           {requestId && (
-            <Link
+            <NavLink
               className="text-sm text-secondary hover:underline"
-              href={`/requests?requestId=${requestId}`}
+              to={`/requests?requestId=${requestId}`}
             >
               From Request: {requestId}
-            </Link>
+            </NavLink>
           )}
 
           {/* Metrics Drawer */}
@@ -1363,7 +1362,7 @@ export default function PromptEditor({
                   name: `${promptData?.user_defined_id}_V${state.version}.${state.versionId}`,
                   originalPromptVersion: state.versionId ?? "",
                 });
-                router.push(`/experiments/${result.data?.data?.experimentId}`);
+                navigate(`/experiments/${result.data?.data?.experimentId}`);
               }}
             >
               <FlaskConicalIcon className="h-4 w-4 mr-2" />

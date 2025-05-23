@@ -36,12 +36,37 @@ const nextConfig = {
   async rewrites() {
     return [
       {
-        source: "/:any*",
+        source: "/ingest/:path*",
+        destination: "https://app.posthog.com/:path*",
+      },
+      // Only rewrite to static-shell for specific paths that need it
+      {
+        source: "/dashboard/:path*",
         destination: "/static-shell",
       },
       {
-        source: "/ingest/:path*",
-        destination: "https://app.posthog.com/:path*",
+        source: "/requests/:path*",
+        destination: "/static-shell",
+      },
+      {
+        source: "/sessions/:path*",
+        destination: "/static-shell",
+      },
+      {
+        source: "/properties/:path*",
+        destination: "/static-shell",
+      },
+      {
+        source: "/users/:path*",
+        destination: "/static-shell",
+      },
+      {
+        source: "/prompts/:path*",
+        destination: "/static-shell",
+      },
+      {
+        source: "/experiments/:path*",
+        destination: "/static-shell",
       },
     ];
   },

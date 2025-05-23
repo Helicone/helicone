@@ -1,7 +1,6 @@
 import { TimeFilter } from "@/types/timeFilter";
 import { AreaChart, MultiSelect, MultiSelectItem } from "@tremor/react";
-import { useSearchParams } from "next/navigation";
-import { useRouter } from "next/router";
+import useSearchParams from "@/components/shared/utils/useSearchParams";
 import { useState } from "react";
 import { getTimeMap } from "../../../../lib/timeCalculations/constants";
 import {
@@ -26,6 +25,7 @@ import StyledAreaChart from "../../dashboard/styledAreaChart";
 import { MODEL_LIST } from "../../playground/new/modelList";
 import ModelPill from "../../requests/modelPill";
 import StatusBadge from "../../requests/statusBadge";
+import { useNavigate } from "react-router";
 
 interface PromptMetricsTabProps {
   id: string;
@@ -36,7 +36,7 @@ const PromptMetricsTab = ({
   id,
   promptUserDefinedId,
 }: PromptMetricsTabProps) => {
-  const router = useRouter();
+  const navigate = useNavigate();
   const searchParams = useSearchParams();
 
   const getTimeFilter = () => {
@@ -300,7 +300,7 @@ const PromptMetricsTab = ({
               },
             ]}
             onSelect={(item) => {
-              router.push(`/prompts/${id}/experiments/${item.id}`);
+              navigate(`/prompts/${id}/experiments/${item.id}`);
             }}
           />
         )}

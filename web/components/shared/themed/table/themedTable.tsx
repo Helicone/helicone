@@ -18,7 +18,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { ChevronDown, ChevronRight, ChevronsUpDown } from "lucide-react";
-import Link from "next/link";
 import React, { useEffect, useMemo } from "react";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { Result } from "@/packages/common/result";
@@ -29,6 +28,7 @@ import { clsx } from "../../clsx";
 import LoadingAnimation from "../../loadingAnimation";
 import { DragColumnItem } from "./columns/DragList";
 import DraggableColumnHeader from "./columns/draggableColumnHeader";
+import { NavLink } from "react-router";
 
 type CheckboxMode = "always_visible" | "on_hover" | "never";
 
@@ -42,9 +42,9 @@ function ConditionalLink<T>({
   className?: string;
 }) {
   return href ? (
-    <Link href={href} className={className}>
+    <NavLink to={href} className={className}>
       {children}
-    </Link>
+    </NavLink>
   ) : (
     children
   );

@@ -20,7 +20,6 @@ import {
   Square2StackIcon,
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
-import { useRouter } from "next/router";
 import { useState } from "react";
 import { PiPlusBold, PiSpinnerGapBold } from "react-icons/pi";
 import {
@@ -38,15 +37,12 @@ import { DiffHighlight } from "../welcome/diffHighlight";
 import PromptCard from "./promptCard";
 import PromptDelete from "./promptDelete";
 import PromptUsageChart from "./promptUsageChart";
+import { useNavigate } from "react-router";
 
-interface PromptsPageProps {
-  defaultIndex: number;
-}
-
-const PromptsPage = (props: PromptsPageProps) => {
+const PromptsPage = () => {
   const { prompts, isLoading, refetch } = usePrompts();
   const [searchName, setSearchName] = useState<string>("");
-  const router = useRouter();
+  const navigate = useNavigate();
   const { createPrompt, isCreating } = useCreatePrompt();
   const searchParams = useSearchParams();
   const promptCount = prompts?.length ?? 0;
@@ -79,7 +75,7 @@ const PromptsPage = (props: PromptsPageProps) => {
 
       const newPrompt = await createPrompt(basePrompt, metadata);
       if (newPrompt?.id) {
-        router.push(`/prompts/${newPrompt.id}`);
+        navigate(`/prompts/${newPrompt.id}`);
       }
     } catch (error) {
       console.error("Error creating prompt:", error);
@@ -334,7 +330,7 @@ const chatCompletion = await openai.chat.completions.create(
                   },
                 ]}
                 onSelect={(prompt) => {
-                  router.push(`/prompts/${prompt.id}`);
+                  navigate(`/prompts/${prompt.id}`);
                 }}
               />
             )

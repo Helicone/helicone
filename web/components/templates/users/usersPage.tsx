@@ -6,9 +6,7 @@ import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { UserMetric } from "@/lib/api/users/UserMetric";
 import { UserGroupIcon } from "@heroicons/react/24/outline";
 import { LockIcon } from "lucide-react";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { useRouter } from "next/router";
+import useSearchParams from "@/components/shared/utils/useSearchParams";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useUsers } from "../../../services/hooks/users";
 import {
@@ -21,38 +19,22 @@ import { UpgradeProDialog } from "../organization/plan/upgradeProDialog";
 import TableFooter from "../requests/tableFooter";
 import { INITIAL_COLUMNS } from "./initialColumns";
 import { UserMetrics } from "./UserMetrics";
-
-interface UsersPageV2Props {
-  currentPage: number;
-  pageSize: number;
-  sort: {
-    sortKey: string | null;
-    sortDirection: SortDirection | null;
-    isCustomProperty: boolean;
-  };
-}
+import { NavLink, useNavigate } from "react-router";
 
 function useQueryParam(
   paramName: string,
   defaultValue: string
 ): [queryParam: string, setQueryParam: (value: string) => void] {
-  const router = useRouter();
   const searchParams = useSearchParams();
+  const navigate = useNavigate();
 
   const setQueryParam = useCallback(
     (value: string) => {
-      const currentQuery = { ...router.query };
-      currentQuery[paramName] = value;
-      router.push(
-        {
-          pathname: router.pathname,
-          query: currentQuery,
-        },
-        undefined,
-        { shallow: true }
-      );
+      const currentQuery = new URLSearchParams(searchParams.toString());
+      currentQuery.set(paramName, value);
+      navigate(`/users?${currentQuery.toString()}`);
     },
-    [router, paramName]
+    [searchParams, paramName, navigate]
   );
 
   // Get the current value from the URL
@@ -68,7 +50,7 @@ function useQueryParam(
   return [queryParam, setQueryParam];
 }
 
-const UsersPageV2 = (props: UsersPageV2Props) => {
+const UsersPageV2 = () => {
   const [currentPage, setCurrentPage] = useQueryParam("page", "1");
   const [pageSize, setPageSize] = useQueryParam("pageSize", "100");
   const [sortDirection, setSortDirection] = useQueryParam(
@@ -78,8 +60,6 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
   const [sortKey, setSortKey] = useQueryParam("sortKey", "last_active");
 
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
-
-  const router = useRouter();
 
   const sortLeaf: SortLeafRequest =
     sortKey && sortDirection
@@ -166,10 +146,12 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
     });
   }, [hasAccess, freeLimit, userMetrics]);
 
+  const navigate = useNavigate();
+
   const handleRowSelect = (row: UserMetric) => {
     // Fast exit if user has full access - direct navigation
     if (hasAccess) {
-      router.push(`/users/${encodeURIComponent(row.user_id)}`);
+      navigate(`/users/${encodeURIComponent(row.user_id)}`);
       return;
     }
 
@@ -184,7 +166,7 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
       return;
     }
 
-    router.push(`/users/${encodeURIComponent(row.user_id)}`);
+    navigate(`/users/${encodeURIComponent(row.user_id)}`);
   };
 
   const hasNoUsers = useMemo(() => {
@@ -262,14 +244,14 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
                   </p>
                   <p className="text-sm text-gray-500 max-w-sm mt-2">
                     Please explore our docs{" "}
-                    <Link
-                      href="https://docs.helicone.ai/features/advanced-usage/user-metrics"
+                    <NavLink
+                      to="https://docs.helicone.ai/features/advanced-usage/user-metrics"
                       target="_blank"
                       rel="noreferrer noopener"
                       className="underline text-blue-500"
                     >
                       here
-                    </Link>{" "}
+                    </NavLink>{" "}
                     to learn more about user tracking and metrics.
                   </p>
                 </div>

@@ -3,9 +3,9 @@
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import { useRouter } from "next/router";
 import { useOrgOnboarding } from "@/services/hooks/useOrgOnboarding";
 import { STEP_ROUTES } from "@/components/onboarding/OnboardingHeader";
+import { useNavigate } from "react-router";
 
 interface OnboardingFloatingPromptProps {
   open: boolean;
@@ -16,7 +16,7 @@ export default function OnboardingFloatingPrompt({
   open,
   setOpen,
 }: OnboardingFloatingPromptProps) {
-  const router = useRouter();
+  const navigate = useNavigate();
   const orgContext = useOrg();
   const { onboardingState } = useOrgOnboarding(
     orgContext?.currentOrg?.id || ""
@@ -36,9 +36,9 @@ export default function OnboardingFloatingPrompt({
     setOpen(false);
     const currentStep = onboardingState?.currentStep || "ORGANIZATION";
     if (currentStep === "EVENT") {
-      router.push("/onboarding/integrate");
+      navigate("/onboarding/integrate");
     } else {
-      router.push(STEP_ROUTES[currentStep]);
+      navigate(STEP_ROUTES[currentStep]);
     }
   };
 

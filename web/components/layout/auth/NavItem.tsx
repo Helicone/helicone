@@ -6,7 +6,6 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { ChevronDownIcon } from "lucide-react";
-import Link from "next/link";
 import { NavLink } from "react-router";
 
 interface NavigationItem {
@@ -44,51 +43,27 @@ const NavItem: React.FC<NavItemProps> = ({
     return (
       <Tooltip delayDuration={0}>
         <TooltipTrigger asChild>
-          {["/requests", "/dashboard", "/sessions"].includes(link.href) ? (
-            <NavLink
-              to={link.href}
-              className={cn(
-                buttonVariants({
-                  variant: "ghost",
-                  size: "icon",
-                }),
-                "h-9 w-9",
-                link.current && "bg-accent hover:bg-accent"
-              )}
-            >
-              {link.icon && (
-                <link.icon
-                  className={cn(
-                    "h-4 w-4 text-slate-500",
-                    link.current && "text-slate-800 dark:text-slate-200"
-                  )}
-                />
-              )}
-              <span className="sr-only">{link.name} lol</span>
-            </NavLink>
-          ) : (
-            <Link
-              href={hasSubItems ? link.subItems![0].href : link.href}
-              className={cn(
-                buttonVariants({
-                  variant: "ghost",
-                  size: "icon",
-                }),
-                "h-9 w-9",
-                link.current && "bg-accent hover:bg-accent"
-              )}
-            >
-              {link.icon && (
-                <link.icon
-                  className={cn(
-                    "h-4 w-4 text-slate-500",
-                    link.current && "text-slate-800 dark:text-slate-200"
-                  )}
-                />
-              )}
-              <span className="sr-only">{link.name}</span>
-            </Link>
-          )}
+          <NavLink
+            to={hasSubItems ? link.subItems![0].href : link.href}
+            className={cn(
+              buttonVariants({
+                variant: "ghost",
+                size: "icon",
+              }),
+              "h-9 w-9",
+              link.current && "bg-accent hover:bg-accent"
+            )}
+          >
+            {link.icon && (
+              <link.icon
+                className={cn(
+                  "h-4 w-4 text-slate-500",
+                  link.current && "text-slate-800 dark:text-slate-200"
+                )}
+              />
+            )}
+            <span className="sr-only">{link.name}</span>
+          </NavLink>
         </TooltipTrigger>
         <TooltipContent
           side="right"
@@ -105,79 +80,50 @@ const NavItem: React.FC<NavItemProps> = ({
 
   return (
     <div className={cn(isSubItem)}>
-      {["/requests", "/dashboard", "/sessions"].includes(link.href) ? (
-        <NavLink
-          to={link.href}
-          className={cn(
-            buttonVariants({
-              variant: "ghost",
-              size: "icon",
-            }),
-            "h-9 w-9",
-            link.current && "bg-accent hover:bg-accent"
-          )}
-        >
+      <NavLink
+        to={hasSubItems ? "#" : link.href}
+        onClick={hasSubItems ? () => toggleExpand(link.name) : onClick}
+        className={cn(
+          hasSubItems
+            ? "flex items-center gap-0.5 text-slate-400 text-xs mt-[14px] text-[11px] font-normal pl-2"
+            : cn(
+                buttonVariants({
+                  variant: link.current ? "secondary" : "ghost",
+                  size: "xs",
+                }),
+                deep && deep > 1 ? "h-6" : "h-8",
+                "justify-start w-full font-normal",
+                "text-sm  text-[12px] text-slate-500",
+                link.current && "text-slate-800 dark:text-slate-200"
+              ),
+          ""
+        )}
+      >
+        <div className="flex items-center">
           {link.icon && (
             <link.icon
               className={cn(
-                "h-4 w-4 text-slate-500",
+                "mr-2 h-3.5 w-3.5 text-slate-500",
                 link.current && "text-slate-800 dark:text-slate-200"
               )}
             />
           )}
-          {link.name} lol
+          {link.name}
           {link.isNew && (
             <div className="uppercase text-[9px] font-semibold border bg-gradient-to-r from-sky-400 via-heliblue to-sky-400 border-sky-500 px-1.5 rounded-full text-white ml-2 animate-shine bg-[length:200%_100%]">
               New
             </div>
           )}
-        </NavLink>
-      ) : (
-        <Link
-          href={hasSubItems ? "#" : link.href}
-          onClick={hasSubItems ? () => toggleExpand(link.name) : onClick}
-          className={cn(
-            hasSubItems
-              ? "flex items-center gap-0.5 text-slate-400 text-xs mt-[14px] text-[11px] font-normal pl-2"
-              : cn(
-                  buttonVariants({
-                    variant: link.current ? "secondary" : "ghost",
-                    size: "xs",
-                  }),
-                  deep && deep > 1 ? "h-6" : "h-8",
-                  "justify-start w-full font-normal",
-                  "text-sm  text-[12px] text-slate-500",
-                  link.current && "text-slate-800 dark:text-slate-200"
-                ),
-            ""
-          )}
-        >
-          <div className="flex items-center">
-            {link.icon && (
-              <link.icon
-                className={cn(
-                  "mr-2 h-3.5 w-3.5 text-slate-500",
-                  link.current && "text-slate-800 dark:text-slate-200"
-                )}
-              />
+        </div>
+        {hasSubItems && (
+          <ChevronDownIcon
+            className={cn(
+              "h-3 w-3 transition-transform text-slate-400",
+              !expandedItems.includes(link.name) && "-rotate-90"
             )}
-            {link.name}
-            {link.isNew && (
-              <div className="uppercase text-[9px] font-semibold border bg-gradient-to-r from-sky-400 via-heliblue to-sky-400 border-sky-500 px-1.5 rounded-full text-white ml-2 animate-shine bg-[length:200%_100%]">
-                New
-              </div>
-            )}
-          </div>
-          {hasSubItems && (
-            <ChevronDownIcon
-              className={cn(
-                "h-3 w-3 transition-transform text-slate-400",
-                !expandedItems.includes(link.name) && "-rotate-90"
-              )}
-            />
-          )}
-        </Link>
-      )}
+          />
+        )}
+      </NavLink>
       {hasSubItems && expandedItems.includes(link.name) && (
         <div className="mt-1">
           {link.subItems!.map((subItem) => (

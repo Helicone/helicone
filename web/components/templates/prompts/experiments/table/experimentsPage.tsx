@@ -25,8 +25,7 @@ import {
   SquareArrowOutUpRight,
   Trash2,
 } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/router";
+import { NavLink, useNavigate } from "react-router";
 import { useState } from "react";
 import { useJawnClient } from "../../../../../lib/clients/jawnHook";
 import { useExperimentTables } from "../../../../../services/hooks/prompts/experiments";
@@ -45,7 +44,7 @@ const ExperimentsPage = () => {
   const [experimentToDelete, setExperimentToDelete] = useState<string | null>(
     null
   );
-  const router = useRouter();
+  const navigate = useNavigate();
   const { experiments, isLoading, deleteExperiment } = useExperimentTables();
   const { setNotification } = useNotification();
   const [headerDropdownOpen, setHeaderDropdownOpen] = useState(false);
@@ -79,7 +78,7 @@ const ExperimentsPage = () => {
     if (res.error) {
       notification.setNotification("Failed to create experiment", "error");
     } else {
-      router.push(`/experiments/${res.data?.data?.experimentId}`);
+      navigate(`/experiments/${res.data?.data?.experimentId}`);
     }
   };
 
@@ -118,15 +117,15 @@ const ExperimentsPage = () => {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-                <Link
-                  href="https://docs.helicone.ai/features/experiments"
+                <NavLink
+                  to="https://docs.helicone.ai/features/experiments"
                   target="_blank"
                 >
                   <Button variant="outline" className="gap-2">
                     View Docs
                     <SquareArrowOutUpRight className="h-4 w-4" />
                   </Button>
-                </Link>
+                </NavLink>
               </>
             }
           >
@@ -268,7 +267,7 @@ const ExperimentsPage = () => {
         onRowSelect={(row) => {
           const promptId = row.original_prompt_version;
           if (promptId) {
-            router.push(`/experiments/${row.id}`);
+            navigate(`/experiments/${row.id}`);
           }
         }}
         fullWidth={true}

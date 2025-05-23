@@ -1,24 +1,21 @@
-import { ReactElement, useMemo, useState } from "react";
-import AuthLayout from "../../../components/layout/auth/authLayout";
-import {
-  EMPTY_SESSION_NAME,
-  SessionContent,
-} from "../../../components/templates/sessions/sessionId/SessionContent";
-import { GetServerSidePropsContext } from "next";
+import { useParams } from "react-router";
+import { SessionContent } from "./sessionId/SessionContent";
+import { useGetRequests } from "@/services/hooks/requests";
+import { useMemo, useState } from "react";
 import {
   convertRealtimeRequestToSteps,
   isRealtimeRequest,
-} from "../../../lib/sessions/realtimeSession";
-import { sessionFromHeliconeRequests } from "../../../lib/sessions/sessionsFromHeliconeTequests";
-import { useGetRequests } from "../../../services/hooks/requests";
+} from "@/lib/sessions/realtimeSession";
+import { sessionFromHeliconeRequests } from "@/lib/sessions/sessionsFromHeliconeTequests";
+import { EMPTY_SESSION_NAME } from "./sessionId/SessionContent";
 
-export const SessionDetail = ({
-  session_id,
-  session_name,
-}: {
-  session_id: string;
-  session_name: string;
-}) => {
+export default function SessionDetailShell() {
+  const { session_id, name: session_name } = useParams();
+  const decodedSessionId = session_id ? decodeURIComponent(session_id) : "";
+  const decodedSessionName = session_name
+    ? decodeURIComponent(session_name)
+    : "";
+
   const ThreeMonthsAgo = useMemo(() => {
     return new Date(Date.now() - 30 * 24 * 60 * 60 * 1000 * 3);
   }, []);
@@ -31,18 +28,18 @@ export const SessionDetail = ({
       left: {
         request_response_rmt: {
           properties:
-            session_name !== EMPTY_SESSION_NAME
+            decodedSessionName !== EMPTY_SESSION_NAME
               ? {
                   "Helicone-Session-Id": {
-                    equals: session_id as string,
+                    equals: decodedSessionId,
                   },
                   "Helicone-Session-Name": {
-                    equals: session_name as string,
+                    equals: decodedSessionName,
                   },
                 }
               : {
                   "Helicone-Session-Id": {
-                    equals: session_id as string,
+                    equals: decodedSessionId,
                   },
                 },
         },
@@ -79,43 +76,15 @@ export const SessionDetail = ({
   }, [requestsHookResult.requests.requests]);
 
   const session = sessionFromHeliconeRequests(processedRequests);
+
   return (
     <SessionContent
       session={session}
-      session_id={session_id}
-      session_name={session_name}
+      session_id={decodedSessionId}
+      session_name={decodedSessionName}
       requests={requestsHookResult}
       isLive={isLive}
       setIsLive={setIsLive}
     />
   );
-};
-
-SessionDetail.getLayout = function getLayout(page: ReactElement) {
-  return <AuthLayout>{page}</AuthLayout>;
-};
-
-export default SessionDetail;
-
-export const getServerSideProps = async (
-  context: GetServerSidePropsContext
-) => {
-  const { session_id, name: session_name } = context.query;
-
-  const decodedSessionId =
-    typeof session_id === "string"
-      ? decodeURIComponent(session_id)
-      : session_id;
-
-  const decodedSessionName =
-    typeof session_name === "string"
-      ? decodeURIComponent(session_name)
-      : session_name;
-
-  return {
-    props: {
-      session_id: decodedSessionId,
-      session_name: decodedSessionName,
-    },
-  };
-};
+}

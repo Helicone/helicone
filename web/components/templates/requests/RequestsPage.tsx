@@ -23,7 +23,6 @@ import { heliconeRequestToMappedContent } from "@helicone-package/llm-mapper/uti
 import { useGetRequestWithBodies } from "@/services/hooks/requests";
 import { UIFilterRowNode, UIFilterRowTree } from "@/services/lib/filters/types";
 import { TimeFilter } from "@/types/timeFilter";
-import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LuPlus } from "react-icons/lu";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
@@ -67,6 +66,7 @@ import StreamWarning from "./StreamWarning";
 import TableFooter from "./tableFooter";
 import UnauthorizedView from "./UnauthorizedView";
 import useRequestsPageV2 from "./useRequestsPageV2";
+import { useNavigate } from "react-router";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -133,7 +133,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   /*                                    HOOKS                                   */
   /* -------------------------------------------------------------------------- */
   const orgContext = useOrg();
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [drawerSize, setDrawerSize] = useLocalStorage("request-drawer-size", 0);
   const [isLive, setIsLive] = useLocalStorage("isLive-RequestPage", false);
@@ -417,19 +416,16 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     return getRootFilterNode();
   }, [searchParams, filterMap]);
 
+  const navigate = useNavigate();
+
   // Update the page state and router query when the page changes
   const handlePageChange = useCallback(
     (newPage: number) => {
-      router.push(
-        {
-          pathname: router.pathname,
-          query: { ...router.query, page: newPage.toString() },
-        },
-        undefined,
-        { shallow: true }
-      );
+      const currentQuery = new URLSearchParams(searchParams.toString());
+      currentQuery.set("page", newPage.toString());
+      navigate(`/requests?${currentQuery.toString()}`);
     },
-    [router]
+    [searchParams, navigate]
   );
 
   const onTimeSelectHandler = useCallback(
@@ -519,14 +515,14 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   /* -------------------------------------------------------------------------- */
   // Synchronize page state from URL query parameters
   useEffect(() => {
-    const pageFromQuery = router.query.page;
+    const pageFromQuery = searchParams.get("page");
     if (pageFromQuery && !Array.isArray(pageFromQuery)) {
       const parsedPage = parseInt(pageFromQuery, 10);
       if (!isNaN(parsedPage) && parsedPage !== page) {
         setPage(parsedPage);
       }
     }
-  }, [router.query.page]);
+  }, [searchParams, page]);
 
   // Initialize advanced filters from URL on first load
   useEffect(() => {
