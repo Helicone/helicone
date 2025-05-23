@@ -16,6 +16,10 @@ impl KeyExtractor for UserIdExtractor {
         else {
             return Err(GovernorError::UnableToExtractKey);
         };
-        Ok(ctx.auth_context.user_id.clone())
+
+        ctx.auth_context
+            .as_ref()
+            .map(|auth_context| auth_context.user_id.clone())
+            .ok_or(GovernorError::UnableToExtractKey)
     }
 }

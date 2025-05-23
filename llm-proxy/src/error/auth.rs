@@ -1,44 +1,48 @@
 use axum_core::response::{IntoResponse, Response};
+use displaydoc::Display;
 use http::StatusCode;
 use tracing::error;
 
 use super::api::ErrorResponse;
 use crate::types::json::Json;
 
-#[derive(Debug, strum::AsRefStr, thiserror::Error)]
+#[derive(Debug, strum::AsRefStr, thiserror::Error, Display)]
 pub enum AuthError {
-    #[error(transparent)]
-    Database(#[from] sqlx::Error),
-
-    #[error(transparent)]
+    /// Reqwest error: {0}
     Reqwest(#[from] reqwest::Error),
-
-    #[error(transparent)]
-    TaskJoin(#[from] tokio::task::JoinError),
-
-    #[error("Invalid credentials")]
+    /// Missing authorization header
+    MissingAuthorizationHeader,
+    /// Invalid credentials
     InvalidCredentials,
 }
 
 impl IntoResponse for AuthError {
     fn into_response(self) -> Response {
-        if let Self::InvalidCredentials = self {
-            (
+        match self {
+            Self::Reqwest(error) => {
+                error!(error = %error, "reqwest error");
+                (
+                    error.status().unwrap_or(StatusCode::INTERNAL_SERVER_ERROR),
+                    Json(ErrorResponse {
+                        error: "Authentication error".to_string(),
+                    }),
+                )
+                    .into_response()
+            }
+            Self::MissingAuthorizationHeader => (
                 StatusCode::UNAUTHORIZED,
                 Json(ErrorResponse {
-                    error: "Invalid credentials".to_string(),
+                    error: Self::MissingAuthorizationHeader.to_string(),
                 }),
             )
-                .into_response()
-        } else {
-            error!(error = %self, "authentication error");
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
+                .into_response(),
+            Self::InvalidCredentials => (
+                StatusCode::UNAUTHORIZED,
                 Json(ErrorResponse {
-                    error: "Internal server error".to_string(),
+                    error: Self::InvalidCredentials.to_string(),
                 }),
             )
-                .into_response()
+                .into_response(),
         }
     }
 }

@@ -21,6 +21,8 @@ use serde::{Deserialize, Serialize};
 use strum::IntoStaticStr;
 use thiserror::Error;
 
+use crate::utils::default_true;
+
 #[derive(Debug, Error, Display)]
 pub enum Error {
     /// error collecting config sources: {0}
@@ -48,12 +50,30 @@ pub enum DeploymentTarget {
 
 #[derive(Debug, Default, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields, rename_all = "kebab-case")]
+pub struct AuthConfig {
+    /// Whether a Helicone API key is required in order to proxy requests.
+    ///
+    /// If `require_auth=true`, then we will check for a valid Helicone API key
+    /// in the `authorization` header.
+    ///
+    /// If `require_auth=false`, we will still proxy the request, but certain
+    /// Helicone features will not be available, such as governance
+    /// features and LLM observability. Costs incurred from the requests
+    /// will be charged to the API keys associated with the given router
+    /// called by the request, so be warned!
+    #[serde(default = "default_true")]
+    pub require_auth: bool,
+}
+
+#[derive(Debug, Default, Deserialize, Serialize)]
+#[serde(default, deny_unknown_fields, rename_all = "kebab-case")]
 pub struct Config {
     pub telemetry: telemetry::Config,
     pub server: self::server::ServerConfig,
     pub database: self::database::Config,
     pub minio: self::minio::Config,
     pub dispatcher: self::dispatcher::DispatcherConfig,
+    pub auth: AuthConfig,
     /// *ALL* supported providers, independent of router configuration.
     pub providers: self::providers::ProvidersConfig,
     pub discover: self::discover::DiscoverConfig,
@@ -111,6 +131,7 @@ impl crate::tests::TestDefault for Config {
             database: self::database::Config::default(),
             minio: self::minio::Config::test_default(),
             dispatcher: self::dispatcher::DispatcherConfig::test_default(),
+            auth: AuthConfig::default(),
             default_model_mapping:
                 self::model_mapping::ModelMappingConfig::default(),
             is_production: false,

@@ -27,6 +27,15 @@ pub async fn test() {
     let response = reqwest::Client::new()
         .post("http://localhost:5678/router/v1/chat/completions")
         .header("Content-Type", "application/json")
+        // TODO: When we implement team keys we can add them here
+        // .header(
+        //     "authorization",
+        //     format!(
+        //         "Bearer {}",
+        //         std::env::var("ROUTER_TEAM_API_KEY") // RIGHT NOW TEAM LOGIC
+        // IS NOT IMPLEMENTED             .unwrap_or_else(|_|
+        // "mock-api-key".to_string())     ),
+        // )
         .body(bytes)
         .send()
         .await

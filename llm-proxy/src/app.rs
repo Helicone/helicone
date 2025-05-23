@@ -220,7 +220,9 @@ impl App {
             .layer(ErrorHandlerLayer::new(app_state.clone()))
             // NOTE: not sure if there is perf impact from Auth layer coming
             // before buffer layer, but required due to Clone bound.
-            .layer(AsyncRequireAuthorizationLayer::new(AuthService))
+            .layer(AsyncRequireAuthorizationLayer::new(AuthService::new(
+                app_state.clone(),
+            )))
             .map_err(crate::error::internal::InternalError::BufferError)
             .layer(BufferLayer::new(BUFFER_SIZE))
             .layer(ErrorHandlerLayer::new(app_state.clone()))

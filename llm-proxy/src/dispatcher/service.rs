@@ -4,6 +4,7 @@ use std::{
     task::{Context, Poll},
 };
 
+use bytes::Bytes;
 use futures::{TryStreamExt, future::BoxFuture};
 use http::{HeaderMap, HeaderName, HeaderValue, StatusCode, uri::PathAndQuery};
 use http_body_util::BodyExt;
@@ -18,6 +19,7 @@ use super::{SSEStream, sse_stream};
 use crate::{
     app::AppState,
     config::router::RouterConfig,
+    discover::monitor::health::EndpointMetricsRegistry,
     dispatcher::{
         anthropic_client::Client as AnthropicClient,
         openai_client::Client as OpenAIClient,
@@ -30,7 +32,7 @@ use crate::{
     },
     types::{
         provider::InferenceProvider,
-        request::{Request, RequestContext, StreamContext},
+        request::{AuthContext, Request, RequestContext, StreamContext},
         secret::Secret,
     },
     utils::{
@@ -174,6 +176,7 @@ impl Dispatcher {
             .get::<Arc<RequestContext>>()
             .ok_or(InternalError::ExtensionNotFound("RequestContext"))?
             .clone();
+        let auth_ctx = req_ctx.auth_context.as_ref();
         let api_endpoint = *req
             .extensions()
             .get::<ApiEndpoint>()
@@ -235,104 +238,22 @@ impl Dispatcher {
 
         let (mut response, body_reader): (
             http::Response<crate::types::body::Body>,
-            crate::types::body::BodyReader,
+            Option<crate::types::body::BodyReader>,
         ) = if stream_ctx.is_stream {
-            // TODO: add better error handling/logging
-            let response_stream =
-                Client::sse_stream(request_builder, req_body_bytes.clone())?
-                    .map_err(move |e| {
-                        if let InternalError::StreamError(error) = &e {
-                            match &**error {
-                            reqwest_eventsource::Error::StreamEnded
-                            | reqwest_eventsource::Error::Transport(..) => {
-                                if let Ok(endpoint_metrics) = metrics_for_stream
-                                    .endpoint_metrics(api_endpoint)
-                                {
-                                    endpoint_metrics
-                                        .incr_remote_internal_error_count();
-                                }
-                            }
-                            reqwest_eventsource::Error::InvalidStatusCode(
-                                status_code,
-                                ..,
-                            ) if status_code.is_server_error() => {
-                                if let Ok(endpoint_metrics) = metrics_for_stream
-                                    .endpoint_metrics(api_endpoint)
-                                {
-                                    endpoint_metrics
-                                        .incr_remote_internal_error_count();
-                                }
-                            }
-                            _ => {}
-                        }
-                        }
-                        e
-                    });
-            let mut resp_builder = http::Response::builder();
-            *resp_builder.headers_mut().unwrap() = stream_response_headers();
-            resp_builder = resp_builder.status(StatusCode::OK);
-            let (user_resp_body, body_reader) =
-                crate::types::body::Body::wrap_stream(
-                    response_stream,
-                    stream_ctx.is_stream,
-                );
-            // TODO: ATM we don't expose non 200 status codes from initial
-            // reponse, since it's not easily exposed by
-            // `reqwest-eventsource`, but we should ideally fix
-            // this.
-            let response = resp_builder
-                .body(user_resp_body)
-                .map_err(InternalError::HttpError)?;
-            (response, body_reader)
+            Self::dispatch_stream(
+                auth_ctx,
+                request_builder,
+                req_body_bytes.clone(),
+                api_endpoint,
+                metrics_for_stream,
+            )?
         } else {
-            let response = request_builder
-                .body(req_body_bytes.clone())
-                .send()
-                .await
-                .map_err(InternalError::ReqwestError)?;
-            let status = response.status();
-            let mut resp_builder = http::Response::builder().status(status);
-            *resp_builder.headers_mut().unwrap() = response.headers().clone();
-            // this if block is compiled out in release builds
-            cfg_if::cfg_if! {
-                if #[cfg(debug_assertions)] {
-                    if status.is_server_error() || status.is_client_error() {
-                        let body = response.text().await.map_err(InternalError::ReqwestError)?;
-                        tracing::error!(body = %body, "received error response");
-                        let bytes = bytes::Bytes::from(body);
-                        let stream = futures::stream::once(futures::future::ok::<_, InternalError>(bytes));
-                        let (error_body, error_reader) = crate::types::body::Body::wrap_stream(stream, false);
-                        let response = resp_builder
-                            .body(error_body)
-                            .map_err(InternalError::HttpError)?;
-                        (response, error_reader)
-                    } else {
-                        let (user_resp_body, body_reader) =
-                            crate::types::body::Body::wrap_stream(
-                                response
-                                    .bytes_stream()
-                                    .map_err(InternalError::ReqwestError),
-                                stream_ctx.is_stream,
-                            );
-                        let response = resp_builder
-                            .body(user_resp_body)
-                            .map_err(InternalError::HttpError)?;
-                        (response, body_reader)
-                    }
-                } else {
-                    let (user_resp_body, body_reader) =
-                        crate::types::body::Body::wrap_stream(
-                            response
-                                .bytes_stream()
-                                .map_err(InternalError::ReqwestError),
-                            stream_ctx.is_stream,
-                        );
-                    let response = resp_builder
-                        .body(user_resp_body)
-                        .map_err(InternalError::HttpError)?;
-                    (response, body_reader)
-                }
-            }
+            self.dispatch_sync(
+                auth_ctx,
+                request_builder,
+                req_body_bytes.clone(),
+            )
+            .await?
         };
         let provider_request_id = {
             let headers = response.headers_mut();
@@ -343,37 +264,149 @@ impl Dispatcher {
         tracing::debug!(provider_req_id = ?provider_request_id, status = %response.status(), "received response");
         response.extensions_mut().insert(stream_ctx);
 
-        let response_logger = LoggerService::builder()
-            .app_state(self.app_state.clone())
-            .req_ctx(req_ctx)
-            .target_url(target_url)
-            .request_headers(headers)
-            .request_body(req_body_bytes)
-            .response_status(response.status())
-            .response_body(body_reader)
-            .provider(target_provider)
-            .build();
+        if let Some(body_reader) = body_reader {
+            let response_logger = LoggerService::builder()
+                .app_state(self.app_state.clone())
+                .req_ctx(req_ctx)
+                .target_url(target_url)
+                .request_headers(headers)
+                .request_body(req_body_bytes)
+                .response_status(response.status())
+                .response_body(body_reader)
+                .provider(target_provider)
+                .build();
 
-        let app_state = self.app_state.clone();
-        tokio::spawn(
-            async move {
-                if let Err(e) = response_logger.log().await {
-                    tracing::error!(error = %e, "failed to log response");
-                    let error_str = e.as_ref().to_string();
-                    app_state
-                        .0
-                        .metrics
-                        .error_count
-                        .add(1, &[KeyValue::new("type", error_str)]);
+            let app_state = self.app_state.clone();
+            tokio::spawn(
+                async move {
+                    if let Err(e) = response_logger.log().await {
+                        tracing::error!(error = %e, "failed to log response");
+                        let error_str = e.as_ref().to_string();
+                        app_state
+                            .0
+                            .metrics
+                            .error_count
+                            .add(1, &[KeyValue::new("type", error_str)]);
+                    }
                 }
-            }
-            .instrument(tracing::Span::current()),
-        );
+                .instrument(tracing::Span::current()),
+            );
+        }
+
         if response.status().is_server_error() {
             endpoint_metrics.incr_remote_internal_error_count();
         }
 
         response.error_for_status()
+    }
+
+    fn dispatch_stream(
+        auth_context: Option<&AuthContext>,
+        request_builder: RequestBuilder,
+        req_body_bytes: Bytes,
+        api_endpoint: ApiEndpoint,
+        metrics_registry: EndpointMetricsRegistry,
+    ) -> Result<
+        (
+            http::Response<crate::types::body::Body>,
+            Option<crate::types::body::BodyReader>,
+        ),
+        Error,
+    > {
+        let response_stream =
+            Client::sse_stream(request_builder, req_body_bytes)?.map_err(
+                move |e| {
+                    if let InternalError::StreamError(error) = &e {
+                        if let Ok(endpoint_metrics) =
+                            metrics_registry.endpoint_metrics(api_endpoint)
+                        {
+                            endpoint_metrics.incr_for_stream_error(error);
+                        }
+                    }
+                    e
+                },
+            );
+        let mut resp_builder = http::Response::builder();
+        *resp_builder.headers_mut().unwrap() = stream_response_headers();
+        resp_builder = resp_builder.status(StatusCode::OK);
+        if auth_context.is_some() {
+            let (user_resp_body, body_reader) =
+                crate::types::body::Body::wrap_stream(response_stream, true);
+            let response = resp_builder
+                .body(user_resp_body)
+                .map_err(InternalError::HttpError)?;
+            Ok((response, Some(body_reader)))
+        } else {
+            let body = crate::types::body::Body::new(
+                reqwest::Body::wrap_stream(response_stream),
+            );
+            let response =
+                resp_builder.body(body).map_err(InternalError::HttpError)?;
+            Ok((response, None))
+        }
+    }
+
+    async fn dispatch_sync(
+        &self,
+        auth_context: Option<&AuthContext>,
+        request_builder: RequestBuilder,
+        req_body_bytes: Bytes,
+    ) -> Result<
+        (
+            http::Response<crate::types::body::Body>,
+            Option<crate::types::body::BodyReader>,
+        ),
+        Error,
+    > {
+        let response = request_builder
+            .body(req_body_bytes)
+            .send()
+            .await
+            .map_err(InternalError::ReqwestError)?;
+
+        let status = response.status();
+        let mut resp_builder = http::Response::builder().status(status);
+        *resp_builder.headers_mut().unwrap() = response.headers().clone();
+
+        // this is compiled out in release builds
+        #[cfg(debug_assertions)]
+        if status.is_server_error() || status.is_client_error() {
+            let body =
+                response.text().await.map_err(InternalError::ReqwestError)?;
+            tracing::error!(error_resp = %body, "received error response");
+            let bytes = bytes::Bytes::from(body);
+            let stream = futures::stream::once(futures::future::ok::<
+                _,
+                InternalError,
+            >(bytes));
+            let (error_body, error_reader) =
+                crate::types::body::Body::wrap_stream(stream, false);
+            let response = resp_builder
+                .body(error_body)
+                .map_err(InternalError::HttpError)?;
+            return Ok((response, Some(error_reader)));
+        }
+
+        if auth_context.is_some() {
+            let (user_resp_body, body_reader) =
+                crate::types::body::Body::wrap_stream(
+                    response
+                        .bytes_stream()
+                        .map_err(InternalError::ReqwestError),
+                    false,
+                );
+            let response = resp_builder
+                .body(user_resp_body)
+                .map_err(InternalError::HttpError)?;
+            Ok((response, Some(body_reader)))
+        } else {
+            let body = crate::types::body::Body::new(
+                reqwest::Body::wrap_stream(response.bytes_stream()),
+            );
+            let response =
+                resp_builder.body(body).map_err(InternalError::HttpError)?;
+            Ok((response, None))
+        }
     }
 }
 

@@ -72,4 +72,22 @@ impl EndpointMetrics {
     pub fn incr_remote_internal_error_count(&self) {
         self.remote_internal_error_count.incr();
     }
+
+    pub fn incr_for_stream_error(
+        &self,
+        stream_error: &reqwest_eventsource::Error,
+    ) {
+        match stream_error {
+            reqwest_eventsource::Error::StreamEnded
+            | reqwest_eventsource::Error::Transport(..) => {
+                self.incr_remote_internal_error_count();
+            }
+            reqwest_eventsource::Error::InvalidStatusCode(status_code, ..)
+                if status_code.is_server_error() =>
+            {
+                self.incr_remote_internal_error_count();
+            }
+            _ => {}
+        }
+    }
 }

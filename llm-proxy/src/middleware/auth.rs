@@ -1,14 +1,57 @@
-use std::str::FromStr;
-
+use axum_core::response::IntoResponse;
 use futures::future::BoxFuture;
-use http::{Request, StatusCode};
+use http::Request;
+use serde::Deserialize;
 use tower_http::auth::AsyncAuthorizeRequest;
+use tracing::warn;
+use url::Url;
 use uuid::Uuid;
 
-use crate::types::{org::OrgId, request::AuthContext, user::UserId};
+use crate::{
+    app::AppState,
+    error::auth::AuthError,
+    types::{org::OrgId, request::AuthContext, user::UserId},
+};
 
-#[derive(Clone, Copy)]
-pub struct AuthService;
+#[derive(Clone)]
+pub struct AuthService {
+    app_state: AppState,
+}
+
+impl AuthService {
+    #[must_use]
+    pub fn new(app_state: AppState) -> Self {
+        Self { app_state }
+    }
+
+    async fn authenticate_request_inner(
+        app_state: AppState,
+        api_key: &str,
+    ) -> Result<AuthContext, AuthError> {
+        let whoami_result = app_state
+            .0
+            .jawn_client
+            .get(whoami_url(&app_state))
+            .header("authorization", api_key)
+            .send()
+            .await?
+            .error_for_status()?;
+        let body = whoami_result.json::<WhoamiResponse>().await?;
+        Ok(AuthContext {
+            api_key: api_key.replace("Bearer ", ""),
+            user_id: UserId::new(body.user_id),
+            org_id: OrgId::new(body.organization_id),
+        })
+    }
+}
+
+#[derive(Debug, Deserialize)]
+struct WhoamiResponse {
+    #[serde(rename = "userId")]
+    user_id: Uuid,
+    #[serde(rename = "organizationId")]
+    organization_id: Uuid,
+}
 
 impl<B> AsyncAuthorizeRequest<B> for AuthService
 where
@@ -23,41 +66,59 @@ where
 
     #[tracing::instrument(skip_all)]
     fn authorize(&mut self, mut request: Request<B>) -> Self::Future {
-        tracing::trace!("Auth middleware");
+        // NOTE:
+        // this is a temporary solution, when we get the control plane up and
+        // running, we will actively be validating the helicone api keys
+        // at the router rather than authenticating with jawn each time
+        tracing::trace!("Auth middleware for axum body");
+        let app_state = self.app_state.clone();
         Box::pin(async move {
-            if let Some(auth_ctx) = check_auth(&request) {
-                // Set `auth_ctx` as a request extension so it can be accessed
-                // by other services down the stack.
-                request.extensions_mut().insert(auth_ctx);
-
-                Ok(request)
-            } else {
-                let unauthorized_response = http::Response::builder()
-                    .status(StatusCode::UNAUTHORIZED)
-                    .body(axum_core::body::Body::default())
-                    .unwrap();
-
-                Err(unauthorized_response)
+            if !app_state.0.config.auth.require_auth {
+                return Ok(request);
+            }
+            let Some(api_key) = request
+                .headers()
+                .get("authorization")
+                .and_then(|h| h.to_str().ok())
+            else {
+                return Err(
+                    AuthError::MissingAuthorizationHeader.into_response()
+                );
+            };
+            match Self::authenticate_request_inner(app_state, api_key).await {
+                Ok(auth_ctx) => {
+                    request.extensions_mut().insert(auth_ctx);
+                    Ok(request)
+                }
+                Err(e) => {
+                    warn!(error = %e, "Authentication error");
+                    Err(e.into_response())
+                }
             }
         })
     }
 }
 
-#[allow(clippy::unnecessary_wraps)]
-fn check_auth<B>(_request: &Request<B>) -> Option<AuthContext> {
-    // ...
-    // for now we are mocking this just to show how layers will stack on top of
-    // each other
+fn whoami_url(app_state: &AppState) -> Url {
+    app_state
+        .0
+        .config
+        .helicone
+        .base_url
+        .join("/v1/router/control-plane/whoami")
+        .expect("helicone base url should be valid")
+}
 
-    // test@helicone.ai / org for test
-    let org_id =
-        Uuid::from_str("83635a30-5ba6-41a8-8cc6-fb7df941b24a").unwrap();
-    let user_id =
-        Uuid::from_str("f76629c5-a070-4bbc-9918-64beaea48848").unwrap();
-    let api_key = std::env::var("HELICONE_API_KEY").unwrap();
-    Some(AuthContext {
-        api_key,
-        user_id: UserId::new(user_id),
-        org_id: OrgId::new(org_id),
-    })
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{app::App, config::Config, tests::TestDefault};
+
+    #[tokio::test]
+    async fn test_whoami_url() {
+        let app = App::new(Config::test_default()).await.unwrap();
+        let _whoami_url = whoami_url(&app.state);
+        // we don't care to assert what the url is,
+        // we just want to make sure it's not panicking
+    }
 }

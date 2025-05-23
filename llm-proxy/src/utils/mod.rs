@@ -82,3 +82,7 @@ pub(crate) fn host_header(url: &Url) -> HeaderValue {
         _ => HeaderValue::from_str("").unwrap(),
     }
 }
+
+pub(crate) fn default_true() -> bool {
+    true
+}

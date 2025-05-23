@@ -12,6 +12,8 @@ use tower::Service;
 #[serial_test::serial]
 async fn openai_slow() {
     let mut config = Config::test_default();
+    // Disable auth for this test since we're testing load balancing behavior
+    config.auth.require_auth = false;
     // enable multiple providers, test_default for RouterConfig has only a
     // single provider
     config.routers = RouterConfigs::default();
@@ -21,6 +23,11 @@ async fn openai_slow() {
         .stubs(HashMap::from([
             ("success:openai:chat_completion", (..3).into()),
             ("success:anthropic:messages", (7..).into()),
+            // Auth is disabled, so auth and logging services should not be
+            // called
+            ("success:jawn:whoami", 0.into()),
+            ("success:minio:upload_request", 0.into()),
+            ("success:jawn:log_request", 0.into()),
         ]))
         .global_openai_latency(latency)
         .verify(false)
@@ -60,6 +67,8 @@ async fn openai_slow() {
 #[serial_test::serial]
 async fn anthropic_slow() {
     let mut config = Config::test_default();
+    // Disable auth for this test since we're testing load balancing behavior
+    config.auth.require_auth = false;
     // enable multiple providers, test_default for RouterConfig has only a
     // single provider
     config.routers = RouterConfigs::default();
@@ -69,6 +78,11 @@ async fn anthropic_slow() {
         .stubs(HashMap::from([
             ("success:openai:chat_completion", (7..).into()),
             ("success:anthropic:messages", (..3).into()),
+            // Auth is disabled, so auth and logging services should not be
+            // called
+            ("success:jawn:whoami", 0.into()),
+            ("success:minio:upload_request", 0.into()),
+            ("success:jawn:log_request", 0.into()),
         ]))
         .global_anthropic_latency(latency)
         .verify(false)
