@@ -1,4 +1,4 @@
-import { MappedLLMRequest, Message } from "@/packages/llm-mapper/types";
+import { MappedLLMRequest, Message } from "@helicone-package/llm-mapper/types";
 import React, { useMemo } from "react";
 import { clsx } from "../../../../../shared/clsx";
 import { PROMPT_MODES } from "../chatTopBar";

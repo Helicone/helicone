@@ -1,3 +1,11 @@
+import { clickhousePriceCalcNonAggregated } from "@helicone-package/cost";
+import { Result, err, ok, resultMap } from "../../../packages/common/result";
+import {
+  DEFAULT_UUID,
+  HeliconeRequest,
+} from "../../../packages/llm-mapper/types";
+import { dbExecute, dbQueryClickhouse } from "../../shared/db/dbExecute";
+import { S3Client } from "../../shared/db/s3Client";
 import { FilterNode } from "../../shared/filters/filterDefs";
 import {
   buildFilterWithAuth,
@@ -9,21 +17,6 @@ import {
   buildRequestSort,
   buildRequestSortClickhouse,
 } from "../../shared/sorts/requests/sorts";
-import { Result, resultMap, ok, err } from "../../../packages/common/result";
-import {
-  dbExecute,
-  dbQueryClickhouse,
-  printRunnableQuery,
-} from "../../shared/db/dbExecute";
-import { LlmSchema } from "../../shared/requestResponseModel";
-import { mapGeminiPro } from "./mappers";
-import { S3Client } from "../../shared/db/s3Client";
-import { Provider } from "../../../packages/llm-mapper/types";
-import { HeliconeRequest } from "../../../packages/llm-mapper/types";
-import {
-  clickhousePriceCalc,
-  clickhousePriceCalcNonAggregated,
-} from "../../../packages/cost";
 
 const MAX_TOTAL_BODY_SIZE = 1024 * 1024;
 
@@ -196,7 +189,9 @@ export async function getRequestsClickhouseNoSort(
       scores,
       properties,
       assets as asset_ids,
-      target_url
+      target_url,
+      cache_reference_id,
+      cache_enabled
     FROM request_response_rmt
     WHERE (
       (${builtFilter.filter})
@@ -231,7 +226,6 @@ export async function getRequestsClickhouse(
   limit: number,
   sort: SortLeafRequest
 ): Promise<Result<HeliconeRequest[], string>> {
-  console.log("getRequestsClickhouse");
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
   }
@@ -269,6 +263,8 @@ export async function getRequestsClickhouse(
       properties,
       assets as asset_ids,
       target_url,
+      cache_reference_id,
+      cache_enabled,
       ${clickhousePriceCalcNonAggregated("request_response_rmt")} as cost_usd
     FROM request_response_rmt FINAL
     WHERE (
@@ -295,92 +291,6 @@ export async function getRequestsClickhouse(
   const mappedRequests = await mapLLMCalls(requests.data, s3Client, orgId);
 
   return mappedRequests;
-}
-
-export async function getRequestsCachedClickhouse(
-  orgId: string,
-  filter: FilterNode,
-  offset: number,
-  limit: number,
-  sort: SortLeafRequest,
-  isPartOfExperiment?: boolean,
-  isScored?: boolean
-): Promise<Result<HeliconeRequest[], string>> {
-  if (isNaN(offset) || isNaN(limit)) {
-    return { data: null, error: "Invalid offset or limit" };
-  }
-
-  if (offset > 10_000 || offset < 0) {
-    return err("unsupported offset value");
-  }
-
-  if (limit < 0 || limit > 1_000) {
-    return err("invalid limit");
-  }
-
-  const builtFilter = await buildFilterWithAuthClickHouse({
-    org_id: orgId,
-    filter,
-    argsAcc: [],
-  });
-
-  const sortSQL = buildRequestSortClickhouse(sort);
-
-  const query = `
-  SELECT
-    rmt.response_id,
-          map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as response_body,
-    rmt.response_created_at,
-    rmt.status AS response_status,
-    rmt.request_id,
-          map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as request_body,
-    rmt.request_created_at,
-    rmt.user_id AS request_user_id,
-    rmt.properties AS request_properties,
-    rmt.provider,
-    rmt.target_url,
-    rmt.model AS request_model,
-    rmt.time_to_first_token,
-    rmt.prompt_tokens + rmt.completion_tokens AS total_tokens,
-    rmt.completion_tokens,
-    rmt.prompt_tokens,
-    rmt.country_code,
-    rmt.scores,
-    rmt.properties,
-    rmt.assets as asset_ids,
-    ch.created_at AS cache_hit_created_at,
-    ch.latency AS cache_hit_latency
-  FROM request_response_rmt rmt
-  INNER JOIN cache_hits ch ON rmt.request_id = ch.request_id
-  WHERE rmt.organization_id = '${orgId}'
-    AND (${builtFilter.filter})
-  ${
-    sortSQL !== undefined
-      ? `ORDER BY ${sortSQL}`
-      : "ORDER BY rmt.request_created_at DESC"
-  }
-  LIMIT ${limit}
-  OFFSET ${offset}
-  `;
-
-  const requests = await dbQueryClickhouse<HeliconeRequest>(
-    query,
-    builtFilter.argsAcc
-  );
-
-  const s3Client = new S3Client(
-    process.env.S3_ACCESS_KEY ?? "",
-    process.env.S3_SECRET_KEY ?? "",
-    process.env.S3_ENDPOINT_PUBLIC ?? process.env.S3_ENDPOINT ?? "",
-    process.env.S3_BUCKET_NAME ?? "",
-    (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
-  );
-
-  const results = await mapLLMCalls(requests.data, s3Client, orgId);
-
-  return resultMap(results, (data) => {
-    return data;
-  });
 }
 
 export async function getRequestsCached(
@@ -495,7 +405,9 @@ async function mapLLMCalls(
         const { data: signedBodyUrl, error: signedBodyUrlErr } =
           await s3Client.getRequestResponseBodySignedUrl(
             orgId,
-            heliconeRequest.request_id
+            heliconeRequest.cache_reference_id === DEFAULT_UUID
+              ? heliconeRequest.request_id
+              : heliconeRequest.cache_reference_id ?? heliconeRequest.request_id
           );
 
         if (signedBodyUrlErr || !signedBodyUrl) {

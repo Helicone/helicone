@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
 import AuthLayout from "../../components/layout/auth/authLayout";
 import DatasetsPage from "../../components/templates/datasets/datasetsPage";
-import { withAuthSSR } from "../../lib/api/handlerWrappers";
+import { GetServerSidePropsContext } from "next";
 import { SortDirection } from "../../services/lib/sorts/requests/sorts";
 
 interface DatasetsProps {
@@ -35,9 +35,11 @@ Datasets.getLayout = function getLayout(page: ReactElement) {
 
 export default Datasets;
 
-export const getServerSideProps = withAuthSSR(async (options) => {
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
   const { page, page_size, sortKey, sortDirection, isCustomProperty, tab } =
-    options.context.query;
+    context.query;
 
   const currentPage = parseInt(page as string, 10) || 1;
   const pageSize = parseInt(page_size as string, 10) || 10;
@@ -54,4 +56,4 @@ export const getServerSideProps = withAuthSSR(async (options) => {
       defaultIndex: tab ? parseInt(tab as string) : 0,
     },
   };
-});
+};

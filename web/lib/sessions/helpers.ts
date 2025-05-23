@@ -1,5 +1,6 @@
 import {
   FolderNode,
+  HeliconeRequestType,
   Session,
   Trace,
   TraceNode,
@@ -63,6 +64,7 @@ export const tracesToFolderNodes = (traces: Trace[]): FolderNode[] => {
       if (!folderMap[currentPath]) {
         const newFolder: FolderNode = {
           folderName: part,
+          currentPath: currentPath,
           children: [],
         };
         folderMap[currentPath] = newFolder;
@@ -89,64 +91,50 @@ export const tracesToFolderNodes = (traces: Trace[]): FolderNode[] => {
   return rootPaths.map((rootPath) => folderMap[rootPath]);
 };
 
-const earliestFolder = (folder: FolderNode): number => {
+export const totalLatency = (folder: FolderNode): number => {
   if (folder.children.length === 0) {
     return 0;
   }
 
-  return Math.min(
-    ...folder.children.map((child) => {
-      if ("folderName" in child) {
-        return earliestFolder(child);
-      } else {
-        return child.start_unix_timestamp_ms;
-      }
-    })
-  );
-};
-
-export const latestFolder = (folder: FolderNode): number => {
-  if (folder.children.length === 0) {
-    return 0;
-  }
-
-  return Math.max(
-    ...folder.children.map((child) => {
-      if ("folderName" in child) {
-        return latestFolder(child);
-      } else {
-        return child.end_unix_timestamp_ms;
-      }
-    })
-  );
+  return folder.children.reduce((acc, child) => {
+    if ("folderName" in child) {
+      return acc + totalLatency(child);
+    } else {
+      return (
+        acc + (child.end_unix_timestamp_ms - child.start_unix_timestamp_ms)
+      );
+    }
+  }, 0);
 };
 
 export const tracesToTreeNodeData = (traces: Trace[]): TreeNodeData => {
   if (traces.length === 0) {
     return {
-      duration: "0s",
-      name: "",
+      latency: 0,
+      subPathName: "",
+      currentPath: "",
     };
   }
   const folderNodes = tracesToFolderNodes(traces);
-
   const folderToTreeNode = (folder: FolderNode): TreeNodeData => {
     return {
-      name: folder.folderName,
-      duration: `${(latestFolder(folder) - earliestFolder(folder)) / 1000}s`,
+      subPathName: folder.folderName,
+      latency: totalLatency(folder),
+      currentPath: folder.currentPath,
       children: folder.children.map((child) => {
         if ("folderName" in child) {
           return folderToTreeNode(child);
         } else {
           return {
             trace: child,
-            name: "LLM",
-            duration: `${
-              (child.end_unix_timestamp_ms - child.start_unix_timestamp_ms) /
-              1000
-            }s`,
+            currentPath: child.path,
+            latency:
+              child?.end_unix_timestamp_ms && child?.start_unix_timestamp_ms
+                ? child.end_unix_timestamp_ms - child.start_unix_timestamp_ms
+                : 0,
             properties: child.properties,
-          } as TreeNodeData;
+            heliconeRequestType: getHeliconeRequestType(child),
+          };
         }
       }),
     };
@@ -154,3 +142,11 @@ export const tracesToTreeNodeData = (traces: Trace[]): TreeNodeData => {
 
   return folderToTreeNode(folderNodes[0]);
 };
+
+function getHeliconeRequestType(trace: Trace): HeliconeRequestType {
+  return trace.request.model.startsWith("tool:")
+    ? "Tool"
+    : trace.request.model.startsWith("vector_db")
+    ? "VectorDB"
+    : "LLM";
+}

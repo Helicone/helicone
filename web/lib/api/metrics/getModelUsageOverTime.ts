@@ -1,5 +1,5 @@
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import { Result } from "../../../packages/common/result";
+import { Result } from "@/packages/common/result";
 import {
   isValidTimeIncrement,
   isValidTimeZoneDifference,

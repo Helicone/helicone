@@ -28,6 +28,7 @@ import RequestsPage from "../requests/RequestsPage";
 import UnauthorizedView from "../requests/UnauthorizedView";
 import { formatNumber } from "../users/initialColumns";
 import { useCachePageClickHouse } from "./useCachePage";
+import { formatTimeSaved } from "@/lib/timeCalculations/time";
 
 interface CachePageProps {
   currentPage: number;
@@ -83,6 +84,7 @@ const CachePage = (props: CachePageProps) => {
     first_used: Date;
     prompt: string;
     model: string;
+    response: string;
   }>();
   const [open, setOpen] = useState<boolean>(false);
   const [openUpgradeModal, setOpenUpgradeModal] = useState<boolean>(false);
@@ -95,12 +97,13 @@ const CachePage = (props: CachePageProps) => {
   } = useGetUnauthorized(heliconeAuthClient?.user?.id || "");
 
   const hasCache = useMemo(() => {
+    if (isAnyLoading) return null;
     const cacheHits = chMetrics.totalCacheHits.data?.data;
     if (cacheHits === undefined || cacheHits === null) {
       return false;
     }
     return +cacheHits > 0;
-  }, [chMetrics.totalCacheHits.data?.data]);
+  }, [chMetrics.totalCacheHits.data?.data, isAnyLoading]);
 
   const shouldShowUnauthorized = hasCache && unauthorized;
 
@@ -118,7 +121,7 @@ const CachePage = (props: CachePageProps) => {
     return null;
   }
 
-  if (!hasCache && !isLoading) {
+  if (hasCache === false) {
     return (
       <div className="flex flex-col w-full h-screen bg-background dark:bg-sidebar-background">
         <div className="flex flex-1 h-full">
@@ -131,22 +134,22 @@ const CachePage = (props: CachePageProps) => {
   const metrics = [
     {
       id: "caches",
-      label: "All Time Caches",
+      label: "Total Cache Hits",
       value: `${chMetrics.totalCacheHits.data?.data ?? 0} hits`,
       isLoading: isAnyLoading,
       icon: CircleStackIcon,
     },
     {
       id: "savings",
-      label: "All Time Savings",
+      label: "Cost Savings",
       value: `$${formatNumber(chMetrics.totalSavings.data?.data ?? 0)}`,
       isLoading: isAnyLoading,
       icon: BanknotesIcon,
     },
     {
       id: "time-saved",
-      label: "Total Time Saved",
-      value: `${chMetrics.timeSaved.data?.data ?? 0} s`,
+      label: "Time Saved",
+      value: formatTimeSaved(chMetrics.timeSaved.data?.data ?? 0),
       isLoading: isAnyLoading,
       icon: ClockIcon,
     },
@@ -211,6 +214,11 @@ const CachePage = (props: CachePageProps) => {
             <TabsContent value="0">
               <div className="flex flex-col xl:flex-row gap-4 w-full py-4">
                 <div className="flex flex-col space-y-4 w-full xl:w-1/2">
+                  <div className="w-full border border-orange-300 dark:border-orange-700 bg-orange-50 dark:bg-orange-950 p-4 text-sm rounded-lg text-orange-800 dark:text-orange-200">
+                    We reworked our caching system on May 22nd, 2025 at 4:30PM
+                    PST. Reach out to us to restore any cache data prior to the
+                    change.
+                  </div>
                   <ul className="flex flex-col sm:flex-row items-center gap-4 w-full">
                     {metrics.map((metric, i) => (
                       <li
@@ -355,6 +363,12 @@ space-y-4 py-6 bg-white dark:bg-black border border-gray-300 dark:border-gray-70
             <p className="text-gray-500 text-sm font-medium">Request</p>
             <p className="text-gray-900 dark:text-gray-100 p-2 border border-gray-300 bg-gray-100 dark:border-gray-700 dark:bg-gray-900 rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
               {selectedRequest?.prompt || "n/a"}
+            </p>
+          </div>
+          <div className="w-full flex flex-col text-left space-y-1 mb-4 pt-8">
+            <p className="text-gray-500 text-sm font-medium">Response</p>
+            <p className="text-gray-900 dark:text-gray-100 p-2 border border-gray-300 bg-gray-100 dark:border-gray-700 dark:bg-gray-900 rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
+              {selectedRequest?.response || "n/a"}
             </p>
           </div>
         </div>

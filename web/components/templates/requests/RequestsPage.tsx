@@ -15,8 +15,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import FilterASTButton from "@/filterAST/FilterASTButton";
-import { HeliconeRequest, MappedLLMRequest } from "@/packages/llm-mapper/types";
-import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
+import {
+  HeliconeRequest,
+  MappedLLMRequest,
+} from "@helicone-package/llm-mapper/types";
+import { heliconeRequestToMappedContent } from "@helicone-package/llm-mapper/utils/getMappedContent";
 import { useGetRequestWithBodies } from "@/services/hooks/requests";
 import { UIFilterRowNode, UIFilterRowTree } from "@/services/lib/filters/types";
 import { TimeFilter } from "@/types/timeFilter";
@@ -82,6 +85,11 @@ interface RequestsPageV2Props {
   emptyStateOptions?: RequestsPageEmptyStateOptions;
 }
 
+type TRequest = {
+  id: string;
+  metadata: MappedLLMRequest;
+};
+
 export default function RequestsPage(props: RequestsPageV2Props) {
   const {
     currentPage,
@@ -91,7 +99,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     initialRequestId,
     userId,
     rateLimited = false,
-    organizationLayoutAvailable,
     emptyStateOptions = {
       options: EMPTY_STATE_PAGES.requests,
       isVisible: true,
@@ -133,44 +140,66 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   const { unauthorized, currentTier } = useGetUnauthorized(userId || "");
   const initialRequest = useGetRequestWithBodies(initialRequestId || "");
 
+  const cacheFilter: FilterNode = isCached
+    ? {
+        request_response_rmt: {
+          cache_enabled: {
+            equals: true,
+          },
+        },
+      }
+    : "all";
+
+  // filter when custom is not selected
+  const defaultFilter = useMemo<FilterNode>(() => {
+    const currentTimeFilter = searchParams.get("t");
+    const timeIntervalDate = getTimeIntervalAgo(
+      (currentTimeFilter as TimeInterval) || "1m"
+    );
+    return {
+      left: {
+        request_response_rmt: {
+          request_created_at: {
+            gte: new Date(timeIntervalDate),
+          },
+        },
+      },
+      operator: "and",
+      right: cacheFilter,
+    };
+  }, [cacheFilter]);
+
   // TODO: Move this to a better place or turn into callback
   const getTimeFilter = () => {
     const currentTimeFilter = searchParams.get("t");
-    const tableName = getTableName(isCached);
-    const createdAtColumn = getCreatedAtColumn(isCached);
 
     if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
       const [_, start, end] = currentTimeFilter.split("_");
 
       const filter: FilterNode = {
         left: {
-          [tableName]: {
-            [createdAtColumn]: {
-              gte: new Date(start).toISOString(),
+          request_response_rmt: {
+            request_created_at: {
+              gte: new Date(start),
             },
           },
         },
         operator: "and",
         right: {
-          [tableName]: {
-            [createdAtColumn]: {
-              lte: new Date(end).toISOString(),
+          left: {
+            request_response_rmt: {
+              request_created_at: {
+                lte: new Date(end),
+              },
             },
           },
+          operator: "and",
+          right: cacheFilter,
         },
       };
       return filter;
     } else {
-      const timeIntervalDate = getTimeIntervalAgo(
-        (currentTimeFilter as TimeInterval) || "1m"
-      );
-      return {
-        [tableName]: {
-          [createdAtColumn]: {
-            gte: new Date(timeIntervalDate).toISOString(),
-          },
-        },
-      };
+      return defaultFilter;
     }
   };
   const getTimeRange = () => {
@@ -200,8 +229,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   const sortLeaf: SortLeafRequest = getSortLeaf(
     sort.sortKey,
     sort.sortDirection,
-    sort.isCustomProperty,
-    isCached
+    sort.isCustomProperty
   );
   const {
     count: realCount,
@@ -213,7 +241,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     properties: realProperties,
     refetch: realRefetch,
     filterMap: realFilterMap,
-    searchPropertyFilters: realSearchPropertyFilters,
   } = useRequestsPageV2(
     page,
     currentPageSize,
@@ -269,11 +296,11 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   // Moved activeColumns state management here
   const [activeColumns, setActiveColumns] = useLocalStorage<DragColumnItem[]>(
     `requests-table-activeColumns`, // Use a unique key
-    getInitialColumns(isCached).map(columnDefToDragColumnItem) // Initialize with default columns
+    getInitialColumns().map(columnDefToDragColumnItem) // Initialize with default columns
   );
 
   const columnsWithProperties = useMemo(() => {
-    const initialColumns = getInitialColumns(isCached);
+    const initialColumns = getInitialColumns();
     return [...initialColumns].concat(
       properties.map((property) => {
         return {
@@ -300,16 +327,17 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   }, [properties, isCached]);
 
   const {
-    selectMode: _selectMode,
-    toggleSelectMode: _toggleSelectMode,
+    selectMode,
     selectedIds,
     toggleSelection,
     selectAll,
     isShiftPressed,
-  } = useSelectMode({
-    items: requests,
-    getItemId: (request: MappedLLMRequest) =>
-      request.heliconeMetadata.requestId,
+  } = useSelectMode<TRequest>({
+    items: requests.map((request, index) => ({
+      id: index.toString(),
+      metadata: request,
+    })),
+    getItemId: (request) => request.id,
   });
 
   const requestWithoutStream = requests.find((r) => {
@@ -319,6 +347,12 @@ export default function RequestsPage(props: RequestsPageV2Props) {
       r.heliconeMetadata.provider === "OPENAI"
     );
   });
+
+  const selectedRequests = useMemo(() => {
+    return requests.filter((_, index) =>
+      selectedIds.includes(index.toString())
+    );
+  }, [requests, selectedIds]);
 
   /* -------------------------------------------------------------------------- */
   /*                                  CALLBACKS                                 */
@@ -400,33 +434,35 @@ export default function RequestsPage(props: RequestsPageV2Props) {
 
   const onTimeSelectHandler = useCallback(
     (key: TimeInterval, value: string) => {
-      const tableName = getTableName(isCached);
-      const createdAtColumn = getCreatedAtColumn(isCached);
       if (key === "custom") {
         const [start, end] = value.split("_");
         const filter: FilterNode = {
           left: {
-            [tableName]: {
-              [createdAtColumn]: {
-                gte: new Date(start).toISOString(),
+            request_response_rmt: {
+              request_created_at: {
+                gte: new Date(start),
               },
             },
           },
           operator: "and",
           right: {
-            [tableName]: {
-              [createdAtColumn]: {
-                lte: new Date(end).toISOString(),
+            left: {
+              request_response_rmt: {
+                request_created_at: {
+                  lte: new Date(end),
+                },
               },
             },
+            operator: "and",
+            right: cacheFilter,
           },
         };
         setTimeFilter(filter);
       } else {
         setTimeFilter({
-          [tableName]: {
-            [createdAtColumn]: {
-              gte: new Date(getTimeIntervalAgo(key)).toISOString(),
+          request_response_rmt: {
+            request_created_at: {
+              gte: new Date(getTimeIntervalAgo(key)),
             },
           },
         });
@@ -447,7 +483,10 @@ export default function RequestsPage(props: RequestsPageV2Props) {
         (event.target.tagName.toLowerCase() === "button" ||
           event.target.closest("button") !== null);
       if (isShiftPressed || event?.metaKey || isCheckboxClick) {
-        toggleSelection(row);
+        toggleSelection({
+          id: index.toString(),
+          metadata: row,
+        });
         return;
       } else {
         setSelectedDataIndex(index);
@@ -463,43 +502,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
       setSelectedData,
       searchParams,
     ]
-  );
-
-  const onSetAdvancedFiltersHandler = useCallback(
-    (filters: UIFilterRowTree, layoutFilterId?: string | null) => {
-      const encodeFilters = (filters: UIFilterRowTree): string => {
-        const encode = (node: UIFilterRowTree): any => {
-          if (isFilterRowNode(node)) {
-            return {
-              type: "node",
-              operator: node.operator,
-              rows: node.rows.map(encode),
-            };
-          } else {
-            return {
-              type: "leaf",
-              filter: `${filterMap[node.filterMapIdx].label}:${
-                filterMap[node.filterMapIdx].operators[node.operatorIdx].label
-              }:${encodeURIComponent(node.value)}`,
-            };
-          }
-        };
-
-        return JSON.stringify(encode(filters));
-      };
-
-      setAdvancedFilters(filters);
-      if (
-        layoutFilterId === null ||
-        (isFilterRowNode(filters) && filters.rows.length === 0)
-      ) {
-        searchParams.delete("filters");
-      } else {
-        const currentAdvancedFilters = encodeFilters(filters);
-        searchParams.set("filters", currentAdvancedFilters);
-      }
-    },
-    [searchParams, filterMap]
   );
 
   const getDefaultValue = useCallback(() => {
@@ -646,7 +648,13 @@ export default function RequestsPage(props: RequestsPageV2Props) {
                 {/* Export button */}
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <ExportButton rows={requests} />
+                    <ExportButton
+                      rows={
+                        selectedRequests.length > 0
+                          ? selectedRequests
+                          : requests
+                      }
+                    />
                   </TooltipTrigger>
                   <TooltipContent>Export data</TooltipContent>
                 </Tooltip>
@@ -676,7 +684,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
               tableRef={tableRef}
               activeColumns={activeColumns}
               setActiveColumns={setActiveColumns}
-              highlightedIds={selectedData ? [selectedData.id] : selectedIds}
               checkboxMode={"on_hover"}
               defaultData={requests}
               defaultColumns={columnsWithProperties}
@@ -715,8 +722,10 @@ export default function RequestsPage(props: RequestsPageV2Props) {
               onRowSelect={onRowSelectHandler}
               onSelectAll={selectAll}
               selectedIds={selectedIds}
+              // only for request page
+              currentRow={selectedData}
             >
-              {_selectMode && (
+              {selectMode && (
                 <Row className="gap-5 items-center w-full justify-between bg-white dark:bg-black p-5">
                   <div className="flex flex-row gap-2 items-center">
                     <span className="text-sm font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">
@@ -807,7 +816,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
       {/* Floating Elements */}
       <ThemedModal open={modalOpen} setOpen={setModalOpen}>
         <NewDataset
-          request_ids={selectedIds}
+          request_ids={selectedRequests.map((request) => request.id)}
           onComplete={() => {
             setModalOpen(false);
           }}
@@ -869,12 +878,8 @@ function getTimeIntervalAgo(interval: TimeInterval): Date {
 function getSortLeaf(
   sortKey: string | null,
   sortDirection: SortDirection | null,
-  isCustomProperty: boolean,
-  isCached: boolean
+  isCustomProperty: boolean
 ): SortLeafRequest {
-  if (isCached && sortKey === "created_at") {
-    sortKey = "cache_created_at";
-  }
   if (sortKey && sortDirection && isCustomProperty) {
     return {
       properties: {
@@ -885,19 +890,9 @@ function getSortLeaf(
     return {
       [sortKey]: sortDirection,
     };
-  } else if (isCached) {
-    return {
-      cache_created_at: "desc",
-    };
   } else {
     return {
       created_at: "desc",
     };
   }
-}
-function getTableName(isCached: boolean): string {
-  return isCached ? "cache_hits" : "request_response_rmt";
-}
-function getCreatedAtColumn(isCached: boolean): string {
-  return isCached ? "created_at" : "request_created_at";
 }

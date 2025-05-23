@@ -7,8 +7,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { getJawnClient } from "@/lib/clients/jawn";
-import { MappedLLMRequest } from "@/packages/llm-mapper/types";
-import React, { useEffect, useMemo, useState } from "react";
+import { MappedLLMRequest } from "@helicone-package/llm-mapper/types";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import {
   PiCaretDownBold,
   PiDownloadBold,
@@ -22,6 +22,7 @@ import {
   PiTextTBold,
 } from "react-icons/pi";
 import ReactMarkdown from "react-markdown";
+import { getSortedMessagesFromMappedRequest } from "@/lib/sessions/realtimeSession";
 
 type MessageType =
   | "text"
@@ -36,6 +37,7 @@ interface RealtimeProps {
     startIndex: number;
     endIndex: number;
   };
+  onRequestSelect?: (request_id: string) => void;
 }
 
 // Helper function to determine the default expansion state for deleted messages
@@ -65,17 +67,42 @@ const calculateDefaultExpandedStates = (
 
 export const Realtime: React.FC<RealtimeProps> = ({
   mappedRequest,
-  messageIndexFilter,
+  messageIndexFilter: propMessageIndexFilter,
+  onRequestSelect,
 }) => {
+  const messageToScrollToRef = useRef<HTMLDivElement>(null);
+  const [shouldScroll, setShouldScroll] = useState(true);
+
+  // Derive messageIndexFilter from metadata if not provided
+  const derivedMessageIndexFilter = useMemo(() => {
+    if (propMessageIndexFilter) {
+      return propMessageIndexFilter; // Use prop if available
+    }
+    const stepIndexStr =
+      mappedRequest.heliconeMetadata?.customProperties
+        ?._helicone_realtime_step_index;
+    if (stepIndexStr) {
+      const stepIndex = parseInt(stepIndexStr, 10);
+      if (!isNaN(stepIndex)) {
+        // Create a filter for the single step index
+        return {
+          startIndex: stepIndex,
+          endIndex: stepIndex,
+        };
+      }
+    }
+
+    return undefined; // No filter derived
+  }, [
+    propMessageIndexFilter,
+    mappedRequest.heliconeMetadata?.customProperties,
+  ]);
+
   // Get all messages sorted by timestamp
-  const sortedMessages = [
-    ...(mappedRequest.schema.request?.messages || []),
-    ...(mappedRequest.schema.response?.messages || []),
-  ].sort((a, b) => {
-    const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
-    const timeB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
-    return timeA - timeB;
-  });
+  const sortedMessages = useMemo(
+    () => getSortedMessagesFromMappedRequest(mappedRequest),
+    [mappedRequest]
+  );
 
   // Define getMessageType function before using it
   const getMessageType = (message: any): MessageType => {
@@ -95,9 +122,9 @@ export const Realtime: React.FC<RealtimeProps> = ({
 
   // Filter messages based on the provided index filter
   const filteredMessages = useMemo(() => {
-    // If we have a message index filter, use that
-    if (messageIndexFilter) {
-      const { startIndex, endIndex } = messageIndexFilter;
+    // Use the derived filter
+    if (derivedMessageIndexFilter) {
+      const { startIndex, endIndex } = derivedMessageIndexFilter;
 
       // Filter by message index
       if (typeof startIndex === "number") {
@@ -125,17 +152,20 @@ export const Realtime: React.FC<RealtimeProps> = ({
 
     // If no filter, return all messages
     return sortedMessages;
-  }, [sortedMessages, messageIndexFilter]);
+  }, [sortedMessages, derivedMessageIndexFilter]);
 
   // State to manage the expansion of deleted messages
   const [deletedMessageStates, setDeletedMessageStates] = useState<{
     [key: string]: boolean;
   }>({});
 
+  const defaultDeletedStates = useMemo(
+    () => calculateDefaultExpandedStates(filteredMessages),
+    [filteredMessages]
+  );
+
   // Effect to update deleted message states when filters change, preserving user interactions
   useEffect(() => {
-    const newDefaultStates = calculateDefaultExpandedStates(filteredMessages);
-
     setDeletedMessageStates((prevStates) => {
       const nextStates: { [key: string]: boolean } = {};
       filteredMessages.forEach((message, idx) => {
@@ -144,12 +174,12 @@ export const Realtime: React.FC<RealtimeProps> = ({
           // If the state for this key exists in the previous state (user might have toggled it), keep it.
           // Otherwise, use the newly calculated default state.
           nextStates[key] =
-            key in prevStates ? prevStates[key] : newDefaultStates[key];
+            key in prevStates ? prevStates[key] : defaultDeletedStates[key];
         }
       });
       return nextStates;
     });
-  }, [filteredMessages]); // Re-run only when filteredMessages change
+  }, [filteredMessages, defaultDeletedStates]); // Only depend on filtered messages and default states
 
   // Toggle function remains the same
   const toggleDeletedMessage = (key: string) => {
@@ -158,12 +188,13 @@ export const Realtime: React.FC<RealtimeProps> = ({
 
   // Get information about the active filter for display
   const filterInfo = useMemo(() => {
+    // Use the derived filter
     if (
-      messageIndexFilter &&
-      typeof messageIndexFilter.startIndex === "number"
+      derivedMessageIndexFilter &&
+      typeof derivedMessageIndexFilter.startIndex === "number"
     ) {
-      const startIndex = messageIndexFilter.startIndex;
-      const endIndex = messageIndexFilter.endIndex;
+      const startIndex = derivedMessageIndexFilter.startIndex;
+      const endIndex = derivedMessageIndexFilter.endIndex;
 
       // Simple filter info that just shows the index range
       return {
@@ -174,7 +205,7 @@ export const Realtime: React.FC<RealtimeProps> = ({
     }
 
     return null;
-  }, [messageIndexFilter]);
+  }, [derivedMessageIndexFilter]);
 
   // Always get the last session update from all messages, not just filtered ones
   const lastMsg = sortedMessages.findLast((msg) => msg._type === "message");
@@ -190,6 +221,19 @@ export const Realtime: React.FC<RealtimeProps> = ({
     };
     return icons[type];
   };
+
+  useEffect(() => {
+    if (
+      messageToScrollToRef.current &&
+      filterInfo?.isFiltered &&
+      shouldScroll
+    ) {
+      messageToScrollToRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, [filterInfo?.isFiltered, filteredMessages, shouldScroll]);
 
   return (
     <div className={`w-full flex flex-col gap-4 ${filterInfo ? "" : "pt-4"}`}>
@@ -210,7 +254,7 @@ export const Realtime: React.FC<RealtimeProps> = ({
 
       {/* Messages Section */}
       <div className="gap-4">
-        {filteredMessages.map((message, idx) => {
+        {sortedMessages.map((message, idx) => {
           const isUser = message.role === "user";
           const isTranscript = message._type === "audio" && message.content;
           const timestamp = message.timestamp
@@ -221,11 +265,39 @@ export const Realtime: React.FC<RealtimeProps> = ({
           const messageKey = `${idx}-${message.timestamp}`; // Use index within the current filtered list + timestamp
           const isDeletedExpanded = deletedMessageStates[messageKey] ?? false; // Use state, default to false if not set
 
+          const shouldScrollToThisMessage =
+            filterInfo?.isFiltered &&
+            idx >= (filterInfo.startIndex || 0) &&
+            idx <= (filterInfo.endIndex || filterInfo.startIndex || 0);
+
+          const isFilteredMessage =
+            !filterInfo?.isFiltered || shouldScrollToThisMessage;
+
           return (
             <div
-              key={messageKey} // Key remains the same
+              key={messageKey}
+              ref={shouldScrollToThisMessage ? messageToScrollToRef : null}
               className={`flex flex-col px-4 pb-4 mb-4 w-full 
-                ${isUser ? "items-end" : "items-start"} `}
+                ${isUser ? "items-end" : "items-start"}
+                ${isFilteredMessage ? "" : "opacity-25"}
+                ${
+                  onRequestSelect
+                    ? "hover:cursor-pointer hover:bg-accent/50"
+                    : ""
+                }`}
+              onClick={() => {
+                if (
+                  filterInfo?.isFiltered &&
+                  filterInfo?.startIndex === filterInfo?.endIndex
+                ) {
+                  onRequestSelect?.(
+                    mappedRequest.id.replace(
+                      `-step-${filterInfo?.startIndex}`,
+                      `-step-${idx}`
+                    )
+                  );
+                }
+              }}
             >
               {isDeleted ? (
                 // Collapsible structure for deleted messages
@@ -387,6 +459,19 @@ export const Realtime: React.FC<RealtimeProps> = ({
                         )}
                       </div>
                     )}
+                  </div>
+                  <div
+                    className={`flex items-center space-x-2 text-xs text-secondary ${
+                      isUser ? "justify-end" : "justify-start"
+                    }`}
+                  >
+                    <span className="text-tertiary">
+                      {message.trigger_event_id && message.ending_event_id && (
+                        <>
+                          {`${message.trigger_event_id} -> ${message.ending_event_id}`}
+                        </>
+                      )}
+                    </span>
                   </div>
                 </div>
               )}

@@ -2,7 +2,10 @@ import React from "react";
 
 import { MessageGroup } from "./MessageGroup";
 import { PartialMessages } from "./ParitalMessage";
-import { MappedLLMRequest, PromptMessage } from "@/packages/llm-mapper/types";
+import {
+  MappedLLMRequest,
+  PromptMessage,
+} from "@helicone-package/llm-mapper/types";
 import { PROMPT_MODES } from "./chatTopBar";
 
 interface MessageRendererProps {

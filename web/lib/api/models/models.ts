@@ -1,10 +1,10 @@
-import { clickhousePriceCalc } from "../../../packages/cost";
+import { clickhousePriceCalc } from "@helicone-package/cost";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
   buildFilterClickHouse,
   buildFilterWithAuthClickHouse,
 } from "../../../services/lib/filters/filters";
-import { Result } from "../../../packages/common/result";
+import { Result } from "@/packages/common/result";
 import { dbQueryClickhouse } from "../db/dbExecute";
 
 export interface ModelMetric {

@@ -20,6 +20,10 @@ export interface ApiKey {
   apiKey: string;
 }
 
+export interface SqsSettings {
+  messagesPerMiniBatch: number;
+}
+
 export interface SettingsType {
   "kafka:dlq": KafkaSettings;
   "kafka:log": KafkaSettings;
@@ -33,6 +37,10 @@ export interface SettingsType {
   "anthropic:apiKey": ApiKey;
   "openrouter:apiKey": ApiKey;
   "togetherai:apiKey": ApiKey;
+  "sqs:request-response-logs": SqsSettings;
+  "sqs:helicone-scores": SqsSettings;
+  "sqs:request-response-logs-dlq": SqsSettings;
+  "sqs:helicone-scores-dlq": SqsSettings;
 }
 
 export type SettingName = keyof SettingsType;

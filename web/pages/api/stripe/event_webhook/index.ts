@@ -5,7 +5,7 @@ import {
 } from "@/lib/api/stripe/llmUsage";
 import { PosthogClient } from "@/lib/clients/posthogClient";
 import { getHeliconeAuthClient } from "@/packages/common/auth/server/AuthClientFactory";
-import { costOf } from "@/packages/cost";
+import { costOf } from "@helicone-package/cost";
 import { OnboardingState } from "@/services/hooks/useOrgOnboarding";
 import { WebClient } from "@slack/web-api";
 import generateApiKey from "generate-api-key";

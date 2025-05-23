@@ -1,0 +1,57 @@
+Tusk uses Helicone Sessions to quickly navigate complex LLM chains in their AI test generation platform, enabling one-click debugging access from customer-reported alerts to pinpoint failures in their multi-step process
+
+## Debugging Complex AI Testing Workflows
+
+Tusk builds advanced AI agents that automatically generate unit and integration tests to help engineering teams prevent bugs and increase code coverage. 
+
+Unlike code review tools, Tusk reads codebases and documentation to create verified test cases. It then runs these tests to find bugs and provides verified suggestions that cover the blind spots for teams wanting to ship faster while maintaining quality.
+
+This workflow involves multiple chains of LLM calls that:
+
+- Parse and analyze customer codebases
+- Generate appropriate test scenarios
+- Create functional test code
+- Provide actionable results back to developers
+
+> We have alerts for events such as when a customer reports a bug. When we actually look at logs, we basically have a button that goes directly to the Helicone session. 
+
+— Jun Yu Tan, Founding Engineer, Tusk
+
+##  Finding Needles in the Haystack
+
+When customers report issues with Tusk's AI-generated tests, their engineering team needs to pinpoint exactly where and why a failure occurred within these sophisticated LLM chains. 
+
+The debugging challenge is magnified by the complexity of their multi-step AI workflow that spans code analysis, test generation, execution, and iteration.
+
+> We usually look at sessions to determine where exactly something might have gone wrong. The tree structure helps narrow things down.
+
+— Jun Yu, Tusk
+
+Before having a structured way to visualize their AI pipelines, the team struggled with pinpointing which specific request in a chain of dozens or hundreds contained issues such as context length errors, status code failures, or LLM hallucinations.
+
+When a test generation failed or produced unexpected results, determining whether the issue stemmed from initial code analysis, test design, execution errors, or iteration problems was a time-consuming process.
+
+## Navigating Complex LLM Workflows with Precision
+
+Implementing Helicone Sessions transformed Tusk's debugging workflow by providing a hierarchical visualization that maps directly to their AI pipeline structure. Engineers can now see the complete relationship between requests, following the exact path of execution from initial code analysis through test generation and execution.
+
+The hierarchical structure allows engineers to collapse irrelevant sections and focus precisely on suspicious areas, dramatically reducing the time needed to isolate issues.
+
+> It's nice to be able to collapse everything and then determine, 'Okay, we think the error is in this part,' and expand that and look there. Sessions helps us locate where the issue is using the paths.
+
+— Jun Yu, Tusk
+
+This visibility has allowed the team to debug their testing pipeline from hours of log searching to seconds of targeted investigation.
+
+## Helicone's Impact 
+
+Helicone's Sessions feature has become a core part of Tusk's debugging infrastructure: 
+
+- Time to pinpoint test generation failures reduced from hours to minutes
+- Customer issue are resolved same-day instead of over the span of multiple days
+- Engineering time saved estimated at 1-2 full engineering days per week. 
+- The accuracy of identifying the root cause of issues increased from uncertain root cause in many cases to precise failure point identification in nearly all cases
+
+## Bring Clarity to Your LLM Workflows
+
+Want to debug complex AI processes like Tusk? Try Helicone free today and see how Sessions can transform your development workflow.

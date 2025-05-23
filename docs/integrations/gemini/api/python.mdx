@@ -43,6 +43,17 @@ iconType: "solid"
     )
     ```
 
+    <Note>
+      If you're using Vertex AI integration (with `GOOGLE_GENAI_USE_VERTEXAI=True`), you need to modify the target URL to point to the Vertex AI endpoint:
+
+      ```python
+      # Use this target URL when GOOGLE_GENAI_USE_VERTEXAI=True
+      "helicone-target-url": f'https://{os.environ.get("GOOGLE_CLOUD_LOCATION")}-aiplatform.googleapis.com'
+      ```
+
+      Make sure the `GOOGLE_CLOUD_LOCATION` environment variable is set to your Google Cloud region (e.g., `us-central1`).
+    </Note>
+
   </Step>
   <Step title="Generate content using the model">
     ```python

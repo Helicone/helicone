@@ -31,12 +31,12 @@ import { generateStream } from "@/lib/api/llm/generate-stream";
 import { processStream } from "@/lib/api/llm/process-stream";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { usePromptRunsStore } from "@/lib/stores/promptRunsStore";
-import { openaiChatMapper } from "@/packages/llm-mapper/mappers/openai/chat-v2";
+import { openaiChatMapper } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
 import {
   heliconeRequestToMappedContent,
   MAPPERS,
-} from "@/packages/llm-mapper/utils/getMappedContent";
-import { getMapperType } from "@/packages/llm-mapper/utils/getMapperType";
+} from "@helicone-package/llm-mapper/utils/getMappedContent";
+import { getMapperType } from "@helicone-package/llm-mapper/utils/getMapperType";
 import autoImprovePrompt from "@/prompts/auto-improve";
 import { PromptState, StateInputs } from "@/types/prompt-state";
 import { $system, $user, findClosestModelProvider } from "@/utils/generate";
@@ -58,7 +58,7 @@ import { autoFillInputs } from "@helicone/prompts";
 import { FlaskConicalIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { LLMRequestBody, Message } from "packages/llm-mapper/types";
+import { LLMRequestBody, Message } from "@helicone-package/llm-mapper/types";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MdKeyboardReturn } from "react-icons/md";
 import {
@@ -120,6 +120,7 @@ export default function PromptEditor({
   /* -------------------------------------------------------------------------- */
   const [state, setState] = useState<PromptState | null>(null);
   const [isAutoImproveOpen, setIsAutoImproveOpen] = useState(false);
+  const [isOpenRouterDialogOpen, setIsOpenRouterDialogOpen] = useState(false);
   const [isImproving, setIsImproving] = useState(false);
   const messagesScrollRef = useRef<CustomScrollbarRef>(null);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -1230,7 +1231,10 @@ export default function PromptEditor({
         {/* Right Side: Actions */}
         <div className="flex flex-row items-center gap-2">
           {/* OpenRouter Dialog */}
-          <Dialog>
+          <Dialog
+            open={isOpenRouterDialogOpen}
+            onOpenChange={setIsOpenRouterDialogOpen}
+          >
             <DialogTrigger asChild>
               <Button
                 variant="outline"
@@ -1299,7 +1303,7 @@ export default function PromptEditor({
           )}
 
           {/* Run & Save Button */}
-          <Tooltip delayDuration={100}>
+          <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 className={`${
@@ -1311,10 +1315,13 @@ export default function PromptEditor({
                 size="sm"
                 disabled={
                   // please forgive me for this, it is a mess just need to get something quick out - Justin
-                  (!canRun || !hasOpenRouter) &&
-                  !(state.isDirty && editorMode === "fromEditor")
+                  !canRun && !(state.isDirty && editorMode === "fromEditor")
                 }
-                onClick={handleSaveAndRun}
+                onClick={
+                  hasOpenRouter
+                    ? handleSaveAndRun
+                    : () => setIsOpenRouterDialogOpen(true)
+                }
               >
                 {hasOpenRouter &&
                   (isStreaming ? (

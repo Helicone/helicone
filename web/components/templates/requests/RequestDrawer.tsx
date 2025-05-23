@@ -8,18 +8,24 @@ import {
 import { P, XSmall } from "@/components/ui/typography";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useJawnClient } from "@/lib/clients/jawnHook";
-import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+import { MappedLLMRequest } from "@helicone-package/llm-mapper/types";
 import { useLocalStorage } from "@/services/hooks/localStorage";
-import { useCreatePrompt } from "@/services/hooks/prompts/prompts";
 import { formatDate } from "@/utils/date";
 import { useQuery } from "@tanstack/react-query";
-import { FlaskConicalIcon } from "lucide-react";
+import {
+  Eye,
+  FlaskConicalIcon,
+  ListTreeIcon,
+  ScrollTextIcon,
+  UserIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   LuChevronDown,
   LuChevronUp,
+  LuCopy,
   LuPanelRightClose,
   LuPlus,
 } from "react-icons/lu";
@@ -34,23 +40,83 @@ import ThemedModal from "../../shared/themed/themedModal";
 import { formatNumber } from "../../shared/utils/formatNumber";
 import { Badge } from "../../ui/badge";
 import NewDataset from "../datasets/NewDataset";
-import FeedbackButtons from "../feedback/thumbsUpThumbsDown";
+import FeedbackAction from "../feedback/thumbsUpThumbsDown";
 import { RenderMappedRequest } from "./RenderHeliconeRequest";
 import ScrollableBadges from "./ScrollableBadges";
 import StatusBadge from "./statusBadge";
+
+const RequestDescTooltip = (props: {
+  displayText: string;
+  icon: React.ReactNode;
+  href?: string;
+  copyText?: string;
+  truncateLength?: number;
+}) => {
+  const { displayText, icon, copyText, href, truncateLength = 18 } = props;
+  const { setNotification } = useNotification();
+  return (
+    <TooltipProvider>
+      <Tooltip delayDuration={150}>
+        <TooltipTrigger asChild>
+          <div className="text-secondary px-2 py-1 -ml-1 hover:bg-accent flex items-center gap-2 rounded-md cursor-pointer">
+            {icon}
+            <XSmall>
+              <span className="truncate">
+                {displayText.length > truncateLength
+                  ? displayText.slice(0, truncateLength) + "..."
+                  : displayText}
+              </span>
+            </XSmall>
+          </div>
+        </TooltipTrigger>
+        <TooltipContent side="bottom" align="start" className="p-0 ml-2">
+          <div className="flex flex-col w-full">
+            {copyText && (
+              <button
+                className="flex items-center justify-between gap-2 p-2 hover:bg-accent text-left"
+                onClick={() => {
+                  navigator.clipboard.writeText(copyText);
+                  setNotification("Copied to clipboard", "success");
+                }}
+              >
+                <span className="text-xs">Copy ID</span>
+                <LuCopy className="h-3 w-3" />
+              </button>
+            )}
+            {href && (
+              <Link
+                href={href}
+                className="flex items-center justify-between gap-2 p-2 hover:bg-accent text-left"
+              >
+                <span className="text-xs">View</span>
+                <Eye className="h-3 w-3" />
+              </Link>
+            )}
+          </div>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+};
 
 interface RequestDivProps {
   onCollapse: () => void;
   onNavigate?: (direction: "prev" | "next") => void;
   request?: MappedLLMRequest;
   showCollapse?: boolean;
+  onRequestSelect?: (request_id: string) => void;
 }
 export default function RequestDrawer(props: RequestDivProps) {
-  const { onCollapse, onNavigate, request, showCollapse = true } = props;
+  const {
+    onCollapse,
+    onNavigate,
+    request,
+    showCollapse = true,
+    onRequestSelect,
+  } = props;
 
   const { setNotification } = useNotification();
   const router = useRouter();
-  const createPrompt = useCreatePrompt();
   const org = useOrg();
   const jawn = useJawnClient();
 
@@ -232,9 +298,7 @@ export default function RequestDrawer(props: RequestDivProps) {
   // Get Helicone Special Properties
   const specialProperties = useMemo(() => {
     return {
-      userId:
-        request?.heliconeMetadata.customProperties?.["Helicone-User-Id"] ??
-        undefined,
+      userId: request?.heliconeMetadata.user ?? undefined,
       promptId:
         request?.heliconeMetadata.customProperties?.["Helicone-Prompt-Id"] ??
         undefined,
@@ -342,6 +406,42 @@ export default function RequestDrawer(props: RequestDivProps) {
     [org?.currentOrg?.id, request, setNotification]
   );
 
+  // Tracking the width of the container holding the 3 RequestDescTooltips to dynamically truncate length
+  const [descContainerWidth, setDescContainerWidth] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setDescContainerWidth(entry.contentRect.width);
+      }
+    });
+
+    resizeObserver.observe(containerRef.current);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [containerRef.current]);
+
+  const MINIMUM_TRUNCATE_LENGTH = 3;
+  const MAXIMUM_TRUNCATE_LENGTH = 30;
+  const CHARACTER_WIDTH = 4;
+  const ITEM_COUNT = 3;
+  const RESERVED_WIDTH = 300;
+  const dynamicTruncateLength = useMemo(() => {
+    const availableWidth = descContainerWidth - RESERVED_WIDTH;
+    const approximateCharsPerItem = Math.floor(
+      availableWidth / (ITEM_COUNT * CHARACTER_WIDTH)
+    );
+    return Math.max(
+      MINIMUM_TRUNCATE_LENGTH,
+      Math.min(approximateCharsPerItem, MAXIMUM_TRUNCATE_LENGTH)
+    );
+  }, [descContainerWidth]);
+
   if (!request) {
     return null;
   } else
@@ -350,7 +450,7 @@ export default function RequestDrawer(props: RequestDivProps) {
         {/* Header */}
         <header className="h-fit w-full flex flex-col pt-2 border-b border-border bg-card">
           {/* First Top Row */}
-          <div className="h-8 w-full shrink-0 flex flex-row justify-between items-center gap-2 px-4">
+          <div className="h-8 w-full shrink-0 flex flex-row justify-between items-center gap-2 px-2">
             {/* Left Side */}
             <div className="flex flex-row items-center gap-3 overflow-hidden">
               {/* Hide Drawer */}
@@ -361,7 +461,7 @@ export default function RequestDrawer(props: RequestDivProps) {
                       <Button
                         variant={"none"}
                         size={"square_icon"}
-                        className="w-fit text-muted-foreground hover:text-primary"
+                        className="w-fit text-muted-foreground hover:text-primary pl-2"
                         onClick={onCollapse}
                       >
                         <LuPanelRightClose className="w-4 h-4" />
@@ -443,44 +543,46 @@ export default function RequestDrawer(props: RequestDivProps) {
 
           {/* Second Top Row */}
           {Object.values(specialProperties).some((value) => value) && (
-            <div className="h-8 w-full flex flex-row gap-4 items-center px-4 shrink-0">
+            <div
+              ref={containerRef}
+              className="h-8 w-full flex flex-row gap-2 items-center px-2.5 shrink-0"
+            >
               {/* User */}
               {specialProperties.userId && (
-                <Link
-                  className="text-secondary hover:underline hover:text-primary"
+                <RequestDescTooltip
+                  displayText={specialProperties.userId}
+                  icon={<UserIcon className="h-4 w-4" />}
+                  copyText={specialProperties.userId}
                   href={`/users/${specialProperties.userId}`}
-                >
-                  <XSmall>{specialProperties.userId}</XSmall>
-                </Link>
+                  truncateLength={dynamicTruncateLength}
+                />
+              )}
+
+              {/* Session */}
+              {specialProperties.sessionId && specialProperties.sessionName && (
+                <RequestDescTooltip
+                  displayText={
+                    specialProperties.sessionPath ??
+                    specialProperties.sessionName
+                  }
+                  icon={<ListTreeIcon className="h-4 w-4" />}
+                  copyText={specialProperties.sessionId}
+                  href={`/sessions/${encodeURIComponent(
+                    specialProperties.sessionName
+                  )}/${specialProperties.sessionId}`}
+                  truncateLength={dynamicTruncateLength}
+                />
               )}
 
               {/* Prompt */}
               {specialProperties.promptId && (
-                <Link
-                  className="text-secondary hover:underline hover:text-primary"
+                <RequestDescTooltip
+                  displayText={specialProperties.promptId}
+                  icon={<ScrollTextIcon className="h-4 w-4" />}
+                  copyText={specialProperties.promptId}
                   href={`/prompts/${promptDataQuery.data?.id}`}
-                >
-                  <XSmall>{specialProperties.promptId}</XSmall>
-                </Link>
-              )}
-
-              {/* Session */}
-              {specialProperties.sessionId && (
-                <Link
-                  className="text-secondary hover:underline hover:text-primary text-xs truncate"
-                  href={`/sessions/${specialProperties.sessionId}`}
-                >
-                  {specialProperties.sessionName ||
-                    (specialProperties.sessionId && (
-                      <span>
-                        {specialProperties.sessionName ||
-                          specialProperties.sessionId}
-                      </span>
-                    ))}
-                  {specialProperties.sessionPath && (
-                    <span>{specialProperties.sessionPath}</span>
-                  )}
-                </Link>
+                  truncateLength={dynamicTruncateLength}
+                />
               )}
             </div>
           )}
@@ -548,30 +650,32 @@ export default function RequestDrawer(props: RequestDivProps) {
                   ))}
                 </div>
               </div>
+            </div>
+          )}
+        </header>
 
-              {/* Request Parameters */}
-              {requestDetails.parameterInfo.length > 0 && (
-                <div className="w-full flex flex-col gap-2 pt-4 border-t border-border px-4">
-                  {requestDetails.parameterInfo.map((item) => (
-                    <div
-                      key={item.label}
-                      className="grid grid-cols-[auto,1fr] gap-x-4 items-start"
-                    >
-                      <XSmall className="text-muted-foreground text-nowrap">
-                        {item.label}
-                      </XSmall>
-                      <XSmall className="truncate min-w-0 text-right">
-                        {item.value}
-                      </XSmall>
-                    </div>
-                  ))}
+        <div className="h-full w-full overflow-auto">
+          {/* Request Parameters - Moved out of header */}
+          {showDetails && requestDetails.parameterInfo.length > 0 && (
+            <div className="w-full flex flex-col gap-2 px-4 py-3 bg-card border-b border-border">
+              {requestDetails.parameterInfo.map((item) => (
+                <div
+                  key={item.label}
+                  className="grid grid-cols-[auto,1fr] gap-x-4 items-start"
+                >
+                  <XSmall className="text-muted-foreground text-nowrap">
+                    {item.label}
+                  </XSmall>
+                  <XSmall className="truncate min-w-0 text-right">
+                    {item.value}
+                  </XSmall>
                 </div>
-              )}
+              ))}
             </div>
           )}
 
           {/* Properties and Scores */}
-          <div className="w-full flex flex-col divide-y divide-border">
+          <div className="w-full flex flex-col divide-y divide-border bg-card border-b border-border">
             {/* Properties */}
             <ScrollableBadges
               className="px-4"
@@ -606,10 +710,15 @@ export default function RequestDrawer(props: RequestDivProps) {
               }}
             />
           </div>
-        </header>
 
-        {/* Mapped Request */}
-        <RenderMappedRequest mappedRequest={request} />
+          <div className="p-3 h-full w-full overflow-auto bg-card">
+            {/* Mapped Request */}
+            <RenderMappedRequest
+              mappedRequest={request}
+              onRequestSelect={onRequestSelect}
+            />
+          </div>
+        </div>
 
         {/* Footer */}
         <footer className="w-full flex flex-col gap-2 py-3 border-t border-border bg-card">
@@ -651,8 +760,9 @@ export default function RequestDrawer(props: RequestDivProps) {
               </Button>
             </div>
 
-            <FeedbackButtons
-              requestId={request.id}
+            <FeedbackAction
+              id={request.id}
+              type="request"
               defaultValue={
                 request.heliconeMetadata.scores &&
                 request.heliconeMetadata.scores["helicone-score-feedback"]

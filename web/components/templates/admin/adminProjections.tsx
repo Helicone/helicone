@@ -1,23 +1,20 @@
-import React, { useState, useMemo, useEffect } from "react";
-import { useJawnClient } from "@/lib/clients/jawnHook";
+import { InvoiceTable, SortConfig } from "@/components/admin/InvoiceTable";
+import { RevenueChart } from "@/components/admin/RevenueChart";
 import {
-  MOCK_INVOICES,
   MOCK_DISCOUNTS,
+  MOCK_INVOICES,
   MOCK_UPCOMING_INVOICES,
 } from "@/components/layout/admin/mockStripeData";
-import type Stripe from "stripe";
 import {
+  InvoiceData,
+  MonthlyRevenueData,
   RawStripeData,
   RevenueCalculator,
-  MonthlyRevenueData,
 } from "@/lib/admin/RevenueCalculator";
-import {
-  getStripeLink,
-  truncateID,
-  formatCurrency,
-  formatMonthKey,
-} from "@/lib/uiUtils";
-import { RevenueChart } from "@/components/admin/RevenueChart";
+import { useJawnClient } from "@/lib/clients/jawnHook";
+import { formatMonthKey } from "@/lib/uiUtils";
+import { useEffect, useMemo, useState } from "react";
+import type Stripe from "stripe";
 
 // Type for the API response
 interface SubscriptionDataResponse {
@@ -84,6 +81,16 @@ const AdminProjections = () => {
   const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // State for sorting configuration
+  const [billedSortConfig, setBilledSortConfig] = useState<SortConfig>({
+    key: null,
+    direction: "asc",
+  });
+  const [upcomingSortConfig, setUpcomingSortConfig] = useState<SortConfig>({
+    key: null,
+    direction: "asc",
+  });
+
   // Product configuration
   const productConfigs = [
     {
@@ -104,6 +111,24 @@ const AdminProjections = () => {
     { productName: "Experiments", productIds: ["prod_Rhx8ZQYhQOuunD"] },
     { productName: "Evals", productIds: ["prod_Rhx7VbaUg1d1zA"] },
   ];
+
+  // Handle sorting logic
+  const handleSort = (
+    tableType: "billed" | "upcoming",
+    key: keyof InvoiceData
+  ) => {
+    const currentConfig =
+      tableType === "billed" ? billedSortConfig : upcomingSortConfig;
+    const setConfig =
+      tableType === "billed" ? setBilledSortConfig : setUpcomingSortConfig;
+
+    let direction: "asc" | "desc" = "asc";
+    // If clicking the same key, toggle direction
+    if (currentConfig.key === key && currentConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setConfig({ key, direction });
+  };
 
   // Toggle expanded state for a section
   const toggleSection = (sectionKey: string) => {
@@ -386,89 +411,17 @@ const AdminProjections = () => {
                       </span>
                     </div>
 
-                    {expandedSections[invoicesSectionKey] &&
-                      (revenueData.billedInvoices.length > 0 ? (
-                        <div className="overflow-x-auto mt-2">
-                          <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                              <tr>
-                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  ID
-                                </th>
-                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Amount
-                                </th>
-                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Customer
-                                </th>
-                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Date
-                                </th>
-                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Status
-                                </th>
-                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Actions
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                              {revenueData.billedInvoices.map((invoice) => (
-                                <tr key={invoice.id}>
-                                  <td className="px-3 py-2 whitespace-nowrap text-sm">
-                                    <a
-                                      href={
-                                        invoice.subscriptionId &&
-                                        !invoice.id.includes("in_")
-                                          ? `https://dashboard.stripe.com/subscriptions/${invoice.subscriptionId}`
-                                          : getStripeLink(invoice.id)
-                                      }
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-blue-600 hover:text-blue-800 hover:underline"
-                                    >
-                                      {invoice.subscriptionId &&
-                                      !invoice.id.includes("in_")
-                                        ? `sub_${truncateID(
-                                            invoice.subscriptionId
-                                          )}`
-                                        : truncateID(invoice.id)}
-                                    </a>
-                                  </td>
-                                  <td className="px-3 py-2 whitespace-nowrap text-sm">
-                                    {formatCurrency(
-                                      invoice.amountAfterDiscount
-                                    )}
-                                  </td>
-                                  <td className="px-3 py-2 whitespace-nowrap text-sm">
-                                    {invoice.customerEmail}
-                                  </td>
-                                  <td className="px-3 py-2 whitespace-nowrap text-sm">
-                                    {invoice.created.toLocaleDateString()}
-                                  </td>
-                                  <td className="px-3 py-2 whitespace-nowrap text-sm">
-                                    {invoice.status}
-                                  </td>
-                                  <td className="px-3 py-2 whitespace-nowrap text-sm">
-                                    <button
-                                      onClick={() =>
-                                        viewRawInvoice(invoice.rawJSON)
-                                      }
-                                      className="text-blue-600 hover:text-blue-800"
-                                    >
-                                      View Raw
-                                    </button>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      ) : (
-                        <p className="text-gray-500 italic mt-2">
-                          No billed invoices for {formatMonthKey(selectedMonth)}
-                        </p>
-                      ))}
+                    {expandedSections[invoicesSectionKey] && (
+                      <InvoiceTable
+                        invoices={revenueData.billedInvoices}
+                        sortConfig={billedSortConfig}
+                        onSort={(key: keyof InvoiceData) =>
+                          handleSort("billed", key)
+                        }
+                        onViewRaw={viewRawInvoice}
+                        caption={formatMonthKey(selectedMonth)}
+                      />
+                    )}
 
                     {!expandedSections[invoicesSectionKey] && (
                       <p className="text-sm text-gray-500 mt-2">
@@ -476,7 +429,7 @@ const AdminProjections = () => {
                         {revenueData.billedInvoices.length > 0
                           ? `$${revenueData.billedInvoices
                               .reduce(
-                                (sum, inv) => sum + inv.amountAfterDiscount,
+                                (sum, inv) => sum + inv.amountAfterProcessing,
                                 0
                               )
                               .toFixed(2)} total`
@@ -502,103 +455,25 @@ const AdminProjections = () => {
                       </span>
                     </div>
 
-                    {expandedSections[`${config.productName}-upcoming`] ? (
-                      revenueData.upcomingInvoices.length > 0 ? (
-                        <div className="overflow-x-auto mt-2">
-                          <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                              <tr>
-                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  ID
-                                </th>
-                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Amount
-                                </th>
-                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Customer
-                                </th>
-                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Date
-                                </th>
-                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Status
-                                </th>
-                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Actions
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                              {revenueData.upcomingInvoices.map(
-                                (invoice, idx) => (
-                                  <React.Fragment key={`${invoice.id}-${idx}`}>
-                                    <tr>
-                                      <td className="px-3 py-2 whitespace-nowrap text-sm">
-                                        {invoice.id !== "upcoming" ? (
-                                          <a
-                                            href={getStripeLink(
-                                              invoice.id,
-                                              invoice.subscriptionId
-                                            )}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-blue-600 hover:text-blue-800 hover:underline"
-                                          >
-                                            {invoice.subscriptionId &&
-                                            !invoice.id.includes("in_")
-                                              ? `sub_${truncateID(
-                                                  invoice.subscriptionId
-                                                )}`
-                                              : truncateID(invoice.id)}
-                                          </a>
-                                        ) : (
-                                          "Upcoming"
-                                        )}
-                                      </td>
-                                      <td className="px-3 py-2 whitespace-nowrap text-sm">
-                                        {formatCurrency(
-                                          invoice.amountAfterDiscount
-                                        )}
-                                      </td>
-                                      <td className="px-3 py-2 whitespace-nowrap text-sm">
-                                        {invoice.customerEmail}
-                                      </td>
-                                      <td className="px-3 py-2 whitespace-nowrap text-sm">
-                                        {invoice.created.toLocaleDateString()}
-                                      </td>
-                                      <td className="px-3 py-2 whitespace-nowrap text-sm">
-                                        {invoice.status}
-                                      </td>
-                                      <td className="px-3 py-2 whitespace-nowrap text-sm">
-                                        <button
-                                          onClick={() =>
-                                            viewRawInvoice(invoice.rawJSON)
-                                          }
-                                          className="text-blue-600 hover:text-blue-800"
-                                        >
-                                          View Raw
-                                        </button>
-                                      </td>
-                                    </tr>
-                                  </React.Fragment>
-                                )
-                              )}
-                            </tbody>
-                          </table>
-                        </div>
-                      ) : (
-                        <p className="text-gray-500 italic mt-2">
-                          No upcoming invoices for{" "}
-                          {formatMonthKey(selectedMonth)}
-                        </p>
-                      )
-                    ) : (
+                    {expandedSections[`${config.productName}-upcoming`] && (
+                      <InvoiceTable
+                        invoices={revenueData.upcomingInvoices}
+                        sortConfig={upcomingSortConfig}
+                        onSort={(key: keyof InvoiceData) =>
+                          handleSort("upcoming", key)
+                        }
+                        onViewRaw={viewRawInvoice}
+                        caption={`${formatMonthKey(selectedMonth)} (Projected)`}
+                      />
+                    )}
+
+                    {!expandedSections[`${config.productName}-upcoming`] && (
                       <p className="text-sm text-gray-500 mt-2">
                         {revenueData.upcomingInvoices.length} invoices (
                         {revenueData.upcomingInvoices.length > 0
                           ? `$${revenueData.upcomingInvoices
                               .reduce(
-                                (sum, inv) => sum + inv.amountAfterDiscount,
+                                (sum, inv) => sum + inv.amountAfterProcessing,
                                 0
                               )
                               .toFixed(2)} projected`

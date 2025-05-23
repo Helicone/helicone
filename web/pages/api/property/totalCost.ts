@@ -3,7 +3,7 @@ import {
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { getTotalCost } from "../../../lib/api/property/totalCosts";
-import { Result, resultsAll } from "../../../packages/common/result";
+import { Result, resultsAll } from "@/packages/common/result";
 
 async function handler(options: HandlerWrapperOptions<Result<number, string>>) {
   const { req, res, userData } = options;

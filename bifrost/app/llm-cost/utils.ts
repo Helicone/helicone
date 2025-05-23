@@ -1,5 +1,5 @@
-import { costOf, costOfPrompt } from "../../packages/cost";
-import { providers } from "../../packages/cost/providers/mappings";
+import { costOf, costOfPrompt } from "@helicone-package/cost";
+import { providers } from "@helicone-package/cost/providers/mappings";
 import { CostData } from "./ModelPriceCalculator"; // Assuming CostData is exported here
 
 // Define and export default token values

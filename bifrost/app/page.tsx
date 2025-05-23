@@ -4,6 +4,7 @@ import Integrations from "@/components/templates/landing/integrations";
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import LazyLoadComponent from "@/components/shared/LazyLoadComponent";
+import { cn, ISLAND_WIDTH } from "@/lib/utils";
 
 const BigDashboard = dynamic(() => import("@/components/home/BigDashboard"));
 const Companies = dynamic(() => import("@/components/home/Companies"));
@@ -50,12 +51,21 @@ export default async function Home() {
 
   return (
     <Layout>
-      <main className="bg-white text-landing-description">
-        <div className="max-w-8xl mx-auto">
+      <main
+        className="bg-[#1c1917] text-landing-description relative"
+        style={{
+          backgroundImage: `
+            radial-gradient(circle at 1px 1px, rgba(255,255,255,0.15) 1px, transparent 0),
+            radial-gradient(circle at 2px 2px, rgba(255,255,255,0.1) 1px, transparent 0)
+          `,
+          backgroundSize: "20px 20px, 40px 40px",
+        }}
+      >
+        <div className="max-w-7xl mx-auto">
           <Hero />
           <Prototype />
           <LazyLoadComponent fallback={<LoadingSection height="h-24" />}>
-            <Companies />
+            <Companies className={cn("bg-[#f2f9fc]", ISLAND_WIDTH)} />
           </LazyLoadComponent>
           <LazyLoadComponent fallback={<LoadingSection />}>
             <Quote />

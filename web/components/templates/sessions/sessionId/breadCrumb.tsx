@@ -8,12 +8,11 @@ import {
 } from "@/components/ui/hoverCard";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import clsx from "clsx";
 import { CopyIcon, InfoIcon } from "lucide-react";
 import { getTimeAgo } from "../../../../lib/sql/timeHelpers";
 import { formatLargeNumber } from "../../../shared/utils/numberFormat";
 import HcBreadcrumb from "../../../ui/hcBreadcrumb";
-import SessionFeedback from "../../feedback/sessionFeedback";
-import clsx from "clsx";
 
 function timeDiff(startTime: Date, endTime: Date): string {
   const diff = endTime.getTime() - startTime.getTime();
@@ -202,7 +201,6 @@ export const BreadCrumb = ({
           </HoverCardContent>
         </HoverCard>
 
-        <SessionFeedback sessionId={sessionId} defaultValue={sessionFeedback} />
         <Button
           variant="ghost"
           className={clsx(

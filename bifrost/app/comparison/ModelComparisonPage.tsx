@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import ModelTimeSeriesChart from "./ModelTimeSeriesChart";
 import ModelComparisonTable from "./ModelComparisonTable";
 import LoadingCard from "./LoadingCard";
-import { ModelDetails } from "@/packages/cost/interfaces/Cost";
+import { ModelDetails } from "@helicone-package/cost/interfaces/Cost";
 import Image from "next/image";
 import ModelCapabilitiesCard from "./ModelCapabilitiesCard";
 import { findModelById } from "@/lib/models/registry";

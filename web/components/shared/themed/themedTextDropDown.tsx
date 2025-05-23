@@ -13,7 +13,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useState } from "react";
-import { Result } from "../../../packages/common/result";
+import { Result } from "@/packages/common/result";
 
 interface ThemedTextDropDownProps {
   options: string[];

@@ -63,6 +63,11 @@ const nextConfig = {
         permanent: true,
       },
       {
+        source: "/community",
+        destination: "/customers",
+        permanent: true,
+      },
+      {
         source: "/blog/slash-llm-cost",
         destination: "/blog/monitor-and-optimize-llm-costs",
         permanent: true,
@@ -70,6 +75,11 @@ const nextConfig = {
       {
         source: "/blog/langsmith",
         destination: "/blog/langsmith-vs-helicone",
+        permanent: true,
+      },
+      {
+        source: "/blog/custom-properties",
+        destination: "/blog/how-to-track-llm-user-feedback",
         permanent: true,
       },
     ];

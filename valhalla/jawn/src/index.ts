@@ -24,7 +24,8 @@ import { RegisterRoutes as registerPublicTSOARoutes } from "./tsoa-build/public/
 import * as publicSwaggerDoc from "./tsoa-build/public/swagger.json";
 import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
-import { startConsumers } from "./workers/consumerInterface";
+import { startConsumers, startSQSConsumers } from "./workers/consumerInterface";
+import { IS_ON_PREM } from "./constants/IS_ON_PREM";
 
 if (ENVIRONMENT === "production" || process.env.ENABLE_CRON_JOB === "true") {
   runMainLoops();
@@ -67,7 +68,10 @@ const corsOptions = {
       callback(null, true);
       return;
     }
-    if (allowedOrigins.some((allowedOrigin) => allowedOrigin.test(origin))) {
+    if (
+      allowedOrigins.some((allowedOrigin) => allowedOrigin.test(origin)) ||
+      IS_ON_PREM
+    ) {
       callback(null, true);
     } else {
       // Important: Disallow origins not in the list
@@ -112,6 +116,13 @@ const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
 if (KAFKA_ENABLED) {
   console.log("Starting Kafka consumers");
   startConsumers({
+    dlqCount: 0,
+    normalCount: 0,
+    scoresCount: 0,
+    scoresDlqCount: 0,
+    backFillCount: 0,
+  });
+  startSQSConsumers({
     dlqCount: DLQ_WORKER_COUNT,
     normalCount: NORMAL_WORKER_COUNT,
     scoresCount: SCORES_WORKER_COUNT,

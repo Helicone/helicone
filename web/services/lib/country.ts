@@ -1,5 +1,5 @@
 import { dbQueryClickhouse } from "../../lib/api/db/dbExecute";
-import { Result } from "../../packages/common/result";
+import { Result } from "@/packages/common/result";
 import { FilterNode } from "./filters/filterDefs";
 import {
   buildFilterClickHouse,

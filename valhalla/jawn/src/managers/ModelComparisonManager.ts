@@ -5,7 +5,7 @@ import {
 import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
 import { err, ok } from "../packages/common/result";
 import { Result } from "../packages/common/result";
-import { providers } from "../packages/cost/providers/mappings";
+import { providers } from "@helicone-package/cost/providers/mappings";
 
 // Query Result Types
 interface ModelMetricsQueryResult {

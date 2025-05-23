@@ -2,7 +2,7 @@ import MarkdownEditor from "@/components/shared/markdownEditor";
 import { markdownComponents } from "@/components/shared/prompts/ResponsePanel";
 import { Button } from "@/components/ui/button";
 import { XSmall } from "@/components/ui/typography";
-import { MappedLLMRequest, Message } from "@/packages/llm-mapper/types";
+import { MappedLLMRequest, Message } from "@helicone-package/llm-mapper/types";
 import { useRequestRenderModeStore } from "@/store/requestRenderModeStore";
 import Image from "next/image";
 import { useMemo, useState } from "react";
@@ -171,13 +171,13 @@ export default function Chat({ mappedRequest }: ChatProps) {
             className="w-full flex flex-col border-b border-border"
           >
             {/* Message Role Header */}
-            <header className="h-12 w-full flex flex-row items-center justify-between shrink-0 px-4 sticky top-0 bg-white dark:bg-black z-10 shadow-sm">
+            <header className="h-12 w-full flex flex-row items-center justify-between px-4 sticky top-0 bg-sidebar-background dark:bg-black z-10">
               <h2 className="text-secondary font-medium capitalize text-sm">
                 {message.role}
               </h2>
             </header>
 
-            <div className="w-full flex flex-col relative p-4">
+            <div className="w-full flex flex-col relative px-4 pb-4 pt-0">
               {(() => {
                 switch (messageType) {
                   case "image":
@@ -238,12 +238,17 @@ export default function Chat({ mappedRequest }: ChatProps) {
                     );
                   case "text":
                     if (isJson(displayContent)) {
-                      return <JsonRenderer data={JSON.parse(displayContent)} />;
+                      return (
+                        <div className="text-sm">
+                          <JsonRenderer data={JSON.parse(displayContent)} />
+                        </div>
+                      );
                     }
                     return mode === "raw" ? (
                       <MarkdownEditor
                         language="markdown"
                         setText={() => {}}
+                        className="border-none"
                         text={
                           typeof displayContent === "string"
                             ? displayContent

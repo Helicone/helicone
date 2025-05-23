@@ -1,0 +1,170 @@
+name: Jawn Deployment
+run-name: Deploy to ${{ github.event.inputs.environment }} by @${{ github.actor }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to deploy (for rollbacks)"
+        required: false
+        default: ""
+      environment:
+        description: "Environment to deploy to"
+        type: choice
+        options:
+          - all
+          - us
+          - eu
+        default: "all"
+
+env:
+  ECR_REPOSITORY: jawn
+  US_REGION: us-west-2
+  EU_REGION: eu-west-1
+  AWS_ACCOUNT_ID: 849596434884
+
+jobs:
+  build_and_push:
+    name: Build and Push Docker Images
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.set-tag.outputs.tag }}
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+        with:
+          ref: "main"
+
+      - name: Set Image Tag
+        id: set-tag
+        run: |
+          # Get current date in YYYYMMDD format
+          CURRENT_DATE=$(date +'%Y%m%d-%H%M%S')
+
+          # Combine them to create the tag
+          TAG="${CURRENT_DATE}"
+
+          # If version was provided, use that instead
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            TAG="${{ github.event.inputs.version }}"
+          fi
+
+          # Set the output variable
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+
+          # Print for logging
+          echo "Generated tag: ${TAG}"
+
+      - name: Create GitHub Tag
+        run: |
+          # Configure Git
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+          # Create and push the tag
+          TAG_NAME="deploy-${{ steps.set-tag.outputs.tag }}"
+          TAG_MESSAGE="Deployment to ${{ github.event.inputs.environment }} by @${{ github.actor }}"
+
+          git tag -a ${TAG_NAME} -m "${TAG_MESSAGE}"
+          git push origin ${TAG_NAME}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_GITHUB_ACTIONS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_GITHUB_ACTIONS_SECRET_KEY }}
+          aws-region: ${{ env.US_REGION }}
+
+      - name: Login to Amazon ECR (US)
+        id: login-ecr-us
+        uses: aws-actions/amazon-ecr-login@v1
+        with:
+          registry-type: private
+
+      - name: Configure AWS credentials (EU)
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_GITHUB_ACTIONS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_GITHUB_ACTIONS_SECRET_KEY }}
+          aws-region: ${{ env.EU_REGION }}
+
+      - name: Login to Amazon ECR (EU)
+        id: login-ecr-eu
+        uses: aws-actions/amazon-ecr-login@v1
+        with:
+          registry-type: private
+
+      - name: Build and push US image
+        if: ${{ github.event.inputs.environment == 'all' || github.event.inputs.environment == 'us' }}
+        uses: docker/build-push-action@v4
+        with:
+          context: ./
+          file: ./valhalla/dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.US_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:us-${{ steps.set-tag.outputs.tag }}
+            ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.US_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:us
+
+      - name: Build and push EU image
+        if: ${{ github.event.inputs.environment == 'all' || github.event.inputs.environment == 'eu' }}
+        uses: docker/build-push-action@v4
+        with:
+          context: ./
+          file: ./valhalla/dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.US_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:eu-${{ steps.set-tag.outputs.tag }}
+            ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.US_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:eu
+
+  deploy_us:
+    name: Deploy to US
+    needs: build_and_push
+    if: ${{ github.event.inputs.environment == 'all' || github.event.inputs.environment == 'us' }}
+    runs-on: ubuntu-latest
+    environment: production-us
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_GITHUB_ACTIONS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_GITHUB_ACTIONS_SECRET_KEY }}
+          aws-region: ${{ env.US_REGION }}
+
+      - name: Deploy to US ECS
+        run: |
+          aws deploy create-deployment \
+            --region ${{ env.US_REGION }} \
+            --application-name AppECS-valhalla_cluster-jawn-prod-blue-green \
+            --deployment-group-name DgpECS-valhalla_cluster-jawn-prod-blue-green \
+            --deployment-config-name CodeDeployDefault.ECSAllAtOnce \
+            --description "GitHub Actions deployment ${{ needs.build_and_push.outputs.image_tag }}" \
+            --revision '{"revisionType": "AppSpecContent", "appSpecContent": {"content": "{\"version\": 1, \"Resources\": [{\"TargetService\": {\"Type\": \"AWS::ECS::Service\", \"Properties\": {\"TaskDefinition\": \"arn:aws:ecs:${{ env.US_REGION }}:${{ env.AWS_ACCOUNT_ID }}:task-definition/valhalla_jawn_production:39\", \"LoadBalancerInfo\": {\"ContainerName\": \"valhalla_jawn_staging\", \"ContainerPort\": 8585}, \"PlatformVersion\": \"1.4.0\"}}}]}"}}'
+
+  deploy_eu:
+    name: Deploy to EU
+    needs: build_and_push
+    if: ${{ github.event.inputs.environment == 'all' || github.event.inputs.environment == 'eu' }}
+    runs-on: ubuntu-latest
+    environment: production-eu
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_GITHUB_ACTIONS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_GITHUB_ACTIONS_SECRET_KEY }}
+          aws-region: ${{ env.EU_REGION }}
+
+      - name: Deploy to EU ECS
+        run: |
+          aws deploy create-deployment \
+            --region ${{ env.EU_REGION }} \
+            --application-name AppECS-eu-cluster-jawn-prod-bg \
+            --deployment-group-name DgpECS-eu-jawn-prod-blue-green \
+            --deployment-config-name CodeDeployDefault.ECSAllAtOnce \
+            --description "GitHub Actions deployment ${{ needs.build_and_push.outputs.image_tag }}" \
+            --revision '{"revisionType": "AppSpecContent", "appSpecContent": {"content": "{\"version\": 1, \"Resources\": [{\"TargetService\": {\"Type\": \"AWS::ECS::Service\", \"Properties\": {\"TaskDefinition\": \"arn:aws:ecs:${{ env.EU_REGION }}:${{ env.AWS_ACCOUNT_ID }}:task-definition/eu_valhalla_jawn_production:27\", \"LoadBalancerInfo\": {\"ContainerName\": \"eu_jawn\", \"ContainerPort\": 8585}, \"PlatformVersion\": \"1.4.0\"}}}]}"}}'

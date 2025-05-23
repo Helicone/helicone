@@ -74,7 +74,7 @@ const featureGroups: FeatureGroup[] = [
       {
         name: "Seats",
         hobby: "1",
-        pro: "$20/seat",
+        pro: "$20/seat/mo",
         team: "Unlimited",
         enterprise: "Unlimited",
       },
@@ -84,13 +84,6 @@ const featureGroups: FeatureGroup[] = [
         pro: "1",
         team: "5",
         enterprise: "Unlimited",
-      },
-      {
-        name: "Key vault",
-        hobby: false,
-        pro: false,
-        team: true,
-        enterprise: true,
       },
     ],
   },
@@ -128,28 +121,28 @@ const featureGroups: FeatureGroup[] = [
       },
       {
         name: "Sessions",
-        hobby: false,
+        hobby: "1",
         pro: true,
         team: true,
         enterprise: true,
       },
       {
         name: "User analytics",
-        hobby: false,
-        pro: "Unlimited",
-        team: "Unlimited",
-        enterprise: "Unlimited",
+        hobby: "3 users",
+        pro: true,
+        team: true,
+        enterprise: true,
       },
       {
         name: "Custom properties",
-        hobby: false,
+        hobby: "1",
         pro: true,
         team: true,
         enterprise: true,
       },
       {
         name: "Alerts",
-        hobby: false,
+        hobby: "1",
         pro: true,
         team: true,
         enterprise: true,
@@ -161,15 +154,15 @@ const featureGroups: FeatureGroup[] = [
     features: [
       {
         name: "Playground",
-        hobby: false,
+        hobby: "10 runs",
         pro: true,
         team: true,
         enterprise: true,
       },
       {
-        name: "Prompt management ($50/mo add-on)",
-        hobby: false,
-        pro: "$50/mo add-on",
+        name: "Prompt management",
+        hobby: "3 prompts",
+        pro: "Unlimited with $50/mo add-on",
         team: true,
         enterprise: true,
       },
@@ -182,15 +175,15 @@ const featureGroups: FeatureGroup[] = [
       },
       {
         name: "• Version history",
-        hobby: false,
+        hobby: "3 versions",
         pro: "Included",
         team: true,
         enterprise: true,
       },
       {
-        name: "Prompt experiments ($50/mo add-on)",
-        hobby: false,
-        pro: "$50/mo add-on",
+        name: "Prompt experiments",
+        hobby: "3 experiments",
+        pro: "Unlimited with $50/mo add-on",
         team: true,
         enterprise: true,
       },
@@ -200,9 +193,9 @@ const featureGroups: FeatureGroup[] = [
     title: "Evaluations",
     features: [
       {
-        name: "Evaluators ($100/mo add-on)",
-        hobby: false,
-        pro: "$100/mo add-on",
+        name: "Evaluators",
+        hobby: "1",
+        pro: "Unlimited with $100/mo add-on",
         team: true,
         enterprise: true,
       },
@@ -221,7 +214,7 @@ const featureGroups: FeatureGroup[] = [
         enterprise: true,
       },
       {
-        name: "• LLM-as-a-judge, Python, LastMile AI",
+        name: "• LLM-as-a-judge",
         hobby: false,
         pro: "Included",
         team: true,
@@ -229,35 +222,28 @@ const featureGroups: FeatureGroup[] = [
       },
       {
         name: "User feedback",
-        hobby: false,
+        hobby: true,
         pro: true,
         team: true,
         enterprise: true,
       },
       {
         name: "Scores",
-        hobby: false,
-        pro: true,
-        team: true,
-        enterprise: true,
-      },
-      {
-        name: "Fine-tuning",
-        hobby: false,
+        hobby: true,
         pro: true,
         team: true,
         enterprise: true,
       },
       {
         name: "Datasets",
-        hobby: false,
+        hobby: "1",
         pro: true,
         team: true,
         enterprise: true,
       },
       {
         name: "Webhooks",
-        hobby: false,
+        hobby: "1",
         pro: true,
         team: true,
         enterprise: true,
@@ -276,14 +262,14 @@ const featureGroups: FeatureGroup[] = [
       },
       {
         name: "Caching",
-        hobby: false,
+        hobby: true,
         pro: true,
         team: true,
         enterprise: true,
       },
       {
         name: "Rate limits",
-        hobby: false,
+        hobby: true,
         pro: true,
         team: true,
         enterprise: true,
@@ -304,14 +290,14 @@ const featureGroups: FeatureGroup[] = [
       },
       {
         name: "Gateway fallbacks",
-        hobby: true,
+        hobby: false,
         pro: true,
         team: true,
         enterprise: true,
       },
       {
         name: "Retries",
-        hobby: true,
+        hobby: false,
         pro: true,
         team: true,
         enterprise: true,
@@ -486,9 +472,9 @@ export default function PricingComparisonTable() {
   return (
     <div className="flex flex-col gap-6">
       <h2 className="text-black text-4xl font-bold">Compare plans</h2>
-      <div className="rounded-xl">
+      <div className="rounded-xl overflow-x-auto lg:overflow-x-visible">
         <StickyTable>
-          <TableHeader className="sticky top-[var(--header-offset)] z-20 bg-slate-50">
+          <TableHeader className="lg:sticky top-[var(--header-offset)] z-20 bg-slate-50">
             <TableRow className="bg-slate-50 hover:bg-slate-50 border-none">
               <TableHead className="w-[318px] p-6 bg-white rounded-tl-xl">
                 <div className="text-slate-900 text-lg font-semibold">
@@ -510,9 +496,7 @@ export default function PricingComparisonTable() {
                     <Link href={tier.ctaHref}>
                       <Button
                         variant={tier.isPrimary ? "default" : "secondary"}
-                        className={`w-full text-base ${
-                          tier.isPrimary ? "bg-brand text-white" : ""
-                        }`}
+                        className={`w-full text-sm`}
                       >
                         {tier.ctaText}
                       </Button>
