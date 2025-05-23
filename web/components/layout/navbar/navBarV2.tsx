@@ -1,10 +1,12 @@
+"use client";
+
 /* eslint-disable @next/next/no-img-element */
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 import { Dialog } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import SolutionsButton from "./solutionsButton";
 
