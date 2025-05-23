@@ -39,14 +39,7 @@ const Hero = () => {
       </div>
       <h1 className="text-5xl sm:text-7xl md:text-[84px] font-semibold mb-3 w-full max-w-3xl text-wrap text-white z-[10]">
         <span className="block">
-          LLM{" "}
-          <GlitchCycle
-            words={["Monitoring", "Tracing", "Gateway"]}
-            className="text-brand"
-            intensity={0.8}
-            frequency={3000}
-            duration={600}
-          />
+          LLM <span className="text-brand">Monitoring</span>
         </span>
         <span className="block">for Startups</span>
       </h1>
