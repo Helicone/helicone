@@ -526,7 +526,7 @@ export class LoggingHandler extends AbstractLogHandler {
     const cacheMetricLog: CacheMetricSMT = {
       organization_id: orgParams?.id ?? "00000000-0000-0000-0000-000000000000",
       date: response.responseCreatedAt.toISOString().split("T")[0],
-      hour: response.responseCreatedAt.getHours(),
+      hour: response.responseCreatedAt.getUTCHours(),
       request_id: context.message.log.request.cacheReferenceId ?? DEFAULT_UUID,
       model: context.processedLog.model ?? "",
       provider: request.provider ?? "",
