@@ -207,7 +207,8 @@ const resourcesComponents: LinkItem[] = [
       href: "/customers",
       isExternal: false,
     },
-    description: "Built for scale, security, and control",
+    description:
+      "Built for scale, security, and control",
     icon: <Gem className="size-5 navbar-icon-style" />,
   },
   {
@@ -336,7 +337,7 @@ const NavBar = (props: NavBarProps) => {
   return (
     <div
       ref={headerRef}
-      className="bg-background top-0 sticky z-30 border-b border-border"
+      className="bg-background top-0 sticky z-30 border-b border-border mb-10"
     >
       <MobileNav />
 
@@ -501,9 +502,9 @@ const NavBar = (props: NavBarProps) => {
                 <p className="text-sm text-accent-foreground">
                   {props.stars
                     ? props.stars.toLocaleString("en-US", {
-                        notation: "compact",
-                        compactDisplay: "short",
-                      })
+                      notation: "compact",
+                      compactDisplay: "short",
+                    })
                     : "0"}
                 </p>
               </Button>
