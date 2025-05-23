@@ -120,7 +120,7 @@ const CachePage = (props: CachePageProps) => {
   const currentTimeFilter = useMemo<TimeFilter>(() => ({
     start: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * timePeriod),
     end: new Date(),
-  }), []);
+  }), [timePeriod]);
 
   const timeZoneDifference = new Date().getTimezoneOffset();
   const router = useRouter();
