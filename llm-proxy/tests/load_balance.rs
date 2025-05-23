@@ -59,8 +59,6 @@ async fn openai_slow() {
         let response = harness.call(request).await.unwrap();
         assert_eq!(response.status(), StatusCode::OK);
     }
-    harness.mock.openai_mock.verify().await;
-    harness.mock.anthropic_mock.verify().await;
 }
 
 #[tokio::test]
@@ -114,6 +112,4 @@ async fn anthropic_slow() {
         let response = harness.call(request).await.unwrap();
         assert_eq!(response.status(), StatusCode::OK);
     }
-    harness.mock.openai_mock.verify().await;
-    harness.mock.anthropic_mock.verify().await;
 }

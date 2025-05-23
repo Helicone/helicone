@@ -37,16 +37,7 @@ async fn main() -> Result<(), llm_proxy::error::runtime::RuntimeError> {
     info!("telemetry initialized");
     let mut shutting_down = false;
     let app = App::new(config).await?;
-    // let rate_limit_cleanup_interval = config.rate_limit.cleanup_interval;
-    // let rate_limiting_cleanup_service =
-    //     middleware::rate_limit::service::Service::new(
-    //         app.state.0.authed_rate_limit.clone(),
-    //         app.state.0.unauthed_rate_limit.clone(),
-    //         rate_limit_cleanup_interval,
-    //     );
-
     let health_monitor = HealthMonitor::new(app.state.clone());
-
     let mut meltdown = Meltdown::new()
         .register(TaggedService::new(
             "shutdown-signals",
@@ -57,10 +48,6 @@ async fn main() -> Result<(), llm_proxy::error::runtime::RuntimeError> {
             "provider-health-monitor",
             health_monitor,
         ));
-    // .register(TaggedService::new(
-    //     "rate-limit-cleanup",
-    //     rate_limiting_cleanup_service,
-    // ));
 
     while let Some((service, result)) = meltdown.next().await {
         match result {

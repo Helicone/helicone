@@ -112,7 +112,7 @@ impl LoggerService {
         let req_path = self.target_url.path().to_string();
         let request_log = RequestLog::builder()
             .id(self.req_ctx.request_id)
-            .user_id(auth_ctx.user_id.clone())
+            .user_id(auth_ctx.user_id)
             .properties(IndexMap::new())
             .target_url(self.target_url)
             .provider(self.provider)

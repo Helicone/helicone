@@ -3,13 +3,12 @@
 ## Local Development Setup Instructions
 
 - Install Rust: https://www.rust-lang.org/tools/install
-- Install direnv: https://direnv.net
 - Install Rust analyzer for your IDE.
 - Setup the `--all-features` flag for your IDE. E.g. for VSCode,
   go to user preferences (`cmd+shift+p`), and add the line:
   `"rust-analyzer.cargo.features": "all"` to your preferences JSON.
 - Create a Helicone API key for your Helicone user.
-- `cp .envrc.template .envrc` and fill out the `PROXY__HELICONE__API_KEY`,
+- `cp .env.template .env` and fill out the `PROXY__HELICONE__API_KEY`,
   `HELICONE_API_KEY`, `OPENAI_API_KEY`, and `ANTHROPIC_API_KEY` environment
   variables, and any others where your local environment does not match the
   default Helicone configuration.

@@ -57,9 +57,6 @@ async fn openai() {
         .unwrap();
     let response = harness.call(request).await.unwrap();
     assert_eq!(response.status(), StatusCode::OK);
-
-    // technically verification happens on drop but we do it here to be explicit
-    harness.mock.openai_mock.verify().await;
 }
 
 /// Sending a request to https://localhost/router should
@@ -117,10 +114,11 @@ async fn anthropic_with_openai_request_style() {
     assert_eq!(response.status(), StatusCode::OK);
 
     // assert that the request was proxied to the mock server correctly
-    harness.mock.anthropic_mock.verify().await;
+    harness.mock.anthropic_mock.http_server.verify().await;
     harness
         .mock
         .anthropic_mock
+        .http_server
         .set_expectation("success:anthropic:messages", 2.into())
         .await;
 
@@ -145,9 +143,6 @@ async fn anthropic_with_openai_request_style() {
         .unwrap();
     let response = harness.call(request).await.unwrap();
     assert_eq!(response.status(), StatusCode::OK);
-
-    // assert that the request was proxied to the mock server correctly
-    harness.mock.anthropic_mock.verify().await;
 }
 
 #[tokio::test]
@@ -203,11 +198,12 @@ async fn anthropic_with_anthropic_request_style() {
     assert_eq!(response.status(), StatusCode::OK);
 
     // assert that the request was proxied to the mock server correctly
-    harness.mock.anthropic_mock.verify().await;
+    harness.mock.verify().await;
     // update the expectation to 2 requests
     harness
         .mock
         .anthropic_mock
+        .http_server
         .set_expectation("success:anthropic:messages", 2.into())
         .await;
 
@@ -232,9 +228,6 @@ async fn anthropic_with_anthropic_request_style() {
         .unwrap();
     let response = harness.call(request).await.unwrap();
     assert_eq!(response.status(), StatusCode::OK);
-
-    // assert that the request was proxied to the mock server correctly
-    harness.mock.anthropic_mock.verify().await;
 }
 
 /// Sending a request to https://localhost/router should
@@ -291,5 +284,4 @@ async fn anthropic_request_style() {
         .unwrap();
     let response = harness.call(request).await.unwrap();
     assert_eq!(response.status(), StatusCode::OK);
-    harness.mock.openai_mock.verify().await;
 }

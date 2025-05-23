@@ -33,4 +33,8 @@ pub enum InitError {
     InvalidWeightedBalancer(String),
     /// Converter registry endpoints not configured for provider: {0}
     EndpointsNotConfigured(InferenceProvider),
+    /// Failed to create redis pool: {0}
+    CreateRedisPool(#[from] r2d2::Error),
+    /// Failed to create redis client: {0}
+    CreateRedisClient(#[from] redis::RedisError),
 }

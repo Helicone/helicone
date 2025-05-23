@@ -98,9 +98,4 @@ async fn errors_remove_provider_from_lb_pool() {
     //
     // but this is totes good for now
     tokio::time::sleep(std::time::Duration::from_millis(10)).await;
-
-    harness.mock.jawn_mock.verify().await;
-    harness.mock.minio_mock.verify().await;
-    harness.mock.openai_mock.verify().await;
-    harness.mock.anthropic_mock.verify().await;
 }

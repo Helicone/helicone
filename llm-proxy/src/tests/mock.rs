@@ -1,9 +1,6 @@
 use std::collections::HashMap;
 
-use stubr::{
-    Stubr,
-    wiremock_rs::{MockServer, Times},
-};
+use stubr::{Stubr, wiremock_rs::Times};
 use typed_builder::TypedBuilder;
 use url::Url;
 
@@ -24,10 +21,11 @@ pub struct MockArgs {
 }
 
 pub struct Mock {
-    pub openai_mock: MockServer,
-    pub anthropic_mock: MockServer,
-    pub minio_mock: MockServer,
-    pub jawn_mock: MockServer,
+    pub openai_mock: Stubr,
+    pub anthropic_mock: Stubr,
+    pub minio_mock: Stubr,
+    pub jawn_mock: Stubr,
+    args: MockArgs,
 }
 
 impl Mock {
@@ -68,11 +66,64 @@ impl Mock {
         config.helicone.base_url = Url::parse(&jawn_mock.uri()).unwrap();
 
         Self {
-            openai_mock: openai_mock.http_server,
-            anthropic_mock: anthropic_mock.http_server,
-            minio_mock: minio_mock.http_server,
-            jawn_mock: jawn_mock.http_server,
+            openai_mock,
+            anthropic_mock,
+            minio_mock,
+            jawn_mock,
+            args,
         }
+    }
+
+    pub async fn verify(&self) {
+        self.openai_mock.http_server.verify().await;
+        self.anthropic_mock.http_server.verify().await;
+        self.minio_mock.http_server.verify().await;
+        self.jawn_mock.http_server.verify().await;
+    }
+
+    pub async fn reset(&self) {
+        self.openai_mock.http_server.reset().await;
+        self.anthropic_mock.http_server.reset().await;
+        self.minio_mock.http_server.reset().await;
+        self.jawn_mock.http_server.reset().await;
+    }
+
+    pub async fn stubs(&self, stubs: HashMap<&'static str, Times>) {
+        register_stubs_for_mock(
+            &self.openai_mock,
+            "./stubs/openai",
+            self.args.global_openai_latency,
+            &stubs,
+            self.args.verify,
+        )
+        .await;
+
+        register_stubs_for_mock(
+            &self.anthropic_mock,
+            "./stubs/anthropic",
+            self.args.global_anthropic_latency,
+            &stubs,
+            self.args.verify,
+        )
+        .await;
+
+        register_stubs_for_mock(
+            &self.minio_mock,
+            "./stubs/minio",
+            None,
+            &stubs,
+            self.args.verify,
+        )
+        .await;
+
+        register_stubs_for_mock(
+            &self.jawn_mock,
+            "./stubs/jawn",
+            None,
+            &stubs,
+            self.args.verify,
+        )
+        .await;
     }
 }
 
@@ -106,4 +157,32 @@ async fn start_mock(
     }
 
     mock
+}
+
+async fn register_stubs_for_mock(
+    mock: &Stubr,
+    stub_path: &str,
+    global_latency: Option<u64>,
+    stubs: &HashMap<&'static str, Times>,
+    verify: bool,
+) {
+    let active_stubs = stubs.keys().copied().collect();
+
+    mock.try_register_stubs(
+        stub_path.into(),
+        Some(active_stubs),
+        stubr::Config {
+            record: true,
+            global_delay: global_latency,
+            verify,
+            ..Default::default()
+        },
+    )
+    .expect("failed to register stubs");
+
+    for (stub_name, times) in stubs {
+        mock.http_server
+            .set_expectation(stub_name, times.clone())
+            .await;
+    }
 }

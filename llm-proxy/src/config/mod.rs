@@ -7,6 +7,7 @@ pub mod model_mapping;
 pub mod monitor;
 pub mod providers;
 pub mod rate_limit;
+pub mod redis;
 pub mod retry;
 pub mod router;
 pub mod server;
@@ -39,9 +40,7 @@ pub enum Error {
 )]
 #[serde(deny_unknown_fields, rename_all = "kebab-case")]
 pub enum DeploymentTarget {
-    Cloud {
-        global_rate_limits: self::rate_limit::RateLimitConfig,
-    },
+    Cloud,
     Sidecar,
     #[default]
     SelfHosted,
@@ -83,6 +82,7 @@ pub struct Config {
     /// *ALL* supported providers, independent of router configuration.
     pub providers: self::providers::ProvidersConfig,
     pub discover: self::discover::DiscoverConfig,
+    pub rate_limit: self::rate_limit::RateLimitConfig,
     /// If a request is made with a model that is not in the `RouterConfig`
     /// model mapping, then we fallback to this.
     pub default_model_mapping: self::model_mapping::ModelMappingConfig,
@@ -145,6 +145,7 @@ impl crate::tests::TestDefault for Config {
             deployment_target: DeploymentTarget::SelfHosted,
             discover: self::discover::DiscoverConfig::test_default(),
             routers: self::router::RouterConfigs::test_default(),
+            rate_limit: self::rate_limit::RateLimitConfig::test_default(),
         }
     }
 }

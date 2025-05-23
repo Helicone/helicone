@@ -55,11 +55,6 @@ async fn request_response_logger_authenticated() {
 
     // sleep so that the background task for logging can complete
     tokio::time::sleep(std::time::Duration::from_millis(10)).await;
-
-    // When authenticated, both minio and jawn logging should be called
-    harness.mock.jawn_mock.verify().await;
-    harness.mock.minio_mock.verify().await;
-    harness.mock.openai_mock.verify().await;
 }
 
 #[tokio::test]
@@ -107,9 +102,4 @@ async fn request_response_logger_unauthenticated() {
 
     // sleep so that the background task for logging can complete
     tokio::time::sleep(std::time::Duration::from_millis(10)).await;
-
-    // When unauthenticated, only the provider mock should be called
-    harness.mock.openai_mock.verify().await;
-    // minio and jawn mocks should not be called when unauthenticated
-    // (their verify() would pass because no expectations were set)
 }

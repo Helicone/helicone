@@ -39,7 +39,7 @@ impl Router {
         app_state: AppState,
     ) -> Result<Self, InitError> {
         let router_config = match &app_state.0.config.deployment_target {
-            DeploymentTarget::Cloud { .. } | DeploymentTarget::Sidecar => {
+            DeploymentTarget::Cloud | DeploymentTarget::Sidecar => {
                 return Err(InitError::DeploymentTargetNotSupported(
                     app_state.0.config.deployment_target.clone(),
                 ));

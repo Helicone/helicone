@@ -88,10 +88,6 @@ async fn weighted_balancer_anthropic_preferred() {
 
     // sleep so that the background task for logging can complete
     tokio::time::sleep(std::time::Duration::from_millis(10)).await;
-
-    // When auth is disabled, only provider mocks should be called
-    harness.mock.openai_mock.verify().await;
-    harness.mock.anthropic_mock.verify().await;
 }
 
 #[tokio::test]
@@ -165,10 +161,6 @@ async fn weighted_balancer_openai_preferred() {
 
     // sleep so that the background task for logging can complete
     tokio::time::sleep(std::time::Duration::from_millis(10)).await;
-
-    // When auth is disabled, only provider mocks should be called
-    harness.mock.openai_mock.verify().await;
-    harness.mock.anthropic_mock.verify().await;
 }
 
 #[tokio::test]
@@ -242,8 +234,4 @@ async fn weighted_balancer_anthropic_heavily_preferred() {
 
     // sleep so that the background task for logging can complete
     tokio::time::sleep(std::time::Duration::from_millis(10)).await;
-
-    // When auth is disabled, only provider mocks should be called
-    harness.mock.openai_mock.verify().await;
-    harness.mock.anthropic_mock.verify().await;
 }

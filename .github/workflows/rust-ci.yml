@@ -22,8 +22,6 @@ jobs:
         run: cargo +nightly fmt --check
   clippy:
     runs-on: ubuntu-latest
-    env:
-      SQLX_OFFLINE: true
     steps:
       - uses: actions/checkout@v4
       - name: Clippy

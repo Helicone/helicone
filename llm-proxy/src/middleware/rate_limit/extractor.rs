@@ -1,25 +1,20 @@
-use std::sync::Arc;
-
 use http::Request;
-use tower_governor::{GovernorError, key_extractor::KeyExtractor};
 
-use crate::types::{request::RequestContext, user::UserId};
+use super::brakes::{KeyExtractor, KeyExtractorError};
+use crate::types::request::AuthContext;
 
 #[derive(Debug, Clone)]
-pub struct UserIdExtractor;
+pub struct RateLimitKeyExtractor;
 
-impl KeyExtractor for UserIdExtractor {
-    type Key = UserId;
-
-    fn extract<T>(&self, req: &Request<T>) -> Result<Self::Key, GovernorError> {
-        let Some(ctx) = req.extensions().get::<Arc<RequestContext>>().cloned()
-        else {
-            return Err(GovernorError::UnableToExtractKey);
+impl KeyExtractor for RateLimitKeyExtractor {
+    fn extract<T>(
+        &self,
+        req: &Request<T>,
+    ) -> Result<String, KeyExtractorError> {
+        let Some(ctx) = req.extensions().get::<AuthContext>() else {
+            return Err(KeyExtractorError::UnableToExtractKey);
         };
 
-        ctx.auth_context
-            .as_ref()
-            .map(|auth_context| auth_context.user_id.clone())
-            .ok_or(GovernorError::UnableToExtractKey)
+        Ok(ctx.user_id.to_string())
     }
 }
