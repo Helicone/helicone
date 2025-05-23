@@ -31,12 +31,11 @@ RUN . venv/bin/activate && \
     pip3 install regex numpy packaging requests tqdm filelock typing-extensions
 
 
-WORKDIR /usr/src/app/valhalla/jawn
+WORKDIR /usr/src/app
+COPY ./shared ./shared
+COPY ./packages ./packages
+COPY ./package.json ./package.json
 
-RUN yarn install
-
-WORKDIR /usr/src/app/shared
-COPY ./shared .
 
 WORKDIR /usr/src/app/valhalla/jawn
 COPY ./valhalla/jawn .

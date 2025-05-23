@@ -83,23 +83,6 @@ export class RequestController extends Controller {
     return count;
   }
 
-  /**
-   *
-   * @param requestBody Request query filters
-   * @example requestBody {
-   *  "filter": "all",
-   *  "isCached": false,
-   *  "limit": 10,
-   *  "offset": 0,
-   *  "sort": {
-   *    "created_at": "desc"
-   *  },
-   *  "isScored": false,
-   *  "isPartOfExperiment": false
-   * }
-   * @param request
-   * @returns
-   */
   @Post("query")
   @Example<RequestQueryParams>({
     filter: "all",
@@ -127,24 +110,6 @@ export class RequestController extends Controller {
     return requests;
   }
 
-  /**
-   *
-   * @param requestBody Request query filters
-   * @example requestBody {
-   *  "filter": "all",
-   *  "isCached": false,
-   *  "limit": 100,
-   *  "offset": 0,
-   *  "sort": {
-   *    "created_at": "desc"
-   *  },
-   *  "includeInputs": false,
-   *  "isScored": false,
-   *  "isPartOfExperiment": false
-   * }
-   * @param request
-   * @returns
-   */
   @Post("query-clickhouse")
   @Example<RequestQueryParams>({
     filter: "all",

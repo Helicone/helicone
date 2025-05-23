@@ -3119,22 +3119,8 @@ export interface operations {
     };
   };
   GetRequests: {
-    /** @description Request query filters */
     requestBody: {
       content: {
-        /**
-         * @example {
-         *   "filter": "all",
-         *   "isCached": false,
-         *   "limit": 10,
-         *   "offset": 0,
-         *   "sort": {
-         *     "created_at": "desc"
-         *   },
-         *   "isScored": false,
-         *   "isPartOfExperiment": false
-         * }
-         */
         "application/json": components["schemas"]["RequestQueryParams"];
       };
     };
@@ -3148,23 +3134,8 @@ export interface operations {
     };
   };
   GetRequestsClickhouse: {
-    /** @description Request query filters */
     requestBody: {
       content: {
-        /**
-         * @example {
-         *   "filter": "all",
-         *   "isCached": false,
-         *   "limit": 100,
-         *   "offset": 0,
-         *   "sort": {
-         *     "created_at": "desc"
-         *   },
-         *   "includeInputs": false,
-         *   "isScored": false,
-         *   "isPartOfExperiment": false
-         * }
-         */
         "application/json": components["schemas"]["RequestQueryParams"];
       };
     };
