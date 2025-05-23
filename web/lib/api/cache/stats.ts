@@ -99,7 +99,7 @@ export async function getTimeSavedClickhouse(
   );
   return resultMap(
     queryResult,
-    (results) => Number(results[0]?.total_latency_ms ?? 0) / 1000
+    (results) => Number(results[0]?.total_latency_ms ?? 0)
   );
 }
 
