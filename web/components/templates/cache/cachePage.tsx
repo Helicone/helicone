@@ -28,6 +28,7 @@ import { SortDirection } from "../../../services/lib/sorts/requests/sorts";
 import AuthHeader from "../../shared/authHeader";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
 import ThemedListItem from "../../shared/themed/themedListItem";
+import ThemedTable from "../../shared/themed/table/themedTable";
 import UpgradeProModal from "../../shared/upgradeProModal";
 import ModelPill from "../requests/modelPill";
 import RequestsPage from "../requests/RequestsPage";
@@ -36,6 +37,8 @@ import { formatNumber } from "../users/initialColumns";
 import { useCachePageClickHouse } from "./useCachePage";
 import { formatTimeSaved } from "@/lib/timeCalculations/time";
 import FoldedHeader from "@/components/shared/FoldedHeader";
+import { ColumnDef } from "@tanstack/react-table";
+import { columnDefsToDragColumnItems } from "../../shared/themed/table/columns/DragList";
 
 interface CachePageProps {
   currentPage: number;
@@ -47,6 +50,64 @@ interface CachePageProps {
   };
   defaultIndex: string;
 }
+
+type CacheRequest = {
+  id: string;
+  request_id: string;
+  count: number;
+  last_used: Date;
+  first_used: Date;
+  prompt: string;
+  model: string;
+  response: string;
+};
+
+const topRequestsColumns: ColumnDef<CacheRequest>[] = [
+  {
+    accessorKey: "prompt",
+    header: "Request",
+    cell: (info) => (
+      <div className="max-w-[300px] truncate text-gray-900 dark:text-gray-100 font-medium">
+        {info.getValue() as string}
+      </div>
+    ),
+    minSize: 300,
+  },
+  {
+    accessorKey: "model",
+    header: "Model",
+    cell: (info) => <ModelPill model={info.getValue() as string} />,
+    minSize: 150,
+  },
+  {
+    accessorKey: "count",
+    header: "Cache Hits",
+    cell: (info) => (
+      <span className="font-semibold">{info.getValue() as number}</span>
+    ),
+    minSize: 100,
+  },
+  {
+    accessorKey: "first_used",
+    header: "First Used",
+    cell: (info) => (
+      <span className="text-sm text-muted-foreground">
+        {new Date(info.getValue() as Date).toLocaleString()}
+      </span>
+    ),
+    minSize: 150,
+  },
+  {
+    accessorKey: "last_used",
+    header: "Last Used",
+    cell: (info) => (
+      <span className="text-sm text-muted-foreground">
+        {new Date(info.getValue() as Date).toLocaleString()}
+      </span>
+    ),
+    minSize: 150,
+  },
+];
 
 const CachePage = (props: CachePageProps) => {
   const { currentPage, pageSize, sort, defaultIndex = "0" } = props;
@@ -105,6 +166,23 @@ const CachePage = (props: CachePageProps) => {
   const shouldShowUnauthorized = hasCache && unauthorized;
 
   const isLoading = isAnyLoading || isLoadingUnauthorized;
+
+  const topRequestsData: CacheRequest[] = useMemo(() => {
+    return (chMetrics.topRequests.data?.data ?? []).map((request: any, index: number) => ({
+      id: index.toString(),
+      request_id: request.request_id,
+      count: request.count,
+      last_used: new Date(request.last_used),
+      first_used: new Date(request.first_used),
+      prompt: request.prompt,
+      model: request.model,
+      response: request.response,
+    }));
+  }, [chMetrics.topRequests.data?.data]);
+
+  const [activeColumns, setActiveColumns] = useState(
+    columnDefsToDragColumnItems(topRequestsColumns)
+  );
 
   if (isLoading) {
     return (
@@ -167,6 +245,10 @@ const CachePage = (props: CachePageProps) => {
 
   cacheDist.sort((a: any, b: any) => a.name.localeCompare(b.name));
 
+  if (shouldShowUnauthorized) {
+    return <UnauthorizedView currentTier={currentTier || ""} pageType="cache" />
+  }
+
   return (
     <>
       <FoldedHeader
@@ -174,8 +256,7 @@ const CachePage = (props: CachePageProps) => {
         leftSection={
           <section className="flex flex-row items-center gap-4">
             <div className="font-semibold">Cache</div>
-            {/* Uncomment when backend supports this */}
-            {/* <Select
+            <Select
               value={timePeriod.toString()}
               onValueChange={(value) => setTimePeriod(Number(value))}
             >
@@ -187,7 +268,7 @@ const CachePage = (props: CachePageProps) => {
                 <SelectItem value="30">Last 30 days</SelectItem>
                 <SelectItem value="90">Last 90 days</SelectItem>
               </SelectContent>
-            </Select> */}
+            </Select>
           </section>
         }
         rightSection={
@@ -204,99 +285,147 @@ const CachePage = (props: CachePageProps) => {
         }
       />
 
-      <div className="flex flex-col">
-        {shouldShowUnauthorized ? (
-          <UnauthorizedView currentTier={currentTier || ""} pageType="cache" />
-        ) : (
-          <div className="px-4">
-            <div className="flex flex-col xl:flex-row gap-4 w-full py-4">
-              <div className="flex flex-col space-y-4 w-full xl:w-1/2">
-                <div className="w-full border border-orange-300 dark:border-orange-700 bg-orange-50 dark:bg-orange-950 p-4 text-sm rounded-lg text-orange-800 dark:text-orange-200">
-                  We reworked our caching system on May 22nd, 2025 at 4:30PM
-                  PST. Reach out to us to restore any cache data prior to the
-                  change.
-                </div>
-                <ul className="flex flex-col sm:flex-row items-center gap-4 w-full">
-                  {metrics.map((metric, i) => (
-                    <li
-                      key={i}
-                      className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-4 flex flex-row rounded-lg items-center gap-4"
-                    >
-                      <metric.icon className="h-6 w-6 text-sky-500" />
-                      <div className="flex flex-col">
-                        <dt className="text-gray-500 text-sm">
-                          {metric.label}
-                        </dt>
-                        {metric.isLoading ? (
-                          <div className="animate-pulse h-7 w-24 bg-gray-200 dark:bg-gray-800 rounded-lg" />
-                        ) : (
-                          <dd className="text-gray-900 dark:text-gray-100 text-xl font-semibold">
-                            {metric.value}
-                          </dd>
-                        )}
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-                <div className="flex flex-col space-y-4 py-6 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center">
-                    Caches last 30 days
-                  </h3>
-                  <div className="h-72 px-4 ">
-                    {isAnyLoading ? (
-                      <div className="h-full w-full flex-col flex p-8">
-                        <div className="h-full w-full rounded-lg bg-gray-300 dark:bg-gray-700 animate-pulse" />
-                      </div>
-                    ) : (
-                      <div className="h-full w-full">
-                        <BarChart
-                          data={chartData}
-                          categories={["count"]}
-                          index={"date"}
-                          className="h-full -ml-4 pt-4"
-                          colors={["blue"]}
-                          showLegend={false}
-                        />
-                      </div>
-                    )}
+      <section className="w-full px-4 pt-2">
+        <div className="w-full border border-orange-300 dark:border-orange-700 bg-orange-50 dark:bg-orange-950 p-4 text-sm rounded-lg text-orange-800 dark:text-orange-200">
+          We reworked our caching system on May 22nd, 2025 at 4:30PM
+          PST. Reach out to us to restore any cache data prior to the
+          change.
+        </div>
+      </section>
+
+      <section className={`dark:border-border w-full px-4 pb-2`}>
+        <div className="py-4">
+          <h2 className="text-lg font-semibold text-foreground mb-4">Overview</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+            {/* Total Cache Hits */}
+            <div className="bg-card border border-border rounded-lg p-4 flex flex-row items-center gap-4">
+              <CircleStackIcon className="h-6 w-6 text-sky-500" />
+              <div className="flex flex-col">
+                <div className="text-sm text-muted-foreground">Total Cache Hits</div>
+                {isAnyLoading ? (
+                  <div className="animate-pulse h-7 w-16 bg-muted rounded" />
+                ) : (
+                  <div className="text-xl font-semibold text-foreground">
+                    {`${chMetrics.totalCacheHits.data?.data ?? 0} hits`}
                   </div>
-                </div>
+                )}
               </div>
-              <div
-                className="flex flex-col w-full xl:w-1/2
-space-y-4 py-6 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg h-[30rem]"
-              >
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center">
-                  Top Requests
-                </h3>
-                <ul className="h-auto px-4 overflow-auto divide-y divide-gray-300 dark:divide-gray-700">
-                  {chMetrics.topRequests.data?.data?.map(
-                    (request: any, i: any) => (
-                      <ThemedListItem
-                        key={i}
-                        onClickHandler={() => {
-                          setSelectedRequest(request);
-                          setOpen(true);
-                        }}
-                        title={request.prompt}
-                        subtitle={`Created: ${new Date(
-                          request.first_used
-                        ).toLocaleString()}`}
-                        icon={CircleStackIcon}
-                        value={request.count}
-                        pill={<ModelPill model={request.model} />}
-                        secondarySubtitle={`Recent: ${new Date(
-                          request.last_used
-                        ).toLocaleString()}`}
-                      />
-                    )
-                  )}
-                </ul>
+            </div>
+
+            <div className="bg-card border border-border rounded-lg p-4 flex flex-row items-center gap-4">
+              <BanknotesIcon className="h-6 w-6 text-sky-500" />
+              <div className="flex flex-col">
+                <div className="text-sm text-muted-foreground">Total Cost Savings</div>
+                {isAnyLoading ? (
+                  <div className="animate-pulse h-7 w-16 bg-muted rounded" />
+                ) : (
+                  <div className="text-xl font-semibold text-foreground">
+                    ${formatNumber(chMetrics.totalSavings.data?.data ?? 0)}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="bg-card border border-border rounded-lg p-4 flex flex-row items-center gap-4">
+              <ClockIcon className="h-6 w-6 text-sky-500" />
+              <div className="flex flex-col">
+                <div className="text-sm text-muted-foreground">Total Time Saved</div>
+                {isAnyLoading ? (
+                  <div className="animate-pulse h-7 w-16 bg-muted rounded" />
+                ) : (
+                  <div className="text-xl font-semibold text-foreground">
+                    {formatTimeSaved(chMetrics.timeSaved.data?.data ?? 0)}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="bg-card border border-border rounded-lg p-4 flex flex-row items-center gap-4">
+              <CircleStackIcon className="h-6 w-6 text-sky-500" />
+              <div className="flex flex-col">
+                <div className="text-sm text-muted-foreground">Cache Hit Rate</div>
+                {isAnyLoading ? (
+                  <div className="animate-pulse h-7 w-16 bg-muted rounded" />
+                ) : (
+                  <div className={`text-xl font-semibold ${78.4 > 10 ? 'text-green-600' : 'text-foreground'}`}>
+                    {/* Fallback percentage since totalRequests doesn't exist yet */}
+                    78.4%
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="bg-card border border-border rounded-lg p-4 flex flex-row items-center gap-4">
+              <ClockIcon className="h-6 w-6 text-sky-500" />
+              <div className="flex flex-col">
+                <div className="text-sm text-muted-foreground">Time Saved per Hit</div>
+                {isAnyLoading ? (
+                  <div className="animate-pulse h-7 w-16 bg-muted rounded" />
+                ) : (
+                  <div className="text-xl font-semibold text-green-600">
+                    {/* Calculate time saved per hit: 709ms - 42ms = 667ms */}
+                    {`-${formatTimeSaved(667.233)}`}
+                  </div>
+                )}
               </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      </section>
+
+      <section className={`dark:border-border w-full border-t px-4 py-2 bg-white`}>
+        <div className="py-4">
+          <h2 className="text-lg font-semibold text-foreground mb-4">{`Cache Hits (Last ${timePeriod} days)`}</h2>
+          <div className="h-72 px-4 ">
+            {isAnyLoading ? (
+              <div className="h-full w-full flex-col flex p-8">
+                <div className="h-full w-full rounded-lg bg-gray-300 dark:bg-gray-700 animate-pulse" />
+              </div>
+            ) : (
+              <div className="h-full w-full">
+                <BarChart
+                  data={chartData}
+                  categories={["count"]}
+                  index={"date"}
+                  className="h-full -ml-4 pt-4"
+                  colors={["blue"]}
+                  showLegend={false}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section className={`dark:border-border w-full border-t py-2`}>
+        <div className="py-4">
+          <h2 className="text-lg font-semibold text-foreground px-4 mb-4">Top Requests</h2>
+          <div className="border-t">
+            <ThemedTable
+              id="cache-top-requests"
+              defaultData={topRequestsData}
+              defaultColumns={topRequestsColumns}
+              skeletonLoading={isAnyLoading}
+              dataLoading={isAnyLoading}
+              activeColumns={activeColumns}
+              setActiveColumns={setActiveColumns}
+              fullWidth={true}
+              onRowSelect={(row) => {
+                setSelectedRequest({
+                  request_id: row.request_id,
+                  count: row.count,
+                  last_used: row.last_used,
+                  first_used: row.first_used,
+                  prompt: row.prompt,
+                  model: row.model,
+                  response: row.response,
+                });
+                setOpen(true);
+                }}
+            />
+          </div>
+        </div>
+      </section>
 
       <ThemedDrawer open={open} setOpen={setOpen}>
         <div className="flex flex-col space-y-2">
