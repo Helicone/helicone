@@ -3,30 +3,66 @@ version: "3.8"
 
 services:
   postgres-flyway-test:
-    image: postgres:17.4 # You can choose a specific version
+    image: postgres:17.4
     container_name: helicone-postgres-flyway-test
     environment:
       POSTGRES_DB: helicone_test
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: testpassword
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "54388:5432" # Map host port 54388 to container port 5432
+      - "54388:5432"
+    # volumes
+    #   - postgres_flyway_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+  migrations:
+    build:
+      context: ../
+      dockerfile: docker/dockerfiles/dockerfile_migrations
+    depends_on:
+      postgres-flyway-test:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+    environment:
+      FLYWAY_URL: jdbc:postgresql://postgres-flyway-test:5432/helicone_test
+      FLYWAY_USER: postgres
+      FLYWAY_PASSWORD: ${POSTGRES_PASSWORD}
+    # volumes:
+    #   - ../supabase:/app/supabase
+    #   - ../clickhouse:/app/clickhouse
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    environment: 
+      PGADMIN_DEFAULT_EMAIL: devinat11@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: password
+      PGADMIN_LISTEN_PORT: 5000
+    ports:
+      - 15432:5000
     volumes:
-      - postgres_flyway_data:/var/lib/postgresql/data
+      - pgadmin:/var/lib/pgadmin
+    depends_on:
+      - postgres-flyway-test
 
   mailhog:
     image: mailhog/mailhog
     container_name: mailhog
     ports:
-      - "1025:1025" # SMTP port
-      - "8025:8025" # Web UI port
+      - "1025:1025"
+      - "8025:8025"
 
   minio:
     image: minio/minio
     container_name: helicone-minio-server
     ports:
-      - "9000:9000" # MinIO API port
-      - "9001:9001" # MinIO Console port
+      - "9000:9000"
+      - "9001:9001"
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
@@ -38,7 +74,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 5s # Give MinIO time to start up before checking
+      start_period: 5s
 
   minio-setup:
     image: minio/mc
@@ -65,9 +101,71 @@ services:
         soft: 262144
         hard: 262144
     environment:
-      # Default user is 'default', no password set initially based on --no-password
       CLICKHOUSE_DEFAULT_USER: default
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8123/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  web:
+    container_name: helicone-web-local
+    image: 849596434884.dkr.ecr.us-east-2.amazonaws.com/helicone/web:v2025.05.23
+    platform: linux/amd64
+    build:
+      context: ../web
+      dockerfile: ../docker/dockerfiles/dockerfile_web
+      args:
+        NEXT_PUBLIC_HELICONE_JAWN_SERVICE: ${JAWN_PUBLIC_URL}
+        NEXT_PUBLIC_BETTER_AUTH: "true"
+        NODE_ENV: development
+    ports:
+      - 3000:3000
+    volumes:
+      - ../web:/app/web
+      - /app/web/node_modules
+      - /app/web/.next
+    environment:
+      NEXT_PUBLIC_HELICONE_JAWN_SERVICE: ${JAWN_PUBLIC_URL}
+      DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+      CLICKHOUSE_HOST: http://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+      VERCEL_ENV: ${VERCEL_ENV}
+      SMTP_HOST: mailhog
+      SMTP_PORT: 1025
+      NEXT_PUBLIC_BETTER_AUTH: "true"
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      SMTP_SECURE: false
+      NODE_ENV: development
+
+
+  worker:
+    image: 849596434884.dkr.ecr.us-east-2.amazonaws.com/helicone/worker:latest
+    platform: linux/amd64
+    container_name: helicone-worker
+    ports:
+      - "8787:8787"
+
+  jawn:
+    image: 849596434884.dkr.ecr.us-east-2.amazonaws.com/helicone/jawn:latest
+    platform: linux/amd64
+    container_name: helicone-jawn
+    ports:
+      - "8585:8585"
+    environment:
+      - AZURE_API_VERSION=anything
+      - AZURE_DEPLOYMENT_NAME=anything
+      - AZURE_BASE_URL=anything
+      - AZURE_API_KEY=anything
+      - OPENAI_API_KEY=sk-
+      - ENABLE_PROMPT_SECURITY=false
+      - NEXT_PUBLIC_BETTER_AUTH=true
+      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}
+      - SUPABASE_DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+      - CLICKHOUSE_CREDS={"CLICKHOUSE_HOST":"http://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}","CLICKHOUSE_USER":"${CLICKHOUSE_USER}","CLICKHOUSE_PASSWORD":"${CLICKHOUSE_PASSWORD}"}
 
 volumes:
   postgres_flyway_data:
@@ -75,4 +173,6 @@ volumes:
   minio_data:
     driver: local
   clickhouse_data:
+    driver: local
+  pgadmin:
     driver: local

@@ -8,6 +8,7 @@ AWS_REGION="us-east-2"
 CUSTOM_TAG=""
 TEST_MODE=false
 DONT_PRUNE=false
+SELECTED_IMAGES=()
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
@@ -26,6 +27,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     -r|--region)
       AWS_REGION="$2"
+      shift 2
+      ;;
+    -i|--image)
+      SELECTED_IMAGES+=("$2")
       shift 2
       ;;
     *)
@@ -68,7 +73,7 @@ create_ecr_repo() {
 
 # Login to ECR
 echo "Logging in to ECR..."
-run_command aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+run_command aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
 
 # Prune Docker images if not disabled
 if [ "$DONT_PRUNE" = false ]; then
@@ -84,6 +89,7 @@ IMAGES=(
   "helicone/supabase-migration-runner:../supabase"
   "helicone/clickhouse-migration-runner:../clickhouse"
   "helicone/jawn:.."
+  "helicone/migrations:.."
 )
 
 # Create ECR repositories first
@@ -95,6 +101,22 @@ done
 # Process each image
 for IMAGE_INFO in "${IMAGES[@]}"; do
   IFS=':' read -r IMAGE_NAME CONTEXT <<< "$IMAGE_INFO"
+  
+  # Skip if specific images were selected and this isn't one of them
+  if [ ${#SELECTED_IMAGES[@]} -gt 0 ]; then
+    SKIP=true
+    for SELECTED in "${SELECTED_IMAGES[@]}"; do
+      if [[ "$IMAGE_NAME" == *"$SELECTED"* ]]; then
+        SKIP=false
+        break
+      fi
+    done
+    if [ "$SKIP" = true ]; then
+      echo "Skipping $IMAGE_NAME (not selected)"
+      continue
+    fi
+  fi
+  
   echo "Processing $IMAGE_NAME..."
   
   # Get Dockerfile path

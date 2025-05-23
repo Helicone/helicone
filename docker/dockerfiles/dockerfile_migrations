@@ -22,6 +22,14 @@ RUN pip install --no-cache-dir requests clickhouse-driver tabulate yarl
 
 WORKDIR /app
 
+# Copy files with absolute paths from the root of the build context
+COPY ./supabase/flyway.conf /app/supabase/flyway.conf
+COPY ./supabase/migrations /app/supabase/migrations
+COPY ./supabase/migrations_without_supabase /app/supabase/migrations_without_supabase
+COPY ./clickhouse/migrations /app/clickhouse/migrations
+COPY ./clickhouse/ch_hcone.py /app/clickhouse/ch_hcone.py
+RUN chmod +x /app/clickhouse/ch_hcone.py
+
 # Create a script to run migrations
 RUN echo '#!/bin/sh \n\
     echo "Running PostgreSQL migrations..." \n\
@@ -35,4 +43,4 @@ RUN echo '#!/bin/sh \n\
     echo "All migrations completed successfully!" \n\
     ' > /app/run-migrations.sh && chmod +x /app/run-migrations.sh
 
-CMD ["/app/run-migrations.sh"] 
+CMD ["/app/run-migrations.sh"]
