@@ -4,10 +4,13 @@ import Integrations from "@/components/templates/landing/integrations";
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import LazyLoadComponent from "@/components/shared/LazyLoadComponent";
-import { cn, ISLAND_WIDTH } from "@/lib/utils";
+import { cn, ISLAND_WIDTH, ISLAND_WIDTH_V2 } from "@/lib/utils";
 
 const BigDashboard = dynamic(() => import("@/components/home/BigDashboard"));
 const Companies = dynamic(() => import("@/components/home/Companies"));
+const CompaniesLanding = dynamic(
+  () => import("@/components/home/CompaniesLanding")
+);
 const CTA = dynamic(() => import("@/components/home/CTA"));
 const Evaluate = dynamic(() => import("@/components/home/Evaluate"));
 const Experiment = dynamic(() => import("@/components/home/Experiment"));
@@ -43,63 +46,86 @@ export default async function Home() {
   // const totalValuesData = undefined;
   const totalValuesData = response.ok
     ? ((await response.json()).data as {
-      total_requests?: number;
-      total_tokens?: number;
-      total_cost?: number;
-    })
+        total_requests?: number;
+        total_tokens?: number;
+        total_cost?: number;
+      })
     : undefined;
 
   return (
     <Layout>
+      {/* Background for Hero and Prototype only */}
+      <div
+        className="relative w-full"
+        style={{
+          backgroundImage: "url('/static/home/clouds6.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
+        {/* Semi-transparent overlay */}
+        <div className="absolute inset-0 bg-white opacity-60 z-0"></div>
+
+        {/* Content for Hero and Prototype with full width but centered content */}
+        <div className="relative z-10">
+          <div className="md:max-w-5xl max-w-7xl mx-auto w-full">
+            <Hero className="" />
+            <Prototype />
+          </div>
+        </div>
+      </div>
+
+      {/* Rest of content without the clouds background */}
       <main className="bg-white text-landing-description">
-        <div className="max-w-8xl mx-auto">
-          <Hero />
-          <Prototype />
-          <LazyLoadComponent fallback={<LoadingSection height="h-24" />}>
-            <Companies className={cn("bg-[#f2f9fc]", ISLAND_WIDTH)} />
-          </LazyLoadComponent>
-          <LazyLoadComponent fallback={<LoadingSection />}>
-            <Quote />
-          </LazyLoadComponent>
-          <LazyLoadComponent fallback={<LoadingSection />}>
-            <Integrations />
-          </LazyLoadComponent>
-          <LazyLoadComponent fallback={<LoadingSection />}>
-            <Quote2 />
-          </LazyLoadComponent>
-          <LazyLoadComponent fallback={<LoadingSection />}>
-            <LLMLifecycle />
-          </LazyLoadComponent>
-          <LazyLoadComponent fallback={<LoadingSection />}>
-            <Log />
-          </LazyLoadComponent>
-          <LazyLoadComponent fallback={<LoadingSection />}>
-            <Evaluate />
-          </LazyLoadComponent>
-          <LazyLoadComponent fallback={<LoadingSection />}>
-            <Experiment />
-          </LazyLoadComponent>
-          <LazyLoadComponent fallback={<LoadingSection />}>
-            <Production />
-          </LazyLoadComponent>
-          <LazyLoadComponent fallback={<LoadingSection height="h-[40rem]" />}>
-            <BigDashboard />
-          </LazyLoadComponent>
-          <LazyLoadComponent fallback={<LoadingSection height="h-48" />}>
-            <Stats totalValuesData={totalValuesData} />
-          </LazyLoadComponent>
-          <LazyLoadComponent fallback={<LoadingSection />}>
-            <OpenSource />
-          </LazyLoadComponent>
-          <LazyLoadComponent fallback={<LoadingSection />}>
-            <FAQ />
-          </LazyLoadComponent>
-          <LazyLoadComponent fallback={<LoadingSection />}>
-            <Quote3 />
-          </LazyLoadComponent>
-          <LazyLoadComponent fallback={<LoadingSection height="h-64" />}>
-            <CTA />
-          </LazyLoadComponent>
+        <div className="flex flex-col gap-10">
+          <div className="md:max-w-5xl max-w-7xl mx-auto w-full">
+            <LazyLoadComponent fallback={<LoadingSection height="h-24" />}>
+              <CompaniesLanding />
+            </LazyLoadComponent>
+            <LazyLoadComponent fallback={<LoadingSection />}>
+              <Quote />
+            </LazyLoadComponent>
+            <LazyLoadComponent fallback={<LoadingSection />}>
+              <Integrations />
+            </LazyLoadComponent>
+            <LazyLoadComponent fallback={<LoadingSection />}>
+              <Quote2 />
+            </LazyLoadComponent>
+            {/* <LazyLoadComponent fallback={<LoadingSection />}>
+              <LLMLifecycle />
+            </LazyLoadComponent>
+            <LazyLoadComponent fallback={<LoadingSection />}>
+              <Log />
+            </LazyLoadComponent> */}
+            {/* <LazyLoadComponent fallback={<LoadingSection />}>
+              <Evaluate />
+            </LazyLoadComponent>
+            <LazyLoadComponent fallback={<LoadingSection />}>
+              <Experiment />
+            </LazyLoadComponent>
+            <LazyLoadComponent fallback={<LoadingSection />}>
+              <Production />
+            </LazyLoadComponent> */}
+            <LazyLoadComponent fallback={<LoadingSection height="h-[40rem]" />}>
+              <BigDashboard />
+            </LazyLoadComponent>
+            <LazyLoadComponent fallback={<LoadingSection height="h-48" />}>
+              <Stats totalValuesData={totalValuesData} />
+            </LazyLoadComponent>
+            <LazyLoadComponent fallback={<LoadingSection />}>
+              <OpenSource />
+            </LazyLoadComponent>
+            <LazyLoadComponent fallback={<LoadingSection />}>
+              <FAQ />
+            </LazyLoadComponent>
+            <LazyLoadComponent fallback={<LoadingSection />}>
+              <Quote3 />
+            </LazyLoadComponent>
+            <LazyLoadComponent fallback={<LoadingSection height="h-64" />}>
+              <CTA />
+            </LazyLoadComponent>
+          </div>
         </div>
       </main>
     </Layout>

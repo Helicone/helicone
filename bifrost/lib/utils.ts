@@ -6,4 +6,8 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const ISLAND_WIDTH =
-  " w-full px-4 sm:px-16 md:px-24 2xl:px-40 max-w-[2000px] mx-auto";
+  // " w-full px-4 sm:px-8 md:px-12 lg:px-6 max-w-[1400px] mx-auto";
+  " w-full px-4 sm:px-8 md:px-12 lg:px-6 max-w-[1400px] mx-auto";
+
+export const ISLAND_WIDTH_V2 =
+  "w-full md:max-w-5xl max-w-7xl mx-auto sm:px-8 md:px-12 lg:px-6";
