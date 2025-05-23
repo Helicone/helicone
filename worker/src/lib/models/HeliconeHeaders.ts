@@ -63,7 +63,7 @@ export interface IHeliconeHeaders {
   nodeId: Nullable<string>;
   fallBacks: Nullable<HeliconeFallback[]>;
   modelOverride: Nullable<string>;
-  promptSecurityEnabled: Nullable<string>;
+  promptSecurityEnabled: Nullable<boolean>;
   promptSecurityAdvanced: Nullable<string>;
   moderationsEnabled: boolean;
   posthogKey: Nullable<string>;
@@ -127,7 +127,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   nodeId: Nullable<string>;
   fallBacks: Nullable<HeliconeFallback[]>;
   modelOverride: Nullable<string>;
-  promptSecurityEnabled: Nullable<string>;
+  promptSecurityEnabled: Nullable<boolean>;
   promptSecurityAdvanced: Nullable<string>;
   moderationsEnabled: boolean;
   posthogKey: Nullable<string>;
@@ -342,9 +342,10 @@ export class HeliconeHeaders implements IHeliconeHeaders {
         this.headers.get("Helicone-Model-Override") ??
         null,
       promptSecurityEnabled:
-        this.headers.get("Helicone-LLM-Security-Enabled") ??
-        this.headers.get("Helicone-Prompt-Security-Enabled") ??
-        null,
+        (this.headers.get("Helicone-LLM-Security-Enabled") ??
+          this.headers.get("Helicone-Prompt-Security-Enabled") ??
+          "").toLowerCase() === "true"
+      ,
       promptSecurityAdvanced:
         this.headers.get("Helicone-LLM-Security-Advanced") ?? null,
       moderationsEnabled:
