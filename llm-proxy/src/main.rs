@@ -19,6 +19,7 @@ pub struct Args {
 
 #[tokio::main]
 async fn main() -> Result<(), llm_proxy::error::runtime::RuntimeError> {
+    dotenvy::dotenv().ok();
     let args = Args::parse();
     let config = match Config::try_read(args.config) {
         Ok(config) => config,

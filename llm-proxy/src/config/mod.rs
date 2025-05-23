@@ -47,8 +47,8 @@ pub enum DeploymentTarget {
     SelfHosted,
 }
 
-#[derive(Debug, Default, Deserialize, Serialize)]
-#[serde(default, deny_unknown_fields, rename_all = "kebab-case")]
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(deny_unknown_fields, rename_all = "kebab-case")]
 pub struct AuthConfig {
     /// Whether a Helicone API key is required in order to proxy requests.
     ///
@@ -62,6 +62,14 @@ pub struct AuthConfig {
     /// called by the request, so be warned!
     #[serde(default = "default_true")]
     pub require_auth: bool,
+}
+
+impl Default for AuthConfig {
+    fn default() -> Self {
+        Self {
+            require_auth: default_true(),
+        }
+    }
 }
 
 #[derive(Debug, Default, Deserialize, Serialize)]
