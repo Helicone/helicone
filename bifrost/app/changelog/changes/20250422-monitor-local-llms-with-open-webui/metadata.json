@@ -1,0 +1,4 @@
+{
+  "title": "Introducing Open WebUI Integration",
+  "description": "Monitor local LLMs (including Ollama, OpenAI-compatible APIs, and custom setups) with Helicone through the Open WebUI integration. Get comprehensive observability, performance tracking, and usage analytics for your local models in Helicone."
+}
