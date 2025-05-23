@@ -134,21 +134,21 @@ const CachePage = (props: CachePageProps) => {
   const metrics = [
     {
       id: "caches",
-      label: "All Time Caches",
+      label: "Total Cache Hits",
       value: `${chMetrics.totalCacheHits.data?.data ?? 0} hits`,
       isLoading: isAnyLoading,
       icon: CircleStackIcon,
     },
     {
       id: "savings",
-      label: "All Time Savings",
+      label: "Cost Savings",
       value: `$${formatNumber(chMetrics.totalSavings.data?.data ?? 0)}`,
       isLoading: isAnyLoading,
       icon: BanknotesIcon,
     },
     {
       id: "time-saved",
-      label: "Total Time Saved",
+      label: "Time Saved",
       value: formatTimeSaved(chMetrics.timeSaved.data?.data ?? 0),
       isLoading: isAnyLoading,
       icon: ClockIcon,
@@ -215,8 +215,9 @@ const CachePage = (props: CachePageProps) => {
               <div className="flex flex-col xl:flex-row gap-4 w-full py-4">
                 <div className="flex flex-col space-y-4 w-full xl:w-1/2">
                   <div className="w-full border border-orange-300 dark:border-orange-700 bg-orange-50 dark:bg-orange-950 p-4 text-sm rounded-lg text-orange-800 dark:text-orange-200">
-                    We reworked our caching system on May 22nd, 2025 at 4:30PM PST. Reach out
-                    to us to restore any cache data prior to the change.
+                    We reworked our caching system on May 22nd, 2025 at 4:30PM
+                    PST. Reach out to us to restore any cache data prior to the
+                    change.
                   </div>
                   <ul className="flex flex-col sm:flex-row items-center gap-4 w-full">
                     {metrics.map((metric, i) => (
