@@ -43,16 +43,25 @@ export default async function Home() {
   // const totalValuesData = undefined;
   const totalValuesData = response.ok
     ? ((await response.json()).data as {
-      total_requests?: number;
-      total_tokens?: number;
-      total_cost?: number;
-    })
+        total_requests?: number;
+        total_tokens?: number;
+        total_cost?: number;
+      })
     : undefined;
 
   return (
     <Layout>
-      <main className="bg-white text-landing-description">
-        <div className="max-w-8xl mx-auto">
+      <main
+        className="bg-[#1c1917] text-landing-description relative"
+        style={{
+          backgroundImage: `
+            radial-gradient(circle at 1px 1px, rgba(255,255,255,0.15) 1px, transparent 0),
+            radial-gradient(circle at 2px 2px, rgba(255,255,255,0.1) 1px, transparent 0)
+          `,
+          backgroundSize: "20px 20px, 40px 40px",
+        }}
+      >
+        <div className="max-w-7xl mx-auto">
           <Hero />
           <Prototype />
           <LazyLoadComponent fallback={<LoadingSection height="h-24" />}>
