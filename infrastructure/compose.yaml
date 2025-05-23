@@ -1,7 +1,6 @@
 name: helicone-proxy-cluster
 
 volumes:
-  postgres-data:
   minio-data:
 
 networks:

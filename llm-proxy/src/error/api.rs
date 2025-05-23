@@ -13,8 +13,6 @@ use crate::types::json::Json;
 pub enum Error {
     /// Invalid request: {0}
     InvalidRequest(#[from] InvalidRequestError),
-    /// Database error: {0}
-    Database(#[from] sqlx::Error),
     /// Authentication error: {0}
     Authentication(#[from] crate::error::auth::AuthError),
     /// Internal error: {0}
@@ -37,16 +35,6 @@ impl IntoResponse for Error {
             Error::InvalidRequest(error) => error.into_response(),
             Error::Authentication(error) => error.into_response(),
             Error::Internal(error) => error.into_response(),
-            Error::Database(error) => {
-                tracing::error!(error = %error, "Internal server error");
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    Json(ErrorResponse {
-                        error: "Internal server error".to_string(),
-                    }),
-                )
-                    .into_response()
-            }
             Error::Box(error) => {
                 tracing::error!(error = %error, "Internal server error");
                 (

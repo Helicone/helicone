@@ -13,10 +13,6 @@ pub enum InitError {
     DeploymentTargetNotSupported(DeploymentTarget),
     /// Failed to read TLS certificate: {0}
     Tls(std::io::Error),
-    /// Failed to connect to database: {0}
-    DatabaseConnection(sqlx::Error),
-    /// Migrations failed: {0}
-    Migrations(#[from] sqlx::migrate::MigrateError),
     /// Failed to bind to address: {0}
     Bind(std::io::Error),
     /// Telemetry: {0}

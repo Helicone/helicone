@@ -106,7 +106,6 @@ serde_with = "3.12.0"
 serde_yaml = "0.9.34"
 serde_yml = "0.0.12"
 serial_test = "3.2.0"
-sqlx = "0.8.5"
 strum = "0.27.1"
 # TODO @tom: Open PR, message maintainers, and link it here.
 stubr = { git = "https://github.com/tomharmon/stubr" }

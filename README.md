@@ -20,7 +20,6 @@
 - Run an HTTP request against the router: `cargo run -p test`, this is the
   package in `scripts/test/src/main.rs` and will eventually be removed or upgraded
   to a CLI.
-- Run unit + integration tests: `cargo int-test`. Requires
-  a postgres database to be running for integration tests.
+- Run unit + integration tests: `cargo int-test`
 
 - TODO: which various homebrew packages are needed? tls, protoc, etc

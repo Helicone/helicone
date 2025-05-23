@@ -1,5 +1,4 @@
 pub mod balance;
-pub mod database;
 pub mod discover;
 pub mod dispatcher;
 pub mod helicone;
@@ -70,7 +69,6 @@ pub struct AuthConfig {
 pub struct Config {
     pub telemetry: telemetry::Config,
     pub server: self::server::ServerConfig,
-    pub database: self::database::Config,
     pub minio: self::minio::Config,
     pub dispatcher: self::dispatcher::DispatcherConfig,
     pub auth: AuthConfig,
@@ -128,7 +126,6 @@ impl crate::tests::TestDefault for Config {
         Config {
             telemetry,
             server: self::server::ServerConfig::test_default(),
-            database: self::database::Config::default(),
             minio: self::minio::Config::test_default(),
             dispatcher: self::dispatcher::DispatcherConfig::test_default(),
             auth: AuthConfig::default(),

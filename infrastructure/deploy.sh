@@ -36,7 +36,6 @@ help() {
   echo " - tempo"
   echo " - loki"
   echo " - grafana"
-  echo " - postgres"
   echo " - redis"
   echo
   echo "Options:"
@@ -82,9 +81,6 @@ case "${1:-}" in
   grafana)
     APP_DIR="infrastructure/grafana"
     ;;
-  postgres)
-    APP_DIR="infrastructure/postgres"
-    ;;
   redis)
     APP_DIR="infrastructure/redis"
     ;;
@@ -128,9 +124,6 @@ case "${1:-}" in
     ;;
   grafana)
     image_label=$(get_dir_hash "infrastructure/grafana")
-    ;;
-  postgres)
-    image_label=$(get_dir_hash "infrastructure/postgres")
     ;;
 esac
 

@@ -30,7 +30,6 @@ use crate::{
     metrics::{self, Metrics},
     middleware::auth::AuthService,
     router::meta::MetaRouter,
-    store::StoreRealm,
     utils::{catch_panic::PanicResponder, handle_error::ErrorHandlerLayer},
 };
 
@@ -68,7 +67,6 @@ pub struct InnerAppState {
     pub config: Config,
     pub minio: Minio,
     pub jawn_client: Client,
-    pub store: StoreRealm,
     /// Top level metrics which are exported to OpenTelemetry.
     pub metrics: Metrics,
     /// Metrics to track provider health and rate limits.
@@ -172,11 +170,6 @@ impl App {
     pub async fn new(config: Config) -> Result<Self, InitError> {
         tracing::info!(config = ?config, "creating app");
         let minio = Minio::new(config.minio.clone())?;
-        let pg_config =
-            sqlx::postgres::PgPoolOptions::from(config.database.clone());
-        let pg_pool = pg_config
-            .connect_lazy(&config.database.url.0)
-            .map_err(error::init::InitError::DatabaseConnection)?;
         let jawn_client = Client::builder()
             .tcp_nodelay(true)
             .connect_timeout(JAWN_CONNECT_TIMEOUT)
@@ -193,7 +186,6 @@ impl App {
         let app_state = AppState(Arc::new(InnerAppState {
             config,
             minio,
-            store: StoreRealm::new(pg_pool),
             jawn_client,
             metrics,
             endpoint_metrics,
