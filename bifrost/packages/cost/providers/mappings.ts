@@ -5,6 +5,7 @@ import { costs as awsBedrockCosts } from "./awsBedrock";
 import { costs as azureCosts } from "./azure";
 import { costs as cohereCosts } from "./cohere";
 import { costs as deepseekCosts } from "./deepseek";
+import { costs as featherlessCosts } from "./featherless";
 import { costs as fireworksAICosts } from "./fireworks";
 import { costs as groqCosts } from "./groq";
 import { costs as mistralCosts } from "./mistral";
@@ -69,6 +70,9 @@ const nebius = /^https:\/\/api\.studio\.nebius\.ai/;
 // https://api.novita.ai
 const novita = /^https:\/\/api\.novita\.ai/;
 
+// https://api.featherless.ai
+const featherless = /^https:\/\/api\.featherless\.ai/;
+
 export const providersNames = [
   "OPENAI",
   "ANTHROPIC",
@@ -98,6 +102,7 @@ export const providersNames = [
   "AVIAN",
   "NEBIUS",
   "NOVITA",
+  "FEATHERLESS",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -247,6 +252,11 @@ export const providers: {
     pattern: novita,
     provider: "NOVITA",
     costs: novitaCosts,
+  },
+  {
+    pattern: featherless,
+    provider: "FEATHERLESS",
+    costs: featherlessCosts,
   },
 ];
 

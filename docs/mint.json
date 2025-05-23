@@ -138,6 +138,7 @@
             "getting-started/integration-method/mistral",
             "getting-started/integration-method/nebius",
             "getting-started/integration-method/novita",
+            "getting-started/integration-method/featherless",
             {
               "group": "Ollama",
               "pages": ["integrations/ollama/javascript"]
