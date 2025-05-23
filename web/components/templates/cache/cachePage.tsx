@@ -1,7 +1,13 @@
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
-import { IslandContainer } from "@/components/ui/islandContainer";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 import {
@@ -29,6 +35,7 @@ import UnauthorizedView from "../requests/UnauthorizedView";
 import { formatNumber } from "../users/initialColumns";
 import { useCachePageClickHouse } from "./useCachePage";
 import { formatTimeSaved } from "@/lib/timeCalculations/time";
+import FoldedHeader from "@/components/shared/FoldedHeader";
 
 interface CachePageProps {
   currentPage: number;
@@ -41,29 +48,19 @@ interface CachePageProps {
   defaultIndex: string;
 }
 
-const tabs: {
-  id: number;
-  title: string;
-  icon: ElementType<any>;
-}[] = [
-  {
-    id: 0,
-    title: "Cache Analytics",
-    icon: CircleStackIcon,
-  },
-  {
-    id: 1,
-    title: "Logs",
-    icon: TableCellsIcon,
-  },
-];
-
 const CachePage = (props: CachePageProps) => {
   const { currentPage, pageSize, sort, defaultIndex = "0" } = props;
+  const [timePeriod, setTimePeriod] = useState<number>(30);
   const [timeFilter, _] = useState<TimeFilter>({
-    start: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 30),
+    start: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * timePeriod),
     end: new Date(),
   });
+
+  const currentTimeFilter = useMemo<TimeFilter>(() => ({
+    start: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * timePeriod),
+    end: new Date(),
+  }), []);
+
   const timeZoneDifference = new Date().getTimezoneOffset();
   const router = useRouter();
   const dbIncrement = "day";
@@ -72,7 +69,7 @@ const CachePage = (props: CachePageProps) => {
     metrics: chMetrics,
     isAnyLoading,
   } = useCachePageClickHouse({
-    timeFilter,
+    timeFilter: currentTimeFilter,
     timeZoneDifference,
     dbIncrement,
   });
@@ -171,152 +168,133 @@ const CachePage = (props: CachePageProps) => {
   cacheDist.sort((a: any, b: any) => a.name.localeCompare(b.name));
 
   return (
-    <IslandContainer>
-      <AuthHeader
-        isWithinIsland={true}
-        title={<div className="flex items-center gap-2">Cache</div>}
-        actions={
-          <Link
-            href="https://docs.helicone.ai/features/advanced-usage/caching"
-            target="_blank"
-            rel="noreferrer noopener"
-            className="w-fit flex items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-          >
-            <BookOpenIcon className="h-4 w-4" />
-          </Link>
+    <>
+      <FoldedHeader
+        showFold={false}
+        leftSection={
+          <section className="flex flex-row items-center gap-4">
+            <div className="font-semibold">Cache</div>
+            {/* Uncomment when backend supports this */}
+            {/* <Select
+              value={timePeriod.toString()}
+              onValueChange={(value) => setTimePeriod(Number(value))}
+            >
+              <SelectTrigger className="w-[160px] h-8 shadow-sm">
+                <SelectValue placeholder="Select time period" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7">Last 7 days</SelectItem>
+                <SelectItem value="30">Last 30 days</SelectItem>
+                <SelectItem value="90">Last 90 days</SelectItem>
+              </SelectContent>
+            </Select> */}
+          </section>
+        }
+        rightSection={
+          <section className="flex flex-row items-center gap-2">
+            <Link
+              href="https://docs.helicone.ai/features/advanced-usage/caching"
+              target="_blank"
+              rel="noreferrer noopener"
+              className="h-8 bg-muted rounded-lg border border-border p-2 flex items-center gap-2 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-900"
+            >
+              <BookOpenIcon className="h-4 w-4" />
+            </Link>
+          </section>
         }
       />
+
       <div className="flex flex-col">
         {shouldShowUnauthorized ? (
           <UnauthorizedView currentTier={currentTier || ""} pageType="cache" />
         ) : (
-          <Tabs defaultValue={defaultIndex} className="w-full">
-            <TabsList className="font-semibold">
-              {tabs.map((tab) => (
-                <TabsTrigger
-                  key={tab.id}
-                  value={tab.id.toString()}
-                  onClick={() => {
-                    router.push(
-                      {
-                        query: { ...router.query, tab: tab.id },
-                      },
-                      undefined,
-                      { shallow: true }
-                    );
-                  }}
-                >
-                  <tab.icon className="h-5 w-5 mr-2" />
-                  {tab.title}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-            <TabsContent value="0">
-              <div className="flex flex-col xl:flex-row gap-4 w-full py-4">
-                <div className="flex flex-col space-y-4 w-full xl:w-1/2">
-                  <div className="w-full border border-orange-300 dark:border-orange-700 bg-orange-50 dark:bg-orange-950 p-4 text-sm rounded-lg text-orange-800 dark:text-orange-200">
-                    We reworked our caching system on May 22nd, 2025 at 4:30PM
-                    PST. Reach out to us to restore any cache data prior to the
-                    change.
-                  </div>
-                  <ul className="flex flex-col sm:flex-row items-center gap-4 w-full">
-                    {metrics.map((metric, i) => (
-                      <li
-                        key={i}
-                        className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-4 flex flex-row rounded-lg items-center gap-4"
-                      >
-                        <metric.icon className="h-6 w-6 text-sky-500" />
-                        <div className="flex flex-col">
-                          <dt className="text-gray-500 text-sm">
-                            {metric.label}
-                          </dt>
-                          {metric.isLoading ? (
-                            <div className="animate-pulse h-7 w-24 bg-gray-200 dark:bg-gray-800 rounded-lg" />
-                          ) : (
-                            <dd className="text-gray-900 dark:text-gray-100 text-xl font-semibold">
-                              {metric.value}
-                            </dd>
-                          )}
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="flex flex-col space-y-4 py-6 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center">
-                      Caches last 30 days
-                    </h3>
-                    <div className="h-72 px-4 ">
-                      {isAnyLoading ? (
-                        <div className="h-full w-full flex-col flex p-8">
-                          <div className="h-full w-full rounded-lg bg-gray-300 dark:bg-gray-700 animate-pulse" />
-                        </div>
-                      ) : (
-                        <div className="h-full w-full">
-                          <BarChart
-                            data={chartData}
-                            categories={["count"]}
-                            index={"date"}
-                            className="h-full -ml-4 pt-4"
-                            colors={["blue"]}
-                            showLegend={false}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
+          <div className="px-4">
+            <div className="flex flex-col xl:flex-row gap-4 w-full py-4">
+              <div className="flex flex-col space-y-4 w-full xl:w-1/2">
+                <div className="w-full border border-orange-300 dark:border-orange-700 bg-orange-50 dark:bg-orange-950 p-4 text-sm rounded-lg text-orange-800 dark:text-orange-200">
+                  We reworked our caching system on May 22nd, 2025 at 4:30PM
+                  PST. Reach out to us to restore any cache data prior to the
+                  change.
                 </div>
-                <div
-                  className="flex flex-col w-full xl:w-1/2
-space-y-4 py-6 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg h-[30rem]"
-                >
+                <ul className="flex flex-col sm:flex-row items-center gap-4 w-full">
+                  {metrics.map((metric, i) => (
+                    <li
+                      key={i}
+                      className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-4 flex flex-row rounded-lg items-center gap-4"
+                    >
+                      <metric.icon className="h-6 w-6 text-sky-500" />
+                      <div className="flex flex-col">
+                        <dt className="text-gray-500 text-sm">
+                          {metric.label}
+                        </dt>
+                        {metric.isLoading ? (
+                          <div className="animate-pulse h-7 w-24 bg-gray-200 dark:bg-gray-800 rounded-lg" />
+                        ) : (
+                          <dd className="text-gray-900 dark:text-gray-100 text-xl font-semibold">
+                            {metric.value}
+                          </dd>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+                <div className="flex flex-col space-y-4 py-6 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center">
-                    Top Requests
+                    Caches last 30 days
                   </h3>
-                  <ul className="h-auto px-4 overflow-auto divide-y divide-gray-300 dark:divide-gray-700">
-                    {chMetrics.topRequests.data?.data?.map(
-                      (request: any, i: any) => (
-                        <ThemedListItem
-                          key={i}
-                          onClickHandler={() => {
-                            setSelectedRequest(request);
-                            setOpen(true);
-                          }}
-                          title={request.prompt}
-                          subtitle={`Created: ${new Date(
-                            request.first_used
-                          ).toLocaleString()}`}
-                          icon={CircleStackIcon}
-                          value={request.count}
-                          pill={<ModelPill model={request.model} />}
-                          secondarySubtitle={`Recent: ${new Date(
-                            request.last_used
-                          ).toLocaleString()}`}
+                  <div className="h-72 px-4 ">
+                    {isAnyLoading ? (
+                      <div className="h-full w-full flex-col flex p-8">
+                        <div className="h-full w-full rounded-lg bg-gray-300 dark:bg-gray-700 animate-pulse" />
+                      </div>
+                    ) : (
+                      <div className="h-full w-full">
+                        <BarChart
+                          data={chartData}
+                          categories={["count"]}
+                          index={"date"}
+                          className="h-full -ml-4 pt-4"
+                          colors={["blue"]}
+                          showLegend={false}
                         />
-                      )
+                      </div>
                     )}
-                  </ul>
+                  </div>
                 </div>
               </div>
-            </TabsContent>
-            <TabsContent value="1">
-              <div className="py-4">
-                {hasCache && unauthorized ? (
-                  <UnauthorizedView
-                    currentTier={currentTier || ""}
-                    pageType="cache"
-                  />
-                ) : (
-                  <RequestsPage
-                    currentPage={currentPage}
-                    pageSize={pageSize}
-                    sort={sort}
-                    isCached={true}
-                    organizationLayoutAvailable={false}
-                  />
-                )}
+              <div
+                className="flex flex-col w-full xl:w-1/2
+space-y-4 py-6 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg h-[30rem]"
+              >
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center">
+                  Top Requests
+                </h3>
+                <ul className="h-auto px-4 overflow-auto divide-y divide-gray-300 dark:divide-gray-700">
+                  {chMetrics.topRequests.data?.data?.map(
+                    (request: any, i: any) => (
+                      <ThemedListItem
+                        key={i}
+                        onClickHandler={() => {
+                          setSelectedRequest(request);
+                          setOpen(true);
+                        }}
+                        title={request.prompt}
+                        subtitle={`Created: ${new Date(
+                          request.first_used
+                        ).toLocaleString()}`}
+                        icon={CircleStackIcon}
+                        value={request.count}
+                        pill={<ModelPill model={request.model} />}
+                        secondarySubtitle={`Recent: ${new Date(
+                          request.last_used
+                        ).toLocaleString()}`}
+                      />
+                    )
+                  )}
+                </ul>
               </div>
-            </TabsContent>
-          </Tabs>
+            </div>
+          </div>
         )}
       </div>
 
@@ -374,7 +352,7 @@ space-y-4 py-6 bg-white dark:bg-black border border-gray-300 dark:border-gray-70
         </div>
       </ThemedDrawer>
       <UpgradeProModal open={openUpgradeModal} setOpen={setOpenUpgradeModal} />
-    </IslandContainer>
+    </>
   );
 };
 
