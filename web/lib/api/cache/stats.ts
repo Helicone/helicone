@@ -97,9 +97,8 @@ export async function getTimeSavedClickhouse(
     query,
     builtFilter.argsAcc
   );
-  return resultMap(
-    queryResult,
-    (results) => Number(results[0]?.total_latency_ms ?? 0)
+  return resultMap(queryResult, (results) =>
+    Number(results[0]?.total_latency_ms ?? 0)
   );
 }
 
