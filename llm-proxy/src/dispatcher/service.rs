@@ -313,19 +313,30 @@ impl Dispatcher {
         ),
         Error,
     > {
-        let response_stream =
-            Client::sse_stream(request_builder, req_body_bytes)?.map_err(
-                move |e| {
-                    if let InternalError::StreamError(error) = &e {
-                        if let Ok(endpoint_metrics) =
-                            metrics_registry.endpoint_metrics(api_endpoint)
-                        {
-                            endpoint_metrics.incr_for_stream_error(error);
-                        }
+        let response_stream = Client::sse_stream(
+            request_builder,
+            req_body_bytes,
+        )?
+        .map_err(move |e| {
+            if let InternalError::StreamError(error) = &e {
+                cfg_if::cfg_if! {
+                    if #[cfg(debug_assertions)] {
+                        metrics_registry.endpoint_metrics(api_endpoint).map(|metrics| {
+                            metrics.incr_for_stream_error_debug(error);
+                        }).inspect_err(|e| {
+                            tracing::error!(error = %e, "failed to increment stream error metrics");
+                        }).ok();
+                    } else {
+                        metrics_registry.endpoint_metrics(api_endpoint).map(|metrics| {
+                            metrics.incr_for_stream_error(error);
+                        }).inspect_err(|e| {
+                            tracing::error!(error = %e, "failed to increment stream error metrics");
+                        }).ok();
                     }
-                    e
-                },
-            );
+                }
+            }
+            e
+        });
         let mut resp_builder = http::Response::builder();
         *resp_builder.headers_mut().unwrap() = stream_response_headers();
         resp_builder = resp_builder.status(StatusCode::OK);

@@ -4,16 +4,23 @@
 
 - Install Rust: https://www.rust-lang.org/tools/install
 - Install direnv: https://direnv.net
-- TODO: which various homebrew packages are needed? tls, protoc, etc
-- Create a Helicone API key for the `test@helicone.ai` user 
-  in the `Organization for Test`.
+- Install Rust analyzer for your IDE.
+- Setup the `--all-features` flag for your IDE. E.g. for VSCode,
+  go to user preferences (`cmd+shift+p`), and add the line:
+  `"rust-analyzer.cargo.features": "all"` to your preferences JSON.
+- Create a Helicone API key for your Helicone user.
 - `cp .envrc.template .envrc` and fill out the `PROXY__HELICONE__API_KEY`,
   `HELICONE_API_KEY`, `OPENAI_API_KEY`, and `ANTHROPIC_API_KEY` environment
   variables, and any others where your local environment does not match the
   default Helicone configuration.
-- Start the router: `cargo run`
+- Start the docker compose stack: `cd infrastructure && docker compose up -d`
+- Start the router (from the root of the repo):
+  - with default configs: `cargo run`
+  - with a dev config file: `cargo rl`
 - Run an HTTP request against the router: `cargo run -p test`, this is the
-  package in `test/src/main.rs` and will eventually be removed or upgraded
+  package in `scripts/test/src/main.rs` and will eventually be removed or upgraded
   to a CLI.
-- Run unit + integration tests: `cargo t --tests --all-features`. Requires
+- Run unit + integration tests: `cargo int-test`. Requires
   a postgres database to be running for integration tests.
+
+- TODO: which various homebrew packages are needed? tls, protoc, etc

@@ -246,7 +246,8 @@ dependencies = [
 [[package]]
 name = "async-openai"
 version = "0.28.1"
-source = "git+https://github.com/tomharmon/async-openai.git?branch=task%2Foptional-backoff#dad43265ef44b931e1299d4735441befe659192f"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "14d76e2f5af19477d6254415acc95ba97c6cc6f3b1e3cb4676b7f0fab8194298"
 dependencies = [
  "async-openai-macros",
  "backoff",
@@ -271,7 +272,8 @@ dependencies = [
 [[package]]
 name = "async-openai-macros"
 version = "0.1.0"
-source = "git+https://github.com/tomharmon/async-openai.git?branch=task%2Foptional-backoff#dad43265ef44b931e1299d4735441befe659192f"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0289cba6d5143bfe8251d57b4a8cac036adf158525a76533a7082ba65ec76398"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -5011,7 +5013,8 @@ dependencies = [
 [[package]]
 name = "tower-http"
 version = "0.6.4"
-source = "git+https://github.com/tower-rs/tower-http.git?branch=main#fa8848e9d128f6ec2d5571fdb8cd74575bf3c834"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0fdb0c213ca27a9f57ab69ddb290fd80d970922355b83ae380b395d3986b8a2e"
 dependencies = [
  "base64 0.22.1",
  "bitflags",

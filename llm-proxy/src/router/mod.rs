@@ -26,17 +26,6 @@ use crate::{
 
 pub type RouterService = request_context::Service<ProviderBalancer>;
 
-// service that calls inner service based on endpoint "type": chat completion,
-// etc eg i call openai /v1/chat/completions
-// this service detects that it's a chat style request
-// and then dispatches to the chat style response provider balancer
-// once provider balancer picks a provider, proxy to that endpoint for that
-// provider.
-
-// health check monitor will be global and stored in app state and use broadcast
-// rate limit monitor will be per router, use mpsc, and be initialized in
-// router::new
-
 #[derive(Debug)]
 pub struct Router {
     inner: HashMap<EndpointType, RouterService>,

@@ -90,4 +90,25 @@ impl EndpointMetrics {
             _ => {}
         }
     }
+
+    pub fn incr_for_stream_error_debug(
+        &self,
+        stream_error: &reqwest_eventsource::Error,
+    ) {
+        match stream_error {
+            reqwest_eventsource::Error::StreamEnded
+            | reqwest_eventsource::Error::Transport(..) => {
+                self.incr_remote_internal_error_count();
+            }
+            reqwest_eventsource::Error::InvalidStatusCode(status_code, ..) => {
+                if status_code.is_server_error() {
+                    self.incr_remote_internal_error_count();
+                    tracing::error!(status_code = %status_code, "received error response in stream");
+                } else if status_code.is_client_error() {
+                    tracing::warn!(status_code = %status_code, "got upstream client error in stream");
+                }
+            }
+            _ => {}
+        }
+    }
 }
