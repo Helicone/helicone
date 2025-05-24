@@ -16,7 +16,6 @@ import {
 import { TimeIncrement } from "../../timeCalculations/fetchTimeData";
 import { dbQueryClickhouse, printRunnableQuery } from "../db/dbExecute";
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
-import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
 
 function convertDbIncrement(dbIncrement: TimeIncrement): string {
   return dbIncrement === "min" ? "MINUTE" : dbIncrement;
@@ -221,7 +220,7 @@ export async function getXOverTimeCacheHits<T extends { count: number }>(
   let dateSelect = "date";
   let dateGroupBy = "date";
   let fillClause = "";
-  
+
   if (request.dbIncrement === "day") {
     const startDateStr = clickhouseParam(builtFilterArgsAcc.length, startDate);
     const endDateStr = clickhouseParam(builtFilterArgsAcc.length + 1, endDate);
@@ -266,11 +265,13 @@ ORDER BY ${dateSelect} ASC ${fillClause}
     created_at_trunc: Date;
   };
 
-  return resultMap(await dbQueryClickhouse<ResultType>(query, builtFilterArgsAcc), (d) =>
-    d.map((r) => ({
-      ...r,
-      created_at_trunc: new Date(r.created_at_trunc),
-    }))
+  return resultMap(
+    await dbQueryClickhouse<ResultType>(query, builtFilterArgsAcc),
+    (d) =>
+      d.map((r) => ({
+        ...r,
+        created_at_trunc: new Date(r.created_at_trunc),
+      }))
   );
 }
 

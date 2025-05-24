@@ -8,30 +8,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 import {
   BanknotesIcon,
   BookOpenIcon,
   CircleStackIcon,
   ClockIcon,
-  TableCellsIcon,
 } from "@heroicons/react/24/outline";
 import { BarChart } from "@tremor/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { ElementType, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
 import { useGetUnauthorized } from "../../../services/hooks/dashboard";
 import { TimeFilter } from "../../../services/lib/filters/filterDefs";
 import { SortDirection } from "../../../services/lib/sorts/requests/sorts";
-import AuthHeader from "../../shared/authHeader";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
-import ThemedListItem from "../../shared/themed/themedListItem";
 import ThemedTable from "../../shared/themed/table/themedTable";
 import UpgradeProModal from "../../shared/upgradeProModal";
 import ModelPill from "../requests/modelPill";
-import RequestsPage from "../requests/RequestsPage";
 import UnauthorizedView from "../requests/UnauthorizedView";
 import { formatNumber } from "../users/initialColumns";
 import { useCachePageClickHouse } from "./useCachePage";
@@ -117,10 +112,13 @@ const CachePage = (props: CachePageProps) => {
     end: new Date(),
   });
 
-  const currentTimeFilter = useMemo<TimeFilter>(() => ({
-    start: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * timePeriod),
-    end: new Date(),
-  }), [timePeriod]);
+  const currentTimeFilter = useMemo<TimeFilter>(
+    () => ({
+      start: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * timePeriod),
+      end: new Date(),
+    }),
+    [timePeriod]
+  );
 
   const timeZoneDifference = new Date().getTimezoneOffset();
   const router = useRouter();
@@ -168,16 +166,18 @@ const CachePage = (props: CachePageProps) => {
   const isLoading = isAnyLoading || isLoadingUnauthorized;
 
   const topRequestsData: CacheRequest[] = useMemo(() => {
-    return (chMetrics.topRequests.data?.data ?? []).map((request: any, index: number) => ({
-      id: index.toString(),
-      request_id: request.request_id,
-      count: request.count,
-      last_used: new Date(request.last_used),
-      first_used: new Date(request.first_used),
-      prompt: request.prompt,
-      model: request.model,
-      response: request.response,
-    }));
+    return (chMetrics.topRequests.data?.data ?? []).map(
+      (request: any, index: number) => ({
+        id: index.toString(),
+        request_id: request.request_id,
+        count: request.count,
+        last_used: new Date(request.last_used),
+        first_used: new Date(request.first_used),
+        prompt: request.prompt,
+        model: request.model,
+        response: request.response,
+      })
+    );
   }, [chMetrics.topRequests.data?.data]);
 
   const [activeColumns, setActiveColumns] = useState(
@@ -187,8 +187,8 @@ const CachePage = (props: CachePageProps) => {
   const cacheHitRate = useMemo(() => {
     const cacheHits = chMetrics.totalCacheHits.data?.data;
     const totalRequests = chMetrics.totalRequests.data?.data;
-    
-    return (cacheHits && totalRequests) ? (cacheHits / totalRequests) * 100 : 0;
+
+    return cacheHits && totalRequests ? (cacheHits / totalRequests) * 100 : 0;
   }, [chMetrics.totalCacheHits.data?.data, chMetrics.totalRequests.data?.data]);
 
   const avgLatencyReduction = useMemo(() => {
@@ -251,7 +251,9 @@ const CachePage = (props: CachePageProps) => {
   }));
 
   if (shouldShowUnauthorized) {
-    return <UnauthorizedView currentTier={currentTier || ""} pageType="cache" />
+    return (
+      <UnauthorizedView currentTier={currentTier || ""} pageType="cache" />
+    );
   }
 
   return (
@@ -292,21 +294,24 @@ const CachePage = (props: CachePageProps) => {
 
       <section className="w-full px-4 pt-2">
         <div className="w-full border border-orange-300 dark:border-orange-700 bg-orange-50 dark:bg-orange-950 p-4 text-sm rounded-lg text-orange-800 dark:text-orange-200">
-          We reworked our caching system on May 22nd, 2025 at 4:30PM
-          PST. Reach out to us to restore any cache data prior to the
-          change.
+          We reworked our caching system on May 22nd, 2025 at 4:30PM PST. Reach
+          out to us to restore any cache data prior to the change.
         </div>
       </section>
 
       <section className={`dark:border-border w-full px-4 pb-2`}>
         <div className="py-4">
-          <h2 className="text-lg font-semibold text-foreground mb-4">Overview</h2>
+          <h2 className="text-lg font-semibold text-foreground mb-4">
+            Overview
+          </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             {/* Total Cache Hits */}
             <div className="bg-card border border-border rounded-lg p-4 flex flex-row items-center gap-4">
               <CircleStackIcon className="h-6 w-6 text-sky-500" />
               <div className="flex flex-col">
-                <div className="text-sm text-muted-foreground">Total Cache Hits</div>
+                <div className="text-sm text-muted-foreground">
+                  Total Cache Hits
+                </div>
                 {isAnyLoading ? (
                   <div className="animate-pulse h-7 w-16 bg-muted rounded" />
                 ) : (
@@ -320,7 +325,9 @@ const CachePage = (props: CachePageProps) => {
             <div className="bg-card border border-border rounded-lg p-4 flex flex-row items-center gap-4">
               <BanknotesIcon className="h-6 w-6 text-sky-500" />
               <div className="flex flex-col">
-                <div className="text-sm text-muted-foreground">Total Cost Savings</div>
+                <div className="text-sm text-muted-foreground">
+                  Total Cost Savings
+                </div>
                 {isAnyLoading ? (
                   <div className="animate-pulse h-7 w-16 bg-muted rounded" />
                 ) : (
@@ -334,7 +341,9 @@ const CachePage = (props: CachePageProps) => {
             <div className="bg-card border border-border rounded-lg p-4 flex flex-row items-center gap-4">
               <ClockIcon className="h-6 w-6 text-sky-500" />
               <div className="flex flex-col">
-                <div className="text-sm text-muted-foreground">Total Time Saved</div>
+                <div className="text-sm text-muted-foreground">
+                  Total Time Saved
+                </div>
                 {isAnyLoading ? (
                   <div className="animate-pulse h-7 w-16 bg-muted rounded" />
                 ) : (
@@ -348,11 +357,17 @@ const CachePage = (props: CachePageProps) => {
             <div className="bg-card border border-border rounded-lg p-4 flex flex-row items-center gap-4">
               <CircleStackIcon className="h-6 w-6 text-sky-500" />
               <div className="flex flex-col">
-                <div className="text-sm text-muted-foreground">Cache Hit Rate</div>
+                <div className="text-sm text-muted-foreground">
+                  Cache Hit Rate
+                </div>
                 {isAnyLoading ? (
                   <div className="animate-pulse h-7 w-16 bg-muted rounded" />
                 ) : (
-                  <div className={`text-xl font-semibold ${cacheHitRate > 10 ? 'text-green-600' : 'text-foreground'}`}>
+                  <div
+                    className={`text-xl font-semibold ${
+                      cacheHitRate > 10 ? "text-green-600" : "text-foreground"
+                    }`}
+                  >
                     {cacheHitRate.toFixed(2)}%
                   </div>
                 )}
@@ -362,7 +377,9 @@ const CachePage = (props: CachePageProps) => {
             <div className="bg-card border border-border rounded-lg p-4 flex flex-row items-center gap-4">
               <ClockIcon className="h-6 w-6 text-sky-500" />
               <div className="flex flex-col">
-                <div className="text-sm text-muted-foreground">Time Saved per Hit</div>
+                <div className="text-sm text-muted-foreground">
+                  Time Saved per Hit
+                </div>
                 {isAnyLoading ? (
                   <div className="animate-pulse h-7 w-16 bg-muted rounded" />
                 ) : (
@@ -377,7 +394,9 @@ const CachePage = (props: CachePageProps) => {
         </div>
       </section>
 
-      <section className={`dark:border-border w-full border-t px-4 py-2 bg-white`}>
+      <section
+        className={`dark:border-border w-full border-t px-4 py-2 bg-white`}
+      >
         <div className="py-4">
           <h2 className="text-lg font-semibold text-foreground mb-4">{`Cache Hits (Last ${timePeriod} days)`}</h2>
           <div className="h-72 px-4 ">
@@ -403,7 +422,9 @@ const CachePage = (props: CachePageProps) => {
 
       <section className={`dark:border-border w-full border-t py-2`}>
         <div className="py-4">
-          <h2 className="text-lg font-semibold text-foreground px-4 mb-4">Top Requests</h2>
+          <h2 className="text-lg font-semibold text-foreground px-4 mb-4">
+            Top Requests
+          </h2>
           <div className="border-t">
             <ThemedTable
               id="cache-top-requests"
@@ -425,7 +446,7 @@ const CachePage = (props: CachePageProps) => {
                   response: row.response,
                 });
                 setOpen(true);
-                }}
+              }}
             />
           </div>
         </div>

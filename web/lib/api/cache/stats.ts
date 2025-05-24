@@ -1,15 +1,9 @@
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import {
-  buildFilterWithAuthClickHouseCacheMetrics,
-} from "../../../services/lib/filters/filters";
+import { buildFilterWithAuthClickHouseCacheMetrics } from "../../../services/lib/filters/filters";
 import { Result, resultMap } from "@/packages/common/result";
-import {
-  isValidTimeIncrement,
-  isValidTimeZoneDifference,
-} from "../../sql/timeHelpers";
-import { dbExecute, dbQueryClickhouse } from "../db/dbExecute";
+
+import { dbQueryClickhouse } from "../db/dbExecute";
 import { ModelMetrics } from "../metrics/modelMetrics";
-import { DataOverTimeRequest } from "../metrics/timeDataHandlerWrapper";
 
 export async function getCacheCountClickhouse(
   orgId: string,

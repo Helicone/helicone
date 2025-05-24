@@ -216,7 +216,7 @@ from request_response_rmt FINAL
 WHERE (${builtFilter.filter})
 ${isCached ? "AND cache_enabled = 1" : ""}
 `;
-console.log(query);
+  console.log(query);
   const { data, error } = await dbQueryClickhouse<{ count: number }>(
     query,
     builtFilter.argsAcc
