@@ -2,7 +2,6 @@ import FilterASTButton from "@/filterAST/FilterASTButton";
 import { TimeFilter } from "@/types/timeFilter";
 import { Menu } from "@headlessui/react";
 import { ArrowDownTrayIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
 import { useState } from "react";
 import { UserMetric } from "../../../lib/api/users/UserMetric";
 import { TimeInterval } from "../../../lib/timeCalculations/time";
@@ -173,14 +172,14 @@ export default function ThemedHeader({
                   Exporting by CSV is limited to 500 rows due to the huge
                   amounts of data in the requests. For larger exports, please
                   use our{" "}
-                  <Link
+                  <a
                     href="https://docs.helicone.ai/helicone-api/getting-started"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="underline font-semibold text-blue-600"
                   >
                     API
-                  </Link>
+                  </a>
                   .
                 </p>
               </div>

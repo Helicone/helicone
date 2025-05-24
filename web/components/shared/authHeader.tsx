@@ -1,8 +1,8 @@
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
 import { ReactNode } from "react";
 import { ISLAND_MARGIN } from "../ui/islandContainer";
 import { cn } from "@/lib/utils";
+import { NavLink } from "react-router";
 
 interface AuthHeaderProps {
   title: React.ReactNode;
@@ -36,13 +36,13 @@ const AuthHeader = (props: AuthHeaderProps) => {
     >
       <div className="flex flex-col items-start space-y-2">
         {breadcrumb ? (
-          <Link
+          <NavLink
             className="flex w-fit items-center text-slate-500 space-x-2 dark:text-slate-400"
-            href={breadcrumb.href}
+            to={breadcrumb.href}
           >
             <ChevronLeftIcon className="h-4 w-4 inline" />
             <span className="text-sm font-semibold">{breadcrumb.title}</span>
-          </Link>
+          </NavLink>
         ) : (
           <div className="flex items-center space-x-4 ">
             <h1 className="flex w-fit items-center text-gray-500 space-x-2 font-bold dark:text-slate-300">
