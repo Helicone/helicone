@@ -207,8 +207,6 @@ export async function getRequestCountClickhouse(
     filter,
   });
 
-  console.log("bruh", filter);
-
   const query = `
 SELECT
   count(DISTINCT request_response_rmt.request_id) as count
@@ -216,7 +214,6 @@ from request_response_rmt FINAL
 WHERE (${builtFilter.filter})
 ${isCached ? "AND cache_enabled = 1" : ""}
 `;
-  console.log(query);
   const { data, error } = await dbQueryClickhouse<{ count: number }>(
     query,
     builtFilter.argsAcc
