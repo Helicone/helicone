@@ -1,22 +1,23 @@
-/* eslint-disable @next/next/no-img-element */
+/* eslint-disable @next/next/no-img-element, custom-rules/no-next-link, custom-rules/no-next-router, custom-rules/no-next-link-import */
+
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 import { Dialog } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { useState } from "react";
 import SolutionsButton from "./solutionsButton";
-import { NavLink, useNavigate } from "react-router";
+import Link from "next/link";
+import { useRouter } from "next/router";
 
 interface NavBarV2Props {}
 
 const NavBarV2 = (props: NavBarV2Props) => {
   const {} = props;
+  const router = useRouter();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const heliconeAuthClient = useHeliconeAuthClient();
-
-  const navigate = useNavigate();
 
   return (
     <header className="bg-inherit dark:bg-black top-0 sticky z-30 border-b border-gray-200 dark:border-gray-700 px-4">
@@ -26,7 +27,7 @@ const NavBarV2 = (props: NavBarV2Props) => {
           aria-label="Global"
         >
           <div className="flex items-center">
-            <NavLink to="/" className="-m-1.5">
+            <Link href="/" className="-m-1.5">
               <span className="sr-only">Helicone</span>
               <Image
                 className="dark:hidden"
@@ -44,51 +45,51 @@ const NavBarV2 = (props: NavBarV2Props) => {
                 width={100}
                 priority={true}
               />
-            </NavLink>
+            </Link>
           </div>
           <div className="hidden md:flex gap-x-1 lg:gap-x-2 items-center text-sm">
             <SolutionsButton />
 
-            <NavLink
-              to="https://docs.helicone.ai/"
+            <Link
+              href="https://docs.helicone.ai/"
               className="flex flex-row items-center font-medium hover:text-black dark:hover:text-white rounded-md px-3 py-1.5 focus:outline-none text-gray-700 dark:text-gray-300"
             >
               Docs
-            </NavLink>
-            <NavLink
-              to="https://helicone.ai/pricing"
+            </Link>
+            <Link
+              href="https://helicone.ai/pricing"
               className="flex flex-row items-center font-medium hover:text-black dark:hover:text-white rounded-md px-3 py-1.5 focus:outline-none text-gray-700 dark:text-gray-300"
             >
               Pricing
-            </NavLink>
-            <NavLink
-              to="/blog"
+            </Link>
+            <Link
+              href="/blog"
               rel="noopener noreferrer"
               className="flex flex-row items-center font-medium hover:text-black dark:hover:text-white rounded-md px-3 py-1.5 focus:outline-none text-gray-700 dark:text-gray-300"
             >
               Blog
-            </NavLink>
-            <NavLink
-              to="/contact"
+            </Link>
+            <Link
+              href="/contact"
               className="flex flex-row items-center font-medium hover:text-black dark:hover:text-white rounded-md px-3 py-1.5 focus:outline-none text-gray-700 dark:text-gray-300"
             >
               Contact
-            </NavLink>
+            </Link>
           </div>
           <div className="flex-1 hidden md:flex items-center justify-end gap-x-2">
             {heliconeAuthClient.user ? (
               <>
-                <NavLink
-                  to="/dashboard"
+                <Link
+                  href="/dashboard"
                   className="bg-sky-500 hover:bg-sky-600 border-2 border-sky-700 whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
                 >
                   Dashboard
-                </NavLink>
+                </Link>
                 <button
                   onClick={async () => {
                     await heliconeAuthClient.refreshSession();
                     await heliconeAuthClient.signOut();
-                    navigate("/");
+                    router.push("/");
                   }}
                   className="bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 ease-in-out duration-500 text-black dark:text-white border-[3px] border-gray-300 dark:border-gray-600 text-sm rounded-lg px-4 py-1.5 font-bold shadow-lg flex w-fit items-center gap-1"
                 >
@@ -97,18 +98,18 @@ const NavBarV2 = (props: NavBarV2Props) => {
               </>
             ) : (
               <>
-                <NavLink
-                  to="/signin"
+                <Link
+                  href="/signin"
                   className="bg-[#f8feff] dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-semibold text-black dark:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
                 >
                   Sign In
-                </NavLink>
-                <NavLink
-                  to="/signup"
+                </Link>
+                <Link
+                  href="/signup"
                   className="bg-sky-500 hover:bg-sky-600 border-2 border-sky-700 whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
                 >
                   Sign up for free
-                </NavLink>
+                </Link>
               </>
             )}
           </div>
@@ -170,41 +171,41 @@ const NavBarV2 = (props: NavBarV2Props) => {
               <div className="mt-6 flow-root">
                 <div className="-my-6">
                   <div className="py-6 flex flex-col space-y-8">
-                    <NavLink
-                      to="https://helicone.ai/pricing"
+                    <Link
+                      href="https://helicone.ai/pricing"
                       className="text-md font-semibold text-gray-900 dark:text-gray-300"
                     >
                       Pricing
-                    </NavLink>
-                    <NavLink
-                      to="https://docs.helicone.ai/"
+                    </Link>
+                    <Link
+                      href="https://docs.helicone.ai/"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-md font-semibold text-gray-900 dark:text-gray-300"
                     >
                       Documentation
-                    </NavLink>
-                    <NavLink
-                      to="/roadmap"
+                    </Link>
+                    <Link
+                      href="/roadmap"
                       className="text-md font-semibold text-gray-900 dark:text-gray-300"
                     >
                       Roadmap
-                    </NavLink>
-                    <NavLink
-                      to="https://github.com/Helicone/helicone"
+                    </Link>
+                    <Link
+                      href="https://github.com/Helicone/helicone"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-md font-semibold text-gray-900 dark:text-gray-300"
                     >
                       Github
-                    </NavLink>
-                    <NavLink
-                      to="/blog"
+                    </Link>
+                    <Link
+                      href="/blog"
                       rel="noopener noreferrer"
                       className="text-md font-semibold text-gray-900 dark:text-gray-300"
                     >
                       Blog
-                    </NavLink>
+                    </Link>
                   </div>
                   <div className="pt-16 w-full">
                     {heliconeAuthClient.user ? (
@@ -212,19 +213,19 @@ const NavBarV2 = (props: NavBarV2Props) => {
                         onClick={async () => {
                           await heliconeAuthClient.refreshSession();
                           await heliconeAuthClient.signOut();
-                          navigate("/");
+                          router.push("/");
                         }}
                         className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap flex w-full justify-center rounded-md px-4 py-2 text-md font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
                       >
                         Sign Out
                       </button>
                     ) : (
-                      <NavLink
-                        to="/signin"
+                      <Link
+                        href="/signin"
                         className="bg-gray-900 hover:bg-gray-700 whitespace-nowrap flex w-full justify-center rounded-md px-4 py-2 text-md font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
                       >
                         Sign In
-                      </NavLink>
+                      </Link>
                     )}
                   </div>
                 </div>
