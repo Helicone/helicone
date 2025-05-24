@@ -74,7 +74,7 @@ type TableDataType = {
   };
 };
 
-export function ExperimentTable() {
+export default function ExperimentTable() {
   const { experimentId } = useParams();
   const experimentTableId = experimentId ?? "";
 

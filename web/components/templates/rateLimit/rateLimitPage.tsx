@@ -67,7 +67,7 @@ const getTimeFilterFromParam = (paramValue: string | null): TimeFilter => {
   return defaultValue;
 };
 
-const RateLimitPage = (props: {}) => {
+const RateLimitPage = () => {
   const searchParams = useSearchParams();
   const [currentTab, setCurrentTab] = useLocalStorage<string>(
     "rateLimitPageActiveTab",
@@ -90,7 +90,7 @@ const RateLimitPage = (props: {}) => {
       start: result.start,
       end: result.end,
     };
-  }, [searchParams.get("t")]);
+  }, [searchParams]);
 
   const timeIncrement = useMemo(
     () => getTimeInterval(urlTimeFilter),

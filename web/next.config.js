@@ -72,6 +72,26 @@ const nextConfig = {
         source: "/evaluators/:path*",
         destination: "/static-shell",
       },
+      {
+        source: "/datasets/:path*",
+        destination: "/static-shell",
+      },
+      {
+        source: "/cache/:path*",
+        destination: "/static-shell",
+      },
+      {
+        source: "/rate-limit/:path*",
+        destination: "/static-shell",
+      },
+      {
+        source: "/alerts/:path*",
+        destination: "/static-shell",
+      },
+      {
+        source: "/webhooks/:path*",
+        destination: "/static-shell",
+      },
     ];
   },
   experimental: {
