@@ -5,7 +5,6 @@ import {
   Square2StackIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
-import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
 import {
@@ -30,6 +29,7 @@ import TableFooter from "../requests/tableFooter";
 import DatasetDrawerV2 from "./datasetDrawer";
 import NewDataset from "./NewDataset";
 import RemoveRequestsModal from "./RemoveRequests";
+import { useNavigate, useSearchParams } from "react-router";
 
 interface DatasetIdPageProps {
   id: string;
@@ -42,11 +42,12 @@ type DatasetRow =
   | null;
 const DatasetIdPage = (props: DatasetIdPageProps) => {
   const { id, currentPage, pageSize } = props;
-  const router = useRouter();
   const org = useOrg();
   const [page, setPage] = useState<number>(currentPage);
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
-  const datasetNameFromQuery = router.query.name as string | undefined;
+  const [searchParams, setSearchParams] = useSearchParams();
+  const datasetNameFromQuery = searchParams.get("name") as string | undefined;
+  const navigate = useNavigate();
 
   const { rows, isLoading, refetch, count, isCountLoading } =
     useGetHeliconeDatasetRows(id, page, currentPageSize);
@@ -156,27 +157,23 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
 
   const handlePageChange = useCallback(
     (newPage: number) => {
-      router.push(
-        {
-          pathname: router.pathname,
-          query: { ...router.query, page: newPage.toString() },
-        },
-        undefined,
-        { shallow: true }
-      );
+      setSearchParams((prev) => {
+        prev.set("page", newPage.toString());
+        return prev;
+      });
     },
-    [router]
+    [setSearchParams]
   );
 
   useEffect(() => {
-    const pageFromQuery = router.query.page;
+    const pageFromQuery = searchParams.get("page");
     if (pageFromQuery && !Array.isArray(pageFromQuery)) {
       const parsedPage = parseInt(pageFromQuery, 10);
       if (!isNaN(parsedPage) && parsedPage !== page) {
         setPage(parsedPage);
       }
     }
-  }, [router.query.page, page]);
+  }, [searchParams, page]);
 
   const handleDuplicateRequests = async () => {
     try {
@@ -236,20 +233,13 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
     (newPageSize: number) => {
       setCurrentPageSize(newPageSize);
       setPage(1); // Reset to first page when changing page size
-      router.push(
-        {
-          pathname: router.pathname,
-          query: {
-            ...router.query,
-            page: "1",
-            pageSize: newPageSize.toString(),
-          },
-        },
-        undefined,
-        { shallow: true }
-      );
+      setSearchParams((prev) => {
+        prev.set("page", "1");
+        prev.set("pageSize", newPageSize.toString());
+        return prev;
+      });
     },
-    [router]
+    [setSearchParams]
   );
 
   const exportedData = useCallback(async () => {

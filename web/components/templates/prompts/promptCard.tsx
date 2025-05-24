@@ -12,12 +12,12 @@ import { useState } from "react";
 import { TimeFilter } from "@/types/timeFilter";
 import { BackendMetricsCall } from "../../../services/hooks/useBackendFunction";
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
-import Link from "next/link";
 import {
   FilterBranch,
   FilterLeaf,
 } from "../../../services/lib/filters/filterDefs";
 import { Badge } from "@/components/ui/badge";
+import { NavLink } from "react-router";
 
 interface PromptCardProps {
   prompt: {
@@ -79,12 +79,12 @@ const PromptCard = (props: PromptCardProps) => {
     <div className="bg-white w-full h-full rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-black p-4 flex flex-col space-y-2">
       <div className="flex items-center space-x-2">
         <DocumentTextIcon className="h-6 w-6 text-gray-500 dark:text-gray-400" />
-        <Link
+        <NavLink
           className="text-2xl font-semibold text-black dark:text-white truncate"
-          href={"/prompts/" + prompt.id}
+          to={"/prompts/" + prompt.id}
         >
           {promptInfo?.user_defined_id}
-        </Link>
+        </NavLink>
       </div>
       <p className="text-sm text-gray-500">
         Last Used:{" "}

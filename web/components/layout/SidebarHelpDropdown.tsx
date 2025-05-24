@@ -15,7 +15,6 @@ import {
   FileTextIcon,
   MessageCircleMore,
 } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FaDiscord } from "react-icons/fa6";
 import { ChangelogItem } from "./auth/types";
@@ -96,20 +95,24 @@ const SidebarHelpDropdown = ({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="ml-4 w-64 text-slate-700 dark:text-slate-200">
-          <Link href="https://docs.helicone.ai" target="_blank">
+          <a href="https://docs.helicone.ai" target="_blank" rel="noreferrer">
             <DropdownMenuItem className="cursor-pointer">
               <FileTextIcon className="h-4 w-4 mr-2 text-slate-500" />
               Docs
               <ArrowUpRightIcon className="h-3.5 w-3.5 ml-2 text-slate-400 dark:text-slate-600" />
             </DropdownMenuItem>
-          </Link>
-          <Link href="https://discord.gg/zsSTcH2qhG" target="_blank">
+          </a>
+          <a
+            href="https://discord.gg/zsSTcH2qhG"
+            target="_blank"
+            rel="noreferrer"
+          >
             <DropdownMenuItem className="cursor-pointer">
               <FaDiscord className="h-4 w-4 mr-2 text-slate-500" />
               Help and Support
               <ArrowUpRightIcon className="h-3.5 w-3.5 ml-2 text-slate-400 dark:text-slate-600" />
             </DropdownMenuItem>
-          </Link>
+          </a>
           <DropdownMenuLabel className="text-xs text-slate-400 dark:text-slate-600 font-medium mt-2">
             What&apos;s new?
           </DropdownMenuLabel>
@@ -157,13 +160,17 @@ const SidebarHelpDropdown = ({
                   </div>
                 </DropdownMenuItem>
               ))}
-          <Link href="https://helicone.ai/changelog" target="_blank">
+          <a
+            href="https://helicone.ai/changelog"
+            target="_blank"
+            rel="noreferrer"
+          >
             <DropdownMenuItem className="cursor-pointer">
               <CalendarIcon className="h-4 w-4 mr-2 text-slate-500" />
               Full changelog
               <ArrowUpRightIcon className="h-3.5 w-3.5 ml-2 text-slate-400 dark:text-slate-600" />
             </DropdownMenuItem>
-          </Link>
+          </a>
         </DropdownMenuContent>
       </DropdownMenu>
 

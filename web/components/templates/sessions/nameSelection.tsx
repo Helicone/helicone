@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/tooltip";
 import { DocumentTextIcon } from "@heroicons/react/24/outline";
 import { InfoIcon, LockIcon } from "lucide-react";
-import Link from "next/link";
 import { getTimeAgo } from "../../../lib/sql/timeHelpers";
 import { Col } from "../../layout/common/col";
 import { Row } from "../../layout/common/row";
@@ -100,12 +99,13 @@ const SessionNameSelection = ({
               size="icon"
               className="hover:cursor-pointer rounded-none hover:bg-transparent"
             >
-              <Link
+              <a
                 href="https://docs.helicone.ai/features/sessions"
                 target="_blank"
+                rel="noreferrer"
               >
                 <DocumentTextIcon className="h-4 w-4 text-slate-500 hover:cursor-pointer" />
-              </Link>
+              </a>
             </Button>
           </TooltipTrigger>
           <TooltipContent>

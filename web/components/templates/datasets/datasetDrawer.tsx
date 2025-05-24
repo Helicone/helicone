@@ -9,7 +9,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useRouter } from "next/router";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
 import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/20/solid";
@@ -21,6 +20,7 @@ import { Button } from "../../ui/button";
 import { Check, X } from "lucide-react";
 import RemoveRequestsModal from "./RemoveRequests";
 import { useGetHeliconeDatasetRows } from "@/services/hooks/dataset/heliconeDataset";
+import { useSearchParams } from "react-router";
 
 type DatasetRow =
   | ReturnType<typeof useGetHeliconeDatasetRows>["rows"][number]
@@ -54,7 +54,7 @@ const DatasetDrawerV2 = (props: DatasetDrawerV2Props) => {
   } = props;
 
   const { setNotification } = useNotification();
-  const router = useRouter();
+  const [_, setSearchParams] = useSearchParams();
   const jawn = useJawnClient();
   const [isEditing, setIsEditing] = useState(false);
   const [editedRequestBody, setEditedRequestBody] = useState("");
@@ -84,11 +84,10 @@ const DatasetDrawerV2 = (props: DatasetDrawerV2Props) => {
 
   const setOpenHandler = (drawerOpen: boolean) => {
     if (!drawerOpen) {
-      const { pathname, query } = router;
-      if (router.query.requestId) {
-        delete router.query.requestId;
-        router.replace({ pathname, query }, undefined, { shallow: true });
-      }
+      setSearchParams((prev) => {
+        prev.delete("requestId");
+        return prev;
+      });
     }
     setOpen(drawerOpen);
   };

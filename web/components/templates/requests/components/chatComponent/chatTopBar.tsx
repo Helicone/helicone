@@ -5,10 +5,9 @@ import {
   EyeIcon,
   EyeSlashIcon,
 } from "@heroicons/react/24/outline";
-import { useRouter } from "next/router";
 import React from "react";
 import { PiPlayBold } from "react-icons/pi";
-import { useCreatePrompt } from "../../../../../services/hooks/prompts/prompts";
+import { useNavigate } from "react-router";
 
 export const PROMPT_MODES = ["Pretty", "JSON", "Markdown", "Debug"] as const;
 
@@ -39,15 +38,13 @@ export const ChatTopBar: React.FC<ChatTopBarProps> = ({
   allExpanded,
   toggleAllExpanded,
   requestId,
-  requestBody,
   setOpen,
   mode,
   setMode,
   isModal = false,
   promptData,
 }) => {
-  const router = useRouter();
-  const createPrompt = useCreatePrompt();
+  const navigate = useNavigate();
 
   return (
     <div className="h-10 px-2 rounded-md flex flex-row items-center justify-between w-full bg-slate-50 dark:bg-black text-slate-900 dark:text-slate-100">
@@ -70,9 +67,9 @@ export const ChatTopBar: React.FC<ChatTopBarProps> = ({
           onClick={async (e) => {
             e.preventDefault();
             if (promptData?.id) {
-              router.push(`/prompts/${promptData.id}`);
+              navigate(`/prompts/${promptData.id}`);
             } else if (requestId) {
-              router.push(`/prompts/fromRequest/${requestId}`);
+              navigate(`/prompts/fromRequest/${requestId}`);
             }
           }}
           className="flex flex-row space-x-1 items-center hover:bg-slate-200 dark:hover:bg-slate-800 py-1 px-2 rounded-lg"

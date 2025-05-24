@@ -15,10 +15,10 @@ import {
   UsersIcon,
   Webhook,
 } from "lucide-react";
-import { useRouter } from "next/router";
 import { useMemo } from "react";
 import DesktopSidebar from "./DesktopSidebar";
 import { ChangelogItem, NavigationItem } from "./types";
+import { useLocation } from "react-router";
 
 interface SidebarProps {
   setOpen: (open: boolean) => void;
@@ -27,8 +27,7 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
-  const router = useRouter();
-  const { pathname } = router;
+  const pathname = useLocation().pathname;
 
   const NAVIGATION: NavigationItem[] = useMemo(
     () => [

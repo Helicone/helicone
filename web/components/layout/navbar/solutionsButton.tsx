@@ -12,7 +12,7 @@ import {
   CommandLineIcon,
 } from "@heroicons/react/20/solid";
 import { Fragment } from "react";
-import Link from "next/link";
+import { NavLink } from "react-router";
 
 const solutions: {
   name: string;
@@ -113,9 +113,9 @@ export default function SolutionsButton() {
                       Use Cases
                     </p>
                     {solutions.map((item) => (
-                      <Link
+                      <NavLink
                         key={item.name}
-                        href={item.href}
+                        to={item.href}
                         target={item.target || "_blank"}
                         rel="noopener noreferrer"
                         className="-m-3 flex items-center rounded-lg p-2 transition duration-150 ease-in-out hover:bg-gray-200 focus:outline-none focus-visible:ring focus-visible:ring-orange-500 focus-visible:ring-opacity-50"
@@ -139,12 +139,12 @@ export default function SolutionsButton() {
                             {item.description}
                           </p>
                         </div>
-                      </Link>
+                      </NavLink>
                     ))}
                   </div>
                   <div className="bg-gray-100 p-4">
-                    <Link
-                      href="/blog"
+                    <NavLink
+                      to="/blog"
                       className="flow-root rounded-md px-2 py-2 transition duration-150 ease-in-out hover:bg-gray-200 focus:outline-none focus-visible:ring focus-visible:ring-orange-500 focus-visible:ring-opacity-50"
                     >
                       <span className="flex items-center">
@@ -155,7 +155,7 @@ export default function SolutionsButton() {
                       <span className="block text-sm text-gray-500 mt-1">
                         Learn more about what is possible with our technology
                       </span>
-                    </Link>
+                    </NavLink>
                   </div>
                 </div>
               </Popover.Panel>

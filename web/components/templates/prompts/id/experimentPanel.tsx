@@ -3,7 +3,7 @@ import { useOrg } from "@/components/layout/org/organizationContext";
 import { Button } from "@/components/ui/button";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
+import { NavLink } from "react-router";
 
 interface PromptIdPageProps {
   promptId: string;
@@ -37,11 +37,11 @@ const ExperimentPanel = (props: PromptIdPageProps) => {
             className="justify-between items-center max-w-md"
           >
             {experiment.created_at}
-            <Link
-              href={`/prompts/${promptId}/subversion/${experiment.meta?.["prompt_version"]}/experiment/${experiment.id}`}
+            <NavLink
+              to={`/prompts/${promptId}/subversion/${experiment.meta?.["prompt_version"]}/experiment/${experiment.id}`}
             >
               <Button>View</Button>
-            </Link>
+            </NavLink>
           </Row>
         ))}
       </div>

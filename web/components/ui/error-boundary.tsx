@@ -65,12 +65,14 @@ export class ErrorBoundary extends Component<Props, State> {
     this.setState({ errorInfo, hasError: true, error });
     console.error("Uncaught error:", error, errorInfo);
 
-    // Add PostHog event
-    posthog.capture("error_boundary_triggered", {
-      error: error.toString(),
-      errorInfo: errorInfo.componentStack,
-      errorType: "class_component",
-    });
+    // Only capture PostHog events in production
+    if (process.env.NODE_ENV === "production") {
+      posthog.capture("error_boundary_triggered", {
+        error: error.toString(),
+        errorInfo: errorInfo.componentStack,
+        errorType: "class_component",
+      });
+    }
   }
 
   public render() {
@@ -187,8 +189,8 @@ export function ErrorBoundaryWithHandler({
   const [error, setError] = React.useState<Error | null>(null);
 
   React.useEffect(() => {
-    if (error) {
-      // Add PostHog event
+    if (error && process.env.NODE_ENV === "production") {
+      // Only capture PostHog events in production
       posthog.capture("error_boundary_triggered", {
         error: error.toString(),
         errorType: "functional_component",

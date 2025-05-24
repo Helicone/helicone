@@ -9,7 +9,6 @@ import {
   getPromptDeploymentExample,
 } from "@/utils/promptDeploy";
 import { InfoIcon } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 import { PiArrowUpRightBold, PiRocketLaunchBold } from "react-icons/pi";
 import { DiffHighlight } from "../../welcome/diffHighlight";
@@ -161,7 +160,7 @@ export default function DeployDialog({
           )}
         </div>
 
-        <Link
+        <a
           href="https://docs.helicone.ai/features/prompts/generate"
           target="_blank"
           rel="noopener noreferrer"
@@ -171,7 +170,7 @@ export default function DeployDialog({
             Read Full Documentation
           </Small>
           <PiArrowUpRightBold className=" h-4 w-4" />
-        </Link>
+        </a>
       </DialogContent>
     </Dialog>
   );

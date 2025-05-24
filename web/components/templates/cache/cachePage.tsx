@@ -12,8 +12,6 @@ import {
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
 import { BarChart } from "@tremor/react";
-import Link from "next/link";
-import { useRouter } from "next/router";
 import { ElementType, useMemo, useState } from "react";
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
 import { useGetUnauthorized } from "../../../services/hooks/dashboard";
@@ -29,6 +27,7 @@ import UnauthorizedView from "../requests/UnauthorizedView";
 import { formatNumber } from "../users/initialColumns";
 import { useCachePageClickHouse } from "./useCachePage";
 import { formatTimeSaved } from "@/lib/timeCalculations/time";
+import { NavLink, useSearchParams } from "react-router";
 
 interface CachePageProps {
   currentPage: number;
@@ -65,7 +64,7 @@ const CachePage = (props: CachePageProps) => {
     end: new Date(),
   });
   const timeZoneDifference = new Date().getTimezoneOffset();
-  const router = useRouter();
+  const [searchParams, setSearchParams] = useSearchParams();
   const dbIncrement = "day";
   const {
     overTimeData,
@@ -176,14 +175,14 @@ const CachePage = (props: CachePageProps) => {
         isWithinIsland={true}
         title={<div className="flex items-center gap-2">Cache</div>}
         actions={
-          <Link
-            href="https://docs.helicone.ai/features/advanced-usage/caching"
+          <NavLink
+            to="https://docs.helicone.ai/features/advanced-usage/caching"
             target="_blank"
             rel="noreferrer noopener"
             className="w-fit flex items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
             <BookOpenIcon className="h-4 w-4" />
-          </Link>
+          </NavLink>
         }
       />
       <div className="flex flex-col">
@@ -197,13 +196,10 @@ const CachePage = (props: CachePageProps) => {
                   key={tab.id}
                   value={tab.id.toString()}
                   onClick={() => {
-                    router.push(
-                      {
-                        query: { ...router.query, tab: tab.id },
-                      },
-                      undefined,
-                      { shallow: true }
-                    );
+                    setSearchParams((prev) => {
+                      prev.set("tab", tab.id.toString());
+                      return prev;
+                    });
                   }}
                 >
                   <tab.icon className="h-5 w-5 mr-2" />

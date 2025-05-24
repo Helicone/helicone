@@ -3,7 +3,6 @@
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { $JAWN_API } from "@/lib/clients/jawn";
 import { Rocket } from "lucide-react";
-import { useRouter } from "next/router";
 import { useMemo, useRef, useState, useEffect } from "react";
 import { useChangelog } from "../../../services/hooks/admin";
 import UpgradeProModal from "../../shared/upgradeProModal";
@@ -14,6 +13,7 @@ import DemoModal from "./DemoModal";
 import MainContent, { BannerType } from "./MainContent";
 import Sidebar from "./Sidebar";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
+import { useLocation, useNavigate } from "react-router";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -21,9 +21,8 @@ interface AuthLayoutProps {
 
 const AuthLayout = (props: AuthLayoutProps) => {
   const { children } = props;
-  const router = useRouter();
-  const { pathname } = router;
-
+  const navigate = useNavigate();
+  const pathname = useLocation().pathname;
   const [open, setOpen] = useState(false);
 
   const auth = useHeliconeAuthClient();
@@ -32,16 +31,16 @@ const AuthLayout = (props: AuthLayoutProps) => {
       try {
         const user = await auth.getUser();
         if (user.error || !user.data) {
-          router.push("/signin?unauthorized=true");
+          navigate("/signin?unauthorized=true");
         }
       } catch (error) {
         console.error("Authentication error:", error);
-        router.push("/signin?unauthorized=true");
+        navigate("/signin?unauthorized=true");
       }
     };
 
     checkAuth();
-  }, [router]);
+  }, [navigate]);
 
   const currentPage = useMemo(() => {
     const path = pathname.split("/")[1];
@@ -81,14 +80,14 @@ const AuthLayout = (props: AuthLayoutProps) => {
           orgContext.allOrgs.forEach((org) => {
             if (org.is_main_org === true) {
               orgContext.setCurrentOrg(org.id);
-              router.push("/onboarding");
+              navigate("/onboarding");
             }
           });
         },
       } as BannerType;
     }
     return null;
-  }, [alertBanners?.data, orgContext, router]);
+  }, [alertBanners?.data, orgContext, navigate]);
 
   const { changelog, isLoading: isChangelogLoading } = useChangelog();
 

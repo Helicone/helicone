@@ -1,9 +1,9 @@
 import { Menu, Transition } from "@headlessui/react";
 import { BarsArrowDownIcon, BarsArrowUpIcon } from "@heroicons/react/20/solid";
 import { Header, SortDirection, flexRender } from "@tanstack/react-table";
-import { useRouter } from "next/router";
 import { Fragment } from "react";
 import { clsx } from "../../../clsx";
+import { useSearchParams } from "react-router";
 
 export default function DraggableColumnHeader<T>(props: {
   header: Header<T, unknown>;
@@ -19,10 +19,10 @@ export default function DraggableColumnHeader<T>(props: {
   className?: string;
 }) {
   const { header, sortable, index, totalColumns, className } = props;
-  const router = useRouter();
 
   const meta = header.column.columnDef?.meta as any;
   const hasSortKey = meta?.sortKey !== undefined;
+  const [searchParams, setSearchParams] = useSearchParams();
 
   return (
     <div
@@ -88,10 +88,11 @@ export default function DraggableColumnHeader<T>(props: {
                           } group flex w-full items-center justify-between rounded-md px-2 py-2 text-xs`}
                           onClick={() => {
                             if (meta && sortable) {
-                              router.query.sortDirection = "asc";
-                              router.query.sortKey = meta.sortKey;
-
-                              router.push(router);
+                              setSearchParams((prev) => {
+                                prev.set("sortDirection", "asc");
+                                prev.set("sortKey", meta.sortKey);
+                                return prev;
+                              });
                             }
                           }}
                         >
@@ -113,10 +114,11 @@ export default function DraggableColumnHeader<T>(props: {
                           } group flex w-full items-center justify-between rounded-md px-2 py-2 text-xs`}
                           onClick={() => {
                             if (meta && sortable) {
-                              router.query.sortDirection = "desc";
-                              router.query.sortKey = meta.sortKey;
-
-                              router.push(router);
+                              setSearchParams((prev) => {
+                                prev.set("sortDirection", "desc");
+                                prev.set("sortKey", meta.sortKey);
+                                return prev;
+                              });
                             }
                           }}
                         >

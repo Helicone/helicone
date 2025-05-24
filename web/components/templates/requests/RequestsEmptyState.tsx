@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { H2, Large } from "@/components/ui/typography";
 import { useOrgOnboarding } from "@/services/hooks/useOrgOnboarding";
 import { ArrowRight } from "lucide-react";
-import { useRouter } from "next/router";
+import { useNavigate } from "react-router";
 
 export interface EmptyStatePage {
   title: string;
@@ -35,7 +35,7 @@ export default function RequestsEmptyState({
   options,
   onClickHandler,
 }: RequestsEmptyStateProps) {
-  const router = useRouter();
+  const navigate = useNavigate();
   const orgContext = useOrg();
   const { onboardingState } = useOrgOnboarding(
     orgContext?.currentOrg?.id || ""
@@ -60,16 +60,16 @@ export default function RequestsEmptyState({
     }
 
     if (options.cta?.primary?.link) {
-      router.push(options.cta.primary.link);
+      navigate(options.cta.primary.link);
       return;
     }
 
     // Default fallback to onboarding flow
     const currentStep = onboardingState?.currentStep || "ORGANIZATION";
     if (currentStep === "EVENT") {
-      router.push("/onboarding/integrate");
+      navigate("/onboarding/integrate");
     } else {
-      router.push(STEP_ROUTES[currentStep]);
+      navigate(STEP_ROUTES[currentStep]);
     }
   };
 
@@ -90,7 +90,7 @@ export default function RequestsEmptyState({
     }
 
     if (link) {
-      router.push(link);
+      navigate(link);
     }
   };
 

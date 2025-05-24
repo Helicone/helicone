@@ -9,12 +9,13 @@ import { Dialog, DialogContent, DialogTrigger } from "../../../../../ui/dialog";
 import { BeakerIcon, PlusIcon } from "@heroicons/react/24/outline";
 import useNotification from "../../../../../shared/notification/useNotification";
 import { useJawnClient } from "../../../../../../lib/clients/jawnHook";
-import { useRouter } from "next/router";
 import PromptPlayground, { PromptObject } from "../../../id/promptPlayground";
 import { Input } from "../../../../../ui/input";
 import LoadingAnimation from "../../../../../shared/loadingAnimation";
+import { useNavigate } from "react-router";
 
 export const NewExperimentDialog = () => {
+  const navigate = useNavigate();
   const notification = useNotification();
   const [basePrompt, setBasePrompt] = useState<PromptObject>({
     model: "gpt-4",
@@ -28,7 +29,6 @@ export const NewExperimentDialog = () => {
     ],
   });
 
-  const router = useRouter();
   const jawn = useJawnClient();
 
   const [selectedInput, setSelectedInput] = useState<any>({
@@ -161,7 +161,7 @@ export const NewExperimentDialog = () => {
 
     notification.setNotification("Prompt created successfully", "success");
     setIsLoading(false);
-    await router.push(
+    await navigate(
       `/prompts/${res.data?.data?.id}/subversion/${res.data?.data?.prompt_version_id}/experiment/${experiment.data?.data?.experimentId}`
     );
   };
@@ -229,7 +229,7 @@ export const StartFromPromptDialog = ({
   prompts,
   onDialogClose,
 }: StartFromPromptDialogProps) => {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [selectedPromptId, setSelectedPromptId] = useState<string | null>(null);
   const notification = useNotification();
   const [selectedVersionId, setSelectedVersionId] = useState<string | null>(
@@ -270,9 +270,7 @@ export const StartFromPromptDialog = ({
       return;
     }
 
-    router.push(
-      `/experiments/${experimentTableResult.data?.data?.experimentId}`
-    );
+    navigate(`/experiments/${experimentTableResult.data?.data?.experimentId}`);
   };
 
   return (

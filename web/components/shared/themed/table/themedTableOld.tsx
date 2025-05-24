@@ -10,7 +10,6 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import Link from "next/link";
 import React, { useEffect, useMemo, useState } from "react";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { Result } from "@/packages/common/result";
@@ -39,6 +38,7 @@ import {
 import { MappedLLMRequest } from "@helicone-package/llm-mapper/types";
 import { RequestViews } from "./RequestViews";
 import useShiftKeyPress from "@/services/hooks/isShiftPressed";
+import { NavLink } from "react-router";
 
 type CheckboxMode = "always_visible" | "on_hover" | "never";
 
@@ -500,8 +500,8 @@ export default function ThemedTable<T extends { id?: string }>(
                                 zIndex: 2,
                               }}
                             >
-                              <Link
-                                href={rowLink(row.original)}
+                              <NavLink
+                                to={rowLink(row.original)}
                                 style={{
                                   display: "block",
                                   width: "100%",

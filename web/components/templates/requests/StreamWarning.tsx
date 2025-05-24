@@ -2,7 +2,7 @@ import { useLocalStorage } from "@/services/hooks/localStorage";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
-import Link from "next/link";
+import { NavLink } from "react-router";
 
 interface StreamWarningProps {
   requestWithStreamUsage: boolean;
@@ -27,12 +27,12 @@ const StreamWarning: React.FC<StreamWarningProps> = ({
           We are unable to calculate your cost accurately because the
           &apos;stream_usage&apos; option is not included in your message.
           Please refer to{" "}
-          <Link
-            href="https://docs.helicone.ai/use-cases/enable-stream-usage"
+          <NavLink
+            to="https://docs.helicone.ai/use-cases/enable-stream-usage"
             className="font-medium underline underline-offset-4"
           >
             this documentation
-          </Link>{" "}
+          </NavLink>{" "}
           for more information.
         </AlertDescription>
         <Button

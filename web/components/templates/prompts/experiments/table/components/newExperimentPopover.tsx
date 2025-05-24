@@ -3,13 +3,14 @@ import { PopoverContent } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { BeakerIcon } from "@heroicons/react/24/outline";
-import { useRouter } from "next/router";
 import PromptPlayground, { PromptObject } from "../../../id/promptPlayground";
 import { Input as PromptInput } from "../../../id/MessageInput";
 import useNotification from "../../../../../shared/notification/useNotification";
 import { useJawnClient } from "../../../../../../lib/clients/jawnHook";
+import { useNavigate } from "react-router";
 
 export const NewExperimentPopover = () => {
+  const navigate = useNavigate();
   const notification = useNotification();
   const jawn = useJawnClient();
   const [basePrompt, setBasePrompt] = useState<PromptObject>({
@@ -23,8 +24,6 @@ export const NewExperimentPopover = () => {
       },
     ],
   });
-
-  const router = useRouter();
 
   const [selectedInput, setSelectedInput] = useState<PromptInput>({
     id: "",
@@ -134,9 +133,7 @@ export const NewExperimentPopover = () => {
       return;
     }
 
-    await router.push(
-      `/experiments/${experimentTableResult.data?.data?.tableId}`
-    );
+    navigate(`/experiments/${experimentTableResult.data?.data?.tableId}`);
   };
 
   return (

@@ -6,7 +6,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { CheckIcon } from "lucide-react";
-import Link from "next/link";
 import { UpgradeToProCTA } from "@/components/templates/pricing/upgradeToProCTA";
 import { FeatureName, useProFeature } from "@/hooks/useProFeature";
 
@@ -79,14 +78,14 @@ export function ProFeatureDialog({
                 Standard support
               </li>
             </ul>
-            <Link
+            <a
               href="https://www.helicone.ai/pricing"
               className="text-sm text-blue-600 mt-2 block"
               target="_blank"
               rel="noopener noreferrer"
             >
               See all features →
-            </Link>
+            </a>
 
             <UpgradeToProCTA
               defaultPrompts={featureName === "Prompts"}

@@ -1,6 +1,5 @@
-import { ReactElement, useEffect, useState } from "react";
-import { useRouter } from "next/router";
-import AuthLayout from "../../components/layout/auth/authLayout";
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router";
 import AuthHeader from "@/components/shared/authHeader";
 import { Card } from "@/components/ui/card";
 import { useEvaluators } from "@/components/templates/evals/EvaluatorHook";
@@ -11,10 +10,8 @@ import { useLLMEvaluatorSubmit } from "@/components/templates/evals/hooks/useEva
 import { useEvaluatorDetails } from "@/components/templates/evals/details/hooks";
 import { OnlineEvaluatorsSection } from "@/components/templates/evals/details/OnlineEvaluatorsSection";
 import { TestDrawer } from "@/components/templates/evals/details/TestDrawer";
-
 import { openAITemplateToOpenAIFunctionParams } from "@/components/templates/evals/CreateNewEvaluator/evaluatorHelpers";
 import { Plus, Settings, Play } from "lucide-react";
-
 import EvaluatorForm from "@/components/templates/evals/EvaluatorForm";
 
 // Type for choice score item
@@ -46,9 +43,9 @@ const PLACEHOLDER_EVALUATOR = {
   last_mile_config: null,
 };
 
-const EvaluatorDetail = () => {
-  const router = useRouter();
-  const { id } = router.query;
+const EvaluatorDetailShell = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
   const { evaluators } = useEvaluators();
   const notification = useNotification();
 
@@ -106,7 +103,7 @@ const EvaluatorDetail = () => {
 
       if (!evaluator) {
         notification.setNotification("Evaluator not found", "error");
-        router.push("/evaluators");
+        navigate("/evaluators");
         return;
       }
 
@@ -223,7 +220,7 @@ const EvaluatorDetail = () => {
 
       setIsLoading(false);
     }
-  }, [evaluators.data, id, router, notification]);
+  }, [evaluators.data, id, navigate, notification]);
 
   // Helper to add a new choice score
   const addChoiceScore = () => {
@@ -406,7 +403,7 @@ const EvaluatorDetail = () => {
             isCreating={false}
             onSubmit={handleSubmit}
             isSubmitting={updateEvaluator.isPending}
-            onCancel={() => router.push("/evaluators")}
+            onCancel={() => navigate("/evaluators")}
           />
         )}
       </div>
@@ -437,8 +434,4 @@ const EvaluatorDetail = () => {
   );
 };
 
-EvaluatorDetail.getLayout = function getLayout(page: ReactElement) {
-  return <AuthLayout>{page}</AuthLayout>;
-};
-
-export default EvaluatorDetail;
+export default EvaluatorDetailShell;

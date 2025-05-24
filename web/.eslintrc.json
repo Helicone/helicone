@@ -11,6 +11,7 @@
     "no-undef": "warn",
     "no-console": "warn",
     "custom-rules/no-next-link": "error",
-    "custom-rules/no-next-router": "error"
+    "custom-rules/no-next-router": "error",
+    "custom-rules/no-next-link-import": "error"
   }
 }

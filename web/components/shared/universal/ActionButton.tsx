@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { IconType } from "react-icons";
+import { NavLink } from "react-router";
 import { ReactElement } from "react";
 
 interface BaseProps {
@@ -37,9 +37,9 @@ export default function ActionButton(props: ActionButtonProps) {
 
   if (props.href) {
     return (
-      <Link href={props.href} className={baseClasses}>
+      <NavLink to={props.href} className={baseClasses}>
         {content}
-      </Link>
+      </NavLink>
     );
   }
 

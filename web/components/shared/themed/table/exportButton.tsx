@@ -13,7 +13,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
 import Papa from "papaparse";
 import { useState } from "react";
 import { LuDownload } from "react-icons/lu";
@@ -116,14 +115,14 @@ export default function ExportButton<T>({
                 Exporting is limited to {MAX_EXPORT_ROWS} rows due to the huge
                 amounts of data in the requests. For larger exports, please use
                 our{" "}
-                <Link
+                <a
                   href="https://docs.helicone.ai/helicone-api/getting-started"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline font-semibold text-blue-600"
                 >
                   API
-                </Link>
+                </a>
                 .
               </p>
             </div>

@@ -14,7 +14,6 @@ import {
 import { Muted, Small, XSmall } from "@/components/ui/typography";
 import { tracesToTreeNodeData } from "@/lib/sessions/helpers";
 import { useColorMapStore } from "@/store/features/sessions/colorMap";
-import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
 import { PiBroadcastBold } from "react-icons/pi";
 import { isRealtimeRequest } from "../../../../lib/sessions/realtimeSession";
@@ -27,8 +26,8 @@ import ExportButton from "../../../shared/themed/table/exportButton";
 import TreeView from "./Tree/TreeView";
 
 import { TagType } from "@/packages/common/sessions/tags";
-import Link from "next/link";
 import { SessionTag } from "../../feedback/sessionTag";
+import { NavLink, useNavigate, useSearchParams } from "react-router";
 
 export const EMPTY_SESSION_NAME = "__unnamed_helicone_session__";
 
@@ -46,13 +45,14 @@ export const SessionContent: React.FC<SessionContentProps> = ({
   session_name,
   requests,
 }) => {
-  const router = useRouter();
   const { initializeColorMap } = useColorMapStore();
 
-  const { _, requestId } = router.query;
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestId = searchParams.get("requestId");
   const [selectedRequestId, setSelectedRequestId] = useState<string>(
     (requestId as string) || ""
   );
+  const navigate = useNavigate();
 
   // SESSIONS DATA
   const timeFilter = useMemo(
@@ -72,18 +72,14 @@ export const SessionContent: React.FC<SessionContentProps> = ({
 
   // HANDLERS
   const handleSessionIdChange = (newSessionId: string) => {
-    router.push(`/sessions/${encodeURIComponent(newSessionId)}`);
+    navigate(`/sessions/${encodeURIComponent(newSessionId)}`);
   };
   const handleRequestIdChange = (newRequestId: string) => {
     setSelectedRequestId(newRequestId);
-    router.push(
-      {
-        pathname: router.pathname,
-        query: { ...router.query, requestId: newRequestId },
-      },
-      undefined,
-      { shallow: true }
-    );
+    setSearchParams((prev) => {
+      prev.set("requestId", newRequestId);
+      return prev;
+    });
   };
 
   // AGREGATED SESSION STATS (Derived from the processed session object)
@@ -175,12 +171,12 @@ export const SessionContent: React.FC<SessionContentProps> = ({
           <div className="flex flex-row gap-4 items-center">
             {/* Dynamic breadcrumb */}
             <div className="flex flex-row gap-1 items-center">
-              <Link href="/sessions" className="no-underline">
+              <NavLink to="/sessions" className="no-underline">
                 <Small className="font-semibold">Sessions</Small>
-              </Link>
+              </NavLink>
               <Small className="font-semibold">/</Small>
-              <Link
-                href={
+              <NavLink
+                to={
                   session_name === EMPTY_SESSION_NAME
                     ? "/sessions"
                     : `/sessions?name=${encodeURIComponent(session_name)}`
@@ -188,7 +184,7 @@ export const SessionContent: React.FC<SessionContentProps> = ({
                 className="no-underline"
               >
                 <Muted className="text-sm">{session_name}</Muted>
-              </Link>
+              </NavLink>
               <Small className="font-semibold">/</Small>
 
               {isLoadingSessions ? (

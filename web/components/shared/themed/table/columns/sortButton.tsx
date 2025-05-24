@@ -18,8 +18,8 @@ import {
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import { Column } from "@tanstack/react-table";
-import { useRouter } from "next/router";
 import { Row } from "@/components/layout/common/row";
+import { useSearchParams } from "react-router";
 
 interface SortButtonProps<T> {
   columns: Column<T, unknown>[];
@@ -27,7 +27,7 @@ interface SortButtonProps<T> {
 
 export default function SortButton<T>(props: SortButtonProps<T>) {
   const { columns } = props;
-  const router = useRouter();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   return (
     <DropdownMenu>
@@ -43,10 +43,10 @@ export default function SortButton<T>(props: SortButtonProps<T>) {
             variant="ghost"
             size="icon"
             onClick={() => {
-              const { sortDirection, sortKey, ...restQuery } = router.query;
-              router.push({
-                pathname: router.pathname,
-                query: restQuery,
+              setSearchParams((prev) => {
+                prev.set("sortDirection", "asc");
+                prev.set("sortKey", "createdAt");
+                return prev;
               });
             }}
           >
@@ -54,15 +54,12 @@ export default function SortButton<T>(props: SortButtonProps<T>) {
           </Button>
           <Select
             onValueChange={(option) => {
-              router.push(
-                {
-                  pathname: router.pathname,
-                  query: { ...router.query, sortKey: option },
-                },
-                undefined
-              );
+              setSearchParams((prev) => {
+                prev.set("sortKey", option);
+                return prev;
+              });
             }}
-            value={router.query.sortKey as string}
+            value={searchParams.get("sortKey") ?? ""}
           >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Select a column" />
@@ -81,21 +78,15 @@ export default function SortButton<T>(props: SortButtonProps<T>) {
             </SelectContent>
           </Select>
           <Switch
-            checked={router.query.sortDirection === "asc"}
+            checked={searchParams.get("sortDirection") === "asc"}
             onCheckedChange={(checked) => {
-              router.push(
-                {
-                  pathname: router.pathname,
-                  query: {
-                    ...router.query,
-                    sortDirection: checked ? "asc" : "desc",
-                  },
-                },
-                undefined
-              );
+              setSearchParams((prev) => {
+                prev.set("sortDirection", checked ? "asc" : "desc");
+                return prev;
+              });
             }}
           />
-          {router.query.sortDirection === "asc" ? (
+          {searchParams.get("sortDirection") === "asc" ? (
             <BarsArrowUpIcon className="h-4 w-4" />
           ) : (
             <BarsArrowDownIcon className="h-4 w-4" />

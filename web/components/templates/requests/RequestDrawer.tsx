@@ -19,8 +19,6 @@ import {
   ScrollTextIcon,
   UserIcon,
 } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   LuChevronDown,
@@ -44,6 +42,7 @@ import FeedbackAction from "../feedback/thumbsUpThumbsDown";
 import { RenderMappedRequest } from "./RenderHeliconeRequest";
 import ScrollableBadges from "./ScrollableBadges";
 import StatusBadge from "./statusBadge";
+import { NavLink, useNavigate } from "react-router";
 
 const RequestDescTooltip = (props: {
   displayText: string;
@@ -84,13 +83,13 @@ const RequestDescTooltip = (props: {
               </button>
             )}
             {href && (
-              <Link
-                href={href}
+              <NavLink
+                to={href}
                 className="flex items-center justify-between gap-2 p-2 hover:bg-accent text-left"
               >
                 <span className="text-xs">View</span>
                 <Eye className="h-3 w-3" />
-              </Link>
+              </NavLink>
             )}
           </div>
         </TooltipContent>
@@ -116,7 +115,7 @@ export default function RequestDrawer(props: RequestDivProps) {
   } = props;
 
   const { setNotification } = useNotification();
-  const router = useRouter();
+  const navigate = useNavigate();
   const org = useOrg();
   const jawn = useJawnClient();
 
@@ -261,20 +260,20 @@ export default function RequestDrawer(props: RequestDivProps) {
           setNotification("Failed to create experiment", "error");
           return;
         }
-        router.push(`/experiments/${res.data.data?.experimentId}`);
+        navigate(`/experiments/${res.data.data?.experimentId}`);
       });
-  }, [jawn, request, router, setNotification]);
+  }, [jawn, request, navigate, setNotification]);
 
   // Test prompt handler
   const handleTestPrompt = useCallback(() => {
     if (!request) return;
 
     if (promptDataQuery.data?.id) {
-      router.push(`/prompts/${promptDataQuery.data?.id}`);
+      navigate(`/prompts/${promptDataQuery.data?.id}`);
     } else {
-      router.push(`/prompts/fromRequest/${request.id}`);
+      navigate(`/prompts/fromRequest/${request.id}`);
     }
-  }, [promptDataQuery.data?.id, request, router]);
+  }, [promptDataQuery.data?.id, request, navigate]);
 
   // Update keyboard event handler
   useEffect(() => {

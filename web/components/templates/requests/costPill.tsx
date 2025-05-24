@@ -1,10 +1,9 @@
-import Link from "next/link";
 import { clsx } from "../../shared/clsx";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 
 const CostPill = () => {
   return (
-    <Link
+    <a
       href={"https://github.com/Helicone/helicone/blob/main/packages/README.md"}
       target="_blank"
       rel="noopener noreferrer"
@@ -15,7 +14,7 @@ const CostPill = () => {
     >
       Cost Unsupported{" "}
       <ArrowTopRightOnSquareIcon className="ml-1 h-4 w-4 text-orange-500 inline-block" />
-    </Link>
+    </a>
   );
 };
 

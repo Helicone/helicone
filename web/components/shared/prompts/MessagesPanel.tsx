@@ -11,7 +11,6 @@ import { Message } from "@helicone-package/llm-mapper/types";
 import { useEffect, useRef, useState } from "react";
 import { PiChatFill, PiChatsBold, PiTrashBold } from "react-icons/pi";
 
-import Link from "next/link";
 import GlassHeader from "../universal/GlassHeader";
 import FunctionCallBox from "./FunctionCallBox";
 
@@ -223,14 +222,14 @@ export default function MessagesPanel({
             </div>
             <p className="text-white text-sm">
               Please load or import a different version to try again.{" "}
-              <Link
+              <a
                 href="https://docs.helicone.ai/features/prompts/import"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="underline font-medium text-white hover:text-blue-300"
               >
                 Learn more about importing from code.
-              </Link>
+              </a>
             </p>
           </div>
         </div>

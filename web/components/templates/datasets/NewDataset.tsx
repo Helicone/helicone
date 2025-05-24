@@ -5,7 +5,7 @@ import { useJawnClient } from "../../../lib/clients/jawnHook";
 import useNotification from "../../shared/notification/useNotification";
 import { useGetHeliconeDatasets } from "../../../services/hooks/dataset/heliconeDataset";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
-import { useRouter } from "next/router";
+import { useNavigate } from "react-router";
 import {
   Card,
   CardContent,
@@ -54,7 +54,7 @@ export default function NewDataset({
     "openDatasetOnAdd",
     false
   );
-  const router = useRouter();
+  const navigate = useNavigate();
   const newDatasetInputRef = useRef<HTMLInputElement>(null);
   const [limitedRequestIds, setLimitedRequestIds] = useState(request_ids);
   const [selectedDataset, setSelectedDataset] = useState<
@@ -390,7 +390,7 @@ export default function NewDataset({
                 if (res.data && !res.data.error) {
                   setNotification("Requests added to dataset", "success");
                   if (openDatasetOnAdd) {
-                    router.push(`/datasets/${datasetId}`);
+                    navigate(`/datasets/${datasetId}`);
                   }
                   onComplete();
                 } else {

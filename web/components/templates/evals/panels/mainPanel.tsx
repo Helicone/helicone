@@ -15,7 +15,6 @@ import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
 import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 import GenericEmptyState from "@/components/shared/helicone/GenericEmptyState";
 import { LineChart, SquareArrowOutUpRight } from "lucide-react";
-import Link from "next/link";
 
 export const MainPanel = () => {
   const { evaluators } = useEvaluators();
@@ -119,15 +118,16 @@ export const MainPanel = () => {
                     <PiPlusBold className="h-4 w-4 ml-2" />
                   </Button>
                 </FreeTierLimitWrapper>
-                <Link
+                <a
                   href="https://docs.helicone.ai/features/evaluation"
                   target="_blank"
+                  rel="noreferrer"
                 >
                   <Button variant="outline" className="gap-2">
                     View Docs
                     <SquareArrowOutUpRight className="h-4 w-4" />
                   </Button>
-                </Link>
+                </a>
               </>
             }
           />

@@ -12,7 +12,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { H2 } from "@/components/ui/typography";
-import Link from "next/link";
 import { LineChart, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -21,13 +20,14 @@ import useNotification from "@/components/shared/notification/useNotification";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { cn } from "@/lib/utils";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router";
+import { NavLink } from "react-router";
 
 export default function EvaluatorsList() {
   const { evaluators, deleteEvaluator } = useEvaluators();
   const notification = useNotification();
   const org = useOrg();
-  const router = useRouter();
+  const navigate = useNavigate();
 
   // State to store online evaluator counts
   const [onlineEvaluatorCounts, setOnlineEvaluatorCounts] = useState<
@@ -159,12 +159,12 @@ export default function EvaluatorsList() {
         <AuthHeader
           title="Evaluators"
           actions={[
-            <Link href="/evaluators/new" key="create-evaluator">
+            <NavLink to="/evaluators/new" key="create-evaluator">
               <Button variant="action" size="sm" className="gap-1 items-center">
                 <PiPlusBold className="h-3.5 w-3.5" />
                 Create Evaluator
               </Button>
-            </Link>,
+            </NavLink>,
           ]}
         />
         <div className="p-6">
@@ -174,12 +174,12 @@ export default function EvaluatorsList() {
             icon={<LineChart size={28} className="text-accent-foreground" />}
             className="w-full"
             actions={
-              <Link href="/evaluators/new">
+              <NavLink to="/evaluators/new">
                 <Button variant="default">
                   Create Evaluator
                   <PiPlusBold className="h-4 w-4 ml-2" />
                 </Button>
-              </Link>
+              </NavLink>
             }
           />
         </div>
@@ -192,12 +192,12 @@ export default function EvaluatorsList() {
       <AuthHeader
         title="Evaluators"
         actions={[
-          <Link href="/evaluators/new" key="create-evaluator">
+          <NavLink to="/evaluators/new" key="create-evaluator">
             <Button variant="action" size="sm" className="gap-1 items-center">
               <PiPlusBold className="h-3.5 w-3.5" />
               Create Evaluator
             </Button>
-          </Link>,
+          </NavLink>,
         ]}
       />
       <div className="p-6">
@@ -246,7 +246,7 @@ export default function EvaluatorsList() {
                     <TableRow
                       key={evaluator.id}
                       className="hover:bg-muted/25 transition-colors border-b border-border/40 dark:border-slate-800/40 last:border-0 cursor-pointer"
-                      onClick={() => router.push(`/evaluators/${evaluator.id}`)}
+                      onClick={() => navigate(`/evaluators/${evaluator.id}`)}
                     >
                       <TableCell className="font-medium py-3 px-4">
                         {evaluator.name}

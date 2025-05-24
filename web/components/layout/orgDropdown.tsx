@@ -15,8 +15,6 @@ import { getTierDisplayInfo } from "@/utils/pricingConfigs";
 import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 import { LogOutIcon } from "lucide-react";
 import { useTheme } from "next-themes";
-import Link from "next/link";
-import { useRouter } from "next/router";
 import { useCallback, useMemo, useState } from "react";
 import { clsx } from "../shared/clsx";
 import AddMemberModal from "../templates/organization/addMemberModal";
@@ -30,6 +28,7 @@ import { useOrg } from "./org/organizationContext";
 import OrgMoreDropdown from "./orgMoreDropdown";
 import Intercom from "@intercom/messenger-js-sdk";
 import { INTERCOM_APP_ID } from "./SidebarHelpDropdown";
+import { NavLink, useNavigate } from "react-router";
 
 interface OrgDropdownProps {}
 
@@ -38,7 +37,6 @@ export default function OrgDropdown({}: OrgDropdownProps) {
 
   const [createOpen, setCreateOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
-  const router = useRouter();
   const heliconeAuthClient = useHeliconeAuthClient();
   const { setTheme, theme } = useTheme();
 
@@ -88,12 +86,14 @@ export default function OrgDropdown({}: OrgDropdownProps) {
     setTheme(theme === "dark" ? "light" : "dark");
   }, [theme, setTheme]);
 
+  const navigate = useNavigate();
+
   const handleSignOut = useCallback(() => {
     heliconeAuthClient.signOut().then(() => {
       Intercom({ app_id: INTERCOM_APP_ID, hide_default_launcher: true });
-      router.push("/");
+      navigate("/");
     });
-  }, [heliconeAuthClient, router]);
+  }, [heliconeAuthClient, navigate]);
 
   // Get tier display info from the centralized config
   const tierDisplayInfo = useMemo(() => {
@@ -158,12 +158,15 @@ export default function OrgDropdown({}: OrgDropdownProps) {
             )}
             {orgContext?.currentOrg?.tier !== "demo" && (
               <DropdownMenuItem asChild className="cursor-pointer text-xs">
-                <Link href="/settings/billing" className="flex flex-row gap-2 ">
+                <NavLink
+                  to="/settings/billing"
+                  className="flex flex-row gap-2 "
+                >
                   <span>Billing</span>
                   <span className={tierDisplayInfo.className}>
                     {tierDisplayInfo.text}
                   </span>
-                </Link>
+                </NavLink>
               </DropdownMenuItem>
             )}
           </DropdownMenuGroup>
@@ -187,12 +190,12 @@ export default function OrgDropdown({}: OrgDropdownProps) {
           <DropdownMenuSeparator />
 
           {orgContext?.currentOrg?.tier !== "demo" && (
-            <Link href="/settings" rel="noopener noreferrer">
+            <NavLink to="/settings" rel="noopener noreferrer">
               <DropdownMenuItem className="text-xs">
                 <Cog6ToothIcon className="h-4 w-4 mr-2" />
                 Settings
               </DropdownMenuItem>
-            </Link>
+            </NavLink>
           )}
 
           <DropdownMenuItem onSelect={handleSignOut} className="text-xs">
@@ -208,7 +211,7 @@ export default function OrgDropdown({}: OrgDropdownProps) {
             onCloseHandler={() => setCreateOpen(false)}
             onSuccess={(orgId) => {
               orgContext?.setCurrentOrg(orgId ?? "");
-              router.push("/dashboard");
+              navigate("/dashboard");
             }}
           />
         </DialogContent>

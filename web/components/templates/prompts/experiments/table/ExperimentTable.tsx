@@ -59,6 +59,7 @@ import ExperimentDatasetSelector from "../experimentDatasetSelector";
 import ImportCSVDialog from "./ImportCSVDialog";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
+import { useParams } from "react-router";
 
 type TableDataType = {
   index: number;
@@ -73,11 +74,10 @@ type TableDataType = {
   };
 };
 
-export function ExperimentTable({
-  experimentTableId,
-}: {
-  experimentTableId: string;
-}) {
+export function ExperimentTable() {
+  const { experimentId } = useParams();
+  const experimentTableId = experimentId ?? "";
+
   const {
     experimentTableQuery,
     promptVersionTemplateData,

@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { SVGProps } from "react";
 import { BsDiscord } from "react-icons/bs";
+import { NavLink } from "react-router";
 
 interface FooterProps {}
 
@@ -46,40 +46,40 @@ const Footer = (props: FooterProps) => {
       <div className="mx-auto max-w-5xl px-4 py-8 md:flex md:items-center md:justify-between lg:px-4">
         <div className="flex space-x-6 md:order-2">
           {meta.social.map((item) => (
-            <Link
+            <NavLink
               key={item.name}
-              href={item.href}
+              to={item.href}
               target="_blank"
               rel="noopener noreferrer"
               className="text-gray-400 hover:text-gray-500 dark:text-gray-300 dark:hover:text-gray-400"
             >
               <span className="sr-only">{item.name}</span>
               <item.icon className="h-6 w-6" aria-hidden="true" />
-            </Link>
+            </NavLink>
           ))}
         </div>
         <div className="mt-8 md:order-1 md:mt-0 space-x-4 flex flex-row">
           <p className="text-center text-xs leading-5 text-gray-500 dark:text-gray-300">
             &copy; 2024 Helicone, Inc. All rights reserved.
           </p>
-          <Link
-            href="/privacy"
+          <NavLink
+            to="/privacy"
             className="text-center text-xs leading-5 text-gray-500 dark:text-gray-300"
           >
             Privacy Policy
-          </Link>
-          <Link
-            href="/terms"
+          </NavLink>
+          <NavLink
+            to="/terms"
             className="text-center text-xs leading-5 text-gray-500 dark:text-gray-300"
           >
             Terms of Use
-          </Link>
-          <Link
-            href="/career"
+          </NavLink>
+          <NavLink
+            to="/career"
             className="text-center text-xs leading-5 text-gray-500 dark:text-gray-300"
           >
             Work with us
-          </Link>
+          </NavLink>
         </div>
       </div>
     </footer>

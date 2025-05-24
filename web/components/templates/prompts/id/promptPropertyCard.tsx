@@ -16,10 +16,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { useRouter } from "next/router";
 import { Col } from "../../../layout/common";
 import { Card, CardContent } from "@/components/ui/card";
 import { ExpandIcon, ShrinkIcon } from "lucide-react";
+import { useNavigate } from "react-router";
 
 interface PromptPropertyCardProps {
   isSelected: boolean;
@@ -48,9 +48,9 @@ const PromptPropertyCard = (props: PromptPropertyCardProps) => {
     autoInputs,
     size = "large",
   } = props;
+  const navigate = useNavigate();
   const { setNotification } = useNotification();
   const [expanded, setExpanded] = useState(false);
-  const router = useRouter();
 
   return (
     <>
@@ -211,7 +211,7 @@ const PromptPropertyCard = (props: PromptPropertyCardProps) => {
                 <li key={key}>
                   <button
                     onClick={() => {
-                      router.push(`#${key}`);
+                      navigate(`#${key}`);
                     }}
                     className="hover:cursor-pointer"
                   >

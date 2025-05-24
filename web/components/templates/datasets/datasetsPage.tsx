@@ -1,4 +1,3 @@
-import { useRouter } from "next/router";
 import { useGetHeliconeDatasets } from "../../../services/hooks/dataset/heliconeDataset";
 import AuthHeader from "../../shared/authHeader";
 import { SimpleTable } from "../../shared/table/simpleTable";
@@ -21,6 +20,7 @@ import { useJawnClient } from "../../../lib/clients/jawnHook";
 import useNotification from "../../shared/notification/useNotification";
 import { Button } from "@/components/ui/button";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
+import { useNavigate } from "react-router";
 
 // Type for the dataset row
 type DatasetTableRow = {
@@ -67,7 +67,7 @@ const DatasetsPage = (props: DatasetsPageProps) => {
     datasets?.length || 0
   );
 
-  const router = useRouter();
+  const navigate = useNavigate();
 
   // Open delete modal
   const handleDeleteClick = (dataset: DatasetTableRow) => {
@@ -196,10 +196,9 @@ const DatasetsPage = (props: DatasetsPageProps) => {
             data={datasets || []}
             columns={columns}
             onSelect={(row) => {
-              router.push({
-                pathname: `/datasets/${row.id}`,
-                query: { name: row.name || "Untitled Dataset" },
-              });
+              navigate(
+                `/datasets/${row.id}?name=${row.name || "Untitled Dataset"}`
+              );
             }}
           />
 

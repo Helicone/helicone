@@ -2,8 +2,8 @@ import AuthLayout from "@/components/layout/auth/authLayout";
 import { Button } from "@/components/ui/button";
 import { dbExecute } from "@/lib/api/db/dbExecute";
 import { GetServerSidePropsContext } from "next";
-import Link from "next/link";
 import { ReactElement } from "react";
+import { NavLink } from "react-router";
 
 export default function SlackRedirect({ error }: { error?: string }) {
   return (
@@ -11,7 +11,7 @@ export default function SlackRedirect({ error }: { error?: string }) {
       {error ? <div>{error}</div> : <div>Slack Redirect</div>}
       <div>
         <Button asChild>
-          <Link href="/alerts">Go to Alerts</Link>
+          <NavLink to="/alerts">Go to Alerts</NavLink>
         </Button>
       </div>
     </div>

@@ -68,6 +68,10 @@ const nextConfig = {
         source: "/experiments/:path*",
         destination: "/static-shell",
       },
+      {
+        source: "/evaluators/:path*",
+        destination: "/static-shell",
+      },
     ];
   },
   experimental: {

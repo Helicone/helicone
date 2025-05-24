@@ -9,7 +9,6 @@ import {
 } from "@heroicons/react/24/outline";
 import { Rocket } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useRouter } from "next/router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import ChangelogModal from "../ChangelogModal";
 import { useOrg } from "../org/organizationContext";
@@ -17,6 +16,7 @@ import OrgDropdown from "../orgDropdown";
 import SidebarHelpDropdown from "../SidebarHelpDropdown";
 import NavItem from "./NavItem";
 import { ChangelogItem } from "./types";
+import { useNavigate } from "react-router";
 
 export interface NavigationItem {
   name: string;
@@ -40,7 +40,7 @@ const DesktopSidebar = ({
   sidebarRef,
 }: SidebarProps) => {
   const orgContext = useOrg();
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const [isCollapsed, setIsCollapsed] = useLocalStorage(
     "isSideBarCollapsed",
@@ -265,7 +265,7 @@ const DesktopSidebar = ({
                       className="w-full dark:text-slate-400"
                       size="sm_sleek"
                       onClick={() => {
-                        router.push("/enterprise/portal");
+                        navigate("/enterprise/portal");
                         if (
                           orgContext.currentOrg?.organization_type ===
                             "customer" &&
@@ -310,7 +310,7 @@ const DesktopSidebar = ({
                           orgContext.allOrgs.forEach((org) => {
                             if (org.is_main_org === true) {
                               orgContext.setCurrentOrg(org.id);
-                              router.push("/onboarding");
+                              navigate("/onboarding");
                             }
                           });
                         }}

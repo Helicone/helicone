@@ -9,7 +9,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { XSmall } from "@/components/ui/typography";
-import Link from "next/link";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import {
   LuCheck,
@@ -19,6 +18,7 @@ import {
   LuScroll,
   LuX,
 } from "react-icons/lu";
+import { NavLink } from "react-router";
 
 // Define item types
 type KeyValueItem = { key: string; value: string | number };
@@ -324,14 +324,14 @@ export default function ScrollableBadges({
               {tooltipText && <span>{tooltipText}</span>}
               {tooltipLink && (
                 <div className="flex items-center justify-center gap-1">
-                  <Link
-                    href={tooltipLink.url}
+                  <NavLink
+                    to={tooltipLink.url}
                     target="_blank"
                     className="text-sky-500 hover:underline flex items-center gap-1 "
                   >
                     {tooltipLink.text}
                     <LuExternalLink className="w-3 h-3" />
-                  </Link>
+                  </NavLink>
                 </div>
               )}
             </TooltipContent>
@@ -359,7 +359,10 @@ const ItemBadge = memo(
 
       if (isSpecial) {
         return (
-          <Link href={`${isSpecial.hrefPrefix}${kvItem.value}`} target="_blank">
+          <NavLink
+            to={`${isSpecial.hrefPrefix}${kvItem.value}`}
+            target="_blank"
+          >
             <Badge
               variant={"none"}
               className={`h-6 flex flex-row gap-2 px-2 py-1 rounded-lg text-xs bg-slate-100 dark:bg-slate-900 ${
@@ -371,7 +374,7 @@ const ItemBadge = memo(
                 {kvItem.value}
               </span>
             </Badge>
-          </Link>
+          </NavLink>
         );
       }
 

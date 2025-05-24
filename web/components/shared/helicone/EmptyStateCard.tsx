@@ -11,8 +11,8 @@ import {
   Tag,
   User,
 } from "lucide-react";
-import Link from "next/link";
 import React, { useEffect, useState } from "react";
+import { NavLink } from "react-router";
 import { createHighlighter } from "shiki";
 
 // Create a singleton highlighter instance
@@ -319,20 +319,20 @@ export const EmptyStateCard = ({
               {cta.primary.text}
             </Button>
           ) : cta.primary.link ? (
-            <Link href={cta.primary.link} target="_blank">
+            <NavLink to={cta.primary.link} target="_blank">
               <Button variant="default">
                 {cta.primary.showPlusIcon && <Plus className="h-4 w-4 mr-2" />}
                 {cta.primary.text}
               </Button>
-            </Link>
+            </NavLink>
           ) : null)}
         {cta.secondary && (
-          <Link href={cta.secondary.link} target="_blank">
+          <NavLink to={cta.secondary.link} target="_blank">
             <Button variant="outline" className="gap-2">
               {cta.secondary.text}
               <SquareArrowOutUpRight className="h-4 w-4" />
             </Button>
-          </Link>
+          </NavLink>
         )}
       </div>
     );

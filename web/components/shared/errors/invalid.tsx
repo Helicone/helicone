@@ -2,8 +2,8 @@ import Footer from "../../layout/footer";
 import NavBarV2 from "../../layout/navbar/navBarV2";
 import Image from "next/image";
 import { clsx } from "../clsx";
-import Link from "next/link";
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
+import { NavLink } from "react-router";
 
 interface InvalidPageProps {}
 
@@ -44,20 +44,20 @@ const InvalidPage = (props: InvalidPageProps) => {
               does not exist - please click the button below to go home.
             </p>
             <div className="flex items-center gap-4 mt-8">
-              <Link
-                href="/"
+              <NavLink
+                to="/"
                 className="flex items-center bg-gray-900 hover:bg-gray-700 whitespace-nowrap rounded-md pl-3 pr-2 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
               >
                 Go Home <ChevronRightIcon className="w-4 h-4 inline" />
-              </Link>
-              <Link
+              </NavLink>
+              <a
                 href="https://theuselessweb.com/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-semibold text-sm flex items-center"
               >
                 The Useless Web <ChevronRightIcon className="w-5 h-5 inline" />
-              </Link>
+              </a>
             </div>
           </div>
         </div>

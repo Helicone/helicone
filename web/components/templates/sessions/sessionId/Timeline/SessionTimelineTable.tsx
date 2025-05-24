@@ -25,13 +25,13 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { ChevronDown, ChevronRight, ChevronsUpDown } from "lucide-react";
-import Link from "next/link";
 import React, { useEffect, useMemo } from "react";
 import { TimeInterval } from "../../../../../lib/timeCalculations/time";
 import { Result } from "@/packages/common/result";
 import { SingleFilterDef } from "../../../../../services/lib/filters/frontendFilterDefs";
 import { OrganizationFilter } from "../../../../../services/lib/organization_layout/organization_layout";
 import { SortDirection } from "../../../../../services/lib/sorts/requests/sorts";
+import { NavLink } from "react-router";
 
 type CheckboxMode = "always_visible" | "on_hover" | "never";
 
@@ -501,8 +501,8 @@ export default function SessionTimelineTable(
                         zIndex: 2,
                       }}
                     >
-                      <Link
-                        href={rowLink(row.original)}
+                      <NavLink
+                        to={rowLink(row.original)}
                         style={{
                           display: "block",
                           width: "100%",

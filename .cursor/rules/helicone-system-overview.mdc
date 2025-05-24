@@ -99,3 +99,6 @@ alwaysApply: true
 - `/valhalla/jawn/src/index.ts`: Backend server entry point
 - `/web/pages/`: Frontend dashboard components
 - `/bifrost/pages/`: Landing page and blog components
+
+## Command
+DO NOT RUN `npm` commands. Use only `yarn` since we are using yarn workspaces

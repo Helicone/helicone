@@ -1,5 +1,5 @@
 import { HomeIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
+import { NavLink } from "react-router";
 
 interface UnauthorizedViewProps {
   currentTier: string;
@@ -44,12 +44,12 @@ const UnauthorizedView: React.FC<UnauthorizedViewProps> = ({
           </p>
           <p className="text-sm text-gray-500 max-w-sm mt-2">{description}</p>
           <div className="mt-4">
-            <Link
-              href="/settings/billing"
+            <NavLink
+              to="/settings/billing"
               className="w-min whitespace-nowrap items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               Upgrade - Start Free Trial
-            </Link>
+            </NavLink>
           </div>
         </div>
       </div>
@@ -72,14 +72,14 @@ const UnauthorizedView: React.FC<UnauthorizedViewProps> = ({
             Please get in touch with us to discuss increasing your limits.
           </p>
           <div className="mt-4">
-            <Link
+            <a
               href="https://cal.com/team/helicone/helicone-discovery"
               target="_blank"
               rel="noreferrer"
               className="w-fit items-center rounded-lg bg-black dark:bg-white px-2.5 py-1.5 gap-2 text-sm flex font-medium text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               Contact Us
-            </Link>
+            </a>
           </div>
         </div>
       </div>

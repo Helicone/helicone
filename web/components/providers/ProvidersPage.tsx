@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import AuthLayout from "@/components/layout/auth/authLayout";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { H1 } from "@/components/ui/typography";
 import { Input } from "@/components/ui/input";
 import { ChevronDown, Search } from "lucide-react";
@@ -41,14 +40,14 @@ export const ProvidersPage: React.FC = () => {
           <AlertDescription>
             <strong>Important:</strong> These keys are not for proxying
             requests. See{" "}
-            <Link
+            <a
               href="https://docs.helicone.ai/getting-started/integration-methods"
               className="text-primary font-medium"
               target="_blank"
               rel="noopener noreferrer"
             >
               integration docs
-            </Link>
+            </a>
             .
           </AlertDescription>
         </Alert>

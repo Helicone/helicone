@@ -1,6 +1,4 @@
-import { ReactElement } from "react";
-import { useRouter } from "next/router";
-import AuthLayout from "@/components/layout/auth/authLayout";
+import { useNavigate } from "react-router";
 import AuthHeader from "@/components/shared/authHeader";
 import useNotification from "@/components/shared/notification/useNotification";
 import {
@@ -9,8 +7,8 @@ import {
 } from "@/components/templates/evals/EvaluatorForm";
 import { useLLMEvaluatorSubmit } from "@/components/templates/evals/hooks/useEvaluatorSubmit";
 
-const CreateEvaluator = () => {
-  const router = useRouter();
+const EvaluatorsNewShell = () => {
+  const navigate = useNavigate();
   const notification = useNotification();
 
   // Use the existing hook for creating evaluators that's already used elsewhere
@@ -18,9 +16,9 @@ const CreateEvaluator = () => {
     const evaluatorId = result?.data?.data?.id;
 
     if (evaluatorId) {
-      router.push(`/evaluators/${evaluatorId}`);
+      navigate(`/evaluators/${evaluatorId}`);
     } else {
-      router.push("/evaluators");
+      navigate("/evaluators");
       notification.setNotification(
         "Evaluator created successfully, but couldn't navigate to edit page. Check console for details.",
         "info"
@@ -65,15 +63,11 @@ const CreateEvaluator = () => {
           isCreating={true}
           onSubmit={handleSubmit}
           isSubmitting={createEvaluator.isPending}
-          onCancel={() => router.push("/evaluators")}
+          onCancel={() => navigate("/evaluators")}
         />
       </div>
     </div>
   );
 };
 
-CreateEvaluator.getLayout = function getLayout(page: ReactElement) {
-  return <AuthLayout>{page}</AuthLayout>;
-};
-
-export default CreateEvaluator;
+export default EvaluatorsNewShell;
