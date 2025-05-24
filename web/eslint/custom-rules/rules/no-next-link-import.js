@@ -2,22 +2,20 @@ module.exports = {
   meta: {
     type: "problem",
     docs: {
-      description:
-        "Disallow usage of next/link in favor of react-router NavLink",
+      description: "Disallow importing from next/link",
       category: "Best Practices",
       recommended: true,
     },
-    fixable: "code",
     schema: [],
   },
   create: function (context) {
     return {
-      JSXOpeningElement: (node) => {
-        if (node.name.name === "Link") {
+      ImportDeclaration: (node) => {
+        if (node.source.value === "next/link") {
           context.report({
             node,
             message:
-              "Do not use Link component from next/link. Use NavLink from react-router instead.",
+              "Do not import Link from next/link. Use NavLink from react-router instead.",
           });
         }
       },
