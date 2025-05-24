@@ -214,6 +214,7 @@ interface RequestResponseVersionedToOperators {
   };
   request_body: SingleKey<VectorOperators>;
   response_body: SingleKey<VectorOperators>;
+  cache_reference_id: SingleKey<TextOperators>;
   cache_enabled: SingleKey<BooleanOperators>;
   "helicone-score-feedback": SingleKey<BooleanOperators>;
 }

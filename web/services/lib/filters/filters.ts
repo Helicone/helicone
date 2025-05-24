@@ -201,6 +201,8 @@ const whereKeyMappings: KeyMappings = {
       completion_tokens: "request_response_rmt.completion_tokens",
       request_body: "request_response_rmt.request_body",
       response_body: "request_response_rmt.response_body",
+      cache_reference_id: "request_response_rmt.cache_reference_id",
+      cache_enabled: "request_response_rmt.cache_enabled",
     })(filter, placeValueSafely);
   },
   users_view: easyKeyMappings<"request_response_rmt">({
