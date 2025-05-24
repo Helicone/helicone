@@ -184,6 +184,19 @@ const CachePage = (props: CachePageProps) => {
     columnDefsToDragColumnItems(topRequestsColumns)
   );
 
+  const cacheHitRate = useMemo(() => {
+    const cacheHits = chMetrics.totalCacheHits.data?.data;
+    const totalRequests = chMetrics.totalRequests.data?.data;
+    
+    return (cacheHits && totalRequests) ? (cacheHits / totalRequests) * 100 : 0;
+  }, [chMetrics.totalCacheHits.data?.data, chMetrics.totalRequests.data?.data]);
+
+  const avgLatencyReduction = useMemo(() => {
+    const avgLatency = chMetrics.avgLatency.data?.data;
+    const avgLatencyCached = chMetrics.avgLatencyCached.data?.data;
+    return avgLatency && avgLatencyCached ? avgLatency - avgLatencyCached : 0;
+  }, [chMetrics.avgLatency.data?.data, chMetrics.avgLatencyCached.data?.data]);
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
@@ -236,14 +249,6 @@ const CachePage = (props: CachePageProps) => {
     ...d,
     date: getTimeMap("day")(new Date(d.time)),
   }));
-
-  const cacheDist =
-    chMetrics.topModels?.data?.data?.map((x: any) => ({
-      name: x.model,
-      value: +x.count,
-    })) ?? [];
-
-  cacheDist.sort((a: any, b: any) => a.name.localeCompare(b.name));
 
   if (shouldShowUnauthorized) {
     return <UnauthorizedView currentTier={currentTier || ""} pageType="cache" />
@@ -320,7 +325,7 @@ const CachePage = (props: CachePageProps) => {
                   <div className="animate-pulse h-7 w-16 bg-muted rounded" />
                 ) : (
                   <div className="text-xl font-semibold text-foreground">
-                    ${formatNumber(chMetrics.totalSavings.data?.data ?? 0)}
+                    ${formatNumber(chMetrics.totalSavings.data?.data ?? 0, 3)}
                   </div>
                 )}
               </div>
@@ -347,9 +352,8 @@ const CachePage = (props: CachePageProps) => {
                 {isAnyLoading ? (
                   <div className="animate-pulse h-7 w-16 bg-muted rounded" />
                 ) : (
-                  <div className={`text-xl font-semibold ${78.4 > 10 ? 'text-green-600' : 'text-foreground'}`}>
-                    {/* Fallback percentage since totalRequests doesn't exist yet */}
-                    78.4%
+                  <div className={`text-xl font-semibold ${cacheHitRate > 10 ? 'text-green-600' : 'text-foreground'}`}>
+                    {cacheHitRate.toFixed(2)}%
                   </div>
                 )}
               </div>
@@ -364,7 +368,7 @@ const CachePage = (props: CachePageProps) => {
                 ) : (
                   <div className="text-xl font-semibold text-green-600">
                     {/* Calculate time saved per hit: 709ms - 42ms = 667ms */}
-                    {`-${formatTimeSaved(667.233)}`}
+                    {`-${formatTimeSaved(avgLatencyReduction)}`}
                   </div>
                 )}
               </div>

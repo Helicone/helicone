@@ -1,7 +1,5 @@
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import {
-  buildFilterWithAuth,
-  buildFilterWithAuthClickHouseCacheHits,
   buildFilterWithAuthClickHouseCacheMetrics,
 } from "../../../services/lib/filters/filters";
 import { Result, resultMap } from "@/packages/common/result";
@@ -102,50 +100,6 @@ export async function getTimeSavedClickhouse(
   );
 }
 
-export async function getTopModelUsageClickhouse(
-  orgId: string,
-  filter: FilterNode
-) {
-  const builtFilter = await buildFilterWithAuthClickHouseCacheHits({
-    org_id: orgId,
-    filter,
-    argsAcc: [],
-  });
-  const query = `select model, count(*) as count from cache_hits where (${builtFilter.filter}) group by model order by count desc limit 10`;
-
-  const res = await dbQueryClickhouse<{
-    model: string;
-    count: number;
-  }>(query, builtFilter.argsAcc);
-
-  return res;
-}
-
-export async function getTopUserUsage(org_id: string, filter: FilterNode) {
-  const builtFilter = await buildFilterWithAuth({
-    org_id,
-    argsAcc: [],
-    filter,
-  });
-  const query = `
-SELECT 
-  request.user_id as user_id,
-  count(*) as count
-FROM cache_hits
-  left join request on cache_hits.request_id = request.id
-WHERE (
-  (${builtFilter.filter})
-)
-GROUP BY request.user_id
-ORDER BY count DESC
-LIMIT 5;
-    `;
-  return dbExecute<{ user_id: string; count: number }>(
-    query,
-    builtFilter.argsAcc
-  );
-}
-
 export async function getTopRequestsClickhouse(
   orgId: string,
   filter: FilterNode
@@ -193,44 +147,4 @@ export async function getTopRequestsClickhouse(
       .sort((a, b) => b.count - a.count)
       .slice(0, 10)
   );
-}
-
-export async function getModelUsageOverTime({
-  userFilter,
-  orgId,
-  dbIncrement,
-  timeZoneDifference,
-}: DataOverTimeRequest) {
-  const filter: FilterNode = userFilter;
-  if (!isValidTimeIncrement(dbIncrement)) {
-    return { data: null, error: "Invalid time increment" };
-  }
-  if (!isValidTimeZoneDifference(timeZoneDifference)) {
-    return { data: null, error: "Invalid time zone difference" };
-  }
-  const builtFilter = await buildFilterWithAuth({
-    filter,
-    argsAcc: [],
-    org_id: orgId,
-  });
-  const dateTrunc = `DATE_TRUNC('${dbIncrement}', request.created_at + INTERVAL '${timeZoneDifference} minutes')`;
-  const query = `
-SELECT
-  response.body ->> 'model'::text as model,
-  ${dateTrunc} as created_at_trunc,
-  count(*) AS sum_tokens
-FROM cache_hits
-  left join request on cache_hits.request_id = request.id
-  left join response on request.id = response.request
-WHERE (
-  response.body ->> 'model'::text is not null
-  AND (${builtFilter.filter})
-)
-GROUP BY response.body ->> 'model'::text, ${dateTrunc}
-`;
-  return await dbExecute<{
-    model: string;
-    created_at_trunc: Date;
-    sum_tokens: number;
-  }>(query, builtFilter.argsAcc);
 }

@@ -257,7 +257,6 @@ WHERE (
 GROUP BY ${groupByColumns.concat([dateGroupBy]).join(", ")}
 ORDER BY ${dateSelect} ASC ${fillClause}
 `;
-printRunnableQuery(query, builtFilterArgsAcc);
 
   if (printQuery) {
     printRunnableQuery(query, builtFilterArgsAcc);
