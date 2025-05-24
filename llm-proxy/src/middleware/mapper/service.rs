@@ -7,6 +7,7 @@ use std::{
 use futures::{TryStreamExt, future::BoxFuture};
 use http::uri::PathAndQuery;
 use http_body_util::BodyExt;
+use tracing::{Instrument, info_span};
 
 use crate::{
     endpoints::ApiEndpoint,
@@ -92,22 +93,35 @@ where
                 .ok_or(Error::Internal(InternalError::ExtensionNotFound(
                     "PathAndQuery",
                 )))?;
-            let source_endpoint = ApiEndpoint::new(
-                extracted_path_and_query.path(),
-                request_style,
-            )?;
+            let source_endpoint =
+                req.extensions().get::<ApiEndpoint>().copied();
             if provider == request_style {
-                // even though we don't need to map the request body, we still
-                // need to deserialize the body in order to extract the `stream`
-                // param
-                let req = map_request_no_op(
-                    converter_registry,
-                    &source_endpoint,
-                    &source_endpoint,
-                    extracted_path_and_query,
-                    req,
-                )
-                .await?;
+                let req = if let Some(source_endpoint) = source_endpoint {
+                    // even though we don't need to map the request body, we
+                    // still need to deserialize the body in
+                    // order to extract the `stream` param
+                    map_request_no_op(
+                        converter_registry,
+                        &source_endpoint,
+                        &source_endpoint,
+                        extracted_path_and_query,
+                        req,
+                    )
+                    .await?
+                } else {
+                    // For endpoints without first class support (where we don't
+                    // have concrete types) then we must assume the request is
+                    // not streaming, *since providers put the stream param in
+                    // the request body*.
+                    //
+                    // If providers start putting the stream param in the query,
+                    // header, or path params, then we can update this
+                    // assumption.
+                    let stream_ctx = StreamContext { is_stream: false };
+                    req.extensions_mut().insert(stream_ctx);
+                    req.extensions_mut().insert(extracted_path_and_query);
+                    req
+                };
                 inner.call(req).await.map(|response| {
                     // no need to deserialize the response body, just stream to
                     // user
@@ -116,6 +130,10 @@ where
                     http::Response::from_parts(parts, body)
                 })
             } else {
+                let source_endpoint =
+                    source_endpoint.ok_or(Error::Internal(
+                        InternalError::ExtensionNotFound("ApiEndpoint"),
+                    ))?;
                 let target_endpoint =
                     ApiEndpoint::mapped(source_endpoint, provider)?;
                 // serialization/deserialization should be done on a dedicated
@@ -129,6 +147,7 @@ where
                         &extracted_path_and_query,
                         req,
                     )
+                    .instrument(info_span!("map_request"))
                     .await
                 })
                 .await
@@ -145,6 +164,7 @@ where
                         )
                         .await
                     })
+                    .instrument(info_span!("map_response"))
                     .await
                     .map_err(InternalError::MappingTaskError)?
                     .await?;
@@ -248,7 +268,6 @@ async fn map_response(
         })?;
 
     if is_stream {
-        tracing::info!("MAPPING RESPONSE, is_stream: {:?}", is_stream);
         // because we are using our custom body type, and we know it was
         // constructed in the dispatcher from either an SSE stream or a
         // stream of bytes, we can safely assume each frame is a single
@@ -257,15 +276,10 @@ async fn map_response(
             .into_data_stream()
             .map_err(|e| Error::Internal(InternalError::ReqwestError(e)))
             .try_filter_map({
-                tracing::trace!("filtering map");
                 let captured_registry = converter_registry.clone();
                 move |bytes| {
                     let registry_for_future = captured_registry.clone();
                     async move {
-                        tracing::trace!(
-                            "got some bytes, stream={:?}",
-                            is_stream
-                        );
                         let converter = registry_for_future
                             .get_converter(
                                 &target_endpoint,
@@ -280,9 +294,6 @@ async fn map_response(
                             })?;
                         let converted_data =
                             converter.convert_resp_body(bytes)?;
-                        if converted_data.is_none() {
-                            tracing::trace!("no converted data");
-                        }
                         Ok(converted_data)
                     }
                 }
@@ -291,7 +302,7 @@ async fn map_response(
             reqwest::Body::wrap_stream(mapped_stream),
         );
         let new_resp = Response::from_parts(parts, final_body);
-        tracing::trace!(
+        tracing::debug!(
             source_endpoint = ?target_endpoint,
             target_endpoint = ?source_endpoint,
             "mapped streaming response"
@@ -310,7 +321,7 @@ async fn map_response(
             .map_err(InternalError::MapperError)?;
         let final_body = axum_core::body::Body::from(mapped_body_bytes);
         let new_resp = Response::from_parts(parts, final_body);
-        tracing::trace!(
+        tracing::debug!(
             source_endpoint = ?target_endpoint,
             target_endpoint = ?source_endpoint,
             "mapped non-streaming response"

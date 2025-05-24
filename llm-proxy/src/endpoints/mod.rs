@@ -30,20 +30,17 @@ pub enum ApiEndpoint {
 }
 
 impl ApiEndpoint {
-    pub fn new(
-        path: &str,
-        request_style: InferenceProvider,
-    ) -> Result<Self, InvalidRequestError> {
+    pub fn new(path: &str, request_style: InferenceProvider) -> Option<Self> {
         match request_style {
             InferenceProvider::OpenAI => {
-                Ok(Self::OpenAI(OpenAI::try_from(path)?))
+                Some(Self::OpenAI(OpenAI::try_from(path).ok()?))
             }
             InferenceProvider::Anthropic => {
-                Ok(Self::Anthropic(Anthropic::try_from(path)?))
+                Some(Self::Anthropic(Anthropic::try_from(path).ok()?))
             }
             unsupported => {
-                tracing::warn!(provider = %unsupported, "Unsupported provider");
-                Err(InvalidRequestError::UnsupportedProvider(unsupported))
+                tracing::debug!(provider = %unsupported, "Provider not supported for request mapping");
+                None
             }
         }
     }

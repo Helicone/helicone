@@ -19,7 +19,7 @@ use crate::{
 /// the rolling window this way.
 #[derive(Debug, Clone)]
 pub struct EndpointMetricsRegistry {
-    inner: Arc<HashMap<ApiEndpoint, EndpointMetrics>>,
+    known_endpoints: Arc<HashMap<ApiEndpoint, EndpointMetrics>>,
 }
 
 impl EndpointMetricsRegistry {
@@ -27,7 +27,7 @@ impl EndpointMetricsRegistry {
         &self,
         api_endpoint: ApiEndpoint,
     ) -> Result<&EndpointMetrics, InternalError> {
-        self.inner
+        self.known_endpoints
             .get(&api_endpoint)
             .ok_or(InternalError::MetricsNotConfigured(api_endpoint))
     }
@@ -35,17 +35,17 @@ impl EndpointMetricsRegistry {
 
 impl Default for EndpointMetricsRegistry {
     fn default() -> Self {
-        let mut inner = HashMap::default();
-        inner.insert(
+        let mut known_endpoints = HashMap::default();
+        known_endpoints.insert(
             ApiEndpoint::OpenAI(OpenAI::ChatCompletions(ChatCompletions)),
             EndpointMetrics::default(),
         );
-        inner.insert(
+        known_endpoints.insert(
             ApiEndpoint::Anthropic(Anthropic::Messages(Messages)),
             EndpointMetrics::default(),
         );
         Self {
-            inner: Arc::new(inner),
+            known_endpoints: Arc::new(known_endpoints),
         }
     }
 }

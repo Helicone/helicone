@@ -3,6 +3,7 @@ use std::pin::Pin;
 use bytes::Bytes;
 use futures::{Stream, StreamExt};
 use reqwest_eventsource::{Event, EventSource};
+use tracing::{Instrument, info_span};
 
 use crate::error::internal::InternalError;
 
@@ -21,37 +22,40 @@ pub(crate) type SSEStream = BoxTryStream<Bytes>;
 pub(super) fn sse_stream(mut event_source: EventSource) -> SSEStream {
     let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
 
-    tokio::spawn(async move {
-        while let Some(ev) = event_source.next().await {
-            match ev {
-                Err(e) => {
-                    if let Err(_e) =
-                        tx.send(Err(InternalError::StreamError(Box::new(e))))
-                    {
-                        // rx dropped
-                        break;
-                    }
-                }
-                Ok(event) => match event {
-                    Event::Message(message) => {
-                        if message.data == "[DONE]" {
-                            break;
-                        }
-
-                        let data = Bytes::from(message.data);
-
-                        if let Err(_e) = tx.send(Ok(data)) {
+    tokio::spawn(
+        async move {
+            while let Some(ev) = event_source.next().await {
+                match ev {
+                    Err(e) => {
+                        if let Err(_e) = tx
+                            .send(Err(InternalError::StreamError(Box::new(e))))
+                        {
                             // rx dropped
                             break;
                         }
                     }
-                    Event::Open => {}
-                },
-            }
-        }
+                    Ok(event) => match event {
+                        Event::Message(message) => {
+                            if message.data == "[DONE]" {
+                                break;
+                            }
 
-        event_source.close();
-    });
+                            let data = Bytes::from(message.data);
+
+                            if let Err(_e) = tx.send(Ok(data)) {
+                                // rx dropped
+                                break;
+                            }
+                        }
+                        Event::Open => {}
+                    },
+                }
+            }
+
+            event_source.close();
+        }
+        .instrument(info_span!("sse_stream")),
+    );
 
     Box::pin(tokio_stream::wrappers::UnboundedReceiverStream::new(rx))
 }

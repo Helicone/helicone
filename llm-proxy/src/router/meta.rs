@@ -10,7 +10,6 @@ use regex::Regex;
 use rustc_hash::FxHashMap as HashMap;
 use uuid::Uuid;
 
-use super::Router;
 use crate::{
     app::AppState,
     config::DeploymentTarget,
@@ -18,6 +17,7 @@ use crate::{
         api::Error, init::InitError, internal::InternalError,
         invalid_req::InvalidRequestError,
     },
+    router::service::Router,
     types::router::RouterId,
 };
 

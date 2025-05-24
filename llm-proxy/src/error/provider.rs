@@ -1,7 +1,7 @@
 use displaydoc::Display;
 use thiserror::Error;
 
-use crate::types::provider::InferenceProvider;
+use crate::types::{provider::InferenceProvider, router::RouterId};
 
 #[derive(Debug, Error, Display)]
 pub enum ProviderError {
@@ -9,4 +9,6 @@ pub enum ProviderError {
     ProviderNotConfigured(InferenceProvider),
     /// API Key not found for provider: {0}
     ApiKeyNotFound(InferenceProvider),
+    /// Provider keys not found for router: {0}
+    ProviderKeysNotFound(RouterId),
 }

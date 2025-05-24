@@ -45,18 +45,30 @@ pub enum ProviderHealthMonitor {
 impl ProviderHealthMonitor {
     fn weighted(
         tx: Sender<Change<WeightedKey, DispatcherService>>,
+        router_id: RouterId,
         router_config: Arc<RouterConfig>,
         app_state: AppState,
     ) -> Self {
-        Self::Weighted(ProviderMonitorInner::new(tx, router_config, app_state))
+        Self::Weighted(ProviderMonitorInner::new(
+            tx,
+            router_id,
+            router_config,
+            app_state,
+        ))
     }
 
     fn p2c(
         tx: Sender<Change<Key, DispatcherService>>,
+        router_id: RouterId,
         router_config: Arc<RouterConfig>,
         app_state: AppState,
     ) -> Self {
-        Self::P2C(ProviderMonitorInner::new(tx, router_config, app_state))
+        Self::P2C(ProviderMonitorInner::new(
+            tx,
+            router_id,
+            router_config,
+            app_state,
+        ))
     }
 
     async fn check_monitor(&mut self) -> Result<(), runtime::RuntimeError> {
@@ -99,7 +111,7 @@ async fn check_weighted_monitor(
                         trace!(provider = ?provider, endpoint_type = ?endpoint_type, "Provider became healthy, adding back");
                         inner.unhealthy_keys.remove(&key);
 
-                        let service = inner.create_service(provider)?;
+                        let service = inner.create_service(provider).await?;
                         if let Err(e) =
                             inner.tx.send(Change::Insert(key, service)).await
                         {
@@ -141,7 +153,7 @@ async fn check_p2c_monitor(
                         trace!(provider = ?provider, endpoint_type = ?endpoint_type, "Provider became healthy, adding back");
                         inner.unhealthy_keys.remove(&key);
 
-                        let service = inner.create_service(provider)?;
+                        let service = inner.create_service(provider).await?;
                         if let Err(e) =
                             inner.tx.send(Change::Insert(key, service)).await
                         {
@@ -165,6 +177,7 @@ async fn check_p2c_monitor(
 #[derive(Debug, Clone)]
 pub struct ProviderMonitorInner<K> {
     tx: Sender<Change<K, DispatcherService>>,
+    router_id: RouterId,
     router_config: Arc<RouterConfig>,
     app_state: AppState,
     unhealthy_keys: HashSet<K>,
@@ -173,11 +186,13 @@ pub struct ProviderMonitorInner<K> {
 impl<K> ProviderMonitorInner<K> {
     fn new(
         tx: Sender<Change<K, DispatcherService>>,
+        router_id: RouterId,
         router_config: Arc<RouterConfig>,
         app_state: AppState,
     ) -> Self {
         Self {
             tx,
+            router_id,
             router_config,
             app_state,
             unhealthy_keys: HashSet::default(),
@@ -231,20 +246,18 @@ impl<K> ProviderMonitorInner<K> {
         Ok(all_healthy)
     }
 
-    fn create_service(
+    async fn create_service(
         &self,
         provider: InferenceProvider,
     ) -> Result<DispatcherService, InitError> {
-        let provider_keys = self
-            .app_state
-            .0
-            .config
-            .discover
-            .provider_keys(&self.router_config.balance)?;
+        let provider_keys = self.app_state.0.provider_keys.read().await;
+        let provider_keys = provider_keys
+            .get(&self.router_id)
+            .ok_or(ProviderError::ProviderKeysNotFound(self.router_id)).inspect_err(|e| {
+                error!(error = ?e, "Provider keys not found for from health monitor");
+            })?;
 
         let api_key = provider_keys
-            .as_ref()
-            .as_ref()
             .get(&provider)
             .ok_or(ProviderError::ApiKeyNotFound(provider))?
             .clone();
@@ -340,7 +353,12 @@ impl AppState {
     ) {
         self.0.health_monitor.write().await.insert(
             router_id,
-            ProviderHealthMonitor::weighted(tx, router_config, self.clone()),
+            ProviderHealthMonitor::weighted(
+                tx,
+                router_id,
+                router_config,
+                self.clone(),
+            ),
         );
     }
 
@@ -352,7 +370,12 @@ impl AppState {
     ) {
         self.0.health_monitor.write().await.insert(
             router_id,
-            ProviderHealthMonitor::p2c(tx, router_config, self.clone()),
+            ProviderHealthMonitor::p2c(
+                tx,
+                router_id,
+                router_config,
+                self.clone(),
+            ),
         );
     }
 }

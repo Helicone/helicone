@@ -37,7 +37,7 @@ impl TryFrom<&str> for Anthropic {
         match path {
             Messages::PATH => Ok(Self::Messages(Messages)),
             path => {
-                tracing::warn!(path = %path, "unsupported anthropic path");
+                tracing::debug!(path = %path, "unsupported anthropic path");
                 Err(InvalidRequestError::NotFound(path.to_string()))
             }
         }

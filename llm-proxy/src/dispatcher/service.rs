@@ -13,7 +13,7 @@ use reqwest::RequestBuilder;
 use reqwest_eventsource::RequestBuilderExt;
 use tower::{Service, ServiceBuilder};
 use tower_http::add_extension::{AddExtension, AddExtensionLayer};
-use tracing::Instrument;
+use tracing::{Instrument, info_span};
 
 use super::{SSEStream, sse_stream};
 use crate::{
@@ -177,10 +177,7 @@ impl Dispatcher {
             .ok_or(InternalError::ExtensionNotFound("RequestContext"))?
             .clone();
         let auth_ctx = req_ctx.auth_context.as_ref();
-        let api_endpoint = *req
-            .extensions()
-            .get::<ApiEndpoint>()
-            .ok_or(InternalError::ExtensionNotFound("ApiEndpoint"))?;
+        let api_endpoint = req.extensions().get::<ApiEndpoint>().copied();
         let target_provider = self.provider;
         let provider_config = self
             .app_state
@@ -229,12 +226,14 @@ impl Dispatcher {
             .headers(headers.clone());
 
         let metrics_for_stream = self.app_state.0.endpoint_metrics.clone();
-        let endpoint_metrics = self
-            .app_state
-            .0
-            .endpoint_metrics
-            .endpoint_metrics(api_endpoint)?;
-        endpoint_metrics.incr_req_count();
+        if let Some(api_endpoint) = api_endpoint {
+            let endpoint_metrics = self
+                .app_state
+                .0
+                .endpoint_metrics
+                .endpoint_metrics(api_endpoint)?;
+            endpoint_metrics.incr_req_count();
+        }
 
         let (mut response, body_reader): (
             http::Response<crate::types::body::Body>,
@@ -253,6 +252,7 @@ impl Dispatcher {
                 request_builder,
                 req_body_bytes.clone(),
             )
+            .instrument(info_span!("dispatch_sync"))
             .await?
         };
         let provider_request_id = {
@@ -294,7 +294,14 @@ impl Dispatcher {
         }
 
         if response.status().is_server_error() {
-            endpoint_metrics.incr_remote_internal_error_count();
+            if let Some(api_endpoint) = api_endpoint {
+                let endpoint_metrics = self
+                    .app_state
+                    .0
+                    .endpoint_metrics
+                    .endpoint_metrics(api_endpoint)?;
+                endpoint_metrics.incr_remote_internal_error_count();
+            }
         }
 
         response.error_for_status()
@@ -304,7 +311,7 @@ impl Dispatcher {
         auth_context: Option<&AuthContext>,
         request_builder: RequestBuilder,
         req_body_bytes: Bytes,
-        api_endpoint: ApiEndpoint,
+        api_endpoint: Option<ApiEndpoint>,
         metrics_registry: EndpointMetricsRegistry,
     ) -> Result<
         (
@@ -321,17 +328,21 @@ impl Dispatcher {
             if let InternalError::StreamError(error) = &e {
                 cfg_if::cfg_if! {
                     if #[cfg(debug_assertions)] {
-                        metrics_registry.endpoint_metrics(api_endpoint).map(|metrics| {
-                            metrics.incr_for_stream_error_debug(error);
-                        }).inspect_err(|e| {
-                            tracing::error!(error = %e, "failed to increment stream error metrics");
-                        }).ok();
+                        if let Some(api_endpoint) = api_endpoint {
+                            metrics_registry.endpoint_metrics(api_endpoint).map(|metrics| {
+                                metrics.incr_for_stream_error_debug(error);
+                            }).inspect_err(|e| {
+                                tracing::error!(error = %e, "failed to increment stream error metrics");
+                            }).ok();
+                        }
                     } else {
-                        metrics_registry.endpoint_metrics(api_endpoint).map(|metrics| {
-                            metrics.incr_for_stream_error(error);
-                        }).inspect_err(|e| {
-                            tracing::error!(error = %e, "failed to increment stream error metrics");
-                        }).ok();
+                        if let Some(api_endpoint) = api_endpoint {
+                            metrics_registry.endpoint_metrics(api_endpoint).map(|metrics| {
+                                metrics.incr_for_stream_error(error);
+                            }).inspect_err(|e| {
+                                tracing::error!(error = %e, "failed to increment stream error metrics");
+                            }).ok();
+                        }
                     }
                 }
             }

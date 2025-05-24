@@ -20,7 +20,7 @@ use crate::{
     discover::{provider::Key, weighted::WeightedKey},
     dispatcher::{Dispatcher, DispatcherService},
     error::{init::InitError, provider::ProviderError},
-    types::provider::ProviderKeys,
+    types::router::RouterId,
 };
 
 pin_project! {
@@ -50,25 +50,30 @@ pin_project! {
 }
 
 impl ConfigDiscovery<Key> {
-    pub fn new(
-        app: &AppState,
+    pub async fn new(
+        app_state: &AppState,
+        router_id: RouterId,
         router_config: &Arc<RouterConfig>,
-        provider_keys: &ProviderKeys,
         rx: Receiver<Change<Key, DispatcherService>>,
     ) -> Result<Self, InitError> {
         let events = ReceiverStream::new(rx);
+        let provider_keys_map = app_state.0.provider_keys.read().await;
+        let provider_keys = provider_keys_map
+            .get(&router_id)
+            .ok_or(ProviderError::ProviderKeysNotFound(router_id))?;
         let mut service_map: HashMap<Key, DispatcherService> = HashMap::new();
         for (endpoint_type, balance_config) in router_config.balance.as_ref() {
             let providers = balance_config.providers();
             for provider in providers {
                 let key = Key::new(provider, *endpoint_type);
                 let api_key = provider_keys
-                    .as_ref()
                     .get(&key.provider)
-                    .ok_or(ProviderError::ApiKeyNotFound(key.provider))?
+                    .ok_or(ProviderError::ApiKeyNotFound(key.provider)).inspect_err(|e| {
+                        tracing::error!(error = ?e, "Api key not found for from config discovery");
+                    })?
                     .clone();
                 let dispatcher = Dispatcher::new(
-                    app.clone(),
+                    app_state.clone(),
                     router_config,
                     key.provider,
                     &api_key,
@@ -86,12 +91,16 @@ impl ConfigDiscovery<Key> {
 }
 
 impl ConfigDiscovery<WeightedKey> {
-    pub fn new_weighted(
-        app: &AppState,
+    pub async fn new_weighted(
+        app_state: &AppState,
+        router_id: RouterId,
         router_config: &Arc<RouterConfig>,
-        provider_keys: &ProviderKeys,
         rx: Receiver<Change<WeightedKey, DispatcherService>>,
     ) -> Result<Self, InitError> {
+        let provider_keys = app_state.0.provider_keys.read().await;
+        let provider_keys = provider_keys
+            .get(&router_id)
+            .ok_or(ProviderError::ProviderKeysNotFound(router_id))?;
         let mut service_map = HashMap::new();
         for (endpoint_type, balance_config) in router_config.balance.as_ref() {
             let weighted_balance_targets = match balance_config {
@@ -113,12 +122,13 @@ impl ConfigDiscovery<WeightedKey> {
                 let key =
                     WeightedKey::new(target.provider, *endpoint_type, weight);
                 let api_key = provider_keys
-                    .as_ref()
                     .get(&key.provider)
-                    .ok_or(ProviderError::ApiKeyNotFound(key.provider))?
+                    .ok_or(ProviderError::ApiKeyNotFound(key.provider)).inspect_err(|e| {
+                        tracing::error!(error = ?e, "Api key not found for from config discovery");
+                    })?
                     .clone();
                 let dispatcher = Dispatcher::new(
-                    app.clone(),
+                    app_state.clone(),
                     router_config,
                     key.provider,
                     &api_key,

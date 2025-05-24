@@ -103,3 +103,7 @@ required-features = ["testing"]
 [[test]]
 name = "rate_limit"
 required-features = ["testing"]
+
+[[test]]
+name = "passthrough"
+required-features = ["testing"]

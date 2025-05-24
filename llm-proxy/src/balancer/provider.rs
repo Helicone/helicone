@@ -57,8 +57,11 @@ impl ProviderBalancer {
     ) -> Result<ProviderBalancer, InitError> {
         tracing::debug!("Creating weighted balancer");
         let (tx, rx) = channel(CHANNEL_CAPACITY);
-        let discover_factory =
-            DiscoverFactory::new(app_state.clone(), router_config.clone());
+        let discover_factory = DiscoverFactory::new(
+            app_state.clone(),
+            router_id,
+            router_config.clone(),
+        );
         let mut balance_factory =
             weighted_balance::balance::make::MakeBalance::new(discover_factory);
         let balance = balance_factory.call(rx).await?;
@@ -77,8 +80,11 @@ impl ProviderBalancer {
     ) -> Result<ProviderBalancer, InitError> {
         tracing::debug!("Creating peak ewma p2c balancer");
         let (tx, rx) = channel(CHANNEL_CAPACITY);
-        let discover_factory =
-            DiscoverFactory::new(app_state.clone(), router_config.clone());
+        let discover_factory = DiscoverFactory::new(
+            app_state.clone(),
+            router_id,
+            router_config.clone(),
+        );
         let mut balance_factory =
             tower::balance::p2c::MakeBalance::new(discover_factory);
         let balance = balance_factory.call(rx).await?;

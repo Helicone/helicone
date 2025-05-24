@@ -9,5 +9,4 @@ pub mod request;
 pub mod response;
 pub mod router;
 pub mod secret;
-pub mod template;
 pub mod user;

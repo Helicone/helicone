@@ -1,4 +1,5 @@
 use std::{
+    collections::HashMap,
     convert::Infallible,
     future::{Ready, ready},
     net::SocketAddr,
@@ -13,6 +14,7 @@ use meltdown::Token;
 use opentelemetry::global;
 use reqwest::Client;
 use telemetry::{make_span::SpanFactory, tracing::MakeRequestId};
+use tokio::sync::RwLock;
 use tower::{ServiceBuilder, buffer::BufferLayer, util::BoxCloneService};
 use tower_http::{
     ServiceBuilderExt, add_extension::AddExtension,
@@ -37,6 +39,7 @@ use crate::{
         auth::AuthService, rate_limit::service::Layer as RateLimitLayer,
     },
     router::meta::MetaRouter,
+    types::{provider::ProviderKeys, router::RouterId},
     utils::{catch_panic::PanicResponder, handle_error::ErrorHandlerLayer},
 };
 
@@ -75,6 +78,7 @@ pub struct InnerAppState {
     pub minio: Minio,
     pub jawn_client: Client,
     pub redis: Option<r2d2::Pool<redis::Client>>,
+    pub provider_keys: RwLock<HashMap<RouterId, ProviderKeys>>,
     /// Top level metrics which are exported to OpenTelemetry.
     pub metrics: Metrics,
     /// Metrics to track provider health and rate limits.
@@ -130,13 +134,16 @@ pub struct InnerAppState {
 /// - `PathAndQuery`
 ///   - Added by the `MetaRouter`
 ///   - Used by the Mapper layer
+/// - `ApiEndpoint`
+///   - Added by the `Router`
+///   - Used by the Mapper layer
 /// - `Arc<RequestContext>`
 ///   - Added by the request context layer
 ///   - Used by many layers
 /// - `RouterConfig`
 ///   - Added by the request context layer
 ///   - Used by the Mapper layer
-/// - `StreamContext`, `ApiEndpoint`
+/// - `StreamContext`
 ///   - Added by the `Mapper` layer
 ///   - Used by the Dispatcher layer
 /// - `Provider`
@@ -206,6 +213,7 @@ impl App {
             minio,
             jawn_client,
             redis,
+            provider_keys: RwLock::new(HashMap::default()),
             metrics,
             endpoint_metrics,
             health_monitor,

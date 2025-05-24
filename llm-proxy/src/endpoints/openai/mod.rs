@@ -37,7 +37,7 @@ impl TryFrom<&str> for OpenAI {
         match path {
             ChatCompletions::PATH => Ok(Self::ChatCompletions(ChatCompletions)),
             path => {
-                tracing::warn!(path = %path, "unsupported openai path");
+                tracing::debug!(path = %path, "unsupported openai path");
                 Err(InvalidRequestError::NotFound(path.to_string()))
             }
         }

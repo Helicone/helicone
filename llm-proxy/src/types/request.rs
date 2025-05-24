@@ -3,7 +3,6 @@ use std::sync::Arc;
 
 use axum_core::body::Body;
 use chrono::{DateTime, Utc};
-use indexmap::IndexMap;
 use isocountry::CountryCode;
 use uuid::Uuid;
 
@@ -11,18 +10,11 @@ use super::{
     model::Model,
     org::OrgId,
     provider::{InferenceProvider, ProviderKeys},
-    template::TemplateInputs,
     user::UserId,
 };
 use crate::config::router::RouterConfig;
 
 pub type Request = http::Request<Body>;
-
-#[derive(Debug)]
-pub struct HeliconeContext {
-    pub properties: Option<IndexMap<String, String>>,
-    pub template_inputs: Option<TemplateInputs>,
-}
 
 #[derive(Debug, Clone)]
 pub struct AuthContext {
@@ -38,7 +30,6 @@ pub struct RequestContext {
     /// If `None`, the router is configured to not require auth for requests,
     /// disabling some features.
     pub auth_context: Option<AuthContext>,
-    pub helicone: HeliconeContext,
     pub start_time: DateTime<Utc>,
     pub request_id: Uuid,
     pub country_code: CountryCode,

@@ -74,6 +74,7 @@ where
         let app_state = self.app_state.clone();
         Box::pin(async move {
             if !app_state.0.config.auth.require_auth {
+                tracing::trace!("Auth middleware for axum body: auth disabled");
                 return Ok(request);
             }
             let Some(api_key) = request

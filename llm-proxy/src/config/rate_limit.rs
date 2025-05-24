@@ -16,6 +16,22 @@ pub enum RateLimitConfig {
     Disabled,
 }
 
+impl RateLimitConfig {
+    #[must_use]
+    pub fn default_enabled_config() -> Self {
+        Self::Enabled {
+            store: RateLimitStore::default(),
+            limits: LimitConfig::default(),
+        }
+    }
+}
+
+impl Default for RateLimitConfig {
+    fn default() -> Self {
+        Self::Disabled
+    }
+}
+
 #[derive(Debug, Default, Clone, Deserialize, Serialize, Eq, PartialEq)]
 #[serde(deny_unknown_fields, rename_all = "kebab-case")]
 pub enum RateLimitStore {
@@ -30,15 +46,6 @@ fn default_capacity() -> u32 {
 
 fn default_fill_frequency() -> Duration {
     Duration::from_secs(1)
-}
-
-impl Default for RateLimitConfig {
-    fn default() -> Self {
-        Self::Enabled {
-            store: RateLimitStore::default(),
-            limits: LimitConfig::default(),
-        }
-    }
 }
 
 #[cfg(feature = "testing")]

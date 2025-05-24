@@ -11,7 +11,6 @@ use uuid::Uuid;
 
 use crate::{
     config::router::RouterConfig,
-    error::api::Error,
     types::{
         provider::ProviderKeys,
         request::{AuthContext, Request, RequestContext},
@@ -42,13 +41,11 @@ impl<S> Service<S> {
 
 impl<S> tower::Service<Request> for Service<S>
 where
-    S: tower::Service<Request, Response = Response, Error = Error>
-        + Send
-        + 'static,
+    S: tower::Service<Request, Response = Response> + Send + 'static,
     S::Future: Send + 'static,
 {
     type Response = S::Response;
-    type Error = Error;
+    type Error = S::Error;
     type Future = Either<Ready<Result<Self::Response, Self::Error>>, S::Future>;
 
     #[inline]
@@ -75,7 +72,6 @@ where
     S: tower::Service<Request>,
     S::Future: Send + 'static,
     S::Response: Send + 'static,
-    S::Error: Into<Error> + Send + Sync + 'static,
 {
     fn get_context(
         router_config: Arc<RouterConfig>,
@@ -83,12 +79,6 @@ where
         req: &mut Request,
     ) -> RequestContext {
         let auth_context = req.extensions_mut().remove::<AuthContext>();
-
-        // TODO: this will come from parsing the prompt+headers+etc
-        let helicone = crate::types::request::HeliconeContext {
-            properties: None,
-            template_inputs: None,
-        };
         let proxy_context = crate::types::request::RequestProxyContext {
             forced_routing: None,
             provider_api_keys,
@@ -96,7 +86,6 @@ where
         RequestContext {
             router_config,
             proxy_context,
-            helicone,
             auth_context,
             request_id: Uuid::new_v4(),
             country_code: CountryCode::USA,
