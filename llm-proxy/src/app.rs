@@ -19,7 +19,8 @@ use tower::{ServiceBuilder, buffer::BufferLayer, util::BoxCloneService};
 use tower_http::{
     ServiceBuilderExt, add_extension::AddExtension,
     auth::AsyncRequireAuthorizationLayer, catch_panic::CatchPanicLayer,
-    normalize_path::NormalizePathLayer, trace::TraceLayer,
+    normalize_path::NormalizePathLayer,
+    sensitive_headers::SetSensitiveHeadersLayer, trace::TraceLayer,
 };
 use tracing::{Level, info};
 
@@ -224,6 +225,9 @@ impl App {
         // global middleware is applied here
         let service_stack = ServiceBuilder::new()
             .layer(CatchPanicLayer::custom(PanicResponder))
+            .layer(SetSensitiveHeadersLayer::new(std::iter::once(
+                http::header::AUTHORIZATION,
+            )))
             .layer(
                 TraceLayer::new_for_http()
                     .make_span_with(SpanFactory::new(
