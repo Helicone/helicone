@@ -8,6 +8,7 @@ use tracing::{Instrument, info_span};
 use crate::error::internal::InternalError;
 
 pub mod anthropic_client;
+mod extensions;
 pub mod openai_client;
 pub mod service;
 

@@ -1,7 +1,7 @@
 use futures::StreamExt;
 
 pub async fn test() {
-    let is_stream = true;
+    let is_stream = false;
     let openai_request_body = serde_json::json!({
         "model": "gpt-4o-mini",
         "messages": [

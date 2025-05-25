@@ -35,9 +35,13 @@ pub struct RequestContext {
     pub country_code: CountryCode,
 }
 
-#[derive(Debug, Clone, Copy)]
-pub struct StreamContext {
+#[derive(Debug, Clone)]
+pub struct MapperContext {
     pub is_stream: bool,
+    /// If `None`, the request was for an endpoint without
+    /// first class support for mapping between different provider
+    /// models.
+    pub model: Option<Model>,
 }
 
 #[derive(Debug)]

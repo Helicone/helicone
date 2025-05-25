@@ -17,7 +17,7 @@ use crate::{
     },
     types::{
         provider::InferenceProvider,
-        request::{Request, RequestContext, StreamContext},
+        request::{MapperContext, Request, RequestContext},
         response::Response,
     },
 };
@@ -117,8 +117,11 @@ where
                     // If providers start putting the stream param in the query,
                     // header, or path params, then we can update this
                     // assumption.
-                    let stream_ctx = StreamContext { is_stream: false };
-                    req.extensions_mut().insert(stream_ctx);
+                    let mapper_ctx = MapperContext {
+                        is_stream: false,
+                        model: None,
+                    };
+                    req.extensions_mut().insert(mapper_ctx);
                     req.extensions_mut().insert(extracted_path_and_query);
                     req
                 };
@@ -196,23 +199,20 @@ async fn map_request(
     let target_path_and_query = PathAndQuery::from_str(&target_path_and_query)
         .map_err(InternalError::InvalidUri)?;
 
-    // For now, assume is_stream is true so we can accurately extract the stream
-    // param via the `StreamRequest` trait.
-    let is_stream = true;
     let converter = converter_registry
-        .get_converter(source_endpoint, target_endpoint, is_stream)
+        .get_converter(source_endpoint, target_endpoint)
         .ok_or_else(|| {
             InternalError::InvalidConverter(*source_endpoint, *target_endpoint)
         })?;
 
-    let (body, stream_ctx) = converter.convert_req_body(body)?;
-    tracing::trace!("stream_ctx: {:?}", stream_ctx);
+    let (body, mapper_ctx) = converter.convert_req_body(body)?;
+    tracing::trace!("mapper_ctx: {:?}", mapper_ctx);
     let mut req = Request::from_parts(parts, axum_core::body::Body::from(body));
     tracing::trace!(
         source_endpoint = ?source_endpoint, target_endpoint = ?target_endpoint,
         target_path_and_query = ?target_path_and_query, "mapped request");
     req.extensions_mut().insert(target_path_and_query);
-    req.extensions_mut().insert(stream_ctx);
+    req.extensions_mut().insert(mapper_ctx);
     req.extensions_mut().insert(*target_endpoint);
     Ok(req)
 }
@@ -230,20 +230,16 @@ async fn map_request_no_op(
         .await
         .map_err(InternalError::CollectBodyError)?
         .to_bytes();
-
-    // For now, assume is_stream is true so we can accurately extract the stream
-    // param via the `StreamRequest` trait.
-    let is_stream = true;
     let converter = converter_registry
-        .get_converter(source_endpoint, target_endpoint, is_stream)
+        .get_converter(source_endpoint, target_endpoint)
         .ok_or_else(|| {
             InternalError::InvalidConverter(*source_endpoint, *target_endpoint)
         })?;
 
-    let (body, stream_ctx) = converter.convert_req_body(body)?;
+    let (body, mapper_ctx) = converter.convert_req_body(body)?;
     let mut req = Request::from_parts(parts, axum_core::body::Body::from(body));
     req.extensions_mut().insert(target_path_and_query);
-    req.extensions_mut().insert(stream_ctx);
+    req.extensions_mut().insert(mapper_ctx);
     req.extensions_mut().insert(*target_endpoint);
     Ok(req)
 }
@@ -254,15 +250,15 @@ async fn map_response(
     target_endpoint: ApiEndpoint,
     resp: http::Response<crate::types::body::Body>,
 ) -> Result<Response, Error> {
-    let stream_ctx = resp
+    let mapper_ctx = resp
         .extensions()
-        .get::<StreamContext>()
-        .ok_or(InternalError::ExtensionNotFound("StreamContext"))?;
-    let is_stream = stream_ctx.is_stream;
+        .get::<MapperContext>()
+        .ok_or(InternalError::ExtensionNotFound("MapperContext"))?;
+    let is_stream = mapper_ctx.is_stream;
     let (parts, body) = resp.into_parts();
 
     let converter = converter_registry
-        .get_converter(&target_endpoint, &source_endpoint, is_stream)
+        .get_converter(&target_endpoint, &source_endpoint)
         .ok_or_else(|| {
             InternalError::InvalidConverter(target_endpoint, source_endpoint)
         })?;
@@ -281,11 +277,7 @@ async fn map_response(
                     let registry_for_future = captured_registry.clone();
                     async move {
                         let converter = registry_for_future
-                            .get_converter(
-                                &target_endpoint,
-                                &source_endpoint,
-                                is_stream,
-                            )
+                            .get_converter(&target_endpoint, &source_endpoint)
                             .ok_or_else(|| {
                                 InternalError::InvalidConverter(
                                     target_endpoint,
@@ -293,7 +285,7 @@ async fn map_response(
                                 )
                             })?;
                         let converted_data =
-                            converter.convert_resp_body(bytes)?;
+                            converter.convert_resp_body(bytes, is_stream)?;
                         Ok(converted_data)
                     }
                 }
@@ -316,7 +308,7 @@ async fn map_response(
             .to_bytes();
 
         let mapped_body_bytes = converter
-            .convert_resp_body(body_bytes)?
+            .convert_resp_body(body_bytes, is_stream)?
             .ok_or(MapperError::EmptyResponseBody)
             .map_err(InternalError::MapperError)?;
         let final_body = axum_core::body::Body::from(mapped_body_bytes);

@@ -117,6 +117,8 @@ tokio-test = "0.4.4"
 tokio-util = "0.7.15"
 tower = "0.5.2"
 tower-http = { version = "0.6.3" }
+# @tom: submit upstream PR
+tower-otel-http-metrics = { git = "https://github.com/tomharmon/tower-otel-http-metrics.git", branch = "feat/custom-attributes-via-extractors" }
 tracing = "0.1.41"
 tracing-opentelemetry = "0.30.0"
 tracing-subscriber = "0.3.19"

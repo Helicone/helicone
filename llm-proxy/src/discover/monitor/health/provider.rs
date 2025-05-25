@@ -264,6 +264,7 @@ impl<K> ProviderMonitorInner<K> {
 
         Dispatcher::new(
             self.app_state.clone(),
+            self.router_id,
             &self.router_config,
             provider,
             &api_key,

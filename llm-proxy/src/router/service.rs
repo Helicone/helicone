@@ -89,6 +89,7 @@ impl Router {
             })?;
         let direct_proxy_dispatcher = Dispatcher::new(
             app_state,
+            id,
             &router_config,
             router_config.request_style,
             direct_proxy_provider_api_key,

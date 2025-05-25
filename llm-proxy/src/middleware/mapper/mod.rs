@@ -35,11 +35,11 @@ use serde::{Serialize, de::DeserializeOwned};
 
 pub use self::service::*;
 use crate::{
-    endpoints::{Endpoint, StreamRequest},
+    endpoints::{AiRequest, Endpoint},
     error::{
         api::Error, internal::InternalError, invalid_req::InvalidRequestError,
     },
-    types::request::StreamContext,
+    types::request::MapperContext,
 };
 
 /// `TryFrom` but allows us to implement it for foreign types, so we can
@@ -66,13 +66,13 @@ pub trait TryConvertStreamData<Source, Target>: Sized {
 pub trait EndpointConverter {
     /// Convert a request body to a target request body with raw bytes.
     ///
-    /// `StreamContext` is used to determine if the request is a stream
+    /// `MapperContext` is used to determine if the request is a stream
     /// since within the converter we have deserialized the request
     /// bytes to a concrete type.
     fn convert_req_body(
         &self,
         req_body_bytes: Bytes,
-    ) -> Result<(Bytes, StreamContext), Error>;
+    ) -> Result<(Bytes, MapperContext), Error>;
     /// Convert a response body to a target response body with raw bytes.
     ///
     /// Returns `None` if there is no applicable mapping for a given chunk
@@ -80,6 +80,7 @@ pub trait EndpointConverter {
     fn convert_resp_body(
         &self,
         resp_body_bytes: Bytes,
+        is_stream: bool,
     ) -> Result<Option<Bytes>, Error>;
 }
 
@@ -112,115 +113,34 @@ where
 impl<S, T, C> EndpointConverter for TypedEndpointConverter<S, T, C>
 where
     S: Endpoint,
-    S::RequestBody: DeserializeOwned,
+    S::RequestBody: DeserializeOwned + AiRequest,
     S::ResponseBody: Serialize,
-    T: Endpoint,
-    T::ResponseBody: DeserializeOwned,
-    T::RequestBody: Serialize,
-    C: TryConvert<S::RequestBody, T::RequestBody>,
-    C: TryConvert<T::ResponseBody, S::ResponseBody>,
-    <C as TryConvert<S::RequestBody, T::RequestBody>>::Error: Into<MapperError>,
-    <C as TryConvert<T::ResponseBody, S::ResponseBody>>::Error:
-        Into<MapperError>,
-{
-    fn convert_req_body(
-        &self,
-        bytes: Bytes,
-    ) -> Result<(Bytes, StreamContext), Error> {
-        tracing::info!("IN NON STREAMING CONVERT REQ BODY");
-        let source_request: S::RequestBody = serde_json::from_slice(&bytes)
-            .map_err(InvalidRequestError::InvalidRequestBody)?;
-        let stream_context = StreamContext { is_stream: false };
-        let target_request: T::RequestBody = self
-            .converter
-            .try_convert(source_request)
-            .map_err(|e| InternalError::MapperError(e.into()))?;
-        let target_bytes =
-            Bytes::from(serde_json::to_vec(&target_request).map_err(|e| {
-                InternalError::Serialize {
-                    ty: std::any::type_name::<T::RequestBody>(),
-                    error: e,
-                }
-            })?);
-
-        Ok((target_bytes, stream_context))
-    }
-
-    fn convert_resp_body(&self, bytes: Bytes) -> Result<Option<Bytes>, Error> {
-        let response: T::ResponseBody = serde_json::from_slice(&bytes)
-            .map_err(InvalidRequestError::InvalidRequestBody)?;
-        let target_response: S::ResponseBody = self
-            .converter
-            .try_convert(response)
-            .map_err(|e| InternalError::MapperError(e.into()))?;
-        let target_bytes =
-            serde_json::to_vec(&target_response).map_err(|e| {
-                InternalError::Serialize {
-                    ty: std::any::type_name::<T::ResponseBody>(),
-                    error: e,
-                }
-            })?;
-
-        Ok(Some(Bytes::from(target_bytes)))
-    }
-}
-
-pub struct TypedStreamEndpointConverter<S, T, C>
-where
-    S: Endpoint,
-    T: Endpoint,
-    S::RequestBody: StreamRequest,
-    T::RequestBody: StreamRequest,
-    C: TryConvert<S::RequestBody, T::RequestBody>,
-    C: TryConvertStreamData<T::StreamResponseBody, S::StreamResponseBody>,
-{
-    converter: C,
-    _phantom: std::marker::PhantomData<(S, T)>,
-}
-
-impl<S, T, C> TypedStreamEndpointConverter<S, T, C>
-where
-    S: Endpoint,
-    T: Endpoint,
-    S::RequestBody: StreamRequest,
-    T::RequestBody: StreamRequest,
-    C: TryConvert<S::RequestBody, T::RequestBody>,
-    C: TryConvertStreamData<T::StreamResponseBody, S::StreamResponseBody>,
-{
-    pub fn new(converter: C) -> Self {
-        Self {
-            converter,
-            _phantom: std::marker::PhantomData,
-        }
-    }
-}
-
-impl<S, T, C> EndpointConverter for TypedStreamEndpointConverter<S, T, C>
-where
-    S: Endpoint,
-    S::RequestBody: DeserializeOwned + StreamRequest,
     S::StreamResponseBody: Serialize,
     T: Endpoint,
-    T::RequestBody: Serialize + StreamRequest,
+    T::RequestBody: Serialize + AiRequest,
+    T::ResponseBody: DeserializeOwned,
     T::StreamResponseBody: DeserializeOwned,
     C: TryConvert<S::RequestBody, T::RequestBody>,
+    C: TryConvert<T::ResponseBody, S::ResponseBody>,
     C: TryConvertStreamData<T::StreamResponseBody, S::StreamResponseBody>,
     <C as TryConvert<S::RequestBody, T::RequestBody>>::Error: Into<MapperError>,
+    <C as TryConvert<T::ResponseBody, S::ResponseBody>>::Error: Into<MapperError>,
     <C as TryConvertStreamData<T::StreamResponseBody, S::StreamResponseBody>>::Error:
         Into<MapperError>,
 {
     fn convert_req_body(
         &self,
         bytes: Bytes,
-    ) -> Result<(Bytes, StreamContext), Error> {
+    ) -> Result<(Bytes, MapperContext), Error> {
         let source_request: S::RequestBody = serde_json::from_slice(&bytes)
             .map_err(InvalidRequestError::InvalidRequestBody)?;
         let is_stream = source_request.is_stream();
-        let stream_context = StreamContext { is_stream };
         let target_request: T::RequestBody = self
             .converter
             .try_convert(source_request)
             .map_err(|e| InternalError::MapperError(e.into()))?;
+        let model = target_request.model().map_err(InternalError::MapperError)?;
+        let mapper_ctx = MapperContext { is_stream, model: Some(model) };
         let target_bytes =
             Bytes::from(serde_json::to_vec(&target_request).map_err(|e| {
                 InternalError::Serialize {
@@ -229,19 +149,41 @@ where
                 }
             })?);
 
-        Ok((target_bytes, stream_context))
+        Ok((target_bytes, mapper_ctx))
     }
 
-    fn convert_resp_body(&self, bytes: Bytes) -> Result<Option<Bytes>, Error> {
-        let source_response: T::StreamResponseBody =
+    fn convert_resp_body(&self, bytes: Bytes, is_stream: bool) -> Result<Option<Bytes>, Error> {
+        if is_stream {
+            let source_response: T::StreamResponseBody =
+                serde_json::from_slice(&bytes)
+                    .map_err(InvalidRequestError::InvalidRequestBody)?;
+            let target_response: Option<S::StreamResponseBody> = self
+                .converter
+                .try_convert_chunk(source_response)
+                .map_err(|e| InternalError::MapperError(e.into()))?;
+
+            if let Some(target_response) = target_response {
+                let target_bytes =
+                serde_json::to_vec(&target_response).map_err(|e| {
+                    InternalError::Serialize {
+                        ty: std::any::type_name::<T::ResponseBody>(),
+                        error: e,
+                    }
+                })?;
+
+                Ok(Some(Bytes::from(target_bytes)))
+            } else {
+                Ok(None)
+            }
+        } else {
+            let source_response: T::ResponseBody =
             serde_json::from_slice(&bytes)
                 .map_err(InvalidRequestError::InvalidRequestBody)?;
-        let target_response: Option<S::StreamResponseBody> = self
+            let target_response: S::ResponseBody = self
             .converter
-            .try_convert_chunk(source_response)
+            .try_convert(source_response)
             .map_err(|e| InternalError::MapperError(e.into()))?;
 
-        if let Some(target_response) = target_response {
             let target_bytes =
             serde_json::to_vec(&target_response).map_err(|e| {
                 InternalError::Serialize {
@@ -251,8 +193,6 @@ where
             })?;
 
             Ok(Some(Bytes::from(target_bytes)))
-        } else {
-            Ok(None)
         }
     }
 }
@@ -260,7 +200,7 @@ where
 pub struct NoOpConverter<S>
 where
     S: Endpoint,
-    S::RequestBody: StreamRequest,
+    S::RequestBody: AiRequest,
 {
     _phantom: std::marker::PhantomData<S>,
 }
@@ -268,7 +208,7 @@ where
 impl<S> Default for NoOpConverter<S>
 where
     S: Endpoint,
-    S::RequestBody: StreamRequest,
+    S::RequestBody: AiRequest,
 {
     fn default() -> Self {
         Self::new()
@@ -278,7 +218,7 @@ where
 impl<S> NoOpConverter<S>
 where
     S: Endpoint,
-    S::RequestBody: StreamRequest,
+    S::RequestBody: AiRequest,
 {
     #[must_use]
     pub fn new() -> Self {
@@ -291,20 +231,29 @@ where
 impl<S> EndpointConverter for NoOpConverter<S>
 where
     S: Endpoint,
-    S::RequestBody: DeserializeOwned + StreamRequest,
+    S::RequestBody: DeserializeOwned + AiRequest,
 {
     fn convert_req_body(
         &self,
         bytes: Bytes,
-    ) -> Result<(Bytes, StreamContext), Error> {
+    ) -> Result<(Bytes, MapperContext), Error> {
         let source_request: S::RequestBody = serde_json::from_slice(&bytes)
             .map_err(InvalidRequestError::InvalidRequestBody)?;
         let is_stream = source_request.is_stream();
-        let stream_context = StreamContext { is_stream };
-        Ok((bytes, stream_context))
+        let model =
+            source_request.model().map_err(InternalError::MapperError)?;
+        let mapper_ctx = MapperContext {
+            is_stream,
+            model: Some(model),
+        };
+        Ok((bytes, mapper_ctx))
     }
 
-    fn convert_resp_body(&self, bytes: Bytes) -> Result<Option<Bytes>, Error> {
+    fn convert_resp_body(
+        &self,
+        bytes: Bytes,
+        _is_stream: bool,
+    ) -> Result<Option<Bytes>, Error> {
         Ok(Some(bytes))
     }
 }

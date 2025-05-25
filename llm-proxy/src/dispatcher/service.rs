@@ -12,7 +12,6 @@ use opentelemetry::KeyValue;
 use reqwest::RequestBuilder;
 use reqwest_eventsource::RequestBuilderExt;
 use tower::{Service, ServiceBuilder};
-use tower_http::add_extension::{AddExtension, AddExtensionLayer};
 use tracing::{Instrument, info_span};
 
 use super::{SSEStream, sse_stream};
@@ -22,17 +21,19 @@ use crate::{
     discover::monitor::health::EndpointMetricsRegistry,
     dispatcher::{
         anthropic_client::Client as AnthropicClient,
-        openai_client::Client as OpenAIClient,
+        extensions::ExtensionsCopier, openai_client::Client as OpenAIClient,
     },
     endpoints::ApiEndpoint,
     error::{api::Error, init::InitError, internal::InternalError},
     logger::service::LoggerService,
-    middleware::mapper::{
-        model::ModelMapper, registry::EndpointConverterRegistry,
+    middleware::{
+        add_extension::{AddExtensions, AddExtensionsLayer},
+        mapper::{model::ModelMapper, registry::EndpointConverterRegistry},
     },
     types::{
         provider::InferenceProvider,
-        request::{AuthContext, Request, RequestContext, StreamContext},
+        request::{AuthContext, MapperContext, Request, RequestContext},
+        router::RouterId,
         secret::Secret,
     },
     utils::{
@@ -43,13 +44,8 @@ use crate::{
 
 pub type DispatcherFuture =
     BoxFuture<'static, Result<http::Response<crate::types::body::Body>, Error>>;
-pub type DispatcherService = AddExtension<
-    AddExtension<
-        ErrorHandler<crate::middleware::mapper::Service<Dispatcher>>,
-        EndpointConverterRegistry,
-    >,
-    InferenceProvider,
->;
+pub type DispatcherService =
+    AddExtensions<ErrorHandler<crate::middleware::mapper::Service<Dispatcher>>>;
 
 #[derive(Debug, Clone)]
 pub enum Client {
@@ -93,6 +89,7 @@ pub struct Dispatcher {
 impl Dispatcher {
     pub fn new(
         app_state: AppState,
+        router_id: RouterId,
         router_config: &Arc<RouterConfig>,
         provider: InferenceProvider,
         provider_api_key: &Secret<String>,
@@ -128,9 +125,14 @@ impl Dispatcher {
         let converter_registry =
             EndpointConverterRegistry::new(router_config, model_mapper);
 
+        let extensions_layer = AddExtensionsLayer::builder()
+            .inference_provider(provider)
+            .endpoint_converter_registry(converter_registry)
+            .router_id(router_id)
+            .build();
+
         Ok(ServiceBuilder::new()
-            .layer(AddExtensionLayer::new(provider))
-            .layer(AddExtensionLayer::new(converter_registry))
+            .layer(extensions_layer)
             .layer(ErrorHandlerLayer::new(app_state))
             .layer(crate::middleware::mapper::Layer)
             // other middleware: rate limiting, logging, etc, etc
@@ -167,15 +169,14 @@ impl Dispatcher {
         &self,
         mut req: Request,
     ) -> Result<http::Response<crate::types::body::Body>, Error> {
-        let stream_ctx = req
+        let mapper_ctx = req
             .extensions_mut()
-            .remove::<StreamContext>()
-            .ok_or(InternalError::ExtensionNotFound("StreamContext"))?;
+            .remove::<MapperContext>()
+            .ok_or(InternalError::ExtensionNotFound("MapperContext"))?;
         let req_ctx = req
-            .extensions()
-            .get::<Arc<RequestContext>>()
-            .ok_or(InternalError::ExtensionNotFound("RequestContext"))?
-            .clone();
+            .extensions_mut()
+            .remove::<Arc<RequestContext>>()
+            .ok_or(InternalError::ExtensionNotFound("RequestContext"))?;
         let auth_ctx = req_ctx.auth_context.as_ref();
         let api_endpoint = req.extensions().get::<ApiEndpoint>().copied();
         let target_provider = self.provider;
@@ -199,11 +200,26 @@ impl Dispatcher {
         let method = req.method().clone();
         let headers = req.headers().clone();
         let extracted_path_and_query = req
+            .extensions_mut()
+            .remove::<PathAndQuery>()
+            .ok_or(Error::Internal(InternalError::ExtensionNotFound(
+                "PathAndQuery",
+            )))?;
+        let inference_provider = req
             .extensions()
-            .get::<PathAndQuery>()
-            .ok_or(Error::Internal(
-            InternalError::ExtensionNotFound("PathAndQuery"),
-        ))?;
+            .get::<InferenceProvider>()
+            .copied()
+            .ok_or(InternalError::ExtensionNotFound("InferenceProvider"))?;
+        let router_id = req
+            .extensions()
+            .get::<RouterId>()
+            .copied()
+            .ok_or(InternalError::ExtensionNotFound("RouterId"))?;
+        let extensions_copier = ExtensionsCopier::builder()
+            .inference_provider(inference_provider)
+            .router_id(router_id)
+            .auth_context(auth_ctx.cloned())
+            .build();
 
         let target_url = base_url
             .join(extracted_path_and_query.as_str())
@@ -238,7 +254,7 @@ impl Dispatcher {
         let (mut response, body_reader): (
             http::Response<crate::types::body::Body>,
             Option<crate::types::body::BodyReader>,
-        ) = if stream_ctx.is_stream {
+        ) = if mapper_ctx.is_stream {
             Self::dispatch_stream(
                 auth_ctx,
                 request_builder,
@@ -258,11 +274,13 @@ impl Dispatcher {
         let provider_request_id = {
             let headers = response.headers_mut();
             headers.remove(http::header::CONTENT_LENGTH);
-
             headers.remove("x-request-id")
         };
         tracing::debug!(provider_req_id = ?provider_request_id, status = %response.status(), "received response");
-        response.extensions_mut().insert(stream_ctx);
+        extensions_copier.copy_extensions(response.extensions_mut());
+        response.extensions_mut().insert(mapper_ctx);
+        response.extensions_mut().insert(api_endpoint);
+        response.extensions_mut().insert(extracted_path_and_query);
 
         if let Some(body_reader) = body_reader {
             let response_logger = LoggerService::builder()

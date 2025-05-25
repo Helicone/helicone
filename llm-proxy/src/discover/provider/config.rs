@@ -74,6 +74,7 @@ impl ConfigDiscovery<Key> {
                     .clone();
                 let dispatcher = Dispatcher::new(
                     app_state.clone(),
+                    router_id,
                     router_config,
                     key.provider,
                     &api_key,
@@ -129,6 +130,7 @@ impl ConfigDiscovery<WeightedKey> {
                     .clone();
                 let dispatcher = Dispatcher::new(
                     app_state.clone(),
+                    router_id,
                     router_config,
                     key.provider,
                     &api_key,

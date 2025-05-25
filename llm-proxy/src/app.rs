@@ -35,7 +35,7 @@ use crate::{
         EndpointMetricsRegistry, provider::HealthMonitorMap,
     },
     error::{self, init::InitError, runtime::RuntimeError},
-    metrics::{self, Metrics},
+    metrics::{self, Metrics, attribute_extractor::AttributeExtractor},
     middleware::{
         auth::AuthService, rate_limit::service::Layer as RateLimitLayer,
     },
@@ -46,20 +46,20 @@ use crate::{
 
 const BUFFER_SIZE: usize = 1024;
 const JAWN_CONNECT_TIMEOUT: Duration = Duration::from_secs(10);
+const SERVICE_NAME: &str = "helicone-router";
 
-pub type AppResponse = http::Response<
-    tower_http::body::UnsyncBoxBody<
-        bytes::Bytes,
-        Box<
-            (
-                dyn std::error::Error
-                    + std::marker::Send
-                    + std::marker::Sync
-                    + 'static
-            ),
-        >,
+pub type AppResponseBody = tower_http::body::UnsyncBoxBody<
+    bytes::Bytes,
+    Box<
+        (
+            dyn std::error::Error
+                + std::marker::Send
+                + std::marker::Sync
+                + 'static
+        ),
     >,
 >;
+pub type AppResponse = http::Response<AppResponseBody>;
 
 pub type BoxedServiceStack =
     BoxCloneService<crate::types::request::Request, AppResponse, Infallible>;
@@ -144,13 +144,23 @@ pub struct InnerAppState {
 /// - `RouterConfig`
 ///   - Added by the request context layer
 ///   - Used by the Mapper layer
-/// - `StreamContext`
+/// - `MapperContext`
 ///   - Added by the `Mapper` layer
 ///   - Used by the Dispatcher layer
 /// - `Provider`
 ///   - Added by the `AddExtensionLayer` in the dispatcher service stack
 ///   - Value is driven by the `Key` type used by the `Discovery` impl.
 ///   - Used by the Mapper layer
+///
+/// Required response extensions:
+/// - Copied by the dispatcher from req to resp extensions
+///   - `InferenceProvider`
+///   - `Model`
+///   - `RouterId`
+///   - `PathAndQuery`
+///   - `ApiEndpoint`
+///   - `MapperContext`
+///   - `AuthContext`
 #[derive(Clone)]
 pub struct App {
     pub state: AppState,
@@ -190,7 +200,7 @@ impl App {
 
         // If global meter is not set, opentelemetry defaults to a
         // NoopMeterProvider
-        let meter = global::meter("helicone-router");
+        let meter = global::meter(SERVICE_NAME);
         let metrics = metrics::Metrics::new(&meter);
         let endpoint_metrics = EndpointMetricsRegistry::default();
         let health_monitor = HealthMonitorMap::default();
@@ -220,6 +230,14 @@ impl App {
             health_monitor,
         }));
 
+        let otel_metrics_layer =
+            tower_otel_http_metrics::HTTPMetricsLayerBuilder::builder()
+                .with_meter(meter)
+                .with_response_extractor::<_, axum_core::body::Body>(
+                    AttributeExtractor,
+                )
+                .build::<axum_core::body::Body, axum_core::body::Body>()?;
+
         let router = MetaRouter::new(app_state.clone()).await?;
 
         // global middleware is applied here
@@ -237,6 +255,7 @@ impl App {
                     .on_body_chunk(())
                     .on_eos(()),
             )
+            .layer(otel_metrics_layer)
             .set_x_request_id(MakeRequestId)
             .propagate_x_request_id()
             .layer(NormalizePathLayer::trim_trailing_slash())

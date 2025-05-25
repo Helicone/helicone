@@ -7,7 +7,8 @@ use serde::{Deserialize, Serialize};
 use crate::{
     endpoints::{anthropic::Anthropic, openai::OpenAI},
     error::invalid_req::InvalidRequestError,
-    types::provider::InferenceProvider,
+    middleware::mapper::error::MapperError,
+    types::{model::Model, provider::InferenceProvider},
 };
 
 pub trait Endpoint {
@@ -19,8 +20,9 @@ pub trait Endpoint {
     type StreamResponseBody;
 }
 
-pub trait StreamRequest {
+pub trait AiRequest {
     fn is_stream(&self) -> bool;
+    fn model(&self) -> Result<Model, MapperError>;
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
