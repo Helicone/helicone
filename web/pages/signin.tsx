@@ -32,19 +32,8 @@ const SignIn = ({
       heliconeAuthClient &&
       heliconeAuthClient.user?.id
     ) {
-      heliconeAuthClient
-        .refreshSession()
-        .then(heliconeAuthClient.getUser)
-        .then((user) => {
-          if (!user.data || !user.data.id) {
-            heliconeAuthClient.signOut().then(() => {
-              setNotification(
-                "You have been logged out due to unauthorized access.",
-                "error"
-              );
-            });
-          }
-        });
+      heliconeAuthClient.refreshSession();
+      router.push("/signin");
     } else if (heliconeAuthClient.user?.id) {
       const { pi_session, ...restQuery } = router.query;
       router.push({
