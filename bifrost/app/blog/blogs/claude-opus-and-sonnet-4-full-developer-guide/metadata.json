@@ -1,11 +1,11 @@
 {
-    "title": "Claude Opus 4 and Sonnet 4 Technical Review: The Best Coding Models for Developers?",
-    "title1": "Claude Opus 4 and Sonnet 4 Technical Review: The Best Coding Models for Developers?",
-    "title2": "Claude Opus 4 and Sonnet 4 Technical Review: The Best Coding Models for Developers?",
-    "description": "Anthropic just dropped Claude 4 with two new models: Opus 4 and Sonnet 4. Both feature enhanced hybrid reasoning and claim to be the world's best coding models. We dive deep into their capabilities, benchmarks, and what Anthropic's developer-first strategy means for the future.",
-    "images": "/static/blog/claude-opus-and-sonnet-4-full-developer-guide/claude-4-cover.webp",
-    "time": "6 minute read",
-    "author": "Yusuf Ishola",
-    "date": "May 23, 2025", 
-    "badge": "Model Benchmarks"
+  "title": "Claude Opus 4 and Sonnet 4 Technical Review: The Best Coding Models for Developers?",
+  "title1": "Claude Opus 4 and Sonnet 4 Technical Review: The Best Coding Models for Developers?",
+  "title2": "Claude Opus 4 and Sonnet 4 Technical Review: The Best Coding Models for Developers?",
+  "description": "Anthropic just dropped Claude 4 with two new models: Opus 4 and Sonnet 4. Both feature enhanced hybrid reasoning and claim to be the world's best coding models. We dive deep into their capabilities, benchmarks, and what Anthropic's developer-first strategy means for the future.",
+  "images": "/static/blog/claude-opus-and-sonnet-4-full-developer-guide/CLAUDE-4-cover.webp",
+  "time": "6 minute read",
+  "author": "Yusuf Ishola",
+  "date": "May 23, 2025",
+  "badge": "Model Benchmarks"
 }
