@@ -82,6 +82,8 @@ opentelemetry_sdk = { version = "0.29.0", features = ["rt-tokio"] }
 opentelemetry-appender-tracing = "0.29.1"
 opentelemetry-otlp = { version = "0.29.0" }
 opentelemetry-semantic-conventions = "0.29.0"
+# TODO: @tom: submit upstream PR
+opentelemetry-system-metrics = { version = "0.4.0", git = "https://github.com/tomharmon/opentelemetry-system-metrics.git", branch = "task/add-gpu-feature" }
 opentelemetry-http = "0.29.0"
 opentelemetry-stdout = { version = "0.29.0" }
 pin-project-lite = "0.2.16"

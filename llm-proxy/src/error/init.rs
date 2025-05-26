@@ -39,4 +39,6 @@ pub enum InitError {
     CreateRedisClient(#[from] redis::RedisError),
     /// Failed to build otel metrics layer: {0}
     InitOtelMetricsLayer(#[from] tower_otel_http_metrics::Error),
+    /// Failed to initialize system metrics
+    InitSystemMetrics,
 }

@@ -1,5 +1,6 @@
 pub mod attribute_extractor;
 pub mod rolling_counter;
+pub mod system;
 
 use opentelemetry::metrics::{Counter, Meter};
 

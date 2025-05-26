@@ -38,6 +38,7 @@ mime = { workspace = true }
 nonempty-collections = { workspace = true, features = ["serde"] }
 opentelemetry = { workspace = true }
 opentelemetry_sdk = { workspace = true, features = ["rt-tokio"] }
+opentelemetry-system-metrics = { workspace = true }
 pin-project-lite = { workspace = true }
 redis = { workspace = true }
 regex = { workspace = true }

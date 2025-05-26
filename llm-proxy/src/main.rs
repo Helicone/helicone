@@ -2,8 +2,11 @@ use std::path::PathBuf;
 
 use clap::Parser;
 use llm_proxy::{
-    app::App, config::Config,
+    app::App,
+    config::Config,
     discover::monitor::health::provider::HealthMonitor,
+    error::{init::InitError, runtime::RuntimeError},
+    metrics::system::SystemMetrics,
     utils::meltdown::TaggedService,
 };
 use meltdown::Meltdown;
@@ -18,7 +21,7 @@ pub struct Args {
 }
 
 #[tokio::main]
-async fn main() -> Result<(), llm_proxy::error::runtime::RuntimeError> {
+async fn main() -> Result<(), RuntimeError> {
     dotenvy::dotenv().ok();
     let args = Args::parse();
     let config = match Config::try_read(args.config) {
@@ -31,8 +34,8 @@ async fn main() -> Result<(), llm_proxy::error::runtime::RuntimeError> {
     // Initialize telemetry
     let (logger_provider, tracer_provider, metrics_provider) =
         telemetry::init_telemetry(&config.telemetry)
-            .map_err(llm_proxy::error::init::InitError::Telemetry)
-            .map_err(llm_proxy::error::runtime::RuntimeError::Init)?;
+            .map_err(InitError::Telemetry)
+            .map_err(RuntimeError::Init)?;
 
     info!("telemetry initialized");
     let mut shutting_down = false;
@@ -47,7 +50,8 @@ async fn main() -> Result<(), llm_proxy::error::runtime::RuntimeError> {
         .register(TaggedService::new(
             "provider-health-monitor",
             health_monitor,
-        ));
+        ))
+        .register(TaggedService::new("system-metrics", SystemMetrics));
 
     while let Some((service, result)) = meltdown.next().await {
         match result {
