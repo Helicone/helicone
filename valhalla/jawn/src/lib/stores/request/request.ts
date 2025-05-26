@@ -3,7 +3,7 @@ import { Result, err, ok, resultMap } from "../../../packages/common/result";
 import {
   DEFAULT_UUID,
   HeliconeRequest,
-} from "../../../packages/llm-mapper/types";
+} from "@helicone-package/llm-mapper/types";
 import { dbExecute, dbQueryClickhouse } from "../../shared/db/dbExecute";
 import { S3Client } from "../../shared/db/s3Client";
 import { FilterNode } from "../../shared/filters/filterDefs";

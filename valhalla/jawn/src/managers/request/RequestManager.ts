@@ -16,7 +16,7 @@ import {
   getRequestsClickhouseNoSort,
 } from "../../lib/stores/request/request";
 import { costOfPrompt } from "@helicone-package/cost";
-import { HeliconeRequest } from "../../packages/llm-mapper/types";
+import { HeliconeRequest } from "@helicone-package/llm-mapper/types";
 import { cacheResultCustom } from "../../utils/cacheResult";
 import { BaseManager } from "../BaseManager";
 import { ScoreManager } from "../score/ScoreManager";
@@ -420,6 +420,8 @@ export class RequestManager extends BaseManager {
           limit,
           sort
         );
+
+    console.log("requests", requests);
 
     return resultMap(requests, (req) => {
       return req.map((r) => {

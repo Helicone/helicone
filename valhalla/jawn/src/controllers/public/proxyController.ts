@@ -8,7 +8,7 @@ import { Readable as NodeReadableStream } from "stream";
 import { proxyForwarder } from "../../lib/proxy/ProxyForwarder";
 import { webSocketProxyForwarder } from "../../lib/proxy/WebSocketProxyForwarder";
 import { RequestWrapper } from "../../lib/requestWrapper/requestWrapper";
-import { Provider } from "../../packages/llm-mapper/types";
+import { Provider } from "@helicone-package/llm-mapper/types";
 
 export const proxyRouter = express.Router();
 proxyRouter.use(express.json());
