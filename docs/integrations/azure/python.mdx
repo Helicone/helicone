@@ -26,10 +26,7 @@ import { strings } from "/snippets/strings.mdx";
   </Step>
 
   <Step title={strings.modifyBasePath}>
-    To learn more about the differences between OpenAI and Azure OpenAI, review the [OpenAI vs Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/switching-endpoints) documentation.
-
     <IncludeApiVersion />
-
     <CodeGroup>
     ```python AzureOpenAI
     from openai import AzureOpenAI
@@ -48,7 +45,7 @@ import { strings } from "/snippets/strings.mdx";
         default_headers={
             "Helicone-Auth": f"Bearer {helicone_api_key}",
             "Helicone-OpenAI-Api-Base": "https://[AZURE_DOMAIN].openai.azure.com",
-            "Helicone-Model-Override": "[MODEL_NAME]", # gpt-4
+            "Helicone-Model-Override": "[MODEL_NAME]",
             "api-key": azure_openai_api_key
         }
     )
@@ -66,11 +63,11 @@ import { strings } from "/snippets/strings.mdx";
 
     azure_openai = OpenAI(
       api_key=azure_openai_api_key,
-      base_url="https://oai.helicone.ai/openai/deployments/[DEPLOYMENT_NAME]", # gpt-4
+      base_url="https://oai.helicone.ai/openai/deployments/[DEPLOYMENT_NAME]",
       default_headers={
         "Helicone-OpenAI-Api-Base": "https://[AZURE_DOMAIN].openai.azure.com",
         "Helicone-Auth": f"Bearer {helicone_api_key}",
-        "Helicone-Model-Override": "[MODEL_NAME]" # gpt-4
+        "Helicone-Model-Override": "[MODEL_NAME]"
       },
       default_query={
         "api-version": "[API_VERSION]" # "2023-03-15-preview"
@@ -84,7 +81,7 @@ import { strings } from "/snippets/strings.mdx";
   <Step title={strings.startUsing("Azure OpenAI")}>
     ```python
     response = azure_openai.chat.completions.create(
-      model="[DEPLOYMENT]", # gpt-4
+      model="[MODEL_NAME]",
       messages=[{"role": "User", "content": "What is the meaning of life?"}]
     )
 
@@ -96,6 +93,8 @@ import { strings } from "/snippets/strings.mdx";
     <div dangerouslySetInnerHTML={{ __html: strings.verifyInHeliconeDesciption("Azure OpenAI") }} />
   </Step>
 </Steps>
+
+<div dangerouslySetInnerHTML={{ __html: strings.azureOpenAIDocs }} />
 
 ## {strings.relatedGuides}
 
