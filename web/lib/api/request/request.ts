@@ -210,7 +210,7 @@ export async function getRequestCountClickhouse(
   const query = `
 SELECT
   count(DISTINCT request_response_rmt.request_id) as count
-from request_response_rmt FINAL
+from request_response_rmt
 WHERE (${builtFilter.filter})
 ${isCached ? "AND cache_enabled = 1" : ""}
 `;
