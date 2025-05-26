@@ -7,6 +7,9 @@ import {
 import { TimeIncrement } from "../../../lib/timeCalculations/fetchTimeData";
 import { CacheHitsOverTime } from "../../../pages/api/cache/getCacheHitsOverTime";
 import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
+import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { useGetRequests } from "../../../services/hooks/requests";
+
 export interface CachePageData {
   timeFilter: {
     start: Date;
@@ -93,17 +96,59 @@ export const useCachePageClickHouse = ({
     }),
   };
 
+  const topRequestIds = metrics.topRequests.data?.data.map(
+    (request: any) => {
+      return request.request_id;
+    }
+  );
+
+  const topRequestsFilter: FilterNode | null = topRequestIds && topRequestIds.length > 0 
+    ? topRequestIds.reduce((acc: FilterNode | null, requestId: string, index: number) => {
+        const currentCondition: FilterNode = {
+          request_response_rmt: {
+            request_id: {
+              equals: requestId,
+            },
+          },
+        };
+
+        if (index === 0) return currentCondition;
+
+        return {
+          left: acc!,
+          operator: "or",
+          right: currentCondition,
+        };
+      }, null)
+    : null;
+
+  const defaultFilter: FilterNode = "all";
+
+  const topSourceRequestsWithBodies = useGetRequests(
+    1,
+    10,
+    topRequestsFilter || defaultFilter,
+    {
+      created_at: "desc",
+    },
+  );
+
   function isLoading(x: UseQueryResult<any>) {
     return x.isLoading || x.isFetching;
   }
 
+  function isRequestsLoading(x: ReturnType<typeof useGetRequests>) {
+    return x.requests.isLoading || x.requests.isRefetching || x.count.isLoading || x.count.isFetching;
+  }
+
   const isAnyLoading =
     Object.values(overTimeData).some((x) => isLoading(x)) ||
-    Object.values(metrics).some((x) => isLoading(x));
+    Object.values(metrics).some((x) => isLoading(x)) ||
+    isRequestsLoading(topSourceRequestsWithBodies);
 
   return {
     overTimeData,
-    metrics,
+    metrics: { ...metrics, topSourceRequestsWithBodies },
     isAnyLoading,
   };
 };

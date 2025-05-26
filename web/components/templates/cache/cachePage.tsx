@@ -34,6 +34,8 @@ import { formatTimeSaved } from "@/lib/timeCalculations/time";
 import FoldedHeader from "@/components/shared/FoldedHeader";
 import { ColumnDef } from "@tanstack/react-table";
 import { columnDefsToDragColumnItems } from "../../shared/themed/table/columns/DragList";
+import RenderHeliconeRequest from "../requests/RenderHeliconeRequest";
+import { HeliconeRequest } from "@helicone-package/llm-mapper/types";
 
 interface CachePageProps {
   currentPage: number;
@@ -55,6 +57,15 @@ type CacheRequest = {
   prompt: string;
   model: string;
   response: string;
+};
+
+type SelectedCachedRequest = {
+  request_id: string;
+  count: number;
+  last_used: Date;
+  first_used: Date;
+  model: string;
+  sourceRequest: HeliconeRequest;
 };
 
 const topRequestsColumns: ColumnDef<CacheRequest>[] = [
@@ -133,15 +144,7 @@ const CachePage = (props: CachePageProps) => {
     dbIncrement,
   });
 
-  const [selectedRequest, setSelectedRequest] = useState<{
-    request_id: string;
-    count: number;
-    last_used: Date;
-    first_used: Date;
-    prompt: string;
-    model: string;
-    response: string;
-  }>();
+  const [selectedRequest, setSelectedRequest] = useState<SelectedCachedRequest>();
   const [open, setOpen] = useState<boolean>(false);
   const [openUpgradeModal, setOpenUpgradeModal] = useState<boolean>(false);
   const heliconeAuthClient = useHeliconeAuthClient();
@@ -436,16 +439,21 @@ const CachePage = (props: CachePageProps) => {
               setActiveColumns={setActiveColumns}
               fullWidth={true}
               onRowSelect={(row) => {
-                setSelectedRequest({
-                  request_id: row.request_id,
-                  count: row.count,
-                  last_used: row.last_used,
-                  first_used: row.first_used,
-                  prompt: row.prompt,
-                  model: row.model,
-                  response: row.response,
-                });
-                setOpen(true);
+                const sourceRequest = chMetrics.topSourceRequestsWithBodies.requests.requests.find(
+                  (req: any) => req.request_id === row.request_id
+                );
+                
+                if (sourceRequest) {
+                  setSelectedRequest({
+                    request_id: row.request_id,
+                    count: row.count,
+                    last_used: row.last_used,
+                    first_used: row.first_used,
+                    model: row.model,
+                    sourceRequest: sourceRequest,
+                  });
+                  setOpen(true);
+                }
               }}
             />
           </div>
@@ -453,57 +461,55 @@ const CachePage = (props: CachePageProps) => {
       </section>
 
       <ThemedDrawer open={open} setOpen={setOpen}>
-        <div className="flex flex-col space-y-2">
-          <p className="text-gray-500 text-sm border p-2 rounded-lg border-red-300 dark:border-red-700">
-            Cache Bucket response configurable soon...
-          </p>
-          <dl className="mt-2 grid grid-cols-2">
-            <div className="col-span-2 flex flex-row justify-between py-2 items-center text-sm font-medium border-b border-gray-200 dark:border-gray-800">
-              <div className="flex flex-col">
-                <dt className="text-gray-500">Request ID</dt>
+        {selectedRequest ? (
+          <div className="flex flex-col space-y-2">
+            <p className="text-gray-500 text-sm border p-2 rounded-lg border-red-300 dark:border-red-700">
+              Cache Bucket response configurable soon...
+            </p>
+            <dl className="mt-2 grid grid-cols-2">
+              <div className="col-span-2 flex flex-row justify-between py-2 items-center text-sm font-medium border-b border-gray-200 dark:border-gray-800">
+                <div className="flex flex-col">
+                  <dt className="text-gray-500">Request ID</dt>
+                  <dd className="text-gray-900 dark:text-gray-100">
+                    {selectedRequest.request_id}
+                  </dd>
+                </div>
+              </div>
+              <div className="flex flex-col justify-between py-2 text-sm font-medium col-span-1 border-b border-gray-200 dark:border-gray-800">
+                <dt className="text-gray-500">Model</dt>
                 <dd className="text-gray-900 dark:text-gray-100">
-                  {selectedRequest?.request_id}
+                  <ModelPill model={selectedRequest.model} />
                 </dd>
               </div>
+              <div className="flex flex-col justify-between py-2 text-sm font-medium col-span-1 border-b border-gray-200 dark:border-gray-800">
+                <dt className="text-gray-500">Cache Hits</dt>
+                <dd className="text-gray-900 dark:text-gray-100">
+                  {selectedRequest.count}
+                </dd>
+              </div>
+              <div className="flex flex-col justify-between py-2 text-sm font-medium col-span-1 border-b border-gray-200 dark:border-gray-800">
+                <dt className="text-gray-500">First Used</dt>
+                <dd className="text-gray-900 dark:text-gray-100">
+                  {new Date(selectedRequest?.first_used || "").toLocaleString()}
+                </dd>
+              </div>
+              <div className="flex flex-col justify-between py-2 text-sm font-medium col-span-1 border-b border-gray-200 dark:border-gray-800">
+                <dt className="text-gray-500">Last Used</dt>
+                <dd className="text-gray-900 dark:text-gray-100">
+                  {new Date(selectedRequest?.last_used || "").toLocaleString()}
+                </dd>
+              </div>
+            </dl>
+            
+            <div className="flex-1 min-h-0">
+              <RenderHeliconeRequest heliconeRequest={selectedRequest.sourceRequest} />
             </div>
-            <div className="flex flex-col justify-between py-2 text-sm font-medium col-span-1 border-b border-gray-200 dark:border-gray-800">
-              <dt className="text-gray-500">Model</dt>
-              <dd className="text-gray-900 dark:text-gray-100">
-                <ModelPill model={selectedRequest?.model ?? ""} />
-              </dd>
-            </div>
-            <div className="flex flex-col justify-between py-2 text-sm font-medium col-span-1 border-b border-gray-200 dark:border-gray-800">
-              <dt className="text-gray-500">Cache Hits</dt>
-              <dd className="text-gray-900 dark:text-gray-100">
-                {selectedRequest?.count}
-              </dd>
-            </div>
-            <div className="flex flex-col justify-between py-2 text-sm font-medium col-span-1 border-b border-gray-200 dark:border-gray-800">
-              <dt className="text-gray-500">First Used</dt>
-              <dd className="text-gray-900 dark:text-gray-100">
-                {new Date(selectedRequest?.first_used || "").toLocaleString()}
-              </dd>
-            </div>
-            <div className="flex flex-col justify-between py-2 text-sm font-medium col-span-1 border-b border-gray-200 dark:border-gray-800">
-              <dt className="text-gray-500">Last Used</dt>
-              <dd className="text-gray-900 dark:text-gray-100">
-                {new Date(selectedRequest?.last_used || "").toLocaleString()}
-              </dd>
-            </div>
-          </dl>
-          <div className="w-full flex flex-col text-left space-y-1 mb-4 pt-8">
-            <p className="text-gray-500 text-sm font-medium">Request</p>
-            <p className="text-gray-900 dark:text-gray-100 p-2 border border-gray-300 bg-gray-100 dark:border-gray-700 dark:bg-gray-900 rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
-              {selectedRequest?.prompt || "n/a"}
-            </p>
           </div>
-          <div className="w-full flex flex-col text-left space-y-1 mb-4 pt-8">
-            <p className="text-gray-500 text-sm font-medium">Response</p>
-            <p className="text-gray-900 dark:text-gray-100 p-2 border border-gray-300 bg-gray-100 dark:border-gray-700 dark:bg-gray-900 rounded-md whitespace-pre-wrap h-full leading-6 overflow-auto">
-              {selectedRequest?.response || "n/a"}
-            </p>
+        ) : (
+          <div className="flex flex-col space-y-2">
+            <p className="text-gray-500 text-sm">No request data available</p>
           </div>
-        </div>
+        )}
       </ThemedDrawer>
       <UpgradeProModal open={openUpgradeModal} setOpen={setOpenUpgradeModal} />
     </>

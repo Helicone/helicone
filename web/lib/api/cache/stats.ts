@@ -94,7 +94,7 @@ export async function getTimeSavedClickhouse(
   );
 }
 
-export async function getTopRequestsClickhouse(
+export async function getTopCachedRequestsClickhouse(
   orgId: string,
   filter: FilterNode
 ) {
