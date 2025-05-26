@@ -23,7 +23,6 @@ interface ContactFormProps {
 const ContactForm = (props: ContactFormProps) => {
   const { contactTag, buttonText, defaultPlaceholder } = props;
 
-  const router = useRouter();
   const { setNotification } = useNotification();
   const [isLoading, setIsLoading] = useState(false);
   const [showCoupon, setShowCoupon] = useState(false);
