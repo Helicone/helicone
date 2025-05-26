@@ -46,7 +46,7 @@ import { strings } from "/snippets/strings.mdx";
       model: "[MODEL_NAME]",
       azureOpenAIApiKey: process.env.AZURE_OPENAI_API_KEY,
       azureOpenAIApiInstanceName: "[AZURE_DOMAIN_NAME]", // "july-mb1z0q9z-eastus2"
-      azureOpenAIApiDeploymentName: "[DEPLOYMENT_NAME]", // "gpt-35-turbo"
+      azureOpenAIApiDeploymentName: "[DEPLOYMENT_NAME]",
       azureOpenAIApiVersion: "[API_VERSION]", // "2023-05-15"
       defaultHeaders: {
         "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
@@ -76,7 +76,7 @@ import { strings } from "/snippets/strings.mdx";
 
     self.model = AzureChatOpenAI(
       openai_api_base="https://oai.helicone.ai",
-      deployment_name="[DEPLOYMENT_NAME]", # "gpt-35-turbo"
+      deployment_name="[DEPLOYMENT_NAME]",
       openai_api_key=f"{AZURE_OPENAI_API_KEY}",
       openai_api_version="[API_VERSION]", # "2023-05-15"
       openai_api_type="azure",
