@@ -2,7 +2,7 @@ import { S3Client } from "../shared/db/s3Client";
 import { PromiseGenericResult, err, ok } from "../../packages/common/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
-import { DEFAULT_UUID } from "../../packages/llm-mapper/types";
+import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
 
 export class S3ReaderHandler extends AbstractLogHandler {
   private s3Client: S3Client;
@@ -18,10 +18,11 @@ export class S3ReaderHandler extends AbstractLogHandler {
         return err("Organization ID not found in org params");
       }
 
-      const requestIdWithData = (
-        context.message.log.request.cacheReferenceId !== DEFAULT_UUID
-        && context.message.log.request.cacheReferenceId
-      ) ? context.message.log.request.cacheReferenceId : context.message.log.request.id;
+      const requestIdWithData =
+        context.message.log.request.cacheReferenceId !== DEFAULT_UUID &&
+        context.message.log.request.cacheReferenceId
+          ? context.message.log.request.cacheReferenceId
+          : context.message.log.request.id;
 
       const signedUrl = await this.s3Client.getRawRequestResponseBodySignedUrl(
         context.orgParams.id,

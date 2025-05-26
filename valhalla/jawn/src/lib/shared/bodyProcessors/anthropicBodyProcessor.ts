@@ -14,7 +14,7 @@ export class AnthropicBodyProcessor implements IBodyProcessor {
     const parsedResponseBody = JSON.parse(responseBody);
     const responseModel = getModelFromResponse(parsedResponseBody);
     const model = calculateModel(requestModel, responseModel, modelOverride);
-    if (model?.includes("claude-3")) {
+    if (model?.includes("claude-3") || model?.includes("claude-sonnet-4")) {
       if (
         !parsedResponseBody?.usage?.output_tokens ||
         !parsedResponseBody?.usage?.input_tokens

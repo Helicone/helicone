@@ -19,7 +19,7 @@ import { SortLeafRequest } from "../../lib/shared/sorts/requests/sorts";
 import { HeliconeRequestAsset } from "../../lib/stores/request/request";
 import { RequestManager } from "../../managers/request/RequestManager";
 import { ScoreManager, ScoreRequest } from "../../managers/score/ScoreManager";
-import { HeliconeRequest } from "../../packages/llm-mapper/types";
+import { HeliconeRequest } from "@helicone-package/llm-mapper/types";
 import { JawnAuthenticatedRequest } from "../../types/request";
 
 export type RequestClickhouseFilterBranch = {
