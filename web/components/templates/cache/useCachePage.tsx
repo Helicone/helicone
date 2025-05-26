@@ -96,31 +96,33 @@ export const useCachePageClickHouse = ({
     }),
   };
 
-  const topRequestIds = metrics.topRequests.data?.data.map(
-    (request: any) => {
-      return request.request_id;
-    }
-  );
+  const topRequestIds = metrics.topRequests.data?.data.map((request: any) => {
+    return request.request_id;
+  });
 
-  const topRequestsFilter: FilterNode | null = topRequestIds && topRequestIds.length > 0 
-    ? topRequestIds.reduce((acc: FilterNode | null, requestId: string, index: number) => {
-        const currentCondition: FilterNode = {
-          request_response_rmt: {
-            request_id: {
-              equals: requestId,
-            },
+  const topRequestsFilter: FilterNode | null =
+    topRequestIds && topRequestIds.length > 0
+      ? topRequestIds.reduce(
+          (acc: FilterNode | null, requestId: string, index: number) => {
+            const currentCondition: FilterNode = {
+              request_response_rmt: {
+                request_id: {
+                  equals: requestId,
+                },
+              },
+            };
+
+            if (index === 0) return currentCondition;
+
+            return {
+              left: acc!,
+              operator: "or",
+              right: currentCondition,
+            };
           },
-        };
-
-        if (index === 0) return currentCondition;
-
-        return {
-          left: acc!,
-          operator: "or",
-          right: currentCondition,
-        };
-      }, null)
-    : null;
+          null
+        )
+      : null;
 
   const defaultFilter: FilterNode = "all";
 
@@ -130,7 +132,7 @@ export const useCachePageClickHouse = ({
     topRequestsFilter || defaultFilter,
     {
       created_at: "desc",
-    },
+    }
   );
 
   function isLoading(x: UseQueryResult<any>) {
@@ -138,7 +140,12 @@ export const useCachePageClickHouse = ({
   }
 
   function isRequestsLoading(x: ReturnType<typeof useGetRequests>) {
-    return x.requests.isLoading || x.requests.isRefetching || x.count.isLoading || x.count.isFetching;
+    return (
+      x.requests.isLoading ||
+      x.requests.isRefetching ||
+      x.count.isLoading ||
+      x.count.isFetching
+    );
   }
 
   const isAnyLoading =

@@ -144,7 +144,8 @@ const CachePage = (props: CachePageProps) => {
     dbIncrement,
   });
 
-  const [selectedRequest, setSelectedRequest] = useState<SelectedCachedRequest>();
+  const [selectedRequest, setSelectedRequest] =
+    useState<SelectedCachedRequest>();
   const [open, setOpen] = useState<boolean>(false);
   const [openUpgradeModal, setOpenUpgradeModal] = useState<boolean>(false);
   const heliconeAuthClient = useHeliconeAuthClient();
@@ -439,10 +440,11 @@ const CachePage = (props: CachePageProps) => {
               setActiveColumns={setActiveColumns}
               fullWidth={true}
               onRowSelect={(row) => {
-                const sourceRequest = chMetrics.topSourceRequestsWithBodies.requests.requests.find(
-                  (req: any) => req.request_id === row.request_id
-                );
-                
+                const sourceRequest =
+                  chMetrics.topSourceRequestsWithBodies.requests.requests.find(
+                    (req: any) => req.request_id === row.request_id
+                  );
+
                 if (sourceRequest) {
                   setSelectedRequest({
                     request_id: row.request_id,
@@ -500,9 +502,11 @@ const CachePage = (props: CachePageProps) => {
                 </dd>
               </div>
             </dl>
-            
+
             <div className="flex-1 min-h-0">
-              <RenderHeliconeRequest heliconeRequest={selectedRequest.sourceRequest} />
+              <RenderHeliconeRequest
+                heliconeRequest={selectedRequest.sourceRequest}
+              />
             </div>
           </div>
         ) : (
