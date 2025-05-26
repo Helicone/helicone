@@ -26,10 +26,7 @@ import { strings } from "/snippets/strings.mdx";
   </Step>
 
   <Step title={strings.modifyBasePath}>
-    To learn more about the differences between OpenAI and Azure OpenAI, review the [OpenAI vs Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/switching-endpoints) documentation.
-
     <IncludeApiVersion />
-
     <CodeGroup>
     ```python AzureOpenAI
     from openai import AzureOpenAI
@@ -96,6 +93,8 @@ import { strings } from "/snippets/strings.mdx";
     <div dangerouslySetInnerHTML={{ __html: strings.verifyInHeliconeDesciption("Azure OpenAI") }} />
   </Step>
 </Steps>
+
+<div dangerouslySetInnerHTML={{ __html: strings.azureOpenAIDocs }} />
 
 ## {strings.relatedGuides}
 
