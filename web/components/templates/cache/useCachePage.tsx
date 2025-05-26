@@ -6,7 +6,7 @@ import {
 } from "../../../services/hooks/useBackendFunction";
 import { TimeIncrement } from "../../../lib/timeCalculations/fetchTimeData";
 import { CacheHitsOverTime } from "../../../pages/api/cache/getCacheHitsOverTime";
-
+import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
 export interface CachePageData {
   timeFilter: {
     start: Date;
@@ -21,12 +21,26 @@ export const useCachePageClickHouse = ({
   timeZoneDifference,
   dbIncrement,
 }: CachePageData) => {
-  const params: BackendMetricsCall<any>["params"] = {
+  const createParams = (
+    userFilters: any
+  ): BackendMetricsCall<any>["params"] => ({
     timeFilter,
-    userFilters: "all",
+    userFilters,
     dbIncrement,
     timeZoneDifference,
-  };
+  });
+
+  const createCacheFilter = (operator: "equals" | "not-equals") => ({
+    request_response_rmt: {
+      cache_reference_id: {
+        [operator]: DEFAULT_UUID,
+      },
+    },
+  });
+
+  const params = createParams("all");
+  const countNonCachedParams = createParams(createCacheFilter("equals"));
+  const countCachedParams = createParams(createCacheFilter("not-equals"));
 
   const overTimeData = {
     cacheHits: useBackendMetricCall<Result<CacheHitsOverTime[], string>>({
@@ -47,6 +61,11 @@ export const useCachePageClickHouse = ({
       params,
       endpoint: "/api/cache/total",
     }),
+    totalRequests: useBackendMetricCall<Result<number, string>>({
+      key: "totalRequests",
+      params,
+      endpoint: "/api/request/count",
+    }),
     totalSavings: useBackendMetricCall<Result<number, string>>({
       key: "totalSavings",
       params,
@@ -57,15 +76,20 @@ export const useCachePageClickHouse = ({
       params,
       endpoint: "/api/cache/time_saved",
     }),
-    topModels: useBackendMetricCall<Result<any, string>>({
-      key: "topModels",
-      params,
-      endpoint: "/api/cache/top_models",
-    }),
     topRequests: useBackendMetricCall<Result<any, string>>({
       key: "topRequests",
       params,
       endpoint: "/api/cache/requests",
+    }),
+    avgLatency: useBackendMetricCall<Result<number, string>>({
+      key: "avgLatency",
+      params: countNonCachedParams,
+      endpoint: "/api/metrics/averageLatency",
+    }),
+    avgLatencyCached: useBackendMetricCall<Result<number, string>>({
+      key: "avgLatencyCached",
+      params: countCachedParams,
+      endpoint: "/api/metrics/averageLatency",
     }),
   };
 
