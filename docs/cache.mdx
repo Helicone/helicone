@@ -1,0 +1,320 @@
+---
+title: "Response Caching"
+sidebarTitle: "Caching"
+description: "Intelligent response caching with Redis and S3 to reduce costs and improve latency"
+---
+
+# Response Caching
+
+Conduit's intelligent caching system reduces costs and improves response times by storing and reusing LLM responses. With flexible storage backends and Helicone API compatibility, you can dramatically reduce redundant API calls while maintaining response quality.
+
+<Note>
+  Response caching is currently in development. All caching features are API-compatible with the existing [Helicone router](https://docs.helicone.ai/features/caching) for seamless migration.
+</Note>
+
+## How Caching Works
+
+When enabled, Conduit intelligently caches LLM responses based on request fingerprints, allowing identical or similar requests to return cached results instead of making expensive API calls to providers.
+
+<CardGroup cols={2}>
+  <Card title="Cost Reduction" icon="piggy-bank">
+    **Save up to 90%** on API costs by reusing responses for repeated queries
+  </Card>
+  
+  <Card title="Latency Improvement" icon="gauge-high">
+    **Sub-millisecond** response times for cached results vs. seconds for API calls
+  </Card>
+  
+  <Card title="Smart Fingerprinting" icon="fingerprint">
+    **Semantic matching** ensures only appropriate responses are cached and reused
+  </Card>
+  
+  <Card title="Provider Agnostic" icon="arrows-rotate">
+    **Cross-provider caching** - cache an OpenAI response, serve for Anthropic request
+  </Card>
+</CardGroup>
+
+## Storage Backends
+
+<Tabs>
+  <Tab title="Redis">
+    **High-performance in-memory caching**
+    
+    Redis provides the fastest cache access with sub-millisecond retrieval times, perfect for frequently accessed responses.
+    
+    ```yaml
+    # config.yaml
+    cache:
+      backend: redis
+      redis:
+        url: "redis://localhost:6379"
+        ttl: "24h"
+        max_memory: "1GB"
+    ```
+    
+    **Features:**
+    - Ultra-fast retrieval (< 1ms)
+    - Automatic expiration (TTL)
+    - Memory-efficient compression
+    - Cluster support for scaling
+    
+    **Best for:**
+    - High-frequency queries
+    - Real-time applications
+    - Development and testing
+  </Tab>
+
+  <Tab title="S3">
+    **Cost-effective persistent storage**
+    
+    S3 provides unlimited, cost-effective storage for long-term caching with automatic lifecycle management.
+    
+    ```yaml
+    # config.yaml  
+    cache:
+      backend: s3
+      s3:
+        bucket: "conduit-cache"
+        region: "us-west-2"
+        prefix: "cache/"
+        storage_class: "STANDARD_IA"
+    ```
+    
+    **Features:**
+    - Unlimited storage capacity
+    - Automatic lifecycle policies
+    - Cross-region replication
+    - Extremely cost-effective
+    
+    **Best for:**
+    - Long-term storage
+    - Infrequent but expensive queries
+    - Large-scale deployments
+  </Tab>
+
+  <Tab title="Hybrid">
+    **Best of both worlds** *(Future enhancement)*
+    
+    Combine Redis for hot cache and S3 for warm/cold storage with automatic tiering.
+    
+    ```yaml
+    # Future configuration
+    cache:
+      backend: hybrid
+      tiers:
+        hot: redis
+        warm: s3
+      policies:
+        promote_threshold: 5  # hits
+        demote_after: "7d"
+    ```
+    
+    **Features:**
+    - Automatic hot/warm/cold tiering
+    - Cost optimization
+    - Intelligent promotion/demotion
+    - Global cache coherence
+  </Tab>
+</Tabs>
+
+## Cache Configuration
+
+### Cache Keys & Fingerprinting
+
+Conduit generates cache keys using sophisticated request fingerprinting:
+
+<AccordionGroup>
+  <Accordion title="Exact Matching" icon="equals">
+    **Identical requests return cached responses**
+    
+    ```json
+    {
+      "model": "gpt-4o",
+      "messages": [{"role": "user", "content": "What is 2+2?"}],
+      "temperature": 0.0
+    }
+    ```
+    
+    Cache key includes: model, messages, temperature, and all parameters
+  </Accordion>
+
+  <Accordion title="Semantic Similarity" icon="brain">
+    **Similar requests can share cached responses** *(Future feature)*
+    
+    ```json
+    // These could share a cache entry:
+    "What is 2+2?" 
+    "What's two plus two?"
+    "2 + 2 = ?"
+    ```
+    
+    Uses embedding-based similarity matching for intelligent reuse
+  </Accordion>
+
+  <Accordion title="Parameter Normalization" icon="sliders">
+    **Normalize equivalent parameters for better hit rates**
+    
+    ```yaml
+    # These are treated as identical:
+    temperature: 0.0
+    temperature: 0
+    # Both normalize to temp=0
+    ```
+    
+    Automatic normalization of equivalent parameter values
+  </Accordion>
+</AccordionGroup>
+
+### Cache Policies
+
+<CodeGroup>
+```yaml Basic Caching
+cache:
+  enabled: true
+  backend: redis
+  default_ttl: "1h"
+  
+  # Simple policy
+  policy:
+    cache_on: ["gpt-4o", "claude-3-sonnet"]
+    skip_cache_on_error: true
+```
+
+```yaml Advanced Policies
+cache:
+  enabled: true
+  backend: s3
+  
+  policies:
+    # Model-specific TTLs
+    - models: ["gpt-4o"]
+      ttl: "24h"
+      max_tokens: 4000
+      
+    # Cost-based caching  
+    - cost_threshold: 0.01  # Cache requests > $0.01
+      ttl: "7d"
+      
+    # User-specific policies
+    - users: ["premium"]
+      ttl: "30d"
+      max_cache_size: "10GB"
+```
+
+```yaml Development Setup
+cache:
+  enabled: true
+  backend: redis
+  redis:
+    url: "redis://localhost:6379"
+    
+  # Development-friendly settings
+  policy:
+    cache_all: true
+    ttl: "10m"  # Short TTL for development
+    debug: true
+```
+</CodeGroup>
+
+## API Compatibility
+
+Conduit's caching is fully compatible with the existing [Helicone router API](https://docs.helicone.ai/features/caching):
+
+### Cache Control Headers
+
+```bash
+# Force cache refresh
+curl -X POST https://your-conduit.com/v1/chat/completions \
+     -H "Helicone-Cache-Enabled: false" \
+     -H "Authorization: Bearer $OPENAI_KEY"
+
+# Set custom TTL
+curl -X POST https://your-conduit.com/v1/chat/completions \
+     -H "Helicone-Cache-TTL: 3600" \
+     -H "Authorization: Bearer $OPENAI_KEY"
+```
+
+### Cache Status Responses
+
+```json
+{
+  "id": "chatcmpl-...", 
+  "object": "chat.completion",
+  "model": "gpt-4o",
+  "choices": [...],
+  "helicone": {
+    "cache": {
+      "hit": true,
+      "age": 1440,  // seconds since cached
+      "key": "sha256:abc123..."
+    }
+  }
+}
+```
+
+## Roadmap
+
+<Steps>
+  <Step title="v1 - Basic Caching">
+    **Redis & S3 backends with exact matching**
+    - Redis in-memory caching
+    - S3 persistent storage  
+    - Exact request fingerprinting
+    - TTL-based expiration
+    - Helicone API compatibility
+  </Step>
+  
+  <Step title="v2 - Smart Caching">
+    **Semantic similarity and advanced policies**
+    - Embedding-based similarity matching
+    - Model-specific cache policies
+    - Cost-based caching rules
+    - Cache analytics and insights
+  </Step>
+  
+  <Step title="v3 - Implicit Caching">
+    **Automatic intelligent caching without configuration**
+    - AI-powered cache decisions
+    - Automatic policy optimization
+    - Predictive pre-caching
+    - Global cache sharing
+  </Step>
+</Steps>
+
+## Benefits & Use Cases
+
+<CardGroup cols={2}>
+  <Card title="Development" icon="code">
+    **Faster iteration cycles**
+    - Cache responses during development
+    - Consistent results for testing
+    - Reduced API costs for experimentation
+  </Card>
+  
+  <Card title="Production" icon="rocket">
+    **Cost & performance optimization**
+    - Significant cost savings on repeated queries
+    - Improved user experience with faster responses
+    - Reduced provider rate limit pressure
+  </Card>
+  
+  <Card title="Analytics" icon="chart-line">
+    **Repeated query patterns**
+    - FAQ systems and chatbots
+    - Content generation pipelines
+    - Batch processing workflows
+  </Card>
+  
+  <Card title="High-Volume" icon="globe">
+    **Scale efficiently**
+    - Handle traffic spikes without proportional costs
+    - Cross-user cache sharing for common queries
+    - Global cache distribution
+  </Card>
+</CardGroup>
+
+---
+
+<Info>
+  **Migration from Helicone**: Existing Helicone router cache configurations work seamlessly with Conduit. Simply update your endpoint URL and continue using the same cache headers and policies.
+</Info>
