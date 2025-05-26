@@ -37,11 +37,7 @@ import { strings } from "/snippets/strings.mdx";
       apiVersion: "[API_VERSION]", // "2023-03-15-preview"
       defaultHeaders: {
         "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-        "Helicone-OpenAI-API-Base": `https://[AZURE_DOMAIN].openai.azure.com`,
-        "api-key": process.env.AZURE_OPENAI_API_KEY
-      },
-      defaultQuery: {
-        "api-version": "[API_VERSION]" // "2023-03-15-preview"
+        "Helicone-OpenAI-API-Base": `https://[AZURE_DOMAIN].azure.com`
       }
     });
     ```
@@ -53,7 +49,7 @@ import { strings } from "/snippets/strings.mdx";
       baseURL: "https://oai.helicone.ai/openai/deployments/[DEPLOYMENT_NAME]", // "gpt-4"
       defaultHeaders: {
         "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-        "Helicone-OpenAI-API-Base": "https://[AZURE_DOMAIN].openai.azure.com",
+        "Helicone-OpenAI-API-Base": "https://[AZURE_DOMAIN].azure.com",
         "api-key": process.env.AZURE_OPENAI_API_KEY
       },
       defaultQuery: {

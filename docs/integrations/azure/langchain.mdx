@@ -28,23 +28,33 @@ import { strings } from "/snippets/strings.mdx";
   <Step title={strings.modifyBasePath}>
     <IncludeApiVersion />
     <CodeGroup>
-    ```javascript javascript
-    const model = new ChatOpenAI({
+    ```javascript javascript ChatOpenAI
+    const llm = new ChatOpenAI({
+      baseURL: "https://oai.helicone.ai/v1",
+      defaultHeaders: {
+        "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+        "Helicone-OpenAI-Api-Base":
+          "https://[AZURE_DOMAIN].azure.com/",
+        "api-key": process.env.AZURE_OPENAI_API_KEY,
+      },
+      model: "[MODEL_NAME]",
+      apiVersion: "[API_VERSION]",
+    });
+
+    ```
+
+    ```javascript javascript AzureChatOpenAI
+    const azureLlm = new AzureChatOpenAI({
+      model: "[MODEL_NAME]",
       azureOpenAIApiKey: process.env.AZURE_OPENAI_API_KEY,
-      azureOpenAIApiDeploymentName: "[DEPLOYMENT_NAME]", // "gpt-35-turbo"
-      azureOpenAIApiVersion: "[API_VERSION]", // "2024-12-15-preview"
-      azureOpenAIBasePath: "https://oai.helicone.ai",
-      configuration: {
-        organization: "[YOUR_ORGANIZATION]", // "my-org"
-        baseOptions: {
-          headers: {
-            "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-            "Helicone-OpenAI-Api-Base":
-              "https://[YOUR_AZURE_DOMAIN].openai.azure.com",
-            "Helicone-Model-Override": "[MODEL_NAME]",  // "gpt-35-turbo"
-            // additional headers
-          }
-        }
+      azureOpenAIApiInstanceName: "[AZURE_DOMAIN_NAME]", // "july-mb1z0q9z-eastus2"
+      azureOpenAIApiDeploymentName: "[DEPLOYMENT_NAME]",
+      azureOpenAIApiVersion: "[API_VERSION]",
+      defaultHeaders: {
+        "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+        "Helicone-OpenAI-Api-Base":
+          "https://[AZURE_DOMAIN].azure.com/",
+        "api-key": process.env.AZURE_OPENAI_API_KEY
       }
     });
     ```
@@ -61,9 +71,9 @@ import { strings } from "/snippets/strings.mdx";
 
     helicone_headers = {
       "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
-      "Helicone-OpenAI-Api-Base": "https://[YOUR_AZURE_DOMAIN].openai.azure.com/",
+      "Helicone-OpenAI-Api-Base": "https://[YOUR_AZURE_DOMAIN].azure.com/",
       "Helicone-Model-Override": "[MODEL_NAME]", # "gpt-35-turbo"
-      # additional headers
+      # ...additional headers
     }
 
     self.model = AzureChatOpenAI(
