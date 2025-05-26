@@ -3,6 +3,7 @@
 import useNotification from "./notification/useNotification";
 import { useState } from "react";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import { useRouter } from "next/router";
 import Link from "next/link";
 
 export type ContactFormData = {
@@ -26,6 +27,7 @@ const ContactForm = (props: ContactFormProps) => {
   const { setNotification } = useNotification();
   const [isLoading, setIsLoading] = useState(false);
   const [showCoupon, setShowCoupon] = useState(false);
+  const router = useRouter();
 
   const formSubmitHandler = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
