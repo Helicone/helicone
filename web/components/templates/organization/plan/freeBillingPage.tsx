@@ -18,13 +18,13 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { UpgradeProDialog } from "./upgradeProDialog";
-import Link from "next/link";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { useUpgradePlan } from "@/hooks/useUpgradePlan";
+import { NavLink } from "react-router";
 
 export const FreePlanCard = () => {
   const org = useOrg();
@@ -243,7 +243,7 @@ export const FreePlanCard = () => {
             </p>
           </CardHeader>
           <CardFooter className="mt-auto">
-            <Link href="/contact" className="w-full">
+            <NavLink to="/contact" className="w-full">
               <Button
                 variant="outline"
                 size="lg"
@@ -251,7 +251,7 @@ export const FreePlanCard = () => {
               >
                 Contact sales
               </Button>
-            </Link>
+            </NavLink>
           </CardFooter>
         </Card>
 
@@ -265,7 +265,7 @@ export const FreePlanCard = () => {
             </p>
           </CardHeader>
           <CardFooter className="mt-auto">
-            <Link href="/contact" className="w-full">
+            <NavLink to="/contact" className="w-full">
               <Button
                 variant="outline"
                 size="lg"
@@ -273,7 +273,7 @@ export const FreePlanCard = () => {
               >
                 Contact us
               </Button>
-            </Link>
+            </NavLink>
           </CardFooter>
         </Card>
       </div>

@@ -7,7 +7,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import Link from "next/link";
 
 interface UnknownTierCardProps {
   tier: string;
@@ -30,9 +29,9 @@ export const UnknownTierCard: React.FC<UnknownTierCardProps> = ({ tier }) => {
               Your current plan: <span className="font-semibold">{tier}</span>
             </div>
             <Col className="gap-2">
-              <Link href="mailto:support@helicone.ai">
+              <a href="mailto:support@helicone.ai">
                 <Button>Email Support</Button>
-              </Link>
+              </a>
               <p className="text-xs text-gray-500 text-center">
                 If you&apos;re still having trouble, please email our support
                 team at {"support@helicone.ai"} for assistance.

@@ -10,7 +10,6 @@ import {
   SparklesIcon,
   WorkflowIcon,
 } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
 import {
   createContext,
   useCallback,
@@ -20,7 +19,7 @@ import {
 } from "react";
 import { OnboardingPopoverAccordion } from "../templates/onboarding/OnboardingPopoverMore";
 import { DiffHighlight } from "../templates/welcome/diffHighlight";
-import { useOrg } from "./org/organizationContext";
+import { useNavigate } from "react-router";
 
 export const ONBOARDING_STEP_LABELS = [
   "REQUESTS_TABLE",
@@ -434,7 +433,7 @@ export const OnboardingProvider = ({
       setCurrentStepState(step);
     }
   }, []);
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const startOnboarding = useCallback(() => {
     if (isOnboardingVisible) return;
@@ -449,13 +448,13 @@ export const OnboardingProvider = ({
         clearInterval(interval);
         setIsOnboardingVisible(true);
         setCurrentStep(0);
-        router.push("/requests");
+        navigate("/requests");
       }
     };
 
     const interval = setInterval(setReady, 1000);
     return () => clearInterval(interval);
-  }, [setCurrentStep, isOnboardingVisible, router]);
+  }, [setCurrentStep, isOnboardingVisible, navigate]);
 
   const endOnboarding = useCallback(() => {
     setCurrentStep(0);
@@ -549,9 +548,6 @@ export const OnboardingProvider = ({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStep, isOnboardingVisible]);
-
-  const org = useOrg();
-  const pathname = usePathname();
 
   // useEffect(() => {
   //   if (

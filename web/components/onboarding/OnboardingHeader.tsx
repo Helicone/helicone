@@ -7,10 +7,10 @@ import {
 import { ChevronRightIcon, LogOut, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
-import { useRouter } from "next/router";
 import React, { useEffect } from "react";
 import { useOrg } from "../layout/org/organizationContext";
 import LoadingAnimation from "../shared/loadingAnimation";
+import { useNavigate } from "react-router";
 
 const BreadcrumbSeparator = () => (
   <svg
@@ -37,7 +37,7 @@ interface OnboardingHeaderProps {
 }
 
 export const OnboardingHeader = ({ children }: OnboardingHeaderProps) => {
-  const router = useRouter();
+  const navigate = useNavigate();
   const org = useOrg();
   const heliconeAuthClient = useHeliconeAuthClient();
   const { theme, setTheme } = useTheme();
@@ -50,10 +50,10 @@ export const OnboardingHeader = ({ children }: OnboardingHeaderProps) => {
       (!isLoading && org?.currentOrg?.has_onboarded) ||
       (!isLoading && org?.currentOrg?.tier?.toLowerCase() === "demo")
     ) {
-      router.push("/dashboard");
+      navigate("/dashboard");
       return;
     }
-  }, [org?.currentOrg?.has_onboarded, isLoading, router]);
+  }, [org?.currentOrg?.has_onboarded, isLoading, navigate]);
 
   const billingStep: { label: string; step: OnboardingStep }[] =
     draftPlan !== "free" ? [{ label: "Add billing", step: "BILLING" }] : [];
@@ -81,14 +81,14 @@ export const OnboardingHeader = ({ children }: OnboardingHeaderProps) => {
   const handleStepClick = async (step: OnboardingStep, index: number) => {
     if (index < currentStepIndex) {
       await updateCurrentStep(step);
-      router.push(STEP_ROUTES[step]);
+      navigate(STEP_ROUTES[step]);
     }
   };
 
   const handleSignOut = async () => {
     await heliconeAuthClient.refreshSession();
     await heliconeAuthClient.signOut();
-    router.push("/");
+    navigate("/");
   };
 
   const handleThemeChange = () => {

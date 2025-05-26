@@ -5,13 +5,13 @@ import {
   ThemeProvider as NextThemesProvider,
   ThemeProviderProps,
 } from "next-themes";
-import { usePathname } from "next/navigation";
+import { useLocation } from "react-router";
 
 export default function ThemeProvider({
   children,
   ...props
 }: ThemeProviderProps) {
-  const pathname = usePathname();
+  const pathname = useLocation().pathname;
 
   return (
     <NextThemesProvider

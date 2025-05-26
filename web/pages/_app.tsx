@@ -15,13 +15,11 @@ import posthog from "posthog-js";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { OrgContextProvider } from "../components/layout/org/organizationContext";
-import ThemeProvider from "../components/shared/theme/themeContext";
 import Script from "next/script";
 import { PostHogProvider } from "posthog-js/react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Inter } from "next/font/google";
 import { env } from "next-runtime-env";
-import { FilterProvider } from "@/filterAST/context/filterContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -110,15 +108,11 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
             <NotificationProvider>
               <DndProvider backend={HTML5Backend}>
                 <OrgContextProvider>
-                  <FilterProvider>
-                    <ThemeProvider attribute="class" defaultTheme="light">
-                      <TooltipProvider>
-                        <div className={inter.className}>
-                          {getLayout(<Component {...pageProps} />)}
-                        </div>
-                      </TooltipProvider>
-                    </ThemeProvider>
-                  </FilterProvider>
+                  <TooltipProvider>
+                    <div className={inter.className}>
+                      {getLayout(<Component {...pageProps} />)}
+                    </div>
+                  </TooltipProvider>
                   <Notification />
                 </OrgContextProvider>
               </DndProvider>

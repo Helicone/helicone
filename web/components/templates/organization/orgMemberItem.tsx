@@ -2,7 +2,6 @@ import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 import { AcademicCapIcon } from "@heroicons/react/20/solid";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/router";
 import { useState } from "react";
 import { useJawnClient } from "../../../lib/clients/jawnHook";
 import { clsx } from "../../shared/clsx";
@@ -10,6 +9,7 @@ import useNotification from "../../shared/notification/useNotification";
 import ThemedDropdown from "../../shared/themed/themedDropdown";
 import ThemedModal from "../../shared/themed/themedModal";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
+import { useNavigate } from "react-router";
 
 interface OrgMemberItemProps {
   index: number;
@@ -34,7 +34,7 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
 
   const { user } = useHeliconeAuthClient();
 
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const jawn = useJawnClient();
 
@@ -156,7 +156,7 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
                   setNotification("Successfully left organization", "success");
                 }
                 refreshOrgs();
-                router.push("/dashboard");
+                navigate("/dashboard");
               }}
             >
               <p className="hover:bg-gray-200 dark:hover:bg-gray-800 inline-flex items-center rounded-full bg-white dark:bg-black px-2 py-1 text-xs font-medium text-gray-500 ring-1 ring-inset ring-gray-300 dark:ring-gray-700">

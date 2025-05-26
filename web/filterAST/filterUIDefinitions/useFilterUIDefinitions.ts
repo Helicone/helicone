@@ -9,7 +9,7 @@ import {
 
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { getJawnClient } from "@/lib/clients/jawn";
-import { useRouter } from "next/router";
+import { useLocation } from "react-router";
 
 const KNOWN_HELICONE_PROPERTIES = {
   "helicone-session-id": {
@@ -72,7 +72,7 @@ export const useFilterUIDefinitions = () => {
     },
   });
 
-  const router = useRouter();
+  const pathname = useLocation().pathname;
   // Combine static definitions with dynamic ones
   const completeDefinitions = useMemo(() => {
     const dynamicDefinitions: FilterUIDefinition[] =
@@ -139,10 +139,10 @@ export const useFilterUIDefinitions = () => {
       ...dynamicDefinitions,
     ] as FilterUIDefinition[];
 
-    if (router.pathname.startsWith("/users")) {
+    if (pathname.startsWith("/users")) {
       definitions.push(...STATIC_USER_VIEW_DEFINITIONS);
     }
-    if (router.pathname.startsWith("/sessions")) {
+    if (pathname.startsWith("/sessions")) {
       definitions.push(...STATIC_SESSIONS_VIEW_DEFINITIONS);
 
       for (const def of definitions) {
@@ -159,12 +159,7 @@ export const useFilterUIDefinitions = () => {
     }
 
     return definitions;
-  }, [
-    properties.data?.data,
-    router.pathname,
-    searchProperties,
-    models.data?.data,
-  ]); // Include all dependencies
+  }, [properties.data?.data, pathname, searchProperties, models.data?.data]); // Include all dependencies
 
   return {
     filterDefinitions: completeDefinitions,

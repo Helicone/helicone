@@ -1,7 +1,6 @@
 import { CheckIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRef, useEffect } from "react";
-import Link from "next/link";
 import { H2, H3, H4, P, Small } from "@/components/ui/typography";
 
 // Base feature properties that all variants share
@@ -177,7 +176,7 @@ export const CtaButton = ({
   };
 
   return (
-    <Link href={link} target="_blank" rel="noopener noreferrer">
+    <a href={link} target="_blank" rel="noopener noreferrer">
       <Button
         className={buttonStyles[variant]}
         variant={variant === "outline" ? "outline" : "action"}
@@ -186,7 +185,7 @@ export const CtaButton = ({
         {variant === "outline" && (Icon ? <Icon /> : <DefaultIcon />)}
         {text}
       </Button>
-    </Link>
+    </a>
   );
 };
 

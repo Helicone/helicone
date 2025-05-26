@@ -1,9 +1,9 @@
 import { FilterState } from "@/filterAST/store/filterStore";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
-import { DEFAULT_FILTER_EXPRESSION, FilterExpression } from "../filterAst";
+import { FilterExpression } from "../filterAst";
 import { StoreFilterType, useFilterCrud } from "../hooks/useFilterCrud";
 import useNotification from "@/components/shared/notification/useNotification";
+import { useNavigate, useSearchParams, useLocation } from "react-router";
 
 /**
  * Hook to manage saved filters for a specific page type
@@ -15,10 +15,10 @@ export const useContextHelpers = ({
   filterStore: FilterState;
   filterCrud: ReturnType<typeof useFilterCrud>;
 }) => {
-  const router = useRouter();
+  const navigate = useNavigate();
 
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
+  const [searchParams] = useSearchParams();
+  const pathname = useLocation().pathname;
   const notification = useNotification();
 
   const loadFilterById = useCallback(
@@ -33,21 +33,21 @@ export const useContextHelpers = ({
         });
         const params = new URLSearchParams(searchParams?.toString());
         params.set("filter_id", filterId);
-        router.push(`${pathname}?${params.toString()}`);
+        navigate(`${pathname}?${params.toString()}`);
         return true;
       }
 
       return false;
     },
-    [filterCrud, filterStore, pathname, searchParams, router]
+    [filterCrud, filterStore, pathname, searchParams, navigate]
   );
 
   const clearFilter = useCallback(() => {
     filterStore.clearActiveFilter();
     const params = new URLSearchParams(searchParams?.toString());
     params.delete("filter_id");
-    router.push(`${pathname}?${params.toString()}`);
-  }, [filterStore, pathname, searchParams, router]);
+    navigate(`${pathname}?${params.toString()}`);
+  }, [filterStore, pathname, searchParams, navigate]);
 
   const saveFilter = async () => {
     if (!filterStore.filter) {
@@ -69,7 +69,7 @@ export const useContextHelpers = ({
       const params = new URLSearchParams(searchParams?.toString());
       params.set("filter_id", result.data.id);
 
-      router.push(`${pathname}?${params.toString()}`);
+      navigate(`${pathname}?${params.toString()}`);
     }
 
     return result;

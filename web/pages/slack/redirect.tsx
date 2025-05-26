@@ -1,9 +1,6 @@
-import AuthLayout from "@/components/layout/auth/authLayout";
 import { Button } from "@/components/ui/button";
 import { dbExecute } from "@/lib/api/db/dbExecute";
 import { GetServerSidePropsContext } from "next";
-import { ReactElement } from "react";
-import { NavLink } from "react-router";
 
 export default function SlackRedirect({ error }: { error?: string }) {
   return (
@@ -11,16 +8,12 @@ export default function SlackRedirect({ error }: { error?: string }) {
       {error ? <div>{error}</div> : <div>Slack Redirect</div>}
       <div>
         <Button asChild>
-          <NavLink to="/alerts">Go to Alerts</NavLink>
+          <a href="/alerts">Go to Alerts</a>
         </Button>
       </div>
     </div>
   );
 }
-
-SlackRedirect.getLayout = function getLayout(page: ReactElement) {
-  return <AuthLayout>{page}</AuthLayout>;
-};
 
 export const getServerSideProps = async (
   context: GetServerSidePropsContext

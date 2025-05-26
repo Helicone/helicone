@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/card";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import Link from "next/link";
 import { InvoiceSheet } from "./InvoiceSheet";
 import {
   Dialog,
@@ -172,12 +171,12 @@ export const TeamPlanCard = () => {
               </Button>
             )}
             <InvoiceSheet />
-            <Link
+            <a
               href="https://helicone.ai/pricing"
               className="text-sm text-gray-500 underline"
             >
               View pricing page
-            </Link>
+            </a>
           </Col>
         </CardContent>
       </Card>

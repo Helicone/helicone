@@ -1,4 +1,5 @@
-import { useRouter } from "next/router";
+/* eslint-disable @next/next/no-img-element, custom-rules/no-next-link, custom-rules/no-next-router, custom-rules/no-next-link-import */
+
 import useNotification from "./notification/useNotification";
 import { useState } from "react";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";

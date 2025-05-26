@@ -8,7 +8,6 @@ import "prismjs/components/prism-clike";
 import "prismjs/components/prism-javascript";
 import "prismjs/components/prism-json";
 import { Course } from "./types";
-import Link from "next/link";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/solid";
 import { SESSION_NAME } from "./courseGenerator";
 
@@ -96,22 +95,22 @@ const TextbookCourse: React.FC<TextbookCourseProps> = ({
         </h1>
         <div className="flex flex-wrap gap-2 items-center">
           {sessionId && (
-            <Link
+            <a
               href={`https://us.helicone.ai/sessions/${encodeURIComponent(
                 SESSION_NAME
               )}/${encodeURIComponent(sessionId)}`}
               className="text-xs px-2 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700"
             >
               View Session
-            </Link>
+            </a>
           )}
 
-          <Link
+          <a
             href="https://us.helicone.ai/prompts"
             className="text-xs px-2 py-1 bg-purple-600 text-white rounded hover:bg-purple-700"
           >
             View Prompts
-          </Link>
+          </a>
           <button
             onClick={toggleOverview}
             className="text-xs px-2 py-1 border border-gray-300 rounded text-gray-700 bg-white hover:bg-gray-50 flex items-center"

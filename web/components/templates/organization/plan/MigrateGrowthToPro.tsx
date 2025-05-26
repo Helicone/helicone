@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/card";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import Link from "next/link";
 import {
   Dialog,
   DialogContent,
@@ -23,6 +22,7 @@ import { useState } from "react";
 import { CalendarIcon } from "lucide-react";
 import { PlanFeatureCard } from "./PlanFeatureCard";
 import { InfoBox } from "@/components/ui/helicone/infoBox";
+import { NavLink } from "react-router";
 
 export const MigrateGrowthToPro = () => {
   const org = useOrg();
@@ -137,18 +137,18 @@ export const MigrateGrowthToPro = () => {
                 current billing period.
               </p>
             )}
-            <Link
-              href="/settings/billing-old"
+            <NavLink
+              to="/settings/billing-old"
               className="text-sm text-gray-500 underline"
             >
               View old billing page
-            </Link>
-            <Link
+            </NavLink>
+            <a
               href="https://helicone.ai/pricing"
               className="text-sm text-gray-500 underline"
             >
               View pricing page
-            </Link>
+            </a>
           </Col>
         </CardContent>
       </Card>

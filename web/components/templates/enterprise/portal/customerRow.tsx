@@ -8,7 +8,6 @@ import { useGetOrgMembers } from "../../../../services/hooks/organizations";
 import { formatISO } from "date-fns";
 import { useRequestsOverTime } from "../../organization/plan/renderOrgPlan";
 import { useOrg } from "../../../layout/org/organizationContext";
-import { useRouter } from "next/router";
 import { OrgLimits } from "../../organization/createOrgForm";
 import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
 import { Menu, Transition } from "@headlessui/react";
@@ -19,6 +18,7 @@ import {
   ORGANIZATION_COLORS,
   ORGANIZATION_ICONS,
 } from "../../organization/orgConstants";
+import { useNavigate } from "react-router";
 
 interface CustomerRowProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
@@ -29,9 +29,9 @@ const CustomerRow = (props: CustomerRowProps) => {
   const { org, refetchCustomerOrgs } = props;
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const navigate = useNavigate();
 
   const orgContext = useOrg();
-  const router = useRouter();
 
   const { data: members, isLoading: isMembersLoading } = useGetOrgMembers(
     org.id
@@ -85,7 +85,7 @@ const CustomerRow = (props: CustomerRowProps) => {
     <>
       <TableRow
         onClick={() => {
-          router.push(`/enterprise/portal/${org.id}`);
+          navigate(`/enterprise/portal/${org.id}`);
         }}
         className="hover:bg-gray-100 dark:hover:bg-gray-900 hover:cursor-pointer"
       >
@@ -170,7 +170,7 @@ const CustomerRow = (props: CustomerRowProps) => {
                         onClick={(e) => {
                           e.stopPropagation();
                           orgContext?.setCurrentOrg(org.id);
-                          router.push("/dashboard");
+                          navigate("/dashboard");
                         }}
                       >
                         View

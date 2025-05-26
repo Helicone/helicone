@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { OnboardingHeader } from "@/components/onboarding/OnboardingHeader";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ExternalLink } from "lucide-react";
-import Link from "next/link";
 import { generateAPIKeyHelper } from "@/utils/generateAPIKeyHelper";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import useNotification from "@/components/shared/notification/useNotification";
@@ -27,10 +26,10 @@ import {
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Result } from "@/packages/common/result";
-import { useRouter } from "next/navigation";
 import { useOrgOnboarding } from "@/services/hooks/useOrgOnboarding";
 import { H1, Small, Muted } from "@/components/ui/typography";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
+import { NavLink, useNavigate } from "react-router";
 
 // Create a singleton highlighter instance
 const highlighterPromise = createHighlighter({
@@ -73,7 +72,7 @@ export function CodeIntegrationPage({
   const { user } = useHeliconeAuthClient();
   const { setNotification } = useNotification();
   const org = useOrg();
-  const router = useRouter();
+  const navigate = useNavigate();
   const { updateCurrentStep, completeOnboarding } = useOrgOnboarding(
     org?.currentOrg?.id ?? ""
   );
@@ -174,12 +173,12 @@ export function CodeIntegrationPage({
     if (hasEvent?.data) {
       const timeout = setTimeout(async () => {
         await completeOnboarding();
-        router.push("/dashboard");
+        navigate("/dashboard");
       }, 1500);
 
       return () => clearTimeout(timeout);
     }
-  }, [hasEvent?.data, router, completeOnboarding]);
+  }, [hasEvent?.data, navigate, completeOnboarding]);
 
   const availableLanguages = Object.keys(codeSnippets[provider]).filter(
     (key) => typeof codeSnippets[provider][key] === "function"
@@ -198,7 +197,7 @@ export function CodeIntegrationPage({
   // Add this function to handle the "Do it later" button click
   const handleDoItLater = () => {
     setIsRedirecting(true);
-    router.push("/dashboard");
+    navigate("/dashboard");
   };
 
   return (
@@ -225,8 +224,8 @@ export function CodeIntegrationPage({
                     ))}
                   </TabsList>
                 </Tabs>
-                <Link
-                  href={codeSnippets[provider].docsLink}
+                <NavLink
+                  to={codeSnippets[provider].docsLink}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -237,7 +236,7 @@ export function CodeIntegrationPage({
                     Other providers
                     <ExternalLink size={16} />
                   </Button>
-                </Link>
+                </NavLink>
               </div>
 
               <div className="rounded-lg border border-[hsl(var(--border))] overflow-hidden">
@@ -342,34 +341,36 @@ export function CodeIntegrationPage({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                   <DropdownMenuItem asChild>
-                    <Link
+                    <a
                       href="https://docs.helicone.ai"
                       target="_blank"
+                      rel="noopener noreferrer"
                       className="flex items-center"
                     >
                       <BookOpen size={16} className="mr-2" />
                       Documentation
-                    </Link>
+                    </a>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link
+                    <a
                       href="https://discord.com/invite/2TkeWdXNPQ"
                       target="_blank"
+                      rel="noopener noreferrer"
                       className="flex items-center"
                     >
                       <MessageSquare size={16} className="mr-2" />
                       Ask us on Discord
-                    </Link>
+                    </a>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link
-                      href="/contact"
+                    <NavLink
+                      to="/contact"
                       className="flex items-center"
                       target="_blank"
                     >
                       <Mail size={16} className="mr-2" />
                       Contact Us
-                    </Link>
+                    </NavLink>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

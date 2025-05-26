@@ -11,7 +11,6 @@ import { useState } from "react";
 import LoadingAnimation from "../../../../shared/loadingAnimation";
 import ProviderKeyList from "./providerKeyList";
 import { useOrg } from "../../../../layout/org/organizationContext";
-import { useRouter } from "next/router";
 import { DeleteOrgModal } from "../../../organization/deleteOrgModal";
 import EditCustomerOrgModal from "../editCustomerOrgModal";
 import HcBreadcrumb from "../../../../ui/hcBreadcrumb";
@@ -23,6 +22,7 @@ import {
   ORGANIZATION_ICONS,
 } from "@/components/templates/organization/orgConstants";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useNavigate } from "react-router";
 
 interface PortalIdPageProps {
   orgId: string | null;
@@ -39,7 +39,7 @@ const PortalIdPage = (props: PortalIdPageProps) => {
     refetch: isRefetching,
   } = useGetOrgMembers(orgId || "");
   const orgContext = useOrg();
-  const router = useRouter();
+  const navigate = useNavigate();
   const startOfMonthFormatted = formatISO(
     new Date(new Date().setDate(new Date().getDate() - 28)),
     {
@@ -140,7 +140,7 @@ const PortalIdPage = (props: PortalIdPageProps) => {
                     // set the org id and then redirect the user to the dashboard page
                     if (org) {
                       orgContext?.setCurrentOrg(org.id);
-                      router.push("/dashboard");
+                      navigate("/dashboard");
                     }
                   }}
                   className="flex w-full items-center justify-center px-4 py-2 bg-white dark:bg-black text-black dark:text-white border border-gray-500 text-xs font-semibold rounded-lg"

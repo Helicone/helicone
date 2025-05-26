@@ -1,4 +1,3 @@
-import { useSearchParams } from "next/navigation";
 import React, {
   createContext,
   ReactNode,
@@ -9,6 +8,7 @@ import React, {
 import { useFilterCrud } from "../hooks/useFilterCrud";
 import { FilterState, useFilterStore } from "../store/filterStore";
 import { useContextHelpers } from "./useContextHelpers";
+import { useSearchParams } from "react-router";
 
 // Define the shape of our context
 interface FilterContextType {
@@ -35,7 +35,7 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({
   options,
 }) => {
   const filterStore = useFilterStore();
-  const searchParams = useSearchParams();
+  const [searchParams] = useSearchParams();
 
   const filterCrud = useFilterCrud();
   const helpers = useContextHelpers({

@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { ArrowUpRightIcon } from "lucide-react";
-import Link from "next/link";
+import { NavLink } from "react-router";
 
 export const OnboardingPopoverAccordion = ({
   icon,
@@ -37,7 +37,7 @@ export const OnboardingPopoverAccordion = ({
         <AccordionContent className="text-[13px] text-slate-500">
           {children}
           {button && (
-            <Link href={button.link} target="_blank">
+            <NavLink to={button.link} target="_blank">
               <Button
                 variant="secondary"
                 className="text-slate-900 dark:text-slate-100 w-full mt-4 gap-2.5"
@@ -45,7 +45,7 @@ export const OnboardingPopoverAccordion = ({
                 {button.text}
                 <ArrowUpRightIcon className="h-4 w-4 text-slate-500" />
               </Button>
-            </Link>
+            </NavLink>
           )}
         </AccordionContent>
       </AccordionItem>

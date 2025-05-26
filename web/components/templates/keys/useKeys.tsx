@@ -3,23 +3,22 @@ import useNotification from "@/components/shared/notification/useNotification";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { generateAPIKeyHelper } from "@/utils/generateAPIKeyHelper";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/router";
 import { $JAWN_API } from "@/lib/clients/jawn";
+import { useLocation } from "react-router";
 
 export const useKeys = () => {
   const org = useOrg();
   const queryClient = useQueryClient();
   const { setNotification } = useNotification();
 
-  const router = useRouter();
+  const pathname = useLocation().pathname;
 
   const useGovernance =
-    router.pathname.includes("access-keys") &&
-    !!org?.currentOrg?.governance_settings;
+    pathname.includes("access-keys") && !!org?.currentOrg?.governance_settings;
 
   const keys = useQuery({
     queryKey: ["keys", org?.currentOrg?.id],
-    enabled: !!router.isReady,
+    enabled: !!pathname,
     queryFn: () => {
       const jawn = getJawnClient(org?.currentOrg?.id);
       return jawn.GET("/v1/api-keys", {

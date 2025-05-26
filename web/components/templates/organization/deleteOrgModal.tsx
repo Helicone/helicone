@@ -2,9 +2,9 @@ import { clsx } from "../../shared/clsx";
 import { useOrg } from "../../layout/org/organizationContext";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
-import { useRouter } from "next/router";
 import { useState } from "react";
 import { getJawnClient } from "../../../lib/clients/jawn";
+import { useNavigate } from "react-router";
 
 interface DeleteOrgModalProps {
   open: boolean;
@@ -18,7 +18,7 @@ export const DeleteOrgModal = (props: DeleteOrgModalProps) => {
 
   const { setNotification } = useNotification();
   const orgContext = useOrg();
-  const router = useRouter();
+  const navigate = useNavigate();
   const jawn = getJawnClient(orgId);
   const [confirmOrgName, setConfirmOrgName] = useState("");
 
@@ -90,7 +90,7 @@ export const DeleteOrgModal = (props: DeleteOrgModalProps) => {
               } else {
                 orgContext?.refetchOrgs();
                 if (onDeleteRoute) {
-                  router.push(onDeleteRoute || "/request");
+                  navigate(onDeleteRoute || "/request");
                 }
                 setNotification("Delete organization", "success");
               }

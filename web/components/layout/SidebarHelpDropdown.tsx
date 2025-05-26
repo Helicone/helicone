@@ -21,7 +21,7 @@ import { ChangelogItem } from "./auth/types";
 import { useOrg } from "./org/organizationContext";
 import Intercom from "@intercom/messenger-js-sdk";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
-import { usePathname } from "next/navigation";
+import { useLocation } from "react-router";
 
 export const INTERCOM_APP_ID = "mna0ba2h";
 const SidebarHelpDropdown = ({
@@ -49,7 +49,7 @@ const SidebarHelpDropdown = ({
     name: orgContext?.currentOrg?.name,
     email: heliconeAuthClient.user?.email,
   });
-  const pathname = usePathname();
+  const pathname = useLocation().pathname;
 
   useEffect(() => {
     if (pathname?.includes("dashboard")) {

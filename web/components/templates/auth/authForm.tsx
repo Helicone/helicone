@@ -1,9 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { BsGoogle, BsGithub } from "react-icons/bs";
 import { FormEvent, useEffect, useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/router";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -14,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+import { NavLink, useSearchParams } from "react-router";
 
 type CustomerPortalContent = {
   domain: string;
@@ -164,9 +163,9 @@ const AuthForm = (props: AuthFormProps) => {
     preloadImages();
   }, []);
 
-  const router = useRouter();
+  const [searchParams] = useSearchParams();
   useEffect(() => {
-    if (router.query.url && router.asPath) {
+    if (searchParams.get("url")) {
       const fullUrl = window.location.href;
       const startIndex = fullUrl.indexOf("url=");
       const urlParam = fullUrl.substring(startIndex + 4);
@@ -174,7 +173,7 @@ const AuthForm = (props: AuthFormProps) => {
 
       window.location.href = decodedUrl as string;
     }
-  }, [router.query, router.asPath]);
+  }, [searchParams]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
@@ -200,10 +199,10 @@ const AuthForm = (props: AuthFormProps) => {
     }
 
     if (regionEvent === "us") {
-      router.push("https://us.helicone.ai/" + authFormType);
+      window.location.href = "https://us.helicone.ai/" + authFormType;
     }
     if (regionEvent === "eu") {
-      router.push("https://eu.helicone.ai/" + authFormType);
+      window.location.href = "https://eu.helicone.ai/" + authFormType;
     }
   };
 
@@ -232,7 +231,7 @@ const AuthForm = (props: AuthFormProps) => {
       >
         <div className="relative z-20">
           <div className="flex justify-between items-center gap-4">
-            <Link href="https://www.helicone.ai/" className="flex">
+            <a href="https://www.helicone.ai/" className="flex">
               <Image
                 src={"/static/logo-no-border.png"}
                 alt="Helicone - Open-source LLM observability and monitoring platform for developers."
@@ -240,7 +239,7 @@ const AuthForm = (props: AuthFormProps) => {
                 width={100}
                 priority={true}
               />
-            </Link>
+            </a>
             <a
               href="https://www.producthunt.com/posts/helicone-ai"
               target="_blank"
@@ -327,7 +326,7 @@ const AuthForm = (props: AuthFormProps) => {
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
           <div className="md:hidden flex justify-center mb-8">
-            <Link href="https://www.helicone.ai/" className="flex">
+            <a href="https://www.helicone.ai/" className="flex">
               <Image
                 src={"/static/logo.svg"}
                 alt="Helicone"
@@ -335,7 +334,7 @@ const AuthForm = (props: AuthFormProps) => {
                 width={80}
                 priority={true}
               />
-            </Link>
+            </a>
           </div>
 
           <div className="mb-8">
@@ -349,22 +348,22 @@ const AuthForm = (props: AuthFormProps) => {
             {authFormType === "signup" ? (
               <p className="mt-2 text-sm text-gray-600">
                 Already have an account?{" "}
-                <Link
-                  href={"/signin"}
+                <NavLink
+                  to={"/signin"}
                   className="text-sky-500 hover:text-sky-700"
                 >
                   Sign in here.
-                </Link>
+                </NavLink>
               </p>
             ) : (
               <p className="mt-2 text-sm text-gray-600">
                 New to Helicone?{" "}
-                <Link
-                  href={"/signup"}
+                <NavLink
+                  to={"/signup"}
                   className="text-sky-500 hover:text-sky-700"
                 >
                   Create an account here.
-                </Link>
+                </NavLink>
               </p>
             )}
           </div>
@@ -448,19 +447,19 @@ const AuthForm = (props: AuthFormProps) => {
                 />
                 <label htmlFor="terms" className="text-sm text-gray-600">
                   I accept the{" "}
-                  <Link
-                    href={"/terms"}
+                  <NavLink
+                    to={"/terms"}
                     className="text-sky-500 hover:text-sky-700"
                   >
                     Terms of Service
-                  </Link>{" "}
+                  </NavLink>{" "}
                   and{" "}
-                  <Link
-                    href={"/privacy"}
+                  <NavLink
+                    to={"/privacy"}
                     className="text-sky-500 hover:text-sky-700"
                   >
                     Privacy Policy
-                  </Link>
+                  </NavLink>
                   .
                 </label>
               </div>
@@ -468,12 +467,12 @@ const AuthForm = (props: AuthFormProps) => {
 
             {authFormType === "signin" && (
               <div className="flex justify-end">
-                <Link
-                  href={"/reset"}
+                <NavLink
+                  to={"/reset"}
                   className="text-sky-500 hover:text-sky-700 text-sm"
                 >
                   Forgot your password?
-                </Link>
+                </NavLink>
               </div>
             )}
 

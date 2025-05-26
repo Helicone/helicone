@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { useRouter } from "next/router";
+import { useNavigate } from "react-router";
 
 export const useQueryParams = () => {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [queryParams, setQueryParamsState] = useState<{
     models: string[] | "none";
     provider: string;
@@ -42,9 +42,7 @@ export const useQueryParams = () => {
     if (params.provider) newParams.set("provider", params.provider);
     if (params.timeSpan) newParams.set("timeSpan", params.timeSpan);
     if (params.tab) newParams.set("tab", params.tab.toString());
-    router.replace({ search: newParams.toString() }, undefined, {
-      shallow: true,
-    });
+    navigate(`?${newParams.toString()}`);
     setQueryParamsState(params);
   };
 

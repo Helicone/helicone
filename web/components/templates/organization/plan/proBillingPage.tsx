@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/card";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import Link from "next/link";
 import { InvoiceSheet } from "./InvoiceSheet";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -30,6 +29,7 @@ import {
 } from "../../pricing/hooks";
 import { Badge } from "@/components/ui/badge";
 import { CalendarIcon } from "lucide-react";
+import { NavLink } from "react-router";
 
 export const ProPlanCard = () => {
   const org = useOrg();
@@ -370,12 +370,12 @@ export const ProPlanCard = () => {
               </Button>
             )}
             <InvoiceSheet />
-            <Link
+            <a
               href="https://helicone.ai/pricing"
               className="mt-6 text-sm text-gray-500 text-semibold text-center text-sky-600 hover:text-sky-700"
             >
               View pricing page
-            </Link>
+            </a>
           </Col>
         </CardContent>
       </Card>
@@ -479,7 +479,7 @@ export const ProPlanCard = () => {
             </p>
           </CardHeader>
           <CardFooter className="mt-auto">
-            <Link href="/contact" className="w-full">
+            <NavLink to="/contact" className="w-full">
               <Button
                 variant="outline"
                 size="lg"
@@ -487,7 +487,7 @@ export const ProPlanCard = () => {
               >
                 Contact sales
               </Button>
-            </Link>
+            </NavLink>
           </CardFooter>
         </Card>
 
@@ -501,7 +501,7 @@ export const ProPlanCard = () => {
             </p>
           </CardHeader>
           <CardFooter className="mt-auto">
-            <Link href="/contact" className="w-full">
+            <NavLink to="/contact" className="w-full">
               <Button
                 variant="outline"
                 size="lg"
@@ -509,7 +509,7 @@ export const ProPlanCard = () => {
               >
                 Contact us
               </Button>
-            </Link>
+            </NavLink>
           </CardFooter>
         </Card>
       </div>

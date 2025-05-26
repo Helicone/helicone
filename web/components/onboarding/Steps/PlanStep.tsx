@@ -6,7 +6,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
 import {
   PlanType,
   useDraftOnboardingStore,
@@ -31,14 +30,14 @@ export const PlanStep = ({
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
         <h2 className="text-[hsl(var(--foreground))]">Plan</h2>
-        <Link
+        <a
           href="https://helicone.ai/pricing"
           className="text-sm font-light text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] underline"
           target="_blank"
           rel="noopener noreferrer"
         >
           See pricing
-        </Link>
+        </a>
       </div>
       <Select
         value={draftPlan}

@@ -13,5 +13,15 @@
     "custom-rules/no-next-link": "error",
     "custom-rules/no-next-router": "error",
     "custom-rules/no-next-link-import": "error"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["pages/**/*.tsx", "components/layout/admin/**/*.tsx"],
+      "rules": {
+        "custom-rules/no-next-link": "off",
+        "custom-rules/no-next-router": "off",
+        "custom-rules/no-next-link-import": "off"
+      }
+    }
+  ]
 }

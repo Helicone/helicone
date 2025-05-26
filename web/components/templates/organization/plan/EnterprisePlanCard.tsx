@@ -7,7 +7,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import Link from "next/link";
 import { PlanFeatureCard } from "./PlanFeatureCard";
 
 export const EnterprisePlanCard = () => {
@@ -33,9 +32,9 @@ export const EnterprisePlanCard = () => {
               custom features, limits, and support options, please contact your
               account manager.
             </p>
-            <Link href="mailto:enterprise-support@helicone.ai">
+            <a href="mailto:enterprise-support@helicone.ai">
               <Button variant="outline">Contact Enterprise Support</Button>
-            </Link>
+            </a>
           </Col>
         </CardContent>
       </Card>

@@ -1,8 +1,8 @@
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 import { ArrowPathIcon, InboxArrowDownIcon } from "@heroicons/react/24/outline";
-import { useRouter } from "next/router";
 import { useState } from "react";
 import { BsGoogle } from "react-icons/bs";
+import { useNavigate } from "react-router";
 
 interface LoginProps {
   formState: "login" | "reset" | "signup";
@@ -32,7 +32,7 @@ const Login = (props: LoginProps) => {
   const [showSignedUpConfirmation, setShowSignedUpConfirmation] =
     useState<boolean>(false);
   const heliconeAuthClient = useHeliconeAuthClient();
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const signUpHandler = async (email: string, password: string) => {
     if (email === "") {
@@ -224,7 +224,7 @@ const Login = (props: LoginProps) => {
                               if (res.error) {
                                 setAuthError(res.error);
                               } else {
-                                router.push("/dashboard");
+                                navigate("/dashboard");
                               }
                               setLoading(false);
                             });

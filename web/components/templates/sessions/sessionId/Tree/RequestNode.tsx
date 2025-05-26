@@ -6,7 +6,6 @@ import {
 } from "@/components/ui/tooltip";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { TreeNodeData } from "../../../../../lib/sessions/sessionTypes";
 import { Row } from "../../../../layout/common/row";
@@ -59,8 +58,6 @@ export function RequestNode(props: {
       "Helicone-Prompt-Id"
     ] as string | undefined;
   }, [node.trace?.request.heliconeMetadata.customProperties]);
-
-  const router = useRouter();
 
   const org = useOrg();
 

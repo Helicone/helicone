@@ -8,11 +8,10 @@ import {
   NoSymbolIcon,
 } from "@heroicons/react/24/outline";
 import { FingerprintIcon, KeyIcon, LinkIcon } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/router";
 import { ReactNode, useMemo } from "react";
 import { useIsGovernanceEnabled } from "../organization/hooks";
 import AuthHeader from "@/components/shared/authHeader";
+import { NavLink, useLocation } from "react-router";
 
 const DEFAULT_TABS = [
   {
@@ -59,8 +58,7 @@ interface SettingsLayoutProps {
 }
 
 const SettingsLayout = ({ children }: SettingsLayoutProps) => {
-  const router = useRouter();
-  const currentPath = router.pathname;
+  const currentPath = useLocation().pathname;
   const org = useOrg();
 
   const isGovernanceEnabled = useIsGovernanceEnabled();
@@ -97,11 +95,9 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
             >
               <TabsList className="flex w-full overflow-x-auto p-1">
                 {tabs.map((tab) => (
-                  <Link
+                  <NavLink
                     key={tab.id}
-                    href={tab.href}
-                    passHref
-                    legacyBehavior
+                    to={tab.href}
                     className="hover:no-underline"
                   >
                     <TabsTrigger
@@ -114,7 +110,7 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
                         {tab.title}
                       </a>
                     </TabsTrigger>
-                  </Link>
+                  </NavLink>
                 ))}
               </TabsList>
             </Tabs>

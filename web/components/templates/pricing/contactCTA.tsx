@@ -1,6 +1,5 @@
 import { Col, Row } from "@/components/layout/common";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 
 export const ContactCTA = ({}) => {
   return (
@@ -13,13 +12,13 @@ export const ContactCTA = ({}) => {
           </p>
         </Col>
         <Button asChild>
-          <Link
+          <a
             href="https://cal.com/team/helicone/helicone-discovery"
             target="_blank"
             rel="noopener noreferrer"
           >
             Contact us
-          </Link>
+          </a>
         </Button>
       </Row>
     </div>

@@ -6,6 +6,18 @@ import AuthLayout from "@/components/layout/auth/authLayout";
 import DashboardPage from "@/components/templates/dashboard/dashboardPage";
 import RequestsPageShell from "@/components/templates/requests/RequestsPageShell";
 import SessionsPageShell from "@/components/templates/sessions/SessionsPageShell";
+import SettingsLayout from "./templates/settings/settingsLayout";
+import BillingPlanPage from "./templates/organization/plan/billingPage";
+import SignInShell from "./templates/auth/SignInShell";
+import SignUpShell from "./templates/auth/SignUpShell";
+import WelcomeShell from "./templates/onboarding/WelcomeShell";
+import OnboardingShell from "./templates/onboarding/OnboardingShell";
+import OnboardingBillingShell from "./templates/onboarding/OnboardingBillingShell";
+import OnboardingIntegrateShell from "./templates/onboarding/OnboardingIntegrateShell";
+import OnboardingIntegrateAsyncShell from "./templates/onboarding/OnboardingIntegrateAsyncShell";
+import OnboardingIntegrateProxyShell from "./templates/onboarding/OnboardingIntegrateProxyShell";
+import { FilterProvider } from "@/filterAST/context/filterContext";
+import { ThemeProvider } from "next-themes";
 
 // Dynamically import route components
 // const DashboardPage = dynamic(
@@ -164,9 +176,132 @@ const WebhooksPage = dynamic(
   }
 );
 
+const SettingsPageShell = dynamic(
+  () => import("./templates/settings/SettingsPageShell"),
+  {
+    loading: () => <div>Loading...</div>,
+  }
+);
+
+const ApiKeysShell = dynamic(
+  () => import("./templates/settings/ApiKeysShell"),
+  {
+    loading: () => <div>Loading...</div>,
+  }
+);
+
+const ConnectionsShell = dynamic(
+  () => import("./templates/settings/ConnectionsShell"),
+  {
+    loading: () => <div>Loading...</div>,
+  }
+);
+
+const MembersShell = dynamic(
+  () => import("./templates/settings/MembersShell"),
+  {
+    loading: () => <div>Loading...</div>,
+  }
+);
+
+const OrganizationShell = dynamic(
+  () => import("./templates/settings/OrganizationShell"),
+  {
+    loading: () => <div>Loading...</div>,
+  }
+);
+
+const ReportsShell = dynamic(
+  () => import("./templates/settings/ReportsShell"),
+  {
+    loading: () => <div>Loading...</div>,
+  }
+);
+
+const RateLimitsShell = dynamic(
+  () => import("./templates/settings/RateLimitsShell"),
+  {
+    loading: () => <div>Loading...</div>,
+  }
+);
+
+const PiOnboardingShell = dynamic(
+  () => import("./templates/pi/PiOnboardingShell"),
+  {
+    loading: () => <div>Loading...</div>,
+  }
+);
+
+const VaultShell = dynamic(() => import("./templates/vault/VaultShell"), {
+  loading: () => <div>Loading...</div>,
+});
+
+const DeveloperShell = dynamic(
+  () => import("./templates/developer/DeveloperShell"),
+  {
+    loading: () => <div>Loading...</div>,
+  }
+);
+
+const DeveloperKeysShell = dynamic(
+  () => import("./templates/developer/DeveloperKeysShell"),
+  {
+    loading: () => <div>Loading...</div>,
+  }
+);
+
+const PortalShell = dynamic(
+  () => import("./templates/enterprise/portal/PortalShell"),
+  {
+    loading: () => <div>Loading...</div>,
+  }
+);
+
+const PortalIdShell = dynamic(
+  () => import("./templates/enterprise/portal/id/PortalIdShell"),
+  {
+    loading: () => <div>Loading...</div>,
+  }
+);
+
 // Group routes by feature
 const routeGroups = {
   main: [
+    {
+      path: "/welcome",
+      element: <WelcomeShell />,
+      title: "Welcome | Helicone",
+    },
+    {
+      path: "/pi/onboarding",
+      element: <PiOnboardingShell />,
+      title: "PI Onboarding | Helicone",
+    },
+    {
+      path: "/enterprise/vault",
+      element: <VaultShell />,
+      title: "Developer Vault | Helicone",
+    },
+    {
+      path: "/enterprise/portal",
+      element: <PortalShell />,
+      title: "Enterprise Portal | Helicone",
+    },
+    {
+      path: "/enterprise/portal/:id",
+      element: <PortalIdShell />,
+      title: "Customer Portal | Helicone",
+    },
+    {
+      path: "/developer",
+      element: <DeveloperShell />,
+      title: "Developer | Helicone",
+    },
+    {
+      path: "/developer/keys",
+      element: <DeveloperKeysShell />,
+      title: "Developer Keys | Helicone",
+    },
     {
       path: "/dashboard",
       element: <DashboardPage />,
@@ -290,6 +425,50 @@ const routeGroups = {
       element: <WebhooksPage />,
       title: "Webhooks | Helicone",
     },
+    {
+      path: "/settings",
+      element: <SettingsPageShell />,
+      title: "Settings | Helicone",
+    },
+    {
+      path: "/settings/billing",
+      element: (
+        <SettingsLayout>
+          <BillingPlanPage />
+        </SettingsLayout>
+      ),
+      title: "Billing | Helicone",
+    },
+    {
+      path: "/settings/api-keys",
+      element: <ApiKeysShell />,
+      title: "API Keys | Helicone",
+    },
+    {
+      path: "/settings/connections",
+      element: <ConnectionsShell />,
+      title: "Connections | Helicone",
+    },
+    {
+      path: "/settings/members",
+      element: <MembersShell />,
+      title: "Members | Helicone",
+    },
+    {
+      path: "/settings/organization",
+      element: <OrganizationShell />,
+      title: "Organization | Helicone",
+    },
+    {
+      path: "/settings/reports",
+      element: <ReportsShell />,
+      title: "Reports | Helicone",
+    },
+    {
+      path: "/settings/rate-limits",
+      element: <RateLimitsShell />,
+      title: "Rate Limits | Helicone",
+    },
   ],
 };
 
@@ -323,27 +502,77 @@ export default function StaticShell() {
   return (
     <HelmetProvider>
       <BrowserRouter>
-        <AuthLayout>
-          <RouteChangeListener />
-          <Routes>
-            {Object.values(routeGroups)
-              .flat()
-              .map(({ path, element, title }) => (
-                <Route
-                  key={path}
-                  path={path}
-                  element={
-                    <>
-                      <Helmet>
-                        <title>{title}</title>
-                      </Helmet>
-                      {element}
-                    </>
-                  }
-                />
-              ))}
-          </Routes>
-        </AuthLayout>
+        <ThemeProvider attribute="class" defaultTheme="light">
+          <FilterProvider>
+            <Routes>
+              <Route path="/signin" element={<SignInShell />} />
+              <Route path="/signup" element={<SignUpShell />} />
+              <Route path="/onboarding" element={<OnboardingShell />} />
+              <Route
+                path="/onboarding/billing"
+                element={<OnboardingBillingShell />}
+              />
+              <Route
+                path="/onboarding/integrate"
+                element={<OnboardingIntegrateShell />}
+              />
+              <Route
+                path="/onboarding/integrate/proxy"
+                element={<OnboardingIntegrateProxyShell />}
+              />
+              <Route
+                path="/onboarding/integrate/async"
+                element={<OnboardingIntegrateAsyncShell />}
+              />
+              <Route
+                path="/*"
+                element={
+                  <>
+                    <AuthLayout>
+                      <RouteChangeListener />
+                      <Routes>
+                        {Object.values(routeGroups)
+                          .flat()
+                          .map(({ path, element, title }) => (
+                            <Route
+                              key={path}
+                              path={path}
+                              element={
+                                <>
+                                  <Helmet>
+                                    <title>{title}</title>
+                                  </Helmet>
+                                  {element}
+                                </>
+                              }
+                            />
+                          ))}
+                        <Route
+                          path="/onboarding/integrate"
+                          element={
+                            <Helmet>
+                              <title>Integration | Helicone</title>
+                            </Helmet>
+                          }
+                        >
+                          <Route index element={<OnboardingIntegrateShell />} />
+                          <Route
+                            path="async"
+                            element={<OnboardingIntegrateAsyncShell />}
+                          />
+                          <Route
+                            path="proxy"
+                            element={<OnboardingIntegrateProxyShell />}
+                          />
+                        </Route>
+                      </Routes>
+                    </AuthLayout>
+                  </>
+                }
+              />
+            </Routes>
+          </FilterProvider>
+        </ThemeProvider>
       </BrowserRouter>
     </HelmetProvider>
   );

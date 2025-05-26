@@ -41,6 +41,22 @@ const nextConfig = {
       },
       // Only rewrite to static-shell for specific paths that need it
       {
+        source: "/signin",
+        destination: "/static-shell",
+      },
+      {
+        source: "/signup",
+        destination: "/static-shell",
+      },
+      {
+        source: "/welcome",
+        destination: "/static-shell",
+      },
+      {
+        source: "/onboarding/:path*",
+        destination: "/static-shell",
+      },
+      {
         source: "/dashboard/:path*",
         destination: "/static-shell",
       },
@@ -90,6 +106,22 @@ const nextConfig = {
       },
       {
         source: "/webhooks/:path*",
+        destination: "/static-shell",
+      },
+      {
+        source: "/settings/:path*",
+        destination: "/static-shell",
+      },
+      {
+        source: "/pi/onboarding",
+        destination: "/static-shell",
+      },
+      {
+        source: "/enterprise/:path*",
+        destination: "/static-shell",
+      },
+      {
+        source: "/developer/:path*",
         destination: "/static-shell",
       },
     ];
