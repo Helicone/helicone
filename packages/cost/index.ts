@@ -264,3 +264,6 @@ sum(
   ) / ${COST_MULTIPLE}
 `;
 }
+
+// Export costCalc functions
+export { modelCost } from "./costCalc";

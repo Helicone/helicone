@@ -2428,6 +2428,9 @@
 					},
 					"cache_enabled": {
 						"$ref": "#/components/schemas/Partial_BooleanOperators_"
+					},
+					"cache_reference_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
 					}
 				},
 				"type": "object",

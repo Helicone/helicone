@@ -1,6 +1,27 @@
 {
   "name": "@helicone-package/cost",
-  "types": "./",
-  "sideEffects": false,
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./costCalc": {
+      "types": "./dist/costCalc.d.ts",
+      "default": "./dist/costCalc.js"
+    },
+    "./providers/*": {
+      "types": "./dist/providers/*.d.ts",
+      "default": "./dist/providers/*.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.4.2"
+  }
 }
