@@ -37,7 +37,7 @@ RUN echo '#!/bin/sh \n\
     echo "PostgreSQL migrations completed" \n\
     \n\
     echo "Running ClickHouse migrations..." \n\
-    python3 /app/clickhouse/ch_hcone.py --upgrade --host clickhouse --port 8123 --user default --no-password \n\
+    python3 /app/clickhouse/ch_hcone.py --upgrade --host ${CLICKHOUSE_HOST:-helicone-clickhouse} --port ${CLICKHOUSE_PORT:-8123} --user ${CLICKHOUSE_USER:-default} --no-password \n\
     echo "ClickHouse migrations completed" \n\
     \n\
     echo "All migrations completed successfully!" \n\
