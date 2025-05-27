@@ -32,6 +32,7 @@ services:
       FLYWAY_URL: jdbc:postgresql://postgres-flyway-test:5432/helicone_test
       FLYWAY_USER: postgres
       FLYWAY_PASSWORD: ${POSTGRES_PASSWORD}
+      CLICKHOUSE_HOST: clickhouse
     # volumes:
     #   - ../supabase:/app/supabase
     #   - ../clickhouse:/app/clickhouse
