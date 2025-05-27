@@ -3,7 +3,7 @@
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { JetBrains_Mono } from "next/font/google";
 import { useRouter } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { useHeliconeLogin } from "./../useHeliconeLogin";
 import { useTestAPIKey } from "./useTestApiKey";
 import { useQuery } from "@tanstack/react-query";
@@ -16,7 +16,14 @@ const FirstPageContent = () => {
   const jawn = useJawnClient(apiKey.data ?? "");
   const router = useRouter();
 
-  router.push("/pi/total-requests");
+  useEffect(() => {
+    if (!data && !isLoading && !apiKey.data && !apiKey.isLoading) {
+      router.push("/pi/setup?invalid_api_key=true");
+    } else {
+      router.push("/pi/total-requests");
+    }
+  }, [data, isLoading, apiKey.data, apiKey.isLoading, router]);
+
   const orgName = useQuery({
     queryKey: ["org-name", apiKey.data],
     queryFn: () => jawn.POST("/v1/pi/org-name/query"),
@@ -45,12 +52,7 @@ const FirstPageContent = () => {
       }),
   });
 
-  if (!data && !isLoading && !apiKey.data && !apiKey.isLoading) {
-    router.push("/pi/setup?invalid_api_key=true");
-    return <div>Loading...</div>;
-  }
-
-  return <div></div>;
+  return <div>Loading...</div>;
 };
 
 const PiPage = () => {
