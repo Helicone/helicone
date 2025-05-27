@@ -2,7 +2,7 @@
 # docker build -t valhalla .. -f dockerfile
 
 # Use an official Node.js runtime as the base image
-FROM --platform=linux/amd64 node:20
+FROM --platform=linux/amd64 node:20-bookworm-slim
 
 
 WORKDIR /usr/src/app/valhalla/prompt_security
@@ -13,6 +13,15 @@ RUN python3 -m venv venv
 # Install supervisor
 RUN apt-get update && apt-get install -y supervisor
 
+# Apply security updates
+RUN apt-get update && apt-get upgrade -y && apt-get autoremove -y && apt-get clean
+
+# Fix CVE-2023-6879 by installing fixed aom version from testing
+RUN echo "deb https://deb.debian.org/debian testing main" > /etc/apt/sources.list.d/testing.list && \
+    apt-get update && \
+    apt-get install -y -t testing libaom3=3.12.1-1 && \
+    rm /etc/apt/sources.list.d/testing.list && \
+    apt-get update
 
 # Install FFMEG and FFPROBE
 RUN apt-get install -y ffmpeg
@@ -21,7 +30,7 @@ ENV FFPROBE_PATH="/usr/bin/ffprobe"
 
 COPY ./valhalla/prompt_security/requirements.txt ./
 RUN . venv/bin/activate && \
-    pip3 install torch==2.3.1+cpu torchvision==0.18.1+cpu -f https://download.pytorch.org/whl/torch_stable.html && \
+    pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cpu && \
     pip3 install "transformers[torch]"
 
 RUN . venv/bin/activate && \
