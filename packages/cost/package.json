@@ -15,6 +15,10 @@
     "./providers/*": {
       "types": "./dist/providers/*.d.ts",
       "default": "./dist/providers/*.js"
+    },
+    "./interfaces/*": {
+      "types": "./dist/interfaces/*.d.ts",
+      "default": "./dist/interfaces/*.js"
     }
   },
   "scripts": {
