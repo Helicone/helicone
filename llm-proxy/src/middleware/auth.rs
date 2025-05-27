@@ -70,13 +70,13 @@ where
         // this is a temporary solution, when we get the control plane up and
         // running, we will actively be validating the helicone api keys
         // at the router rather than authenticating with jawn each time
-        tracing::trace!("Auth middleware for axum body");
         let app_state = self.app_state.clone();
         Box::pin(async move {
             if !app_state.0.config.auth.require_auth {
-                tracing::trace!("Auth middleware for axum body: auth disabled");
+                tracing::trace!("Auth middleware: auth disabled");
                 return Ok(request);
             }
+            tracing::trace!("Auth middleware");
             let Some(api_key) = request
                 .headers()
                 .get("authorization")
@@ -86,13 +86,19 @@ where
                     AuthError::MissingAuthorizationHeader.into_response()
                 );
             };
-            match Self::authenticate_request_inner(app_state, api_key).await {
+            app_state.0.metrics.auth_attempts.add(1, &[]);
+            match Self::authenticate_request_inner(app_state.clone(), api_key)
+                .await
+            {
                 Ok(auth_ctx) => {
                     request.extensions_mut().insert(auth_ctx);
                     Ok(request)
                 }
                 Err(e) => {
                     warn!(error = %e, "Authentication error");
+                    if let AuthError::InvalidCredentials = e {
+                        app_state.0.metrics.auth_rejections.add(1, &[]);
+                    }
                     Err(e.into_response())
                 }
             }

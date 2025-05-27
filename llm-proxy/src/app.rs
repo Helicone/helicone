@@ -259,6 +259,7 @@ impl App {
             .set_x_request_id(MakeRequestId)
             .propagate_x_request_id()
             .layer(NormalizePathLayer::trim_trailing_slash())
+            .layer(metrics::request_count::Layer::new(app_state.clone()))
             .layer(ErrorHandlerLayer::new(app_state.clone()))
             // NOTE: not sure if there is perf impact from Auth layer coming
             // before buffer layer, but required due to Clone bound.
