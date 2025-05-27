@@ -4,7 +4,6 @@
 # Use an official Node.js runtime as the base image
 FROM --platform=linux/amd64 node:20-bookworm-slim
 
-
 WORKDIR /usr/src/app/valhalla/prompt_security
 
 SHELL ["/bin/bash", "-c"]
@@ -39,7 +38,6 @@ RUN . venv/bin/activate && \
 RUN . venv/bin/activate && \
     pip3 install regex numpy packaging requests tqdm filelock typing-extensions
 
-
 WORKDIR /usr/src/app
 COPY ./shared ./shared
 COPY ./packages ./packages
@@ -48,7 +46,7 @@ COPY ./packages/cost/package.json ./packages/cost/
 COPY ./packages/llm-mapper/package.json ./packages/llm-mapper/
 COPY ./valhalla/jawn/package.json ./valhalla/jawn/
 
-# Install dependencies and build everything
+# Install dependencies and build packages
 RUN yarn install --frozen-lockfile
 RUN yarn build:packages
 
@@ -59,12 +57,12 @@ RUN find /usr/src/app/valhalla/jawn -name ".env.*" -exec rm {} \;
 
 ENV PORT=8585
 
+# Build the jawn package
 RUN yarn build
 
 COPY ./valhalla/prompt_security/main.py /usr/src/app/valhalla/prompt_security/main.py
 COPY ./valhalla/prompt_security/run_service.sh /usr/src/app/valhalla/prompt_security/run_service.sh
 RUN chmod +x /usr/src/app/valhalla/prompt_security/run_service.sh
-
 
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONFAULTHANDLER=1
@@ -74,8 +72,6 @@ ENV DLQ_WORKER_COUNT=1
 ENV NORMAL_WORKER_COUNT=3
 ENV CSB_API_KEY="1234567890"
 ENV ENABLE_PROMPT_SECURITY="true"
-
-
 
 # Add supervisor configuration
 COPY ./valhalla/supervisord.conf /etc/supervisor/conf.d/supervisord.conf

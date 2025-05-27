@@ -11,7 +11,8 @@
     "build:web": "yarn workspace helicone build",
     "build:cost": "yarn workspace @helicone-package/cost build",
     "build:llm-mapper": "yarn workspace @helicone-package/llm-mapper build",
-    "build:packages": "yarn build:cost && yarn build:llm-mapper"
+    "build:types": "yarn workspace @helicone-package/types build",
+    "build:packages": "yarn build:types && yarn build:cost && yarn build:llm-mapper"
   },
   "engines": {
     "node": "=20"

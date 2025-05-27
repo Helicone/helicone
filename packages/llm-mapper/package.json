@@ -17,7 +17,7 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@helicone-package/cost": "*"
+    "@helicone-package/types": "*"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",

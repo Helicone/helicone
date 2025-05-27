@@ -24,7 +24,9 @@
   "scripts": {
     "build": "tsc"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@helicone-package/types": "*"
+  },
   "devDependencies": {
     "typescript": "^5.4.2"
   }
