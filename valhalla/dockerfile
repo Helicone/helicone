@@ -48,18 +48,9 @@ COPY ./packages/cost/package.json ./packages/cost/
 COPY ./packages/llm-mapper/package.json ./packages/llm-mapper/
 COPY ./valhalla/jawn/package.json ./valhalla/jawn/
 
-# Build packages first
-WORKDIR /usr/src/app/packages/cost
-RUN yarn install
-RUN yarn build
-
-WORKDIR /usr/src/app/packages/llm-mapper
-RUN yarn install
-RUN yarn build
-
-# Now install all dependencies
-WORKDIR /usr/src/app
+# Install dependencies and build everything
 RUN yarn install --frozen-lockfile
+RUN yarn build:packages
 
 WORKDIR /usr/src/app/valhalla/jawn
 COPY ./valhalla/jawn .
