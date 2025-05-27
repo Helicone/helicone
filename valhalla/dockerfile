@@ -30,7 +30,7 @@ ENV FFPROBE_PATH="/usr/bin/ffprobe"
 
 COPY ./valhalla/prompt_security/requirements.txt ./
 RUN . venv/bin/activate && \
-    pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cpu && \
+    pip3 install torch==2.3.1+cpu torchvision==0.18.1+cpu -f https://download.pytorch.org/whl/torch_stable.html && \
     pip3 install "transformers[torch]"
 
 RUN . venv/bin/activate && \
