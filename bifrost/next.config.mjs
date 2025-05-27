@@ -8,10 +8,15 @@ import rehypeAutolinkHeadings from "rehype-autolink-headings";
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   pageExtensions: ["js", "jsx", "ts", "tsx", "md", "mdx"],
-  transpilePackages: ["next-mdx-remote"],
+  transpilePackages: [
+    "next-mdx-remote",
+    "@helicone-package/cost",
+    "@helicone-package/llm-mapper",
+    "@helicone-package/common",
+  ],
   images: {
     dangerouslyAllowSVG: true,
-    contentDispositionType: 'attachment',
+    contentDispositionType: "attachment",
     remotePatterns: [
       {
         protocol: "https",
@@ -35,8 +40,8 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "marketing-assets-helicone.s3.us-west-2.amazonaws.com"
-      }
+        hostname: "marketing-assets-helicone.s3.us-west-2.amazonaws.com",
+      },
     ],
   },
   async redirects() {
