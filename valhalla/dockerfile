@@ -48,26 +48,27 @@ COPY ./packages/cost/package.json ./packages/cost/
 COPY ./packages/llm-mapper/package.json ./packages/llm-mapper/
 COPY ./valhalla/jawn/package.json ./valhalla/jawn/
 
-# Install dependencies after copying all package.json files
+# Build packages first
+WORKDIR /usr/src/app/packages/cost
+RUN yarn install
+RUN yarn build
+
+WORKDIR /usr/src/app/packages/llm-mapper
+RUN yarn install
+RUN yarn build
+
+# Now install all dependencies
+WORKDIR /usr/src/app
 RUN yarn install --frozen-lockfile
 
 WORKDIR /usr/src/app/valhalla/jawn
 COPY ./valhalla/jawn .
 
-
 RUN find /usr/src/app/valhalla/jawn -name ".env.*" -exec rm {} \;
 
-# Build packages individually to better handle errors
-WORKDIR /usr/src/app/packages/cost
-RUN yarn build
-
-WORKDIR /usr/src/app/packages/llm-mapper
-RUN yarn build
-
-WORKDIR /usr/src/app/valhalla/jawn
-RUN yarn build
-
 ENV PORT=8585
+
+RUN yarn build
 
 COPY ./valhalla/prompt_security/main.py /usr/src/app/valhalla/prompt_security/main.py
 COPY ./valhalla/prompt_security/run_service.sh /usr/src/app/valhalla/prompt_security/run_service.sh
