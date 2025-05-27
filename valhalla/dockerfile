@@ -4,7 +4,6 @@
 # Use an official Node.js runtime as the base image
 FROM --platform=linux/amd64 node:20-bookworm-slim
 
-
 WORKDIR /usr/src/app/valhalla/prompt_security
 
 SHELL ["/bin/bash", "-c"]
@@ -55,8 +54,15 @@ RUN find /usr/src/app/valhalla/jawn -name ".env.*" -exec rm {} \;
 #yarn workspace jawn serve
 ENV PORT=8585
 
-RUN yarn
+# Install dependencies and build packages in the correct order
+WORKDIR /usr/src/app
+RUN yarn install
+RUN yarn build:types && yarn build:cost && yarn build:llm-mapper
+
+# Build the jawn package
+WORKDIR /usr/src/app/valhalla/jawn
 RUN yarn build
+
 COPY ./valhalla/prompt_security/main.py /usr/src/app/valhalla/prompt_security/main.py
 COPY ./valhalla/prompt_security/run_service.sh /usr/src/app/valhalla/prompt_security/run_service.sh
 RUN chmod +x /usr/src/app/valhalla/prompt_security/run_service.sh
