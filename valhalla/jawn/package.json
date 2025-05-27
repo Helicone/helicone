@@ -2,6 +2,7 @@
   "name": "helicone-api",
   "scripts": {
     "start": "ts-node src/index.ts",
+    "prebuild": "yarn --cwd ../.. build:packages && yarn",
     "build": "tsc && cp src/utils/trace.proto dist/valhalla/jawn/src/utils/trace.proto",
     "serve": "node dist/valhalla/jawn/src/index.js",
     "dev": "concurrently \"nodemon\" \"nodemon -x python3 genTypes.py\"",
