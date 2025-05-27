@@ -7,8 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "preinstall": "echo \"hello\"",
     "lint-fix": "next lint --fix",
-    "prebuild": "yarn --cwd .. build:packages && yarn",
     "postbuild": "next-sitemap"
   },
   "dependencies": {
