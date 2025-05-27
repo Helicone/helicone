@@ -5,7 +5,7 @@
     "build": "tsc && cp src/utils/trace.proto dist/valhalla/jawn/src/utils/trace.proto",
     "serve": "node dist/valhalla/jawn/src/index.js",
     "dev": "concurrently \"nodemon\" \"nodemon -x python3 genTypes.py\"",
-    "test:jawn": "npx jest --config packages/jawn/jest.config.js --detectOpenHandles"
+    "test:jawn": "npx jest --config packages/jawn/jest.confipg.js --detectOpenHandles"
   },
   "version": "1.0.0",
   "main": "index.js",
@@ -31,9 +31,8 @@
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dateformat": "^5.0.3",
-    "@helicone-package/common": "*",
-    "@helicone-package/cost": "*",
-    "@helicone-package/llm-mapper": "*",
+    "@helicone-package/cost": "file:../../packages/cost",
+    "@helicone-package/llm-mapper": "file:../../packages/llm-mapper",
     "dotenv": "^16.3.1",
     "express": "^5.1.0",
     "express-openapi-validator": "^5.3.7",

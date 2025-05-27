@@ -8,7 +8,9 @@
     "valhalla/jawn"
   ],
   "scripts": {
-    "build:web": "yarn workspace helicone build"
+    "build:web": "yarn workspace helicone build",
+    "build:jawn": "yarn workspace helicone-api build",
+    "serve:jawn": "yarn workspace helicone-api serve"
   },
   "engines": {
     "node": "=20"

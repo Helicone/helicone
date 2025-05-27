@@ -1975,6 +1975,12 @@
     "@tanstack/react-virtual" "^3.13.9"
     use-sync-external-store "^1.5.0"
 
+"@helicone-package/cost@file:packages/cost":
+  version "1.0.0"
+
+"@helicone-package/llm-mapper@file:packages/llm-mapper":
+  version "1.0.0"
+
 "@helicone/helpers@^1.1.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@helicone/helpers/-/helpers-1.1.0.tgz#4012a7ec8df911dea77964855f280df7cca94d41"
