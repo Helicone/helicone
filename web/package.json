@@ -10,7 +10,7 @@
     "dev": "vercel env pull .env && next dev --turbo -p 3000",
     "dev:better-auth": "npx dotenv -e .env.better-auth -- next dev -p 3008",
     "dev:preview": "vercel env pull .env --environment preview && next dev --turbo -p 3001",
-    "preinstall": "yarn --cwd .. build:packages && yarn",
+    "preinstall": "yarn --cwd .. build:packages ",
     "build": "next build",
     "start": "next start",
     "build-and-start": "next build && next start",
