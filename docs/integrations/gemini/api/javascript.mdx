@@ -81,12 +81,12 @@ iconType: "solid"
   <Step title="Install necessary packages">
     Ensure you have the necessary packages installed in your Javascript project:
     ```bash
-    npm install @google/generative-ai
+    npm install @google/genai
     ```
   </Step>
   <Step title="Import and configure the client">
     ```javascript
-    import { GoogleGenAI } from "@google/generative-ai";
+    import { GoogleGenAI } from "@google/genai";
 
     if (!process.env.GOOGLE_API_KEY) {
       throw new Error("GOOGLE_API_KEY environment variable must be set");
@@ -102,7 +102,7 @@ iconType: "solid"
         baseUrl: "https://gateway.helicone.ai",
         headers: {
           "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-          "Helicone-Target-URL": "https://generativelanguage.googleapis.com",
+          "Helicone-Target-URL": "https://generativelanguage.googleapis.com", // Change this to "https://aiplatform.googleapis.com" if vertexai is set to true
         },
       },
     });
