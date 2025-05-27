@@ -2,7 +2,7 @@ pub mod attribute_extractor;
 pub mod rolling_counter;
 pub mod system;
 
-use opentelemetry::metrics::{Counter, Meter};
+use opentelemetry::metrics::{Counter, Gauge, Meter};
 
 pub use self::rolling_counter::RollingCounter;
 
@@ -11,6 +11,7 @@ pub use self::rolling_counter::RollingCounter;
 #[derive(Debug, Clone)]
 pub struct Metrics {
     pub error_count: Counter<u64>,
+    pub provider_health: Gauge<u64>,
 }
 
 impl Metrics {
@@ -20,6 +21,13 @@ impl Metrics {
             .u64_counter("error_count")
             .with_description("Number of error occurences")
             .build();
-        Self { error_count }
+        let provider_health = meter
+            .u64_gauge("provider_health")
+            .with_description("Upstream provider health")
+            .build();
+        Self {
+            error_count,
+            provider_health,
+        }
     }
 }

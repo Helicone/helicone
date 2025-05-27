@@ -3,6 +3,7 @@ use std::{sync::Arc, time::Duration};
 
 use futures::future::{self, BoxFuture};
 use meltdown::Token;
+use opentelemetry::KeyValue;
 use rust_decimal::prelude::ToPrimitive;
 use rustc_hash::{FxHashMap as HashMap, FxHashSet as HashSet};
 use tokio::{
@@ -118,6 +119,24 @@ async fn check_weighted_monitor(
                             warn!(error = ?e, "Failed to send insert event for healthy provider");
                         }
                     }
+
+                    let metric_attributes =
+                        [KeyValue::new("provider", provider.to_string())];
+                    if is_healthy {
+                        inner
+                            .app_state
+                            .0
+                            .metrics
+                            .provider_health
+                            .record(1, &metric_attributes);
+                    } else {
+                        inner
+                            .app_state
+                            .0
+                            .metrics
+                            .provider_health
+                            .record(0, &metric_attributes);
+                    }
                 }
             }
             BalanceConfigInner::P2C { .. } => {
@@ -159,6 +178,24 @@ async fn check_p2c_monitor(
                         {
                             warn!(error = ?e, "Failed to send insert event for healthy provider");
                         }
+                    }
+
+                    let metric_attributes =
+                        [KeyValue::new("provider", provider.to_string())];
+                    if is_healthy {
+                        inner
+                            .app_state
+                            .0
+                            .metrics
+                            .provider_health
+                            .record(1, &metric_attributes);
+                    } else {
+                        inner
+                            .app_state
+                            .0
+                            .metrics
+                            .provider_health
+                            .record(0, &metric_attributes);
                     }
                 }
             }
