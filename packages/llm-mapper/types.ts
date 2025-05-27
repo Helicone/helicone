@@ -1,4 +1,4 @@
-import { ProviderName } from "../cost/providers/mappings";
+import { ProviderName } from "@helicone-package/cost/providers/mappings";
 
 export const DEFAULT_UUID = "00000000-0000-0000-0000-000000000000";
 
@@ -12,17 +12,15 @@ export type MapperType =
   | "openai-image"
   | "openai-moderation"
   | "openai-embedding"
-  | "openai-instruct" // Might be close to this one, maybe...
+  | "openai-instruct"
   | "openai-realtime"
   | "vector-db"
   | "tool"
   | "unknown";
+
 export type Provider = ProviderName | "CUSTOM";
 export type LlmType = "chat" | "completion";
 
-/* -------------------------------------------------------------------------- */
-/*                               Parent Objects                               */
-/* -------------------------------------------------------------------------- */
 export type MappedLLMRequest = {
   _type: MapperType;
   id: string;
@@ -35,10 +33,12 @@ export type MappedLLMRequest = {
   };
   heliconeMetadata: HeliconeMetadata;
 };
+
 export interface LlmSchema {
   request: LLMRequestBody;
   response?: LLMResponseBody | null;
 }
+
 export type LLMPreview = {
   fullRequestText?: (preview?: boolean) => string;
   fullResponseText?: (preview?: boolean) => string;
@@ -47,55 +47,37 @@ export type LLMPreview = {
   concatenatedMessages: Message[];
 };
 
-/* -------------------------------------------------------------------------- */
-/*                                   Request                                  */
-/* -------------------------------------------------------------------------- */
 export interface LLMRequestBody {
-  // Overall Details
   llm_type?: LlmType;
   provider?: string;
   model?: string;
-
-  // Messages
   messages?: Message[] | null;
   prompt?: string | null;
   instructions?: string | null;
-  // Parameters
-  max_tokens?: number | null; // max_completion_tokens for OpenAI
+  max_tokens?: number | null;
   temperature?: number | null;
   top_p?: number | null;
   seed?: number | null;
   stream?: boolean | null;
   presence_penalty?: number | null;
   frequency_penalty?: number | null;
-  stop?: string[] | string | null; // stop_sequences for Anthropic
+  stop?: string[] | string | null;
   reasoning_effort?: "low" | "medium" | "high" | null;
-
-  // Internal Tools
   tools?: Tool[];
   parallel_tool_calls?: boolean | null;
   tool_choice?: {
-    type: "none" | "auto" | "any" | "tool"; // "none" is only supported by OpenAI
-    // For "tool"
-    name?: string; // The function name to call
+    type: "none" | "auto" | "any" | "tool";
+    name?: string;
   };
   response_format?: { type: string; json_schema?: any };
-  // External Tools
   toolDetails?: HeliconeEventTool;
   vectorDBDetails?: HeliconeEventVectorDB;
-
-  // Embedding models
   input?: string | string[];
   n?: number | null;
-
-  // Image-gen Models
   size?: string;
   quality?: string;
 }
 
-/* -------------------------------------------------------------------------- */
-/*                                  Response                                  */
-/* -------------------------------------------------------------------------- */
 type LLMResponseBody = {
   messages?: Message[] | null;
   responses?: Response[] | null;
@@ -128,16 +110,13 @@ type LLMResponseBody = {
   };
 };
 
-/* -------------------------------------------------------------------------- */
-/*                                   Message                                  */
-/* -------------------------------------------------------------------------- */
 export type Message = {
   _type:
-    | "functionCall" // The request for a function call: function (openai) or tool_use (anthropic)
-    | "function" // The result of a function call to give: tool (openai) or tool_result (anthropic)
+    | "functionCall"
+    | "function"
     | "image"
     | "file"
-    | "message" // same as text
+    | "message"
     | "autoInput"
     | "contentArray"
     | "audio";
@@ -146,31 +125,29 @@ export type Message = {
   instruction?: string;
   name?: string;
   content?: string;
-  mime_type?: string; // Added to store MIME type for base64 content
-  tool_calls?: FunctionCall[]; // only used if _type is functionCall
+  mime_type?: string;
+  tool_calls?: FunctionCall[];
   tool_call_id?: string;
-  timestamp?: string; // For realtime API
+  timestamp?: string;
   image_url?: string;
-  audio_data?: string; // Base64 encoded audio data
+  audio_data?: string;
   type?: "input_image" | "input_text" | "input_file";
-  file_data?: string; // File..
+  file_data?: string;
   file_id?: string;
   filename?: string;
-  detail?: string; // Image input
-  idx?: number; // Index of an auto prompt input message
+  detail?: string;
+  idx?: number;
   contentArray?: Message[];
-  deleted?: boolean; // For realtime API (conversation.item.delete)
-
-  // For realtime API
-  start_timestamp?: string; // For realtime API (creation)
-  trigger_event_id?: string; // event id that sets start_timestamp (e.g response.created)
-  ending_event_id?: string; // event id that sets timestamp (e.g response.done) for realtime API only
+  deleted?: boolean;
+  start_timestamp?: string;
+  trigger_event_id?: string;
+  ending_event_id?: string;
 };
 
 export type Response = {
   _type:
-    | "functionCall" // The request for a function call: function (openai) or tool_use (anthropic)
-    | "function" // The result of a function call to give: tool (openai) or tool_result (anthropic)
+    | "functionCall"
+    | "function"
     | "image"
     | "text"
     | "file"
@@ -180,27 +157,25 @@ export type Response = {
   name?: string;
   type: "input_image" | "input_text" | "input_file";
   text?: string | undefined;
-  tool_calls?: FunctionCall[]; // only used if _type is functionCall
+  tool_calls?: FunctionCall[];
   tool_call_id?: string;
-  timestamp?: string; // For realtime API
+  timestamp?: string;
   image_url?: string;
-  audio_data?: string; // Base64 encoded audio data
-  idx?: number; // Index of an auto prompt input message
-  file_data?: string; // File..
+  audio_data?: string;
+  idx?: number;
+  file_data?: string;
   file_id?: string;
   filename?: string;
-  detail?: string; // Image input
+  detail?: string;
   contentArray?: Response[];
 };
 
-/* -------------------------------------------------------------------------- */
-/*                                    Tools                                   */
-/* -------------------------------------------------------------------------- */
 export interface Tool {
   name: string;
   description: string;
-  parameters?: Record<string, any>; // Strict JSON Schema type ("parameters" in OPENAI, "input_schema" in ANTHROPIC)
+  parameters?: Record<string, any>;
 }
+
 export interface FunctionCall {
   name: string;
   arguments: Record<string, any>;
@@ -236,14 +211,14 @@ type HeliconeMetadata = {
   scores?: Record<string, { value: number; valueType: string } | number> | null;
 };
 
-// UNORGANZIED
 export type PromptMessage = Message | string;
-// These are planned I think?
+
 export type HeliconeErrorType = {
   error: {
     heliconeMessage: string;
   };
 };
+
 export type ProviderRequest = {
   url: string;
   json: {
@@ -251,6 +226,7 @@ export type ProviderRequest = {
   };
   meta: Record<string, string>;
 };
+
 export type ProviderResponse = {
   json: {
     [key: string]: any;
@@ -258,6 +234,7 @@ export type ProviderResponse = {
   status: number;
   headers: Record<string, string>;
 };
+
 export type Timing = {
   startTime: {
     seconds: number;
@@ -268,21 +245,25 @@ export type Timing = {
     milliseconds: number;
   };
 };
+
 export type IHeliconeManualLogger = {
   apiKey: string;
   headers?: Record<string, string>;
   loggingEndpoint?: string;
 };
+
 export type ILogRequest = {
   model: string;
   [key: string]: any;
 };
+
 export interface HeliconeEventTool {
   _type: "tool";
   toolName: string;
   input: any;
   [key: string]: any;
 }
+
 export interface HeliconeEventVectorDB {
   _type: "vector_db";
   operation: "search" | "insert" | "delete" | "update";
@@ -293,13 +274,13 @@ export interface HeliconeEventVectorDB {
   databaseName?: string;
   [key: string]: any;
 }
+
 export type HeliconeCustomEventRequest =
   | HeliconeEventTool
   | HeliconeEventVectorDB;
 
 export type HeliconeLogRequest = ILogRequest | HeliconeCustomEventRequest;
 
-// Database Row Reference
 export interface HeliconeRequest {
   response_id: string | null;
   response_created_at: string | null;

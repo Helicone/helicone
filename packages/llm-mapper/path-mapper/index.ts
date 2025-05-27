@@ -9,7 +9,11 @@ export const mappers = {
   "openai-chat": openaiChatMapper,
   "anthropic-chat": anthropicChatMapper,
   "gemini-chat": googleChatMapper,
-} as const;
+} as {
+  "openai-chat": typeof openaiChatMapper;
+  "anthropic-chat": typeof anthropicChatMapper;
+  "gemini-chat": typeof googleChatMapper;
+};
 
 // Type for available mapper names
 export type MapperName = keyof typeof mappers;

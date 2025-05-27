@@ -1,4 +1,4 @@
-import { getMapper } from "../../llm-mapper/path-mapper";
+import { getMapper } from "@helicone-package/llm-mapper/path-mapper";
 import { getProviderConfig } from "./providers";
 import { Creator, CreatorModelMapping, Parameters, Provider } from "./types";
 

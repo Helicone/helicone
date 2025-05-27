@@ -1,5 +1,8 @@
-import { MapperName, PathMapper } from "../../llm-mapper/path-mapper";
-import { LLMRequestBody } from "../../llm-mapper/types";
+import {
+  MapperName,
+  PathMapper,
+} from "@helicone-package/llm-mapper/path-mapper";
+import { LLMRequestBody } from "@helicone-package/llm-mapper/types";
 
 // Define the three main model creators we're focusing on
 export type Creator = "OpenAI" | "Anthropic" | "Google" | "Meta" | "DeepSeek";

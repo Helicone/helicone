@@ -11,7 +11,7 @@ import {
   Message,
 } from "../types";
 
-import { modelCost } from "../../cost/costCalc";
+import { modelCost } from "@helicone-package/cost/costCalc";
 import { mapBlackForestLabsImage } from "../mappers/black-forest-labs/image";
 import { mapOpenAIAssistant } from "../mappers/openai/assistant";
 import { mapOpenAIModeration } from "../mappers/openai/moderation";
