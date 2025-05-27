@@ -51,6 +51,7 @@ RUN yarn
 RUN yarn build
 COPY ./valhalla/prompt_security/main.py /usr/src/app/valhalla/prompt_security/main.py
 COPY ./valhalla/prompt_security/run_service.sh /usr/src/app/valhalla/prompt_security/run_service.sh
+COPY ./minio/minio_hcone.py /usr/src/app/minio/minio_hcone.py
 RUN chmod +x /usr/src/app/valhalla/prompt_security/run_service.sh
 
 
