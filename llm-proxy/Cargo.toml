@@ -22,8 +22,8 @@ derive_more = { workspace = true, features = ['as_ref', 'constructor', 'debug', 
 displaydoc = { workspace = true }
 eventsource-stream = { workspace = true }
 futures = { workspace = true }
-governor = { workspace = true }
 gemini-rust = { git = "https://github.com/hcharlie1201/gemini-rust.git" }
+governor = { workspace = true }
 heck = { workspace = true }
 http = { workspace = true }
 http-body = { workspace = true }

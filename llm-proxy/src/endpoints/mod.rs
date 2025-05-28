@@ -42,7 +42,7 @@ impl ApiEndpoint {
             InferenceProvider::Anthropic => {
                 Some(Self::Anthropic(Anthropic::try_from(path).ok()?))
             }
-            InferenceProvider::Google => {
+            InferenceProvider::GoogleGemini => {
                 Ok(Self::Google(Google::try_from(path)?))
             }
             unsupported => {
@@ -66,7 +66,7 @@ impl ApiEndpoint {
             (Self::Google(source), InferenceProvider::OpenAI) => {
                 Ok(Self::OpenAI(OpenAI::from(source)))
             }
-            (Self::OpenAI(source), InferenceProvider::Google) => {
+            (Self::OpenAI(source), InferenceProvider::GoogleGemini) => {
                 Ok(Self::Google(Google::from(source)))
             }
             _ => Err(InvalidRequestError::UnsupportedProvider(target_provider)),
@@ -78,7 +78,7 @@ impl ApiEndpoint {
         match self {
             Self::OpenAI(_) => InferenceProvider::OpenAI,
             Self::Anthropic(_) => InferenceProvider::Anthropic,
-            Self::Google(_) => InferenceProvider::Google,
+            Self::Google(_) => InferenceProvider::GoogleGemini,
         }
     }
 

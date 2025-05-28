@@ -131,7 +131,7 @@ impl EndpointConverterRegistryInner {
                 },
             );
         } else if request_style == InferenceProvider::OpenAI
-            && providers.contains(&InferenceProvider::Google)
+            && providers.contains(&InferenceProvider::GoogleGemini)
         {
             let key = RegistryKey::new(
                 ApiEndpoint::OpenAI(OpenAI::chat_completions()),
@@ -195,8 +195,8 @@ impl EndpointConverterRegistryInner {
                     >,
                 },
             );
-        } else if request_style == InferenceProvider::Google
-            && providers.contains(&InferenceProvider::Google)
+        } else if request_style == InferenceProvider::GoogleGemini
+            && providers.contains(&InferenceProvider::GoogleGemini)
         {
             let key = RegistryKey::new(
                 ApiEndpoint::Google(Google::generate_contents()),
