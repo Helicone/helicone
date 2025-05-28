@@ -1,5 +1,5 @@
 import { PropertyParam } from "../../lib/api/properties/propertyParams";
-import { Result } from "../../packages/common/result";
+import { Result } from "@/packages/common/result";
 
 const getPropertyParams = async (property: string, search: string) => {
   const resp = await fetch(

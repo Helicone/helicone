@@ -1,6 +1,6 @@
-import { RequestResponseRMT, clickhouseDb } from "../db/ClickhouseWrapper";
+import { err, ok, Result, resultMap } from "../../packages/common/result";
+import { clickhouseDb, RequestResponseRMT } from "../db/ClickhouseWrapper";
 import { dbExecute } from "../shared/db/dbExecute";
-import { err, resultMap, ok, Result } from "../../packages/common/result";
 import { BaseStore } from "./baseStore";
 
 export type Score = {
@@ -208,6 +208,8 @@ export class ScoreStore extends BaseStore {
             prompt_tokens: row.prompt_tokens,
             prompt_cache_write_tokens: row.prompt_cache_write_tokens,
             prompt_cache_read_tokens: row.prompt_cache_read_tokens,
+            prompt_audio_tokens: row.prompt_audio_tokens,
+            completion_audio_tokens: row.completion_audio_tokens,
             model:
               row.model && row.model !== ""
                 ? row.model
@@ -227,6 +229,8 @@ export class ScoreStore extends BaseStore {
             response_body: row.response_body,
             assets: row.assets,
             scores: validScores,
+            cache_enabled: row.cache_enabled,
+            cache_reference_id: row.cache_reference_id,
           },
         ];
       })

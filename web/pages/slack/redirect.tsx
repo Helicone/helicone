@@ -1,18 +1,11 @@
 import AuthLayout from "@/components/layout/auth/authLayout";
 import { Button } from "@/components/ui/button";
-import { withAuthSSR } from "@/lib/api/handlerWrappers";
-import { getSupabaseServer } from "@/lib/supabaseServer";
-import { User } from "@supabase/supabase-js";
+import { dbExecute } from "@/lib/api/db/dbExecute";
+import { GetServerSidePropsContext } from "next";
 import Link from "next/link";
 import { ReactElement } from "react";
 
-export default function SlackRedirect({
-  user,
-  error,
-}: {
-  user: User;
-  error?: string;
-}) {
+export default function SlackRedirect({ error }: { error?: string }) {
   return (
     <div>
       {error ? <div>{error}</div> : <div>Slack Redirect</div>}
@@ -29,39 +22,41 @@ SlackRedirect.getLayout = function getLayout(page: ReactElement) {
   return <AuthLayout>{page}</AuthLayout>;
 };
 
-export const getServerSideProps = withAuthSSR(async (options) => {
-  const { code, state } = options.context.query;
-  const host = options.context.req.headers.host;
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  const { code, state } = context.query;
+  const host = context.req.headers.host;
 
   if (!code || !state) {
     return {
       props: {
-        user: options.userData.user,
         error: "Missing code or state",
       },
     };
   }
 
-  const { data, error } = await getSupabaseServer()
-    .from("organization")
-    .select("*")
-    .eq("id", state);
+  const { data, error } = await dbExecute<{ id: string }>(
+    `
+    SELECT id FROM organization
+    WHERE id = $1
+    `,
+    [state]
+  );
 
   if (error) {
     return {
       props: {
-        user: options.userData.user,
         error: error,
       },
     };
   }
 
-  const organization = data[0];
+  const organization = data?.[0];
 
   if (!organization) {
     return {
       props: {
-        user: options.userData.user,
         error: "Organization not found",
       },
     };
@@ -97,7 +92,6 @@ export const getServerSideProps = withAuthSSR(async (options) => {
       console.error("Failed to get access token", data);
       return {
         props: {
-          user: options.userData.user,
           error: "Failed to get access token",
         },
       };
@@ -106,29 +100,32 @@ export const getServerSideProps = withAuthSSR(async (options) => {
     console.error("Failed to get access token", error);
     return {
       props: {
-        user: options.userData.user,
         error: "Failed to get access token",
       },
     };
   }
 
-  const { data: slackData, error: slackError } = await getSupabaseServer()
-    .from("integrations")
-    .insert({
-      integration_name: "slack",
-      organization_id: organization.id,
-      settings: {
+  const { data: slackData, error: slackError } = await dbExecute<{
+    id: string;
+  }>(
+    `
+    INSERT INTO integrations (integration_name, organization_id, settings)
+    VALUES ($1, $2, $3)
+    RETURNING *
+    `,
+    [
+      "slack",
+      organization.id,
+      {
         team_id: responseData.team.id,
         access_token: responseData.access_token,
       },
-    })
-    .select("*")
-    .single();
+    ]
+  );
 
   if (slackError) {
     return {
       props: {
-        user: options.userData.user,
         error: slackError,
       },
     };
@@ -140,4 +137,4 @@ export const getServerSideProps = withAuthSSR(async (options) => {
       permanent: false,
     },
   };
-});
+};

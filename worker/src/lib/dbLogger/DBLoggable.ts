@@ -16,6 +16,7 @@ import { PromptSettings, RequestWrapper } from "../RequestWrapper";
 import { INTERNAL_ERRORS } from "../util/constants";
 import { withTimeout } from "../util/helpers";
 import { Result, err, ok } from "../util/results";
+import { CacheSettings } from "../util/cache/cacheSettings";
 import {
   anthropicAIStream,
   getModel,
@@ -24,7 +25,9 @@ import { parseOpenAIStream } from "./streamParsers/openAIStreamParser";
 
 import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 import { costOfPrompt } from "../../packages/cost";
-import { KafkaMessage, KafkaProducer } from "../clients/KafkaProducer";
+import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
+import { MessageData } from "../clients/producers/types";
+import { DEFAULT_UUID } from "../../packages/llm-mapper/types";
 
 export interface DBLoggableProps {
   response: {
@@ -239,6 +242,10 @@ export class DBLoggable {
     return await this.response.getResponseBody();
   }
 
+  getTimingStart(): number {
+    return this.timing.startTime.getTime();
+  }
+
   async tokenCounter(text: string): Promise<number> {
     return getTokenCount(text, this.provider, this.tokenCalcUrl);
   }
@@ -378,6 +385,10 @@ export class DBLoggable {
     };
   }
 
+  async getStatus() {
+    return await this.response.status();
+  }
+
   async getResponse() {
     const { body: responseBody, endTime: responseEndTime } =
       await this.response.getResponseBody();
@@ -513,10 +524,12 @@ export class DBLoggable {
       clickhouse: ClickhouseClientWrapper;
       queue: RequestResponseStore;
       requestResponseManager: RequestResponseManager;
-      kafkaProducer: KafkaProducer;
+      producer: HeliconeProducer;
     },
     S3_ENABLED: Env["S3_ENABLED"],
-    requestHeaders?: HeliconeHeaders
+    requestHeaders?: HeliconeHeaders,
+    cachedHeaders?: Headers,
+    cacheSettings?: CacheSettings
   ): Promise<
     Result<
       {
@@ -568,7 +581,14 @@ export class DBLoggable {
       console.error(`Error checking rate limit: ${e}`);
     }
 
-    await this.useKafka(db, authParams, S3_ENABLED, requestHeaders);
+    await this.useKafka(
+      db,
+      authParams,
+      S3_ENABLED,
+      requestHeaders,
+      cachedHeaders,
+      cacheSettings
+    );
 
     // THIS IS ONLY USED FOR COST CALCULATION ON RATELIMITING
     const readResponse = await this.readResponse();
@@ -602,11 +622,13 @@ export class DBLoggable {
       clickhouse: ClickhouseClientWrapper;
       queue: RequestResponseStore;
       requestResponseManager: RequestResponseManager;
-      kafkaProducer: KafkaProducer;
+      producer: HeliconeProducer;
     },
     authParams: AuthParams,
     S3_ENABLED: Env["S3_ENABLED"],
-    requestHeaders?: HeliconeHeaders
+    requestHeaders?: HeliconeHeaders,
+    cachedHeaders?: Headers,
+    cacheSettings?: CacheSettings
   ): Promise<Result<null, string>> {
     if (
       !authParams?.organizationId ||
@@ -649,7 +671,12 @@ export class DBLoggable {
       timeToFirstToken = undefined;
     }
 
-    const kafkaMessage: KafkaMessage = {
+    const cacheReferenceId =
+      cacheSettings?.shouldReadFromCache && cachedHeaders
+        ? cachedHeaders.get("Helicone-Id")
+        : DEFAULT_UUID;
+
+    const kafkaMessage: MessageData = {
       id: this.request.requestId,
       authorization: requestHeaders.heliconeAuthV2.token,
       heliconeMeta: {
@@ -672,6 +699,12 @@ export class DBLoggable {
             this.request.promptSettings.promptMode === "production"
               ? this.request.promptSettings.promptId
               : "",
+          cacheReferenceId: cacheReferenceId ?? DEFAULT_UUID,
+          cacheEnabled: requestHeaders.cacheHeaders.cacheEnabled ?? undefined,
+          cacheSeed: requestHeaders.cacheHeaders.cacheSeed ?? undefined,
+          cacheBucketMaxSize:
+            requestHeaders.cacheHeaders.cacheBucketMaxSize ?? undefined,
+          cacheControl: requestHeaders.cacheHeaders.cacheControl ?? undefined,
           promptVersion: this.request.promptSettings.promptVersion,
           properties: this.request.properties,
           heliconeApiKeyId: authParams.heliconeApiKeyId, // If undefined, proxy key id must be present
@@ -690,6 +723,7 @@ export class DBLoggable {
           experimentRowIndex:
             requestHeaders.experimentHeaders.rowIndex ?? undefined,
         },
+
         response: {
           id: this.response.responseId,
           status: await this.response.status(),
@@ -697,12 +731,19 @@ export class DBLoggable {
           timeToFirstToken,
           responseCreatedAt: endTime,
           delayMs: endTime.getTime() - this.timing.startTime.getTime(),
+          cachedLatency: cacheReferenceId == DEFAULT_UUID ? 0 : (() => {
+            try {
+              return Number(cachedHeaders?.get("Helicone-Cache-Latency") ?? 0);
+            } catch {
+              return 0;
+            }
+          })(),
         },
       },
     };
 
     // Send to Kafka or REST if not enabled
-    await db.kafkaProducer.sendMessage(kafkaMessage);
+    await db.producer.sendMessage(kafkaMessage);
 
     return ok(null);
   }
@@ -754,8 +795,10 @@ export class DBLoggable {
         promptTokens,
         completionTokens,
         provider: modelRow.provider,
-        promptCacheReadTokens: 0,
         promptCacheWriteTokens: 0,
+        promptCacheReadTokens: 0,
+        promptAudioTokens: 0,
+        completionAudioTokens: 0,
       }) ?? 0
     );
   }

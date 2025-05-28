@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { Result } from "../../../packages/common/result";
+import { Result } from "@/packages/common/result";
 import { DecryptedProviderKeyMapping } from "../../../services/lib/keys";
-import { LimitUsageResult } from "../../../pages/api/proxy_keys/usage/get";
+import { LimitUsageResult } from "@/pages/api/proxy_keys/usage/LimitUsageResult";
 
 const useLimitsCell = (limits?: DecryptedProviderKeyMapping["limits"]) => {
   const {

@@ -8,21 +8,18 @@ import { useCallback, useEffect, useState } from "react";
 import { clsx } from "../../../shared/clsx";
 import { removeLeadingWhitespace } from "../../../shared/utils/utils";
 
-import RoleButton from "../../playground/new/roleButton";
-import useNotification from "../../../shared/notification/useNotification";
 import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
+import useNotification from "../../../shared/notification/useNotification";
+import RoleButton from "../../playground/new/roleButton";
 
-import { enforceString } from "../../../../lib/helpers/typeEnforcers";
-import AddFileButton from "../../playground/new/addFileButton";
-import ThemedModal from "../../../shared/themed/themedModal";
-import MarkdownEditor from "../../../shared/markdownEditor";
-import { Message } from "@/packages/llm-mapper/types";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { Message } from "@helicone-package/llm-mapper/types";
 import { ClipboardIcon, EyeIcon, EyeOffIcon } from "lucide-react";
-import useOnboardingContext, {
-  ONBOARDING_STEPS,
-} from "@/components/layout/onboardingContext";
+import { enforceString } from "../../../../lib/helpers/typeEnforcers";
+import MarkdownEditor from "../../../shared/markdownEditor";
+import ThemedModal from "../../../shared/themed/themedModal";
+import AddFileButton from "../../playground/new/addFileButton";
 
 // Update type definitions
 type ImageUrlItem = {
@@ -534,8 +531,6 @@ const PromptChatRow = (props: PromptChatRowProps) => {
   const showMinimizeButton =
     textMessage && textMessage.text && textMessage.text.length > 100;
 
-  const { isOnboardingVisible, currentStep } = useOnboardingContext();
-
   const handleCallback = (
     content: string | undefined,
     newRole: "system" | "user" | "assistant" | "function",
@@ -574,21 +569,6 @@ const PromptChatRow = (props: PromptChatRowProps) => {
     }
     setPromptVariables(newVariables);
   };
-
-  useEffect(() => {
-    if (
-      isOnboardingVisible &&
-      currentStep === ONBOARDING_STEPS.EXPERIMENTS_ADD_CHANGE_PROMPT.stepNumber
-    ) {
-      setText(
-        contentAsString.replace(
-          "As a QA engineer, analyze the structure of the following page:",
-          "As a QA engineer, analyze the structure of the following page, I am providing the file name:"
-        )
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOnboardingVisible, currentStep, contentAsString]);
 
   if (playgroundMode === "experiment-compact") {
     return (

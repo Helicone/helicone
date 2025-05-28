@@ -1,15 +1,17 @@
+import { getSSRHeliconeAuthClient } from "@/packages/common/auth/client/getSSRHeliconeAuthClient";
+import { HeliconeAuthClient } from "@/packages/common/auth/client/HeliconeAuthClient";
+import { HeliconeUser } from "@/packages/common/auth/types";
 import {
   GetServerSideProps,
   GetServerSidePropsContext,
   NextApiRequest,
   NextApiResponse,
 } from "next";
-import { Result, err, ok } from "../../packages/common/result";
-import { SupabaseServerWrapper } from "../wrappers/supabase";
-import { User } from "@supabase/auth-helpers-nextjs";
+import { Database } from "../../db/database.types";
+import { Result, err, ok } from "@/packages/common/result";
 import { FilterNode, TimeFilter } from "../../services/lib/filters/filterDefs";
 import { Permission, Role, hasPermission } from "../../services/lib/user";
-import { Database } from "../../db/database.types";
+import { dbExecute } from "./db/dbExecute";
 
 export interface HandlerWrapperNext<RetVal> {
   req: NextApiRequest;
@@ -62,13 +64,13 @@ export class RequestBodyParser {
 }
 export interface HandlerWrapperOptions<RetVal>
   extends HandlerWrapperNext<RetVal> {
-  supabaseClient: SupabaseServerWrapper<RetVal>;
+  heliconeClient: HeliconeAuthClient;
   userData: {
     userId: string;
     orgHasOnboarded: boolean;
     orgId: string;
     org?: Database["public"]["Tables"]["organization"]["Row"];
-    user: User;
+    user: HeliconeUser;
     role: string;
   };
   body: RequestBodyParser;
@@ -80,19 +82,19 @@ export interface HandlerWrapperOptionsAPI<RetVal>
 }
 
 export function withAuth<T>(
-  handler: (supabaseServer: HandlerWrapperOptions<T>) => Promise<void>,
+  handler: (heliconeClient: HandlerWrapperOptions<T>) => Promise<void>,
   permissions?: Permission[]
 ) {
   return async (
     req: NextApiRequest,
     res: NextApiResponse<T | { error: string }>
   ) => {
-    const supabaseClient = new SupabaseServerWrapper({
-      req,
-      res,
-    });
-    const { data, error } = await supabaseClient.getUserAndOrg();
-    if (error !== null || !data.orgId || !data.userId) {
+    const client = await getSSRHeliconeAuthClient({ ctx: { req, res } });
+
+    const user = await client.getUser();
+    const org = await client.getOrg();
+
+    if (org.error || !org.data || !user.data || user.error) {
       res.status(401).json({
         error: `Unauthorized: error`,
       });
@@ -104,7 +106,7 @@ export function withAuth<T>(
       permissions &&
       permissions.length > 0 &&
       !permissions.every((permission) =>
-        hasPermission(data.role as Role, permission)
+        hasPermission(org.data.role as Role, permission)
       )
     ) {
       res.status(403).json({ error: "Forbidden" });
@@ -114,8 +116,15 @@ export function withAuth<T>(
     await handler({
       req,
       res,
-      supabaseClient,
-      userData: data,
+      heliconeClient: client,
+      userData: {
+        orgHasOnboarded: org.data.org.has_onboarded,
+        orgId: org.data.org.id,
+        org: org.data.org,
+        user: user.data,
+        role: org.data.role,
+        userId: user.data.id,
+      },
       body: new RequestBodyParser(req),
     });
   };
@@ -123,12 +132,8 @@ export function withAuth<T>(
 
 export interface HandlerWrapperOptionsSSR<RetVal> {
   context: GetServerSidePropsContext;
-  supabaseClient: SupabaseServerWrapper<RetVal>;
   userData: {
     userId: string;
-    orgId: string;
-    orgHasOnboarded: boolean;
-    user: User;
   };
 }
 
@@ -140,10 +145,11 @@ export function withAuthSSR<T>(
   return async (
     context: GetServerSidePropsContext
   ): Promise<ReturnType<GetServerSideProps>> => {
-    const supabaseClient = new SupabaseServerWrapper(context);
-    const { data, error } = await supabaseClient.getUserAndOrg();
+    const authClient = await getSSRHeliconeAuthClient({ ctx: context });
 
-    if (error !== null || !data.orgId || !data.userId) {
+    const user = await authClient.getUser();
+
+    if (user.error || !user.data) {
       return {
         redirect: {
           destination: "/signin?unauthorized=true",
@@ -153,9 +159,45 @@ export function withAuthSSR<T>(
     } else {
       return await getServerSidePropsFunc({
         context,
-        supabaseClient,
-        userData: data,
+        userData: {
+          userId: user.data.id,
+        },
       });
     }
   };
 }
+
+export const withAdminSSR = withAuthSSR(async (options) => {
+  const {
+    userData: { userId },
+  } = options;
+
+  const { data, error } = await dbExecute<{ user_id: string }>(
+    "SELECT user_id FROM admins WHERE user_id = $1",
+    [userId]
+  );
+
+  const admins = data?.map((admin) => admin.user_id || "") || [];
+
+  if (error) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+
+  if (!admins.includes(userId || "")) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {},
+  };
+});

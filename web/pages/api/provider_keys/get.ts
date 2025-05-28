@@ -2,11 +2,12 @@ import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { Result } from "../../../packages/common/result";
-import { getSupabaseServer } from "../../../lib/supabaseServer";
-import { DecryptedProviderKey } from "../../../services/lib/keys";
+import { Result } from "@/packages/common/result";
+import {
+  DecryptedProviderKey,
+  getDecryptedProviderKeysByOrgId,
+} from "../../../services/lib/keys";
 import { Role } from "../../../services/lib/user";
-import { getDecryptedProviderKeysByOrgId } from "../../../services/lib/keys";
 
 async function handler({
   req,
@@ -18,7 +19,6 @@ async function handler({
   }
 
   const { data: keys, error } = await getDecryptedProviderKeysByOrgId(
-    getSupabaseServer(),
     userData.orgId
   );
 

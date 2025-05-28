@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import { RenderMappedRequest } from "@/components/templates/requests/RenderHeliconeRequest";
-import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+import { MappedLLMRequest } from "@helicone-package/llm-mapper/types";
 import { Square2StackIcon } from "@heroicons/react/24/outline";
 import RequestRow from "./requestRow";
 
@@ -34,7 +34,7 @@ const RequestRowView = (props: RequestRowViewProps) => {
       </ul>
       {selectedRow ? (
         <div className="flex flex-col space-y-2 w-full h-full overflow-auto">
-          <RenderMappedRequest mapperContent={selectedRow} />
+          <RenderMappedRequest mappedRequest={selectedRow} />
         </div>
       ) : (
         <div className="flex flex-col space-y-4 justify-center items-center w-full h-screen bg-white border border-gray-300 dark:bg-black dark:border-gray-700 rounded-lg">

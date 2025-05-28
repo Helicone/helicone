@@ -6,6 +6,10 @@ description: "Retrieve all requests visible in the request table at Helicone."
 openapi: post /v1/request/query
 ---
 
+import EUAPIWarning from "/snippets/eu-api-warning.mdx";
+
+<EUAPIWarning />
+
 <Warning>
   This API is optimized for point queries. For bulk queries, use the [Get
   Requests (faster)](/rest/request/post-v1requestquery-clickhouse) API.

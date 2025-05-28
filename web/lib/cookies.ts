@@ -1,6 +1,6 @@
 import Cookies from "js-cookie";
+import { Result, err } from "@/packages/common/result";
 import { SUPABASE_AUTH_TOKEN } from "./constants";
-import { Result, err } from "../packages/common/result";
 
 export function getHeliconeCookie(): Result<
   {
@@ -9,6 +9,7 @@ export function getHeliconeCookie(): Result<
   string
 > {
   const authFromCookie = Cookies.get(SUPABASE_AUTH_TOKEN);
+
   if (!authFromCookie) {
     return err("No auth token found in cookie");
   }

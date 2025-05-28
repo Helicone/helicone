@@ -1,7 +1,9 @@
-import { RenderHeliconeRequest } from "@/components/templates/requests/RenderHeliconeRequest";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { HeliconeRequest, MappedLLMRequest } from "@/packages/llm-mapper/types";
-import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
+import {
+  HeliconeRequest,
+  MappedLLMRequest,
+} from "@helicone-package/llm-mapper/types";
+import { heliconeRequestToMappedContent } from "@helicone-package/llm-mapper/utils/getMappedContent";
 import React, { useMemo, useState } from "react";
 import { FaChevronRight } from "react-icons/fa";
 import { Session } from "../../../../../lib/sessions/sessionTypes";
@@ -9,9 +11,9 @@ import { useGetPropertiesV2 } from "../../../../../services/hooks/propertiesV2";
 import { useGetRequests } from "../../../../../services/hooks/requests";
 import { Col } from "../../../../layout/common/col";
 import { Row } from "../../../../layout/common/row";
-import FeedbackButtons from "../../../feedback/thumbsUpThumbsDown";
+import FeedbackAction from "../../../feedback/thumbsUpThumbsDown";
 import { CustomPropertiesCard } from "../../../requests/customProperties";
-import RequestDrawerV2 from "../../../requests/requestDrawerV2";
+import RequestDrawer from "../../../requests/RequestDrawer";
 import StatusBadge from "../../../requests/statusBadge";
 
 interface ChatSessionProps {
@@ -23,7 +25,6 @@ interface ChatSessionProps {
     originalRequest: HeliconeRequest | null;
   };
 }
-
 const ChatSession: React.FC<ChatSessionProps> = ({
   requests,
   session,
@@ -64,10 +65,10 @@ const ChatSession: React.FC<ChatSessionProps> = ({
               className="request-item mb-4 shadow-sm border-y border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950"
             >
               <div className="flex-1">
-                <RenderHeliconeRequest
-                  heliconeRequest={request}
-                  hideTopBar={true}
-                  className={""}
+                <RequestDrawer
+                  request={mappedRequest}
+                  onCollapse={() => {}}
+                  showCollapse={false}
                 />
               </div>
               <div className="lg:min-w-[350px] p-5 rounded-lg bg-slate-100 dark:bg-black">
@@ -80,8 +81,9 @@ const ChatSession: React.FC<ChatSessionProps> = ({
                         }
                         errorCode={mappedRequest.heliconeMetadata.status.code}
                       />
-                      <FeedbackButtons
-                        requestId={mappedRequest.id}
+                      <FeedbackAction
+                        id={mappedRequest.id}
+                        type="request"
                         defaultValue={
                           mappedRequest.heliconeMetadata.scores &&
                           mappedRequest.heliconeMetadata.scores[
@@ -163,12 +165,7 @@ const ChatSession: React.FC<ChatSessionProps> = ({
             </Row>
           );
         })}
-        <RequestDrawerV2
-          open={open}
-          setOpen={(open) => setOpen(open)}
-          request={requestDrawerRequest}
-          properties={properties.properties}
-        />
+        <RequestDrawer request={requestDrawerRequest} onCollapse={() => {}} />
       </div>
     </ScrollArea>
   );

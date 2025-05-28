@@ -12,7 +12,7 @@ import {
   ExperimentOutputForScores,
   ExperimentV2Manager,
 } from "../../managers/experiment/ExperimentV2Manager";
-import { HeliconeRequest, LlmSchema } from "../../packages/llm-mapper/types";
+import { HeliconeRequest, LlmSchema } from "@helicone-package/llm-mapper/types";
 import { BaseManager } from "../BaseManager";
 import { RequestManager } from "../request/RequestManager";
 import { ScoreManager } from "../score/ScoreManager";
@@ -272,6 +272,10 @@ export class EvaluatorManager extends BaseManager {
           assets: [],
           target_url: "",
           model: "gpt-3.5-turbo",
+          prompt_audio_tokens: null,
+          completion_audio_tokens: null,
+          cache_enabled: false,
+          cache_reference_id: null,
         },
       });
       if (scoreResult.error) {

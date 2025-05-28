@@ -1,0 +1,474 @@
+The real challenge with running a local LLM like Llama is understanding what's happening inside your system — how accurately your models respond to prompts, how efficiently they use resources, and how your local AI implementation is performing overall.
+
+This tutorial will show you how to gain visibility into your Llama AI local model using Helicone with Open WebUI, providing powerful monitoring capabilities for anyone looking to run local LLM systems effectively.
+
+Open WebUI (formerly Ollama WebUI) is a feature-rich, self-hosted web interface designed for interacting with various AI LLM local implementations including Llama models, OpenAI-compatible APIs, and custom LLM setups.
+
+![Open WebUI and Helicone integration](/static/blog/monitoring-local-llms/thumbnail.webp)
+
+## Table of Contents
+
+## Why Monitoring Is Essential When You Run Local LLM Systems
+
+- **Track request patterns**: See which types of prompts are being sent to your Llama AI models
+- **Measure inference latency**: Monitor how long your local LLM takes to generate responses
+- **Analyze usage patterns**: Identify how users interact with your AI LLM local implementation
+- **Evaluate model performance**: Compare different Llama models with the same prompts to optimize your setup
+- **Test locally before deploying to production**: Evaluate implementations locally before deploying to production where costs and risks are higher
+
+## Prerequisites
+
+- <a href="https://www.docker.com/get-started/" target="_blank" rel="noopener">Docker</a> installed
+- <a href="https://github.com/ollama/ollama" target="_blank" rel="noopener">Ollama</a> or another local model runner
+- A <a href="https://www.helicone.ai" target="_blank" rel="noopener">Helicone account</a>
+
+## Step-by-Step Tutorial: Setting Up Helicone to Monitor Your Local LLM with Open WebUI
+
+In this tutorial, we will create the proxy server to log every LLM request into Helicone so you can monitor and evaluate how your model responds.
+
+![Architecture diagram showing the proxy setup between OpenWebUI and local LLM](/static/blog/monitoring-local-llms/proxy-architecture.webp)
+
+### Step 1: Create a Helicone Account and Generate an API Key
+
+1. Sign up for a <a href="https://www.helicone.ai" target="_blank" rel="noopener">Helicone account</a>
+2. Navigate to the <a href="https://us.helicone.ai/settings/api-keys" target="_blank" rel="noopener">API Keys section in your Helicone dashboard settings</a>
+3. Generate a new API key for your Open WebUI integration
+
+![Helicone API Key Generation Interface](/static/blog/monitoring-local-llms/api-key-screenshot.webp)
+
+### Step 2: Set up a proxy server to log the local LLM requests to Helicone
+
+Since Open WebUI doesn't directly support custom Helicone headers, we'll need to set up a JavaScript layer to handle this integration. This allows us to monitor Llama requests made through Open WebUI.
+
+<BottomLine
+  title="Beyond Open WebUI 👀"
+  description="We will use Open WebUI as our interface to the local LLM, but you can use any other interface to make LLM requests - as long as you use the proxy server's domain as your base URL like we do below."
+/>
+
+1. **Run your Llama server locally**
+
+First, let's get your local model runner - in this case, <a href="https://ollama.com/" target="_blank" rel="noopener">Ollama</a> - set up locally.
+
+Then, in your terminal, run the following command to start running your Llama model locally.
+
+```bash
+export OLLAMA_HOST=0.0.0.0 && ollama serve
+```
+
+2. **Build the Helicone proxy server**
+
+Let's create a Node.js proxy server that will sit between Open WebUI and your AI implementation. This proxy forms the backbone of your local LLM monitoring solution, logging all requests to Helicone for analysis.
+
+<em>— You can find a <a href="https://github.com/juliettech13/helicone-ollama-proxy" target="_blank" rel="noopener">finished version of the codebase here</a>. Feel free to clone it locally and skip to the last step of this section.</em>
+
+```bash
+mkdir helicone-ollama-proxy && cd helicone-ollama-proxy
+npm init
+npm install express dotenv typescript ts-node @types/node @types/express @helicone/helpers
+touch .env && touch proxy.ts && touch tsconfig.json
+```
+
+Include your environment variables in your `.env` file:
+
+```js
+// Example
+HELICONE_API_KEY=<YOUR_HELICONE_API_KEY>
+```
+
+Define your `tsconfig.json` file with the following configurations.
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "dist",
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "allowSyntheticDefaultImports": true,
+    "removeComments": true,
+    "baseUrl": ".",
+    "paths": {
+      "*": ["node_modules/*"]
+    }
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}
+```
+
+Create a simple proxy file (`proxy.ts`) to handle the Helicone logging every time you make an LLM request using your local LLM implementation.
+
+```js
+import express, { Request, Response } from "express";
+import { HeliconeManualLogger } from "@helicone/helpers";
+
+// Define types for Ollama requests
+interface ChatMessage {
+  role: string;
+  content: string;
+}
+
+interface ChatRequest {
+  model: string;
+  messages: ChatMessage[];
+  stream?: boolean;
+  options?: Record<string, unknown>;
+}
+
+interface GenerateRequest {
+  model: string;
+  prompt: string;
+  stream?: boolean;
+  options?: Record<string, unknown>;
+}
+
+interface OllamaResponse {
+  id: string;
+  model: string;
+  created_at: string;
+  message?: {
+    role: string;
+    content: string;
+  };
+  response?: string;
+  done: boolean;
+}
+
+const app = express();
+app.use(express.json());
+
+// Initialize Helicone logger
+const logger = new HeliconeManualLogger({
+  apiKey: process.env.HELICONE_API_KEY || ""
+});
+
+// Get Ollama version
+app.get("/api/version", async (req: Request, res: Response) => {
+  try {
+    const response = await fetch("http://localhost:11434/api/version");
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error("Error fetching version:", error);
+    res.status(500).json({ error: "Failed to fetch version" });
+  }
+});
+
+// Get available tags
+app.get("/api/tags", async (req: Request, res: Response) => {
+  try {
+    const response = await fetch("http://localhost:11434/api/tags");
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error("Error fetching tags:", error);
+    res.status(500).json({ error: "Failed to fetch tags" });
+  }
+});
+
+// Proxy requests to Ollama and log them to Helicone
+app.post("/api/chat", async (req: Request, res: Response) => {
+  const reqBody = req.body as ChatRequest;
+  console.log("Received chat request:", JSON.stringify(reqBody, null, 2));
+  console.log("Forwarding to Ollama at: http://localhost:11434/api/chat");
+
+  try {
+    const result = await logger.logRequest(reqBody, async (resultRecorder) => {
+      const response = await fetch("http://localhost:11434/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(reqBody)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error("Ollama API error:", errorText)
+        throw new Error(`Ollama API error: ${response.status} ${errorText}`)
+      }
+
+      // Handle streaming response
+      const reader = response.body?.getReader()
+      const decoder = new TextDecoder()
+      let finalResponse: OllamaResponse | null = null
+      let accumulatedContent = ""
+
+      if (!reader) {
+        throw new Error("No response body received from Ollama")
+      }
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        const chunk = decoder.decode(value)
+        const lines = chunk.split('\n').filter(line => line.trim())
+
+        for (const line of lines) {
+          try {
+            const jsonResponse = JSON.parse(line) as OllamaResponse
+            if (jsonResponse.message?.content) {
+              accumulatedContent += jsonResponse.message.content
+            }
+
+            if (jsonResponse.done) {
+              // Create final response with accumulated content
+              finalResponse = {
+                ...jsonResponse,
+                message: {
+                  role: "assistant",
+                  content: accumulatedContent
+                }
+              }
+              resultRecorder.appendResults(finalResponse)
+              return finalResponse
+            }
+          } catch (parseError) {
+            console.error("Failed to parse chunk:", line)
+          }
+        }
+      }
+
+      if (!finalResponse) {
+        throw new Error("No valid response received from LLM")
+      }
+
+      return finalResponse
+    })
+
+    res.json(result)
+  } catch (error) {
+    console.error("Error:", error)
+    res.status(500).json({ error: error instanceof Error ? error.message : "Failed to process request" })
+  }
+});
+
+// Handle generation requests
+app.post("/api/generate", async (req: Request, res: Response) => {
+  const reqBody = req.body as GenerateRequest;
+  console.log("Received generate request:", JSON.stringify(reqBody, null, 2));
+  console.log("Forwarding to Ollama at: http://localhost:11434/api/generate");
+
+  try {
+    const result = await logger.logRequest(reqBody, async (resultRecorder) => {
+      const response = await fetch("http://localhost:11434/api/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(reqBody),
+      });
+
+      const resBody = (await response.json()) as OllamaResponse;
+      resultRecorder.appendResults(resBody);
+      return resBody;
+    });
+
+    res.json(result);
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Failed to process request" });
+  }
+});
+
+const PORT = 3100;
+app.listen(PORT, () => {
+  console.log(`Ollama proxy with Helicone logging running on port ${PORT}`);
+});
+```
+
+In your `package.json` file, include the following config and start script to run your proxy server locally.
+
+```json
+{
+	"name": "..",
+	...,
+	"main": "dist/proxy.js",
+	"type": "module",
+  "scripts": {
+		"build": "tsc",
+    "start": "npm run build && node -r dotenv/config dist/proxy.js",
+    "dev": "tsc -w",
+    ...
+  },
+	...
+}
+```
+
+In your terminal, start your proxy server by running the following command.
+
+```bash
+npm run start
+```
+
+3. **Run your OpenWebUI instance pointing to our proxy service as the Ollama Base URL.**
+
+Finally, update your Open WebUI configuration to point to this proxy and run your OpenWebUI instance!
+
+```bash
+# Run Open WebUI using the proxy as the LLAMA base URL
+docker run -d -p 3000:8080 --add-host=host.docker.internal:host-gateway -e OLLAMA_BASE_URL="http://host.docker.internal:3100" -v open-webui:/app/backend/data --name open-webui --restart always ghcr.io/open-webui/open-webui:main
+```
+
+### Step 3: Verify Your Monitoring Setup
+
+Once your proxy server is running and Open WebUI is configured to use it:
+
+1. Open your Helicone dashboard
+2. Go to the Requests tab
+3. Make a few test queries in your Open WebUI interface
+4. Confirm that requests appear in your Helicone dashboard
+
+You should see your Llama model requests being logged, along with their full prompts and responses.
+
+![Helicone Dashboard showing logged requests](/static/blog/monitoring-local-llms/requests-screenshot.webp)
+
+### Not using Open WebUI? That's okay!
+
+Once you have your proxy server running, feel free to use the Helicone headers anywhere in your application for enhanced monitoring.
+
+```js
+fetch("http://localhost:3100/api/chat", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "Helicone-Property-App-Context": "dashboard",
+    "Helicone-Property-User-Id": "user-123"
+  },
+  body: JSON.stringify({
+    model: "llama3",
+    messages: [{ role: "user", content: "What is the meaning of life?" }],
+    stream: true
+  })
+});
+```
+
+These custom headers enable you to pass metadata about your application context and user to Helicone, which can be used to filter and segment your monitoring data in the dashboard. To read more about Helicone's custom headers, check out the <a href="https://docs.helicone.ai/features/advanced-usage/custom-properties">documentation</a>.
+
+<CallToAction
+  title="Monitor your Llama API costs with Helicone ⚡️"
+  description="Track usage, debug model responses, and optimize your local LLM implementation."
+  primaryButtonText="Get started for free"
+  primaryButtonLink="https://www.helicone.ai/signup"
+  secondaryButtonText="Learn more"
+  secondaryButtonLink="https://docs.helicone.ai/getting-started/quick-start"
+/>
+
+## How to Get the Most from Your Open WebUI Monitoring
+
+Now that you have the basic local LLM monitoring integration set up, let's explore how to gain actionable insights into your Llama AI implementation.
+
+### Tracking Your LLM Interactions
+
+When using Llama AI models through Open WebUI with monitoring enabled, your interaction typically follows this flow:
+
+1. Your prompt is sent through the monitored interface to your local LLM
+2. The system processes your request in your LLM implementation
+3. The LLM generates a response based on your input
+4. All interactions are logged for monitoring purposes
+
+To see Llama monitoring in action:
+
+1. Create a new chat in Open WebUI
+2. Select your local Llama model
+3. Ask a variety of questions to generate diverse data
+4. Check your Helicone dashboard to analyze both queries and responses
+
+![Open WebUI interface with Llama model](https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/open-webui-gif.gif)
+
+### Debugging Llama AI Performance Issues
+
+To understand how your local LLM is performing in detail:
+
+1. In Open WebUI, enable detailed logging in settings (if available)
+2. Run different types of prompts through your system
+3. Use Helicone to track response times, token usage, and response quality
+4. Compare different configurations to optimize how you run local LLM systems
+
+## Advanced Monitoring Techniques for LLMs
+
+### Comprehensive Prompt Tracing
+
+For complex local implementations, tracking the full prompt engineering process is invaluable:
+
+1. In your Helicone dashboard, examine the complete prompts sent to your LLM
+2. Analyze the "system" messages that guide your LLM's behavior
+3. Measure how different prompt structures affect your LLM's response quality
+4. Experiment with different prompt engineering techniques and compare results in your prompts experimentation dashboard
+
+![Prompt analysis in Helicone](/static/blog/monitoring-local-llms/prompts-analysis.webp)
+
+## Best Practices for LLM Monitoring and Optimization
+
+1. **Start with fundamentals**: Begin with basic request tracking in your Open WebUI monitoring before exploring advanced metrics
+2. **Establish benchmarks**: Create a consistent set of test prompts to evaluate your AI performance
+3. **Implement regular monitoring cycles**: Check your Helicone dashboard regularly, especially after making changes to how you run local LLM systems
+4. **Focus on application-specific needs**: Track which types of prompts work best for your particular use case
+5. **Maintain comprehensive documentation**: Keep detailed records of all optimizations and their measurable impacts
+
+## How to Optimize Local LLMs Based on Monitoring Insights
+
+After collecting substantial data through your Open WebUI monitoring setup, here are practical adjustments to enhance your AI LLM local implementation:
+
+1. **Temperature Parameter Optimization**: If your AI monitoring shows inconsistent outputs, fine-tune the temperature settings
+2. **Context Window Management**: If responses are hitting token limits, adjust your prompt engineering approach
+3. **AI Model Selection**: Use monitoring data to compare performance across different sizes of LLM models
+4. **System Prompt Engineering**: Develop and test specialized system prompts that guide your LLM models behavior
+
+|                     | Small Models (7B)            | Medium Models (13B-34B)    | Large Models (70B+)          |
+| ------------------- | ---------------------------- | -------------------------- | ---------------------------- |
+| **Response Speed**  | Very Fast 🏆                 | Moderate                   | Slower                       |
+| **Resource Usage**  | Low (4-8GB VRAM) 🏆          | Medium (12-24GB VRAM)      | High (32GB+ VRAM)            |
+| **Response Quality**| Good for simple tasks        | Great for most tasks       | Superior for complex tasks 🏆 |
+| **Monitoring Focus**| Optimizing for speed         | Balancing speed/quality    | Maximizing context usage     |
+| **Ideal Use Cases** | Quick assistants, basic Q&A  | General purpose assistant  | Complex reasoning, creation  |
+
+## Conclusion: The Power of Monitoring for Your Local AI Implementation
+
+Implementing comprehensive AI monitoring with Helicone through a custom server provides insights that help optimize performance, improve accuracy, and enhance the overall experience of running your applications in the long-term.
+
+This proxy approach allows you to monitor all your AI requests, even when direct header support isn't available in your interface of choice (as is the case with Open WebUI). We can capture rich metadata about your local LLM performance, helping you make data-driven decisions about optimizations before deploying to production.
+
+As you continue to refine how you run your local AI implementation, these monitoring tools will help you build a more robust, performant, and effective implementation tailored to your specific needs.
+
+## Next Steps in Your LLM Monitoring Journey
+
+- Experiment with different AI model parameter settings to find optimal configurations
+- Test various prompt engineering techniques and compare results in your monitoring dashboard
+- Establish regular review sessions to analyze your AI monitoring data
+- Implement systematic A/B testing with different system prompts to guide your AI models
+
+Remember that the perfect way to run local LLM systems is through continuous iteration — monitor your Llama AI implementation, make adjustments based on data, and monitor again to progressively improve your system's effectiveness.
+
+### Learn more about local LLM implementation:
+
+- **<a href="https://www.helicone.ai/blog/meta-llama-3-3-70-b-instruct">Llama 3.3 just dropped — is it better than GPT-4 or Claude-Sonnet-3.5?</a>**
+- **<a href="https://www.helicone.ai/blog/open-webui-alternatives">Top Open WebUI Alternatives for Running LLMs Locally</a>**
+- **<a href="https://www.helicone.ai/blog/buy-vs-build-llm-observability">Should You Build or Buy LLM Observability?</a>**
+
+---
+
+<FAQ items={[
+  {
+    question: "How do I monitor multiple Llama models simultaneously?",
+    answer: "You can set up multiple proxy instances pointing to different model endpoints and label them with distinct properties in Helicone headers. This allows you to segment your monitoring data by model while using a unified dashboard."
+  },
+  {
+    question: "What are the hardware requirements for running local Llama models?",
+    answer: "For Llama 3.1 models: (a) 7B models: minimum 8GB RAM, 4GB VRAM. (b) 13B models: minimum 16GB RAM, 8GB VRAM. (c) 70B models: minimum 32GB RAM, 24GB VRAM (or use quantized versions)."
+  },
+  {
+    question: "Can I use this monitoring setup with other LLMs besides Llama?",
+    answer: "Yes, this monitoring architecture works with any local model accessible via API. Simply adjust the proxy endpoints to point to your specific model server, such as Mistral."
+  }
+]} />
+
+<Questions />

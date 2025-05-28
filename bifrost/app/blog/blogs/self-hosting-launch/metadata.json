@@ -1,0 +1,11 @@
+{
+  "title": "Introducing Helicone Self-Hosting",
+  "title1": "Introducing Helicone Self-Hosting: All the LLM Observability You Love, Now Behind Your Firewall - Helicone",
+  "title2": "Introducing Helicone Self-Hosting: LLM Observability Without Compromise - Helicone",
+  "description": "Deploy Helicone's powerful LLM observability platform within your own infrastructure with a single Docker command.",
+  "images": "/static/blog/self-hosting-launch/thumbanail.webp",
+  "time": "5 minute read",
+  "author": "Juliette Chevalier",
+  "date": "May 5, 2025",
+  "badge": "Product"
+}

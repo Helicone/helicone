@@ -1,4 +1,4 @@
-import { costOfPrompt } from "../../packages/cost";
+import { costOfPrompt } from "@helicone-package/cost";
 import {
   HeliconeRequestResponseToPosthog,
   PostHogEvent,
@@ -130,6 +130,8 @@ export class PostHogHandler extends AbstractLogHandler {
         provider: modelRow.provider,
         promptCacheWriteTokens: 0,
         promptCacheReadTokens: 0,
+        promptAudioTokens: 0,
+        completionAudioTokens: 0,
       }) ?? 0
     );
   }

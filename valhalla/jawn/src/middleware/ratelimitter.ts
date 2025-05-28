@@ -10,7 +10,6 @@ export let limiter: any | null = null;
 if (IS_RATE_LIMIT_ENABLED) {
   limiter = rateLimit({
     windowMs: 60 * 1000, // 1 minute
-    max: 200, // limit each Organization to 200 requests per windowMs
     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
     keyGenerator: (req) => {
@@ -20,21 +19,18 @@ if (IS_RATE_LIMIT_ENABLED) {
         "unknown"
       );
     },
+    limit: (req) => {
+      const authParams = (req as JawnAuthenticatedRequest)?.authParams;
+      if (req.path.startsWith("/v1/log")) {
+        return 1_000_000;
+      }
+      if (req.path.startsWith("/v1/trace")) {
+        return 10_000;
+      }
+      return 200;
+    },
+
     handler: (req, res, next) => {
-      postHogClient?.capture({
-        distinctId: "jawn-server",
-        event: "rate-limited",
-        properties: {
-          orgId:
-            (req as JawnAuthenticatedRequest)?.authParams?.organizationId ??
-            req.ip ??
-            "unknown",
-          wasRateLimited: true,
-          url: req.url,
-          method: req.method,
-          body: req.body,
-        },
-      });
       next();
     },
     store: new RedisStore({

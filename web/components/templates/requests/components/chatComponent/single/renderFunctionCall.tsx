@@ -1,4 +1,4 @@
-import { isJSON } from "@/packages/llm-mapper/utils/contentHelpers";
+import { isJSON } from "@helicone-package/llm-mapper/utils/contentHelpers";
 import React from "react";
 import { JsonRenderer } from "./JsonRenderer";
 

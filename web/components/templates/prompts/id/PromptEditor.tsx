@@ -1,5 +1,4 @@
 import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
-import { FreeTierLimitWrapper } from "@/components/shared/FreeTierLimitWrapper";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import useNotification from "@/components/shared/notification/useNotification";
 import AutoImprove from "@/components/shared/prompts/AutoImprove";
@@ -32,20 +31,15 @@ import { generateStream } from "@/lib/api/llm/generate-stream";
 import { processStream } from "@/lib/api/llm/process-stream";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { usePromptRunsStore } from "@/lib/stores/promptRunsStore";
-import { openaiChatMapper } from "@/packages/llm-mapper/mappers/openai/chat-v2";
+import { openaiChatMapper } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
 import {
   heliconeRequestToMappedContent,
   MAPPERS,
-} from "@/packages/llm-mapper/utils/getMappedContent";
-import { getMapperType } from "@/packages/llm-mapper/utils/getMapperType";
+} from "@helicone-package/llm-mapper/utils/getMappedContent";
+import { getMapperType } from "@helicone-package/llm-mapper/utils/getMapperType";
 import autoImprovePrompt from "@/prompts/auto-improve";
 import { PromptState, StateInputs } from "@/types/prompt-state";
-import {
-  $system,
-  $user,
-  findClosestModel,
-  findClosestProvider,
-} from "@/utils/generate";
+import { $system, $user, findClosestModelProvider } from "@/utils/generate";
 import {
   isLastMessageUser,
   isPrefillSupported,
@@ -64,7 +58,7 @@ import { autoFillInputs } from "@helicone/prompts";
 import { FlaskConicalIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { LLMRequestBody, Message } from "packages/llm-mapper/types";
+import { LLMRequestBody, Message } from "@helicone-package/llm-mapper/types";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MdKeyboardReturn } from "react-icons/md";
 import {
@@ -86,6 +80,17 @@ import { useGetRequestWithBodies } from "../../../../services/hooks/requests";
 import DeployDialog from "./DeployDialog";
 import { useExperiment } from "./hooks";
 import PromptMetricsTab from "./PromptMetricsTab";
+import { ProviderCard } from "@/components/providers/ProviderCard";
+import { providers } from "@/data/providers";
+import { useProvider } from "@/hooks/useProvider";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import Image from "next/image";
 
 type EditorMode =
   | "fromCode"
@@ -115,6 +120,7 @@ export default function PromptEditor({
   /* -------------------------------------------------------------------------- */
   const [state, setState] = useState<PromptState | null>(null);
   const [isAutoImproveOpen, setIsAutoImproveOpen] = useState(false);
+  const [isOpenRouterDialogOpen, setIsOpenRouterDialogOpen] = useState(false);
   const [isImproving, setIsImproving] = useState(false);
   const messagesScrollRef = useRef<CustomScrollbarRef>(null);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -123,6 +129,9 @@ export default function PromptEditor({
   /* -------------------------------------------------------------------------- */
   /*                                    Hooks                                   */
   /* -------------------------------------------------------------------------- */
+  const { existingKey: hasOpenRouter } = useProvider({
+    provider: providers.find((p) => p.id === "openrouter")!,
+  });
   // - Router
   const router = useRouter();
   // - Jawn Client
@@ -356,11 +365,12 @@ export default function PromptEditor({
       // 4. Deduplicate variables
       inputs = deduplicateVariables(inputs);
 
-      // Find closest provider and model
-      const provider = findClosestProvider(
-        templateData.provider || metadata?.provider || "OPENAI"
-      );
-      const model = findClosestModel(provider, templateData.model || "gpt-4");
+      // Find closest model and provider together
+      const { provider: selectedProvider, model: selectedModel } =
+        findClosestModelProvider(
+          templateData.model || "gpt-4o-mini",
+          templateData.provider || metadata?.provider
+        );
 
       // Update state with processed data
       setState({
@@ -371,13 +381,20 @@ export default function PromptEditor({
 
         messages: stateMessages,
         parameters: {
-          provider: provider,
-          model: model,
+          provider: selectedProvider,
+          model: selectedModel,
           temperature: templateData.temperature ?? undefined,
           tools: templateData.tools ?? undefined,
           max_tokens: templateData.max_tokens ?? undefined,
           reasoning_effort: templateData.reasoning_effort ?? undefined,
           stop: templateData.stop ?? undefined,
+          response_format:
+            templateData.response_format?.type === "json_schema"
+              ? {
+                  type: "json_schema",
+                  json_schema: templateData.response_format.json_schema,
+                }
+              : undefined,
         },
         inputs,
         evals: metadata?.evals ?? [],
@@ -725,6 +742,7 @@ export default function PromptEditor({
         template: state.messages,
       }),
     });
+    console.log("Run Template:", runTemplate);
 
     // 6. EXECUTE
     try {
@@ -959,23 +977,32 @@ export default function PromptEditor({
             const mappedContent = heliconeRequestToMappedContent(
               requestData.data
             );
-            const provider = findClosestProvider(
-              mappedContent.schema.request.provider || "OPENAI"
-            );
-            const model = findClosestModel(
-              provider,
-              mappedContent.schema.request.model || "gpt-4"
-            );
+
+            const { provider: requestProvider, model: requestModel } =
+              findClosestModelProvider(
+                mappedContent.schema.request.model || "gpt-4o-mini",
+                mappedContent.schema.request.provider
+              );
 
             setState({
               messages: mappedContent.schema.request.messages || [],
               parameters: {
-                provider: provider,
-                model: model,
+                provider: requestProvider,
+                model: requestModel,
                 temperature:
                   mappedContent.schema.request.temperature ?? undefined,
                 max_tokens:
                   mappedContent.schema.request.max_tokens ?? undefined,
+                response_format:
+                  mappedContent.schema.request.response_format?.type ===
+                  "json_schema"
+                    ? {
+                        type: "json_schema",
+                        json_schema:
+                          mappedContent.schema.request.response_format
+                            .json_schema,
+                      }
+                    : undefined,
                 tools: mappedContent.schema.request.tools ?? undefined,
                 reasoning_effort:
                   mappedContent.schema.request.reasoning_effort ?? undefined,
@@ -999,19 +1026,17 @@ export default function PromptEditor({
 
         case "fromPlayground":
           if (basePrompt) {
-            const provider = findClosestProvider(
-              basePrompt.metadata.provider || "OPENAI"
-            );
-            const model = findClosestModel(
-              provider,
-              basePrompt.body.model || "gpt-4o-mini"
-            );
+            const { provider: baseProvider, model: baseModel } =
+              findClosestModelProvider(
+                basePrompt.body.model || "gpt-4o-mini",
+                basePrompt.metadata.provider
+              );
 
             setState({
               messages: basePrompt.body.messages || [],
               parameters: {
-                provider: provider,
-                model: model,
+                provider: baseProvider,
+                model: baseModel,
                 temperature: basePrompt.body.temperature ?? undefined,
                 max_tokens: basePrompt.body.max_tokens ?? undefined,
                 tools: basePrompt.body.tools ?? undefined,
@@ -1113,7 +1138,7 @@ export default function PromptEditor({
   return (
     <main className="relative flex flex-col h-screen">
       {/* Header */}
-      <div className="h-16 bg-slate-100 dark:bg-slate-900 flex flex-row items-center justify-between px-4 py-2.5 z-50 border-b border-slate-200 dark:border-slate-800">
+      <div className="h-16 shrink-0 bg-slate-100 dark:bg-slate-900 flex flex-row items-center justify-between px-4 py-2.5 z-50 border-b border-slate-200 dark:border-slate-800">
         {/* Left Side: Navigation */}
         <div className="flex flex-row items-center gap-2">
           {/* Back Button */}
@@ -1205,6 +1230,42 @@ export default function PromptEditor({
 
         {/* Right Side: Actions */}
         <div className="flex flex-row items-center gap-2">
+          {/* OpenRouter Dialog */}
+          <Dialog
+            open={isOpenRouterDialogOpen}
+            onOpenChange={setIsOpenRouterDialogOpen}
+          >
+            <DialogTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <Image
+                  src="/assets/home/providers/openrouter.jpg"
+                  alt="OpenRouter"
+                  className="h-4 w-4 rounded-sm"
+                  width={16}
+                  height={16}
+                />
+                Configure OpenRouter
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-xl">
+              <DialogHeader>
+                <DialogTitle>Configure OpenRouter</DialogTitle>
+              </DialogHeader>
+              <div className="mb-4 text-sm text-muted-foreground">
+                OpenRouter provides access to multiple LLM models through a
+                single API. Set up your OpenRouter API key to unlock all
+                available models in the prompt editor.
+              </div>
+              <ProviderCard
+                provider={providers.find((p) => p.id === "openrouter")!}
+              />
+            </DialogContent>
+          </Dialog>
+
           {/* Auto-Improve Button */}
           {editorMode === "fromEditor" && (
             <Button
@@ -1242,33 +1303,37 @@ export default function PromptEditor({
           )}
 
           {/* Run & Save Button */}
-          {editorMode === "fromEditor" && state.isDirty ? (
-            <FreeTierLimitWrapper
-              feature="prompts"
-              subfeature="versions"
-              itemCount={versionCount}
-            >
+          <Tooltip>
+            <TooltipTrigger asChild>
               <Button
                 className={`${
                   isStreaming
                     ? "bg-red-500 hover:bg-red-500/90 dark:bg-red-500 dark:hover:bg-red-500/90 text-white hover:text-white"
                     : ""
                 }`}
-                variant="action"
+                variant={editorMode === "fromEditor" ? "action" : "outline"}
                 size="sm"
-                disabled={!canRun}
-                onClick={handleSaveAndRun}
+                disabled={
+                  // please forgive me for this, it is a mess just need to get something quick out - Justin
+                  !canRun && !(state.isDirty && editorMode === "fromEditor")
+                }
+                onClick={
+                  hasOpenRouter
+                    ? handleSaveAndRun
+                    : () => setIsOpenRouterDialogOpen(true)
+                }
               >
-                {isStreaming ? (
-                  <PiStopBold className="h-4 w-4 mr-2" />
-                ) : (
-                  <PiPlayBold className="h-4 w-4 mr-2" />
-                )}
+                {hasOpenRouter &&
+                  (isStreaming ? (
+                    <PiStopBold className="h-4 w-4 mr-2" />
+                  ) : (
+                    <PiPlayBold className="h-4 w-4 mr-2" />
+                  ))}
                 <span className="mr-2">
                   {isStreaming
                     ? "Stop"
                     : state.isDirty && editorMode === "fromEditor"
-                    ? "Save & Run"
+                    ? `Save${hasOpenRouter ? " & Run" : ""}`
                     : "Run"}
                 </span>
                 {isStreaming && (
@@ -1279,40 +1344,13 @@ export default function PromptEditor({
                   <MdKeyboardReturn className="h-4 w-4" />
                 </div>
               </Button>
-            </FreeTierLimitWrapper>
-          ) : (
-            <Button
-              className={`${
-                isStreaming
-                  ? "bg-red-500 hover:bg-red-500/90 dark:bg-red-500 dark:hover:bg-red-500/90 text-white hover:text-white"
-                  : ""
-              }`}
-              variant={editorMode === "fromEditor" ? "action" : "outline"}
-              size="sm"
-              disabled={!canRun}
-              onClick={handleSaveAndRun}
-            >
-              {isStreaming ? (
-                <PiStopBold className="h-4 w-4 mr-2" />
-              ) : (
-                <PiPlayBold className="h-4 w-4 mr-2" />
-              )}
-              <span className="mr-2">
-                {isStreaming
-                  ? "Stop"
-                  : state.isDirty && editorMode === "fromEditor"
-                  ? "Save & Run"
-                  : "Run"}
-              </span>
-              {isStreaming && (
-                <PiSpinnerGapBold className="h-4 w-4 mr-2 animate-spin" />
-              )}
-              <div className="flex items-center gap-0.5 text-sm opacity-60">
-                <PiCommandBold className="h-4 w-4" />
-                <MdKeyboardReturn className="h-4 w-4" />
-              </div>
-            </Button>
-          )}
+            </TooltipTrigger>
+            {!hasOpenRouter && (
+              <TooltipContent side="bottom">
+                Add OpenRouter API Key to use this feature
+              </TooltipContent>
+            )}
+          </Tooltip>
 
           {/* Experiment Button */}
           {promptId && (

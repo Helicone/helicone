@@ -1,0 +1,239 @@
+OpenAI just dropped their latest models: **o3** and **o4-mini**, representing a significant shift in how AI tools can reason and use tools autonomously. 
+
+These models bridge the gap between specialized reasoning and practical tool use in ways that make their predecessors feel noticeably limited.
+
+![OpenAI o3 and o4-mini](/static/blog/o3-and-o4-mini-for-developers/openai-o3-and-o4-mini.webp)
+
+In this blog, we will explore the capabilities, benchmarks, and how you can shift to using them in your production apps right away (safely) with Helicone. Let's dive in!
+
+## Table Of Contents
+
+## What's New?
+
+- **Full tool access**: Unlike previous reasoning models, o3 and o4-mini can use *every* tool within ChatGPT—web search, Python, image analysis, file interpretation, and image generation.
+- **Agentic capabilities**: These models can make dozens or even hundreds of tool calls in sequence, thinking through complex problems step by step. You'd want to **keep a close eye on token use** with Helicone.
+- **"Thinking with images"**: They can directly incorporate images into their reasoning, manipulating and analyzing visual data as part of their thought process.
+- **Substantial improvements**: o3 makes 20% fewer major errors than o1 on difficult real-world tasks, while o4-mini provides similar benefits to o3-mini but at a fraction of the cost.
+- **Codex CLI**: A lightweight coding agent that runs in your terminal, leveraging models like o3 and o4-mini. Quite similar to the much earlier <a href="https://www.helicone.ai/blog/evaluating-claude-code" target="_blank" rel="noopener">Claude Code</a>.
+
+<BottomLine
+  title="💡 How are o3 and o4-mini different from previous models?"
+  description="Unlike earlier o-series models that could only reason internally, o3 and o4-mini can actively use tools during their reasoning process. This creates a feedback loop where the model can evaluate its own outputs, verify information, and iterate until it reaches a solid answer."
+/>
+
+## o3 and o4-mini Performance Benchmarks
+
+| Benchmark | What It Tests | o3 | o4-mini | o1 | o3-mini |
+|-----------|---------------|-----|---------|-----|---------|
+| **AIME 2024** | High school competition-level mathematics problems | 91.6% | **93.4%** | 74.3% | 87.3% |
+| **AIME 2025** | Most recent competition math (more challenging) | 88.9% | **92.7%** | 79.2% | 86.5% |
+| **Codeforces** | Competitive programming problems (higher ELO = better) | 2706 ELO | **2719 ELO** | 1891 ELO | 2073 ELO |
+| **GPQA Diamond** | Graduate-level physics, chemistry and biology questions | **83.3%** | 81.4% | 78.0% | 77.0% |
+| **MMMU** | College-level visual problem solving across multiple domains | **82.9%** | 81.6% | 77.6% | N/A |
+| **SWE-Bench Verified** | Solving real-world GitHub issues in production codebases | **69.1%** | 68.1% | 48.9% | 49.3% |
+| **SWE-Lancer** | Real-world Upwork freelance coding tasks earnings | **$65,250** | $56,375 | $28,500 | $17,375 |
+
+The numbers tell a clear story, but it gets even more interesting when you add tools to the mix:
+
+- With a Python interpreter, o4-mini achieves a **99.5%** first pass score on AIME 2025
+- On BrowseComp (a benchmark testing agentic web browsing abilities for complex research tasks), o3 with Python and web search scores 49.7%, compared to GPT-4o's 1.9%
+
+## Real-World Capabilities & Developer Reaction
+
+### "Thinking with Images"
+
+<video width="100%" controls autoplay loop>
+  <source
+    src="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/Thinking+with+Images.mp4"
+    type="video/mp4"
+  />
+  Your browser does not support the video tag.
+</video>
+
+One of the most impressive features is how these models can "think with images." They don't just see an image—they work with it directly in their chain of thought.
+
+This capability allows the models to:
+- Analyze blurry, reversed, or low-quality images
+- Manipulate images (crop, zoom, rotate) as part of their reasoning
+- Interpret whiteboard diagrams, textbook pages, or hand-drawn sketches
+- Infer non-obvious information, such as location, via thorough image analysis
+
+Here are some examples:
+
+### 1. Zooming Into Images
+
+![o3 zooming into image](/static/blog/o3-and-o4-mini-for-developers/zooming-into-images.webp)
+
+_Source: <a href="https://x.com/danshipper/status/1912552321650672078" target="_blank" rel="noopener">Dan Shipper on X</a>_
+
+### 2. Guessing Locations (like GeoGuessr)
+
+![o3 zooming into image](/static/blog/o3-and-o4-mini-for-developers/guessing-location-1.webp)
+
+![o3 zooming into image](/static/blog/o3-and-o4-mini-for-developers/guessing-location-2.webp)
+
+_Source: <a href="https://x.com/emollick/status/1912726124913623143" target="_blank" rel="noopener">Ethan Mollick on X</a>_
+
+### 3. Counting Rocks
+
+They're not perfect, though. Interestingly, Gemini 2.5 counted correctly in way less time.
+
+![o3 counting rocks](/static/blog/o3-and-o4-mini-for-developers/o3-counting-rocks.webp)
+
+### 4. Scientific Problem-Solving
+
+o3 excels at complex scientific math tasks that stumped previous models:
+
+```
+Problem: Construct a degree 19 polynomial p(x) in ℂ[x] such that X := {p(x) = p(y)} ⊂ ℙ¹ × ℙ¹ has at least 3 (but not all linear) irreducible components over ℂ. Choose p(x) to be odd, monic, have real coefficients and linear coefficient (-19) and calculate p(19).
+```
+
+While o1 struggled to produce a correct solution, o3 methodically worked through the problem, breaking it down into steps, identifying the right approach using Dickson polynomials, and arriving at the correct answer: `1,876,572,071,974,094,803,391,179`.
+
+## o3 and o4-mini Pricing
+
+| Model | Input Cost | Output Cost | 
+|-------|------------|-------------|
+| **o3** | $10 / 1M tokens | $40 / 1M tokens |  
+| **o4-mini** | $1.10 / 1M tokens | $4.40 / 1M tokens | 
+| **o1** | $15.00 / 1M tokens | $60.00 / 1M tokens | 
+| **o3-mini** | $3.00 / 1M tokens | $12.00 / 1M tokens | 
+
+<BottomLine
+  title="Developer Tip 💡"
+  description="o4-mini IS the model to use in terms of price vs performance. It's 63% cheaper than o3-mini, and almost a tenth of the cost of o3, yet performs on par with it!"
+/>
+
+## How to Access o3 and o4-mini
+
+Both models can be accessed:
+
+- **Via ChatGPT**: Available now for Plus, Pro, and Team users. Enterprise and Edu users will get access within one week. Free users can try o4-mini by selecting **'Think'** in the composer before submitting. ChatGPT users can also choose the o4-mini-high variant for greater thinking effort.
+- **Via API**: Available via Chat Completions API and Responses API. Rolling out gradually so not all developers get access immediately. Users can perform an <a href="https://help.openai.com/en/articles/10910291-api-organization-verification" target="_blank" rel="noopener">organization verification</a> to gain access if they currently don't have it.
+
+**o3-pro** (like o1-pro for o3) is expected to launch sometime later.
+
+If you are interested in how to prompt these models better, <a href="https://www.helicone.ai/blog/prompt-thinking-models" target="_blank" rel="noopener">here's a good read</a>.
+
+{/* ## o3 and o4-mini vs Gemini 2.5 vs Claude 3.7 Sonnet */}
+{/* will write this when theres better info */}
+
+## How to Switch your Apps to OpenAI o3 and o4-mini
+
+Making the leap to a new model can be nerve-wracking, especially if you're running production apps with thousands of users. 
+
+With Helicone, however, you can greatly reduce any potential migration risks. Here's how to go about it without disrupting your services:
+
+1. **Log your current model requests**: Log at least 100 requests in your Helicone dashboard from your app's current model. This creates your performance baseline.
+2. **Compare performance**: Test o3 or o4-mini against your current model using identical prompts and inputs. Use Helicone's <a href="https://docs.helicone.ai/features/prompts/editor" target="_blank" rel="noopener">Prompt Editor</a> or <a href="https://docs.helicone.ai/features/experiments" target="_blank" rel="noopener">Experiments</a> feature for systematic comparison.
+3. **Analyze results**: Compare outputs, costs, and latency between your current model and o3 or o4-mini side-by-side. Pay special attention to how o3 and o4-mini handle any reasoning tasks and tool use in your applications.
+4. **Roll out gradually**: Shift traffic from your current model to o3 or o4-mini incrementally using Helicone's routing features. Start with 10% traffic to the new model and increase as you build confidence. Monitor performance metrics continuously.
+
+You can follow <a href="https://www.helicone.ai/blog/switch-to-deepseek" target="_blank" rel="noopener">this guide</a> for more detailed instructions! 
+
+<CallToAction
+  title="Reduce o3 & o4-mini costs with Helicone ⚡️"
+  description="o3 and o4-mini are very capable reasoning models, which makes them even more token-hungry. Track their performance, costs, and usage patterns with just one line of code and save on API costs by up to 70%."
+  primaryButtonText="Start Free Trial (No card required)"
+  primaryButtonLink="https://helicone.ai/signup"
+  secondaryButtonText="Read the Docs"
+  secondaryButtonLink="https://docs.helicone.ai/integrations/openai/javascript"
+>
+```javascript
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: `https://oai.helicone.ai/v1`,
+  defaultHeaders: {
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+  }
+});
+
+const response = await openai.chat.completions.create({
+  model: "o4-mini", // or "o3"
+  messages: [
+    {role: "user", content: "Analyze this data and create a visualization"}
+  ]
+});
+```
+</CallToAction>
+
+{/* Should i break into separate piece like last time? */}
+
+## Codex CLI: AI Development in Your Terminal
+
+Alongside o3 and o4-mini, OpenAI released <a href="https://github.com/openai/codex" target="_blank" rel="noopener">Codex CLI</a>—an open-source coding agent that runs directly from your terminal. 
+
+![Codex demo](https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/codex-demo.gif)
+
+Codex is built to leverage the reasoning capabilities of these new models, allowing developers to:
+- Execute tasks on your computer through natural language
+- Process screenshots or hand-drawn sketches to build applications
+- Safely run commands and edit files in a sandboxed environment
+
+### Getting Started with Codex
+
+Installation is straightforward:
+
+```bash
+npm install -g @openai/codex
+```
+
+After setting your OpenAI API key, you can immediately start using it:
+
+```bash
+codex "explain this codebase to me"
+```
+
+Or in "full automation" mode:
+
+```bash
+codex --approval-mode full-auto "create a flash card app with React"
+```
+
+<BottomLine
+  title="Security First 💡"
+  description="Even in full-auto mode, Codex runs network-disabled and sandboxed to the current directory. For macOS, it uses Apple Seatbelt sandboxing; on Linux, you can run it in a Docker container for additional isolation."
+/>
+
+**Fun fact:** To support developers using Codex, OpenAI announced a <a href="https://openai.com/form/codex-open-source-fund/" target="_blank" rel="noopener">$1 million initiative</a> for open-source projects, offering grants of $25,000 in API credits.
+
+## Key Takeaway
+
+{/* o3 and o4-mini represent a significant leap forward in AI capabilities—not just in raw performance, but in how these models can autonomously work through complex problems by combining reasoning and tool use. */}
+
+OpenAI's roadmap is becoming clearer. They're converging the specialized reasoning capabilities of the o-series with the conversational abilities of the GPT series. By unifying these strengths, future models (i.e. GPT-5) will likely support seamless conversations alongside proactive tool use and advanced problem-solving.
+
+But there's a bigger strategic shift happening. OpenAI appears to be making an **aggressive push to win over developers**—traditionally Anthropic's strong point. 
+
+Consider that Codex was made open source, their relentless focus on lower pricing and tool use, and their potential <a href="https://www.cnbc.com/2024/04/16/openai-in-talks-to-pay-about-3-billion-to-acquire-startup-windsurf.html" target="_blank" rel="noopener">acquisition of Windsurf</a>—it's quite clear that they're positioning themselves to take Anthropic's seat as the **AI provider for developers**.
+
+### You might also be interested in:
+
+- <a href="https://www.helicone.ai/blog/openai-gpt-5" target="_blank" rel="noopener">GPT-5: Release Date, Features & Everything You Need to Know</a>
+- <a href="https://www.helicone.ai/blog/gpt-4.1-full-developer-guide" target="_blank" rel="noopener">GPT-4.1 Released: Benchmarks, Performance, and How to Safely Migrate to Production</a>
+- <a href="https://www.helicone.ai/blog/claude-3.5-sonnet-vs-openai-o1" target="_blank" rel="noopener">Claude 3.5 Sonnet vs OpenAI o1: A Comprehensive Comparison</a>
+
+<FAQ 
+  items={[
+    {
+      question: "What's the difference between o3 and o4-mini?",
+      answer: "o3 is OpenAI's most powerful reasoning model, while o4-mini is a smaller, more efficient model that's still remarkably capable. o4-mini is faster and significantly cheaper, making it suitable for high-volume applications, while o3 delivers the absolute highest quality for complex tasks."
+    },
+    {
+      question: "How do I decide between o3, o4-mini, and GPT-4.5?",
+      answer: "Use o3 for complex reasoning tasks requiring multiple tool calls, o4-mini for similar reasoning needs but with budget constraints, and GPT-4.5 for natural conversations and cases where emotional intelligence is more important than step-by-step reasoning."
+    },
+    {
+      question: "What is o3 and o4-mini's context window?",
+      answer: "Both o3 and o4-mini have a 200,000 token context window."
+    },
+    {
+      question: "What tools can o3 and o4-mini use?",
+      answer: "They can use all tools available in ChatGPT, including web search, Python for data analysis, image analysis, file interpretation, and even image generation. They can also combine these tools in multi-step sequences."
+    },
+    {
+      question: "How is Codex CLI different from other coding assistants?",
+      answer: "Codex CLI runs directly in your terminal with access to your local files and can execute commands on your behalf in a sandboxed environment. Unlike web-based assistants, it integrates directly with your development workflow and local codebase."
+    }
+  ]}
+/>

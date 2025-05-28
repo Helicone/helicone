@@ -46,4 +46,44 @@ export const costs: ModelRow[] = [
       completion_token: 0.00001,
     },
   },
+  {
+    model: {
+      operator: "equals",
+      value: "grok-3",
+    },
+    cost: {
+      prompt_token: 0.000003,
+      completion_token: 0.000015,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "grok-3-fast",
+    },
+    cost: {
+      prompt_token: 0.000003,
+      completion_token: 0.000025,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "grok-3-mini",
+    },
+    cost: {
+      prompt_token: 0.0000003,
+      completion_token: 0.0000005,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "grok-3-mini-fast",
+    },
+    cost: {
+      prompt_token: 0.0000006,
+      completion_token: 0.000004,
+    },
+  },
 ];

@@ -282,7 +282,6 @@ const costs: ModelRow[] = [
     },
     showInPlayground: true,
   },
-
   {
     model: {
       operator: "equals",
@@ -562,9 +561,296 @@ const costs: ModelRow[] = [
     },
     showInPlayground: true,
   },
+  {
+    model: {
+      operator: "equals",
+      value: "o3-2025-04-16",
+    },
+    cost: {
+      prompt_token: 0.00001,
+      completion_token: 0.00004,
+      prompt_cache_read_token: 0.0000025,
+    },
+    showInPlayground: true,
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "gpt-4.1",
+    },
+    cost: {
+      prompt_token: 0.000002,
+      completion_token: 0.000008,
+      prompt_cache_read_token: 0.0000005,
+    },
+    showInPlayground: true,
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "gpt-4.1-2025-04-14",
+    },
+    cost: {
+      prompt_token: 0.000002,
+      completion_token: 0.000008,
+      prompt_cache_read_token: 0.0000005,
+    },
+    showInPlayground: true,
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "gpt-4.1-mini",
+    },
+    cost: {
+      prompt_token: 0.0000004,
+      completion_token: 0.0000016,
+      prompt_cache_read_token: 0.0000001,
+    },
+    showInPlayground: true,
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "gpt-4.1-mini-2025-04-14",
+    },
+    cost: {
+      prompt_token: 0.0000004,
+      completion_token: 0.0000016,
+      prompt_cache_read_token: 0.0000001,
+    },
+    showInPlayground: true,
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "gpt-4.1-nano",
+    },
+    cost: {
+      prompt_token: 0.0000001,
+      completion_token: 0.0000004,
+      prompt_cache_read_token: 0.000000025,
+    },
+    showInPlayground: true,
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "gpt-4.1-nano-2025-04-14",
+    },
+    cost: {
+      prompt_token: 0.0000001,
+      completion_token: 0.0000004,
+      prompt_cache_read_token: 0.000000025,
+    },
+    showInPlayground: true,
+  },
+  {
+    model: {
+      operator: "includes",
+      value: "gpt-4o-realtime",
+    },
+    cost: {
+      prompt_token: 0.000005,
+      completion_token: 0.00002,
+      prompt_audio_token: 0.00004,
+      completion_audio_token: 0.00008,
+      prompt_cache_read_token: 0.0000025,
+    },
+  },
+  {
+    model: {
+      operator: "includes",
+      value: "gpt-4o-mini-realtime",
+    },
+    cost: {
+      prompt_token: 0.00000015,
+      completion_token: 0.0000006,
+      prompt_audio_token: 0.00001,
+      completion_audio_token: 0.00002,
+    },
+  },
+  {
+    model: {
+      operator: "includes",
+      value: "o4-mini",
+    },
+    cost: {
+      prompt_token: 0.0000011,
+      completion_token: 0.0000044,
+    },
+    showInPlayground: true,
+  },
+  {
+    model: {
+      operator: "includes",
+      value: "o4-mini-2025-04-16",
+    },
+    cost: {
+      prompt_token: 0.0000011,
+      completion_token: 0.0000044,
+    },
+    showInPlayground: true,
+  },
 ];
 
 const modelDetails: ModelDetailsMap = {
+  "gpt-4.1": {
+    matches: ["gpt-4.1", "gpt-4.1-2025-04-14"],
+    searchTerms: ["gpt 4.1", "gpt-4.1", "chat gpt 4.1", "4.1", "chat 4.1"],
+    info: {
+      maxTokens: 1000000,
+      releaseDate: "2025-04-14",
+      description:
+        "GPT-4.1 is OpenAI's latest flagship model, offering major improvements in coding, instruction following, and long context understanding with up to 1 million tokens of context.",
+      tradeOffs: [
+        "Higher resource requirements than smaller models",
+        "More costly than mini and nano variants",
+        "May be more literal in instruction following",
+      ],
+      benchmarks: {
+        mmlu: 0.902,
+        hellaswag: 0.96,
+        swe_bench: 0.546,
+        gpqa: 0.663,
+        multicballenge: 0.383,
+        ifeval: 0.874,
+      },
+      capabilities: [
+        "Advanced coding skills (54.6% on SWE-bench Verified)",
+        "Improved instruction following (38.3% on MultiChallenge)",
+        "Long context understanding (1M tokens)",
+        "Vision processing capabilities",
+        "Reliable code diff handling",
+      ],
+      strengths: [
+        "Superior coding performance (21.4% better than GPT-4o)",
+        "Excellent long-context comprehension",
+        "Enhanced instruction following reliability",
+        "Better frontend coding with aesthetic results",
+        "Less prone to extraneous code edits (2% vs 9% with GPT-4o)",
+      ],
+      weaknesses: [
+        "Can be more literal in instruction following",
+        "First token latency of ~15s with 128K tokens",
+        "Requires specific prompting for best results",
+      ],
+      recommendations: [
+        "Complex software engineering tasks",
+        "Working with large codebases",
+        "Frontend development and web applications",
+        "Multi-document processing (legal, financial)",
+        "Building reliable agents with long contexts",
+      ],
+    },
+  },
+  "gpt-4.1-mini": {
+    matches: ["gpt-4.1-mini", "gpt-4.1-mini-2025-04-14"],
+    searchTerms: [
+      "gpt 4.1 mini",
+      "gpt-4.1-mini",
+      "chat gpt 4.1 mini",
+      "4.1 mini",
+      "chat 4.1 mini",
+    ],
+    info: {
+      maxTokens: 1000000,
+      releaseDate: "2025-04-14",
+      description:
+        "GPT-4.1 Mini is a significant leap in small model performance, matching or exceeding GPT-4o in many benchmarks while reducing latency by nearly half and cost by 83%.",
+      tradeOffs: [
+        "Lower cost than GPT-4.1 ($0.40/1M tokens input vs $2.00/1M)",
+        "Reduced latency compared to GPT-4.1",
+        "Better performance-to-cost ratio",
+      ],
+      benchmarks: {
+        mmlu: 0.875,
+        hellaswag: 0.92,
+        mathvista: 0.731,
+        gpqa: 0.65,
+        multicballenge: 0.358,
+      },
+      capabilities: [
+        "Strong coding abilities (23.6% on SWE-bench Verified)",
+        "Excellent vision capabilities (often beating GPT-4o)",
+        "Long context processing (1M tokens)",
+        "Good instruction following",
+        "Efficient resource utilization",
+      ],
+      strengths: [
+        "Significantly outperforms GPT-4o mini",
+        "Matches or exceeds GPT-4o on intelligence evaluations",
+        "Exceptional vision performance (73.1% on MathVista)",
+        "Lower latency with large context windows",
+        "Cost-effective for production deployments",
+      ],
+      weaknesses: [
+        "Lower performance on complex coding tasks than GPT-4.1",
+        "Reduced function calling capability (49.3% on ComplexFuncBench)",
+      ],
+      recommendations: [
+        "Production applications requiring good performance-to-cost ratio",
+        "Image understanding and visual tasks",
+        "Applications with latency requirements",
+        "Standard software development tasks",
+        "Cost-sensitive deployments with long context needs",
+      ],
+    },
+  },
+  "gpt-4.1-nano": {
+    matches: ["gpt-4.1-nano", "gpt-4.1-nano-2025-04-14"],
+    searchTerms: [
+      "gpt 4.1 nano",
+      "gpt-4.1-nano",
+      "chat gpt 4.1 nano",
+      "4.1 nano",
+      "chat 4.1 nano",
+    ],
+    info: {
+      maxTokens: 1000000,
+      releaseDate: "2025-04-14",
+      description:
+        "GPT-4.1 Nano is OpenAI's fastest and cheapest model, delivering exceptional performance for its size with a 1 million token context window, ideal for classification and autocompletion tasks.",
+      tradeOffs: [
+        "Lowest cost in the GPT-4.1 series ($0.10/1M tokens input)",
+        "Fastest response time (under 5 seconds for 128K tokens)",
+        "Performance trade-off for speed and cost",
+      ],
+      benchmarks: {
+        mmlu: 0.801,
+        gpqa: 0.503,
+        aider_polyglot: 0.098,
+        hellaswag: 0.88,
+        ifeval: 0.745,
+      },
+      capabilities: [
+        "Fast response time (first token in <5s for 128K tokens)",
+        "Long context window (1M tokens)",
+        "Basic vision capabilities",
+        "Classification and autocompletion tasks",
+        "Simple instruction following",
+      ],
+      strengths: [
+        "Outperforms GPT-4o mini on key benchmarks",
+        "Extremely cost-effective",
+        "Lowest latency of the GPT-4.1 family",
+        "Ideal for high-volume, latency-sensitive applications",
+        "Cost-efficient for classification tasks",
+      ],
+      weaknesses: [
+        "Limited complex reasoning compared to larger models",
+        "Poor function calling ability (0.6% on ComplexFuncBench)",
+        "Basic coding capabilities",
+      ],
+      recommendations: [
+        "Classification tasks",
+        "Autocompletion features",
+        "High-volume production deployments",
+        "Applications with strict latency requirements",
+        "Cost-sensitive implementations",
+      ],
+    },
+  },
   "gpt-4": {
     matches: [
       "gpt-4",

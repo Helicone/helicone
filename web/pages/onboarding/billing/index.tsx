@@ -64,7 +64,7 @@ export default function BillingPage() {
 
   const subscription = useQuery({
     queryKey: ["subscription", createdOrgId],
-    queryFn: async (query) => {
+    queryFn: async (query: any) => {
       const jawn = getJawnClient();
       const subscription = await jawn.GET("/v1/stripe/subscription");
       return subscription;
@@ -118,7 +118,7 @@ export default function BillingPage() {
     // Reset client secret when dependencies change
     setClientSecret(null);
     createCheckoutSession();
-  }, [createdOrgId, draftPlan, draftMembers.length, draftAddons]); // Include all dependencies that should trigger a new checkout session
+  }, [createdOrgId, draftPlan, draftMembers.length, draftAddons]);
 
   if (subscription.isLoading) {
     return (

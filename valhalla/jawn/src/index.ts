@@ -4,6 +4,7 @@ import "./lib/env";
 import bodyParser from "body-parser";
 import express, { Request as ExpressRequest, NextFunction } from "express";
 import swaggerUi from "swagger-ui-express";
+import cors from "cors";
 import { proxyRouter } from "./controllers/public/proxyController";
 import { ENVIRONMENT } from "./lib/clients/constant";
 import {
@@ -23,7 +24,8 @@ import { RegisterRoutes as registerPublicTSOARoutes } from "./tsoa-build/public/
 import * as publicSwaggerDoc from "./tsoa-build/public/swagger.json";
 import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
-import { startConsumers } from "./workers/consumerInterface";
+import { startConsumers, startSQSConsumers } from "./workers/consumerInterface";
+import { IS_ON_PREM } from "./constants/IS_ON_PREM";
 
 if (ENVIRONMENT === "production" || process.env.ENABLE_CRON_JOB === "true") {
   runMainLoops();
@@ -56,6 +58,41 @@ const allowedOrigins = allowedOriginsEnv[ENVIRONMENT];
 
 const app = express();
 
+const corsOptions = {
+  origin: function (
+    origin: string | undefined,
+    callback: (err: Error | null, allow?: boolean) => void
+  ) {
+    if (!origin) {
+      // Allow requests with no origin (like server-to-server, curl)
+      callback(null, true);
+      return;
+    }
+    if (
+      allowedOrigins.some((allowedOrigin) => allowedOrigin.test(origin)) ||
+      IS_ON_PREM
+    ) {
+      callback(null, true);
+    } else {
+      // Important: Disallow origins not in the list
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "Helicone-Authorization",
+    "x-vercel-set-bypass-cookie",
+    "x-vercel-protection-bypass",
+  ],
+  credentials: true,
+  optionsSuccessStatus: 204,
+};
+
+app.options("/{*any}", cors(corsOptions));
+app.use(cors(corsOptions));
+
 var rawBodySaver = function (req: any, res: any, buf: any, encoding: any) {
   if (buf && buf.length) {
     req.rawBody = buf.toString(encoding || "utf8");
@@ -79,6 +116,13 @@ const KAFKA_ENABLED = (KAFKA_CREDS?.KAFKA_ENABLED ?? "false") === "true";
 if (KAFKA_ENABLED) {
   console.log("Starting Kafka consumers");
   startConsumers({
+    dlqCount: 0,
+    normalCount: 0,
+    scoresCount: 0,
+    scoresDlqCount: 0,
+    backFillCount: 0,
+  });
+  startSQSConsumers({
     dlqCount: DLQ_WORKER_COUNT,
     normalCount: NORMAL_WORKER_COUNT,
     scoresCount: SCORES_WORKER_COUNT,
@@ -105,26 +149,6 @@ if (ENVIRONMENT !== "production") {
 
 initSentry(app);
 initLogs(app);
-
-app.options("*", (req, res) => {
-  if (
-    req.headers.origin &&
-    allowedOrigins.some((allowedOrigin) =>
-      allowedOrigin.test(req.headers.origin ?? "")
-    )
-  ) {
-    res.setHeader("Access-Control-Allow-Origin", req.headers.origin);
-  } else {
-    res.setHeader("Access-Control-Allow-Origin", "");
-  }
-  res.setHeader("Access-Control-Allow-Methods", "*");
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "Content-Type, Authorization, Helicone-Authorization, x-vercel-set-bypass-cookie, x-vercel-protection-bypass"
-  );
-  res.setHeader("Access-Control-Allow-Credentials", "true");
-  res.status(200).send();
-});
 
 const v1APIRouter = express.Router();
 const unAuthenticatedRouter = express.Router();
@@ -167,28 +191,6 @@ v1APIRouter.use(
 );
 registerPublicTSOARoutes(v1APIRouter);
 registerPrivateTSOARoutes(v1APIRouter);
-
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (!origin) {
-    return next();
-  }
-  if (allowedOrigins.some((allowedOrigin) => allowedOrigin.test(origin))) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-  } else {
-    res.setHeader("Access-Control-Allow-Origin", "");
-  }
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET, POST, OPTIONS, PATCH, PUT"
-  );
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "Content-Type, Authorization, Helicone-Authorization, x-vercel-set-bypass-cookie, x-vercel-protection-bypass"
-  );
-  res.setHeader("Access-Control-Allow-Credentials", "true");
-  next();
-});
 
 app.use(unAuthenticatedRouter);
 app.use(v1APIRouter);

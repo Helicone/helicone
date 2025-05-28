@@ -1,26 +1,26 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef } from "react";
-import {
-  Calculator,
-  Twitter,
-  ChevronUp,
-  ChevronDown,
-  XCircle,
-} from "lucide-react";
-import { costOf, costOfPrompt } from "../../packages/cost"; // Ensure the path is correct
-import { providers } from "../../packages/cost/providers/mappings"; // Ensure the path is correct
-import Image from "next/image";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { usePathname } from "next/navigation";
-import Link from "next/link";
-import CalculatorInfo, { formatProviderName } from "./CalculatorInfo";
-import { Button } from "@/components/ui/button";
-import { ThemedTextDropDown } from "@/components/ui/themedTextDropDown";
 import { ModelCostCardSkeleton } from "@/components/skeletons/ModelCostCardSkeleton";
 import { TableSkeleton } from "@/components/skeletons/TableSkeleton";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ThemedTextDropDown } from "@/components/ui/themedTextDropDown";
+import {
+  Calculator,
+  ChevronDown,
+  ChevronUp,
+  Twitter,
+  XCircle,
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { costOf, costOfPrompt } from "@helicone-package/cost"; // Ensure the path is correct
+import { providers } from "@helicone-package/cost/providers/mappings"; // Ensure the path is correct
+import CalculatorInfo, { formatProviderName } from "./CalculatorInfo";
 import { ProviderWithModels } from "./utils";
 
 // Define and export the CostData type
@@ -208,7 +208,7 @@ export default function ModelPriceCalculator({
       // This assumes `providers` mapping is relatively static and doesn't need constant updates
       // Alternatively, if costOf/costOfPrompt don't need the full providers map, adjust imports
       const currentProviders =
-        require("../../packages/cost/providers/mappings").providers;
+        require("@helicone-package/cost/providers/mappings").providers;
 
       currentProviders.forEach((prov: any) => {
         prov.costs?.forEach((modelCost: any) => {
@@ -223,6 +223,8 @@ export default function ModelPriceCalculator({
             promptCacheWriteTokens: 0,
             promptCacheReadTokens: 0,
             completionTokens: outputTokensNum,
+            completionAudioTokens: 0,
+            promptAudioTokens: 0,
           });
 
           if (costDetails) {

@@ -1,8 +1,9 @@
 import { useOrg } from "@/components/layout/org/organizationContext";
-import { getJawnClient } from "@/lib/clients/jawn";
+import { $JAWN_API, getJawnClient } from "@/lib/clients/jawn";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { Result } from "../../packages/common/result";
+import { Result } from "@/packages/common/result";
+import { useJawnClient } from "@/lib/clients/jawnHook";
 
 const useGetUnauthorized = (userId: string) => {
   function getBeginningOfMonth() {
@@ -12,32 +13,22 @@ const useGetUnauthorized = (userId: string) => {
   }
   const org = useOrg();
 
-  const { data: count, isLoading: isCountLoading } = useQuery({
-    queryKey: [`requestCount`],
-    queryFn: async (query) => {
-      const data = await fetch(`/api/request/ch/count`, {
-        method: "POST",
-        body: JSON.stringify({
-          filter: {
-            left: {
-              request_response_rmt: {
-                request_created_at: {
-                  gte: getBeginningOfMonth(),
-                },
-              },
+  const { data: count, isLoading: isCountLoading } = $JAWN_API.useQuery(
+    "post",
+    "/v1/request/count/query",
+    {
+      body: {
+        filter: {
+          request_response_rmt: {
+            request_created_at: {
+              gte: getBeginningOfMonth(),
             },
-            operator: "and",
-            right: "all",
           },
-        }),
-        headers: {
-          "Content-Type": "application/json",
         },
-      }).then((res) => res.json() as Promise<Result<number, string>>);
-      return data;
+      },
     },
-    refetchOnWindowFocus: false,
-  });
+    { refetchOnWindowFocus: false }
+  );
 
   const checkAuthorizedByTier = () => {
     const currentTier = org?.currentOrg?.tier;

@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
 import AuthLayout from "../../components/layout/auth/authLayout";
 import BillingPlanPage from "@/components/templates/organization/plan/billingPage";
-import { withAuthSSR } from "../../lib/api/handlerWrappers";
+import { GetServerSidePropsContext } from "next";
 import { NextPageWithLayout } from "../_app";
 import SettingsLayout from "@/components/templates/settings/settingsLayout";
 
@@ -19,10 +19,10 @@ PlanSettings.getLayout = function getLayout(page: ReactElement) {
 
 export default PlanSettings;
 
-export const getServerSideProps = withAuthSSR(async (options) => {
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
   return {
-    props: {
-      user: options.userData.user,
-    },
+    props: {},
   };
-});
+};

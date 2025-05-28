@@ -1,0 +1,11 @@
+{ 
+  "title": "How to Build Your First MCP Server: Full Guide for Developers",
+  "title1": "Extend Your AI Agents: Build and Deploy Your First MCP",
+  "title2": "How to Build Your First MCP Server: Full Guide for Developers",
+  "description": "Learn how to build your first Model Context Protocol (MCP) server, integrate it with AI apps like Cursor, and add Helicone observability to monitor LLM performance in production.",
+  "images": "/static/blog/building-first-mcp-for-developers/build-first-mcp.webp",
+  "time": "10 minute read",
+  "author": "Yusuf Ishola",
+  "date": "April 21, 2025", 
+  "badge": "Best Practices"
+}

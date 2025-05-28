@@ -4,7 +4,6 @@ import useAlertsPage from "./useAlertsPage";
 import { CreateAlertModal, EditAlertModal } from "./createAlertModal";
 import DeleteAlertModal from "./deleteAlertModal";
 import ThemedTable from "../../shared/themed/themedTable";
-import { User } from "@supabase/auth-helpers-react";
 import { Database } from "../../../db/database.types";
 import { getUSDate } from "../../shared/utils/utils";
 import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
@@ -22,9 +21,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import AuthHeader from "@/components/shared/authHeader";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 
-interface AlertsPageProps {
-  user: User;
-}
+interface AlertsPageProps {}
 
 const AlertsPage = (props: AlertsPageProps) => {
   const [createNewAlertModal, setCreateNewAlertModal] = useState(false);
@@ -41,6 +38,10 @@ const AlertsPage = (props: AlertsPageProps) => {
   const { data: slackChannelsData, isLoading: isLoadingSlackChannels } =
     useGetOrgSlackChannels(orgContext?.currentOrg?.id || "");
 
+  const slackChannels: {
+    id: string;
+    name: string;
+  }[] = [...(slackChannelsData?.data || [])];
   // Free tier limit checks
   const alertCount = alerts?.length || 0;
   const {
@@ -179,7 +180,7 @@ const AlertsPage = (props: AlertsPageProps) => {
                       <span>{`${key.threshold}%`}</span>
                     )}
                     {key.metric === "cost" && (
-                      <span>{`$${key.threshold.toFixed(2)}`}</span>
+                      <span>{`$${Number(key.threshold).toFixed(2)}`}</span>
                     )}
                   </P>
                 ),
@@ -196,7 +197,7 @@ const AlertsPage = (props: AlertsPageProps) => {
                     {key.slack_channels
                       .map(
                         (channel) =>
-                          slackChannelsData?.find(
+                          slackChannels?.find(
                             (slackChannel) => slackChannel.id === channel
                           )?.name
                       )

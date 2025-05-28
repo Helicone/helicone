@@ -1,15 +1,24 @@
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { useOrg } from "../../components/layout/org/organizationContext";
 import { HeliconeRequest } from "../../lib/api/request/request";
 import { $JAWN_API, getJawnClient } from "../../lib/clients/jawn";
-import { Result } from "../../packages/common/result";
+import { Result } from "@/packages/common/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { placeAssetIdValues } from "../lib/requestTraverseHelper";
 import { SortLeafRequest } from "../lib/sorts/requests/sorts";
+import { MAX_EXPORT_ROWS } from "@/lib/constants";
+import { TSessions } from "@/components/templates/sessions/sessionsPage";
 
 function formatDateForClickHouse(date: Date): string {
   return date.toISOString().slice(0, 19).replace("T", " ");
+}
+
+function isISODateString(value: any): boolean {
+  if (typeof value !== "string") return false;
+  // match: 2025-04-08T00:32:56.000Z
+  const isoDateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/;
+  return isoDateRegex.test(value) && !isNaN(Date.parse(value));
 }
 
 function processFilter(filter: any): any {
@@ -18,12 +27,16 @@ function processFilter(filter: any): any {
   }
 
   const result: any = Array.isArray(filter) ? [] : {};
-
   for (const key in filter) {
-    if (key === "gte" || key === "lte") {
-      result[key] = formatDateForClickHouse(new Date(filter[key]));
-    } else if (typeof filter[key] === "object") {
+    const isDateISO = isISODateString(filter[key]);
+    const isDate = filter[key] instanceof Date && !isNaN(filter[key].getTime());
+
+    if (typeof filter[key] === "object" && !isDate) {
       result[key] = processFilter(filter[key]);
+    } else if (isDate || isDateISO) {
+      const dateToFormat = isDateISO ? new Date(filter[key]) : filter[key];
+      const formattedDate = formatDateForClickHouse(dateToFormat);
+      result[key] = formattedDate;
     } else {
       result[key] = filter[key];
     }
@@ -245,46 +258,35 @@ const useGetRequests = (
 
 const useGetRequestCountClickhouse = (
   startDateISO: string,
-  endDateISO: string,
-  orgId?: string
+  endDateISO: string
 ) => {
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: [`org-count`, orgId, startDateISO, endDateISO],
-    queryFn: async (query) => {
-      const organizationId = query.queryKey[1];
-      const startDate = query.queryKey[2];
-      const endDate = query.queryKey[3];
-
-      const data = await fetch(`/api/request/ch/count`, {
-        method: "POST",
-        body: JSON.stringify({
-          filter: {
-            left: {
-              request_response_rmt: {
-                request_created_at: {
-                  gte: startDate,
-                },
-              },
-            },
-            operator: "and",
-            right: {
-              request_response_rmt: {
-                request_created_at: {
-                  lte: endDate,
-                },
+  const { data, isLoading, refetch } = $JAWN_API.useQuery(
+    "post",
+    "/v1/request/count/query",
+    {
+      body: {
+        filter: {
+          left: {
+            request_response_rmt: {
+              request_created_at: {
+                gte: startDateISO,
               },
             },
           },
-          organization_id: organizationId,
-        }),
-        headers: {
-          "Content-Type": "application/json",
+          operator: "and",
+          right: {
+            request_response_rmt: {
+              request_created_at: {
+                lte: endDateISO,
+              },
+            },
+          },
         },
-      }).then((res) => res.json());
-      return data;
+      },
     },
-    refetchOnWindowFocus: false,
-  });
+    { refetchOnWindowFocus: false }
+  );
+
   return {
     count: data,
     isLoading,
@@ -292,4 +294,98 @@ const useGetRequestCountClickhouse = (
   };
 };
 
-export { useGetRequestCountClickhouse, useGetRequests };
+const getRequestBodiesBySession = async (sessions: TSessions[]) => {
+  const filter = sessions.reduce((acc: any, session, index) => {
+    const currentCondition = {
+      request_response_rmt: {
+        properties: {
+          "Helicone-Session-Id": {
+            equals: session.metadata.session_id,
+          },
+          "Helicone-Session-Name": {
+            equals: session.metadata.session_name,
+          },
+        },
+      },
+    };
+
+    if (index === 0) return currentCondition;
+
+    return {
+      left: acc,
+      operator: "or" as const,
+      right: currentCondition,
+    };
+  }, {});
+
+  try {
+    const response = await $JAWN_API.POST("/v1/request/query-clickhouse", {
+      body: {
+        filter,
+        offset: 0,
+        limit: MAX_EXPORT_ROWS,
+        sort: {
+          created_at: "desc",
+        },
+        isCached: false,
+      },
+    });
+
+    const requests = response.data?.data ?? [];
+
+    return await Promise.all(
+      requests.map(async (request) => {
+        if (requestBodyCache.has(request.request_id)) {
+          const bodyContent = requestBodyCache.get(request.request_id);
+          return {
+            ...request,
+            request_body: bodyContent?.request,
+            response_body: bodyContent?.response,
+          };
+        }
+
+        if (!request.signed_body_url) return request;
+
+        try {
+          const contentResponse = await fetch(request.signed_body_url);
+          if (!contentResponse.ok) {
+            console.error(
+              `Error fetching request body: ${contentResponse.status}`
+            );
+            return request;
+          }
+
+          const text = await contentResponse.text();
+          let content = JSON.parse(text);
+
+          if (request.asset_urls) {
+            content = placeAssetIdValues(request.asset_urls, content);
+          }
+
+          requestBodyCache.set(request.request_id, content);
+          if (requestBodyCache.size > 10_000) {
+            requestBodyCache.clear();
+          }
+
+          return {
+            ...request,
+            request_body: content.request,
+            response_body: content.response,
+          };
+        } catch (error) {
+          console.error("Error processing request body:", error);
+          return request;
+        }
+      })
+    );
+  } catch (error) {
+    console.error("Error fetching requests by session IDs with bodies:", error);
+    throw error;
+  }
+};
+
+export {
+  useGetRequestCountClickhouse,
+  useGetRequests,
+  getRequestBodiesBySession as getRequestsByIdsWithBodies,
+};

@@ -130,6 +130,11 @@ Helicone-Cache-Seed: "user-123"         // Optional: Isolate cache by seed`,
         text: "View Docs",
         link: "https://docs.helicone.ai/features/advanced-usage/custom-rate-limits",
       },
+      primary: {
+        text: "Create Rate Limit",
+        onClick: true,
+        showPlusIcon: true,
+      },
     },
   },
   users: {
@@ -382,6 +387,7 @@ export const EmptyStateCard = ({
               </div>
             ) : (
               featureDefaults.featureImage.type === "image" && (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={featureDefaults.featureImage.content}
                   alt={featureDefaults.title}

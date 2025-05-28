@@ -1,4 +1,5 @@
 import { Headers } from "@cloudflare/workers-types";
+import { HELICONE_RATE_LIMITED_API_KEY_REGEX } from "../util/apiKeyRegex";
 
 type Nullable<T> = T | null;
 
@@ -10,6 +11,8 @@ export type HeliconeFallback = {
   onCodes: HeliconeFallbackCode[];
   bodyKeyOverride?: object;
 };
+
+export type HeliconeBearerKeyType = "standard" | "rate-limited";
 
 export interface IHeliconeHeaders {
   heliconeAuth: Nullable<string>;
@@ -40,6 +43,12 @@ export interface IHeliconeHeaders {
     promptMode: Nullable<string>;
     promptVersion: Nullable<string>;
   };
+  cacheHeaders: {
+    cacheEnabled: Nullable<boolean>;
+    cacheSeed: Nullable<number>;
+    cacheBucketMaxSize: Nullable<number>;
+    cacheControl: Nullable<string>;
+  };
   promptName: Nullable<string>;
   userId: Nullable<string>;
   omitHeaders: {
@@ -54,7 +63,7 @@ export interface IHeliconeHeaders {
   nodeId: Nullable<string>;
   fallBacks: Nullable<HeliconeFallback[]>;
   modelOverride: Nullable<string>;
-  promptSecurityEnabled: Nullable<string>;
+  promptSecurityEnabled: Nullable<boolean>;
   promptSecurityAdvanced: Nullable<string>;
   moderationsEnabled: boolean;
   posthogKey: Nullable<string>;
@@ -77,6 +86,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     _type: "jwt" | "bearer";
     token: string;
     orgId?: string;
+    keyType?: HeliconeBearerKeyType;
   }>;
   rateLimitPolicy: Nullable<string>;
   featureFlags: {
@@ -100,6 +110,12 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     promptMode: Nullable<string>;
     promptVersion: Nullable<string>;
   };
+  cacheHeaders: {
+    cacheEnabled: Nullable<boolean>;
+    cacheSeed: Nullable<number>;
+    cacheBucketMaxSize: Nullable<number>;
+    cacheControl: Nullable<string>;
+  };
   promptName: Nullable<string>;
   userId: Nullable<string>;
   omitHeaders: { omitResponse: boolean; omitRequest: boolean };
@@ -111,7 +127,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   nodeId: Nullable<string>;
   fallBacks: Nullable<HeliconeFallback[]>;
   modelOverride: Nullable<string>;
-  promptSecurityEnabled: Nullable<string>;
+  promptSecurityEnabled: Nullable<boolean>;
   promptSecurityAdvanced: Nullable<string>;
   moderationsEnabled: boolean;
   posthogKey: Nullable<string>;
@@ -144,6 +160,12 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       promptMode: heliconeHeaders.promptHeaders.promptMode,
       promptVersion: heliconeHeaders.promptHeaders.promptVersion,
     };
+    this.cacheHeaders = {
+      cacheEnabled: heliconeHeaders.cacheHeaders.cacheEnabled,
+      cacheSeed: heliconeHeaders.cacheHeaders.cacheSeed,
+      cacheBucketMaxSize: heliconeHeaders.cacheHeaders.cacheBucketMaxSize,
+      cacheControl: heliconeHeaders.cacheHeaders.cacheControl,
+    }
     this.promptName = heliconeHeaders.promptName;
     this.omitHeaders = heliconeHeaders.omitHeaders;
     this.sessionHeaders = heliconeHeaders.sessionHeaders;
@@ -225,6 +247,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     _type: "jwt" | "bearer";
     token: string;
     orgId?: string;
+    keyType?: HeliconeBearerKeyType;
   }> {
     const heliconeAuth = this.headers.get("helicone-auth");
 
@@ -232,6 +255,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       return {
         _type: "bearer",
         token: heliconeAuth,
+        keyType: this.determineBearerKeyType(heliconeAuth),
       };
     }
     const heliconeAuthFallback = this.headers.get("authorization");
@@ -239,6 +263,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       return {
         _type: "bearer",
         token: heliconeAuthFallback,
+        keyType: this.determineBearerKeyType(heliconeAuthFallback),
       };
     }
     const heliconeAuthJWT = this.headers.get("helicone-jwt");
@@ -250,6 +275,23 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       };
     }
     return null;
+  }
+
+  determineBearerKeyType(bearerKey: string): HeliconeBearerKeyType {
+    try {
+      const key = bearerKey.replace("Bearer ", "").trim();
+
+      if (
+        HELICONE_RATE_LIMITED_API_KEY_REGEX.some((pattern) => pattern.test(key))
+      ) {
+        return "rate-limited";
+      }
+
+      return "standard";
+    } catch (e) {
+      console.error(`Error determining bearer key type: ${e}`);
+      return "standard";
+    }
   }
 
   setModelOverride(modelOverride: string | null) {
@@ -276,6 +318,12 @@ export class HeliconeHeaders implements IHeliconeHeaders {
         promptMode: this.headers.get("Helicone-Prompt-Mode") ?? null,
         promptVersion: this.headers.get("Helicone-Prompt-Version") ?? null,
       },
+      cacheHeaders: {
+        cacheEnabled: this.headers.get("Helicone-Cache-Enabled") === "true" ? true : false,
+        cacheSeed: this.headers.get("Helicone-Cache-Seed") ? parseInt(this.headers.get("Helicone-Cache-Seed") ?? "0") : null,
+        cacheBucketMaxSize: this.headers.get("Helicone-Cache-Bucket-Max-Size") ? parseInt(this.headers.get("Helicone-Cache-Bucket-Max-Size") ?? "0") : null,
+        cacheControl: this.headers.get("Helicone-Cache-Control") ?? null,
+      },
       promptName: this.headers.get("Helicone-Prompt-Name") ?? null,
       userId: this.headers.get("Helicone-User-Id") ?? null,
       omitHeaders: {
@@ -294,9 +342,10 @@ export class HeliconeHeaders implements IHeliconeHeaders {
         this.headers.get("Helicone-Model-Override") ??
         null,
       promptSecurityEnabled:
-        this.headers.get("Helicone-LLM-Security-Enabled") ??
-        this.headers.get("Helicone-Prompt-Security-Enabled") ??
-        null,
+        (this.headers.get("Helicone-LLM-Security-Enabled") ??
+          this.headers.get("Helicone-Prompt-Security-Enabled") ??
+          "").toLowerCase() === "true"
+      ,
       promptSecurityAdvanced:
         this.headers.get("Helicone-LLM-Security-Advanced") ?? null,
       moderationsEnabled:
@@ -389,6 +438,22 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     if (heliconeHeaders.experimentHeaders.experimentId) {
       heliconePropertyHeaders["Helicone-Experiment-Id"] =
         heliconeHeaders.experimentHeaders.experimentId;
+    }
+
+    if (heliconeHeaders.cacheHeaders.cacheEnabled) {
+      heliconePropertyHeaders["Helicone-Cache-Enabled"] = heliconeHeaders.cacheHeaders.cacheEnabled.toString();
+    }
+
+    if (heliconeHeaders.cacheHeaders.cacheSeed) {
+      heliconePropertyHeaders["Helicone-Cache-Seed"] = heliconeHeaders.cacheHeaders.cacheSeed.toString();
+    }
+
+    if (heliconeHeaders.cacheHeaders.cacheBucketMaxSize) {
+      heliconePropertyHeaders["Helicone-Cache-Bucket-Max-Size"] = heliconeHeaders.cacheHeaders.cacheBucketMaxSize.toString();
+    }
+
+    if (heliconeHeaders.cacheHeaders.cacheControl) {
+      heliconePropertyHeaders["Helicone-Cache-Control"] = heliconeHeaders.cacheHeaders.cacheControl;
     }
 
     return heliconePropertyHeaders;

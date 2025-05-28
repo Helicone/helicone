@@ -1,14 +1,15 @@
-import {
-  DragDropContext,
-  Draggable,
-  Droppable,
-  DropResult,
-} from "react-beautiful-dnd";
-import { clsx } from "../../../clsx";
-import { ColumnDef } from "@tanstack/react-table";
 import { EllipsisVerticalIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { ColumnDef } from "@tanstack/react-table";
+import { useCallback, useRef } from "react";
+import { useDrag, useDrop, XYCoord } from "react-dnd";
 import { Col } from "../../../../layout/common/col";
 import { Row } from "../../../../layout/common/row";
+import { clsx } from "../../../clsx";
+
+// Define item type for react-dnd
+const ItemTypes = {
+  COLUMN: "column",
+};
 
 // Fake data generator
 
@@ -36,29 +37,129 @@ export function columnDefsToDragColumnItems(
   return columns.map(columnDefToDragColumnItem);
 }
 
-// A little function to help with reordering the result
-const reorder = (list: any[], startIndex: number, endIndex: number) => {
-  const result = Array.from(list);
-  const [removed] = result.splice(startIndex, 1);
-  result.splice(endIndex, 0, removed);
-  return result;
-};
+interface DraggableItemProps {
+  item: DragColumnItem;
+  index: number;
+  moveItem: (dragIndex: number, hoverIndex: number) => void;
+  removeItem: (index: number) => void;
+}
 
-const grid = 4;
+// Define the type for the dragged item
+interface DragItem {
+  id: string;
+  index: number;
+}
 
-const getItemStyle = (isDragging: boolean, draggableStyle: any) => ({
-  // Some basic styles to make the items look a bit nicer
-  userSelect: "none",
-  // Styles we need to apply on draggables
-  ...draggableStyle,
-});
+const DraggableItem = ({
+  item,
+  index,
+  moveItem,
+  removeItem,
+}: DraggableItemProps) => {
+  const ref = useRef<HTMLDivElement>(null);
 
-const getListStyle = (isDraggingOver: boolean) =>
-  clsx(
-    isDraggingOver ? "bg-lightblue" : "bg-lightgrey",
-    `p-${grid}`,
-    "w-250px"
+  const [{ handlerId }, drop] = useDrop<DragItem, void, { handlerId: any }>({
+    accept: ItemTypes.COLUMN,
+    collect(monitor) {
+      return {
+        handlerId: monitor.getHandlerId(),
+      };
+    },
+    hover(draggedItem, monitor) {
+      if (!ref.current) {
+        return;
+      }
+      const dragIndex = draggedItem.index;
+      const hoverIndex = index;
+
+      // Don't replace items with themselves
+      if (dragIndex === hoverIndex) {
+        return;
+      }
+
+      // Determine rectangle on screen
+      const hoverBoundingRect = ref.current?.getBoundingClientRect();
+
+      // Get vertical middle
+      const hoverMiddleY =
+        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+
+      // Determine mouse position
+      const clientOffset = monitor.getClientOffset();
+
+      // Get pixels to the top
+      const hoverClientY = (clientOffset as XYCoord).y - hoverBoundingRect.top;
+
+      // Only perform the move when the mouse has crossed half of the items height
+      // When dragging downwards, only move when the cursor is below 50%
+      // When dragging upwards, only move when the cursor is above 50%
+
+      // Dragging downwards
+      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
+        return;
+      }
+
+      // Dragging upwards
+      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
+        return;
+      }
+
+      // Time to actually perform the action
+      moveItem(dragIndex, hoverIndex);
+
+      // Note: we're mutating the monitor item here!
+      // Generally it's better to avoid mutations, but it's good here for the sake of performance
+      // to avoid expensive index searches.
+      draggedItem.index = hoverIndex;
+    },
+  });
+
+  const [{ isDragging }, drag] = useDrag({
+    type: ItemTypes.COLUMN,
+    item: (): DragItem => {
+      return { id: item.id, index };
+    },
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
+  });
+
+  drag(drop(ref));
+
+  return (
+    <div
+      ref={ref}
+      style={{ opacity: isDragging ? 0.5 : 1 }}
+      data-handler-id={handlerId}
+      className={clsx(
+        "p-2 mb-1",
+        isDragging ? "bg-blue-100 dark:bg-slate-900" : "bg-white dark:bg-black",
+        "border border-gray-200 dark:border-gray-800 rounded-md cursor-move",
+        item.shown ? "block" : "hidden"
+      )}
+    >
+      <Row className="items-center justify-between">
+        <Row className="items-center gap-2 text-xs">
+          <Row>
+            <EllipsisVerticalIcon className="h-3 w-3 " />
+            <EllipsisVerticalIcon className="h-3 w-3 -ml-2" />
+          </Row>
+          {item.name}
+        </Row>
+        <Col>
+          <button
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent drag from starting on button click
+              removeItem(index);
+            }}
+          >
+            <TrashIcon className="w-4 h-4 text-red-500" />
+          </button>
+        </Col>
+      </Row>
+    </div>
   );
+};
 
 export const DragList = ({
   items,
@@ -67,74 +168,36 @@ export const DragList = ({
   items: DragColumnItem[];
   setItems: (items: DragColumnItem[]) => void;
 }) => {
-  const onDragEnd = (result: DropResult) => {
-    // Dropped outside the list
-    if (!result.destination) {
-      return;
-    }
-    const reorderedItems = reorder(
-      items,
-      result.source.index,
-      result.destination.index
-    );
-    setItems(reorderedItems);
-  };
+  const moveItem = useCallback(
+    (dragIndex: number, hoverIndex: number) => {
+      const dragItem = items[dragIndex];
+      const newItems = [...items];
+      newItems.splice(dragIndex, 1);
+      newItems.splice(hoverIndex, 0, dragItem);
+      setItems(newItems);
+    },
+    [items, setItems]
+  );
+
+  const removeItem = useCallback(
+    (index: number) => {
+      const newItems = items.filter((_, i) => i !== index);
+      setItems(newItems);
+    },
+    [items, setItems]
+  );
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <Droppable droppableId="droppable">
-        {(provided, snapshot) => (
-          <div
-            {...provided.droppableProps}
-            ref={provided.innerRef}
-            className={getListStyle(snapshot.isDraggingOver)}
-          >
-            {items.map((item, index) => (
-              <Draggable key={item.id} draggableId={item.id} index={index}>
-                {(provided, snapshot) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps}
-                    style={getItemStyle(
-                      snapshot.isDragging,
-                      provided.draggableProps.style
-                    )}
-                    className={clsx(
-                      "p-2 mb-1",
-                      snapshot.isDragging
-                        ? "bg-blue-100 dark:bg-slate-900"
-                        : "bg-white dark:bg-black",
-                      "border border-gray-200 dark:border-gray-800 rounded-md",
-                      item.shown ? "block" : "hidden"
-                    )}
-                  >
-                    <Row className="items-center justify-between">
-                      <Row className="items-center gap-2 text-xs">
-                        <Row>
-                          <EllipsisVerticalIcon className="h-3 w-3 " />
-                          <EllipsisVerticalIcon className="h-3 w-3 -ml-2" />
-                        </Row>
-                        {item.name}
-                      </Row>
-                      <Col>
-                        <button
-                          onClick={() => {
-                            setItems(items.filter((_, i) => i !== index));
-                          }}
-                        >
-                          <TrashIcon className="w-4 h-4 text-red-500" />
-                        </button>
-                      </Col>
-                    </Row>
-                  </div>
-                )}
-              </Draggable>
-            ))}
-            {provided.placeholder}
-          </div>
-        )}
-      </Droppable>
-    </DragDropContext>
+    <div className="p-1 w-full">
+      {items.map((item, index) => (
+        <DraggableItem
+          key={item.id}
+          index={index}
+          item={item}
+          moveItem={moveItem}
+          removeItem={removeItem}
+        />
+      ))}
+    </div>
   );
 };

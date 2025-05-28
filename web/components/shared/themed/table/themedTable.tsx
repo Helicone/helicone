@@ -1,3 +1,6 @@
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { UIFilterRowTree } from "@/services/lib/filters/types";
 import { TimeFilter } from "@/types/timeFilter";
 import {
@@ -6,51 +9,56 @@ import {
 } from "@heroicons/react/24/outline";
 import {
   ColumnDef,
+  ExpandedState,
   flexRender,
   getCoreRowModel,
+  getExpandedRowModel,
+  Table as ReactTable,
+  Row,
   useReactTable,
 } from "@tanstack/react-table";
+import { ChevronDown, ChevronRight, ChevronsUpDown } from "lucide-react";
 import Link from "next/link";
-import React, { useEffect, useMemo, useState } from "react";
-import { Result } from "../../../../packages/common/result";
+import React, { useEffect, useMemo } from "react";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
-import { useLocalStorage } from "../../../../services/hooks/localStorage";
+import { Result } from "@/packages/common/result";
 import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
 import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";
 import { SortDirection } from "../../../../services/lib/sorts/requests/sorts";
-
 import { clsx } from "../../clsx";
 import LoadingAnimation from "../../loadingAnimation";
-import {
-  columnDefsToDragColumnItems,
-  columnDefToDragColumnItem,
-  DragColumnItem,
-} from "./columns/DragList";
+import { DragColumnItem } from "./columns/DragList";
 import DraggableColumnHeader from "./columns/draggableColumnHeader";
-import RequestRowView from "./requestRowView";
-import ThemedTableHeader from "./themedTableHeader";
-
-import useOnboardingContext, {
-  ONBOARDING_STEPS,
-} from "@/components/layout/onboardingContext";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable";
-import { MappedLLMRequest } from "@/packages/llm-mapper/types";
-import { useRouter, useSearchParams } from "next/navigation";
-import { RequestViews } from "./RequestViews";
 
 type CheckboxMode = "always_visible" | "on_hover" | "never";
 
-interface ThemedTableV5Props<T extends { id?: string }> {
+function ConditionalLink<T>({
+  children,
+  href,
+  className,
+}: {
+  children: React.ReactNode;
+  href?: string | undefined;
+  className?: string;
+}) {
+  return href ? (
+    <Link href={href} className={className}>
+      {children}
+    </Link>
+  ) : (
+    children
+  );
+}
+
+interface ThemedTableProps<T extends { id?: string; subRows?: T[] }> {
   id: string;
   defaultData: T[];
   defaultColumns: ColumnDef<T>[];
   skeletonLoading: boolean;
   dataLoading: boolean;
+  tableRef?: React.MutableRefObject<any>;
+  activeColumns: DragColumnItem[];
+  setActiveColumns: (columns: DragColumnItem[]) => void;
   advancedFilters?: {
     filterMap: SingleFilterDef<any>[];
     filters: UIFilterRowTree;
@@ -73,11 +81,6 @@ interface ThemedTableV5Props<T extends { id?: string }> {
     isCustomProperty: boolean;
   };
   onRowSelect?: (row: T, index: number, event?: React.MouseEvent) => void;
-  makeCard?: (row: T) => React.ReactNode;
-  makeRow?: {
-    properties: string[];
-  };
-  hideView?: boolean;
   hideHeader?: boolean;
   noDataCTA?: React.ReactNode;
   onDataSet?: () => void;
@@ -88,7 +91,6 @@ interface ThemedTableV5Props<T extends { id?: string }> {
     onSaveFilterCallback?: () => void;
     layoutPage: "dashboard" | "requests";
   };
-  highlightedIds?: string[];
   /**
    * Controls the visibility of checkboxes in the table
    * - "always_visible": Checkboxes are always shown
@@ -106,7 +108,6 @@ interface ThemedTableV5Props<T extends { id?: string }> {
   };
   fullWidth?: boolean;
   isDatasetsPage?: boolean;
-  rightPanel?: React.ReactNode;
   search?: {
     value: string;
     onChange: (value: string) => void;
@@ -114,84 +115,94 @@ interface ThemedTableV5Props<T extends { id?: string }> {
   };
   rowLink?: (row: T) => string;
   showFilters?: boolean;
+  /**
+   * Callback function to trigger toggling the expansion state of all rows.
+   * Receives the table instance.
+   */
+  onToggleAllRows?: (table: ReactTable<T>) => void;
+  currentRow?: T;
 }
 
-export default function ThemedTable<T extends { id?: string }>(
-  props: ThemedTableV5Props<T>
+export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
+  props: ThemedTableProps<T>
 ) {
   const {
-    id,
     defaultData,
     defaultColumns,
     skeletonLoading,
     dataLoading,
-    advancedFilters,
-    exportData,
-    timeFilter,
+    activeColumns,
     sortable,
     onRowSelect,
-    makeCard,
-    makeRow,
-    hideView, // hides the view columns button
-    hideHeader,
     noDataCTA,
-    onDataSet: onDataSet,
-    savedFilters,
-    highlightedIds: checkedIds,
     checkboxMode = "never",
-    customButtons,
     children,
     onSelectAll,
     selectedIds,
-    selectedRows,
     fullWidth = false,
-    isDatasetsPage,
-    rightPanel,
-    search,
     rowLink,
-    showFilters,
+    tableRef,
+    onToggleAllRows,
+    currentRow,
   } = props;
 
-  const [view, setView] = useLocalStorage<RequestViews>("view", "table");
-
-  const [activeColumns, setActiveColumns] = useLocalStorage<DragColumnItem[]>(
-    `${id}-activeColumns`,
-    defaultColumns?.map(columnDefToDragColumnItem)
-  );
-
+  const [expanded, setExpanded] = React.useState<ExpandedState>({});
   const table = useReactTable({
     data: defaultData,
     columns: defaultColumns,
     columnResizeMode: "onChange",
+    getSubRows: (row) => row.subRows,
     getCoreRowModel: getCoreRowModel(),
+    getExpandedRowModel: getExpandedRowModel(),
     state: {
       columnOrder: activeColumns.map((column) => column.id),
+      expanded,
     },
+    onExpandedChange: setExpanded,
   });
+
+  if (tableRef) {
+    tableRef.current = table;
+  }
 
   const rows = table.getRowModel().rows;
   const columns = table.getAllColumns();
 
-  useEffect(() => {
-    // This is a weird hack for people migrating to a new local storage
-    if (activeColumns.length > 0 && activeColumns.every((c) => c.id === "")) {
-      setActiveColumns(columnDefsToDragColumnItems(columns));
-    }
-  }, [activeColumns, columns, setActiveColumns]);
+  const topLevelPathColorMap = useMemo(() => {
+    const chartColors = [
+      "bg-chart-1",
+      "bg-chart-2",
+      "bg-chart-3",
+      "bg-chart-4",
+      "bg-chart-5",
+    ];
+    const map: Record<string, string> = {};
+    let colorIndex = 0;
 
-  useEffect(() => {
-    for (const column of columns) {
-      if (activeColumns.find((c) => c.name === column.id)?.shown) {
-        if (!column.getIsVisible()) {
-          column.toggleVisibility(true);
-        }
-      } else {
-        if (column.getIsVisible()) {
-          column.toggleVisibility(false);
+    rows.forEach((row) => {
+      if (row.depth === 0) {
+        const path = (row.original as any)?.path as string;
+        if (path && !(path in map)) {
+          map[path] = chartColors[colorIndex % chartColors.length];
+          colorIndex++;
         }
       }
-    }
-  }, [activeColumns, columns]);
+    });
+    return map;
+  }, [rows]);
+
+  useEffect(() => {
+    const columnVisibility: { [key: string]: boolean } = {};
+    activeColumns.forEach((col) => {
+      columnVisibility[col.id] = col.shown;
+    });
+    columns.forEach((column) => {
+      if (columnVisibility[column.id] === undefined) {
+        columnVisibility[column.id] = true;
+      }
+    });
+    table.setColumnVisibility(columnVisibility);
+  }, [activeColumns, columns, table]);
 
   const handleSelectAll = (checked: boolean) => {
     onSelectAll?.(checked);
@@ -201,373 +212,305 @@ export default function ThemedTable<T extends { id?: string }>(
     onRowSelect?.(row, index, event);
   };
 
-  const [isPanelVisible, setIsPanelVisible] = useState(false);
-
-  useEffect(() => {
-    if (rightPanel) {
-      // Delay the animation start slightly
-      const timer = setTimeout(() => {
-        setIsPanelVisible(true);
-      }, 50);
-      return () => clearTimeout(timer);
-    } else {
-      setIsPanelVisible(false);
-    }
-  }, [rightPanel]);
-
-  const sessionData = useMemo(() => {
-    if (rows.length === 0) {
-      return undefined;
-    }
-    // @ts-ignore
-    const sessionId = rows[0].original?.customProperties?.[
-      "Helicone-Session-Id"
-    ] as string | undefined;
-    return { sessionId };
-  }, [rows]);
-
-  const { currentStep, isOnboardingVisible, setOnClickElement } =
-    useOnboardingContext();
-
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  useEffect(() => {
-    if (
-      id === "requests-table" &&
-      isOnboardingVisible &&
-      currentStep === ONBOARDING_STEPS.REQUESTS_DRAWER.stepNumber
-    ) {
-      setOnClickElement(
-        () => () =>
-          router.push(
-            `/sessions/${encodeURIComponent(sessionData?.sessionId || "")}`
-          )
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOnboardingVisible, currentStep]);
-
   return (
-    <div className="h-full flex flex-col border-slate-300 dark:border-slate-700 divide-y divide-slate-300 dark:divide-slate-700">
-      {!hideHeader && (
-        <div className="p-1 flex-shrink-0">
-          <ThemedTableHeader
-            search={search}
-            onDataSet={onDataSet}
-            isDatasetsPage={isDatasetsPage}
-            advancedFilters={
-              advancedFilters
-                ? {
-                    filterMap: advancedFilters.filterMap,
-                    filters: advancedFilters.filters,
-                    searchPropertyFilters:
-                      advancedFilters.searchPropertyFilters,
-                    setAdvancedFilters: advancedFilters.setAdvancedFilters,
-                    show: advancedFilters.show,
-                  }
-                : undefined
-            }
-            showFilters={showFilters}
-            savedFilters={savedFilters}
-            activeColumns={activeColumns}
-            setActiveColumns={setActiveColumns}
-            columns={hideView ? [] : table.getAllColumns()}
-            timeFilter={
-              timeFilter
-                ? {
-                    defaultValue: timeFilter.defaultValue,
-                    onTimeSelectHandler: timeFilter.onTimeSelectHandler,
-                    currentTimeFilter: timeFilter.currentTimeFilter,
-                  }
-                : undefined
-            }
-            viewToggle={
-              makeCard
-                ? {
-                    currentView: view,
-                    onViewChange: setView,
-                  }
-                : undefined
-            }
-            rows={exportData}
-            customButtons={customButtons}
-            selectedRows={{
-              count: selectedIds?.length,
-              children: selectedRows?.children,
-            }}
-          />
-        </div>
-      )}
-
+    <ScrollArea className="h-full w-full sentry-mask-me" orientation="both">
       {children && <div className="flex-shrink-0">{children}</div>}
-      <ResizablePanelGroup
-        direction="horizontal"
-        className="flex-grow overflow-hidden"
-      >
-        <ResizablePanel defaultSize={100} className="flex-grow">
-          <div className="h-full overflow-auto ">
-            {skeletonLoading ? (
-              <LoadingAnimation title="Loading Data..." />
-            ) : rows.length === 0 ? (
-              <div className="bg-white dark:bg-black h-48 w-full  border-slate-300 dark:border-slate-700 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
-                <TableCellsIcon className="h-12 w-12 text-slate-900 dark:text-slate-100" />
-                <p className="text-xl font-semibold text-slate-900 dark:text-slate-100">
-                  No Data Found
-                </p>
-                {noDataCTA}
-              </div>
-            ) : table.getVisibleFlatColumns().length === 0 ? (
-              <div className="bg-white dark:bg-black h-48 w-full  border-slate-300 dark:border-slate-700 py-2 px-4 flex flex-col space-y-3 justify-center items-center">
-                <AdjustmentsHorizontalIcon className="h-12 w-12 text-slate-900 dark:text-slate-100" />
-                <p className="text-xl font-semibold text-slate-900 dark:text-slate-100">
-                  No Columns Selected
-                </p>
-              </div>
-            ) : makeCard && view === "card" ? (
-              <ul className="flex flex-col space-y-8 divide-y divide-slate-300 dark:divide-slate-700 bg-white dark:bg-black rounded-lg border border-slate-300 dark:border-slate-700">
-                {rows.map((row, i) => (
-                  <li key={"expanded-row" + i}>{makeCard(row.original)}</li>
-                ))}
-              </ul>
-            ) : makeRow && view === "row" ? (
-              <RequestRowView
-                rows={rows.map(
-                  (row) => row.original as unknown as MappedLLMRequest
-                )}
-                properties={makeRow.properties}
-              />
-            ) : (
-              <div className="bg-slate-50 dark:bg-black rounded-sm h-full">
-                <div
-                  className=""
-                  style={{
-                    boxSizing: "border-box",
+      <div className="h-full bg-slate-50 dark:bg-slate-950">
+        {skeletonLoading ? (
+          <LoadingAnimation title="Loading Data..." />
+        ) : rows.length === 0 ? (
+          <div className="bg-white dark:bg-black h-48 w-full  border-border py-2 px-4 flex flex-col space-y-3 justify-center items-center">
+            <TableCellsIcon className="h-12 w-12 text-slate-900 dark:text-slate-100" />
+            <p className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+              No Data Found
+            </p>
+            {noDataCTA}
+          </div>
+        ) : table.getVisibleFlatColumns().length === 0 ? (
+          <div className="bg-white dark:bg-black h-48 w-full  border-border py-2 px-4 flex flex-col space-y-3 justify-center items-center">
+            <AdjustmentsHorizontalIcon className="h-12 w-12 text-slate-900 dark:text-slate-100" />
+            <p className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+              No Columns Selected
+            </p>
+          </div>
+        ) : (
+          <table
+            className="bg-white dark:bg-black"
+            style={{
+              width: fullWidth ? "100%" : table.getCenterTotalSize(),
+            }}
+          >
+            <thead className="text-[12px]">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <tr
+                  key={headerGroup.id}
+                  className="sticky top-0 bg-slate-50 dark:bg-slate-950 z-[2] h-11"
+                >
+                  {checkboxMode !== "never" && (
+                    <th className="relative">
+                      <div className="flex justify-center items-center h-full ml-2">
+                        <Checkbox
+                          variant="helicone"
+                          onCheckedChange={handleSelectAll}
+                          checked={selectedIds?.length === rows.length}
+                          ref={(ref) => {
+                            if (ref) {
+                              (
+                                ref as unknown as HTMLInputElement
+                              ).indeterminate =
+                                selectedIds !== undefined &&
+                                selectedIds.length > 0 &&
+                                selectedIds.length < rows.length;
+                            }
+                          }}
+                          className="data-[state=checked]:bg-primary data-[state=indeterminate]:bg-primary"
+                        />
+                      </div>
+                      <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-300 dark:bg-slate-700" />
+                    </th>
+                  )}
+                  {headerGroup.headers.map((header, index) => (
+                    <th
+                      key={`header-${index}`}
+                      className={clsx(
+                        "relative",
+                        index === headerGroup.headers.length - 1 &&
+                          "border-r border-slate-300 dark:border-slate-700"
+                      )}
+                    >
+                      {index === 0 && onToggleAllRows !== undefined && (
+                        <div className="absolute left-1 top-1/2 -translate-y-1/2 z-10">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => onToggleAllRows(table)}
+                            className="h-6 w-6"
+                            aria-label={"Toggle expand all rows"}
+                          >
+                            <ChevronsUpDown className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
+                      <DraggableColumnHeader
+                        header={header}
+                        sortable={sortable}
+                        index={index}
+                        totalColumns={headerGroup.headers.length}
+                      />
+                      {index < headerGroup.headers.length - 1 && (
+                        <div className="absolute top-0 right-0 h-full w-px bg-slate-300 dark:bg-slate-700" />
+                      )}
+                      <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-300 dark:bg-slate-700" />
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+            <tbody className="text-[13px] divide-y divide-border">
+              {rows.map((row, index) => (
+                <tr
+                  key={row.id}
+                  className={clsx(
+                    "group relative",
+                    rowLink && "relative",
+                    selectedIds?.includes(row.id ?? "") ||
+                      (currentRow && currentRow.id === row.original.id)
+                      ? "!bg-sky-100 dark:!bg-slate-800/50"
+                      : clsx(
+                          "hover:bg-sky-50 dark:hover:bg-slate-700/50",
+                          row.getCanExpand()
+                            ? "font-semibold cursor-pointer bg-muted"
+                            : row.depth > 0
+                            ? "bg-slate-50 dark:bg-slate-950/50"
+                            : "bg-white dark:bg-black"
+                        )
+                  )}
+                  onClick={(e: React.MouseEvent) => {
+                    if (row.getCanExpand()) {
+                      if (
+                        e.target instanceof HTMLElement &&
+                        e.target.closest('a, button, input[type="checkbox"]')
+                      ) {
+                        return;
+                      }
+                      row.getToggleExpandedHandler()();
+                    } else if (onRowSelect) {
+                      handleRowSelect(row.original, index, e);
+                    }
                   }}
                 >
-                  <table
-                    className="h-full bg-white dark:bg-black"
-                    {...{
-                      style: {
-                        width: fullWidth ? "100%" : table.getCenterTotalSize(),
-                        overflow: "auto",
-                      },
-                    }}
+                  <td
+                    className={clsx(
+                      "h-[1px] sticky left-0 bottom-[-2px] z-[1]",
+                      checkboxMode === "on_hover"
+                        ? clsx(
+                            "opacity-0 group-hover:opacity-100 !border-0 !outline-none pt-[1px] px-0 pb-0 m-0",
+                            selectedIds?.includes(row.id ?? "") &&
+                              "!opacity-100"
+                          )
+                        : "",
+                      checkboxMode === "never" && "hidden"
+                    )}
+                    style={{ verticalAlign: "middle" }}
                   >
-                    <thead className="text-[12px] z-[2]">
-                      {table.getHeaderGroups().map((headerGroup) => (
-                        <tr
-                          key={headerGroup.id}
-                          className="sticky top-0  bg-slate-50 dark:bg-slate-900 shadow-sm"
-                        >
-                          <th
-                            className={clsx(
-                              "w-8 px-2 sticky left-0 z-20 bg-slate-50 dark:bg-slate-900",
-                              checkboxMode === "never" && "hidden"
-                            )}
-                          >
-                            <div
-                              className={clsx(
-                                checkboxMode === "on_hover" &&
-                                  "opacity-40 hover:opacity-100 transition-opacity duration-150"
-                              )}
-                            >
-                              <Checkbox
-                                variant="blue"
-                                onCheckedChange={handleSelectAll}
-                                checked={selectedIds?.length === rows.length}
-                                ref={(ref) => {
-                                  if (ref) {
-                                    (
-                                      ref as unknown as HTMLInputElement
-                                    ).indeterminate =
-                                      selectedIds !== undefined &&
-                                      selectedIds.length > 0 &&
-                                      selectedIds.length < rows.length;
-                                  }
-                                }}
-                                className="data-[state=checked]:bg-primary data-[state=indeterminate]:bg-primary"
-                              />
-                            </div>
-                            <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-300 dark:bg-slate-700" />
-                          </th>
-                          {headerGroup.headers.map((header, index) => (
-                            <th
-                              key={`header-${index}`}
-                              className={clsx(
-                                "relative",
-                                index === headerGroup.headers.length - 1 &&
-                                  "border-r border-slate-300 dark:border-slate-700"
-                              )}
-                            >
-                              <DraggableColumnHeader
-                                header={header}
-                                sortable={sortable}
-                                index={index}
-                                totalColumns={headerGroup.headers.length}
-                              />
-                              {index < headerGroup.headers.length - 1 && (
-                                <div className="absolute top-0 right-0 h-full w-px bg-slate-300 dark:bg-slate-700" />
-                              )}
-                              <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-300 dark:bg-slate-700" />
-                            </th>
-                          ))}
-                        </tr>
-                      ))}
-                    </thead>
-                    <tbody className="text-[13px] ">
-                      {rows.map((row, index) => (
-                        <tr
-                          key={row.original?.id}
-                          className={clsx(
-                            "hover:cursor-pointer group",
-                            checkedIds?.includes(row.original?.id ?? "")
-                              ? "bg-sky-100 border-l border-sky-500 pl-2 dark:bg-slate-800/50 dark:border-sky-900"
-                              : "hover:bg-sky-50 dark:hover:bg-slate-700/50",
-                            rowLink && "relative"
-                          )}
-                          onClick={
-                            onRowSelect &&
-                            ((e: React.MouseEvent) => {
-                              handleRowSelect(row.original, index, e);
-                            })
+                    <div
+                      className={clsx(
+                        "flex justify-center items-center w-full h-full",
+                        selectedIds?.includes(row.id ?? "") ||
+                          (currentRow && currentRow.id === row.original.id)
+                          ? "bg-inherit"
+                          : row.getCanExpand()
+                          ? "bg-inherit"
+                          : row.depth > 0
+                          ? "bg-slate-50 dark:bg-slate-950/50"
+                          : "bg-white dark:bg-black"
+                      )}
+                    >
+                      <Checkbox
+                        variant="helicone"
+                        checked={selectedIds?.includes(row.id ?? "")}
+                      />
+                    </div>
+                  </td>
+                  {row.getVisibleCells().map((cell, i) => (
+                    <td
+                      key={cell.id}
+                      className={clsx(
+                        " text-slate-700 dark:text-slate-300 truncate select-none",
+                        !rowLink?.(row.original) &&
+                          clsx(
+                            "py-3",
+                            i === 0 && "pr-2",
+                            i > 0 && "px-2",
+                            onRowSelect && "cursor-pointer"
+                          ),
+                        i === 0 && "relative",
+                        selectedIds?.includes(row.id ?? "") ||
+                          (currentRow && currentRow.id === row.original.id)
+                          ? "bg-inherit"
+                          : row.getCanExpand()
+                          ? "bg-inherit"
+                          : row.depth > 0
+                          ? "bg-slate-50 dark:bg-slate-950/50"
+                          : "bg-white dark:bg-black",
+                        i === row.getVisibleCells().length - 1 &&
+                          "border-r border-border"
+                      )}
+                      style={{
+                        maxWidth: cell.column.getSize(),
+                      }}
+                    >
+                      <ConditionalLink
+                        href={rowLink?.(row.original)}
+                        className={clsx(
+                          "block w-full h-full",
+                          "py-3",
+                          i === 0 && "pr-2",
+                          i > 0 && "px-2"
+                        )}
+                      >
+                        <div
+                          className={clsx("flex items-center gap-1")}
+                          style={
+                            i === 0
+                              ? {
+                                  paddingLeft: `${
+                                    row.depth * 24 +
+                                    (onToggleAllRows !== undefined ? 24 : 0) +
+                                    (row.getCanExpand() ? 0 : 8)
+                                  }px`,
+                                }
+                              : {}
                           }
                         >
-                          <td
-                            className={clsx(
-                              "w-8 px-2 border-t border-slate-300 dark:border-slate-700",
-                              checkboxMode === "on_hover"
-                                ? clsx(
-                                    "opacity-0 group-hover:opacity-100 transition-opacity duration-150",
-                                    selectedIds?.includes(
-                                      row.original?.id ?? ""
-                                    ) && "!opacity-100"
-                                  )
-                                : "",
-                              checkboxMode === "never" && "hidden"
-                            )}
-                          >
-                            <Checkbox
-                              variant="blue"
-                              checked={selectedIds?.includes(
-                                row.original?.id ?? ""
-                              )}
-                              onChange={() => {}}
-                              className="text-slate-700 dark:text-slate-400"
-                            />
-                          </td>
-                          {row.getVisibleCells().map((cell, i) => (
-                            <td
-                              key={i}
-                              className={clsx(
-                                "py-3 border-t border-slate-300 dark:border-slate-700 px-2 text-slate-700 dark:text-slate-300",
-                                i === 0 &&
-                                  checkboxMode === "always_visible" &&
-                                  "pl-2",
-                                i === 0 &&
-                                  checkboxMode === "on_hover" &&
-                                  "pl-2",
-                                i === 0 && checkboxMode === "never" && "pl-10",
-                                // For selected rows in hover mode
-                                i === 0 &&
-                                  checkboxMode === "on_hover" &&
-                                  selectedIds?.includes(
-                                    row.original?.id ?? ""
-                                  ) &&
-                                  "!pl-2",
-                                i === row.getVisibleCells().length - 1 &&
-                                  "pr-10 border-r border-slate-300 dark:border-slate-700"
-                              )}
-                              style={{
-                                maxWidth: cell.column.getSize(),
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap",
+                          {i === 0 &&
+                            (() => {
+                              const getAncestorPath = (
+                                currentRow: Row<T>
+                              ): string | undefined => {
+                                if (currentRow.depth === 0) {
+                                  return (currentRow.original as any)
+                                    ?.path as string;
+                                }
+                                let currentParent = currentRow.getParentRow();
+                                while (
+                                  currentParent &&
+                                  currentParent.depth > 0
+                                ) {
+                                  currentParent = currentParent.getParentRow();
+                                }
+                                return currentParent
+                                  ? ((currentParent.original as any)
+                                      ?.path as string)
+                                  : undefined;
+                              };
+
+                              const ancestorPath = getAncestorPath(row);
+                              const groupColorClass =
+                                (ancestorPath &&
+                                  topLevelPathColorMap[ancestorPath]) ||
+                                "bg-transparent";
+
+                              if (groupColorClass !== "bg-transparent") {
+                                return (
+                                  <div
+                                    className={clsx(
+                                      "absolute left-0 top-0 bottom-0 w-1 z-30",
+                                      groupColorClass
+                                    )}
+                                  />
+                                );
+                              }
+                              return null;
+                            })()}
+
+                          {i === 0 && row.getCanExpand() && (
+                            <button
+                              {...{
+                                onClick: row.getToggleExpandedHandler(),
+                                style: { cursor: "pointer" },
+                                "data-expander": true,
                               }}
+                              className="p-0.5"
                             >
-                              {dataLoading &&
-                              (cell.column.id == "requestText" ||
-                                cell.column.id == "responseText") ? (
-                                <span
-                                  className={clsx(
-                                    "w-full flex flex-grow",
-                                    (cell.column.id == "requestText" ||
-                                      cell.column.id == "responseText") &&
-                                      dataLoading
-                                      ? "animate-pulse bg-slate-200 rounded-md"
-                                      : "hidden"
-                                  )}
-                                >
-                                  &nbsp;
-                                </span>
+                              {row.getIsExpanded() ? (
+                                <ChevronDown className="h-4 w-4 text-muted-foreground" />
                               ) : (
-                                flexRender(
-                                  cell.column.columnDef.cell,
-                                  cell.getContext()
-                                )
+                                <ChevronRight className="h-4 w-4 text-muted-foreground" />
                               )}
-                            </td>
-                          ))}
-                          {rowLink && (
-                            <td
-                              className="p-0 m-0 border-0"
-                              style={{
-                                position: "absolute",
-                                top: 0,
-                                left: 0,
-                                right: 0,
-                                bottom: 0,
-                                padding: 0,
-                                margin: 0,
-                                border: "none",
-                                background: "transparent",
-                                pointerEvents: "none",
-                                zIndex: 2,
-                              }}
-                            >
-                              <Link
-                                href={rowLink(row.original)}
-                                style={{
-                                  display: "block",
-                                  width: "100%",
-                                  height: "100%",
-                                  opacity: 0,
-                                  pointerEvents: "auto",
-                                }}
-                                onClick={(e: React.MouseEvent) => {
-                                  if (onRowSelect) {
-                                    e.stopPropagation();
-                                  }
-                                }}
-                                aria-hidden="true"
-                              />
-                            </td>
+                            </button>
                           )}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-          </div>
-        </ResizablePanel>
-        {rightPanel && (
-          <>
-            {isOnboardingVisible && currentStep === 1 ? (
-              <div className="h-full w-1/2">{rightPanel}</div>
-            ) : (
-              <>
-                <ResizableHandle withHandle />
-                <ResizablePanel minSize={25} maxSize={75} defaultSize={75}>
-                  <div className="h-full flex-shrink-0 flex flex-col">
-                    {rightPanel}
-                  </div>
-                </ResizablePanel>
-              </>
-            )}
-          </>
+                          {dataLoading &&
+                          (cell.column.id == "requestText" ||
+                            cell.column.id == "responseText") ? (
+                            <span
+                              className={clsx(
+                                "w-full flex flex-grow",
+                                (cell.column.id == "requestText" ||
+                                  cell.column.id == "responseText") &&
+                                  dataLoading
+                                  ? "animate-pulse bg-slate-200 rounded-md"
+                                  : "hidden"
+                              )}
+                            >
+                              &nbsp;
+                            </span>
+                          ) : (
+                            flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )
+                          )}
+                        </div>
+                      </ConditionalLink>
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
-      </ResizablePanelGroup>
-    </div>
+      </div>
+    </ScrollArea>
   );
 }

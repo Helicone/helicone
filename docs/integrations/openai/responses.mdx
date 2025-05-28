@@ -1,0 +1,196 @@
+---
+title: "OpenAI Responses API"
+sidebarTitle: "Responses"
+description: "Integrate OpenAI Responses API with Helicone to monitor and analyze your model's responses."
+"twitter:title": "OpenAI Responses Integration - Helicone OSS LLM Observability"
+icon: "plug"
+iconType: "solid"
+---
+
+import { strings } from "/snippets/strings.mdx";
+
+OpenAI Responses enable you to provide text or image inputs to generate text or JSON outputs by calling your own custom code or use built-in tools like web search or file search. By integrating them with Helicone, you can monitor performance, analyze interactions, and gain valuable insights into your responses.
+
+## {strings.howToIntegrate}
+
+<Steps>
+  <Step title={strings.generateKey}>
+    <div dangerouslySetInnerHTML={{ __html: strings.generateKeyInstructions }} />
+  </Step>
+
+  <Step title={strings.setApiKey}>
+    ```javascript
+    HELICONE_API_KEY=<your-helicone-api-key>
+    OPENAI_API_KEY=<your-openai-api-key>
+    ```
+  </Step>
+
+  <Step title={strings.modifyBasePath}>
+    ```javascript
+    import OpenAI from "openai";
+
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+      baseURL: "https://oai.helicone.ai/v1",
+      defaultHeaders: {
+        "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`
+      }
+    });
+    ```
+  </Step>
+
+  <Step title={strings.startUsing("OpenAI Responses API")}>
+    <Note>
+      Replace the response's model, input, and output with content relevant to your application.
+    </Note>
+
+    <CodeGroup>
+    ```javascript text
+    const textInputResponse = await openai.responses.create({
+        model: "gpt-4.1",
+        input: "What is the meaning of life?"
+    });
+
+    console.log(textInputResponse);
+    ```
+
+    ```javascript image
+    const imageInputResponse = await openai.responses.create({
+        model: "gpt-4.1",
+        input: [
+            {
+                role: "user",
+                content: [
+                    { type: "input_text", text: "what is in this image?" },
+                    {
+                        type: "input_image",
+                        image_url:
+                            "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Gfp-wisconsin-madison-the-nature-boardwalk.jpg/2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg",
+                    },
+                ],
+            },
+        ],
+    });
+
+    console.log(imageInputResponse);
+    ```
+
+    ```javascript json
+    const jsonInputResponse = await openai.responses.create({
+      model: "gpt-4.1",
+      input: { name: "John", age: 30 }
+    });
+
+    console.log(jsonInputResponse);
+    ```
+
+    ```javascript web-search
+    const webSearchResponse = await openai.responses.create({
+      model: "gpt-4.1",
+      tools: [{ type: "web_search_preview" }],
+      input: "What was a positive news story from today?",
+    });
+
+    console.log(webSearchResponse);
+    ```
+
+    ```javascript file-search
+    const fileSearchResponse = await openai.responses.create({
+      model: "gpt-4.1",
+      tools: [{
+        type: "file_search",
+        vector_store_ids: ["vs_1234567890"],
+        max_num_results: 20
+      }],
+      input: "What are the attributes of an ancient brown dragon?",
+    });
+
+    console.log(fileSearchResponse);
+    ```
+
+    ```javascript streaming
+    const streamingResponse = await openai.responses.create({
+      model: "gpt-4.1",
+      instructions: "You are a helpful assistant.",
+      input: "Hello!",
+      stream: true,
+    });
+
+    for await (const event of streamingResponse) {
+      console.log(event);
+    }
+    ```
+
+    ```javascript function-calling
+    const tools = [
+      {
+        type: "function" as const,
+        name: "get_current_weather",
+        description: "Get the current weather in a given location",
+        parameters: {
+          type: "object",
+          properties: {
+            location: {
+              type: "string",
+              description: "The city and state, e.g. San Francisco, CA"
+            },
+            unit: { type: "string", enum: ["celsius", "fahrenheit"] }
+          },
+          required: ["location", "unit"]
+        },
+        strict: true
+      },
+    ];
+
+    const functionCallingResponse = await openai.responses.create({
+      model: "gpt-4.1",
+      tools: tools,
+      input: "What is the weather like in Boston today?",
+      tool_choice: "auto"
+    });
+
+    console.log(functionCallingResponse);
+    ```
+
+    ```javascript reasoning
+    const reasoningResponse = await openai.responses.create({
+      model: "o3-mini",
+      input: "How much wood would a woodchuck chuck?",
+      reasoning: {
+        effort: "high"
+      }
+    });
+
+    console.log(reasoningResponse);
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title={strings.verifyInHelicone}>
+    <div dangerouslySetInnerHTML={{ __html: strings.verifyInHeliconeDesciption("OpenAI Responses API") }} />
+  </Step>
+</Steps>
+
+## {strings.relatedGuides}
+
+<CardGroup cols={2}>
+  <Card
+    title="Building a chatbot with OpenAI structured outputs"
+    icon="lightbulb"
+    href="/guides/cookbooks/openai-structured-outputs"
+    iconType="light"
+    vertical
+  >
+    {strings.chatbotCookbookDescription}
+  </Card>
+  <Card
+    title="Use Chain-of-Thought Prompting"
+    icon="stairs"
+    href="/guides/prompt-engineering/use-chain-of-thought-prompting"
+    iconType="light"
+    vertical
+    >
+
+    {strings.chainOfThoughtPromptingCookbookDescription}
+  </Card>
+</CardGroup>

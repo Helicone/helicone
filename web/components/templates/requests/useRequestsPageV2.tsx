@@ -1,4 +1,4 @@
-import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
+import { heliconeRequestToMappedContent } from "@helicone-package/llm-mapper/utils/getMappedContent";
 import { UIFilterRowTree } from "@/services/lib/filters/types";
 import { TimeFilter } from "@/types/timeFilter";
 import { useState } from "react";
@@ -22,10 +22,11 @@ const useRequestsPageV2 = (
   currentPage: number,
   currentPageSize: number,
   uiFilterIdxs: UIFilterRowTree,
-  advancedFilter: FilterNode,
+  timeFilterNode: FilterNode,
   sortLeaf: SortLeafRequest,
   isCached: boolean,
-  isLive: boolean
+  isLive: boolean,
+  rateLimited?: boolean
 ) => {
   const filterStore = useFilterAST();
   const [timeFilter] = useState<TimeFilter>({
@@ -71,18 +72,39 @@ const useRequestsPageV2 = (
     };
   }
 
+  const rateLimitFilterMapIndex = filterMap.findIndex(
+    (filter: any) => filter.label?.trim() === "Helicone-Rate-Limit-Status"
+  );
+
+  let rateLimitFilterNode: FilterNode = "all";
+  if (rateLimited && rateLimitFilterMapIndex !== -1) {
+    rateLimitFilterNode = filterUITreeToFilterNode(filterMap, {
+      filterMapIdx: rateLimitFilterMapIndex,
+      operatorIdx: 0,
+      value: "rate_limited",
+    });
+  }
+
   // sort the model by name
   models?.data?.sort((a, b) => a.model.localeCompare(b.model));
 
-  const filter: FilterNode = {
+  const nonTimeFilters: FilterNode = {
     left: {
-      right: filterUITreeToFilterNode(filterMap, uiFilterIdxs),
-      left: filterStore.store.filter
+      left: filterUITreeToFilterNode(filterMap, uiFilterIdxs),
+      right: filterStore.store.filter
         ? toFilterNode(filterStore.store.filter)
         : "all",
       operator: "and",
     },
-    right: advancedFilter,
+    // Combine with only the conditional Rate Limit Filter
+    right: rateLimitFilterNode,
+    operator: "and",
+  };
+
+  // Combine with time filter last
+  const filter: FilterNode = {
+    left: nonTimeFilters,
+    right: timeFilterNode,
     operator: "and",
   };
 
@@ -109,6 +131,7 @@ const useRequestsPageV2 = (
     searchPropertyFilters,
     filterMap,
     filter,
+    rateLimitFilterNode,
   };
 };
 

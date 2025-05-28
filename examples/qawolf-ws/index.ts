@@ -18,7 +18,7 @@ import WebSocket from "ws";
 config({ path: ".env" });
 
 // Azure vs OpenAI Usage
-const isAzure = true;
+const isAzure = false;
 const resource = process.env.AZURE_RESOURCE;
 const deployment = process.env.AZURE_DEPLOYMENT;
 
@@ -33,7 +33,9 @@ const ws = new WebSocket(url, {
     Authorization: `Bearer ${apiKey}`,
     "Helicone-Auth": "Bearer " + process.env.HELICONE_API_KEY,
     // + Any Helicone properties here:
+    "Helicone-Session-Name": "QAWOLF-Live-Updates",
     "Helicone-Session-Id": `session_${Date.now()}`,
+    "Helicone-Session-Path": "/realtime-session",
     "Helicone-User-Id": "qawolf",
   },
 });
@@ -62,15 +64,70 @@ const sessionUpdate = {
       {
         type: "function",
         name: "get_weather",
-        description: "Get the current weather...",
+        description: "Get the current weather for a location with detailed information",
         parameters: {
           type: "object",
           properties: {
-            location: { type: "string" },
+            location: { 
+              type: "string",
+              description: "The city and country/state to get weather for"
+            },
+            units: { 
+              type: "string",
+              enum: ["celsius", "fahrenheit"],
+              description: "Temperature units to return"
+            }
           },
           required: ["location"],
         },
       },
+      {
+        type: "function",
+        name: "get_stock_price",
+        description: "Get the current stock price for a given ticker symbol",
+        parameters: {
+          type: "object",
+          properties: {
+            symbol: { 
+              type: "string",
+              description: "The stock ticker symbol (e.g. AAPL, GOOGL)"
+            },
+            exchange: {
+              type: "string",
+              enum: ["NYSE", "NASDAQ"],
+              description: "The stock exchange"
+            }
+          },
+          required: ["symbol"],
+        },
+      },
+      {
+        type: "function",
+        name: "calculate_mortgage",
+        description: "Calculate monthly mortgage payments based on loan details",
+        parameters: {
+          type: "object",
+          properties: {
+            principal: { 
+              type: "number",
+              description: "The loan amount in dollars"
+            },
+            annual_interest_rate: {
+              type: "number",
+              description: "Annual interest rate as a percentage (e.g. 5.5 for 5.5%)"
+            },
+            loan_term_years: {
+              type: "number",
+              description: "The length of the loan in years"
+            },
+            down_payment: {
+              type: "number",
+              description: "Down payment amount in dollars (optional)",
+            }
+          },
+          required: ["principal", "annual_interest_rate", "loan_term_years"],
+        },
+      }
     ],
     tool_choice: "auto",
     temperature: 0.8,
@@ -88,6 +145,10 @@ const rl = readline.createInterface({
 let mic: any = null;
 let micStream: any = null;
 let isRecording = false;
+
+// Track the last item ID for deletion
+let lastItemId = "";
+let messageCounter = 0;
 
 // Initialize microphone
 function initMicrophone() {
@@ -218,6 +279,7 @@ ws.on("open", function open() {
     JSON.stringify({
       type: "conversation.item.create",
       item: {
+        id: `item_${Date.now()}`,
         call_id: callId,
         output: "success",
         type: "function_call_output",
@@ -233,7 +295,7 @@ ws.on("open", function open() {
 
   console.log("Enter your message (or 'quit' to exit):");
   console.log(
-    "Commands: 'mic' to toggle microphone, 'update' to send session update"
+    "Commands: 'mic' to toggle microphone, 'update' to send session update, 'delete' to delete last message"
   );
   startCliLoop();
 });
@@ -291,34 +353,79 @@ ws.on("message", function incoming(message: WebSocket.RawData) {
 // Function call handler
 function handleFunctionCall(functionCall: any) {
   const { name, arguments: args } = functionCall;
+  const parsedArgs = JSON.parse(args);
+  const functionItemId = `item_function_${Date.now()}_${messageCounter++}`;
+  lastItemId = functionItemId;
 
-  if (name === "get_weather") {
-    const parsedArgs = JSON.parse(args);
-    const dummyResponse = {
-      type: "conversation.item.create",
-      item: {
-        type: "function_call_output",
-        call_id: functionCall.call_id,
-        output: JSON.stringify({
-          temperature: 72,
-          conditions: "sunny",
-          location: parsedArgs.location,
-        }),
-      },
-    };
+  let response;
 
-    console.log(
-      "\nSending function response:",
-      inspect(dummyResponse, { colors: true, depth: null })
-    );
-    ws.send(JSON.stringify(dummyResponse));
-    ws.send(
-      JSON.stringify({
-        type: "response.create",
-        response: {},
-      })
-    );
+  switch (name) {
+    case "get_weather":
+      response = {
+        temperature: parsedArgs.units === "celsius" ? 22 : 72,
+        conditions: "sunny",
+        location: parsedArgs.location,
+        humidity: 45,
+        wind_speed: 10,
+        units: parsedArgs.units || "fahrenheit"
+      };
+      break;
+
+    case "get_stock_price":
+      response = {
+        symbol: parsedArgs.symbol,
+        price: 150.25,
+        exchange: parsedArgs.exchange || "NASDAQ",
+        change_percent: 2.5,
+        volume: 1000000,
+        timestamp: new Date().toISOString()
+      };
+      break;
+
+    case "calculate_mortgage":
+      const principal = parsedArgs.principal - (parsedArgs.down_payment || 0);
+      const monthlyRate = (parsedArgs.annual_interest_rate / 100) / 12;
+      const totalPayments = parsedArgs.loan_term_years * 12;
+      
+      const monthlyPayment = principal * 
+        (monthlyRate * Math.pow(1 + monthlyRate, totalPayments)) / 
+        (Math.pow(1 + monthlyRate, totalPayments) - 1);
+
+      response = {
+        monthly_payment: Math.round(monthlyPayment * 100) / 100,
+        total_payments: totalPayments,
+        total_interest: Math.round((monthlyPayment * totalPayments - principal) * 100) / 100,
+        principal_amount: principal,
+        down_payment: parsedArgs.down_payment || 0
+      };
+      break;
+
+    default:
+      console.error("Unknown function:", name);
+      return;
   }
+
+  const dummyResponse = {
+    type: "conversation.item.create",
+    item: {
+      id: functionItemId,
+      type: "function_call_output",
+      call_id: functionCall.call_id,
+      output: JSON.stringify(response),
+    },
+  };
+
+  console.log(
+    "\nSending function response:",
+    inspect(dummyResponse, { colors: true, depth: null })
+  );
+  ws.send(JSON.stringify(dummyResponse));
+  ws.send(
+    JSON.stringify({
+      type: "response.create",
+      response: {},
+    })
+  );
 }
 
 ws.on("error", function error(err: Error) {
@@ -364,13 +471,116 @@ function startCliLoop() {
       return;
     }
 
+    // If input is "delete"
+    if (input.toLowerCase() === "delete") {
+      if (lastItemId) {
+        const deleteMessage = {
+          event_id: `event_${Date.now()}`,
+          type: "conversation.item.delete",
+          item_id: lastItemId,
+        };
+
+        console.log("Deleting last item with ID:", lastItemId);
+        ws.send(JSON.stringify(deleteMessage));
+        console.log("Delete message sent!");
+      } else {
+        console.log("No item to delete.");
+      }
+      return;
+    }
+
+    // If input is "delete-list"
+    if (input.toLowerCase() === "delete-list") {
+      console.log("Starting delete-list test sequence...");
+
+      // Create and delete first message
+      const msgId1 = `msg_${Date.now()}_${messageCounter++}`;
+      ws.send(
+        JSON.stringify({
+          type: "conversation.item.create",
+          item: {
+            id: msgId1,
+            type: "message",
+            role: "user",
+            content: [{ type: "input_text", text: "Test message 1" }],
+          },
+        })
+      );
+      console.log("Created message 1:", msgId1);
+
+      ws.send(
+        JSON.stringify({
+          event_id: `event_${Date.now()}`,
+          type: "conversation.item.delete",
+          item_id: msgId1,
+        })
+      );
+      console.log("Deleted message 1:", msgId1);
+
+      // Create and delete second message
+      const msgId2 = `msg_${Date.now()}_${messageCounter++}`;
+      ws.send(
+        JSON.stringify({
+          type: "conversation.item.create",
+          item: {
+            id: msgId2,
+            type: "message",
+            role: "user",
+            content: [{ type: "input_text", text: "Test message 2" }],
+          },
+        })
+      );
+      console.log("Created message 2:", msgId2);
+
+      ws.send(
+        JSON.stringify({
+          event_id: `event_${Date.now()}`,
+          type: "conversation.item.delete",
+          item_id: msgId2,
+        })
+      );
+      console.log("Deleted message 2:", msgId2);
+
+      // Create and delete third message
+      const msgId3 = `msg_${Date.now()}_${messageCounter++}`;
+      ws.send(
+        JSON.stringify({
+          type: "conversation.item.create",
+          item: {
+            id: msgId3,
+            type: "message",
+            role: "user",
+            content: [{ type: "input_text", text: "Test message 3" }],
+          },
+        })
+      );
+      console.log("Created message 3:", msgId3);
+
+      ws.send(
+        JSON.stringify({
+          event_id: `event_${Date.now()}`,
+          type: "conversation.item.delete",
+          item_id: msgId3,
+        })
+      );
+      console.log("Deleted message 3:", msgId3);
+      console.log("Delete-list test sequence completed!");
+
+      return;
+    }
+
     // Otherwise, send the message as text
     try {
+      // Generate a unique message ID
+      const messageId = `msg_${Date.now()}_${messageCounter++}`;
+      lastItemId = messageId;
+
       // Create a text message item
       ws.send(
         JSON.stringify({
           type: "conversation.item.create",
           item: {
+            id: messageId,
             type: "message",
             role: "user",
             content: [

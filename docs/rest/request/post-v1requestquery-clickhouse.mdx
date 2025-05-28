@@ -6,11 +6,9 @@ description: "Retrieve all requests visible in the request table at Helicone."
 openapi: post /v1/request/query-clickhouse
 ---
 
-<Warning>
-  For users in the European Union: Please use `eu.api.helicone.ai` instead of
-  `api.helicone.ai` to ensure compliance with data residency requirements and
-  optimal performance.
-</Warning>
+import EUAPIWarning from "/snippets/eu-api-warning.mdx";
+
+<EUAPIWarning />
 
 <CardGroup cols={2}>
   <Card

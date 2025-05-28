@@ -12,7 +12,7 @@ Let's consider a simple internal chatbot designed to help employees of a small b
 
 Initially, you can simply copy and paste the last 10 emails into the context.
 
-![LLM Stack Example - Stage 1](/static/pasted_images/llm-stack-ex-stage-1.png)
+![LLM Stack Example - Stage 1](/static/pasted_images/llm-stack-ex-stage-1.webp)
 
 **System:**
 
@@ -36,37 +36,37 @@ What is the status of the order with the id 123456?
 
 As your app gains popularity, you may find yourself spending $100 a day on OpenAI. At this stage, basic observability becomes essential.
 
-![LLM Stack Example - Stage 2](/static/pasted_images/llm-stack-ex-stage-2.png)
+![LLM Stack Example - Stage 2](/static/pasted_images/llm-stack-ex-stage-2.webp)
 
 ### Stage 3: Scaling
 
 Users may complain that the chatbot only considers the last 10 emails. To address this, implement a Vector DB to store all emails and use embeddings to retrieve the 10 most relevant ones.
 
-![LLM Stack Example - Stage 3](/static/pasted_images/llm-stack-ex-stage-3.png)
+![LLM Stack Example - Stage 3](/static/pasted_images/llm-stack-ex-stage-3.webp)
 
 ### Stage 4: Gateway
 
 To manage costs, you may need to rate-limit users and add a caching layer. This is where a gateway comes into play.
 
-![LLM Stack Example - Stage 4](/static/pasted_images/llm-stack-ex-stage-4.png)
+![LLM Stack Example - Stage 4](/static/pasted_images/llm-stack-ex-stage-4.webp)
 
 ### Stage 5: Tools
 
 Enhance functionality by adding tools that perform actions on behalf of users, such as marking emails as read or adding events to a calendar.
 
-![LLM Stack Example - Stage 5](/static/pasted_images/llm-stack-ex-stage-5.png)
+![LLM Stack Example - Stage 5](/static/pasted_images/llm-stack-ex-stage-5.webp)
 
 ### Stage 6: Prompting
 
 Implement a robust prompt management solution to handle prompt versions for testing and observability.
 
-![LLM Stack Example - Stage 6](/static/pasted_images/llm-stack-ex-stage-6.png)
+![LLM Stack Example - Stage 6](/static/pasted_images/llm-stack-ex-stage-6.webp)
 
 ### Stage 7: Agents
 
 Some actions may require multiple tool calls in a loop, where tools decide on the next action. This is where Agents come into play.
 
-![LLM Stack Example - Stage 7](/static/pasted_images/llm-stack-ex-stage-7.png)
+![LLM Stack Example - Stage 7](/static/pasted_images/llm-stack-ex-stage-7.webp)
 
 Agents are advanced integrations that operate within complex environments, allowing for sophisticated interactions through prompts instead of direct provider calls.
 
@@ -74,18 +74,18 @@ Agents are advanced integrations that operate within complex environments, allow
 
 As your application grows, different models may be better suited for specific tasks. A model load balancer can help distribute the workload effectively.
 
-![LLM Stack Example - Stage 8](/static/pasted_images/llm-stack-ex-stage-8.png)
+![LLM Stack Example - Stage 8](/static/pasted_images/llm-stack-ex-stage-8.webp)
 
 ### Stage 9: Testing
 
 To make data actionable, implement a testing framework that provides insights and evaluators to assess the quality of your model's outputs.
 
-![LLM Stack Example - Stage 9](/static/pasted_images/llm-stack-ex-stage-9.png)
+![LLM Stack Example - Stage 9](/static/pasted_images/llm-stack-ex-stage-9.webp)
 
 ### Stage 10: Fine Tuning
 
 Fine-tuning is typically employed for workloads requiring significant customization, especially when optimizing for specific problems or cost savings.
 
-![LLM Stack Example - Stage 10](/static/pasted_images/llm-stack-ex-stage-10.png)
+![LLM Stack Example - Stage 10](/static/pasted_images/llm-stack-ex-stage-10.webp)
 
 <Questions />

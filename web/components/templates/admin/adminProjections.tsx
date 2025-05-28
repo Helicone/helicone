@@ -1,14 +1,20 @@
-import React, { useState, useMemo, useEffect } from "react";
-import { useJawnClient } from "@/lib/clients/jawnHook";
-import SubscriptionTable from "@/components/layout/admin/SubscriptionTable";
+import { InvoiceTable, SortConfig } from "@/components/admin/InvoiceTable";
+import { RevenueChart } from "@/components/admin/RevenueChart";
 import {
-  MOCK_SUBSCRIPTIONS,
-  MOCK_INVOICES,
   MOCK_DISCOUNTS,
+  MOCK_INVOICES,
+  MOCK_UPCOMING_INVOICES,
 } from "@/components/layout/admin/mockStripeData";
-import { SubscriptionAnalytics } from "@/lib/SubscriptionAnalytics";
+import {
+  InvoiceData,
+  MonthlyRevenueData,
+  RawStripeData,
+  RevenueCalculator,
+} from "@/lib/admin/RevenueCalculator";
+import { useJawnClient } from "@/lib/clients/jawnHook";
+import { formatMonthKey } from "@/lib/uiUtils";
+import { useEffect, useMemo, useState } from "react";
 import type Stripe from "stripe";
-import ProductRevenueTrendChart from "@/components/admin/ProductRevenueTrendChart";
 
 // Type for the API response
 interface SubscriptionDataResponse {
@@ -16,23 +22,141 @@ interface SubscriptionDataResponse {
     subscriptions: Stripe.Subscription[];
     invoices: Stripe.Invoice[];
     discounts: Record<string, Stripe.Discount>;
-    upcomingInvoices: Record<string, any>;
+    upcomingInvoices: Stripe.UpcomingInvoice[];
   };
   error?: string;
 }
+
+// Modal component for displaying raw invoice data
+const InvoiceModal = ({
+  isOpen,
+  invoice,
+  onClose,
+}: {
+  isOpen: boolean;
+  invoice: any;
+  onClose: () => void;
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-background rounded-lg shadow-lg w-full max-w-4xl max-h-[80vh] flex flex-col">
+        <div className="flex justify-between items-center p-4 border-b border-border">
+          <h2 className="text-lg font-semibold">Raw Invoice Data</h2>
+          <button
+            onClick={onClose}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            ✕
+          </button>
+        </div>
+        <div className="overflow-auto p-4 flex-grow">
+          <pre className="text-xs whitespace-pre-wrap bg-slate-50 p-4 rounded">
+            {JSON.stringify(invoice, null, 2)}
+          </pre>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const AdminProjections = () => {
   const jawn = useJawnClient();
   const [refreshCounter, setRefreshCounter] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [subscriptionData, setSubscriptionData] = useState(MOCK_SUBSCRIPTIONS);
-  const [invoiceData, setInvoiceData] = useState(MOCK_INVOICES);
-  const [discountData, setDiscountData] = useState(MOCK_DISCOUNTS);
-  const [upcomingInvoiceData, setUpcomingInvoiceData] = useState<
-    Record<string, any>
-  >({});
+  const [rawData, setRawData] = useState<RawStripeData>({
+    invoices: MOCK_INVOICES,
+    discounts: MOCK_DISCOUNTS,
+    upcomingInvoices: MOCK_UPCOMING_INVOICES,
+  });
   const [error, setError] = useState<string | null>(null);
   const [dataFetched, setDataFetched] = useState(false);
+  const [expandedSections, setExpandedSections] = useState<
+    Record<string, boolean>
+  >({});
+  const [selectedMonths, setSelectedMonths] = useState<Record<string, string>>(
+    {}
+  );
+  const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // State for sorting configuration
+  const [billedSortConfig, setBilledSortConfig] = useState<SortConfig>({
+    key: null,
+    direction: "asc",
+  });
+  const [upcomingSortConfig, setUpcomingSortConfig] = useState<SortConfig>({
+    key: null,
+    direction: "asc",
+  });
+
+  // Product configuration
+  const productConfigs = [
+    {
+      productName: "All Products",
+      productIds: [
+        "prod_Rhx6vMVdGqih1E", // Team
+        "prod_QrcNwy2KPKiZJ5", // Users
+        "prod_PpPUGArb7KCAZT", // Usage
+        "prod_QrcOEoxIc76n6K", // Prompts
+        "prod_Rhx8ZQYhQOuunD", // Experiments
+        "prod_Rhx7VbaUg1d1zA", // Evals
+      ],
+    },
+    { productName: "Team", productIds: ["prod_Rhx6vMVdGqih1E"] },
+    { productName: "Users", productIds: ["prod_QrcNwy2KPKiZJ5"] },
+    { productName: "Usage", productIds: ["prod_PpPUGArb7KCAZT"] },
+    { productName: "Prompts", productIds: ["prod_QrcOEoxIc76n6K"] },
+    { productName: "Experiments", productIds: ["prod_Rhx8ZQYhQOuunD"] },
+    { productName: "Evals", productIds: ["prod_Rhx7VbaUg1d1zA"] },
+  ];
+
+  // Handle sorting logic
+  const handleSort = (
+    tableType: "billed" | "upcoming",
+    key: keyof InvoiceData
+  ) => {
+    const currentConfig =
+      tableType === "billed" ? billedSortConfig : upcomingSortConfig;
+    const setConfig =
+      tableType === "billed" ? setBilledSortConfig : setUpcomingSortConfig;
+
+    let direction: "asc" | "desc" = "asc";
+    // If clicking the same key, toggle direction
+    if (currentConfig.key === key && currentConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setConfig({ key, direction });
+  };
+
+  // Toggle expanded state for a section
+  const toggleSection = (sectionKey: string) => {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [sectionKey]: !prev[sectionKey],
+    }));
+  };
+
+  // View raw invoice data
+  const viewRawInvoice = (invoice: any) => {
+    setSelectedInvoice(invoice);
+    setIsModalOpen(true);
+  };
+
+  // Close the modal
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedInvoice(null);
+  };
+
+  // Set selected month for a product
+  const selectMonth = (productName: string, monthKey: string) => {
+    setSelectedMonths((prev) => ({
+      ...prev,
+      [productName]: monthKey,
+    }));
+  };
 
   // Fetch subscription data from API
   useEffect(() => {
@@ -44,7 +168,7 @@ const AdminProjections = () => {
         const response = (await jawn.GET("/v1/admin/subscription-data", {
           params: {
             query: {
-              forceRefresh: refreshCounter > 0, // Only force refresh if button was clicked
+              forceRefresh: refreshCounter > 0,
             },
           },
         })) as unknown as SubscriptionDataResponse;
@@ -53,22 +177,23 @@ const AdminProjections = () => {
           throw new Error(response.error);
         }
 
-        setSubscriptionData(
-          response.data.subscriptions as typeof MOCK_SUBSCRIPTIONS
-        );
-        setInvoiceData(response.data.invoices as typeof MOCK_INVOICES);
-        setDiscountData(response.data.discounts as typeof MOCK_DISCOUNTS);
-        setUpcomingInvoiceData(response.data.upcomingInvoices || {});
+        // Store the fetched raw data in state
+        setRawData({
+          invoices: response.data.invoices,
+          discounts: response.data.discounts,
+          upcomingInvoices: response.data.upcomingInvoices,
+        });
         setDataFetched(true);
       } catch (err) {
         console.error("Error fetching subscription data:", err);
         setError("Failed to load subscription data. Using mock data instead.");
 
-        // Fall back to mock data
-        setSubscriptionData(MOCK_SUBSCRIPTIONS);
-        setInvoiceData(MOCK_INVOICES);
-        setDiscountData(MOCK_DISCOUNTS);
-        setUpcomingInvoiceData({});
+        // Fall back to mock data if fetch fails
+        setRawData({
+          invoices: MOCK_INVOICES,
+          discounts: MOCK_DISCOUNTS,
+          upcomingInvoices: MOCK_UPCOMING_INVOICES,
+        });
       } finally {
         setIsLoading(false);
       }
@@ -77,17 +202,50 @@ const AdminProjections = () => {
     fetchSubscriptionData();
   }, [refreshCounter]);
 
-  // Create analytics engine
-  const analytics = useMemo(
-    () =>
-      new SubscriptionAnalytics({
-        subscriptions: subscriptionData,
-        invoices: invoiceData,
-        discounts: discountData,
-        upcomingInvoices: upcomingInvoiceData,
-      }),
-    [subscriptionData, invoiceData, discountData, upcomingInvoiceData]
-  );
+  // Instantiate the RevenueCalculator ONCE with the raw data
+  const revenueCalculator = useMemo(() => {
+    return new RevenueCalculator(rawData);
+  }, [rawData]);
+
+  // Compute monthly revenue data for each product once
+  const productRevenueData = useMemo(() => {
+    if (!revenueCalculator) return {};
+
+    return productConfigs.reduce((acc, config) => {
+      const productId =
+        config.productName === "All Products"
+          ? config.productIds
+          : config.productIds[0] || "";
+
+      acc[config.productName] = revenueCalculator.getProductRevenue(
+        productId,
+        6
+      );
+      return acc;
+    }, {} as Record<string, MonthlyRevenueData>);
+  }, [revenueCalculator, productConfigs]);
+
+  // Prepare chart data from the memoized revenue data
+  const productChartData = useMemo(() => {
+    return productConfigs.map((config) => {
+      const monthlyData = productRevenueData[config.productName] || {};
+
+      // Collect all invoices across all months for the chart
+      const allBilledInvoices = Object.values(monthlyData).flatMap(
+        (data) => data.billedInvoices || []
+      );
+
+      const allUpcomingInvoices = Object.values(monthlyData).flatMap(
+        (data) => data.upcomingInvoices || []
+      );
+
+      return {
+        productName: config.productName,
+        billedInvoices: allBilledInvoices,
+        upcomingInvoices: allUpcomingInvoices,
+      };
+    });
+  }, [productRevenueData, productConfigs]);
 
   // Refresh function
   const handleRefresh = () => {
@@ -131,59 +289,215 @@ const AdminProjections = () => {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-        <ProductRevenueTrendChart
-          productName="All Products"
-          productId={[
-            "prod_Rhx6vMVdGqih1E", // Team
-            "prod_QrcNwy2KPKiZJ5", // Users
-            "prod_PpPUGArb7KCAZT", // Usage
-            "prod_QrcOEoxIc76n6K", // Prompts
-            "prod_Rhx8ZQYhQOuunD", // Experiments
-            "prod_Rhx7VbaUg1d1zA", // Evals
-          ]}
-          analytics={analytics}
-        />
-        <ProductRevenueTrendChart
-          productName="Team"
-          productId="prod_Rhx6vMVdGqih1E"
-          analytics={analytics}
-        />
-
-        <ProductRevenueTrendChart
-          productName="Users"
-          productId="prod_QrcNwy2KPKiZJ5"
-          analytics={analytics}
-        />
-
-        <ProductRevenueTrendChart
-          productName="Usage"
-          productId="prod_PpPUGArb7KCAZT"
-          analytics={analytics}
-        />
-        <ProductRevenueTrendChart
-          productName="Prompts"
-          productId="prod_QrcOEoxIc76n6K"
-          analytics={analytics}
-        />
-        <ProductRevenueTrendChart
-          productName="Experiments"
-          productId="prod_Rhx8ZQYhQOuunD"
-          analytics={analytics}
-        />
-        <ProductRevenueTrendChart
-          productName="Evals"
-          productId="prod_Rhx7VbaUg1d1zA"
-          analytics={analytics}
-        />
+      {/* Revenue Charts Grid */}
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold mb-4">Revenue Overview</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {productChartData.map(
+            ({ productName, billedInvoices, upcomingInvoices }) => (
+              <RevenueChart
+                key={`chart-${productName}`}
+                billedInvoices={billedInvoices}
+                upcomingInvoices={upcomingInvoices}
+                title={productName}
+                months={6}
+              />
+            )
+          )}
+        </div>
       </div>
 
-      <SubscriptionTable
-        subscriptions={subscriptionData}
-        invoices={invoiceData}
-        discounts={discountData}
-        analytics={analytics}
-        isLoading={isLoading}
+      {/* Product Details */}
+      <div className="grid grid-cols-1 gap-8">
+        {productConfigs.map((config) => {
+          // Get monthly revenue data from memoized results
+          const monthlyRevenueData =
+            productRevenueData[config.productName] || {};
+
+          // Get available months
+          const availableMonths = Object.keys(monthlyRevenueData)
+            .sort()
+            .reverse();
+
+          // Set default selected month if not already set
+          if (
+            !selectedMonths[config.productName] &&
+            availableMonths.length > 0
+          ) {
+            setTimeout(() => {
+              selectMonth(config.productName, availableMonths[0]);
+            }, 0);
+          }
+
+          const selectedMonth =
+            selectedMonths[config.productName] ||
+            (availableMonths.length > 0 ? availableMonths[0] : "");
+          const revenueData = selectedMonth
+            ? monthlyRevenueData[selectedMonth]
+            : undefined;
+
+          // Create unique section keys for this product
+          const invoicesSectionKey = `${config.productName}-invoices`;
+
+          return (
+            <div key={config.productName} className="border rounded-lg p-4">
+              <h2 className="text-xl font-semibold mb-4">
+                {config.productName} Details
+              </h2>
+
+              {/* Month selector */}
+              {availableMonths.length > 0 && (
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Select Month:
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {availableMonths.map((monthKey) => (
+                      <button
+                        key={monthKey}
+                        onClick={() =>
+                          selectMonth(config.productName, monthKey)
+                        }
+                        className={`px-3 py-1 text-sm rounded ${
+                          selectedMonth === monthKey
+                            ? "bg-blue-500 text-white"
+                            : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                        }`}
+                      >
+                        {formatMonthKey(monthKey)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {revenueData ? (
+                <>
+                  {/* Monthly revenue summary */}
+                  <div className="mb-4">
+                    <h3 className="text-lg font-medium mb-2">
+                      Summary for{" "}
+                      {selectedMonth ? formatMonthKey(selectedMonth) : ""}
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-slate-50 p-3 rounded">
+                        <p className="text-sm text-slate-500">
+                          Current Revenue
+                        </p>
+                        <p className="text-2xl font-bold">
+                          ${revenueData.current.toFixed(2)}
+                        </p>
+                      </div>
+                      <div className="bg-slate-50 p-3 rounded">
+                        <p className="text-sm text-slate-500">
+                          Projected Revenue
+                        </p>
+                        <p className="text-2xl font-bold">
+                          ${revenueData.projected.toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Billed invoices section */}
+                  <div className="mb-4">
+                    <div
+                      className="flex justify-between items-center cursor-pointer py-2 border-b"
+                      onClick={() => toggleSection(invoicesSectionKey)}
+                    >
+                      <h3 className="text-lg font-medium">Billed Invoices</h3>
+                      <span className="text-lg">
+                        {expandedSections[invoicesSectionKey] ? "▼" : "►"}
+                      </span>
+                    </div>
+
+                    {expandedSections[invoicesSectionKey] && (
+                      <InvoiceTable
+                        invoices={revenueData.billedInvoices}
+                        sortConfig={billedSortConfig}
+                        onSort={(key: keyof InvoiceData) =>
+                          handleSort("billed", key)
+                        }
+                        onViewRaw={viewRawInvoice}
+                        caption={formatMonthKey(selectedMonth)}
+                      />
+                    )}
+
+                    {!expandedSections[invoicesSectionKey] && (
+                      <p className="text-sm text-gray-500 mt-2">
+                        {revenueData.billedInvoices.length} invoices (
+                        {revenueData.billedInvoices.length > 0
+                          ? `$${revenueData.billedInvoices
+                              .reduce(
+                                (sum, inv) => sum + inv.amountAfterProcessing,
+                                0
+                              )
+                              .toFixed(2)} total`
+                          : "No revenue"}
+                        )
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Upcoming invoices section */}
+                  <div>
+                    <div
+                      className="flex justify-between items-center cursor-pointer py-2 border-b"
+                      onClick={() =>
+                        toggleSection(`${config.productName}-upcoming`)
+                      }
+                    >
+                      <h3 className="text-lg font-medium">Upcoming Invoices</h3>
+                      <span className="text-lg">
+                        {expandedSections[`${config.productName}-upcoming`]
+                          ? "▼"
+                          : "►"}
+                      </span>
+                    </div>
+
+                    {expandedSections[`${config.productName}-upcoming`] && (
+                      <InvoiceTable
+                        invoices={revenueData.upcomingInvoices}
+                        sortConfig={upcomingSortConfig}
+                        onSort={(key: keyof InvoiceData) =>
+                          handleSort("upcoming", key)
+                        }
+                        onViewRaw={viewRawInvoice}
+                        caption={`${formatMonthKey(selectedMonth)} (Projected)`}
+                      />
+                    )}
+
+                    {!expandedSections[`${config.productName}-upcoming`] && (
+                      <p className="text-sm text-gray-500 mt-2">
+                        {revenueData.upcomingInvoices.length} invoices (
+                        {revenueData.upcomingInvoices.length > 0
+                          ? `$${revenueData.upcomingInvoices
+                              .reduce(
+                                (sum, inv) => sum + inv.amountAfterProcessing,
+                                0
+                              )
+                              .toFixed(2)} projected`
+                          : "No projected revenue"}
+                        )
+                      </p>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <p className="text-gray-500 italic">
+                  No revenue data available
+                </p>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Invoice Modal */}
+      <InvoiceModal
+        isOpen={isModalOpen}
+        invoice={selectedInvoice}
+        onClose={closeModal}
       />
     </div>
   );

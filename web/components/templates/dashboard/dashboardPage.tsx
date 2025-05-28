@@ -1,13 +1,13 @@
+import { HeliconeUser } from "@/packages/common/auth/types";
+import { TimeFilter } from "@/types/timeFilter";
 import {
   ArrowPathIcon,
   ChartBarIcon,
   PresentationChartLineIcon,
 } from "@heroicons/react/24/outline";
-import { User } from "@supabase/auth-helpers-nextjs";
 import { AreaChart, BarChart, BarList, Card } from "@tremor/react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Responsive, WidthProvider } from "react-grid-layout";
-import { ModelMetric } from "../../../lib/api/models/models";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Responsive, ResponsiveProps, WidthProvider } from "react-grid-layout";
 import {
   getIncrementAsMinutes,
   getTimeMap,
@@ -18,22 +18,11 @@ import {
   TimeInterval,
 } from "../../../lib/timeCalculations/time";
 import { useGetUnauthorized } from "../../../services/hooks/dashboard";
-import { useDebounce } from "../../../services/hooks/debounce";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
-import { useOrganizationLayout } from "../../../services/hooks/organization_layout";
-import {
-  filterUITreeToFilterNode,
-  getRootFilterNode,
-  isFilterRowNode,
-} from "../../../services/lib/filters/uiFilterRowTree";
-import { UIFilterRowTree } from "@/services/lib/filters/types";
-import {
-  OrganizationFilter,
-  OrganizationLayout,
-  transformFilter,
-  transformOrganizationLayoutFilters,
-} from "../../../services/lib/organization_layout/organization_layout";
 import { useOrg } from "../../layout/org/organizationContext";
+
+import { useFilterStore } from "@/filterAST/store/filterStore";
+import { toFilterNode } from "@/filterAST/toFilterNode";
 import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";
@@ -47,44 +36,25 @@ import UpgradeProModal from "../../shared/upgradeProModal";
 import { formatLargeNumber } from "../../shared/utils/numberFormat";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import UnauthorizedView from "../requests/UnauthorizedView";
+import DashboardEmptyState from "./DashboardEmptyState";
 import { INITIAL_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
+import {
+  getMockMetrics,
+  getMockModels,
+  getMockOverTimeData,
+} from "./mockDashboardData";
 import CountryPanel from "./panels/countryPanel";
 import { ScoresPanel } from "./panels/scores/scoresPanel";
 import { QuantilesGraph } from "./quantilesGraph";
 import StyledAreaChart from "./styledAreaChart";
 import SuggestionModal from "./suggestionsModal";
 import { useDashboardPage } from "./useDashboardPage";
-import { TimeFilter } from "@/types/timeFilter";
-import DashboardEmptyState from "./DashboardEmptyState";
-import {
-  getMockMetrics,
-  getMockModels,
-  getMockOverTimeData,
-  getMockFilterMap,
-} from "./mockDashboardData";
-
-const ResponsiveGridLayout = WidthProvider(Responsive);
+const ResponsiveGridLayout = WidthProvider(Responsive) as React.ComponentType<
+  ResponsiveProps & { children?: React.ReactNode }
+>;
 
 interface DashboardPageProps {
-  user: User;
-  currentFilter: OrganizationFilter | null;
-  organizationLayout: OrganizationLayout | null;
-}
-
-function max(arr: number[]) {
-  return arr.reduce((p, c) => (p > c ? p : c), 0);
-}
-
-export function formatNumberString(
-  numString: string,
-  minimumFractionDigits?: boolean
-) {
-  const num = parseFloat(numString);
-  if (minimumFractionDigits) {
-    return num.toLocaleString("en-US", { minimumFractionDigits: 2 });
-  } else {
-    return num.toLocaleString("en-US");
-  }
+  user: HeliconeUser;
 }
 
 export type Loading<T> = T | "loading";
@@ -92,49 +62,13 @@ export type Loading<T> = T | "loading";
 export type DashboardMode = "requests" | "costs" | "errors";
 
 const DashboardPage = (props: DashboardPageProps) => {
-  const { user, organizationLayout } = props;
-  const initialLoadRef = useRef(true);
-
+  const { user } = props;
   const searchParams = useSearchParams();
-
   const orgContext = useOrg();
+  const filterStore = useFilterStore();
+  const filters = filterStore.filter ? toFilterNode(filterStore.filter) : "all";
 
-  // Track whether we should show mock data (for users who haven't onboarded)
   const shouldShowMockData = orgContext?.currentOrg?.has_onboarded === false;
-
-  const mockMetrics = useMemo(() => getMockMetrics(), []);
-  const mockFilterMap = useMemo(() => getMockFilterMap(), []);
-  const mockModels = useMemo(() => getMockModels(), []);
-
-  const { organizationLayout: orgLayout, refetch: orgLayoutRefetch } =
-    useOrganizationLayout(
-      orgContext?.currentOrg?.id!,
-      "dashboard",
-      organizationLayout
-        ? {
-            data: organizationLayout,
-            error: null,
-          }
-        : undefined
-    );
-
-  const transformedFilters = useMemo(() => {
-    if (orgLayout?.data?.filters) {
-      return transformOrganizationLayoutFilters(orgLayout.data.filters);
-    }
-    return [];
-  }, [orgLayout?.data?.filters]);
-
-  const [currFilter, setCurrFilter] = useState<string | null>("");
-
-  const getInterval = () => {
-    const currentTimeFilter = searchParams.get("t");
-    if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
-      return "custom";
-    } else {
-      return currentTimeFilter || "24h";
-    }
-  };
 
   // TODO: Move this to a hook and consolidate with the request page
   // Make the hook called like "useTimeFilter"
@@ -161,7 +95,14 @@ const DashboardPage = (props: DashboardPageProps) => {
   };
 
   const [interval, setInterval] = useState<TimeInterval>(
-    getInterval() as TimeInterval
+    (() => {
+      const currentTimeFilter = searchParams.get("t") as TimeInterval;
+      if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
+        return "custom";
+      } else {
+        return currentTimeFilter || "24h";
+      }
+    })()
   );
   const [timeFilter, setTimeFilter] = useState<TimeFilter>(getTimeFilter());
 
@@ -179,28 +120,6 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const { unauthorized, currentTier } = useGetUnauthorized(user.id);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const encodeFilters = (filters: UIFilterRowTree): string => {
-    const encode = (node: UIFilterRowTree): any => {
-      if (isFilterRowNode(node)) {
-        return {
-          type: "node",
-          operator: node.operator,
-          rows: node.rows.map(encode),
-        };
-      } else {
-        return {
-          type: "leaf",
-          filter: `${filterMap[node.filterMapIdx].label}:${
-            filterMap[node.filterMapIdx].operators[node.operatorIdx].label
-          }:${encodeURIComponent(node.value)}`,
-        };
-      }
-    };
-
-    return JSON.stringify(encode(filters));
-  };
-
   const [isLive, setIsLive] = useLocalStorage("isLive-DashboardPage", false);
 
   useEffect(() => {
@@ -209,16 +128,8 @@ const DashboardPage = (props: DashboardPageProps) => {
     }
   }, [orgContext?.currentOrg?.tier]);
 
-  const [advancedFilters, setAdvancedFilters] = useState<UIFilterRowTree>(
-    getRootFilterNode()
-  );
-
-  const debouncedAdvancedFilter = useDebounce(advancedFilters, 500);
-
   const {
     metrics: realMetrics,
-    filterMap: realFilterMap,
-    searchPropertyFilters,
     overTimeData: realOverTimeData,
     isAnyLoading,
     refetch,
@@ -226,101 +137,19 @@ const DashboardPage = (props: DashboardPageProps) => {
     isModelsLoading,
   } = useDashboardPage({
     timeFilter,
-    uiFilters: debouncedAdvancedFilter,
-    apiKeyFilter: null,
     timeZoneDifference: new Date().getTimezoneOffset(),
     dbIncrement: timeIncrement,
     isLive,
   });
 
+  const mockMetrics = useMemo(() => getMockMetrics(), []);
+  const mockModels = useMemo(() => getMockModels(), []);
+
   const metrics = shouldShowMockData ? mockMetrics : realMetrics;
-  const filterMap = shouldShowMockData ? mockFilterMap : realFilterMap;
   const overTimeData = shouldShowMockData ? mockOverTimeData : realOverTimeData;
   const models = shouldShowMockData
     ? { data: mockModels.data, isLoading: false }
     : realModels;
-
-  const getAdvancedFilters = useCallback((): UIFilterRowTree => {
-    const decodeFilter = (encoded: any): UIFilterRowTree => {
-      if (encoded.type === "node") {
-        return {
-          operator: encoded.operator as "and" | "or",
-          rows: encoded.rows.map(decodeFilter),
-        };
-      } else {
-        const [filterLabel, operator, value] = encoded.filter.split(":");
-        const filterMapIdx = filterMap.findIndex(
-          (f) =>
-            f.label.trim().toLowerCase() === filterLabel.trim().toLowerCase()
-        );
-        const operatorIdx = filterMap[filterMapIdx]?.operators.findIndex(
-          (o) => o.label.trim().toLowerCase() === operator.trim().toLowerCase()
-        );
-
-        if (
-          isNaN(filterMapIdx) ||
-          isNaN(operatorIdx) ||
-          filterMapIdx === -1 ||
-          operatorIdx === -1
-        ) {
-          console.log("Invalid filter map or operator index", {
-            filterLabel,
-            operator,
-          });
-          return getRootFilterNode();
-        }
-
-        return {
-          filterMapIdx,
-          operatorIdx,
-          value: value,
-        };
-      }
-    };
-
-    try {
-      const currentAdvancedFilters = searchParams.get("filters");
-
-      if (currentAdvancedFilters) {
-        const filters = decodeURIComponent(currentAdvancedFilters).replace(
-          /^"|"$/g,
-          ""
-        );
-
-        const parsedFilters = JSON.parse(filters);
-        const result = decodeFilter(parsedFilters);
-        return result;
-      }
-    } catch (error) {
-      console.error("Error decoding advanced filters:", error);
-    }
-
-    return getRootFilterNode();
-  }, [searchParams, filterMap]);
-
-  useEffect(() => {
-    if (initialLoadRef.current && filterMap.length > 0 && !isAnyLoading) {
-      const loadedFilters = getAdvancedFilters();
-      setAdvancedFilters(loadedFilters);
-      initialLoadRef.current = false;
-    }
-  }, [filterMap, getAdvancedFilters]);
-
-  const onSetAdvancedFiltersHandler = useCallback(
-    (filters: UIFilterRowTree, layoutFilterId?: string | null) => {
-      setAdvancedFilters(filters);
-      if (
-        layoutFilterId === null ||
-        (isFilterRowNode(filters) && filters.rows.length === 0)
-      ) {
-        searchParams.delete("filters");
-      } else {
-        const currentAdvancedFilters = encodeFilters(filters);
-        searchParams.set("filters", currentAdvancedFilters);
-      }
-    },
-    [encodeFilters, refetch]
-  );
 
   const metricsData: MetricsPanelProps["metric"][] = [
     {
@@ -388,17 +217,6 @@ const DashboardPage = (props: DashboardPageProps) => {
   const gridCols = { lg: 12, md: 12, sm: 12, xs: 4, xxs: 2 };
 
   const listColors = ["purple", "blue", "green", "yellow", "orange"];
-
-  const modelMapper = (model: ModelMetric, index: number) => {
-    // TODO add the filter to the advancedFilters
-    return {
-      name: model.model || "n/a",
-      value: model.total_requests,
-      color: listColors[index % listColors.length],
-      // href: urlString,
-      // target: "_self",
-    };
-  };
 
   // put this forEach inside of a useCallback to prevent unnecessary re-renders
   const getStatusCountsOverTime = useCallback(() => {
@@ -475,17 +293,6 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const [openSuggestGraph, setOpenSuggestGraph] = useState(false);
 
-  const onLayoutFilterChange = (layoutFilter: OrganizationFilter | null) => {
-    if (layoutFilter !== null) {
-      const transformedFilter = transformFilter(layoutFilter.filter[0]);
-      onSetAdvancedFiltersHandler(transformedFilter, layoutFilter.id);
-      setCurrFilter(layoutFilter.id);
-    } else {
-      setCurrFilter(null);
-      onSetAdvancedFiltersHandler({ operator: "and", rows: [] }, null);
-    }
-  };
-
   return (
     <>
       <div className="px-8">
@@ -556,32 +363,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                       },
                     }
               }
-              advancedFilter={
-                shouldShowMockData
-                  ? undefined
-                  : {
-                      filterMap,
-                      onAdvancedFilter: onSetAdvancedFiltersHandler,
-                      filters: advancedFilters,
-                      searchPropertyFilters: searchPropertyFilters,
-                    }
-              }
-              savedFilters={
-                shouldShowMockData
-                  ? undefined
-                  : {
-                      currentFilter: currFilter ?? undefined,
-                      filters:
-                        transformedFilters && orgLayout?.data?.id
-                          ? transformedFilters
-                          : undefined,
-                      onFilterChange: onLayoutFilterChange,
-                      onSaveFilterCallback: async () => {
-                        await orgLayoutRefetch();
-                      },
-                      layoutPage: "dashboard",
-                    }
-              }
+              savedFilters={undefined}
             />
             <section id="panels" className="-m-2">
               <ResponsiveGridLayout
@@ -599,7 +381,6 @@ const DashboardPage = (props: DashboardPageProps) => {
                 breakpoints={{ lg: 1200, md: 996, sm: 600, xs: 360, xxs: 0 }}
                 cols={gridCols}
                 rowHeight={96}
-                onLayoutChange={(currentLayout, allLayouts) => {}}
               >
                 {metricsData.map((m, i) => (
                   <div key={m.id}>
@@ -731,7 +512,11 @@ const DashboardPage = (props: DashboardPageProps) => {
                     <BarList
                       data={
                         models?.data
-                          ?.map((model, index) => modelMapper(model, index))
+                          ?.map((model, index) => ({
+                            name: model.model || "n/a",
+                            value: model.total_requests,
+                            color: listColors[index % listColors.length],
+                          }))
                           .sort(
                             (a, b) =>
                               b.value - a.value - (b.name === "n/a" ? 1 : 0)
@@ -803,31 +588,19 @@ const DashboardPage = (props: DashboardPageProps) => {
                   </StyledAreaChart>
                 </div>
                 <div key="countries">
-                  <CountryPanel
-                    timeFilter={timeFilter}
-                    userFilters={filterUITreeToFilterNode(
-                      filterMap,
-                      debouncedAdvancedFilter
-                    )}
-                  />
+                  <CountryPanel timeFilter={timeFilter} userFilters={filters} />
                 </div>
                 <div key="scores">
                   <ScoresPanel
                     timeFilter={timeFilter}
-                    userFilters={filterUITreeToFilterNode(
-                      filterMap,
-                      debouncedAdvancedFilter
-                    )}
+                    userFilters={filters}
                     dbIncrement={timeIncrement}
                   />
                 </div>
                 <div key="scores-bool">
                   <ScoresPanel
                     timeFilter={timeFilter}
-                    userFilters={filterUITreeToFilterNode(
-                      filterMap,
-                      debouncedAdvancedFilter
-                    )}
+                    userFilters={filters}
                     dbIncrement={timeIncrement}
                     filterBool={true}
                   />
@@ -863,10 +636,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                 </div>
                 <div key="quantiles">
                   <QuantilesGraph
-                    uiFilters={filterUITreeToFilterNode(
-                      filterMap,
-                      debouncedAdvancedFilter
-                    )}
+                    filters={filters}
                     timeFilter={timeFilter}
                     timeIncrement={timeIncrement}
                   />
@@ -1025,3 +795,19 @@ const DashboardPage = (props: DashboardPageProps) => {
 };
 
 export default DashboardPage;
+
+function max(arr: number[]) {
+  return arr.reduce((p, c) => (p > c ? p : c), 0);
+}
+
+export function formatNumberString(
+  numString: string,
+  minimumFractionDigits?: boolean
+) {
+  const num = parseFloat(numString);
+  if (minimumFractionDigits) {
+    return num.toLocaleString("en-US", { minimumFractionDigits: 2 });
+  } else {
+    return num.toLocaleString("en-US");
+  }
+}

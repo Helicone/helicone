@@ -14,7 +14,7 @@ import { ReportStore } from "./lib/db/ReportStore";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
-export type Provider = ProviderName | "CUSTOM";
+export type Provider = ProviderName | "CUSTOM" | "VAPI";
 
 export interface EU_Env {
   EU_CLICKHOUSE_HOST: string;
@@ -27,6 +27,8 @@ export interface EU_Env {
   EU_UPSTASH_KAFKA_URL: string;
   EU_UPSTASH_KAFKA_USERNAME: string;
   EU_SECURE_CACHE: KVNamespace;
+  EU_REQUEST_LOGS_QUEUE_URL: string;
+  EU_AWS_REGION?: "eu-west-1";
 }
 export interface BASE_Env {
   SUPABASE_SERVICE_ROLE_KEY: string;
@@ -69,11 +71,7 @@ export interface BASE_Env {
   DATADOG_ENDPOINT: string;
   GATEWAY_TARGET?: string;
   S3_ENABLED: string;
-  S3_ACCESS_KEY: string;
-  S3_SECRET_KEY: string;
-  S3_ENDPOINT: string;
-  S3_BUCKET_NAME: string;
-  S3_REGION?: "us-west-2" | "eu-west-1";
+
   UPSTASH_KAFKA_URL: string;
   UPSTASH_KAFKA_USERNAME: string;
   UPSTASH_KAFKA_API_KEY: string;
@@ -84,6 +82,23 @@ export interface BASE_Env {
   SENTRY_API_KEY: string;
   SENTRY_PROJECT_ID: string;
   WORKER_DEFINED_REDIRECT_URL?: string;
+
+  // AWS Configuration + S3
+
+  // TODO REPLACE WITH AWS
+  S3_ACCESS_KEY: string;
+  S3_SECRET_KEY: string;
+  S3_REGION?: "us-west-2" | "eu-west-1";
+
+  S3_ENDPOINT: string;
+  S3_BUCKET_NAME: string;
+
+  AWS_REGION: "us-west-2" | "eu-west-1";
+  AWS_ACCESS_KEY_ID?: string;
+  AWS_SECRET_ACCESS_KEY?: string;
+  REQUEST_LOGS_QUEUE_URL?: string;
+
+  QUEUE_PROVIDER?: "kafka" | "sqs" | "dual";
 }
 export type Env = BASE_Env & EU_Env;
 
@@ -127,7 +142,9 @@ async function modifyEnvBasedOnPath(
       UPSTASH_KAFKA_USERNAME: env.EU_UPSTASH_KAFKA_USERNAME,
       S3_BUCKET_NAME: env.EU_S3_BUCKET_NAME,
       SECURE_CACHE: env.EU_SECURE_CACHE,
+      REQUEST_LOGS_QUEUE_URL: env.EU_REQUEST_LOGS_QUEUE_URL,
       S3_REGION: "eu-west-1",
+      AWS_REGION: env.EU_AWS_REGION ?? "eu-west-1",
     };
   }
 

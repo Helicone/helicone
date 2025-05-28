@@ -1,7 +1,7 @@
-import { modelMapping } from "packages/cost/unified/models";
-import { providerConfigs } from "packages/cost/unified/providers";
-import { Provider } from "packages/cost/unified/types";
-import { Message } from "packages/llm-mapper/types";
+import { modelMapping } from "@helicone-package/cost/unified/models";
+import { providerConfigs } from "@helicone-package/cost/unified/providers";
+import { Creator, Provider } from "@helicone-package/cost/unified/types";
+import { Message } from "@helicone-package/llm-mapper/types";
 import findBestMatch from "string-similarity-js";
 
 /**
@@ -77,6 +77,82 @@ export function findClosestModel(provider: Provider, model: string): string {
     current.similarity > best.similarity ? current : best
   );
   return closestMatch.target;
+}
+
+/**
+ * Find the closest matching model string and its provider from a model input
+ * @param modelInput The model string to match
+ * @param providerInput Optional provider string to prioritize
+ * @returns An object with the closest matching model and its first provider
+ */
+export function findClosestModelProvider(
+  modelInput: string,
+  providerInput?: string
+): { provider: Provider; model: string } {
+  // Get all available models for all providers
+  const allModels: {
+    creator: Creator;
+    modelName: string;
+    modelString: string;
+    provider: Provider;
+  }[] = [];
+
+  // Iterate through all creators
+  Object.entries(modelMapping).forEach(([creator, creatorModels]) => {
+    // Iterate through all models for this creator
+    Object.entries(creatorModels).forEach(([modelName, modelConfig]) => {
+      // Add each provider implementation
+      modelConfig.providers.forEach((providerModel) => {
+        allModels.push({
+          creator: creator as Creator,
+          modelName,
+          modelString: providerModel.modelString,
+          provider: providerModel.provider,
+        });
+      });
+    });
+  });
+
+  // Check for exact match first (case insensitive)
+  const normalizedModel = modelInput.trim().toLowerCase();
+  const exactMatches = allModels.filter(
+    (m) => m.modelString.toLowerCase() === normalizedModel
+  );
+  if (exactMatches.length > 0) {
+    // If we have a provider input, try to match it
+    if (providerInput) {
+      const normalizedProvider = providerInput.trim().toUpperCase();
+      const providerMatch = exactMatches.find(
+        (m) => m.provider === normalizedProvider
+      );
+      if (providerMatch) {
+        return {
+          provider: providerMatch.provider,
+          model: providerMatch.modelString,
+        };
+      }
+    }
+    // Otherwise return the first match
+    return {
+      provider: exactMatches[0].provider,
+      model: exactMatches[0].modelString,
+    };
+  }
+
+  // If no exact match, find the closest match
+  const similarities = allModels.map((m) => ({
+    target: m,
+    similarity: findBestMatch(modelInput, m.modelString),
+  }));
+
+  const closestMatch = similarities.reduce((best, current) =>
+    current.similarity > best.similarity ? current : best
+  );
+
+  return {
+    provider: closestMatch.target.provider,
+    model: closestMatch.target.modelString,
+  };
 }
 
 // Helper functions for creating message objects

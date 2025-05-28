@@ -1,6 +1,6 @@
-import { modelMapping } from "packages/cost/unified/models";
-import { Provider } from "packages/cost/unified/types";
-import { Message, Tool } from "packages/llm-mapper/types";
+import { modelMapping } from "@helicone-package/cost/unified/models";
+import { Provider } from "@helicone-package/cost/unified/types";
+import { Message, Tool } from "@helicone-package/llm-mapper/types";
 import { z } from "zod";
 
 export interface GenerateParams {
@@ -18,6 +18,7 @@ export interface GenerateParams {
   signal?: AbortSignal;
   includeReasoning?: boolean;
   reasoning_effort?: "low" | "medium" | "high";
+  response_format?: { type: "json_schema"; json_schema?: object };
   stream?: {
     onChunk: (chunk: string) => void;
     onCompletion: () => void;
@@ -76,7 +77,9 @@ export async function generate<T extends object | undefined = undefined>(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Accept: "application/json",
       "x-cancel": "0",
+      "x-helicone-client": "browser",
     },
     body: JSON.stringify({
       ...modifiedParams,

@@ -1,6 +1,6 @@
 import { Response } from "node-fetch";
-import { Provider } from "../../packages/llm-mapper/types";
-import { KafkaProducer } from "../clients/KafkaProducer";
+import { Provider } from "@helicone-package/llm-mapper/types";
+import { HeliconeQueueProducer } from "../clients/HeliconeQuequeProducer";
 import { RequestWrapper } from "../requestWrapper/requestWrapper";
 import { getHeliconeAuthClient } from "../../packages/common/auth/server/AuthClientFactory";
 import { S3Client } from "../shared/db/s3Client";
@@ -111,7 +111,7 @@ async function log(
           (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
         )
       ),
-      kafkaProducer: new KafkaProducer(),
+      kafkaProducer: new HeliconeQueueProducer(),
     },
     authParams,
     orgParams,

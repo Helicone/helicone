@@ -1,6 +1,6 @@
-import { Provider } from "@/packages/cost/unified/types";
+import { Provider } from "@helicone-package/cost/unified/types";
 import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
-import { Message, Tool } from "packages/llm-mapper/types";
+import { Message, Tool } from "@helicone-package/llm-mapper/types";
 
 export interface PromptState {
   promptId?: string; // The prompt ID (UUID)
@@ -28,6 +28,7 @@ export interface StateParameters {
   max_tokens?: number;
   tools?: Tool[];
   stop?: string[];
+  response_format?: { type: "json_schema"; json_schema?: object };
   // TODO: Add more parameters
 }
 

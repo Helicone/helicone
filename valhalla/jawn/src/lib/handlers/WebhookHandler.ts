@@ -5,7 +5,7 @@ import { WebhookStore } from "../stores/WebhookStore";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 import { S3Client } from "../shared/db/s3Client";
-import { modelCost } from "../../packages/cost/costCalc";
+import { modelCost } from "@helicone-package/cost/costCalc";
 import { WebhookConfig } from "../shared/types";
 
 export class WebhookHandler extends AbstractLogHandler {
@@ -65,6 +65,8 @@ export class WebhookHandler extends AbstractLogHandler {
             prompt_cache_read_tokens: context.usage.promptCacheReadTokens || 0,
             sum_completion_tokens: completionTokens,
             sum_tokens: totalTokens,
+            prompt_audio_tokens: context.usage.promptAudioTokens || 0,
+            completion_audio_tokens: context.usage.completionAudioTokens || 0,
           });
 
           // Calculate latency

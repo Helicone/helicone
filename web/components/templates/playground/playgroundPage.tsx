@@ -1,11 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 import {
   CodeBracketSquareIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 import { MultiSelect, MultiSelectItem } from "@tremor/react";
 import Image from "next/image";
+import { ChatCompletionTool } from "openai/resources";
 import {
   Dispatch,
   SetStateAction,
@@ -14,21 +16,17 @@ import {
   useRef,
   useState,
 } from "react";
+import {
+  playgroundModels as PLAYGROUND_MODELS,
+  playgroundModels,
+} from "@helicone-package/cost/providers/mappings";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { usePlaygroundPage } from "../../../services/hooks/playground";
 import AuthHeader from "../../shared/authHeader";
 import { clsx } from "../../shared/clsx";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
-import RequestDrawerV2 from "../requests/requestDrawerV2";
 import ChatPlayground from "./chatPlayground";
-
-import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
-import { ChatCompletionTool } from "openai/resources";
-import {
-  playgroundModels as PLAYGROUND_MODELS,
-  playgroundModels,
-} from "../../../packages/cost/providers/mappings";
 import FunctionButton from "./functionButton";
 
 import { useOrg } from "@/components/layout/org/organizationContext";
@@ -553,14 +551,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           </p>
         </div>
       </ThemedModal>
-      {singleRequest !== null && (
-        <RequestDrawerV2
-          open={open}
-          setOpen={setOpen}
-          request={singleRequest}
-          properties={[]}
-        />
-      )}
     </IslandContainer>
   );
 };

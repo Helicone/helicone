@@ -1,4 +1,3 @@
-import { signOut } from "@/components/shared/utils/utils";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
@@ -11,9 +10,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
-import { Database } from "@/db/database.types";
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
+import { getTierDisplayInfo } from "@/utils/pricingConfigs";
 import { Cog6ToothIcon } from "@heroicons/react/24/outline";
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { LogOutIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
@@ -29,17 +28,18 @@ import {
 import { UpgradeProDialog } from "../templates/organization/plan/upgradeProDialog";
 import { useOrg } from "./org/organizationContext";
 import OrgMoreDropdown from "./orgMoreDropdown";
-import { getTierDisplayInfo } from "@/utils/pricingConfigs";
+import Intercom from "@intercom/messenger-js-sdk";
+import { INTERCOM_APP_ID } from "./SidebarHelpDropdown";
 
 interface OrgDropdownProps {}
 
 export default function OrgDropdown({}: OrgDropdownProps) {
   const orgContext = useOrg();
-  const user = useUser();
+
   const [createOpen, setCreateOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const router = useRouter();
-  const supabaseClient = useSupabaseClient<Database>();
+  const heliconeAuthClient = useHeliconeAuthClient();
   const { setTheme, theme } = useTheme();
 
   const org = useOrg();
@@ -47,18 +47,22 @@ export default function OrgDropdown({}: OrgDropdownProps) {
   const { ownedOrgs, memberOrgs, customerOrgs } = useMemo(() => {
     const owned =
       orgContext?.allOrgs.filter(
-        (org) => org.owner === user?.id && org.organization_type !== "customer"
+        (org) =>
+          org.owner === heliconeAuthClient.user?.id &&
+          org.organization_type !== "customer"
       ) || [];
     const member =
       orgContext?.allOrgs.filter(
-        (org) => org.owner !== user?.id && org.organization_type !== "customer"
+        (org) =>
+          org.owner !== heliconeAuthClient.user?.id &&
+          org.organization_type !== "customer"
       ) || [];
     const customer =
       orgContext?.allOrgs.filter(
         (org) => org.organization_type === "customer"
       ) || [];
     return { ownedOrgs: owned, memberOrgs: member, customerOrgs: customer };
-  }, [orgContext?.allOrgs, user?.id]);
+  }, [orgContext?.allOrgs, heliconeAuthClient.user?.id]);
 
   const currentIcon = useMemo(
     () =>
@@ -85,8 +89,11 @@ export default function OrgDropdown({}: OrgDropdownProps) {
   }, [theme, setTheme]);
 
   const handleSignOut = useCallback(() => {
-    signOut(supabaseClient).then(() => router.push("/"));
-  }, [supabaseClient, router]);
+    heliconeAuthClient.signOut().then(() => {
+      Intercom({ app_id: INTERCOM_APP_ID, hide_default_launcher: true });
+      router.push("/");
+    });
+  }, [heliconeAuthClient, router]);
 
   // Get tier display info from the centralized config
   const tierDisplayInfo = useMemo(() => {
@@ -119,7 +126,7 @@ export default function OrgDropdown({}: OrgDropdownProps) {
               </div>
 
               <p className="ml-6 text-xs text-slate-400 font-medium max-w-[6rem] truncate">
-                {user?.email}
+                {heliconeAuthClient.user?.email}
               </p>
             </div>
           </Button>

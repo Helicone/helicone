@@ -195,6 +195,8 @@ interface RequestResponseRMTToOperators {
   scores_column: SingleKey<TextOperators>;
   request_body: SingleKey<VectorOperators>;
   response_body: SingleKey<VectorOperators>;
+  cache_enabled: SingleKey<BooleanOperators>;
+  cache_reference_id: SingleKey<TextOperators>;
 }
 
 interface SessionsRequestResponseRMTToOperators {
@@ -207,6 +209,7 @@ interface SessionsRequestResponseRMTToOperators {
   session_total_requests: SingleKey<NumberOperators>;
   session_created_at: SingleKey<TimestampOperatorsTyped>;
   session_latest_request_created_at: SingleKey<TimestampOperatorsTyped>;
+  session_tag: SingleKey<TextOperators>;
 }
 
 export type FilterLeafRequestResponseLog =

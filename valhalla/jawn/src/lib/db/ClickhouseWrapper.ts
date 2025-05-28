@@ -1,4 +1,4 @@
-import { createClient, ClickHouseClient } from "@clickhouse/client";
+import { ClickHouseClient, createClient, ClickHouseSettings, DataFormat } from "@clickhouse/client";
 import { Result } from "../../packages/common/result";
 
 interface ClickhouseEnv {
@@ -176,6 +176,8 @@ export interface InsertRequestResponseVersioned {
   prompt_tokens: Nullable<number>;
   prompt_cache_write_tokens: Nullable<number>;
   prompt_cache_read_tokens: Nullable<number>;
+  prompt_audio_tokens: Nullable<number>;
+  completion_audio_tokens: Nullable<number>;
   model: string;
   request_id: string;
   request_created_at: string;
@@ -209,6 +211,8 @@ export interface RequestResponseRMT {
   prompt_tokens: number;
   prompt_cache_write_tokens: number;
   prompt_cache_read_tokens: number;
+  prompt_audio_tokens: number;
+  completion_audio_tokens: number;
   model: string;
   request_id: string;
   request_created_at: string;
@@ -226,6 +230,53 @@ export interface RequestResponseRMT {
   response_body: string;
   assets: Array<string>;
   updated_at?: string;
+  cache_reference_id?: string;
+  cache_enabled: boolean;
+}
+
+export interface CacheMetricSMT {
+  organization_id: string;
+  date: string;
+  hour: number;
+  request_id: string;
+  model: string;
+  provider: string;
+  cache_hit_count: number;
+  
+  // Saving metrics
+  saved_latency_ms: number;
+  saved_completion_tokens: number;
+  saved_prompt_tokens: number;
+  saved_completion_audio_tokens: number;
+  saved_prompt_audio_tokens: number;
+  saved_prompt_cache_write_tokens: number;
+  saved_prompt_cache_read_tokens: number;
+
+  last_hit: string;
+  first_hit: string;
+
+  request_body: string;
+  response_body: string;
+}
+
+export interface JawnHttpLogs {
+  organization_id: string;
+  method: string;
+  url: string;
+  status: number;
+  duration: number;
+  user_agent: string;
+  timestamp: string;
+  properties: Record<string, string>;
+}
+
+export interface Tags {
+  organization_id: string;
+  entity_type: string;
+  entity_id: string;
+  tag: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface ClickhouseDB {
@@ -233,10 +284,13 @@ export interface ClickhouseDB {
     properties_v3: PropertiesV3;
     property_with_response_v1: PropertyWithResponseV1;
     request_response_versioned: RequestResponseVersioned;
+    cache_metrics: CacheMetricSMT;
     rate_limit_log: RateLimitLog;
     rate_limit_log_v2: RateLimitLogV2;
     cache_hits: CacheHits;
     request_response_rmt: RequestResponseRMT;
+    tags: Tags;
+    jawn_http_logs: JawnHttpLogs;
   };
 }
 

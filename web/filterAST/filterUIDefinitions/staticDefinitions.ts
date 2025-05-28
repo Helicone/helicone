@@ -140,6 +140,14 @@ export const STATIC_SESSIONS_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     table: "sessions_request_response_rmt",
     subType: "sessions",
   },
+  {
+    id: "session_tag",
+    label: "Tags",
+    type: "string",
+    operators: ["eq", "neq", "like", "ilike", "contains"],
+    table: "sessions_request_response_rmt",
+    subType: "sessions",
+  },
 ];
 
 // Static definitions that don't need to be fetched
@@ -266,6 +274,17 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
   {
     id: "threat",
     label: "Threat",
+    type: "boolean",
+    operators: ["is"],
+    valueOptions: [
+      { label: "Yes", value: true },
+      { label: "No", value: false },
+    ],
+    table: "request_response_rmt",
+  },
+  {
+    id: "cache_enabled",
+    label: "Cache Enabled",
     type: "boolean",
     operators: ["is"],
     valueOptions: [

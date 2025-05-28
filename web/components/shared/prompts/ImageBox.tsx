@@ -1,4 +1,4 @@
-import { Message } from "packages/llm-mapper/types";
+import { Message } from "@helicone-package/llm-mapper/types";
 
 interface ImageBoxProps {
   message: Message;
@@ -17,6 +17,7 @@ export default function ImageBox({ message, disabled = false }: ImageBoxProps) {
         disabled ? "opacity-50" : ""
       }`}
     >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={message.image_url}
         alt={message.content || "Image message"}

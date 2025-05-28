@@ -1,35 +1,32 @@
 import { Card } from "@/components/ui/card";
 import { Col } from "@/components/common/col";
 import { Row } from "@/components/common/row";
-import { CheckIcon } from "@heroicons/react/24/outline";
+import { Check } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { FeatureItem } from "./FeaturedItem";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 const TeamCard: React.FC = () => {
   return (
-    <Card className="w-full h-full p-6 bg-white rounded-xl border-none shadow-none mx-auto">
-      <Col className="h-full justify-between gap-4">
-        <Col className="gap-3">
-          <Row className="justify-between items-center">
-            <div className="text-slate-900 text-sm font-medium leading-tight">
-              Team
-            </div>
-            <div className="px-3 py-1 bg-slate-100 rounded-md">
-              <div className="text-center text-slate-500 text-xs font-bold">
-                BEST VALUE
-              </div>
-            </div>
-          </Row>
+    <Card className="w-full h-full p-6 bg-background rounded-xl border-spacing-1.5 border-border md:border-transparent md:shadow-none mx-auto">
+      <Col className="h-full justify-between gap-6">
+        <Col className="gap-6">
 
           <Col className="h-full gap-2">
+            <Row className="justify-between items-center">
+              <div className="text-accent-foreground text-md font-semibold leading-tight">
+                Team
+              </div>
+              <Badge variant="secondary">BEST VALUE</Badge>
+            </Row>
             <Row className="items-center gap-0.5">
-              <div className="text-slate-900 text-3xl font-bold">$200</div>
-              <div className="text-slate-700 text-lg font-semibold">
+              <div className="text-accent-foreground text-3xl font-bold">$200</div>
+              <div className="text-accent-foreground text-lg font-semibold">
                 per month
               </div>
             </Row>
-            <div className="text-slate-700 text-sm font-normal">
+            <div className="text-sidebar-foreground text-sm font-normal">
               For growing companies.
             </div>
           </Col>
@@ -42,11 +39,11 @@ const TeamCard: React.FC = () => {
               "SOC-2 Compliance & HIPAA",
               "Dedicated Slack channel",
             ].map((feature, index) => (
-              <div key={index} className="px-2 py-1.5 flex items-start gap-2">
-                <div className="w-5 h-5 relative overflow-hidden">
-                  <CheckIcon className="w-full h-full" />
+              <div key={index} className="py-1.5 flex items-center gap-2">
+                <div className="w-4 h-4 relative overflow-hidden">
+                  <Check className="w-full h-full" />
                 </div>
-                <div className="text-slate-700 text-sm font-medium">
+                <div className="text-sidebar-foreground text-sm font-normal">
                   {feature}
                 </div>
               </div>
@@ -55,7 +52,7 @@ const TeamCard: React.FC = () => {
         </Col>
 
         <Link href="https://us.helicone.ai/settings/billing">
-          <Button variant="secondary" className="w-full text-base py-6">
+          <Button variant="secondary" className="w-full text-base py-5">
             7-day free trial
           </Button>
         </Link>

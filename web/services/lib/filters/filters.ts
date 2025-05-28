@@ -29,7 +29,7 @@ const extractOperatorAndValueFromAnOperator = (
       value: operator[key as keyof typeof operator],
     };
   }
-  throw new Error(`Invalid operator ${operator}`);
+  throw new Error(`Invalid operator ${JSON.stringify(operator)}`);
 };
 
 function easyKeyMappings<T extends keyof TablesAndViews>(
@@ -201,6 +201,8 @@ const whereKeyMappings: KeyMappings = {
       completion_tokens: "request_response_rmt.completion_tokens",
       request_body: "request_response_rmt.request_body",
       response_body: "request_response_rmt.response_body",
+      cache_reference_id: "request_response_rmt.cache_reference_id",
+      cache_enabled: "request_response_rmt.cache_enabled",
     })(filter, placeValueSafely);
   },
   users_view: easyKeyMappings<"request_response_rmt">({
@@ -225,6 +227,24 @@ const whereKeyMappings: KeyMappings = {
   }),
   sessions_request_response_rmt:
     easyKeyMappings<"sessions_request_response_rmt">({}),
+  cache_metrics: easyKeyMappings<"cache_metrics">({
+    organization_id: "cache_metrics.organization_id",
+    date: "cache_metrics.date",
+    hour: "cache_metrics.hour",
+    request_id: "cache_metrics.request_id",
+    model: "cache_metrics.model",
+    saved_latency_ms: "cache_metrics.saved_latency_ms",
+    saved_completion_tokens: "cache_metrics.saved_completion_tokens",
+    saved_prompt_tokens: "cache_metrics.saved_prompt_tokens",
+    saved_completion_audio_tokens: "cache_metrics.saved_completion_audio_tokens",
+    saved_prompt_audio_tokens: "cache_metrics.saved_prompt_audio_tokens",
+    saved_prompt_cache_write_tokens: "cache_metrics.saved_prompt_cache_write_tokens",
+    saved_prompt_cache_read_tokens: "cache_metrics.saved_prompt_cache_read_tokens",
+    first_hit: "cache_metrics.first_hit",
+    last_hit: "cache_metrics.last_hit",
+    request_body: "cache_metrics.request_body",
+    response_body: "cache_metrics.response_body",
+  }),
 
   // Deprecated
   values: NOT_IMPLEMENTED,
@@ -313,7 +333,24 @@ const havingKeyMappings: KeyMappings = {
   feedback: NOT_IMPLEMENTED,
   cache_hits: NOT_IMPLEMENTED,
   rate_limit_log: NOT_IMPLEMENTED,
-
+  cache_metrics: easyKeyMappings<"cache_metrics">({
+    organization_id: "cache_metrics.organization_id",
+    date: "cache_metrics.date",
+    hour: "cache_metrics.hour",
+    request_id: "cache_metrics.request_id",
+    model: "cache_metrics.model",
+    saved_latency_ms: "cache_metrics.saved_latency_ms",
+    saved_completion_tokens: "cache_metrics.saved_completion_tokens",
+    saved_prompt_tokens: "cache_metrics.saved_prompt_tokens",
+    saved_completion_audio_tokens: "cache_metrics.saved_completion_audio_tokens",
+    saved_prompt_audio_tokens: "cache_metrics.saved_prompt_audio_tokens",
+    saved_prompt_cache_write_tokens: "cache_metrics.saved_prompt_cache_write_tokens",
+    saved_prompt_cache_read_tokens: "cache_metrics.saved_prompt_cache_read_tokens",
+    first_hit: "cache_metrics.first_hit",
+    last_hit: "cache_metrics.last_hit",
+    request_body: "cache_metrics.request_body",
+    response_body: "cache_metrics.response_body",
+  }),
   // Deprecated
   values: NOT_IMPLEMENTED,
   job: NOT_IMPLEMENTED,
@@ -572,6 +609,20 @@ export async function buildFilterWithAuthClickHouseCacheHits(
     },
   }));
 }
+
+
+export async function buildFilterWithAuthClickHouseCacheMetrics(
+  args: ExternalBuildFilterArgs & { org_id: string }
+): Promise<{ filter: string; argsAcc: any[] }> {
+  return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
+    cache_metrics: {
+      organization_id: {
+        equals: orgId,
+      },
+    },
+  }));
+}
+
 
 export async function buildFilterWithAuthClickHouseRateLimits(
   args: ExternalBuildFilterArgs & { org_id: string }

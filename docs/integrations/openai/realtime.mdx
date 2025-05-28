@@ -1,0 +1,177 @@
+---
+title: "OpenAI Realtime API"
+sidebarTitle: "Realtime"
+description: "Integrate OpenAI's Realtime API with Helicone to monitor and analyze your real-time conversations."
+"twitter:title": "OpenAI Realtime API Integration - Helicone OSS LLM Observability"
+icon: "microphone"
+iconType: "solid"
+---
+
+import { strings } from "/snippets/strings.mdx";
+
+OpenAI's Realtime API enables low-latency, multi-modal conversational experiences with support for text and audio as both input and output.
+
+By integrating with Helicone, you can monitor performance, analyze interactions, and gain valuable insights into your real-time conversations.
+
+## {strings.howToIntegrate}
+
+<Steps>
+  <Step title={strings.generateKey}>
+    <div dangerouslySetInnerHTML={{ __html: strings.generateKeyInstructions }} />
+  </Step>
+
+  <Step title={strings.setApiKey}>
+   ```javascript
+    // For OpenAI
+    OPENAI_API_KEY=<your-openai-api-key>
+    HELICONE_API_KEY=<your-helicone-api-key>
+
+    // For Azure
+    AZURE_API_KEY=<your-azure-api-key>
+    AZURE_RESOURCE=<your-azure-resource>
+    AZURE_DEPLOYMENT=<your-azure-deployment>
+    HELICONE_API_KEY=<your-helicone-api-key>
+    ```
+  </Step>
+
+  <Step title={strings.configureWebSocketConnection}>
+    You can connect to the Realtime API through Helicone using either OpenAI or Azure as your provider.
+    <CodeGroup>
+
+      ```typescript OpenAI
+      import WebSocket from "ws";
+      import { config } from "dotenv";
+
+      config();
+
+      const url = "wss://api.helicone.ai/v1/gateway/oai/realtime?model=[MODEL_NAME]"; // gpt-4o-realtime-preview-2024-12-17
+
+      const ws = new WebSocket(url, {
+        headers: {
+          "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+          "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+          // Optional Helicone properties
+          "Helicone-Session-Id": `session_${Date.now()}`,
+          "Helicone-User-Id": "user_123"
+        },
+      });
+
+      ws.on("open", function open() {
+        console.log("Connected to server");
+
+        ws.send(JSON.stringify({
+          type: "session.update",
+          session: {
+            modalities: ["text", "audio"],
+            instructions: "You are a helpful AI assistant...",
+            voice: "alloy",
+            input_audio_format: "pcm16",
+            output_audio_format: "pcm16",
+          }
+        }));
+      });
+      ```
+
+      ```typescript Azure
+      import WebSocket from "ws";
+      import { config } from "dotenv";
+
+      config();
+
+      const url = `wss://api.helicone.ai/v1/gateway/oai/realtime?resource=${process.env.AZURE_RESOURCE}&deployment=${process.env.AZURE_DEPLOYMENT}`;
+
+      const ws = new WebSocket(url, {
+        headers: {
+          "Authorization": `Bearer ${process.env.AZURE_API_KEY}`,
+          "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+          // Optional Helicone properties
+          "Helicone-Session-Id": `session_${Date.now()}`,
+          "Helicone-User-Id": "user_123",
+        },
+      });
+
+      ws.on("open", function open() {
+        console.log("Connected to server");
+        // Initialize session with desired configuration
+        ws.send(JSON.stringify({
+          type: "session.update",
+          session: {
+            modalities: ["text", "audio"],
+            instructions: "You are a helpful AI assistant...",
+            voice: "alloy",
+            input_audio_format: "pcm16",
+            output_audio_format: "pcm16",
+          }
+        }));
+      });
+      ```
+    </CodeGroup>
+  </Step>
+
+  <Step title={strings.handleWebSocketEvents}>
+    ```javascript
+    ws.on("message", function incoming(message) {
+      try {
+        const response = JSON.parse(message.toString());
+        console.log("Received:", response);
+
+        // Handle specific event types
+        switch (response.type) {
+          case "input_audio_buffer.speech_started":
+            console.log("Speech detected!");
+            break;
+          case "input_audio_buffer.speech_stopped":
+            console.log("Speech ended. Processing...");
+            break;
+          case "conversation.item.input_audio_transcription.completed":
+            console.log("Transcription:", response.transcript);
+            break;
+          case "error":
+            console.error("Error:", response.error.message);
+            break;
+        }
+      } catch (error) {
+        console.error("Error parsing message:", error);
+      }
+    });
+
+    ws.on("error", function error(err) {
+      console.error("WebSocket error:", err);
+    });
+
+    // Handle cleanup
+    process.on("SIGINT", () => {
+      console.log("\nClosing connection...");
+      ws.close();
+      process.exit(0);
+    });
+    ```
+  </Step>
+
+  <Step title={strings.verifyInHelicone}>
+    <div dangerouslySetInnerHTML={{ __html: strings.verifyInHeliconeDesciption("OpenAI Realtime API") }} />
+  </Step>
+</Steps>
+
+## {strings.relatedGuides}
+
+<CardGroup cols={2}>
+  <Card
+    title="Building a chatbot with OpenAI structured outputs"
+    icon="lightbulb"
+    href="/guides/cookbooks/openai-structured-outputs"
+    iconType="light"
+    vertical
+  >
+    {strings.chatbotCookbookDescription}
+  </Card>
+  <Card
+    title="Trace, replay, and debug LLM sessions"
+    icon="arrows-rotate"
+    href="/guides/cookbooks/replay-llm-sessions"
+    iconType="light"
+    vertical
+  >
+    {strings.replayLlmSessionsCookbookDescription}
+  </Card>
+</CardGroup>

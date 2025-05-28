@@ -1,0 +1,198 @@
+Google just released Gemini 2.5 Pro, its "most intelligent AI model" and most expensive yet, setting new benchmarks in reasoning capabilities and coding performance. 
+
+Released on March 25, 2025, this model combines enhanced reasoning, practical coding skills, and a gigantic context window—making it a serious competitor to <a href="https://www.helicone.ai/blog/gpt-4.5-benchmarks" target="_blank" rel="noopener">ChatGPT-4.5</a>, <a href="https://www.helicone.ai/blog/claude-3.7-benchmarks-and-examples" target="_blank" rel="noopener">Claude 3.7 Sonnet</a>, and <a href="https://www.helicone.ai/blog/grok-3-benchmark-comparison" target="_blank" rel="noopener">Grok 3</a>.
+
+![Gemini 2.5 Pro](/static/blog/gemini-2.5-pro/gemini-2.5-pro.webp)
+
+Let's take a look at Google's latest offering. 
+
+## Table of Contents
+
+## What's New in Gemini 2.5 Pro?
+
+- **Built-in reasoning capabilities**: Unlike previous models where "thinking" was more of a bolt-on feature, reasoning is now integrated directly into the model
+- **Massive context window**: Gemini 2.5 Pro has a huge one million token context window
+- **Enhanced performance**: Leads on benchmarks like Humanity's Last Exam, GPQA, and AIME 2025
+- **Improved coding skills**: Notable improvements over Gemini 2.0, especially for complex applications
+- **Multimodal capabilities**: Handles text, images, audio, and video with improved understanding
+- **Knowledge cutoff**: Gemini 2.5 Pro has a more recent knowledge cutoff of January 2025
+
+<BottomLine
+  title="Flash Update 💡"
+  description="Google just announced that Gemini 2.5 Flash is coming soon—bringing even lower latency and greater cost-efficiency than the already-cheap-and-fast Gemini 2.5 Pro."
+/>
+
+## Gemini 2.5 Pro Benchmarks
+
+Google's new flagship model has posted some impressive benchmark results, particularly in reasoning-heavy tasks:
+
+| Benchmark | Gemini 2.5 Pro | OpenAI o3-mini | OpenAI GPT-4.5 | Claude 3.7 Sonnet | Grok 3 Beta | DeepSeek R1 |
+|-----------|----------------|----------------|----------------|-------------------|-------------|-------------|
+| **Humanity's Last Exam** (no tools) | 18.8% | 14.0% | 6.4% | 8.9% | - | 8.6% |
+| **GPQA Diamond** (single attempt) | 84.0% | 79.7% | 71.4% | 78.2% | 80.2% | 71.5% |
+| **AIME 2025** (single attempt) | 86.7% | 86.5% | - | 49.5% | 77.3% | 70.0% |
+| **AIME 2024** (single attempt) | 92.0% | 87.3% | 36.7% | 61.3% | 83.9% | 79.8% |
+| **LiveCodeBench v5** (single attempt) | 70.4% | 74.1% | - | - | 70.6% | 64.3% |
+| **Aider Polyglot** (whole file) | 74.0% | 60.4% (diff) | 44.9% (diff) | 64.9% (diff) | - | 56.9% (diff) |
+| **SWE-bench Verified** | 63.8% | 49.3% | 38.0% | 70.3% | - | 49.2% |
+| **SimpleQA** | 52.9% | 13.8% | 62.5% | - | 43.6% | 30.1% |
+| **MMMU** (single attempt) | 81.7% | no MM support | 74.4% | 75.0% | 76.0% | no MM support |
+| **MRCR** (128k context) | 94.5% | 61.4% | 64.0% | - | - | - |
+| **Global MMLU (Lite)** | 89.8% | - | - | - | - | - |
+
+Gemini 2.5 Pro shows particularly impressive results in:
+
+- **Reasoning tasks**: Leading on Humanity's Last Exam (18.8%), which tests advanced reasoning on complex scientific and general knowledge questions
+- **Science reasoning**: Strong performance on GPQA Diamond (84.0%), which measures ability to solve graduate-level physics, chemistry, and biology problems
+- **Mathematics**: Excellent results on AIME 2024 (92.0%) and AIME 2025 (86.7%), rigorous competitive high-school mathematics examinations
+- **Long-context processing**: Outstanding performance on MRCR (94.5% at 128k context), which evaluates comprehension of lengthy documents
+- **Multimodal understanding**: Leading on MMMU (81.7%), which tests understanding across text, images, and diagrams in specialized domains
+
+While it performs well in coding tasks, Claude 3.7 Sonnet maintains an edge in SWE-bench Verified (70.3% vs. 63.8%), which measures ability to solve real-world GitHub issues, and o3-mini leads slightly in LiveCodeBench v5 (74.1% vs. 70.4%), which evaluates code generation capabilities.
+
+That said, in real-world usage, many developers find Gemini 2.5 Pro to be at least as good or even better at coding than Claude 3.7 Sonnet.
+
+## Gemini 2.5 Real-World Performance & Reviews
+
+Let's look past the benchmarks and see if Gemini 2.5 Pro can back up those big numbers.
+
+### TL;DR: 
+- **Frontend Development**: Excellent at building functional UIs and complex frontends, though generally less aesthetic than the king of aesthetics—Claude 3.7 Sonnet
+- **Code Understanding**: Makes effective use of its massive context window to comprehend entire codebases—perhaps its greatest strength
+- **Project Architecture**: Strong at suggesting architectural improvements and feature implementations
+- **Reasoning**: Very capable at solving math and problems requiring logical reasoning—significantly outperforming models like Grok 3 and o3-mini.
+
+<BottomLine
+  title="Tip for Devs 💡"
+  description="The big advantage of Gemini 2.5 Pro, at least for developers, is its 1 million token context window, which is five times larger than Claude 3.7's. This allows it to comprehend entire codebases at once."
+/>
+
+## Gemini 2.5 Pro vs Claude 3.7 Sonnet: Which is the Better LLM for Coding? 
+
+### Interactive 3D Solar System
+
+In a direct comparison with Claude 3.7 Sonnet, Gemini 2.5 Pro created a less polished but more interactive 3D solar system visualization. 
+
+![Claude 3.7 vs. Gemini 2.5 Pro Planets](/static/blog/gemini-2.5-pro/claude-3.7-sonnet-planets-vs-gemini-2.5-pro.webp)
+
+But Gemini 2.5 Pro's version did have:
+
+- Smoother and more intuitive flight controls for navigation
+- Better integration of educational content with the 3D interface
+- More degrees of movement freedom
+
+### Physics Simulation: Ball in a Rotating Hexagon
+
+In the popular ball-in-a-hexagon problem, Gemini 2.5 Pro was able to create a functioning implementation, though the ball occasionally escaped the container at certain angles.
+
+<video width="100%" controls autoplay loop className="rounded-xl">
+  <source
+    src="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/gemini-hexagon.mp4"
+    type="video/mp4"
+  />
+  Your browser does not support the video tag.
+</video>
+
+<BottomLine
+  title="Fun Fact about Gemini 2.5 Pro 💡"
+  description="Gemini 2.5 Pro is great at editing images too. While GPT-4o's Ghibli-editing capabilities are currently all the rage, Gemini can edit images to match the style of a source image with a quality that can easily fool the untrained eye."
+/>
+
+## Gemini 2.5 Pro Pricing
+
+Gemini 2.5 Pro is Google's most expensive AI model yet. Comparing with state-of-the-art models like Claude 3.7 Sonnet, o3-mini, and GPT-4.5, here's how it stacks up:
+
+| Model | Input Cost | Output Cost | 
+|-------|----------------------------------|----------------------------------|
+| **OpenAI GPT-4.5** <br/> Significantly more expensive | $75.00/1M tokens | $150.00/1M tokens | 
+| **Claude 3.7 Sonnet** <br/> More expensive than Gemini 2.5 Pro | $3.00/1M tokens | $15.00/1M tokens  | 
+| **<span style={{color: 'blue'}}>Gemini 2.5 Pro (Extended)</span>** <br/> For prompts beyond 200K tokens | $2.50/1M tokens | $15.00/1M tokens  | 
+| **<span style={{color: 'blue'}}>Gemini 2.5 Pro (Standard)</span>** <br/> For prompts up to 200K tokens | $1.25/1M tokens | $10.00/1M tokens  | 
+| **OpenAI o3-mini** <br/> Less expensive than Gemini 2.5 Pro | $1.10/1M tokens | $4.40/1M tokens  | 
+| **Gemini 2.0 Flash** <br/> More affordable alternative | $0.10/1M tokens | $0.40/1M tokens  | 
+
+## How to Access Gemini 2.5 Pro
+
+Gemini 2.5 Pro is accessible through multiple channels depending on your needs:
+
+1. <a href="https://gemini.google.com/">Gemini App</a>: The simplest way to access Gemini 2.5 Pro, available on mobile/web. 
+2. <a href="https://ai.google.dev/gemini-api/docs/models#gemini-2.5-pro-preview-03-25" target="_blank" rel="noopener">Gemini API</a>: For developers. Use model string `gemini-2.5-pro-preview-03-25`. 
+3. <a href="https://aistudio.google.com/">Google AI Studio</a>: Fastest way to test and experiment with Gemini for free. 
+4. **Vertex AI (Coming Soon)**: Pay-as-you-go with the pricing mentioned above. 
+
+<CallToAction
+  title="Monitor Your Gemini 2.5 Pro Usage in 1 Minute ⚡️"
+  description="Track every Gemini call with real-time dashboard in under 60 seconds. Discover hidden costs, step through each prompt and debug issues in seconds."
+  primaryButtonText="Get Started for Free"
+  primaryButtonLink="https://helicone.ai/signup"
+  secondaryButtonText="Read Integration Docs"
+  secondaryButtonLink="https://docs.helicone.ai/integrations/gemini/api/javascript"
+>
+```javascript
+const model = genAI.getGenerativeModel({
+  model: "gemini-2.5-pro-preview-03-25",
+}, {
+  baseUrl: "https://gateway.helicone.ai",
+  customHeaders: {
+    'Helicone-Auth': `Bearer ${process.env.HELICONE_API_KEY}`,
+    'Helicone-Target-URL': 'https://generativelanguage.googleapis.com'
+  }
+});
+```
+</CallToAction>
+
+## When to Use Gemini 2.5 Pro
+
+Here are guidelines for when to use Gemini 2.5 Pro:
+
+### Best Use Cases
+
+- **Complex reasoning tasks**: Excellent for problems requiring multi-step logical solutions
+- **Large codebases**: The massive context window allows entire projects to be understood
+- **Science reasoning**: Outstanding performance on scientific problem-solving
+- **Interactive visualizations**: Strong capabilities for creating web-based visualizations and simulations
+- **Multi-modal applications**: Handles text, image, audio, and video inputs effectively
+- **Simple Image Editing**: Can perform decent edits to images 
+
+### When to Consider Alternatives
+
+- **Design-heavy applications**: Claude 3.7 Sonnet is often better for building better-looking applications and interfaces
+- **Cost-conscious applications**: For applications where cost is of great concern, cheaper Gemini 2.5 alternatives like DeepSeek V3 offer better value
+
+## Related Articles
+
+- <a href="https://www.helicone.ai/blog/gemini-2.0-flash" target="_blank" rel="noopener">Gemini 2.0 Flash Explained: Building More Reliable Applications</a>
+- <a href="https://www.helicone.ai/blog/google-gemini-exp-1206" target="_blank" rel="noopener">Google's Gemini-Exp-1206 is Outperforming GPT-4o and o1</a>
+- <a href="https://www.helicone.ai/blog/gpt-4.5-benchmarks" target="_blank" rel="noopener">GPT 4.5 Released: Here Are the Benchmarks</a>
+- <a href="https://www.helicone.ai/blog/claude-3.7-benchmarks-and-examples" target="_blank" rel="noopener">Claude 3.7 Sonnet & Claude Code: A Technical Review</a>
+
+<FAQ 
+  items={[
+    {
+      question: "How does Gemini 2.5 Pro compare to Gemini 2.0 Flash?",
+      answer: "Gemini 2.5 Pro significantly outperforms Gemini 2.0 Flash on reasoning tasks, with particular improvements in math, science, and coding capabilities. However, it comes at a higher price point ($1.25 vs $0.10 per million input tokens)."
+    },
+    {
+      question: "What's the biggest advantage of Gemini 2.5 Pro over Claude 3.7 Sonnet?",
+      answer: "The most significant advantage is Gemini 2.5 Pro's 1 million token context window (vs Claude's 200K tokens), allowing it to process about 750,000 words of text—longer than the entire 'Lord of the Rings' series."
+    },
+    {
+      question: "Is Gemini 2.5 Pro good for coding?",
+      answer: "Yes, Gemini 2.5 Pro shows strong coding capabilities, particularly for complex web applications and projects requiring an understanding of large codebases. It's even competitive with Claude 3.7 Sonnet, which has been the leading LLM for coding."
+    },
+    {
+      question: "Can Gemini 2.5 Pro be used for free?",
+      answer: "Yes, Google offers free access to Gemini 2.5 Pro through AI Studio."
+    },
+    {
+      question: "Does Gemini 2.5 Pro support API access?",
+      answer: "Yes, Gemini 2.5 Pro is available through the Gemini API."
+    },
+    {
+      question: "What is Gemini 2.5 Pro's context window and knowledge cutoff date?",
+      answer: "Gemini 2.5 Pro has a 1 million token context window and the knowledge cutoff is January 2025."
+    }
+  ]}
+/>
+
+<Questions />

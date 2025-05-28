@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import BasePageV2 from "../components/layout/basePageV2";
 import MetaData from "../components/layout/public/authMetaData";
 import { BarChart } from "@tremor/react";
-import { Result } from "../packages/common/result";
+import { Result } from "@/packages/common/result";
 import { HeliconeStats } from "./api/stats";
 import { getTimeMap } from "../lib/timeCalculations/constants";
 

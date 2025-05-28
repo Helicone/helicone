@@ -1,5 +1,5 @@
 ---
-title: "Azure OpenAI JavaScript Integration"
+title: "Azure OpenAI with JavaScript"
 sidebarTitle: "JavaScript"
 description: "Use JavaScript to integrate Azure OpenAI with Helicone to log your Azure OpenAI usage."
 "twitter:title": "Azure OpenAI JavaScript Integration - Helicone OSS LLM Observability"
@@ -7,91 +7,81 @@ icon: "js"
 iconType: "solid"
 ---
 
-## Proxy Integration
+import IncludeApiVersion from "/snippets/include-api-version.mdx";
+import ModelOverride from "/snippets/model-override.mdx";
+import { strings } from "/snippets/strings.mdx";
 
-<Info>
-<b>Recomendation: Model Override</b>
-
-When using Azure, the model displays differently than expected at times. We have implemented logic to parse out the model, but to guarantee your model is consistent, we highly recommend using model override:
-
-<code>Helicone-Model-Override: [MODEL_NAME]</code>
-<br />
-<br />
-<a href="/helicone-headers/header-directory"> Click here to learn more about model override</a>
-</Info>
+## {strings.howToIntegrate}
 
 <Steps>
-  <Step title="Create an account + Generate an API Key">
-    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
-    can generate an [API key](https://helicone.ai/developer).
+  <Step title={strings.generateKey}>
+    <div dangerouslySetInnerHTML={{ __html: strings.generateKeyInstructions }} />
   </Step>
-  <Step title="Set HELICONE_API_KEY as an environment variable">
-```javascript
-HELICONE_API_KEY=<your API key>
-```
+
+  <Step title={strings.setApiKey}>
+    ```javascript
+    HELICONE_API_KEY=<YOUR_HELICONE_API_KEY>
+    AZURE_OPENAI_API_KEY=<YOUR_AZURE_OPENAI_API_KEY>
+    ```
   </Step>
-  <Step title="Modify the base path and add a Helicone-Auth header">
-  <Note>Please ensure to include the ‘api-version’ in all of your requests.</Note>
-<CodeGroup>
 
-```javascript AzureOpenAI
-import { AzureOpenAI } from "openai";
+  <Step title={strings.modifyBasePath}>
+    <IncludeApiVersion />
+    <CodeGroup>
+    ```javascript
+    const client = new OpenAI({
+      baseURL: "https://oai.helicone.ai/openai/deployments/[DEPLOYMENT_NAME]",
+      defaultHeaders: {
+        "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+        "Helicone-OpenAI-API-Base": "https://[DOMAIN_NAME].azure.com/",
+        "api-key": process.env.AZURE_OPENAI_API_KEY
+      },
+      defaultQuery: {
+        "api-version": "[API_VERSION]"
+      },
+    });
+    ```
+    </CodeGroup>
+    <ModelOverride />
+  </Step>
 
-const azureOpenai = new AzureOpenAI({
-  apiKey: "[AZURE_OPENAI_API_KEY]",
-  apiVersion: "[API_VERSION]",
-  baseURL: `https://oai.helicone.ai/openai/deployments/[DEPLOYMENT_NAME]`,
-  defaultHeaders: {
-    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-    "Helicone-OpenAI-API-Base": `https://[AZURE_DOMAIN].openai.azure.com`,
-    "api-key": "[AZURE_OPENAI_API_KEY]",
-  },
-});
+  <Step title={strings.startUsing("Azure OpenAI")}>
+    ```javascript
+    const response = await client.chat.completions.create({
+      model: "[MODEL_NAME]",
+      messages: [{ role: "user", content: "What is the meaning of life?" }]
+    });
 
-const response = await azureOpenai.chat.completions.create({
-  model: "gpt-4",
-  messages: [{ role: "user", content: "Say Hi" }],
-});
+    console.log(response);
+    ```
+  </Step>
 
-console.log(response);
-```
-
-```javascript OpenAI V4+
-import OpenAI from "openai";
-
-const openai = new OpenAI({
-  baseURL: "https://oai.helicone.ai/openai/deployments/[DEPLOYMENT_NAME]",
-  defaultHeaders: {
-    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-    "Helicone-OpenAI-API-Base": "https://[AZURE_DOMAIN].openai.azure.com",
-    "api-key": "[AZURE_OPENAI_API_KEY]",
-  },
-  defaultQuery: { "api-version": "[API_VERSION]" },
-});
-```
-
-```javascript OpenAI
-import { Configuration, OpenAIApi } from "openai";
-
-const configuration = new Configuration({
-  apiKey: "[AZURE_OPENAI_API_KEY]",
-  basePath: "https://oai.helicone.ai/openai/deployments/[DEPLOYMENT]",
-  baseOptions: {
-    headers: {
-      "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-      "api-key": "[AZURE_OPENAI_API_KEY]",
-      "Helicone-OpenAI-Api-Base": "https://[AZURE_DOMAIN].openai.azure.com",
-    },
-    params: {
-      "api-version": "[API_VERSION]",
-    },
-  },
-});
-
-const openai = new OpenAIApi(configuration);
-```
-
-</CodeGroup>
-
+  <Step title={strings.verifyInHelicone}>
+    <div dangerouslySetInnerHTML={{ __html: strings.verifyInHeliconeDesciption("Azure OpenAI") }} />
   </Step>
 </Steps>
+
+<div dangerouslySetInnerHTML={{ __html: strings.azureOpenAIDocs }} />
+
+## {strings.relatedGuides}
+
+<CardGroup cols={2}>
+  <Card
+    title="Environment Tracking"
+    icon="viruses"
+    href="/guides/cookbooks/environment-tracking"
+    iconType="light"
+    vertical
+  >
+    {strings.environmentTrackingCookbookDescription}
+  </Card>
+  <Card
+    title="Integration with GitHub Actions"
+    icon="github"
+    href="/guides/cookbooks/github-actions"
+    iconType="light"
+    vertical
+  >
+    {strings.githubActionsCookbookDescription}
+  </Card>
+</CardGroup>

@@ -1,41 +1,29 @@
-import { UseQueryResult } from "@tanstack/react-query";
 import { OverTimeRequestQueryParams } from "../../../lib/api/metrics/timeDataHandlerWrapper";
-import { Result, ok, resultMap } from "../../../packages/common/result";
 import {
   RequestsOverTime,
   TimeIncrement,
 } from "../../../lib/timeCalculations/fetchTimeData";
+import { Result, ok, resultMap } from "@/packages/common/result";
 import { CostOverTime } from "../../../pages/api/metrics/costOverTime";
 import { ErrorOverTime } from "../../../pages/api/metrics/errorOverTime";
 
 import { useFilterStore } from "@/filterAST/store/filterStore";
 import { toFilterNode } from "@/filterAST/toFilterNode";
-import { UIFilterRowTree } from "@/services/lib/filters/types";
-import { useCallback, useMemo } from "react";
+import { TokensOverTime } from "@/pages/api/metrics/TokensOverTimeType";
 import { getTokensPerRequest } from "../../../lib/api/metrics/averageTokensPerRequest";
 import { LatencyOverTime } from "../../../lib/api/metrics/getLatencyOverTime";
 import { ThreatsOverTime } from "../../../lib/api/metrics/getThreatsOverTime";
 import { TimeToFirstToken } from "../../../lib/api/metrics/getTimeToFirstToken";
 import { UsersOverTime } from "../../../lib/api/metrics/getUsersOverTime";
 import { UnPromise } from "../../../lib/tsxHelpers";
-import { TokensOverTime } from "../../../pages/api/metrics/tokensOverTime";
 import { useModels } from "../../../services/hooks/models";
 import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
 import {
   BackendMetricsCall,
   useBackendMetricCall,
 } from "../../../services/hooks/useBackendFunction";
-import {
-  FilterLeaf,
-  FilterNode,
-} from "../../../services/lib/filters/filterDefs";
-import {
-  DASHBOARD_PAGE_TABLE_FILTERS,
-  SingleFilterDef,
-  getPropertyFiltersV2,
-  textWithSuggestions,
-} from "../../../services/lib/filters/frontendFilterDefs";
-import { filterUITreeToFilterNode } from "../../../services/lib/filters/uiFilterRowTree";
+import { FilterLeaf } from "../../../services/lib/filters/filterDefs";
+import { getPropertyFiltersV2 } from "../../../services/lib/filters/frontendFilterDefs";
 
 export async function fetchDataOverTime<T>(
   timeFilter: {
@@ -69,157 +57,34 @@ export interface DashboardPageData {
     start: Date;
     end: Date;
   };
-  uiFilters: UIFilterRowTree;
-  apiKeyFilter: string | null;
   timeZoneDifference: number;
   dbIncrement: TimeIncrement;
   isLive: boolean;
 }
 
-export const useUIFilterConvert = (
-  uiFilters: UIFilterRowTree,
-  timeFilter: {
-    start: Date;
-    end: Date;
-  }
-) => {
+export const useDashboardPage = ({
+  timeFilter,
+  timeZoneDifference,
+  dbIncrement,
+  isLive,
+}: DashboardPageData) => {
   const properties = useGetPropertiesV2(getPropertyFiltersV2);
-
-  const filterMap = useMemo(() => {
-    return (DASHBOARD_PAGE_TABLE_FILTERS as SingleFilterDef<any>[]).concat(
-      Array.isArray(properties.propertyFilters)
-        ? properties.propertyFilters
-        : []
-    );
-  }, [properties.propertyFilters]);
-
-  const userFilters = useMemo(
-    () => filterUITreeToFilterNode(filterMap, uiFilters),
-    [filterMap, uiFilters]
-  );
+  const filterStore = useFilterStore();
+  const filter = filterStore.filter ? toFilterNode(filterStore.filter) : "all";
 
   const { isLoading: isModelsLoading, models } = useModels(
     timeFilter,
     1000,
-    userFilters
+    filter
   );
   const topModels =
     models?.data?.sort((a, b) =>
       a.total_requests > b.total_requests ? -1 : 1
     ) ?? [];
 
-  const { isLoading: isAllModelsLoading, models: allModels } = useModels(
-    timeFilter,
-    1000
-  );
-
-  const allModelsData = allModels?.data;
-  allModels?.data?.sort((a, b) =>
-    a.total_requests > b.total_requests ? -1 : 1
-  ) ?? [];
-
-  const updateModelFilter = useCallback(
-    (filterMap: SingleFilterDef<any>[], allModelsData: any[]) => {
-      const modelFilterIdx = filterMap.findIndex(
-        (filter) => filter.label === "Model"
-      );
-      if (modelFilterIdx !== -1) {
-        return [
-          ...filterMap.slice(0, modelFilterIdx),
-          {
-            label: "Model",
-            operators: textWithSuggestions(
-              allModelsData
-                ?.filter((model) => model.model)
-                .map((model) => ({
-                  key: model.model,
-                  param: model.model,
-                })) || []
-            ),
-            category: "request",
-            table: "request_response_rmt",
-            column: "model",
-          },
-          ...filterMap.slice(modelFilterIdx + 1),
-        ];
-      }
-      return filterMap;
-    },
-    []
-  );
-
-  const sortedAllModelsData = useMemo(() => {
-    return (
-      allModelsData?.sort((a, b) =>
-        a.total_requests > b.total_requests ? -1 : 1
-      ) ?? []
-    );
-  }, [allModelsData]);
-
-  const updatedFilterMap = useMemo(() => {
-    return updateModelFilter(filterMap, sortedAllModelsData);
-  }, [filterMap, sortedAllModelsData, updateModelFilter]);
-
-  const filterStore = useFilterStore();
-
-  return {
-    properties,
-    userFilters: {
-      left: userFilters,
-      right: filterStore.filter ? toFilterNode(filterStore.filter) : "all",
-      operator: "and",
-    } as FilterNode,
-    filterMap: updatedFilterMap,
-    allModelsData: sortedAllModelsData,
-    isModelsLoading,
-    models,
-    topModels,
-  };
-};
-
-export const useDashboardPage = ({
-  timeFilter,
-  uiFilters,
-  timeZoneDifference,
-  dbIncrement,
-  isLive,
-}: DashboardPageData) => {
-  const {
-    properties: {
-      properties,
-      isLoading: isPropertiesLoading,
-      searchPropertyFilters,
-    },
-    filterMap,
-    userFilters,
-    allModelsData,
-    isModelsLoading,
-    topModels,
-  } = useUIFilterConvert(uiFilters, timeFilter);
-
-  const modelFilterIdx = filterMap.findIndex(
-    (filter) => filter.label === "Model"
-  );
-  if (modelFilterIdx !== -1) {
-    filterMap[modelFilterIdx] = {
-      label: "Model",
-      operators: textWithSuggestions(
-        allModelsData
-          ?.filter((model) => model.model)
-          .map((model) => ({
-            key: model.model,
-            param: model.model,
-          })) || []
-      ),
-      category: "request",
-      table: "request_response_rmt",
-      column: "model",
-    };
-  }
-
   const params: BackendMetricsCall<any>["params"] = {
     timeFilter,
-    userFilters,
+    userFilters: filter,
     dbIncrement,
     timeZoneDifference,
   };
@@ -378,22 +243,20 @@ export const useDashboardPage = ({
     }),
   };
 
-  function isLoading(x: UseQueryResult<any>) {
-    return x.isLoading || x.isFetching || isPropertiesLoading;
-  }
-
   const isAnyLoading =
-    Object.values(overTimeData).some(isLoading) ||
-    Object.values(metrics).some(isLoading) ||
-    isPropertiesLoading;
+    Object.values(overTimeData).some(
+      ({ isLoading, isFetching }) => isLoading || isFetching
+    ) ||
+    Object.values(metrics).some(
+      ({ isLoading, isFetching }) => isLoading || isFetching
+    ) ||
+    isModelsLoading;
 
   return {
-    filterMap,
     metrics,
     overTimeData,
     isAnyLoading,
     properties,
-    searchPropertyFilters,
     refetch: () => {
       Object.values(overTimeData).forEach((x) => x.refetch());
       Object.values(metrics).forEach((x) => x.refetch());

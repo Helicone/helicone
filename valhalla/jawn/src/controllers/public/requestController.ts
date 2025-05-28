@@ -19,7 +19,7 @@ import { SortLeafRequest } from "../../lib/shared/sorts/requests/sorts";
 import { HeliconeRequestAsset } from "../../lib/stores/request/request";
 import { RequestManager } from "../../managers/request/RequestManager";
 import { ScoreManager, ScoreRequest } from "../../managers/score/ScoreManager";
-import { HeliconeRequest } from "../../packages/llm-mapper/types";
+import { HeliconeRequest } from "@helicone-package/llm-mapper/types";
 import { JawnAuthenticatedRequest } from "../../types/request";
 
 export type RequestClickhouseFilterBranch = {
@@ -68,23 +68,21 @@ export interface RequestQueryParams {
 @Tags("Request")
 @Security("api_key")
 export class RequestController extends Controller {
-  /**
-   *
-   * @param requestBody Request query filters
-   * @example requestBody {
-   *  "filter": "all",
-   *  "isCached": false,
-   *  "limit": 10,
-   *  "offset": 0,
-   *  "sort": {
-   *    "created_at": "desc"
-   *  },
-   *  "isScored": false,
-   *  "isPartOfExperiment": false
-   * }
-   * @param request
-   * @returns
-   */
+  @Post("count/query")
+  public async getRequestCount(
+    @Body() requestBody: RequestQueryParams,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<number, string>> {
+    const reqManager = new RequestManager(request.authParams);
+    const count = await reqManager.getRequestCount(requestBody);
+    if (count.error) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return count;
+  }
+
   @Post("query")
   @Example<RequestQueryParams>({
     filter: "all",
@@ -112,24 +110,6 @@ export class RequestController extends Controller {
     return requests;
   }
 
-  /**
-   *
-   * @param requestBody Request query filters
-   * @example requestBody {
-   *  "filter": "all",
-   *  "isCached": false,
-   *  "limit": 100,
-   *  "offset": 0,
-   *  "sort": {
-   *    "created_at": "desc"
-   *  },
-   *  "includeInputs": false,
-   *  "isScored": false,
-   *  "isPartOfExperiment": false
-   * }
-   * @param request
-   * @returns
-   */
   @Post("query-clickhouse")
   @Example<RequestQueryParams>({
     filter: "all",

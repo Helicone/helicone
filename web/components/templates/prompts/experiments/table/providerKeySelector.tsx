@@ -1,28 +1,10 @@
-import { RadioGroup } from "@headlessui/react";
-import { CheckCircleIcon } from "@heroicons/react/20/solid";
-import { KeyIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
-
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import { useCallback, useState } from "react";
-import { DecryptedProviderKey } from "../../../../../services/lib/keys";
-import { clsx } from "../../../../shared/clsx";
-import useNotification from "../../../../shared/notification/useNotification";
-import { SecretInput } from "../../../../shared/themed/themedTable";
-import { useVaultPage } from "../../../vault/useVaultPage";
-import { Button } from "../../../../ui/button";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { DialogHeader } from "@/components/ui/dialog";
-import ThemedModal from "../../../../shared/themed/themedModal";
-import { Result } from "../../../../../packages/common/result";
 import {
-  ArrowPathIcon,
-  InformationCircleIcon,
-} from "@heroicons/react/24/outline";
-import { useOrg } from "../../../../layout/org/organizationContext";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { useGetOrgMembers } from "../../../../../services/hooks/organizations";
-import { useUser } from "@supabase/auth-helpers-react";
 import {
   Select,
   SelectContent,
@@ -30,6 +12,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
+import { RadioGroup } from "@headlessui/react";
+import { CheckCircleIcon } from "@heroicons/react/20/solid";
+import {
+  ArrowPathIcon,
+  InformationCircleIcon,
+  KeyIcon,
+  TrashIcon,
+} from "@heroicons/react/24/outline";
+import { useCallback, useState } from "react";
+import { Result } from "@/packages/common/result";
+import { useGetOrgMembers } from "../../../../../services/hooks/organizations";
+import { DecryptedProviderKey } from "../../../../../services/lib/keys";
+import { useOrg } from "../../../../layout/org/organizationContext";
+import { clsx } from "../../../../shared/clsx";
+import useNotification from "../../../../shared/notification/useNotification";
+import ThemedModal from "../../../../shared/themed/themedModal";
+import { SecretInput } from "../../../../shared/themed/themedTable";
+import { Button } from "../../../../ui/button";
+import { useVaultPage } from "../../../vault/useVaultPage";
 
 interface ProviderKeySelectorProps {
   variant?: "portal" | "basic";
@@ -54,7 +57,7 @@ const ProviderKeySelector = (props: ProviderKeySelectorProps) => {
 
   const { providerKeys, refetchProviderKeys } = useVaultPage();
   const { setNotification } = useNotification();
-  const supabaseClient = useSupabaseClient();
+  const heliconeAuthClient = useHeliconeAuthClient();
 
   const [providerKey, setProviderKey] = useState(
     defaultProviderKey || orgProviderKey
@@ -69,16 +72,10 @@ const ProviderKeySelector = (props: ProviderKeySelectorProps) => {
 
   const [isLoading, setIsLoading] = useState(false);
   const org = useOrg();
-  const user = useUser();
-
-  const {
-    data: orgMembers,
-    isLoading: isMembersLoading,
-    refetch: refetchOrgMembers,
-  } = useGetOrgMembers(org?.currentOrg?.id || "");
+  const { data: orgMembers } = useGetOrgMembers(org?.currentOrg?.id || "");
 
   const currentUserRole = orgMembers?.find(
-    (d) => d.email === user?.email
+    (d) => d.email === heliconeAuthClient?.user?.email
   )?.org_role;
 
   const changeProviderKeyHandler = useCallback(
@@ -88,29 +85,8 @@ const ProviderKeySelector = (props: ProviderKeySelectorProps) => {
         setProviderKeyCallback(newProviderKey);
         return;
       }
-
-      if (orgId) {
-        // update the current orgs provider key if the orgId is set
-        const { error } = await supabaseClient
-          .from("organization")
-          .update({ org_provider_key: newProviderKey })
-          .eq("id", orgId);
-
-        if (error) {
-          setNotification("Error Updating Provider Key", "error");
-        } else {
-          setNotification("Provider Key Updated", "success");
-          setProviderKey(newProviderKey);
-        }
-      }
     },
-    [
-      setProviderKeyCallback,
-      orgId,
-      supabaseClient,
-      setNotification,
-      setProviderKey,
-    ]
+    [setProviderKeyCallback, setProviderKey]
   );
 
   const deleteProviderKey = async (id: string) => {

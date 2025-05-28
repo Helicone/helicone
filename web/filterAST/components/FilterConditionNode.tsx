@@ -18,6 +18,7 @@ import {
 import { useFilterUIDefinitions } from "../filterUIDefinitions/useFilterUIDefinitions";
 import clsx from "clsx";
 import { Small } from "@/components/ui/typography";
+import DateTimeInput from "./ui/DateTimeInput";
 
 // Define the FILTER_OPERATOR_LABELS mapping
 const FILTER_OPERATOR_LABELS: Record<FilterOperator, string> = {
@@ -207,6 +208,17 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
     // Create updated field with default operator
     const defaultOperator = filterDef.operators[0] || "eq";
 
+    const defaultValue = (() => {
+      switch (filterDef.type) {
+        case "number":
+          return 0;
+        case "boolean":
+          return true;
+        default:
+          return "";
+      }
+    })();
+
     // Create updated condition with new field and default operator
     const updated: ConditionExpression = {
       ...condition,
@@ -216,7 +228,7 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
         table: filterDef.table,
       },
       operator: defaultOperator,
-      value: "", // Reset value since field changed
+      value: defaultValue, // Reset value since field changed
     };
 
     filterStore.updateFilterExpression(path, updated);
@@ -357,6 +369,14 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
       );
     }
 
+    if (filterDef?.type === "datetime") {
+      return (
+        <DateTimeInput
+          value={String(condition.value)}
+          onValueChange={handleValueChange}
+        />
+      );
+    }
     // For searchable fields with onSearch function
     if (filterDef?.type === "searchable" && filterDef.onSearch) {
       return (

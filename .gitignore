@@ -22,3 +22,9 @@ codesandbox/
 
 lastmile/
 rosebud/
+
+.env.*
+!.env.example
+
+dev.vars.*
+node_modules/

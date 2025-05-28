@@ -1,13 +1,10 @@
 import AuthLayout from "../components/layout/auth/authLayout";
-
-import { withAuthSSR } from "../lib/api/handlerWrappers";
-import { User } from "@supabase/auth-helpers-react";
+import { GetServerSidePropsContext } from "next";
 import CachePage from "../components/templates/cache/cachePage";
 import { SortDirection } from "../services/lib/sorts/requests/sorts";
 import { ReactElement } from "react";
 
 interface CacheProps {
-  user: User;
   currentPage: number;
   pageSize: number;
   sort: {
@@ -38,16 +35,17 @@ Cache.getLayout = function getLayout(page: ReactElement) {
 
 export default Cache;
 
-export const getServerSideProps = withAuthSSR(async (options) => {
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
   const { page, page_size, sortKey, sortDirection, isCustomProperty, tab } =
-    options.context.query;
+    context.query;
 
   const currentPage = parseInt(page as string, 10) || 1;
-  const pageSize = parseInt(page_size as string, 10) || 10;
+  const pageSize = parseInt(page_size as string, 10) || 25;
 
   return {
     props: {
-      user: options.userData.user,
       currentPage,
       pageSize,
       sort: {
@@ -58,4 +56,4 @@ export const getServerSideProps = withAuthSSR(async (options) => {
       defaultIndex: tab ? tab.toString() : "0",
     },
   };
-});
+};

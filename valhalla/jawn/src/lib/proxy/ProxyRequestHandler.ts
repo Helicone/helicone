@@ -61,12 +61,6 @@ export async function handleProxyRequest(
     }
   }
 
-  if (interceptor) {
-    console.log("Interceptor created, starting stream");
-  } else {
-    console.log("No interceptor created, ending response");
-  }
-
   return {
     data: {
       loggable: new DBLoggable({

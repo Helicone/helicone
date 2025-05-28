@@ -16,10 +16,15 @@ import {
   MessageCircleMore,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaDiscord } from "react-icons/fa6";
 import { ChangelogItem } from "./auth/types";
+import { useOrg } from "./org/organizationContext";
+import Intercom from "@intercom/messenger-js-sdk";
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
+import { usePathname } from "next/navigation";
 
+export const INTERCOM_APP_ID = "mna0ba2h";
 const SidebarHelpDropdown = ({
   changelog,
   handleChangelogClick,
@@ -37,8 +42,26 @@ const SidebarHelpDropdown = ({
     changelog.length > 0 && latestChangelogSeen !== changelog[0].title;
 
   const [chatOpen, setChatOpen] = useState(false);
+  const orgContext = useOrg();
+  const heliconeAuthClient = useHeliconeAuthClient();
+  Intercom({
+    app_id: INTERCOM_APP_ID,
+    user_id: heliconeAuthClient.user?.id,
+    name: orgContext?.currentOrg?.name,
+    email: heliconeAuthClient.user?.email,
+  });
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (pathname?.includes("dashboard")) {
+      // Only want to show on dashboard for now
+      Intercom({ app_id: INTERCOM_APP_ID, hide_default_launcher: false });
+    } else {
+      Intercom({ app_id: INTERCOM_APP_ID, hide_default_launcher: true });
+    }
+  }, [pathname]);
   return (
-    <div className="flex flex-col items-start w-full gap-1.5">
+    <div className="w-full flex flex-col items-center gap-2">
       <DropdownMenu
         modal={false}
         onOpenChange={
@@ -49,11 +72,11 @@ const SidebarHelpDropdown = ({
       >
         <DropdownMenuTrigger asChild>
           <Button
-            variant="ghost"
-            size="sm"
+            variant="outline"
+            size="none"
             className={clsx(
-              "flex items-center text-xs text-muted-foreground hover:text-foreground w-full h-7",
-              isCollapsed ? "justify-center px-0" : "justify-start px-2 gap-1.5"
+              "h-9  flex items-center text-xs text-muted-foreground hover:text-foreground",
+              isCollapsed ? "w-9" : "w-full gap-1"
             )}
           >
             <div className="relative flex items-center">
@@ -145,35 +168,30 @@ const SidebarHelpDropdown = ({
       </DropdownMenu>
 
       <Button
-        variant="ghost"
-        size="sm"
+        variant="outline"
+        size="none"
         onClick={() => {
-          if (window.Pylon) {
-            if (chatOpen) {
-              window.Pylon("hide");
-            } else {
-              window.Pylon("show");
-            }
-            setChatOpen(!chatOpen);
-          }
+          setChatOpen(!chatOpen);
+          Intercom({
+            app_id: INTERCOM_APP_ID,
+            hide_default_launcher: !chatOpen,
+          });
         }}
         className={clsx(
-          "flex items-center text-xs text-muted-foreground hover:text-foreground w-full h-7",
-          isCollapsed ? "justify-center px-0" : "justify-start px-2 gap-1.5",
+          "flex items-center text-xs text-muted-foreground hover:text-foreground",
+          isCollapsed ? "h-9 w-9" : "h-7 w-full gap-1",
           chatOpen && "text-primary"
         )}
       >
-        <div className="relative flex items-center">
-          <MessageCircleMore
-            size={12}
-            className={clsx(
-              chatOpen
-                ? "text-primary"
-                : "text-muted-foreground hover:text-primary"
-            )}
-          />
-        </div>
-        {!isCollapsed && <span>Message us</span>}
+        <MessageCircleMore
+          size={12}
+          className={clsx(
+            chatOpen
+              ? "text-primary"
+              : "text-muted-foreground hover:text-primary"
+          )}
+        />
+        {!isCollapsed && <div>Message us</div>}
       </Button>
     </div>
   );

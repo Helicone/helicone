@@ -15,11 +15,13 @@ MAX_CHUNKS = 8
 # MAX_TOKEN_WINDOW = MAX_TOKENS_PER_CHUNK * MAX_CHUNKS
 AVERAGE_TOKEN_LENGTH = 4
 MARGIN_OF_ERROR = 0.20
-MAX_TEXT_LENGTH = int(MAX_TOKENS_PER_CHUNK *
-                      AVERAGE_TOKEN_LENGTH * MAX_CHUNKS * (1 + MARGIN_OF_ERROR))
+MAX_TEXT_LENGTH = int(
+    MAX_TOKENS_PER_CHUNK * AVERAGE_TOKEN_LENGTH *
+    MAX_CHUNKS * (1 + MARGIN_OF_ERROR)
+)
 
 prompt_guard_model_path = os.path.join(
-    os.path.dirname(__file__), "./prompt-guard-86m")
+    os.path.dirname(__file__), "prompt-guard-86m")
 
 
 def download_prompt_guard_model():
@@ -34,37 +36,41 @@ def download_prompt_guard_model():
     try:
         print("Downloading prompt-guard model")
         s3 = boto3.client(
-            's3',
-            aws_access_key_id=os.getenv('S3_ACCESS_KEY'),
-            aws_secret_access_key=os.getenv('S3_SECRET_KEY'),
-            region_name=os.getenv('S3_REGION'),
+            "s3",
+            aws_access_key_id=os.getenv("S3_ACCESS_KEY"),
+            aws_secret_access_key=os.getenv("S3_SECRET_KEY"),
+            region_name=os.getenv("S3_REGION"),
         )
 
         # Get file size
         response = s3.head_object(
-            Bucket="helicone-llm-models",
-            Key='prompt-guard-86m.tar.gz'
+            Bucket="helicone-llm-models", Key="prompt-guard-86m.tar.gz"
         )
-        total_length = response['ContentLength']
+        total_length = response["ContentLength"]
 
         # Download with progress bar
-        with tqdm(total=total_length, unit='B', unit_scale=True, desc="Downloading prompt-guard model") as pbar:
+        with tqdm(
+            total=total_length,
+            unit="B",
+            unit_scale=True,
+            desc="Downloading prompt-guard model",
+        ) as pbar:
             s3.download_file(
                 Bucket="helicone-llm-models",
-                Key='prompt-guard-86m.tar.gz',
-                Filename='prompt-guard-86m.tar.gz',
+                Key="prompt-guard-86m.tar.gz",
+                Filename="prompt-guard-86m.tar.gz",
                 Callback=lambda bytes_transferred: pbar.update(
-                    bytes_transferred)
+                    bytes_transferred),
             )
 
         print("Downloaded prompt-guard-86m.tar.gz")
         # Extract the model file
         print("Extracting prompt-guard-86m.tar.gz")
-        os.system('tar -xzf prompt-guard-86m.tar.gz')
+        os.system("tar -xzf prompt-guard-86m.tar.gz")
         print("Extracted prompt-guard-86m.tar.gz")
         # Remove the tar.gz file
         print("Removing prompt-guard-86m.tar.gz")
-        os.remove('prompt-guard-86m.tar.gz')
+        os.remove("prompt-guard-86m.tar.gz")
         print("Removed prompt-guard-86m.tar.gz")
     except Exception as e:
         print(f"Error downloading model: {str(e)}")
@@ -74,7 +80,7 @@ def download_prompt_guard_model():
 # Initialize FastAPI app
 app = FastAPI(
     title="Prompt Security API",
-    description="API for detecting prompt injection and jailbreak attempts"
+    description="API for detecting prompt injection and jailbreak attempts",
 )
 
 
@@ -84,7 +90,7 @@ class TextRequest(BaseModel):
 
 
 class BaseSecurityModel(ABC):
-    def __init__(self, device: str = 'cpu'):
+    def __init__(self, device: str = "cpu"):
         self.device = device
         self.model = None
         self.tokenizer = None
@@ -99,29 +105,35 @@ class BaseSecurityModel(ABC):
 
 
 class PromptGuardModel(BaseSecurityModel):
-    def __init__(self, device: str = 'cpu', num_workers: int = 6):
+    def __init__(self, device: str = "cpu", num_workers: int = 6):
         super().__init__(device)
         self.num_workers = num_workers
 
     def load_model(self):
         model_path = prompt_guard_model_path
         self.tokenizer = AutoTokenizer.from_pretrained(
-            model_path, local_files_only=True)
+            model_path, local_files_only=True
+        )
         self.model = AutoModelForSequenceClassification.from_pretrained(
-            model_path, local_files_only=True)
+            model_path, local_files_only=True
+        )
         self.model.to(self.device)
         self.model.eval()
         return self
 
     def _tokenize_chunk(self, chunk: str):
         # Ensure we get a dictionary with the correct structure and proper padding
-        return self.tokenizer(chunk,
-                              padding='max_length',  # Changed from True to 'max_length'
-                              truncation=True,
-                              max_length=MAX_TOKENS_PER_CHUNK,
-                              return_tensors=None)
+        return self.tokenizer(
+            chunk,
+            padding="max_length",  # Changed from True to 'max_length'
+            truncation=True,
+            max_length=MAX_TOKENS_PER_CHUNK,
+            return_tensors=None,
+        )
 
-    def get_class_probabilities(self, text: str, temperature: float = 1.0) -> torch.Tensor:
+    def get_class_probabilities(
+        self, text: str, temperature: float = 1.0
+    ) -> torch.Tensor:
         # More efficient text splitting using character count instead of words
         max_length = MAX_TOKENS_PER_CHUNK
         text_length = len(text)
@@ -130,22 +142,25 @@ class PromptGuardModel(BaseSecurityModel):
         chunk_size = (text_length + n_chunks - 1) // n_chunks
 
         # Create chunks based on character count
-        chunks = [text[i:i + chunk_size]
+        chunks = [text[i: i + chunk_size]
                   for i in range(0, text_length, chunk_size)]
 
         # Parallel tokenization of chunks
         tokenized_chunks = [self._tokenize_chunk(chunk) for chunk in chunks]
 
         # Convert tokenized chunks to tensors and move to device
-        all_input_ids = torch.tensor(
-            [tc['input_ids'] for tc in tokenized_chunks]).to(self.device)
+        all_input_ids = torch.tensor([tc["input_ids"] for tc in tokenized_chunks]).to(
+            self.device
+        )
         all_attention_mask = torch.tensor(
-            [tc['attention_mask'] for tc in tokenized_chunks]).to(self.device)
+            [tc["attention_mask"] for tc in tokenized_chunks]
+        ).to(self.device)
 
         # Process all chunks at once
         with torch.no_grad():
-            logits = self.model(input_ids=all_input_ids,
-                                attention_mask=all_attention_mask).logits
+            logits = self.model(
+                input_ids=all_input_ids, attention_mask=all_attention_mask
+            ).logits
 
         scaled_logits = logits / temperature
         probabilities = softmax(scaled_logits, dim=-1)
@@ -157,13 +172,35 @@ class PromptGuardModel(BaseSecurityModel):
         probabilities = self.get_class_probabilities(text, temperature)
         return {
             "jailbreak_score": probabilities[0, 2].item(),
-            "indirect_injection_score": (probabilities[0, 1] + probabilities[0, 2]).item(),
+            "indirect_injection_score": (
+                probabilities[0, 1] + probabilities[0, 2]
+            ).item(),
         }
 
 
 # Initialize model globally with 6 workers (half of available cores)
 cpu_count = os.cpu_count() or 8
-global_model = PromptGuardModel(num_workers=cpu_count // 2).load_model()
+# Remove global initialization here
+# global_model = PromptGuardModel(num_workers=cpu_count // 2).load_model()
+global_model = None
+
+
+@app.on_event("startup")
+async def startup_event():
+    """Download and load the model on startup."""
+    global global_model
+    try:
+        print("Downloading model on startup...")
+        download_prompt_guard_model()
+        print("Loading model...")
+        global_model = PromptGuardModel(
+            num_workers=cpu_count // 2).load_model()
+        print("Model loaded successfully.")
+    except Exception as e:
+        print(f"FATAL: Error during model initialization: {str(e)}")
+        # Optionally, exit the application if the model fails to load
+        # import sys
+        # sys.exit(1)
 
 
 @app.post("/check_security")
@@ -171,6 +208,11 @@ async def check_security(request: TextRequest):
     """
     Check text for both jailbreak and indirect injection attempts using the specified model
     """
+    if global_model is None:
+        raise HTTPException(
+            status_code=503, detail="Model not loaded. Service is starting up."
+        )
+
     try:
         if len(request.text) > MAX_TEXT_LENGTH:
             request.text = request.text[:MAX_TEXT_LENGTH]
@@ -182,10 +224,13 @@ async def check_security(request: TextRequest):
 
 
 if __name__ == "__main__":
-    try:
-        download_prompt_guard_model()
-    except Exception as e:
-        print(f"Error downloading model: {str(e)}")
+    # Remove download call from here, it's now in startup event
+    # try:
+    #     download_prompt_guard_model()
+    # except Exception as e:
+    #     print(f"Error downloading model: {str(e)}")
 
     import uvicorn
+
+    # Uvicorn will automatically run the startup event
     uvicorn.run(app, host="0.0.0.0", port=9001)

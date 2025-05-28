@@ -3,7 +3,7 @@ import internal from "stream";
 import { WebSocket, WebSocketServer } from "ws";
 import { SocketMessage } from "../../types/realtime";
 import { safeJsonParse } from "../../utils/helpers";
-import { KafkaProducer } from "../clients/KafkaProducer";
+import { HeliconeQueueProducer } from "../clients/HeliconeQuequeProducer";
 import { RequestWrapper } from "../requestWrapper/requestWrapper";
 import { getHeliconeAuthClient } from "../../packages/common/auth/server/AuthClientFactory";
 import { S3Client } from "../shared/db/s3Client";
@@ -15,8 +15,83 @@ import { handleSocketSession } from "./WebSocketProxyRequestHandler";
 // TODO: If this problem occurs in production, we will have to dig further.
 /* -------------------------------------------------------------------------- */
 
+const REALTIME_LOGGING_INTERVAL = 15000; // 15 seconds
+
 // Create a WebSocket server to handle the upgrade
 const wss = new WebSocketServer({ noServer: true });
+
+// Helper function to log the current session
+async function logCurrentSession(
+  loggedRequestId: string | null,
+  messages: SocketMessage[],
+  requestWrapper: RequestWrapper,
+): Promise<{
+  requestId: string | null;
+}> {
+  try {
+    const authClient = getHeliconeAuthClient();
+    // 1. Create loggable object
+    const { loggable } = await handleSocketSession(
+      messages,
+      requestWrapper,
+      loggedRequestId ?? undefined
+    );
+    const requestId = await loggable.getRequestId();
+
+    // 2. Get the auth
+    const { data: auth, error: authError } =
+      await requestWrapper.auth();
+    if (authError !== null) {
+      console.error("Error getting auth", authError);
+      return { requestId };
+    }
+
+    // 3. Get the auth params
+    const { data: authParams, error: authParamsError } =
+      await authClient.authenticate(auth);
+    if (authParamsError || !authParams) {
+      console.error("Error getting auth params", authParamsError);
+      return { requestId };
+    }
+
+    // 4. Get the org params
+    const { data: orgParams, error: orgParamsError } =
+      await authClient.getOrganization(authParams);
+
+    if (orgParamsError || !orgParams) {
+      console.error("Error getting organization", orgParamsError);
+      return { requestId };
+    }
+    // 5. Log the session
+    const result = await loggable.log(
+      {
+        s3Manager: new S3Manager(
+          new S3Client(
+            process.env.S3_ACCESS_KEY ?? "",
+            process.env.S3_SECRET_KEY ?? "",
+            process.env.S3_ENDPOINT ?? "",
+            process.env.S3_BUCKET_NAME ?? "",
+            (process.env.S3_REGION as "us-west-2" | "eu-west-1") ??
+              "us-west-2"
+          )
+        ),
+        kafkaProducer: new HeliconeQueueProducer(),
+      },
+      authParams,
+      orgParams,
+      requestWrapper.heliconeHeaders
+    );
+
+    if (result.error) {
+      console.error("Error logging WebSocket session:", result.error);
+    }
+
+    return { requestId };
+  } catch (error) {
+    console.error("Error handling socket session:", error);
+    return { requestId: null };
+  }
+}
 
 export function webSocketProxyForwarder(
   requestWrapper: RequestWrapper,
@@ -32,6 +107,10 @@ export function webSocketProxyForwarder(
     // Buffer to store early incoming messages from the client.
     const messageBuffer: Array<{ data: ArrayBufferLike; isBinary: boolean }> =
       [];
+
+    
+    let requestId: string | null = null;
+    let loggingInterval: NodeJS.Timeout | null = null;
 
     // Attach a temporary listener to capture messages until the target is ready.
     const tempListener = (data: ArrayBufferLike, isBinary: boolean) => {
@@ -90,12 +169,17 @@ export function webSocketProxyForwarder(
       );
     });
 
-    openaiWs.on("open", () => {
+    openaiWs.on("open", async () => {
       // Remove the temporary listener and flush any buffered messages.
       clientWs.off("message", tempListener);
       messageBuffer.forEach(({ data, isBinary }) => {
         openaiWs.send(data, { binary: isBinary });
       });
+
+      loggingInterval = setInterval(async () => {
+        const { requestId: newRequestId } = await logCurrentSession(requestId, [...messages], requestWrapper);
+        requestId = newRequestId;
+      }, REALTIME_LOGGING_INTERVAL);
 
       // Link the WebSocket connections, with a callback for events.
       linkWebSocket({
@@ -113,70 +197,16 @@ export function webSocketProxyForwarder(
               timestamp: new Date().toISOString(),
               from,
             });
-            /* -------------------------------------------------------------------------- */
-            /*                            Handle Closing Event                            */
-            /* -------------------------------------------------------------------------- */
-          } else if (messageType === "close") {
-            const authClient = getHeliconeAuthClient();
-            try {
-              // 1. Handle the socket session with socket messages
-              const { loggable } = await handleSocketSession(
-                messages,
-                requestWrapper
-              );
-
-              // 2. Get the auth
-              const { data: auth, error: authError } =
-                await requestWrapper.auth();
-              if (authError !== null) {
-                console.error("Error getting auth", authError);
-                return;
-              }
-
-              // 3. Get the auth params
-              const { data: authParams, error: authParamsError } =
-                await authClient.authenticate(auth);
-
-              if (authParamsError || !authParams) {
-                console.error("Error getting auth params", authParamsError);
-                return;
-              }
-
-              // 4. Get the org params
-              const { data: orgParams, error: orgParamsError } =
-                await authClient.getOrganization(authParams);
-
-              if (orgParamsError || !orgParams) {
-                console.error("Error getting organization", orgParamsError);
-                return;
-              }
-
-              // 5. Log the session
-              const result = await loggable.log(
-                {
-                  s3Manager: new S3Manager(
-                    new S3Client(
-                      process.env.S3_ACCESS_KEY ?? "",
-                      process.env.S3_SECRET_KEY ?? "",
-                      process.env.S3_ENDPOINT ?? "",
-                      process.env.S3_BUCKET_NAME ?? "",
-                      (process.env.S3_REGION as "us-west-2" | "eu-west-1") ??
-                        "us-west-2"
-                    )
-                  ),
-                  kafkaProducer: new KafkaProducer(),
-                },
-                authParams,
-                orgParams,
-                requestWrapper.heliconeHeaders
-              );
-
-              if (result.error) {
-                console.error("Error logging WebSocket session:", result.error);
-              }
-            } catch (error) {
-              console.error("Error handling socket session:", error);
+          }
+          /* -------------------------------------------------------------------------- */
+          /*                            Handle Closing Event                            */
+          /* -------------------------------------------------------------------------- */
+          else if (messageType === "close") {
+            if (loggingInterval) {
+              clearInterval(loggingInterval);
             }
+            const { requestId: newRequestId } = await logCurrentSession(requestId, [...messages], requestWrapper);
+            requestId = newRequestId;
           }
         },
       });

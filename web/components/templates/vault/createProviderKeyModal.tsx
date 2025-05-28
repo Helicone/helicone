@@ -1,14 +1,4 @@
-import { FormEvent, useState } from "react";
-import ThemedModal from "../../shared/themed/themedModal";
-import useNotification from "../../shared/notification/useNotification";
-import { Result } from "../../../packages/common/result";
-import { DecryptedProviderKey } from "../../../services/lib/keys";
-import { clsx } from "../../shared/clsx";
-import {
-  ArrowPathIcon,
-  InformationCircleIcon,
-} from "@heroicons/react/24/outline";
-import { useOrg } from "../../layout/org/organizationContext";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -16,11 +6,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-
-import { useGetOrgMembers } from "../../../services/hooks/organizations";
-import { useUser } from "@supabase/auth-helpers-react";
 import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
+import {
+  ArrowPathIcon,
+  InformationCircleIcon,
+} from "@heroicons/react/24/outline";
+import { FormEvent, useState } from "react";
+import { Result } from "@/packages/common/result";
+import { useGetOrgMembers } from "../../../services/hooks/organizations";
+import { DecryptedProviderKey } from "../../../services/lib/keys";
+import { useOrg } from "../../layout/org/organizationContext";
+import { clsx } from "../../shared/clsx";
+import useNotification from "../../shared/notification/useNotification";
+import ThemedModal from "../../shared/themed/themedModal";
 
 interface CreateProviderKeyModalProps {
   open: boolean;
@@ -35,7 +34,7 @@ const CreateProviderKeyModal = (props: CreateProviderKeyModalProps) => {
   const { setNotification } = useNotification();
   const [isLoading, setIsLoading] = useState(false);
   const org = useOrg();
-  const user = useUser();
+  const { user } = useHeliconeAuthClient();
 
   const {
     data,

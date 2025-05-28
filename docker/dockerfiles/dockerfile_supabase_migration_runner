@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 node:18.18.0
+FROM --platform=linux/amd64 node:20.19
 
 WORKDIR /app
 RUN apt update -y
@@ -11,4 +11,4 @@ RUN find /app/supabase -name ".env.*" -exec rm {} \;
 
 WORKDIR /app
 
-CMD ["sh", "-c", "npx supabase db push --db-url ${DATABASE_URL}"]
+CMD ["sh", "-c", "yes | npx supabase db push --db-url ${DATABASE_URL}"]

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Select, SelectItem, TextInput, Button } from "@tremor/react";
 import { useJawnClient } from "../../../../lib/clients/jawnHook";
 import { Col } from "../../../layout/common";
-import { useUser } from "@supabase/auth-helpers-react";
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 import OpenAI from "openai";
 import { hpf, hpstatic } from "@helicone/prompts";
 import TextbookCourse from "./textbookCourse";
@@ -20,9 +20,11 @@ type CourseParts =
   | "sectionTitles"
   | "sectionContent";
 
+export const SESSION_NAME = "Course Generator";
+
 export const CourseGenerator: React.FC = () => {
   const jawn = useJawnClient();
-  const user = useUser();
+  const { user } = useHeliconeAuthClient();
   const [showTextbook, setShowTextbook] = useState(false);
 
   const [params, setParams] = useState<CourseParams>({
@@ -248,7 +250,7 @@ export const CourseGenerator: React.FC = () => {
           promptId: `Course-Generator-${part}`,
           userEmail: user?.email ?? "no-email",
           sessionId,
-          sessionName: "Course Generator",
+          sessionName: SESSION_NAME,
           sessionPath,
           tools,
           tool_choice: {

@@ -13,12 +13,12 @@ import {
 import { HeliconeHeaders } from "./models/HeliconeHeaders";
 import { getAndStoreInCache } from "./util/cache/secureCache";
 import { Result, err, map, mapPostgrestErr, ok } from "./util/results";
-
 import { Sha256 } from "@aws-crypto/sha256-js";
 import { CfProperties } from "@cloudflare/workers-types";
 import { parseJSXObject } from "@helicone/prompts";
 import { HttpRequest } from "@smithy/protocol-http";
 import { SignatureV4 } from "@smithy/signature-v4";
+import { HELICONE_API_KEY_REGEX } from "./util/apiKeyRegex";
 
 export type RequestHandlerType =
   | "proxy_only"
@@ -446,25 +446,8 @@ export class RequestWrapper {
     }
 
     const apiKey = heliconeAuth.replace("Bearer ", "").trim();
-    const apiKeyPatterns = [
-      /^sk-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
-      /^sk-helicone-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
-      /^sk-helicone-cp-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
-      /^pk-helicone-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
-      /^pk-helicone-cp-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
-      /^pk-helicone-eu-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
-      /^pk-helicone-cp-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
-      /^pk-helicone-eu-cp-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
-      /^sk-helicone-eu-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
-      /^sk-helicone-cp-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
-      /^sk-helicone-eu-cp-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
-      /^[sp]k(-helicone)?(-eu)?(-cp)?-\w{7}-\w{7}-\w{7}-\w{7}$/,
-    ];
 
-    // We can probably do something like this... but i am scared lol
-    // const apiKeyPattern = /^(sk|pk)(-helicone)?(-(cp|eu|eu-cp))?-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/;
-
-    if (!apiKeyPatterns.some((pattern) => pattern.test(apiKey))) {
+    if (!HELICONE_API_KEY_REGEX.some((pattern) => pattern.test(apiKey))) {
       return err("API Key is not well formed");
     }
     return ok(null);
@@ -603,11 +586,6 @@ export interface ProxyKeyRow {
   organizationId: string;
 }
 
-export interface ProxyKeyRow {
-  providerKey: string;
-  proxyKeyId: string;
-  organizationId: string;
-}
 export async function getProviderKeyFromProxyCache(
   authKey: string,
   env: Env,
