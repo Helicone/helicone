@@ -1,7 +1,7 @@
 mod generate_contents;
 
-use crate::endpoints::google::generate_contents::GenerateContents;
 use super::{Endpoint, EndpointType};
+pub(crate) use crate::endpoints::google::generate_contents::GenerateContents;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, strum::EnumIter)]
 pub enum Google {
@@ -34,10 +34,14 @@ impl TryFrom<&str> for Google {
 
     fn try_from(path: &str) -> Result<Self, Self::Error> {
         match path {
-            GenerateContents::PATH => Ok(Self::GenerateContents(GenerateContents)),
+            GenerateContents::PATH => {
+                Ok(Self::GenerateContents(GenerateContents))
+            }
             path => {
                 tracing::warn!(path = %path, "unsupported anthropic path");
-                Err(crate::error::invalid_req::InvalidRequestError::NotFound(path.to_string()))
+                Err(crate::error::invalid_req::InvalidRequestError::NotFound(
+                    path.to_string(),
+                ))
             }
         }
     }
