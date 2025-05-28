@@ -3,7 +3,7 @@ import RSS from "rss";
 import fs from "fs";
 import { serialize } from "next-mdx-remote/serialize";
 import { getMetadata } from "@/components/templates/blog/getMetaData";
-import { blogContent } from "@/app/blog/page";
+import { BLOG_CONTENT } from "@/app/blog/page";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import rehypeSlug from "rehype-slug";
@@ -24,7 +24,7 @@ export async function GET() {
   });
 
   const mdxs = await Promise.all(
-    blogContent
+    BLOG_CONTENT
       .filter(
         (contentPath) =>
           "dynmaicEntry" in contentPath ||
