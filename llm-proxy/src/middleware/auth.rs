@@ -96,9 +96,15 @@ where
                     Ok(request)
                 }
                 Err(e) => {
-                    warn!(error = %e, "Authentication error");
-                    if let AuthError::InvalidCredentials = e {
-                        app_state.0.metrics.auth_rejections.add(1, &[]);
+                    match &e {
+                        AuthError::Transport(_) => {
+                            warn!(error = %e, "Authentication error");
+                        }
+                        AuthError::UnsuccessfulAuthResponse(_)
+                        | AuthError::MissingAuthorizationHeader
+                        | AuthError::InvalidCredentials => {
+                            app_state.0.metrics.auth_rejections.add(1, &[]);
+                        }
                     }
                     Err(e.into_response())
                 }
