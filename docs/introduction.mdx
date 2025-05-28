@@ -1,0 +1,65 @@
+---
+title: "Intro to Helix"
+sidebarTitle: "Intro to Helix"
+description: "Helix is the fully open-source, lightweight Rust-based router for Large Language Models (LLMs)"
+---
+
+<Note>
+  Built and maintained by the team at
+  [Helicone](https://helicone.ai).
+</Note>
+
+![Subway](./images/subway.jpg)
+
+# Why we're building Helix?
+
+The AI development space is progressing at an exponential rate. We see it every day at Helicone—over 90 % of our users run 10 + LLMs in production, each with its own SDK, auth scheme, rate limits, and quirks.
+
+Keeping up today means rewriting integrations for every new model, managing a maze of API keys, engineering custom fallbacks for provider outages, and constantly tuning traffic for cost or compliance.
+
+Helix is our answer. It is a lightweight Rust router inspired by NGINX that removes the integration tax so you can focus on shipping features.
+
+
+# What do you get with Helix?
+
+<CardGroup cols={2}>
+<Card title="One line. 100+ models" icon="plug" href="/quickstart">
+  A unified interface for every LLM provider using familiar OpenAI syntax
+</Card>
+<Card title="Smart provider selection" icon="shuffle" href="/loadbalancing">
+  Load balance to always hit the fastest, cheapest, or most reliable option
+</Card>
+<Card title="Control your spending" icon="shield" href="/rate-limiting">
+  Rate limit to prevent runaway costs and usage abuse
+</Card>
+<Card title="Reduce latency" icon="clock" href="/cache">
+  Cache responses to reduce costs and latency by up to 95%
+</Card>
+<Card title="Centralize API keys" icon="key" href="/secret-management">
+  Store all API keys securely to end credential chaos and security risks
+</Card>
+<Card title="Simplified tracing" icon="eye" href="/helicone">
+  Monitor performance and debug issues with built-in Helicone integration
+</Card>
+</CardGroup>
+
+# What sets Helix apart?
+
+Built in Rust, Helix ships as one lightweight binary you can run anywhere:
+
+- **Self-hosted by default** - needs only Redis, nothing else
+- **Sidecar-friendly** - drop into Docker, Kubernetes, bare-metal, or spawn as a subprocess
+- **Built with Tower** - P2C + PeakEWMA load-balancing, retries, and timeouts are just middleware layers
+- **NGINX-style proxy** - local gateway to any provider, model, or region
+- **Horizontally scalable** - run 1-N instances behind any load balancer
+- **Open-source** - MIT licensed, no vendor lock-in
+
+# Let's get started
+<CardGroup cols={2}>
+<Card title="Quickstart" icon="plug" href="/quickstart">
+  Get started in minutes with our quickstart guide
+</Card>
+<Card title="GitHub" icon="github" href="https://github.com/helicone/helix">
+  View the source code and contribute to Helix
+</Card>
+</CardGroup>

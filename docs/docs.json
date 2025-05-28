@@ -1,0 +1,32 @@
+{
+  "name": "Helix",
+  "logo": "/images/logo_text.webp",
+  "theme": "linden",
+  "colors": {
+    "primary": "#e7614c",
+    "light": "#e7614c",
+    "dark": "#000000"
+  },
+  "background": {
+    "color": {
+      "light": "#fff0de",
+      "dark": "#1c1917"
+    }
+  },
+  "navigation": {
+    "groups": [
+      {
+        "group": "Getting Started",
+        "pages": [
+          "/introduction",
+          "/quickstart",
+          "/loadbalancing",
+          "/secret-management",
+          "/rate-limiting",
+          "/cache",
+          "/otel-observability"
+        ]
+      }
+    ]
+  }
+}
