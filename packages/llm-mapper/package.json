@@ -1,32 +1,6 @@
 {
   "name": "@helicone-package/llm-mapper",
-  "version": "1.0.0",
-  "main": "dist/types.js",
-  "types": "dist/types.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/types.d.ts",
-      "default": "./dist/types.js"
-    },
-    "./types": {
-      "types": "./dist/types.d.ts",
-      "default": "./dist/types.js"
-    }
-  },
-  "scripts": {
-    "build": "tsc"
-  },
-  "dependencies": {
-    "@helicone-package/cost": "*"
-  },
-  "devDependencies": {
-    "@jest/globals": "^29.7.0",
-    "@types/jest": "^29.5.14",
-    "@types/node": "^20.11.25",
-    "jest": "^29.7.0",
-    "nodemon": "^3.1.0",
-    "ts-jest": "^29.2.5",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.4.2"
-  }
+  "types": "./",
+  "sideEffects": false,
+  "version": "1.0.0"
 }
