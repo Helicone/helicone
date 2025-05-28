@@ -17,7 +17,6 @@ import {
   HeliconeProxyRequest,
   RetryOptions,
 } from "../models/HeliconeProxyRequest";
-import { error } from "console";
 
 export type ProxyResult = {
   loggable: DBLoggable;
