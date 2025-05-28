@@ -16,7 +16,7 @@ use crate::{
     dispatcher::{Dispatcher, DispatcherService},
     endpoints::{ApiEndpoint, EndpointType},
     error::{
-        api::Error, init::InitError, internal::InternalError,
+        api::ApiError, init::InitError, internal::InternalError,
         invalid_req::InvalidRequestError, provider::ProviderError,
     },
     middleware::request_context,
@@ -132,7 +132,7 @@ impl Router {
 
 impl tower::Service<crate::types::request::Request> for Router {
     type Response = crate::types::response::Response;
-    type Error = Error;
+    type Error = ApiError;
     type Future = RouterFuture;
 
     #[inline]
@@ -194,7 +194,7 @@ impl tower::Service<crate::types::request::Request> for Router {
 
 pub enum RouterFuture {
     /// Ready with an immediate response
-    Ready(Ready<Result<crate::types::response::Response, Error>>),
+    Ready(Ready<Result<crate::types::response::Response, ApiError>>),
     /// Calling the `ProviderBalancer`
     Balancer(<RouterService as tower::Service<crate::types::request::Request>>::Future),
     /// Calling the direct proxy
@@ -202,7 +202,7 @@ pub enum RouterFuture {
 }
 
 impl Future for RouterFuture {
-    type Output = Result<crate::types::response::Response, Error>;
+    type Output = Result<crate::types::response::Response, ApiError>;
 
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         match self.get_mut() {

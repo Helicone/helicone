@@ -13,7 +13,7 @@ use opentelemetry::KeyValue;
 use pin_project_lite::pin_project;
 use tower::{Layer, Service};
 
-use crate::app::AppState;
+use crate::{app::AppState, error::ErrorMetric};
 
 /// A [`Layer`] that wraps a [`Service`] and converts errors into [`Response`]s.
 #[derive(Debug, Clone)]
@@ -81,7 +81,7 @@ pin_project! {
 impl<F, E> Future for ResponseFuture<F, E>
 where
     F: Future<Output = Result<Response, E>>,
-    E: IntoResponse + AsRef<str>,
+    E: IntoResponse + ErrorMetric,
 {
     type Output = Result<Response, Infallible>;
 
@@ -90,7 +90,7 @@ where
         match ready!(this.inner.poll(cx)) {
             Ok(res) => Poll::Ready(Ok(res)),
             Err(svc_err) => {
-                let error_str = svc_err.as_ref().to_string();
+                let error_str = svc_err.error_metric();
                 this.app_state
                     .0
                     .metrics
@@ -111,7 +111,7 @@ where
     S::Future: Send + 'static,
     S::Error: IntoResponse + std::fmt::Display,
     ReqBody: Send + 'static,
-    E: Send + 'static + std::fmt::Display + AsRef<str>,
+    E: Send + 'static + std::fmt::Display + ErrorMetric,
 {
     type Response = Response;
     type Error = Infallible;

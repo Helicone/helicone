@@ -1,10 +1,11 @@
 use displaydoc::Display;
+use strum::AsRefStr;
 use thiserror::Error;
 
 use crate::types::provider::InferenceProvider;
 
 /// Error types that can occur when mapping requests between providers.
-#[derive(Debug, Error, Display)]
+#[derive(Debug, Error, Display, AsRefStr)]
 pub enum MapperError {
     /// Failed to convert chat completion request
     ChatConversion,
@@ -24,4 +25,43 @@ pub enum MapperError {
     StreamError(String),
     /// Empty response body
     EmptyResponseBody,
+}
+
+/// Error types that can occur when mapping requests between providers.
+#[derive(Debug, Error, Display, strum::AsRefStr)]
+pub enum MapperErrorMetric {
+    /// Failed to convert chat completion request
+    ChatConversion,
+    /// No model mapping found
+    NoModelMapping,
+    /// Invalid model name
+    InvalidModelName,
+    /// No global provider config found
+    NoProviderConfig,
+    /// Provider not enabled in router config
+    ProviderNotEnabled,
+    /// Invalid request body
+    InvalidRequest,
+    /// Serde error
+    SerdeError,
+    /// Underlying stream error
+    StreamError,
+    /// Empty response body
+    EmptyResponseBody,
+}
+
+impl From<&MapperError> for MapperErrorMetric {
+    fn from(error: &MapperError) -> Self {
+        match error {
+            MapperError::ChatConversion => Self::ChatConversion,
+            MapperError::NoModelMapping(_, _) => Self::NoModelMapping,
+            MapperError::InvalidModelName(_) => Self::InvalidModelName,
+            MapperError::NoProviderConfig(_) => Self::NoProviderConfig,
+            MapperError::ProviderNotEnabled(_) => Self::ProviderNotEnabled,
+            MapperError::InvalidRequest => Self::InvalidRequest,
+            MapperError::SerdeError(_) => Self::SerdeError,
+            MapperError::StreamError(_) => Self::StreamError,
+            MapperError::EmptyResponseBody => Self::EmptyResponseBody,
+        }
+    }
 }

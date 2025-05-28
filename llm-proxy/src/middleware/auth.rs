@@ -35,7 +35,8 @@ impl AuthService {
             .header("authorization", api_key)
             .send()
             .await?
-            .error_for_status()?;
+            .error_for_status()
+            .map_err(AuthError::UnsuccessfulAuthResponse)?;
         let body = whoami_result.json::<WhoamiResponse>().await?;
         Ok(AuthContext {
             api_key: api_key.replace("Bearer ", ""),

@@ -11,7 +11,7 @@ use tracing::{Instrument, info_span};
 
 use crate::{
     endpoints::ApiEndpoint,
-    error::{api::Error, internal::InternalError},
+    error::{api::ApiError, internal::InternalError},
     middleware::mapper::{
         error::MapperError, registry::EndpointConverterRegistry,
     },
@@ -38,14 +38,14 @@ where
     S: tower::Service<
             Request,
             Response = http::Response<crate::types::body::Body>,
-            Error = Error,
+            Error = ApiError,
         > + Clone
         + Send
         + 'static,
     S::Future: Send + 'static,
 {
     type Response = Response;
-    type Error = Error;
+    type Error = ApiError;
     type Future = BoxFuture<'static, Result<Self::Response, Self::Error>>;
 
     #[inline]
@@ -64,13 +64,13 @@ where
             let provider = *req
                 .extensions_mut()
                 .get::<InferenceProvider>()
-                .ok_or(Error::Internal(InternalError::ExtensionNotFound(
+                .ok_or(ApiError::Internal(InternalError::ExtensionNotFound(
                     "Provider",
                 )))?;
             let req_ctx = req
                 .extensions()
                 .get::<Arc<RequestContext>>()
-                .ok_or(Error::Internal(InternalError::ExtensionNotFound(
+                .ok_or(ApiError::Internal(InternalError::ExtensionNotFound(
                     "RequestContext",
                 )))?
                 .clone();
@@ -83,14 +83,14 @@ where
             let converter_registry = req
                 .extensions()
                 .get::<EndpointConverterRegistry>()
-                .ok_or(Error::Internal(InternalError::ExtensionNotFound(
+                .ok_or(ApiError::Internal(InternalError::ExtensionNotFound(
                     "EndpointConverterRegistry",
                 )))?
                 .clone();
             let extracted_path_and_query = req
                 .extensions_mut()
                 .remove::<PathAndQuery>()
-                .ok_or(Error::Internal(InternalError::ExtensionNotFound(
+                .ok_or(ApiError::Internal(InternalError::ExtensionNotFound(
                     "PathAndQuery",
                 )))?;
             let source_endpoint =
@@ -134,7 +134,7 @@ where
                 })
             } else {
                 let source_endpoint =
-                    source_endpoint.ok_or(Error::Internal(
+                    source_endpoint.ok_or(ApiError::Internal(
                         InternalError::ExtensionNotFound("ApiEndpoint"),
                     ))?;
                 let target_endpoint =
@@ -183,7 +183,7 @@ async fn map_request(
     target_endpoint: &ApiEndpoint,
     target_path_and_query: &PathAndQuery,
     req: Request,
-) -> Result<Request, Error> {
+) -> Result<Request, ApiError> {
     let (parts, body) = req.into_parts();
     let body = body
         .collect()
@@ -223,7 +223,7 @@ async fn map_request_no_op(
     target_endpoint: &ApiEndpoint,
     target_path_and_query: PathAndQuery,
     req: Request,
-) -> Result<Request, Error> {
+) -> Result<Request, ApiError> {
     let (parts, body) = req.into_parts();
     let body = body
         .collect()
@@ -249,7 +249,7 @@ async fn map_response(
     source_endpoint: ApiEndpoint,
     target_endpoint: ApiEndpoint,
     resp: http::Response<crate::types::body::Body>,
-) -> Result<Response, Error> {
+) -> Result<Response, ApiError> {
     let mapper_ctx = resp
         .extensions()
         .get::<MapperContext>()
@@ -270,7 +270,7 @@ async fn map_response(
         // SSE event in this branch
         let mapped_stream = body
             .into_data_stream()
-            .map_err(|e| Error::Internal(InternalError::ReqwestError(e)))
+            .map_err(|e| ApiError::Internal(InternalError::ReqwestError(e)))
             .try_filter_map({
                 let captured_registry = converter_registry.clone();
                 move |bytes| {

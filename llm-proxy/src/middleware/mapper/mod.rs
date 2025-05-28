@@ -37,7 +37,8 @@ pub use self::service::*;
 use crate::{
     endpoints::{AiRequest, Endpoint},
     error::{
-        api::Error, internal::InternalError, invalid_req::InvalidRequestError,
+        api::ApiError, internal::InternalError,
+        invalid_req::InvalidRequestError,
     },
     types::request::MapperContext,
 };
@@ -72,7 +73,7 @@ pub trait EndpointConverter {
     fn convert_req_body(
         &self,
         req_body_bytes: Bytes,
-    ) -> Result<(Bytes, MapperContext), Error>;
+    ) -> Result<(Bytes, MapperContext), ApiError>;
     /// Convert a response body to a target response body with raw bytes.
     ///
     /// Returns `None` if there is no applicable mapping for a given chunk
@@ -81,7 +82,7 @@ pub trait EndpointConverter {
         &self,
         resp_body_bytes: Bytes,
         is_stream: bool,
-    ) -> Result<Option<Bytes>, Error>;
+    ) -> Result<Option<Bytes>, ApiError>;
 }
 
 pub struct TypedEndpointConverter<S, T, C>
@@ -131,7 +132,7 @@ where
     fn convert_req_body(
         &self,
         bytes: Bytes,
-    ) -> Result<(Bytes, MapperContext), Error> {
+    ) -> Result<(Bytes, MapperContext), ApiError> {
         let source_request: S::RequestBody = serde_json::from_slice(&bytes)
             .map_err(InvalidRequestError::InvalidRequestBody)?;
         let is_stream = source_request.is_stream();
@@ -152,7 +153,7 @@ where
         Ok((target_bytes, mapper_ctx))
     }
 
-    fn convert_resp_body(&self, bytes: Bytes, is_stream: bool) -> Result<Option<Bytes>, Error> {
+    fn convert_resp_body(&self, bytes: Bytes, is_stream: bool) -> Result<Option<Bytes>, ApiError> {
         if is_stream {
             let source_response: T::StreamResponseBody =
                 serde_json::from_slice(&bytes)
@@ -236,7 +237,7 @@ where
     fn convert_req_body(
         &self,
         bytes: Bytes,
-    ) -> Result<(Bytes, MapperContext), Error> {
+    ) -> Result<(Bytes, MapperContext), ApiError> {
         let source_request: S::RequestBody = serde_json::from_slice(&bytes)
             .map_err(InvalidRequestError::InvalidRequestBody)?;
         let is_stream = source_request.is_stream();
@@ -253,7 +254,7 @@ where
         &self,
         bytes: Bytes,
         _is_stream: bool,
-    ) -> Result<Option<Bytes>, Error> {
+    ) -> Result<Option<Bytes>, ApiError> {
         Ok(Some(bytes))
     }
 }

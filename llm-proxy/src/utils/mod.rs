@@ -14,11 +14,11 @@ use url::Url;
 use crate::error::{internal::InternalError, invalid_req::InvalidRequestError};
 
 pub trait ResponseExt: Sized {
-    fn error_for_status(self) -> Result<Self, crate::error::api::Error>;
+    fn error_for_status(self) -> Result<Self, crate::error::api::ApiError>;
 }
 
 impl<B> ResponseExt for http::Response<B> {
-    fn error_for_status(self) -> Result<Self, crate::error::api::Error> {
+    fn error_for_status(self) -> Result<Self, crate::error::api::ApiError> {
         let status = self.status();
         if status.is_client_error() {
             Err(InvalidRequestError::Provider4xxError(status).into())

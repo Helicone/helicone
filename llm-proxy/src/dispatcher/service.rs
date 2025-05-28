@@ -24,7 +24,7 @@ use crate::{
         extensions::ExtensionsCopier, openai_client::Client as OpenAIClient,
     },
     endpoints::ApiEndpoint,
-    error::{api::Error, init::InitError, internal::InternalError},
+    error::{api::ApiError, init::InitError, internal::InternalError},
     logger::service::LoggerService,
     middleware::{
         add_extension::{AddExtensions, AddExtensionsLayer},
@@ -42,8 +42,10 @@ use crate::{
     },
 };
 
-pub type DispatcherFuture =
-    BoxFuture<'static, Result<http::Response<crate::types::body::Body>, Error>>;
+pub type DispatcherFuture = BoxFuture<
+    'static,
+    Result<http::Response<crate::types::body::Body>, ApiError>,
+>;
 pub type DispatcherService =
     AddExtensions<ErrorHandler<crate::middleware::mapper::Service<Dispatcher>>>;
 
@@ -143,7 +145,7 @@ impl Dispatcher {
 
 impl Service<Request> for Dispatcher {
     type Response = http::Response<crate::types::body::Body>;
-    type Error = Error;
+    type Error = ApiError;
     type Future = DispatcherFuture;
 
     fn poll_ready(
@@ -168,7 +170,7 @@ impl Dispatcher {
     async fn dispatch(
         &self,
         mut req: Request,
-    ) -> Result<http::Response<crate::types::body::Body>, Error> {
+    ) -> Result<http::Response<crate::types::body::Body>, ApiError> {
         let mapper_ctx = req
             .extensions_mut()
             .remove::<MapperContext>()
@@ -202,7 +204,7 @@ impl Dispatcher {
         let extracted_path_and_query = req
             .extensions_mut()
             .remove::<PathAndQuery>()
-            .ok_or(Error::Internal(InternalError::ExtensionNotFound(
+            .ok_or(ApiError::Internal(InternalError::ExtensionNotFound(
                 "PathAndQuery",
             )))?;
         let inference_provider = req
@@ -336,7 +338,7 @@ impl Dispatcher {
             http::Response<crate::types::body::Body>,
             Option<crate::types::body::BodyReader>,
         ),
-        Error,
+        ApiError,
     > {
         let response_stream = Client::sse_stream(
             request_builder,
@@ -396,7 +398,7 @@ impl Dispatcher {
             http::Response<crate::types::body::Body>,
             Option<crate::types::body::BodyReader>,
         ),
-        Error,
+        ApiError,
     > {
         let response = request_builder
             .body(req_body_bytes)

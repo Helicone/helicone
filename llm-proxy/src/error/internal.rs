@@ -5,9 +5,11 @@ use thiserror::Error;
 use tower::BoxError;
 use tracing::error;
 
+use super::ErrorMetric;
 use crate::{
     endpoints::ApiEndpoint,
     error::api::ErrorResponse,
+    middleware::mapper::error::MapperErrorMetric,
     types::{json::Json, provider::InferenceProvider},
 };
 
@@ -74,5 +76,99 @@ impl IntoResponse for InternalError {
             }),
         )
             .into_response()
+    }
+}
+
+/// Auth errors for metrics. This is a special type
+/// that avoids including dynamic information to limit cardinality
+/// such that we can use this type in metrics.
+#[derive(Debug, Error, Display, strum::AsRefStr)]
+pub enum InternalErrorMetric {
+    /// Internal error
+    Internal,
+    /// Could not serialize
+    Serialize,
+    /// Could not deserialize
+    Deserialize,
+    /// Router config provider not present in `ProvidersConfig`
+    ProviderNotConfigured,
+    /// Extension not found
+    ExtensionNotFound,
+    /// Provider not found
+    ProviderNotFound,
+    /// Could not collect response body
+    CollectBodyError,
+    /// Could not process request body
+    RequestBodyError,
+    /// Reqwest error
+    ReqwestError,
+    /// Http error
+    HttpError,
+    /// Mapper error
+    MapperError(#[from] crate::middleware::mapper::error::MapperErrorMetric),
+    /// Load balancer error
+    LoadBalancerError,
+    /// Poll ready error
+    PollReadyError,
+    /// Buffer error
+    BufferError,
+    /// Invalid URI
+    InvalidUri,
+    /// Invalid header
+    InvalidHeader,
+    /// Failed to complete tokio task
+    TokioTaskError,
+    /// Converter not present
+    InvalidConverter,
+    /// Stream error
+    StreamError,
+    /// Upstream 5xx error
+    Provider5xxError,
+    /// Metrics not configured
+    MetricsNotConfigured,
+}
+
+impl From<&InternalError> for InternalErrorMetric {
+    fn from(error: &InternalError) -> Self {
+        match error {
+            InternalError::Internal => Self::Internal,
+            InternalError::Serialize { .. } => Self::Serialize,
+            InternalError::Deserialize { .. } => Self::Deserialize,
+            InternalError::ProviderNotConfigured(_) => {
+                Self::ProviderNotConfigured
+            }
+            InternalError::ExtensionNotFound(_) => Self::ExtensionNotFound,
+            InternalError::ProviderNotFound => Self::ProviderNotFound,
+            InternalError::CollectBodyError(_) => Self::CollectBodyError,
+            InternalError::RequestBodyError(_) => Self::RequestBodyError,
+            InternalError::ReqwestError(_) => Self::ReqwestError,
+            InternalError::HttpError(_) => Self::HttpError,
+            InternalError::MapperError(error) => {
+                Self::MapperError(MapperErrorMetric::from(error))
+            }
+            InternalError::LoadBalancerError(_) => Self::LoadBalancerError,
+            InternalError::PollReadyError(_) => Self::PollReadyError,
+            InternalError::BufferError(_) => Self::BufferError,
+            InternalError::InvalidUri(_) => Self::InvalidUri,
+            InternalError::InvalidHeader(_) => Self::InvalidHeader,
+            InternalError::MappingTaskError(_) => Self::TokioTaskError,
+            InternalError::InvalidConverter(_, _) => Self::InvalidConverter,
+            InternalError::StreamError(_) => Self::StreamError,
+            InternalError::Provider5xxError(_) => Self::Provider5xxError,
+            InternalError::MetricsNotConfigured(_) => {
+                Self::MetricsNotConfigured
+            }
+        }
+    }
+}
+
+impl ErrorMetric for InternalError {
+    fn error_metric(&self) -> String {
+        if let InternalError::MapperError(e) = self {
+            let e = MapperErrorMetric::from(e);
+            format!("InternalError:MapperError:{}", e.as_ref())
+        } else {
+            InternalErrorMetric::from(self).as_ref().to_string()
+        }
     }
 }
