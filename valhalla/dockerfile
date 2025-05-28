@@ -40,6 +40,7 @@ RUN . venv/bin/activate && \
     pip3 install regex numpy packaging requests tqdm filelock typing-extensions
 
 
+RUN apt install curl -y
 WORKDIR /usr/src/app
 COPY ./shared ./shared
 COPY ./packages ./packages

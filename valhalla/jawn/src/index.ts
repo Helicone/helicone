@@ -123,10 +123,10 @@ if (KAFKA_ENABLED) {
     backFillCount: 0,
   });
   startSQSConsumers({
-    dlqCount: 0,
-    normalCount: 0,
-    scoresCount: 0,
-    scoresDlqCount: 0,
+    dlqCount: DLQ_WORKER_COUNT,
+    normalCount: NORMAL_WORKER_COUNT,
+    scoresCount: SCORES_WORKER_COUNT,
+    scoresDlqCount: SCORES_WORKER_COUNT,
     backFillCount: 0,
   });
 }
@@ -253,7 +253,7 @@ server.on("upgrade", async (req, socket, head) => {
     route: {},
     originalUrl: req.url,
     baseUrl: "",
-    next: function () { },
+    next: function () {},
   } as unknown as ExpressRequest;
 
   const { data: requestWrapper, error: requestWrapperErr } =
