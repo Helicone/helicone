@@ -141,7 +141,7 @@ impl EndpointConverterRegistryInner {
             registry.register_converter(
                 key,
                 TypedEndpointConverter {
-                    converter: GoogleConverter::new(model_mapper.clone()),
+                    converter: GoogleConverter::new(),
                     _phantom: std::marker::PhantomData::<(
                         endpoints::openai::ChatCompletions,
                         endpoints::openai::ChatCompletions,
@@ -159,7 +159,7 @@ impl EndpointConverterRegistryInner {
             registry.register_converter(
                 key,
                 TypedEndpointConverter {
-                    converter: GoogleConverter::new(model_mapper.clone()),
+                    converter: GoogleConverter::new(),
                     _phantom: std::marker::PhantomData::<(
                         endpoints::openai::ChatCompletions,
                         endpoints::openai::ChatCompletions,

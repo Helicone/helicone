@@ -3,16 +3,13 @@ use async_openai::types::{
 };
 
 use super::{TryConvert, TryConvertStreamData, error::MapperError};
-use crate::middleware::mapper::model::ModelMapper;
 
-pub struct GoogleConverter {
-    model_mapper: ModelMapper,
-}
+pub struct GoogleConverter;
 
 impl GoogleConverter {
     #[must_use]
-    pub fn new(model_mapper: ModelMapper) -> Self {
-        Self { model_mapper }
+    pub fn new() -> Self {
+        Self
     }
 }
 
