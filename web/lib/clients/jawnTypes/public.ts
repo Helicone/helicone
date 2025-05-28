@@ -718,6 +718,7 @@ export interface components {
       request_body?: components["schemas"]["Partial_VectorOperators_"];
       response_body?: components["schemas"]["Partial_VectorOperators_"];
       cache_enabled?: components["schemas"]["Partial_BooleanOperators_"];
+      cache_reference_id?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
     "Pick_FilterLeaf.user_metrics-or-request_response_rmt_": {
@@ -3119,22 +3120,8 @@ export interface operations {
     };
   };
   GetRequests: {
-    /** @description Request query filters */
     requestBody: {
       content: {
-        /**
-         * @example {
-         *   "filter": "all",
-         *   "isCached": false,
-         *   "limit": 10,
-         *   "offset": 0,
-         *   "sort": {
-         *     "created_at": "desc"
-         *   },
-         *   "isScored": false,
-         *   "isPartOfExperiment": false
-         * }
-         */
         "application/json": components["schemas"]["RequestQueryParams"];
       };
     };
@@ -3148,23 +3135,8 @@ export interface operations {
     };
   };
   GetRequestsClickhouse: {
-    /** @description Request query filters */
     requestBody: {
       content: {
-        /**
-         * @example {
-         *   "filter": "all",
-         *   "isCached": false,
-         *   "limit": 100,
-         *   "offset": 0,
-         *   "sort": {
-         *     "created_at": "desc"
-         *   },
-         *   "includeInputs": false,
-         *   "isScored": false,
-         *   "isPartOfExperiment": false
-         * }
-         */
         "application/json": components["schemas"]["RequestQueryParams"];
       };
     };

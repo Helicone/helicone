@@ -1,4 +1,4 @@
-import { getTopRequestsClickhouse } from "../../../lib/api/cache/stats";
+import { getTopCachedRequestsClickhouse } from "../../../lib/api/cache/stats";
 import {
   HandlerWrapperOptions,
   withAuth,
@@ -10,9 +10,9 @@ async function handler({
   res,
   userData: { orgId },
 }: HandlerWrapperOptions<
-  UnPromise<ReturnType<typeof getTopRequestsClickhouse>>
+  UnPromise<ReturnType<typeof getTopCachedRequestsClickhouse>>
 >) {
-  res.status(200).json(await getTopRequestsClickhouse(orgId, "all"));
+  res.status(200).json(await getTopCachedRequestsClickhouse(orgId, "all"));
 }
 
 export default withAuth(handler);

@@ -1,6 +1,6 @@
 import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 import { PromiseGenericResult, Result } from "../../packages/common/result";
-import { Provider } from "../../packages/llm-mapper/types";
+import { Provider } from "@helicone-package/llm-mapper/types";
 import {
   KafkaMessageContents,
   HeliconeScoresMessage,

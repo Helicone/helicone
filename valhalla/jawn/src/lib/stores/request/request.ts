@@ -3,7 +3,7 @@ import { Result, err, ok, resultMap } from "../../../packages/common/result";
 import {
   DEFAULT_UUID,
   HeliconeRequest,
-} from "../../../packages/llm-mapper/types";
+} from "@helicone-package/llm-mapper/types";
 import { dbExecute, dbQueryClickhouse } from "../../shared/db/dbExecute";
 import { S3Client } from "../../shared/db/s3Client";
 import { FilterNode } from "../../shared/filters/filterDefs";
@@ -503,35 +503,6 @@ export async function getRequestsDateRange(
       max: new Date(data[0].max),
     };
   });
-}
-
-export async function getRequestCountCached(
-  org_id: string,
-  filter: FilterNode
-): Promise<Result<number, string>> {
-  const builtFilter = await buildFilterWithAuth({
-    org_id,
-    argsAcc: [],
-    filter,
-  });
-
-  const query = `
-  SELECT count(request.id)::bigint as count
-  FROM cache_hits
-    left join request on cache_hits.request_id = request.id
-    left join response on request.id = response.request
-  WHERE (
-    (${builtFilter.filter})
-  )
-  `;
-  const { data, error } = await dbExecute<{ count: number }>(
-    query,
-    builtFilter.argsAcc
-  );
-  if (error !== null) {
-    return { data: null, error: error };
-  }
-  return { data: +data[0].count, error: null };
 }
 
 export async function getRequestCount(

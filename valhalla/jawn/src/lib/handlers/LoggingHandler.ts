@@ -1,5 +1,9 @@
-import { heliconeRequestToMappedContent } from "../../packages/llm-mapper/utils/getMappedContent";
-import { CacheMetricSMT, formatTimeString, RequestResponseRMT } from "../db/ClickhouseWrapper";
+import { heliconeRequestToMappedContent } from "@helicone-package/llm-mapper/utils/getMappedContent";
+import {
+  CacheMetricSMT,
+  formatTimeString,
+  RequestResponseRMT,
+} from "../db/ClickhouseWrapper";
 import { Database } from "../db/database.types";
 import { S3Client } from "../shared/db/s3Client";
 import {
@@ -17,8 +21,7 @@ import {
   PromptRecord,
   toHeliconeRequest,
 } from "./HandlerContext";
-import { DEFAULT_UUID } from "../../packages/llm-mapper/types";
-
+import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
 
 type S3Record = {
   requestId: string;
@@ -121,11 +124,12 @@ export class LoggingHandler extends AbstractLogHandler {
           );
       }
 
-      const loggingCacheHit = context.message.log.request.cacheReferenceId != DEFAULT_UUID;
+      const loggingCacheHit =
+        context.message.log.request.cacheReferenceId != DEFAULT_UUID;
       if (loggingCacheHit) {
         const sanitizedCacheMetricCHMapped = this.sanitizeJsonEscapeSequences(
           this.mapCacheMetricCH(context)
-        )
+        );
         this.batchPayload.cacheMetricCH.push(sanitizedCacheMetricCHMapped);
       }
 
@@ -463,9 +467,11 @@ export class LoggingHandler extends AbstractLogHandler {
     const response = context.message.log.response;
     const usage = context.usage;
     const orgParams = context.orgParams;
-    const { requestText, responseText } = this.requestResponseTextFromContext(context);
+    const { requestText, responseText } =
+      this.requestResponseTextFromContext(context);
 
-    const isCacheHit = context.message.log.request.cacheReferenceId != DEFAULT_UUID;
+    const isCacheHit =
+      context.message.log.request.cacheReferenceId != DEFAULT_UUID;
 
     const requestResponseLog: RequestResponseRMT = {
       user_id:
@@ -477,10 +483,16 @@ export class LoggingHandler extends AbstractLogHandler {
       latency: response.delayMs ?? 0,
       model: context.processedLog.model ?? "",
       prompt_tokens: isCacheHit ? 0 : usage.promptTokens ?? 0,
-      prompt_cache_write_tokens: isCacheHit ? 0 : usage.promptCacheWriteTokens ?? 0,
-      prompt_cache_read_tokens: isCacheHit ? 0 : usage.promptCacheReadTokens ?? 0,
+      prompt_cache_write_tokens: isCacheHit
+        ? 0
+        : usage.promptCacheWriteTokens ?? 0,
+      prompt_cache_read_tokens: isCacheHit
+        ? 0
+        : usage.promptCacheReadTokens ?? 0,
       prompt_audio_tokens: isCacheHit ? 0 : usage.promptAudioTokens ?? 0,
-      completion_audio_tokens: isCacheHit ? 0 : usage.completionAudioTokens ?? 0,
+      completion_audio_tokens: isCacheHit
+        ? 0
+        : usage.completionAudioTokens ?? 0,
       request_created_at: formatTimeString(
         request.requestCreatedAt.toISOString()
       ),
@@ -508,7 +520,8 @@ export class LoggingHandler extends AbstractLogHandler {
       ),
       request_body: requestText,
       response_body: responseText,
-      cache_reference_id: context.message.log.request.cacheReferenceId ?? undefined,
+      cache_reference_id:
+        context.message.log.request.cacheReferenceId ?? undefined,
       cache_enabled: context.message.log.request.cacheEnabled ?? false,
     };
 
@@ -516,17 +529,18 @@ export class LoggingHandler extends AbstractLogHandler {
   }
 
   mapCacheMetricCH(context: HandlerContext): CacheMetricSMT {
-    const { requestText, responseText } = this.requestResponseTextFromContext(context);
+    const { requestText, responseText } =
+      this.requestResponseTextFromContext(context);
 
     const request = context.message.log.request;
     const response = context.message.log.response;
     const usage = context.usage;
     const orgParams = context.orgParams;
-   
+
     const cacheMetricLog: CacheMetricSMT = {
       organization_id: orgParams?.id ?? "00000000-0000-0000-0000-000000000000",
       date: response.responseCreatedAt.toISOString().split("T")[0],
-      hour: response.responseCreatedAt.getHours(),
+      hour: response.responseCreatedAt.getUTCHours(),
       request_id: context.message.log.request.cacheReferenceId ?? DEFAULT_UUID,
       model: context.processedLog.model ?? "",
       provider: request.provider ?? "",
@@ -541,22 +555,31 @@ export class LoggingHandler extends AbstractLogHandler {
       last_hit: formatTimeString(response.responseCreatedAt.toISOString()),
       first_hit: formatTimeString(response.responseCreatedAt.toISOString()),
       request_body: requestText,
-      response_body: responseText
+      response_body: responseText,
     };
 
     return cacheMetricLog;
   }
 
-  requestResponseTextFromContext(context: HandlerContext): {requestText: string, responseText: string} {
+  requestResponseTextFromContext(context: HandlerContext): {
+    requestText: string;
+    responseText: string;
+  } {
     try {
-      const mappedContent = heliconeRequestToMappedContent(toHeliconeRequest(context))
+      const mappedContent = heliconeRequestToMappedContent(
+        toHeliconeRequest(context)
+      );
       return {
-        requestText: mappedContent.preview?.fullRequestText?.() ?? JSON.stringify(mappedContent.raw.request),
-        responseText: mappedContent.preview?.fullResponseText?.() ?? JSON.stringify(mappedContent.raw.request)
-      }
+        requestText:
+          mappedContent.preview?.fullRequestText?.() ??
+          JSON.stringify(mappedContent.raw.request),
+        responseText:
+          mappedContent.preview?.fullResponseText?.() ??
+          JSON.stringify(mappedContent.raw.request),
+      };
     } catch (error) {
       console.error("Error mapping request/response for preview:", error);
-      return { requestText: "", responseText: "" }; 
+      return { requestText: "", responseText: "" };
     }
   }
 

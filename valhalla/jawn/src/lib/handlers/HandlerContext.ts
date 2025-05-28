@@ -1,9 +1,9 @@
 import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
-import { HeliconeRequest, Provider } from "../../packages/llm-mapper/types";
+import { HeliconeRequest, Provider } from "@helicone-package/llm-mapper/types";
 import { SetOnce } from "../../utils/setOnce";
 import { AuthParams } from "../../packages/common/auth/types";
 import { OrgParams } from "../../packages/common/auth/types";
-import { DEFAULT_UUID } from "../../packages/llm-mapper/types";
+import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
 
 export class HandlerContext extends SetOnce {
   public message: KafkaMessageContents;
@@ -145,7 +145,8 @@ export type ExperimentCellValue = {
 };
 
 export const toHeliconeRequest = (context: HandlerContext): HeliconeRequest => {
-  const isCacheHit = context.message.log.request.cacheReferenceId != DEFAULT_UUID;
+  const isCacheHit =
+    context.message.log.request.cacheReferenceId != DEFAULT_UUID;
   return {
     request_body: context.processedLog.request.body,
     response_body: context.processedLog.response.body,
@@ -166,16 +167,23 @@ export const toHeliconeRequest = (context: HandlerContext): HeliconeRequest => {
     provider: context.message.log.request.provider,
     delay_ms: context.message.log.response.delayMs ?? null,
     time_to_first_token: context.message.log.response.timeToFirstToken ?? null,
-    
+
     // We don't track tokens on cache hits, since cost is 0
     total_tokens: isCacheHit ? 0 : context.usage.totalTokens ?? null,
     prompt_tokens: isCacheHit ? 0 : context.usage.promptTokens ?? null,
     completion_tokens: isCacheHit ? 0 : context.usage.completionTokens ?? null,
-    prompt_cache_write_tokens: isCacheHit ? 0 : context.usage.promptCacheWriteTokens ?? null,
-    prompt_cache_read_tokens: isCacheHit ? 0 : context.usage.promptCacheReadTokens ?? null,
-    prompt_audio_tokens: isCacheHit ? 0 : context.usage.promptAudioTokens ?? null,
-    completion_audio_tokens: isCacheHit ? 0 : context.usage.completionAudioTokens ?? null,
-    
+    prompt_cache_write_tokens: isCacheHit
+      ? 0
+      : context.usage.promptCacheWriteTokens ?? null,
+    prompt_cache_read_tokens: isCacheHit
+      ? 0
+      : context.usage.promptCacheReadTokens ?? null,
+    prompt_audio_tokens: isCacheHit
+      ? 0
+      : context.usage.promptAudioTokens ?? null,
+    completion_audio_tokens: isCacheHit
+      ? 0
+      : context.usage.completionAudioTokens ?? null,
 
     prompt_id: context.message.log.request.promptId ?? null,
     llmSchema: null,

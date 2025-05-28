@@ -282,6 +282,17 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
     ],
     table: "request_response_rmt",
   },
+  {
+    id: "cache_enabled",
+    label: "Cache Enabled",
+    type: "boolean",
+    operators: ["is"],
+    valueOptions: [
+      { label: "Yes", value: true },
+      { label: "No", value: false },
+    ],
+    table: "request_response_rmt",
+  },
 
   // Datetime fields
   {

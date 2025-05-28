@@ -385,6 +385,10 @@ export class DBLoggable {
     };
   }
 
+  async getStatus() {
+    return await this.response.status();
+  }
+
   async getResponse() {
     const { body: responseBody, endTime: responseEndTime } =
       await this.response.getResponseBody();
@@ -726,7 +730,7 @@ export class DBLoggable {
           bodySize: rawResponseBody.length,
           timeToFirstToken,
           responseCreatedAt: endTime,
-          delayMs: cacheReferenceId == DEFAULT_UUID ? endTime.getTime() - this.timing.startTime.getTime() : 0,
+          delayMs: endTime.getTime() - this.timing.startTime.getTime(),
           cachedLatency: cacheReferenceId == DEFAULT_UUID ? 0 : (() => {
             try {
               return Number(cachedHeaders?.get("Helicone-Cache-Latency") ?? 0);

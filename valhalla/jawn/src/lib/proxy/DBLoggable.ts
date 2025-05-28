@@ -1,5 +1,5 @@
 import { HeliconeHeaders } from "../../../../../shared/proxy/heliconeHeaders";
-import { Provider } from "../../packages/llm-mapper/types";
+import { Provider } from "@helicone-package/llm-mapper/types";
 import { PromptSettings } from "../requestWrapper/requestWrapper";
 import { err, ok } from "../../packages/common/result";
 import { HeliconeProxyRequest } from "./HeliconeProxyRequest";
