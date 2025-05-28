@@ -41,7 +41,7 @@ impl std::fmt::Display for ModelProvider {
             ModelProvider::Anthropic => write!(f, "anthropic"),
             ModelProvider::Amazon => write!(f, "amazon"),
             ModelProvider::Deepseek => write!(f, "deepseek"),
-            ModelProvider::Google => write!(f, "google"),
+            ModelProvider::Google => write!(f, "google")
         }
     }
 }
@@ -66,6 +66,7 @@ pub enum InferenceProvider {
     Anthropic,
     Bedrock,
     VertexAi,
+    Google,
     // Ollama
 }
 
@@ -83,6 +84,11 @@ impl InferenceProvider {
                     .map(ApiEndpoint::Anthropic)
                     .collect()
             }
+            InferenceProvider::Google => {
+                crate::endpoints::google::Google::iter()
+                    .map(ApiEndpoint::Google)
+                    .collect()
+            },
             InferenceProvider::Bedrock | InferenceProvider::VertexAi => vec![],
         }
     }
@@ -94,6 +100,7 @@ impl std::fmt::Display for InferenceProvider {
             InferenceProvider::OpenAI => write!(f, "openai"),
             InferenceProvider::Anthropic => write!(f, "anthropic"),
             InferenceProvider::Bedrock => write!(f, "bedrock"),
+            InferenceProvider::Google => write!(f, "google"),
             InferenceProvider::VertexAi => write!(f, "vertexai"),
         }
     }

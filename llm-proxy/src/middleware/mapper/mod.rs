@@ -28,6 +28,7 @@ pub mod model;
 pub mod openai;
 pub mod registry;
 pub mod service;
+mod google;
 
 use bytes::Bytes;
 use error::MapperError;

@@ -1364,6 +1364,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "gemini-rust"
+version = "0.4.3"
+source = "git+https://github.com/hcharlie1201/gemini-rust.git#2ea8f991a0724d8ec98135a1b8715375b493c305"
+dependencies = [
+ "async-trait",
+ "futures",
+ "futures-util",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.12",
+ "tokio",
+ "url",
+]
+
+[[package]]
 name = "generic-array"
 version = "0.14.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2243,6 +2259,7 @@ dependencies = [
  "dotenvy",
  "eventsource-stream",
  "futures",
+ "gemini-rust",
  "governor",
  "heck 0.5.0",
  "http 1.3.1",

@@ -23,6 +23,7 @@ displaydoc = { workspace = true }
 eventsource-stream = { workspace = true }
 futures = { workspace = true }
 governor = { workspace = true }
+gemini-rust = { git = "https://github.com/hcharlie1201/gemini-rust.git" }
 heck = { workspace = true }
 http = { workspace = true }
 http-body = { workspace = true }

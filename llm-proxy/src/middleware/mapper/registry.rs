@@ -1,5 +1,5 @@
 use std::sync::Arc;
-
+use indexmap::IndexSet;
 use rustc_hash::FxHashMap as HashMap;
 
 use super::{
@@ -11,6 +11,7 @@ use crate::{
     endpoints::{self, ApiEndpoint, anthropic::Anthropic, openai::OpenAI},
     types::provider::InferenceProvider,
 };
+use crate::endpoints::google::Google;
 
 #[derive(Debug, Clone)]
 pub struct EndpointConverterRegistry(Arc<EndpointConverterRegistryInner>);
@@ -127,6 +128,25 @@ impl EndpointConverterRegistryInner {
                     )>,
                 },
             );
+        } else if request_style == InferenceProvider::OpenAI 
+            && providers.contains(&InferenceProvider::Google) {
+            let key = RegistryKey::new(
+                ApiEndpoint::OpenAI(OpenAI::chat_completions()),
+                ApiEndpoint::Google(Google::generate_contents()),
+                false,
+            );
+
+            registry.register_converter(
+                key,
+                TypedEndpointConverter {
+                    converter: AnthropicConverter::new(model_mapper.clone()),
+                    _phantom: std::marker::PhantomData::<(
+                        endpoints::openai::ChatCompletions,
+                        endpoints::anthropic::Messages,
+                    )>,
+                },
+            );
+            
         }
 
         if request_style == InferenceProvider::OpenAI
