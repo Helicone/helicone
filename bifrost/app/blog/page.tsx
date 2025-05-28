@@ -44,7 +44,7 @@ export const HEADSHOTS = {
   "Scott Nguyen": "/static/blog/scottnguyen-headshot.webp",
   "Kavin Desi": "/static/blog/kavin-headshot.webp",
   "Yusuf Ishola": "/static/blog/yusuf-headshot.webp",
-  "Juliette Chevalier": "/static/blog/juliette-headshot.webp"
+  "Juliette Chevalier": "/static/blog/juliette-headshot.webp",
 };
 
 function metaDataToBlogStructure(
@@ -58,15 +58,15 @@ function metaDataToBlogStructure(
     authors:
       metadata.authors && metadata.authors.length > 0
         ? metadata.authors.map((author) => ({
-          name: author,
-          imageUrl: HEADSHOTS[author as keyof typeof HEADSHOTS],
-        }))
+            name: author,
+            imageUrl: HEADSHOTS[author as keyof typeof HEADSHOTS],
+          }))
         : [
-          {
-            name: metadata.author || "",
-            imageUrl: HEADSHOTS[metadata.author as keyof typeof HEADSHOTS],
-          },
-        ],
+            {
+              name: metadata.author || "",
+              imageUrl: HEADSHOTS[metadata.author as keyof typeof HEADSHOTS],
+            },
+          ],
     title: metadata.title,
     description: metadata.description,
     badgeText: metadata.badge || "insight",
@@ -213,12 +213,27 @@ type ManualBlogStructure = {
 export type BlogStructure =
   | ManualBlogStructure
   | {
-    dynmaicEntry: {
-      folderName: string;
+      dynmaicEntry: {
+        folderName: string;
+      };
     };
-  };
 
 export const BLOG_CONTENT: BlogStructure[] = [
+  {
+    dynmaicEntry: {
+      folderName: "claude-opus-and-sonnet-4-full-developer-guide",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "building-production-grade-ai-applications",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "the-complete-llm-model-comparison-guide",
+    },
+  },
   {
     dynmaicEntry: {
       folderName: "self-hosting-launch",

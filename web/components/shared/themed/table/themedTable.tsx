@@ -21,7 +21,7 @@ import { ChevronDown, ChevronRight, ChevronsUpDown } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useMemo } from "react";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
-import { Result } from "../../../../packages/common/result";
+import { Result } from "@/packages/common/result";
 import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
 import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";
 import { SortDirection } from "../../../../services/lib/sorts/requests/sorts";
@@ -35,11 +35,19 @@ type CheckboxMode = "always_visible" | "on_hover" | "never";
 function ConditionalLink<T>({
   children,
   href,
+  className,
 }: {
   children: React.ReactNode;
   href?: string | undefined;
+  className?: string;
 }) {
-  return href ? <Link href={href}>{children}</Link> : children;
+  return href ? (
+    <Link href={href} className={className}>
+      {children}
+    </Link>
+  ) : (
+    children
+  );
 }
 
 interface ThemedTableProps<T extends { id?: string; subRows?: T[] }> {
@@ -83,7 +91,6 @@ interface ThemedTableProps<T extends { id?: string; subRows?: T[] }> {
     onSaveFilterCallback?: () => void;
     layoutPage: "dashboard" | "requests";
   };
-  highlightedIds?: string[];
   /**
    * Controls the visibility of checkboxes in the table
    * - "always_visible": Checkboxes are always shown
@@ -113,6 +120,7 @@ interface ThemedTableProps<T extends { id?: string; subRows?: T[] }> {
    * Receives the table instance.
    */
   onToggleAllRows?: (table: ReactTable<T>) => void;
+  currentRow?: T;
 }
 
 export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
@@ -127,7 +135,6 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
     sortable,
     onRowSelect,
     noDataCTA,
-    highlightedIds: checkedIds,
     checkboxMode = "never",
     children,
     onSelectAll,
@@ -136,10 +143,10 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
     rowLink,
     tableRef,
     onToggleAllRows,
+    currentRow,
   } = props;
 
   const [expanded, setExpanded] = React.useState<ExpandedState>({});
-
   const table = useReactTable({
     data: defaultData,
     columns: defaultColumns,
@@ -240,7 +247,7 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                   className="sticky top-0 bg-slate-50 dark:bg-slate-950 z-[2] h-11"
                 >
                   {checkboxMode !== "never" && (
-                    <th>
+                    <th className="relative">
                       <div className="flex justify-center items-center h-full ml-2">
                         <Checkbox
                           variant="helicone"
@@ -259,6 +266,7 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                           className="data-[state=checked]:bg-primary data-[state=indeterminate]:bg-primary"
                         />
                       </div>
+                      <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-300 dark:bg-slate-700" />
                     </th>
                   )}
                   {headerGroup.headers.map((header, index) => (
@@ -305,8 +313,8 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                   className={clsx(
                     "group relative",
                     rowLink && "relative",
-                    checkedIds?.includes(row.original?.id ?? "") ||
-                      selectedIds?.includes(row.original?.id ?? "")
+                    selectedIds?.includes(row.id ?? "") ||
+                      (currentRow && currentRow.id === row.original.id)
                       ? "!bg-sky-100 dark:!bg-slate-800/50"
                       : clsx(
                           "hover:bg-sky-50 dark:hover:bg-slate-700/50",
@@ -333,16 +341,11 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                 >
                   <td
                     className={clsx(
-                      "h-full sticky left-0 z-10",
-                      row.getCanExpand()
-                        ? "bg-inherit"
-                        : row.depth > 0
-                        ? "bg-slate-50 dark:bg-slate-950/50"
-                        : "bg-white dark:bg-black",
+                      "h-[1px] sticky left-0 bottom-[-2px] z-[1]",
                       checkboxMode === "on_hover"
                         ? clsx(
-                            "opacity-0 group-hover:opacity-100 transition-opacity duration-150",
-                            selectedIds?.includes(row.original?.id ?? "") &&
+                            "opacity-0 group-hover:opacity-100 !border-0 !outline-none pt-[1px] px-0 pb-0 m-0",
+                            selectedIds?.includes(row.id ?? "") &&
                               "!opacity-100"
                           )
                         : "",
@@ -350,10 +353,22 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                     )}
                     style={{ verticalAlign: "middle" }}
                   >
-                    <div className="flex justify-center items-center h-full">
+                    <div
+                      className={clsx(
+                        "flex justify-center items-center w-full h-full",
+                        selectedIds?.includes(row.id ?? "") ||
+                          (currentRow && currentRow.id === row.original.id)
+                          ? "bg-inherit"
+                          : row.getCanExpand()
+                          ? "bg-inherit"
+                          : row.depth > 0
+                          ? "bg-slate-50 dark:bg-slate-950/50"
+                          : "bg-white dark:bg-black"
+                      )}
+                    >
                       <Checkbox
                         variant="helicone"
-                        checked={selectedIds?.includes(row.original?.id ?? "")}
+                        checked={selectedIds?.includes(row.id ?? "")}
                       />
                     </div>
                   </td>
@@ -361,12 +376,17 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                     <td
                       key={cell.id}
                       className={clsx(
-                        "py-3 text-slate-700 dark:text-slate-300 truncate select-none",
-                        i === 0 && "pr-2",
-                        i > 0 && "px-2",
+                        " text-slate-700 dark:text-slate-300 truncate select-none",
+                        !rowLink?.(row.original) &&
+                          clsx(
+                            "py-3",
+                            i === 0 && "pr-2",
+                            i > 0 && "px-2",
+                            onRowSelect && "cursor-pointer"
+                          ),
                         i === 0 && "relative",
-                        checkedIds?.includes(row.original?.id ?? "") ||
-                          selectedIds?.includes(row.original?.id ?? "")
+                        selectedIds?.includes(row.id ?? "") ||
+                          (currentRow && currentRow.id === row.original.id)
                           ? "bg-inherit"
                           : row.getCanExpand()
                           ? "bg-inherit"
@@ -380,7 +400,15 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                         maxWidth: cell.column.getSize(),
                       }}
                     >
-                      <ConditionalLink href={rowLink?.(row.original)}>
+                      <ConditionalLink
+                        href={rowLink?.(row.original)}
+                        className={clsx(
+                          "block w-full h-full",
+                          "py-3",
+                          i === 0 && "pr-2",
+                          i > 0 && "px-2"
+                        )}
+                      >
                         <div
                           className={clsx("flex items-center gap-1")}
                           style={

@@ -1,7 +1,7 @@
-import { Message } from "@/packages/llm-mapper/types";
+import { Message } from "@helicone-package/llm-mapper/types";
 import React, { useMemo } from "react";
 import { JsonRenderer } from "./JsonRenderer";
-import { isJSON } from "@/packages/llm-mapper/utils/contentHelpers";
+import { isJSON } from "@helicone-package/llm-mapper/utils/contentHelpers";
 
 export const OpenAIImage: React.FC<{
   imageUrl: string;

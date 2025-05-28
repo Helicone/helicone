@@ -1,4 +1,4 @@
-import { ModelDetails } from "@/packages/cost/interfaces/Cost";
+import { ModelDetails } from "@helicone-package/cost/interfaces/Cost";
 import { CheckIcon } from "@heroicons/react/24/outline";
 
 interface ModelInfoCardProps {

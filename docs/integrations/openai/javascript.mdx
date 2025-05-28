@@ -1,5 +1,5 @@
 ---
-title: "OpenAI JavaScript SDK Integration"
+title: "OpenAI JavaScript SDK"
 sidebarTitle: "JavaScript"
 description: "Use OpenAI's JavaScript SDK to integrate with Helicone to log your OpenAI usage."
 "twitter:title": "OpenAI JavaScript SDK Integration - Helicone OSS LLM Observability"
@@ -7,109 +7,82 @@ icon: "js"
 iconType: "solid"
 ---
 
-## Proxy Integration (recommended)
+import GenerateKey from "/snippets/generate-key.mdx";
+import { strings } from "/snippets/strings.mdx";
+
+## {strings.howToIntegrate}
+
+<video width="100%" controls autoplay loop>
+  <source
+    src="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/Helicone+Tutorial+Video.mp4"
+    type="video/mp4"
+  />
+  Your browser does not support the video tag.
+</video>
 
 <Steps>
-  <Step title="Create an account + Generate an API Key">
-    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
-    can generate an [API key](https://helicone.ai/developer).
+  <Step title={strings.generateKey}>
+    <div dangerouslySetInnerHTML={{ __html: strings.generateKeyInstructions }} />
   </Step>
-  <Step title="Set HELICONE_API_KEY as an environment variable">
-```javascript
-HELICONE_API_KEY=<your API key>
-```
+
+  <Step title={strings.setApiKey}>
+    ```javascript
+    HELICONE_API_KEY=<your-helicone-api-key>
+    OPENAI_API_KEY=<your-openai-api-key>
+    ```
   </Step>
-  <Step title="Modify the base path and add a Helicone-Auth header">
-<CodeGroup>
 
-```javascript OpenAI V4+
-import OpenAI from "openai";
+  <Step title={strings.modifyBasePath}>
+    <CodeGroup>
+      ```javascript OpenAI v4+
+      import OpenAI from "openai";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  baseURL: "https://oai.helicone.ai/v1",
-  defaultHeaders: {
-    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-  },
-});
-```
+      const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+        baseURL: "https://oai.helicone.ai/v1",
+        defaultHeaders: {
+          "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`
+        }
+      });
+      ```
 
-```javascript OpenAI
-import { Configuration, OpenAIApi } from "openai";
+      ```javascript OpenAI v1
+      import { Configuration, OpenAIApi } from "openai";
 
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-  basePath: "https://oai.helicone.ai/v1",
-  baseOptions: {
-    headers: {
-      "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-    },
-  },
-});
+      const configuration = new Configuration({
+        apiKey: process.env.OPENAI_API_KEY,
+        basePath: "https://oai.helicone.ai/v1",
+        baseOptions: {
+          headers: {
+            "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`
+          }
+        }
+      });
 
-const openai = new OpenAIApi(configuration);
-```
+      const openai = new OpenAIApi(configuration);
+      ```
+    </CodeGroup>
+  </Step>
 
-</CodeGroup>
+  <Step title={strings.useTheSDK("OpenAI")}>
+    ```javascript
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: "What is the meaning of life?" }]
+    });
 
+    console.log(response);
+    ```
+  </Step>
+
+  <Step title={strings.verifyInHelicone}>
+    <div dangerouslySetInnerHTML={{ __html: strings.verifyInHeliconeDesciption("OpenAI") }} />
   </Step>
 </Steps>
 
-## Package Integration
+## {strings.relatedGuides}
 
-<Warning>
-  `@helicone/helicone` has been deprecated and will no longer be maintained. We
-  recommend you setup OpenAI integration with Proxy as mentioned above.
-</Warning>
-
- <Steps>
-      <Step title="To get started, install the `helicone-openai` package">
-      ```bash
-      npm install @helicone/helicone
-      ```
-      </Step>
-      <Step title="Set `HELICONE_API_KEY` as an environment variable">
-       ```bash
-      export HELICONE_API_KEY=sk-<your-api-key>
-      ```
-      <Info>You can also set the Helicone API Key in your code (See below)</Info>
-      </Step>
-      <Step title="Replace">
-      ```typescript
-      const { ClientOptions, OpenAI } = require("openai");
-      ```
-
-      with
-
-      ```typescript
-      const { HeliconeAsyncOpenAI as OpenAI,
-        IHeliconeAsyncClientOptions as ClientOptions } = require("helicone");
-      ```
-      </Step>
-      <Step title="Make a request">
-      Chat, Completion, Embedding, etc usage is equivalent to OpenAI package.
-      ```typescript
-      const openai = new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY,
-        heliconeMeta: {
-          apiKey: process.env.HELICONE_API_KEY, // Can be set as env variable
-          // ... additional helicone meta fields
-        },
-      });
-
-      const chatCompletion = await openai.chat.completion.create({
-        model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: "Hello world" }],
-      });
-
-      console.log(chatCompletion.data.choices[0].message);
-      ```
-      </Step>
-    </Steps>
-
-### Related Guides
-
-<CardGroup cols={1}>
+<CardGroup cols={2}>
   <Card
     title="Building a chatbot with OpenAI structured outputs"
     icon="lightbulb"
@@ -117,7 +90,15 @@ const openai = new OpenAIApi(configuration);
     iconType="light"
     vertical
   >
-    This step-by-step guide covers function calling, response formatting and
-    monitoring with Helicone.
+    {strings.chatbotCookbookDescription}
+  </Card>
+  <Card
+    title="How to Prompt Thinking Models Effectively"
+    icon="arrows-rotate"
+    href="/guides/cookbooks/prompt-thinking-models"
+    iconType="light"
+    vertical
+  >
+    {strings.howToPromptThinkingModelsCookbookDescription}
   </Card>
 </CardGroup>

@@ -1,0 +1,23 @@
+name: Jawn Build Precheck
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  jawn-build-precheck:
+    name: Jawn Client
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build US image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./
+          file: ./valhalla/dockerfile
+          platforms: linux/amd64
+          push: false

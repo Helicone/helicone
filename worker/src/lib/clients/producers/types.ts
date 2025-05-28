@@ -44,6 +44,11 @@ export type Log = {
     heliconeTemplate?: TemplateWithInputs;
     experimentColumnId?: string;
     experimentRowIndex?: string;
+    cacheEnabled?: boolean;
+    cacheSeed?: number;
+    cacheBucketMaxSize?: number;
+    cacheControl?: string;
+    cacheReferenceId?: string;
   };
   response: {
     id: string;
@@ -52,5 +57,6 @@ export type Log = {
     timeToFirstToken?: number;
     responseCreatedAt: Date;
     delayMs: number;
+    cachedLatency?: number;
   };
 };

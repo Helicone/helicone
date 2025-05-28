@@ -21,11 +21,13 @@ import LoadingAnimation from "../../shared/loadingAnimation";
 import { formatLargeNumber } from "../../shared/utils/numberFormat";
 
 import { TimeFilter } from "@/types/timeFilter";
-import { Responsive, WidthProvider } from "react-grid-layout";
+import { Responsive, ResponsiveProps, WidthProvider } from "react-grid-layout";
 import { INITIAL_LAYOUT, MD_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
 type SessionResult = ReturnType<typeof useSessionNames>["sessions"][number];
 
-const ResponsiveGridLayout = WidthProvider(Responsive);
+const ResponsiveGridLayout = WidthProvider(Responsive) as React.ComponentType<
+  ResponsiveProps & { children?: React.ReactNode }
+>;
 
 interface SessionMetricsProps {
   selectedSession: SessionResult | null;

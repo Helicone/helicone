@@ -10,7 +10,7 @@ import "prismjs/components/prism-json";
 import { Course } from "./types";
 import Link from "next/link";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/solid";
-import { useRouter } from "next/router";
+import { SESSION_NAME } from "./courseGenerator";
 
 interface TextbookCourseProps {
   course: Partial<Course>;
@@ -32,12 +32,11 @@ const TextbookCourse: React.FC<TextbookCourseProps> = ({
   const [quizAnswers, setQuizAnswers] = useState<QuizAnswers>({});
   const [quizSubmitted, setQuizSubmitted] = useState<QuizSubmitted>({});
   const [isOverviewExpanded, setIsOverviewExpanded] = useState<boolean>(false);
-  const router = useRouter();
 
   useEffect(() => {
     const renderer = new marked.Renderer();
 
-    renderer.code = ({ text, lang, escaped }) => {
+    renderer.code = ({ text, lang }) => {
       const language = lang && languages[lang] ? lang : "markdown";
       const highlightedCode = highlight(
         text,
@@ -99,8 +98,8 @@ const TextbookCourse: React.FC<TextbookCourseProps> = ({
           {sessionId && (
             <Link
               href={`https://us.helicone.ai/sessions/${encodeURIComponent(
-                sessionId
-              )}`}
+                SESSION_NAME
+              )}/${encodeURIComponent(sessionId)}`}
               className="text-xs px-2 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700"
             >
               View Session

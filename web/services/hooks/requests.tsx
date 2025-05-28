@@ -3,11 +3,12 @@ import { useMemo } from "react";
 import { useOrg } from "../../components/layout/org/organizationContext";
 import { HeliconeRequest } from "../../lib/api/request/request";
 import { $JAWN_API, getJawnClient } from "../../lib/clients/jawn";
-import { Result } from "../../packages/common/result";
+import { Result } from "@/packages/common/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { placeAssetIdValues } from "../lib/requestTraverseHelper";
 import { SortLeafRequest } from "../lib/sorts/requests/sorts";
 import { MAX_EXPORT_ROWS } from "@/lib/constants";
+import { TSessions } from "@/components/templates/sessions/sessionsPage";
 
 function formatDateForClickHouse(date: Date): string {
   return date.toISOString().slice(0, 19).replace("T", " ");
@@ -27,11 +28,15 @@ function processFilter(filter: any): any {
 
   const result: any = Array.isArray(filter) ? [] : {};
   for (const key in filter) {
-    const isDate = isISODateString(filter[key]);
-    if (typeof filter[key] === "object") {
+    const isDateISO = isISODateString(filter[key]);
+    const isDate = filter[key] instanceof Date && !isNaN(filter[key].getTime());
+
+    if (typeof filter[key] === "object" && !isDate) {
       result[key] = processFilter(filter[key]);
-    } else if (isDate) {
-      result[key] = formatDateForClickHouse(new Date(filter[key]));
+    } else if (isDate || isDateISO) {
+      const dateToFormat = isDateISO ? new Date(filter[key]) : filter[key];
+      const formattedDate = formatDateForClickHouse(dateToFormat);
+      result[key] = formattedDate;
     } else {
       result[key] = filter[key];
     }
@@ -289,13 +294,16 @@ const useGetRequestCountClickhouse = (
   };
 };
 
-const getRequestsByIdsWithBodies = async (sessionIds: string[]) => {
-  const filter = sessionIds.reduce((acc: any, sessionId, index) => {
+const getRequestBodiesBySession = async (sessions: TSessions[]) => {
+  const filter = sessions.reduce((acc: any, session, index) => {
     const currentCondition = {
       request_response_rmt: {
         properties: {
           "Helicone-Session-Id": {
-            equals: sessionId,
+            equals: session.metadata.session_id,
+          },
+          "Helicone-Session-Name": {
+            equals: session.metadata.session_name,
           },
         },
       },
@@ -324,8 +332,8 @@ const getRequestsByIdsWithBodies = async (sessionIds: string[]) => {
     });
 
     const requests = response.data?.data ?? [];
-    
-    const requestsWithBodies = await Promise.all(
+
+    return await Promise.all(
       requests.map(async (request) => {
         if (requestBodyCache.has(request.request_id)) {
           const bodyContent = requestBodyCache.get(request.request_id);
@@ -370,12 +378,14 @@ const getRequestsByIdsWithBodies = async (sessionIds: string[]) => {
         }
       })
     );
-
-    return requestsWithBodies;
   } catch (error) {
     console.error("Error fetching requests by session IDs with bodies:", error);
     throw error;
   }
 };
 
-export { useGetRequestCountClickhouse, useGetRequests, getRequestsByIdsWithBodies };
+export {
+  useGetRequestCountClickhouse,
+  useGetRequests,
+  getRequestBodiesBySession as getRequestsByIdsWithBodies,
+};

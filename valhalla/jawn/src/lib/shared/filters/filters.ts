@@ -238,6 +238,8 @@ const whereKeyMappings: KeyMappings = {
       request_body: "request_response_rmt.request_body",
       response_body: "request_response_rmt.response_body",
       scores_column: "request_response_rmt.scores",
+      cache_enabled: "request_response_rmt.cache_enabled",
+      cache_reference_id: "request_response_rmt.cache_reference_id",
     })(filter, placeValueSafely);
   },
   users_view: easyKeyMappings<"request_response_log">({

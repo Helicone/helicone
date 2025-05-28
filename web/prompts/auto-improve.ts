@@ -1,4 +1,4 @@
-import { Message } from "@/packages/llm-mapper/types";
+import { Message } from "@helicone-package/llm-mapper/types";
 
 export default function autoImprovePrompt(messages: Message[]) {
   const formattedMessages = messages

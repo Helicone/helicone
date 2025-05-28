@@ -3,7 +3,7 @@ import {
   FineTuningJobEventsPage,
 } from "openai/resources/fine-tuning/jobs";
 import { OpenAIClient } from "../lib/clients/OpenAIClient";
-import { HeliconeRequest } from "../packages/llm-mapper/types";
+import { HeliconeRequest } from "@helicone-package/llm-mapper/types";
 import { Result, err, ok } from "../packages/common/result";
 import crypto from "crypto";
 import fs from "fs";
@@ -94,12 +94,14 @@ export class FineTuningManager {
     for await (const row of formattedRows) {
       if (!writeStream.write(row)) {
         // Wait for the stream to drain if it returns false
-        await new Promise((resolve) => writeStream.once("drain", resolve));
+        await new Promise((resolve) =>
+          writeStream.once("drain", resolve as () => void)
+        );
       }
     }
 
     await new Promise((resolve, reject) => {
-      writeStream.on("finish", resolve);
+      writeStream.on("finish", resolve as () => void);
       writeStream.on("error", reject);
       writeStream.end();
     });

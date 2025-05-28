@@ -1,0 +1,4 @@
+{
+  "title": "Added support for OpenAI's new Responses API",
+  "description": "Helicone now supports OpenAI's new Responses API — so you can monitor those calls just like any other."
+}

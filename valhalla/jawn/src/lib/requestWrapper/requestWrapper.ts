@@ -434,11 +434,6 @@ export interface ProxyKeyRow {
   organizationId: string;
 }
 
-export interface ProxyKeyRow {
-  providerKey: string;
-  proxyKeyId: string;
-  organizationId: string;
-}
 export async function getProviderKeyFromProxyCache(
   authKey: string
 ): Promise<Result<ProxyKeyRow, string>> {

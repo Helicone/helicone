@@ -1,5 +1,5 @@
 import useNotification from "@/components/shared/notification/useNotification";
-import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+import { MappedLLMRequest } from "@helicone-package/llm-mapper/types";
 import {
   ChevronDownIcon,
   ChevronUpIcon,

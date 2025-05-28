@@ -6,7 +6,7 @@ import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { Result, resultMap } from "../../../packages/common/result";
+import { Result, resultMap } from "@/packages/common/result";
 import {
   getDecryptedProviderKeyById,
   HeliconeProxyKeys,

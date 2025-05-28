@@ -230,7 +230,7 @@ const DesktopSidebar = ({
         <div className="w-full flex flex-col h-full border-r border-slate-200 dark:border-slate-800">
           {/* Collapse button and OrgDropdown */}
           <div
-            className={`flex flex-row items-center border-b border-slate-200 dark:border-slate-800 p-2.5 
+            className={`flex flex-row items-center p-2.5 
               ${isCollapsed ? "justify-center" : "justify-between"}`}
           >
             {/* - OrgDropdown */}

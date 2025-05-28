@@ -1,10 +1,12 @@
 import { TestInput } from "../../controllers/public/evaluatorController";
-import { HeliconeRequest } from "../../packages/llm-mapper/types";
+import { HeliconeRequest } from "@helicone-package/llm-mapper/types";
 
 export const convertTestInputToHeliconeRequest = (
   testInput: TestInput
 ): HeliconeRequest => {
   return {
+    cache_enabled: false,
+    cache_reference_id: null,
     asset_ids: [],
     asset_urls: {},
     helicone_user: null,

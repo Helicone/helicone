@@ -1,7 +1,7 @@
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import { timeFilterToFilterNode } from "@/services/lib/filters/helpers/filterFunctions";
 import { buildFilterWithAuthClickHouseRateLimits } from "../../../services/lib/filters/filters";
-import { Result, resultMap } from "../../../packages/common/result";
+import { Result, resultMap } from "@/packages/common/result";
 import { dbQueryClickhouse } from "../db/dbExecute";
 
 export interface TotalRateLimits {

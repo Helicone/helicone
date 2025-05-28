@@ -7,7 +7,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { getJawnClient } from "@/lib/clients/jawn";
-import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+import { MappedLLMRequest } from "@helicone-package/llm-mapper/types";
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import {
   PiCaretDownBold,

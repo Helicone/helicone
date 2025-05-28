@@ -195,6 +195,8 @@ interface RequestResponseRMTToOperators {
   scores_column: SingleKey<TextOperators>;
   request_body: SingleKey<VectorOperators>;
   response_body: SingleKey<VectorOperators>;
+  cache_enabled: SingleKey<BooleanOperators>;
+  cache_reference_id: SingleKey<TextOperators>;
 }
 
 interface SessionsRequestResponseRMTToOperators {

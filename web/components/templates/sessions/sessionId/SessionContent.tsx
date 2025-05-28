@@ -30,7 +30,8 @@ import { TagType } from "@/packages/common/sessions/tags";
 import Link from "next/link";
 import { SessionTag } from "../../feedback/sessionTag";
 
-export const EMPTY_SESSION_NAME = "Unnamed";
+export const EMPTY_SESSION_NAME = "__unnamed_helicone_session__";
+
 interface SessionContentProps {
   session: Session;
   session_id: string;
