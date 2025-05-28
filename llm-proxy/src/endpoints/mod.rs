@@ -43,7 +43,7 @@ impl ApiEndpoint {
                 Some(Self::Anthropic(Anthropic::try_from(path).ok()?))
             }
             InferenceProvider::GoogleGemini => {
-                Ok(Self::Google(Google::try_from(path)?))
+                Some(Self::Google(Google::try_from(path).ok()?))
             }
             unsupported => {
                 tracing::debug!(provider = %unsupported, "Provider not supported for request mapping");

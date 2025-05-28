@@ -148,22 +148,6 @@ impl EndpointConverterRegistryInner {
                     )>,
                 },
             );
-
-            let key = RegistryKey::new(
-                ApiEndpoint::OpenAI(OpenAI::chat_completions()),
-                ApiEndpoint::Google(Google::generate_contents()),
-            );
-
-            registry.register_converter(
-                key,
-                TypedEndpointConverter {
-                    converter: GoogleConverter::new(model_mapper.clone()),
-                    _phantom: std::marker::PhantomData::<(
-                        endpoints::openai::ChatCompletions,
-                        endpoints::openai::ChatCompletions,
-                    )>,
-                },
-            );
         }
         if request_style == InferenceProvider::OpenAI
             && providers.contains(&InferenceProvider::OpenAI)
@@ -192,21 +176,6 @@ impl EndpointConverterRegistryInner {
                 NoOpConverter {
                     _phantom: std::marker::PhantomData::<
                         endpoints::anthropic::Messages,
-                    >,
-                },
-            );
-        } else if request_style == InferenceProvider::GoogleGemini
-            && providers.contains(&InferenceProvider::GoogleGemini)
-        {
-            let key = RegistryKey::new(
-                ApiEndpoint::Google(Google::generate_contents()),
-                ApiEndpoint::Google(Google::generate_contents()),
-            );
-            registry.register_converter(
-                key,
-                NoOpConverter {
-                    _phantom: std::marker::PhantomData::<
-                        endpoints::google::GenerateContents,
                     >,
                 },
             );

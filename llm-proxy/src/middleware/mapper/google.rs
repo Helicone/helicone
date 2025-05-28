@@ -1,8 +1,9 @@
-use super::{TryConvert, error::MapperError};
-use crate::middleware::mapper::model::ModelMapper;
+use async_openai::types::{
+    CreateChatCompletionResponse, CreateChatCompletionStreamResponse,
+};
 
-const DEFAULT_MAX_TOKENS: u32 = 1000;
-const OPENAI_CHAT_COMPLETION_OBJECT: &str = "chat.completion";
+use super::{TryConvert, TryConvertStreamData, error::MapperError};
+use crate::middleware::mapper::model::ModelMapper;
 
 pub struct GoogleConverter {
     model_mapper: ModelMapper,
@@ -22,7 +23,6 @@ impl
     > for GoogleConverter
 {
     type Error = MapperError;
-    #[allow(clippy::too_many_lines)]
     fn try_convert(
         &self,
         value: async_openai::types::CreateChatCompletionRequest,
@@ -40,13 +40,27 @@ impl
     > for GoogleConverter
 {
     type Error = MapperError;
-    #[allow(clippy::too_many_lines)]
     fn try_convert(
         &self,
-        value: async_openai::types::CreateChatCompletionResponse,
-    ) -> Result<async_openai::types::CreateChatCompletionResponse, Self::Error>
-    {
+        value: CreateChatCompletionResponse,
+    ) -> Result<CreateChatCompletionResponse, Self::Error> {
         // no op:
         Ok(value)
+    }
+}
+
+impl
+    TryConvertStreamData<
+        CreateChatCompletionStreamResponse,
+        CreateChatCompletionStreamResponse,
+    > for GoogleConverter
+{
+    type Error = MapperError;
+
+    fn try_convert_chunk(
+        &self,
+        value: CreateChatCompletionStreamResponse,
+    ) -> Result<Option<CreateChatCompletionStreamResponse>, Self::Error> {
+        Ok(Some(value))
     }
 }
