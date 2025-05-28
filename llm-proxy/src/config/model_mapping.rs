@@ -23,6 +23,9 @@ impl Default for ModelMappingConfig {
             ModelName::borrowed("claude-3-5-haiku") => nes![ModelName::borrowed("gpt-4o-mini")],
             ModelName::borrowed("claude-3-5-sonnet") => nes![ModelName::borrowed("gpt-4o")],
             ModelName::borrowed("claude-3-7-sonnet") => nes![ModelName::borrowed("gpt-4.1")],
+
+
+            ModelName::borrowed("gemini-2.0-flash") => nes![ModelName::borrowed("gpt-4.5")],
         ])
     }
 }
