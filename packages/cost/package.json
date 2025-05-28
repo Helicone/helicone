@@ -1,6 +1,41 @@
 {
   "name": "@helicone-package/cost",
-  "types": "./",
+  "version": "1.0.0",
+  "main": "./index.js",
+  "types": "./index.d.ts",
   "sideEffects": false,
-  "version": "1.0.0"
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    },
+    "./costCalc": {
+      "types": "./costCalc.d.ts",
+      "default": "./costCalc.js"
+    },
+    "./providers/mappings": {
+      "types": "./providers/mappings.d.ts",
+      "default": "./providers/mappings.js"
+    },
+    "./unified/providers": {
+      "types": "./unified/providers.d.ts",
+      "default": "./unified/providers.js"
+    },
+    "./unified/types": {
+      "types": "./unified/types.d.ts",
+      "default": "./unified/types.js"
+    },
+    "./unified/models": {
+      "types": "./unified/models.d.ts",
+      "default": "./unified/models.js"
+    },
+    "./providers/*": {
+      "types": "./providers/*.d.ts",
+      "default": "./providers/*.js"
+    },
+    "./unified/*": {
+      "types": "./unified/*.d.ts",
+      "default": "./unified/*.js"
+    }
+  }
 }

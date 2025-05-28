@@ -1,6 +1,29 @@
 {
   "name": "@helicone-package/llm-mapper",
-  "types": "./",
+  "version": "1.0.0",
+  "main": "./index.js",
+  "types": "./index.d.ts",
   "sideEffects": false,
-  "version": "1.0.0"
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    },
+    "./types": {
+      "types": "./types.d.ts",
+      "default": "./types.js"
+    },
+    "./utils/*": {
+      "types": "./utils/*.d.ts",
+      "default": "./utils/*.js"
+    },
+    "./mappers/*": {
+      "types": "./mappers/*.d.ts",
+      "default": "./mappers/*.js"
+    },
+    "./path-mapper/*": {
+      "types": "./path-mapper/*.d.ts",
+      "default": "./path-mapper/*.js"
+    }
+  }
 }
