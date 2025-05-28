@@ -8,8 +8,7 @@ import { ArrowUpRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "../ui/button";
 
-function humanReadableNumber(num: number | undefined): string {
-  if (!num) return "0";
+function humanReadableNumber(num: number): string {
   if (num >= 1_000_000_000_000) {
     return `${Math.ceil(num / 1_000_000_000_00) / 10} trillion`;
   } else if (num >= 1_000_000_000) {
@@ -69,21 +68,17 @@ const Stats = ({
               isVisible ? "rotate-[-3deg]" : "rotate-[0  deg]"
             )}
           >
-            {humanReadableNumber(totalValuesData?.total_requests)}
+            {humanReadableNumber(totalValuesData?.total_requests ?? 0)}
           </span>{" "}
           requests processed,{" "}
           <span className="text-brand">
-            {humanReadableNumber(totalValuesData?.total_tokens)}
+            {humanReadableNumber(totalValuesData?.total_tokens ?? 0)}
           </span>{" "}
           tokens logged and <span className="text-brand">18.3 million</span>{" "}
           users tracked
         </h1>
         <div className="flex gap-2 items-center md:gap-4">
-          <Link
-            href="https://us.helicone.ai/open-stats"
-            target="_blank"
-            rel="noopener"
-          >
+          <Link href="https://us.helicone.ai/open-stats" target="_blank" rel="noopener">
             <Button
               variant="ghost"
               size="landing_page"

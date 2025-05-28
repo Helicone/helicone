@@ -2,9 +2,7 @@
   "name": "helicone-api",
   "scripts": {
     "start": "ts-node src/index.ts",
-    "prebuild": "yarn --cwd ../.. build:packages && yarn",
-    "build": "tsc && cp src/utils/trace.proto dist/valhalla/jawn/src/utils/trace.proto",
-    "serve": "node dist/valhalla/jawn/src/index.js",
+    "serve": "tsx src/index.ts",
     "dev": "concurrently \"nodemon\" \"nodemon -x python3 genTypes.py\"",
     "test:jawn": "npx jest --config packages/jawn/jest.config.js --detectOpenHandles"
   },
@@ -18,6 +16,8 @@
     "@aws-sdk/s3-request-presigner": "^3.537.0",
     "@clickhouse/client": "^0.0.14",
     "@codesandbox/sdk": "^0.0.10",
+    "@helicone-package/cost": "*",
+    "@helicone-package/llm-mapper": "*",
     "@helicone/helpers": "^1.1.0",
     "@helicone/prompts": "^1.0.11",
     "@sentry/node": "^7.93.0",
@@ -32,8 +32,6 @@
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dateformat": "^5.0.3",
-    "@helicone-package/cost": "file:../../packages/cost/dist",
-    "@helicone-package/llm-mapper": "file:../../packages/llm-mapper/dist",
     "dotenv": "^16.3.1",
     "express": "^5.1.0",
     "express-openapi-validator": "^5.3.7",
@@ -89,6 +87,7 @@
     "ts-jest": "^29.1.1",
     "ts-node": "^10.9.2",
     "tsoa": "^6.5.1",
+    "tsx": "^4.19.4",
     "typescript": "^5.2.2"
   }
 }

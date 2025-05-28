@@ -8,10 +8,7 @@
     "valhalla/jawn"
   ],
   "scripts": {
-    "build:web": "yarn workspace helicone build",
-    "build:cost": "yarn workspace @helicone-package/cost build",
-    "build:llm-mapper": "yarn workspace @helicone-package/llm-mapper build",
-    "build:packages": "yarn build:cost && yarn build:llm-mapper"
+    "build:web": "yarn workspace helicone build"
   },
   "engines": {
     "node": "=20"

@@ -11,7 +11,6 @@ const nextConfig = {
   reactStrictMode: false,
   swcMinify: true,
   transpilePackages: [
-    "@helicone-package/common",
     "@helicone-package/cost",
     "@helicone-package/llm-mapper",
   ],

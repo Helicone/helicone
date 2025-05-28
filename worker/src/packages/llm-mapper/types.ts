@@ -1,4 +1,4 @@
-import { ProviderName } from "@helicone-package/cost/providers/mappings";
+import { ProviderName } from "../cost/providers/mappings";
 
 export const DEFAULT_UUID = "00000000-0000-0000-0000-000000000000";
 
