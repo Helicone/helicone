@@ -52,6 +52,10 @@ impl Default for ProvidersConfig {
                 InferenceProvider::Anthropic,
                 default_anthropic_provider_config(),
             ),
+            (
+                InferenceProvider::GoogleGemini,
+                default_google_provider_config(),
+            ),
         ]))
     }
 }
@@ -68,6 +72,21 @@ fn default_openai_provider_config() -> GlobalProviderConfig {
             ModelName::borrowed("o4-mini"),
         ]),
         base_url: Url::parse("https://api.openai.com").unwrap(),
+        version: None,
+    }
+}
+
+fn default_google_provider_config() -> GlobalProviderConfig {
+    GlobalProviderConfig {
+        models: IndexSet::from([
+            ModelName::borrowed("gemini-1.5-pro"),
+            ModelName::borrowed("gemini-1.5-flash"),
+            ModelName::borrowed("gemini-2.0-flash"),
+            ModelName::borrowed("gemini-2.5-pro-preview-tts"),
+            ModelName::borrowed("gemini-2.5-flash-preview-05-20"),
+        ]),
+        base_url: Url::parse("https://generativelanguage.googleapis.com")
+            .unwrap(),
         version: None,
     }
 }

@@ -10,6 +10,7 @@ pub struct ModelMappingConfig(
 );
 
 impl Default for ModelMappingConfig {
+    #[allow(clippy::too_many_lines)]
     fn default() -> Self {
         ModelMappingConfig(nem![
             ModelName::borrowed("gpt-4o-mini") => nes![ModelName::borrowed("claude-3-5-haiku")],

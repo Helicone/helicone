@@ -9,6 +9,7 @@ use crate::error::internal::InternalError;
 
 pub mod anthropic_client;
 mod extensions;
+pub mod google_gemini_client;
 pub mod openai_client;
 pub mod service;
 

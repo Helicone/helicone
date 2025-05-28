@@ -78,7 +78,8 @@ impl BalanceConfigInner {
         Self::P2C {
             targets: nes![
                 InferenceProvider::OpenAI,
-                InferenceProvider::Anthropic
+                InferenceProvider::Anthropic,
+                InferenceProvider::GoogleGemini,
             ],
         }
     }
