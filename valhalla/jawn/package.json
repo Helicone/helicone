@@ -31,7 +31,6 @@
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dateformat": "^5.0.3",
-    "@helicone-package/common": "*",
     "@helicone-package/cost": "*",
     "@helicone-package/llm-mapper": "*",
     "dotenv": "^16.3.1",
