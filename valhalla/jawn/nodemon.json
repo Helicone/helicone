@@ -1,6 +1,15 @@
 {
-  "exec": "ts-node src/index.ts ",
-  "watch": ["src", "../../shared"],
-  "ignore": ["src/tsoa-build"],
-  "ext": "ts"
+  "exec": "ts-node src/index.ts",
+  "watch": [
+    "src",
+    "../../shared",
+    "../../packages/cost",
+    "../../packages/llm-mapper"
+  ],
+  "ignore": [
+    "src/tsoa-build",
+    "node_modules",
+    "dist"
+  ],
+  "ext": "ts,js,json"
 }

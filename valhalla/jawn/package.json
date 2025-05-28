@@ -2,9 +2,12 @@
   "name": "helicone-api",
   "scripts": {
     "start": "ts-node src/index.ts",
-    "build": "tsc && cp src/utils/trace.proto dist/valhalla/jawn/src/utils/trace.proto",
-    "serve": "node dist/valhalla/jawn/src/index.js",
+    "start:tsx": "tsx src/index.ts",
+    "build": "swc src -d dist --copy-files && cp src/utils/trace.proto dist/src/utils/trace.proto",
+    "build:tsc": "tsc && cp src/utils/trace.proto dist/valhalla/jawn/src/utils/trace.proto",
+    "serve": "node dist/src/index.js",
     "dev": "concurrently \"nodemon\" \"nodemon -x python3 genTypes.py\"",
+    "dev:tsx": "tsx watch src/index.ts",
     "test:jawn": "npx jest --config packages/jawn/jest.config.js --detectOpenHandles"
   },
   "version": "1.0.0",
@@ -65,6 +68,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@swc/cli": "^0.1.62",
     "@swc/core": "^1.7.26",
     "@swc/helpers": "^0.5.13",
     "@types/async-retry": "^1.4.8",
@@ -88,6 +92,7 @@
     "ts-jest": "^29.1.1",
     "ts-node": "^10.9.2",
     "tsoa": "^6.5.1",
+    "tsx": "^4.7.0",
     "typescript": "^5.2.2"
   }
 }
