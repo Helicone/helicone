@@ -1,5 +1,6 @@
 {
   "name": "Helix",
+  "logo": "/images/logo_text.webp",
   "theme": "linden",
   "colors": {
     "primary": "#e7614c",
