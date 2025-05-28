@@ -1,106 +1,118 @@
 use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
-use tower_governor::{
-    governor::{GovernorConfig, GovernorConfigBuilder},
-    key_extractor::SmartIpKeyExtractor,
-};
 
-use crate::middleware::rate_limit::extractor::UserIdExtractor;
-
-pub type UnauthedLimiterConfig = GovernorConfig<
-    SmartIpKeyExtractor,
-    governor::middleware::StateInformationMiddleware,
->;
-pub type AuthedLimiterConfig = GovernorConfig<
-    UserIdExtractor,
-    governor::middleware::StateInformationMiddleware,
->;
+use super::redis::RedisConfig;
 
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
-#[serde(deny_unknown_fields, rename_all = "kebab-case")]
-pub struct RateLimitConfig {
-    #[serde(default)]
-    pub unauthenticated: LimitConfig,
-    #[serde(default)]
-    pub authenticated: LimitConfig,
-    #[serde(with = "humantime_serde", default = "default_cleanup_interval")]
-    pub cleanup_interval: Duration,
-}
-
-impl Default for RateLimitConfig {
-    fn default() -> Self {
-        Self {
-            unauthenticated: LimitConfig {
-                replenish_interval: 6,
-                quota: 15,
-            },
-            authenticated: LimitConfig {
-                replenish_interval: 1,
-                quota: 20,
-            },
-            cleanup_interval: Duration::from_secs(60),
-        }
-    }
+#[serde(deny_unknown_fields, untagged, rename_all = "kebab-case")]
+pub enum RateLimitConfig {
+    Enabled {
+        #[serde(default)]
+        store: RateLimitStore,
+        #[serde(default, flatten)]
+        limits: LimitConfig,
+    },
+    Disabled,
 }
 
 impl RateLimitConfig {
     #[must_use]
-    pub fn unauthed_limiter(&self) -> UnauthedLimiterConfig {
-        GovernorConfigBuilder::default()
-            .per_second(self.unauthenticated.replenish_interval.into())
-            .burst_size(self.unauthenticated.quota)
-            .use_headers()
-            .key_extractor(SmartIpKeyExtractor)
-            .finish()
-            .unwrap()
-    }
-
-    #[must_use]
-    pub fn authed_limiter(&self) -> AuthedLimiterConfig {
-        GovernorConfigBuilder::default()
-            .per_second(self.authenticated.replenish_interval.into())
-            .burst_size(self.authenticated.quota)
-            .use_headers()
-            .key_extractor(UserIdExtractor)
-            .finish()
-            .unwrap()
-    }
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
-#[serde(deny_unknown_fields, rename_all = "kebab-case")]
-pub struct LimitConfig {
-    #[serde(default = "default_replenish_interval")]
-    pub replenish_interval: u32,
-    #[serde(default = "default_quota")]
-    pub quota: u32,
-}
-
-impl Default for LimitConfig {
-    fn default() -> Self {
-        Self {
-            replenish_interval: default_replenish_interval(),
-            quota: default_quota(),
+    pub fn default_enabled_config() -> Self {
+        Self::Enabled {
+            store: RateLimitStore::default(),
+            limits: LimitConfig::default(),
         }
     }
 }
 
-fn default_replenish_interval() -> u32 {
-    20
+impl Default for RateLimitConfig {
+    fn default() -> Self {
+        Self::Disabled
+    }
 }
 
-fn default_quota() -> u32 {
-    35
+#[derive(Debug, Default, Clone, Deserialize, Serialize, Eq, PartialEq)]
+#[serde(deny_unknown_fields, rename_all = "kebab-case")]
+pub enum RateLimitStore {
+    Redis(RedisConfig),
+    #[default]
+    InMemory,
 }
 
-fn default_cleanup_interval() -> Duration {
-    Duration::from_secs(60)
+fn default_capacity() -> u32 {
+    100
+}
+
+fn default_fill_frequency() -> Duration {
+    Duration::from_secs(1)
 }
 
 #[cfg(feature = "testing")]
 impl crate::tests::TestDefault for RateLimitConfig {
     fn test_default() -> Self {
-        Self::default()
+        Self::Disabled
+    }
+}
+
+#[cfg(feature = "testing")]
+pub fn enabled_for_test_redis() -> RateLimitConfig {
+    use crate::tests::TestDefault;
+    RateLimitConfig::Enabled {
+        store: RateLimitStore::Redis(RedisConfig::default()),
+        limits: LimitConfig::test_default(),
+    }
+}
+
+#[cfg(feature = "testing")]
+pub fn enabled_for_test_in_memory() -> RateLimitConfig {
+    use crate::tests::TestDefault;
+    RateLimitConfig::Enabled {
+        store: RateLimitStore::InMemory,
+        limits: LimitConfig::test_default(),
+    }
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
+#[serde(deny_unknown_fields, rename_all = "kebab-case")]
+#[derive(Default)]
+pub struct LimitConfig {
+    pub per_user: TokenBucketConfig,
+}
+
+#[cfg(feature = "testing")]
+impl crate::tests::TestDefault for LimitConfig {
+    fn test_default() -> Self {
+        Self {
+            per_user: TokenBucketConfig::test_default(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
+#[serde(deny_unknown_fields, rename_all = "kebab-case")]
+pub struct TokenBucketConfig {
+    #[serde(with = "humantime_serde", default = "default_fill_frequency")]
+    pub fill_frequency: Duration,
+    #[serde(default = "default_capacity")]
+    pub capacity: u32,
+}
+
+impl Default for TokenBucketConfig {
+    fn default() -> Self {
+        Self {
+            fill_frequency: default_fill_frequency(),
+            capacity: default_capacity(),
+        }
+    }
+}
+
+#[cfg(feature = "testing")]
+impl crate::tests::TestDefault for TokenBucketConfig {
+    fn test_default() -> Self {
+        Self {
+            fill_frequency: Duration::from_millis(500),
+            capacity: 5,
+        }
     }
 }

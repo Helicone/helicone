@@ -1,8 +1,9 @@
 #![allow(dead_code)]
-use std::{collections::HashMap, sync::Arc};
+use std::sync::Arc;
 
 use futures::future::BoxFuture;
 use meltdown::Token;
+use rustc_hash::FxHashMap as HashMap;
 use tokio::sync::{RwLock, mpsc::Sender};
 use tower::discover::Change;
 use tracing::info;

@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use async_openai::types::{
     ChatCompletionRequestDeveloperMessageContent, ChatCompletionRequestMessage,
     ChatCompletionRequestSystemMessageContent,
@@ -5,7 +7,11 @@ use async_openai::types::{
     CreateChatCompletionResponse, CreateChatCompletionStreamResponse,
 };
 
-use crate::endpoints::{Endpoint, StreamRequest};
+use crate::{
+    endpoints::{AiRequest, Endpoint},
+    middleware::mapper::error::MapperError,
+    types::model::Model,
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub struct ChatCompletions;
@@ -17,9 +23,13 @@ impl Endpoint for ChatCompletions {
     type StreamResponseBody = CreateChatCompletionStreamResponse;
 }
 
-impl StreamRequest for CreateChatCompletionRequest {
+impl AiRequest for CreateChatCompletionRequest {
     fn is_stream(&self) -> bool {
         self.stream.unwrap_or(false)
+    }
+
+    fn model(&self) -> Result<Model, MapperError> {
+        Model::from_str(&self.model)
     }
 }
 

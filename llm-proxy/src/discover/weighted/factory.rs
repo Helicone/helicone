@@ -1,8 +1,6 @@
-use std::{
-    future::{Ready, ready},
-    task::{Context, Poll},
-};
+use std::task::{Context, Poll};
 
+use futures::future::BoxFuture;
 use tokio::sync::mpsc::Receiver;
 use tower::{Service, discover::Change};
 use weighted_balance::weight::WeightedDiscover;
@@ -21,7 +19,7 @@ impl Service<Receiver<Change<WeightedKey, DispatcherService>>>
 {
     type Response = WeightedDiscover<Discovery<WeightedKey>>;
     type Error = InitError;
-    type Future = Ready<Result<Self::Response, Self::Error>>;
+    type Future = BoxFuture<'static, Result<Self::Response, Self::Error>>;
 
     fn poll_ready(
         &mut self,
@@ -34,15 +32,19 @@ impl Service<Receiver<Change<WeightedKey, DispatcherService>>>
         &mut self,
         rx: Receiver<Change<WeightedKey, DispatcherService>>,
     ) -> Self::Future {
-        let discovery = match Discovery::new_weighted(
-            &self.app_state,
-            &self.router_config,
-            rx,
-        ) {
-            Ok(discovery) => discovery,
-            Err(e) => return ready(Err(e)),
-        };
-        let discovery = WeightedDiscover::new(discovery);
-        ready(Ok(discovery))
+        let app_state = self.app_state.clone();
+        let router_id = self.router_id;
+        let router_config = self.router_config.clone();
+        Box::pin(async move {
+            let discovery = Discovery::new_weighted(
+                &app_state,
+                router_id,
+                &router_config,
+                rx,
+            )
+            .await?;
+            let discovery = WeightedDiscover::new(discovery);
+            Ok(discovery)
+        })
     }
 }

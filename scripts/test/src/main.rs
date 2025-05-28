@@ -1,7 +1,7 @@
 use futures::StreamExt;
 
 pub async fn test() {
-    let is_stream = true;
+    let is_stream = false;
     let openai_request_body = serde_json::json!({
         "model": "gpt-4o-mini",
         "messages": [
@@ -27,11 +27,27 @@ pub async fn test() {
     let response = reqwest::Client::new()
         .post("http://localhost:5678/router/v1/chat/completions")
         .header("Content-Type", "application/json")
+        // TODO: When we implement team keys we can add them here
+        // .header(
+        //     "authorization",
+        //     format!(
+        //         "Bearer {}",
+        //         std::env::var("ROUTER_TEAM_API_KEY") // RIGHT NOW TEAM LOGIC
+        // IS NOT IMPLEMENTED             .unwrap_or_else(|_|
+        // "mock-api-key".to_string())     ),
+        // )
         .body(bytes)
         .send()
         .await
         .unwrap();
     println!("Status: {}", response.status());
+    let trace_id = response
+        .headers()
+        .get("x-request-id")
+        .unwrap()
+        .to_str()
+        .unwrap();
+    println!("Trace ID: {}", trace_id);
     if is_stream {
         let mut body_stream = response.bytes_stream();
         while let Some(Ok(chunk)) = body_stream.next().await {

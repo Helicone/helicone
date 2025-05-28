@@ -1,5 +1,4 @@
 pub mod balance;
-pub mod database;
 pub mod discover;
 pub mod dispatcher;
 pub mod helicone;
@@ -8,6 +7,7 @@ pub mod model_mapping;
 pub mod monitor;
 pub mod providers;
 pub mod rate_limit;
+pub mod redis;
 pub mod retry;
 pub mod router;
 pub mod server;
@@ -20,6 +20,8 @@ use json_patch::merge;
 use serde::{Deserialize, Serialize};
 use strum::IntoStaticStr;
 use thiserror::Error;
+
+use crate::utils::default_true;
 
 #[derive(Debug, Error, Display)]
 pub enum Error {
@@ -38,12 +40,35 @@ pub enum Error {
 )]
 #[serde(deny_unknown_fields, rename_all = "kebab-case")]
 pub enum DeploymentTarget {
-    Cloud {
-        global_rate_limits: self::rate_limit::RateLimitConfig,
-    },
+    Cloud,
     Sidecar,
     #[default]
     SelfHosted,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(deny_unknown_fields, rename_all = "kebab-case")]
+pub struct AuthConfig {
+    /// Whether a Helicone API key is required in order to proxy requests.
+    ///
+    /// If `require_auth=true`, then we will check for a valid Helicone API key
+    /// in the `authorization` header.
+    ///
+    /// If `require_auth=false`, we will still proxy the request, but certain
+    /// Helicone features will not be available, such as governance
+    /// features and LLM observability. Costs incurred from the requests
+    /// will be charged to the API keys associated with the given router
+    /// called by the request, so be warned!
+    #[serde(default = "default_true")]
+    pub require_auth: bool,
+}
+
+impl Default for AuthConfig {
+    fn default() -> Self {
+        Self {
+            require_auth: default_true(),
+        }
+    }
 }
 
 #[derive(Debug, Default, Deserialize, Serialize)]
@@ -51,12 +76,13 @@ pub enum DeploymentTarget {
 pub struct Config {
     pub telemetry: telemetry::Config,
     pub server: self::server::ServerConfig,
-    pub database: self::database::Config,
     pub minio: self::minio::Config,
     pub dispatcher: self::dispatcher::DispatcherConfig,
+    pub auth: AuthConfig,
     /// *ALL* supported providers, independent of router configuration.
     pub providers: self::providers::ProvidersConfig,
     pub discover: self::discover::DiscoverConfig,
+    pub rate_limit: self::rate_limit::RateLimitConfig,
     /// If a request is made with a model that is not in the `RouterConfig`
     /// model mapping, then we fallback to this.
     pub default_model_mapping: self::model_mapping::ModelMappingConfig,
@@ -102,15 +128,15 @@ impl crate::tests::TestDefault for Config {
     fn test_default() -> Self {
         let telemetry = telemetry::Config {
             exporter: telemetry::Exporter::Stdout,
-            level: "info,llm_proxy=debug,llm_proxy::discover=trace".to_string(),
+            level: "info,llm_proxy=trace".to_string(),
             ..Default::default()
         };
         Config {
             telemetry,
             server: self::server::ServerConfig::test_default(),
-            database: self::database::Config::default(),
             minio: self::minio::Config::test_default(),
             dispatcher: self::dispatcher::DispatcherConfig::test_default(),
+            auth: AuthConfig::default(),
             default_model_mapping:
                 self::model_mapping::ModelMappingConfig::default(),
             is_production: false,
@@ -119,6 +145,7 @@ impl crate::tests::TestDefault for Config {
             deployment_target: DeploymentTarget::SelfHosted,
             discover: self::discover::DiscoverConfig::test_default(),
             routers: self::router::RouterConfigs::test_default(),
+            rate_limit: self::rate_limit::RateLimitConfig::test_default(),
         }
     }
 }

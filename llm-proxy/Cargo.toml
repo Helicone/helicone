@@ -11,6 +11,7 @@ anthropic-ai-sdk = { workspace = true }
 async-openai = { workspace = true }
 axum-core = { workspace = true }
 axum-server = { workspace = true, features = ["tls-rustls"] }
+brakes = { workspace = true }
 bytes = { workspace = true, features = ['serde'] }
 cfg-if = { workspace = true }
 chrono = { workspace = true, features = ['default', 'serde'] }
@@ -37,12 +38,16 @@ mime = { workspace = true }
 nonempty-collections = { workspace = true, features = ["serde"] }
 opentelemetry = { workspace = true }
 opentelemetry_sdk = { workspace = true, features = ["rt-tokio"] }
+opentelemetry-system-metrics = { workspace = true }
 pin-project-lite = { workspace = true }
+redis = { workspace = true }
 regex = { workspace = true }
 reqwest = { workspace = true }
 reqwest-eventsource = { workspace = true }
+rustc-hash = { workspace = true }
 rust_decimal = { workspace = true }
 rusty-s3 = { workspace = true }
+r2d2 = { workspace = true }
 semver = { workspace = true }
 serde = { workspace = true, features = ['derive', 'rc'] }
 serde_json = { workspace = true }
@@ -50,7 +55,6 @@ serde_path_to_error = { workspace = true }
 serde_with = { workspace = true }
 serde_yml = { workspace = true }
 serial_test = { workspace = true, optional = true }
-sqlx = { workspace = true, features = ['default', 'runtime-tokio', 'chrono', 'postgres', 'uuid']}
 strum = { workspace = true, features = ["derive"]  }
 stubr = { workspace = true, optional = true }
 telemetry = { workspace = true }
@@ -59,8 +63,8 @@ tokio = { workspace = true }
 tokio-stream = { workspace = true, features = ['sync'] }
 tokio-util = { workspace = true }
 tower = { workspace = true, features = ['full']}
-tower_governor = { workspace = true }
-tower-http = { workspace = true, features = ['default', 'auth', 'catch-panic', 'add-extension', 'normalize-path', 'request-id', 'trace', 'util'] }
+tower-http = { workspace = true, features = ['default', 'auth', 'catch-panic', 'add-extension', 'normalize-path', 'request-id', 'trace', 'util', 'sensitive-headers'] }
+tower-otel-http-metrics = { workspace = true }
 tracing = { workspace = true }
 tracing-opentelemetry.workspace = true
 tracing-subscriber = { workspace = true, features = ['env-filter', 'std'] }
@@ -69,6 +73,7 @@ weighted-balance = { workspace = true }
 url = { workspace = true, features = ['serde'] }
 utoipa = { workspace = true }
 uuid = { workspace = true, features = ["serde", "v7"] }
+dotenvy = { version = "0.15.7"}
 
 [features]
 default = []
@@ -95,4 +100,12 @@ required-features = ["testing"]
 
 [[test]]
 name = "health_monitor"
+required-features = ["testing"]
+
+[[test]]
+name = "rate_limit"
+required-features = ["testing"]
+
+[[test]]
+name = "passthrough"
 required-features = ["testing"]

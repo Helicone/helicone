@@ -18,12 +18,19 @@ use tower::Service;
 #[tokio::test]
 #[serial_test::serial(default_mock)]
 async fn openai() {
-    let config = Config::test_default();
+    let mut config = Config::test_default();
+    // Disable auth for this test since we're testing basic provider
+    // functionality
+    config.auth.require_auth = false;
     let mock_args = MockArgs::builder()
-        .stubs(HashMap::from([(
-            "success:openai:chat_completion",
-            1.into(),
-        )]))
+        .stubs(HashMap::from([
+            ("success:openai:chat_completion", 1.into()),
+            // Auth is disabled, so auth and logging services should not be
+            // called
+            ("success:jawn:whoami", 0.into()),
+            ("success:minio:upload_request", 0.into()),
+            ("success:jawn:log_request", 0.into()),
+        ]))
         .build();
     let mut harness = Harness::builder()
         .with_config(config)
@@ -50,9 +57,6 @@ async fn openai() {
         .unwrap();
     let response = harness.call(request).await.unwrap();
     assert_eq!(response.status(), StatusCode::OK);
-
-    // technically verification happens on drop but we do it here to be explicit
-    harness.mock.openai_mock.verify().await;
 }
 
 /// Sending a request to https://localhost/router should
@@ -61,6 +65,9 @@ async fn openai() {
 #[serial_test::serial(default_mock)]
 async fn anthropic_with_openai_request_style() {
     let mut config = Config::test_default();
+    // Disable auth for this test since we're testing basic provider
+    // functionality
+    config.auth.require_auth = false;
     let router_config = RouterConfigs::new(HashMap::from([(
         RouterId::Default,
         RouterConfig {
@@ -71,7 +78,14 @@ async fn anthropic_with_openai_request_style() {
     )]));
     config.routers = router_config;
     let mock_args = MockArgs::builder()
-        .stubs(HashMap::from([("success:anthropic:messages", 1.into())]))
+        .stubs(HashMap::from([
+            ("success:anthropic:messages", 1.into()),
+            // Auth is disabled, so auth and logging services should not be
+            // called
+            ("success:jawn:whoami", 0.into()),
+            ("success:minio:upload_request", 0.into()),
+            ("success:jawn:log_request", 0.into()),
+        ]))
         .build();
     let mut harness = Harness::builder()
         .with_config(config)
@@ -100,10 +114,11 @@ async fn anthropic_with_openai_request_style() {
     assert_eq!(response.status(), StatusCode::OK);
 
     // assert that the request was proxied to the mock server correctly
-    harness.mock.anthropic_mock.verify().await;
+    harness.mock.anthropic_mock.http_server.verify().await;
     harness
         .mock
         .anthropic_mock
+        .http_server
         .set_expectation("success:anthropic:messages", 2.into())
         .await;
 
@@ -128,15 +143,15 @@ async fn anthropic_with_openai_request_style() {
         .unwrap();
     let response = harness.call(request).await.unwrap();
     assert_eq!(response.status(), StatusCode::OK);
-
-    // assert that the request was proxied to the mock server correctly
-    harness.mock.anthropic_mock.verify().await;
 }
 
 #[tokio::test]
 #[serial_test::serial(default_mock)]
 async fn anthropic_with_anthropic_request_style() {
     let mut config = Config::test_default();
+    // Disable auth for this test since we're testing basic provider
+    // functionality
+    config.auth.require_auth = false;
     let router_config = RouterConfigs::new(HashMap::from([(
         RouterId::Default,
         RouterConfig {
@@ -147,7 +162,14 @@ async fn anthropic_with_anthropic_request_style() {
     )]));
     config.routers = router_config;
     let mock_args = MockArgs::builder()
-        .stubs(HashMap::from([("success:anthropic:messages", 1.into())]))
+        .stubs(HashMap::from([
+            ("success:anthropic:messages", 1.into()),
+            // Auth is disabled, so auth and logging services should not be
+            // called
+            ("success:jawn:whoami", 0.into()),
+            ("success:minio:upload_request", 0.into()),
+            ("success:jawn:log_request", 0.into()),
+        ]))
         .build();
     let mut harness = Harness::builder()
         .with_config(config)
@@ -176,11 +198,12 @@ async fn anthropic_with_anthropic_request_style() {
     assert_eq!(response.status(), StatusCode::OK);
 
     // assert that the request was proxied to the mock server correctly
-    harness.mock.anthropic_mock.verify().await;
+    harness.mock.verify().await;
     // update the expectation to 2 requests
     harness
         .mock
         .anthropic_mock
+        .http_server
         .set_expectation("success:anthropic:messages", 2.into())
         .await;
 
@@ -205,9 +228,6 @@ async fn anthropic_with_anthropic_request_style() {
         .unwrap();
     let response = harness.call(request).await.unwrap();
     assert_eq!(response.status(), StatusCode::OK);
-
-    // assert that the request was proxied to the mock server correctly
-    harness.mock.anthropic_mock.verify().await;
 }
 
 /// Sending a request to https://localhost/router should
@@ -216,6 +236,9 @@ async fn anthropic_with_anthropic_request_style() {
 #[serial_test::serial(default_mock)]
 async fn anthropic_request_style() {
     let mut config = Config::test_default();
+    // Disable auth for this test since we're testing basic provider
+    // functionality
+    config.auth.require_auth = false;
     let router_config = RouterConfigs::new(HashMap::from([(
         RouterId::Default,
         RouterConfig {
@@ -226,10 +249,14 @@ async fn anthropic_request_style() {
     )]));
     config.routers = router_config;
     let mock_args = MockArgs::builder()
-        .stubs(HashMap::from([(
-            "success:openai:chat_completion",
-            1.into(),
-        )]))
+        .stubs(HashMap::from([
+            ("success:openai:chat_completion", 1.into()),
+            // Auth is disabled, so auth and logging services should not be
+            // called
+            ("success:jawn:whoami", 0.into()),
+            ("success:minio:upload_request", 0.into()),
+            ("success:jawn:log_request", 0.into()),
+        ]))
         .build();
     let mut harness = Harness::builder()
         .with_config(config)
@@ -257,5 +284,4 @@ async fn anthropic_request_style() {
         .unwrap();
     let response = harness.call(request).await.unwrap();
     assert_eq!(response.status(), StatusCode::OK);
-    harness.mock.openai_mock.verify().await;
 }

@@ -9,8 +9,6 @@ pub mod logger;
 pub mod metrics;
 pub mod middleware;
 pub(crate) mod router;
-// pub(crate) mod response;
-pub(crate) mod store;
 #[cfg(feature = "testing")]
 pub mod tests;
 pub mod types;

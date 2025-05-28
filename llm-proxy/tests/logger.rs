@@ -11,13 +11,17 @@ use tower::Service;
 
 #[tokio::test]
 #[serial_test::serial]
-async fn request_response_logger() {
-    let config = Config::test_default();
+async fn request_response_logger_authenticated() {
+    let mut config = Config::test_default();
+    // Ensure auth is required for this test
+    config.auth.require_auth = true;
+
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([
             ("success:openai:chat_completion", 1.into()),
             ("success:minio:upload_request", 1.into()),
             ("success:jawn:log_request", 1.into()),
+            ("success:jawn:whoami", 1.into()),
         ]))
         .build();
     let mut harness = Harness::builder()
@@ -39,7 +43,7 @@ async fn request_response_logger() {
     let request_body = axum_core::body::Body::from(body_bytes.clone());
     let request = Request::builder()
         .method(Method::POST)
-        // default router
+        .header("authorization", "Bearer sk-helicone-test-key")
         .uri("http://router.helicone.com/router/v1/chat/completions")
         .body(request_body)
         .unwrap();
@@ -50,14 +54,52 @@ async fn request_response_logger() {
     let _response_body = response.into_body().collect().await.unwrap();
 
     // sleep so that the background task for logging can complete
-    // the proper way to write this test without a sleep is to
-    // test it at the dispatcher level by returning a handle
-    // to the async task and awaiting it in the test.
-    //
-    // but this is totes good for now
-    tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+    tokio::time::sleep(std::time::Duration::from_millis(10)).await;
+}
 
-    harness.mock.jawn_mock.verify().await;
-    harness.mock.minio_mock.verify().await;
-    harness.mock.openai_mock.verify().await;
+#[tokio::test]
+#[serial_test::serial]
+async fn request_response_logger_unauthenticated() {
+    let mut config = Config::test_default();
+    // Disable auth requirement for this test
+    config.auth.require_auth = false;
+
+    let mock_args = MockArgs::builder()
+        .stubs(HashMap::from([
+            ("success:openai:chat_completion", 1.into()),
+            // When unauthenticated, logging services should NOT be called
+            ("success:minio:upload_request", 0.into()),
+            ("success:jawn:log_request", 0.into()),
+        ]))
+        .build();
+    let mut harness = Harness::builder()
+        .with_config(config)
+        .with_mock_args(mock_args)
+        .build()
+        .await;
+    let body_bytes = serde_json::to_vec(&json!({
+        "model": "gpt-4o-mini",
+        "messages": [
+            {
+                "role": "user",
+                "content": "Hello, world!"
+            }
+        ]
+    }))
+    .unwrap();
+
+    let request_body = axum_core::body::Body::from(body_bytes.clone());
+    let request = Request::builder()
+        .method(Method::POST)
+        // No authorization header when auth is not required
+        .uri("http://router.helicone.com/router/v1/chat/completions")
+        .body(request_body)
+        .unwrap();
+    let response = harness.call(request).await.unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+    // we need to collect the body here in order to poll the underlying body
+    let _response_body = response.into_body().collect().await.unwrap();
+
+    // sleep so that the background task for logging can complete
+    tokio::time::sleep(std::time::Duration::from_millis(10)).await;
 }

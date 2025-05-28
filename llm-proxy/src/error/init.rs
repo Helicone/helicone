@@ -13,10 +13,6 @@ pub enum InitError {
     DeploymentTargetNotSupported(DeploymentTarget),
     /// Failed to read TLS certificate: {0}
     Tls(std::io::Error),
-    /// Failed to connect to database: {0}
-    DatabaseConnection(sqlx::Error),
-    /// Migrations failed: {0}
-    Migrations(#[from] sqlx::migrate::MigrateError),
     /// Failed to bind to address: {0}
     Bind(std::io::Error),
     /// Telemetry: {0}
@@ -37,4 +33,12 @@ pub enum InitError {
     InvalidWeightedBalancer(String),
     /// Converter registry endpoints not configured for provider: {0}
     EndpointsNotConfigured(InferenceProvider),
+    /// Failed to create redis pool: {0}
+    CreateRedisPool(#[from] r2d2::Error),
+    /// Failed to create redis client: {0}
+    CreateRedisClient(#[from] redis::RedisError),
+    /// Failed to build otel metrics layer: {0}
+    InitOtelMetricsLayer(#[from] tower_otel_http_metrics::Error),
+    /// Failed to initialize system metrics
+    InitSystemMetrics,
 }

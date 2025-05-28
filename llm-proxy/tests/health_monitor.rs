@@ -22,6 +22,8 @@ use tower::Service;
 #[serial_test::serial]
 async fn errors_remove_provider_from_lb_pool() {
     let mut config = Config::test_default();
+    // Enable auth so that logging services are called
+    config.auth.require_auth = true;
     let balance_config = BalanceConfig::from(HashMap::from([(
         EndpointType::Chat,
         BalanceConfigInner::Weighted {
@@ -50,6 +52,7 @@ async fn errors_remove_provider_from_lb_pool() {
             ("error:anthropic:messages", (..12).into()),
             ("success:minio:upload_request", 100.into()),
             ("success:jawn:log_request", 100.into()),
+            ("success:jawn:whoami", 100.into()),
         ]))
         .build();
     let mut harness = Harness::builder()
@@ -77,6 +80,7 @@ async fn errors_remove_provider_from_lb_pool() {
         let request_body = axum_core::body::Body::from(body_bytes.clone());
         let request = Request::builder()
             .method(Method::POST)
+            .header("authorization", "Bearer sk-helicone-test-key")
             // default router
             .uri("http://router.helicone.com/router/v1/chat/completions")
             .body(request_body)
@@ -93,10 +97,5 @@ async fn errors_remove_provider_from_lb_pool() {
     // to the async task and awaiting it in the test.
     //
     // but this is totes good for now
-    tokio::time::sleep(std::time::Duration::from_millis(100)).await;
-
-    harness.mock.jawn_mock.verify().await;
-    harness.mock.minio_mock.verify().await;
-    harness.mock.openai_mock.verify().await;
-    harness.mock.anthropic_mock.verify().await;
+    tokio::time::sleep(std::time::Duration::from_millis(10)).await;
 }

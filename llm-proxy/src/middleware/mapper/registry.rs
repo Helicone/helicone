@@ -1,9 +1,10 @@
-use std::{collections::HashMap, sync::Arc};
+use std::sync::Arc;
+
+use rustc_hash::FxHashMap as HashMap;
 
 use super::{
     EndpointConverter, NoOpConverter, TypedEndpointConverter,
-    TypedStreamEndpointConverter, anthropic::AnthropicConverter,
-    model::ModelMapper, openai::OpenAiConverter,
+    anthropic::AnthropicConverter, model::ModelMapper, openai::OpenAiConverter,
 };
 use crate::{
     config::router::RouterConfig,
@@ -30,15 +31,10 @@ impl EndpointConverterRegistry {
         &self,
         source_endpoint: &ApiEndpoint,
         target_endpoint: &ApiEndpoint,
-        is_stream: bool,
     ) -> Option<&(dyn EndpointConverter + Send + Sync + 'static)> {
         self.0
             .converters
-            .get(&RegistryKey::new(
-                *source_endpoint,
-                *target_endpoint,
-                is_stream,
-            ))
+            .get(&RegistryKey::new(*source_endpoint, *target_endpoint))
             .map(|v| &**v)
     }
 }
@@ -47,19 +43,13 @@ impl EndpointConverterRegistry {
 struct RegistryKey {
     source_endpoint: ApiEndpoint,
     target_endpoint: ApiEndpoint,
-    is_stream: bool,
 }
 
 impl RegistryKey {
-    fn new(
-        source_endpoint: ApiEndpoint,
-        target_endpoint: ApiEndpoint,
-        is_stream: bool,
-    ) -> Self {
+    fn new(source_endpoint: ApiEndpoint, target_endpoint: ApiEndpoint) -> Self {
         Self {
             source_endpoint,
             target_endpoint,
-            is_stream,
         }
     }
 }
@@ -84,7 +74,7 @@ impl EndpointConverterRegistryInner {
     #[allow(clippy::too_many_lines)]
     fn new(router_config: &RouterConfig, model_mapper: ModelMapper) -> Self {
         let mut registry = Self {
-            converters: HashMap::new(),
+            converters: HashMap::default(),
         };
         let providers = router_config.balance.providers();
         let request_style = router_config.request_style;
@@ -95,7 +85,6 @@ impl EndpointConverterRegistryInner {
             let key = RegistryKey::new(
                 ApiEndpoint::OpenAI(OpenAI::chat_completions()),
                 ApiEndpoint::Anthropic(Anthropic::messages()),
-                false,
             );
             registry.register_converter(
                 key,
@@ -110,11 +99,10 @@ impl EndpointConverterRegistryInner {
             let key = RegistryKey::new(
                 ApiEndpoint::OpenAI(OpenAI::chat_completions()),
                 ApiEndpoint::Anthropic(Anthropic::messages()),
-                true,
             );
             registry.register_converter(
                 key,
-                TypedStreamEndpointConverter {
+                TypedEndpointConverter {
                     converter: AnthropicConverter::new(model_mapper.clone()),
                     _phantom: std::marker::PhantomData::<(
                         endpoints::openai::ChatCompletions,
@@ -128,26 +116,10 @@ impl EndpointConverterRegistryInner {
             let key = RegistryKey::new(
                 ApiEndpoint::Anthropic(Anthropic::messages()),
                 ApiEndpoint::OpenAI(OpenAI::chat_completions()),
-                false,
             );
             registry.register_converter(
                 key,
                 TypedEndpointConverter {
-                    converter: OpenAiConverter::new(model_mapper.clone()),
-                    _phantom: std::marker::PhantomData::<(
-                        endpoints::anthropic::Messages,
-                        endpoints::openai::ChatCompletions,
-                    )>,
-                },
-            );
-            let key = RegistryKey::new(
-                ApiEndpoint::Anthropic(Anthropic::messages()),
-                ApiEndpoint::OpenAI(OpenAI::chat_completions()),
-                true,
-            );
-            registry.register_converter(
-                key,
-                TypedStreamEndpointConverter {
                     converter: OpenAiConverter::new(model_mapper),
                     _phantom: std::marker::PhantomData::<(
                         endpoints::anthropic::Messages,
@@ -163,21 +135,6 @@ impl EndpointConverterRegistryInner {
             let key = RegistryKey::new(
                 ApiEndpoint::OpenAI(OpenAI::chat_completions()),
                 ApiEndpoint::OpenAI(OpenAI::chat_completions()),
-                false,
-            );
-            registry.register_converter(
-                key,
-                NoOpConverter {
-                    _phantom: std::marker::PhantomData::<
-                        endpoints::openai::ChatCompletions,
-                    >,
-                },
-            );
-
-            let key = RegistryKey::new(
-                ApiEndpoint::OpenAI(OpenAI::chat_completions()),
-                ApiEndpoint::OpenAI(OpenAI::chat_completions()),
-                true,
             );
             registry.register_converter(
                 key,
@@ -193,20 +150,6 @@ impl EndpointConverterRegistryInner {
             let key = RegistryKey::new(
                 ApiEndpoint::Anthropic(Anthropic::messages()),
                 ApiEndpoint::Anthropic(Anthropic::messages()),
-                false,
-            );
-            registry.register_converter(
-                key,
-                NoOpConverter {
-                    _phantom: std::marker::PhantomData::<
-                        endpoints::anthropic::Messages,
-                    >,
-                },
-            );
-            let key = RegistryKey::new(
-                ApiEndpoint::Anthropic(Anthropic::messages()),
-                ApiEndpoint::Anthropic(Anthropic::messages()),
-                true,
             );
             registry.register_converter(
                 key,

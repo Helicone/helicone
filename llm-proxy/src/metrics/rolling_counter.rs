@@ -3,26 +3,6 @@ use std::{
     time::{Duration, Instant},
 };
 
-use opentelemetry::metrics::{Counter, Meter};
-
-/// The top level struct that contains all metrics
-/// which are exported to OpenTelemetry.
-#[derive(Debug, Clone)]
-pub struct Metrics {
-    pub error_count: Counter<u64>,
-}
-
-impl Metrics {
-    #[must_use]
-    pub fn new(meter: &Meter) -> Self {
-        let error_count = meter
-            .u64_counter("error_count")
-            .with_description("Number of error occurences")
-            .build();
-        Self { error_count }
-    }
-}
-
 #[derive(Debug)]
 pub struct RollingCounter {
     /// How many buckets to use

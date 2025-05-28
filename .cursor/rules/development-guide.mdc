@@ -1,6 +1,6 @@
 ---
-description:
-globs:
+description: 
+globs: 
 alwaysApply: false
 ---
 # Development Guide
@@ -27,17 +27,16 @@ This document provides guidance for developing and testing the LLM Proxy.
 - [llm-proxy/src/lib.rs](mdc:llm-proxy/src/lib.rs) - Library exports
 
 ### Tests
-- [llm-proxy/tests/](mdc:llm-proxy/tests/) - Integration tests
-- [llm-proxy/src/tests/](mdc:llm-proxy/src/tests/) - Test utilities
+- [llm-proxy/tests/](mdc:llm-proxy/tests) - Integration tests
+- [llm-proxy/src/tests/](mdc:llm-proxy/src/tests) - Test utilities
 - Unit tests are typically located alongside the code they test
 
 ## Testing
 
 - Run tests: `cargo test --all-features`
-- Integration tests require a PostgreSQL database
 
 ## Crate Organization
 
-- Core application logic is in the [llm-proxy/](mdc:llm-proxy/) directory
-- Supporting libraries are in the [crates/](mdc:crates/) directory
+- Core application logic is in the [llm-proxy/](mdc:llm-proxy) directory
+- Supporting libraries are in the [crates/](mdc:crates) directory
 - External dependencies are defined in the root [Cargo.toml](mdc:Cargo.toml)

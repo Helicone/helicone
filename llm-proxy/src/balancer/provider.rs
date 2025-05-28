@@ -16,7 +16,7 @@ use crate::{
         provider::{Key, discover, factory::DiscoverFactory},
         weighted::WeightedKey,
     },
-    error::{api::Error, init::InitError, internal::InternalError},
+    error::{api::ApiError, init::InitError, internal::InternalError},
     types::{request::Request, response::Response, router::RouterId},
 };
 
@@ -57,8 +57,11 @@ impl ProviderBalancer {
     ) -> Result<ProviderBalancer, InitError> {
         tracing::debug!("Creating weighted balancer");
         let (tx, rx) = channel(CHANNEL_CAPACITY);
-        let discover_factory =
-            DiscoverFactory::new(app_state.clone(), router_config.clone());
+        let discover_factory = DiscoverFactory::new(
+            app_state.clone(),
+            router_id,
+            router_config.clone(),
+        );
         let mut balance_factory =
             weighted_balance::balance::make::MakeBalance::new(discover_factory);
         let balance = balance_factory.call(rx).await?;
@@ -77,8 +80,11 @@ impl ProviderBalancer {
     ) -> Result<ProviderBalancer, InitError> {
         tracing::debug!("Creating peak ewma p2c balancer");
         let (tx, rx) = channel(CHANNEL_CAPACITY);
-        let discover_factory =
-            DiscoverFactory::new(app_state.clone(), router_config.clone());
+        let discover_factory = DiscoverFactory::new(
+            app_state.clone(),
+            router_id,
+            router_config.clone(),
+        );
         let mut balance_factory =
             tower::balance::p2c::MakeBalance::new(discover_factory);
         let balance = balance_factory.call(rx).await?;
@@ -93,7 +99,7 @@ impl ProviderBalancer {
 
 impl tower::Service<Request> for ProviderBalancer {
     type Response = Response;
-    type Error = Error;
+    type Error = ApiError;
     type Future = ResponseFuture;
 
     #[inline]
@@ -145,7 +151,7 @@ pin_project! {
 }
 
 impl Future for ResponseFuture {
-    type Output = Result<Response, Error>;
+    type Output = Result<Response, ApiError>;
 
     fn poll(
         self: std::pin::Pin<&mut Self>,
@@ -154,14 +160,14 @@ impl Future for ResponseFuture {
         match self.project() {
             EnumProj::PeakEwma { future } => match future.poll(cx) {
                 Poll::Ready(Ok(res)) => Poll::Ready(Ok(res)),
-                Poll::Ready(Err(e)) => Poll::Ready(Err(Error::Internal(
+                Poll::Ready(Err(e)) => Poll::Ready(Err(ApiError::Internal(
                     InternalError::LoadBalancerError(e),
                 ))),
                 Poll::Pending => Poll::Pending,
             },
             EnumProj::Weighted { future } => match future.poll(cx) {
                 Poll::Ready(Ok(res)) => Poll::Ready(Ok(res)),
-                Poll::Ready(Err(e)) => Poll::Ready(Err(Error::Internal(
+                Poll::Ready(Err(e)) => Poll::Ready(Err(ApiError::Internal(
                     InternalError::LoadBalancerError(e),
                 ))),
                 Poll::Pending => Poll::Pending,

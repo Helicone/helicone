@@ -86,3 +86,41 @@ impl IntoResponse for InvalidRequestError {
         }
     }
 }
+
+/// User errors for metrics. This is a special type
+/// that avoids including dynamic information to limit cardinality
+/// such that we can use this type in metrics.
+#[derive(Debug, Error, Display, strum::AsRefStr)]
+pub enum InvalidRequestErrorMetric {
+    /// Resource not found
+    NotFound,
+    /// Unsupported provider
+    UnsupportedProvider,
+    /// Invalid request
+    InvalidRequest,
+    /// Invalid request uri
+    InvalidUri,
+    /// Invalid request body
+    InvalidRequestBody,
+    /// Upstream 4xx error
+    Provider4xxError,
+}
+
+impl From<&InvalidRequestError> for InvalidRequestErrorMetric {
+    fn from(error: &InvalidRequestError) -> Self {
+        match error {
+            InvalidRequestError::UnsupportedProvider(_) => {
+                Self::UnsupportedProvider
+            }
+            InvalidRequestError::NotFound(_)
+            | InvalidRequestError::RouterIdNotFound(_)
+            | InvalidRequestError::MissingRouterId => Self::NotFound,
+            InvalidRequestError::InvalidRequest(_) => Self::InvalidRequest,
+            InvalidRequestError::InvalidUri(_) => Self::InvalidUri,
+            InvalidRequestError::InvalidRequestBody(_) => {
+                Self::InvalidRequestBody
+            }
+            InvalidRequestError::Provider4xxError(_) => Self::Provider4xxError,
+        }
+    }
+}

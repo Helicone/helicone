@@ -3,7 +3,6 @@ use std::sync::Arc;
 
 use axum_core::body::Body;
 use chrono::{DateTime, Utc};
-use indexmap::IndexMap;
 use isocountry::CountryCode;
 use uuid::Uuid;
 
@@ -11,18 +10,11 @@ use super::{
     model::Model,
     org::OrgId,
     provider::{InferenceProvider, ProviderKeys},
-    template::TemplateInputs,
     user::UserId,
 };
 use crate::config::router::RouterConfig;
 
 pub type Request = http::Request<Body>;
-
-#[derive(Debug)]
-pub struct HeliconeContext {
-    pub properties: Option<IndexMap<String, String>>,
-    pub template_inputs: Option<TemplateInputs>,
-}
 
 #[derive(Debug, Clone)]
 pub struct AuthContext {
@@ -35,16 +27,21 @@ pub struct AuthContext {
 pub struct RequestContext {
     pub router_config: Arc<RouterConfig>,
     pub proxy_context: RequestProxyContext,
-    pub auth_context: AuthContext,
-    pub helicone: HeliconeContext,
+    /// If `None`, the router is configured to not require auth for requests,
+    /// disabling some features.
+    pub auth_context: Option<AuthContext>,
     pub start_time: DateTime<Utc>,
     pub request_id: Uuid,
     pub country_code: CountryCode,
 }
 
-#[derive(Debug, Clone, Copy)]
-pub struct StreamContext {
+#[derive(Debug, Clone)]
+pub struct MapperContext {
     pub is_stream: bool,
+    /// If `None`, the request was for an endpoint without
+    /// first class support for mapping between different provider
+    /// models.
+    pub model: Option<Model>,
 }
 
 #[derive(Debug)]

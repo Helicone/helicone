@@ -38,11 +38,11 @@ weighted-balance = { path = "./crates/weighted-balance" }
 # TODO: @tom: submit upstream PR
 anthropic-ai-sdk = { version = "0.2.2", git = "https://github.com/tomharmon/anthropic-sdk-rs.git", branch = "add-serde-impls" }
 anyhow = "1.0.98"
-# TODO: @tom: submit upstream PR
-async-openai = { version = "0.28.1", git = "https://github.com/tomharmon/async-openai.git", branch = "task/optional-backoff" }
+async-openai = { version = "0.28.1" }
 axum-core = "0.5.2"
 axum-server = "0.7.2"
 base64 = "0.22.1"
+brakes = { version = "0.1.1", features = ["redis", "tower"] }
 bytes = "1.10.1"
 cfg-if = "1.0.0"
 chrono = "0.4.40"
@@ -71,7 +71,6 @@ hyper = { version = "1.6.0", features = ['full'] }
 hyper-util = "0.1.11"
 indexmap = "2.9.0"
 isocountry = "0.3.2"
-itertools = "0.14.0"
 json-patch = "4.0.0"
 log-panics = { version = "2.1.0", features = ["with-backtrace"] }
 meltdown = "0.3.2"
@@ -83,10 +82,13 @@ opentelemetry_sdk = { version = "0.29.0", features = ["rt-tokio"] }
 opentelemetry-appender-tracing = "0.29.1"
 opentelemetry-otlp = { version = "0.29.0" }
 opentelemetry-semantic-conventions = "0.29.0"
+# TODO: @tom: submit upstream PR
+opentelemetry-system-metrics = { version = "0.4.0", git = "https://github.com/tomharmon/opentelemetry-system-metrics.git", branch = "task/add-gpu-feature" }
 opentelemetry-http = "0.29.0"
 opentelemetry-stdout = { version = "0.29.0" }
 pin-project-lite = "0.2.16"
 rand = "0.9.1"
+redis = "0.27.6"
 regex = "1.11.1"
 reqwest = { version = "0.12.15", features = [
     "json",
@@ -95,18 +97,18 @@ reqwest = { version = "0.12.15", features = [
     "native-tls",
 ], default-features = false }
 reqwest-eventsource = "0.6.0"
+rustc-hash = "2.1.1"
 rust_decimal = "1.37.1"
 rusty-s3 = "0.7.0"
+r2d2 = "0.8.10"
 semver = "1.0.26"
 serde = { version = "1.0.219", features = ["derive", "rc"] }
 serde_json = "1.0.140"
 serde_path_to_error = "0.1.17"
-serde_repr = "0.1.20"
 serde_with = "3.12.0"
 serde_yaml = "0.9.34"
 serde_yml = "0.0.12"
 serial_test = "3.2.0"
-sqlx = "0.8.5"
 strum = "0.27.1"
 # TODO @tom: Open PR, message maintainers, and link it here.
 stubr = { git = "https://github.com/tomharmon/stubr" }
@@ -116,9 +118,9 @@ tokio-stream = "0.1.17"
 tokio-test = "0.4.4"
 tokio-util = "0.7.15"
 tower = "0.5.2"
-tower_governor = "0.7.0"
-# TODO: once version 0.6.3 is published, switch off of git
-tower-http = { version = "0.6.2", git = "https://github.com/tower-rs/tower-http.git", branch = "main" }
+tower-http = { version = "0.6.3" }
+# @tom: submit upstream PR
+tower-otel-http-metrics = { git = "https://github.com/tomharmon/tower-otel-http-metrics.git", branch = "feat/custom-attributes-via-extractors" }
 tracing = "0.1.41"
 tracing-opentelemetry = "0.30.0"
 tracing-subscriber = "0.3.19"

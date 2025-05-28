@@ -20,7 +20,7 @@ use crate::{
     },
     dispatcher::DispatcherService,
     error::init::InitError,
-    types::discover::DiscoverMode,
+    types::{discover::DiscoverMode, router::RouterId},
 };
 
 pin_project! {
@@ -35,48 +35,42 @@ pin_project! {
 }
 
 impl Discovery<Key> {
-    pub fn new(
+    pub async fn new(
         app_state: &AppState,
+        router_id: RouterId,
         router_config: &Arc<RouterConfig>,
         rx: Receiver<Change<Key, DispatcherService>>,
     ) -> Result<Self, InitError> {
-        let provider_keys = app_state
-            .0
-            .config
-            .discover
-            .provider_keys(&router_config.balance)?;
         match app_state.0.config.discover.discover_mode {
             DiscoverMode::Config => Ok(Self::Config {
                 inner: ConfigDiscovery::new(
                     app_state,
+                    router_id,
                     router_config,
-                    &provider_keys,
                     rx,
-                )?,
+                )
+                .await?,
             }),
         }
     }
 }
 
 impl Discovery<WeightedKey> {
-    pub fn new_weighted(
+    pub async fn new_weighted(
         app_state: &AppState,
+        router_id: RouterId,
         router_config: &Arc<RouterConfig>,
         rx: Receiver<Change<WeightedKey, DispatcherService>>,
     ) -> Result<Self, InitError> {
-        let provider_keys = app_state
-            .0
-            .config
-            .discover
-            .provider_keys(&router_config.balance)?;
         match app_state.0.config.discover.discover_mode {
             DiscoverMode::Config => Ok(Self::Config {
                 inner: ConfigDiscovery::new_weighted(
                     app_state,
+                    router_id,
                     router_config,
-                    &provider_keys,
                     rx,
-                )?,
+                )
+                .await?,
             }),
         }
     }

@@ -2,8 +2,11 @@ use std::path::PathBuf;
 
 use clap::Parser;
 use llm_proxy::{
-    app::App, config::Config,
+    app::App,
+    config::Config,
     discover::monitor::health::provider::HealthMonitor,
+    error::{init::InitError, runtime::RuntimeError},
+    metrics::system::SystemMetrics,
     utils::meltdown::TaggedService,
 };
 use meltdown::Meltdown;
@@ -18,7 +21,8 @@ pub struct Args {
 }
 
 #[tokio::main]
-async fn main() -> Result<(), llm_proxy::error::runtime::RuntimeError> {
+async fn main() -> Result<(), RuntimeError> {
+    dotenvy::dotenv().ok();
     let args = Args::parse();
     let config = match Config::try_read(args.config) {
         Ok(config) => config,
@@ -30,22 +34,13 @@ async fn main() -> Result<(), llm_proxy::error::runtime::RuntimeError> {
     // Initialize telemetry
     let (logger_provider, tracer_provider, metrics_provider) =
         telemetry::init_telemetry(&config.telemetry)
-            .map_err(llm_proxy::error::init::InitError::Telemetry)
-            .map_err(llm_proxy::error::runtime::RuntimeError::Init)?;
+            .map_err(InitError::Telemetry)
+            .map_err(RuntimeError::Init)?;
 
     info!("telemetry initialized");
     let mut shutting_down = false;
     let app = App::new(config).await?;
-    // let rate_limit_cleanup_interval = config.rate_limit.cleanup_interval;
-    // let rate_limiting_cleanup_service =
-    //     middleware::rate_limit::service::Service::new(
-    //         app.state.0.authed_rate_limit.clone(),
-    //         app.state.0.unauthed_rate_limit.clone(),
-    //         rate_limit_cleanup_interval,
-    //     );
-
     let health_monitor = HealthMonitor::new(app.state.clone());
-
     let mut meltdown = Meltdown::new()
         .register(TaggedService::new(
             "shutdown-signals",
@@ -55,11 +50,8 @@ async fn main() -> Result<(), llm_proxy::error::runtime::RuntimeError> {
         .register(TaggedService::new(
             "provider-health-monitor",
             health_monitor,
-        ));
-    // .register(TaggedService::new(
-    //     "rate-limit-cleanup",
-    //     rate_limiting_cleanup_service,
-    // ));
+        ))
+        .register(TaggedService::new("system-metrics", SystemMetrics));
 
     while let Some((service, result)) = meltdown.next().await {
         match result {

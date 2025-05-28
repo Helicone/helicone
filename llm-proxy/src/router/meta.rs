@@ -1,5 +1,4 @@
 use std::{
-    collections::HashMap,
     future::{Ready, ready},
     task::{Context, Poll},
 };
@@ -8,16 +7,17 @@ use axum_core::response::IntoResponse;
 use futures::future::Either;
 use http::uri::PathAndQuery;
 use regex::Regex;
+use rustc_hash::FxHashMap as HashMap;
 use uuid::Uuid;
 
-use super::Router;
 use crate::{
     app::AppState,
     config::DeploymentTarget,
     error::{
-        api::Error, init::InitError, internal::InternalError,
+        api::ApiError, init::InitError, internal::InternalError,
         invalid_req::InvalidRequestError,
     },
+    router::service::Router,
     types::router::RouterId,
 };
 
@@ -45,7 +45,7 @@ impl MetaRouter {
     pub async fn new(app_state: AppState) -> Result<Self, InitError> {
         let meta_router = match app_state.0.config.deployment_target {
             DeploymentTarget::SelfHosted => Self::from_config(app_state).await,
-            DeploymentTarget::Cloud { .. } | DeploymentTarget::Sidecar => {
+            DeploymentTarget::Cloud | DeploymentTarget::Sidecar => {
                 return Err(InitError::DeploymentTargetNotSupported(
                     app_state.0.config.deployment_target.clone(),
                 ));
@@ -61,8 +61,7 @@ impl MetaRouter {
     pub async fn from_config(app_state: AppState) -> Result<Self, InitError> {
         let router_id_regex =
             Regex::new(ROUTER_ID_REGEX).expect("always valid if tests pass");
-        let mut inner =
-            HashMap::with_capacity(app_state.0.config.routers.as_ref().len());
+        let mut inner = HashMap::default();
         for router_id in app_state.0.config.routers.as_ref().keys() {
             let router = Router::new(*router_id, app_state.clone()).await?;
             inner.insert(*router_id, router);
@@ -77,7 +76,7 @@ impl MetaRouter {
 
 impl tower::Service<crate::types::request::Request> for MetaRouter {
     type Response = crate::types::response::Response;
-    type Error = Error;
+    type Error = ApiError;
     type Future = Either<
         Ready<Result<Self::Response, Self::Error>>,
         <Router as tower::Service<crate::types::request::Request>>::Future,
@@ -131,7 +130,7 @@ impl tower::Service<crate::types::request::Request> for MetaRouter {
                 tracing::warn!(
                     "Failed to convert extracted path to PathAndQuery"
                 );
-                return Either::Left(ready(Ok(Error::Internal(
+                return Either::Left(ready(Ok(ApiError::Internal(
                     InternalError::Internal,
                 )
                 .into_response())));
@@ -141,7 +140,7 @@ impl tower::Service<crate::types::request::Request> for MetaRouter {
             req.extensions_mut().insert(extracted_path_and_query);
             Either::Right(router.call(req))
         } else {
-            Either::Left(ready(Ok(Error::InvalidRequest(
+            Either::Left(ready(Ok(ApiError::InvalidRequest(
                 InvalidRequestError::NotFound(req.uri().path().to_string()),
             )
             .into_response())))
@@ -152,7 +151,7 @@ impl tower::Service<crate::types::request::Request> for MetaRouter {
 fn extract_router_id_and_path<'a>(
     router_id_regex: &Regex,
     path: &'a str,
-) -> Result<(RouterId, &'a str), Error> {
+) -> Result<(RouterId, &'a str), ApiError> {
     if let Some(captures) = router_id_regex.captures(path) {
         let router_id: RouterId;
         let mut extracted_sub_path_component: &str = ""; // Stores the raw captured sub-path
@@ -175,7 +174,7 @@ fn extract_router_id_and_path<'a>(
                     "Path segment matched UUID pattern but failed to parse as \
                      UUID"
                 );
-                return Err(Error::Internal(InternalError::Internal));
+                return Err(ApiError::Internal(InternalError::Internal));
             }
         } else {
             // No UUID matched, so it's a Default Router ID
@@ -229,7 +228,7 @@ fn extract_router_id_and_path<'a>(
     } else {
         // Regex did not match the path at all (e.g. path doesn't start with
         // /router)
-        Err(Error::InvalidRequest(InvalidRequestError::NotFound(
+        Err(ApiError::InvalidRequest(InvalidRequestError::NotFound(
             path.to_string(),
         )))
     }
@@ -384,7 +383,7 @@ mod tests {
         let path_invalid_base = "/other/invalid/path";
         assert!(matches!(
             extract_router_id_and_path(&router_id_regex, path_invalid_base),
-            Err(Error::InvalidRequest(InvalidRequestError::NotFound(_)))
+            Err(ApiError::InvalidRequest(InvalidRequestError::NotFound(_)))
         ));
 
         // Path that looks like an invalid UUID but is treated as a default path

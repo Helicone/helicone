@@ -1,5 +1,5 @@
 use std::{
-    future::{Ready, ready},
+    future::Ready,
     sync::Arc,
     task::{Context, Poll},
 };
@@ -11,7 +11,6 @@ use uuid::Uuid;
 
 use crate::{
     config::router::RouterConfig,
-    error::{api::Error, internal::InternalError},
     types::{
         provider::ProviderKeys,
         request::{AuthContext, Request, RequestContext},
@@ -42,13 +41,11 @@ impl<S> Service<S> {
 
 impl<S> tower::Service<Request> for Service<S>
 where
-    S: tower::Service<Request, Response = Response, Error = Error>
-        + Send
-        + 'static,
+    S: tower::Service<Request, Response = Response> + Send + 'static,
     S::Future: Send + 'static,
 {
     type Response = S::Response;
-    type Error = Error;
+    type Error = S::Error;
     type Future = Either<Ready<Result<Self::Response, Self::Error>>, S::Future>;
 
     #[inline]
@@ -63,15 +60,9 @@ where
     fn call(&mut self, mut req: Request) -> Self::Future {
         let router_config = self.router_config.clone();
         let provider_keys = self.provider_keys.clone();
-        match Service::<S>::get_context(router_config, provider_keys, &mut req)
-        {
-            Ok(req_ctx) => {
-                req.extensions_mut().insert(Arc::new(req_ctx));
-            }
-            Err(e) => {
-                return Either::Left(ready(Err(e)));
-            }
-        }
+        let req_ctx =
+            Service::<S>::get_context(router_config, provider_keys, &mut req);
+        req.extensions_mut().insert(Arc::new(req_ctx));
         Either::Right(self.inner.call(req))
     }
 }
@@ -81,38 +72,25 @@ where
     S: tower::Service<Request>,
     S::Future: Send + 'static,
     S::Response: Send + 'static,
-    S::Error: Into<Error> + Send + Sync + 'static,
 {
     fn get_context(
         router_config: Arc<RouterConfig>,
         provider_api_keys: ProviderKeys,
         req: &mut Request,
-    ) -> Result<RequestContext, Error> {
-        let auth_context = req
-            .extensions_mut()
-            .remove::<AuthContext>()
-            .ok_or(InternalError::ExtensionNotFound("AuthContext"))?;
-
-        // TODO: this will come from parsing the prompt+headers+etc
-        let helicone = crate::types::request::HeliconeContext {
-            properties: None,
-            template_inputs: None,
-        };
+    ) -> RequestContext {
+        let auth_context = req.extensions_mut().remove::<AuthContext>();
         let proxy_context = crate::types::request::RequestProxyContext {
             forced_routing: None,
             provider_api_keys,
         };
-        let req_ctx = RequestContext {
+        RequestContext {
             router_config,
             proxy_context,
-            helicone,
             auth_context,
             request_id: Uuid::new_v4(),
             country_code: CountryCode::USA,
             start_time: Utc::now(),
-        };
-
-        Ok(req_ctx)
+        }
     }
 }
 

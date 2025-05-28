@@ -1,3 +1,4 @@
 [alias]
 ci-clippy = "clippy -- -D warnings"
 int-test = "t --tests --all-features"
+rl = "run -- -c ./llm-proxy/config/local.yaml"

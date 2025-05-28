@@ -2,9 +2,9 @@ name: Rust CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 env:
   CARGO_TERM_COLOR: always
@@ -13,44 +13,33 @@ jobs:
   format:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Use nightly rustfmt
-      run: rustup override set nightly && rustup component add --toolchain nightly-x86_64-unknown-linux-gnu rustfmt
-    - name: Output rust version for educational purposes
-      run: rustup --version
-    - name: Format
-      run: cargo +nightly fmt --check
+      - uses: actions/checkout@v4
+      - name: Use nightly rustfmt
+        run: rustup override set nightly && rustup component add --toolchain nightly-x86_64-unknown-linux-gnu rustfmt
+      - name: Output rust version for educational purposes
+        run: rustup --version
+      - name: Format
+        run: cargo +nightly fmt --check
   clippy:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Clippy
-      run: cargo ci-clippy
+      - uses: actions/checkout@v4
+      - name: Clippy
+        run: cargo ci-clippy
   test:
     runs-on: ubuntu-latest
     env:
-      SQLX_OFFLINE: true
-      PROXY__DATABASE__URL: "postgresql://postgres:postgres@localhost:5432/postgres"
       HELICONE_API_KEY: "sk-helicone-..."
     services:
-      postgres:
-        image: postgres:16.4-alpine
-        env:
-          POSTGRES_DB: postgres
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-        ports:
-          - 54322:5432
-
       redis:
         image: redis:6.2.6-alpine
         ports:
           - 6379:6379
 
     steps:
-    - uses: actions/checkout@v4
-    # required for stubr test dependency
-    - name: Install Protoc
-      uses: arduino/setup-protoc@v3
-    - name: Test
-      run: cargo test --tests --all-features
+      - uses: actions/checkout@v4
+      # required for stubr test dependency
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v3
+      - name: Test
+        run: cargo test --tests --all-features

@@ -1,4 +1,5 @@
 use std::{
+    collections::HashMap,
     convert::Infallible,
     future::{Ready, ready},
     net::SocketAddr,
@@ -13,43 +14,52 @@ use meltdown::Token;
 use opentelemetry::global;
 use reqwest::Client;
 use telemetry::{make_span::SpanFactory, tracing::MakeRequestId};
+use tokio::sync::RwLock;
 use tower::{ServiceBuilder, buffer::BufferLayer, util::BoxCloneService};
 use tower_http::{
     ServiceBuilderExt, add_extension::AddExtension,
     auth::AsyncRequireAuthorizationLayer, catch_panic::CatchPanicLayer,
-    normalize_path::NormalizePathLayer, trace::TraceLayer,
+    normalize_path::NormalizePathLayer,
+    sensitive_headers::SetSensitiveHeadersLayer, trace::TraceLayer,
 };
 use tracing::{Level, info};
 
 use crate::{
-    config::{Config, minio::Minio, server::TlsConfig},
+    config::{
+        Config,
+        minio::Minio,
+        rate_limit::{RateLimitConfig, RateLimitStore},
+        server::TlsConfig,
+    },
     discover::monitor::health::{
         EndpointMetricsRegistry, provider::HealthMonitorMap,
     },
     error::{self, init::InitError, runtime::RuntimeError},
-    metrics::{self, Metrics},
-    middleware::auth::AuthService,
+    metrics::{self, Metrics, attribute_extractor::AttributeExtractor},
+    middleware::{
+        auth::AuthService, rate_limit::service::Layer as RateLimitLayer,
+    },
     router::meta::MetaRouter,
-    store::StoreRealm,
+    types::{provider::ProviderKeys, router::RouterId},
     utils::{catch_panic::PanicResponder, handle_error::ErrorHandlerLayer},
 };
 
 const BUFFER_SIZE: usize = 1024;
 const JAWN_CONNECT_TIMEOUT: Duration = Duration::from_secs(10);
+const SERVICE_NAME: &str = "helicone-router";
 
-pub type AppResponse = http::Response<
-    tower_http::body::UnsyncBoxBody<
-        bytes::Bytes,
-        Box<
-            (
-                dyn std::error::Error
-                    + std::marker::Send
-                    + std::marker::Sync
-                    + 'static
-            ),
-        >,
+pub type AppResponseBody = tower_http::body::UnsyncBoxBody<
+    bytes::Bytes,
+    Box<
+        (
+            dyn std::error::Error
+                + std::marker::Send
+                + std::marker::Sync
+                + 'static
+        ),
     >,
 >;
+pub type AppResponse = http::Response<AppResponseBody>;
 
 pub type BoxedServiceStack =
     BoxCloneService<crate::types::request::Request, AppResponse, Infallible>;
@@ -68,7 +78,8 @@ pub struct InnerAppState {
     pub config: Config,
     pub minio: Minio,
     pub jawn_client: Client,
-    pub store: StoreRealm,
+    pub redis: Option<r2d2::Pool<redis::Client>>,
+    pub provider_keys: RwLock<HashMap<RouterId, ProviderKeys>>,
     /// Top level metrics which are exported to OpenTelemetry.
     pub metrics: Metrics,
     /// Metrics to track provider health and rate limits.
@@ -110,10 +121,6 @@ pub struct InnerAppState {
 /// -- region specific middleware (none yet, just leaf service) --
 /// 17. Dispatcher
 ///
-/// Ideally we could combine the rate limits into one layer
-/// instead of using `tower_governor` and having to split them up.
-///
-///
 /// For request processing, we need to use some dynamically added
 /// request extensions. We try to aggregate most of this into the
 /// `RequestContext` struct to keep things simple but for some things
@@ -128,19 +135,32 @@ pub struct InnerAppState {
 /// - `PathAndQuery`
 ///   - Added by the `MetaRouter`
 ///   - Used by the Mapper layer
+/// - `ApiEndpoint`
+///   - Added by the `Router`
+///   - Used by the Mapper layer
 /// - `Arc<RequestContext>`
 ///   - Added by the request context layer
 ///   - Used by many layers
 /// - `RouterConfig`
 ///   - Added by the request context layer
 ///   - Used by the Mapper layer
-/// - `StreamContext`, `ApiEndpoint`
+/// - `MapperContext`
 ///   - Added by the `Mapper` layer
 ///   - Used by the Dispatcher layer
 /// - `Provider`
 ///   - Added by the `AddExtensionLayer` in the dispatcher service stack
 ///   - Value is driven by the `Key` type used by the `Discovery` impl.
 ///   - Used by the Mapper layer
+///
+/// Required response extensions:
+/// - Copied by the dispatcher from req to resp extensions
+///   - `InferenceProvider`
+///   - `Model`
+///   - `RouterId`
+///   - `PathAndQuery`
+///   - `ApiEndpoint`
+///   - `MapperContext`
+///   - `AuthContext`
 #[derive(Clone)]
 pub struct App {
     pub state: AppState,
@@ -172,11 +192,6 @@ impl App {
     pub async fn new(config: Config) -> Result<Self, InitError> {
         tracing::info!(config = ?config, "creating app");
         let minio = Minio::new(config.minio.clone())?;
-        let pg_config =
-            sqlx::postgres::PgPoolOptions::from(config.database.clone());
-        let pg_pool = pg_config
-            .connect_lazy(&config.database.url.0)
-            .map_err(error::init::InitError::DatabaseConnection)?;
         let jawn_client = Client::builder()
             .tcp_nodelay(true)
             .connect_timeout(JAWN_CONNECT_TIMEOUT)
@@ -185,26 +200,52 @@ impl App {
 
         // If global meter is not set, opentelemetry defaults to a
         // NoopMeterProvider
-        let meter = global::meter("helicone-router");
+        let meter = global::meter(SERVICE_NAME);
         let metrics = metrics::Metrics::new(&meter);
         let endpoint_metrics = EndpointMetricsRegistry::default();
         let health_monitor = HealthMonitorMap::default();
 
+        let redis = match &config.rate_limit {
+            RateLimitConfig::Enabled { store, .. } => match store {
+                RateLimitStore::Redis(redis) => {
+                    let client = redis::Client::open(redis.url.0.clone())?;
+                    let pool = r2d2::Pool::builder()
+                        .connection_timeout(redis.connection_timeout)
+                        .build(client)?;
+                    Some(pool)
+                }
+                RateLimitStore::InMemory => None,
+            },
+            RateLimitConfig::Disabled => None,
+        };
+
         let app_state = AppState(Arc::new(InnerAppState {
             config,
             minio,
-            store: StoreRealm::new(pg_pool),
             jawn_client,
+            redis,
+            provider_keys: RwLock::new(HashMap::default()),
             metrics,
             endpoint_metrics,
             health_monitor,
         }));
+
+        let otel_metrics_layer =
+            tower_otel_http_metrics::HTTPMetricsLayerBuilder::builder()
+                .with_meter(meter)
+                .with_response_extractor::<_, axum_core::body::Body>(
+                    AttributeExtractor,
+                )
+                .build::<axum_core::body::Body, axum_core::body::Body>()?;
 
         let router = MetaRouter::new(app_state.clone()).await?;
 
         // global middleware is applied here
         let service_stack = ServiceBuilder::new()
             .layer(CatchPanicLayer::custom(PanicResponder))
+            .layer(SetSensitiveHeadersLayer::new(std::iter::once(
+                http::header::AUTHORIZATION,
+            )))
             .layer(
                 TraceLayer::new_for_http()
                     .make_span_with(SpanFactory::new(
@@ -214,13 +255,18 @@ impl App {
                     .on_body_chunk(())
                     .on_eos(()),
             )
+            .layer(otel_metrics_layer)
             .set_x_request_id(MakeRequestId)
             .propagate_x_request_id()
             .layer(NormalizePathLayer::trim_trailing_slash())
+            .layer(metrics::request_count::Layer::new(app_state.clone()))
             .layer(ErrorHandlerLayer::new(app_state.clone()))
             // NOTE: not sure if there is perf impact from Auth layer coming
             // before buffer layer, but required due to Clone bound.
-            .layer(AsyncRequireAuthorizationLayer::new(AuthService))
+            .layer(AsyncRequireAuthorizationLayer::new(AuthService::new(
+                app_state.clone(),
+            )))
+            .layer(RateLimitLayer::new(&app_state))
             .map_err(crate::error::internal::InternalError::BufferError)
             .layer(BufferLayer::new(BUFFER_SIZE))
             .layer(ErrorHandlerLayer::new(app_state.clone()))

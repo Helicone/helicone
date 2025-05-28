@@ -1,8 +1,8 @@
-use std::time::Duration;
+use std::{sync::Arc, time::Duration};
 
 use serde::{Deserialize, Serialize};
 
-use super::{balance::BalanceConfig, monitor::MonitorConfig};
+use super::{monitor::MonitorConfig, router::RouterConfig};
 use crate::{
     error::provider::ProviderError,
     types::{discover::DiscoverMode, provider::ProviderKeys},
@@ -35,10 +35,10 @@ pub struct DiscoverConfig {
 impl DiscoverConfig {
     pub fn provider_keys(
         &self,
-        balance_config: &BalanceConfig,
+        router_config: &Arc<RouterConfig>,
     ) -> Result<ProviderKeys, ProviderError> {
         match self.api_keys_source {
-            ProviderKeysSource::Env => ProviderKeys::from_env(balance_config),
+            ProviderKeysSource::Env => ProviderKeys::from_env(router_config),
         }
     }
 }

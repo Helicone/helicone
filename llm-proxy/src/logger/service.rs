@@ -45,7 +45,11 @@ impl LoggerService {
         request_body: Bytes,
         response_body: Bytes,
     ) -> Result<(), LoggerError> {
-        let auth_ctx = &req_ctx.auth_context;
+        let auth_ctx = req_ctx
+            .auth_context
+            .as_ref()
+            .ok_or(LoggerError::NoAuthContextSet)?;
+
         let object_path = format!(
             "organizations/{}/requests/{}/raw_request_response_body",
             auth_ctx.org_id.as_ref(),
@@ -81,6 +85,11 @@ impl LoggerService {
     #[allow(clippy::cast_precision_loss)]
     pub async fn log(mut self) -> Result<(), LoggerError> {
         tracing::trace!("logging request");
+        let auth_ctx = self
+            .req_ctx
+            .auth_context
+            .as_ref()
+            .ok_or(LoggerError::NoAuthContextSet)?;
         let response_body = self
             .response_body
             .collect()
@@ -103,7 +112,7 @@ impl LoggerService {
         let req_path = self.target_url.path().to_string();
         let request_log = RequestLog::builder()
             .id(self.req_ctx.request_id)
-            .user_id(self.req_ctx.auth_context.user_id.clone())
+            .user_id(auth_ctx.user_id)
             .properties(IndexMap::new())
             .target_url(self.target_url)
             .provider(self.provider)
@@ -121,7 +130,7 @@ impl LoggerService {
             .build();
         let log = Log::new(request_log, response_log);
         let log_message = LogMessage::builder()
-            .authorization(self.req_ctx.auth_context.api_key.clone())
+            .authorization(auth_ctx.api_key.clone())
             .helicone_meta(helicone_metadata)
             .log(log)
             .build();
@@ -140,7 +149,10 @@ impl LoggerService {
             .jawn_client
             .post(helicone_url)
             .json(&log_message)
-            .header("authorization", format!("Bearer {}", self.req_ctx.auth_context.api_key))
+            .header(
+                "authorization",
+                format!("Bearer {}", auth_ctx.api_key),
+            )
             .send()
             .await
             .map_err(|e| {
