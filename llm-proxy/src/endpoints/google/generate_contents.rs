@@ -8,7 +8,7 @@ pub struct GenerateContents;
 
 impl crate::endpoints::Endpoint for GenerateContents {
     // https://ai.google.dev/gemini-api/docs/openai
-    const PATH: &'static str = "/v1beta/openai/chat/completions";
+    const PATH: &'static str = "/v1/chat/completions";
     type RequestBody = CreateChatCompletionRequest;
     type ResponseBody = CreateChatCompletionResponse;
     type StreamResponseBody = CreateChatCompletionStreamResponse;

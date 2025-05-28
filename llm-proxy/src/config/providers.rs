@@ -85,8 +85,10 @@ fn default_google_provider_config() -> GlobalProviderConfig {
             ModelName::borrowed("gemini-2.5-pro-preview-tts"),
             ModelName::borrowed("gemini-2.5-flash-preview-05-20"),
         ]),
-        base_url: Url::parse("https://generativelanguage.googleapis.com")
-            .unwrap(),
+        base_url: Url::parse(
+            "https://generativelanguage.googleapis.com/v1beta/openai",
+        )
+        .unwrap(),
         version: None,
     }
 }
