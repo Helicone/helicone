@@ -430,12 +430,11 @@ const CachePage = (props: CachePageProps) => {
 
       <section className={`dark:border-border w-full border-t py-2`}>
         <div className="py-4">
-          
           <div className="flex flex-row items-center justify-between px-4 mb-4">
             <h2 className="text-lg font-semibold text-foreground">
               Top Requests
             </h2>
-            <button 
+            <button
               className="px-3 py-1.5 text-sm border border-border rounded-lg hover:bg-muted"
               onClick={() => {
                 filterStore.setFilter(
