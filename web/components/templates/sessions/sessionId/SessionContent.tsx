@@ -66,7 +66,7 @@ export const SessionContent: React.FC<SessionContentProps> = ({
   const { sessions: relatedSessions, isLoading: isLoadingSessions } =
     useSessions({
       timeFilter,
-      sessionIdSearch: session_id,
+      sessionIdSearch: "",
       selectedName: session_name === EMPTY_SESSION_NAME ? "" : session_name,
     });
 
