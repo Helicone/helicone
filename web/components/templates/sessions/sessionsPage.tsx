@@ -20,7 +20,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { Muted, Small, XSmall } from "@/components/ui/typography";
 import { FilterASTButton } from "@/filterAST/FilterASTButton";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
@@ -51,7 +50,6 @@ import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
 import { getColumns } from "./initialColumns";
 import { EMPTY_SESSION_NAME } from "./sessionId/SessionContent";
 import SessionMetrics from "./SessionMetrics";
-import { clickhousePriceCalc } from "@/packages/cost";
 
 interface SessionsPageProps {
   currentPage: number;
@@ -266,7 +264,6 @@ const SessionsPage = (props: SessionsPageProps) => {
     },
     { label: "Created On", value: aggregatedStats.createdOn },
   ];
-
 
   return hasSessions || isSessionsLoading ? (
     <main className="h-screen flex flex-col w-full animate-fade-in">
