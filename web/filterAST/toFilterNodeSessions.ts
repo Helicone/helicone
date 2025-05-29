@@ -28,7 +28,7 @@ const operatorMap: Record<string, string> = {
 };
 
 /**
- * Get field type based on field name for sessions_request_response_rmt
+ * Get field type based on field name for sessions
  * This helps with proper type conversion for values
  */
 function getFieldType(fieldName: string): "string" | "number" {
@@ -81,13 +81,13 @@ export function toFilterNodeSessions(filter: FilterExpression): FilterNode {
     const operator = operatorMap[condition.operator] || condition.operator;
 
     // Only process sessions table conditions
-    if (condition.field.table === "sessions_request_response_rmt") {
+    if (condition.field.table === "sessions") {
       const fieldName = condition.field.column.toString();
       const processedValue = processValue(fieldName, condition.value);
 
       // Create filter leaf for sessions
       const result: FilterLeaf = {
-        sessions_request_response_rmt: {
+        sessions: {
           [fieldName]: {
             [operator]: processedValue,
           },

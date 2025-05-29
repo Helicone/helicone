@@ -1,4 +1,5 @@
 import { FilterUIDefinition } from "./types";
+import { RequestResponseRMTDerivedTable } from "../filterAst";
 
 export const STATIC_USER_VIEW_DEFINITIONS: FilterUIDefinition[] = [
   {
@@ -89,7 +90,7 @@ export const STATIC_SESSIONS_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     label: "Created At",
     type: "datetime",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
-    table: "sessions_request_response_rmt",
+    table: "sessions",
     subType: "sessions",
   },
   {
@@ -97,7 +98,7 @@ export const STATIC_SESSIONS_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     label: "Latest Request Created At",
     type: "datetime",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
-    table: "sessions_request_response_rmt",
+    table: "sessions",
     subType: "sessions",
   },
   {
@@ -105,7 +106,7 @@ export const STATIC_SESSIONS_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     label: "Total Tokens",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
-    table: "sessions_request_response_rmt",
+    table: "sessions",
     subType: "sessions",
   },
   {
@@ -113,7 +114,7 @@ export const STATIC_SESSIONS_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     label: "Total Requests",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
-    table: "sessions_request_response_rmt",
+    table: "sessions",
     subType: "sessions",
   },
   {
@@ -121,7 +122,7 @@ export const STATIC_SESSIONS_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     label: "Total Completion Tokens",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
-    table: "sessions_request_response_rmt",
+    table: "sessions",
     subType: "sessions",
   },
   {
@@ -129,7 +130,7 @@ export const STATIC_SESSIONS_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     label: "Total Prompt Tokens",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
-    table: "sessions_request_response_rmt",
+    table: "sessions",
     subType: "sessions",
   },
   {
@@ -137,7 +138,7 @@ export const STATIC_SESSIONS_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     label: "Total Cost",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
-    table: "sessions_request_response_rmt",
+    table: "sessions",
     subType: "sessions",
   },
   {
@@ -145,7 +146,7 @@ export const STATIC_SESSIONS_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     label: "Tags",
     type: "string",
     operators: ["eq", "neq", "like", "ilike", "contains"],
-    table: "sessions_request_response_rmt",
+    table: "sessions",
     subType: "sessions",
   },
 ];
@@ -331,3 +332,35 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
     table: "request_response_rmt",
   },
 ];
+
+// Derivations of the base table request_response_rmt
+export const getRMTBasedFilterDefinitions = (table: RequestResponseRMTDerivedTable): FilterUIDefinition[] => {
+  return STATIC_FILTER_DEFINITIONS.map((def) => ({
+    ...def,
+    table,
+  }));
+};
+
+export const STATIC_SESSION_RMT_DEFINITIONS: FilterUIDefinition[] = [
+  {
+    id: "session_id",
+    label: "Session ID",
+    type: "string",
+    operators: ["eq", "neq", "like", "ilike", "contains"],
+    table: "session_rmt",
+  },
+  {
+    id: "session_name", 
+    label: "Session Name",
+    type: "string",
+    operators: ["eq", "neq", "like", "ilike", "contains"],
+    table: "session_rmt",
+  },
+];
+
+export const getSessionRMTFilterDefinitions = (): FilterUIDefinition[] => {
+  return [
+    ...getRMTBasedFilterDefinitions("session_rmt"),
+    ...STATIC_SESSION_RMT_DEFINITIONS,
+  ];
+};

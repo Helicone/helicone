@@ -212,6 +212,7 @@ interface RequestResponseVersionedToOperators {
   scores: {
     [key: string]: SingleKey<TextOperators>;
   };
+  scores_column: SingleKey<TextOperators>;
   request_body: SingleKey<VectorOperators>;
   response_body: SingleKey<VectorOperators>;
   cache_reference_id: SingleKey<TextOperators>;
@@ -219,7 +220,41 @@ interface RequestResponseVersionedToOperators {
   "helicone-score-feedback": SingleKey<BooleanOperators>;
 }
 
-interface SessionsRequestResponseVersionedToOperators {
+interface SessionRMTToOperators {
+  session_id: SingleKey<TextOperators>;
+  session_name: SingleKey<TextOperators>;
+  latency: SingleKey<NumberOperators>;
+  status: SingleKey<NumberOperators>;
+  request_created_at: SingleKey<TimestampOperatorsTyped>;
+  response_created_at: SingleKey<TimestampOperatorsTyped>;
+  model: SingleKey<TextOperators>;
+  user_id: SingleKey<TextOperators>;
+  organization_id: SingleKey<TextOperators>;
+  node_id: SingleKey<TextOperators>;
+  job_id: SingleKey<TextOperators>;
+  threat: SingleKey<BooleanOperators>;
+  request_id: SingleKey<TextOperators>;
+  prompt_tokens: SingleKey<NumberOperators>;
+  completion_tokens: SingleKey<NumberOperators>;
+  total_tokens: SingleKey<NumberOperators>;
+  target_url: SingleKey<TextOperators>;
+  properties: {
+    [key: string]: SingleKey<TextOperators>;
+  };
+  search_properties: {
+    [key: string]: SingleKey<TextOperators>;
+  };
+  scores: {
+    [key: string]: SingleKey<TextOperators>;
+  };
+  scores_column: SingleKey<TextOperators>;
+  request_body: SingleKey<VectorOperators>;
+  response_body: SingleKey<VectorOperators>;
+  cache_enabled: SingleKey<BooleanOperators>;
+  cache_reference_id: SingleKey<TextOperators>;
+}
+
+interface SessionsToOperators {
   total_cost: SingleKey<NumberOperators>;
   total_tokens: SingleKey<NumberOperators>;
 }
@@ -230,8 +265,11 @@ export type FilterLeafRequestResponseLog =
 export type FilterLeafRequestResponseVersioned =
   SingleKey<RequestResponseVersionedToOperators>;
 
-export type FilterLeafSessionsRequestResponseVersioned =
-  SingleKey<SessionsRequestResponseVersionedToOperators>;
+export type FilterLeafSessionRMT =
+  SingleKey<SessionRMTToOperators>;
+
+export type FilterLeafSessions =
+  SingleKey<SessionsToOperators>;
 
 type PropertiesCopyV2ToOperators = {
   key: SingleKey<TextOperators>;
@@ -310,7 +348,8 @@ export type TablesAndViews = {
   // CLICKHOUSE TABLES
   request_response_log: FilterLeafRequestResponseLog;
   request_response_rmt: FilterLeafRequestResponseVersioned;
-  sessions_request_response_rmt: FilterLeafSessionsRequestResponseVersioned;
+  session_rmt: FilterLeafSessionRMT;
+  sessions: FilterLeafSessions;
   users_view: FilterLeafUserView;
   properties_v3: FilterLeafPropertiesCopyV2;
   property_with_response_v1: FilterLeafPropertyWithResponseV1;

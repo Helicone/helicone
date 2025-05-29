@@ -51,6 +51,7 @@ import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
 import { getColumns } from "./initialColumns";
 import { EMPTY_SESSION_NAME } from "./sessionId/SessionContent";
 import SessionMetrics from "./SessionMetrics";
+import { clickhousePriceCalc } from "@/packages/cost";
 
 interface SessionsPageProps {
   currentPage: number;
@@ -266,13 +267,6 @@ const SessionsPage = (props: SessionsPageProps) => {
     { label: "Created On", value: aggregatedStats.createdOn },
   ];
 
-  if (isSessionsLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-        <LoadingAnimation title="Loading sessions..." />
-      </div>
-    );
-  }
 
   return hasSessions || isSessionsLoading ? (
     <main className="h-screen flex flex-col w-full animate-fade-in">
@@ -366,7 +360,7 @@ const SessionsPage = (props: SessionsPageProps) => {
                 custom={true}
               />
 
-              <FilterASTButton />
+              <FilterASTButton baseTable="session_rmt" />
             </section>
           }
           rightSection={

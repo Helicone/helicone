@@ -5,11 +5,13 @@ import {
   STATIC_FILTER_DEFINITIONS,
   STATIC_USER_VIEW_DEFINITIONS,
   STATIC_SESSIONS_VIEW_DEFINITIONS,
+  getRMTBasedFilterDefinitions,
 } from "./staticDefinitions";
 
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useRouter } from "next/router";
+import { RequestResponseRMTDerivedTable } from "../filterAst";
 
 const KNOWN_HELICONE_PROPERTIES = {
   "helicone-session-id": {
@@ -75,6 +77,10 @@ export const useFilterUIDefinitions = () => {
   const router = useRouter();
   // Combine static definitions with dynamic ones
   const completeDefinitions = useMemo(() => {
+    const table: RequestResponseRMTDerivedTable = router.pathname.startsWith("/sessions") 
+      ? "session_rmt" 
+      : "request_response_rmt";
+
     const dynamicDefinitions: FilterUIDefinition[] =
       properties.data?.data?.map((property) => ({
         id: property.property,
@@ -101,7 +107,7 @@ export const useFilterUIDefinitions = () => {
             );
         },
         subType: "property",
-        table: "request_response_rmt",
+        table,
       })) ?? [];
 
     const modelsDefinition: FilterUIDefinition = {
@@ -124,7 +130,7 @@ export const useFilterUIDefinitions = () => {
             })) ?? []
         );
       },
-      table: "request_response_rmt",
+      table,
     };
 
     // Replace or add dynamic definitions to the static ones
@@ -135,7 +141,7 @@ export const useFilterUIDefinitions = () => {
 
     const definitions = [
       modelsDefinition,
-      ...filteredStaticDefs,
+      ...getRMTBasedFilterDefinitions(table),
       ...dynamicDefinitions,
     ] as FilterUIDefinition[];
 
@@ -164,7 +170,7 @@ export const useFilterUIDefinitions = () => {
     router.pathname,
     searchProperties,
     models.data?.data,
-  ]); // Include all dependencies
+  ]);
 
   return {
     filterDefinitions: completeDefinitions,

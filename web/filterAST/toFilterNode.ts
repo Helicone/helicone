@@ -73,6 +73,7 @@ function getTableFromField(field: FieldSpec): string {
  * @returns The equivalent legacy filter node
  */
 export function toFilterNode(filter: FilterExpression): FilterNode {
+  console.log("toFilterNode", filter);
   // Handle "all" expression
   if (filter.type === "all") {
     return "all";

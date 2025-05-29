@@ -65,6 +65,53 @@ const NOT_IMPLEMENTED = () => {
   throw new Error("Not implemented");
 };
 
+function createRMTTableMapper<T extends keyof TablesAndViews>(
+  tableName: T,
+  fieldMappings: { [key in keyof TablesAndViews[T]]: string }
+): KeyMapper<TablesAndViews[T]> {
+  return (filter, placeValueSafely) => {
+    if ("properties" in filter && filter.properties) {
+      const key = Object.keys(filter.properties)[0];
+      const propertyValue = filter.properties[key as keyof typeof filter.properties];
+      if (propertyValue) {
+        const { operator, value } = extractOperatorAndValueFromAnOperator(propertyValue as AnyOperator);
+        return {
+          column: `${tableName}.properties[${placeValueSafely(key)}]`,
+          operator: operator,
+          value: `${placeValueSafely(value)}`,
+        };
+      }
+    }
+    if ("search_properties" in filter && filter.search_properties) {
+      const key = Object.keys(filter.search_properties)[0];
+      const searchPropertyValue = filter.search_properties[key as keyof typeof filter.search_properties];
+      if (searchPropertyValue) {
+        const { operator, value } = extractOperatorAndValueFromAnOperator(searchPropertyValue as AnyOperator);
+        return {
+          column: `key`,
+          operator: operator,
+          value: `${placeValueSafely(value)}`,
+        };
+      }
+    }
+    if ("scores" in filter && filter.scores) {
+      const key = Object.keys(filter.scores)[0];
+      const scoreValue = filter.scores[key as keyof typeof filter.scores];
+      if (scoreValue) {
+        const { operator, value } = extractOperatorAndValueFromAnOperator(scoreValue as AnyOperator);
+        return {
+          column: `has(scores, ${placeValueSafely(
+            key
+          )}) AND scores[${placeValueSafely(key)}]`,
+          operator: operator,
+          value: `${placeValueSafely(value)}`,
+        };
+      }
+    }
+    return easyKeyMappings<T>(fieldMappings)(filter, placeValueSafely);
+  };
+}
+
 const whereKeyMappings: KeyMappings = {
   user_metrics: easyKeyMappings(
     {
@@ -150,61 +197,50 @@ const whereKeyMappings: KeyMappings = {
     job_id: "request_response_log.job_id",
     threat: "request_response_log.threat",
   }),
-  request_response_rmt: (filter, placeValueSafely) => {
-    if ("properties" in filter && filter.properties) {
-      const key = Object.keys(filter.properties)[0];
-      const { operator, value } = extractOperatorAndValueFromAnOperator(
-        filter.properties[key as keyof typeof filter.properties]
-      );
-      return {
-        column: `properties[${placeValueSafely(key)}]`,
-        operator: operator,
-        value: placeValueSafely(value),
-      };
-    }
-    if ("search_properties" in filter && filter.search_properties) {
-      const key = Object.keys(filter.search_properties)[0];
-      const { operator, value } = extractOperatorAndValueFromAnOperator(
-        filter.search_properties[key as keyof typeof filter.search_properties]
-      );
-      return {
-        column: `key`,
-        operator: operator,
-        value: placeValueSafely(value),
-      };
-    }
-    if ("scores" in filter && filter.scores) {
-      const key = Object.keys(filter.scores)[0];
-      const { operator, value } = extractOperatorAndValueFromAnOperator(
-        filter.scores[key as keyof typeof filter.scores]
-      );
-      return {
-        column: `has(scores, ${placeValueSafely(
-          key
-        )}) AND scores[${placeValueSafely(key)}]`,
-        operator: operator,
-        value: value,
-      };
-    }
-    return easyKeyMappings<"request_response_rmt">({
-      latency: "request_response_rmt.latency",
-      status: "request_response_rmt.status",
-      request_created_at: "request_response_rmt.request_created_at",
-      response_created_at: "request_response_rmt.response_created_at",
-      model: "request_response_rmt.model",
-      user_id: "request_response_rmt.user_id",
-      organization_id: "request_response_rmt.organization_id",
-      node_id: "request_response_rmt.node_id",
-      job_id: "request_response_rmtd",
-      threat: "request_response_rmt.threat",
-      prompt_tokens: "request_response_rmt.prompt_tokens",
-      completion_tokens: "request_response_rmt.completion_tokens",
-      request_body: "request_response_rmt.request_body",
-      response_body: "request_response_rmt.response_body",
-      cache_reference_id: "request_response_rmt.cache_reference_id",
-      cache_enabled: "request_response_rmt.cache_enabled",
-    })(filter, placeValueSafely);
-  },
+  request_response_rmt: createRMTTableMapper("request_response_rmt", {
+    latency: "request_response_rmt.latency",
+    status: "request_response_rmt.status",
+    request_created_at: "request_response_rmt.request_created_at",
+    response_created_at: "request_response_rmt.response_created_at",
+    request_id: "request_response_rmt.request_id",
+    model: "request_response_rmt.model",
+    user_id: "request_response_rmt.user_id",
+    organization_id: "request_response_rmt.organization_id",
+    node_id: "request_response_rmt.node_id",
+    job_id: "request_response_rmt.job_id",
+    threat: "request_response_rmt.threat",
+    total_tokens: "total_tokens",
+    prompt_tokens: "request_response_rmt.prompt_tokens",
+    completion_tokens: "request_response_rmt.completion_tokens",
+    request_body: "request_response_rmt.request_body",
+    response_body: "request_response_rmt.response_body",
+    scores_column: "request_response_rmt.scores",
+    cache_enabled: "request_response_rmt.cache_enabled",
+    cache_reference_id: "request_response_rmt.cache_reference_id",
+  }),
+  session_rmt: createRMTTableMapper("session_rmt", {
+    session_id: "session_rmt.session_id",
+    session_name: "session_rmt.session_name",
+    latency: "session_rmt.latency",
+    status: "session_rmt.status",
+    request_created_at: "session_rmt.request_created_at",
+    response_created_at: "session_rmt.response_created_at",
+    request_id: "session_rmt.request_id",
+    model: "session_rmt.model",
+    user_id: "session_rmt.user_id",
+    organization_id: "session_rmt.organization_id",
+    node_id: "session_rmt.node_id",
+    job_id: "session_rmt.job_id",
+    threat: "session_rmt.threat",
+    total_tokens: "total_tokens",
+    prompt_tokens: "session_rmt.prompt_tokens",
+    completion_tokens: "session_rmt.completion_tokens",
+    request_body: "session_rmt.request_body",
+    response_body: "session_rmt.response_body",
+    scores_column: "session_rmt.scores",
+    cache_enabled: "session_rmt.cache_enabled",
+    cache_reference_id: "session_rmt.cache_reference_id",
+  }),
   users_view: easyKeyMappings<"request_response_rmt">({
     status: "r.status",
     user_id: "r.user_id",
@@ -225,8 +261,8 @@ const whereKeyMappings: KeyMappings = {
     organization_id: "rate_limit_log.organization_id",
     created_at: "rate_limit_log.created_at",
   }),
-  sessions_request_response_rmt:
-    easyKeyMappings<"sessions_request_response_rmt">({}),
+  sessions:
+    easyKeyMappings<"sessions">({}),
   cache_metrics: easyKeyMappings<"cache_metrics">({
     organization_id: "cache_metrics.organization_id",
     date: "cache_metrics.date",
@@ -268,8 +304,8 @@ const havingKeyMappings: KeyMappings = {
     total_prompt_token: "total_prompt_token",
     cost: "cost",
   }),
-  sessions_request_response_rmt:
-    easyKeyMappings<"sessions_request_response_rmt">({
+  sessions:
+    easyKeyMappings<"sessions">({
       total_cost: "total_cost",
       total_tokens: "total_tokens",
     }),
@@ -279,55 +315,8 @@ const havingKeyMappings: KeyMappings = {
   response: NOT_IMPLEMENTED,
   properties_table: NOT_IMPLEMENTED,
   request_response_log: NOT_IMPLEMENTED,
-  request_response_rmt: (filter, placeValueSafely) => {
-    if ("properties" in filter && filter.properties) {
-      const key = Object.keys(filter.properties)[0];
-      const { operator, value } = extractOperatorAndValueFromAnOperator(
-        filter.properties[key as keyof typeof filter.properties]
-      );
-      return {
-        column: `properties[${placeValueSafely(key)}]`,
-        operator: operator,
-        value: placeValueSafely(value),
-      };
-    }
-    if ("search_properties" in filter && filter.search_properties) {
-      const key = Object.keys(filter.search_properties)[0];
-      const { operator, value } = extractOperatorAndValueFromAnOperator(
-        filter.search_properties[key as keyof typeof filter.search_properties]
-      );
-      return {
-        column: `key`,
-        operator: operator,
-        value: placeValueSafely(value),
-      };
-    }
-    if ("scores" in filter && filter.scores) {
-      const key = Object.keys(filter.scores)[0];
-      const { operator, value } = extractOperatorAndValueFromAnOperator(
-        filter.scores[key as keyof typeof filter.scores]
-      );
-      return {
-        column: `has(scores, ${placeValueSafely(
-          key
-        )}) AND scores[${placeValueSafely(key)}]`,
-        operator: operator,
-        value: value,
-      };
-    }
-    return easyKeyMappings<"request_response_rmt">({
-      latency: "request_response_rmt",
-      status: "request_response_rmt.status",
-      request_created_at: "request_response_rmt.request_created_at",
-      response_created_at: "request_response_rmt.response_created_at",
-      model: "request_response_rmt.model",
-      user_id: "request_response_rmt.user_id",
-      organization_id: "request_response_rmt.organization_id",
-      node_id: "request_response_rmt.node_id",
-      job_id: "request_response_rmt.job_id",
-      threat: "request_response_rmt.threat",
-    })(filter, placeValueSafely);
-  },
+  request_response_rmt: NOT_IMPLEMENTED,
+  session_rmt: NOT_IMPLEMENTED,
   properties_v3: NOT_IMPLEMENTED,
   property_with_response_v1: NOT_IMPLEMENTED,
   feedback: NOT_IMPLEMENTED,

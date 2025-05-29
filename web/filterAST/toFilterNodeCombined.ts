@@ -17,7 +17,7 @@ import { toFilterNodeSessions } from "./toFilterNodeSessions";
  *
  * Priority:
  * 1. If the filter only contains user_metrics table conditions, use toFilterNodeUserView
- * 2. If the filter only contains sessions_request_response_rmt table conditions, use toFilterNodeSessions
+ * 2. If the filter only contains sessions or session_rmt table conditions, use toFilterNodeSessions
  * 3. Otherwise, use the regular toFilterNode
  *
  * @param filter - The new filter expression to convert
@@ -79,13 +79,13 @@ function isPureUserViewFilter(filter: FilterExpression): boolean {
 }
 
 /**
- * Checks if a filter expression only contains conditions for the sessions_request_response_rmt table
+ * Checks if a filter expression only contains conditions for the sessions or session_rmt tables
  */
 function isPureSessionsFilter(filter: FilterExpression): boolean {
   // Handle leaf condition
   if (filter.type === "condition") {
     const condition = filter as ConditionExpression;
-    return condition.field.table === "sessions_request_response_rmt";
+    return condition.field.table === "sessions" || condition.field.table === "session_rmt";
   }
 
   // Handle AND expressions

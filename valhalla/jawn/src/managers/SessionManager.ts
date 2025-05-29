@@ -4,9 +4,9 @@ import {
   SessionMetricsQueryParams,
 } from "../controllers/public/sessionController";
 import { clickhouseDb, Tags } from "../lib/db/ClickhouseWrapper";
-import { dbExecute, printRunnableQuery } from "../lib/shared/db/dbExecute";
+import { dbExecute } from "../lib/shared/db/dbExecute";
 import { filterListToTree, FilterNode } from "../lib/shared/filters/filterDefs";
-import { buildFilterWithAuthClickHouse } from "../lib/shared/filters/filters";
+import { buildFilterWithAuthClickHouseSessionRMT } from "../lib/shared/filters/filters";
 import { TimeFilterMs } from "../lib/shared/filters/timeFilter";
 import { AuthParams } from "../packages/common/auth/types";
 import { err, ok, Result, resultMap } from "../packages/common/result";
@@ -90,7 +90,7 @@ export class SessionManager {
       return err("Invalid timezone difference");
     }
 
-    const builtFilter = await buildFilterWithAuthClickHouse({
+    const builtFilter = await buildFilterWithAuthClickHouseSessionRMT({
       org_id: this.authParams.organizationId,
       filter: filterListToTree(filters, "and"),
       argsAcc: [],
@@ -191,17 +191,15 @@ export class SessionManager {
 
     if (nameContains) {
       filters.push({
-        request_response_rmt: {
-          properties: {
-            "Helicone-Session-Name": {
-              equals: nameContains,
-            },
+        session_rmt: {
+          session_name: {
+            equals: nameContains,
           },
         },
       });
     }
 
-    const builtFilter = await buildFilterWithAuthClickHouse({
+    const builtFilter = await buildFilterWithAuthClickHouseSessionRMT({
       org_id: this.authParams.organizationId,
       filter: filterListToTree(filters, "and"),
       argsAcc: [],
@@ -209,32 +207,30 @@ export class SessionManager {
 
     const query = `
     SELECT 
-      properties['Helicone-Session-Name'] as name,
-      min(request_response_rmt.request_created_at) ${
+      session_name as name,
+      min(session_rmt.request_created_at) ${
         timezoneDifference > 0
           ? `- INTERVAL '${Math.abs(timezoneDifference)} minute'`
           : `+ INTERVAL '${timezoneDifference} minute'`
       } AS created_at,
-      avg(request_response_rmt.latency) as avg_latency,
-      max(request_response_rmt.request_created_at )${
+      avg(session_rmt.latency) as avg_latency,
+      max(session_rmt.request_created_at) ${
         timezoneDifference > 0
           ? `- INTERVAL '${Math.abs(timezoneDifference)} minute'`
           : `+ INTERVAL '${timezoneDifference} minute'`
       } AS last_used,
-      min(request_response_rmt.request_created_at) ${
+      min(session_rmt.request_created_at) ${
         timezoneDifference > 0
           ? `- INTERVAL '${Math.abs(timezoneDifference)} minute'`
           : `+ INTERVAL '${timezoneDifference} minute'`
       } AS first_used,
-      count(DISTINCT properties['Helicone-Session-Id']) AS session_count
-    FROM request_response_rmt
+      count(DISTINCT session_id) AS session_count
+    FROM session_rmt
     WHERE (
-      has(properties, 'Helicone-Session-Id')
-      AND
       ${builtFilter.filter}
       and request_created_at > now() - interval '150 days'
     )
-    GROUP BY properties['Helicone-Session-Name']
+    GROUP BY session_name
     LIMIT 50
     `;
 
@@ -270,11 +266,9 @@ export class SessionManager {
 
     if (nameEquals) {
       filters.push({
-        request_response_rmt: {
-          properties: {
-            "Helicone-Session-Name": {
-              equals: nameEquals,
-            },
+        session_rmt: {
+          session_name: {
+            equals: nameEquals,
           },
         },
       });
@@ -285,20 +279,16 @@ export class SessionManager {
         filterListToTree(
           [
             {
-              request_response_rmt: {
-                properties: {
-                  "Helicone-Session-Id": {
-                    ilike: `%${search}%`,
-                  },
+              session_rmt: {
+                session_id: {
+                  ilike: `%${search}%`,
                 },
               },
             },
             {
-              request_response_rmt: {
-                properties: {
-                  "Helicone-Session-Name": {
-                    ilike: `%${search}%`,
-                  },
+              session_rmt: {
+                session_name: {
+                  ilike: `%${search}%`,
                 },
               },
             },
@@ -308,41 +298,31 @@ export class SessionManager {
       );
     }
 
-    const builtFilter = await buildFilterWithAuthClickHouse({
+    const builtFilter = await buildFilterWithAuthClickHouseSessionRMT({
       org_id: this.authParams.organizationId,
       filter: filterListToTree(filters, "and"),
       argsAcc: [],
     });
 
-    const havingFilter = await buildFilterWithAuthClickHouse({
-      org_id: this.authParams.organizationId,
-      filter: filterListToTree(filters, "and"),
-      argsAcc: [],
-      having: true,
-    });
-
-    // Step 1 get all the properties given this filter
+    // clickhousePriceCalc("session_rmt")
     const query = `
     SELECT 
-      min(request_response_rmt.request_created_at) + INTERVAL ${timezoneDifference} MINUTE AS created_at,
-      max(request_response_rmt.request_created_at) + INTERVAL ${timezoneDifference} MINUTE AS latest_request_created_at,
-      properties['Helicone-Session-Id'] as session_id,
-      properties['Helicone-Session-Name'] as session_name,
-      avg(request_response_rmt.latency) as avg_latency,
-      ${clickhousePriceCalc("request_response_rmt")} AS total_cost,
+      min(session_rmt.request_created_at) + INTERVAL ${timezoneDifference} MINUTE AS created_at,
+      max(session_rmt.request_created_at) + INTERVAL ${timezoneDifference} MINUTE AS latest_request_created_at,
+      session_id,
+      session_name,
+      avg(session_rmt.latency) as avg_latency,
+      ${0} AS total_cost,
       count(*) AS total_requests,
-      sum(request_response_rmt.prompt_tokens) AS prompt_tokens,
-      sum(request_response_rmt.completion_tokens) AS completion_tokens,
-      sum(request_response_rmt.prompt_tokens) + sum(request_response_rmt.completion_tokens) AS total_tokens
-    FROM request_response_rmt
+      sum(session_rmt.prompt_tokens) AS prompt_tokens,
+      sum(session_rmt.completion_tokens) AS completion_tokens,
+      sum(session_rmt.prompt_tokens) + sum(session_rmt.completion_tokens) AS total_tokens
+    FROM session_rmt
     WHERE (
-        has(properties, 'Helicone-Session-Id')
-        AND (
-          ${builtFilter.filter}
-        )
+      ${builtFilter.filter}
     )
-    GROUP BY properties['Helicone-Session-Id'], properties['Helicone-Session-Name']
-    ORDER BY created_at DESC -- TODO: REMOVE FOR TEST
+    GROUP BY session_id, session_name
+    ORDER BY created_at DESC
     LIMIT 50
     `;
 
@@ -465,14 +445,14 @@ const timeFilterNodes = (timeFilter: TimeFilterMs): FilterNode[] => {
   }
   return [
     {
-      request_response_rmt: {
+      session_rmt: {
         request_created_at: {
           gt: new Date(timeFilter.startTimeUnixMs),
         },
       },
     },
     {
-      request_response_rmt: {
+      session_rmt: {
         request_created_at: {
           lt: new Date(timeFilter.endTimeUnixMs),
         },
