@@ -940,6 +940,7 @@ Json: JsonObject;
     };
     /** @description Make all properties in T optional */
     Partial_TimestampOperators_: {
+      equals?: string;
       gte?: string;
       lte?: string;
       lt?: string;
@@ -995,6 +996,8 @@ Json: JsonObject;
     };
     /** @description Make all properties in T optional */
     Partial_TimestampOperatorsTyped_: {
+      /** Format: date-time */
+      equals?: string;
       /** Format: date-time */
       gte?: string;
       /** Format: date-time */

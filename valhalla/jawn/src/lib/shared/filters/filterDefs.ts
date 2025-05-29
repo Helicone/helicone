@@ -34,9 +34,9 @@ export type NumberOperators = Record<
 
 export type BooleanOperators = Record<"equals", boolean>;
 
-export type TimestampOperators = Record<"gte" | "lte" | "lt" | "gt", string>;
+export type TimestampOperators = Record<"gte" | "lte" | "lt" | "gt" | "equals", string>;
 
-export type TimestampOperatorsTyped = Record<"gte" | "lte" | "lt" | "gt", Date>;
+export type TimestampOperatorsTyped = Record<"gte" | "lte" | "lt" | "gt" | "equals", Date>;
 
 export type AnyOperator =
   | SingleKey<TextOperators>

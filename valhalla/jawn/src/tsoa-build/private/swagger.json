@@ -2161,6 +2161,9 @@
 			},
 			"Partial_TimestampOperators_": {
 				"properties": {
+					"equals": {
+						"type": "string"
+					},
 					"gte": {
 						"type": "string"
 					},
@@ -2296,6 +2299,10 @@
 			},
 			"Partial_TimestampOperatorsTyped_": {
 				"properties": {
+					"equals": {
+						"type": "string",
+						"format": "date-time"
+					},
 					"gte": {
 						"type": "string",
 						"format": "date-time"
