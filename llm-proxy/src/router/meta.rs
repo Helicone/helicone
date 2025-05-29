@@ -103,9 +103,6 @@ impl tower::Service<crate::types::request::Request> for MetaRouter {
         &mut self,
         mut req: crate::types::request::Request,
     ) -> Self::Future {
-        // http://localhost:5678/router/ ->   /v1/chat/completions
-        // http://localhost:5678/router/v1/chat/completions"
-        // based url open ai => https://api.openai.com/v1/chat/completions
         let (router_id, api_path) = match extract_router_id_and_path(
             &self.router_id_regex,
             req.uri().path(),

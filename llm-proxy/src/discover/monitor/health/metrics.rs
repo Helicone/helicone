@@ -28,8 +28,6 @@ impl EndpointMetricsRegistry {
         &self,
         api_endpoint: ApiEndpoint,
     ) -> Result<&EndpointMetrics, InternalError> {
-        tracing::debug!("api_endpoint: {:?}", api_endpoint);
-        tracing::debug!("known_endpoints: {:?}", self.known_endpoints);
         self.known_endpoints
             .get(&api_endpoint)
             .ok_or(InternalError::MetricsNotConfigured(api_endpoint))

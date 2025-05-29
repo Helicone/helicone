@@ -79,11 +79,8 @@ fn default_openai_provider_config() -> GlobalProviderConfig {
 fn default_google_provider_config() -> GlobalProviderConfig {
     GlobalProviderConfig {
         models: IndexSet::from([
-            ModelName::borrowed("gemini-1.5-pro"),
             ModelName::borrowed("gemini-1.5-flash"),
             ModelName::borrowed("gemini-2.0-flash"),
-            ModelName::borrowed("gemini-2.5-pro-preview-tts"),
-            ModelName::borrowed("gemini-2.5-flash-preview-05-20"),
         ]),
         base_url: Url::parse("https://generativelanguage.googleapis.com")
             .unwrap(),
