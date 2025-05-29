@@ -13,21 +13,34 @@ impl Default for ModelMappingConfig {
     #[allow(clippy::too_many_lines)]
     fn default() -> Self {
         ModelMappingConfig(nem![
-            ModelName::borrowed("gpt-4o-mini") => nes![ModelName::borrowed("claude-3-5-haiku")],
-            ModelName::borrowed("gpt-4o") => nes![ModelName::borrowed("claude-3-5-sonnet")],
-            ModelName::borrowed("gpt-4.1") => nes![ModelName::borrowed("claude-3-7-sonnet")],
-            ModelName::borrowed("gpt-4.5") => nes![ModelName::borrowed("claude-3-7-sonnet")],
-            ModelName::borrowed("o3") => nes![ModelName::borrowed("claude-3-7-sonnet")],
-            ModelName::borrowed("o4-mini") => nes![ModelName::borrowed("claude-3-5-sonnet")],
-            ModelName::borrowed("o4-mini-high") => nes![ModelName::borrowed("claude-3-5-sonnet")],
-
-            ModelName::borrowed("gpt-4o-mini") => nes![ModelName::borrowed("gemini-2.0-flash")],
-            ModelName::borrowed("gpt-4o") => nes![ModelName::borrowed("gemini-2.0-flash")],
-            ModelName::borrowed("gpt-4.1") => nes![ModelName::borrowed("gemini-2.0-flash")],
-            ModelName::borrowed("gpt-4.5") => nes![ModelName::borrowed("gemini-2.0-flash")],
-            ModelName::borrowed("o3") => nes![ModelName::borrowed("gemini-2.0-flash")],
-            ModelName::borrowed("o4-mini") => nes![ModelName::borrowed("gemini-2.0-flash")],
-            ModelName::borrowed("o4-mini-high") => nes![ModelName::borrowed("gemini-2.0-flash")],
+            ModelName::borrowed("gpt-4o-mini") => nes![
+                ModelName::borrowed("claude-3-5-haiku"),
+                ModelName::borrowed("gemini-2.0-flash")
+            ],
+            ModelName::borrowed("gpt-4o") => nes![
+                ModelName::borrowed("claude-3-5-sonnet"),
+                ModelName::borrowed("gemini-2.0-flash")
+            ],
+            ModelName::borrowed("gpt-4.1") => nes![
+                ModelName::borrowed("claude-3-7-sonnet"),
+                ModelName::borrowed("gemini-2.0-flash")
+            ],
+            ModelName::borrowed("gpt-4.5") => nes![
+                ModelName::borrowed("claude-3-7-sonnet"),
+                ModelName::borrowed("gemini-2.0-flash")
+            ],
+            ModelName::borrowed("o3") => nes![
+                ModelName::borrowed("claude-3-7-sonnet"),
+                ModelName::borrowed("gemini-2.0-flash")
+            ],
+            ModelName::borrowed("o4-mini") => nes![
+                ModelName::borrowed("claude-3-5-sonnet"),
+                ModelName::borrowed("gemini-2.0-flash")
+            ],
+            ModelName::borrowed("o4-mini-high") => nes![
+                ModelName::borrowed("claude-3-5-sonnet"),
+                ModelName::borrowed("gemini-2.0-flash")
+            ],
 
             ModelName::borrowed("claude-3-5-haiku") => nes![ModelName::borrowed("gpt-4o-mini")],
             ModelName::borrowed("claude-3-5-sonnet") => nes![ModelName::borrowed("gpt-4o")],

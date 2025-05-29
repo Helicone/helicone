@@ -1,0 +1,10 @@
+{
+  "id": "error:google:generate_content",
+  "request": {
+    "method": "POST",
+    "url": "/v1beta/openai/chat/completions"
+  },
+  "response": {
+    "status": 500
+  }
+}

@@ -137,7 +137,7 @@ impl Dispatcher {
         let model_mapper =
             ModelMapper::new(app_state.clone(), router_config.clone());
         let converter_registry =
-            EndpointConverterRegistry::new(router_config, model_mapper);
+            EndpointConverterRegistry::new(router_config, &model_mapper);
 
         let extensions_layer = AddExtensionsLayer::builder()
             .inference_provider(provider)

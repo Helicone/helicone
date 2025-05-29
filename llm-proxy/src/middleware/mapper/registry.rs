@@ -22,7 +22,7 @@ impl EndpointConverterRegistry {
     #[must_use]
     pub fn new(
         router_config: &RouterConfig,
-        model_mapper: ModelMapper,
+        model_mapper: &ModelMapper,
     ) -> Self {
         let inner =
             EndpointConverterRegistryInner::new(router_config, model_mapper);
@@ -76,7 +76,7 @@ impl std::fmt::Debug for EndpointConverterRegistryInner {
 
 impl EndpointConverterRegistryInner {
     #[allow(clippy::too_many_lines)]
-    fn new(router_config: &RouterConfig, model_mapper: ModelMapper) -> Self {
+    fn new(router_config: &RouterConfig, model_mapper: &ModelMapper) -> Self {
         let mut registry = Self {
             converters: HashMap::default(),
         };

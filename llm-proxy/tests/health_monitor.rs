@@ -30,11 +30,15 @@ async fn errors_remove_provider_from_lb_pool() {
             targets: nes![
                 BalanceTarget {
                     provider: InferenceProvider::OpenAI,
-                    weight: Decimal::try_from(0.10).unwrap(),
+                    weight: Decimal::try_from(0.80).unwrap(),
                 },
                 BalanceTarget {
                     provider: InferenceProvider::Anthropic,
-                    weight: Decimal::try_from(0.90).unwrap(),
+                    weight: Decimal::try_from(0.10).unwrap(),
+                },
+                BalanceTarget {
+                    provider: InferenceProvider::GoogleGemini,
+                    weight: Decimal::try_from(0.10).unwrap(),
                 },
             ],
         },
@@ -48,8 +52,9 @@ async fn errors_remove_provider_from_lb_pool() {
     )]));
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([
-            ("success:openai:chat_completion", (88..).into()),
+            ("success:openai:chat_completion", (70..).into()),
             ("error:anthropic:messages", (..12).into()),
+            ("error:google:generate_content", (..12).into()),
             ("success:minio:upload_request", 100.into()),
             ("success:jawn:log_request", 100.into()),
             ("success:jawn:whoami", 100.into()),
@@ -97,5 +102,5 @@ async fn errors_remove_provider_from_lb_pool() {
     // to the async task and awaiting it in the test.
     //
     // but this is totes good for now
-    tokio::time::sleep(std::time::Duration::from_millis(10)).await;
+    tokio::time::sleep(std::time::Duration::from_millis(100)).await;
 }
