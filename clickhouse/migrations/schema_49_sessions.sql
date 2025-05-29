@@ -40,6 +40,6 @@ CREATE TABLE session_rmt
 )
 ENGINE = ReplacingMergeTree(updated_at)
 PARTITION BY toYYYYMM(request_created_at)
-PRIMARY KEY (organization_id, session_name, session_id)
-ORDER BY (organization_id, session_name, session_id)
+PRIMARY KEY (organization_id, session_name, session_id, request_id)
+ORDER BY (organization_id, session_name, session_id, request_id)
 SETTINGS index_granularity = 8192
