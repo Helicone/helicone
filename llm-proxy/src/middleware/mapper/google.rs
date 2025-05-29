@@ -7,7 +7,7 @@ use async_openai::types::{
 use super::{
     TryConvert, TryConvertStreamData, error::MapperError, model::ModelMapper,
 };
-use crate::types::{model::Model, provider::InferenceProvider};
+use crate::types::{model_id::ModelId, provider::InferenceProvider};
 
 pub struct GoogleConverter {
     model_mapper: ModelMapper,
@@ -33,7 +33,7 @@ impl
     ) -> Result<async_openai::types::CreateChatCompletionRequest, Self::Error>
     {
         // no op:
-        let source_model = Model::from_str(&value.model)?;
+        let source_model = ModelId::from_str(&value.model)?;
         let target_model = self
             .model_mapper
             .map_model(&source_model, &InferenceProvider::GoogleGemini)?;

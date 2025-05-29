@@ -61,7 +61,7 @@ async fn weighted_balancer_anthropic_preferred() {
         .await;
     let num_requests = 100;
     let body_bytes = serde_json::to_vec(&json!({
-        "model": "gpt-4o-mini",
+        "model": "openai/gpt-4o-mini",
         "messages": [
             {
                 "role": "user",
@@ -134,7 +134,7 @@ async fn weighted_balancer_openai_preferred() {
         .await;
     let num_requests = 100;
     let body_bytes = serde_json::to_vec(&json!({
-        "model": "gpt-4o-mini",
+        "model": "openai/gpt-4o-mini",
         "messages": [
             {
                 "role": "user",
@@ -207,7 +207,7 @@ async fn weighted_balancer_anthropic_heavily_preferred() {
         .await;
     let num_requests = 100;
     let body_bytes = serde_json::to_vec(&json!({
-        "model": "gpt-4o-mini",
+        "model": "openai/gpt-4o-mini",
         "messages": [
             {
                 "role": "user",

@@ -12,8 +12,8 @@ use super::{
     spend_control::SpendControlConfig,
 };
 use crate::{
-    error::{init::InitError, provider::ProviderError},
-    types::{model::Model, provider::InferenceProvider, router::RouterId},
+    error::init::InitError,
+    types::{provider::InferenceProvider, router::RouterId},
 };
 
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq, AsRef, AsMut)]
@@ -40,12 +40,10 @@ impl Default for RouterConfigs {
 pub struct RouterConfig {
     #[serde(default = "default_request_style")]
     pub request_style: InferenceProvider,
-    pub model_mappings: ModelMappingConfig,
+    pub balance: BalanceConfig,
+    pub model_mappings: Option<ModelMappingConfig>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub cache: Option<CacheControlConfig>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub fallback: Option<FallbackConfig>,
-    pub balance: BalanceConfig,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub retries: Option<RetryConfig>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -58,9 +56,8 @@ impl Default for RouterConfig {
     fn default() -> Self {
         Self {
             request_style: InferenceProvider::OpenAI,
-            model_mappings: ModelMappingConfig::default(),
+            model_mappings: None,
             cache: None,
-            fallback: None,
             balance: BalanceConfig::default(),
             retries: None,
             rate_limit: None,
@@ -75,7 +72,6 @@ fn default_request_style() -> InferenceProvider {
 
 impl RouterConfig {
     pub fn validate(&self) -> Result<(), InitError> {
-        let providers = self.balance.providers();
         for balance_config in self.balance.0.values() {
             match balance_config {
                 BalanceConfigInner::Weighted { targets } => {
@@ -91,22 +87,11 @@ impl RouterConfig {
             }
         }
 
-        // check that all providers in the fallback config are in the providers
-        // list
-        if let Some(fallback_config) = &self.fallback {
-            if let Some(unsupported_provider) = fallback_config
-                .order
-                .iter()
-                .find(|target| !providers.contains(&target.provider))
-            {
-                return Err(ProviderError::ProviderNotConfigured(
-                    unsupported_provider.provider,
-                )
-                .into());
-            }
-        }
-
         Ok(())
+    }
+
+    #[must_use] pub fn model_mappings(&self) -> Option<&ModelMappingConfig> {
+        self.model_mappings.as_ref()
     }
 }
 
@@ -120,21 +105,6 @@ pub struct CacheControlConfig {
     pub seed: String,
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
-#[serde(rename_all = "kebab-case")]
-pub struct FallbackConfig {
-    pub enabled: bool,
-    #[serde(default)]
-    pub order: Vec<FallbackTarget>,
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
-#[serde(rename_all = "kebab-case")]
-pub struct FallbackTarget {
-    pub provider: InferenceProvider,
-    pub model: Model,
-}
-
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, Hash, PartialEq)]
 pub struct PromptVersion(pub String);
 
@@ -145,9 +115,8 @@ impl crate::tests::TestDefault for RouterConfigs {
             RouterId::Default,
             RouterConfig {
                 request_style: InferenceProvider::OpenAI,
-                model_mappings: ModelMappingConfig::default(),
+                model_mappings: None,
                 cache: None,
-                fallback: None,
                 balance: BalanceConfig(HashMap::from([(
                     crate::endpoints::EndpointType::Chat,
                     BalanceConfigInner::P2C {
@@ -169,7 +138,7 @@ mod tests {
     use std::time::Duration;
 
     use super::*;
-    use crate::{config::retry::Strategy, types::model::Version};
+    use crate::config::retry::Strategy;
 
     fn test_router_config() -> RouterConfig {
         let cache = CacheControlConfig {
@@ -177,18 +146,6 @@ mod tests {
             enabled: true,
             buckets: 10,
             seed: "test-seed".to_string(),
-        };
-
-        // Create test values for FallbackConfig
-        let fallback = FallbackConfig {
-            enabled: true,
-            order: vec![FallbackTarget {
-                provider: InferenceProvider::OpenAI,
-                model: Model {
-                    name: "claude-3-7-sonnet-latest".to_string(),
-                    version: Some(Version::Latest),
-                },
-            }],
         };
 
         let balance = BalanceConfig::p2c_all_providers();
@@ -203,9 +160,8 @@ mod tests {
 
         RouterConfig {
             request_style: InferenceProvider::OpenAI,
-            model_mappings: ModelMappingConfig::default(),
+            model_mappings: None,
             cache: Some(cache),
-            fallback: Some(fallback),
             balance,
             retries: Some(retries),
             rate_limit: None,

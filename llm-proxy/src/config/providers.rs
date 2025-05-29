@@ -3,7 +3,7 @@ use indexmap::{IndexMap, IndexSet};
 use serde::{Deserialize, Serialize};
 use url::Url;
 
-use crate::types::{model::ModelName, provider::InferenceProvider};
+use crate::types::{model_id::ModelName, provider::InferenceProvider};
 
 /// Global configuration for providers, shared across all routers.
 ///

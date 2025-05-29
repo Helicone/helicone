@@ -30,7 +30,7 @@ async fn request_response_logger_authenticated() {
         .build()
         .await;
     let body_bytes = serde_json::to_vec(&json!({
-        "model": "gpt-4o-mini",
+        "model": "openai/gpt-4o-mini",
         "messages": [
             {
                 "role": "user",
@@ -78,7 +78,7 @@ async fn request_response_logger_unauthenticated() {
         .build()
         .await;
     let body_bytes = serde_json::to_vec(&json!({
-        "model": "gpt-4o-mini",
+        "model": "openai/gpt-4o-mini",
         "messages": [
             {
                 "role": "user",

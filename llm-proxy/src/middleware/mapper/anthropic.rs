@@ -6,7 +6,7 @@ use super::{TryConvert, TryConvertStreamData, error::MapperError};
 use crate::{
     endpoints::openai::chat_completions::system_prompt,
     middleware::mapper::model::ModelMapper,
-    types::{model::Model, provider::InferenceProvider},
+    types::{model_id::ModelId, provider::InferenceProvider},
 };
 
 const DEFAULT_MAX_TOKENS: u32 = 1000;
@@ -42,7 +42,7 @@ impl
         use anthropic_ai_sdk::types::message as anthropic;
         use async_openai::types as openai;
         let target_provider = InferenceProvider::Anthropic;
-        let source_model = Model::from_str(&value.model)?;
+        let source_model = ModelId::from_str(&value.model)?;
         let target_model = self
             .model_mapper
             .map_model(&source_model, &target_provider)?;

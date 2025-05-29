@@ -1,5 +1,3 @@
-use std::str::FromStr;
-
 use async_openai::types::{
     ChatCompletionRequestDeveloperMessageContent, ChatCompletionRequestMessage,
     ChatCompletionRequestSystemMessageContent,
@@ -10,7 +8,7 @@ use async_openai::types::{
 use crate::{
     endpoints::{AiRequest, Endpoint},
     middleware::mapper::error::MapperError,
-    types::model::Model,
+    types::{model_id::ModelId, provider::InferenceProvider},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
@@ -28,8 +26,8 @@ impl AiRequest for CreateChatCompletionRequest {
         self.stream.unwrap_or(false)
     }
 
-    fn model(&self) -> Result<Model, MapperError> {
-        Model::from_str(&self.model)
+    fn model(&self) -> Result<ModelId, MapperError> {
+        ModelId::from_str_and_provider(InferenceProvider::OpenAI, &self.model)
     }
 }
 

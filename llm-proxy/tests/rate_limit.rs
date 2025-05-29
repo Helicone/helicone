@@ -294,7 +294,7 @@ async fn make_chat_request(
     auth_header: &str,
 ) -> http::StatusCode {
     let body_bytes = serde_json::to_vec(&json!({
-        "model": "gpt-4o-mini",
+        "model": "openai/gpt-4o-mini",
         "messages": [
             {
                 "role": "user",

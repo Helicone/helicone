@@ -7,7 +7,7 @@ use isocountry::CountryCode;
 use uuid::Uuid;
 
 use super::{
-    model::Model,
+    model_id::ModelId,
     org::OrgId,
     provider::{InferenceProvider, ProviderKeys},
     user::UserId,
@@ -41,7 +41,7 @@ pub struct MapperContext {
     /// If `None`, the request was for an endpoint without
     /// first class support for mapping between different provider
     /// models.
-    pub model: Option<Model>,
+    pub model: Option<ModelId>,
 }
 
 #[derive(Debug)]
@@ -53,5 +53,5 @@ pub struct RequestProxyContext {
 #[derive(Debug)]
 pub struct ForcedRouting {
     pub provider: InferenceProvider,
-    pub model: Model,
+    pub model: ModelId,
 }

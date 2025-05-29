@@ -8,7 +8,7 @@ use crate::{
     },
     middleware::mapper::error::MapperError,
     types::{
-        model::{Model, ModelName},
+        model_id::{ModelId, ModelName},
         provider::InferenceProvider,
     },
 };
@@ -46,32 +46,35 @@ impl ModelMapper {
     /// for _every_ model seems onerous)
     pub fn map_model(
         &self,
-        source_model: &Model,
+        source_model: &ModelId,
         target_provider: &InferenceProvider,
-    ) -> Result<Model, MapperError> {
-        let target_provider_models = &self
+    ) -> Result<ModelId, MapperError> {
+        let models_offered_by_target_provider = &self
             .providers_config()
             .get(target_provider)
             .ok_or(MapperError::NoProviderConfig(*target_provider))?
             .models;
         let source_model_name = ModelName::from_model(source_model);
-        if target_provider_models.contains(&source_model_name) {
+        if models_offered_by_target_provider.contains(&source_model_name) {
             return Ok(source_model.clone());
         }
-        // otherwise, use the model mapping from router config
+        // otherwise, use the model mapping from router config if it exists
         if let Some(router_model_mapping) = self
             .router_config
-            .model_mappings
-            .as_ref()
-            .get(&source_model_name)
+            .model_mappings()
+            .and_then(|m| m.as_ref().get(&source_model_name))
         {
             // get the first model from the router model mapping that the target
             // provider supports
             let target_model = router_model_mapping
                 .iter()
-                .find(|m| target_provider_models.contains(*m));
+                .find(|m| models_offered_by_target_provider.contains(*m));
             if let Some(target_model) = target_model {
-                return Ok(target_model.into_latest());
+                // the parsed model id here will use the "latest" version
+                return ModelId::from_str_and_provider(
+                    *target_provider,
+                    target_model.as_ref(),
+                );
             }
         }
         // if that doesn't have a mapping, use the default model mapping
@@ -81,11 +84,14 @@ impl ModelMapper {
             .get(&source_model_name)
             .iter()
             .flat_map(|m| m.iter())
-            .find(|m| target_provider_models.contains(*m))
+            .find(|m| models_offered_by_target_provider.contains(*m))
             .ok_or(MapperError::NoModelMapping(
                 *target_provider,
-                source_model.name.clone(),
+                source_model_name.as_ref().to_string(),
             ))?;
-        Ok(default_mapping.into_latest())
+        ModelId::from_str_and_provider(
+            *target_provider,
+            default_mapping.as_ref(),
+        )
     }
 }

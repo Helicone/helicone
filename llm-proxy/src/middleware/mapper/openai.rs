@@ -3,16 +3,16 @@ use std::str::FromStr;
 use super::{TryConvertStreamData, model::ModelMapper};
 use crate::{
     middleware::mapper::{TryConvert, error::MapperError},
-    types::{model::Model, provider::InferenceProvider},
+    types::{model_id::ModelId, provider::InferenceProvider},
 };
 
 const ANTHROPIC_MESSAGE_TYPE: &str = "message";
 
-pub struct OpenAiConverter {
+pub struct OpenAIConverter {
     model_mapper: ModelMapper,
 }
 
-impl OpenAiConverter {
+impl OpenAIConverter {
     #[must_use]
     pub fn new(model_mapper: ModelMapper) -> Self {
         Self { model_mapper }
@@ -23,7 +23,7 @@ impl
     TryConvert<
         anthropic_ai_sdk::types::message::CreateMessageParams,
         async_openai::types::CreateChatCompletionRequest,
-    > for OpenAiConverter
+    > for OpenAIConverter
 {
     type Error = MapperError;
 
@@ -38,7 +38,7 @@ impl
         use anthropic_ai_sdk::types::message as anthropic;
         use async_openai::types as openai;
         let target_provider = InferenceProvider::OpenAI;
-        let source_model = Model::from_str(&value.model)?;
+        let source_model = ModelId::from_str(&value.model)?;
         let target_model = self
             .model_mapper
             .map_model(&source_model, &target_provider)?;
@@ -308,7 +308,7 @@ impl
     TryConvert<
         async_openai::types::CreateChatCompletionResponse,
         anthropic_ai_sdk::types::message::CreateMessageResponse,
-    > for OpenAiConverter
+    > for OpenAIConverter
 {
     type Error = MapperError;
 
@@ -397,7 +397,7 @@ impl
     TryConvertStreamData<
         async_openai::types::CreateChatCompletionStreamResponse,
         anthropic_ai_sdk::types::message::StreamEvent,
-    > for OpenAiConverter
+    > for OpenAIConverter
 {
     type Error = MapperError;
 

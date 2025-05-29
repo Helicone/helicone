@@ -81,11 +81,11 @@ impl Router {
 
             inner.insert(*endpoint_type, service_stack);
         }
-        let direct_proxy_provider_api_key =
-            provider_keys.get(&router_config.request_style).ok_or(
-                ProviderError::ApiKeyNotFound(router_config.request_style),
-            ).inspect_err(|e| {
-                tracing::error!(error = ?e, "Api key not found for from router service");
+        let direct_proxy_provider_api_key = provider_keys
+            .get(&router_config.request_style)
+            .ok_or(ProviderError::ApiKeyNotFound(router_config.request_style))
+            .inspect_err(|e| {
+                tracing::error!(error = ?e, "Api key not found");
             })?;
         let direct_proxy_dispatcher = Dispatcher::new(
             app_state,

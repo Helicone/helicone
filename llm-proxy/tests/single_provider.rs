@@ -39,7 +39,7 @@ async fn openai() {
         .await;
     let request_body = axum_core::body::Body::from(
         serde_json::to_vec(&json!({
-            "model": "gpt-4o-mini",
+            "model": "openai/gpt-4o-mini",
             "messages": [
                 {
                     "role": "user",
@@ -94,7 +94,7 @@ async fn google_with_openai_request_style() {
         .await;
     let request_body = axum_core::body::Body::from(
         serde_json::to_vec(&json!({
-            "model": "gemini-2.0-flash",
+            "model": "gemini/gemini-2.0-flash",
             "messages": [
                 {"role": "user", "content": "Explain to me how AI works"}
             ],
@@ -112,7 +112,7 @@ async fn google_with_openai_request_style() {
 
     let request_body = axum_core::body::Body::from(
         serde_json::to_vec(&json!({
-            "model": "gpt-4o-mini",
+            "model": "openai/gpt-4o-mini",
             "messages": [
                 {"role": "user", "content": "Explain to me how AI works"}
             ]
@@ -164,7 +164,7 @@ async fn anthropic_with_openai_request_style() {
         .await;
     let request_body = axum_core::body::Body::from(
         serde_json::to_vec(&json!({
-            "model": "claude-3-5-sonnet-latest",
+            "model": "anthropic/claude-3-5-sonnet-latest",
             "messages": [
                 {
                     "role": "user",
@@ -186,7 +186,7 @@ async fn anthropic_with_openai_request_style() {
     // test that using an openai model name works as well
     let request_body = axum_core::body::Body::from(
         serde_json::to_vec(&json!({
-            "model": "gpt-4o-mini",
+            "model": "openai/gpt-4o-mini",
             "messages": [
                 {
                     "role": "user",
@@ -239,7 +239,7 @@ async fn anthropic_with_anthropic_request_style() {
         .await;
     let request_body = axum_core::body::Body::from(
         serde_json::to_vec(&json!({
-            "model": "claude-3-5-sonnet-latest",
+            "model": "anthropic/claude-3-5-sonnet-latest",
             "messages": [
                 {
                     "role": "user",
@@ -261,7 +261,7 @@ async fn anthropic_with_anthropic_request_style() {
     // test that using an openai model name works as well
     let request_body = axum_core::body::Body::from(
         serde_json::to_vec(&json!({
-            "model": "gpt-4o-mini",
+            "model": "openai/gpt-4o-mini",
             "messages": [
                 {
                     "role": "user",
@@ -316,7 +316,7 @@ async fn anthropic_request_style() {
         .await;
     let request_body = axum_core::body::Body::from(
         serde_json::to_vec(&json!({
-            "model": "gpt-4o-mini",
+            "model": "openai/gpt-4o-mini",
             "messages": [
                 {
                     "role": "user",

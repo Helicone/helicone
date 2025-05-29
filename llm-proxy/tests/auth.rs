@@ -30,7 +30,7 @@ async fn require_auth_enabled_with_valid_token() {
         .await;
 
     let body_bytes = serde_json::to_vec(&json!({
-        "model": "gpt-4o-mini",
+        "model": "openai/gpt-4o-mini",
         "messages": [
             {
                 "role": "user",
@@ -84,7 +84,7 @@ async fn require_auth_enabled_without_token() {
         .await;
 
     let body_bytes = serde_json::to_vec(&json!({
-        "model": "gpt-4o-mini",
+        "model": "openai/gpt-4o-mini",
         "messages": [
             {
                 "role": "user",
@@ -131,7 +131,7 @@ async fn require_auth_disabled_without_token() {
         .await;
 
     let body_bytes = serde_json::to_vec(&json!({
-        "model": "gpt-4o-mini",
+        "model": "openai/gpt-4o-mini",
         "messages": [
             {
                 "role": "user",
@@ -178,7 +178,7 @@ async fn require_auth_disabled_with_token() {
         .await;
 
     let body_bytes = serde_json::to_vec(&json!({
-        "model": "gpt-4o-mini",
+        "model": "openai/gpt-4o-mini",
         "messages": [
             {
                 "role": "user",

@@ -71,7 +71,7 @@ async fn errors_remove_provider_from_lb_pool() {
     });
     let num_requests = 100;
     let body_bytes = serde_json::to_vec(&json!({
-        "model": "gpt-4o-mini",
+        "model": "openai/gpt-4o-mini",
         "messages": [
             {
                 "role": "user",

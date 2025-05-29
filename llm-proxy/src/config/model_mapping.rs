@@ -2,7 +2,7 @@ use derive_more::AsRef;
 use nonempty_collections::{NEMap, NESet, nem, nes};
 use serde::{Deserialize, Serialize};
 
-use crate::types::model::ModelName;
+use crate::types::model_id::ModelName;
 
 #[derive(Debug, Clone, Deserialize, Serialize, AsRef, PartialEq, Eq)]
 pub struct ModelMappingConfig(

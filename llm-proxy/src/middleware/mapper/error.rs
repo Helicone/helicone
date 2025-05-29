@@ -25,6 +25,8 @@ pub enum MapperError {
     StreamError(String),
     /// Empty response body
     EmptyResponseBody,
+    /// Provider not supported: {0}
+    ProviderNotSupported(String),
 }
 
 /// Error types that can occur when mapping requests between providers.
@@ -48,6 +50,8 @@ pub enum MapperErrorMetric {
     StreamError,
     /// Empty response body
     EmptyResponseBody,
+    /// Provider not supported
+    ProviderNotSupported,
 }
 
 impl From<&MapperError> for MapperErrorMetric {
@@ -62,6 +66,7 @@ impl From<&MapperError> for MapperErrorMetric {
             MapperError::SerdeError(_) => Self::SerdeError,
             MapperError::StreamError(_) => Self::StreamError,
             MapperError::EmptyResponseBody => Self::EmptyResponseBody,
+            MapperError::ProviderNotSupported(_) => Self::ProviderNotSupported,
         }
     }
 }

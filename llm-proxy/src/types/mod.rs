@@ -2,7 +2,7 @@ pub mod body;
 pub mod discover;
 pub mod json;
 pub mod logger;
-pub mod model;
+pub mod model_id;
 pub mod org;
 pub mod provider;
 pub mod request;

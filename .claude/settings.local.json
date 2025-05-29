@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cargo clippy:*)",
+      "Bash(grep:*)",
+      "Bash(cargo check:*)",
+      "Bash(cargo test:*)",
+      "Bash(rg:*)",
+      "Bash(cargo:*)",
+      "Bash(RUST_BACKTRACE=1 cargo test test_bedrock_valid_provider_models --all-features)",
+      "Bash(ls:*)"
+    ],
+    "deny": []
+  }
+}

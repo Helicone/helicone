@@ -1,5 +1,4 @@
 use std::{
-    collections::HashMap,
     convert::Infallible,
     future::{Ready, ready},
     net::SocketAddr,
@@ -13,6 +12,7 @@ use futures::future::BoxFuture;
 use meltdown::Token;
 use opentelemetry::global;
 use reqwest::Client;
+use rustc_hash::FxHashMap as HashMap;
 use telemetry::{make_span::SpanFactory, tracing::MakeRequestId};
 use tokio::sync::RwLock;
 use tower::{ServiceBuilder, buffer::BufferLayer, util::BoxCloneService};

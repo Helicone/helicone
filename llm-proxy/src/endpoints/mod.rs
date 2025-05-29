@@ -9,7 +9,7 @@ use crate::{
     endpoints::{anthropic::Anthropic, google::Google, openai::OpenAI},
     error::invalid_req::InvalidRequestError,
     middleware::mapper::error::MapperError,
-    types::{model::Model, provider::InferenceProvider},
+    types::{model_id::ModelId, provider::InferenceProvider},
 };
 
 pub trait Endpoint {
@@ -23,7 +23,7 @@ pub trait Endpoint {
 
 pub trait AiRequest {
     fn is_stream(&self) -> bool;
-    fn model(&self) -> Result<Model, MapperError>;
+    fn model(&self) -> Result<ModelId, MapperError>;
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

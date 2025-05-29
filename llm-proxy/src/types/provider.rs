@@ -1,7 +1,7 @@
-use std::sync::Arc;
+use std::{str::FromStr, sync::Arc};
 
 use rustc_hash::FxHashMap as HashMap;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use strum::{EnumIter, IntoEnumIterator};
 
 use super::secret::Secret;
@@ -16,17 +16,16 @@ use crate::{
     Clone,
     Default,
     Copy,
-    Deserialize,
     Eq,
     Hash,
     PartialEq,
-    Serialize,
     EnumIter,
+    strum::Display,
+    strum::EnumString,
 )]
-#[serde(rename_all = "kebab-case")]
+#[strum(serialize_all = "kebab-case")]
 pub enum ModelProvider {
     #[default]
-    #[serde(rename = "openai")]
     OpenAI,
     Anthropic,
     Amazon,
@@ -34,15 +33,22 @@ pub enum ModelProvider {
     Google,
 }
 
-impl std::fmt::Display for ModelProvider {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            ModelProvider::OpenAI => write!(f, "openai"),
-            ModelProvider::Anthropic => write!(f, "anthropic"),
-            ModelProvider::Amazon => write!(f, "amazon"),
-            ModelProvider::Deepseek => write!(f, "deepseek"),
-            ModelProvider::Google => write!(f, "google"),
-        }
+impl<'de> Deserialize<'de> for ModelProvider {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let s = String::deserialize(deserializer)?;
+        ModelProvider::from_str(&s).map_err(serde::de::Error::custom)
+    }
+}
+
+impl Serialize for ModelProvider {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&self.to_string())
     }
 }
 
@@ -51,23 +57,24 @@ impl std::fmt::Display for ModelProvider {
     Clone,
     Default,
     Copy,
-    Deserialize,
     Eq,
     Hash,
     PartialEq,
-    Serialize,
     EnumIter,
+    strum::Display,
+    strum::EnumString,
 )]
-#[serde(rename_all = "kebab-case")]
+#[strum(serialize_all = "kebab-case")]
 pub enum InferenceProvider {
     #[default]
-    #[serde(rename = "openai")]
+    #[strum(serialize = "openai")]
     OpenAI,
     Anthropic,
     Bedrock,
+    Ollama,
     VertexAi,
+    #[strum(serialize = "gemini")]
     GoogleGemini,
-    // Ollama
 }
 
 impl InferenceProvider {
@@ -89,20 +96,30 @@ impl InferenceProvider {
                     .map(ApiEndpoint::Google)
                     .collect()
             }
-            InferenceProvider::Bedrock | InferenceProvider::VertexAi => vec![],
+            // Inference not supported yet for these providers
+            InferenceProvider::Bedrock
+            | InferenceProvider::VertexAi
+            | InferenceProvider::Ollama => vec![],
         }
     }
 }
 
-impl std::fmt::Display for InferenceProvider {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            InferenceProvider::OpenAI => write!(f, "openai"),
-            InferenceProvider::Anthropic => write!(f, "anthropic"),
-            InferenceProvider::Bedrock => write!(f, "bedrock"),
-            InferenceProvider::GoogleGemini => write!(f, "google"),
-            InferenceProvider::VertexAi => write!(f, "vertexai"),
-        }
+impl<'de> Deserialize<'de> for InferenceProvider {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let s = String::deserialize(deserializer)?;
+        InferenceProvider::from_str(&s).map_err(serde::de::Error::custom)
+    }
+}
+
+impl Serialize for InferenceProvider {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&self.to_string())
     }
 }
 
@@ -127,6 +144,7 @@ impl ProviderKeys {
 
         for provider in providers {
             let provider_str = provider.to_string().to_uppercase();
+            println!("provider_str: {provider_str}");
             let env_var = format!("{provider_str}_API_KEY");
             if let Ok(key) = std::env::var(&env_var) {
                 tracing::trace!(
