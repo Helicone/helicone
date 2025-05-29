@@ -14,15 +14,6 @@ provider "aws" {
 }
 
 # ECR Repositories
-resource "aws_ecr_repository" "worker" {
-  name                 = "helicone/worker"
-  image_tag_mutability = "MUTABLE"
-
-  image_scanning_configuration {
-    scan_on_push = true
-  }
-}
-
 resource "aws_ecr_repository" "web" {
   name                 = "helicone/web"
   image_tag_mutability = "MUTABLE"
@@ -32,35 +23,17 @@ resource "aws_ecr_repository" "web" {
   }
 }
 
-resource "aws_ecr_repository" "web_dev" {
-  name                 = "helicone/web-dev"
-  image_tag_mutability = "MUTABLE"
-
-  image_scanning_configuration {
-    scan_on_push = true
-  }
-}
-
-resource "aws_ecr_repository" "supabase_migration_runner" {
-  name                 = "helicone/supabase-migration-runner"
-  image_tag_mutability = "MUTABLE"
-
-  image_scanning_configuration {
-    scan_on_push = true
-  }
-}
-
-resource "aws_ecr_repository" "clickhouse_migration_runner" {
-  name                 = "helicone/clickhouse-migration-runner"
-  image_tag_mutability = "MUTABLE"
-
-  image_scanning_configuration {
-    scan_on_push = true
-  }
-}
-
 resource "aws_ecr_repository" "jawn" {
   name                 = "helicone/jawn"
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+}
+
+resource "aws_ecr_repository" "migrations" {
+  name                 = "helicone/migrations"
   image_tag_mutability = "MUTABLE"
 
   image_scanning_configuration {
