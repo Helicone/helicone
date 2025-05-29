@@ -2,7 +2,7 @@
   "name": "helicone-api",
   "scripts": {
     "start": "ts-node src/index.ts",
-    "serve": "tsx src/index.ts",
+    "serve": "node dist/index.js",
     "dev": "concurrently \"nodemon\" \"nodemon -x python3 genTypes.py\"",
     "test:jawn": "npx jest --config packages/jawn/jest.config.js --detectOpenHandles",
     "build": "tsup"
