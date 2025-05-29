@@ -20,7 +20,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { Muted, Small, XSmall } from "@/components/ui/typography";
 import { FilterASTButton } from "@/filterAST/FilterASTButton";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
@@ -265,14 +264,6 @@ const SessionsPage = (props: SessionsPageProps) => {
     },
     { label: "Created On", value: aggregatedStats.createdOn },
   ];
-
-  if (isSessionsLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-        <LoadingAnimation title="Loading sessions..." />
-      </div>
-    );
-  }
 
   return hasSessions || isSessionsLoading ? (
     <main className="h-screen flex flex-col w-full animate-fade-in">
