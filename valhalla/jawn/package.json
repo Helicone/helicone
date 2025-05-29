@@ -5,7 +5,7 @@
     "serve": "node dist/index.js",
     "dev": "concurrently \"nodemon\" \"nodemon -x python3 genTypes.py\"",
     "test:jawn": "npx jest --config packages/jawn/jest.config.js --detectOpenHandles",
-    "build": "tsup"
+    "build": "tsup && cp src/utils/trace.proto dist/valhalla/jawn/src/utils/trace.proto"
   },
   "version": "1.0.0",
   "main": "index.js",
