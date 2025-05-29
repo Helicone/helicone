@@ -1,0 +1,55 @@
+# Docker ignore file to speed up builds
+# Exclude target directory (Rust build artifacts)
+target/
+
+# Exclude cargo files
+.cargo/
+rustfmt.toml
+
+# Exclude NPM node_modules if any
+node_modules/
+
+# Exclude git files
+.git/
+.gitignore
+
+# Exclude temporary files
+**/*.tmp
+**/*.temp
+**/.DS_Store
+
+# Exclude env files
+.env
+.env.template
+
+# Exclude IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Exclude documentation that's not needed for builds
+*.md
+!README.md
+docs/
+
+# Exclude CI files (not needed in container)
+.github/
+
+# Exclude test artifacts
+npx/test-artifacts/
+npx/dist/
+npx/
+
+# Exclude Docker files themselves
+**/Dockerfile*
+**/docker-compose*
+
+# Exclude logs
+**/*.log
+
+# Exclude AI stuff
+.ai/
+.cursor/
+.claude/
+CLAUDE.md

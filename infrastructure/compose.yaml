@@ -1,8 +1,5 @@
 name: helicone-proxy-cluster
 
-volumes:
-  minio-data:
-
 networks:
   traces:
     name: traces
@@ -80,20 +77,3 @@ services:
     environment:
       - REDIS_PASSWORD=helicone-redis-pw
       - REDIS_PORT=6379
-
-# NOTE:
-# Grafana/loki/tempo/prom/otel stack above could be replaced with single image:
-#
-#  telemetry:
-#    image: grafana/otel-lgtm:0.7.1
-#    environment:
-#      - GF_AUTH_ANONYMOUS_ENABLED=true
-#      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
-#      - GF_AUTH_DISABLE_LOGIN_FORM=true
-#    ports:
-#      - 3000:3000
-#      - 4317:4317
-#      - 4318:4318
-#
-# However at the moment I don't want to do that until we have working prod
-# configs in place.
