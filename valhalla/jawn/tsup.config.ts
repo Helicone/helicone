@@ -1,24 +1,8 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig([
-  // Main build for most files
   {
-    entry: [
-      "src/index.ts",
-      "src/authentication.ts",
-      "src/mainLoops.ts",
-      "src/constants/**/*.ts",
-      "src/controllers/**/*.ts",
-      "src/loops/**/*.ts",
-      "src/managers/**/*.ts",
-      "src/middleware/**/*.ts",
-      "src/models/**/*.ts",
-      "src/packages/**/*.ts",
-      "src/schema/**/*.ts",
-      "src/tsoa-build/**/*.ts",
-      "src/types/**/*.ts",
-      "src/utils/**/*.ts",
-    ],
+    entry: ["src/**/*.ts"],
     noExternal: ["@helicone-package"],
     splitting: false,
     target: "es2022",
@@ -32,42 +16,8 @@ export default defineConfig([
     loader: { ".json": "copy" },
     minify: true,
     sourcemap: false,
+    external: ["**/kafkaConsumer.js", "**/sqsConsumer.js"],
   },
-  // Separate build for workers
-  {
-    entry: ["src/workers/**/*.ts"],
-    noExternal: ["@helicone-package"],
-    splitting: false,
-    target: "es2022",
-    tsconfig: "./tsconfig.json",
-    cjsInterop: true,
-    format: ["cjs"],
-    platform: "node",
-    outDir: "./dist/valhalla/jawn/src/workers",
-    clean: false,
-    env: { IS_SERVER_BUILD: "true" },
-    loader: { ".json": "copy" },
-    minify: true,
-    sourcemap: false,
-  },
-  // Separate build for lib
-  {
-    entry: ["src/lib/**/*.ts"],
-    noExternal: ["@helicone-package"],
-    splitting: false,
-    target: "es2022",
-    tsconfig: "./tsconfig.json",
-    cjsInterop: true,
-    format: ["cjs"],
-    platform: "node",
-    outDir: "./dist/valhalla/jawn/src/lib",
-    clean: false,
-    env: { IS_SERVER_BUILD: "true" },
-    loader: { ".json": "copy" },
-    minify: true,
-    sourcemap: false,
-  },
-  // Separate build for shared
   {
     entry: ["../../shared/**/*.ts"],
     noExternal: ["@helicone-package"],
