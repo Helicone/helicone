@@ -16,8 +16,9 @@ import {
 import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
 import { prepareRequestAzure } from "../../lib/experiment/requestPrep/azure";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
-import { JawnAuthenticatedRequest } from "../../types/request";
-import { Setting, SettingName } from "../../utils/settings";
+import type { JawnAuthenticatedRequest } from "../../types/request";
+import { Setting } from "../../utils/settings";
+import type { SettingName } from "../../utils/settings";
 import Stripe from "stripe";
 import { AdminManager } from "../../managers/admin/AdminManager";
 

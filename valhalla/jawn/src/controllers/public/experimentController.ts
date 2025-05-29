@@ -24,11 +24,11 @@ import {
 import { DatasetManager } from "../../managers/dataset/DatasetManager";
 import { EvaluatorManager } from "../../managers/evaluator/EvaluatorManager";
 import {
-  CreateExperimentTableParams,
+  type CreateExperimentTableParams,
   ExperimentManager,
 } from "../../managers/experiment/ExperimentManager";
 import { InputsManager } from "../../managers/inputs/InputsManager";
-import { JawnAuthenticatedRequest } from "../../types/request";
+import { type JawnAuthenticatedRequest } from "../../types/request";
 import { EvaluatorResult } from "./evaluatorController";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 

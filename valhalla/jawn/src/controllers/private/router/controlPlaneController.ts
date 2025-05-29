@@ -9,7 +9,7 @@ import {
   Tags,
 } from "tsoa";
 import { dbExecute } from "../../../lib/shared/db/dbExecute";
-import { JawnAuthenticatedRequest } from "../../../types/request";
+import type { JawnAuthenticatedRequest } from "../../../types/request";
 
 @Route("v1/router/control-plane")
 @Tags("Router Control Plane")

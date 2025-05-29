@@ -14,7 +14,7 @@ import {
 import { postHogClient } from "../../lib/clients/postHogClient";
 import { getRequests } from "../../lib/stores/request/request";
 import { FineTuningManager } from "../../managers/FineTuningManager";
-import { JawnAuthenticatedRequest } from "../../types/request";
+import { type JawnAuthenticatedRequest } from "../../types/request";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { Result, err, ok } from "../../packages/common/result";
 
