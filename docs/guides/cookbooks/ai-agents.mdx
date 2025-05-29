@@ -55,8 +55,8 @@ pip install openai yfinance python-dotenv helicone-helpers
 Create a `.env` file:
 
 ```
-OPENAI_API_KEY=your_openai_key_here
 HELICONE_API_KEY=your_helicone_key_here
+OPENAI_API_KEY=your_openai_key_here
 ```
 
 ## Building the AI Agent
@@ -79,7 +79,7 @@ HELICONE_API_KEY=your_helicone_key_here
 
     class StockInfoAgent:
         def __init__(self):
-            # Initialize OpenAI client with Helicone proxy for LLM calls
+            # Initialize OpenAI client with Helicone for LLM calls
             self.client = OpenAI(
                 api_key=os.getenv('OPENAI_API_KEY'),
                 base_url="https://oai.helicone.ai/v1",
@@ -525,7 +525,7 @@ load_dotenv()
 
 class StockInfoAgent:
     def __init__(self):
-        # Initialize OpenAI client with Helicone proxy
+        # Initialize OpenAI client with Helicone 
         self.client = OpenAI(
             api_key=os.getenv('OPENAI_API_KEY'),
             base_url="https://oai.helicone.ai/v1",
