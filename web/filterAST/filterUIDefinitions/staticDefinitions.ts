@@ -183,13 +183,6 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
     table: "request_response_rmt",
   },
   {
-    id: "proxy_key_id",
-    label: "Proxy Key ID",
-    type: "string",
-    operators: ["eq", "neq", "like", "ilike", "contains"],
-    table: "request_response_rmt",
-  },
-  {
     id: "target_url",
     label: "Target URL",
     type: "string",
@@ -313,13 +306,6 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
     id: "updated_at",
     label: "Updated At",
     type: "datetime",
-    operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
-    table: "request_response_rmt",
-  },
-  {
-    id: "scores",
-    label: "Scores",
-    type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
     table: "request_response_rmt",
   },
