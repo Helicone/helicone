@@ -87,6 +87,8 @@ where
                     "EndpointConverterRegistry",
                 )))?
                 .clone();
+
+            println!("converter_registry: {:?}", &converter_registry);
             let extracted_path_and_query = req
                 .extensions_mut()
                 .remove::<PathAndQuery>()

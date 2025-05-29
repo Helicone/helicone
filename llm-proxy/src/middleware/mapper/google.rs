@@ -1,15 +1,22 @@
+use std::str::FromStr;
+
 use async_openai::types::{
     CreateChatCompletionResponse, CreateChatCompletionStreamResponse,
 };
 
-use super::{TryConvert, TryConvertStreamData, error::MapperError};
+use super::{
+    TryConvert, TryConvertStreamData, error::MapperError, model::ModelMapper,
+};
+use crate::types::{model::Model, provider::InferenceProvider};
 
-pub struct GoogleConverter;
+pub struct GoogleConverter {
+    model_mapper: ModelMapper,
+}
 
 impl GoogleConverter {
     #[must_use]
-    pub fn new() -> Self {
-        Self
+    pub fn new(model_mapper: ModelMapper) -> Self {
+        Self { model_mapper }
     }
 }
 
@@ -22,10 +29,18 @@ impl
     type Error = MapperError;
     fn try_convert(
         &self,
-        value: async_openai::types::CreateChatCompletionRequest,
+        mut value: async_openai::types::CreateChatCompletionRequest,
     ) -> Result<async_openai::types::CreateChatCompletionRequest, Self::Error>
     {
         // no op:
+        let source_model = Model::from_str(&value.model)?;
+        let target_model = self
+            .model_mapper
+            .map_model(&source_model, &InferenceProvider::GoogleGemini)?;
+        tracing::trace!(source_model = ?source_model, target_model = ?target_model, "mapped model");
+
+        value.model = target_model.to_string().replace("-latest", "");
+
         Ok(value)
     }
 }
