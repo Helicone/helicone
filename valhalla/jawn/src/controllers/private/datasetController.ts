@@ -15,7 +15,7 @@ import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
 import { getRequests } from "../../lib/stores/request/request";
 import { FineTuningManager } from "../../managers/FineTuningManager";
-import { JawnAuthenticatedRequest } from "../../types/request";
+import { type JawnAuthenticatedRequest } from "../../types/request";
 
 export interface GenerateHashQueryParams {
   apiKey: string;

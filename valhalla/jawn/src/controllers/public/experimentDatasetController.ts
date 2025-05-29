@@ -15,7 +15,7 @@ import {
   FilterNode,
 } from "../../lib/shared/filters/filterDefs";
 import { DatasetManager } from "../../managers/dataset/DatasetManager";
-import { JawnAuthenticatedRequest } from "../../types/request";
+import { type JawnAuthenticatedRequest } from "../../types/request";
 import { randomUUID } from "crypto";
 import { InputsManager } from "../../managers/inputs/InputsManager";
 import { ExperimentManager } from "../../managers/experiment/ExperimentManager";

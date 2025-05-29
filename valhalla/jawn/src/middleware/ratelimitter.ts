@@ -1,7 +1,7 @@
 import { redisClient } from "../lib/clients/redisClient";
 import { rateLimit } from "express-rate-limit";
 import { RedisStore } from "rate-limit-redis";
-import { JawnAuthenticatedRequest } from "../types/request";
+import { type JawnAuthenticatedRequest } from "../types/request";
 import { postHogClient } from "../lib/clients/postHogClient";
 
 export const IS_RATE_LIMIT_ENABLED = !!process.env.REDIS_HOST;

@@ -4,7 +4,8 @@
     "start": "ts-node src/index.ts",
     "serve": "tsx src/index.ts",
     "dev": "concurrently \"nodemon\" \"nodemon -x python3 genTypes.py\"",
-    "test:jawn": "npx jest --config packages/jawn/jest.config.js --detectOpenHandles"
+    "test:jawn": "npx jest --config packages/jawn/jest.config.js --detectOpenHandles",
+    "build": "tsup"
   },
   "version": "1.0.0",
   "main": "index.js",
@@ -57,6 +58,7 @@
     "stripe": "17.7.0",
     "swagger-ui-express": "^5.0.0",
     "tiktoken": "^1.0.15",
+    "tsup": "^8.5.0",
     "typescript": "^5.2.2",
     "uuid": "^9.0.1",
     "uuidv4": "^6.2.13",
@@ -64,8 +66,8 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@swc/core": "^1.7.26",
-    "@swc/helpers": "^0.5.13",
+    "@swc/core": "^1.11.29",
+    "@swc/helpers": "^0.5.17",
     "@types/async-retry": "^1.4.8",
     "@types/cookie-parser": "^1.4.8",
     "@types/cors": "^2.8.17",
