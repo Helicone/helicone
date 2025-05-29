@@ -691,6 +691,7 @@ export interface components {
     /** @description Make all properties in T optional */
     Partial_RequestResponseRMTToOperators_: {
       latency?: components["schemas"]["Partial_NumberOperators_"];
+      time_to_first_token?: components["schemas"]["Partial_NumberOperators_"];
       status?: components["schemas"]["Partial_NumberOperators_"];
       request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
       response_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
@@ -703,6 +704,8 @@ export interface components {
       request_id?: components["schemas"]["Partial_TextOperators_"];
       prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
       completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      prompt_cache_read_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      prompt_cache_write_tokens?: components["schemas"]["Partial_NumberOperators_"];
       total_tokens?: components["schemas"]["Partial_NumberOperators_"];
       target_url?: components["schemas"]["Partial_TextOperators_"];
       properties?: {
@@ -719,6 +722,7 @@ export interface components {
       response_body?: components["schemas"]["Partial_VectorOperators_"];
       cache_enabled?: components["schemas"]["Partial_BooleanOperators_"];
       cache_reference_id?: components["schemas"]["Partial_TextOperators_"];
+      assets?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
     "Pick_FilterLeaf.user_metrics-or-request_response_rmt_": {
