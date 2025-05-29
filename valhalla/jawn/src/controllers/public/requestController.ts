@@ -18,9 +18,10 @@ import { err, ok, Result } from "../../packages/common/result";
 import { SortLeafRequest } from "../../lib/shared/sorts/requests/sorts";
 import { HeliconeRequestAsset } from "../../lib/stores/request/request";
 import { RequestManager } from "../../managers/request/RequestManager";
-import { ScoreManager, ScoreRequest } from "../../managers/score/ScoreManager";
+import { ScoreManager } from "../../managers/score/ScoreManager";
+import type { ScoreRequest } from "../../managers/score/ScoreManager";
 import { HeliconeRequest } from "@helicone-package/llm-mapper/types";
-import { JawnAuthenticatedRequest } from "../../types/request";
+import type { JawnAuthenticatedRequest } from "../../types/request";
 
 export type RequestClickhouseFilterBranch = {
   left: RequestClickhouseFilterNode;
@@ -104,7 +105,7 @@ export class RequestController extends Controller {
     if (requests.error || !requests.data) {
       this.setStatus(500);
     } else {
-      this.setStatus(200); // set return status 201
+      this.setStatus(201);
     }
     return requests;
   }
@@ -133,7 +134,7 @@ export class RequestController extends Controller {
     if (requests.error || !requests.data) {
       this.setStatus(500);
     } else {
-      this.setStatus(200); // set return status 201
+      this.setStatus(201);
     }
     return requests;
   }
@@ -187,7 +188,7 @@ export class RequestController extends Controller {
     if (requestFeedback.error) {
       this.setStatus(500);
     } else {
-      this.setStatus(200); // set return status 201
+      this.setStatus(201);
     }
     return requestFeedback;
   }
@@ -210,7 +211,7 @@ export class RequestController extends Controller {
       console.log(requestFeedback.error);
       this.setStatus(500);
     } else {
-      this.setStatus(200); // set return status 201
+      this.setStatus(201);
     }
     return requestFeedback;
   }

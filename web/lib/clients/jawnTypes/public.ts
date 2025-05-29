@@ -637,6 +637,7 @@ export interface components {
     };
     /** @description Make all properties in T optional */
     Partial_TimestampOperators_: {
+      equals?: string;
       gte?: string;
       lte?: string;
       lt?: string;
@@ -672,6 +673,8 @@ export interface components {
     /** @description Make all properties in T optional */
     Partial_TimestampOperatorsTyped_: {
       /** Format: date-time */
+      equals?: string;
+      /** Format: date-time */
       gte?: string;
       /** Format: date-time */
       lte?: string;
@@ -691,6 +694,7 @@ export interface components {
     /** @description Make all properties in T optional */
     Partial_RequestResponseRMTToOperators_: {
       latency?: components["schemas"]["Partial_NumberOperators_"];
+      time_to_first_token?: components["schemas"]["Partial_NumberOperators_"];
       status?: components["schemas"]["Partial_NumberOperators_"];
       request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
       response_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
@@ -703,6 +707,8 @@ export interface components {
       request_id?: components["schemas"]["Partial_TextOperators_"];
       prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
       completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      prompt_cache_read_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      prompt_cache_write_tokens?: components["schemas"]["Partial_NumberOperators_"];
       total_tokens?: components["schemas"]["Partial_NumberOperators_"];
       target_url?: components["schemas"]["Partial_TextOperators_"];
       properties?: {
@@ -719,6 +725,7 @@ export interface components {
       response_body?: components["schemas"]["Partial_VectorOperators_"];
       cache_enabled?: components["schemas"]["Partial_BooleanOperators_"];
       cache_reference_id?: components["schemas"]["Partial_TextOperators_"];
+      assets?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
     "Pick_FilterLeaf.user_metrics-or-request_response_rmt_": {
@@ -1024,19 +1031,6 @@ export interface components {
       response_id?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description Make all properties in T optional */
-    Partial_SessionsRequestResponseRMTToOperators_: {
-      session_session_id?: components["schemas"]["Partial_TextOperators_"];
-      session_session_name?: components["schemas"]["Partial_TextOperators_"];
-      session_total_cost?: components["schemas"]["Partial_NumberOperators_"];
-      session_total_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      session_prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      session_completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      session_total_requests?: components["schemas"]["Partial_NumberOperators_"];
-      session_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
-      session_latest_request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
-      session_tag?: components["schemas"]["Partial_TextOperators_"];
-    };
-    /** @description Make all properties in T optional */
     Partial_CacheHitsTableToOperators_: {
       organization_id?: components["schemas"]["Partial_TextOperators_"];
       request_id?: components["schemas"]["Partial_TextOperators_"];
@@ -1046,12 +1040,11 @@ export interface components {
       created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": {
+    "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt_": {
       request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
       response?: components["schemas"]["Partial_ResponseTableToOperators_"];
       request?: components["schemas"]["Partial_RequestTableToOperators_"];
       feedback?: components["schemas"]["Partial_FeedbackTableToOperators_"];
-      sessions_request_response_rmt?: components["schemas"]["Partial_SessionsRequestResponseRMTToOperators_"];
       cache_hits?: components["schemas"]["Partial_CacheHitsTableToOperators_"];
       properties?: {
         [key: string]: components["schemas"]["Partial_TextOperators_"];
@@ -1060,8 +1053,8 @@ export interface components {
         [key: string]: components["schemas"]["Partial_TextOperators_"];
       };
     };
-    "FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": components["schemas"]["Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_"];
-    RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_"] | components["schemas"]["RequestFilterBranch"] | "all";
+    "FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt_": components["schemas"]["Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt_"];
+    RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt_"] | components["schemas"]["RequestFilterBranch"] | "all";
     RequestFilterBranch: {
       right: components["schemas"]["RequestFilterNode"];
       /** @enum {string} */
@@ -1806,13 +1799,60 @@ Json: JsonObject;
       error: null;
     };
     "Result_SessionResult-Array.string_": components["schemas"]["ResultSuccess_SessionResult-Array_"] | components["schemas"]["ResultError_string_"];
-    /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.request_response_rmt-or-sessions_request_response_rmt_": {
-      request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
-      sessions_request_response_rmt?: components["schemas"]["Partial_SessionsRequestResponseRMTToOperators_"];
+    /** @description Make all properties in T optional */
+    Partial_SessionRMTToOperators_: {
+      session_id?: components["schemas"]["Partial_TextOperators_"];
+      session_name?: components["schemas"]["Partial_TextOperators_"];
+      latency?: components["schemas"]["Partial_NumberOperators_"];
+      status?: components["schemas"]["Partial_NumberOperators_"];
+      request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      response_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      model?: components["schemas"]["Partial_TextOperators_"];
+      user_id?: components["schemas"]["Partial_TextOperators_"];
+      organization_id?: components["schemas"]["Partial_TextOperators_"];
+      node_id?: components["schemas"]["Partial_TextOperators_"];
+      job_id?: components["schemas"]["Partial_TextOperators_"];
+      threat?: components["schemas"]["Partial_BooleanOperators_"];
+      request_id?: components["schemas"]["Partial_TextOperators_"];
+      prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      total_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      target_url?: components["schemas"]["Partial_TextOperators_"];
+      properties?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      search_properties?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      scores?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      scores_column?: components["schemas"]["Partial_TextOperators_"];
+      request_body?: components["schemas"]["Partial_VectorOperators_"];
+      response_body?: components["schemas"]["Partial_VectorOperators_"];
+      cache_enabled?: components["schemas"]["Partial_BooleanOperators_"];
+      cache_reference_id?: components["schemas"]["Partial_TextOperators_"];
     };
-    "FilterLeafSubset_request_response_rmt-or-sessions_request_response_rmt_": components["schemas"]["Pick_FilterLeaf.request_response_rmt-or-sessions_request_response_rmt_"];
-    SessionFilterNode: components["schemas"]["FilterLeafSubset_request_response_rmt-or-sessions_request_response_rmt_"] | components["schemas"]["SessionFilterBranch"] | "all";
+    /** @description Make all properties in T optional */
+    Partial_SessionsToOperators_: {
+      session_session_id?: components["schemas"]["Partial_TextOperators_"];
+      session_session_name?: components["schemas"]["Partial_TextOperators_"];
+      session_total_cost?: components["schemas"]["Partial_NumberOperators_"];
+      session_total_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      session_prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      session_completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      session_total_requests?: components["schemas"]["Partial_NumberOperators_"];
+      session_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      session_latest_request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      session_tag?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_FilterLeaf.session_rmt-or-sessions_": {
+      session_rmt?: components["schemas"]["Partial_SessionRMTToOperators_"];
+      sessions?: components["schemas"]["Partial_SessionsToOperators_"];
+    };
+    "FilterLeafSubset_session_rmt-or-sessions_": components["schemas"]["Pick_FilterLeaf.session_rmt-or-sessions_"];
+    SessionFilterNode: components["schemas"]["FilterLeafSubset_session_rmt-or-sessions_"] | components["schemas"]["SessionFilterBranch"] | "all";
     SessionFilterBranch: {
       right: components["schemas"]["SessionFilterNode"];
       /** @enum {string} */

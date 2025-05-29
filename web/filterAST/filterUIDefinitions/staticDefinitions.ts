@@ -119,7 +119,7 @@ export const STATIC_SESSIONS_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     subType: "sessions",
   },
   {
-    id: "session_total_completion_tokens",
+    id: "session_completion_tokens",
     label: "Total Completion Tokens",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
@@ -180,13 +180,6 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
   {
     id: "organization_id",
     label: "Organization ID",
-    type: "string",
-    operators: ["eq", "neq", "like", "ilike", "contains"],
-    table: "request_response_rmt",
-  },
-  {
-    id: "proxy_key_id",
-    label: "Proxy Key ID",
     type: "string",
     operators: ["eq", "neq", "like", "ilike", "contains"],
     table: "request_response_rmt",
@@ -315,13 +308,6 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
     id: "updated_at",
     label: "Updated At",
     type: "datetime",
-    operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
-    table: "request_response_rmt",
-  },
-  {
-    id: "scores",
-    label: "Scores",
-    type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
     table: "request_response_rmt",
   },

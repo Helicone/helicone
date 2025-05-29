@@ -57,6 +57,7 @@ RUN find /usr/src/app/valhalla/jawn -name ".env.*" -exec rm {} \;
 ENV PORT=8585
 
 RUN yarn
+RUN yarn build
 COPY ./valhalla/prompt_security/main.py /usr/src/app/valhalla/prompt_security/main.py
 COPY ./valhalla/prompt_security/run_service.sh /usr/src/app/valhalla/prompt_security/run_service.sh
 RUN chmod +x /usr/src/app/valhalla/prompt_security/run_service.sh

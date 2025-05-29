@@ -1,6 +1,6 @@
 import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
 import { Result, err, ok } from "../../packages/common/result";
-import { JawnAuthenticatedRequest } from "../../types/request";
+import { type JawnAuthenticatedRequest } from "../../types/request";
 
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { generateHeliconeAPIKey } from "../../lib/experiment/tempKeys/tempAPIKey";

@@ -304,7 +304,13 @@ export class SessionManager {
       argsAcc: [],
     });
 
-    // clickhousePriceCalc("session_rmt")
+    const havingFilter = await buildFilterWithAuthClickHouseSessionRMT({
+      org_id: this.authParams.organizationId,
+      filter: filterListToTree(filters, "and"),
+      argsAcc: [],
+      having: true,
+    });
+
     const query = `
     SELECT 
       min(session_rmt.request_created_at) + INTERVAL ${timezoneDifference} MINUTE AS created_at,
@@ -322,9 +328,11 @@ export class SessionManager {
       ${builtFilter.filter}
     )
     GROUP BY session_id, session_name
+    HAVING (${havingFilter.filter})
     ORDER BY created_at DESC
     LIMIT 50
-    `;
+    `; // clickhousePriceCalc("session_rmt")
+    console.log(query)
 
     const results = await clickhouseDb.dbQuery<SessionResult>(
       query,

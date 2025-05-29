@@ -110,7 +110,6 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
             </Small>
           ) : (
             group.expressions.map((expr, index) => {
-              console.log("expr", expr);
               const newPath = [...path, index];
               if (expr.type === "and" || expr.type === "or") {
                 const isLast = index === group.expressions.length - 1;

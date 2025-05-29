@@ -11,7 +11,7 @@ import {
   Tags,
 } from "tsoa";
 import { StripeManager } from "../../managers/stripe/StripeManager";
-import { JawnAuthenticatedRequest } from "../../types/request";
+import type { JawnAuthenticatedRequest } from "../../types/request";
 
 export interface UpgradeToProRequest {
   addons?: {

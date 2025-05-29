@@ -12,18 +12,18 @@ import {
   Tags,
 } from "tsoa";
 import { err, ok, Result } from "../../packages/common/result";
-import {
+import { OrganizationManager } from "../../managers/organization/OrganizationManager";
+import type {
   NewOrganizationParams,
   OnboardingStatus,
   OrganizationFilter,
   OrganizationLayout,
-  OrganizationManager,
   OrganizationMember,
   OrganizationOwner,
   UpdateOrganizationParams,
 } from "../../managers/organization/OrganizationManager";
 import { StripeManager } from "../../managers/stripe/StripeManager";
-import { JawnAuthenticatedRequest } from "../../types/request";
+import type { JawnAuthenticatedRequest } from "../../types/request";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { Database } from "../../lib/db/database.types";
 import { RequestWrapper } from "../../lib/requestWrapper";

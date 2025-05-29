@@ -11,7 +11,7 @@ import {
   Tags,
 } from "tsoa";
 import { Result, err, ok } from "../../packages/common/result";
-import { JawnAuthenticatedRequest } from "../../types/request";
+import { type JawnAuthenticatedRequest } from "../../types/request";
 import crypto from "crypto";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 

@@ -13,7 +13,7 @@ import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
 import { resultMap } from "../../packages/common/result";
 import { clickhousePriceCalc } from "@helicone-package/cost";
-import { JawnAuthenticatedRequest } from "../../types/request";
+import type { JawnAuthenticatedRequest } from "../../types/request";
 import { quickCacheResultCustom } from "../../utils/cacheResult";
 
 export interface Property {
