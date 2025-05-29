@@ -1,0 +1,3 @@
+Just noting everything i did for installing cargo dist... 
+
+cargo install --git https://github.com/astral-sh/cargo-dist cargo-dist
