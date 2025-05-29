@@ -20,7 +20,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { Muted, Small, XSmall } from "@/components/ui/typography";
 import { FilterASTButton } from "@/filterAST/FilterASTButton";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
