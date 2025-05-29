@@ -333,14 +333,6 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
   },
 ];
 
-// Derivations of the base table request_response_rmt
-export const getRMTBasedFilterDefinitions = (table: RequestResponseRMTDerivedTable): FilterUIDefinition[] => {
-  return STATIC_FILTER_DEFINITIONS.map((def) => ({
-    ...def,
-    table,
-  }));
-};
-
 export const STATIC_SESSION_RMT_DEFINITIONS: FilterUIDefinition[] = [
   {
     id: "session_id",
@@ -358,9 +350,19 @@ export const STATIC_SESSION_RMT_DEFINITIONS: FilterUIDefinition[] = [
   },
 ];
 
-export const getSessionRMTFilterDefinitions = (): FilterUIDefinition[] => {
+export const getRMTBasedFilterDefinitions = (table: RequestResponseRMTDerivedTable): FilterUIDefinition[] => {
   return [
-    ...getRMTBasedFilterDefinitions("session_rmt"),
-    ...STATIC_SESSION_RMT_DEFINITIONS,
+    ...STATIC_FILTER_DEFINITIONS.map((def) => ({
+      ...def,
+      table,
+    })),
+    ...(() => {
+      switch (table) {
+        case "session_rmt":
+          return STATIC_SESSION_RMT_DEFINITIONS;
+        default:
+          return []; // to add more later, e.g /users
+      }
+    })(),
   ];
 };

@@ -135,13 +135,13 @@ export const useFilterUIDefinitions = () => {
 
     // Replace or add dynamic definitions to the static ones
     const staticIdsToExclude = dynamicDefinitions.map((def) => def.id);
-    const filteredStaticDefs = STATIC_FILTER_DEFINITIONS.filter(
+    const filteredStaticDefs = getRMTBasedFilterDefinitions(table).filter(
       (def) => !staticIdsToExclude.includes(def.id)
     );
 
     const definitions = [
       modelsDefinition,
-      ...getRMTBasedFilterDefinitions(table),
+      ...filteredStaticDefs,
       ...dynamicDefinitions,
     ] as FilterUIDefinition[];
 
