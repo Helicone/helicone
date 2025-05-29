@@ -233,7 +233,8 @@
                       "getting-started/integration-method/custom",
                       "getting-started/integration-method/manual-logger-curl",
                       "getting-started/integration-method/manual-logger-python",
-                      "getting-started/integration-method/manual-logger-typescript"
+                      "getting-started/integration-method/manual-logger-typescript",
+                      "getting-started/integration-method/manual-logger-go"
                     ]
                   }
                 ]
