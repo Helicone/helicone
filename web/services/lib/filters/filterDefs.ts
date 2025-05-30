@@ -3,6 +3,11 @@ export interface TimeFilter {
   end: Date;
 }
 
+export interface ISOTimeFilter {
+  start: string;
+  end: string;
+}
+
 export type AllOperators =
   | "equals"
   | "like"

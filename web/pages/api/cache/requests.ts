@@ -4,6 +4,7 @@ import {
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { UnPromise } from "../../../lib/tsxHelpers";
+import { ISOTimeFilter } from "@/services/lib/filters/filterDefs";
 
 async function handler({
   req,
@@ -12,7 +13,10 @@ async function handler({
 }: HandlerWrapperOptions<
   UnPromise<ReturnType<typeof getTopCachedRequestsClickhouse>>
 >) {
-  res.status(200).json(await getTopCachedRequestsClickhouse(orgId, "all"));
+  const { timeFilter } = req.body as {
+    timeFilter: ISOTimeFilter;
+  };
+  res.status(200).json(await getTopCachedRequestsClickhouse(orgId, timeFilter));
 }
 
 export default withAuth(handler);
