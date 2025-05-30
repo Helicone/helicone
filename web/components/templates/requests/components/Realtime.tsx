@@ -265,13 +265,16 @@ export const Realtime: React.FC<RealtimeProps> = ({
             filterInfo?.isFiltered &&
             idx >= (filterInfo.startIndex || 0) &&
             idx <= (filterInfo.endIndex || filterInfo.startIndex || 0);
+          const isFilteredMessage =
+            !filterInfo?.isFiltered || shouldScrollToThisMessage;
 
           return (
             <div
               key={messageKey}
               ref={shouldScrollToThisMessage ? messageToScrollToRef : null}
               className={`flex flex-col px-4 pb-4 mb-4 w-full 
-                ${isUser ? "items-end" : "items-start"} 
+                ${isUser ? "items-end" : "items-start"}
+                ${isFilteredMessage ? "" : "opacity-85 text-sm"}
                 ${
                   onRequestSelect
                     ? "hover:cursor-pointer hover:bg-accent/50"
@@ -417,7 +420,7 @@ export const Realtime: React.FC<RealtimeProps> = ({
                         ? `${
                             messageType === "session" ||
                             messageType === "functionCall"
-                              ? "bg-blue-500 dark:bg-blue-700 text-white border-4 border-blue-400 dark:border-blue-600 b"
+                              ? "bg-blue-500 dark:bg-blue-700 text-white border-4 border-blue-400 dark:border-blue-600"
                               : messageType === "functionOutput"
                               ? "bg-slate-100 dark:bg-slate-900 border-4 border-slate-50 dark:border-slate-950"
                               : "bg-blue-500 dark:bg-blue-700 text-white"
