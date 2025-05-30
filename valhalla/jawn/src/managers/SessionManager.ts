@@ -194,7 +194,7 @@ export class SessionManager {
         request_response_rmt: {
           properties: {
             "Helicone-Session-Name": {
-              equals: nameContains,
+              contains: nameContains,
             },
           },
         },
