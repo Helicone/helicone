@@ -46,7 +46,7 @@ const calculateDefaultExpandedStates = (
 ): { [key: string]: boolean } => {
   const states: { [key: string]: boolean } = {};
   messages.forEach((message, idx) => {
-    const messageKey = `${idx}-${message.timestamp}`; // Use index within the current filtered list + timestamp
+    const messageKey = `${idx}`; // Use index within the current filtered list + timestamp
     if (message.deleted === true) {
       // Check if it's the last message OR the next message is not an assistant message or is also deleted
       if (
@@ -207,10 +207,6 @@ export const Realtime: React.FC<RealtimeProps> = ({
     return null;
   }, [derivedMessageIndexFilter]);
 
-  // Always get the last session update from all messages, not just filtered ones
-  const lastMsg = sortedMessages.findLast((msg) => msg._type === "message");
-  const lastSessionUpdate = parseSessionUpdate(lastMsg?.content);
-
   const ModailityIcon = ({ type }: { type: MessageType }) => {
     const icons = {
       audio: <PiMicrophoneBold size={14} className="text-secondary" />,
@@ -262,7 +258,7 @@ export const Realtime: React.FC<RealtimeProps> = ({
             : null;
           const messageType = getMessageType(message);
           const isDeleted = message.deleted === true;
-          const messageKey = `${idx}-${message.timestamp}`; // Use index within the current filtered list + timestamp
+          const messageKey = `${idx}`; // Use index within the current filtered list + timestamp
           const isDeletedExpanded = deletedMessageStates[messageKey] ?? false; // Use state, default to false if not set
 
           const shouldScrollToThisMessage =
@@ -270,16 +266,12 @@ export const Realtime: React.FC<RealtimeProps> = ({
             idx >= (filterInfo.startIndex || 0) &&
             idx <= (filterInfo.endIndex || filterInfo.startIndex || 0);
 
-          const isFilteredMessage =
-            !filterInfo?.isFiltered || shouldScrollToThisMessage;
-
           return (
             <div
               key={messageKey}
               ref={shouldScrollToThisMessage ? messageToScrollToRef : null}
               className={`flex flex-col px-4 pb-4 mb-4 w-full 
-                ${isUser ? "items-end" : "items-start"}
-                ${isFilteredMessage ? "" : "opacity-25"}
+                ${isUser ? "items-end" : "items-start"} 
                 ${
                   onRequestSelect
                     ? "hover:cursor-pointer hover:bg-accent/50"
@@ -415,12 +407,17 @@ export const Realtime: React.FC<RealtimeProps> = ({
 
                   {/* Message Content */}
                   <div
-                    className={`rounded-lg p-3 ${
+                    className={`rounded-lg p-3 ${(() => {
+                      return mappedRequest.id.split("-step-")[1] ===
+                        messageKey.toString()
+                        ? "font-bold transition-all duration-200"
+                        : "";
+                    })()} ${
                       isUser
                         ? `${
                             messageType === "session" ||
                             messageType === "functionCall"
-                              ? "bg-blue-500 dark:bg-blue-700 text-white border-4 border-blue-400 dark:border-blue-600"
+                              ? "bg-blue-500 dark:bg-blue-700 text-white border-4 border-blue-400 dark:border-blue-600 b"
                               : messageType === "functionOutput"
                               ? "bg-slate-100 dark:bg-slate-900 border-4 border-slate-50 dark:border-slate-950"
                               : "bg-blue-500 dark:bg-blue-700 text-white"
