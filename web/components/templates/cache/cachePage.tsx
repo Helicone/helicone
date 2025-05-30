@@ -36,6 +36,8 @@ import { ColumnDef } from "@tanstack/react-table";
 import { columnDefsToDragColumnItems } from "../../shared/themed/table/columns/DragList";
 import RenderHeliconeRequest from "../requests/RenderHeliconeRequest";
 import { HeliconeRequest } from "@helicone-package/llm-mapper/types";
+import { FilterAST } from "@/filterAST/filterAst";
+import { useFilterAST } from "@/filterAST/context/filterContext";
 
 interface CachePageProps {
   currentPage: number;
@@ -130,6 +132,8 @@ const CachePage = (props: CachePageProps) => {
     }),
     [timePeriod]
   );
+
+  const { store: filterStore, helpers } = useFilterAST();
 
   const timeZoneDifference = new Date().getTimezoneOffset();
   const router = useRouter();
@@ -426,9 +430,25 @@ const CachePage = (props: CachePageProps) => {
 
       <section className={`dark:border-border w-full border-t py-2`}>
         <div className="py-4">
-          <h2 className="text-lg font-semibold text-foreground px-4 mb-4">
-            Top Requests
-          </h2>
+          <div className="flex flex-row items-center justify-between px-4 mb-4">
+            <h2 className="text-lg font-semibold text-foreground">
+              Top Requests
+            </h2>
+            <button
+              className="px-3 py-1.5 text-sm border border-border rounded-lg hover:bg-muted"
+              onClick={() => {
+                filterStore.setFilter(
+                  FilterAST.and(
+                    FilterAST.condition("cache_enabled", "is", true)
+                  )
+                );
+                filterStore.setActiveFilterName("Cache Enabled Requests");
+                router.push("/requests");
+              }}
+            >
+              View All
+            </button>
+          </div>
           <div className="border-t">
             <ThemedTable
               id="cache-top-requests"
