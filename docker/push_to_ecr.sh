@@ -44,7 +44,7 @@ done
 AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 
 # Generate version tag
-VERSION_TAG="v$(date +'%Y.%m.%d')"
+VERSION_TAG="v$(date +'%Y-%m-%d')"
 if [ ! -z "$CUSTOM_TAG" ]; then
   VERSION_TAG="${VERSION_TAG}-${CUSTOM_TAG}"
 fi
@@ -86,8 +86,6 @@ IMAGES=(
   "helicone/worker:../worker"
   "helicone/web:../web"
   "helicone/web-dev:../web"
-  "helicone/supabase-migration-runner:../supabase"
-  "helicone/clickhouse-migration-runner:../clickhouse"
   "helicone/jawn:.."
   "helicone/migrations:.."
 )
