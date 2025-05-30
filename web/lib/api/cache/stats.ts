@@ -11,18 +11,18 @@ function buildTimeFilter(timeFilter: ISOTimeFilter): FilterNode {
       cache_metrics: {
         date: {
           gte: new Date(timeFilter.start),
-        }
-      }
+        },
+      },
     },
-    operator: "and", 
+    operator: "and",
     right: {
       cache_metrics: {
         date: {
           lte: new Date(timeFilter.end),
-        }
-      }
-    }
-  }
+        },
+      },
+    },
+  };
 }
 
 export async function getCacheCountClickhouse(
@@ -39,8 +39,12 @@ export async function getCacheCountClickhouse(
   select sum(cache_hit_count) as count 
   from cache_metrics 
   where ${builtFilter.filter}
-  ${timeFilter ? `and date >= '${timeFilter.start.split("T")[0]}'
-  and date <= '${timeFilter.end.split("T")[0]}'` : ""}`;
+  ${
+    timeFilter
+      ? `and date >= '${timeFilter.start.split("T")[0]}'
+  and date <= '${timeFilter.end.split("T")[0]}'`
+      : ""
+  }`;
 
   const queryResult = await dbQueryClickhouse<{ count: number }>(
     query,
@@ -151,7 +155,10 @@ export async function getTopCachedRequestsClickhouse(
   LIMIT 10
   `;
 
-  const rmtResult = await dbQueryClickhouse<TopCachedRequest>(query, builtFilter.argsAcc);
+  const rmtResult = await dbQueryClickhouse<TopCachedRequest>(
+    query,
+    builtFilter.argsAcc
+  );
 
   return resultMap(rmtResult, (requests) =>
     requests

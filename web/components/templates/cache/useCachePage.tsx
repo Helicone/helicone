@@ -14,7 +14,7 @@ import {
   useGetCacheCount,
   useGetCacheTotalSavings,
   useGetCacheTimeSaved,
-  useGetCacheTopRequests
+  useGetCacheTopRequests,
 } from "@/services/hooks/cache";
 import { useGetRequestCount } from "@/services/hooks/requests";
 
@@ -65,23 +65,27 @@ export const useCachePageClickHouse = ({
 
   const metrics = {
     totalCacheHits: useGetCacheCount(timeFilter),
-    totalRequests: useGetRequestCount({
-      left: {
-        request_response_rmt: {
-          request_created_at: {
-            gte: timeFilter.start,
-          }
-        }
+    totalRequests: useGetRequestCount(
+      {
+        left: {
+          request_response_rmt: {
+            request_created_at: {
+              gte: timeFilter.start,
+            },
+          },
+        },
+        operator: "and",
+        right: {
+          request_response_rmt: {
+            request_created_at: {
+              lte: timeFilter.end,
+            },
+          },
+        },
       },
-      operator: "and", 
-      right: {
-        request_response_rmt: {
-          request_created_at: {
-            lte: timeFilter.end,
-          }
-        }
-      }
-    }, false, true),
+      false,
+      true
+    ),
     totalSavings: useGetCacheTotalSavings(timeFilter),
     timeSaved: useGetCacheTimeSaved(timeFilter),
     topRequests: useGetCacheTopRequests(timeFilter),
@@ -97,9 +101,10 @@ export const useCachePageClickHouse = ({
     }),
   };
 
-  const topRequestIds = metrics.topRequests.data?.data?.map((request: any) => {
-    return request.request_id;
-  }) ?? [];
+  const topRequestIds =
+    metrics.topRequests.data?.data?.map((request: any) => {
+      return request.request_id;
+    }) ?? [];
 
   const topRequestsFilter: FilterNode | null =
     topRequestIds && topRequestIds.length > 0
