@@ -14,7 +14,9 @@ async function handler({
 }: HandlerWrapperOptions<Result<number, string>>) {
   const parsedBody = TimeFilterSchema.safeParse(req.body);
   if (!parsedBody.success) {
-    return res.status(400).json({ error: parsedBody.error.message, data: null });
+    return res
+      .status(400)
+      .json({ error: parsedBody.error.message, data: null });
   }
 
   res
