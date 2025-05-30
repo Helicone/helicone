@@ -279,6 +279,7 @@ const CachePage = (props: CachePageProps) => {
                 <SelectValue placeholder="Select time period" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="3">Last 3 days</SelectItem>
                 <SelectItem value="7">Last 7 days</SelectItem>
                 <SelectItem value="30">Last 30 days</SelectItem>
                 <SelectItem value="90">Last 90 days</SelectItem>

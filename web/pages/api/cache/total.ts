@@ -1,3 +1,4 @@
+import { TimeFilterSchema } from "@/services/lib/filters/filterDefs";
 import { getCacheCountClickhouse } from "../../../lib/api/cache/stats";
 import {
   HandlerWrapperOptions,
@@ -10,7 +11,15 @@ async function handler({
   res,
   userData: { orgId },
 }: HandlerWrapperOptions<Result<number, string>>) {
-  res.status(200).json(await getCacheCountClickhouse(orgId, "all"));
+  const parsedBody = TimeFilterSchema.safeParse(req.body);
+  if (!parsedBody.success) {
+    return res
+      .status(400)
+      .json({ error: parsedBody.error.message, data: null });
+  }
+  res
+    .status(200)
+    .json(await getCacheCountClickhouse(orgId, parsedBody.data.timeFilter));
 }
 
 export default withAuth(handler);

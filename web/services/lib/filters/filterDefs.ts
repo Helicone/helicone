@@ -1,7 +1,17 @@
+import { z } from "zod";
+
 export interface TimeFilter {
   start: Date;
   end: Date;
 }
+
+export const TimeFilterSchema = z.object({
+  timeFilter: z.object({
+    start: z.string().datetime().transform(str => new Date(str)),
+    end: z.string().datetime().transform(str => new Date(str)),
+  }),
+});
+
 
 export type AllOperators =
   | "equals"
