@@ -12,6 +12,8 @@ pub struct MockArgs {
     pub global_openai_latency: Option<u64>,
     #[builder(setter(strip_option), default = None)]
     pub global_anthropic_latency: Option<u64>,
+    #[builder(setter(strip_option), default = None)]
+    pub global_google_latency: Option<u64>,
     /// Map of stub id to the expectations on the number of times it should be
     /// called.
     #[builder(setter(strip_option), default = None)]
@@ -23,6 +25,7 @@ pub struct MockArgs {
 pub struct Mock {
     pub openai_mock: Stubr,
     pub anthropic_mock: Stubr,
+    pub google_mock: Stubr,
     pub minio_mock: Stubr,
     pub jawn_mock: Stubr,
     args: MockArgs,
@@ -57,6 +60,20 @@ impl Mock {
             .unwrap()
             .base_url = Url::parse(&anthropic_mock.uri()).unwrap();
 
+        let google_mock = start_mock(
+            "./stubs/google",
+            args.global_google_latency,
+            &args.stubs,
+            args.verify,
+        )
+        .await;
+
+        config
+            .providers
+            .get_mut(&InferenceProvider::GoogleGemini)
+            .unwrap()
+            .base_url = Url::parse(&google_mock.uri()).unwrap();
+
         let minio_mock =
             start_mock("./stubs/minio", None, &args.stubs, args.verify).await;
         config.minio.host = Url::parse(&minio_mock.uri()).unwrap();
@@ -68,6 +85,7 @@ impl Mock {
         Self {
             openai_mock,
             anthropic_mock,
+            google_mock,
             minio_mock,
             jawn_mock,
             args,
@@ -77,6 +95,7 @@ impl Mock {
     pub async fn verify(&self) {
         self.openai_mock.http_server.verify().await;
         self.anthropic_mock.http_server.verify().await;
+        self.google_mock.http_server.verify().await;
         self.minio_mock.http_server.verify().await;
         self.jawn_mock.http_server.verify().await;
     }
@@ -84,6 +103,7 @@ impl Mock {
     pub async fn reset(&self) {
         self.openai_mock.http_server.reset().await;
         self.anthropic_mock.http_server.reset().await;
+        self.google_mock.http_server.reset().await;
         self.minio_mock.http_server.reset().await;
         self.jawn_mock.http_server.reset().await;
     }
@@ -102,6 +122,15 @@ impl Mock {
             &self.anthropic_mock,
             "./stubs/anthropic",
             self.args.global_anthropic_latency,
+            &stubs,
+            self.args.verify,
+        )
+        .await;
+
+        register_stubs_for_mock(
+            &self.google_mock,
+            "./stubs/google",
+            self.args.global_google_latency,
             &stubs,
             self.args.verify,
         )

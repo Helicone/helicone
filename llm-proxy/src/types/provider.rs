@@ -66,6 +66,7 @@ pub enum InferenceProvider {
     Anthropic,
     Bedrock,
     VertexAi,
+    GoogleGemini,
     // Ollama
 }
 
@@ -83,6 +84,11 @@ impl InferenceProvider {
                     .map(ApiEndpoint::Anthropic)
                     .collect()
             }
+            InferenceProvider::GoogleGemini => {
+                crate::endpoints::google::Google::iter()
+                    .map(ApiEndpoint::Google)
+                    .collect()
+            }
             InferenceProvider::Bedrock | InferenceProvider::VertexAi => vec![],
         }
     }
@@ -94,6 +100,7 @@ impl std::fmt::Display for InferenceProvider {
             InferenceProvider::OpenAI => write!(f, "openai"),
             InferenceProvider::Anthropic => write!(f, "anthropic"),
             InferenceProvider::Bedrock => write!(f, "bedrock"),
+            InferenceProvider::GoogleGemini => write!(f, "google"),
             InferenceProvider::VertexAi => write!(f, "vertexai"),
         }
     }

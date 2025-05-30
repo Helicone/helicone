@@ -56,6 +56,20 @@ impl BalanceConfig {
         )]))
     }
 
+    #[cfg(any(test, feature = "testing"))]
+    #[must_use]
+    pub fn google_gemini() -> Self {
+        Self(HashMap::from([(
+            EndpointType::Chat,
+            BalanceConfigInner::Weighted {
+                targets: nes![BalanceTarget {
+                    provider: InferenceProvider::GoogleGemini,
+                    weight: Decimal::from(1),
+                }],
+            },
+        )]))
+    }
+
     #[must_use]
     pub fn providers(&self) -> IndexSet<InferenceProvider> {
         self.0
@@ -78,7 +92,8 @@ impl BalanceConfigInner {
         Self::P2C {
             targets: nes![
                 InferenceProvider::OpenAI,
-                InferenceProvider::Anthropic
+                InferenceProvider::Anthropic,
+                InferenceProvider::GoogleGemini,
             ],
         }
     }

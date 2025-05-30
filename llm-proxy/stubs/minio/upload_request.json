@@ -1,10 +1,10 @@
 {
-  "id":"success:minio:upload_request",
-  "request":{
-    "method":"PUT",
-    "urlPathPattern": "/request-response-storage/organizations/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/requests/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/raw_request_response_body"
+  "id": "success:minio:upload_request",
+  "request": {
+    "method": "PUT",
+    "urlPathPattern": "/organizations/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/requests/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/raw_request_response_body"
   },
-  "response":{
-    "status":200
+  "response": {
+    "status": 200
   }
 }

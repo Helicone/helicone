@@ -21,7 +21,9 @@ use crate::{
     discover::monitor::health::EndpointMetricsRegistry,
     dispatcher::{
         anthropic_client::Client as AnthropicClient,
-        extensions::ExtensionsCopier, openai_client::Client as OpenAIClient,
+        extensions::ExtensionsCopier,
+        google_gemini_client::Client as GoogleGeminiClient,
+        openai_client::Client as OpenAIClient,
     },
     endpoints::ApiEndpoint,
     error::{api::ApiError, init::InitError, internal::InternalError},
@@ -53,6 +55,7 @@ pub type DispatcherService =
 pub enum Client {
     OpenAI(OpenAIClient),
     Anthropic(AnthropicClient),
+    GoogleGemini(GoogleGeminiClient),
 }
 
 impl Client {
@@ -76,6 +79,7 @@ impl AsRef<reqwest::Client> for Client {
         match self {
             Client::OpenAI(client) => &client.0,
             Client::Anthropic(client) => &client.0,
+            Client::GoogleGemini(client) => &client.0,
         }
     }
 }
@@ -101,6 +105,7 @@ impl Dispatcher {
             .connect_timeout(app_state.0.config.dispatcher.connection_timeout)
             .timeout(app_state.0.config.dispatcher.timeout)
             .tcp_nodelay(true);
+
         let client = match provider {
             InferenceProvider::OpenAI => Client::OpenAI(OpenAIClient::new(
                 &app_state,
@@ -109,6 +114,13 @@ impl Dispatcher {
             )?),
             InferenceProvider::Anthropic => {
                 Client::Anthropic(AnthropicClient::new(
+                    &app_state,
+                    base_client,
+                    provider_api_key,
+                )?)
+            }
+            InferenceProvider::GoogleGemini => {
+                Client::GoogleGemini(GoogleGeminiClient::new(
                     &app_state,
                     base_client,
                     provider_api_key,
@@ -125,7 +137,7 @@ impl Dispatcher {
         let model_mapper =
             ModelMapper::new(app_state.clone(), router_config.clone());
         let converter_registry =
-            EndpointConverterRegistry::new(router_config, model_mapper);
+            EndpointConverterRegistry::new(router_config, &model_mapper);
 
         let extensions_layer = AddExtensionsLayer::builder()
             .inference_provider(provider)

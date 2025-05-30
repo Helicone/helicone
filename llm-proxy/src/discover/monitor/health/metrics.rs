@@ -6,6 +6,7 @@ use crate::{
     endpoints::{
         ApiEndpoint,
         anthropic::{Anthropic, Messages},
+        google::{GenerateContents, Google},
         openai::{ChatCompletions, OpenAI},
     },
     error::internal::InternalError,
@@ -42,6 +43,10 @@ impl Default for EndpointMetricsRegistry {
         );
         known_endpoints.insert(
             ApiEndpoint::Anthropic(Anthropic::Messages(Messages)),
+            EndpointMetrics::default(),
+        );
+        known_endpoints.insert(
+            ApiEndpoint::Google(Google::GenerateContents(GenerateContents)),
             EndpointMetrics::default(),
         );
         Self {

@@ -1,11 +1,12 @@
 pub mod anthropic;
+pub mod google;
 pub mod mappings;
 pub mod openai;
 
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    endpoints::{anthropic::Anthropic, openai::OpenAI},
+    endpoints::{anthropic::Anthropic, google::Google, openai::OpenAI},
     error::invalid_req::InvalidRequestError,
     middleware::mapper::error::MapperError,
     types::{model::Model, provider::InferenceProvider},
@@ -29,6 +30,7 @@ pub trait AiRequest {
 pub enum ApiEndpoint {
     OpenAI(OpenAI),
     Anthropic(Anthropic),
+    Google(Google),
 }
 
 impl ApiEndpoint {
@@ -39,6 +41,9 @@ impl ApiEndpoint {
             }
             InferenceProvider::Anthropic => {
                 Some(Self::Anthropic(Anthropic::try_from(path).ok()?))
+            }
+            InferenceProvider::GoogleGemini => {
+                Some(Self::Google(Google::try_from(path).ok()?))
             }
             unsupported => {
                 tracing::debug!(provider = %unsupported, "Provider not supported for request mapping");
@@ -58,6 +63,12 @@ impl ApiEndpoint {
             (Self::Anthropic(source), InferenceProvider::OpenAI) => {
                 Ok(Self::OpenAI(OpenAI::from(source)))
             }
+            (Self::Google(source), InferenceProvider::OpenAI) => {
+                Ok(Self::OpenAI(OpenAI::from(source)))
+            }
+            (Self::OpenAI(source), InferenceProvider::GoogleGemini) => {
+                Ok(Self::Google(Google::from(source)))
+            }
             _ => Err(InvalidRequestError::UnsupportedProvider(target_provider)),
         }
     }
@@ -67,6 +78,7 @@ impl ApiEndpoint {
         match self {
             Self::OpenAI(_) => InferenceProvider::OpenAI,
             Self::Anthropic(_) => InferenceProvider::Anthropic,
+            Self::Google(_) => InferenceProvider::GoogleGemini,
         }
     }
 
@@ -75,6 +87,7 @@ impl ApiEndpoint {
         match self {
             Self::OpenAI(openai) => openai.path(),
             Self::Anthropic(anthropic) => anthropic.path(),
+            Self::Google(google) => google.path(),
         }
     }
 
@@ -83,6 +96,7 @@ impl ApiEndpoint {
         match self {
             Self::OpenAI(openai) => openai.endpoint_type(),
             Self::Anthropic(anthropic) => anthropic.endpoint_type(),
+            Self::Google(google) => google.endpoint_type(),
         }
     }
 }
