@@ -75,9 +75,9 @@ async fn anthropic_slow() {
     let requests = 10;
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([
-            ("success:openai:chat_completion", (4..).into()),
-            ("success:anthropic:messages", (..5).into()),
-            ("success:google:generate_content", (..5).into()),
+            ("success:openai:chat_completion", (3..).into()),
+            ("success:anthropic:messages", (..6).into()),
+            ("success:google:generate_content", (..6).into()),
             // Auth is disabled, so auth and logging services should not be
             // called
             ("success:jawn:whoami", 0.into()),

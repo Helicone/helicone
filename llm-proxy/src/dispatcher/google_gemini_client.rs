@@ -28,8 +28,6 @@ impl Client {
             .base_url
             .clone();
 
-        tracing::debug!("Base URL: {:?}", base_url);
-
         let mut default_headers = HeaderMap::new();
         default_headers.insert(
             http::header::AUTHORIZATION,

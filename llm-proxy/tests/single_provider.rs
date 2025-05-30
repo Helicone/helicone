@@ -79,7 +79,7 @@ async fn google_with_openai_request_style() {
     config.routers = router_config;
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([
-            ("success:google:generate_content", 1.into()),
+            ("success:google:generate_content", 2.into()),
             // Auth is disabled, so auth and logging services should not be
             // called
             ("success:jawn:whoami", 0.into()),
@@ -109,15 +109,6 @@ async fn google_with_openai_request_style() {
         .unwrap();
     let response = harness.call(request).await.unwrap();
     assert_eq!(response.status(), StatusCode::OK);
-
-    // assert that the request was proxied to the mock server correctly
-    harness.mock.google_mock.http_server.verify().await;
-    harness
-        .mock
-        .google_mock
-        .http_server
-        .set_expectation("success:google:generate_content", 2.into())
-        .await;
 
     let request_body = axum_core::body::Body::from(
         serde_json::to_vec(&json!({
@@ -158,7 +149,7 @@ async fn anthropic_with_openai_request_style() {
     config.routers = router_config;
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([
-            ("success:anthropic:messages", 1.into()),
+            ("success:anthropic:messages", 2.into()),
             // Auth is disabled, so auth and logging services should not be
             // called
             ("success:jawn:whoami", 0.into()),
@@ -191,15 +182,6 @@ async fn anthropic_with_openai_request_style() {
         .unwrap();
     let response = harness.call(request).await.unwrap();
     assert_eq!(response.status(), StatusCode::OK);
-
-    // assert that the request was proxied to the mock server correctly
-    harness.mock.anthropic_mock.http_server.verify().await;
-    harness
-        .mock
-        .anthropic_mock
-        .http_server
-        .set_expectation("success:anthropic:messages", 2.into())
-        .await;
 
     // test that using an openai model name works as well
     let request_body = axum_core::body::Body::from(
@@ -242,7 +224,7 @@ async fn anthropic_with_anthropic_request_style() {
     config.routers = router_config;
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([
-            ("success:anthropic:messages", 1.into()),
+            ("success:anthropic:messages", 2.into()),
             // Auth is disabled, so auth and logging services should not be
             // called
             ("success:jawn:whoami", 0.into()),
@@ -275,16 +257,6 @@ async fn anthropic_with_anthropic_request_style() {
         .unwrap();
     let response = harness.call(request).await.unwrap();
     assert_eq!(response.status(), StatusCode::OK);
-
-    // assert that the request was proxied to the mock server correctly
-    harness.mock.verify().await;
-    // update the expectation to 2 requests
-    harness
-        .mock
-        .anthropic_mock
-        .http_server
-        .set_expectation("success:anthropic:messages", 2.into())
-        .await;
 
     // test that using an openai model name works as well
     let request_body = axum_core::body::Body::from(

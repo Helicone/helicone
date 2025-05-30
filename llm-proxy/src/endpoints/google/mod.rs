@@ -38,7 +38,7 @@ impl TryFrom<&str> for Google {
                 Ok(Self::GenerateContents(GenerateContents))
             }
             path => {
-                tracing::warn!(path = %path, "unsupported anthropic path");
+                tracing::warn!(path = %path, "unsupported Google path");
                 Err(crate::error::invalid_req::InvalidRequestError::NotFound(
                     path.to_string(),
                 ))
