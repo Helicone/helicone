@@ -1,4 +1,4 @@
-import { ISOTimeFilter, checkISOTimeFilter } from "@/services/lib/filters/filterDefs";
+import { TimeFilterSchema } from "@/services/lib/filters/filterDefs";
 import { getCacheCountClickhouse } from "../../../lib/api/cache/stats";
 import {
   HandlerWrapperOptions,
@@ -11,14 +11,11 @@ async function handler({
   res,
   userData: { orgId },
 }: HandlerWrapperOptions<Result<number, string>>) {
-  const { timeFilter } = req.body as {
-    timeFilter: ISOTimeFilter;
-  };
-  const validatedTimeFilter = checkISOTimeFilter(timeFilter);
-  if (validatedTimeFilter instanceof Error) {
-    return res.status(400).json({ error: validatedTimeFilter.message, data: null });
+  const parsedBody = TimeFilterSchema.safeParse(req.body);
+  if (!parsedBody.success) {
+    return res.status(400).json({ error: parsedBody.error.message, data: null });
   }
-  res.status(200).json(await getCacheCountClickhouse(orgId, validatedTimeFilter));
+  res.status(200).json(await getCacheCountClickhouse(orgId, parsedBody.data.timeFilter));
 }
 
 export default withAuth(handler);

@@ -1,23 +1,17 @@
+import { z } from "zod";
+
 export interface TimeFilter {
   start: Date;
   end: Date;
 }
 
-export interface ISOTimeFilter {
-  start: string;
-  end: string;
-}
+export const TimeFilterSchema = z.object({
+  timeFilter: z.object({
+    start: z.string().datetime().transform(str => new Date(str)),
+    end: z.string().datetime().transform(str => new Date(str)),
+  }),
+});
 
-export function checkISOTimeFilter(isoTimeFilter: ISOTimeFilter): TimeFilter | Error {
-  try {
-    return {
-      start: new Date(isoTimeFilter.start),
-      end: new Date(isoTimeFilter.end),
-    };
-  } catch (e) {
-    return e as Error;
-  }
-}
 
 export type AllOperators =
   | "equals"
