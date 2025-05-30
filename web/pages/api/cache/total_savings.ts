@@ -5,7 +5,7 @@ import {
 } from "../../../lib/api/handlerWrappers";
 import { modelCost } from "../../../lib/api/metrics/costCalc";
 import { Result, resultMap } from "@/packages/common/result";
-import { ISOTimeFilter } from "@/services/lib/filters/filterDefs";
+import { ISOTimeFilter, checkISOTimeFilter } from "@/services/lib/filters/filterDefs";
 
 async function handler({
   req,
@@ -15,11 +15,17 @@ async function handler({
   const { timeFilter } = req.body as {
     timeFilter: ISOTimeFilter;
   };
+  
+  const validatedTimeFilter = checkISOTimeFilter(timeFilter);
+  if (validatedTimeFilter instanceof Error) {
+    return res.status(400).json({ error: validatedTimeFilter.message, data: null });
+  }
+
   res
     .status(200)
     .json(
       resultMap(
-        await getTotalSavingsClickhouse(orgId, timeFilter),
+        await getTotalSavingsClickhouse(orgId, validatedTimeFilter),
         (modelMetrics) =>
           modelMetrics.reduce(
             (acc, modelMetric) => acc + modelCost(modelMetric),

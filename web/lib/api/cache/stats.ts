@@ -1,16 +1,16 @@
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import { buildFilterWithAuthClickHouseCacheMetrics } from "../../../services/lib/filters/filters";
 import { Result, resultMap } from "@/packages/common/result";
-import { ISOTimeFilter } from "@/services/lib/filters/filterDefs";
+import { TimeFilter } from "@/services/lib/filters/filterDefs";
 import { dbQueryClickhouse } from "../db/dbExecute";
 import { ModelMetrics } from "../metrics/modelMetrics";
 
-function buildTimeFilter(timeFilter: ISOTimeFilter): FilterNode {
+function buildTimeFilter(timeFilter: TimeFilter): FilterNode {
   return {
     left: {
       cache_metrics: {
         date: {
-          gte: new Date(timeFilter.start),
+          gte: timeFilter.start,
         },
       },
     },
@@ -18,7 +18,7 @@ function buildTimeFilter(timeFilter: ISOTimeFilter): FilterNode {
     right: {
       cache_metrics: {
         date: {
-          lte: new Date(timeFilter.end),
+          lte: timeFilter.end,
         },
       },
     },
@@ -27,7 +27,7 @@ function buildTimeFilter(timeFilter: ISOTimeFilter): FilterNode {
 
 export async function getCacheCountClickhouse(
   orgId: string,
-  timeFilter: ISOTimeFilter
+  timeFilter: TimeFilter
 ): Promise<Result<number, string>> {
   const builtFilter = await buildFilterWithAuthClickHouseCacheMetrics({
     org_id: orgId,
@@ -41,8 +41,8 @@ export async function getCacheCountClickhouse(
   where ${builtFilter.filter}
   ${
     timeFilter
-      ? `and date >= '${timeFilter.start.split("T")[0]}'
-  and date <= '${timeFilter.end.split("T")[0]}'`
+      ? `and date >= '${timeFilter.start.toISOString().split("T")[0]}'
+  and date <= '${timeFilter.end.toISOString().split("T")[0]}'`
       : ""
   }`;
 
@@ -55,7 +55,7 @@ export async function getCacheCountClickhouse(
 
 export async function getTotalSavingsClickhouse(
   orgId: string,
-  timeFilter: ISOTimeFilter
+  timeFilter: TimeFilter
 ): Promise<Result<ModelMetrics[], string>> {
   const builtFilter = await buildFilterWithAuthClickHouseCacheMetrics({
     org_id: orgId,
@@ -98,7 +98,7 @@ export async function getTotalSavingsClickhouse(
 
 export async function getTimeSavedClickhouse(
   orgId: string,
-  timeFilter: ISOTimeFilter
+  timeFilter: TimeFilter
 ): Promise<Result<number, string>> {
   const builtFilter = await buildFilterWithAuthClickHouseCacheMetrics({
     org_id: orgId,
@@ -131,7 +131,7 @@ export interface TopCachedRequest {
 
 export async function getTopCachedRequestsClickhouse(
   orgId: string,
-  timeFilter: ISOTimeFilter
+  timeFilter: TimeFilter
 ): Promise<Result<TopCachedRequest[], string>> {
   const builtFilter = await buildFilterWithAuthClickHouseCacheMetrics({
     org_id: orgId,

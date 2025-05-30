@@ -4,7 +4,7 @@ import {
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { UnPromise } from "../../../lib/tsxHelpers";
-import { ISOTimeFilter } from "@/services/lib/filters/filterDefs";
+import { ISOTimeFilter, checkISOTimeFilter } from "@/services/lib/filters/filterDefs";
 
 async function handler({
   req,
@@ -16,7 +16,11 @@ async function handler({
   const { timeFilter } = req.body as {
     timeFilter: ISOTimeFilter;
   };
-  res.status(200).json(await getTopCachedRequestsClickhouse(orgId, timeFilter));
+  const validatedTimeFilter = checkISOTimeFilter(timeFilter);
+  if (validatedTimeFilter instanceof Error) {
+    return res.status(400).json({ error: validatedTimeFilter.message, data: null });
+  }
+  res.status(200).json(await getTopCachedRequestsClickhouse(orgId, validatedTimeFilter));
 }
 
 export default withAuth(handler);

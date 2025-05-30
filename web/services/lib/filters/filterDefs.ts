@@ -8,6 +8,17 @@ export interface ISOTimeFilter {
   end: string;
 }
 
+export function checkISOTimeFilter(isoTimeFilter: ISOTimeFilter): TimeFilter | Error {
+  try {
+    return {
+      start: new Date(isoTimeFilter.start),
+      end: new Date(isoTimeFilter.end),
+    };
+  } catch (e) {
+    return e as Error;
+  }
+}
+
 export type AllOperators =
   | "equals"
   | "like"
