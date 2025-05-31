@@ -144,17 +144,35 @@ export class StripeManager extends BaseManager {
   public async trackStripeMeter(
     events: StripeMeterEvent[]
   ): Promise<Result<string, string>> {
-    console.log("Tracking stripe meter");
     try {
       // First create a meter event session to get an auth token
-      for (const event of events) {
-        const result = await this.stripe.v2.billing.meterEvents.create(event);
-        console.log("Meter event created", result);
+      const meterEventSession =
+        await this.stripe.v2.billing.meterEventSession.create();
+
+      // Use a direct fetch to the meter events stream endpoint with the auth token
+      // The endpoint is different from the standard Stripe API endpoint
+      const response = await fetch(
+        "https://meter-events.stripe.com/v2/billing/meter_event_stream",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${meterEventSession.authentication_token}`,
+            "Content-Type": "application/json",
+            "Stripe-Version": "2025-03-31.preview",
+          },
+          body: JSON.stringify({ events }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(
+          `Error response from Stripe: ${response.status} ${errorText}`
+        );
       }
 
       return ok("Success");
     } catch (error) {
-      console.error("Error tracking stripe meter", error);
       return err(`Error tracking stripe meter: ${error}`);
     }
   }
@@ -459,35 +477,35 @@ WHERE (${builtFilter.filter})`,
         },
         ...(body?.addons?.prompts
           ? [
-            {
-              price: proProductPrices["prompts"],
-              quantity: 1,
-            },
-          ]
+              {
+                price: proProductPrices["prompts"],
+                quantity: 1,
+              },
+            ]
           : []),
         ...(body?.addons?.alerts
           ? [
-            {
-              price: proProductPrices["alerts"],
-              quantity: 1,
-            },
-          ]
+              {
+                price: proProductPrices["alerts"],
+                quantity: 1,
+              },
+            ]
           : []),
         ...(body?.addons?.experiments
           ? [
-            {
-              price: proProductPrices["experiments"],
-              quantity: 1,
-            },
-          ]
+              {
+                price: proProductPrices["experiments"],
+                quantity: 1,
+              },
+            ]
           : []),
         ...(body?.addons?.evals
           ? [
-            {
-              price: proProductPrices["evals"],
-              quantity: 1,
-            },
-          ]
+              {
+                price: proProductPrices["evals"],
+                quantity: 1,
+              },
+            ]
           : []),
       ],
       mode: "subscription",
@@ -1216,11 +1234,11 @@ WHERE (${builtFilter.filter})`,
     try {
       // Assuming you have a usage item ID for each customer
       const usageRecordParams: Stripe.SubscriptionItemCreateUsageRecordParams =
-      {
-        quantity: usage,
-        timestamp: Math.floor(Date.now() / 1000),
-        action: "set",
-      };
+        {
+          quantity: usage,
+          timestamp: Math.floor(Date.now() / 1000),
+          action: "set",
+        };
 
       await this.stripe.subscriptionItems.createUsageRecord(
         "si_1234", // Replace with actual subscription item ID

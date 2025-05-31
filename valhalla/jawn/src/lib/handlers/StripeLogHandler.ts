@@ -12,6 +12,7 @@ import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 import { cacheResultCustom } from "../../utils/cacheResult";
 
+const DEFAULT_CACHE_REFERENCE_ID = "00000000-0000-0000-0000-000000000000";
 type StripeMeterEvent = Stripe.V2.Billing.MeterEventStreamCreateParams.Event;
 
 const cache = new KVCache(60 * 1000); // 1 hour
@@ -47,14 +48,17 @@ export class StripeLogHandler extends AbstractLogHandler {
       return await super.handle(context);
     }
 
-    if (context.message.log.request.cacheReferenceId) {
+    if (context.message.log.request.cacheReferenceId && (context.message.log.request.cacheReferenceId !== DEFAULT_CACHE_REFERENCE_ID)) {
       return await super.handle(context);
     }
 
-    const stripe_customer_id = await getStripeCustomerId(organizationId);
+    const stripe_customer_id = await cacheResultCustom(
+      "stripe_customer_id_" + organizationId,
+      async () => getStripeCustomerId(organizationId),
+      cache
+    );
 
     if (stripe_customer_id.error || !stripe_customer_id.data) {
-      console.error("No stripe customer id found");
       return await super.handle(context);
     }
 
@@ -74,7 +78,6 @@ export class StripeLogHandler extends AbstractLogHandler {
   }
 
   public async handleResults(): PromiseGenericResult<string> {
-    console.log("Handling stripe meter");
     const stripeManager = new StripeManager({
       organizationId: "",
     });
