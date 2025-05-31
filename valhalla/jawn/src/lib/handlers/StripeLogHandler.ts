@@ -51,13 +51,10 @@ export class StripeLogHandler extends AbstractLogHandler {
       return await super.handle(context);
     }
 
-    const stripe_customer_id = await cacheResultCustom(
-      "stripe_customer_id_" + organizationId,
-      async () => getStripeCustomerId(organizationId),
-      cache
-    );
+    const stripe_customer_id = await getStripeCustomerId(organizationId);
 
     if (stripe_customer_id.error || !stripe_customer_id.data) {
+      console.error("No stripe customer id found");
       return await super.handle(context);
     }
 
@@ -77,6 +74,7 @@ export class StripeLogHandler extends AbstractLogHandler {
   }
 
   public async handleResults(): PromiseGenericResult<string> {
+    console.log("Handling stripe meter");
     const stripeManager = new StripeManager({
       organizationId: "",
     });
