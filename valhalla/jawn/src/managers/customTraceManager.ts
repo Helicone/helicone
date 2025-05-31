@@ -3,7 +3,7 @@ import { HeliconeQueueProducer } from "../lib/clients/HeliconeQuequeProducer";
 import type { KafkaMessageContents } from "../lib/handlers/HandlerContext";
 import { S3Client } from "../lib/shared/db/s3Client";
 import { AuthParams } from "../packages/common/auth/types";
-import { Provider } from "@helicone-package/llm-mapper/types";
+import { Provider } from "../packages/llm-mapper/types";
 
 export type AsyncLogModel = {
   providerRequest: ProviderRequest;
@@ -82,7 +82,7 @@ export class CustomTraceManager {
       process.env.S3_SECRET_KEY ?? "",
       process.env.S3_ENDPOINT ?? "",
       process.env.S3_BUCKET_NAME ?? "",
-      (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
+      process.env.S3_REGION ?? "",
     );
   }
 
