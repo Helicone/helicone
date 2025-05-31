@@ -84,11 +84,12 @@ export class LogManager {
       .setNext(promptHandler)
       .setNext(onlineEvalHandler)
       .setNext(loggingHandler)
+      .setNext(stripeLogHandler)
       .setNext(posthogHandler)
       .setNext(lytixHandler)
       .setNext(webhookHandler)
-      .setNext(segmentHandler)
-      .setNext(stripeLogHandler);
+      .setNext(segmentHandler);
+
 
     await Promise.all(
       logMessages.map(async (logMessage) => {
@@ -161,6 +162,7 @@ export class LogManager {
 
     await this.logRateLimits(rateLimitHandler, logMetaData);
     await this.logHandlerResults(loggingHandler, logMetaData, logMessages);
+    console.log("Logging stripe meter");
     await this.logStripeMeter(stripeLogHandler, logMetaData);
 
     // BEST EFFORT LOGGING
