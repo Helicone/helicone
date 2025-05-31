@@ -337,6 +337,16 @@ export const STATIC_SESSION_RMT_DEFINITIONS: FilterUIDefinition[] = [
   },
 ];
 
+// Given a table variation of request_response_rmt, return filter definitions of the view of the variation
+// example: session_rmt is aggregated to session_metrics, so provide a filter defn for that view
+export const rmtDerivedTableViewMappings: Record<RequestResponseRMTDerivedTable, FilterUIDefinition[]> = {
+  request_response_rmt: [],
+  session_rmt: STATIC_SESSIONS_VIEW_DEFINITIONS,
+  // user_rmt: STATIC_USER_VIEW_DEFINITIONS,
+};
+
+
+// Given a table variation of request_response_rmt, return the base static filter definitions
 export const getRMTBasedFilterDefinitions = (table: RequestResponseRMTDerivedTable): FilterUIDefinition[] => {
   return [
     ...STATIC_FILTER_DEFINITIONS.map((def) => ({

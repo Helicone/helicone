@@ -2,10 +2,10 @@ import { useMemo } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { FilterUIDefinition } from "./types";
 import {
-  STATIC_FILTER_DEFINITIONS,
   STATIC_USER_VIEW_DEFINITIONS,
   STATIC_SESSIONS_VIEW_DEFINITIONS,
   getRMTBasedFilterDefinitions,
+  rmtDerivedTableViewMappings,
 } from "./staticDefinitions";
 
 import { useOrg } from "@/components/layout/org/organizationContext";
@@ -145,12 +145,8 @@ export const useFilterUIDefinitions = () => {
       ...dynamicDefinitions,
     ] as FilterUIDefinition[];
 
-    if (router.pathname.startsWith("/users")) {
-      definitions.push(...STATIC_USER_VIEW_DEFINITIONS);
-    }
-    if (router.pathname.startsWith("/sessions")) {
-      definitions.push(...STATIC_SESSIONS_VIEW_DEFINITIONS);
-
+    const viewMappings = rmtDerivedTableViewMappings[table];
+    if (viewMappings.length > 0) {
       for (const def of definitions) {
         if (
           def.subType === "property" &&
@@ -162,6 +158,11 @@ export const useFilterUIDefinitions = () => {
             ].subType;
         }
       }
+    }
+    definitions.push(...rmtDerivedTableViewMappings[table]);
+    // TODO: for user_rmt, we can remove this and instead add STATIC_USER_VIEW_DEFINITIONS to the rmtDerivedTableViewMappings
+    if (router.pathname.startsWith("/users")) {
+      definitions.push(...STATIC_USER_VIEW_DEFINITIONS);
     }
 
     return definitions;
