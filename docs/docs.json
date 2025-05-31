@@ -450,7 +450,8 @@
                   "guides/cookbooks/predefining-request-id",
                   "guides/cookbooks/prompt-thinking-models",
                   "guides/cookbooks/replay-session",
-                  "guides/cookbooks/segmentation"
+                  "guides/cookbooks/segmentation",
+                  "guides/cookbooks/ai-agents"
                 ]
               },
               {
