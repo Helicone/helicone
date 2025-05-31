@@ -95,7 +95,6 @@ export class AnthropicStreamBodyProcessor implements IBodyProcessor {
         model?.includes("claude-sonnet-4") ||
         model?.includes("claude-opus-4")
       ) {
-        console.log("Processing with claude-3");
         const processedBody = {
           ...processConsolidatedJsonForClaude3(processedLines),
           // Store the original response body
