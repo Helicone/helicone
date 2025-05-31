@@ -111,6 +111,44 @@ export class StripeManager extends BaseManager {
     });
   }
 
+
+  public async getMeterEventSummaries(
+    startTime: number,
+    endTime: number,
+    customerId: string,
+  ): Promise<Stripe.Billing.MeterEventSummary[]> {
+    const meterId = await getMeterId("stripe:trace-meter-id");
+    const result = await this.stripe.billing.meters.listEventSummaries(
+      meterId.data ?? "",
+      {
+        customer: customerId,
+        start_time: startTime,
+        end_time: endTime,
+        value_grouping_window: 'day',
+        limit: 100,
+      }
+    );
+    return result.data;
+  }
+  public async reconcileBilling(
+    customerId: string,
+    count: number,
+    organizationId: string,
+  ): Promise<Result<null, string>> {
+
+    const result = await this.stripe.v2.billing.meterEvents.create({
+      identifier: `org_${organizationId}_request_reconcile_${new Date().toISOString()}`,
+      event_name: "requests_sum",
+      timestamp: new Date().toISOString(),
+      payload: {
+        stripe_customer_id: customerId,
+        value: count.toString(),
+      },
+    });
+
+    return ok(null);
+  }
+
   public async getCostForPrompts(): Promise<Result<number, string>> {
     const subscriptionResult = await this.getSubscription();
     const proProductPrices = await getProProductPrices();
@@ -477,35 +515,35 @@ WHERE (${builtFilter.filter})`,
         },
         ...(body?.addons?.prompts
           ? [
-              {
-                price: proProductPrices["prompts"],
-                quantity: 1,
-              },
-            ]
+            {
+              price: proProductPrices["prompts"],
+              quantity: 1,
+            },
+          ]
           : []),
         ...(body?.addons?.alerts
           ? [
-              {
-                price: proProductPrices["alerts"],
-                quantity: 1,
-              },
-            ]
+            {
+              price: proProductPrices["alerts"],
+              quantity: 1,
+            },
+          ]
           : []),
         ...(body?.addons?.experiments
           ? [
-              {
-                price: proProductPrices["experiments"],
-                quantity: 1,
-              },
-            ]
+            {
+              price: proProductPrices["experiments"],
+              quantity: 1,
+            },
+          ]
           : []),
         ...(body?.addons?.evals
           ? [
-              {
-                price: proProductPrices["evals"],
-                quantity: 1,
-              },
-            ]
+            {
+              price: proProductPrices["evals"],
+              quantity: 1,
+            },
+          ]
           : []),
       ],
       mode: "subscription",
@@ -1234,11 +1272,11 @@ WHERE (${builtFilter.filter})`,
     try {
       // Assuming you have a usage item ID for each customer
       const usageRecordParams: Stripe.SubscriptionItemCreateUsageRecordParams =
-        {
-          quantity: usage,
-          timestamp: Math.floor(Date.now() / 1000),
-          action: "set",
-        };
+      {
+        quantity: usage,
+        timestamp: Math.floor(Date.now() / 1000),
+        action: "set",
+      };
 
       await this.stripe.subscriptionItems.createUsageRecord(
         "si_1234", // Replace with actual subscription item ID
