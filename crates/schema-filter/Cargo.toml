@@ -13,7 +13,7 @@ openapiv3 = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 serde_path_to_error = { workspace = true }
-serde_yaml = { workspace = true }
+serde_yml = { workspace = true }
 
 [lints]
 workspace = true

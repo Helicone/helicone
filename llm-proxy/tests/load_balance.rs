@@ -18,12 +18,12 @@ async fn openai_slow() {
     // single provider
     config.routers = RouterConfigs::default();
     let latency = 100;
-    let requests = 10;
+    let requests = 100;
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([
-            ("success:openai:chat_completion", (..4).into()),
-            ("success:anthropic:messages", (3..).into()),
-            ("success:google:generate_content", (3..).into()),
+            ("success:openai:chat_completion", (..40).into()),
+            ("success:anthropic:messages", (30..).into()),
+            ("success:google:generate_content", (30..).into()),
             // Auth is disabled, so auth and logging services should not be
             // called
             ("success:jawn:whoami", 0.into()),
@@ -72,12 +72,12 @@ async fn anthropic_slow() {
     // single provider
     config.routers = RouterConfigs::default();
     let latency = 10;
-    let requests = 10;
+    let requests = 100;
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([
-            ("success:openai:chat_completion", (3..).into()),
-            ("success:anthropic:messages", (..6).into()),
-            ("success:google:generate_content", (..6).into()),
+            ("success:openai:chat_completion", (30..).into()),
+            ("success:anthropic:messages", (..60).into()),
+            ("success:google:generate_content", (..60).into()),
             // Auth is disabled, so auth and logging services should not be
             // called
             ("success:jawn:whoami", 0.into()),

@@ -4,8 +4,8 @@ use rustc_hash::FxHashMap as HashMap;
 
 use super::{
     EndpointConverter, NoOpConverter, TypedEndpointConverter,
-    anthropic::AnthropicConverter, google::GoogleConverter, model::ModelMapper,
-    openai::OpenAIConverter,
+    anthropic::AnthropicConverter, gemini::GoogleGeminiConverter,
+    model::ModelMapper, openai::OpenAIConverter,
 };
 use crate::{
     config::router::RouterConfig,
@@ -144,7 +144,7 @@ impl EndpointConverterRegistryInner {
             registry.register_converter(
                 key,
                 TypedEndpointConverter {
-                    converter: GoogleConverter::new(model_mapper.clone()),
+                    converter: GoogleGeminiConverter::new(model_mapper.clone()),
                     _phantom: std::marker::PhantomData::<(
                         endpoints::openai::ChatCompletions,
                         endpoints::openai::ChatCompletions,
@@ -163,7 +163,7 @@ impl EndpointConverterRegistryInner {
             registry.register_converter(
                 key,
                 TypedEndpointConverter {
-                    converter: GoogleConverter::new(model_mapper.clone()),
+                    converter: GoogleGeminiConverter::new(model_mapper.clone()),
                     _phantom: std::marker::PhantomData::<(
                         endpoints::openai::ChatCompletions,
                         endpoints::openai::ChatCompletions,

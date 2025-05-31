@@ -90,7 +90,8 @@ impl RouterConfig {
         Ok(())
     }
 
-    #[must_use] pub fn model_mappings(&self) -> Option<&ModelMappingConfig> {
+    #[must_use]
+    pub fn model_mappings(&self) -> Option<&ModelMappingConfig> {
         self.model_mappings.as_ref()
     }
 }

@@ -24,7 +24,7 @@
 //! call the `TryConvert` fn.
 pub mod anthropic;
 pub mod error;
-mod google;
+mod gemini;
 pub mod model;
 pub mod openai;
 pub mod registry;

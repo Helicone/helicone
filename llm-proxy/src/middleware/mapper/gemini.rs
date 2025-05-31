@@ -9,11 +9,11 @@ use super::{
 };
 use crate::types::{model_id::ModelId, provider::InferenceProvider};
 
-pub struct GoogleConverter {
+pub struct GoogleGeminiConverter {
     model_mapper: ModelMapper,
 }
 
-impl GoogleConverter {
+impl GoogleGeminiConverter {
     #[must_use]
     pub fn new(model_mapper: ModelMapper) -> Self {
         Self { model_mapper }
@@ -24,12 +24,12 @@ impl
     TryConvert<
         async_openai::types::CreateChatCompletionRequest,
         async_openai::types::CreateChatCompletionRequest,
-    > for GoogleConverter
+    > for GoogleGeminiConverter
 {
     type Error = MapperError;
     fn try_convert(
         &self,
-        mut value: async_openai::types::CreateChatCompletionRequest,
+        value: async_openai::types::CreateChatCompletionRequest,
     ) -> Result<async_openai::types::CreateChatCompletionRequest, Self::Error>
     {
         // no op:
@@ -39,7 +39,7 @@ impl
             .map_model(&source_model, &InferenceProvider::GoogleGemini)?;
         tracing::trace!(source_model = ?source_model, target_model = ?target_model, "mapped model");
 
-        value.model = target_model.to_string().replace("-latest", "");
+        // value.model = target_model.to_string().replace("-latest", "");
 
         Ok(value)
     }
@@ -49,7 +49,7 @@ impl
     TryConvert<
         async_openai::types::CreateChatCompletionResponse,
         async_openai::types::CreateChatCompletionResponse,
-    > for GoogleConverter
+    > for GoogleGeminiConverter
 {
     type Error = MapperError;
     fn try_convert(
@@ -65,7 +65,7 @@ impl
     TryConvertStreamData<
         CreateChatCompletionStreamResponse,
         CreateChatCompletionStreamResponse,
-    > for GoogleConverter
+    > for GoogleGeminiConverter
 {
     type Error = MapperError;
 

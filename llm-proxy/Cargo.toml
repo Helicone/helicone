@@ -49,7 +49,6 @@ rustc-hash = { workspace = true }
 rust_decimal = { workspace = true }
 rusty-s3 = { workspace = true }
 r2d2 = { workspace = true }
-semver = { workspace = true }
 serde = { workspace = true, features = ['derive', 'rc'] }
 serde_json = { workspace = true }
 serde_path_to_error = { workspace = true }

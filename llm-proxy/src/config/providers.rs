@@ -5,6 +5,9 @@ use url::Url;
 
 use crate::types::{model_id::ModelName, provider::InferenceProvider};
 
+const PROVIDERS_YAML: &str = include_str!("../../config/providers.yaml");
+pub(crate) const DEFAULT_ANTHROPIC_VERSION: &str = "2023-06-01";
+
 /// Global configuration for providers, shared across all routers.
 ///
 /// For router-specific provider configuration, see [`RouterProviderConfgi`]
@@ -16,12 +19,6 @@ pub struct GlobalProviderConfig {
     pub models: IndexSet<ModelName<'static>>,
     pub base_url: Url,
     pub version: Option<String>,
-}
-
-impl Default for GlobalProviderConfig {
-    fn default() -> Self {
-        default_openai_provider_config()
-    }
 }
 
 /// Map of *ALL* supported providers.
@@ -46,58 +43,17 @@ impl FromIterator<(InferenceProvider, GlobalProviderConfig)>
 
 impl Default for ProvidersConfig {
     fn default() -> Self {
-        Self(IndexMap::from([
-            (InferenceProvider::OpenAI, default_openai_provider_config()),
-            (
-                InferenceProvider::Anthropic,
-                default_anthropic_provider_config(),
-            ),
-            (
-                InferenceProvider::GoogleGemini,
-                default_google_provider_config(),
-            ),
-        ]))
+        serde_yml::from_str(PROVIDERS_YAML).expect("Always valid if tests pass")
     }
 }
 
-fn default_openai_provider_config() -> GlobalProviderConfig {
-    GlobalProviderConfig {
-        models: IndexSet::from([
-            ModelName::borrowed("gpt-4o"),
-            ModelName::borrowed("gpt-4o-mini"),
-            ModelName::borrowed("gpt-4.1"),
-            ModelName::borrowed("gpt-4.5"),
-            ModelName::borrowed("o1"),
-            ModelName::borrowed("o3"),
-            ModelName::borrowed("o4-mini"),
-        ]),
-        base_url: Url::parse("https://api.openai.com").unwrap(),
-        version: None,
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_default_providers_config_loads_from_yaml_string() {
+        let _default_config = ProvidersConfig::default();
+        // just want to make sure we don't panic...
     }
 }
-
-fn default_google_provider_config() -> GlobalProviderConfig {
-    GlobalProviderConfig {
-        models: IndexSet::from([
-            ModelName::borrowed("gemini-1.5-flash"),
-            ModelName::borrowed("gemini-2.0-flash"),
-        ]),
-        base_url: Url::parse("https://generativelanguage.googleapis.com")
-            .unwrap(),
-        version: None,
-    }
-}
-
-fn default_anthropic_provider_config() -> GlobalProviderConfig {
-    GlobalProviderConfig {
-        models: IndexSet::from([
-            ModelName::borrowed("claude-3-5-sonnet"),
-            ModelName::borrowed("claude-3-7-sonnet"),
-            ModelName::borrowed("claude-3-5-haiku"),
-        ]),
-        base_url: Url::parse("https://api.anthropic.com").unwrap(),
-        version: Some(DEFAULT_ANTHROPIC_VERSION.to_string()),
-    }
-}
-
-pub const DEFAULT_ANTHROPIC_VERSION: &str = "2023-06-01";

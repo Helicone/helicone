@@ -13,6 +13,8 @@ use crate::middleware::mapper::error::MapperError;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Version {
+    /// Same as `Latest` but without the `latest` suffix.
+    ImplicitLatest,
     /// An alias for the latest version of the model.
     Latest,
     /// An alias for the latest preview version of the model.
@@ -29,8 +31,6 @@ pub enum Version {
         /// The format of the date so we know how to re-serialize it
         format: &'static str,
     },
-    /// A semver version for the model
-    Semver(semver::Version),
 }
 
 impl<'de> Deserialize<'de> for Version {
@@ -55,6 +55,7 @@ impl Serialize for Version {
 impl Display for Version {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            Version::ImplicitLatest => write!(f, ""),
             Version::Latest => write!(f, "latest"),
             Version::Preview => write!(f, "preview"),
             Version::DateVersionedPreview { date, format } => {
@@ -63,7 +64,6 @@ impl Display for Version {
             Version::Date { date, format } => {
                 write!(f, "{}", date.format(format))
             }
-            Version::Semver(v) => write!(f, "{v}"),
         }
     }
 }
@@ -89,8 +89,8 @@ impl FromStr for Version {
                 date: dt,
                 format: fmt,
             })
-        } else if let Ok(semver_ver) = semver::Version::parse(input) {
-            Ok(Version::Semver(semver_ver))
+        } else if input.is_empty() {
+            Ok(Version::ImplicitLatest)
         } else {
             Err(MapperError::InvalidModelName(input.to_string()))
         }
@@ -186,6 +186,25 @@ impl ModelId {
     }
 }
 
+impl<'de> Deserialize<'de> for ModelId {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let s = String::deserialize(deserializer)?;
+        ModelId::from_str(&s).map_err(serde::de::Error::custom)
+    }
+}
+
+impl Serialize for ModelId {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&self.to_string())
+    }
+}
+
 /// Parse a model id in the format `{provider}/{model_name}` to a `ModelId`.
 impl FromStr for ModelId {
     type Err = MapperError;
@@ -273,7 +292,7 @@ impl FromStr for ModelIdWithVersion {
         let (model, version) = parse_model_and_version(s, '-');
         Ok(ModelIdWithVersion {
             model: model.to_string(),
-            version: version.unwrap_or(Version::Latest),
+            version: version.unwrap_or(Version::ImplicitLatest),
         })
     }
 }
@@ -281,7 +300,7 @@ impl FromStr for ModelIdWithVersion {
 impl Display for ModelIdWithVersion {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match &self.version {
-            Version::Latest => write!(f, "{}", self.model),
+            Version::ImplicitLatest => write!(f, "{}", self.model),
             _ => write!(f, "{}-{}", self.model, self.version),
         }
     }
@@ -493,12 +512,6 @@ fn parse_model_and_version(
             );
         }
 
-        // Try parsing as semver
-        if let Ok(semver_ver) = semver::Version::parse(candidate) {
-            let model = &s[..*idx];
-            return (model, Some(Version::Semver(semver_ver)));
-        }
-
         // Try parsing as special version keywords
         if candidate.eq_ignore_ascii_case("latest") {
             let model = &s[..*idx];
@@ -616,10 +629,13 @@ mod tests {
         )
         .unwrap();
         let ModelId::OpenAI(model_with_version) = &result else {
-            panic!("Expected OpenAI ModelId with latest version");
+            panic!("Expected OpenAI ModelId with implicit latest version");
         };
         assert_eq!(model_with_version.model, "o1");
-        assert!(matches!(model_with_version.version, Version::Latest));
+        assert!(matches!(
+            model_with_version.version,
+            Version::ImplicitLatest
+        ));
 
         assert_eq!(result.to_string(), model_id_str);
     }
@@ -650,10 +666,13 @@ mod tests {
         )
         .unwrap();
         let ModelId::OpenAI(model_with_version) = &result else {
-            panic!("Expected OpenAI ModelId with latest version");
+            panic!("Expected OpenAI ModelId with implicit latest version");
         };
         assert_eq!(model_with_version.model, "gpt-4");
-        assert!(matches!(model_with_version.version, Version::Latest));
+        assert!(matches!(
+            model_with_version.version,
+            Version::ImplicitLatest
+        ));
 
         assert_eq!(result.to_string(), model_id_str);
     }
@@ -667,10 +686,13 @@ mod tests {
         )
         .unwrap();
         let ModelId::OpenAI(model_with_version) = &result else {
-            panic!("Expected OpenAI ModelId with latest version");
+            panic!("Expected OpenAI ModelId with implicit latest version");
         };
         assert_eq!(model_with_version.model, "gpt-3.5-turbo");
-        assert!(matches!(model_with_version.version, Version::Latest));
+        assert!(matches!(
+            model_with_version.version,
+            Version::ImplicitLatest
+        ));
 
         assert_eq!(result.to_string(), model_id_str);
     }
@@ -777,24 +799,8 @@ mod tests {
         assert_eq!(model_with_version.model, "claude-3-7-sonnet");
         assert!(matches!(model_with_version.version, Version::Latest));
 
-        assert_eq!(result.to_string(), "claude-3-7-sonnet");
-    }
-
-    #[test]
-    fn test_anthropic_claude_opus_4_semver_alias() {
-        let model_id_str = "claude-opus-4";
-        let result = ModelId::from_str_and_provider(
-            InferenceProvider::Anthropic,
-            model_id_str,
-        )
-        .unwrap();
-        let ModelId::Anthropic(model_with_version) = &result else {
-            panic!("Expected Anthropic ModelId with latest version");
-        };
-        assert_eq!(model_with_version.model, "claude-opus-4");
-        assert!(matches!(model_with_version.version, Version::Latest));
-
-        assert_eq!(result.to_string(), model_id_str);
+        // Display for Version::Latest appends "-latest"
+        assert_eq!(result.to_string(), "claude-3-7-sonnet-latest");
     }
 
     #[test]
@@ -811,7 +817,48 @@ mod tests {
         assert_eq!(model_with_version.model, "claude-sonnet-4");
         assert!(matches!(model_with_version.version, Version::Latest));
 
-        assert_eq!(result.to_string(), "claude-sonnet-4");
+        // Display for Version::Latest appends "-latest"
+        assert_eq!(result.to_string(), "claude-sonnet-4-latest");
+    }
+
+    #[test]
+    fn test_anthropic_claude_opus_4_0_implicit_latest() {
+        let model_id_str = "claude-opus-4-0";
+        let result = ModelId::from_str_and_provider(
+            InferenceProvider::Anthropic,
+            model_id_str,
+        )
+        .unwrap();
+        let ModelId::Anthropic(model_with_version) = &result else {
+            panic!("Expected Anthropic ModelId with implicit latest version");
+        };
+        assert_eq!(model_with_version.model, "claude-opus-4-0");
+        assert!(matches!(
+            model_with_version.version,
+            Version::ImplicitLatest
+        ));
+
+        assert_eq!(result.to_string(), model_id_str);
+    }
+
+    #[test]
+    fn test_anthropic_claude_sonnet_4_0_implicit_latest() {
+        let model_id_str = "claude-sonnet-4-0";
+        let result = ModelId::from_str_and_provider(
+            InferenceProvider::Anthropic,
+            model_id_str,
+        )
+        .unwrap();
+        let ModelId::Anthropic(model_with_version) = &result else {
+            panic!("Expected Anthropic ModelId with implicit latest version");
+        };
+        assert_eq!(model_with_version.model, "claude-sonnet-4-0");
+        assert!(matches!(
+            model_with_version.version,
+            Version::ImplicitLatest
+        ));
+
+        assert_eq!(result.to_string(), model_id_str);
     }
 
     #[test]
@@ -1289,7 +1336,10 @@ mod tests {
         assert!(result.is_ok());
         if let Ok(ModelId::OpenAI(model_with_version)) = &result {
             assert_eq!(model_with_version.model, "a");
-            assert!(matches!(model_with_version.version, Version::Latest));
+            assert!(matches!(
+                model_with_version.version,
+                Version::ImplicitLatest
+            ));
 
             assert_eq!(result.as_ref().unwrap().to_string(), model_id_str);
         } else {
@@ -1389,7 +1439,10 @@ mod tests {
 
         if let ModelId::OpenAI(model_with_version) = result {
             assert_eq!(model_with_version.model, "gpt-4");
-            assert!(matches!(model_with_version.version, Version::Latest));
+            assert!(matches!(
+                model_with_version.version,
+                Version::ImplicitLatest
+            ));
         } else {
             panic!("Expected OpenAI ModelId");
         }
@@ -1409,6 +1462,38 @@ mod tests {
             } else {
                 panic!("Expected date version");
             }
+        } else {
+            panic!("Expected Anthropic ModelId");
+        }
+    }
+
+    #[test]
+    fn test_from_str_anthropic_claude_opus_4_0_model() {
+        let model_str = "anthropic/claude-opus-4-0";
+        let result = ModelId::from_str(model_str).unwrap();
+
+        if let ModelId::Anthropic(model_with_version) = result {
+            assert_eq!(model_with_version.model, "claude-opus-4-0");
+            assert!(matches!(
+                model_with_version.version,
+                Version::ImplicitLatest
+            ));
+        } else {
+            panic!("Expected Anthropic ModelId");
+        }
+    }
+
+    #[test]
+    fn test_from_str_anthropic_claude_sonnet_4_0_model() {
+        let model_str = "anthropic/claude-sonnet-4-0";
+        let result = ModelId::from_str(model_str).unwrap();
+
+        if let ModelId::Anthropic(model_with_version) = result {
+            assert_eq!(model_with_version.model, "claude-sonnet-4-0");
+            assert!(matches!(
+                model_with_version.version,
+                Version::ImplicitLatest
+            ));
         } else {
             panic!("Expected Anthropic ModelId");
         }
@@ -1448,7 +1533,10 @@ mod tests {
 
         if let ModelId::GoogleGemini(model_with_version) = result {
             assert_eq!(model_with_version.model, "gemini-pro");
-            assert!(matches!(model_with_version.version, Version::Latest));
+            assert!(matches!(
+                model_with_version.version,
+                Version::ImplicitLatest
+            ));
         } else {
             panic!("Expected GoogleGemini ModelId");
         }
@@ -1462,7 +1550,10 @@ mod tests {
         // VertexAi maps to OpenAI variant based on from_str_and_provider
         if let ModelId::OpenAI(model_with_version) = result {
             assert_eq!(model_with_version.model, "gemini-pro");
-            assert!(matches!(model_with_version.version, Version::Latest));
+            assert!(matches!(
+                model_with_version.version,
+                Version::ImplicitLatest
+            ));
         } else {
             panic!("Expected OpenAI ModelId for VertexAi");
         }
@@ -1503,5 +1594,39 @@ mod tests {
         } else {
             panic!("Expected ProviderNotSupported error");
         }
+    }
+
+    #[test]
+    fn test_version_implicit_latest_from_empty_string() {
+        let version = Version::from_str("").unwrap();
+        assert!(matches!(version, Version::ImplicitLatest));
+    }
+
+    #[test]
+    fn test_version_implicit_latest_display() {
+        let version = Version::ImplicitLatest;
+        assert_eq!(version.to_string(), "");
+    }
+
+    #[test]
+    fn test_version_implicit_latest_serialization() {
+        let version = Version::ImplicitLatest;
+        let serialized = serde_json::to_string(&version).unwrap();
+        assert_eq!(serialized, "\"\"");
+    }
+
+    #[test]
+    fn test_version_implicit_latest_deserialization() {
+        let json = "\"\"";
+        let version: Version = serde_json::from_str(json).unwrap();
+        assert!(matches!(version, Version::ImplicitLatest));
+    }
+
+    #[test]
+    fn test_version_implicit_latest_roundtrip() {
+        let original = Version::ImplicitLatest;
+        let serialized = serde_json::to_string(&original).unwrap();
+        let deserialized: Version = serde_json::from_str(&serialized).unwrap();
+        assert_eq!(original, deserialized);
     }
 }

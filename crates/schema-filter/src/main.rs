@@ -67,7 +67,7 @@ fn main() -> Result<()> {
                 }
             }
         } else {
-            let jd = serde_yaml::Deserializer::from_str(&schema_content);
+            let jd = serde_yml::Deserializer::from_str(&schema_content);
             let result: Result<OpenAPI, _> =
                 serde_path_to_error::deserialize(jd);
             match result {
@@ -90,7 +90,7 @@ fn main() -> Result<()> {
             format!("Failed to read config file at {}", args.config.display())
         })?;
 
-    let config: Config = serde_yaml::from_str(&config_content)
+    let config: Config = serde_yml::from_str(&config_content)
         .with_context(|| "Failed to parse config file")?;
 
     // Filter the schema
@@ -103,7 +103,7 @@ fn main() -> Result<()> {
                 "Failed to serialize filtered schema to JSON"
             })?
         } else {
-            serde_yaml::to_string(&schema).with_context(|| {
+            serde_yml::to_string(&schema).with_context(|| {
                 "Failed to serialize filtered schema to YAML"
             })?
         };

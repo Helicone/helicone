@@ -1,0 +1,95 @@
+# OpenAI Models
+gpt-4:
+  - claude-3-7-sonnet
+  - gemini-2.5-pro
+gpt-4-turbo:
+  - claude-3-7-sonnet
+  - gemini-2.5-pro
+gpt-4o:
+  - claude-3-7-sonnet
+  - gemini-2.5-pro
+gpt-4o-mini:
+  - claude-3-5-haiku
+  - gemini-2.0-flash
+gpt-4.1:
+  - claude-3-7-sonnet
+  - gemini-2.5-pro
+gpt-4.1-mini:
+  - claude-3-5-haiku
+  - gemini-2.0-flash
+gpt-4.1-nano:
+  - claude-3-5-haiku
+  - gemini-1.5-flash-8b
+gpt-4.5:
+  - claude-opus-4-0
+  - gemini-2.5-pro
+o1:
+  - claude-4-0-sonnet
+  - gemini-2.5-pro
+o1-mini:
+  - claude-3-5-haiku
+  - gemini-2.0-flash
+o1-pro:
+  - claude-opus-4-0
+  - gemini-2.5-pro
+o3:
+  - claude-opus-4-0
+  - gemini-2.5-pro
+o3-mini:
+  - claude-3-5-haiku
+  - gemini-2.0-flash
+o4-mini:
+  - gemini-2.0-flash
+  - gpt-4.1
+codex-mini:
+  - claude-3-7-sonnet
+  - gemini-2.0-flash
+gpt-4o-mini-search:
+  - claude-3-5-haiku
+  - gemini-1.5-flash
+gpt-4o-search:
+  - claude-3-7-sonnet
+  - gemini-2.5-pro
+
+# Anthropic Models
+claude-opus-4-0:
+  - o3
+  - gemini-2.5-pro
+claude-sonnet-4-0:
+  - o4-mini
+  - gemini-2.0-flash
+claude-3-7-sonnet:
+  - o4-mini
+  - gemini-2.0-flash
+claude-3-5-haiku:
+  - gemini-2.0-flash
+  - gpt-4o-mini
+claude-3-5-sonnet:
+  - o3-mini
+  - gemini-2.0-flash
+claude-3-opus:
+  - gpt-4.5
+  - gemini-2.5-pro
+
+# Gemini Models
+gemini-2.5-flash:
+  - gpt-4o-mini
+  - claude-3-5-haiku
+gemini-2.5-pro:
+  - gpt-4.5
+  - claude-opus-4-0
+gemini-2.0-flash:
+  - gpt-4o-mini
+  - claude-3-5-haiku
+gemini-2.0-flash-lite:
+  - gpt-4o-mini
+  - claude-3-5-haiku
+gemini-1.5-flash:
+  - gpt-4o-mini
+  - claude-3-5-haiku
+gemini-1.5-flash-8b:
+  - gpt-4o-mini
+  - claude-3-5-haiku
+gemini-1.5-pro:
+  - gpt-4o
+  - claude-3-5-sonnet

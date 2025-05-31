@@ -6,7 +6,10 @@ use super::{TryConvert, TryConvertStreamData, error::MapperError};
 use crate::{
     endpoints::openai::chat_completions::system_prompt,
     middleware::mapper::model::ModelMapper,
-    types::{model_id::ModelId, provider::InferenceProvider},
+    types::{
+        model_id::{ModelId, Version},
+        provider::InferenceProvider,
+    },
 };
 
 const DEFAULT_MAX_TOKENS: u32 = 1000;
@@ -43,10 +46,25 @@ impl
         use async_openai::types as openai;
         let target_provider = InferenceProvider::Anthropic;
         let source_model = ModelId::from_str(&value.model)?;
-        let target_model = self
+        let mut target_model = self
             .model_mapper
             .map_model(&source_model, &target_provider)?;
         tracing::trace!(source_model = ?source_model, target_model = ?target_model, "mapped model");
+
+        // for claude 3-x, anthropic required an explicit `-latest` suffix for
+        // aliases but for claude 4-x, the aliases must be implicit, ie they
+        // must not have the `-latest` suffix
+
+        if let ModelId::Anthropic(model) = &mut target_model {
+            if model.model.contains("claude-3") {
+                tracing::info!("claude 3-x model, ensuring -latest suffix");
+                model.version = Version::Latest;
+            } else {
+                tracing::info!("claude 4-x model, not adding -latest suffix");
+                model.version = Version::ImplicitLatest;
+            }
+        }
+
         let system_prompt = system_prompt(&value);
         #[allow(deprecated)]
         let max_tokens = value
