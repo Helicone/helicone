@@ -7,8 +7,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { getJawnClient } from "@/lib/clients/jawn";
+import { getSortedMessagesFromMappedRequest } from "@/lib/sessions/realtimeSession";
 import { MappedLLMRequest } from "@helicone-package/llm-mapper/types";
-import React, { useEffect, useMemo, useState, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   PiCaretDownBold,
   PiDownloadBold,
@@ -22,7 +23,6 @@ import {
   PiTextTBold,
 } from "react-icons/pi";
 import ReactMarkdown from "react-markdown";
-import { getSortedMessagesFromMappedRequest } from "@/lib/sessions/realtimeSession";
 
 type MessageType =
   | "text"
@@ -46,7 +46,7 @@ const calculateDefaultExpandedStates = (
 ): { [key: string]: boolean } => {
   const states: { [key: string]: boolean } = {};
   messages.forEach((message, idx) => {
-    const messageKey = `${idx}-${message.timestamp}`; // Use index within the current filtered list + timestamp
+    const messageKey = idx.toString(); // Use index within the current filtered list + timestamp
     if (message.deleted === true) {
       // Check if it's the last message OR the next message is not an assistant message or is also deleted
       if (
@@ -169,7 +169,7 @@ export const Realtime: React.FC<RealtimeProps> = ({
     setDeletedMessageStates((prevStates) => {
       const nextStates: { [key: string]: boolean } = {};
       filteredMessages.forEach((message, idx) => {
-        const key = `${idx}-${message.timestamp}`;
+        const key = idx.toString();
         if (message.deleted === true) {
           // If the state for this key exists in the previous state (user might have toggled it), keep it.
           // Otherwise, use the newly calculated default state.
@@ -206,10 +206,6 @@ export const Realtime: React.FC<RealtimeProps> = ({
 
     return null;
   }, [derivedMessageIndexFilter]);
-
-  // Always get the last session update from all messages, not just filtered ones
-  const lastMsg = sortedMessages.findLast((msg) => msg._type === "message");
-  const lastSessionUpdate = parseSessionUpdate(lastMsg?.content);
 
   const ModailityIcon = ({ type }: { type: MessageType }) => {
     const icons = {
@@ -262,14 +258,13 @@ export const Realtime: React.FC<RealtimeProps> = ({
             : null;
           const messageType = getMessageType(message);
           const isDeleted = message.deleted === true;
-          const messageKey = `${idx}-${message.timestamp}`; // Use index within the current filtered list + timestamp
+          const messageKey = `${idx}`; // Use index within the current filtered list
           const isDeletedExpanded = deletedMessageStates[messageKey] ?? false; // Use state, default to false if not set
 
           const shouldScrollToThisMessage =
             filterInfo?.isFiltered &&
             idx >= (filterInfo.startIndex || 0) &&
             idx <= (filterInfo.endIndex || filterInfo.startIndex || 0);
-
           const isFilteredMessage =
             !filterInfo?.isFiltered || shouldScrollToThisMessage;
 
@@ -279,7 +274,7 @@ export const Realtime: React.FC<RealtimeProps> = ({
               ref={shouldScrollToThisMessage ? messageToScrollToRef : null}
               className={`flex flex-col px-4 pb-4 mb-4 w-full 
                 ${isUser ? "items-end" : "items-start"}
-                ${isFilteredMessage ? "" : "opacity-25"}
+                ${isFilteredMessage ? "" : "opacity-85 text-sm"}
                 ${
                   onRequestSelect
                     ? "hover:cursor-pointer hover:bg-accent/50"
@@ -307,7 +302,11 @@ export const Realtime: React.FC<RealtimeProps> = ({
                     className={`flex items-center space-x-2 text-xs text-secondary cursor-pointer select-none 
                       ${isUser ? "justify-end" : "justify-start"} 
                       ${isDeletedExpanded ? "" : "opacity-50"}`}
-                    onClick={() => toggleDeletedMessage(messageKey)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+
+                      toggleDeletedMessage(messageKey);
+                    }}
                   >
                     <PiCaretDownBold
                       className={`w-4 h-4 transition-transform duration-200 ${
@@ -415,7 +414,12 @@ export const Realtime: React.FC<RealtimeProps> = ({
 
                   {/* Message Content */}
                   <div
-                    className={`rounded-lg p-3 ${
+                    className={`rounded-lg p-3 ${(() => {
+                      return mappedRequest.id.split("-step-")[1] ===
+                        messageKey.toString()
+                        ? "font-bold transition-all duration-200"
+                        : "";
+                    })()} ${
                       isUser
                         ? `${
                             messageType === "session" ||

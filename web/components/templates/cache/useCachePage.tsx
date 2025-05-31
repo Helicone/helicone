@@ -9,12 +9,17 @@ import { CacheHitsOverTime } from "../../../pages/api/cache/getCacheHitsOverTime
 import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import { useGetRequests } from "../../../services/hooks/requests";
+import { TimeFilter } from "@/services/lib/filters/filterDefs";
+import {
+  useGetCacheCount,
+  useGetCacheTotalSavings,
+  useGetCacheTimeSaved,
+  useGetCacheTopRequests,
+} from "@/services/hooks/cache";
+import { useGetRequestCount } from "@/services/hooks/requests";
 
 export interface CachePageData {
-  timeFilter: {
-    start: Date;
-    end: Date;
-  };
+  timeFilter: TimeFilter;
   timeZoneDifference: number;
   dbIncrement: TimeIncrement | undefined;
 }
@@ -59,31 +64,31 @@ export const useCachePageClickHouse = ({
   };
 
   const metrics = {
-    totalCacheHits: useBackendMetricCall<Result<number, string>>({
-      key: "totalCacheHits",
-      params,
-      endpoint: "/api/cache/total",
-    }),
-    totalRequests: useBackendMetricCall<Result<number, string>>({
-      key: "totalRequests",
-      params,
-      endpoint: "/api/request/count",
-    }),
-    totalSavings: useBackendMetricCall<Result<number, string>>({
-      key: "totalSavings",
-      params,
-      endpoint: "/api/cache/total_savings",
-    }),
-    timeSaved: useBackendMetricCall<Result<number, string>>({
-      key: "timeSaved",
-      params,
-      endpoint: "/api/cache/time_saved",
-    }),
-    topRequests: useBackendMetricCall<Result<any, string>>({
-      key: "topRequests",
-      params,
-      endpoint: "/api/cache/requests",
-    }),
+    totalCacheHits: useGetCacheCount(timeFilter),
+    totalRequests: useGetRequestCount(
+      {
+        left: {
+          request_response_rmt: {
+            request_created_at: {
+              gte: timeFilter.start,
+            },
+          },
+        },
+        operator: "and",
+        right: {
+          request_response_rmt: {
+            request_created_at: {
+              lte: timeFilter.end,
+            },
+          },
+        },
+      },
+      false,
+      true
+    ),
+    totalSavings: useGetCacheTotalSavings(timeFilter),
+    timeSaved: useGetCacheTimeSaved(timeFilter),
+    topRequests: useGetCacheTopRequests(timeFilter),
     avgLatency: useBackendMetricCall<Result<number, string>>({
       key: "avgLatency",
       params: countNonCachedParams,
@@ -96,9 +101,10 @@ export const useCachePageClickHouse = ({
     }),
   };
 
-  const topRequestIds = metrics.topRequests.data?.data.map((request: any) => {
-    return request.request_id;
-  });
+  const topRequestIds =
+    metrics.topRequests.data?.data?.map((request: any) => {
+      return request.request_id;
+    }) ?? [];
 
   const topRequestsFilter: FilterNode | null =
     topRequestIds && topRequestIds.length > 0

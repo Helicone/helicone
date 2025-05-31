@@ -119,6 +119,15 @@ const SessionsPage = (props: SessionsPageProps) => {
   const debouncedSessionNameSearch = useDebounce(sessionNameSearch, 500);
 
   const names = useSessionNames(debouncedSessionNameSearch ?? "", timeFilter);
+  const sessionNames = [
+    "All",
+    ...names.sessions
+      .sort(
+        (a, b) =>
+          new Date(b.last_used).getTime() - new Date(a.last_used).getTime()
+      )
+      .map((name) => name.name),
+  ];
   const allNames = useSessionNames("", timeFilter);
 
   const debouncedSessionIdSearch = useDebounce(sessionIdSearch, 500); // 0.5 seconds
@@ -155,7 +164,7 @@ const SessionsPage = (props: SessionsPageProps) => {
     });
 
   const handleSelectSessionName = (value: string) => {
-    if (value === "" || value === "all") {
+    if (value === "" || value === "All") {
       setSelectedName(""); // Map placeholder back to empty string
     } else {
       setSelectedName(value);
@@ -312,34 +321,26 @@ const SessionsPage = (props: SessionsPageProps) => {
                     <CommandEmpty>No results found.</CommandEmpty>
 
                     <CommandList>
-                      {names.sessions
-                        .sort(
-                          (a, b) =>
-                            new Date(b.last_used).getTime() -
-                            new Date(a.last_used).getTime()
-                        )
-                        .map((session) => (
-                          <CommandItem
-                            key={session.name}
-                            value={session.name}
-                            onSelect={() => {
-                              setOpen(false);
-                              handleSelectSessionName(session.name);
-                            }}
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-3 w-3",
-                                selectedName === session.name
-                                  ? "opacity-100"
-                                  : "opacity-0"
-                              )}
-                            />
-                            {session.name === ""
-                              ? EMPTY_SESSION_NAME
-                              : session.name}
-                          </CommandItem>
-                        ))}
+                      {sessionNames.map((name) => (
+                        <CommandItem
+                          key={name}
+                          value={name}
+                          onSelect={() => {
+                            setOpen(false);
+                            handleSelectSessionName(name);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-3 w-3",
+                              selectedName === name
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                          {name === "" ? EMPTY_SESSION_NAME : name}
+                        </CommandItem>
+                      ))}
                     </CommandList>
                   </Command>
                 </PopoverContent>
