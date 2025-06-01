@@ -1,0 +1,343 @@
+**Time to complete: ~30 minutes**
+
+In <a href="https://www.helicone.ai/blog/ai-agent-monitoring-tutorial-part-1">Part 1</a> of our series, we built a financial assistant that could answer queries about stock prices and financial concepts. We discovered a critical issue: the assistant was confidently providing information about topics not in its knowledge base—a classic hallucination problem.
+
+Today, we'll tackle this issue head-on by implementing comprehensive AI agent observability with Helicone's Sessions feature. By the end, you'll be able to trace every step of your AI agent's decision-making process and resolve subtle bugs that would otherwise be nearly impossible to detect.
+
+## Table of Contents
+
+## Understanding the Hallucination Problem
+
+Let's revisit the issue we discovered in Part 1. When asked about "halal investing," a term not in our knowledge base, our agent confidently generated an inaccurate response instead of acknowledging the knowledge gap:
+
+{/* ![Halal Investing Hallucination](/static/blog/ai-agent-monitoring-tutorial-part-2/halal-investing-hallucination.webp) */}
+
+This type of behavior is particularly problematic in financial contexts where incorrect information could lead to poor investment decisions. 
+
+After implementing Helicone Sessions and adding more detailed logging, we discovered the actual issue was more fundamental than we initially thought. Our code was checking for a property that doesn't exist:
+
+```javascript
+// Original buggy code
+if (!hasRelevantResults || results[0].score > 0.7) {
+  return "I don't have specific information about this financial term...";
+}
+```
+
+When we added logging to inspect our vector search results, we found that `results[0].score` is actually `undefined`. This explains why our RAG system was failing silently - we were comparing an undefined value against our threshold, which always evaluates to `false` and causes the system to continue as if it found a good match.
+
+## Fixing the Bug with Helicone Sessions
+
+To properly debug this issue and verify our fix, we need visibility into what's happening at each step. That's where Helicone Sessions comes in.
+
+### Step 1: Set Up Session Tracking
+
+First, let's install the UUID package to generate unique session identifiers:
+
+```bash
+npm install uuid
+```
+
+Then modify our code to use sessions:
+
+```javascript
+import { v4 as uuidv4 } from 'uuid';
+
+// Main function to process user queries
+async function processQuery(query, vectorStore) {
+  // Generate a session ID for tracking this entire query
+  const sessionId = uuidv4();
+  console.log(`Session ID: ${sessionId}`);
+  
+  // Rest of the function...
+}
+```
+
+### Step 2: Update Our API Calls with Session Headers
+
+We'll add session headers to all our OpenAI calls:
+
+```javascript
+const response = await openai.chat.completions.create(
+  {
+    model: "gpt-3.5-turbo",
+    messages: [...],
+    temperature: 0.1,
+  },
+  {
+    headers: {
+      "Helicone-Session-Id": sessionId,
+      "Helicone-Session-Path": "/router",
+      "Helicone-Property-Query-Type": "routing"
+    }
+  }
+);
+```
+
+Note how we're passing headers as a separate object in the second parameter, not inside the request parameters.
+
+### Step 3: Add Improved Logging to Debug Vector Search
+
+To diagnose our vector search issue, we'll enhance our logging:
+
+```javascript
+async function findFinancialTerms(query, vectorStore, sessionId) {
+  console.log("Finding relevant financial terms for: ", query);
+  
+  // Get relevant documents from vector store
+  const results = await vectorStore.similaritySearch(query, 2);
+  
+  // Log the results for debugging
+  const terms = results.map(doc => {
+    // Extract the term from the document
+    const termMatch = doc.pageContent.match(/^[\s\n]*#\s+(.*?)[\s\n]/);
+    return termMatch ? termMatch[1] : "Unknown Term";
+  });
+  
+  console.log(`Found ${results.length} relevant terms: ${terms.join(", ")}`);
+  console.log(`Similarity scores available: ${results.map(r => r.score ? 'yes' : 'no').join(', ')}`);
+  
+  return results;
+}
+```
+
+This enhanced logging reveals that the `score` property is undefined, which explains why our conditional check was failing.
+
+### Step 4: Fix the Bug in Our RAG System
+
+Now, let's fix the actual bug by removing the score check entirely and just verifying we have results:
+
+```javascript
+// FIX: Check if we have relevant results without relying on score
+// The bug was that we were checking for a score property that doesn't exist
+// Just check if we found any matching documents instead
+if (results.length === 0) {
+  // No results found - log this to Helicone
+  const noResultsResponse = await openai.chat.completions.create(
+    {
+      model: "gpt-3.5-turbo",
+      messages: [...],
+      temperature: 0.1,
+    },
+    {
+      headers: {
+        "Helicone-Session-Id": sessionId,
+        "Helicone-Session-Path": "/no-terms-found",
+        "Helicone-Property-Query-Type": "financial_term",
+        "Helicone-Property-Terms-Found": "0",
+        "Helicone-Property-Search-Query": query
+      }
+    }
+  );
+  
+  return "I don't have specific information about this financial term...";
+}
+```
+
+By simplifying our check to just verify if we have any results at all, we've fixed the bug. If there are no relevant documents in our knowledge base, we'll correctly return the "I don't know" response.
+
+## Testing the Fixed Implementation
+
+Let's test our fixed financial assistant with the same query that caused hallucination before:
+
+```bash
+npm start
+```
+
+> Prompt: What is halal investing?
+
+Result:
+
+{/* ![Fixed Halal Investing Response](/static/blog/ai-agent-monitoring-tutorial-part-2/halal-investing-fixed.webp) */}
+
+Great! Our assistant now correctly states it doesn't have information about halal investing in its knowledge base, instead of hallucinating.
+
+## Visualizing the Workflow in Helicone
+
+The real power of Helicone Sessions is in the visualization. Let's look at the trace tree for our query:
+
+{/* ![Helicone Sessions Tree View](/static/blog/ai-agent-monitoring-tutorial-part-2/helicone-sessions-tree.webp) */}
+
+We can see the full flow:
+1. The router determines this is a financial term query
+2. The search finds no relevant documents (or low similarity scores)
+3. We explicitly acknowledge the lack of information
+4. The final response indicates we don't have data on this topic
+
+This tree view makes it easy to identify exactly where issues occur in complex workflows.
+
+{/* ## Advanced Debugging with Helicone
+
+Beyond fixing our hallucination issue, Helicone Sessions enables several powerful debugging capabilities:
+
+### 1. Analyzing Token Usage
+
+Helicone lets you see the token breakdown for each step of your workflow:
+
+![Token Usage Analysis](/static/blog/ai-agent-monitoring-tutorial-part-2/token-usage-chart.webp)
+
+This helps identify which components are most expensive and optimize accordingly.
+
+### 2. Comparing Multiple Sessions
+
+You can compare multiple sessions side-by-side to understand differences in behavior:
+
+![Session Comparison](/static/blog/ai-agent-monitoring-tutorial-part-2/session-comparison.webp)
+
+This is invaluable for comparing successful and failed sessions to identify patterns.
+
+### 3. Setting Up Alerts for Anomalies
+
+Helicone allows you to set up alerts for unusual patterns like:
+- Unusually high token usage
+- Abnormal latency
+- Error rates exceeding thresholds
+- Specific custom properties (e.g., when no documents are found)
+
+![Helicone Alerts](/static/blog/ai-agent-monitoring-tutorial-part-2/helicone-alerts.webp) */}
+
+## Best Practices for Monitoring AI Agents
+
+Based on our experience debugging the financial assistant, here are some best practices for monitoring AI agents:
+
+### 1. Use unique session IDs for each query
+
+Generate a new session ID for each query to ensure proper grouping in the Helicone dashboard:
+
+```javascript
+const sessionId = uuidv4();
+```
+
+### 2. Name your session paths descriptively
+
+Use clear, hierarchical names for your session paths to make the tree view more readable:
+
+```javascript
+"Helicone-Session-Path": "/financial/term-definition"
+```
+
+### 3. Add custom properties for filtering
+
+Custom properties allow you to filter and analyze specific aspects of your agent:
+
+```javascript
+headers: {
+  "Helicone-Property-Query-Type": "financial_term",
+  "Helicone-Property-Terms-Found": results.length.toString(),
+  "Helicone-Property-Search-Query": query
+}
+```
+
+### 4. Log property existence and types
+
+When debugging complex objects, always check if properties actually exist:
+
+```javascript
+// Log whether expected properties exist
+console.log(`Similarity scores available: ${results.map(r => r.score !== undefined ? 'yes' : 'no').join(', ')}`);
+console.log(`Result types: ${results.map(r => typeof r).join(', ')}`);
+```
+
+### 5. Check assumptions explicitly
+
+Don't assume properties exist or have specific types - verify them:
+
+```javascript
+// Always check if a property exists before using it
+if (results.length === 0) {
+  // Handle empty results case
+} else if (results[0].score !== undefined && results[0].score < 0.7) {
+  // Handle low similarity score case
+} else {
+  // Handle normal case
+}
+```
+
+### 6. Test with edge cases
+
+Make sure to test your agent with inputs that might not be in your knowledge base:
+
+```javascript
+// Test edge cases
+await testQuery("What is halal investing?"); // Not in knowledge base
+await testQuery("What is a P/E ratio?");     // In knowledge base
+await testQuery("");                         // Empty query
+```
+
+## Beyond Debugging: Continuous Monitoring
+
+Helicone isn't just for one-time debugging—it's a powerful platform for continuous monitoring of your AI agents in production. Here are some ongoing monitoring strategies:
+
+### 1. Cost monitoring
+
+Track token usage over time to control costs and identify optimization opportunities:
+
+{/* ![Cost Monitoring Dashboard](/static/blog/ai-agent-monitoring-tutorial-part-2/cost-monitoring.webp) */}
+
+### 2. Performance metrics
+
+Monitor key performance indicators like:
+- Average latency by query type
+- Error rates by component
+- Cache hit rates
+- Token usage efficiency
+
+### 3. User experience metrics
+
+Track how well your agent is serving users:
+- Success rate for different query types
+- RAG retrieval quality
+- Routing accuracy
+- Response quality
+
+## Conclusion
+
+In this two-part series, we've built a financial assistant AI agent from scratch, implemented comprehensive observability with Helicone Sessions, and fixed a subtle but critical bug in our RAG implementation.
+
+The hallucination issue we encountered is a common problem in AI systems, but by using proper monitoring and tracing, we were able to:
+
+1. Identify that our code was checking for a property (`score`) that didn't exist
+2. Fix the bug by simplifying our check to just verify if results exist
+3. Add better logging to catch similar issues in the future
+
+This case study highlights how important proper observability is for AI agents. Without Helicone Sessions, we might have continued assuming that our vector search was working correctly, not realizing that we were referencing an undefined property.
+
+By adopting these monitoring practices early in your AI agent development process, you can catch subtle bugs before they affect users, optimize costs and performance, and build more reliable and trustworthy AI systems.
+
+<CallToAction
+  title="Monitor Your AI Agents with Helicone ⚡️"
+  description="Get complete visibility into your AI applications. Track costs, debug complex workflows, and optimize performance with just a few lines of code."
+  primaryButtonText="Start Monitoring for Free"
+  primaryButtonLink="https://helicone.ai/signup"
+  secondaryButtonText="Explore the Docs"
+  secondaryButtonLink="https://docs.helicone.ai/features/sessions"
+/>
+
+### You might also like:
+
+- **<a href="https://www.helicone.ai/blog/debugging-chatbots-and-ai-agents-with-sessions" target="_blank" rel="noopener">Debugging RAG Chatbots and AI Agents with Sessions</a>**
+- **<a href="https://www.helicone.ai/blog/full-guide-to-improving-ai-agents" target="_blank" rel="noopener">The Full Developer's Guide to Building Effective AI Agents</a>**
+- **<a href="https://www.helicone.ai/blog/agentic-rag-full-developer-guide" target="_blank" rel="noopener">Building Agentic RAG Systems: A Developer's Guide to Smarter Information Retrieval</a>**
+- **<a href="https://www.helicone.ai/blog/how-to-reduce-llm-hallucination" target="_blank" rel="noopener">How to Reduce LLM Hallucination in Production Apps</a>**
+
+<FAQ 
+  items={[
+    {
+      question: "How does Helicone Sessions differ from basic request logging?",
+      answer: "Basic request logging tracks individual LLM calls in isolation, while Helicone Sessions connects related calls into a unified workflow. Sessions allow you to trace the entire decision tree of your AI agent, visualize the relationships between different steps, and identify where issues occur in complex multi-step processes. This is particularly valuable for debugging agents with branching logic, multiple LLM calls, and external tool integration."
+    },
+    {
+      question: "Can I trace non-LLM operations in my AI agent with Helicone?",
+      answer: "Yes, Helicone provides a manual logging SDK that allows you to track non-LLM operations like database queries, API calls to external services, or custom tool executions. By incorporating these operations into your session traces, you get a complete picture of your agent's behavior. In our financial assistant example, we could extend this to track the Alpha Vantage API calls and vector store operations for full visibility."
+    },
+    {
+      question: "How can I identify which user queries are most prone to hallucinations?",
+      answer: "Helicone's custom properties make this straightforward. By tracking metrics like 'documents found' in your RAG system and comparing them with the confidence scores in responses, you can identify patterns of hallucination. For example, filter for sessions where no documents were found but the model still generated a lengthy, confident response. You can then set up alerts for these conditions or create dashboards to monitor problematic query types."
+    },
+    {
+      question: "What's the performance impact of adding Helicone Sessions to my production AI agent?",
+      answer: "Helicone is designed for minimal performance impact. The overhead of adding session headers to your requests is negligible—typically less than 5ms per request. For high-volume production systems, Helicone offers enterprise features like dedicated instances and custom retention policies to ensure monitoring doesn't affect your application's performance. The insights gained from comprehensive observability far outweigh the minimal performance cost."
+    }
+  ]}
+/>
+
+<Questions />
