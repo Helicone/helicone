@@ -9,7 +9,6 @@ description = "A high-performance LLM proxy router for load balancing, monitorin
 homepage = "https://helix.helicone.ai"
 
 [dependencies]
-
 anthropic-ai-sdk = { workspace = true }
 async-openai = { workspace = true }
 axum-core = { workspace = true }
@@ -78,6 +77,9 @@ utoipa = { workspace = true }
 uuid = { workspace = true, features = ["serde", "v7"] }
 weighted-balance = { workspace = true }
 
+[dev-dependencies]
+pretty_assertions = { workspace = true }
+
 [features]
 default = []
 testing = ["dep:stubr", "dep:serial_test"]
@@ -111,4 +113,8 @@ required-features = ["testing"]
 
 [[test]]
 name = "passthrough"
+required-features = ["testing"]
+
+[[test]]
+name = "rate_limit_combinations"
 required-features = ["testing"]

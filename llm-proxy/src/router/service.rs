@@ -19,12 +19,14 @@ use crate::{
         api::ApiError, init::InitError, internal::InternalError,
         invalid_req::InvalidRequestError, provider::ProviderError,
     },
-    middleware::request_context,
+    middleware::{rate_limit::service as rate_limit, request_context},
     types::{provider::ProviderKeys, router::RouterId},
 };
 
-pub type RouterService = request_context::Service<ProviderBalancer>;
-pub type DirectProxyService = request_context::Service<DispatcherService>;
+pub type RouterService =
+    rate_limit::Service<request_context::Service<ProviderBalancer>>;
+pub type DirectProxyService =
+    rate_limit::Service<request_context::Service<DispatcherService>>;
 
 #[derive(Debug)]
 pub struct Router {
@@ -70,11 +72,15 @@ impl Router {
             )
             .await?;
             let service_stack: RouterService = ServiceBuilder::new()
+                .layer(rate_limit::Layer::per_router(
+                    &app_state,
+                    &router_config,
+                )?)
                 .layer(request_context::Layer::new(
                     router_config.clone(),
                     provider_keys.clone(),
                 ))
-                // other middleware: rate limiting, caching, etc, etc
+                // other middleware: caching, etc, etc
                 // will be added here as well from the router config
                 // .map_err(|e| crate::error::api::Error::Box(e))
                 .service(balancer);
@@ -88,7 +94,7 @@ impl Router {
                 tracing::error!(error = ?e, "Api key not found");
             })?;
         let direct_proxy_dispatcher = Dispatcher::new(
-            app_state,
+            app_state.clone(),
             id,
             &router_config,
             router_config.request_style,
@@ -96,11 +102,12 @@ impl Router {
         )?;
 
         let direct_proxy = ServiceBuilder::new()
+            .layer(rate_limit::Layer::per_router(&app_state, &router_config)?)
             .layer(request_context::Layer::new(
                 router_config.clone(),
                 provider_keys,
             ))
-            // other middleware: rate limiting, caching, etc, etc
+            // other middleware: caching, etc, etc
             // will be added here as well from the router config
             // .map_err(|e| crate::error::api::Error::Box(e))
             .service(direct_proxy_dispatcher);

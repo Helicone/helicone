@@ -15,6 +15,8 @@ impl KeyExtractor for RateLimitKeyExtractor {
             return Err(KeyExtractorError::UnableToExtractKey);
         };
 
-        Ok(ctx.user_id.to_string())
+        let user_id = ctx.user_id.to_string();
+        tracing::info!("user_id: {}", user_id);
+        Ok(user_id)
     }
 }

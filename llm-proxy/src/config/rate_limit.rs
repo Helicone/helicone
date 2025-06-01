@@ -5,21 +5,40 @@ use serde::{Deserialize, Serialize};
 use super::redis::RedisConfig;
 
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
-#[serde(deny_unknown_fields, untagged, rename_all = "kebab-case")]
+#[serde(deny_unknown_fields, rename_all = "kebab-case")]
 pub enum RateLimitConfig {
-    Enabled {
+    /// Globally enabled rate limits across the entire app.
+    ///
+    /// Individual routers may still configure their own rate limit
+    /// configuration.
+    Global {
         #[serde(default)]
         store: RateLimitStore,
         #[serde(default, flatten)]
         limits: LimitConfig,
     },
+    /// A global setting that routers can selectively opt in to
+    /// if they wish to enable rate limiting without needing to repeat
+    /// the same settings for each router.
+    OptIn {
+        #[serde(default)]
+        store: RateLimitStore,
+        #[serde(default, flatten)]
+        limits: LimitConfig,
+    },
+    /// Routers must configure their own rate limit settings.
+    RouterSpecific {
+        #[serde(default)]
+        store: RateLimitStore,
+    },
+    /// Disabled for all routers in the app.
     Disabled,
 }
 
 impl RateLimitConfig {
     #[must_use]
     pub fn default_enabled_config() -> Self {
-        Self::Enabled {
+        Self::Global {
             store: RateLimitStore::default(),
             limits: LimitConfig::default(),
         }
@@ -58,7 +77,7 @@ impl crate::tests::TestDefault for RateLimitConfig {
 #[cfg(feature = "testing")]
 pub fn enabled_for_test_redis() -> RateLimitConfig {
     use crate::tests::TestDefault;
-    RateLimitConfig::Enabled {
+    RateLimitConfig::Global {
         store: RateLimitStore::Redis(RedisConfig::default()),
         limits: LimitConfig::test_default(),
     }
@@ -67,7 +86,7 @@ pub fn enabled_for_test_redis() -> RateLimitConfig {
 #[cfg(feature = "testing")]
 pub fn enabled_for_test_in_memory() -> RateLimitConfig {
     use crate::tests::TestDefault;
-    RateLimitConfig::Enabled {
+    RateLimitConfig::Global {
         store: RateLimitStore::InMemory,
         limits: LimitConfig::test_default(),
     }

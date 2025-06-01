@@ -206,7 +206,9 @@ impl App {
         let health_monitor = HealthMonitorMap::default();
 
         let redis = match &config.rate_limit {
-            RateLimitConfig::Enabled { store, .. } => match store {
+            RateLimitConfig::Global { store, .. }
+            | RateLimitConfig::OptIn { store, .. }
+            | RateLimitConfig::RouterSpecific { store, .. } => match store {
                 RateLimitStore::Redis(redis) => {
                     let client = redis::Client::open(redis.url.0.clone())?;
                     let pool = r2d2::Pool::builder()
@@ -266,7 +268,7 @@ impl App {
             .layer(AsyncRequireAuthorizationLayer::new(AuthService::new(
                 app_state.clone(),
             )))
-            .layer(RateLimitLayer::new(&app_state))
+            .layer(RateLimitLayer::global(&app_state))
             .map_err(crate::error::internal::InternalError::BufferError)
             .layer(BufferLayer::new(BUFFER_SIZE))
             .layer(ErrorHandlerLayer::new(app_state.clone()))

@@ -144,7 +144,6 @@ impl ProviderKeys {
 
         for provider in providers {
             let provider_str = provider.to_string().to_uppercase();
-            println!("provider_str: {provider_str}");
             let env_var = format!("{provider_str}_API_KEY");
             if let Ok(key) = std::env::var(&env_var) {
                 tracing::trace!(

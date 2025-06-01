@@ -57,10 +57,8 @@ impl
 
         if let ModelId::Anthropic(model) = &mut target_model {
             if model.model.contains("claude-3") {
-                tracing::info!("claude 3-x model, ensuring -latest suffix");
                 model.version = Version::Latest;
             } else {
-                tracing::info!("claude 4-x model, not adding -latest suffix");
                 model.version = Version::ImplicitLatest;
             }
         }

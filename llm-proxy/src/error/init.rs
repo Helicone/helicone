@@ -41,4 +41,6 @@ pub enum InitError {
     InitOtelMetricsLayer(#[from] tower_otel_http_metrics::Error),
     /// Failed to initialize system metrics
     InitSystemMetrics,
+    /// Invalid rate limit config: {0}
+    InvalidRateLimitConfig(&'static str),
 }

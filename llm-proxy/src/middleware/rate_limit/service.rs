@@ -12,7 +12,11 @@ use tower::util::Either;
 use super::{brakes::TowerRateLimiterLayer, extractor::RateLimitKeyExtractor};
 use crate::{
     app::AppState,
-    config::rate_limit::{RateLimitConfig, RateLimitStore},
+    config::{
+        rate_limit::{LimitConfig, RateLimitConfig, RateLimitStore},
+        router::{RouterConfig, RouterRateLimitConfig},
+    },
+    error::init::InitError,
 };
 
 pub type RedisRateLimitService<S> =
@@ -51,48 +55,94 @@ pub struct Layer {
 }
 
 impl Layer {
-    /// Create a new rate limit layer.
-    ///
-    /// If the config is `None`, the layer will be a no-op.
+    /// Create a new rate limit layer to be applied globally.
     #[must_use]
-    pub fn new(app_state: &AppState) -> Self {
+    pub fn global(app_state: &AppState) -> Self {
         match &app_state.0.config.rate_limit {
-            RateLimitConfig::Enabled { limits, store } => {
-                let strategy = TokenBucket::new(
-                    limits.per_user.capacity,
-                    limits.per_user.fill_frequency,
-                );
-                match store {
-                    RateLimitStore::Redis(_redis_config) => {
-                        let backend = RedisBackend::new(
-                            app_state
-                                .0
-                                .redis
-                                .as_ref()
-                                .expect("redis is required")
-                                .clone(),
-                        );
-                        let limiter = build_limiter(backend, strategy);
-                        let inner =
-                            Some(Either::Left(TowerRateLimiterLayer::new(
-                                limiter,
-                                RateLimitKeyExtractor,
-                            )));
-                        Self { inner }
-                    }
-                    RateLimitStore::InMemory => {
-                        let backend = brakes::backend::local::Memory::new();
-                        let limiter = build_limiter(backend, strategy);
-                        let inner =
-                            Some(Either::Right(TowerRateLimiterLayer::new(
-                                limiter,
-                                RateLimitKeyExtractor,
-                            )));
-                        Self { inner }
-                    }
-                }
-            }
-            RateLimitConfig::Disabled => Self { inner: None },
+            RateLimitConfig::Global { limits, store } => Self {
+                inner: Some(build_rate_limit_layer(app_state, limits, store)),
+            },
+            RateLimitConfig::OptIn { .. }
+            | RateLimitConfig::RouterSpecific { .. }
+            | RateLimitConfig::Disabled => Self { inner: None },
+        }
+    }
+
+    pub fn per_router(
+        app_state: &AppState,
+        router_config: &RouterConfig,
+    ) -> Result<Self, InitError> {
+        match (&app_state.0.config.rate_limit, &router_config.rate_limit) {
+            (
+                RateLimitConfig::Global { store, .. }
+                | RateLimitConfig::RouterSpecific { store }
+                | RateLimitConfig::OptIn { store, .. },
+                RouterRateLimitConfig::Custom { limits },
+            )
+            | (
+                RateLimitConfig::OptIn { store, limits },
+                RouterRateLimitConfig::OptIn,
+            ) => Ok(Self {
+                inner: Some(build_rate_limit_layer(app_state, limits, store)),
+            }),
+
+            (
+                RateLimitConfig::Global { .. }
+                | RateLimitConfig::OptIn { .. }
+                | RateLimitConfig::RouterSpecific { .. }
+                | RateLimitConfig::Disabled,
+                RouterRateLimitConfig::None,
+            ) => Ok(Self { inner: None }),
+            (
+                RateLimitConfig::Disabled,
+                RouterRateLimitConfig::Custom { .. }
+                | RouterRateLimitConfig::OptIn,
+            ) => Err(InitError::InvalidRateLimitConfig(
+                "Rate limiting is disabled at the app level",
+            )),
+            (
+                RateLimitConfig::RouterSpecific { .. }
+                | RateLimitConfig::Global { .. },
+                RouterRateLimitConfig::OptIn,
+            ) => Err(InitError::InvalidRateLimitConfig(
+                "App-level rate limiting does not allow rate limiting opt-in",
+            )),
+        }
+    }
+}
+
+fn build_rate_limit_layer(
+    app_state: &AppState,
+    limits: &LimitConfig,
+    store: &RateLimitStore,
+) -> Either<RedisRateLimitLayer, InMemoryRateLimitLayer> {
+    let strategy = TokenBucket::new(
+        limits.per_user.capacity,
+        limits.per_user.fill_frequency,
+    );
+    match store {
+        RateLimitStore::Redis(_redis_config) => {
+            let backend = RedisBackend::new(
+                app_state
+                    .0
+                    .redis
+                    .as_ref()
+                    .expect("redis is required")
+                    .clone(),
+            );
+            let limiter = build_limiter(backend, strategy);
+            Either::Left(TowerRateLimiterLayer::new(
+                limiter,
+                RateLimitKeyExtractor,
+            ))
+        }
+        RateLimitStore::InMemory => {
+            let backend = brakes::backend::local::Memory::new();
+            let limiter = build_limiter(backend, strategy);
+            Either::Right(TowerRateLimiterLayer::new(
+                limiter,
+                RateLimitKeyExtractor,
+            ))
         }
     }
 }
@@ -190,4 +240,243 @@ fn build_limiter<B: brakes::backend::Backend>(
         .with_failure_strategy(brakes::RetryStrategy::RetryAndDeny(1))
         .with_conflict_strategy(brakes::RetryStrategy::RetryAndDeny(1))
         .build()
+}
+
+#[cfg(test)]
+mod tests {
+    use std::time::Duration;
+
+    use pretty_assertions::assert_eq;
+
+    use super::*;
+    use crate::{
+        app::AppState,
+        config::{
+            Config,
+            rate_limit::{
+                LimitConfig, RateLimitConfig, RateLimitStore, TokenBucketConfig,
+            },
+            router::{RouterConfig, RouterRateLimitConfig},
+        },
+        tests::TestDefault,
+    };
+
+    async fn create_test_app_state(
+        rate_limit_config: RateLimitConfig,
+    ) -> AppState {
+        let mut config = Config::test_default();
+        config.rate_limit = rate_limit_config;
+        let app = crate::app::App::new(config)
+            .await
+            .expect("failed to create app");
+        app.state
+    }
+
+    fn create_test_limits() -> LimitConfig {
+        LimitConfig {
+            per_user: TokenBucketConfig {
+                capacity: 10,
+                fill_frequency: Duration::from_secs(1),
+            },
+        }
+    }
+
+    fn create_router_config(rate_limit: RouterRateLimitConfig) -> RouterConfig {
+        RouterConfig {
+            rate_limit,
+            ..Default::default()
+        }
+    }
+
+    #[tokio::test]
+    async fn global_app_with_none_router() {
+        let app_state = create_test_app_state(RateLimitConfig::Global {
+            store: RateLimitStore::InMemory,
+            limits: create_test_limits(),
+        })
+        .await;
+        let router_config = create_router_config(RouterRateLimitConfig::None);
+
+        let result = Layer::per_router(&app_state, &router_config);
+        assert!(result.is_ok());
+        assert!(result.unwrap().inner.is_none());
+    }
+
+    #[tokio::test]
+    async fn global_app_with_custom_router() {
+        let app_state = create_test_app_state(RateLimitConfig::Global {
+            store: RateLimitStore::InMemory,
+            limits: create_test_limits(),
+        })
+        .await;
+        let router_config =
+            create_router_config(RouterRateLimitConfig::Custom {
+                limits: create_test_limits(),
+            });
+
+        let result = Layer::per_router(&app_state, &router_config);
+        assert!(result.is_ok());
+        assert!(result.unwrap().inner.is_some());
+    }
+
+    #[tokio::test]
+    async fn global_app_with_optin_router_should_error() {
+        let app_state = create_test_app_state(RateLimitConfig::Global {
+            store: RateLimitStore::InMemory,
+            limits: create_test_limits(),
+        })
+        .await;
+        let router_config = create_router_config(RouterRateLimitConfig::OptIn);
+
+        let result = Layer::per_router(&app_state, &router_config);
+        assert!(result.is_err());
+        if let Err(error) = result {
+            assert_eq!(
+                error.to_string(),
+                "Invalid rate limit config: App-level rate limiting does not \
+                 allow rate limiting opt-in"
+            );
+        }
+    }
+
+    #[tokio::test]
+    async fn optin_app_with_none_router() {
+        let app_state = create_test_app_state(RateLimitConfig::OptIn {
+            store: RateLimitStore::InMemory,
+            limits: create_test_limits(),
+        })
+        .await;
+        let router_config = create_router_config(RouterRateLimitConfig::None);
+
+        let result = Layer::per_router(&app_state, &router_config);
+        assert!(result.is_ok());
+        assert!(result.unwrap().inner.is_none());
+    }
+
+    #[tokio::test]
+    async fn optin_app_with_optin_router() {
+        let app_state = create_test_app_state(RateLimitConfig::OptIn {
+            store: RateLimitStore::InMemory,
+            limits: create_test_limits(),
+        })
+        .await;
+        let router_config = create_router_config(RouterRateLimitConfig::OptIn);
+
+        let result = Layer::per_router(&app_state, &router_config);
+        assert!(result.is_ok());
+        assert!(result.unwrap().inner.is_some());
+    }
+
+    #[tokio::test]
+    async fn optin_app_with_custom_router() {
+        let app_state = create_test_app_state(RateLimitConfig::OptIn {
+            store: RateLimitStore::InMemory,
+            limits: create_test_limits(),
+        })
+        .await;
+        let router_config =
+            create_router_config(RouterRateLimitConfig::Custom {
+                limits: create_test_limits(),
+            });
+
+        let result = Layer::per_router(&app_state, &router_config);
+        assert!(result.is_ok());
+        assert!(result.unwrap().inner.is_some());
+    }
+
+    #[tokio::test]
+    async fn router_specific_app_with_none_router() {
+        let app_state =
+            create_test_app_state(RateLimitConfig::RouterSpecific {
+                store: RateLimitStore::InMemory,
+            })
+            .await;
+        let router_config = create_router_config(RouterRateLimitConfig::None);
+
+        let result = Layer::per_router(&app_state, &router_config);
+        assert!(result.is_ok());
+        assert!(result.unwrap().inner.is_none());
+    }
+
+    #[tokio::test]
+    async fn router_specific_app_with_custom_router() {
+        let app_state =
+            create_test_app_state(RateLimitConfig::RouterSpecific {
+                store: RateLimitStore::InMemory,
+            })
+            .await;
+        let router_config =
+            create_router_config(RouterRateLimitConfig::Custom {
+                limits: create_test_limits(),
+            });
+
+        let result = Layer::per_router(&app_state, &router_config);
+        assert!(result.is_ok());
+        assert!(result.unwrap().inner.is_some());
+    }
+
+    #[tokio::test]
+    async fn router_specific_app_with_optin_router_should_error() {
+        let app_state =
+            create_test_app_state(RateLimitConfig::RouterSpecific {
+                store: RateLimitStore::InMemory,
+            })
+            .await;
+        let router_config = create_router_config(RouterRateLimitConfig::OptIn);
+
+        let result = Layer::per_router(&app_state, &router_config);
+        assert!(result.is_err());
+        if let Err(error) = result {
+            assert_eq!(
+                error.to_string(),
+                "Invalid rate limit config: App-level rate limiting does not \
+                 allow rate limiting opt-in"
+            );
+        }
+    }
+
+    #[tokio::test]
+    async fn disabled_app_with_none_router() {
+        let app_state = create_test_app_state(RateLimitConfig::Disabled).await;
+        let router_config = create_router_config(RouterRateLimitConfig::None);
+
+        let result = Layer::per_router(&app_state, &router_config);
+        assert!(result.is_ok());
+        assert!(result.unwrap().inner.is_none());
+    }
+
+    #[tokio::test]
+    async fn disabled_app_with_custom_router_should_error() {
+        let app_state = create_test_app_state(RateLimitConfig::Disabled).await;
+        let router_config =
+            create_router_config(RouterRateLimitConfig::Custom {
+                limits: create_test_limits(),
+            });
+
+        let result = Layer::per_router(&app_state, &router_config);
+        assert!(result.is_err());
+        if let Err(error) = result {
+            assert_eq!(
+                error.to_string(),
+                "Invalid rate limit config: Rate limiting is disabled at the \
+                 app level"
+            );
+        }
+    }
+
+    #[tokio::test]
+    async fn disabled_app_with_optin_router_should_error() {
+        let app_state = create_test_app_state(RateLimitConfig::Disabled).await;
+        let router_config = create_router_config(RouterRateLimitConfig::OptIn);
+
+        let result = Layer::per_router(&app_state, &router_config);
+        assert!(result.is_err());
+        if let Err(error) = result {
+            assert_eq!(
+                error.to_string(),
+                "Invalid rate limit config: Rate limiting is disabled at the \
+                 app level"
+            );
+        }
+    }
 }
