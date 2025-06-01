@@ -21,6 +21,7 @@ import { Setting } from "../../utils/settings";
 import type { SettingName } from "../../utils/settings";
 import Stripe from "stripe";
 import { AdminManager } from "../../managers/admin/AdminManager";
+import { StripeManager } from "../../managers/stripe/StripeManager";
 
 export const authCheckThrow = async (userId: string | undefined) => {
   if (!userId) {
@@ -75,6 +76,72 @@ export class AdminController extends Controller {
       `DELETE FROM feature_flags WHERE org_id = $1 AND feature = $2`,
       [body.orgId, body.flag]
     );
+  }
+
+  @Get("/reconcile-billing")
+  public async reconcileBilling(@Request() request: JawnAuthenticatedRequest) {
+    const todayUTCStart = new Date(new Date().setUTCHours(0, 0, 0, 0));
+    const end = todayUTCStart.getTime();
+    const start = end - 1000 * 60 * 60 * 24 * 30; // 30 days ago
+
+
+    console.log("Reconciling billing");
+    await authCheckThrow(request.authParams.userId);
+
+    const stripeManager = new StripeManager(request.authParams);
+
+
+    const organizations = await dbExecute<{
+      stripe_customer_id: string;
+      id: string;
+    }>(
+      `
+      SELECT stripe_customer_id, id FROM organization WHERE stripe_customer_id IS NOT NULL
+      `,
+      []
+    );
+
+    for (const organization of organizations.data ?? []) {
+      const count = await clickhouseDb.dbQuery<{
+        count: string,
+      }>(
+        `
+        select count(*) as count
+        FROM request_response_rmt
+        WHERE organization_id = {val_0: String} AND request_created_at >= {val_1: DateTime} AND request_created_at <= {val_2: DateTime}
+        and cache_reference_id = '00000000-0000-0000-0000-000000000000'
+        `,
+        [organization.id, new Date(start), new Date(end)]
+      );
+      if (count.error) {
+        console.error(`Error getting count for ${organization.id}: ${count.error}`);
+        continue;
+      }
+      
+
+      if (+(count.data?.[0]?.count ?? "0") === 0) {
+        console.log(`No requests for ${organization.id} in the last 30 days`);
+        continue;
+      }
+
+      const result = await stripeManager.getMeterEventSummaries(
+        start,
+        end,
+        organization.stripe_customer_id
+      );
+
+      const totalInStripe = result.reduce((acc, curr) => acc + curr.aggregated_value, 0);
+      const totalToReconcile = +(count.data?.[0]?.count ?? "0") - totalInStripe;
+
+      await stripeManager.reconcileBilling(
+        organization.stripe_customer_id,
+        totalToReconcile,
+        organization.id
+      );
+
+    }
+
+    return "done";
   }
 
   @Post("/feature-flags/query")
@@ -377,8 +444,7 @@ export class AdminController extends Controller {
     FROM request_response_rmt
     WHERE
       request_response_rmt.request_created_at > toDateTime('${body.startDate}')
-      and request_response_rmt.request_created_at < toDateTime('${
-        body.endDate
+      and request_response_rmt.request_created_at < toDateTime('${body.endDate
       }')
     AND organization_id in (
       ${orgData.data
@@ -463,21 +529,18 @@ export class AdminController extends Controller {
       from request_response_rmt
       where request_response_rmt.organization_id in (
         ${orgs.data
-          ?.map((org) => `'${org.organization_id}'`)
-          .slice(0, 30)
-          .join(",")}
+        ?.map((org) => `'${org.organization_id}'`)
+        .slice(0, 30)
+        .join(",")}
       )
-      and request_response_rmt.request_created_at > toDateTime('${
-        body.startDate
+      and request_response_rmt.request_created_at > toDateTime('${body.startDate
       }')
-      and request_response_rmt.request_created_at < toDateTime('${
-        body.endDate
+      and request_response_rmt.request_created_at < toDateTime('${body.endDate
       }')
       group by dt, organization_id
       order by organization_id, dt ASC
       -- WITH FILL FROM toStartOfHour(now() - INTERVAL '30 day') TO toStartOfHour(now()) + 1 STEP INTERVAL 1 HOUR
-      WITH FILL FROM toDateTime('${body.startDate}') TO toDateTime('${
-        body.endDate
+      WITH FILL FROM toDateTime('${body.startDate}') TO toDateTime('${body.endDate
       }') STEP INTERVAL 1 ${timeGrain}
     `,
       []
@@ -584,13 +647,12 @@ export class AdminController extends Controller {
         FROM organization o
         LEFT JOIN organization_member om ON o.id = om.organization
         LEFT JOIN auth.users u ON om.member = u.id OR o.owner = u.id
-        WHERE ${
-          organizationId
-            ? "o.id = $1"
-            : userId
-            ? "om.member = $1"
-            : "u.email = $1"
-        }
+        WHERE ${organizationId
+        ? "o.id = $1"
+        : userId
+          ? "om.member = $1"
+          : "u.email = $1"
+      }
       )
       SELECT
         o.id, o.name, o.created_at, o.owner, o.tier,
@@ -872,13 +934,13 @@ export class AdminController extends Controller {
     @Body()
     body: {
       timeFilter:
-        | "1 days"
-        | "7 days"
-        | "1 month"
-        | "3 months"
-        | "6 months"
-        | "12 months"
-        | "24 months";
+      | "1 days"
+      | "7 days"
+      | "1 month"
+      | "3 months"
+      | "6 months"
+      | "12 months"
+      | "24 months";
       groupBy: "hour" | "day" | "week" | "month";
     }
   ): Promise<{
