@@ -122,8 +122,8 @@ export class StripeManager extends BaseManager {
       meterId.data ?? "",
       {
         customer: customerId,
-        start_time: startTime,
-        end_time: endTime,
+        start_time: Math.floor(startTime / 1000),
+        end_time: Math.floor(endTime / 1000),
         value_grouping_window: 'day',
         limit: 100,
       }
@@ -135,6 +135,7 @@ export class StripeManager extends BaseManager {
     count: number,
     organizationId: string,
   ): Promise<Result<null, string>> {
+    console.log(`Reconciling billing for ${organizationId} with ${count} requests`);
 
     const result = await this.stripe.v2.billing.meterEvents.create({
       identifier: `org_${organizationId}_request_reconcile_${new Date().toISOString()}`,

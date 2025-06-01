@@ -80,7 +80,8 @@ export class AdminController extends Controller {
 
   @Get("/reconcile-billing")
   public async reconcileBilling(@Request() request: JawnAuthenticatedRequest) {
-    const end = Date.now();
+    const todayUTCStart = new Date(new Date().setUTCHours(0, 0, 0, 0));
+    const end = todayUTCStart.getTime();
     const start = end - 1000 * 60 * 60 * 24 * 30; // 30 days ago
 
 
@@ -92,24 +93,30 @@ export class AdminController extends Controller {
 
     const organizations = await dbExecute<{
       stripe_customer_id: string;
-      organization_id: string;
+      id: string;
     }>(
       `
-      SELECT stripe_customer_id, organization_id FROM organization WHERE stripe_customer_id IS NOT NULL
+      SELECT stripe_customer_id, id FROM organization WHERE stripe_customer_id IS NOT NULL
       `,
       []
     );
 
     for (const organization of organizations.data ?? []) {
       const count = await clickhouseDb.dbQuery<{
-        count: number,
+        count: string,
       }>(
         `
         select count(*) as count
-        WHERE organization_id = $1 AND start_time >= $2 AND end_time <= $3`,
-        [organization.organization_id, new Date(start), new Date(end)]
+        FROM request_response_rmt
+        WHERE organization_id = {val_0: String} AND request_created_at >= {val_1: DateTime} AND request_created_at <= {val_2: DateTime}`,
+        [organization.id, new Date(start), new Date(end)]
       );
+      
 
+      if (+(count.data?.[0]?.count ?? "0") === 0) {
+        console.log(`No requests for ${organization.id} in the last 30 days`);
+        continue;
+      }
 
       const result = await stripeManager.getMeterEventSummaries(
         start,
@@ -118,12 +125,12 @@ export class AdminController extends Controller {
       );
 
       const totalInStripe = result.reduce((acc, curr) => acc + curr.aggregated_value, 0);
-      const totalToReconcile = count.data?.[0]?.count ?? 0 - totalInStripe;
+      const totalToReconcile = +(count.data?.[0]?.count ?? "0") - totalInStripe;
 
       await stripeManager.reconcileBilling(
         organization.stripe_customer_id,
         totalToReconcile,
-        organization.organization_id
+        organization.id
       );
 
     }
