@@ -109,10 +109,14 @@ export class AdminController extends Controller {
         select count(*) as count
         FROM request_response_rmt
         WHERE organization_id = {val_0: String} AND request_created_at >= {val_1: DateTime} AND request_created_at <= {val_2: DateTime}
-        and cache_reference_id == '00000000-0000-0000-0000-000000000000'
+        and cache_reference_id = '00000000-0000-0000-0000-000000000000'
         `,
         [organization.id, new Date(start), new Date(end)]
       );
+      if (count.error) {
+        console.error(`Error getting count for ${organization.id}: ${count.error}`);
+        continue;
+      }
       
 
       if (+(count.data?.[0]?.count ?? "0") === 0) {
