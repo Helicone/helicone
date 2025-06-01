@@ -1,4 +1,4 @@
-import { Result, resultMap } from "../../../packages/common/result";
+import { Result, resultMap } from "@/packages/common/result";
 import { getXOverTime } from "./getXOverTime";
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
 

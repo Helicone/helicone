@@ -3,7 +3,7 @@ import {
   RequestsOverTime,
   TimeIncrement,
 } from "../../../lib/timeCalculations/fetchTimeData";
-import { Result, ok, resultMap } from "../../../packages/common/result";
+import { Result, ok, resultMap } from "@/packages/common/result";
 import { CostOverTime } from "../../../pages/api/metrics/costOverTime";
 import { ErrorOverTime } from "../../../pages/api/metrics/errorOverTime";
 

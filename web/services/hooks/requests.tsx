@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { useOrg } from "../../components/layout/org/organizationContext";
 import { HeliconeRequest } from "../../lib/api/request/request";
 import { $JAWN_API, getJawnClient } from "../../lib/clients/jawn";
-import { Result } from "../../packages/common/result";
+import { Result } from "@/packages/common/result";
 import { FilterNode } from "../lib/filters/filterDefs";
 import { placeAssetIdValues } from "../lib/requestTraverseHelper";
 import { SortLeafRequest } from "../lib/sorts/requests/sorts";
@@ -208,6 +208,30 @@ export const useGetRequestsWithBodies = (
   };
 };
 
+const useGetRequestCount = (
+  filter: FilterNode,
+  isLive = false,
+  isCached = false,
+) => {
+  return useQuery({
+    queryKey: ["requestsCount", filter, isCached],
+    queryFn: async (query) => {
+      const [_, filter, isLive, isCached] = query.queryKey as [string, FilterNode, boolean, boolean];
+      const processedFilter = processFilter(filter);
+      return await fetch("/api/request/count", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ filter: processedFilter, isCached }),
+      }).then((res) => res.json() as Promise<Result<number, string>>);
+    },
+    refetchOnWindowFocus: false,
+    refetchInterval: isLive ? 2_000 : false,
+    gcTime: 5 * 60 * 1000,
+  });
+}
+
 const useGetRequests = (
   currentPage: number,
   currentPageSize: number,
@@ -225,34 +249,7 @@ const useGetRequests = (
       isLive,
       isCached
     ),
-    count: useQuery({
-      queryKey: [
-        "requestsCount",
-        currentPage,
-        currentPageSize,
-        advancedFilter,
-        sortLeaf,
-        isCached,
-      ],
-      queryFn: async (query) => {
-        const advancedFilter = query.queryKey[3];
-        const isCached = query.queryKey[5];
-        const processedFilter = processFilter(advancedFilter);
-        return await fetch("/api/request/count", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            filter: processedFilter,
-            isCached,
-          }),
-        }).then((res) => res.json() as Promise<Result<number, string>>);
-      },
-      refetchOnWindowFocus: false,
-      refetchInterval: isLive ? 2_000 : false,
-      gcTime: 5 * 60 * 1000,
-    }),
+    count: useGetRequestCount(advancedFilter, isLive, isCached),
   };
 };
 
@@ -386,6 +383,7 @@ const getRequestBodiesBySession = async (sessions: TSessions[]) => {
 
 export {
   useGetRequestCountClickhouse,
+  useGetRequestCount,
   useGetRequests,
   getRequestBodiesBySession as getRequestsByIdsWithBodies,
 };

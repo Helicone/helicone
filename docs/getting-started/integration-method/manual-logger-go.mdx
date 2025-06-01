@@ -1,0 +1,167 @@
+---
+title: "Manual Logger - Go"
+sidebarTitle: "Go"
+description: "Integrate any custom LLM with Helicone using the Go Manual Logger. Step-by-step guide for Go implementation to connect your proprietary or open-source models."
+"twitter:title": "Go Manual Logger - Helicone OSS LLM Observability"
+icon: "golang"
+iconType: "solid"
+---
+
+# Go Manual Logger
+
+Logging calls to custom models is supported via the Helicone Python SDK.
+
+<Steps>
+  <Step title="Install the Helicone helpers package">
+  ```bash
+  go get github.com/helicone/go-helicone-helpers
+  ```
+  </Step>
+
+  <Step title="Set `HELICONE_API_KEY` as an environment variable">
+  ```bash
+  export HELICONE_API_KEY=sk-<your-api-key>
+  ```
+  <Info>You can also set the Helicone API Key in your code (See below)</Info>
+  </Step>
+
+  <Step title="Create a new HeliconeManualLogger instance">
+  ```go
+package main
+
+import (
+    logger "github.com/helicone/go-helicone-helpers"
+    "github.com/openai/openai-go"
+    "github.com/openai/openai-go/option"
+)
+
+func main() {
+    // Replace with your actual API key
+	apiKey := os.Getenv("HELICONE_API_KEY")
+	openaiApiKey := os.Getenv("OPENAI_API_KEY")
+
+	// Example: Basic Logger
+	fmt.Println("Testing Basic Logger...")
+	chatCompletionOperation(apiKey, openaiApiKey)
+}
+
+func chatCompletionOperation(apiKey string, openaiApiKey string) {
+    manualLogger := logger.New(logger.LoggerOptions{
+		APIKey: apiKey,
+		Headers: map[string]string{
+			"Helicone-User-Id": "test-user-123",
+		},
+	})
+
+    openaiClient := openai.NewClient(option.WithAPIKey(openaiApiKey))
+}
+```
+</Step>
+
+<Step title="Define your operation and make the request">
+```go
+// Define your request
+request := logger.ILogRequest{
+    Model: "gpt-4o",
+    Extra: map[string]interface{}{
+        "messages": []map[string]string{
+            {"role": "user", "content": "Hello from basic logger!"},
+        },
+    },
+}
+
+result, err := manualLogger.LogRequest(request, func(recorder *logger.ResultRecorder) (interface{}, error) {
+    chatCompletion, err := openaiClient.Chat.Completions.New(context.TODO(), openai.ChatCompletionNewParams{
+        Messages: []openai.ChatCompletionMessageParamUnion{
+            openai.UserMessage("Hello, world!"),
+        },
+        Model: openai.ChatModelGPT4o,
+    })
+    if err != nil {
+        panic(err.Error())
+    }
+    // Simulate some processing time
+    jsonData, _ := json.Marshal(chatCompletion)
+    var resultMap map[string]interface{}
+    json.Unmarshal(jsonData, &resultMap)
+    recorder.AppendResults(resultMap)
+    return "Response from basic logger test", nil
+}, map[string]string{
+    "Helicone-Session-Id":   sessionId, // Optional session tracking
+})
+```
+
+  </Step>
+</Steps>
+
+## API Reference
+
+### ManualLogger
+
+```go
+type ManualLogger struct {
+	apiKey          string
+	headers         map[string]string
+	loggingEndpoint string
+}
+
+func New(options LoggerOptions) *ManualLogger {
+    //...
+}
+
+type LoggerOptions struct {
+	APIKey          string
+	Headers         map[string]string
+	LoggingEndpoint string
+}
+```
+
+### LogOptions
+
+```go
+type LogOptions struct {
+	StartTime         int64
+	EndTime           int64
+	AdditionalHeaders map[string]string
+	TimeToFirstToken  *int
+	Status            int
+}
+```
+
+### LogRequest
+
+```go
+func (l *ManualLogger) LogRequest(request HeliconeLogRequest, operation func(*ResultRecorder) (any, error),
+    additionalHeaders map[string]string
+) (any, error) {
+    //...
+}
+// HeliconeLogRequest represents either a basic log request or a custom event request
+type HeliconeLogRequest interface{}
+```
+
+#### Parameters
+
+1. `request`: A HeliconeLogRequest (interface) containing the request parameters
+2. `operation`: A function that takes a ResultRecorder and returns a result
+3. `additionalHeaders`: A map of string keys to string values
+
+### ResultRecorder
+
+```go
+type ResultRecorder struct {
+	results map[string]interface{}
+}
+
+func NewResultRecorder(logger *ManualLogger, request HeliconeLogRequest) *ResultRecorder {
+    //...
+}
+
+func (r *ResultRecorder) AppendResults(data map[string]interface{}) {
+    //...
+}
+
+func (r *ResultRecorder) GetResults() map[string]interface{} {
+    //...
+}
+```

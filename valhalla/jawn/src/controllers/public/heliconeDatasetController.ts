@@ -15,11 +15,11 @@ import {
   FilterNode,
 } from "../../lib/shared/filters/filterDefs";
 import { DatasetManager } from "../../managers/dataset/DatasetManager";
-import { JawnAuthenticatedRequest } from "../../types/request";
+import { type JawnAuthenticatedRequest } from "../../types/request";
 import {
   HeliconeDataset,
   HeliconeDatasetRow,
-  MutateParams,
+  type MutateParams,
 } from "../../managers/dataset/HeliconeDatasetManager";
 import { Json } from "../../lib/db/database.types";
 

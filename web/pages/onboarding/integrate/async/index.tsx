@@ -14,10 +14,7 @@ const CODE_SNIPPETS: CodeSnippet = {
 import OpenAI from "openai";
 
 const logger = new HeliconeAsyncLogger({
-  apiKey: "${key}",
-  providers: {
-    openAI: OpenAI
-  }
+  apiKey: "${key}"
 });
 logger.init();
 

@@ -165,7 +165,7 @@ export async function proxyForwarder(
   }
 
   if (
-    proxyRequest.requestWrapper.heliconeHeaders.promptSecurityEnabled &&
+    proxyRequest.requestWrapper.heliconeHeaders.promptSecurityEnabled === true &&
     provider === "OPENAI"
   ) {
     const { data: latestMsg, error: latestMsgErr } =
@@ -294,21 +294,26 @@ export async function proxyForwarder(
     if (authError == null) {
       const db = new DBWrapper(env, auth);
       const { data: orgData, error: orgError } = await db.getAuthParams();
+
       if (orgError !== null || !orgData?.organizationId) {
         console.error("Error getting org", orgError);
       } else {
         ctx.waitUntil(
-          loggable.waitForResponse().then((responseBody) =>
-            saveToCache({
-              request: proxyRequest,
-              response,
-              responseBody: responseBody.body,
-              cacheControl: cacheSettings.cacheControl,
-              settings: cacheSettings.bucketSettings,
-              cacheKv: env.CACHE_KV,
-              cacheSeed: cacheSettings.cacheSeed ?? null,
-            })
-          )
+          loggable.waitForResponse().then(async (responseBody) => {
+            const status = await loggable.getStatus();
+            if (status >= 200 && status < 300) {
+              saveToCache({
+                request: proxyRequest,
+                response,
+                responseBody: responseBody.body,
+                cacheControl: cacheSettings.cacheControl,
+                settings: cacheSettings.bucketSettings,
+                responseLatencyMs: responseBody.endTime.getTime() - loggable.getTimingStart(),
+                cacheKv: env.CACHE_KV,
+                cacheSeed: cacheSettings.cacheSeed ?? null,
+              });
+            }
+          })
         );
       }
     }

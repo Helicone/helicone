@@ -2,7 +2,7 @@ import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { Result, resultsAll } from "../../../packages/common/result";
+import { Result, resultsAll } from "@/packages/common/result";
 import { getTotalFeedback } from "../../../lib/api/metrics/feedback";
 
 async function handler(options: HandlerWrapperOptions<Result<number, string>>) {

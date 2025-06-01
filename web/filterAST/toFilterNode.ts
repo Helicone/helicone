@@ -19,6 +19,7 @@ import {
 const operatorMap: Record<string, string> = {
   eq: "equals",
   neq: "not-equals",
+  is: "equals",
   gt: "gt",
   gte: "gte",
   lt: "lt",

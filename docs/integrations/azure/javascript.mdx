@@ -28,37 +28,17 @@ import { strings } from "/snippets/strings.mdx";
   <Step title={strings.modifyBasePath}>
     <IncludeApiVersion />
     <CodeGroup>
-    ```javascript AzureOpenAI
-    import { AzureOpenAI } from "openai";
-
-    const azureOpenai = new AzureOpenAI({
-      baseURL: `https://oai.helicone.ai/openai/deployments/[DEPLOYMENT_NAME]`, // "gpt-4"
-      apiKey: process.env.AZURE_OPENAI_API_KEY,
-      apiVersion: "[API_VERSION]", // "2023-03-15-preview"
+    ```javascript
+    const client = new OpenAI({
+      baseURL: "https://oai.helicone.ai/openai/deployments/[DEPLOYMENT_NAME]",
       defaultHeaders: {
         "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-        "Helicone-OpenAI-API-Base": `https://[AZURE_DOMAIN].openai.azure.com`,
+        "Helicone-OpenAI-API-Base": "https://[DOMAIN_NAME].azure.com/",
         "api-key": process.env.AZURE_OPENAI_API_KEY
       },
       defaultQuery: {
-        "api-version": "[API_VERSION]" // "2023-03-15-preview"
-      }
-    });
-    ```
-
-    ```javascript OpenAI V4+
-    import OpenAI from "openai";
-
-    const azureOpenai = new OpenAI({
-      baseURL: "https://oai.helicone.ai/openai/deployments/[DEPLOYMENT_NAME]", // "gpt-4"
-      defaultHeaders: {
-        "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-        "Helicone-OpenAI-API-Base": "https://[AZURE_DOMAIN].openai.azure.com",
-        "api-key": process.env.AZURE_OPENAI_API_KEY
+        "api-version": "[API_VERSION]"
       },
-      defaultQuery: {
-        "api-version": "[API_VERSION]" // "2023-03-15-preview"
-      }
     });
     ```
     </CodeGroup>
@@ -67,8 +47,8 @@ import { strings } from "/snippets/strings.mdx";
 
   <Step title={strings.startUsing("Azure OpenAI")}>
     ```javascript
-    const response = await azureOpenai.chat.completions.create({
-      model: "gpt-4",
+    const response = await client.chat.completions.create({
+      model: "[MODEL_NAME]",
       messages: [{ role: "user", content: "What is the meaning of life?" }]
     });
 
@@ -80,6 +60,8 @@ import { strings } from "/snippets/strings.mdx";
     <div dangerouslySetInnerHTML={{ __html: strings.verifyInHeliconeDesciption("Azure OpenAI") }} />
   </Step>
 </Steps>
+
+<div dangerouslySetInnerHTML={{ __html: strings.azureOpenAIDocs }} />
 
 ## {strings.relatedGuides}
 

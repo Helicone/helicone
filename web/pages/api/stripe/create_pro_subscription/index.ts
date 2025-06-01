@@ -3,7 +3,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 import { dbExecute } from "../../../../lib/api/db/dbExecute";
-import { resultMap } from "../../../../packages/common/result";
+import { resultMap } from "@/packages/common/result";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-02-24.acacia",
@@ -32,7 +32,7 @@ export default async function handler(
       await dbExecute<{
         stripe_customer_id: string;
       }>("SELECT * FROM organization WHERE id = $1", [orgId]),
-      (d) => d[0]
+      (d) => d?.[0]
     );
 
     if (orgError !== null) {
@@ -41,7 +41,7 @@ export default async function handler(
       return;
     }
 
-    let customerId = org.stripe_customer_id;
+    let customerId = org?.stripe_customer_id;
 
     // If the organization isn't already associated with a Stripe customer, create one
     if (!customerId) {

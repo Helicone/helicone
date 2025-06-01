@@ -8,7 +8,7 @@ import {
   TextBlockParam,
 } from "@anthropic-ai/sdk/resources/messages";
 import { DEMO_EMAIL } from "../../../../lib/constants";
-import { Result } from "../../../../packages/common/result";
+import { Result } from "@/packages/common/result";
 
 export interface ChatParams {
   content: string | Array<TextBlockParam | ImageBlockParam>;

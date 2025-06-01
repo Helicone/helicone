@@ -2,7 +2,7 @@ import { HeliconeUser } from "@/packages/common/auth/types";
 import { ReactElement } from "react";
 import AuthLayout from "../components/layout/auth/authLayout";
 import DashboardPage from "../components/templates/dashboard/dashboardPage";
-import { withAuthSSR } from "../lib/api/handlerWrappers";
+import { GetServerSidePropsContext } from "next";
 
 interface DashboardProps {
   user: HeliconeUser;
@@ -20,12 +20,14 @@ Dashboard.getLayout = function getLayout(page: ReactElement) {
 
 export default Dashboard;
 
-export const getServerSideProps = withAuthSSR(async (options) => {
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
   return {
     props: {
       user: {
-        id: options.userData.userId,
+        id: "",
       },
     },
   };
-});
+};

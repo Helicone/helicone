@@ -222,6 +222,7 @@ const whereKeyMappings: KeyMappings = {
     }
     return easyKeyMappings<"request_response_rmt">({
       latency: "request_response_rmt.latency",
+      time_to_first_token: "request_response_rmt.time_to_first_token",
       status: "request_response_rmt.status",
       request_created_at: "request_response_rmt.request_created_at",
       response_created_at: "request_response_rmt.response_created_at",
@@ -239,6 +240,10 @@ const whereKeyMappings: KeyMappings = {
       response_body: "request_response_rmt.response_body",
       scores_column: "request_response_rmt.scores",
       cache_enabled: "request_response_rmt.cache_enabled",
+      cache_reference_id: "request_response_rmt.cache_reference_id",
+      assets: "request_response_rmt.asset_ids",
+      prompt_cache_read_tokens: "request_response_rmt.prompt_cache_read_tokens",
+      prompt_cache_write_tokens: "request_response_rmt.prompt_cache_write_tokens",
     })(filter, placeValueSafely);
   },
   users_view: easyKeyMappings<"request_response_log">({

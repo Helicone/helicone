@@ -34,9 +34,9 @@ export type NumberOperators = Record<
 
 export type BooleanOperators = Record<"equals", boolean>;
 
-export type TimestampOperators = Record<"gte" | "lte" | "lt" | "gt", string>;
+export type TimestampOperators = Record<"gte" | "lte" | "lt" | "gt" | "equals", string>;
 
-export type TimestampOperatorsTyped = Record<"gte" | "lte" | "lt" | "gt", Date>;
+export type TimestampOperatorsTyped = Record<"gte" | "lte" | "lt" | "gt" | "equals", Date>;
 
 export type AnyOperator =
   | SingleKey<TextOperators>
@@ -169,6 +169,7 @@ interface RequestResponseLogToOperators {
 
 interface RequestResponseRMTToOperators {
   latency: SingleKey<NumberOperators>;
+  time_to_first_token: SingleKey<NumberOperators>;
   status: SingleKey<NumberOperators>;
   request_created_at: SingleKey<TimestampOperatorsTyped>;
   response_created_at: SingleKey<TimestampOperatorsTyped>;
@@ -181,6 +182,8 @@ interface RequestResponseRMTToOperators {
   request_id: SingleKey<TextOperators>;
   prompt_tokens: SingleKey<NumberOperators>;
   completion_tokens: SingleKey<NumberOperators>;
+  prompt_cache_read_tokens: SingleKey<NumberOperators>;
+  prompt_cache_write_tokens: SingleKey<NumberOperators>;
   total_tokens: SingleKey<NumberOperators>;
   target_url: SingleKey<TextOperators>;
   properties: {
@@ -196,6 +199,8 @@ interface RequestResponseRMTToOperators {
   request_body: SingleKey<VectorOperators>;
   response_body: SingleKey<VectorOperators>;
   cache_enabled: SingleKey<BooleanOperators>;
+  cache_reference_id: SingleKey<TextOperators>;
+  assets: SingleKey<TextOperators>;
 }
 
 interface SessionsRequestResponseRMTToOperators {

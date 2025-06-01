@@ -23,7 +23,7 @@ import {
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useCallback, useState } from "react";
-import { Result } from "../../../../../packages/common/result";
+import { Result } from "@/packages/common/result";
 import { useGetOrgMembers } from "../../../../../services/hooks/organizations";
 import { DecryptedProviderKey } from "../../../../../services/lib/keys";
 import { useOrg } from "../../../../layout/org/organizationContext";

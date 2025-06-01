@@ -16,13 +16,13 @@ import {
   getModelString,
   getProvidersForModel,
   modelMapping,
-} from "packages/cost/unified/models";
+} from "@helicone-package/cost/unified/models";
 import {
   Creator,
   Parameters,
   Provider,
   ProviderModel,
-} from "packages/cost/unified/types";
+} from "@helicone-package/cost/unified/types";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   PiBracketsCurlyBold,

@@ -18,7 +18,7 @@ import {
   SessionResult,
 } from "../../managers/SessionManager";
 import { err, ok, Result } from "../../packages/common/result";
-import { JawnAuthenticatedRequest } from "../../types/request";
+import { type JawnAuthenticatedRequest } from "../../types/request";
 import { cacheResultCustom } from "../../utils/cacheResult";
 import { TimeFilterMs } from "../../lib/shared/filters/timeFilter";
 

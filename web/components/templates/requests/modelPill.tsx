@@ -1,5 +1,5 @@
-import { MapperType } from "@/packages/llm-mapper/types";
-import { getMapperType } from "@/packages/llm-mapper/utils/getMapperType";
+import { MapperType } from "@helicone-package/llm-mapper/types";
+import { getMapperType } from "@helicone-package/llm-mapper/utils/getMapperType";
 import { clsx } from "../../shared/clsx";
 
 interface ModelPillProps {

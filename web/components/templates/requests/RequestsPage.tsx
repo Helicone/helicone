@@ -15,8 +15,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import FilterASTButton from "@/filterAST/FilterASTButton";
-import { HeliconeRequest, MappedLLMRequest } from "@/packages/llm-mapper/types";
-import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
+import {
+  HeliconeRequest,
+  MappedLLMRequest,
+} from "@helicone-package/llm-mapper/types";
+import { heliconeRequestToMappedContent } from "@helicone-package/llm-mapper/utils/getMappedContent";
 import { useGetRequestWithBodies } from "@/services/hooks/requests";
 import { UIFilterRowNode, UIFilterRowTree } from "@/services/lib/filters/types";
 import { TimeFilter } from "@/types/timeFilter";
@@ -719,6 +722,8 @@ export default function RequestsPage(props: RequestsPageV2Props) {
               onRowSelect={onRowSelectHandler}
               onSelectAll={selectAll}
               selectedIds={selectedIds}
+              // only for request page
+              currentRow={selectedData}
             >
               {selectMode && (
                 <Row className="gap-5 items-center w-full justify-between bg-white dark:bg-black p-5">

@@ -10,7 +10,7 @@ import {
   Query,
 } from "tsoa";
 import { Result } from "../../packages/common/result";
-import { JawnAuthenticatedRequest } from "../../types/request";
+import { type JawnAuthenticatedRequest } from "../../types/request";
 import {
   ProviderMetrics,
   ProviderStatusManager,

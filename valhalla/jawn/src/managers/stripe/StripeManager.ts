@@ -11,7 +11,7 @@ import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters"
 import { getHeliconeAuthClient } from "../../packages/common/auth/server/AuthClientFactory";
 import { AuthParams } from "../../packages/common/auth/types";
 import { Result, err, ok } from "../../packages/common/result";
-import { costOf } from "../../packages/cost";
+import { costOf } from "@helicone-package/cost";
 import { BaseManager } from "../BaseManager";
 import { OrganizationManager } from "../organization/OrganizationManager";
 import { KVCache } from "../../lib/cache/kvCache";

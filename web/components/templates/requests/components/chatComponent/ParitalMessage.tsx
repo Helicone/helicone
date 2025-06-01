@@ -1,5 +1,5 @@
 import React from "react";
-import { PromptMessage } from "@/packages/llm-mapper/types";
+import { PromptMessage } from "@helicone-package/llm-mapper/types";
 import { MessageGroup } from "./MessageGroup";
 import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/outline";
 import { PROMPT_MODES } from "./chatTopBar";

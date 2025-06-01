@@ -12,8 +12,8 @@ import { KVCache } from "../../lib/cache/kvCache";
 import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
 import { resultMap } from "../../packages/common/result";
-import { clickhousePriceCalc } from "../../packages/cost";
-import { JawnAuthenticatedRequest } from "../../types/request";
+import { clickhousePriceCalc } from "@helicone-package/cost";
+import type { JawnAuthenticatedRequest } from "../../types/request";
 import { quickCacheResultCustom } from "../../utils/cacheResult";
 
 export interface Property {

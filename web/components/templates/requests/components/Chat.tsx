@@ -2,7 +2,7 @@ import MarkdownEditor from "@/components/shared/markdownEditor";
 import { markdownComponents } from "@/components/shared/prompts/ResponsePanel";
 import { Button } from "@/components/ui/button";
 import { XSmall } from "@/components/ui/typography";
-import { MappedLLMRequest, Message } from "@/packages/llm-mapper/types";
+import { MappedLLMRequest, Message } from "@helicone-package/llm-mapper/types";
 import { useRequestRenderModeStore } from "@/store/requestRenderModeStore";
 import Image from "next/image";
 import { useMemo, useState } from "react";

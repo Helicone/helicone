@@ -9,7 +9,7 @@ import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
 import { GET_KEY } from "../../lib/clients/constant";
 import { generateTempHeliconeAPIKey } from "../../lib/experiment/tempKeys/tempAPIKey";
 import { ok, Result } from "../../packages/common/result";
-import { JawnAuthenticatedRequest } from "../../types/request";
+import { type JawnAuthenticatedRequest } from "../../types/request";
 
 @Route("v1/demo")
 @Tags("Demo")

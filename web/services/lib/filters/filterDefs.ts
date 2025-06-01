@@ -1,7 +1,17 @@
+import { z } from "zod";
+
 export interface TimeFilter {
   start: Date;
   end: Date;
 }
+
+export const TimeFilterSchema = z.object({
+  timeFilter: z.object({
+    start: z.string().datetime().transform(str => new Date(str)),
+    end: z.string().datetime().transform(str => new Date(str)),
+  }),
+});
+
 
 export type AllOperators =
   | "equals"
@@ -77,6 +87,26 @@ export type PropertiesTableToOperators = {
   value: SingleKey<TextOperators>;
 };
 
+export type CacheMetricsTableToOperators = {
+  organization_id: SingleKey<TextOperators>;
+  request_id: SingleKey<TextOperators>;
+  date: SingleKey<TimestampOperatorsTyped>;
+  hour: SingleKey<NumberOperators>;
+  model: SingleKey<TextOperators>;
+  cache_hit_count: SingleKey<NumberOperators>;
+  saved_latency_ms: SingleKey<NumberOperators>;
+  saved_completion_tokens: SingleKey<NumberOperators>;
+  saved_prompt_tokens: SingleKey<NumberOperators>;
+  saved_completion_audio_tokens: SingleKey<NumberOperators>;
+  saved_prompt_audio_tokens: SingleKey<NumberOperators>;
+  saved_prompt_cache_write_tokens: SingleKey<NumberOperators>;
+  saved_prompt_cache_read_tokens: SingleKey<NumberOperators>;
+  first_hit: SingleKey<TimestampOperatorsTyped>;
+  last_hit: SingleKey<TimestampOperatorsTyped>;
+  request_body: SingleKey<TextOperators>;
+  response_body: SingleKey<TextOperators>;
+}
+
 export type CacheHitsTableToOperators = {
   organization_id: SingleKey<TextOperators>;
   request_id: SingleKey<TextOperators>;
@@ -86,6 +116,7 @@ export type CacheHitsTableToOperators = {
   created_at: SingleKey<TimestampOperatorsTyped>;
 };
 
+export type FilterLeafCacheMetrics = SingleKey<CacheMetricsTableToOperators>;
 export type FilterLeafCacheHits = SingleKey<CacheHitsTableToOperators>;
 
 export type RateLimitTableToOperators = {
@@ -193,6 +224,7 @@ interface RequestResponseVersionedToOperators {
   };
   request_body: SingleKey<VectorOperators>;
   response_body: SingleKey<VectorOperators>;
+  cache_reference_id: SingleKey<TextOperators>;
   cache_enabled: SingleKey<BooleanOperators>;
   "helicone-score-feedback": SingleKey<BooleanOperators>;
 }
@@ -294,6 +326,7 @@ export type TablesAndViews = {
   property_with_response_v1: FilterLeafPropertyWithResponseV1;
   job: FilterLeafJob;
   job_node: FilterLeafNode;
+  cache_metrics: FilterLeafCacheMetrics;
   cache_hits: FilterLeafCacheHits;
   rate_limit_log: FilterLeafRateLimitLog;
 

@@ -1,4 +1,4 @@
-import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+import { MappedLLMRequest } from "@helicone-package/llm-mapper/types";
 import { useState } from "react";
 import { useLocalStorage } from "../../../../../services/hooks/localStorage";
 import { clsx } from "../../../../shared/clsx";

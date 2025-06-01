@@ -26,7 +26,7 @@ import { Col } from "../../../layout/common/col";
 import ExportButton from "../../../shared/themed/table/exportButton";
 import TreeView from "./Tree/TreeView";
 
-import { TagType } from "@helicone-package/common/sessions/tags";
+import { TagType } from "@/packages/common/sessions/tags";
 import Link from "next/link";
 import { SessionTag } from "../../feedback/sessionTag";
 
@@ -66,7 +66,7 @@ export const SessionContent: React.FC<SessionContentProps> = ({
   const { sessions: relatedSessions, isLoading: isLoadingSessions } =
     useSessions({
       timeFilter,
-      sessionIdSearch: session_id,
+      sessionIdSearch: "",
       selectedName: session_name === EMPTY_SESSION_NAME ? "" : session_name,
     });
 

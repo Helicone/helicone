@@ -448,6 +448,9 @@
 			},
 			"Partial_TimestampOperators_": {
 				"properties": {
+					"equals": {
+						"type": "string"
+					},
 					"gte": {
 						"type": "string"
 					},
@@ -529,6 +532,10 @@
 			},
 			"Partial_TimestampOperatorsTyped_": {
 				"properties": {
+					"equals": {
+						"type": "string",
+						"format": "date-time"
+					},
 					"gte": {
 						"type": "string",
 						"format": "date-time"
@@ -572,6 +579,9 @@
 					"latency": {
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},
+					"time_to_first_token": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
 					"status": {
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},
@@ -606,6 +616,12 @@
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},
 					"completion_tokens": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"prompt_cache_read_tokens": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"prompt_cache_write_tokens": {
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},
 					"total_tokens": {
@@ -646,6 +662,12 @@
 					},
 					"cache_enabled": {
 						"$ref": "#/components/schemas/Partial_BooleanOperators_"
+					},
+					"cache_reference_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"assets": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
 					}
 				},
 				"type": "object",
@@ -9672,24 +9694,11 @@
 				],
 				"parameters": [],
 				"requestBody": {
-					"description": "Request query filters",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/RequestQueryParams",
-								"description": "Request query filters"
-							},
-							"example": {
-								"filter": "all",
-								"isCached": false,
-								"limit": 10,
-								"offset": 0,
-								"sort": {
-									"created_at": "desc"
-								},
-								"isScored": false,
-								"isPartOfExperiment": false
+								"$ref": "#/components/schemas/RequestQueryParams"
 							}
 						}
 					}
@@ -9736,25 +9745,11 @@
 				],
 				"parameters": [],
 				"requestBody": {
-					"description": "Request query filters",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/RequestQueryParams",
-								"description": "Request query filters"
-							},
-							"example": {
-								"filter": "all",
-								"isCached": false,
-								"limit": 100,
-								"offset": 0,
-								"sort": {
-									"created_at": "desc"
-								},
-								"includeInputs": false,
-								"isScored": false,
-								"isPartOfExperiment": false
+								"$ref": "#/components/schemas/RequestQueryParams"
 							}
 						}
 					}

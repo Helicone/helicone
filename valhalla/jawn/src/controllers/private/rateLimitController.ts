@@ -12,7 +12,7 @@ import {
   Tags,
 } from "tsoa";
 import { RateLimitManager } from "../../managers/rateLimitManager";
-import { JawnAuthenticatedRequest } from "../../types/request";
+import type { JawnAuthenticatedRequest } from "../../types/request";
 import { Result, err, ok } from "../../packages/common/result";
 
 // Exported types for the API contract

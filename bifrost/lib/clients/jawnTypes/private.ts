@@ -407,6 +407,9 @@ export interface paths {
   "/v1/audio/convert-to-wav": {
     post: operations["ConvertToWav"];
   };
+  "/v1/router/control-plane/whoami": {
+    get: operations["Whoami"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -937,6 +940,7 @@ Json: JsonObject;
     };
     /** @description Make all properties in T optional */
     Partial_TimestampOperators_: {
+      equals?: string;
       gte?: string;
       lte?: string;
       lt?: string;
@@ -993,6 +997,8 @@ Json: JsonObject;
     /** @description Make all properties in T optional */
     Partial_TimestampOperatorsTyped_: {
       /** Format: date-time */
+      equals?: string;
+      /** Format: date-time */
       gte?: string;
       /** Format: date-time */
       lte?: string;
@@ -1017,6 +1023,7 @@ Json: JsonObject;
     /** @description Make all properties in T optional */
     Partial_RequestResponseRMTToOperators_: {
       latency?: components["schemas"]["Partial_NumberOperators_"];
+      time_to_first_token?: components["schemas"]["Partial_NumberOperators_"];
       status?: components["schemas"]["Partial_NumberOperators_"];
       request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
       response_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
@@ -1029,6 +1036,8 @@ Json: JsonObject;
       request_id?: components["schemas"]["Partial_TextOperators_"];
       prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
       completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      prompt_cache_read_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      prompt_cache_write_tokens?: components["schemas"]["Partial_NumberOperators_"];
       total_tokens?: components["schemas"]["Partial_NumberOperators_"];
       target_url?: components["schemas"]["Partial_TextOperators_"];
       properties?: {
@@ -1044,6 +1053,8 @@ Json: JsonObject;
       request_body?: components["schemas"]["Partial_VectorOperators_"];
       response_body?: components["schemas"]["Partial_VectorOperators_"];
       cache_enabled?: components["schemas"]["Partial_BooleanOperators_"];
+      cache_reference_id?: components["schemas"]["Partial_TextOperators_"];
+      assets?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description Make all properties in T optional */
     Partial_SessionsRequestResponseRMTToOperators_: {
@@ -1754,6 +1765,8 @@ Json: JsonObject;
     };
     Log: {
       response: {
+        /** Format: double */
+        cachedLatency?: number;
         /** Format: double */
         delayMs: number;
         /** Format: date-time */
@@ -15236,22 +15249,8 @@ export interface operations {
     };
   };
   GetRequests: {
-    /** @description Request query filters */
     requestBody: {
       content: {
-        /**
-         * @example {
-         *   "filter": "all",
-         *   "isCached": false,
-         *   "limit": 10,
-         *   "offset": 0,
-         *   "sort": {
-         *     "created_at": "desc"
-         *   },
-         *   "isScored": false,
-         *   "isPartOfExperiment": false
-         * }
-         */
         "application/json": components["schemas"]["RequestQueryParams"];
       };
     };
@@ -15265,23 +15264,8 @@ export interface operations {
     };
   };
   GetRequestsClickhouse: {
-    /** @description Request query filters */
     requestBody: {
       content: {
-        /**
-         * @example {
-         *   "filter": "all",
-         *   "isCached": false,
-         *   "limit": 100,
-         *   "offset": 0,
-         *   "sort": {
-         *     "created_at": "desc"
-         *   },
-         *   "includeInputs": false,
-         *   "isScored": false,
-         *   "isPartOfExperiment": false
-         * }
-         */
         "application/json": components["schemas"]["RequestQueryParams"];
       };
     };
@@ -16879,6 +16863,19 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["ConvertToWavResponse"];
+        };
+      };
+    };
+  };
+  Whoami: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            organizationId: string;
+            userId: string;
+          };
         };
       };
     };
