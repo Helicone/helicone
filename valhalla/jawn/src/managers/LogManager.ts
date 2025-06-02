@@ -84,11 +84,12 @@ export class LogManager {
       .setNext(promptHandler)
       .setNext(onlineEvalHandler)
       .setNext(loggingHandler)
+      .setNext(stripeLogHandler)
       .setNext(posthogHandler)
       .setNext(lytixHandler)
       .setNext(webhookHandler)
-      .setNext(segmentHandler)
-      .setNext(stripeLogHandler);
+      .setNext(segmentHandler);
+      
 
     await Promise.all(
       logMessages.map(async (logMessage) => {

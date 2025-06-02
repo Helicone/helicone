@@ -23,6 +23,55 @@ import Stripe from "stripe";
 import { AdminManager } from "../../managers/admin/AdminManager";
 import { StripeManager } from "../../managers/stripe/StripeManager";
 
+function makeBatch<T>(items: T[], batchSize: number): T[][] {
+  const batches: T[][] = [];
+  for (let i = 0; i < items.length; i += batchSize) {
+    batches.push(items.slice(i, i + batchSize));
+  }
+  return batches;
+}
+
+
+async function reconcileOrgBilling(organization: {
+  id: string;
+  stripe_customer_id: string;
+}, start: number, end: number, stripeManager: StripeManager) {
+  const count = await clickhouseDb.dbQuery<{
+    count: string,
+  }>(
+    `
+    select count(*) as count
+    FROM request_response_rmt
+    WHERE organization_id = {val_0: String} AND request_created_at >= {val_1: DateTime} AND request_created_at <= {val_2: DateTime}
+    `,
+    [organization.id, new Date(start), new Date(end)]
+  );
+  if (count.error) {
+    console.error(`Error getting count for ${organization.id}: ${count.error}`);
+    return;
+  }
+  
+
+  if (+(count.data?.[0]?.count ?? "0") === 0) {
+    return;
+  }
+
+  const result = await stripeManager.getMeterEventSummaries(
+    start,
+    end,
+    organization.stripe_customer_id
+  );
+
+  const totalInStripe = result.reduce((acc, curr) => acc + curr.aggregated_value, 0);
+  const totalToReconcile = +(count.data?.[0]?.count ?? "0") - totalInStripe;
+
+  await stripeManager.reconcileBilling(
+    organization.stripe_customer_id,
+    totalToReconcile,
+    organization.id
+  ); 
+}
+
 export const authCheckThrow = async (userId: string | undefined) => {
   if (!userId) {
     throw new Error("Unauthorized");
@@ -80,9 +129,6 @@ export class AdminController extends Controller {
 
   @Get("/reconcile-billing")
   public async reconcileBilling(@Request() request: JawnAuthenticatedRequest) {
-    const todayUTCStart = new Date(new Date().setUTCHours(0, 0, 0, 0));
-    const end = todayUTCStart.getTime();
-    const start = end - 1000 * 60 * 60 * 24 * 30; // 30 days ago
 
 
     console.log("Reconciling billing");
@@ -97,50 +143,27 @@ export class AdminController extends Controller {
     }>(
       `
       SELECT stripe_customer_id, id FROM organization WHERE stripe_customer_id IS NOT NULL
+      
       `,
       []
     );
+    const orgBatches = makeBatch(organizations.data ?? [], 25);
+    let index = 0;
 
-    for (const organization of organizations.data ?? []) {
-      const count = await clickhouseDb.dbQuery<{
-        count: string,
-      }>(
-        `
-        select count(*) as count
-        FROM request_response_rmt
-        WHERE organization_id = {val_0: String} AND request_created_at >= {val_1: DateTime} AND request_created_at <= {val_2: DateTime}
-        and cache_reference_id = '00000000-0000-0000-0000-000000000000'
-        `,
-        [organization.id, new Date(start), new Date(end)]
-      );
-      if (count.error) {
-        console.error(`Error getting count for ${organization.id}: ${count.error}`);
-        continue;
-      }
-      
-
-      if (+(count.data?.[0]?.count ?? "0") === 0) {
-        console.log(`No requests for ${organization.id} in the last 30 days`);
-        continue;
-      }
-
-      const result = await stripeManager.getMeterEventSummaries(
-        start,
-        end,
-        organization.stripe_customer_id
-      );
-
-      const totalInStripe = result.reduce((acc, curr) => acc + curr.aggregated_value, 0);
-      const totalToReconcile = +(count.data?.[0]?.count ?? "0") - totalInStripe;
-
-      await stripeManager.reconcileBilling(
-        organization.stripe_customer_id,
-        totalToReconcile,
-        organization.id
-      );
-
+    for (const batch of orgBatches) {
+      await Promise.all(batch.map(async (organization) => {
+        const tomorrowUTCStart = new Date(new Date().setUTCHours(0, 0, 0, 0));
+        tomorrowUTCStart.setDate(tomorrowUTCStart.getDate() + 1);
+        const end = tomorrowUTCStart.getTime();
+        // May 16th UTC 
+        const may17th = new Date(new Date(2025, 4, 17, 0, 0, 0, 0).setUTCHours(0, 0, 0, 0));
+        const start = may17th.getTime();
+        await reconcileOrgBilling(organization, start, end, stripeManager);
+      }));
+      index++;
+      console.log(`Processed batch of ${batch.length} organizations, ${((index / orgBatches.length) * 100).toFixed(2)}% done`);
     }
-
+ 
     return "done";
   }
 
