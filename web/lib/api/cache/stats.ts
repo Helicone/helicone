@@ -1,24 +1,50 @@
 import { FilterNode } from "../../../services/lib/filters/filterDefs";
 import { buildFilterWithAuthClickHouseCacheMetrics } from "../../../services/lib/filters/filters";
 import { Result, resultMap } from "@/packages/common/result";
-
+import { TimeFilter } from "@/services/lib/filters/filterDefs";
 import { dbQueryClickhouse } from "../db/dbExecute";
 import { ModelMetrics } from "../metrics/modelMetrics";
 
+function buildTimeFilter(timeFilter: TimeFilter): FilterNode {
+  return {
+    left: {
+      cache_metrics: {
+        date: {
+          gte: timeFilter.start,
+        },
+      },
+    },
+    operator: "and",
+    right: {
+      cache_metrics: {
+        date: {
+          lte: timeFilter.end,
+        },
+      },
+    },
+  };
+}
+
 export async function getCacheCountClickhouse(
   orgId: string,
-  filter: FilterNode
+  timeFilter: TimeFilter
 ): Promise<Result<number, string>> {
   const builtFilter = await buildFilterWithAuthClickHouseCacheMetrics({
     org_id: orgId,
-    filter,
+    filter: "all",
     argsAcc: [],
   });
 
   const query = `
   select sum(cache_hit_count) as count 
   from cache_metrics 
-  where ${builtFilter.filter}`;
+  where ${builtFilter.filter}
+  ${
+    timeFilter
+      ? `and date >= '${timeFilter.start.toISOString().split("T")[0]}'
+  and date <= '${timeFilter.end.toISOString().split("T")[0]}'`
+      : ""
+  }`;
 
   const queryResult = await dbQueryClickhouse<{ count: number }>(
     query,
@@ -27,13 +53,13 @@ export async function getCacheCountClickhouse(
   return resultMap(queryResult, (results) => Number(results[0].count));
 }
 
-export async function getModelMetricsClickhouse(
+export async function getTotalSavingsClickhouse(
   orgId: string,
-  filter: FilterNode
+  timeFilter: TimeFilter
 ): Promise<Result<ModelMetrics[], string>> {
   const builtFilter = await buildFilterWithAuthClickHouseCacheMetrics({
     org_id: orgId,
-    filter,
+    filter: buildTimeFilter(timeFilter),
     argsAcc: [],
   });
 
@@ -72,18 +98,17 @@ export async function getModelMetricsClickhouse(
 
 export async function getTimeSavedClickhouse(
   orgId: string,
-  filter: FilterNode
-) {
+  timeFilter: TimeFilter
+): Promise<Result<number, string>> {
   const builtFilter = await buildFilterWithAuthClickHouseCacheMetrics({
     org_id: orgId,
-    filter,
+    filter: buildTimeFilter(timeFilter),
     argsAcc: [],
   });
   const query = `
   SELECT sum(saved_latency_ms) as total_latency_ms
   FROM cache_metrics
   WHERE (${builtFilter.filter})
-  AND date > now() - interval '30 days'
   `;
   const queryResult = await dbQueryClickhouse<{ total_latency_ms: number }>(
     query,
@@ -94,13 +119,23 @@ export async function getTimeSavedClickhouse(
   );
 }
 
+export interface TopCachedRequest {
+  request_id: string;
+  count: number;
+  first_used: Date;
+  last_used: Date;
+  model: string;
+  prompt: string;
+  response: string;
+}
+
 export async function getTopCachedRequestsClickhouse(
   orgId: string,
-  filter: FilterNode
-) {
+  timeFilter: TimeFilter
+): Promise<Result<TopCachedRequest[], string>> {
   const builtFilter = await buildFilterWithAuthClickHouseCacheMetrics({
     org_id: orgId,
-    filter,
+    filter: buildTimeFilter(timeFilter),
     argsAcc: [],
   });
 
@@ -115,20 +150,15 @@ export async function getTopCachedRequestsClickhouse(
     any(response_body) as response
   FROM cache_metrics
   WHERE ${builtFilter.filter}
-    AND date > now() - interval '30 days'
   GROUP BY request_id
+  ORDER BY count DESC
   LIMIT 10
   `;
 
-  const rmtResult = await dbQueryClickhouse<{
-    request_id: string;
-    count: number;
-    first_used: Date;
-    last_used: Date;
-    model: string;
-    prompt: string;
-    response: string;
-  }>(query, builtFilter.argsAcc);
+  const rmtResult = await dbQueryClickhouse<TopCachedRequest>(
+    query,
+    builtFilter.argsAcc
+  );
 
   return resultMap(rmtResult, (requests) =>
     requests

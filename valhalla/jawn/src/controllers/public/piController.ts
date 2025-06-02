@@ -9,7 +9,7 @@ import {
   Tags,
 } from "tsoa";
 import { Result, err, ok } from "../../packages/common/result";
-import { JawnAuthenticatedRequest } from "../../types/request";
+import { type JawnAuthenticatedRequest } from "../../types/request";
 
 import { RequestManager } from "../../managers/request/RequestManager";
 import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
@@ -17,7 +17,7 @@ import { timeFilterToFilterNode } from "../../lib/shared/filters/filterDefs";
 import { dbExecute, dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import { clickhousePriceCalc } from "@helicone-package/cost";
 import {
-  DataOverTimeRequest,
+  type DataOverTimeRequest,
   getXOverTime,
 } from "../../managers/helpers/getXOverTime";
 

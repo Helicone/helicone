@@ -194,7 +194,7 @@ export class SessionManager {
         request_response_rmt: {
           properties: {
             "Helicone-Session-Name": {
-              equals: nameContains,
+              contains: nameContains,
             },
           },
         },
@@ -342,6 +342,7 @@ export class SessionManager {
         )
     )
     GROUP BY properties['Helicone-Session-Id'], properties['Helicone-Session-Name']
+    HAVING (${havingFilter.filter})
     ORDER BY created_at DESC -- TODO: REMOVE FOR TEST
     LIMIT 50
     `;

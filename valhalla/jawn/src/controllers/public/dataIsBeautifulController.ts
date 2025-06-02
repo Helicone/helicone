@@ -9,7 +9,7 @@ import {
   Get,
 } from "tsoa";
 import { Result, ok } from "../../packages/common/result";
-import { JawnAuthenticatedRequest } from "../../types/request";
+import { type JawnAuthenticatedRequest } from "../../types/request";
 import { DataIsBeautifulManager } from "../../managers/DataIsBeautifulManager";
 import { cacheResult } from "../../utils/cacheResult";
 

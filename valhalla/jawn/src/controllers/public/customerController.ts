@@ -12,7 +12,7 @@ import {
 } from "tsoa";
 import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
-import { JawnAuthenticatedRequest } from "../../types/request";
+import { type JawnAuthenticatedRequest } from "../../types/request";
 
 export interface CustomerUsage {
   id: string;

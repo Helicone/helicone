@@ -1,6 +1,6 @@
 import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
-import { JawnAuthenticatedRequest } from "../../types/request";
+import type { JawnAuthenticatedRequest } from "../../types/request";
 
 @Route("v1/user-feedback")
 @Tags("User Feedback")

@@ -448,6 +448,9 @@
 			},
 			"Partial_TimestampOperators_": {
 				"properties": {
+					"equals": {
+						"type": "string"
+					},
 					"gte": {
 						"type": "string"
 					},
@@ -529,6 +532,10 @@
 			},
 			"Partial_TimestampOperatorsTyped_": {
 				"properties": {
+					"equals": {
+						"type": "string",
+						"format": "date-time"
+					},
 					"gte": {
 						"type": "string",
 						"format": "date-time"
@@ -572,6 +579,9 @@
 					"latency": {
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},
+					"time_to_first_token": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
 					"status": {
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},
@@ -606,6 +616,12 @@
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},
 					"completion_tokens": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"prompt_cache_read_tokens": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"prompt_cache_write_tokens": {
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},
 					"total_tokens": {
@@ -648,6 +664,9 @@
 						"$ref": "#/components/schemas/Partial_BooleanOperators_"
 					},
 					"cache_reference_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"assets": {
 						"$ref": "#/components/schemas/Partial_TextOperators_"
 					}
 				},

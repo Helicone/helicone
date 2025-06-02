@@ -1,6 +1,6 @@
 import { Controller, Request, Route, Post, Tags, Security, Body } from "tsoa";
 import type { JawnAuthenticatedRequest } from "../../types/request";
-import { OTELTrace, TraceManager } from "../../managers/traceManager";
+import { type OTELTrace, TraceManager } from "../../managers/traceManager";
 import * as protobuf from "protobufjs";
 import path from "path";
 import { CustomTraceManager } from "../../managers/customTraceManager";

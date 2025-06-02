@@ -233,7 +233,8 @@
                       "getting-started/integration-method/custom",
                       "getting-started/integration-method/manual-logger-curl",
                       "getting-started/integration-method/manual-logger-python",
-                      "getting-started/integration-method/manual-logger-typescript"
+                      "getting-started/integration-method/manual-logger-typescript",
+                      "getting-started/integration-method/manual-logger-go"
                     ]
                   }
                 ]
@@ -449,7 +450,8 @@
                   "guides/cookbooks/predefining-request-id",
                   "guides/cookbooks/prompt-thinking-models",
                   "guides/cookbooks/replay-session",
-                  "guides/cookbooks/segmentation"
+                  "guides/cookbooks/segmentation",
+                  "guides/cookbooks/ai-agents"
                 ]
               },
               {

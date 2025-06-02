@@ -128,7 +128,6 @@ export const TreeView: React.FC<TreeViewProps> = ({
   // Handle message selection
   const handleRequestSelect = useCallback((request_id: string) => {
     setSelectedRequestId(request_id);
-    resizeDrawer();
   }, []);
 
   return (

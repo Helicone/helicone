@@ -4,6 +4,7 @@ import {
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { UnPromise } from "../../../lib/tsxHelpers";
+import { TimeFilterSchema } from "@/services/lib/filters/filterDefs";
 
 async function handler({
   req,
@@ -12,7 +13,17 @@ async function handler({
 }: HandlerWrapperOptions<
   UnPromise<ReturnType<typeof getTopCachedRequestsClickhouse>>
 >) {
-  res.status(200).json(await getTopCachedRequestsClickhouse(orgId, "all"));
+  const parsedBody = TimeFilterSchema.safeParse(req.body);
+  if (!parsedBody.success) {
+    return res
+      .status(400)
+      .json({ error: parsedBody.error.message, data: null });
+  }
+  res
+    .status(200)
+    .json(
+      await getTopCachedRequestsClickhouse(orgId, parsedBody.data.timeFilter)
+    );
 }
 
 export default withAuth(handler);
