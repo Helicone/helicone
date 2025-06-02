@@ -107,6 +107,12 @@ export const authMiddleware = async (
     res.on("finish", onFinish);
 
     if (req.path.startsWith("/admin")) {
+      if(authorization.data?._type !== "jwt") {
+        res.status(401).json({
+          error: "Unauthorized",
+        });
+        return;
+      }
       await authCheckThrow(authParams.data.userId);
     }
     next();
