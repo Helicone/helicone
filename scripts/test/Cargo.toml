@@ -4,6 +4,9 @@ version = "0.1.0"
 edition.workspace = true
 authors.workspace = true
 license.workspace = true
+description = "Test scripts for the LLM proxy router"
+homepage = "https://helix.helicone.ai"
+publish = false
 
 [dependencies]
 async-openai = { workspace = true }

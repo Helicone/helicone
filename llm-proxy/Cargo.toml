@@ -5,6 +5,8 @@ edition.workspace = true
 authors = [ "Thomas Harmon <thomas.alan.harmon@gmail.com>" ]
 repository = "https://github.com/Helicone/helicone-router"
 default-run = "llm-proxy"
+description = "A high-performance LLM proxy router for load balancing, monitoring, and managing API requests to various language model providers"
+homepage = "https://helix.helicone.ai"
 
 [dependencies]
 

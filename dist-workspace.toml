@@ -1,5 +1,5 @@
 [workspace]
-members = ["cargo:."]
+members = ["cargo:llm-proxy"]
 
 # Config for 'dist'
 [dist]
@@ -8,6 +8,16 @@ cargo-dist-version = "0.28.5"
 # CI backends to support
 ci = "github"
 # The installers to generate for each app
-installers = []
+installers = ["shell", "npm", "homebrew"]
 # Target platforms to build apps for (Rust target-triple syntax)
 targets = ["aarch64-apple-darwin", "x86_64-apple-darwin", "x86_64-unknown-linux-gnu"]
+# A GitHub repo to push Homebrew formulas to
+tap = "Helicone/helicone-router"
+# A namespace to use when publishing this package to the npm registry
+npm-scope = "@helicone"
+# Publish jobs to run in CI
+publish-jobs = ["homebrew"]
+# Path that installers should place binaries in
+install-path = "CARGO_HOME"
+# Whether to install an updater program
+install-updater = false

@@ -3,8 +3,10 @@ name = "weighted-balance"
 edition.workspace = true
 authors.workspace = true
 license.workspace = true
-publish.workspace = true
 version.workspace = true
+description = "Weighted load balancing algorithms for the LLM proxy router"
+homepage = "https://helix.helicone.ai"
+publish = false
 
 [dependencies]
 futures = { workspace = true }
