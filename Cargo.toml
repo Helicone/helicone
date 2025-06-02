@@ -54,16 +54,9 @@ chrono = "0.4.40"
 clap = { version = "4.5.37", features = ["derive"] }
 compact_str = "0.9.0"
 config = "0.15.11"
-derive_more = { version = "2.0.1", features = [
-    'as_ref',
-    'constructor',
-    'debug',
-    'deref',
-    'display',
-    'from',
-    'from_str',
-] }
+derive_more = { version = "2.0.1", features = [ 'as_ref', 'constructor', 'debug', 'deref', 'display', 'from', 'from_str', ] }
 displaydoc = "0.2.5"
+dotenvy = { version = "0.15.7"}
 eventsource-stream = "0.2.3"
 futures = "0.3.31"
 governor = "0.8.1"
@@ -85,27 +78,21 @@ openapiv3 = "2.0"
 opentelemetry = { version = "0.29.1" }
 opentelemetry_sdk = { version = "0.29.0", features = ["rt-tokio"] }
 opentelemetry-appender-tracing = "0.29.1"
+opentelemetry-http = "0.29.0"
 opentelemetry-otlp = { version = "0.29.0" }
 opentelemetry-semantic-conventions = "0.29.0"
-# TODO: @tom: submit upstream PR
-opentelemetry-system-metrics = { version = "0.4.0", git = "https://github.com/tomharmon/opentelemetry-system-metrics.git", branch = "task/add-gpu-feature" }
-opentelemetry-http = "0.29.0"
 opentelemetry-stdout = { version = "0.29.0" }
+opentelemetry-system-metrics = { version = "0.4.0", git = "https://github.com/tomharmon/opentelemetry-system-metrics.git", branch = "task/add-gpu-feature" }
 pin-project-lite = "0.2.16"
+r2d2 = "0.8.10"
 rand = "0.9.1"
 redis = "0.27.6"
 regex = "1.11.1"
-reqwest = { version = "0.12.15", features = [
-    "json",
-    "stream",
-    "multipart",
-    "native-tls",
-], default-features = false }
+reqwest = { version = "0.12.15", features = [ "json", "stream", "multipart", "native-tls", ], default-features = false }
 reqwest-eventsource = "0.6.0"
-rustc-hash = "2.1.1"
 rust_decimal = "1.37.1"
+rustc-hash = "2.1.1"
 rusty-s3 = "0.7.0"
-r2d2 = "0.8.10"
 serde = { version = "1.0.219", features = ["derive", "rc"] }
 serde_json = "1.0.140"
 serde_path_to_error = "0.1.17"
@@ -113,7 +100,6 @@ serde_with = "3.12.0"
 serde_yml = "0.0.12"
 serial_test = "3.2.0"
 strum = "0.27.1"
-# TODO @tom: Open PR, message maintainers, and link it here.
 stubr = { git = "https://github.com/tomharmon/stubr" }
 thiserror = "2.0.12"
 tokio = { version = "1.44.2", features = ['full'] }
@@ -122,7 +108,6 @@ tokio-test = "0.4.4"
 tokio-util = "0.7.15"
 tower = "0.5.2"
 tower-http = { version = "0.6.3" }
-# @tom: submit upstream PR
 tower-otel-http-metrics = { git = "https://github.com/tomharmon/tower-otel-http-metrics.git", branch = "feat/custom-attributes-via-extractors" }
 tracing = "0.1.41"
 tracing-opentelemetry = "0.30.0"

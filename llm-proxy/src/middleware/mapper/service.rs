@@ -111,12 +111,7 @@ where
                 } else {
                     // For endpoints without first class support (where we don't
                     // have concrete types) then we must assume the request is
-                    // not streaming, *since providers put the stream param in
-                    // the request body*.
-                    //
-                    // If providers start putting the stream param in the query,
-                    // header, or path params, then we can update this
-                    // assumption.
+                    // not streaming.
                     let mapper_ctx = MapperContext {
                         is_stream: false,
                         model: None,
@@ -206,11 +201,14 @@ async fn map_request(
         })?;
 
     let (body, mapper_ctx) = converter.convert_req_body(body)?;
-    tracing::trace!("mapper_ctx: {:?}", mapper_ctx);
     let mut req = Request::from_parts(parts, axum_core::body::Body::from(body));
     tracing::trace!(
-        source_endpoint = ?source_endpoint, target_endpoint = ?target_endpoint,
-        target_path_and_query = ?target_path_and_query, "mapped request");
+        source_endpoint = ?source_endpoint,
+        target_endpoint = ?target_endpoint,
+        target_path_and_query = ?target_path_and_query,
+        mapper_ctx = ?mapper_ctx,
+        "mapped request"
+    );
     req.extensions_mut().insert(target_path_and_query);
     req.extensions_mut().insert(mapper_ctx);
     req.extensions_mut().insert(*target_endpoint);
@@ -238,6 +236,12 @@ async fn map_request_no_op(
 
     let (body, mapper_ctx) = converter.convert_req_body(body)?;
     let mut req = Request::from_parts(parts, axum_core::body::Body::from(body));
+    tracing::trace!(
+        endpoint = ?source_endpoint,
+        target_path_and_query = ?target_path_and_query,
+        mapper_ctx = ?mapper_ctx,
+        "no-op request mapping"
+    );
     req.extensions_mut().insert(target_path_and_query);
     req.extensions_mut().insert(mapper_ctx);
     req.extensions_mut().insert(*target_endpoint);
@@ -294,7 +298,7 @@ async fn map_response(
             reqwest::Body::wrap_stream(mapped_stream),
         );
         let new_resp = Response::from_parts(parts, final_body);
-        tracing::debug!(
+        tracing::trace!(
             source_endpoint = ?target_endpoint,
             target_endpoint = ?source_endpoint,
             "mapped streaming response"
@@ -313,7 +317,7 @@ async fn map_response(
             .map_err(InternalError::MapperError)?;
         let final_body = axum_core::body::Body::from(mapped_body_bytes);
         let new_resp = Response::from_parts(parts, final_body);
-        tracing::debug!(
+        tracing::trace!(
             source_endpoint = ?target_endpoint,
             target_endpoint = ?source_endpoint,
             "mapped non-streaming response"

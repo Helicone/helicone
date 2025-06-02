@@ -10,12 +10,13 @@ publish = false
 
 [dependencies]
 async-openai = { workspace = true }
-llm-proxy = { workspace = true }
-tokio = { workspace = true }
-serde_json = { workspace = true }
-reqwest = { workspace = true, features = ["json", "rustls-tls"] }
-thiserror = { workspace = true }
-http = { workspace = true }
-futures = { workspace = true }
-http-body-util = { workspace = true }
 bytes = { workspace = true, features = ['serde'] }
+dotenvy = { workspace = true }
+futures = { workspace = true }
+http = { workspace = true }
+http-body-util = { workspace = true }
+llm-proxy = { workspace = true }
+reqwest = { workspace = true, features = ["json", "rustls-tls"] }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }

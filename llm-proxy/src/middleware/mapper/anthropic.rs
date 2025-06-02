@@ -732,3 +732,66 @@ impl
         }
     }
 }
+
+impl
+    TryConvert<
+        anthropic_ai_sdk::types::message::CreateMessageParams,
+        anthropic_ai_sdk::types::message::CreateMessageParams,
+    > for AnthropicConverter
+{
+    type Error = MapperError;
+    fn try_convert(
+        &self,
+        mut value: anthropic_ai_sdk::types::message::CreateMessageParams,
+    ) -> Result<
+        anthropic_ai_sdk::types::message::CreateMessageParams,
+        Self::Error,
+    > {
+        let source_model = ModelId::from_str(&value.model)?;
+        let target_model = self
+            .model_mapper
+            .map_model(&source_model, &InferenceProvider::Anthropic)?;
+        tracing::trace!(source_model = ?source_model, target_model = ?target_model, "mapped model");
+
+        value.model = target_model.to_string();
+
+        Ok(value)
+    }
+}
+
+impl
+    TryConvert<
+        anthropic_ai_sdk::types::message::CreateMessageResponse,
+        anthropic_ai_sdk::types::message::CreateMessageResponse,
+    > for AnthropicConverter
+{
+    type Error = MapperError;
+    fn try_convert(
+        &self,
+        value: anthropic_ai_sdk::types::message::CreateMessageResponse,
+    ) -> Result<
+        anthropic_ai_sdk::types::message::CreateMessageResponse,
+        Self::Error,
+    > {
+        Ok(value)
+    }
+}
+
+impl
+    TryConvertStreamData<
+        anthropic_ai_sdk::types::message::StreamEvent,
+        anthropic_ai_sdk::types::message::StreamEvent,
+    > for AnthropicConverter
+{
+    type Error = MapperError;
+
+    fn try_convert_chunk(
+        &self,
+        value: anthropic_ai_sdk::types::message::StreamEvent,
+    ) -> Result<
+        Option<anthropic_ai_sdk::types::message::StreamEvent>,
+        Self::Error,
+    > {
+        Ok(Some(value))
+    }
+}

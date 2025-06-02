@@ -637,3 +637,61 @@ impl
         Ok(None) // No convertible event found in this chunk
     }
 }
+
+impl
+    TryConvert<
+        async_openai::types::CreateChatCompletionRequest,
+        async_openai::types::CreateChatCompletionRequest,
+    > for OpenAIConverter
+{
+    type Error = MapperError;
+    fn try_convert(
+        &self,
+        mut value: async_openai::types::CreateChatCompletionRequest,
+    ) -> Result<async_openai::types::CreateChatCompletionRequest, Self::Error>
+    {
+        let source_model = ModelId::from_str(&value.model)?;
+        let target_model = self
+            .model_mapper
+            .map_model(&source_model, &InferenceProvider::OpenAI)?;
+        tracing::trace!(source_model = ?source_model, target_model = ?target_model, "mapped model");
+        value.model = target_model.to_string();
+
+        Ok(value)
+    }
+}
+
+impl
+    TryConvert<
+        async_openai::types::CreateChatCompletionResponse,
+        async_openai::types::CreateChatCompletionResponse,
+    > for OpenAIConverter
+{
+    type Error = MapperError;
+    fn try_convert(
+        &self,
+        value: async_openai::types::CreateChatCompletionResponse,
+    ) -> Result<async_openai::types::CreateChatCompletionResponse, Self::Error>
+    {
+        Ok(value)
+    }
+}
+
+impl
+    TryConvertStreamData<
+        async_openai::types::CreateChatCompletionStreamResponse,
+        async_openai::types::CreateChatCompletionStreamResponse,
+    > for OpenAIConverter
+{
+    type Error = MapperError;
+
+    fn try_convert_chunk(
+        &self,
+        value: async_openai::types::CreateChatCompletionStreamResponse,
+    ) -> Result<
+        Option<async_openai::types::CreateChatCompletionStreamResponse>,
+        Self::Error,
+    > {
+        Ok(Some(value))
+    }
+}

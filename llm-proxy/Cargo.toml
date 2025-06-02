@@ -19,10 +19,11 @@ bytes = { workspace = true, features = ['serde'] }
 cfg-if = { workspace = true }
 chrono = { workspace = true, features = ['default', 'serde'] }
 clap = { workspace = true }
-config = { workspace = true }
 compact_str = { workspace = true, features = ['serde'] }
+config = { workspace = true }
 derive_more = { workspace = true, features = ['as_ref', 'constructor', 'debug', 'deref', 'deref_mut', 'display', 'from', 'from_str'] }
 displaydoc = { workspace = true }
+dotenvy = { workspace = true }
 eventsource-stream = { workspace = true }
 futures = { workspace = true }
 governor = { workspace = true }
@@ -43,14 +44,14 @@ opentelemetry = { workspace = true }
 opentelemetry_sdk = { workspace = true, features = ["rt-tokio"] }
 opentelemetry-system-metrics = { workspace = true }
 pin-project-lite = { workspace = true }
+r2d2 = { workspace = true }
 redis = { workspace = true }
 regex = { workspace = true }
 reqwest = { workspace = true }
 reqwest-eventsource = { workspace = true }
-rustc-hash = { workspace = true }
 rust_decimal = { workspace = true }
+rustc-hash = { workspace = true }
 rusty-s3 = { workspace = true }
-r2d2 = { workspace = true }
 serde = { workspace = true, features = ['derive', 'rc'] }
 serde_json = { workspace = true }
 serde_path_to_error = { workspace = true }
@@ -71,11 +72,10 @@ tracing = { workspace = true }
 tracing-opentelemetry.workspace = true
 tracing-subscriber = { workspace = true, features = ['env-filter', 'std'] }
 typed-builder = { workspace = true }
-weighted-balance = { workspace = true }
 url = { workspace = true, features = ['serde'] }
 utoipa = { workspace = true }
 uuid = { workspace = true, features = ["serde", "v7"] }
-dotenvy = { version = "0.15.7"}
+weighted-balance = { workspace = true }
 
 [features]
 default = []

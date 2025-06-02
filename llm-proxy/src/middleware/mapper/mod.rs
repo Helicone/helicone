@@ -141,7 +141,10 @@ where
             .converter
             .try_convert(source_request)
             .map_err(|e| InternalError::MapperError(e.into()))?;
-        let model = target_request.model().map_err(InternalError::MapperError)?;
+        let model = target_request.model().map_err(InternalError::MapperError).inspect_err(|e| {
+            tracing::error!(?e, "failed to get model from request");
+        })?;
+
         let mapper_ctx = MapperContext { is_stream, model: Some(model) };
         let target_bytes =
             Bytes::from(serde_json::to_vec(&target_request).map_err(|e| {
@@ -196,66 +199,5 @@ where
 
             Ok(Some(Bytes::from(target_bytes)))
         }
-    }
-}
-
-pub struct NoOpConverter<S>
-where
-    S: Endpoint,
-    S::RequestBody: AiRequest,
-{
-    _phantom: std::marker::PhantomData<S>,
-}
-
-impl<S> Default for NoOpConverter<S>
-where
-    S: Endpoint,
-    S::RequestBody: AiRequest,
-{
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl<S> NoOpConverter<S>
-where
-    S: Endpoint,
-    S::RequestBody: AiRequest,
-{
-    #[must_use]
-    pub fn new() -> Self {
-        Self {
-            _phantom: std::marker::PhantomData,
-        }
-    }
-}
-
-impl<S> EndpointConverter for NoOpConverter<S>
-where
-    S: Endpoint,
-    S::RequestBody: DeserializeOwned + AiRequest,
-{
-    fn convert_req_body(
-        &self,
-        bytes: Bytes,
-    ) -> Result<(Bytes, MapperContext), ApiError> {
-        let source_request: S::RequestBody = serde_json::from_slice(&bytes)
-            .map_err(InvalidRequestError::InvalidRequestBody)?;
-        let is_stream = source_request.is_stream();
-        let model =
-            source_request.model().map_err(InternalError::MapperError)?;
-        let mapper_ctx = MapperContext {
-            is_stream,
-            model: Some(model),
-        };
-        Ok((bytes, mapper_ctx))
-    }
-
-    fn convert_resp_body(
-        &self,
-        bytes: Bytes,
-        _is_stream: bool,
-    ) -> Result<Option<Bytes>, ApiError> {
-        Ok(Some(bytes))
     }
 }

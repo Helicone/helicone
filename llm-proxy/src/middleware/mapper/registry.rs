@@ -3,9 +3,8 @@ use std::sync::Arc;
 use rustc_hash::FxHashMap as HashMap;
 
 use super::{
-    EndpointConverter, NoOpConverter, TypedEndpointConverter,
-    anthropic::AnthropicConverter, gemini::GoogleGeminiConverter,
-    model::ModelMapper, openai::OpenAIConverter,
+    EndpointConverter, TypedEndpointConverter, anthropic::AnthropicConverter,
+    gemini::GoogleGeminiConverter, model::ModelMapper, openai::OpenAIConverter,
 };
 use crate::{
     config::router::RouterConfig,
@@ -90,48 +89,14 @@ impl EndpointConverterRegistryInner {
                 ApiEndpoint::OpenAI(OpenAI::chat_completions()),
                 ApiEndpoint::Anthropic(Anthropic::messages()),
             );
-            registry.register_converter(
-                key,
-                TypedEndpointConverter {
-                    converter: AnthropicConverter::new(model_mapper.clone()),
-                    _phantom: std::marker::PhantomData::<(
-                        endpoints::openai::ChatCompletions,
-                        endpoints::anthropic::Messages,
-                    )>,
-                },
-            );
-            let key = RegistryKey::new(
-                ApiEndpoint::OpenAI(OpenAI::chat_completions()),
-                ApiEndpoint::Anthropic(Anthropic::messages()),
-            );
-            registry.register_converter(
-                key,
-                TypedEndpointConverter {
-                    converter: AnthropicConverter::new(model_mapper.clone()),
-                    _phantom: std::marker::PhantomData::<(
-                        endpoints::openai::ChatCompletions,
-                        endpoints::anthropic::Messages,
-                    )>,
-                },
-            );
-        }
-        if request_style == InferenceProvider::Anthropic
-            && providers.contains(&InferenceProvider::OpenAI)
-        {
-            let key = RegistryKey::new(
-                ApiEndpoint::Anthropic(Anthropic::messages()),
-                ApiEndpoint::OpenAI(OpenAI::chat_completions()),
-            );
-            registry.register_converter(
-                key,
-                TypedEndpointConverter {
-                    converter: OpenAIConverter::new(model_mapper.clone()),
-                    _phantom: std::marker::PhantomData::<(
-                        endpoints::anthropic::Messages,
-                        endpoints::openai::ChatCompletions,
-                    )>,
-                },
-            );
+            let converter = TypedEndpointConverter::<
+                endpoints::openai::ChatCompletions,
+                endpoints::anthropic::Messages,
+                AnthropicConverter,
+            >::new(AnthropicConverter::new(
+                model_mapper.clone(),
+            ));
+            registry.register_converter(key, converter);
         }
         if request_style == InferenceProvider::OpenAI
             && providers.contains(&InferenceProvider::GoogleGemini)
@@ -140,36 +105,14 @@ impl EndpointConverterRegistryInner {
                 ApiEndpoint::OpenAI(OpenAI::chat_completions()),
                 ApiEndpoint::Google(Google::generate_contents()),
             );
-
-            registry.register_converter(
-                key,
-                TypedEndpointConverter {
-                    converter: GoogleGeminiConverter::new(model_mapper.clone()),
-                    _phantom: std::marker::PhantomData::<(
-                        endpoints::openai::ChatCompletions,
-                        endpoints::openai::ChatCompletions,
-                    )>,
-                },
-            );
-        }
-        if request_style == InferenceProvider::GoogleGemini
-            && providers.contains(&InferenceProvider::OpenAI)
-        {
-            let key = RegistryKey::new(
-                ApiEndpoint::Google(Google::generate_contents()),
-                ApiEndpoint::OpenAI(OpenAI::chat_completions()),
-            );
-
-            registry.register_converter(
-                key,
-                TypedEndpointConverter {
-                    converter: GoogleGeminiConverter::new(model_mapper.clone()),
-                    _phantom: std::marker::PhantomData::<(
-                        endpoints::openai::ChatCompletions,
-                        endpoints::openai::ChatCompletions,
-                    )>,
-                },
-            );
+            let converter = TypedEndpointConverter::<
+                endpoints::openai::ChatCompletions,
+                endpoints::google::GenerateContents,
+                GoogleGeminiConverter,
+            >::new(GoogleGeminiConverter::new(
+                model_mapper.clone(),
+            ));
+            registry.register_converter(key, converter);
         }
         if request_style == InferenceProvider::OpenAI
             && providers.contains(&InferenceProvider::OpenAI)
@@ -178,14 +121,31 @@ impl EndpointConverterRegistryInner {
                 ApiEndpoint::OpenAI(OpenAI::chat_completions()),
                 ApiEndpoint::OpenAI(OpenAI::chat_completions()),
             );
-            registry.register_converter(
-                key,
-                NoOpConverter {
-                    _phantom: std::marker::PhantomData::<
-                        endpoints::openai::ChatCompletions,
-                    >,
-                },
+            let converter = TypedEndpointConverter::<
+                endpoints::openai::ChatCompletions,
+                endpoints::openai::ChatCompletions,
+                OpenAIConverter,
+            >::new(OpenAIConverter::new(
+                model_mapper.clone(),
+            ));
+            registry.register_converter(key, converter);
+        }
+
+        if request_style == InferenceProvider::Anthropic
+            && providers.contains(&InferenceProvider::OpenAI)
+        {
+            let key = RegistryKey::new(
+                ApiEndpoint::Anthropic(Anthropic::messages()),
+                ApiEndpoint::OpenAI(OpenAI::chat_completions()),
             );
+            let converter = TypedEndpointConverter::<
+                endpoints::anthropic::Messages,
+                endpoints::openai::ChatCompletions,
+                OpenAIConverter,
+            >::new(OpenAIConverter::new(
+                model_mapper.clone(),
+            ));
+            registry.register_converter(key, converter);
         }
         if request_style == InferenceProvider::Anthropic
             && providers.contains(&InferenceProvider::Anthropic)
@@ -194,30 +154,14 @@ impl EndpointConverterRegistryInner {
                 ApiEndpoint::Anthropic(Anthropic::messages()),
                 ApiEndpoint::Anthropic(Anthropic::messages()),
             );
-            registry.register_converter(
-                key,
-                NoOpConverter {
-                    _phantom: std::marker::PhantomData::<
-                        endpoints::anthropic::Messages,
-                    >,
-                },
-            );
-        }
-        if request_style == InferenceProvider::GoogleGemini
-            && providers.contains(&InferenceProvider::GoogleGemini)
-        {
-            let key = RegistryKey::new(
-                ApiEndpoint::Google(Google::generate_contents()),
-                ApiEndpoint::Google(Google::generate_contents()),
-            );
-            registry.register_converter(
-                key,
-                NoOpConverter {
-                    _phantom: std::marker::PhantomData::<
-                        endpoints::google::GenerateContents,
-                    >,
-                },
-            );
+            let converter = TypedEndpointConverter::<
+                endpoints::anthropic::Messages,
+                endpoints::anthropic::Messages,
+                AnthropicConverter,
+            >::new(AnthropicConverter::new(
+                model_mapper.clone(),
+            ));
+            registry.register_converter(key, converter);
         }
         registry
     }

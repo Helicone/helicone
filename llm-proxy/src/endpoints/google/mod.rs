@@ -1,4 +1,4 @@
-mod generate_contents;
+pub(crate) mod generate_contents;
 
 use super::{Endpoint, EndpointType};
 pub(crate) use crate::endpoints::google::generate_contents::GenerateContents;

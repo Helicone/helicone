@@ -1,9 +1,10 @@
 use futures::StreamExt;
 
 pub async fn test() {
+    dotenvy::dotenv().ok();
     let is_stream = false;
     let openai_request_body = serde_json::json!({
-        "model": "openai/o3",
+        "model": "openai/gpt-4o-mini",
         "messages": [
             {
                 "role": "system",
@@ -24,9 +25,12 @@ pub async fn test() {
 
     let bytes = serde_json::to_vec(&openai_request).unwrap();
 
+    let helicone_api_key = std::env::var("HELICONE_API_KEY").unwrap();
+
     let response = reqwest::Client::new()
         .post("http://localhost:5678/router/v1/chat/completions")
         .header("Content-Type", "application/json")
+        .header("authorization", helicone_api_key)
         .body(bytes)
         .send()
         .await

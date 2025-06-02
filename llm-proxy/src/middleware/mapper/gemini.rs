@@ -7,7 +7,10 @@ use async_openai::types::{
 use super::{
     TryConvert, TryConvertStreamData, error::MapperError, model::ModelMapper,
 };
-use crate::types::{model_id::ModelId, provider::InferenceProvider};
+use crate::{
+    endpoints::google::generate_contents::CreateChatCompletionRequestGemini,
+    types::{model_id::ModelId, provider::InferenceProvider},
+};
 
 pub struct GoogleGeminiConverter {
     model_mapper: ModelMapper,
@@ -23,25 +26,23 @@ impl GoogleGeminiConverter {
 impl
     TryConvert<
         async_openai::types::CreateChatCompletionRequest,
-        async_openai::types::CreateChatCompletionRequest,
+        CreateChatCompletionRequestGemini,
     > for GoogleGeminiConverter
 {
     type Error = MapperError;
     fn try_convert(
         &self,
-        value: async_openai::types::CreateChatCompletionRequest,
-    ) -> Result<async_openai::types::CreateChatCompletionRequest, Self::Error>
-    {
-        // no op:
+        mut value: async_openai::types::CreateChatCompletionRequest,
+    ) -> Result<CreateChatCompletionRequestGemini, Self::Error> {
         let source_model = ModelId::from_str(&value.model)?;
         let target_model = self
             .model_mapper
             .map_model(&source_model, &InferenceProvider::GoogleGemini)?;
         tracing::trace!(source_model = ?source_model, target_model = ?target_model, "mapped model");
 
-        // value.model = target_model.to_string().replace("-latest", "");
+        value.model = target_model.to_string();
 
-        Ok(value)
+        Ok(CreateChatCompletionRequestGemini(value))
     }
 }
 
@@ -56,7 +57,6 @@ impl
         &self,
         value: CreateChatCompletionResponse,
     ) -> Result<CreateChatCompletionResponse, Self::Error> {
-        // no op:
         Ok(value)
     }
 }
