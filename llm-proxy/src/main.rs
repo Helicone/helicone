@@ -12,6 +12,9 @@ use llm_proxy::{
 use meltdown::Meltdown;
 use tracing::info;
 
+#[global_allocator]
+static GLOBAL: jemallocator::Jemalloc = jemallocator::Jemalloc;
+
 #[derive(Debug, Parser)]
 pub struct Args {
     /// Path to the default config file.

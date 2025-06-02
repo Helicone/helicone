@@ -36,6 +36,7 @@ hyper = { workspace = true }
 hyper-util = { workspace = true, features = ['server-auto', 'server-graceful', 'tokio'] }
 indexmap = { workspace = true, features = ['serde'] }
 isocountry = { workspace = true }
+jemallocator = { workspace = true }
 json-patch = { workspace = true }
 meltdown = { workspace = true }
 mime = { workspace = true }

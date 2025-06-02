@@ -69,6 +69,7 @@ hyper = { version = "1.6.0", features = ['full'] }
 hyper-util = "0.1.11"
 indexmap = "2.9.0"
 isocountry = "0.3.2"
+jemallocator = "0.5.4"
 json-patch = "4.0.0"
 log-panics = { version = "2.1.0", features = ["with-backtrace"] }
 meltdown = "0.3.2"
