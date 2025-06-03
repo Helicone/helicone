@@ -76,13 +76,14 @@ url = { workspace = true, features = ['serde'] }
 utoipa = { workspace = true }
 uuid = { workspace = true, features = ["serde", "v7"] }
 weighted-balance = { workspace = true }
+workspace_root = { workspace = true, optional = true }
 
 [dev-dependencies]
 pretty_assertions = { workspace = true }
 
 [features]
 default = []
-testing = ["dep:stubr", "dep:serial_test"]
+testing = ["dep:stubr", "dep:serial_test", "dep:workspace_root"]
 
 [lints]
 workspace = true

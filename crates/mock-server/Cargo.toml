@@ -1,0 +1,17 @@
+[package]
+name = "mock-server"
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+publish.workspace = true
+version.workspace = true
+description = "A standalone binary for running a mock server for the Helix Router 3rd party apis in order to enable load testing"
+
+[dependencies]
+llm-proxy = { workspace = true, features = ["testing"] }
+tokio = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+[lints]
+workspace = true

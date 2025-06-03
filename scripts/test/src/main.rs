@@ -1,7 +1,22 @@
-use futures::StreamExt;
+use std::time::Duration;
 
-pub async fn test() {
-    dotenvy::dotenv().ok();
+use clap::Parser;
+use futures::StreamExt;
+use rand::Rng;
+use tokio::{
+    signal,
+    time::{Instant, sleep},
+};
+
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+    /// Run requests forever in a loop until Ctrl+C is pressed
+    #[arg(long)]
+    run_forever: bool,
+}
+
+pub async fn test(run_forever_mode: bool) {
     let is_stream = false;
     let openai_request_body = serde_json::json!({
         "model": "openai/gpt-4o-mini",
@@ -43,24 +58,67 @@ pub async fn test() {
         .to_str()
         .unwrap();
     println!("Trace ID: {}", trace_id);
-    if is_stream {
-        let mut body_stream = response.bytes_stream();
-        while let Some(Ok(chunk)) = body_stream.next().await {
-            let json =
-                serde_json::from_slice::<serde_json::Value>(&chunk).unwrap();
-            let pretty_json = serde_json::to_string_pretty(&json).unwrap();
-            println!("Chunk: {}", pretty_json);
+    if !run_forever_mode {
+        if is_stream {
+            let mut body_stream = response.bytes_stream();
+            while let Some(Ok(chunk)) = body_stream.next().await {
+                let json = serde_json::from_slice::<serde_json::Value>(&chunk)
+                    .unwrap();
+                let pretty_json = serde_json::to_string_pretty(&json).unwrap();
+                println!("Chunk: {}", pretty_json);
+            }
+        } else {
+            let response_bytes =
+                response.json::<serde_json::Value>().await.unwrap();
+            println!("Response: {}", response_bytes);
         }
-    } else {
-        let response_bytes =
-            response.json::<serde_json::Value>().await.unwrap();
-        println!("Response: {}", response_bytes);
+    }
+}
+
+async fn run_forever_loop() {
+    let mut rng = rand::thread_rng();
+    let mut request_count = 0u64;
+    let start_time = Instant::now();
+
+    loop {
+        tokio::select! {
+            _ = signal::ctrl_c() => {
+                let elapsed = start_time.elapsed();
+                let rps = request_count as f64 / elapsed.as_secs_f64();
+                println!("\nShutdown signal received!");
+                println!("Total requests: {}", request_count);
+                println!("Total time: {:.2}s", elapsed.as_secs_f64());
+                println!("Average RPS: {:.2}", rps);
+                break;
+            }
+            _ = async {
+                test(true).await;
+                request_count += 1;
+
+                if request_count % 100 == 0 {
+                    let elapsed = start_time.elapsed();
+                    let current_rps = request_count as f64 / elapsed.as_secs_f64();
+                    println!("Requests sent: {}, Current RPS: {:.2}", request_count, current_rps);
+                }
+
+                let delay_ms = rng.gen_range(0..=2);
+                sleep(Duration::from_millis(delay_ms)).await;
+            } => {}
+        }
     }
 }
 
 #[tokio::main]
 async fn main() {
-    println!("Starting test...");
-    test().await;
-    println!("Test completed successfully!");
+    let args = Args::parse();
+    dotenvy::dotenv().ok();
+
+    if args.run_forever {
+        println!("Starting load test - press Ctrl+C to stop...");
+        run_forever_loop().await;
+    } else {
+        println!("Starting single test...");
+        test(false).await;
+        println!("Test completed successfully!");
+    }
 }

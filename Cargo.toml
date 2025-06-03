@@ -1,5 +1,5 @@
 [workspace]
-members = [
+members = [ "crates/mock-server",
     "crates/schema-filter",
     "crates/telemetry",
     "crates/weighted-balance",
@@ -115,6 +115,7 @@ tracing = "0.1.41"
 tracing-opentelemetry = "0.30.0"
 tracing-subscriber = "0.3.19"
 typed-builder = "0.21.0"
+workspace_root = "0.1.2"
 url = "2.5.4"
 utoipa = "5.3.1"
 uuid = { version = "1.16.0", features = ["serde", "v7"] }

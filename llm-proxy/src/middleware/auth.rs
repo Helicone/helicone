@@ -34,9 +34,15 @@ impl AuthService {
             .get(whoami_url(&app_state))
             .header("authorization", api_key)
             .send()
-            .await?
+            .await
+            .inspect_err(|e| {
+                tracing::error!("Error sending request to whoami: {:?}", e);
+            })?
             .error_for_status()
-            .map_err(AuthError::UnsuccessfulAuthResponse)?;
+            .map_err(AuthError::UnsuccessfulAuthResponse)
+            .inspect_err(|e| {
+                tracing::error!("Error calling whoami: {:?}", e);
+            })?;
         let body = whoami_result.json::<WhoamiResponse>().await?;
         Ok(AuthContext {
             api_key: api_key.replace("Bearer ", ""),

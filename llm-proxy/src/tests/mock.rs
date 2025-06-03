@@ -3,8 +3,15 @@ use std::collections::HashMap;
 use stubr::{Stubr, wiremock_rs::Times};
 use typed_builder::TypedBuilder;
 use url::Url;
+use workspace_root::get_workspace_root;
 
 use crate::{config::Config, types::provider::InferenceProvider};
+
+fn get_stubs_path(provider: &str) -> String {
+    let workspace_root = get_workspace_root();
+    let stubs_path = workspace_root.join("llm-proxy/stubs").join(provider);
+    stubs_path.to_string_lossy().to_string()
+}
 
 #[derive(TypedBuilder)]
 pub struct MockArgs {
@@ -14,6 +21,18 @@ pub struct MockArgs {
     pub global_anthropic_latency: Option<u64>,
     #[builder(setter(strip_option), default = None)]
     pub global_google_latency: Option<u64>,
+
+    #[builder(setter(strip_option), default = None)]
+    pub openai_port: Option<u16>,
+    #[builder(setter(strip_option), default = None)]
+    pub anthropic_port: Option<u16>,
+    #[builder(setter(strip_option), default = None)]
+    pub google_port: Option<u16>,
+    #[builder(setter(strip_option), default = None)]
+    pub minio_port: Option<u16>,
+    #[builder(setter(strip_option), default = None)]
+    pub jawn_port: Option<u16>,
+
     /// Map of stub id to the expectations on the number of times it should be
     /// called.
     #[builder(setter(strip_option), default = None)]
@@ -34,8 +53,8 @@ pub struct Mock {
 impl Mock {
     pub async fn new(config: &mut Config, args: MockArgs) -> Self {
         tracing::debug!(stubs = ?args.stubs, "starting mock servers");
-        let openai_mock = start_mock(
-            "./stubs/openai",
+        let openai_mock = start_mock_for_test(
+            &get_stubs_path("openai"),
             args.global_openai_latency,
             &args.stubs,
             args.verify,
@@ -47,8 +66,8 @@ impl Mock {
             .unwrap()
             .base_url = Url::parse(&openai_mock.uri()).unwrap();
 
-        let anthropic_mock = start_mock(
-            "./stubs/anthropic",
+        let anthropic_mock = start_mock_for_test(
+            &get_stubs_path("anthropic"),
             args.global_anthropic_latency,
             &args.stubs,
             args.verify,
@@ -60,8 +79,8 @@ impl Mock {
             .unwrap()
             .base_url = Url::parse(&anthropic_mock.uri()).unwrap();
 
-        let google_mock = start_mock(
-            "./stubs/google",
+        let google_mock = start_mock_for_test(
+            &get_stubs_path("google"),
             args.global_google_latency,
             &args.stubs,
             args.verify,
@@ -74,13 +93,83 @@ impl Mock {
             .unwrap()
             .base_url = Url::parse(&google_mock.uri()).unwrap();
 
-        let minio_mock =
-            start_mock("./stubs/minio", None, &args.stubs, args.verify).await;
+        let minio_mock = start_mock_for_test(
+            &get_stubs_path("minio"),
+            None,
+            &args.stubs,
+            args.verify,
+        )
+        .await;
         config.minio.host = Url::parse(&minio_mock.uri()).unwrap();
 
-        let jawn_mock =
-            start_mock("./stubs/jawn", None, &args.stubs, args.verify).await;
+        let jawn_mock = start_mock_for_test(
+            &get_stubs_path("jawn"),
+            None,
+            &args.stubs,
+            args.verify,
+        )
+        .await;
         config.helicone.base_url = Url::parse(&jawn_mock.uri()).unwrap();
+
+        Self {
+            openai_mock,
+            anthropic_mock,
+            google_mock,
+            minio_mock,
+            jawn_mock,
+            args,
+        }
+    }
+
+    pub async fn from_args(args: MockArgs) -> Self {
+        let openai_mock = start_mock(
+            &get_stubs_path("openai"),
+            args.global_openai_latency,
+            &args.stubs,
+            false,
+            false,
+            args.openai_port,
+        )
+        .await;
+        let anthropic_mock = start_mock(
+            &get_stubs_path("anthropic"),
+            args.global_anthropic_latency,
+            &args.stubs,
+            false,
+            false,
+            args.anthropic_port,
+        )
+        .await;
+
+        let google_mock = start_mock(
+            &get_stubs_path("google"),
+            args.global_google_latency,
+            &args.stubs,
+            false,
+            false,
+            args.google_port,
+        )
+        .await;
+
+        let minio_mock = start_mock(
+            &get_stubs_path("minio"),
+            None,
+            &args.stubs,
+            false,
+            false,
+            args.minio_port,
+        )
+        .await;
+
+        let jawn_mock = start_mock(
+            &get_stubs_path("jawn"),
+            None,
+            &args.stubs,
+            false,
+            false,
+            args.jawn_port,
+        )
+        .await;
 
         Self {
             openai_mock,
@@ -111,7 +200,7 @@ impl Mock {
     pub async fn stubs(&self, stubs: HashMap<&'static str, Times>) {
         register_stubs_for_mock(
             &self.openai_mock,
-            "./stubs/openai",
+            &get_stubs_path("openai"),
             self.args.global_openai_latency,
             &stubs,
             self.args.verify,
@@ -120,7 +209,7 @@ impl Mock {
 
         register_stubs_for_mock(
             &self.anthropic_mock,
-            "./stubs/anthropic",
+            &get_stubs_path("anthropic"),
             self.args.global_anthropic_latency,
             &stubs,
             self.args.verify,
@@ -129,7 +218,7 @@ impl Mock {
 
         register_stubs_for_mock(
             &self.google_mock,
-            "./stubs/google",
+            &get_stubs_path("google"),
             self.args.global_google_latency,
             &stubs,
             self.args.verify,
@@ -138,7 +227,7 @@ impl Mock {
 
         register_stubs_for_mock(
             &self.minio_mock,
-            "./stubs/minio",
+            &get_stubs_path("minio"),
             None,
             &stubs,
             self.args.verify,
@@ -147,7 +236,7 @@ impl Mock {
 
         register_stubs_for_mock(
             &self.jawn_mock,
-            "./stubs/jawn",
+            &get_stubs_path("jawn"),
             None,
             &stubs,
             self.args.verify,
@@ -156,11 +245,22 @@ impl Mock {
     }
 }
 
-async fn start_mock(
+async fn start_mock_for_test(
     stub_path: &str,
-    global_latency: Option<u64>,
+    global_delay: Option<u64>,
     stubs: &Option<HashMap<&'static str, Times>>,
     verify: bool,
+) -> Stubr {
+    start_mock(stub_path, global_delay, stubs, verify, true, None).await
+}
+
+async fn start_mock(
+    stub_path: &str,
+    global_delay: Option<u64>,
+    stubs: &Option<HashMap<&'static str, Times>>,
+    verify: bool,
+    record: bool,
+    port: Option<u16>,
 ) -> Stubr {
     let active_stubs =
         stubs.as_ref().map(|stubs| stubs.keys().copied().collect());
@@ -168,9 +268,10 @@ async fn start_mock(
         stub_path,
         active_stubs,
         stubr::Config {
-            record: true,
-            global_delay: global_latency,
+            record,
+            global_delay,
             verify,
+            port,
             ..Default::default()
         },
     )

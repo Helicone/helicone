@@ -1380,6 +1380,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "get_dir"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "157475c9ef63284947b6a2f3661795a4fdbf581974d36daf3567cd20cb1e217e"
+
+[[package]]
 name = "getrandom"
 version = "0.1.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2321,6 +2327,7 @@ dependencies = [
  "utoipa",
  "uuid",
  "weighted-balance",
+ "workspace_root",
 ]
 
 [[package]]
@@ -2434,6 +2441,16 @@ dependencies = [
  "libc",
  "wasi 0.11.0+wasi-snapshot-preview1",
  "windows-sys 0.59.0",
+]
+
+[[package]]
+name = "mock-server"
+version = "0.1.0"
+dependencies = [
+ "llm-proxy",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
 ]
 
 [[package]]
@@ -4373,11 +4390,13 @@ version = "0.1.0"
 dependencies = [
  "async-openai",
  "bytes",
+ "clap",
  "dotenvy",
  "futures",
  "http 1.3.1",
  "http-body-util",
  "llm-proxy",
+ "rand 0.8.5",
  "reqwest",
  "serde_json",
  "thiserror 2.0.12",
@@ -5521,6 +5540,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6f42320e61fe2cfd34354ecb597f86f413484a798ba44a8ca1165c58d42da6c1"
 dependencies = [
  "bitflags",
+]
+
+[[package]]
+name = "workspace_root"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "70d34ee5edf31cd59cf2d7bf699a9af8f1de1743e03aab3982f5ae87b626a2af"
+dependencies = [
+ "get_dir",
 ]
 
 [[package]]

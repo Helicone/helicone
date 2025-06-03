@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use crate::types::model_id::ModelName;
 
 const MODEL_MAPPING_YAML: &str =
-    include_str!("../../config/model_mapping.yaml");
+    include_str!("../../config/model-mapping.yaml");
 
 #[derive(Debug, Clone, Deserialize, Serialize, AsRef, PartialEq, Eq)]
 pub struct ModelMappingConfig(

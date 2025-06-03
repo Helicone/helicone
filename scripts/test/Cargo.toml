@@ -11,12 +11,14 @@ publish = false
 [dependencies]
 async-openai = { workspace = true }
 bytes = { workspace = true, features = ['serde'] }
+clap = { version = "4.0", features = ["derive"] }
 dotenvy = { workspace = true }
 futures = { workspace = true }
 http = { workspace = true }
 http-body-util = { workspace = true }
 llm-proxy = { workspace = true }
+rand = "0.8"
 reqwest = { workspace = true, features = ["json", "rustls-tls"] }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
-tokio = { workspace = true }
+tokio = { workspace = true, features = ["signal"] }
