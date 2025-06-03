@@ -6,10 +6,17 @@ import { MappedLLMRequest, Message } from "@/packages/llm-mapper/types";
 import { useRequestRenderModeStore } from "@/store/requestRenderModeStore";
 import Image from "next/image";
 import { useMemo, useState } from "react";
-import { LuChevronDown, LuFileText } from "react-icons/lu";
+import { LuChevronDown, LuFileText, LuPlus, LuTrash2 } from "react-icons/lu";
 import { PiToolboxBold } from "react-icons/pi";
 import ReactMarkdown from "react-markdown";
 import { JsonRenderer } from "./chatComponent/single/JsonRenderer";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const MESSAGE_LENGTH_THRESHOLD = 1000; // Characters before truncating
 
@@ -146,6 +153,7 @@ const renderToolMessage = (
                     );
                     return;
                   }
+                  console.log("text", text);
                   onChatChange?.({
                     ...mappedRequest,
                     schema: {
@@ -167,7 +175,7 @@ const renderToolMessage = (
                                           ...toolCall,
                                           arguments: (() => {
                                             try {
-                                              return JSON.parse(text);
+                                              return text;
                                             } catch {
                                               return {};
                                             }
@@ -186,7 +194,7 @@ const renderToolMessage = (
                     },
                   });
                 }}
-                text={JSON.stringify(tool.arguments, null, 2)}
+                text={tool.arguments}
               />
             )}
           </div>
@@ -254,6 +262,72 @@ export default function Chat({
     }));
   };
 
+  const addMessage = () => {
+    if (!onChatChange) return;
+
+    const newMessage: Message = {
+      role: "user",
+      content: "",
+      _type: "message",
+    };
+
+    onChatChange({
+      ...mappedRequest,
+      schema: {
+        ...mappedRequest.schema,
+        request: {
+          ...mappedRequest.schema.request,
+          messages: [
+            ...(mappedRequest.schema.request?.messages ?? []),
+            newMessage,
+          ],
+        },
+      },
+    });
+  };
+
+  const deleteMessage = (index: number) => {
+    if (!onChatChange) return;
+
+    onChatChange({
+      ...mappedRequest,
+      schema: {
+        ...mappedRequest.schema,
+        request: {
+          ...mappedRequest.schema.request,
+          messages: mappedRequest.schema.request?.messages?.filter(
+            (_, i) => i !== index
+          ),
+        },
+      },
+    });
+  };
+
+  const changeMessageRole = (index: number, newRole: string) => {
+    if (!onChatChange) return;
+
+    onChatChange({
+      ...mappedRequest,
+      schema: {
+        ...mappedRequest.schema,
+        request: {
+          ...mappedRequest.schema.request,
+          messages: mappedRequest.schema.request?.messages?.map(
+            (message, i) => {
+              if (i === index) {
+                return {
+                  ...message,
+                  role: newRole,
+                };
+              }
+              return message;
+            }
+          ),
+        },
+      },
+    });
+  };
+
   return (
     <div className="h-full w-full flex flex-col">
       {messages.map((message, index) => {
@@ -275,9 +349,41 @@ export default function Chat({
           >
             {/* Message Role Header */}
             <header className="h-12 w-full flex flex-row items-center justify-between px-4 sticky top-0 bg-sidebar-background dark:bg-black z-10">
-              <h2 className="text-secondary font-medium capitalize text-sm">
-                {message.role}
-              </h2>
+              <div className="flex items-center gap-2">
+                {playgroundMode ? (
+                  <Select
+                    value={message.role}
+                    onValueChange={(value) => changeMessageRole(index, value)}
+                  >
+                    <SelectTrigger className="w-[140px] h-8">
+                      <SelectValue placeholder="Select role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="user">User</SelectItem>
+                      <SelectItem value="assistant">Assistant</SelectItem>
+                      <SelectItem value="system">System</SelectItem>
+                      <SelectItem value="function">Function</SelectItem>
+                      <SelectItem value="tool">Tool</SelectItem>
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <h2 className="text-secondary font-medium capitalize text-sm">
+                    {message.role}
+                  </h2>
+                )}
+              </div>
+              {playgroundMode && (
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => deleteMessage(index)}
+                  >
+                    <LuTrash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                </div>
+              )}
             </header>
 
             <div className="w-full flex flex-col relative px-4 pb-4 pt-0">
@@ -428,6 +534,19 @@ export default function Chat({
           </div>
         );
       })}
+      {playgroundMode && (
+        <div className="p-4">
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full"
+            onClick={addMessage}
+          >
+            <LuPlus className="h-4 w-4 mr-2" />
+            Add Message
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

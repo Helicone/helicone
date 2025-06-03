@@ -6,27 +6,25 @@ import { hpf } from "@helicone/prompts";
 
 async function main() {
   const anthropic = new Anthropic({
-    baseURL: "https://anthropic.helicone.ai",
+    baseURL: process.env.HELICONE_BASE_URL || "https://anthropic.helicone.ai",
     apiKey: process.env.ANTHROPIC_API_KEY,
     defaultHeaders: {
       "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
     },
   });
 
-  const response = await anthropic.messages.create(
-    {
-      model: "claude-3-opus-20240229",
-      max_tokens: 1024,
-      messages: [
-        { role: "user", content: hpf`Hello, world ${{ hello: "world" }}` },
-      ],
-    },
-    {
-      headers: {
-        "Helicone-Prompt-Id": "test-prompt",
+  const response = await anthropic.messages.create({
+    model: "claude-3-opus-20240229",
+    max_tokens: 1024,
+    messages: [
+      { role: "user", content: `Hello` },
+      {
+        role: "assistant",
+        content: `Hello, how may I help you today?`,
       },
-    }
-  );
+      { role: "user", content: `What is the weather in Tokyo?` },
+    ],
+  });
 
   console.log(response);
 

@@ -36,7 +36,7 @@ const MonacoMarkdownEditor = (props: MarkdownEditorProps) => {
   return (
     <div>
       <MonacoEditor
-        value={text}
+        value={typeof text === "string" ? text : JSON.stringify(text)}
         onChange={(value) => setText(value || "")}
         language={language}
         theme={currentTheme === "dark" ? "vs-dark" : "vs-light"}
@@ -65,7 +65,7 @@ const MonacoMarkdownEditor = (props: MarkdownEditorProps) => {
 };
 
 interface MarkdownEditorProps {
-  text: string;
+  text: string | object;
   setText: (text: string) => void;
   language: "json" | "markdown" | "python";
   disabled?: boolean;
@@ -90,6 +90,7 @@ const MarkdownEditor = (props: MarkdownEditorProps) => {
   } = props;
 
   const text = useMemo(() => {
+    console.log({ noSafeText });
     if (typeof noSafeText === "string") {
       return noSafeText;
     }

@@ -13,7 +13,11 @@ import useNotification from "../../shared/notification/useNotification";
 import { heliconeRequestToMappedContent } from "@helicone-package/llm-mapper/utils/getMappedContent";
 import { useGetRequestWithBodies } from "@/services/hooks/requests";
 import { OPENROUTER_MODEL_MAP } from "./new/openRouterModelMap";
-import { MappedLLMRequest, Tool } from "@helicone-package/llm-mapper/types";
+import {
+  MappedLLMRequest,
+  Tool,
+  Provider,
+} from "@helicone-package/llm-mapper/types";
 import { generateStream } from "@/lib/api/llm/generate-stream";
 import { processStream } from "@/lib/api/llm/process-stream";
 import { CommandItem } from "@/components/ui/command";
@@ -38,6 +42,65 @@ import { openaiChatMapper } from "@helicone-package/llm-mapper/mappers/openai/ch
 import { JsonRenderer } from "../requests/components/chatComponent/single/JsonRenderer";
 import findBestMatch from "string-similarity-js";
 
+const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
+  _type: "openai-chat",
+  id: "",
+  preview: {
+    request: "You are a helpful AI assistant.",
+    response: "",
+    concatenatedMessages: [
+      {
+        _type: "message",
+        role: "system",
+        content: "You are a helpful AI assistant.",
+      },
+    ],
+  },
+  model: "gpt-3.5-turbo",
+  raw: {
+    request: {},
+    response: {},
+  },
+  heliconeMetadata: {
+    requestId: "",
+    path: "",
+    countryCode: null,
+    cacheEnabled: false,
+    cacheReferenceId: null,
+    createdAt: new Date().toISOString(),
+    totalTokens: null,
+    promptTokens: null,
+    completionTokens: null,
+    latency: null,
+    user: null,
+    status: {
+      code: 200,
+      statusType: "success",
+    },
+    customProperties: null,
+    cost: null,
+    feedback: {
+      createdAt: null,
+      id: null,
+      rating: null,
+    },
+    provider: "OPENAI" as Provider,
+  },
+  schema: {
+    request: {
+      messages: [
+        {
+          _type: "message",
+          role: "system",
+          content: "You are a helpful AI assistant.",
+        },
+      ],
+      model: "gpt-3.5-turbo",
+      temperature: 0.7,
+    },
+  },
+};
+
 const PlaygroundPage = (props: PlaygroundPageProps) => {
   const { requestId } = props;
 
@@ -46,11 +109,10 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   const { data: requestData, isLoading: isRequestLoading } =
     useGetRequestWithBodies(requestId ?? "");
 
-  const [selectedModel, setSelectedModel] = useState<string>("");
+  const [selectedModel, setSelectedModel] = useState<string>("gpt-3.5-turbo");
 
-  const [mappedContent, setMappedContent] = useState<MappedLLMRequest | null>(
-    null
-  );
+  const [mappedContent, setMappedContent] =
+    useState<MappedLLMRequest>(DEFAULT_EMPTY_CHAT);
 
   const defaultMappedContent = useMemo(() => {
     if (requestData?.data && !isRequestLoading) {
@@ -67,13 +129,11 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         );
         setSelectedModel(OPENROUTER_MODEL_MAP[closestMatch.target]);
       }
-      console.log("data", requestData.data);
       const mappedContent = heliconeRequestToMappedContent(requestData.data);
-      console.log("mappedContent", mappedContent);
       setMappedContent(mappedContent);
       return mappedContent;
     }
-    return null;
+    return DEFAULT_EMPTY_CHAT;
   }, [requestData, isRequestLoading]);
 
   console.log(defaultMappedContent, selectedModel);
