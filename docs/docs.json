@@ -17,15 +17,20 @@
     "groups": [
       {
         "group": "Getting Started",
+        "pages": ["/introduction", "/quickstart", "/router-health"]
+      },
+      {
+        "group": "Features",
         "pages": [
-          "/introduction",
-          "/quickstart",
-          "/loadbalancing",
-          "/secret-management",
-          "/rate-limiting",
-          "/cache",
-          "/otel-observability"
+          "/features/loadbalancing",
+          "/features/secret-management",
+          "/features/rate-limiting",
+          "/features/cache"
         ]
+      },
+      {
+        "group": "Debugging",
+        "pages": ["/debugging/router-health"]
       }
     ]
   }
