@@ -22,3 +22,17 @@
 - Run unit + integration tests: `cargo int-test`
 
 - TODO: which various homebrew packages are needed? tls, protoc, etc
+
+# DEMO
+- setup env vars
+- run jawn+web
+- run router locally with openai/anthropic: `cargo run -- -c ./llm-proxy/config/demo.yaml`
+- send single request, see it logged in helicone dashboard: `cargo run -p test`
+- change the load balancing strategy: uncomment file, `cargo run -- -c ...` again
+- send some more requests, see it logged in helicone dashboard: `cargo run -p test`
+- talk about future load balancing strategies
+- load test example:
+  - in one terminal: `cargo rlt`
+  - in another: `cargo run -p mock-server`
+  - in another: `cargo run -p test -- --run-forever`
+- show grafana dashboard

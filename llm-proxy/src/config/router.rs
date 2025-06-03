@@ -41,11 +41,16 @@ pub struct RouterConfig {
     #[serde(default = "default_request_style")]
     pub request_style: InferenceProvider,
     pub balance: BalanceConfig,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub model_mappings: Option<ModelMappingConfig>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub cache: Option<CacheControlConfig>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub retries: Option<RetryConfig>,
+    #[serde(
+        default,
+        skip_serializing_if = "RouterRateLimitConfig::is_disabled"
+    )]
     pub rate_limit: RouterRateLimitConfig,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub spend_control: Option<SpendControlConfig>,
@@ -120,6 +125,13 @@ pub enum RouterRateLimitConfig {
         #[serde(default, flatten)]
         limits: LimitConfig,
     },
+}
+
+impl RouterRateLimitConfig {
+    #[must_use]
+    pub fn is_disabled(&self) -> bool {
+        matches!(self, RouterRateLimitConfig::None)
+    }
 }
 
 #[cfg(feature = "testing")]

@@ -7,6 +7,7 @@ use crate::config::router::RouterConfig;
 #[derive(
     Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, Default,
 )]
+#[serde(rename_all = "kebab-case")]
 pub enum RouterId {
     Uuid(Uuid),
     #[default]

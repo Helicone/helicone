@@ -1,0 +1,19 @@
+routers:
+  default:
+    balance:
+      chat:
+        strategy: p2-c
+        targets:
+          - openai
+          - anthropic
+
+# routers:
+#   default:
+#     balance:
+#       chat:
+#         strategy: weighted
+#         targets:
+#         - provider: anthropic
+#           weight: '0.95'
+#         - provider: openai
+#           weight: '0.05'
