@@ -203,38 +203,9 @@ interface RequestResponseRMTToOperators {
   assets: SingleKey<TextOperators>;
 }
 
-interface SessionRMTToOperators {
+interface SessionRMTToOperators extends RequestResponseRMTToOperators {
   session_id: SingleKey<TextOperators>;
   session_name: SingleKey<TextOperators>;
-  latency: SingleKey<NumberOperators>;
-  status: SingleKey<NumberOperators>;
-  request_created_at: SingleKey<TimestampOperatorsTyped>;
-  response_created_at: SingleKey<TimestampOperatorsTyped>;
-  model: SingleKey<TextOperators>;
-  user_id: SingleKey<TextOperators>;
-  organization_id: SingleKey<TextOperators>;
-  node_id: SingleKey<TextOperators>;
-  job_id: SingleKey<TextOperators>;
-  threat: SingleKey<BooleanOperators>;
-  request_id: SingleKey<TextOperators>;
-  prompt_tokens: SingleKey<NumberOperators>;
-  completion_tokens: SingleKey<NumberOperators>;
-  total_tokens: SingleKey<NumberOperators>;
-  target_url: SingleKey<TextOperators>;
-  properties: {
-    [key: string]: SingleKey<TextOperators>;
-  };
-  search_properties: {
-    [key: string]: SingleKey<TextOperators>;
-  };
-  scores: {
-    [key: string]: SingleKey<TextOperators>;
-  };
-  scores_column: SingleKey<TextOperators>;
-  request_body: SingleKey<VectorOperators>;
-  response_body: SingleKey<VectorOperators>;
-  cache_enabled: SingleKey<BooleanOperators>;
-  cache_reference_id: SingleKey<TextOperators>;
 }
 
 interface SessionsToOperators {
