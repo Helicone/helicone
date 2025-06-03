@@ -3,7 +3,7 @@ import { HeliconeQueueProducer } from "../lib/clients/HeliconeQuequeProducer";
 import type { KafkaMessageContents } from "../lib/handlers/HandlerContext";
 import { S3Client } from "../lib/shared/db/s3Client";
 import { AuthParams } from "../packages/common/auth/types";
-import { Provider } from "../packages/llm-mapper/types";
+import { Provider } from "@helicone-package/llm-mapper/types";
 
 export type AsyncLogModel = {
   providerRequest: ProviderRequest;
