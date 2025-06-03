@@ -1,7 +1,7 @@
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import { buildFilterWithAuthClickHouseCacheMetrics } from "../../../services/lib/filters/filters";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
+import { buildFilterWithAuthClickHouseCacheMetrics } from "@helicone-package/filters/filters";
 import { Result, resultMap } from "@/packages/common/result";
-import { TimeFilter } from "@/services/lib/filters/filterDefs";
+import { TimeFilter } from "@helicone-package/filters/filterDefs";
 import { dbQueryClickhouse } from "../db/dbExecute";
 import { ModelMetrics } from "../metrics/modelMetrics";
 

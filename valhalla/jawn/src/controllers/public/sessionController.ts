@@ -10,7 +10,7 @@ import {
   Tags,
 } from "tsoa";
 import { KVCache } from "../../lib/cache/kvCache";
-import { FilterLeafSubset } from "../../lib/shared/filters/filterDefs";
+import { FilterLeafSubset } from "@helicone-package/filters/filterDefs";
 import {
   SessionManager,
   SessionMetrics,
@@ -20,7 +20,7 @@ import {
 import { err, ok, Result } from "../../packages/common/result";
 import { type JawnAuthenticatedRequest } from "../../types/request";
 import { cacheResultCustom } from "../../utils/cacheResult";
-import { TimeFilterMs } from "../../lib/shared/filters/timeFilter";
+import { TimeFilterMs } from "@helicone-package/filters/filterDefs";
 
 export type SessionFilterBranch = {
   left: SessionFilterNode;

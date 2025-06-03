@@ -7,9 +7,9 @@ import {
 import { TimeIncrement } from "../../../lib/timeCalculations/fetchTimeData";
 import { CacheHitsOverTime } from "../../../pages/api/cache/getCacheHitsOverTime";
 import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
 import { useGetRequests } from "../../../services/hooks/requests";
-import { TimeFilter } from "@/services/lib/filters/filterDefs";
+import { TimeFilter } from "@helicone-package/filters/filterDefs";
 import {
   useGetCacheCount,
   useGetCacheTotalSavings,

@@ -5,12 +5,12 @@ import { FilterExpression } from "@/filterAST/filterAst";
 import { toFilterNode } from "@/filterAST/toFilterNode";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { getTimeMap } from "../../lib/timeCalculations/constants";
-import { filterListToTree } from "../lib/filters/filterListToTree";
+import { filterListToTree } from "@helicone-package/filters/helpers";
 import {
   DASHBOARD_PAGE_TABLE_FILTERS,
   SingleFilterDef,
-} from "../lib/filters/frontendFilterDefs";
-import { filterUIToFilterLeafs } from "../lib/filters/helpers/filterFunctions";
+} from "@helicone-package/filters/frontendFilterDefs";
+import { filterUIToFilterLeafs } from "@helicone-package/filters/helpers";
 
 const useUserId = (userId: string) => {
   const org = useOrg();

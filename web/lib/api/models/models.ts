@@ -1,9 +1,9 @@
 import { clickhousePriceCalc } from "@helicone-package/cost";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
 import {
   buildFilterClickHouse,
   buildFilterWithAuthClickHouse,
-} from "../../../services/lib/filters/filters";
+} from "@helicone-package/filters/filters";
 import { Result } from "@/packages/common/result";
 import { dbQueryClickhouse } from "../db/dbExecute";
 

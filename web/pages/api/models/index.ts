@@ -6,7 +6,7 @@ import {
 } from "../../../lib/api/handlerWrappers";
 import { ModelMetric, modelMetrics } from "../../../lib/api/models/models";
 import { Result } from "@/packages/common/result";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
 
 async function handler(
   options: HandlerWrapperOptions<Result<ModelMetric[], string>>

@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { TimeFilter } from "@/types/timeFilter";
 import { Result } from "@/packages/common/result";
 import { CountryData } from "../lib/country";
-import { FilterNode } from "../lib/filters/filterDefs";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
 
 const useCountries = (
   timeFilter: TimeFilter,

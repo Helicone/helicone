@@ -6,7 +6,7 @@ import {
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { Result } from "@/packages/common/result";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
 async function handler({
   req,
   res,

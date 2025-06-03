@@ -1,11 +1,4 @@
-export type UIFilterRow = {
-  filterMapIdx: number;
-  operatorIdx: number;
-  value: string;
-};
 
-import { SingleFilterDef } from "./frontendFilterDefs";
-import { TimeFilter } from "./timeFilter";
 export type AllOperators =
   | "equals"
   | "like"
@@ -34,9 +27,9 @@ export type NumberOperators = Record<
 
 export type BooleanOperators = Record<"equals", boolean>;
 
-export type TimestampOperators = Record<"gte" | "lte" | "lt" | "gt" | "equals", string>;
+export type TimestampOperators = Record<"gte" | "lte" | "lt" | "gt", string>;
 
-export type TimestampOperatorsTyped = Record<"gte" | "lte" | "lt" | "gt" | "equals", Date>;
+export type TimestampOperatorsTyped = Record<"gte" | "lte" | "lt" | "gt", Date>;
 
 export type AnyOperator =
   | SingleKey<TextOperators>
@@ -44,77 +37,21 @@ export type AnyOperator =
   | SingleKey<TimestampOperators>
   | SingleKey<TimestampOperatorsTyped>
   | SingleKey<BooleanOperators>;
-
 export type SingleKey<T> = Partial<T>;
 
-export type RequestTableToOperators = {
-  prompt: SingleKey<TextOperators>;
-  created_at: SingleKey<TimestampOperators>;
-  user_id: SingleKey<TextOperators>;
-  auth_hash: SingleKey<TextOperators>;
-  org_id: SingleKey<TextOperators>;
-  id: SingleKey<TextOperators>;
-  node_id: SingleKey<TextOperators>;
-  model: SingleKey<TextOperators>;
-  modelOverride: SingleKey<TextOperators>;
-  path: SingleKey<TextOperators>;
-  prompt_id: SingleKey<TextOperators>;
-};
+export interface TimeFilter {
+  start: Date;
+  end: Date;
+}
 
-export type FilterLeafRequest = SingleKey<RequestTableToOperators>;
+export interface TimeFilterMs {
+  startTimeUnixMs: number;
+  endTimeUnixMs: number;
+}
 
-export type FeedbackTableToOperators = {
-  id: SingleKey<NumberOperators>;
-  created_at: SingleKey<TimestampOperators>;
-  rating: SingleKey<BooleanOperators>;
-  response_id: SingleKey<TextOperators>;
-};
+// NON CLICKHOUSE TABLES
 
-export type FilterLeafFeedback = SingleKey<FeedbackTableToOperators>;
-
-export type PropertiesTableToOperators = {
-  auth_hash: SingleKey<TextOperators>;
-  key: SingleKey<TextOperators>;
-  value: SingleKey<TextOperators>;
-};
-
-export type CacheHitsTableToOperators = {
-  organization_id: SingleKey<TextOperators>;
-  request_id: SingleKey<TextOperators>;
-  latency: SingleKey<NumberOperators>;
-  completion_tokens: SingleKey<NumberOperators>;
-  prompt_tokens: SingleKey<NumberOperators>;
-  created_at: SingleKey<TimestampOperatorsTyped>;
-};
-
-export type FilterLeafCacheHits = SingleKey<CacheHitsTableToOperators>;
-
-export type RateLimitTableToOperators = {
-  organization_id: SingleKey<TextOperators>;
-  created_at: SingleKey<TimestampOperatorsTyped>;
-};
-
-export type FilterLeafRateLimitLog = SingleKey<RateLimitTableToOperators>;
-
-export type FilterLeafPropertiesTable = SingleKey<PropertiesTableToOperators>;
-
-type UserApiKeysTableToOperators = {
-  api_key_hash: SingleKey<TextOperators>;
-  api_key_name: SingleKey<TextOperators>;
-};
-
-export type FilterLeafUserApiKeys = SingleKey<UserApiKeysTableToOperators>;
-
-type ResponseTableToOperators = {
-  body_tokens: SingleKey<NumberOperators>;
-  body_model: SingleKey<TextOperators>;
-  body_completion: SingleKey<TextOperators>;
-  status: SingleKey<NumberOperators>;
-  model: SingleKey<TextOperators>;
-};
-
-export type FilterLeafResponse = SingleKey<ResponseTableToOperators>;
-
+// user_metrics
 type UserMetricsToOperators = {
   user_id: SingleKey<TextOperators>;
   last_active: SingleKey<TimestampOperators>;
@@ -126,33 +63,101 @@ type UserMetricsToOperators = {
   total_prompt_tokens: SingleKey<NumberOperators>;
   cost: SingleKey<NumberOperators>;
 };
-
 export type FilterLeafUserMetrics = SingleKey<UserMetricsToOperators>;
 
-type ResponseCopyV1ToOperators = {
-  latency: SingleKey<NumberOperators>;
-  status: SingleKey<NumberOperators>;
-  request_created_at: SingleKey<TimestampOperatorsTyped>;
-  response_created_at: SingleKey<TimestampOperatorsTyped>;
-  auth_hash: SingleKey<TextOperators>;
-  model: SingleKey<TextOperators>;
-  user_id: SingleKey<TextOperators>;
+// user_api_keys
+type UserApiKeysTableToOperators = {
+  api_key_hash: SingleKey<TextOperators>;
+  api_key_name: SingleKey<TextOperators>;
 };
-export type FilterLeafResponseCopyV1 = SingleKey<ResponseCopyV1ToOperators>;
-interface ResponseCopyV2ToOperators extends ResponseCopyV1ToOperators {
-  organization_id: SingleKey<TextOperators>;
-}
+export type FilterLeafUserApiKeys = SingleKey<UserApiKeysTableToOperators>;
 
-export type FilterLeafResponseCopyV2 = SingleKey<ResponseCopyV2ToOperators>;
+// response
+type ResponseTableToOperators = {
+  body_tokens: SingleKey<NumberOperators>;
+  body_model: SingleKey<TextOperators>;
+  body_completion: SingleKey<TextOperators>;
+  status: SingleKey<NumberOperators>;
+  model: SingleKey<TextOperators>;
+};
+export type FilterLeafResponse = SingleKey<ResponseTableToOperators>;
 
-interface ResponseCopyV3ToOperators extends ResponseCopyV2ToOperators {
+// request
+export type RequestTableToOperators = {
+  prompt: SingleKey<TextOperators>;
+  created_at: SingleKey<TimestampOperators>;
+  user_id: SingleKey<TextOperators>;
+  auth_hash: SingleKey<TextOperators>;
+  org_id: SingleKey<TextOperators>;
+  id: SingleKey<TextOperators>;
+  node_id: SingleKey<TextOperators>;
+  model: SingleKey<TextOperators>;
+  modelOverride: SingleKey<TextOperators>;
+  path: SingleKey<TextOperators>;
+  country_code: SingleKey<TextOperators>;
+  prompt_id: SingleKey<TextOperators>;
+};
+export type FilterLeafRequest = SingleKey<RequestTableToOperators>;
+
+// feedback
+export type FeedbackTableToOperators = {
+  id: SingleKey<NumberOperators>;
+  created_at: SingleKey<TimestampOperators>;
   rating: SingleKey<BooleanOperators>;
-  feedback_created_at: SingleKey<TimestampOperatorsTyped>;
-  feedback_id: SingleKey<TextOperators>;
-}
+  response_id: SingleKey<TextOperators>;
+};
+export type FilterLeafFeedback = SingleKey<FeedbackTableToOperators>;
 
-export type FilterLeafResponseCopyV3 = SingleKey<ResponseCopyV3ToOperators>;
+// properties_table
+export type PropertiesTableToOperators = {
+  auth_hash: SingleKey<TextOperators>;
+  key: SingleKey<TextOperators>;
+  value: SingleKey<TextOperators>;
+};
+export type FilterLeafPropertiesTable = SingleKey<PropertiesTableToOperators>;
 
+// prompt_v2
+type PromptToOperators = {
+  id: SingleKey<TextOperators>;
+  user_defined_id: SingleKey<TextOperators>;
+};
+
+export type FilterLeafPrompt = SingleKey<PromptToOperators>;
+
+// prompts_versions
+type PromptVersionsToOperators = {
+  minor_version: SingleKey<NumberOperators>;
+  major_version: SingleKey<NumberOperators>;
+  id: SingleKey<TextOperators>;
+  prompt_v2: SingleKey<TextOperators>;
+};
+export type FilterLeafPromptVersions = SingleKey<PromptVersionsToOperators>;
+
+// experiment
+type ExperimentToOperators = {
+  id: SingleKey<TextOperators>;
+  prompt_v2: SingleKey<TextOperators>;
+};
+export type FilterLeafExperiment = SingleKey<ExperimentToOperators>;
+
+// experiment_hypothesis_run
+type ExperimentHypothesisRunToOperator = {
+  result_request_id: SingleKey<TextOperators>;
+};
+export type ExperimentHypothesisRunScoreValue = SingleKey<ExperimentHypothesisRunToOperator>;
+
+// score_value
+type ScoreValueToOperator = {
+  request_id: SingleKey<TextOperators>;
+};
+export type FilterLeafScoreValue = 
+  SingleKey<ScoreValueToOperator>;
+
+
+
+// CLICKHOUSE TABLES
+
+// request_response_log
 interface RequestResponseLogToOperators {
   latency: SingleKey<NumberOperators>;
   status: SingleKey<NumberOperators>;
@@ -166,7 +171,10 @@ interface RequestResponseLogToOperators {
   job_id: SingleKey<TextOperators>;
   threat: SingleKey<BooleanOperators>;
 }
+export type FilterLeafRequestResponseLog =
+  SingleKey<RequestResponseLogToOperators>;
 
+// request_response_rmt
 interface RequestResponseRMTToOperators {
   latency: SingleKey<NumberOperators>;
   time_to_first_token: SingleKey<NumberOperators>;
@@ -201,8 +209,12 @@ interface RequestResponseRMTToOperators {
   cache_enabled: SingleKey<BooleanOperators>;
   cache_reference_id: SingleKey<TextOperators>;
   assets: SingleKey<TextOperators>;
+  "helicone-score-feedback": SingleKey<BooleanOperators>; // TODO: make this not a string literal key
 }
+export type FilterLeafRequestResponseRMT =
+  SingleKey<RequestResponseRMTToOperators>;
 
+// sessions_request_response_rmt
 interface SessionsRequestResponseRMTToOperators {
   session_session_id: SingleKey<TextOperators>;
   session_session_name: SingleKey<TextOperators>;
@@ -215,45 +227,10 @@ interface SessionsRequestResponseRMTToOperators {
   session_latest_request_created_at: SingleKey<TimestampOperatorsTyped>;
   session_tag: SingleKey<TextOperators>;
 }
-
-export type FilterLeafRequestResponseLog =
-  SingleKey<RequestResponseLogToOperators>;
-
-export type FilterLeafRequestResponseRMT =
-  SingleKey<RequestResponseRMTToOperators>;
-
 export type FilterLeafSessionsRequestResponseRMT =
   SingleKey<SessionsRequestResponseRMTToOperators>;
 
-type PropertiesCopyV2ToOperators = {
-  key: SingleKey<TextOperators>;
-  value: SingleKey<TextOperators>;
-  organization_id: SingleKey<TextOperators>;
-};
-
-export type FilterLeafPropertiesCopyV2 = SingleKey<PropertiesCopyV2ToOperators>;
-
-export type FilterLeafPropertiesV3 = FilterLeafPropertiesCopyV2;
-
-type PropertyWithResponseV1ToOperators = {
-  property_key: SingleKey<TextOperators>;
-  property_value: SingleKey<TextOperators>;
-  request_created_at: SingleKey<TimestampOperatorsTyped>;
-  organization_id: SingleKey<TextOperators>;
-  threat: SingleKey<BooleanOperators>;
-};
-
-export type FilterLeafPropertyWithResponseV1 =
-  SingleKey<PropertyWithResponseV1ToOperators>;
-
-type RequestResponseSearchToOperators = {
-  request_body_vector: SingleKey<VectorOperators>;
-  response_body_vector: SingleKey<VectorOperators>;
-};
-
-export type FilterLeafRequestResponseSearch =
-  SingleKey<RequestResponseSearchToOperators>;
-
+// users_view
 type UserViewToOperators = {
   user_id: SingleKey<TextOperators>;
   active_for: SingleKey<NumberOperators>;
@@ -266,9 +243,28 @@ type UserViewToOperators = {
   total_prompt_token: SingleKey<NumberOperators>;
   cost: SingleKey<NumberOperators>;
 };
-
 export type FilterLeafUserView = SingleKey<UserViewToOperators>;
 
+// properties_v3
+type PropertiesV3ToOperators = {
+  key: SingleKey<TextOperators>;
+  value: SingleKey<TextOperators>;
+  organization_id: SingleKey<TextOperators>;
+};
+export type FilterLeafPropertiesV3 = SingleKey<PropertiesV3ToOperators>;
+
+// property_with_response_v1
+type PropertyWithResponseV1ToOperators = {
+  property_key: SingleKey<TextOperators>;
+  property_value: SingleKey<TextOperators>;
+  request_created_at: SingleKey<TimestampOperatorsTyped>;
+  organization_id: SingleKey<TextOperators>;
+  threat: SingleKey<BooleanOperators>;
+};
+export type FilterLeafPropertyWithResponseV1 =
+  SingleKey<PropertyWithResponseV1ToOperators>;
+
+// job
 type JobToOperators = {
   id: SingleKey<TextOperators>;
   name: SingleKey<TextOperators>;
@@ -282,9 +278,9 @@ type JobToOperators = {
   };
   org_id: SingleKey<TextOperators>;
 };
-
 export type FilterLeafJob = SingleKey<JobToOperators>;
 
+// job_node
 type NodesToOperators = {
   id: SingleKey<TextOperators>;
   name: SingleKey<TextOperators>;
@@ -299,46 +295,41 @@ type NodesToOperators = {
   };
   org_id: SingleKey<TextOperators>;
 };
-
 export type FilterLeafNode = SingleKey<NodesToOperators>;
 
-type PromptVersionsToOperators = {
-  minor_version: SingleKey<NumberOperators>;
-  major_version: SingleKey<NumberOperators>;
-  id: SingleKey<TextOperators>;
-  prompt_v2: SingleKey<TextOperators>;
-};
-
-export type FilterLeafPromptVersions = SingleKey<PromptVersionsToOperators>;
-
-type PromptToOperators = {
-  id: SingleKey<TextOperators>;
-  user_defined_id: SingleKey<TextOperators>;
-};
-
-export type FilterLeafPrompt = SingleKey<PromptToOperators>;
-
-type ExperimentToOperators = {
-  id: SingleKey<TextOperators>;
-  prompt_v2: SingleKey<TextOperators>;
-};
-
-export type FilterLeafExperiment = SingleKey<ExperimentToOperators>;
-
-type ScoreValueToOperator = {
+// cache_metrics
+export type CacheMetricsTableToOperators = {
+  organization_id: SingleKey<TextOperators>;
   request_id: SingleKey<TextOperators>;
+  date: SingleKey<TimestampOperatorsTyped>;
+  hour: SingleKey<NumberOperators>;
+  model: SingleKey<TextOperators>;
+  cache_hit_count: SingleKey<NumberOperators>;
+  saved_latency_ms: SingleKey<NumberOperators>;
+  saved_completion_tokens: SingleKey<NumberOperators>;
+  saved_prompt_tokens: SingleKey<NumberOperators>;
+  saved_completion_audio_tokens: SingleKey<NumberOperators>;
+  saved_prompt_audio_tokens: SingleKey<NumberOperators>;
+  saved_prompt_cache_write_tokens: SingleKey<NumberOperators>;
+  saved_prompt_cache_read_tokens: SingleKey<NumberOperators>;
+  first_hit: SingleKey<TimestampOperatorsTyped>;
+  last_hit: SingleKey<TimestampOperatorsTyped>;
+  request_body: SingleKey<TextOperators>;
+  response_body: SingleKey<TextOperators>;
+}
+export type FilterLeafCacheMetrics = SingleKey<CacheMetricsTableToOperators>;
+
+// rate_limit_log
+export type RateLimitTableToOperators = {
+  organization_id: SingleKey<TextOperators>;
+  created_at: SingleKey<TimestampOperatorsTyped>;
 };
+export type FilterLeafRateLimitLog = SingleKey<RateLimitTableToOperators>;
 
-export type FilterLeafScoreValue = SingleKey<ScoreValueToOperator>;
 
-type ExperimentHypothesisRunToOperator = {
-  result_request_id: SingleKey<TextOperators>;
-};
-
-export type ExperimentHypothesisRunScoreValue =
-  SingleKey<ExperimentHypothesisRunToOperator>;
-
+// FilterLeaf
 export type TablesAndViews = {
+  // NON CLICKHOUSE TABLES
   user_metrics: FilterLeafUserMetrics;
   user_api_keys: FilterLeafUserApiKeys;
   response: FilterLeafResponse;
@@ -351,6 +342,7 @@ export type TablesAndViews = {
   experiment_hypothesis_run: ExperimentHypothesisRunScoreValue;
   score_value: FilterLeafScoreValue;
 
+
   // CLICKHOUSE TABLES
   request_response_log: FilterLeafRequestResponseLog;
   request_response_rmt: FilterLeafRequestResponseRMT;
@@ -360,7 +352,7 @@ export type TablesAndViews = {
   property_with_response_v1: FilterLeafPropertyWithResponseV1;
   job: FilterLeafJob;
   job_node: FilterLeafNode;
-  cache_hits: FilterLeafCacheHits;
+  cache_metrics: FilterLeafCacheMetrics;
   rate_limit_log: FilterLeafRateLimitLog;
 
   properties: {
@@ -370,22 +362,22 @@ export type TablesAndViews = {
     [key: string]: SingleKey<TextOperators>;
   };
 };
-
 export type FilterLeaf = SingleKey<TablesAndViews>;
+
+export type FilterNode = FilterLeaf | FilterBranch | "all";
 
 export interface FilterBranch {
   left: FilterNode;
-  operator: "or" | "and"; // Can add more later
+  operator: "or" | "and";
   right: FilterNode;
 }
-
-export type FilterNode = FilterLeaf | FilterBranch | "all";
 
 export type FilterLeafSubset<T extends keyof TablesAndViews> = Pick<
   FilterLeaf,
   T
 >;
 
+// Note: (justin)
 // I am keeping this here just incase anyone in the future tries to do this... we know it has been done before.
 // Basically this would be awesome instead of having to create types like RequestFilterNode, but tsoa is not
 // sophisticated enough to handle this.
@@ -401,109 +393,3 @@ export type FilterLeafSubset<T extends keyof TablesAndViews> = Pick<
 //   | FilterBranchSubset<T>
 //   | "all";
 
-export function timeFilterToFilterNode(
-  filter: TimeFilter,
-  table: keyof TablesAndViews
-): FilterNode {
-  if (table === "request_response_rmt") {
-    return {
-      left: {
-        request_response_rmt: {
-          request_created_at: {
-            gte: filter.start,
-          },
-        },
-      },
-      right: {
-        request_response_rmt: {
-          request_created_at: {
-            lte: filter.end,
-          },
-        },
-      },
-      operator: "and",
-    };
-  } else if (table === "property_with_response_v1") {
-    return {
-      left: {
-        property_with_response_v1: {
-          request_created_at: {
-            gte: filter.start,
-          },
-        },
-      },
-      right: {
-        property_with_response_v1: {
-          request_created_at: {
-            lte: filter.end,
-          },
-        },
-      },
-      operator: "and",
-    };
-  }
-
-  throw new Error("Table not supported");
-}
-
-export function filterListToTree(
-  list: FilterNode[],
-  operator: "or" | "and"
-): FilterNode {
-  if (list.length === 0) {
-    return "all";
-  } else if (list.length === 1) {
-    return list[0];
-  } else {
-    return {
-      left: list[0],
-      operator,
-      right: filterListToTree(list.slice(1), operator),
-    };
-  }
-}
-
-export function filterUIToFilterLeafs(
-  filterMap: SingleFilterDef<any>[],
-  filters: UIFilterRow[]
-): FilterLeaf[] {
-  return filters
-    .filter((filter) => filter.value !== "")
-    .map((filter) => {
-      if (
-        filterMap &&
-        filterMap[filter.filterMapIdx].isCustomProperty &&
-        filterMap[filter.filterMapIdx].isCustomProperty === true
-      ) {
-        return {
-          request_response_rmt: {
-            properties: {
-              [filterMap[filter.filterMapIdx]?.column]: {
-                [filterMap[filter.filterMapIdx]?.operators[filter.operatorIdx]
-                  ?.value]: filter.value,
-              },
-            },
-          },
-        };
-      }
-      const leaf: FilterLeaf = {
-        [filterMap[filter.filterMapIdx]?.table]: {
-          [filterMap[filter.filterMapIdx]?.column]: {
-            [filterMap[filter.filterMapIdx]?.operators[filter.operatorIdx]
-              ?.value]: filter.value,
-          },
-        },
-      };
-      return leaf;
-    });
-}
-
-export const parseKey = (keyString: string): FilterLeaf => {
-  return {
-    request: {
-      auth_hash: {
-        equals: keyString,
-      },
-    },
-  };
-};
