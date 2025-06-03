@@ -21,7 +21,7 @@ import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
 import { useGetUnauthorized } from "../../../services/hooks/dashboard";
-import { TimeFilter } from "../../../services/lib/filters/filterDefs";
+import { TimeFilter } from "@helicone-package/filters/filterDefs";
 import { SortDirection } from "../../../services/lib/sorts/requests/sorts";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
 import ThemedTable from "../../shared/themed/table/themedTable";

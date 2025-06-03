@@ -5,7 +5,7 @@ import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
 import { TimeIncrement } from "../../../lib/timeCalculations/fetchTimeData";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { getMockQuantiles } from "./mockDashboardData";
 

@@ -3,7 +3,7 @@ import { Result, resultMap } from "@/packages/common/result";
 import { TimeIncrement } from "../../../../lib/timeCalculations/fetchTimeData";
 import { RateLimitOverTime } from "../../../../pages/api/metrics/RateLimitOverTime";
 import { useBackendMetricCall } from "../../../../services/hooks/useBackendFunction";
-import { FilterNode } from "../../../../services/lib/filters/filterDefs";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
 
 export interface RateLimitPageData {
   timeFilter: {
