@@ -36,7 +36,6 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Check, ChevronsUpDownIcon } from "lucide-react";
-import { RenderMappedRequest } from "../requests/RenderHeliconeRequest";
 import Chat from "../requests/components/Chat";
 import { openaiChatMapper } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
 import { JsonRenderer } from "../requests/components/chatComponent/single/JsonRenderer";
@@ -232,21 +231,11 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                 );
             }
           })()}
+        </div>
+        <div className="flex flex-col w-full max-w-[16rem] h-full space-y-8 ">
           <div className="flex flex-col gap-2 p-20">
             <JsonRenderer data={response} showCopyButton={false} />
           </div>
-          {/* TODO: Keeping the following here for reference, remove later */}
-          {false && !isRequestLoading && defaultMappedContent && (
-            <RenderMappedRequest
-              mappedRequest={defaultMappedContent as MappedLLMRequest}
-              messageIndexFilter={{
-                startIndex: 0,
-                endIndex: 0,
-              }}
-            />
-          )}
-        </div>
-        <div className="flex flex-col w-full max-w-[16rem] h-full space-y-8 ">
           <div className="flex flex-col space-y-2 w-full">
             <div className="flex flex-row w-full space-x-1 items-center">
               <p className="font-medium text-sm text-gray-900 dark:text-gray-100">

@@ -8,8 +8,8 @@
   },
   "rules": {
     "unused-imports/no-unused-imports": "error",
-    "no-unused-vars": "warn",
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
     "no-undef": "warn",
-    "no-console": "warn"
+    "no-console": ["warn", { "allow": ["warn", "error"] }]
   }
 }

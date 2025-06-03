@@ -90,7 +90,6 @@ const MarkdownEditor = (props: MarkdownEditorProps) => {
   } = props;
 
   const text = useMemo(() => {
-    console.log({ noSafeText });
     if (typeof noSafeText === "string") {
       return noSafeText;
     }
