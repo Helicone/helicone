@@ -122,15 +122,7 @@
                   },
                   "getting-started/integration-method/perplexity",
                   "getting-started/integration-method/together",
-                  "getting-started/integration-method/x",
-                  {
-                    "group": "Tools",
-                    "pages": [
-                      "integrations/tools/curl",
-                      "integrations/tools/javascript",
-                      "integrations/tools/python"
-                    ]
-                  }
+                  "getting-started/integration-method/x"
                 ]
               },
               {
@@ -164,6 +156,15 @@
                       "other-integrations/upstash-qstash"
                     ]
                   },
+                  "getting-started/integration-method/vercelai"
+                ]
+              },
+              {
+                "group": "Build Your Own",
+                "pages": [
+                  "integrations/tools/curl",
+                  "integrations/tools/javascript",
+                  "integrations/tools/python",
                   {
                     "group": "Vector DB",
                     "pages": [
@@ -171,8 +172,7 @@
                       "integrations/vectordb/javascript",
                       "integrations/vectordb/python"
                     ]
-                  },
-                  "getting-started/integration-method/vercelai"
+                  }
                 ]
               }
             ]
