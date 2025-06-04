@@ -194,9 +194,7 @@ elif [ "$MODE" = "ecr" ]; then
   
   # Define images and their contexts for ECR
   ECR_IMAGES=(
-    "helicone/worker:../worker"
     "helicone/web:../web"
-    "helicone/web-dev:../web"
     "helicone/jawn:.."
     "helicone/migrations:.."
   )
