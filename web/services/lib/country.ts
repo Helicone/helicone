@@ -1,10 +1,10 @@
 import { dbQueryClickhouse } from "../../lib/api/db/dbExecute";
 import { Result } from "@/packages/common/result";
-import { FilterNode } from "./filters/filterDefs";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
 import {
   buildFilterClickHouse,
   buildFilterWithAuthClickHouse,
-} from "./filters/filters";
+} from "@helicone-package/filters/filters";
 
 export interface CountryData {
   country: string;

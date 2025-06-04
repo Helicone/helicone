@@ -7,10 +7,7 @@ import {
   BackendMetricsCall,
   useBackendMetricCall,
 } from "../../../services/hooks/useBackendFunction";
-import {
-  FilterBranch,
-  FilterLeaf,
-} from "../../../services/lib/filters/filterDefs";
+import { FilterBranch, FilterLeaf } from "@helicone-package/filters/filterDefs";
 
 export interface PropertyPageData {
   timeFilter: {

@@ -1,10 +1,10 @@
 import { LlmSchema } from "@helicone-package/llm-mapper/types";
 import { ProviderName } from "@helicone-package/cost/providers/mappings";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
 import {
   buildFilterWithAuth,
   buildFilterWithAuthClickHouse,
-} from "../../../services/lib/filters/filters";
+} from "@helicone-package/filters/filters";
 import {
   SortLeafRequest,
   buildRequestSort,

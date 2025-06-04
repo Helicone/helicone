@@ -13,7 +13,7 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { FilterLeafSubset } from "../../lib/shared/filters/filterDefs";
+import { FilterLeafSubset } from "@helicone-package/filters/filterDefs";
 import { err, ok, Result } from "../../packages/common/result";
 import { SortLeafRequest } from "../../lib/shared/sorts/requests/sorts";
 import { HeliconeRequestAsset } from "../../lib/stores/request/request";
@@ -47,7 +47,6 @@ export type RequestFilterNode =
       | "response"
       | "properties"
       | "values"
-      | "cache_hits"
       | "request_response_rmt"
       | "sessions_request_response_rmt"
     >

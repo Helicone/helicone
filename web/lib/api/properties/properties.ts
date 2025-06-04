@@ -1,4 +1,4 @@
-import { buildFilterWithAuthClickHouseProperties } from "../../../services/lib/filters/filters";
+import { buildFilterWithAuthClickHouseProperties } from "@helicone-package/filters/filters";
 import { Result } from "@/packages/common/result";
 import { dbQueryClickhouse } from "../db/dbExecute";
 

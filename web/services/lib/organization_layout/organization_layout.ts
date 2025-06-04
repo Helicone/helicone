@@ -1,5 +1,5 @@
-import { isUIFilterRow } from "../filters/uiFilterRowTree";
-import { UIFilterRowTree } from "../filters/types";
+import { isUIFilterRow } from "@helicone-package/filters/helpers";
+import { UIFilterRowTree } from "@helicone-package/filters/types";
 
 export type FilterRow = {
   filterMapIdx: number;

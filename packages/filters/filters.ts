@@ -1,4 +1,3 @@
-import { TagType } from "../../../packages/common/sessions/tags";
 import {
   AllOperators,
   AnyOperator,
@@ -7,6 +6,11 @@ import {
   FilterNode,
   TablesAndViews,
 } from "./filterDefs";
+
+export enum TagType {
+  REQUEST = "request",
+  SESSION = "session",
+}
 
 type KeyMapper<T> = (
   filter: T,
@@ -30,7 +34,7 @@ const extractOperatorAndValueFromAnOperator = (
       value: operator[key as keyof typeof operator],
     };
   }
-  throw new Error(`Invalid operator ${operator}`);
+  throw new Error(`Invalid operator ${JSON.stringify(operator)}`);
 };
 
 function easyKeyMappings<T extends keyof TablesAndViews>(
@@ -54,6 +58,7 @@ function easyKeyMappings<T extends keyof TablesAndViews>(
         columnToUse = columnFromMapping;
       }
     }
+
     if (value === "null") {
       return {
         column: columnToUse,
@@ -127,8 +132,8 @@ const whereKeyMappings: KeyMappings = {
     modelOverride: "request.model_override",
     path: "request.path",
     prompt_id: "request.prompt_id",
+    country_code: "request.country_code",
   }),
-
   prompt_v2: easyKeyMappings<"prompt_v2">({
     id: "prompt_v2.id",
     user_defined_id: "prompt_v2.user_defined_id",
@@ -162,14 +167,6 @@ const whereKeyMappings: KeyMappings = {
     id: "feedback.id",
     created_at: "feedback.created_at",
     response_id: "feedback.response_id",
-  }),
-  cache_hits: easyKeyMappings<"cache_hits">({
-    organization_id: "cache_hits.organization_id",
-    request_id: "cache_hits.request_id",
-    latency: "cache_hits.latency",
-    completion_tokens: "cache_hits.completion_tokens",
-    prompt_tokens: "cache_hits.prompt_tokens",
-    created_at: "cache_hits.created_at",
   }),
   request_response_log: easyKeyMappings<"request_response_log">({
     latency: "request_response_log.latency",
@@ -233,7 +230,7 @@ const whereKeyMappings: KeyMappings = {
       node_id: "request_response_rmt.node_id",
       job_id: "request_response_rmt.job_id",
       threat: "request_response_rmt.threat",
-      total_tokens: "total_tokens",
+      total_tokens: "request_response_rmt.total_tokens",
       prompt_tokens: "request_response_rmt.prompt_tokens",
       completion_tokens: "request_response_rmt.completion_tokens",
       request_body: "request_response_rmt.request_body",
@@ -276,13 +273,30 @@ const whereKeyMappings: KeyMappings = {
     easyKeyMappings<"sessions_request_response_rmt">({
       session_tag: "tag",
     }),
+  cache_metrics: easyKeyMappings<"cache_metrics">({
+    organization_id: "cache_metrics.organization_id",
+    date: "cache_metrics.date",
+    hour: "cache_metrics.hour",
+    request_id: "cache_metrics.request_id",
+    model: "cache_metrics.model",
+    saved_latency_ms: "cache_metrics.saved_latency_ms",
+    saved_completion_tokens: "cache_metrics.saved_completion_tokens",
+    saved_prompt_tokens: "cache_metrics.saved_prompt_tokens",
+    saved_completion_audio_tokens: "cache_metrics.saved_completion_audio_tokens",
+    saved_prompt_audio_tokens: "cache_metrics.saved_prompt_audio_tokens",
+    saved_prompt_cache_write_tokens: "cache_metrics.saved_prompt_cache_write_tokens",
+    saved_prompt_cache_read_tokens: "cache_metrics.saved_prompt_cache_read_tokens",
+    first_hit: "cache_metrics.first_hit",
+    last_hit: "cache_metrics.last_hit",
+    request_body: "cache_metrics.request_body",
+    response_body: "cache_metrics.response_body",
+  }),
 
-  // Deprecated
   values: NOT_IMPLEMENTED,
   job: NOT_IMPLEMENTED,
   job_node: NOT_IMPLEMENTED,
   user_metrics: easyKeyMappings<"user_metrics">({}),
-};
+}
 
 const havingKeyMappings: KeyMappings = {
   user_metrics: easyKeyMappings<"user_metrics">({
@@ -319,7 +333,24 @@ const havingKeyMappings: KeyMappings = {
       session_session_name: "properties['Helicone-Session-Name']",
     }),
   request_response_rmt: easyKeyMappings<"request_response_rmt">({}),
-
+  cache_metrics: easyKeyMappings<"cache_metrics">({
+    organization_id: "cache_metrics.organization_id",
+    date: "cache_metrics.date",
+    hour: "cache_metrics.hour",
+    request_id: "cache_metrics.request_id",
+    model: "cache_metrics.model",
+    saved_latency_ms: "cache_metrics.saved_latency_ms",
+    saved_completion_tokens: "cache_metrics.saved_completion_tokens",
+    saved_prompt_tokens: "cache_metrics.saved_prompt_tokens",
+    saved_completion_audio_tokens: "cache_metrics.saved_completion_audio_tokens",
+    saved_prompt_audio_tokens: "cache_metrics.saved_prompt_audio_tokens",
+    saved_prompt_cache_write_tokens: "cache_metrics.saved_prompt_cache_write_tokens",
+    saved_prompt_cache_read_tokens: "cache_metrics.saved_prompt_cache_read_tokens",
+    first_hit: "cache_metrics.first_hit",
+    last_hit: "cache_metrics.last_hit",
+    request_body: "cache_metrics.request_body",
+    response_body: "cache_metrics.response_body",
+  }),
   score_value: NOT_IMPLEMENTED,
   experiment_hypothesis_run: NOT_IMPLEMENTED,
   user_api_keys: NOT_IMPLEMENTED,
@@ -331,17 +362,15 @@ const havingKeyMappings: KeyMappings = {
   properties_v3: NOT_IMPLEMENTED,
   property_with_response_v1: NOT_IMPLEMENTED,
   feedback: NOT_IMPLEMENTED,
-  cache_hits: NOT_IMPLEMENTED,
   rate_limit_log: NOT_IMPLEMENTED,
   prompt_v2: NOT_IMPLEMENTED,
   prompts_versions: NOT_IMPLEMENTED,
   experiment: NOT_IMPLEMENTED,
 
-  // Deprecated
   values: NOT_IMPLEMENTED,
   job: NOT_IMPLEMENTED,
   job_node: NOT_IMPLEMENTED,
-};
+}
 
 function operatorToSql(operator: AllOperators): string {
   switch (operator) {
@@ -594,17 +623,30 @@ export async function buildFilterWithAuthClickHouseProperties(
   }));
 }
 
-export async function buildFilterWithAuthClickHouseCacheHits(
+export async function buildFilterWithAuthClickHousePropertiesV2(
   args: ExternalBuildFilterArgs & { org_id: string }
 ): Promise<{ filter: string; argsAcc: any[] }> {
   return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
-    cache_hits: {
+    request_response_rmt: {
       organization_id: {
         equals: orgId,
       },
     },
   }));
 }
+
+export async function buildFilterWithAuthClickHouseCacheMetrics(
+  args: ExternalBuildFilterArgs & { org_id: string }
+): Promise<{ filter: string; argsAcc: any[] }> {
+  return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
+    cache_metrics: {
+      organization_id: {
+        equals: orgId,
+      },
+    },
+  }));
+}
+
 
 export async function buildFilterWithAuthClickHouseRateLimits(
   args: ExternalBuildFilterArgs & { org_id: string }
@@ -641,34 +683,6 @@ export async function buildFilterWithAuth(
 
   const filterBuilder =
     database === "clickhouse" ? buildFilterClickHouse : buildFilterPostgres;
-
-  return filterBuilder({
-    ...args,
-    filter: filterNode,
-  });
-}
-
-export async function buildFilterWithAuthCacheHits(
-  args: ExternalBuildFilterArgs & {
-    org_id: string;
-  },
-  getOrgIdFilter: (orgId: string) => FilterLeaf = (orgId) => ({
-    cache_hits: {
-      organization_id: {
-        equals: orgId,
-      },
-    },
-  })
-): Promise<{ filter: string; argsAcc: any[] }> {
-  const { org_id, filter } = args;
-
-  const filterNode: FilterNode = {
-    left: getOrgIdFilter(org_id),
-    operator: "and",
-    right: filter,
-  };
-
-  const filterBuilder = buildFilterPostgres;
 
   return filterBuilder({
     ...args,

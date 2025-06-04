@@ -12,8 +12,8 @@ import { Result, err, ok } from "../../packages/common/result";
 import { type JawnAuthenticatedRequest } from "../../types/request";
 
 import { RequestManager } from "../../managers/request/RequestManager";
-import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
-import { timeFilterToFilterNode } from "../../lib/shared/filters/filterDefs";
+import { buildFilterWithAuthClickHouse } from "@helicone-package/filters/filters";
+import { timeFilterToFilterNode } from "@helicone-package/filters/helpers";
 import { dbExecute, dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import { clickhousePriceCalc } from "@helicone-package/cost";
 import {

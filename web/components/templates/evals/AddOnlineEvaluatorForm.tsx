@@ -10,7 +10,7 @@ import { Slider } from "@/components/ui/slider";
 import { X } from "lucide-react";
 import { Plus } from "lucide-react";
 import { useGetPropertiesV2 } from "@/services/hooks/propertiesV2";
-import { getPropertyFiltersV2 } from "@/services/lib/filters/frontendFilterDefs";
+import { getPropertyFiltersV2 } from "@helicone-package/filters/frontendFilterDefs";
 import { useState, useEffect } from "react";
 import {
   CommandGroup,

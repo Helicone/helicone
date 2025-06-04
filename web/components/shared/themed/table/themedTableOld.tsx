@@ -1,4 +1,4 @@
-import { UIFilterRowTree } from "@/services/lib/filters/types";
+import { UIFilterRowTree } from "@helicone-package/filters/types";
 import { TimeFilter } from "@/types/timeFilter";
 import {
   AdjustmentsHorizontalIcon,
@@ -15,7 +15,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { Result } from "@/packages/common/result";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
-import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
+import { SingleFilterDef } from "@helicone-package/filters/frontendFilterDefs";
 import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";
 import { SortDirection } from "../../../../services/lib/sorts/requests/sorts";
 

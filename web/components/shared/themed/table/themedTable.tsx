@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { UIFilterRowTree } from "@/services/lib/filters/types";
+import { UIFilterRowTree } from "@helicone-package/filters/types";
 import { TimeFilter } from "@/types/timeFilter";
 import {
   AdjustmentsHorizontalIcon,
@@ -22,7 +22,7 @@ import Link from "next/link";
 import React, { useEffect, useMemo } from "react";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
 import { Result } from "@/packages/common/result";
-import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
+import { SingleFilterDef } from "@helicone-package/filters/frontendFilterDefs";
 import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";
 import { SortDirection } from "../../../../services/lib/sorts/requests/sorts";
 import { clsx } from "../../clsx";

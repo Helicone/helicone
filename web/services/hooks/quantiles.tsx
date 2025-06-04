@@ -2,8 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Result } from "@/packages/common/result";
 import { TimeIncrement } from "../../lib/timeCalculations/fetchTimeData";
 import { Quantiles } from "../../lib/api/metrics/quantilesCalc";
-import { FilterNode } from "../lib/filters/filterDefs";
-import { getPropertyFiltersV2 } from "../lib/filters/frontendFilterDefs";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
+import { getPropertyFiltersV2 } from "@helicone-package/filters/frontendFilterDefs";
 import { useGetPropertiesV2 } from "./propertiesV2";
 
 const useQuantiles = (data: {
