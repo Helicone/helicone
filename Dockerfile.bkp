@@ -111,12 +111,12 @@ CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
 # RUN yarn install
 
 # # Create supervisord configuration
-# RUN mkdir -p /var/log/supervisor
-# COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+RUN mkdir -p /var/log/supervisor
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 
 # # Expose ports
 # EXPOSE 9000 8123 9009 5432 3000
 
 # # Use supervisord as entrypoint instead of ClickHouse entrypoint
-# CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
