@@ -86,6 +86,39 @@ const NOT_IMPLEMENTED = () => {
   throw new FilterNotImplemented("This filter is not implemented");
 };
 
+// Base fields that are common across all request_response_rmt tables
+const baseRequestResponseRMTFields = {
+  latency: "latency",
+  time_to_first_token: "time_to_first_token",
+  status: "status",
+  request_created_at: "request_created_at",
+  response_created_at: "response_created_at",
+  request_id: "request_id",
+  model: "model",
+  user_id: "user_id",
+  organization_id: "organization_id",
+  node_id: "node_id",
+  job_id: "job_id",
+  threat: "threat",
+  total_tokens: "total_tokens",
+  prompt_tokens: "prompt_tokens",
+  completion_tokens: "completion_tokens",
+  request_body: "request_body",
+  response_body: "response_body",
+  scores_column: "scores",
+  cache_enabled: "cache_enabled",
+  cache_reference_id: "cache_reference_id",
+  assets: "asset_ids",
+  prompt_cache_read_tokens: "prompt_cache_read_tokens",
+  prompt_cache_write_tokens: "prompt_cache_write_tokens",
+};
+
+const prefixFields = (fields: Record<string, string>, tableName: string): Record<string, string> => {
+  return Object.fromEntries(
+    Object.entries(fields).map(([key, value]) => [key, `${tableName}.${value}`])
+  );
+};
+
 function createRMTTableMapper<T extends keyof TablesAndViews>(
   tableName: T,
   fieldMappings: { [key in keyof TablesAndViews[T]]: string }
@@ -229,52 +262,12 @@ const whereKeyMappings: KeyMappings = {
     threat: "request_response_log.threat",
   }),
   request_response_rmt: createRMTTableMapper("request_response_rmt", {
-    latency: "request_response_rmt.latency",
-    time_to_first_token: "request_response_rmt.time_to_first_token",
-    status: "request_response_rmt.status",
-    request_created_at: "request_response_rmt.request_created_at",
-    response_created_at: "request_response_rmt.response_created_at",
-    request_id: "request_response_rmt.request_id",
-    model: "request_response_rmt.model",
-    user_id: "request_response_rmt.user_id",
-    organization_id: "request_response_rmt.organization_id",
-    node_id: "request_response_rmt.node_id",
-    job_id: "request_response_rmt.job_id",
-    threat: "request_response_rmt.threat",
-    total_tokens: "total_tokens",
-    prompt_tokens: "request_response_rmt.prompt_tokens",
-    completion_tokens: "request_response_rmt.completion_tokens",
-    request_body: "request_response_rmt.request_body",
-    response_body: "request_response_rmt.response_body",
-    scores_column: "request_response_rmt.scores",
-    cache_enabled: "request_response_rmt.cache_enabled",
-    cache_reference_id: "request_response_rmt.cache_reference_id",
-    assets: "request_response_rmt.asset_ids",
-    prompt_cache_read_tokens: "request_response_rmt.prompt_cache_read_tokens",
-    prompt_cache_write_tokens: "request_response_rmt.prompt_cache_write_tokens",
+    ...prefixFields(baseRequestResponseRMTFields, "request_response_rmt"),
   }),
   session_rmt: createRMTTableMapper("session_rmt", {
+    ...prefixFields(baseRequestResponseRMTFields, "session_rmt"),
     session_id: "session_rmt.session_id",
     session_name: "session_rmt.session_name",
-    latency: "session_rmt.latency",
-    status: "session_rmt.status",
-    request_created_at: "session_rmt.request_created_at",
-    response_created_at: "session_rmt.response_created_at",
-    request_id: "session_rmt.request_id",
-    model: "session_rmt.model",
-    user_id: "session_rmt.user_id",
-    organization_id: "session_rmt.organization_id",
-    node_id: "session_rmt.node_id",
-    job_id: "session_rmt.job_id",
-    threat: "session_rmt.threat",
-    total_tokens: "total_tokens",
-    prompt_tokens: "session_rmt.prompt_tokens",
-    completion_tokens: "session_rmt.completion_tokens",
-    request_body: "session_rmt.request_body",
-    response_body: "session_rmt.response_body",
-    scores_column: "session_rmt.scores",
-    cache_enabled: "session_rmt.cache_enabled",
-    cache_reference_id: "session_rmt.cache_reference_id",
   }),
   users_view: easyKeyMappings<"request_response_log">({
     status: "r.status",

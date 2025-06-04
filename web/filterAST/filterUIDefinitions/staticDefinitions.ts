@@ -1,6 +1,5 @@
 import { FilterUIDefinition } from "./types";
 import { RequestResponseRMTDerivedTable } from "../filterAst";
-import { Table } from "lucide-react";
 
 export const STATIC_USER_VIEW_DEFINITIONS: FilterUIDefinition[] = [
   {

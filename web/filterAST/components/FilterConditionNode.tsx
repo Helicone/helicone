@@ -260,7 +260,7 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
     filterStore.removeFilterExpression(path);
   };
 
-  // Find the filter definition for this fiel
+  // Find the filter definition for this field
   const filterDef = filterDefs.find((def) => (def.id === condition.field.column) && (def.table === condition.field.table));
   
 
