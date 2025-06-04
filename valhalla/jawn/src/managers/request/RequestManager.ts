@@ -472,6 +472,7 @@ export class RequestManager extends BaseManager {
         created_at: "desc",
       },
       isScored,
+      baseTable = "request_response_rmt",
     } = params;
 
     let newFilter = filter;
@@ -486,14 +487,16 @@ export class RequestManager extends BaseManager {
             this.authParams.organizationId,
             newFilter,
             offset,
-            limit
+            limit,
+            baseTable
           )
         : await getRequestsClickhouse(
             this.authParams.organizationId,
             newFilter,
             offset,
             limit,
-            sort
+            sort,
+            baseTable
           );
 
     return resultMap(requests, (req) => {

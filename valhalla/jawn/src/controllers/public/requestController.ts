@@ -22,6 +22,7 @@ import { ScoreManager } from "../../managers/score/ScoreManager";
 import type { ScoreRequest } from "../../managers/score/ScoreManager";
 import { HeliconeRequest } from "@helicone-package/llm-mapper/types";
 import type { JawnAuthenticatedRequest } from "../../types/request";
+import { RequestResponseRMTDerivedTable } from "@helicone-package/filters/filters";
 
 export type RequestClickhouseFilterBranch = {
   left: RequestClickhouseFilterNode;
@@ -30,7 +31,7 @@ export type RequestClickhouseFilterBranch = {
 };
 
 export type RequestClickhouseFilterNode =
-  | FilterLeafSubset<"request_response_rmt">
+  | FilterLeafSubset<RequestResponseRMTDerivedTable>
   | RequestClickhouseFilterBranch
   | "all";
 
@@ -47,7 +48,7 @@ export type RequestFilterNode =
       | "response"
       | "properties"
       | "values"
-      | "request_response_rmt"
+      | RequestResponseRMTDerivedTable
     >
   | RequestFilterBranch
   | "all";
@@ -61,6 +62,7 @@ export interface RequestQueryParams {
   includeInputs?: boolean;
   isPartOfExperiment?: boolean;
   isScored?: boolean;
+  baseTable?: RequestResponseRMTDerivedTable;
 }
 
 @Route("v1/request")
@@ -120,6 +122,7 @@ export class RequestController extends Controller {
     },
     isScored: false,
     isPartOfExperiment: false,
+    baseTable: "request_response_rmt",
   })
   public async getRequestsClickhouse(
     @Body()

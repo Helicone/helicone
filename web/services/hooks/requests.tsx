@@ -9,6 +9,7 @@ import { placeAssetIdValues } from "../lib/requestTraverseHelper";
 import { SortLeafRequest } from "../lib/sorts/requests/sorts";
 import { MAX_EXPORT_ROWS } from "@/lib/constants";
 import { TSessions } from "@/components/templates/sessions/sessionsPage";
+import { RequestResponseRMTDerivedTable } from "@helicone-package/filters/filters";
 
 function formatDateForClickHouse(date: Date): string {
   return date.toISOString().slice(0, 19).replace("T", " ");
@@ -99,7 +100,8 @@ export const useGetRequestsWithBodies = (
   advancedFilter: FilterNode,
   sortLeaf: SortLeafRequest,
   isLive: boolean = false,
-  isCached: boolean = false
+  isCached: boolean = false,
+  baseTable: RequestResponseRMTDerivedTable = "request_response_rmt"
 ) => {
   // First query to fetch the initial request data
   const requestQuery = $JAWN_API.useQuery(
@@ -112,6 +114,7 @@ export const useGetRequestsWithBodies = (
         limit: currentPageSize,
         sort: sortLeaf as any,
         isCached: isCached as any,
+        baseTable: baseTable,
       },
     },
     {
@@ -212,6 +215,7 @@ const useGetRequestCount = (
   filter: FilterNode,
   isLive = false,
   isCached = false,
+  baseTable: RequestResponseRMTDerivedTable = "request_response_rmt"
 ) => {
   return useQuery({
     queryKey: ["requestsCount", filter, isCached],
@@ -223,7 +227,7 @@ const useGetRequestCount = (
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ filter: processedFilter, isCached }),
+        body: JSON.stringify({ filter: processedFilter, isCached, baseTable }),
       }).then((res) => res.json() as Promise<Result<number, string>>);
     },
     refetchOnWindowFocus: false,
@@ -238,7 +242,8 @@ const useGetRequests = (
   advancedFilter: FilterNode,
   sortLeaf: SortLeafRequest,
   isCached: boolean = false,
-  isLive: boolean = false
+  isLive: boolean = false,
+  baseTable: RequestResponseRMTDerivedTable = "request_response_rmt"
 ) => {
   return {
     requests: useGetRequestsWithBodies(
@@ -247,9 +252,10 @@ const useGetRequests = (
       advancedFilter,
       sortLeaf,
       isLive,
-      isCached
+      isCached,
+      baseTable
     ),
-    count: useGetRequestCount(advancedFilter, isLive, isCached),
+    count: useGetRequestCount(advancedFilter, isLive, isCached, baseTable),
   };
 };
 

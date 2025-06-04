@@ -11,6 +11,7 @@ import {
 } from "../../../lib/sessions/realtimeSession";
 import { sessionFromHeliconeRequests } from "../../../lib/sessions/sessionsFromHeliconeTequests";
 import { useGetRequests } from "../../../services/hooks/requests";
+import { RequestResponseRMTDerivedTable } from "@helicone-package/filters/filters";
 
 export const SessionDetail = ({
   session_id,
@@ -28,31 +29,17 @@ export const SessionDetail = ({
     1,
     1000,
     {
-      left: {
-        request_response_rmt: {
-          properties:
-            session_name !== EMPTY_SESSION_NAME
-              ? {
-                  "Helicone-Session-Id": {
-                    equals: session_id as string,
-                  },
-                  "Helicone-Session-Name": {
-                    equals: session_name as string,
-                  },
-                }
-              : {
-                  "Helicone-Session-Id": {
-                    equals: session_id as string,
-                  },
-                },
+      session_rmt: {
+        session_id: {
+          equals: session_id,
         },
-      },
-      operator: "and",
-      right: {
-        request_response_rmt: {
-          request_created_at: {
-            gt: ThreeMonthsAgo,
+        ...(session_name !== EMPTY_SESSION_NAME && {
+          session_name: {
+            equals: session_name,
           },
+        }),
+        request_created_at: {
+          gt: ThreeMonthsAgo,
         },
       },
     },
@@ -60,7 +47,8 @@ export const SessionDetail = ({
       created_at: "desc",
     },
     false,
-    isLive
+    isLive,
+    "session_rmt" as RequestResponseRMTDerivedTable
   );
 
   // Process requests: Check for realtime session and convert if necessary

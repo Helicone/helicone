@@ -10,6 +10,8 @@ import { FilterNode } from "../../shared/filters/filterDefs";
 import {
   buildFilterWithAuth,
   buildFilterWithAuthClickHouse,
+  getFilterBuilderForTable,
+  RequestResponseRMTDerivedTable,
 } from "@helicone-package/filters/filters";
 import {
   SortLeafRequest,
@@ -152,7 +154,8 @@ export async function getRequestsClickhouseNoSort(
   orgId: string,
   filter: FilterNode,
   offset: number,
-  limit: number
+  limit: number,
+  baseTable: RequestResponseRMTDerivedTable = "request_response_rmt"
 ): Promise<Result<HeliconeRequest[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
@@ -161,7 +164,8 @@ export async function getRequestsClickhouseNoSort(
   if (limit < 0 || limit > 1_000) {
     return err("invalid limit");
   }
-  const builtFilter = await buildFilterWithAuthClickHouse({
+  const filterBuilder = getFilterBuilderForTable(baseTable);
+  const builtFilter = await filterBuilder({
     org_id: orgId,
     filter,
     argsAcc: [],
@@ -190,8 +194,9 @@ export async function getRequestsClickhouseNoSort(
       assets as asset_ids,
       target_url,
       cache_reference_id,
-      cache_enabled
-    FROM request_response_rmt
+      cache_enabled,
+      ${clickhousePriceCalcNonAggregated(baseTable)} as cost_usd
+    FROM ${baseTable}
     WHERE (
       (${builtFilter.filter})
     )
@@ -223,7 +228,8 @@ export async function getRequestsClickhouse(
   filter: FilterNode,
   offset: number,
   limit: number,
-  sort: SortLeafRequest
+  sort: SortLeafRequest,
+  baseTable: RequestResponseRMTDerivedTable = "request_response_rmt"
 ): Promise<Result<HeliconeRequest[], string>> {
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
@@ -234,7 +240,9 @@ export async function getRequestsClickhouse(
   if (limit < 0 || limit > 1_000) {
     return err("invalid limit");
   }
-  const builtFilter = await buildFilterWithAuthClickHouse({
+
+  const filterBuilder = getFilterBuilderForTable(baseTable);
+  const builtFilter = await filterBuilder({
     org_id: orgId,
     filter,
     argsAcc: [],
@@ -264,8 +272,8 @@ export async function getRequestsClickhouse(
       target_url,
       cache_reference_id,
       cache_enabled,
-      ${clickhousePriceCalcNonAggregated("request_response_rmt")} as cost_usd
-    FROM request_response_rmt FINAL
+      ${clickhousePriceCalcNonAggregated(baseTable)} as cost_usd
+    FROM ${baseTable} FINAL
     WHERE (
       (${builtFilter.filter})
     )
