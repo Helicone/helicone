@@ -1,5 +1,5 @@
 import { FilterUIDefinition } from "./types";
-import { RequestResponseRMTDerivedTable } from "../filterAst";
+import { RequestResponseRMTDerivedTable } from "@helicone-package/filters/filters";
 
 export const STATIC_USER_VIEW_DEFINITIONS: FilterUIDefinition[] = [
   {

@@ -12,6 +12,10 @@ export enum TagType {
   SESSION = "session",
 }
 
+export type RequestResponseRMTDerivedTable =
+  | "request_response_rmt"
+  | "session_rmt";
+
 type KeyMapper<T> = (
   filter: T,
   placeValueSafely: (val: string) => string
@@ -728,4 +732,16 @@ export async function buildFilterWithAuth(
     ...args,
     filter: filterNode,
   });
+}
+
+export type BuildFilterWithAuthFunction = (args: ExternalBuildFilterArgs & { org_id: string }) => Promise<{ filter: string; argsAcc: any[] }>;
+export function getFilterBuilderForTable(table: RequestResponseRMTDerivedTable): BuildFilterWithAuthFunction {
+  switch (table) {
+    case "request_response_rmt":
+      return buildFilterWithAuthClickHouse;
+    case "session_rmt":
+      return buildFilterWithAuthClickHouseSessionRMT;
+    default:
+      throw new Error(`No filter builder found for table ${table}`);
+  }
 }

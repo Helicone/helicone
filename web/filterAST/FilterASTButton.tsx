@@ -10,7 +10,7 @@ import { FilterASTEditor } from "./FilterASTEditor";
 import { useFilterAST } from "./context/filterContext";
 import { Badge } from "@/components/ui/badge";
 import { Row } from "@/components/layout/common";
-import { RequestResponseRMTDerivedTable } from "./filterAst";
+import { RequestResponseRMTDerivedTable } from "@helicone-package/filters/filters";
 
 interface FilterASTButtonProps {
   baseTable?: RequestResponseRMTDerivedTable;

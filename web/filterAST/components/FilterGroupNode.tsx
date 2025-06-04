@@ -12,7 +12,7 @@ import { useFilterStore } from "../store/filterStore";
 import FilterConditionNode from "./FilterConditionNode";
 import { Row } from "@/components/layout/common/row";
 import SaveFilterButton from "./SaveFilterButton";
-import { RequestResponseRMTDerivedTable } from "../filterAst";
+import { RequestResponseRMTDerivedTable } from "@helicone-package/filters/filters";
 
 interface FilterGroupNodeProps {
   group: AndExpression | OrExpression;
