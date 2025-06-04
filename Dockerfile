@@ -47,7 +47,51 @@ RUN yarn install
 RUN mkdir -p /var/log/supervisor
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# grep and remove all .env.* files
+# MIGRATIONS
+
+
+# Install Java for Flyway and other necessary tools
+RUN apt-get update && apt-get install -y \
+    openjdk-17-jre-headless \
+    wget \
+    unzip \
+    curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Flyway using Java method (should work better cross-platform)
+RUN wget -q -O flyway.tar.gz https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/10.5.0/flyway-commandline-10.5.0.tar.gz \
+    && mkdir -p /opt/flyway \
+    && tar -xzf flyway.tar.gz -C /opt/flyway --strip-components=1 \
+    && rm flyway.tar.gz \
+    && ln -s /opt/flyway/flyway /usr/local/bin/flyway \
+    && flyway -v
+
+# Install Python dependencies
+RUN pip install --no-cache-dir requests clickhouse-driver tabulate yarl
+
+WORKDIR /app
+
+# Copy files with absolute paths from the root of the build context
+COPY ./supabase/flyway.conf /app/supabase/flyway.conf
+COPY ./supabase/migrations /app/supabase/migrations
+COPY ./supabase/migrations_without_supabase /app/supabase/migrations_without_supabase
+COPY ./clickhouse/migrations /app/clickhouse/migrations
+COPY ./clickhouse/ch_hcone.py /app/clickhouse/ch_hcone.py
+RUN chmod +x /app/clickhouse/ch_hcone.py
+
+# Create a script to run migrations
+RUN echo '#!/bin/sh \n\
+    echo "Running PostgreSQL migrations..." \n\
+    flyway migrate -configFiles=/app/supabase/flyway.conf \n\
+    echo "PostgreSQL migrations completed" \n\
+    \n\
+    echo "Running ClickHouse migrations..." \n\
+    python3 /app/clickhouse/ch_hcone.py --upgrade --host ${CLICKHOUSE_HOST:-helicone-core-clickhouse} --port ${CLICKHOUSE_PORT:-8123} --user ${CLICKHOUSE_USER:-default} --no-password \n\
+    echo "ClickHouse migrations completed" \n\
+    \n\
+    echo "All migrations completed successfully!" \n\
+    ' > /app/run-migrations.sh && chmod +x /app/run-migrations.sh
 
 # Expose ports
 EXPOSE 9000 8123 9009 5432 3000
