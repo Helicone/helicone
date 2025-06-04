@@ -1,0 +1,41 @@
+name: helicone-local-testing
+version: "3.8"
+
+services:
+  helicone-all:
+    build:
+      context: .
+    container_name: helicone-all-in-one
+    environment:      
+      # POSTGRES_DB: helicone
+      # POSTGRES_USER: postgres
+      # POSTGRES_PASSWORD: testpassword
+      FLYWAY_URL: jdbc:postgresql://localhost:5432/helicone
+      FLYWAY_USER: postgres
+      FLYWAY_PASSWORD: testpassword
+    volumes:
+      - postgres_flyway_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+      - "8123:8123"
+      - "9000:9000"
+      - "9009:9009"
+      - "3000:3000"
+      - "8585:8585"
+  
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@helicone.ai
+      PGADMIN_DEFAULT_PASSWORD: password
+    ports:
+      - "8080:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+volumes:
+  postgres_flyway_data:
+    driver: local
+  pgadmin_data:
+    driver: local
