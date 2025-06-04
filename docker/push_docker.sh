@@ -13,16 +13,17 @@ SELECTED_IMAGES=()
 
 # Function to show usage
 show_usage() {
-  echo "Usage: $0 --mode <dockerhub|ecr> [OPTIONS]"
+  echo "Usage: $0 --mode <dockerhub|ecr|helm> [OPTIONS]"
   echo ""
   echo "Modes:"
   echo "  --mode dockerhub    Push to Docker Hub"
   echo "  --mode ecr          Push to AWS ECR"
+  echo "  --mode helm         Push to Docker Hub with helicone/helm/ prefix (ECR-style images)"
   echo ""
   echo "Options:"
   echo "  -t, --test          Test mode (show commands without executing)"
   echo "  --dont-prune        Don't prune Docker images before building"
-  echo "  -c, --custom-tag    Custom tag suffix (ECR mode only)"
+  echo "  -c, --custom-tag    Custom tag suffix (ECR and helm mode only)"
   echo "  -r, --region        AWS region (default: us-east-2, ECR mode only)"
   echo "  -i, --image         Select specific image to build (can be used multiple times)"
   echo "  -h, --help          Show this help message"
@@ -30,6 +31,7 @@ show_usage() {
   echo "Examples:"
   echo "  $0 --mode dockerhub"
   echo "  $0 --mode ecr --region us-west-2 --custom-tag hotfix"
+  echo "  $0 --mode helm --custom-tag v1.2.3"
   echo "  $0 --mode dockerhub --test"
   echo "  $0 --mode ecr --image web --image worker"
 }
@@ -81,8 +83,8 @@ if [ -z "$MODE" ]; then
 fi
 
 # Validate mode value
-if [[ "$MODE" != "dockerhub" && "$MODE" != "ecr" ]]; then
-  echo "Error: --mode must be either 'dockerhub' or 'ecr'"
+if [[ "$MODE" != "dockerhub" && "$MODE" != "ecr" && "$MODE" != "helm" ]]; then
+  echo "Error: --mode must be either 'dockerhub', 'ecr', or 'helm'"
   show_usage
   exit 1
 fi
@@ -179,6 +181,60 @@ if [ "$MODE" = "dockerhub" ]; then
     run_command docker push ${image}:$tag
     run_command docker tag ${image}:$tag ${image}:latest
     run_command docker push ${image}:latest
+  done
+
+# Helm mode (Docker Hub with helm/ prefix and ECR-style images)
+elif [ "$MODE" = "helm" ]; then
+  echo "=== Helm Mode ==="
+  
+  # Define images and their contexts for Helm (same as ECR but with helicone/helm/ prefix)
+  HELM_IMAGES=(
+    "helicone/helm/web:../web"
+    "helicone/helm/jawn:.."
+    "helicone/helm/migrations:.."
+  )
+
+  # Process each image
+  for IMAGE_INFO in "${HELM_IMAGES[@]}"; do
+    IFS=':' read -r IMAGE_NAME CONTEXT <<< "$IMAGE_INFO"
+    
+    # Skip if specific images were selected and this isn't one of them
+    if [ ${#SELECTED_IMAGES[@]} -gt 0 ]; then
+      SKIP=true
+      for SELECTED in "${SELECTED_IMAGES[@]}"; do
+        if [[ "$IMAGE_NAME" == *"$SELECTED"* ]]; then
+          SKIP=false
+          break
+        fi
+      done
+      if [ "$SKIP" = true ]; then
+        echo "Skipping $IMAGE_NAME (not selected)"
+        continue
+      fi
+    fi
+    
+    echo "Processing $IMAGE_NAME..."
+    
+    # Get Dockerfile path
+    DOCKERFILE_NAME=$(basename "$IMAGE_NAME" | tr '-' '_')
+    DOCKERFILE_PATH="dockerfiles/dockerfile_${DOCKERFILE_NAME}"
+    
+    if [ "$DOCKERFILE_NAME" = "jawn" ]; then
+      DOCKERFILE_PATH="../valhalla/dockerfile"
+    fi
+    
+    # Build image
+    echo "Building $IMAGE_NAME:$VERSION_TAG..."
+    run_command docker build --platform linux/amd64 -t "$IMAGE_NAME:$VERSION_TAG" -f "$DOCKERFILE_PATH" "$CONTEXT"
+    
+    # Push version tag
+    echo "Pushing $IMAGE_NAME:$VERSION_TAG..."
+    run_command docker push "$IMAGE_NAME:$VERSION_TAG"
+    
+    # Tag and push latest
+    echo "Tagging and pushing latest..."
+    run_command docker tag "$IMAGE_NAME:$VERSION_TAG" "$IMAGE_NAME:latest"
+    run_command docker push "$IMAGE_NAME:latest"
   done
 
 # ECR mode
