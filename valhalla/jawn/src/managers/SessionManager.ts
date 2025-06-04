@@ -333,7 +333,6 @@ export class SessionManager {
     ORDER BY created_at DESC
     LIMIT 50
     `;
-    console.log(query)
 
     const results = await clickhouseDb.dbQuery<SessionResult>(
       query,
