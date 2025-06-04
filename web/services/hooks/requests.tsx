@@ -4,7 +4,7 @@ import { useOrg } from "../../components/layout/org/organizationContext";
 import { HeliconeRequest } from "../../lib/api/request/request";
 import { $JAWN_API, getJawnClient } from "../../lib/clients/jawn";
 import { Result } from "@/packages/common/result";
-import { FilterNode } from "../lib/filters/filterDefs";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
 import { placeAssetIdValues } from "../lib/requestTraverseHelper";
 import { SortLeafRequest } from "../lib/sorts/requests/sorts";
 import { MAX_EXPORT_ROWS } from "@/lib/constants";

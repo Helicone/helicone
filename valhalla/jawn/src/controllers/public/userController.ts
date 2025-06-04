@@ -4,9 +4,9 @@ import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import {
   FilterLeaf,
   FilterLeafSubset,
-  filterListToTree,
-} from "../../lib/shared/filters/filterDefs";
-import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
+} from "@helicone-package/filters/filterDefs";
+import { filterListToTree } from "@helicone-package/filters/helpers";
+import { buildFilterWithAuthClickHouse } from "@helicone-package/filters/filters";
 import { Result } from "../../packages/common/result";
 import { PSize, SortLeafUsers, UserManager } from "../../managers/UserManager";
 import { clickhousePriceCalc } from "@helicone-package/cost";

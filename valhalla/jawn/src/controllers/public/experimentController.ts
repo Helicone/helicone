@@ -12,7 +12,7 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { FilterLeafSubset } from "../../lib/shared/filters/filterDefs";
+import { FilterLeafSubset } from "@helicone-package/filters/filterDefs";
 import { Result, err, ok } from "../../packages/common/result";
 import {
   Experiment,

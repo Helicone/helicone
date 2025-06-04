@@ -7,6 +7,11 @@ import {
   TablesAndViews,
 } from "./filterDefs";
 
+export enum TagType {
+  REQUEST = "request",
+  SESSION = "session",
+}
+
 type KeyMapper<T> = (
   filter: T,
   placeValueSafely: (val: string) => string
@@ -54,15 +59,31 @@ function easyKeyMappings<T extends keyof TablesAndViews>(
       }
     }
 
-    return {
-      column: columnToUse,
-      operator: operator,
-      value: placeValueSafely(value),
-    };
+    if (value === "null") {
+      return {
+        column: columnToUse,
+        operator: operator,
+        value: value,
+      };
+    } else {
+      return {
+        column: columnToUse,
+        operator: operator,
+        value: placeValueSafely(value),
+      };
+    }
   };
 }
+
+export class FilterNotImplemented extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "FilterNotImplemented";
+  }
+}
+
 const NOT_IMPLEMENTED = () => {
-  throw new Error("Not implemented");
+  throw new FilterNotImplemented("This filter is not implemented");
 };
 
 function createRMTTableMapper<T extends keyof TablesAndViews>(
@@ -113,14 +134,6 @@ function createRMTTableMapper<T extends keyof TablesAndViews>(
 }
 
 const whereKeyMappings: KeyMappings = {
-  user_metrics: easyKeyMappings(
-    {
-      user_id: "user_id",
-      last_active: "last_active",
-      total_requests: "total_requests",
-    },
-    "user_metrics"
-  ),
   user_api_keys: easyKeyMappings(
     {
       api_key_hash: "api_key_hash",
@@ -137,11 +150,22 @@ const whereKeyMappings: KeyMappings = {
     const { operator, value } = extractOperatorAndValueFromAnOperator(
       filter[key as keyof typeof filter]
     );
-    return {
-      column: `properties ->> ${placeValueSafely(key)}`,
-      operator: operator,
-      value: placeValueSafely(value),
-    };
+
+    if (operator === "equals") {
+      return {
+        column: `properties`,
+        operator: "gin-contains",
+        value: `jsonb_build_object(${placeValueSafely(
+          key
+        )}::text, ${placeValueSafely(value)}::text)`,
+      };
+    } else {
+      return {
+        column: `properties ->> ${placeValueSafely(key)}`,
+        operator: operator,
+        value: placeValueSafely(value),
+      };
+    }
   },
   request: easyKeyMappings<"request">({
     prompt: `coalesce(request.body ->>'prompt', request.body ->'messages'->0->>'content')`,
@@ -154,14 +178,29 @@ const whereKeyMappings: KeyMappings = {
     model: "request.model",
     modelOverride: "request.model_override",
     path: "request.path",
+    prompt_id: "request.prompt_id",
     country_code: "request.country_code",
+  }),
+  prompt_v2: easyKeyMappings<"prompt_v2">({
+    id: "prompt_v2.id",
+    user_defined_id: "prompt_v2.user_defined_id",
+  }),
+  prompts_versions: easyKeyMappings<"prompts_versions">({
+    id: "prompts_versions.id",
+    major_version: "prompts_versions.major_version",
+    minor_version: "prompts_versions.minor_version",
+    prompt_v2: "prompts_versions.prompt_v2",
+  }),
+  experiment: easyKeyMappings<"experiment">({
+    id: "e.id",
+    prompt_v2: "pv.prompt_v2",
   }),
   response: easyKeyMappings<"response">({
     body_completion:
       "(coalesce(response.body ->'choices'->0->>'text', response.body ->'choices'->0->>'message'))::text",
     body_model:
       "(coalesce(request.model_override, response.model, request.model, response.body ->> 'model', request.body ->> 'model'))::text",
-    body_tokens: "((response.body -> 'usage') ->> 'total_tokens')::bigint",
+    body_tokens: "(response.completion_tokens + response.prompt_tokens)",
     status: "response.status",
     model: "response.model",
   }),
@@ -175,14 +214,6 @@ const whereKeyMappings: KeyMappings = {
     id: "feedback.id",
     created_at: "feedback.created_at",
     response_id: "feedback.response_id",
-  }),
-  cache_hits: easyKeyMappings<"cache_hits">({
-    organization_id: "cache_hits.organization_id",
-    request_id: "cache_hits.request_id",
-    latency: "cache_hits.latency",
-    completion_tokens: "cache_hits.completion_tokens",
-    prompt_tokens: "cache_hits.prompt_tokens",
-    created_at: "cache_hits.created_at",
   }),
   request_response_log: easyKeyMappings<"request_response_log">({
     latency: "request_response_log.latency",
@@ -199,6 +230,7 @@ const whereKeyMappings: KeyMappings = {
   }),
   request_response_rmt: createRMTTableMapper("request_response_rmt", {
     latency: "request_response_rmt.latency",
+    time_to_first_token: "request_response_rmt.time_to_first_token",
     status: "request_response_rmt.status",
     request_created_at: "request_response_rmt.request_created_at",
     response_created_at: "request_response_rmt.response_created_at",
@@ -217,6 +249,9 @@ const whereKeyMappings: KeyMappings = {
     scores_column: "request_response_rmt.scores",
     cache_enabled: "request_response_rmt.cache_enabled",
     cache_reference_id: "request_response_rmt.cache_reference_id",
+    assets: "request_response_rmt.asset_ids",
+    prompt_cache_read_tokens: "request_response_rmt.prompt_cache_read_tokens",
+    prompt_cache_write_tokens: "request_response_rmt.prompt_cache_write_tokens",
   }),
   session_rmt: createRMTTableMapper("session_rmt", {
     session_id: "session_rmt.session_id",
@@ -241,7 +276,7 @@ const whereKeyMappings: KeyMappings = {
     cache_enabled: "session_rmt.cache_enabled",
     cache_reference_id: "session_rmt.cache_reference_id",
   }),
-  users_view: easyKeyMappings<"request_response_rmt">({
+  users_view: easyKeyMappings<"request_response_log">({
     status: "r.status",
     user_id: "r.user_id",
   }),
@@ -261,8 +296,16 @@ const whereKeyMappings: KeyMappings = {
     organization_id: "rate_limit_log.organization_id",
     created_at: "rate_limit_log.created_at",
   }),
+  score_value: easyKeyMappings<"score_value">({
+    request_id: "score_value.request_id",
+  }),
+  experiment_hypothesis_run: easyKeyMappings<"experiment_hypothesis_run">({
+    result_request_id: "experiment_v2_hypothesis_run.result_request_id",
+  }),
   sessions:
-    easyKeyMappings<"sessions">({}),
+    easyKeyMappings<"sessions">({
+      session_tag: "tag",
+    }),
   cache_metrics: easyKeyMappings<"cache_metrics">({
     organization_id: "cache_metrics.organization_id",
     date: "cache_metrics.date",
@@ -282,16 +325,22 @@ const whereKeyMappings: KeyMappings = {
     response_body: "cache_metrics.response_body",
   }),
 
-  // Deprecated
   values: NOT_IMPLEMENTED,
   job: NOT_IMPLEMENTED,
   job_node: NOT_IMPLEMENTED,
-};
+  user_metrics: easyKeyMappings<"user_metrics">({}),
+}
 
 const havingKeyMappings: KeyMappings = {
   user_metrics: easyKeyMappings<"user_metrics">({
-    last_active: "max(request.created_at)",
-    total_requests: "count(request.id)",
+    last_active: "last_active",
+    total_requests: "total_requests",
+    active_for: "active_for",
+    average_requests_per_day_active: "average_requests_per_day_active",
+    average_tokens_per_request: "average_tokens_per_request",
+    total_completion_tokens: "total_completion_tokens",
+    total_prompt_tokens: "total_prompt_tokens",
+    cost: "cost",
   }),
   users_view: easyKeyMappings<"users_view">({
     active_for: "active_for",
@@ -306,22 +355,19 @@ const havingKeyMappings: KeyMappings = {
   }),
   sessions:
     easyKeyMappings<"sessions">({
-      total_cost: "total_cost",
-      total_tokens: "total_tokens",
+      session_total_cost: "total_cost",
+      session_completion_tokens: "completion_tokens",
+      session_prompt_tokens: "prompt_tokens",
+      session_total_requests: "total_requests",
+      session_created_at: "created_at",
+      session_latest_request_created_at: "latest_request_created_at",
+      session_total_tokens: "total_tokens",
+      session_session_id: "properties['Helicone-Session-Id']",
+      session_session_name: "properties['Helicone-Session-Name']",
     }),
-  user_api_keys: NOT_IMPLEMENTED,
-  properties: NOT_IMPLEMENTED,
-  request: NOT_IMPLEMENTED,
-  response: NOT_IMPLEMENTED,
-  properties_table: NOT_IMPLEMENTED,
-  request_response_log: NOT_IMPLEMENTED,
-  request_response_rmt: NOT_IMPLEMENTED,
-  session_rmt: NOT_IMPLEMENTED,
-  properties_v3: NOT_IMPLEMENTED,
-  property_with_response_v1: NOT_IMPLEMENTED,
-  feedback: NOT_IMPLEMENTED,
-  cache_hits: NOT_IMPLEMENTED,
-  rate_limit_log: NOT_IMPLEMENTED,
+  request_response_rmt: easyKeyMappings<"request_response_rmt">({}),
+  session_rmt: easyKeyMappings<"session_rmt">({}),
+
   cache_metrics: easyKeyMappings<"cache_metrics">({
     organization_id: "cache_metrics.organization_id",
     date: "cache_metrics.date",
@@ -340,11 +386,26 @@ const havingKeyMappings: KeyMappings = {
     request_body: "cache_metrics.request_body",
     response_body: "cache_metrics.response_body",
   }),
-  // Deprecated
+  score_value: NOT_IMPLEMENTED,
+  experiment_hypothesis_run: NOT_IMPLEMENTED,
+  user_api_keys: NOT_IMPLEMENTED,
+  properties: NOT_IMPLEMENTED,
+  request: NOT_IMPLEMENTED,
+  response: NOT_IMPLEMENTED,
+  properties_table: NOT_IMPLEMENTED,
+  request_response_log: NOT_IMPLEMENTED,
+  properties_v3: NOT_IMPLEMENTED,
+  property_with_response_v1: NOT_IMPLEMENTED,
+  feedback: NOT_IMPLEMENTED,
+  rate_limit_log: NOT_IMPLEMENTED,
+  prompt_v2: NOT_IMPLEMENTED,
+  prompts_versions: NOT_IMPLEMENTED,
+  experiment: NOT_IMPLEMENTED,
+
   values: NOT_IMPLEMENTED,
   job: NOT_IMPLEMENTED,
   job_node: NOT_IMPLEMENTED,
-};
+}
 
 function operatorToSql(operator: AllOperators): string {
   switch (operator) {
@@ -368,6 +429,8 @@ function operatorToSql(operator: AllOperators): string {
       return "ILIKE";
     case "not-contains":
       return "NOT ILIKE";
+    case "gin-contains":
+      return "@>";
     case "vector-contains":
       return "@@";
   }
@@ -387,12 +450,12 @@ export function buildFilterLeaf(
     return argPlaceHolder(argsAcc.length - 1, value);
   };
 
-  const filters: string[] = [];
-
-  for (const _tableKey in filter) {
+  const filters = Object.keys(filter).reduce<string[]>((acc, _tableKey) => {
     const tableKey = _tableKey as keyof typeof filter;
     const table = filter[tableKey];
+    // table is {session_tag: { equals: "test" }} tableKey is sessions
     const mapper = keyMappings[tableKey] as KeyMapper<typeof table>;
+
     const {
       column,
       operator: operatorKey,
@@ -400,23 +463,43 @@ export function buildFilterLeaf(
     } = mapper(table, placeValueSafely);
 
     if (!column) {
-      continue;
+      return acc;
     }
 
+    const tagFilter =
+      column === "tag" && tableKey === "sessions"; // Tag is a column in tags
     const sqlOperator = operatorToSql(operatorKey);
 
-    if (operatorKey === "not-equals" && value === "null") {
-      filters.push(`${column} is not null`);
-    } else if (operatorKey === "equals" && value === "null") {
-      filters.push(`${column} is null`);
-    } else {
-      if (operatorKey === "contains" || operatorKey === "not-contains") {
-        filters.push(`${column} ${sqlOperator} '%' || ${value}::text || '%'`);
-      } else {
-        filters.push(`${column} ${sqlOperator} ${value}`);
-      }
+    // TODO: (Justin) not sure if I should set a limit here
+    // Add special check for session_tag
+    if (tagFilter) {
+      const subQuery = `
+        SELECT entity_id
+        FROM tags
+        WHERE tag ${sqlOperator} ${value}
+        AND entity_type = '${TagType.SESSION}'
+      `;
+
+      return [...acc, `properties['Helicone-Session-Id'] IN (${subQuery})`];
     }
-  }
+
+    const filterClause = (() => {
+      switch (true) {
+        case operatorKey === "not-equals" && value === "null":
+          return `${column} is not null`;
+        case operatorKey === "equals" && value === "null":
+          return `${column} is null`;
+        case operatorKey === "contains" || operatorKey === "not-contains":
+          return `${column} ${sqlOperator} '%' || ${value}::text || '%'`;
+        case operatorKey === "vector-contains":
+          return `${column} ${sqlOperator} plainto_tsquery('helicone_search_config', ${value}::text)`;
+        default:
+          return `${column} ${sqlOperator} ${value}`;
+      }
+    })();
+
+    return [...acc, filterClause];
+  }, []);
 
   return {
     filters,
@@ -519,7 +602,7 @@ export function buildFilterClickHouse(
   });
 }
 
-function buildFilterPostgres(
+export function buildFilterPostgres(
   args: ExternalBuildFilterArgs
 ): ReturnType<typeof buildFilter> {
   return buildFilter({
@@ -587,19 +670,6 @@ export async function buildFilterWithAuthClickHousePropertiesV2(
   }));
 }
 
-export async function buildFilterWithAuthClickHouseCacheHits(
-  args: ExternalBuildFilterArgs & { org_id: string }
-): Promise<{ filter: string; argsAcc: any[] }> {
-  return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
-    cache_hits: {
-      organization_id: {
-        equals: orgId,
-      },
-    },
-  }));
-}
-
-
 export async function buildFilterWithAuthClickHouseCacheMetrics(
   args: ExternalBuildFilterArgs & { org_id: string }
 ): Promise<{ filter: string; argsAcc: any[] }> {
@@ -618,6 +688,18 @@ export async function buildFilterWithAuthClickHouseRateLimits(
 ): Promise<{ filter: string; argsAcc: any[] }> {
   return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
     rate_limit_log: {
+      organization_id: {
+        equals: orgId,
+      },
+    },
+  }));
+}
+
+export async function buildFilterWithAuthClickHouseSessionRMT(
+  args: ExternalBuildFilterArgs & { org_id: string }
+): Promise<{ filter: string; argsAcc: any[] }> {
+  return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
+    session_rmt: {
       organization_id: {
         equals: orgId,
       },

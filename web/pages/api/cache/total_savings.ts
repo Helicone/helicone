@@ -5,7 +5,7 @@ import {
 } from "../../../lib/api/handlerWrappers";
 import { modelCost } from "../../../lib/api/metrics/costCalc";
 import { Result, resultMap } from "@/packages/common/result";
-import { TimeFilterSchema } from "@/services/lib/filters/filterDefs";
+import { TimeFilterSchema } from "@helicone-package/filters/helpers";
 
 async function handler({
   req,

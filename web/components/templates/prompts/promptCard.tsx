@@ -13,10 +13,7 @@ import { TimeFilter } from "@/types/timeFilter";
 import { BackendMetricsCall } from "../../../services/hooks/useBackendFunction";
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
 import Link from "next/link";
-import {
-  FilterBranch,
-  FilterLeaf,
-} from "../../../services/lib/filters/filterDefs";
+import { FilterBranch, FilterLeaf } from "@helicone-package/filters/filterDefs";
 import { Badge } from "@/components/ui/badge";
 
 interface PromptCardProps {

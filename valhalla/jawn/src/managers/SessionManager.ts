@@ -4,10 +4,11 @@ import {
   SessionMetricsQueryParams,
 } from "../controllers/public/sessionController";
 import { clickhouseDb, Tags } from "../lib/db/ClickhouseWrapper";
-import { dbExecute } from "../lib/shared/db/dbExecute";
-import { filterListToTree, FilterNode } from "../lib/shared/filters/filterDefs";
-import { buildFilterWithAuthClickHouseSessionRMT } from "../lib/shared/filters/filters";
-import { TimeFilterMs } from "../lib/shared/filters/timeFilter";
+import { dbExecute, printRunnableQuery } from "../lib/shared/db/dbExecute";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
+import { filterListToTree } from "@helicone-package/filters/helpers";
+import { buildFilterWithAuthClickHouseSessionRMT } from "@helicone-package/filters/filters";
+import { TimeFilterMs } from "@helicone-package/filters/filterDefs";
 import { AuthParams } from "../packages/common/auth/types";
 import { err, ok, Result, resultMap } from "../packages/common/result";
 import { TagType } from "../packages/common/sessions/tags";
@@ -318,7 +319,7 @@ export class SessionManager {
       session_id,
       session_name,
       avg(session_rmt.latency) as avg_latency,
-      ${0} AS total_cost,
+      ${clickhousePriceCalc("session_rmt")} AS total_cost,
       count(*) AS total_requests,
       sum(session_rmt.prompt_tokens) AS prompt_tokens,
       sum(session_rmt.completion_tokens) AS completion_tokens,
@@ -331,7 +332,7 @@ export class SessionManager {
     HAVING (${havingFilter.filter})
     ORDER BY created_at DESC
     LIMIT 50
-    `; // clickhousePriceCalc("session_rmt")
+    `;
     console.log(query)
 
     const results = await clickhouseDb.dbQuery<SessionResult>(

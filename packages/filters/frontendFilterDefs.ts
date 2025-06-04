@@ -1,6 +1,6 @@
 import {
   BooleanOperators,
-  FilterLeafRequestResponseVersioned,
+  FilterLeafRequestResponseRMT,
   NumberOperators,
   TablesAndViews,
   TextOperators,
@@ -15,6 +15,7 @@ export type ColumnType =
   | "number-with-suggestions"
   | "bool";
 
+
 export type InputParam = {
   key: string;
   param: string;
@@ -25,6 +26,7 @@ interface Operator<T> {
   type: ColumnType;
   inputParams?: InputParam[];
 }
+
 const textOperators: Operator<keyof TextOperators>[] = [
   {
     value: "equals",
@@ -132,6 +134,67 @@ export type SingleFilterDef<T extends keyof TablesAndViews> = {
   category: string;
   isCustomProperty?: boolean;
 };
+
+export function textWithSuggestions(
+  inputParams: InputParam[]
+): Operator<string>[] {
+  return textOperators.map((o) => ({
+    ...o,
+    type: "text-with-suggestions",
+    inputParams,
+  }));
+}
+
+export function numberWithSuggestions(
+  inputParams: InputParam[]
+): Operator<string>[] {
+  return numberOperators.map((o) => ({
+    ...o,
+    type: "number-with-suggestions",
+    inputParams,
+  }));
+}
+
+export function getPropertyFilters(
+  properties: string[],
+  inputParams: InputParam[]
+): SingleFilterDef<"properties">[] {
+  return properties.map((p) => ({
+    label: p,
+    operators: textWithSuggestions(inputParams),
+    table: "properties",
+    column: p,
+    category: "properties",
+  }));
+}
+
+export function getPropertyFiltersV2(
+  properties: string[],
+  inputParams: InputParam[]
+): SingleFilterDef<"request_response_rmt">[] {
+  return properties.map((p) => ({
+    label: p,
+    operators: textWithSuggestions(inputParams),
+    table: "request_response_rmt",
+    column: p as keyof FilterLeafRequestResponseRMT,
+    category: "properties",
+    isCustomProperty: true,
+  }));
+}
+
+export function getValueFilters(
+  properties: string[],
+  inputParams: InputParam[]
+): SingleFilterDef<"values">[] {
+  return properties.map((p) => ({
+    label: p,
+    operators: textWithSuggestions(inputParams),
+    table: "values",
+    column: p,
+    category: "prompt variables",
+  }));
+}
+
 
 const STATUS_OPS = numberWithSuggestions([
   {
@@ -307,147 +370,3 @@ export const REQUEST_TABLE_FILTERS: [
     category: "feedback",
   },
 ];
-
-export const userTableFilters: [
-  SingleFilterDef<"users_view">,
-  SingleFilterDef<"users_view">,
-  SingleFilterDef<"users_view">,
-  SingleFilterDef<"users_view">,
-  SingleFilterDef<"users_view">,
-  SingleFilterDef<"users_view">,
-  SingleFilterDef<"users_view">,
-  SingleFilterDef<"users_view">,
-  SingleFilterDef<"users_view">,
-  SingleFilterDef<"users_view">
-] = [
-  {
-    label: "User Id",
-    operators: textOperators,
-    table: "users_view",
-    column: "user_id",
-    category: "user",
-  },
-  {
-    label: "Cost",
-    operators: numberOperators,
-    table: "users_view",
-    column: "cost",
-    category: "user",
-  },
-  {
-    label: "Active For",
-    operators: numberOperators,
-    table: "users_view",
-    column: "active_for",
-    category: "user",
-  },
-  {
-    label: "First Active",
-    operators: timestampOperators,
-    table: "users_view",
-    column: "last_active",
-    category: "user",
-  },
-  {
-    label: "Last Active",
-    operators: timestampOperators,
-    table: "users_view",
-    column: "last_active",
-    category: "user",
-  },
-  {
-    label: "Requests",
-    operators: numberOperators,
-    table: "users_view",
-    column: "total_requests",
-    category: "user",
-  },
-  {
-    label: "Avg Requests per Day",
-    operators: numberOperators,
-    table: "users_view",
-    column: "average_requests_per_day_active",
-    category: "user",
-  },
-  {
-    label: "Avg Tokens per Request",
-    operators: numberOperators,
-    table: "users_view",
-    column: "average_tokens_per_request",
-    category: "user",
-  },
-  {
-    label: "Completion Tokens",
-    operators: numberOperators,
-    table: "users_view",
-    column: "total_completion_tokens",
-    category: "user",
-  },
-  {
-    label: "Prompt Tokens",
-    operators: numberOperators,
-    table: "users_view",
-    column: "total_prompt_token",
-    category: "user",
-  },
-];
-
-export function textWithSuggestions(
-  inputParams: InputParam[]
-): Operator<string>[] {
-  return textOperators.map((o) => ({
-    ...o,
-    type: "text-with-suggestions",
-    inputParams,
-  }));
-}
-
-export function numberWithSuggestions(
-  inputParams: InputParam[]
-): Operator<string>[] {
-  return numberOperators.map((o) => ({
-    ...o,
-    type: "number-with-suggestions",
-    inputParams,
-  }));
-}
-
-export function getPropertyFilters(
-  properties: string[],
-  inputParams: InputParam[]
-): SingleFilterDef<"properties">[] {
-  return properties.map((p) => ({
-    label: p,
-    operators: textWithSuggestions(inputParams),
-    table: "properties",
-    column: p,
-    category: "properties",
-  }));
-}
-
-export function getPropertyFiltersV2(
-  properties: string[],
-  inputParams: InputParam[]
-): SingleFilterDef<"request_response_rmt">[] {
-  return properties.map((p) => ({
-    label: p,
-    operators: textWithSuggestions(inputParams),
-    table: "request_response_rmt",
-    column: p as keyof FilterLeafRequestResponseVersioned,
-    category: "properties",
-    isCustomProperty: true,
-  }));
-}
-
-export function getValueFilters(
-  properties: string[],
-  inputParams: InputParam[]
-): SingleFilterDef<"values">[] {
-  return properties.map((p) => ({
-    label: p,
-    operators: textWithSuggestions(inputParams),
-    table: "values",
-    column: p,
-    category: "prompt variables",
-  }));
-}

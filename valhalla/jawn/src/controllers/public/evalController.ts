@@ -17,7 +17,7 @@ import {
   EvalManager,
   ScoreDistribution,
 } from "../../managers/eval/EvalManager";
-import { FilterLeafSubset } from "../../lib/shared/filters/filterDefs";
+import { FilterLeafSubset } from "@helicone-package/filters/filterDefs";
 
 import { KVCache } from "../../lib/cache/kvCache";
 import { cacheResultCustom } from "../../utils/cacheResult";

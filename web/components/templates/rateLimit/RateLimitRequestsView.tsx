@@ -5,7 +5,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { TimeFilter } from "../../../services/lib/filters/filterDefs";
+import { TimeFilter } from "@helicone-package/filters/filterDefs";
 import { Col } from "../../layout/common/col";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import RequestsPage from "../requests/RequestsPage";

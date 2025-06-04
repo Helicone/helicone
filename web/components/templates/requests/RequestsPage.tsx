@@ -21,7 +21,10 @@ import {
 } from "@helicone-package/llm-mapper/types";
 import { heliconeRequestToMappedContent } from "@helicone-package/llm-mapper/utils/getMappedContent";
 import { useGetRequestWithBodies } from "@/services/hooks/requests";
-import { UIFilterRowNode, UIFilterRowTree } from "@/services/lib/filters/types";
+import {
+  UIFilterRowNode,
+  UIFilterRowTree,
+} from "@helicone-package/filters/types";
 import { TimeFilter } from "@/types/timeFilter";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -31,11 +34,11 @@ import { useGetUnauthorized } from "../../../services/hooks/dashboard";
 import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
 import {
   getRootFilterNode,
   isFilterRowNode,
-} from "../../../services/lib/filters/uiFilterRowTree";
+} from "@helicone-package/filters/helpers";
 import {
   SortDirection,
   SortLeafRequest,

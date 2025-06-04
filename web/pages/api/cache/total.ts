@@ -1,4 +1,4 @@
-import { TimeFilterSchema } from "@/services/lib/filters/filterDefs";
+import { TimeFilterSchema } from "@helicone-package/filters/helpers";
 import { getCacheCountClickhouse } from "../../../lib/api/cache/stats";
 import {
   HandlerWrapperOptions,

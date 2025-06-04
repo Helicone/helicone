@@ -1,19 +1,19 @@
 import { heliconeRequestToMappedContent } from "@helicone-package/llm-mapper/utils/getMappedContent";
-import { UIFilterRowTree } from "@/services/lib/filters/types";
+import { UIFilterRowTree } from "@helicone-package/filters/types";
 import { TimeFilter } from "@/types/timeFilter";
 import { useState } from "react";
 import { getTimeIntervalAgo } from "../../../lib/timeCalculations/time";
 import { useModels } from "../../../services/hooks/models";
 import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
 import { useGetRequests } from "../../../services/hooks/requests";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
 import {
   getPropertyFiltersV2,
   REQUEST_TABLE_FILTERS,
   SingleFilterDef,
   textWithSuggestions,
-} from "../../../services/lib/filters/frontendFilterDefs";
-import { filterUITreeToFilterNode } from "../../../services/lib/filters/uiFilterRowTree";
+} from "@helicone-package/filters/frontendFilterDefs";
+import { filterUITreeToFilterNode } from "@helicone-package/filters/helpers";
 import { SortLeafRequest } from "../../../services/lib/sorts/requests/sorts";
 import { useFilterAST } from "@/filterAST/context/filterContext";
 import { toFilterNode } from "@/filterAST/toFilterNode";
