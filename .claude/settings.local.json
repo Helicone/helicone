@@ -8,7 +8,9 @@
       "Bash(rg:*)",
       "Bash(cargo:*)",
       "Bash(RUST_BACKTRACE=1 cargo test test_bedrock_valid_provider_models --all-features)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "WebFetch(domain:docs.rs)",
+      "Bash(RUST_LOG=* cargo test*)"
     ],
     "deny": []
   }

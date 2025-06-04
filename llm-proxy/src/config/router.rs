@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use super::{
     balance::{BalanceConfig, BalanceConfigInner},
     model_mapping::ModelMappingConfig,
-    rate_limit::LimitConfig,
+    rate_limit::LimitsConfig,
     retry::RetryConfig,
     spend_control::SpendControlConfig,
 };
@@ -123,7 +123,7 @@ pub enum RouterRateLimitConfig {
     /// Routers must configure their own rate limit settings.
     Custom {
         #[serde(default, flatten)]
-        limits: LimitConfig,
+        limits: LimitsConfig,
     },
 }
 

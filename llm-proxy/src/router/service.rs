@@ -63,6 +63,9 @@ impl Router {
         let provider_keys =
             Self::add_provider_keys(id, &router_config, &app_state).await?;
         let mut inner = HashMap::default();
+        let rl_layer =
+            rate_limit::Layer::per_router(&app_state, id, &router_config)
+                .await?;
         for (endpoint_type, balance_config) in router_config.balance.as_ref() {
             let balancer = ProviderBalancer::new(
                 app_state.clone(),
@@ -72,10 +75,7 @@ impl Router {
             )
             .await?;
             let service_stack: RouterService = ServiceBuilder::new()
-                .layer(rate_limit::Layer::per_router(
-                    &app_state,
-                    &router_config,
-                )?)
+                .layer(rl_layer.clone())
                 .layer(request_context::Layer::new(
                     router_config.clone(),
                     provider_keys.clone(),
@@ -102,7 +102,7 @@ impl Router {
         )?;
 
         let direct_proxy = ServiceBuilder::new()
-            .layer(rate_limit::Layer::per_router(&app_state, &router_config)?)
+            .layer(rl_layer)
             .layer(request_context::Layer::new(
                 router_config.clone(),
                 provider_keys,
