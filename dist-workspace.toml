@@ -16,7 +16,7 @@ tap = "Helicone/homebrew-tap"
 # A namespace to use when publishing this package to the npm registry
 npm-scope = "@helicone"
 # Publish jobs to run in CI
-publish-jobs = ["homebrew", "npm"]
+publish-jobs = ["npm"]
 # Path that installers should place binaries in
 install-path = "CARGO_HOME"
 # Whether to install an updater program
