@@ -151,15 +151,9 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       setNotification("No mapped content", "error");
       return;
     }
-    console.log(
-      "request",
-      JSON.stringify(mappedContent.schema.request, null, 2)
-    );
     const openaiRequest = openaiChatMapper.toExternal(
       mappedContent.schema.request
     );
-
-    console.log(openaiRequest);
 
     try {
       abortController.current = new AbortController();

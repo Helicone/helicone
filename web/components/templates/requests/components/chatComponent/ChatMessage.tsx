@@ -378,7 +378,7 @@ export default function ChatMessage({
                 </div>
               );
             case "tool":
-              return mode === "raw" || !playgroundMode ? (
+              return mode === "raw" && !playgroundMode ? (
                 <MarkdownEditor
                   language="json"
                   setText={() => {}}
