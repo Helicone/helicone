@@ -10,13 +10,19 @@ services:
       POSTGRES_DB: helicone_test
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: testpassword
+      
       FLYWAY_URL: jdbc:postgresql://localhost:5432/helicone_test
       FLYWAY_USER: postgres
       FLYWAY_PASSWORD: testpassword
+
+      CLICKHOUSE_DEFAULT_USER: default
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - clickhouse_data:/var/lib/clickhouse
     ports:
       - "5432:5432"
+      - "18123:8123" # HTTP interface (Clickhouse)
+      - "19000:9000" # Native interface (Clickhouse)
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -26,5 +32,5 @@ services:
 volumes:
   postgres_data:
     driver: local
-  pgadmin_data:
+  clickhouse_data:
     driver: local
