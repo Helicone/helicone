@@ -1,5 +1,11 @@
 FROM clickhouse/clickhouse-server:latest
 
+# SUMMARY
+# Clickhouse: 8123 (9000 TCP, 9009 inter-server)
+# Postgres: 5432
+# Web: 3000
+# Jawn: 8585
+
 # Install PostgreSQL and supervisord
 RUN apt-get update && apt-get install -y \
     postgresql \
@@ -17,26 +23,23 @@ RUN service postgresql start && \
     service postgresql stop
 
 
+# Yarn + Node installation
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
     && npm install -g yarn
 
-# Copy your application
 
 WORKDIR /app
-
 COPY package.json package.json
 COPY yarn.lock yarn.lock
 COPY web/package.json web/package.json
 COPY packages ./packages
+COPY shared ./shared
 COPY web ./web
 COPY valhalla ./valhalla
 RUN find /app -name ".env.*" -exec rm {} \;
 
-
-# Install Node.js and Yarn after copying the app
-
-# Install your application dependencies
+# Install web and jawn dependencies
 WORKDIR /app/web
 RUN yarn install
 
@@ -47,15 +50,13 @@ RUN yarn install
 RUN mkdir -p /var/log/supervisor
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# MIGRATIONS
-
-
-# Install Java for Flyway and other necessary tools
 RUN apt-get update && apt-get install -y \
     openjdk-17-jre-headless \
     wget \
     unzip \
     curl \
+    python3 \
+    python3-pip \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -68,7 +69,7 @@ RUN wget -q -O flyway.tar.gz https://repo1.maven.org/maven2/org/flywaydb/flyway-
     && flyway -v
 
 # Install Python dependencies
-RUN pip install --no-cache-dir requests clickhouse-driver tabulate yarl
+RUN pip3 install --no-cache-dir requests clickhouse-driver tabulate yarl
 
 WORKDIR /app
 
