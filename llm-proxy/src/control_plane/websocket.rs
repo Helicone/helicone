@@ -2,7 +2,7 @@ use futures::{SinkExt, StreamExt};
 use std::time::Duration;
 use tokio::sync::{broadcast, mpsc};
 use tokio_tungstenite::{
-    MaybeTlsStream, WebSocketStream, tungstenite::Message,
+    MaybeTlsStream, WebSocketStream, connect_async, tungstenite::Message,
 };
 use tracing::{debug, error, info};
 
@@ -44,10 +44,10 @@ impl Default for ReconnectConfig {
 /// WebSocket client with async event subscription capabilities
 #[derive(Debug)]
 pub struct WebSocketClient {
-    message_tx: mpsc::UnboundedSender<Message>,
-    event_rx: broadcast::Receiver<WebSocketEvent>,
-    task_handle: tokio::task::JoinHandle<()>,
-    reconnect_tx: mpsc::UnboundedSender<()>,
+    msg_tx: mpsc::UnboundedSender<Message>,
+    evt_rx: broadcast::Receiver<WebSocketEvent>,
+    join: tokio::task::JoinHandle<()>,
+    rec_tx: mpsc::UnboundedSender<()>,
 }
 
 impl WebSocketClient {
@@ -55,189 +55,142 @@ impl WebSocketClient {
     pub async fn connect(
         url: &str,
     ) -> Result<Self, Box<dyn std::error::Error + Send + Sync>> {
-        Self::connect_with_config(url, ReconnectConfig::default())
+        Self::connect_with_config(url, Default::default())
     }
 
     /// Connect with custom reconnection configuration
     pub fn connect_with_config(
         url: &str,
-        reconnect_config: ReconnectConfig,
+        cfg: ReconnectConfig,
     ) -> Result<Self, Box<dyn std::error::Error + Send + Sync>> {
-        let (message_tx, message_rx) = mpsc::unbounded_channel();
-        let (event_tx, event_rx) = broadcast::channel(1000);
-        let (reconnect_tx, reconnect_rx) = mpsc::unbounded_channel();
+        let (msg_tx, msg_rx) = mpsc::unbounded_channel();
+        let (ev_tx, ev_rx) = broadcast::channel(1000);
+        let (rec_tx, rec_rx) = mpsc::unbounded_channel();
 
-        let task_handle = tokio::spawn(Self::handle_websocket_with_reconnect(
+        let join = tokio::spawn(Self::run(
             url.to_string(),
-            reconnect_config,
-            message_rx,
-            reconnect_rx,
-            event_tx,
+            cfg,
+            msg_rx,
+            rec_rx,
+            ev_tx,
         ));
 
         Ok(Self {
-            message_tx,
-            event_rx,
-            task_handle,
-            reconnect_tx,
+            msg_tx,
+            evt_rx: ev_rx,
+            join,
+            rec_tx,
         })
     }
 
     /// Send a message to the WebSocket
     pub fn send_message(
         &self,
-        message: Message,
+        m: Message,
     ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-        self.message_tx.send(message)?;
+        self.msg_tx.send(m)?;
         Ok(())
     }
 
     /// Subscribe to WebSocket events (each subscriber gets their own receiver)
     #[must_use]
     pub fn subscribe(&self) -> broadcast::Receiver<WebSocketEvent> {
-        self.event_rx.resubscribe()
+        self.evt_rx.resubscribe()
     }
 
     /// Trigger a manual reconnection attempt
     pub fn reconnect(
         &self,
     ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-        self.reconnect_tx.send(())?;
+        self.rec_tx.send(())?;
         Ok(())
     }
 
-    async fn handle_websocket_with_reconnect(
+    async fn run(
         url: String,
-        config: ReconnectConfig,
-        mut message_rx: mpsc::UnboundedReceiver<Message>,
-        mut reconnect_rx: mpsc::UnboundedReceiver<()>,
-        event_tx: broadcast::Sender<WebSocketEvent>,
+        cfg: ReconnectConfig,
+        mut msg_rx: mpsc::UnboundedReceiver<Message>,
+        mut rec_rx: mpsc::UnboundedReceiver<()>,
+        ev_tx: broadcast::Sender<WebSocketEvent>,
     ) {
-        let mut reconnect_attempts = 0u32;
-        let mut current_delay = config.initial_delay;
+        let mut attempts = 0;
+        let mut delay = cfg.initial_delay;
 
         loop {
-            match tokio_tungstenite::connect_async(&url).await {
-                Ok((ws_stream, _)) => {
+            match connect_async(&url).await {
+                Ok((stream, _)) => {
                     info!("WebSocket connected to {}", url);
-                    let _ = event_tx.send(WebSocketEvent::Connected);
+                    let _ = ev_tx.send(WebSocketEvent::Connected);
+                    attempts = 0;
+                    delay = cfg.initial_delay;
 
-                    reconnect_attempts = 0;
-                    current_delay = config.initial_delay;
-
-                    let disconnect_reason = Self::handle_websocket_connection(
-                        ws_stream,
-                        &mut message_rx,
-                        &mut reconnect_rx,
-                        &event_tx,
-                    )
-                    .await;
-
-                    match disconnect_reason {
-                        DisconnectReason::Manual => {
-                            debug!("Manual disconnect requested");
-                            break;
-                        }
-                        DisconnectReason::Error(e) => {
-                            error!(
-                                "WebSocket disconnected due to error: {}",
-                                e
-                            );
-                            let _ = event_tx.send(WebSocketEvent::Error(e));
-                        }
-                        DisconnectReason::ManualReconnect => {
-                            info!("Manual reconnection requested");
-                            continue;
+                    match Self::pump(stream, &mut msg_rx, &mut rec_rx, &ev_tx)
+                        .await
+                    {
+                        Disconnect::Manual => break,
+                        Disconnect::ManualReconnect => continue,
+                        Disconnect::Error(e) => {
+                            error!("WebSocket error: {}", e);
+                            let _ = ev_tx.send(WebSocketEvent::Error(e));
                         }
                     }
 
-                    let _ = event_tx.send(WebSocketEvent::Disconnected);
-
-                    if !config.auto_reconnect {
+                    let _ = ev_tx.send(WebSocketEvent::Disconnected);
+                    if !cfg.auto_reconnect {
                         break;
                     }
                 }
                 Err(e) => {
-                    error!("Failed to connect to WebSocket: {}", e);
-                    let _ = event_tx.send(WebSocketEvent::ReconnectFailed {
-                        attempt: reconnect_attempts + 1,
+                    error!("Failed to connect: {}", e);
+                    let _ = ev_tx.send(WebSocketEvent::ReconnectFailed {
+                        attempt: attempts + 1,
                         error: e.to_string(),
                     });
                 }
             }
 
-            if config.max_attempts > 0
-                && reconnect_attempts >= config.max_attempts
-            {
-                error!(
-                    "Giving up after {} reconnection attempts",
-                    reconnect_attempts
-                );
-                let _ = event_tx.send(WebSocketEvent::ReconnectGaveUp {
-                    total_attempts: reconnect_attempts,
+            if cfg.max_attempts > 0 && attempts >= cfg.max_attempts {
+                let _ = ev_tx.send(WebSocketEvent::ReconnectGaveUp {
+                    total_attempts: attempts,
                 });
                 break;
             }
 
-            reconnect_attempts += 1;
-
-            let _ = event_tx.send(WebSocketEvent::Reconnecting {
-                attempt: reconnect_attempts,
-                delay: current_delay,
+            attempts += 1;
+            let _ = ev_tx.send(WebSocketEvent::Reconnecting {
+                attempt: attempts,
+                delay,
             });
-
-            tokio::time::sleep(current_delay).await;
-
-            let new_delay_millis = (current_delay.as_millis()
-                * u128::from(config.backoff_multiplier))
-            .min(config.max_delay.as_millis());
-            current_delay = Duration::from_millis(
-                new_delay_millis.try_into().unwrap_or(u64::MAX),
+            tokio::time::sleep(delay).await;
+            delay = Duration::from_millis(
+                (delay.as_millis() * cfg.backoff_multiplier as u128)
+                    .min(cfg.max_delay.as_millis()) as u64,
             );
         }
 
         debug!("WebSocket handler task finished");
     }
 
-    async fn handle_websocket_connection(
-        ws_stream: WebSocketStream<MaybeTlsStream<tokio::net::TcpStream>>,
-        message_rx: &mut mpsc::UnboundedReceiver<Message>,
-        reconnect_rx: &mut mpsc::UnboundedReceiver<()>,
-        event_tx: &broadcast::Sender<WebSocketEvent>,
-    ) -> DisconnectReason {
-        let (mut ws_tx, mut ws_rx) = ws_stream.split();
-
+    async fn pump(
+        stream: WebSocketStream<MaybeTlsStream<tokio::net::TcpStream>>,
+        msg_rx: &mut mpsc::UnboundedReceiver<Message>,
+        rec_rx: &mut mpsc::UnboundedReceiver<()>,
+        ev_tx: &broadcast::Sender<WebSocketEvent>,
+    ) -> Disconnect {
+        let (mut tx, mut rx) = stream.split();
         loop {
             tokio::select! {
-                Some(message) = message_rx.recv() => {
-                    if let Err(e) = ws_tx.send(message).await {
-                        error!("Failed to send WebSocket message: {}", e);
-                        return DisconnectReason::Error(format!("Send error: {e}"));
+                Some(m) = msg_rx.recv() => {
+                    if let Err(e) = tx.send(m).await {
+                        return Disconnect::Error(format!("Send error: {e}"));
                     }
                 }
-
-                Some(message_result) = ws_rx.next() => {
-                    match message_result {
-                        Ok(message) => {
-                            debug!("Received WebSocket message: {:?}", message);
-                            let _ = event_tx.send(WebSocketEvent::Message(message));
-                        }
-                        Err(e) => {
-                            error!("WebSocket receive error: {}", e);
-                            return DisconnectReason::Error(format!("Receive error: {e}"));
-                        }
-                    }
-                }
-
-                Some(()) = reconnect_rx.recv() => {
-                    info!("Manual reconnection requested");
-                    return DisconnectReason::ManualReconnect;
-                }
-
-                else => {
-                    debug!("WebSocket channels closed, exiting gracefully");
-                    return DisconnectReason::Manual;
-                }
+                Some(r) = rx.next() => match r {
+                    Ok(m) => { let _ = ev_tx.send(WebSocketEvent::Message(m)); },
+                    Err(e) => return Disconnect::Error(format!("Receive error: {e}")),
+                },
+                Some(()) = rec_rx.recv() => return Disconnect::ManualReconnect,
+                else => return Disconnect::Manual,
             }
         }
     }
@@ -246,15 +199,15 @@ impl WebSocketClient {
     pub async fn close(
         self,
     ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-        drop(self.message_tx);
-        drop(self.reconnect_tx);
-        self.task_handle.await?;
+        drop(self.msg_tx);
+        drop(self.rec_tx);
+        self.join.await?;
         Ok(())
     }
 }
 
 #[derive(Debug)]
-enum DisconnectReason {
+enum Disconnect {
     Manual,
     Error(String),
     ManualReconnect,
