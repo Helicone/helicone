@@ -103,3 +103,5 @@ CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 # TEST JAWN (not very rigorous)
 # docker exec -it helicone-all-in-one curl http://localhost:8585
 # curl http://localhost:8585/api/v1/health
+# LOGS
+# docker exec -it helicone-all-in-one cat /var/log/supervisor/web.err.log 
