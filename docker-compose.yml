@@ -9,12 +9,7 @@ services:
     environment:      
       POSTGRES_DB: helicone_test
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: testpassword
-      
-      FLYWAY_URL: jdbc:postgresql://localhost:5432/helicone_test
-      FLYWAY_USER: postgres
-      FLYWAY_PASSWORD: testpassword
-
+      POSTGRES_PASSWORD: password
       CLICKHOUSE_DEFAULT_USER: default
     volumes:
       - postgres_data:/var/lib/postgresql/data

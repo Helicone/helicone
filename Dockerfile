@@ -1,17 +1,8 @@
-FROM postgres:17.4 AS postgres-stage
+FROM clickhouse/clickhouse-server:24.3.13.40 AS final-stage
 
-CMD ["postgres"]
-
-# --------------------------------------------------------------------------------------------------------------------
-FROM clickhouse/clickhouse-server:24.3.13.40 AS clickhouse-stage
-
-CMD ["clickhouse-server"]
-
-# --------------------------------------------------------------------------------------------------------------------
-FROM postgres-stage AS final-stage
-
-# Install Python 3.11 and system dependencies
+# Install PostgreSQL and other dependencies
 RUN apt-get update && apt-get install -y \
+    postgresql-common \
     python3.11 \
     python3.11-dev \
     python3-pip \
@@ -20,6 +11,11 @@ RUN apt-get update && apt-get install -y \
     unzip \
     curl \
     supervisor \
+    && /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y \
+    && apt-get install -y \
+    postgresql-17 \
+    postgresql-client-17 \
+    postgresql-contrib-17 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -32,42 +28,33 @@ RUN wget -q -O flyway.tar.gz https://repo1.maven.org/maven2/org/flywaydb/flyway-
     && flyway -v
 
 # Install Python dependencies
-RUN pip3 install --no-cache-dir --break-system-packages requests clickhouse-driver tabulate yarl
-
-# Copy ClickHouse binaries and configuration from clickhouse-stage
-COPY --from=clickhouse-stage /usr/bin/clickhouse* /usr/bin/
-COPY --from=clickhouse-stage /etc/clickhouse-server /etc/clickhouse-server
-COPY --from=clickhouse-stage /etc/clickhouse-client /etc/clickhouse-client
-
-# Copy ClickHouse user/group setup from clickhouse-stage
-COPY --from=clickhouse-stage /etc/passwd /tmp/clickhouse-passwd
-COPY --from=clickhouse-stage /etc/group /tmp/clickhouse-group
-RUN grep clickhouse /tmp/clickhouse-passwd >> /etc/passwd || true \
-    && grep clickhouse /tmp/clickhouse-group >> /etc/group || true \
-    && rm /tmp/clickhouse-passwd /tmp/clickhouse-group
-
-# Create directories for both services
-RUN mkdir -p /var/log/supervisor \
-    && mkdir -p /var/lib/clickhouse \
-    && mkdir -p /var/log/clickhouse-server \
-    && mkdir -p /tmp/clickhouse-server \
-    && chown -R clickhouse:clickhouse /var/lib/clickhouse \
-    && chown -R clickhouse:clickhouse /var/log/clickhouse-server \
-    && chown -R clickhouse:clickhouse /tmp/clickhouse-server
+RUN pip3 install --no-cache-dir requests clickhouse-driver tabulate yarl
 
 # Create supervisord directories and copy configuration
+RUN mkdir -p /var/log/supervisor
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 WORKDIR /app
-COPY ./supabase/flyway.conf /app/supabase/flyway.conf
+COPY ./flyway.conf /app/flyway.conf
 COPY ./supabase/migrations /app/supabase/migrations
 COPY ./supabase/migrations_without_supabase /app/supabase/migrations_without_supabase
 COPY ./clickhouse/migrations /app/clickhouse/migrations
 COPY ./clickhouse/ch_hcone.py /app/clickhouse/ch_hcone.py
 RUN chmod +x /app/clickhouse/ch_hcone.py
 
+RUN service postgresql start && \
+    su - postgres -c "createdb helicone_test" && \
+    su - postgres -c "psql -c \"ALTER USER postgres WITH PASSWORD 'password';\"" && \
+    service postgresql stop
+
 # Use supervisord as entrypoint
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 # docker compose down -v && docker compose up --build --force-recreate
+
+# works with the postgres:17.4 image
 # docker exec -it helicone-all-in-one psql -U postgres -d helicone_test
+
+# actual
+# docker exec -it helicone-all-in-one su - postgres -c "psql -d helicone_test"
+
 # docker exec -it helicone-all-in-one clickhouse-client
