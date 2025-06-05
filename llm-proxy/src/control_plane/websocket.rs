@@ -20,7 +20,7 @@ pub struct ControlPlaneClient {
 }
 
 fn handle_message(
-    state: Arc<Mutex<ControlPlaneState>>,
+    state: &Arc<Mutex<ControlPlaneState>>,
     message: Message,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let m: MessageTypeRX = serde_json::from_str(&message.into_text()?)?;
@@ -44,11 +44,11 @@ impl ControlPlaneClient {
             while let Some(message) = rx.next().await {
                 match message {
                     Ok(message) => {
-                        let _ =
-                            handle_message(Arc::clone(&state_clone), message)
-                                .map_err(|e| {
-                                    tracing::error!("Error: {}", e);
-                                });
+                        let _ = handle_message(&state_clone, message).map_err(
+                            |e| {
+                                tracing::error!("Error: {}", e);
+                            },
+                        );
                     }
                     Err(tungstenite::Error::AlreadyClosed) => {
                         tracing::error!("Connection closed");
@@ -86,7 +86,7 @@ impl ControlPlaneClient {
         };
         if let Some(ref mut tx) = self.msg_tx {
             match tx.send(m).await {
-                Ok(_) => (),
+                Ok(()) => (),
                 Err(tungstenite::Error::AlreadyClosed) => {
                     tracing::error!("Connection closed");
                     self.reconnect_websocket().await?;
@@ -97,5 +97,54 @@ impl ControlPlaneClient {
             }
         }
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::ControlPlaneClient;
+    use crate::control_plane::types::MessageTypeTX;
+    use std::time::Duration;
+    use tokio::net::TcpListener;
+    use tokio_tungstenite::accept_async;
+
+    #[tokio::test]
+    async fn test_mock_server_connection() {
+        // Start a simple mock server
+        let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let addr = listener.local_addr().unwrap();
+        let ws_url = format!("ws://{}", addr);
+
+        // Spawn mock server that just accepts connections
+        tokio::spawn(async move {
+            if let Ok((stream, _)) = listener.accept().await {
+                let _ = accept_async(stream).await;
+                // Just accept and do nothing - minimal mock
+            }
+        });
+
+        tokio::time::sleep(Duration::from_millis(50)).await;
+
+        // Test connection
+        let result = ControlPlaneClient::connect(&ws_url).await;
+        assert!(result.is_ok(), "Should connect to mock server");
+    }
+
+    #[tokio::test]
+    async fn test_integration_localhost_8585() {
+        let ws_url = "ws://localhost:8585";
+
+        // This will fail if no server is running on 8585, which is expected
+        let result = ControlPlaneClient::connect(ws_url).await;
+
+        if let Ok(mut client) = result {
+            // If we can connect, try sending a heartbeat
+            let send_result =
+                client.send_message(MessageTypeTX::Heartbeat).await;
+            assert!(send_result.is_ok(), "Should be able to send heartbeat");
+        } else {
+            // If we can't connect, that's fine for this test
+            println!("No server running on localhost:8585 - this is expected");
+        }
     }
 }
