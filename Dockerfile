@@ -1,4 +1,4 @@
-FROM clickhouse/clickhouse-server:24.3.13.40 AS final-stage
+FROM clickhouse/clickhouse-server:24.3.13.40 AS database-stage
 
 # Install PostgreSQL and other dependencies
 RUN apt-get update && apt-get install -y \
@@ -34,7 +34,6 @@ RUN pip3 install --no-cache-dir requests clickhouse-driver tabulate yarl
 RUN mkdir -p /var/log/supervisor
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-WORKDIR /app
 COPY ./flyway.conf /app/flyway.conf
 COPY ./supabase/migrations /app/supabase/migrations
 COPY ./supabase/migrations_without_supabase /app/supabase/migrations_without_supabase
@@ -47,14 +46,60 @@ RUN service postgresql start && \
     su - postgres -c "psql -c \"ALTER USER postgres WITH PASSWORD 'password';\"" && \
     service postgresql stop
 
+# --------------------------------------------------------------------------------------------------------------------
+
+FROM database-stage AS jawn-stage
+
+# Install Node.js 20 and yarn
+RUN apt-get update && apt-get install -y curl \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && npm install -g yarn \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy package files and source code
+WORKDIR /app
+COPY package.json package.json
+COPY yarn.lock yarn.lock
+COPY web/package.json web/package.json
+COPY packages ./packages
+COPY shared ./shared
+COPY valhalla ./valhalla
+RUN find /app -name ".env.*" -exec rm {} \;
+
+# Install dependencies and build jawn
+RUN yarn install \
+    && cd valhalla/jawn \
+    && yarn install \
+    && yarn build
+
+
+# --------------------------------------------------------------------------------------------------------------------
+
+FROM jawn-stage AS web-stage
+
+# Copy package files and source code
+WORKDIR /app
+COPY web ./web
+RUN find /app -name ".env.*" -exec rm {} \;
+
+# Install dependencies and build jawn
+RUN yarn install \
+    && cd web \
+    && yarn install \
+    && yarn build
+
+
 # Use supervisord as entrypoint
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+
+# CREATE
 # docker compose down -v && docker compose up --build --force-recreate
-
-# works with the postgres:17.4 image
-# docker exec -it helicone-all-in-one psql -U postgres -d helicone_test
-
-# actual
+# TEST POSTGRES
 # docker exec -it helicone-all-in-one su - postgres -c "psql -d helicone_test"
-
+# TEST CLICKHOUSE
 # docker exec -it helicone-all-in-one clickhouse-client
+# TEST JAWN (not very rigorous)
+# docker exec -it helicone-all-in-one curl http://localhost:8585
+# curl http://localhost:8585/api/v1/health

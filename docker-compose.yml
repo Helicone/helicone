@@ -18,6 +18,8 @@ services:
       - "5432:5432"
       - "18123:8123" # HTTP interface (Clickhouse)
       - "19000:9000" # Native interface (Clickhouse)
+      - "8585:8585" # Jawn API
+      - "3000:3000" # Web
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s

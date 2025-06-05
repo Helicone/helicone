@@ -74,15 +74,15 @@ CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
 # # Web: 3000
 # # Jawn: 8585
 
-# WORKDIR /app
-# COPY package.json package.json
-# COPY yarn.lock yarn.lock
-# COPY web/package.json web/package.json
-# COPY packages ./packages
-# COPY shared ./shared
-# COPY web ./web
-# COPY valhalla ./valhalla
-# RUN find /app -name ".env.*" -exec rm {} \;
+WORKDIR /app
+COPY package.json package.json
+COPY yarn.lock yarn.lock
+COPY web/package.json web/package.json
+COPY packages ./packages
+COPY shared ./shared
+COPY web ./web
+COPY valhalla ./valhalla
+RUN find /app -name ".env.*" -exec rm {} \;
 
 # # --------------------------------------------------------------------------------------------------------------------
 # FROM --platform=linux/amd64 node:20-bookworm-slim as jawn-build
