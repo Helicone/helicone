@@ -3,19 +3,11 @@ FROM node:20-bookworm-slim
 # Apply security updates
 RUN apt-get update && apt-get upgrade -y && apt-get autoremove -y && apt-get clean
 
-# Set working directory
 WORKDIR /app
 
-# Copy workspace files
 COPY package.json yarn.lock ./
 COPY packages/ ./packages/
 COPY web/ ./web/
 
-# Remove any environment files
-RUN find . -name ".env.*" -exec rm {} \;
-
-# Install dependencies for the entire workspace
 RUN yarn install --frozen-lockfile
-
-# Build the web application
 RUN cd web && yarn build
