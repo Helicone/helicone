@@ -11,7 +11,7 @@ use crate::{endpoints::EndpointType, types::provider::InferenceProvider};
 /// A registry of balance configs for each endpoint type,
 /// since a separate load balancer is used for each endpoint type.
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq, AsRef, From)]
-pub struct BalanceConfig(pub(super) HashMap<EndpointType, BalanceConfigInner>);
+pub struct BalanceConfig(pub HashMap<EndpointType, BalanceConfigInner>);
 
 impl Default for BalanceConfig {
     fn default() -> Self {
@@ -70,6 +70,20 @@ impl BalanceConfig {
         )]))
     }
 
+    #[cfg(any(test, feature = "testing"))]
+    #[must_use]
+    pub fn ollama_chat() -> Self {
+        Self(HashMap::from([(
+            EndpointType::Chat,
+            BalanceConfigInner::Weighted {
+                targets: nes![BalanceTarget {
+                    provider: InferenceProvider::Ollama,
+                    weight: Decimal::from(1),
+                }],
+            },
+        )]))
+    }
+
     #[must_use]
     pub fn providers(&self) -> IndexSet<InferenceProvider> {
         self.0
@@ -94,6 +108,7 @@ impl BalanceConfigInner {
                 InferenceProvider::OpenAI,
                 InferenceProvider::Anthropic,
                 InferenceProvider::GoogleGemini,
+                InferenceProvider::Ollama,
             ],
         }
     }

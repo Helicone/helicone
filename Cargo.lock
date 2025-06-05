@@ -2309,7 +2309,6 @@ dependencies = [
  "meltdown",
  "mime",
  "nonempty-collections",
- "ollama-rest",
  "opentelemetry",
  "opentelemetry-system-metrics",
  "opentelemetry_sdk",
@@ -2620,21 +2619,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "62948e14d923ea95ea2c7c86c71013138b66525b86bdc08d2dcc262bdb497b87"
 dependencies = [
  "memchr",
-]
-
-[[package]]
-name = "ollama-rest"
-version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cf86e887049a9cb49e230996c03872e47ee77b2e0f9dd17a25fddbe7d6e629b2"
-dependencies = [
- "chrono",
- "futures",
- "reqwest",
- "serde",
- "serde_json",
- "tokio",
- "url",
 ]
 
 [[package]]

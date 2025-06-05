@@ -2,11 +2,42 @@ use std::collections::HashMap;
 
 use http::{Method, Request, StatusCode};
 use llm_proxy::{
-    config::{Config, router::RouterConfigs},
+    config::{
+        Config,
+        balance::{BalanceConfig, BalanceConfigInner},
+        router::{RouterConfig, RouterConfigs},
+    },
+    endpoints::EndpointType,
     tests::{TestDefault, harness::Harness, mock::MockArgs},
+    types::{provider::InferenceProvider, router::RouterId},
 };
+use nonempty_collections::nes;
 use serde_json::json;
 use tower::Service;
+
+fn p2c_config_openai_anthropic_google() -> RouterConfigs {
+    RouterConfigs::new(HashMap::from([(
+        RouterId::Default,
+        RouterConfig {
+            request_style: InferenceProvider::OpenAI,
+            balance: BalanceConfig(HashMap::from([(
+                EndpointType::Chat,
+                BalanceConfigInner::P2C {
+                    targets: nes![
+                        InferenceProvider::OpenAI,
+                        InferenceProvider::Anthropic,
+                        InferenceProvider::GoogleGemini
+                    ],
+                },
+            )])),
+            model_mappings: None,
+            cache: None,
+            retries: None,
+            rate_limit: Default::default(),
+            spend_control: None,
+        },
+    )]))
+}
 
 #[tokio::test]
 #[serial_test::serial]
@@ -14,9 +45,8 @@ async fn openai_slow() {
     let mut config = Config::test_default();
     // Disable auth for this test since we're testing load balancing behavior
     config.auth.require_auth = false;
-    // enable multiple providers, test_default for RouterConfig has only a
-    // single provider
-    config.routers = RouterConfigs::default();
+    // Use p2c balance config with OpenAI, Anthropic, and Google providers
+    config.routers = p2c_config_openai_anthropic_google();
     let latency = 100;
     let requests = 100;
     let mock_args = MockArgs::builder()
@@ -68,9 +98,8 @@ async fn anthropic_slow() {
     let mut config = Config::test_default();
     // Disable auth for this test since we're testing load balancing behavior
     config.auth.require_auth = false;
-    // enable multiple providers, test_default for RouterConfig has only a
-    // single provider
-    config.routers = RouterConfigs::default();
+    // Use p2c balance config with OpenAI, Anthropic, and Google providers
+    config.routers = p2c_config_openai_anthropic_google();
     let latency = 10;
     let requests = 100;
     let mock_args = MockArgs::builder()

@@ -44,3 +44,16 @@ gemini:
     - gemini-1.5-pro
   base-url: https://generativelanguage.googleapis.com
   version: null
+
+ollama:
+  models:
+    - deepseek-r1
+    - gemma3
+    - qwen3
+    - llama4
+    - llama3.3
+    - llama3.2
+    - llama3
+    - phi4
+    - llava
+  base-url: http://localhost:11434

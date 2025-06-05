@@ -17,7 +17,7 @@ use crate::{
     endpoints::{ApiEndpoint, EndpointType},
     error::{
         api::ApiError, init::InitError, internal::InternalError,
-        invalid_req::InvalidRequestError, provider::ProviderError,
+        invalid_req::InvalidRequestError,
     },
     middleware::{rate_limit::service as rate_limit, request_context},
     types::{provider::ProviderKeys, router::RouterId},
@@ -87,19 +87,13 @@ impl Router {
 
             inner.insert(*endpoint_type, service_stack);
         }
-        let direct_proxy_provider_api_key = provider_keys
-            .get(&router_config.request_style)
-            .ok_or(ProviderError::ApiKeyNotFound(router_config.request_style))
-            .inspect_err(|e| {
-                tracing::error!(error = ?e, "Api key not found");
-            })?;
         let direct_proxy_dispatcher = Dispatcher::new(
             app_state.clone(),
             id,
             &router_config,
             router_config.request_style,
-            direct_proxy_provider_api_key,
-        )?;
+        )
+        .await?;
 
         let direct_proxy = ServiceBuilder::new()
             .layer(rl_layer)

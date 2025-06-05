@@ -97,10 +97,13 @@ impl InferenceProvider {
                     .map(ApiEndpoint::Google)
                     .collect()
             }
+            InferenceProvider::Ollama => {
+                crate::endpoints::ollama::Ollama::iter()
+                    .map(ApiEndpoint::Ollama)
+                    .collect()
+            }
             // Inference not supported yet for these providers
-            InferenceProvider::Bedrock
-            | InferenceProvider::VertexAi
-            | InferenceProvider::Ollama => vec![],
+            InferenceProvider::Bedrock | InferenceProvider::VertexAi => vec![],
         }
     }
 }
@@ -144,6 +147,10 @@ impl ProviderKeys {
         let providers = balance_config.providers();
 
         for provider in providers {
+            if provider == InferenceProvider::Ollama {
+                // ollama doesn't require an API key
+                continue;
+            }
             let provider_str = provider.to_string().to_uppercase();
             let env_var = format!("{provider_str}_API_KEY");
             if let Ok(key) = std::env::var(&env_var) {

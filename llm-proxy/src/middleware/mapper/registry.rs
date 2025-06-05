@@ -9,8 +9,10 @@ use super::{
 use crate::{
     config::router::RouterConfig,
     endpoints::{
-        self, ApiEndpoint, anthropic::Anthropic, google::Google, openai::OpenAI,
+        self, ApiEndpoint, anthropic::Anthropic, google::Google,
+        ollama::Ollama, openai::OpenAI,
     },
+    middleware::mapper::ollama::OllamaConverter,
     types::provider::InferenceProvider,
 };
 
@@ -163,6 +165,23 @@ impl EndpointConverterRegistryInner {
             ));
             registry.register_converter(key, converter);
         }
+        if request_style == InferenceProvider::OpenAI
+            && providers.contains(&InferenceProvider::Ollama)
+        {
+            let key = RegistryKey::new(
+                ApiEndpoint::OpenAI(OpenAI::chat_completions()),
+                ApiEndpoint::Ollama(Ollama::chat_completions()),
+            );
+            let converter = TypedEndpointConverter::<
+                endpoints::openai::ChatCompletions,
+                endpoints::ollama::chat_completions::ChatCompletions,
+                OllamaConverter,
+            >::new(OllamaConverter::new(
+                model_mapper.clone(),
+            ));
+            registry.register_converter(key, converter);
+        }
+
         registry
     }
 

@@ -79,6 +79,9 @@ impl ApiEndpoint {
             (Self::OpenAI(source), InferenceProvider::Ollama) => {
                 Ok(Self::Ollama(Ollama::from(source)))
             }
+            (Self::Ollama(source), InferenceProvider::OpenAI) => {
+                Ok(Self::OpenAI(OpenAI::from(source)))
+            }
             _ => Err(InvalidRequestError::UnsupportedProvider(target_provider)),
         }
     }

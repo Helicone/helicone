@@ -1,11 +1,16 @@
 use std::str::FromStr;
 
-use ollama_rest::models::chat::{ChatRequest, ChatResponse};
+use async_openai::types::{
+    CreateChatCompletionResponse, CreateChatCompletionStreamResponse,
+};
 
 use super::{
     TryConvert, TryConvertStreamData, error::MapperError, model::ModelMapper,
 };
-use crate::types::{model_id::ModelId, provider::InferenceProvider};
+use crate::{
+    endpoints::ollama::chat_completions::CreateChatCompletionRequestOllama,
+    types::{model_id::ModelId, provider::InferenceProvider},
+};
 
 pub struct OllamaConverter {
     model_mapper: ModelMapper,
@@ -18,57 +23,56 @@ impl OllamaConverter {
     }
 }
 
-impl TryConvert<async_openai::types::CreateChatCompletionRequest, ChatRequest>
-    for OllamaConverter
+impl
+    TryConvert<
+        async_openai::types::CreateChatCompletionRequest,
+        CreateChatCompletionRequestOllama,
+    > for OllamaConverter
 {
     type Error = MapperError;
     fn try_convert(
         &self,
         mut value: async_openai::types::CreateChatCompletionRequest,
-    ) -> Result<ChatRequest, Self::Error> {
+    ) -> Result<CreateChatCompletionRequestOllama, Self::Error> {
         let source_model = ModelId::from_str(&value.model)?;
         let target_model = self
             .model_mapper
-            .map_model(&source_model, &InferenceProvider::GoogleGemini)?;
+            .map_model(&source_model, &InferenceProvider::Ollama)?;
         tracing::trace!(source_model = ?source_model, target_model = ?target_model, "mapped model");
 
         value.model = target_model.to_string();
 
-        todo!()
-        // Ok(CreateChatCompletionRequestGemini(value))
+        Ok(CreateChatCompletionRequestOllama(value))
     }
 }
 
-impl TryConvert<ChatResponse, async_openai::types::CreateChatCompletionResponse>
-    for OllamaConverter
+impl
+    TryConvert<
+        async_openai::types::CreateChatCompletionResponse,
+        async_openai::types::CreateChatCompletionResponse,
+    > for OllamaConverter
 {
     type Error = MapperError;
     fn try_convert(
         &self,
-        value: ChatResponse,
-    ) -> Result<async_openai::types::CreateChatCompletionResponse, Self::Error>
-    {
-        todo!()
-        // Ok(value)
+        value: CreateChatCompletionResponse,
+    ) -> Result<CreateChatCompletionResponse, Self::Error> {
+        Ok(value)
     }
 }
 
 impl
     TryConvertStreamData<
-        ChatResponse,
-        async_openai::types::CreateChatCompletionStreamResponse,
+        CreateChatCompletionStreamResponse,
+        CreateChatCompletionStreamResponse,
     > for OllamaConverter
 {
     type Error = MapperError;
 
     fn try_convert_chunk(
         &self,
-        value: ChatResponse,
-    ) -> Result<
-        Option<async_openai::types::CreateChatCompletionStreamResponse>,
-        Self::Error,
-    > {
-        todo!()
-        // Ok(Some(value))
+        value: CreateChatCompletionStreamResponse,
+    ) -> Result<Option<CreateChatCompletionStreamResponse>, Self::Error> {
+        Ok(Some(value))
     }
 }
