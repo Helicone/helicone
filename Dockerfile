@@ -71,8 +71,8 @@ RUN find /app -name ".env.*" -exec rm {} \;
 # Install dependencies and build jawn
 RUN yarn install \
     && cd valhalla/jawn \
-    && yarn install \
-    && yarn build
+    && yarn install
+    # && yarn build
 
 
 # --------------------------------------------------------------------------------------------------------------------
@@ -84,12 +84,24 @@ WORKDIR /app
 COPY web ./web
 RUN find /app -name ".env.*" -exec rm {} \;
 
-# Install dependencies and build jawn
+# Install dependencies and build web
 RUN yarn install \
     && cd web \
-    && yarn install \
-    && yarn build
+    && yarn install
+    # && yarn build
 
+# --------------------------------------------------------------------------------------------------------------------
+
+FROM web-stage AS minio-stage
+
+# Install MinIO server and client
+RUN wget -q -O /usr/local/bin/minio https://dl.min.io/server/minio/release/linux-amd64/minio \
+    && chmod +x /usr/local/bin/minio \
+    && wget -q -O /usr/local/bin/mc https://dl.min.io/client/mc/release/linux-amd64/mc \
+    && chmod +x /usr/local/bin/mc
+
+# Create MinIO data directory
+RUN mkdir -p /data
 
 # Use supervisord as entrypoint
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
@@ -100,6 +112,9 @@ CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 # docker exec -it helicone-all-in-one su - postgres -c "psql -d helicone_test"
 # TEST CLICKHOUSE
 # docker exec -it helicone-all-in-one clickhouse-client
+# TEST MINIO
+# docker exec -it helicone-all-in-one mc ls localminio/
+# curl http://localhost:9080/minio/health/live
 # TEST JAWN (not very rigorous)
 # docker exec -it helicone-all-in-one curl http://localhost:8585
 # curl http://localhost:8585/api/v1/health
