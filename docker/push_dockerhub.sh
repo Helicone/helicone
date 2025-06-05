@@ -51,10 +51,10 @@ run_command() {
 }
 
 # Prune Docker images if not disabled
-# if [ "$DONT_PRUNE" = false ]; then
-#   echo "Pruning Docker images..."
-#   run_command docker system prune -af
-# fi
+if [ "$DONT_PRUNE" = false ]; then
+  echo "Pruning Docker images..."
+  run_command docker system prune -af
+fi
 
 # Define images and their contexts
 IMAGES=(
