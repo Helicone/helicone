@@ -5,51 +5,60 @@ description: "Deploy Helicone using Docker Compose. Quick setup guide for runnin
 "twitter:title": "Docker Compose Deployment - Helicone OSS LLM Observability"
 ---
 
-At Helicone we believe that open-source software makes the world a better place. We are committed to open-source and we made a guide to make it easy for you to deploy your own instance of Helicone.
+## Running via Docker Compose
+### Prerequisites
 
-## Running locally
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+
+### Clone the Repository
+```bash
+git clone https://github.com/Helicone/helicone.git
+cd helicone
+```
+
+### Copy all environment variables
+Copy the `.env.example` file within the docker directory to `.env` and modify as needed.
+
+### Running as Docker File
+To run all services in a single Docker container, you can use the `helicone-all` image. This is useful for quick testing or development purposes.
+
+1. Build the all-in-one image:
 
 ```bash
-# Clone repository
-git clone https://github.com/Helicone/helicone.git
-
 cd docker
+docker build -t helicone-all -f docker/dockerfiles/dockerfile_all .
+```
 
-# NOTE: to pull the latest changes and migrations run `docker compose build`
+2. Run the container:
 
-# Start up the services
+```bash
+docker run -d --name helicone-all -p 3000:3000 -p 8585:8585 -p 5432:5432 -p 8123:8123 -p 9000:9000 helicone-all
+```
+
+### Running via Docker Compose
+```bash
+cd docker
 docker compose up -d # NOTE: the initial build will take a while ~5 minutes, but subsequent builds will be a lot faster
 ```
 
-**Default URLs:**
+## Running Services
 
-- Helicone Webpage: localhost:3000
-- Helicone Worker: localhost:8585/v1/gateway/oai/v1/chat/completions
-- Temp mailer: http://localhost:8025/
+- Helicone Webpage (frontend): localhost:3000
+- Jawn (backend): localhost:8585/v1/gateway/oai/v1/chat/completions
+- Postgres (database): localhost:5432
+- Clickhouse (analytics): localhost:8123
+- Minio (object storage): localhost:9000
 
-## Example
-
-```python
-from openai import OpenAI
-import os
-from dotenv import load_dotenv
-
-# Load environment variables from .env file
-load_dotenv()
-
-openai_client = OpenAI(
-    api_key=os.getenv("OPENAI_API_KEY"),
-    base_url="http://127.0.0.1:8585/v1/gateway/oai/v1",
-    default_headers={
-        "Helicone-Auth": f"Bearer {os.getenv('HELICONE_API_KEY')}",
-    }
-)
-
-response = openai_client.completions.create(
-    model="gpt-3.5-turbo-instruct",
-    prompt="Count to 5",
-    stream=False,
-)
-assert response.choices[0].text is not None
-
+## Example to test the Jawn service
+```bash
+curl --location 'https://localhost:8585/jawn/v1/gateway/oai/v1/completions' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer {{OPENAI_API_KEY}}' \
+--header 'Helicone-Auth: Bearer {{HELICONE_API_KEY}}' \
+--data '{
+    "model": "gpt-4o-mini",
+    "prompt": "Count to 5",
+    "stream": false
+  }'
 ```
