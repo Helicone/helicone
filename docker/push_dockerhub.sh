@@ -58,7 +58,7 @@ run_command() {
 
 # Define images and their contexts
 IMAGES=(
-  "helicone/web:../web"
+  "helicone/web:.."
   "helicone/migrations:.."
   "helicone/jawn:.."
 )
