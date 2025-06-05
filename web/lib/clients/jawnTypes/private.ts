@@ -15990,7 +15990,7 @@ export interface operations {
       };
     };
     responses: {
-      /** @description Ok */
+      /** @description requests */
       200: {
         content: {
           "application/json": components["schemas"]["Result_HeliconeRequest-Array.string_"];
@@ -16020,7 +16020,7 @@ export interface operations {
       };
     };
     responses: {
-      /** @description Ok */
+      /** @description requests */
       200: {
         content: {
           "application/json": components["schemas"]["Result_HeliconeRequest-Array.string_"];

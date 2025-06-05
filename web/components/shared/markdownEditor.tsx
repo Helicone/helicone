@@ -72,6 +72,7 @@ interface MarkdownEditorProps {
   className?: string;
   textareaClassName?: string;
   monaco?: boolean;
+  id?: string;
 }
 
 const LARGE_TEXT_THRESHOLD = 50;
@@ -87,6 +88,7 @@ const MarkdownEditor = (props: MarkdownEditorProps) => {
     className,
     textareaClassName,
     monaco = false,
+    id,
   } = props;
 
   const text = useMemo(() => {
@@ -123,6 +125,7 @@ const MarkdownEditor = (props: MarkdownEditorProps) => {
 
   return (
     <Editor
+      {...(id && { id })}
       value={text}
       onValueChange={setText}
       highlight={(code) => {

@@ -1,0 +1,315 @@
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { FlaskConicalIcon, PlusIcon, Settings2, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Tool } from "@helicone-package/llm-mapper/types";
+import MarkdownEditor from "@/components/shared/markdownEditor";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import clsx from "clsx";
+
+interface ToolsConfigurationModalProps {
+  tools: Tool[];
+  onToolsChange: (_tools: Tool[]) => void;
+}
+
+export default function ToolsConfigurationModal({
+  tools,
+  onToolsChange,
+}: ToolsConfigurationModalProps) {
+  const [toolsDialogOpen, setToolsDialogOpen] = useState(false);
+  const [selectedToolIndex, setSelectedToolIndex] = useState<number | null>(
+    tools.length > 0 ? 0 : null
+  );
+  const [currentTools, setCurrentTools] = useState<Tool[]>(tools);
+
+  useEffect(() => {
+    setSelectedToolIndex(tools.length > 0 ? 0 : null);
+    setCurrentTools(tools);
+  }, [tools]);
+
+  const hasUnsavedChanges = useMemo(() => {
+    return JSON.stringify(tools) !== JSON.stringify(currentTools);
+  }, [tools, currentTools]);
+
+  const [parametersAsString, setParametersAsString] = useState<string>(
+    selectedToolIndex !== null
+      ? JSON.stringify(
+          currentTools[selectedToolIndex]?.parameters ?? {},
+          null,
+          2
+        )
+      : ""
+  );
+  const [toolAsString, setToolAsString] = useState<string>(
+    selectedToolIndex !== null
+      ? JSON.stringify(currentTools[selectedToolIndex] ?? {}, null, 2)
+      : ""
+  );
+
+  useEffect(() => {
+    if (selectedToolIndex !== null) {
+      setParametersAsString(
+        JSON.stringify(
+          currentTools[selectedToolIndex]?.parameters ?? {},
+          null,
+          2
+        )
+      );
+      setToolAsString(
+        JSON.stringify(currentTools[selectedToolIndex] ?? {}, null, 2)
+      );
+    }
+  }, [selectedToolIndex, currentTools]);
+
+  const updateToolField = (field: keyof Tool, value: string) => {
+    if (selectedToolIndex === null) return;
+
+    const newTools = [...currentTools];
+    newTools[selectedToolIndex] = {
+      ...newTools[selectedToolIndex],
+      [field]: value,
+    };
+    setCurrentTools(newTools);
+  };
+
+  const handleJsonViewChange = (text: string) => {
+    setToolAsString(text);
+    try {
+      const parsedTool = JSON.parse(text);
+      if (selectedToolIndex !== null) {
+        const newTools = [...currentTools];
+        newTools[selectedToolIndex] = parsedTool;
+        setCurrentTools(newTools);
+      }
+    } catch {}
+  };
+
+  return (
+    <Dialog open={toolsDialogOpen} onOpenChange={setToolsDialogOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="icon">
+          <Settings2 className="h-4 w-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent
+        className={clsx(
+          "max-w-7xl max-h-[95vh] gap-0 overflow-y-auto items-start flex flex-col",
+          currentTools.length !== 0 ? "w-[95vw]" : "w-auto"
+        )}
+      >
+        <div className="flex items center justify-between">
+          <div className="flex items-center">
+            <FlaskConicalIcon className="w-5 h-5 mr-2.5 text-slate-500" />
+            <DialogTitle>
+              <h3 className="text-base font-medium text-slate-950 dark:text-white mr-3">
+                Tools Configuration
+              </h3>
+            </DialogTitle>
+          </div>
+        </div>
+        {currentTools.length === 0 ? (
+          <div className="flex-1 p-20 flex flex-col items-center justify-center gap-4">
+            <div className="flex flex-col items-center gap-2 text-center">
+              <FlaskConicalIcon className="w-8 h-8 text-slate-400" />
+              <p className="text-sm text-slate-500">No tools configured</p>
+              <p className="text-xs text-slate-400">
+                Add a tool to get started
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              className="flex items-center gap-2"
+              onClick={() => {
+                const newTools = [
+                  {
+                    name: "new_function",
+                    description: "",
+                    parameters: {},
+                  },
+                ];
+                setCurrentTools(newTools);
+                setSelectedToolIndex(0);
+              }}
+            >
+              <PlusIcon className="h-4 w-4" />
+              Add Tool
+            </Button>
+          </div>
+        ) : (
+          <div className="flex h-full gap-4 py-4 w-full">
+            {/* Tools List */}
+            <div className="w-64 border-r pr-4 flex flex-col gap-2">
+              <div className="flex justify-between items-center">
+                <h3 className="font-medium">Tools</h3>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    const newTools = [
+                      ...currentTools,
+                      {
+                        name: "new_function",
+                        description: "",
+                        parameters: {},
+                      },
+                    ];
+                    setCurrentTools(newTools);
+                    setSelectedToolIndex(newTools.length - 1);
+                  }}
+                >
+                  <PlusIcon className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="flex-1 overflow-y-auto">
+                {currentTools.map((tool, index) => (
+                  <Button
+                    key={index}
+                    variant={
+                      selectedToolIndex === index ? "secondary" : "ghost"
+                    }
+                    className="w-full justify-start"
+                    onClick={() => setSelectedToolIndex(index)}
+                  >
+                    {tool.name || `Tool ${index + 1}`}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto">
+              {selectedToolIndex !== null &&
+                currentTools[selectedToolIndex] && (
+                  <div className="flex flex-col gap-4">
+                    <div className="flex justify-between ">
+                      <Tabs defaultValue="form" className="w-full">
+                        <TabsList>
+                          <TabsTrigger value="form">Form</TabsTrigger>
+                          <TabsTrigger value="json">JSON</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="form" className="mt-4">
+                          <div className="flex flex-col gap-2">
+                            <div className="grid gap-2">
+                              <Label
+                                className="text-sm justify-start text-slate-500"
+                                htmlFor="name"
+                              >
+                                Name
+                              </Label>
+                              <Input
+                                id="name"
+                                value={currentTools[selectedToolIndex].name}
+                                onChange={(e) =>
+                                  updateToolField("name", e.target.value)
+                                }
+                              />
+                            </div>
+                            <div className="grid gap-2">
+                              <Label
+                                className="text-sm justify-start text-slate-500"
+                                htmlFor="description"
+                              >
+                                Description
+                              </Label>
+                              <Input
+                                id="description"
+                                value={
+                                  currentTools[selectedToolIndex].description
+                                }
+                                onChange={(e) =>
+                                  updateToolField("description", e.target.value)
+                                }
+                              />
+                            </div>
+                            <div className="grid gap-2">
+                              <Label
+                                className="text-sm justify-start text-slate-500"
+                                htmlFor="parameters"
+                              >
+                                Parameters (JSON Schema)
+                              </Label>
+                              <MarkdownEditor
+                                id="parameters"
+                                language="json"
+                                text={parametersAsString}
+                                setText={setParametersAsString}
+                              />
+                            </div>
+                          </div>
+                        </TabsContent>
+                        <TabsContent value="json" className="mt-4">
+                          <MarkdownEditor
+                            id="tool-editor"
+                            language="json"
+                            text={toolAsString}
+                            setText={handleJsonViewChange}
+                          />
+                        </TabsContent>
+                      </Tabs>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          setCurrentTools(
+                            currentTools.filter(
+                              (_, i) => i !== selectedToolIndex
+                            )
+                          );
+                          setSelectedToolIndex(
+                            currentTools.length > 0
+                              ? currentTools.length - 1
+                              : null
+                          );
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+            </div>
+          </div>
+        )}
+        {currentTools.length > 0 && (
+          <DialogFooter className="flex justify-between w-full">
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button
+              onClick={() => {
+                try {
+                  const validatedTools = currentTools.map((tool) => {
+                    if (
+                      selectedToolIndex !== null &&
+                      tool === currentTools[selectedToolIndex]
+                    ) {
+                      return JSON.parse(toolAsString);
+                    }
+                    return {
+                      ...tool,
+                      parameters: JSON.parse(parametersAsString),
+                    };
+                  });
+                  onToolsChange(validatedTools);
+                  setToolsDialogOpen(false);
+                } catch (error) {
+                  console.error("Invalid JSON in tool parameters");
+                }
+              }}
+            >
+              Save
+            </Button>
+          </DialogFooter>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}

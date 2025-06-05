@@ -5,7 +5,7 @@ import MarkdownEditor from "@/components/shared/markdownEditor";
 import { markdownComponents } from "@/components/shared/prompts/ResponsePanel";
 import { PiToolboxBold } from "react-icons/pi";
 import dynamic from "next/dynamic";
-import { LuChevronDown, LuFileText, LuTrash2 } from "react-icons/lu";
+import { LuChevronDown, LuFileText, LuTrash2, LuPlus } from "react-icons/lu";
 import {
   Select,
   SelectContent,
@@ -17,7 +17,13 @@ import Image from "next/image";
 import { useRequestRenderModeStore } from "@/store/requestRenderModeStore";
 import { Button } from "@/components/ui/button";
 import { Dispatch } from "react";
-import { SetStateAction } from "react";
+import { SetStateAction, useState } from "react";
+import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 // Dynamically import ReactMarkdown with no SSR
 const ReactMarkdown = dynamic(() => import("react-markdown"), {
@@ -82,12 +88,55 @@ const renderToolMessage = (
   messageIndex?: number,
   onChatChange?: (_mappedRequest: MappedLLMRequest) => void
 ) => {
+  const updateMessageField = (field: string, value: string) => {
+    if (!mappedRequest || !onChatChange || !messageIndex) {
+      return;
+    }
+    onChatChange?.({
+      ...mappedRequest,
+      schema: {
+        ...mappedRequest.schema,
+        request: {
+          ...mappedRequest.schema.request,
+          messages: mappedRequest.schema.request?.messages?.map(
+            (message, i) => {
+              if (i === messageIndex) {
+                return {
+                  ...message,
+                  [field]: value,
+                };
+              }
+              return message;
+            }
+          ),
+        },
+      },
+    });
+  };
+
   if (message.tool_call_id && message.content) {
     return (
       <div className="flex flex-col gap-2 p-4 bg-muted rounded-lg text-xs">
-        <XSmall className="font-mono font-semibold">
-          {message.tool_call_id}
-        </XSmall>
+        {playgroundMode ? (
+          <div className="flex flex-row items-center gap-2">
+            <Input
+              value={message.name}
+              onChange={(e) => updateMessageField("name", e.target.value)}
+              placeholder="Function Name"
+            />
+            <Input
+              value={message.tool_call_id}
+              onChange={(e) =>
+                updateMessageField("tool_call_id", e.target.value)
+              }
+              placeholder="Tool Call ID"
+            />
+          </div>
+        ) : (
+          <XSmall className="font-mono font-semibold">
+            {message.tool_call_id}
+          </XSmall>
+        )}
         {!playgroundMode ? (
           <JsonRenderer
             data={
@@ -141,70 +190,161 @@ const renderToolMessage = (
             {message.content}
           </ReactMarkdown>
         )}
-        {message.tool_calls.map((tool, index) => (
-          <div
-            key={index}
-            className="flex flex-col gap-2 bg-muted rounded-lg text-sm p-2"
-          >
-            <div className="flex flex-row items-center gap-2">
-              <PiToolboxBold className="text-muted-foreground" />
-              <XSmall className="font-mono font-semibold">{tool.name}</XSmall>
-            </div>
-            {!playgroundMode ? (
-              <JsonRenderer data={tool.arguments} showCopyButton={false} />
-            ) : (
-              <MarkdownEditor
-                language="markdown"
-                className="border "
-                setText={(text) => {
-                  if (!mappedRequest || !onChatChange || !messageIndex) {
-                    return;
-                  }
-                  onChatChange?.({
-                    ...mappedRequest,
-                    schema: {
-                      ...mappedRequest.schema,
-                      request: {
-                        ...mappedRequest.schema.request,
-                        messages: mappedRequest.schema.request?.messages?.map(
-                          (message, mappedMessageIndex) => {
-                            if (mappedMessageIndex === messageIndex) {
+        {message.tool_calls.map((tool, index) => {
+          const updateMessageToolCallField = (field: string, value: string) => {
+            if (!mappedRequest || !onChatChange || !messageIndex) {
+              return;
+            }
+            onChatChange?.({
+              ...mappedRequest,
+              schema: {
+                ...mappedRequest.schema,
+                request: {
+                  ...mappedRequest.schema.request,
+                  messages: mappedRequest.schema.request?.messages?.map(
+                    (message, i) => {
+                      if (i === messageIndex) {
+                        return {
+                          ...message,
+                          tool_calls: message.tool_calls?.map((toolCall) => {
+                            if (toolCall.id === tool.id) {
                               return {
-                                ...message,
-                                tool_calls:
-                                  mappedRequest.schema.request?.messages?.[
-                                    messageIndex
-                                  ]?.tool_calls?.map(
-                                    (toolCall, toolCallIndex) => {
-                                      if (toolCallIndex === index) {
-                                        return {
-                                          ...toolCall,
-                                          arguments: (() => {
-                                            try {
-                                              return text;
-                                            } catch {
-                                              return {};
-                                            }
-                                          })(),
-                                        };
-                                      }
-                                      return toolCall;
-                                    }
-                                  ),
+                                ...toolCall,
+                                [field]: value,
                               };
                             }
-                            return message;
-                          }
-                        ),
+                            return toolCall;
+                          }),
+                        };
+                      }
+                      return message;
+                    }
+                  ),
+                },
+              },
+            });
+          };
+
+          return (
+            <div
+              key={index}
+              className="flex flex-col gap-2 bg-muted rounded-lg text-sm p-2"
+            >
+              <div className="flex flex-row items-center gap-2">
+                <PiToolboxBold className="text-muted-foreground" />
+                {playgroundMode ? (
+                  <div className="flex flex-row items-center gap-2">
+                    <Input
+                      value={tool.name}
+                      onChange={(e) =>
+                        updateMessageToolCallField("name", e.target.value)
+                      }
+                      placeholder="Function Name"
+                    />
+                    <Input
+                      value={tool.id}
+                      onChange={(e) =>
+                        updateMessageToolCallField("id", e.target.value)
+                      }
+                      placeholder="Tool Call ID"
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => {
+                        if (!onChatChange || !mappedRequest) return;
+                        const updatedMessages =
+                          mappedRequest.schema.request?.messages?.map(
+                            (message, i) => {
+                              if (i === messageIndex) {
+                                return {
+                                  ...message,
+                                  tool_calls: message.tool_calls?.filter(
+                                    (_, toolIndex) => toolIndex !== index
+                                  ),
+                                };
+                              }
+                              return message;
+                            }
+                          );
+                        onChatChange({
+                          ...mappedRequest,
+                          schema: {
+                            ...mappedRequest.schema,
+                            request: {
+                              ...mappedRequest.schema.request,
+                              messages: updatedMessages,
+                            },
+                          },
+                        });
+                      }}
+                    >
+                      <LuTrash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                ) : (
+                  <XSmall className="font-mono font-semibold">
+                    {tool.name}
+                  </XSmall>
+                )}
+              </div>
+              {!playgroundMode ? (
+                <JsonRenderer data={tool.arguments} showCopyButton={false} />
+              ) : (
+                <MarkdownEditor
+                  language="markdown"
+                  className="border "
+                  setText={(text) => {
+                    if (!mappedRequest || !onChatChange || !messageIndex) {
+                      return;
+                    }
+                    onChatChange?.({
+                      ...mappedRequest,
+                      schema: {
+                        ...mappedRequest.schema,
+                        request: {
+                          ...mappedRequest.schema.request,
+                          messages: mappedRequest.schema.request?.messages?.map(
+                            (message, mappedMessageIndex) => {
+                              if (mappedMessageIndex === messageIndex) {
+                                return {
+                                  ...message,
+                                  tool_calls:
+                                    mappedRequest.schema.request?.messages?.[
+                                      messageIndex
+                                    ]?.tool_calls?.map(
+                                      (toolCall, toolCallIndex) => {
+                                        if (toolCallIndex === index) {
+                                          return {
+                                            ...toolCall,
+                                            arguments: (() => {
+                                              try {
+                                                return text;
+                                              } catch {
+                                                return {};
+                                              }
+                                            })(),
+                                          };
+                                        }
+                                        return toolCall;
+                                      }
+                                    ),
+                                };
+                              }
+                              return message;
+                            }
+                          ),
+                        },
                       },
-                    },
-                  });
-                }}
-                text={tool.arguments}
-              />
-            )}
-          </div>
-        ))}
+                    });
+                  }}
+                  text={tool.arguments}
+                />
+              )}
+            </div>
+          );
+        })}
       </div>
     );
   }
@@ -285,6 +425,42 @@ export default function ChatMessage({
       },
     });
   };
+
+  const addToolCall = (index: number) => {
+    if (!onChatChange) return;
+
+    onChatChange({
+      ...mappedRequest,
+      schema: {
+        ...mappedRequest.schema,
+        request: {
+          ...mappedRequest.schema.request,
+          messages: mappedRequest.schema.request?.messages?.map(
+            (message, i) => {
+              if (i === index) {
+                return {
+                  ...message,
+                  tool_calls: [
+                    ...(message.tool_calls || []),
+                    {
+                      id: `call_${Date.now()}`,
+                      name: "new_function",
+                      arguments: {},
+                    },
+                  ],
+                };
+              }
+              return message;
+            }
+          ),
+        },
+      },
+    });
+    setPopoverOpen(false);
+  };
+
+  const [popoverOpen, setPopoverOpen] = useState(false);
+
   const content = message.content ?? JSON.stringify(message.tool_calls) ?? "";
   const isLongMessage = content.length > MESSAGE_LENGTH_THRESHOLD;
   const isExpanded = expandedMessages[messageIndex];
@@ -305,15 +481,22 @@ export default function ChatMessage({
               value={message.role}
               onValueChange={(value) => changeMessageRole(messageIndex, value)}
             >
-              <SelectTrigger className="w-[140px] h-8">
+              <SelectTrigger className="h-6 inline-flex items-center px-2.5 py-0.5 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-2 text-nowrap border-[hsl(var(--border))] bg-[hsl(var(--background))] text-[hsl(var(--foreground))] hover:bg-[hsl(var(--accent))] rounded-md">
                 <SelectValue placeholder="Select role" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="user">User</SelectItem>
-                <SelectItem value="assistant">Assistant</SelectItem>
-                <SelectItem value="system">System</SelectItem>
-                <SelectItem value="function">Function</SelectItem>
-                <SelectItem value="tool">Tool</SelectItem>
+              <SelectContent className="min-w-[140px]">
+                <SelectItem value="user" className="text-xs">
+                  User
+                </SelectItem>
+                <SelectItem value="assistant" className="text-xs">
+                  Assistant
+                </SelectItem>
+                <SelectItem value="system" className="text-xs">
+                  System
+                </SelectItem>
+                <SelectItem value="tool" className="text-xs">
+                  Tool
+                </SelectItem>
               </SelectContent>
             </Select>
           ) : (
@@ -324,6 +507,24 @@ export default function ChatMessage({
         </div>
         {playgroundMode && (
           <div className="flex items-center gap-2">
+            {message.role === "assistant" && (
+              <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <LuPlus className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-48 p-2">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start"
+                    onClick={() => addToolCall(messageIndex)}
+                  >
+                    Add Tool Call
+                  </Button>
+                </PopoverContent>
+              </Popover>
+            )}
             <Button
               variant="ghost"
               size="icon"

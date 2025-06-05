@@ -202,6 +202,7 @@ export interface Tool {
   parameters?: Record<string, any>; // Strict JSON Schema type ("parameters" in OPENAI, "input_schema" in ANTHROPIC)
 }
 export interface FunctionCall {
+  id?: string;
   name: string;
   arguments: Record<string, any>;
 }

@@ -1,11 +1,5 @@
 import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
-// import { MultiSelect, MultiSelectItem } from "@tremor/react";
-// import Image from "next/image";
-// import {
-//   ChatCompletionCreateParams,
-//   ChatCompletionTool,
-// } from "openai/resources";
 import { useMemo, useRef, useState } from "react";
 import { playgroundModels as PLAYGROUND_MODELS } from "@helicone-package/cost/providers/mappings";
 import AuthHeader from "../../shared/authHeader";
@@ -40,6 +34,7 @@ import Chat from "../requests/components/Chat";
 import { openaiChatMapper } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
 import { JsonRenderer } from "../requests/components/chatComponent/single/JsonRenderer";
 import findBestMatch from "string-similarity-js";
+import ToolsConfigurationModal from "./components/ToolsConfigurationModal";
 
 const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
   _type: "openai-chat",
@@ -113,7 +108,9 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   const [mappedContent, setMappedContent] =
     useState<MappedLLMRequest>(DEFAULT_EMPTY_CHAT);
 
-  const defaultMappedContent = useMemo(() => {
+  const [tools, setTools] = useState<Tool[]>([]);
+
+  useMemo(() => {
     if (requestData?.data && !isRequestLoading) {
       if (requestData.data.model in OPENROUTER_MODEL_MAP) {
         setSelectedModel(OPENROUTER_MODEL_MAP[requestData.data.model]);
@@ -130,17 +127,14 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       }
       const mappedContent = heliconeRequestToMappedContent(requestData.data);
       setMappedContent(mappedContent);
+      setTools(mappedContent?.schema.request.tools ?? []);
       return mappedContent;
     }
     return DEFAULT_EMPTY_CHAT;
   }, [requestData, isRequestLoading]);
 
-  console.log(defaultMappedContent, selectedModel);
-
-  const [tools, setTools] = useState<Tool[]>(
-    mappedContent?.schema.request.tools ?? []
-  );
   const [response, setResponse] = useState<string>("");
+  const [toolsDialogOpen, setToolsDialogOpen] = useState(false);
 
   const { setNotification } = useNotification();
   const abortController = useRef<AbortController | null>(null);
@@ -157,6 +151,8 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
 
     try {
       abortController.current = new AbortController();
+
+      console.log("openaiRequest", openaiRequest);
 
       try {
         const stream = await generateStream({
@@ -196,46 +192,12 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         title={"Playground"}
         actions={<Button onClick={onRun}>Run</Button>}
       />
-      <div className="flex justify-between w-full h-full gap-8 min-h-[80vh] border-t border-border">
-        <div className="flex w-full h-full ">
-          {(() => {
-            switch (mappedContent?._type) {
-              case "openai-chat":
-              case "anthropic-chat":
-              case "gemini-chat":
-                return (
-                  <Chat
-                    mappedRequest={mappedContent as MappedLLMRequest}
-                    playgroundMode
-                    onChatChange={(mappedRequest) => {
-                      setMappedContent(mappedRequest);
-                    }}
-                  />
-                );
-              default:
-                return (
-                  <div className="flex flex-col gap-2 p-20">
-                    <div className="text-sm text-gray-500 ">
-                      Unable to support playground on this request. Please
-                      contact support at (support@helicone.ai) and we can be
-                      sure to add support for it. Or if you feel inclined, you
-                      can submit a PR to add support for it.
-                    </div>
-                  </div>
-                );
-            }
-          })()}
-        </div>
-        <div className="flex flex-col w-full max-w-[16rem] h-full space-y-8 ">
-          <div className="flex flex-col gap-2 p-20">
-            <JsonRenderer data={response} showCopyButton={false} />
-          </div>
-          <div className="flex flex-col space-y-2 w-full">
-            <div className="flex flex-row w-full space-x-1 items-center">
-              <p className="font-medium text-sm text-gray-900 dark:text-gray-100">
-                Models
-              </p>
-            </div>
+      <div className="flex flex-col w-full h-full gap-4 min-h-[80vh] border-t border-border">
+        <div className="flex justify-between items-center px-4 py-2 border-b border-border">
+          <div className="flex items-center space-x-4">
+            <p className="font-medium text-sm text-gray-900 dark:text-gray-100">
+              Models
+            </p>
             <Popover open={modelListOpen} onOpenChange={setModelListOpen}>
               <PopoverTrigger asChild>
                 <Button
@@ -283,24 +245,60 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                 </Command>
               </PopoverContent>
             </Popover>
+            <ToolsConfigurationModal tools={tools} onToolsChange={setTools} />
           </div>
-          <div className="flex flex-col space-y-2 w-full">
-            <div className="flex flex-row w-full justify-between items-center">
-              <label
-                htmlFor="temp"
-                className="flex gap-1 font-medium text-sm text-gray-900 dark:text-gray-100"
-              >
-                <span>Provider API Key</span>
-
-                <Tooltip
-                  title={
-                    "Your API keys are required to use fine-tuned models in the playground."
-                  }
-                  placement="top-end"
+        </div>
+        <div className="flex justify-between w-full h-full gap-8">
+          <div className="flex w-full h-full">
+            {(() => {
+              switch (mappedContent?._type) {
+                case "openai-chat":
+                case "anthropic-chat":
+                case "gemini-chat":
+                  return (
+                    <Chat
+                      mappedRequest={mappedContent as MappedLLMRequest}
+                      playgroundMode
+                      onChatChange={(mappedRequest) => {
+                        setMappedContent(mappedRequest);
+                      }}
+                    />
+                  );
+                default:
+                  return (
+                    <div className="flex flex-col gap-2 p-20">
+                      <div className="text-sm text-gray-500">
+                        Unable to support playground on this request. Please
+                        contact support at (support@helicone.ai) and we can be
+                        sure to add support for it. Or if you feel inclined, you
+                        can submit a PR to add support for it.
+                      </div>
+                    </div>
+                  );
+              }
+            })()}
+          </div>
+          <div className="flex flex-col w-full max-w-[16rem] h-full space-y-8">
+            <div className="flex flex-col gap-2 p-20">
+              <JsonRenderer data={response} showCopyButton={false} />
+            </div>
+            <div className="flex flex-col space-y-2 w-full">
+              <div className="flex flex-row w-full justify-between items-center">
+                <label
+                  htmlFor="temp"
+                  className="flex gap-1 font-medium text-sm text-gray-900 dark:text-gray-100"
                 >
-                  <InformationCircleIcon className="h-5 w-5 text-gray-500" />
-                </Tooltip>
-              </label>
+                  <span>Provider API Key</span>
+                  <Tooltip
+                    title={
+                      "Your API keys are required to use fine-tuned models in the playground."
+                    }
+                    placement="top-end"
+                  >
+                    <InformationCircleIcon className="h-5 w-5 text-gray-500" />
+                  </Tooltip>
+                </label>
+              </div>
             </div>
           </div>
         </div>
