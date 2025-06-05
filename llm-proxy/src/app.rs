@@ -26,7 +26,8 @@ use tracing::{Level, info};
 
 use crate::{
     config::{
-        Config, minio::Minio, rate_limit::RateLimiterConfig, server::TlsConfig,
+        Config, minio::Minio, rate_limit::RateLimiterConfig,
+        response_headers::ResponseHeadersConfig, server::TlsConfig,
     },
     discover::monitor::health::{
         EndpointMetricsRegistry, provider::HealthMonitorMap,
@@ -35,6 +36,7 @@ use crate::{
     metrics::{self, Metrics, attribute_extractor::AttributeExtractor},
     middleware::{
         auth::AuthService, rate_limit::service::Layer as RateLimitLayer,
+        response_headers::ResponseHeaderLayer,
     },
     router::meta::MetaRouter,
     types::{provider::ProviderKeys, router::RouterId},
@@ -69,6 +71,13 @@ pub type BoxedHyperServiceStack = BoxCloneService<
 
 #[derive(Debug, Clone)]
 pub struct AppState(pub Arc<InnerAppState>);
+
+impl AppState {
+    #[must_use]
+    pub fn response_headers_config(&self) -> ResponseHeadersConfig {
+        self.0.config.response_headers
+    }
+}
 
 #[derive(Debug)]
 pub struct InnerAppState {
@@ -159,6 +168,7 @@ pub struct InnerAppState {
 ///   - `ApiEndpoint`
 ///   - `MapperContext`
 ///   - `AuthContext`
+///   - `ProviderRequestId`
 #[derive(Clone)]
 pub struct App {
     pub state: AppState,
@@ -255,6 +265,9 @@ impl App {
                 app_state.clone(),
             )))
             .layer(RateLimitLayer::global(&app_state))
+            .layer(ResponseHeaderLayer::new(
+                app_state.response_headers_config(),
+            ))
             .map_err(crate::error::internal::InternalError::BufferError)
             // TODO: move this up before the auth layer
             .layer(BufferLayer::new(BUFFER_SIZE))

@@ -229,11 +229,6 @@ impl Dispatcher {
             .get::<RouterId>()
             .copied()
             .ok_or(InternalError::ExtensionNotFound("RouterId"))?;
-        let extensions_copier = ExtensionsCopier::builder()
-            .inference_provider(inference_provider)
-            .router_id(router_id)
-            .auth_context(auth_ctx.cloned())
-            .build();
 
         let target_url = base_url
             .join(extracted_path_and_query.as_str())
@@ -291,6 +286,12 @@ impl Dispatcher {
             headers.remove("x-request-id")
         };
         tracing::debug!(provider_req_id = ?provider_request_id, status = %response.status(), "received response");
+        let extensions_copier = ExtensionsCopier::builder()
+            .inference_provider(inference_provider)
+            .router_id(router_id)
+            .auth_context(auth_ctx.cloned())
+            .provider_request_id(provider_request_id)
+            .build();
         extensions_copier.copy_extensions(response.extensions_mut());
         response.extensions_mut().insert(mapper_ctx);
         response.extensions_mut().insert(api_endpoint);

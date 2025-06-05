@@ -63,6 +63,7 @@ impl Serialize for ModelProvider {
     EnumIter,
     strum::Display,
     strum::EnumString,
+    strum::AsRefStr,
 )]
 #[strum(serialize_all = "kebab-case")]
 pub enum InferenceProvider {
@@ -119,7 +120,7 @@ impl Serialize for InferenceProvider {
     where
         S: Serializer,
     {
-        serializer.serialize_str(&self.to_string())
+        serializer.serialize_str(self.as_ref())
     }
 }
 

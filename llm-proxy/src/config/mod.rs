@@ -8,6 +8,7 @@ pub mod monitor;
 pub mod providers;
 pub mod rate_limit;
 pub mod redis;
+pub mod response_headers;
 pub mod retry;
 pub mod router;
 pub mod server;
@@ -89,6 +90,7 @@ pub struct Config {
     pub routers: self::router::RouterConfigs,
     pub deployment_target: DeploymentTarget,
     pub is_production: bool,
+    pub response_headers: self::response_headers::ResponseHeadersConfig,
     pub helicone: self::helicone::HeliconeConfig,
 }
 
@@ -145,6 +147,8 @@ impl crate::tests::TestDefault for Config {
             deployment_target: DeploymentTarget::SelfHosted,
             discover: self::discover::DiscoverConfig::test_default(),
             routers: self::router::RouterConfigs::test_default(),
+            response_headers:
+                self::response_headers::ResponseHeadersConfig::default(),
             rate_limit: self::rate_limit::TopLevelRateLimitConfig::test_default(
             ),
         }
