@@ -75,7 +75,7 @@ impl crate::tests::TestDefault for RateLimitConfig {
 }
 
 #[cfg(feature = "testing")]
-pub fn enabled_for_test_redis() -> RateLimitConfig {
+#[must_use] pub fn enabled_for_test_redis() -> RateLimitConfig {
     use crate::tests::TestDefault;
     RateLimitConfig::Global {
         store: RateLimitStore::Redis(RedisConfig::default()),
@@ -84,7 +84,7 @@ pub fn enabled_for_test_redis() -> RateLimitConfig {
 }
 
 #[cfg(feature = "testing")]
-pub fn enabled_for_test_in_memory() -> RateLimitConfig {
+#[must_use] pub fn enabled_for_test_in_memory() -> RateLimitConfig {
     use crate::tests::TestDefault;
     RateLimitConfig::Global {
         store: RateLimitStore::InMemory,

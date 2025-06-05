@@ -2,14 +2,13 @@ use std::{
     convert::Infallible,
     future::{Ready, ready},
     net::SocketAddr,
-    pin::Pin,
     sync::Arc,
     task::{Context, Poll},
     time::Duration,
 };
 
 use axum_server::{accept::NoDelayAcceptor, tls_rustls::RustlsConfig};
-use futures::{SinkExt, StreamExt, future::BoxFuture};
+use futures::{StreamExt, future::BoxFuture};
 use meltdown::Token;
 use opentelemetry::global;
 use reqwest::Client;
@@ -17,6 +16,7 @@ use rustc_hash::FxHashMap as HashMap;
 use telemetry::{make_span::SpanFactory, tracing::MakeRequestId};
 use tokio::sync::OnceCell;
 use tokio::sync::RwLock;
+use tokio_tungstenite::tungstenite::Message;
 use tower::{ServiceBuilder, buffer::BufferLayer, util::BoxCloneService};
 use tower_http::{
     ServiceBuilderExt, add_extension::AddExtension,
@@ -24,7 +24,7 @@ use tower_http::{
     normalize_path::NormalizePathLayer,
     sensitive_headers::SetSensitiveHeadersLayer, trace::TraceLayer,
 };
-use tracing::{Level, debug, error, info};
+use tracing::{Level, info};
 use url::Url;
 
 use crate::{
@@ -34,7 +34,7 @@ use crate::{
         rate_limit::{RateLimitConfig, RateLimitStore},
         server::TlsConfig,
     },
-    control_plane::websocket::{WebSocketClient, WebSocketEvent},
+    control_plane::websocket::WebSocketClient,
     discover::monitor::health::{
         EndpointMetricsRegistry, provider::HealthMonitorMap,
     },
@@ -101,7 +101,7 @@ impl JawnClient {
                 "https" => "wss",
                 _ => "ws",
             })
-            .map_err(|_| "Invalid URL scheme")?;
+            .map_err(|()| "Invalid URL scheme")?;
 
         self.control_plane_client
             .get_or_try_init(|| WebSocketClient::connect(ws_url.as_str()))

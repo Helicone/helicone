@@ -85,8 +85,7 @@ async fn make_chat_request_for_router(
     .unwrap();
     let uri = match router_id {
         RouterId::Uuid(uuid) => format!(
-            "http://router.helicone.com/router/{}/v1/chat/completions",
-            uuid
+            "http://router.helicone.com/router/{uuid}/v1/chat/completions"
         ),
         RouterId::Default => {
             "http://router.helicone.com/router/v1/chat/completions".to_string()
@@ -165,7 +164,7 @@ async fn test_global_rate_limit_with_router_none() {
     // The user should be able to make 3 requests successfully (capacity = 3)
     for i in 1..=3 {
         let status = make_chat_request(&mut harness, auth_header).await;
-        assert_eq!(status, StatusCode::OK, "Request {} should succeed", i);
+        assert_eq!(status, StatusCode::OK, "Request {i} should succeed");
     }
 
     // The 4th request should be rate limited
@@ -228,7 +227,7 @@ async fn test_optin_rate_limit_with_router_optin() {
     // Make 3 requests - should all succeed (capacity = 3)
     for i in 1..=3 {
         let status = make_chat_request(&mut harness, auth_header).await;
-        assert_eq!(status, StatusCode::OK, "Request {} should succeed", i);
+        assert_eq!(status, StatusCode::OK, "Request {i} should succeed");
     }
 
     // 4th request should be rate limited
@@ -358,7 +357,7 @@ async fn test_global_with_custom_router_override() {
     // Make 2 requests - should all succeed (router capacity = 2)
     for i in 1..=2 {
         let status = make_chat_request(&mut harness, auth_header).await;
-        assert_eq!(status, StatusCode::OK, "Request {} should succeed", i);
+        assert_eq!(status, StatusCode::OK, "Request {i} should succeed");
     }
 
     // 3rd request should be rate limited by router config, not global
@@ -413,7 +412,7 @@ async fn test_optin_app_with_router_none() {
     // All requests should succeed since router doesn't opt in to rate limiting
     for i in 1..=5 {
         let status = make_chat_request(&mut harness, auth_header).await;
-        assert_eq!(status, StatusCode::OK, "Request {} should succeed", i);
+        assert_eq!(status, StatusCode::OK, "Request {i} should succeed");
     }
 }
 
@@ -567,9 +566,8 @@ async fn test_router_independence_different_rate_limits() {
         assert_eq!(
             status,
             StatusCode::OK,
-            "Lenient router: Request {} should succeed (independent from \
-             strict router)",
-            i
+            "Lenient router: Request {i} should succeed (independent from \
+             strict router)"
         );
     }
 
@@ -579,8 +577,7 @@ async fn test_router_independence_different_rate_limits() {
         assert_eq!(
             status,
             StatusCode::OK,
-            "Default router: Request {} should succeed (no rate limiting)",
-            i
+            "Default router: Request {i} should succeed (no rate limiting)"
         );
     }
 }
@@ -604,8 +601,7 @@ async fn make_chat_request_to_router(
     let request_body = axum_core::body::Body::from(body_bytes);
     let uri = match router_id {
         RouterId::Uuid(uuid) => format!(
-            "http://router.helicone.com/router/{}/v1/chat/completions",
-            uuid
+            "http://router.helicone.com/router/{uuid}/v1/chat/completions"
         ),
         RouterId::Default => {
             "http://router.helicone.com/router/v1/chat/completions".to_string()
@@ -741,8 +737,7 @@ async fn test_multi_router_different_rate_limits_in_memory() {
         assert_eq!(
             status,
             StatusCode::OK,
-            "Router B: Request {} should succeed",
-            i
+            "Router B: Request {i} should succeed"
         );
     }
     let status =
@@ -766,8 +761,7 @@ async fn test_multi_router_different_rate_limits_in_memory() {
         assert_eq!(
             status,
             StatusCode::OK,
-            "Router C: Request {} should succeed (no rate limiting)",
-            i
+            "Router C: Request {i} should succeed (no rate limiting)"
         );
     }
 }

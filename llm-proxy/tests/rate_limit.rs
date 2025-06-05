@@ -80,7 +80,7 @@ async fn rate_limit_capacity_enforced_impl(rate_limit_config: RateLimitConfig) {
     // Make 5 requests - should all succeed (capacity = 5)
     for i in 1..=5 {
         let status = make_chat_request(&mut harness, auth_header).await;
-        assert_eq!(status, StatusCode::OK, "Request {} should succeed", i);
+        assert_eq!(status, StatusCode::OK, "Request {i} should succeed");
     }
 
     // 6th request should be rate limited
@@ -162,8 +162,7 @@ async fn rate_limit_per_user_isolation_impl(
         assert_eq!(
             status,
             StatusCode::OK,
-            "User1 request {} should succeed",
-            i
+            "User1 request {i} should succeed"
         );
     }
 
@@ -211,8 +210,7 @@ async fn rate_limit_per_user_isolation_impl(
         assert_eq!(
             status,
             StatusCode::OK,
-            "User2 request {} should succeed",
-            i
+            "User2 request {i} should succeed"
         );
     }
 
@@ -268,8 +266,7 @@ async fn rate_limit_disabled() {
         assert_eq!(
             status,
             StatusCode::OK,
-            "Request {} should succeed when rate limiting disabled",
-            i
+            "Request {i} should succeed when rate limiting disabled"
         );
     }
 

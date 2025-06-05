@@ -1,10 +1,10 @@
-use std::error;
 
+use futures::{SinkExt, StreamExt};
 use tokio::sync::{broadcast, mpsc};
 use tokio_tungstenite::{
     MaybeTlsStream, WebSocketStream, tungstenite::Message,
 };
-use tracing::{Level, debug, error, info};
+use tracing::{debug, error};
 
 /// WebSocket message event that subscribers can listen to
 #[derive(Debug, Clone)]
