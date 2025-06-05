@@ -20,8 +20,7 @@ export async function generateStream(
           return;
         }
         try {
-          // For includeReasoning=false, chunk is already a string
-          // For includeReasoning=true, chunk is a JSON string
+          // Pass through the raw chunk exactly as received
           await writer.write(encoder.encode(chunk));
         } catch (error) {
           console.error("[generateStream] Error writing chunk:", error);

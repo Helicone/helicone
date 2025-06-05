@@ -204,7 +204,7 @@ const processTextMessage = (msg: any): Message => {
   };
 };
 
-const openAIMessageToHeliconeMessage = (msg: any): Message => {
+export const openAIMessageToHeliconeMessage = (msg: any): Message => {
   if (msg.function_call || msg.tool_calls) {
     return processFunctionCall(msg);
   }
@@ -228,7 +228,7 @@ export const getRequestMessages = (request: any): Message[] => {
   return request.messages?.map(openAIMessageToHeliconeMessage) ?? [];
 };
 
-const getLLMSchemaResponse = (response: any) => {
+export const getLLMSchemaResponse = (response: any) => {
   if ("error" in response) {
     return {
       error: {

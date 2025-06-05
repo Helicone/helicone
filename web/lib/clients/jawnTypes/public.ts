@@ -3139,7 +3139,7 @@ export interface operations {
       };
     };
     responses: {
-      /** @description requests */
+      /** @description Ok */
       200: {
         content: {
           "application/json": components["schemas"]["Result_HeliconeRequest-Array.string_"];
@@ -3169,7 +3169,7 @@ export interface operations {
       };
     };
     responses: {
-      /** @description requests */
+      /** @description Ok */
       200: {
         content: {
           "application/json": components["schemas"]["Result_HeliconeRequest-Array.string_"];

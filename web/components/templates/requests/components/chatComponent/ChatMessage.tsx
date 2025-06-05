@@ -159,8 +159,8 @@ const renderToolMessage = (
                   request: {
                     ...mappedRequest.schema.request,
                     messages: mappedRequest.schema.request?.messages?.map(
-                      (message, messageIndex) => {
-                        if (messageIndex === messageIndex) {
+                      (message, i) => {
+                        if (i === messageIndex) {
                           return {
                             ...message,
                             content: text,
@@ -387,26 +387,57 @@ export default function ChatMessage({
   const changeMessageRole = (index: number, newRole: string) => {
     if (!onChatChange) return;
 
-    onChatChange({
-      ...mappedRequest,
-      schema: {
-        ...mappedRequest.schema,
-        request: {
-          ...mappedRequest.schema.request,
-          messages: mappedRequest.schema.request?.messages?.map(
-            (message, i) => {
-              if (i === index) {
-                return {
-                  ...message,
-                  role: newRole,
-                };
+    console.log("newRole", newRole);
+    console.log("mappedRequest", mappedRequest);
+
+    if (newRole === "tool") {
+      console.log("newRole", newRole);
+      onChatChange({
+        ...mappedRequest,
+        schema: {
+          ...mappedRequest.schema,
+          request: {
+            ...mappedRequest.schema.request,
+            messages: mappedRequest.schema.request?.messages?.map(
+              (message, i) => {
+                if (i === index) {
+                  return {
+                    ...message,
+                    role: newRole,
+                    _type: "function",
+                    name: "new_function",
+                    tool_call_id: `call_${crypto.randomUUID()}`,
+                    content: "{}",
+                  };
+                }
+                return message;
               }
-              return message;
-            }
-          ),
+            ),
+          },
         },
-      },
-    });
+      });
+    } else {
+      onChatChange({
+        ...mappedRequest,
+        schema: {
+          ...mappedRequest.schema,
+          request: {
+            ...mappedRequest.schema.request,
+            messages: mappedRequest.schema.request?.messages?.map(
+              (message, i) => {
+                if (i === index) {
+                  return {
+                    ...message,
+                    role: newRole,
+                  };
+                }
+                return message;
+              }
+            ),
+          },
+        },
+      });
+    }
   };
 
   const deleteMessage = (index: number) => {

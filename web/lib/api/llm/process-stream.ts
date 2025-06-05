@@ -3,13 +3,71 @@
  * that is compatible with the PromptState response type.
  */
 
+import {
+  ChatCompletionChunk,
+  ChatCompletionMessage,
+} from "openai/resources/chat/completions";
+
 interface StreamProcessorOptions {
   onUpdate: (response: {
     content: string;
     reasoning: string;
     calls: string;
+    fullContent: string;
   }) => void;
-  initialState?: { content: string; reasoning: string; calls: string };
+  initialState?: {
+    content: string;
+    reasoning: string;
+    calls: string;
+    fullContent: string;
+  };
+}
+
+function messageReducer2(
+  previous: ChatCompletionMessage,
+  item: ChatCompletionChunk
+): ChatCompletionMessage {
+  const reduce = (acc: any, delta: ChatCompletionChunk.Choice.Delta) => {
+    acc = { ...acc };
+    for (const [key, value] of Object.entries(delta)) {
+      if (acc[key] === undefined || acc[key] === null) {
+        acc[key] = value;
+        //  OpenAI.Chat.Completions.ChatCompletionMessageToolCall does not have a key, .index
+        if (Array.isArray(acc[key])) {
+          for (const arr of acc[key]) {
+            delete arr.index;
+          }
+        }
+      } else if (typeof acc[key] === "string" && typeof value === "string") {
+        if (key === "content") {
+          acc[key] += value;
+        }
+      } else if (typeof acc[key] === "number" && typeof value === "number") {
+        acc[key] = value;
+      } else if (Array.isArray(acc[key]) && Array.isArray(value)) {
+        const accArray = acc[key];
+        for (let i = 0; i < value.length; i++) {
+          const { index, ...chunkTool } = value[i];
+          if (index - accArray.length > 1) {
+            throw new Error(
+              `Error: An array has an empty value when tool_calls are constructed. tool_calls: ${accArray}; tool: ${value}`
+            );
+          }
+          accArray[index] = reduce(accArray[index], chunkTool);
+        }
+      } else if (typeof acc[key] === "object" && typeof value === "object") {
+        acc[key] = reduce(acc[key], value);
+      }
+    }
+    return acc;
+  };
+
+  const choice = item.choices[0];
+  if (!choice) {
+    // chunk contains information about usage and token counts
+    return previous;
+  }
+  return reduce(previous, choice.delta) as ChatCompletionMessage;
 }
 
 // Use the messageReducer provided by OpenAI example, adapted slightly
@@ -124,10 +182,18 @@ export async function processStream(
   stream: ReadableStream<Uint8Array>,
   options: StreamProcessorOptions,
   signal?: AbortSignal
-): Promise<{ content: string; reasoning: string; calls: string }> {
+): Promise<{
+  fullContent: string;
+  content: string;
+  reasoning: string;
+  calls: string;
+  error?: any;
+}> {
   const reader = stream.getReader();
-  const { onUpdate, initialState = { content: "", reasoning: "", calls: "" } } =
-    options;
+  const {
+    onUpdate,
+    initialState = { content: "", reasoning: "", calls: "", fullContent: "" },
+  } = options;
 
   // Use state primarily for accumulating content for real-time updates
   // State will hold the standardized {content, reasoning, calls} format for updates
@@ -140,6 +206,7 @@ export async function processStream(
     tool_calls: undefined,
     function_call: undefined,
   };
+  let fullMessage = {} as ChatCompletionMessage;
 
   try {
     while (true) {
@@ -159,6 +226,8 @@ export async function processStream(
         // Always expect raw OpenAI ChatCompletionChunk JSON
         const chunkJson = JSON.parse(chunkString);
 
+        fullMessage = messageReducer2(fullMessage, chunkJson);
+        callbackState.fullContent = JSON.stringify(fullMessage, null, 2);
         // Use the OpenAI reducer to accumulate the message structure
         accumulatedMessage = messageReducer(accumulatedMessage, chunkJson);
 
@@ -208,6 +277,7 @@ export async function processStream(
       content: finalContent,
       reasoning: finalReasoning,
       calls: finalCallsString,
+      fullContent: callbackState.fullContent,
     };
 
     // Ensure the last update reflects the true final state
@@ -239,6 +309,8 @@ export async function processStream(
       content: finalContentOnError,
       reasoning: finalReasoningOnError,
       calls: finalCallsStringOnError,
+      error: error,
+      fullContent: callbackState.fullContent,
     };
   } finally {
     // Ensure the lock is always released

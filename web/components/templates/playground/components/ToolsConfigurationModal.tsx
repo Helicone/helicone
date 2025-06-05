@@ -258,7 +258,7 @@ export default function ToolsConfigurationModal({
                         variant="ghost"
                         size="icon"
                         onClick={() => {
-                          setCurrentTools(
+                          onToolsChange(
                             currentTools.filter(
                               (_, i) => i !== selectedToolIndex
                             )

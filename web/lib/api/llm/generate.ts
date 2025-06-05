@@ -87,6 +87,11 @@ export async function generate<T extends object | undefined = undefined>(
     }),
   });
 
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.error || "Failed to generate response");
+  }
+
   if (params.stream) {
     if (!response.body) {
       throw new Error("No response body");
@@ -178,9 +183,6 @@ export async function generate<T extends object | undefined = undefined>(
   }
 
   const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.error || "Failed to generate response");
-  }
 
   // Handle potential schema parsing for non-streaming
   if (

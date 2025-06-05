@@ -1,10 +1,11 @@
-import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
-import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import { useMemo, useRef, useState } from "react";
 import { playgroundModels as PLAYGROUND_MODELS } from "@helicone-package/cost/providers/mappings";
 import AuthHeader from "../../shared/authHeader";
 import useNotification from "../../shared/notification/useNotification";
-import { heliconeRequestToMappedContent } from "@helicone-package/llm-mapper/utils/getMappedContent";
+import {
+  getMappedContent,
+  heliconeRequestToMappedContent,
+} from "@helicone-package/llm-mapper/utils/getMappedContent";
 import { useGetRequestWithBodies } from "@/services/hooks/requests";
 import { OPENROUTER_MODEL_MAP } from "./new/openRouterModelMap";
 import {
@@ -32,9 +33,12 @@ import { Button } from "@/components/ui/button";
 import { Check, ChevronsUpDownIcon } from "lucide-react";
 import Chat from "../requests/components/Chat";
 import { openaiChatMapper } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
-import { JsonRenderer } from "../requests/components/chatComponent/single/JsonRenderer";
 import findBestMatch from "string-similarity-js";
 import ToolsConfigurationModal from "./components/ToolsConfigurationModal";
+import { ResizableHandle, ResizablePanel } from "@/components/ui/resizable";
+import { ResizablePanelGroup } from "@/components/ui/resizable";
+import MarkdownEditor from "@/components/shared/markdownEditor";
+import { openAIMessageToHeliconeMessage } from "@helicone-package/llm-mapper/mappers/openai/chat";
 
 const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
   _type: "openai-chat",
@@ -127,6 +131,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       }
       const mappedContent = heliconeRequestToMappedContent(requestData.data);
       setMappedContent(mappedContent);
+      console.log("mappedContent", mappedContent);
       setTools(mappedContent?.schema.request.tools ?? []);
       return mappedContent;
     }
@@ -134,22 +139,25 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   }, [requestData, isRequestLoading]);
 
   const [response, setResponse] = useState<string>("");
-  const [toolsDialogOpen, setToolsDialogOpen] = useState(false);
-
+  const [error, setError] = useState<string | null>(null);
   const { setNotification } = useNotification();
   const abortController = useRef<AbortController | null>(null);
   const [isStreaming, setIsStreaming] = useState<boolean>(false);
 
   const onRun = async () => {
+    setNotification("Running...", "info");
     if (!mappedContent) {
       setNotification("No mapped content", "error");
       return;
     }
-    const openaiRequest = openaiChatMapper.toExternal(
-      mappedContent.schema.request
-    );
+    const openaiRequest = openaiChatMapper.toExternal({
+      ...mappedContent.schema.request,
+      tools,
+    });
 
     try {
+      setError(null);
+      setIsStreaming(true);
       abortController.current = new AbortController();
 
       console.log("openaiRequest", openaiRequest);
@@ -161,28 +169,54 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           signal: abortController.current.signal,
         } as any);
 
-        await processStream(
+        const result = await processStream(
           stream,
           {
-            initialState: { content: "", reasoning: "", calls: "" },
+            initialState: {
+              content: "",
+              reasoning: "",
+              calls: "",
+              fullContent: "",
+            },
             onUpdate: (result) => {
-              setResponse(result.content);
+              setResponse(result.fullContent);
             },
           },
           abortController.current.signal
         );
+
+        if (result && result.error) {
+          setError(result.error.message);
+          console.error("error", result.error);
+        }
       } catch (error) {
-        if (error instanceof Error && error.name !== "AbortError") {
-          console.error("Error:", error);
-          setNotification(error.message, "error");
+        if (error instanceof Error) {
+          if (error.name === "AbortError") {
+            setError("Request was cancelled");
+            setNotification("Request was cancelled", "error");
+          } else {
+            console.error("Error:", error);
+            setError(
+              error.message || "An error occurred while generating the response"
+            );
+            setNotification(
+              error.message ||
+                "An error occurred while generating the response",
+              "error"
+            );
+          }
         }
       } finally {
+        console.log("finally");
         setIsStreaming(false);
         abortController.current = null;
       }
     } catch (error) {
       setNotification("Failed to save prompt state", "error");
       setIsStreaming(false);
+      if (error instanceof Error) {
+        setError(error.message);
+      }
     }
   };
 
@@ -192,8 +226,8 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         title={"Playground"}
         actions={<Button onClick={onRun}>Run</Button>}
       />
-      <div className="flex flex-col w-full h-full gap-4 min-h-[80vh] border-t border-border">
-        <div className="flex justify-between items-center px-4 py-2 border-b border-border">
+      <div className="flex flex-col w-full h-full min-h-[80vh] border-t border-border">
+        <div className="flex justify-between items-center px-4 py-2 border-b border-border bg-sidebar-background">
           <div className="flex items-center space-x-4">
             <p className="font-medium text-sm text-gray-900 dark:text-gray-100">
               Models
@@ -248,8 +282,12 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
             <ToolsConfigurationModal tools={tools} onToolsChange={setTools} />
           </div>
         </div>
-        <div className="flex justify-between w-full h-full gap-8">
-          <div className="flex w-full h-full">
+        <ResizablePanelGroup direction="horizontal">
+          <ResizablePanel
+            className="flex w-full h-full"
+            defaultSize={70}
+            minSize={30}
+          >
             {(() => {
               switch (mappedContent?._type) {
                 case "openai-chat":
@@ -277,31 +315,63 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                   );
               }
             })()}
-          </div>
-          <div className="flex flex-col w-full max-w-[16rem] h-full space-y-8">
-            <div className="flex flex-col gap-2 p-20">
-              <JsonRenderer data={response} showCopyButton={false} />
+          </ResizablePanel>
+          <ResizableHandle withHandle />
+          <ResizablePanel defaultSize={30} minSize={20}>
+            <div className="flex flex-col h-full bg-white dark:bg-black">
+              {error ? (
+                <div className="p-4 text-red-500 dark:text-red-400 text-sm">
+                  {error}
+                </div>
+              ) : (
+                <>
+                  <div className="flex justify-end p-2 border-b border-border">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const newMessageMappedResponse =
+                          openAIMessageToHeliconeMessage(JSON.parse(response));
+
+                        if (response) {
+                          const newMappedContent = {
+                            ...mappedContent,
+                            schema: {
+                              ...mappedContent.schema,
+                              request: {
+                                ...mappedContent.schema.request,
+                                messages: [
+                                  ...(mappedContent.schema.request.messages ??
+                                    []),
+                                  newMessageMappedResponse,
+                                ],
+                              },
+                            },
+                          };
+                          setMappedContent(newMappedContent);
+                        }
+                        console.log(
+                          "newMessageMappedResponse",
+                          newMessageMappedResponse
+                        );
+                      }}
+                    >
+                      Add to Chat
+                    </Button>
+                  </div>
+                  <MarkdownEditor
+                    language="markdown"
+                    text={response}
+                    placeholder="Output"
+                    setText={() => {}}
+                    disabled
+                    className="flex-1"
+                  />
+                </>
+              )}
             </div>
-            <div className="flex flex-col space-y-2 w-full">
-              <div className="flex flex-row w-full justify-between items-center">
-                <label
-                  htmlFor="temp"
-                  className="flex gap-1 font-medium text-sm text-gray-900 dark:text-gray-100"
-                >
-                  <span>Provider API Key</span>
-                  <Tooltip
-                    title={
-                      "Your API keys are required to use fine-tuned models in the playground."
-                    }
-                    placement="top-end"
-                  >
-                    <InformationCircleIcon className="h-5 w-5 text-gray-500" />
-                  </Tooltip>
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </div>
     </main>
   );
