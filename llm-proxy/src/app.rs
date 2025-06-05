@@ -8,7 +8,7 @@ use std::{
 };
 
 use axum_server::{accept::NoDelayAcceptor, tls_rustls::RustlsConfig};
-use futures::{StreamExt, future::BoxFuture};
+use futures::future::BoxFuture;
 use meltdown::Token;
 use opentelemetry::global;
 use reqwest::Client;
@@ -94,7 +94,6 @@ impl JawnClient {
         &self,
     ) -> Result<&WebSocketClient, Box<dyn std::error::Error + Send + Sync>>
     {
-        // Convert HTTP URL to WebSocket URL
         let mut ws_url = self.base_url.clone();
         ws_url
             .set_scheme(match ws_url.scheme() {
@@ -102,6 +101,8 @@ impl JawnClient {
                 _ => "ws",
             })
             .map_err(|()| "Invalid URL scheme")?;
+
+        ws_url = ws_url.join("/ws/v1/router/control-plane")?;
 
         self.control_plane_client
             .get_or_try_init(|| WebSocketClient::connect(ws_url.as_str()))
