@@ -39,6 +39,7 @@ json-patch = { workspace = true }
 meltdown = { workspace = true }
 mime = { workspace = true }
 nonempty-collections = { workspace = true, features = ["serde"] }
+ollama-rest = { workspace = true }
 opentelemetry = { workspace = true }
 opentelemetry_sdk = { workspace = true, features = ["rt-tokio"] }
 opentelemetry-system-metrics = { workspace = true }
