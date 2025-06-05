@@ -11,3 +11,5 @@ COPY web/ ./web/
 
 RUN yarn install --frozen-lockfile
 RUN cd web && yarn build
+
+CMD ["yarn", "--cwd", "web", "start"]
