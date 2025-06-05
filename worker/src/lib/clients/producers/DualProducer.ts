@@ -1,4 +1,4 @@
-import { MessageData, MessageProducer } from "./types";
+import { LOW_PRIORITY_QUEUE_URL, MessageData, MessageProducer } from "./types";
 
 export class DualWriteProducer implements MessageProducer {
   private primary: MessageProducer;
@@ -10,6 +10,10 @@ export class DualWriteProducer implements MessageProducer {
   ) {
     this.primary = primaryProducer;
     this.secondary = secondaryProducer;
+  }
+
+  setLowerPriorityQueueUrl(queueUrl: string) {
+    this.secondary.setLowerPriorityQueueUrl(LOW_PRIORITY_QUEUE_URL);
   }
 
   async sendMessage(msg: MessageData) {

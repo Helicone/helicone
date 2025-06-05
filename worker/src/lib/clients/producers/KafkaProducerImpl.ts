@@ -23,6 +23,10 @@ export class KafkaProducerImpl implements MessageProducer {
     });
   }
 
+  setLowerPriorityQueueUrl(queueUrl: string) {
+    // Do nothing
+  }
+
   async sendMessage(msg: MessageData): Promise<Result<null, string>> {
     const producer = this.kafka.producer();
 

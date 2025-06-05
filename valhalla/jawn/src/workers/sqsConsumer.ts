@@ -4,12 +4,16 @@ import {
   consumeHeliconeScoresDlq,
   consumeRequestResponseLogs,
   consumeRequestResponseLogsDlq,
+  consumeRequestResponseLogsLowPriority,
 } from "../lib/clients/sqsConsumers/sqsConsumers";
 
 parentPort?.once("message", (message) => {
   if (message === "start") {
     console.log("Sqs consumer thread started!");
     consumeRequestResponseLogs();
+  } else if (message === "start-low") {
+    console.log("Sqs consumer thread started!");
+    consumeRequestResponseLogsLowPriority();
   } else if (message === "start-dlq") {
     console.log("Sqs DLQ consumer thread started!");
     consumeRequestResponseLogsDlq();

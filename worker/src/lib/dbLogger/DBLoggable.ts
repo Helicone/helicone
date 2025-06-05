@@ -26,7 +26,10 @@ import { parseOpenAIStream } from "./streamParsers/openAIStreamParser";
 import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 import { costOfPrompt } from "../../packages/cost";
 import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
-import { MessageData } from "../clients/producers/types";
+import {
+  LOW_PRIORITY_QUEUE_URL,
+  MessageData,
+} from "../clients/producers/types";
 import { DEFAULT_UUID } from "../../packages/llm-mapper/types";
 
 export interface DBLoggableProps {
@@ -543,6 +546,7 @@ export class DBLoggable {
       return err(`Auth failed! ${error}`);
     }
 
+    let rateLimited = false;
     try {
       const org = await db.dbWrapper.getOrganization();
       if (org.error !== null) {
@@ -556,13 +560,16 @@ export class DBLoggable {
         return rateLimiter;
       }
 
+      // TODO: Add an early exit if we really want to rate limit in the future
       const rateLimit = await rateLimiter.data.checkRateLimit(tier);
 
       if (rateLimit.error) {
         console.error(`Error checking rate limit: ${rateLimit.error}`);
       }
 
+      // Set rate limited flag to clickhouse
       if (!rateLimit.error && rateLimit.data?.isRateLimited) {
+        rateLimited = true;
         await db.clickhouse.dbInsertClickhouse("rate_limit_log_v2", [
           {
             request_id: this.request.requestId,
@@ -573,9 +580,6 @@ export class DBLoggable {
             ),
           },
         ]);
-        return ok({
-          cost: 0,
-        });
       }
     } catch (e) {
       console.error(`Error checking rate limit: ${e}`);
@@ -585,6 +589,7 @@ export class DBLoggable {
       db,
       authParams,
       S3_ENABLED,
+      rateLimited,
       requestHeaders,
       cachedHeaders,
       cacheSettings
@@ -626,6 +631,7 @@ export class DBLoggable {
     },
     authParams: AuthParams,
     S3_ENABLED: Env["S3_ENABLED"],
+    rateLimited: boolean,
     requestHeaders?: HeliconeHeaders,
     cachedHeaders?: Headers,
     cacheSettings?: CacheSettings
@@ -731,18 +737,25 @@ export class DBLoggable {
           timeToFirstToken,
           responseCreatedAt: endTime,
           delayMs: endTime.getTime() - this.timing.startTime.getTime(),
-          cachedLatency: cacheReferenceId == DEFAULT_UUID ? 0 : (() => {
-            try {
-              return Number(cachedHeaders?.get("Helicone-Cache-Latency") ?? 0);
-            } catch {
-              return 0;
-            }
-          })(),
+          cachedLatency:
+            cacheReferenceId == DEFAULT_UUID
+              ? 0
+              : (() => {
+                  try {
+                    return Number(
+                      cachedHeaders?.get("Helicone-Cache-Latency") ?? 0
+                    );
+                  } catch {
+                    return 0;
+                  }
+                })(),
         },
       },
     };
 
-    // Send to Kafka or REST if not enabled
+    if (rateLimited) {
+      db.producer.setLowerPriorityQueueUrl(LOW_PRIORITY_QUEUE_URL);
+    }
     await db.producer.sendMessage(kafkaMessage);
 
     return ok(null);

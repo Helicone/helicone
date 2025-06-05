@@ -30,6 +30,10 @@ export class SQSProducerImpl implements MessageProducer {
     this.queueUrl = env.REQUEST_LOGS_QUEUE_URL;
   }
 
+  setLowerPriorityQueueUrl(queueUrl: string) {
+    this.queueUrl = queueUrl;
+  }
+
   async sendMessage(msg: MessageData): Promise<Result<null, string>> {
     let attempts = 0;
     const maxAttempts = 3;

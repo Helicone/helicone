@@ -1,5 +1,6 @@
 export const QUEUE_NAMES = {
   requestResponseLogs: "request-response-logs-queue",
+  requestResponseLogsLowPriority: "request-response-logs-low",
   heliconeScores: "helicone-scores-queue",
   requestResponseLogsDlq: "request-response-logs-dlq",
   heliconeScoresDlq: "helicone-scores-dlq",
@@ -7,6 +8,7 @@ export const QUEUE_NAMES = {
 
 export const QUEUE_URLS = {
   requestResponseLogs: `https://sqs.${process.env.AWS_REGION}.amazonaws.com/${process.env.AWS_ACCOUNT_ID}/${QUEUE_NAMES.requestResponseLogs}`,
+  requestResponseLogsLowPriority: `https://sqs.${process.env.AWS_REGION}.amazonaws.com/${process.env.AWS_ACCOUNT_ID}/${QUEUE_NAMES.requestResponseLogsLowPriority}`,
   heliconeScores: `https://sqs.${process.env.AWS_REGION}.amazonaws.com/${process.env.AWS_ACCOUNT_ID}/${QUEUE_NAMES.heliconeScores}`,
   requestResponseLogsDlq: `https://sqs.${process.env.AWS_REGION}.amazonaws.com/${process.env.AWS_ACCOUNT_ID}/${QUEUE_NAMES.requestResponseLogsDlq}`,
   heliconeScoresDlq: `https://sqs.${process.env.AWS_REGION}.amazonaws.com/${process.env.AWS_ACCOUNT_ID}/${QUEUE_NAMES.heliconeScoresDlq}`,
