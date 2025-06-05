@@ -2,18 +2,20 @@ use std::{
     convert::Infallible,
     future::{Ready, ready},
     net::SocketAddr,
+    pin::Pin,
     sync::Arc,
     task::{Context, Poll},
     time::Duration,
 };
 
 use axum_server::{accept::NoDelayAcceptor, tls_rustls::RustlsConfig};
-use futures::future::BoxFuture;
+use futures::{SinkExt, StreamExt, future::BoxFuture};
 use meltdown::Token;
 use opentelemetry::global;
 use reqwest::Client;
 use rustc_hash::FxHashMap as HashMap;
 use telemetry::{make_span::SpanFactory, tracing::MakeRequestId};
+use tokio::sync::OnceCell;
 use tokio::sync::RwLock;
 use tower::{ServiceBuilder, buffer::BufferLayer, util::BoxCloneService};
 use tower_http::{
@@ -22,7 +24,8 @@ use tower_http::{
     normalize_path::NormalizePathLayer,
     sensitive_headers::SetSensitiveHeadersLayer, trace::TraceLayer,
 };
-use tracing::{Level, info};
+use tracing::{Level, debug, error, info};
+use url::Url;
 
 use crate::{
     config::{
@@ -31,6 +34,7 @@ use crate::{
         rate_limit::{RateLimitConfig, RateLimitStore},
         server::TlsConfig,
     },
+    control_plane::websocket::{WebSocketClient, WebSocketEvent},
     discover::monitor::health::{
         EndpointMetricsRegistry, provider::HealthMonitorMap,
     },
@@ -70,14 +74,54 @@ pub type BoxedHyperServiceStack = BoxCloneService<
     Infallible,
 >;
 
-#[derive(Debug, Clone)]
-pub struct AppState(pub Arc<InnerAppState>);
+#[derive(Debug)]
+pub struct JawnClient {
+    pub request_client: Client,
+    pub control_plane_client: OnceCell<WebSocketClient>,
+    pub base_url: Url,
+}
+
+impl JawnClient {
+    #[must_use]
+    pub fn new(request_client: Client, base_url: Url) -> Self {
+        Self {
+            request_client,
+            control_plane_client: OnceCell::new(),
+            base_url,
+        }
+    }
+    async fn get_client(
+        &self,
+    ) -> Result<&WebSocketClient, Box<dyn std::error::Error + Send + Sync>>
+    {
+        // Convert HTTP URL to WebSocket URL
+        let mut ws_url = self.base_url.clone();
+        ws_url
+            .set_scheme(match ws_url.scheme() {
+                "https" => "wss",
+                _ => "ws",
+            })
+            .map_err(|_| "Invalid URL scheme")?;
+
+        self.control_plane_client
+            .get_or_try_init(|| WebSocketClient::connect(ws_url.as_str()))
+            .await
+    }
+
+    pub async fn send_message(
+        &self,
+        message: Message,
+    ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+        self.get_client().await?.send_message(message)?;
+        Ok(())
+    }
+}
 
 #[derive(Debug)]
 pub struct InnerAppState {
     pub config: Config,
     pub minio: Minio,
-    pub jawn_client: Client,
+    pub jawn_client: JawnClient,
     pub redis: Option<r2d2::Pool<redis::Client>>,
     pub provider_keys: RwLock<HashMap<RouterId, ProviderKeys>>,
     /// Top level metrics which are exported to OpenTelemetry.
@@ -86,6 +130,9 @@ pub struct InnerAppState {
     pub endpoint_metrics: EndpointMetricsRegistry,
     pub health_monitor: HealthMonitorMap,
 }
+
+#[derive(Debug, Clone)]
+pub struct AppState(pub Arc<InnerAppState>);
 
 /// The top level app used to start the hyper server.
 /// The middleware stack is as follows:
@@ -192,11 +239,14 @@ impl App {
     pub async fn new(config: Config) -> Result<Self, InitError> {
         tracing::info!(config = ?config, "creating app");
         let minio = Minio::new(config.minio.clone())?;
-        let jawn_client = Client::builder()
+        let request_client = Client::builder()
             .tcp_nodelay(true)
             .connect_timeout(JAWN_CONNECT_TIMEOUT)
             .build()
             .map_err(error::init::InitError::CreateReqwestClient)?;
+
+        let jawn_client =
+            JawnClient::new(request_client, config.helicone.base_url.clone());
 
         // If global meter is not set, opentelemetry defaults to a
         // NoopMeterProvider

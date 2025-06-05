@@ -64,6 +64,7 @@ telemetry = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
 tokio-stream = { workspace = true, features = ['sync'] }
+tokio-tungstenite = { workspace = true }
 tokio-util = { workspace = true }
 tower = { workspace = true, features = ['full']}
 tower-http = { workspace = true, features = ['default', 'auth', 'catch-panic', 'add-extension', 'normalize-path', 'request-id', 'trace', 'util', 'sensitive-headers'] }

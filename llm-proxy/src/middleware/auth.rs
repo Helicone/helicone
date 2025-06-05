@@ -31,6 +31,7 @@ impl AuthService {
         let whoami_result = app_state
             .0
             .jawn_client
+            .request_client
             .get(whoami_url(&app_state))
             .header("authorization", api_key)
             .send()

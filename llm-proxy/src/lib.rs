@@ -1,6 +1,7 @@
 pub mod app;
 pub(crate) mod balancer;
 pub mod config;
+pub mod control_plane;
 pub mod discover;
 pub(crate) mod dispatcher;
 pub mod endpoints;
