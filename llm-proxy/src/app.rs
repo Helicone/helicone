@@ -16,7 +16,6 @@ use rustc_hash::FxHashMap as HashMap;
 use telemetry::{make_span::SpanFactory, tracing::MakeRequestId};
 use tokio::sync::OnceCell;
 use tokio::sync::RwLock;
-use tokio_tungstenite::tungstenite::Message;
 use tower::{ServiceBuilder, buffer::BufferLayer, util::BoxCloneService};
 use tower_http::{
     ServiceBuilderExt, add_extension::AddExtension,
@@ -34,7 +33,7 @@ use crate::{
         rate_limit::{RateLimitConfig, RateLimitStore},
         server::TlsConfig,
     },
-    control_plane::websocket::WebSocketClient,
+    control_plane::websocket::ControlPlaneClient,
     discover::monitor::health::{
         EndpointMetricsRegistry, provider::HealthMonitorMap,
     },
@@ -77,8 +76,8 @@ pub type BoxedHyperServiceStack = BoxCloneService<
 #[derive(Debug)]
 pub struct JawnClient {
     pub request_client: Client,
-    pub control_plane_client: OnceCell<WebSocketClient>,
-    pub base_url: Url,
+    control_plane_client: OnceCell<ControlPlaneClient>,
+    base_url: Url,
 }
 
 impl JawnClient {
@@ -90,9 +89,10 @@ impl JawnClient {
             base_url,
         }
     }
+
     async fn get_client(
         &self,
-    ) -> Result<&WebSocketClient, Box<dyn std::error::Error + Send + Sync>>
+    ) -> Result<&ControlPlaneClient, Box<dyn std::error::Error + Send + Sync>>
     {
         let mut ws_url = self.base_url.clone();
         ws_url
@@ -105,16 +105,8 @@ impl JawnClient {
         ws_url = ws_url.join("/ws/v1/router/control-plane")?;
 
         self.control_plane_client
-            .get_or_try_init(|| WebSocketClient::connect(ws_url.as_str()))
+            .get_or_try_init(|| ControlPlaneClient::connect(ws_url.as_str()))
             .await
-    }
-
-    pub async fn send_message(
-        &self,
-        message: Message,
-    ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-        self.get_client().await?.send_message(message)?;
-        Ok(())
     }
 }
 

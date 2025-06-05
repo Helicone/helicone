@@ -78,9 +78,11 @@ utoipa = { workspace = true }
 uuid = { workspace = true, features = ["serde", "v7"] }
 weighted-balance = { workspace = true }
 workspace_root = { workspace = true, optional = true }
+ts-rs = "11.0.1"
 
 [dev-dependencies]
 pretty_assertions = { workspace = true }
+ts-rs = "11.0.1"
 
 [features]
 default = []
