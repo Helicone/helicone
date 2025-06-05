@@ -1,4 +1,4 @@
-name: helicone-local-testing
+name: helicone-all-in-one
 version: "3.8"
 
 services:

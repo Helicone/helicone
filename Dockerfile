@@ -71,8 +71,8 @@ RUN find /app -name ".env.*" -exec rm {} \;
 # Install dependencies and build jawn
 RUN yarn install \
     && cd valhalla/jawn \
-    && yarn install
-    # && yarn build
+    && yarn install \
+    && yarn build
 
 
 # --------------------------------------------------------------------------------------------------------------------
@@ -87,8 +87,8 @@ RUN find /app -name ".env.*" -exec rm {} \;
 # Install dependencies and build web
 RUN yarn install \
     && cd web \
-    && yarn install
-    # && yarn build
+    && yarn install \
+    && yarn build
 
 # --------------------------------------------------------------------------------------------------------------------
 
