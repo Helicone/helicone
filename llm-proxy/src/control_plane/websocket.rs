@@ -19,21 +19,21 @@ pub struct ControlPlaneClient {
     url: String,
 }
 
-impl ControlPlaneClient {
-    fn handle_message(
-        state: Arc<Mutex<ControlPlaneState>>,
-        message: Result<Message, tungstenite::Error>,
-    ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-        let m: MessageTypeRX = serde_json::from_str(&message?.into_text()?)?;
+fn handle_message(
+    state: Arc<Mutex<ControlPlaneState>>,
+    message: Message,
+) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    let m: MessageTypeRX = serde_json::from_str(&message.into_text()?)?;
 
-        tracing::info!("Received message: {:?}", m);
-        if let Ok(mut state_guard) = state.lock() {
-            state_guard.update(m);
-        }
-
-        Ok(())
+    tracing::info!("Received message: {:?}", m);
+    if let Ok(mut state_guard) = state.lock() {
+        state_guard.update(m);
     }
 
+    Ok(())
+}
+
+impl ControlPlaneClient {
     async fn reconnect_websocket(
         &mut self,
     ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
@@ -42,10 +42,22 @@ impl ControlPlaneClient {
 
         tokio::spawn(async move {
             while let Some(message) = rx.next().await {
-                let _ = Self::handle_message(Arc::clone(&state_clone), message)
-                    .map_err(|e| {
+                match message {
+                    Ok(message) => {
+                        let _ =
+                            handle_message(Arc::clone(&state_clone), message)
+                                .map_err(|e| {
+                                    tracing::error!("Error: {}", e);
+                                });
+                    }
+                    Err(tungstenite::Error::AlreadyClosed) => {
+                        tracing::error!("Connection closed");
+                        break;
+                    }
+                    Err(e) => {
                         tracing::error!("Error: {}", e);
-                    });
+                    }
+                }
             }
         });
 
@@ -73,7 +85,16 @@ impl ControlPlaneClient {
             MessageTypeTX::Heartbeat => Message::Text("heartbeat".to_string()),
         };
         if let Some(ref mut tx) = self.msg_tx {
-            tx.send(m).await?;
+            match tx.send(m).await {
+                Ok(_) => (),
+                Err(tungstenite::Error::AlreadyClosed) => {
+                    tracing::error!("Connection closed");
+                    self.reconnect_websocket().await?;
+                }
+                Err(e) => {
+                    tracing::error!("Error: {}", e);
+                }
+            }
         }
         Ok(())
     }
