@@ -140,10 +140,6 @@ IMAGES=(
   "helicone/web:.."
   "helicone/jawn:.."
   "helicone/migrations:.."
-  "helicone/supabase-migration-runner:.."
-  "helicone/worker-helicone-api:.."
-  "helicone/worker-openai-proxy:.."
-  "helicone/clickhouse-migration-runner:.."
 )
 
 # Docker Hub mode
@@ -155,10 +151,6 @@ if [ "$MODE" = "dockerhub" ]; then
     "helicone/web:.."
     "helicone/jawn:.."
     "helicone/migrations:.."
-    "helicone/supabase-migration-runner:.."
-    "helicone/worker-helicone-api:.."
-    "helicone/worker-openai-proxy:.."
-    "helicone/clickhouse-migration-runner:.."
   )
   
   # Filter images if specific ones were selected
