@@ -82,27 +82,25 @@ pub struct JawnClient {
 
 impl JawnClient {
     #[must_use]
-    pub fn new(request_client: Client, base_url: Url) -> Self {
-        Self {
+    pub fn new(base_url: Url) -> Result<Self, error::init::InitError> {
+        let request_client = Client::builder()
+            .tcp_nodelay(true)
+            .connect_timeout(JAWN_CONNECT_TIMEOUT)
+            .build()
+            .map_err(error::init::InitError::CreateReqwestClient)?;
+
+        Ok(Self {
             request_client,
             control_plane_client: OnceCell::new(),
             base_url,
-        }
+        })
     }
 
     async fn get_client(
         &self,
     ) -> Result<&ControlPlaneClient, Box<dyn std::error::Error + Send + Sync>>
     {
-        let mut ws_url = self.base_url.clone();
-        ws_url
-            .set_scheme(match ws_url.scheme() {
-                "https" => "wss",
-                _ => "ws",
-            })
-            .map_err(|()| "Invalid URL scheme")?;
-
-        ws_url = ws_url.join("/ws/v1/router/control-plane")?;
+        let ws_url = self.base_url.join("/ws/v1/router/control-plane")?;
 
         self.control_plane_client
             .get_or_try_init(|| ControlPlaneClient::connect(ws_url.as_str()))
@@ -232,14 +230,9 @@ impl App {
     pub async fn new(config: Config) -> Result<Self, InitError> {
         tracing::info!(config = ?config, "creating app");
         let minio = Minio::new(config.minio.clone())?;
-        let request_client = Client::builder()
-            .tcp_nodelay(true)
-            .connect_timeout(JAWN_CONNECT_TIMEOUT)
-            .build()
-            .map_err(error::init::InitError::CreateReqwestClient)?;
 
         let jawn_client =
-            JawnClient::new(request_client, config.helicone.base_url.clone());
+            JawnClient::new(config.helicone.websocket_url.clone())?;
 
         // If global meter is not set, opentelemetry defaults to a
         // NoopMeterProvider
