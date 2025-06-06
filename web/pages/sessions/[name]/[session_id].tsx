@@ -11,8 +11,6 @@ import {
 } from "../../../lib/sessions/realtimeSession";
 import { sessionFromHeliconeRequests } from "../../../lib/sessions/sessionsFromHeliconeTequests";
 import { useGetRequests } from "../../../services/hooks/requests";
-import { useFilterAST } from "@/filterAST/context/filterContext";
-import { toFilterNode } from "@/filterAST/toFilterNode";
 import { useRouter } from "next/router";
 
 export const SessionDetail = ({
@@ -23,7 +21,7 @@ export const SessionDetail = ({
   session_name: string;
 }) => {
   const router = useRouter();
-  
+
   const [page, setPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(500);
 
@@ -128,7 +126,7 @@ export const SessionDetail = ({
   }, [requestsHookResult.requests.requests]);
 
   const session = sessionFromHeliconeRequests(processedRequests);
-  
+
   return (
     <SessionContent
       session={session}
