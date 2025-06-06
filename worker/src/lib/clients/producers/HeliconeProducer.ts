@@ -35,7 +35,6 @@ export class HeliconeProducer {
     this.VALHALLA_URL = env.VALHALLA_URL;
     this.HELICONE_MANUAL_ACCESS_KEY = env.HELICONE_MANUAL_ACCESS_KEY;
 
-    console.log(env);
     if (
       !env.UPSTASH_KAFKA_URL ||
       !env.UPSTASH_KAFKA_USERNAME ||
@@ -49,7 +48,7 @@ export class HeliconeProducer {
     this.producer = MessageProducerFactory.createProducer(env);
   }
 
-  async setLowerPriority() {
+  setLowerPriority() {
     if (this.producer) {
       this.producer.setLowerPriority();
     }

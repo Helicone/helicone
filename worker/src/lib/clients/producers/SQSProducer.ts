@@ -42,17 +42,13 @@ export class SQSProducerImpl implements MessageProducer {
     const maxAttempts = 3;
     const timeout = 1000;
 
-    console.log(msg);
-
     while (attempts < maxAttempts) {
       try {
-        console.log("queue url", this.queueUrl);
         const command = new SendMessageCommand({
           QueueUrl: this.queueUrl,
           MessageBody: JSON.stringify(msg),
         });
 
-        console.log(`Sending message to SQS: ${this.queueUrl}`);
         await this.sqs.send(command);
 
         return ok(null);
