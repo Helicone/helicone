@@ -6,13 +6,15 @@ import { Result, err, ok } from "../../util/results";
 export class SQSProducerImpl implements MessageProducer {
   private sqs: SQSClient;
   private queueUrl: string;
+  private lowerPriorityQueueUrl: string;
 
   constructor(env: Env) {
     if (
       !env.AWS_REGION ||
       !env.AWS_ACCESS_KEY_ID ||
       !env.AWS_SECRET_ACCESS_KEY ||
-      !env.REQUEST_LOGS_QUEUE_URL
+      !env.REQUEST_LOGS_QUEUE_URL ||
+      !env.REQUEST_LOGS_QUEUE_URL_LOW_PRIORITY
     ) {
       throw new Error(
         "Required AWS SQS environment variables are not set, SQSProducer will not be initialized."
@@ -28,10 +30,11 @@ export class SQSProducerImpl implements MessageProducer {
     });
 
     this.queueUrl = env.REQUEST_LOGS_QUEUE_URL;
+    this.lowerPriorityQueueUrl = env.REQUEST_LOGS_QUEUE_URL_LOW_PRIORITY;
   }
 
-  setLowerPriorityQueueUrl(queueUrl: string) {
-    this.queueUrl = queueUrl;
+  setLowerPriority() {
+    this.queueUrl = this.lowerPriorityQueueUrl;
   }
 
   async sendMessage(msg: MessageData): Promise<Result<null, string>> {
@@ -39,13 +42,17 @@ export class SQSProducerImpl implements MessageProducer {
     const maxAttempts = 3;
     const timeout = 1000;
 
+    console.log(msg);
+
     while (attempts < maxAttempts) {
       try {
+        console.log("queue url", this.queueUrl);
         const command = new SendMessageCommand({
           QueueUrl: this.queueUrl,
           MessageBody: JSON.stringify(msg),
         });
 
+        console.log(`Sending message to SQS: ${this.queueUrl}`);
         await this.sqs.send(command);
 
         return ok(null);

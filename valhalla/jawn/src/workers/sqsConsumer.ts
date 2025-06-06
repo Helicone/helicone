@@ -18,11 +18,19 @@ parentPort?.once("message", (message) => {
     console.log("Sqs DLQ consumer thread started!");
     consumeRequestResponseLogsDlq();
   } else if (message === "start-scores") {
-    console.log("Sqs scores consumer thread started!");
-    consumeHeliconeScores();
+    if (!process.env.DISABLE_NON_REQUEST_CONSUMERS) {
+      console.log("Sqs scores consumer thread started!");
+      consumeHeliconeScores();
+    } else {
+      console.log("Scores consumer disabled via DISABLE_NON_REQUEST_CONSUMERS");
+    }
   } else if (message === "start-scores-dlq") {
-    console.log("Sqs scores DLQ consumer thread started!");
-    consumeHeliconeScoresDlq();
+    if (!process.env.DISABLE_NON_REQUEST_CONSUMERS) {
+      console.log("Sqs scores DLQ consumer thread started!");
+      consumeHeliconeScoresDlq();
+    } else {
+      console.log("Scores DLQ consumer disabled via DISABLE_NON_REQUEST_CONSUMERS");
+    }
   } else if (message === "start-backfill") {
     throw new Error("Not implemented");
   }

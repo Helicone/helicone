@@ -27,7 +27,6 @@ import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 import { costOfPrompt } from "../../packages/cost";
 import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
 import {
-  LOW_PRIORITY_QUEUE_URL,
   MessageData,
 } from "../clients/producers/types";
 import { DEFAULT_UUID } from "../../packages/llm-mapper/types";
@@ -546,7 +545,6 @@ export class DBLoggable {
       return err(`Auth failed! ${error}`);
     }
 
-    let rateLimited = false;
     try {
       const org = await db.dbWrapper.getOrganization();
       if (org.error !== null) {
@@ -569,7 +567,7 @@ export class DBLoggable {
 
       // Set rate limited flag to clickhouse
       if (!rateLimit.error && rateLimit.data?.isRateLimited) {
-        rateLimited = true;
+        db.producer.setLowerPriority();
         await db.clickhouse.dbInsertClickhouse("rate_limit_log_v2", [
           {
             request_id: this.request.requestId,
@@ -589,7 +587,6 @@ export class DBLoggable {
       db,
       authParams,
       S3_ENABLED,
-      rateLimited,
       requestHeaders,
       cachedHeaders,
       cacheSettings
@@ -631,7 +628,6 @@ export class DBLoggable {
     },
     authParams: AuthParams,
     S3_ENABLED: Env["S3_ENABLED"],
-    rateLimited: boolean,
     requestHeaders?: HeliconeHeaders,
     cachedHeaders?: Headers,
     cacheSettings?: CacheSettings
@@ -753,9 +749,6 @@ export class DBLoggable {
       },
     };
 
-    if (rateLimited) {
-      db.producer.setLowerPriorityQueueUrl(LOW_PRIORITY_QUEUE_URL);
-    }
     await db.producer.sendMessage(kafkaMessage);
 
     return ok(null);

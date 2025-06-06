@@ -23,7 +23,7 @@ export class KafkaProducerImpl implements MessageProducer {
     });
   }
 
-  setLowerPriorityQueueUrl(queueUrl: string) {
+  setLowerPriority() {
     // Do nothing
   }
 

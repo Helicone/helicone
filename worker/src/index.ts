@@ -97,6 +97,7 @@ export interface BASE_Env {
   AWS_ACCESS_KEY_ID?: string;
   AWS_SECRET_ACCESS_KEY?: string;
   REQUEST_LOGS_QUEUE_URL?: string;
+  REQUEST_LOGS_QUEUE_URL_LOW_PRIORITY?: string;
 
   QUEUE_PROVIDER?: "kafka" | "sqs" | "dual";
 }

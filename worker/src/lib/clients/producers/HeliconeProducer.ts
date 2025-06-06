@@ -49,9 +49,9 @@ export class HeliconeProducer {
     this.producer = MessageProducerFactory.createProducer(env);
   }
 
-  async setLowerPriorityQueueUrl(queueUrl: string) {
+  async setLowerPriority() {
     if (this.producer) {
-      this.producer.setLowerPriorityQueueUrl(queueUrl);
+      this.producer.setLowerPriority();
     }
   }
 
