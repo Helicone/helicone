@@ -39,7 +39,7 @@ docker run -d --name helicone-all -p 3000:3000 -p 8585:8585 -p 5432:5432 -p 8123
 ### Running via Docker Compose
 ```bash
 cd docker
-docker compose up -d # NOTE: the initial build will take a while ~5 minutes, but subsequent builds will be a lot faster
+./helicone-compose.sh helicone up # NOTE: the initial build will take a while ~5 minutes, but subsequent builds will be a lot faster
 ```
 
 ## Running Services

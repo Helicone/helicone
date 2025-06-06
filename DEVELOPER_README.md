@@ -6,7 +6,7 @@ This is a short guide on how to get Helicone up and running if you are planning 
 Start databases and run migrations...
 
 ```bash
-cd docker && docker compose -f docker-compose-slim.yml up -d
+./helicone-compose.sh helicone up
 ```
 
 Start web service in a terminal

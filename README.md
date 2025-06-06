@@ -103,7 +103,7 @@ cd docker
 cp .env.example .env
 
 # Start the services
-docker compose up
+./helicone-compose.sh helicone up
 ```
 
 #### Helm
