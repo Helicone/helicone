@@ -47,7 +47,6 @@ async-openai = { version = "0.28.1" }
 axum-core = "0.5.2"
 axum-server = "0.7.2"
 base64 = "0.22.1"
-brakes = { version = "0.1.1", features = ["redis", "tower"] }
 bytes = "1.10.1"
 cfg-if = "1.0.0"
 chrono = "0.4.40"
@@ -110,6 +109,7 @@ tokio-test = "0.4.4"
 tokio-tungstenite = { version = "0.21.0", features = ["native-tls"] }
 tokio-util = "0.7.15"
 tower = "0.5.2"
+tower_governor = { version = "0.7.0", features = [] }
 tower-http = { version = "0.6.3" }
 tower-otel-http-metrics = { git = "https://github.com/tomharmon/tower-otel-http-metrics.git", branch = "feat/custom-attributes-via-extractors" }
 tracing = "0.1.41"

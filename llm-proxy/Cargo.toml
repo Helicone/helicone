@@ -13,7 +13,6 @@ anthropic-ai-sdk = { workspace = true }
 async-openai = { workspace = true }
 axum-core = { workspace = true }
 axum-server = { workspace = true, features = ["tls-rustls"] }
-brakes = { workspace = true }
 bytes = { workspace = true, features = ['serde'] }
 cfg-if = { workspace = true }
 chrono = { workspace = true, features = ['default', 'serde'] }
@@ -67,6 +66,7 @@ tokio-stream = { workspace = true, features = ['sync'] }
 tokio-tungstenite = { workspace = true }
 tokio-util = { workspace = true }
 tower = { workspace = true, features = ['full']}
+tower_governor = { workspace = true, features = [] }
 tower-http = { workspace = true, features = ['default', 'auth', 'catch-panic', 'add-extension', 'normalize-path', 'request-id', 'trace', 'util', 'sensitive-headers'] }
 tower-otel-http-metrics = { workspace = true }
 tracing = { workspace = true }

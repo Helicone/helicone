@@ -26,7 +26,6 @@ use crate::{
     error::{
         init::InitError,
         internal::InternalError,
-        provider::ProviderError,
         runtime::{self, RuntimeError},
     },
     types::{provider::InferenceProvider, router::RouterId},
@@ -112,7 +111,14 @@ async fn check_weighted_monitor(
                         trace!(provider = ?provider, endpoint_type = ?endpoint_type, "Provider became healthy, adding back");
                         inner.unhealthy_keys.remove(&key);
 
-                        let service = inner.create_service(provider).await?;
+                        let service = Dispatcher::new(
+                            inner.app_state.clone(),
+                            inner.router_id,
+                            &inner.router_config,
+                            provider,
+                        )
+                        .await?;
+
                         if let Err(e) =
                             inner.tx.send(Change::Insert(key, service)).await
                         {
@@ -172,7 +178,14 @@ async fn check_p2c_monitor(
                         trace!(provider = ?provider, endpoint_type = ?endpoint_type, "Provider became healthy, adding back");
                         inner.unhealthy_keys.remove(&key);
 
-                        let service = inner.create_service(provider).await?;
+                        let service = Dispatcher::new(
+                            inner.app_state.clone(),
+                            inner.router_id,
+                            &inner.router_config,
+                            provider,
+                        )
+                        .await?;
+
                         if let Err(e) =
                             inner.tx.send(Change::Insert(key, service)).await
                         {
@@ -281,31 +294,6 @@ impl<K> ProviderMonitorInner<K> {
         }
 
         Ok(all_healthy)
-    }
-
-    async fn create_service(
-        &self,
-        provider: InferenceProvider,
-    ) -> Result<DispatcherService, InitError> {
-        let provider_keys = self.app_state.0.provider_keys.read().await;
-        let provider_keys = provider_keys
-            .get(&self.router_id)
-            .ok_or(ProviderError::ProviderKeysNotFound(self.router_id)).inspect_err(|e| {
-                error!(error = ?e, "Provider keys not found for from health monitor");
-            })?;
-
-        let api_key = provider_keys
-            .get(&provider)
-            .ok_or(ProviderError::ApiKeyNotFound(provider))?
-            .clone();
-
-        Dispatcher::new(
-            self.app_state.clone(),
-            self.router_id,
-            &self.router_config,
-            provider,
-            &api_key,
-        )
     }
 }
 

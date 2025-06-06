@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use http::{Method, Request, StatusCode};
 use http_body_util::BodyExt;
 use llm_proxy::{
-    config::{Config, rate_limit::RateLimitConfig},
+    config::{Config, rate_limit::TopLevelRateLimitConfig},
     tests::{TestDefault, harness::Harness, mock::MockArgs},
 };
 use serde_json::json;
@@ -11,26 +11,6 @@ use stubr::wiremock_rs::{Mock, ResponseTemplate, matchers};
 use tower::Service;
 use uuid::Uuid;
 
-// Redis-based rate limiter tests
-#[tokio::test]
-#[serial_test::serial]
-async fn rate_limit_capacity_enforced_redis() {
-    rate_limit_capacity_enforced_impl(
-        llm_proxy::config::rate_limit::enabled_for_test_redis(),
-    )
-    .await;
-}
-
-#[tokio::test]
-#[serial_test::serial]
-async fn rate_limit_per_user_isolation_redis() {
-    rate_limit_per_user_isolation_impl(
-        llm_proxy::config::rate_limit::enabled_for_test_redis(),
-    )
-    .await;
-}
-
-// In-memory rate limiter tests
 #[tokio::test]
 #[serial_test::serial]
 async fn rate_limit_capacity_enforced_in_memory() {
@@ -49,8 +29,9 @@ async fn rate_limit_per_user_isolation_in_memory() {
     .await;
 }
 
-// Parameterized test implementations
-async fn rate_limit_capacity_enforced_impl(rate_limit_config: RateLimitConfig) {
+async fn rate_limit_capacity_enforced_impl(
+    rate_limit_config: TopLevelRateLimitConfig,
+) {
     let mut config = Config::test_default();
     config.auth.require_auth = true;
     config.rate_limit = rate_limit_config;
@@ -68,76 +49,80 @@ async fn rate_limit_capacity_enforced_impl(rate_limit_config: RateLimitConfig) {
         .build()
         .await;
 
+    let user_id = Uuid::new_v4();
+    let organization_id = Uuid::new_v4();
+
     harness
         .mock
         .jawn_mock
         .http_server
-        .register(whoami_mock())
+        .register(whoami_mock(user_id, organization_id))
         .await;
 
     let auth_header = "Bearer sk-helicone-test-key";
 
-    // Make 5 requests - should all succeed (capacity = 5)
-    for i in 1..=5 {
-        let status = make_chat_request(&mut harness, auth_header).await;
-        assert_eq!(status, StatusCode::OK, "Request {i} should succeed");
+    for i in 1..=3 {
+        let response = make_chat_request(&mut harness, auth_header).await;
+        assert_eq!(
+            response.status(),
+            StatusCode::OK,
+            "Request {} should succeed",
+            i
+        );
+        let _body = response.into_body().collect().await.unwrap();
     }
 
-    // 6th request should be rate limited
-    let status = make_chat_request(&mut harness, auth_header).await;
+    let response = make_chat_request(&mut harness, auth_header).await;
+    let status = response.status();
     assert_eq!(
         status,
         StatusCode::TOO_MANY_REQUESTS,
-        "6th request should be rate limited"
+        "4th request should be rate limited"
     );
 
-    // Sleep to allow the rate limit to refill
+    let retry_after = response.headers().get("retry-after");
+    assert!(
+        retry_after.is_some(),
+        "retry-after header should be present"
+    );
+    let _body = response.into_body().collect().await.unwrap();
+
     tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+    for i in 1..=3 {
+        let response = make_chat_request(&mut harness, auth_header).await;
+        assert_eq!(
+            response.status(),
+            StatusCode::OK,
+            "Request {} should succeed",
+            i
+        );
+        let _body = response.into_body().collect().await.unwrap();
+    }
 
-    // 7th request should succeed
-    let status = make_chat_request(&mut harness, auth_header).await;
-    assert_eq!(
-        status,
-        StatusCode::OK,
-        "7th request should succeed after refill"
-    );
+    let response = make_chat_request(&mut harness, auth_header).await;
+    let status = response.status();
+    assert_eq!(status, StatusCode::TOO_MANY_REQUESTS,);
 
-    // 8th request should be rate limited
-    let status = make_chat_request(&mut harness, auth_header).await;
-    assert_eq!(
-        status,
-        StatusCode::TOO_MANY_REQUESTS,
-        "8th request should be rate limited"
+    let retry_after = response.headers().get("retry-after");
+    assert!(
+        retry_after.is_some(),
+        "retry-after header should be present"
     );
-
-    let whoami_received_req = harness
-        .mock
-        .jawn_mock
-        .http_server
-        .received_requests_for("GET", "/v1/router/control-plane/whoami")
-        .await
-        .unwrap();
-    assert_eq!(
-        whoami_received_req.len(),
-        8,
-        "8 whoami requests should have been received"
-    );
-    // mocks are verified on drop
+    let _body = response.into_body().collect().await.unwrap();
 }
 
 async fn rate_limit_per_user_isolation_impl(
-    rate_limit_config: RateLimitConfig,
+    rate_limit_config: TopLevelRateLimitConfig,
 ) {
     let mut config = Config::test_default();
     config.auth.require_auth = true;
     config.rate_limit = rate_limit_config;
 
-    // Set up mocks - expect requests from both users
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([
-            ("success:openai:chat_completion", 5.into()),
-            ("success:minio:upload_request", 5.into()),
-            ("success:jawn:log_request", 5.into()),
+            ("success:openai:chat_completion", 3.into()),
+            ("success:minio:upload_request", 3.into()),
+            ("success:jawn:log_request", 3.into()),
         ]))
         .build();
 
@@ -149,84 +134,68 @@ async fn rate_limit_per_user_isolation_impl(
 
     let user1_auth = "Bearer sk-helicone-user1-key";
     let user2_auth = "Bearer sk-helicone-user2-key";
+    let user1_id = Uuid::new_v4();
+    let organization1_id = Uuid::new_v4();
+    let user2_id = Uuid::new_v4();
+    let organization2_id = Uuid::new_v4();
     harness
         .mock
         .jawn_mock
         .http_server
-        .register(whoami_mock())
+        .register(whoami_mock(user1_id, organization1_id))
         .await;
 
-    // Exhaust user1's rate limit
-    for i in 1..=5 {
-        let status = make_chat_request(&mut harness, user1_auth).await;
+    for i in 1..=3 {
+        let response = make_chat_request(&mut harness, user1_auth).await;
         assert_eq!(
-            status,
+            response.status(),
             StatusCode::OK,
             "User1 request {i} should succeed"
         );
+        let _body = response.into_body().collect().await.unwrap();
     }
 
-    // User1's next request should be rate limited
-    let status = make_chat_request(&mut harness, user1_auth).await;
+    let response = make_chat_request(&mut harness, user1_auth).await;
     assert_eq!(
-        status,
+        response.status(),
         StatusCode::TOO_MANY_REQUESTS,
         "User1 should be rate limited"
     );
 
-    let whoami_received_req = harness
-        .mock
-        .jawn_mock
-        .http_server
-        .received_requests_for("GET", "/v1/router/control-plane/whoami")
-        .await
-        .unwrap();
-    assert_eq!(
-        whoami_received_req.len(),
-        6,
-        "6 whoami requests should have been received"
+    let retry_after = response.headers().get("retry-after");
+    assert!(
+        retry_after.is_some(),
+        "retry-after header should be present"
     );
+    let _body = response.into_body().collect().await.unwrap();
 
     harness.mock.verify().await;
     harness.mock.reset().await;
     harness
         .mock
         .stubs(HashMap::from([
-            ("success:openai:chat_completion", 5.into()),
-            ("success:minio:upload_request", 5.into()),
-            ("success:jawn:log_request", 5.into()),
+            ("success:openai:chat_completion", 3.into()),
+            ("success:minio:upload_request", 3.into()),
+            ("success:jawn:log_request", 3.into()),
         ]))
         .await;
     harness
         .mock
         .jawn_mock
         .http_server
-        .register(whoami_mock())
+        .register(whoami_mock(user2_id, organization2_id))
         .await;
 
-    // User2 should still have full capacity available
-    for i in 1..=5 {
-        let status = make_chat_request(&mut harness, user2_auth).await;
+    for i in 1..=3 {
+        let response = make_chat_request(&mut harness, user2_auth).await;
         assert_eq!(
-            status,
+            response.status(),
             StatusCode::OK,
             "User2 request {i} should succeed"
         );
+        let _body = response.into_body().collect().await.unwrap();
     }
-
-    let whoami_received_req = harness
-        .mock
-        .jawn_mock
-        .http_server
-        .received_requests_for("GET", "/v1/router/control-plane/whoami")
-        .await
-        .unwrap();
-    assert_eq!(
-        whoami_received_req.len(),
-        5,
-        "5 whoami requests should have been received"
-    );
-    // mocks are verified on drop
+    tokio::time::sleep(std::time::Duration::from_millis(10)).await;
 }
 
 #[tokio::test]
@@ -234,10 +203,7 @@ async fn rate_limit_per_user_isolation_impl(
 async fn rate_limit_disabled() {
     let mut config = Config::test_default();
     config.auth.require_auth = true;
-    // rate_limit defaults to disabled in test config
 
-    // Set up mocks - many requests should succeed when rate limiting is
-    // disabled
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([
             ("success:openai:chat_completion", 10.into()),
@@ -251,45 +217,38 @@ async fn rate_limit_disabled() {
         .with_mock_args(mock_args)
         .build()
         .await;
+    let user_id = Uuid::new_v4();
+    let organization_id = Uuid::new_v4();
     harness
         .mock
         .jawn_mock
         .http_server
-        .register(whoami_mock())
+        .register(whoami_mock(user_id, organization_id))
         .await;
 
     let auth_header = "Bearer sk-helicone-test-key";
 
-    // Make many requests - all should succeed when rate limiting is disabled
     for i in 1..=10 {
-        let status = make_chat_request(&mut harness, auth_header).await;
+        let response = make_chat_request(&mut harness, auth_header).await;
         assert_eq!(
-            status,
+            response.status(),
             StatusCode::OK,
             "Request {i} should succeed when rate limiting disabled"
         );
+        let _body = response.into_body().collect().await.unwrap();
     }
-
-    let whoami_received_req = harness
-        .mock
-        .jawn_mock
-        .http_server
-        .received_requests_for("GET", "/v1/router/control-plane/whoami")
-        .await
-        .unwrap();
-    assert_eq!(
-        whoami_received_req.len(),
-        10,
-        "10 whoami requests should have been received"
-    );
-
-    // mocks are verified on drop
+    tokio::time::sleep(std::time::Duration::from_millis(10)).await;
 }
 
 async fn make_chat_request(
     harness: &mut Harness,
     auth_header: &str,
-) -> http::StatusCode {
+) -> http::Response<
+    tower_http::body::UnsyncBoxBody<
+        bytes::Bytes,
+        Box<dyn std::error::Error + Send + Sync + 'static>,
+    >,
+> {
     let body_bytes = serde_json::to_vec(&json!({
         "model": "openai/gpt-4o-mini",
         "messages": [
@@ -310,22 +269,19 @@ async fn make_chat_request(
         .unwrap();
 
     let response = harness.call(request).await.unwrap();
-    let status = response.status();
 
-    // Collect the body and sleep to ensure async logging completes
-    let _response_body = response.into_body().collect().await.unwrap();
     tokio::time::sleep(std::time::Duration::from_millis(10)).await;
 
-    status
+    response
 }
 
-fn whoami_mock() -> Mock {
+fn whoami_mock(user_id: Uuid, organization_id: Uuid) -> Mock {
     let matcher = matchers::path("/v1/router/control-plane/whoami");
     let response = ResponseTemplate::new(200)
         .append_header("content-type", "application/json")
         .set_body_json(json!({
-            "userId": Uuid::new_v4().to_string(),
-            "organizationId": Uuid::new_v4().to_string()
+            "userId": user_id.to_string(),
+            "organizationId": organization_id.to_string()
         }));
     Mock::given(matcher).respond_with(response)
 }

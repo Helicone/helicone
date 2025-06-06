@@ -1,22 +1,18 @@
 use http::Request;
+use tower_governor::{GovernorError, key_extractor::KeyExtractor};
 
-use super::brakes::{KeyExtractor, KeyExtractorError};
-use crate::types::request::AuthContext;
+use crate::types::{request::AuthContext, user::UserId};
 
 #[derive(Debug, Clone)]
 pub struct RateLimitKeyExtractor;
 
 impl KeyExtractor for RateLimitKeyExtractor {
-    fn extract<T>(
-        &self,
-        req: &Request<T>,
-    ) -> Result<String, KeyExtractorError> {
+    type Key = UserId;
+    fn extract<T>(&self, req: &Request<T>) -> Result<Self::Key, GovernorError> {
         let Some(ctx) = req.extensions().get::<AuthContext>() else {
-            return Err(KeyExtractorError::UnableToExtractKey);
+            return Err(GovernorError::UnableToExtractKey);
         };
 
-        let user_id = ctx.user_id.to_string();
-        tracing::info!("user_id: {}", user_id);
-        Ok(user_id)
+        Ok(ctx.user_id)
     }
 }

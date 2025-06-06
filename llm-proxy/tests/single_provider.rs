@@ -336,3 +336,58 @@ async fn anthropic_request_style() {
     let response = harness.call(request).await.unwrap();
     assert_eq!(response.status(), StatusCode::OK);
 }
+
+/// Sending a request to https://localhost/router should
+/// result in the proxied request targeting Ollama chat completions endpoint
+#[tokio::test]
+#[serial_test::serial(default_mock)]
+async fn ollama() {
+    let mut config = Config::test_default();
+    // Disable auth for this test since we're testing basic provider
+    // functionality
+    config.auth.require_auth = false;
+    let router_config = RouterConfigs::new(HashMap::from([(
+        RouterId::Default,
+        RouterConfig {
+            request_style: InferenceProvider::OpenAI,
+            balance: BalanceConfig::ollama_chat(),
+            ..Default::default()
+        },
+    )]));
+    config.routers = router_config;
+    let mock_args = MockArgs::builder()
+        .stubs(HashMap::from([
+            ("success:ollama:chat_completions", 1.into()),
+            // Auth is disabled, so auth and logging services should not be
+            // called
+            ("success:jawn:whoami", 0.into()),
+            ("success:minio:upload_request", 0.into()),
+            ("success:jawn:log_request", 0.into()),
+        ]))
+        .build();
+    let mut harness = Harness::builder()
+        .with_config(config)
+        .with_mock_args(mock_args)
+        .build()
+        .await;
+    let request_body = axum_core::body::Body::from(
+        serde_json::to_vec(&json!({
+            "model": "ollama/llama3",
+            "messages": [
+                {
+                    "role": "user",
+                    "content": "Hello, world!"
+                }
+            ]
+        }))
+        .unwrap(),
+    );
+    let request = Request::builder()
+        .method(Method::POST)
+        // default router
+        .uri("http://router.helicone.com/router/v1/chat/completions")
+        .body(request_body)
+        .unwrap();
+    let response = harness.call(request).await.unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+}

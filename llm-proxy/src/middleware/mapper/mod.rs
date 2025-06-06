@@ -26,6 +26,7 @@ pub mod anthropic;
 pub mod error;
 mod gemini;
 pub mod model;
+pub mod ollama;
 pub mod openai;
 pub mod registry;
 pub mod service;

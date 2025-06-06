@@ -23,10 +23,14 @@ use crate::{
         anthropic_client::Client as AnthropicClient,
         extensions::ExtensionsCopier,
         google_gemini_client::Client as GoogleGeminiClient,
+        ollama_client::Client as OllamaClient,
         openai_client::Client as OpenAIClient,
     },
     endpoints::ApiEndpoint,
-    error::{api::ApiError, init::InitError, internal::InternalError},
+    error::{
+        api::ApiError, init::InitError, internal::InternalError,
+        provider::ProviderError,
+    },
     logger::service::LoggerService,
     middleware::{
         add_extension::{AddExtensions, AddExtensionsLayer},
@@ -56,6 +60,7 @@ pub enum Client {
     OpenAI(OpenAIClient),
     Anthropic(AnthropicClient),
     GoogleGemini(GoogleGeminiClient),
+    Ollama(OllamaClient),
 }
 
 impl Client {
@@ -80,6 +85,7 @@ impl AsRef<reqwest::Client> for Client {
             Client::OpenAI(client) => &client.0,
             Client::Anthropic(client) => &client.0,
             Client::GoogleGemini(client) => &client.0,
+            Client::Ollama(client) => &client.0,
         }
     }
 }
@@ -93,12 +99,11 @@ pub struct Dispatcher {
 }
 
 impl Dispatcher {
-    pub fn new(
+    pub async fn new(
         app_state: AppState,
         router_id: RouterId,
         router_config: &Arc<RouterConfig>,
         provider: InferenceProvider,
-        provider_api_key: &Secret<String>,
     ) -> Result<DispatcherService, InitError> {
         // connection timeout, timeout, etc.
         let base_client = reqwest::Client::builder()
@@ -110,21 +115,26 @@ impl Dispatcher {
             InferenceProvider::OpenAI => Client::OpenAI(OpenAIClient::new(
                 &app_state,
                 base_client,
-                provider_api_key,
+                &get_provider_api_key(&app_state, router_id, provider).await?,
             )?),
             InferenceProvider::Anthropic => {
                 Client::Anthropic(AnthropicClient::new(
                     &app_state,
                     base_client,
-                    provider_api_key,
+                    &get_provider_api_key(&app_state, router_id, provider)
+                        .await?,
                 )?)
             }
             InferenceProvider::GoogleGemini => {
                 Client::GoogleGemini(GoogleGeminiClient::new(
                     &app_state,
                     base_client,
-                    provider_api_key,
+                    &get_provider_api_key(&app_state, router_id, provider)
+                        .await?,
                 )?)
+            }
+            InferenceProvider::Ollama => {
+                Client::Ollama(OllamaClient::new(&app_state, base_client)?)
             }
             _ => todo!("only openai and anthropic are supported at the moment"),
         };
@@ -153,6 +163,21 @@ impl Dispatcher {
             // will be added here as well
             .service(dispatcher))
     }
+}
+
+async fn get_provider_api_key(
+    app_state: &AppState,
+    router_id: RouterId,
+    provider: InferenceProvider,
+) -> Result<Secret<String>, ProviderError> {
+    let provider_keys = app_state.0.provider_keys.read().await;
+    let provider_keys = provider_keys
+        .get(&router_id)
+        .ok_or(ProviderError::ProviderKeysNotFound(router_id))?;
+    Ok(provider_keys
+        .get(&provider)
+        .ok_or(ProviderError::ApiKeyNotFound(provider))?
+        .clone())
 }
 
 impl Service<Request> for Dispatcher {
@@ -229,11 +254,6 @@ impl Dispatcher {
             .get::<RouterId>()
             .copied()
             .ok_or(InternalError::ExtensionNotFound("RouterId"))?;
-        let extensions_copier = ExtensionsCopier::builder()
-            .inference_provider(inference_provider)
-            .router_id(router_id)
-            .auth_context(auth_ctx.cloned())
-            .build();
 
         let target_url = base_url
             .join(extracted_path_and_query.as_str())
@@ -291,6 +311,12 @@ impl Dispatcher {
             headers.remove("x-request-id")
         };
         tracing::debug!(provider_req_id = ?provider_request_id, status = %response.status(), "received response");
+        let extensions_copier = ExtensionsCopier::builder()
+            .inference_provider(inference_provider)
+            .router_id(router_id)
+            .auth_context(auth_ctx.cloned())
+            .provider_request_id(provider_request_id)
+            .build();
         extensions_copier.copy_extensions(response.extensions_mut());
         response.extensions_mut().insert(mapper_ctx);
         response.extensions_mut().insert(api_endpoint);

@@ -28,10 +28,8 @@ use url::Url;
 
 use crate::{
     config::{
-        Config,
-        minio::Minio,
-        rate_limit::{RateLimitConfig, RateLimitStore},
-        server::TlsConfig,
+        Config, minio::Minio, rate_limit::RateLimiterConfig,
+        response_headers::ResponseHeadersConfig, server::TlsConfig,
     },
     control_plane::websocket::ControlPlaneClient,
     discover::monitor::health::{
@@ -41,6 +39,7 @@ use crate::{
     metrics::{self, Metrics, attribute_extractor::AttributeExtractor},
     middleware::{
         auth::AuthService, rate_limit::service::Layer as RateLimitLayer,
+        response_headers::ResponseHeaderLayer,
     },
     router::meta::MetaRouter,
     types::{provider::ProviderKeys, router::RouterId},
@@ -102,6 +101,13 @@ impl JawnClient {
     }
 }
 
+impl AppState {
+    #[must_use]
+    pub fn response_headers_config(&self) -> ResponseHeadersConfig {
+        self.0.config.response_headers
+    }
+}
+
 #[derive(Debug)]
 pub struct InnerAppState {
     pub config: Config,
@@ -109,6 +115,8 @@ pub struct InnerAppState {
     pub jawn_client: JawnClient,
     pub redis: Option<r2d2::Pool<redis::Client>>,
     pub provider_keys: RwLock<HashMap<RouterId, ProviderKeys>>,
+    pub global_rate_limit: Option<Arc<RateLimiterConfig>>,
+    pub router_rate_limits: RwLock<HashMap<RouterId, Arc<RateLimiterConfig>>>,
     /// Top level metrics which are exported to OpenTelemetry.
     pub metrics: Metrics,
     /// Metrics to track provider health and rate limits.
@@ -193,6 +201,7 @@ pub struct AppState(pub Arc<InnerAppState>);
 ///   - `ApiEndpoint`
 ///   - `MapperContext`
 ///   - `AuthContext`
+///   - `ProviderRequestId`
 #[derive(Clone)]
 pub struct App {
     pub state: AppState,
@@ -235,28 +244,16 @@ impl App {
         let endpoint_metrics = EndpointMetricsRegistry::default();
         let health_monitor = HealthMonitorMap::default();
 
-        let redis = match &config.rate_limit {
-            RateLimitConfig::Global { store, .. }
-            | RateLimitConfig::OptIn { store, .. }
-            | RateLimitConfig::RouterSpecific { store, .. } => match store {
-                RateLimitStore::Redis(redis) => {
-                    let client = redis::Client::open(redis.url.0.clone())?;
-                    let pool = r2d2::Pool::builder()
-                        .connection_timeout(redis.connection_timeout)
-                        .build(client)?;
-                    Some(pool)
-                }
-                RateLimitStore::InMemory => None,
-            },
-            RateLimitConfig::Disabled => None,
-        };
+        let global_rate_limit =
+            config.rate_limit.global_limiter().map(Arc::new);
 
         let app_state = AppState(Arc::new(InnerAppState {
             config,
             minio,
             jawn_client,
-            redis,
             provider_keys: RwLock::new(HashMap::default()),
+            global_rate_limit,
+            router_rate_limits: RwLock::new(HashMap::default()),
             metrics,
             endpoint_metrics,
             health_monitor,
@@ -299,7 +296,11 @@ impl App {
                 app_state.clone(),
             )))
             .layer(RateLimitLayer::global(&app_state))
+            .layer(ResponseHeaderLayer::new(
+                app_state.response_headers_config(),
+            ))
             .map_err(crate::error::internal::InternalError::BufferError)
+            // TODO: move this up before the auth layer
             .layer(BufferLayer::new(BUFFER_SIZE))
             .layer(ErrorHandlerLayer::new(app_state.clone()))
             .service(router);

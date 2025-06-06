@@ -63,6 +63,7 @@ impl Serialize for ModelProvider {
     EnumIter,
     strum::Display,
     strum::EnumString,
+    strum::AsRefStr,
 )]
 #[strum(serialize_all = "kebab-case")]
 pub enum InferenceProvider {
@@ -96,10 +97,13 @@ impl InferenceProvider {
                     .map(ApiEndpoint::Google)
                     .collect()
             }
+            InferenceProvider::Ollama => {
+                crate::endpoints::ollama::Ollama::iter()
+                    .map(ApiEndpoint::Ollama)
+                    .collect()
+            }
             // Inference not supported yet for these providers
-            InferenceProvider::Bedrock
-            | InferenceProvider::VertexAi
-            | InferenceProvider::Ollama => vec![],
+            InferenceProvider::Bedrock | InferenceProvider::VertexAi => vec![],
         }
     }
 }
@@ -119,7 +123,7 @@ impl Serialize for InferenceProvider {
     where
         S: Serializer,
     {
-        serializer.serialize_str(&self.to_string())
+        serializer.serialize_str(self.as_ref())
     }
 }
 
@@ -143,6 +147,10 @@ impl ProviderKeys {
         let providers = balance_config.providers();
 
         for provider in providers {
+            if provider == InferenceProvider::Ollama {
+                // ollama doesn't require an API key
+                continue;
+            }
             let provider_str = provider.to_string().to_uppercase();
             let env_var = format!("{provider_str}_API_KEY");
             if let Ok(key) = std::env::var(&env_var) {

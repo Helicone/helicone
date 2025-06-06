@@ -21,6 +21,8 @@ pub struct MockArgs {
     pub global_anthropic_latency: Option<u64>,
     #[builder(setter(strip_option), default = None)]
     pub global_google_latency: Option<u64>,
+    #[builder(setter(strip_option), default = None)]
+    pub global_ollama_latency: Option<u64>,
 
     #[builder(setter(strip_option), default = None)]
     pub openai_port: Option<u16>,
@@ -28,6 +30,8 @@ pub struct MockArgs {
     pub anthropic_port: Option<u16>,
     #[builder(setter(strip_option), default = None)]
     pub google_port: Option<u16>,
+    #[builder(setter(strip_option), default = None)]
+    pub ollama_port: Option<u16>,
     #[builder(setter(strip_option), default = None)]
     pub minio_port: Option<u16>,
     #[builder(setter(strip_option), default = None)]
@@ -45,6 +49,7 @@ pub struct Mock {
     pub openai_mock: Stubr,
     pub anthropic_mock: Stubr,
     pub google_mock: Stubr,
+    pub ollama_mock: Stubr,
     pub minio_mock: Stubr,
     pub jawn_mock: Stubr,
     args: MockArgs,
@@ -93,6 +98,20 @@ impl Mock {
             .unwrap()
             .base_url = Url::parse(&google_mock.uri()).unwrap();
 
+        let ollama_mock = start_mock_for_test(
+            &get_stubs_path("ollama"),
+            args.global_ollama_latency,
+            &args.stubs,
+            args.verify,
+        )
+        .await;
+
+        config
+            .providers
+            .get_mut(&InferenceProvider::Ollama)
+            .unwrap()
+            .base_url = Url::parse(&ollama_mock.uri()).unwrap();
+
         let minio_mock = start_mock_for_test(
             &get_stubs_path("minio"),
             None,
@@ -115,6 +134,7 @@ impl Mock {
             openai_mock,
             anthropic_mock,
             google_mock,
+            ollama_mock,
             minio_mock,
             jawn_mock,
             args,
@@ -151,6 +171,16 @@ impl Mock {
         )
         .await;
 
+        let ollama_mock = start_mock(
+            &get_stubs_path("ollama"),
+            args.global_ollama_latency,
+            &args.stubs,
+            false,
+            false,
+            args.ollama_port,
+        )
+        .await;
+
         let minio_mock = start_mock(
             &get_stubs_path("minio"),
             None,
@@ -175,6 +205,7 @@ impl Mock {
             openai_mock,
             anthropic_mock,
             google_mock,
+            ollama_mock,
             minio_mock,
             jawn_mock,
             args,
@@ -185,6 +216,7 @@ impl Mock {
         self.openai_mock.http_server.verify().await;
         self.anthropic_mock.http_server.verify().await;
         self.google_mock.http_server.verify().await;
+        self.ollama_mock.http_server.verify().await;
         self.minio_mock.http_server.verify().await;
         self.jawn_mock.http_server.verify().await;
     }
@@ -193,6 +225,7 @@ impl Mock {
         self.openai_mock.http_server.reset().await;
         self.anthropic_mock.http_server.reset().await;
         self.google_mock.http_server.reset().await;
+        self.ollama_mock.http_server.reset().await;
         self.minio_mock.http_server.reset().await;
         self.jawn_mock.http_server.reset().await;
     }
@@ -220,6 +253,15 @@ impl Mock {
             &self.google_mock,
             &get_stubs_path("google"),
             self.args.global_google_latency,
+            &stubs,
+            self.args.verify,
+        )
+        .await;
+
+        register_stubs_for_mock(
+            &self.ollama_mock,
+            &get_stubs_path("ollama"),
+            self.args.global_ollama_latency,
             &stubs,
             self.args.verify,
         )

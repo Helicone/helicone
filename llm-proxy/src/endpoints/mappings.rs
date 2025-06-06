@@ -1,4 +1,6 @@
-use crate::endpoints::{anthropic::Anthropic, google::Google, openai::OpenAI};
+use crate::endpoints::{
+    anthropic::Anthropic, google::Google, ollama::Ollama, openai::OpenAI,
+};
 
 impl From<Anthropic> for OpenAI {
     fn from(value: Anthropic) -> Self {
@@ -28,6 +30,22 @@ impl From<OpenAI> for Google {
     fn from(value: OpenAI) -> Self {
         match value {
             OpenAI::ChatCompletions(_) => Self::generate_contents(),
+        }
+    }
+}
+
+impl From<OpenAI> for Ollama {
+    fn from(value: OpenAI) -> Self {
+        match value {
+            OpenAI::ChatCompletions(_) => Self::chat_completions(),
+        }
+    }
+}
+
+impl From<Ollama> for OpenAI {
+    fn from(value: Ollama) -> Self {
+        match value {
+            Ollama::ChatCompletions(_) => Self::chat_completions(),
         }
     }
 }

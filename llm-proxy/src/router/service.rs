@@ -17,7 +17,7 @@ use crate::{
     endpoints::{ApiEndpoint, EndpointType},
     error::{
         api::ApiError, init::InitError, internal::InternalError,
-        invalid_req::InvalidRequestError, provider::ProviderError,
+        invalid_req::InvalidRequestError,
     },
     middleware::{rate_limit::service as rate_limit, request_context},
     types::{provider::ProviderKeys, router::RouterId},
@@ -63,6 +63,9 @@ impl Router {
         let provider_keys =
             Self::add_provider_keys(id, &router_config, &app_state).await?;
         let mut inner = HashMap::default();
+        let rl_layer =
+            rate_limit::Layer::per_router(&app_state, id, &router_config)
+                .await?;
         for (endpoint_type, balance_config) in router_config.balance.as_ref() {
             let balancer = ProviderBalancer::new(
                 app_state.clone(),
@@ -72,10 +75,7 @@ impl Router {
             )
             .await?;
             let service_stack: RouterService = ServiceBuilder::new()
-                .layer(rate_limit::Layer::per_router(
-                    &app_state,
-                    &router_config,
-                )?)
+                .layer(rl_layer.clone())
                 .layer(request_context::Layer::new(
                     router_config.clone(),
                     provider_keys.clone(),
@@ -87,22 +87,16 @@ impl Router {
 
             inner.insert(*endpoint_type, service_stack);
         }
-        let direct_proxy_provider_api_key = provider_keys
-            .get(&router_config.request_style)
-            .ok_or(ProviderError::ApiKeyNotFound(router_config.request_style))
-            .inspect_err(|e| {
-                tracing::error!(error = ?e, "Api key not found");
-            })?;
         let direct_proxy_dispatcher = Dispatcher::new(
             app_state.clone(),
             id,
             &router_config,
             router_config.request_style,
-            direct_proxy_provider_api_key,
-        )?;
+        )
+        .await?;
 
         let direct_proxy = ServiceBuilder::new()
-            .layer(rate_limit::Layer::per_router(&app_state, &router_config)?)
+            .layer(rl_layer)
             .layer(request_context::Layer::new(
                 router_config.clone(),
                 provider_keys,
