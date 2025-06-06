@@ -4,6 +4,7 @@ import { Result } from "../../util/results";
 
 export interface MessageProducer {
   sendMessage(msg: MessageData): Promise<Result<null, string>>;
+  setLowerPriority(): void;
 }
 
 export type HeliconeMeta = {

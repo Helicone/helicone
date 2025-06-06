@@ -48,6 +48,12 @@ export class HeliconeProducer {
     this.producer = MessageProducerFactory.createProducer(env);
   }
 
+  setLowerPriority() {
+    if (this.producer) {
+      this.producer.setLowerPriority();
+    }
+  }
+
   async sendMessage(msg: MessageData) {
     if (
       !this.producer ||
