@@ -1,4 +1,4 @@
-import { ReactElement, useMemo, useState } from "react";
+import { ReactElement, useMemo, useState, useEffect, useCallback } from "react";
 import AuthLayout from "../../../components/layout/auth/authLayout";
 import {
   EMPTY_SESSION_NAME,
@@ -11,6 +11,7 @@ import {
 } from "../../../lib/sessions/realtimeSession";
 import { sessionFromHeliconeRequests } from "../../../lib/sessions/sessionsFromHeliconeTequests";
 import { useGetRequests } from "../../../services/hooks/requests";
+import { useRouter } from "next/router";
 import { useFilterAST } from "@/filterAST/context/filterContext";
 import { toFilterNode } from "@/filterAST/toFilterNode";
 
@@ -21,6 +22,11 @@ export const SessionDetail = ({
   session_id: string;
   session_name: string;
 }) => {
+  const router = useRouter();
+
+  const [page, setPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(500);
+
   const ThreeMonthsAgo = useMemo(() => {
     return new Date(Date.now() - 30 * 24 * 60 * 60 * 1000 * 3);
   }, []);
@@ -28,9 +34,50 @@ export const SessionDetail = ({
   const filterStore = useFilterAST();
 
   const [isLive, setIsLive] = useState(false);
+
+  const handlePageChange = useCallback(
+    (newPage: number) => {
+      router.push(
+        {
+          pathname: router.pathname,
+          query: { ...router.query, page: newPage.toString() },
+        },
+        undefined,
+        { shallow: true }
+      );
+    },
+    [router]
+  );
+
+  const handlePageSizeChange = useCallback(
+    (newPageSize: number) => {
+      setPageSize(newPageSize);
+      setPage(1);
+      router.push(
+        {
+          pathname: router.pathname,
+          query: { ...router.query, page: "1" },
+        },
+        undefined,
+        { shallow: true }
+      );
+    },
+    [router]
+  );
+
+  useEffect(() => {
+    const pageFromQuery = router.query.page;
+    if (pageFromQuery && !Array.isArray(pageFromQuery)) {
+      const parsedPage = parseInt(pageFromQuery, 10);
+      if (!isNaN(parsedPage) && parsedPage !== page) {
+        setPage(parsedPage);
+      }
+    }
+  }, [router.query.page, page]);
+
   const requestsHookResult = useGetRequests(
-    1,
-    1000,
+    page,
+    pageSize,
     {
       left: {
         request_response_rmt: {
@@ -89,6 +136,7 @@ export const SessionDetail = ({
   }, [requestsHookResult.requests.requests]);
 
   const session = sessionFromHeliconeRequests(processedRequests);
+
   return (
     <SessionContent
       session={session}
@@ -97,6 +145,10 @@ export const SessionDetail = ({
       requests={requestsHookResult}
       isLive={isLive}
       setIsLive={setIsLive}
+      currentPage={page}
+      pageSize={pageSize}
+      onPageChange={handlePageChange}
+      onPageSizeChange={handlePageSizeChange}
     />
   );
 };
