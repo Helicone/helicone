@@ -76,35 +76,29 @@ pub type BoxedHyperServiceStack = BoxCloneService<
 #[derive(Debug)]
 pub struct JawnClient {
     pub request_client: Client,
-    control_plane_client: OnceCell<ControlPlaneClient>,
-    base_url: Url,
+    control_plane_client: ControlPlaneClient,
 }
 
 impl JawnClient {
     #[must_use]
-    pub fn new(base_url: Url) -> Result<Self, error::init::InitError> {
+    pub async fn new(base_url: Url) -> Result<Self, error::init::InitError> {
         let request_client = Client::builder()
             .tcp_nodelay(true)
             .connect_timeout(JAWN_CONNECT_TIMEOUT)
             .build()
             .map_err(error::init::InitError::CreateReqwestClient)?;
 
+        let ws_url =
+            base_url.join("/ws/v1/router/control-plane").map_err(|e| {
+                error::init::InitError::WebsocketConnection(Box::new(e))
+            })?;
+
         Ok(Self {
             request_client,
-            control_plane_client: OnceCell::new(),
-            base_url,
+            control_plane_client: ControlPlaneClient::connect(ws_url.as_str())
+                .await
+                .map_err(error::init::InitError::WebsocketConnection)?,
         })
-    }
-
-    async fn get_client(
-        &self,
-    ) -> Result<&ControlPlaneClient, Box<dyn std::error::Error + Send + Sync>>
-    {
-        let ws_url = self.base_url.join("/ws/v1/router/control-plane")?;
-
-        self.control_plane_client
-            .get_or_try_init(|| ControlPlaneClient::connect(ws_url.as_str()))
-            .await
     }
 }
 
@@ -232,7 +226,7 @@ impl App {
         let minio = Minio::new(config.minio.clone())?;
 
         let jawn_client =
-            JawnClient::new(config.helicone.websocket_url.clone())?;
+            JawnClient::new(config.helicone.websocket_url.clone()).await?;
 
         // If global meter is not set, opentelemetry defaults to a
         // NoopMeterProvider

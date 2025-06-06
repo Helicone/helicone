@@ -133,7 +133,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_integration_localhost_8585() {
-        let ws_url = "ws://localhost:8585";
+        let ws_url = "ws://localhost:8585/ws/v1/router/control-plane";
 
         // This will fail if no server is running on 8585, which is expected
         let result = ControlPlaneClient::connect(ws_url).await;
