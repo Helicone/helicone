@@ -34,7 +34,15 @@ RUN pip3 install --no-cache-dir requests clickhouse-driver tabulate yarl
 RUN mkdir -p /var/log/supervisor
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-COPY ./flyway.conf /app/flyway.conf
+ENV FLYWAY_URL=jdbc:postgresql://localhost:5432/helicone_test
+ENV FLYWAY_USER=postgres
+ENV FLYWAY_PASSWORD=password
+ENV FLYWAY_LOCATIONS=filesystem:/app/supabase/migrations,filesystem:/app/supabase/migrations_without_supabase
+ENV FLYWAY_SQL_MIGRATION_PREFIX=
+ENV FLYWAY_SQL_MIGRATION_SEPARATOR=_
+ENV FLYWAY_SQL_MIGRATION_SUFFIXES=.sql
+
+
 COPY ./supabase/migrations /app/supabase/migrations
 COPY ./supabase/migrations_without_supabase /app/supabase/migrations_without_supabase
 COPY ./clickhouse/migrations /app/clickhouse/migrations
@@ -102,6 +110,17 @@ RUN wget -q -O /usr/local/bin/minio https://dl.min.io/server/minio/release/linux
 
 # Create MinIO data directory
 RUN mkdir -p /data
+
+ENV POSTGRES_DB=helicone_test
+ENV POSTGRES_USER=postgres
+ENV POSTGRES_PASSWORD=password
+ENV CLICKHOUSE_DEFAULT_USER=default
+
+ENV CLICKHOUSE_HOST=http://localhost:8123
+
+ENV MINIO_ROOT_USER=minioadmin
+ENV MINIO_ROOT_PASSWORD=minioadmin
+
 
 # Use supervisord as entrypoint
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
