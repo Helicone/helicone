@@ -23,7 +23,8 @@ fn handle_message(
     state: &Arc<Mutex<ControlPlaneState>>,
     message: Message,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let m: MessageTypeRX = serde_json::from_str(&message.into_text()?)?;
+    let bytes = message.into_data();
+    let m: MessageTypeRX = serde_json::from_slice(&bytes)?;
 
     tracing::info!("Received message: {:?}", m);
     if let Ok(mut state_guard) = state.lock() {
@@ -81,11 +82,11 @@ impl ControlPlaneClient {
         &mut self,
         m: MessageTypeTX,
     ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-        let m = match m {
-            MessageTypeTX::Heartbeat => Message::Text("heartbeat".to_string()),
-        };
+        let bytes = serde_json::to_vec(&m)?;
+        let message = Message::Binary(bytes);
+
         if let Some(ref mut tx) = self.msg_tx {
-            match tx.send(m).await {
+            match tx.send(message).await {
                 Ok(()) => (),
                 Err(tungstenite::Error::AlreadyClosed) => {
                     tracing::error!("Connection closed");
