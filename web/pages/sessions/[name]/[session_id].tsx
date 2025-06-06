@@ -12,6 +12,8 @@ import {
 import { sessionFromHeliconeRequests } from "../../../lib/sessions/sessionsFromHeliconeTequests";
 import { useGetRequests } from "../../../services/hooks/requests";
 import { useRouter } from "next/router";
+import { useFilterAST } from "@/filterAST/context/filterContext";
+import { toFilterNode } from "@/filterAST/toFilterNode";
 
 export const SessionDetail = ({
   session_id,
@@ -28,6 +30,8 @@ export const SessionDetail = ({
   const ThreeMonthsAgo = useMemo(() => {
     return new Date(Date.now() - 30 * 24 * 60 * 60 * 1000 * 3);
   }, []);
+
+  const filterStore = useFilterAST();
 
   const [isLive, setIsLive] = useState(false);
 
@@ -96,11 +100,17 @@ export const SessionDetail = ({
       },
       operator: "and",
       right: {
-        request_response_rmt: {
-          request_created_at: {
-            gt: ThreeMonthsAgo,
+        left: {
+          request_response_rmt: {
+            request_created_at: {
+              gt: ThreeMonthsAgo,
+            },
           },
         },
+        operator: "and",
+        right: filterStore.store.filter
+          ? toFilterNode(filterStore.store.filter)
+          : "all",
       },
     },
     {
