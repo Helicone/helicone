@@ -29,6 +29,7 @@ import TreeView from "./Tree/TreeView";
 import { TagType } from "@/packages/common/sessions/tags";
 import Link from "next/link";
 import { SessionTag } from "../../feedback/sessionTag";
+import { FilterASTButton } from "@/filterAST/FilterASTButton";
 
 export const EMPTY_SESSION_NAME = "__unnamed_helicone_session__";
 
@@ -211,6 +212,8 @@ export const SessionContent: React.FC<SessionContentProps> = ({
                 </Select>
               )}
             </div>
+
+            <FilterASTButton />
 
             {/* Realtime session reconstruction warning) */}
             {containsRealtime && (
