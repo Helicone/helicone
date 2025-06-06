@@ -26,6 +26,8 @@ import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
 import { startConsumers, startSQSConsumers } from "./workers/consumerInterface";
 import { IS_ON_PREM } from "./constants/IS_ON_PREM";
+import { toExpressRequest } from "./utils/expressHelpers";
+import { webSocketControlPlaneServer } from "./controlPlane/controlPlane";
 
 if (ENVIRONMENT === "production" || process.env.ENABLE_CRON_JOB === "true") {
   runMainLoops();
@@ -218,51 +220,19 @@ const server = app.listen(port, "0.0.0.0", () => {
 });
 
 server.on("upgrade", async (req, socket, head) => {
-  // Only handle websocket upgrades for /v1/gateway/oai/realtime
-  if (!req.url?.startsWith("/v1/gateway/oai/realtime")) {
-    socket.destroy();
-    return;
-  }
-
-  const expressRequest: ExpressRequest = {
-    method: req.method!,
-    headers: req.headers!,
-    body: "{}",
-    get: function (this: { headers: any }, name: string) {
-      return this.headers[name];
-    },
-    header: function (this: { headers: any }, name: string) {
-      return this.headers[name];
-    },
-    is: function () {
-      return false;
-    },
-    protocol: "http",
-    secure: false,
-    ip: "::1",
-    ips: [],
-    subdomains: [],
-    hostname: "localhost",
-    host: "localhost",
-    fresh: false,
-    stale: true,
-    xhr: false,
-    cookies: {},
-    signedCookies: {},
-    query: {},
-    route: {},
-    originalUrl: req.url,
-    baseUrl: "",
-    next: function () {},
-  } as unknown as ExpressRequest;
-
   const { data: requestWrapper, error: requestWrapperErr } =
-    await RequestWrapper.create(expressRequest);
+    await RequestWrapper.create(toExpressRequest(req));
 
   if (requestWrapperErr || !requestWrapper) {
     throw new Error("Error creating request wrapper");
   }
-  webSocketProxyForwarder(requestWrapper, socket, head);
+  if (req.url?.startsWith("/v1/gateway/oai/realtime")) {
+    webSocketProxyForwarder(requestWrapper, socket, head);
+  } else if (req.url?.startsWith("/v1/gateway/oai/realtime/control-plane")) {
+    webSocketControlPlaneServer(requestWrapper, socket, head);
+  } else {
+    socket.destroy();
+  }
 });
 
 // ... existing code ...
