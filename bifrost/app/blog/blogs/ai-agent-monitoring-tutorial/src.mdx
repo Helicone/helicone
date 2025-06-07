@@ -52,7 +52,7 @@ In part 2, we'll show you how to add comprehensive monitoring to your AI agent w
 Our financial assistant does two things:
 
 1. Fetches real-time price information and news for specific tickers
-2. Uses RAG to answer questions about financial concepts
+2. Uses RAG to answer questions about company information
 
 The agent intelligently determines which approach to take for each query—a pattern applicable to many domains beyond finance, including customer support, healthcare, and legal applications.
 
@@ -104,16 +104,31 @@ const openai = new OpenAI({
 
 ### 3. RAG & External API access
 
-For popular financial term queries, we use a vector store to retrieve relevant information, while for stock queries, such as real-time price information or news, we connect to the Alpha Vantage API:
+For company information queries, we use a vector store to retrieve relevant information, while for stock queries, such as real-time price information or news, we connect to the Alpha Vantage API:
 
 ```javascript
-async function searchFinancialTerms(query, vectorStore) {
-  console.log("Searching for financial term definitions in knowledge base...");
+async function searchCompanyInfo(query, vectorStore) {
+  console.log("Searching for company information in knowledge base...");
   
   // Get relevant documents from vector store with similarity scores
   const resultsWithScores = await vectorStore.similaritySearchWithScore(query, 2);
-
-  // Process results... 
+    
+  // Check if we have relevant results with good similarity scores
+  if (resultsWithScores.length === 0 || resultsWithScores[0][1] < 0.9) {
+    console.log("No relevant company information found in the knowledge base.");
+    return {
+      found: false,
+      message: "No relevant company information found in the knowledge base."
+    };
+  }
+  
+  // Extract just the documents from the results for context
+  const relevantDocs = resultsWithScores.map(([doc]) => doc);
+  
+  return {
+    found: true,
+    documents: relevantDocs
+  };
 }
 ```
 
@@ -130,15 +145,13 @@ async function getStockData(ticker) {
 
 The RAG implementation provides domain-specific knowledge to the agent. However, as we'll see later, **without proper monitoring**, detecting what's causing the system to fail when it does might be difficult. 
 
-### 4. Minimal Agent Loop (Tool Calling)
+### 4. Agent Loop (Tool Calling)
 
 We expose three tools to the LLM:
 
 - `getStockData`: Retrieves current price and market information for a specific ticker
 - `getStockNews`: Fetches the latest news articles related to a stock ticker
-- `searchFinancialTerms`: Queries our vector database for information about financial concepts
-
-The LLM may call a tool, receive its output as feedback, and then answer the user.
+- `searchCompanyInfo`: Queries our vector database for information about company profiles
 
 The loop allows our agent to call tools and process results for as long as needed to generate an appropriate response:
 
@@ -198,30 +211,83 @@ Result:
 
 ![Example of a financial research assistant responding to the prompt 'What is Tesla's stock price?' displaying the stock information.](/static/blog/ai-agent-monitoring-tutorial/tesla-prompt.webp)
 
+> Prompt: What is the latest news on tesla?
+
+Result:
+
+```
+What would you like to know? What is the latest news on Tesla?
+
+Researching your question...
+Sending query to OpenAI...
+Executing getStockNews with args: { ticker: 'TSLA' }
+Sending query to OpenAI...
+
+Answer: Here are some of the latest news articles related to Tesla:
+
+...
+```
+
+As you can see, the first two queries work as expected—our agent successfully retrieves Tesla's stock price and latest news using the Alpha Vantage API.
+
+However, when we try other prompts, problems emerge:
+
+> Prompt: Who is Elon Musk?
+
+Result:
+
+```
+What would you like to know? Who is Elon Musk?
+
+Researching your question...
+Sending query to OpenAI...
+Executing searchCompanyInfo with args: { query: 'Elon Musk' }
+Searching for company information in knowledge base...
+No relevant company information found in the knowledge base.
+Sending query to OpenAI...
+
+Answer: Elon Musk is a well-known entrepreneur and business magnate. He is the founder, CEO, and lead designer of SpaceX; early investor, CEO, and product architect of Tesla, Inc.; founder of The Boring Company; co-founder of Neuralink; and co-founder and initial co-chairman of OpenAI. Musk is known for his ambitious vision for the future, including the colonization of Mars and the development of sustainable energy solutions on Earth.
+
+```
+
 > Prompt: What is GreenEnergy's profit margin?
 
 Result:
 
-![Example of an AI agent failing to retrieve information about GreenEnergy's profit margin despite having it in the knowledge base.](/static/blog/ai-agent-monitoring-tutorial/greenenergy-profit-margin.webp)
+```
+What would you like to know? What is GreenEnergy's profit margin?
 
-It looks like there's an issue with our agent!
+Researching your question...
+Sending query to OpenAI...
+Executing searchCompanyInfo with args: { query: 'GreenEnergy' }
+Searching for company information in knowledge base...
+No relevant company information found in the knowledge base.
+Sending query to OpenAI...
 
-It can't find the profit margin of GreenEnergy despite it being in our knowledge base.
+Answer: I couldn't find specific information on a company named GreenEnergy in the knowledge base. If you have a different company name or if there's any other specific information you need, feel free to let me know!
 
-Something is obviously wrong with our RAG implementation—but what?
+```
 
-This is where **observability** comes in!
+Even though GreenEnergy's profit margin (14%) is clearly **in our knowledge base**, the agent fails to retrieve it. 
+
+<BottomLine
+  title="The Challenge of Production Debugging 💡"
+  description="These issues might seem obvious since we're running locally with CLI access, but in a production environment with thousands of queries, spotting these patterns becomes nearly impossible without proper observability tools like Helicone."
+/>
 
 ## Debugging Our Financial Assistant 
 
 Looking at our implementation, there are several blind spots that could potentially cause issues:
 
 - **Hallucinations and retrieval issues**: Our agent failed to answer the query related to GreenEnergy despite having the requisite information—how do we pinpoint the problem?
+- **Inappropriate knowledge source selection**: The agent searched its internal knowledge base for information it already had.
 - **Cost Visibility**: How many tokens is each component of our agent consuming? Which queries are most expensive?
 - **Latency Issues**: If the agent becomes slow, which step is causing the bottleneck?
 - **Error Patterns**: Are certain types of queries consistently failing? Where in the pipeline do these failures occur?
 
-In <a href="https://www.helicone.ai/blog/ai-agent-monitoring-tutorial-part-2" target="_blank" rel="noopener">Part 2 of this tutorial</a> on AI agent optimization, we'll add Helicone to our financial assistant to gain comprehensive visibility into every step of the process. Here's a preview of what you can see:
+In <a href="https://www.helicone.ai/blog/ai-agent-monitoring-tutorial-part-2" target="_blank" rel="noopener">Part 2 of this tutorial</a> on AI agent optimization, we'll add Helicone to our financial assistant to gain comprehensive visibility into every step of the process. 
+
+Here's a preview of what you can see:
 
 ![Helicone dashboard showcasing the Sessions feature for debugging AI agents, demonstrating AI observability and agent monitoring capabilities.](/static/blog/ai-agent-monitoring-tutorial/sessions-ai-agent.webp)
 
@@ -253,7 +319,7 @@ Stay tuned!
     },
     {
       question: "What are the biggest blind spots when deploying AI agents to production?",
-      answer: "The most dangerous blind spots include: undetected hallucinations in responses, hidden cost escalations from inefficient prompts, silent failures in multi-step reasoning chains, data leakage in RAG implementations, inconsistent performance across different user segments, and degrading accuracy over time as data or usage patterns change. Without proper observability, these issues can persist for weeks before being discovered, potentially causing significant business impact."
+      answer: "The most dangerous blind spots include: RAG threshold issues causing information retrieval failures, inappropriate knowledge source selection leading to hallucinations, hidden cost escalations from inefficient prompts, silent failures in multi-step reasoning chains, inconsistent performance across different user segments, and degrading accuracy over time as data or usage patterns change. Without proper observability, these issues can persist for weeks before being discovered, potentially causing significant business impact."
     },
     {
       question: "What metrics should I monitor for any AI agent?",
