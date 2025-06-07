@@ -146,7 +146,8 @@ impl LoggerService {
         let _helicone_response = self
             .app_state
             .0
-            .jawn_client
+            .jawn_http_client
+            .request_client
             .post(helicone_url)
             .json(&log_message)
             .header(

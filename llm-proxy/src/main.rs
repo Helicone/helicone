@@ -4,6 +4,7 @@ use clap::Parser;
 use llm_proxy::{
     app::App,
     config::Config,
+    control_plane::websocket::ControlPlaneClient,
     discover::monitor::health::provider::HealthMonitor,
     error::{init::InitError, runtime::RuntimeError},
     metrics::system::SystemMetrics,
@@ -40,6 +41,7 @@ async fn main() -> Result<(), RuntimeError> {
         telemetry::init_telemetry(&config.telemetry)
             .map_err(InitError::Telemetry)
             .map_err(RuntimeError::Init)?;
+    let ws_url = &config.helicone.websocket_url.to_string();
 
     info!("telemetry initialized");
     let mut shutting_down = false;
@@ -66,6 +68,10 @@ async fn main() -> Result<(), RuntimeError> {
         .register(TaggedService::new(
             "rate-limiting-cleanup",
             rate_limiting_cleanup_service,
+        ))
+        .register(TaggedService::new(
+            "control-plane-client",
+            ControlPlaneClient::connect(ws_url).await?,
         ));
 
     while let Some((service, result)) = meltdown.next().await {

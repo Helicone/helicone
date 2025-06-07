@@ -30,7 +30,8 @@ impl AuthService {
     ) -> Result<AuthContext, AuthError> {
         let whoami_result = app_state
             .0
-            .jawn_client
+            .jawn_http_client
+            .request_client
             .get(whoami_url(&app_state))
             .header("authorization", api_key)
             .send()

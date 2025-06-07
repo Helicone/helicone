@@ -63,6 +63,7 @@ telemetry = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
 tokio-stream = { workspace = true, features = ['sync'] }
+tokio-tungstenite = { workspace = true }
 tokio-util = { workspace = true }
 tower = { workspace = true, features = ['full']}
 tower_governor = { workspace = true, features = [] }
@@ -77,9 +78,11 @@ utoipa = { workspace = true }
 uuid = { workspace = true, features = ["serde", "v7"] }
 weighted-balance = { workspace = true }
 workspace_root = { workspace = true, optional = true }
+ts-rs = "11.0.1"
 
 [dev-dependencies]
 pretty_assertions = { workspace = true }
+ts-rs = "11.0.1"
 
 [features]
 default = []

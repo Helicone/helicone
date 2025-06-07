@@ -19,4 +19,6 @@ pub enum RuntimeError {
     Telemetry(#[from] TelemetryError),
     /// Failed to send on channel
     ChannelSendFailed,
+    /// Failed to send on websocket due to mutex poison
+    WebsocketMutexLock,
 }

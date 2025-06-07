@@ -917,8 +917,7 @@ mod tests {
         } else {
             panic!(
                 "Expected InvalidModelName error for OpenAI format on \
-                 Bedrock, got: {:?}",
-                result
+                 Bedrock, got: {result:?}"
             );
         }
     }

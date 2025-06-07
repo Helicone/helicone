@@ -43,4 +43,8 @@ pub enum InitError {
     InitSystemMetrics,
     /// Invalid rate limit config: {0}
     InvalidRateLimitConfig(&'static str),
+    /// Failed to connect to websocket: {0}
+    WebsocketConnection(#[from] Box<tokio_tungstenite::tungstenite::Error>),
+    /// URL parsing error: {0}
+    WebsocketUrlParse(#[from] url::ParseError),
 }
