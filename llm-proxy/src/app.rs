@@ -72,6 +72,9 @@ pub type BoxedHyperServiceStack = BoxCloneService<
     Infallible,
 >;
 
+#[derive(Debug, Clone)]
+pub struct AppState(pub Arc<InnerAppState>);
+
 #[derive(Debug)]
 pub struct JawnClient {
     pub request_client: Client,
