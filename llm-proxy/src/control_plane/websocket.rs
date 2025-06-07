@@ -52,7 +52,7 @@ async fn connect_async_and_split(
 ) -> Result<WebsocketChannel, InitError> {
     let (tx, rx) = connect_async(url)
         .await
-        .map_err(InitError::WebsocketConnection)?
+        .map_err(|e| InitError::WebsocketConnection(Box::new(e)))?
         .0
         .split();
 

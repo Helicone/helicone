@@ -79,8 +79,7 @@ pub struct JawnClient {
 }
 
 impl JawnClient {
-    #[must_use]
-    pub async fn new() -> Result<Self, error::init::InitError> {
+    pub fn new() -> Result<Self, error::init::InitError> {
         Ok(Self {
             request_client: Client::builder()
                 .tcp_nodelay(true)
@@ -221,7 +220,7 @@ impl App {
         tracing::info!(config = ?config, "creating app");
         let minio = Minio::new(config.minio.clone())?;
 
-        let jawn_client = JawnClient::new().await?;
+        let jawn_client = JawnClient::new()?;
 
         // If global meter is not set, opentelemetry defaults to a
         // NoopMeterProvider
