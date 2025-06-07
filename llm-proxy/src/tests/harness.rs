@@ -23,12 +23,14 @@ pub struct HarnessBuilder {
 }
 
 impl HarnessBuilder {
-    #[must_use] pub fn with_mock_args(mut self, mock_args: MockArgs) -> Self {
+    #[must_use]
+    pub fn with_mock_args(mut self, mock_args: MockArgs) -> Self {
         self.mock_args = Some(mock_args);
         self
     }
 
-    #[must_use] pub fn with_config(mut self, config: Config) -> Self {
+    #[must_use]
+    pub fn with_config(mut self, config: Config) -> Self {
         self.config = Some(config);
         self
     }
@@ -61,7 +63,8 @@ impl Harness {
         }
     }
 
-    #[must_use] pub fn builder() -> HarnessBuilder {
+    #[must_use]
+    pub fn builder() -> HarnessBuilder {
         HarnessBuilder::default()
     }
 }

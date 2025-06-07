@@ -143,7 +143,8 @@ impl crate::tests::TestDefault for TopLevelRateLimitConfig {
 }
 
 #[cfg(feature = "testing")]
-#[must_use] pub fn enabled_for_test_in_memory() -> TopLevelRateLimitConfig {
+#[must_use]
+pub fn enabled_for_test_in_memory() -> TopLevelRateLimitConfig {
     use crate::tests::TestDefault;
     TopLevelRateLimitConfig::Global {
         store: RateLimitStore::InMemory,

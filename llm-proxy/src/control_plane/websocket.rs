@@ -1,10 +1,11 @@
+use std::{sync::Arc, time::Duration};
+
 use futures::{
     SinkExt, StreamExt,
     future::BoxFuture,
     stream::{SplitSink, SplitStream},
 };
 use meltdown::Token;
-use std::{sync::Arc, time::Duration};
 use tokio::{net::TcpStream, sync::Mutex};
 use tokio_tungstenite::{
     MaybeTlsStream, WebSocketStream, connect_async,
@@ -144,11 +145,13 @@ impl meltdown::Service for ControlPlaneClient {
 
 #[cfg(test)]
 mod tests {
-    use super::ControlPlaneClient;
-    use crate::control_plane::types::MessageTypeTX;
     use std::time::Duration;
+
     use tokio::net::TcpListener;
     use tokio_tungstenite::accept_async;
+
+    use super::ControlPlaneClient;
+    use crate::control_plane::types::MessageTypeTX;
 
     #[tokio::test]
     async fn test_mock_server_connection() {
