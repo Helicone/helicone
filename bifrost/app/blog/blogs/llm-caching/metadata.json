@@ -1,0 +1,11 @@
+{
+  "title": "Effective LLM Caching Strategies to Optimize Performance",
+  "title1": "Effective LLM Caching Strategies to Optimize Performance",
+  "title2": "Effective LLM Caching Strategies to Optimize Performance",
+  "description": "Learn how to optimize LLM performance using various caching strategies, from KV-caches to semantic caching. Explore best practices and tools for implementation.",
+  "images": "/static/blog/llm-caching/llm-caching-strategy-cover.png",
+  "time": "15 minute read",
+  "author": "Lina Lam",
+  "date": "January 23, 2025",
+  "badge": "how-to"
+}
