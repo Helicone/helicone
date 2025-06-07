@@ -17,20 +17,25 @@ use super::{
     control_plane_state::ControlPlaneState,
     types::{MessageTypeRX, MessageTypeTX},
 };
-use crate::error::{init::InitError, runtime::RuntimeError};
+use crate::{
+    config::helicone::HeliconeConfig,
+    error::{init::InitError, runtime::RuntimeError},
+};
 type TlsWebSocketStream = WebSocketStream<MaybeTlsStream<TcpStream>>;
 
 #[derive(Debug)]
 pub struct WebsocketChannel {
-    msg_tx: Arc<Mutex<SplitSink<TlsWebSocketStream, Message>>>,
-    msg_rx: Arc<Mutex<SplitStream<TlsWebSocketStream>>>,
+    msg_tx: SplitSink<TlsWebSocketStream, Message>,
+    msg_rx: SplitStream<TlsWebSocketStream>,
 }
 
 #[derive(Debug)]
 pub struct ControlPlaneClient {
     pub state: Arc<Mutex<ControlPlaneState>>,
     channel: WebsocketChannel,
-    url: Url,
+    /// Config about Control plane, such as the websocket url,
+    /// reconnect interval/backoff policy, heartbeat interval, etc.
+    config: HeliconeConfig,
 }
 
 async fn handle_message(
@@ -40,7 +45,7 @@ async fn handle_message(
     let bytes = message.into_data();
     let m: MessageTypeRX = serde_json::from_slice(&bytes)?;
 
-    tracing::info!("Received message: {:?}", m);
+    tracing::info!(message = ?m, "received message from control plane");
     let mut state_guard = state.lock().await;
     state_guard.update(m);
 
@@ -48,7 +53,7 @@ async fn handle_message(
 }
 
 async fn connect_async_and_split(
-    url: &str,
+    url: &Url,
 ) -> Result<WebsocketChannel, InitError> {
     let (tx, rx) = connect_async(url)
         .await
@@ -57,25 +62,30 @@ async fn connect_async_and_split(
         .split();
 
     Ok(WebsocketChannel {
-        msg_tx: Arc::new(Mutex::new(tx)),
-        msg_rx: Arc::new(Mutex::new(rx)),
+        msg_tx: tx,
+        msg_rx: rx,
     })
 }
 
 impl ControlPlaneClient {
     async fn reconnect_websocket(&mut self) -> Result<(), InitError> {
-        let channel = connect_async_and_split(self.url.as_str()).await?;
+        // TODO: add retries w/ exponential backoff
+        // https://crates.io/crates/backon
+        let channel =
+            connect_async_and_split(&self.config.websocket_url).await?;
         self.channel = channel;
+        tracing::info!("Successfully reconnected to control plane");
         Ok(())
     }
 
-    pub async fn connect(url: &str) -> Result<Self, InitError> {
-        let url = Url::parse(url).map_err(InitError::WebsocketUrlParse)?;
-
+    pub async fn connect(
+        control_plane_state: Arc<Mutex<ControlPlaneState>>,
+        config: HeliconeConfig,
+    ) -> Result<Self, InitError> {
         Ok(Self {
-            channel: connect_async_and_split(url.as_str()).await?,
-            url,
-            state: Arc::new(Mutex::new(ControlPlaneState::default())),
+            channel: connect_async_and_split(&config.websocket_url).await?,
+            config,
+            state: control_plane_state,
         })
     }
 
@@ -85,20 +95,17 @@ impl ControlPlaneClient {
     ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         let bytes = serde_json::to_vec(&m)?;
         let message = Message::Binary(bytes);
-        let mut msg_tx = self.channel.msg_tx.lock().await;
 
-        match msg_tx.send(message).await {
+        match self.channel.msg_tx.send(message).await {
             Ok(()) => (),
             Err(tungstenite::Error::AlreadyClosed) => {
-                tracing::error!("Connection closed");
-                drop(msg_tx); // Explicitly drop the guard before calling reconnect
+                tracing::error!("websocket connection closed, reconnecting...");
                 self.reconnect_websocket().await?;
             }
             Err(e) => {
-                tracing::error!("Error: {}", e);
+                tracing::error!(error = %e, "websocket error");
             }
         }
-        // msg_tx automatically unlocks when it goes out of scope here
 
         Ok(())
     }
@@ -112,23 +119,25 @@ impl meltdown::Service for ControlPlaneClient {
 
         Box::pin(async move {
             loop {
-                while let Some(message) =
-                    self.channel.msg_rx.lock().await.next().await
-                {
+                while let Some(message) = self.channel.msg_rx.next().await {
                     match message {
                         Ok(message) => {
                             let _ = handle_message(&state_clone, message)
                                 .await
                                 .map_err(|e| {
-                                    tracing::error!("Error: {}", e);
+                                    tracing::error!(error = ?e, "websocket error");
                                 });
                         }
                         Err(tungstenite::Error::AlreadyClosed) => {
-                            tracing::error!("Connection closed");
-                            break;
+                            tracing::error!(
+                                "websocket connection closed, reconnecting..."
+                            );
+                            self.reconnect_websocket()
+                                .await
+                                .map_err(RuntimeError::Init)?;
                         }
                         Err(e) => {
-                            tracing::error!("Error: {}", e);
+                            tracing::error!(error = ?e, "websocket error");
                         }
                     }
                 }
@@ -151,7 +160,9 @@ mod tests {
     use tokio_tungstenite::accept_async;
 
     use super::ControlPlaneClient;
-    use crate::control_plane::types::MessageTypeTX;
+    use crate::{
+        config::helicone::HeliconeConfig, control_plane::types::MessageTypeTX,
+    };
 
     #[tokio::test]
     async fn test_mock_server_connection() {
@@ -159,6 +170,8 @@ mod tests {
         let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
         let addr = listener.local_addr().unwrap();
         let ws_url = format!("ws://{addr}");
+        let mut helicone_config = HeliconeConfig::default();
+        helicone_config.websocket_url = ws_url.parse().unwrap();
 
         // Spawn mock server that just accepts connections
         tokio::spawn(async move {
@@ -171,16 +184,20 @@ mod tests {
         tokio::time::sleep(Duration::from_millis(50)).await;
 
         // Test connection
-        let result = ControlPlaneClient::connect(&ws_url).await;
+        let result =
+            ControlPlaneClient::connect(Default::default(), helicone_config)
+                .await;
         assert!(result.is_ok(), "Should connect to mock server");
     }
 
     #[tokio::test]
     async fn test_integration_localhost_8585() {
-        let ws_url = "ws://localhost:8585/ws/v1/router/control-plane";
+        let helicone_config = HeliconeConfig::default();
 
         // This will fail if no server is running on 8585, which is expected
-        let result = ControlPlaneClient::connect(ws_url).await;
+        let result =
+            ControlPlaneClient::connect(Default::default(), helicone_config)
+                .await;
 
         if let Ok(mut client) = result {
             // If we can connect, try sending a heartbeat

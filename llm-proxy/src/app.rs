@@ -4,14 +4,12 @@ use std::{
     net::SocketAddr,
     sync::Arc,
     task::{Context, Poll},
-    time::Duration,
 };
 
 use axum_server::{accept::NoDelayAcceptor, tls_rustls::RustlsConfig};
 use futures::future::BoxFuture;
 use meltdown::Token;
 use opentelemetry::global;
-use reqwest::Client;
 use rustc_hash::FxHashMap as HashMap;
 use telemetry::{make_span::SpanFactory, tracing::MakeRequestId};
 use tokio::sync::{Mutex, RwLock};
@@ -34,6 +32,7 @@ use crate::{
         EndpointMetricsRegistry, provider::HealthMonitorMap,
     },
     error::{self, init::InitError, runtime::RuntimeError},
+    logger::service::JawnClient,
     metrics::{self, Metrics, attribute_extractor::AttributeExtractor},
     middleware::{
         auth::AuthService, rate_limit::service::Layer as RateLimitLayer,
@@ -45,7 +44,6 @@ use crate::{
 };
 
 const BUFFER_SIZE: usize = 1024;
-const JAWN_CONNECT_TIMEOUT: Duration = Duration::from_secs(10);
 const SERVICE_NAME: &str = "helicone-router";
 
 pub type AppResponseBody = tower_http::body::UnsyncBoxBody<
@@ -73,23 +71,6 @@ pub type BoxedHyperServiceStack = BoxCloneService<
 #[derive(Debug, Clone)]
 pub struct AppState(pub Arc<InnerAppState>);
 
-#[derive(Debug)]
-pub struct JawnClient {
-    pub request_client: Client,
-}
-
-impl JawnClient {
-    pub fn new() -> Result<Self, error::init::InitError> {
-        Ok(Self {
-            request_client: Client::builder()
-                .tcp_nodelay(true)
-                .connect_timeout(JAWN_CONNECT_TIMEOUT)
-                .build()
-                .map_err(error::init::InitError::CreateReqwestClient)?,
-        })
-    }
-}
-
 impl AppState {
     #[must_use]
     pub fn response_headers_config(&self) -> ResponseHeadersConfig {
@@ -102,7 +83,7 @@ pub struct InnerAppState {
     pub config: Config,
     pub minio: Minio,
     pub jawn_http_client: JawnClient,
-    pub jawn_client: Arc<Mutex<ControlPlaneState>>,
+    pub control_plane_state: Arc<Mutex<ControlPlaneState>>,
     pub provider_keys: RwLock<HashMap<RouterId, ProviderKeys>>,
     pub global_rate_limit: Option<Arc<RateLimiterConfig>>,
     pub router_rate_limits: RwLock<HashMap<RouterId, Arc<RateLimiterConfig>>>,
@@ -220,7 +201,7 @@ impl App {
         tracing::info!(config = ?config, "creating app");
         let minio = Minio::new(config.minio.clone())?;
 
-        let jawn_client = JawnClient::new()?;
+        let jawn_http_client = JawnClient::new()?;
 
         // If global meter is not set, opentelemetry defaults to a
         // NoopMeterProvider
@@ -235,8 +216,10 @@ impl App {
         let app_state = AppState(Arc::new(InnerAppState {
             config,
             minio,
-            jawn_http_client: jawn_client,
-            jawn_client: Arc::new(Mutex::new(ControlPlaneState::default())),
+            jawn_http_client,
+            control_plane_state: Arc::new(Mutex::new(
+                ControlPlaneState::default(),
+            )),
             provider_keys: RwLock::new(HashMap::default()),
             global_rate_limit,
             router_rate_limits: RwLock::new(HashMap::default()),

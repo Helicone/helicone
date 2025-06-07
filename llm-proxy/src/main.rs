@@ -41,12 +41,13 @@ async fn main() -> Result<(), RuntimeError> {
         telemetry::init_telemetry(&config.telemetry)
             .map_err(InitError::Telemetry)
             .map_err(RuntimeError::Init)?;
-    let ws_url = &config.helicone.websocket_url.to_string();
 
     info!("telemetry initialized");
     let mut shutting_down = false;
+    let helicone_config = config.helicone.clone();
     let app = App::new(config).await?;
     let health_monitor = HealthMonitor::new(app.state.clone());
+    let control_plane_state = app.state.0.control_plane_state.clone();
 
     let rate_limiting_cleanup_service =
         rate_limit::cleanup::GarbageCollector::new(
@@ -71,7 +72,8 @@ async fn main() -> Result<(), RuntimeError> {
         ))
         .register(TaggedService::new(
             "control-plane-client",
-            ControlPlaneClient::connect(ws_url).await?,
+            ControlPlaneClient::connect(control_plane_state, helicone_config)
+                .await?,
         ));
 
     while let Some((service, result)) = meltdown.next().await {
