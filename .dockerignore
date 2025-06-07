@@ -12,6 +12,7 @@ node_modules/
 # Exclude git files
 .git/
 .gitignore
+.cargo-husky/
 
 # Exclude temporary files
 **/*.tmp

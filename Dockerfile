@@ -17,7 +17,7 @@ RUN cargo build --release -p llm-proxy
 
 # We do not need the Rust toolchain to run the binary!
 FROM debian:bookworm-slim AS runtime
-RUN apt-get update && apt install -y openssl && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt install -y openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY --from=builder /app/target/release/llm-proxy /usr/local/bin
 CMD ["/usr/local/bin/llm-proxy"]

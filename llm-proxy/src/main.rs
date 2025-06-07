@@ -55,11 +55,20 @@ async fn main() -> Result<(), RuntimeError> {
             app.state.0.config.rate_limit.cleanup_interval(),
         );
 
-    let mut meltdown = Meltdown::new()
-        .register(TaggedService::new(
-            "shutdown-signals",
-            llm_proxy::utils::meltdown::wait_for_shutdown_signals,
-        ))
+    let mut meltdown = Meltdown::new().register(TaggedService::new(
+        "shutdown-signals",
+        llm_proxy::utils::meltdown::wait_for_shutdown_signals,
+    ));
+
+    if app.state.0.config.auth.require_auth {
+        meltdown = meltdown.register(TaggedService::new(
+            "control-plane-client",
+            ControlPlaneClient::connect(control_plane_state, helicone_config)
+                .await?,
+        ));
+    }
+
+    meltdown = meltdown
         .register(TaggedService::new("proxy", app))
         .register(TaggedService::new(
             "provider-health-monitor",
@@ -69,11 +78,6 @@ async fn main() -> Result<(), RuntimeError> {
         .register(TaggedService::new(
             "rate-limiting-cleanup",
             rate_limiting_cleanup_service,
-        ))
-        .register(TaggedService::new(
-            "control-plane-client",
-            ControlPlaneClient::connect(control_plane_state, helicone_config)
-                .await?,
         ));
 
     while let Some((service, result)) = meltdown.next().await {

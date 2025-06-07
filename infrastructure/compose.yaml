@@ -9,7 +9,8 @@ services:
   # collects traces, metrics, logs
   # then exports to tempo, prometheus, loki
   otelcol:
-    image: otel/opentelemetry-collector:0.108.0
+    image: otel/opentelemetry-collector:0.127.0
+    restart: unless-stopped
     command:
       - --config=/etc/config.yaml
     volumes:
@@ -20,7 +21,8 @@ services:
       - traces
 
   prometheus:
-    image: prom/prometheus:v3.3.1
+    image: prom/prometheus:v3.4.1
+    restart: unless-stopped
     command:
       - --config.file=/etc/config.yaml
       - --web.enable-remote-write-receiver
@@ -36,7 +38,8 @@ services:
       - host.docker.internal:host-gateway
 
   tempo:
-    image: grafana/tempo:2.5.0
+    image: grafana/tempo:2.7.2
+    restart: unless-stopped
     command:
       - -config.file=/etc/tempo.yaml
     volumes:
@@ -45,7 +48,8 @@ services:
       - traces
 
   loki:
-    image: grafana/loki:3.0.0
+    image: grafana/loki:3.5.0
+    restart: unless-stopped
     command:
       - -config.file=/etc/loki.yaml
     volumes:
@@ -56,7 +60,8 @@ services:
       - 3100:3100
 
   grafana:
-    image: grafana/grafana:11.2.0
+    image: grafana/grafana:12.0.1
+    restart: unless-stopped
     volumes:
       - ./grafana/datasources-local.yaml:/etc/grafana/provisioning/datasources/datasources.yaml:ro
       - ./grafana/config-local.yaml:/etc/grafana/grafana.ini:ro
@@ -70,10 +75,37 @@ services:
       - traces
 
   redis:
-    image: redis:6.2.6-alpine
-    restart: always
+    image: redis:8.0.2-alpine
+    restart: unless-stopped
     ports:
       - '6379:6379'
     environment:
       - REDIS_PASSWORD=helicone-redis-pw
       - REDIS_PORT=6379
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  helix:
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - '5678:5678'
+    profiles: ["include-helix"]
+    depends_on:
+      redis:
+        condition: service_healthy
+    env_file: "../.env"
+    environment:
+      # Configure server to bind to all interfaces (0.0.0.0) instead of localhost (127.0.0.1)
+      - PROXY__SERVER__ADDRESS=0.0.0.0
+    networks:
+      - traces
+      - default
+    extra_hosts:
+      - host.docker.internal:host-gateway
