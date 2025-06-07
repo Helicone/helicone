@@ -106,7 +106,7 @@ impl ControlPlaneClient {
 impl meltdown::Service for ControlPlaneClient {
     type Future = BoxFuture<'static, Result<(), RuntimeError>>;
 
-    fn run(mut self, token: Token) -> Self::Future {
+    fn run(mut self, _token: Token) -> Self::Future {
         let state_clone = Arc::clone(&self.state);
 
         Box::pin(async move {
