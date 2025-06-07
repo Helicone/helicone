@@ -16,7 +16,7 @@ pub struct ControlPlaneClient {
     pub state: Arc<Mutex<ControlPlaneState>>,
     msg_tx:
         Option<SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>>,
-    url: String,
+    url: Url,
 }
 
 fn handle_message(
