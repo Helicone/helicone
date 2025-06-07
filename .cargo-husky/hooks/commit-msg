@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+# Path to the temporary file that holds the commit message
+commit_msg_file="$1"
+
+# Read only the first line of the commit message
+first_line="$(head -n1 "$commit_msg_file")"
+
+# Conventional Commit regex (case-insensitive):
+#   type(scope)?(!)?: subject
+# Types: build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test
+pattern='^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([[:alnum:]\_\-]+\))?(!)?: .{1,80}$'
+
+if ! echo "$first_line" | grep -Eqi "$pattern"; then
+  cat <<-EOF >&2
+
+  ✘ Aborting commit.
+  Your commit message's first line must follow Conventional Commits:
+
+      <type>(<scope>)?: <subject>
+
+  • type: one of build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test  
+  • scope: optional, alphanumeric/hyphen/underscore  
+  • subject: 1–80 characters  
+
+  Example: "feat(parser): support unicode identifiers"
+EOF
+  exit 1
+fi
+
+exit 0

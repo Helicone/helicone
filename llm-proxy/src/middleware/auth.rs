@@ -130,7 +130,7 @@ fn whoami_url(app_state: &AppState) -> Url {
         .expect("helicone base url should be valid")
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "testing"))]
 mod tests {
     use super::*;
     use crate::{app::App, config::Config, tests::TestDefault};

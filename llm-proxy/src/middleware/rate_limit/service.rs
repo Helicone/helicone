@@ -199,7 +199,7 @@ where
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "testing"))]
 mod tests {
     use std::{num::NonZeroU32, time::Duration};
 
