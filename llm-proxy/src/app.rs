@@ -116,6 +116,7 @@ pub struct InnerAppState {
     pub config: Config,
     pub minio: Minio,
     pub jawn_client: JawnClient,
+    pub control_plane: Arc<Mutex<ControlPlaneState>>,
     pub provider_keys: RwLock<HashMap<RouterId, ProviderKeys>>,
     pub global_rate_limit: Option<Arc<RateLimiterConfig>>,
     pub router_rate_limits: RwLock<HashMap<RouterId, Arc<RateLimiterConfig>>>,
