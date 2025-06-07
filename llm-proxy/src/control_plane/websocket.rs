@@ -9,9 +9,10 @@ use meltdown::Token;
 use tokio::{net::TcpStream, sync::Mutex};
 use tokio_tungstenite::{
     MaybeTlsStream, WebSocketStream, connect_async,
-    tungstenite::{self, Message},
+    tungstenite::{
+        self, Message, client::IntoClientRequest, handshake::client::Request,
+    },
 };
-use url::Url;
 
 use super::{
     control_plane_state::ControlPlaneState,
@@ -52,10 +53,47 @@ async fn handle_message(
     Ok(())
 }
 
+impl IntoClientRequest for &HeliconeConfig {
+    fn into_client_request(
+        self,
+    ) -> Result<Request, tokio_tungstenite::tungstenite::Error> {
+        let host = self.websocket_url.host_str().ok_or({
+            tokio_tungstenite::tungstenite::Error::Url(
+                tungstenite::error::UrlError::UnsupportedUrlScheme,
+            )
+        })?;
+        let port = self
+            .websocket_url
+            .port()
+            .map(|p| format!(":{p}"))
+            .unwrap_or_default();
+        let host_header = format!("{host}{port}");
+
+        Request::builder()
+            .uri(self.websocket_url.as_str())
+            .header("Host", host_header)
+            .header("Authorization", format!("Bearer {}", self.api_key.0))
+            .header("Connection", "Upgrade")
+            .header("Upgrade", "websocket")
+            .header("Sec-WebSocket-Version", "13")
+            .header(
+                "Sec-WebSocket-Key",
+                tokio_tungstenite::tungstenite::handshake::client::generate_key(
+                ),
+            )
+            .body(())
+            .map_err(|_| {
+                tokio_tungstenite::tungstenite::Error::Url(
+                    tungstenite::error::UrlError::UnsupportedUrlScheme,
+                )
+            })
+    }
+}
+
 async fn connect_async_and_split(
-    url: &Url,
+    helicone_config: &HeliconeConfig,
 ) -> Result<WebsocketChannel, InitError> {
-    let (tx, rx) = connect_async(url)
+    let (tx, rx) = connect_async(helicone_config)
         .await
         .map_err(|e| InitError::WebsocketConnection(Box::new(e)))?
         .0
@@ -71,8 +109,7 @@ impl ControlPlaneClient {
     async fn reconnect_websocket(&mut self) -> Result<(), InitError> {
         // TODO: add retries w/ exponential backoff
         // https://crates.io/crates/backon
-        let channel =
-            connect_async_and_split(&self.config.websocket_url).await?;
+        let channel = connect_async_and_split(&self.config).await?;
         self.channel = channel;
         tracing::info!("Successfully reconnected to control plane");
         Ok(())
@@ -83,7 +120,7 @@ impl ControlPlaneClient {
         config: HeliconeConfig,
     ) -> Result<Self, InitError> {
         Ok(Self {
-            channel: connect_async_and_split(&config.websocket_url).await?,
+            channel: connect_async_and_split(&config).await?,
             config,
             state: control_plane_state,
         })

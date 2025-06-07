@@ -52,4 +52,6 @@ pub enum InitError {
     WebsocketUrlParse(#[from] url::ParseError),
     /// Rate limit channels not initialized for router: {0}
     RateLimitChannelsNotInitialized(RouterId),
+    /// Failed to build websocket request: {0}
+    WebsocketRequestBuild(#[from] http::Error),
 }
