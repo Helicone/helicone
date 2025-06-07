@@ -113,7 +113,6 @@ pub struct InnerAppState {
     pub config: Config,
     pub minio: Minio,
     pub jawn_client: JawnClient,
-    pub redis: Option<r2d2::Pool<redis::Client>>,
     pub provider_keys: RwLock<HashMap<RouterId, ProviderKeys>>,
     pub global_rate_limit: Option<Arc<RateLimiterConfig>>,
     pub router_rate_limits: RwLock<HashMap<RouterId, Arc<RateLimiterConfig>>>,
@@ -123,9 +122,6 @@ pub struct InnerAppState {
     pub endpoint_metrics: EndpointMetricsRegistry,
     pub health_monitor: HealthMonitorMap,
 }
-
-#[derive(Debug, Clone)]
-pub struct AppState(pub Arc<InnerAppState>);
 
 /// The top level app used to start the hyper server.
 /// The middleware stack is as follows:
