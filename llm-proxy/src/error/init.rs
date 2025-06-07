@@ -44,5 +44,5 @@ pub enum InitError {
     /// Invalid rate limit config: {0}
     InvalidRateLimitConfig(&'static str),
     /// Failed to connect to websocket: {0}
-    WebsocketConnection(Box<dyn std::error::Error + Send + Sync>),
+    WebsocketConnection(tungstenite::Error),
 }
