@@ -16,7 +16,9 @@ impl Default for HeliconeConfig {
         Self {
             api_key: Secret("sk-helicone-...".to_string()),
             base_url: "http://localhost:8585".parse().unwrap(),
-            websocket_url: "ws://localhost:8585".parse().unwrap(),
+            websocket_url: "ws://localhost:8585/ws/v1/router/control-plane"
+                .parse()
+                .unwrap(),
         }
     }
 }

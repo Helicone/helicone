@@ -1,25 +1,38 @@
-use futures::{SinkExt, StreamExt, stream::SplitSink};
-use std::sync::{Arc, Mutex};
-use tokio::net::TcpStream;
+use futures::{
+    SinkExt, StreamExt,
+    future::BoxFuture,
+    stream::{SplitSink, SplitStream},
+};
+use meltdown::Token;
+use std::{sync::Arc, time::Duration};
+use tokio::{net::TcpStream, sync::Mutex};
 use tokio_tungstenite::{
     MaybeTlsStream, WebSocketStream, connect_async,
     tungstenite::{self, Message},
 };
+use url::Url;
 
 use super::{
     control_plane_state::ControlPlaneState,
     types::{MessageTypeRX, MessageTypeTX},
 };
+use crate::error::{init::InitError, runtime::RuntimeError};
+type TlsWebSocketStream = WebSocketStream<MaybeTlsStream<TcpStream>>;
+
+#[derive(Debug)]
+pub struct WebsocketChannel {
+    msg_tx: Arc<Mutex<SplitSink<TlsWebSocketStream, Message>>>,
+    msg_rx: Arc<Mutex<SplitStream<TlsWebSocketStream>>>,
+}
 
 #[derive(Debug)]
 pub struct ControlPlaneClient {
     pub state: Arc<Mutex<ControlPlaneState>>,
-    msg_tx:
-        Option<SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>>,
+    channel: WebsocketChannel,
     url: Url,
 }
 
-fn handle_message(
+async fn handle_message(
     state: &Arc<Mutex<ControlPlaneState>>,
     message: Message,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
@@ -27,55 +40,42 @@ fn handle_message(
     let m: MessageTypeRX = serde_json::from_slice(&bytes)?;
 
     tracing::info!("Received message: {:?}", m);
-    if let Ok(mut state_guard) = state.lock() {
-        state_guard.update(m);
-    }
+    let mut state_guard = state.lock().await;
+    state_guard.update(m);
 
     Ok(())
 }
 
+async fn connect_async_and_split(
+    url: &str,
+) -> Result<WebsocketChannel, InitError> {
+    let (tx, rx) = connect_async(url)
+        .await
+        .map_err(InitError::WebsocketConnection)?
+        .0
+        .split();
+
+    Ok(WebsocketChannel {
+        msg_tx: Arc::new(Mutex::new(tx)),
+        msg_rx: Arc::new(Mutex::new(rx)),
+    })
+}
+
 impl ControlPlaneClient {
-    async fn reconnect_websocket(
-        &mut self,
-    ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-        let (tx, mut rx) = connect_async(&self.url).await?.0.split();
-        let state_clone = Arc::clone(&self.state);
-
-        tokio::spawn(async move {
-            while let Some(message) = rx.next().await {
-                match message {
-                    Ok(message) => {
-                        let _ = handle_message(&state_clone, message).map_err(
-                            |e| {
-                                tracing::error!("Error: {}", e);
-                            },
-                        );
-                    }
-                    Err(tungstenite::Error::AlreadyClosed) => {
-                        tracing::error!("Connection closed");
-                        break;
-                    }
-                    Err(e) => {
-                        tracing::error!("Error: {}", e);
-                    }
-                }
-            }
-        });
-
-        self.msg_tx = Some(tx);
+    async fn reconnect_websocket(&mut self) -> Result<(), InitError> {
+        let channel = connect_async_and_split(self.url.as_str()).await?;
+        self.channel = channel;
         Ok(())
     }
 
-    pub async fn connect(
-        url: &str,
-    ) -> Result<Self, Box<dyn std::error::Error + Send + Sync>> {
-        let mut client = Self {
-            url: url.to_string(),
+    pub async fn connect(url: &str) -> Result<Self, InitError> {
+        let url = Url::parse(url).map_err(InitError::WebsocketUrlParse)?;
+
+        Ok(Self {
+            channel: connect_async_and_split(url.as_str()).await?,
+            url,
             state: Arc::new(Mutex::new(ControlPlaneState::default())),
-            msg_tx: None,
-        };
-        client.reconnect_websocket().await?;
-        Ok(client)
+        })
     }
 
     pub async fn send_message(
@@ -84,20 +84,61 @@ impl ControlPlaneClient {
     ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         let bytes = serde_json::to_vec(&m)?;
         let message = Message::Binary(bytes);
+        let mut msg_tx = self.channel.msg_tx.lock().await;
 
-        if let Some(ref mut tx) = self.msg_tx {
-            match tx.send(message).await {
-                Ok(()) => (),
-                Err(tungstenite::Error::AlreadyClosed) => {
-                    tracing::error!("Connection closed");
-                    self.reconnect_websocket().await?;
-                }
-                Err(e) => {
-                    tracing::error!("Error: {}", e);
-                }
+        match msg_tx.send(message).await {
+            Ok(()) => (),
+            Err(tungstenite::Error::AlreadyClosed) => {
+                tracing::error!("Connection closed");
+                drop(msg_tx); // Explicitly drop the guard before calling reconnect
+                self.reconnect_websocket().await?;
+            }
+            Err(e) => {
+                tracing::error!("Error: {}", e);
             }
         }
+        // msg_tx automatically unlocks when it goes out of scope here
+
         Ok(())
+    }
+}
+
+impl meltdown::Service for ControlPlaneClient {
+    type Future = BoxFuture<'static, Result<(), RuntimeError>>;
+
+    fn run(mut self, token: Token) -> Self::Future {
+        let state_clone = Arc::clone(&self.state);
+
+        Box::pin(async move {
+            loop {
+                while let Some(message) =
+                    self.channel.msg_rx.lock().await.next().await
+                {
+                    match message {
+                        Ok(message) => {
+                            let _ = handle_message(&state_clone, message)
+                                .await
+                                .map_err(|e| {
+                                    tracing::error!("Error: {}", e);
+                                });
+                        }
+                        Err(tungstenite::Error::AlreadyClosed) => {
+                            tracing::error!("Connection closed");
+                            break;
+                        }
+                        Err(e) => {
+                            tracing::error!("Error: {}", e);
+                        }
+                    }
+                }
+
+                // if the connection is closed, we need to reconnect
+                self.reconnect_websocket()
+                    .await
+                    .map_err(RuntimeError::Init)?;
+                tokio::time::sleep(Duration::from_secs(1)).await;
+            }
+        })
     }
 }
 

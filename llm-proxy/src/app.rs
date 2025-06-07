@@ -14,7 +14,7 @@ use opentelemetry::global;
 use reqwest::Client;
 use rustc_hash::FxHashMap as HashMap;
 use telemetry::{make_span::SpanFactory, tracing::MakeRequestId};
-use tokio::sync::RwLock;
+use tokio::sync::{Mutex, RwLock};
 use tower::{ServiceBuilder, buffer::BufferLayer, util::BoxCloneService};
 use tower_http::{
     ServiceBuilderExt, add_extension::AddExtension,
@@ -23,14 +23,13 @@ use tower_http::{
     sensitive_headers::SetSensitiveHeadersLayer, trace::TraceLayer,
 };
 use tracing::{Level, info};
-use url::Url;
 
 use crate::{
     config::{
         Config, minio::Minio, rate_limit::RateLimiterConfig,
         response_headers::ResponseHeadersConfig, server::TlsConfig,
     },
-    control_plane::websocket::ControlPlaneClient,
+    control_plane::control_plane_state::ControlPlaneState,
     discover::monitor::health::{
         EndpointMetricsRegistry, provider::HealthMonitorMap,
     },
@@ -77,29 +76,17 @@ pub struct AppState(pub Arc<InnerAppState>);
 #[derive(Debug)]
 pub struct JawnClient {
     pub request_client: Client,
-    #[allow(dead_code)] // TODO: remove this once we have a use for it
-    control_plane_client: ControlPlaneClient,
 }
 
 impl JawnClient {
     #[must_use]
-    pub async fn new(base_url: Url) -> Result<Self, error::init::InitError> {
-        let request_client = Client::builder()
-            .tcp_nodelay(true)
-            .connect_timeout(JAWN_CONNECT_TIMEOUT)
-            .build()
-            .map_err(error::init::InitError::CreateReqwestClient)?;
-
-        let ws_url =
-            base_url.join("/ws/v1/router/control-plane").map_err(|e| {
-                error::init::InitError::WebsocketConnection(Box::new(e))
-            })?;
-
+    pub async fn new() -> Result<Self, error::init::InitError> {
         Ok(Self {
-            request_client,
-            control_plane_client: ControlPlaneClient::connect(ws_url.as_str())
-                .await
-                .map_err(error::init::InitError::WebsocketConnection)?,
+            request_client: Client::builder()
+                .tcp_nodelay(true)
+                .connect_timeout(JAWN_CONNECT_TIMEOUT)
+                .build()
+                .map_err(error::init::InitError::CreateReqwestClient)?,
         })
     }
 }
@@ -115,7 +102,7 @@ impl AppState {
 pub struct InnerAppState {
     pub config: Config,
     pub minio: Minio,
-    pub jawn_client: JawnClient,
+    pub jawn_http_client: JawnClient,
     pub control_plane: Arc<Mutex<ControlPlaneState>>,
     pub provider_keys: RwLock<HashMap<RouterId, ProviderKeys>>,
     pub global_rate_limit: Option<Arc<RateLimiterConfig>>,
@@ -234,8 +221,7 @@ impl App {
         tracing::info!(config = ?config, "creating app");
         let minio = Minio::new(config.minio.clone())?;
 
-        let jawn_client =
-            JawnClient::new(config.helicone.websocket_url.clone()).await?;
+        let jawn_client = JawnClient::new().await?;
 
         // If global meter is not set, opentelemetry defaults to a
         // NoopMeterProvider
@@ -250,7 +236,8 @@ impl App {
         let app_state = AppState(Arc::new(InnerAppState {
             config,
             minio,
-            jawn_client,
+            jawn_http_client: jawn_client,
+            control_plane: Arc::new(Mutex::new(ControlPlaneState::default())),
             provider_keys: RwLock::new(HashMap::default()),
             global_rate_limit,
             router_rate_limits: RwLock::new(HashMap::default()),
