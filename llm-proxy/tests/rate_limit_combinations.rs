@@ -92,7 +92,8 @@ async fn make_chat_request_for_router(
     .unwrap();
     let uri = match router_id {
         RouterId::Uuid(uuid) => format!(
-            "http://router.helicone.com/router/{uuid}/v1/chat/completions"
+            "http://router.helicone.com/router/{}/v1/chat/completions",
+            uuid
         ),
         RouterId::Default => {
             "http://router.helicone.com/router/v1/chat/completions".to_string()
@@ -600,7 +601,8 @@ async fn test_router_independence_different_rate_limits() {
         assert_eq!(
             response.status(),
             StatusCode::OK,
-            "Default router: Request {i} should succeed (no rate limiting)"
+            "Default router: Request {} should succeed (no rate limiting)",
+            i
         );
         let _body = response.into_body().collect().await.unwrap();
     }
@@ -626,7 +628,8 @@ async fn make_chat_request_to_router(
     let request_body = axum_core::body::Body::from(body_bytes);
     let uri = match router_id {
         RouterId::Uuid(uuid) => format!(
-            "http://router.helicone.com/router/{uuid}/v1/chat/completions"
+            "http://router.helicone.com/router/{}/v1/chat/completions",
+            uuid
         ),
         RouterId::Default => {
             "http://router.helicone.com/router/v1/chat/completions".to_string()
@@ -772,7 +775,8 @@ async fn test_multi_router_different_rate_limits_in_memory() {
         assert_eq!(
             response.status(),
             StatusCode::OK,
-            "Router B: Request {i} should succeed"
+            "Router B: Request {} should succeed",
+            i
         );
         let _body = response.into_body().collect().await.unwrap();
     }
@@ -798,7 +802,8 @@ async fn test_multi_router_different_rate_limits_in_memory() {
         assert_eq!(
             response.status(),
             StatusCode::OK,
-            "Router C: Request {i} should succeed (no rate limiting)"
+            "Router C: Request {} should succeed (no rate limiting)",
+            i
         );
         let _body = response.into_body().collect().await.unwrap();
     }
