@@ -150,7 +150,8 @@ async fn rate_limit_per_user_isolation_impl(
         assert_eq!(
             response.status(),
             StatusCode::OK,
-            "User1 request {i} should succeed"
+            "User1 request {} should succeed",
+            i
         );
         let _body = response.into_body().collect().await.unwrap();
     }
@@ -191,7 +192,8 @@ async fn rate_limit_per_user_isolation_impl(
         assert_eq!(
             response.status(),
             StatusCode::OK,
-            "User2 request {i} should succeed"
+            "User2 request {} should succeed",
+            i
         );
         let _body = response.into_body().collect().await.unwrap();
     }
@@ -233,7 +235,8 @@ async fn rate_limit_disabled() {
         assert_eq!(
             response.status(),
             StatusCode::OK,
-            "Request {i} should succeed when rate limiting disabled"
+            "Request {} should succeed when rate limiting disabled",
+            i
         );
         let _body = response.into_body().collect().await.unwrap();
     }
