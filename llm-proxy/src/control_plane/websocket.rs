@@ -114,7 +114,7 @@ mod tests {
         // Start a simple mock server
         let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
         let addr = listener.local_addr().unwrap();
-        let ws_url = format!("ws://{}", addr);
+        let ws_url = format!("ws://{addr}");
 
         // Spawn mock server that just accepts connections
         tokio::spawn(async move {

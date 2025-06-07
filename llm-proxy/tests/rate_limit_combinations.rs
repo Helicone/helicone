@@ -92,8 +92,7 @@ async fn make_chat_request_for_router(
     .unwrap();
     let uri = match router_id {
         RouterId::Uuid(uuid) => format!(
-            "http://router.helicone.com/router/{}/v1/chat/completions",
-            uuid
+            "http://router.helicone.com/router/{uuid}/v1/chat/completions"
         ),
         RouterId::Default => {
             "http://router.helicone.com/router/v1/chat/completions".to_string()
@@ -176,8 +175,7 @@ async fn test_global_rate_limit_with_router_none() {
         assert_eq!(
             response.status(),
             StatusCode::OK,
-            "Request {} should succeed",
-            i
+            "Request {i} should succeed"
         );
         let _body = response.into_body().collect().await.unwrap();
     }
@@ -257,8 +255,7 @@ async fn test_optin_rate_limit_with_router_optin() {
         assert_eq!(
             response.status(),
             StatusCode::OK,
-            "Request {} should succeed",
-            i
+            "Request {i} should succeed"
         );
         let _body = response.into_body().collect().await.unwrap();
     }
@@ -328,8 +325,7 @@ async fn test_router_specific_with_custom_limits() {
         assert_eq!(
             response.status(),
             StatusCode::OK,
-            "Request {} should succeed",
-            i
+            "Request {i} should succeed"
         );
         let _body = response.into_body().collect().await.unwrap();
     }
@@ -402,8 +398,7 @@ async fn test_global_with_custom_router_override() {
         assert_eq!(
             response.status(),
             StatusCode::OK,
-            "Request {} should succeed",
-            i
+            "Request {i} should succeed"
         );
         let _body = response.into_body().collect().await.unwrap();
     }
@@ -468,8 +463,7 @@ async fn test_optin_app_with_router_none() {
         assert_eq!(
             response.status(),
             StatusCode::OK,
-            "Request {} should succeed",
-            i
+            "Request {i} should succeed"
         );
         let _body = response.into_body().collect().await.unwrap();
     }
@@ -601,8 +595,7 @@ async fn test_router_independence_different_rate_limits() {
         assert_eq!(
             response.status(),
             StatusCode::OK,
-            "Default router: Request {} should succeed (no rate limiting)",
-            i
+            "Default router: Request {i} should succeed (no rate limiting)"
         );
         let _body = response.into_body().collect().await.unwrap();
     }
@@ -628,8 +621,7 @@ async fn make_chat_request_to_router(
     let request_body = axum_core::body::Body::from(body_bytes);
     let uri = match router_id {
         RouterId::Uuid(uuid) => format!(
-            "http://router.helicone.com/router/{}/v1/chat/completions",
-            uuid
+            "http://router.helicone.com/router/{uuid}/v1/chat/completions"
         ),
         RouterId::Default => {
             "http://router.helicone.com/router/v1/chat/completions".to_string()
@@ -775,8 +767,7 @@ async fn test_multi_router_different_rate_limits_in_memory() {
         assert_eq!(
             response.status(),
             StatusCode::OK,
-            "Router B: Request {} should succeed",
-            i
+            "Router B: Request {i} should succeed"
         );
         let _body = response.into_body().collect().await.unwrap();
     }
@@ -802,8 +793,7 @@ async fn test_multi_router_different_rate_limits_in_memory() {
         assert_eq!(
             response.status(),
             StatusCode::OK,
-            "Router C: Request {} should succeed (no rate limiting)",
-            i
+            "Router C: Request {i} should succeed (no rate limiting)"
         );
         let _body = response.into_body().collect().await.unwrap();
     }

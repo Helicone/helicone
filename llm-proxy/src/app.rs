@@ -14,7 +14,6 @@ use opentelemetry::global;
 use reqwest::Client;
 use rustc_hash::FxHashMap as HashMap;
 use telemetry::{make_span::SpanFactory, tracing::MakeRequestId};
-use tokio::sync::OnceCell;
 use tokio::sync::RwLock;
 use tower::{ServiceBuilder, buffer::BufferLayer, util::BoxCloneService};
 use tower_http::{
@@ -78,6 +77,7 @@ pub struct AppState(pub Arc<InnerAppState>);
 #[derive(Debug)]
 pub struct JawnClient {
     pub request_client: Client,
+    #[allow(dead_code)] // TODO: remove this once we have a use for it
     control_plane_client: ControlPlaneClient,
 }
 
