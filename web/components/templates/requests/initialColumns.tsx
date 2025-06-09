@@ -246,7 +246,9 @@ export const getInitialColumns = (): ColumnDef<MappedLLMRequest>[] => [
     accessorKey: "promptCacheReadTokens",
     header: "Prompt Cache Read Tokens",
     cell: (info) => {
-      const tokens = Number(info.row.original.heliconeMetadata.promptCacheReadTokens);
+      const tokens = Number(
+        info.row.original.heliconeMetadata.promptCacheReadTokens
+      );
       return <span>{tokens >= 0 ? tokens : "not found"}</span>;
     },
   },
