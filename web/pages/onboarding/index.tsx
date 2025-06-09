@@ -1,16 +1,15 @@
 "use client";
 import { useOrg } from "@/components/layout/org/organizationContext";
-import { MemberRole, MembersTable } from "@/components/onboarding/MembersTable";
+
 import { OnboardingHeader } from "@/components/onboarding/OnboardingHeader";
 import { OrganizationStep } from "@/components/onboarding/Steps/OrganizationStep";
-import { PlanStep } from "@/components/onboarding/Steps/PlanStep";
 import useNotification from "@/components/shared/notification/useNotification";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { H1, Muted } from "@/components/ui/typography";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
-import { PlanType, useOrgOnboarding } from "@/services/hooks/useOrgOnboarding";
+import { useOrgOnboarding } from "@/services/hooks/useOrgOnboarding";
 import { useQuery } from "@tanstack/react-query";
 import { Info } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -25,10 +24,6 @@ export default function OnboardingPage() {
     onboardingState,
     isLoading,
     draftName,
-    draftPlan,
-    draftMembers,
-    setDraftMembers,
-    setDraftPlan,
     updateCurrentStep,
   } = useOrgOnboarding(org?.currentOrg?.id ?? "");
 
@@ -54,23 +49,6 @@ export default function OnboardingPage() {
     subscription.data?.data?.status === "trialing" ||
     subscription.data?.data?.status === "incomplete";
 
-  const handlePlanChange = (plan: PlanType) => {
-    setDraftPlan(plan);
-
-    if (plan !== "free") {
-      updateCurrentStep("MEMBERS");
-    } else {
-      updateCurrentStep("ORGANIZATION");
-    }
-  };
-
-  const handleAddMember = (email: string, role: MemberRole) => {
-    setDraftMembers([...draftMembers, { email, role }]);
-  };
-
-  const handleRemoveMember = (email: string) => {
-    setDraftMembers(draftMembers.filter((m) => m.email !== email));
-  };
 
   const handleOrganizationSubmit = () => {
     if (!draftName) return;
@@ -82,16 +60,8 @@ export default function OnboardingPage() {
       "success"
     );
 
-    if (isSubscribed) {
-      updateCurrentStep("INTEGRATION");
-      router.push("/onboarding/integrate");
-    } else if (draftPlan !== "free") {
-      updateCurrentStep("BILLING");
-      router.push("/onboarding/billing");
-    } else {
-      updateCurrentStep("INTEGRATION");
-      router.push("/onboarding/integrate");
-    }
+    updateCurrentStep("INTEGRATION");
+    router.push("/onboarding/integrate");
   };
 
   if (subscription.isLoading || isLoading) {
@@ -122,20 +92,7 @@ export default function OnboardingPage() {
 
           <OrganizationStep />
 
-          {!isSubscribed && (
-            <>
-              <PlanStep onPlanChange={handlePlanChange} />
 
-              {!isLoading && draftPlan !== "free" && (
-                <MembersTable
-                  members={draftMembers}
-                  onAddMember={handleAddMember}
-                  onRemoveMember={handleRemoveMember}
-                  ownerEmail={user?.email ?? ""}
-                />
-              )}
-            </>
-          )}
 
           {isSubscribed && (
             <Alert className="bg-[hsl(var(--muted))] border-[hsl(var(--border))]">
