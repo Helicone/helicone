@@ -572,6 +572,9 @@
 					"latency": {
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},
+					"time_to_first_token": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
 					"status": {
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},
@@ -606,6 +609,12 @@
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},
 					"completion_tokens": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"prompt_cache_read_tokens": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"prompt_cache_write_tokens": {
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},
 					"total_tokens": {
@@ -643,6 +652,18 @@
 					},
 					"response_body": {
 						"$ref": "#/components/schemas/Partial_VectorOperators_"
+					},
+					"cache_enabled": {
+						"$ref": "#/components/schemas/Partial_BooleanOperators_"
+					},
+					"cache_reference_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"assets": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"helicone-score-feedback": {
+						"$ref": "#/components/schemas/Partial_BooleanOperators_"
 					}
 				},
 				"type": "object",
@@ -1777,6 +1798,9 @@
 					"path": {
 						"$ref": "#/components/schemas/Partial_TextOperators_"
 					},
+					"country_code": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
 					"prompt_id": {
 						"$ref": "#/components/schemas/Partial_TextOperators_"
 					}
@@ -1830,36 +1854,15 @@
 					},
 					"session_latest_request_created_at": {
 						"$ref": "#/components/schemas/Partial_TimestampOperatorsTyped_"
+					},
+					"session_tag": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
 					}
 				},
 				"type": "object",
 				"description": "Make all properties in T optional"
 			},
-			"Partial_CacheHitsTableToOperators_": {
-				"properties": {
-					"organization_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"request_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"latency": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"completion_tokens": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"prompt_tokens": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"created_at": {
-						"$ref": "#/components/schemas/Partial_TimestampOperatorsTyped_"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
-			"Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": {
+			"Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_": {
 				"properties": {
 					"request_response_rmt": {
 						"$ref": "#/components/schemas/Partial_RequestResponseRMTToOperators_"
@@ -1875,9 +1878,6 @@
 					},
 					"sessions_request_response_rmt": {
 						"$ref": "#/components/schemas/Partial_SessionsRequestResponseRMTToOperators_"
-					},
-					"cache_hits": {
-						"$ref": "#/components/schemas/Partial_CacheHitsTableToOperators_"
 					},
 					"properties": {
 						"properties": {},
@@ -1897,13 +1897,13 @@
 				"type": "object",
 				"description": "From T, pick a set of properties whose keys are in the union K"
 			},
-			"FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": {
-				"$ref": "#/components/schemas/Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_"
+			"FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_": {
+				"$ref": "#/components/schemas/Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_"
 			},
 			"RequestFilterNode": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_"
+						"$ref": "#/components/schemas/FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_"
 					},
 					{
 						"$ref": "#/components/schemas/RequestFilterBranch"
@@ -2111,6 +2111,15 @@
 			},
 			"Message": {
 				"properties": {
+					"ending_event_id": {
+						"type": "string"
+					},
+					"trigger_event_id": {
+						"type": "string"
+					},
+					"start_timestamp": {
+						"type": "string"
+					},
 					"deleted": {
 						"type": "boolean"
 					},
@@ -2882,6 +2891,13 @@
 					},
 					"model": {
 						"type": "string"
+					},
+					"cache_reference_id": {
+						"type": "string",
+						"nullable": true
+					},
+					"cache_enabled": {
+						"type": "boolean"
 					}
 				},
 				"required": [
@@ -2917,7 +2933,9 @@
 					"properties",
 					"assets",
 					"target_url",
-					"model"
+					"model",
+					"cache_reference_id",
+					"cache_enabled"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -4519,6 +4537,111 @@
 					}
 				]
 			},
+			"UpgradeToProRequest": {
+				"properties": {
+					"addons": {
+						"properties": {
+							"evals": {
+								"type": "boolean"
+							},
+							"experiments": {
+								"type": "boolean"
+							},
+							"prompts": {
+								"type": "boolean"
+							},
+							"alerts": {
+								"type": "boolean"
+							}
+						},
+						"type": "object"
+					},
+					"seats": {
+						"type": "number",
+						"format": "double"
+					},
+					"ui_mode": {
+						"type": "string",
+						"enum": [
+							"embedded",
+							"hosted"
+						]
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"UpgradeToTeamBundleRequest": {
+				"properties": {
+					"ui_mode": {
+						"type": "string",
+						"enum": [
+							"embedded",
+							"hosted"
+						]
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"LLMUsage": {
+				"properties": {
+					"model": {
+						"type": "string"
+					},
+					"provider": {
+						"type": "string"
+					},
+					"prompt_tokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"completion_tokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"total_count": {
+						"type": "number",
+						"format": "double"
+					},
+					"amount": {
+						"type": "number",
+						"format": "double"
+					},
+					"description": {
+						"type": "string"
+					},
+					"totalCost": {
+						"properties": {
+							"prompt_token": {
+								"type": "number",
+								"format": "double"
+							},
+							"completion_token": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"prompt_token",
+							"completion_token"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"model",
+					"provider",
+					"prompt_tokens",
+					"completion_tokens",
+					"total_count",
+					"amount",
+					"description",
+					"totalCost"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"OTELTrace": {
 				"properties": {
 					"resourceSpans": {
@@ -4728,111 +4851,6 @@
 					"resourceSpans"
 				],
 				"type": "object"
-			},
-			"UpgradeToProRequest": {
-				"properties": {
-					"addons": {
-						"properties": {
-							"evals": {
-								"type": "boolean"
-							},
-							"experiments": {
-								"type": "boolean"
-							},
-							"prompts": {
-								"type": "boolean"
-							},
-							"alerts": {
-								"type": "boolean"
-							}
-						},
-						"type": "object"
-					},
-					"seats": {
-						"type": "number",
-						"format": "double"
-					},
-					"ui_mode": {
-						"type": "string",
-						"enum": [
-							"embedded",
-							"hosted"
-						]
-					}
-				},
-				"type": "object",
-				"additionalProperties": false
-			},
-			"UpgradeToTeamBundleRequest": {
-				"properties": {
-					"ui_mode": {
-						"type": "string",
-						"enum": [
-							"embedded",
-							"hosted"
-						]
-					}
-				},
-				"type": "object",
-				"additionalProperties": false
-			},
-			"LLMUsage": {
-				"properties": {
-					"model": {
-						"type": "string"
-					},
-					"provider": {
-						"type": "string"
-					},
-					"prompt_tokens": {
-						"type": "number",
-						"format": "double"
-					},
-					"completion_tokens": {
-						"type": "number",
-						"format": "double"
-					},
-					"total_count": {
-						"type": "number",
-						"format": "double"
-					},
-					"amount": {
-						"type": "number",
-						"format": "double"
-					},
-					"description": {
-						"type": "string"
-					},
-					"totalCost": {
-						"properties": {
-							"prompt_token": {
-								"type": "number",
-								"format": "double"
-							},
-							"completion_token": {
-								"type": "number",
-								"format": "double"
-							}
-						},
-						"required": [
-							"prompt_token",
-							"completion_token"
-						],
-						"type": "object"
-					}
-				},
-				"required": [
-					"model",
-					"provider",
-					"prompt_tokens",
-					"completion_tokens",
-					"total_count",
-					"amount",
-					"description",
-					"totalCost"
-				],
-				"type": "object",
-				"additionalProperties": false
 			},
 			"SessionResult": {
 				"properties": {
@@ -5084,6 +5102,24 @@
 					}
 				]
 			},
+			"TimeFilterMs": {
+				"properties": {
+					"startTimeUnixMs": {
+						"type": "number",
+						"format": "double"
+					},
+					"endTimeUnixMs": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"startTimeUnixMs",
+					"endTimeUnixMs"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"SessionNameQueryParams": {
 				"properties": {
 					"nameContains": {
@@ -5105,11 +5141,30 @@
 					},
 					"useInterquartile": {
 						"type": "boolean"
+					},
+					"timeFilter": {
+						"$ref": "#/components/schemas/TimeFilterMs"
+					},
+					"filter": {
+						"$ref": "#/components/schemas/SessionFilterNode"
 					}
 				},
 				"required": [
 					"nameContains",
 					"timezoneDifference"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"AverageRow": {
+				"properties": {
+					"average": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"average"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -5133,12 +5188,41 @@
 							"$ref": "#/components/schemas/HistogramRow"
 						},
 						"type": "array"
+					},
+					"average": {
+						"properties": {
+							"session_cost": {
+								"items": {
+									"$ref": "#/components/schemas/AverageRow"
+								},
+								"type": "array"
+							},
+							"session_duration": {
+								"items": {
+									"$ref": "#/components/schemas/AverageRow"
+								},
+								"type": "array"
+							},
+							"session_count": {
+								"items": {
+									"$ref": "#/components/schemas/AverageRow"
+								},
+								"type": "array"
+							}
+						},
+						"required": [
+							"session_cost",
+							"session_duration",
+							"session_count"
+						],
+						"type": "object"
 					}
 				},
 				"required": [
 					"session_count",
 					"session_duration",
-					"session_cost"
+					"session_cost",
+					"average"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -5167,6 +5251,73 @@
 				"anyOf": [
 					{
 						"$ref": "#/components/schemas/ResultSuccess_SessionMetrics_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"SessionMetricsQueryParams": {
+				"properties": {
+					"nameContains": {
+						"type": "string"
+					},
+					"timezoneDifference": {
+						"type": "number",
+						"format": "double"
+					},
+					"pSize": {
+						"type": "string",
+						"enum": [
+							"p50",
+							"p75",
+							"p95",
+							"p99",
+							"p99.9"
+						]
+					},
+					"useInterquartile": {
+						"type": "boolean"
+					},
+					"timeFilter": {
+						"$ref": "#/components/schemas/TimeFilterMs"
+					},
+					"filter": {
+						"$ref": "#/components/schemas/SessionFilterNode"
+					}
+				},
+				"required": [
+					"nameContains",
+					"timezoneDifference"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_string-or-null_": {
+				"properties": {
+					"data": {
+						"type": "string",
+						"nullable": true
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_string-or-null.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_string-or-null_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -9515,24 +9666,11 @@
 				],
 				"parameters": [],
 				"requestBody": {
-					"description": "Request query filters",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/RequestQueryParams",
-								"description": "Request query filters"
-							},
-							"example": {
-								"filter": "all",
-								"isCached": false,
-								"limit": 10,
-								"offset": 0,
-								"sort": {
-									"created_at": "desc"
-								},
-								"isScored": false,
-								"isPartOfExperiment": false
+								"$ref": "#/components/schemas/RequestQueryParams"
 							}
 						}
 					}
@@ -9579,25 +9717,11 @@
 				],
 				"parameters": [],
 				"requestBody": {
-					"description": "Request query filters",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/RequestQueryParams",
-								"description": "Request query filters"
-							},
-							"example": {
-								"filter": "all",
-								"isCached": false,
-								"limit": 100,
-								"offset": 0,
-								"sort": {
-									"created_at": "desc"
-								},
-								"includeInputs": false,
-								"isScored": false,
-								"isPartOfExperiment": false
+								"$ref": "#/components/schemas/RequestQueryParams"
 							}
 						}
 					}
@@ -11682,116 +11806,6 @@
 				]
 			}
 		},
-		"/v1/trace/custom/v1/log": {
-			"post": {
-				"operationId": "LogCustomTraceLegacy",
-				"responses": {
-					"204": {
-						"description": "No content"
-					}
-				},
-				"tags": [
-					"Trace"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {}
-						}
-					}
-				}
-			}
-		},
-		"/v1/trace/custom/log": {
-			"post": {
-				"operationId": "LogCustomTrace",
-				"responses": {
-					"204": {
-						"description": "No content"
-					}
-				},
-				"tags": [
-					"Trace"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {}
-						}
-					}
-				}
-			}
-		},
-		"/v1/trace/log": {
-			"post": {
-				"operationId": "LogTrace",
-				"responses": {
-					"204": {
-						"description": "No content"
-					}
-				},
-				"tags": [
-					"Trace"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/OTELTrace"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/trace/log-python": {
-			"post": {
-				"operationId": "LogPythonTrace",
-				"responses": {
-					"204": {
-						"description": "No content"
-					}
-				},
-				"tags": [
-					"Trace"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {}
-						}
-					}
-				}
-			}
-		},
 		"/v1/stripe/subscription/cost-for-prompts": {
 			"get": {
 				"operationId": "GetCostForPrompts",
@@ -12502,6 +12516,116 @@
 				}
 			}
 		},
+		"/v1/trace/custom/v1/log": {
+			"post": {
+				"operationId": "LogCustomTraceLegacy",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Trace"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {}
+						}
+					}
+				}
+			}
+		},
+		"/v1/trace/custom/log": {
+			"post": {
+				"operationId": "LogCustomTrace",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Trace"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {}
+						}
+					}
+				}
+			}
+		},
+		"/v1/trace/log": {
+			"post": {
+				"operationId": "LogTrace",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Trace"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/OTELTrace"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/trace/log-python": {
+			"post": {
+				"operationId": "LogPythonTrace",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Trace"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {}
+						}
+					}
+				}
+			}
+		},
 		"/v1/session/has-session": {
 			"get": {
 				"operationId": "HasSession",
@@ -12629,7 +12753,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/SessionNameQueryParams"
+								"$ref": "#/components/schemas/SessionMetricsQueryParams"
 							}
 						}
 					}
@@ -12681,6 +12805,92 @@
 								},
 								"required": [
 									"rating"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/session/{sessionId}/tag": {
+			"get": {
+				"operationId": "GetSessionTag",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_string-or-null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Session"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "sessionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "UpdateSessionTag",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Session"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "sessionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"tag": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"tag"
 								],
 								"type": "object"
 							}

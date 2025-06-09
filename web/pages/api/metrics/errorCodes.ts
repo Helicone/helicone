@@ -3,7 +3,7 @@ import {
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { getErrorCodes } from "../../../lib/api/metrics/errorCodes";
-import { resultsAll } from "../../../packages/common/result";
+import { resultsAll } from "@/packages/common/result";
 import { UnPromise } from "../../../lib/tsxHelpers";
 
 async function handler(

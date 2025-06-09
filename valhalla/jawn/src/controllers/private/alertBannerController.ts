@@ -1,6 +1,6 @@
 import { Controller, Get, Request, Route, Security, Tags } from "tsoa";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
-import { JawnAuthenticatedRequest } from "../../types/request";
+import type { JawnAuthenticatedRequest } from "../../types/request";
 import { Database } from "../../lib/db/database.types";
 
 @Route("v1/alert-banner")

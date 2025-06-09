@@ -7,7 +7,7 @@ import { clsx } from "../../clsx";
 import { useState } from "react";
 import CostPill from "../../../templates/requests/costPill";
 import { getUSDateFromString } from "../../utils/utils";
-import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+import { MappedLLMRequest } from "@helicone-package/llm-mapper/types";
 
 interface RequestRowProps {
   index: number;

@@ -10,12 +10,9 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { JawnAuthenticatedRequest } from "../../types/request";
-import {
-  AlertManager,
-  AlertRequest,
-  AlertResponse,
-} from "../../managers/alert/AlertManager";
+import type { JawnAuthenticatedRequest } from "../../types/request";
+import { AlertManager, AlertResponse } from "../../managers/alert/AlertManager";
+import type { AlertRequest } from "../../managers/alert/AlertManager";
 import { Result } from "../../packages/common/result";
 
 @Route("v1/alert")

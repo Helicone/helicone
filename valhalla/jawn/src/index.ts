@@ -25,6 +25,7 @@ import * as publicSwaggerDoc from "./tsoa-build/public/swagger.json";
 import { initLogs } from "./utils/injectLogs";
 import { initSentry } from "./utils/injectSentry";
 import { startConsumers, startSQSConsumers } from "./workers/consumerInterface";
+import { IS_ON_PREM } from "./constants/IS_ON_PREM";
 
 if (ENVIRONMENT === "production" || process.env.ENABLE_CRON_JOB === "true") {
   runMainLoops();
@@ -67,7 +68,10 @@ const corsOptions = {
       callback(null, true);
       return;
     }
-    if (allowedOrigins.some((allowedOrigin) => allowedOrigin.test(origin))) {
+    if (
+      allowedOrigins.some((allowedOrigin) => allowedOrigin.test(origin)) ||
+      IS_ON_PREM
+    ) {
       callback(null, true);
     } else {
       // Important: Disallow origins not in the list
@@ -86,7 +90,7 @@ const corsOptions = {
   optionsSuccessStatus: 204,
 };
 
-app.options("*", cors(corsOptions));
+app.options("/{*any}", cors(corsOptions));
 app.use(cors(corsOptions));
 
 var rawBodySaver = function (req: any, res: any, buf: any, encoding: any) {

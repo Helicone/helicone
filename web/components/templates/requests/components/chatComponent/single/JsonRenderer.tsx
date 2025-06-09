@@ -28,22 +28,35 @@ interface JsonRendererProps {
 interface StringRendererProps {
   data: string;
   maxLength?: number;
+  showRawString?: boolean;
 }
 
 const StringRenderer: React.FC<StringRendererProps> = ({
   data,
   maxLength = 10_000,
+  showRawString = false,
 }) => {
   const [expanded, setExpanded] = useState(false);
   const isTruncated = data.length > maxLength;
 
   return (
-    <span className="text-violet-600 dark:text-violet-400">
-      &quot;{expanded || !isTruncated ? data : data.slice(0, maxLength)}
+    <span
+      className={`text-violet-600 dark:text-violet-400 ${
+        !showRawString ? "whitespace-pre-wrap" : ""
+      }`}
+    >
+      {(() => {
+        if (expanded || !isTruncated) {
+          return showRawString ? `"${data.replace(/\n/g, "\\n")}"` : data;
+        } else {
+          return showRawString
+            ? `"${data.slice(0, maxLength).replace(/\n/g, "\\n")}"`
+            : data.slice(0, maxLength);
+        }
+      })()}
       {isTruncated && !expanded && (
         <span className="text-slate-400 dark:text-slate-500">...</span>
       )}
-      &quot;
       {isTruncated && (
         <button
           onClick={() => setExpanded(!expanded)}
@@ -108,7 +121,7 @@ export const JsonRenderer: React.FC<JsonRendererProps> = ({
   }
 
   if (typeof data === "string") {
-    return <StringRenderer data={data} />;
+    return <StringRenderer data={data} showRawString={level !== 0} />;
   }
 
   if (Array.isArray(data)) {

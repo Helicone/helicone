@@ -8,7 +8,7 @@ import {
   getLatencyOverTime,
   LatencyOverTime,
 } from "../../../lib/api/metrics/getLatencyOverTime";
-import { Result } from "../../../packages/common/result";
+import { Result } from "@/packages/common/result";
 import { MetricsBackendBody } from "../../../services/hooks/useBackendFunction";
 
 async function handler(

@@ -1,6 +1,6 @@
 import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
-import { JawnAuthenticatedRequest } from "../../types/request";
-import { KafkaMessageContents } from "../../lib/handlers/HandlerContext";
+import { type JawnAuthenticatedRequest } from "../../types/request";
+import { type KafkaMessageContents } from "../../lib/handlers/HandlerContext";
 import { LogManager } from "../../managers/LogManager";
 
 @Route("v1/log")

@@ -1,38 +1,54 @@
 import FoldedHeader from "@/components/shared/FoldedHeader";
 import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
+import { Button } from "@/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Command,
+  CommandEmpty,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Muted, Small, XSmall } from "@/components/ui/typography";
 import { FilterASTButton } from "@/filterAST/FilterASTButton";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
+import { cn } from "@/lib/utils";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import { useURLParams } from "@/services/hooks/localURLParams";
 import { SortDirection } from "@/services/lib/sorts/requests/sorts";
 import { TimeFilter } from "@/types/timeFilter";
-import { PieChart, Table } from "lucide-react";
-import { useRouter } from "next/router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Check, ChevronDown, PieChart, Table } from "lucide-react";
+import Link from "next/link";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   getTimeIntervalAgo,
   TimeInterval,
 } from "../../../lib/timeCalculations/time";
+import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
 import { useDebounce } from "../../../services/hooks/debounce";
+import { getRequestsByIdsWithBodies } from "../../../services/hooks/requests";
 import { useSessionNames, useSessions } from "../../../services/hooks/sessions";
 import {
   columnDefsToDragColumnItems,
   DragColumnItem,
 } from "../../shared/themed/table/columns/DragList";
 import ViewColumns from "../../shared/themed/table/columns/viewColumns";
+import ExportButton from "../../shared/themed/table/exportButton";
 import ThemedTable from "../../shared/themed/table/themedTable";
 import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
-import { INITIAL_COLUMNS } from "./initialColumns";
+import { getColumns } from "./initialColumns";
+import { EMPTY_SESSION_NAME } from "./sessionId/SessionContent";
 import SessionMetrics from "./SessionMetrics";
 
 interface SessionsPageProps {
@@ -44,25 +60,25 @@ interface SessionsPageProps {
     isCustomProperty: boolean;
   };
   defaultIndex: number;
+  selectedName?: string;
 }
 
-// Define a constant for the unnamed session value
-const UNNAMED_SESSION_VALUE = "__helicone_unnamed_session__";
-
 // Moved from SessionDetails.tsx
-type TSessions = {
-  created_at: string;
-  latest_request_created_at: string;
-  session_id: string;
-  session_name: string;
-  total_cost: number;
-  total_requests: number;
-  prompt_tokens: number;
-  completion_tokens: number;
-  total_tokens: number;
-  avg_latency: number;
+export type TSessions = {
+  id: string;
+  metadata: {
+    created_at: string;
+    latest_request_created_at: string;
+    session_name: string;
+    session_id: string;
+    total_cost: number;
+    total_requests: number;
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+    avg_latency: number;
+  };
 };
-type SessionResult = ReturnType<typeof useSessionNames>["sessions"][number];
 
 const TABS = [
   {
@@ -78,19 +94,14 @@ const TABS = [
 ];
 
 const SessionsPage = (props: SessionsPageProps) => {
-  const { sort } = props;
-  const router = useRouter();
   const tableRef = useRef<any>(null);
 
   // State for active columns
   const [activeColumns, setActiveColumns] = useState<DragColumnItem[]>(
-    columnDefsToDragColumnItems(INITIAL_COLUMNS)
+    columnDefsToDragColumnItems(getColumns())
   );
 
-  const [timeFilter, setTimeFilter] = useState<{
-    start: Date;
-    end: Date;
-  }>({
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>({
     start: getTimeIntervalAgo("1m"),
     end: new Date(),
   });
@@ -99,23 +110,43 @@ const SessionsPage = (props: SessionsPageProps) => {
     "session-search",
     undefined
   );
-  const [sessionNameSearch] = useState<string | undefined>(undefined);
+
+  const [open, setOpen] = useState(false);
+  const [sessionNameSearch, setSessionNameSearch] = useState<
+    string | undefined
+  >(undefined);
 
   const debouncedSessionNameSearch = useDebounce(sessionNameSearch, 500);
 
-  const names = useSessionNames(debouncedSessionNameSearch ?? "");
-  const allNames = useSessionNames("");
+  const names = useSessionNames(debouncedSessionNameSearch ?? "", timeFilter);
+  const sessionNames = [
+    "All",
+    ...names.sessions
+      .sort(
+        (a, b) =>
+          new Date(b.last_used).getTime() - new Date(a.last_used).getTime()
+      )
+      .map((name) => name.name),
+  ];
+  const allNames = useSessionNames("", timeFilter);
 
   const debouncedSessionIdSearch = useDebounce(sessionIdSearch, 500); // 0.5 seconds
   const [selectedName, setSelectedName] = useState<string | undefined>(
-    undefined
+    props.selectedName
   );
 
-  const { sessions, isLoading, hasSessions, refetch } = useSessions({
+  const { sessions, isLoading, hasSessions } = useSessions({
     timeFilter,
     sessionIdSearch: debouncedSessionIdSearch ?? "",
     selectedName,
   });
+
+  const sessionsWithId = useMemo(() => {
+    return sessions.map((session, index) => ({
+      metadata: session,
+      id: index.toString(),
+    }));
+  }, [sessions]);
 
   const { canCreate, freeLimit } = useFeatureLimit(
     "sessions",
@@ -126,36 +157,14 @@ const SessionsPage = (props: SessionsPageProps) => {
     (typeof TABS)[number]["id"]
   >("session-details-tab", "sessions");
 
-  const { hasAccess } = useFeatureLimit("sessions", allNames.sessions.length);
-
-  useEffect(() => {
-    if (
-      !hasAccess &&
-      hasSessions &&
-      selectedName === undefined &&
-      !allNames.isLoading
-    ) {
-      const sortedSessions = [...allNames.sessions].sort(
-        (a, b) =>
-          new Date(b.last_used).getTime() - new Date(a.last_used).getTime()
-      );
-
-      if (sortedSessions.length > 0) {
-        setSelectedName(sortedSessions[0].name);
-      }
-    }
-  }, [
-    hasSessions,
-    allNames.sessions,
-    allNames.isLoading,
-    selectedName,
-    hasAccess,
-  ]);
+  const { selectedIds, toggleSelection, selectAll, isShiftPressed } =
+    useSelectMode({
+      items: sessionsWithId,
+      getItemId: (session: TSessions) => session.id,
+    });
 
   const handleSelectSessionName = (value: string) => {
-    if (value === "all") {
-      setSelectedName(undefined);
-    } else if (value === UNNAMED_SESSION_VALUE) {
+    if (value === "" || value === "All") {
       setSelectedName(""); // Map placeholder back to empty string
     } else {
       setSelectedName(value);
@@ -163,7 +172,6 @@ const SessionsPage = (props: SessionsPageProps) => {
   };
 
   const isSessionsLoading = isLoading || allNames.isLoading || names.isLoading;
-  const combinedLoading = isSessionsLoading || refetch;
 
   // Helper function to get TimeFilter object
   const getTimeFilterObject = (start: Date, end: Date): TimeFilter => ({
@@ -187,6 +195,34 @@ const SessionsPage = (props: SessionsPageProps) => {
       });
     }
   };
+
+  const onFetchBulkSessions = async () => {
+    // Download all sessions if no sessions are selected
+    if (!selectedIds.length) {
+      const data = await getRequestsByIdsWithBodies(sessionsWithId);
+      return data;
+    }
+
+    const filteredSessions = sessionsWithId.filter((session) =>
+      selectedIds.includes(session.id)
+    );
+
+    return await getRequestsByIdsWithBodies(filteredSessions);
+  };
+
+  const onRowSelectHandler = useCallback(
+    (row: TSessions, index: number, event?: React.MouseEvent) => {
+      // bit of a hack since pre-existing table behavior is noop
+      let isCheckboxClick =
+        event?.target instanceof HTMLElement &&
+        (event.target.tagName.toLowerCase() === "button" ||
+          event.target.closest("button") !== null);
+      if (isShiftPressed || event?.metaKey || isCheckboxClick) {
+        toggleSelection(row);
+      }
+    },
+    [isShiftPressed, toggleSelection]
+  );
 
   // Calculate aggregated stats
   const aggregatedStats = useMemo(() => {
@@ -248,36 +284,67 @@ const SessionsPage = (props: SessionsPageProps) => {
         <FoldedHeader
           leftSection={
             <section className="flex flex-row items-center gap-2">
-              <Small className="font-semibold">Sessions</Small>
+              <Link href="/sessions" className="no-underline">
+                <Small className="font-semibold">Sessions</Small>
+              </Link>
               <Small className="font-semibold">/</Small>
 
-              <Select
-                value={
-                  selectedName === ""
-                    ? UNNAMED_SESSION_VALUE // Map empty string to placeholder
-                    : selectedName ?? "all"
-                }
-                onValueChange={handleSelectSessionName}
-              >
-                <SelectTrigger className="w-[280px] h-8 shadow-sm">
-                  <SelectValue placeholder="Select a session" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Sessions</SelectItem>
-                  {allNames.sessions.map((session) => (
-                    <SelectItem
-                      key={session.name}
-                      value={
-                        session.name === ""
-                          ? UNNAMED_SESSION_VALUE
-                          : session.name
-                      }
-                    >
-                      {session.name === "" ? "Unnamed" : session.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger
+                  asChild
+                  className={cn(
+                    "flex h-8 w-[280px] items-center justify-between rounded-md border border-sky-200 bg-white px-3 py-2 text-xs ring-offset-white placeholder:text-slate-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:bg-sidebar-background",
+                    "focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 dark:focus:ring-slate-300"
+                  )}
+                >
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={open}
+                  >
+                    {selectedName === ""
+                      ? EMPTY_SESSION_NAME
+                      : selectedName ?? "All"}
+                    <ChevronDown className="ml-2 h-3 w-3 shrink-0 opacity-50 " />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[280px] p-0">
+                  <Command>
+                    <CommandInput
+                      placeholder="Search sessions..."
+                      onChangeCapture={(
+                        e: React.ChangeEvent<HTMLInputElement>
+                      ) => {
+                        setSessionNameSearch(e.target.value);
+                      }}
+                    />
+                    <CommandEmpty>No results found.</CommandEmpty>
+
+                    <CommandList>
+                      {sessionNames.map((name) => (
+                        <CommandItem
+                          key={name}
+                          value={name}
+                          onSelect={() => {
+                            setOpen(false);
+                            handleSelectSessionName(name);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-3 w-3",
+                              selectedName === name
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                          {name === "" ? EMPTY_SESSION_NAME : name}
+                        </CommandItem>
+                      ))}
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
 
               <ThemedTimeFilter
                 currentTimeFilter={getTimeFilterObject(
@@ -296,6 +363,17 @@ const SessionsPage = (props: SessionsPageProps) => {
           }
           rightSection={
             <section className="flex flex-row items-center gap-2">
+              <div className="flex flex-row items-center gap-2 bg-sky-200 rounded-lg">
+                {selectedIds.length > 0 && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <ExportButton rows={[]} fetchRows={onFetchBulkSessions} />
+                    </TooltipTrigger>
+                    <TooltipContent>Export raw data</TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
+
               <div className="h-8 flex flex-row items-center border border-border rounded-lg divide-x divide-border overflow-hidden shadow-sm">
                 <label className="text-xs px-2 py-1">Views</label>
 
@@ -311,7 +389,7 @@ const SessionsPage = (props: SessionsPageProps) => {
                       asPill={"none"}
                       key={tab.id}
                       value={tab.id}
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 bg-sidebar-background dark:bg-sidebar-foreground"
                     >
                       {tab.icon}
                     </TabsTrigger>
@@ -354,15 +432,23 @@ const SessionsPage = (props: SessionsPageProps) => {
           <ThemedTable
             id="sessions-table"
             tableRef={tableRef}
-            defaultData={sessions || []}
-            defaultColumns={INITIAL_COLUMNS}
+            defaultData={sessionsWithId}
+            defaultColumns={getColumns()}
             skeletonLoading={isLoading}
             dataLoading={isLoading}
             activeColumns={activeColumns}
             setActiveColumns={setActiveColumns}
             rowLink={(row: TSessions) =>
-              `/sessions/${encodeURIComponent(row.session_id)}`
+              `/sessions/${
+                row.metadata.session_name
+                  ? encodeURIComponent(row.metadata.session_name)
+                  : EMPTY_SESSION_NAME
+              }/${encodeURIComponent(row.metadata.session_id)}`
             }
+            checkboxMode={"on_hover"}
+            onRowSelect={onRowSelectHandler}
+            onSelectAll={selectAll}
+            selectedIds={selectedIds}
           />
         </TabsContent>
         <TabsContent value="metrics">
@@ -372,6 +458,7 @@ const SessionsPage = (props: SessionsPageProps) => {
                 (session) => session.name === selectedName
               ) ?? null
             }
+            timeFilter={timeFilter}
           />
         </TabsContent>
       </Tabs>

@@ -5,27 +5,24 @@ import nodemailer from "nodemailer";
 // Create a reusable transporter object using the default SMTP transport
 // Configure for MailHog in development, or your actual email service in production
 const transporter = nodemailer.createTransport({
-  host:
-    process.env.NODE_ENV === "development"
-      ? process.env.SMTP_HOST ?? "localhost"
-      : process.env.SMTP_HOST,
-  port:
-    process.env.NODE_ENV === "development"
-      ? 1025
-      : parseInt(process.env.SMTP_PORT || "587"),
-  secure:
-    process.env.NODE_ENV === "development"
-      ? false
-      : process.env.SMTP_SECURE === "true", // true for 465, false for other ports
-  auth:
-    process.env.NODE_ENV === "development"
-      ? undefined
-      : {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
+  host: process.env.SMTP_HOST ?? "localhost",
+  port: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 1025,
+  secure: process.env.SMTP_SECURE === "true", // true for 465, false for other ports
+
+  // Don't use auth for MailHog, but use it for production SMTP servers
+  ...(process.env.SMTP_HOST?.includes("mailhog") ||
+  process.env.NODE_ENV === "development"
+    ? {} // No auth for MailHog
+    : {
+        auth: {
+          user: process.env.SMTP_USER || "",
+          pass: process.env.SMTP_PASS || "",
         },
-  // In development with MailHog, TLS verification is not needed
+      }),
+
+  // MailHog doesn't need TLS verification
   tls:
+    process.env.SMTP_HOST?.includes("mailhog") ||
     process.env.NODE_ENV === "development"
       ? { rejectUnauthorized: false }
       : undefined,
@@ -88,6 +85,12 @@ export const auth = betterAuth({
         }
       } catch (error) {
         console.error("Error sending verification email:", error);
+        console.error("SMTP Config:", {
+          host: process.env.SMTP_HOST,
+          port: process.env.SMTP_PORT,
+          secure: process.env.SMTP_SECURE === "true",
+          hasAuth: !process.env.SMTP_HOST?.includes("mailhog"),
+        });
         // Optionally, re-throw the error or handle it as needed
         // throw error;
       }

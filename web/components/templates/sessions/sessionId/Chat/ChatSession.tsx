@@ -1,6 +1,9 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { HeliconeRequest, MappedLLMRequest } from "@/packages/llm-mapper/types";
-import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
+import {
+  HeliconeRequest,
+  MappedLLMRequest,
+} from "@helicone-package/llm-mapper/types";
+import { heliconeRequestToMappedContent } from "@helicone-package/llm-mapper/utils/getMappedContent";
 import React, { useMemo, useState } from "react";
 import { FaChevronRight } from "react-icons/fa";
 import { Session } from "../../../../../lib/sessions/sessionTypes";

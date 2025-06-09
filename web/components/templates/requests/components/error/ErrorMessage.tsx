@@ -1,5 +1,5 @@
 import ThemedModal from "@/components/shared/themed/themedModal";
-import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+import { MappedLLMRequest } from "@helicone-package/llm-mapper/types";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import { AlertTriangle } from "lucide-react";
 import { useMemo, useState } from "react";

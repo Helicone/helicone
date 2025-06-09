@@ -7,7 +7,7 @@ import {
   heliconeToTemplateTags,
   templateToHeliconeTags,
 } from "@/utils/variables";
-import { Message } from "packages/llm-mapper/types";
+import { Message } from "@helicone-package/llm-mapper/types";
 import { useEffect, useRef, useState } from "react";
 import { PiChatFill, PiChatsBold, PiTrashBold } from "react-icons/pi";
 

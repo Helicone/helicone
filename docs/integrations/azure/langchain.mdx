@@ -1,5 +1,5 @@
 ---
-title: "Azure OpenAI LangChain Integration"
+title: "Azure OpenAI with LangChain"
 sidebarTitle: "LangChain"
 description: "Use LangChain to integrate Azure OpenAI with Helicone to log your Azure OpenAI usage."
 "twitter:title": "Azure OpenAI Langchain Integration - Helicone OSS LLM Observability"
@@ -7,59 +7,128 @@ icon: "bird"
 iconType: "solid"
 ---
 
-<Steps>
-  <Step title="Create an account + Generate an API Key">
-    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
-    can generate an [API key](https://helicone.ai/developer).
-  </Step>
-  <Step title="Set HELICONE_API_KEY as an environment variable">
-```typescript
-HELICONE_API_KEY=<your API key>
-```
-  </Step>
-  <Step title="Modify the API base and add the `Helicone-Auth` header">
-<CodeGroup>
+import IncludeApiVersion from "/snippets/include-api-version.mdx";
+import ModelOverride from "/snippets/model-override.mdx";
+import { strings } from "/snippets/strings.mdx";
 
-```typescript example.ts
-const model = new ChatOpenAI({
-  azureOpenAIApiKey: "[AZURE_OPENAI_API_KEY]",
-  azureOpenAIApiDeploymentName: "openai/deployments/gpt-35-turbo",
-  azureOpenAIApiVersion: "2023-03-15-preview",
-  azureOpenAIBasePath: "https://oai.helicone.ai",
-  configuration: {
-    organization: "[organization]",
-    baseOptions: {
-      headers: {
+## {strings.howToIntegrate}
+
+<Steps>
+  <Step title={strings.generateKey}>
+    <div dangerouslySetInnerHTML={{ __html: strings.generateKeyInstructions }} />
+  </Step>
+
+  <Step title={strings.setApiKey}>
+    ```javascript
+    HELICONE_API_KEY=<YOUR_HELICONE_API_KEY>
+    AZURE_OPENAI_API_KEY=<YOUR_AZURE_OPENAI_API_KEY>
+    ```
+  </Step>
+
+  <Step title={strings.modifyBasePath}>
+    <IncludeApiVersion />
+    <CodeGroup>
+    ```javascript ChatOpenAI js
+    const model = new ChatOpenAI({
+      baseURL: "https://oai.helicone.ai/v1",
+      defaultHeaders: {
+        "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+        "Helicone-OpenAI-Api-Base": "https://[AZURE_DOMAIN].azure.com/",
+        "api-key": process.env.AZURE_OPENAI_API_KEY
+      },
+      model: "[MODEL_NAME]", // "gpt-35-turbo"
+      apiVersion: "[API_VERSION]" // "2023-05-15"
+    });
+    ```
+
+    ```javascript AzureChatOpenAI js
+    const model = new AzureChatOpenAI({
+      model: "[MODEL_NAME]",
+      azureOpenAIApiKey: process.env.AZURE_OPENAI_API_KEY,
+      azureOpenAIApiInstanceName: "[AZURE_DOMAIN_NAME]", // "july-mb1z0q9z-eastus2"
+      azureOpenAIApiDeploymentName: "[DEPLOYMENT_NAME]",
+      azureOpenAIApiVersion: "[API_VERSION]", // "2023-05-15"
+      defaultHeaders: {
         "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
         "Helicone-OpenAI-Api-Base":
-          "https://[YOUR_AZURE_DOMAIN].openai.azure.com",
-      },
-    },
-  },
-});
-```
+          "https://[AZURE_DOMAIN].azure.com/",
+        "api-key": process.env.AZURE_OPENAI_API_KEY
+      }
+    });
+    ```
 
-```python example.py
-from langchain.chat_models import AzureChatOpenAI
+    ```python AzureChatOpenAI py
+    from langchain.chat_models import AzureChatOpenAI
+    from dotenv import load_dotenv
+    import os
 
-helicone_headers = {
-  "Helicone-Auth": f"Bearer {helicone_api_key}",
-  "Helicone-OpenAI-Api-Base": "https://<model_name>.openai.azure.com/"
-}
+    load_dotenv()
 
-self.model = AzureChatOpenAI(
-  openai_api_base="https://oai.helicone.ai",
-  deployment_name="gpt-35-turbo",
-  openai_api_key=<AZURE_OPENAI_API_KEY>,
-  openai_api_version="2023-05-15",
-  openai_api_type="azure",
-  max_retries=max_retries,
-  headers=helicone_headers,
-  **kwargs,
-)
-```
+    HELICONE_API_KEY = os.getenv("HELICONE_API_KEY")
+    AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
 
-</CodeGroup>
+    helicone_headers = {
+      "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+      "Helicone-OpenAI-Api-Base": "https://[YOUR_AZURE_DOMAIN].azure.com/",
+      "Helicone-Model-Override": "[MODEL_NAME]", # "gpt-35-turbo"
+      # ...additional headers
+    }
 
+    self.model = AzureChatOpenAI(
+      openai_api_base="https://oai.helicone.ai",
+      deployment_name="[DEPLOYMENT_NAME]",
+      openai_api_key=f"{AZURE_OPENAI_API_KEY}",
+      openai_api_version="[API_VERSION]", # "2023-05-15"
+      openai_api_type="azure",
+      max_retries=max_retries,
+      headers=helicone_headers,
+      **kwargs
+    )
+    ```
+    </CodeGroup>
+    <ModelOverride />
+  </Step>
+
+  <Step title={strings.startUsing("Azure OpenAI")}>
+    <CodeGroup>
+    ```javascript javascript
+    const response = await model.invoke("What is the meaning of life?");
+    console.log(response);
+    ```
+
+    ```python python
+    response = model.invoke("What is the meaning of life?")
+    print(response)
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title={strings.verifyInHelicone}>
+    <div dangerouslySetInnerHTML={{ __html: strings.verifyInHeliconeDesciption("Azure OpenAI") }} />
   </Step>
 </Steps>
+
+<div dangerouslySetInnerHTML={{ __html: strings.azureOpenAIDocs }} />
+
+## {strings.relatedGuides}
+
+<CardGroup cols={2}>
+  <Card
+    title="How to Prompt Thinking Models"
+    icon="brain"
+    href="/guides/cookbooks/prompt-thinking-models"
+    iconType="light"
+    vertical
+  >
+    {strings.howToPromptThinkingModelsCookbookDescription}
+  </Card>
+  <Card
+    title="Getting User Requests"
+    icon="user"
+    href="/guides/cookbooks/getting-user-requests"
+    iconType="light"
+    vertical
+  >
+    {strings.gettingUserRequestsCookbookDescription}
+  </Card>
+</CardGroup>

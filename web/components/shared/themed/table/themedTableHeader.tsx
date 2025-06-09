@@ -7,7 +7,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import FilterASTButton from "@/filterAST/FilterASTButton";
-import { UIFilterRowTree } from "@/services/lib/filters/types";
+import { UIFilterRowTree } from "@helicone-package/filters/types";
 import { TimeFilter } from "@/types/timeFilter";
 import {
   CircleStackIcon,
@@ -17,9 +17,9 @@ import {
 import { Column } from "@tanstack/react-table";
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
-import { Result } from "../../../../packages/common/result";
+import { Result } from "@/packages/common/result";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
-import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
+import { SingleFilterDef } from "@helicone-package/filters/frontendFilterDefs";
 import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";
 import useSearchParams from "../../utils/useSearchParams";
 import ThemedTimeFilter from "../themedTimeFilter";

@@ -1,13 +1,13 @@
 import moment from "moment";
 
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
 import {
   buildFilterWithAuthClickHouse,
-  buildFilterWithAuthClickHouseCacheHits,
   buildFilterWithAuthClickHouseRateLimits,
+  buildFilterWithAuthClickHouseCacheMetrics,
   clickhouseParam,
-} from "../../../services/lib/filters/filters";
-import { Result, resultMap } from "../../../packages/common/result";
+} from "@helicone-package/filters/filters";
+import { Result, resultMap } from "@/packages/common/result";
 import {
   isValidTimeFilter,
   isValidTimeIncrement,
@@ -166,8 +166,8 @@ ORDER BY ${dateTrunc} ASC ${fill}
   );
 }
 
-export async function getXOverTimeCacheHits<T>(
-  { timeFilter, orgId, dbIncrement, timeZoneDifference }: DataOverTimeRequest,
+export async function getXOverTimeCacheHits<T extends { count: number }>(
+  request: DataOverTimeRequest,
   countColumn: string,
   groupByColumns: string[] = [],
   printQuery = false
@@ -179,85 +179,99 @@ export async function getXOverTimeCacheHits<T>(
     string
   >
 > {
-  const startDate = new Date(timeFilter.start);
-  const endDate = new Date(timeFilter.end);
+  const startDate = new Date(request.timeFilter.start);
+  const endDate = new Date(request.timeFilter.end);
+
   const timeFilterNode: FilterNode = {
     left: {
-      cache_hits: {
-        created_at: {
+      cache_metrics: {
+        date: {
           gte: startDate,
         },
       },
     },
     right: {
-      cache_hits: {
-        created_at: {
+      cache_metrics: {
+        date: {
           lte: endDate,
         },
       },
     },
     operator: "and",
   };
-  const filter: FilterNode = timeFilterNode;
 
-  if (!isValidTimeFilter(timeFilter)) {
+  if (!isValidTimeFilter(request.timeFilter)) {
     return { data: null, error: "Invalid time filter" };
   }
-  if (!isValidTimeIncrement(dbIncrement)) {
+  if (!isValidTimeIncrement(request.dbIncrement)) {
     return { data: null, error: "Invalid time increment" };
   }
-  if (!isValidTimeZoneDifference(timeZoneDifference)) {
+  if (!isValidTimeZoneDifference(request.timeZoneDifference)) {
     return { data: null, error: "Invalid time zone difference" };
   }
+
   const { filter: builtFilter, argsAcc: builtFilterArgsAcc } =
-    await buildFilterWithAuthClickHouseCacheHits({
-      org_id: orgId,
-      filter,
+    await buildFilterWithAuthClickHouseCacheMetrics({
+      org_id: request.orgId,
+      filter: timeFilterNode,
       argsAcc: [],
     });
-  const { fill, argsAcc } = buildFill(
-    startDate,
-    endDate,
-    dbIncrement,
-    timeZoneDifference,
-    builtFilterArgsAcc
-  );
-  const dateTrunc = buildDateTrunc(
-    dbIncrement,
-    timeZoneDifference,
-    "created_at"
-  );
+
+  let dateSelect = "date";
+  let dateGroupBy = "date";
+  let fillClause = "";
+
+  if (request.dbIncrement === "day") {
+    const startDateStr = clickhouseParam(builtFilterArgsAcc.length, startDate);
+    const endDateStr = clickhouseParam(builtFilterArgsAcc.length + 1, endDate);
+    fillClause = `WITH FILL FROM toDate(${startDateStr}) TO toDate(${endDateStr}) + 1 STEP INTERVAL 1 DAY`;
+    builtFilterArgsAcc.push(startDate, endDate);
+  } else if (request.dbIncrement === "hour" || request.dbIncrement === "min") {
+    const dateTrunc = buildDateTrunc(
+      request.dbIncrement,
+      request.timeZoneDifference,
+      "toDateTime(date)"
+    );
+    dateSelect = `${dateTrunc}`;
+    dateGroupBy = dateSelect;
+    const { fill, argsAcc } = buildFill(
+      startDate,
+      endDate,
+      request.dbIncrement,
+      request.timeZoneDifference,
+      builtFilterArgsAcc
+    );
+    fillClause = fill;
+    builtFilterArgsAcc.push(...argsAcc.slice(builtFilterArgsAcc.length));
+  }
 
   const query = `
 SELECT
-  ${dateTrunc} as created_at_trunc,
+  ${dateSelect} as created_at_trunc,
   ${groupByColumns.concat([countColumn]).join(", ")}
-FROM cache_hits
+FROM cache_metrics
 WHERE (
   ${builtFilter}
 )
-GROUP BY ${groupByColumns.concat([dateTrunc]).join(", ")}
-ORDER BY ${dateTrunc} ASC ${fill}
+GROUP BY ${groupByColumns.concat([dateGroupBy]).join(", ")}
+ORDER BY ${dateSelect} ASC ${fillClause}
 `;
 
   if (printQuery) {
-    await printRunnableQuery(query, argsAcc);
+    printRunnableQuery(query, builtFilterArgsAcc);
   }
 
   type ResultType = T & {
     created_at_trunc: Date;
   };
-  return resultMap(await dbQueryClickhouse<ResultType>(query, argsAcc), (d) =>
-    d.map((r) => ({
-      ...r,
-      created_at_trunc: new Date(
-        moment
-          .utc(r.created_at_trunc, "YYYY-MM-DD HH:mm:ss")
-          .toDate()
-          .getTime() +
-          timeZoneDifference * 60 * 1000
-      ),
-    }))
+
+  return resultMap(
+    await dbQueryClickhouse<ResultType>(query, builtFilterArgsAcc),
+    (d) =>
+      d.map((r) => ({
+        ...r,
+        created_at_trunc: new Date(r.created_at_trunc),
+      }))
   );
 }
 

@@ -1,7 +1,7 @@
 import { ISLAND_WIDTH } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
-import { ArrowUpRightIcon } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 import ContributorsImg from "@/public/static/home/community.webp";
 import DeployImg from "@/public/static/deploy-cube.png";
@@ -229,7 +229,11 @@ const OpenSource = async () => {
         </a>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
-        <div className="col-span-1 md:col-span-3 p-6 bg-slate-50 rounded-xl border border-slate-200 flex flex-col gap-9 justify-between">
+        <Link
+          href="https://github.com/helicone/helicone"
+          target="_blank"
+          className="col-span-1 md:col-span-3 p-6 bg-slate-50 rounded-xl border border-slate-200 flex flex-col gap-9 justify-between hover:bg-slate-100 transition-colors"
+        >
           <div className="flex flex-col gap-2">
             <h3 className="text-xl sm:text-2xl font-semibold text-black">
               Join our community
@@ -245,18 +249,18 @@ const OpenSource = async () => {
               </a>{" "}
               or become a contributor!
             </p>
-            <a
-              href="https://github.com/helicone/helicone"
-              target="_blank"
-              className="text-brand text-base sm:text-lg font-medium flex items-center gap-1"
-            >
+            <span className="text-brand text-base sm:text-lg font-medium flex items-center gap-1">
               Fork Helicone
-              <ArrowUpRightIcon className="w-4 h-4" />
-            </a>
+              <ArrowUpRight className="size-5 md:size-6" />
+            </span>
           </div>
           <Image src={ContributorsImg} alt="Contributors" className="w-full" />
-        </div>
-        <div className="col-span-1 md:col-span-3  bg-slate-50 rounded-xl border border-slate-200 flex flex-col gap-6">
+        </Link>
+        <Link
+          href="/contact"
+          target="_blank"
+          className="col-span-1 md:col-span-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col gap-6 hover:bg-slate-100 transition-colors"
+        >
           <div className="flex flex-col gap-2 p-6">
             <h3 className="text-xl sm:text-2xl font-semibold text-black">
               Deploy on-prem
@@ -265,25 +269,21 @@ const OpenSource = async () => {
               Cloud-host or deploy on-prem with our production-ready HELM chart
               for maximum security. Chat with us about other options.
             </p>
-            <Link
-              href="/contact"
-              target="_blank"
-              className="text-brand text-base sm:text-lg font-medium flex items-center gap-1"
-            >
+            <span className="text-brand text-base sm:text-lg font-medium flex items-center gap-1">
               Get in touch
-              <ArrowUpRightIcon className="w-4 h-4" />
-            </Link>
+              <ArrowUpRight className="w-4 h-4" />
+            </span>
           </div>
           <Image
             className="self-end pl-8 w-3/5"
             src={DeployImg}
             alt="Deploy on prem"
           />
-        </div>
+        </Link>
         <Link
           href="/llm-cost"
           target="_blank"
-          className="col-span-1 md:col-span-4 px-6 pt-6 pb-2 sm:pb-6 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row items-center sm:items-stretch gap-y-8 justify-between relative hover:bg-slate-100"
+          className="col-span-1 md:col-span-4 px-6 pt-6 pb-2 sm:pb-6 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row items-center sm:items-stretch gap-y-8 justify-between relative hover:bg-slate-100 transition-colors"
         >
           <div className="flex flex-col gap-4 sm:gap-10">
             <div className="flex flex-col gap-2">
@@ -292,7 +292,7 @@ const OpenSource = async () => {
                 <h3 className="text-xl sm:text-2xl font-semibold text-black">
                   API Cost Calculator
                 </h3>
-                <ArrowUpRightIcon className="w-4 h-4 text-brand" />
+                <ArrowUpRight className="w-4 h-4 text-brand" />
               </div>
             </div>
             <p className="text-base sm:text-lg max-w-[486px] text-wrap">
@@ -308,24 +308,22 @@ const OpenSource = async () => {
         <Link
           href="https://us.helicone.ai/open-stats"
           target="_blank"
-          className="block col-span-1 md:col-span-2 p-6 bg-slate-50 rounded-xl border border-slate-200 relative hover:bg-slate-100"
+          className="col-span-1 md:col-span-2 p-6 bg-slate-50 rounded-xl border border-slate-200 relative hover:bg-slate-100 transition-colors flex flex-col h-full justify-between"
         >
-          <div className="flex flex-col h-full justify-between">
-            <div className="flex flex-col gap-2">
-              <p className="text-sm text-slate-500">Built by Helicone</p>
+          <div className="flex flex-col gap-2">
+            <p className="text-sm text-slate-500">Built by Helicone</p>
 
-              <div className="flex items-center gap-2">
-                <h3 className="text-xl sm:text-2xl font-semibold text-black">
-                  Open Stats
-                </h3>
-                <ArrowUpRightIcon className="w-4 h-4 text-brand" />
-              </div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-xl sm:text-2xl font-semibold text-black">
+                Open Stats
+              </h3>
+              <ArrowUpRight className="w-4 h-4 text-brand" />
             </div>
-            <p className="text-base sm:text-lg max-w-[380px] text-wrap">
-              The largest public AI conversation datasets consisting of all of
-              Helicone’s LLM usage data. All anonymized.
-            </p>
           </div>
+          <p className="text-base sm:text-lg max-w-[380px] text-wrap">
+            The largest public AI conversation datasets consisting of all of
+            Helicone&apos;s LLM usage data. All anonymized.
+          </p>
           <OpenStatsSVG />
         </Link>
       </div>

@@ -16,13 +16,14 @@ import { RequestBodyHandler } from "../lib/handlers/RequestBodyHandler";
 import { ResponseBodyHandler } from "../lib/handlers/ResponseBodyHandler";
 import { S3ReaderHandler } from "../lib/handlers/S3ReaderHandler";
 import { SegmentLogHandler } from "../lib/handlers/SegmentLogHandler";
+import { StripeLogHandler } from "../lib/handlers/StripeLogHandler";
 import { WebhookHandler } from "../lib/handlers/WebhookHandler";
+import { KAFKA_ENABLED } from "../lib/producers/KafkaProducerImpl";
 import { S3Client } from "../lib/shared/db/s3Client";
 import { LogStore } from "../lib/stores/LogStore";
 import { RateLimitStore } from "../lib/stores/RateLimitStore";
 import { VersionedRequestStore } from "../lib/stores/request/VersionedRequestStore";
 import { WebhookStore } from "../lib/stores/WebhookStore";
-import { KAFKA_ENABLED } from "../lib/producers/KafkaProducerImpl";
 
 export interface LogMetaData {
   batchId?: string;
@@ -73,6 +74,7 @@ export class LogManager {
 
     const webhookHandler = new WebhookHandler(new WebhookStore());
     const segmentHandler = new SegmentLogHandler();
+    const stripeLogHandler = new StripeLogHandler();
 
     authHandler
       .setNext(rateLimitHandler)
@@ -85,7 +87,8 @@ export class LogManager {
       .setNext(posthogHandler)
       .setNext(lytixHandler)
       .setNext(webhookHandler)
-      .setNext(segmentHandler);
+      .setNext(segmentHandler)
+      .setNext(stripeLogHandler);
 
     await Promise.all(
       logMessages.map(async (logMessage) => {
@@ -158,6 +161,7 @@ export class LogManager {
 
     await this.logRateLimits(rateLimitHandler, logMetaData);
     await this.logHandlerResults(loggingHandler, logMetaData, logMessages);
+    await this.logStripeMeter(stripeLogHandler, logMetaData);
 
     // BEST EFFORT LOGGING
     this.logPosthogEvents(posthogHandler, logMetaData);
@@ -165,6 +169,27 @@ export class LogManager {
     this.logSegmentEvents(segmentHandler, logMetaData);
     this.logWebhooks(webhookHandler, logMetaData);
     console.log(`Finished processing batch ${logMetaData.batchId}`);
+  }
+
+  private async logStripeMeter(
+    stripeLogHandler: StripeLogHandler,
+    logMetaData: LogMetaData
+  ): Promise<void> {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return;
+    }
+    const start = performance.now();
+    await stripeLogHandler.handleResults();
+    const end = performance.now();
+    const executionTimeMs = end - start;
+
+    dataDogClient.logHandleResults({
+      executionTimeMs,
+      handlerName: stripeLogHandler.constructor.name,
+      methodName: "handleResults",
+      messageCount: logMetaData.messageCount ?? 0,
+      message: "Stripe meter",
+    });
   }
 
   private async logHandlerResults(
@@ -201,8 +226,7 @@ export class LogManager {
       });
 
       console.error(
-        `Error inserting logs: ${JSON.stringify(result.error)} for batch ${
-          logMetaData.batchId
+        `Error inserting logs: ${JSON.stringify(result.error)} for batch ${logMetaData.batchId
         }`
       );
 

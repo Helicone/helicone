@@ -1,17 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
-import { Result } from "../../packages/common/result";
+import { Result } from "@/packages/common/result";
 import { TimeIncrement } from "../../lib/timeCalculations/fetchTimeData";
 import { Quantiles } from "../../lib/api/metrics/quantilesCalc";
-import { FilterNode } from "../lib/filters/filterDefs";
-import {
-  DASHBOARD_PAGE_TABLE_FILTERS,
-  SingleFilterDef,
-  getPropertyFiltersV2,
-} from "../lib/filters/frontendFilterDefs";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
+import { getPropertyFiltersV2 } from "@helicone-package/filters/frontendFilterDefs";
 import { useGetPropertiesV2 } from "./propertiesV2";
 
 const useQuantiles = (data: {
-  uiFilters: FilterNode;
+  filters: FilterNode;
   timeFilter: {
     start: Date;
     end: Date;
@@ -20,12 +16,8 @@ const useQuantiles = (data: {
   timeZoneDifference: number;
   metric: string;
 }) => {
-  const {
-    properties,
-    isLoading: isPropertiesLoading,
-    propertyFilters,
-    searchPropertyFilters,
-  } = useGetPropertiesV2(getPropertyFiltersV2);
+  const { isLoading: isPropertiesLoading, propertyFilters } =
+    useGetPropertiesV2(getPropertyFiltersV2);
 
   const {
     data: quantiles,
@@ -36,7 +28,7 @@ const useQuantiles = (data: {
       "quantiles",
       data.timeFilter,
       data.metric,
-      data.uiFilters,
+      data.filters,
       data.dbIncrement,
       data.timeZoneDifference,
     ],
@@ -46,10 +38,6 @@ const useQuantiles = (data: {
       const uiFilters = query.queryKey[3] as FilterNode;
       const dbIncrement = query.queryKey[4];
       const timeZoneDifference = query.queryKey[5];
-
-      const filterMap = (
-        DASHBOARD_PAGE_TABLE_FILTERS as SingleFilterDef<any>[]
-      ).concat(propertyFilters);
 
       return await fetch("/api/metrics/quantiles", {
         method: "POST",

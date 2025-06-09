@@ -44,12 +44,58 @@ async function getProviderResponse(
   retryOptions: RetryOptions | null,
   responseOverride?: Response
 ): Promise<Response> {
-  if (responseOverride) {
-    return responseOverride;
-  } else if (retryOptions) {
-    return callProviderWithRetry(callProps, retryOptions);
-  } else {
-    return callProvider(callProps);
+  try {
+    if (responseOverride) {
+      return responseOverride;
+    } else if (retryOptions) {
+      return await callProviderWithRetry(callProps, retryOptions);
+    } else {
+      return await callProvider(callProps);
+    }
+  } catch (e) {
+
+    if (e instanceof Error) {
+      if (e.message.includes("Network connection lost")) {
+        return new Response(
+          JSON.stringify({
+            error: "Network connection lost",
+            message: "Unable to connect to the provider",
+            "helicone-message": "Unable to connect to the provider",
+            support:
+              "Please reach out on our discord or email us at help@helicone.ai, we'd love to help!",
+            "error-trace": "" + e.message + " " + e.name + " " + e.stack,
+          }),
+          {
+            status: 502, // Bad Gateway
+            headers: { "content-type": "application/json" }
+          }
+        );
+      }
+
+      if (e.message.includes("timeout") || e.name === "AbortError") {
+        return new Response(
+          JSON.stringify({
+            error: "Request timeout",
+            message: "The request to the provider timed out",
+            "helicone-message": "The request to the provider timed out",
+            support:
+              "Please reach out on our discord or email us at help@helicone.ai, we'd love to help!",
+            "error-trace": "" + e.message + " " + e.name + " " + e.stack,
+          }),
+          {
+            status: 504, // Gateway Timeout
+            headers: { "content-type": "application/json" }
+          }
+        );
+      }
+    }
+    return new Response(JSON.stringify({
+      error: "Unknown error",
+      message: "An unknown error occurred",
+      "helicone-message": "An unknown error occurred",
+      support: "Please reach out on our discord or email us at help@helicone.ai, we'd love to help!",
+      "error-trace": JSON.stringify(e),
+    }), { status: 500, headers: { "content-type": "application/json" } });
   }
 }
 
@@ -124,7 +170,7 @@ export async function handleProxyRequest(
             body: (await interceptor?.waitForStream())?.body ?? [],
             endTime: new Date(
               (await interceptor?.waitForStream())?.endTimeUnix ??
-                new Date().getTime()
+              new Date().getTime()
             ),
           }),
           responseHeaders: new Headers(response.headers),

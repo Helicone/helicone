@@ -5,7 +5,7 @@ import {
   TimeInterval,
   getTimeIntervalAgo,
 } from "../../../lib/timeCalculations/time";
-import { Result } from "../../../packages/common/result";
+import { Result } from "@/packages/common/result";
 import AuthHeader from "../../shared/authHeader";
 import ThemedTable from "../../shared/themed/table/themedTableOld";
 import { INITIAL_COLUMNS } from "./initialColumns";

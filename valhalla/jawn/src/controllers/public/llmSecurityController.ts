@@ -1,7 +1,7 @@
 import { Body, Controller, Post, Request, Route, Tags } from "tsoa";
 import { GET_KEY } from "../../lib/clients/constant";
 import { Result, err, ok } from "../../packages/common/result";
-import { JawnAuthenticatedRequest } from "../../types/request";
+import { type JawnAuthenticatedRequest } from "../../types/request";
 
 async function checkLLMGuard(text: string): Promise<{
   unsafe: boolean;

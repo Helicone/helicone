@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { TimeFilter } from "@/types/timeFilter";
-import { Result } from "../../packages/common/result";
+import { Result } from "@/packages/common/result";
 import { ModelMetric } from "../../lib/api/models/models";
-import { FilterNode } from "../lib/filters/filterDefs";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
 
 const useModels = (
   timeFilter: TimeFilter,

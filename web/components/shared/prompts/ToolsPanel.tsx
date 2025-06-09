@@ -5,7 +5,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Tool } from "packages/llm-mapper/types";
+import { Tool } from "@helicone-package/llm-mapper/types";
 import { useState } from "react";
 import { PiPlusBold, PiToolboxBold, PiTrashBold } from "react-icons/pi";
 import GlassHeader from "../universal/GlassHeader";

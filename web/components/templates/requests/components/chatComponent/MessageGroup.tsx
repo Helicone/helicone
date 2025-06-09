@@ -1,5 +1,8 @@
 import React from "react";
-import { MappedLLMRequest, PromptMessage } from "@/packages/llm-mapper/types";
+import {
+  MappedLLMRequest,
+  PromptMessage,
+} from "@helicone-package/llm-mapper/types";
 import { SingleChat } from "./single/singleChat";
 import { PROMPT_MODES } from "./chatTopBar";
 

@@ -12,7 +12,7 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { FilterLeafSubset } from "../../lib/shared/filters/filterDefs";
+import { FilterLeafSubset } from "@helicone-package/filters/filterDefs";
 import { Result, err, ok } from "../../packages/common/result";
 import {
   Experiment,
@@ -24,11 +24,11 @@ import {
 import { DatasetManager } from "../../managers/dataset/DatasetManager";
 import { EvaluatorManager } from "../../managers/evaluator/EvaluatorManager";
 import {
-  CreateExperimentTableParams,
+  type CreateExperimentTableParams,
   ExperimentManager,
 } from "../../managers/experiment/ExperimentManager";
 import { InputsManager } from "../../managers/inputs/InputsManager";
-import { JawnAuthenticatedRequest } from "../../types/request";
+import { type JawnAuthenticatedRequest } from "../../types/request";
 import { EvaluatorResult } from "./evaluatorController";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 

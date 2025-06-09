@@ -1,5 +1,5 @@
 import { Response } from "node-fetch";
-import { Provider } from "../../packages/llm-mapper/types";
+import { Provider } from "@helicone-package/llm-mapper/types";
 import { HeliconeQueueProducer } from "../clients/HeliconeQuequeProducer";
 import { RequestWrapper } from "../requestWrapper/requestWrapper";
 import { getHeliconeAuthClient } from "../../packages/common/auth/server/AuthClientFactory";

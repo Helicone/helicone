@@ -11,7 +11,7 @@ import {
 } from "next";
 import { supabaseUrl as serverSupabaseUrl } from "../supabaseServer";
 import { ORG_ID_COOKIE_KEY } from "../constants";
-import { Result, ok } from "../../packages/common/result";
+import { Result, ok } from "@/packages/common/result";
 import { dbExecute } from "../api/db/dbExecute";
 
 export type SSRContext<T> =

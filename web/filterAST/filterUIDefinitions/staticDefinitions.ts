@@ -140,6 +140,14 @@ export const STATIC_SESSIONS_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     table: "sessions_request_response_rmt",
     subType: "sessions",
   },
+  {
+    id: "session_tag",
+    label: "Tags",
+    type: "string",
+    operators: ["eq", "neq", "like", "ilike", "contains"],
+    table: "sessions_request_response_rmt",
+    subType: "sessions",
+  },
 ];
 
 // Static definitions that don't need to be fetched
@@ -170,13 +178,6 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
   {
     id: "organization_id",
     label: "Organization ID",
-    type: "string",
-    operators: ["eq", "neq", "like", "ilike", "contains"],
-    table: "request_response_rmt",
-  },
-  {
-    id: "proxy_key_id",
-    label: "Proxy Key ID",
     type: "string",
     operators: ["eq", "neq", "like", "ilike", "contains"],
     table: "request_response_rmt",
@@ -274,6 +275,17 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
     ],
     table: "request_response_rmt",
   },
+  {
+    id: "cache_enabled",
+    label: "Cache Enabled",
+    type: "boolean",
+    operators: ["is"],
+    valueOptions: [
+      { label: "Yes", value: true },
+      { label: "No", value: false },
+    ],
+    table: "request_response_rmt",
+  },
 
   // Datetime fields
   {
@@ -294,13 +306,6 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
     id: "updated_at",
     label: "Updated At",
     type: "datetime",
-    operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
-    table: "request_response_rmt",
-  },
-  {
-    id: "scores",
-    label: "Scores",
-    type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
     table: "request_response_rmt",
   },

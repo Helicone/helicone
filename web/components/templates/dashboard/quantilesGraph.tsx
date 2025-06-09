@@ -5,12 +5,12 @@ import { clsx } from "../../shared/clsx";
 import LoadingAnimation from "../../shared/loadingAnimation";
 import { getTimeMap } from "../../../lib/timeCalculations/constants";
 import { TimeIncrement } from "../../../lib/timeCalculations/fetchTimeData";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { getMockQuantiles } from "./mockDashboardData";
 
 type QuantilesGraphProps = {
-  uiFilters: FilterNode;
+  filters: FilterNode;
   timeFilter: {
     start: Date;
     end: Date;
@@ -19,7 +19,7 @@ type QuantilesGraphProps = {
 };
 
 export const QuantilesGraph = ({
-  uiFilters,
+  filters,
   timeFilter,
   timeIncrement,
 }: QuantilesGraphProps) => {
@@ -35,7 +35,7 @@ export const QuantilesGraph = ({
   const shouldShowMockData = org?.currentOrg?.has_onboarded === false;
 
   const { quantiles, isQuantilesLoading: quantilesIsLoading } = useQuantiles({
-    uiFilters,
+    filters,
     timeFilter,
     dbIncrement: timeIncrement,
     timeZoneDifference: new Date().getTimezoneOffset(),

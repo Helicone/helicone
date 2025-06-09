@@ -6,7 +6,7 @@ import {
   PaperAirplaneIcon,
 } from "@heroicons/react/24/outline";
 import { clsx } from "../../shared/clsx";
-import { Message } from "@/packages/llm-mapper/types";
+import { Message } from "@helicone-package/llm-mapper/types";
 
 interface ChatInputAreaProps {
   currentChat: Message[];

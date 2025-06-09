@@ -1,5 +1,30 @@
-import { HeliconeRequest, Message } from "@/packages/llm-mapper/types";
-import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
+import { HeliconeRequest, Message } from "@helicone-package/llm-mapper/types";
+import { heliconeRequestToMappedContent } from "@helicone-package/llm-mapper/utils/getMappedContent";
+import { MappedLLMRequest } from "@helicone-package/llm-mapper/types";
+
+// Given a mapped request, return a sorted array of "valid" messages.
+// => Valid, for e.g messages that can be displayed as a row in Sessions, separately.
+// => Invalid, e.g "session.update" messages, are not renderable steps. (though, I think it should be.)
+// note: We should render session.update messages, its important information.
+export const getSortedMessagesFromMappedRequest = (
+  mappedRequest: MappedLLMRequest
+) => {
+  const messages = [
+    ...(mappedRequest.schema.request?.messages || []),
+    ...(mappedRequest.schema.response?.messages || []),
+  ];
+
+  return messages
+    .filter(
+      (m) => m.timestamp && m.role && !isNaN(new Date(m.timestamp).getTime())
+    )
+    .sort((a, b) => {
+      return (
+        new Date((a?.start_timestamp ?? a?.timestamp) || 0).getTime() -
+        new Date((b?.start_timestamp ?? b?.timestamp) || 0).getTime()
+      );
+    });
+};
 
 /**
  * Checks if a HeliconeRequest represents a realtime session based on its model name.
@@ -26,27 +51,7 @@ export const convertRealtimeRequestToSteps = (
   }
 
   const mappedContent = heliconeRequestToMappedContent(realtimeRequest);
-
-  // Get all timestamped messages from the realtime request
-  const reqMessages = mappedContent.schema.request.messages || [];
-  const respMessages = mappedContent.schema.response?.messages || [];
-  // Filter out messages without valid timestamps, role, or content, as they cannot be sequenced
-  // *** Also filter out the "session.update" messages as they don't represent renderable steps ***
-  const allMessages = [...reqMessages, ...respMessages].filter(
-    (m) =>
-      m.timestamp &&
-      m.role &&
-      m.content &&
-      !isNaN(new Date(m.timestamp).getTime())
-  );
-
-  // Sort messages by timestamp
-  const sortedMessages = [...allMessages].sort((a, b) => {
-    // Timestamps are validated by the filter above
-    const timeA = new Date(a.timestamp!).getTime();
-    const timeB = new Date(b.timestamp!).getTime();
-    return timeA - timeB;
-  });
+  const sortedMessages = getSortedMessagesFromMappedRequest(mappedContent);
 
   const simulatedSteps: HeliconeRequest[] = [];
   let previousStepResponseTimestampMs = 0; // Track the end time of the last created step
@@ -81,23 +86,35 @@ function createSimulatedRequestStep(
   previousStepResponseTimestampMs: number // The end time (in ms) of the preceding step
 ): HeliconeRequest {
   // Use the message timestamp as the base request time
-  const baseRequestTimestampMs = new Date(message.timestamp!).getTime();
+  const baseRequestTimestampMs = new Date(
+    message.start_timestamp ?? message.timestamp!
+  ).getTime();
 
   // Ensure the current step starts at least 1ms after the previous step ended
-  const stepRequestTimestampMs = Math.max(
-    baseRequestTimestampMs,
-    previousStepResponseTimestampMs + 1 // Add 1ms to ensure it's strictly after
-  );
+  const stepRequestTimestampMs = Math.max(baseRequestTimestampMs, 0);
 
   // Set response time 100ms after the (potentially adjusted) request time
   // Add a minimum duration of 1ms in case 100ms is too short due to adjustments
   const stepResponseTimestampMs = Math.max(
-    stepRequestTimestampMs + 100, // Keep a small simulated duration for the step
-    stepRequestTimestampMs + 1
+    stepRequestTimestampMs + 1,
+    new Date(message.timestamp!).getTime()
   );
 
   // Create a unique ID for the simulated step based on its index
   const simulatedId = `${originalRequest.request_id}-step-${stepIndex}`;
+
+  const getMessagePath = (request: HeliconeRequest, message: Message) => {
+    let base = request.request_properties?.["Helicone-Session-Path"];
+    if (message._type === "functionCall" || message._type === "function") {
+      return base ? base + "-Tool" : "/Tool";
+    } else if (message.role === "user" || message.role === "assistant") {
+      const role =
+        message.role?.charAt(0).toUpperCase() + message.role?.slice(1);
+      return base ? base + `-${role}` : `/${role}`;
+    } else {
+      return base ? base + "-Other" : "/Other";
+    }
+  };
 
   // Create the simulated request step object
   return {
@@ -113,6 +130,8 @@ function createSimulatedRequestStep(
     request_body: originalRequest.request_body,
     response_body: originalRequest.response_body,
 
+    request_path: getMessagePath(originalRequest, message),
+
     // Keep original token/cost/latency data from the parent request
     // These fields are already copied by the spread operator above
 
@@ -120,6 +139,7 @@ function createSimulatedRequestStep(
     // Merge with existing request_properties
     request_properties: {
       ...(originalRequest.request_properties || {}),
+      "Helicone-Session-Path": getMessagePath(originalRequest, message),
       _helicone_realtime_original_request_id: originalRequest.request_id,
       _helicone_realtime_step_index: stepIndex.toString(), // Store the step's chronological index
     },

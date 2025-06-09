@@ -11,6 +11,7 @@ async function main() {
     defaultHeaders: {
       "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
       "Helicone-Cache-Enabled": "true",
+      "Helicone-Cache-Bucket-Max-Size": "3",
     },
   });
 
@@ -36,6 +37,7 @@ async function main() {
       {
         headers: {
           "Helicone-Cache-Enabled": "true",
+          "Helicone-Cache-Bucket-Max-Size": "3",
         },
       }
     )

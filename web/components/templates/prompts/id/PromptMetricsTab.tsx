@@ -13,10 +13,7 @@ import { useGetDataSets } from "../../../../services/hooks/prompts/datasets";
 import { useExperiments } from "../../../../services/hooks/prompts/experiments";
 import { usePromptRequestsOverTime } from "../../../../services/hooks/prompts/prompts";
 import { BackendMetricsCall } from "../../../../services/hooks/useBackendFunction";
-import {
-  FilterBranch,
-  FilterLeaf,
-} from "../../../../services/lib/filters/filterDefs";
+import { FilterBranch, FilterLeaf } from "@helicone-package/filters/filterDefs";
 import LoadingAnimation from "../../../shared/loadingAnimation";
 import { SimpleTable } from "../../../shared/table/simpleTable";
 import ThemedTimeFilter from "../../../shared/themed/themedTimeFilter";

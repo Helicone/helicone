@@ -1,18 +1,24 @@
 import {
   SessionNameQueryParams,
   SessionQueryParams,
+  SessionMetricsQueryParams,
 } from "../controllers/public/sessionController";
-import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
-import { dbExecute } from "../lib/shared/db/dbExecute";
-import { filterListToTree, FilterNode } from "../lib/shared/filters/filterDefs";
-import { buildFilterWithAuthClickHouse } from "../lib/shared/filters/filters";
+import { clickhouseDb, Tags } from "../lib/db/ClickhouseWrapper";
+import { dbExecute, printRunnableQuery } from "../lib/shared/db/dbExecute";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
+import { filterListToTree } from "@helicone-package/filters/helpers";
+import { buildFilterWithAuthClickHouse } from "@helicone-package/filters/filters";
+import { TimeFilterMs } from "@helicone-package/filters/filterDefs";
 import { AuthParams } from "../packages/common/auth/types";
 import { err, ok, Result, resultMap } from "../packages/common/result";
-import { clickhousePriceCalc } from "../packages/cost";
+import { TagType } from "../packages/common/sessions/tags";
+import { clickhousePriceCalc } from "@helicone-package/cost";
 import { isValidTimeZoneDifference } from "../utils/helpers";
 import {
   getHistogramRowOnKeys,
   HistogramRow,
+  getAveragePerSession,
+  AverageRow,
 } from "./helpers/percentileDistributions";
 import { RequestManager } from "./request/RequestManager";
 
@@ -42,16 +48,44 @@ export interface SessionMetrics {
   session_count: HistogramRow[];
   session_duration: HistogramRow[];
   session_cost: HistogramRow[];
+  average: {
+    session_count: AverageRow[];
+    session_duration: AverageRow[];
+    session_cost: AverageRow[];
+  };
 }
 
 export class SessionManager {
   constructor(private authParams: AuthParams) {}
 
   async getMetrics(
-    requestBody: SessionNameQueryParams
+    requestBody: SessionMetricsQueryParams
   ): Promise<Result<SessionMetrics, string>> {
-    const { nameContains, timezoneDifference, useInterquartile, pSize } =
-      requestBody;
+    const {
+      nameContains,
+      timezoneDifference,
+      useInterquartile,
+      pSize,
+      timeFilter,
+      filter,
+    } = requestBody;
+
+    const filters: FilterNode[] = [
+      ...(timeFilter ? timeFilterNodes(timeFilter) : []),
+      ...(filter ? [filter] : []),
+    ];
+
+    if (nameContains) {
+      filters.push({
+        request_response_rmt: {
+          properties: {
+            "Helicone-Session-Name": {
+              equals: nameContains,
+            },
+          },
+        },
+      });
+    }
 
     if (!isValidTimeZoneDifference(timezoneDifference)) {
       return err("Invalid timezone difference");
@@ -59,18 +93,15 @@ export class SessionManager {
 
     const builtFilter = await buildFilterWithAuthClickHouse({
       org_id: this.authParams.organizationId,
-      filter: nameContains
-        ? {
-            request_response_rmt: {
-              properties: {
-                "Helicone-Session-Name": {
-                  ilike: `%${nameContains}%`,
-                },
-              },
-            },
-          }
-        : "all",
+      filter: filterListToTree(filters, "and"),
       argsAcc: [],
+    });
+
+    const havingFilter = await buildFilterWithAuthClickHouse({
+      org_id: this.authParams.organizationId,
+      filter: filterListToTree(filters, "and"),
+      argsAcc: [],
+      having: true,
     });
 
     const histogramData = await getHistogramRowOnKeys({
@@ -78,8 +109,8 @@ export class SessionManager {
         { key: "properties['Helicone-Session-Name']", alias: "session_name" },
         { key: "properties['Helicone-Session-Id']", alias: "session_id" },
       ],
-      pSize: requestBody.pSize ?? "p75",
-      useInterquartile: requestBody.useInterquartile ?? false,
+      pSize: pSize ?? "p75",
+      useInterquartile: useInterquartile ?? false,
       builtFilter,
       aggregateFunction: "count(*)",
     });
@@ -109,39 +140,78 @@ export class SessionManager {
       aggregateFunction: clickhousePriceCalc("request_response_rmt"),
     });
 
+    const averageResults = await Promise.all([
+      getAveragePerSession({
+        key: { key: "properties['Helicone-Session-Id']", alias: "cost" },
+        builtFilter,
+        aggregateFunction: clickhousePriceCalc("request_response_rmt"),
+      }),
+      getAveragePerSession({
+        key: { key: "properties['Helicone-Session-Id']", alias: "duration" },
+        builtFilter,
+        aggregateFunction:
+          "dateDiff('second', min(request_response_rmt.request_created_at), max(request_response_rmt.request_created_at))",
+      }),
+      getAveragePerSession({
+        key: { key: "properties['Helicone-Session-Id']", alias: "count" },
+        builtFilter,
+        aggregateFunction: "count(*)",
+      }),
+    ]);
+
     if (sessionCostData.error) {
       return sessionCostData;
+    }
+
+    // Check for errors in each average result
+    for (const result of averageResults) {
+      if (result.error) {
+        return result;
+      }
     }
 
     return ok({
       session_count: histogramData.data!,
       session_duration: sessionDurationData.data!,
       session_cost: sessionCostData.data!,
+      average: {
+        session_cost: averageResults[0].data!,
+        session_duration: averageResults[1].data!,
+        session_count: averageResults[2].data!,
+      },
     });
   }
 
   async getSessionNames(
     requestBody: SessionNameQueryParams
   ): Promise<Result<SessionNameResult[], string>> {
-    const { nameContains, timezoneDifference } = requestBody;
+    const { nameContains, timezoneDifference, timeFilter, filter } =
+      requestBody;
 
     if (!isValidTimeZoneDifference(timezoneDifference)) {
       return err("Invalid timezone difference");
     }
 
+    const filters: FilterNode[] = [
+      ...(timeFilter ? timeFilterNodes(timeFilter) : []),
+      ...(filter ? [filter] : []),
+    ];
+
+    if (nameContains) {
+      filters.push({
+        request_response_rmt: {
+          properties: {
+            "Helicone-Session-Name": {
+              contains: nameContains,
+            },
+          },
+        },
+      });
+    }
+
     const builtFilter = await buildFilterWithAuthClickHouse({
       org_id: this.authParams.organizationId,
-      filter: nameContains
-        ? {
-            request_response_rmt: {
-              properties: {
-                "Helicone-Session-Name": {
-                  ilike: `%${nameContains}%`,
-                },
-              },
-            },
-          }
-        : "all",
+      filter: filterListToTree(filters, "and"),
       argsAcc: [],
     });
 
@@ -204,23 +274,7 @@ export class SessionManager {
       return err("Invalid timezone difference");
     }
 
-    const filters: FilterNode[] = [
-      {
-        request_response_rmt: {
-          request_created_at: {
-            gt: new Date(timeFilter.startTimeUnixMs),
-          },
-        },
-      },
-      {
-        request_response_rmt: {
-          request_created_at: {
-            lt: new Date(timeFilter.endTimeUnixMs),
-          },
-        },
-      },
-      filterTree,
-    ];
+    const filters: FilterNode[] = [...timeFilterNodes(timeFilter), filterTree];
 
     if (nameEquals) {
       filters.push({
@@ -283,7 +337,7 @@ export class SessionManager {
       properties['Helicone-Session-Id'] as session_id,
       properties['Helicone-Session-Name'] as session_name,
       avg(request_response_rmt.latency) as avg_latency,
-      ${clickhousePriceCalc("request_response_rmt")} AS total_cost,
+      0 AS total_cost,
       count(*) AS total_requests,
       sum(request_response_rmt.prompt_tokens) AS prompt_tokens,
       sum(request_response_rmt.completion_tokens) AS completion_tokens,
@@ -297,7 +351,7 @@ export class SessionManager {
     )
     GROUP BY properties['Helicone-Session-Id'], properties['Helicone-Session-Name']
     HAVING (${havingFilter.filter})
-    ORDER BY created_at DESC
+    ORDER BY created_at DESC -- TODO: REMOVE FOR TEST
     LIMIT 50
     `;
 
@@ -352,4 +406,86 @@ export class SessionManager {
       return err(String(error));
     }
   }
+
+  async getSessionTag(
+    sessionId: string
+  ): Promise<Result<string | null, string>> {
+    try {
+      const query = `
+        SELECT tag 
+        FROM tags 
+        WHERE entity_id = {val_0: String} AND entity_type = {val_1: String} AND organization_id = {val_2: String}
+        GROUP BY tag 
+        ORDER BY max(created_at) DESC
+      `;
+
+      const result = await clickhouseDb.dbQuery<{ tag: string }>(query, [
+        sessionId,
+        TagType.SESSION,
+        this.authParams.organizationId,
+      ]);
+
+      if (result.error) {
+        return err(result.error ?? "No tag found");
+      }
+
+      if (!result.data || result.data.length === 0) {
+        return ok(null);
+      }
+
+      return ok(result.data[0].tag);
+    } catch (error) {
+      console.error("Error getting session tag:", error);
+      return err(String(error));
+    }
+  }
+
+  async updateSessionTag(
+    sessionId: string,
+    tag: string
+  ): Promise<Result<null, string>> {
+    try {
+      const valuesToInsert: Tags = {
+        organization_id: this.authParams.organizationId,
+        entity_type: TagType.SESSION,
+        entity_id: sessionId,
+        tag: tag,
+      };
+
+      const insertResult = await clickhouseDb.dbInsertClickhouse("tags", [
+        valuesToInsert,
+      ]);
+
+      if (insertResult.error) {
+        return err(insertResult.error ?? "Could not update session tag");
+      }
+
+      return ok(null); // Successfully inserted
+    } catch (error) {
+      console.error("Error updating session tag:", error);
+      return err(String(error));
+    }
+  }
 }
+
+const timeFilterNodes = (timeFilter: TimeFilterMs): FilterNode[] => {
+  if (!timeFilter) {
+    return [];
+  }
+  return [
+    {
+      request_response_rmt: {
+        request_created_at: {
+          gt: new Date(timeFilter.startTimeUnixMs),
+        },
+      },
+    },
+    {
+      request_response_rmt: {
+        request_created_at: {
+          lt: new Date(timeFilter.endTimeUnixMs),
+        },
+      },
+    },
+  ];
+};
