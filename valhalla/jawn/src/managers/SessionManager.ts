@@ -5,9 +5,10 @@ import {
 } from "../controllers/public/sessionController";
 import { clickhouseDb, Tags } from "../lib/db/ClickhouseWrapper";
 import { dbExecute, printRunnableQuery } from "../lib/shared/db/dbExecute";
-import { filterListToTree, FilterNode } from "../lib/shared/filters/filterDefs";
-import { buildFilterWithAuthClickHouse } from "../lib/shared/filters/filters";
-import { TimeFilterMs } from "../lib/shared/filters/timeFilter";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
+import { filterListToTree } from "@helicone-package/filters/helpers";
+import { buildFilterWithAuthClickHouse } from "@helicone-package/filters/filters";
+import { TimeFilterMs } from "@helicone-package/filters/filterDefs";
 import { AuthParams } from "../packages/common/auth/types";
 import { err, ok, Result, resultMap } from "../packages/common/result";
 import { TagType } from "../packages/common/sessions/tags";
@@ -94,6 +95,13 @@ export class SessionManager {
       org_id: this.authParams.organizationId,
       filter: filterListToTree(filters, "and"),
       argsAcc: [],
+    });
+
+    const havingFilter = await buildFilterWithAuthClickHouse({
+      org_id: this.authParams.organizationId,
+      filter: filterListToTree(filters, "and"),
+      argsAcc: [],
+      having: true,
     });
 
     const histogramData = await getHistogramRowOnKeys({
@@ -329,7 +337,7 @@ export class SessionManager {
       properties['Helicone-Session-Id'] as session_id,
       properties['Helicone-Session-Name'] as session_name,
       avg(request_response_rmt.latency) as avg_latency,
-      ${clickhousePriceCalc("request_response_rmt")} AS total_cost,
+      0 AS total_cost,
       count(*) AS total_requests,
       sum(request_response_rmt.prompt_tokens) AS prompt_tokens,
       sum(request_response_rmt.completion_tokens) AS completion_tokens,

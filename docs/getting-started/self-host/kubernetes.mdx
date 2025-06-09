@@ -5,255 +5,203 @@ description: "Deploy Helicone using Kubernetes and Helm. Quick setup guide for r
 "twitter:title": "Kubernetes Deployment - Helicone OSS LLM Observability"
 ---
 
-At Helicone, we believe that open-source software makes the world a better place. We are committed to open-source and have made a guide to make it easy for you to deploy your own instance of Helicone using Kubernetes and Helm.
+The Helm chart deploys the complete Helicone stack on Kubernetes. Terraform creates AWS S3, Aurora,
+and EKS resources to run the Helicone project on.
+The Helm chart is available in the [Helicone Helm repository](https://github.com/Helicone/helicone-helm-v3).
+Previous version: [v2](https://github.com/Helicone/helicone-helm-v2)
 
-## Prerequisites
+## AWS Setup Guide
 
-- A running Kubernetes cluster (local or cloud-based)
-- [Helm](https://helm.sh/docs/intro/install/) installed (version 3 or higher)
-- [kubectl](https://kubernetes.io/docs/tasks/tools/) command-line tool configured to communicate with your cluster
+### Prerequisites
 
-## Installation Steps
+1. Install **[AWS CLI](https://aws.amazon.com/cli/)** - Install and configure with appropriate
+   permissions
+2. Install **[kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)** - For Kubernetes
+   operations
+3. Install **[Helm](https://helm.sh/docs/intro/install/)** - For chart deployment
+4. Install **[Terraform](https://developer.hashicorp.com/terraform/install)** - For infrastructure
+   as code deployment
+5. Copy all values.example.yaml files to values.yaml for each of the charts in `charts/` and
+   customize as needed for your configuration.
 
-### 1. Add the Helicone Helm Repository
+## Cluster Creation on EKS with Terraform
 
-First, add the Helicone Helm repository to your Helm repos:
+1. Set up [Terraform](https://developer.hashicorp.com/terraform/install)
+2. Go to terraform/eks, then `terraform init`, followed by `terrform validate` followed by
+   `terraform apply`
 
-```bash
-helm repo add helicone https://github.com/Helicone/HELM
-helm repo update
-```
+## Deploy Helm Charts
 
-### 2. Create Required Kubernetes Secrets
+### Option 1: Using Helm Compose (Recommended)
 
-Helicone requires certain secrets to be set up for ClickHouse (the database) and S3-compatible storage. These secrets need to be created before installing the Helm chart.
-
-#### Create ClickHouse Secret
-
-If you don't specify custom credentials, default values will be used. To create a secret with default credentials:
-
-```bash
-kubectl create secret generic helicone-clickhouse \
-  --from-literal=CLICKHOUSE_USER='default' \
-  --from-literal=CLICKHOUSE_PASSWORD='default'
-```
-
-<Note>
-  You can replace `'default'` with your preferred username and password.
-</Note>
-
-#### Create S3 Secret
-
-Helicone requires S3-compatible storage for certain functionalities. Create a Kubernetes secret with your storage credentials:
+You can now deploy all Helicone components with a single command using the provided
+`helm-compose.yaml` configuration:
 
 ```bash
-kubectl create secret generic helicone-s3 \
-  --from-literal=access_key='YOUR_ACCESS_KEY' \
-  --from-literal=secret_key='YOUR_SECRET_KEY' \
-  --from-literal=bucket_name='YOUR_BUCKET_NAME' \
-  --from-literal=endpoint='YOUR_S3_ENDPOINT'
+helm compose up
 ```
 
-<Note>
-  Replace placeholders with your actual S3 credentials and bucket details. For
-  example, if you're using AWS S3, the endpoint would be
-  `https://s3.amazonaws.com`.
-</Note>
+This will deploy the complete Helicone stack including:
 
-### 3. Install the Helicone Helm Chart
+- **helicone-core** - Main application components (web, jawn, worker, etc.)
+- **helicone-infrastructure** - Infrastructure services (PostgreSQL, Redis, ClickHouse, etc.)
+- **helicone-monitoring** - Monitoring stack (Grafana, Prometheus)
+- **helicone-argocd** - ArgoCD for GitOps workflows
 
-To install the chart with the release name `helicone`:
+To tear down all components:
 
 ```bash
-helm install helicone helicone/helicone
+helm compose down
 ```
 
-This command deploys Helicone on your Kubernetes cluster using the default configuration.
+### Option 2: Manual Helm Installation
 
-### 4. Accessing the Helicone Web Interface
+Alternatively, you can install components individually:
 
-By default, the Helicone web service is exposed internally within the cluster. To access it locally, set up port forwarding:
-
-```bash
-kubectl port-forward svc/helicone-web 3000:80
-```
-
-Now, you can access the Helicone web interface at `http://localhost:3000`.
-
-<Note>
-  To create a user, you need to access the Supabase Auth dashboard. Set up port forwarding for the Supabase service:
-
-```bash
-kubectl port-forward svc/helicone-supabase 8989:8989
-```
-
-Then, navigate to `http://localhost:8989/project/default/auth/users` in your browser and add your account. You can use this account to sign into Helicone at `http://localhost:3000`.
-
-</Note>
-
-**Default URLs:**
-
-- Helicone Web Interface: `http://localhost:3000`
-- Helicone Worker: `http://localhost:8787`
-
-## Configuration
-
-### Customizing the Deployment
-
-You can customize the Helm chart by specifying parameters using the `--set` flag when installing or upgrading the chart.
-
-For example, to change the service type to `LoadBalancer`:
-
-```bash
-helm install helicone helicone/helicone --set service.type=LoadBalancer
-```
-
-Alternatively, you can create a custom `values.yaml` file to override default settings.
-
-#### Using a Custom Values File
-
-1. Create a `custom-values.yaml` file with your desired configuration:
-
-   ```yaml
-   service:
-     type: LoadBalancer
-     port: 80
-   ```
-
-2. Install the Helm chart using your custom values:
+1. Install necessary helm dependencies:
 
    ```bash
-   helm install helicone helicone/helicone -f custom-values.yaml
+   cd helicone && helm dependency build
    ```
 
-### Persistent Storage and Data
+2. Use `values.example.yaml` as a starting point, and copy into `values.yaml`
 
-If you need to retain data between pod restarts or upgrades, ensure that you configure persistent storage for the databases used by Helicone. You can specify PVCs (Persistent Volume Claims) in your `values.yaml`.
+3. Copy `secrets.example.yaml` into `secrets.yaml`, and change the secrets according to your setup.
 
-## Additional Ingress & TLS Configuration
+4. Install/upgrade each Helm chart individually:
 
-To expose Helicone externally with a domain name and secure it with TLS certificates, follow these steps.
+   ```bash
+   # Install core Helicone application components
+   helm upgrade --install helicone-core ./helicone-core -f values.yaml
 
-### 1. Install an Ingress Controller
+   # Install infrastructure services (autoscaling, [Beyla](https://grafana.com/docs/beyla/latest/))
+   helm upgrade --install helicone-infrastructure ./helicone-infrastructure -f values.yaml
 
-Install an ingress controller suitable for your Kubernetes cluster. For example, to install NGINX Ingress Controller:
+   # Install monitoring stack (Grafana, Prometheus)
+   helm upgrade --install helicone-monitoring ./helicone-monitoring -f values.yaml
 
-```bash
-helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-helm repo update
+   # Install ArgoCD for GitOps workflows
+   helm upgrade --install helicone-argocd ./helicone-argocd -f values.yaml
+   ```
 
-helm install nginx-ingress ingress-nginx/ingress-nginx \
-  --namespace ingress-nginx --create-namespace \
-  --set controller.publishService.enabled=true
-```
+5. Verify the deployment:
 
-### 2. Install Cert-Manager
+   ```bash
+   kubectl get pods
+   ```
 
-Cert-Manager automates the management and issuance of TLS certificates.
+## Accessing Deployed Services
 
-```bash
-kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/latest/download/cert-manager.yaml
-```
+### ArgoCD
 
-Create a ClusterIssuer for Let's Encrypt (production):
+ArgoCD is deployed as part of the **helicone-argocd** component and provides GitOps capabilities for
+continuous deployment. It monitors your Git repositories and automatically synchronizes your
+Kubernetes cluster state with the desired state defined in your Git repos.
+
+#### Accessing ArgoCD UI
+
+1. Port-forward to access the ArgoCD server:
+
+   ```bash
+   kubectl port-forward svc/argocd-server -n argocd 8080:443
+   ```
+
+2. Access the ArgoCD UI at: `https://localhost:8080`
+
+3. Get the initial admin password:
+
+   ```bash
+   kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+   ```
+
+4. Login with username `admin` and the password retrieved above.
+
+### Grafana
+
+Grafana is deployed as part of the **helicone-monitoring** component and provides observability
+dashboards for monitoring your Helicone deployment. It works alongside Prometheus to collect and
+visualize metrics from all your services.
+
+#### Accessing Grafana UI
+
+1. Port-forward to access the Grafana server:
+
+   ```bash
+   kubectl port-forward svc/grafana -n monitoring 3000:80
+   ```
+
+2. Access the Grafana UI at: `http://localhost:3000`
+
+3. Get the admin password (if using default configuration):
+
+   ```bash
+   kubectl get secret grafana -n monitoring -o jsonpath="{.data.admin-password}" | base64 -d
+   ```
+
+4. Login with username `admin` and the password retrieved above.
+
+5. Pre-configured dashboards for Helicone services should be available under the Dashboards section.
+
+## Configuring S3 (Optional)
+
+### Terraform Setup
+
+Go to terraform/s3, then `terraform validate` followed by `terraform apply`
+
+### Manual Setup
+
+If minio is enabled, then it will take the place of S3. Minio is a storage solution similar to AWS
+S3, which can be used for local testing. If minio is disabled by setting the enabled flag under that
+service to false, then the following parameters are used to configure the bucket:
+
+- s3BucketName
+- s3Endpoint
+- s3AccessKey (secret)
+- s3SecretKey (secret)
+
+Make sure to enable the following CORS policy on the S3 bucket, such that the web service can fetch
+URL's from the bucket. To do so in AWS, in the bucket settings, set the following under Permissions
+-> Cross-origin resource sharing (CORS):
 
 ```yaml
-# cluster-issuer.yaml
-apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
-metadata:
-  name: letsencrypt-prod
-spec:
-  acme:
-    email: your-email@example.com
-    server: https://acme-v02.api.letsencrypt.org/directory
-    privateKeySecretRef:
-      name: letsencrypt-prod-private-key
-    solvers:
-      - http01:
-          ingress:
-            class: nginx
+[
+  {
+    'AllowedHeaders': ['*'],
+    'AllowedMethods': ['GET'],
+    'AllowedOrigins': ['https://heliconetest.com'],
+    'ExposeHeaders': ['ETag'],
+    'MaxAgeSeconds': 3000,
+  },
+]
 ```
 
-Apply the ClusterIssuer:
+## Aurora Setup via Terraform
 
-```bash
-kubectl apply -f cluster-issuer.yaml
-```
+To set up an Aurora postgresql database using Terraform, follow these steps:
 
-<Note>Replace `your-email@example.com` with your actual email address.</Note>
+1. Navigate to the terraform/aurora directory:
 
-### 3. Configure Ingress in Helm Chart
+   ```bash
+   cd terraform/aurora
+   ```
 
-Modify your `custom-values.yaml` to enable ingress and TLS:
+2. Initialize Terraform:
 
-```yaml
-ingress:
-  enabled: true
-  annotations:
-    kubernetes.io/ingress.class: nginx
-    cert-manager.io/cluster-issuer: letsencrypt-prod
-  hosts:
-    - host: your-domain.example.com
-      paths:
-        - path: /
-          pathType: Prefix
-  tls:
-    - secretName: helicone-tls
-      hosts:
-        - your-domain.example.com
-```
+   ```bash
+   terraform init
+   ```
 
-<Note>
-  Replace `your-domain.example.com` with your actual domain name. Ensure your
-  domain's DNS records point to the ingress controller's external IP.
-</Note>
+3. Validate the Terraform configuration:
 
-### 4. Install or Upgrade Helicone with Ingress
+   ```bash
+   terraform validate
+   ```
 
-Install or upgrade Helicone using your custom values file:
+4. Apply the Terraform configuration to create the Aurora cluster:
 
-```bash
-helm install helicone helicone/helicone -f custom-values.yaml
-```
+   ```bash
+   terraform apply
+   ```
 
-Or, if upgrading:
-
-```bash
-helm upgrade helicone helicone/helicone -f custom-values.yaml
-```
-
-## Maintaining Your Instance
-
-### Upgrading the Helm Release
-
-To upgrade your Helicone deployment when a new chart version is available:
-
-```bash
-helm repo update
-helm upgrade helicone helicone/helicone
-```
-
-### Scaling the Deployment
-
-To scale the number of replicas for the Helicone web component, you can use:
-
-```bash
-kubectl scale deployment helicone-web --replicas=3
-```
-
-Adjust the number of replicas as needed.
-
-### Uninstalling the Helm Release
-
-To completely remove the Helicone deployment from your cluster:
-
-```bash
-helm uninstall helicone
-```
-
-## Background
-
-This Helm chart simplifies the deployment of Helicone on Kubernetes clusters, making it easier to manage and scale.
-
-For more detailed information, visit the [Helicone Helm Chart repository](https://github.com/Helicone/helicone-helm-v2).
+After the aurora resource is created, make sure to set enabled to false for postgresql. This will
+allow the aurora cluster to be used in its place.

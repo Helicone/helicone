@@ -15,7 +15,7 @@ import {
 } from "../../controllers/public/promptController";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
-import { buildFilterPostgres } from "../../lib/shared/filters/filters";
+import { buildFilterPostgres } from "@helicone-package/filters/filters";
 import { Result, err, ok, resultMap } from "../../packages/common/result";
 import { BaseManager } from "../BaseManager";
 import { RequestManager } from "../request/RequestManager";

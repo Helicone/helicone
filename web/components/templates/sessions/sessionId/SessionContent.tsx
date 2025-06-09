@@ -25,10 +25,12 @@ import { useSessions } from "../../../../services/hooks/sessions";
 import { Col } from "../../../layout/common/col";
 import ExportButton from "../../../shared/themed/table/exportButton";
 import TreeView from "./Tree/TreeView";
+import TableFooter from "../../requests/tableFooter";
 
 import { TagType } from "@/packages/common/sessions/tags";
 import Link from "next/link";
 import { SessionTag } from "../../feedback/sessionTag";
+import { FilterASTButton } from "@/filterAST/FilterASTButton";
 
 export const EMPTY_SESSION_NAME = "__unnamed_helicone_session__";
 
@@ -39,12 +41,21 @@ interface SessionContentProps {
   requests: ReturnType<typeof useGetRequests>;
   isLive: boolean;
   setIsLive: (isLive: boolean) => void;
+  currentPage: number;
+  pageSize: number;
+  onPageChange: (newPage: number) => void;
+  onPageSizeChange: (newPageSize: number) => void;
 }
+
 export const SessionContent: React.FC<SessionContentProps> = ({
   session,
   session_id,
   session_name,
   requests,
+  currentPage,
+  pageSize,
+  onPageChange,
+  onPageSizeChange,
 }) => {
   const router = useRouter();
   const { initializeColorMap } = useColorMapStore();
@@ -212,6 +223,8 @@ export const SessionContent: React.FC<SessionContentProps> = ({
               )}
             </div>
 
+            <FilterASTButton />
+
             {/* Realtime session reconstruction warning) */}
             {containsRealtime && (
               <div className="flex flex-row gap-2 items-center text-xs text-blue-500 font-semibold">
@@ -259,6 +272,16 @@ export const SessionContent: React.FC<SessionContentProps> = ({
           isOriginalRealtime={containsRealtime}
         />
       </div>
+
+      <TableFooter
+        currentPage={currentPage}
+        pageSize={pageSize}
+        isCountLoading={requests.count.isLoading}
+        count={requests.count.data?.data || 0}
+        onPageChange={onPageChange}
+        onPageSizeChange={onPageSizeChange}
+        pageSizeOptions={[100, 250, 500, 1000]}
+      />
     </Col>
   );
 };

@@ -9,7 +9,7 @@ import { FilterNode } from "../lib/shared/filters/filterDefs";
 import {
   buildFilterClickHouse,
   buildFilterWithAuthClickHouse,
-} from "../lib/shared/filters/filters";
+} from "@helicone-package/filters/filters";
 import { ok, Result, resultMap } from "../packages/common/result";
 import { SortDirection } from "../lib/shared/sorts/requests/sorts";
 import { clickhousePriceCalc } from "@helicone-package/cost";

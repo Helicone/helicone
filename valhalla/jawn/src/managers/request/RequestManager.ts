@@ -4,14 +4,13 @@ import { KVCache } from "../../lib/cache/kvCache";
 import { HeliconeScoresMessage } from "../../lib/handlers/HandlerContext";
 import { dbExecute, dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import { S3Client } from "../../lib/shared/db/s3Client";
-import { FilterNode } from "../../lib/shared/filters/filterDefs";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
 import { Result, err, ok, resultMap } from "../../packages/common/result";
 import { VersionedRequestStore } from "../../lib/stores/request/VersionedRequestStore";
 import {
   HeliconeRequestAsset,
   getRequestAsset,
   getRequests,
-  getRequestsCached,
   getRequestsClickhouse,
   getRequestsClickhouseNoSort,
 } from "../../lib/stores/request/request";
@@ -21,7 +20,7 @@ import { cacheResultCustom } from "../../utils/cacheResult";
 import { BaseManager } from "../BaseManager";
 import { ScoreManager } from "../score/ScoreManager";
 import { AuthParams } from "../../packages/common/auth/types";
-import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
+import { buildFilterWithAuthClickHouse } from "@helicone-package/filters/filters";
 export const getModelFromPath = (path: string) => {
   const regex1 = /\/engines\/([^/]+)/;
   const regex2 = /models\/([^/:]+)/;
@@ -403,23 +402,13 @@ export class RequestManager extends BaseManager {
       newFilter = this.addPartOfExperimentFilter(isPartOfExperiment, newFilter);
     }
 
-    const requests = isCached
-      ? await getRequestsCached(
-          this.authParams.organizationId,
-          filter,
-          offset,
-          limit,
-          sort,
-          isPartOfExperiment,
-          isScored
-        )
-      : await getRequests(
-          this.authParams.organizationId,
-          newFilter,
-          offset,
-          limit,
-          sort
-        );
+    const requests = await getRequests(
+      this.authParams.organizationId,
+      newFilter,
+      offset,
+      limit,
+      sort,
+    );
 
     console.log("requests", requests);
 

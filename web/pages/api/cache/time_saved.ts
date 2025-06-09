@@ -4,7 +4,7 @@ import {
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { Result } from "@/packages/common/result";
-import { TimeFilterSchema } from "@/services/lib/filters/filterDefs";
+import { TimeFilterSchema } from "@helicone-package/filters/helpers";
 
 async function handler({
   req,

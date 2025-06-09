@@ -1,12 +1,12 @@
 import moment from "moment";
 
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
 import {
   buildFilterWithAuthClickHouse,
   buildFilterWithAuthClickHouseRateLimits,
   buildFilterWithAuthClickHouseCacheMetrics,
   clickhouseParam,
-} from "../../../services/lib/filters/filters";
+} from "@helicone-package/filters/filters";
 import { Result, resultMap } from "@/packages/common/result";
 import {
   isValidTimeFilter,

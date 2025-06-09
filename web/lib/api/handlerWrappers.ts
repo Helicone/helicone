@@ -9,7 +9,7 @@ import {
 } from "next";
 import { Database } from "../../db/database.types";
 import { Result, err, ok } from "@/packages/common/result";
-import { FilterNode, TimeFilter } from "../../services/lib/filters/filterDefs";
+import { FilterNode, TimeFilter } from "@helicone-package/filters/filterDefs";
 import { Permission, Role, hasPermission } from "../../services/lib/user";
 import { dbExecute } from "./db/dbExecute";
 
