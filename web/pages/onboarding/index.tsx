@@ -20,12 +20,8 @@ export default function OnboardingPage() {
   const org = useOrg();
   const { user } = useHeliconeAuthClient();
   const { setNotification } = useNotification();
-  const {
-    onboardingState,
-    isLoading,
-    draftName,
-    updateCurrentStep,
-  } = useOrgOnboarding(org?.currentOrg?.id ?? "");
+  const { onboardingState, isLoading, draftName, updateCurrentStep } =
+    useOrgOnboarding(org?.currentOrg?.id ?? "");
 
   useEffect(() => {
     updateCurrentStep("ORGANIZATION");
@@ -48,7 +44,6 @@ export default function OnboardingPage() {
     subscription.data?.data?.status === "active" ||
     subscription.data?.data?.status === "trialing" ||
     subscription.data?.data?.status === "incomplete";
-
 
   const handleOrganizationSubmit = () => {
     if (!draftName) return;
@@ -91,8 +86,6 @@ export default function OnboardingPage() {
           </div>
 
           <OrganizationStep />
-
-
 
           {isSubscribed && (
             <Alert className="bg-[hsl(var(--muted))] border-[hsl(var(--border))]">
