@@ -5,7 +5,7 @@ import {
 import { KVCache } from "../lib/cache/kvCache";
 import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
 import { dbQueryClickhouse } from "../lib/shared/db/dbExecute";
-import { FilterNode } from "../lib/shared/filters/filterDefs";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
 import {
   buildFilterClickHouse,
   buildFilterWithAuthClickHouse,
