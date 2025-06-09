@@ -2,7 +2,16 @@ import { MappedLLMRequest } from "@helicone-package/llm-mapper/types";
 import { HandThumbDownIcon, HandThumbUpIcon } from "@heroicons/react/24/solid";
 import { ColumnDef } from "@tanstack/react-table";
 import { clsx } from "../../shared/clsx";
-import { getUSDateFromString } from "../../shared/utils/utils";
+import {
+  getUSDateFromString,
+  get24HourFromString,
+} from "../../shared/utils/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import CostPill from "./costPill";
 import { COUTNRY_CODE_DIRECTORY } from "./countryCodeDirectory";
 import ModelPill from "./modelPill";
@@ -31,11 +40,23 @@ export const getInitialColumns = (): ColumnDef<MappedLLMRequest>[] => [
     id: "createdAt",
     accessorKey: "createdAt",
     header: "Created At",
-    cell: (info) => (
-      <span className="text-gray-900 dark:text-gray-100 font-medium">
-        {getUSDateFromString(info.row.original.heliconeMetadata.createdAt)}
-      </span>
-    ),
+    cell: (info) => {
+      const value = info.row.original.heliconeMetadata.createdAt;
+      return (
+        <TooltipProvider>
+          <Tooltip delayDuration={100}>
+            <TooltipTrigger asChild>
+              <span className="text-gray-900 dark:text-gray-100 font-medium cursor-default">
+                {getUSDateFromString(value)}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="text-xs">
+              <p>{get24HourFromString(value)}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    },
     meta: {
       sortKey: "created_at",
     },
