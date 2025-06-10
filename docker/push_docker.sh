@@ -22,7 +22,7 @@ show_usage() {
   echo "Options:"
   echo "  -t, --test          Test mode (show commands without executing)"
   echo "  --dont-prune        Don't prune Docker images before building"
-  echo "  -c, --custom-tag    Custom tag suffix (ECR mode only)"
+  echo "  -c, --custom-tag    Custom tag suffix"
   echo "  -r, --region        AWS region (default: us-east-2, ECR mode only)"
   echo "  -i, --image         Select specific image to build (can be used multiple times)"
   echo "  -h, --help          Show this help message"
@@ -31,7 +31,7 @@ show_usage() {
   echo "  $0 --mode dockerhub"
   echo "  $0 --mode ecr --region us-west-2 --custom-tag hotfix"
   echo "  $0 --mode dockerhub --test"
-  echo "  $0 --mode ecr --image web --image worker"
+  echo "  $0 --mode ecr --image web --image jawn"
 }
 
 # Parse command line arguments
@@ -125,31 +125,42 @@ if [ "$MODE" = "dockerhub" ]; then
   VERSION_TAG="v$DATE"
 else
   VERSION_TAG="v$(date +'%Y-%m-%d')"
-  if [ ! -z "$CUSTOM_TAG" ]; then
+fi
+
+if [ ! -z "$CUSTOM_TAG" ]; then
+  if [ "$MODE" = "dockerhub" ]; then
+    VERSION_TAG="${VERSION_TAG}-${CUSTOM_TAG}"
+  else
     VERSION_TAG="${VERSION_TAG}-${CUSTOM_TAG}"
   fi
 fi
+
+# Define images and their contexts (unified for both modes)
+IMAGES=(
+  "helicone/web:.."
+  "helicone/jawn:.."
+  "helicone/migrations:.."
+)
 
 # Docker Hub mode
 if [ "$MODE" = "dockerhub" ]; then
   echo "=== Docker Hub Mode ==="
   
-  # Docker images for Docker Hub
+  # Filter out legacy dockerhub-only images for the unified approach
   DOCKERHUB_IMAGES=(
-    "helicone/supabase-migration-runner"
-    "helicone/worker-helicone-api"
-    "helicone/worker-openai-proxy"
-    "helicone/web"
-    "helicone/clickhouse-migration-runner"
+    "helicone/web:.."
+    "helicone/jawn:.."
+    "helicone/migrations:.."
   )
   
   # Filter images if specific ones were selected
   if [ ${#SELECTED_IMAGES[@]} -gt 0 ]; then
     FILTERED_IMAGES=()
-    for image in "${DOCKERHUB_IMAGES[@]}"; do
-      for selected in "${SELECTED_IMAGES[@]}"; do
-        if [[ "$image" == *"$selected"* ]]; then
-          FILTERED_IMAGES+=("$image")
+    for IMAGE_INFO in "${DOCKERHUB_IMAGES[@]}"; do
+      IFS=':' read -r IMAGE_NAME _ <<< "$IMAGE_INFO"
+      for SELECTED in "${SELECTED_IMAGES[@]}"; do
+        if [[ "$IMAGE_NAME" == *"$SELECTED"* ]]; then
+          FILTERED_IMAGES+=("$IMAGE_INFO")
           break
         fi
       done
@@ -157,28 +168,52 @@ if [ "$MODE" = "dockerhub" ]; then
     DOCKERHUB_IMAGES=("${FILTERED_IMAGES[@]}")
   fi
   
-  for image in "${DOCKERHUB_IMAGES[@]}"; do
-    echo "Processing $image..."
+  for IMAGE_INFO in "${DOCKERHUB_IMAGES[@]}"; do
+    IFS=':' read -r IMAGE_NAME CONTEXT <<< "$IMAGE_INFO"
+    echo "Processing $IMAGE_NAME..."
     
-    # Get the Docker tags for the current image from Docker Hub
-    tags=$(curl -s "https://hub.docker.com/v2/repositories/${image}/tags/?page_size=100" | jq -r '.results|.[]|.name')
+    # Get the Docker tags for the current image from Docker Hub (only for legacy images)
+    if [[ "$IMAGE_NAME" == "helicone/supabase-migration-runner" || 
+          "$IMAGE_NAME" == "helicone/worker-helicone-api" || 
+          "$IMAGE_NAME" == "helicone/worker-openai-proxy" || 
+          "$IMAGE_NAME" == "helicone/clickhouse-migration-runner" ]]; then
+      tags=$(curl -s "https://hub.docker.com/v2/repositories/${IMAGE_NAME}/tags/?page_size=100" | jq -r '.results|.[]|.name')
 
-    # Check if the current date tag exists already
-    tag=$VERSION_TAG
-    counter=1
-    while [[ $tags =~ $tag ]]; do
-      # If it does, increment the counter and append it to the date tag
-      tag=$VERSION_TAG-$counter
-      ((counter++))
-    done
+      # Check if the current date tag exists already
+      tag=$VERSION_TAG
+      counter=1
+      while [[ $tags =~ $tag ]]; do
+        # If it does, increment the counter and append it to the date tag
+        tag=$VERSION_TAG-$counter
+        ((counter++))
+      done
+    else
+      tag=$VERSION_TAG
+    fi
 
-    # Replace dash "-" with underscore "_" in Dockerfile name
-    dockerfile_name=$(basename $image | tr '-' '_')
+    # Get Dockerfile path
+    DOCKERFILE_NAME=$(basename "$IMAGE_NAME" | tr '-' '_')
+    DOCKERFILE_PATH="dockerfiles/dockerfile_${DOCKERFILE_NAME}"
+    
+    if [ "$DOCKERFILE_NAME" = "jawn" ]; then
+      DOCKERFILE_PATH="../valhalla/dockerfile"
+    elif [ "$DOCKERFILE_NAME" = "migrations" ]; then
+      DOCKERFILE_PATH="dockerfiles/dockerfile_migrations"
+    fi
 
-    run_command docker build --platform linux/amd64 -t ${image}:$tag -f dockerfiles/dockerfile_${dockerfile_name} ..
-    run_command docker push ${image}:$tag
-    run_command docker tag ${image}:$tag ${image}:latest
-    run_command docker push ${image}:latest
+    # Build image
+    FULL_IMAGE_TAG="$IMAGE_NAME:$tag"
+    echo "Building $FULL_IMAGE_TAG..."
+    run_command docker build --platform linux/amd64 -t "$FULL_IMAGE_TAG" -f "$DOCKERFILE_PATH" "$CONTEXT"
+    
+    # Push version tag
+    echo "Pushing $FULL_IMAGE_TAG..."
+    run_command docker push "$FULL_IMAGE_TAG"
+    
+    # Tag and push latest
+    echo "Tagging and pushing latest..."
+    run_command docker tag "$FULL_IMAGE_TAG" "$IMAGE_NAME:latest"
+    run_command docker push "$IMAGE_NAME:latest"
   done
 
 # ECR mode
@@ -192,11 +227,9 @@ elif [ "$MODE" = "ecr" ]; then
   echo "Logging in to ECR..."
   run_command aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
   
-  # Define images and their contexts for ECR
+  # Use only the core images for ECR
   ECR_IMAGES=(
-    "helicone/worker:../worker"
-    "helicone/web:../web"
-    "helicone/web-dev:../web"
+    "helicone/web:.."
     "helicone/jawn:.."
     "helicone/migrations:.."
   )
@@ -249,20 +282,23 @@ elif [ "$MODE" = "ecr" ]; then
     
     if [ "$DOCKERFILE_NAME" = "jawn" ]; then
       DOCKERFILE_PATH="../valhalla/dockerfile"
+    elif [ "$DOCKERFILE_NAME" = "migrations" ]; then
+      DOCKERFILE_PATH="dockerfiles/dockerfile_migrations"
     fi
     
     # Build image
     ECR_REPO="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME"
-    echo "Building $ECR_REPO:$VERSION_TAG..."
-    run_command docker build --platform linux/amd64 -t "$ECR_REPO:$VERSION_TAG" -f "$DOCKERFILE_PATH" "$CONTEXT"
+    FULL_IMAGE_TAG="$ECR_REPO:$VERSION_TAG"
+    echo "Building $FULL_IMAGE_TAG..."
+    run_command docker build --platform linux/amd64 -t "$FULL_IMAGE_TAG" -f "$DOCKERFILE_PATH" "$CONTEXT"
     
     # Push version tag
-    echo "Pushing $ECR_REPO:$VERSION_TAG..."
-    run_command docker push "$ECR_REPO:$VERSION_TAG"
+    echo "Pushing $FULL_IMAGE_TAG..."
+    run_command docker push "$FULL_IMAGE_TAG"
     
     # Tag and push latest
     echo "Tagging and pushing latest..."
-    run_command docker tag "$ECR_REPO:$VERSION_TAG" "$ECR_REPO:latest"
+    run_command docker tag "$FULL_IMAGE_TAG" "$ECR_REPO:latest"
     run_command docker push "$ECR_REPO:latest"
   done
 fi

@@ -216,6 +216,8 @@ type HeliconeMetadata = {
   totalTokens: number | null;
   promptTokens: number | null;
   completionTokens: number | null;
+  promptCacheWriteTokens: number | null;
+  promptCacheReadTokens: number | null;
   latency: number | null;
   user: string | null;
   status: {

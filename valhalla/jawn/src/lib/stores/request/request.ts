@@ -6,7 +6,7 @@ import {
 } from "@helicone-package/llm-mapper/types";
 import { dbExecute, dbQueryClickhouse } from "../../shared/db/dbExecute";
 import { S3Client } from "../../shared/db/s3Client";
-import { FilterNode } from "../../shared/filters/filterDefs";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
 import {
   buildFilterWithAuth,
   buildFilterWithAuthClickHouse,
@@ -183,6 +183,8 @@ export async function getRequestsClickhouseNoSort(
       time_to_first_token,
       (prompt_tokens + completion_tokens) AS total_tokens,
       completion_tokens,
+      prompt_cache_read_tokens,
+      prompt_cache_write_tokens,
       prompt_tokens,
       country_code,
       scores,
@@ -257,6 +259,8 @@ export async function getRequestsClickhouse(
       (prompt_tokens + completion_tokens) AS total_tokens,
       completion_tokens,
       prompt_tokens,
+      prompt_cache_read_tokens,
+      prompt_cache_write_tokens,
       country_code,
       scores,
       properties,

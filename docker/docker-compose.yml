@@ -1,72 +1,19 @@
-name: helicone-local-testing
-version: "3.8"
+name: helicone-self-host
 
 services:
-  jawn:
-    container_name: helicone-jawn
-    build:
-      context: ../
-      dockerfile: valhalla/dockerfile
-    restart: unless-stopped
-    ports:
-      - ${JAWN_PORT}:${JAWN_PORT}
-    environment:
-      PORT: ${JAWN_PORT}
-
-      NEXT_PUBLIC_BETTER_AUTH: "true"
-      S3_ENDPOINT: http://minio:9000
-      S3_ACCESS_KEY: ${MINIO_ROOT_USER}
-      S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
-      S3_BUCKET_NAME: "request-response-storage"
-      S3_ENDPOINT_PUBLIC: http://localhost:9000
-      CLICKHOUSE_CREDS: |
-        {
-          "CLICKHOUSE_HOST": "http://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}",
-          "CLICKHOUSE_USER": "${CLICKHOUSE_USER}",
-          "CLICKHOUSE_PASSWORD": "${CLICKHOUSE_PASSWORD}"
-        }
-      VERCEL_ENV: ${VERCEL_ENV}
-      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
-      SUPABASE_DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
-
-  web:
-    container_name: helicone-web-local
-    build:
-      context: ../web
-      dockerfile: ../docker/dockerfiles/dockerfile_web
-      args:
-        NEXT_PUBLIC_HELICONE_JAWN_SERVICE: ${JAWN_PUBLIC_URL}
-        NEXT_PUBLIC_BETTER_AUTH: "true"
-        NODE_ENV: development
-    ports:
-      - 3000:3000
-    volumes:
-      - ../web:/app/web
-      - /app/web/node_modules
-      - /app/web/.next
-    environment:
-      NEXT_PUBLIC_HELICONE_JAWN_SERVICE: ${JAWN_PUBLIC_URL}
-      DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
-      CLICKHOUSE_HOST: http://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}
-      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
-      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
-      VERCEL_ENV: ${VERCEL_ENV}
-      SMTP_HOST: mailhog
-      SMTP_PORT: 1025
-      NEXT_PUBLIC_BETTER_AUTH: "true"
-      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
-      SMTP_SECURE: false
-      NODE_ENV: development
-
+  # =============================================================================
+  # INFRASTRUCTURE SERVICES (Default profile - always runs)
+  # =============================================================================
+  
   db:
-    image: postgres:17.4 # You can choose a specific version
+    image: postgres:17.4
     container_name: helicone-postgres-flyway-test
     environment:
       POSTGRES_DB: helicone_test
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: testpassword
     ports:
-      - "54388:5432" # Map host port 54388 to container port 5432
+      - "54388:5432"
     volumes:
       - postgres_flyway_data:/var/lib/postgresql/data
     healthcheck:
@@ -75,16 +22,31 @@ services:
       timeout: 5s
       retries: 5
 
-  mailhog:
-    image: mailhog/mailhog
-    container_name: mailhog
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.3.13.40
+    container_name: helicone-clickhouse
     ports:
-      - "1025:1025" # SMTP port
-      - "8025:8025" # Web UI port
+      - "18123:8123" # HTTP interface
+      - "19000:9000" # Native interface
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    environment:
+      CLICKHOUSE_DEFAULT_USER: default
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   minio:
     image: minio/minio
-    container_name: helicone-minio-server
+    container_name: helicone-minio
     ports:
       - "9000:9000" # MinIO API port
       - "9001:9001" # MinIO Console port
@@ -99,7 +61,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 5s # Give MinIO time to start up before checking
+      start_period: 5s
 
   minio-setup:
     image: minio/mc:RELEASE.2025-04-08T15-39-49Z
@@ -113,34 +75,13 @@ services:
       exit 0;
       "
 
-  clickhouse:
-    image: clickhouse/clickhouse-server:24.3.13.40
-    container_name: helicone-clickhouse-server
+  mailhog:
+    image: mailhog/mailhog
+    container_name: mailhog
     ports:
-      - "18123:8123" # HTTP interface
-      - "19000:9000" # Native interface
-    volumes:
-      - clickhouse_data:/var/lib/clickhouse
-    ulimits:
-      nofile:
-        soft: 262144
-        hard: 262144
-    environment:
-      # Default user is 'default', no password set initially based on --no-password
-      CLICKHOUSE_DEFAULT_USER: default
-    restart: unless-stopped
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "wget",
-          "--no-verbose",
-          "--spider",
-          "http://localhost:8123/ping",
-        ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      - "1025:1025" # SMTP port
+      - "8025:8025" # Web UI port
+
   migrations:
     build:
       context: ../
@@ -154,9 +95,339 @@ services:
       FLYWAY_URL: jdbc:postgresql://db:5432/helicone_test
       FLYWAY_USER: postgres
       FLYWAY_PASSWORD: testpassword
+      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_USER: default
     volumes:
       - ../supabase:/app/supabase
       - ../clickhouse:/app/clickhouse
+
+  # =============================================================================
+  # HELICONE CORE SERVICES (include-helicone profile)
+  # =============================================================================
+
+  jawn:
+    container_name: helicone-jawn
+    build:
+      context: ../
+      dockerfile: valhalla/dockerfile
+    restart: unless-stopped
+    ports:
+      - ${JAWN_PORT:-8585}:${JAWN_PORT:-8585}
+    profiles: ["include-helicone"]
+    depends_on:
+      db:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    environment:
+      PORT: ${JAWN_PORT:-8585}
+      NEXT_PUBLIC_BETTER_AUTH: "true"
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: minioadmin
+      S3_SECRET_KEY: minioadmin
+      S3_BUCKET_NAME: "request-response-storage"
+      S3_ENDPOINT_PUBLIC: http://localhost:9000
+      CLICKHOUSE_CREDS: |
+        {
+          "CLICKHOUSE_HOST": "http://clickhouse:8123",
+          "CLICKHOUSE_USER": "default",
+          "CLICKHOUSE_PASSWORD": ""
+        }
+      VERCEL_ENV: ${VERCEL_ENV:-development}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-your-secret-key}
+      SUPABASE_DATABASE_URL: postgres://postgres:testpassword@db:5432/helicone_test
+
+  web:
+    container_name: helicone-web
+    build:
+      context: ../
+      dockerfile: docker/dockerfiles/dockerfile_web
+      args:
+        NEXT_PUBLIC_HELICONE_JAWN_SERVICE: ${JAWN_PUBLIC_URL:-http://localhost:8585}
+        NEXT_PUBLIC_BETTER_AUTH: "true"
+        NODE_ENV: development
+    ports:
+      - "3000:3000"
+    profiles: ["include-helicone"]
+    depends_on:
+      jawn:
+        condition: service_started
+      db:
+        condition: service_healthy
+    environment:
+      NEXT_PUBLIC_HELICONE_JAWN_SERVICE: ${JAWN_PUBLIC_URL:-http://localhost:8585}
+      DATABASE_URL: postgres://postgres:testpassword@db:5432/helicone_test
+      CLICKHOUSE_HOST: http://clickhouse:8123
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: ""
+      VERCEL_ENV: ${VERCEL_ENV:-development}
+      SMTP_HOST: mailhog
+      SMTP_PORT: 1025
+      NEXT_PUBLIC_BETTER_AUTH: "true"
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-your-secret-key}
+      SMTP_SECURE: false
+      NODE_ENV: development
+
+  # =============================================================================
+  # DEVELOPMENT SERVICES (dev profile)
+  # =============================================================================
+
+  jawn-dev:
+    container_name: helicone-jawn-dev
+    build:
+      context: ../
+      dockerfile: valhalla/dockerfile_dev
+    restart: unless-stopped
+    ports:
+      - ${JAWN_PORT:-8585}:${JAWN_PORT:-8585}
+    profiles: ["dev"]
+    depends_on:
+      db:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    environment:
+      PORT: ${JAWN_PORT:-8585}
+      NEXT_PUBLIC_BETTER_AUTH: "true"
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: minioadmin
+      S3_SECRET_KEY: minioadmin
+      S3_BUCKET_NAME: "request-response-storage"
+      S3_ENDPOINT_PUBLIC: http://localhost:9000
+      CLICKHOUSE_CREDS: |
+        {
+          "CLICKHOUSE_HOST": "http://clickhouse:8123",
+          "CLICKHOUSE_USER": "default",
+          "CLICKHOUSE_PASSWORD": ""
+        }
+      VERCEL_ENV: ${VERCEL_ENV:-development}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-your-secret-key}
+      SUPABASE_DATABASE_URL: postgres://postgres:testpassword@db:5432/helicone_test
+    volumes:
+      - ../valhalla:/app/valhalla
+      - ../shared:/app/shared
+      - /app/valhalla/node_modules
+    working_dir: /app/valhalla/jawn
+    command: yarn dev
+
+  web-dev:
+    container_name: helicone-web-dev
+    build:
+      context: ../web
+      dockerfile: docker/dockerfiles/dockerfile_web_dev
+    ports:
+      - "3000:3000"
+    profiles: ["dev"]
+    depends_on:
+      jawn-dev:
+        condition: service_started
+      db:
+        condition: service_healthy
+    volumes:
+      - ../web:/app/web
+      - /app/web/node_modules
+      - /app/web/.next
+    environment:
+      NEXT_PUBLIC_HELICONE_JAWN_SERVICE: ${JAWN_PUBLIC_URL:-http://localhost:8585}
+      DATABASE_URL: postgres://postgres:testpassword@db:5432/helicone_test
+      CLICKHOUSE_HOST: http://clickhouse:8123
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: ""
+      VERCEL_ENV: ${VERCEL_ENV:-development}
+      SMTP_HOST: mailhog
+      SMTP_PORT: 1025
+      NEXT_PUBLIC_BETTER_AUTH: "true"
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-your-secret-key}
+      SMTP_SECURE: false
+      NODE_ENV: development
+    command: yarn dev:local -p 3000
+
+  # =============================================================================
+  # WORKER SERVICES (workers profile)
+  # =============================================================================
+
+  worker-openai-proxy:
+    image: worker-local
+    build:
+      context: ../worker
+      dockerfile: docker/dockerfiles/dockerfile_worker
+    container_name: helicone-worker-openai-proxy
+    ports:
+      - "8787:8787"
+    profiles: ["workers"]
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    environment:
+      PORT: 8787
+      WORKER_TYPE: OPENAI_PROXY
+      WORKER_PORT: 8787
+      CLICKHOUSE_HOST: http://clickhouse:8123
+      VALHALLA_URL: http://jawn:${JAWN_PORT:-8585}
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: minioadmin
+      S3_SECRET_KEY: minioadmin
+      S3_BUCKET_NAME: request-response-storage
+
+  worker-helicone-api:
+    image: worker-local
+    build:
+      context: ../worker
+      dockerfile: docker/dockerfiles/dockerfile_worker
+    container_name: helicone-worker-api
+    ports:
+      - "8788:8788"
+    profiles: ["workers"]
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    environment:
+      PORT: 8788
+      WORKER_TYPE: HELICONE_API
+      WORKER_PORT: 8788
+      CLICKHOUSE_HOST: http://clickhouse:8123
+      VALHALLA_URL: http://jawn:${JAWN_PORT:-8585}
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: minioadmin
+      S3_SECRET_KEY: minioadmin
+
+  worker-gateway-api:
+    image: worker-local
+    build:
+      context: ../worker
+      dockerfile: docker/dockerfiles/dockerfile_worker
+    container_name: helicone-worker-gateway
+    ports:
+      - "8789:8789"
+    profiles: ["workers"]
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    environment:
+      PORT: 8789
+      WORKER_TYPE: GATEWAY_API
+      WORKER_PORT: 8789
+      GATEWAY_TARGET: https://openrouter.ai
+      CLICKHOUSE_HOST: http://clickhouse:8123
+      VALHALLA_URL: http://jawn:${JAWN_PORT:-8585}
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: minioadmin
+      S3_SECRET_KEY: minioadmin
+
+  worker-anthropic-proxy:
+    image: worker-local
+    build:
+      context: ../worker
+      dockerfile: docker/dockerfiles/dockerfile_worker
+    container_name: helicone-worker-anthropic
+    ports:
+      - "8790:8790"
+    profiles: ["workers"]
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    environment:
+      PORT: 8790
+      WORKER_TYPE: ANTHROPIC_PROXY
+      WORKER_PORT: 8790
+      CLICKHOUSE_HOST: http://clickhouse:8123
+      VALHALLA_URL: http://jawn:${JAWN_PORT:-8585}
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: minioadmin
+      S3_SECRET_KEY: minioadmin
+
+  worker-generate-api:
+    image: worker-local
+    build:
+      context: ../worker
+      dockerfile: docker/dockerfiles/dockerfile_worker
+    container_name: helicone-worker-generate
+    ports:
+      - "8791:8791"
+    profiles: ["workers"]
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    environment:
+      PORT: 8791
+      WORKER_TYPE: GENERATE_API
+      WORKER_PORT: 8791
+      CLICKHOUSE_HOST: http://clickhouse:8123
+      VALHALLA_URL: http://jawn:${JAWN_PORT:-8585}
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: minioadmin
+      S3_SECRET_KEY: minioadmin
+
+  # =============================================================================
+  # KAFKA SERVICES (kafka profile - experimental)
+  # =============================================================================
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.8.0
+    hostname: zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    profiles: ["kafka"]
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_SERVERS: zookeeper:2888:3888
+
+  kafka:
+    image: confluentinc/cp-kafka:7.8.0
+    hostname: kafka
+    container_name: kafka
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+      - "9999:9999"
+    profiles: ["kafka"]
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:19092,EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9092,DOCKER://host.docker.internal:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,DOCKER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_BROKER_ID: 1
+      KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_JMX_PORT: 9999
+      KAFKA_JMX_HOSTNAME: ${DOCKER_HOST_IP:-127.0.0.1}
+      KAFKA_AUTHORIZER_CLASS_NAME: kafka.security.authorizer.AclAuthorizer
+      KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "true"
 
 volumes:
   postgres_flyway_data:

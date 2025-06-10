@@ -35,10 +35,7 @@ import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
 import { FilterNode } from "@helicone-package/filters/filterDefs";
-import {
-  getRootFilterNode,
-  isFilterRowNode,
-} from "@helicone-package/filters/helpers";
+import { getRootFilterNode } from "@helicone-package/filters/helpers";
 import {
   SortDirection,
   SortLeafRequest,
@@ -532,13 +529,37 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   }, [router.query.page]);
 
   // Initialize advanced filters from URL on first load
+  const userFilterAppliedRef = useRef(false);
   useEffect(() => {
-    if (initialLoadRef.current && filterMap.length > 0 && !isDataLoading) {
+    if (userId && !userFilterAppliedRef.current) {
+      const userFilterMapIndex = filterMap.findIndex(
+        (filter: any) => filter.label === "User"
+      );
+
+      if (userFilterMapIndex !== -1) {
+        setAdvancedFilters({
+          operator: "and",
+          rows: [
+            {
+              filterMapIdx: userFilterMapIndex,
+              operatorIdx: 0,
+              value: userId,
+            },
+          ],
+        } as UIFilterRowNode);
+      }
+      userFilterAppliedRef.current = true;
+    } else if (
+      initialLoadRef.current &&
+      filterMap.length > 0 &&
+      !isDataLoading &&
+      !userId
+    ) {
       const loadedFilters = getAdvancedFilters();
       setAdvancedFilters(loadedFilters);
       initialLoadRef.current = false;
     }
-  }, [filterMap, getAdvancedFilters, isDataLoading]);
+  }, [filterMap, getAdvancedFilters, isDataLoading, userId]);
 
   // Load and display initial request data in drawer
   useEffect(() => {
@@ -552,38 +573,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
       drawerRef.current?.resize(drawerSize);
     }
   }, [initialRequest, selectedData, drawerSize]);
-
-  // Apply user filter when userId is provided
-  const userFilterAppliedRef = useRef(false);
-  useEffect(() => {
-    // Only run if we have a userId and haven't applied the filter yet
-    if (userId && !userFilterAppliedRef.current) {
-      const isEmpty =
-        !isFilterRowNode(advancedFilters) || advancedFilters.rows.length === 0;
-
-      if (isEmpty) {
-        const userFilterMapIndex = filterMap.findIndex(
-          (filter: any) => filter.label === "User"
-        );
-
-        if (userFilterMapIndex !== -1) {
-          setAdvancedFilters({
-            operator: "and",
-            rows: [
-              {
-                filterMapIdx: userFilterMapIndex,
-                operatorIdx: 0,
-                value: userId,
-              },
-            ],
-          } as UIFilterRowNode);
-
-          // Mark that we've applied the filter
-          userFilterAppliedRef.current = true;
-        }
-      }
-    }
-  }, [userId, filterMap]);
 
   return shouldShowMockData === undefined ? null : shouldShowMockData ===
     false ? (

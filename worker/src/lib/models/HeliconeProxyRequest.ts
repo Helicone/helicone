@@ -1,6 +1,7 @@
 // This will store all of the information coming from the client.
 
-import { Env, Provider } from "../..";
+import { Env } from "../..";
+import { Provider } from "@helicone-package/llm-mapper/types";
 import { approvedDomains } from "../../packages/cost/providers/mappings";
 import { RequestWrapper } from "../RequestWrapper";
 import { buildTargetUrl } from "../clients/ProviderClient";
