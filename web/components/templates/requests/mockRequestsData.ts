@@ -266,6 +266,8 @@ const generateMockRequest = (
       totalTokens: totalTokens,
       promptTokens: promptTokens,
       completionTokens: completionTokens,
+      promptCacheReadTokens: 0,
+      promptCacheWriteTokens: 0,
       latency: Math.floor(Math.random() * 2000) + 500,
       user: `user-${Math.floor(Math.random() * 999)}`,
       status: {
