@@ -48,7 +48,6 @@ export type RequestFilterNode =
       | "properties"
       | "values"
       | "request_response_rmt"
-      | "sessions_request_response_rmt"
     >
   | RequestFilterBranch
   | "all";

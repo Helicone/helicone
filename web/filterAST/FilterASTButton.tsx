@@ -10,10 +10,15 @@ import { FilterASTEditor } from "./FilterASTEditor";
 import { useFilterAST } from "./context/filterContext";
 import { Badge } from "@/components/ui/badge";
 import { Row } from "@/components/layout/common";
+import { RequestResponseRMTDerivedTable } from "./filterAst";
 
-interface FilterASTButtonProps {}
+interface FilterASTButtonProps {
+  baseTable?: RequestResponseRMTDerivedTable;
+}
 
-export const FilterASTButton: React.FC<FilterASTButtonProps> = ({}) => {
+export const FilterASTButton: React.FC<FilterASTButtonProps> = ({
+  baseTable = "request_response_rmt",
+}) => {
   const { store } = useFilterAST();
   const [isHydrated, setIsHydrated] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -55,7 +60,7 @@ export const FilterASTButton: React.FC<FilterASTButtonProps> = ({}) => {
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto min-w-[800px] max-w-[90vw] p-0">
-          <FilterASTEditor />
+          <FilterASTEditor baseTable={baseTable} />
         </PopoverContent>
       </Popover>
       {store.getFilterNodeCount() > 0 && (

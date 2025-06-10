@@ -1,7 +1,7 @@
 import { FilterState } from "@/filterAST/store/filterStore";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
-import { DEFAULT_FILTER_EXPRESSION, FilterExpression } from "../filterAst";
+import { FilterExpression } from "../filterAst";
 import { StoreFilterType, useFilterCrud } from "../hooks/useFilterCrud";
 import useNotification from "@/components/shared/notification/useNotification";
 

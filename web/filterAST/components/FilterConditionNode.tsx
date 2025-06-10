@@ -261,7 +261,8 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
   };
 
   // Find the filter definition for this field
-  const filterDef = filterDefs.find((def) => def.id === condition.field.column);
+  const filterDef = filterDefs.find((def) => (def.id === condition.field.column) && (def.table === condition.field.table));
+  
 
   // Get available operators
   const operators = filterDef?.operators || [];
@@ -326,7 +327,7 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
             Invalid field: &quot;{condition.field.column || "empty"}&quot;
           </span>
           <span className="text-[10px] text-amber-600 dark:text-amber-400">
-            Please select a valid field or remove
+            Filter refers to a different table or is invalid. Please select a valid field or remove.
           </span>
         </div>
 
