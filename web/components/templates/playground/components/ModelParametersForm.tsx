@@ -71,7 +71,7 @@ export default function ModelParametersForm({
   };
 
   const [isModelParametersPopoverOpen, setIsModelParametersPopoverOpen] =
-    useState(true);
+    useState(false);
   const [isResponseFormatModalOpen, setIsResponseFormatModalOpen] =
     useState(false);
 
