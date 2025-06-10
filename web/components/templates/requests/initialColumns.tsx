@@ -242,6 +242,28 @@ export const getInitialColumns = (): ColumnDef<MappedLLMRequest>[] => [
     minSize: 200,
   },
   {
+    id: "promptCacheReadTokens",
+    accessorKey: "promptCacheReadTokens",
+    header: "Prompt Cache Read Tokens",
+    cell: (info) => {
+      const tokens = Number(
+        info.row.original.heliconeMetadata.promptCacheReadTokens
+      );
+      return <span>{tokens >= 0 ? tokens : "not found"}</span>;
+    },
+  },
+  {
+    id: "promptCacheWriteTokens",
+    accessorKey: "promptCacheWriteTokens",
+    header: "Prompt Cache Write Tokens",
+    cell: (info) => {
+      const tokens = Number(
+        info.row.original.heliconeMetadata.promptCacheWriteTokens
+      );
+      return <span>{tokens >= 0 ? tokens : "not found"}</span>;
+    },
+  },
+  {
     id: "cacheEnabled",
     accessorKey: "cacheEnabled",
     header: "Cache Enabled",

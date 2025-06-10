@@ -48,11 +48,15 @@ export class GenericBodyProcessor implements IBodyProcessor {
     const response = parsedResponse as {
       usage: {
         prompt_tokens?: number;
-        prompt_cache_write_tokens?: number;
-        prompt_cache_read_tokens?: number;
         completion_tokens?: number;
         input_tokens?: number;
         output_tokens?: number;
+        prompt_tokens_details?: {
+          cached_tokens?: number;
+        };
+        completion_tokens_details?: {
+          reasoning_tokens?: number;
+        };
       };
     };
 
@@ -60,8 +64,10 @@ export class GenericBodyProcessor implements IBodyProcessor {
 
     return {
       promptTokens: usage?.prompt_tokens ?? usage?.input_tokens,
-      promptCacheWriteTokens: usage?.prompt_cache_write_tokens,
-      promptCacheReadTokens: usage?.prompt_cache_read_tokens,
+      // promptCacheWriteTokens, not explicitly provided in OpenAI spec response
+      // possibly can calculate for prompt_tokens > 1024, 128 token increments
+      // https://openai.com/index/api-prompt-caching/
+      promptCacheReadTokens: usage?.prompt_tokens_details?.cached_tokens,
       completionTokens: usage?.completion_tokens ?? usage?.output_tokens,
       totalTokens: undefined,
       heliconeCalculated: false,
