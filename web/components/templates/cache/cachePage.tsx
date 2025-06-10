@@ -1,6 +1,5 @@
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
-import LoadingAnimation from "@/components/shared/loadingAnimation";
 import {
   Select,
   SelectContent,

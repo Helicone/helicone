@@ -170,7 +170,7 @@ export const useCachePageClickHouse = ({
 
   const hasCacheData = (() => {
     if (loadingStates.totalCacheHits) return null;
-    
+
     const cacheHits = metrics.totalCacheHits.data?.data;
     if (cacheHits === undefined || cacheHits === null) {
       return false;
