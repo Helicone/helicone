@@ -10,8 +10,15 @@ import type { paths as publicPaths } from "./jawnTypes/public";
 type allPaths = publicPaths & privatePaths;
 
 export function getJawnClient(orgId?: string | "none") {
+  const region = env("REGION") || process.env.REGION || "us";
   return createFetchClient<allPaths>({
-    baseUrl: env("NEXT_PUBLIC_HELICONE_JAWN_SERVICE"),
+    baseUrl:
+      env("NEXT_PUBLIC_HELICONE_JAWN_SERVICE") ||
+      (process.env.NODE_ENV === "development"
+        ? "http://localhost:8585"
+        : region === "eu"
+        ? "https://eu.api.helicone.ai"
+        : "https://api.helicone.ai"),
     fetch: (request: Request) => {
       // Read cookies on each request to get latest values
       const currentOrgId = orgId || Cookies.get(ORG_ID_COOKIE_KEY);

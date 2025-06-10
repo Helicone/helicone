@@ -16,9 +16,15 @@ export function getJawnClient(apiKey?: string) {
   //       }
   //     : {};
 
+  const region = process.env.REGION || "us";
   return createClient<publicPaths>({
     baseUrl:
-      process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE ?? "http://localhost:8585",
+      process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE ||
+      (process.env.NODE_ENV === "development"
+        ? "http://localhost:8585"
+        : region === "eu"
+        ? "https://eu.api.helicone.ai"
+        : "https://api.helicone.ai"),
     headers: {
       Authorization: `Bearer ${apiKey}`,
     },

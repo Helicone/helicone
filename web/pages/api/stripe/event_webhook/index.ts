@@ -399,8 +399,14 @@ async function generateTempAPIKey(
 // Helper function to get the Jawn service URL, replacing localhost with 127.0.0.1 in serverless environments
 function getJawnServiceUrl(): string {
   // Get the URL from environment variable
+  const region = process.env.REGION || "us";
   const jawnServiceUrl =
-    process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE || "http://localhost:8585";
+    process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE ||
+    (process.env.NODE_ENV === "development"
+      ? "http://localhost:8585"
+      : region === "eu"
+      ? "https://eu.api.helicone.ai"
+      : "https://api.helicone.ai");
 
   // In serverless environments (Next.js API routes), replace localhost with 127.0.0.1
   // This is needed because localhost doesn't resolve correctly in serverless environments
