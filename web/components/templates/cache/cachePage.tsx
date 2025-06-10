@@ -1,6 +1,5 @@
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
-import LoadingAnimation from "@/components/shared/loadingAnimation";
 import {
   Select,
   SelectContent,
@@ -142,6 +141,8 @@ const CachePage = (props: CachePageProps) => {
     overTimeData,
     metrics: chMetrics,
     isAnyLoading,
+    loadingStates,
+    hasCacheData,
   } = useCachePageClickHouse({
     timeFilter: currentTimeFilter,
     timeZoneDifference,
@@ -160,14 +161,7 @@ const CachePage = (props: CachePageProps) => {
     isLoading: isLoadingUnauthorized,
   } = useGetUnauthorized(heliconeAuthClient?.user?.id || "");
 
-  const hasCache = useMemo(() => {
-    if (isAnyLoading) return null;
-    const cacheHits = chMetrics.totalCacheHits.data?.data;
-    if (cacheHits === undefined || cacheHits === null) {
-      return false;
-    }
-    return +cacheHits > 0;
-  }, [chMetrics.totalCacheHits.data?.data, isAnyLoading]);
+  const hasCache = hasCacheData;
 
   const shouldShowUnauthorized = hasCache && unauthorized;
 
@@ -205,13 +199,13 @@ const CachePage = (props: CachePageProps) => {
     return avgLatency && avgLatencyCached ? avgLatency - avgLatencyCached : 0;
   }, [chMetrics.avgLatency.data?.data, chMetrics.avgLatencyCached.data?.data]);
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-        <LoadingAnimation title="Loading cache data..." />
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
+  //       <LoadingAnimation title="Loading cache data..." />
+  //     </div>
+  //   );
+  // }
 
   if (!org?.currentOrg?.tier) {
     return null;
@@ -321,7 +315,7 @@ const CachePage = (props: CachePageProps) => {
                 <div className="text-sm text-muted-foreground">
                   Total Cache Hits
                 </div>
-                {isAnyLoading ? (
+                {loadingStates.totalCacheHits ? (
                   <div className="animate-pulse h-7 w-16 bg-muted rounded" />
                 ) : (
                   <div className="text-xl font-semibold text-foreground">
@@ -337,7 +331,7 @@ const CachePage = (props: CachePageProps) => {
                 <div className="text-sm text-muted-foreground">
                   Total Cost Savings
                 </div>
-                {isAnyLoading ? (
+                {loadingStates.totalSavings ? (
                   <div className="animate-pulse h-7 w-16 bg-muted rounded" />
                 ) : (
                   <div className="text-xl font-semibold text-foreground">
@@ -353,7 +347,7 @@ const CachePage = (props: CachePageProps) => {
                 <div className="text-sm text-muted-foreground">
                   Total Time Saved
                 </div>
-                {isAnyLoading ? (
+                {loadingStates.timeSaved ? (
                   <div className="animate-pulse h-7 w-16 bg-muted rounded" />
                 ) : (
                   <div className="text-xl font-semibold text-foreground">
@@ -369,7 +363,7 @@ const CachePage = (props: CachePageProps) => {
                 <div className="text-sm text-muted-foreground">
                   Cache Hit Rate
                 </div>
-                {isAnyLoading ? (
+                {loadingStates.totalCacheHits || loadingStates.totalRequests ? (
                   <div className="animate-pulse h-7 w-16 bg-muted rounded" />
                 ) : (
                   <div
@@ -389,7 +383,7 @@ const CachePage = (props: CachePageProps) => {
                 <div className="text-sm text-muted-foreground">
                   Time Saved per Hit
                 </div>
-                {isAnyLoading ? (
+                {loadingStates.avgLatency || loadingStates.avgLatencyCached ? (
                   <div className="animate-pulse h-7 w-16 bg-muted rounded" />
                 ) : (
                   <div className="text-xl font-semibold text-green-600">
@@ -409,7 +403,7 @@ const CachePage = (props: CachePageProps) => {
         <div className="py-4">
           <h2 className="text-lg font-semibold text-foreground mb-4">{`Cache Hits (Last ${timePeriod} days)`}</h2>
           <div className="h-72 px-4 ">
-            {isAnyLoading ? (
+            {loadingStates.cacheHits ? (
               <div className="h-full w-full flex-col flex p-8">
                 <div className="h-full w-full rounded-lg bg-gray-300 dark:bg-gray-700 animate-pulse" />
               </div>
@@ -455,8 +449,8 @@ const CachePage = (props: CachePageProps) => {
               id="cache-top-requests"
               defaultData={topRequestsData}
               defaultColumns={topRequestsColumns}
-              skeletonLoading={isAnyLoading}
-              dataLoading={isAnyLoading}
+              skeletonLoading={loadingStates.topRequests}
+              dataLoading={loadingStates.topRequests}
               activeColumns={activeColumns}
               setActiveColumns={setActiveColumns}
               fullWidth={true}
