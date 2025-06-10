@@ -11,7 +11,7 @@ import {
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useRouter } from "next/router";
-import { RequestResponseRMTDerivedTable } from "../filterAst";
+import { RequestResponseRMTDerivedTable } from "@helicone-package/filters/filterDefs";
 
 const KNOWN_HELICONE_PROPERTIES = {
   "helicone-session-id": {

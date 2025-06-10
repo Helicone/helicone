@@ -1,8 +1,5 @@
 import { UserMetric } from "@/lib/api/users/UserMetric";
-
-export type RequestResponseRMTDerivedTable =
-  | "request_response_rmt"
-  | "session_rmt";
+import { RequestResponseRMTDerivedTable } from "@helicone-package/filters/filterDefs";
 
 export type RMTTableDefinitions = RequestResponseRMT | SessionRMT;
 

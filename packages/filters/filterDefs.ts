@@ -49,6 +49,10 @@ export interface TimeFilterMs {
   endTimeUnixMs: number;
 }
 
+export type RequestResponseRMTDerivedTable =
+  | "request_response_rmt"
+  | "session_rmt";
+
 // NON CLICKHOUSE TABLES
 
 // user_metrics

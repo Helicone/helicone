@@ -12,7 +12,7 @@ import {
   createDefaultFilterGroupExpressionForTable,
   OrExpression,
 } from "./filterAst";
-import { RequestResponseRMTDerivedTable } from "./filterAst";
+import { RequestResponseRMTDerivedTable } from "@helicone-package/filters/filterDefs";
 
 interface FilterASTEditorProps {
   baseTable?: RequestResponseRMTDerivedTable;

@@ -8,6 +8,7 @@ import { FilterNode } from "@helicone-package/filters/filterDefs";
 import { placeAssetIdValues } from "../lib/requestTraverseHelper";
 import { SortLeafRequest } from "../lib/sorts/requests/sorts";
 import { MAX_EXPORT_ROWS } from "@/lib/constants";
+import { RequestResponseRMTDerivedTable } from "@helicone-package/filters/filterDefs";
 import { TSessions } from "@/components/templates/sessions/sessionsPage";
 
 function formatDateForClickHouse(date: Date): string {
@@ -99,7 +100,8 @@ export const useGetRequestsWithBodies = (
   advancedFilter: FilterNode,
   sortLeaf: SortLeafRequest,
   isLive: boolean = false,
-  isCached: boolean = false
+  isCached: boolean = false,
+  baseTable: RequestResponseRMTDerivedTable = "request_response_rmt"
 ) => {
   // First query to fetch the initial request data
   const requestQuery = $JAWN_API.useQuery(
@@ -112,6 +114,7 @@ export const useGetRequestsWithBodies = (
         limit: currentPageSize,
         sort: sortLeaf as any,
         isCached: isCached as any,
+        baseTable: baseTable as RequestResponseRMTDerivedTable,
       },
     },
     {
@@ -238,7 +241,8 @@ const useGetRequests = (
   advancedFilter: FilterNode,
   sortLeaf: SortLeafRequest,
   isCached: boolean = false,
-  isLive: boolean = false
+  isLive: boolean = false,
+  baseTable: RequestResponseRMTDerivedTable = "request_response_rmt"
 ) => {
   return {
     requests: useGetRequestsWithBodies(
@@ -247,7 +251,8 @@ const useGetRequests = (
       advancedFilter,
       sortLeaf,
       isLive,
-      isCached
+      isCached,
+      baseTable
     ),
     count: useGetRequestCount(advancedFilter, isLive, isCached),
   };
