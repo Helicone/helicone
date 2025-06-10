@@ -66,7 +66,6 @@ export function RenderMappedRequest({
   className,
   messageIndexFilter,
   onRequestSelect,
-  renderMode = "DEFAULT",
 }: {
   mappedRequest: MappedLLMRequest;
   className?: string;
@@ -75,7 +74,6 @@ export function RenderMappedRequest({
     endIndex: number;
   };
   onRequestSelect?: (request_id: string) => void;
-  renderMode?: ChatMode;
 }) {
   const { mode, toggleMode, setMode } = useRequestRenderModeStore();
   const isShiftPressed = useShiftKeyPress();
@@ -125,14 +123,14 @@ export function RenderMappedRequest({
             case "anthropic-chat":
             case "openai-image":
             case "black-forest-labs-image":
-              return <Chat mappedRequest={mappedRequest} mode={renderMode} />;
+              return <Chat mappedRequest={mappedRequest} />;
 
             case "openai-instruct":
             case "openai-embedding":
               return <Completion mappedRequest={mappedRequest} />;
 
             case "openai-response":
-              return <Chat mappedRequest={mappedRequest} mode={renderMode} />;
+              return <Chat mappedRequest={mappedRequest} />;
 
             case "vector-db":
               return <VectorDB mappedRequest={mappedRequest} />;
