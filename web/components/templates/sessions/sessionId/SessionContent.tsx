@@ -225,7 +225,7 @@ export const SessionContent: React.FC<SessionContentProps> = ({
               )}
             </div>
 
-            <FilterASTButton />
+            <FilterASTButton baseTable="session_rmt" />
 
             {/* Realtime session reconstruction warning) */}
             {containsRealtime && (

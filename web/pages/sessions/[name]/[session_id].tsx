@@ -14,6 +14,7 @@ import { useGetRequests } from "../../../services/hooks/requests";
 import { useRouter } from "next/router";
 import { useFilterAST } from "@/filterAST/context/filterContext";
 import { toFilterNode } from "@/filterAST/toFilterNode";
+import { RequestResponseRMTDerivedTable } from "@helicone-package/filters/filterDefs";
 
 export const SessionDetail = ({
   session_id,
@@ -80,7 +81,7 @@ export const SessionDetail = ({
     pageSize,
     {
       left: {
-        request_response_rmt: {
+        session_rmt: {
           properties:
             session_name !== EMPTY_SESSION_NAME
               ? {
@@ -101,7 +102,7 @@ export const SessionDetail = ({
       operator: "and",
       right: {
         left: {
-          request_response_rmt: {
+          session_rmt: {
             request_created_at: {
               gt: ThreeMonthsAgo,
             },
@@ -117,7 +118,8 @@ export const SessionDetail = ({
       created_at: "desc",
     },
     false,
-    isLive
+    isLive,
+    "session_rmt" as RequestResponseRMTDerivedTable
   );
 
   // Process requests: Check for realtime session and convert if necessary

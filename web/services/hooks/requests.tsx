@@ -215,18 +215,19 @@ const useGetRequestCount = (
   filter: FilterNode,
   isLive = false,
   isCached = false,
+  baseTable: RequestResponseRMTDerivedTable = "request_response_rmt"
 ) => {
   return useQuery({
-    queryKey: ["requestsCount", filter, isCached],
+    queryKey: ["requestsCount", filter, isLive, isCached, baseTable],
     queryFn: async (query) => {
-      const [_, filter, isLive, isCached] = query.queryKey as [string, FilterNode, boolean, boolean];
+      const [_, filter, isLive, isCached, baseTable] = query.queryKey as [string, FilterNode, boolean, boolean, RequestResponseRMTDerivedTable];
       const processedFilter = processFilter(filter);
       return await fetch("/api/request/count", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ filter: processedFilter, isCached }),
+        body: JSON.stringify({ filter: processedFilter, isCached, baseTable }),
       }).then((res) => res.json() as Promise<Result<number, string>>);
     },
     refetchOnWindowFocus: false,
@@ -244,6 +245,7 @@ const useGetRequests = (
   isLive: boolean = false,
   baseTable: RequestResponseRMTDerivedTable = "request_response_rmt"
 ) => {
+  console.log("baseTable, useGetRequests", baseTable)
   return {
     requests: useGetRequestsWithBodies(
       currentPage,
@@ -254,7 +256,7 @@ const useGetRequests = (
       isCached,
       baseTable
     ),
-    count: useGetRequestCount(advancedFilter, isLive, isCached),
+    count: useGetRequestCount(advancedFilter, isLive, isCached, baseTable),
   };
 };
 

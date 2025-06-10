@@ -7,16 +7,18 @@ import {
 } from "../../../lib/api/handlerWrappers";
 import { Result } from "@/packages/common/result";
 import { FilterNode } from "@helicone-package/filters/filterDefs";
+import { RequestResponseRMTDerivedTable } from "@helicone-package/filters/filterDefs";
 async function handler({
   req,
   res,
   userData: { orgId },
 }: HandlerWrapperOptions<Result<number, string>>) {
-  const { filter, isCached } = req.body as {
+  const { filter, isCached, baseTable = "request_response_rmt" } = req.body as {
     filter: FilterNode;
     isCached: boolean;
+    baseTable?: RequestResponseRMTDerivedTable;
   };
-  const metrics = await getRequestCountClickhouse(orgId, filter, isCached);
+  const metrics = await getRequestCountClickhouse(orgId, filter, isCached, baseTable);
   res.status(metrics.error === null ? 200 : 500).json(metrics);
 }
 

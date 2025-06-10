@@ -4,7 +4,7 @@ import { KVCache } from "../../lib/cache/kvCache";
 import { HeliconeScoresMessage } from "../../lib/handlers/HandlerContext";
 import { dbExecute, dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import { S3Client } from "../../lib/shared/db/s3Client";
-import { FilterNode } from "@helicone-package/filters/filterDefs";
+import { FilterNode, RequestResponseRMTDerivedTable } from "@helicone-package/filters/filterDefs";
 import { Result, err, ok, resultMap } from "../../packages/common/result";
 import { VersionedRequestStore } from "../../lib/stores/request/VersionedRequestStore";
 import {
@@ -20,7 +20,7 @@ import { cacheResultCustom } from "../../utils/cacheResult";
 import { BaseManager } from "../BaseManager";
 import { ScoreManager } from "../score/ScoreManager";
 import { AuthParams } from "../../packages/common/auth/types";
-import { buildFilterWithAuthClickHouse } from "@helicone-package/filters/filters";
+import { buildFilterWithAuthFromTable } from "@helicone-package/filters/filters";
 export const getModelFromPath = (path: string) => {
   const regex1 = /\/engines\/([^/]+)/;
   const regex2 = /models\/([^/:]+)/;
@@ -317,14 +317,15 @@ export class RequestManager extends BaseManager {
 
   private addScoreFilterClickhouse(
     isScored: boolean,
-    filter: FilterNode
+    filter: FilterNode,
+    baseTable: RequestResponseRMTDerivedTable = "request_response_rmt"
   ): FilterNode {
     if (isScored) {
       return {
         left: filter,
         operator: "and",
         right: {
-          request_response_rmt: {
+          [baseTable]: {
             scores_column: {
               "not-equals": "{}",
             },
@@ -336,7 +337,7 @@ export class RequestManager extends BaseManager {
         left: filter,
         operator: "and",
         right: {
-          request_response_rmt: {
+          [baseTable]: {
             scores_column: {
               equals: "{}",
             },
@@ -436,16 +437,17 @@ export class RequestManager extends BaseManager {
 
   async getRequestCount(params: {
     filter: FilterNode;
+    baseTable?: RequestResponseRMTDerivedTable;
   }): Promise<Result<number, string>> {
-    const { filter } = params;
-    const builtFilter = await buildFilterWithAuthClickHouse({
+    const { filter, baseTable = "request_response_rmt" } = params;
+    const builtFilter = await buildFilterWithAuthFromTable(baseTable)({
       org_id: this.authParams.organizationId,
       filter,
       argsAcc: [],
     });
 
     const query = `
-    SELECT COUNT(*) FROM request_response_rmt
+    SELECT COUNT(*) FROM ${baseTable}
     WHERE (${builtFilter.filter})
     `;
 
@@ -472,12 +474,13 @@ export class RequestManager extends BaseManager {
         created_at: "desc",
       },
       isScored,
+      baseTable = "request_response_rmt"
     } = params;
 
     let newFilter = filter;
 
     if (isScored !== undefined) {
-      newFilter = this.addScoreFilterClickhouse(isScored, newFilter);
+      newFilter = this.addScoreFilterClickhouse(isScored, newFilter, baseTable);
     }
 
     const requests =
@@ -486,14 +489,16 @@ export class RequestManager extends BaseManager {
             this.authParams.organizationId,
             newFilter,
             offset,
-            limit
+            limit,
+            baseTable
           )
         : await getRequestsClickhouse(
             this.authParams.organizationId,
             newFilter,
             offset,
             limit,
-            sort
+            sort,
+            baseTable
           );
 
     return resultMap(requests, (req) => {

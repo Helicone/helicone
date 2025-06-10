@@ -4,6 +4,7 @@ import {
   FilterBranch,
   FilterLeaf,
   FilterNode,
+  RequestResponseRMTDerivedTable,
   TablesAndViews,
 } from "./filterDefs";
 
@@ -728,4 +729,18 @@ export async function buildFilterWithAuth(
     ...args,
     filter: filterNode,
   });
+}
+
+type FilterBuilderWithAuthFunction = (args: ExternalBuildFilterArgs & { org_id: string }) => Promise<{ filter: string; argsAcc: any[] }>;
+export function buildFilterWithAuthFromTable(
+  baseTable: RequestResponseRMTDerivedTable
+): FilterBuilderWithAuthFunction {
+  switch (baseTable) {
+    case "request_response_rmt":
+      return buildFilterWithAuthClickHouse;
+    case "session_rmt": 
+      return buildFilterWithAuthClickHouseSessionRMT;
+    default:
+      throw new Error(`Unhandled table type: ${baseTable}`);
+  }
 }

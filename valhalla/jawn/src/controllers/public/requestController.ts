@@ -13,7 +13,7 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { FilterLeafSubset } from "@helicone-package/filters/filterDefs";
+import { FilterLeafSubset, RequestResponseRMTDerivedTable } from "@helicone-package/filters/filterDefs";
 import { err, ok, Result } from "../../packages/common/result";
 import { SortLeafRequest } from "../../lib/shared/sorts/requests/sorts";
 import { HeliconeRequestAsset } from "../../lib/stores/request/request";
@@ -47,7 +47,7 @@ export type RequestFilterNode =
       | "response"
       | "properties"
       | "values"
-      | "request_response_rmt"
+      | RequestResponseRMTDerivedTable
     >
   | RequestFilterBranch
   | "all";
@@ -61,6 +61,7 @@ export interface RequestQueryParams {
   includeInputs?: boolean;
   isPartOfExperiment?: boolean;
   isScored?: boolean;
+  baseTable?: RequestResponseRMTDerivedTable;
 }
 
 @Route("v1/request")
@@ -120,6 +121,7 @@ export class RequestController extends Controller {
     },
     isScored: false,
     isPartOfExperiment: false,
+    baseTable: "request_response_rmt" as RequestResponseRMTDerivedTable
   })
   public async getRequestsClickhouse(
     @Body()

@@ -1,9 +1,10 @@
 import { LlmSchema } from "@helicone-package/llm-mapper/types";
 import { ProviderName } from "@helicone-package/cost/providers/mappings";
-import { FilterNode } from "@helicone-package/filters/filterDefs";
+import { FilterNode, RequestResponseRMTDerivedTable } from "@helicone-package/filters/filterDefs";
 import {
   buildFilterWithAuth,
   buildFilterWithAuthClickHouse,
+  buildFilterWithAuthFromTable,
 } from "@helicone-package/filters/filters";
 import {
   SortLeafRequest,
@@ -199,9 +200,10 @@ export async function getRequestCount(
 export async function getRequestCountClickhouse(
   org_id: string,
   filter: FilterNode,
-  isCached = false
+  isCached = false,
+  baseTable: RequestResponseRMTDerivedTable = "request_response_rmt"
 ): Promise<Result<number, string>> {
-  const builtFilter = await buildFilterWithAuthClickHouse({
+  const builtFilter = await buildFilterWithAuthFromTable(baseTable)({
     org_id,
     argsAcc: [],
     filter,
@@ -209,8 +211,8 @@ export async function getRequestCountClickhouse(
 
   const query = `
 SELECT
-  count(DISTINCT request_response_rmt.request_id) as count
-from request_response_rmt
+  count(DISTINCT ${baseTable}.request_id) as count
+from ${baseTable}
 WHERE (${builtFilter.filter})
 ${isCached ? "AND cache_enabled = 1" : ""}
 `;
