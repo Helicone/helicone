@@ -1,4 +1,5 @@
 import { FilterUIDefinition } from "./types";
+import { RequestResponseRMTDerivedTable } from "../filterAst";
 
 export const STATIC_USER_VIEW_DEFINITIONS: FilterUIDefinition[] = [
   {
@@ -89,7 +90,7 @@ export const STATIC_SESSIONS_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     label: "Created At",
     type: "datetime",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
-    table: "sessions_request_response_rmt",
+    table: "sessions",
     subType: "sessions",
   },
   {
@@ -97,7 +98,7 @@ export const STATIC_SESSIONS_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     label: "Latest Request Created At",
     type: "datetime",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
-    table: "sessions_request_response_rmt",
+    table: "sessions",
     subType: "sessions",
   },
   {
@@ -105,7 +106,7 @@ export const STATIC_SESSIONS_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     label: "Total Tokens",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
-    table: "sessions_request_response_rmt",
+    table: "sessions",
     subType: "sessions",
   },
   {
@@ -113,15 +114,15 @@ export const STATIC_SESSIONS_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     label: "Total Requests",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
-    table: "sessions_request_response_rmt",
+    table: "sessions",
     subType: "sessions",
   },
   {
-    id: "session_total_completion_tokens",
+    id: "session_completion_tokens",
     label: "Total Completion Tokens",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
-    table: "sessions_request_response_rmt",
+    table: "sessions",
     subType: "sessions",
   },
   {
@@ -129,7 +130,7 @@ export const STATIC_SESSIONS_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     label: "Total Prompt Tokens",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
-    table: "sessions_request_response_rmt",
+    table: "sessions",
     subType: "sessions",
   },
   {
@@ -137,7 +138,7 @@ export const STATIC_SESSIONS_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     label: "Total Cost",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
-    table: "sessions_request_response_rmt",
+    table: "sessions",
     subType: "sessions",
   },
   {
@@ -145,7 +146,7 @@ export const STATIC_SESSIONS_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     label: "Tags",
     type: "string",
     operators: ["eq", "neq", "like", "ilike", "contains"],
-    table: "sessions_request_response_rmt",
+    table: "sessions",
     subType: "sessions",
   },
 ];
@@ -317,3 +318,47 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
     table: "request_response_rmt",
   },
 ];
+
+export const STATIC_SESSION_RMT_DEFINITIONS: FilterUIDefinition[] = [
+  {
+    id: "session_id",
+    label: "Session ID",
+    type: "string",
+    operators: ["eq", "neq", "like", "ilike", "contains"],
+    table: "session_rmt",
+  },
+  {
+    id: "session_name", 
+    label: "Session Name",
+    type: "string",
+    operators: ["eq", "neq", "like", "ilike", "contains"],
+    table: "session_rmt",
+  },
+];
+
+// Given a table variation of request_response_rmt, return filter definitions of the view of the variation
+// example: session_rmt is aggregated to session_metrics, so provide a filter defn for that view
+export const rmtDerivedTableViewMappings: Record<RequestResponseRMTDerivedTable, FilterUIDefinition[]> = {
+  request_response_rmt: [],
+  session_rmt: STATIC_SESSIONS_VIEW_DEFINITIONS,
+  // user_rmt: STATIC_USER_VIEW_DEFINITIONS,
+};
+
+
+// Given a table variation of request_response_rmt, return the base static filter definitions
+export const getRMTBasedFilterDefinitions = (table: RequestResponseRMTDerivedTable): FilterUIDefinition[] => {
+  return [
+    ...STATIC_FILTER_DEFINITIONS.map((def) => ({
+      ...def,
+      table,
+    })),
+    ...(() => {
+      switch (table) {
+        case "session_rmt":
+          return STATIC_SESSION_RMT_DEFINITIONS;
+        default:
+          return []; // to add more later, e.g /users
+      }
+    })(),
+  ];
+};
