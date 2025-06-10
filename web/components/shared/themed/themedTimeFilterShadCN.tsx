@@ -31,6 +31,13 @@ interface ThemedTimeFilterShadCNProps
   initialDateRange?: DateRange;
 }
 
+function isValidDate(date: Date | undefined) {
+  if (!date) {
+    return false;
+  }
+  return !isNaN(date.getTime());
+}
+
 export function ThemedTimeFilterShadCN({
   className,
   onDateChange,
@@ -155,6 +162,41 @@ export function ThemedTimeFilterShadCN({
     handleDateChange(newRange);
   };
 
+  const [date1Value, setDate1Value] = useState<string | undefined>(
+    date?.from && isValidDate(date.from)
+      ? format(date.from, "yyyy-MM-dd")
+      : undefined
+  );
+  const [date2Value, setDate2Value] = useState<string | undefined>(
+    date?.to && isValidDate(date.to) ? format(date.to, "yyyy-MM-dd") : undefined
+  );
+
+  const [time1Value, setTime1Value] = useState<string | undefined>(
+    date?.from && isValidDate(date.from)
+      ? format(date.from, "HH:mm")
+      : undefined
+  );
+  const [time2Value, setTime2Value] = useState<string | undefined>(
+    date?.to && isValidDate(date.to) ? format(date.to, "HH:mm") : undefined
+  );
+
+  const [isDateTimeSet, setIsDateTimeSet] = useState(false);
+
+  useEffect(() => {
+    if (isDateTimeSet) {
+      return;
+    }
+    if (date?.from && isValidDate(date.from)) {
+      setDate1Value(format(date.from, "yyyy-MM-dd"));
+      setTime1Value(format(date.from, "HH:mm"));
+    }
+    if (date?.to && isValidDate(date.to)) {
+      setDate2Value(format(date.to, "yyyy-MM-dd"));
+      setTime2Value(format(date.to, "HH:mm"));
+      setIsDateTimeSet(true);
+    }
+  }, [date]);
+
   return (
     <div className={cn("grid gap-2", className)}>
       <Popover>
@@ -170,7 +212,10 @@ export function ThemedTimeFilterShadCN({
             size="md_sleek"
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {date?.from && date?.to ? (
+            {date?.from &&
+            date?.to &&
+            isValidDate(date?.from) &&
+            isValidDate(date?.to) ? (
               <>
                 {formatDateDisplay(date.from, date.to)}
                 {isInvertedRange && (
@@ -290,10 +335,11 @@ export function ThemedTimeFilterShadCN({
                 <Input
                   type="date"
                   className="text-xs w-min ml-auto border-gray-300 rounded-md"
-                  value={date?.from ? format(date.from, "yyyy-MM-dd") : ""}
+                  value={date1Value}
                   onChange={(e) => {
-                    if (date?.from) {
-                      const newFrom = new Date(e.target.value);
+                    setDate1Value(e.target.value);
+                    const newFrom = new Date(e.target.value);
+                    if (isValidDate(newFrom)) {
                       handleDateChange({ ...date, from: newFrom });
                     }
                   }}
@@ -301,11 +347,12 @@ export function ThemedTimeFilterShadCN({
                 <Input
                   type="time"
                   className="text-xs w-min ml-auto border-gray-300 rounded-md"
-                  value={date?.from ? format(date.from, "HH:mm") : ""}
+                  value={time1Value}
                   onChange={(e) => {
-                    if (date?.from) {
+                    setTime1Value(e.target.value);
+                    const newFrom = new Date(e.target.value);
+                    if (isValidDate(newFrom)) {
                       let [hours, minutes] = e.target.value.split(":");
-                      const newFrom = new Date(date.from);
 
                       if (hours && minutes) {
                         newFrom.setHours(Number(hours), Number(minutes));
@@ -319,10 +366,11 @@ export function ThemedTimeFilterShadCN({
                 <Input
                   type="date"
                   className="text-xs w-min ml-auto border-gray-300 rounded-md"
-                  value={date?.to ? format(date.to, "yyyy-MM-dd") : ""}
+                  value={date2Value}
                   onChange={(e) => {
-                    if (date?.to) {
-                      const newTo = new Date(e.target.value);
+                    setDate2Value(e.target.value);
+                    const newTo = new Date(e.target.value);
+                    if (isValidDate(newTo) && date?.from) {
                       handleDateChange({ ...date, to: newTo });
                     }
                   }}
@@ -330,11 +378,12 @@ export function ThemedTimeFilterShadCN({
                 <Input
                   type="time"
                   className="text-xs w-min ml-auto border-gray-300 rounded-md"
-                  value={date?.to ? format(date.to, "HH:mm") : ""}
+                  value={time2Value}
                   onChange={(e) => {
-                    if (date?.to) {
+                    setTime2Value(e.target.value);
+                    const newTo = new Date(e.target.value);
+                    if (isValidDate(newTo) && date?.from) {
                       let [hours, minutes] = e.target.value.split(":");
-                      const newTo = new Date(date.to);
 
                       if (hours && minutes) {
                         newTo.setHours(Number(hours), Number(minutes));
