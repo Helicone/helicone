@@ -83,7 +83,7 @@ export const SessionContent: React.FC<SessionContentProps> = ({
 
   // HANDLERS
   const handleSessionIdChange = (newSessionId: string) => {
-    router.push(`/sessions/${encodeURIComponent(newSessionId)}`);
+    router.push(`/sessions/${session_name}/${encodeURIComponent(newSessionId)}`);
   };
   const handleRequestIdChange = (newRequestId: string) => {
     setSelectedRequestId(newRequestId);
