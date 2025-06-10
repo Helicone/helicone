@@ -1,58 +1,30 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { playgroundModels as PLAYGROUND_MODELS } from "@helicone-package/cost/providers/mappings";
-import AuthHeader from "../../shared/authHeader";
-import useNotification from "../../shared/notification/useNotification";
-import { useGetRequestWithBodies } from "@/services/hooks/requests";
-import { OPENROUTER_MODEL_MAP } from "./new/openRouterModelMap";
 import {
-  MappedLLMRequest,
-  Tool,
-  Provider,
-} from "@helicone-package/llm-mapper/types";
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 import { generateStream } from "@/lib/api/llm/generate-stream";
 import { processStream } from "@/lib/api/llm/process-stream";
-import { CommandItem } from "@/components/ui/command";
-import {
-  CommandEmpty,
-  CommandGroup,
-  CommandList,
-} from "@/components/ui/command";
-import { cn } from "@/lib/utils";
-import { CommandInput } from "@/components/ui/command";
-import { Command } from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import {
-  Check,
-  ChevronsUpDownIcon,
-  CommandIcon,
-  Loader2,
-  Undo2Icon,
-} from "lucide-react";
-import Chat from "../requests/components/Chat";
-import { openaiChatMapper } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
-import findBestMatch from "string-similarity-js";
-import ToolsConfigurationModal from "./components/ToolsConfigurationModal";
-import { ResizableHandle, ResizablePanel } from "@/components/ui/resizable";
-import { ResizablePanelGroup } from "@/components/ui/resizable";
-import { openAIMessageToHeliconeMessage } from "@helicone-package/llm-mapper/mappers/openai/chat";
-import { FlaskConicalIcon } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { v4 as uuidv4 } from "uuid";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useLocalStorage } from "@/services/hooks/localStorage";
-import _ from "lodash";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useGetRequestWithBodies } from "@/services/hooks/requests";
+import { openAIMessageToHeliconeMessage } from "@helicone-package/llm-mapper/mappers/openai/chat";
+import { openaiChatMapper } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
+import {
+  MappedLLMRequest,
+  Provider,
+  Tool,
+} from "@helicone-package/llm-mapper/types";
 import { heliconeRequestToMappedContent } from "@helicone-package/llm-mapper/utils/getMappedContent";
-import ModelParametersForm from "./components/ModelParametersForm";
+import { useEffect, useMemo, useRef, useState } from "react";
+import findBestMatch from "string-similarity-js";
+import { v4 as uuidv4 } from "uuid";
+import AuthHeader from "../../shared/authHeader";
+import useNotification from "../../shared/notification/useNotification";
+import PlaygroundActions from "./components/PlaygroundActions";
+import PlaygroundHeader from "./components/PlaygroundHeader";
+import PlaygroundMessagesPanel from "./components/PlaygroundMessagesPanel";
+import PlaygroundResponsePanel from "./components/PlaygroundResponsePanel";
+import { OPENROUTER_MODEL_MAP } from "./new/openRouterModelMap";
 
 export interface ModelParameters {
   temperature: number | null | undefined;
@@ -63,7 +35,7 @@ export interface ModelParameters {
   stop: string | null | undefined;
 }
 
-const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
+export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
   _type: "openai-chat",
   id: "",
   preview: {
@@ -134,8 +106,6 @@ const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
 const PlaygroundPage = (props: PlaygroundPageProps) => {
   const { requestId } = props;
 
-  const [modelListOpen, setModelListOpen] = useState<boolean>(false);
-
   const { data: requestData, isLoading: isRequestLoading } =
     useGetRequestWithBodies(requestId ?? "");
 
@@ -155,6 +125,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     if (!requestId) {
       setMappedContent(DEFAULT_EMPTY_CHAT);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [requestId]);
 
   const [tools, setTools] = useState<Tool[]>([]);
@@ -227,6 +198,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       return mappedContent;
     }
     return DEFAULT_EMPTY_CHAT;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [requestData, isRequestLoading]);
 
   const [response, setResponse] = useState<string>("");
@@ -254,6 +226,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         },
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mappedContent, response]);
 
   const onRun = async () => {
@@ -349,314 +322,70 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mappedContent]);
+
+  const handleToolsChange = (newTools: Tool[]) => {
+    setTools(newTools);
+    if (!mappedContent) {
+      return;
+    }
+    setMappedContent({
+      ...mappedContent,
+      schema: {
+        ...mappedContent.schema,
+        request: { ...mappedContent.schema.request, tools: newTools },
+      },
+    });
+  };
 
   return (
     <main className="h-screen flex flex-col w-full animate-fade-in">
       <AuthHeader
         title={"Playground"}
         actions={
-          <div className="flex items-center gap-2">
-            {mappedContent && !_.isEqual(mappedContent, defaultContent) && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => {
-                      if (defaultContent) {
-                        setMappedContent(defaultContent);
-                        setModelParameters({
-                          temperature:
-                            defaultContent.schema.request.temperature,
-                          maxTokens: defaultContent.schema.request.max_tokens,
-                          topP: defaultContent.schema.request.top_p,
-                          frequencyPenalty:
-                            defaultContent.schema.request.frequency_penalty,
-                          presencePenalty:
-                            defaultContent.schema.request.presence_penalty,
-                          stop: defaultContent.schema.request.stop
-                            ? Array.isArray(defaultContent.schema.request.stop)
-                              ? defaultContent.schema.request.stop.join(",")
-                              : defaultContent.schema.request.stop
-                            : undefined,
-                        });
-                      } else {
-                        setMappedContent(DEFAULT_EMPTY_CHAT);
-                      }
-                    }}
-                  >
-                    <Undo2Icon className="w-4 h-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  Reset to {requestId ? `original request` : "blank content"}
-                </TooltipContent>
-              </Tooltip>
-            )}
-            {/* <ResponseFormatModal
-              responseFormat={responseFormat.json_schema ?? ""}
-              onResponseFormatChange={(format) => {
-                setResponseFormat({
-                  type: format ? "json_schema" : "text",
-                  json_schema: format ? format : undefined,
-                });
-              }}
-            />
-            <ToolsConfigurationModal tools={tools} onToolsChange={setTools} /> */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button onClick={onRun}>Run</Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <div className="flex items-center gap-1">
-                  <div className="p-1 rounded-md bg-muted">
-                    <CommandIcon className="w-3 h-3" />
-                  </div>
-                  +{" "}
-                  <div className="px-1 py rounded-md bg-muted">
-                    <kbd className="text-xs">Enter</kbd>
-                  </div>
-                </div>
-              </TooltipContent>
-            </Tooltip>
-          </div>
+          <PlaygroundActions
+            mappedContent={mappedContent}
+            defaultContent={defaultContent}
+            setMappedContent={setMappedContent}
+            setModelParameters={setModelParameters}
+            setTools={setTools}
+            onRun={onRun}
+            requestId={requestId}
+          />
         }
       />
       <div className="flex flex-col w-full h-full min-h-[80vh] border-t border-border">
-        <div className="flex justify-between items-center px-4 py-2 border-b border-border bg-sidebar-background w-full">
-          <div className="flex flex-col gap-2 w-full">
-            <div className="flex justify-between items-center w-full cursor-pointer">
-              <Popover open={modelListOpen} onOpenChange={setModelListOpen}>
-                <PopoverTrigger
-                  asChild
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setModelListOpen(!modelListOpen);
-                  }}
-                >
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={modelListOpen}
-                    className="w-[200px] justify-between"
-                  >
-                    <span className="truncate max-w-[150px]">
-                      {selectedModel || "Select model..."}
-                    </span>
-                    <ChevronsUpDownIcon className="opacity-50 w-4 h-4" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[200px] p-0">
-                  <Command>
-                    <CommandInput placeholder="Search model..." />
-                    <CommandList>
-                      <CommandEmpty>No framework found.</CommandEmpty>
-                      <CommandGroup>
-                        {PLAYGROUND_MODELS.map((model) => (
-                          <CommandItem
-                            key={model}
-                            value={model}
-                            onSelect={(currentValue) => {
-                              setSelectedModel(
-                                currentValue === selectedModel
-                                  ? ""
-                                  : currentValue
-                              );
-                              setModelListOpen(false);
-                            }}
-                          >
-                            {model}
-                            <Check
-                              className={cn(
-                                "ml-auto",
-                                model === selectedModel
-                                  ? "opacity-100"
-                                  : "opacity-0"
-                              )}
-                            />
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              <div className="flex items-center gap-2">
-                <ToolsConfigurationModal
-                  tools={tools}
-                  onToolsChange={setTools}
-                />
-
-                <ModelParametersForm
-                  responseFormat={responseFormat}
-                  onResponseFormatChange={setResponseFormat}
-                  parameters={modelParameters}
-                  onParametersChange={setModelParameters}
-                />
-              </div>
-            </div>
-            <div className="flex gap-2 mt-2 flex-wrap text-slate-500">
-              {Object.entries(modelParameters).map(([key, value], index) => (
-                <div key={index}>
-                  <p className="text-xs">
-                    <span className="font-medium">{key}:</span>{" "}
-                    {!value
-                      ? "Default"
-                      : typeof value === "string"
-                      ? value
-                      : Array.isArray(value)
-                      ? value.length > 0
-                        ? value.join(", ")
-                        : "[]"
-                      : value}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        <PlaygroundHeader
+          selectedModel={selectedModel}
+          setSelectedModel={setSelectedModel}
+          tools={tools}
+          setTools={handleToolsChange}
+          responseFormat={responseFormat}
+          setResponseFormat={setResponseFormat}
+          modelParameters={modelParameters}
+          setModelParameters={setModelParameters}
+        />
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel
             className="flex w-full h-full"
             defaultSize={70}
             minSize={30}
           >
-            <ScrollArea className="w-full h-full">
-              {(() => {
-                if (!mappedContent) {
-                  return (
-                    <div className="flex flex-col w-full h-full">
-                      {/* Message Role Header Skeleton */}
-                      <div className="h-12 w-full flex flex-row items-center justify-between px-4 sticky top-0 bg-sidebar-background dark:bg-black z-10">
-                        <div className="flex items-center gap-2">
-                          <Skeleton className="h-6 w-24" />
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Skeleton className="h-8 w-8 rounded-md" />
-                          <Skeleton className="h-8 w-8 rounded-md" />
-                        </div>
-                      </div>
-                      {/* Message Content Skeleton */}
-                      <div className="w-full flex flex-col px-4 pb-4 pt-0">
-                        <Skeleton className="w-full h-32 mt-4" />
-                      </div>
-                      {/* Additional Message Skeleton */}
-                      <div className="h-12 w-full flex flex-row items-center justify-between px-4 border-t border-border">
-                        <div className="flex items-center gap-2">
-                          <Skeleton className="h-6 w-24" />
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Skeleton className="h-8 w-8 rounded-md" />
-                          <Skeleton className="h-8 w-8 rounded-md" />
-                        </div>
-                      </div>
-                      <div className="w-full flex flex-col px-4 pb-4 pt-0">
-                        <Skeleton className="w-full h-24 mt-4" />
-                      </div>
-                    </div>
-                  );
-                }
-                switch (mappedContent?._type) {
-                  case "openai-chat":
-                  case "anthropic-chat":
-                  case "gemini-chat":
-                    return (
-                      <Chat
-                        mappedRequest={mappedContent as MappedLLMRequest}
-                        mode="PLAYGROUND_INPUT"
-                        onChatChange={(mappedRequest) => {
-                          setMappedContent(mappedRequest);
-                        }}
-                      />
-                    );
-                  default:
-                    return (
-                      <div className="flex flex-col gap-2 p-20">
-                        <div className="text-sm text-gray-500">
-                          Unable to support playground on this request. Please
-                          contact support at (support@helicone.ai) and we can be
-                          sure to add support for it. Or if you feel inclined,
-                          you can submit a PR to add support for it.
-                        </div>
-                      </div>
-                    );
-                }
-              })()}
-            </ScrollArea>
+            <PlaygroundMessagesPanel
+              mappedContent={mappedContent}
+              setMappedContent={setMappedContent}
+            />
           </ResizablePanel>
           <ResizableHandle withHandle />
           <ResizablePanel defaultSize={30} minSize={20}>
-            <ScrollArea className="w-full h-full">
-              <div className="flex flex-col h-full">
-                {error ? (
-                  <div className="p-4 text-red-500 dark:text-red-400 text-sm">
-                    {error}
-                  </div>
-                ) : !response ? (
-                  <div className="flex flex-col items-center justify-center h-full p-8 text-center">
-                    <div className="flex flex-col items-center gap-2">
-                      <FlaskConicalIcon className="w-8 h-8 text-slate-400" />
-                      <p className="text-sm text-slate-500">No response yet</p>
-                      <p className="text-xs text-slate-400">
-                        Click Run to generate a response
-                      </p>
-                    </div>
-                  </div>
-                ) : isStreaming ? (
-                  <div className="flex flex-col items-center justify-center h-full p-8 text-center">
-                    <div className="flex flex-col items-center gap-2">
-                      <Loader2 className="w-8 h-8 text-slate-400 animate-spin" />
-                      <p className="text-sm text-slate-500">
-                        Generating response...
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <div className="flex justify-end p-2 border-b border-border">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          const newMessageMappedResponse =
-                            openAIMessageToHeliconeMessage(
-                              JSON.parse(response)
-                            );
-
-                          if (response && mappedContent) {
-                            const newMappedContent = {
-                              ...mappedContent,
-                              schema: {
-                                ...mappedContent.schema,
-                                request: {
-                                  ...mappedContent.schema.request,
-                                  messages: [
-                                    ...(mappedContent.schema.request.messages ??
-                                      []),
-                                    {
-                                      ...newMessageMappedResponse,
-                                      id: `msg-${uuidv4()}`,
-                                    },
-                                  ],
-                                },
-                              },
-                            };
-                            setMappedContent(newMappedContent);
-                          }
-                        }}
-                      >
-                        Add to Chat
-                      </Button>
-                    </div>
-                    <Chat
-                      mappedRequest={mappedContent as MappedLLMRequest}
-                      mode="PLAYGROUND_OUTPUT"
-                    />
-                  </>
-                )}
-              </div>
-            </ScrollArea>
+            <PlaygroundResponsePanel
+              mappedContent={mappedContent}
+              setMappedContent={setMappedContent}
+              error={error}
+              response={response}
+              isStreaming={isStreaming}
+            />
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>

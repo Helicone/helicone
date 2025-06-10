@@ -20,6 +20,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 
 interface ToolsConfigurationModalProps {
   tools: Tool[];
@@ -181,16 +187,40 @@ export default function ToolsConfigurationModal({
               </div>
               <div className="flex-1 overflow-y-auto">
                 {currentTools.map((tool, index) => (
-                  <Button
-                    key={index}
-                    variant={
-                      selectedToolIndex === index ? "secondary" : "ghost"
-                    }
-                    className="w-full justify-start"
-                    onClick={() => setSelectedToolIndex(index)}
-                  >
-                    {tool.name || `Tool ${index + 1}`}
-                  </Button>
+                  <ContextMenu key={index}>
+                    <ContextMenuTrigger asChild>
+                      <Button
+                        key={index}
+                        variant={
+                          selectedToolIndex === index ? "secondary" : "ghost"
+                        }
+                        className="w-full justify-start"
+                        onClick={() => setSelectedToolIndex(index)}
+                      >
+                        {tool.name || `Tool ${index + 1}`}
+                      </Button>
+                    </ContextMenuTrigger>
+                    <ContextMenuContent>
+                      <ContextMenuItem
+                        onSelect={() => {
+                          onToolsChange(
+                            currentTools.filter((_, i) => i !== index)
+                          );
+                          if (selectedToolIndex === index) {
+                            setSelectedToolIndex(
+                              currentTools.length > 0
+                                ? index === 0
+                                  ? 1
+                                  : index - 1
+                                : null
+                            );
+                          }
+                        }}
+                      >
+                        Delete
+                      </ContextMenuItem>
+                    </ContextMenuContent>
+                  </ContextMenu>
                 ))}
               </div>
             </div>
@@ -273,9 +303,11 @@ export default function ToolsConfigurationModal({
                               (_, i) => i !== selectedToolIndex
                             )
                           );
-                          setSelectedToolIndex(
+                          setSelectedToolIndex((prev) =>
                             currentTools.length > 0
-                              ? currentTools.length - 1
+                              ? prev === 0
+                                ? 1
+                                : prev! - 1
                               : null
                           );
                         }}
