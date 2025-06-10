@@ -29,8 +29,15 @@ const PlaygroundActions = ({
   requestId,
 }: PlaygroundActionsProps) => {
   const resetToDefault = () => {
+    console.log("Reset triggered with:", {
+      defaultContent,
+      mappedContent,
+      requestId,
+    });
+
     if (defaultContent) {
-      setMappedContent(defaultContent);
+      console.log("Setting to default content");
+      // Reset all states in sequence
       setModelParameters({
         temperature: defaultContent.schema.request.temperature,
         maxTokens: defaultContent.schema.request.max_tokens,
@@ -44,9 +51,20 @@ const PlaygroundActions = ({
           : undefined,
       });
       setTools(defaultContent.schema.request.tools || []);
+      setMappedContent(defaultContent);
     } else {
-      setMappedContent(DEFAULT_EMPTY_CHAT);
+      console.log("Setting to empty chat");
+      // Reset all states in sequence
       setTools([]);
+      setModelParameters({
+        temperature: 0.7,
+        maxTokens: 1000,
+        topP: 1,
+        frequencyPenalty: 0,
+        presencePenalty: 0,
+        stop: undefined,
+      });
+      setMappedContent(DEFAULT_EMPTY_CHAT);
     }
   };
   return (

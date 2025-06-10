@@ -21,7 +21,6 @@ import { v4 as uuidv4 } from "uuid";
 import AuthHeader from "../../shared/authHeader";
 import useNotification from "../../shared/notification/useNotification";
 import PlaygroundActions from "./components/PlaygroundActions";
-import PlaygroundHeader from "./components/PlaygroundHeader";
 import PlaygroundMessagesPanel from "./components/PlaygroundMessagesPanel";
 import PlaygroundResponsePanel from "./components/PlaygroundResponsePanel";
 import { OPENROUTER_MODEL_MAP } from "./new/openRouterModelMap";
@@ -148,6 +147,20 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   });
 
   useMemo(() => {
+    if (!requestId) {
+      setTools([]);
+      setModelParameters({
+        temperature: 0.7,
+        maxTokens: 1000,
+        topP: 1,
+        frequencyPenalty: 0,
+        presencePenalty: 0,
+        stop: undefined,
+      });
+      setMappedContent(DEFAULT_EMPTY_CHAT);
+      setDefaultContent(DEFAULT_EMPTY_CHAT);
+      return;
+    }
     if (requestData?.data && !isRequestLoading) {
       if (requestData.data.model in OPENROUTER_MODEL_MAP) {
         setSelectedModel(OPENROUTER_MODEL_MAP[requestData.data.model]);
@@ -199,7 +212,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     }
     return DEFAULT_EMPTY_CHAT;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [requestData, isRequestLoading]);
+  }, [requestId, requestData, isRequestLoading]);
 
   const [response, setResponse] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
@@ -341,22 +354,9 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
 
   return (
     <main className="h-screen flex flex-col w-full animate-fade-in">
-      <AuthHeader
-        title={"Playground"}
-        actions={
-          <PlaygroundActions
-            mappedContent={mappedContent}
-            defaultContent={defaultContent}
-            setMappedContent={setMappedContent}
-            setModelParameters={setModelParameters}
-            setTools={setTools}
-            onRun={onRun}
-            requestId={requestId}
-          />
-        }
-      />
+      <AuthHeader title={"Playground"} />
       <div className="flex flex-col w-full h-full min-h-[80vh] border-t border-border">
-        <PlaygroundHeader
+        {/* <PlaygroundHeader
           selectedModel={selectedModel}
           setSelectedModel={setSelectedModel}
           tools={tools}
@@ -365,7 +365,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           setResponseFormat={setResponseFormat}
           modelParameters={modelParameters}
           setModelParameters={setModelParameters}
-        />
+        /> */}
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel
             className="flex w-full h-full"
@@ -374,7 +374,17 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           >
             <PlaygroundMessagesPanel
               mappedContent={mappedContent}
+              defaultContent={defaultContent}
               setMappedContent={setMappedContent}
+              selectedModel={selectedModel}
+              setSelectedModel={setSelectedModel}
+              tools={tools}
+              setTools={handleToolsChange}
+              responseFormat={responseFormat}
+              setResponseFormat={setResponseFormat}
+              modelParameters={modelParameters}
+              setModelParameters={setModelParameters}
+              onRun={onRun}
             />
           </ResizablePanel>
           <ResizableHandle withHandle />

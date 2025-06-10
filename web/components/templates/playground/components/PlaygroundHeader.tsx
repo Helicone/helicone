@@ -14,12 +14,13 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { playgroundModels as PLAYGROUND_MODELS } from "@helicone-package/cost/providers/mappings";
-import { Tool } from "@helicone-package/llm-mapper/types";
+import { MappedLLMRequest, Tool } from "@helicone-package/llm-mapper/types";
 import { CheckIcon, ChevronsUpDownIcon } from "lucide-react";
 import { useState } from "react";
 import { ModelParameters } from "../playgroundPage";
 import ModelParametersForm from "./ModelParametersForm";
 import ToolsConfigurationModal from "./ToolsConfigurationModal";
+import PlaygroundActions from "./PlaygroundActions";
 
 interface PlaygroundHeaderProps {
   selectedModel: string;
@@ -36,6 +37,10 @@ interface PlaygroundHeaderProps {
   }) => void;
   modelParameters: ModelParameters;
   setModelParameters: (_modelParameters: ModelParameters) => void;
+  mappedContent: MappedLLMRequest | null;
+  defaultContent: MappedLLMRequest | null;
+  setMappedContent: (_mappedContent: MappedLLMRequest) => void;
+  onRun: () => void;
 }
 
 const PlaygroundHeader = ({
@@ -47,12 +52,16 @@ const PlaygroundHeader = ({
   setResponseFormat,
   modelParameters,
   setModelParameters,
+  mappedContent,
+  defaultContent,
+  setMappedContent,
+  onRun,
 }: PlaygroundHeaderProps) => {
   const [modelListOpen, setModelListOpen] = useState<boolean>(false);
   return (
     <div className="flex justify-between items-center px-4 py-2 border-b border-border bg-sidebar-background w-full">
-      <div className="flex flex-col gap-2 w-full">
-        <div className="flex justify-between items-center w-full cursor-pointer">
+      <div className="flex justify-between items-center gap-2 w-full">
+        <div className="flex items-center gap-2 w-full cursor-pointer">
           <Popover open={modelListOpen} onOpenChange={setModelListOpen}>
             <PopoverTrigger
               asChild
@@ -117,24 +126,14 @@ const PlaygroundHeader = ({
             />
           </div>
         </div>
-        <div className="flex gap-2 mt-2 flex-wrap text-slate-500">
-          {Object.entries(modelParameters).map(([key, value], index) => (
-            <div key={index}>
-              <p className="text-xs">
-                <span className="font-medium">{key}:</span>{" "}
-                {!value
-                  ? "Default"
-                  : typeof value === "string"
-                  ? value
-                  : Array.isArray(value)
-                  ? value.length > 0
-                    ? value.join(", ")
-                    : "[]"
-                  : value}
-              </p>
-            </div>
-          ))}
-        </div>
+        <PlaygroundActions
+          mappedContent={mappedContent}
+          defaultContent={defaultContent}
+          setMappedContent={setMappedContent}
+          setModelParameters={setModelParameters}
+          setTools={setTools}
+          onRun={onRun}
+        />
       </div>
     </div>
   );

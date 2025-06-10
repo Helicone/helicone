@@ -2,79 +2,203 @@ import Chat from "@/components/templates/requests/components/Chat";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MappedLLMRequest } from "@helicone-package/llm-mapper/types";
+import PlaygroundHeader from "./PlaygroundHeader";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Tool } from "@helicone-package/llm-mapper/types";
+import { ModelParameters } from "../playgroundPage";
 
 interface PlaygroundMessagesPanelProps {
   mappedContent: MappedLLMRequest | null;
+  defaultContent: MappedLLMRequest | null;
   setMappedContent: (_mappedContent: MappedLLMRequest) => void;
+  selectedModel: string;
+  setSelectedModel: (_model: string) => void;
+  tools: Tool[];
+  setTools: (_tools: Tool[]) => void;
+  responseFormat: {
+    type: string;
+    json_schema?: string;
+  };
+  setResponseFormat: (_responseFormat: {
+    type: string;
+    json_schema?: string;
+  }) => void;
+  modelParameters: ModelParameters;
+  setModelParameters: (_modelParameters: ModelParameters) => void;
+  onRun: () => void;
 }
 
 const PlaygroundMessagesPanel = ({
   mappedContent,
+  defaultContent,
   setMappedContent,
+  selectedModel,
+  setSelectedModel,
+  tools,
+  setTools,
+  responseFormat,
+  setResponseFormat,
+  modelParameters,
+  setModelParameters,
+  onRun,
 }: PlaygroundMessagesPanelProps) => {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const lastScrollTopRef = useRef<number>(0);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout>();
+  const resizeTimeoutRef = useRef<NodeJS.Timeout>();
+
+  const checkScrollPosition = useCallback((scrollArea: Element) => {
+    const scrollTop = scrollArea.scrollTop;
+    const scrollHeight = scrollArea.scrollHeight;
+    const clientHeight = scrollArea.clientHeight;
+    const isNearBottom = scrollHeight - scrollTop - clientHeight < 150;
+    setIsScrolled(!isNearBottom);
+  }, []);
+
+  const handleScroll = useCallback(() => {
+    const scrollArea = scrollAreaRef.current?.querySelector(
+      "[data-radix-scroll-area-viewport]"
+    );
+    if (!scrollArea) return;
+
+    // Clear any pending timeout
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
+
+    // Set a new timeout
+    scrollTimeoutRef.current = setTimeout(() => {
+      const scrollTop = scrollArea.scrollTop;
+      // Only update if we've scrolled more than 20px from last position
+      if (Math.abs(scrollTop - lastScrollTopRef.current) > 20) {
+        checkScrollPosition(scrollArea);
+        lastScrollTopRef.current = scrollTop;
+      }
+    }, 50); // 50ms debounce
+  }, [checkScrollPosition]);
+
+  // Add resize observer
+  useEffect(() => {
+    const scrollArea = scrollAreaRef.current?.querySelector(
+      "[data-radix-scroll-area-viewport]"
+    );
+    if (!scrollArea) return;
+
+    const resizeObserver = new ResizeObserver(() => {
+      // Clear any pending resize timeout
+      if (resizeTimeoutRef.current) {
+        clearTimeout(resizeTimeoutRef.current);
+      }
+
+      // Set a new timeout for resize
+      resizeTimeoutRef.current = setTimeout(() => {
+        checkScrollPosition(scrollArea);
+      }, 100); // Slightly longer debounce for resize
+    });
+
+    resizeObserver.observe(scrollArea);
+    return () => {
+      resizeObserver.disconnect();
+      if (resizeTimeoutRef.current) {
+        clearTimeout(resizeTimeoutRef.current);
+      }
+    };
+  }, [checkScrollPosition]);
+
   return (
-    <ScrollArea className="w-full h-full">
-      {(() => {
-        if (!mappedContent) {
-          return (
-            <div className="flex flex-col w-full h-full">
-              {/* Message Role Header Skeleton */}
-              <div className="h-12 w-full flex flex-row items-center justify-between px-4 sticky top-0 bg-sidebar-background dark:bg-black z-10">
-                <div className="flex items-center gap-2">
-                  <Skeleton className="h-6 w-24" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <Skeleton className="h-8 w-8 rounded-md" />
-                  <Skeleton className="h-8 w-8 rounded-md" />
-                </div>
-              </div>
-              {/* Message Content Skeleton */}
-              <div className="w-full flex flex-col px-4 pb-4 pt-0">
-                <Skeleton className="w-full h-32 mt-4" />
-              </div>
-              {/* Additional Message Skeleton */}
-              <div className="h-12 w-full flex flex-row items-center justify-between px-4 border-t border-border">
-                <div className="flex items-center gap-2">
-                  <Skeleton className="h-6 w-24" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <Skeleton className="h-8 w-8 rounded-md" />
-                  <Skeleton className="h-8 w-8 rounded-md" />
-                </div>
-              </div>
-              <div className="w-full flex flex-col px-4 pb-4 pt-0">
-                <Skeleton className="w-full h-24 mt-4" />
-              </div>
-            </div>
-          );
-        }
-        switch (mappedContent?._type) {
-          case "openai-chat":
-          case "anthropic-chat":
-          case "gemini-chat":
+    <div className="relative w-full h-full flex flex-col">
+      <ScrollArea
+        className="w-full flex-1"
+        onScrollCapture={handleScroll}
+        ref={scrollAreaRef}
+      >
+        {(() => {
+          if (!mappedContent) {
             return (
-              <Chat
-                mappedRequest={mappedContent as MappedLLMRequest}
-                mode="PLAYGROUND_INPUT"
-                onChatChange={(mappedRequest) => {
-                  setMappedContent(mappedRequest);
-                }}
-              />
-            );
-          default:
-            return (
-              <div className="flex flex-col gap-2 p-20">
-                <div className="text-sm text-gray-500">
-                  Unable to support playground on this request. Please contact
-                  support at (support@helicone.ai) and we can be sure to add
-                  support for it. Or if you feel inclined, you can submit a PR
-                  to add support for it.
+              <div className="flex flex-col w-full h-full">
+                {/* Message Role Header Skeleton */}
+                <div className="h-12 w-full flex flex-row items-center justify-between px-4 sticky top-0 bg-sidebar-background dark:bg-black z-10">
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-6 w-24" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-8 w-8 rounded-md" />
+                    <Skeleton className="h-8 w-8 rounded-md" />
+                  </div>
+                </div>
+                {/* Message Content Skeleton */}
+                <div className="w-full flex flex-col px-4 pb-4 pt-0">
+                  <Skeleton className="w-full h-32 mt-4" />
+                </div>
+                {/* Additional Message Skeleton */}
+                <div className="h-12 w-full flex flex-row items-center justify-between px-4 border-t border-border">
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-6 w-24" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-8 w-8 rounded-md" />
+                    <Skeleton className="h-8 w-8 rounded-md" />
+                  </div>
+                </div>
+                <div className="w-full flex flex-col px-4 pb-4 pt-0">
+                  <Skeleton className="w-full h-24 mt-4" />
                 </div>
               </div>
             );
-        }
-      })()}
-    </ScrollArea>
+          }
+          switch (mappedContent?._type) {
+            case "openai-chat":
+            case "anthropic-chat":
+            case "gemini-chat":
+              return (
+                <Chat
+                  mappedRequest={mappedContent as MappedLLMRequest}
+                  mode="PLAYGROUND_INPUT"
+                  onChatChange={(mappedRequest) => {
+                    setMappedContent(mappedRequest);
+                  }}
+                />
+              );
+            default:
+              return (
+                <div className="flex flex-col gap-2 p-20">
+                  <div className="text-sm text-gray-500">
+                    Unable to support playground on this request. Please contact
+                    support at (support@helicone.ai) and we can be sure to add
+                    support for it. Or if you feel inclined, you can submit a PR
+                    to add support for it.
+                  </div>
+                </div>
+              );
+          }
+        })()}
+      </ScrollArea>
+      <div
+        ref={headerRef}
+        className={`transition-all duration-200 ${
+          isScrolled
+            ? "absolute bottom-0 left-1/2 -translate-x-1/2 z-50 bg-sidebar-background/80 backdrop-blur-sm rounded-t-lg shadow-lg mx-4 mb-4 w-[500px]"
+            : "border-t border-border"
+        }`}
+      >
+        <PlaygroundHeader
+          selectedModel={selectedModel}
+          setSelectedModel={setSelectedModel}
+          tools={tools}
+          setTools={setTools}
+          responseFormat={responseFormat}
+          setResponseFormat={setResponseFormat}
+          modelParameters={modelParameters}
+          setModelParameters={setModelParameters}
+          mappedContent={mappedContent}
+          defaultContent={defaultContent}
+          setMappedContent={setMappedContent}
+          onRun={onRun}
+        />
+      </div>
+    </div>
   );
 };
 

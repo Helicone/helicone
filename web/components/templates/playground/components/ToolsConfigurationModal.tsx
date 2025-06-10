@@ -38,13 +38,13 @@ export default function ToolsConfigurationModal({
 }: ToolsConfigurationModalProps) {
   const [toolsDialogOpen, setToolsDialogOpen] = useState(false);
   const [selectedToolIndex, setSelectedToolIndex] = useState<number | null>(
-    tools.length > 0 ? 0 : null
+    tools ? (tools.length > 0 ? 0 : null) : null
   );
-  const [currentTools, setCurrentTools] = useState<Tool[]>(tools);
+  const [currentTools, setCurrentTools] = useState<Tool[]>(tools || []);
 
   useEffect(() => {
-    setSelectedToolIndex(tools.length > 0 ? 0 : null);
-    setCurrentTools(tools);
+    setSelectedToolIndex(tools ? (tools.length > 0 ? 0 : null) : null);
+    setCurrentTools(tools || []);
   }, [tools]);
 
   const hasUnsavedChanges = useMemo(() => {
