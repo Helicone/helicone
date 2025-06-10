@@ -1,4 +1,4 @@
-import { Message } from "packages/llm-mapper/types";
+import { Message } from "@helicone-package/llm-mapper/types";
 
 interface ImageBoxProps {
   message: Message;

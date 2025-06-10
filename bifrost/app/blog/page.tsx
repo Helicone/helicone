@@ -221,6 +221,16 @@ export type BlogStructure =
 export const BLOG_CONTENT: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "complete-guide-to-debugging-llm-applications",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "claude-opus-and-sonnet-4-full-developer-guide",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "building-production-grade-ai-applications",
     },
   },

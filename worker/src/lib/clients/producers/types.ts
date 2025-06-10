@@ -57,5 +57,6 @@ export type Log = {
     timeToFirstToken?: number;
     responseCreatedAt: Date;
     delayMs: number;
+    cachedLatency?: number;
   };
 };

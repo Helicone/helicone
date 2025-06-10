@@ -572,6 +572,9 @@
 					"latency": {
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},
+					"time_to_first_token": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
 					"status": {
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},
@@ -606,6 +609,12 @@
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},
 					"completion_tokens": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"prompt_cache_read_tokens": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"prompt_cache_write_tokens": {
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},
 					"total_tokens": {
@@ -645,6 +654,15 @@
 						"$ref": "#/components/schemas/Partial_VectorOperators_"
 					},
 					"cache_enabled": {
+						"$ref": "#/components/schemas/Partial_BooleanOperators_"
+					},
+					"cache_reference_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"assets": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"helicone-score-feedback": {
 						"$ref": "#/components/schemas/Partial_BooleanOperators_"
 					}
 				},
@@ -1780,6 +1798,9 @@
 					"path": {
 						"$ref": "#/components/schemas/Partial_TextOperators_"
 					},
+					"country_code": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
 					"prompt_id": {
 						"$ref": "#/components/schemas/Partial_TextOperators_"
 					}
@@ -1841,31 +1862,7 @@
 				"type": "object",
 				"description": "Make all properties in T optional"
 			},
-			"Partial_CacheHitsTableToOperators_": {
-				"properties": {
-					"organization_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"request_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"latency": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"completion_tokens": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"prompt_tokens": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"created_at": {
-						"$ref": "#/components/schemas/Partial_TimestampOperatorsTyped_"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
-			"Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": {
+			"Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_": {
 				"properties": {
 					"request_response_rmt": {
 						"$ref": "#/components/schemas/Partial_RequestResponseRMTToOperators_"
@@ -1881,9 +1878,6 @@
 					},
 					"sessions_request_response_rmt": {
 						"$ref": "#/components/schemas/Partial_SessionsRequestResponseRMTToOperators_"
-					},
-					"cache_hits": {
-						"$ref": "#/components/schemas/Partial_CacheHitsTableToOperators_"
 					},
 					"properties": {
 						"properties": {},
@@ -1903,13 +1897,13 @@
 				"type": "object",
 				"description": "From T, pick a set of properties whose keys are in the union K"
 			},
-			"FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": {
-				"$ref": "#/components/schemas/Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_"
+			"FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_": {
+				"$ref": "#/components/schemas/Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_"
 			},
 			"RequestFilterNode": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_"
+						"$ref": "#/components/schemas/FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_"
 					},
 					{
 						"$ref": "#/components/schemas/RequestFilterBranch"
@@ -9672,24 +9666,11 @@
 				],
 				"parameters": [],
 				"requestBody": {
-					"description": "Request query filters",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/RequestQueryParams",
-								"description": "Request query filters"
-							},
-							"example": {
-								"filter": "all",
-								"isCached": false,
-								"limit": 10,
-								"offset": 0,
-								"sort": {
-									"created_at": "desc"
-								},
-								"isScored": false,
-								"isPartOfExperiment": false
+								"$ref": "#/components/schemas/RequestQueryParams"
 							}
 						}
 					}
@@ -9736,25 +9717,11 @@
 				],
 				"parameters": [],
 				"requestBody": {
-					"description": "Request query filters",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/RequestQueryParams",
-								"description": "Request query filters"
-							},
-							"example": {
-								"filter": "all",
-								"isCached": false,
-								"limit": 100,
-								"offset": 0,
-								"sort": {
-									"created_at": "desc"
-								},
-								"includeInputs": false,
-								"isScored": false,
-								"isPartOfExperiment": false
+								"$ref": "#/components/schemas/RequestQueryParams"
 							}
 						}
 					}

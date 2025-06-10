@@ -1,5 +1,5 @@
 import { $JAWN_API } from "@/lib/clients/jawn";
-import { TagType } from "../../../packages/common/sessions/tags";
+import { TagType } from "@/packages/common/sessions/tags";
 import { create } from "zustand";
 import { produce } from "immer";
 

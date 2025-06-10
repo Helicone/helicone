@@ -1,9 +1,6 @@
-import {
-  FilterLeaf,
-  FilterNode,
-} from "../../../services/lib/filters/filterDefs";
-import { buildFilterWithAuthClickHousePropertiesV2 } from "../../../services/lib/filters/filters";
-import { Result } from "../../../packages/common/result";
+import { FilterLeaf, FilterNode } from "@helicone-package/filters/filterDefs";
+import { buildFilterWithAuthClickHousePropertiesV2 } from "@helicone-package/filters/filters";
+import { Result } from "@/packages/common/result";
 import { dbQueryClickhouse } from "../db/dbExecute";
 
 export interface PropertyParam {

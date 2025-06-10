@@ -1,4 +1,4 @@
-import { Message } from "@/packages/llm-mapper/types";
+import { Message } from "@helicone-package/llm-mapper/types";
 import React from "react";
 import { renderFunctionCall } from "./renderFunctionCall";
 import MarkdownEditor from "@/components/shared/markdownEditor";

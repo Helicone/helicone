@@ -1,4 +1,4 @@
-import { LLMRequestBody } from "@/packages/llm-mapper/types";
+import { LLMRequestBody } from "@helicone-package/llm-mapper/types";
 import { ReactElement } from "react";
 import AuthLayout from "../../../components/layout/auth/authLayout";
 import PromptEditor from "../../../components/templates/prompts/id/PromptEditor";

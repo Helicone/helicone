@@ -4,9 +4,9 @@ import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { Result } from "../../../packages/common/result";
+import { Result } from "@/packages/common/result";
 import { CountryData, getCountries } from "../../../services/lib/country";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
 
 async function handler(
   options: HandlerWrapperOptions<Result<CountryData[], string>>

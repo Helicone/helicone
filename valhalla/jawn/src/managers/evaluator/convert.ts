@@ -1,5 +1,5 @@
 import { TestInput } from "../../controllers/public/evaluatorController";
-import { HeliconeRequest } from "../../packages/llm-mapper/types";
+import { HeliconeRequest } from "@helicone-package/llm-mapper/types";
 
 export const convertTestInputToHeliconeRequest = (
   testInput: TestInput

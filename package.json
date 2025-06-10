@@ -4,7 +4,8 @@
   "workspaces": [
     "bifrost",
     "web",
-    "packages/*"
+    "packages/*",
+    "valhalla/jawn"
   ],
   "scripts": {
     "build:web": "yarn workspace helicone build"

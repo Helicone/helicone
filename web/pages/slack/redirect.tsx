@@ -1,7 +1,7 @@
 import AuthLayout from "@/components/layout/auth/authLayout";
 import { Button } from "@/components/ui/button";
 import { dbExecute } from "@/lib/api/db/dbExecute";
-import { withAuthSSR } from "@/lib/api/handlerWrappers";
+import { GetServerSidePropsContext } from "next";
 import Link from "next/link";
 import { ReactElement } from "react";
 
@@ -22,9 +22,11 @@ SlackRedirect.getLayout = function getLayout(page: ReactElement) {
   return <AuthLayout>{page}</AuthLayout>;
 };
 
-export const getServerSideProps = withAuthSSR(async (options) => {
-  const { code, state } = options.context.query;
-  const host = options.context.req.headers.host;
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  const { code, state } = context.query;
+  const host = context.req.headers.host;
 
   if (!code || !state) {
     return {
@@ -135,4 +137,4 @@ export const getServerSideProps = withAuthSSR(async (options) => {
       permanent: false,
     },
   };
-});
+};

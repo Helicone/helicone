@@ -1,23 +1,15 @@
-FROM node:20
+FROM node:20-bookworm-slim
 
-COPY ./package.json /app/web/package.json
-COPY ./yarn.lock /app/web/yarn.lock
+# Apply security updates
+RUN apt-get update && apt-get upgrade -y && apt-get autoremove -y && apt-get clean
 
-WORKDIR /app/web
+WORKDIR /app
 
-RUN yarn
+COPY package.json yarn.lock ./
+COPY packages/ ./packages/
+COPY web/ ./web/
 
-# Exclude yarn.lock from the copy command to avoid unnecessary rebuilds
-RUN mv /app/web/yarn.lock /app/web/yarn.lock.bak
-COPY . /app/web2
-RUN find /app/web2 -name ".env.*" -exec rm {} \;
-RUN cp -r /app/web2/* /app/web
-RUN mv /app/web/yarn.lock.bak /app/web/yarn.lock
+RUN yarn install --frozen-lockfile
+RUN cd web && yarn build
 
-RUN rm .env.* || true
-
-EXPOSE 3000
-
-RUN yarn build
-
-CMD ["yarn", "start"]
+CMD ["yarn", "--cwd", "web", "start"]

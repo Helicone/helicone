@@ -13,11 +13,11 @@ import {
   Tags,
 } from "tsoa";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
-import { FilterLeafSubset } from "../../lib/shared/filters/filterDefs";
+import { FilterLeafSubset } from "@helicone-package/filters/filterDefs";
 import { Result, resultMap } from "../../packages/common/result";
 import { InputsManager } from "../../managers/inputs/InputsManager";
 import { PromptManager } from "../../managers/prompt/PromptManager";
-import { JawnAuthenticatedRequest } from "../../types/request";
+import type { JawnAuthenticatedRequest } from "../../types/request";
 
 export type PromptsFilterBranch = {
   left: PromptsFilterNode;

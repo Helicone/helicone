@@ -149,6 +149,30 @@ export const costs: ModelRow[] = [
     },
     showInPlayground: true,
   },
+  {
+    model: {
+      operator: "equals",
+      value: "claude-sonnet-4-20250514",
+    },
+    cost: {
+      prompt_token: 0.000003, // $3 / MTok
+      completion_token: 0.000015, // $15 / MTok
+      prompt_cache_write_token: 0.00000375, // $3.75 / MTok
+      prompt_cache_read_token: 0.0000003, // $0.30 / MTok
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "claude-opus-4-20250514",
+    },
+    cost: {
+      prompt_token: 0.000015,
+      completion_token: 0.000075,
+      prompt_cache_write_token: 0.00001875,
+      prompt_cache_read_token: 0.0000015,
+    },
+  },
 ];
 
 export const modelDetails: ModelDetailsMap = {

@@ -104,3 +104,21 @@ export const getTimeInterval = ({
     return "day";
   }
 };
+
+export function formatTimeSaved(ms: number): string {
+  if (ms < 1000) {
+    return `${ms.toFixed(3)} ms`;
+  } else if (ms < 1000 * 60) {
+    return `${(ms / 1000).toFixed(3)} s`;
+  } else if (ms < 1000 * 60 * 60) {
+    return `${(ms / (1000 * 60)).toFixed(3)} min`;
+  } else if (ms < 1000 * 60 * 60 * 24) {
+    return `${(ms / (1000 * 60 * 60)).toFixed(3)} h`;
+  } else if (ms < 1000 * 60 * 60 * 24 * 30) {
+    return `${(ms / (1000 * 60 * 60 * 24)).toFixed(3)} d`;
+  } else if (ms < 1000 * 60 * 60 * 24 * 365) {
+    return `${(ms / (1000 * 60 * 60 * 24 * 30)).toFixed(3)} mo`;
+  } else {
+    return `${(ms / (1000 * 60 * 60 * 24 * 365)).toFixed(3)} y`;
+  }
+}

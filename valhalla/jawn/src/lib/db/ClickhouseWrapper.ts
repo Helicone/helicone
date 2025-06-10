@@ -1,4 +1,4 @@
-import { ClickHouseClient, createClient } from "@clickhouse/client";
+import { ClickHouseClient, createClient, ClickHouseSettings, DataFormat } from "@clickhouse/client";
 import { Result } from "../../packages/common/result";
 
 interface ClickhouseEnv {
@@ -234,6 +234,31 @@ export interface RequestResponseRMT {
   cache_enabled: boolean;
 }
 
+export interface CacheMetricSMT {
+  organization_id: string;
+  date: string;
+  hour: number;
+  request_id: string;
+  model: string;
+  provider: string;
+  cache_hit_count: number;
+  
+  // Saving metrics
+  saved_latency_ms: number;
+  saved_completion_tokens: number;
+  saved_prompt_tokens: number;
+  saved_completion_audio_tokens: number;
+  saved_prompt_audio_tokens: number;
+  saved_prompt_cache_write_tokens: number;
+  saved_prompt_cache_read_tokens: number;
+
+  last_hit: string;
+  first_hit: string;
+
+  request_body: string;
+  response_body: string;
+}
+
 export interface JawnHttpLogs {
   organization_id: string;
   method: string;
@@ -259,6 +284,7 @@ export interface ClickhouseDB {
     properties_v3: PropertiesV3;
     property_with_response_v1: PropertyWithResponseV1;
     request_response_versioned: RequestResponseVersioned;
+    cache_metrics: CacheMetricSMT;
     rate_limit_log: RateLimitLog;
     rate_limit_log_v2: RateLimitLogV2;
     cache_hits: CacheHits;

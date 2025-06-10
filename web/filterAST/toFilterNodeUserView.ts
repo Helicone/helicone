@@ -4,7 +4,7 @@ import {
   FilterNode,
   FilterBranch,
   FilterLeaf,
-} from "@/services/lib/filters/filterDefs";
+} from "@helicone-package/filters/filterDefs";
 import {
   FilterExpression,
   ConditionExpression,

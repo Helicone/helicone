@@ -4,7 +4,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Switch } from "@/components/ui/switch";
 import { P, Small } from "@/components/ui/typography";
 import { toSnakeCase } from "@/utils/strings";
-import { Tool } from "packages/llm-mapper/types";
+import { Tool } from "@helicone-package/llm-mapper/types";
 import { useState } from "react";
 import {
   PiNumberCircleOneBold,

@@ -7,7 +7,7 @@ import { useEffect } from "react";
 import PublicMetaData from "../components/layout/public/publicMetaData";
 import useNotification from "../components/shared/notification/useNotification";
 import AuthForm from "../components/templates/auth/authForm";
-import { Result } from "../packages/common/result";
+import { Result } from "@/packages/common/result";
 
 const SignIn = ({
   customerPortal,
@@ -32,19 +32,8 @@ const SignIn = ({
       heliconeAuthClient &&
       heliconeAuthClient.user?.id
     ) {
-      heliconeAuthClient
-        .refreshSession()
-        .then(heliconeAuthClient.getUser)
-        .then((user) => {
-          if (!user.data || !user.data.id) {
-            heliconeAuthClient.signOut().then(() => {
-              setNotification(
-                "You have been logged out due to unauthorized access.",
-                "error"
-              );
-            });
-          }
-        });
+      heliconeAuthClient.refreshSession();
+      router.push("/signin");
     } else if (heliconeAuthClient.user?.id) {
       const { pi_session, ...restQuery } = router.query;
       router.push({

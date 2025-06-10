@@ -407,6 +407,9 @@ export interface paths {
   "/v1/audio/convert-to-wav": {
     post: operations["ConvertToWav"];
   };
+  "/v1/router/control-plane/whoami": {
+    get: operations["Whoami"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -954,6 +957,7 @@ Json: JsonObject;
       model?: components["schemas"]["Partial_TextOperators_"];
       modelOverride?: components["schemas"]["Partial_TextOperators_"];
       path?: components["schemas"]["Partial_TextOperators_"];
+      country_code?: components["schemas"]["Partial_TextOperators_"];
       prompt_id?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description Make all properties in T optional */
@@ -1002,21 +1006,13 @@ Json: JsonObject;
       gt?: string;
     };
     /** @description Make all properties in T optional */
-    Partial_CacheHitsTableToOperators_: {
-      organization_id?: components["schemas"]["Partial_TextOperators_"];
-      request_id?: components["schemas"]["Partial_TextOperators_"];
-      latency?: components["schemas"]["Partial_NumberOperators_"];
-      completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
-    };
-    /** @description Make all properties in T optional */
     Partial_VectorOperators_: {
       contains?: string;
     };
     /** @description Make all properties in T optional */
     Partial_RequestResponseRMTToOperators_: {
       latency?: components["schemas"]["Partial_NumberOperators_"];
+      time_to_first_token?: components["schemas"]["Partial_NumberOperators_"];
       status?: components["schemas"]["Partial_NumberOperators_"];
       request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
       response_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
@@ -1029,6 +1025,8 @@ Json: JsonObject;
       request_id?: components["schemas"]["Partial_TextOperators_"];
       prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
       completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      prompt_cache_read_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      prompt_cache_write_tokens?: components["schemas"]["Partial_NumberOperators_"];
       total_tokens?: components["schemas"]["Partial_NumberOperators_"];
       target_url?: components["schemas"]["Partial_TextOperators_"];
       properties?: {
@@ -1044,6 +1042,9 @@ Json: JsonObject;
       request_body?: components["schemas"]["Partial_VectorOperators_"];
       response_body?: components["schemas"]["Partial_VectorOperators_"];
       cache_enabled?: components["schemas"]["Partial_BooleanOperators_"];
+      cache_reference_id?: components["schemas"]["Partial_TextOperators_"];
+      assets?: components["schemas"]["Partial_TextOperators_"];
+      "helicone-score-feedback"?: components["schemas"]["Partial_BooleanOperators_"];
     };
     /** @description Make all properties in T optional */
     Partial_SessionsRequestResponseRMTToOperators_: {
@@ -1059,7 +1060,7 @@ Json: JsonObject;
       session_tag?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": {
+    "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_": {
       request?: components["schemas"]["Partial_RequestTableToOperators_"];
       feedback?: components["schemas"]["Partial_FeedbackTableToOperators_"];
       response?: components["schemas"]["Partial_ResponseTableToOperators_"];
@@ -1069,12 +1070,11 @@ Json: JsonObject;
       values?: {
         [key: string]: components["schemas"]["Partial_TextOperators_"];
       };
-      cache_hits?: components["schemas"]["Partial_CacheHitsTableToOperators_"];
       request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
       sessions_request_response_rmt?: components["schemas"]["Partial_SessionsRequestResponseRMTToOperators_"];
     };
-    "FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": components["schemas"]["Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_"];
-    RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_"] | components["schemas"]["RequestFilterBranch"] | "all";
+    "FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_": components["schemas"]["Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_"];
+    RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_"] | components["schemas"]["RequestFilterBranch"] | "all";
     RequestFilterBranch: {
       right: components["schemas"]["RequestFilterNode"];
       /** @enum {string} */
@@ -1755,6 +1755,8 @@ Json: JsonObject;
     Log: {
       response: {
         /** Format: double */
+        cachedLatency?: number;
+        /** Format: double */
         delayMs: number;
         /** Format: date-time */
         responseCreatedAt: string;
@@ -1910,6 +1912,33 @@ Json: JsonObject;
       /** @description A list of message refusal tokens with log probability information. */
       refusal: components["schemas"]["ChatCompletionTokenLogprob"][] | null;
     };
+    /** @description A URL citation when using web search. */
+    "ChatCompletionMessage.Annotation.URLCitation": {
+      /**
+       * Format: double
+       * @description The index of the last character of the URL citation in the message.
+       */
+      end_index: number;
+      /**
+       * Format: double
+       * @description The index of the first character of the URL citation in the message.
+       */
+      start_index: number;
+      /** @description The title of the web resource. */
+      title: string;
+      /** @description The URL of the web resource. */
+      url: string;
+    };
+    /** @description A URL citation when using web search. */
+    "ChatCompletionMessage.Annotation": {
+      /**
+       * @description The type of the URL citation. Always `url_citation`.
+       * @enum {string}
+       */
+      type: "url_citation";
+      /** @description A URL citation when using web search. */
+      url_citation: components["schemas"]["ChatCompletionMessage.Annotation.URLCitation"];
+    };
     /**
      * @description If the audio output modality is requested, this object contains data about the
      * audio response from the model.
@@ -1979,6 +2008,11 @@ Json: JsonObject;
        */
       role: "assistant";
       /**
+       * @description Annotations for the message, when applicable, as when using the
+       * [web search tool](https://platform.openai.com/docs/guides/tools-web-search?api-mode=chat).
+       */
+      annotations?: components["schemas"]["ChatCompletionMessage.Annotation"][];
+      /**
        * @description If the audio output modality is requested, this object contains data about the
        * audio response from the model.
        * [Learn more](https://platform.openai.com/docs/guides/audio).
@@ -2014,6 +2048,12 @@ Json: JsonObject;
     "CompletionUsage.CompletionTokensDetails": {
       /**
        * Format: double
+       * @description When using Predicted Outputs, the number of tokens in the prediction that
+       * appeared in the completion.
+       */
+      accepted_prediction_tokens?: number;
+      /**
+       * Format: double
        * @description Audio input tokens generated by the model.
        */
       audio_tokens?: number;
@@ -2022,6 +2062,14 @@ Json: JsonObject;
        * @description Tokens generated by the model for reasoning.
        */
       reasoning_tokens?: number;
+      /**
+       * Format: double
+       * @description When using Predicted Outputs, the number of tokens in the prediction that did
+       * not appear in the completion. However, like reasoning tokens, these tokens are
+       * still counted in the total completion tokens for purposes of billing, output,
+       * and context window limits.
+       */
+      rejected_prediction_tokens?: number;
     };
     /** @description Breakdown of tokens used in the prompt. */
     "CompletionUsage.PromptTokensDetails": {
@@ -2083,11 +2131,26 @@ Json: JsonObject;
        */
       object: "chat.completion";
       /**
-       * @description The service tier used for processing the request. This field is only included if
-       * the `service_tier` parameter is specified in the request.
+       * @description Specifies the latency tier to use for processing the request. This parameter is
+       * relevant for customers subscribed to the scale tier service:
+       *
+       * - If set to 'auto', and the Project is Scale tier enabled, the system will
+       *   utilize scale tier credits until they are exhausted.
+       * - If set to 'auto', and the Project is not Scale tier enabled, the request will
+       *   be processed using the default service tier with a lower uptime SLA and no
+       *   latency guarentee.
+       * - If set to 'default', the request will be processed using the default service
+       *   tier with a lower uptime SLA and no latency guarentee.
+       * - If set to 'flex', the request will be processed with the Flex Processing
+       *   service tier.
+       *   [Learn more](https://platform.openai.com/docs/guides/flex-processing).
+       * - When not set, the default behavior is 'auto'.
+       *
+       * When this parameter is set, the response body will include the `service_tier`
+       * utilized.
        * @enum {string|null}
        */
-      service_tier?: "scale" | "default" | null;
+      service_tier?: "auto" | "default" | "flex" | null;
       /**
        * @description This fingerprint represents the backend configuration that the model runs with.
        *
@@ -2117,6 +2180,30 @@ Json: JsonObject;
        */
       type: "text";
     };
+    /**
+     * @description Developer-provided instructions that the model should follow, regardless of
+     * messages sent by the user. With o1 models and newer, `developer` messages
+     * replace the previous `system` messages.
+     */
+    ChatCompletionDeveloperMessageParam: {
+      /** @description The contents of the developer message. */
+      content: string | components["schemas"]["ChatCompletionContentPartText"][];
+      /**
+       * @description The role of the messages author, in this case `developer`.
+       * @enum {string}
+       */
+      role: "developer";
+      /**
+       * @description An optional name for the participant. Provides the model information to
+       * differentiate between participants of the same role.
+       */
+      name?: string;
+    };
+    /**
+     * @description Developer-provided instructions that the model should follow, regardless of
+     * messages sent by the user. With o1 models and newer, use `developer` messages
+     * for this purpose instead.
+     */
     ChatCompletionSystemMessageParam: {
       /** @description The contents of the system message. */
       content: string | components["schemas"]["ChatCompletionContentPartText"][];
@@ -2136,7 +2223,7 @@ Json: JsonObject;
       url: string;
       /**
        * @description Specifies the detail level of the image. Learn more in the
-       * [Vision guide](https://platform.openai.com/docs/guides/vision/low-or-high-fidelity-image-understanding).
+       * [Vision guide](https://platform.openai.com/docs/guides/vision#low-or-high-fidelity-image-understanding).
        * @enum {string}
        */
       detail?: "auto" | "low" | "high";
@@ -2168,11 +2255,38 @@ Json: JsonObject;
        */
       type: "input_audio";
     };
+    "ChatCompletionContentPart.File.File": {
+      /**
+       * @description The base64 encoded file data, used when passing the file to the model as a
+       * string.
+       */
+      file_data?: string;
+      /** @description The ID of an uploaded file to use as input. */
+      file_id?: string;
+      /** @description The name of the file, used when passing the file to the model as a string. */
+      filename?: string;
+    };
+    /**
+     * @description Learn about [file inputs](https://platform.openai.com/docs/guides/text) for text
+     * generation.
+     */
+    "ChatCompletionContentPart.File": {
+      file: components["schemas"]["ChatCompletionContentPart.File.File"];
+      /**
+       * @description The type of the content part. Always `file`.
+       * @enum {string}
+       */
+      type: "file";
+    };
     /**
      * @description Learn about
      * [text inputs](https://platform.openai.com/docs/guides/text-generation).
      */
-    ChatCompletionContentPart: components["schemas"]["ChatCompletionContentPartText"] | components["schemas"]["ChatCompletionContentPartImage"] | components["schemas"]["ChatCompletionContentPartInputAudio"];
+    ChatCompletionContentPart: components["schemas"]["ChatCompletionContentPartText"] | components["schemas"]["ChatCompletionContentPartImage"] | components["schemas"]["ChatCompletionContentPartInputAudio"] | components["schemas"]["ChatCompletionContentPart.File"];
+    /**
+     * @description Messages sent by an end user, containing prompts or additional context
+     * information.
+     */
     ChatCompletionUserMessageParam: {
       /** @description The contents of the user message. */
       content: string | components["schemas"]["ChatCompletionContentPart"][];
@@ -2216,6 +2330,7 @@ Json: JsonObject;
       /** @description The name of the function to call. */
       name: string;
     };
+    /** @description Messages sent by the model in response to user messages. */
     ChatCompletionAssistantMessageParam: {
       /**
        * @description The role of the messages author, in this case `assistant`.
@@ -2267,7 +2382,12 @@ Json: JsonObject;
        */
       role: "function";
     };
-    ChatCompletionMessageParam: components["schemas"]["ChatCompletionSystemMessageParam"] | components["schemas"]["ChatCompletionUserMessageParam"] | components["schemas"]["ChatCompletionAssistantMessageParam"] | components["schemas"]["ChatCompletionToolMessageParam"] | components["schemas"]["ChatCompletionFunctionMessageParam"];
+    /**
+     * @description Developer-provided instructions that the model should follow, regardless of
+     * messages sent by the user. With o1 models and newer, `developer` messages
+     * replace the previous `system` messages.
+     */
+    ChatCompletionMessageParam: components["schemas"]["ChatCompletionDeveloperMessageParam"] | components["schemas"]["ChatCompletionSystemMessageParam"] | components["schemas"]["ChatCompletionUserMessageParam"] | components["schemas"]["ChatCompletionAssistantMessageParam"] | components["schemas"]["ChatCompletionToolMessageParam"] | components["schemas"]["ChatCompletionFunctionMessageParam"];
     /** @description Construct a type with a set of properties K of type T */
     "Record_string.unknown_": {
       [key: string]: unknown;
@@ -15970,22 +16090,8 @@ export interface operations {
     };
   };
   GetRequests: {
-    /** @description Request query filters */
     requestBody: {
       content: {
-        /**
-         * @example {
-         *   "filter": "all",
-         *   "isCached": false,
-         *   "limit": 10,
-         *   "offset": 0,
-         *   "sort": {
-         *     "created_at": "desc"
-         *   },
-         *   "isScored": false,
-         *   "isPartOfExperiment": false
-         * }
-         */
         "application/json": components["schemas"]["RequestQueryParams"];
       };
     };
@@ -15999,23 +16105,8 @@ export interface operations {
     };
   };
   GetRequestsClickhouse: {
-    /** @description Request query filters */
     requestBody: {
       content: {
-        /**
-         * @example {
-         *   "filter": "all",
-         *   "isCached": false,
-         *   "limit": 100,
-         *   "offset": 0,
-         *   "sort": {
-         *     "created_at": "desc"
-         *   },
-         *   "includeInputs": false,
-         *   "isScored": false,
-         *   "isPartOfExperiment": false
-         * }
-         */
         "application/json": components["schemas"]["RequestQueryParams"];
       };
     };
@@ -17613,6 +17704,19 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["ConvertToWavResponse"];
+        };
+      };
+    };
+  };
+  Whoami: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            organizationId: string;
+            userId: string;
+          };
         };
       };
     };

@@ -1,8 +1,8 @@
 import { AutoEval, Metric, BuiltinMetrics } from "lastmile/lib/auto_eval";
-import { HeliconeRequest } from "../../../packages/llm-mapper/types";
+import { HeliconeRequest } from "@helicone-package/llm-mapper/types";
 import { DataEntry, LastMileConfigForm } from "../types";
-import { heliconeRequestToMappedContent } from "../../../packages/llm-mapper/utils/getMappedContent";
-import { MappedLLMRequest } from "../../../packages/llm-mapper/types";
+import { heliconeRequestToMappedContent } from "@helicone-package/llm-mapper/utils/getMappedContent";
+import { MappedLLMRequest } from "@helicone-package/llm-mapper/types";
 import { parseJSXObject } from "@helicone/prompts";
 import { err, ok, Result } from "../../../packages/common/result";
 

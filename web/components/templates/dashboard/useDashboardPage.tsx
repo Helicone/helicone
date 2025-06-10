@@ -3,7 +3,7 @@ import {
   RequestsOverTime,
   TimeIncrement,
 } from "../../../lib/timeCalculations/fetchTimeData";
-import { Result, ok, resultMap } from "../../../packages/common/result";
+import { Result, ok, resultMap } from "@/packages/common/result";
 import { CostOverTime } from "../../../pages/api/metrics/costOverTime";
 import { ErrorOverTime } from "../../../pages/api/metrics/errorOverTime";
 
@@ -22,8 +22,8 @@ import {
   BackendMetricsCall,
   useBackendMetricCall,
 } from "../../../services/hooks/useBackendFunction";
-import { FilterLeaf } from "../../../services/lib/filters/filterDefs";
-import { getPropertyFiltersV2 } from "../../../services/lib/filters/frontendFilterDefs";
+import { FilterLeaf } from "@helicone-package/filters/filterDefs";
+import { getPropertyFiltersV2 } from "@helicone-package/filters/frontendFilterDefs";
 
 export async function fetchDataOverTime<T>(
   timeFilter: {

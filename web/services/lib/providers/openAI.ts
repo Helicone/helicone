@@ -3,7 +3,7 @@ import {
   ChatCompletionCreateParams,
   ChatCompletionTool,
 } from "openai/resources/chat";
-import { Result } from "../../../packages/common/result";
+import { Result } from "@/packages/common/result";
 
 interface OpenAIReq {
   messages: ChatCompletionCreateParams[];

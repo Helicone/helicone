@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { MappedLLMRequest, Message } from "@/packages/llm-mapper/types";
+import { MappedLLMRequest, Message } from "@helicone-package/llm-mapper/types";
 import { useMemo, useState } from "react";
 import { LuPlus } from "react-icons/lu";
 import ChatMessage from "./chatComponent/ChatMessage";

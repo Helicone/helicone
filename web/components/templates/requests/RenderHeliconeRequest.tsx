@@ -1,9 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { XSmall } from "@/components/ui/typography";
-import { HeliconeRequest, MappedLLMRequest } from "@/packages/llm-mapper/types";
-import { getMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
-import { getMapperTypeFromHeliconeRequest } from "@/packages/llm-mapper/utils/getMapperType";
+import {
+  HeliconeRequest,
+  MappedLLMRequest,
+} from "@helicone-package/llm-mapper/types";
+import { getMappedContent } from "@helicone-package/llm-mapper/utils/getMappedContent";
+import { getMapperTypeFromHeliconeRequest } from "@helicone-package/llm-mapper/utils/getMapperType";
 import useShiftKeyPress from "@/services/hooks/isShiftPressed";
 import {
   MODE_LABELS,

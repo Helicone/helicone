@@ -1,9 +1,8 @@
 import AuthLayout from "../components/layout/auth/authLayout";
-import { withAuthSSR } from "../lib/api/handlerWrappers";
 import { SortDirection } from "../services/lib/sorts/requests/sorts";
 import { ReactElement } from "react";
 import SessionsPage from "../components/templates/sessions/sessionsPage";
-
+import { GetServerSidePropsContext } from "next";
 interface SessionsProps {
   currentPage: number;
   pageSize: number;
@@ -35,7 +34,9 @@ Sessions.getLayout = function getLayout(page: ReactElement) {
 
 export default Sessions;
 
-export const getServerSideProps = withAuthSSR(async (options) => {
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
   const {
     page,
     page_size,
@@ -44,7 +45,7 @@ export const getServerSideProps = withAuthSSR(async (options) => {
     isCustomProperty,
     tab,
     name,
-  } = options.context.query;
+  } = context.query;
 
   const currentPage = parseInt(page as string, 10) || 1;
   const pageSize = parseInt(page_size as string, 10) || 10;
@@ -62,4 +63,4 @@ export const getServerSideProps = withAuthSSR(async (options) => {
       selectedName: name ? (name as string) : null,
     },
   };
-});
+};

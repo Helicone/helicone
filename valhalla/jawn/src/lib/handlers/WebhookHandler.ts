@@ -5,7 +5,7 @@ import { WebhookStore } from "../stores/WebhookStore";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 import { S3Client } from "../shared/db/s3Client";
-import { modelCost } from "../../packages/cost/costCalc";
+import { modelCost } from "@helicone-package/cost/costCalc";
 import { WebhookConfig } from "../shared/types";
 
 export class WebhookHandler extends AbstractLogHandler {

@@ -5,13 +5,14 @@ import {
 } from "../controllers/public/sessionController";
 import { clickhouseDb, Tags } from "../lib/db/ClickhouseWrapper";
 import { dbExecute, printRunnableQuery } from "../lib/shared/db/dbExecute";
-import { filterListToTree, FilterNode } from "../lib/shared/filters/filterDefs";
-import { buildFilterWithAuthClickHouse } from "../lib/shared/filters/filters";
-import { TimeFilterMs } from "../lib/shared/filters/timeFilter";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
+import { filterListToTree } from "@helicone-package/filters/helpers";
+import { buildFilterWithAuthClickHouse } from "@helicone-package/filters/filters";
+import { TimeFilterMs } from "@helicone-package/filters/filterDefs";
 import { AuthParams } from "../packages/common/auth/types";
 import { err, ok, Result, resultMap } from "../packages/common/result";
 import { TagType } from "../packages/common/sessions/tags";
-import { clickhousePriceCalc } from "../packages/cost";
+import { clickhousePriceCalc } from "@helicone-package/cost";
 import { isValidTimeZoneDifference } from "../utils/helpers";
 import {
   getHistogramRowOnKeys,
@@ -94,6 +95,13 @@ export class SessionManager {
       org_id: this.authParams.organizationId,
       filter: filterListToTree(filters, "and"),
       argsAcc: [],
+    });
+
+    const havingFilter = await buildFilterWithAuthClickHouse({
+      org_id: this.authParams.organizationId,
+      filter: filterListToTree(filters, "and"),
+      argsAcc: [],
+      having: true,
     });
 
     const histogramData = await getHistogramRowOnKeys({
@@ -194,7 +202,7 @@ export class SessionManager {
         request_response_rmt: {
           properties: {
             "Helicone-Session-Name": {
-              equals: nameContains,
+              contains: nameContains,
             },
           },
         },
@@ -342,6 +350,7 @@ export class SessionManager {
         )
     )
     GROUP BY properties['Helicone-Session-Id'], properties['Helicone-Session-Name']
+    HAVING (${havingFilter.filter})
     ORDER BY created_at DESC -- TODO: REMOVE FOR TEST
     LIMIT 50
     `;

@@ -1,0 +1,37 @@
+import { defineConfig } from "tsup";
+
+export default defineConfig([
+  {
+    entry: ["src/**/*.ts"],
+    noExternal: ["@helicone-package"],
+    splitting: false,
+    target: "es2022",
+    tsconfig: "./tsconfig.json",
+    cjsInterop: true,
+    format: ["cjs"],
+    platform: "node",
+    outDir: "./dist/valhalla/jawn/src",
+    clean: true,
+    env: { IS_SERVER_BUILD: "true" },
+    loader: { ".json": "copy" },
+    minify: true,
+    sourcemap: false,
+    external: ["**/kafkaConsumer.js", "**/sqsConsumer.js"],
+  },
+  {
+    entry: ["../../shared/**/*.ts"],
+    noExternal: ["@helicone-package"],
+    splitting: false,
+    target: "es2022",
+    tsconfig: "./tsconfig.json",
+    cjsInterop: true,
+    format: ["cjs"],
+    platform: "node",
+    outDir: "./dist/shared",
+    clean: false,
+    env: { IS_SERVER_BUILD: "true" },
+    loader: { ".json": "copy" },
+    minify: true,
+    sourcemap: false,
+  },
+]);

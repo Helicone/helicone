@@ -106,6 +106,8 @@ const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
       rating: null,
     },
     provider: "OPENAI" as Provider,
+    promptCacheWriteTokens: 0,
+    promptCacheReadTokens: 0,
   },
   schema: {
     request: {
@@ -262,13 +264,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     const openaiRequest = openaiChatMapper.toExternal({
       ...mappedContent.schema.request,
       tools,
-      // temperature: modelParameters.temperature,
-      // max_tokens: modelParameters.maxTokens,
-      // top_p: modelParameters.topP,
-      // frequency_penalty: modelParameters.frequencyPenalty,
-      // presence_penalty: modelParameters.presencePenalty,
-      // stop: modelParameters.stop,
-      // response_format: responseFormat?.type ? responseFormat : undefined,
     } as any);
 
     try {

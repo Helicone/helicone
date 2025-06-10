@@ -1,6 +1,6 @@
 import { getXOverTimeCacheHits } from "../../../lib/api/metrics/getXOverTime";
 import { DataOverTimeRequest } from "../../../lib/api/metrics/timeDataHandlerWrapper";
-import { Result, resultMap } from "../../../packages/common/result";
+import { Result, resultMap } from "@/packages/common/result";
 
 export interface CacheHitsOverTime {
   count: number;
@@ -13,7 +13,7 @@ export async function getCacheHitsOverTime(
   const res = await getXOverTimeCacheHits<{
     count: number;
     status: number;
-  }>(data, "count(*) as count");
+  }>(data, "sum(cache_hit_count) as count");
   return resultMap(res, (resData) =>
     resData.map((d) => ({
       time: new Date(new Date(d.created_at_trunc).getTime()),

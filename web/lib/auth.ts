@@ -10,7 +10,7 @@ const transporter = nodemailer.createTransport({
   secure: process.env.SMTP_SECURE === "true", // true for 465, false for other ports
 
   // Don't use auth for MailHog, but use it for production SMTP servers
-  ...(process.env.SMTP_HOST === "mailhog" ||
+  ...(process.env.SMTP_HOST?.includes("mailhog") ||
   process.env.NODE_ENV === "development"
     ? {} // No auth for MailHog
     : {
@@ -22,7 +22,7 @@ const transporter = nodemailer.createTransport({
 
   // MailHog doesn't need TLS verification
   tls:
-    process.env.SMTP_HOST === "mailhog" ||
+    process.env.SMTP_HOST?.includes("mailhog") ||
     process.env.NODE_ENV === "development"
       ? { rejectUnauthorized: false }
       : undefined,

@@ -1,6 +1,6 @@
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import { buildFilterWithAuthClickHouse } from "../../../services/lib/filters/filters";
-import { resultMap } from "../../../packages/common/result";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
+import { buildFilterWithAuthClickHouse } from "@helicone-package/filters/filters";
+import { resultMap } from "@/packages/common/result";
 import { dbQueryClickhouse } from "../db/dbExecute";
 
 export async function getDailyActiveUsers(org_id: string, filter: FilterNode) {

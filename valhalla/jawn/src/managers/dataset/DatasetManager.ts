@@ -16,7 +16,7 @@ import { AuthParams } from "../../packages/common/auth/types";
 import { Result, err, ok } from "../../packages/common/result";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { FilterNode } from "../../lib/shared/filters/filterDefs";
-import { buildFilterPostgres } from "../../lib/shared/filters/filters";
+import { buildFilterPostgres } from "@helicone-package/filters/filters";
 import { resultMap } from "../../packages/common/result";
 import { User } from "../../models/user";
 import { BaseManager } from "../BaseManager";

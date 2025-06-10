@@ -6,7 +6,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { FormEvent, useEffect, useState } from "react";
 import { Database } from "../../../db/database.types";
-import { Result } from "../../../packages/common/result";
+import { Result } from "@/packages/common/result";
 import {
   DecryptedProviderKey,
   DecryptedProviderKeyMapping,

@@ -1,4 +1,4 @@
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
 
 export interface Metrics {
   average_requests_per_day: number;

@@ -1,12 +1,12 @@
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import { Result } from "../../../packages/common/result";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
+import { Result } from "@/packages/common/result";
 import {
   isValidTimeIncrement,
   isValidTimeZoneDifference,
 } from "../../sql/timeHelpers";
 import { dbExecute } from "../db/dbExecute";
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
-import { buildFilterWithAuth } from "../../../services/lib/filters/filters";
+import { buildFilterWithAuth } from "@helicone-package/filters/filters";
 
 export interface ModelUsageOverTime {
   created_at_trunc: Date;

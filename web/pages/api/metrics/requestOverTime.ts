@@ -5,7 +5,7 @@ import {
 } from "../../../lib/api/handlerWrappers";
 import { getTotalRequestsOverTime } from "../../../lib/api/metrics/getRequestOverTime";
 import { RequestsOverTime } from "../../../lib/timeCalculations/fetchTimeData";
-import { Result } from "../../../packages/common/result";
+import { Result } from "@/packages/common/result";
 import { MetricsBackendBody } from "../../../services/hooks/useBackendFunction";
 
 async function handler(

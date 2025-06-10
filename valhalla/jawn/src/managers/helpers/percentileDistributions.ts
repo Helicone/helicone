@@ -1,5 +1,5 @@
 import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
-import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
+import { buildFilterWithAuthClickHouse } from "@helicone-package/filters/filters";
 import { err, ok, Result } from "../../packages/common/result";
 
 export type PSize = "p50" | "p75" | "p95" | "p99" | "p99.9";

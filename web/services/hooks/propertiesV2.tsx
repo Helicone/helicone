@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
 import { Property } from "../../lib/api/properties/properties";
-import { ok, Result } from "../../packages/common/result";
-import { InputParam, SingleFilterDef } from "../lib/filters/frontendFilterDefs";
+import { ok, Result } from "@/packages/common/result";
+import { InputParam, SingleFilterDef } from "@helicone-package/filters/frontendFilterDefs";
 import { getPropertyParamsV2 } from "../lib/propertyParamsV2";
 import { useDebounce } from "./debounce";
 import { getJawnClient } from "../../lib/clients/jawn";

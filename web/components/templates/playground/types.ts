@@ -1,4 +1,4 @@
-import { ProviderName } from "@/packages/cost/providers/mappings";
+import { ProviderName } from "@helicone-package/cost/providers/mappings";
 
 export type PlaygroundModel = {
   name: string;

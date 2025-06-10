@@ -11,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { useGetPropertiesV2 } from "@/services/hooks/propertiesV2";
 import { ChevronsUpDown, Loader2, Plus, X, ExternalLink } from "lucide-react";
 import { useState } from "react";
-import { getPropertyFiltersV2 } from "../../../services/lib/filters/frontendFilterDefs";
+import { getPropertyFiltersV2 } from "@helicone-package/filters/frontendFilterDefs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import {

@@ -15,10 +15,16 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import FilterASTButton from "@/filterAST/FilterASTButton";
-import { HeliconeRequest, MappedLLMRequest } from "@/packages/llm-mapper/types";
-import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
+import {
+  HeliconeRequest,
+  MappedLLMRequest,
+} from "@helicone-package/llm-mapper/types";
+import { heliconeRequestToMappedContent } from "@helicone-package/llm-mapper/utils/getMappedContent";
 import { useGetRequestWithBodies } from "@/services/hooks/requests";
-import { UIFilterRowNode, UIFilterRowTree } from "@/services/lib/filters/types";
+import {
+  UIFilterRowNode,
+  UIFilterRowTree,
+} from "@helicone-package/filters/types";
 import { TimeFilter } from "@/types/timeFilter";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -28,11 +34,8 @@ import { useGetUnauthorized } from "../../../services/hooks/dashboard";
 import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
 import { useDebounce } from "../../../services/hooks/debounce";
 import { useLocalStorage } from "../../../services/hooks/localStorage";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import {
-  getRootFilterNode,
-  isFilterRowNode,
-} from "../../../services/lib/filters/uiFilterRowTree";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
+import { getRootFilterNode } from "@helicone-package/filters/helpers";
 import {
   SortDirection,
   SortLeafRequest,
@@ -526,13 +529,37 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   }, [router.query.page]);
 
   // Initialize advanced filters from URL on first load
+  const userFilterAppliedRef = useRef(false);
   useEffect(() => {
-    if (initialLoadRef.current && filterMap.length > 0 && !isDataLoading) {
+    if (userId && !userFilterAppliedRef.current) {
+      const userFilterMapIndex = filterMap.findIndex(
+        (filter: any) => filter.label === "User"
+      );
+
+      if (userFilterMapIndex !== -1) {
+        setAdvancedFilters({
+          operator: "and",
+          rows: [
+            {
+              filterMapIdx: userFilterMapIndex,
+              operatorIdx: 0,
+              value: userId,
+            },
+          ],
+        } as UIFilterRowNode);
+      }
+      userFilterAppliedRef.current = true;
+    } else if (
+      initialLoadRef.current &&
+      filterMap.length > 0 &&
+      !isDataLoading &&
+      !userId
+    ) {
       const loadedFilters = getAdvancedFilters();
       setAdvancedFilters(loadedFilters);
       initialLoadRef.current = false;
     }
-  }, [filterMap, getAdvancedFilters, isDataLoading]);
+  }, [filterMap, getAdvancedFilters, isDataLoading, userId]);
 
   // Load and display initial request data in drawer
   useEffect(() => {
@@ -546,38 +573,6 @@ export default function RequestsPage(props: RequestsPageV2Props) {
       drawerRef.current?.resize(drawerSize);
     }
   }, [initialRequest, selectedData, drawerSize]);
-
-  // Apply user filter when userId is provided
-  const userFilterAppliedRef = useRef(false);
-  useEffect(() => {
-    // Only run if we have a userId and haven't applied the filter yet
-    if (userId && !userFilterAppliedRef.current) {
-      const isEmpty =
-        !isFilterRowNode(advancedFilters) || advancedFilters.rows.length === 0;
-
-      if (isEmpty) {
-        const userFilterMapIndex = filterMap.findIndex(
-          (filter: any) => filter.label === "User"
-        );
-
-        if (userFilterMapIndex !== -1) {
-          setAdvancedFilters({
-            operator: "and",
-            rows: [
-              {
-                filterMapIdx: userFilterMapIndex,
-                operatorIdx: 0,
-                value: userId,
-              },
-            ],
-          } as UIFilterRowNode);
-
-          // Mark that we've applied the filter
-          userFilterAppliedRef.current = true;
-        }
-      }
-    }
-  }, [userId, filterMap]);
 
   return shouldShowMockData === undefined ? null : shouldShowMockData ===
     false ? (
@@ -719,6 +714,8 @@ export default function RequestsPage(props: RequestsPageV2Props) {
               onRowSelect={onRowSelectHandler}
               onSelectAll={selectAll}
               selectedIds={selectedIds}
+              // only for request page
+              currentRow={selectedData}
             >
               {selectMode && (
                 <Row className="gap-5 items-center w-full justify-between bg-white dark:bg-black p-5">

@@ -2209,6 +2209,9 @@
 					"path": {
 						"$ref": "#/components/schemas/Partial_TextOperators_"
 					},
+					"country_code": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
 					"prompt_id": {
 						"$ref": "#/components/schemas/Partial_TextOperators_"
 					}
@@ -2316,30 +2319,6 @@
 				"type": "object",
 				"description": "Make all properties in T optional"
 			},
-			"Partial_CacheHitsTableToOperators_": {
-				"properties": {
-					"organization_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"request_id": {
-						"$ref": "#/components/schemas/Partial_TextOperators_"
-					},
-					"latency": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"completion_tokens": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"prompt_tokens": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"created_at": {
-						"$ref": "#/components/schemas/Partial_TimestampOperatorsTyped_"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
 			"Partial_VectorOperators_": {
 				"properties": {
 					"contains": {
@@ -2352,6 +2331,9 @@
 			"Partial_RequestResponseRMTToOperators_": {
 				"properties": {
 					"latency": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"time_to_first_token": {
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},
 					"status": {
@@ -2388,6 +2370,12 @@
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},
 					"completion_tokens": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"prompt_cache_read_tokens": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"prompt_cache_write_tokens": {
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},
 					"total_tokens": {
@@ -2427,6 +2415,15 @@
 						"$ref": "#/components/schemas/Partial_VectorOperators_"
 					},
 					"cache_enabled": {
+						"$ref": "#/components/schemas/Partial_BooleanOperators_"
+					},
+					"cache_reference_id": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"assets": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
+					"helicone-score-feedback": {
 						"$ref": "#/components/schemas/Partial_BooleanOperators_"
 					}
 				},
@@ -2469,7 +2466,7 @@
 				"type": "object",
 				"description": "Make all properties in T optional"
 			},
-			"Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": {
+			"Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_": {
 				"properties": {
 					"request": {
 						"$ref": "#/components/schemas/Partial_RequestTableToOperators_"
@@ -2494,9 +2491,6 @@
 						},
 						"type": "object"
 					},
-					"cache_hits": {
-						"$ref": "#/components/schemas/Partial_CacheHitsTableToOperators_"
-					},
 					"request_response_rmt": {
 						"$ref": "#/components/schemas/Partial_RequestResponseRMTToOperators_"
 					},
@@ -2507,13 +2501,13 @@
 				"type": "object",
 				"description": "From T, pick a set of properties whose keys are in the union K"
 			},
-			"FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": {
-				"$ref": "#/components/schemas/Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_"
+			"FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_": {
+				"$ref": "#/components/schemas/Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_"
 			},
 			"RequestFilterNode": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_"
+						"$ref": "#/components/schemas/FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_"
 					},
 					{
 						"$ref": "#/components/schemas/RequestFilterBranch"
@@ -5164,6 +5158,10 @@
 				"properties": {
 					"response": {
 						"properties": {
+							"cachedLatency": {
+								"type": "number",
+								"format": "double"
+							},
 							"delayMs": {
 								"type": "number",
 								"format": "double"
@@ -5659,6 +5657,60 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"ChatCompletionMessage.Annotation.URLCitation": {
+				"description": "A URL citation when using web search.",
+				"properties": {
+					"end_index": {
+						"type": "number",
+						"format": "double",
+						"description": "The index of the last character of the URL citation in the message."
+					},
+					"start_index": {
+						"type": "number",
+						"format": "double",
+						"description": "The index of the first character of the URL citation in the message."
+					},
+					"title": {
+						"type": "string",
+						"description": "The title of the web resource."
+					},
+					"url": {
+						"type": "string",
+						"description": "The URL of the web resource."
+					}
+				},
+				"required": [
+					"end_index",
+					"start_index",
+					"title",
+					"url"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChatCompletionMessage.Annotation": {
+				"description": "A URL citation when using web search.",
+				"properties": {
+					"type": {
+						"type": "string",
+						"enum": [
+							"url_citation"
+						],
+						"nullable": false,
+						"description": "The type of the URL citation. Always `url_citation`."
+					},
+					"url_citation": {
+						"$ref": "#/components/schemas/ChatCompletionMessage.Annotation.URLCitation",
+						"description": "A URL citation when using web search."
+					}
+				},
+				"required": [
+					"type",
+					"url_citation"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"ChatCompletionAudio": {
 				"description": "If the audio output modality is requested, this object contains data about the\naudio response from the model.\n[Learn more](https://platform.openai.com/docs/guides/audio).",
 				"properties": {
@@ -5775,6 +5827,13 @@
 						"nullable": false,
 						"description": "The role of the author of this message."
 					},
+					"annotations": {
+						"items": {
+							"$ref": "#/components/schemas/ChatCompletionMessage.Annotation"
+						},
+						"type": "array",
+						"description": "Annotations for the message, when applicable, as when using the\n[web search tool](https://platform.openai.com/docs/guides/tools-web-search?api-mode=chat)."
+					},
 					"audio": {
 						"allOf": [
 							{
@@ -5853,6 +5912,11 @@
 			"CompletionUsage.CompletionTokensDetails": {
 				"description": "Breakdown of tokens used in a completion.",
 				"properties": {
+					"accepted_prediction_tokens": {
+						"type": "number",
+						"format": "double",
+						"description": "When using Predicted Outputs, the number of tokens in the prediction that\nappeared in the completion."
+					},
 					"audio_tokens": {
 						"type": "number",
 						"format": "double",
@@ -5862,6 +5926,11 @@
 						"type": "number",
 						"format": "double",
 						"description": "Tokens generated by the model for reasoning."
+					},
+					"rejected_prediction_tokens": {
+						"type": "number",
+						"format": "double",
+						"description": "When using Predicted Outputs, the number of tokens in the prediction that did\nnot appear in the completion. However, like reasoning tokens, these tokens are\nstill counted in the total completion tokens for purposes of billing, output,\nand context window limits."
 					}
 				},
 				"type": "object",
@@ -5953,12 +6022,13 @@
 					"service_tier": {
 						"type": "string",
 						"enum": [
-							"scale",
+							"auto",
 							"default",
+							"flex",
 							null
 						],
 						"nullable": true,
-						"description": "The service tier used for processing the request. This field is only included if\nthe `service_tier` parameter is specified in the request."
+						"description": "Specifies the latency tier to use for processing the request. This parameter is\nrelevant for customers subscribed to the scale tier service:\n\n- If set to 'auto', and the Project is Scale tier enabled, the system will\n  utilize scale tier credits until they are exhausted.\n- If set to 'auto', and the Project is not Scale tier enabled, the request will\n  be processed using the default service tier with a lower uptime SLA and no\n  latency guarentee.\n- If set to 'default', the request will be processed using the default service\n  tier with a lower uptime SLA and no latency guarentee.\n- If set to 'flex', the request will be processed with the Flex Processing\n  service tier.\n  [Learn more](https://platform.openai.com/docs/guides/flex-processing).\n- When not set, the default behavior is 'auto'.\n\nWhen this parameter is set, the response body will include the `service_tier`\nutilized."
 					},
 					"system_fingerprint": {
 						"type": "string",
@@ -6032,7 +6102,45 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"ChatCompletionDeveloperMessageParam": {
+				"description": "Developer-provided instructions that the model should follow, regardless of\nmessages sent by the user. With o1 models and newer, `developer` messages\nreplace the previous `system` messages.",
+				"properties": {
+					"content": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"items": {
+									"$ref": "#/components/schemas/ChatCompletionContentPartText"
+								},
+								"type": "array"
+							}
+						],
+						"description": "The contents of the developer message."
+					},
+					"role": {
+						"type": "string",
+						"enum": [
+							"developer"
+						],
+						"nullable": false,
+						"description": "The role of the messages author, in this case `developer`."
+					},
+					"name": {
+						"type": "string",
+						"description": "An optional name for the participant. Provides the model information to\ndifferentiate between participants of the same role."
+					}
+				},
+				"required": [
+					"content",
+					"role"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"ChatCompletionSystemMessageParam": {
+				"description": "Developer-provided instructions that the model should follow, regardless of\nmessages sent by the user. With o1 models and newer, use `developer` messages\nfor this purpose instead.",
 				"properties": {
 					"content": {
 						"anyOf": [
@@ -6081,7 +6189,7 @@
 							"low",
 							"high"
 						],
-						"description": "Specifies the detail level of the image. Learn more in the\n[Vision guide](https://platform.openai.com/docs/guides/vision/low-or-high-fidelity-image-understanding)."
+						"description": "Specifies the detail level of the image. Learn more in the\n[Vision guide](https://platform.openai.com/docs/guides/vision#low-or-high-fidelity-image-understanding)."
 					}
 				},
 				"required": [
@@ -6156,6 +6264,46 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"ChatCompletionContentPart.File.File": {
+				"properties": {
+					"file_data": {
+						"type": "string",
+						"description": "The base64 encoded file data, used when passing the file to the model as a\nstring."
+					},
+					"file_id": {
+						"type": "string",
+						"description": "The ID of an uploaded file to use as input."
+					},
+					"filename": {
+						"type": "string",
+						"description": "The name of the file, used when passing the file to the model as a string."
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChatCompletionContentPart.File": {
+				"description": "Learn about [file inputs](https://platform.openai.com/docs/guides/text) for text\ngeneration.",
+				"properties": {
+					"file": {
+						"$ref": "#/components/schemas/ChatCompletionContentPart.File.File"
+					},
+					"type": {
+						"type": "string",
+						"enum": [
+							"file"
+						],
+						"nullable": false,
+						"description": "The type of the content part. Always `file`."
+					}
+				},
+				"required": [
+					"file",
+					"type"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"ChatCompletionContentPart": {
 				"anyOf": [
 					{
@@ -6166,11 +6314,15 @@
 					},
 					{
 						"$ref": "#/components/schemas/ChatCompletionContentPartInputAudio"
+					},
+					{
+						"$ref": "#/components/schemas/ChatCompletionContentPart.File"
 					}
 				],
 				"description": "Learn about\n[text inputs](https://platform.openai.com/docs/guides/text-generation)."
 			},
 			"ChatCompletionUserMessageParam": {
+				"description": "Messages sent by an end user, containing prompts or additional context\ninformation.",
 				"properties": {
 					"content": {
 						"anyOf": [
@@ -6262,6 +6414,7 @@
 				"deprecated": true
 			},
 			"ChatCompletionAssistantMessageParam": {
+				"description": "Messages sent by the model in response to user messages.",
 				"properties": {
 					"role": {
 						"type": "string",
@@ -6403,6 +6556,9 @@
 			"ChatCompletionMessageParam": {
 				"anyOf": [
 					{
+						"$ref": "#/components/schemas/ChatCompletionDeveloperMessageParam"
+					},
+					{
 						"$ref": "#/components/schemas/ChatCompletionSystemMessageParam"
 					},
 					{
@@ -6417,7 +6573,8 @@
 					{
 						"$ref": "#/components/schemas/ChatCompletionFunctionMessageParam"
 					}
-				]
+				],
+				"description": "Developer-provided instructions that the model should follow, regardless of\nmessages sent by the user. With o1 models and newer, `developer` messages\nreplace the previous `system` messages."
 			},
 			"Record_string.unknown_": {
 				"properties": {},
@@ -47506,24 +47663,11 @@
 				],
 				"parameters": [],
 				"requestBody": {
-					"description": "Request query filters",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/RequestQueryParams",
-								"description": "Request query filters"
-							},
-							"example": {
-								"filter": "all",
-								"isCached": false,
-								"limit": 10,
-								"offset": 0,
-								"sort": {
-									"created_at": "desc"
-								},
-								"isScored": false,
-								"isPartOfExperiment": false
+								"$ref": "#/components/schemas/RequestQueryParams"
 							}
 						}
 					}
@@ -47570,25 +47714,11 @@
 				],
 				"parameters": [],
 				"requestBody": {
-					"description": "Request query filters",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/RequestQueryParams",
-								"description": "Request query filters"
-							},
-							"example": {
-								"filter": "all",
-								"isCached": false,
-								"limit": 100,
-								"offset": 0,
-								"sort": {
-									"created_at": "desc"
-								},
-								"includeInputs": false,
-								"isScored": false,
-								"isPartOfExperiment": false
+								"$ref": "#/components/schemas/RequestQueryParams"
 							}
 						}
 					}
@@ -51867,6 +51997,44 @@
 						}
 					}
 				}
+			}
+		},
+		"/v1/router/control-plane/whoami": {
+			"get": {
+				"operationId": "Whoami",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"organizationId": {
+											"type": "string"
+										},
+										"userId": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"organizationId",
+										"userId"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Router Control Plane"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
 			}
 		}
 	},
