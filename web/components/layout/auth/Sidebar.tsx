@@ -105,9 +105,9 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
           },
           {
             name: "Playground",
-            href: "/prompts/fromPlayground",
+            href: "/playground",
             icon: TestTube2,
-            current: pathname.includes("/prompts/fromPlayground"),
+            current: pathname.includes("/playground"),
           },
         ],
       },

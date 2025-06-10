@@ -9,12 +9,17 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FlaskConicalIcon, PlusIcon, Settings2, Trash2 } from "lucide-react";
+import { FlaskConicalIcon, PlusIcon, Trash2, WrenchIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Tool } from "@helicone-package/llm-mapper/types";
 import MarkdownEditor from "@/components/shared/markdownEditor";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import clsx from "clsx";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ToolsConfigurationModalProps {
   tools: Tool[];
@@ -95,11 +100,16 @@ export default function ToolsConfigurationModal({
 
   return (
     <Dialog open={toolsDialogOpen} onOpenChange={setToolsDialogOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="icon">
-          <Settings2 className="h-4 w-4" />
-        </Button>
-      </DialogTrigger>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <DialogTrigger asChild>
+            <Button variant="outline" size="icon">
+              <WrenchIcon className="h-4 w-4" />
+            </Button>
+          </DialogTrigger>
+        </TooltipTrigger>
+        <TooltipContent>Tools Configuration</TooltipContent>
+      </Tooltip>
       <DialogContent
         className={clsx(
           "max-w-7xl max-h-[95vh] gap-0 overflow-y-auto items-start flex flex-col",

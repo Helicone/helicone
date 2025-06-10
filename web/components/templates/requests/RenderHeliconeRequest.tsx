@@ -12,7 +12,7 @@ import {
 import { useMemo } from "react";
 import { LuChevronsLeftRight } from "react-icons/lu";
 import { Assistant } from "./components/assistant/Assistant";
-import Chat from "./components/Chat";
+import Chat, { ChatMode } from "./components/Chat";
 import { JsonRenderer } from "./components/chatComponent/single/JsonRenderer";
 import { Completion } from "./components/completion";
 import { ErrorMessage } from "./components/error/ErrorMessage";
@@ -63,6 +63,7 @@ export function RenderMappedRequest({
   className,
   messageIndexFilter,
   onRequestSelect,
+  renderMode = "DEFAULT",
 }: {
   mappedRequest: MappedLLMRequest;
   className?: string;
@@ -71,6 +72,7 @@ export function RenderMappedRequest({
     endIndex: number;
   };
   onRequestSelect?: (request_id: string) => void;
+  renderMode?: ChatMode;
 }) {
   const { mode, toggleMode, setMode } = useRequestRenderModeStore();
   const isShiftPressed = useShiftKeyPress();
@@ -120,14 +122,14 @@ export function RenderMappedRequest({
             case "anthropic-chat":
             case "openai-image":
             case "black-forest-labs-image":
-              return <Chat mappedRequest={mappedRequest} />;
+              return <Chat mappedRequest={mappedRequest} mode={renderMode} />;
 
             case "openai-instruct":
             case "openai-embedding":
               return <Completion mappedRequest={mappedRequest} />;
 
             case "openai-response":
-              return <Chat mappedRequest={mappedRequest} />;
+              return <Chat mappedRequest={mappedRequest} mode={renderMode} />;
 
             case "vector-db":
               return <VectorDB mappedRequest={mappedRequest} />;

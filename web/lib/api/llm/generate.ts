@@ -12,7 +12,7 @@ export interface GenerateParams {
   topP?: number;
   frequencyPenalty?: number;
   presencePenalty?: number;
-  stop?: string[];
+  stop?: string[] | string;
   tools?: Tool[];
   schema?: object extends object ? z.ZodType<object> : never;
   signal?: AbortSignal;

@@ -20,6 +20,7 @@ const MonacoMarkdownEditor = (props: MarkdownEditorProps) => {
     disabled = false,
     className,
     textareaClassName,
+    containerClassName,
   } = props;
   const { theme: currentTheme } = useTheme();
   const minHeight = 100;
@@ -34,7 +35,7 @@ const MonacoMarkdownEditor = (props: MarkdownEditorProps) => {
     );
 
   return (
-    <div>
+    <div className={containerClassName}>
       <MonacoEditor
         value={typeof text === "string" ? text : JSON.stringify(text)}
         onChange={(value) => setText(value || "")}
@@ -74,9 +75,10 @@ interface MarkdownEditorProps {
   monaco?: boolean;
   id?: string;
   placeholder?: string;
+  containerClassName?: string;
 }
 
-const LARGE_TEXT_THRESHOLD = 50;
+const LARGE_TEXT_THRESHOLD = 20;
 
 const LARGE_TEXT_THRESHOLD_CHARS = 10_000;
 

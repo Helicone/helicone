@@ -24,6 +24,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { cn } from "@/lib/utils";
+import { ChatMode } from "../Chat";
 
 // Dynamically import ReactMarkdown with no SSR
 const ReactMarkdown = dynamic(() => import("react-markdown"), {
@@ -74,10 +78,11 @@ interface ChatMessageProps {
   message: Message;
   expandedMessages: Record<number, boolean>;
   setExpandedMessages: Dispatch<SetStateAction<Record<number, boolean>>>;
-  playgroundMode: boolean;
+  chatMode: ChatMode;
   mappedRequest: MappedLLMRequest;
   messageIndex: number;
   onChatChange?: (_mappedRequest: MappedLLMRequest) => void;
+  dragHandle?: React.ReactNode;
 }
 
 const renderToolMessage = (
@@ -114,9 +119,14 @@ const renderToolMessage = (
     });
   };
 
-  if (message.tool_call_id && message.content) {
+  if (message.tool_call_id && (message.content || playgroundMode)) {
     return (
-      <div className="flex flex-col gap-2 p-4 bg-muted rounded-lg text-xs">
+      <div
+        className={cn(
+          "flex flex-col gap-2 p-4 bg-muted text-xs",
+          !playgroundMode ? "rounded-lg" : "dark:bg-black"
+        )}
+      >
         {playgroundMode ? (
           <div className="flex flex-row items-center gap-2">
             <Input
@@ -140,13 +150,14 @@ const renderToolMessage = (
         {!playgroundMode ? (
           <JsonRenderer
             data={
-              isJson(message.content)
-                ? JSON.parse(message.content)
-                : message.content
+              isJson(message.content || "")
+                ? JSON.parse(message.content || "")
+                : message.content || ""
             }
           />
         ) : (
           <MarkdownEditor
+            className="w-full rounded-none bg-white dark:bg-slate-950"
             language="markdown"
             setText={(text) => {
               if (!mappedRequest || !onChatChange || !messageIndex) {
@@ -173,7 +184,7 @@ const renderToolMessage = (
                 },
               });
             }}
-            text={message.content}
+            text={message.content || ""}
           />
         )}
       </div>
@@ -181,7 +192,7 @@ const renderToolMessage = (
   }
   if (message.tool_calls) {
     return (
-      <div className="flex flex-col gap-4">
+      <div className={cn("flex flex-col", !playgroundMode && "gap-4")}>
         {message.content && (
           <ReactMarkdown
             components={markdownComponents}
@@ -228,7 +239,10 @@ const renderToolMessage = (
           return (
             <div
               key={index}
-              className="flex flex-col gap-2 bg-muted rounded-lg text-sm p-2"
+              className={cn(
+                "flex flex-col gap-2 text-sm p-2 bg-muted",
+                !playgroundMode ? "rounded-lg" : "dark:bg-black"
+              )}
             >
               <div className="flex flex-row items-center gap-2">
                 <PiToolboxBold className="text-muted-foreground" />
@@ -293,8 +307,9 @@ const renderToolMessage = (
                 <JsonRenderer data={tool.arguments} showCopyButton={false} />
               ) : (
                 <MarkdownEditor
+                  placeholder="{}"
                   language="markdown"
-                  className="border "
+                  className="bg-white dark:bg-slate-950 rounded-none"
                   setText={(text) => {
                     if (!mappedRequest || !onChatChange || !messageIndex) {
                       return;
@@ -370,10 +385,11 @@ export default function ChatMessage({
   message,
   expandedMessages,
   setExpandedMessages,
-  playgroundMode,
+  chatMode,
   mappedRequest,
   messageIndex,
   onChatChange,
+  dragHandle,
 }: ChatMessageProps) {
   const { mode } = useRequestRenderModeStore();
 
@@ -387,11 +403,7 @@ export default function ChatMessage({
   const changeMessageRole = (index: number, newRole: string) => {
     if (!onChatChange) return;
 
-    console.log("newRole", newRole);
-    console.log("mappedRequest", mappedRequest);
-
     if (newRole === "tool") {
-      console.log("newRole", newRole);
       onChatChange({
         ...mappedRequest,
         schema: {
@@ -429,6 +441,9 @@ export default function ChatMessage({
                   return {
                     ...message,
                     role: newRole,
+                    _type: "message",
+                    tool_call_id: undefined,
+                    name: undefined,
                   };
                 }
                 return message;
@@ -502,73 +517,111 @@ export default function ChatMessage({
 
   const messageType = getMessageType(message);
 
-  return (
-    <div className="w-full flex flex-col border-b border-border">
-      {/* Message Role Header */}
-      <header className="h-12 w-full flex flex-row items-center justify-between px-4 sticky top-0 bg-sidebar-background dark:bg-black z-10">
-        <div className="flex items-center gap-2">
-          {playgroundMode ? (
-            <Select
-              value={message.role}
-              onValueChange={(value) => changeMessageRole(messageIndex, value)}
-            >
-              <SelectTrigger className="h-6 inline-flex items-center px-2.5 py-0.5 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-2 text-nowrap border-[hsl(var(--border))] bg-[hsl(var(--background))] text-[hsl(var(--foreground))] hover:bg-[hsl(var(--accent))] rounded-md">
-                <SelectValue placeholder="Select role" />
-              </SelectTrigger>
-              <SelectContent className="min-w-[140px]">
-                <SelectItem value="user" className="text-xs">
-                  User
-                </SelectItem>
-                <SelectItem value="assistant" className="text-xs">
-                  Assistant
-                </SelectItem>
-                <SelectItem value="system" className="text-xs">
-                  System
-                </SelectItem>
-                <SelectItem value="tool" className="text-xs">
-                  Tool
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          ) : (
-            <h2 className="text-secondary font-medium capitalize text-sm">
-              {message.role}
-            </h2>
-          )}
-        </div>
-        {playgroundMode && (
-          <div className="flex items-center gap-2">
-            {message.role === "assistant" && (
-              <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-                <PopoverTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <LuPlus className="h-4 w-4" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-48 p-2">
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start"
-                    onClick={() => addToolCall(messageIndex)}
-                  >
-                    Add Tool Call
-                  </Button>
-                </PopoverContent>
-              </Popover>
-            )}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => deleteMessage(messageIndex)}
-            >
-              <LuTrash2 className="h-4 w-4 text-destructive" />
-            </Button>
-          </div>
-        )}
-      </header>
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transition,
+    transform,
+    isDragging,
+  } = useSortable({
+    id: message.id || `msg-${messageIndex}`,
+  });
+  const style = {
+    transition,
+    transform: CSS.Translate.toString(transform),
+    opacity: isDragging ? 0.5 : 1,
+  };
 
-      <div className="w-full flex flex-col relative px-4 pb-4 pt-0">
+  return (
+    <div
+      className={cn(
+        "w-full flex flex-col border-b border-border",
+        chatMode === "PLAYGROUND_OUTPUT" && "border-0"
+      )}
+      ref={setNodeRef}
+      style={style}
+    >
+      {/* Message Role Header */}
+      {chatMode !== "PLAYGROUND_OUTPUT" && (
+        <header className="h-12 w-full flex flex-row items-center justify-between px-4 sticky top-0 bg-sidebar-background dark:bg-black z-10">
+          <div className="flex items-center gap-2">
+            {dragHandle && (
+              <div {...attributes} {...listeners}>
+                {dragHandle}
+              </div>
+            )}
+            {chatMode === "PLAYGROUND_INPUT" ? (
+              <Select
+                value={message.role}
+                onValueChange={(value) =>
+                  changeMessageRole(messageIndex, value)
+                }
+              >
+                <SelectTrigger className="h-6 inline-flex items-center px-2.5 py-0.5 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-2 text-nowrap border-[hsl(var(--border))] bg-[hsl(var(--background))] text-[hsl(var(--foreground))] hover:bg-[hsl(var(--accent))] rounded-md">
+                  <SelectValue placeholder="Select role" />
+                </SelectTrigger>
+                <SelectContent className="min-w-[140px]">
+                  <SelectItem value="user" className="text-xs">
+                    User
+                  </SelectItem>
+                  <SelectItem value="assistant" className="text-xs">
+                    Assistant
+                  </SelectItem>
+                  <SelectItem value="system" className="text-xs">
+                    System
+                  </SelectItem>
+                  <SelectItem value="tool" className="text-xs">
+                    Tool
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            ) : (
+              <h2 className="text-secondary font-medium capitalize text-sm">
+                {message.role}
+              </h2>
+            )}
+          </div>
+          {chatMode === "PLAYGROUND_INPUT" && (
+            <div className="flex items-center gap-2">
+              {message.role === "assistant" && (
+                <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+                  <PopoverTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <LuPlus className="h-4 w-4" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-48 p-2">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start"
+                      onClick={() => addToolCall(messageIndex)}
+                    >
+                      Add Tool Call
+                    </Button>
+                  </PopoverContent>
+                </Popover>
+              )}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => deleteMessage(messageIndex)}
+              >
+                <LuTrash2 className="h-4 w-4 text-destructive" />
+              </Button>
+            </div>
+          )}
+        </header>
+      )}
+
+      <div
+        className={cn(
+          "w-full flex flex-col relative",
+          chatMode !== "PLAYGROUND_INPUT" && "px-4 pb-4 pt-0",
+          chatMode === "PLAYGROUND_OUTPUT" && "pt-4"
+        )}
+      >
         {(() => {
           switch (messageType) {
             case "image":
@@ -610,7 +663,7 @@ export default function ChatMessage({
                 </div>
               );
             case "tool":
-              return mode === "raw" && !playgroundMode ? (
+              return mode === "raw" && chatMode !== "PLAYGROUND_INPUT" ? (
                 <MarkdownEditor
                   language="json"
                   setText={() => {}}
@@ -625,25 +678,27 @@ export default function ChatMessage({
                 renderToolMessage(
                   displayContent,
                   message,
-                  playgroundMode,
+                  chatMode === "PLAYGROUND_INPUT",
                   mappedRequest,
                   messageIndex,
                   onChatChange
                 )
               );
             case "text":
-              if (isJson(displayContent) && !playgroundMode) {
+              if (isJson(displayContent) && chatMode !== "PLAYGROUND_INPUT") {
                 return (
                   <div className="text-sm">
                     <JsonRenderer data={JSON.parse(displayContent)} />
                   </div>
                 );
               }
-              return mode === "raw" || playgroundMode ? (
+              return mode === "raw" || chatMode === "PLAYGROUND_INPUT" ? (
                 <MarkdownEditor
+                  className="rounded-none bg-white dark:bg-slate-950"
+                  placeholder="Enter your message here..."
                   language="markdown"
                   setText={
-                    playgroundMode
+                    chatMode === "PLAYGROUND_INPUT"
                       ? (text) => {
                           onChatChange?.({
                             ...mappedRequest,
@@ -671,13 +726,12 @@ export default function ChatMessage({
                         }
                       : () => {}
                   }
-                  className="border-none"
                   text={
                     typeof displayContent === "string"
                       ? displayContent
                       : JSON.stringify(displayContent)
                   }
-                  disabled={!playgroundMode}
+                  disabled={chatMode !== "PLAYGROUND_INPUT"}
                 />
               ) : (
                 <ReactMarkdown

@@ -142,6 +142,7 @@
     "@tailwindcss/typography": "^0.5.12",
     "@types/dateformat": "^5.0.0",
     "@types/js-cookie": "^3.0.3",
+    "@types/lodash": "^4.17.17",
     "@types/node": "^20.17.24",
     "@types/papaparse": "^5.3.15",
     "@types/pg": "^8.6.6",
