@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use crate::{
-    app::AppState,
+    app_state::AppState,
     config::{
         model_mapping::ModelMappingConfig, providers::ProvidersConfig,
         router::RouterConfig,

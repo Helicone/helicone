@@ -5,22 +5,22 @@ use std::{
 };
 
 use bytes::Bytes;
+use chrono::DateTime;
 use futures::{TryStreamExt, future::BoxFuture};
 use http::{HeaderMap, HeaderName, HeaderValue, StatusCode, uri::PathAndQuery};
 use http_body_util::BodyExt;
 use opentelemetry::KeyValue;
 use reqwest::RequestBuilder;
-use reqwest_eventsource::RequestBuilderExt;
+use tokio::sync::mpsc::Sender;
 use tower::{Service, ServiceBuilder};
 use tracing::{Instrument, info_span};
 
-use super::{SSEStream, sse_stream};
 use crate::{
-    app::AppState,
+    app_state::AppState,
     config::router::RouterConfig,
-    discover::monitor::health::EndpointMetricsRegistry,
+    discover::monitor::metrics::EndpointMetricsRegistry,
     dispatcher::{
-        anthropic_client::Client as AnthropicClient,
+        anthropic_client::Client as AnthropicClient, client::Client,
         extensions::ExtensionsCopier,
         google_gemini_client::Client as GoogleGeminiClient,
         ollama_client::Client as OllamaClient,
@@ -38,6 +38,7 @@ use crate::{
     },
     types::{
         provider::InferenceProvider,
+        rate_limit::RateLimitEvent,
         request::{AuthContext, MapperContext, Request, RequestContext},
         router::RouterId,
         secret::Secret,
@@ -55,47 +56,13 @@ pub type DispatcherFuture = BoxFuture<
 pub type DispatcherService =
     AddExtensions<ErrorHandler<crate::middleware::mapper::Service<Dispatcher>>>;
 
-#[derive(Debug, Clone)]
-pub enum Client {
-    OpenAI(OpenAIClient),
-    Anthropic(AnthropicClient),
-    GoogleGemini(GoogleGeminiClient),
-    Ollama(OllamaClient),
-}
-
-impl Client {
-    pub(crate) fn sse_stream<B>(
-        request_builder: RequestBuilder,
-        body: B,
-    ) -> Result<SSEStream, InternalError>
-    where
-        B: Into<reqwest::Body>,
-    {
-        let event_source = request_builder
-            .body(body)
-            .eventsource()
-            .map_err(|e| InternalError::RequestBodyError(Box::new(e)))?;
-        Ok(sse_stream(event_source))
-    }
-}
-
-impl AsRef<reqwest::Client> for Client {
-    fn as_ref(&self) -> &reqwest::Client {
-        match self {
-            Client::OpenAI(client) => &client.0,
-            Client::Anthropic(client) => &client.0,
-            Client::GoogleGemini(client) => &client.0,
-            Client::Ollama(client) => &client.0,
-        }
-    }
-}
-
 /// Leaf service that dispatches requests to the correct provider.
 #[derive(Debug, Clone)]
 pub struct Dispatcher {
     client: Client,
     app_state: AppState,
     provider: InferenceProvider,
+    rate_limit_tx: Sender<RateLimitEvent>,
 }
 
 impl Dispatcher {
@@ -138,11 +105,13 @@ impl Dispatcher {
             }
             _ => todo!("only openai and anthropic are supported at the moment"),
         };
+        let rate_limit_tx = app_state.get_rate_limit_tx(router_id).await?;
 
         let dispatcher = Self {
             client,
             app_state: app_state.clone(),
             provider,
+            rate_limit_tx,
         };
         let model_mapper =
             ModelMapper::new(app_state.clone(), router_config.clone());
@@ -219,13 +188,9 @@ impl Dispatcher {
         let auth_ctx = req_ctx.auth_context.as_ref();
         let api_endpoint = req.extensions().get::<ApiEndpoint>().copied();
         let target_provider = self.provider;
-        let provider_config = self
-            .app_state
-            .0
-            .config
-            .providers
-            .get(&target_provider)
-            .ok_or_else(|| {
+        let config = self.app_state.config();
+        let provider_config =
+            config.providers.get(&target_provider).ok_or_else(|| {
                 InternalError::ProviderNotConfigured(target_provider)
             })?;
         let base_url = provider_config.base_url.clone();
@@ -281,7 +246,7 @@ impl Dispatcher {
                 .app_state
                 .0
                 .endpoint_metrics
-                .endpoint_metrics(api_endpoint)?;
+                .health_metrics(api_endpoint)?;
             endpoint_metrics.incr_req_count();
         }
 
@@ -357,8 +322,26 @@ impl Dispatcher {
                     .app_state
                     .0
                     .endpoint_metrics
-                    .endpoint_metrics(api_endpoint)?;
+                    .health_metrics(api_endpoint)?;
                 endpoint_metrics.incr_remote_internal_error_count();
+            }
+        } else if response.status() == StatusCode::TOO_MANY_REQUESTS {
+            if let Some(api_endpoint) = api_endpoint {
+                let retry_after = extract_retry_after(response.headers());
+                tracing::info!(
+                    provider = ?self.provider,
+                    api_endpoint = ?api_endpoint,
+                    retry_after = ?retry_after,
+                    "Provider rate limited, signaling monitor"
+                );
+
+                if let Err(e) = self
+                    .rate_limit_tx
+                    .send(RateLimitEvent::new(api_endpoint, retry_after))
+                    .await
+                {
+                    tracing::error!(error = %e, "failed to send rate limit event");
+                }
             }
         }
 
@@ -384,24 +367,12 @@ impl Dispatcher {
         )?
         .map_err(move |e| {
             if let InternalError::StreamError(error) = &e {
-                cfg_if::cfg_if! {
-                    if #[cfg(debug_assertions)] {
-                        if let Some(api_endpoint) = api_endpoint {
-                            metrics_registry.endpoint_metrics(api_endpoint).map(|metrics| {
-                                metrics.incr_for_stream_error_debug(error);
-                            }).inspect_err(|e| {
-                                tracing::error!(error = %e, "failed to increment stream error metrics");
-                            }).ok();
-                        }
-                    } else {
-                        if let Some(api_endpoint) = api_endpoint {
-                            metrics_registry.endpoint_metrics(api_endpoint).map(|metrics| {
-                                metrics.incr_for_stream_error(error);
-                            }).inspect_err(|e| {
-                                tracing::error!(error = %e, "failed to increment stream error metrics");
-                            }).ok();
-                        }
-                    }
+                if let Some(api_endpoint) = api_endpoint {
+                    metrics_registry.health_metrics(api_endpoint).map(|metrics| {
+                        metrics.incr_for_stream_error(error);
+                    }).inspect_err(|e| {
+                        tracing::error!(error = %e, "failed to increment stream error metrics");
+                    }).ok();
                 }
             }
             e
@@ -488,6 +459,35 @@ impl Dispatcher {
             Ok((response, None))
         }
     }
+}
+
+fn extract_retry_after(headers: &HeaderMap) -> Option<u64> {
+    let retry_after_str = headers
+        .get(http::header::RETRY_AFTER)
+        .and_then(|v| v.to_str().ok())?;
+
+    // First try to parse as seconds (u64)
+    if let Ok(seconds) = retry_after_str.parse::<u64>() {
+        // The value is in seconds, return seconds from now
+        return Some(seconds);
+    }
+
+    // If that fails, try to parse as HTTP date format
+    if let Ok(datetime) =
+        DateTime::parse_from_str(retry_after_str, "%a, %d %b %Y %H:%M:%S GMT")
+    {
+        // Convert to seconds from now
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("epoch is always earlier than now")
+            .as_secs();
+        let target = u64::try_from(datetime.to_utc().timestamp()).unwrap_or(0);
+        if target > now {
+            return Some(target - now);
+        }
+    }
+
+    None
 }
 
 fn stream_response_headers() -> HeaderMap {

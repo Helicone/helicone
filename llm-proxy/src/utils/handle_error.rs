@@ -13,7 +13,7 @@ use opentelemetry::KeyValue;
 use pin_project_lite::pin_project;
 use tower::{Layer, Service};
 
-use crate::{app::AppState, error::ErrorMetric};
+use crate::{app_state::AppState, error::ErrorMetric};
 
 /// A [`Layer`] that wraps a [`Service`] and converts errors into [`Response`]s.
 #[derive(Debug, Clone)]

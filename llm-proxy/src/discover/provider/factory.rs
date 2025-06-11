@@ -12,7 +12,7 @@ use tower::{
 };
 
 use crate::{
-    app::AppState,
+    app_state::AppState,
     config::router::RouterConfig,
     discover::provider::{Key, discover::Discovery},
     dispatcher::DispatcherService,

@@ -10,7 +10,7 @@ use rustc_hash::FxHashMap as HashMap;
 use tower::ServiceBuilder;
 
 use crate::{
-    app::AppState,
+    app_state::AppState,
     balancer::provider::ProviderBalancer,
     config::{DeploymentTarget, router::RouterConfig},
     dispatcher::{Dispatcher, DispatcherService},
@@ -62,6 +62,7 @@ impl Router {
 
         let provider_keys =
             Self::add_provider_keys(id, &router_config, &app_state).await?;
+
         let mut inner = HashMap::default();
         let rl_layer =
             rate_limit::Layer::per_router(&app_state, id, &router_config)

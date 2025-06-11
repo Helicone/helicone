@@ -15,7 +15,7 @@ use tower::discover::Change;
 use weighted_balance::weight::Weight;
 
 use crate::{
-    app::AppState,
+    app_state::AppState,
     config::{balance::BalanceConfigInner, router::RouterConfig},
     discover::{provider::Key, weighted::WeightedKey},
     dispatcher::{Dispatcher, DispatcherService},

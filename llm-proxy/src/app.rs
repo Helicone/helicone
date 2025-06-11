@@ -23,23 +23,21 @@ use tower_http::{
 use tracing::{Level, info};
 
 use crate::{
-    config::{
-        Config, minio::Minio, rate_limit::RateLimiterConfig,
-        response_headers::ResponseHeadersConfig, server::TlsConfig,
-    },
+    app_state::{AppState, InnerAppState},
+    config::{Config, minio::Minio, server::TlsConfig},
     control_plane::control_plane_state::ControlPlaneState,
-    discover::monitor::health::{
-        EndpointMetricsRegistry, provider::HealthMonitorMap,
+    discover::monitor::{
+        health::provider::HealthMonitorMap, metrics::EndpointMetricsRegistry,
+        rate_limit::RateLimitMonitorMap,
     },
     error::{self, init::InitError, runtime::RuntimeError},
     logger::service::JawnClient,
-    metrics::{self, Metrics, attribute_extractor::AttributeExtractor},
+    metrics::{self, attribute_extractor::AttributeExtractor},
     middleware::{
         auth::AuthService, rate_limit::service::Layer as RateLimitLayer,
         response_headers::ResponseHeaderLayer,
     },
     router::meta::MetaRouter,
-    types::{provider::ProviderKeys, router::RouterId},
     utils::{catch_panic::PanicResponder, handle_error::ErrorHandlerLayer},
 };
 
@@ -67,32 +65,6 @@ pub type BoxedHyperServiceStack = BoxCloneService<
     AppResponse,
     Infallible,
 >;
-
-#[derive(Debug, Clone)]
-pub struct AppState(pub Arc<InnerAppState>);
-
-impl AppState {
-    #[must_use]
-    pub fn response_headers_config(&self) -> ResponseHeadersConfig {
-        self.0.config.response_headers
-    }
-}
-
-#[derive(Debug)]
-pub struct InnerAppState {
-    pub config: Config,
-    pub minio: Minio,
-    pub jawn_http_client: JawnClient,
-    pub control_plane_state: Arc<Mutex<ControlPlaneState>>,
-    pub provider_keys: RwLock<HashMap<RouterId, ProviderKeys>>,
-    pub global_rate_limit: Option<Arc<RateLimiterConfig>>,
-    pub router_rate_limits: RwLock<HashMap<RouterId, Arc<RateLimiterConfig>>>,
-    /// Top level metrics which are exported to OpenTelemetry.
-    pub metrics: Metrics,
-    /// Metrics to track provider health and rate limits.
-    pub endpoint_metrics: EndpointMetricsRegistry,
-    pub health_monitor: HealthMonitorMap,
-}
 
 /// The top level app used to start the hyper server.
 /// The middleware stack is as follows:
@@ -209,6 +181,7 @@ impl App {
         let metrics = metrics::Metrics::new(&meter);
         let endpoint_metrics = EndpointMetricsRegistry::default();
         let health_monitor = HealthMonitorMap::default();
+        let rate_limit_monitor = RateLimitMonitorMap::default();
 
         let global_rate_limit =
             config.rate_limit.global_limiter().map(Arc::new);
@@ -225,7 +198,10 @@ impl App {
             router_rate_limits: RwLock::new(HashMap::default()),
             metrics,
             endpoint_metrics,
-            health_monitor,
+            health_monitors: health_monitor,
+            rate_limit_monitors: rate_limit_monitor,
+            rate_limit_senders: RwLock::new(HashMap::default()),
+            rate_limit_receivers: RwLock::new(HashMap::default()),
         }));
 
         let otel_metrics_layer =
@@ -248,7 +224,7 @@ impl App {
                 TraceLayer::new_for_http()
                     .make_span_with(SpanFactory::new(
                         Level::INFO,
-                        app_state.0.config.telemetry.propagate,
+                        app_state.config().telemetry.propagate,
                     ))
                     .on_body_chunk(())
                     .on_eos(()),
@@ -289,15 +265,14 @@ impl meltdown::Service for App {
     fn run(self, token: Token) -> Self::Future {
         Box::pin(async move {
             let app_state = self.state.clone();
-            let addr = SocketAddr::from((
-                app_state.0.config.server.address,
-                app_state.0.config.server.port,
-            ));
-            info!(address = %addr, tls = %app_state.0.config.server.tls, "server starting");
+            let config = app_state.config();
+            let addr =
+                SocketAddr::from((config.server.address, config.server.port));
+            info!(address = %addr, tls = %config.server.tls, "server starting");
 
             let handle = axum_server::Handle::new();
             let app_factory = AppFactory::new_hyper_app(self);
-            match &app_state.0.config.server.tls {
+            match &config.server.tls {
                 TlsConfig::Enabled { cert, key } => {
                     let tls_config =
                         RustlsConfig::from_pem_file(cert.clone(), key.clone())

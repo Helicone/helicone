@@ -10,7 +10,7 @@ use tower::{Service, balance::p2c::Balance, load::PeakEwmaDiscover};
 use weighted_balance::{balance::WeightedBalance, weight::WeightedDiscover};
 
 use crate::{
-    app::AppState,
+    app_state::AppState,
     config::{balance::BalanceConfigInner, router::RouterConfig},
     discover::{
         provider::{Key, discover, factory::DiscoverFactory},
@@ -20,7 +20,7 @@ use crate::{
     types::{request::Request, response::Response, router::RouterId},
 };
 
-const CHANNEL_CAPACITY: usize = 128;
+const CHANNEL_CAPACITY: usize = 16;
 
 #[derive(Debug)]
 pub enum ProviderBalancer {
@@ -56,18 +56,32 @@ impl ProviderBalancer {
         router_config: Arc<RouterConfig>,
     ) -> Result<ProviderBalancer, InitError> {
         tracing::debug!("Creating weighted balancer");
-        let (tx, rx) = channel(CHANNEL_CAPACITY);
+        let (change_tx, change_rx) = channel(CHANNEL_CAPACITY);
+        let (rate_limit_tx, rate_limit_rx) = channel(CHANNEL_CAPACITY);
         let discover_factory = DiscoverFactory::new(
             app_state.clone(),
             router_id,
             router_config.clone(),
         );
+        app_state
+            .add_weighted_router_health_monitor(
+                router_id,
+                router_config.clone(),
+                change_tx.clone(),
+            )
+            .await;
+        app_state.add_rate_limit_tx(router_id, rate_limit_tx).await;
+        app_state.add_rate_limit_rx(router_id, rate_limit_rx).await;
+        app_state
+            .add_weighted_router_rate_limit_monitor(
+                router_id,
+                router_config,
+                change_tx,
+            )
+            .await;
         let mut balance_factory =
             weighted_balance::balance::make::MakeBalance::new(discover_factory);
-        let balance = balance_factory.call(rx).await?;
-        app_state
-            .add_weighted_router_health_monitor(router_id, router_config, tx)
-            .await;
+        let balance = balance_factory.call(change_rx).await?;
         let provider_balancer = ProviderBalancer::Weighted(balance);
 
         Ok(provider_balancer)
@@ -79,18 +93,32 @@ impl ProviderBalancer {
         router_config: Arc<RouterConfig>,
     ) -> Result<ProviderBalancer, InitError> {
         tracing::debug!("Creating peak ewma p2c balancer");
-        let (tx, rx) = channel(CHANNEL_CAPACITY);
+        let (change_tx, change_rx) = channel(CHANNEL_CAPACITY);
+        let (rate_limit_tx, rate_limit_rx) = channel(CHANNEL_CAPACITY);
         let discover_factory = DiscoverFactory::new(
             app_state.clone(),
             router_id,
             router_config.clone(),
         );
+        app_state
+            .add_p2c_router_health_monitor(
+                router_id,
+                router_config.clone(),
+                change_tx.clone(),
+            )
+            .await;
+        app_state.add_rate_limit_tx(router_id, rate_limit_tx).await;
+        app_state.add_rate_limit_rx(router_id, rate_limit_rx).await;
+        app_state
+            .add_p2c_router_rate_limit_monitor(
+                router_id,
+                router_config,
+                change_tx,
+            )
+            .await;
         let mut balance_factory =
             tower::balance::p2c::MakeBalance::new(discover_factory);
-        let balance = balance_factory.call(rx).await?;
-        app_state
-            .add_p2c_router_health_monitor(router_id, router_config, tx)
-            .await;
+        let balance = balance_factory.call(change_rx).await?;
         let provider_balancer = ProviderBalancer::PeakEwma(balance);
 
         Ok(provider_balancer)

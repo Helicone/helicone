@@ -126,3 +126,7 @@ required-features = ["testing"]
 [[test]]
 name = "rate_limit_combinations"
 required-features = ["testing"]
+
+[[test]]
+name = "rate_limit_monitor"
+required-features = ["testing"]

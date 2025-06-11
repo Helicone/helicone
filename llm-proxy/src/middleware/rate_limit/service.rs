@@ -10,7 +10,7 @@ use tower_governor::{GovernorLayer, governor::GovernorConfigBuilder};
 
 use super::extractor::RateLimitKeyExtractor;
 use crate::{
-    app::AppState,
+    app_state::AppState,
     config::{
         rate_limit::{
             RateLimiterConfig, TopLevelRateLimitConfig,
@@ -207,7 +207,7 @@ mod tests {
 
     use super::*;
     use crate::{
-        app::AppState,
+        app_state::AppState,
         config::{
             Config,
             rate_limit::{

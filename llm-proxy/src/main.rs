@@ -5,7 +5,9 @@ use llm_proxy::{
     app::App,
     config::Config,
     control_plane::websocket::ControlPlaneClient,
-    discover::monitor::health::provider::HealthMonitor,
+    discover::monitor::{
+        health::provider::HealthMonitor, rate_limit::RateLimitMonitor,
+    },
     error::{init::InitError, runtime::RuntimeError},
     metrics::system::SystemMetrics,
     middleware::rate_limit,
@@ -46,13 +48,15 @@ async fn main() -> Result<(), RuntimeError> {
     let mut shutting_down = false;
     let helicone_config = config.helicone.clone();
     let app = App::new(config).await?;
+    let config = app.state.config();
     let health_monitor = HealthMonitor::new(app.state.clone());
+    let rate_limit_monitor = RateLimitMonitor::new(app.state.clone());
     let control_plane_state = app.state.0.control_plane_state.clone();
 
     let rate_limiting_cleanup_service =
         rate_limit::cleanup::GarbageCollector::new(
             app.state.clone(),
-            app.state.0.config.rate_limit.cleanup_interval(),
+            config.rate_limit.cleanup_interval(),
         );
 
     let mut meltdown = Meltdown::new().register(TaggedService::new(
@@ -73,6 +77,10 @@ async fn main() -> Result<(), RuntimeError> {
         .register(TaggedService::new(
             "provider-health-monitor",
             health_monitor,
+        ))
+        .register(TaggedService::new(
+            "provider-rate-limit-monitor",
+            rate_limit_monitor,
         ))
         .register(TaggedService::new("system-metrics", SystemMetrics))
         .register(TaggedService::new(

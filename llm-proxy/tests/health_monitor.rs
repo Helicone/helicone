@@ -30,15 +30,15 @@ async fn errors_remove_provider_from_lb_pool() {
             targets: nes![
                 BalanceTarget {
                     provider: InferenceProvider::OpenAI,
-                    weight: Decimal::try_from(0.80).unwrap(),
+                    weight: Decimal::try_from(0.20).unwrap(),
                 },
                 BalanceTarget {
                     provider: InferenceProvider::Anthropic,
-                    weight: Decimal::try_from(0.10).unwrap(),
+                    weight: Decimal::try_from(0.40).unwrap(),
                 },
                 BalanceTarget {
                     provider: InferenceProvider::GoogleGemini,
-                    weight: Decimal::try_from(0.10).unwrap(),
+                    weight: Decimal::try_from(0.40).unwrap(),
                 },
             ],
         },

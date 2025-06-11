@@ -1,11 +1,49 @@
 use std::time::Duration;
 
-use rust_decimal::{Decimal, prelude::FromPrimitive};
+use rust_decimal::{
+    Decimal,
+    prelude::{FromPrimitive, ToPrimitive},
+};
 use serde::{Deserialize, Serialize};
+
+const DEFAULT_ERROR_THRESHOLD: f64 = 0.15;
+
+#[derive(Debug, Default, Clone, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(deny_unknown_fields, default, rename_all = "kebab-case")]
+pub struct MonitorConfig {
+    pub health: HealthMonitorConfig,
+}
+
+impl MonitorConfig {
+    #[must_use]
+    pub fn error_threshold(&self) -> f64 {
+        match &self.health {
+            HealthMonitorConfig::ErrorRatio { ratio, .. } => {
+                ratio.to_f64().unwrap_or(DEFAULT_ERROR_THRESHOLD)
+            }
+        }
+    }
+
+    #[must_use]
+    pub fn grace_period(&self) -> &GracePeriod {
+        match &self.health {
+            HealthMonitorConfig::ErrorRatio { grace_period, .. } => {
+                grace_period
+            }
+        }
+    }
+
+    #[must_use]
+    pub fn health_interval(&self) -> Duration {
+        match &self.health {
+            HealthMonitorConfig::ErrorRatio { interval, .. } => *interval,
+        }
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(deny_unknown_fields, tag = "type", rename_all = "kebab-case")]
-pub enum MonitorConfig {
+pub enum HealthMonitorConfig {
     ErrorRatio {
         /// The ratio of 5xx errors to requests that will trigger a provider
         /// to be marked as unhealthy.
@@ -18,7 +56,7 @@ pub enum MonitorConfig {
         #[serde(default = "default_buckets")]
         buckets: usize,
         /// Interval to check if providers have changed health status.
-        #[serde(default = "default_interval", with = "humantime_serde")]
+        #[serde(default = "default_health_interval", with = "humantime_serde")]
         interval: Duration,
         /// The grace period to wait before removing a provider from the load
         /// balancer.
@@ -41,8 +79,8 @@ fn default_grace_period() -> GracePeriod {
     GracePeriod::Requests { min_requests: 20 }
 }
 
-fn default_interval() -> Duration {
-    Duration::from_secs(10)
+fn default_health_interval() -> Duration {
+    Duration::from_secs(5)
 }
 
 fn default_buckets() -> usize {
@@ -57,20 +95,20 @@ fn default_ratio() -> Decimal {
     Decimal::from_f64(0.10).unwrap()
 }
 
-impl Default for MonitorConfig {
+impl Default for HealthMonitorConfig {
     fn default() -> Self {
         Self::ErrorRatio {
             ratio: default_ratio(),
             window: default_window(),
             buckets: default_buckets(),
-            interval: default_interval(),
+            interval: default_health_interval(),
             grace_period: default_grace_period(),
         }
     }
 }
 
 #[cfg(feature = "testing")]
-impl crate::tests::TestDefault for MonitorConfig {
+impl crate::tests::TestDefault for HealthMonitorConfig {
     fn test_default() -> Self {
         Self::ErrorRatio {
             ratio: Decimal::from_f64(0.02).unwrap(),
@@ -78,6 +116,15 @@ impl crate::tests::TestDefault for MonitorConfig {
             buckets: 10,
             interval: Duration::from_millis(1),
             grace_period: GracePeriod::Requests { min_requests: 10 },
+        }
+    }
+}
+
+#[cfg(feature = "testing")]
+impl crate::tests::TestDefault for MonitorConfig {
+    fn test_default() -> Self {
+        Self {
+            health: HealthMonitorConfig::test_default(),
         }
     }
 }

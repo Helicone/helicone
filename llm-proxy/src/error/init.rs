@@ -2,7 +2,10 @@ use displaydoc::Display;
 use telemetry::TelemetryError;
 use thiserror::Error;
 
-use crate::{config::DeploymentTarget, types::provider::InferenceProvider};
+use crate::{
+    config::DeploymentTarget,
+    types::{provider::InferenceProvider, router::RouterId},
+};
 
 /// Errors that can occur during initialization.
 #[derive(Debug, Error, Display)]
@@ -47,4 +50,6 @@ pub enum InitError {
     WebsocketConnection(#[from] Box<tokio_tungstenite::tungstenite::Error>),
     /// URL parsing error: {0}
     WebsocketUrlParse(#[from] url::ParseError),
+    /// Rate limit channels not initialized for router: {0}
+    RateLimitChannelsNotInitialized(RouterId),
 }

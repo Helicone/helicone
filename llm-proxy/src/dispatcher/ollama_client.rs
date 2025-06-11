@@ -2,7 +2,7 @@ use http::{HeaderMap, HeaderValue};
 use reqwest::ClientBuilder;
 
 use crate::{
-    app::AppState,
+    app_state::AppState,
     error::{init::InitError, provider::ProviderError},
     types::provider::InferenceProvider,
     utils::host_header,

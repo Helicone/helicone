@@ -24,6 +24,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # required for stubr test dependency
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v3
       - name: Clippy
         run: cargo ci-clippy
   test:

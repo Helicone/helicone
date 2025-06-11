@@ -8,7 +8,7 @@ use url::Url;
 use uuid::Uuid;
 
 use crate::{
-    app::AppState,
+    app_state::AppState,
     error::auth::AuthError,
     types::{org::OrgId, request::AuthContext, user::UserId},
 };

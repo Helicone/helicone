@@ -6,6 +6,7 @@ pub mod logger;
 pub mod model_id;
 pub mod org;
 pub mod provider;
+pub mod rate_limit;
 pub mod request;
 pub mod response;
 pub mod router;

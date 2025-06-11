@@ -4,7 +4,7 @@ use futures::future::BoxFuture;
 use meltdown::Token;
 use tracing::{error, info};
 
-use crate::{app::AppState, error::runtime::RuntimeError};
+use crate::{app_state::AppState, error::runtime::RuntimeError};
 
 pub struct GarbageCollector {
     pub app_state: AppState,

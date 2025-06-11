@@ -11,7 +11,7 @@ use typed_builder::TypedBuilder;
 use url::Url;
 
 use crate::{
-    app::AppState,
+    app_state::AppState,
     error::{init::InitError, logger::LoggerError},
     types::{
         body::BodyReader,
@@ -156,8 +156,7 @@ impl LoggerService {
 
         let helicone_url = self
             .app_state
-            .0
-            .config
+            .config()
             .helicone
             .base_url
             .join("/v1/log/request")?;

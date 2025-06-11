@@ -12,7 +12,7 @@ use tokio::sync::mpsc::Receiver;
 use tower::discover::Change;
 
 use crate::{
-    app::AppState,
+    app_state::AppState,
     config::router::RouterConfig,
     discover::{
         provider::{Key, config::ConfigDiscovery},

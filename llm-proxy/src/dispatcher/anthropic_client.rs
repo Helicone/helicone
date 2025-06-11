@@ -2,7 +2,7 @@ use http::{HeaderMap, HeaderName, HeaderValue};
 use reqwest::ClientBuilder;
 
 use crate::{
-    app::AppState,
+    app_state::AppState,
     config::providers::DEFAULT_ANTHROPIC_VERSION,
     error::{init::InitError, provider::ProviderError},
     types::{provider::InferenceProvider, secret::Secret},

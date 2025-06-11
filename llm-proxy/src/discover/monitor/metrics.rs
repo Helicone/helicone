@@ -1,17 +1,11 @@
 use std::{sync::Arc, time::Duration};
 
 use rustc_hash::FxHashMap as HashMap;
+use strum::IntoEnumIterator;
 
 use crate::{
-    endpoints::{
-        ApiEndpoint,
-        anthropic::{Anthropic, Messages},
-        google::{GenerateContents, Google},
-        ollama::Ollama,
-        openai::{ChatCompletions, OpenAI},
-    },
-    error::internal::InternalError,
-    metrics::RollingCounter,
+    endpoints::ApiEndpoint, error::internal::InternalError,
+    metrics::RollingCounter, types::provider::InferenceProvider,
 };
 
 /// We use this to track metrics for monitoring provider health.
@@ -21,15 +15,15 @@ use crate::{
 /// the rolling window this way.
 #[derive(Debug, Clone)]
 pub struct EndpointMetricsRegistry {
-    known_endpoints: Arc<HashMap<ApiEndpoint, EndpointMetrics>>,
+    endpoint_health_metrics: Arc<HashMap<ApiEndpoint, EndpointMetrics>>,
 }
 
 impl EndpointMetricsRegistry {
-    pub fn endpoint_metrics(
+    pub fn health_metrics(
         &self,
         api_endpoint: ApiEndpoint,
     ) -> Result<&EndpointMetrics, InternalError> {
-        self.known_endpoints
+        self.endpoint_health_metrics
             .get(&api_endpoint)
             .ok_or(InternalError::MetricsNotConfigured(api_endpoint))
     }
@@ -37,27 +31,15 @@ impl EndpointMetricsRegistry {
 
 impl Default for EndpointMetricsRegistry {
     fn default() -> Self {
-        let mut known_endpoints = HashMap::default();
-        known_endpoints.insert(
-            ApiEndpoint::OpenAI(OpenAI::ChatCompletions(ChatCompletions)),
-            EndpointMetrics::default(),
-        );
-        known_endpoints.insert(
-            ApiEndpoint::Anthropic(Anthropic::Messages(Messages)),
-            EndpointMetrics::default(),
-        );
-        known_endpoints.insert(
-            ApiEndpoint::Google(Google::GenerateContents(GenerateContents)),
-            EndpointMetrics::default(),
-        );
-        known_endpoints.insert(
-            ApiEndpoint::Ollama(Ollama::ChatCompletions(
-                crate::endpoints::ollama::chat_completions::ChatCompletions,
-            )),
-            EndpointMetrics::default(),
-        );
+        let mut endpoint_health_metrics = HashMap::default();
+        for provider in InferenceProvider::iter() {
+            for endpoint in provider.endpoints() {
+                endpoint_health_metrics
+                    .insert(endpoint, EndpointMetrics::default());
+            }
+        }
         Self {
-            known_endpoints: Arc::new(known_endpoints),
+            endpoint_health_metrics: Arc::new(endpoint_health_metrics),
         }
     }
 }
@@ -96,30 +78,12 @@ impl EndpointMetrics {
             | reqwest_eventsource::Error::Transport(..) => {
                 self.incr_remote_internal_error_count();
             }
-            reqwest_eventsource::Error::InvalidStatusCode(status_code, ..)
-                if status_code.is_server_error() =>
-            {
-                self.incr_remote_internal_error_count();
-            }
-            _ => {}
-        }
-    }
-
-    pub fn incr_for_stream_error_debug(
-        &self,
-        stream_error: &reqwest_eventsource::Error,
-    ) {
-        match stream_error {
-            reqwest_eventsource::Error::StreamEnded
-            | reqwest_eventsource::Error::Transport(..) => {
-                self.incr_remote_internal_error_count();
-            }
             reqwest_eventsource::Error::InvalidStatusCode(status_code, ..) => {
                 if status_code.is_server_error() {
                     self.incr_remote_internal_error_count();
                     tracing::error!(status_code = %status_code, "received error response in stream");
                 } else if status_code.is_client_error() {
-                    tracing::warn!(status_code = %status_code, "got upstream client error in stream");
+                    tracing::debug!(status_code = %status_code, "got upstream client error in stream");
                 }
             }
             _ => {}

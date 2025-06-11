@@ -1,5 +1,5 @@
 //! Dynamically remove inference providers that fail health checks
-use std::{sync::Arc, time::Duration};
+use std::sync::Arc;
 
 use futures::future::{self, BoxFuture};
 use meltdown::Token;
@@ -11,15 +11,13 @@ use tokio::{
     time,
 };
 use tower::discover::Change;
-use tracing::{Instrument, error, info, trace, warn};
+use tracing::{Instrument, error, info, trace};
 use weighted_balance::weight::Weight;
 
 use crate::{
-    app::AppState,
+    app_state::AppState,
     config::{
-        balance::BalanceConfigInner,
-        monitor::{GracePeriod, MonitorConfig},
-        router::RouterConfig,
+        balance::BalanceConfigInner, monitor::GracePeriod, router::RouterConfig,
     },
     discover::{provider::Key, weighted::WeightedKey},
     dispatcher::{Dispatcher, DispatcherService},
@@ -30,8 +28,6 @@ use crate::{
     },
     types::{provider::InferenceProvider, router::RouterId},
 };
-
-const DEFAULT_ERROR_THRESHOLD: f64 = 0.15;
 
 pub type HealthMonitorMap =
     Arc<RwLock<HashMap<RouterId, ProviderHealthMonitor>>>;
@@ -104,7 +100,7 @@ async fn check_weighted_monitor(
                         trace!(provider = ?provider, endpoint_type = ?endpoint_type, "Provider became unhealthy, removing");
                         if let Err(e) = inner.tx.send(Change::Remove(key)).await
                         {
-                            warn!(error = ?e, "Failed to send remove event for unhealthy provider");
+                            error!(error = ?e, "Failed to send remove event for unhealthy provider");
                         }
                         inner.unhealthy_keys.insert(key);
                     } else if is_healthy && was_unhealthy {
@@ -122,7 +118,7 @@ async fn check_weighted_monitor(
                         if let Err(e) =
                             inner.tx.send(Change::Insert(key, service)).await
                         {
-                            warn!(error = ?e, "Failed to send insert event for healthy provider");
+                            error!(error = ?e, "Failed to send insert event for healthy provider");
                         }
                     }
 
@@ -171,7 +167,7 @@ async fn check_p2c_monitor(
                         trace!(provider = ?provider, endpoint_type = ?endpoint_type, "Provider became unhealthy, removing");
                         if let Err(e) = inner.tx.send(Change::Remove(key)).await
                         {
-                            warn!(error = ?e, "Failed to send remove event for unhealthy provider");
+                            error!(error = ?e, "Failed to send remove event for unhealthy provider");
                         }
                         inner.unhealthy_keys.insert(key);
                     } else if is_healthy && was_unhealthy {
@@ -189,7 +185,7 @@ async fn check_p2c_monitor(
                         if let Err(e) =
                             inner.tx.send(Change::Insert(key, service)).await
                         {
-                            warn!(error = ?e, "Failed to send insert event for healthy provider");
+                            error!(error = ?e, "Failed to send insert event for healthy provider");
                         }
                     }
 
@@ -249,33 +245,17 @@ impl<K> ProviderMonitorInner<K> {
         }
     }
 
-    fn error_threshold(&self) -> f64 {
-        match self.app_state.0.config.discover.monitor {
-            MonitorConfig::ErrorRatio { ratio, .. } => {
-                ratio.to_f64().unwrap_or(DEFAULT_ERROR_THRESHOLD)
-            }
-        }
-    }
-
-    fn grace_period(&self) -> &GracePeriod {
-        match &self.app_state.0.config.discover.monitor {
-            MonitorConfig::ErrorRatio { grace_period, .. } => grace_period,
-        }
-    }
-
     fn check_health(
         &self,
         provider: InferenceProvider,
     ) -> Result<bool, InternalError> {
         let provider_endpoints = provider.endpoints();
-        let grace_period = self.grace_period();
+        let config = self.app_state.config();
+        let grace_period = config.discover.monitor.grace_period();
         let mut all_healthy = true;
         for endpoint in provider_endpoints {
-            let endpoint_metrics = self
-                .app_state
-                .0
-                .endpoint_metrics
-                .endpoint_metrics(endpoint)?;
+            let endpoint_metrics =
+                self.app_state.0.endpoint_metrics.health_metrics(endpoint)?;
             let requests = endpoint_metrics.request_count.total();
             match grace_period {
                 GracePeriod::Requests { min_requests } => {
@@ -288,7 +268,7 @@ impl<K> ProviderMonitorInner<K> {
             let errors = endpoint_metrics.remote_internal_error_count.total();
             let error_ratio = f64::from(errors) / f64::from(requests);
 
-            if error_ratio > self.error_threshold() {
+            if error_ratio > config.discover.monitor.error_threshold() {
                 all_healthy = false;
             }
         }
@@ -311,21 +291,21 @@ impl HealthMonitor {
     pub async fn run_forever(self) -> Result<(), runtime::RuntimeError> {
         info!("Starting provider monitors");
 
-        let interval_duration = self.interval();
+        let interval_duration =
+            self.app_state.config().discover.monitor.health_interval();
         let mut interval = time::interval(interval_duration);
 
         loop {
-            trace!("Checking provider monitors");
             interval.tick().await;
-            let mut monitors = self.app_state.0.health_monitor.write().await;
+            let mut monitors = self.app_state.0.health_monitors.write().await;
             let mut check_futures = Vec::new();
             for (router_id, monitor) in monitors.iter_mut() {
-                let span = tracing::info_span!("provider_monitor", router_id = ?router_id);
+                let span = tracing::info_span!("health_monitor", router_id = ?router_id);
                 let router_id = *router_id;
                 let check_future = async move {
                     let result = monitor.check_monitor().await;
                     if let Err(e) = &result {
-                        error!(router_id = ?router_id, error = ?e, "Provider monitor check failed");
+                        error!(router_id = ?router_id, error = ?e, "Provider health monitor check failed");
                     }
                     result
                 }.instrument(span);
@@ -334,15 +314,9 @@ impl HealthMonitor {
             }
 
             if let Err(e) = future::try_join_all(check_futures).await {
-                error!(error = ?e, "Provider monitor encountered an error");
+                error!(error = ?e, "Provider health monitor encountered an error");
                 return Err(e);
             }
-        }
-    }
-
-    fn interval(&self) -> Duration {
-        match self.app_state.0.config.discover.monitor {
-            MonitorConfig::ErrorRatio { interval, .. } => interval,
         }
     }
 }
@@ -377,7 +351,7 @@ impl AppState {
         router_config: Arc<RouterConfig>,
         tx: Sender<Change<WeightedKey, DispatcherService>>,
     ) {
-        self.0.health_monitor.write().await.insert(
+        self.0.health_monitors.write().await.insert(
             router_id,
             ProviderHealthMonitor::weighted(
                 tx,
@@ -394,7 +368,7 @@ impl AppState {
         router_config: Arc<RouterConfig>,
         tx: Sender<Change<Key, DispatcherService>>,
     ) {
-        self.0.health_monitor.write().await.insert(
+        self.0.health_monitors.write().await.insert(
             router_id,
             ProviderHealthMonitor::p2c(
                 tx,

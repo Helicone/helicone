@@ -11,7 +11,7 @@ use rustc_hash::FxHashMap as HashMap;
 use uuid::Uuid;
 
 use crate::{
-    app::AppState,
+    app_state::AppState,
     config::DeploymentTarget,
     error::{
         api::ApiError, init::InitError, internal::InternalError,

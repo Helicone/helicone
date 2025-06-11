@@ -7,8 +7,9 @@ use std::{
 use futures::ready;
 use tower_otel_http_metrics::ResponseAttributeExtractor;
 
-use super::attribute_extractor::AttributeExtractor;
-use crate::app::AppState;
+use crate::{
+    app_state::AppState, metrics::attribute_extractor::AttributeExtractor,
+};
 
 #[derive(Clone)]
 pub struct Layer {

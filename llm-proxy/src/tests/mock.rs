@@ -61,7 +61,7 @@ impl Mock {
         let openai_mock = start_mock_for_test(
             &get_stubs_path("openai"),
             args.global_openai_latency,
-            &args.stubs,
+            args.stubs.as_ref(),
             args.verify,
         )
         .await;
@@ -74,7 +74,7 @@ impl Mock {
         let anthropic_mock = start_mock_for_test(
             &get_stubs_path("anthropic"),
             args.global_anthropic_latency,
-            &args.stubs,
+            args.stubs.as_ref(),
             args.verify,
         )
         .await;
@@ -87,7 +87,7 @@ impl Mock {
         let google_mock = start_mock_for_test(
             &get_stubs_path("google"),
             args.global_google_latency,
-            &args.stubs,
+            args.stubs.as_ref(),
             args.verify,
         )
         .await;
@@ -101,7 +101,7 @@ impl Mock {
         let ollama_mock = start_mock_for_test(
             &get_stubs_path("ollama"),
             args.global_ollama_latency,
-            &args.stubs,
+            args.stubs.as_ref(),
             args.verify,
         )
         .await;
@@ -115,7 +115,7 @@ impl Mock {
         let minio_mock = start_mock_for_test(
             &get_stubs_path("minio"),
             None,
-            &args.stubs,
+            args.stubs.as_ref(),
             args.verify,
         )
         .await;
@@ -124,7 +124,7 @@ impl Mock {
         let jawn_mock = start_mock_for_test(
             &get_stubs_path("jawn"),
             None,
-            &args.stubs,
+            args.stubs.as_ref(),
             args.verify,
         )
         .await;
@@ -145,7 +145,7 @@ impl Mock {
         let openai_mock = start_mock(
             &get_stubs_path("openai"),
             args.global_openai_latency,
-            &args.stubs,
+            args.stubs.as_ref(),
             false,
             false,
             args.openai_port,
@@ -154,7 +154,7 @@ impl Mock {
         let anthropic_mock = start_mock(
             &get_stubs_path("anthropic"),
             args.global_anthropic_latency,
-            &args.stubs,
+            args.stubs.as_ref(),
             false,
             false,
             args.anthropic_port,
@@ -164,7 +164,7 @@ impl Mock {
         let google_mock = start_mock(
             &get_stubs_path("google"),
             args.global_google_latency,
-            &args.stubs,
+            args.stubs.as_ref(),
             false,
             false,
             args.google_port,
@@ -174,7 +174,7 @@ impl Mock {
         let ollama_mock = start_mock(
             &get_stubs_path("ollama"),
             args.global_ollama_latency,
-            &args.stubs,
+            args.stubs.as_ref(),
             false,
             false,
             args.ollama_port,
@@ -184,7 +184,7 @@ impl Mock {
         let minio_mock = start_mock(
             &get_stubs_path("minio"),
             None,
-            &args.stubs,
+            args.stubs.as_ref(),
             false,
             false,
             args.minio_port,
@@ -194,7 +194,7 @@ impl Mock {
         let jawn_mock = start_mock(
             &get_stubs_path("jawn"),
             None,
-            &args.stubs,
+            args.stubs.as_ref(),
             false,
             false,
             args.jawn_port,
@@ -290,7 +290,7 @@ impl Mock {
 async fn start_mock_for_test(
     stub_path: &str,
     global_delay: Option<u64>,
-    stubs: &Option<HashMap<&'static str, Times>>,
+    stubs: Option<&HashMap<&'static str, Times>>,
     verify: bool,
 ) -> Stubr {
     start_mock(stub_path, global_delay, stubs, verify, true, None).await
@@ -299,7 +299,7 @@ async fn start_mock_for_test(
 async fn start_mock(
     stub_path: &str,
     global_delay: Option<u64>,
-    stubs: &Option<HashMap<&'static str, Times>>,
+    stubs: Option<&HashMap<&'static str, Times>>,
     verify: bool,
     record: bool,
     port: Option<u16>,
