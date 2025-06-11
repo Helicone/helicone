@@ -86,86 +86,6 @@ const NOT_IMPLEMENTED = () => {
   throw new FilterNotImplemented("This filter is not implemented");
 };
 
-// Base fields that are common across all request_response_rmt tables
-const baseRequestResponseRMTFields = {
-  latency: "latency",
-  time_to_first_token: "time_to_first_token",
-  status: "status",
-  request_created_at: "request_created_at",
-  response_created_at: "response_created_at",
-  request_id: "request_id",
-  model: "model",
-  user_id: "user_id",
-  organization_id: "organization_id",
-  node_id: "node_id",
-  job_id: "job_id",
-  threat: "threat",
-  total_tokens: "total_tokens",
-  prompt_tokens: "prompt_tokens",
-  completion_tokens: "completion_tokens",
-  request_body: "request_body",
-  response_body: "response_body",
-  scores_column: "scores",
-  cache_enabled: "cache_enabled",
-  cache_reference_id: "cache_reference_id",
-  assets: "asset_ids",
-  prompt_cache_read_tokens: "prompt_cache_read_tokens",
-  prompt_cache_write_tokens: "prompt_cache_write_tokens",
-};
-
-const prefixFields = (fields: Record<string, string>, tableName: string): Record<string, string> => {
-  return Object.fromEntries(
-    Object.entries(fields).map(([key, value]) => [key, `${tableName}.${value}`])
-  );
-};
-
-function createRMTTableMapper<T extends keyof TablesAndViews>(
-  tableName: T,
-  fieldMappings: { [key in keyof TablesAndViews[T]]: string }
-): KeyMapper<TablesAndViews[T]> {
-  return (filter, placeValueSafely) => {
-    if ("properties" in filter && filter.properties) {
-      const key = Object.keys(filter.properties)[0];
-      const propertyValue = filter.properties[key as keyof typeof filter.properties];
-      if (propertyValue) {
-        const { operator, value } = extractOperatorAndValueFromAnOperator(propertyValue as AnyOperator);
-        return {
-          column: `${tableName}.properties[${placeValueSafely(key)}]`,
-          operator: operator,
-          value: `${placeValueSafely(value)}`,
-        };
-      }
-    }
-    if ("search_properties" in filter && filter.search_properties) {
-      const key = Object.keys(filter.search_properties)[0];
-      const searchPropertyValue = filter.search_properties[key as keyof typeof filter.search_properties];
-      if (searchPropertyValue) {
-        const { operator, value } = extractOperatorAndValueFromAnOperator(searchPropertyValue as AnyOperator);
-        return {
-          column: `key`,
-          operator: operator,
-          value: `${placeValueSafely(value)}`,
-        };
-      }
-    }
-    if ("scores" in filter && filter.scores) {
-      const key = Object.keys(filter.scores)[0];
-      const scoreValue = filter.scores[key as keyof typeof filter.scores];
-      if (scoreValue) {
-        const { operator, value } = extractOperatorAndValueFromAnOperator(scoreValue as AnyOperator);
-        return {
-          column: `has(scores, ${placeValueSafely(
-            key
-          )}) AND scores[${placeValueSafely(key)}]`,
-          operator: operator,
-          value: `${placeValueSafely(value)}`,
-        };
-      }
-    }
-    return easyKeyMappings<T>(fieldMappings)(filter, placeValueSafely);
-  };
-}
-
 const whereKeyMappings: KeyMappings = {
   user_api_keys: easyKeyMappings(
     {
@@ -261,14 +181,68 @@ const whereKeyMappings: KeyMappings = {
     job_id: "request_response_log.job_id",
     threat: "request_response_log.threat",
   }),
-  request_response_rmt: createRMTTableMapper("request_response_rmt", {
-    ...prefixFields(baseRequestResponseRMTFields, "request_response_rmt"),
-  }),
-  session_rmt: createRMTTableMapper("session_rmt", {
-    ...prefixFields(baseRequestResponseRMTFields, "session_rmt"),
-    session_id: "session_rmt.session_id",
-    session_name: "session_rmt.session_name",
-  }),
+  request_response_rmt: (filter, placeValueSafely) => {
+    if ("properties" in filter && filter.properties) {
+      const key = Object.keys(filter.properties)[0];
+      const { operator, value } = extractOperatorAndValueFromAnOperator(
+        filter.properties[key as keyof typeof filter.properties]
+      );
+      return {
+        column: `request_response_rmt.properties[${placeValueSafely(key)}]`,
+        operator: operator,
+        value: `${placeValueSafely(value)}`,
+      };
+    }
+    if ("search_properties" in filter && filter.search_properties) {
+      const key = Object.keys(filter.search_properties)[0];
+      const { operator, value } = extractOperatorAndValueFromAnOperator(
+        filter.search_properties[key as keyof typeof filter.search_properties]
+      );
+      return {
+        column: `key`,
+        operator: operator,
+        value: `${placeValueSafely(value)}`,
+      };
+    }
+    if ("scores" in filter && filter.scores) {
+      const key = Object.keys(filter.scores)[0];
+      const { operator, value } = extractOperatorAndValueFromAnOperator(
+        filter.scores[key as keyof typeof filter.scores]
+      );
+      return {
+        column: `has(scores, ${placeValueSafely(
+          key
+        )}) AND scores[${placeValueSafely(key)}]`,
+        operator: operator,
+        value: `${placeValueSafely(value)}`,
+      };
+    }
+    return easyKeyMappings<"request_response_rmt">({
+      latency: "request_response_rmt.latency",
+      time_to_first_token: "request_response_rmt.time_to_first_token",
+      status: "request_response_rmt.status",
+      request_created_at: "request_response_rmt.request_created_at",
+      response_created_at: "request_response_rmt.response_created_at",
+      request_id: "request_response_rmt.request_id",
+      model: "request_response_rmt.model",
+      user_id: "request_response_rmt.user_id",
+      organization_id: "request_response_rmt.organization_id",
+      node_id: "request_response_rmt.node_id",
+      job_id: "request_response_rmt.job_id",
+      threat: "request_response_rmt.threat",
+      total_tokens: "request_response_rmt.total_tokens",
+      prompt_tokens: "request_response_rmt.prompt_tokens",
+      completion_tokens: "request_response_rmt.completion_tokens",
+      request_body: "request_response_rmt.request_body",
+      response_body: "request_response_rmt.response_body",
+      scores_column: "request_response_rmt.scores",
+      cache_enabled: "request_response_rmt.cache_enabled",
+      cache_reference_id: "request_response_rmt.cache_reference_id",
+      assets: "request_response_rmt.asset_ids",
+      prompt_cache_read_tokens: "request_response_rmt.prompt_cache_read_tokens",
+      prompt_cache_write_tokens: "request_response_rmt.prompt_cache_write_tokens",
+    })(filter, placeValueSafely);
+  },
   users_view: easyKeyMappings<"request_response_log">({
     status: "r.status",
     user_id: "r.user_id",
@@ -295,8 +269,8 @@ const whereKeyMappings: KeyMappings = {
   experiment_hypothesis_run: easyKeyMappings<"experiment_hypothesis_run">({
     result_request_id: "experiment_v2_hypothesis_run.result_request_id",
   }),
-  sessions:
-    easyKeyMappings<"sessions">({
+  sessions_request_response_rmt:
+    easyKeyMappings<"sessions_request_response_rmt">({
       session_tag: "tag",
     }),
   cache_metrics: easyKeyMappings<"cache_metrics">({
@@ -346,8 +320,8 @@ const havingKeyMappings: KeyMappings = {
     total_prompt_token: "total_prompt_token",
     cost: "cost",
   }),
-  sessions:
-    easyKeyMappings<"sessions">({
+  sessions_request_response_rmt:
+    easyKeyMappings<"sessions_request_response_rmt">({
       session_total_cost: "total_cost",
       session_completion_tokens: "completion_tokens",
       session_prompt_tokens: "prompt_tokens",
@@ -359,8 +333,6 @@ const havingKeyMappings: KeyMappings = {
       session_session_name: "properties['Helicone-Session-Name']",
     }),
   request_response_rmt: easyKeyMappings<"request_response_rmt">({}),
-  session_rmt: easyKeyMappings<"session_rmt">({}),
-
   cache_metrics: easyKeyMappings<"cache_metrics">({
     organization_id: "cache_metrics.organization_id",
     date: "cache_metrics.date",
@@ -446,7 +418,7 @@ export function buildFilterLeaf(
   const filters = Object.keys(filter).reduce<string[]>((acc, _tableKey) => {
     const tableKey = _tableKey as keyof typeof filter;
     const table = filter[tableKey];
-    // table is {session_tag: { equals: "test" }} tableKey is sessions
+    // table is {session_tag: { equals: "test" }} tableKey is sessions_request_response_rmt
     const mapper = keyMappings[tableKey] as KeyMapper<typeof table>;
 
     const {
@@ -460,7 +432,7 @@ export function buildFilterLeaf(
     }
 
     const tagFilter =
-      column === "tag" && tableKey === "sessions"; // Tag is a column in tags
+      column === "tag" && tableKey === "sessions_request_response_rmt"; // Tag is a column in tags
     const sqlOperator = operatorToSql(operatorKey);
 
     // TODO: (Justin) not sure if I should set a limit here
@@ -681,18 +653,6 @@ export async function buildFilterWithAuthClickHouseRateLimits(
 ): Promise<{ filter: string; argsAcc: any[] }> {
   return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
     rate_limit_log: {
-      organization_id: {
-        equals: orgId,
-      },
-    },
-  }));
-}
-
-export async function buildFilterWithAuthClickHouseSessionRMT(
-  args: ExternalBuildFilterArgs & { org_id: string }
-): Promise<{ filter: string; argsAcc: any[] }> {
-  return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
-    session_rmt: {
       organization_id: {
         equals: orgId,
       },
