@@ -1,9 +1,9 @@
 -- Backfill cost in request_response_rmt for the latest row with cost=0 and the previous 30 days
 WITH
     if(
-        (SELECT count() FROM request_response_rmt WHERE cost = 0) = 0,
+        (SELECT count() FROM request_response_rmt WHERE cost IS NULL) = 0,
         now(),
-        (SELECT max(request_created_at) FROM request_response_rmt WHERE cost = 0)
+        (SELECT max(request_created_at) FROM request_response_rmt WHERE cost IS NULL)
     ) AS earliest_date
 INSERT INTO request_response_rmt
 SELECT

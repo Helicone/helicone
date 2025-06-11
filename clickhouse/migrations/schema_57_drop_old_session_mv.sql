@@ -1,1 +1,0 @@
-DROP TABLE IF EXISTS session_rmt_mv_old; 
