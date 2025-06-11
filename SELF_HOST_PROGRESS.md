@@ -58,6 +58,27 @@ When trying to use the direct logging API endpoints, we encounter an error relat
    - Created R2 bucket "helicone-storage" using Wrangler
    - Would need to update S3 credentials in docker-compose.yml for all services
 
+## Environment Variable Configuration 
+
+The following environment variables should be set in the docker/.env file and/or docker-compose.yml file depending on your needs:
+
+### Required Environment Variables
+
+- **S3_REGION**: Must be set to a valid AWS region (e.g., `us-west-2` or `eu-west-1`) even when using MinIO
+- **S3_ENDPOINT**: URL endpoint for your storage service
+  - MinIO (default): `http://minio:9000` (in docker-compose.yml for containers)
+  - MinIO (public): `http://localhost:9000` (in S3_ENDPOINT_PUBLIC)
+  - R2: Your R2 endpoint URL from Cloudflare dashboard
+- **S3_ACCESS_KEY**: Access key for your storage service
+- **S3_SECRET_KEY**: Secret key for your storage service
+- **S3_BUCKET_NAME**: Bucket name (default is "request-response-storage" for MinIO)
+
+### Important Notes
+
+1. When using the docker-compose.yml setup, environment variables are set directly in the file for each service and take precedence over values in the .env file
+2. If you want to switch between MinIO and R2, you'll need to update the credentials in docker-compose.yml, not just in the .env file
+3. The `S3_REGION` parameter is critical - it must be set even when using MinIO
+
 ## Default Login Credentials
 
 - **Username**: test@helicone.ai
