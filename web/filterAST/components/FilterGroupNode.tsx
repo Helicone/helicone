@@ -4,7 +4,7 @@ import { ChevronsUpDown, Plus } from "lucide-react";
 import React, { useMemo } from "react";
 import {
   AndExpression,
-  createDefaultFilterGroupExpressionForTable,
+  DEFAULT_FILTER_GROUP_EXPRESSION,
   FilterAST,
   OrExpression,
 } from "../filterAst";
@@ -12,21 +12,18 @@ import { useFilterStore } from "../store/filterStore";
 import FilterConditionNode from "./FilterConditionNode";
 import { Row } from "@/components/layout/common/row";
 import SaveFilterButton from "./SaveFilterButton";
-import { RequestResponseRMTDerivedTable } from "../filterAst";
 
 interface FilterGroupNodeProps {
   group: AndExpression | OrExpression;
   path: number[];
 
   isRoot?: boolean;
-  baseTable?: RequestResponseRMTDerivedTable;
 }
 
 export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
   group,
   path,
   isRoot = false,
-  baseTable = "request_response_rmt",
 }) => {
   const filterStore = useFilterStore();
 
@@ -36,7 +33,7 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
       type: "condition",
       field: {
         column: "status",
-        table: baseTable,
+        table: "request_response_rmt",
       },
       operator: "eq",
       value: 200,
@@ -51,11 +48,11 @@ export const FilterGroupNode: React.FC<FilterGroupNodeProps> = ({
   // Handle adding a nested group to this group
   const handleAddGroup = () => {
     if (hasGroupAlready) {
-      group.expressions.push(createDefaultFilterGroupExpressionForTable(baseTable));
+      group.expressions.push(DEFAULT_FILTER_GROUP_EXPRESSION);
       filterStore.setFilter(group);
     } else {
       filterStore.setFilter(
-        FilterAST.and(group, createDefaultFilterGroupExpressionForTable(baseTable))
+        FilterAST.and(group, DEFAULT_FILTER_GROUP_EXPRESSION)
       );
     }
   };

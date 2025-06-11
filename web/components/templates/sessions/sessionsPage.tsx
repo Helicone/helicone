@@ -358,7 +358,7 @@ const SessionsPage = (props: SessionsPageProps) => {
                 custom={true}
               />
 
-              <FilterASTButton baseTable="session_rmt" />
+              <FilterASTButton />
             </section>
           }
           rightSection={

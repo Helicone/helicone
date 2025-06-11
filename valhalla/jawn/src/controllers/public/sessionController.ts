@@ -29,7 +29,7 @@ export type SessionFilterBranch = {
 };
 
 export type SessionFilterNode =
-  | FilterLeafSubset<"session_rmt" | "sessions">
+  | FilterLeafSubset<"request_response_rmt" | "sessions_request_response_rmt">
   | SessionFilterBranch
   | "all";
 

@@ -1,11 +1,5 @@
 import { UserMetric } from "@/lib/api/users/UserMetric";
 
-export type RequestResponseRMTDerivedTable =
-  | "request_response_rmt"
-  | "session_rmt";
-
-export type RMTTableDefinitions = RequestResponseRMT | SessionRMT;
-
 export type FilterSubType = "property" | "score" | "sessions" | "user";
 /**
  * Represents a record/row from the request_response_rmt table
@@ -37,11 +31,6 @@ interface RequestResponseRMT {
   response_body: string;
   assets: Array<string>;
   updated_at?: string;
-}
-
-interface SessionRMT extends RequestResponseRMT {
-  session_id: string;
-  session_name: string;
 }
 
 export interface Views {
@@ -139,12 +128,8 @@ type FieldSpec =
       column: keyof Views["user_metrics"];
     })
   | (BaseFieldSpec & {
-      table: "sessions";
+      table: "sessions_request_response_rmt";
       column: keyof Views["session_metrics"];
-    })
-  | (BaseFieldSpec & {
-      table: "session_rmt";
-      column: keyof SessionRMT;
     });
 
 /**
@@ -202,19 +187,19 @@ function all(): AllExpression {
 function condition(
   column: string,
   operator: FilterOperator,
-  value: string | number | boolean,
-  baseTable: RequestResponseRMTDerivedTable = "request_response_rmt"
+  value: string | number | boolean
 ): ConditionExpression {
   return {
     type: "condition",
     field: {
-      table: baseTable,
-      column: column as keyof RMTTableDefinitions,
-    } as FieldSpec,
+      table: "request_response_rmt",
+      column: column as keyof RequestResponseRMT,
+    },
     operator,
     value,
   };
 }
+
 /**
  * Creates an AND expression combining multiple expressions
  * All expressions must match for the AND to match
@@ -684,19 +669,14 @@ export type {
   OrExpression,
 };
 
-export const createDefaultFilterExpressionForTable = (
-  baseTable: RequestResponseRMTDerivedTable = "request_response_rmt"
-): ConditionExpression => {
-  return FilterAST.condition("status", "eq", "200", baseTable);
-};
+export const DEFAULT_FILTER_EXPRESSION = FilterAST.condition(
+  "status",
+  "eq",
+  "200"
+);
 
-export const createDefaultFilterGroupExpressionForTable = (
-  baseTable: RequestResponseRMTDerivedTable = "request_response_rmt"
-): AndExpression => {
-  return FilterAST.and(
-    FilterAST.condition("status", "eq", "200", baseTable)
-  );
-};
+export const DEFAULT_FILTER_GROUP_EXPRESSION = FilterAST.and(
+  FilterAST.condition("status", "eq", "200")
+);
 
 export const EMPTY_FILTER_GROUP_EXPRESSION = null;
-

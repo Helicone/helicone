@@ -2,16 +2,14 @@ import { useMemo } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { FilterUIDefinition } from "./types";
 import {
+  STATIC_FILTER_DEFINITIONS,
   STATIC_USER_VIEW_DEFINITIONS,
   STATIC_SESSIONS_VIEW_DEFINITIONS,
-  getRMTBasedFilterDefinitions,
-  rmtDerivedTableViewMappings,
 } from "./staticDefinitions";
 
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useRouter } from "next/router";
-import { RequestResponseRMTDerivedTable } from "../filterAst";
 
 const KNOWN_HELICONE_PROPERTIES = {
   "helicone-session-id": {
@@ -77,10 +75,6 @@ export const useFilterUIDefinitions = () => {
   const router = useRouter();
   // Combine static definitions with dynamic ones
   const completeDefinitions = useMemo(() => {
-    const table: RequestResponseRMTDerivedTable = router.pathname.startsWith("/sessions") 
-      ? "session_rmt" 
-      : "request_response_rmt";
-
     const dynamicDefinitions: FilterUIDefinition[] =
       properties.data?.data?.map((property) => ({
         id: property.property,
@@ -107,7 +101,7 @@ export const useFilterUIDefinitions = () => {
             );
         },
         subType: "property",
-        table,
+        table: "request_response_rmt",
       })) ?? [];
 
     const modelsDefinition: FilterUIDefinition = {
@@ -130,12 +124,12 @@ export const useFilterUIDefinitions = () => {
             })) ?? []
         );
       },
-      table,
+      table: "request_response_rmt",
     };
 
     // Replace or add dynamic definitions to the static ones
     const staticIdsToExclude = dynamicDefinitions.map((def) => def.id);
-    const filteredStaticDefs = getRMTBasedFilterDefinitions(table).filter(
+    const filteredStaticDefs = STATIC_FILTER_DEFINITIONS.filter(
       (def) => !staticIdsToExclude.includes(def.id)
     );
 
@@ -145,8 +139,12 @@ export const useFilterUIDefinitions = () => {
       ...dynamicDefinitions,
     ] as FilterUIDefinition[];
 
-    const viewMappings = rmtDerivedTableViewMappings[table];
-    if (viewMappings.length > 0) {
+    if (router.pathname.startsWith("/users")) {
+      definitions.push(...STATIC_USER_VIEW_DEFINITIONS);
+    }
+    if (router.pathname.startsWith("/sessions")) {
+      definitions.push(...STATIC_SESSIONS_VIEW_DEFINITIONS);
+
       for (const def of definitions) {
         if (
           def.subType === "property" &&
@@ -159,11 +157,6 @@ export const useFilterUIDefinitions = () => {
         }
       }
     }
-    definitions.push(...rmtDerivedTableViewMappings[table]);
-    // TODO: for user_rmt, we can remove this and instead add STATIC_USER_VIEW_DEFINITIONS to the rmtDerivedTableViewMappings
-    if (router.pathname.startsWith("/users")) {
-      definitions.push(...STATIC_USER_VIEW_DEFINITIONS);
-    }
 
     return definitions;
   }, [
@@ -171,7 +164,7 @@ export const useFilterUIDefinitions = () => {
     router.pathname,
     searchProperties,
     models.data?.data,
-  ]);
+  ]); // Include all dependencies
 
   return {
     filterDefinitions: completeDefinitions,
