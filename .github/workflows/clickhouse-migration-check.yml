@@ -1,5 +1,4 @@
 name: ClickHouse Migration Check
-
 on:
   pull_request:
     paths:
@@ -12,6 +11,7 @@ on:
 
 jobs:
   check-migrations:
+    name: Check Migrations
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,7 +19,7 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Check Migrations
+      - name: Check Migration Numbers
         run: |
           python - <<EOF
           import os
