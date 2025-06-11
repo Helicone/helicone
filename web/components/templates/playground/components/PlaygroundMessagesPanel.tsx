@@ -48,12 +48,16 @@ const PlaygroundMessagesPanel = ({
   const lastScrollTopRef = useRef<number>(0);
   const scrollTimeoutRef = useRef<NodeJS.Timeout>();
   const resizeTimeoutRef = useRef<NodeJS.Timeout>();
+  const clientHeightRef = useRef<number>(0);
 
   const checkScrollPosition = useCallback((scrollArea: Element) => {
     const scrollTop = scrollArea.scrollTop;
     const scrollHeight = scrollArea.scrollHeight;
-    const clientHeight = scrollArea.clientHeight;
+    const clientHeight = clientHeightRef.current || scrollArea.clientHeight;
     const isNearBottom = scrollHeight - scrollTop - clientHeight < 150;
+    clientHeightRef.current = isNearBottom
+      ? scrollArea.clientHeight + 60
+      : scrollArea.clientHeight;
     setIsScrolled(!isNearBottom);
   }, []);
 
@@ -77,7 +81,7 @@ const PlaygroundMessagesPanel = ({
         lastScrollTopRef.current = scrollTop;
       }
     }, 50); // 50ms debounce
-  }, [checkScrollPosition]);
+  }, []);
 
   // Add resize observer
   useEffect(() => {
@@ -92,10 +96,7 @@ const PlaygroundMessagesPanel = ({
         clearTimeout(resizeTimeoutRef.current);
       }
 
-      // Set a new timeout for resize
-      resizeTimeoutRef.current = setTimeout(() => {
-        checkScrollPosition(scrollArea);
-      }, 100); // Slightly longer debounce for resize
+      checkScrollPosition(scrollArea);
     });
 
     resizeObserver.observe(scrollArea);
@@ -106,6 +107,16 @@ const PlaygroundMessagesPanel = ({
       }
     };
   }, [checkScrollPosition]);
+
+  useEffect(() => {
+    if (mappedContent) {
+      const scrollArea = scrollAreaRef.current?.querySelector(
+        "[data-radix-scroll-area-viewport]"
+      );
+      if (!scrollArea) return;
+      checkScrollPosition(scrollArea);
+    }
+  }, [mappedContent]);
 
   return (
     <div className="relative w-full h-full flex flex-col">
@@ -179,8 +190,8 @@ const PlaygroundMessagesPanel = ({
         ref={headerRef}
         className={`transition-all duration-200 ${
           isScrolled
-            ? "absolute bottom-0 left-1/2 -translate-x-1/2 z-50 bg-sidebar-background/80 backdrop-blur-sm rounded-t-lg shadow-lg mx-4 mb-4 w-[500px]"
-            : "border-t border-border"
+            ? "absolute bottom-0 left-1/2 -translate-x-1/2 z-50 rounded-lg shadow-xl mx-4 mb-4 w-[500px] bg-background border-none"
+            : "bg-sidebar-background"
         }`}
       >
         <PlaygroundHeader
@@ -196,6 +207,7 @@ const PlaygroundMessagesPanel = ({
           defaultContent={defaultContent}
           setMappedContent={setMappedContent}
           onRun={onRun}
+          isScrolled={isScrolled}
         />
       </div>
     </div>

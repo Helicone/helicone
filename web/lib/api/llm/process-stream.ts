@@ -39,7 +39,12 @@ function messageReducer2(
           }
         }
       } else if (typeof acc[key] === "string" && typeof value === "string") {
-        if (key === "content") {
+        if (
+          key === "content" ||
+          key === "arguments" ||
+          key === "name" ||
+          key === "reasoning"
+        ) {
           acc[key] += value;
         }
       } else if (typeof acc[key] === "number" && typeof value === "number") {
@@ -228,6 +233,7 @@ export async function processStream(
 
         fullMessage = messageReducer2(fullMessage, chunkJson);
         callbackState.fullContent = JSON.stringify(fullMessage, null, 2);
+        console.log({ fullContent: callbackState.fullContent });
         // Use the OpenAI reducer to accumulate the message structure
         accumulatedMessage = messageReducer(accumulatedMessage, chunkJson);
 

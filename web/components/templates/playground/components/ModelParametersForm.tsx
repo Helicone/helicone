@@ -20,6 +20,7 @@ import { PopoverContent } from "@/components/ui/popover";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import ResponseFormatModal from "./ResponseFormatModal";
+import { cn } from "@/lib/utils";
 
 interface ModelParameters {
   temperature: number | undefined | null;
@@ -31,6 +32,7 @@ interface ModelParameters {
 }
 
 interface ModelParametersFormProps {
+  isScrolled: boolean;
   parameters: ModelParameters;
   onParametersChange: (_parameters: ModelParameters) => void;
   responseFormat: {
@@ -44,6 +46,7 @@ interface ModelParametersFormProps {
 }
 
 export default function ModelParametersForm({
+  isScrolled,
   parameters = {
     temperature: undefined,
     maxTokens: undefined,
@@ -82,8 +85,16 @@ export default function ModelParametersForm({
         onOpenChange={setIsModelParametersPopoverOpen}
       >
         <PopoverTrigger asChild>
-          <Button variant="outline" size="icon">
-            <Settings2Icon className="h-4 w-4" />
+          <Button
+            variant="outline"
+            size="icon"
+            className={cn(
+              "border-none h-9 w-9",
+              isScrolled &&
+                "bg-slate-100 dark:bg-slate-950 hover:bg-slate-200 dark:hover:bg-slate-900"
+            )}
+          >
+            <Settings2Icon className="h-3.5 w-3.5" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-96 mr-2">

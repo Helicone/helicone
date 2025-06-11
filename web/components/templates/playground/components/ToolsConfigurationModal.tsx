@@ -26,15 +26,18 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import { cn } from "@/lib/utils";
 
 interface ToolsConfigurationModalProps {
   tools: Tool[];
   onToolsChange: (_tools: Tool[]) => void;
+  isScrolled: boolean;
 }
 
 export default function ToolsConfigurationModal({
   tools,
   onToolsChange,
+  isScrolled,
 }: ToolsConfigurationModalProps) {
   const [toolsDialogOpen, setToolsDialogOpen] = useState(false);
   const [selectedToolIndex, setSelectedToolIndex] = useState<number | null>(
@@ -109,8 +112,16 @@ export default function ToolsConfigurationModal({
       <Tooltip>
         <TooltipTrigger asChild>
           <DialogTrigger asChild>
-            <Button variant="outline" size="icon">
-              <WrenchIcon className="h-4 w-4" />
+            <Button
+              variant="outline"
+              size="icon"
+              className={cn(
+                "border-none h-9 w-9",
+                isScrolled &&
+                  "bg-slate-100 dark:bg-slate-950 hover:bg-slate-200 dark:hover:bg-slate-900"
+              )}
+            >
+              <WrenchIcon className="h-3.5 w-3.5" />
             </Button>
           </DialogTrigger>
         </TooltipTrigger>

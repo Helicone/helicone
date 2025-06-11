@@ -41,6 +41,7 @@ interface PlaygroundHeaderProps {
   defaultContent: MappedLLMRequest | null;
   setMappedContent: (_mappedContent: MappedLLMRequest) => void;
   onRun: () => void;
+  isScrolled: boolean;
 }
 
 const PlaygroundHeader = ({
@@ -56,10 +57,18 @@ const PlaygroundHeader = ({
   defaultContent,
   setMappedContent,
   onRun,
+  isScrolled,
 }: PlaygroundHeaderProps) => {
   const [modelListOpen, setModelListOpen] = useState<boolean>(false);
   return (
-    <div className="flex justify-between items-center px-4 py-2 border-b border-border bg-sidebar-background w-full">
+    <div
+      className={cn(
+        "flex justify-between items-center px-4 py-2 w-full",
+        isScrolled
+          ? "rounded-lg bg-background"
+          : "border-t border-border bg-sidebar-background"
+      )}
+    >
       <div className="flex justify-between items-center gap-2 w-full">
         <div className="flex items-center gap-2 w-full cursor-pointer">
           <Popover open={modelListOpen} onOpenChange={setModelListOpen}>
@@ -74,7 +83,11 @@ const PlaygroundHeader = ({
                 variant="outline"
                 role="combobox"
                 aria-expanded={modelListOpen}
-                className="w-[200px] justify-between"
+                className={cn(
+                  "w-[200px] justify-between border-none",
+                  isScrolled &&
+                    "bg-slate-100 dark:bg-slate-950 hover:bg-slate-200 dark:hover:bg-slate-900"
+                )}
               >
                 <span className="truncate max-w-[150px]">
                   {selectedModel || "Select model..."}
@@ -116,9 +129,14 @@ const PlaygroundHeader = ({
             </PopoverContent>
           </Popover>
           <div className="flex items-center gap-2">
-            <ToolsConfigurationModal tools={tools} onToolsChange={setTools} />
+            <ToolsConfigurationModal
+              isScrolled={isScrolled}
+              tools={tools}
+              onToolsChange={setTools}
+            />
 
             <ModelParametersForm
+              isScrolled={isScrolled}
               responseFormat={responseFormat}
               onResponseFormatChange={setResponseFormat}
               parameters={modelParameters}

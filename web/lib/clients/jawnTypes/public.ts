@@ -1105,6 +1105,7 @@ export interface components {
     /** @enum {string} */
     LlmType: "chat" | "completion";
     FunctionCall: {
+      id?: string;
       name: string;
       arguments: components["schemas"]["Record_string.any_"];
     };

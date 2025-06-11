@@ -20,7 +20,6 @@ import findBestMatch from "string-similarity-js";
 import { v4 as uuidv4 } from "uuid";
 import AuthHeader from "../../shared/authHeader";
 import useNotification from "../../shared/notification/useNotification";
-import PlaygroundActions from "./components/PlaygroundActions";
 import PlaygroundMessagesPanel from "./components/PlaygroundMessagesPanel";
 import PlaygroundResponsePanel from "./components/PlaygroundResponsePanel";
 import { OPENROUTER_MODEL_MAP } from "./new/openRouterModelMap";
