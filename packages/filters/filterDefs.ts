@@ -214,15 +214,8 @@ interface RequestResponseRMTToOperators {
 export type FilterLeafRequestResponseRMT =
   SingleKey<RequestResponseRMTToOperators>;
 
-// session_rmt
-interface SessionRMTToOperators extends RequestResponseRMTToOperators {
-  session_id: SingleKey<TextOperators>;
-  session_name: SingleKey<TextOperators>;
-}
-export type FilterLeafSessionRMT =
-  SingleKey<SessionRMTToOperators>;
-
-interface SessionsToOperators {
+// sessions_request_response_rmt
+interface SessionsRequestResponseRMTToOperators {
   session_session_id: SingleKey<TextOperators>;
   session_session_name: SingleKey<TextOperators>;
   session_total_cost: SingleKey<NumberOperators>;
@@ -234,8 +227,8 @@ interface SessionsToOperators {
   session_latest_request_created_at: SingleKey<TimestampOperatorsTyped>;
   session_tag: SingleKey<TextOperators>;
 }
-export type FilterLeafSessions =
-  SingleKey<SessionsToOperators>;
+export type FilterLeafSessionsRequestResponseRMT =
+  SingleKey<SessionsRequestResponseRMTToOperators>;
 
 // users_view
 type UserViewToOperators = {
@@ -353,8 +346,7 @@ export type TablesAndViews = {
   // CLICKHOUSE TABLES
   request_response_log: FilterLeafRequestResponseLog;
   request_response_rmt: FilterLeafRequestResponseRMT;
-  session_rmt: FilterLeafSessionRMT;
-  sessions: FilterLeafSessions;
+  sessions_request_response_rmt: FilterLeafSessionsRequestResponseRMT;
   users_view: FilterLeafUserView;
   properties_v3: FilterLeafPropertiesV3;
   property_with_response_v1: FilterLeafPropertyWithResponseV1;
