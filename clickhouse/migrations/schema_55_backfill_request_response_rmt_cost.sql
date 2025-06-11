@@ -1,10 +1,4 @@
--- Backfill cost in request_response_rmt for the latest row with cost=0 and the previous 30 days
-WITH
-    if(
-        (SELECT count() FROM request_response_rmt WHERE cost IS NULL) = 0,
-        now(),
-        (SELECT max(request_created_at) FROM request_response_rmt WHERE cost IS NULL)
-    ) AS earliest_date
+-- Backfill cost in request_response_rmt for rows with NULL cost and the previous 30 days
 INSERT INTO request_response_rmt
 SELECT
   response_id,
@@ -824,6 +818,6 @@ END
   assets,
   now() as updated_at
 FROM request_response_rmt
-WHERE
-    request_created_at >= earliest_date - INTERVAL 30 DAY
-    AND request_created_at <= earliest_date;
+WHERE request_created_at >= (SELECT max(request_created_at) FROM request_response_rmt WHERE cost IS NULL) - INTERVAL 30 DAY
+  AND request_created_at <= (SELECT max(request_created_at) FROM request_response_rmt WHERE cost IS NULL)
+  AND (SELECT count() FROM request_response_rmt WHERE cost IS NULL) > 0;
