@@ -32,7 +32,10 @@ async function main() {
         ],
         max_tokens: 700,
 
-        // stream: true,
+        stream: true,
+        stream_options: {
+          include_usage: true,
+        }
       },
       {
         headers: {
