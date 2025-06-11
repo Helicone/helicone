@@ -12,7 +12,6 @@ import { TimeFilterMs } from "@helicone-package/filters/filterDefs";
 import { AuthParams } from "../packages/common/auth/types";
 import { err, ok, Result, resultMap } from "../packages/common/result";
 import { TagType } from "../packages/common/sessions/tags";
-import { clickhousePriceCalc } from "@helicone-package/cost";
 import { isValidTimeZoneDifference } from "../utils/helpers";
 import {
   getHistogramRowOnKeys,
@@ -138,14 +137,14 @@ export class SessionManager {
       pSize: requestBody.pSize ?? "p75",
       useInterquartile: requestBody.useInterquartile ?? false,
       builtFilter,
-      aggregateFunction: clickhousePriceCalc("request_response_rmt"),
+      aggregateFunction: `sum(cost) / ${COST_PRECISION_MULTIPLIER}`,
     });
 
     const averageResults = await Promise.all([
       getAveragePerSession({
         key: { key: "properties['Helicone-Session-Id']", alias: "cost" },
         builtFilter,
-        aggregateFunction: clickhousePriceCalc("request_response_rmt"),
+        aggregateFunction: `sum(cost) / ${COST_PRECISION_MULTIPLIER}`,
       }),
       getAveragePerSession({
         key: { key: "properties['Helicone-Session-Id']", alias: "duration" },
