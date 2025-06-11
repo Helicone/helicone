@@ -1,6 +1,6 @@
 import { costOfPrompt } from "./index";
 
-export const COST_PRECISION_MULTIPLIER = 1000000;
+export const COST_PRECISION_MULTIPLIER = 1_000_000_000;
 
 export function modelCost(
   modelRow: {

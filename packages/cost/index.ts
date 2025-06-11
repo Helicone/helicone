@@ -5,6 +5,7 @@
 
 import { ModelRow } from "./interfaces/Cost";
 import { allCosts, defaultProvider, providers } from "./providers/mappings";
+import { COST_PRECISION_MULTIPLIER } from "./costCalc";
 
 export function costOf({
   model,
@@ -211,7 +212,6 @@ function caseForCost(costs: ModelRow[], table: string, multiple: number) {
 END
 `;
 }
-export const COST_MULTIPLE = 1_000_000_000;
 
 export function clickhousePriceCalcNonAggregated(table: string) {
   // This is so that we don't need to do any floating point math in the database
@@ -232,12 +232,12 @@ export function clickhousePriceCalcNonAggregated(table: string) {
           throw new Error("Provider does not have costs");
         }
         return `    WHEN (${table}.provider = '${provider.provider}') 
-      THEN (${caseForCost(provider.costs, table, COST_MULTIPLE)})`;
+      THEN (${caseForCost(provider.costs, table, COST_PRECISION_MULTIPLIER)})`;
       })
       .join("\n")}
-    ELSE (${caseForCost(defaultProvider.costs, table, COST_MULTIPLE)})
+    ELSE (${caseForCost(defaultProvider.costs, table, COST_PRECISION_MULTIPLIER)})
   END
-) / ${COST_MULTIPLE}
+) / ${COST_PRECISION_MULTIPLIER}
 `;
 }
 
@@ -262,11 +262,11 @@ sum(
 
       return `WHEN (${table}.provider = '${
         provider.provider
-      }') THEN (${caseForCost(provider.costs, table, COST_MULTIPLE)})`;
+      }') THEN (${caseForCost(provider.costs, table, COST_PRECISION_MULTIPLIER)})`;
     })
     .join("\n")}
-    ELSE ${caseForCost(defaultProvider.costs, table, COST_MULTIPLE)}
+    ELSE ${caseForCost(defaultProvider.costs, table, COST_PRECISION_MULTIPLIER)}
   END
-  ) / ${COST_MULTIPLE}
+  ) / ${COST_PRECISION_MULTIPLIER}
 `;
 }
