@@ -41,7 +41,7 @@ llm-proxy = { path = "./llm-proxy" }
 weighted-balance = { path = "./crates/weighted-balance" }
 
 # TODO: @tom: submit upstream PR
-anthropic-ai-sdk = { version = "0.2.2", git = "https://github.com/tomharmon/anthropic-sdk-rs.git", branch = "add-serde-impls" }
+anthropic-ai-sdk = { version = "0.2.2", git = "https://github.com/tomharmon/anthropic-sdk-rs.git", branch = "task/add-serde-impls" }
 anyhow = "1.0.98"
 async-openai = { version = "0.28.1" }
 axum-core = "0.5.2"
@@ -83,7 +83,8 @@ opentelemetry-http = "0.29.0"
 opentelemetry-otlp = { version = "0.29.0" }
 opentelemetry-semantic-conventions = "0.29.0"
 opentelemetry-stdout = { version = "0.29.0" }
-opentelemetry-system-metrics = { version = "0.4.0", git = "https://github.com/tomharmon/opentelemetry-system-metrics.git", branch = "task/add-gpu-feature" }
+# TODO: Update to pull from crates.io when new crate is published
+opentelemetry-system-metrics = { version = "0.4.2", git = "https://github.com/haixuanTao/opentelemetry-system-metrics.git" }
 pin-project-lite = "0.2.16"
 pretty_assertions = "1.4.1"
 r2d2 = "0.8.10"
@@ -102,16 +103,17 @@ serde_with = "3.12.0"
 serde_yml = "0.0.12"
 serial_test = "3.2.0"
 strum = "0.27.1"
-stubr = { git = "https://github.com/tomharmon/stubr" }
+stubr = { git = "https://github.com/helicone/stubr" }
 thiserror = "2.0.12"
 tokio = { version = "1.44.2", features = ['full'] }
 tokio-stream = "0.1.17"
 tokio-test = "0.4.4"
-tokio-tungstenite = { version = "0.21.0", features = ["native-tls"] }
+tokio-tungstenite = { version = "0.26.2", features = ["native-tls", "url"] }
 tokio-util = "0.7.15"
 tower = "0.5.2"
 tower_governor = { version = "0.7.0", features = [] }
 tower-http = { version = "0.6.3" }
+# upstream PR: https://github.com/francoposa/tower-otel-http-metrics/pull/24
 tower-otel-http-metrics = { git = "https://github.com/tomharmon/tower-otel-http-metrics.git", branch = "feat/custom-attributes-via-extractors" }
 tracing = "0.1.41"
 tracing-opentelemetry = "0.30.0"

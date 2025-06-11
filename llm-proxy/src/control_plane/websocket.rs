@@ -94,7 +94,7 @@ impl ControlPlaneClient {
         m: MessageTypeTX,
     ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         let bytes = serde_json::to_vec(&m)?;
-        let message = Message::Binary(bytes);
+        let message = Message::Binary(bytes.into());
 
         match self.channel.msg_tx.send(message).await {
             Ok(()) => (),

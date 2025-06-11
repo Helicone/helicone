@@ -1,7 +1,5 @@
 use std::{collections::HashMap, str::FromStr};
 
-use anthropic_ai_sdk::types::message::ImageMediaType;
-
 use super::{TryConvert, TryConvertStreamData, error::MapperError};
 use crate::{
     endpoints::openai::chat_completions::system_prompt,
@@ -79,7 +77,7 @@ impl
         let tools = if let Some(tools) = value.tools {
             let mapped_tools: Vec<_> = tools
                 .iter()
-                .map(|tool| anthropic::Tool::Custom {
+                .map(|tool| anthropic::Tool {
                     name: tool.function.name.clone(),
                     description: tool.function.description.clone(),
                     input_schema: tool
@@ -87,7 +85,6 @@ impl
                         .parameters
                         .clone()
                         .unwrap_or_default(),
-                    cache_control: None,
                 })
                 .collect();
             Some(mapped_tools)
@@ -102,18 +99,13 @@ impl
             Some(openai::ChatCompletionToolChoiceOption::Named(tool)) => {
                 Some(anthropic::ToolChoice::Tool {
                     name: tool.function.name,
-                    disable_parallel_tool_use: None,
                 })
             }
             Some(openai::ChatCompletionToolChoiceOption::Auto) => {
-                Some(anthropic::ToolChoice::Auto {
-                    disable_parallel_tool_use: None,
-                })
+                Some(anthropic::ToolChoice::Auto)
             }
             Some(openai::ChatCompletionToolChoiceOption::Required) => {
-                Some(anthropic::ToolChoice::Any {
-                    disable_parallel_tool_use: None,
-                })
+                Some(anthropic::ToolChoice::Any)
             }
             Some(openai::ChatCompletionToolChoiceOption::None) => {
                 Some(anthropic::ToolChoice::None)
@@ -136,16 +128,19 @@ impl
                             let mapped_content_blocks = content.into_iter().filter_map(|part| {
                                 match part {
                                     openai::ChatCompletionRequestUserMessageContentPart::Text(text) => {
-                                        Some(anthropic::ContentBlock::Text { text: text.text, citations: None })
+                                        Some(anthropic::ContentBlock::Text { text: text.text })
                                     },
                                     openai::ChatCompletionRequestUserMessageContentPart::ImageUrl(image) => {
                                         let mapped_image = if image.image_url.url.starts_with("http") {
-                                            anthropic::ImageSource::Url {
-                                                url: image.image_url.url,
+                                            anthropic::ImageSource {
+                                                type_: "url".to_string(),
+                                                media_type: String::new(),
+                                                data: image.image_url.url,
                                             }
                                         } else {
-                                            anthropic::ImageSource::Base64 {
-                                                media_type: ImageMediaType::Png,
+                                            anthropic::ImageSource {
+                                                type_: "base64".to_string(),
+                                                media_type: "image/png".to_string(),
                                                 data: image.image_url.url,
                                             }
                                         };
@@ -175,10 +170,10 @@ impl
                             let mapped_content_blocks = content.into_iter().map(|part| {
                                 match part {
                                     openai::ChatCompletionRequestAssistantMessageContentPart::Text(text) => {
-                                        anthropic::ContentBlock::Text { text: text.text, citations: None }
+                                        anthropic::ContentBlock::Text { text: text.text }
                                     },
                                     openai::ChatCompletionRequestAssistantMessageContentPart::Refusal(text) => {
-                                        anthropic::ContentBlock::Text { text: text.refusal.clone(), citations: None }
+                                        anthropic::ContentBlock::Text { text: text.refusal.clone() }
                                     },
                                 }
                             }).collect();
@@ -194,10 +189,10 @@ impl
                 }
                 openai::ChatCompletionRequestMessage::Tool(message) => {
                     let mapped_content = match message.content {
-                        openai::ChatCompletionRequestToolMessageContent::Text(text) => {
+                        openai::ChatCompletionRequestToolMessageContent::Text(content) => {
                             let block = anthropic::ContentBlock::ToolResult {
                                 tool_use_id: message.tool_call_id,
-                                content: anthropic::ToolResultContent::TextContent(text),
+                                content,
                             };
                             anthropic::MessageContent::Blocks { content: vec![block] }
                         },
@@ -205,7 +200,7 @@ impl
                             let mapped_content_blocks = content.into_iter().map(|part| {
                                 match part {
                                     openai::ChatCompletionRequestToolMessageContentPart::Text(text) => {
-                                        anthropic::ContentBlock::ToolResult { tool_use_id: message.tool_call_id.clone(), content: anthropic::ToolResultContent::TextContent(text.text) }
+                                        anthropic::ContentBlock::ToolResult { tool_use_id: message.tool_call_id.clone(), content: text.text }
                                     },
                                 }
                             }).collect();
@@ -220,31 +215,15 @@ impl
                 }
                 openai::ChatCompletionRequestMessage::Function(message) => {
                     let Some(tool) = tools.as_ref().and_then(|tools| {
-                        tools
-                            .iter()
-                            .find(|tool| match tool {
-                                anthropic::Tool::Custom { name, .. } => {
-                                    *name == message.name
-                                }
-                                _ => false,
-                            })
-                            .cloned()
+                        tools.iter().find(|tool| tool.name == message.name)
                     }) else {
-                        continue;
-                    };
-                    let anthropic::Tool::Custom {
-                        input_schema: input,
-                        name,
-                        ..
-                    } = tool
-                    else {
                         continue;
                     };
                     let mapped_content = anthropic::MessageContent::Blocks {
                         content: vec![anthropic::ContentBlock::ToolUse {
-                            id: name.clone(),
-                            name: name.clone(),
-                            input: input.clone(),
+                            id: message.name.clone(),
+                            name: tool.name.clone(),
+                            input: tool.input_schema.clone(),
                         }],
                     };
                     let mapped_message = anthropic::Message {
@@ -298,19 +277,11 @@ impl
         let created = 0;
         let object = OPENAI_CHAT_COMPLETION_OBJECT.to_string();
 
-        let prompt_tokens_details = value
-            .usage
-            .cache_creation_input_tokens
-            .map(|cache_creation_input_tokens| openai::PromptTokensDetails {
-                cached_tokens: Some(cache_creation_input_tokens),
-                audio_tokens: None,
-            });
-
         let usage = openai::CompletionUsage {
             prompt_tokens: value.usage.input_tokens,
             completion_tokens: value.usage.output_tokens,
             total_tokens: value.usage.input_tokens + value.usage.output_tokens,
-            prompt_tokens_details,
+            prompt_tokens_details: None,
             completion_tokens_details: None,
         };
 
@@ -340,21 +311,11 @@ impl
                         arguments: serde_json::to_string(&content)?,
                     },
                 }),
-                anthropic::ContentBlock::ServerToolUse { id, name, input } => {
-                    tool_calls.push(openai::ChatCompletionMessageToolCall {
-                        id: id.clone(),
-                        r#type: openai::ChatCompletionToolType::Function,
-                        function: openai::FunctionCall {
-                            name: name.clone(),
-                            arguments: serde_json::to_string(&input)?,
-                        },
-                    });
-                }
+
                 anthropic::ContentBlock::Text { text, .. } => {
                     content = Some(text.clone());
                 }
-                anthropic::ContentBlock::WebSearchToolResult { .. }
-                | anthropic::ContentBlock::Image { .. }
+                anthropic::ContentBlock::Image { .. }
                 | anthropic::ContentBlock::Thinking { .. }
                 | anthropic::ContentBlock::RedactedThinking { .. } => {}
             }
@@ -438,11 +399,6 @@ impl
                             id,
                             name,
                             input,
-                        }
-                        | anthropic::ContentBlock::ServerToolUse {
-                            id,
-                            name,
-                            input,
                         } => {
                             tool_calls.push(
                                 openai::ChatCompletionMessageToolCallChunk {
@@ -462,25 +418,10 @@ impl
                         anthropic::ContentBlock::ToolResult {
                             tool_use_id: _,
                             content,
-                        } => match content {
-                            anthropic::ToolResultContent::TextContent(text) => {
-                                current_text_content.push('\n');
-                                current_text_content.push_str(text);
-                            }
-                            anthropic::ToolResultContent::Blocks(
-                                tool_result_blocks,
-                            ) => {
-                                current_text_content.push('\n');
-                                for block in tool_result_blocks {
-                                    if let anthropic::ToolResultBlock::Text {
-                                        text,
-                                    } = block
-                                    {
-                                        current_text_content.push_str(text);
-                                    }
-                                }
-                            }
-                        },
+                        } => {
+                            current_text_content.push('\n');
+                            current_text_content.push_str(content);
+                        }
                         _ => {}
                     }
                 }
@@ -488,8 +429,7 @@ impl
                 let finish_reason = match message.stop_reason {
                     Some(
                         anthropic::StopReason::EndTurn
-                        | anthropic::StopReason::StopSequence
-                        | anthropic::StopReason::PauseTurn,
+                        | anthropic::StopReason::StopSequence,
                     ) => Some(openai::FinishReason::Stop),
                     Some(anthropic::StopReason::MaxTokens) => {
                         Some(openai::FinishReason::Length)
@@ -656,8 +596,7 @@ impl
                             usage: None,
                         }))
                     }
-                    anthropic::ContentBlockDelta::CitationsDelta { .. }
-                    | anthropic::ContentBlockDelta::ThinkingDelta { .. }
+                    anthropic::ContentBlockDelta::ThinkingDelta { .. }
                     | anthropic::ContentBlockDelta::SignatureDelta { .. } => {
                         Ok(None)
                     } // No direct OpenAI mapping for these deltas
@@ -672,8 +611,7 @@ impl
                 let finish_reason = match delta.stop_reason {
                     Some(
                         anthropic::StopReason::EndTurn
-                        | anthropic::StopReason::StopSequence
-                        | anthropic::StopReason::PauseTurn,
+                        | anthropic::StopReason::StopSequence,
                     ) => Some(openai::FinishReason::Stop),
                     Some(anthropic::StopReason::MaxTokens) => {
                         Some(openai::FinishReason::Length)
@@ -688,9 +626,13 @@ impl
                 };
 
                 let completion_usage = openai::CompletionUsage {
-                    prompt_tokens: usage.input_tokens,
-                    completion_tokens: usage.output_tokens,
-                    total_tokens: usage.input_tokens + usage.output_tokens,
+                    prompt_tokens: usage.as_ref().map_or(0, |u| u.input_tokens),
+                    completion_tokens: usage
+                        .as_ref()
+                        .map_or(0, |u| u.output_tokens),
+                    total_tokens: usage
+                        .as_ref()
+                        .map_or(0, |u| u.input_tokens + u.output_tokens),
                     prompt_tokens_details: None,
                     completion_tokens_details: None,
                 };

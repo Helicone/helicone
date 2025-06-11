@@ -45,10 +45,11 @@ impl
 
         tracing::trace!(source_model = ?source_model, target_model = ?target_model, "mapped model");
         let reasoning_effort = if let Some(thinking) = value.thinking {
-            match thinking {
-                anthropic::ThinkingConfig::Enabled { budget_tokens } => {
-                    let reasoning_budget =
-                        f64::from(budget_tokens) / f64::from(value.max_tokens);
+            match thinking.type_ {
+                anthropic::ThinkingType::Enabled => {
+                    #[allow(clippy::cast_precision_loss)]
+                    let reasoning_budget = thinking.budget_tokens as f64
+                        / f64::from(value.max_tokens);
                     match reasoning_budget {
                         reasoning_budget if reasoning_budget < 0.33 => {
                             Some(openai::ReasoningEffort::Low)
@@ -62,7 +63,6 @@ impl
                         _ => Some(openai::ReasoningEffort::Medium),
                     }
                 }
-                anthropic::ThinkingConfig::Disabled => None,
             }
         } else {
             None
@@ -80,30 +80,18 @@ impl
         };
         let temperature = value.temperature;
         let top_p = value.top_p;
-        let (tool_choice, parallel_tool_calls): (
-            Option<openai::ChatCompletionToolChoiceOption>,
-            Option<bool>,
-        ) = match value.tool_choice {
+        let tool_choice = match value.tool_choice {
             Some(tool_choice) => match tool_choice {
-                anthropic::ToolChoice::Auto {
-                    disable_parallel_tool_use,
-                } => (
-                    Some(openai::ChatCompletionToolChoiceOption::Auto),
-                    disable_parallel_tool_use,
-                ),
-                anthropic::ToolChoice::None => {
-                    (Some(openai::ChatCompletionToolChoiceOption::None), None)
+                anthropic::ToolChoice::Auto => {
+                    Some(openai::ChatCompletionToolChoiceOption::Auto)
                 }
-                anthropic::ToolChoice::Any {
-                    disable_parallel_tool_use,
-                } => (
-                    Some(openai::ChatCompletionToolChoiceOption::Required),
-                    disable_parallel_tool_use,
-                ),
-                anthropic::ToolChoice::Tool {
-                    name,
-                    disable_parallel_tool_use,
-                } => {
+                anthropic::ToolChoice::None => {
+                    Some(openai::ChatCompletionToolChoiceOption::None)
+                }
+                anthropic::ToolChoice::Any => {
+                    Some(openai::ChatCompletionToolChoiceOption::Required)
+                }
+                anthropic::ToolChoice::Tool { name } => {
                     let named_tool_choice =
                         openai::ChatCompletionNamedToolChoice {
                             r#type: openai::ChatCompletionToolType::Function,
@@ -111,36 +99,25 @@ impl
                                 name: name.clone(),
                             },
                         };
-                    (
-                        Some(openai::ChatCompletionToolChoiceOption::Named(
-                            named_tool_choice,
-                        )),
-                        disable_parallel_tool_use,
-                    )
+                    Some(openai::ChatCompletionToolChoiceOption::Named(
+                        named_tool_choice,
+                    ))
                 }
             },
-            None => (None, None),
+            None => None,
         };
         let tools: Option<Vec<openai::ChatCompletionTool>> =
             if let Some(tools) = value.tools {
                 let mapped_tools: Vec<_> = tools
                     .into_iter()
-                    .filter_map(|tool| match tool {
-                        anthropic::Tool::Custom {
-                            name,
-                            description,
-                            input_schema,
-                            ..
-                        } => Some(openai::ChatCompletionTool {
-                            r#type: openai::ChatCompletionToolType::Function,
-                            function: openai::FunctionObject {
-                                name,
-                                description,
-                                parameters: Some(input_schema),
-                                strict: None,
-                            },
-                        }),
-                        _ => None,
+                    .map(|tool| openai::ChatCompletionTool {
+                        r#type: openai::ChatCompletionToolType::Function,
+                        function: openai::FunctionObject {
+                            name: tool.name,
+                            description: tool.description,
+                            parameters: Some(tool.input_schema),
+                            strict: None,
+                        },
                     })
                     .collect();
 
@@ -187,8 +164,6 @@ impl
                                     anthropic::ContentBlock::Image { .. } |
                                     anthropic::ContentBlock::ToolUse { .. } |
                                     anthropic::ContentBlock::ToolResult { .. } |
-                                    anthropic::ContentBlock::ServerToolUse { .. } |
-                                    anthropic::ContentBlock::WebSearchToolResult { .. } |
                                     anthropic::ContentBlock::Thinking { .. } |
                                     anthropic::ContentBlock::RedactedThinking { .. } => {
                                         None
@@ -224,19 +199,9 @@ impl
                                         }))
                                     },
                                     anthropic::ContentBlock::Image { source } => {
-                                        let image_url = match source {
-                                            anthropic::ImageSource::Base64 { media_type: _, data } => {
-                                                openai::ImageUrl {
-                                                    url: data,
-                                                    detail: None,
-                                                }
-                                            },
-                                            anthropic::ImageSource::Url { url } => {
-                                                openai::ImageUrl {
-                                                    url,
-                                                    detail: None,
-                                                }
-                                            },
+                                        let image_url = openai::ImageUrl {
+                                            url: source.data,
+                                            detail: None,
                                         };
                                         Some(openai::ChatCompletionRequestUserMessageContentPart::ImageUrl(openai::ChatCompletionRequestMessageContentPartImage {
                                             image_url,
@@ -244,8 +209,6 @@ impl
                                     },
                                     anthropic::ContentBlock::ToolUse { .. } |
                                     anthropic::ContentBlock::ToolResult { .. } |
-                                    anthropic::ContentBlock::ServerToolUse { .. } |
-                                    anthropic::ContentBlock::WebSearchToolResult { .. } |
                                     anthropic::ContentBlock::Thinking { .. } |
                                     anthropic::ContentBlock::RedactedThinking { .. } => {
                                         None
@@ -273,7 +236,7 @@ impl
             store: None,
             reasoning_effort,
             metadata,
-            parallel_tool_calls,
+            parallel_tool_calls: None,
             stop,
             stream,
             stream_options,
@@ -298,6 +261,7 @@ impl
             audio: None,
             function_call: None,
             functions: None,
+            web_search_options: None,
         };
 
         Ok(request)
@@ -332,21 +296,10 @@ impl
             anthropic::Usage {
                 input_tokens: 0,
                 output_tokens: 0,
-                cache_creation_input_tokens: None,
-                cache_read_input_tokens: None,
-                server_tool_use: None,
             },
-            |usage| {
-                let cache_creation_input_tokens = usage
-                    .prompt_tokens_details
-                    .and_then(|details| details.cached_tokens);
-                anthropic::Usage {
-                    input_tokens: usage.prompt_tokens,
-                    output_tokens: usage.completion_tokens,
-                    cache_creation_input_tokens,
-                    cache_read_input_tokens: None,
-                    server_tool_use: None,
-                }
+            |usage| anthropic::Usage {
+                input_tokens: usage.prompt_tokens,
+                output_tokens: usage.completion_tokens,
             },
         );
 
@@ -373,10 +326,7 @@ impl
             }
         }
         if let Some(text) = openai_message.message.content {
-            let text = anthropic::ContentBlock::Text {
-                text,
-                citations: None,
-            };
+            let text = anthropic::ContentBlock::Text { text };
             content.push(text);
         }
 
@@ -431,10 +381,8 @@ impl
 
             // Add text content if present in the MessageStart delta
             if let Some(text) = &delta.content {
-                content_blocks.push(anthropic::ContentBlock::Text {
-                    text: text.clone(),
-                    citations: None,
-                });
+                content_blocks
+                    .push(anthropic::ContentBlock::Text { text: text.clone() });
             }
 
             // Add tool_calls if present in the MessageStart delta
@@ -478,9 +426,6 @@ impl
             let initial_usage = anthropic::Usage {
                 input_tokens: 0,
                 output_tokens: 0,
-                cache_creation_input_tokens: None,
-                cache_read_input_tokens: None,
-                server_tool_use: None,
             };
 
             let message_start_content = anthropic::MessageStartContent {
@@ -519,20 +464,10 @@ impl
                     // Default if OpenAI chunk has no usage
                     input_tokens: 0,
                     output_tokens: 0,
-                    cache_creation_input_tokens: None,
-                    cache_read_input_tokens: None,
-                    server_tool_use: None,
                 },
                 |u| anthropic::StreamUsage {
                     input_tokens: u.prompt_tokens,
                     output_tokens: u.completion_tokens,
-                    cache_creation_input_tokens: u
-                        .prompt_tokens_details
-                        .and_then(|d| d.cached_tokens),
-                    cache_read_input_tokens: None, /* OpenAI stream usage
-                                                    * doesn't provide this */
-                    server_tool_use: None, /* OpenAI stream usage doesn't
-                                            * provide this */
                 },
             );
 
@@ -543,7 +478,7 @@ impl
             };
             return Ok(Some(anthropic::StreamEvent::MessageDelta {
                 delta: message_delta_content,
-                usage: stream_usage,
+                usage: Some(stream_usage),
             }));
         }
 

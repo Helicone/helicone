@@ -9,7 +9,7 @@ first_line="$(head -n1 "$commit_msg_file")"
 # Conventional Commit regex (case-insensitive):
 #   type(scope)?(!)?: subject
 # Types: build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test
-pattern='^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([[:alnum:]\_\-]+\))?(!)?: .{1,80}$'
+pattern='^(task|build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([[:alnum:]\_\-]+\))?(!)?: .{1,80}$'
 
 if ! echo "$first_line" | grep -Eqi "$pattern"; then
   cat <<-EOF >&2
