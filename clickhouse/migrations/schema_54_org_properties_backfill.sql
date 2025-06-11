@@ -1,4 +1,4 @@
-INSERT INTO properties (
+INSERT INTO organization_properties (
     organization_id,
     property_key
 )
