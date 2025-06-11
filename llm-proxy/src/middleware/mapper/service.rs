@@ -228,6 +228,11 @@ async fn map_request_no_op(
         .await
         .map_err(InternalError::CollectBodyError)?
         .to_bytes();
+    // we still collect the body and call the converter in order to map the
+    // model name. eg if they send `model:
+    // anthropic/claude-3-5-sonnet-20240620` from the OpenAI sdk,
+    // and the only configured provider is OpenAI, we need to map the model name
+    // but not change the structure of the request body.
     let converter = converter_registry
         .get_converter(source_endpoint, target_endpoint)
         .ok_or_else(|| {

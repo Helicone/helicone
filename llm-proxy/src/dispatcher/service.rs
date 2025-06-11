@@ -43,10 +43,7 @@ use crate::{
         router::RouterId,
         secret::Secret,
     },
-    utils::{
-        ResponseExt as _,
-        handle_error::{ErrorHandler, ErrorHandlerLayer},
-    },
+    utils::handle_error::{ErrorHandler, ErrorHandlerLayer},
 };
 
 pub type DispatcherFuture = BoxFuture<
@@ -345,7 +342,7 @@ impl Dispatcher {
             }
         }
 
-        response.error_for_status()
+        Ok(response)
     }
 
     fn dispatch_stream(
