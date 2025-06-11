@@ -176,7 +176,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       }
 
       const content = heliconeRequestToMappedContent(requestData.data);
-      const contentWithIds = {
+      let contentWithIds = {
         ...content,
         schema: {
           ...content.schema,
@@ -191,22 +191,39 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         },
       };
       if (!mappedContent) {
+        // nothing in local storage
         setMappedContent(contentWithIds);
+        setTools(contentWithIds?.schema.request.tools ?? []);
+        setModelParameters({
+          temperature: contentWithIds.schema.request.temperature,
+          maxTokens: contentWithIds.schema.request.max_tokens,
+          topP: contentWithIds.schema.request.top_p,
+          frequencyPenalty: contentWithIds.schema.request.frequency_penalty,
+          presencePenalty: contentWithIds.schema.request.presence_penalty,
+          stop: contentWithIds.schema.request.stop
+            ? Array.isArray(contentWithIds.schema.request.stop)
+              ? contentWithIds.schema.request.stop.join(",")
+              : contentWithIds.schema.request.stop
+            : undefined,
+        });
+      } else {
+        setTools(mappedContent?.schema.request.tools ?? []);
+        setModelParameters({
+          temperature: mappedContent?.schema.request.temperature,
+          maxTokens: mappedContent?.schema.request.max_tokens,
+          topP: mappedContent?.schema.request.top_p,
+          frequencyPenalty: mappedContent?.schema.request.frequency_penalty,
+          presencePenalty: mappedContent?.schema.request.presence_penalty,
+          stop: mappedContent?.schema.request.stop
+            ? Array.isArray(mappedContent?.schema.request.stop)
+              ? mappedContent?.schema.request.stop.join(",")
+              : mappedContent?.schema.request.stop
+            : undefined,
+        });
+        setSelectedModel(mappedContent.model);
       }
       setDefaultContent(contentWithIds);
-      setTools(mappedContent?.schema.request.tools ?? []);
-      setModelParameters({
-        temperature: content.schema.request.temperature,
-        maxTokens: content.schema.request.max_tokens,
-        topP: content.schema.request.top_p,
-        frequencyPenalty: content.schema.request.frequency_penalty,
-        presencePenalty: content.schema.request.presence_penalty,
-        stop: content.schema.request.stop
-          ? Array.isArray(content.schema.request.stop)
-            ? content.schema.request.stop.join(",")
-            : content.schema.request.stop
-          : undefined,
-      });
+
       return mappedContent;
     }
     return DEFAULT_EMPTY_CHAT;
@@ -351,6 +368,21 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     });
   };
 
+  const handleSelectedModelChange = (newModel: string) => {
+    setSelectedModel(newModel);
+    if (!mappedContent) {
+      return;
+    }
+    setMappedContent({
+      ...mappedContent,
+      model: newModel,
+      schema: {
+        ...mappedContent.schema,
+        request: { ...mappedContent.schema.request, model: newModel },
+      },
+    });
+  };
+
   return (
     <main className="h-screen flex flex-col w-full animate-fade-in">
       <AuthHeader title={"Playground"} />
@@ -376,7 +408,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               defaultContent={defaultContent}
               setMappedContent={setMappedContent}
               selectedModel={selectedModel}
-              setSelectedModel={setSelectedModel}
+              setSelectedModel={handleSelectedModelChange}
               tools={tools}
               setTools={handleToolsChange}
               responseFormat={responseFormat}

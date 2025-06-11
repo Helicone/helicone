@@ -193,13 +193,44 @@ const renderToolMessage = (
   if (message.tool_calls) {
     return (
       <div className={cn("flex flex-col", !playgroundMode && "gap-4")}>
-        {message.content && (
+        {message.content && !playgroundMode ? (
           <ReactMarkdown
             components={markdownComponents}
             className="w-full text-xs whitespace-pre-wrap break-words p-2"
           >
             {message.content}
           </ReactMarkdown>
+        ) : (
+          <MarkdownEditor
+            className="w-full rounded-none bg-white dark:bg-slate-950"
+            language="markdown"
+            setText={(text) => {
+              if (!mappedRequest || !onChatChange || !messageIndex) {
+                return;
+              }
+              onChatChange?.({
+                ...mappedRequest,
+                schema: {
+                  ...mappedRequest.schema,
+                  request: {
+                    ...mappedRequest.schema.request,
+                    messages: mappedRequest.schema.request?.messages?.map(
+                      (message, i) => {
+                        if (i === messageIndex) {
+                          return {
+                            ...message,
+                            content: text,
+                          };
+                        }
+                        return message;
+                      }
+                    ),
+                  },
+                },
+              });
+            }}
+            text={message.content || ""}
+          />
         )}
         {message.tool_calls.map((tool, index) => {
           const updateMessageToolCallField = (field: string, value: string) => {
@@ -240,7 +271,7 @@ const renderToolMessage = (
             <div
               key={index}
               className={cn(
-                "flex flex-col gap-2 text-sm p-2 bg-muted",
+                "flex flex-col gap-2 text-sm p-2 pl-7 bg-muted",
                 !playgroundMode ? "rounded-lg" : "dark:bg-black"
               )}
             >
