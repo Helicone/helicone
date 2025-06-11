@@ -21,7 +21,7 @@ jobs:
 
       - name: Check Migrations
         run: |
-          python - << 'EOF'
+          python - <<EOF
           import os
           import re
           import sys
@@ -47,4 +47,4 @@ jobs:
               sys.exit(1)
 
           print(f"OK - {len(nums)} migrations from {min(nums)} to {max(nums)}")
-EOF
+          EOF
