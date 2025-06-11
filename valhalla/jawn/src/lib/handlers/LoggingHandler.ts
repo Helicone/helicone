@@ -494,7 +494,7 @@ export class LoggingHandler extends AbstractLogHandler {
       completion_audio_tokens: isCacheHit
         ? 0
         : usage.completionAudioTokens ?? 0,
-      cost: modelCost({
+      cost: isCacheHit ? 0 : modelCost({
         provider: request.provider ?? "",
         model: context.processedLog.model ?? "",
         sum_prompt_tokens: usage.promptTokens ?? 0,
