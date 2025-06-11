@@ -61,6 +61,7 @@ export function costOfPrompt({
   completionAudioTokens,
   images = 1,
   perCall = 1,
+  multiple,
 }: {
   provider: string;
   model: string;
@@ -72,8 +73,9 @@ export function costOfPrompt({
   completionAudioTokens: number;
   images?: number;
   perCall?: number;
+  multiple?: number;
 }) {
-  const cost = costOf({ model, provider });
+  let cost = costOf({ model, provider });
   if (!cost) {
     return null;
   }
@@ -118,6 +120,10 @@ export function costOfPrompt({
   const imageCost = images * (cost.per_image ?? 0);
   const perCallCost = perCall * (cost.per_call ?? 0);
   totalCost += imageCost + perCallCost;
+
+  if (multiple !== undefined) {
+    return Math.round(totalCost * multiple);
+  }
 
   return totalCost;
 }

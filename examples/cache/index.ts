@@ -18,7 +18,7 @@ async function main() {
   const chatCompletion = await openai.chat.completions
     .create(
       {
-        model: "gpt-4-turbo",
+        model: "gpt-4.1-nano",
         messages: [
           {
             role: "system",
@@ -32,7 +32,7 @@ async function main() {
         ],
         max_tokens: 700,
 
-        stream: true,
+        // stream: true,
       },
       {
         headers: {
