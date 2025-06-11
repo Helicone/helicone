@@ -114,7 +114,7 @@ export const SessionDetail = ({
       },
     },
     {
-      created_at: "desc",
+      created_at: "asc",
     },
     false,
     isLive
