@@ -9,22 +9,13 @@ import SavedFiltersDropdown from "./components/SavedFiltersDropdown";
 import { useFilterAST } from "./context/filterContext";
 import {
   AndExpression,
-  createDefaultFilterGroupExpressionForTable,
+  DEFAULT_FILTER_GROUP_EXPRESSION,
   OrExpression,
 } from "./filterAst";
-import { RequestResponseRMTDerivedTable } from "./filterAst";
 
-interface FilterASTEditorProps {
-  baseTable?: RequestResponseRMTDerivedTable;
-}
+interface FilterASTEditorProps {}
 
-
-// Editor for filters of request_response_rmt, and extensions.
-// Extensions referring to tables that are derived from request_response_rmt, such as session_rmt.
-// But can add additional filters for aggregations or reformations of the base RMT table.
-export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
-  baseTable = "request_response_rmt",
-}) => {
+export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({}) => {
   const { store: filterStore, helpers } = useFilterAST();
 
   return (
@@ -72,7 +63,6 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
             group={filterStore.filter as AndExpression | OrExpression}
             path={[]}
             isRoot={true}
-            baseTable={baseTable}
           />
         ) : (
           <Button
@@ -80,7 +70,7 @@ export const FilterASTEditor: React.FC<FilterASTEditorProps> = ({
             size="xs"
             className="flex items-center gap-1 w-fit"
             onClick={() => {
-              filterStore.setFilter(createDefaultFilterGroupExpressionForTable(baseTable));
+              filterStore.setFilter(DEFAULT_FILTER_GROUP_EXPRESSION);
               filterStore.setActiveFilterName("Untitled Filter");
             }}
           >
