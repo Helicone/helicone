@@ -128,6 +128,7 @@ services:
       PORT: ${JAWN_PORT:-8585}
       NEXT_PUBLIC_BETTER_AUTH: "true"
       S3_ENDPOINT: http://minio:9000
+      S3_REGION: us-west-2
       S3_ACCESS_KEY: minioadmin
       S3_SECRET_KEY: minioadmin
       S3_BUCKET_NAME: "request-response-storage"
