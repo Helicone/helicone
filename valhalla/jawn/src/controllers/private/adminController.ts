@@ -1317,4 +1317,40 @@ export class AdminController extends Controller {
     // Return the data
     return result.data;
   }
+
+  /**
+   * Backfill costs in Clickhouse with updated cost package data.
+   */
+  @Post("/backfill-costs")
+  public async backfillCosts(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body() body: {
+      timeExpression: string;
+      modelId: string;
+    }
+  ): Promise<{
+    success: boolean;
+  }> {
+    await authCheckThrow(request.authParams.userId);
+    
+    const query = `
+    INSERT INTO request_response_rmt
+    SELECT
+      r.*,
+      0 as cost,
+      now() as updated_at
+    FROM
+      request_response_rmt r
+    WHERE
+      request_created_at >= ${body.timeExpression}
+      AND model = '${body.modelId}'
+    `
+    const { error } = await clickhouseDb.dbQuery(query, []);
+
+    if (error) {
+      throw new Error(error);
+    }
+
+    return { success: true };
+  }
 }

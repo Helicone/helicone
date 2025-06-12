@@ -404,6 +404,10 @@ export interface paths {
      */
     get: operations["GetSubscriptionData"];
   };
+  "/v1/admin/backfill-costs": {
+    /** @description Backfill costs in Clickhouse with updated cost package data. */
+    post: operations["BackfillCosts"];
+  };
   "/v1/audio/convert-to-wav": {
     post: operations["ConvertToWav"];
   };
@@ -17690,6 +17694,27 @@ export interface operations {
             discounts: components["schemas"]["Record_string.stripe.Stripe.Discount_"];
             invoices: components["schemas"]["stripe.Stripe.Invoice"][];
             subscriptions: components["schemas"]["stripe.Stripe.Subscription"][];
+          };
+        };
+      };
+    };
+  };
+  /** @description Backfill costs in Clickhouse with updated cost package data. */
+  BackfillCosts: {
+    requestBody: {
+      content: {
+        "application/json": {
+          modelId: string;
+          timeExpression: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            success: boolean;
           };
         };
       };
