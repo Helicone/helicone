@@ -1,5 +1,5 @@
 import { XSmall } from "@/components/ui/typography";
-import { MappedLLMRequest, Message } from "@/packages/llm-mapper/types";
+import { MappedLLMRequest, Message } from "@helicone-package/llm-mapper/types";
 import { JsonRenderer } from "./single/JsonRenderer";
 import MarkdownEditor from "@/components/shared/markdownEditor";
 import { markdownComponents } from "@/components/shared/prompts/ResponsePanel";
