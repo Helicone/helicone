@@ -15,7 +15,7 @@ import {
 import { useMemo } from "react";
 import { LuChevronsLeftRight } from "react-icons/lu";
 import { Assistant } from "./components/assistant/Assistant";
-import Chat, { ChatMode } from "./components/Chat";
+import Chat from "./components/Chat";
 import { JsonRenderer } from "./components/chatComponent/single/JsonRenderer";
 import { Completion } from "./components/completion";
 import { ErrorMessage } from "./components/error/ErrorMessage";
