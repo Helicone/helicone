@@ -23,6 +23,17 @@ import useNotification from "../../shared/notification/useNotification";
 import PlaygroundMessagesPanel from "./components/PlaygroundMessagesPanel";
 import PlaygroundResponsePanel from "./components/PlaygroundResponsePanel";
 import { OPENROUTER_MODEL_MAP } from "./new/openRouterModelMap";
+import { ProviderCard } from "@/components/providers/ProviderCard";
+import { DialogHeader } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import Image from "next/image";
+import { providers } from "@/data/providers";
 
 export interface ModelParameters {
   temperature: number | null | undefined;
@@ -292,9 +303,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           stream,
           {
             initialState: {
-              content: "",
-              reasoning: "",
-              calls: "",
               fullContent: "",
             },
             onUpdate: (result) => {
@@ -383,9 +391,51 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     });
   };
 
+  const [isOpenRouterDialogOpen, setIsOpenRouterDialogOpen] = useState(false);
+
   return (
     <main className="h-screen flex flex-col w-full animate-fade-in">
-      <AuthHeader title={"Playground"} />
+      <AuthHeader
+        title={"Playground"}
+        actions={
+          <div className="flex flex-row items-center gap-2">
+            <Dialog
+              open={isOpenRouterDialogOpen}
+              onOpenChange={setIsOpenRouterDialogOpen}
+            >
+              <DialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <Image
+                    src="/assets/home/providers/openrouter.jpg"
+                    alt="OpenRouter"
+                    className="h-4 w-4 rounded-sm"
+                    width={16}
+                    height={16}
+                  />
+                  Configure OpenRouter
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-xl">
+                <DialogHeader>
+                  <DialogTitle>Configure OpenRouter</DialogTitle>
+                </DialogHeader>
+                <div className="mb-4 text-sm text-muted-foreground">
+                  OpenRouter provides access to multiple LLM models through a
+                  single API. Set up your OpenRouter API key to unlock all
+                  available models in the prompt editor.
+                </div>
+                <ProviderCard
+                  provider={providers.find((p) => p.id === "openrouter")!}
+                />
+              </DialogContent>
+            </Dialog>
+          </div>
+        }
+      />
       <div className="flex flex-col w-full h-full min-h-[80vh] border-t border-border">
         {/* <PlaygroundHeader
           selectedModel={selectedModel}

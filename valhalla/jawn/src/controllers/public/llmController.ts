@@ -6,6 +6,7 @@ import { OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/c
 import OpenAI from "openai";
 import { generateTempHeliconeAPIKey } from "../../lib/experiment/tempKeys/tempAPIKey";
 import { GET_KEY } from "../../lib/clients/constant";
+import { dbExecute } from "../../lib/shared/db/dbExecute";
 
 export interface GenerateParams {
   provider: any;
@@ -53,7 +54,29 @@ export class LLMController extends Controller {
         );
       }
 
-      const openrouterKey = await GET_KEY("key:openrouter");
+      const result = await dbExecute<{
+        id: string;
+        org_id: string;
+        decrypted_provider_key: string;
+        provider_key_name: string;
+        provider_name: string;
+      }>(
+        `SELECT id, org_id, decrypted_provider_key, provider_key_name, provider_name
+         FROM decrypted_provider_keys
+         WHERE org_id = $1
+         AND soft_delete = false
+         AND provider_name = 'OpenRouter'
+         LIMIT 1`,
+        [request.authParams.organizationId]
+      );
+
+      let openRouterKey = await GET_KEY("key:openrouter");
+      let selfKey = false;
+
+      if (result?.data?.[0]?.decrypted_provider_key) {
+        openRouterKey = result.data?.[0]?.decrypted_provider_key;
+        selfKey = true;
+      }
 
       return tempKey.data.with<
         Result<
@@ -62,14 +85,16 @@ export class LLMController extends Controller {
           string
         >
       >(async (secretKey) => {
-        console.log("secretKey", secretKey);
         const openai = new OpenAI({
-          baseURL: "http://localhost:8789/api/v1/",
-          apiKey: openrouterKey,
+          baseURL: `${process.env.HELICONE_WORKER_URL}/api/v1/`,
+          apiKey: openRouterKey,
           defaultHeaders: {
             "Helicone-Auth": `Bearer ${secretKey}`,
             "Helicone-User-Id": request.authParams.organizationId,
-            "Helicone-Property-User-Id": request.authParams.userId || "",
+            ...(!selfKey && {
+              // 10 requests per user per year
+              "Helicone-RateLimit-Policy": "10;w=31536000;s=user",
+            }),
           },
         });
         const abortController = new AbortController();
@@ -115,6 +140,11 @@ export class LLMController extends Controller {
                 return ok({ content: "", reasoning: "", calls: "" }); // Exit the loop and function
               }
 
+              // Skip [DONE] message and only send actual chunks
+              if (typeof chunk === "string" && chunk === "[DONE]") {
+                continue;
+              }
+
               // Format as Server-Sent Event (SSE)
               const chunkString = JSON.stringify(chunk);
               const sseFormattedChunk = `data: ${chunkString}\n\n`;
@@ -158,12 +188,23 @@ export class LLMController extends Controller {
         return ok({ content, reasoning, calls });
       });
     } catch (error) {
+      console.error("Error in generate", error);
       if (error instanceof Error) {
         if (error.name === "ResponseAborted" || error.name === "AbortError") {
           return ok({ content: "", reasoning: "", calls: "" });
         }
 
         if (error instanceof OpenAI.APIError) {
+          if (
+            error.status === 429 &&
+            "helicone-ratelimit-remaining" in error.headers &&
+            error.headers["helicone-ratelimit-remaining"] === "0"
+          ) {
+            return err(
+              "You have reached your free playground limit. Please add your own OpenRouter key to continue using the Playground."
+            );
+          }
+
           return err(
             error.error.metadata?.raw
               ? JSON.parse(error.error.metadata?.raw || "{}")?.error?.message

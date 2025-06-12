@@ -83,7 +83,6 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
             href: "/prompts",
             icon: ScrollTextIcon,
             current: pathname.includes("/prompts"),
-            isNew: true,
           },
           {
             name: "Experiments",
