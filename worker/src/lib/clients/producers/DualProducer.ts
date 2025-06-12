@@ -13,8 +13,12 @@ export class DualWriteProducer implements MessageProducer {
   }
 
   setLowerPriority() {
-    this.secondary.setLowerPriority();
-    this.primary.setLowerPriority();
+    if (!(this.secondary instanceof DualWriteProducer)) {
+      this.secondary.setLowerPriority();
+    }
+    if (!(this.primary instanceof DualWriteProducer)) {
+      this.primary.setLowerPriority();
+    }
   }
 
   async sendMessage(msg: MessageData) {
