@@ -61,7 +61,7 @@ async fn openai_passthrough() {
     let request = Request::builder()
         .method(Method::POST)
         // Route to the fake endpoint through the default router
-        .uri("http://router.helicone.com/router/v1/fake_endpoint")
+        .uri("http://router.helicone.com/router/default/v1/fake_endpoint")
         .header("content-type", "application/json")
         .body(request_body)
         .unwrap();

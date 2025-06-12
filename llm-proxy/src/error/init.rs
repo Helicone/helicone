@@ -56,4 +56,6 @@ pub enum InitError {
     RateLimitChannelsNotInitialized(RouterId),
     /// Failed to build websocket request: {0}
     WebsocketRequestBuild(#[from] http::Error),
+    /// Invalid router id: {0}
+    InvalidRouterId(String),
 }

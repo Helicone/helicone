@@ -59,11 +59,11 @@ impl Service<Receiver<Change<Key, DispatcherService>>> for DiscoverFactory {
         rx: Receiver<Change<Key, DispatcherService>>,
     ) -> Self::Future {
         let app_state = self.app_state.clone();
-        let router_id = self.router_id;
+        let router_id = self.router_id.clone();
         let router_config = self.router_config.clone();
         Box::pin(async move {
             let discovery =
-                Discovery::new(&app_state, router_id, &router_config, rx)
+                Discovery::new(&app_state, &router_id, &router_config, rx)
                     .await?;
             let discovery = PeakEwmaDiscover::new(
                 discovery,

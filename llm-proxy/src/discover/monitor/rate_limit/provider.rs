@@ -176,7 +176,7 @@ impl ProviderMonitorInner<Key> {
 
                     let service = Dispatcher::new(
                         self.app_state.clone(),
-                        self.router_id,
+                        &self.router_id,
                         &self.router_config,
                         api_endpoint.provider(),
                     )
@@ -324,7 +324,7 @@ impl ProviderMonitorInner<WeightedKey> {
 
                     let service = Dispatcher::new(
                         self.app_state.clone(),
-                        self.router_id,
+                        &self.router_id,
                         &self.router_config,
                         api_endpoint.provider(),
                     )
@@ -398,7 +398,7 @@ impl RateLimitMonitor {
                     // Check for new routers
                     let mut monitors = app_state.0.rate_limit_monitors.write().await;
                     for (router_id, monitor) in monitors.drain() {
-                        let rx = app_state.remove_rate_limit_receiver(router_id).await?;
+                        let rx = app_state.remove_rate_limit_receiver(&router_id).await?;
                         match monitor {
                             ProviderRateLimitMonitor::Weighted(inner) => {
                                 self.tasks.spawn(inner.monitor(rx));
@@ -445,7 +445,7 @@ impl AppState {
         tx: Sender<Change<WeightedKey, DispatcherService>>,
     ) {
         self.0.rate_limit_monitors.write().await.insert(
-            router_id,
+            router_id.clone(),
             ProviderRateLimitMonitor::weighted(
                 tx,
                 router_id,
@@ -462,7 +462,7 @@ impl AppState {
         tx: Sender<Change<Key, DispatcherService>>,
     ) {
         self.0.rate_limit_monitors.write().await.insert(
-            router_id,
+            router_id.clone(),
             ProviderRateLimitMonitor::p2c(
                 tx,
                 router_id,
@@ -474,13 +474,15 @@ impl AppState {
 
     pub async fn remove_rate_limit_receiver(
         &self,
-        router_id: RouterId,
+        router_id: &RouterId,
     ) -> Result<Receiver<RateLimitEvent>, InitError> {
         let Some(rx) =
-            self.0.rate_limit_receivers.write().await.remove(&router_id)
+            self.0.rate_limit_receivers.write().await.remove(router_id)
         else {
             warn!(router_id = ?router_id, "No rate limit receiver found for router");
-            return Err(InitError::RateLimitChannelsNotInitialized(router_id));
+            return Err(InitError::RateLimitChannelsNotInitialized(
+                router_id.clone(),
+            ));
         };
         Ok(rx)
     }

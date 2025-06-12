@@ -52,7 +52,7 @@ impl Config {
                 if !self.providers.contains_key(provider) {
                     return Err(
                         ModelMappingValidationError::ProviderNotConfigured {
-                            router: *router_id,
+                            router: router_id.clone(),
                             provider: *provider,
                         },
                     );
@@ -122,7 +122,7 @@ impl Config {
         }
 
         Err(ModelMappingValidationError::NoValidMapping {
-            router: *router_id,
+            router: router_id.clone(),
             source_model: source_model.as_ref().to_string(),
             target_provider,
         })

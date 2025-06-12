@@ -52,7 +52,7 @@ pin_project! {
 impl ConfigDiscovery<Key> {
     pub async fn new(
         app_state: &AppState,
-        router_id: RouterId,
+        router_id: &RouterId,
         router_config: &Arc<RouterConfig>,
         rx: Receiver<Change<Key, DispatcherService>>,
     ) -> Result<Self, InitError> {
@@ -86,7 +86,7 @@ impl ConfigDiscovery<Key> {
 impl ConfigDiscovery<WeightedKey> {
     pub async fn new_weighted(
         app_state: &AppState,
-        router_id: RouterId,
+        router_id: &RouterId,
         router_config: &Arc<RouterConfig>,
         rx: Receiver<Change<WeightedKey, DispatcherService>>,
     ) -> Result<Self, InitError> {

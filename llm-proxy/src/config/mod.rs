@@ -19,11 +19,14 @@ use std::path::PathBuf;
 use config::ConfigError;
 use displaydoc::Display;
 use json_patch::merge;
+use regex::Regex;
 use serde::{Deserialize, Serialize};
 use strum::IntoStaticStr;
 use thiserror::Error;
 
 use crate::{error::init::InitError, utils::default_true};
+
+const ROUTER_ID_REGEX: &str = r"^[A-Za-z0-9_-]{1,12}$";
 
 #[derive(Debug, Error, Display)]
 pub enum Error {
@@ -126,8 +129,13 @@ impl Config {
     }
 
     pub fn validate(&self) -> Result<(), InitError> {
-        for router_config in self.routers.as_ref().values() {
+        let router_id_regex =
+            Regex::new(ROUTER_ID_REGEX).expect("always valid if tests pass");
+        for (router_id, router_config) in self.routers.as_ref() {
             router_config.validate()?;
+            if !router_id_regex.is_match(router_id.as_ref()) {
+                return Err(InitError::InvalidRouterId(router_id.to_string()));
+            }
         }
         self.validate_model_mappings()?;
         Ok(())
@@ -169,6 +177,11 @@ mod tests {
     use super::*;
 
     #[test]
+    fn router_id_regex_is_valid() {
+        assert!(Regex::new(ROUTER_ID_REGEX).is_ok());
+    }
+
+    #[test]
     fn default_config_is_serializable() {
         // if it doesn't panic, it's good
         let _config = serde_json::to_string(&Config::default())
@@ -182,5 +195,50 @@ mod tests {
         let deserialized =
             serde_json::from_str::<DeploymentTarget>(&serialized).unwrap();
         assert_eq!(config, deserialized);
+    }
+
+    #[test]
+    fn router_id_regex_positive_cases() {
+        let regex = Regex::new(ROUTER_ID_REGEX).unwrap();
+        let valid_ids = [
+            "a",
+            "Z",
+            "abc",
+            "ABC",
+            "A1B2",
+            "A-1",
+            "a_b",
+            "abc_def",
+            "0123456789",
+            "123456789012", // 12 chars
+            "a-b-c-d",
+        ];
+        for id in valid_ids {
+            assert!(
+                regex.is_match(id),
+                "expected '{}' to be valid according to ROUTER_ID_REGEX",
+                id
+            );
+        }
+    }
+
+    #[test]
+    fn router_id_regex_negative_cases() {
+        let regex = Regex::new(ROUTER_ID_REGEX).unwrap();
+        let invalid_ids = [
+            "",
+            "with space",
+            "special$",
+            "1234567890123", // 13 chars
+            "trailingdash-",
+            "mixed*chars",
+        ];
+        for id in invalid_ids {
+            assert!(
+                !regex.is_match(id),
+                "expected '{}' to be invalid according to ROUTER_ID_REGEX",
+                id
+            );
+        }
     }
 }

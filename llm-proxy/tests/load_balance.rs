@@ -84,7 +84,9 @@ async fn openai_slow() {
         let request = Request::builder()
             .method(Method::POST)
             // default router
-            .uri("http://router.helicone.com/router/v1/chat/completions")
+            .uri(
+                "http://router.helicone.com/router/default/v1/chat/completions",
+            )
             .body(request_body)
             .unwrap();
         let response = harness.call(request).await.unwrap();
@@ -137,7 +139,9 @@ async fn anthropic_slow() {
         let request = Request::builder()
             .method(Method::POST)
             // default router
-            .uri("http://router.helicone.com/router/v1/chat/completions")
+            .uri(
+                "http://router.helicone.com/router/default/v1/chat/completions",
+            )
             .body(request_body)
             .unwrap();
         let response = harness.call(request).await.unwrap();

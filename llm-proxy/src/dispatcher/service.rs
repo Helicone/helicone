@@ -65,7 +65,7 @@ pub struct Dispatcher {
 impl Dispatcher {
     pub async fn new(
         app_state: AppState,
-        router_id: RouterId,
+        router_id: &RouterId,
         router_config: &Arc<RouterConfig>,
         provider: InferenceProvider,
     ) -> Result<DispatcherService, InitError> {
@@ -118,7 +118,7 @@ impl Dispatcher {
         let extensions_layer = AddExtensionsLayer::builder()
             .inference_provider(provider)
             .endpoint_converter_registry(converter_registry)
-            .router_id(router_id)
+            .router_id(router_id.clone())
             .build();
 
         Ok(ServiceBuilder::new()
@@ -133,16 +133,16 @@ impl Dispatcher {
 
 async fn get_provider_api_key(
     app_state: &AppState,
-    router_id: RouterId,
+    router_id: &RouterId,
     provider: InferenceProvider,
 ) -> Result<Secret<String>, ProviderError> {
     let provider_keys = app_state.0.provider_keys.read().await;
-    let provider_keys = provider_keys
-        .get(&router_id)
-        .ok_or(ProviderError::ProviderKeysNotFound(router_id))?;
+    let provider_keys = provider_keys.get(router_id).ok_or_else(|| {
+        ProviderError::ProviderKeysNotFound(router_id.clone())
+    })?;
     Ok(provider_keys
         .get(&provider)
-        .ok_or(ProviderError::ApiKeyNotFound(provider))?
+        .ok_or_else(|| ProviderError::ApiKeyNotFound(provider))?
         .clone())
 }
 
@@ -214,7 +214,7 @@ impl Dispatcher {
         let router_id = req
             .extensions()
             .get::<RouterId>()
-            .copied()
+            .cloned()
             .ok_or(InternalError::ExtensionNotFound("RouterId"))?;
 
         let target_url = base_url

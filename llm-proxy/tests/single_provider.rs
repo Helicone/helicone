@@ -52,7 +52,7 @@ async fn openai() {
     let request = Request::builder()
         .method(Method::POST)
         // default router
-        .uri("http://router.helicone.com/router/v1/chat/completions")
+        .uri("http://router.helicone.com/router/default/v1/chat/completions")
         .body(request_body)
         .unwrap();
     let response = harness.call(request).await.unwrap();
@@ -104,7 +104,7 @@ async fn google_with_openai_request_style() {
     let request = Request::builder()
         .method(Method::POST)
         // default router
-        .uri("http://router.helicone.com/router/v1/chat/completions")
+        .uri("http://router.helicone.com/router/default/v1/chat/completions")
         .body(request_body)
         .unwrap();
     let response = harness.call(request).await.unwrap();
@@ -122,7 +122,7 @@ async fn google_with_openai_request_style() {
     let request = Request::builder()
         .method(Method::POST)
         // default router
-        .uri("http://router.helicone.com/router/v1/chat/completions")
+        .uri("http://router.helicone.com/router/default/v1/chat/completions")
         .body(request_body)
         .unwrap();
     let response = harness.call(request).await.unwrap();
@@ -177,7 +177,7 @@ async fn anthropic_with_openai_request_style() {
     let request = Request::builder()
         .method(Method::POST)
         // default router
-        .uri("http://router.helicone.com/router/v1/chat/completions")
+        .uri("http://router.helicone.com/router/default/v1/chat/completions")
         .body(request_body)
         .unwrap();
     let response = harness.call(request).await.unwrap();
@@ -199,7 +199,7 @@ async fn anthropic_with_openai_request_style() {
     let request = Request::builder()
         .method(Method::POST)
         // default router
-        .uri("http://router.helicone.com/router/v1/chat/completions")
+        .uri("http://router.helicone.com/router/default/v1/chat/completions")
         .body(request_body)
         .unwrap();
     let response = harness.call(request).await.unwrap();
@@ -252,7 +252,7 @@ async fn anthropic_with_anthropic_request_style() {
     let request = Request::builder()
         .method(Method::POST)
         // default router
-        .uri("http://router.helicone.com/router/v1/chat/completions")
+        .uri("http://router.helicone.com/router/default/v1/chat/completions")
         .body(request_body)
         .unwrap();
     let response = harness.call(request).await.unwrap();
@@ -274,7 +274,7 @@ async fn anthropic_with_anthropic_request_style() {
     let request = Request::builder()
         .method(Method::POST)
         // default router
-        .uri("http://router.helicone.com/router/v1/chat/completions")
+        .uri("http://router.helicone.com/router/default/v1/chat/completions")
         .body(request_body)
         .unwrap();
     let response = harness.call(request).await.unwrap();
@@ -330,7 +330,7 @@ async fn anthropic_request_style() {
     let request = Request::builder()
         .method(Method::POST)
         // default router
-        .uri("http://router.helicone.com/router/v1/messages")
+        .uri("http://router.helicone.com/router/default/v1/messages")
         .body(request_body)
         .unwrap();
     let response = harness.call(request).await.unwrap();
@@ -385,7 +385,7 @@ async fn ollama() {
     let request = Request::builder()
         .method(Method::POST)
         // default router
-        .uri("http://router.helicone.com/router/v1/chat/completions")
+        .uri("http://router.helicone.com/router/default/v1/chat/completions")
         .body(request_body)
         .unwrap();
     let response = harness.call(request).await.unwrap();

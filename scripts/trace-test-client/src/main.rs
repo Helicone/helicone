@@ -100,7 +100,7 @@ async fn main()
     let logger_provider = init_logs();
 
     send_request(
-        "http://localhost:5678/router/v1/chat/completions",
+        "http://localhost:5678/router/default/v1/chat/completions",
         r#"{
             "model": "gpt-4o-mini",
             "messages": [

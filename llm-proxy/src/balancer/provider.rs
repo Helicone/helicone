@@ -60,21 +60,25 @@ impl ProviderBalancer {
         let (rate_limit_tx, rate_limit_rx) = channel(CHANNEL_CAPACITY);
         let discover_factory = DiscoverFactory::new(
             app_state.clone(),
-            router_id,
+            router_id.clone(),
             router_config.clone(),
         );
         app_state
             .add_weighted_router_health_monitor(
-                router_id,
+                router_id.clone(),
                 router_config.clone(),
                 change_tx.clone(),
             )
             .await;
-        app_state.add_rate_limit_tx(router_id, rate_limit_tx).await;
-        app_state.add_rate_limit_rx(router_id, rate_limit_rx).await;
+        app_state
+            .add_rate_limit_tx(router_id.clone(), rate_limit_tx)
+            .await;
+        app_state
+            .add_rate_limit_rx(router_id.clone(), rate_limit_rx)
+            .await;
         app_state
             .add_weighted_router_rate_limit_monitor(
-                router_id,
+                router_id.clone(),
                 router_config,
                 change_tx,
             )
@@ -97,21 +101,25 @@ impl ProviderBalancer {
         let (rate_limit_tx, rate_limit_rx) = channel(CHANNEL_CAPACITY);
         let discover_factory = DiscoverFactory::new(
             app_state.clone(),
-            router_id,
+            router_id.clone(),
             router_config.clone(),
         );
         app_state
             .add_p2c_router_health_monitor(
-                router_id,
+                router_id.clone(),
                 router_config.clone(),
                 change_tx.clone(),
             )
             .await;
-        app_state.add_rate_limit_tx(router_id, rate_limit_tx).await;
-        app_state.add_rate_limit_rx(router_id, rate_limit_rx).await;
+        app_state
+            .add_rate_limit_tx(router_id.clone(), rate_limit_tx)
+            .await;
+        app_state
+            .add_rate_limit_rx(router_id.clone(), rate_limit_rx)
+            .await;
         app_state
             .add_p2c_router_rate_limit_monitor(
-                router_id,
+                router_id.clone(),
                 router_config,
                 change_tx,
             )

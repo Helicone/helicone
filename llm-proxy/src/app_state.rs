@@ -67,12 +67,13 @@ pub struct InnerAppState {
 impl AppState {
     pub async fn get_rate_limit_tx(
         &self,
-        router_id: RouterId,
+        router_id: &RouterId,
     ) -> Result<Sender<RateLimitEvent>, InitError> {
         let rate_limit_channels = self.0.rate_limit_senders.read().await;
-        let rate_limit_tx = rate_limit_channels
-            .get(&router_id)
-            .ok_or(InitError::RateLimitChannelsNotInitialized(router_id))?;
+        let rate_limit_tx =
+            rate_limit_channels.get(router_id).ok_or_else(|| {
+                InitError::RateLimitChannelsNotInitialized(router_id.clone())
+            })?;
         Ok(rate_limit_tx.clone())
     }
 

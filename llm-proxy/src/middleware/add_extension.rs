@@ -25,7 +25,7 @@ impl<S> Layer<S> for AddExtensionsLayer {
                 .endpoint_converter_registry
                 .clone(),
             inference_provider: self.inference_provider,
-            router_id: self.router_id,
+            router_id: self.router_id.clone(),
         }
     }
 }
@@ -58,7 +58,7 @@ where
         req.extensions_mut()
             .insert(self.endpoint_converter_registry.clone());
         req.extensions_mut().insert(self.inference_provider);
-        req.extensions_mut().insert(self.router_id);
+        req.extensions_mut().insert(self.router_id.clone());
         self.inner.call(req)
     }
 }

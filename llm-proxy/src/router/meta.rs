@@ -4,11 +4,11 @@ use std::{
 };
 
 use axum_core::response::IntoResponse;
+use compact_str::CompactString;
 use futures::future::Either;
 use http::uri::PathAndQuery;
 use regex::Regex;
 use rustc_hash::FxHashMap as HashMap;
-use uuid::Uuid;
 
 use crate::{
     app_state::AppState,
@@ -21,24 +21,26 @@ use crate::{
     types::router::RouterId,
 };
 
-// Regex matching API calls starting with "/router":
-// 1. ^/router(?: ... )?$
-//    - Path must start with "/router". The part after is optional.
-//    - Alternatives for the optional part:
-// 2. `/(?P<router_uuid_val>UUID_PATTERN)(?P<api_path_after_uuid>.*)?`
-//    - Matches `/` + UUID. `api_path_after_uuid` captures the rest (e.g.,
-//      "/foo", "?q=b", or empty).
-// 3. `(?P<api_path_default>/.+)`
-//    - Matches a default path starting with `/` (e.g., "/v1/bar").
-// 4. `(?P<api_path_query_only>\?[^/].*)`
-//    - Matches a query string immediately after "/router" (e.g., "?q=b").
-//      `[^/]` prevents conflict.
-const ROUTER_ID_REGEX: &str = r"^/router(?:/(?P<router_uuid_val>[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12})(?P<api_path_after_uuid>.*)?|(?P<api_path_default>/.+)|(?P<api_path_query_only>\?[^/].*))?$";
+/// Regex for the following URL format:
+/// - `/router/{name}`
+/// - `/router/{name}?{query}`
+/// - `/router/{name}/{path}`
+/// - `/router/{name}/{path}?{query}`
+///
+/// eg:
+/// - `/router/default`
+/// - `/router/my-router`
+/// - `/router/my-router?user=bar`
+/// - `/router/default/v1/chat/completions`
+/// - `/router/my-router/v1/chat/completions`
+/// - `/router/my-router/v1/chat/completions?user=test&limit=10`
+const URL_REGEX: &str =
+    r"^/router/(?P<id>[A-Za-z0-9_-]{1,12})(?P<path>/[^?]*)?(?P<query>\?.*)?$";
 
 #[derive(Debug)]
 pub struct MetaRouter {
     inner: HashMap<RouterId, Router>,
-    router_id_regex: Regex,
+    url_regex: Regex,
 }
 
 impl MetaRouter {
@@ -59,17 +61,15 @@ impl MetaRouter {
     }
 
     pub async fn from_config(app_state: AppState) -> Result<Self, InitError> {
-        let router_id_regex =
-            Regex::new(ROUTER_ID_REGEX).expect("always valid if tests pass");
+        let url_regex =
+            Regex::new(URL_REGEX).expect("always valid if tests pass");
         let mut inner = HashMap::default();
         for router_id in app_state.0.config.routers.as_ref().keys() {
-            let router = Router::new(*router_id, app_state.clone()).await?;
-            inner.insert(*router_id, router);
+            let router =
+                Router::new(router_id.clone(), app_state.clone()).await?;
+            inner.insert(router_id.clone(), router);
         }
-        let meta_router = Self {
-            inner,
-            router_id_regex,
-        };
+        let meta_router = Self { inner, url_regex };
         Ok(meta_router)
     }
 }
@@ -103,15 +103,14 @@ impl tower::Service<crate::types::request::Request> for MetaRouter {
         &mut self,
         mut req: crate::types::request::Request,
     ) -> Self::Future {
-        let (router_id, api_path) = match extract_router_id_and_path(
-            &self.router_id_regex,
-            req.uri().path(),
-        ) {
-            Ok(result) => result,
-            Err(e) => {
-                return Either::Left(ready(Ok(e.into_response())));
-            }
-        };
+        let (router_id, api_path) =
+            match extract_router_id_and_path(&self.url_regex, req.uri().path())
+            {
+                Ok(result) => result,
+                Err(e) => {
+                    return Either::Left(ready(Ok(e.into_response())));
+                }
+            };
         tracing::trace!(
             router_id = router_id.to_string(),
             api_path = api_path,
@@ -153,85 +152,51 @@ impl tower::Service<crate::types::request::Request> for MetaRouter {
 }
 
 fn extract_router_id_and_path<'a>(
-    router_id_regex: &Regex,
+    url_regex: &Regex,
     path: &'a str,
 ) -> Result<(RouterId, &'a str), ApiError> {
-    if let Some(captures) = router_id_regex.captures(path) {
-        let router_id: RouterId;
-        let mut extracted_sub_path_component: &str = ""; // Stores the raw captured sub-path
+    // Attempt to match the incoming URI path against the provided regex
+    if let Some(captures) = url_regex.captures(path) {
+        // --- Determine the router id ---
+        let id_str = captures
+            .name("id")
+            .ok_or_else(|| {
+                ApiError::InvalidRequest(InvalidRequestError::NotFound(
+                    path.to_string(),
+                ))
+            })?
+            .as_str();
 
-        if let Some(uuid_match) = captures.name("router_uuid_val") {
-            let uuid_str = uuid_match.as_str();
-            if let Ok(uuid) = Uuid::parse_str(uuid_str) {
-                router_id = RouterId::Uuid(uuid);
-                if let Some(path_after_uuid_match) =
-                    captures.name("api_path_after_uuid")
-                {
-                    extracted_sub_path_component =
-                        path_after_uuid_match.as_str();
-                }
-                // extracted_sub_path_component can be "", "/foo",
-                // "?query"
-            } else {
-                // This should **never** happen if our regex is correct
-                tracing::warn!(
-                    "Path segment matched UUID pattern but failed to parse as \
-                     UUID"
-                );
-                return Err(ApiError::Internal(InternalError::Internal));
-            }
+        // Treat the special literal "default" (case-insensitive) as the default
+        // router. Anything else is considered a named router.
+        let router_id = if id_str.eq_ignore_ascii_case("default") {
+            RouterId::Default
         } else {
-            // No UUID matched, so it's a Default Router ID
-            router_id = RouterId::Default;
-            if let Some(default_path_match) = captures.name("api_path_default")
-            {
-                // Matched /.+
-                extracted_sub_path_component = default_path_match.as_str(); // e.g., "/foo", "/?query"
-            } else if let Some(query_only_match) =
-                captures.name("api_path_query_only")
-            {
-                // Matched \?[^/].*
-                extracted_sub_path_component = query_only_match.as_str(); // e.g., "?query"
-            }
-            // If path was just "/router", all optional groups are None, so
-            // extracted_sub_path_component remains ""
-        }
-
-        // Determine the final string for PathAndQuery construction
-        // If component is empty (e.g. "/router" or "/router/UUID"), path is
-        // "/". Otherwise, use the component as is (e.g. "/foo",
-        // "/?q=b", or potentially invalid "?q=b").
-
-        let mut processed_path_component = extracted_sub_path_component;
-
-        if !processed_path_component.is_empty()
-            && !processed_path_component.starts_with('?')
-        {
-            // This applies to cases like "/foo?bar" or "/?bar"
-            // For "/foo?bar", it becomes "/foo"
-            // For "/?bar", it becomes "/"
-            processed_path_component = processed_path_component
-                .split('?')
-                .next()
-                .unwrap_or(processed_path_component);
-        }
-
-        let final_path_and_query_str = if processed_path_component.is_empty() {
-            // This case is for when extracted_sub_path_component was originally
-            // empty (e.g. /router or /router/UUID)
-            "/"
-        } else {
-            // This handles:
-            // - "?query" (from extracted_sub_path_component starting with '?')
-            // - "/path" (from stripped "/path?query" or originally "/path")
-            // - "/" (from stripped "/?query" or originally "/")
-            processed_path_component
+            RouterId::Named(CompactString::from(id_str))
         };
 
-        Ok((router_id, final_path_and_query_str))
+        // --- Determine the API sub-path
+        // ------------------------------------------------------
+        // Priority:
+        //   1. If a concrete path segment was captured (e.g. "/v1/chat"), use
+        //      it.
+        //   2. If no path but a query string was captured (e.g. "?q=foo"),
+        //      return the raw query component so the caller can attempt to
+        //      reconstruct a `PathAndQuery`.
+        //   3. Otherwise default to the root path "/".
+        let api_path = if let Some(path_match) = captures.name("path") {
+            let p = path_match.as_str();
+            if p.is_empty() { "/" } else { p }
+        } else if let Some(query_match) = captures.name("query") {
+            query_match.as_str()
+        } else {
+            "/"
+        };
+
+        Ok((router_id, api_path))
     } else {
-        // Regex did not match the path at all (e.g. path doesn't start with
-        // /router)
+        // If the regex does not match at all, the request URI is considered
+        // invalid.
         Err(ApiError::InvalidRequest(InvalidRequestError::NotFound(
             path.to_string(),
         )))
@@ -244,289 +209,114 @@ mod tests {
 
     #[test]
     fn test_regex() {
-        let regex = Regex::new(ROUTER_ID_REGEX).expect("Regex should be valid");
+        let regex = Regex::new(URL_REGEX).expect("Regex should be valid");
 
-        // UUID paths
+        // --- Positive cases
+        // ---------------------------------------------------
+        // Basic default router id
+        assert!(regex.is_match("/router/default"));
+
+        // Default router id with additional API path
+        assert!(regex.is_match("/router/default/v1/chat/completions"));
+
+        // Default router id with query parameters
+        assert!(regex.is_match("/router/default?user=test"));
+
+        // Named router id containing a hyphen
+        assert!(regex.is_match("/router/my-router"));
+
+        // Named router id with additional API path and query parameters
         assert!(regex.is_match(
-            "/router/123e4567-e89b-12d3-a456-426614174000/v1/chat/completions"
-        ));
-        assert!(regex.is_match(
-            "/router/123e4567-e89b-12d3-a456-426614174000/v1/some/other/path"
-        ));
-        assert!(regex.is_match(
-            // UUID only
-            "/router/123e4567-e89b-12d3-a456-426614174000"
-        ));
-        assert!(regex.is_match(
-            // UUID with trailing slash
-            "/router/123e4567-e89b-12d3-a456-426614174000/"
+            "/router/my-router/v1/chat/completions?user=test&limit=10"
         ));
 
-        // Default paths (previously "Named" or "Default" can now be general
-        // Default paths)
-        assert!(regex.is_match("/router/some-id"));
-        assert!(regex.is_match("/router/some-id/"));
-
-        // Default paths (explicit /v1 or other segments)
-        assert!(regex.is_match("/router/v1/chat/completions"));
-        assert!(regex.is_match("/router/v1/completions"));
-
-        // Root router paths
-        assert!(regex.is_match("/router"));
-
-        assert!(!regex.is_match("/other/path"));
+        // --- Negative cases
+        // ---------------------------------------------------
+        // Missing router id
+        assert!(!regex.is_match("/router"));
         assert!(!regex.is_match("/router/"));
 
-        // Paths that might seem invalid but the regex is permissive for the
-        // path part
-        assert!(regex.is_match("/router//v1/path"));
+        // Router id exceeds 12 characters
+        assert!(!regex.is_match("/router/this-id-is-way-too-long"));
 
-        // Paths with only query params (regex matches, but extraction might
-        // fail on PathAndQuery)
-        assert!(regex.is_match("/router?query=param"));
-        assert!(regex.is_match("/router/?query=param"));
-        assert!(regex.is_match(
-            "/router/123e4567-e89b-12d3-a456-426614174000?query=param"
-        ));
-        assert!(regex.is_match(
-            "/router/123e4567-e89b-12d3-a456-426614174000/?query=param"
-        ));
+        // Path does not start with /router
+        assert!(!regex.is_match("/other/path"));
     }
 
     #[test]
-    #[allow(clippy::too_many_lines)]
     fn test_extract_router_id_and_path() {
-        let router_id_regex = Regex::new(ROUTER_ID_REGEX).unwrap();
+        let url_regex = Regex::new(URL_REGEX).unwrap();
 
-        let uuid = Uuid::new_v4();
-
-        // UUID with API path
-        let path = format!("/router/{uuid}/v1/chat/completions");
-        let expected_api_path = "/v1/chat/completions";
+        // --- Default router id
+        // -------------------------------------------------
+        let path_default = "/router/default";
+        let expected_api_path_default = "/";
         assert_eq!(
-            extract_router_id_and_path(&router_id_regex, &path).unwrap(),
-            (RouterId::Uuid(uuid), expected_api_path)
+            extract_router_id_and_path(&url_regex, path_default).unwrap(),
+            (RouterId::Default, expected_api_path_default)
         );
 
-        // UUID only (should default to API path "/")
-        let path_uuid_only = format!("/router/{uuid}");
-        let expected_api_path_uuid_only = "/";
-        assert_eq!(
-            extract_router_id_and_path(&router_id_regex, &path_uuid_only)
-                .unwrap(),
-            (RouterId::Uuid(uuid), expected_api_path_uuid_only)
-        );
-
-        // UUID with trailing slash (should default to API path "/")
-        let path_uuid_trailing_slash = format!("/router/{uuid}/");
-        let expected_api_path_uuid_trailing_slash = "/";
+        // Default router id with API path and query params
+        let path_default_with_path_query =
+            "/router/default/v1/chat/completions?user=test";
+        let expected_api_path_default_with_path_query = "/v1/chat/completions";
         assert_eq!(
             extract_router_id_and_path(
-                &router_id_regex,
-                &path_uuid_trailing_slash
+                &url_regex,
+                path_default_with_path_query
             )
             .unwrap(),
-            (RouterId::Uuid(uuid), expected_api_path_uuid_trailing_slash)
+            (RouterId::Default, expected_api_path_default_with_path_query)
         );
 
-        // Default with specific API path
-        let path_default_specific = "/router/v1/messages";
-        let expected_api_path_default_specific = "/v1/messages";
+        // --- Named router id
+        // ---------------------------------------------------
+        let path_named = "/router/my-router";
+        let expected_api_path_named = "/";
         assert_eq!(
-            extract_router_id_and_path(&router_id_regex, path_default_specific)
-                .unwrap(),
-            (RouterId::Default, expected_api_path_default_specific)
-        );
-
-        // Default router root (path "/router")
-        let path_default_root = "/router";
-        let expected_api_path_default_root = "/";
-        assert_eq!(
-            extract_router_id_and_path(&router_id_regex, path_default_root)
-                .unwrap(),
-            (RouterId::Default, expected_api_path_default_root)
-        );
-
-        // Default router root with trailing slash (path "/router/")
-        let path_default_root_trailing_slash = "/router";
-        let expected_api_path_default_root_trailing_slash = "/";
-        assert_eq!(
-            extract_router_id_and_path(
-                &router_id_regex,
-                path_default_root_trailing_slash
-            )
-            .unwrap(),
+            extract_router_id_and_path(&url_regex, path_named).unwrap(),
             (
-                RouterId::Default,
-                expected_api_path_default_root_trailing_slash
+                RouterId::Named(CompactString::from("my-router")),
+                expected_api_path_named
             )
         );
 
-        // Default with a non-UUID, non-/v1 segment as path
-        let path_default_custom_segment = "/router/my-custom-path/data";
-        let expected_api_path_custom_segment = "/my-custom-path/data";
+        // Named router id with additional API path
+        let path_named_with_path = "/router/my-router/v1/chat/completions";
+        let expected_api_path_named_with_path = "/v1/chat/completions";
         assert_eq!(
-            extract_router_id_and_path(
-                &router_id_regex,
-                path_default_custom_segment
-            )
-            .unwrap(),
-            (RouterId::Default, expected_api_path_custom_segment)
-        );
-
-        // Default with a path that looks like a named ID previously
-        let path_prev_named = "/router/my_named_router/v1/completions";
-        let expected_api_path_prev_named = "/my_named_router/v1/completions";
-        assert_eq!(
-            extract_router_id_and_path(&router_id_regex, path_prev_named)
+            extract_router_id_and_path(&url_regex, path_named_with_path)
                 .unwrap(),
-            (RouterId::Default, expected_api_path_prev_named)
+            (
+                RouterId::Named(CompactString::from("my-router")),
+                expected_api_path_named_with_path
+            )
         );
 
-        // Invalid path (does not start with /router)
-        let path_invalid_base = "/other/invalid/path";
+        // Named router id with query params but no explicit API path
+        let path_named_query_only = "/router/my-router?foo=bar";
+        let expected_api_path_named_query_only = "?foo=bar";
+        assert_eq!(
+            extract_router_id_and_path(&url_regex, path_named_query_only)
+                .unwrap(),
+            (
+                RouterId::Named(CompactString::from("my-router")),
+                expected_api_path_named_query_only
+            )
+        );
+
+        // --- Invalid cases
+        // -----------------------------------------------------
+        let path_missing_id = "/router";
         assert!(matches!(
-            extract_router_id_and_path(&router_id_regex, path_invalid_base),
-            Err(ApiError::InvalidRequest(InvalidRequestError::NotFound(_)))
+            extract_router_id_and_path(&url_regex, path_missing_id),
+            Err(ApiError::InvalidRequest(_))
         ));
 
-        // Path that looks like an invalid UUID but is treated as a default path
-        // segment
-        let path_not_a_uuid_segment = "/router/not-a-uuid/v1/responses";
-        let expected_api_path_not_a_uuid = "/not-a-uuid/v1/responses";
-        assert_eq!(
-            extract_router_id_and_path(
-                &router_id_regex,
-                path_not_a_uuid_segment
-            )
-            .unwrap(),
-            (RouterId::Default, expected_api_path_not_a_uuid)
-        );
-
-        // --- Cases with Query Parameters ---
-
-        // Default with API path and query
-        let path_default_query = "/router/v1/messages?user=test&limit=10";
-        let expected_api_path_default_query = "/v1/messages";
-        assert_eq!(
-            extract_router_id_and_path(&router_id_regex, path_default_query)
-                .unwrap(),
-            (RouterId::Default, expected_api_path_default_query)
-        );
-
-        // UUID with API path and query
-        let path_uuid_query = format!("/router/{uuid}/v1/chat?model=gpt4");
-        let expected_api_path_uuid_query = "/v1/chat";
-        assert_eq!(
-            extract_router_id_and_path(&router_id_regex, &path_uuid_query)
-                .unwrap(),
-            (RouterId::Uuid(uuid), expected_api_path_uuid_query)
-        );
-
-        // Default with API path (that used to be "named") and query
-        let path_default_custom_query =
-            "/router/my_router/v1/endpoint?id=123&flag=true";
-        let expected_api_path_default_custom_query = "/my_router/v1/endpoint";
-        assert_eq!(
-            extract_router_id_and_path(
-                &router_id_regex,
-                path_default_custom_query
-            )
-            .unwrap(),
-            (RouterId::Default, expected_api_path_default_custom_query)
-        );
-
-        // Default with API path, trailing slash, and query
-        let path_default_slash_query = "/router/v1/?action=query";
-        let expected_api_path_default_slash_query = "/v1/";
-        assert_eq!(
-            extract_router_id_and_path(
-                &router_id_regex,
-                path_default_slash_query
-            )
-            .unwrap(),
-            (RouterId::Default, expected_api_path_default_slash_query)
-        );
-
-        // UUID with API path, trailing slash, and query
-        let path_uuid_slash_query = format!("/router/{uuid}/v1/?action=query");
-        let expected_api_path_uuid_slash_query = "/v1/";
-        assert_eq!(
-            extract_router_id_and_path(
-                &router_id_regex,
-                &path_uuid_slash_query
-            )
-            .unwrap(),
-            (RouterId::Uuid(uuid), expected_api_path_uuid_slash_query)
-        );
-
-        // --- Cases where regex matches but PathAndQuery::try_from might fail
-        // --- These paths have query strings but lack a leading '/' for
-        // the path component if not part of a longer path.
-
-        // Default router root with only query (e.g. /router?action=query) ->
-        // API path "?action=query" (invalid for PathAndQuery)
-        let path_default_root_only_query = "/router?action=query";
-        let expected_api_path_default_root_only_query = "?action=query";
-        assert_eq!(
-            extract_router_id_and_path(
-                &router_id_regex,
-                path_default_root_only_query
-            )
-            .unwrap(),
-            (RouterId::Default, expected_api_path_default_root_only_query)
-        );
-
-        // UUID root with only query (e.g. /router/{uuid}?action=query) -> API
-        // path "?action=query" (invalid for PathAndQuery)
-        let path_uuid_root_only_query = format!("/router/{uuid}?action=query");
-        let expected_api_path_uuid_root_only_query = "?action=query";
-        assert_eq!(
-            extract_router_id_and_path(
-                &router_id_regex,
-                &path_uuid_root_only_query
-            )
-            .unwrap(),
-            (RouterId::Uuid(uuid), expected_api_path_uuid_root_only_query)
-        );
-
-        // Default router root with slash and query (e.g. /router/?action=query)
-        // -> API path "/"
-        let path_default_root_slash_query = "/router/?action=query";
-        let expected_path_default_root_slash_query = "/";
-        assert_eq!(
-            extract_router_id_and_path(
-                &router_id_regex,
-                path_default_root_slash_query
-            )
-            .unwrap(),
-            (RouterId::Default, expected_path_default_root_slash_query)
-        );
-
-        // UUID root with slash and query (e.g. /router/{uuid}/?action=query) ->
-        // API path "/"
-        let path_uuid_root_slash_query =
-            format!("/router/{uuid}/?action=query");
-        let expected_path_uuid_root_slash_query = "/";
-        assert_eq!(
-            extract_router_id_and_path(
-                &router_id_regex,
-                &path_uuid_root_slash_query
-            )
-            .unwrap(),
-            (RouterId::Uuid(uuid), expected_path_uuid_root_slash_query)
-        );
-
-        // Default path (that used to be named) with query
-        let path_default_was_named_query = "/router/named_id/v1?action=query";
-        let expected_path_default_was_named_query = "/named_id/v1";
-        assert_eq!(
-            extract_router_id_and_path(
-                &router_id_regex,
-                path_default_was_named_query
-            )
-            .unwrap(),
-            (RouterId::Default, expected_path_default_was_named_query)
-        );
+        let path_id_too_long = "/router/this-id-is-way-too-long";
+        assert!(matches!(
+            extract_router_id_and_path(&url_regex, path_id_too_long),
+            Err(ApiError::InvalidRequest(_))
+        ));
     }
 }

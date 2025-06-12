@@ -262,7 +262,7 @@ async fn make_chat_request(
     let request = Request::builder()
         .method(Method::POST)
         .header("authorization", auth_header)
-        .uri("http://router.helicone.com/router/v1/chat/completions")
+        .uri("http://router.helicone.com/router/default/v1/chat/completions")
         .body(request_body)
         .unwrap();
 

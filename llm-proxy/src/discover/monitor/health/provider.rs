@@ -110,7 +110,7 @@ async fn check_weighted_monitor(
 
                         let service = Dispatcher::new(
                             inner.app_state.clone(),
-                            inner.router_id,
+                            &inner.router_id,
                             &inner.router_config,
                             provider,
                         )
@@ -178,7 +178,7 @@ async fn check_p2c_monitor(
 
                         let service = Dispatcher::new(
                             inner.app_state.clone(),
-                            inner.router_id,
+                            &inner.router_id,
                             &inner.router_config,
                             provider,
                         )
@@ -303,7 +303,6 @@ impl HealthMonitor {
             let mut check_futures = Vec::new();
             for (router_id, monitor) in monitors.iter_mut() {
                 let span = tracing::info_span!("health_monitor", router_id = ?router_id);
-                let router_id = *router_id;
                 let check_future = async move {
                     let result = monitor.check_monitor().await;
                     if let Err(e) = &result {
@@ -354,7 +353,7 @@ impl AppState {
         tx: Sender<Change<WeightedKey, DispatcherService>>,
     ) {
         self.0.health_monitors.write().await.insert(
-            router_id,
+            router_id.clone(),
             ProviderHealthMonitor::weighted(
                 tx,
                 router_id,
@@ -371,7 +370,7 @@ impl AppState {
         tx: Sender<Change<Key, DispatcherService>>,
     ) {
         self.0.health_monitors.write().await.insert(
-            router_id,
+            router_id.clone(),
             ProviderHealthMonitor::p2c(
                 tx,
                 router_id,

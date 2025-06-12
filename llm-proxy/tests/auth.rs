@@ -44,7 +44,7 @@ async fn require_auth_enabled_with_valid_token() {
     let request = Request::builder()
         .method(Method::POST)
         .header("authorization", "Bearer sk-helicone-test-key")
-        .uri("http://router.helicone.com/router/v1/chat/completions")
+        .uri("http://router.helicone.com/router/default/v1/chat/completions")
         .body(request_body)
         .unwrap();
 
@@ -98,7 +98,7 @@ async fn require_auth_enabled_without_token() {
     let request = Request::builder()
         .method(Method::POST)
         // Missing authorization header
-        .uri("http://router.helicone.com/router/v1/chat/completions")
+        .uri("http://router.helicone.com/router/default/v1/chat/completions")
         .body(request_body)
         .unwrap();
 
@@ -145,7 +145,7 @@ async fn require_auth_disabled_without_token() {
     let request = Request::builder()
         .method(Method::POST)
         // No authorization header, but auth is disabled
-        .uri("http://router.helicone.com/router/v1/chat/completions")
+        .uri("http://router.helicone.com/router/default/v1/chat/completions")
         .body(request_body)
         .unwrap();
 
@@ -192,7 +192,7 @@ async fn require_auth_disabled_with_token() {
     let request = Request::builder()
         .method(Method::POST)
         .header("authorization", "Bearer sk-helicone-test-key")
-        .uri("http://router.helicone.com/router/v1/chat/completions")
+        .uri("http://router.helicone.com/router/default/v1/chat/completions")
         .body(request_body)
         .unwrap();
 
