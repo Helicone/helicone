@@ -1,7 +1,5 @@
 import { useState } from "react";
-import {
-    useBackfillCosts,
-  } from "../../../../services/hooks/admin";
+import { useBackfillCosts } from "../../../../services/hooks/admin";
 import { Button } from "@/components/ui/button";
 
 const CostBackfiller = () => {
@@ -10,7 +8,6 @@ const CostBackfiller = () => {
   const [modelId, setModelId] = useState("");
 
   const { backfillCosts, isBackfillingCosts } = useBackfillCosts(() => {
-    
     console.log("Backfill completed successfully");
   });
 
@@ -26,7 +23,9 @@ const CostBackfiller = () => {
     <div className="flex flex-col gap-4">
       <div className="rounded-md border border-destructive bg-white/50 p-4">
         <p className="text-sm text-destructive">
-          Cost backfilling is expensive, double check before you run anything. If possible, double check adminController.ts and the /backfill-costs query for all the columns.
+          Cost backfilling is expensive, double check before you run anything.
+          If possible, double check adminController.ts and the /backfill-costs
+          query for all the columns.
         </p>
       </div>
       <select
