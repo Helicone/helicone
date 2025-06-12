@@ -24,7 +24,7 @@ export class KafkaProducerImpl implements MessageProducer {
   }
 
   setLowerPriority() {
-    // Do nothing
+    // Do nothing since this is deprecated to SQS
   }
 
   async sendMessage(msg: MessageData): Promise<Result<null, string>> {
