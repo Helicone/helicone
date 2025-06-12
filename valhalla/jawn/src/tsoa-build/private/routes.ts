@@ -18361,7 +18361,7 @@ export function RegisterRoutes(app: Router) {
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsAdminController_backfillCosts: Record<string, TsoaRoute.ParameterSchema> = {
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
-                body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"modelId":{"dataType":"string","required":true},"timeExpression":{"dataType":"string","required":true}}},
+                body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"modelId":{"dataType":"string","required":true},"specifyModel":{"dataType":"boolean","required":true},"timeExpression":{"dataType":"string","required":true}}},
         };
         app.post('/v1/admin/backfill-costs',
             authenticateMiddleware([{"api_key":[]}]),

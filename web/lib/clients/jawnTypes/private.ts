@@ -17705,6 +17705,7 @@ export interface operations {
       content: {
         "application/json": {
           modelId: string;
+          specifyModel: boolean;
           timeExpression: string;
         };
       };

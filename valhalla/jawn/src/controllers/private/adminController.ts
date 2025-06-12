@@ -21,6 +21,7 @@ import { Setting } from "../../utils/settings";
 import type { SettingName } from "../../utils/settings";
 import Stripe from "stripe";
 import { AdminManager } from "../../managers/admin/AdminManager";
+import { clickhousePriceCalcNonAggregated } from "@helicone-package/cost";
 
 export const authCheckThrow = async (userId: string | undefined) => {
   if (!userId) {
@@ -1326,6 +1327,7 @@ export class AdminController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Body() body: {
       timeExpression: string;
+      specifyModel: boolean;
       modelId: string;
     }
   ): Promise<{
@@ -1336,14 +1338,41 @@ export class AdminController extends Controller {
     const query = `
     INSERT INTO request_response_rmt
     SELECT
-      r.*,
-      0 as cost,
+      response_id,
+      response_created_at,
+      latency,
+      status,
+      completion_tokens,
+      completion_audio_tokens,
+      cache_reference_id,
+      prompt_tokens,
+      prompt_cache_write_tokens,
+      prompt_cache_read_tokens,
+      prompt_audio_tokens,
+      model,
+      request_id,
+      request_created_at,
+      user_id,
+      organization_id,
+      proxy_key_id,
+      threat,
+      time_to_first_token,
+      provider,
+      target_url,
+      country_code,
+      cache_enabled,
+      properties,
+      scores,
+      request_body,
+      response_body,
+      ${clickhousePriceCalcNonAggregated("request_response_rmt")} as cost,
+      assets,
       now() as updated_at
     FROM
-      request_response_rmt r
+      request_response_rmt
     WHERE
       request_created_at >= ${body.timeExpression}
-      AND model = '${body.modelId}'
+      ${body.specifyModel ? `AND model = '${body.modelId}'` : ""}
     `
     const { error } = await clickhouseDb.dbQuery(query, []);
 

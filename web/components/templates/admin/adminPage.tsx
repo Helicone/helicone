@@ -1,3 +1,5 @@
+'use client';
+
 import AlertBanners from "./panels/alertBanners";
 import CostBackfiller from "./panels/costBackfiller";
 import KafkaSettings from "./panels/kafkaSettings";

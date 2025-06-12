@@ -52011,12 +52011,16 @@
 									"modelId": {
 										"type": "string"
 									},
+									"specifyModel": {
+										"type": "boolean"
+									},
 									"timeExpression": {
 										"type": "string"
 									}
 								},
 								"required": [
 									"modelId",
+									"specifyModel",
 									"timeExpression"
 								],
 								"type": "object"

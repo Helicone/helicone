@@ -213,7 +213,37 @@ END
 `;
 }
 
-export function clickhousePriceCalc(table: string) {
+export function clickhousePriceCalcNonAggregated(table: string, inDollars: boolean = true) {
+  // This is so that we don't need to do any floating point math in the database
+  // and we can just divide by 1_000_000 to get the cost in dollars
+
+  const providersWithCosts = providers.filter(
+    (p) => p.costs && defaultProvider.provider !== p.provider
+  );
+  if (!defaultProvider.costs) {
+    throw new Error("Default provider does not have costs");
+  }
+  return `
+  (
+  CASE
+  ${providersWithCosts
+    .map((provider) => {
+      if (!provider.costs) {
+        throw new Error("Provider does not have costs");
+      }
+
+      return `WHEN (${table}.provider = '${
+        provider.provider
+      }') THEN (${caseForCost(provider.costs, table, COST_PRECISION_MULTIPLIER)})`;
+    })
+    .join("\n")}
+    ELSE ${caseForCost(defaultProvider.costs, table, COST_PRECISION_MULTIPLIER)}
+  END
+  ) ${inDollars ? `/ ${COST_PRECISION_MULTIPLIER}` : ""}
+`;
+}
+
+export function clickhousePriceCalc(table: string, inDollars: boolean = true) {
   // This is so that we don't need to do any floating point math in the database
   // and we can just divide by 1_000_000 to get the cost in dollars
 
@@ -239,6 +269,6 @@ sum(
     .join("\n")}
     ELSE ${caseForCost(defaultProvider.costs, table, COST_PRECISION_MULTIPLIER)}
   END
-  ) / ${COST_PRECISION_MULTIPLIER}
+  ) ${inDollars ? `/ ${COST_PRECISION_MULTIPLIER}` : ""}
 `;
 }

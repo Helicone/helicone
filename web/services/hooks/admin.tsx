@@ -139,10 +139,40 @@ const useChangelog = () => {
   };
 };
 
+const useBackfillCosts = (onSuccess?: () => void) => {
+  const { mutate: backfillCosts, isPending: isBackfillingCosts } = useMutation({
+    mutationKey: ["backfill-costs"],
+    mutationFn: async (req: {
+      timeExpression: string;
+      specifyModel: boolean;
+      modelId: string;
+    }) => {
+      const jawnClient = getJawnClient();
+      const { data, error } = await jawnClient.POST("/v1/admin/backfill-costs", {
+        body: {
+          timeExpression: req.timeExpression,
+          specifyModel: req.specifyModel,
+          modelId: req.modelId,
+        },
+      });
+
+      console.log(`Backfilled costs`, data);
+
+      return { data, error };
+    },
+  });
+
+  return {
+    backfillCosts,
+    isBackfillingCosts,
+  };
+};
+
 export {
   useChangelog,
   useCreateAlertBanner,
   useGetSetting,
   useUpdateAlertBanner,
   useUpdateSetting,
+  useBackfillCosts,
 };
