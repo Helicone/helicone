@@ -160,19 +160,17 @@
                 ]
               },
               {
-                "group": "Build Your Own",
+                "group": "Tools Logging",
                 "pages": [
                   "integrations/tools/curl",
-                  "integrations/tools/javascript",
-                  "integrations/tools/python",
-                  {
-                    "group": "Vector DB",
-                    "pages": [
-                      "integrations/vectordb/curl",
-                      "integrations/vectordb/javascript",
-                      "integrations/vectordb/python"
-                    ]
-                  }
+                  "integrations/tools/logger-sdk"
+                ]
+              },
+              {
+                "group": "Any Vector DB",
+                "pages": [
+                  "integrations/vectordb/curl",
+                  "integrations/vectordb/logger-sdk"
                 ]
               }
             ]
