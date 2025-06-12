@@ -3,7 +3,7 @@ use telemetry::TelemetryError;
 use thiserror::Error;
 
 use crate::{
-    config::DeploymentTarget,
+    config::{DeploymentTarget, validation::ModelMappingValidationError},
     types::{provider::InferenceProvider, router::RouterId},
 };
 
@@ -46,6 +46,8 @@ pub enum InitError {
     InitSystemMetrics,
     /// Invalid rate limit config: {0}
     InvalidRateLimitConfig(&'static str),
+    /// Invalid mappings config: {0}
+    InvalidMappingsConfig(#[from] ModelMappingValidationError),
     /// Failed to connect to websocket: {0}
     WebsocketConnection(#[from] Box<tokio_tungstenite::tungstenite::Error>),
     /// URL parsing error: {0}

@@ -38,13 +38,16 @@ async fn main() -> Result<(), RuntimeError> {
             std::process::exit(1);
         }
     };
-    // Initialize telemetry
+
     let (logger_provider, tracer_provider, metrics_provider) =
         telemetry::init_telemetry(&config.telemetry)
-            .map_err(InitError::Telemetry)
-            .map_err(RuntimeError::Init)?;
+            .map_err(InitError::Telemetry)?;
 
     info!("telemetry initialized");
+
+    config.validate().inspect_err(|e| {
+        tracing::error!(error = %e, "configuration validation failed");
+    })?;
     let mut shutting_down = false;
     let helicone_config = config.helicone.clone();
     let app = App::new(config).await?;

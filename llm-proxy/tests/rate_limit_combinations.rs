@@ -30,7 +30,7 @@ fn create_test_limits(capacity: u32, duration_ms: u64) -> LimitsConfig {
 fn create_router_config(rate_limit: RouterRateLimitConfig) -> RouterConfig {
     RouterConfig {
         rate_limit,
-        balance: llm_proxy::config::balance::BalanceConfig::openai_chat(),
+        load_balance: llm_proxy::config::balance::BalanceConfig::openai_chat(),
         ..Default::default()
     }
 }
@@ -288,7 +288,8 @@ async fn test_router_specific_with_custom_limits() {
             rate_limit: RouterRateLimitConfig::Custom {
                 limits: create_test_limits(2, 1000), // 2 requests per second
             },
-            balance: llm_proxy::config::balance::BalanceConfig::openai_chat(),
+            load_balance:
+                llm_proxy::config::balance::BalanceConfig::openai_chat(),
             ..Default::default()
         },
     )]));
@@ -361,7 +362,8 @@ async fn test_global_with_custom_router_override() {
                 limits: create_test_limits(2, 1000), /* 2 requests per second
                                                       * for this router */
             },
-            balance: llm_proxy::config::balance::BalanceConfig::openai_chat(),
+            load_balance:
+                llm_proxy::config::balance::BalanceConfig::openai_chat(),
             ..Default::default()
         },
     )]));
@@ -493,8 +495,8 @@ async fn test_router_independence_different_rate_limits() {
                     limits: create_test_limits(1, 1000), /* 1 request per
                                                          second - strict */
                 },
-                balance: llm_proxy::config::balance::BalanceConfig::openai_chat(
-                ),
+                load_balance:
+                    llm_proxy::config::balance::BalanceConfig::openai_chat(),
                 ..Default::default()
             },
         ),
@@ -505,8 +507,8 @@ async fn test_router_independence_different_rate_limits() {
                     limits: create_test_limits(5, 1000), /* 5 requests per
                                                          second - lenient */
                 },
-                balance: llm_proxy::config::balance::BalanceConfig::openai_chat(
-                ),
+                load_balance:
+                    llm_proxy::config::balance::BalanceConfig::openai_chat(),
                 ..Default::default()
             },
         ),
@@ -514,8 +516,8 @@ async fn test_router_independence_different_rate_limits() {
             RouterId::Default,
             RouterConfig {
                 rate_limit: RouterRateLimitConfig::None, // No rate limiting
-                balance: llm_proxy::config::balance::BalanceConfig::openai_chat(
-                ),
+                load_balance:
+                    llm_proxy::config::balance::BalanceConfig::openai_chat(),
                 ..Default::default()
             },
         ),
@@ -680,8 +682,8 @@ async fn test_multi_router_different_rate_limits_in_memory() {
                 rate_limit: RouterRateLimitConfig::Custom {
                     limits: create_test_limits(1, 1000),
                 },
-                balance: llm_proxy::config::balance::BalanceConfig::openai_chat(
-                ),
+                load_balance:
+                    llm_proxy::config::balance::BalanceConfig::openai_chat(),
                 ..Default::default()
             },
         ),
@@ -689,8 +691,8 @@ async fn test_multi_router_different_rate_limits_in_memory() {
             router_b_id,
             RouterConfig {
                 rate_limit: RouterRateLimitConfig::OptIn,
-                balance: llm_proxy::config::balance::BalanceConfig::openai_chat(
-                ),
+                load_balance:
+                    llm_proxy::config::balance::BalanceConfig::openai_chat(),
                 ..Default::default()
             },
         ),
@@ -698,8 +700,8 @@ async fn test_multi_router_different_rate_limits_in_memory() {
             router_c_id,
             RouterConfig {
                 rate_limit: RouterRateLimitConfig::None,
-                balance: llm_proxy::config::balance::BalanceConfig::openai_chat(
-                ),
+                load_balance:
+                    llm_proxy::config::balance::BalanceConfig::openai_chat(),
                 ..Default::default()
             },
         ),

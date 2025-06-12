@@ -72,7 +72,7 @@ async fn google_with_openai_request_style() {
         RouterId::Default,
         RouterConfig {
             request_style: InferenceProvider::OpenAI,
-            balance: BalanceConfig::google_gemini(),
+            load_balance: BalanceConfig::google_gemini(),
             ..Default::default()
         },
     )]));
@@ -142,7 +142,7 @@ async fn anthropic_with_openai_request_style() {
         RouterId::Default,
         RouterConfig {
             request_style: InferenceProvider::OpenAI,
-            balance: BalanceConfig::anthropic_chat(),
+            load_balance: BalanceConfig::anthropic_chat(),
             ..Default::default()
         },
     )]));
@@ -217,7 +217,7 @@ async fn anthropic_with_anthropic_request_style() {
         RouterId::Default,
         RouterConfig {
             request_style: InferenceProvider::OpenAI,
-            balance: BalanceConfig::anthropic_chat(),
+            load_balance: BalanceConfig::anthropic_chat(),
             ..Default::default()
         },
     )]));
@@ -294,7 +294,7 @@ async fn anthropic_request_style() {
         RouterId::Default,
         RouterConfig {
             request_style: InferenceProvider::Anthropic,
-            balance: BalanceConfig::openai_chat(),
+            load_balance: BalanceConfig::openai_chat(),
             ..Default::default()
         },
     )]));
@@ -350,7 +350,7 @@ async fn ollama() {
         RouterId::Default,
         RouterConfig {
             request_style: InferenceProvider::OpenAI,
-            balance: BalanceConfig::ollama_chat(),
+            load_balance: BalanceConfig::ollama_chat(),
             ..Default::default()
         },
     )]));

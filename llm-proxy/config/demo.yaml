@@ -1,15 +1,15 @@
 routers:
   default:
-    balance:
+    load-balance:
       chat:
-        strategy: p2-c
+        strategy: latency
         targets:
           - openai
           - anthropic
 
 # routers:
 #   default:
-#     balance:
+#     load-balance:
 #       chat:
 #         strategy: weighted
 #         targets:

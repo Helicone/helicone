@@ -80,7 +80,8 @@ impl ProviderHealthMonitor {
 async fn check_weighted_monitor(
     inner: &mut ProviderMonitorInner<WeightedKey>,
 ) -> Result<(), runtime::RuntimeError> {
-    for (endpoint_type, balance_config) in inner.router_config.balance.as_ref()
+    for (endpoint_type, balance_config) in
+        inner.router_config.load_balance.as_ref()
     {
         match balance_config {
             BalanceConfigInner::Weighted { targets } => {
@@ -141,7 +142,7 @@ async fn check_weighted_monitor(
                     }
                 }
             }
-            BalanceConfigInner::P2C { .. } => {
+            BalanceConfigInner::Latency { .. } => {
                 tracing::error!("P2C entries in a weighted monitor");
                 return Err(InternalError::Internal.into());
             }
@@ -154,10 +155,11 @@ async fn check_weighted_monitor(
 async fn check_p2c_monitor(
     inner: &mut ProviderMonitorInner<Key>,
 ) -> Result<(), runtime::RuntimeError> {
-    for (endpoint_type, balance_config) in inner.router_config.balance.as_ref()
+    for (endpoint_type, balance_config) in
+        inner.router_config.load_balance.as_ref()
     {
         match balance_config {
-            BalanceConfigInner::P2C { targets } => {
+            BalanceConfigInner::Latency { targets } => {
                 for &provider in targets {
                     let key = Key::new(provider, *endpoint_type);
                     let is_healthy = inner.check_health(provider)?;

@@ -15,16 +15,22 @@ pub struct BalanceConfig(pub HashMap<EndpointType, BalanceConfigInner>);
 
 impl Default for BalanceConfig {
     fn default() -> Self {
-        Self::p2c_all_providers()
+        Self::latency_all_providers_except_ollama()
     }
 }
 
 impl BalanceConfig {
     #[must_use]
-    pub fn p2c_all_providers() -> Self {
+    pub fn latency_all_providers_except_ollama() -> Self {
         Self(HashMap::from([(
             EndpointType::Chat,
-            BalanceConfigInner::p2c_all_providers(),
+            BalanceConfigInner::Latency {
+                targets: nes![
+                    InferenceProvider::OpenAI,
+                    InferenceProvider::Anthropic,
+                    InferenceProvider::GoogleGemini,
+                ],
+            },
         )]))
     }
 
@@ -97,13 +103,13 @@ impl BalanceConfig {
 #[serde(rename_all = "kebab-case", tag = "strategy")]
 pub enum BalanceConfigInner {
     Weighted { targets: NESet<BalanceTarget> },
-    P2C { targets: NESet<InferenceProvider> },
+    Latency { targets: NESet<InferenceProvider> },
 }
 
 impl BalanceConfigInner {
     #[must_use]
     pub fn p2c_all_providers() -> Self {
-        Self::P2C {
+        Self::Latency {
             targets: nes![
                 InferenceProvider::OpenAI,
                 InferenceProvider::Anthropic,
@@ -119,7 +125,7 @@ impl BalanceConfigInner {
             Self::Weighted { targets } => {
                 targets.iter().map(|t| t.provider).collect()
             }
-            Self::P2C { targets } => targets.iter().copied().collect(),
+            Self::Latency { targets } => targets.iter().copied().collect(),
         }
     }
 }

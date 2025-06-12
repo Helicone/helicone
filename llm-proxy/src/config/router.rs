@@ -40,7 +40,8 @@ impl Default for RouterConfigs {
 pub struct RouterConfig {
     #[serde(default = "default_request_style")]
     pub request_style: InferenceProvider,
-    pub balance: BalanceConfig,
+    #[serde(default = "Default::default")]
+    pub load_balance: BalanceConfig,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub model_mappings: Option<ModelMappingConfig>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -62,7 +63,7 @@ impl Default for RouterConfig {
             request_style: InferenceProvider::OpenAI,
             model_mappings: None,
             cache: None,
-            balance: BalanceConfig::default(),
+            load_balance: BalanceConfig::default(),
             retries: None,
             rate_limit: RouterRateLimitConfig::default(),
             spend_control: None,
@@ -76,7 +77,7 @@ fn default_request_style() -> InferenceProvider {
 
 impl RouterConfig {
     pub fn validate(&self) -> Result<(), InitError> {
-        for balance_config in self.balance.0.values() {
+        for balance_config in self.load_balance.0.values() {
             match balance_config {
                 BalanceConfigInner::Weighted { targets } => {
                     let total =
@@ -87,7 +88,7 @@ impl RouterConfig {
                         ));
                     }
                 }
-                BalanceConfigInner::P2C { .. } => {}
+                BalanceConfigInner::Latency { .. } => {}
             }
         }
 
@@ -143,9 +144,9 @@ impl crate::tests::TestDefault for RouterConfigs {
                 request_style: InferenceProvider::OpenAI,
                 model_mappings: None,
                 cache: None,
-                balance: BalanceConfig(HashMap::from([(
+                load_balance: BalanceConfig(HashMap::from([(
                     crate::endpoints::EndpointType::Chat,
-                    BalanceConfigInner::P2C {
+                    BalanceConfigInner::Latency {
                         targets: nonempty_collections::nes![
                             InferenceProvider::OpenAI
                         ],
@@ -174,7 +175,7 @@ mod tests {
             seed: "test-seed".to_string(),
         };
 
-        let balance = BalanceConfig::p2c_all_providers();
+        let balance = BalanceConfig::latency_all_providers_except_ollama();
         let retries = RetryConfig {
             enabled: false,
             max_retries: 3,
@@ -188,7 +189,7 @@ mod tests {
             request_style: InferenceProvider::OpenAI,
             model_mappings: None,
             cache: Some(cache),
-            balance,
+            load_balance: balance,
             retries: Some(retries),
             rate_limit: RouterRateLimitConfig::default(),
             spend_control: None,

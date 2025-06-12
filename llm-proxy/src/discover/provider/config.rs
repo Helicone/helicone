@@ -58,7 +58,9 @@ impl ConfigDiscovery<Key> {
     ) -> Result<Self, InitError> {
         let events = ReceiverStream::new(rx);
         let mut service_map: HashMap<Key, DispatcherService> = HashMap::new();
-        for (endpoint_type, balance_config) in router_config.balance.as_ref() {
+        for (endpoint_type, balance_config) in
+            router_config.load_balance.as_ref()
+        {
             let providers = balance_config.providers();
             for provider in providers {
                 let key = Key::new(provider, *endpoint_type);
@@ -89,10 +91,12 @@ impl ConfigDiscovery<WeightedKey> {
         rx: Receiver<Change<WeightedKey, DispatcherService>>,
     ) -> Result<Self, InitError> {
         let mut service_map = HashMap::new();
-        for (endpoint_type, balance_config) in router_config.balance.as_ref() {
+        for (endpoint_type, balance_config) in
+            router_config.load_balance.as_ref()
+        {
             let weighted_balance_targets = match balance_config {
                 BalanceConfigInner::Weighted { targets } => targets,
-                BalanceConfigInner::P2C { .. } => {
+                BalanceConfigInner::Latency { .. } => {
                     return Err(InitError::InvalidWeightedBalancer(
                         "P2C balancer not supported for weighted discovery"
                             .to_string(),

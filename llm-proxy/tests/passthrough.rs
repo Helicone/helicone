@@ -28,7 +28,7 @@ async fn openai_passthrough() {
         RouterId::Default,
         RouterConfig {
             request_style: InferenceProvider::OpenAI,
-            balance: BalanceConfig::openai_chat(),
+            load_balance: BalanceConfig::openai_chat(),
             ..Default::default()
         },
     )]));

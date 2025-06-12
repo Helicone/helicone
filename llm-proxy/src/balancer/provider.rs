@@ -44,7 +44,7 @@ impl ProviderBalancer {
             BalanceConfigInner::Weighted { .. } => {
                 Self::weighted(app_state, router_id, router_config).await
             }
-            BalanceConfigInner::P2C { .. } => {
+            BalanceConfigInner::Latency { .. } => {
                 Self::peak_ewma(app_state, router_id, router_config).await
             }
         }

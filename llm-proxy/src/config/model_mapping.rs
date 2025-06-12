@@ -5,11 +5,11 @@ use serde::{Deserialize, Serialize};
 use crate::types::model_id::ModelName;
 
 const MODEL_MAPPING_YAML: &str =
-    include_str!("../../config/model-mapping.yaml");
+    include_str!("../../config/embedded/model-mapping.yaml");
 
 #[derive(Debug, Clone, Deserialize, Serialize, AsRef, PartialEq, Eq)]
 pub struct ModelMappingConfig(
-    NEMap<ModelName<'static>, NESet<ModelName<'static>>>,
+    pub(crate) NEMap<ModelName<'static>, NESet<ModelName<'static>>>,
 );
 
 impl Default for ModelMappingConfig {

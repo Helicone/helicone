@@ -217,7 +217,7 @@ impl ProviderMonitorInner<WeightedKey> {
         let endpoint_type = api_endpoint.endpoint_type();
 
         let Some(balance_config) =
-            self.router_config.balance.0.get(&endpoint_type)
+            self.router_config.load_balance.0.get(&endpoint_type)
         else {
             tracing::error!(
                 router_id = ?self.router_id,
@@ -252,7 +252,7 @@ impl ProviderMonitorInner<WeightedKey> {
                 );
                 Err(InternalError::Internal)
             }
-            BalanceConfigInner::P2C { .. } => Err(InternalError::Internal),
+            BalanceConfigInner::Latency { .. } => Err(InternalError::Internal),
         }
     }
 

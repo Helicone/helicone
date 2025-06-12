@@ -13,6 +13,7 @@ pub mod retry;
 pub mod router;
 pub mod server;
 pub mod spend_control;
+pub mod validation;
 use std::path::PathBuf;
 
 use config::ConfigError;
@@ -22,7 +23,7 @@ use serde::{Deserialize, Serialize};
 use strum::IntoStaticStr;
 use thiserror::Error;
 
-use crate::utils::default_true;
+use crate::{error::init::InitError, utils::default_true};
 
 #[derive(Debug, Error, Display)]
 pub enum Error {
@@ -122,6 +123,14 @@ impl Config {
             .map_err(Error::from)
             .map_err(Box::new)?;
         Ok(config)
+    }
+
+    pub fn validate(&self) -> Result<(), InitError> {
+        for router_config in self.routers.as_ref().values() {
+            router_config.validate()?;
+        }
+        self.validate_model_mappings()?;
+        Ok(())
     }
 }
 

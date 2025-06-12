@@ -67,7 +67,9 @@ impl Router {
         let rl_layer =
             rate_limit::Layer::per_router(&app_state, id, &router_config)
                 .await?;
-        for (endpoint_type, balance_config) in router_config.balance.as_ref() {
+        for (endpoint_type, balance_config) in
+            router_config.load_balance.as_ref()
+        {
             let balancer = ProviderBalancer::new(
                 app_state.clone(),
                 id,

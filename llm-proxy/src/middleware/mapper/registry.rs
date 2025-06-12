@@ -81,7 +81,7 @@ impl EndpointConverterRegistryInner {
         let mut registry = Self {
             converters: HashMap::default(),
         };
-        let providers = router_config.balance.providers();
+        let providers = router_config.load_balance.providers();
         let request_style = router_config.request_style;
 
         if request_style == InferenceProvider::OpenAI

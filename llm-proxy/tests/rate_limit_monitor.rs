@@ -42,7 +42,7 @@ async fn rate_limit_removes_provider_from_lb_pool() {
     config.routers = RouterConfigs::new(HashMap::from([(
         RouterId::Default,
         RouterConfig {
-            balance: balance_config,
+            load_balance: balance_config,
             ..Default::default()
         },
     )]));

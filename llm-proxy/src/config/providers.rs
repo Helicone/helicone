@@ -5,7 +5,8 @@ use url::Url;
 
 use crate::types::{model_id::ModelName, provider::InferenceProvider};
 
-const PROVIDERS_YAML: &str = include_str!("../../config/providers.yaml");
+const PROVIDERS_YAML: &str =
+    include_str!("../../config/embedded/providers.yaml");
 pub(crate) const DEFAULT_ANTHROPIC_VERSION: &str = "2023-06-01";
 
 /// Global configuration for providers, shared across all routers.
