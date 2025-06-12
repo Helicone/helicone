@@ -99,120 +99,136 @@ export class LLMController extends Controller {
         });
         const abortController = new AbortController();
 
-        const response = await openai.chat.completions.create(
-          {
-            provider: isOnPrem
-              ? undefined
-              : {
-                  sort: "throughput",
-                  order: ["Fireworks"],
-                },
-            model: isOnPrem ? params.model?.split("/")[1] : params.model,
-            messages: params.messages,
-            temperature: params.temperature,
-            max_tokens: params.max_tokens,
-            top_p: params.top_p,
-            frequency_penalty: params.frequency_penalty,
-            presence_penalty: params.presence_penalty,
-            stop: params.stop,
-            stream: params.stream !== undefined,
-            response_format: params.response_format,
-            tools: params.tools,
-          } as any,
-          {
-            signal: abortController.signal,
-          }
-        );
-
-        if (params.stream) {
-          // Set up streaming response
-          (<any>request.res).setHeader("Content-Type", "text/event-stream");
-          (<any>request.res).setHeader("Cache-Control", "no-cache");
-          (<any>request.res).setHeader("Connection", "keep-alive");
-
-          const stream =
-            response as unknown as AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>;
-          try {
-            for await (const chunk of stream) {
-              // Check if request was cancelled
-              if (request.headers["x-cancel"] === "1") {
-                abortController.abort();
-                return ok({ content: "", reasoning: "", calls: "" }); // Exit the loop and function
-              }
-
-              // Skip [DONE] message and only send actual chunks
-              if (typeof chunk === "string" && chunk === "[DONE]") {
-                continue;
-              }
-
-              // Format as Server-Sent Event (SSE)
-              const chunkString = JSON.stringify(chunk);
-              const sseFormattedChunk = `data: ${chunkString}\n\n`;
-              (<any>request.res).write(sseFormattedChunk);
-
-              // @ts-ignore - flush exists on NodeJS.ServerResponse
-              request.res.flush?.(); // Ensure chunk is sent immediately
+        try {
+          const response = await openai.chat.completions.create(
+            {
+              provider: isOnPrem
+                ? undefined
+                : {
+                    sort: "throughput",
+                    order: ["Fireworks"],
+                  },
+              model: isOnPrem ? params.model?.split("/")[1] : params.model,
+              messages: params.messages,
+              temperature: params.temperature,
+              max_tokens: params.max_tokens,
+              top_p: params.top_p,
+              frequency_penalty: params.frequency_penalty,
+              presence_penalty: params.presence_penalty,
+              stop: params.stop,
+              stream: params.stream !== undefined,
+              response_format: params.response_format,
+              tools: params.tools,
+            } as any,
+            {
+              signal: abortController.signal,
             }
-          } catch (error) {
-            // Handle stream interruption gracefully
-            console.error("[API Stream] Stream error:", error); // Log the error
-            if (
-              error instanceof Error &&
-              (error.name === "ResponseAborted" || error.name === "AbortError")
-            ) {
-              // Client likely disconnected or aborted, no need to throw further
-            } else {
-              // Rethrow other errors to be caught by the outer try-catch
-              throw error;
-            }
-          } finally {
-            // Ensure the response is always ended when the stream finishes or aborts/errors
-            if (!(<any>request.res).writableEnded) {
-              (<any>request.res).end();
-            }
-          }
-          return ok({ content: "", reasoning: "", calls: "" });
-        }
-
-        const resp = response as any;
-        const content = resp.choices?.[0]?.message?.content || "";
-        const reasoning = resp.choices?.[0]?.message?.reasoning || "";
-        const calls = resp.choices?.[0]?.message?.tool_calls || "";
-
-        if (!content && !calls) {
-          console.warn(
-            "[API] LLM call resulted in empty content and no tool calls."
           );
-        }
 
-        return ok({ content, reasoning, calls });
-      });
-    } catch (error) {
-      console.error("Error in generate", error);
-      if (error instanceof Error) {
-        if (error.name === "ResponseAborted" || error.name === "AbortError") {
-          return ok({ content: "", reasoning: "", calls: "" });
-        }
+          if (params.stream) {
+            // Set up streaming response
+            (<any>request.res).setHeader("Content-Type", "text/event-stream");
+            (<any>request.res).setHeader("Cache-Control", "no-cache");
+            (<any>request.res).setHeader("Connection", "keep-alive");
 
-        if (error instanceof OpenAI.APIError) {
-          if (
-            error.status === 429 &&
-            "helicone-ratelimit-remaining" in error.headers &&
-            error.headers["helicone-ratelimit-remaining"] === "0"
-          ) {
-            return err(
-              "You have reached your free playground limit. Please add your own OpenRouter key to continue using the Playground."
+            const stream =
+              response as unknown as AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>;
+            try {
+              for await (const chunk of stream) {
+                // Check if request was cancelled
+                if (request.headers["x-cancel"] === "1") {
+                  abortController.abort();
+                  return ok({ content: "", reasoning: "", calls: "" }); // Exit the loop and function
+                }
+
+                // Skip [DONE] message and only send actual chunks
+                if (typeof chunk === "string" && chunk === "[DONE]") {
+                  continue;
+                }
+
+                // Format as Server-Sent Event (SSE)
+                const chunkString = JSON.stringify(chunk);
+                const sseFormattedChunk = `data: ${chunkString}\n\n`;
+                (<any>request.res).write(sseFormattedChunk);
+
+                // @ts-ignore - flush exists on NodeJS.ServerResponse
+                request.res.flush?.(); // Ensure chunk is sent immediately
+              }
+            } catch (error) {
+              // Handle stream interruption gracefully
+              console.error("[API Stream] Stream error:", error); // Log the error
+              if (
+                error instanceof Error &&
+                (error.name === "ResponseAborted" ||
+                  error.name === "AbortError")
+              ) {
+                // Client likely disconnected or aborted, no need to throw further
+              } else {
+                // Rethrow other errors to be caught by the outer try-catch
+                return err("Stream error");
+              }
+            } finally {
+              // Ensure the response is always ended when the stream finishes or aborts/errors
+              if (!(<any>request.res).writableEnded) {
+                (<any>request.res).end();
+              }
+            }
+            return ok({ content: "", reasoning: "", calls: "" });
+          }
+
+          const resp = response as any;
+          const content = resp.choices?.[0]?.message?.content || "";
+          const reasoning = resp.choices?.[0]?.message?.reasoning || "";
+          const calls = resp.choices?.[0]?.message?.tool_calls || "";
+
+          if (!content && !calls) {
+            console.warn(
+              "[API] LLM call resulted in empty content and no tool calls."
             );
           }
 
-          return err(
-            error.error.metadata?.raw
-              ? JSON.parse(error.error.metadata?.raw || "{}")?.error?.message
-              : error.error.message
-          );
+          return ok({ content, reasoning, calls });
+        } catch (error) {
+          console.error("[API] Inner try-catch error:", error);
+          this.setStatus(500);
+          if (error instanceof Error) {
+            if (
+              error.name === "ResponseAborted" ||
+              error.name === "AbortError"
+            ) {
+              this.setStatus(400);
+              return err("Request cancelled");
+            }
+
+            if (error instanceof OpenAI.APIError) {
+              if (
+                error.status === 429 &&
+                "helicone-ratelimit-remaining" in error.headers &&
+                error.headers["helicone-ratelimit-remaining"] === "0"
+              ) {
+                this.setStatus(429);
+                return err(
+                  "You have reached your free playground limit. Please add your own OpenRouter key to continue using the Playground."
+                );
+              }
+
+              this.setStatus(error.status);
+              return err(
+                error.error.metadata?.raw
+                  ? JSON.parse(error.error.metadata?.raw || "{}")?.error
+                      ?.message
+                  : error.error.message
+              );
+            }
+
+            return err(error.message);
+          }
+
+          return err("Failed to generate response");
         }
-      }
-      console.error("Generation error:", error);
+      });
+    } catch (error) {
+      this.setStatus(500);
       return err("Failed to generate response");
     }
   }
