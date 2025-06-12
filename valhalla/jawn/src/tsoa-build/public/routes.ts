@@ -40,6 +40,8 @@ import { ModelController } from './../../controllers/public/modelController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { LLMSecurityController } from './../../controllers/public/llmSecurityController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { LLMController } from './../../controllers/public/llmController';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { IntegrationController } from './../../controllers/public/integrationController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { ExperimentController } from './../../controllers/public/experimentController';
@@ -699,6 +701,7 @@ const models: TsoaRoute.Models = {
     "FunctionCall": {
         "dataType": "refObject",
         "properties": {
+            "id": {"dataType":"string"},
             "name": {"dataType":"string","required":true},
             "arguments": {"ref":"Record_string.any_","required":true},
         },
@@ -1957,6 +1960,218 @@ const models: TsoaRoute.Models = {
     "Result__unsafe-boolean_.string_": {
         "dataType": "refAlias",
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__unsafe-boolean__"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ChatCompletionTokenLogprob.TopLogprob": {
+        "dataType": "refObject",
+        "properties": {
+            "token": {"dataType":"string","required":true},
+            "bytes": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"double"}},{"dataType":"enum","enums":[null]}],"required":true},
+            "logprob": {"dataType":"double","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ChatCompletionTokenLogprob": {
+        "dataType": "refObject",
+        "properties": {
+            "token": {"dataType":"string","required":true},
+            "bytes": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"double"}},{"dataType":"enum","enums":[null]}],"required":true},
+            "logprob": {"dataType":"double","required":true},
+            "top_logprobs": {"dataType":"array","array":{"dataType":"refObject","ref":"ChatCompletionTokenLogprob.TopLogprob"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ChatCompletion.Choice.Logprobs": {
+        "dataType": "refObject",
+        "properties": {
+            "content": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refObject","ref":"ChatCompletionTokenLogprob"}},{"dataType":"enum","enums":[null]}],"required":true},
+            "refusal": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"refObject","ref":"ChatCompletionTokenLogprob"}},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ChatCompletionMessage.Annotation.URLCitation": {
+        "dataType": "refObject",
+        "properties": {
+            "end_index": {"dataType":"double","required":true},
+            "start_index": {"dataType":"double","required":true},
+            "title": {"dataType":"string","required":true},
+            "url": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ChatCompletionMessage.Annotation": {
+        "dataType": "refObject",
+        "properties": {
+            "type": {"dataType":"enum","enums":["url_citation"],"required":true},
+            "url_citation": {"ref":"ChatCompletionMessage.Annotation.URLCitation","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ChatCompletionAudio": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string","required":true},
+            "data": {"dataType":"string","required":true},
+            "expires_at": {"dataType":"double","required":true},
+            "transcript": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ChatCompletionMessage.FunctionCall": {
+        "dataType": "refObject",
+        "properties": {
+            "arguments": {"dataType":"string","required":true},
+            "name": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ChatCompletionMessageToolCall.Function": {
+        "dataType": "refObject",
+        "properties": {
+            "arguments": {"dataType":"string","required":true},
+            "name": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ChatCompletionMessageToolCall": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string","required":true},
+            "function": {"ref":"ChatCompletionMessageToolCall.Function","required":true},
+            "type": {"dataType":"enum","enums":["function"],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ChatCompletionMessage": {
+        "dataType": "refObject",
+        "properties": {
+            "content": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "refusal": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "role": {"dataType":"enum","enums":["assistant"],"required":true},
+            "annotations": {"dataType":"array","array":{"dataType":"refObject","ref":"ChatCompletionMessage.Annotation"}},
+            "audio": {"dataType":"union","subSchemas":[{"ref":"ChatCompletionAudio"},{"dataType":"enum","enums":[null]}]},
+            "function_call": {"dataType":"union","subSchemas":[{"ref":"ChatCompletionMessage.FunctionCall"},{"dataType":"enum","enums":[null]}]},
+            "tool_calls": {"dataType":"array","array":{"dataType":"refObject","ref":"ChatCompletionMessageToolCall"}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ChatCompletion.Choice": {
+        "dataType": "refObject",
+        "properties": {
+            "finish_reason": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["stop"]},{"dataType":"enum","enums":["length"]},{"dataType":"enum","enums":["tool_calls"]},{"dataType":"enum","enums":["content_filter"]},{"dataType":"enum","enums":["function_call"]}],"required":true},
+            "index": {"dataType":"double","required":true},
+            "logprobs": {"dataType":"union","subSchemas":[{"ref":"ChatCompletion.Choice.Logprobs"},{"dataType":"enum","enums":[null]}],"required":true},
+            "message": {"ref":"ChatCompletionMessage","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "CompletionUsage.CompletionTokensDetails": {
+        "dataType": "refObject",
+        "properties": {
+            "accepted_prediction_tokens": {"dataType":"double"},
+            "audio_tokens": {"dataType":"double"},
+            "reasoning_tokens": {"dataType":"double"},
+            "rejected_prediction_tokens": {"dataType":"double"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "CompletionUsage.PromptTokensDetails": {
+        "dataType": "refObject",
+        "properties": {
+            "audio_tokens": {"dataType":"double"},
+            "cached_tokens": {"dataType":"double"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "CompletionUsage": {
+        "dataType": "refObject",
+        "properties": {
+            "completion_tokens": {"dataType":"double","required":true},
+            "prompt_tokens": {"dataType":"double","required":true},
+            "total_tokens": {"dataType":"double","required":true},
+            "completion_tokens_details": {"ref":"CompletionUsage.CompletionTokensDetails"},
+            "prompt_tokens_details": {"ref":"CompletionUsage.PromptTokensDetails"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ChatCompletion": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string","required":true},
+            "choices": {"dataType":"array","array":{"dataType":"refObject","ref":"ChatCompletion.Choice"},"required":true},
+            "created": {"dataType":"double","required":true},
+            "model": {"dataType":"string","required":true},
+            "object": {"dataType":"enum","enums":["chat.completion"],"required":true},
+            "service_tier": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["auto"]},{"dataType":"enum","enums":["default"]},{"dataType":"enum","enums":["flex"]},{"dataType":"enum","enums":[null]}]},
+            "system_fingerprint": {"dataType":"string"},
+            "usage": {"ref":"CompletionUsage"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess_ChatCompletion-or-_content-string--reasoning-string--calls-any__": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"dataType":"union","subSchemas":[{"ref":"ChatCompletion"},{"dataType":"nestedObjectLiteral","nestedProperties":{"calls":{"dataType":"any","required":true},"reasoning":{"dataType":"string","required":true},"content":{"dataType":"string","required":true}}}],"required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result_ChatCompletion-or-_content-string--reasoning-string--calls-any_.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_ChatCompletion-or-_content-string--reasoning-string--calls-any__"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "OpenAIChatRequest": {
+        "dataType": "refObject",
+        "properties": {
+            "model": {"dataType":"string"},
+            "messages": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"tool_calls":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"type":{"dataType":"enum","enums":["function"],"required":true},"function":{"dataType":"nestedObjectLiteral","nestedProperties":{"arguments":{"dataType":"string","required":true},"name":{"dataType":"string","required":true}},"required":true},"id":{"dataType":"string","required":true}}}},"tool_call_id":{"dataType":"string"},"name":{"dataType":"string"},"content":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"image_url":{"dataType":"nestedObjectLiteral","nestedProperties":{"url":{"dataType":"string","required":true}}},"text":{"dataType":"string"},"type":{"dataType":"string","required":true}}}},{"dataType":"enum","enums":[null]}],"required":true},"role":{"dataType":"string","required":true}}}},
+            "temperature": {"dataType":"double"},
+            "top_p": {"dataType":"double"},
+            "max_tokens": {"dataType":"double"},
+            "max_completion_tokens": {"dataType":"double"},
+            "stream": {"dataType":"boolean"},
+            "stop": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"string"}},{"dataType":"string"}]},
+            "tools": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"function":{"dataType":"nestedObjectLiteral","nestedProperties":{"parameters":{"ref":"Record_string.any_","required":true},"description":{"dataType":"string","required":true},"name":{"dataType":"string","required":true}},"required":true},"type":{"dataType":"enum","enums":["function"],"required":true}}}},
+            "tool_choice": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["none"]},{"dataType":"enum","enums":["auto"]},{"dataType":"enum","enums":["required"]},{"dataType":"nestedObjectLiteral","nestedProperties":{"function":{"dataType":"nestedObjectLiteral","nestedProperties":{"name":{"dataType":"string","required":true},"type":{"dataType":"enum","enums":["function"],"required":true}}},"type":{"dataType":"string","required":true}}}]},
+            "parallel_tool_calls": {"dataType":"boolean"},
+            "reasoning_effort": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["low"]},{"dataType":"enum","enums":["medium"]},{"dataType":"enum","enums":["high"]}]},
+            "frequency_penalty": {"dataType":"double"},
+            "presence_penalty": {"dataType":"double"},
+            "logit_bias": {"ref":"Record_string.number_"},
+            "logprobs": {"dataType":"boolean"},
+            "top_logprobs": {"dataType":"double"},
+            "n": {"dataType":"double"},
+            "modalities": {"dataType":"array","array":{"dataType":"string"}},
+            "prediction": {"dataType":"any"},
+            "audio": {"dataType":"any"},
+            "response_format": {"dataType":"nestedObjectLiteral","nestedProperties":{"json_schema":{"dataType":"any"},"type":{"dataType":"string","required":true}}},
+            "seed": {"dataType":"double"},
+            "service_tier": {"dataType":"string"},
+            "store": {"dataType":"boolean"},
+            "stream_options": {"dataType":"any"},
+            "metadata": {"ref":"Record_string.string_"},
+            "user": {"dataType":"string"},
+            "function_call": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"nestedObjectLiteral","nestedProperties":{"name":{"dataType":"string","required":true}}}]},
+            "functions": {"dataType":"array","array":{"dataType":"any"}},
+        },
+        "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "IntegrationCreateParams": {
@@ -6529,6 +6744,38 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'getSecurity',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsLLMController_generate: Record<string, TsoaRoute.ParameterSchema> = {
+                params: {"in":"body","name":"params","required":true,"ref":"OpenAIChatRequest"},
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.post('/v1/llm/generate',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(LLMController)),
+            ...(fetchMiddlewares<RequestHandler>(LLMController.prototype.generate)),
+
+            async function LLMController_generate(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsLLMController_generate, request, response });
+
+                const controller = new LLMController();
+
+              await templateService.apiHandler({
+                methodName: 'generate',
                 controller,
                 response,
                 next,

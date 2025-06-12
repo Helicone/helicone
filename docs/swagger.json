@@ -2095,6 +2095,9 @@
 			},
 			"FunctionCall": {
 				"properties": {
+					"id": {
+						"type": "string"
+					},
 					"name": {
 						"type": "string"
 					},
@@ -6191,6 +6194,851 @@
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
+			},
+			"ChatCompletionTokenLogprob.TopLogprob": {
+				"properties": {
+					"token": {
+						"type": "string",
+						"description": "The token."
+					},
+					"bytes": {
+						"items": {
+							"type": "number",
+							"format": "double"
+						},
+						"type": "array",
+						"nullable": true,
+						"description": "A list of integers representing the UTF-8 bytes representation of the token.\nUseful in instances where characters are represented by multiple tokens and\ntheir byte representations must be combined to generate the correct text\nrepresentation. Can be `null` if there is no bytes representation for the token."
+					},
+					"logprob": {
+						"type": "number",
+						"format": "double",
+						"description": "The log probability of this token, if it is within the top 20 most likely\ntokens. Otherwise, the value `-9999.0` is used to signify that the token is very\nunlikely."
+					}
+				},
+				"required": [
+					"token",
+					"bytes",
+					"logprob"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChatCompletionTokenLogprob": {
+				"properties": {
+					"token": {
+						"type": "string",
+						"description": "The token."
+					},
+					"bytes": {
+						"items": {
+							"type": "number",
+							"format": "double"
+						},
+						"type": "array",
+						"nullable": true,
+						"description": "A list of integers representing the UTF-8 bytes representation of the token.\nUseful in instances where characters are represented by multiple tokens and\ntheir byte representations must be combined to generate the correct text\nrepresentation. Can be `null` if there is no bytes representation for the token."
+					},
+					"logprob": {
+						"type": "number",
+						"format": "double",
+						"description": "The log probability of this token, if it is within the top 20 most likely\ntokens. Otherwise, the value `-9999.0` is used to signify that the token is very\nunlikely."
+					},
+					"top_logprobs": {
+						"items": {
+							"$ref": "#/components/schemas/ChatCompletionTokenLogprob.TopLogprob"
+						},
+						"type": "array",
+						"description": "List of the most likely tokens and their log probability, at this token\nposition. In rare cases, there may be fewer than the number of requested\n`top_logprobs` returned."
+					}
+				},
+				"required": [
+					"token",
+					"bytes",
+					"logprob",
+					"top_logprobs"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChatCompletion.Choice.Logprobs": {
+				"description": "Log probability information for the choice.",
+				"properties": {
+					"content": {
+						"items": {
+							"$ref": "#/components/schemas/ChatCompletionTokenLogprob"
+						},
+						"type": "array",
+						"nullable": true,
+						"description": "A list of message content tokens with log probability information."
+					},
+					"refusal": {
+						"items": {
+							"$ref": "#/components/schemas/ChatCompletionTokenLogprob"
+						},
+						"type": "array",
+						"nullable": true,
+						"description": "A list of message refusal tokens with log probability information."
+					}
+				},
+				"required": [
+					"content",
+					"refusal"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChatCompletionMessage.Annotation.URLCitation": {
+				"description": "A URL citation when using web search.",
+				"properties": {
+					"end_index": {
+						"type": "number",
+						"format": "double",
+						"description": "The index of the last character of the URL citation in the message."
+					},
+					"start_index": {
+						"type": "number",
+						"format": "double",
+						"description": "The index of the first character of the URL citation in the message."
+					},
+					"title": {
+						"type": "string",
+						"description": "The title of the web resource."
+					},
+					"url": {
+						"type": "string",
+						"description": "The URL of the web resource."
+					}
+				},
+				"required": [
+					"end_index",
+					"start_index",
+					"title",
+					"url"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChatCompletionMessage.Annotation": {
+				"description": "A URL citation when using web search.",
+				"properties": {
+					"type": {
+						"type": "string",
+						"enum": [
+							"url_citation"
+						],
+						"nullable": false,
+						"description": "The type of the URL citation. Always `url_citation`."
+					},
+					"url_citation": {
+						"$ref": "#/components/schemas/ChatCompletionMessage.Annotation.URLCitation",
+						"description": "A URL citation when using web search."
+					}
+				},
+				"required": [
+					"type",
+					"url_citation"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChatCompletionAudio": {
+				"description": "If the audio output modality is requested, this object contains data about the\naudio response from the model.\n[Learn more](https://platform.openai.com/docs/guides/audio).",
+				"properties": {
+					"id": {
+						"type": "string",
+						"description": "Unique identifier for this audio response."
+					},
+					"data": {
+						"type": "string",
+						"description": "Base64 encoded audio bytes generated by the model, in the format specified in\nthe request."
+					},
+					"expires_at": {
+						"type": "number",
+						"format": "double",
+						"description": "The Unix timestamp (in seconds) for when this audio response will no longer be\naccessible on the server for use in multi-turn conversations."
+					},
+					"transcript": {
+						"type": "string",
+						"description": "Transcript of the audio generated by the model."
+					}
+				},
+				"required": [
+					"id",
+					"data",
+					"expires_at",
+					"transcript"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChatCompletionMessage.FunctionCall": {
+				"properties": {
+					"arguments": {
+						"type": "string",
+						"description": "The arguments to call the function with, as generated by the model in JSON\nformat. Note that the model does not always generate valid JSON, and may\nhallucinate parameters not defined by your function schema. Validate the\narguments in your code before calling your function."
+					},
+					"name": {
+						"type": "string",
+						"description": "The name of the function to call."
+					}
+				},
+				"required": [
+					"arguments",
+					"name"
+				],
+				"type": "object",
+				"additionalProperties": false,
+				"deprecated": true
+			},
+			"ChatCompletionMessageToolCall.Function": {
+				"description": "The function that the model called.",
+				"properties": {
+					"arguments": {
+						"type": "string",
+						"description": "The arguments to call the function with, as generated by the model in JSON\nformat. Note that the model does not always generate valid JSON, and may\nhallucinate parameters not defined by your function schema. Validate the\narguments in your code before calling your function."
+					},
+					"name": {
+						"type": "string",
+						"description": "The name of the function to call."
+					}
+				},
+				"required": [
+					"arguments",
+					"name"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChatCompletionMessageToolCall": {
+				"properties": {
+					"id": {
+						"type": "string",
+						"description": "The ID of the tool call."
+					},
+					"function": {
+						"$ref": "#/components/schemas/ChatCompletionMessageToolCall.Function",
+						"description": "The function that the model called."
+					},
+					"type": {
+						"type": "string",
+						"enum": [
+							"function"
+						],
+						"nullable": false,
+						"description": "The type of the tool. Currently, only `function` is supported."
+					}
+				},
+				"required": [
+					"id",
+					"function",
+					"type"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChatCompletionMessage": {
+				"description": "A chat completion message generated by the model.",
+				"properties": {
+					"content": {
+						"type": "string",
+						"nullable": true,
+						"description": "The contents of the message."
+					},
+					"refusal": {
+						"type": "string",
+						"nullable": true,
+						"description": "The refusal message generated by the model."
+					},
+					"role": {
+						"type": "string",
+						"enum": [
+							"assistant"
+						],
+						"nullable": false,
+						"description": "The role of the author of this message."
+					},
+					"annotations": {
+						"items": {
+							"$ref": "#/components/schemas/ChatCompletionMessage.Annotation"
+						},
+						"type": "array",
+						"description": "Annotations for the message, when applicable, as when using the\n[web search tool](https://platform.openai.com/docs/guides/tools-web-search?api-mode=chat)."
+					},
+					"audio": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ChatCompletionAudio"
+							}
+						],
+						"nullable": true,
+						"description": "If the audio output modality is requested, this object contains data about the\naudio response from the model.\n[Learn more](https://platform.openai.com/docs/guides/audio)."
+					},
+					"function_call": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ChatCompletionMessage.FunctionCall"
+							}
+						],
+						"nullable": true,
+						"deprecated": true
+					},
+					"tool_calls": {
+						"items": {
+							"$ref": "#/components/schemas/ChatCompletionMessageToolCall"
+						},
+						"type": "array",
+						"description": "The tool calls generated by the model, such as function calls."
+					}
+				},
+				"required": [
+					"content",
+					"refusal",
+					"role"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChatCompletion.Choice": {
+				"properties": {
+					"finish_reason": {
+						"type": "string",
+						"enum": [
+							"stop",
+							"length",
+							"tool_calls",
+							"content_filter",
+							"function_call"
+						],
+						"description": "The reason the model stopped generating tokens. This will be `stop` if the model\nhit a natural stop point or a provided stop sequence, `length` if the maximum\nnumber of tokens specified in the request was reached, `content_filter` if\ncontent was omitted due to a flag from our content filters, `tool_calls` if the\nmodel called a tool, or `function_call` (deprecated) if the model called a\nfunction."
+					},
+					"index": {
+						"type": "number",
+						"format": "double",
+						"description": "The index of the choice in the list of choices."
+					},
+					"logprobs": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ChatCompletion.Choice.Logprobs"
+							}
+						],
+						"nullable": true,
+						"description": "Log probability information for the choice."
+					},
+					"message": {
+						"$ref": "#/components/schemas/ChatCompletionMessage",
+						"description": "A chat completion message generated by the model."
+					}
+				},
+				"required": [
+					"finish_reason",
+					"index",
+					"logprobs",
+					"message"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CompletionUsage.CompletionTokensDetails": {
+				"description": "Breakdown of tokens used in a completion.",
+				"properties": {
+					"accepted_prediction_tokens": {
+						"type": "number",
+						"format": "double",
+						"description": "When using Predicted Outputs, the number of tokens in the prediction that\nappeared in the completion."
+					},
+					"audio_tokens": {
+						"type": "number",
+						"format": "double",
+						"description": "Audio input tokens generated by the model."
+					},
+					"reasoning_tokens": {
+						"type": "number",
+						"format": "double",
+						"description": "Tokens generated by the model for reasoning."
+					},
+					"rejected_prediction_tokens": {
+						"type": "number",
+						"format": "double",
+						"description": "When using Predicted Outputs, the number of tokens in the prediction that did\nnot appear in the completion. However, like reasoning tokens, these tokens are\nstill counted in the total completion tokens for purposes of billing, output,\nand context window limits."
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CompletionUsage.PromptTokensDetails": {
+				"description": "Breakdown of tokens used in the prompt.",
+				"properties": {
+					"audio_tokens": {
+						"type": "number",
+						"format": "double",
+						"description": "Audio input tokens present in the prompt."
+					},
+					"cached_tokens": {
+						"type": "number",
+						"format": "double",
+						"description": "Cached tokens present in the prompt."
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CompletionUsage": {
+				"description": "Usage statistics for the completion request.",
+				"properties": {
+					"completion_tokens": {
+						"type": "number",
+						"format": "double",
+						"description": "Number of tokens in the generated completion."
+					},
+					"prompt_tokens": {
+						"type": "number",
+						"format": "double",
+						"description": "Number of tokens in the prompt."
+					},
+					"total_tokens": {
+						"type": "number",
+						"format": "double",
+						"description": "Total number of tokens used in the request (prompt + completion)."
+					},
+					"completion_tokens_details": {
+						"$ref": "#/components/schemas/CompletionUsage.CompletionTokensDetails",
+						"description": "Breakdown of tokens used in a completion."
+					},
+					"prompt_tokens_details": {
+						"$ref": "#/components/schemas/CompletionUsage.PromptTokensDetails",
+						"description": "Breakdown of tokens used in the prompt."
+					}
+				},
+				"required": [
+					"completion_tokens",
+					"prompt_tokens",
+					"total_tokens"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ChatCompletion": {
+				"description": "Represents a chat completion response returned by model, based on the provided\ninput.",
+				"properties": {
+					"id": {
+						"type": "string",
+						"description": "A unique identifier for the chat completion."
+					},
+					"choices": {
+						"items": {
+							"$ref": "#/components/schemas/ChatCompletion.Choice"
+						},
+						"type": "array",
+						"description": "A list of chat completion choices. Can be more than one if `n` is greater\nthan 1."
+					},
+					"created": {
+						"type": "number",
+						"format": "double",
+						"description": "The Unix timestamp (in seconds) of when the chat completion was created."
+					},
+					"model": {
+						"type": "string",
+						"description": "The model used for the chat completion."
+					},
+					"object": {
+						"type": "string",
+						"enum": [
+							"chat.completion"
+						],
+						"nullable": false,
+						"description": "The object type, which is always `chat.completion`."
+					},
+					"service_tier": {
+						"type": "string",
+						"enum": [
+							"auto",
+							"default",
+							"flex",
+							null
+						],
+						"nullable": true,
+						"description": "Specifies the latency tier to use for processing the request. This parameter is\nrelevant for customers subscribed to the scale tier service:\n\n- If set to 'auto', and the Project is Scale tier enabled, the system will\n  utilize scale tier credits until they are exhausted.\n- If set to 'auto', and the Project is not Scale tier enabled, the request will\n  be processed using the default service tier with a lower uptime SLA and no\n  latency guarentee.\n- If set to 'default', the request will be processed using the default service\n  tier with a lower uptime SLA and no latency guarentee.\n- If set to 'flex', the request will be processed with the Flex Processing\n  service tier.\n  [Learn more](https://platform.openai.com/docs/guides/flex-processing).\n- When not set, the default behavior is 'auto'.\n\nWhen this parameter is set, the response body will include the `service_tier`\nutilized."
+					},
+					"system_fingerprint": {
+						"type": "string",
+						"description": "This fingerprint represents the backend configuration that the model runs with.\n\nCan be used in conjunction with the `seed` request parameter to understand when\nbackend changes have been made that might impact determinism."
+					},
+					"usage": {
+						"$ref": "#/components/schemas/CompletionUsage",
+						"description": "Usage statistics for the completion request."
+					}
+				},
+				"required": [
+					"id",
+					"choices",
+					"created",
+					"model",
+					"object"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_ChatCompletion-or-_content-string--reasoning-string--calls-any__": {
+				"properties": {
+					"data": {
+						"anyOf": [
+							{
+								"$ref": "#/components/schemas/ChatCompletion"
+							},
+							{
+								"properties": {
+									"calls": {},
+									"reasoning": {
+										"type": "string"
+									},
+									"content": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"calls",
+									"reasoning",
+									"content"
+								],
+								"type": "object"
+							}
+						]
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_ChatCompletion-or-_content-string--reasoning-string--calls-any_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ChatCompletion-or-_content-string--reasoning-string--calls-any__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"OpenAIChatRequest": {
+				"description": "Simplified interface for the OpenAI Chat request format",
+				"properties": {
+					"model": {
+						"type": "string"
+					},
+					"messages": {
+						"items": {
+							"properties": {
+								"tool_calls": {
+									"items": {
+										"properties": {
+											"type": {
+												"type": "string",
+												"enum": [
+													"function"
+												],
+												"nullable": false
+											},
+											"function": {
+												"properties": {
+													"arguments": {
+														"type": "string"
+													},
+													"name": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"arguments",
+													"name"
+												],
+												"type": "object"
+											},
+											"id": {
+												"type": "string"
+											}
+										},
+										"required": [
+											"type",
+											"function",
+											"id"
+										],
+										"type": "object"
+									},
+									"type": "array"
+								},
+								"tool_call_id": {
+									"type": "string"
+								},
+								"name": {
+									"type": "string"
+								},
+								"content": {
+									"anyOf": [
+										{
+											"type": "string"
+										},
+										{
+											"items": {
+												"properties": {
+													"image_url": {
+														"properties": {
+															"url": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"url"
+														],
+														"type": "object"
+													},
+													"text": {
+														"type": "string"
+													},
+													"type": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"type"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										}
+									],
+									"nullable": true
+								},
+								"role": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"content",
+								"role"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"temperature": {
+						"type": "number",
+						"format": "double"
+					},
+					"top_p": {
+						"type": "number",
+						"format": "double"
+					},
+					"max_tokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"max_completion_tokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"stream": {
+						"type": "boolean"
+					},
+					"stop": {
+						"anyOf": [
+							{
+								"items": {
+									"type": "string"
+								},
+								"type": "array"
+							},
+							{
+								"type": "string"
+							}
+						]
+					},
+					"tools": {
+						"items": {
+							"properties": {
+								"function": {
+									"properties": {
+										"parameters": {
+											"$ref": "#/components/schemas/Record_string.any_"
+										},
+										"description": {
+											"type": "string"
+										},
+										"name": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"parameters",
+										"description",
+										"name"
+									],
+									"type": "object"
+								},
+								"type": {
+									"type": "string",
+									"enum": [
+										"function"
+									],
+									"nullable": false
+								}
+							},
+							"required": [
+								"function",
+								"type"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"tool_choice": {
+						"anyOf": [
+							{
+								"properties": {
+									"function": {
+										"properties": {
+											"name": {
+												"type": "string"
+											},
+											"type": {
+												"type": "string",
+												"enum": [
+													"function"
+												],
+												"nullable": false
+											}
+										},
+										"required": [
+											"name",
+											"type"
+										],
+										"type": "object"
+									},
+									"type": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"type"
+								],
+								"type": "object"
+							},
+							{
+								"type": "string",
+								"enum": [
+									"none",
+									"auto",
+									"required"
+								]
+							}
+						]
+					},
+					"parallel_tool_calls": {
+						"type": "boolean"
+					},
+					"reasoning_effort": {
+						"type": "string",
+						"enum": [
+							"low",
+							"medium",
+							"high"
+						]
+					},
+					"frequency_penalty": {
+						"type": "number",
+						"format": "double"
+					},
+					"presence_penalty": {
+						"type": "number",
+						"format": "double"
+					},
+					"logit_bias": {
+						"$ref": "#/components/schemas/Record_string.number_"
+					},
+					"logprobs": {
+						"type": "boolean"
+					},
+					"top_logprobs": {
+						"type": "number",
+						"format": "double"
+					},
+					"n": {
+						"type": "number",
+						"format": "double"
+					},
+					"modalities": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"prediction": {},
+					"audio": {},
+					"response_format": {
+						"properties": {
+							"json_schema": {},
+							"type": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"type"
+						],
+						"type": "object"
+					},
+					"seed": {
+						"type": "number",
+						"format": "double"
+					},
+					"service_tier": {
+						"type": "string"
+					},
+					"store": {
+						"type": "boolean"
+					},
+					"stream_options": {},
+					"metadata": {
+						"$ref": "#/components/schemas/Record_string.string_"
+					},
+					"user": {
+						"type": "string"
+					},
+					"function_call": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"properties": {
+									"name": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"name"
+								],
+								"type": "object"
+							}
+						]
+					},
+					"functions": {
+						"items": {},
+						"type": "array"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
 			},
 			"IntegrationCreateParams": {
 				"properties": {
@@ -13421,6 +14269,42 @@
 									"advanced"
 								],
 								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/llm/generate": {
+			"post": {
+				"operationId": "Generate",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ChatCompletion-or-_content-string--reasoning-string--calls-any_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"LLM"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/OpenAIChatRequest"
 							}
 						}
 					}

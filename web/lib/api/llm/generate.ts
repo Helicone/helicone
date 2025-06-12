@@ -1,6 +1,12 @@
+// import { $JAWN_API } from "@/lib/clients/jawn";
 import { Provider } from "@helicone-package/cost/unified/types";
 import { Message, Tool } from "@helicone-package/llm-mapper/types";
 import { z } from "zod";
+import { env } from "next-runtime-env";
+import { getHeliconeCookie } from "@/lib/cookies";
+import { ORG_ID_COOKIE_KEY } from "@/lib/constants";
+import Cookies from "js-cookie";
+import { OpenAI } from "openai";
 
 export interface GenerateParams {
   provider: Provider;
@@ -113,25 +119,56 @@ async function handleNonStreamResponse(
 }
 
 export async function generate<T extends object | undefined = undefined>(
-  params: GenerateParams
+  params: OpenAI.Chat.Completions.ChatCompletionCreateParams & {
+    stream: {
+      onChunk: (chunk: string) => void;
+      onCompletion: () => void;
+    };
+    schema?: z.ZodType<object>;
+  }
 ): Promise<GenerateResponse> {
-  const response = await fetch("/api/llm", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      "x-cancel": "0",
-      "x-helicone-client": "browser",
-    },
-    body: JSON.stringify({
-      ...params,
-      stream: !!params.stream,
-    }),
+  const currentOrgId = Cookies.get(ORG_ID_COOKIE_KEY);
+  const jwtToken = getHeliconeCookie().data?.jwtToken ?? "";
+  console.log({
+    currentOrgId,
+    jwtToken,
   });
 
+  console.log({ params });
+  console.log(env("NEXT_PUBLIC_HELICONE_JAWN_SERVICE"));
+
+  const response = await fetch(
+    `${env("NEXT_PUBLIC_HELICONE_JAWN_SERVICE")}/v1/llm/generate`,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        messages: params.messages,
+        stream: !!params.stream,
+        max_tokens: params.max_tokens,
+        temperature: params.temperature,
+        top_p: params.top_p,
+        frequency_penalty: params.frequency_penalty,
+        presence_penalty: params.presence_penalty,
+        stop: params.stop,
+        tools: params.tools,
+        response_format: params.response_format,
+        model: params.model,
+      }),
+      headers: {
+        "helicone-authorization": JSON.stringify({
+          _type: "jwt",
+          token: jwtToken,
+          orgId: currentOrgId ?? "no-org-id",
+        }),
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+    }
+  );
+
   if (!response.ok) {
-    const data = await response.json();
-    throw new Error(data.error || "Failed to generate response");
+    const error = await response.json();
+    throw new Error(error.error || "Failed to generate response");
   }
 
   if (params.stream) {

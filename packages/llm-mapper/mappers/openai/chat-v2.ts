@@ -17,6 +17,7 @@ export interface OpenAIChatRequest {
         }>
       | null;
     name?: string;
+    tool_call_id?: string;
     tool_calls?: {
       id: string;
       function: {

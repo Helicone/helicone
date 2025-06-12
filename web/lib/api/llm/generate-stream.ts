@@ -12,6 +12,7 @@ export async function generateStream(
   generate({
     ...params,
     signal: abortController.signal,
+    // @ts-ignore
     stream: {
       onChunk: async (chunk: string) => {
         if (options?.headers?.["x-cancel"] === "1") {
