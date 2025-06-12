@@ -2,7 +2,7 @@ import { Usage } from "../../handlers/HandlerContext";
 import { PromiseGenericResult, ok } from "../../../packages/common/result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
 
-export class GenericBodyProcessor implements IBodyProcessor {
+export class OpenAIBodyProcessor implements IBodyProcessor {
   public async parse(
     parseInput: ParseInput
   ): PromiseGenericResult<ParseOutput> {
@@ -51,22 +51,39 @@ export class GenericBodyProcessor implements IBodyProcessor {
         completion_tokens?: number;
         input_tokens?: number;
         output_tokens?: number;
+        total_tokens?: number;
         prompt_tokens_details?: {
           cached_tokens?: number;
+          audio_tokens?: number;
         };
         completion_tokens_details?: {
           reasoning_tokens?: number;
+          audio_tokens?: number;
+          accepted_prediction_tokens?: number;
+          rejected_prediction_tokens?: number;
         };
       };
     };
 
+    // OpenAI charges for input, input cache read, output, output audio, input audio.
     const usage = response.usage;
+    console.log("OpenAI usage", usage);
+    const effectivePromptTokens = usage?.prompt_tokens !== undefined
+        ? Math.max(0, (usage.prompt_tokens ?? 0) - (usage.prompt_tokens_details?.cached_tokens ?? 0) - (usage.prompt_tokens_details?.audio_tokens ?? 0))
+        : usage?.input_tokens;
+    const effectiveCompletionTokens = usage?.completion_tokens !== undefined
+        ? Math.max(0, (usage.completion_tokens ?? 0) - (usage.completion_tokens_details?.audio_tokens ?? 0))
+        : usage?.output_tokens;
 
     return {
-      promptTokens: usage?.prompt_tokens ?? usage?.input_tokens,
+      promptTokens: effectivePromptTokens,
+      // promptCacheWriteTokens, not explicitly provided in OpenAI spec response
+      // possibly can calculate for prompt_tokens > 1024, 128 token increments
+      // https://openai.com/index/api-prompt-caching/
+      // This is fine since they don't charge for cache writes, unlike Anthropic.
       promptCacheReadTokens: usage?.prompt_tokens_details?.cached_tokens,
-      completionTokens: usage?.completion_tokens ?? usage?.output_tokens,
-      totalTokens: undefined,
+      completionTokens: effectiveCompletionTokens,
+      totalTokens: usage?.total_tokens,
       heliconeCalculated: false,
     };
   }
