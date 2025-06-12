@@ -9,21 +9,12 @@ import {
 } from "openai/resources/chat/completions";
 
 interface StreamProcessorOptions {
-  onUpdate: (response: {
-    content: string;
-    reasoning: string;
-    calls: string;
-    fullContent: string;
-  }) => void;
-  initialState?: {
-    content: string;
-    reasoning: string;
-    calls: string;
-    fullContent: string;
-  };
+  onUpdate: (response: { fullContent: string }) => void;
+  initialState?: { fullContent: string };
 }
 
-function messageReducer2(
+/* This is boilerplate code from an OpenAI implementation */
+function messageReducer(
   previous: ChatCompletionMessage,
   item: ChatCompletionChunk
 ): ChatCompletionMessage {
@@ -75,106 +66,6 @@ function messageReducer2(
   return reduce(previous, choice.delta) as ChatCompletionMessage;
 }
 
-// Use the messageReducer provided by OpenAI example, adapted slightly
-function messageReducer(previous: any, item: any): any {
-  // Ensure previous is treated as the message part if it's not the full chunk structure
-  let accumulator =
-    previous.choices && previous.choices[0]
-      ? JSON.parse(JSON.stringify(previous.choices[0].message || {}))
-      : JSON.parse(JSON.stringify(previous || {}));
-
-  // Get the delta from the current chunk
-  const delta = item.choices?.[0]?.delta;
-  if (!delta && !item.choices?.[0]?.finish_reason) {
-    // If no delta and no finish reason in this chunk, return the accumulator unchanged
-    // (Handles potential usage chunks or other metadata)
-    return accumulator;
-  }
-
-  // Recursive reducer function (nested within messageReducer)
-  const reduce = (acc: any, delta: any): any => {
-    acc = { ...acc }; // Shallow clone
-    for (const [key, value] of Object.entries(delta)) {
-      if (value === null) continue; // Skip null values in delta
-
-      if (acc[key] === undefined || acc[key] === null) {
-        // If key doesn't exist in accumulator, add it
-        acc[key] = value;
-        // Ensure index is removed if it's an array (specifically for tool_calls)
-        if (key === "tool_calls" && Array.isArray(acc[key])) {
-          for (const arr of acc[key]) {
-            if (arr && typeof arr === "object") delete arr.index;
-          }
-        }
-      } else if (typeof acc[key] === "string" && typeof value === "string") {
-        // Be specific about which string fields should be concatenated
-        if (
-          key === "content" ||
-          key === "arguments" ||
-          key === "name" ||
-          key === "reasoning"
-        ) {
-          acc[key] += value;
-        } else {
-          // For other string fields (like 'id', 'type', 'role'), only set if not already set (handled by the initial check)
-          // If the field already exists, do nothing to prevent concatenation.
-        }
-      } else if (typeof acc[key] === "number" && typeof value === "number") {
-        // Replace numbers (usually not additive)
-        acc[key] = value;
-      } else if (Array.isArray(acc[key]) && Array.isArray(value)) {
-        // Handle arrays, specifically tool_calls based on index
-        const accArray = acc[key];
-        for (let i = 0; i < value.length; i++) {
-          const { index, ...chunkTool } = value[i];
-          if (index === undefined) {
-            console.error(
-              "Reducer: Array element in delta missing index",
-              value[i]
-            );
-            // Attempt to append if index missing, might be wrong
-            accArray.push(chunkTool);
-            continue;
-          }
-          // Ensure array is long enough
-          while (accArray.length <= index) {
-            accArray.push({});
-          }
-          // Recursively reduce the object at the specific index
-          accArray[index] = reduce(accArray[index] || {}, chunkTool);
-        }
-      } else if (typeof acc[key] === "object" && typeof value === "object") {
-        // Recursively reduce nested objects
-        acc[key] = reduce(acc[key], value);
-      } else {
-        // Handle other types or mismatches if necessary
-        console.warn(
-          `Reducer: Unhandled type mismatch for key '${key}'. Accumulator: ${typeof acc[
-            key
-          ]}, Delta: ${typeof value}`
-        );
-        // Default behavior: overwrite accumulator with delta value
-        acc[key] = value;
-      }
-    }
-    return acc;
-  };
-
-  // Apply the recursive reducer to the accumulator with the delta
-  let result = delta ? reduce(accumulator, delta) : accumulator;
-
-  // Add finish reason if present in the choice
-  const finishReason = item.choices?.[0]?.finish_reason;
-  if (finishReason) {
-    // Ensure the result object has a place for finish_reason if it wasn't added by delta
-    if (!result.finish_reason) {
-      result.finish_reason = finishReason;
-    }
-  }
-
-  return result;
-}
-
 /**
  * Processes a stream of LLM responses and calls the onUpdate callback with standardized format
  *
@@ -189,28 +80,14 @@ export async function processStream(
   signal?: AbortSignal
 ): Promise<{
   fullContent: string;
-  content: string;
-  reasoning: string;
-  calls: string;
   error?: any;
 }> {
   const reader = stream.getReader();
-  const {
-    onUpdate,
-    initialState = { content: "", reasoning: "", calls: "", fullContent: "" },
-  } = options;
+  const { onUpdate, initialState = { fullContent: "" } } = options;
 
   // Use state primarily for accumulating content for real-time updates
   // State will hold the standardized {content, reasoning, calls} format for updates
   let callbackState = { ...initialState };
-  // accumulatedMessage will hold the full reconstructed message object using the reducer
-  // Initialize as empty object, reducer expects this shape
-  let accumulatedMessage: any = {
-    role: undefined,
-    content: null,
-    tool_calls: undefined,
-    function_call: undefined,
-  };
   let fullMessage = {} as ChatCompletionMessage;
 
   try {
@@ -231,30 +108,8 @@ export async function processStream(
         // Always expect raw OpenAI ChatCompletionChunk JSON
         const chunkJson = JSON.parse(chunkString);
 
-        fullMessage = messageReducer2(fullMessage, chunkJson);
+        fullMessage = messageReducer(fullMessage, chunkJson);
         callbackState.fullContent = JSON.stringify(fullMessage, null, 2);
-        console.log({ fullContent: callbackState.fullContent });
-        // Use the OpenAI reducer to accumulate the message structure
-        accumulatedMessage = messageReducer(accumulatedMessage, chunkJson);
-
-        // For intermediate updates, extract current state from the accumulated message
-        // Use accumulated content directly
-        callbackState.content = accumulatedMessage.content || "";
-
-        // Reasoning might not be standard, check for it (adjust key if needed)
-        callbackState.reasoning = (accumulatedMessage as any).reasoning || "";
-
-        // Update intermediate calls state from accumulated message
-        if (accumulatedMessage.tool_calls) {
-          callbackState.calls = JSON.stringify(
-            accumulatedMessage.tool_calls,
-            null,
-            2
-          );
-        } else {
-          // Ensure calls is reset if tool_calls disappears during reduction (shouldn't happen often)
-          callbackState.calls = "";
-        }
       } catch (error) {
         console.error(
           "[processStream] Error parsing JSON chunk or processing delta:",
@@ -271,18 +126,7 @@ export async function processStream(
       onUpdate({ ...callbackState });
     }
 
-    // After loop: Extract final state from the fully accumulated message
-    const finalContent = accumulatedMessage.content || "";
-    const finalReasoning = (accumulatedMessage as any).reasoning || ""; // Adjust key if needed
-    const finalToolCalls = accumulatedMessage.tool_calls;
-    const finalCallsString = finalToolCalls
-      ? JSON.stringify(finalToolCalls, null, 2)
-      : "";
-
     const finalState = {
-      content: finalContent,
-      reasoning: finalReasoning,
-      calls: finalCallsString,
       fullContent: callbackState.fullContent,
     };
 
@@ -302,19 +146,7 @@ export async function processStream(
       "[processStream] Returning state possibly incomplete due to error:",
       callbackState
     );
-    // Attempt to extract final state even on error, might be partial
-    // Use the accumulated message directly
-    const finalContentOnError = accumulatedMessage.content || "";
-    const finalReasoningOnError = (accumulatedMessage as any).reasoning || "";
-    const finalToolCallsOnError = accumulatedMessage.tool_calls;
-    const finalCallsStringOnError = finalToolCallsOnError
-      ? JSON.stringify(finalToolCallsOnError, null, 2)
-      : callbackState.calls; // Fallback to last known calls
-
     return {
-      content: finalContentOnError,
-      reasoning: finalReasoningOnError,
-      calls: finalCallsStringOnError,
       error: error,
       fullContent: callbackState.fullContent,
     };
