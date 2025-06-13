@@ -14,6 +14,7 @@ export function modelCost(modelRow: {
   sum_tokens: number;
   per_call?: number;
   per_image?: number;
+  multiple?: number;
 }): number {
   return (
     costOfPrompt({
