@@ -1,78 +1,12 @@
 ---
-title: "Tools Curl Integration"
+title: "Trace Tools with cURL"
 sidebarTitle: "cURL"
-description: "Log any external tools used in your LLM applications to Helicone using cURL."
+description: "Log responses from any external tools used in your LLM applications to Helicone using cURL."
 icon: "code"
 iconType: "solid"
 ---
 
-## Request Structure
-
-A typical request will have the following structure:
-
-### Endpoint
-
-```
-POST https://api.worker.helicone.ai/custom/v1/log
-```
-
-> **Note:** The endpoint may vary depending on your Helicone setup. If the above endpoint doesn't work, you can also try:
->
-> - `https://api.us.helicone.ai/custom/v1/log`
-> - `https://api.helicone.ai/custom/v1/log`
-
-### Headers
-
-| Name          | Value              |
-| ------------- | ------------------ |
-| Authorization | Bearer `{API_KEY}` |
-
-Replace `{API_KEY}` with your actual API Key.
-
-### Body
-
-```typescript
-export type HeliconeAsyncLogRequest = {
-  providerRequest: ProviderRequest;
-  providerResponse: ProviderResponse;
-  timing: Timing;
-};
-
-export type ProviderRequest = {
-  url: "custom-model-nopath";
-  json: {
-    _type: "tool";
-    toolName: string;
-    input: any;
-    [key: string]: any;
-  };
-  meta: Record<string, string>;
-};
-
-export type ProviderResponse = {
-  json: {
-    _type?: "tool";
-    toolName: string;
-    [key: string]: any;
-  };
-  status: number;
-  headers: Record<string, string>;
-};
-
-export type Timing = {
-  // From Unix epoch in Milliseconds
-  startTime: {
-    seconds: number;
-    milliseconds: number;
-  };
-  endTime: {
-    seconds: number;
-    milliseconds: number;
-  };
-};
-```
-
-## Example Usage
+## Example
 
 ```bash
 curl -X POST https://api.worker.helicone.ai/custom/v1/log \
@@ -124,4 +58,67 @@ curl -X POST https://api.worker.helicone.ai/custom/v1/log \
     }
   }
 }'
+```
+
+## Request Structure
+### Endpoint
+
+```
+POST https://api.worker.helicone.ai/custom/v1/log
+```
+
+> **Note:** The endpoint may vary depending on your Helicone setup. If the above endpoint doesn't work, you can also try:
+>
+> - For US: `https://api.us.helicone.ai/custom/v1/log`
+> - Elsewhere: `https://api.helicone.ai/custom/v1/log`
+
+### Headers
+
+| Name          | Value              |
+| ------------- | ------------------ |
+| Authorization | Bearer `{API_KEY}` |
+
+Replace `{API_KEY}` with your actual API Key.
+
+### Body
+
+```typescript
+export type HeliconeAsyncLogRequest = {
+  providerRequest: ProviderRequest;
+  providerResponse: ProviderResponse;
+  timing: Timing;
+};
+
+export type ProviderRequest = {
+  url: "custom-model-nopath";
+  json: {
+    _type: "tool";
+    toolName: string;
+    input: any;
+    [key: string]: any;
+  };
+  meta: Record<string, string>;
+};
+
+export type ProviderResponse = {
+  json: {
+    _type?: "tool";
+    toolName: string;
+    [key: string]: any;
+  };
+  status: number;
+  headers: Record<string, string>;
+};
+
+export type Timing = {
+  // From Unix epoch in Milliseconds
+  startTime: {
+    seconds: number;
+    milliseconds: number;
+  };
+  endTime: {
+    seconds: number;
+    milliseconds: number;
+  };
+};
 ```
