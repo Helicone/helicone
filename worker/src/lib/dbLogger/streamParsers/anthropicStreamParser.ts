@@ -26,12 +26,12 @@ export function recursivelyConsolidateAnthropic(body: any, delta: any): any {
   return body;
 }
 
-export function recursivelyConsolidateAnthropicListForClaude3(
+export function recursivelyConsolidateAnthropicListForClaude(
   delta: any[]
 ): any {
   return delta.reduce((acc, item) => {
     if (Array.isArray(item)) {
-      return recursivelyConsolidateAnthropicListForClaude3(item);
+      return recursivelyConsolidateAnthropicListForClaude(item);
     }
     if (typeof item !== "object") {
       return item;
@@ -115,7 +115,7 @@ export async function anthropicAIStream(
       getModel(requestBody ?? "{}").includes("claude-opus-4")
     ) {
       return ok({
-        ...recursivelyConsolidateAnthropicListForClaude3(lines),
+        ...recursivelyConsolidateAnthropicListForClaude(lines),
       });
     } else {
       const claudeData = {
