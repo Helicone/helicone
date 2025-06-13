@@ -1335,6 +1335,7 @@ export class AdminController extends Controller {
   }> {
     await authCheckThrow(request.authParams.userId);
     
+    try {
     const query = `
     INSERT INTO request_response_rmt
     SELECT
@@ -1365,7 +1366,7 @@ export class AdminController extends Controller {
       scores,
       request_body,
       response_body,
-      ${clickhousePriceCalcNonAggregated("request_response_rmt")} as cost,
+      ${clickhousePriceCalcNonAggregated("request_response_rmt", false)} as cost,
       assets,
       now() as updated_at
     FROM
@@ -1375,10 +1376,16 @@ export class AdminController extends Controller {
       ${body.specifyModel ? `AND model = '${body.modelId}'` : ""}
     `
     const { error } = await clickhouseDb.dbQuery(query, []);
-
-    if (error) {
-      throw new Error(error);
+    
+    } catch (e) {
+      console.error("Backfill error:", e);
+      throw e;
     }
+
+
+    // if (error) {
+    //   throw new Error(error);
+    // }
 
     return { success: true };
   }
