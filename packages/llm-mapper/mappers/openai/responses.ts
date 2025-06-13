@@ -1,6 +1,5 @@
 import { MapperBuilder } from "../../path-mapper/builder";
 import { LlmSchema, Message, Response, LLMPreview } from "../../types";
-import { Tool } from "openai/resources/responses/responses"
 
 const typeMap: Record<string, Message["_type"]> = {
   input_text: "message",
