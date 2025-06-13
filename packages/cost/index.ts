@@ -226,18 +226,20 @@ export function clickhousePriceCalcNonAggregated(table: string, inDollars: boole
   return `
   (
   CASE
-    ${providersWithCosts
-      .map((provider) => {
-        if (!provider.costs) {
-          throw new Error("Provider does not have costs");
-        }
-        return `    WHEN (${table}.provider = '${provider.provider}') 
-      THEN (${caseForCost(provider.costs, table, COST_PRECISION_MULTIPLIER)})`;
-      })
-      .join("\n")}
-    ELSE (${caseForCost(defaultProvider.costs, table, COST_PRECISION_MULTIPLIER)})
+  ${providersWithCosts
+    .map((provider) => {
+      if (!provider.costs) {
+        throw new Error("Provider does not have costs");
+      }
+
+      return `WHEN (${table}.provider = '${
+        provider.provider
+      }') THEN (${caseForCost(provider.costs, table, COST_PRECISION_MULTIPLIER)})`;
+    })
+    .join("\n")}
+    ELSE ${caseForCost(defaultProvider.costs, table, COST_PRECISION_MULTIPLIER)}
   END
-) / ${COST_PRECISION_MULTIPLIER}
+  ) ${inDollars ? `/ ${COST_PRECISION_MULTIPLIER}` : ""}
 `;
 }
 
@@ -267,10 +269,6 @@ sum(
     .join("\n")}
     ELSE ${caseForCost(defaultProvider.costs, table, COST_PRECISION_MULTIPLIER)}
   END
-<<<<<<< HEAD
   ) ${inDollars ? `/ ${COST_PRECISION_MULTIPLIER}` : ""}
-=======
-  ) / ${COST_PRECISION_MULTIPLIER}
->>>>>>> main
 `;
 }
