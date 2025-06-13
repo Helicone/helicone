@@ -1,10 +1,10 @@
-import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { MappedLLMRequest, Message } from "@helicone-package/llm-mapper/types";
 import { XSmall } from "@/components/ui/typography";
 import { JsonRenderer } from "./single/JsonRenderer";
 import MarkdownEditor from "@/components/shared/markdownEditor";
 import { isJson } from "./ChatMessage";
+import PlaygroundToolAttributes from "./PlaygroundToolAttributes";
 
 interface ToolMessageProps {
   message: Message;
@@ -45,31 +45,24 @@ export default function ToolMessage({
       },
     });
   };
+
   return (
     <div
       className={cn(
-        "flex flex-col gap-2 p-4 bg-muted text-xs",
-        !playgroundMode ? "rounded-lg" : "dark:bg-black"
+        "flex flex-col gap-2 px-4 pb-4 bg-muted text-xs",
+        !playgroundMode ? "rounded-lg pt-4" : "dark:bg-black pt-2"
       )}
     >
       {playgroundMode ? (
         <div className="flex flex-row items-center justify-between w-full">
-          <div className="flex items-center gap-2">
-            <Input
-              className="text-xs"
-              value={message.name}
-              onChange={(e) => updateMessageField("name", e.target.value)}
-              placeholder="Function Name"
-            />
-            <Input
-              className="text-xs"
-              value={message.tool_call_id}
-              onChange={(e) =>
-                updateMessageField("tool_call_id", e.target.value)
-              }
-              placeholder="Tool Call ID"
-            />
-          </div>
+          <PlaygroundToolAttributes
+            toolName={message.name}
+            toolCallId={message.tool_call_id}
+            updateToolName={(name) => updateMessageField("name", name)}
+            updateToolCallId={(callId) =>
+              updateMessageField("tool_call_id", callId)
+            }
+          />
         </div>
       ) : (
         <XSmall className="font-mono font-semibold">

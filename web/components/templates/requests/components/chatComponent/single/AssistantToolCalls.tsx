@@ -37,6 +37,7 @@ export default function AssistantToolCalls({
         <MarkdownEditor
           className="w-full rounded-none bg-white dark:bg-slate-950"
           language="markdown"
+          placeholder="Enter your message here..."
           setText={(text) => {
             if (!mappedRequest || !onChatChange || messageIndex === undefined) {
               return;

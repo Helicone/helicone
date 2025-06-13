@@ -5,11 +5,11 @@ import {
 import { JsonRenderer } from "./JsonRenderer";
 import MarkdownEditor from "@/components/shared/markdownEditor";
 import { cn } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Trash2Icon } from "lucide-react";
 import { PiToolboxBold } from "react-icons/pi";
 import { XSmall } from "@/components/ui/typography";
+import PlaygroundToolAttributes from "../PlaygroundToolAttributes";
 
 interface AssistantToolCallProps {
   tool: FunctionCall;
@@ -143,24 +143,16 @@ export default function AssistantToolCall({
         <PiToolboxBold className="text-muted-foreground" />
         {playgroundMode ? (
           <div className="flex items-center justify-between w-full">
-            <div className="flex items-center gap-2">
-              <Input
-                className="text-xs"
-                value={tool.name}
-                onChange={(e) =>
-                  updateMessageToolCallField("name", e.target.value)
-                }
-                placeholder="Function Name"
-              />
-              <Input
-                className="text-xs"
-                value={tool.id}
-                onChange={(e) =>
-                  updateMessageToolCallField("id", e.target.value)
-                }
-                placeholder="Tool Call ID"
-              />
-            </div>
+            <PlaygroundToolAttributes
+              toolName={tool.name}
+              toolCallId={tool.id}
+              updateToolName={(name) =>
+                updateMessageToolCallField("name", name)
+              }
+              updateToolCallId={(callId) =>
+                updateMessageToolCallField("id", callId)
+              }
+            />
             <Button
               variant="ghost"
               size="icon"
