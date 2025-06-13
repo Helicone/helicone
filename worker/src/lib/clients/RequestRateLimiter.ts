@@ -8,7 +8,7 @@ export class RateLimiter {
     private authParams: AuthParams
   ) {}
 
-  private getRateLimitParams(tier: "free") {
+  private getRateLimitParams(tier: string) {
     const rateLimitParams: Record<
       string,
       {
@@ -41,13 +41,6 @@ export class RateLimiter {
       );
 
       const rateLimiter = this.rateLimiter.get(rateLimiterId);
-      if (tier !== "free") {
-        return ok({
-          isRateLimited: false,
-          shouldLogInDB: false,
-          rlIncrementDB: 0,
-        });
-      }
 
       const params = this.getRateLimitParams(tier);
 
