@@ -12,7 +12,6 @@ export async function generateStream(
   generate({
     ...params,
     signal: abortController.signal,
-    // @ts-ignore
     stream: {
       onChunk: async (chunk: string) => {
         if (options?.headers?.["x-cancel"] === "1") {
@@ -21,7 +20,8 @@ export async function generateStream(
           return;
         }
         try {
-          // Pass through the raw chunk exactly as received
+          // For includeReasoning=false, chunk is already a string
+          // For includeReasoning=true, chunk is a JSON string
           await writer.write(encoder.encode(chunk));
         } catch (error) {
           console.error("[generateStream] Error writing chunk:", error);

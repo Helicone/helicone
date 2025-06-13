@@ -146,14 +146,6 @@ const processToolResponse = (msg: any): Message => {
     content: toolResponseMsg.content || "",
     _type: "function",
     name: msg.name,
-    tool_calls: [
-      {
-        name: msg.name,
-        arguments: {
-          query_result: msg.content,
-        },
-      },
-    ],
   };
 };
 
@@ -212,7 +204,7 @@ const processTextMessage = (msg: any): Message => {
   };
 };
 
-const openAIMessageToHeliconeMessage = (msg: any): Message => {
+export const openAIMessageToHeliconeMessage = (msg: any): Message => {
   if (msg.function_call || msg.tool_calls) {
     return processFunctionCall(msg);
   }
@@ -236,7 +228,7 @@ export const getRequestMessages = (request: any): Message[] => {
   return request.messages?.map(openAIMessageToHeliconeMessage) ?? [];
 };
 
-const getLLMSchemaResponse = (response: any) => {
+export const getLLMSchemaResponse = (response: any) => {
   if ("error" in response) {
     return {
       error: {

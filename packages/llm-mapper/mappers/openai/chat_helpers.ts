@@ -29,6 +29,7 @@ export const parseFunctionArguments = (
 };
 
 export const mapToolCallToFunction = (tool: ToolCall): FunctionCall => ({
+  id: tool.id ?? "",
   name: tool.function?.name ?? "",
   arguments: parseFunctionArguments(tool.function?.arguments),
 });
@@ -56,19 +57,22 @@ export const handleObjectContent = (content: any): string => {
   return JSON.stringify(content);
 };
 
-export const handleToolCalls = (message: any): Message => ({
-  content: message.content || "",
-  role: message.role ?? "assistant",
-  tool_calls: message.function_call
-    ? [
-        {
-          name: message.function_call.name,
-          arguments: parseFunctionArguments(message.function_call.arguments),
-        },
-      ]
-    : message.tool_calls?.map(mapToolCallToFunction) ?? [],
-  _type: "functionCall",
-});
+export const handleToolCalls = (message: any): Message => {
+  return {
+    content: message.content || "",
+    role: message.role ?? "assistant",
+    tool_calls: message.function_call
+      ? [
+          {
+            id: "id" in message.function_call ? message.function_call.id : "",
+            name: message.function_call.name,
+            arguments: parseFunctionArguments(message.function_call.arguments),
+          },
+        ]
+      : message.tool_calls?.map(mapToolCallToFunction) ?? [],
+    _type: "functionCall",
+  };
+};
 
 export const handleImageMessage = (msg: any, imageContent: any): Message => ({
   role: msg.role,
@@ -102,14 +106,6 @@ export const handleToolResponse = (msg: any): Message => {
       tool_call_id: msg.tool_call_id,
       _type: "function",
       name: msg.name,
-      tool_calls: [
-        {
-          name: msg.name,
-          arguments: {
-            query_result: msg.content,
-          },
-        },
-      ],
     };
   }
 
@@ -118,7 +114,6 @@ export const handleToolResponse = (msg: any): Message => {
     role: msg.role,
     tool_call_id: msg.tool_call_id,
     _type: "function",
-    tool_calls: msg.tool_calls?.map(mapToolCallToFunction) ?? [],
   };
 };
 

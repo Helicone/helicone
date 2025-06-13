@@ -130,7 +130,7 @@ export default {
         },
         // Sidebar Colors
         sidebar: {
-          background: "hsl(var(--sidebar-background))",
+          background: "var(--sidebar-background)",
           foreground: "hsl(var(--sidebar-foreground))",
           primary: "hsl(var(--sidebar-primary))",
           "primary-foreground": "hsl(var(--sidebar-primary-foreground))",

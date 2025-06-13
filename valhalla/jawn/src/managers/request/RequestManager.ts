@@ -407,10 +407,8 @@ export class RequestManager extends BaseManager {
       newFilter,
       offset,
       limit,
-      sort,
+      sort
     );
-
-    console.log("requests", requests);
 
     return resultMap(requests, (req) => {
       return req.map((r) => {

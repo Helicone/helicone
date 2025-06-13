@@ -27,8 +27,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
-import { generateStream } from "@/lib/api/llm/generate-stream";
-import { processStream } from "@/lib/api/llm/process-stream";
+import { generateStream } from "@/lib/api/llm-old/generate-stream";
+import { processStream } from "@/lib/api/llm-old/process-stream";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { usePromptRunsStore } from "@/lib/stores/promptRunsStore";
 import { openaiChatMapper } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
