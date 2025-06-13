@@ -13,14 +13,11 @@ export function modelCost(modelRow: {
   per_call?: number;
   per_image?: number;
 }): number {
-  const effectivePromptTokens =
-    modelRow.sum_prompt_tokens - modelRow.prompt_cache_read_tokens;
-
   return (
     costOfPrompt({
       provider: modelRow.provider,
       model: modelRow.model,
-      promptTokens: effectivePromptTokens,
+      promptTokens: modelRow.sum_prompt_tokens,
       promptCacheWriteTokens: modelRow.prompt_cache_write_tokens,
       promptCacheReadTokens: modelRow.prompt_cache_read_tokens,
       promptAudioTokens: modelRow.prompt_audio_tokens,
