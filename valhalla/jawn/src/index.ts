@@ -17,7 +17,7 @@ import { RequestWrapper } from "./lib/requestWrapper/requestWrapper";
 import { tokenRouter } from "./lib/routers/tokenRouter";
 import { DelayedOperationService } from "./lib/shared/delayedOperationService";
 import { runLoopsOnce, runMainLoops } from "./mainLoops";
-import { authMiddleware } from "./middleware/auth";
+import { authFromRequest, authMiddleware } from "./middleware/auth";
 import { IS_RATE_LIMIT_ENABLED, limiter } from "./middleware/ratelimitter";
 import { RegisterRoutes as registerPrivateTSOARoutes } from "./tsoa-build/private/routes";
 import { RegisterRoutes as registerPublicTSOARoutes } from "./tsoa-build/public/routes";
@@ -28,6 +28,7 @@ import { startConsumers, startSQSConsumers } from "./workers/consumerInterface";
 import { IS_ON_PREM } from "./constants/IS_ON_PREM";
 import { toExpressRequest } from "./utils/expressHelpers";
 import { webSocketControlPlaneServer } from "./controlPlane/controlPlane";
+import { startDBListener } from "./controlPlane/dbListener";
 
 if (ENVIRONMENT === "production" || process.env.ENABLE_CRON_JOB === "true") {
   runMainLoops();
@@ -133,6 +134,8 @@ if (KAFKA_ENABLED) {
   });
 }
 
+startDBListener();
+
 app.get("/healthcheck", (req, res) => {
   res.json({
     status: "healthy :)",
@@ -191,6 +194,7 @@ v1APIRouter.use(
     parameterLimit: 50000,
   })
 );
+
 registerPublicTSOARoutes(v1APIRouter);
 registerPrivateTSOARoutes(v1APIRouter);
 
@@ -228,8 +232,20 @@ server.on("upgrade", async (req, socket, head) => {
   }
   if (req.url?.startsWith("/v1/gateway/oai/realtime")) {
     webSocketProxyForwarder(requestWrapper, socket, head);
-  } else if (req.url?.startsWith("/v1/gateway/oai/realtime/control-plane")) {
-    webSocketControlPlaneServer(requestWrapper, socket, head);
+  } else if (req.url?.startsWith("/ws/v1/router/control-plane")) {
+    const auth = await authFromRequest(toExpressRequest(req));
+    if (auth.error) {
+      socket.write(
+        JSON.stringify({
+          type: "error",
+          error: auth.error,
+        })
+      );
+      socket.destroy();
+      return;
+    } else {
+      return webSocketControlPlaneServer(requestWrapper, socket, head);
+    }
   } else {
     socket.destroy();
   }
