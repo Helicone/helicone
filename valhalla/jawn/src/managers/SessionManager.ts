@@ -337,7 +337,7 @@ export class SessionManager {
       properties['Helicone-Session-Id'] as session_id,
       properties['Helicone-Session-Name'] as session_name,
       avg(request_response_rmt.latency) as avg_latency,
-      sum(cost) / ${COST_PRECISION_MULTIPLIER} AS total_cost,
+      sum(request_response_rmt.cost) / ${COST_PRECISION_MULTIPLIER} AS total_cost,
       count(*) AS total_requests,
       sum(request_response_rmt.prompt_tokens) AS prompt_tokens,
       sum(request_response_rmt.completion_tokens) AS completion_tokens,
