@@ -128,6 +128,7 @@ export class VersionedRequestStore {
         target_url: row.target_url,
         request_body: row.request_body,
         response_body: row.response_body,
+        cost: row.cost,
         assets: row.assets,
         scores: row.scores,
         properties: newVersion.properties,

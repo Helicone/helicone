@@ -1,5 +1,7 @@
 import { costOfPrompt } from "./index";
 
+export const COST_PRECISION_MULTIPLIER = 1_000_000_000;
+
 export function modelCost(modelRow: {
   provider: string;
   model: string;
@@ -25,6 +27,7 @@ export function modelCost(modelRow: {
       completionAudioTokens: modelRow.completion_audio_tokens,
       perCall: modelRow.per_call,
       images: modelRow.per_image,
+      multiple: modelRow.multiple,
     }) ?? 0
   );
 }
