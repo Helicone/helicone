@@ -206,7 +206,6 @@ const convertTools = (
   tools?: OpenAIResponseRequest["tools"]
 ): LlmSchema["request"]["tools"] => {
   if (!tools) return [];
-  console.log("tools", tools);
   return tools.map((tool) => ({
     type: "function",
     name: tool.function?.name,
