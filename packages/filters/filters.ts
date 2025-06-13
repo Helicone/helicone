@@ -291,6 +291,10 @@ const whereKeyMappings: KeyMappings = {
     request_body: "cache_metrics.request_body",
     response_body: "cache_metrics.response_body",
   }),
+  organization_properties: easyKeyMappings<"organization_properties">({
+    organization_id: "organization_properties.organization_id",
+    property_key: "organization_properties.property_key",
+  }),
 
   values: NOT_IMPLEMENTED,
   job: NOT_IMPLEMENTED,
@@ -363,6 +367,7 @@ const havingKeyMappings: KeyMappings = {
   property_with_response_v1: NOT_IMPLEMENTED,
   feedback: NOT_IMPLEMENTED,
   rate_limit_log: NOT_IMPLEMENTED,
+  organization_properties: NOT_IMPLEMENTED,
   prompt_v2: NOT_IMPLEMENTED,
   prompts_versions: NOT_IMPLEMENTED,
   experiment: NOT_IMPLEMENTED,
@@ -653,6 +658,18 @@ export async function buildFilterWithAuthClickHouseRateLimits(
 ): Promise<{ filter: string; argsAcc: any[] }> {
   return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
     rate_limit_log: {
+      organization_id: {
+        equals: orgId,
+      },
+    },
+  }));
+}
+
+export async function buildFilterWithAuthClickHouseOrganizationProperties(
+  args: ExternalBuildFilterArgs & { org_id: string }
+): Promise<{ filter: string; argsAcc: any[] }> {
+  return buildFilterWithAuth(args, "clickhouse", (orgId) => ({
+    organization_properties: {
       organization_id: {
         equals: orgId,
       },

@@ -1,4 +1,4 @@
-import { MessageData, MessageProducer } from "./types";
+import {  MessageData, MessageProducer } from "./types";
 
 export class DualWriteProducer implements MessageProducer {
   private primary: MessageProducer;
@@ -10,6 +10,15 @@ export class DualWriteProducer implements MessageProducer {
   ) {
     this.primary = primaryProducer;
     this.secondary = secondaryProducer;
+  }
+
+  setLowerPriority() {
+    if (!(this.secondary instanceof DualWriteProducer)) {
+      this.secondary.setLowerPriority();
+    }
+    if (!(this.primary instanceof DualWriteProducer)) {
+      this.primary.setLowerPriority();
+    }
   }
 
   async sendMessage(msg: MessageData) {

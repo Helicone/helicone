@@ -326,6 +326,14 @@ export type RateLimitTableToOperators = {
 };
 export type FilterLeafRateLimitLog = SingleKey<RateLimitTableToOperators>;
 
+// CLICKHOUSE TABLES: SIMPLE MATERIALIZED VIEWS
+
+// organization_properties
+type OrganizationPropertiesToOperators = {
+  organization_id: SingleKey<TextOperators>;
+  property_key: SingleKey<TextOperators>;
+};
+export type FilterLeafOrganizationProperties = SingleKey<OrganizationPropertiesToOperators>;
 
 // FilterLeaf
 export type TablesAndViews = {
@@ -354,6 +362,10 @@ export type TablesAndViews = {
   job_node: FilterLeafNode;
   cache_metrics: FilterLeafCacheMetrics;
   rate_limit_log: FilterLeafRateLimitLog;
+
+  // SIMPLE MATERIALIZED VIEWS
+  // cheap tables, made for quick stat queries
+  organization_properties: FilterLeafOrganizationProperties;
 
   properties: {
     [key: string]: SingleKey<TextOperators>;
