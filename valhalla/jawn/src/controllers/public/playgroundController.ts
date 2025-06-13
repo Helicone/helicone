@@ -1,4 +1,13 @@
-import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Request,
+  Route,
+  Security,
+  Tags,
+} from "tsoa";
 import { Result, err, ok } from "../../packages/common/result";
 import { type JawnAuthenticatedRequest } from "../../types/request";
 import { Message, Tool } from "@helicone-package/llm-mapper/types";
@@ -7,6 +16,7 @@ import OpenAI from "openai";
 import { generateTempHeliconeAPIKey } from "../../lib/experiment/tempKeys/tempAPIKey";
 import { GET_KEY } from "../../lib/clients/constant";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
+import { PlaygroundManager } from "../../managers/playgroundManager";
 
 export interface GenerateParams {
   provider: any;
@@ -29,10 +39,10 @@ export interface GenerateParams {
 
 const isOnPrem = false;
 
-@Route("v1/llm")
-@Tags("LLM")
+@Route("v1/playground")
+@Tags("Playground")
 @Security("api_key")
-export class LLMController extends Controller {
+export class PlaygroundController extends Controller {
   @Post("/generate")
   public async generate(
     @Body() params: OpenAIChatRequest,
@@ -91,10 +101,10 @@ export class LLMController extends Controller {
           defaultHeaders: {
             "Helicone-Auth": `Bearer ${secretKey}`,
             "Helicone-User-Id": request.authParams.organizationId,
-            ...(!selfKey && {
-              // 10 requests per user per year
-              "Helicone-RateLimit-Policy": "10;w=31536000;s=user",
-            }),
+            // ...(!selfKey && {
+            //   // 10 requests per user per year
+            //   "Helicone-RateLimit-Policy": "10;w=31536000;s=user",
+            // }),
           },
         });
         const abortController = new AbortController();
@@ -231,5 +241,27 @@ export class LLMController extends Controller {
       this.setStatus(500);
       return err("Failed to generate response");
     }
+  }
+
+  @Post("/requests-through-helicone")
+  public async requestsThroughHelicone(
+    @Body() params: { requestsThroughHelicone: boolean },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<string, string>> {
+    const playgroundManager = new PlaygroundManager(request.authParams);
+    return playgroundManager.setPlaygroundRequestsThroughHelicone(
+      request.authParams.organizationId,
+      params.requestsThroughHelicone
+    );
+  }
+
+  @Get("/requests-through-helicone")
+  public async getRequestsThroughHelicone(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<boolean, string>> {
+    const playgroundManager = new PlaygroundManager(request.authParams);
+    return playgroundManager.getRequestsThroughHelicone(
+      request.authParams.organizationId
+    );
   }
 }

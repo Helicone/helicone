@@ -34,6 +34,10 @@ import {
 } from "@/components/ui/dialog";
 import Image from "next/image";
 import { providers } from "@/data/providers";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getJawnClient } from "@/lib/clients/jawn";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 export interface ModelParameters {
   temperature: number | null | undefined;
@@ -393,12 +397,74 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
 
   const [isOpenRouterDialogOpen, setIsOpenRouterDialogOpen] = useState(false);
 
+  const queryClient = useQueryClient();
+
+  const { mutate: setPlaygroundRequestsThroughHelicone, isPending } =
+    useMutation({
+      mutationKey: ["addAdminToOrg"],
+      mutationFn: async ({
+        requestsThroughHelicone,
+      }: {
+        requestsThroughHelicone: boolean;
+      }) => {
+        const jawn = getJawnClient();
+        const { error } = await jawn.POST(
+          "/v1/playground/requests-through-helicone",
+          {
+            body: {
+              requestsThroughHelicone,
+            },
+          }
+        );
+
+        if (error) {
+          setNotification("Failed to update playground settings", "error");
+        } else {
+          setNotification("Playground settings updated", "success");
+        }
+      },
+      onMutate: ({ requestsThroughHelicone }) => {
+        console.log("on mutate");
+        queryClient.setQueryData(
+          ["playground-requests-through-helicone"],
+          requestsThroughHelicone
+        );
+      },
+    });
+
+  const { data: requestsThroughHelicone } = useQuery({
+    queryKey: ["playground-requests-through-helicone"],
+    queryFn: async () => {
+      const jawn = getJawnClient();
+      const { data } = await jawn.GET(
+        "/v1/playground/requests-through-helicone"
+      );
+      return data?.data ?? false;
+    },
+  });
+
   return (
     <main className="h-screen flex flex-col w-full animate-fade-in">
       <AuthHeader
         title={"Playground"}
         actions={
           <div className="flex flex-row items-center gap-2">
+            <div className="flex gap-2 items-center">
+              <Checkbox
+                id="requests-through-helicone"
+                checked={requestsThroughHelicone}
+                onCheckedChange={(checked) =>
+                  setPlaygroundRequestsThroughHelicone({
+                    requestsThroughHelicone:
+                      checked === "indeterminate" ? false : checked,
+                  })
+                }
+                disabled={isPending}
+              />
+              <Label htmlFor="requests-through-helicone" className="text-sm">
+                Requests through Helicone
+              </Label>
+            </div>
             <Dialog
               open={isOpenRouterDialogOpen}
               onOpenChange={setIsOpenRouterDialogOpen}

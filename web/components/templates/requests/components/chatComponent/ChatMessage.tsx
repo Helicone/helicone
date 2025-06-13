@@ -191,16 +191,10 @@ const renderToolMessage = (
     );
   }
   if (message.tool_calls) {
+    console.log({ message, playgroundMode });
     return (
       <div className={cn("flex flex-col", !playgroundMode && "gap-4")}>
-        {message.content && !playgroundMode ? (
-          <ReactMarkdown
-            components={markdownComponents}
-            className="w-full text-xs whitespace-pre-wrap break-words p-2"
-          >
-            {message.content}
-          </ReactMarkdown>
-        ) : (
+        {playgroundMode ? (
           <MarkdownEditor
             className="w-full rounded-none bg-white dark:bg-slate-950"
             language="markdown"
@@ -231,6 +225,15 @@ const renderToolMessage = (
             }}
             text={message.content || ""}
           />
+        ) : (
+          message.content && (
+            <ReactMarkdown
+              components={markdownComponents}
+              className="w-full text-xs whitespace-pre-wrap break-words p-2"
+            >
+              {message.content}
+            </ReactMarkdown>
+          )
         )}
         {message.tool_calls.map((tool, index) => {
           const updateMessageToolCallField = (field: string, value: string) => {

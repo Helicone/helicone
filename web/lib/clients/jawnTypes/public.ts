@@ -312,6 +312,13 @@ export interface paths {
   "/v1/property/{propertyKey}/top-costs/query": {
     post: operations["GetTopCosts"];
   };
+  "/v1/playground/generate": {
+    post: operations["Generate"];
+  };
+  "/v1/playground/requests-through-helicone": {
+    get: operations["GetRequestsThroughHelicone"];
+    post: operations["RequestsThroughHelicone"];
+  };
   "/v1/public/pi/get-api-key": {
     post: operations["GetApiKey"];
   };
@@ -338,9 +345,6 @@ export interface paths {
   };
   "/v1/public/security": {
     post: operations["GetSecurity"];
-  };
-  "/v1/llm/generate": {
-    post: operations["Generate"];
   };
   "/v1/integration": {
     get: operations["GetIntegrations"];
@@ -1983,140 +1987,6 @@ Json: JsonObject;
         start: string;
       };
     };
-    "ResultSuccess__apiKey-string__": {
-      data: {
-        apiKey: string;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__apiKey-string_.string_": components["schemas"]["ResultSuccess__apiKey-string__"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__cost-number--created_at_trunc-string_-Array_": {
-      data: {
-          created_at_trunc: string;
-          /** Format: double */
-          cost: number;
-        }[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__cost-number--created_at_trunc-string_-Array.string_": components["schemas"]["ResultSuccess__cost-number--created_at_trunc-string_-Array_"] | components["schemas"]["ResultError_string_"];
-    /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.request_response_rmt_": {
-      request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
-    };
-    FilterLeafSubset_request_response_rmt_: components["schemas"]["Pick_FilterLeaf.request_response_rmt_"];
-    RequestClickhouseFilterNode: components["schemas"]["FilterLeafSubset_request_response_rmt_"] | components["schemas"]["RequestClickhouseFilterBranch"] | "all";
-    RequestClickhouseFilterBranch: {
-      right: components["schemas"]["RequestClickhouseFilterNode"];
-      /** @enum {string} */
-      operator: "or" | "and";
-      left: components["schemas"]["RequestClickhouseFilterNode"];
-    };
-    /** @enum {string} */
-    TimeIncrement: "min" | "hour" | "day" | "week" | "month" | "year";
-    DataOverTimeRequest: {
-      timeFilter: {
-        end: string;
-        start: string;
-      };
-      userFilter: components["schemas"]["RequestClickhouseFilterNode"];
-      dbIncrement: components["schemas"]["TimeIncrement"];
-      /** Format: double */
-      timeZoneDifference: number;
-    };
-    MetricStats: {
-      /** Format: double */
-      p99: number;
-      /** Format: double */
-      p95: number;
-      /** Format: double */
-      p90: number;
-      /** Format: double */
-      max: number;
-      /** Format: double */
-      min: number;
-      /** Format: double */
-      median: number;
-      /** Format: double */
-      average: number;
-    };
-    TokenMetricStats: components["schemas"]["MetricStats"] & {
-      /** Format: double */
-      medianPer1000Tokens: number;
-    };
-    TimeSeriesMetric: {
-      /** Format: double */
-      value: number;
-      timestamp: string;
-    };
-    Model: {
-      timeSeriesData: {
-        errorRate: components["schemas"]["TimeSeriesMetric"][];
-        successRate: components["schemas"]["TimeSeriesMetric"][];
-        ttft: components["schemas"]["TimeSeriesMetric"][];
-        latency: components["schemas"]["TimeSeriesMetric"][];
-      };
-      requestStatus: {
-        /** Format: double */
-        errorRate: number;
-        /** Format: double */
-        successRate: number;
-      };
-      geographicTtft: {
-          /** Format: double */
-          median: number;
-          countryCode: string;
-        }[];
-      geographicLatency: {
-          /** Format: double */
-          median: number;
-          countryCode: string;
-        }[];
-      feedback: {
-        /** Format: double */
-        negativePercentage: number;
-        /** Format: double */
-        positivePercentage: number;
-      };
-      costs: {
-        /** Format: double */
-        completion_token: number;
-        /** Format: double */
-        prompt_token: number;
-      };
-      ttft: components["schemas"]["MetricStats"];
-      latency: components["schemas"]["TokenMetricStats"];
-      provider: string;
-      model: string;
-    };
-    "ResultSuccess_Model-Array_": {
-      data: components["schemas"]["Model"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_Model-Array.string_": components["schemas"]["ResultSuccess_Model-Array_"] | components["schemas"]["ResultError_string_"];
-    ModelsToCompare: {
-      provider: string;
-      names: string[];
-      parent: string;
-    };
-    "ResultSuccess__model-string_-Array_": {
-      data: {
-          model: string;
-        }[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__model-string_-Array.string_": components["schemas"]["ResultSuccess__model-string_-Array_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__unsafe-boolean__": {
-      data: {
-        unsafe: boolean;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__unsafe-boolean_.string_": components["schemas"]["ResultSuccess__unsafe-boolean__"] | components["schemas"]["ResultError_string_"];
     "ChatCompletionTokenLogprob.TopLogprob": {
       /** @description The token. */
       token: string;
@@ -2508,6 +2378,140 @@ Json: JsonObject;
       };
       functions?: unknown[];
     };
+    "ResultSuccess__apiKey-string__": {
+      data: {
+        apiKey: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__apiKey-string_.string_": components["schemas"]["ResultSuccess__apiKey-string__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__cost-number--created_at_trunc-string_-Array_": {
+      data: {
+          created_at_trunc: string;
+          /** Format: double */
+          cost: number;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__cost-number--created_at_trunc-string_-Array.string_": components["schemas"]["ResultSuccess__cost-number--created_at_trunc-string_-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_FilterLeaf.request_response_rmt_": {
+      request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
+    };
+    FilterLeafSubset_request_response_rmt_: components["schemas"]["Pick_FilterLeaf.request_response_rmt_"];
+    RequestClickhouseFilterNode: components["schemas"]["FilterLeafSubset_request_response_rmt_"] | components["schemas"]["RequestClickhouseFilterBranch"] | "all";
+    RequestClickhouseFilterBranch: {
+      right: components["schemas"]["RequestClickhouseFilterNode"];
+      /** @enum {string} */
+      operator: "or" | "and";
+      left: components["schemas"]["RequestClickhouseFilterNode"];
+    };
+    /** @enum {string} */
+    TimeIncrement: "min" | "hour" | "day" | "week" | "month" | "year";
+    DataOverTimeRequest: {
+      timeFilter: {
+        end: string;
+        start: string;
+      };
+      userFilter: components["schemas"]["RequestClickhouseFilterNode"];
+      dbIncrement: components["schemas"]["TimeIncrement"];
+      /** Format: double */
+      timeZoneDifference: number;
+    };
+    MetricStats: {
+      /** Format: double */
+      p99: number;
+      /** Format: double */
+      p95: number;
+      /** Format: double */
+      p90: number;
+      /** Format: double */
+      max: number;
+      /** Format: double */
+      min: number;
+      /** Format: double */
+      median: number;
+      /** Format: double */
+      average: number;
+    };
+    TokenMetricStats: components["schemas"]["MetricStats"] & {
+      /** Format: double */
+      medianPer1000Tokens: number;
+    };
+    TimeSeriesMetric: {
+      /** Format: double */
+      value: number;
+      timestamp: string;
+    };
+    Model: {
+      timeSeriesData: {
+        errorRate: components["schemas"]["TimeSeriesMetric"][];
+        successRate: components["schemas"]["TimeSeriesMetric"][];
+        ttft: components["schemas"]["TimeSeriesMetric"][];
+        latency: components["schemas"]["TimeSeriesMetric"][];
+      };
+      requestStatus: {
+        /** Format: double */
+        errorRate: number;
+        /** Format: double */
+        successRate: number;
+      };
+      geographicTtft: {
+          /** Format: double */
+          median: number;
+          countryCode: string;
+        }[];
+      geographicLatency: {
+          /** Format: double */
+          median: number;
+          countryCode: string;
+        }[];
+      feedback: {
+        /** Format: double */
+        negativePercentage: number;
+        /** Format: double */
+        positivePercentage: number;
+      };
+      costs: {
+        /** Format: double */
+        completion_token: number;
+        /** Format: double */
+        prompt_token: number;
+      };
+      ttft: components["schemas"]["MetricStats"];
+      latency: components["schemas"]["TokenMetricStats"];
+      provider: string;
+      model: string;
+    };
+    "ResultSuccess_Model-Array_": {
+      data: components["schemas"]["Model"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Model-Array.string_": components["schemas"]["ResultSuccess_Model-Array_"] | components["schemas"]["ResultError_string_"];
+    ModelsToCompare: {
+      provider: string;
+      names: string[];
+      parent: string;
+    };
+    "ResultSuccess__model-string_-Array_": {
+      data: {
+          model: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__model-string_-Array.string_": components["schemas"]["ResultSuccess__model-string_-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__unsafe-boolean__": {
+      data: {
+        unsafe: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__unsafe-boolean_.string_": components["schemas"]["ResultSuccess__unsafe-boolean__"] | components["schemas"]["ResultError_string_"];
     IntegrationCreateParams: {
       integration_name: string;
       settings?: components["schemas"]["Json"];
@@ -4880,6 +4884,48 @@ export interface operations {
       };
     };
   };
+  Generate: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OpenAIChatRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ChatCompletion-or-_content-string--reasoning-string--calls-any_.string_"];
+        };
+      };
+    };
+  };
+  GetRequestsThroughHelicone: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_boolean.string_"];
+        };
+      };
+    };
+  };
+  RequestsThroughHelicone: {
+    requestBody: {
+      content: {
+        "application/json": {
+          requestsThroughHelicone: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string.string_"];
+        };
+      };
+    };
+  };
   GetApiKey: {
     requestBody: {
       content: {
@@ -4998,21 +5044,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result__unsafe-boolean_.string_"];
-        };
-      };
-    };
-  };
-  Generate: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["OpenAIChatRequest"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ChatCompletion-or-_content-string--reasoning-string--calls-any_.string_"];
         };
       };
     };

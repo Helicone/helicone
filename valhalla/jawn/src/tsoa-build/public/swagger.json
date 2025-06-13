@@ -5648,553 +5648,6 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ResultSuccess__apiKey-string__": {
-				"properties": {
-					"data": {
-						"properties": {
-							"apiKey": {
-								"type": "string"
-							}
-						},
-						"required": [
-							"apiKey"
-						],
-						"type": "object"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result__apiKey-string_.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess__apiKey-string__"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"ResultSuccess__cost-number--created_at_trunc-string_-Array_": {
-				"properties": {
-					"data": {
-						"items": {
-							"properties": {
-								"created_at_trunc": {
-									"type": "string"
-								},
-								"cost": {
-									"type": "number",
-									"format": "double"
-								}
-							},
-							"required": [
-								"created_at_trunc",
-								"cost"
-							],
-							"type": "object"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result__cost-number--created_at_trunc-string_-Array.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess__cost-number--created_at_trunc-string_-Array_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"Pick_FilterLeaf.request_response_rmt_": {
-				"properties": {
-					"request_response_rmt": {
-						"$ref": "#/components/schemas/Partial_RequestResponseRMTToOperators_"
-					}
-				},
-				"type": "object",
-				"description": "From T, pick a set of properties whose keys are in the union K"
-			},
-			"FilterLeafSubset_request_response_rmt_": {
-				"$ref": "#/components/schemas/Pick_FilterLeaf.request_response_rmt_"
-			},
-			"RequestClickhouseFilterNode": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/FilterLeafSubset_request_response_rmt_"
-					},
-					{
-						"$ref": "#/components/schemas/RequestClickhouseFilterBranch"
-					},
-					{
-						"type": "string",
-						"enum": [
-							"all"
-						]
-					}
-				]
-			},
-			"RequestClickhouseFilterBranch": {
-				"properties": {
-					"right": {
-						"$ref": "#/components/schemas/RequestClickhouseFilterNode"
-					},
-					"operator": {
-						"type": "string",
-						"enum": [
-							"or",
-							"and"
-						]
-					},
-					"left": {
-						"$ref": "#/components/schemas/RequestClickhouseFilterNode"
-					}
-				},
-				"required": [
-					"right",
-					"operator",
-					"left"
-				],
-				"type": "object"
-			},
-			"TimeIncrement": {
-				"type": "string",
-				"enum": [
-					"min",
-					"hour",
-					"day",
-					"week",
-					"month",
-					"year"
-				]
-			},
-			"DataOverTimeRequest": {
-				"properties": {
-					"timeFilter": {
-						"properties": {
-							"end": {
-								"type": "string"
-							},
-							"start": {
-								"type": "string"
-							}
-						},
-						"required": [
-							"end",
-							"start"
-						],
-						"type": "object"
-					},
-					"userFilter": {
-						"$ref": "#/components/schemas/RequestClickhouseFilterNode"
-					},
-					"dbIncrement": {
-						"$ref": "#/components/schemas/TimeIncrement"
-					},
-					"timeZoneDifference": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"timeFilter",
-					"userFilter",
-					"dbIncrement",
-					"timeZoneDifference"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"MetricStats": {
-				"properties": {
-					"p99": {
-						"type": "number",
-						"format": "double"
-					},
-					"p95": {
-						"type": "number",
-						"format": "double"
-					},
-					"p90": {
-						"type": "number",
-						"format": "double"
-					},
-					"max": {
-						"type": "number",
-						"format": "double"
-					},
-					"min": {
-						"type": "number",
-						"format": "double"
-					},
-					"median": {
-						"type": "number",
-						"format": "double"
-					},
-					"average": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"p99",
-					"p95",
-					"p90",
-					"max",
-					"min",
-					"median",
-					"average"
-				],
-				"type": "object"
-			},
-			"TokenMetricStats": {
-				"allOf": [
-					{
-						"$ref": "#/components/schemas/MetricStats"
-					},
-					{
-						"properties": {
-							"medianPer1000Tokens": {
-								"type": "number",
-								"format": "double"
-							}
-						},
-						"required": [
-							"medianPer1000Tokens"
-						],
-						"type": "object"
-					}
-				]
-			},
-			"TimeSeriesMetric": {
-				"properties": {
-					"value": {
-						"type": "number",
-						"format": "double"
-					},
-					"timestamp": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"value",
-					"timestamp"
-				],
-				"type": "object"
-			},
-			"Model": {
-				"properties": {
-					"timeSeriesData": {
-						"properties": {
-							"errorRate": {
-								"items": {
-									"$ref": "#/components/schemas/TimeSeriesMetric"
-								},
-								"type": "array"
-							},
-							"successRate": {
-								"items": {
-									"$ref": "#/components/schemas/TimeSeriesMetric"
-								},
-								"type": "array"
-							},
-							"ttft": {
-								"items": {
-									"$ref": "#/components/schemas/TimeSeriesMetric"
-								},
-								"type": "array"
-							},
-							"latency": {
-								"items": {
-									"$ref": "#/components/schemas/TimeSeriesMetric"
-								},
-								"type": "array"
-							}
-						},
-						"required": [
-							"errorRate",
-							"successRate",
-							"ttft",
-							"latency"
-						],
-						"type": "object"
-					},
-					"requestStatus": {
-						"properties": {
-							"errorRate": {
-								"type": "number",
-								"format": "double"
-							},
-							"successRate": {
-								"type": "number",
-								"format": "double"
-							}
-						},
-						"required": [
-							"errorRate",
-							"successRate"
-						],
-						"type": "object"
-					},
-					"geographicTtft": {
-						"items": {
-							"properties": {
-								"median": {
-									"type": "number",
-									"format": "double"
-								},
-								"countryCode": {
-									"type": "string"
-								}
-							},
-							"required": [
-								"median",
-								"countryCode"
-							],
-							"type": "object"
-						},
-						"type": "array"
-					},
-					"geographicLatency": {
-						"items": {
-							"properties": {
-								"median": {
-									"type": "number",
-									"format": "double"
-								},
-								"countryCode": {
-									"type": "string"
-								}
-							},
-							"required": [
-								"median",
-								"countryCode"
-							],
-							"type": "object"
-						},
-						"type": "array"
-					},
-					"feedback": {
-						"properties": {
-							"negativePercentage": {
-								"type": "number",
-								"format": "double"
-							},
-							"positivePercentage": {
-								"type": "number",
-								"format": "double"
-							}
-						},
-						"required": [
-							"negativePercentage",
-							"positivePercentage"
-						],
-						"type": "object"
-					},
-					"costs": {
-						"properties": {
-							"completion_token": {
-								"type": "number",
-								"format": "double"
-							},
-							"prompt_token": {
-								"type": "number",
-								"format": "double"
-							}
-						},
-						"required": [
-							"completion_token",
-							"prompt_token"
-						],
-						"type": "object"
-					},
-					"ttft": {
-						"$ref": "#/components/schemas/MetricStats"
-					},
-					"latency": {
-						"$ref": "#/components/schemas/TokenMetricStats"
-					},
-					"provider": {
-						"type": "string"
-					},
-					"model": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"timeSeriesData",
-					"requestStatus",
-					"geographicTtft",
-					"geographicLatency",
-					"feedback",
-					"costs",
-					"ttft",
-					"latency",
-					"provider",
-					"model"
-				],
-				"type": "object"
-			},
-			"ResultSuccess_Model-Array_": {
-				"properties": {
-					"data": {
-						"items": {
-							"$ref": "#/components/schemas/Model"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_Model-Array.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_Model-Array_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"ModelsToCompare": {
-				"properties": {
-					"provider": {
-						"type": "string"
-					},
-					"names": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"parent": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"provider",
-					"names",
-					"parent"
-				],
-				"type": "object"
-			},
-			"ResultSuccess__model-string_-Array_": {
-				"properties": {
-					"data": {
-						"items": {
-							"properties": {
-								"model": {
-									"type": "string"
-								}
-							},
-							"required": [
-								"model"
-							],
-							"type": "object"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result__model-string_-Array.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess__model-string_-Array_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"ResultSuccess__unsafe-boolean__": {
-				"properties": {
-					"data": {
-						"properties": {
-							"unsafe": {
-								"type": "boolean"
-							}
-						},
-						"required": [
-							"unsafe"
-						],
-						"type": "object"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result__unsafe-boolean_.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess__unsafe-boolean__"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
 			"ChatCompletionTokenLogprob.TopLogprob": {
 				"properties": {
 					"token": {
@@ -7039,6 +6492,553 @@
 				},
 				"type": "object",
 				"additionalProperties": false
+			},
+			"ResultSuccess__apiKey-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"apiKey": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"apiKey"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__apiKey-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__apiKey-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__cost-number--created_at_trunc-string_-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"properties": {
+								"created_at_trunc": {
+									"type": "string"
+								},
+								"cost": {
+									"type": "number",
+									"format": "double"
+								}
+							},
+							"required": [
+								"created_at_trunc",
+								"cost"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__cost-number--created_at_trunc-string_-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__cost-number--created_at_trunc-string_-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"Pick_FilterLeaf.request_response_rmt_": {
+				"properties": {
+					"request_response_rmt": {
+						"$ref": "#/components/schemas/Partial_RequestResponseRMTToOperators_"
+					}
+				},
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
+			"FilterLeafSubset_request_response_rmt_": {
+				"$ref": "#/components/schemas/Pick_FilterLeaf.request_response_rmt_"
+			},
+			"RequestClickhouseFilterNode": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/FilterLeafSubset_request_response_rmt_"
+					},
+					{
+						"$ref": "#/components/schemas/RequestClickhouseFilterBranch"
+					},
+					{
+						"type": "string",
+						"enum": [
+							"all"
+						]
+					}
+				]
+			},
+			"RequestClickhouseFilterBranch": {
+				"properties": {
+					"right": {
+						"$ref": "#/components/schemas/RequestClickhouseFilterNode"
+					},
+					"operator": {
+						"type": "string",
+						"enum": [
+							"or",
+							"and"
+						]
+					},
+					"left": {
+						"$ref": "#/components/schemas/RequestClickhouseFilterNode"
+					}
+				},
+				"required": [
+					"right",
+					"operator",
+					"left"
+				],
+				"type": "object"
+			},
+			"TimeIncrement": {
+				"type": "string",
+				"enum": [
+					"min",
+					"hour",
+					"day",
+					"week",
+					"month",
+					"year"
+				]
+			},
+			"DataOverTimeRequest": {
+				"properties": {
+					"timeFilter": {
+						"properties": {
+							"end": {
+								"type": "string"
+							},
+							"start": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"end",
+							"start"
+						],
+						"type": "object"
+					},
+					"userFilter": {
+						"$ref": "#/components/schemas/RequestClickhouseFilterNode"
+					},
+					"dbIncrement": {
+						"$ref": "#/components/schemas/TimeIncrement"
+					},
+					"timeZoneDifference": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"timeFilter",
+					"userFilter",
+					"dbIncrement",
+					"timeZoneDifference"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"MetricStats": {
+				"properties": {
+					"p99": {
+						"type": "number",
+						"format": "double"
+					},
+					"p95": {
+						"type": "number",
+						"format": "double"
+					},
+					"p90": {
+						"type": "number",
+						"format": "double"
+					},
+					"max": {
+						"type": "number",
+						"format": "double"
+					},
+					"min": {
+						"type": "number",
+						"format": "double"
+					},
+					"median": {
+						"type": "number",
+						"format": "double"
+					},
+					"average": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"p99",
+					"p95",
+					"p90",
+					"max",
+					"min",
+					"median",
+					"average"
+				],
+				"type": "object"
+			},
+			"TokenMetricStats": {
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/MetricStats"
+					},
+					{
+						"properties": {
+							"medianPer1000Tokens": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"medianPer1000Tokens"
+						],
+						"type": "object"
+					}
+				]
+			},
+			"TimeSeriesMetric": {
+				"properties": {
+					"value": {
+						"type": "number",
+						"format": "double"
+					},
+					"timestamp": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"value",
+					"timestamp"
+				],
+				"type": "object"
+			},
+			"Model": {
+				"properties": {
+					"timeSeriesData": {
+						"properties": {
+							"errorRate": {
+								"items": {
+									"$ref": "#/components/schemas/TimeSeriesMetric"
+								},
+								"type": "array"
+							},
+							"successRate": {
+								"items": {
+									"$ref": "#/components/schemas/TimeSeriesMetric"
+								},
+								"type": "array"
+							},
+							"ttft": {
+								"items": {
+									"$ref": "#/components/schemas/TimeSeriesMetric"
+								},
+								"type": "array"
+							},
+							"latency": {
+								"items": {
+									"$ref": "#/components/schemas/TimeSeriesMetric"
+								},
+								"type": "array"
+							}
+						},
+						"required": [
+							"errorRate",
+							"successRate",
+							"ttft",
+							"latency"
+						],
+						"type": "object"
+					},
+					"requestStatus": {
+						"properties": {
+							"errorRate": {
+								"type": "number",
+								"format": "double"
+							},
+							"successRate": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"errorRate",
+							"successRate"
+						],
+						"type": "object"
+					},
+					"geographicTtft": {
+						"items": {
+							"properties": {
+								"median": {
+									"type": "number",
+									"format": "double"
+								},
+								"countryCode": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"median",
+								"countryCode"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"geographicLatency": {
+						"items": {
+							"properties": {
+								"median": {
+									"type": "number",
+									"format": "double"
+								},
+								"countryCode": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"median",
+								"countryCode"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"feedback": {
+						"properties": {
+							"negativePercentage": {
+								"type": "number",
+								"format": "double"
+							},
+							"positivePercentage": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"negativePercentage",
+							"positivePercentage"
+						],
+						"type": "object"
+					},
+					"costs": {
+						"properties": {
+							"completion_token": {
+								"type": "number",
+								"format": "double"
+							},
+							"prompt_token": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"completion_token",
+							"prompt_token"
+						],
+						"type": "object"
+					},
+					"ttft": {
+						"$ref": "#/components/schemas/MetricStats"
+					},
+					"latency": {
+						"$ref": "#/components/schemas/TokenMetricStats"
+					},
+					"provider": {
+						"type": "string"
+					},
+					"model": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"timeSeriesData",
+					"requestStatus",
+					"geographicTtft",
+					"geographicLatency",
+					"feedback",
+					"costs",
+					"ttft",
+					"latency",
+					"provider",
+					"model"
+				],
+				"type": "object"
+			},
+			"ResultSuccess_Model-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/Model"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_Model-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_Model-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ModelsToCompare": {
+				"properties": {
+					"provider": {
+						"type": "string"
+					},
+					"names": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"parent": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"provider",
+					"names",
+					"parent"
+				],
+				"type": "object"
+			},
+			"ResultSuccess__model-string_-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"properties": {
+								"model": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"model"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__model-string_-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__model-string_-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__unsafe-boolean__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"unsafe": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"unsafe"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__unsafe-boolean_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__unsafe-boolean__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
 			},
 			"IntegrationCreateParams": {
 				"properties": {
@@ -13951,6 +13951,110 @@
 				}
 			}
 		},
+		"/v1/playground/generate": {
+			"post": {
+				"operationId": "Generate",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ChatCompletion-or-_content-string--reasoning-string--calls-any_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Playground"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/OpenAIChatRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/playground/requests-through-helicone": {
+			"post": {
+				"operationId": "RequestsThroughHelicone",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_string.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Playground"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"requestsThroughHelicone": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"requestsThroughHelicone"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			},
+			"get": {
+				"operationId": "GetRequestsThroughHelicone",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_boolean.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Playground"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
 		"/v1/public/pi/get-api-key": {
 			"post": {
 				"operationId": "GetApiKey",
@@ -14269,42 +14373,6 @@
 									"advanced"
 								],
 								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/llm/generate": {
-			"post": {
-				"operationId": "Generate",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result_ChatCompletion-or-_content-string--reasoning-string--calls-any_.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"LLM"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/OpenAIChatRequest"
 							}
 						}
 					}

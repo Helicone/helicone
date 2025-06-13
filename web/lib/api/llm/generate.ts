@@ -138,7 +138,7 @@ export async function generate<T extends object | undefined = undefined>(
   console.log(env("NEXT_PUBLIC_HELICONE_JAWN_SERVICE"));
 
   const response = await fetch(
-    `${env("NEXT_PUBLIC_HELICONE_JAWN_SERVICE")}/v1/llm/generate`,
+    `${env("NEXT_PUBLIC_HELICONE_JAWN_SERVICE")}/v1/playground/generate`,
     {
       method: "POST",
       body: JSON.stringify({
