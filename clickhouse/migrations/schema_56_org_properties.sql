@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS organization_properties
 (
     organization_id UUID,
-    property_key LowCardinality(String),
+    property_key String,
 )
 ENGINE = ReplacingMergeTree()
 PARTITION BY organization_id
