@@ -69,6 +69,7 @@ impl ConfigDiscovery<Key> {
                     router_id,
                     router_config,
                     key.provider,
+                    false,
                 )
                 .await?;
                 service_map.insert(key, dispatcher);
@@ -117,6 +118,7 @@ impl ConfigDiscovery<WeightedKey> {
                     router_id,
                     router_config,
                     key.provider,
+                    false,
                 )
                 .await?;
                 service_map.insert(key, dispatcher);

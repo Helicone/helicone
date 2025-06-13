@@ -3,7 +3,10 @@ use indexmap::{IndexMap, IndexSet};
 use serde::{Deserialize, Serialize};
 use url::Url;
 
-use crate::types::{model_id::ModelName, provider::InferenceProvider};
+use crate::{
+    types::{model_id::ModelName, provider::InferenceProvider},
+    utils::default_true,
+};
 
 const PROVIDERS_YAML: &str =
     include_str!("../../config/embedded/providers.yaml");
@@ -11,7 +14,7 @@ pub(crate) const DEFAULT_ANTHROPIC_VERSION: &str = "2023-06-01";
 
 /// Global configuration for providers, shared across all routers.
 ///
-/// For router-specific provider configuration, see [`RouterProviderConfgi`]
+/// For router-specific provider configuration, see [`RouterProviderConfig`]
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 pub struct GlobalProviderConfig {
@@ -20,6 +23,8 @@ pub struct GlobalProviderConfig {
     pub models: IndexSet<ModelName<'static>>,
     pub base_url: Url,
     pub version: Option<String>,
+    #[serde(default = "default_true")]
+    pub enabled: bool,
 }
 
 /// Map of *ALL* supported providers.

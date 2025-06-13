@@ -14,12 +14,11 @@ use serde_json::json;
 use tower::Service;
 
 /// Test that requests are properly passed through to the OpenAI provider
-/// using the fake endpoint stub
+/// using the direct proxy extension when using the /{provider} base url.
 #[tokio::test]
 #[serial_test::serial(default_mock)]
-async fn openai_passthrough() {
+async fn openai_direct_proxy() {
     let mut config = Config::test_default();
-    // let _logger = telemetry::init_telemetry(&config.telemetry);
     // Disable auth for this test since we're testing basic passthrough
     // functionality
     config.auth.require_auth = false;
@@ -62,7 +61,7 @@ async fn openai_passthrough() {
     let request = Request::builder()
         .method(Method::POST)
         // Route to the fake endpoint through the default router
-        .uri("http://router.helicone.com/router/default/v1/fake_endpoint")
+        .uri("http://router.helicone.com/openai/v1/fake_endpoint")
         .header("content-type", "application/json")
         .body(request_body)
         .unwrap();

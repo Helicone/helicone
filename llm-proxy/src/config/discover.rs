@@ -79,7 +79,7 @@ impl crate::tests::TestDefault for DiscoverConfig {
         unsafe {
             std::env::set_var("OPENAI_API_KEY", "sk-...");
             std::env::set_var("ANTHROPIC_API_KEY", "sk-...");
-            std::env::set_var("GEMINI_API_KEY", "");
+            std::env::set_var("GEMINI_API_KEY", "fjbn34ji");
         }
         Self {
             api_keys_source: ProviderKeysSource::Env,

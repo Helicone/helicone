@@ -58,4 +58,6 @@ pub enum InitError {
     WebsocketRequestBuild(#[from] http::Error),
     /// Invalid router id: {0}
     InvalidRouterId(String),
+    /// Router config must contain the default router
+    DefaultRouterNotEnabled,
 }

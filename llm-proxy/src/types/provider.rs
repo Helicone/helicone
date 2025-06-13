@@ -6,7 +6,10 @@ use strum::{EnumIter, IntoEnumIterator};
 
 use super::secret::Secret;
 use crate::{
-    config::{balance::BalanceConfig, router::RouterConfig},
+    config::{
+        balance::BalanceConfig, providers::ProvidersConfig,
+        router::RouterConfig,
+    },
     endpoints::ApiEndpoint,
     error::provider::ProviderError,
 };
@@ -73,7 +76,6 @@ pub enum InferenceProvider {
     Anthropic,
     Bedrock,
     Ollama,
-    VertexAi,
     #[strum(serialize = "gemini")]
     GoogleGemini,
 }
@@ -103,7 +105,7 @@ impl InferenceProvider {
                     .collect()
             }
             // Inference not supported yet for these providers
-            InferenceProvider::Bedrock | InferenceProvider::VertexAi => vec![],
+            InferenceProvider::Bedrock => vec![],
         }
     }
 }
@@ -148,7 +150,7 @@ impl ProviderKeys {
 
         for provider in providers {
             if provider == InferenceProvider::Ollama {
-                // ollama doesn't require an API key
+                // ollama doesn't support API keys
                 continue;
             }
             let provider_str = provider.to_string().to_uppercase();
@@ -177,11 +179,35 @@ impl ProviderKeys {
         if let Ok(key) = std::env::var(&env_var) {
             tracing::trace!(
                 provider = %default_provider,
-                "Got provider key"
+                "Got provider key for load balanced router"
             );
             keys.insert(default_provider, Secret(key));
         } else {
             return Err(ProviderError::ApiKeyNotFound(default_provider));
+        }
+        Ok(Self(Arc::new(keys)))
+    }
+
+    pub fn from_env_direct_proxy(
+        providers_config: &ProvidersConfig,
+    ) -> Result<Self, ProviderError> {
+        let mut keys = HashMap::default();
+        for (provider, config) in providers_config.iter() {
+            // ollama doesn't support API keys
+            if config.enabled && !matches!(provider, InferenceProvider::Ollama)
+            {
+                let provider_str = provider.to_string().to_uppercase();
+                let env_var = format!("{provider_str}_API_KEY");
+                if let Ok(key) = std::env::var(&env_var) {
+                    tracing::trace!(
+                        provider = %provider,
+                        "Got direct proxy provider key"
+                    );
+                    keys.insert(*provider, Secret(key));
+                } else {
+                    return Err(ProviderError::ApiKeyNotFound(*provider));
+                }
+            }
         }
         Ok(Self(Arc::new(keys)))
     }

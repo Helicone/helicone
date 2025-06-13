@@ -24,7 +24,9 @@ use serde::{Deserialize, Serialize};
 use strum::IntoStaticStr;
 use thiserror::Error;
 
-use crate::{error::init::InitError, utils::default_true};
+use crate::{
+    error::init::InitError, types::router::RouterId, utils::default_true,
+};
 
 const ROUTER_ID_REGEX: &str = r"^[A-Za-z0-9_-]{1,12}$";
 
@@ -131,6 +133,9 @@ impl Config {
     pub fn validate(&self) -> Result<(), InitError> {
         let router_id_regex =
             Regex::new(ROUTER_ID_REGEX).expect("always valid if tests pass");
+        if !self.routers.as_ref().contains_key(&RouterId::Default) {
+            return Err(InitError::DefaultRouterNotEnabled);
+        }
         for (router_id, router_config) in self.routers.as_ref() {
             router_config.validate()?;
             if !router_id_regex.is_match(router_id.as_ref()) {
@@ -216,8 +221,7 @@ mod tests {
         for id in valid_ids {
             assert!(
                 regex.is_match(id),
-                "expected '{}' to be valid according to ROUTER_ID_REGEX",
-                id
+                "expected '{id}' to be valid according to ROUTER_ID_REGEX"
             );
         }
     }
@@ -236,8 +240,7 @@ mod tests {
         for id in invalid_ids {
             assert!(
                 !regex.is_match(id),
-                "expected '{}' to be invalid according to ROUTER_ID_REGEX",
-                id
+                "expected '{id}' to be invalid according to ROUTER_ID_REGEX"
             );
         }
     }

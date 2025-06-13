@@ -1,14 +1,15 @@
 use std::{
     future::{Ready, ready},
+    str::FromStr,
     task::{Context, Poll},
 };
 
-use axum_core::response::IntoResponse;
 use compact_str::CompactString;
 use futures::future::Either;
 use http::uri::PathAndQuery;
 use regex::Regex;
 use rustc_hash::FxHashMap as HashMap;
+use tower::Service as _;
 
 use crate::{
     app_state::AppState,
@@ -18,7 +19,9 @@ use crate::{
         invalid_req::InvalidRequestError,
     },
     router::service::Router,
-    types::router::RouterId,
+    types::{
+        extensions::DirectProxy, provider::InferenceProvider, router::RouterId,
+    },
 };
 
 /// Regex for the following URL format:
@@ -72,6 +75,49 @@ impl MetaRouter {
         let meta_router = Self { inner, url_regex };
         Ok(meta_router)
     }
+
+    fn handle_request(
+        &mut self,
+        mut req: crate::types::request::Request,
+        router_id: &RouterId,
+        extracted_api_path: &str,
+    ) -> Either<
+        Ready<Result<crate::types::response::Response, ApiError>>,
+        <Router as tower::Service<crate::types::request::Request>>::Future,
+    > {
+        tracing::trace!(
+            router_id = %router_id,
+            api_path = extracted_api_path,
+            "MetaRouter received request"
+        );
+        let extracted_path_and_query =
+            if let Some(query_params) = req.uri().query() {
+                PathAndQuery::try_from(format!(
+                    "{extracted_api_path}?{query_params}"
+                ))
+            } else {
+                PathAndQuery::try_from(extracted_api_path)
+            };
+
+        let Ok(extracted_path_and_query) = extracted_path_and_query else {
+            // This should **never** happen theoretically since in order to
+            // get this far, the request uri should have
+            // been valid, and a subpath of that which
+            // we extract with the regex should also be valid.
+            tracing::warn!("Failed to convert extracted path to PathAndQuery");
+            return Either::Left(ready(Err(ApiError::Internal(
+                InternalError::Internal,
+            ))));
+        };
+        if let Some(router) = self.inner.get_mut(router_id) {
+            req.extensions_mut().insert(extracted_path_and_query);
+            Either::Right(router.call(req))
+        } else {
+            Either::Left(ready(Err(ApiError::InvalidRequest(
+                InvalidRequestError::NotFound(req.uri().path().to_string()),
+            ))))
+        }
+    }
 }
 
 impl tower::Service<crate::types::request::Request> for MetaRouter {
@@ -103,50 +149,35 @@ impl tower::Service<crate::types::request::Request> for MetaRouter {
         &mut self,
         mut req: crate::types::request::Request,
     ) -> Self::Future {
-        let (router_id, api_path) =
-            match extract_router_id_and_path(&self.url_regex, req.uri().path())
-            {
-                Ok(result) => result,
-                Err(e) => {
-                    return Either::Left(ready(Ok(e.into_response())));
+        if req.uri().path().starts_with("/router/") {
+            // .to_string() to avoid borrowing issues
+            let path = req.uri().path().to_string();
+            match extract_router_id_and_path(&self.url_regex, &path) {
+                Ok((router_id, api_path)) => {
+                    self.handle_request(req, &router_id, api_path)
                 }
-            };
-        tracing::trace!(
-            router_id = router_id.to_string(),
-            api_path = api_path,
-            "MetaRouter received request"
-        );
-        let extracted_path_and_query =
-            if let Some(query_params) = req.uri().query() {
-                PathAndQuery::try_from(format!("{api_path}?{query_params}"))
-            } else {
-                PathAndQuery::try_from(api_path)
-            };
-
-        let extracted_path_and_query = match extracted_path_and_query {
-            Ok(path_and_query) => path_and_query,
-            Err(_e) => {
-                // This should **never** happen theoretically since in order to
-                // get this far, the request uri should have
-                // been valid, and a subpath of that which
-                // we extract with the regex should also be valid.
-                tracing::warn!(
-                    "Failed to convert extracted path to PathAndQuery"
-                );
-                return Either::Left(ready(Ok(ApiError::Internal(
-                    InternalError::Internal,
-                )
-                .into_response())));
+                Err(e) => Either::Left(ready(Err(e))),
             }
-        };
-        if let Some(router) = self.inner.get_mut(&router_id) {
-            req.extensions_mut().insert(extracted_path_and_query);
-            Either::Right(router.call(req))
+        } else if req.uri().path().starts_with("/ai/") {
+            // assumes request is from OpenAI compatible client
+            // and uses the model name to determine the provider.
+            todo!()
         } else {
-            Either::Left(ready(Ok(ApiError::InvalidRequest(
-                InvalidRequestError::NotFound(req.uri().path().to_string()),
-            )
-            .into_response())))
+            // Extract the first path segment (e.g. "openai" from
+            // "/openai/v1/chat")
+            let path = req.uri().path();
+            let mut segment_iter = path.trim_start_matches('/').split('/');
+            let first_segment = segment_iter.next().unwrap_or(""); // will never be empty
+            match InferenceProvider::from_str(first_segment) {
+                Ok(provider) => {
+                    let rest = segment_iter.collect::<Vec<_>>().join("/");
+                    req.extensions_mut().insert(DirectProxy(provider));
+                    self.handle_request(req, &RouterId::Default, &rest)
+                }
+                Err(_) => Either::Left(ready(Err(ApiError::InvalidRequest(
+                    InvalidRequestError::NotFound(path.to_string()),
+                )))),
+            }
         }
     }
 }

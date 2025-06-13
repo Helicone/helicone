@@ -20,7 +20,9 @@ use crate::{
         invalid_req::InvalidRequestError,
     },
     middleware::{rate_limit::service as rate_limit, request_context},
-    types::{provider::ProviderKeys, router::RouterId},
+    types::{
+        extensions::DirectProxy, provider::InferenceProvider, router::RouterId,
+    },
 };
 
 pub type RouterService =
@@ -31,7 +33,7 @@ pub type DirectProxyService =
 #[derive(Debug)]
 pub struct Router {
     inner: HashMap<EndpointType, RouterService>,
-    direct_proxy: DirectProxyService,
+    direct_proxies: HashMap<InferenceProvider, DirectProxyService>,
     router_config: Arc<RouterConfig>,
 }
 
@@ -60,9 +62,9 @@ impl Router {
         };
         router_config.validate()?;
 
-        let provider_keys =
-            Self::add_provider_keys(id.clone(), &router_config, &app_state)
-                .await?;
+        let provider_keys = app_state
+            .add_provider_keys(id.clone(), &router_config)
+            .await?;
 
         let mut inner = HashMap::default();
         let rl_layer = rate_limit::Layer::per_router(
@@ -94,47 +96,44 @@ impl Router {
 
             inner.insert(*endpoint_type, service_stack);
         }
-        let direct_proxy_dispatcher = Dispatcher::new(
-            app_state.clone(),
-            &id,
-            &router_config,
-            router_config.request_style,
-        )
-        .await?;
 
-        let direct_proxy = ServiceBuilder::new()
-            .layer(rl_layer)
-            .layer(request_context::Layer::new(
-                router_config.clone(),
-                provider_keys,
-            ))
-            // other middleware: caching, etc, etc
-            // will be added here as well from the router config
-            // .map_err(|e| crate::error::api::Error::Box(e))
-            .service(direct_proxy_dispatcher);
+        let mut direct_proxies = HashMap::default();
+        for (provider, _provider_config) in app_state
+            .config()
+            .providers
+            .iter()
+            .filter(|(_, config)| config.enabled)
+        {
+            let direct_proxy_dispatcher = Dispatcher::new(
+                app_state.clone(),
+                &id,
+                &router_config,
+                *provider,
+                true,
+            )
+            .await?;
+
+            let direct_proxy = ServiceBuilder::new()
+                .layer(rl_layer.clone())
+                .layer(request_context::Layer::new(
+                    router_config.clone(),
+                    provider_keys.clone(),
+                ))
+                // other middleware: caching, etc, etc
+                // will be added here as well from the router config
+                // .map_err(|e| crate::error::api::Error::Box(e))
+                .service(direct_proxy_dispatcher);
+
+            direct_proxies.insert(*provider, direct_proxy);
+        }
 
         tracing::info!(id = %id, "router created");
 
         Ok(Self {
             inner,
-            direct_proxy,
+            direct_proxies,
             router_config,
         })
-    }
-
-    async fn add_provider_keys(
-        router_id: RouterId,
-        router_config: &Arc<RouterConfig>,
-        app_state: &AppState,
-    ) -> Result<ProviderKeys, InitError> {
-        // This should be the only place we call .provider_keys(), everywhere
-        // else we should use the `router_id` to get the provider keys
-        // from the app state
-        let provider_keys =
-            app_state.0.config.discover.provider_keys(router_config)?;
-        let mut provider_keys_map = app_state.0.provider_keys.write().await;
-        provider_keys_map.insert(router_id, provider_keys.clone());
-        Ok(provider_keys)
     }
 }
 
@@ -161,7 +160,6 @@ impl tower::Service<crate::types::request::Request> for Router {
         }
     }
 
-    #[inline]
     #[tracing::instrument(level = "debug", name = "router", skip_all)]
     fn call(
         &mut self,
@@ -175,13 +173,30 @@ impl tower::Service<crate::types::request::Request> for Router {
                 InternalError::ExtensionNotFound("PathAndQuery").into(),
             )));
         };
-
+        let direct_proxy = req.extensions().get::<DirectProxy>();
         let api_endpoint = ApiEndpoint::new(
             extracted_path_and_query.path(),
             router_config.request_style,
         );
-        match api_endpoint {
-            Some(api_endpoint) => {
+        match (direct_proxy, api_endpoint) {
+            (Some(direct_proxy), _) => {
+                if let Some(direct_proxy) =
+                    self.direct_proxies.get_mut(&direct_proxy.0)
+                {
+                    RouterFuture::DirectProxy(direct_proxy.call(req))
+                } else {
+                    // in theory, this should never happen
+                    // it means that our constructor for the `Router` is wrong
+                    tracing::error!("no direct proxy found for request");
+                    RouterFuture::Ready(ready(Err(
+                        InvalidRequestError::NotFound(
+                            extracted_path_and_query.path().to_string(),
+                        )
+                        .into(),
+                    )))
+                }
+            }
+            (None, Some(api_endpoint)) => {
                 let endpoint_type = api_endpoint.endpoint_type();
                 if let Some(balancer) = self.inner.get_mut(&endpoint_type) {
                     req.extensions_mut().insert(api_endpoint);
@@ -195,7 +210,20 @@ impl tower::Service<crate::types::request::Request> for Router {
                     )))
                 }
             }
-            None => RouterFuture::DirectProxy(self.direct_proxy.call(req)),
+            (None, None) => {
+                if let Some(direct_proxy) =
+                    self.direct_proxies.get_mut(&router_config.request_style)
+                {
+                    RouterFuture::DirectProxy(direct_proxy.call(req))
+                } else {
+                    RouterFuture::Ready(ready(Err(
+                        InvalidRequestError::NotFound(
+                            extracted_path_and_query.path().to_string(),
+                        )
+                        .into(),
+                    )))
+                }
+            }
         }
     }
 }

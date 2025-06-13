@@ -174,10 +174,6 @@ impl ModelId {
                 let ollama_model = OllamaModelId::from_str(s)?;
                 Ok(ModelId::Ollama(ollama_model))
             }
-            InferenceProvider::VertexAi => {
-                let model_with_version = ModelIdWithVersion::from_str(s)?;
-                Ok(ModelId::OpenAI(model_with_version))
-            }
             InferenceProvider::GoogleGemini => {
                 let model_with_version = ModelIdWithVersion::from_str(s)?;
                 Ok(ModelId::GoogleGemini(model_with_version))
@@ -1538,23 +1534,6 @@ mod tests {
             ));
         } else {
             panic!("Expected GoogleGemini ModelId");
-        }
-    }
-
-    #[test]
-    fn test_from_str_vertex_ai_model() {
-        let model_str = "vertex-ai/gemini-pro";
-        let result = ModelId::from_str(model_str).unwrap();
-
-        // VertexAi maps to OpenAI variant based on from_str_and_provider
-        if let ModelId::OpenAI(model_with_version) = result {
-            assert_eq!(model_with_version.model, "gemini-pro");
-            assert!(matches!(
-                model_with_version.version,
-                Version::ImplicitLatest
-            ));
-        } else {
-            panic!("Expected OpenAI ModelId for VertexAi");
         }
     }
 

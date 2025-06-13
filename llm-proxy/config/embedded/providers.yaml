@@ -1,4 +1,5 @@
 openai:
+  enabled: true
   models:
     - gpt-4
     - gpt-4-turbo
@@ -21,6 +22,7 @@ openai:
   version: null
 
 anthropic:
+  enabled: true
   models:
     - claude-opus-4-0
     - claude-sonnet-4-0
@@ -34,6 +36,7 @@ anthropic:
   version: "2023-06-01"
 
 gemini:
+  enabled: true
   models:
     - gemini-2.5-flash
     - gemini-2.5-pro
@@ -46,6 +49,7 @@ gemini:
   version: null
 
 ollama:
+  enabled: false
   models:
     - deepseek-r1
     - gemma3

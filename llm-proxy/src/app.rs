@@ -38,6 +38,7 @@ use crate::{
         response_headers::ResponseHeaderLayer,
     },
     router::meta::MetaRouter,
+    types::provider::ProviderKeys,
     utils::{catch_panic::PanicResponder, handle_error::ErrorHandlerLayer},
 };
 
@@ -186,6 +187,9 @@ impl App {
         let global_rate_limit =
             config.rate_limit.global_limiter().map(Arc::new);
 
+        let direct_proxy_api_keys =
+            ProviderKeys::from_env_direct_proxy(&config.providers)?;
+
         let app_state = AppState(Arc::new(InnerAppState {
             config,
             minio,
@@ -196,6 +200,7 @@ impl App {
             provider_keys: RwLock::new(HashMap::default()),
             global_rate_limit,
             router_rate_limits: RwLock::new(HashMap::default()),
+            direct_proxy_api_keys,
             metrics,
             endpoint_metrics,
             health_monitors: health_monitor,

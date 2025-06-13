@@ -9,7 +9,7 @@ use tokio::sync::{
 use crate::{
     config::{
         Config, minio::Minio, rate_limit::RateLimiterConfig,
-        response_headers::ResponseHeadersConfig,
+        response_headers::ResponseHeadersConfig, router::RouterConfig,
     },
     control_plane::control_plane_state::ControlPlaneState,
     discover::monitor::{
@@ -52,6 +52,7 @@ pub struct InnerAppState {
     pub provider_keys: RwLock<HashMap<RouterId, ProviderKeys>>,
     pub global_rate_limit: Option<Arc<RateLimiterConfig>>,
     pub router_rate_limits: RwLock<HashMap<RouterId, Arc<RateLimiterConfig>>>,
+    pub direct_proxy_api_keys: ProviderKeys,
     /// Top level metrics which are exported to OpenTelemetry.
     pub metrics: Metrics,
     /// Metrics to track provider health and rate limits.
@@ -93,5 +94,20 @@ impl AppState {
     ) {
         let mut rate_limit_channels = self.0.rate_limit_receivers.write().await;
         rate_limit_channels.insert(router_id, rate_limit_rx);
+    }
+
+    pub async fn add_provider_keys(
+        &self,
+        router_id: RouterId,
+        router_config: &Arc<RouterConfig>,
+    ) -> Result<ProviderKeys, InitError> {
+        // This should be the only place we call .provider_keys(), everywhere
+        // else we should use the `router_id` to get the provider keys
+        // from the app state
+        let provider_keys =
+            self.0.config.discover.provider_keys(router_config)?;
+        let mut provider_keys_map = self.0.provider_keys.write().await;
+        provider_keys_map.insert(router_id, provider_keys.clone());
+        Ok(provider_keys)
     }
 }

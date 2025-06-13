@@ -68,6 +68,7 @@ impl Dispatcher {
         router_id: &RouterId,
         router_config: &Arc<RouterConfig>,
         provider: InferenceProvider,
+        is_direct_proxy: bool,
     ) -> Result<DispatcherService, InitError> {
         // connection timeout, timeout, etc.
         let base_client = reqwest::Client::builder()
@@ -79,28 +80,46 @@ impl Dispatcher {
             InferenceProvider::OpenAI => Client::OpenAI(OpenAIClient::new(
                 &app_state,
                 base_client,
-                &get_provider_api_key(&app_state, router_id, provider).await?,
+                &get_provider_api_key(
+                    &app_state,
+                    router_id,
+                    provider,
+                    is_direct_proxy,
+                )
+                .await?,
             )?),
             InferenceProvider::Anthropic => {
                 Client::Anthropic(AnthropicClient::new(
                     &app_state,
                     base_client,
-                    &get_provider_api_key(&app_state, router_id, provider)
-                        .await?,
+                    &get_provider_api_key(
+                        &app_state,
+                        router_id,
+                        provider,
+                        is_direct_proxy,
+                    )
+                    .await?,
                 )?)
             }
             InferenceProvider::GoogleGemini => {
                 Client::GoogleGemini(GoogleGeminiClient::new(
                     &app_state,
                     base_client,
-                    &get_provider_api_key(&app_state, router_id, provider)
-                        .await?,
+                    &get_provider_api_key(
+                        &app_state,
+                        router_id,
+                        provider,
+                        is_direct_proxy,
+                    )
+                    .await?,
                 )?)
             }
             InferenceProvider::Ollama => {
                 Client::Ollama(OllamaClient::new(&app_state, base_client)?)
             }
-            _ => todo!("only openai and anthropic are supported at the moment"),
+            InferenceProvider::Bedrock => {
+                todo!("only openai and anthropic are supported at the moment")
+            }
         };
         let rate_limit_tx = app_state.get_rate_limit_tx(router_id).await?;
 
@@ -135,15 +154,29 @@ async fn get_provider_api_key(
     app_state: &AppState,
     router_id: &RouterId,
     provider: InferenceProvider,
+    is_direct_proxy: bool,
 ) -> Result<Secret<String>, ProviderError> {
-    let provider_keys = app_state.0.provider_keys.read().await;
-    let provider_keys = provider_keys.get(router_id).ok_or_else(|| {
-        ProviderError::ProviderKeysNotFound(router_id.clone())
-    })?;
-    Ok(provider_keys
-        .get(&provider)
-        .ok_or_else(|| ProviderError::ApiKeyNotFound(provider))?
-        .clone())
+    if is_direct_proxy {
+        let provider_keys = &app_state.0.direct_proxy_api_keys;
+        let key = provider_keys
+            .get(&provider)
+            .ok_or_else(|| ProviderError::ApiKeyNotFound(provider))
+            .inspect_err(|e| {
+                tracing::error!(error = %e, "FOO Provider key not found");
+            })?
+            .clone();
+        Ok(key)
+    } else {
+        let provider_keys = app_state.0.provider_keys.read().await;
+        let provider_keys = provider_keys.get(router_id).ok_or_else(|| {
+            ProviderError::ProviderKeysNotFound(router_id.clone())
+        })?;
+        let key = provider_keys
+            .get(&provider)
+            .ok_or_else(|| ProviderError::ApiKeyNotFound(provider))?
+            .clone();
+        Ok(key)
+    }
 }
 
 impl Service<Request> for Dispatcher {
