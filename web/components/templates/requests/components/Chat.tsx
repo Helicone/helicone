@@ -176,11 +176,11 @@ export default function Chat({
     <div className="h-full w-full flex flex-col">
       {renderMessages()}
       {mode === "PLAYGROUND_INPUT" && (
-        <div className="p-4">
+        <div>
           <Button
             variant="outline"
             size="sm"
-            className="w-full"
+            className="w-full rounded-none border-none border-b"
             onClick={addMessage}
           >
             <LuPlus className="h-4 w-4 mr-2" />

@@ -104,13 +104,13 @@ export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
         },
       ],
       model: "gpt-3.5-turbo",
-      temperature: 0.7,
+      temperature: undefined,
       tools: [],
       response_format: { type: "text" },
-      max_tokens: 1000,
-      top_p: 1,
-      frequency_penalty: 0,
-      presence_penalty: 0,
+      max_tokens: undefined,
+      top_p: undefined,
+      frequency_penalty: undefined,
+      presence_penalty: undefined,
       stop: [],
     },
   },
@@ -137,6 +137,8 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   useEffect(() => {
     if (!requestId) {
       setMappedContent(DEFAULT_EMPTY_CHAT);
+      setSelectedModel("openai/gpt-3.5-turbo");
+      setDefaultContent(DEFAULT_EMPTY_CHAT);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [requestId]);
@@ -144,12 +146,12 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   const [tools, setTools] = useState<Tool[]>([]);
 
   const [modelParameters, setModelParameters] = useState<ModelParameters>({
-    temperature: 0.7,
-    maxTokens: 1000,
-    topP: 1,
-    frequencyPenalty: 0,
-    presencePenalty: 0,
-    stop: "",
+    temperature: undefined,
+    maxTokens: undefined,
+    topP: undefined,
+    frequencyPenalty: undefined,
+    presencePenalty: undefined,
+    stop: undefined,
   });
 
   const [responseFormat, setResponseFormat] = useState<{
@@ -164,11 +166,11 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     if (!requestId) {
       setTools([]);
       setModelParameters({
-        temperature: 0.7,
-        maxTokens: 1000,
-        topP: 1,
-        frequencyPenalty: 0,
-        presencePenalty: 0,
+        temperature: undefined,
+        maxTokens: undefined,
+        topP: undefined,
+        frequencyPenalty: undefined,
+        presencePenalty: undefined,
         stop: undefined,
       });
       setMappedContent(DEFAULT_EMPTY_CHAT);

@@ -1,39 +1,19 @@
-import { XSmall } from "@/components/ui/typography";
-import { MappedLLMRequest, Message } from "@helicone-package/llm-mapper/types";
-import { JsonRenderer } from "./single/JsonRenderer";
 import MarkdownEditor from "@/components/shared/markdownEditor";
-import { markdownComponents } from "@/components/shared/prompts/ResponsePanel";
-import { PiToolboxBold } from "react-icons/pi";
-import dynamic from "next/dynamic";
-import { LuChevronDown, LuFileText, LuTrash2, LuPlus } from "react-icons/lu";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import Image from "next/image";
-import { useRequestRenderModeStore } from "@/store/requestRenderModeStore";
 import { Button } from "@/components/ui/button";
-import { Dispatch } from "react";
-import { SetStateAction, useState } from "react";
-import { Input } from "@/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { useRequestRenderModeStore } from "@/store/requestRenderModeStore";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { cn } from "@/lib/utils";
+import { MappedLLMRequest, Message } from "@helicone-package/llm-mapper/types";
+import Image from "next/image";
+import { Dispatch, ReactNode, SetStateAction, useState } from "react";
+import { LuChevronDown, LuFileText } from "react-icons/lu";
 import { ChatMode } from "../Chat";
-
-// Dynamically import ReactMarkdown with no SSR
-const ReactMarkdown = dynamic(() => import("react-markdown"), {
-  ssr: false,
-  loading: () => <div className="animate-pulse bg-muted h-4 w-full rounded" />,
-});
+import AssistantToolCalls from "./single/AssistantToolCalls";
+import { JsonRenderer } from "./single/JsonRenderer";
+import ToolMessage from "./ToolMessage";
+import TextMessage from "./single/TextMessage";
+import ChatMessageTopBar from "./ChatMessageTopBar";
 
 type MessageType = "image" | "tool" | "text" | "pdf";
 
@@ -65,7 +45,7 @@ const getMessageType = (message: Message): MessageType => {
   return "text";
 };
 
-const isJson = (content: string) => {
+export const isJson = (content: string) => {
   try {
     JSON.parse(content);
     return true;
@@ -82,7 +62,7 @@ interface ChatMessageProps {
   mappedRequest: MappedLLMRequest;
   messageIndex: number;
   onChatChange?: (_mappedRequest: MappedLLMRequest) => void;
-  dragHandle?: React.ReactNode;
+  dragHandle?: ReactNode;
 }
 
 const renderToolMessage = (
@@ -93,308 +73,28 @@ const renderToolMessage = (
   messageIndex?: number,
   onChatChange?: (_mappedRequest: MappedLLMRequest) => void
 ) => {
-  const updateMessageField = (field: string, value: string) => {
-    if (!mappedRequest || !onChatChange || !messageIndex) {
-      return;
-    }
-    onChatChange?.({
-      ...mappedRequest,
-      schema: {
-        ...mappedRequest.schema,
-        request: {
-          ...mappedRequest.schema.request,
-          messages: mappedRequest.schema.request?.messages?.map(
-            (message, i) => {
-              if (i === messageIndex) {
-                return {
-                  ...message,
-                  [field]: value,
-                };
-              }
-              return message;
-            }
-          ),
-        },
-      },
-    });
-  };
-
   if (message.tool_call_id && (message.content || playgroundMode)) {
     return (
-      <div
-        className={cn(
-          "flex flex-col gap-2 p-4 bg-muted text-xs",
-          !playgroundMode ? "rounded-lg" : "dark:bg-black"
-        )}
-      >
-        {playgroundMode ? (
-          <div className="flex flex-row items-center gap-2">
-            <Input
-              value={message.name}
-              onChange={(e) => updateMessageField("name", e.target.value)}
-              placeholder="Function Name"
-            />
-            <Input
-              value={message.tool_call_id}
-              onChange={(e) =>
-                updateMessageField("tool_call_id", e.target.value)
-              }
-              placeholder="Tool Call ID"
-            />
-          </div>
-        ) : (
-          <XSmall className="font-mono font-semibold">
-            {message.tool_call_id}
-          </XSmall>
-        )}
-        {!playgroundMode ? (
-          <JsonRenderer
-            data={
-              isJson(message.content || "")
-                ? JSON.parse(message.content || "")
-                : message.content || ""
-            }
-          />
-        ) : (
-          <MarkdownEditor
-            className="w-full rounded-none bg-white dark:bg-slate-950"
-            language="markdown"
-            setText={(text) => {
-              if (!mappedRequest || !onChatChange || !messageIndex) {
-                return;
-              }
-              onChatChange?.({
-                ...mappedRequest,
-                schema: {
-                  ...mappedRequest.schema,
-                  request: {
-                    ...mappedRequest.schema.request,
-                    messages: mappedRequest.schema.request?.messages?.map(
-                      (message, i) => {
-                        if (i === messageIndex) {
-                          return {
-                            ...message,
-                            content: text,
-                          };
-                        }
-                        return message;
-                      }
-                    ),
-                  },
-                },
-              });
-            }}
-            text={message.content || ""}
-          />
-        )}
-      </div>
+      <ToolMessage
+        message={message}
+        playgroundMode={playgroundMode}
+        mappedRequest={mappedRequest}
+        messageIndex={messageIndex}
+        onChatChange={onChatChange}
+      />
     );
   }
-  if (message.tool_calls) {
-    console.log({ message, playgroundMode });
-    return (
-      <div className={cn("flex flex-col", !playgroundMode && "gap-4")}>
-        {playgroundMode ? (
-          <MarkdownEditor
-            className="w-full rounded-none bg-white dark:bg-slate-950"
-            language="markdown"
-            setText={(text) => {
-              if (!mappedRequest || !onChatChange || !messageIndex) {
-                return;
-              }
-              onChatChange?.({
-                ...mappedRequest,
-                schema: {
-                  ...mappedRequest.schema,
-                  request: {
-                    ...mappedRequest.schema.request,
-                    messages: mappedRequest.schema.request?.messages?.map(
-                      (message, i) => {
-                        if (i === messageIndex) {
-                          return {
-                            ...message,
-                            content: text,
-                          };
-                        }
-                        return message;
-                      }
-                    ),
-                  },
-                },
-              });
-            }}
-            text={message.content || ""}
-          />
-        ) : (
-          message.content && (
-            <ReactMarkdown
-              components={markdownComponents}
-              className="w-full text-xs whitespace-pre-wrap break-words p-2"
-            >
-              {message.content}
-            </ReactMarkdown>
-          )
-        )}
-        {message.tool_calls.map((tool, index) => {
-          const updateMessageToolCallField = (field: string, value: string) => {
-            if (!mappedRequest || !onChatChange || !messageIndex) {
-              return;
-            }
-            onChatChange?.({
-              ...mappedRequest,
-              schema: {
-                ...mappedRequest.schema,
-                request: {
-                  ...mappedRequest.schema.request,
-                  messages: mappedRequest.schema.request?.messages?.map(
-                    (message, i) => {
-                      if (i === messageIndex) {
-                        return {
-                          ...message,
-                          tool_calls: message.tool_calls?.map((toolCall) => {
-                            if (toolCall.id === tool.id) {
-                              return {
-                                ...toolCall,
-                                [field]: value,
-                              };
-                            }
-                            return toolCall;
-                          }),
-                        };
-                      }
-                      return message;
-                    }
-                  ),
-                },
-              },
-            });
-          };
 
-          return (
-            <div
-              key={index}
-              className={cn(
-                "flex flex-col gap-2 text-sm p-2 pl-7 bg-muted",
-                !playgroundMode ? "rounded-lg" : "dark:bg-black"
-              )}
-            >
-              <div className="flex flex-row items-center gap-2">
-                <PiToolboxBold className="text-muted-foreground" />
-                {playgroundMode ? (
-                  <div className="flex flex-row items-center gap-2">
-                    <Input
-                      value={tool.name}
-                      onChange={(e) =>
-                        updateMessageToolCallField("name", e.target.value)
-                      }
-                      placeholder="Function Name"
-                    />
-                    <Input
-                      value={tool.id}
-                      onChange={(e) =>
-                        updateMessageToolCallField("id", e.target.value)
-                      }
-                      placeholder="Tool Call ID"
-                    />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => {
-                        if (!onChatChange || !mappedRequest) return;
-                        const updatedMessages =
-                          mappedRequest.schema.request?.messages?.map(
-                            (message, i) => {
-                              if (i === messageIndex) {
-                                return {
-                                  ...message,
-                                  tool_calls: message.tool_calls?.filter(
-                                    (_, toolIndex) => toolIndex !== index
-                                  ),
-                                };
-                              }
-                              return message;
-                            }
-                          );
-                        onChatChange({
-                          ...mappedRequest,
-                          schema: {
-                            ...mappedRequest.schema,
-                            request: {
-                              ...mappedRequest.schema.request,
-                              messages: updatedMessages,
-                            },
-                          },
-                        });
-                      }}
-                    >
-                      <LuTrash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </div>
-                ) : (
-                  <XSmall className="font-mono font-semibold">
-                    {tool.name}
-                  </XSmall>
-                )}
-              </div>
-              {!playgroundMode ? (
-                <JsonRenderer data={tool.arguments} showCopyButton={false} />
-              ) : (
-                <MarkdownEditor
-                  placeholder="{}"
-                  language="markdown"
-                  className="bg-white dark:bg-slate-950 rounded-none"
-                  setText={(text) => {
-                    if (!mappedRequest || !onChatChange || !messageIndex) {
-                      return;
-                    }
-                    onChatChange?.({
-                      ...mappedRequest,
-                      schema: {
-                        ...mappedRequest.schema,
-                        request: {
-                          ...mappedRequest.schema.request,
-                          messages: mappedRequest.schema.request?.messages?.map(
-                            (message, mappedMessageIndex) => {
-                              if (mappedMessageIndex === messageIndex) {
-                                return {
-                                  ...message,
-                                  tool_calls:
-                                    mappedRequest.schema.request?.messages?.[
-                                      messageIndex
-                                    ]?.tool_calls?.map(
-                                      (toolCall, toolCallIndex) => {
-                                        if (toolCallIndex === index) {
-                                          return {
-                                            ...toolCall,
-                                            arguments: (() => {
-                                              try {
-                                                return text;
-                                              } catch {
-                                                return {};
-                                              }
-                                            })(),
-                                          };
-                                        }
-                                        return toolCall;
-                                      }
-                                    ),
-                                };
-                              }
-                              return message;
-                            }
-                          ),
-                        },
-                      },
-                    });
-                  }}
-                  text={tool.arguments}
-                />
-              )}
-            </div>
-          );
-        })}
-      </div>
+  if (message.tool_calls) {
+    return (
+      <AssistantToolCalls
+        content={message.content}
+        toolCalls={message.tool_calls}
+        playgroundMode={playgroundMode}
+        mappedRequest={mappedRequest}
+        messageIndex={messageIndex}
+        onChatChange={onChatChange}
+      />
     );
   }
   try {
@@ -437,6 +137,8 @@ export default function ChatMessage({
   const changeMessageRole = (index: number, newRole: string) => {
     if (!onChatChange) return;
 
+    const prevRole = mappedRequest.schema.request?.messages?.[index]?.role;
+
     if (newRole === "tool") {
       onChatChange({
         ...mappedRequest,
@@ -478,6 +180,11 @@ export default function ChatMessage({
                     _type: "message",
                     tool_call_id: undefined,
                     name: undefined,
+                    ...(prevRole === "assistant" && newRole !== "assistant"
+                      ? {
+                          tool_calls: undefined,
+                        }
+                      : {}),
                   };
                 }
                 return message;
@@ -578,75 +285,19 @@ export default function ChatMessage({
     >
       {/* Message Role Header */}
       {chatMode !== "PLAYGROUND_OUTPUT" && (
-        <header className="h-12 w-full flex flex-row items-center justify-between px-4 sticky top-0 bg-sidebar-background dark:bg-black z-10">
-          <div className="flex items-center gap-2">
-            {dragHandle && (
-              <div {...attributes} {...listeners}>
-                {dragHandle}
-              </div>
-            )}
-            {chatMode === "PLAYGROUND_INPUT" ? (
-              <Select
-                value={message.role}
-                onValueChange={(value) =>
-                  changeMessageRole(messageIndex, value)
-                }
-              >
-                <SelectTrigger className="h-6 inline-flex items-center px-2.5 py-0.5 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-2 text-nowrap border-[hsl(var(--border))] bg-[hsl(var(--background))] text-[hsl(var(--foreground))] hover:bg-[hsl(var(--accent))] rounded-md">
-                  <SelectValue placeholder="Select role" />
-                </SelectTrigger>
-                <SelectContent className="min-w-[140px]">
-                  <SelectItem value="user" className="text-xs">
-                    User
-                  </SelectItem>
-                  <SelectItem value="assistant" className="text-xs">
-                    Assistant
-                  </SelectItem>
-                  <SelectItem value="system" className="text-xs">
-                    System
-                  </SelectItem>
-                  <SelectItem value="tool" className="text-xs">
-                    Tool
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            ) : (
-              <h2 className="text-secondary font-medium capitalize text-sm">
-                {message.role}
-              </h2>
-            )}
-          </div>
-          {chatMode === "PLAYGROUND_INPUT" && (
-            <div className="flex items-center gap-2">
-              {message.role === "assistant" && (
-                <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-                  <PopoverTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <LuPlus className="h-4 w-4" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-48 p-2">
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start"
-                      onClick={() => addToolCall(messageIndex)}
-                    >
-                      Add Tool Call
-                    </Button>
-                  </PopoverContent>
-                </Popover>
-              )}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => deleteMessage(messageIndex)}
-              >
-                <LuTrash2 className="h-4 w-4 text-destructive" />
-              </Button>
-            </div>
-          )}
-        </header>
+        <ChatMessageTopBar
+          popoverOpen={popoverOpen}
+          setPopoverOpen={setPopoverOpen}
+          dragHandle={dragHandle}
+          chatMode={chatMode}
+          message={message}
+          changeMessageRole={changeMessageRole}
+          messageIndex={messageIndex}
+          attributes={attributes}
+          listeners={listeners}
+          addToolCall={addToolCall}
+          deleteMessage={deleteMessage}
+        />
       )}
 
       <div
@@ -719,61 +370,15 @@ export default function ChatMessage({
                 )
               );
             case "text":
-              if (isJson(displayContent) && chatMode !== "PLAYGROUND_INPUT") {
-                return (
-                  <div className="text-sm">
-                    <JsonRenderer data={JSON.parse(displayContent)} />
-                  </div>
-                );
-              }
-              return mode === "raw" || chatMode === "PLAYGROUND_INPUT" ? (
-                <MarkdownEditor
-                  className="rounded-none bg-white dark:bg-slate-950"
-                  placeholder="Enter your message here..."
-                  language="markdown"
-                  setText={
-                    chatMode === "PLAYGROUND_INPUT"
-                      ? (text) => {
-                          onChatChange?.({
-                            ...mappedRequest,
-                            schema: {
-                              ...mappedRequest.schema,
-                              request: {
-                                ...mappedRequest.schema.request,
-                                messages:
-                                  mappedRequest.schema.request?.messages?.map(
-                                    (message, markdownMessageIndex) => {
-                                      if (
-                                        markdownMessageIndex === messageIndex
-                                      ) {
-                                        return {
-                                          ...message,
-                                          content: text,
-                                        };
-                                      }
-                                      return message;
-                                    }
-                                  ),
-                              },
-                            },
-                          });
-                        }
-                      : () => {}
-                  }
-                  text={
-                    typeof displayContent === "string"
-                      ? displayContent
-                      : JSON.stringify(displayContent)
-                  }
-                  disabled={chatMode !== "PLAYGROUND_INPUT"}
+              return (
+                <TextMessage
+                  displayContent={displayContent}
+                  chatMode={chatMode}
+                  mappedRequest={mappedRequest}
+                  messageIndex={messageIndex}
+                  onChatChange={onChatChange}
+                  mode={mode}
                 />
-              ) : (
-                <ReactMarkdown
-                  components={markdownComponents}
-                  className="w-full text-sm whitespace-pre-wrap break-words"
-                >
-                  {displayContent}
-                </ReactMarkdown>
               );
             default:
               return null;
