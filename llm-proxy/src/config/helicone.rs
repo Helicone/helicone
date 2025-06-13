@@ -15,7 +15,7 @@ pub struct HeliconeConfig {
 impl Default for HeliconeConfig {
     fn default() -> Self {
         Self {
-            api_key: Secret(
+            api_key: Secret::from(
                 std::env::var("HELICONE_API_KEY")
                     .unwrap_or("sk-helicone-...".to_string()),
             ),

@@ -86,8 +86,10 @@ impl Minio {
             .tcp_nodelay(true)
             .build()
             .map_err(InitError::CreateReqwestClient)?;
-        let credentials =
-            Credentials::new(config.access_key.0, config.secret_key.0);
+        let credentials = Credentials::new(
+            config.access_key.expose(),
+            config.secret_key.expose(),
+        );
         Ok(Self {
             bucket,
             client,
@@ -124,11 +126,11 @@ fn default_region() -> String {
 }
 
 fn default_access_key() -> Secret<String> {
-    Secret("minioadmin".to_string())
+    Secret::from("minioadmin".to_string())
 }
 
 fn default_secret_key() -> Secret<String> {
-    Secret("minioadmin".to_string())
+    Secret::from("minioadmin".to_string())
 }
 
 #[cfg(feature = "testing")]

@@ -44,6 +44,9 @@ async fn main() -> Result<(), RuntimeError> {
             .map_err(InitError::Telemetry)?;
 
     info!("telemetry initialized");
+    let pretty_config = serde_yml::to_string(&config)
+        .expect("config should always be serializable");
+    info!(config = pretty_config, "starting up with config");
 
     config.validate().inspect_err(|e| {
         tracing::error!(error = %e, "configuration validation failed");

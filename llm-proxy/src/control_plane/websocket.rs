@@ -72,7 +72,10 @@ impl IntoClientRequest for &HeliconeConfig {
         Request::builder()
             .uri(self.websocket_url.as_str())
             .header("Host", host_header)
-            .header("Authorization", format!("Bearer {}", self.api_key.0))
+            .header(
+                "Authorization",
+                format!("Bearer {}", self.api_key.expose()),
+            )
             .header("Connection", "Upgrade")
             .header("Upgrade", "websocket")
             .header("Sec-WebSocket-Version", "13")

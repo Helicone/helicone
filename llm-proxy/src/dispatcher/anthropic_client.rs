@@ -36,7 +36,7 @@ impl Client {
         let mut default_headers = HeaderMap::new();
         default_headers.insert(
             HeaderName::from_static("x-api-key"),
-            HeaderValue::from_str(&api_key.0).unwrap(),
+            HeaderValue::from_str(api_key.expose()).unwrap(),
         );
         default_headers.insert(
             HeaderName::from_static("anthropic-version"),

@@ -31,7 +31,8 @@ impl Client {
         let mut default_headers = HeaderMap::new();
         default_headers.insert(
             http::header::AUTHORIZATION,
-            HeaderValue::from_str(&format!("Bearer {}", api_key.0)).unwrap(),
+            HeaderValue::from_str(&format!("Bearer {}", api_key.expose()))
+                .unwrap(),
         );
         default_headers.insert(http::header::HOST, host_header(&base_url));
         default_headers.insert(

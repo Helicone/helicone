@@ -160,7 +160,7 @@ impl ProviderKeys {
                     provider = %provider,
                     "Got provider key"
                 );
-                keys.insert(provider, Secret(key));
+                keys.insert(provider, Secret::from(key));
             } else {
                 return Err(ProviderError::ApiKeyNotFound(provider));
             }
@@ -181,7 +181,7 @@ impl ProviderKeys {
                 provider = %default_provider,
                 "Got provider key for load balanced router"
             );
-            keys.insert(default_provider, Secret(key));
+            keys.insert(default_provider, Secret::from(key));
         } else {
             return Err(ProviderError::ApiKeyNotFound(default_provider));
         }
@@ -203,7 +203,7 @@ impl ProviderKeys {
                         provider = %provider,
                         "Got direct proxy provider key"
                     );
-                    keys.insert(*provider, Secret(key));
+                    keys.insert(*provider, Secret::from(key));
                 } else {
                     return Err(ProviderError::ApiKeyNotFound(*provider));
                 }
