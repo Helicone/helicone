@@ -13,7 +13,10 @@ import { type JawnAuthenticatedRequest } from "../../types/request";
 import { Message, Tool } from "@helicone-package/llm-mapper/types";
 import { OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
 import OpenAI from "openai";
-import { generateTempHeliconeAPIKey } from "../../lib/experiment/tempKeys/tempAPIKey";
+import {
+  generateTempHeliconeAPIKey,
+  getHeliconeDefaultTempKey,
+} from "../../lib/experiment/tempKeys/tempAPIKey";
 import { GET_KEY } from "../../lib/clients/constant";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { PlaygroundManager } from "../../managers/playgroundManager";
@@ -55,9 +58,21 @@ export class PlaygroundController extends Controller {
     >
   > {
     try {
-      const tempKey = await generateTempHeliconeAPIKey(
-        request.authParams.organizationId
-      );
+      const org = await dbExecute<{
+        id: string;
+        playground_helicone: boolean;
+      }>(`SELECT id, playground_helicone FROM organization WHERE id = $1`, [
+        request.authParams.organizationId,
+      ]);
+
+      if (org.error) {
+        return err(`Failed to get organization: ${org.error}`);
+      }
+
+      const tempKey = org.data?.[0]?.playground_helicone
+        ? await generateTempHeliconeAPIKey(request.authParams.organizationId)
+        : await getHeliconeDefaultTempKey(request.authParams.organizationId);
+
       if (tempKey.error || !tempKey.data) {
         throw new Error(
           tempKey.error || "Failed to generate temporary API key"
@@ -95,16 +110,17 @@ export class PlaygroundController extends Controller {
           string
         >
       >(async (secretKey) => {
+        console.log({ secretKey });
         const openai = new OpenAI({
           baseURL: `${process.env.HELICONE_WORKER_URL}/api/v1/`,
           apiKey: openRouterKey,
           defaultHeaders: {
             "Helicone-Auth": `Bearer ${secretKey}`,
             "Helicone-User-Id": request.authParams.organizationId,
-            // ...(!selfKey && {
-            //   // 10 requests per user per year
-            //   "Helicone-RateLimit-Policy": "10;w=31536000;s=user",
-            // }),
+            ...(!selfKey && {
+              // 10 requests per user per year
+              "Helicone-RateLimit-Policy": "10;w=31536000;s=user",
+            }),
           },
         });
         const abortController = new AbortController();
