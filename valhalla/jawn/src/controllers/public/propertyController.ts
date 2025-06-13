@@ -10,7 +10,7 @@ import {
 } from "tsoa";
 import { KVCache } from "../../lib/cache/kvCache";
 import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
-import { buildFilterWithAuthClickHouse } from "@helicone-package/filters/filters";
+import { buildFilterWithAuthClickHouse, buildFilterWithAuthClickHouseOrganizationProperties } from "@helicone-package/filters/filters";
 import { resultMap } from "../../packages/common/result";
 import { clickhousePriceCalc } from "@helicone-package/cost";
 import type { JawnAuthenticatedRequest } from "../../types/request";
@@ -39,15 +39,15 @@ export class PropertyController extends Controller {
     requestBody: {},
     @Request() request: JawnAuthenticatedRequest
   ) {
-    const builtFilter = await buildFilterWithAuthClickHouse({
+    const builtFilter = await buildFilterWithAuthClickHouseOrganizationProperties({
       org_id: request.authParams.organizationId,
       argsAcc: [],
       filter: "all",
     });
 
     const query = `
-    SELECT DISTINCT arrayJoin(mapKeys(properties)) AS property
-    FROM request_response_rmt
+    SELECT DISTINCT property_key AS property
+    FROM organization_properties
     WHERE (
       ${builtFilter.filter}
     )
