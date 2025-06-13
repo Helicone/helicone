@@ -3,7 +3,7 @@ import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientF
 import { GetServerSidePropsContext } from "next";
 import { env } from "next-runtime-env";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import PublicMetaData from "../components/layout/public/publicMetaData";
 import useNotification from "../components/shared/notification/useNotification";
 import AuthForm from "../components/templates/auth/authForm";
@@ -26,14 +26,20 @@ const SignIn = ({
 
   const customerPortalContent = customerPortal?.data || undefined;
   const { unauthorized } = router.query;
+  const [refreshed, setRefreshed] = useState(false);
   useEffect(() => {
     if (
       unauthorized === "true" &&
       heliconeAuthClient &&
       heliconeAuthClient.user?.id
     ) {
-      heliconeAuthClient.refreshSession();
-      router.push("/signin");
+      if (!refreshed) {
+        router.push("/signin").then(() => {
+          heliconeAuthClient.refreshSession();
+          setRefreshed(true);
+        });
+      }
+      return;
     } else if (heliconeAuthClient.user?.id) {
       const { pi_session, ...restQuery } = router.query;
       router.push({
