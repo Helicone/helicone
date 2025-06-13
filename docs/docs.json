@@ -122,15 +122,7 @@
                   },
                   "getting-started/integration-method/perplexity",
                   "getting-started/integration-method/together",
-                  "getting-started/integration-method/x",
-                  {
-                    "group": "Tools",
-                    "pages": [
-                      "integrations/tools/curl",
-                      "integrations/tools/javascript",
-                      "integrations/tools/python"
-                    ]
-                  }
+                  "getting-started/integration-method/x"
                 ]
               },
               {
@@ -164,15 +156,21 @@
                       "other-integrations/upstash-qstash"
                     ]
                   },
-                  {
-                    "group": "Vector DB",
-                    "pages": [
-                      "integrations/vectordb/curl",
-                      "integrations/vectordb/javascript",
-                      "integrations/vectordb/python"
-                    ]
-                  },
                   "getting-started/integration-method/vercelai"
+                ]
+              },
+              {
+                "group": "Tools Logging",
+                "pages": [
+                  "integrations/tools/curl",
+                  "integrations/tools/logger-sdk"
+                ]
+              },
+              {
+                "group": "Any Vector DB",
+                "pages": [
+                  "integrations/vectordb/curl",
+                  "integrations/vectordb/logger-sdk"
                 ]
               }
             ]
