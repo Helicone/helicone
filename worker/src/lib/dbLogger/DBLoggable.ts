@@ -564,21 +564,6 @@ export class DBLoggable {
       if (rateLimit.error) {
         console.error(`Error checking rate limit: ${rateLimit.error}`);
       }
-
-      // Set rate limited flag to clickhouse
-      if (!rateLimit.error && rateLimit.data?.isRateLimited) {
-        db.producer.setLowerPriority();
-        await db.clickhouse.dbInsertClickhouse("rate_limit_log_v2", [
-          {
-            request_id: this.request.requestId,
-            organization_id: org.data.id,
-            tier: tier,
-            rate_limit_created_at: formatTimeStringDateTime(
-              new Date().toISOString()
-            ),
-          },
-        ]);
-      }
     } catch (e) {
       console.error(`Error checking rate limit: ${e}`);
     }
