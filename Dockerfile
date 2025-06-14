@@ -146,7 +146,7 @@ FROM lukemathwalker/cargo-chef:0.1.71-rust-1.87-bookworm AS chef
 WORKDIR /app
 
 FROM chef AS planner
-COPY ./helix.
+COPY ./helix .
 RUN cargo chef prepare --bin llm-proxy --recipe-path recipe.json
 
 FROM chef AS builder 
