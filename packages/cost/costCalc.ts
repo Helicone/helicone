@@ -1,5 +1,7 @@
 import { costOfPrompt } from "./index";
 
+export const COST_PRECISION_MULTIPLIER = 1_000_000_000;
+
 export function modelCost(modelRow: {
   provider: string;
   model: string;
@@ -12,15 +14,13 @@ export function modelCost(modelRow: {
   sum_tokens: number;
   per_call?: number;
   per_image?: number;
+  multiple?: number;
 }): number {
-  const effectivePromptTokens =
-    modelRow.sum_prompt_tokens - modelRow.prompt_cache_read_tokens;
-
   return (
     costOfPrompt({
       provider: modelRow.provider,
       model: modelRow.model,
-      promptTokens: effectivePromptTokens,
+      promptTokens: modelRow.sum_prompt_tokens,
       promptCacheWriteTokens: modelRow.prompt_cache_write_tokens,
       promptCacheReadTokens: modelRow.prompt_cache_read_tokens,
       promptAudioTokens: modelRow.prompt_audio_tokens,
@@ -28,6 +28,7 @@ export function modelCost(modelRow: {
       completionAudioTokens: modelRow.completion_audio_tokens,
       perCall: modelRow.per_call,
       images: modelRow.per_image,
+      multiple: modelRow.multiple,
     }) ?? 0
   );
 }

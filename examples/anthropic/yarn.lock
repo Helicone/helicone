@@ -2,18 +2,10 @@
 # yarn lockfile v1
 
 
-"@anthropic-ai/sdk@^0.27.1":
-  version "0.27.1"
-  resolved "https://registry.npmjs.org/@anthropic-ai/sdk/-/sdk-0.27.1.tgz"
-  integrity sha512-AKFd/E8HO26+DOVPiZpEked3Pm2feA5d4gcX2FcJXr9veDkXbKO90hr2C7N2TL7mPIMwm040ldXlsIZQ416dHg==
-  dependencies:
-    "@types/node" "^18.11.18"
-    "@types/node-fetch" "^2.6.4"
-    abort-controller "^3.0.0"
-    agentkeepalive "^4.2.1"
-    form-data-encoder "1.7.2"
-    formdata-node "^4.3.2"
-    node-fetch "^2.6.7"
+"@anthropic-ai/sdk@^0.54.0":
+  version "0.54.0"
+  resolved "https://registry.yarnpkg.com/@anthropic-ai/sdk/-/sdk-0.54.0.tgz#5d4fec666f2ae75f213cc5600ec9f92c9f026e11"
+  integrity sha512-xyoCtHJnt/qg5GG6IgK+UJEndz8h8ljzt/caKXmq3LfBF81nC/BW6E4x2rOWCZcvsLyVW+e8U5mtIr6UCE/kJw==
 
 "@azure/abort-controller@^1.0.0":
   version "1.1.0"

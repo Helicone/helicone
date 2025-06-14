@@ -23,6 +23,10 @@ export class KafkaProducerImpl implements MessageProducer {
     });
   }
 
+  setLowerPriority() {
+    // Do nothing since this is deprecated to SQS
+  }
+
   async sendMessage(msg: MessageData): Promise<Result<null, string>> {
     const producer = this.kafka.producer();
 

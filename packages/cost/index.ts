@@ -5,6 +5,7 @@
 
 import { ModelRow } from "./interfaces/Cost";
 import { allCosts, defaultProvider, providers } from "./providers/mappings";
+import { COST_PRECISION_MULTIPLIER } from "./costCalc";
 
 export function costOf({
   model,
@@ -61,6 +62,7 @@ export function costOfPrompt({
   completionAudioTokens,
   images = 1,
   perCall = 1,
+  multiple,
 }: {
   provider: string;
   model: string;
@@ -72,6 +74,7 @@ export function costOfPrompt({
   completionAudioTokens: number;
   images?: number;
   perCall?: number;
+  multiple?: number;
 }) {
   const cost = costOf({ model, provider });
   if (!cost) {
@@ -118,6 +121,10 @@ export function costOfPrompt({
   const imageCost = images * (cost.per_image ?? 0);
   const perCallCost = perCall * (cost.per_call ?? 0);
   totalCost += imageCost + perCallCost;
+
+  if (multiple !== undefined) {
+    return Math.round(totalCost * multiple);
+  }
 
   return totalCost;
 }
@@ -205,7 +212,6 @@ function caseForCost(costs: ModelRow[], table: string, multiple: number) {
 END
 `;
 }
-export const COST_MULTIPLE = 1_000_000_000;
 
 export function clickhousePriceCalcNonAggregated(table: string) {
   // This is so that we don't need to do any floating point math in the database
@@ -226,12 +232,12 @@ export function clickhousePriceCalcNonAggregated(table: string) {
           throw new Error("Provider does not have costs");
         }
         return `    WHEN (${table}.provider = '${provider.provider}') 
-      THEN (${caseForCost(provider.costs, table, COST_MULTIPLE)})`;
+      THEN (${caseForCost(provider.costs, table, COST_PRECISION_MULTIPLIER)})`;
       })
       .join("\n")}
-    ELSE (${caseForCost(defaultProvider.costs, table, COST_MULTIPLE)})
+    ELSE (${caseForCost(defaultProvider.costs, table, COST_PRECISION_MULTIPLIER)})
   END
-) / ${COST_MULTIPLE}
+) / ${COST_PRECISION_MULTIPLIER}
 `;
 }
 
@@ -256,11 +262,11 @@ sum(
 
       return `WHEN (${table}.provider = '${
         provider.provider
-      }') THEN (${caseForCost(provider.costs, table, COST_MULTIPLE)})`;
+      }') THEN (${caseForCost(provider.costs, table, COST_PRECISION_MULTIPLIER)})`;
     })
     .join("\n")}
-    ELSE ${caseForCost(defaultProvider.costs, table, COST_MULTIPLE)}
+    ELSE ${caseForCost(defaultProvider.costs, table, COST_PRECISION_MULTIPLIER)}
   END
-  ) / ${COST_MULTIPLE}
+  ) / ${COST_PRECISION_MULTIPLIER}
 `;
 }
