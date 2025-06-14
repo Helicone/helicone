@@ -182,6 +182,13 @@ function processConsolidatedJsonForClaude3(events: any[]): any {
           acc[key] = value;
         }
       });
+      // accurate token count is in final message delta
+      if (item.usage) {
+        acc.usage = {
+          ...acc.usage,
+          output_tokens: (item.usage as any).output_tokens
+        };
+      }
     } else if (item.type === "content_block_start" && item.content_block) {
       // Initialize content array if needed
       if (!acc.content) {

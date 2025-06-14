@@ -1,11 +1,11 @@
 {
-  "title": "Prompt Engineering Tools & Techniques [Updated Jan 2025]",
-  "title1": "Prompt Engineering Tools & Techniques [Updated Jan 2025]",
-  "title2": "Prompt Engineering Tools & Techniques [Updated Jan 2025]",
+  "title": "Prompt Engineering Tools & Techniques [Updated June 2025]",
+  "title1": "Prompt Engineering Tools & Techniques [Updated June 2025]",
+  "title2": "Prompt Engineering Tools & Techniques [Updated June 2025]",
   "description": "Writing effective prompts is a crucial skill for developers working with large language models (LLMs). Here are the essentials of prompt engineering and the best tools to optimize your prompts.",
   "images": "/static/blog/prompt-engineering-tools/prompt-engineering-cover.webp",
   "time": "8 minute read",
   "author": "Lina Lam",
-  "date": "September 12, 2024", 
+  "date": "June 9, 2025", 
   "badge": "Frameworks & Tools"
 }

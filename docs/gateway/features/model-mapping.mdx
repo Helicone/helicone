@@ -1,0 +1,271 @@
+---
+title: "Model Mapping"
+sidebarTitle: "Model Mapping"
+description: "Define equivalencies between models for seamless provider switching"
+---
+
+# Model Mapping
+
+Model mapping allows you to define equivalencies between models from different providers, enabling seamless switching and load balancing across providers. For example, you can map `gpt-4` to `claude-3-opus` as equivalent models for your application.
+
+## Why Configure Model Mapping?
+
+The gateway ships with comprehensive default mappings ([general mappings](https://github.com/Helicone/helicone-router/blob/main/llm-proxy/config/embedded/model-mapping.yaml) and [Ollama-specific mappings](https://github.com/Helicone/helicone-router/blob/main/llm-proxy/config/embedded/model-mapping-ollama.yaml)) that work for most use cases. You'll want to override these when you:
+
+- **Disagree with our default model equivalencies**
+- **Want to map to newer models** not in our defaults
+- **Have custom models** that need specific routing
+- **Want different mappings** for different routers (e.g., experimental vs production)
+
+## How It Works
+
+Model mappings create equivalency groups where models can substitute for each other. When your application requests one model, the gateway can transparently route to any equivalent model based on availability, cost, or performance preferences.
+
+### Example Flow
+
+1. Application requests `gpt-4`
+2. Gateway checks load balancer configuration
+3. Routes to `claude-3-opus` (mapped as equivalent)
+4. Returns response as if it came from `gpt-4`
+
+## Default Mappings
+
+The gateway includes intelligent default mappings based on:
+- **Model capabilities** (reasoning, coding, general knowledge)
+- **Context windows** (similar token limits)
+- **Performance characteristics** (speed, quality trade-offs)
+- **Cost tiers** (similar pricing ranges)
+
+### Example Default Equivalencies
+
+```yaml
+# High-capability reasoning models
+- models: [gpt-4, claude-3-opus, gemini-1.5-pro]
+  
+# Fast, cost-effective models  
+- models: [gpt-4o-mini, claude-3-haiku, gemini-1.5-flash]
+
+# Code-specialized models
+- models: [gpt-4o, claude-3.5-sonnet, deepseek-r1]
+
+# Local models for development
+- models: [llama3, deepseek-r1-local, phi-3]
+```
+
+## Configuration Examples
+
+### Basic Model Mapping
+
+Define custom equivalency groups:
+
+```yaml
+model-mapping:
+  # Production-quality models
+  - models:
+      - gpt-4
+      - claude-3-opus
+      - gemini-1.5-pro
+    
+  # Development models (faster/cheaper)
+  - models:
+      - gpt-4o-mini
+      - claude-3-haiku
+      - ollama:llama3
+    
+  # Coding specialists
+  - models:
+      - gpt-4o
+      - claude-3.5-sonnet
+      - deepseek-r1
+```
+
+### Per-Router Mappings
+
+Different mappings for different use cases:
+
+```yaml
+routers:
+  production:
+    model-mapping:
+      # Conservative mappings for production
+      - models: [gpt-4, claude-3-opus]
+      - models: [gpt-4o-mini, claude-3-haiku]
+  
+  experimental:
+    model-mapping:
+      # Include experimental models
+      - models: [gpt-4, claude-3-opus, o1-preview]
+      - models: [gpt-4o-mini, gemini-1.5-flash, deepseek-r1]
+```
+
+### Custom Model Integration
+
+Map custom models to standard equivalents:
+
+```yaml
+model-mapping:
+  # Include your custom model in existing group
+  - models:
+      - gpt-4
+      - claude-3-opus
+      - custom-model-v1  # Your custom model
+    
+  # Create new group for specialized models
+  - models:
+      - ollama:custom-coding-model
+      - deepseek-r1
+      - codellama
+```
+
+### Override Default Mappings
+
+Replace default mappings entirely:
+
+```yaml
+model-mapping:
+  # Completely custom mapping strategy
+  - models: [gpt-4o, claude-3.5-sonnet]  # Only these two
+  - models: [gpt-4o-mini]  # No equivalents
+  - models: [ollama:llama3, ollama:phi-3]  # Local only
+```
+
+## Advanced Patterns
+
+### Capability-Based Mapping
+
+Group models by specific capabilities:
+
+```yaml
+model-mapping:
+  # Mathematical reasoning
+  - models: [gpt-4, o1-preview, claude-3-opus]
+  
+  # Code generation
+  - models: [gpt-4o, claude-3.5-sonnet, deepseek-r1]
+  
+  # General conversation
+  - models: [gpt-4o-mini, claude-3-haiku, gemini-1.5-flash]
+  
+  # Long context tasks
+  - models: [claude-3-opus, gemini-1.5-pro, gpt-4-turbo]
+```
+
+### Cost Optimization
+
+Map expensive models to cheaper alternatives:
+
+```yaml
+model-mapping:
+  # Map premium to standard
+  - models: [gpt-4, gpt-4o]  # Route expensive to cheaper
+  
+  # Map standard to budget
+  - models: [gpt-4o, gpt-4o-mini]  # Further cost savings
+  
+  # Local fallbacks
+  - models: [gpt-4o-mini, ollama:llama3]  # Free local option
+```
+
+### Development vs Production
+
+Different strategies for different environments:
+
+```yaml
+# Development router - prefer local/cheap
+development:
+  model-mapping:
+    - models: [gpt-4, ollama:llama3]  # Local first
+    - models: [gpt-4o, gpt-4o-mini]  # Cheap cloud backup
+
+# Production router - prefer quality  
+production:
+  model-mapping:
+    - models: [gpt-4, claude-3-opus]  # Best quality
+    - models: [gpt-4o-mini, claude-3-haiku]  # Fast responses
+```
+
+## Configuration Fields
+
+### Mapping Structure
+
+| Field | Type | Description | Example |
+|-------|------|-------------|---------|
+| `models` | array | Equivalent model names | `["gpt-4", "claude-3-opus"]` |
+
+### Model Name Format
+
+| Provider | Format | Example |
+|----------|---------|---------|
+| OpenAI | `model-name` | `gpt-4` |
+| Anthropic | `model-name` | `claude-3-opus` |
+| Ollama | `ollama:model-name` | `ollama:llama3` |
+| Bedrock | `bedrock:model-name` | `bedrock:claude-3` |
+
+## Best Practices
+
+1. **Test equivalencies** thoroughly before production deployment
+2. **Consider context windows** when mapping models
+3. **Group by capability** rather than just cost
+4. **Document your mapping strategy** for team understanding
+5. **Monitor performance** across mapped models
+6. **Start with defaults** and override only when needed
+
+## Common Use Cases
+
+### Multi-Provider Resilience
+
+```yaml
+model-mapping:
+  - models: [gpt-4, claude-3-opus, gemini-1.5-pro]
+```
+Automatic failover if one provider has issues.
+
+### Cost Optimization
+
+```yaml
+model-mapping:
+  - models: [gpt-4, gpt-4o-mini]  # Route expensive to cheap
+```
+Reduce costs while maintaining functionality.
+
+### Local Development
+
+```yaml
+model-mapping:
+  - models: [gpt-4, ollama:llama3]  # Use local models in dev
+```
+Develop without API costs.
+
+### A/B Testing
+
+```yaml
+model-mapping:
+  - models: [gpt-4, claude-3-opus]  # Test different models
+```
+Compare model performance transparently.
+
+## Troubleshooting
+
+### Common Issues
+
+**Models not routing correctly:**
+- Check model names match provider specifications
+- Verify models are available in provider configuration
+- Ensure mapping syntax is correct
+
+**Unexpected model selection:**
+- Review load balancing strategy configuration
+- Check if model availability affects routing
+- Verify mapping groups don't overlap unexpectedly
+
+**Performance inconsistencies:**
+- Consider model capability differences in mappings
+- Test with consistent prompts across mapped models
+- Monitor response quality across equivalent models
+
+### Debugging Tips
+
+1. **Enable logging** to see which models are selected
+2. **Test mappings individually** before complex configurations
+3. **Use health checks** to verify model availability
+4. **Monitor costs** when using cost-optimization mappings 

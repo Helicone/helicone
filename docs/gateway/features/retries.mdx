@@ -1,0 +1,91 @@
+---
+title: "Retry Configuration"
+sidebarTitle: "Retries"
+description: "Automatic retry logic for failed requests with configurable strategies and backoff patterns"
+---
+
+# Retry Configuration
+
+Automatic retry logic for failed requests with configurable strategies and backoff patterns to improve reliability and handle transient failures gracefully.
+
+## Why Use Retries?
+
+Retries improve reliability by:
+- **Handling temporary provider outages** or network issues
+- **Reducing error rates** from transient failures
+- **Providing graceful degradation** during high load periods
+
+## How It Works
+
+When a request fails, the gateway waits according to the backoff strategy before retrying. Exponential backoff increases wait times between retries to avoid overwhelming providers that may be experiencing issues.
+
+## Configuration Options
+
+### Basic Retry Setup
+
+```yaml
+routers:
+  production:
+    retries:
+      enabled: true
+      max-retries: 3
+      strategy: exponential
+      base: 1s
+      max: 30s
+```
+
+### Configuration Fields
+
+| Field | Type | Description | Default |
+|-------|------|-------------|---------|
+| `enabled` | boolean | Enable or disable retry logic | `false` |
+| `max-retries` | integer | Maximum retry attempts (0-255) | `3` |
+| `strategy` | string | Backoff strategy (`exponential`) | `exponential` |
+| `base` | duration | Initial retry delay | `1s` |
+| `max` | duration | Maximum delay between retries | `30s` |
+
+### Exponential Backoff
+
+With exponential backoff, each retry waits progressively longer:
+
+- **First retry**: Wait `base` duration (e.g., 1s)
+- **Second retry**: Wait `base * 2` (e.g., 2s)  
+- **Third retry**: Wait `base * 4` (e.g., 4s)
+- **Maximum**: Never exceed `max` duration (e.g., 30s)
+
+This prevents overwhelming providers while still providing multiple retry attempts for transient issues.
+
+## Best Practices
+
+1. **Start conservatively** - Begin with 3 retries and adjust based on provider behavior
+2. **Set reasonable maximums** - Avoid delays longer than your application's timeout
+3. **Monitor retry rates** - High retry rates may indicate provider issues or configuration problems
+4. **Consider provider limits** - Some providers may have specific retry policies
+
+## When Retries Occur
+
+The gateway automatically retries requests for:
+- **Network timeouts** and connection errors
+- **Provider rate limit responses** (429 status codes)
+- **Server errors** (5xx status codes)
+- **Temporary unavailability** responses
+
+Retries do **not** occur for:
+- **Authentication errors** (401, 403)
+- **Bad requests** (400, 422)
+- **Not found errors** (404)
+- **Client errors** that indicate permanent issues
+
+## Monitoring Retry Behavior
+
+Track retry metrics to optimize your configuration:
+- **Retry rate** - Percentage of requests that required retries
+- **Retry success rate** - How often retries succeed
+- **Average retry count** - Typical number of retries per failed request
+- **Retry latency** - Additional time from retry delays
+
+High retry rates may indicate:
+- Provider instability
+- Network issues
+- Aggressive retry configuration
+- Need for different load balancing strategy
