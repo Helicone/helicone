@@ -140,6 +140,7 @@ IMAGES=(
   "helicone/web:.."
   "helicone/jawn:.."
   "helicone/migrations:.."
+  "helicone/helix:.."
 )
 
 # Docker Hub mode
@@ -151,6 +152,7 @@ if [ "$MODE" = "dockerhub" ]; then
     "helicone/web:.."
     "helicone/jawn:.."
     "helicone/migrations:.."
+    "helicone/helix:.."
   )
   
   # Filter images if specific ones were selected
@@ -191,20 +193,24 @@ if [ "$MODE" = "dockerhub" ]; then
       tag=$VERSION_TAG
     fi
 
-    # Get Dockerfile path
+    # Get Dockerfile path and context
     DOCKERFILE_NAME=$(basename "$IMAGE_NAME" | tr '-' '_')
     DOCKERFILE_PATH="dockerfiles/dockerfile_${DOCKERFILE_NAME}"
+    BUILD_CONTEXT="$CONTEXT"
     
     if [ "$DOCKERFILE_NAME" = "jawn" ]; then
       DOCKERFILE_PATH="../valhalla/dockerfile"
     elif [ "$DOCKERFILE_NAME" = "migrations" ]; then
       DOCKERFILE_PATH="dockerfiles/dockerfile_migrations"
+    elif [ "$DOCKERFILE_NAME" = "helix" ]; then
+      DOCKERFILE_PATH="../helix/Dockerfile"
+      BUILD_CONTEXT="../helix"
     fi
 
     # Build image
     FULL_IMAGE_TAG="$IMAGE_NAME:$tag"
     echo "Building $FULL_IMAGE_TAG..."
-    run_command docker build --platform linux/amd64 -t "$FULL_IMAGE_TAG" -f "$DOCKERFILE_PATH" "$CONTEXT"
+    run_command docker build --platform linux/amd64 -t "$FULL_IMAGE_TAG" -f "$DOCKERFILE_PATH" "$BUILD_CONTEXT"
     
     # Push version tag
     echo "Pushing $FULL_IMAGE_TAG..."
@@ -232,6 +238,7 @@ elif [ "$MODE" = "ecr" ]; then
     "helicone/web:.."
     "helicone/jawn:.."
     "helicone/migrations:.."
+    "helicone/helix:.."
   )
   
   # Create ECR repositories first
@@ -276,21 +283,25 @@ elif [ "$MODE" = "ecr" ]; then
     
     echo "Processing $IMAGE_NAME..."
     
-    # Get Dockerfile path
+    # Get Dockerfile path and context
     DOCKERFILE_NAME=$(basename "$IMAGE_NAME" | tr '-' '_')
     DOCKERFILE_PATH="dockerfiles/dockerfile_${DOCKERFILE_NAME}"
+    BUILD_CONTEXT="$CONTEXT"
     
     if [ "$DOCKERFILE_NAME" = "jawn" ]; then
       DOCKERFILE_PATH="../valhalla/dockerfile"
     elif [ "$DOCKERFILE_NAME" = "migrations" ]; then
       DOCKERFILE_PATH="dockerfiles/dockerfile_migrations"
+    elif [ "$DOCKERFILE_NAME" = "helix" ]; then
+      DOCKERFILE_PATH="../helix/Dockerfile"
+      BUILD_CONTEXT="../helix"
     fi
     
     # Build image
     ECR_REPO="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME"
     FULL_IMAGE_TAG="$ECR_REPO:$VERSION_TAG"
     echo "Building $FULL_IMAGE_TAG..."
-    run_command docker build --platform linux/amd64 -t "$FULL_IMAGE_TAG" -f "$DOCKERFILE_PATH" "$CONTEXT"
+    run_command docker build --platform linux/amd64 -t "$FULL_IMAGE_TAG" -f "$DOCKERFILE_PATH" "$BUILD_CONTEXT"
     
     # Push version tag
     echo "Pushing $FULL_IMAGE_TAG..."
