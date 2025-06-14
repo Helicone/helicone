@@ -77,10 +77,7 @@ export class OpenAIBodyProcessor implements IBodyProcessor {
 
     return {
       promptTokens: effectivePromptTokens,
-      // promptCacheWriteTokens, not explicitly provided in OpenAI spec response
-      // possibly can calculate for prompt_tokens > 1024, 128 token increments
-      // https://openai.com/index/api-prompt-caching/
-      // This is fine since they don't charge for cache writes, unlike Anthropic.
+      // See note in GenericBodyProcessor
       promptCacheReadTokens: usage?.prompt_tokens_details?.cached_tokens,
       completionTokens: effectiveCompletionTokens,
       totalTokens: usage?.total_tokens,
