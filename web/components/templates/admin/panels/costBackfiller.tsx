@@ -81,7 +81,9 @@ const CostBackfiller = () => {
           type="number"
           min="1"
           value={totalChunks}
-          onChange={(e) => setTotalChunks(Math.max(1, parseInt(e.target.value)))}
+          onChange={(e) =>
+            setTotalChunks(Math.max(1, parseInt(e.target.value)))
+          }
           className="w-24 rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
         />
       </div>
@@ -115,13 +117,12 @@ const CostBackfiller = () => {
           disabled={isRunning || (specifyModel && !modelId)}
           variant="action"
         >
-          {isRunning ? `Backfilling... (${Math.round(progress)}%)` : "Backfill Costs"}
+          {isRunning
+            ? `Backfilling... (${Math.round(progress)}%)`
+            : "Backfill Costs"}
         </Button>
         {isRunning && (
-          <Button
-            onClick={handleCancel}
-            variant="destructive"
-          >
+          <Button onClick={handleCancel} variant="destructive">
             Cancel
           </Button>
         )}
