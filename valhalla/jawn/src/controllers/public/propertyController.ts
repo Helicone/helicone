@@ -12,9 +12,9 @@ import { KVCache } from "../../lib/cache/kvCache";
 import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import { buildFilterWithAuthClickHouse, buildFilterWithAuthClickHouseOrganizationProperties } from "@helicone-package/filters/filters";
 import { resultMap } from "../../packages/common/result";
-import { clickhousePriceCalc } from "@helicone-package/cost";
 import type { JawnAuthenticatedRequest } from "../../types/request";
 import { quickCacheResultCustom } from "../../utils/cacheResult";
+import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 
 export interface Property {
   property: string;
@@ -142,7 +142,7 @@ export class PropertyController extends Controller {
     const topQuery = `
     SELECT
       properties[${propertySQLKey}] as value,
-      ${clickhousePriceCalc("request_response_rmt")} as cost
+      sum(cost) / ${COST_PRECISION_MULTIPLIER} as cost
     FROM request_response_rmt
     WHERE (
       ${builtFilter.filter}
@@ -156,7 +156,7 @@ export class PropertyController extends Controller {
     // Query to get the total cost for this property
     const totalQuery = `
     SELECT
-      ${clickhousePriceCalc("request_response_rmt")} as cost
+      sum(cost) / ${COST_PRECISION_MULTIPLIER} as cost
     FROM request_response_rmt
     WHERE (
       ${builtFilter.filter}

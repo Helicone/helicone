@@ -1,4 +1,3 @@
-import { clickhousePriceCalcNonAggregated } from "@helicone-package/cost";
 import { Result, err, ok, resultMap } from "../../../packages/common/result";
 import {
   DEFAULT_UUID,
@@ -16,6 +15,7 @@ import {
   buildRequestSort,
   buildRequestSortClickhouse,
 } from "../../shared/sorts/requests/sorts";
+import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 
 const MAX_TOTAL_BODY_SIZE = 1024 * 1024;
 
@@ -192,7 +192,8 @@ export async function getRequestsClickhouseNoSort(
       assets as asset_ids,
       target_url,
       cache_reference_id,
-      cache_enabled
+      cache_enabled,
+      cost / ${COST_PRECISION_MULTIPLIER} as cost
     FROM request_response_rmt
     WHERE (
       (${builtFilter.filter})
@@ -268,7 +269,7 @@ export async function getRequestsClickhouse(
       target_url,
       cache_reference_id,
       cache_enabled,
-      ${clickhousePriceCalcNonAggregated("request_response_rmt")} as cost_usd
+      cost / ${COST_PRECISION_MULTIPLIER} as cost
     FROM request_response_rmt FINAL
     WHERE (
       (${builtFilter.filter})

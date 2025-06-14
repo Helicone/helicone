@@ -67,21 +67,7 @@ const metaDataFromHeliconeRequest = (
     countryCode: heliconeRequest.country_code,
     cacheEnabled: heliconeRequest.cache_enabled ?? false,
     cacheReferenceId: heliconeRequest.cache_reference_id ?? null,
-    cost: modelCost({
-      provider: heliconeRequest.provider,
-      model: model,
-
-      sum_prompt_tokens: heliconeRequest.prompt_tokens || 0,
-      prompt_cache_write_tokens: heliconeRequest.prompt_cache_write_tokens || 0,
-      prompt_cache_read_tokens: heliconeRequest.prompt_cache_read_tokens || 0,
-
-      prompt_audio_tokens: heliconeRequest.prompt_audio_tokens || 0,
-      completion_audio_tokens: heliconeRequest.completion_audio_tokens || 0,
-
-      sum_completion_tokens: heliconeRequest.completion_tokens || 0,
-
-      sum_tokens: heliconeRequest.total_tokens || 0,
-    }),
+    cost: heliconeRequest.cost ?? 0,
     createdAt: heliconeRequest.request_created_at,
     path: heliconeRequest.request_path,
     completionTokens: heliconeRequest.completion_tokens,

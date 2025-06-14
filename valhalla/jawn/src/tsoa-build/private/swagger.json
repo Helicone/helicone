@@ -3428,6 +3428,11 @@
 						"format": "double",
 						"nullable": true
 					},
+					"cost": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
 					"prompt_id": {
 						"type": "string",
 						"nullable": true
@@ -3535,6 +3540,7 @@
 					"completion_tokens",
 					"prompt_audio_tokens",
 					"completion_audio_tokens",
+					"cost",
 					"prompt_id",
 					"llmSchema",
 					"country_code",
