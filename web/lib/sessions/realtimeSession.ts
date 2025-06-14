@@ -107,7 +107,11 @@ function createSimulatedRequestStep(
     let base = request.request_properties?.["Helicone-Session-Path"];
     if (message._type === "functionCall" || message._type === "function") {
       return base ? base + "-Tool" : "/Tool";
-    } else if (message.role === "user" || message.role === "assistant") {
+    } else if (
+      message.role === "user" ||
+      message.role === "assistant" ||
+      message.role === "system"
+    ) {
       const role =
         message.role?.charAt(0).toUpperCase() + message.role?.slice(1);
       return base ? base + `-${role}` : `/${role}`;
