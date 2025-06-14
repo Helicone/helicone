@@ -23,21 +23,6 @@ import useNotification from "../../shared/notification/useNotification";
 import PlaygroundMessagesPanel from "./components/PlaygroundMessagesPanel";
 import PlaygroundResponsePanel from "./components/PlaygroundResponsePanel";
 import { OPENROUTER_MODEL_MAP } from "./new/openRouterModelMap";
-import { ProviderCard } from "@/components/providers/ProviderCard";
-import { DialogHeader } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import Image from "next/image";
-import { providers } from "@/data/providers";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getJawnClient } from "@/lib/clients/jawn";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 
 export interface ModelParameters {
   temperature: number | null | undefined;
@@ -406,124 +391,10 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     });
   };
 
-  const [isOpenRouterDialogOpen, setIsOpenRouterDialogOpen] = useState(false);
-
-  const queryClient = useQueryClient();
-
-  const { mutate: setPlaygroundRequestsThroughHelicone, isPending } =
-    useMutation({
-      mutationKey: ["addAdminToOrg"],
-      mutationFn: async ({
-        requestsThroughHelicone,
-      }: {
-        requestsThroughHelicone: boolean;
-      }) => {
-        const jawn = getJawnClient();
-        const { error } = await jawn.POST(
-          "/v1/playground/requests-through-helicone",
-          {
-            body: {
-              requestsThroughHelicone,
-            },
-          }
-        );
-
-        if (error) {
-          setNotification("Failed to update playground settings", "error");
-        } else {
-          setNotification("Playground settings updated", "success");
-        }
-      },
-      onMutate: ({ requestsThroughHelicone }) => {
-        console.log("on mutate");
-        queryClient.setQueryData(
-          ["playground-requests-through-helicone"],
-          requestsThroughHelicone
-        );
-      },
-    });
-
-  const { data: requestsThroughHelicone } = useQuery({
-    queryKey: ["playground-requests-through-helicone"],
-    queryFn: async () => {
-      const jawn = getJawnClient();
-      const { data } = await jawn.GET(
-        "/v1/playground/requests-through-helicone"
-      );
-      return data?.data ?? false;
-    },
-  });
-
   return (
     <main className="h-screen flex flex-col w-full animate-fade-in">
-      <AuthHeader
-        title={"Playground"}
-        actions={
-          <div className="flex flex-row items-center gap-2">
-            <div className="flex gap-2 items-center">
-              <Checkbox
-                id="requests-through-helicone"
-                checked={requestsThroughHelicone}
-                onCheckedChange={(checked) =>
-                  setPlaygroundRequestsThroughHelicone({
-                    requestsThroughHelicone:
-                      checked === "indeterminate" ? false : checked,
-                  })
-                }
-                disabled={isPending}
-              />
-              <Label htmlFor="requests-through-helicone" className="text-sm">
-                Requests through Helicone
-              </Label>
-            </div>
-            <Dialog
-              open={isOpenRouterDialogOpen}
-              onOpenChange={setIsOpenRouterDialogOpen}
-            >
-              <DialogTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2"
-                >
-                  <Image
-                    src="/assets/home/providers/openrouter.jpg"
-                    alt="OpenRouter"
-                    className="h-4 w-4 rounded-sm"
-                    width={16}
-                    height={16}
-                  />
-                  Configure OpenRouter
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-xl">
-                <DialogHeader>
-                  <DialogTitle>Configure OpenRouter</DialogTitle>
-                </DialogHeader>
-                <div className="mb-4 text-sm text-muted-foreground">
-                  OpenRouter provides access to multiple LLM models through a
-                  single API. Set up your OpenRouter API key to unlock all
-                  available models in the prompt editor.
-                </div>
-                <ProviderCard
-                  provider={providers.find((p) => p.id === "openrouter")!}
-                />
-              </DialogContent>
-            </Dialog>
-          </div>
-        }
-      />
+      <AuthHeader title={"Playground"} />
       <div className="flex flex-col w-full h-full min-h-[80vh] border-t border-border">
-        {/* <PlaygroundHeader
-          selectedModel={selectedModel}
-          setSelectedModel={setSelectedModel}
-          tools={tools}
-          setTools={handleToolsChange}
-          responseFormat={responseFormat}
-          setResponseFormat={setResponseFormat}
-          modelParameters={modelParameters}
-          setModelParameters={setModelParameters}
-        /> */}
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel
             className="flex w-full h-full"

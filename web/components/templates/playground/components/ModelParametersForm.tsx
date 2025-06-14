@@ -1,26 +1,43 @@
+import useNotification from "@/components/shared/notification/useNotification";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { InfoIcon, PencilIcon, Settings2Icon } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectTrigger,
-  SelectContent,
-  SelectItem,
-  SelectValue,
-} from "@/components/ui/select";
-import { Popover, PopoverTrigger } from "@/components/ui/popover";
-import { PopoverContent } from "@/components/ui/popover";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import ResponseFormatModal from "./ResponseFormatModal";
+import { getJawnClient } from "@/lib/clients/jawn";
 import { cn } from "@/lib/utils";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { InfoIcon, PencilIcon, Settings2Icon } from "lucide-react";
+import { useState } from "react";
+import ResponseFormatModal from "./ResponseFormatModal";
+import {
+  DialogContent,
+  DialogTitle,
+  DialogHeader,
+} from "@/components/ui/dialog";
+import { DialogTrigger } from "@/components/ui/dialog";
+import { Dialog } from "@/components/ui/dialog";
+import { providers } from "@/data/providers";
+import { ProviderCard } from "@/components/providers/ProviderCard";
+import Image from "next/image";
 
 interface ModelParameters {
   temperature: number | undefined | null;
@@ -78,6 +95,59 @@ export default function ModelParametersForm({
   const [isResponseFormatModalOpen, setIsResponseFormatModalOpen] =
     useState(false);
 
+  const { setNotification } = useNotification();
+  const queryClient = useQueryClient();
+
+  const { mutate: setPlaygroundRequestsThroughHelicone, isPending } =
+    useMutation({
+      mutationKey: ["playground-requests"],
+      mutationFn: async ({
+        requestsThroughHelicone,
+      }: {
+        requestsThroughHelicone: boolean;
+      }) => {
+        const jawn = getJawnClient();
+        const { error } = await jawn.POST(
+          "/v1/playground/requests-through-helicone",
+          {
+            body: {
+              requestsThroughHelicone,
+            },
+          }
+        );
+
+        if (error) {
+          setNotification("Failed to update playground settings", "error");
+        } else {
+          setNotification("Playground settings updated", "success");
+        }
+      },
+      onMutate: ({ requestsThroughHelicone }) => {
+        queryClient.setQueryData(
+          ["playground-requests-through-helicone"],
+          requestsThroughHelicone
+        );
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["playground-requests-through-helicone"],
+        });
+      },
+    });
+
+  const { data: requestsThroughHelicone } = useQuery({
+    queryKey: ["playground-requests-through-helicone"],
+    queryFn: async () => {
+      const jawn = getJawnClient();
+      const { data } = await jawn.GET(
+        "/v1/playground/requests-through-helicone"
+      );
+      return data?.data ?? false;
+    },
+  });
+
+  const [isOpenRouterDialogOpen, setIsOpenRouterDialogOpen] = useState(false);
+
   return (
     <>
       <Popover
@@ -99,6 +169,35 @@ export default function ModelParametersForm({
         </PopoverTrigger>
         <PopoverContent className="w-96 mr-2">
           <div className="flex flex-col gap-4 py-4 w-full">
+            <div className="flex justify-end">
+              <div className="flex gap-2 items-center">
+                <Tooltip>
+                  <TooltipTrigger>
+                    <InfoIcon className="h-3 w-3 text-muted-foreground" />
+                  </TooltipTrigger>
+                  <TooltipContent align="start">
+                    You will be able to see your playground requests on the
+                    requests and dashboards page.
+                  </TooltipContent>
+                </Tooltip>
+                <Label htmlFor="requests-through-helicone" className="text-sm">
+                  Log playground requests
+                </Label>
+                <Switch
+                  className="data-[state=checked]:bg-foreground"
+                  size="sm"
+                  variant="helicone"
+                  id="requests-through-helicone"
+                  checked={requestsThroughHelicone ?? false}
+                  onCheckedChange={(checked) => {
+                    setPlaygroundRequestsThroughHelicone({
+                      requestsThroughHelicone: checked,
+                    });
+                  }}
+                  disabled={isPending}
+                />
+              </div>
+            </div>
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-2">
@@ -406,6 +505,40 @@ export default function ModelParametersForm({
                 disabled={parameters.stop === undefined}
               />
             </div>
+            <Dialog
+              open={isOpenRouterDialogOpen}
+              onOpenChange={setIsOpenRouterDialogOpen}
+            >
+              <DialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <Image
+                    src="/assets/home/providers/openrouter.jpg"
+                    alt="OpenRouter"
+                    className="h-4 w-4 rounded-sm"
+                    width={16}
+                    height={16}
+                  />
+                  Configure OpenRouter
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-xl">
+                <DialogHeader>
+                  <DialogTitle>Configure OpenRouter</DialogTitle>
+                </DialogHeader>
+                <div className="mb-4 text-sm text-muted-foreground">
+                  OpenRouter provides access to multiple LLM models through a
+                  single API. Set up your OpenRouter API key to unlock all
+                  available models in the prompt editor.
+                </div>
+                <ProviderCard
+                  provider={providers.find((p) => p.id === "openrouter")!}
+                />
+              </DialogContent>
+            </Dialog>
           </div>
         </PopoverContent>
       </Popover>
