@@ -103,9 +103,10 @@ export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
           content: "You are a helpful AI assistant.",
         },
       ],
+      tool_choice: undefined,
       model: "gpt-3.5-turbo",
       temperature: undefined,
-      tools: [],
+      tools: undefined,
       response_format: { type: "text" },
       max_tokens: undefined,
       top_p: undefined,
@@ -122,7 +123,9 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   const { data: requestData, isLoading: isRequestLoading } =
     useGetRequestWithBodies(requestId ?? "");
 
-  const [selectedModel, setSelectedModel] = useState<string>("gpt-3.5-turbo");
+  const [selectedModel, setSelectedModel] = useState<string>(
+    "openai/gpt-3.5-turbo"
+  );
 
   const [defaultContent, setDefaultContent] = useState<MappedLLMRequest | null>(
     null
@@ -137,7 +140,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   useEffect(() => {
     if (!requestId) {
       setMappedContent(DEFAULT_EMPTY_CHAT);
-      setSelectedModel("openai/gpt-3.5-turbo");
       setDefaultContent(DEFAULT_EMPTY_CHAT);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -255,14 +257,21 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
 
   useEffect(() => {
     if (response) {
-      const newMessageMappedResponse = openAIMessageToHeliconeMessage(
-        JSON.parse(response)
-      );
+      const parsedResponse = JSON.parse(response);
+      const newMessageMappedResponse =
+        openAIMessageToHeliconeMessage(parsedResponse);
       if (!mappedContent) {
         return;
       }
       setMappedContent({
         ...mappedContent,
+        raw: {
+          ...mappedContent.raw,
+          response: {
+            ...mappedContent.raw.response,
+            messages: [parsedResponse],
+          },
+        },
         schema: {
           ...mappedContent.schema,
           response: {
@@ -282,7 +291,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     }
     const openaiRequest = openaiChatMapper.toExternal({
       ...mappedContent.schema.request,
-      tools,
+      tools: tools && tools.length > 0 ? tools : undefined,
     } as any);
 
     try {

@@ -5,6 +5,14 @@ import { Button } from "@/components/ui/button";
 import { openAIMessageToHeliconeMessage } from "@helicone-package/llm-mapper/mappers/openai/chat";
 import { v4 as uuidv4 } from "uuid";
 import Chat from "@/components/templates/requests/components/Chat";
+import useShiftKeyPress from "@/services/hooks/isShiftPressed";
+import { XSmall } from "@/components/ui/typography";
+import {
+  MODE_LABELS,
+  useRequestRenderModeStore,
+} from "@/store/requestRenderModeStore";
+import { LuChevronsLeftRight } from "react-icons/lu";
+import { JsonRenderer } from "@/components/templates/requests/components/chatComponent/single/JsonRenderer";
 
 interface PlaygroundResponsePanelProps {
   mappedContent: MappedLLMRequest | null;
@@ -49,6 +57,9 @@ const PlaygroundResponsePanel = ({
     }
   };
 
+  const { mode, toggleMode, setMode } = useRequestRenderModeStore();
+  const isShiftPressed = useShiftKeyPress();
+
   return (
     <ScrollArea className="w-full h-full">
       <div className="flex flex-col h-full">
@@ -75,15 +86,47 @@ const PlaygroundResponsePanel = ({
           </div>
         ) : (
           <>
-            <div className="flex justify-end p-2 border-b border-border">
+            <div className="flex justify-between p-2 border-b border-border">
               <Button variant="outline" size="sm" onClick={handleAddToChat}>
                 Add to Chat
               </Button>
+              <Button
+                variant={"outline"}
+                size={"sm"}
+                className="flex flex-row gap-1 absolute top-2 right-2 z-20"
+                onClick={() => toggleMode(isShiftPressed)}
+              >
+                <XSmall className="text-secondary font-medium">
+                  {MODE_LABELS[mode]}
+                </XSmall>
+                <LuChevronsLeftRight className="h-4 w-4 text-secondary" />
+              </Button>
             </div>
-            <Chat
-              mappedRequest={mappedContent as MappedLLMRequest}
-              mode="PLAYGROUND_OUTPUT"
-            />
+
+            {mode === "debug" ? (
+              <div className="p-4">
+                <pre className="whitespace-pre-wrap text-sm">
+                  <JsonRenderer
+                    data={JSON.parse(JSON.stringify(mappedContent))}
+                    copyButtonPosition="top-left"
+                  />
+                </pre>
+              </div>
+            ) : mode === "json" ? (
+              <div className="w-full h-full flex flex-col text-sm">
+                <div className="p-4 pb-4 border-b border-border">
+                  <JsonRenderer
+                    data={JSON.parse(JSON.stringify(response))}
+                    copyButtonPosition="top-left"
+                  />
+                </div>
+              </div>
+            ) : (
+              <Chat
+                mappedRequest={mappedContent as MappedLLMRequest}
+                mode="PLAYGROUND_OUTPUT"
+              />
+            )}
           </>
         )}
       </div>

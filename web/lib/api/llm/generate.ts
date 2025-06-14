@@ -38,7 +38,7 @@ export type GenerateResponse = {
 
 async function handleStreamResponse(
   response: Response,
-  onChunk: (chunk: string) => void,
+  onChunk: (_chunk: string) => void,
   onCompletion: () => void
 ): Promise<GenerateResponse> {
   if (!response.body) {
@@ -52,13 +52,29 @@ async function handleStreamResponse(
   try {
     while (true) {
       const { done, value } = await reader.read();
+      console.log("done", done);
+      console.log("value", value);
       if (done) {
+        console.log("buffer", buffer);
         if (buffer.trim()) {
           const events = buffer.split("\n\n");
+          console.log("events", events);
           for (const event of events) {
+            console.log("event", event);
             if (event.startsWith("data: ")) {
               const jsonString = event.substring(6).trim();
-              if (jsonString) onChunk(jsonString);
+              if (jsonString) {
+                try {
+                  const data = JSON.parse(jsonString);
+                  if (data.error) {
+                    throw new Error(data.error);
+                  }
+                  onChunk(jsonString);
+                } catch (e) {
+                  if (e instanceof Error) throw e;
+                  onChunk(jsonString);
+                }
+              }
             }
           }
         }
@@ -72,7 +88,18 @@ async function handleStreamResponse(
       for (const event of events) {
         if (event.startsWith("data: ")) {
           const jsonString = event.substring(6).trim();
-          if (jsonString) onChunk(jsonString);
+          if (jsonString) {
+            try {
+              const data = JSON.parse(jsonString);
+              if (data.error) {
+                throw new Error(data.error);
+              }
+              onChunk(jsonString);
+            } catch (e) {
+              if (e instanceof Error) throw e;
+              onChunk(jsonString);
+            }
+          }
         }
       }
     }
@@ -129,14 +156,6 @@ export async function generate<T extends object | undefined = undefined>(
 ): Promise<GenerateResponse> {
   const currentOrgId = Cookies.get(ORG_ID_COOKIE_KEY);
   const jwtToken = getHeliconeCookie().data?.jwtToken ?? "";
-  console.log({
-    currentOrgId,
-    jwtToken,
-  });
-
-  console.log({ params });
-  console.log(env("NEXT_PUBLIC_HELICONE_JAWN_SERVICE"));
-
   const response = await fetch(
     `${env("NEXT_PUBLIC_HELICONE_JAWN_SERVICE")}/v1/playground/generate`,
     {
