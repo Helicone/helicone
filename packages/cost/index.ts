@@ -76,7 +76,7 @@ export function costOfPrompt({
   perCall?: number;
   multiple?: number;
 }) {
-  let cost = costOf({ model, provider });
+  const cost = costOf({ model, provider });
   if (!cost) {
     return null;
   }
