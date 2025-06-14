@@ -404,6 +404,10 @@ export interface paths {
      */
     get: operations["GetSubscriptionData"];
   };
+  "/v1/admin/backfill-costs": {
+    /** @description Backfill costs in Clickhouse with updated cost package data. */
+    post: operations["BackfillCosts"];
+  };
   "/v1/audio/convert-to-wav": {
     post: operations["ConvertToWav"];
   };
@@ -1323,6 +1327,8 @@ Json: JsonObject;
       prompt_audio_tokens: number | null;
       /** Format: double */
       completion_audio_tokens: number | null;
+      /** Format: double */
+      cost: number | null;
       prompt_id: string | null;
       feedback_created_at?: string | null;
       feedback_id?: string | null;
@@ -17688,6 +17694,32 @@ export interface operations {
             discounts: components["schemas"]["Record_string.stripe.Stripe.Discount_"];
             invoices: components["schemas"]["stripe.Stripe.Invoice"][];
             subscriptions: components["schemas"]["stripe.Stripe.Subscription"][];
+          };
+        };
+      };
+    };
+  };
+  /** @description Backfill costs in Clickhouse with updated cost package data. */
+  BackfillCosts: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: double */
+          chunkNumber: number;
+          /** Format: double */
+          totalChunks: number;
+          modelId: string;
+          specifyModel: boolean;
+          timeExpression: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            success: boolean;
           };
         };
       };
