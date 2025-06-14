@@ -23,6 +23,9 @@ import useNotification from "../../shared/notification/useNotification";
 import PlaygroundMessagesPanel from "./components/PlaygroundMessagesPanel";
 import PlaygroundResponsePanel from "./components/PlaygroundResponsePanel";
 import { OPENROUTER_MODEL_MAP } from "./new/openRouterModelMap";
+import FoldedHeader from "@/components/shared/FoldedHeader";
+import Link from "next/link";
+import { Small } from "@/components/ui/typography";
 
 export interface ModelParameters {
   temperature: number | null | undefined;
@@ -393,7 +396,14 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
 
   return (
     <main className="h-screen flex flex-col w-full animate-fade-in">
-      <AuthHeader title={"Playground"} />
+      <FoldedHeader
+        showFold={false}
+        leftSection={
+          <Small className="font-bold text-gray-500 dark:text-slate-300">
+            Playground
+          </Small>
+        }
+      />
       <div className="flex flex-col w-full h-full min-h-[80vh] border-t border-border">
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel
