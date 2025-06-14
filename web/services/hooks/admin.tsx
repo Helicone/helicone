@@ -146,6 +146,8 @@ const useBackfillCosts = (onSuccess?: () => void) => {
       timeExpression: string;
       specifyModel: boolean;
       modelId: string;
+      totalChunks: number;
+      chunkNumber: number;
     }) => {
       const jawnClient = getJawnClient();
       const { data, error } = await jawnClient.POST("/v1/admin/backfill-costs", {
@@ -153,6 +155,8 @@ const useBackfillCosts = (onSuccess?: () => void) => {
           timeExpression: req.timeExpression,
           specifyModel: req.specifyModel,
           modelId: req.modelId,
+          totalChunks: req.totalChunks,
+          chunkNumber: req.chunkNumber,
         },
       });
 

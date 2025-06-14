@@ -129,7 +129,13 @@ export function costOfPrompt({
   return totalCost;
 }
 
-function caseForCost(costs: ModelRow[], table: string, multiple: number) {
+function caseForCost(
+  costs: ModelRow[],
+  table: string,
+  multiple: number,
+  useDefaultCost: boolean = false,
+  optimized: boolean = false,
+) {
   return `
   CASE
   ${costs
@@ -195,7 +201,8 @@ function caseForCost(costs: ModelRow[], table: string, multiple: number) {
       if (costParts.length > 0) {
         const costString = costParts.join(" + ");
         if (cost.model.operator === "equals") {
-          return `WHEN (${table}.model ILIKE '${cost.model.value}') THEN ${costString}`;
+          const op = optimized ? "=" : "ILIKE";
+          return `WHEN (${table}.model ${op} '${cost.model.value}') THEN ${costString}`;
         } else if (cost.model.operator === "startsWith") {
           return `WHEN (${table}.model LIKE '${cost.model.value}%') THEN ${costString}`;
         } else if (cost.model.operator === "includes") {
@@ -208,25 +215,54 @@ function caseForCost(costs: ModelRow[], table: string, multiple: number) {
       }
     })
     .join("\n")}
-  ELSE 0
+  ELSE ${useDefaultCost ? `toInt64(${table}.cost)` : `toInt64(0)`}
 END
 `;
 }
 
-export function clickhousePriceCalcNonAggregated(table: string, inDollars: boolean = true) {
-  // This is so that we don't need to do any floating point math in the database
-  // and we can just divide by 1_000_000 to get the cost in dollars
-
+// Currently only used for backfilling costs via admin.
+// If not chunked, the query will be too large for Clickhouse.
+export function clickhousePriceCalcNonAggregated(
+  table: string,
+  inDollars: boolean = true,
+  chunkProviders: boolean = false, // if true, chunk providers into multiple queries to avoid memory issues.
+  totalChunks: number = 1, // total number of chunks to split providers into
+  chunk: number = 0, // which chunk to process (0 to totalChunks-1)
+  useDefaultCost: boolean = true, // if true, set 0 by default if unsupported model/provider, otherwise don't change.
+  optimized: boolean = false, // if true, use equalities instead of LIKE where possible. Will not catch capitalization diffs.
+) {
   const providersWithCosts = providers.filter(
     (p) => p.costs && defaultProvider.provider !== p.provider
   );
   if (!defaultProvider.costs) {
     throw new Error("Default provider does not have costs");
   }
+
+  const cappedTotalChunks = Math.max(1, Math.min(totalChunks, providersWithCosts.length));
+  const cappedChunk = Math.min(chunk, cappedTotalChunks - 1);
+
+  let providersToProcess = providersWithCosts;
+  if (chunkProviders) {
+    const chunkSize = Math.ceil(providersWithCosts.length / cappedTotalChunks);
+    const start = cappedChunk * chunkSize;
+    const end = Math.min(start + chunkSize, providersWithCosts.length);
+    providersToProcess = providersWithCosts.slice(start, end);
+  }
+
+  if (providersToProcess.length === 0) {
+    return `
+  (
+  CASE
+    ${caseForCost(defaultProvider.costs, table, COST_PRECISION_MULTIPLIER, useDefaultCost, optimized)}
+  END
+  ) ${inDollars ? `/ ${COST_PRECISION_MULTIPLIER}` : ""}
+`;
+  }
+
   return `
   (
   CASE
-  ${providersWithCosts
+  ${providersToProcess
     .map((provider) => {
       if (!provider.costs) {
         throw new Error("Provider does not have costs");
@@ -234,18 +270,16 @@ export function clickhousePriceCalcNonAggregated(table: string, inDollars: boole
 
       return `WHEN (${table}.provider = '${
         provider.provider
-      }') THEN (${caseForCost(provider.costs, table, COST_PRECISION_MULTIPLIER)})`;
+      }') THEN (${caseForCost(provider.costs, table, COST_PRECISION_MULTIPLIER, useDefaultCost, optimized)})`;
     })
     .join("\n")}
-    ELSE ${caseForCost(defaultProvider.costs, table, COST_PRECISION_MULTIPLIER)}
+    ELSE ${caseForCost(defaultProvider.costs, table, COST_PRECISION_MULTIPLIER, useDefaultCost, optimized)}
   END
   ) ${inDollars ? `/ ${COST_PRECISION_MULTIPLIER}` : ""}
 `;
 }
 
 export function clickhousePriceCalc(table: string, inDollars: boolean = true) {
-  // This is so that we don't need to do any floating point math in the database
-  // and we can just divide by 1_000_000 to get the cost in dollars
 
   const providersWithCosts = providers.filter(
     (p) => p.costs && defaultProvider.provider !== p.provider

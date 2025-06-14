@@ -52008,6 +52008,14 @@
 						"application/json": {
 							"schema": {
 								"properties": {
+									"chunkNumber": {
+										"type": "number",
+										"format": "double"
+									},
+									"totalChunks": {
+										"type": "number",
+										"format": "double"
+									},
 									"modelId": {
 										"type": "string"
 									},
@@ -52019,6 +52027,8 @@
 									}
 								},
 								"required": [
+									"chunkNumber",
+									"totalChunks",
 									"modelId",
 									"specifyModel",
 									"timeExpression"

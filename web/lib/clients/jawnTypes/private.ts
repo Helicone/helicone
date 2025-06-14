@@ -17704,6 +17704,10 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
+          /** Format: double */
+          chunkNumber: number;
+          /** Format: double */
+          totalChunks: number;
           modelId: string;
           specifyModel: boolean;
           timeExpression: string;

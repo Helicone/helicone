@@ -1329,11 +1329,16 @@ export class AdminController extends Controller {
       timeExpression: string;
       specifyModel: boolean;
       modelId: string;
+      totalChunks: number;
+      chunkNumber: number;
     }
   ): Promise<{
     success: boolean;
   }> {
     await authCheckThrow(request.authParams.userId);
+    
+    // Simulate delay for testing
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     
     try {
     const query = `
@@ -1366,11 +1371,19 @@ export class AdminController extends Controller {
       scores,
       request_body,
       response_body,
-      ${clickhousePriceCalcNonAggregated("request_response_rmt", false)} as cost,
+      ${clickhousePriceCalcNonAggregated(
+        "request_response_rmt",
+        false,
+        true,
+        body.totalChunks,
+        body.chunkNumber,
+        true,
+        true
+      )} as cost,
       assets,
       now() as updated_at
     FROM
-      request_response_rmt
+      request_response_rmt FINAL
     WHERE
       request_created_at >= ${body.timeExpression}
       ${body.specifyModel ? `AND model = '${body.modelId}'` : ""}
@@ -1381,11 +1394,6 @@ export class AdminController extends Controller {
       console.error("Backfill error:", e);
       throw e;
     }
-
-
-    // if (error) {
-    //   throw new Error(error);
-    // }
 
     return { success: true };
   }
