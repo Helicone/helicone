@@ -207,9 +207,9 @@ const convertTools = (
   if (!tools) return [];
   return tools.map((tool) => ({
     type: "function",
-    name: tool.function.name,
-    description: tool.function.description,
-    parameters: tool.function.parameters,
+    name: tool.function?.name,
+    description: tool.function?.description,
+    parameters: tool.function?.parameters,
   }));
 };
 
@@ -221,9 +221,9 @@ const toExternalTools = (
   return tools.map((tool) => ({
     type: "function",
     function: {
-      name: tool.name,
-      description: tool.description,
-      parameters: tool.parameters || {},
+      name: tool?.name,
+      description: tool?.description,
+      parameters: tool?.parameters || {},
     },
   }));
 };
@@ -278,7 +278,7 @@ const toExternalToolChoice = (
   }
 
   // Handle "tool" type with name
-  if (toolChoice.type === "tool" && toolChoice.name) {
+  if (toolChoice.type === "tool" && toolChoice?.name) {
     return {
       type: "function",
       function: {
