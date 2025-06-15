@@ -275,7 +275,7 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
               content: "",
               start_timestamp: msg.timestamp,
               trigger_event_id: msg.content.type,
-            }
+            };
           }
           break;
         case "input_audio_buffer.append":
@@ -287,7 +287,7 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
               audio_data: "",
               start_timestamp: msg.timestamp,
               trigger_event_id: msg.content.type,
-            }
+            };
           }
           break;
         case "input_audio_buffer.combined":
@@ -309,7 +309,7 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
               _type: "audio",
               start_timestamp: msg.timestamp,
               trigger_event_id: msg.content.type,
-            }
+            };
           }
           break;
         case "response.audio.combined":
@@ -464,12 +464,12 @@ const mapRealtimeMessages = (messages: SocketMessage[]): Message[] => {
             };
           }
           return null;
-
+        case "session.created":
         case "session.update":
-          // -> User: Session update
+          // -> System: Session update
           return msg.content
             ? {
-                role: "user",
+                role: "system",
                 _type: "message",
                 content: JSON.stringify(msg.content),
                 timestamp: msg.timestamp,
