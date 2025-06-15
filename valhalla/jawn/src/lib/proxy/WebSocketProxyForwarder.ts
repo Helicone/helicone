@@ -3,7 +3,7 @@ import internal from "stream";
 import { WebSocket, WebSocketServer } from "ws";
 import { SocketMessage } from "../../types/realtime";
 import { safeJsonParse } from "../../utils/helpers";
-import { HeliconeQueueProducer } from "../clients/HeliconeQuequeProducer";
+import { HeliconeQueueProducer } from "../clients/HeliconeQueueProducer";
 import { RequestWrapper } from "../requestWrapper/requestWrapper";
 import { getHeliconeAuthClient } from "../../packages/common/auth/server/AuthClientFactory";
 import { S3Client } from "../shared/db/s3Client";

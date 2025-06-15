@@ -1,5 +1,5 @@
 import { HeliconeHeaders } from "../../../../shared/proxy/heliconeHeaders";
-import { HeliconeQueueProducer } from "../lib/clients/HeliconeQuequeProducer";
+import { HeliconeQueueProducer } from "../lib/clients/HeliconeQueueProducer";
 import type { KafkaMessageContents } from "../lib/handlers/HandlerContext";
 import { S3Client } from "../lib/shared/db/s3Client";
 import { AuthParams } from "../packages/common/auth/types";
