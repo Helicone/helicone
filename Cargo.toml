@@ -1,6 +1,6 @@
 [workspace]
-members = [ "crates/mock-server",
-    "crates/schema-filter",
+members = [
+    "crates/mock-server",
     "crates/telemetry",
     "crates/weighted-balance",
     "llm-proxy",
