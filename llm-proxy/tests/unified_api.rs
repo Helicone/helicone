@@ -12,7 +12,7 @@ use tower::Service;
 /// when using the /{provider} base url.
 #[tokio::test]
 #[serial_test::serial(default_mock)]
-async fn openai_direct_proxy() {
+async fn openai_unified_api() {
     let mut config = Config::test_default();
     // Disable auth for this test since we're testing basic passthrough
     // functionality
@@ -20,7 +20,7 @@ async fn openai_direct_proxy() {
 
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([
-            ("success:openai:fake_endpoint", 1.into()),
+            ("success:openai:chat_completion", 1.into()),
             // Auth is disabled, so auth and logging services should not be
             // called
             ("success:jawn:whoami", 0.into()),
@@ -37,7 +37,13 @@ async fn openai_direct_proxy() {
 
     let request_body = axum_core::body::Body::from(
         serde_json::to_vec(&json!({
-            "test": "data"
+            "model": "openai/gpt-4o-mini",
+            "messages": [
+                {
+                    "role": "user",
+                    "content": "Hello, world!"
+                }
+            ]
         }))
         .unwrap(),
     );
@@ -45,7 +51,7 @@ async fn openai_direct_proxy() {
     let request = Request::builder()
         .method(Method::POST)
         // Route to the fake endpoint through the default router
-        .uri("http://router.helicone.com/openai/v1/fake_endpoint")
+        .uri("http://router.helicone.com/ai/v1/chat/completions")
         .header("content-type", "application/json")
         .body(request_body)
         .unwrap();
@@ -55,10 +61,11 @@ async fn openai_direct_proxy() {
 }
 
 /// Test that requests are properly passed through to the Anthropic provider
-/// when using the /{provider} base url.
+/// when using the /ai base url and using an anthropic model in the `model`
+/// field.
 #[tokio::test]
 #[serial_test::serial(default_mock)]
-async fn anthropic_direct_proxy() {
+async fn anthropic_unified_api() {
     let mut config = Config::test_default();
     // Disable auth for this test since we're testing basic passthrough
     // functionality
@@ -66,7 +73,7 @@ async fn anthropic_direct_proxy() {
 
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([
-            ("success:anthropic:fake_endpoint", 1.into()),
+            ("success:anthropic:messages", 1.into()),
             // Auth is disabled, so auth and logging services should not be
             // called
             ("success:jawn:whoami", 0.into()),
@@ -83,7 +90,13 @@ async fn anthropic_direct_proxy() {
 
     let request_body = axum_core::body::Body::from(
         serde_json::to_vec(&json!({
-            "test": "data"
+            "model": "anthropic/claude-sonnet-4-0",
+            "messages": [
+                {
+                    "role": "user",
+                    "content": "Hello, world!"
+                }
+            ]
         }))
         .unwrap(),
     );
@@ -91,7 +104,7 @@ async fn anthropic_direct_proxy() {
     let request = Request::builder()
         .method(Method::POST)
         // Route to the fake endpoint through the default router
-        .uri("http://router.helicone.com/anthropic/v1/fake_endpoint")
+        .uri("http://router.helicone.com/ai/v1/chat/completions")
         .header("content-type", "application/json")
         .body(request_body)
         .unwrap();

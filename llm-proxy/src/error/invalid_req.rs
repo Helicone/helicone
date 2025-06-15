@@ -16,6 +16,8 @@ pub enum InvalidRequestError {
     NotFound(String),
     /// Unsupported provider: {0}
     UnsupportedProvider(InferenceProvider),
+    /// Unsupported endpoint: {0}
+    UnsupportedEndpoint(String),
     /// Router id not found: {0}
     RouterIdNotFound(String),
     /// Missing router id in request path
@@ -38,6 +40,13 @@ impl IntoResponse for InvalidRequestError {
                 StatusCode::NOT_FOUND,
                 Json(ErrorResponse {
                     error: format!("Not found: {path}"),
+                }),
+            )
+                .into_response(),
+            Self::UnsupportedEndpoint(path) => (
+                StatusCode::BAD_REQUEST,
+                Json(ErrorResponse {
+                    error: format!("Unsupported endpoint: {path}"),
                 }),
             )
                 .into_response(),
@@ -115,7 +124,10 @@ impl From<&InvalidRequestError> for InvalidRequestErrorMetric {
             InvalidRequestError::NotFound(_)
             | InvalidRequestError::RouterIdNotFound(_)
             | InvalidRequestError::MissingRouterId => Self::NotFound,
-            InvalidRequestError::InvalidRequest(_) => Self::InvalidRequest,
+            InvalidRequestError::InvalidRequest(_)
+            | InvalidRequestError::UnsupportedEndpoint(_) => {
+                Self::InvalidRequest
+            }
             InvalidRequestError::InvalidUri(_) => Self::InvalidUri,
             InvalidRequestError::InvalidRequestBody(_) => {
                 Self::InvalidRequestBody

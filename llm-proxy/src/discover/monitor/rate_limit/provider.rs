@@ -179,7 +179,6 @@ impl ProviderMonitorInner<Key> {
                         &self.router_id,
                         &self.router_config,
                         api_endpoint.provider(),
-                        false,
                     )
                     .await
                     .inspect_err(|e| {
@@ -328,7 +327,6 @@ impl ProviderMonitorInner<WeightedKey> {
                         &self.router_id,
                         &self.router_config,
                         api_endpoint.provider(),
-                        false,
                     )
                     .await
                     .inspect_err(|e| {

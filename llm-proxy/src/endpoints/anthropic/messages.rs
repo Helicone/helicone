@@ -4,7 +4,7 @@ use anthropic_ai_sdk::types::message::{
 
 use crate::{
     endpoints::{AiRequest, Endpoint},
-    middleware::mapper::error::MapperError,
+    error::mapper::MapperError,
     types::{model_id::ModelId, provider::InferenceProvider},
 };
 

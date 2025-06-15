@@ -4,80 +4,13 @@ use std::{
     task::{Context, Poll},
 };
 
-use axum_core::response::IntoResponse;
+pub use axum_core::body::Body;
 use bytes::{BufMut, Bytes, BytesMut};
 use futures::{Stream, StreamExt};
-use http::Response;
 use hyper::body::{Body as _, Frame, SizeHint};
 use tokio::sync::mpsc::{self, UnboundedReceiver};
 
 use crate::error::internal::InternalError;
-
-pub struct Body {
-    pub(crate) inner: reqwest::Body,
-}
-
-impl Body {
-    pub fn new(inner: reqwest::Body) -> Self {
-        Self { inner }
-    }
-
-    /// `append_newlines` is used to support LLM response logging with Helicone
-    /// for streaming responses.
-    pub fn wrap_stream(
-        stream: impl Stream<Item = Result<Bytes, InternalError>> + Send + 'static,
-        append_newlines: bool,
-    ) -> (Self, BodyReader) {
-        // unbounded channel is okay since we limit memory usage higher in the
-        // stack by limiting concurrency and request/response body size.
-        let (tx, rx) = mpsc::unbounded_channel();
-        let s = stream.map(move |b| {
-            match &b {
-                Ok(b) => {
-                    if let Err(e) = tx.send(b.clone()) {
-                        tracing::error!(error = %e, "BodyReader dropped before stream ended");
-                    }
-                }
-                Err(e) => {
-                    tracing::error!(error = %e, "BodyReader dropped before stream ended");
-                }
-            }
-            b
-        });
-        let inner = reqwest::Body::wrap_stream(s);
-        let size_hint = inner.size_hint();
-        (
-            Self { inner },
-            BodyReader::new(rx, size_hint, append_newlines),
-        )
-    }
-}
-
-impl hyper::body::Body for Body {
-    type Data = Bytes;
-    type Error = reqwest::Error;
-
-    fn poll_frame(
-        mut self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
-    ) -> Poll<Option<Result<Frame<Self::Data>, Self::Error>>> {
-        Pin::new(&mut self.inner).poll_frame(cx)
-    }
-
-    fn is_end_stream(&self) -> bool {
-        self.inner.is_end_stream()
-    }
-
-    fn size_hint(&self) -> SizeHint {
-        self.inner.size_hint()
-    }
-}
-
-impl IntoResponse for Body {
-    fn into_response(self) -> axum_core::response::Response {
-        Response::new(axum_core::body::Body::new(self))
-    }
-}
 
 /// Reads a stream of HTTP data frames as `Bytes` from a channel.
 #[derive(Debug)]
@@ -101,6 +34,33 @@ impl BodyReader {
             size_hint,
             append_newlines,
         }
+    }
+
+    /// `append_newlines` is used to support LLM response logging with Helicone
+    /// for streaming responses.
+    pub fn wrap_stream(
+        stream: impl Stream<Item = Result<Bytes, InternalError>> + Send + 'static,
+        append_newlines: bool,
+    ) -> (axum_core::body::Body, BodyReader) {
+        // unbounded channel is okay since we limit memory usage higher in the
+        // stack by limiting concurrency and request/response body size.
+        let (tx, rx) = mpsc::unbounded_channel();
+        let s = stream.map(move |b| {
+            match &b {
+                Ok(b) => {
+                    if let Err(e) = tx.send(b.clone()) {
+                        tracing::error!(error = %e, "BodyReader dropped before stream ended");
+                    }
+                }
+                Err(e) => {
+                    tracing::error!(error = %e, "BodyReader dropped before stream ended");
+                }
+            }
+            b
+        });
+        let inner = axum_core::body::Body::from_stream(s);
+        let size_hint = inner.size_hint();
+        (inner, BodyReader::new(rx, size_hint, append_newlines))
     }
 }
 

@@ -1,8 +1,9 @@
 use std::{collections::HashMap, str::FromStr};
 
-use super::{TryConvert, TryConvertStreamData, error::MapperError};
+use super::{TryConvert, TryConvertStreamData};
 use crate::{
     endpoints::openai::chat_completions::system_prompt,
+    error::mapper::MapperError,
     middleware::mapper::model::ModelMapper,
     types::{
         model_id::{ModelId, Version},
@@ -409,7 +410,7 @@ impl
                                         name: Some(name.clone()),
                                         arguments: Some(
                                             serde_json::to_string(input)
-                                                .map_err(super::error::MapperError::SerdeError)?,
+                                                .map_err(MapperError::SerdeError)?,
                                         ),
                                     }),
                                 }
@@ -496,15 +497,21 @@ impl
             } => {
                 match content_block {
                     anthropic::ContentBlock::ToolUse { id, name, input } => {
-                        let tool_call_chunk = openai::ChatCompletionMessageToolCallChunk {
-                            index: u32::try_from(index).unwrap_or(0),
-                            id: Some(id),
-                            r#type: Some(openai::ChatCompletionToolType::Function),
-                            function: Some(openai::FunctionCallStream {
-                                name: Some(name),
-                                arguments: Some(serde_json::to_string(&input).map_err(super::error::MapperError::SerdeError)?),
-                            }),
-                        };
+                        let tool_call_chunk =
+                            openai::ChatCompletionMessageToolCallChunk {
+                                index: u32::try_from(index).unwrap_or(0),
+                                id: Some(id),
+                                r#type: Some(
+                                    openai::ChatCompletionToolType::Function,
+                                ),
+                                function: Some(openai::FunctionCallStream {
+                                    name: Some(name),
+                                    arguments: Some(
+                                        serde_json::to_string(&input)
+                                            .map_err(MapperError::SerdeError)?,
+                                    ),
+                                }),
+                            };
                         let choice = openai::ChatChoiceStream {
                             index: 0,
                             delta: openai::ChatCompletionStreamResponseDelta {

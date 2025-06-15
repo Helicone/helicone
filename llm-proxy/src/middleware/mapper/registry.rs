@@ -7,26 +7,20 @@ use super::{
     gemini::GoogleGeminiConverter, model::ModelMapper, openai::OpenAIConverter,
 };
 use crate::{
-    config::router::RouterConfig,
     endpoints::{
         self, ApiEndpoint, anthropic::Anthropic, google::Google,
         ollama::Ollama, openai::OpenAI,
     },
     middleware::mapper::ollama::OllamaConverter,
-    types::provider::InferenceProvider,
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Default, Clone)]
 pub struct EndpointConverterRegistry(Arc<EndpointConverterRegistryInner>);
 
 impl EndpointConverterRegistry {
     #[must_use]
-    pub fn new(
-        router_config: &RouterConfig,
-        model_mapper: &ModelMapper,
-    ) -> Self {
-        let inner =
-            EndpointConverterRegistryInner::new(router_config, model_mapper);
+    pub fn new(model_mapper: &ModelMapper) -> Self {
+        let inner = EndpointConverterRegistryInner::new(model_mapper);
         Self(Arc::new(inner))
     }
 
@@ -58,6 +52,7 @@ impl RegistryKey {
     }
 }
 
+#[derive(Default)]
 struct EndpointConverterRegistryInner {
     /// In the future when we support other APIs beside just chat completion
     /// we'll want to add another level here.
@@ -77,110 +72,74 @@ impl std::fmt::Debug for EndpointConverterRegistryInner {
 
 impl EndpointConverterRegistryInner {
     #[allow(clippy::too_many_lines)]
-    fn new(router_config: &RouterConfig, model_mapper: &ModelMapper) -> Self {
+    fn new(model_mapper: &ModelMapper) -> Self {
         let mut registry = Self {
             converters: HashMap::default(),
         };
-        let providers = router_config.load_balance.providers();
-        let request_style = router_config.request_style;
 
-        if request_style == InferenceProvider::OpenAI
-            && providers.contains(&InferenceProvider::Anthropic)
-        {
-            let key = RegistryKey::new(
-                ApiEndpoint::OpenAI(OpenAI::chat_completions()),
-                ApiEndpoint::Anthropic(Anthropic::messages()),
-            );
-            let converter = TypedEndpointConverter::<
+        let key = RegistryKey::new(
+            ApiEndpoint::OpenAI(OpenAI::chat_completions()),
+            ApiEndpoint::Anthropic(Anthropic::messages()),
+        );
+        let converter =
+            TypedEndpointConverter::<
                 endpoints::openai::ChatCompletions,
                 endpoints::anthropic::Messages,
                 AnthropicConverter,
-            >::new(AnthropicConverter::new(
-                model_mapper.clone(),
-            ));
-            registry.register_converter(key, converter);
-        }
-        if request_style == InferenceProvider::OpenAI
-            && providers.contains(&InferenceProvider::GoogleGemini)
-        {
-            let key = RegistryKey::new(
-                ApiEndpoint::OpenAI(OpenAI::chat_completions()),
-                ApiEndpoint::Google(Google::generate_contents()),
-            );
-            let converter = TypedEndpointConverter::<
-                endpoints::openai::ChatCompletions,
-                endpoints::google::GenerateContents,
-                GoogleGeminiConverter,
-            >::new(GoogleGeminiConverter::new(
-                model_mapper.clone(),
-            ));
-            registry.register_converter(key, converter);
-        }
-        if request_style == InferenceProvider::OpenAI
-            && providers.contains(&InferenceProvider::OpenAI)
-        {
-            let key = RegistryKey::new(
-                ApiEndpoint::OpenAI(OpenAI::chat_completions()),
-                ApiEndpoint::OpenAI(OpenAI::chat_completions()),
-            );
-            let converter = TypedEndpointConverter::<
-                endpoints::openai::ChatCompletions,
-                endpoints::openai::ChatCompletions,
-                OpenAIConverter,
-            >::new(OpenAIConverter::new(
-                model_mapper.clone(),
-            ));
-            registry.register_converter(key, converter);
-        }
+            >::new(AnthropicConverter::new(model_mapper.clone()));
+        registry.register_converter(key, converter);
 
-        if request_style == InferenceProvider::Anthropic
-            && providers.contains(&InferenceProvider::OpenAI)
-        {
-            let key = RegistryKey::new(
-                ApiEndpoint::Anthropic(Anthropic::messages()),
-                ApiEndpoint::OpenAI(OpenAI::chat_completions()),
-            );
-            let converter = TypedEndpointConverter::<
-                endpoints::anthropic::Messages,
+        let key = RegistryKey::new(
+            ApiEndpoint::OpenAI(OpenAI::chat_completions()),
+            ApiEndpoint::Google(Google::generate_contents()),
+        );
+        let converter = TypedEndpointConverter::<
+            endpoints::openai::ChatCompletions,
+            endpoints::google::GenerateContents,
+            GoogleGeminiConverter,
+        >::new(GoogleGeminiConverter::new(
+            model_mapper.clone(),
+        ));
+        registry.register_converter(key, converter);
+
+        let key = RegistryKey::new(
+            ApiEndpoint::OpenAI(OpenAI::chat_completions()),
+            ApiEndpoint::OpenAI(OpenAI::chat_completions()),
+        );
+        let converter =
+            TypedEndpointConverter::<
+                endpoints::openai::ChatCompletions,
                 endpoints::openai::ChatCompletions,
                 OpenAIConverter,
-            >::new(OpenAIConverter::new(
-                model_mapper.clone(),
-            ));
-            registry.register_converter(key, converter);
-        }
-        if request_style == InferenceProvider::Anthropic
-            && providers.contains(&InferenceProvider::Anthropic)
-        {
-            let key = RegistryKey::new(
-                ApiEndpoint::Anthropic(Anthropic::messages()),
-                ApiEndpoint::Anthropic(Anthropic::messages()),
-            );
-            let converter = TypedEndpointConverter::<
-                endpoints::anthropic::Messages,
-                endpoints::anthropic::Messages,
-                AnthropicConverter,
-            >::new(AnthropicConverter::new(
-                model_mapper.clone(),
-            ));
-            registry.register_converter(key, converter);
-        }
-        if request_style == InferenceProvider::OpenAI
-            && providers.contains(&InferenceProvider::Ollama)
-        {
-            let key = RegistryKey::new(
-                ApiEndpoint::OpenAI(OpenAI::chat_completions()),
-                ApiEndpoint::Ollama(Ollama::chat_completions()),
-            );
-            let converter = TypedEndpointConverter::<
+            >::new(OpenAIConverter::new(model_mapper.clone()));
+        registry.register_converter(key, converter);
+
+        let key = RegistryKey::new(
+            ApiEndpoint::OpenAI(OpenAI::chat_completions()),
+            ApiEndpoint::Ollama(Ollama::chat_completions()),
+        );
+        let converter =
+            TypedEndpointConverter::<
                 endpoints::openai::ChatCompletions,
                 endpoints::ollama::chat_completions::ChatCompletions,
                 OllamaConverter,
-            >::new(OllamaConverter::new(
-                model_mapper.clone(),
-            ));
-            registry.register_converter(key, converter);
-        }
+            >::new(OllamaConverter::new(model_mapper.clone()));
+        registry.register_converter(key, converter);
+
+        // technically unused since we are focusing on supporting an OpenAI
+        // compatible API, but in the future if we wanted to support other
+        // APIs, we would need to add them similar to this.
+        let key = RegistryKey::new(
+            ApiEndpoint::Anthropic(Anthropic::messages()),
+            ApiEndpoint::OpenAI(OpenAI::chat_completions()),
+        );
+        let converter =
+            TypedEndpointConverter::<
+                endpoints::anthropic::Messages,
+                endpoints::openai::ChatCompletions,
+                OpenAIConverter,
+            >::new(OpenAIConverter::new(model_mapper.clone()));
+        registry.register_converter(key, converter);
 
         registry
     }

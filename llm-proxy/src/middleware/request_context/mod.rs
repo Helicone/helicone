@@ -1,19 +1,16 @@
 use std::{
-    future::Ready,
     sync::Arc,
     task::{Context, Poll},
 };
 
 use chrono::Utc;
-use futures::future::Either;
-use isocountry::CountryCode;
-use uuid::Uuid;
 
 use crate::{
     config::router::RouterConfig,
     types::{
+        extensions::{AuthContext, RequestContext},
         provider::ProviderKeys,
-        request::{AuthContext, Request, RequestContext},
+        request::Request,
         response::Response,
     },
 };
@@ -21,14 +18,16 @@ use crate::{
 #[derive(Debug, Clone)]
 pub struct Service<S> {
     inner: S,
-    router_config: Arc<RouterConfig>,
+    /// If `None`, this service is for a direct proxy.
+    /// If `Some`, this service is for a load balanced router.
+    router_config: Option<Arc<RouterConfig>>,
     provider_keys: ProviderKeys,
 }
 
 impl<S> Service<S> {
     pub fn new(
         inner: S,
-        router_config: Arc<RouterConfig>,
+        router_config: Option<Arc<RouterConfig>>,
         provider_keys: ProviderKeys,
     ) -> Self {
         Self {
@@ -46,7 +45,7 @@ where
 {
     type Response = S::Response;
     type Error = S::Error;
-    type Future = Either<Ready<Result<Self::Response, Self::Error>>, S::Future>;
+    type Future = S::Future;
 
     #[inline]
     fn poll_ready(
@@ -59,55 +58,43 @@ where
     #[tracing::instrument(level = "debug", name = "request_context", skip_all)]
     fn call(&mut self, mut req: Request) -> Self::Future {
         let router_config = self.router_config.clone();
-        let provider_keys = self.provider_keys.clone();
-        let req_ctx =
-            Service::<S>::get_context(router_config, provider_keys, &mut req);
-        req.extensions_mut().insert(Arc::new(req_ctx));
-        Either::Right(self.inner.call(req))
-    }
-}
-
-impl<S> Service<S>
-where
-    S: tower::Service<Request>,
-    S::Future: Send + 'static,
-    S::Response: Send + 'static,
-{
-    fn get_context(
-        router_config: Arc<RouterConfig>,
-        provider_api_keys: ProviderKeys,
-        req: &mut Request,
-    ) -> RequestContext {
+        let provider_api_keys = self.provider_keys.clone();
         let auth_context = req.extensions_mut().remove::<AuthContext>();
-        let proxy_context = crate::types::request::RequestProxyContext {
-            forced_routing: None,
-            provider_api_keys,
-        };
-        RequestContext {
+        let req_ctx = RequestContext {
             router_config,
-            proxy_context,
+            provider_api_keys,
             auth_context,
-            request_id: Uuid::new_v4(),
-            country_code: CountryCode::USA,
+            // TODO: this is probably tracked earlier by other middleware,
+            // can we re-use that more accurate timestamp?
             start_time: Utc::now(),
-        }
+        };
+        req.extensions_mut().insert(Arc::new(req_ctx));
+        self.inner.call(req)
     }
 }
 
 #[derive(Debug, Clone)]
 pub struct Layer {
-    router_config: Arc<RouterConfig>,
+    router_config: Option<Arc<RouterConfig>>,
     provider_keys: ProviderKeys,
 }
 
 impl Layer {
     #[must_use]
-    pub fn new(
+    pub fn for_router(
         router_config: Arc<RouterConfig>,
         provider_keys: ProviderKeys,
     ) -> Self {
         Self {
-            router_config,
+            router_config: Some(router_config),
+            provider_keys,
+        }
+    }
+
+    #[must_use]
+    pub fn for_direct_proxy(provider_keys: ProviderKeys) -> Self {
+        Self {
+            router_config: None,
             provider_keys,
         }
     }

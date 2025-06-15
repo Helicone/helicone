@@ -113,7 +113,6 @@ async fn check_weighted_monitor(
                             &inner.router_id,
                             &inner.router_config,
                             provider,
-                            false,
                         )
                         .await?;
 
@@ -182,7 +181,6 @@ async fn check_p2c_monitor(
                             &inner.router_id,
                             &inner.router_config,
                             provider,
-                            false,
                         )
                         .await?;
 

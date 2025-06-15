@@ -3,7 +3,7 @@ use opentelemetry::KeyValue;
 use tower_otel_http_metrics::ResponseAttributeExtractor;
 
 use crate::types::{
-    provider::InferenceProvider, request::MapperContext, router::RouterId,
+    extensions::MapperContext, provider::InferenceProvider, router::RouterId,
 };
 
 #[derive(Debug, Clone)]

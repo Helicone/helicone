@@ -9,18 +9,19 @@ use reqwest::Client;
 use rusty_s3::S3Action;
 use typed_builder::TypedBuilder;
 use url::Url;
+use uuid::Uuid;
 
 use crate::{
     app_state::AppState,
     error::{init::InitError, logger::LoggerError},
     types::{
         body::BodyReader,
+        extensions::{AuthContext, RequestContext},
         logger::{
             HeliconeLogMetadata, Log, LogMessage, RequestLog, ResponseLog,
             S3Log,
         },
         provider::InferenceProvider,
-        request::RequestContext,
     },
 };
 
@@ -60,19 +61,15 @@ impl LoggerService {
     #[tracing::instrument(skip_all)]
     async fn log_bodies(
         app_state: &AppState,
-        req_ctx: &Arc<RequestContext>,
+        auth_ctx: &AuthContext,
+        request_id: Uuid,
         request_body: Bytes,
         response_body: Bytes,
     ) -> Result<(), LoggerError> {
-        let auth_ctx = req_ctx
-            .auth_context
-            .as_ref()
-            .ok_or(LoggerError::NoAuthContextSet)?;
-
         let object_path = format!(
             "organizations/{}/requests/{}/raw_request_response_body",
             auth_ctx.org_id.as_ref(),
-            req_ctx.request_id
+            request_id
         );
         let action = app_state.0.minio.put_object(&object_path);
         let signed_url = action.sign(PUT_OBJECT_SIGN_DURATION);
@@ -118,9 +115,11 @@ impl LoggerService {
             .to_bytes();
         let req_body_len = self.request_body.len();
         let resp_body_len = response_body.len();
+        let request_id = Uuid::new_v4();
         LoggerService::log_bodies(
             &self.app_state,
-            &self.req_ctx,
+            auth_ctx,
+            request_id,
             self.request_body,
             response_body,
         )
@@ -130,7 +129,7 @@ impl LoggerService {
             HeliconeLogMetadata::from_headers(&mut self.request_headers)?;
         let req_path = self.target_url.path().to_string();
         let request_log = RequestLog::builder()
-            .id(self.req_ctx.request_id)
+            .id(request_id)
             .user_id(auth_ctx.user_id)
             .properties(IndexMap::new())
             .target_url(self.target_url)
@@ -141,7 +140,7 @@ impl LoggerService {
             .is_stream(false)
             .build();
         let response_log = ResponseLog::builder()
-            .id(self.req_ctx.request_id)
+            .id(request_id)
             .status(f64::from(self.response_status.as_u16()))
             .body_size(resp_body_len as f64)
             .response_created_at(Utc::now())
@@ -149,7 +148,7 @@ impl LoggerService {
             .build();
         let log = Log::new(request_log, response_log);
         let log_message = LogMessage::builder()
-            .authorization(auth_ctx.api_key.clone())
+            .authorization(auth_ctx.api_key.expose().clone())
             .helicone_meta(helicone_metadata)
             .log(log)
             .build();
@@ -170,7 +169,7 @@ impl LoggerService {
             .json(&log_message)
             .header(
                 "authorization",
-                format!("Bearer {}", auth_ctx.api_key),
+                format!("Bearer {}", auth_ctx.api_key.expose()),
             )
             .send()
             .await

@@ -19,7 +19,6 @@ use tower::Service;
 #[serial_test::serial(default_mock)]
 async fn openai_passthrough() {
     let mut config = Config::test_default();
-    // let _logger = telemetry::init_telemetry(&config.telemetry);
     // Disable auth for this test since we're testing basic passthrough
     // functionality
     config.auth.require_auth = false;

@@ -9,7 +9,7 @@ use derive_more::AsRef;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 use super::provider::InferenceProvider;
-use crate::middleware::mapper::error::MapperError;
+use crate::error::mapper::MapperError;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Version {

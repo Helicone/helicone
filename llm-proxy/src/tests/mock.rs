@@ -65,6 +65,7 @@ impl Mock {
             args.verify,
         )
         .await;
+        tracing::debug!(port = %openai_mock.uri(), "openai mock started");
         config
             .providers
             .get_mut(&InferenceProvider::OpenAI)

@@ -7,7 +7,7 @@ use async_openai::types::{
 
 use crate::{
     endpoints::{AiRequest, Endpoint},
-    middleware::mapper::error::MapperError,
+    error::mapper::MapperError,
     types::{model_id::ModelId, provider::InferenceProvider},
 };
 

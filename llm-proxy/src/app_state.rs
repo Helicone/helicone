@@ -16,15 +16,16 @@ use crate::{
         health::provider::HealthMonitorMap, metrics::EndpointMetricsRegistry,
         rate_limit::RateLimitMonitorMap,
     },
-    error::init::InitError,
+    error::{init::InitError, provider::ProviderError},
     logger::service::JawnClient,
     metrics::Metrics,
     types::{
-        provider::ProviderKeys,
+        provider::{InferenceProvider, ProviderKeys},
         rate_limit::{
             RateLimitEvent, RateLimitEventReceivers, RateLimitEventSenders,
         },
         router::RouterId,
+        secret::Secret,
     },
 };
 
@@ -96,7 +97,7 @@ impl AppState {
         rate_limit_channels.insert(router_id, rate_limit_rx);
     }
 
-    pub async fn add_provider_keys(
+    pub async fn add_provider_keys_for_router(
         &self,
         router_id: RouterId,
         router_config: &Arc<RouterConfig>,
@@ -109,5 +110,34 @@ impl AppState {
         let mut provider_keys_map = self.0.provider_keys.write().await;
         provider_keys_map.insert(router_id, provider_keys.clone());
         Ok(provider_keys)
+    }
+
+    pub async fn get_provider_api_key_for_router(
+        &self,
+        router_id: &RouterId,
+        provider: InferenceProvider,
+    ) -> Result<Secret<String>, ProviderError> {
+        let provider_keys = self.0.provider_keys.read().await;
+        let provider_keys = provider_keys.get(router_id).ok_or_else(|| {
+            ProviderError::ProviderKeysNotFound(router_id.clone())
+        })?;
+        let key = provider_keys
+            .get(&provider)
+            .ok_or_else(|| ProviderError::ApiKeyNotFound(provider))?
+            .clone();
+        Ok(key)
+    }
+
+    pub fn get_provider_api_key_for_direct_proxy(
+        &self,
+        provider: InferenceProvider,
+    ) -> Result<Secret<String>, ProviderError> {
+        let key = self
+            .0
+            .direct_proxy_api_keys
+            .get(&provider)
+            .ok_or_else(|| ProviderError::ApiKeyNotFound(provider))?
+            .clone();
+        Ok(key)
     }
 }

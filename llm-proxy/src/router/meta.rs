@@ -5,8 +5,8 @@ use std::{
 };
 
 use compact_str::CompactString;
-use futures::future::Either;
 use http::uri::PathAndQuery;
+use pin_project_lite::pin_project;
 use regex::Regex;
 use rustc_hash::FxHashMap as HashMap;
 use tower::Service as _;
@@ -18,9 +18,14 @@ use crate::{
         api::ApiError, init::InitError, internal::InternalError,
         invalid_req::InvalidRequestError,
     },
-    router::service::Router,
+    router::{
+        direct::{DirectProxiesWithoutMapper, DirectProxyServiceWithoutMapper},
+        service::{Router, RouterFuture},
+        unified_api,
+    },
     types::{
-        extensions::DirectProxy, provider::InferenceProvider, router::RouterId,
+        extensions::MapperContext, provider::InferenceProvider,
+        router::RouterId,
     },
 };
 
@@ -43,6 +48,8 @@ const URL_REGEX: &str =
 #[derive(Debug)]
 pub struct MetaRouter {
     inner: HashMap<RouterId, Router>,
+    unified_api: unified_api::Service,
+    direct_proxies: DirectProxiesWithoutMapper,
     url_regex: Regex,
 }
 
@@ -72,23 +79,34 @@ impl MetaRouter {
                 Router::new(router_id.clone(), app_state.clone()).await?;
             inner.insert(router_id.clone(), router);
         }
-        let meta_router = Self { inner, url_regex };
+        let unified_api = unified_api::Service::new(&app_state)?;
+        let direct_proxies = DirectProxiesWithoutMapper::new(&app_state)?;
+        let meta_router = Self {
+            inner,
+            unified_api,
+            direct_proxies,
+            url_regex,
+        };
         Ok(meta_router)
     }
 
-    fn handle_request(
+    fn handle_router_request(
         &mut self,
         mut req: crate::types::request::Request,
-        router_id: &RouterId,
-        extracted_api_path: &str,
-    ) -> Either<
-        Ready<Result<crate::types::response::Response, ApiError>>,
-        <Router as tower::Service<crate::types::request::Request>>::Future,
-    > {
+    ) -> ResponseFuture {
+        let Ok((router_id, extracted_api_path)) =
+            extract_router_id_and_path(&self.url_regex, req.uri().path())
+        else {
+            return ResponseFuture::Ready {
+                future: ready(Err(ApiError::InvalidRequest(
+                    InvalidRequestError::NotFound(req.uri().path().to_string()),
+                ))),
+            };
+        };
         tracing::trace!(
             router_id = %router_id,
             api_path = extracted_api_path,
-            "MetaRouter received request"
+            "received /router request"
         );
         let extracted_path_and_query =
             if let Some(query_params) = req.uri().query() {
@@ -105,17 +123,115 @@ impl MetaRouter {
             // been valid, and a subpath of that which
             // we extract with the regex should also be valid.
             tracing::warn!("Failed to convert extracted path to PathAndQuery");
-            return Either::Left(ready(Err(ApiError::Internal(
-                InternalError::Internal,
-            ))));
+            return ResponseFuture::Ready {
+                future: ready(Err(ApiError::Internal(InternalError::Internal))),
+            };
         };
-        if let Some(router) = self.inner.get_mut(router_id) {
+        if let Some(router) = self.inner.get_mut(&router_id) {
             req.extensions_mut().insert(extracted_path_and_query);
-            Either::Right(router.call(req))
+            ResponseFuture::RouterRequest {
+                future: router.call(req),
+            }
         } else {
-            Either::Left(ready(Err(ApiError::InvalidRequest(
-                InvalidRequestError::NotFound(req.uri().path().to_string()),
-            ))))
+            ResponseFuture::Ready {
+                future: ready(Err(ApiError::InvalidRequest(
+                    InvalidRequestError::NotFound(req.uri().path().to_string()),
+                ))),
+            }
+        }
+    }
+
+    fn handle_unified_api_request(
+        &mut self,
+        mut req: crate::types::request::Request,
+    ) -> ResponseFuture {
+        let rest = req.uri().path().trim_start_matches("/ai");
+        tracing::trace!(api_path = rest, "received /ai request");
+        let extracted_path_and_query =
+            if let Some(query_params) = req.uri().query() {
+                PathAndQuery::try_from(format!("{rest}?{query_params}"))
+            } else {
+                PathAndQuery::try_from(rest)
+            };
+        let Ok(extracted_path_and_query) = extracted_path_and_query else {
+            return ResponseFuture::Ready {
+                future: ready(Err(ApiError::Internal(InternalError::Internal))),
+            };
+        };
+        req.extensions_mut().insert(extracted_path_and_query);
+        // assumes request is from OpenAI compatible client
+        // and uses the model name to determine the provider.
+        ResponseFuture::UnifiedApi {
+            future: self.unified_api.call(req),
+        }
+    }
+
+    fn handle_direct_proxy_request(
+        &mut self,
+        mut req: crate::types::request::Request,
+    ) -> ResponseFuture {
+        // Extract the first path segment (e.g. "openai" from
+        // "/openai/v1/chat")
+        let path = req.uri().path();
+        let mut segment_iter = path.trim_start_matches('/').split('/');
+        let first_segment = segment_iter.next().unwrap_or("");
+        tracing::trace!(
+            provider = %first_segment,
+            "received /{{provider}} request"
+        );
+        match InferenceProvider::from_str(first_segment) {
+            Ok(provider) => {
+                let rest = segment_iter.collect::<Vec<_>>().join("/");
+                let extracted_path_and_query =
+                    if let Some(query_params) = req.uri().query() {
+                        PathAndQuery::try_from(format!("{rest}?{query_params}"))
+                    } else {
+                        PathAndQuery::try_from(rest)
+                    };
+                let Ok(extracted_path_and_query) = extracted_path_and_query
+                else {
+                    return ResponseFuture::Ready {
+                        future: ready(Err(ApiError::Internal(
+                            InternalError::Internal,
+                        ))),
+                    };
+                };
+                req.extensions_mut().insert(extracted_path_and_query);
+                // for the passthrough endpoints, we don't want to
+                // collect/deserialize the request
+                // body, and thus we must assume the request is not a stream
+                // request and cannot support streaming.
+                let mapper_ctx = MapperContext {
+                    is_stream: false,
+                    model: None,
+                };
+                req.extensions_mut().insert(mapper_ctx);
+
+                let Some(mut direct_proxy) =
+                    self.direct_proxies.get(&provider).cloned()
+                else {
+                    tracing::warn!(provider = %provider, "requested provider is not configured for direct proxy");
+                    return ResponseFuture::Ready {
+                        future: ready(Err(ApiError::InvalidRequest(
+                            InvalidRequestError::UnsupportedProvider(provider),
+                        ))),
+                    };
+                };
+                ResponseFuture::DirectProxy {
+                    future: direct_proxy.call(req),
+                }
+            }
+            Err(e) => {
+                tracing::debug!(
+                    error = %e,
+                    "Invalid inference provider"
+                );
+                ResponseFuture::Ready {
+                    future: ready(Err(ApiError::InvalidRequest(
+                        InvalidRequestError::NotFound(path.to_string()),
+                    ))),
+                }
+            }
         }
     }
 }
@@ -123,10 +239,7 @@ impl MetaRouter {
 impl tower::Service<crate::types::request::Request> for MetaRouter {
     type Response = crate::types::response::Response;
     type Error = ApiError;
-    type Future = Either<
-        Ready<Result<Self::Response, Self::Error>>,
-        <Router as tower::Service<crate::types::request::Request>>::Future,
-    >;
+    type Future = ResponseFuture;
 
     fn poll_ready(
         &mut self,
@@ -138,6 +251,12 @@ impl tower::Service<crate::types::request::Request> for MetaRouter {
                 any_pending = true;
             }
         }
+        if self.unified_api.poll_ready(ctx).is_pending() {
+            any_pending = true;
+        }
+        // we don't need to poll the direct proxies since they
+        // always return `Poll::Ready(Ok(()))`. However, if this
+        // were to change, we would need to poll them here.
         if any_pending {
             Poll::Pending
         } else {
@@ -145,39 +264,13 @@ impl tower::Service<crate::types::request::Request> for MetaRouter {
         }
     }
 
-    fn call(
-        &mut self,
-        mut req: crate::types::request::Request,
-    ) -> Self::Future {
-        if req.uri().path().starts_with("/router/") {
-            // .to_string() to avoid borrowing issues
-            let path = req.uri().path().to_string();
-            match extract_router_id_and_path(&self.url_regex, &path) {
-                Ok((router_id, api_path)) => {
-                    self.handle_request(req, &router_id, api_path)
-                }
-                Err(e) => Either::Left(ready(Err(e))),
-            }
-        } else if req.uri().path().starts_with("/ai/") {
-            // assumes request is from OpenAI compatible client
-            // and uses the model name to determine the provider.
-            todo!()
+    fn call(&mut self, req: crate::types::request::Request) -> Self::Future {
+        if req.uri().path().starts_with("/router") {
+            self.handle_router_request(req)
+        } else if req.uri().path().starts_with("/ai") {
+            self.handle_unified_api_request(req)
         } else {
-            // Extract the first path segment (e.g. "openai" from
-            // "/openai/v1/chat")
-            let path = req.uri().path();
-            let mut segment_iter = path.trim_start_matches('/').split('/');
-            let first_segment = segment_iter.next().unwrap_or(""); // will never be empty
-            match InferenceProvider::from_str(first_segment) {
-                Ok(provider) => {
-                    let rest = segment_iter.collect::<Vec<_>>().join("/");
-                    req.extensions_mut().insert(DirectProxy(provider));
-                    self.handle_request(req, &RouterId::Default, &rest)
-                }
-                Err(_) => Either::Left(ready(Err(ApiError::InvalidRequest(
-                    InvalidRequestError::NotFound(path.to_string()),
-                )))),
-            }
+            self.handle_direct_proxy_request(req)
         }
     }
 }
@@ -231,6 +324,46 @@ fn extract_router_id_and_path<'a>(
         Err(ApiError::InvalidRequest(InvalidRequestError::NotFound(
             path.to_string(),
         )))
+    }
+}
+
+pin_project! {
+    #[project = ResponseFutureProj]
+    pub enum ResponseFuture {
+        Ready {
+            #[pin]
+            future: Ready<Result<crate::types::response::Response, ApiError>>,
+        },
+        RouterRequest {
+            #[pin]
+            future: RouterFuture,
+        },
+        UnifiedApi {
+            #[pin]
+            future: unified_api::ResponseFuture,
+        },
+        DirectProxy {
+            #[pin]
+            future: <DirectProxyServiceWithoutMapper as tower::Service<crate::types::request::Request>>::Future,
+        },
+    }
+}
+
+impl Future for ResponseFuture {
+    type Output = Result<crate::types::response::Response, ApiError>;
+
+    fn poll(
+        self: std::pin::Pin<&mut Self>,
+        cx: &mut Context<'_>,
+    ) -> Poll<Self::Output> {
+        match self.project() {
+            ResponseFutureProj::Ready { future } => future.poll(cx),
+            ResponseFutureProj::RouterRequest { future } => future.poll(cx),
+            ResponseFutureProj::UnifiedApi { future } => future.poll(cx),
+            ResponseFutureProj::DirectProxy { future } => future
+                .poll(cx)
+                .map_err(|_| ApiError::Internal(InternalError::Internal)),
+        }
     }
 }
 

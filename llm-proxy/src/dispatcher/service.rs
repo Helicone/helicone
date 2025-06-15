@@ -27,21 +27,19 @@ use crate::{
         openai_client::Client as OpenAIClient,
     },
     endpoints::ApiEndpoint,
-    error::{
-        api::ApiError, init::InitError, internal::InternalError,
-        provider::ProviderError,
-    },
+    error::{api::ApiError, init::InitError, internal::InternalError},
     logger::service::LoggerService,
     middleware::{
         add_extension::{AddExtensions, AddExtensionsLayer},
         mapper::{model::ModelMapper, registry::EndpointConverterRegistry},
     },
     types::{
+        body::BodyReader,
+        extensions::{AuthContext, MapperContext, RequestContext},
         provider::InferenceProvider,
         rate_limit::RateLimitEvent,
-        request::{AuthContext, MapperContext, Request, RequestContext},
+        request::Request,
         router::RouterId,
-        secret::Secret,
     },
     utils::handle_error::{ErrorHandler, ErrorHandlerLayer},
 };
@@ -52,6 +50,8 @@ pub type DispatcherFuture = BoxFuture<
 >;
 pub type DispatcherService =
     AddExtensions<ErrorHandler<crate::middleware::mapper::Service<Dispatcher>>>;
+pub type DispatcherServiceWithoutMapper =
+    AddExtensions<ErrorHandler<Dispatcher>>;
 
 /// Leaf service that dispatches requests to the correct provider.
 #[derive(Debug, Clone)]
@@ -59,7 +59,8 @@ pub struct Dispatcher {
     client: Client,
     app_state: AppState,
     provider: InferenceProvider,
-    rate_limit_tx: Sender<RateLimitEvent>,
+    /// Is `Some` for load balanced routers, `None` for direct proxies.
+    rate_limit_tx: Option<Sender<RateLimitEvent>>,
 }
 
 impl Dispatcher {
@@ -68,7 +69,6 @@ impl Dispatcher {
         router_id: &RouterId,
         router_config: &Arc<RouterConfig>,
         provider: InferenceProvider,
-        is_direct_proxy: bool,
     ) -> Result<DispatcherService, InitError> {
         // connection timeout, timeout, etc.
         let base_client = reqwest::Client::builder()
@@ -80,38 +80,26 @@ impl Dispatcher {
             InferenceProvider::OpenAI => Client::OpenAI(OpenAIClient::new(
                 &app_state,
                 base_client,
-                &get_provider_api_key(
-                    &app_state,
-                    router_id,
-                    provider,
-                    is_direct_proxy,
-                )
-                .await?,
+                &app_state
+                    .get_provider_api_key_for_router(router_id, provider)
+                    .await?,
             )?),
             InferenceProvider::Anthropic => {
                 Client::Anthropic(AnthropicClient::new(
                     &app_state,
                     base_client,
-                    &get_provider_api_key(
-                        &app_state,
-                        router_id,
-                        provider,
-                        is_direct_proxy,
-                    )
-                    .await?,
+                    &app_state
+                        .get_provider_api_key_for_router(router_id, provider)
+                        .await?,
                 )?)
             }
             InferenceProvider::GoogleGemini => {
                 Client::GoogleGemini(GoogleGeminiClient::new(
                     &app_state,
                     base_client,
-                    &get_provider_api_key(
-                        &app_state,
-                        router_id,
-                        provider,
-                        is_direct_proxy,
-                    )
-                    .await?,
+                    &app_state
+                        .get_provider_api_key_for_router(router_id, provider)
+                        .await?,
                 )?)
             }
             InferenceProvider::Ollama => {
@@ -127,55 +115,149 @@ impl Dispatcher {
             client,
             app_state: app_state.clone(),
             provider,
-            rate_limit_tx,
+            rate_limit_tx: Some(rate_limit_tx),
         };
-        let model_mapper =
-            ModelMapper::new(app_state.clone(), router_config.clone());
-        let converter_registry =
-            EndpointConverterRegistry::new(router_config, &model_mapper);
+        let model_mapper = ModelMapper::new_for_router(
+            app_state.clone(),
+            router_config.clone(),
+        );
+        let converter_registry = EndpointConverterRegistry::new(&model_mapper);
 
         let extensions_layer = AddExtensionsLayer::builder()
             .inference_provider(provider)
-            .endpoint_converter_registry(converter_registry)
-            .router_id(router_id.clone())
+            .router_id(Some(router_id.clone()))
             .build();
 
         Ok(ServiceBuilder::new()
             .layer(extensions_layer)
             .layer(ErrorHandlerLayer::new(app_state))
-            .layer(crate::middleware::mapper::Layer)
+            .layer(crate::middleware::mapper::Layer::new(converter_registry))
             // other middleware: rate limiting, logging, etc, etc
             // will be added here as well
             .service(dispatcher))
     }
-}
 
-async fn get_provider_api_key(
-    app_state: &AppState,
-    router_id: &RouterId,
-    provider: InferenceProvider,
-    is_direct_proxy: bool,
-) -> Result<Secret<String>, ProviderError> {
-    if is_direct_proxy {
-        let provider_keys = &app_state.0.direct_proxy_api_keys;
-        let key = provider_keys
-            .get(&provider)
-            .ok_or_else(|| ProviderError::ApiKeyNotFound(provider))
-            .inspect_err(|e| {
-                tracing::error!(error = %e, "FOO Provider key not found");
-            })?
-            .clone();
-        Ok(key)
-    } else {
-        let provider_keys = app_state.0.provider_keys.read().await;
-        let provider_keys = provider_keys.get(router_id).ok_or_else(|| {
-            ProviderError::ProviderKeysNotFound(router_id.clone())
-        })?;
-        let key = provider_keys
-            .get(&provider)
-            .ok_or_else(|| ProviderError::ApiKeyNotFound(provider))?
-            .clone();
-        Ok(key)
+    pub fn new_direct_proxy(
+        app_state: AppState,
+        provider: InferenceProvider,
+    ) -> Result<DispatcherService, InitError> {
+        // connection timeout, timeout, etc.
+        let base_client = reqwest::Client::builder()
+            .connect_timeout(app_state.0.config.dispatcher.connection_timeout)
+            .timeout(app_state.0.config.dispatcher.timeout)
+            .tcp_nodelay(true);
+
+        let client = match provider {
+            InferenceProvider::OpenAI => Client::OpenAI(OpenAIClient::new(
+                &app_state,
+                base_client,
+                &app_state.get_provider_api_key_for_direct_proxy(provider)?,
+            )?),
+            InferenceProvider::Anthropic => {
+                Client::Anthropic(AnthropicClient::new(
+                    &app_state,
+                    base_client,
+                    &app_state
+                        .get_provider_api_key_for_direct_proxy(provider)?,
+                )?)
+            }
+            InferenceProvider::GoogleGemini => {
+                Client::GoogleGemini(GoogleGeminiClient::new(
+                    &app_state,
+                    base_client,
+                    &app_state
+                        .get_provider_api_key_for_direct_proxy(provider)?,
+                )?)
+            }
+            InferenceProvider::Ollama => {
+                Client::Ollama(OllamaClient::new(&app_state, base_client)?)
+            }
+            InferenceProvider::Bedrock => {
+                todo!("only openai and anthropic are supported at the moment")
+            }
+        };
+
+        let dispatcher = Self {
+            client,
+            app_state: app_state.clone(),
+            provider,
+            rate_limit_tx: None,
+        };
+        let model_mapper = ModelMapper::new(app_state.clone());
+        let converter_registry = EndpointConverterRegistry::new(&model_mapper);
+
+        let extensions_layer = AddExtensionsLayer::builder()
+            .inference_provider(provider)
+            .router_id(None)
+            .build();
+
+        Ok(ServiceBuilder::new()
+            .layer(extensions_layer)
+            .layer(ErrorHandlerLayer::new(app_state))
+            .layer(crate::middleware::mapper::Layer::new(converter_registry))
+            // other middleware: rate limiting, logging, etc, etc
+            // will be added here as well
+            .service(dispatcher))
+    }
+
+    pub fn new_without_mapper(
+        app_state: AppState,
+        provider: InferenceProvider,
+    ) -> Result<DispatcherServiceWithoutMapper, InitError> {
+        // connection timeout, timeout, etc.
+        let base_client = reqwest::Client::builder()
+            .connect_timeout(app_state.0.config.dispatcher.connection_timeout)
+            .timeout(app_state.0.config.dispatcher.timeout)
+            .tcp_nodelay(true);
+
+        let client = match provider {
+            InferenceProvider::OpenAI => Client::OpenAI(OpenAIClient::new(
+                &app_state,
+                base_client,
+                &app_state.get_provider_api_key_for_direct_proxy(provider)?,
+            )?),
+            InferenceProvider::Anthropic => {
+                Client::Anthropic(AnthropicClient::new(
+                    &app_state,
+                    base_client,
+                    &app_state
+                        .get_provider_api_key_for_direct_proxy(provider)?,
+                )?)
+            }
+            InferenceProvider::GoogleGemini => {
+                Client::GoogleGemini(GoogleGeminiClient::new(
+                    &app_state,
+                    base_client,
+                    &app_state
+                        .get_provider_api_key_for_direct_proxy(provider)?,
+                )?)
+            }
+            InferenceProvider::Ollama => {
+                Client::Ollama(OllamaClient::new(&app_state, base_client)?)
+            }
+            InferenceProvider::Bedrock => {
+                todo!("only openai and anthropic are supported at the moment")
+            }
+        };
+
+        let dispatcher = Self {
+            client,
+            app_state: app_state.clone(),
+            provider,
+            rate_limit_tx: None,
+        };
+
+        let extensions_layer = AddExtensionsLayer::builder()
+            .inference_provider(provider)
+            .router_id(None)
+            .build();
+
+        Ok(ServiceBuilder::new()
+            .layer(extensions_layer)
+            .layer(ErrorHandlerLayer::new(app_state))
+            // other middleware: rate limiting, logging, etc, etc
+            // will be added here as well
+            .service(dispatcher))
     }
 }
 
@@ -244,16 +326,11 @@ impl Dispatcher {
             .get::<InferenceProvider>()
             .copied()
             .ok_or(InternalError::ExtensionNotFound("InferenceProvider"))?;
-        let router_id = req
-            .extensions()
-            .get::<RouterId>()
-            .cloned()
-            .ok_or(InternalError::ExtensionNotFound("RouterId"))?;
+        let router_id = req.extensions().get::<RouterId>().cloned();
 
         let target_url = base_url
             .join(extracted_path_and_query.as_str())
             .expect("PathAndQuery joined with valid url will always succeed");
-        tracing::debug!(method = %method, target_url = %target_url, "dispatching request");
         // TODO: could change request type of dispatcher to
         // http::Request<reqwest::Body>
         // to avoid collecting the body twice
@@ -267,7 +344,7 @@ impl Dispatcher {
         let request_builder = self
             .client
             .as_ref()
-            .request(method, target_url.clone())
+            .request(method.clone(), target_url.clone())
             .headers(headers.clone());
 
         let metrics_for_stream = self.app_state.0.endpoint_metrics.clone();
@@ -284,6 +361,7 @@ impl Dispatcher {
             http::Response<crate::types::body::Body>,
             Option<crate::types::body::BodyReader>,
         ) = if mapper_ctx.is_stream {
+            tracing::debug!(method = %method, target_url = %target_url, "dispatching stream request");
             Self::dispatch_stream(
                 auth_ctx,
                 request_builder,
@@ -292,6 +370,7 @@ impl Dispatcher {
                 metrics_for_stream,
             )?
         } else {
+            tracing::debug!(method = %method, target_url = %target_url, "dispatching sync request");
             self.dispatch_sync(
                 auth_ctx,
                 request_builder,
@@ -365,12 +444,13 @@ impl Dispatcher {
                     "Provider rate limited, signaling monitor"
                 );
 
-                if let Err(e) = self
-                    .rate_limit_tx
-                    .send(RateLimitEvent::new(api_endpoint, retry_after))
-                    .await
-                {
-                    tracing::error!(error = %e, "failed to send rate limit event");
+                if let Some(rate_limit_tx) = &self.rate_limit_tx {
+                    if let Err(e) = rate_limit_tx
+                        .send(RateLimitEvent::new(api_endpoint, retry_after))
+                        .await
+                    {
+                        tracing::error!(error = %e, "failed to send rate limit event");
+                    }
                 }
             }
         }
@@ -412,7 +492,7 @@ impl Dispatcher {
         resp_builder = resp_builder.status(StatusCode::OK);
         if auth_context.is_some() {
             let (user_resp_body, body_reader) =
-                crate::types::body::Body::wrap_stream(response_stream, true);
+                BodyReader::wrap_stream(response_stream, true);
             let response = resp_builder
                 .body(user_resp_body)
                 .map_err(InternalError::HttpError)?;
@@ -439,11 +519,13 @@ impl Dispatcher {
         ),
         ApiError,
     > {
+        tracing::debug!("trying to send request");
         let response = request_builder
             .body(req_body_bytes)
             .send()
             .await
             .map_err(InternalError::ReqwestError)?;
+        tracing::debug!("sent request");
 
         let status = response.status();
         let mut resp_builder = http::Response::builder().status(status);
@@ -461,7 +543,7 @@ impl Dispatcher {
                 InternalError,
             >(bytes));
             let (error_body, error_reader) =
-                crate::types::body::Body::wrap_stream(stream, false);
+                BodyReader::wrap_stream(stream, false);
             let response = resp_builder
                 .body(error_body)
                 .map_err(InternalError::HttpError)?;
@@ -469,13 +551,10 @@ impl Dispatcher {
         }
 
         if auth_context.is_some() {
-            let (user_resp_body, body_reader) =
-                crate::types::body::Body::wrap_stream(
-                    response
-                        .bytes_stream()
-                        .map_err(InternalError::ReqwestError),
-                    false,
-                );
+            let (user_resp_body, body_reader) = BodyReader::wrap_stream(
+                response.bytes_stream().map_err(InternalError::ReqwestError),
+                false,
+            );
             let response = resp_builder
                 .body(user_resp_body)
                 .map_err(InternalError::HttpError)?;

@@ -58,7 +58,6 @@ async fn rate_limit_removes_provider_from_lb_pool() {
             ("success:jawn:log_request", num_requests.into()),
             ("success:jawn:whoami", num_requests.into()),
         ]))
-        .verify(false) // Disable strict verification
         .build();
 
     let mut harness = Harness::builder()
@@ -111,20 +110,19 @@ async fn rate_limit_removes_provider_from_lb_pool() {
     tracing::info!("Verifying mock stubs");
     harness.mock.verify().await;
     harness.mock.reset().await;
-    tracing::info!("verified mock stubs");
     // reset stubs so that openai is no longer returning 429s
     harness
         .mock
         .stubs(HashMap::from([
-            ("success:openai:chat_completion", (3..=7).into()),
-            ("success:anthropic:messages", (3..=7).into()),
-            ("success:minio:upload_request", 10.into()),
-            ("success:jawn:log_request", 10.into()),
-            ("success:jawn:whoami", 10.into()),
+            ("success:openai:chat_completion", (6..=14).into()),
+            ("success:anthropic:messages", (6..=14).into()),
+            ("success:minio:upload_request", 20.into()),
+            ("success:jawn:log_request", 20.into()),
+            ("success:jawn:whoami", 20.into()),
         ]))
         .await;
 
-    for _ in 0..10 {
+    for _ in 0..20 {
         let request_body = axum_core::body::Body::from(body_bytes.clone());
         let request = Request::builder()
             .method(Method::POST)

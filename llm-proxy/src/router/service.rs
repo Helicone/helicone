@@ -13,27 +13,24 @@ use crate::{
     app_state::AppState,
     balancer::provider::ProviderBalancer,
     config::{DeploymentTarget, router::RouterConfig},
-    dispatcher::{Dispatcher, DispatcherService},
+    dispatcher::Dispatcher,
     endpoints::{ApiEndpoint, EndpointType},
     error::{
         api::ApiError, init::InitError, internal::InternalError,
         invalid_req::InvalidRequestError,
     },
-    middleware::{rate_limit::service as rate_limit, request_context},
-    types::{
-        extensions::DirectProxy, provider::InferenceProvider, router::RouterId,
-    },
+    middleware::{rate_limit, request_context},
+    router::direct::DirectProxyService,
+    types::router::RouterId,
 };
 
 pub type RouterService =
     rate_limit::Service<request_context::Service<ProviderBalancer>>;
-pub type DirectProxyService =
-    rate_limit::Service<request_context::Service<DispatcherService>>;
 
 #[derive(Debug)]
 pub struct Router {
     inner: HashMap<EndpointType, RouterService>,
-    direct_proxies: HashMap<InferenceProvider, DirectProxyService>,
+    direct_proxy: DirectProxyService,
     router_config: Arc<RouterConfig>,
 }
 
@@ -63,7 +60,7 @@ impl Router {
         router_config.validate()?;
 
         let provider_keys = app_state
-            .add_provider_keys(id.clone(), &router_config)
+            .add_provider_keys_for_router(id.clone(), &router_config)
             .await?;
 
         let mut inner = HashMap::default();
@@ -85,7 +82,7 @@ impl Router {
             .await?;
             let service_stack: RouterService = ServiceBuilder::new()
                 .layer(rl_layer.clone())
-                .layer(request_context::Layer::new(
+                .layer(request_context::Layer::for_router(
                     router_config.clone(),
                     provider_keys.clone(),
                 ))
@@ -96,42 +93,30 @@ impl Router {
 
             inner.insert(*endpoint_type, service_stack);
         }
+        let direct_proxy_dispatcher = Dispatcher::new(
+            app_state.clone(),
+            &id,
+            &router_config,
+            router_config.request_style,
+        )
+        .await?;
 
-        let mut direct_proxies = HashMap::default();
-        for (provider, _provider_config) in app_state
-            .config()
-            .providers
-            .iter()
-            .filter(|(_, config)| config.enabled)
-        {
-            let direct_proxy_dispatcher = Dispatcher::new(
-                app_state.clone(),
-                &id,
-                &router_config,
-                *provider,
-                true,
-            )
-            .await?;
-
-            let direct_proxy = ServiceBuilder::new()
-                .layer(rl_layer.clone())
-                .layer(request_context::Layer::new(
-                    router_config.clone(),
-                    provider_keys.clone(),
-                ))
-                // other middleware: caching, etc, etc
-                // will be added here as well from the router config
-                // .map_err(|e| crate::error::api::Error::Box(e))
-                .service(direct_proxy_dispatcher);
-
-            direct_proxies.insert(*provider, direct_proxy);
-        }
+        let direct_proxy = ServiceBuilder::new()
+            .layer(rl_layer)
+            .layer(request_context::Layer::for_router(
+                router_config.clone(),
+                provider_keys.clone(),
+            ))
+            // other middleware: caching, etc, etc
+            // will be added here as well from the router config
+            // .map_err(|e| crate::error::api::Error::Box(e))
+            .service(direct_proxy_dispatcher);
 
         tracing::info!(id = %id, "router created");
 
         Ok(Self {
             inner,
-            direct_proxies,
+            direct_proxy,
             router_config,
         })
     }
@@ -153,6 +138,9 @@ impl tower::Service<crate::types::request::Request> for Router {
                 any_pending = true;
             }
         }
+        if self.direct_proxy.poll_ready(ctx).is_pending() {
+            any_pending = true;
+        }
         if any_pending {
             Poll::Pending
         } else {
@@ -160,6 +148,7 @@ impl tower::Service<crate::types::request::Request> for Router {
         }
     }
 
+    #[inline]
     #[tracing::instrument(level = "debug", name = "router", skip_all)]
     fn call(
         &mut self,
@@ -173,30 +162,13 @@ impl tower::Service<crate::types::request::Request> for Router {
                 InternalError::ExtensionNotFound("PathAndQuery").into(),
             )));
         };
-        let direct_proxy = req.extensions().get::<DirectProxy>();
+
         let api_endpoint = ApiEndpoint::new(
             extracted_path_and_query.path(),
             router_config.request_style,
         );
-        match (direct_proxy, api_endpoint) {
-            (Some(direct_proxy), _) => {
-                if let Some(direct_proxy) =
-                    self.direct_proxies.get_mut(&direct_proxy.0)
-                {
-                    RouterFuture::DirectProxy(direct_proxy.call(req))
-                } else {
-                    // in theory, this should never happen
-                    // it means that our constructor for the `Router` is wrong
-                    tracing::error!("no direct proxy found for request");
-                    RouterFuture::Ready(ready(Err(
-                        InvalidRequestError::NotFound(
-                            extracted_path_and_query.path().to_string(),
-                        )
-                        .into(),
-                    )))
-                }
-            }
-            (None, Some(api_endpoint)) => {
+        match api_endpoint {
+            Some(api_endpoint) => {
                 let endpoint_type = api_endpoint.endpoint_type();
                 if let Some(balancer) = self.inner.get_mut(&endpoint_type) {
                     req.extensions_mut().insert(api_endpoint);
@@ -210,20 +182,7 @@ impl tower::Service<crate::types::request::Request> for Router {
                     )))
                 }
             }
-            (None, None) => {
-                if let Some(direct_proxy) =
-                    self.direct_proxies.get_mut(&router_config.request_style)
-                {
-                    RouterFuture::DirectProxy(direct_proxy.call(req))
-                } else {
-                    RouterFuture::Ready(ready(Err(
-                        InvalidRequestError::NotFound(
-                            extracted_path_and_query.path().to_string(),
-                        )
-                        .into(),
-                    )))
-                }
-            }
+            None => RouterFuture::DirectProxy(self.direct_proxy.call(req)),
         }
     }
 }

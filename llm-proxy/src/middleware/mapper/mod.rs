@@ -23,7 +23,6 @@
 //! this struct then helps us deserialize to the correct type and then
 //! call the `TryConvert` fn.
 pub mod anthropic;
-pub mod error;
 mod gemini;
 pub mod model;
 pub mod ollama;
@@ -32,7 +31,6 @@ pub mod registry;
 pub mod service;
 
 use bytes::Bytes;
-use error::MapperError;
 use serde::{Serialize, de::DeserializeOwned};
 
 pub use self::service::*;
@@ -40,9 +38,9 @@ use crate::{
     endpoints::{AiRequest, Endpoint},
     error::{
         api::ApiError, internal::InternalError,
-        invalid_req::InvalidRequestError,
+        invalid_req::InvalidRequestError, mapper::MapperError,
     },
-    types::request::MapperContext,
+    types::extensions::MapperContext,
 };
 
 /// `TryFrom` but allows us to implement it for foreign types, so we can

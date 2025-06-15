@@ -48,6 +48,12 @@ impl Layer {
         }
     }
 
+    /// For when we statically know that rate limiting is disabled.
+    #[must_use]
+    pub fn disabled() -> Self {
+        Self { inner: None }
+    }
+
     pub async fn per_router(
         app_state: &AppState,
         router_id: RouterId,

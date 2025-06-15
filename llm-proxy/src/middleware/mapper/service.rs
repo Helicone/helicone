@@ -1,35 +1,37 @@
 use std::{
     str::FromStr,
-    sync::Arc,
     task::{Context, Poll},
 };
 
 use futures::{TryStreamExt, future::BoxFuture};
 use http::uri::PathAndQuery;
-use http_body_util::BodyExt;
 use tracing::{Instrument, info_span};
 
 use crate::{
     endpoints::ApiEndpoint,
-    error::{api::ApiError, internal::InternalError},
-    middleware::mapper::{
-        error::MapperError, registry::EndpointConverterRegistry,
-    },
+    error::{api::ApiError, internal::InternalError, mapper::MapperError},
+    middleware::mapper::registry::EndpointConverterRegistry,
     types::{
-        provider::InferenceProvider,
-        request::{MapperContext, Request, RequestContext},
-        response::Response,
+        extensions::MapperContext, provider::InferenceProvider,
+        request::Request, response::Response,
     },
 };
 
 #[derive(Debug, Clone)]
 pub struct Service<S> {
     inner: S,
+    endpoint_converter_registry: EndpointConverterRegistry,
 }
 
 impl<S> Service<S> {
-    pub fn new(inner: S) -> Self {
-        Self { inner }
+    pub fn new(
+        inner: S,
+        endpoint_converter_registry: EndpointConverterRegistry,
+    ) -> Self {
+        Self {
+            inner,
+            endpoint_converter_registry,
+        }
     }
 }
 
@@ -59,34 +61,15 @@ where
     #[tracing::instrument(name = "mapper", skip_all)]
     fn call(&mut self, mut req: Request) -> Self::Future {
         let mut inner = self.inner.clone();
+        let converter_registry = self.endpoint_converter_registry.clone();
         std::mem::swap(&mut self.inner, &mut inner);
         Box::pin(async move {
-            let provider = *req
+            let target_provider = *req
                 .extensions_mut()
                 .get::<InferenceProvider>()
                 .ok_or(ApiError::Internal(InternalError::ExtensionNotFound(
                     "Provider",
                 )))?;
-            let req_ctx = req
-                .extensions()
-                .get::<Arc<RequestContext>>()
-                .ok_or(ApiError::Internal(InternalError::ExtensionNotFound(
-                    "RequestContext",
-                )))?
-                .clone();
-            let request_style = req_ctx.router_config.request_style;
-            tracing::trace!(
-                request_style = %request_style,
-                provider = %provider,
-                "Mapper"
-            );
-            let converter_registry = req
-                .extensions()
-                .get::<EndpointConverterRegistry>()
-                .ok_or(ApiError::Internal(InternalError::ExtensionNotFound(
-                    "EndpointConverterRegistry",
-                )))?
-                .clone();
             let extracted_path_and_query = req
                 .extensions_mut()
                 .remove::<PathAndQuery>()
@@ -95,9 +78,11 @@ where
                 )))?;
             let source_endpoint =
                 req.extensions().get::<ApiEndpoint>().copied();
-            if provider == request_style {
+            if target_provider == InferenceProvider::OpenAI {
                 let req = if let Some(source_endpoint) = source_endpoint {
-                    // even though we don't need to map the request body, we
+                    // Since we support the OpenAI API only, then we can
+                    // special case when our target provider is OpenAI.
+                    // Even though we don't need to map the request body, we
                     // still need to deserialize the body in
                     // order to extract the `stream` param
                     map_request_no_op(
@@ -120,20 +105,14 @@ where
                     req.extensions_mut().insert(extracted_path_and_query);
                     req
                 };
-                inner.call(req).await.map(|response| {
-                    // no need to deserialize the response body, just stream to
-                    // user
-                    let (parts, body) = response.into_parts();
-                    let body = axum_core::body::Body::new(body.inner);
-                    http::Response::from_parts(parts, body)
-                })
+                inner.call(req).await
             } else {
                 let source_endpoint =
                     source_endpoint.ok_or(ApiError::Internal(
                         InternalError::ExtensionNotFound("ApiEndpoint"),
                     ))?;
                 let target_endpoint =
-                    ApiEndpoint::mapped(source_endpoint, provider)?;
+                    ApiEndpoint::mapped(source_endpoint, target_provider)?;
                 // serialization/deserialization should be done on a dedicated
                 // thread
                 let converter_registry_cloned = converter_registry.clone();
@@ -179,6 +158,7 @@ async fn map_request(
     target_path_and_query: &PathAndQuery,
     req: Request,
 ) -> Result<Request, ApiError> {
+    use http_body_util::BodyExt;
     let (parts, body) = req.into_parts();
     let body = body
         .collect()
@@ -222,6 +202,7 @@ async fn map_request_no_op(
     target_path_and_query: PathAndQuery,
     req: Request,
 ) -> Result<Request, ApiError> {
+    use http_body_util::BodyExt;
     let (parts, body) = req.into_parts();
     let body = body
         .collect()
@@ -279,7 +260,7 @@ async fn map_response(
         // SSE event in this branch
         let mapped_stream = body
             .into_data_stream()
-            .map_err(|e| ApiError::Internal(InternalError::ReqwestError(e)))
+            .map_err(|e| ApiError::Internal(InternalError::CollectBodyError(e)))
             .try_filter_map({
                 let captured_registry = converter_registry.clone();
                 move |bytes| {
@@ -310,10 +291,11 @@ async fn map_response(
         );
         Ok(new_resp)
     } else {
+        use http_body_util::BodyExt;
         let body_bytes = body
             .collect()
             .await
-            .map_err(InternalError::ReqwestError)?
+            .map_err(InternalError::CollectBodyError)?
             .to_bytes();
 
         let mapped_body_bytes = converter
@@ -332,12 +314,23 @@ async fn map_response(
 }
 
 #[derive(Debug, Clone)]
-pub struct Layer;
+pub struct Layer {
+    endpoint_converter_registry: EndpointConverterRegistry,
+}
+
+impl Layer {
+    #[must_use]
+    pub fn new(endpoint_converter_registry: EndpointConverterRegistry) -> Self {
+        Self {
+            endpoint_converter_registry,
+        }
+    }
+}
 
 impl<S> tower::Layer<S> for Layer {
     type Service = Service<S>;
 
     fn layer(&self, inner: S) -> Self::Service {
-        Service::new(inner)
+        Service::new(inner, self.endpoint_converter_registry.clone())
     }
 }

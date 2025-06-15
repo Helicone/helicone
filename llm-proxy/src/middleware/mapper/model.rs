@@ -6,7 +6,7 @@ use crate::{
         model_mapping::ModelMappingConfig, providers::ProvidersConfig,
         router::RouterConfig,
     },
-    middleware::mapper::error::MapperError,
+    error::mapper::MapperError,
     types::{
         model_id::{ModelId, ModelName},
         provider::InferenceProvider,
@@ -16,15 +16,26 @@ use crate::{
 #[derive(Debug, Clone)]
 pub struct ModelMapper {
     app_state: AppState,
-    router_config: Arc<RouterConfig>,
+    router_config: Option<Arc<RouterConfig>>,
 }
 
 impl ModelMapper {
     #[must_use]
-    pub fn new(app_state: AppState, router_config: Arc<RouterConfig>) -> Self {
+    pub fn new_for_router(
+        app_state: AppState,
+        router_config: Arc<RouterConfig>,
+    ) -> Self {
         Self {
             app_state,
-            router_config,
+            router_config: Some(router_config),
+        }
+    }
+
+    #[must_use]
+    pub fn new(app_state: AppState) -> Self {
+        Self {
+            app_state,
+            router_config: None,
         }
     }
 
@@ -61,7 +72,8 @@ impl ModelMapper {
         // otherwise, use the model mapping from router config if it exists
         if let Some(router_model_mapping) = self
             .router_config
-            .model_mappings()
+            .as_ref()
+            .and_then(|c| c.model_mappings())
             .and_then(|m| m.as_ref().get(&source_model_name))
         {
             // get the first model from the router model mapping that the target

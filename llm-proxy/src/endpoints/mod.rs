@@ -10,8 +10,7 @@ use crate::{
     endpoints::{
         anthropic::Anthropic, google::Google, ollama::Ollama, openai::OpenAI,
     },
-    error::invalid_req::InvalidRequestError,
-    middleware::mapper::error::MapperError,
+    error::{invalid_req::InvalidRequestError, mapper::MapperError},
     types::{model_id::ModelId, provider::InferenceProvider},
 };
 

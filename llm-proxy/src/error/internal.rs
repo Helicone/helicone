@@ -8,8 +8,7 @@ use tracing::error;
 use super::ErrorMetric;
 use crate::{
     endpoints::ApiEndpoint,
-    error::api::ErrorResponse,
-    middleware::mapper::error::MapperErrorMetric,
+    error::{api::ErrorResponse, mapper::MapperErrorMetric},
     types::{json::Json, provider::InferenceProvider},
 };
 
@@ -43,7 +42,7 @@ pub enum InternalError {
     /// Http error: {0}
     HttpError(#[from] http::Error),
     /// Mapper error: {0}
-    MapperError(#[from] crate::middleware::mapper::error::MapperError),
+    MapperError(#[from] crate::error::mapper::MapperError),
     /// Load balancer error: {0}
     LoadBalancerError(BoxError),
     /// Poll ready error: {0}
@@ -105,7 +104,7 @@ pub enum InternalErrorMetric {
     /// Http error
     HttpError,
     /// Mapper error
-    MapperError(#[from] crate::middleware::mapper::error::MapperErrorMetric),
+    MapperError(#[from] crate::error::mapper::MapperErrorMetric),
     /// Load balancer error
     LoadBalancerError,
     /// Poll ready error

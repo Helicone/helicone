@@ -4,11 +4,11 @@ use async_openai::types::{
     CreateChatCompletionResponse, CreateChatCompletionStreamResponse,
 };
 
-use super::{
-    TryConvert, TryConvertStreamData, error::MapperError, model::ModelMapper,
-};
+use super::{TryConvert, TryConvertStreamData};
 use crate::{
     endpoints::ollama::chat_completions::CreateChatCompletionRequestOllama,
+    error::mapper::MapperError,
+    middleware::mapper::model::ModelMapper,
     types::{model_id::ModelId, provider::InferenceProvider},
 };
 

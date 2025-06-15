@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 )]
 #[serde(rename_all = "kebab-case")]
 pub enum DiscoverMode {
+    /// Discover enabled providers from a YAML config file.
     #[default]
     Config,
 }

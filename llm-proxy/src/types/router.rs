@@ -44,8 +44,6 @@ pub struct VersionedRouter {
 
 #[cfg(test)]
 mod tests {
-    use http::uri::PathAndQuery;
-
     use super::*;
 
     #[test]
@@ -61,15 +59,5 @@ mod tests {
         let deserialized =
             serde_json::from_str::<RouterId>(&serialized).unwrap();
         assert_eq!(id, deserialized);
-    }
-
-    #[test]
-    fn extracted_path_and_query_try_from_str() {
-        let path_and_query =
-            PathAndQuery::try_from("/v1/chat/completions").unwrap();
-        assert_eq!(path_and_query.as_str(), "/v1/chat/completions");
-        let path_and_query =
-            PathAndQuery::try_from("/v1/chat/completions?key=value").unwrap();
-        assert_eq!(path_and_query.as_str(), "/v1/chat/completions?key=value");
     }
 }

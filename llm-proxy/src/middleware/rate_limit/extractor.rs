@@ -1,7 +1,7 @@
 use http::Request;
 use tower_governor::{GovernorError, key_extractor::KeyExtractor};
 
-use crate::types::{request::AuthContext, user::UserId};
+use crate::types::{extensions::AuthContext, user::UserId};
 
 #[derive(Debug, Clone)]
 pub struct RateLimitKeyExtractor;

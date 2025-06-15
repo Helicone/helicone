@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     endpoints::AiRequest,
-    middleware::mapper::error::MapperError,
+    error::mapper::MapperError,
     types::{model_id::ModelId, provider::InferenceProvider},
 };
 

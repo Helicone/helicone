@@ -134,3 +134,7 @@ required-features = ["testing"]
 [[test]]
 name = "direct_proxy"
 required-features = ["testing"]
+
+[[test]]
+name = "unified_api"
+required-features = ["testing"]
