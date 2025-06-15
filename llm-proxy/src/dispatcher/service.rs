@@ -11,7 +11,7 @@ use http::{HeaderMap, HeaderName, HeaderValue, StatusCode, uri::PathAndQuery};
 use http_body_util::BodyExt;
 use opentelemetry::KeyValue;
 use reqwest::RequestBuilder;
-use tokio::sync::mpsc::Sender;
+use tokio::sync::{mpsc::Sender, oneshot};
 use tower::{Service, ServiceBuilder};
 use tracing::{Instrument, info_span};
 
@@ -29,13 +29,14 @@ use crate::{
     endpoints::ApiEndpoint,
     error::{api::ApiError, init::InitError, internal::InternalError},
     logger::service::LoggerService,
+    metrics::tfft::TFFTFuture,
     middleware::{
         add_extension::{AddExtensions, AddExtensionsLayer},
         mapper::{model::ModelMapper, registry::EndpointConverterRegistry},
     },
     types::{
         body::BodyReader,
-        extensions::{AuthContext, MapperContext, RequestContext},
+        extensions::{MapperContext, RequestContext},
         provider::InferenceProvider,
         rate_limit::RateLimitEvent,
         request::Request,
@@ -357,13 +358,14 @@ impl Dispatcher {
             endpoint_metrics.incr_req_count();
         }
 
-        let (mut response, body_reader): (
+        let request_start = tokio::time::Instant::now();
+        let (mut response, body_reader, tfft_rx): (
             http::Response<crate::types::body::Body>,
-            Option<crate::types::body::BodyReader>,
+            crate::types::body::BodyReader,
+            oneshot::Receiver<()>,
         ) = if mapper_ctx.is_stream {
             tracing::debug!(method = %method, target_url = %target_url, "dispatching stream request");
             Self::dispatch_stream(
-                auth_ctx,
                 request_builder,
                 req_body_bytes.clone(),
                 api_endpoint,
@@ -371,13 +373,9 @@ impl Dispatcher {
             )?
         } else {
             tracing::debug!(method = %method, target_url = %target_url, "dispatching sync request");
-            self.dispatch_sync(
-                auth_ctx,
-                request_builder,
-                req_body_bytes.clone(),
-            )
-            .instrument(info_span!("dispatch_sync"))
-            .await?
+            self.dispatch_sync(request_builder, req_body_bytes.clone())
+                .instrument(info_span!("dispatch_sync"))
+                .await?
         };
         let provider_request_id = {
             let headers = response.headers_mut();
@@ -392,11 +390,11 @@ impl Dispatcher {
             .provider_request_id(provider_request_id)
             .build();
         extensions_copier.copy_extensions(response.extensions_mut());
-        response.extensions_mut().insert(mapper_ctx);
+        response.extensions_mut().insert(mapper_ctx.clone());
         response.extensions_mut().insert(api_endpoint);
         response.extensions_mut().insert(extracted_path_and_query);
 
-        if let Some(body_reader) = body_reader {
+        if auth_ctx.is_some() {
             let response_logger = LoggerService::builder()
                 .app_state(self.app_state.clone())
                 .req_ctx(req_ctx)
@@ -406,6 +404,9 @@ impl Dispatcher {
                 .response_status(response.status())
                 .response_body(body_reader)
                 .provider(target_provider)
+                .tfft_rx(tfft_rx)
+                .request_start(request_start)
+                .mapper_ctx(mapper_ctx)
                 .build();
 
             let app_state = self.app_state.clone();
@@ -420,6 +421,31 @@ impl Dispatcher {
                             .error_count
                             .add(1, &[KeyValue::new("type", error_str)]);
                     }
+                }
+                .instrument(tracing::Span::current()),
+            );
+        } else {
+            let app_state = self.app_state.clone();
+            let model = mapper_ctx.model.as_ref().map_or_else(
+                || "unknown".to_string(),
+                std::string::ToString::to_string,
+            );
+            let path = target_url.path().to_string();
+            tokio::spawn(
+                async move {
+                    let tfft_future = TFFTFuture::new(request_start, tfft_rx);
+                    let collect_future = body_reader.collect();
+                    let (_response_body, tfft_duration) = tokio::join!(collect_future, tfft_future);
+                    if let Ok(tfft_duration) = tfft_duration {
+                        tracing::info!(tfft_duration = ?tfft_duration, "TFFT duration");
+                        let attributes = [
+                            KeyValue::new("provider", inference_provider.to_string()),
+                            KeyValue::new("model", model),
+                            KeyValue::new("path", path),
+                        ];
+                        #[allow(clippy::cast_precision_loss)]
+                        app_state.0.metrics.tfft_duration.record(tfft_duration.as_millis() as f64, &attributes);
+                    } else { tracing::error!("Failed to get TFFT signal") }
                 }
                 .instrument(tracing::Span::current()),
             );
@@ -459,7 +485,6 @@ impl Dispatcher {
     }
 
     fn dispatch_stream(
-        auth_context: Option<&AuthContext>,
         request_builder: RequestBuilder,
         req_body_bytes: Bytes,
         api_endpoint: Option<ApiEndpoint>,
@@ -467,7 +492,8 @@ impl Dispatcher {
     ) -> Result<
         (
             http::Response<crate::types::body::Body>,
-            Option<crate::types::body::BodyReader>,
+            crate::types::body::BodyReader,
+            oneshot::Receiver<()>,
         ),
         ApiError,
     > {
@@ -490,32 +516,25 @@ impl Dispatcher {
         let mut resp_builder = http::Response::builder();
         *resp_builder.headers_mut().unwrap() = stream_response_headers();
         resp_builder = resp_builder.status(StatusCode::OK);
-        if auth_context.is_some() {
-            let (user_resp_body, body_reader) =
-                BodyReader::wrap_stream(response_stream, true);
-            let response = resp_builder
-                .body(user_resp_body)
-                .map_err(InternalError::HttpError)?;
-            Ok((response, Some(body_reader)))
-        } else {
-            let body = crate::types::body::Body::new(
-                reqwest::Body::wrap_stream(response_stream),
-            );
-            let response =
-                resp_builder.body(body).map_err(InternalError::HttpError)?;
-            Ok((response, None))
-        }
+
+        let (user_resp_body, body_reader, tfft_rx) =
+            BodyReader::wrap_stream(response_stream, true);
+
+        let response = resp_builder
+            .body(user_resp_body)
+            .map_err(InternalError::HttpError)?;
+        Ok((response, body_reader, tfft_rx))
     }
 
     async fn dispatch_sync(
         &self,
-        auth_context: Option<&AuthContext>,
         request_builder: RequestBuilder,
         req_body_bytes: Bytes,
     ) -> Result<
         (
             http::Response<crate::types::body::Body>,
-            Option<crate::types::body::BodyReader>,
+            crate::types::body::BodyReader,
+            oneshot::Receiver<()>,
         ),
         ApiError,
     > {
@@ -542,31 +561,22 @@ impl Dispatcher {
                 _,
                 InternalError,
             >(bytes));
-            let (error_body, error_reader) =
+            let (error_body, error_reader, tfft_rx) =
                 BodyReader::wrap_stream(stream, false);
             let response = resp_builder
                 .body(error_body)
                 .map_err(InternalError::HttpError)?;
-            return Ok((response, Some(error_reader)));
+            return Ok((response, error_reader, tfft_rx));
         }
 
-        if auth_context.is_some() {
-            let (user_resp_body, body_reader) = BodyReader::wrap_stream(
-                response.bytes_stream().map_err(InternalError::ReqwestError),
-                false,
-            );
-            let response = resp_builder
-                .body(user_resp_body)
-                .map_err(InternalError::HttpError)?;
-            Ok((response, Some(body_reader)))
-        } else {
-            let body = crate::types::body::Body::new(
-                reqwest::Body::wrap_stream(response.bytes_stream()),
-            );
-            let response =
-                resp_builder.body(body).map_err(InternalError::HttpError)?;
-            Ok((response, None))
-        }
+        let (user_resp_body, body_reader, tfft_rx) = BodyReader::wrap_stream(
+            response.bytes_stream().map_err(InternalError::ReqwestError),
+            false,
+        );
+        let response = resp_builder
+            .body(user_resp_body)
+            .map_err(InternalError::HttpError)?;
+        Ok((response, body_reader, tfft_rx))
     }
 }
 

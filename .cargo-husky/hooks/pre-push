@@ -9,4 +9,3 @@ set -e
 
 echo 'Running pre-push hooks'
 cargo +nightly fmt -- --check
-cargo c

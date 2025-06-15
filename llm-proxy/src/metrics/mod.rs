@@ -2,8 +2,9 @@ pub mod attribute_extractor;
 pub mod request_count;
 pub mod rolling_counter;
 pub mod system;
+pub mod tfft;
 
-use opentelemetry::metrics::{Counter, Gauge, Meter};
+use opentelemetry::metrics::{Counter, Gauge, Histogram, Meter};
 
 pub use self::rolling_counter::RollingCounter;
 
@@ -17,6 +18,7 @@ pub struct Metrics {
     pub auth_rejections: Counter<u64>,
     pub request_count: Counter<u64>,
     pub response_count: Counter<u64>,
+    pub tfft_duration: Histogram<f64>,
 }
 
 impl Metrics {
@@ -46,6 +48,11 @@ impl Metrics {
             .u64_counter("response_count")
             .with_description("Number of successful responses")
             .build();
+        let tfft_duration = meter
+            .f64_histogram("tfft_duration")
+            .with_unit("ms")
+            .with_description("Time to first token duration")
+            .build();
         Self {
             error_count,
             provider_health,
@@ -53,6 +60,7 @@ impl Metrics {
             auth_rejections,
             request_count,
             response_count,
+            tfft_duration,
         }
     }
 }

@@ -19,7 +19,7 @@ if ! echo "$first_line" | grep -Eqi "$pattern"; then
 
       <type>(<scope>)?: <subject>
 
-  • type: one of build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test  
+  • type: one of task, build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test  
   • scope: optional, alphanumeric/hyphen/underscore  
   • subject: 1–80 characters  
 
