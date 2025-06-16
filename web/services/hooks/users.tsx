@@ -156,7 +156,7 @@ const useUsers = (
       if (result.error || result.data.error) {
         throw new Error(result.error || result.data.error || "Unknown error");
       }
-      return result;
+      return result.data.data;
     },
     retry: 2,
     refetchOnWindowFocus: false,

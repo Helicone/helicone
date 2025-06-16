@@ -115,7 +115,7 @@ const UsersPageV2 = () => {
 
   const { hasAccess, freeLimit, upgradeMessage, canCreate } = useFeatureLimit(
     "users",
-    userMetrics.data?.data?.data?.count ?? 0
+    userMetrics.data?.count ?? 0
   );
 
   const onTimeSelectHandler = (key: string, value: string) => {
@@ -145,8 +145,8 @@ const UsersPageV2 = () => {
           cell: (info: any) => {
             const user = info.row.original;
             const userIndex =
-              userMetrics.data?.data?.data?.users?.findIndex(
-                (u) => u.user_id === user.user_id
+              userMetrics.data?.users?.findIndex(
+                (u: { user_id: string }) => u.user_id === user.user_id
               ) ?? 0;
             const isPremium = userIndex >= freeLimit;
 
@@ -171,8 +171,8 @@ const UsersPageV2 = () => {
           cell: (info: any) => {
             const user = info.row.original;
             const userIndex =
-              userMetrics.data?.data?.data?.users?.findIndex(
-                (u) => u.user_id === user.user_id
+              userMetrics.data?.users?.findIndex(
+                (u: { user_id: string }) => u.user_id === user.user_id
               ) ?? 0;
             const isPremium = userIndex >= freeLimit;
 
@@ -206,8 +206,8 @@ const UsersPageV2 = () => {
     }
 
     const userIndex =
-      userMetrics.data?.data?.data?.users?.findIndex(
-        (u) => u.user_id === row.user_id
+      userMetrics.data?.users?.findIndex(
+        (u: { user_id: string }) => u.user_id === row.user_id
       ) ?? 0;
     const isPremiumUser = userIndex >= freeLimit;
 
@@ -220,18 +220,18 @@ const UsersPageV2 = () => {
   };
 
   const hasNoUsers = useMemo(() => {
-    return !userMetrics.data?.data?.data?.hasUsers;
+    return !userMetrics.data?.hasUsers;
   }, [userMetrics]);
 
-  if (hasNoUsers && !userMetrics.isLoading) {
-    return (
-      <div className="flex flex-col w-full h-screen bg-background dark:bg-sidebar-background">
-        <div className="flex flex-1 h-full">
-          <EmptyStateCard feature="users" />
-        </div>
-      </div>
-    );
-  }
+  // if (hasNoUsers && !userMetrics.isLoading) {
+  //   return (
+  //     <div className="flex flex-col w-full h-screen bg-background dark:bg-sidebar-background">
+  //       <div className="flex flex-1 h-full">
+  //         <EmptyStateCard feature="users" />
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <main className="h-screen flex flex-col w-full animate-fade-in">
@@ -298,7 +298,7 @@ const UsersPageV2 = () => {
         {!canCreate && (
           <FreeTierLimitBanner
             feature="users"
-            itemCount={userMetrics.data?.data?.data?.count ?? 0}
+            itemCount={userMetrics.data?.count ?? 0}
             freeLimit={freeLimit}
             className="w-full"
           />
@@ -309,7 +309,7 @@ const UsersPageV2 = () => {
             <ThemedTable
               id="users-table"
               tableRef={tableRef}
-              defaultData={userMetrics.data?.data?.data?.users ?? []}
+              defaultData={userMetrics.data?.users ?? []}
               defaultColumns={columns}
               skeletonLoading={userMetrics.isLoading}
               dataLoading={userMetrics.isLoading}
@@ -326,7 +326,7 @@ const UsersPageV2 = () => {
             currentPage={parseInt(currentPage, 10)}
             pageSize={parseInt(pageSize, 10)}
             isCountLoading={userMetrics.isLoading}
-            count={userMetrics.data?.data?.data?.count || 0}
+            count={userMetrics.data?.count || 0}
             onPageChange={(n) => setCurrentPage(n.toString())}
             onPageSizeChange={(n) => setPageSize(n.toString())}
             pageSizeOptions={[25, 50, 100, 250, 500]}
