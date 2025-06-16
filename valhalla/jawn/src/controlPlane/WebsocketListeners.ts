@@ -6,6 +6,7 @@ import console from "console";
 import { WebSocket } from "ws";
 import { AuthParams } from "../packages/common/auth/types";
 import { safeJsonParse } from "../utils/helpers";
+import { getConfig, getKeys } from "./managers/keys";
 
 export class HeliconeRouterSocket {
   _socket: WebSocket;
@@ -44,7 +45,17 @@ export class WebsocketListeners {
     this.listeners = new Map();
   }
 
-  addListener(organizationId: string, listener: ConnectedRouterState) {
+  async addListener(organizationId: string, listener: ConnectedRouterState) {
+    const config = await getConfig({ auth: listener.auth });
+    if (!config.error) {
+      listener.socket.send({
+        _type: "Update",
+        Config: {
+          data: config.data!,
+        },
+      });
+    }
+
     if (!this.listeners.has(organizationId)) {
       this.listeners.set(organizationId, []);
     }

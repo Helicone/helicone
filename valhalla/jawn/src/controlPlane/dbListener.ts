@@ -2,6 +2,7 @@ import { NotificationResponseMessage } from "pg-protocol/dist/messages";
 import { HELICONE_DB } from "../lib/shared/db/pgpClient";
 import { websocketListeners } from "./controlPlane";
 import { dbExecute } from "../lib/shared/db/dbExecute";
+import { getKeys } from "./managers/keys";
 
 interface BroadcastPayload {
   event: "api_key_updated";
@@ -22,13 +23,7 @@ export const startDBListener = async () => {
           payload.organization_id
         );
 
-        const keys = await dbExecute<{
-          user_id: string;
-          api_key_hash: string;
-        }>(
-          "SELECT user_id, api_key_hash FROM helicone_api_keys WHERE organization_id = $1 and soft_delete = false",
-          [payload.organization_id]
-        );
+        const keys = await getKeys(payload.organization_id);
         if (keys.error || keys.data?.length === 0) {
           return;
         }
