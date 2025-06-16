@@ -8,9 +8,11 @@ The AI Gateway is configured through a `config.yaml` file that defines how reque
 
 ## Provider Configuration
 
-Configure LLM providers, their endpoints, and available models. The gateway ships with comprehensive defaults for all major providers.
+Configure LLM providers, their endpoints, and available models. 
 
-[Learn more](/gateway/features/providers)
+<Note>
+The gateway ships with [comprehensive defaults](https://github.com/Helicone/helicone-router/blob/main/llm-proxy/config/embedded/providers.yaml) for all major providers. Most users will not need to configure this section, [this guide](/gateway/features/providers) will walk you through when you might need to.
+</Note>
 
 <ParamField path="providers" type="object">
   Configure provider settings to override defaults.
@@ -81,9 +83,11 @@ Configure LLM providers, their endpoints, and available models. The gateway ship
 
 ## Model Mapping
 
-Define equivalencies between models from different providers for seamless switching and load balancing.
+Define equivalencies between models from different providers for seamless switching and load balancing. 
 
-[Learn more](/gateway/features/model-mapping)
+<Note>
+The Gateway ships with [comprehensive defaults](https://github.com/Helicone/helicone-router/blob/main/llm-proxy/config/embedded/model-mapping.yaml) for all major providers. Most users will not need to configure this section, [this guide](/gateway/features/model-mapping) will walk you through when you might need to.
+</Note>
 
 <ParamField path="routers.[name].model-mappings" type="object" optional>
   Router-specific model mappings for fallback when requested model isn't available.
@@ -114,7 +118,9 @@ Define equivalencies between models from different providers for seamless switch
 
 Configure multiple independent routing policies for different use cases. Each router operates with its own load balancing strategy, provider set, and configuration.
 
-[Learn more](/gateway/features/routers)
+<Note>
+The Gateway ships with a single `default` router that provides basic OpenAI-compatible proxying. You can either configure this router to add features like load balancing and caching, or create multiple routers for different use cases, [this guide](/gateway/concepts/loadbalancing) will walk you through when and why you'd want multiple routers.
+</Note>
 
 ### Basic Router Setup
 
