@@ -40,7 +40,7 @@ pub async fn test(run_forever_mode: bool) {
 
     let bytes = serde_json::to_vec(&openai_request).unwrap();
 
-    let helicone_api_key = std::env::var("HELICONE_API_KEY").unwrap();
+    let helicone_api_key = std::env::var("PROXY__HELICONE__API_KEY").unwrap();
 
     let response = reqwest::Client::new()
         .post("http://localhost:5678/router/default/v1/chat/completions")
