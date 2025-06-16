@@ -18,13 +18,11 @@ import { heliconeRequestToMappedContent } from "@helicone-package/llm-mapper/uti
 import { useEffect, useMemo, useRef, useState } from "react";
 import findBestMatch from "string-similarity-js";
 import { v4 as uuidv4 } from "uuid";
-import AuthHeader from "../../shared/authHeader";
 import useNotification from "../../shared/notification/useNotification";
 import PlaygroundMessagesPanel from "./components/PlaygroundMessagesPanel";
 import PlaygroundResponsePanel from "./components/PlaygroundResponsePanel";
 import { OPENROUTER_MODEL_MAP } from "./new/openRouterModelMap";
 import FoldedHeader from "@/components/shared/FoldedHeader";
-import Link from "next/link";
 import { Small } from "@/components/ui/typography";
 
 export interface ModelParameters {
