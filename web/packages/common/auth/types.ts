@@ -58,7 +58,6 @@ export type HeliconeOrg = {
   is_main_org: boolean;
   is_personal: boolean;
   limits: any | null;
-  logo_path: string | null;
   name: string;
   onboarding_status: any;
   org_provider_key: string | null;
@@ -68,7 +67,6 @@ export type HeliconeOrg = {
   playground_helicone: boolean;
   referral: string | null;
   request_limit: number | null;
-  reseller_id: string | null;
   size: string | null;
   soft_delete: boolean;
   stripe_customer_id: string | null;
