@@ -24,7 +24,10 @@ if (IS_RATE_LIMIT_ENABLED) {
       if (req.path.startsWith("/v1/log")) {
         return 1_000_000;
       }
-      if (req.path.startsWith("/v1/trace")) {
+      if (
+        req.path.startsWith("/v1/trace") ||
+        req.path.startsWith("/v1/router/control-plane/sign-s3-url")
+      ) {
         return 10_000;
       }
       return 200;

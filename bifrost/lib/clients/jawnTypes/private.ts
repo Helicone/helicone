@@ -410,6 +410,9 @@ export interface paths {
   "/v1/router/control-plane/whoami": {
     get: operations["Whoami"];
   };
+  "/v1/router/control-plane/sign-s3-url": {
+    post: operations["SignS3Url"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -15198,6 +15201,14 @@ Json: JsonObject;
     ConvertToWavRequestBody: {
       audioData: string;
     };
+    "ResultSuccess__url-string__": {
+      data: {
+        url: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__url-string_.string_": components["schemas"]["ResultSuccess__url-string__"] | components["schemas"]["ResultError_string_"];
   };
   responses: {
   };
@@ -17719,6 +17730,25 @@ export interface operations {
             organizationId: string;
             userId: string;
           };
+        };
+      };
+    };
+  };
+  SignS3Url: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: double */
+          payloadSize: number;
+          requestId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__url-string_.string_"];
         };
       };
     };

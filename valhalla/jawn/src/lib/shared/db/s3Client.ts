@@ -221,6 +221,25 @@ export class S3Client {
     }
   }
 
+  async putObjectSignedUrlWithExpiration(key: string, bodySize: number, expiresIn: number): Promise<Result<string, string>> {
+    try {
+      this.awsClient;
+      const command = new PutObjectCommand({
+        Bucket: this.bucketName,
+        Key: key,
+        ContentLength: bodySize,
+      });
+
+      const signedUrl = await getSignedUrl(this.awsClient, command, {
+        expiresIn,
+      });
+
+      return { data: signedUrl, error: null };
+    } catch (error: any) {
+      return { data: null, error: error.message };
+    }
+  }
+
   async uploadToS3(
     key: string,
     body: ArrayBuffer | Buffer,
