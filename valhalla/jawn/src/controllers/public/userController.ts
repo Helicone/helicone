@@ -9,8 +9,8 @@ import { filterListToTree } from "@helicone-package/filters/helpers";
 import { buildFilterWithAuthClickHouse } from "@helicone-package/filters/filters";
 import { Result } from "../../packages/common/result";
 import { PSize, SortLeafUsers, UserManager } from "../../managers/UserManager";
-import { clickhousePriceCalc } from "@helicone-package/cost";
 import type { JawnAuthenticatedRequest } from "../../types/request";
+import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 
 export interface UserQueryParams {
   userIds?: string[];
@@ -171,7 +171,7 @@ export class UserController extends Controller {
       sum(prompt_tokens) as prompt_tokens, 
       sum(completion_tokens) as completion_tokens, 
       user_id,
-      ${clickhousePriceCalc("request_response_rmt")} as cost_usd
+      sum(cost) / ${COST_PRECISION_MULTIPLIER} as cost_usd
       from request_response_rmt
     WHERE (
       ${filter.filter}

@@ -1,5 +1,4 @@
 // src/users/usersController.ts
-import { clickhousePriceCalc } from "@helicone-package/cost";
 import {
   Body,
   Controller,
@@ -13,6 +12,7 @@ import {
 import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { type JawnAuthenticatedRequest } from "../../types/request";
+import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 
 export interface CustomerUsage {
   id: string;
@@ -72,7 +72,7 @@ export class CustomerController extends Controller {
       `
       SELECT
         count(*) as count,
-        ${clickhousePriceCalc("request_response_rmt")} as cost,
+        sum(cost) / ${COST_PRECISION_MULTIPLIER} as cost,
         count(request_response_rmt.prompt_tokens) as prompt_tokens,
         count(request_response_rmt.completion_tokens) as completion_tokens
       FROM request_response_rmt

@@ -12,13 +12,13 @@ import {
 } from "@helicone-package/filters/filters";
 import { ok, Result, resultMap } from "../packages/common/result";
 import { SortDirection } from "../lib/shared/sorts/requests/sorts";
-import { clickhousePriceCalc } from "@helicone-package/cost";
 import { cacheResultCustom } from "../utils/cacheResult";
 import { BaseManager } from "./BaseManager";
 import {
   getHistogramRowOnKeys,
   HistogramRow,
 } from "./helpers/percentileDistributions";
+import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 
 export type PSize = "p50" | "p75" | "p95" | "p99" | "p99.9";
 
@@ -121,7 +121,7 @@ export class UserManager extends BaseManager {
       pSize,
       useInterquartile,
       builtFilter,
-      aggregateFunction: clickhousePriceCalc("request_response_rmt"),
+      aggregateFunction: `sum(cost) / ${COST_PRECISION_MULTIPLIER}`,
     });
 
     if (userCostData.error) {
@@ -204,7 +204,7 @@ export class UserManager extends BaseManager {
       (sum(r.prompt_tokens) + sum(r.completion_tokens)) / count(r.request_id) as average_tokens_per_request,
       sum(r.completion_tokens) as total_completion_tokens,
       sum(r.prompt_tokens) as total_prompt_token,
-      (${clickhousePriceCalc("r")}) as cost,
+      sum(r.cost) / ${COST_PRECISION_MULTIPLIER} as cost,
       sum(CASE WHEN r.properties['Helicone-Rate-Limit-Status'] = 'rate_limited' THEN 1 ELSE 0 END) as rate_limited_count
     from request_response_rmt r
     WHERE (${builtFilter.filter})

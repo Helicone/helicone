@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { useOrg } from "../../components/layout/org/organizationContext";
-import { HeliconeRequest } from "../../lib/api/request/request";
+import { HeliconeRequest } from "@helicone-package/llm-mapper/types";
 import { $JAWN_API, getJawnClient } from "../../lib/clients/jawn";
 import { Result } from "@/packages/common/result";
 import { FilterNode } from "@helicone-package/filters/filterDefs";
