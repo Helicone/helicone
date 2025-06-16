@@ -792,10 +792,13 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ResultSuccess__users-UserMetricsResult-Array--count-number__": {
+			"ResultSuccess__users-UserMetricsResult-Array--count-number--hasUsers-boolean__": {
 				"properties": {
 					"data": {
 						"properties": {
+							"hasUsers": {
+								"type": "boolean"
+							},
 							"count": {
 								"type": "number",
 								"format": "double"
@@ -808,6 +811,7 @@
 							}
 						},
 						"required": [
+							"hasUsers",
 							"count",
 							"users"
 						],
@@ -828,10 +832,10 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result__users-UserMetricsResult-Array--count-number_.string_": {
+			"Result__users-UserMetricsResult-Array--count-number--hasUsers-boolean_.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess__users-UserMetricsResult-Array--count-number__"
+						"$ref": "#/components/schemas/ResultSuccess__users-UserMetricsResult-Array--count-number--hasUsers-boolean__"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -9010,7 +9014,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result__users-UserMetricsResult-Array--count-number_.string_"
+									"$ref": "#/components/schemas/Result__users-UserMetricsResult-Array--count-number--hasUsers-boolean_.string_"
 								}
 							}
 						}

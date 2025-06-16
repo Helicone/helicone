@@ -760,8 +760,9 @@ export interface components {
       /** Format: double */
       cost: number;
     };
-    "ResultSuccess__users-UserMetricsResult-Array--count-number__": {
+    "ResultSuccess__users-UserMetricsResult-Array--count-number--hasUsers-boolean__": {
       data: {
+        hasUsers: boolean;
         /** Format: double */
         count: number;
         users: components["schemas"]["UserMetricsResult"][];
@@ -769,7 +770,7 @@ export interface components {
       /** @enum {number|null} */
       error: null;
     };
-    "Result__users-UserMetricsResult-Array--count-number_.string_": components["schemas"]["ResultSuccess__users-UserMetricsResult-Array--count-number__"] | components["schemas"]["ResultError_string_"];
+    "Result__users-UserMetricsResult-Array--count-number--hasUsers-boolean_.string_": components["schemas"]["ResultSuccess__users-UserMetricsResult-Array--count-number--hasUsers-boolean__"] | components["schemas"]["ResultError_string_"];
     /** @enum {string} */
     SortDirection: "asc" | "desc";
     SortLeafUsers: {
@@ -2866,7 +2867,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result__users-UserMetricsResult-Array--count-number_.string_"];
+          "application/json": components["schemas"]["Result__users-UserMetricsResult-Array--count-number--hasUsers-boolean_.string_"];
         };
       };
     };
