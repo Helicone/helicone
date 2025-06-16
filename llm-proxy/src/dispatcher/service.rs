@@ -538,13 +538,11 @@ impl Dispatcher {
         ),
         ApiError,
     > {
-        tracing::debug!("trying to send request");
         let response = request_builder
             .body(req_body_bytes)
             .send()
             .await
             .map_err(InternalError::ReqwestError)?;
-        tracing::debug!("sent request");
 
         let status = response.status();
         let mut resp_builder = http::Response::builder().status(status);

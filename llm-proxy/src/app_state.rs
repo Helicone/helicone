@@ -52,6 +52,7 @@ pub struct InnerAppState {
     pub control_plane_state: Arc<Mutex<ControlPlaneState>>,
     pub provider_keys: RwLock<HashMap<RouterId, ProviderKeys>>,
     pub global_rate_limit: Option<Arc<RateLimiterConfig>>,
+    pub unified_api_rate_limit: Option<Arc<RateLimiterConfig>>,
     pub router_rate_limits: RwLock<HashMap<RouterId, Arc<RateLimiterConfig>>>,
     pub direct_proxy_api_keys: ProviderKeys,
     /// Top level metrics which are exported to OpenTelemetry.

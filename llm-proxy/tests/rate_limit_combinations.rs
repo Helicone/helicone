@@ -133,9 +133,11 @@ fn whoami_mock(user_id: Uuid, organization_id: Uuid) -> Mock {
 async fn test_global_rate_limit_with_router_none() {
     let mut config = Config::test_default();
     config.auth.require_auth = true;
-    config.rate_limit = TopLevelRateLimitConfig::Global {
+    config.rate_limit = TopLevelRateLimitConfig {
         store: RateLimitStore::InMemory,
-        limits: create_test_limits(3, 1000), // 3 requests per second
+        // 3 requests per second
+        global_limits: Some(create_test_limits(3, 1000)),
+        unified_api_limits: None,
         cleanup_interval: Duration::from_secs(60),
     };
 
@@ -207,79 +209,16 @@ async fn test_global_rate_limit_with_router_none() {
     let _body = response.into_body().collect().await.unwrap();
 }
 
-// Test 2: OptIn app config with router that opts in
-#[tokio::test]
-#[serial_test::serial]
-async fn test_optin_rate_limit_with_router_optin() {
-    let mut config = Config::test_default();
-    config.auth.require_auth = true;
-    config.rate_limit = TopLevelRateLimitConfig::OptIn {
-        store: RateLimitStore::InMemory,
-        limits: create_test_limits(3, 1000), // 3 requests per second
-        cleanup_interval: Duration::from_secs(60),
-    };
-
-    // Router opts into global rate limiting
-    config.routers = RouterConfigs::new(HashMap::from([(
-        RouterId::Default,
-        create_router_config(RouterRateLimitConfig::OptIn),
-    )]));
-
-    let mock_args = MockArgs::builder()
-        .stubs(HashMap::from([
-            ("success:openai:chat_completion", 3.into()),
-            ("success:minio:upload_request", 3.into()),
-            ("success:jawn:log_request", 3.into()),
-        ]))
-        .build();
-
-    let mut harness = Harness::builder()
-        .with_config(config)
-        .with_mock_args(mock_args)
-        .build()
-        .await;
-
-    let user_id = Uuid::new_v4();
-    let organization_id = Uuid::new_v4();
-
-    harness
-        .mock
-        .jawn_mock
-        .http_server
-        .register(whoami_mock(user_id, organization_id))
-        .await;
-
-    let auth_header = "Bearer sk-helicone-test-key";
-
-    // Make 3 requests - should all succeed (capacity = 3)
-    for i in 1..=3 {
-        let response = make_chat_request(&mut harness, auth_header).await;
-        assert_eq!(
-            response.status(),
-            StatusCode::OK,
-            "Request {i} should succeed"
-        );
-        let _body = response.into_body().collect().await.unwrap();
-    }
-
-    // 4th request should be rate limited
-    let response = make_chat_request(&mut harness, auth_header).await;
-    assert_eq!(
-        response.status(),
-        StatusCode::TOO_MANY_REQUESTS,
-        "4th request should be rate limited"
-    );
-    let _body = response.into_body().collect().await.unwrap();
-}
-
 // Test 3: RouterSpecific config with custom router limits
 #[tokio::test]
 #[serial_test::serial]
 async fn test_router_specific_with_custom_limits() {
     let mut config = Config::test_default();
     config.auth.require_auth = true;
-    config.rate_limit = TopLevelRateLimitConfig::RouterSpecific {
+    config.rate_limit = TopLevelRateLimitConfig {
         store: RateLimitStore::InMemory,
+        global_limits: None,
+        unified_api_limits: None,
         cleanup_interval: Duration::from_secs(60),
     };
 
@@ -350,9 +289,11 @@ async fn test_router_specific_with_custom_limits() {
 async fn test_global_with_custom_router_override() {
     let mut config = Config::test_default();
     config.auth.require_auth = true;
-    config.rate_limit = TopLevelRateLimitConfig::Global {
+    config.rate_limit = TopLevelRateLimitConfig {
         store: RateLimitStore::InMemory,
-        limits: create_test_limits(5, 1000), // 5 requests per second
+        // 5 requests per second
+        global_limits: Some(create_test_limits(5, 1000)),
+        unified_api_limits: None,
         cleanup_interval: Duration::from_secs(60),
     };
 
@@ -417,71 +358,16 @@ async fn test_global_with_custom_router_override() {
     let _body = response.into_body().collect().await.unwrap();
 }
 
-// Test 5: OptIn app with router that doesn't opt in (no rate limiting)
-#[tokio::test]
-#[serial_test::serial]
-async fn test_optin_app_with_router_none() {
-    let mut config = Config::test_default();
-    config.auth.require_auth = true;
-    config.rate_limit = TopLevelRateLimitConfig::OptIn {
-        store: RateLimitStore::InMemory,
-        limits: create_test_limits(2, 1000), // 2 requests per second
-        cleanup_interval: Duration::from_secs(60),
-    };
-
-    // Router doesn't opt in
-    config.routers = RouterConfigs::new(HashMap::from([(
-        RouterId::Default,
-        create_router_config(RouterRateLimitConfig::None),
-    )]));
-
-    let mock_args = MockArgs::builder()
-        .stubs(HashMap::from([
-            ("success:openai:chat_completion", 5.into()),
-            ("success:minio:upload_request", 5.into()),
-            ("success:jawn:log_request", 5.into()),
-        ]))
-        .build();
-
-    let mut harness = Harness::builder()
-        .with_config(config)
-        .with_mock_args(mock_args)
-        .build()
-        .await;
-
-    let user_id = Uuid::new_v4();
-    let organization_id = Uuid::new_v4();
-
-    harness
-        .mock
-        .jawn_mock
-        .http_server
-        .register(whoami_mock(user_id, organization_id))
-        .await;
-
-    let auth_header = "Bearer sk-helicone-test-key";
-
-    // All requests should succeed since router doesn't opt in to rate limiting
-    for i in 1..=5 {
-        let response = make_chat_request(&mut harness, auth_header).await;
-        assert_eq!(
-            response.status(),
-            StatusCode::OK,
-            "Request {i} should succeed"
-        );
-        let _body = response.into_body().collect().await.unwrap();
-    }
-    tokio::time::sleep(std::time::Duration::from_millis(10)).await;
-}
-
 // Test 8: Router independence - verify that rate limits are applied per-router
 #[tokio::test]
 #[serial_test::serial]
 async fn test_router_independence_different_rate_limits() {
     let mut config = Config::test_default();
     config.auth.require_auth = true;
-    config.rate_limit = TopLevelRateLimitConfig::RouterSpecific {
+    config.rate_limit = TopLevelRateLimitConfig {
         store: RateLimitStore::InMemory,
+        global_limits: None,
+        unified_api_limits: None,
         cleanup_interval: Duration::from_secs(60),
     };
 
@@ -657,10 +543,7 @@ async fn make_chat_request_to_router(
 // - If I then request router b, the rate limiting *key* is shared, but since
 //   router b has a higher rate limit config, I should be able to make requests
 //   until I hit the capacity for router b's configuration.
-//   - For this test, we are using an in memory rate limiting, so while the rate
-//     limiting key is shared, the backing store is not, and thus the user's
-//     rate limit usage is not shared between routers. For redis, this is not
-//     true and the rate limitng would be shared.
+//   - The router rate limiting layers use different in memory stores
 // - If I then make requests to router c, since it has no rate limit configured,
 //   I should be able to make requests.
 #[tokio::test]
@@ -668,9 +551,10 @@ async fn make_chat_request_to_router(
 async fn test_multi_router_different_rate_limits_in_memory() {
     let mut config = Config::test_default();
     config.auth.require_auth = true;
-    config.rate_limit = TopLevelRateLimitConfig::OptIn {
+    config.rate_limit = TopLevelRateLimitConfig {
         store: RateLimitStore::InMemory,
-        limits: create_test_limits(3, 1000),
+        global_limits: None,
+        unified_api_limits: None,
         cleanup_interval: Duration::from_secs(60),
     };
     let router_a_id = RouterId::Named(CompactString::from("router-a"));
@@ -693,7 +577,9 @@ async fn test_multi_router_different_rate_limits_in_memory() {
         (
             router_b_id.clone(),
             RouterConfig {
-                rate_limit: RouterRateLimitConfig::OptIn,
+                rate_limit: RouterRateLimitConfig::Custom {
+                    limits: create_test_limits(3, 1000),
+                },
                 load_balance:
                     llm_proxy::config::balance::BalanceConfig::openai_chat(),
                 ..Default::default()

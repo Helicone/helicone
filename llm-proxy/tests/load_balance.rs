@@ -19,7 +19,6 @@ fn p2c_config_openai_anthropic_google() -> RouterConfigs {
     RouterConfigs::new(HashMap::from([(
         RouterId::Default,
         RouterConfig {
-            request_style: InferenceProvider::OpenAI,
             load_balance: BalanceConfig(HashMap::from([(
                 EndpointType::Chat,
                 BalanceConfigInner::Latency {
@@ -34,7 +33,6 @@ fn p2c_config_openai_anthropic_google() -> RouterConfigs {
             cache: None,
             retries: None,
             rate_limit: Default::default(),
-            spend_control: None,
         },
     )]))
 }

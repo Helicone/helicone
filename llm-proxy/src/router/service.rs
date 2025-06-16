@@ -12,7 +12,7 @@ use tower::ServiceBuilder;
 use crate::{
     app_state::AppState,
     balancer::provider::ProviderBalancer,
-    config::{DeploymentTarget, router::RouterConfig},
+    config::{DeploymentTarget, SDK},
     dispatcher::Dispatcher,
     endpoints::{ApiEndpoint, EndpointType},
     error::{
@@ -31,7 +31,6 @@ pub type RouterService =
 pub struct Router {
     inner: HashMap<EndpointType, RouterService>,
     direct_proxy: DirectProxyService,
-    router_config: Arc<RouterConfig>,
 }
 
 impl Router {
@@ -93,13 +92,9 @@ impl Router {
 
             inner.insert(*endpoint_type, service_stack);
         }
-        let direct_proxy_dispatcher = Dispatcher::new(
-            app_state.clone(),
-            &id,
-            &router_config,
-            router_config.request_style,
-        )
-        .await?;
+        let direct_proxy_dispatcher =
+            Dispatcher::new(app_state.clone(), &id, &router_config, SDK)
+                .await?;
 
         let direct_proxy = ServiceBuilder::new()
             .layer(rl_layer)
@@ -117,7 +112,6 @@ impl Router {
         Ok(Self {
             inner,
             direct_proxy,
-            router_config,
         })
     }
 }
@@ -154,7 +148,6 @@ impl tower::Service<crate::types::request::Request> for Router {
         &mut self,
         mut req: crate::types::request::Request,
     ) -> Self::Future {
-        let router_config = self.router_config.clone();
         let Some(extracted_path_and_query) =
             req.extensions().get::<PathAndQuery>()
         else {
@@ -163,10 +156,8 @@ impl tower::Service<crate::types::request::Request> for Router {
             )));
         };
 
-        let api_endpoint = ApiEndpoint::new(
-            extracted_path_and_query.path(),
-            router_config.request_style,
-        );
+        let api_endpoint =
+            ApiEndpoint::new(extracted_path_and_query.path(), SDK);
         match api_endpoint {
             Some(api_endpoint) => {
                 let endpoint_type = api_endpoint.endpoint_type();

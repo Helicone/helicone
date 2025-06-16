@@ -7,7 +7,7 @@ use strum::{EnumIter, IntoEnumIterator};
 use super::secret::Secret;
 use crate::{
     config::{
-        balance::BalanceConfig, providers::ProvidersConfig,
+        SDK, balance::BalanceConfig, providers::ProvidersConfig,
         router::RouterConfig,
     },
     endpoints::ApiEndpoint,
@@ -173,7 +173,7 @@ impl ProviderKeys {
         router_config: &Arc<RouterConfig>,
     ) -> Result<Self, ProviderError> {
         let mut keys = Self::from_env_inner(&router_config.load_balance)?;
-        let default_provider = router_config.request_style;
+        let default_provider = SDK;
         let provider_str = default_provider.to_string().to_uppercase();
         let env_var = format!("{provider_str}_API_KEY");
         if let Ok(key) = std::env::var(&env_var) {

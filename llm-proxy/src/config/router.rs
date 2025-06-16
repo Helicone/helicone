@@ -9,12 +9,8 @@ use super::{
     model_mapping::ModelMappingConfig,
     rate_limit::LimitsConfig,
     retry::RetryConfig,
-    spend_control::SpendControlConfig,
 };
-use crate::{
-    error::init::InitError,
-    types::{provider::InferenceProvider, router::RouterId},
-};
+use crate::{error::init::InitError, types::router::RouterId};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq, AsRef, AsMut)]
 pub struct RouterConfigs(HashMap<RouterId, RouterConfig>);
@@ -35,11 +31,9 @@ impl Default for RouterConfigs {
     }
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
+#[derive(Debug, Default, Clone, Deserialize, Serialize, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 pub struct RouterConfig {
-    #[serde(default = "default_request_style")]
-    pub request_style: InferenceProvider,
     #[serde(default = "Default::default")]
     pub load_balance: BalanceConfig,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -53,26 +47,6 @@ pub struct RouterConfig {
         skip_serializing_if = "RouterRateLimitConfig::is_disabled"
     )]
     pub rate_limit: RouterRateLimitConfig,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub spend_control: Option<SpendControlConfig>,
-}
-
-impl Default for RouterConfig {
-    fn default() -> Self {
-        Self {
-            request_style: InferenceProvider::OpenAI,
-            model_mappings: None,
-            cache: None,
-            load_balance: BalanceConfig::default(),
-            retries: None,
-            rate_limit: RouterRateLimitConfig::default(),
-            spend_control: None,
-        }
-    }
-}
-
-fn default_request_style() -> InferenceProvider {
-    InferenceProvider::OpenAI
 }
 
 impl RouterConfig {
@@ -119,8 +93,6 @@ pub enum RouterRateLimitConfig {
     /// then rate limiting will still take effect.
     #[default]
     None,
-    /// Opt-in to the global rate limit config.
-    OptIn,
     /// Routers must configure their own rate limit settings.
     Custom {
         #[serde(default, flatten)]
@@ -141,20 +113,18 @@ impl crate::tests::TestDefault for RouterConfigs {
         Self(HashMap::from([(
             RouterId::Default,
             RouterConfig {
-                request_style: InferenceProvider::OpenAI,
                 model_mappings: None,
                 cache: None,
                 load_balance: BalanceConfig(HashMap::from([(
                     crate::endpoints::EndpointType::Chat,
                     BalanceConfigInner::Latency {
                         targets: nonempty_collections::nes![
-                            InferenceProvider::OpenAI
+                            crate::types::provider::InferenceProvider::OpenAI
                         ],
                     },
                 )])),
                 retries: None,
                 rate_limit: RouterRateLimitConfig::default(),
-                spend_control: None,
             },
         )]))
     }
@@ -186,13 +156,11 @@ mod tests {
         };
 
         RouterConfig {
-            request_style: InferenceProvider::OpenAI,
             model_mappings: None,
             cache: Some(cache),
             load_balance: balance,
             retries: Some(retries),
             rate_limit: RouterRateLimitConfig::default(),
-            spend_control: None,
         }
     }
 

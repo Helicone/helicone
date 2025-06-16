@@ -11,107 +11,66 @@ pub type RateLimiterConfig = GovernorConfig<
 >;
 
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
-#[serde(deny_unknown_fields, rename_all = "kebab-case")]
-pub enum TopLevelRateLimitConfig {
-    /// Globally enabled rate limits across the entire app.
-    ///
-    /// Individual routers may still configure their own rate limit
-    /// configuration.
-    Global {
-        #[serde(default)]
-        store: RateLimitStore,
-        #[serde(default, flatten)]
-        limits: LimitsConfig,
-        #[serde(
-            with = "humantime_serde",
-            default = "default_cleanup_interval"
-        )]
-        cleanup_interval: Duration,
-    },
-    /// A global setting that routers can selectively opt in to
-    /// if they wish to enable rate limiting without needing to repeat
-    /// the same settings for each router.
-    OptIn {
-        #[serde(default)]
-        store: RateLimitStore,
-        #[serde(default, flatten)]
-        limits: LimitsConfig,
-        #[serde(
-            with = "humantime_serde",
-            default = "default_cleanup_interval"
-        )]
-        cleanup_interval: Duration,
-    },
-    /// Routers must configure their own rate limit settings.
-    RouterSpecific {
-        #[serde(default)]
-        store: RateLimitStore,
-        #[serde(
-            with = "humantime_serde",
-            default = "default_cleanup_interval"
-        )]
-        cleanup_interval: Duration,
-    },
+#[serde(rename_all = "kebab-case")]
+pub struct TopLevelRateLimitConfig {
+    #[serde(default)]
+    pub store: RateLimitStore,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub global_limits: Option<LimitsConfig>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub unified_api_limits: Option<LimitsConfig>,
+    #[serde(with = "humantime_serde", default = "default_cleanup_interval")]
+    pub cleanup_interval: Duration,
 }
 
 impl TopLevelRateLimitConfig {
     #[must_use]
-    pub fn default_enabled_config() -> Self {
-        Self::Global {
-            store: RateLimitStore::default(),
-            limits: LimitsConfig::default(),
-            cleanup_interval: default_cleanup_interval(),
-        }
+    pub fn global_limiter(&self) -> Option<RateLimiterConfig> {
+        limiter_config(self.global_limits.as_ref())
     }
 
     #[must_use]
-    pub fn global_limiter(&self) -> Option<RateLimiterConfig> {
-        match self {
-            TopLevelRateLimitConfig::Global { limits, .. } => {
-                let gcra = &limits.per_api_key;
-                let per_cell_duration = gcra
-                    .refill_frequency
-                    .checked_div(gcra.capacity.into())
-                    .unwrap_or_else(|| {
-                        tracing::warn!(
-                            "fill_frequency is too small for capacity, using \
-                             default fill frequency"
-                        );
-                        default_refill_frequency()
-                    });
-
-                GovernorConfigBuilder::default()
-                    .period(per_cell_duration)
-                    .burst_size(gcra.capacity.get())
-                    .use_headers()
-                    .key_extractor(RateLimitKeyExtractor)
-                    .finish()
-            }
-            _ => None,
-        }
+    pub fn unified_api_limiter(&self) -> Option<RateLimiterConfig> {
+        limiter_config(self.unified_api_limits.as_ref())
     }
 
     #[must_use]
     pub fn cleanup_interval(&self) -> Duration {
-        match self {
-            TopLevelRateLimitConfig::Global {
-                cleanup_interval, ..
-            }
-            | TopLevelRateLimitConfig::OptIn {
-                cleanup_interval, ..
-            }
-            | TopLevelRateLimitConfig::RouterSpecific {
-                cleanup_interval,
-                ..
-            } => *cleanup_interval,
-        }
+        self.cleanup_interval
+    }
+}
+
+fn limiter_config(limits: Option<&LimitsConfig>) -> Option<RateLimiterConfig> {
+    if let Some(limits) = limits {
+        let gcra = &limits.per_api_key;
+        let per_cell_duration = gcra
+            .refill_frequency
+            .checked_div(gcra.capacity.into())
+            .unwrap_or_else(|| {
+                tracing::warn!(
+                    "fill_frequency is too small for capacity, using default \
+                     fill frequency"
+                );
+                default_refill_frequency()
+            });
+
+        GovernorConfigBuilder::default()
+            .period(per_cell_duration)
+            .burst_size(gcra.capacity.get())
+            .use_headers()
+            .key_extractor(RateLimitKeyExtractor)
+            .finish()
+    } else {
+        None
     }
 }
 
 impl Default for TopLevelRateLimitConfig {
     fn default() -> Self {
-        Self::RouterSpecific {
+        Self {
             store: RateLimitStore::InMemory,
+            global_limits: None,
+            unified_api_limits: None,
             cleanup_interval: default_cleanup_interval(),
         }
     }
@@ -135,8 +94,10 @@ pub(crate) fn default_refill_frequency() -> Duration {
 #[cfg(feature = "testing")]
 impl crate::tests::TestDefault for TopLevelRateLimitConfig {
     fn test_default() -> Self {
-        Self::RouterSpecific {
+        Self {
             store: RateLimitStore::InMemory,
+            global_limits: None,
+            unified_api_limits: None,
             cleanup_interval: Duration::from_secs(60),
         }
     }
@@ -146,16 +107,16 @@ impl crate::tests::TestDefault for TopLevelRateLimitConfig {
 #[must_use]
 pub fn enabled_for_test_in_memory() -> TopLevelRateLimitConfig {
     use crate::tests::TestDefault;
-    TopLevelRateLimitConfig::Global {
+    TopLevelRateLimitConfig {
         store: RateLimitStore::InMemory,
-        limits: LimitsConfig::test_default(),
+        global_limits: Some(LimitsConfig::test_default()),
+        unified_api_limits: None,
         cleanup_interval: Duration::from_secs(60),
     }
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
+#[derive(Debug, Default, Clone, Deserialize, Serialize, Eq, PartialEq)]
 #[serde(deny_unknown_fields, rename_all = "kebab-case")]
-#[derive(Default)]
 pub struct LimitsConfig {
     pub per_api_key: GcraConfig,
 }

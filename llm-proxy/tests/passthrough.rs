@@ -8,7 +8,7 @@ use llm_proxy::{
         router::{RouterConfig, RouterConfigs},
     },
     tests::{TestDefault, harness::Harness, mock::MockArgs},
-    types::{provider::InferenceProvider, router::RouterId},
+    types::router::RouterId,
 };
 use serde_json::json;
 use tower::Service;
@@ -27,7 +27,6 @@ async fn openai_passthrough() {
     let router_config = RouterConfigs::new(HashMap::from([(
         RouterId::Default,
         RouterConfig {
-            request_style: InferenceProvider::OpenAI,
             load_balance: BalanceConfig::openai_chat(),
             ..Default::default()
         },

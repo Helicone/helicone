@@ -186,6 +186,8 @@ impl App {
 
         let global_rate_limit =
             config.rate_limit.global_limiter().map(Arc::new);
+        let unified_api_rate_limit =
+            config.rate_limit.unified_api_limiter().map(Arc::new);
 
         let direct_proxy_api_keys =
             ProviderKeys::from_env_direct_proxy(&config.providers)?;
@@ -199,6 +201,7 @@ impl App {
             )),
             provider_keys: RwLock::new(HashMap::default()),
             global_rate_limit,
+            unified_api_rate_limit,
             router_rate_limits: RwLock::new(HashMap::default()),
             direct_proxy_api_keys,
             metrics,

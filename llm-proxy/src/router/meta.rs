@@ -9,7 +9,7 @@ use http::uri::PathAndQuery;
 use pin_project_lite::pin_project;
 use regex::Regex;
 use rustc_hash::FxHashMap as HashMap;
-use tower::Service as _;
+use tower::{Service as _, ServiceBuilder};
 
 use crate::{
     app_state::AppState,
@@ -18,6 +18,7 @@ use crate::{
         api::ApiError, init::InitError, internal::InternalError,
         invalid_req::InvalidRequestError,
     },
+    middleware::rate_limit,
     router::{
         direct::{DirectProxiesWithoutMapper, DirectProxyServiceWithoutMapper},
         service::{Router, RouterFuture},
@@ -45,10 +46,12 @@ use crate::{
 const URL_REGEX: &str =
     r"^/router/(?P<id>[A-Za-z0-9_-]{1,12})(?P<path>/[^?]*)?(?P<query>\?.*)?$";
 
+pub type UnifiedApiService = rate_limit::Service<unified_api::Service>;
+
 #[derive(Debug)]
 pub struct MetaRouter {
     inner: HashMap<RouterId, Router>,
-    unified_api: unified_api::Service,
+    unified_api: UnifiedApiService,
     direct_proxies: DirectProxiesWithoutMapper,
     url_regex: Regex,
 }
@@ -79,7 +82,9 @@ impl MetaRouter {
                 Router::new(router_id.clone(), app_state.clone()).await?;
             inner.insert(router_id.clone(), router);
         }
-        let unified_api = unified_api::Service::new(&app_state)?;
+        let unified_api = ServiceBuilder::new()
+            .layer(rate_limit::Layer::unified_api(&app_state))
+            .service(unified_api::Service::new(&app_state)?);
         let direct_proxies = DirectProxiesWithoutMapper::new(&app_state)?;
         let meta_router = Self {
             inner,
@@ -340,7 +345,7 @@ pin_project! {
         },
         UnifiedApi {
             #[pin]
-            future: unified_api::ResponseFuture,
+            future: <rate_limit::Service<unified_api::Service> as tower::Service<crate::types::request::Request>>::Future,
         },
         DirectProxy {
             #[pin]

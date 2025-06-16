@@ -12,7 +12,6 @@ pub mod response_headers;
 pub mod retry;
 pub mod router;
 pub mod server;
-pub mod spend_control;
 pub mod validation;
 use std::path::PathBuf;
 
@@ -25,10 +24,13 @@ use strum::IntoStaticStr;
 use thiserror::Error;
 
 use crate::{
-    error::init::InitError, types::router::RouterId, utils::default_true,
+    error::init::InitError,
+    types::{provider::InferenceProvider, router::RouterId},
+    utils::default_true,
 };
 
 const ROUTER_ID_REGEX: &str = r"^[A-Za-z0-9_-]{1,12}$";
+pub(crate) const SDK: InferenceProvider = InferenceProvider::OpenAI;
 
 #[derive(Debug, Error, Display)]
 pub enum Error {
@@ -152,7 +154,7 @@ impl crate::tests::TestDefault for Config {
     fn test_default() -> Self {
         let telemetry = telemetry::Config {
             exporter: telemetry::Exporter::Stdout,
-            level: "info,llm_proxy=trace,stubr=trace".to_string(),
+            level: "info,llm_proxy=trace".to_string(),
             ..Default::default()
         };
         Config {
