@@ -1,3 +1,4 @@
+mkdir -p db
 supabase gen types typescript --local > db/temp.types.ts
 cp db/temp.types.ts web/db/database.types.ts
 cp db/temp.types.ts worker/supabase/database.types.ts
