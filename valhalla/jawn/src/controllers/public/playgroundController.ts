@@ -11,7 +11,7 @@ import {
 import { Result, err, ok } from "../../packages/common/result";
 import { type JawnAuthenticatedRequest } from "../../types/request";
 import { Message, Tool } from "@helicone-package/llm-mapper/types";
-import { OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
+import { type OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
 import OpenAI from "openai";
 import {
   generateTempHeliconeAPIKey,
@@ -110,17 +110,16 @@ export class PlaygroundController extends Controller {
           string
         >
       >(async (secretKey) => {
-        console.log({ secretKey });
         const openai = new OpenAI({
-          baseURL: `${process.env.HELICONE_WORKER_URL}/api/v1/`,
+          baseURL: `http://localhost:8789/api/v1/`,
           apiKey: openRouterKey,
           defaultHeaders: {
             "Helicone-Auth": `Bearer ${secretKey}`,
             "Helicone-User-Id": request.authParams.organizationId,
-            ...(!selfKey && {
-              // 10 requests per user per year
-              "Helicone-RateLimit-Policy": "10;w=31536000;s=user",
-            }),
+            // ...(!selfKey && {
+            //   // 10 requests per user per year
+            //   "Helicone-RateLimit-Policy": "10;w=31536000;s=user",
+            // }),
           },
         });
         const abortController = new AbortController();
@@ -128,12 +127,6 @@ export class PlaygroundController extends Controller {
         try {
           const response = await openai.chat.completions.create(
             {
-              provider: isOnPrem
-                ? undefined
-                : {
-                    sort: "throughput",
-                    order: ["Fireworks"],
-                  },
               model: isOnPrem ? params.model?.split("/")[1] : params.model,
               messages: params.messages,
               temperature: params.temperature,
@@ -191,7 +184,8 @@ export class PlaygroundController extends Controller {
                 // Client likely disconnected or aborted, no need to throw further
               } else {
                 // Rethrow other errors to be caught by the outer try-catch
-                return err("Stream error");
+                (<any>request.res).end();
+                throw error;
               }
             } finally {
               // Ensure the response is always ended when the stream finishes or aborts/errors
@@ -238,18 +232,23 @@ export class PlaygroundController extends Controller {
                 );
               }
 
-              this.setStatus(error.status);
-              return err(
-                error.error.metadata?.raw
-                  ? JSON.parse(error.error.metadata?.raw || "{}")?.error
-                      ?.message
-                  : error.error.message
-              );
-            }
+              this.setStatus(400);
+              if (error.error.metadata?.raw) {
+                try {
+                  const raw = JSON.parse(error.error.metadata?.raw || "{}");
+                  if (raw.error?.message) {
+                    return err(raw.error?.message);
+                  }
+                } catch (err) {}
+              }
 
+              return err(error.error.message);
+            }
+            this.setStatus(500);
             return err(error.message);
           }
 
+          this.setStatus(500);
           return err("Failed to generate response");
         }
       });
