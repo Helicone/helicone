@@ -6,8 +6,8 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { MappedLLMRequest, Message } from "@helicone-package/llm-mapper/types";
 import Image from "next/image";
-import { Dispatch, ReactNode, SetStateAction, useState } from "react";
-import { LuChevronDown, LuFileText } from "react-icons/lu";
+import { Dispatch, ReactNode, SetStateAction, useRef, useState } from "react";
+import { LuChevronDown, LuFileText, LuImage } from "react-icons/lu";
 import { ChatMode } from "../Chat";
 import AssistantToolCalls from "./single/AssistantToolCalls";
 import { JsonRenderer } from "./single/JsonRenderer";
@@ -15,9 +15,13 @@ import ToolMessage from "./ToolMessage";
 import TextMessage from "./single/TextMessage";
 import ChatMessageTopBar from "./ChatMessageTopBar";
 
-type MessageType = "image" | "tool" | "text" | "pdf";
+type MessageType = "image" | "tool" | "text" | "pdf" | "contentArray";
 
 const getMessageType = (message: Message): MessageType => {
+  if (message._type === "contentArray") {
+    return "contentArray";
+  }
+
   // Check for file type first
   if (message._type === "file" && message.content && message.mime_type) {
     if (message.mime_type.startsWith("image/")) {
@@ -30,6 +34,7 @@ const getMessageType = (message: Message): MessageType => {
 
   // Check for image URL if _type is image (legacy or non-base64 images)
   if (message._type === "image" && message.image_url) {
+    console.log("yahan par");
     return "image";
   }
 
@@ -55,6 +60,8 @@ export const isJson = (content: string) => {
 };
 
 interface ChatMessageProps {
+  parentIndex?: number;
+  isPartOfContentArray?: boolean;
   message: Message;
   expandedMessages: Record<number, boolean>;
   setExpandedMessages: Dispatch<SetStateAction<Record<number, boolean>>>;
@@ -116,6 +123,8 @@ const renderToolMessage = (
 const MESSAGE_LENGTH_THRESHOLD = 1000; // Characters before truncating
 
 export default function ChatMessage({
+  parentIndex,
+  isPartOfContentArray = false,
   message,
   expandedMessages,
   setExpandedMessages,
@@ -126,6 +135,9 @@ export default function ChatMessage({
   dragHandle,
 }: ChatMessageProps) {
   const { mode } = useRequestRenderModeStore();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
 
   const toggleMessage = (index: number) => {
     setExpandedMessages((prev) => ({
@@ -140,7 +152,7 @@ export default function ChatMessage({
     const prevRole = mappedRequest.schema.request?.messages?.[index]?.role;
 
     if (newRole === "tool") {
-      onChatChange({
+      return onChatChange({
         ...mappedRequest,
         schema: {
           ...mappedRequest.schema,
@@ -164,8 +176,48 @@ export default function ChatMessage({
           },
         },
       });
-    } else {
-      onChatChange({
+    }
+
+    if (newRole === "image") {
+      fileInputRef.current?.click();
+      return;
+    }
+
+    return onChatChange({
+      ...mappedRequest,
+      schema: {
+        ...mappedRequest.schema,
+        request: {
+          ...mappedRequest.schema.request,
+          messages: mappedRequest.schema.request?.messages?.map(
+            (message, i) => {
+              if (i === index) {
+                return {
+                  ...message,
+                  role: newRole,
+                  _type: "message",
+                  tool_call_id: undefined,
+                  name: undefined,
+                  ...(prevRole === "assistant" && newRole !== "assistant"
+                    ? {
+                        tool_calls: undefined,
+                      }
+                    : {}),
+                };
+              }
+              return message;
+            }
+          ),
+        },
+      },
+    });
+  };
+
+  const deleteMessage = (index: number) => {
+    if (!onChatChange) return;
+
+    if (message._type === "image" && isPartOfContentArray) {
+      return onChatChange({
         ...mappedRequest,
         schema: {
           ...mappedRequest.schema,
@@ -173,18 +225,12 @@ export default function ChatMessage({
             ...mappedRequest.schema.request,
             messages: mappedRequest.schema.request?.messages?.map(
               (message, i) => {
-                if (i === index) {
+                if (i === parentIndex) {
                   return {
                     ...message,
-                    role: newRole,
-                    _type: "message",
-                    tool_call_id: undefined,
-                    name: undefined,
-                    ...(prevRole === "assistant" && newRole !== "assistant"
-                      ? {
-                          tool_calls: undefined,
-                        }
-                      : {}),
+                    contentArray: message.contentArray?.filter(
+                      (_, j) => j !== index
+                    ),
                   };
                 }
                 return message;
@@ -194,10 +240,6 @@ export default function ChatMessage({
         },
       });
     }
-  };
-
-  const deleteMessage = (index: number) => {
-    if (!onChatChange) return;
 
     onChatChange({
       ...mappedRequest,
@@ -246,8 +288,6 @@ export default function ChatMessage({
     setPopoverOpen(false);
   };
 
-  const [popoverOpen, setPopoverOpen] = useState(false);
-
   const content = message.content ?? JSON.stringify(message.tool_calls) ?? "";
   const isLongMessage = content.length > MESSAGE_LENGTH_THRESHOLD;
   const isExpanded = expandedMessages[messageIndex];
@@ -274,6 +314,70 @@ export default function ChatMessage({
     opacity: isDragging ? 0.5 : 1,
   };
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log("handleFileChange called");
+    const file = e.target.files?.[0];
+    console.log("file:", file);
+    if (!file || !onChatChange) {
+      console.log("no file or onChatChange:", { file, onChatChange });
+      return;
+    }
+
+    // Convert file to base64
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const base64 = event.target?.result as string;
+
+      // Update the message with the image data
+      onChatChange({
+        ...mappedRequest,
+        schema: {
+          ...mappedRequest.schema,
+          request: {
+            ...mappedRequest.schema.request,
+            messages: mappedRequest.schema.request?.messages?.map(
+              (message, i) => {
+                if (i === messageIndex) {
+                  const currentContent = message.content || "";
+                  const contentArray = Array.isArray(message.content)
+                    ? message.content
+                    : [
+                        {
+                          _type: "message",
+                          role: "user",
+                          content: currentContent,
+                        },
+                      ];
+
+                  const updatedMessage = {
+                    content: "",
+                    _type: "contentArray" as const,
+                    role: "user",
+                    contentArray: [
+                      ...contentArray,
+                      {
+                        _type: "image" as const,
+                        content: "",
+                        role: "user",
+                        image_url: base64,
+                      },
+                    ],
+                  };
+                  return updatedMessage;
+                }
+                return message;
+              }
+            ),
+          },
+        },
+      });
+    };
+    reader.onerror = (error) => {
+      console.error("FileReader error:", error);
+    };
+    reader.readAsDataURL(file);
+  };
+
   return (
     <div
       className={cn(
@@ -283,8 +387,17 @@ export default function ChatMessage({
       ref={setNodeRef}
       style={style}
     >
+      <input
+        type="file"
+        ref={fileInputRef}
+        className="hidden"
+        accept="image/*"
+        onChange={handleFileChange}
+      />
       {/* Message Role Header */}
-      {chatMode !== "PLAYGROUND_OUTPUT" && (
+      {(chatMode !== "PLAYGROUND_OUTPUT" ||
+        (chatMode === "PLAYGROUND_OUTPUT" &&
+          message._type === "contentArray")) && (
         <ChatMessageTopBar
           popoverOpen={popoverOpen}
           setPopoverOpen={setPopoverOpen}
@@ -306,16 +419,16 @@ export default function ChatMessage({
           chatMode !== "PLAYGROUND_INPUT" && "px-4 pb-4 pt-0",
           chatMode === "PLAYGROUND_OUTPUT" && "pt-4"
         )}
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
       >
         {(() => {
           switch (messageType) {
             case "image":
-              let imageSrc = message.image_url; // Default to URL
+              let imageSrc = message.image_url;
               if (message.content && message.mime_type?.startsWith("image/")) {
-                // Use mime_type to construct the data URI
                 imageSrc = `data:${message.mime_type};base64,${message.content}`;
               } else if (message.content && !message.mime_type) {
-                // Fallback for older data where mime_type might be missing - assume png
                 console.warn(
                   "Image message missing mime_type, assuming image/png"
                 );
@@ -371,14 +484,51 @@ export default function ChatMessage({
               );
             case "text":
               return (
-                <TextMessage
-                  displayContent={displayContent}
-                  chatMode={chatMode}
-                  mappedRequest={mappedRequest}
-                  messageIndex={messageIndex}
-                  onChatChange={onChatChange}
-                  mode={mode}
-                />
+                <div className="relative">
+                  <TextMessage
+                    isPartOfContentArray={isPartOfContentArray}
+                    parentIndex={parentIndex}
+                    displayContent={displayContent}
+                    chatMode={chatMode}
+                    mappedRequest={mappedRequest}
+                    messageIndex={messageIndex}
+                    onChatChange={onChatChange}
+                    mode={mode}
+                  />
+                  {chatMode === "PLAYGROUND_INPUT" &&
+                    isHovering &&
+                    message.role === "user" && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute top-2 right-2"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <LuImage className="h-4 w-4" />
+                      </Button>
+                    )}
+                </div>
+              );
+            case "contentArray":
+              return (
+                <>
+                  {message.contentArray?.map((content, index) => {
+                    return (
+                      <ChatMessage
+                        parentIndex={messageIndex}
+                        isPartOfContentArray={true}
+                        key={index}
+                        message={content}
+                        expandedMessages={expandedMessages}
+                        setExpandedMessages={setExpandedMessages}
+                        chatMode={chatMode}
+                        mappedRequest={mappedRequest}
+                        messageIndex={index}
+                        onChatChange={onChatChange}
+                      />
+                    );
+                  })}
+                </>
               );
             default:
               return null;

@@ -76,6 +76,9 @@ export default function ChatMessageTopBar({
               <SelectItem value="tool" className="text-xs">
                 Tool
               </SelectItem>
+              <SelectItem value="image" className="text-xs">
+                Image
+              </SelectItem>
             </SelectContent>
           </Select>
         ) : (
