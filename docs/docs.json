@@ -180,8 +180,8 @@
             "pages": [
               "gateway/introduction",
               "gateway/quickstart",
-              "gateway/deployment/guides",
               "gateway/config",
+              "gateway/deployment/guides",
               {
                 "group": "Concepts",
                 "pages": [

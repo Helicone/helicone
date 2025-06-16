@@ -1,319 +1,286 @@
 ---
 title: "Rate Limiting & Spend Controls"
 sidebarTitle: "Rate Limiting"
-description: "Comprehensive rate limiting across users, teams, providers, and cost controls"
+description: "GCRA-based rate limiting with burst capacity and smooth request throttling"
 ---
 
-# Rate Limiting & Spend Controls
+The AI Gateway provides flexible rate limiting using GCRA (Generic Cell Rate Algorithm) to help you manage request frequency and prevent abuse. Configure limits globally or per-router with burst capacity and smooth rate limiting.
 
-Conduit provides flexible rate limiting and spend controls to help you manage costs, prevent abuse, and stay within provider limits. Configure limits by user, team, provider, or globally with granular control over requests, tokens, and costs.
+Rate limiting uses **[configurable storage backends](#storage-backend-options)** and is applied with configurable burst capacity and sustained rates.
 
 ## Why Use Rate Limiting?
 
 Rate limiting helps you:
-- **Prevent abuse** and protect your infrastructure
-- **Control costs** by limiting provider API usage 
-- **Implement fair usage policies** across users
-- **Avoid hitting provider rate limits**
+- **Prevent abuse** by limiting request rates per API key
+- **Manage costs** by controlling request frequency
+- **Ensure stability** by preventing traffic spikes from overwhelming your system
+- **Fair usage** by distributing capacity across different API keys
+- **Control your own traffic** based on your business requirements
+
+<Info>
+  **Provider rate limits are handled automatically** by the load balancing system. This rate limiting feature is for controlling your own API traffic based on your business requirements.
+</Info>
 
 <Note>
-  Rate limits and spend controls are managed through the [Helicone dashboard](https://helicone.ai), providing a unified interface for cross-cutting resource allocation rules.
+  For complete configuration options and syntax, see the [Configuration Reference](/gateway/config#rate-limiting).
 </Note>
 
-## How Rate Limiting Works
-
-Rate limits are configured using three key dimensions:
-
-<CardGroup cols={3}>
-  <Card title="Segments" icon="users">
-    **Who** gets rate limited
-    
-    Users, teams, providers, or global limits
-  </Card>
-  
-  <Card title="Units" icon="gauge">
-    **What** gets measured
-    
-    Requests, tokens, or cost in USD
-  </Card>
-  
-  <Card title="Refresh Interval" icon="clock">
-    **When** limits reset
-    
-    Per minute, hour, day, or custom intervals
-  </Card>
-</CardGroup>
-
-This flexible system allows configurations like:
-- **1000 requests per minute** per user
-- **$50 per day** per team  
-- **100K tokens per hour** across all providers
-- **500 requests per minute** to OpenAI specifically
-
-## Rate Limit Segments
+## Available Strategies
 
 <AccordionGroup>
-  <Accordion title="Global Limits" icon="globe">
-    **Organization-wide rate limiting** *(Available in v0)*
+  <Accordion title="Requests Per Time Period - Default" icon="gauge">
+    **Burst-aware rate limiting with smooth sustained rates**
     
-    **Precedence:** Highest (applied first)
+    Control request frequency using capacity (burst allowance) and refill frequency (sustained rate). Uses GCRA (Generic Cell Rate Algorithm) for smooth token bucket behavior that's more sophisticated than simple sliding window approaches.
     
-    Ensure your entire organization stays within limits across all users and teams. Global limits act as a safety net to prevent runaway costs or hitting provider-level quotas.
+    **Best for:** Production workloads requiring smooth rate limiting with burst tolerance
     
+    **How it works:**
+    1. Each API key gets a virtual token bucket with specified capacity
+    2. Requests consume tokens from the bucket
+    3. Tokens refill at the specified rate (refill-frequency / capacity)
+    4. Requests are allowed if tokens are available, rejected otherwise
+    
+    **Example:**
     ```yaml
-    # Example: Global limits
-    - segment: global
-      unit: cost
-      limit: 1000  # $1000 USD
-      interval: "1d"  # per day
+    rate-limit:
+      global:
+        per-api-key:
+          capacity: 500
+          refill-frequency: 1s  # 500 requests per second sustained
     ```
-    
-    **Use cases:**
-    - Monthly budget caps
-    - Emergency cost controls
-    - Provider quota management
   </Accordion>
 
-  <Accordion title="Helicone User Limits" icon="user">
-    **Individual user rate limiting** *(Available in v0)*
+  <Accordion title="Fixed Window Rate Limiting" icon="window">
+    **Simple time-based request counting** *(Coming in v2)*
     
-    **Precedence:** Lowest (applied last)
+    Traditional rate limiting based on fixed time windows (e.g., 1000 requests per hour, reset at the top of each hour).
     
-    Ensure individual users within the Helicone platform stay within their allocated limits.
-    
-    ```yaml
-    # Example: Per-user limits  
-    - segment: helicone-user
-      unit: requests
-      limit: 100
-      interval: "1m"  # 100 requests per minute
-    ```
-    
-    **Use cases:**
-    - Developer quotas
-    - Fair usage policies
-    - Individual cost tracking
+    **Best for:** Simple use cases where burst behavior is less important than predictable reset times
   </Accordion>
 
-  <Accordion title="Provider Limits" icon="server">
-    **Provider-specific rate limiting** *(Coming in v1)*
+  <Accordion title="Sliding Window Rate Limiting" icon="chart-line">
+    **Rolling time-based request counting** *(Coming in v2)*
     
-    **Precedence:** Highest (applied first)
+    Rate limiting based on a rolling time window that provides smoother behavior than fixed windows.
     
-    Stay within LLM provider limits across all Conduit router instances. This provides an extra layer of protection beyond load balancing strategies.
-    
-    ```yaml
-    # Example: Provider limits
-    - segment: provider
-      provider: openai
-      unit: requests  
-      limit: 10000
-      interval: "1m"  # 10K requests per minute to OpenAI
-    ```
-    
-    **Features:**
-    - Cross-instance coordination
-    - Provider quota awareness  
-    - Automatic failover integration
-    
-    <Note>
-      All load balancing strategies are already provider rate limit aware. This adds an additional safety layer.
-    </Note>
-  </Accordion>
-
-  <Accordion title="End User Limits" icon="id-card">
-    **End-user rate limiting via headers** *(Coming in v1)*
-    
-    **Precedence:** Lowest (applied last)
-    
-    Rate limit your application's end users by including the `Helicone-User-Id` header in requests.
-    
-    ```bash
-    curl -X POST https://your-conduit.com/v1/chat/completions \
-         -H "Helicone-User-Id: user_123" \
-         -H "Authorization: Bearer $OPENAI_KEY" \
-         # ... rest of request
-    ```
-    
-    **Use cases:**
-    - SaaS application user limits
-    - Freemium tier enforcement  
-    - Abuse prevention
-  </Accordion>
-
-  <Accordion title="Team Limits" icon="users-gear">
-    **Team-based budget controls** *(Coming in v1)*
-    
-    **Precedence:** High (applied early)
-    
-    Ensure teams stay within their allocated budgets and usage quotas.
-    
-    ```yaml
-    # Example: Team limits
-    - segment: team
-      team: engineering
-      unit: cost
-      limit: 500  # $500 USD
-      interval: "7d"  # per week
-    ```
-    
-    **Use cases:**
-    - Department budgets
-    - Project cost allocation
-    - Team resource management
+    **Best for:** Applications requiring more predictable rate limiting without the complexity of token buckets
   </Accordion>
 </AccordionGroup>
 
-## Rate Limit Units
+## Rate Limiting Levels
 
-<Tabs>
-  <Tab title="Requests">
-    **Count-based limiting** *(Available in v0)*
-    
-    Limit the total number of requests per refresh interval, regardless of size or cost.
-    
-    ```yaml
-    unit: requests
-    limit: 1000
-    interval: "1h"  # 1000 requests per hour
-    ```
-    
-    **Best for:**
-    - Simple usage quotas
-    - API call counting
-    - Basic abuse prevention
-  </Tab>
+The AI Gateway supports rate limiting at multiple levels based on **who** gets rate limited:
 
-  <Tab title="Token Usage">
-    **Token-based limiting** *(Coming in v1)*
-    
-    Limit based on token consumption (input + output tokens) per refresh interval.
-    
-    ```yaml  
-    unit: tokens
-    limit: 100000
-    interval: "1d"  # 100K tokens per day
-    ```
-    
-    **Best for:**
-    - Resource-aware limiting
-    - Model-agnostic quotas
-    - Usage-based billing alignment
-  </Tab>
+| Level                   | Availability | Description                                                                 | Example Use Case       |
+| ----------------------- | ------------ | --------------------------------------------------------------------------- | ---------------------- |
+| **Per-API-Key**         | v0 (live!)   | Limits applied to each API key individually                                | Prevent API key abuse  |
+| **Per-End-User**        | v1 (coming)  | Limits applied to end users via `Helicone-User-Id` header                 | SaaS user quotas       |
+| **Per-Team**            | v2 (planned) | Limits applied to teams for budget and governance controls                 | Department budgets     |
+| **Per-Team-Member**     | v2 (planned) | Limits applied to individual team members for governance                   | Developer quotas       |
 
-  <Tab title="Cost">
-    **Cost-based limiting** *(Coming in v1)*
-    
-    Limit based on estimated USD cost per refresh interval across all providers.
-    
-    ```yaml
-    unit: cost  
-    limit: 50.00
-    interval: "1d"  # $50 per day
-    ```
-    
-    **Best for:**
-    - Budget enforcement
-    - Cost control
-    - Financial guardrails
-  </Tab>
-</Tabs>
+### Configuration Scope
 
-## Precedence & Enforcement
-
-Rate limits are enforced in **precedence order** - higher precedence limits are checked first:
+Rate limits are checked in precedence order when a request comes in:
 
 <Steps>
-  <Step title="Global & Provider Limits">
-    **Highest precedence** - Organization-wide and provider-specific limits applied first
+  <Step title="Global Rate Limits">
+    **Application-wide limits** *(Available in v0)*
+    
+    Applied to all requests across all routers. These limits are checked first and act as a safety net for your entire system.
   </Step>
   
-  <Step title="Team Limits">  
-    **High precedence** - Team-based budget and usage controls
-  </Step>
-  
-  <Step title="User & End-User Limits">
-    **Lowest precedence** - Individual user quotas applied last
+  <Step title="Router-Specific Rate Limits">
+    **Individual router limits** *(Available in v0)*
+    
+    Applied after global limits pass. Each router can have custom limits or opt out of rate limiting entirely.
   </Step>
 </Steps>
 
-When any limit is exceeded, the request is rejected with a `429 Too Many Requests` response including retry headers.
+<Note>
+  Global and router-specific settings control the **configuration scope**, not who gets limited.
+</Note>
+
+## Storage Backend Options
+
+Rate limiting counters can be stored in different backends depending on your deployment needs:
+
+<AccordionGroup>
+  <Accordion title="In-Memory Storage" icon="memory">
+    **Local memory storage** *(Available in v0)*
+    
+    Rate limiting state is stored locally in each router instance. Fast and simple, but limits are not shared across multiple instances.
+    
+    ```yaml
+    rate-limit:
+      global:
+        store: in-memory
+        cleanup-interval: 5m
+    ```
+    
+    **Best for:**
+    - Single instance deployments
+    - Development environments
+    - High-performance scenarios where cross-instance coordination isn't needed
+  </Accordion>
+
+  <Accordion title="Redis Storage" icon="database">
+    **Distributed storage** *(Coming in v1)*
+    
+    Rate limiting state is stored in Redis, allowing coordination across multiple router instances for consistent limits.
+    
+    ```yaml
+    rate-limit:
+      global:
+        store: redis
+        redis:
+          url: "redis://localhost:6379"
+        cleanup-interval: 5m
+    ```
+    
+    **Best for:**
+    - Multi-instance deployments
+    - Load-balanced router setups
+    - Consistent rate limiting across a distributed system
+  </Accordion>
+
+  <Accordion title="Database Storage" icon="server">
+    **Persistent storage** *(Planned for future releases)*
+    
+    Rate limiting state stored in a database for persistence and advanced querying capabilities.
+    
+    **Best for:**
+    - Long-term rate limiting analytics
+    - Compliance requirements
+    - Complex rate limiting policies
+  </Accordion>
+</AccordionGroup>
 
 ## Configuration Examples
 
-<CodeGroup>
-```yaml Multi-tier Limits
-# Complete rate limiting configuration
-rate_limits:
-  # Global safety net
-  - segment: global
-    unit: cost
-    limit: 5000
-    interval: "1d"
-    
-  # Per-team budgets  
-  - segment: team
-    team: engineering
-    unit: cost
-    limit: 200
-    interval: "1d"
-    
-  # Per-user quotas
-  - segment: helicone-user  
-    unit: requests
-    limit: 1000
-    interval: "1h"
-    
-  # Provider limits
-  - segment: provider
-    provider: openai
-    unit: requests
-    limit: 50000
-    interval: "1m"
-```
+<Tabs>
+  <Tab title="Production API - Abuse Prevention">
+    **Use case:** Production API that needs to prevent abuse while allowing reasonable burst traffic for legitimate users.
 
-```yaml Development Environment
-# Simple rate limits for development
-rate_limits:
-  # Global limit to prevent accidents
-  - segment: global
-    unit: requests
-    limit: 10000
-    interval: "1d"
-    
-  # Per-developer limits  
-  - segment: helicone-user
-    unit: requests
-    limit: 100
-    interval: "1m"
-```
+    ```yaml
+    rate-limit:
+      global:
+        store: in-memory
+        per-api-key:
+          capacity: 1000
+          refill-frequency: 1m  # 1000 requests per minute
+        cleanup-interval: 5m
+    ```
+  </Tab>
 
-```yaml Production SaaS
-# Production SaaS application limits
-rate_limits:
-  # Monthly budget cap
-  - segment: global
-    unit: cost
-    limit: 10000
-    interval: "30d"
-    
-  # End-user limits (freemium)
-  - segment: end-user
-    unit: requests
-    limit: 50
-    interval: "1d"
-    
-  # Team quotas
-  - segment: team
-    team: premium-customers
-    unit: cost
-    limit: 1000
-    interval: "30d"
-```
-</CodeGroup>
+  <Tab title="Development Environment - Cost Safety">
+    **Use case:** Development environment where you want to prevent accidental high costs while allowing reasonable experimentation.
 
----
+    ```yaml
+    rate-limit:
+      global:
+        store: in-memory
+        per-api-key:
+          capacity: 100
+          refill-frequency: 1h  # 100 requests per hour
+        cleanup-interval: 5m
+    ```
+  </Tab>
 
-<Info>
-  **Dashboard Management**: All rate limits are configured and monitored through the [Helicone dashboard](https://helicone.ai). Real-time usage tracking, alerts, and historical analytics help you optimize your limits over time.
-</Info>
+  <Tab title="Multi-Tier Service - Different Router Limits">
+    **Use case:** Different service tiers with varying rate limits. Premium router gets higher limits than basic router.
+
+    ```yaml
+    rate-limit:
+      global:
+        store: in-memory
+        cleanup-interval: 5m
+    
+    routers:
+      premium:
+        rate-limit:
+          per-api-key:
+            capacity: 5000
+            refill-frequency: 1m  # 5000 requests per minute
+      
+      basic:
+        rate-limit:
+          per-api-key:
+            capacity: 100
+            refill-frequency: 1m  # 100 requests per minute
+    ```
+  </Tab>
+
+  <Tab title="High-Volume Production - Burst Tolerance">
+    **Use case:** High-traffic production system that needs to handle traffic spikes while maintaining overall rate control.
+
+    ```yaml
+    rate-limit:
+      global:
+        store: in-memory
+        per-api-key:
+          capacity: 10000       # Allow large bursts
+          refill-frequency: 10s # 1000 requests per second sustained
+        cleanup-interval: 2m
+    ```
+  </Tab>
+
+  <Tab title="Router-Specific Override">
+    **Use case:** Most routers use global settings, but one router needs stricter limits for sensitive operations.
+
+    ```yaml
+    rate-limit:
+      global:
+        store: in-memory
+        per-api-key:
+          capacity: 1000
+          refill-frequency: 1m
+        cleanup-interval: 5m
+    
+    routers:
+      sensitive:
+        rate-limit:
+          per-api-key:
+            capacity: 10
+            refill-frequency: 1m  # Much stricter: 10 requests per minute
+    ```
+  </Tab>
+</Tabs>
+
+## Choosing the Right Configuration
+
+| Use Case                    | Recommended Approach          | Availability |
+| --------------------------- | ----------------------------- | ------------ |
+| **Production APIs**         | Global GCRA with burst tolerance | v0       |
+| **Development/Testing**     | Conservative limits with long refill periods | v0 |
+| **Multi-tier services**     | Router-specific limit overrides | v0        |
+| **High-volume systems**     | High capacity with short refill periods | v0 |
+| **Single instance**         | In-memory storage             | v0           |
+| **Distributed deployments** | Redis storage                 | v1           |
+| **SaaS applications**       | Per-end-user limits           | v1           |
+| **Enterprise governance**   | Per-team and per-team-member limits | v2    |
+
+## GCRA Rate Limiting
+
+All rate limiting strategies use the Generic Cell Rate Algorithm to provide smooth, burst-aware request throttling:
+
+<CardGroup>
+  <Card title="Burst tolerance">
+    Allows legitimate traffic spikes while maintaining sustained rate controls
+  </Card>
+  <Card title="Smooth rate limiting">
+    More sophisticated than simple sliding windows - avoids thundering herd problems
+  </Card>
+  <Card title="Per-API-key tracking">
+    Individual limits for each API key with consistent behavior across routers
+  </Card>
+  <Card title="Automatic cleanup">
+    Expired rate limiting state is automatically cleaned up to manage memory usage
+  </Card>
+</CardGroup>
+
+<Note>
+  **Provider rate limits are handled automatically** by the load balancing system. This rate limiting feature is for controlling your own API traffic based on your business requirements.
+</Note>
+
+To customize rate limiting parameters and behavior, see the [Configuration Reference](/gateway/config#rate-limiting).
