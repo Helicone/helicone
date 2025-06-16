@@ -70,6 +70,6 @@ export const OPENROUTER_MODEL_MAP: Record<string, string> = {
   "llama-2-13b-chat": "meta-llama/llama-2-13b-chat",
   "deepseek/deepseek-chat": "deepseek/deepseek-chat",
   "deepseek/deepseek-r1": "deepseek/deepseek-r1",
-  "o3-mini": "o3-mini",
-  "o1-mini": "o1-mini",
+  "o3-mini": "openai/o3-mini",
+  "o1-mini": "openai/o1-mini",
 };

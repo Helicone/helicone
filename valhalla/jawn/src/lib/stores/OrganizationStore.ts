@@ -22,9 +22,8 @@ export class OrganizationStore extends BaseStore {
       // Insert the organization and return the inserted record
       const orgResult = await dbExecute<NewOrganizationParams>(
         `INSERT INTO organization (name, owner, tier, is_personal, has_onboarded, soft_delete, 
-          organization_type, limits, color, icon, stripe_customer_id, 
-          reseller_id, org_provider_key)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+          organization_type, limits, color, icon, stripe_customer_id, org_provider_key)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
          RETURNING *`,
         [
           createOrgParams.name,
@@ -38,7 +37,6 @@ export class OrganizationStore extends BaseStore {
           createOrgParams.color,
           createOrgParams.icon,
           createOrgParams.stripe_customer_id,
-          createOrgParams.reseller_id,
           createOrgParams.org_provider_key,
         ]
       );
@@ -138,22 +136,6 @@ export class OrganizationStore extends BaseStore {
         updateOrgParams.color || null,
         updateOrgParams.icon || null,
       ];
-
-      // Add reseller fields if variant is reseller
-      if (updateOrgParams.variant === "reseller") {
-        sql += `, 
-          org_provider_key = $4, 
-          limits = $5::jsonb, 
-          reseller_id = $6, 
-          organization_type = $7`;
-
-        params.push(
-          updateOrgParams.org_provider_key || null,
-          JSON.stringify(updateOrgParams.limits || {}),
-          updateOrgParams.reseller_id || null,
-          "customer"
-        );
-      }
 
       // Add WHERE clause and RETURNING
       sql += ` WHERE id = $${params.length + 1} RETURNING id`;
@@ -479,9 +461,8 @@ export class OrganizationStore extends BaseStore {
       // Check if organization exists
       const orgResult = await dbExecute<{
         id: string;
-        reseller_id: string | null;
       }>(
-        `SELECT id, reseller_id
+        `SELECT id
          FROM organization
          WHERE id = $1
          LIMIT 1`,
@@ -496,13 +477,6 @@ export class OrganizationStore extends BaseStore {
 
       // Check if user has access to the organization
       if (await this._checkAccessToOrg(orgId, userId)) {
-        return true;
-      }
-      // Check if user has access to the reseller organization
-      else if (
-        org.reseller_id &&
-        (await this._checkAccessToOrg(org.reseller_id, userId))
-      ) {
         return true;
       } else {
         return false;
