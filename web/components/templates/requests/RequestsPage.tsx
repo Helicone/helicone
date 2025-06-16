@@ -119,6 +119,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   const [selectedData, setSelectedData] = useState<
     MappedLLMRequest | undefined
   >(undefined);
+
   const [currentPageSize, setCurrentPageSize] = useState<number>(pageSize);
   const [selectedDataIndex, setSelectedDataIndex] = useState<number>();
   const [page, setPage] = useState<number>(currentPage);
