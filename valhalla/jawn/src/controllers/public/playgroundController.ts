@@ -111,15 +111,15 @@ export class PlaygroundController extends Controller {
         >
       >(async (secretKey) => {
         const openai = new OpenAI({
-          baseURL: `http://localhost:8789/api/v1/`,
+          baseURL: `https://openrouter.helicone.ai/api/v1/`,
           apiKey: openRouterKey,
           defaultHeaders: {
             "Helicone-Auth": `Bearer ${secretKey}`,
             "Helicone-User-Id": request.authParams.organizationId,
-            // ...(!selfKey && {
-            //   // 10 requests per user per year
-            //   "Helicone-RateLimit-Policy": "10;w=31536000;s=user",
-            // }),
+            ...(!selfKey && {
+              // 10 requests per user per year
+              "Helicone-RateLimit-Policy": "10;w=31536000;s=user",
+            }),
           },
         });
         const abortController = new AbortController();
