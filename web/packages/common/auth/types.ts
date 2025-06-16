@@ -65,6 +65,7 @@ export type HeliconeOrg = {
   organization_type: string;
   owner: string;
   percent_to_log: number | null;
+  playground_helicone: boolean;
   referral: string | null;
   request_limit: number | null;
   reseller_id: string | null;
