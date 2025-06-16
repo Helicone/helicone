@@ -1,0 +1,193 @@
+---
+title: "Trace Tools with the Logger SDK"
+sidebarTitle: "Logger SDK"
+description: "Log LLM responses from any external tools used in your LLM applications using Helicone's Logger SDK."
+icon: "plug"
+iconType: "solid"
+---
+
+import { strings } from "/snippets/strings.mdx";
+
+<Steps>
+  <Step title={strings.getStartedWithPackage}>
+    <CodeGroup>
+    ```bash npm
+    npm install @helicone/helpers
+    ```
+    ```bash pip
+    pip install helicone-helpers
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title={strings.setApiKey}>
+  <div dangerouslySetInnerHTML={{ __html: strings.generateKeyInstructions }} />
+
+  ```bash
+  export HELICONE_API_KEY=<your-helicone-api-key>
+  ```
+
+  </Step>
+  <Step title={strings.createHeliconeManualLogger}>
+    <CodeGroup>
+      ```js js
+      import { HeliconeManualLogger } from "@helicone/helpers";
+
+      const heliconeLogger = new HeliconeManualLogger({
+        apiKey: process.env.HELICONE_API_KEY,
+        headers: {} // Additional headers sent with the request (optional)
+      });
+      ```
+      ```python python
+      from helicone_helpers import HeliconeManualLogger
+
+      helicone_logger = HeliconeManualLogger(
+        api_key=os.getenv("HELICONE_API_KEY"),
+        headers={} # Additional headers sent with the request (optional)
+      )
+      ```
+    </CodeGroup>
+  </Step>
+
+  <Step title={strings.logYourRequest}>
+    <CodeGroup>
+      ```js js
+      const tools = [{
+        "type": "function",
+        "function": {
+          "name": "getWeather",
+          "description": "Get current temperature for a given location.",
+          "parameters": {
+              "type": "object",
+              "properties": {
+                  "location": {
+                      "type": "string",
+                      "description": "City and country e.g. Bogotá, Colombia"
+                  }
+              },
+              "required": [
+                  "location"
+              ],
+              "additionalProperties": false
+          },
+          "strict": true
+        }
+      }];
+
+      const request = await heliconeLogger.logRequest(
+        tools,
+        async (resultRecorder) => {
+          // The actual tool call
+          const response = await fetch("https://api.openai.com/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
+            },
+            body: JSON.stringify({
+              model: "gpt-3.5-turbo",
+              messages: [
+                {
+                  role: "user",
+                  content: "What's the weather like in Bogotá, Colombia?"
+                }
+              ],
+              tools
+            })
+          });
+
+          const results = await response.json();
+
+          // Log the results to Helicone
+          resultRecorder.appendResults({
+            response: results,
+            usage: results.usage,
+            model: results.model
+          });
+
+          return results;
+        },
+        {
+          "Helicone-Property-Session": "user-123" // Optional: Add session tracking or any custom properties
+        }
+      );
+      ```
+
+      ```python python
+    import os
+    import requests
+
+    tools = [{
+      "type": "function",
+      "function": {
+        "name": "getWeather",
+        "description": "Get current temperature for a given location.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "location": {
+              "type": "string",
+              "description": "City and country e.g. Bogotá, Colombia"
+            }
+          },
+          "required": ["location"],
+          "additionalProperties": False
+        },
+        "strict": True
+      }
+    }]
+
+    def tool_call(result_recorder):
+      # The tool call
+      response = requests.post(
+          "https://api.openai.com/v1/chat/completions",
+          headers={
+              "Content-Type": "application/json",
+              "Authorization": f"Bearer {os.getenv('OPENAI_API_KEY')}"
+          },
+          json={
+              "model": "gpt-3.5-turbo",
+              "messages": [
+                  {
+                      "role": "user",
+                      "content": "What's the weather like in Panama City, Panama?"
+                  }
+              ],
+              "tools": tools
+          }
+      )
+      response_json = response.json()
+
+      # Log the results to Helicone
+      result_recorder.append_results({
+          "response": response_json,
+          "usage": response_json.get("usage"),
+          "model": response_json.get("model")
+      })
+      return response
+
+    request = helicone_logger.log_request(
+        provider="openai",
+        request={"tools": tools},
+        operation=tool_call,
+        additional_headers={
+            "Helicone-Property-Session": "user-123" # Optional: Add session tracking or any custom properties
+        }
+      )
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title={strings.verifyInHelicone}>
+    <div dangerouslySetInnerHTML={{ __html: strings.verifyInHeliconeDesciption("any tool") }} />
+  </Step>
+</Steps>
+
+For more complex examples including APIs, database queries, and document search, check out our [full examples on GitHub](https://github.com/Helicone/helicone/tree/main/examples/tools/python).
+
+<div dangerouslySetInnerHTML={{ __html: strings.heliconeLoggerAPIReference }} />
+
+## Related Guides
+
+- [How to use Helicone Sessions](/guides/sessions)
+- [How to use Helicone Custom Properties](/guides/custom-properties)

@@ -44,6 +44,18 @@ const getUSDateFromString = (value: string) => {
   return getUSDate(date);
 };
 
+const get24HourFromString = (value: string) => {
+  const date = new Date(value);
+  return date.toLocaleString(undefined, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  });
+};
+
 const getUSDateMin = (value: string) => {
   const date = new Date(value);
   const day = date.getDate();
@@ -80,6 +92,7 @@ export {
   capitalizeWords,
   getUSDate,
   getUSDateFromString,
+  get24HourFromString,
   getUSDateMin,
   getUSDateShort,
   removeLeadingWhitespace,

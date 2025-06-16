@@ -1312,6 +1312,8 @@ export interface components {
       prompt_audio_tokens: number | null;
       /** Format: double */
       completion_audio_tokens: number | null;
+      /** Format: double */
+      cost: number | null;
       prompt_id: string | null;
       feedback_created_at?: string | null;
       feedback_id?: string | null;

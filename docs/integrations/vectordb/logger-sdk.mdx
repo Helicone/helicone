@@ -1,0 +1,119 @@
+---
+title: "Trace Any Vector DB interactions"
+sidebarTitle: "Logger SDK"
+description: "Log any Vector DB interactions using Helicone's Logger SDK."
+icon: "plug"
+iconType: "solid"
+---
+
+import { strings } from "/snippets/strings.mdx";
+
+<Steps>
+  <Step title={strings.getStartedWithPackage}>
+    <CodeGroup>
+      ```bash npm
+      npm install @helicone/helpers
+      ```
+      ```bash pip
+      pip install helicone-helpers
+      ```
+    </CodeGroup>
+  </Step>
+
+  <Step title={strings.setApiKey}>
+    <div dangerouslySetInnerHTML={{ __html: strings.generateKeyInstructions }} />
+    ```bash
+    export HELICONE_API_KEY=<your-helicone-api-key>
+    ```
+  </Step>
+
+  <Step title={strings.createHeliconeManualLogger}>
+    <CodeGroup>
+    ```js js
+    import { HeliconeManualLogger } from "@helicone/helpers";
+
+    const heliconeLogger = new HeliconeManualLogger({
+      apiKey: process.env.HELICONE_API_KEY, // Can be set as env variable
+      headers: {} // Additional headers to be sent with the request
+    });
+    ```
+    ```python python
+    from helicone_helpers import HeliconeManualLogger
+
+    helicone_logger = HeliconeManualLogger(
+      api_key=os.getenv("HELICONE_API_KEY"),
+      headers={} # Additional headers to be sent with the request
+    )
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title={strings.logYourRequest}>
+    <CodeGroup>
+    ```js js
+    const res = await heliconeLogger.logRequest(
+      {
+        _type: "vector_db",
+        operation: "search", // The operation performed. In this case, search.
+        // ...include any other data about the vector db request here (look at the API reference for more details)
+      },
+      async (resultRecorder) => {
+        // Your vector db operation here. In this case, search
+        const searchResults = await vectorDB.search({
+          query: "Find similar products to iPhone",
+          limit: 3
+        });
+
+        // Log the results
+        resultRecorder.appendResults({
+          // These are the results of the operation that Helicone will log
+          products: searchResults.map(result => ({
+            name: result.name,
+            price: result.price
+          }))
+        });
+
+        return searchResults;
+      }
+    );
+    ```
+    ```python python
+    def vector_db_operation(result_recorder: HeliconeResultRecorder):
+      # Your vector db operation here. In this case, search
+      search_results = vector_db.search(
+        query="Find similar products to iPhone",
+        limit=3
+      )
+
+      # Log the results
+      result_recorder.appendResults({
+        # These are the results of the operation that Helicone will log
+        "products": [
+          {
+            "name": result["name"],
+            "price": result["price"]
+          }
+          for result in search_results
+        ]
+      })
+
+      return search_results
+
+    res = heliconeLogger.logRequest(
+      request={
+        "_type": "vector_db",
+        "operation": "search" # The operation performed. In this case, search.
+        # ...include any other data about the vector db request here (look at the API reference for more details)
+      },
+      operation=vector_db_operation
+    );
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title={strings.verifyInHelicone}>
+    <div dangerouslySetInnerHTML={{ __html: strings.verifyInHeliconeDesciption("any Vector DB") }} />
+  </Step>
+</Steps>
+
+<div dangerouslySetInnerHTML={{ __html: strings.heliconeLoggerAPIReference }} />

@@ -26,7 +26,9 @@ import { parseOpenAIStream } from "./streamParsers/openAIStreamParser";
 import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 import { costOfPrompt } from "../../packages/cost";
 import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
-import { MessageData } from "../clients/producers/types";
+import {
+  MessageData,
+} from "../clients/producers/types";
 import { DEFAULT_UUID } from "../../packages/llm-mapper/types";
 
 export interface DBLoggableProps {
@@ -556,26 +558,11 @@ export class DBLoggable {
         return rateLimiter;
       }
 
+      // TODO: Add an early exit if we really want to rate limit in the future
       const rateLimit = await rateLimiter.data.checkRateLimit(tier);
 
       if (rateLimit.error) {
         console.error(`Error checking rate limit: ${rateLimit.error}`);
-      }
-
-      if (!rateLimit.error && rateLimit.data?.isRateLimited) {
-        await db.clickhouse.dbInsertClickhouse("rate_limit_log_v2", [
-          {
-            request_id: this.request.requestId,
-            organization_id: org.data.id,
-            tier: tier,
-            rate_limit_created_at: formatTimeStringDateTime(
-              new Date().toISOString()
-            ),
-          },
-        ]);
-        return ok({
-          cost: 0,
-        });
       }
     } catch (e) {
       console.error(`Error checking rate limit: ${e}`);
@@ -731,18 +718,22 @@ export class DBLoggable {
           timeToFirstToken,
           responseCreatedAt: endTime,
           delayMs: endTime.getTime() - this.timing.startTime.getTime(),
-          cachedLatency: cacheReferenceId == DEFAULT_UUID ? 0 : (() => {
-            try {
-              return Number(cachedHeaders?.get("Helicone-Cache-Latency") ?? 0);
-            } catch {
-              return 0;
-            }
-          })(),
+          cachedLatency:
+            cacheReferenceId == DEFAULT_UUID
+              ? 0
+              : (() => {
+                  try {
+                    return Number(
+                      cachedHeaders?.get("Helicone-Cache-Latency") ?? 0
+                    );
+                  } catch {
+                    return 0;
+                  }
+                })(),
         },
       },
     };
 
-    // Send to Kafka or REST if not enabled
     await db.producer.sendMessage(kafkaMessage);
 
     return ok(null);

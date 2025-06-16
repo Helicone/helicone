@@ -193,7 +193,7 @@ const convertToolChoice = (
     if (toolChoice.type === "function" && toolChoice.function?.name) {
       return {
         type: "tool",
-        name: toolChoice.function.name,
+        name: toolChoice.function?.name,
       };
     }
   }
@@ -261,9 +261,9 @@ const convertTools = (
   if (!tools || !Array.isArray(tools)) return undefined;
 
   return tools.map((tool) => ({
-    name: tool.function.name,
-    description: tool.function.description,
-    parameters: tool.function.parameters,
+    name: tool.function?.name,
+    description: tool.function?.description,
+    parameters: tool.function?.parameters,
   }));
 };
 

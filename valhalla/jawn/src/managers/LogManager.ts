@@ -1,6 +1,6 @@
 import * as Sentry from "@sentry/node";
 import { dataDogClient } from "../lib/clients/DataDogClient";
-import { HeliconeQueueProducer } from "../lib/clients/HeliconeQuequeProducer";
+import { HeliconeQueueProducer } from "../lib/clients/HeliconeQueueProducer";
 import { AuthenticationHandler } from "../lib/handlers/AuthenticationHandler";
 import {
   HandlerContext,
