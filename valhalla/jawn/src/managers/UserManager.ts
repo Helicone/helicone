@@ -283,8 +283,6 @@ export class UserManager extends BaseManager {
       return countResult;
     }
 
-    console.log(hasUsersResult.data?.[0].has_users);
-
     return ok({
       users: users.data!,
       count: countResult.data?.[0].count ?? 0,
