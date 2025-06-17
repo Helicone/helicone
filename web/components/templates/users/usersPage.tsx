@@ -34,6 +34,16 @@ import {
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import TableFooter from "../requests/tableFooter";
 
+interface UsersPageV2Props {
+  currentPage: number;
+  pageSize: number;
+  sort: {
+    sortKey: string | null;
+    sortDirection: SortDirection | null;
+    isCustomProperty: boolean;
+  };
+}
+
 const TABS = [
   {
     id: "users",
@@ -81,15 +91,17 @@ function useQueryParam(
   return [queryParam, setQueryParam];
 }
 
-const UsersPageV2 = () => {
+const UsersPageV2 = (props: UsersPageV2Props) => {
+  const { currentPage: currentPageProp, pageSize: pageSizeProp, sort: sortProp } = props;
+
   const tableRef = useRef<any>(null);
   const router = useRouter();
 
-  const [currentPage, setCurrentPage] = useQueryParam("page", "1");
-  const [pageSize, setPageSize] = useQueryParam("pageSize", "100");
+  const [currentPage, setCurrentPage] = useQueryParam("page", currentPageProp.toString());
+  const [pageSize, setPageSize] = useQueryParam("pageSize", pageSizeProp.toString());
   const [sortDirection, setSortDirection] = useQueryParam(
     "sortDirection",
-    "desc"
+    sortProp.sortDirection ?? "desc"
   );
   const [sortKey, setSortKey] = useQueryParam("sortKey", "last_active");
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
@@ -223,15 +235,15 @@ const UsersPageV2 = () => {
     return !userMetrics.data?.hasUsers;
   }, [userMetrics]);
 
-  // if (hasNoUsers && !userMetrics.isLoading) {
-  //   return (
-  //     <div className="flex flex-col w-full h-screen bg-background dark:bg-sidebar-background">
-  //       <div className="flex flex-1 h-full">
-  //         <EmptyStateCard feature="users" />
-  //       </div>
-  //     </div>
-  //   );
-  // }
+  if (hasNoUsers && !userMetrics.isLoading) {
+    return (
+      <div className="flex flex-col w-full h-screen bg-background dark:bg-sidebar-background">
+        <div className="flex flex-1 h-full">
+          <EmptyStateCard feature="users" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <main className="h-screen flex flex-col w-full animate-fade-in">
