@@ -241,8 +241,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   const abortController = useRef<AbortController | null>(null);
   const [isStreaming, setIsLoading] = useState<boolean>(false);
 
-  console.log("render");
-
   useEffect(() => {
     if (response) {
       const parsedResponse = JSON.parse(response);
