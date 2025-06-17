@@ -259,28 +259,3 @@ Rate limiting counters can be stored in different backends depending on your dep
 | **Distributed deployments** | Redis storage                 | v1           |
 | **SaaS applications**       | Per-end-user limits           | v1           |
 | **Enterprise governance**   | Per-team and per-team-member limits | v2    |
-
-## GCRA Rate Limiting
-
-All rate limiting strategies use the Generic Cell Rate Algorithm to provide smooth, burst-aware request throttling:
-
-<CardGroup>
-  <Card title="Burst tolerance">
-    Allows legitimate traffic spikes while maintaining sustained rate controls
-  </Card>
-  <Card title="Smooth rate limiting">
-    More sophisticated than simple sliding windows - avoids thundering herd problems
-  </Card>
-  <Card title="Per-API-key tracking">
-    Individual limits for each API key with consistent behavior across routers
-  </Card>
-  <Card title="Automatic cleanup">
-    Expired rate limiting state is automatically cleaned up to manage memory usage
-  </Card>
-</CardGroup>
-
-<Note>
-  **Provider rate limits are handled automatically** by the load balancing system. This rate limiting feature is for controlling your own API traffic based on your business requirements.
-</Note>
-
-To customize rate limiting parameters and behavior, see the [Configuration Reference](/gateway/config#rate-limiting).

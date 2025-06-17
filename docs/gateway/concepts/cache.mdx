@@ -1,162 +1,272 @@
 ---
-title: "Caching"
+title: "Response Caching"
 sidebarTitle: "Caching"
-description: "Cache LLM responses to reduce costs and improve latency"
+description: "Intelligent LLM response caching to reduce costs and improve latency"
 ---
 
-## Intro to Caching
+The AI Gateway automatically caches LLM responses and reuses them for identical requests, reducing costs by up to 95% and improving response times.
 
-Helix will automatically store LLM responses and reuse them for identical requests, generating cache keys from model, messages, temperature, and all parameters.
+Caching uses exact parameter matching with configurable TTL, staleness policies, and bucketed responses for variety.
 
 ## Why Use Caching?
 
-Caching is essential for:
-- **Reducing API costs** by up to 95% during development
-- **Improving response times** for repeated requests
-- **Supporting high-traffic applications** with common queries
-- **Cross-provider caching** - cache OpenAI responses, serve for Anthropic requests
+Caching helps you:
+- **Eliminate CI/test costs** by reusing responses across test runs and development
+- **Reduce costs** by eliminating duplicate API calls to providers
+- **Improve latency** by serving cached responses instantly
+- **Handle high traffic** by reducing load on upstream providers
+- **Cross-provider efficiency** by reusing responses across different providers
 
-## When to use Caching
-- **During development**: Save money while testing by reducing API calls
-- **High-traffic apps**: Improve response times for repeated requests  
-- **Cost optimization**: Reduce provider bills by up to 95%
-- **Cross-provider scenarios**: Cache OpenAI responses, serve for Anthropic calls
+<Note>
+  For complete configuration options and syntax, see the [Configuration Reference](/gateway/config#caching).
+</Note>
 
-## Quick Start
+## How Caching Works
 
-<Steps>
-<Step title="Start Redis">
-Caching requires a Redis server. Start one with our infrastructure:
-```bash
-cd infrastructure && docker compose up -d redis
-```
+All caching uses **exact parameter matching**—identical requests (model, messages, temperature, all parameters) return cached responses instantly.
 
-<Accordion title="Using your own Redis?">
-Set the Redis URL:
-```bash
-export PROXY__CACHE__REDIS__URL="redis://your-host:6379"
-```
-</Accordion>
-</Step>
-<Step title="Enable Response Caching">
-Add to `config.yaml`:
+**How it works:**
+1. Incoming request parameters are hashed to create a unique cache key
+2. System checks the cache store for an existing cached response
+3. If found and not expired, returns cached response immediately
+4. If not found, forwards request to provider and caches the response
+
+**Basic example:**
 ```yaml
-cache:
-  enabled: true
-  directive:
-    max-age: 3600
-    max-stale: 1800
+routers:
+  default:
+    cache:
+      enabled: true
+      directive: "max-age=3600, max-stale=1800"  # 1-hour TTL, 30-min stale
+      buckets: 1   # Single response per cache key
 ```
 
-See [Configuration Options](#configuration-options) below for advanced cache settings.
+## Configuration Options
 
-</Step>
-<Step title="Test it works">
-Make the same request twice and check for cache hits in the response:
+<AccordionGroup>
+  <Accordion title="Multiple Responses (Buckets)" icon="bucket">
+    **Store multiple responses for the same cache key**
+    
+    Instead of storing one response per cache key, store multiple responses to provide variety for non-deterministic use cases while still benefiting from caching.
+    
+    **Best for:** Creative applications where response variety is desired
+    
+    **Example:**
+    ```yaml
+    cache:
+      enabled: true
+      buckets: 10  # Store up to 10 different responses
+      directive: "max-age=3600"
+    ```
+  </Accordion>
 
-```json
-{
-  "helicone": {
-    "cache": {
-      "hit": true,
-      "age": 1440
-    }
-  }
-}
-```
-</Step>
-</Steps>
-
-## Advanced Configuration
-
-### Runtime Control
-
-For more control, you can enable or disable caching per request using headers:
-
-```bash
-curl -H "Helicone-Cache-Enabled: false" \
-     https://your-helix/v1/chat/completions
-```
-
-### Cache Settings
-
-Set in your `config.yaml`
-
-#### Overview
-
-| Setting | Type | Description | Default | Example |
-|---------|------|-------------|---------|---------|
-| `enabled` | boolean | Turn caching on/off globally | `false` | `true` |
-| `max-bucket-size` | number | Maximum number of items per cache bucket | `16` | `10` |
-| `seed` | string | Seed for generating cache keys (ensures consistent hashing) | `""` | `"router-seed-1"` |
-| `directive.max-age` | number | How long responses stay fresh (seconds) | `3600` | `3600` |
-| `directive.max-stale` | number | How long stale responses are acceptable (seconds) | `0` | `1800` |
-
-#### Explanations & Examples
-<AccordionGroup title="Examples">
-<Accordion title="Bucket Size">
-Bucket size is the max number of items that can be stored in a bucket.
-
-If the bucket is full, the oldest item will be evicted.
-
-If the bucket is not full, the new item will be added to the bucket.
-
-
-```javascript
-openai.completion("give me a random number") -> "42"
-# Cache Miss
-openai.completion("give me a random number") -> "47"
-# Cache Miss
-openai.completion("give me a random number") -> "17"
-# Cache Miss
-
-openai.completion("give me a random number") -> This will randomly choose 42 | 47 | 17
-# Cache Hit
-```
-
-</Accordion>
-<Accordion title="Seed" icon="wrench">
-Different seeds create isolated cache namespaces:
-
-```bash
-# Seed: "user-123" 
-curl -H "Helicone-Cache-Seed: user-123" ... -> "42"     # Cache MISS
-curl -H "Helicone-Cache-Seed: user-123" ... -> "42"     # Cache HIT
-
-# Seed: "user-456"
-curl -H "Helicone-Cache-Seed: user-456" ... -> "17"     # Cache MISS  
-curl -H "Helicone-Cache-Seed: user-456" ... -> "17"     # Cache HIT
-
-# Back to "user-123"
-curl -H "Helicone-Cache-Seed: user-123" ... -> "42"     # Cache HIT
-```
-</Accordion>
-
+  <Accordion title="Cache Namespacing (Seeds)" icon="key">
+    **Partition cache by seed for multi-tenant isolation**
+    
+    Each cache entry lives in a namespace derived from a **seed**. You can set the seed once in the router config or override it per-request with the `Helicone-Cache-Seed` header.
+    
+    **Best for:** SaaS apps and multi-tenant systems that need user-level isolation
+    
+    **How it works:**
+    1. Router config can set a default `seed` value
+    2. Incoming requests may override the seed via header
+    3. The seed is prefixed to the cache key, creating an isolated namespace
+    
+    **Example (router config):**
+    ```yaml
+    cache:
+      enabled: true
+      directive: "max-age=3600, max-stale=1800"
+      seed: "tenant-alpha"
+    ```
+    
+    **Example (per-request header):**
+    ```bash
+    curl -H "Helicone-Cache-Seed: user-123" ...
+    ```
+  </Accordion>
 </AccordionGroup>
 
+### Configuration Scope
 
-## Cache Responses
+Cache settings are applied in precedence order when a request comes in:
 
-Cached responses include metadata:
+<Steps>
+  <Step title="Request Headers">
+    **Per-request cache control**
+    
+    Headers like `Helicone-Cache-Enabled` and `Helicone-Cache-Seed` override router settings for specific requests.
+    
+    ```bash
+    # Disable caching for this request
+    curl -H "Helicone-Cache-Enabled: false" \
+         -H "Authorization: Bearer $API_KEY" \
+         https://gateway.example.com/v1/chat/completions
+    
+    # Use custom cache seed for isolation
+    curl -H "Helicone-Cache-Seed: user-123" \
+         -H "Authorization: Bearer $API_KEY" \
+         https://gateway.example.com/v1/chat/completions
+    ```
+  </Step>
+  
+  <Step title="Router Configuration">
+    **Default cache policies per router**
+    
+    Each router can have custom cache settings (TTL, buckets, seed) or disable caching entirely.
+  </Step>
+</Steps>
 
-```json
-{
-  "id": "chatcmpl-...",
-  "object": "chat.completion", 
-  "choices": [...],
-  "helicone": {
-    "cache": {
-      "hit": true,
-      "age": 1440,
-      "key": "sha256:abc123..."
-    }
-  }
-}
+
+### Configuration Examples
+
+<Tabs>
+  <Tab title="CI/Test Pipeline - Eliminate Costs">
+    **Use case:** CI pipeline or test suite that makes repeated identical requests. Cache for the duration of the test run to eliminate all provider costs.
+
+    ```yaml
+    routers:
+      testing:
+        cache:
+          enabled: true
+          directive: "max-age=7200, max-stale=3600"  # 2-hour TTL for test runs
+          buckets: 1   # Consistent responses for tests
+    ```
+  </Tab>
+
+  <Tab title="Development Environment - Fast Iteration">
+    **Use case:** Local development where you want to avoid repeated API calls while building and debugging.
+
+    ```yaml
+    routers:
+      dev:
+        cache:
+          enabled: true
+          directive: "max-age=3600, max-stale=1800"  # 1-hour TTL
+          buckets: 3   # Some variety for testing
+    ```
+  </Tab>
+
+  <Tab title="Production API - Cost Optimization">
+    **Use case:** Production API that needs to minimize provider costs while maintaining response freshness for users.
+
+    ```yaml
+    routers:
+      production:
+        cache:
+          enabled: true
+          directive: "max-age=1800, max-stale=900"  # 30-min TTL
+          buckets: 1   # Consistent responses
+    ```
+  </Tab>
+
+  <Tab title="Creative Applications - Response Variety">
+    **Use case:** Creative writing or brainstorming app where users want variety in responses while still benefiting from caching.
+
+    ```yaml
+    routers:
+      creative:
+        cache:
+          enabled: true
+          directive: "max-age=900, max-stale=300"  # 15-min TTL
+          buckets: 10  # High variety
+    ```
+  </Tab>
+
+  <Tab title="Multi-Tenant SaaS - User Isolation">
+    **Use case:** SaaS application where each customer needs isolated cache to prevent data leakage between tenants.
+
+    ```yaml
+    routers:
+      saas:
+        cache:
+          enabled: true
+          directive: "max-age=3600, max-stale=1800"
+          buckets: 2
+          seed: "default-tenant"  # Default, overridden per request
+    ```
+
+    **Per-tenant requests:**
+    ```bash
+    # Each tenant gets isolated cache
+    curl -H "Helicone-Cache-Seed: tenant-123" \
+         -H "Authorization: Bearer $API_KEY" \
+         https://gateway.example.com/v1/chat/completions
+    ```
+  </Tab>
+</Tabs>
+
+### Choosing the Right Configuration
+
+| Use Case                    | Recommended Approach               | Availability |
+| --------------------------- | ---------------------------------- | ------------ |
+| **Production APIs**         | 1-hour TTL, buckets 1-3            | v0           |
+| **Development/Testing**     | 24-hour TTL, buckets 5-10          | v0           |
+| **Creative applications**   | 30-min TTL, buckets 10+            | v0           |
+| **High-traffic systems**    | Short TTL (≤2 h), buckets 3-5      | v0           |
+| **User-specific caching**   | Seeds for namespace isolation      | v0           |
+| **Single instance**         | In-memory storage                  | v0           |
+
+## Storage Backend Options
+
+Cache responses can be stored in different backends depending on your deployment needs:
+
+<AccordionGroup>
+  <Accordion title="In-Memory Storage" icon="memory">
+    **Local cache storage**
+    
+    Cache responses are stored locally in each router instance—no external dependencies, ultra-fast lookup.
+    
+    **Best for:**
+    - Single-instance deployments
+    - Development environments
+    - High-performance scenarios
+  </Accordion>
+
+  <Accordion title="Redis Storage" icon="database">
+    **Distributed cache storage**
+    
+    Will allow sharing cache across multiple router instances and persistence across restarts.
+    
+    *Configuration details will be documented closer to release.*
+  </Accordion>
+
+  <Accordion title="Database Storage" icon="server">
+    **Persistent cache storage**
+    
+    Cache responses stored in a database for long-term persistence and advanced analytics.
+    
+    **Best for:**
+    - Long-term cache analytics
+    - Compliance requirements
+    - Advanced cache management
+  </Accordion>
+</AccordionGroup>
+
+## Cache Response Headers
+
+When caching is enabled, the gateway adds response headers to indicate cache status and performance:
+
+<ParamField path="helicone-cache" type="string">
+  Indicates whether the response was served from cache.
+
+  **Values:** `"HIT"` for cache hits, `"MISS"` for cache misses
+</ParamField>
+
+<ParamField path="helicone-cache-bucket-idx" type="number">
+  Index of the cache bucket used for this response.
+
+  **How it works:** When using bucketed caching, shows which stored response was returned (0-based index)
+</ParamField>
+
+**Example checking cache headers:**
+```bash
+curl -i -H "Helicone-Cache-Enabled: true" \
+     -H "Authorization: Bearer $API_KEY" \
+     https://gateway.example.com/v1/chat/completions \
+     -d '{"model": "gpt-4", "messages": [{"role": "user", "content": "Hello"}]}'
+
+# Response headers:
+# helicone-cache: HIT
+# helicone-cache-bucket-idx: 2
 ```
-
-
-## How It Works
-
-**Cache Key Generation**
-- Exact matching on model, messages, temperature, and all parameters
-- Identical requests return cached responses instantly
