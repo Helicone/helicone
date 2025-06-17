@@ -3500,6 +3500,9 @@
 					},
 					"cache_enabled": {
 						"type": "boolean"
+					},
+					"updated_at": {
+						"type": "string"
 					}
 				},
 				"required": [

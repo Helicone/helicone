@@ -346,5 +346,5 @@ export interface HeliconeRequest {
   model: string;
   cache_reference_id: string | null;
   cache_enabled: boolean;
-  updated_at: string;
+  updated_at?: string;
 }
