@@ -446,24 +446,6 @@
 				"type": "object",
 				"description": "Make all properties in T optional"
 			},
-			"Partial_TimestampOperators_": {
-				"properties": {
-					"gte": {
-						"type": "string"
-					},
-					"lte": {
-						"type": "string"
-					},
-					"lt": {
-						"type": "string"
-					},
-					"gt": {
-						"type": "string"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
 			"Partial_NumberOperators_": {
 				"properties": {
 					"not-equals": {
@@ -494,33 +476,54 @@
 				"type": "object",
 				"description": "Make all properties in T optional"
 			},
-			"Partial_UserMetricsToOperators_": {
+			"Partial_TimestampOperators_": {
 				"properties": {
-					"user_id": {
+					"gte": {
+						"type": "string"
+					},
+					"lte": {
+						"type": "string"
+					},
+					"lt": {
+						"type": "string"
+					},
+					"gt": {
+						"type": "string"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Partial_UserViewToOperators_": {
+				"properties": {
+					"user_user_id": {
 						"$ref": "#/components/schemas/Partial_TextOperators_"
 					},
-					"last_active": {
+					"user_active_for": {
+						"$ref": "#/components/schemas/Partial_NumberOperators_"
+					},
+					"user_first_active": {
 						"$ref": "#/components/schemas/Partial_TimestampOperators_"
 					},
-					"total_requests": {
+					"user_last_active": {
+						"$ref": "#/components/schemas/Partial_TimestampOperators_"
+					},
+					"user_total_requests": {
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},
-					"active_for": {
+					"user_average_requests_per_day_active": {
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},
-					"average_requests_per_day_active": {
+					"user_average_tokens_per_request": {
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},
-					"average_tokens_per_request": {
+					"user_total_completion_tokens": {
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},
-					"total_completion_tokens": {
+					"user_total_prompt_tokens": {
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},
-					"total_prompt_tokens": {
-						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					},
-					"cost": {
+					"user_cost": {
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					}
 				},
@@ -669,10 +672,10 @@
 				"type": "object",
 				"description": "Make all properties in T optional"
 			},
-			"Pick_FilterLeaf.user_metrics-or-request_response_rmt_": {
+			"Pick_FilterLeaf.users_view-or-request_response_rmt_": {
 				"properties": {
-					"user_metrics": {
-						"$ref": "#/components/schemas/Partial_UserMetricsToOperators_"
+					"users_view": {
+						"$ref": "#/components/schemas/Partial_UserViewToOperators_"
 					},
 					"request_response_rmt": {
 						"$ref": "#/components/schemas/Partial_RequestResponseRMTToOperators_"
@@ -681,13 +684,13 @@
 				"type": "object",
 				"description": "From T, pick a set of properties whose keys are in the union K"
 			},
-			"FilterLeafSubset_user_metrics-or-request_response_rmt_": {
-				"$ref": "#/components/schemas/Pick_FilterLeaf.user_metrics-or-request_response_rmt_"
+			"FilterLeafSubset_users_view-or-request_response_rmt_": {
+				"$ref": "#/components/schemas/Pick_FilterLeaf.users_view-or-request_response_rmt_"
 			},
 			"UserFilterNode": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/FilterLeafSubset_user_metrics-or-request_response_rmt_"
+						"$ref": "#/components/schemas/FilterLeafSubset_users_view-or-request_response_rmt_"
 					},
 					{
 						"$ref": "#/components/schemas/UserFilterBranch"
@@ -873,6 +876,12 @@
 						"$ref": "#/components/schemas/SortDirection"
 					},
 					"average_tokens_per_request": {
+						"$ref": "#/components/schemas/SortDirection"
+					},
+					"total_prompt_token": {
+						"$ref": "#/components/schemas/SortDirection"
+					},
+					"total_completion_tokens": {
 						"$ref": "#/components/schemas/SortDirection"
 					},
 					"cost": {

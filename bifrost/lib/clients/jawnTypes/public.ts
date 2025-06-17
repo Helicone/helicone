@@ -643,13 +643,6 @@ export interface components {
       "not-contains"?: string;
     };
     /** @description Make all properties in T optional */
-    Partial_TimestampOperators_: {
-      gte?: string;
-      lte?: string;
-      lt?: string;
-      gt?: string;
-    };
-    /** @description Make all properties in T optional */
     Partial_NumberOperators_: {
       /** Format: double */
       "not-equals"?: number;
@@ -665,16 +658,24 @@ export interface components {
       gt?: number;
     };
     /** @description Make all properties in T optional */
-    Partial_UserMetricsToOperators_: {
-      user_id?: components["schemas"]["Partial_TextOperators_"];
-      last_active?: components["schemas"]["Partial_TimestampOperators_"];
-      total_requests?: components["schemas"]["Partial_NumberOperators_"];
-      active_for?: components["schemas"]["Partial_NumberOperators_"];
-      average_requests_per_day_active?: components["schemas"]["Partial_NumberOperators_"];
-      average_tokens_per_request?: components["schemas"]["Partial_NumberOperators_"];
-      total_completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      total_prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      cost?: components["schemas"]["Partial_NumberOperators_"];
+    Partial_TimestampOperators_: {
+      gte?: string;
+      lte?: string;
+      lt?: string;
+      gt?: string;
+    };
+    /** @description Make all properties in T optional */
+    Partial_UserViewToOperators_: {
+      user_user_id?: components["schemas"]["Partial_TextOperators_"];
+      user_active_for?: components["schemas"]["Partial_NumberOperators_"];
+      user_first_active?: components["schemas"]["Partial_TimestampOperators_"];
+      user_last_active?: components["schemas"]["Partial_TimestampOperators_"];
+      user_total_requests?: components["schemas"]["Partial_NumberOperators_"];
+      user_average_requests_per_day_active?: components["schemas"]["Partial_NumberOperators_"];
+      user_average_tokens_per_request?: components["schemas"]["Partial_NumberOperators_"];
+      user_total_completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      user_total_prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      user_cost?: components["schemas"]["Partial_NumberOperators_"];
     };
     /** @description Make all properties in T optional */
     Partial_TimestampOperatorsTyped_: {
@@ -733,12 +734,12 @@ export interface components {
       "helicone-score-feedback"?: components["schemas"]["Partial_BooleanOperators_"];
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.user_metrics-or-request_response_rmt_": {
-      user_metrics?: components["schemas"]["Partial_UserMetricsToOperators_"];
+    "Pick_FilterLeaf.users_view-or-request_response_rmt_": {
+      users_view?: components["schemas"]["Partial_UserViewToOperators_"];
       request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
     };
-    "FilterLeafSubset_user_metrics-or-request_response_rmt_": components["schemas"]["Pick_FilterLeaf.user_metrics-or-request_response_rmt_"];
-    UserFilterNode: components["schemas"]["FilterLeafSubset_user_metrics-or-request_response_rmt_"] | components["schemas"]["UserFilterBranch"] | "all";
+    "FilterLeafSubset_users_view-or-request_response_rmt_": components["schemas"]["Pick_FilterLeaf.users_view-or-request_response_rmt_"];
+    UserFilterNode: components["schemas"]["FilterLeafSubset_users_view-or-request_response_rmt_"] | components["schemas"]["UserFilterBranch"] | "all";
     UserFilterBranch: {
       right: components["schemas"]["UserFilterNode"];
       /** @enum {string} */
@@ -789,6 +790,8 @@ export interface components {
       total_requests?: components["schemas"]["SortDirection"];
       average_requests_per_day_active?: components["schemas"]["SortDirection"];
       average_tokens_per_request?: components["schemas"]["SortDirection"];
+      total_prompt_token?: components["schemas"]["SortDirection"];
+      total_completion_tokens?: components["schemas"]["SortDirection"];
       cost?: components["schemas"]["SortDirection"];
       rate_limited_count?: components["schemas"]["SortDirection"];
     };

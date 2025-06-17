@@ -27,7 +27,7 @@ export type UserFilterBranch = {
 };
 
 type UserFilterNode =
-  | FilterLeafSubset<"user_metrics" | "request_response_rmt">
+  | FilterLeafSubset<"users_view" | "request_response_rmt">
   | UserFilterBranch
   | "all";
 export interface UserMetricsQueryParams {

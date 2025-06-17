@@ -34,7 +34,7 @@ interface RequestResponseRMT {
 }
 
 export interface Views {
-  user_metrics: UserMetric;
+  users_view: UserMetric;
   session_metrics: {
     total_cost: number;
     total_tokens: number;
@@ -124,12 +124,12 @@ type FieldSpec =
       column: keyof RequestResponseRMT;
     })
   | (BaseFieldSpec & {
-      table: "user_metrics";
-      column: keyof Views["user_metrics"];
-    })
-  | (BaseFieldSpec & {
       table: "sessions_request_response_rmt";
       column: keyof Views["session_metrics"];
+    })
+  | (BaseFieldSpec & {
+      table: "users_view";
+      column: keyof Views["users_view"];
     });
 
 /**

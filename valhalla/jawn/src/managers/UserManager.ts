@@ -41,6 +41,8 @@ export interface UserMetric {
   total_requests: number;
   average_requests_per_day_active: number;
   average_tokens_per_request: number;
+  total_prompt_token: number;
+  total_completion_tokens: number;
   cost: number;
   rate_limited_count: number;
 }
@@ -59,6 +61,8 @@ const sortMappings: { [K in keyof UserMetric]: string } = {
   first_active: "first_active",
   cost: "cost",
   rate_limited_count: "rate_limited_count",
+  total_prompt_token: "total_prompt_token",
+  total_completion_tokens: "total_completion_tokens",
 };
 
 export function buildUserSort(

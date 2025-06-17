@@ -242,7 +242,7 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
   };
 
   const hasNoUsers = useMemo(() => {
-    return !userMetrics.data?.hasUsers;
+    return userMetrics.data?.hasUsers === false;
   }, [userMetrics]);
 
   if (hasNoUsers && !userMetrics.isLoading) {

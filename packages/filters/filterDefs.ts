@@ -232,16 +232,16 @@ export type FilterLeafSessionsRequestResponseRMT =
 
 // users_view
 type UserViewToOperators = {
-  user_id: SingleKey<TextOperators>;
-  active_for: SingleKey<NumberOperators>;
-  first_active: SingleKey<TimestampOperators>;
-  last_active: SingleKey<TimestampOperators>;
-  total_requests: SingleKey<NumberOperators>;
-  average_requests_per_day_active: SingleKey<NumberOperators>;
-  average_tokens_per_request: SingleKey<NumberOperators>;
-  total_completion_tokens: SingleKey<NumberOperators>;
-  total_prompt_token: SingleKey<NumberOperators>;
-  cost: SingleKey<NumberOperators>;
+  user_user_id: SingleKey<TextOperators>;
+  user_active_for: SingleKey<NumberOperators>;
+  user_first_active: SingleKey<TimestampOperators>;
+  user_last_active: SingleKey<TimestampOperators>;
+  user_total_requests: SingleKey<NumberOperators>;
+  user_average_requests_per_day_active: SingleKey<NumberOperators>;
+  user_average_tokens_per_request: SingleKey<NumberOperators>;
+  user_total_completion_tokens: SingleKey<NumberOperators>;
+  user_total_prompt_tokens: SingleKey<NumberOperators>;
+  user_cost: SingleKey<NumberOperators>;
 };
 export type FilterLeafUserView = SingleKey<UserViewToOperators>;
 
