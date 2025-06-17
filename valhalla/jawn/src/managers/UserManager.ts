@@ -136,7 +136,7 @@ export class UserManager extends BaseManager {
 
   async getUserMetrics(
     queryParams: UserMetricsQueryParams
-  ): Promise<Result<{ users: UserMetricsResult[]; count: number }, string>> {
+  ): Promise<Result<{ users: UserMetricsResult[]; count: number; hasUsers: boolean }, string>> {
     const {
       filter,
       offset,
@@ -149,6 +149,19 @@ export class UserManager extends BaseManager {
     } = queryParams;
     const { organizationId } = this.authParams;
     const { argsAcc, orderByString } = buildUserSort(sort);
+
+    const hasUsersQuery = `
+    SELECT
+      EXISTS(
+        SELECT 1
+        FROM request_response_rmt
+        WHERE organization_id = {val_0: String}
+          AND user_id != ''
+        LIMIT 1
+      ) AS has_users
+    `;
+
+    const hasUsersResult = await dbQueryClickhouse<{ has_users: number }>(hasUsersQuery, [organizationId]);
 
     const builtFilter = await buildFilterWithAuthClickHouse({
       org_id: organizationId,
@@ -276,6 +289,7 @@ export class UserManager extends BaseManager {
     return ok({
       users: users.data!,
       count: countResult.data?.[0].count ?? 0,
+      hasUsers: hasUsersResult.data?.[0].has_users === 1,
     });
   }
 }

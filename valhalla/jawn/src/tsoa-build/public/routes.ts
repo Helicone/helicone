@@ -312,18 +312,18 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ResultSuccess__users-UserMetricsResult-Array--count-number__": {
+    "ResultSuccess__users-UserMetricsResult-Array--count-number--hasUsers-boolean__": {
         "dataType": "refObject",
         "properties": {
-            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"count":{"dataType":"double","required":true},"users":{"dataType":"array","array":{"dataType":"refObject","ref":"UserMetricsResult"},"required":true}},"required":true},
+            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"hasUsers":{"dataType":"boolean","required":true},"count":{"dataType":"double","required":true},"users":{"dataType":"array","array":{"dataType":"refObject","ref":"UserMetricsResult"},"required":true}},"required":true},
             "error": {"dataType":"enum","enums":[null],"required":true},
         },
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Result__users-UserMetricsResult-Array--count-number_.string_": {
+    "Result__users-UserMetricsResult-Array--count-number--hasUsers-boolean_.string_": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__users-UserMetricsResult-Array--count-number__"},{"ref":"ResultError_string_"}],"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__users-UserMetricsResult-Array--count-number--hasUsers-boolean__"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "SortDirection": {
