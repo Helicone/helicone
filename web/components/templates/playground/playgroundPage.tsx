@@ -241,6 +241,8 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   const abortController = useRef<AbortController | null>(null);
   const [isStreaming, setIsLoading] = useState<boolean>(false);
 
+  console.log("render");
+
   useEffect(() => {
     if (response) {
       const parsedResponse = JSON.parse(response);
@@ -249,26 +251,28 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       if (!mappedContent) {
         return;
       }
-      setMappedContent({
-        ...mappedContent,
+      // TODO: be able to remove the @ts-ignore
+      // @ts-ignore
+      setMappedContent((prev: MappedLLMRequest) => ({
+        ...prev,
         raw: {
-          ...mappedContent.raw,
+          ...prev.raw,
           response: {
-            ...mappedContent.raw.response,
+            ...prev.raw.response,
             messages: [parsedResponse],
           },
         },
         schema: {
-          ...mappedContent.schema,
+          ...prev.schema,
           response: {
-            ...(mappedContent.schema.response ?? {}),
+            ...(prev.schema.response ?? {}),
             messages: [newMessageMappedResponse],
           },
         },
-      });
+      }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mappedContent, response]);
+  }, [response]);
 
   const onRun = async () => {
     if (!mappedContent) {
