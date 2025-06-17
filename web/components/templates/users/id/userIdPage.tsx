@@ -80,7 +80,7 @@ const UserIdPage = (props: UserIdPageProps) => {
           <div className="grid grid-cols-10 gap-8 w-full pt-8">
             <div className="flex flex-col items-start space-y-4 w-full col-span-12 md:col-span-3 pt-2">
               <div className="flex flex-col space-y-2 divide-y divide-gray-200 dark:divide-gray-800 w-full text-black dark:text-white">
-                <p className="font-semibold text-md">Overview</p>
+                <p className="font-semibold text-md">Overview (Last 30 days)</p>
                 <div className="flex flex-wrap w-full justify-between gap-2 pt-4 pr-4">
                   <div className="flex flex-col items-start space-y-1">
                     <p className="text-sm font-semibold">Total Cost</p>
@@ -103,7 +103,7 @@ const UserIdPage = (props: UserIdPageProps) => {
                 </div>
               </div>
               <div className="flex flex-col space-y-2 divide-y divide-gray-200 dark:divide-gray-800 w-full pt-8 text-black dark:text-white">
-                <p className="font-semibold text-md">Details</p>
+                <p className="font-semibold text-md">Details (Last 30 days)</p>
                 <div className="flex flex-col pt-4 pr-4 space-y-4">
                   <div className="flex flex-col items-start space-y-1">
                     <p className="text-sm font-semibold">First Active</p>
