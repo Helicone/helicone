@@ -59,6 +59,8 @@ import { DashboardController } from './../../controllers/public/dashboardControl
 import { CustomerController } from './../../controllers/public/customerController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { ApiKeyController } from './../../controllers/public/apiKeyController';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { AnnotationController } from './../../controllers/public/annotationController';
 import { expressAuthentication } from './../../authentication';
 // @ts-ignore - no great way to install types from subpackage
 import type { Request as ExRequest, Response as ExResponse, RequestHandler, Router } from 'express';
@@ -3008,6 +3010,90 @@ const models: TsoaRoute.Models = {
     "Result__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array.string_": {
         "dataType": "refAlias",
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ABAnnotationRequest": {
+        "dataType": "refObject",
+        "properties": {
+            "datasetId": {"dataType":"string","required":true},
+            "datasetRowId": {"dataType":"string","required":true},
+            "requestId": {"dataType":"string","required":true},
+            "prompt": {"dataType":"string","required":true},
+            "responseA": {"dataType":"string","required":true},
+            "responseB": {"dataType":"string","required":true},
+            "choice": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["a"]},{"dataType":"enum","enums":["b"]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Annotations": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string","required":true},
+            "dataset_id": {"dataType":"string","required":true},
+            "dataset_row_id": {"dataType":"string","required":true},
+            "request_id": {"dataType":"string","required":true},
+            "organization_id": {"dataType":"string","required":true},
+            "annotation_type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["A/B"]},{"dataType":"enum","enums":["Labeling"]},{"dataType":"enum","enums":["RL"]},{"dataType":"enum","enums":["SFT"]}],"required":true},
+            "annotation_data": {"ref":"Record_string.any_","required":true},
+            "annotator_id": {"dataType":"string","required":true},
+            "created_at": {"dataType":"string","required":true},
+            "updated_at": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess_Annotations-Array_": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"dataType":"array","array":{"dataType":"refObject","ref":"Annotations"},"required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result_Annotations-Array.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_Annotations-Array_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess_Annotations_": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"ref":"Annotations","required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result_Annotations.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_Annotations_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "UpdateABAnnotationRequest": {
+        "dataType": "refObject",
+        "properties": {
+            "prompt": {"dataType":"string"},
+            "responseA": {"dataType":"string"},
+            "responseB": {"dataType":"string"},
+            "choice": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["a"]},{"dataType":"enum","enums":["b"]}]},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess__total-number--choice_a_count-number--choice_b_count-number--annotators_count-number__": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"annotators_count":{"dataType":"double","required":true},"choice_b_count":{"dataType":"double","required":true},"choice_a_count":{"dataType":"double","required":true},"total":{"dataType":"double","required":true}},"required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result__total-number--choice_a_count-number--choice_b_count-number--annotators_count-number_.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__total-number--choice_a_count-number--choice_b_count-number--annotators_count-number__"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 };
@@ -8994,6 +9080,274 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'updateAPIKey',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAnnotationController_createABAnnotation: Record<string, TsoaRoute.ParameterSchema> = {
+                body: {"in":"body","name":"body","required":true,"ref":"ABAnnotationRequest"},
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.post('/v1/annotation/ab',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(AnnotationController)),
+            ...(fetchMiddlewares<RequestHandler>(AnnotationController.prototype.createABAnnotation)),
+
+            async function AnnotationController_createABAnnotation(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAnnotationController_createABAnnotation, request, response });
+
+                const controller = new AnnotationController();
+
+              await templateService.apiHandler({
+                methodName: 'createABAnnotation',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAnnotationController_getAnnotations: Record<string, TsoaRoute.ParameterSchema> = {
+                datasetId: {"in":"query","name":"datasetId","dataType":"string"},
+                requestId: {"in":"query","name":"requestId","dataType":"string"},
+                annotationType: {"in":"query","name":"annotationType","dataType":"union","subSchemas":[{"dataType":"enum","enums":["A/B"]},{"dataType":"enum","enums":["Labeling"]},{"dataType":"enum","enums":["RL"]},{"dataType":"enum","enums":["SFT"]}]},
+                annotatorId: {"in":"query","name":"annotatorId","dataType":"string"},
+                limit: {"in":"query","name":"limit","dataType":"double"},
+                offset: {"in":"query","name":"offset","dataType":"double"},
+                request: {"in":"request","name":"request","dataType":"object"},
+        };
+        app.get('/v1/annotation',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(AnnotationController)),
+            ...(fetchMiddlewares<RequestHandler>(AnnotationController.prototype.getAnnotations)),
+
+            async function AnnotationController_getAnnotations(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAnnotationController_getAnnotations, request, response });
+
+                const controller = new AnnotationController();
+
+              await templateService.apiHandler({
+                methodName: 'getAnnotations',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAnnotationController_getAnnotationById: Record<string, TsoaRoute.ParameterSchema> = {
+                id: {"in":"path","name":"id","required":true,"dataType":"string"},
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.get('/v1/annotation/:id',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(AnnotationController)),
+            ...(fetchMiddlewares<RequestHandler>(AnnotationController.prototype.getAnnotationById)),
+
+            async function AnnotationController_getAnnotationById(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAnnotationController_getAnnotationById, request, response });
+
+                const controller = new AnnotationController();
+
+              await templateService.apiHandler({
+                methodName: 'getAnnotationById',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAnnotationController_updateABAnnotation: Record<string, TsoaRoute.ParameterSchema> = {
+                id: {"in":"path","name":"id","required":true,"dataType":"string"},
+                body: {"in":"body","name":"body","required":true,"ref":"UpdateABAnnotationRequest"},
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.put('/v1/annotation/ab/:id',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(AnnotationController)),
+            ...(fetchMiddlewares<RequestHandler>(AnnotationController.prototype.updateABAnnotation)),
+
+            async function AnnotationController_updateABAnnotation(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAnnotationController_updateABAnnotation, request, response });
+
+                const controller = new AnnotationController();
+
+              await templateService.apiHandler({
+                methodName: 'updateABAnnotation',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAnnotationController_getDatasetAnnotations: Record<string, TsoaRoute.ParameterSchema> = {
+                datasetId: {"in":"path","name":"datasetId","required":true,"dataType":"string"},
+                limit: {"in":"query","name":"limit","dataType":"double"},
+                offset: {"in":"query","name":"offset","dataType":"double"},
+                request: {"in":"request","name":"request","dataType":"object"},
+        };
+        app.get('/v1/annotation/dataset/:datasetId',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(AnnotationController)),
+            ...(fetchMiddlewares<RequestHandler>(AnnotationController.prototype.getDatasetAnnotations)),
+
+            async function AnnotationController_getDatasetAnnotations(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAnnotationController_getDatasetAnnotations, request, response });
+
+                const controller = new AnnotationController();
+
+              await templateService.apiHandler({
+                methodName: 'getDatasetAnnotations',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAnnotationController_getABAnnotationStats: Record<string, TsoaRoute.ParameterSchema> = {
+                datasetId: {"in":"path","name":"datasetId","required":true,"dataType":"string"},
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.get('/v1/annotation/dataset/:datasetId/ab/stats',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(AnnotationController)),
+            ...(fetchMiddlewares<RequestHandler>(AnnotationController.prototype.getABAnnotationStats)),
+
+            async function AnnotationController_getABAnnotationStats(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAnnotationController_getABAnnotationStats, request, response });
+
+                const controller = new AnnotationController();
+
+              await templateService.apiHandler({
+                methodName: 'getABAnnotationStats',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAnnotationController_getRequestAnnotations: Record<string, TsoaRoute.ParameterSchema> = {
+                requestId: {"in":"path","name":"requestId","required":true,"dataType":"string"},
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.get('/v1/annotation/request/:requestId',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(AnnotationController)),
+            ...(fetchMiddlewares<RequestHandler>(AnnotationController.prototype.getRequestAnnotations)),
+
+            async function AnnotationController_getRequestAnnotations(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAnnotationController_getRequestAnnotations, request, response });
+
+                const controller = new AnnotationController();
+
+              await templateService.apiHandler({
+                methodName: 'getRequestAnnotations',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsAnnotationController_getAnnotationsByAnnotator: Record<string, TsoaRoute.ParameterSchema> = {
+                annotatorId: {"in":"path","name":"annotatorId","required":true,"dataType":"string"},
+                datasetId: {"in":"query","name":"datasetId","dataType":"string"},
+                annotationType: {"in":"query","name":"annotationType","dataType":"union","subSchemas":[{"dataType":"enum","enums":["A/B"]},{"dataType":"enum","enums":["Labeling"]},{"dataType":"enum","enums":["RL"]},{"dataType":"enum","enums":["SFT"]}]},
+                limit: {"in":"query","name":"limit","dataType":"double"},
+                offset: {"in":"query","name":"offset","dataType":"double"},
+                request: {"in":"request","name":"request","dataType":"object"},
+        };
+        app.get('/v1/annotation/annotator/:annotatorId',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(AnnotationController)),
+            ...(fetchMiddlewares<RequestHandler>(AnnotationController.prototype.getAnnotationsByAnnotator)),
+
+            async function AnnotationController_getAnnotationsByAnnotator(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsAnnotationController_getAnnotationsByAnnotator, request, response });
+
+                const controller = new AnnotationController();
+
+              await templateService.apiHandler({
+                methodName: 'getAnnotationsByAnnotator',
                 controller,
                 response,
                 next,

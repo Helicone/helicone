@@ -280,6 +280,24 @@ export interface Tags {
   updated_at?: string;
 }
 
+export interface Annotations {
+  id: string;
+  dataset_id: string;
+  dataset_row_id: string;
+  request_id: string;
+  organization_id: string;
+  annotation_type: "A/B" | "Labeling" | "RL" | "SFT";
+  annotation_data: Record<string, any>;
+  annotator_id: string;
+  created_at: string;
+  updated_at: string;
+  // A/B specific fields stored in annotation_data
+  // prompt: string;
+  // response_a: string;
+  // response_b: string; 
+  // choice: "a" | "b";
+}
+
 export interface ClickhouseDB {
   Tables: {
     properties_v3: PropertiesV3;
@@ -292,6 +310,7 @@ export interface ClickhouseDB {
     request_response_rmt: RequestResponseRMT;
     tags: Tags;
     jawn_http_logs: JawnHttpLogs;
+    annotations: Annotations;
   };
 }
 

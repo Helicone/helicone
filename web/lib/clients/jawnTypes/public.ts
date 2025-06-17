@@ -531,6 +531,30 @@ export interface paths {
     delete: operations["DeleteAPIKey"];
     patch: operations["UpdateAPIKey"];
   };
+  "/v1/annotation/ab": {
+    post: operations["CreateABAnnotation"];
+  };
+  "/v1/annotation": {
+    get: operations["GetAnnotations"];
+  };
+  "/v1/annotation/{id}": {
+    get: operations["GetAnnotationById"];
+  };
+  "/v1/annotation/ab/{id}": {
+    put: operations["UpdateABAnnotation"];
+  };
+  "/v1/annotation/dataset/{datasetId}": {
+    get: operations["GetDatasetAnnotations"];
+  };
+  "/v1/annotation/dataset/{datasetId}/ab/stats": {
+    get: operations["GetABAnnotationStats"];
+  };
+  "/v1/annotation/request/{requestId}": {
+    get: operations["GetRequestAnnotations"];
+  };
+  "/v1/annotation/annotator/{annotatorId}": {
+    get: operations["GetAnnotationsByAnnotator"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -3098,6 +3122,63 @@ Json: JsonObject;
       error: null;
     };
     "Result__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array.string_": components["schemas"]["ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_"] | components["schemas"]["ResultError_string_"];
+    ABAnnotationRequest: {
+      datasetId: string;
+      datasetRowId: string;
+      requestId: string;
+      prompt: string;
+      responseA: string;
+      responseB: string;
+      /** @enum {string} */
+      choice: "a" | "b";
+    };
+    Annotations: {
+      id: string;
+      dataset_id: string;
+      dataset_row_id: string;
+      request_id: string;
+      organization_id: string;
+      /** @enum {string} */
+      annotation_type: "A/B" | "Labeling" | "RL" | "SFT";
+      annotation_data: components["schemas"]["Record_string.any_"];
+      annotator_id: string;
+      created_at: string;
+      updated_at: string;
+    };
+    "ResultSuccess_Annotations-Array_": {
+      data: components["schemas"]["Annotations"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Annotations-Array.string_": components["schemas"]["ResultSuccess_Annotations-Array_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_Annotations_: {
+      data: components["schemas"]["Annotations"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Annotations.string_": components["schemas"]["ResultSuccess_Annotations_"] | components["schemas"]["ResultError_string_"];
+    UpdateABAnnotationRequest: {
+      prompt?: string;
+      responseA?: string;
+      responseB?: string;
+      /** @enum {string} */
+      choice?: "a" | "b";
+    };
+    "ResultSuccess__total-number--choice_a_count-number--choice_b_count-number--annotators_count-number__": {
+      data: {
+        /** Format: double */
+        annotators_count: number;
+        /** Format: double */
+        choice_b_count: number;
+        /** Format: double */
+        choice_a_count: number;
+        /** Format: double */
+        total: number;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__total-number--choice_a_count-number--choice_b_count-number--annotators_count-number_.string_": components["schemas"]["ResultSuccess__total-number--choice_a_count-number--choice_b_count-number--annotators_count-number__"] | components["schemas"]["ResultError_string_"];
   };
   responses: {
   };
@@ -6189,6 +6270,146 @@ export interface operations {
           "application/json": {
             error: string;
           };
+        };
+      };
+    };
+  };
+  CreateABAnnotation: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ABAnnotationRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string.string_"];
+        };
+      };
+    };
+  };
+  GetAnnotations: {
+    parameters: {
+      query?: {
+        datasetId?: string;
+        requestId?: string;
+        annotationType?: "A/B" | "Labeling" | "RL" | "SFT";
+        annotatorId?: string;
+        limit?: number;
+        offset?: number;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Annotations-Array.string_"];
+        };
+      };
+    };
+  };
+  GetAnnotationById: {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Annotations.string_"];
+        };
+      };
+    };
+  };
+  UpdateABAnnotation: {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateABAnnotationRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetDatasetAnnotations: {
+    parameters: {
+      query?: {
+        limit?: number;
+        offset?: number;
+      };
+      path: {
+        datasetId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Annotations-Array.string_"];
+        };
+      };
+    };
+  };
+  GetABAnnotationStats: {
+    parameters: {
+      path: {
+        datasetId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__total-number--choice_a_count-number--choice_b_count-number--annotators_count-number_.string_"];
+        };
+      };
+    };
+  };
+  GetRequestAnnotations: {
+    parameters: {
+      path: {
+        requestId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Annotations-Array.string_"];
+        };
+      };
+    };
+  };
+  GetAnnotationsByAnnotator: {
+    parameters: {
+      query?: {
+        datasetId?: string;
+        annotationType?: "A/B" | "Labeling" | "RL" | "SFT";
+        limit?: number;
+        offset?: number;
+      };
+      path: {
+        annotatorId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Annotations-Array.string_"];
         };
       };
     };

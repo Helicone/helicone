@@ -3,6 +3,7 @@ import {
   ArchiveIcon,
   BellIcon,
   ChartLineIcon,
+  CheckSquare,
   DatabaseIcon,
   FlaskConicalIcon,
   Home,
@@ -78,6 +79,12 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
         icon: null,
         current: false,
         subItems: [
+          {
+            name: "Annotations",
+            href: "/annotations",
+            icon: CheckSquare,
+            current: pathname.includes("/annotations"),
+          },
           {
             name: "Prompts",
             href: "/prompts",

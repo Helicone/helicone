@@ -9480,6 +9480,239 @@
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
+			},
+			"ABAnnotationRequest": {
+				"properties": {
+					"datasetId": {
+						"type": "string"
+					},
+					"datasetRowId": {
+						"type": "string"
+					},
+					"requestId": {
+						"type": "string"
+					},
+					"prompt": {
+						"type": "string"
+					},
+					"responseA": {
+						"type": "string"
+					},
+					"responseB": {
+						"type": "string"
+					},
+					"choice": {
+						"type": "string",
+						"enum": [
+							"a",
+							"b"
+						]
+					}
+				},
+				"required": [
+					"datasetId",
+					"datasetRowId",
+					"requestId",
+					"prompt",
+					"responseA",
+					"responseB",
+					"choice"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Annotations": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"dataset_id": {
+						"type": "string"
+					},
+					"dataset_row_id": {
+						"type": "string"
+					},
+					"request_id": {
+						"type": "string"
+					},
+					"organization_id": {
+						"type": "string"
+					},
+					"annotation_type": {
+						"type": "string",
+						"enum": [
+							"A/B",
+							"Labeling",
+							"RL",
+							"SFT"
+						]
+					},
+					"annotation_data": {
+						"$ref": "#/components/schemas/Record_string.any_"
+					},
+					"annotator_id": {
+						"type": "string"
+					},
+					"created_at": {
+						"type": "string"
+					},
+					"updated_at": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"dataset_id",
+					"dataset_row_id",
+					"request_id",
+					"organization_id",
+					"annotation_type",
+					"annotation_data",
+					"annotator_id",
+					"created_at",
+					"updated_at"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_Annotations-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/Annotations"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_Annotations-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_Annotations-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess_Annotations_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/Annotations"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_Annotations.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_Annotations_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"UpdateABAnnotationRequest": {
+				"properties": {
+					"prompt": {
+						"type": "string"
+					},
+					"responseA": {
+						"type": "string"
+					},
+					"responseB": {
+						"type": "string"
+					},
+					"choice": {
+						"type": "string",
+						"enum": [
+							"a",
+							"b"
+						]
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess__total-number--choice_a_count-number--choice_b_count-number--annotators_count-number__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"annotators_count": {
+								"type": "number",
+								"format": "double"
+							},
+							"choice_b_count": {
+								"type": "number",
+								"format": "double"
+							},
+							"choice_a_count": {
+								"type": "number",
+								"format": "double"
+							},
+							"total": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"annotators_count",
+							"choice_b_count",
+							"choice_a_count",
+							"total"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__total-number--choice_a_count-number--choice_b_count-number--annotators_count-number_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__total-number--choice_a_count-number--choice_b_count-number--annotators_count-number__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
 			}
 		},
 		"securitySchemes": {
@@ -17379,6 +17612,403 @@
 						}
 					}
 				}
+			}
+		},
+		"/v1/annotation/ab": {
+			"post": {
+				"operationId": "CreateABAnnotation",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_string.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Annotation"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ABAnnotationRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/annotation": {
+			"get": {
+				"operationId": "GetAnnotations",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Annotations-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Annotation"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "datasetId",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "requestId",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "annotationType",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"A/B",
+								"Labeling",
+								"RL",
+								"SFT"
+							]
+						}
+					},
+					{
+						"in": "query",
+						"name": "annotatorId",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "offset",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/v1/annotation/{id}": {
+			"get": {
+				"operationId": "GetAnnotationById",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Annotations.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Annotation"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/annotation/ab/{id}": {
+			"put": {
+				"operationId": "UpdateABAnnotation",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Annotation"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateABAnnotationRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/annotation/dataset/{datasetId}": {
+			"get": {
+				"operationId": "GetDatasetAnnotations",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Annotations-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Annotation"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "datasetId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "offset",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/v1/annotation/dataset/{datasetId}/ab/stats": {
+			"get": {
+				"operationId": "GetABAnnotationStats",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__total-number--choice_a_count-number--choice_b_count-number--annotators_count-number_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Annotation"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "datasetId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/annotation/request/{requestId}": {
+			"get": {
+				"operationId": "GetRequestAnnotations",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Annotations-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Annotation"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "requestId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/annotation/annotator/{annotatorId}": {
+			"get": {
+				"operationId": "GetAnnotationsByAnnotator",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Annotations-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Annotation"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "annotatorId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "datasetId",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "annotationType",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"A/B",
+								"Labeling",
+								"RL",
+								"SFT"
+							]
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "offset",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
 			}
 		}
 	},
