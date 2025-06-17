@@ -176,36 +176,6 @@
             ]
           },
           {
-            "group": "AI Gateway",
-            "pages": [
-              "gateway/introduction",
-              "gateway/quickstart",
-              "gateway/config",
-              "gateway/deployment/guides",
-              {
-                "group": "Concepts",
-                "pages": [
-                  "gateway/concepts/loadbalancing",
-                  "gateway/concepts/rate-limiting",
-                  "gateway/concepts/cache",
-                  "gateway/concepts/secret-management"
-                ]
-              },
-              {
-                "group": "Deployments",
-                "pages": [
-                  "gateway/deployment/production-readiness",
-                  "gateway/deployment/flyio",
-                  "gateway/deployment/porter"
-                ]
-              },
-              {
-                "group": "Debugging",
-                "pages": ["gateway/debugging/router-health"]
-              }
-            ]
-          },
-          {
             "group": "Tracing",
             "pages": [
               "features/advanced-usage/caching",
