@@ -21,9 +21,6 @@ async fn openai_unified_api() {
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([
             ("success:openai:chat_completion", 1.into()),
-            // Auth is disabled, so auth and logging services should not be
-            // called
-            ("success:jawn:whoami", 0.into()),
             ("success:minio:upload_request", 0.into()),
             ("success:jawn:log_request", 0.into()),
         ]))
@@ -74,9 +71,6 @@ async fn anthropic_unified_api() {
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([
             ("success:anthropic:messages", 1.into()),
-            // Auth is disabled, so auth and logging services should not be
-            // called
-            ("success:jawn:whoami", 0.into()),
             ("success:minio:upload_request", 0.into()),
             ("success:jawn:log_request", 0.into()),
         ]))

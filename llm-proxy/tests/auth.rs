@@ -18,7 +18,6 @@ async fn require_auth_enabled_with_valid_token() {
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([
             ("success:openai:chat_completion", 1.into()),
-            ("success:jawn:whoami", 1.into()),
             ("success:minio:upload_request", 1.into()),
             ("success:jawn:log_request", 1.into()),
         ]))
@@ -26,6 +25,7 @@ async fn require_auth_enabled_with_valid_token() {
     let mut harness = Harness::builder()
         .with_config(config)
         .with_mock_args(mock_args)
+        .with_mock_auth()
         .build()
         .await;
 
@@ -72,7 +72,6 @@ async fn require_auth_enabled_without_token() {
             // be called
             ("success:openai:chat_completion", 0.into()),
             ("success:anthropic:messages", 0.into()),
-            ("success:jawn:whoami", 0.into()),
             ("success:minio:upload_request", 0.into()),
             ("success:jawn:log_request", 0.into()),
         ]))
@@ -117,9 +116,6 @@ async fn require_auth_disabled_without_token() {
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([
             ("success:openai:chat_completion", 1.into()),
-            // Auth is disabled, so auth and logging services should not be
-            // called
-            ("success:jawn:whoami", 0.into()),
             ("success:minio:upload_request", 0.into()),
             ("success:jawn:log_request", 0.into()),
         ]))
@@ -164,9 +160,6 @@ async fn require_auth_disabled_with_token() {
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([
             ("success:openai:chat_completion", 1.into()),
-            // Auth is disabled, so auth and logging services should not be
-            // called
-            ("success:jawn:whoami", 0.into()),
             ("success:minio:upload_request", 0.into()),
             ("success:jawn:log_request", 0.into()),
         ]))

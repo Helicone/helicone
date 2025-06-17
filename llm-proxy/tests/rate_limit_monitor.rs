@@ -56,13 +56,13 @@ async fn rate_limit_removes_provider_from_lb_pool() {
             ("success:anthropic:messages", (num_requests - 1..).into()),
             ("success:minio:upload_request", num_requests.into()),
             ("success:jawn:log_request", num_requests.into()),
-            ("success:jawn:whoami", num_requests.into()),
         ]))
         .build();
 
     let mut harness = Harness::builder()
         .with_config(config)
         .with_mock_args(mock_args)
+        .with_mock_auth()
         .build()
         .await;
 
@@ -118,7 +118,6 @@ async fn rate_limit_removes_provider_from_lb_pool() {
             ("success:anthropic:messages", (6..=14).into()),
             ("success:minio:upload_request", 20.into()),
             ("success:jawn:log_request", 20.into()),
-            ("success:jawn:whoami", 20.into()),
         ]))
         .await;
 

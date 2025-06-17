@@ -52,9 +52,6 @@ async fn openai_slow() {
             ("success:openai:chat_completion", (..40).into()),
             ("success:anthropic:messages", (30..).into()),
             ("success:google:generate_content", (30..).into()),
-            // Auth is disabled, so auth and logging services should not be
-            // called
-            ("success:jawn:whoami", 0.into()),
             ("success:minio:upload_request", 0.into()),
             ("success:jawn:log_request", 0.into()),
         ]))
@@ -107,9 +104,6 @@ async fn anthropic_slow() {
             ("success:openai:chat_completion", (30..).into()),
             ("success:anthropic:messages", (..60).into()),
             ("success:google:generate_content", (..60).into()),
-            // Auth is disabled, so auth and logging services should not be
-            // called
-            ("success:jawn:whoami", 0.into()),
             ("success:minio:upload_request", 0.into()),
             ("success:jawn:log_request", 0.into()),
         ]))

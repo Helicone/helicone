@@ -10,6 +10,7 @@ homepage = "https://helix.helicone.ai"
 
 [dependencies]
 anthropic-ai-sdk = { workspace = true }
+sha2 = { workspace = true }
 async-openai = { workspace = true }
 axum-core = { workspace = true }
 axum-server = { workspace = true, features = ["tls-rustls"] }

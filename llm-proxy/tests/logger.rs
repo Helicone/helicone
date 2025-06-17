@@ -21,12 +21,12 @@ async fn request_response_logger_authenticated() {
             ("success:openai:chat_completion", 1.into()),
             ("success:minio:upload_request", 1.into()),
             ("success:jawn:log_request", 1.into()),
-            ("success:jawn:whoami", 1.into()),
         ]))
         .build();
     let mut harness = Harness::builder()
         .with_config(config)
         .with_mock_args(mock_args)
+        .with_mock_auth()
         .build()
         .await;
     let body_bytes = serde_json::to_vec(&json!({

@@ -15,9 +15,7 @@ use llm_proxy::{
     types::router::RouterId,
 };
 use serde_json::json;
-use stubr::wiremock_rs::{Mock, ResponseTemplate, matchers};
 use tower::Service;
-use uuid::Uuid;
 
 fn create_test_limits(capacity: u32, duration_ms: u64) -> LimitsConfig {
     LimitsConfig {
@@ -116,17 +114,6 @@ async fn make_chat_request_for_router(
     response
 }
 
-fn whoami_mock(user_id: Uuid, organization_id: Uuid) -> Mock {
-    let matcher = matchers::path("/v1/router/control-plane/whoami");
-    let response = ResponseTemplate::new(200)
-        .append_header("content-type", "application/json")
-        .set_body_json(json!({
-            "userId": user_id.to_string(),
-            "organizationId": organization_id.to_string()
-        }));
-    Mock::given(matcher).respond_with(response)
-}
-
 // Test 1: Global rate limiting with router that doesn't override
 #[tokio::test]
 #[serial_test::serial]
@@ -158,17 +145,8 @@ async fn test_global_rate_limit_with_router_none() {
     let mut harness = Harness::builder()
         .with_config(config)
         .with_mock_args(mock_args)
+        .with_mock_auth()
         .build()
-        .await;
-
-    let user_id = Uuid::new_v4();
-    let organization_id = Uuid::new_v4();
-
-    harness
-        .mock
-        .jawn_mock
-        .http_server
-        .register(whoami_mock(user_id, organization_id))
         .await;
 
     let auth_header = "Bearer sk-helicone-test-key";
@@ -246,17 +224,8 @@ async fn test_router_specific_with_custom_limits() {
     let mut harness = Harness::builder()
         .with_config(config)
         .with_mock_args(mock_args)
+        .with_mock_auth()
         .build()
-        .await;
-
-    let user_id = Uuid::new_v4();
-    let organization_id = Uuid::new_v4();
-
-    harness
-        .mock
-        .jawn_mock
-        .http_server
-        .register(whoami_mock(user_id, organization_id))
         .await;
 
     let auth_header = "Bearer sk-helicone-test-key";
@@ -322,17 +291,8 @@ async fn test_global_with_custom_router_override() {
     let mut harness = Harness::builder()
         .with_config(config)
         .with_mock_args(mock_args)
+        .with_mock_auth()
         .build()
-        .await;
-
-    let user_id = Uuid::new_v4();
-    let organization_id = Uuid::new_v4();
-
-    harness
-        .mock
-        .jawn_mock
-        .http_server
-        .register(whoami_mock(user_id, organization_id))
         .await;
 
     let auth_header = "Bearer sk-helicone-test-key";
@@ -422,17 +382,8 @@ async fn test_router_independence_different_rate_limits() {
     let mut harness = Harness::builder()
         .with_config(config)
         .with_mock_args(mock_args)
+        .with_mock_auth()
         .build()
-        .await;
-
-    let user_id = Uuid::new_v4();
-    let organization_id = Uuid::new_v4();
-
-    harness
-        .mock
-        .jawn_mock
-        .http_server
-        .register(whoami_mock(user_id, organization_id))
         .await;
 
     let auth_header = "Bearer sk-helicone-test-key";
@@ -607,17 +558,8 @@ async fn test_multi_router_different_rate_limits_in_memory() {
     let mut harness = Harness::builder()
         .with_config(config)
         .with_mock_args(mock_args)
+        .with_mock_auth()
         .build()
-        .await;
-
-    let user_id = Uuid::new_v4();
-    let organization_id = Uuid::new_v4();
-
-    harness
-        .mock
-        .jawn_mock
-        .http_server
-        .register(whoami_mock(user_id, organization_id))
         .await;
 
     let auth_header = "Bearer sk-helicone-test-key";

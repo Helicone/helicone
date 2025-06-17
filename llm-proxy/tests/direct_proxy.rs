@@ -21,9 +21,6 @@ async fn openai_direct_proxy() {
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([
             ("success:openai:fake_endpoint", 1.into()),
-            // Auth is disabled, so auth and logging services should not be
-            // called
-            ("success:jawn:whoami", 0.into()),
             ("success:minio:upload_request", 0.into()),
             ("success:jawn:log_request", 0.into()),
         ]))
@@ -67,9 +64,6 @@ async fn anthropic_direct_proxy() {
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([
             ("success:anthropic:fake_endpoint", 1.into()),
-            // Auth is disabled, so auth and logging services should not be
-            // called
-            ("success:jawn:whoami", 0.into()),
             ("success:minio:upload_request", 0.into()),
             ("success:jawn:log_request", 0.into()),
         ]))

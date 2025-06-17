@@ -1,18 +1,14 @@
 use axum_core::response::IntoResponse;
 use futures::future::BoxFuture;
 use http::Request;
-use serde::Deserialize;
 use tower_http::auth::AsyncAuthorizeRequest;
 use tracing::warn;
-use url::Url;
-use uuid::Uuid;
 
 use crate::{
     app_state::AppState,
+    control_plane::types::hash_key,
     error::auth::AuthError,
-    types::{
-        extensions::AuthContext, org::OrgId, secret::Secret, user::UserId,
-    },
+    types::{extensions::AuthContext, secret::Secret},
 };
 
 #[derive(Clone)]
@@ -30,37 +26,26 @@ impl AuthService {
         app_state: AppState,
         api_key: &str,
     ) -> Result<AuthContext, AuthError> {
-        let whoami_result = app_state
-            .0
-            .jawn_http_client
-            .request_client
-            .get(whoami_url(&app_state))
-            .header("authorization", api_key)
-            .send()
-            .await
-            .inspect_err(|e| {
-                tracing::error!("Error sending request to whoami: {:?}", e);
-            })?
-            .error_for_status()
-            .map_err(AuthError::UnsuccessfulAuthResponse)
-            .inspect_err(|e| {
-                tracing::error!("Error calling whoami: {:?}", e);
-            })?;
-        let body = whoami_result.json::<WhoamiResponse>().await?;
-        Ok(AuthContext {
-            api_key: Secret::from(api_key.replace("Bearer ", "")),
-            user_id: UserId::new(body.user_id),
-            org_id: OrgId::new(body.organization_id),
-        })
-    }
-}
+        let config = &app_state.0.control_plane_state.lock().await.config;
+        let computed_hash = hash_key(api_key);
+        let key = config.get_key_from_hash(&computed_hash);
 
-#[derive(Debug, Deserialize)]
-struct WhoamiResponse {
-    #[serde(rename = "userId")]
-    user_id: Uuid,
-    #[serde(rename = "organizationId")]
-    organization_id: Uuid,
+        if let Some(key) = key {
+            Ok(AuthContext {
+                api_key: Secret::from(api_key.replace("Bearer ", "")),
+                user_id: key.owner_id.as_str().try_into()?,
+                org_id: config.auth.organization_id.as_str().try_into()?,
+            })
+        } else {
+            tracing::error!("key not found: {:?}", api_key);
+            tracing::error!("computed hash: {}", computed_hash);
+            tracing::error!(
+                "available hashes: {:?}",
+                config.keys.iter().map(|k| &k.key_hash).collect::<Vec<_>>()
+            );
+            Err(AuthError::InvalidCredentials)
+        }
+    }
 }
 
 impl<B> AsyncAuthorizeRequest<B> for AuthService
@@ -119,29 +104,5 @@ where
                 }
             }
         })
-    }
-}
-
-fn whoami_url(app_state: &AppState) -> Url {
-    app_state
-        .0
-        .config
-        .helicone
-        .base_url
-        .join("/v1/router/control-plane/whoami")
-        .expect("helicone base url should be valid")
-}
-
-#[cfg(all(test, feature = "testing"))]
-mod tests {
-    use super::*;
-    use crate::{app::App, config::Config, tests::TestDefault};
-
-    #[tokio::test]
-    async fn test_whoami_url() {
-        let app = App::new(Config::test_default()).await.unwrap();
-        let _whoami_url = whoami_url(&app.state);
-        // we don't care to assert what the url is,
-        // we just want to make sure it's not panicking
     }
 }

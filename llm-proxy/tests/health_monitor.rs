@@ -57,11 +57,11 @@ async fn errors_remove_provider_from_lb_pool() {
             ("error:google:generate_content", (..12).into()),
             ("success:minio:upload_request", 100.into()),
             ("success:jawn:log_request", 100.into()),
-            ("success:jawn:whoami", 100.into()),
         ]))
         .build();
     let mut harness = Harness::builder()
         .with_config(config)
+        .with_mock_auth()
         .with_mock_args(mock_args)
         .build()
         .await;

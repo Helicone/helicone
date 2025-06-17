@@ -4,10 +4,13 @@ use http::{Method, Request, StatusCode};
 use http_body_util::BodyExt;
 use llm_proxy::{
     config::{Config, rate_limit::TopLevelRateLimitConfig},
+    control_plane::{
+        self,
+        types::{AuthData, Key, hash_key},
+    },
     tests::{TestDefault, harness::Harness, mock::MockArgs},
 };
 use serde_json::json;
-use stubr::wiremock_rs::{Mock, ResponseTemplate, matchers};
 use tower::Service;
 use uuid::Uuid;
 
@@ -46,17 +49,8 @@ async fn rate_limit_capacity_enforced_impl(
     let mut harness = Harness::builder()
         .with_config(config)
         .with_mock_args(mock_args)
+        .with_mock_auth()
         .build()
-        .await;
-
-    let user_id = Uuid::new_v4();
-    let organization_id = Uuid::new_v4();
-
-    harness
-        .mock
-        .jawn_mock
-        .http_server
-        .register(whoami_mock(user_id, organization_id))
         .await;
 
     let auth_header = "Bearer sk-helicone-test-key";
@@ -124,23 +118,35 @@ async fn rate_limit_per_user_isolation_impl(
         ]))
         .build();
 
-    let mut harness = Harness::builder()
-        .with_config(config)
-        .with_mock_args(mock_args)
-        .build()
-        .await;
-
     let user1_auth = "Bearer sk-helicone-user1-key";
     let user2_auth = "Bearer sk-helicone-user2-key";
     let user1_id = Uuid::new_v4();
-    let organization1_id = Uuid::new_v4();
     let user2_id = Uuid::new_v4();
-    let organization2_id = Uuid::new_v4();
-    harness
-        .mock
-        .jawn_mock
-        .http_server
-        .register(whoami_mock(user1_id, organization1_id))
+
+    let control_plane_config = control_plane::types::Config {
+        auth: AuthData {
+            user_id: user1_auth.to_string(),
+            organization_id: Uuid::new_v4().to_string(),
+        },
+        keys: vec![
+            Key {
+                key_hash: hash_key(user1_auth),
+                owner_id: user1_id.to_string(),
+            },
+            Key {
+                key_hash: hash_key(user2_auth),
+                owner_id: user2_id.to_string(),
+            },
+        ],
+        router_id: "default".to_string(),
+        router_config: "{}".to_string(),
+    };
+
+    let mut harness = Harness::builder()
+        .with_config(config)
+        .with_mock_args(mock_args)
+        .with_control_plane_config(control_plane_config)
+        .build()
         .await;
 
     for i in 1..=3 {
@@ -177,12 +183,6 @@ async fn rate_limit_per_user_isolation_impl(
             ("success:jawn:log_request", 3.into()),
         ]))
         .await;
-    harness
-        .mock
-        .jawn_mock
-        .http_server
-        .register(whoami_mock(user2_id, organization2_id))
-        .await;
 
     for i in 1..=3 {
         let response = make_chat_request(&mut harness, user2_auth).await;
@@ -213,15 +213,8 @@ async fn rate_limit_disabled() {
     let mut harness = Harness::builder()
         .with_config(config)
         .with_mock_args(mock_args)
+        .with_mock_auth()
         .build()
-        .await;
-    let user_id = Uuid::new_v4();
-    let organization_id = Uuid::new_v4();
-    harness
-        .mock
-        .jawn_mock
-        .http_server
-        .register(whoami_mock(user_id, organization_id))
         .await;
 
     let auth_header = "Bearer sk-helicone-test-key";
@@ -271,15 +264,4 @@ async fn make_chat_request(
     tokio::time::sleep(std::time::Duration::from_millis(10)).await;
 
     response
-}
-
-fn whoami_mock(user_id: Uuid, organization_id: Uuid) -> Mock {
-    let matcher = matchers::path("/v1/router/control-plane/whoami");
-    let response = ResponseTemplate::new(200)
-        .append_header("content-type", "application/json")
-        .set_body_json(json!({
-            "userId": user_id.to_string(),
-            "organizationId": organization_id.to_string()
-        }));
-    Mock::given(matcher).respond_with(response)
 }

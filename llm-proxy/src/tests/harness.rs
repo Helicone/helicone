@@ -11,6 +11,7 @@ use super::mock::{Mock, MockArgs};
 use crate::{
     app::{App, AppFactory, AppResponse},
     config::Config,
+    control_plane,
     types::request::Request,
 };
 
@@ -20,6 +21,7 @@ pub const MOCK_SERVER_PORT: u16 = 8111;
 pub struct HarnessBuilder {
     mock_args: Option<MockArgs>,
     config: Option<Config>,
+    control_plane_config: control_plane::types::Config,
 }
 
 impl HarnessBuilder {
@@ -40,7 +42,26 @@ impl HarnessBuilder {
         let mock_args = self
             .mock_args
             .unwrap_or_else(|| MockArgs::builder().build());
-        Harness::new(mock_args, config).await
+        Harness::new(mock_args, config, self.control_plane_config).await
+    }
+
+    #[must_use]
+    pub fn with_control_plane_config(
+        mut self,
+        control_plane_config: control_plane::types::Config,
+    ) -> Self {
+        self.control_plane_config = control_plane_config;
+        self
+    }
+
+    #[cfg(feature = "testing")]
+    #[must_use]
+    pub fn with_mock_auth(self) -> Self {
+        use super::TestDefault;
+
+        self.with_control_plane_config(
+            control_plane::types::Config::test_default(),
+        )
     }
 }
 pub struct Harness {
@@ -50,10 +71,16 @@ pub struct Harness {
 }
 
 impl Harness {
-    async fn new(mock_args: MockArgs, mut config: Config) -> Self {
+    async fn new(
+        mock_args: MockArgs,
+        mut config: Config,
+        control_plane_config: control_plane::types::Config,
+    ) -> Self {
         let mock = Mock::new(&mut config, mock_args).await;
         let app = App::new(config).await.expect("failed to create app");
         let app_factory = AppFactory::new(app.state.clone(), app);
+        app_factory.state.0.control_plane_state.lock().await.config =
+            control_plane_config;
         let socket_addr =
             SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 0);
         Self {

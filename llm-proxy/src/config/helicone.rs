@@ -23,7 +23,7 @@ impl Default for HeliconeConfig {
             websocket_url: "ws://localhost:8585/ws/v1/router/control-plane"
                 .parse()
                 .unwrap(),
-            enable_control_plane: false,
+            enable_control_plane: true,
         }
     }
 }

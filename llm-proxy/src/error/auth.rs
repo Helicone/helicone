@@ -70,6 +70,10 @@ pub enum AuthErrorMetric {
     MissingAuthorizationHeader,
     /// Invalid credentials
     InvalidCredentials,
+    /// Invalid user id
+    InvalidUserId,
+    /// Invalid org id
+    InvalidOrgId,
 }
 
 impl From<&AuthError> for AuthErrorMetric {
