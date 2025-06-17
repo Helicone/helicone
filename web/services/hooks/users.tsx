@@ -139,22 +139,18 @@ const useUsers = (
       const jawn = getJawnClient(orgId);
       const filterNode = filter ? toFilterNode(filter) : "all";
 
-      const body = {
-        filter: filterNode as any,
-        offset: (currentPage - 1) * currentPageSize,
-        limit: currentPageSize,
-        sort: sortLeaf,
-        timeFilter: {
-          startTimeUnixSeconds: Math.floor(timeFilter.start.getTime() / 1000),
-          endTimeUnixSeconds: Math.floor(timeFilter.end.getTime() / 1000),
-        },
-        timeZoneDifferenceMinutes: new Date().getTimezoneOffset(),
-      };
-
-      console.log("User metrics query body:", body);
-
       const result = await jawn.POST("/v1/user/metrics/query", {
-        body,
+        body: {
+          filter: filterNode as any,
+          offset: (currentPage - 1) * currentPageSize,
+          limit: currentPageSize,
+          sort: sortLeaf,
+          timeFilter: {
+            startTimeUnixSeconds: Math.floor(timeFilter.start.getTime() / 1000),
+            endTimeUnixSeconds: Math.floor(timeFilter.end.getTime() / 1000),
+          },
+          timeZoneDifferenceMinutes: new Date().getTimezoneOffset(),
+        }
       });
 
       if (result.error || result.data.error) {
