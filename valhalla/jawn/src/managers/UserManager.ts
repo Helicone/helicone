@@ -151,14 +151,11 @@ export class UserManager extends BaseManager {
     const { argsAcc, orderByString } = buildUserSort(sort);
 
     const hasUsersQuery = `
-    SELECT
-      EXISTS(
-        SELECT 1
-        FROM request_response_rmt
-        WHERE organization_id = {val_0: String}
-          AND user_id != ''
-        LIMIT 1
-      ) AS has_users
+    SELECT count() > 0 AS has_users
+    FROM request_response_rmt
+    WHERE organization_id = {val_0: String}
+      AND user_id != ''
+    LIMIT 1
     `;
 
     const hasUsersResult = await dbQueryClickhouse<{ has_users: number }>(hasUsersQuery, [organizationId]);
