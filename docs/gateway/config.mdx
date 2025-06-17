@@ -20,14 +20,12 @@ The gateway ships with [comprehensive defaults](https://github.com/Helicone/heli
   ```yaml
   providers:
     openai:
-      base-url: "https://api.openai.com"
       models:
         - gpt-4
         - gpt-4o
         - gpt-4o-mini
     
     anthropic:
-      base-url: "https://api.anthropic.com"
       version: "2023-06-01"
       models:
         - claude-3-opus
@@ -35,7 +33,6 @@ The gateway ships with [comprehensive defaults](https://github.com/Helicone/heli
         - claude-3-haiku
     
     gemini:
-      base-url: "https://generativelanguage.googleapis.com"
       models:
         - gemini-1.5-pro
         - gemini-1.5-flash
@@ -94,7 +91,7 @@ The Gateway ships with [comprehensive defaults](https://github.com/Helicone/heli
 
   ```yaml
   routers:
-    default:
+    production:
       model-mappings:
         gpt-4: claude-3-opus
         gpt-4o-mini: claude-3-haiku
@@ -132,7 +129,7 @@ The Gateway ships with a single `default` router that provides basic OpenAI-comp
     production:
       balance:
         chat:
-          strategy: p2-c
+          strategy: latency
           targets:
             - openai
             - anthropic
@@ -164,7 +161,7 @@ Distribute requests across multiple providers to optimize performance, costs, an
 
   ```yaml
   routers:
-    default:
+    production:
       load-balance:
         chat:
           strategy: latency
@@ -233,7 +230,7 @@ Store and reuse LLM responses for identical requests to dramatically reduce cost
 
   ```yaml
   routers:
-    default:
+    production:
       cache:
         enabled: true
         directive: "max-age=3600, max-stale=1800"
