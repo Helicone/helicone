@@ -92,13 +92,23 @@ function useQueryParam(
 }
 
 const UsersPageV2 = (props: UsersPageV2Props) => {
-  const { currentPage: currentPageProp, pageSize: pageSizeProp, sort: sortProp } = props;
+  const {
+    currentPage: currentPageProp,
+    pageSize: pageSizeProp,
+    sort: sortProp,
+  } = props;
 
   const tableRef = useRef<any>(null);
   const router = useRouter();
 
-  const [currentPage, setCurrentPage] = useQueryParam("page", currentPageProp.toString());
-  const [pageSize, setPageSize] = useQueryParam("pageSize", pageSizeProp.toString());
+  const [currentPage, setCurrentPage] = useQueryParam(
+    "page",
+    currentPageProp.toString()
+  );
+  const [pageSize, setPageSize] = useQueryParam(
+    "pageSize",
+    pageSizeProp.toString()
+  );
   const [sortDirection, setSortDirection] = useQueryParam(
     "sortDirection",
     sortProp.sortDirection ?? "desc"
