@@ -8,7 +8,9 @@ The AI Gateway automatically distributes requests across multiple providers usin
 
 All strategies are **rate-limit aware** and **health-monitored**—unhealthy providers are automatically removed and re-added when they recover. This is enabled by default and [configurable](#health-monitoring).
 
-## Why Use Load Balancing?
+## Getting Started
+
+### Why Use Load Balancing?
 
 Load balancing helps you:
 - **Optimize latency** by routing to the fastest available providers
@@ -21,7 +23,7 @@ Load balancing helps you:
   For complete configuration options and syntax, see the [Configuration Reference](/gateway/config#load-balancing).
 </Note>
 
-## Available Strategies
+### Available Strategies
 
 <AccordionGroup>
   <Accordion title="Latency-based (P2C + PeakEWMA) - Default" icon="bolt">
@@ -102,22 +104,7 @@ Load balancing helps you:
   </Accordion>
 </AccordionGroup>
 
-## Load Balancing Levels
-
-The AI Gateway supports load balancing at multiple levels of granularity:
-
-| Level                   | Availability | Description                                                                                                                 | Example                                          |
-| ----------------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| **Providers**           | v0 (live!)           | Balance across different AI companies                                                                                       | OpenAI vs Anthropic vs Google Gemini             |
-| **Deployments/Regions** | v0 (live!)           | Balance across regions for providers that support them                                                                     | `us-east-1` vs `us-west-2` vs `eu-west-1`        |
-| **Models**              | v2 (coming soon!)           | Balance over (provider, model) pairs. | `openai/gpt-4o` vs `anthropic/claude-3-5-sonnet` |
-
-<Callout type="info">
-  Currently, the AI Gateway load balances at the **provider level**. Model-level and regional load balancing are planned for future releases.
-</Callout>
-
-
-## Configuration Examples
+### Configuration Examples
 
 <Tabs>
   <Tab title="Production API - Optimize for Speed">
@@ -211,7 +198,23 @@ The AI Gateway supports load balancing at multiple levels of granularity:
   </Tab>
 </Tabs>
 
-## Choosing the Right Strategy
+## Reference
+
+### Load Balancing Levels
+
+The AI Gateway supports load balancing at multiple levels of granularity:
+
+| Level                   | Availability | Description                                                                                                                 | Example                                          |
+| ----------------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| **Providers**           | v0 (live!)           | Balance across different AI companies                                                                                       | OpenAI vs Anthropic vs Google Gemini             |
+| **Deployments/Regions** | v0 (live!)           | Balance across regions for providers that support them                                                                     | `us-east-1` vs `us-west-2` vs `eu-west-1`        |
+| **Models**              | v2 (coming soon!)           | Balance over (provider, model) pairs. | `openai/gpt-4o` vs `anthropic/claude-3-5-sonnet` |
+
+<Callout type="info">
+  Currently, the AI Gateway load balances at the **provider level**. Model-level and regional load balancing are planned for future releases.
+</Callout>
+
+### Choosing the Right Strategy
 
 | Use Case                 | Recommended Strategy       | Availability |
 | ------------------------ | -------------------------- | ------------ |
@@ -222,7 +225,9 @@ The AI Gateway supports load balancing at multiple levels of granularity:
 | **Fine-grained control** | Model-level weighted       | v2           |
 | **Compliance routing**   | [Multiple routers](#compliance-based-routing)                  | v3           |
 
-## Health Monitoring
+## Advanced Configuration
+
+### Health Monitoring
 
 All load balancing strategies automatically handle provider failures through intelligent health monitoring:
 
@@ -247,11 +252,11 @@ All load balancing strategies automatically handle provider failures through int
 
 To customize health monitoring behavior, see the [Configuration Reference](/gateway/config#health-monitoring).
 
-## Compliance-Based Routing
+### Compliance-Based Routing
 
 For compliance requirements, deploy **multiple router instances** rather than complex routing logic. This provides better isolation, security, and auditability.
 
-### Common Scenarios
+#### Common Scenarios
 
 <Tabs>
   <Tab title="Data Sovereignty - GDPR">
