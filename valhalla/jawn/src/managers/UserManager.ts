@@ -155,13 +155,13 @@ export class UserManager extends BaseManager {
       EXISTS(
         SELECT 1
         FROM request_response_rmt
-        WHERE organization_id = '${organizationId}'
+        WHERE organization_id = {val_0: String}
           AND user_id != ''
         LIMIT 1
       ) AS has_users
     `;
 
-    const hasUsersResult = await dbQueryClickhouse<{ has_users: number }>(hasUsersQuery, []);
+    const hasUsersResult = await dbQueryClickhouse<{ has_users: number }>(hasUsersQuery, [organizationId]);
 
     const builtFilter = await buildFilterWithAuthClickHouse({
       org_id: organizationId,
