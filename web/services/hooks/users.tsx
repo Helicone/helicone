@@ -150,7 +150,7 @@ const useUsers = (
             endTimeUnixSeconds: Math.floor(timeFilter.end.getTime() / 1000),
           },
           timeZoneDifferenceMinutes: new Date().getTimezoneOffset(),
-        },
+        }
       });
 
       if (result.error || result.data.error) {

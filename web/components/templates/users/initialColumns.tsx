@@ -109,12 +109,12 @@ export const INITIAL_COLUMNS: ColumnDef<UserMetric>[] = [
     minSize: 200,
   },
   {
-    id: "total_prompt_token",
-    accessorKey: "total_prompt_token",
+    id: "total_prompt_tokens",
+    accessorKey: "total_prompt_tokens",
     header: "Prompt Tokens",
     cell: (info) => Number(info.getValue()).toLocaleString(),
     meta: {
-      sortKey: "total_prompt_token",
+      sortKey: "total_prompt_tokens",
     },
     minSize: 200,
   },
