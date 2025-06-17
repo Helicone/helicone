@@ -476,19 +476,27 @@
 				"type": "object",
 				"description": "Make all properties in T optional"
 			},
-			"Partial_TimestampOperators_": {
+			"Partial_TimestampOperatorsTyped_": {
 				"properties": {
+					"equals": {
+						"type": "string",
+						"format": "date-time"
+					},
 					"gte": {
-						"type": "string"
+						"type": "string",
+						"format": "date-time"
 					},
 					"lte": {
-						"type": "string"
+						"type": "string",
+						"format": "date-time"
 					},
 					"lt": {
-						"type": "string"
+						"type": "string",
+						"format": "date-time"
 					},
 					"gt": {
-						"type": "string"
+						"type": "string",
+						"format": "date-time"
 					}
 				},
 				"type": "object",
@@ -503,10 +511,10 @@
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},
 					"user_first_active": {
-						"$ref": "#/components/schemas/Partial_TimestampOperators_"
+						"$ref": "#/components/schemas/Partial_TimestampOperatorsTyped_"
 					},
 					"user_last_active": {
-						"$ref": "#/components/schemas/Partial_TimestampOperators_"
+						"$ref": "#/components/schemas/Partial_TimestampOperatorsTyped_"
 					},
 					"user_total_requests": {
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
@@ -525,28 +533,6 @@
 					},
 					"user_cost": {
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
-			"Partial_TimestampOperatorsTyped_": {
-				"properties": {
-					"gte": {
-						"type": "string",
-						"format": "date-time"
-					},
-					"lte": {
-						"type": "string",
-						"format": "date-time"
-					},
-					"lt": {
-						"type": "string",
-						"format": "date-time"
-					},
-					"gt": {
-						"type": "string",
-						"format": "date-time"
 					}
 				},
 				"type": "object",
@@ -878,7 +864,7 @@
 					"average_tokens_per_request": {
 						"$ref": "#/components/schemas/SortDirection"
 					},
-					"total_prompt_token": {
+					"total_prompt_tokens": {
 						"$ref": "#/components/schemas/SortDirection"
 					},
 					"total_completion_tokens": {
@@ -1774,6 +1760,27 @@
 					},
 					"model": {
 						"$ref": "#/components/schemas/Partial_TextOperators_"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Partial_TimestampOperators_": {
+				"properties": {
+					"equals": {
+						"type": "string"
+					},
+					"gte": {
+						"type": "string"
+					},
+					"lte": {
+						"type": "string"
+					},
+					"lt": {
+						"type": "string"
+					},
+					"gt": {
+						"type": "string"
 					}
 				},
 				"type": "object",

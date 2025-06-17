@@ -36,7 +36,7 @@ interface RequestResponseRMT {
 export interface Views {
   users_view: UserMetric;
   session_metrics: {
-    total_cost: number;
+    cost: number;
     total_tokens: number;
     prompt_tokens: number;
     completion_tokens: number;

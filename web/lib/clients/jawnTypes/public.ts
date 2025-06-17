@@ -658,35 +658,30 @@ export interface components {
       gt?: number;
     };
     /** @description Make all properties in T optional */
-    Partial_TimestampOperators_: {
+    Partial_TimestampOperatorsTyped_: {
+      /** Format: date-time */
+      equals?: string;
+      /** Format: date-time */
       gte?: string;
+      /** Format: date-time */
       lte?: string;
+      /** Format: date-time */
       lt?: string;
+      /** Format: date-time */
       gt?: string;
     };
     /** @description Make all properties in T optional */
     Partial_UserViewToOperators_: {
       user_user_id?: components["schemas"]["Partial_TextOperators_"];
       user_active_for?: components["schemas"]["Partial_NumberOperators_"];
-      user_first_active?: components["schemas"]["Partial_TimestampOperators_"];
-      user_last_active?: components["schemas"]["Partial_TimestampOperators_"];
+      user_first_active?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      user_last_active?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
       user_total_requests?: components["schemas"]["Partial_NumberOperators_"];
       user_average_requests_per_day_active?: components["schemas"]["Partial_NumberOperators_"];
       user_average_tokens_per_request?: components["schemas"]["Partial_NumberOperators_"];
       user_total_completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
       user_total_prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
       user_cost?: components["schemas"]["Partial_NumberOperators_"];
-    };
-    /** @description Make all properties in T optional */
-    Partial_TimestampOperatorsTyped_: {
-      /** Format: date-time */
-      gte?: string;
-      /** Format: date-time */
-      lte?: string;
-      /** Format: date-time */
-      lt?: string;
-      /** Format: date-time */
-      gt?: string;
     };
     /** @description Make all properties in T optional */
     Partial_BooleanOperators_: {
@@ -790,7 +785,7 @@ export interface components {
       total_requests?: components["schemas"]["SortDirection"];
       average_requests_per_day_active?: components["schemas"]["SortDirection"];
       average_tokens_per_request?: components["schemas"]["SortDirection"];
-      total_prompt_token?: components["schemas"]["SortDirection"];
+      total_prompt_tokens?: components["schemas"]["SortDirection"];
       total_completion_tokens?: components["schemas"]["SortDirection"];
       cost?: components["schemas"]["SortDirection"];
       rate_limited_count?: components["schemas"]["SortDirection"];
@@ -1017,6 +1012,14 @@ export interface components {
       body_completion?: components["schemas"]["Partial_TextOperators_"];
       status?: components["schemas"]["Partial_NumberOperators_"];
       model?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_TimestampOperators_: {
+      equals?: string;
+      gte?: string;
+      lte?: string;
+      lt?: string;
+      gt?: string;
     };
     /** @description Make all properties in T optional */
     Partial_RequestTableToOperators_: {

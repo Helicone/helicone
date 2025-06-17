@@ -239,19 +239,14 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"not-equals":{"dataType":"double"},"equals":{"dataType":"double"},"gte":{"dataType":"double"},"lte":{"dataType":"double"},"lt":{"dataType":"double"},"gt":{"dataType":"double"}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Partial_TimestampOperators_": {
+    "Partial_TimestampOperatorsTyped_": {
         "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"gte":{"dataType":"string"},"lte":{"dataType":"string"},"lt":{"dataType":"string"},"gt":{"dataType":"string"}},"validators":{}},
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"equals":{"dataType":"datetime"},"gte":{"dataType":"datetime"},"lte":{"dataType":"datetime"},"lt":{"dataType":"datetime"},"gt":{"dataType":"datetime"}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Partial_UserViewToOperators_": {
         "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"user_user_id":{"ref":"Partial_TextOperators_"},"user_active_for":{"ref":"Partial_NumberOperators_"},"user_first_active":{"ref":"Partial_TimestampOperators_"},"user_last_active":{"ref":"Partial_TimestampOperators_"},"user_total_requests":{"ref":"Partial_NumberOperators_"},"user_average_requests_per_day_active":{"ref":"Partial_NumberOperators_"},"user_average_tokens_per_request":{"ref":"Partial_NumberOperators_"},"user_total_completion_tokens":{"ref":"Partial_NumberOperators_"},"user_total_prompt_tokens":{"ref":"Partial_NumberOperators_"},"user_cost":{"ref":"Partial_NumberOperators_"}},"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Partial_TimestampOperatorsTyped_": {
-        "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"gte":{"dataType":"datetime"},"lte":{"dataType":"datetime"},"lt":{"dataType":"datetime"},"gt":{"dataType":"datetime"}},"validators":{}},
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"user_user_id":{"ref":"Partial_TextOperators_"},"user_active_for":{"ref":"Partial_NumberOperators_"},"user_first_active":{"ref":"Partial_TimestampOperatorsTyped_"},"user_last_active":{"ref":"Partial_TimestampOperatorsTyped_"},"user_total_requests":{"ref":"Partial_NumberOperators_"},"user_average_requests_per_day_active":{"ref":"Partial_NumberOperators_"},"user_average_tokens_per_request":{"ref":"Partial_NumberOperators_"},"user_total_completion_tokens":{"ref":"Partial_NumberOperators_"},"user_total_prompt_tokens":{"ref":"Partial_NumberOperators_"},"user_cost":{"ref":"Partial_NumberOperators_"}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Partial_BooleanOperators_": {
@@ -333,7 +328,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "SortLeafUsers": {
         "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"id":{"ref":"SortDirection"},"user_id":{"ref":"SortDirection"},"active_for":{"ref":"SortDirection"},"first_active":{"ref":"SortDirection"},"last_active":{"ref":"SortDirection"},"total_requests":{"ref":"SortDirection"},"average_requests_per_day_active":{"ref":"SortDirection"},"average_tokens_per_request":{"ref":"SortDirection"},"total_prompt_token":{"ref":"SortDirection"},"total_completion_tokens":{"ref":"SortDirection"},"cost":{"ref":"SortDirection"},"rate_limited_count":{"ref":"SortDirection"}},"validators":{}},
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"id":{"ref":"SortDirection"},"user_id":{"ref":"SortDirection"},"active_for":{"ref":"SortDirection"},"first_active":{"ref":"SortDirection"},"last_active":{"ref":"SortDirection"},"total_requests":{"ref":"SortDirection"},"average_requests_per_day_active":{"ref":"SortDirection"},"average_tokens_per_request":{"ref":"SortDirection"},"total_prompt_tokens":{"ref":"SortDirection"},"total_completion_tokens":{"ref":"SortDirection"},"cost":{"ref":"SortDirection"},"rate_limited_count":{"ref":"SortDirection"}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "UserMetricsQueryParams": {
@@ -608,6 +603,11 @@ const models: TsoaRoute.Models = {
     "Partial_ResponseTableToOperators_": {
         "dataType": "refAlias",
         "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"body_tokens":{"ref":"Partial_NumberOperators_"},"body_model":{"ref":"Partial_TextOperators_"},"body_completion":{"ref":"Partial_TextOperators_"},"status":{"ref":"Partial_NumberOperators_"},"model":{"ref":"Partial_TextOperators_"}},"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Partial_TimestampOperators_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"equals":{"dataType":"string"},"gte":{"dataType":"string"},"lte":{"dataType":"string"},"lt":{"dataType":"string"},"gt":{"dataType":"string"}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Partial_RequestTableToOperators_": {

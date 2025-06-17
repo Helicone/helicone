@@ -27,9 +27,9 @@ export type NumberOperators = Record<
 
 export type BooleanOperators = Record<"equals", boolean>;
 
-export type TimestampOperators = Record<"gte" | "lte" | "lt" | "gt", string>;
+export type TimestampOperators = Record<"equals" | "gte" | "lte" | "lt" | "gt", string>;
 
-export type TimestampOperatorsTyped = Record<"gte" | "lte" | "lt" | "gt", Date>;
+export type TimestampOperatorsTyped = Record<"equals" | "gte" | "lte" | "lt" | "gt", Date>;
 
 export type AnyOperator =
   | SingleKey<TextOperators>
@@ -234,8 +234,8 @@ export type FilterLeafSessionsRequestResponseRMT =
 type UserViewToOperators = {
   user_user_id: SingleKey<TextOperators>;
   user_active_for: SingleKey<NumberOperators>;
-  user_first_active: SingleKey<TimestampOperators>;
-  user_last_active: SingleKey<TimestampOperators>;
+  user_first_active: SingleKey<TimestampOperatorsTyped>;
+  user_last_active: SingleKey<TimestampOperatorsTyped>;
   user_total_requests: SingleKey<NumberOperators>;
   user_average_requests_per_day_active: SingleKey<NumberOperators>;
   user_average_tokens_per_request: SingleKey<NumberOperators>;

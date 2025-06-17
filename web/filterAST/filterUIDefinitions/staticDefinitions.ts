@@ -66,7 +66,7 @@ export const STATIC_USER_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     subType: "user",
   },
   {
-    id: "user_total_prompt_token",
+    id: "user_total_prompt_tokens",
     label: "Total Prompt Tokens",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
@@ -74,7 +74,7 @@ export const STATIC_USER_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     subType: "user",
   },
   {
-    id: "user_total_cost",
+    id: "user_cost",
     label: "Total Cost",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],

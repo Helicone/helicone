@@ -311,6 +311,7 @@ const havingKeyMappings: KeyMappings = {
     cost: "cost",
   }),
   users_view: easyKeyMappings<"users_view">({
+    user_user_id: "user_id",
     user_active_for: "active_for",
     user_first_active: "first_active",
     user_last_active: "last_active",
@@ -318,7 +319,7 @@ const havingKeyMappings: KeyMappings = {
     user_average_requests_per_day_active: "average_requests_per_day_active",
     user_average_tokens_per_request: "average_tokens_per_request",
     user_total_completion_tokens: "total_completion_tokens",
-    user_total_prompt_tokens: "total_prompt_token",
+    user_total_prompt_tokens: "total_prompt_tokens",
     user_cost: "cost",
   }),
   sessions_request_response_rmt:
