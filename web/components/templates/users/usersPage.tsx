@@ -354,7 +354,7 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
             pageSizeOptions={[25, 50, 100, 250, 500]}
           />
         </TabsContent>
-        <TabsContent value="metrics" className="flex-1 overflow-auto">
+        <TabsContent value="metrics" className="h-full">
           <UserMetrics />
         </TabsContent>
       </Tabs>
