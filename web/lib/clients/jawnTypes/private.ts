@@ -1342,6 +1342,7 @@ Json: JsonObject;
       model: string;
       cache_reference_id: string | null;
       cache_enabled: boolean;
+      updated_at?: string;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];
