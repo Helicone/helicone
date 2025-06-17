@@ -1337,7 +1337,6 @@ export class AdminController extends Controller {
   }> {
     await authCheckThrow(request.authParams.userId);
     
-    // Simulate delay for testing
     await new Promise((resolve) => setTimeout(resolve, 1000));
     
     try {

@@ -76,7 +76,7 @@ export function costOfPrompt({
   perCall?: number;
   multiple?: number;
 }) {
-  let cost = costOf({ model, provider });
+  const cost = costOf({ model, provider });
   if (!cost) {
     return null;
   }
@@ -225,11 +225,11 @@ END
 export function clickhousePriceCalcNonAggregated(
   table: string,
   inDollars: boolean = true,
-  chunkProviders: boolean = false, // if true, chunk providers into multiple queries to avoid memory issues.
-  totalChunks: number = 1, // total number of chunks to split providers into
-  chunk: number = 0, // which chunk to process (0 to totalChunks-1)
-  useDefaultCost: boolean = true, // if true, set 0 by default if unsupported model/provider, otherwise don't change.
-  optimized: boolean = false, // if true, use equalities instead of LIKE where possible. Will not catch capitalization diffs.
+  chunkProviders: boolean = false,
+  totalChunks: number = 1,
+  chunk: number = 0,
+  useDefaultCost: boolean = true,
+  optimized: boolean = false,
 ) {
   const providersWithCosts = providers.filter(
     (p) => p.costs && defaultProvider.provider !== p.provider
