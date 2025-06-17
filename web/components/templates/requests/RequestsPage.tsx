@@ -83,6 +83,7 @@ interface RequestsPageV2Props {
   rateLimited?: boolean;
   organizationLayoutAvailable: boolean;
   emptyStateOptions?: RequestsPageEmptyStateOptions;
+  showSelection?: boolean;
 }
 
 type TRequest = {
@@ -103,6 +104,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
       options: EMPTY_STATE_PAGES.requests,
       isVisible: true,
     },
+    showSelection = true,
   } = props;
 
   /* -------------------------------------------------------------------------- */
@@ -677,7 +679,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
               tableRef={tableRef}
               activeColumns={activeColumns}
               setActiveColumns={setActiveColumns}
-              checkboxMode={"on_hover"}
+              checkboxMode={showSelection ? "on_hover" : "never"}
               defaultData={requests}
               defaultColumns={columnsWithProperties}
               skeletonLoading={isDataLoading}
@@ -713,7 +715,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
                   : undefined
               }
               onRowSelect={onRowSelectHandler}
-              onSelectAll={selectAll}
+              onSelectAll={showSelection ? selectAll : undefined}
               selectedIds={selectedIds}
               // only for request page
               currentRow={selectedData}

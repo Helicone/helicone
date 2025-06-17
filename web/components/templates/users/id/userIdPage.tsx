@@ -212,6 +212,7 @@ const UserIdPage = (props: UserIdPageProps) => {
                       }}
                       userId={userId}
                       organizationLayoutAvailable={false}
+                      showSelection={false}
                     />
                   </div>
                 </TabsContent>
