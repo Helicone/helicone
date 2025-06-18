@@ -7,7 +7,7 @@ use llm_proxy::{
     config::{
         Config,
         rate_limit::{
-            GcraConfig, LimitsConfig, RateLimitStore, TopLevelRateLimitConfig,
+            GcraConfig, GlobalRateLimitConfig, LimitsConfig, RateLimitStore,
         },
         router::{RouterConfig, RouterConfigs, RouterRateLimitConfig},
     },
@@ -120,13 +120,12 @@ async fn make_chat_request_for_router(
 async fn test_global_rate_limit_with_router_none() {
     let mut config = Config::test_default();
     config.helicone.enable_auth = true;
-    config.rate_limit = TopLevelRateLimitConfig {
+    config.global.rate_limit = Some(GlobalRateLimitConfig {
         store: RateLimitStore::InMemory,
         // 3 requests per second
-        global_limits: Some(create_test_limits(3, 1000)),
-        unified_api_limits: None,
+        limits: Some(create_test_limits(3, 1000)),
         cleanup_interval: Duration::from_secs(60),
-    };
+    });
 
     // Router doesn't override rate limiting
     config.routers = RouterConfigs::new(HashMap::from([(
@@ -194,12 +193,11 @@ async fn test_global_rate_limit_with_router_none() {
 async fn test_router_specific_with_custom_limits() {
     let mut config = Config::test_default();
     config.helicone.enable_auth = true;
-    config.rate_limit = TopLevelRateLimitConfig {
+    config.global.rate_limit = Some(GlobalRateLimitConfig {
         store: RateLimitStore::InMemory,
-        global_limits: None,
-        unified_api_limits: None,
+        limits: None,
         cleanup_interval: Duration::from_secs(60),
-    };
+    });
 
     // Router provides its own custom rate limits
     config.routers = RouterConfigs::new(HashMap::from([(
@@ -260,13 +258,12 @@ async fn test_router_specific_with_custom_limits() {
 async fn test_global_with_custom_router_override() {
     let mut config = Config::test_default();
     config.helicone.enable_auth = true;
-    config.rate_limit = TopLevelRateLimitConfig {
+    config.global.rate_limit = Some(GlobalRateLimitConfig {
         store: RateLimitStore::InMemory,
         // 5 requests per second
-        global_limits: Some(create_test_limits(5, 1000)),
-        unified_api_limits: None,
+        limits: Some(create_test_limits(5, 1000)),
         cleanup_interval: Duration::from_secs(60),
-    };
+    });
 
     // Router overrides with stricter custom limits
     config.routers = RouterConfigs::new(HashMap::from([(
@@ -327,12 +324,11 @@ async fn test_global_with_custom_router_override() {
 async fn test_router_independence_different_rate_limits() {
     let mut config = Config::test_default();
     config.helicone.enable_auth = true;
-    config.rate_limit = TopLevelRateLimitConfig {
+    config.global.rate_limit = Some(GlobalRateLimitConfig {
         store: RateLimitStore::InMemory,
-        global_limits: None,
-        unified_api_limits: None,
+        limits: None,
         cleanup_interval: Duration::from_secs(60),
-    };
+    });
 
     let strict_router_id = RouterId::Named(CompactString::from("strict"));
     let lenient_router_id = RouterId::Named(CompactString::from("lenient"));
@@ -506,12 +502,11 @@ async fn make_chat_request_to_router(
 async fn test_multi_router_different_rate_limits_in_memory() {
     let mut config = Config::test_default();
     config.helicone.enable_auth = true;
-    config.rate_limit = TopLevelRateLimitConfig {
+    config.global.rate_limit = Some(GlobalRateLimitConfig {
         store: RateLimitStore::InMemory,
-        global_limits: None,
-        unified_api_limits: None,
+        limits: None,
         cleanup_interval: Duration::from_secs(60),
-    };
+    });
     let router_a_id = RouterId::Named(CompactString::from("router-a"));
     let router_b_id = RouterId::Named(CompactString::from("router-b"));
     let router_c_id = RouterId::Default;

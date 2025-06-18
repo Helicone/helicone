@@ -60,6 +60,7 @@ where
 
     #[tracing::instrument(name = "mapper", skip_all)]
     fn call(&mut self, mut req: Request) -> Self::Future {
+        // see: https://docs.rs/tower/latest/tower/trait.Service.html#be-careful-when-cloning-inner-services
         let mut inner = self.inner.clone();
         let converter_registry = self.endpoint_converter_registry.clone();
         std::mem::swap(&mut self.inner, &mut inner);

@@ -18,7 +18,10 @@ use crate::{
         api::ApiError, init::InitError, internal::InternalError,
         invalid_req::InvalidRequestError,
     },
-    middleware::rate_limit,
+    middleware::{
+        cache::{CacheLayer, CacheService},
+        rate_limit,
+    },
     router::{
         direct::{DirectProxiesWithoutMapper, DirectProxyServiceWithoutMapper},
         service::{Router, RouterFuture},
@@ -28,6 +31,7 @@ use crate::{
         extensions::MapperContext, provider::InferenceProvider,
         router::RouterId,
     },
+    utils::handle_error::{ErrorHandler, ErrorHandlerLayer},
 };
 
 /// Regex for the following URL format:
@@ -46,7 +50,8 @@ use crate::{
 const URL_REGEX: &str =
     r"^/router/(?P<id>[A-Za-z0-9_-]{1,12})(?P<path>/[^?]*)?(?P<query>\?.*)?$";
 
-pub type UnifiedApiService = rate_limit::Service<unified_api::Service>;
+pub type UnifiedApiService =
+    rate_limit::Service<CacheService<ErrorHandler<unified_api::Service>>>;
 
 #[derive(Debug)]
 pub struct MetaRouter {
@@ -85,7 +90,12 @@ impl MetaRouter {
             inner.insert(router_id.clone(), router);
         }
         let unified_api = ServiceBuilder::new()
-            .layer(rate_limit::Layer::unified_api(&app_state))
+            // TODO: should we change how global configs work for rate limiting,
+            // caching?       For now, leave these types here to
+            // make it easier to change later on.
+            .layer(rate_limit::Layer::disabled())
+            .layer(CacheLayer::disabled())
+            .layer(ErrorHandlerLayer::new(app_state.clone()))
             .service(unified_api::Service::new(&app_state)?);
         let direct_proxies = DirectProxiesWithoutMapper::new(&app_state)?;
         let meta_router = Self {
@@ -347,7 +357,7 @@ pin_project! {
         },
         UnifiedApi {
             #[pin]
-            future: <rate_limit::Service<unified_api::Service> as tower::Service<crate::types::request::Request>>::Future,
+            future: <UnifiedApiService as tower::Service<crate::types::request::Request>>::Future,
         },
         DirectProxy {
             #[pin]

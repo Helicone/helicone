@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use http_cache::MokaManager;
 use rustc_hash::FxHashMap as HashMap;
 use tokio::sync::{
     RwLock,
@@ -49,11 +50,11 @@ pub struct InnerAppState {
     pub minio: Minio,
     pub jawn_http_client: JawnClient,
     pub control_plane_state: Arc<RwLock<ControlPlaneState>>,
-    pub provider_keys: RwLock<HashMap<RouterId, ProviderKeys>>,
-    pub global_rate_limit: Option<Arc<RateLimiterConfig>>,
-    pub unified_api_rate_limit: Option<Arc<RateLimiterConfig>>,
-    pub router_rate_limits: RwLock<HashMap<RouterId, Arc<RateLimiterConfig>>>,
     pub direct_proxy_api_keys: ProviderKeys,
+    pub provider_keys: RwLock<HashMap<RouterId, ProviderKeys>>,
+    pub moka_manager: Option<MokaManager>,
+    pub global_rate_limit: Option<Arc<RateLimiterConfig>>,
+    pub router_rate_limits: RwLock<HashMap<RouterId, Arc<RateLimiterConfig>>>,
     /// Top level metrics which are exported to OpenTelemetry.
     pub metrics: Metrics,
     /// Metrics to track provider health and rate limits.

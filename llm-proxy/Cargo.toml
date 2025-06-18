@@ -35,6 +35,8 @@ heck = { workspace = true }
 http = { workspace = true }
 http-body = { workspace = true }
 http-body-util = { workspace = true }
+http-cache = { workspace = true, features = ["manager-moka"] }
+http-cache-semantics = { workspace = true }
 humantime-serde = { workspace = true }
 hyper = { workspace = true }
 hyper-util = { workspace = true, features = ['server-auto', 'server-graceful', 'tokio'] }
@@ -44,12 +46,14 @@ jemallocator = { workspace = true }
 json-patch = { workspace = true }
 meltdown = { workspace = true }
 mime = { workspace = true }
+moka = { workspace = true }
 nonempty-collections = { workspace = true, features = ["serde"] }
 opentelemetry = { workspace = true }
 opentelemetry_sdk = { workspace = true, features = ["rt-tokio"] }
 opentelemetry-system-metrics = { workspace = true }
 pin-project-lite = { workspace = true }
 r2d2 = { workspace = true }
+rand = { workspace = true }
 redis = { workspace = true }
 regex = { workspace = true }
 reqwest = { workspace = true }
@@ -143,4 +147,8 @@ required-features = ["testing"]
 
 [[test]]
 name = "unified_api"
+required-features = ["testing"]
+
+[[test]]
+name = "cache"
 required-features = ["testing"]

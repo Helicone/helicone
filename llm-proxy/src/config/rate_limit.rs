@@ -12,26 +12,19 @@ pub type RateLimiterConfig = GovernorConfig<
 
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case")]
-pub struct TopLevelRateLimitConfig {
+pub struct GlobalRateLimitConfig {
     #[serde(default)]
     pub store: RateLimitStore,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub global_limits: Option<LimitsConfig>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub unified_api_limits: Option<LimitsConfig>,
+    #[serde(default, flatten, skip_serializing_if = "Option::is_none")]
+    pub limits: Option<LimitsConfig>,
     #[serde(with = "humantime_serde", default = "default_cleanup_interval")]
     pub cleanup_interval: Duration,
 }
 
-impl TopLevelRateLimitConfig {
+impl GlobalRateLimitConfig {
     #[must_use]
     pub fn global_limiter(&self) -> Option<RateLimiterConfig> {
-        limiter_config(self.global_limits.as_ref())
-    }
-
-    #[must_use]
-    pub fn unified_api_limiter(&self) -> Option<RateLimiterConfig> {
-        limiter_config(self.unified_api_limits.as_ref())
+        limiter_config(self.limits.as_ref())
     }
 
     #[must_use]
@@ -65,12 +58,11 @@ fn limiter_config(limits: Option<&LimitsConfig>) -> Option<RateLimiterConfig> {
     }
 }
 
-impl Default for TopLevelRateLimitConfig {
+impl Default for GlobalRateLimitConfig {
     fn default() -> Self {
         Self {
             store: RateLimitStore::InMemory,
-            global_limits: None,
-            unified_api_limits: None,
+            limits: None,
             cleanup_interval: default_cleanup_interval(),
         }
     }
@@ -92,12 +84,11 @@ pub(crate) fn default_refill_frequency() -> Duration {
 }
 
 #[cfg(feature = "testing")]
-impl crate::tests::TestDefault for TopLevelRateLimitConfig {
+impl crate::tests::TestDefault for GlobalRateLimitConfig {
     fn test_default() -> Self {
         Self {
             store: RateLimitStore::InMemory,
-            global_limits: None,
-            unified_api_limits: None,
+            limits: None,
             cleanup_interval: Duration::from_secs(60),
         }
     }
@@ -105,12 +96,11 @@ impl crate::tests::TestDefault for TopLevelRateLimitConfig {
 
 #[cfg(feature = "testing")]
 #[must_use]
-pub fn enabled_for_test_in_memory() -> TopLevelRateLimitConfig {
+pub fn enabled_for_test_in_memory() -> GlobalRateLimitConfig {
     use crate::tests::TestDefault;
-    TopLevelRateLimitConfig {
+    GlobalRateLimitConfig {
         store: RateLimitStore::InMemory,
-        global_limits: Some(LimitsConfig::test_default()),
-        unified_api_limits: None,
+        limits: Some(LimitsConfig::test_default()),
         cleanup_interval: Duration::from_secs(60),
     }
 }

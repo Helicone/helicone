@@ -1,4 +1,5 @@
 pub mod balance;
+pub mod cache;
 pub mod discover;
 pub mod dispatcher;
 pub mod helicone;
@@ -23,10 +24,7 @@ use serde::{Deserialize, Serialize};
 use strum::IntoStaticStr;
 use thiserror::Error;
 
-use crate::{
-    error::init::InitError,
-    types::{provider::InferenceProvider, router::RouterId},
-};
+use crate::{error::init::InitError, types::provider::InferenceProvider};
 
 const ROUTER_ID_REGEX: &str = r"^[A-Za-z0-9_-]{1,12}$";
 pub(crate) const SDK: InferenceProvider = InferenceProvider::OpenAI;
@@ -55,24 +53,36 @@ pub enum DeploymentTarget {
 }
 
 #[derive(Debug, Default, Deserialize, Serialize)]
+#[serde(deny_unknown_fields, rename_all = "kebab-case")]
+pub struct MiddlewareConfig {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cache: Option<self::cache::CacheConfig>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rate_limit: Option<self::rate_limit::GlobalRateLimitConfig>,
+}
+
+#[derive(Debug, Default, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields, rename_all = "kebab-case")]
 pub struct Config {
     pub telemetry: telemetry::Config,
     pub server: self::server::ServerConfig,
     pub minio: self::minio::Config,
     pub dispatcher: self::dispatcher::DispatcherConfig,
-    /// *ALL* supported providers, independent of router configuration.
-    pub providers: self::providers::ProvidersConfig,
     pub discover: self::discover::DiscoverConfig,
-    pub rate_limit: self::rate_limit::TopLevelRateLimitConfig,
+    pub response_headers: self::response_headers::ResponseHeadersConfig,
+    pub deployment_target: DeploymentTarget,
+    pub is_production: bool,
+
     /// If a request is made with a model that is not in the `RouterConfig`
     /// model mapping, then we fallback to this.
     pub default_model_mapping: self::model_mapping::ModelMappingConfig,
-    pub routers: self::router::RouterConfigs,
-    pub deployment_target: DeploymentTarget,
-    pub is_production: bool,
-    pub response_headers: self::response_headers::ResponseHeadersConfig,
     pub helicone: self::helicone::HeliconeConfig,
+    /// *ALL* supported providers, independent of router configuration.
+    pub providers: self::providers::ProvidersConfig,
+
+    /// Global middleware configuration, e.g. rate limiting, caching, etc.
+    pub global: MiddlewareConfig,
+    pub routers: self::router::RouterConfigs,
 }
 
 impl Config {
@@ -108,9 +118,6 @@ impl Config {
     pub fn validate(&self) -> Result<(), InitError> {
         let router_id_regex =
             Regex::new(ROUTER_ID_REGEX).expect("always valid if tests pass");
-        if !self.routers.as_ref().contains_key(&RouterId::Default) {
-            return Err(InitError::DefaultRouterNotEnabled);
-        }
         for (router_id, router_config) in self.routers.as_ref() {
             router_config.validate()?;
             if !router_id_regex.is_match(router_id.as_ref()) {
@@ -130,6 +137,12 @@ impl crate::tests::TestDefault for Config {
             level: "info,llm_proxy=trace".to_string(),
             ..Default::default()
         };
+        let middleware = MiddlewareConfig {
+            cache: Some(self::cache::CacheConfig::test_default()),
+            rate_limit: Some(
+                self::rate_limit::GlobalRateLimitConfig::test_default(),
+            ),
+        };
         Config {
             telemetry,
             server: self::server::ServerConfig::test_default(),
@@ -137,6 +150,7 @@ impl crate::tests::TestDefault for Config {
             dispatcher: self::dispatcher::DispatcherConfig::test_default(),
             default_model_mapping:
                 self::model_mapping::ModelMappingConfig::default(),
+            global: middleware,
             is_production: false,
             providers: self::providers::ProvidersConfig::default(),
             helicone: self::helicone::HeliconeConfig::test_default(),
@@ -145,8 +159,6 @@ impl crate::tests::TestDefault for Config {
             routers: self::router::RouterConfigs::test_default(),
             response_headers:
                 self::response_headers::ResponseHeadersConfig::default(),
-            rate_limit: self::rate_limit::TopLevelRateLimitConfig::test_default(
-            ),
         }
     }
 }

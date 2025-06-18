@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use http::{Method, Request, StatusCode};
 use http_body_util::BodyExt;
 use llm_proxy::{
-    config::{Config, rate_limit::TopLevelRateLimitConfig},
+    config::{Config, rate_limit::GlobalRateLimitConfig},
     control_plane::types::{Key, hash_key},
     tests::{TestDefault, harness::Harness, mock::MockArgs},
 };
@@ -30,11 +30,11 @@ async fn rate_limit_per_user_isolation_in_memory() {
 }
 
 async fn rate_limit_capacity_enforced_impl(
-    rate_limit_config: TopLevelRateLimitConfig,
+    rate_limit_config: GlobalRateLimitConfig,
 ) {
     let mut config = Config::test_default();
     config.helicone.enable_auth = true;
-    config.rate_limit = rate_limit_config;
+    config.global.rate_limit = Some(rate_limit_config);
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([
             ("success:openai:chat_completion", 6.into()),
@@ -102,11 +102,11 @@ async fn rate_limit_capacity_enforced_impl(
 }
 
 async fn rate_limit_per_user_isolation_impl(
-    rate_limit_config: TopLevelRateLimitConfig,
+    rate_limit_config: GlobalRateLimitConfig,
 ) {
     let mut config = Config::test_default();
     config.helicone.enable_auth = true;
-    config.rate_limit = rate_limit_config;
+    config.global.rate_limit = Some(rate_limit_config);
 
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([

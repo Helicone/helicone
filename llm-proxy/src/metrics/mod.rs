@@ -19,6 +19,14 @@ pub struct Metrics {
     pub request_count: Counter<u64>,
     pub response_count: Counter<u64>,
     pub tfft_duration: Histogram<f64>,
+    pub cache: CacheMetrics,
+}
+
+#[derive(Debug, Clone)]
+pub struct CacheMetrics {
+    pub hits: Counter<u64>,
+    pub misses: Counter<u64>,
+    pub evictions: Counter<u64>,
 }
 
 impl Metrics {
@@ -53,6 +61,23 @@ impl Metrics {
             .with_unit("ms")
             .with_description("Time to first token duration")
             .build();
+        let cache_hits = meter
+            .u64_counter("cache_hits")
+            .with_description("Number of cache hits")
+            .build();
+        let cache_misses = meter
+            .u64_counter("cache_misses")
+            .with_description("Number of cache misses")
+            .build();
+        let cache_evictions = meter
+            .u64_counter("cache_evictions")
+            .with_description("Number of cache evictions")
+            .build();
+        let cache = CacheMetrics {
+            hits: cache_hits,
+            misses: cache_misses,
+            evictions: cache_evictions,
+        };
         Self {
             error_count,
             provider_health,
@@ -61,6 +86,7 @@ impl Metrics {
             request_count,
             response_count,
             tfft_duration,
+            cache,
         }
     }
 }

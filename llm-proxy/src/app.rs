@@ -8,7 +8,9 @@ use std::{
 
 use axum_server::{accept::NoDelayAcceptor, tls_rustls::RustlsConfig};
 use futures::future::BoxFuture;
+use http_cache::MokaManager;
 use meltdown::Token;
+use moka::future::Cache;
 use opentelemetry::global;
 use rustc_hash::FxHashMap as HashMap;
 use telemetry::{make_span::SpanFactory, tracing::MakeRequestId};
@@ -24,7 +26,7 @@ use tracing::{Level, info};
 
 use crate::{
     app_state::{AppState, InnerAppState},
-    config::{Config, minio::Minio, server::TlsConfig},
+    config::{Config, cache::CacheStore, minio::Minio, server::TlsConfig},
     control_plane::control_plane_state::ControlPlaneState,
     discover::monitor::{
         health::provider::HealthMonitorMap, metrics::EndpointMetricsRegistry,
@@ -32,9 +34,10 @@ use crate::{
     },
     error::{self, init::InitError, runtime::RuntimeError},
     logger::service::JawnClient,
-    metrics::{self, attribute_extractor::AttributeExtractor},
+    metrics::{self, Metrics, attribute_extractor::AttributeExtractor},
     middleware::{
-        auth::AuthService, rate_limit::service::Layer as RateLimitLayer,
+        auth::AuthService, cache::CacheLayer,
+        rate_limit::service::Layer as RateLimitLayer,
         response_headers::ResponseHeaderLayer,
     },
     router::meta::MetaRouter,
@@ -42,7 +45,7 @@ use crate::{
     utils::{catch_panic::PanicResponder, handle_error::ErrorHandlerLayer},
 };
 
-const BUFFER_SIZE: usize = 1024;
+pub(crate) const BUFFER_SIZE: usize = 1024;
 const SERVICE_NAME: &str = "helicone-router";
 
 pub type AppResponseBody = tower_http::body::UnsyncBoxBody<
@@ -184,10 +187,11 @@ impl App {
         let health_monitor = HealthMonitorMap::default();
         let rate_limit_monitor = RateLimitMonitorMap::default();
 
-        let global_rate_limit =
-            config.rate_limit.global_limiter().map(Arc::new);
-        let unified_api_rate_limit =
-            config.rate_limit.unified_api_limiter().map(Arc::new);
+        let global_rate_limit = config
+            .global
+            .rate_limit
+            .as_ref()
+            .and_then(|rl| rl.global_limiter().map(Arc::new));
 
         let direct_proxy_api_keys =
             ProviderKeys::from_env_direct_proxy(&config.providers)
@@ -198,6 +202,8 @@ impl App {
                     );
                 })?;
 
+        let moka_manager = setup_cache(&config, metrics.clone());
+
         let app_state = AppState(Arc::new(InnerAppState {
             config,
             minio,
@@ -207,7 +213,6 @@ impl App {
             )),
             provider_keys: RwLock::new(HashMap::default()),
             global_rate_limit,
-            unified_api_rate_limit,
             router_rate_limits: RwLock::new(HashMap::default()),
             direct_proxy_api_keys,
             metrics,
@@ -216,6 +221,7 @@ impl App {
             rate_limit_monitors: rate_limit_monitor,
             rate_limit_senders: RwLock::new(HashMap::default()),
             rate_limit_receivers: RwLock::new(HashMap::default()),
+            moka_manager,
         }));
 
         let otel_metrics_layer =
@@ -255,6 +261,8 @@ impl App {
                 app_state.clone(),
             )))
             .layer(RateLimitLayer::global(&app_state))
+            .layer(CacheLayer::global(&app_state))
+            .layer(ErrorHandlerLayer::new(app_state.clone()))
             .layer(ResponseHeaderLayer::new(
                 app_state.response_headers_config(),
             ))
@@ -413,4 +421,59 @@ where
             .service(inner);
         ready(Ok(svc))
     }
+}
+
+fn setup_cache(config: &Config, metrics: Metrics) -> Option<MokaManager> {
+    // Check if global caching is enabled
+    let global_cache_config = config.global.cache.as_ref();
+
+    // Check if any router has caching enabled
+    let any_router_has_cache = config
+        .routers
+        .as_ref()
+        .values()
+        .any(|router_config| router_config.cache.is_some());
+
+    // If neither global nor any router config has caching enabled, return None
+    if global_cache_config.is_none() && !any_router_has_cache {
+        return None;
+    }
+
+    // Determine the cache capacity to use
+    let capacity = if let Some(global_config) = global_cache_config {
+        // Use global cache config if available
+        match &global_config.store {
+            CacheStore::InMemory { max_size } => *max_size,
+        }
+    } else {
+        // Find the largest cache size among router configs
+        config
+            .routers
+            .as_ref()
+            .values()
+            .filter_map(|router_config| router_config.cache.as_ref())
+            .map(|cache_config| match &cache_config.store {
+                CacheStore::InMemory { max_size } => *max_size,
+            })
+            .max()
+            .unwrap_or(1024 * 1024 * 256)
+    };
+
+    let listener = move |_k, _v, cause| {
+        use moka::notification::RemovalCause;
+        // RemovalCause::Size means that the cache reached its maximum
+        // capacity and had to evict an entry.
+        //
+        // For other causes, please see:
+        // https://docs.rs/moka/*/moka/notification/enum.RemovalCause.html
+        if cause == RemovalCause::Size {
+            metrics.cache.evictions.add(1, &[]);
+        }
+    };
+
+    let cache = Cache::builder()
+        .max_capacity(u64::try_from(capacity).unwrap_or(u64::MAX))
+        .eviction_listener(listener)
+        .build();
+    Some(MokaManager::new(cache))
 }

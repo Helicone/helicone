@@ -40,11 +40,6 @@ impl Layer {
     }
 
     #[must_use]
-    pub fn unified_api(app_state: &AppState) -> Self {
-        Self::new_inner(app_state.0.unified_api_rate_limit.clone())
-    }
-
-    #[must_use]
     fn new_inner(rl: Option<Arc<RateLimiterConfig>>) -> Self {
         if let Some(rl) = rl {
             Self {
@@ -200,8 +195,7 @@ mod tests {
         config::{
             Config,
             rate_limit::{
-                GcraConfig, LimitsConfig, RateLimitStore,
-                TopLevelRateLimitConfig,
+                GcraConfig, GlobalRateLimitConfig, LimitsConfig, RateLimitStore,
             },
             router::{RouterConfig, RouterRateLimitConfig},
         },
@@ -210,10 +204,10 @@ mod tests {
     };
 
     async fn create_test_app_state(
-        rate_limit_config: TopLevelRateLimitConfig,
+        rate_limit_config: GlobalRateLimitConfig,
     ) -> AppState {
         let mut config = Config::test_default();
-        config.rate_limit = rate_limit_config;
+        config.global.rate_limit = Some(rate_limit_config);
         let app = crate::app::App::new(config)
             .await
             .expect("failed to create app");
@@ -238,10 +232,9 @@ mod tests {
 
     #[tokio::test]
     async fn global_app_with_none_router() {
-        let app_state = create_test_app_state(TopLevelRateLimitConfig {
+        let app_state = create_test_app_state(GlobalRateLimitConfig {
             store: RateLimitStore::InMemory,
-            global_limits: Some(create_test_limits()),
-            unified_api_limits: None,
+            limits: Some(create_test_limits()),
             cleanup_interval: Duration::from_secs(300),
         })
         .await;
@@ -256,10 +249,9 @@ mod tests {
 
     #[tokio::test]
     async fn global_app_with_custom_router() {
-        let app_state = create_test_app_state(TopLevelRateLimitConfig {
+        let app_state = create_test_app_state(GlobalRateLimitConfig {
             store: RateLimitStore::InMemory,
-            global_limits: Some(create_test_limits()),
-            unified_api_limits: None,
+            limits: Some(create_test_limits()),
             cleanup_interval: Duration::from_secs(300),
         })
         .await;
@@ -277,10 +269,9 @@ mod tests {
 
     #[tokio::test]
     async fn router_specific_app_with_custom_router() {
-        let app_state = create_test_app_state(TopLevelRateLimitConfig {
+        let app_state = create_test_app_state(GlobalRateLimitConfig {
             store: RateLimitStore::InMemory,
-            global_limits: None,
-            unified_api_limits: None,
+            limits: None,
             cleanup_interval: Duration::from_secs(300),
         })
         .await;

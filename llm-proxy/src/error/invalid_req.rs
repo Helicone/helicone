@@ -1,6 +1,6 @@
 use axum_core::response::IntoResponse;
 use displaydoc::Display;
-use http::{StatusCode, uri::InvalidUri};
+use http::StatusCode;
 use thiserror::Error;
 use tracing::debug;
 
@@ -24,12 +24,14 @@ pub enum InvalidRequestError {
     MissingRouterId,
     /// Invalid request: {0}
     InvalidRequest(http::Error),
-    /// Invalid request uri: {0}
-    InvalidUri(#[from] InvalidUri),
+    /// Invalid request url: {0}
+    InvalidUrl(String),
     /// Invalid request body: {0}
     InvalidRequestBody(#[from] serde_json::Error),
     /// Upstream 4xx error: {0}
     Provider4xxError(StatusCode),
+    /// Invalid cache config
+    InvalidCacheConfig,
 }
 
 impl IntoResponse for InvalidRequestError {
@@ -64,7 +66,7 @@ impl IntoResponse for InvalidRequestError {
                 }),
             )
                 .into_response(),
-            Self::InvalidRequest(_) | Self::InvalidUri(_) => (
+            Self::InvalidRequest(_) | Self::InvalidUrl(_) => (
                 StatusCode::BAD_REQUEST,
                 Json(ErrorResponse {
                     error: "Invalid request".to_string(),
@@ -92,6 +94,13 @@ impl IntoResponse for InvalidRequestError {
                 }),
             )
                 .into_response(),
+            Self::InvalidCacheConfig => (
+                StatusCode::BAD_REQUEST,
+                Json(ErrorResponse {
+                    error: "Invalid cache config".to_string(),
+                }),
+            )
+                .into_response(),
         }
     }
 }
@@ -107,8 +116,8 @@ pub enum InvalidRequestErrorMetric {
     UnsupportedProvider,
     /// Invalid request
     InvalidRequest,
-    /// Invalid request uri
-    InvalidUri,
+    /// Invalid request url
+    InvalidUrl,
     /// Invalid request body
     InvalidRequestBody,
     /// Upstream 4xx error
@@ -125,10 +134,9 @@ impl From<&InvalidRequestError> for InvalidRequestErrorMetric {
             | InvalidRequestError::RouterIdNotFound(_)
             | InvalidRequestError::MissingRouterId => Self::NotFound,
             InvalidRequestError::InvalidRequest(_)
-            | InvalidRequestError::UnsupportedEndpoint(_) => {
-                Self::InvalidRequest
-            }
-            InvalidRequestError::InvalidUri(_) => Self::InvalidUri,
+            | InvalidRequestError::UnsupportedEndpoint(_)
+            | InvalidRequestError::InvalidCacheConfig => Self::InvalidRequest,
+            InvalidRequestError::InvalidUrl(_) => Self::InvalidUrl,
             InvalidRequestError::InvalidRequestBody(_) => {
                 Self::InvalidRequestBody
             }

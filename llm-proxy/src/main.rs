@@ -60,10 +60,12 @@ async fn main() -> Result<(), RuntimeError> {
     let control_plane_state = app.state.0.control_plane_state.clone();
 
     let rate_limiting_cleanup_service =
-        rate_limit::cleanup::GarbageCollector::new(
-            app.state.clone(),
-            config.rate_limit.cleanup_interval(),
-        );
+        config.global.rate_limit.as_ref().map(|rl| {
+            rate_limit::cleanup::GarbageCollector::new(
+                app.state.clone(),
+                rl.cleanup_interval(),
+            )
+        });
 
     let mut meltdown = Meltdown::new().register(TaggedService::new(
         "shutdown-signals",
@@ -88,11 +90,14 @@ async fn main() -> Result<(), RuntimeError> {
             "provider-rate-limit-monitor",
             rate_limit_monitor,
         ))
-        .register(TaggedService::new("system-metrics", SystemMetrics))
-        .register(TaggedService::new(
+        .register(TaggedService::new("system-metrics", SystemMetrics));
+
+    if let Some(rate_limiting_cleanup_service) = rate_limiting_cleanup_service {
+        meltdown = meltdown.register(TaggedService::new(
             "rate-limiting-cleanup",
             rate_limiting_cleanup_service,
         ));
+    }
 
     while let Some((service, result)) = meltdown.next().await {
         match result {

@@ -65,6 +65,8 @@ pub enum InternalError {
     MetricsNotConfigured(ApiEndpoint),
     /// Failed to sign AWS request: {0}
     AwsRequestSigningError(String),
+    /// Cache error: {0}
+    CacheError(http_cache::BoxError),
 }
 
 impl IntoResponse for InternalError {
@@ -129,6 +131,8 @@ pub enum InternalErrorMetric {
     MetricsNotConfigured,
     /// Failed to sign AWS request
     AwsRequestSigningError,
+    /// Cache error
+    CacheError,
 }
 
 impl From<&InternalError> for InternalErrorMetric {
@@ -164,6 +168,7 @@ impl From<&InternalError> for InternalErrorMetric {
             InternalError::AwsRequestSigningError(_) => {
                 Self::AwsRequestSigningError
             }
+            InternalError::CacheError(_) => Self::CacheError,
         }
     }
 }

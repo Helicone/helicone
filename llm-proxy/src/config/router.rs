@@ -10,7 +10,9 @@ use super::{
     rate_limit::LimitsConfig,
     retry::RetryConfig,
 };
-use crate::{error::init::InitError, types::router::RouterId};
+use crate::{
+    config::cache::CacheConfig, error::init::InitError, types::router::RouterId,
+};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq, AsRef, AsMut)]
 pub struct RouterConfigs(HashMap<RouterId, RouterConfig>);
@@ -31,21 +33,24 @@ impl Default for RouterConfigs {
     }
 }
 
+impl std::ops::Deref for RouterConfigs {
+    type Target = HashMap<RouterId, RouterConfig>;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 #[derive(Debug, Default, Clone, Deserialize, Serialize, Eq, PartialEq)]
-#[serde(rename_all = "kebab-case")]
+#[serde(default, rename_all = "kebab-case")]
 pub struct RouterConfig {
-    #[serde(default = "Default::default")]
     pub load_balance: BalanceConfig,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub model_mappings: Option<ModelMappingConfig>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub cache: Option<CacheControlConfig>,
+    pub cache: Option<CacheConfig>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub retries: Option<RetryConfig>,
-    #[serde(
-        default,
-        skip_serializing_if = "RouterRateLimitConfig::is_disabled"
-    )]
+    #[serde(skip_serializing_if = "RouterRateLimitConfig::is_disabled")]
     pub rate_limit: RouterRateLimitConfig,
 }
 
@@ -73,16 +78,6 @@ impl RouterConfig {
     pub fn model_mappings(&self) -> Option<&ModelMappingConfig> {
         self.model_mappings.as_ref()
     }
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
-#[serde(rename_all = "kebab-case")]
-pub struct CacheControlConfig {
-    /// Cache-control header: <https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cache-Control>
-    pub directive: String,
-    pub enabled: bool,
-    pub buckets: u16,
-    pub seed: String,
 }
 
 #[derive(Debug, Default, Clone, Deserialize, Serialize, Eq, PartialEq)]
@@ -135,14 +130,17 @@ mod tests {
     use std::time::Duration;
 
     use super::*;
-    use crate::config::retry::Strategy;
+    use crate::config::{
+        cache::{CacheConfig, CacheStore},
+        retry::Strategy,
+    };
 
     fn test_router_config() -> RouterConfig {
-        let cache = CacheControlConfig {
-            directive: "max-age=3600, max-stale=1800".to_string(),
-            enabled: true,
+        let cache = CacheConfig {
+            store: CacheStore::InMemory { max_size: 100 },
+            directive: Some("max-age=3600, max-stale=1800".to_string()),
             buckets: 10,
-            seed: "test-seed".to_string(),
+            seed: Some("test-seed".to_string()),
         };
 
         let balance = BalanceConfig::default();

@@ -118,6 +118,7 @@ impl tower::Service<Request> for Harness {
     fn call(&mut self, req: Request) -> Self::Future {
         let mut factory = self.app_factory.clone();
         let socket_addr = self.socket_addr;
+        // see: https://docs.rs/tower/latest/tower/trait.Service.html#be-careful-when-cloning-inner-services
         std::mem::swap(&mut self.app_factory, &mut factory);
         Box::pin(async move {
             let mut app =
