@@ -79,7 +79,7 @@ impl Harness {
         let mock = Mock::new(&mut config, mock_args).await;
         let app = App::new(config).await.expect("failed to create app");
         let app_factory = AppFactory::new(app.state.clone(), app);
-        app_factory.state.0.control_plane_state.lock().await.config =
+        app_factory.state.0.control_plane_state.write().await.config =
             control_plane_config;
         let socket_addr =
             SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 0);

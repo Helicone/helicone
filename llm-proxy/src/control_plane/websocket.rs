@@ -6,7 +6,7 @@ use futures::{
     stream::{SplitSink, SplitStream},
 };
 use meltdown::Token;
-use tokio::{net::TcpStream, sync::Mutex};
+use tokio::{net::TcpStream, sync::RwLock};
 use tokio_tungstenite::{
     MaybeTlsStream, WebSocketStream, connect_async,
     tungstenite::{
@@ -33,7 +33,7 @@ pub struct WebsocketChannel {
 
 #[derive(Debug)]
 pub struct ControlPlaneClient {
-    pub state: Arc<Mutex<ControlPlaneState>>,
+    pub state: Arc<RwLock<ControlPlaneState>>,
     channel: WebsocketChannel,
     /// Config about Control plane, such as the websocket url,
     /// reconnect interval/backoff policy, heartbeat interval, etc.
@@ -44,13 +44,13 @@ pub struct ControlPlaneClient {
 }
 
 async fn handle_message(
-    state: &Arc<Mutex<ControlPlaneState>>,
+    state: &Arc<RwLock<ControlPlaneState>>,
     message: Message,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let bytes = message.into_data();
     let m: MessageTypeRX = serde_json::from_slice(&bytes)?;
     debug!("received message: {:?}", m);
-    let mut state_guard = state.lock().await;
+    let mut state_guard = state.write().await;
     state_guard.update(m);
 
     Ok(())
@@ -123,7 +123,7 @@ impl ControlPlaneClient {
     }
 
     pub async fn connect(
-        control_plane_state: Arc<Mutex<ControlPlaneState>>,
+        control_plane_state: Arc<RwLock<ControlPlaneState>>,
         config: HeliconeConfig,
     ) -> Result<Self, InitError> {
         Ok(Self {
@@ -226,7 +226,7 @@ mod tests {
     use std::{sync::Arc, time::Duration};
 
     use meltdown::{Service, Token};
-    use tokio::{net::TcpListener, sync::Mutex};
+    use tokio::{net::TcpListener, sync::RwLock};
     use tokio_tungstenite::accept_async;
 
     use super::ControlPlaneClient;
@@ -294,7 +294,8 @@ mod tests {
         println!("setting api key");
         let helicone_config = HeliconeConfig::default();
 
-        let control_plane_state: Arc<Mutex<ControlPlaneState>> = Arc::default();
+        let control_plane_state: Arc<RwLock<ControlPlaneState>> =
+            Arc::default();
         // This will fail if no server is running on 8585, which is expected
         let result = ControlPlaneClient::connect(
             control_plane_state.clone(),
@@ -306,7 +307,7 @@ mod tests {
         assert!(
             control_plane_state
                 .clone()
-                .lock()
+                .read()
                 .await
                 .last_heartbeat
                 .is_none(),
@@ -325,7 +326,7 @@ mod tests {
             tokio::time::sleep(Duration::from_secs(10)).await;
 
             assert!(
-                control_plane_state.lock().await.last_heartbeat.is_some(),
+                control_plane_state.read().await.last_heartbeat.is_some(),
                 "Last heartbeat should be some"
             );
         }

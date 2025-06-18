@@ -12,7 +12,7 @@ use meltdown::Token;
 use opentelemetry::global;
 use rustc_hash::FxHashMap as HashMap;
 use telemetry::{make_span::SpanFactory, tracing::MakeRequestId};
-use tokio::sync::{Mutex, RwLock};
+use tokio::sync::RwLock;
 use tower::{ServiceBuilder, buffer::BufferLayer, util::BoxCloneService};
 use tower_http::{
     ServiceBuilderExt, add_extension::AddExtension,
@@ -196,7 +196,7 @@ impl App {
             config,
             minio,
             jawn_http_client,
-            control_plane_state: Arc::new(Mutex::new(
+            control_plane_state: Arc::new(RwLock::new(
                 ControlPlaneState::default(),
             )),
             provider_keys: RwLock::new(HashMap::default()),

@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use rustc_hash::FxHashMap as HashMap;
 use tokio::sync::{
-    Mutex, RwLock,
+    RwLock,
     mpsc::{Receiver, Sender},
 };
 
@@ -49,7 +49,7 @@ pub struct InnerAppState {
     pub config: Config,
     pub minio: Minio,
     pub jawn_http_client: JawnClient,
-    pub control_plane_state: Arc<Mutex<ControlPlaneState>>,
+    pub control_plane_state: Arc<RwLock<ControlPlaneState>>,
     pub provider_keys: RwLock<HashMap<RouterId, ProviderKeys>>,
     pub global_rate_limit: Option<Arc<RateLimiterConfig>>,
     pub unified_api_rate_limit: Option<Arc<RateLimiterConfig>>,

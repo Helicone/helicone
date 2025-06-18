@@ -3,7 +3,6 @@ use std::fmt::Write;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use ts_rs::TS;
-use uuid::Uuid;
 
 /// Computes the hash of an API key for storage and lookup in the control plane.
 /// This function adds a "Bearer " prefix to the key before hashing to match
@@ -77,6 +76,8 @@ impl Config {
 #[cfg(feature = "testing")]
 impl crate::tests::TestDefault for Config {
     fn test_default() -> Self {
+        use uuid::Uuid;
+
         let test_key = "sk-helicone-test-key";
         let auth_header = format!("Bearer {test_key}");
         let key_hash = hash_key(&auth_header);

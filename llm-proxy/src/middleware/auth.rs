@@ -26,7 +26,7 @@ impl AuthService {
         app_state: AppState,
         api_key: &str,
     ) -> Result<AuthContext, AuthError> {
-        let config = &app_state.0.control_plane_state.lock().await.config;
+        let config = &app_state.0.control_plane_state.read().await.config;
         let computed_hash = hash_key(api_key);
         let key = config.get_key_from_hash(&computed_hash);
 
