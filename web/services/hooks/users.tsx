@@ -15,8 +15,8 @@ const useUserId = (userId: string) => {
       const userId = query.queryKey[1] as string;
 
       const timeFilter = {
-        startTimeUnixSeconds: Math.floor(new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000).getTime() / 1000),
-        endTimeUnixSeconds: Math.floor(new Date().getTime() / 1000),
+        start: new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+        end: new Date().toISOString(),
       };
 
       const [response, requestOverTime, costOverTime] = await Promise.all([
@@ -34,7 +34,10 @@ const useUserId = (userId: string) => {
             sort: {
               last_active: "desc",
             },
-            timeFilter,
+            timeFilter: {
+              startTimeUnixSeconds: Math.floor(new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000).getTime() / 1000),
+              endTimeUnixSeconds: Math.floor(new Date().getTime() / 1000),
+            },
             timeZoneDifferenceMinutes: new Date().getTimezoneOffset(),
           },
         }),
@@ -82,11 +85,11 @@ const useUserId = (userId: string) => {
         response,
         requestOverTime: requestOverTime?.data?.map((d: any) => ({
           requests: +d.count,
-          date: new Date(d.time),
+          date: new Date(d.time).toISOString().split('T')[0],
         })),
         costOverTime: costOverTime?.data?.map((d: any) => ({
           cost: +d.cost,
-          date: new Date(d.time),
+          date: new Date(d.time).toISOString().split('T')[0],
         })),
       };
     },
