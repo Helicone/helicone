@@ -11,6 +11,11 @@ description: "Deploy your own instance of Helicone. Follow our step-by-step guid
   works easily with just **one line**.
 </Warning>
 
+<i>
+  Note we moved the old manual setup with [Supabase
+  here](https://docs.helicone.ai/getting-started/self-host/manual-old)
+</i>
+
 At Helicone we believe that open-source software makes the world a better place. We are committed to open-source and we made a guide to make it easy for you to deploy your own instance of Helicone.
 
 ## Running locally
@@ -30,66 +35,41 @@ Requirements
 
 - Docker
 
-### Install [Supabase](https://supabase.com/docs/guides/cli)
-
-```bash
-brew install supabase/tap/supabase
-```
-
-### Install Wrangler and Yarn
+### Install Yarn
 
 ```bash
 nvm install 20
 nvm use 20
-npm install -g wrangler
 npm install -g yarn
 ```
 
-### Set environment variables
-```bash
-cd valhalla/jawn
-cp .env.example .env
-```
-
-```
-cd web
-cp .env.example .env
-```
-
-Take a look at the environment files you just copied. You'll want to comment out the parts under "Self-Hosting", and keep the ones under "Manual Hosting".
-
 ## Step 2 - Start all the services
 
-### Start Supabase
-
-```bash
-supabase start
-```
-
-### Start Clickhouse + Minio
+### Start Databases
 
 ```bash
 python3 -m venv env
 source env/bin/activate
 pip install tabulate requests minio
-pip install -r clickhouse/requirements.txt
 
-# This will start clickhouse locally
+# Start Clickhouse (time-series database)
 python3 clickhouse/ch_hcone.py --restart --no-password --host localhost
+
+# Start Minio (S3 compatible object storage)
 python3 minio_hcone.py --restart
+
+# Start Postgres
+docker run -d --name helicone-postgres-flyway-test -e POSTGRES_DB=helicone_test -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=testpassword -p 54388:5432 -v postgres_flyway_data:/var/lib/postgresql/data postgres:17.4
+flyway migrate -configFiles=supabase/flyway.conf
 ```
 
-### Start Workers
+### Start mailhog server (local email testing)
 
 ```bash
-# Install worker dependencies
-cd worker
-yarn
-
-./run_all_workers.sh
+docker run -p 1025:1025 -p 8025:8025 mailhog/mailhog
 ```
 
-### Start Jawn (Serves Web)
+### Start Jawn (Backend + Main Proxy)
 
 In a new terminal tab, run the following:
 
@@ -120,7 +100,7 @@ You are done!
 export OPENAI_API_KEY="sk-"
 export HELICONE_API_KEY="sk-helicone-aizk36y-5yue2my-qmy5tza-n7x3aqa"
 curl --request POST \
-  --url http://localhost:8787/v1/chat/completions \
+  --url http://localhost:8585/v1/gateway/oai/v1/chat/completions \
   --header "Authorization: Bearer $OPENAI_API_KEY" \
   --header "Helicone-Auth: Bearer $HELICONE_API_KEY" \
   --header 'Content-Type: application/json' \
