@@ -8,7 +8,9 @@ The AI Gateway provides flexible rate limiting using GCRA (Generic Cell Rate Alg
 
 Rate limiting uses **[configurable storage backends](#storage-backend-options)** and is applied with configurable burst capacity and sustained rates.
 
-## Why Use Rate Limiting?
+## Getting Started
+
+### Why Use Rate Limiting?
 
 Rate limiting helps you:
 - **Prevent abuse** by limiting request rates per API key
@@ -25,7 +27,7 @@ Rate limiting helps you:
   For complete configuration options and syntax, see the [Configuration Reference](/gateway/config#rate-limiting).
 </Note>
 
-## Available Strategies
+### Available Strategies
 
 <AccordionGroup>
   <Accordion title="Requests Per Time Period - Default" icon="gauge">
@@ -68,7 +70,65 @@ Rate limiting helps you:
   </Accordion>
 </AccordionGroup>
 
-## Rate Limiting Levels
+### Configuration Examples
+
+<Tabs>
+  <Tab title="Production API - Abuse Prevention">
+    **Use case:** Production API that needs to prevent abuse while allowing reasonable burst traffic for legitimate users.
+
+    ```yaml
+    rate-limit:
+      global:
+        store: in-memory
+        per-api-key:
+          capacity: 1000
+          refill-frequency: 1m  # 1000 requests per minute
+        cleanup-interval: 5m
+    ```
+  </Tab>
+
+  <Tab title="Development Environment - Cost Safety">
+    **Use case:** Development environment where you want to prevent accidental high costs while allowing reasonable experimentation.
+
+    ```yaml
+    rate-limit:
+      global:
+        store: in-memory
+        per-api-key:
+          capacity: 100
+          refill-frequency: 1h  # 100 requests per hour
+        cleanup-interval: 5m
+    ```
+  </Tab>
+
+  <Tab title="Multi-Tier Service - Different Router Limits">
+    **Use case:** Different service tiers with varying rate limits. Premium router gets higher limits than basic router.
+
+    ```yaml
+    rate-limit:
+      global:
+        store: in-memory
+        cleanup-interval: 5m
+    
+    routers:
+      premium:
+        rate-limit:
+          per-api-key:
+            capacity: 5000
+            refill-frequency: 1m  # 5000 requests per minute
+      
+      basic:
+        rate-limit:
+          per-api-key:
+            capacity: 100
+            refill-frequency: 1m  # 100 requests per minute
+    ```
+  </Tab>
+</Tabs>
+
+## Reference
+
+### Rate Limiting Levels
 
 The AI Gateway supports rate limiting at multiple levels based on **who** gets rate limited:
 
@@ -79,7 +139,7 @@ The AI Gateway supports rate limiting at multiple levels based on **who** gets r
 | **Per-Team**            | v2 (planned) | Limits applied to teams for budget and governance controls                 | Department budgets     |
 | **Per-Team-Member**     | v2 (planned) | Limits applied to individual team members for governance                   | Developer quotas       |
 
-### Configuration Scope
+#### Configuration Scope
 
 Rate limits are checked in precedence order when a request comes in:
 
@@ -101,7 +161,7 @@ Rate limits are checked in precedence order when a request comes in:
   Global and router-specific settings control the **configuration scope**, not who gets limited.
 </Note>
 
-## Storage Backend Options
+### Storage Backend Options
 
 Rate limiting counters can be stored in different backends depending on your deployment needs:
 
@@ -156,98 +216,7 @@ Rate limiting counters can be stored in different backends depending on your dep
   </Accordion>
 </AccordionGroup>
 
-## Configuration Examples
-
-<Tabs>
-  <Tab title="Production API - Abuse Prevention">
-    **Use case:** Production API that needs to prevent abuse while allowing reasonable burst traffic for legitimate users.
-
-    ```yaml
-    rate-limit:
-      global:
-        store: in-memory
-        per-api-key:
-          capacity: 1000
-          refill-frequency: 1m  # 1000 requests per minute
-        cleanup-interval: 5m
-    ```
-  </Tab>
-
-  <Tab title="Development Environment - Cost Safety">
-    **Use case:** Development environment where you want to prevent accidental high costs while allowing reasonable experimentation.
-
-    ```yaml
-    rate-limit:
-      global:
-        store: in-memory
-        per-api-key:
-          capacity: 100
-          refill-frequency: 1h  # 100 requests per hour
-        cleanup-interval: 5m
-    ```
-  </Tab>
-
-  <Tab title="Multi-Tier Service - Different Router Limits">
-    **Use case:** Different service tiers with varying rate limits. Premium router gets higher limits than basic router.
-
-    ```yaml
-    rate-limit:
-      global:
-        store: in-memory
-        cleanup-interval: 5m
-    
-    routers:
-      premium:
-        rate-limit:
-          per-api-key:
-            capacity: 5000
-            refill-frequency: 1m  # 5000 requests per minute
-      
-      basic:
-        rate-limit:
-          per-api-key:
-            capacity: 100
-            refill-frequency: 1m  # 100 requests per minute
-    ```
-  </Tab>
-
-  <Tab title="High-Volume Production - Burst Tolerance">
-    **Use case:** High-traffic production system that needs to handle traffic spikes while maintaining overall rate control.
-
-    ```yaml
-    rate-limit:
-      global:
-        store: in-memory
-        per-api-key:
-          capacity: 10000       # Allow large bursts
-          refill-frequency: 10s # 1000 requests per second sustained
-        cleanup-interval: 2m
-    ```
-  </Tab>
-
-  <Tab title="Router-Specific Override">
-    **Use case:** Most routers use global settings, but one router needs stricter limits for sensitive operations.
-
-    ```yaml
-    rate-limit:
-      global:
-        store: in-memory
-        per-api-key:
-          capacity: 1000
-          refill-frequency: 1m
-        cleanup-interval: 5m
-    
-    routers:
-      sensitive:
-        rate-limit:
-          per-api-key:
-            capacity: 10
-            refill-frequency: 1m  # Much stricter: 10 requests per minute
-    ```
-  </Tab>
-</Tabs>
-
-## Choosing the Right Configuration
+### Choosing the Right Configuration
 
 | Use Case                    | Recommended Approach          | Availability |
 | --------------------------- | ----------------------------- | ------------ |
