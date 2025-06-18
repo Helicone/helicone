@@ -1,10 +1,10 @@
 import { IslandContainer } from "@/components/ui/islandContainer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ThemedLineChart } from "@/components/ui/themedLineChart";
 import {
   PresentationChartLineIcon,
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
-import { AreaChart } from "@tremor/react";
 import { useRouter } from "next/router";
 import { ElementType } from "react";
 import { useUserId } from "../../../../services/hooks/users";
@@ -169,14 +169,12 @@ const UserIdPage = (props: UserIdPageProps) => {
                       isDataOverTimeLoading={isLoading}
                       height={"200px"}
                     >
-                      <AreaChart
+                      <ThemedLineChart
                         data={requestOverTime}
+                        index="date"
                         categories={["requests"]}
-                        index={"date"}
-                        className="h-56"
-                        colors={["blue"]}
-                        showLegend={false}
-                        curveType="monotone"
+                        colors={["chart1"]}
+                        height="200px"
                       />
                     </StyledAreaChart>
                     <StyledAreaChart
@@ -185,17 +183,15 @@ const UserIdPage = (props: UserIdPageProps) => {
                       isDataOverTimeLoading={isLoading}
                       height={"200px"}
                     >
-                      <AreaChart
+                      <ThemedLineChart
                         data={costOverTime}
+                        index="date"
                         categories={["cost"]}
-                        index={"date"}
-                        className="h-56"
-                        colors={["green"]}
-                        showLegend={false}
-                        valueFormatter={(value) => {
-                          return `$${formatNumber(value, 6)}`;
-                        }}
-                        curveType="monotone"
+                        colors={["chart2"]}
+                        height="200px"
+                        valueFormatter={(value: number) =>
+                          `$${formatNumber(value, 6)}`
+                        }
                       />
                     </StyledAreaChart>
                   </div>
