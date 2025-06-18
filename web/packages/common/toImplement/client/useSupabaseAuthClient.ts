@@ -9,7 +9,9 @@ import { useMemo } from "react";
 import { HeliconeAuthClient } from "../../auth/client/HeliconeAuthClient";
 import { HeliconeOrg, HeliconeUser } from "../../auth/types";
 import { err, ok, Result } from "../../result";
+import { clearSupabaseCookies, setOrgCookie } from "../helpers/setOrgCookie";
 import { QueryClient, useQueryClient } from "@tanstack/react-query";
+
 
 export class SupabaseAuthClient implements HeliconeAuthClient {
   user: HeliconeUser | undefined;
@@ -30,6 +32,8 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
   }
 
   async signOut(): Promise<void> {
+    setOrgCookie("none");
+    clearSupabaseCookies();
     if (this.queryClient) {
       this.queryClient.clear();
     }
@@ -126,9 +130,11 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
     email: string;
     password: string;
   }): Promise<Result<HeliconeUser, string>> {
+
     if (this.queryClient) {
       this.queryClient.clear();
     }
+
     if (!this.supabaseClient) {
       return err("Supabase client not found");
     }
@@ -154,6 +160,7 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
     provider: "google" | "github";
     options?: { redirectTo?: string };
   }): Promise<Result<void, string>> {
+
     if (this.queryClient) {
       this.queryClient.clear();
     }
