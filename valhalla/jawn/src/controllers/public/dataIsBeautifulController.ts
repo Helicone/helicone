@@ -35,6 +35,7 @@ export const allProviders = [
   "GROQ",
   "META",
   "MISTRAL",
+  "INFERENCE",
   "OTHER",
 ] as const;
 

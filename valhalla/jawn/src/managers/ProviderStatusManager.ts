@@ -12,6 +12,7 @@ const PROVIDERS = [
   "GROQ",
   "MISTRAL",
   "DEEPINFRA",
+  "INFERENCE",
   "QSTASH",
   "PERPLEXITY",
   "HYPERBOLIC",

@@ -240,6 +240,18 @@ async function modifyEnvBasedOnPath(
         WORKER_TYPE: "GATEWAY_API",
         GATEWAY_TARGET: "https://api.deepinfra.com",
       };
+    } else if (hostParts[0].includes("inference")) {
+      if (isRootPath(url) && request.getMethod() === "GET") {
+        return {
+          ...env,
+          WORKER_DEFINED_REDIRECT_URL: "https://inference.net",
+        };
+      }
+      return {
+        ...env,
+        WORKER_TYPE: "GATEWAY_API",
+        GATEWAY_TARGET: "https://api.inference.net",
+      };
     } else if (hostParts[0].includes("groq")) {
       if (isRootPath(url) && request.getMethod() === "GET") {
         return {

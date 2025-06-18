@@ -128,6 +128,16 @@ export const providers: Provider[] = [
     relevanceScore: 50,
   },
   {
+    id: "inference",
+    name: "Inference",
+    logoUrl: "/assets/home/providers/inference.png",
+    description: "Configure your Inference API keys",
+    docsUrl: "https://docs.helicone.ai/getting-started/integration-methods",
+    apiKeyLabel: "Inference API Key",
+    apiKeyPlaceholder: "...",
+    relevanceScore: 50,
+  },
+  {
     id: "aws",
     name: "AWS Bedrock",
     logoUrl: "/assets/home/providers/bedrock.webp",
@@ -177,7 +187,7 @@ export const providers: Provider[] = [
     apiKeyLabel: "LemonFox API Key",
     apiKeyPlaceholder: "...",
     relevanceScore: 15,
-  },
+  }
 ];
 
 // Mock recently used providers - in a real app, this would come from user data

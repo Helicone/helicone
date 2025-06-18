@@ -30,6 +30,7 @@
 <url><loc>https://www.helicone.ai/status/provider/perplexity</loc><lastmod>2025-05-22T23:00:02.368Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
 <url><loc>https://www.helicone.ai/status/provider/qstash</loc><lastmod>2025-05-22T23:00:02.368Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
 <url><loc>https://www.helicone.ai/status/provider/together</loc><lastmod>2025-05-22T23:00:02.368Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.helicone.ai/status/provider/inference</loc><lastmod>2025-05-22T23:00:02.368Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
 <url><loc>https://www.helicone.ai/llm-cost/provider/anthropic/model/claude%202</loc><lastmod>2025-05-22T23:00:02.368Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
 <url><loc>https://www.helicone.ai/llm-cost/provider/anthropic/model/claude%203%20haiku</loc><lastmod>2025-05-22T23:00:02.368Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
 <url><loc>https://www.helicone.ai/llm-cost/provider/anthropic/model/claude%203%20opus</loc><lastmod>2025-05-22T23:00:02.368Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>

@@ -13,6 +13,7 @@ const PROVIDERS = [
   "DEEPINFRA",
   "QSTASH",
   "PERPLEXITY",
+  "INFERENCE",
 ] as const;
 
 const displayToBackendName: Record<string, string> = {

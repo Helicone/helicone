@@ -39,6 +39,7 @@ const lemonFox = /^https:\/\/api\.lemonfox\.ai/;
 const fireworks = /^https:\/\/api\.fireworks\.ai/;
 const perplexity = /^https:\/\/api\.perplexity\.ai/;
 const googleapis = /^https:\/\/(.*\.)?googleapis\.com/;
+const inference = /^https:\/\/inference\.net/;
 // openrouter.ai or api.openrouter.ai
 const openRouter = /^https:\/\/(api\.)?openrouter\.ai/;
 //api.wisdominanutshell.academy
@@ -98,6 +99,7 @@ export const providersNames = [
   "AVIAN",
   "NEBIUS",
   "NOVITA",
+  "INFERENCE",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -247,6 +249,10 @@ export const providers: {
     pattern: novita,
     provider: "NOVITA",
     costs: novitaCosts,
+  },
+  {
+    pattern: inference,
+    provider: "INFERENCE",
   },
 ];
 

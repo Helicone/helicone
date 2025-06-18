@@ -149,6 +149,7 @@ Helicone is comprised of five services:
 | [OpenRouter](https://docs.helicone.ai/getting-started/integration-method/openrouter)   | JS/TS, Python                                                                                                                                | Unified API for multiple AI models                    |
 | [LiteLLM](https://docs.helicone.ai/getting-started/integration-method/litellm)         | JS/TS, Python                                                                                                                                | Proxy server supporting multiple LLM providers        |
 | [Fireworks AI](https://docs.helicone.ai/getting-started/integration-method/fireworks)  | JS/TS, Python                                                                                                                                | Fast inference API for open-source LLMs               |
+| [Inference](https://docs.helicone.ai/getting-started/integration-method/inference)     | JS/TS, Python                                                                                                                                | High-performance inference platform                   |
 
 ### Supported Frameworks
 

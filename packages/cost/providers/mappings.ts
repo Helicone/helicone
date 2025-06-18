@@ -69,6 +69,9 @@ const nebius = /^https:\/\/api\.studio\.nebius\.ai/;
 // https://api.novita.ai
 const novita = /^https:\/\/api\.novita\.ai/;
 
+// https://api.inference.net
+const inference = /^https:\/\/api\.inference\.net/;
+
 export const providersNames = [
   "OPENAI",
   "ANTHROPIC",
@@ -98,6 +101,7 @@ export const providersNames = [
   "AVIAN",
   "NEBIUS",
   "NOVITA",
+  "INFERENCE",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -247,6 +251,10 @@ export const providers: {
     pattern: novita,
     provider: "NOVITA",
     costs: novitaCosts,
+  },
+  {
+    pattern: inference,
+    provider: "INFERENCE",
   },
 ];
 

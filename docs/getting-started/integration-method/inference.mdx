@@ -1,0 +1,89 @@
+---
+title: "Inference.net Integration"
+sidebarTitle: "Inference.net"
+description: "Connect Helicone with OpenAI-compatible models on Inference.net. Follow a few simple steps to route your requests through the Helicone gateway and unlock observability."
+"twitter:title": "Inference.net Integration - Helicone OSS LLM Observability"
+---
+
+You can follow the official Inference.net quick-start guide here: [https://docs.inference.net/quickstart](https://docs.inference.net/quickstart)
+
+# Gateway Integration
+
+<Steps>
+  <Step title="Create a Helicone account">
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+  </Step>
+
+  <Step title="Create an Inference.net account + obtain an API key">
+    Visit [inference.net](https://inference.net) and sign up. In the **API Keys** tab on the sidebar, create (or copy) an API key.
+  </Step>
+
+  <Step title="Set HELICONE_API_KEY and INFERENCE_API_KEY as environment variables">
+```bash
+export HELICONE_API_KEY=<your-helicone-api-key>
+export INFERENCE_API_KEY=<your-inference-api-key>
+```
+  </Step>
+
+  <Step title="Modify the base URL and add authentication headers">
+
+Replace the original Inference.net endpoint:
+
+`https://api.inference.net/v1/chat/completions` → `https://inference.helicone.ai/v1/chat/completions`
+
+Then add the following headers to every request:
+
+```
+Helicone-Auth: Bearer ${HELICONE_API_KEY}
+Authorization:  Bearer ${INFERENCE_API_KEY}
+```
+
+  </Step>
+</Steps>
+
+## Example (cURL)
+
+```bash
+curl -N https://inference.helicone.ai/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Helicone-Auth: Bearer $HELICONE_API_KEY" \
+  -H "Authorization: Bearer $INFERENCE_API_KEY" \
+  -d '{
+    "model": "meta-llama/llama-3.1-8b-instruct/fp-8",
+    "messages": [
+      { "role": "system", "content": "You are a helpful assistant." },
+      { "role": "user", "content": "What is the meaning of life?" }
+    ],
+    "stream": true
+  }'
+```
+
+## Example (Python • OpenAI SDK)
+
+```python
+import os
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://inference.helicone.ai/v1",
+    api_key=os.environ.get("INFERENCE_API_KEY"),
+    default_headers={
+        "Helicone-Auth": f"Bearer {os.environ.get('HELICONE_API_KEY')}"
+    },
+)
+
+response = client.chat.completions.create(
+    model="meta-llama/llama-3.1-8b-instruct/fp-8",
+    messages=[{"role": "user", "content": "What is the meaning of life?"}],
+    stream=True,
+)
+
+for chunk in response:
+    if chunk.choices[0].delta.content is not None:
+        print(chunk.choices[0].delta.content, end="", flush=True)
+```
+
+For more information on how to use headers, see [Helicone Headers](https://docs.helicone.ai/helicone-headers/header-directory#utilizing-headers) docs.
+
+For more details on the Inference.net platform, see [Inference.net Docs](https://docs.inference.net/).

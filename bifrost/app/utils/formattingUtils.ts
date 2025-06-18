@@ -21,6 +21,7 @@ export function formatProviderName(provider: string): string {
     BEDROCK: "Bedrock",
     CLOUDFLARE: "Cloudflare",
     HYPERBOLIC: "Hyperbolic",
+    INFERENCE: "Inference",
   };
 
   return (

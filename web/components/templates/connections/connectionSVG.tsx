@@ -98,6 +98,18 @@ const Deepinfra = ({ className }: { className: string }) => {
   );
 };
 
+const Inference = ({ className }: { className: string }) => {
+  return (
+    <Image
+      src="/assets/home/providers/inference.png"
+      alt="Inference"
+      width={100}
+      height={100}
+      className={className}
+    />
+  );
+};
+
 const Anyscale = ({ className }: { className: string }) => {
   return (
     <Image
@@ -243,4 +255,5 @@ export const LOGOS = {
   PostHog,
   Lytix,
   Datadog,
+  Inference,
 };
