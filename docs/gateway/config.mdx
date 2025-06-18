@@ -129,16 +129,16 @@ The Gateway ships with a single `default` router that provides basic OpenAI-comp
 
   ```yaml
   routers:
-    production:
-      balance:
+    default:
+      load-balance:
         chat:
-          strategy: p2-c
+          strategy: latency
           targets:
             - openai
             - anthropic
     
     experimental:
-      balance:
+      load-balance:
         chat:
           strategy: weighted
           targets:
