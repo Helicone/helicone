@@ -24,10 +24,14 @@ if (IS_RATE_LIMIT_ENABLED) {
       if (req.path.startsWith("/v1/log")) {
         return 1_000_000;
       }
-      if (
-        req.path.startsWith("/v1/trace") ||
-        req.path.startsWith("/v1/router/control-plane/sign-s3-url")
-      ) {
+      if (req.path.startsWith("/v1/trace")) {
+        return 10_000;
+      }
+
+      if (req.path.startsWith("/v1/router/control-plane/sign-s3-url")) {
+        if (authParams?.tier === "free") {
+          return 100;
+        }
         return 10_000;
       }
       return 200;
