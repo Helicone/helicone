@@ -21,7 +21,7 @@ async fn openai() {
     let mut config = Config::test_default();
     // Disable auth for this test since we're testing basic provider
     // functionality
-    config.auth.require_auth = false;
+    config.helicone.enable_auth = false;
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([
             ("success:openai:chat_completion", 1.into()),
@@ -64,7 +64,7 @@ async fn google_with_openai_request_style() {
     let mut config = Config::test_default();
     // Disable auth for this test since we're testing basic provider
     // functionality
-    config.auth.require_auth = false;
+    config.helicone.enable_auth = false;
     let router_config = RouterConfigs::new(HashMap::from([(
         RouterId::Default,
         RouterConfig {
@@ -130,7 +130,7 @@ async fn anthropic_with_openai_request_style() {
     let mut config = Config::test_default();
     // Disable auth for this test since we're testing basic provider
     // functionality
-    config.auth.require_auth = false;
+    config.helicone.enable_auth = false;
     let router_config = RouterConfigs::new(HashMap::from([(
         RouterId::Default,
         RouterConfig {
@@ -204,7 +204,7 @@ async fn ollama() {
     let mut config = Config::test_default();
     // Disable auth for this test since we're testing basic provider
     // functionality
-    config.auth.require_auth = false;
+    config.helicone.enable_auth = false;
     let router_config = RouterConfigs::new(HashMap::from([(
         RouterId::Default,
         RouterConfig {
@@ -254,7 +254,7 @@ async fn ollama() {
 #[serial_test::serial(default_mock)]
 async fn bedrock_with_openai_request_style() {
     let mut config = Config::test_default();
-    config.auth.require_auth = false;
+    config.helicone.enable_auth = false;
     let router_config = RouterConfigs::new(HashMap::from([(
         RouterId::Default,
         RouterConfig {
@@ -266,9 +266,6 @@ async fn bedrock_with_openai_request_style() {
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([
             ("success:bedrock:converse", 1.into()),
-            // Auth is disabled, so auth and logging services should not be
-            // called
-            ("success:jawn:whoami", 0.into()),
             ("success:minio:upload_request", 0.into()),
             ("success:jawn:log_request", 0.into()),
         ]))

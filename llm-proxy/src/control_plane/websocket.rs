@@ -13,7 +13,7 @@ use tokio_tungstenite::{
         self, Message, client::IntoClientRequest, handshake::client::Request,
     },
 };
-use tracing::{debug, error, info};
+use tracing::{error, info};
 
 use super::{
     control_plane_state::ControlPlaneState,
@@ -38,9 +38,6 @@ pub struct ControlPlaneClient {
     /// Config about Control plane, such as the websocket url,
     /// reconnect interval/backoff policy, heartbeat interval, etc.
     config: HeliconeConfig,
-
-    #[cfg(feature = "testing")]
-    pub enable_loop: bool,
 }
 
 async fn handle_message(
@@ -49,7 +46,6 @@ async fn handle_message(
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let bytes = message.into_data();
     let m: MessageTypeRX = serde_json::from_slice(&bytes)?;
-    debug!("received message: {:?}", m);
     let mut state_guard = state.write().await;
     state_guard.update(m);
 
@@ -60,22 +56,10 @@ impl IntoClientRequest for &HeliconeConfig {
     fn into_client_request(
         self,
     ) -> Result<Request, tokio_tungstenite::tungstenite::Error> {
-        let host = self.websocket_url.host_str().ok_or({
-            tokio_tungstenite::tungstenite::Error::Url(
-                tungstenite::error::UrlError::UnsupportedUrlScheme,
-            )
-        })?;
-        let port = self
-            .websocket_url
-            .port()
-            .map(|p| format!(":{p}"))
-            .unwrap_or_default();
-
-        let host_header = format!("{host}{port}");
-
+        let host = self.websocket_url.authority();
         Request::builder()
             .uri(self.websocket_url.as_str())
-            .header("Host", host_header)
+            .header("Host", host)
             .header(
                 "Authorization",
                 format!("Bearer {}", self.api_key.expose()),
@@ -130,8 +114,6 @@ impl ControlPlaneClient {
             channel: connect_async_and_split(&config).await?,
             config,
             state: control_plane_state,
-            #[cfg(feature = "testing")]
-            enable_loop: false,
         })
     }
 
@@ -166,7 +148,7 @@ impl ControlPlaneClient {
                     Ok(message) => {
                         let _ = handle_message(&state_clone, message)
                             .await
-                            .map_err(|e| {
+                            .inspect_err(|e| {
                                 tracing::error!(error = ?e, "websocket error");
                             });
                     }
@@ -197,11 +179,6 @@ impl meltdown::Service for ControlPlaneClient {
     type Future = BoxFuture<'static, Result<(), RuntimeError>>;
 
     fn run(self, mut token: Token) -> Self::Future {
-        #[cfg(feature = "testing")]
-        if !self.enable_loop {
-            return Box::pin(async move { Ok(()) });
-        }
-
         Box::pin(async move {
             tokio::select! {
                 result = self.run_control_plane_forever() => {

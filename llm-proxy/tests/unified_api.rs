@@ -16,7 +16,7 @@ async fn openai_unified_api() {
     let mut config = Config::test_default();
     // Disable auth for this test since we're testing basic passthrough
     // functionality
-    config.auth.require_auth = false;
+    config.helicone.enable_auth = false;
 
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([
@@ -66,7 +66,7 @@ async fn anthropic_unified_api() {
     let mut config = Config::test_default();
     // Disable auth for this test since we're testing basic passthrough
     // functionality
-    config.auth.require_auth = false;
+    config.helicone.enable_auth = false;
 
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([

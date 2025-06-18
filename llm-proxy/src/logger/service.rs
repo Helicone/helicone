@@ -7,7 +7,6 @@ use http_body_util::BodyExt;
 use indexmap::IndexMap;
 use opentelemetry::KeyValue;
 use reqwest::Client;
-use rusty_s3::S3Action;
 use tokio::{sync::oneshot, time::Instant};
 use typed_builder::TypedBuilder;
 use url::Url;
@@ -15,20 +14,20 @@ use uuid::Uuid;
 
 use crate::{
     app_state::AppState,
+    config::DeploymentTarget,
     error::{init::InitError, logger::LoggerError},
+    logger::s3::S3Client,
     metrics::tfft::TFFTFuture,
     types::{
         body::BodyReader,
-        extensions::{AuthContext, MapperContext, RequestContext},
+        extensions::{MapperContext, RequestContext},
         logger::{
             HeliconeLogMetadata, Log, LogMessage, RequestLog, ResponseLog,
-            S3Log,
         },
         provider::InferenceProvider,
     },
 };
 
-const PUT_OBJECT_SIGN_DURATION: Duration = Duration::from_secs(120);
 const JAWN_CONNECT_TIMEOUT: Duration = Duration::from_secs(10);
 
 #[derive(Debug)]
@@ -65,45 +64,6 @@ pub struct LoggerService {
 
 impl LoggerService {
     #[tracing::instrument(skip_all)]
-    async fn log_bodies(
-        app_state: &AppState,
-        auth_ctx: &AuthContext,
-        request_id: Uuid,
-        request_body: Bytes,
-        response_body: Bytes,
-    ) -> Result<(), LoggerError> {
-        let object_path = format!(
-            "organizations/{}/requests/{}/raw_request_response_body",
-            auth_ctx.org_id.as_ref(),
-            request_id
-        );
-        let action = app_state.0.minio.put_object(&object_path);
-        let signed_url = action.sign(PUT_OBJECT_SIGN_DURATION);
-        let request_body = String::from_utf8(request_body.to_vec())?;
-        let response_body = String::from_utf8(response_body.to_vec())?;
-
-        let s3_log = S3Log::new(request_body, response_body);
-        let _resp = app_state
-            .0
-            .minio
-            .client
-            .put(signed_url)
-            .json(&s3_log)
-            .send()
-            .await
-            .map_err(|e| {
-                tracing::debug!(error = %e, "failed to send request to S3");
-                LoggerError::FailedToSendRequest(e)
-            })?
-            .error_for_status()
-            .map_err(|e| {
-                tracing::error!(error = %e, "failed to log bodies in S3");
-                LoggerError::ResponseError(e)
-            })?;
-        Ok(())
-    }
-
-    #[tracing::instrument(skip_all)]
     #[allow(clippy::cast_precision_loss, clippy::too_many_lines)]
     pub async fn log(mut self) -> Result<(), LoggerError> {
         tracing::trace!("logging request");
@@ -127,19 +87,30 @@ impl LoggerService {
         let req_body_len = self.request_body.len();
         let resp_body_len = response_body.len();
         let request_id = Uuid::new_v4();
-        LoggerService::log_bodies(
-            &self.app_state,
-            auth_ctx,
-            request_id,
-            self.request_body,
-            response_body,
-        )
-        .await?;
+        let s3_client = match self.app_state.config().deployment_target {
+            DeploymentTarget::SelfHosted => {
+                S3Client::self_hosted(&self.app_state.0.minio)
+            }
+            DeploymentTarget::Sidecar => {
+                S3Client::sidecar(&self.app_state.0.jawn_http_client)
+            }
+            DeploymentTarget::Cloud => todo!("cloud is not yet supported"),
+        };
+        s3_client
+            .log_bodies(
+                &self.app_state,
+                auth_ctx,
+                request_id,
+                self.request_body,
+                response_body,
+            )
+            .await?;
 
-        let model = self.mapper_ctx.model.as_ref().map_or_else(
-            || "unknown".to_string(),
-            std::string::ToString::to_string,
-        );
+        let model = self
+            .mapper_ctx
+            .model
+            .as_ref()
+            .map_or_else(|| "unknown".to_string(), ToString::to_string);
         let attributes = [
             KeyValue::new("provider", self.provider.to_string()),
             KeyValue::new("model", model),
@@ -209,6 +180,7 @@ impl LoggerService {
                 LoggerError::ResponseError(e)
             })?;
 
+        tracing::trace!("successfully logged request");
         Ok(())
     }
 }

@@ -1,6 +1,9 @@
 use std::collections::HashMap;
 
-use stubr::{Stubr, wiremock_rs::Times};
+use stubr::{
+    Stubr,
+    wiremock_rs::{ResponseTemplate, Times},
+};
 use typed_builder::TypedBuilder;
 use url::Url;
 use workspace_root::get_workspace_root;
@@ -68,9 +71,9 @@ impl Mock {
             args.global_openai_latency,
             args.stubs.as_ref(),
             args.verify,
+            args.openai_port,
         )
         .await;
-        tracing::debug!(port = %openai_mock.uri(), "openai mock started");
         config
             .providers
             .get_mut(&InferenceProvider::OpenAI)
@@ -82,6 +85,7 @@ impl Mock {
             args.global_anthropic_latency,
             args.stubs.as_ref(),
             args.verify,
+            args.anthropic_port,
         )
         .await;
         config
@@ -95,6 +99,7 @@ impl Mock {
             args.global_google_latency,
             args.stubs.as_ref(),
             args.verify,
+            args.google_port,
         )
         .await;
 
@@ -109,6 +114,7 @@ impl Mock {
             args.global_ollama_latency,
             args.stubs.as_ref(),
             args.verify,
+            args.ollama_port,
         )
         .await;
 
@@ -117,6 +123,7 @@ impl Mock {
             args.global_bedrock_latency,
             args.stubs.as_ref(),
             args.verify,
+            args.bedrock_port,
         )
         .await;
 
@@ -137,6 +144,7 @@ impl Mock {
             None,
             args.stubs.as_ref(),
             args.verify,
+            args.minio_port,
         )
         .await;
         config.minio.host = Url::parse(&minio_mock.uri()).unwrap();
@@ -146,9 +154,13 @@ impl Mock {
             None,
             args.stubs.as_ref(),
             args.verify,
+            args.jawn_port,
         )
         .await;
         config.helicone.base_url = Url::parse(&jawn_mock.uri()).unwrap();
+
+        handle_presigned_url_mock(&jawn_mock, &minio_mock, args.stubs.as_ref())
+            .await;
 
         Self {
             openai_mock,
@@ -327,6 +339,13 @@ impl Mock {
             self.args.verify,
         )
         .await;
+
+        handle_presigned_url_mock(
+            &self.jawn_mock,
+            &self.minio_mock,
+            self.args.stubs.as_ref(),
+        )
+        .await;
     }
 }
 
@@ -335,8 +354,9 @@ async fn start_mock_for_test(
     global_delay: Option<u64>,
     stubs: Option<&HashMap<&'static str, Times>>,
     verify: bool,
+    port: Option<u16>,
 ) -> Stubr {
-    start_mock(stub_path, global_delay, stubs, verify, true, None).await
+    start_mock(stub_path, global_delay, stubs, verify, true, port).await
 }
 
 async fn start_mock(
@@ -399,5 +419,46 @@ async fn register_stubs_for_mock(
         mock.http_server
             .set_expectation(stub_name, times.clone())
             .await;
+    }
+}
+
+async fn handle_presigned_url_mock(
+    jawn_mock: &Stubr,
+    minio_mock: &Stubr,
+    stubs: Option<&HashMap<&'static str, Times>>,
+) {
+    if let Some(expectation) =
+        stubs.and_then(|s| s.get("success:jawn:sign_s3_url"))
+    {
+        // the reason we do this hack is because the presigned url needs the
+        // port of the minio mock, which is dynamic, so we can't use regular
+        // stubs here.
+        let minio_base_url = minio_mock.http_server.uri();
+        let presigned_url = format!(
+            "{minio_base_url}/request-response-storage/organizations/\
+             c3bc2b69-c55c-4dfc-8a29-47db1245ee7c/requests/\
+             a41cbcd7-5e9e-4104-b29b-2ef4473d71a7/raw_request_response_body"
+        );
+        tracing::info!(
+            url = %presigned_url,
+            "setting up presigned url mock"
+        );
+        let presigned_url_mock =
+            ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "data": {
+                    "url": presigned_url
+                }
+            }));
+        stubr::wiremock_rs::Mock::given(stubr::wiremock_rs::matchers::method(
+            "POST",
+        ))
+        .and(stubr::wiremock_rs::matchers::path(
+            "/v1/router/control-plane/sign-s3-url",
+        ))
+        .respond_with(presigned_url_mock)
+        .expect(expectation.clone())
+        .named("success:jawn:sign_s3_url")
+        .mount(&jawn_mock.http_server)
+        .await;
     }
 }

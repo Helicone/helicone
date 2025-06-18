@@ -37,12 +37,6 @@ impl AuthService {
                 org_id: config.auth.organization_id.as_str().try_into()?,
             })
         } else {
-            tracing::error!("key not found: {:?}", api_key);
-            tracing::error!("computed hash: {}", computed_hash);
-            tracing::error!(
-                "available hashes: {:?}",
-                config.keys.iter().map(|k| &k.key_hash).collect::<Vec<_>>()
-            );
             Err(AuthError::InvalidCredentials)
         }
     }
@@ -61,13 +55,9 @@ where
 
     #[tracing::instrument(skip_all)]
     fn authorize(&mut self, mut request: Request<B>) -> Self::Future {
-        // NOTE:
-        // this is a temporary solution, when we get the control plane up and
-        // running, we will actively be validating the helicone api keys
-        // at the router rather than authenticating with jawn each time
         let app_state = self.app_state.clone();
         Box::pin(async move {
-            if !app_state.0.config.auth.require_auth {
+            if !app_state.0.config.helicone.enable_auth {
                 tracing::trace!("Auth middleware: auth disabled");
                 return Ok(request);
             }

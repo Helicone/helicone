@@ -26,7 +26,6 @@ use thiserror::Error;
 use crate::{
     error::init::InitError,
     types::{provider::InferenceProvider, router::RouterId},
-    utils::default_true,
 };
 
 const ROUTER_ID_REGEX: &str = r"^[A-Za-z0-9_-]{1,12}$";
@@ -50,34 +49,9 @@ pub enum Error {
 #[serde(deny_unknown_fields, rename_all = "kebab-case")]
 pub enum DeploymentTarget {
     Cloud,
-    Sidecar,
-    #[default]
     SelfHosted,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-#[serde(deny_unknown_fields, rename_all = "kebab-case")]
-pub struct AuthConfig {
-    /// Whether a Helicone API key is required in order to proxy requests.
-    ///
-    /// If `require_auth=true`, then we will check for a valid Helicone API key
-    /// in the `authorization` header.
-    ///
-    /// If `require_auth=false`, we will still proxy the request, but certain
-    /// Helicone features will not be available, such as governance
-    /// features and LLM observability. Costs incurred from the requests
-    /// will be charged to the API keys associated with the given router
-    /// called by the request, so be warned!
-    #[serde(default = "default_true")]
-    pub require_auth: bool,
-}
-
-impl Default for AuthConfig {
-    fn default() -> Self {
-        Self {
-            require_auth: default_true(),
-        }
-    }
+    #[default]
+    Sidecar,
 }
 
 #[derive(Debug, Default, Deserialize, Serialize)]
@@ -87,7 +61,6 @@ pub struct Config {
     pub server: self::server::ServerConfig,
     pub minio: self::minio::Config,
     pub dispatcher: self::dispatcher::DispatcherConfig,
-    pub auth: AuthConfig,
     /// *ALL* supported providers, independent of router configuration.
     pub providers: self::providers::ProvidersConfig,
     pub discover: self::discover::DiscoverConfig,
@@ -162,13 +135,12 @@ impl crate::tests::TestDefault for Config {
             server: self::server::ServerConfig::test_default(),
             minio: self::minio::Config::test_default(),
             dispatcher: self::dispatcher::DispatcherConfig::test_default(),
-            auth: AuthConfig::default(),
             default_model_mapping:
                 self::model_mapping::ModelMappingConfig::default(),
             is_production: false,
             providers: self::providers::ProvidersConfig::default(),
             helicone: self::helicone::HeliconeConfig::test_default(),
-            deployment_target: DeploymentTarget::SelfHosted,
+            deployment_target: DeploymentTarget::Sidecar,
             discover: self::discover::DiscoverConfig::test_default(),
             routers: self::router::RouterConfigs::test_default(),
             response_headers:

@@ -13,12 +13,13 @@ use tower::Service;
 #[serial_test::serial]
 async fn require_auth_enabled_with_valid_token() {
     let mut config = Config::test_default();
-    config.auth.require_auth = true;
+    config.helicone.enable_auth = true;
 
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([
             ("success:openai:chat_completion", 1.into()),
             ("success:minio:upload_request", 1.into()),
+            ("success:jawn:sign_s3_url", 1.into()),
             ("success:jawn:log_request", 1.into()),
         ]))
         .build();
@@ -53,9 +54,17 @@ async fn require_auth_enabled_with_valid_token() {
     // we need to collect the body here in order to poll the underlying body
     // so that the async logging task can complete
     let _response_body = response.into_body().collect().await.unwrap();
+    let received_req = harness
+        .mock
+        .jawn_mock
+        .http_server
+        .received_requests()
+        .await
+        .unwrap();
+    tracing::info!("received request: {:?}", received_req);
 
     // sleep so that the background task for logging can complete
-    tokio::time::sleep(std::time::Duration::from_millis(10)).await;
+    tokio::time::sleep(std::time::Duration::from_millis(20)).await;
 
     // mocks are verified on drop
 }
@@ -64,7 +73,7 @@ async fn require_auth_enabled_with_valid_token() {
 #[serial_test::serial]
 async fn require_auth_enabled_without_token() {
     let mut config = Config::test_default();
-    config.auth.require_auth = true;
+    config.helicone.enable_auth = true;
 
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([
@@ -111,7 +120,7 @@ async fn require_auth_enabled_without_token() {
 #[serial_test::serial]
 async fn require_auth_disabled_without_token() {
     let mut config = Config::test_default();
-    config.auth.require_auth = false;
+    config.helicone.enable_auth = false;
 
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([
@@ -155,7 +164,7 @@ async fn require_auth_disabled_without_token() {
 #[serial_test::serial]
 async fn require_auth_disabled_with_token() {
     let mut config = Config::test_default();
-    config.auth.require_auth = false;
+    config.helicone.enable_auth = false;
 
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([

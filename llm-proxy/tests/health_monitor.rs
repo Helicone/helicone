@@ -23,7 +23,7 @@ use tower::Service;
 async fn errors_remove_provider_from_lb_pool() {
     let mut config = Config::test_default();
     // Enable auth so that logging services are called
-    config.auth.require_auth = true;
+    config.helicone.enable_auth = true;
     let balance_config = BalanceConfig::from(HashMap::from([(
         EndpointType::Chat,
         BalanceConfigInner::Weighted {
@@ -57,6 +57,7 @@ async fn errors_remove_provider_from_lb_pool() {
             ("error:google:generate_content", (..12).into()),
             ("success:minio:upload_request", 100.into()),
             ("success:jawn:log_request", 100.into()),
+            ("success:jawn:sign_s3_url", 100.into()),
         ]))
         .build();
     let mut harness = Harness::builder()

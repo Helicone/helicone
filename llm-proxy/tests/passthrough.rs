@@ -21,7 +21,7 @@ async fn openai_passthrough() {
     let mut config = Config::test_default();
     // Disable auth for this test since we're testing basic passthrough
     // functionality
-    config.auth.require_auth = false;
+    config.helicone.enable_auth = false;
 
     // Configure router to use OpenAI as the only provider
     let router_config = RouterConfigs::new(HashMap::from([(

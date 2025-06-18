@@ -11,7 +11,7 @@ use super::mock::{Mock, MockArgs};
 use crate::{
     app::{App, AppFactory, AppResponse},
     config::Config,
-    control_plane,
+    control_plane::{self, types::Key},
     types::request::Request,
 };
 
@@ -54,7 +54,6 @@ impl HarnessBuilder {
         self
     }
 
-    #[cfg(feature = "testing")]
     #[must_use]
     pub fn with_mock_auth(self) -> Self {
         use super::TestDefault;
@@ -62,6 +61,14 @@ impl HarnessBuilder {
         self.with_control_plane_config(
             control_plane::types::Config::test_default(),
         )
+    }
+
+    #[must_use]
+    pub fn with_auth_keys(self, keys: Vec<Key>) -> Self {
+        use super::TestDefault;
+        let mut default = control_plane::types::Config::test_default();
+        default.keys = keys;
+        self.with_control_plane_config(default)
     }
 }
 pub struct Harness {

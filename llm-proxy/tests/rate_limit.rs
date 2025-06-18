@@ -4,10 +4,7 @@ use http::{Method, Request, StatusCode};
 use http_body_util::BodyExt;
 use llm_proxy::{
     config::{Config, rate_limit::TopLevelRateLimitConfig},
-    control_plane::{
-        self,
-        types::{AuthData, Key, hash_key},
-    },
+    control_plane::types::{Key, hash_key},
     tests::{TestDefault, harness::Harness, mock::MockArgs},
 };
 use serde_json::json;
@@ -36,13 +33,14 @@ async fn rate_limit_capacity_enforced_impl(
     rate_limit_config: TopLevelRateLimitConfig,
 ) {
     let mut config = Config::test_default();
-    config.auth.require_auth = true;
+    config.helicone.enable_auth = true;
     config.rate_limit = rate_limit_config;
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([
             ("success:openai:chat_completion", 6.into()),
             ("success:minio:upload_request", 6.into()),
             ("success:jawn:log_request", 6.into()),
+            ("success:jawn:sign_s3_url", 6.into()),
         ]))
         .build();
 
@@ -107,7 +105,7 @@ async fn rate_limit_per_user_isolation_impl(
     rate_limit_config: TopLevelRateLimitConfig,
 ) {
     let mut config = Config::test_default();
-    config.auth.require_auth = true;
+    config.helicone.enable_auth = true;
     config.rate_limit = rate_limit_config;
 
     let mock_args = MockArgs::builder()
@@ -115,6 +113,7 @@ async fn rate_limit_per_user_isolation_impl(
             ("success:openai:chat_completion", 3.into()),
             ("success:minio:upload_request", 3.into()),
             ("success:jawn:log_request", 3.into()),
+            ("success:jawn:sign_s3_url", 3.into()),
         ]))
         .build();
 
@@ -123,12 +122,10 @@ async fn rate_limit_per_user_isolation_impl(
     let user1_id = Uuid::new_v4();
     let user2_id = Uuid::new_v4();
 
-    let control_plane_config = control_plane::types::Config {
-        auth: AuthData {
-            user_id: user1_auth.to_string(),
-            organization_id: Uuid::new_v4().to_string(),
-        },
-        keys: vec![
+    let mut harness = Harness::builder()
+        .with_config(config)
+        .with_mock_args(mock_args)
+        .with_auth_keys(vec![
             Key {
                 key_hash: hash_key(user1_auth),
                 owner_id: user1_id.to_string(),
@@ -137,15 +134,7 @@ async fn rate_limit_per_user_isolation_impl(
                 key_hash: hash_key(user2_auth),
                 owner_id: user2_id.to_string(),
             },
-        ],
-        router_id: "default".to_string(),
-        router_config: "{}".to_string(),
-    };
-
-    let mut harness = Harness::builder()
-        .with_config(config)
-        .with_mock_args(mock_args)
-        .with_control_plane_config(control_plane_config)
+        ])
         .build()
         .await;
 
@@ -181,6 +170,7 @@ async fn rate_limit_per_user_isolation_impl(
             ("success:openai:chat_completion", 3.into()),
             ("success:minio:upload_request", 3.into()),
             ("success:jawn:log_request", 3.into()),
+            ("success:jawn:sign_s3_url", 3.into()),
         ]))
         .await;
 
@@ -200,13 +190,14 @@ async fn rate_limit_per_user_isolation_impl(
 #[serial_test::serial]
 async fn rate_limit_disabled() {
     let mut config = Config::test_default();
-    config.auth.require_auth = true;
+    config.helicone.enable_auth = true;
 
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([
             ("success:openai:chat_completion", 10.into()),
             ("success:minio:upload_request", 10.into()),
             ("success:jawn:log_request", 10.into()),
+            ("success:jawn:sign_s3_url", 10.into()),
         ]))
         .build();
 

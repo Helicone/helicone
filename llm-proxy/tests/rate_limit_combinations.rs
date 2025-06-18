@@ -119,7 +119,7 @@ async fn make_chat_request_for_router(
 #[serial_test::serial]
 async fn test_global_rate_limit_with_router_none() {
     let mut config = Config::test_default();
-    config.auth.require_auth = true;
+    config.helicone.enable_auth = true;
     config.rate_limit = TopLevelRateLimitConfig {
         store: RateLimitStore::InMemory,
         // 3 requests per second
@@ -139,6 +139,7 @@ async fn test_global_rate_limit_with_router_none() {
             ("success:openai:chat_completion", 3.into()),
             ("success:minio:upload_request", 3.into()),
             ("success:jawn:log_request", 3.into()),
+            ("success:jawn:sign_s3_url", 3.into()),
         ]))
         .build();
 
@@ -192,7 +193,7 @@ async fn test_global_rate_limit_with_router_none() {
 #[serial_test::serial]
 async fn test_router_specific_with_custom_limits() {
     let mut config = Config::test_default();
-    config.auth.require_auth = true;
+    config.helicone.enable_auth = true;
     config.rate_limit = TopLevelRateLimitConfig {
         store: RateLimitStore::InMemory,
         global_limits: None,
@@ -215,9 +216,10 @@ async fn test_router_specific_with_custom_limits() {
 
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([
-            ("success:openai:chat_completion", (2).into()),
-            ("success:minio:upload_request", (2).into()),
-            ("success:jawn:log_request", (2).into()),
+            ("success:openai:chat_completion", 2.into()),
+            ("success:minio:upload_request", 2.into()),
+            ("success:jawn:log_request", 2.into()),
+            ("success:jawn:sign_s3_url", 2.into()),
         ]))
         .build();
 
@@ -257,7 +259,7 @@ async fn test_router_specific_with_custom_limits() {
 #[serial_test::serial]
 async fn test_global_with_custom_router_override() {
     let mut config = Config::test_default();
-    config.auth.require_auth = true;
+    config.helicone.enable_auth = true;
     config.rate_limit = TopLevelRateLimitConfig {
         store: RateLimitStore::InMemory,
         // 5 requests per second
@@ -285,6 +287,7 @@ async fn test_global_with_custom_router_override() {
             ("success:openai:chat_completion", 2.into()),
             ("success:minio:upload_request", 2.into()),
             ("success:jawn:log_request", 2.into()),
+            ("success:jawn:sign_s3_url", 2.into()),
         ]))
         .build();
 
@@ -323,7 +326,7 @@ async fn test_global_with_custom_router_override() {
 #[serial_test::serial]
 async fn test_router_independence_different_rate_limits() {
     let mut config = Config::test_default();
-    config.auth.require_auth = true;
+    config.helicone.enable_auth = true;
     config.rate_limit = TopLevelRateLimitConfig {
         store: RateLimitStore::InMemory,
         global_limits: None,
@@ -376,6 +379,7 @@ async fn test_router_independence_different_rate_limits() {
             ("success:openai:chat_completion", 5.into()),
             ("success:minio:upload_request", 5.into()),
             ("success:jawn:log_request", 5.into()),
+            ("success:jawn:sign_s3_url", 5.into()),
         ]))
         .build();
 
@@ -501,7 +505,7 @@ async fn make_chat_request_to_router(
 #[serial_test::serial]
 async fn test_multi_router_different_rate_limits_in_memory() {
     let mut config = Config::test_default();
-    config.auth.require_auth = true;
+    config.helicone.enable_auth = true;
     config.rate_limit = TopLevelRateLimitConfig {
         store: RateLimitStore::InMemory,
         global_limits: None,
@@ -552,6 +556,7 @@ async fn test_multi_router_different_rate_limits_in_memory() {
             ("success:openai:chat_completion", 7.into()),
             ("success:minio:upload_request", 7.into()),
             ("success:jawn:log_request", 7.into()),
+            ("success:jawn:sign_s3_url", 7.into()),
         ]))
         .build();
 

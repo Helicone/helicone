@@ -136,6 +136,9 @@ fn default_secret_key() -> Secret<String> {
 #[cfg(feature = "testing")]
 impl crate::tests::TestDefault for Config {
     fn test_default() -> Self {
-        Self::default()
+        Self {
+            host: Url::parse("http://localhost:9190").unwrap(),
+            ..Self::default()
+        }
     }
 }

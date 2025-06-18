@@ -41,7 +41,7 @@ telemetry = { path = "./crates/telemetry" }
 llm-proxy = { path = "./llm-proxy" }
 weighted-balance = { path = "./crates/weighted-balance" }
 
-# TODO: @tom: submit upstream PR
+# Upstream PR: https://github.com/katsuhirohonda/anthropic-sdk-rs/pull/49
 anthropic-ai-sdk = { version = "0.2.2", git = "https://github.com/tomharmon/anthropic-sdk-rs.git", branch = "task/add-serde-impls" }
 anyhow = "1.0.98"
 async-openai = { version = "0.28.1" }

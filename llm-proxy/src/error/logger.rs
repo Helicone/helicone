@@ -18,4 +18,6 @@ pub enum LoggerError {
     BodyNotUtf8(#[from] std::string::FromUtf8Error),
     /// No auth context set
     NoAuthContextSet,
+    /// Unexpected response: {0}
+    UnexpectedResponse(String),
 }

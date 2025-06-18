@@ -1,2 +1,2 @@
-auth:
-  require-auth: false
+helicone:
+  enable-auth: false

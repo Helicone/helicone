@@ -70,7 +70,7 @@ async fn main() -> Result<(), RuntimeError> {
         llm_proxy::utils::meltdown::wait_for_shutdown_signals,
     ));
 
-    if app.state.0.config.helicone.enable_control_plane {
+    if app.state.0.config.helicone.enable_auth {
         meltdown = meltdown.register(TaggedService::new(
             "control-plane-client",
             ControlPlaneClient::connect(control_plane_state, helicone_config)

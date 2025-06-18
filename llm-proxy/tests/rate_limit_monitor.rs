@@ -23,7 +23,7 @@ use tower::Service;
 async fn rate_limit_removes_provider_from_lb_pool() {
     let mut config = Config::test_default();
     // Enable auth so that logging services are called
-    config.auth.require_auth = true;
+    config.helicone.enable_auth = true;
     let balance_config = BalanceConfig::from(HashMap::from([(
         EndpointType::Chat,
         BalanceConfigInner::Weighted {
@@ -56,6 +56,7 @@ async fn rate_limit_removes_provider_from_lb_pool() {
             ("success:anthropic:messages", (num_requests - 1..).into()),
             ("success:minio:upload_request", num_requests.into()),
             ("success:jawn:log_request", num_requests.into()),
+            ("success:jawn:sign_s3_url", num_requests.into()),
         ]))
         .build();
 
@@ -106,7 +107,7 @@ async fn rate_limit_removes_provider_from_lb_pool() {
     }
 
     // sleep to allow the provider to be re-added after the retry-after period
-    tokio::time::sleep(std::time::Duration::from_secs(3)).await;
+    tokio::time::sleep(std::time::Duration::from_secs(4)).await;
     tracing::info!("Verifying mock stubs");
     harness.mock.verify().await;
     harness.mock.reset().await;
@@ -118,6 +119,7 @@ async fn rate_limit_removes_provider_from_lb_pool() {
             ("success:anthropic:messages", (6..=14).into()),
             ("success:minio:upload_request", 20.into()),
             ("success:jawn:log_request", 20.into()),
+            ("success:jawn:sign_s3_url", 20.into()),
         ]))
         .await;
 

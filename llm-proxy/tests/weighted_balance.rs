@@ -22,7 +22,7 @@ use tower::Service;
 async fn weighted_balancer_anthropic_preferred() {
     let mut config = Config::test_default();
     // Disable auth for this test since we're not testing authentication
-    config.auth.require_auth = false;
+    config.helicone.enable_auth = false;
     let balance_config = BalanceConfig::from(HashMap::from([(
         EndpointType::Chat,
         BalanceConfigInner::Weighted {
@@ -97,7 +97,7 @@ async fn weighted_balancer_anthropic_preferred() {
 async fn weighted_balancer_openai_preferred() {
     let mut config = Config::test_default();
     // Disable auth for this test since we're not testing authentication
-    config.auth.require_auth = false;
+    config.helicone.enable_auth = false;
     let balance_config = BalanceConfig::from(HashMap::from([(
         EndpointType::Chat,
         BalanceConfigInner::Weighted {
@@ -172,7 +172,7 @@ async fn weighted_balancer_openai_preferred() {
 async fn weighted_balancer_anthropic_heavily_preferred() {
     let mut config = Config::test_default();
     // Disable auth for this test since we're not testing authentication
-    config.auth.require_auth = false;
+    config.helicone.enable_auth = false;
     let balance_config = BalanceConfig::from(HashMap::from([(
         EndpointType::Chat,
         BalanceConfigInner::Weighted {
@@ -247,7 +247,7 @@ async fn weighted_balancer_anthropic_heavily_preferred() {
 async fn weighted_balancer_equal_four_providers() {
     let mut config = Config::test_default();
     // Disable auth for this test since we're not testing authentication
-    config.auth.require_auth = false;
+    config.helicone.enable_auth = false;
     let balance_config = BalanceConfig::from(HashMap::from([(
         EndpointType::Chat,
         BalanceConfigInner::Weighted {
@@ -332,7 +332,7 @@ async fn weighted_balancer_equal_four_providers() {
 async fn weighted_balancer_bedrock() {
     let mut config = Config::test_default();
     // Disable auth for this test since we're not testing authentication
-    config.auth.require_auth = false;
+    config.helicone.enable_auth = false;
     let balance_config = BalanceConfig::from(HashMap::from([(
         EndpointType::Chat,
         BalanceConfigInner::Weighted {
