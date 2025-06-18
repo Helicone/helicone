@@ -6,120 +6,9 @@ description: "Complete reference for configuring your LLM Gateway"
 
 The AI Gateway is configured through a `config.yaml` file that defines how requests are routed, balanced, and processed across different LLM providers.
 
-## Provider Configuration
+## Routers
 
-Configure LLM providers, their endpoints, and available models. 
-
-<Note>
-The gateway ships with [comprehensive defaults](https://github.com/Helicone/helicone-router/blob/main/llm-proxy/config/embedded/providers.yaml) for all major providers. Most users will not need to configure this section, [this guide](/gateway/features/providers) will walk you through when you might need to.
-</Note>
-
-<ParamField path="providers" type="object">
-  Configure provider settings to override defaults.
-
-  ```yaml
-  providers:
-    openai:
-      models:
-        - gpt-4
-        - gpt-4o
-        - gpt-4o-mini
-    
-    anthropic:
-      version: "2023-06-01"
-      models:
-        - claude-3-opus
-        - claude-3-sonnet
-        - claude-3-haiku
-    
-    gemini:
-      models:
-        - gemini-1.5-pro
-        - gemini-1.5-flash
-    
-    ollama:
-      base-url: "http://localhost:11434"
-      models:
-        - llama3
-        - deepseek-r1
-  ```
-</ParamField>
-
-<ParamField path="providers.[name].base-url" type="string" required>
-  API endpoint URL for the provider.
-
-  ```yaml
-  providers:
-    openai:
-      base-url: "https://api.openai.com"
-  ```
-</ParamField>
-
-<ParamField path="providers.[name].models" type="array" required>
-  List of supported models for this provider.
-
-  ```yaml
-  providers:
-    openai:
-      models:
-        - gpt-4
-        - gpt-4o
-        - gpt-4o-mini
-  ```
-</ParamField>
-
-<ParamField path="providers.[name].version" type="string" optional>
-  API version (required for some providers like Anthropic).
-
-  ```yaml
-  providers:
-    anthropic:
-      version: "2023-06-01"
-  ```
-</ParamField>
-
-## Model Mapping
-
-Define equivalencies between models from different providers for seamless switching and load balancing. 
-
-<Note>
-The Gateway ships with [comprehensive defaults](https://github.com/Helicone/helicone-router/blob/main/llm-proxy/config/embedded/model-mapping.yaml) for all major providers. Most users will not need to configure this section, [this guide](/gateway/features/model-mapping) will walk you through when you might need to.
-</Note>
-
-<ParamField path="routers.[name].model-mappings" type="object" optional>
-  Router-specific model mappings for fallback when requested model isn't available.
-
-  ```yaml
-  routers:
-    production:
-      model-mappings:
-        gpt-4: claude-3-opus
-        gpt-4o-mini: claude-3-haiku
-        gemini-pro: gpt-4
-  ```
-</ParamField>
-
-<ParamField path="default-model-mapping" type="object">
-  Global fallback mappings used when router-specific mappings aren't defined.
-
-  ```yaml
-  default-model-mapping:
-    gpt-4: claude-3-opus
-    gpt-4o-mini: claude-3-haiku
-    claude-opus: gpt-4
-  ```
-</ParamField>
-
-
-## Router Configuration
-
-Configure multiple independent routing policies for different use cases. Each router operates with its own load balancing strategy, provider set, and configuration.
-
-<Note>
-The Gateway ships with a single `default` router that provides basic OpenAI-compatible proxying. You can either configure this router to add features like load balancing and caching, or create multiple routers for different use cases, [this guide](/gateway/concepts/loadbalancing) will walk you through when and why you'd want multiple routers.
-</Note>
-
-### Basic Router Setup
+Each Helicone AI Gateway deployment can configure multiple independent routing policies for different use cases. Each router operates with its own load balancing strategy, provider set, and configuration.
 
 <ParamField path="routers" type="object">
   Define one or more routers. Each router name becomes part of the URL path when making requests.
@@ -182,7 +71,7 @@ Distribute requests across multiple providers to optimize performance, costs, an
 
   ```yaml
   routers:
-    cost-optimized:
+    production:
       load-balance:
         chat:
           strategy: weighted
@@ -366,12 +255,12 @@ Control request frequency using GCRA (Generic Cell Rate Algorithm) with burst ca
 
 ### Global Rate Limiting
 
-<ParamField path="rate-limit.global" type="object">
+<ParamField path="global.rate-limit" type="object">
   Configure application-wide rate limits that apply to all requests.
 
   ```yaml
-  rate-limit:
-    global:
+  global:
+    rate-limit:
       store: in-memory
       per-api-key:
         capacity: 500
@@ -389,7 +278,7 @@ Control request frequency using GCRA (Generic Cell Rate Algorithm) with burst ca
 
   ```yaml
   routers:
-    restricted:
+    production:
       rate-limit:
         per-api-key:
           capacity: 100
@@ -403,7 +292,7 @@ Control request frequency using GCRA (Generic Cell Rate Algorithm) with burst ca
 
 The following fields are available for both global and router-level rate limiting:
 
-<ParamField path="[context].store" type="string" default="in-memory">
+<ParamField path="[context].rate-limit.store" type="string" default="in-memory">
   Storage backend for rate limit counters.
 
   ```yaml
@@ -414,7 +303,7 @@ The following fields are available for both global and router-level rate limitin
   - `in-memory` - Local memory storage (default)
 </ParamField>
 
-<ParamField path="[context].per-api-key" type="object">
+<ParamField path="[context].rate-limit.per-api-key" type="object">
   Rate limits applied per API key.
 
   ```yaml
@@ -424,7 +313,7 @@ The following fields are available for both global and router-level rate limitin
   ```
 </ParamField>
 
-<ParamField path="[context].per-api-key.capacity" type="integer" default="500">
+<ParamField path="[context].rate-limit.per-api-key.capacity" type="integer" default="500">
   Maximum number of requests in the bucket (burst capacity).
 
   ```yaml
@@ -435,7 +324,7 @@ The following fields are available for both global and router-level rate limitin
   **How it works:** This is the maximum number of requests that can be made instantly before rate limiting kicks in.
 </ParamField>
 
-<ParamField path="[context].per-api-key.refill-frequency" type="duration" default="1s">
+<ParamField path="[context].rate-limit.per-api-key.refill-frequency" type="duration" default="1s">
   Time to completely refill the capacity bucket.
 
   ```yaml
@@ -446,7 +335,7 @@ The following fields are available for both global and router-level rate limitin
   **How it works:** With capacity=500 and refill-frequency=1s, you get 500 requests per second sustained rate.
 </ParamField>
 
-<ParamField path="[context].cleanup-interval" type="duration" default="5m">
+<ParamField path="[context].rate-limit.cleanup-interval" type="duration" default="5m">
   How often to clean up expired rate limit entries.
 
   ```yaml
@@ -456,42 +345,145 @@ The following fields are available for both global and router-level rate limitin
   **Note:** Only available for global rate limiting configuration.
 </ParamField>
 
-## Helicone Integration
+## Helicone Observability
 
-Configure integration with Helicone platform for authentication and observability. When enabled, requests must include a valid Helicone API key. By default, the AI gateway assumes deployment in private infrastructure with no authentication required.
+Configure integration with the Helicone platform for authentication and observability. When enabled, requests must include a valid Helicone API key.
 
-[Integration guide →](/gateway/features/helicone-integration)
+[Learn more](/gateway/features/helicone-integration)
 
 ### Authentication
 
 If you plan on enabling authentication, you'll need to register your router with Helicone first.
 
-<ParamField path="helicone.enable" type="boolean" default="false">
+<ParamField path="helicone-observability.enable" type="boolean" default="false">
   Enable Helicone platform integration and authentication.
 
   ```yaml
-  helicone:
+  helicone-observability:
     enable: true
   ```
 
   **When enabled:** Requests must include a valid Helicone API key, and observability data is automatically sent to Helicone.
 </ParamField>
 
-<ParamField path="helicone.base-url" type="string" default="https://api.helicone.ai">
+<ParamField path="helicone-observability.base-url" type="string" default="https://api.helicone.ai">
   Helicone API endpoint URL.
 
   ```yaml
-  helicone:
+  helicone-observability:
     base-url: "https://api.helicone.ai"
   ```
 </ParamField>
 
 
+## Provider Configuration
+
+Configure LLM providers, their endpoints, and available models. 
+
+<Note>
+The gateway ships with [comprehensive defaults](https://github.com/Helicone/helicone-router/blob/main/llm-proxy/config/embedded/providers.yaml) for all major providers. Most users will not need to configure this section, [this guide](/gateway/features/providers) will walk you through when you might need to.
+</Note>
+
+<ParamField path="providers" type="object">
+  Configure provider settings to override defaults.
+
+  ```yaml
+  providers:
+    anthropic:
+      base-url: "https://api.anthropic.com"
+      version: "2023-06-01"
+      models:
+        - claude-3-5-haiku
+    
+    ollama:
+      base-url: "http://192.168.1.100:8080"
+      models:
+        - llama3.2
+        - deepseek-r1
+        - custom-fine-tuned-model
+    
+    bedrock:
+      base-url: "https://bedrock-runtime.us-west-2.amazonaws.com"
+      models:
+        - anthropic.claude-3-5-sonnet-20241022-v2:0
+        - anthropic.claude-3-haiku-20240307-v1:0
+  ```
+</ParamField>
+
+<ParamField path="providers.[name].base-url" type="string" required>
+  API endpoint URL for the provider.
+
+  ```yaml
+  providers:
+    openai:
+      base-url: "https://api.openai.com"
+  ```
+</ParamField>
+
+<ParamField path="providers.[name].models" type="array" required>
+  List of supported models for this provider.
+
+  ```yaml
+  providers:
+    openai:
+      models:
+        - gpt-4
+        - gpt-4o
+        - gpt-4o-mini
+  ```
+</ParamField>
+
+<ParamField path="providers.[name].version" type="string" optional>
+  API version (required for some providers like Anthropic).
+
+  ```yaml
+  providers:
+    anthropic:
+      version: "2023-06-01"
+  ```
+</ParamField>
+
+## Model Mapping
+
+Define equivalencies between models from different providers for seamless switching and load balancing. 
+
+<Note>
+The Gateway ships with [comprehensive defaults](https://github.com/Helicone/helicone-router/blob/main/llm-proxy/config/embedded/model-mapping.yaml) for all major providers. Most users will not need to configure this section, [this guide](/gateway/features/model-mapping) will walk you through when you might need to.
+</Note>
+
+<ParamField path="routers.[name].model-mappings" type="object" optional>
+  Router-specific model mappings for fallback when requested model isn't available.
+
+  ```yaml
+  routers:
+    custom-equivalents:
+      model-mappings:
+        gpt-4o: claude-3-opus
+        claude-3-5-sonnet: gemini-1.5-pro
+        gpt-4o-mini: claude-3-5-sonnet
+  ```
+</ParamField>
+
+<ParamField path="default-model-mapping" type="object">
+  Global fallback mappings used when router-specific mappings aren't defined.
+
+  ```yaml
+  default-model-mapping:
+    gpt-4o: claude-3-opus
+    gpt-4o-mini: claude-3-5-sonnet
+    claude-3-5-sonnet: gemini-1.5-pro
+  ```
+</ParamField>
+
 ## Telemetry
 
-Configure observability and logging using OpenTelemetry for traces, metrics, and logs.
+Configure monitoring and logging via OpenTelemetry for the AI Gateway's health and performance.
 
-[Learn more](/gateway/features/observability)
+<Note>
+  Monitor the AI Gateway's health and performance with OpenTelemetry. We provide Docker Compose for local testing and Grafana dashboard configs for production. 
+  
+  [Learn more](/gateway/features/observability)
+</Note>
 
 <ParamField path="telemetry.level" type="string" default="info,llm_proxy=trace">
   Logging level in env logger format.
@@ -518,7 +510,7 @@ Configure observability and logging using OpenTelemetry for traces, metrics, and
 
 ## Response Headers
 
-Configure additional headers added to responses for observability and debugging.
+Control which headers are returned to provide visibility into the gateway's routing decisions and processing.
 
 <ParamField path="response-headers.provider" type="boolean" default="true">
   Add `helicone-provider` header showing which provider handled the request.
@@ -544,23 +536,31 @@ Configure additional headers added to responses for observability and debugging.
 
 ## Deployment Configuration
 
-<ParamField path="deployment-target" type="string" default="self-hosted">
+Configure the AI Gateway's runtime behavior for different deployment patterns and environments.
+
+[Learn more about deployment modes](/gateway/deployment)
+
+<ParamField path="deployment-target" type="string" default="sidecar">
   Deployment environment type.
 
   ```yaml
-  deployment-target: "self-hosted"  # cloud | sidecar | self-hosted
+  deployment-target: "self-hosted"  # sidecar | self-hosted
   ```
 </ParamField>
 
 <ParamField path="is-production" type="boolean" default="false">
-  Production environment flag.
+  Production environment flag for optimized logging and performance settings.
 
   ```yaml
   is-production: true
   ```
+
+  **When enabled:** Optimizes telemetry output and logging levels for production workloads.
 </ParamField>
 
 ## Health Monitoring
+
+Configure how the AI Gateway monitors provider health and automatically removes failing providers from load balancing rotation.
 
 <ParamField path="discover.monitor.health.type" type="string">
   Health monitoring strategy.
@@ -617,15 +617,4 @@ Configure additional headers added to responses for observability and debugging.
   ```
 
   **How it works:** Providers won't be marked unhealthy until they've handled at least this many requests.
-</ParamField>
-## Dispatcher Configuration
-
-<ParamField path="dispatcher" type="object">
-  Configure request dispatching behavior.
-
-  ```yaml
-  dispatcher:
-    timeout: "60s"
-    max-concurrent-requests: 1000
-  ```
 </ParamField>
