@@ -4754,7 +4754,7 @@ dependencies = [
 [[package]]
 name = "stubr"
 version = "0.6.2"
-source = "git+https://github.com/Helicone/stubr#bb80ee03b156d11437e5ff797b5b3557d1c1ab27"
+source = "git+https://github.com/Helicone/stubr#e28d3183329c11550e26fc3e27b414ef100f6ad8"
 dependencies = [
  "anyhow",
  "assert-json-diff",
@@ -4797,7 +4797,7 @@ dependencies = [
 [[package]]
 name = "stubr-attributes"
 version = "0.6.2"
-source = "git+https://github.com/Helicone/stubr#bb80ee03b156d11437e5ff797b5b3557d1c1ab27"
+source = "git+https://github.com/Helicone/stubr#e28d3183329c11550e26fc3e27b414ef100f6ad8"
 dependencies = [
  "itertools 0.11.0",
  "proc-macro2",
