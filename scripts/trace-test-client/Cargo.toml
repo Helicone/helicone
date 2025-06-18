@@ -2,12 +2,13 @@
 name = "trace-test-client"
 version = "0.1.0"
 edition = { workspace = true }
-license = "Apache-2.0"
+license.workspace = true
 publish = false
+authors.workspace = true
 autobenches = false
 default-run = "trace-test-client"
 description = "OpenTelemetry trace test client for the LLM proxy router"
-homepage = "https://helix.helicone.ai"
+homepage = "https://docs.helicone.ai/ai-gateway"
 
 [dependencies]
 http-body-util = { workspace = true }

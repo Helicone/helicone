@@ -3,7 +3,7 @@ name = "mock-server"
 edition.workspace = true
 authors.workspace = true
 license.workspace = true
-publish.workspace = true
+publish = false
 version.workspace = true
 description = "A standalone binary for running a mock server for the Helix Router 3rd party apis in order to enable load testing"
 

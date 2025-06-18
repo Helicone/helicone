@@ -2,11 +2,11 @@
 name = "llm-proxy"
 version = "0.1.0"
 edition.workspace = true
-authors = ["Thomas Harmon <thomas.alan.harmon@gmail.com>"]
+authors.workspace = true
 repository = "https://github.com/Helicone/helicone-router"
 default-run = "llm-proxy"
 description = "A high-performance LLM proxy router."
-homepage = "https://helix.helicone.ai"
+homepage = "https://docs.helicone.ai/ai-gateway"
 
 [dependencies]
 anthropic-ai-sdk = { workspace = true }

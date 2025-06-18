@@ -4,6 +4,7 @@ edition = { workspace = true }
 publish = false
 version = { workspace = true }
 description = "OpenTelemetry telemetry configuration and utilities for the LLM proxy router"
+authors.workspace = true
 homepage = "https://helix.helicone.ai"
 
 [dependencies]

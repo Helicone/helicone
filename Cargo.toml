@@ -13,7 +13,7 @@ default-members = ["llm-proxy"]
 
 [workspace.package]
 edition = "2024"
-authors = ["Thomas Harmon <thomas.alan.harmon@gmail.com>"]
+authors = [ "Thomas Harmon <tom@helicone.ai>, Justin Torre <justin@helicone.ai>, Kavin Desi Valli <kavin@helicone.ai>, Charlie Wu <charlie@helicone.ai>", "Helicone Developers" ]
 license = "UNLICENSED"
 publish = false
 version = "0.1.0"

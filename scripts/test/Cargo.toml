@@ -5,7 +5,7 @@ edition.workspace = true
 authors.workspace = true
 license.workspace = true
 description = "Test scripts for the LLM proxy router"
-homepage = "https://helix.helicone.ai"
+homepage = "https://docs.helicone.ai/ai-gateway"
 publish = false
 
 [dependencies]
