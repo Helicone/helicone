@@ -1,4 +1,4 @@
-import {
+import type {
   MessageTypeRX,
   MessageTypeTX,
 } from "@helicone-package/llm-mapper/router-bindings";
