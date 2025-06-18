@@ -80,6 +80,7 @@ export class SupabaseConnector {
         organizationId: member.data[0].organization,
         userId: data.user.id,
         role: member.data[0].org_role as Role,
+        tier: owner.data[0].tier ?? "",
       });
     }
     if (owner.data.length !== 0) {
@@ -87,6 +88,7 @@ export class SupabaseConnector {
         organizationId: owner.data[0].id,
         userId: data.user.id,
         role: "owner" as Role,
+        tier: owner.data[0].tier ?? "free",
       });
     }
 
@@ -164,6 +166,7 @@ export class SupabaseConnector {
       heliconeApiKeyId,
       keyPermissions,
       role,
+      tier,
     } = result.data;
 
     if (!orgId) {
@@ -176,6 +179,7 @@ export class SupabaseConnector {
       heliconeApiKeyId,
       keyPermissions,
       role,
+      tier,
     };
 
     return ok(authParamsResult);
