@@ -1003,6 +1003,48 @@ export type Database = {
           },
         ]
       }
+      gateway_configs: {
+        Row: {
+          config_yaml: string
+          created_at: string
+          id: number
+          key_id: number | null
+          organization_id: string
+          type: string
+        }
+        Insert: {
+          config_yaml: string
+          created_at?: string
+          id?: number
+          key_id?: number | null
+          organization_id: string
+          type?: string
+        }
+        Update: {
+          config_yaml?: string
+          created_at?: string
+          id?: number
+          key_id?: number | null
+          organization_id?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_gateway_configs_key_id_fkey"
+            columns: ["key_id"]
+            isOneToOne: false
+            referencedRelation: "helicone_api_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_gateway_configs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       helicone_api_keys: {
         Row: {
           api_key_hash: string
