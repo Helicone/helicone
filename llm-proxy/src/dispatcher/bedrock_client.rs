@@ -151,11 +151,14 @@ impl Client {
 
         let (signing_output, _signature) =
             aws_sigv4::http_request::sign(signable_request, &signing_params)
-                .expect("cannot sign request")
+                .map_err(|e| {
+                    InternalError::AwsRequestSigningError(e.to_string())
+                })?
                 .into_parts();
         signing_output.apply_to_request_http1x(&mut temp_request);
 
-        let req_headers = temp_request.headers();
+        // Get the headers from the original request
+        let req_headers = request.headers();
 
         // Copy all the aws signed credentials from temp_request since the
         // apply_to_request_http1x is only for http::Request types
