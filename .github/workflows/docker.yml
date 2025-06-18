@@ -25,8 +25,8 @@ jobs:
         with:
           # list of Docker images to use as base name for tags
           images: |
-            helicone/helix
-            ghcr.io/helicone/helix
+            helicone/ai-gateway
+            ghcr.io/helicone/ai-gateway
           # generate Docker tags based on the following events/attributes
           tags: |
             type=ref,event=branch
