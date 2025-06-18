@@ -1003,6 +1003,77 @@ export type Database = {
           },
         ]
       }
+      gateway_config_versions: {
+        Row: {
+          config: Json
+          config_id: string
+          created_at: string
+          id: string
+          version: string
+        }
+        Insert: {
+          config: Json
+          config_id: string
+          created_at?: string
+          id?: string
+          version: string
+        }
+        Update: {
+          config?: Json
+          config_id?: string
+          created_at?: string
+          id?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_gateway_config_versions_config_id_fkey"
+            columns: ["config_id"]
+            isOneToOne: false
+            referencedRelation: "gateway_configs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gateway_configs: {
+        Row: {
+          created_at: string
+          id: string
+          key_id: number | null
+          name: string | null
+          organization_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key_id?: number | null
+          name?: string | null
+          organization_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key_id?: number | null
+          name?: string | null
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_gateway_configs_key_id_fkey"
+            columns: ["key_id"]
+            isOneToOne: false
+            referencedRelation: "helicone_api_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_gateway_configs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       helicone_api_keys: {
         Row: {
           api_key_hash: string
