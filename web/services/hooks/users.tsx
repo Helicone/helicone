@@ -85,11 +85,19 @@ const useUserId = (userId: string) => {
         response,
         requestOverTime: requestOverTime?.data?.map((d: any) => ({
           requests: +d.count,
-          date: new Date(d.time).toISOString().split('T')[0],
+          date: new Date(d.time).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          }),
         })),
         costOverTime: costOverTime?.data?.map((d: any) => ({
           cost: +d.cost,
-          date: new Date(d.time).toISOString().split('T')[0],
+          date: new Date(d.time).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          }),
         })),
       };
     },
