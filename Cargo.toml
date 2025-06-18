@@ -1,4 +1,5 @@
 [workspace]
+
 members = [
     "crates/mock-server",
     "crates/telemetry",
@@ -45,6 +46,13 @@ anthropic-ai-sdk = { version = "0.2.2", git = "https://github.com/tomharmon/anth
 anyhow = "1.0.98"
 async-openai = { version = "0.28.1" }
 axum-core = "0.5.2"
+aws-sdk-bedrockruntime = { version = "1.92.0", git = "https://github.com/hcharlie1201/aws-sdk-rust.git" }
+aws-smithy-types = { version = "1.3.2", features = ["serde-serialize", "serde-deserialize"] }
+aws-types = "1.3.7"
+aws-smithy-http = "0.62.1"
+aws-sigv4 = "1.3.2"
+aws-smithy-runtime-api = "1.8.0"
+aws-credential-types = "1.2.3"
 axum-server = "0.7.2"
 base64 = "0.22.1"
 bytes = "1.10.1"
@@ -54,9 +62,9 @@ chrono = "0.4.40"
 clap = { version = "4.5.37", features = ["derive"] }
 compact_str = "0.9.0"
 config = "0.15.11"
-derive_more = { version = "2.0.1", features = [ 'as_ref', 'constructor', 'debug', 'deref', 'display', 'from', 'from_str', ] }
+derive_more = { version = "2.0.1", features = ['as_ref', 'constructor', 'debug', 'deref', 'display', 'from', 'from_str', ] }
 displaydoc = "0.2.5"
-dotenvy = { version = "0.15.7"}
+dotenvy = { version = "0.15.7" }
 eventsource-stream = "0.2.3"
 futures = "0.3.31"
 governor = "0.8.1"
@@ -92,7 +100,7 @@ r2d2 = "0.8.10"
 rand = "0.9.1"
 redis = "0.27.6"
 regex = "1.11.1"
-reqwest = { version = "0.12.15", features = [ "json", "stream", "multipart", "native-tls", ], default-features = false }
+reqwest = { version = "0.12.15", features = ["json", "stream", "multipart", "native-tls", ], default-features = false }
 reqwest-eventsource = "0.6.0"
 rust_decimal = "1.37.1"
 rustc-hash = "2.1.1"
@@ -104,7 +112,7 @@ serde_with = "3.12.0"
 serde_yml = "0.0.12"
 serial_test = "3.2.0"
 strum = "0.27.1"
-stubr = { git = "https://github.com/helicone/stubr" }
+stubr = { git = "https://github.com/Helicone/stubr" }
 thiserror = "2.0.12"
 tokio = { version = "1.44.2", features = ['full'] }
 tokio-stream = "0.1.17"
@@ -114,8 +122,7 @@ tokio-util = "0.7.15"
 tower = "0.5.2"
 tower_governor = { version = "0.7.0", features = [] }
 tower-http = { version = "0.6.3" }
-# upstream PR: https://github.com/francoposa/tower-otel-http-metrics/pull/24
-tower-otel-http-metrics = { git = "https://github.com/tomharmon/tower-otel-http-metrics.git", branch = "feat/custom-attributes-via-extractors" }
+tower-otel-http-metrics = { version = "0.15.0" }
 tracing = "0.1.41"
 tracing-opentelemetry = "0.30.0"
 tracing-subscriber = "0.3.19"

@@ -145,7 +145,7 @@ mod tests {
             seed: "test-seed".to_string(),
         };
 
-        let balance = BalanceConfig::latency_all_providers_except_ollama();
+        let balance = BalanceConfig::default();
         let retries = RetryConfig {
             enabled: false,
             max_retries: 3,

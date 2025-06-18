@@ -4,15 +4,14 @@ use super::{TryConvert, TryConvertStreamData};
 use crate::{
     endpoints::openai::chat_completions::system_prompt,
     error::mapper::MapperError,
-    middleware::mapper::model::ModelMapper,
+    middleware::mapper::{DEFAULT_MAX_TOKENS, model::ModelMapper},
     types::{
         model_id::{ModelId, Version},
         provider::InferenceProvider,
     },
 };
 
-const DEFAULT_MAX_TOKENS: u32 = 1000;
-const OPENAI_CHAT_COMPLETION_OBJECT: &str = "chat.completion";
+pub const OPENAI_CHAT_COMPLETION_OBJECT: &str = "chat.completion";
 
 pub struct AnthropicConverter {
     model_mapper: ModelMapper,

@@ -8,10 +8,10 @@ use super::{
 };
 use crate::{
     endpoints::{
-        self, ApiEndpoint, anthropic::Anthropic, google::Google,
-        ollama::Ollama, openai::OpenAI,
+        self, ApiEndpoint, anthropic::Anthropic, bedrock::Bedrock,
+        google::Google, ollama::Ollama, openai::OpenAI,
     },
-    middleware::mapper::ollama::OllamaConverter,
+    middleware::mapper::{bedrock::BedrockConverter, ollama::OllamaConverter},
 };
 
 #[derive(Debug, Default, Clone)]
@@ -139,6 +139,20 @@ impl EndpointConverterRegistryInner {
                 endpoints::openai::ChatCompletions,
                 OpenAIConverter,
             >::new(OpenAIConverter::new(model_mapper.clone()));
+        registry.register_converter(key, converter);
+
+        let key = RegistryKey::new(
+            ApiEndpoint::OpenAI(OpenAI::chat_completions()),
+            ApiEndpoint::Bedrock(Bedrock::converse()),
+        );
+
+        let converter =
+            TypedEndpointConverter::<
+                endpoints::openai::ChatCompletions,
+                endpoints::bedrock::Converse,
+                BedrockConverter,
+            >::new(BedrockConverter::new(model_mapper.clone()));
+
         registry.register_converter(key, converter);
 
         registry

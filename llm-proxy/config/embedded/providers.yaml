@@ -61,3 +61,43 @@ ollama:
     - phi4
     - llava
   base-url: http://localhost:11434
+
+bedrock:
+  enabled: false
+  # bedrock models must be enabled prior to sending
+  # requests which use them
+  models:
+    - us.anthropic.claude-3-5-haiku-20241022-v1:0
+    - anthropic.claude-3-5-sonnet-20240620-v1:0
+    - us.anthropic.claude-3-opus-20240229-v1:0
+    - us.anthropic.claude-3-7-sonnet-20250219-v1:0
+    - us.anthropic.claude-opus-4-20250514-v1:0
+    - us.anthropic.claude-sonnet-4-20250514-v1:0
+    - us.deepseek.r1-v1:0
+    - us.amazon.nova-premier-v1:0
+    - amazon.titan-text-premier-v1:0
+    - amazon.titan-text-express-v1
+    - amazon.titan-text-lite-v1
+    - amazon.nova-sonic-v1:0
+    - amazon.nova-pro-v1:0
+    - amazon.nova-lite-v1:0
+    - amazon.nova-micro-v1:0
+    - ai21.jamba-1-5-large-v1:0
+    - ai21.jamba-1-5-mini-v1:0
+    - cohere.command-light-text-v14
+    - cohere.command-r-plus-v1:0
+    - cohere.command-text-v14
+    - meta.llama3-8b-instruct-v1:0
+    - meta.llama3-70b-instruct-v1:0
+    - us.meta.llama3-1-8b-instruct-v1:0
+    - us.meta.llama3-2-1b-instruct-v1:0
+    - us.meta.llama3-2-3b-instruct-v1:0
+    - us.meta.llama3-2-90b-instruct-v1:0
+    - us.meta.llama4-maverick-17b-instruct-v1:0
+    - mistral.mistral-7b-instruct-v0:2
+    - mistral.mistral-large-2402-v1:0
+    - mistral.mistral-small-2402-v1:0
+    - mistral.mixtral-8x7b-instruct-v0:1
+    - us.mistral.pixtral-large-2502-v1:0
+  base-url: https://bedrock-runtime.us-east-1.amazonaws.com
+  version: null

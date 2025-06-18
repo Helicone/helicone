@@ -5,7 +5,7 @@ use crate::{
     app_state::AppState,
     config::providers::DEFAULT_ANTHROPIC_VERSION,
     error::{init::InitError, provider::ProviderError},
-    types::{provider::InferenceProvider, secret::Secret},
+    types::provider::{InferenceProvider, ProviderKey},
     utils::host_header,
 };
 
@@ -16,7 +16,7 @@ impl Client {
     pub fn new(
         app_state: &AppState,
         client_builder: ClientBuilder,
-        api_key: &Secret<String>,
+        provider_key: &ProviderKey,
     ) -> Result<Self, InitError> {
         let provider_config = app_state
             .0
@@ -26,6 +26,15 @@ impl Client {
             .ok_or(ProviderError::ProviderNotConfigured(
                 InferenceProvider::Anthropic,
             ))?;
+
+        let api_key = match provider_key {
+            ProviderKey::Secret(key) => key,
+            ProviderKey::AwsCredentials { .. } => {
+                return Err(InitError::ProviderError(
+                    ProviderError::ApiKeyNotFound(InferenceProvider::Anthropic),
+                ));
+            }
+        };
 
         let base_url = provider_config.base_url.clone();
         let version = provider_config

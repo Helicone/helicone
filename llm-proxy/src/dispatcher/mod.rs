@@ -1,4 +1,5 @@
 pub mod anthropic_client;
+mod bedrock_client;
 pub mod client;
 mod extensions;
 pub mod google_gemini_client;

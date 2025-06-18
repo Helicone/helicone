@@ -15,13 +15,6 @@ pub struct BalanceConfig(pub HashMap<EndpointType, BalanceConfigInner>);
 
 impl Default for BalanceConfig {
     fn default() -> Self {
-        Self::latency_all_providers_except_ollama()
-    }
-}
-
-impl BalanceConfig {
-    #[must_use]
-    pub fn latency_all_providers_except_ollama() -> Self {
         Self(HashMap::from([(
             EndpointType::Chat,
             BalanceConfigInner::Latency {
@@ -33,7 +26,9 @@ impl BalanceConfig {
             },
         )]))
     }
+}
 
+impl BalanceConfig {
     #[cfg(any(test, feature = "testing"))]
     #[must_use]
     pub fn openai_chat() -> Self {
@@ -90,6 +85,20 @@ impl BalanceConfig {
         )]))
     }
 
+    #[cfg(any(test, feature = "testing"))]
+    #[must_use]
+    pub fn bedrock() -> Self {
+        Self(HashMap::from([(
+            EndpointType::Chat,
+            BalanceConfigInner::Weighted {
+                targets: nes![BalanceTarget {
+                    provider: InferenceProvider::Bedrock,
+                    weight: Decimal::from(1),
+                }],
+            },
+        )]))
+    }
+
     #[must_use]
     pub fn providers(&self) -> IndexSet<InferenceProvider> {
         self.0
@@ -107,18 +116,6 @@ pub enum BalanceConfigInner {
 }
 
 impl BalanceConfigInner {
-    #[must_use]
-    pub fn p2c_all_providers() -> Self {
-        Self::Latency {
-            targets: nes![
-                InferenceProvider::OpenAI,
-                InferenceProvider::Anthropic,
-                InferenceProvider::GoogleGemini,
-                InferenceProvider::Ollama,
-            ],
-        }
-    }
-
     #[must_use]
     pub fn providers(&self) -> IndexSet<InferenceProvider> {
         match self {

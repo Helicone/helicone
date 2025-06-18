@@ -190,7 +190,13 @@ impl App {
             config.rate_limit.unified_api_limiter().map(Arc::new);
 
         let direct_proxy_api_keys =
-            ProviderKeys::from_env_direct_proxy(&config.providers)?;
+            ProviderKeys::from_env_direct_proxy(&config.providers)
+                .inspect_err(|e| {
+                    tracing::error!(
+                        error = %e,
+                        "Error getting provider keys from direct proxy"
+                    );
+                })?;
 
         let app_state = AppState(Arc::new(InnerAppState {
             config,
@@ -218,7 +224,7 @@ impl App {
                 .with_response_extractor::<_, axum_core::body::Body>(
                     AttributeExtractor,
                 )
-                .build::<axum_core::body::Body, axum_core::body::Body>()?;
+                .build()?;
 
         let router = MetaRouter::new(app_state.clone()).await?;
 

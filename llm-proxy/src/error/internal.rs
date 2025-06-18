@@ -63,6 +63,8 @@ pub enum InternalError {
     Provider5xxError(StatusCode),
     /// Metrics not configured for: {0:?}
     MetricsNotConfigured(ApiEndpoint),
+    /// Failed to sign AWS request: {0}
+    AwsRequestSigningError(String),
 }
 
 impl IntoResponse for InternalError {
@@ -125,6 +127,8 @@ pub enum InternalErrorMetric {
     Provider5xxError,
     /// Metrics not configured
     MetricsNotConfigured,
+    /// Failed to sign AWS request
+    AwsRequestSigningError,
 }
 
 impl From<&InternalError> for InternalErrorMetric {
@@ -156,6 +160,9 @@ impl From<&InternalError> for InternalErrorMetric {
             InternalError::Provider5xxError(_) => Self::Provider5xxError,
             InternalError::MetricsNotConfigured(_) => {
                 Self::MetricsNotConfigured
+            }
+            InternalError::AwsRequestSigningError(_) => {
+                Self::AwsRequestSigningError
             }
         }
     }

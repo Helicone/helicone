@@ -4,7 +4,7 @@ use reqwest::ClientBuilder;
 use crate::{
     app_state::AppState,
     error::{init::InitError, provider::ProviderError},
-    types::{provider::InferenceProvider, secret::Secret},
+    types::provider::{InferenceProvider, ProviderKey},
     utils::host_header,
 };
 
@@ -15,7 +15,7 @@ impl Client {
     pub fn new(
         app_state: &AppState,
         client_builder: ClientBuilder,
-        api_key: &Secret<String>,
+        provider_key: &ProviderKey,
     ) -> Result<Self, InitError> {
         let base_url = app_state
             .0
@@ -27,6 +27,17 @@ impl Client {
             ))?
             .base_url
             .clone();
+
+        let api_key = match provider_key {
+            ProviderKey::Secret(key) => key,
+            ProviderKey::AwsCredentials { .. } => {
+                return Err(InitError::ProviderError(
+                    ProviderError::ApiKeyNotFound(
+                        InferenceProvider::GoogleGemini,
+                    ),
+                ));
+            }
+        };
 
         let mut default_headers = HeaderMap::new();
         default_headers.insert(

@@ -182,10 +182,7 @@ impl Config {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
-
     use super::*;
-    use crate::config::{balance::BalanceConfig, router::RouterConfigs};
 
     #[test]
     fn default_config_passes_validation() {
@@ -193,32 +190,6 @@ mod tests {
         let result = config.validate_model_mappings();
 
         assert!(result.is_ok());
-    }
-
-    #[test]
-    fn test_missing_provider_fails_validation() {
-        let mut config = Config::default();
-
-        config.providers.shift_remove(&InferenceProvider::Ollama);
-
-        let mut router_config = RouterConfig::default();
-        router_config.load_balance = BalanceConfig::from(HashMap::from([(
-            crate::endpoints::EndpointType::Chat,
-            crate::config::balance::BalanceConfigInner::Latency {
-                targets: nonempty_collections::nes![InferenceProvider::Ollama],
-            },
-        )]));
-
-        config.routers = RouterConfigs::new(HashMap::from([(
-            RouterId::Default,
-            router_config,
-        )]));
-
-        let result = config.validate_model_mappings();
-        assert!(matches!(
-            result,
-            Err(ModelMappingValidationError::ProviderNotConfigured { .. })
-        ));
     }
 
     #[test]

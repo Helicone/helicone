@@ -2,7 +2,7 @@
 name = "llm-proxy"
 version = "0.1.0"
 edition.workspace = true
-authors = [ "Thomas Harmon <thomas.alan.harmon@gmail.com>" ]
+authors = ["Thomas Harmon <thomas.alan.harmon@gmail.com>"]
 repository = "https://github.com/Helicone/helicone-router"
 default-run = "llm-proxy"
 description = "A high-performance LLM proxy router."
@@ -14,6 +14,11 @@ sha2 = { workspace = true }
 async-openai = { workspace = true }
 axum-core = { workspace = true }
 axum-server = { workspace = true, features = ["tls-rustls"] }
+aws-sdk-bedrockruntime = { workspace = true }
+aws-smithy-types = { workspace = true }
+aws-sigv4 = { workspace = true }
+aws-smithy-runtime-api = { workspace = true }
+aws-credential-types = { workspace = true }
 bytes = { workspace = true, features = ['serde'] }
 cfg-if = { workspace = true }
 chrono = { workspace = true, features = ['default', 'serde'] }
@@ -58,7 +63,7 @@ serde_path_to_error = { workspace = true }
 serde_with = { workspace = true }
 serde_yml = { workspace = true }
 serial_test = { workspace = true, optional = true }
-strum = { workspace = true, features = ["derive"]  }
+strum = { workspace = true, features = ["derive"] }
 stubr = { workspace = true, optional = true }
 telemetry = { workspace = true }
 thiserror = { workspace = true }
@@ -66,7 +71,7 @@ tokio = { workspace = true }
 tokio-stream = { workspace = true, features = ['sync'] }
 tokio-tungstenite = { workspace = true }
 tokio-util = { workspace = true }
-tower = { workspace = true, features = ['full']}
+tower = { workspace = true, features = ['full'] }
 tower_governor = { workspace = true, features = [] }
 tower-http = { workspace = true, features = ['default', 'auth', 'catch-panic', 'add-extension', 'normalize-path', 'request-id', 'trace', 'util', 'sensitive-headers'] }
 tower-otel-http-metrics = { workspace = true }

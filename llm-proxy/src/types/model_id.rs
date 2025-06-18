@@ -339,9 +339,10 @@ impl Display for OllamaModelId {
 
 /// Has the format of:
 /// `{provider}.{model}(-version)?-{bedrock_internal_version}`
+/// amazon.nova-pro-v1:0
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct BedrockModelId {
-    pub provider: InferenceProvider,
+    pub provider: String,
     pub model: String,
     pub version: Option<Version>,
     pub bedrock_internal_version: String,
@@ -359,11 +360,6 @@ impl FromStr for BedrockModelId {
             .next()
             .ok_or_else(|| MapperError::InvalidModelName(s.to_string()))?;
 
-        let provider =
-            InferenceProvider::from_str(provider_str).map_err(|_| {
-                MapperError::ProviderNotSupported(provider_str.to_string())
-            })?;
-
         // Parse the bedrock internal version
         // eg: claude-3-sonnet-20240229-v1:0 (split on `-v`)
         let (model_part, bedrock_version) =
@@ -377,7 +373,7 @@ impl FromStr for BedrockModelId {
         let (model, version) = parse_model_and_version(model_part, '-');
 
         Ok(BedrockModelId {
-            provider,
+            provider: provider_str.to_string(),
             model: model.to_string(),
             version,
             bedrock_internal_version: bedrock_version.to_string(),
@@ -858,45 +854,30 @@ mod tests {
     }
 
     #[test]
-    fn test_bedrock_amazon_titan_invalid_provider() {
+    fn test_bedrock_amazon_titan_valid_provider() {
         let result = ModelId::from_str_and_provider(
             InferenceProvider::Bedrock,
             "amazon.titan-embed-text-v1:0",
         );
-        assert!(result.is_err());
-        if let Err(MapperError::ProviderNotSupported(provider)) = result {
-            assert_eq!(provider, "amazon");
-        } else {
-            panic!("Expected ProviderNotSupported error for amazon provider");
-        }
+        assert!(result.is_ok());
     }
 
     #[test]
-    fn test_bedrock_ai21_jamba_invalid_provider() {
+    fn test_bedrock_ai21_jamba_valid_provider() {
         let result = ModelId::from_str_and_provider(
             InferenceProvider::Bedrock,
             "ai21.jamba-1-5-large-v1:0",
         );
-        assert!(result.is_err());
-        if let Err(MapperError::ProviderNotSupported(provider)) = result {
-            assert_eq!(provider, "ai21");
-        } else {
-            panic!("Expected ProviderNotSupported error for ai21 provider");
-        }
+        assert!(result.is_ok());
     }
 
     #[test]
-    fn test_bedrock_meta_llama_invalid_provider() {
+    fn test_bedrock_meta_llama_valid_provider() {
         let result = ModelId::from_str_and_provider(
             InferenceProvider::Bedrock,
             "meta.llama3-8b-instruct-v1:0",
         );
-        assert!(result.is_err());
-        if let Err(MapperError::ProviderNotSupported(provider)) = result {
-            assert_eq!(provider, "meta");
-        } else {
-            panic!("Expected ProviderNotSupported error for meta provider");
-        }
+        assert!(result.is_ok());
     }
 
     #[test]
@@ -927,7 +908,10 @@ mod tests {
         );
         assert!(result.is_ok());
         if let Ok(ModelId::Bedrock(bedrock_model)) = &result {
-            assert_eq!(bedrock_model.provider, InferenceProvider::Anthropic);
+            assert_eq!(
+                bedrock_model.provider,
+                InferenceProvider::Anthropic.to_string()
+            );
             assert_eq!(bedrock_model.model, "claude-opus-4");
             let Version::Date { date, .. } =
                 bedrock_model.version.as_ref().unwrap()
@@ -954,7 +938,10 @@ mod tests {
         );
         assert!(result.is_ok());
         if let Ok(ModelId::Bedrock(bedrock_model)) = &result {
-            assert_eq!(bedrock_model.provider, InferenceProvider::Anthropic);
+            assert_eq!(
+                bedrock_model.provider,
+                InferenceProvider::Anthropic.to_string()
+            );
             assert_eq!(bedrock_model.model, "claude-3-7-sonnet");
             let Version::Date { date, .. } =
                 bedrock_model.version.as_ref().unwrap()
@@ -980,7 +967,10 @@ mod tests {
         );
         assert!(result.is_ok());
         if let Ok(ModelId::Bedrock(bedrock_model)) = &result {
-            assert_eq!(bedrock_model.provider, InferenceProvider::Anthropic);
+            assert_eq!(
+                bedrock_model.provider,
+                InferenceProvider::Anthropic.to_string()
+            );
             assert_eq!(bedrock_model.model, "claude-3-haiku");
             let Version::Date { date, .. } =
                 bedrock_model.version.as_ref().unwrap()
@@ -1006,7 +996,10 @@ mod tests {
         );
         assert!(result.is_ok());
         if let Ok(ModelId::Bedrock(bedrock_model)) = &result {
-            assert_eq!(bedrock_model.provider, InferenceProvider::Anthropic);
+            assert_eq!(
+                bedrock_model.provider,
+                InferenceProvider::Anthropic.to_string()
+            );
             assert_eq!(bedrock_model.model, "claude-3-sonnet");
             let Version::Date { date, .. } =
                 bedrock_model.version.as_ref().unwrap()
@@ -1032,7 +1025,10 @@ mod tests {
         );
         assert!(result.is_ok());
         if let Ok(ModelId::Bedrock(bedrock_model)) = &result {
-            assert_eq!(bedrock_model.provider, InferenceProvider::Anthropic);
+            assert_eq!(
+                bedrock_model.provider,
+                InferenceProvider::Anthropic.to_string()
+            );
             assert_eq!(bedrock_model.model, "claude-3-5-sonnet");
             let Version::Date { date, .. } =
                 bedrock_model.version.as_ref().unwrap()
@@ -1058,7 +1054,10 @@ mod tests {
         );
         assert!(result.is_ok());
         if let Ok(ModelId::Bedrock(bedrock_model)) = &result {
-            assert_eq!(bedrock_model.provider, InferenceProvider::Anthropic);
+            assert_eq!(
+                bedrock_model.provider,
+                InferenceProvider::Anthropic.to_string()
+            );
             assert_eq!(bedrock_model.model, "claude-sonnet-4");
             let Version::Date { date, .. } =
                 bedrock_model.version.as_ref().unwrap()
@@ -1270,9 +1269,10 @@ mod tests {
             InferenceProvider::Bedrock,
             "some-unknown-provider.model",
         );
+
         assert!(result.is_err());
-        if let Err(MapperError::ProviderNotSupported(provider)) = result {
-            assert_eq!(provider, "some-unknown-provider");
+        if let Err(MapperError::InvalidModelName(provider)) = result {
+            assert_eq!(provider, "some-unknown-provider.model");
         } else {
             panic!("Expected ProviderNotSupported error for unknown provider");
         }
@@ -1500,7 +1500,10 @@ mod tests {
         let result = ModelId::from_str(model_str).unwrap();
 
         if let ModelId::Bedrock(bedrock_model) = result {
-            assert_eq!(bedrock_model.provider, InferenceProvider::Anthropic);
+            assert_eq!(
+                bedrock_model.provider,
+                InferenceProvider::Anthropic.to_string()
+            );
             assert_eq!(bedrock_model.model, "claude-3-sonnet");
             assert_eq!(bedrock_model.bedrock_internal_version, "v1:0");
         } else {

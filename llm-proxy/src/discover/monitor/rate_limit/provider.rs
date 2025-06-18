@@ -34,6 +34,10 @@ use crate::{
 };
 
 const DEFAULT_WAIT_SECONDS: u64 = 30;
+#[cfg(not(any(feature = "testing", test)))]
+const RATE_LIMIT_BUFFER_SECONDS: Duration = Duration::from_secs(30);
+#[cfg(any(feature = "testing", test))]
+const RATE_LIMIT_BUFFER_SECONDS: Duration = Duration::from_secs(1);
 
 #[cfg(not(any(feature = "testing", test)))]
 /// The interval at which we check for new rate limit monitors
@@ -149,7 +153,7 @@ impl ProviderMonitorInner<Key> {
 
                         let duration = Duration::from_secs(
                             event.retry_after_seconds.unwrap_or(DEFAULT_WAIT_SECONDS)
-                        );
+                        ) + RATE_LIMIT_BUFFER_SECONDS;
 
                         let restore = ProviderRestore {
                             key: Some(key),
@@ -288,7 +292,7 @@ impl ProviderMonitorInner<WeightedKey> {
 
                         let duration = Duration::from_secs(
                             event.retry_after_seconds.unwrap_or(DEFAULT_WAIT_SECONDS)
-                        );
+                        ) + RATE_LIMIT_BUFFER_SECONDS;
                         info!(
                             provider = ?event.api_endpoint.provider(),
                             endpoint_type = ?event.api_endpoint.endpoint_type(),

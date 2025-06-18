@@ -80,6 +80,8 @@ impl crate::tests::TestDefault for DiscoverConfig {
             std::env::set_var("OPENAI_API_KEY", "sk-...");
             std::env::set_var("ANTHROPIC_API_KEY", "sk-...");
             std::env::set_var("GEMINI_API_KEY", "fjbn34ji");
+            std::env::set_var("AWS_ACCESS_KEY", "");
+            std::env::set_var("AWS_SECRET_KEY", "");
         }
         Self {
             api_keys_source: ProviderKeysSource::Env,

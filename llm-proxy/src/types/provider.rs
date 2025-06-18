@@ -104,8 +104,11 @@ impl InferenceProvider {
                     .map(ApiEndpoint::Ollama)
                     .collect()
             }
-            // Inference not supported yet for these providers
-            InferenceProvider::Bedrock => vec![],
+            InferenceProvider::Bedrock => {
+                crate::endpoints::bedrock::Bedrock::iter()
+                    .map(ApiEndpoint::Bedrock)
+                    .collect()
+            }
         }
     }
 }
@@ -129,11 +132,57 @@ impl Serialize for InferenceProvider {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum ProviderKey {
+    Secret(Secret<String>),
+    AwsCredentials {
+        access_key: Secret<String>,
+        secret_key: Secret<String>,
+    },
+}
+
+impl ProviderKey {
+    pub fn from_env(
+        provider: InferenceProvider,
+    ) -> Result<Self, ProviderError> {
+        if provider == InferenceProvider::Bedrock {
+            let access_key = Secret::from(
+                std::env::var("AWS_ACCESS_KEY")
+                    .map_err(|_| ProviderError::ApiKeyNotFound(provider))?,
+            );
+            let secret_key = Secret::from(
+                std::env::var("AWS_SECRET_KEY")
+                    .map_err(|_| ProviderError::ApiKeyNotFound(provider))?,
+            );
+            tracing::trace!(
+                provider = %provider,
+                "Got provider key"
+            );
+            Ok(ProviderKey::AwsCredentials {
+                access_key,
+                secret_key,
+            })
+        } else {
+            let provider_str = provider.to_string().to_uppercase();
+            let env_var = format!("{provider_str}_API_KEY");
+            if let Ok(key) = std::env::var(&env_var) {
+                tracing::trace!(
+                    provider = %provider,
+                    "Got provider key"
+                );
+                Ok(ProviderKey::Secret(Secret::from(key)))
+            } else {
+                Err(ProviderError::ApiKeyNotFound(provider))
+            }
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
-pub struct ProviderKeys(Arc<HashMap<InferenceProvider, Secret<String>>>);
+pub struct ProviderKeys(Arc<HashMap<InferenceProvider, ProviderKey>>);
 
 impl std::ops::Deref for ProviderKeys {
-    type Target = HashMap<InferenceProvider, Secret<String>>;
+    type Target = HashMap<InferenceProvider, ProviderKey>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -143,27 +192,27 @@ impl std::ops::Deref for ProviderKeys {
 impl ProviderKeys {
     fn from_env_inner(
         balance_config: &BalanceConfig,
-    ) -> Result<HashMap<InferenceProvider, Secret<String>>, ProviderError> {
+    ) -> Result<HashMap<InferenceProvider, ProviderKey>, ProviderError> {
         tracing::debug!("Discovering provider keys");
         let mut keys = HashMap::default();
         let providers = balance_config.providers();
 
         for provider in providers {
             if provider == InferenceProvider::Ollama {
-                // ollama doesn't support API keys
+                // ollama doesn't require an API key
+                tracing::debug!(
+                    provider = %provider,
+                    "from_env_inner ollama"
+                );
                 continue;
             }
-            let provider_str = provider.to_string().to_uppercase();
-            let env_var = format!("{provider_str}_API_KEY");
-            if let Ok(key) = std::env::var(&env_var) {
-                tracing::trace!(
-                    provider = %provider,
-                    "Got provider key"
-                );
-                keys.insert(provider, Secret::from(key));
-            } else {
-                return Err(ProviderError::ApiKeyNotFound(provider));
-            }
+
+            tracing::debug!(
+                provider = %provider,
+                "from_env_inner"
+            );
+            let key = ProviderKey::from_env(provider)?;
+            keys.insert(provider, key);
         }
 
         Ok(keys)
@@ -174,17 +223,8 @@ impl ProviderKeys {
     ) -> Result<Self, ProviderError> {
         let mut keys = Self::from_env_inner(&router_config.load_balance)?;
         let default_provider = SDK;
-        let provider_str = default_provider.to_string().to_uppercase();
-        let env_var = format!("{provider_str}_API_KEY");
-        if let Ok(key) = std::env::var(&env_var) {
-            tracing::trace!(
-                provider = %default_provider,
-                "Got provider key for load balanced router"
-            );
-            keys.insert(default_provider, Secret::from(key));
-        } else {
-            return Err(ProviderError::ApiKeyNotFound(default_provider));
-        }
+        let key = ProviderKey::from_env(default_provider)?;
+        keys.insert(default_provider, key);
         Ok(Self(Arc::new(keys)))
     }
 
@@ -193,20 +233,15 @@ impl ProviderKeys {
     ) -> Result<Self, ProviderError> {
         let mut keys = HashMap::default();
         for (provider, config) in providers_config.iter() {
-            // ollama doesn't support API keys
+            // ollama doesn't support API keys and bedrock
             if config.enabled && !matches!(provider, InferenceProvider::Ollama)
             {
-                let provider_str = provider.to_string().to_uppercase();
-                let env_var = format!("{provider_str}_API_KEY");
-                if let Ok(key) = std::env::var(&env_var) {
-                    tracing::trace!(
-                        provider = %provider,
-                        "Got direct proxy provider key"
-                    );
-                    keys.insert(*provider, Secret::from(key));
-                } else {
-                    return Err(ProviderError::ApiKeyNotFound(*provider));
-                }
+                tracing::debug!(
+                    provider = %provider,
+                    "from_env_direct_proxy"
+                );
+                let key = ProviderKey::from_env(*provider)?;
+                keys.insert(*provider, key);
             }
         }
         Ok(Self(Arc::new(keys)))

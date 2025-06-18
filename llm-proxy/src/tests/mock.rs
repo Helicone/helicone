@@ -23,6 +23,8 @@ pub struct MockArgs {
     pub global_google_latency: Option<u64>,
     #[builder(setter(strip_option), default = None)]
     pub global_ollama_latency: Option<u64>,
+    #[builder(setter(strip_option), default = None)]
+    pub global_bedrock_latency: Option<u64>,
 
     #[builder(setter(strip_option), default = None)]
     pub openai_port: Option<u16>,
@@ -32,6 +34,8 @@ pub struct MockArgs {
     pub google_port: Option<u16>,
     #[builder(setter(strip_option), default = None)]
     pub ollama_port: Option<u16>,
+    #[builder(setter(strip_option), default = None)]
+    pub bedrock_port: Option<u16>,
     #[builder(setter(strip_option), default = None)]
     pub minio_port: Option<u16>,
     #[builder(setter(strip_option), default = None)]
@@ -50,6 +54,7 @@ pub struct Mock {
     pub anthropic_mock: Stubr,
     pub google_mock: Stubr,
     pub ollama_mock: Stubr,
+    pub bedrock_mock: Stubr,
     pub minio_mock: Stubr,
     pub jawn_mock: Stubr,
     args: MockArgs,
@@ -107,11 +112,25 @@ impl Mock {
         )
         .await;
 
+        let bedrock_mock = start_mock_for_test(
+            &get_stubs_path("bedrock"),
+            args.global_bedrock_latency,
+            args.stubs.as_ref(),
+            args.verify,
+        )
+        .await;
+
         config
             .providers
             .get_mut(&InferenceProvider::Ollama)
             .unwrap()
             .base_url = Url::parse(&ollama_mock.uri()).unwrap();
+
+        config
+            .providers
+            .get_mut(&InferenceProvider::Bedrock)
+            .unwrap()
+            .base_url = Url::parse(&bedrock_mock.uri()).unwrap();
 
         let minio_mock = start_mock_for_test(
             &get_stubs_path("minio"),
@@ -136,6 +155,7 @@ impl Mock {
             anthropic_mock,
             google_mock,
             ollama_mock,
+            bedrock_mock,
             minio_mock,
             jawn_mock,
             args,
@@ -182,6 +202,16 @@ impl Mock {
         )
         .await;
 
+        let bedrock_mock = start_mock(
+            &get_stubs_path("bedrock"),
+            args.global_bedrock_latency,
+            args.stubs.as_ref(),
+            false,
+            false,
+            args.bedrock_port,
+        )
+        .await;
+
         let minio_mock = start_mock(
             &get_stubs_path("minio"),
             None,
@@ -207,6 +237,7 @@ impl Mock {
             anthropic_mock,
             google_mock,
             ollama_mock,
+            bedrock_mock,
             minio_mock,
             jawn_mock,
             args,
@@ -218,6 +249,7 @@ impl Mock {
         self.anthropic_mock.http_server.verify().await;
         self.google_mock.http_server.verify().await;
         self.ollama_mock.http_server.verify().await;
+        self.bedrock_mock.http_server.verify().await;
         self.minio_mock.http_server.verify().await;
         self.jawn_mock.http_server.verify().await;
     }
@@ -227,6 +259,7 @@ impl Mock {
         self.anthropic_mock.http_server.reset().await;
         self.google_mock.http_server.reset().await;
         self.ollama_mock.http_server.reset().await;
+        self.bedrock_mock.http_server.reset().await;
         self.minio_mock.http_server.reset().await;
         self.jawn_mock.http_server.reset().await;
     }
@@ -263,6 +296,15 @@ impl Mock {
             &self.ollama_mock,
             &get_stubs_path("ollama"),
             self.args.global_ollama_latency,
+            &stubs,
+            self.args.verify,
+        )
+        .await;
+
+        register_stubs_for_mock(
+            &self.bedrock_mock,
+            &get_stubs_path("bedrock"),
+            self.args.global_bedrock_latency,
             &stubs,
             self.args.verify,
         )
