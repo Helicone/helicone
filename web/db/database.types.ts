@@ -1003,30 +1003,59 @@ export type Database = {
           },
         ]
       }
-      gateway_configs: {
+      gateway_config_versions: {
         Row: {
-          config_yaml: string
+          config: Json
+          config_id: string
           created_at: string
-          id: number
-          key_id: number | null
-          organization_id: string
-          type: string
+          id: string
+          version: string
         }
         Insert: {
-          config_yaml: string
+          config: Json
+          config_id: string
           created_at?: string
-          id?: number
-          key_id?: number | null
-          organization_id: string
-          type?: string
+          id?: string
+          version: string
         }
         Update: {
-          config_yaml?: string
+          config?: Json
+          config_id?: string
           created_at?: string
-          id?: number
+          id?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_gateway_config_versions_config_id_fkey"
+            columns: ["config_id"]
+            isOneToOne: false
+            referencedRelation: "gateway_configs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gateway_configs: {
+        Row: {
+          created_at: string
+          id: string
+          key_id: number | null
+          name: string | null
+          organization_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
           key_id?: number | null
+          name?: string | null
+          organization_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key_id?: number | null
+          name?: string | null
           organization_id?: string
-          type?: string
         }
         Relationships: [
           {
