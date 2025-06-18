@@ -21,5 +21,7 @@ publish-jobs = ["npm"]
 install-path = "CARGO_HOME"
 # Whether to install an updater program
 install-updater = false
-npm-package = "helix"
-formula = "helix"
+# The npm package should have this name
+npm-package = "ai-gateway"
+# Customize the Homebrew formula name
+formula = "ai-gateway"
