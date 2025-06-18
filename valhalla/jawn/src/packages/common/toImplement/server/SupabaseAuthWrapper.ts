@@ -88,7 +88,7 @@ export class SupabaseConnector {
         organizationId: owner.data[0].id,
         userId: data.user.id,
         role: "owner" as Role,
-        tier: owner.data[0].tier ?? "",
+        tier: owner.data[0].tier ?? "free",
       });
     }
 
