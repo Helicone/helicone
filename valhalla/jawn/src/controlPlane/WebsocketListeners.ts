@@ -2,7 +2,6 @@ import {
   MessageTypeRX,
   MessageTypeTX,
 } from "@helicone-package/llm-mapper/router-bindings";
-import console from "console";
 import { WebSocket } from "ws";
 import { AuthParams } from "../packages/common/auth/types";
 import { safeJsonParse } from "../utils/helpers";
