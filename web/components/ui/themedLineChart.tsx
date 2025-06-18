@@ -1,4 +1,12 @@
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 type ChartColor = "chart1" | "chart2" | "chart3" | "chart4" | "chart5";
 
@@ -84,7 +92,7 @@ export function ThemedLineChart<T extends Record<string, any>>({
             axisLine={{ stroke: "currentColor" }}
           />
           {showYAxis && (
-            <YAxis 
+            <YAxis
               tick={{ fill: "currentColor" }}
               tickLine={{ stroke: "currentColor" }}
               axisLine={{ stroke: "currentColor" }}
@@ -95,7 +103,7 @@ export function ThemedLineChart<T extends Record<string, any>>({
               backgroundColor: "var(--background)",
               borderColor: "var(--border)",
               borderRadius: "0.5rem",
-              color: "var(--foreground)"
+              color: "var(--foreground)",
             }}
             formatter={valueFormatter}
             labelStyle={{ color: "var(--foreground)" }}
@@ -116,4 +124,4 @@ export function ThemedLineChart<T extends Record<string, any>>({
       </ResponsiveContainer>
     </div>
   );
-} 
+}

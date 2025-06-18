@@ -40,8 +40,6 @@ const UserIdPage = (props: UserIdPageProps) => {
   const { userId, defaultIndex = 0 } = props;
 
   const { user, isLoading, costOverTime, requestOverTime } = useUserId(userId);
-  console.log(costOverTime);
-  console.log(requestOverTime);
   const router = useRouter();
 
   return (
@@ -191,7 +189,9 @@ const UserIdPage = (props: UserIdPageProps) => {
                         categories={["cost"]}
                         colors={["chart2"]}
                         height="200px"
-                        valueFormatter={(value: number) => `$${formatNumber(value, 6)}`}
+                        valueFormatter={(value: number) =>
+                          `$${formatNumber(value, 6)}`
+                        }
                       />
                     </StyledAreaChart>
                   </div>
