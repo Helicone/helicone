@@ -3817,9 +3817,9 @@ dependencies = [
 
 [[package]]
 name = "quinn-udp"
-version = "0.5.12"
+version = "0.5.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ee4e529991f949c5e25755532370b8af5d114acae52326361d68d47af64aa842"
+checksum = "fcebb1209ee276352ef14ff8732e24cc2b02bbac986cd74a4c81bcb2f9881970"
 dependencies = [
  "cfg_aliases",
  "libc",
@@ -4878,7 +4878,7 @@ dependencies = [
 [[package]]
 name = "stubr"
 version = "0.6.2"
-source = "git+https://github.com/Helicone/stubr#bb80ee03b156d11437e5ff797b5b3557d1c1ab27"
+source = "git+https://github.com/Helicone/stubr#e28d3183329c11550e26fc3e27b414ef100f6ad8"
 dependencies = [
  "anyhow",
  "assert-json-diff",
@@ -4921,7 +4921,7 @@ dependencies = [
 [[package]]
 name = "stubr-attributes"
 version = "0.6.2"
-source = "git+https://github.com/Helicone/stubr#bb80ee03b156d11437e5ff797b5b3557d1c1ab27"
+source = "git+https://github.com/Helicone/stubr#e28d3183329c11550e26fc3e27b414ef100f6ad8"
 dependencies = [
  "itertools 0.11.0",
  "proc-macro2",
