@@ -1,4 +1,4 @@
-use llm_proxy::tests::mock::{Mock, MockArgs};
+use ai_gateway::tests::mock::{Mock, MockArgs};
 use tokio::{
     main,
     signal::unix::{SignalKind, signal},

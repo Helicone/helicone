@@ -9,11 +9,11 @@ This project is a Rust-based LLM (Large Language Model) proxy/router service tha
 
 ## Key Files and Directories
 
-- [llm-proxy/src/main.rs](mdc:llm-proxy/src/main.rs) - Main entry point for the application
-- [llm-proxy/src/lib.rs](mdc:llm-proxy/src/lib.rs) - Exposes the main modules of the application
-- [llm-proxy/src/app.rs](mdc:llm-proxy/src/app.rs) - Core application setup and HTTP server
-- [llm-proxy/src/router/](mdc:llm-proxy/src/router) - Contains routing logic for API requests
-- [llm-proxy/src/config/](mdc:llm-proxy/src/config) - Configuration handling
+- [ai-gateway/src/main.rs](mdc:ai-gateway/src/main.rs) - Main entry point for the application
+- [ai-gateway/src/lib.rs](mdc:ai-gateway/src/lib.rs) - Exposes the main modules of the application
+- [ai-gateway/src/app.rs](mdc:ai-gateway/src/app.rs) - Core application setup and HTTP server
+- [ai-gateway/src/router/](mdc:ai-gateway/src/router) - Contains routing logic for API requests
+- [ai-gateway/src/config/](mdc:ai-gateway/src/config) - Configuration handling
 - [crates/](mdc:crates) - Contains smaller crates for specific functionality
 
 ## Specialized Crates

@@ -23,12 +23,12 @@ This document provides guidance for developing and testing the LLM Proxy.
 ## File Structure Conventions
 
 ### Main Application
-- [llm-proxy/src/main.rs](mdc:llm-proxy/src/main.rs) - Application entry point
-- [llm-proxy/src/lib.rs](mdc:llm-proxy/src/lib.rs) - Library exports
+- [ai-gateway/src/main.rs](mdc:ai-gateway/src/main.rs) - Application entry point
+- [ai-gateway/src/lib.rs](mdc:ai-gateway/src/lib.rs) - Library exports
 
 ### Tests
-- [llm-proxy/tests/](mdc:llm-proxy/tests) - Integration tests
-- [llm-proxy/src/tests/](mdc:llm-proxy/src/tests) - Test utilities
+- [ai-gateway/tests/](mdc:ai-gateway/tests) - Integration tests
+- [ai-gateway/src/tests/](mdc:ai-gateway/src/tests) - Test utilities
 - Unit tests are typically located alongside the code they test
 
 ## Testing
@@ -37,6 +37,6 @@ This document provides guidance for developing and testing the LLM Proxy.
 
 ## Crate Organization
 
-- Core application logic is in the [llm-proxy/](mdc:llm-proxy) directory
+- Core application logic is in the [ai-gateway/](mdc:ai-gateway) directory
 - Supporting libraries are in the [crates/](mdc:crates) directory
 - External dependencies are defined in the root [Cargo.toml](mdc:Cargo.toml)

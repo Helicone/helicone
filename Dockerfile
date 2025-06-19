@@ -3,7 +3,7 @@ WORKDIR /app
 
 FROM chef AS planner
 COPY . .
-RUN cargo chef prepare --bin llm-proxy --recipe-path recipe.json
+RUN cargo chef prepare --bin ai-gateway --recipe-path recipe.json
 
 FROM chef AS builder 
 # Install OpenSSL development libraries and pkg-config for Debian
@@ -13,11 +13,11 @@ COPY --from=planner /app/recipe.json recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json
 # Build application
 COPY . .
-RUN cargo build --release -p llm-proxy
+RUN cargo build --release -p ai-gateway
 
 # We do not need the Rust toolchain to run the binary!
 FROM debian:bookworm-slim AS runtime
 RUN apt-get update && apt install -y openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
-COPY --from=builder /app/target/release/llm-proxy /usr/local/bin
-CMD ["/usr/local/bin/llm-proxy"]
+COPY --from=builder /app/target/release/ai-gateway /usr/local/bin
+CMD ["/usr/local/bin/ai-gateway"]

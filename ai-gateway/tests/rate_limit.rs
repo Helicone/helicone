@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 
-use http::{Method, Request, StatusCode};
-use http_body_util::BodyExt;
-use llm_proxy::{
+use ai_gateway::{
     config::{Config, rate_limit::GlobalRateLimitConfig},
     control_plane::types::{Key, hash_key},
     tests::{TestDefault, harness::Harness, mock::MockArgs},
 };
+use http::{Method, Request, StatusCode};
+use http_body_util::BodyExt;
 use serde_json::json;
 use tower::Service;
 use uuid::Uuid;
@@ -15,7 +15,7 @@ use uuid::Uuid;
 #[serial_test::serial]
 async fn rate_limit_capacity_enforced_in_memory() {
     rate_limit_capacity_enforced_impl(
-        llm_proxy::config::rate_limit::enabled_for_test_in_memory(),
+        ai_gateway::config::rate_limit::enabled_for_test_in_memory(),
     )
     .await;
 }
@@ -24,7 +24,7 @@ async fn rate_limit_capacity_enforced_in_memory() {
 #[serial_test::serial]
 async fn rate_limit_per_user_isolation_in_memory() {
     rate_limit_per_user_isolation_impl(
-        llm_proxy::config::rate_limit::enabled_for_test_in_memory(),
+        ai_gateway::config::rate_limit::enabled_for_test_in_memory(),
     )
     .await;
 }

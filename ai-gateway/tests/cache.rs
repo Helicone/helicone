@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
-use http::{Method, Request, StatusCode};
-use llm_proxy::{
+use ai_gateway::{
     config::Config,
     tests::{TestDefault, harness::Harness, mock::MockArgs},
 };
+use http::{Method, Request, StatusCode};
 use serde_json::json;
 use tower::Service;
 
@@ -286,14 +286,14 @@ async fn cache_disabled_globally() {
 #[tokio::test]
 #[serial_test::serial(default_mock)]
 async fn cache_enabled_per_router() {
-    use compact_str::CompactString;
-    use llm_proxy::{
+    use ai_gateway::{
         config::{
             cache::{CacheConfig, CacheStore},
             router::{RouterConfig, RouterConfigs},
         },
         types::router::RouterId,
     };
+    use compact_str::CompactString;
 
     let mut config = Config::test_default();
     // Disable auth for this test since we're testing basic passthrough
@@ -319,7 +319,7 @@ async fn cache_enabled_per_router() {
                     seed: Some("router-cached-seed".to_string()),
                 }),
                 load_balance:
-                    llm_proxy::config::balance::BalanceConfig::openai_chat(),
+                    ai_gateway::config::balance::BalanceConfig::openai_chat(),
                 ..Default::default()
             },
         ),
@@ -328,7 +328,7 @@ async fn cache_enabled_per_router() {
             RouterConfig {
                 cache: None, // No cache for this router
                 load_balance:
-                    llm_proxy::config::balance::BalanceConfig::openai_chat(),
+                    ai_gateway::config::balance::BalanceConfig::openai_chat(),
                 ..Default::default()
             },
         ),
@@ -337,7 +337,7 @@ async fn cache_enabled_per_router() {
             RouterConfig {
                 cache: None, // Default router also has no cache
                 load_balance:
-                    llm_proxy::config::balance::BalanceConfig::openai_chat(),
+                    ai_gateway::config::balance::BalanceConfig::openai_chat(),
                 ..Default::default()
             },
         ),

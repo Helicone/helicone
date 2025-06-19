@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
-use http::{Method, Request, StatusCode};
-use llm_proxy::{
+use ai_gateway::{
     config::{
         Config,
         balance::{BalanceConfig, BalanceConfigInner},
@@ -11,6 +10,7 @@ use llm_proxy::{
     tests::{TestDefault, harness::Harness, mock::MockArgs},
     types::{provider::InferenceProvider, router::RouterId},
 };
+use http::{Method, Request, StatusCode};
 use nonempty_collections::nes;
 use serde_json::json;
 use tower::Service;

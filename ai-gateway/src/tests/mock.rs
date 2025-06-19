@@ -12,7 +12,7 @@ use crate::{config::Config, types::provider::InferenceProvider};
 
 fn get_stubs_path(provider: &str) -> String {
     let workspace_root = get_workspace_root();
-    let stubs_path = workspace_root.join("llm-proxy/stubs").join(provider);
+    let stubs_path = workspace_root.join("ai-gateway/stubs").join(provider);
     stubs_path.to_string_lossy().to_string()
 }
 

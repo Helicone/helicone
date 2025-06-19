@@ -1,5 +1,5 @@
 [workspace]
-members = ["cargo:llm-proxy"]
+members = ["cargo:ai-gateway"]
 
 # Config for 'dist'
 [dist]

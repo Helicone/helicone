@@ -1,10 +1,10 @@
 [package]
-name = "llm-proxy"
+name = "ai-gateway"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
 repository = "https://github.com/Helicone/helicone-router"
-default-run = "llm-proxy"
+default-run = "ai-gateway"
 description = "A high-performance LLM proxy router."
 homepage = "https://docs.helicone.ai/ai-gateway"
 

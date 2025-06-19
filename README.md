@@ -199,7 +199,7 @@ routers:
     helicone: # Include your HELICONE_API_KEY in your .env file
       enable: true
     telemetry:
-      level: "info,llm_proxy=trace"
+      level: "info,ai_gateway=trace"
 ```
 ### Run with your custom config file
 

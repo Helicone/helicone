@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 
-use http::{Method, Request, StatusCode};
-use http_body_util::BodyExt;
-use llm_proxy::{
+use ai_gateway::{
     config::Config,
     tests::{TestDefault, harness::Harness, mock::MockArgs},
 };
+use http::{Method, Request, StatusCode};
+use http_body_util::BodyExt;
 use serde_json::json;
 use tower::Service;
 

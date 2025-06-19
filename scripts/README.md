@@ -27,6 +27,6 @@ cargo run
 ### Running Unit Tests
 
 ```bash
-cd llm-proxy
+cd ai-gateway
 cargo test --features testing
 ```

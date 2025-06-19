@@ -16,7 +16,7 @@ dotenvy = { workspace = true }
 futures = { workspace = true }
 http = { workspace = true }
 http-body-util = { workspace = true }
-llm-proxy = { workspace = true }
+ai-gateway = { workspace = true }
 rand = "0.8"
 reqwest = { workspace = true, features = ["json", "rustls-tls"] }
 serde_json = { workspace = true }

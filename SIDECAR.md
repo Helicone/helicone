@@ -6,7 +6,7 @@
    - `OPENAI_API_KEY`
    - `ANTHROPIC_API_KEY`
 5. Run the router locally with `cargo`:
-   `cargo run -- -c llm-proxy/config/sidecar.yaml`
+   `cargo run -- -c ai-gateway/config/sidecar.yaml`
 6. Run a test request:
    `cargo run -p test`
 7. You should see a log in your Helicone account

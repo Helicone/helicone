@@ -1,8 +1,8 @@
 [alias]
 ci-clippy = "clippy --all-features -- -D warnings"
 int-test = "t --tests --all-features"
-rl = "run -- -c ./llm-proxy/config/local.yaml"
-rlt = "run --release -- -c ./llm-proxy/config/load-test.yaml"
+rl = "run -- -c ./ai-gateway/config/local.yaml"
+rlt = "run --release -- -c ./ai-gateway/config/load-test.yaml"
 
 [net]
 git-fetch-with-cli = true

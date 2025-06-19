@@ -9,7 +9,9 @@ description: "Complete observability with OpenTelemetry traces, metrics, and log
 Conduit provides comprehensive observability through OpenTelemetry (OTel), enabling deep visibility into request flows, performance metrics, and operational health. With built-in trace propagation and multiple exporter options, you can seamlessly integrate with your existing observability stack.
 
 <Note>
-  Conduit automatically instruments all requests with distributed tracing, metrics collection, and structured logging using the industry-standard OpenTelemetry protocol.
+  Conduit automatically instruments all requests with distributed tracing,
+  metrics collection, and structured logging using the industry-standard
+  OpenTelemetry protocol.
 </Note>
 
 ## Quick Start
@@ -18,7 +20,7 @@ Enable observability by configuring the telemetry section in your `config.yaml`:
 
 ```yaml
 telemetry:
-  level: "info,llm_proxy=trace"
+  level: "info,ai_gateway=trace"
   service-name: "conduit-router"
   exporter: "otlp"
   otlp-endpoint: "http://localhost:4317"
@@ -27,17 +29,18 @@ telemetry:
 
 <CardGroup cols={2}>
   <Card title="Distributed Tracing" icon="route">
-    **End-to-end request visibility** across all providers and load balancing decisions
+    **End-to-end request visibility** across all providers and load balancing
+    decisions
   </Card>
-  
+
   <Card title="Real-time Metrics" icon="chart-line">
     **Performance and health metrics** with automatic OpenTelemetry collection
   </Card>
-  
+
   <Card title="Structured Logs" icon="file-text">
     **Contextual logging** with trace correlation and error tracking
   </Card>
-  
+
   <Card title="Standards-Based" icon="shield-check">
     **OpenTelemetry protocol** compatible with any observability backend
   </Card>
@@ -51,7 +54,7 @@ telemetry:
     
     ```yaml
     telemetry:
-      level: "debug,llm_proxy=trace"
+      level: "debug,ai_gateway=trace"
       service-name: "conduit-dev"
       exporter: "stdout"
       propagate: true
@@ -64,31 +67,21 @@ telemetry:
     - Human-readable format
   </Tab>
 
-  <Tab title="Production">
-    **Full observability stack integration**
-    
-    ```yaml
-    telemetry:
-      level: "info,llm_proxy=trace"
-      service-name: "conduit-production"
-      exporter: "otlp"
-      otlp-endpoint: "https://otel-collector.yourcompany.com:4317"
-      propagate: true
-    ```
-    
-    Production-ready configuration:
-    - OTLP export to collector
-    - Structured telemetry data
-    - Cross-service correlation
-    - Optimized performance
-  </Tab>
+{" "}
+<Tab title="Production">
+  **Full observability stack integration** ```yaml telemetry: level:
+  "info,ai_gateway=trace" service-name: "conduit-production" exporter: "otlp"
+  otlp-endpoint: "https://otel-collector.yourcompany.com:4317" propagate: true
+  ``` Production-ready configuration: - OTLP export to collector - Structured
+  telemetry data - Cross-service correlation - Optimized performance
+</Tab>
 
   <Tab title="Hybrid">
     **Both console and OTLP export**
     
     ```yaml
     telemetry:
-      level: "info,llm_proxy=debug"
+      level: "info,ai_gateway=debug"
       service-name: "conduit-staging"
       exporter: "both"
       otlp-endpoint: "http://jaeger:14268/api/traces"
@@ -111,7 +104,7 @@ telemetry:
     
     ```yaml
     # Available log levels per module
-    level: "info,llm_proxy=trace,tower=debug"
+    level: "info,ai_gateway=trace,tower=debug"
     ```
     
     **Common configurations:**
@@ -120,66 +113,35 @@ telemetry:
     - `"info"` - General information (default)
     - `"debug"` - Detailed debugging
     - `"trace"` - Maximum verbosity
-    - `"info,llm_proxy=trace"` - Trace Conduit, info for dependencies
+    - `"info,ai_gateway=trace"` - Trace Conduit, info for dependencies
   </Accordion>
 
-  <Accordion title="Service Name" icon="tag">
-    **OpenTelemetry service identification**
-    
-    ```yaml
-    service-name: "conduit-production"
-    ```
-    
-    Used for:
-    - Service identification in traces
-    - Metrics labeling
-    - Dashboard filtering
-    - Cross-service correlation
-    
-    **Naming conventions:**
-    - Environment prefix: `conduit-prod`, `conduit-staging`
-    - Instance suffix: `conduit-us-west-1`, `conduit-eu-1`
-  </Accordion>
+{" "}
+<Accordion title="Service Name" icon="tag">
+  **OpenTelemetry service identification** ```yaml service-name:
+  "conduit-production" ``` Used for: - Service identification in traces -
+  Metrics labeling - Dashboard filtering - Cross-service correlation **Naming
+  conventions:** - Environment prefix: `conduit-prod`, `conduit-staging` -
+  Instance suffix: `conduit-us-west-1`, `conduit-eu-1`
+</Accordion>
 
-  <Accordion title="Exporter Types" icon="upload">
-    **Choose your telemetry destination**
-    
-    ```yaml
-    # Console output only
-    exporter: "stdout"
-    
-    # OTLP export only  
-    exporter: "otlp"
-    
-    # Both console and OTLP
-    exporter: "both"
-    ```
-    
-    **When to use each:**
-    - `stdout`: Development, debugging, container logs
-    - `otlp`: Production, observability platforms
-    - `both`: Staging, troubleshooting, hybrid deployments
-  </Accordion>
+{" "}
+<Accordion title="Exporter Types" icon="upload">
+  **Choose your telemetry destination** ```yaml # Console output only exporter:
+  "stdout" # OTLP export only exporter: "otlp" # Both console and OTLP exporter:
+  "both" ``` **When to use each:** - `stdout`: Development, debugging, container
+  logs - `otlp`: Production, observability platforms - `both`: Staging,
+  troubleshooting, hybrid deployments
+</Accordion>
 
-  <Accordion title="OTLP Endpoint" icon="globe">
-    **Configure your observability backend**
-    
-    ```yaml
-    # OpenTelemetry Collector
-    otlp-endpoint: "http://otel-collector:4317"
-    
-    # Jaeger directly
-    otlp-endpoint: "http://jaeger:14268/api/traces"
-    
-    # Cloud providers
-    otlp-endpoint: "https://api.honeycomb.io:443"
-    ```
-    
-    **Protocol support:**
-    - gRPC over HTTP/2 (default)
-    - Automatic TLS for HTTPS endpoints
-    - Batch export for performance
-  </Accordion>
+{" "}
+<Accordion title="OTLP Endpoint" icon="globe">
+  **Configure your observability backend** ```yaml # OpenTelemetry Collector
+  otlp-endpoint: "http://otel-collector:4317" # Jaeger directly otlp-endpoint:
+  "http://jaeger:14268/api/traces" # Cloud providers otlp-endpoint:
+  "https://api.honeycomb.io:443" ``` **Protocol support:** - gRPC over HTTP/2
+  (default) - Automatic TLS for HTTPS endpoints - Batch export for performance
+</Accordion>
 
   <Accordion title="Trace Propagation" icon="arrows-rotate">
     **Distributed tracing across services**
@@ -210,7 +172,7 @@ Conduit automatically creates detailed traces for every request:
 Request Trace Example:
 ├── request [Conduit Gateway]
 │   ├── auth_middleware [2.1ms]
-│   ├── rate_limit_check [0.8ms] 
+│   ├── rate_limit_check [0.8ms]
 │   ├── load_balancer_select [1.2ms]
 │   ├── provider_request [OpenAI]
 │   │   ├── http_request [245ms]
@@ -220,6 +182,7 @@ Request Trace Example:
 ```
 
 **Trace attributes include:**
+
 - Request method, path, headers
 - Provider selection decisions
 - Load balancing strategy used
@@ -240,7 +203,7 @@ conduit_errors_total{error_type="rate_limit"} 12
 ```
 
 ```prometheus Provider Health
-# Provider availability and performance  
+# Provider availability and performance
 conduit_provider_health{provider="openai"} 1.0
 conduit_provider_latency_p99{provider="anthropic"} 0.312
 conduit_load_balancer_decisions{strategy="p2c"} 89
@@ -252,6 +215,7 @@ conduit_memory_usage_bytes 134217728
 conduit_active_connections 45
 conduit_cache_hit_rate 0.73
 ```
+
 </CodeGroup>
 
 ### Structured Logging
@@ -262,7 +226,7 @@ All logs include trace correlation and structured data:
 {
   "timestamp": "2024-01-15T10:30:45Z",
   "level": "INFO",
-  "target": "llm_proxy::router",
+  "target": "ai_gateway::router",
   "message": "Request routed successfully",
   "trace_id": "a1b2c3d4e5f6",
   "span_id": "g7h8i9j0",
@@ -306,46 +270,23 @@ All logs include trace correlation and structured data:
     ```
   </Tab>
 
-  <Tab title="Jaeger">
-    **Distributed tracing with Jaeger**
-    
-    ```yaml
-    telemetry:
-      level: "info,llm_proxy=trace"
-      service-name: "conduit"
-      exporter: "otlp"
-      otlp-endpoint: "http://jaeger:14268/api/traces"
-    ```
-    
-    Run Jaeger locally:
-    ```bash
-    docker run -d \
-      -p 16686:16686 \
-      -p 14268:14268 \
-      jaegertracing/all-in-one:latest
-    ```
-    
-    View traces at: http://localhost:16686
-  </Tab>
+{" "}
+<Tab title="Jaeger">
+  **Distributed tracing with Jaeger** ```yaml telemetry: level:
+  "info,ai_gateway=trace" service-name: "conduit" exporter: "otlp"
+  otlp-endpoint: "http://jaeger:14268/api/traces" ``` Run Jaeger locally:
+  ```bash docker run -d \ -p 16686:16686 \ -p 14268:14268 \
+  jaegertracing/all-in-one:latest ``` View traces at: http://localhost:16686
+</Tab>
 
-  <Tab title="Honeycomb">
-    **Cloud-native observability**
-    
-    ```yaml
-    telemetry:
-      service-name: "conduit-production"
-      exporter: "otlp"
-      otlp-endpoint: "https://api.honeycomb.io:443"
-    ```
-    
-    Environment variables:
-    ```bash
-    export HONEYCOMB_API_KEY="your_api_key"
-    export HONEYCOMB_DATASET="conduit"
-    ```
-    
-    Headers automatically added for authentication.
-  </Tab>
+{" "}
+<Tab title="Honeycomb">
+  **Cloud-native observability** ```yaml telemetry: service-name:
+  "conduit-production" exporter: "otlp" otlp-endpoint:
+  "https://api.honeycomb.io:443" ``` Environment variables: ```bash export
+  HONEYCOMB_API_KEY="your_api_key" export HONEYCOMB_DATASET="conduit" ```
+  Headers automatically added for authentication.
+</Tab>
 
   <Tab title="Custom Backend">
     **Any OpenTelemetry-compatible backend**
@@ -372,56 +313,26 @@ All logs include trace correlation and structured data:
 
 <Steps>
   <Step title="Resource Configuration">
-    **Configure telemetry for production scale**
-    
-    ```yaml
-    telemetry:
-      level: "info,llm_proxy=debug"  # Avoid trace in production
-      service-name: "conduit-prod-us-west-1"
-      exporter: "otlp"
-      otlp-endpoint: "https://otel-collector.internal:4317"
-      propagate: true
-    ```
-    
-    - Use `info` level for dependencies to reduce noise
-    - Include environment and region in service name
-    - Use internal endpoints for security
+    **Configure telemetry for production scale** ```yaml telemetry: level:
+    "info,ai_gateway=debug" # Avoid trace in production service-name:
+    "conduit-prod-us-west-1" exporter: "otlp" otlp-endpoint:
+    "https://otel-collector.internal:4317" propagate: true ``` - Use `info`
+    level for dependencies to reduce noise - Include environment and region in
+    service name - Use internal endpoints for security
   </Step>
-  
+
   <Step title="Collector Configuration">
-    **Use OpenTelemetry Collector for production**
-    
-    ```yaml
-    # otel-collector.yaml
-    processors:
-      batch:
-        timeout: 1s
-        send_batch_size: 1024
-      memory_limiter:
-        limit_mib: 512
-      
-    exporters:
-      otlp/jaeger:
-        endpoint: jaeger:4317
-        tls:
-          insecure: true
-          
-    service:
-      pipelines:
-        traces:
-          receivers: [otlp]
-          processors: [memory_limiter, batch]
-          exporters: [otlp/jaeger]
-    ```
+    **Use OpenTelemetry Collector for production** ```yaml # otel-collector.yaml
+    processors: batch: timeout: 1s send_batch_size: 1024 memory_limiter:
+    limit_mib: 512 exporters: otlp/jaeger: endpoint: jaeger:4317 tls: insecure:
+    true service: pipelines: traces: receivers: [otlp] processors:
+    [memory_limiter, batch] exporters: [otlp/jaeger] ```
   </Step>
-  
+
   <Step title="Monitoring Setup">
-    **Monitor your monitoring**
-    
-    - Set up alerts on trace export failures
-    - Monitor collector health and performance
-    - Configure appropriate retention policies
-    - Set up sampling for high-volume scenarios
+    **Monitor your monitoring** - Set up alerts on trace export failures -
+    Monitor collector health and performance - Configure appropriate retention
+    policies - Set up sampling for high-volume scenarios
   </Step>
 </Steps>
 
@@ -431,7 +342,7 @@ Override configuration with environment variables:
 
 ```bash
 # Telemetry configuration
-export PROXY_TELEMETRY__LEVEL="info,llm_proxy=debug"
+export PROXY_TELEMETRY__LEVEL="info,ai_gateway=debug"
 export PROXY_TELEMETRY__SERVICE_NAME="conduit-staging"
 export PROXY_TELEMETRY__EXPORTER="otlp"
 export PROXY_TELEMETRY__OTLP_ENDPOINT="http://otel-collector:4317"
@@ -439,7 +350,8 @@ export PROXY_TELEMETRY__PROPAGATE="true"
 ```
 
 <Note>
-  Environment variables use double underscores (`__`) to separate nested configuration keys and follow the `PROXY_` prefix convention.
+  Environment variables use double underscores (`__`) to separate nested
+  configuration keys and follow the `PROXY_` prefix convention.
 </Note>
 
 ## Troubleshooting
@@ -466,29 +378,14 @@ export PROXY_TELEMETRY__PROPAGATE="true"
        ```
   </Accordion>
 
-  <Accordion title="High overhead" icon="gauge-high">
-    **Optimize telemetry for performance**
-    
-    1. Reduce log level for noisy modules:
-       ```yaml
-       level: "warn,llm_proxy=info"
-       ```
-    
-    2. Use sampling in the collector:
-       ```yaml
-       processors:
-         probabilistic_sampler:
-           sampling_percentage: 10
-       ```
-    
-    3. Increase batch sizes:
-       ```yaml
-       processors:
-         batch:
-           send_batch_size: 2048
-           timeout: 5s
-       ```
-  </Accordion>
+{" "}
+<Accordion title="High overhead" icon="gauge-high">
+  **Optimize telemetry for performance** 1. Reduce log level for noisy modules:
+  ```yaml level: "warn,ai_gateway=info" ``` 2. Use sampling in the collector:
+  ```yaml processors: probabilistic_sampler: sampling_percentage: 10 ``` 3.
+  Increase batch sizes: ```yaml processors: batch: send_batch_size: 2048
+  timeout: 5s ```
+</Accordion>
 
   <Accordion title="Missing context" icon="link">
     **Ensure proper trace propagation**
@@ -510,5 +407,7 @@ export PROXY_TELEMETRY__PROPAGATE="true"
 ---
 
 <Info>
-  **Getting Started**: Use the provided Docker Compose stack in `infrastructure/` for a complete local observability setup with Grafana, Prometheus, Tempo, and Loki pre-configured for Conduit.
+  **Getting Started**: Use the provided Docker Compose stack in
+  `infrastructure/` for a complete local observability setup with Grafana,
+  Prometheus, Tempo, and Loki pre-configured for Conduit.
 </Info>

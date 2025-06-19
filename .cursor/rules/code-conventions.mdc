@@ -18,19 +18,19 @@ This document outlines the code conventions and best practices used in the LLM P
 ## Error Handling
 
 - Use `thiserror` for defining error types
-- Structured errors in [llm-proxy/src/error/](mdc:llm-proxy/src/error)
+- Structured errors in [ai-gateway/src/error/](mdc:ai-gateway/src/error)
 
 ## Type Definitions
 
 - Leverage Rust's type system for safety
-- Common types in [llm-proxy/src/types/](mdc:llm-proxy/src/types)
+- Common types in [ai-gateway/src/types/](mdc:ai-gateway/src/types)
 
 ## Testing Approaches
 
 - Unit tests alongside the code they test
 - Integration tests in separate directories
 - Use the `serial_test` crate for tests that can't run in parallel
-- Leverage the test utilities in [llm-proxy/src/tests/](mdc:llm-proxy/src/tests)
+- Leverage the test utilities in [ai-gateway/src/tests/](mdc:ai-gateway/src/tests)
 
 ## Dependency Management
 

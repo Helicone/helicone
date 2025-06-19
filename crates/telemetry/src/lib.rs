@@ -67,7 +67,7 @@ fn default_service_name() -> String {
 }
 
 fn default_level() -> String {
-    "info,llm_proxy=trace".to_string()
+    "info,ai_gateway=trace".to_string()
 }
 
 fn default_otlp_endpoint() -> String {

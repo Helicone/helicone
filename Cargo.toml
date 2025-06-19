@@ -4,12 +4,12 @@ members = [
     "crates/mock-server",
     "crates/telemetry",
     "crates/weighted-balance",
-    "llm-proxy",
+    "ai-gateway",
     "scripts/test",
     "scripts/trace-test-client",
 ]
 resolver = "2"
-default-members = ["llm-proxy"]
+default-members = ["ai-gateway"]
 
 [workspace.package]
 edition = "2024"
@@ -38,7 +38,7 @@ struct_field_names = { level = "allow" }
 
 [workspace.dependencies]
 telemetry = { path = "./crates/telemetry" }
-llm-proxy = { path = "./llm-proxy" }
+ai-gateway = { path = "./ai-gateway" }
 weighted-balance = { path = "./crates/weighted-balance" }
 
 # Upstream PR: https://github.com/katsuhirohonda/anthropic-sdk-rs/pull/49

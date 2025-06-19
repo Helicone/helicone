@@ -96,7 +96,7 @@ impl Config {
             builder = builder.add_source(config::File::from(path));
         }
         builder = builder.add_source(
-            config::Environment::with_prefix("PROXY")
+            config::Environment::with_prefix("AI_GATEWAY")
                 .try_parsing(true)
                 .separator("__")
                 .convert_case(config::Case::Kebab),
@@ -134,7 +134,7 @@ impl crate::tests::TestDefault for Config {
     fn test_default() -> Self {
         let telemetry = telemetry::Config {
             exporter: telemetry::Exporter::Stdout,
-            level: "info,llm_proxy=trace".to_string(),
+            level: "info,ai_gateway=trace".to_string(),
             ..Default::default()
         };
         let middleware = MiddlewareConfig {

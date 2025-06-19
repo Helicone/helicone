@@ -1,7 +1,6 @@
 use std::path::PathBuf;
 
-use clap::Parser;
-use llm_proxy::{
+use ai_gateway::{
     app::App,
     config::Config,
     control_plane::websocket::ControlPlaneClient,
@@ -13,6 +12,7 @@ use llm_proxy::{
     middleware::rate_limit,
     utils::meltdown::TaggedService,
 };
+use clap::Parser;
 use meltdown::Meltdown;
 use tracing::info;
 
@@ -69,7 +69,7 @@ async fn main() -> Result<(), RuntimeError> {
 
     let mut meltdown = Meltdown::new().register(TaggedService::new(
         "shutdown-signals",
-        llm_proxy::utils::meltdown::wait_for_shutdown_signals,
+        ai_gateway::utils::meltdown::wait_for_shutdown_signals,
     ));
 
     if app.state.0.config.helicone.enable_auth {
