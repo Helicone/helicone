@@ -8575,6 +8575,162 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"ResultSuccess__gatewayConfigs_58__id-string--name-string_-Array__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"gatewayConfigs": {
+								"items": {
+									"properties": {
+										"name": {
+											"type": "string"
+										},
+										"id": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"name",
+										"id"
+									],
+									"type": "object"
+								},
+								"type": "array"
+							}
+						},
+						"required": [
+							"gatewayConfigs"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__gatewayConfigs_58__id-string--name-string_-Array_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__gatewayConfigs_58__id-string--name-string_-Array__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"GatewayConfig": {
+				"properties": {
+					"config": {
+						"type": "string"
+					},
+					"version": {
+						"type": "string"
+					},
+					"apiKey": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"config",
+					"version",
+					"apiKey",
+					"name",
+					"id"
+				],
+				"type": "object"
+			},
+			"ResultSuccess_GatewayConfig_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/GatewayConfig"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_GatewayConfig.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_GatewayConfig_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__gatewayConfigId-string--gatewayVersionId-string--apiKey-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"apiKey": {
+								"type": "string"
+							},
+							"gatewayVersionId": {
+								"type": "string"
+							},
+							"gatewayConfigId": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"apiKey",
+							"gatewayVersionId",
+							"gatewayConfigId"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__gatewayConfigId-string--gatewayVersionId-string--apiKey-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__gatewayConfigId-string--gatewayVersionId-string--apiKey-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"Eval": {
 				"properties": {
 					"name": {
@@ -16260,6 +16416,170 @@
 						}
 					}
 				]
+			}
+		},
+		"/v1/gateway": {
+			"get": {
+				"operationId": "GetGatewayConfigs",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__gatewayConfigs_58__id-string--name-string_-Array_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Gateway"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/gateway/{id}": {
+			"get": {
+				"operationId": "GetGatewayConfig",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_GatewayConfig.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Gateway"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdateGatewayConfig",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Gateway"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"config": {
+										"type": "string"
+									},
+									"name": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"config",
+									"name"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/gateway/create": {
+			"post": {
+				"operationId": "CreateGatewayConfig",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__gatewayConfigId-string--gatewayVersionId-string--apiKey-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Gateway"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"config": {
+										"type": "string"
+									},
+									"name": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"config",
+									"name"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/evals/query": {

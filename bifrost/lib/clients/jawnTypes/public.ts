@@ -461,6 +461,16 @@ export interface paths {
   "/v1/helicone-dataset/{datasetId}/delete": {
     post: operations["DeleteHeliconeDataset"];
   };
+  "/v1/gateway": {
+    get: operations["GetGatewayConfigs"];
+  };
+  "/v1/gateway/{id}": {
+    get: operations["GetGatewayConfig"];
+    put: operations["UpdateGatewayConfig"];
+  };
+  "/v1/gateway/create": {
+    post: operations["CreateGatewayConfig"];
+  };
   "/v1/evals/query": {
     post: operations["QueryEvals"];
   };
@@ -2879,6 +2889,40 @@ Json: JsonObject;
       /** @enum {number|null} */
       error: null;
     };
+    "ResultSuccess__gatewayConfigs_58__id-string--name-string_-Array__": {
+      data: {
+        gatewayConfigs: {
+            name: string;
+            id: string;
+          }[];
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__gatewayConfigs_58__id-string--name-string_-Array_.string_": components["schemas"]["ResultSuccess__gatewayConfigs_58__id-string--name-string_-Array__"] | components["schemas"]["ResultError_string_"];
+    GatewayConfig: {
+      config: string;
+      version: string;
+      apiKey: string;
+      name: string;
+      id: string;
+    };
+    ResultSuccess_GatewayConfig_: {
+      data: components["schemas"]["GatewayConfig"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_GatewayConfig.string_": components["schemas"]["ResultSuccess_GatewayConfig_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__gatewayConfigId-string--gatewayVersionId-string--apiKey-string__": {
+      data: {
+        apiKey: string;
+        gatewayVersionId: string;
+        gatewayConfigId: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__gatewayConfigId-string--gatewayVersionId-string--apiKey-string_.string_": components["schemas"]["ResultSuccess__gatewayConfigId-string--gatewayVersionId-string--apiKey-string__"] | components["schemas"]["ResultError_string_"];
     Eval: {
       name: string;
       /** Format: double */
@@ -5771,6 +5815,72 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetGatewayConfigs: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__gatewayConfigs_58__id-string--name-string_-Array_.string_"];
+        };
+      };
+    };
+  };
+  GetGatewayConfig: {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_GatewayConfig.string_"];
+        };
+      };
+    };
+  };
+  UpdateGatewayConfig: {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          config: string;
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  CreateGatewayConfig: {
+    requestBody: {
+      content: {
+        "application/json": {
+          config: string;
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__gatewayConfigId-string--gatewayVersionId-string--apiKey-string_.string_"];
         };
       };
     };
