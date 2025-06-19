@@ -479,7 +479,7 @@ export class RequestManager extends BaseManager {
     }
 
     const requests =
-      sort.created_at === "desc"
+      sort.created_at === "desc" || sort.created_at === "asc"
         ? await getRequestsClickhouseNoSort(
             this.authParams.organizationId,
             newFilter,
@@ -495,35 +495,40 @@ export class RequestManager extends BaseManager {
           );
 
     return resultMap(requests, (req) => {
-      const seen = new Set();
-      return req
-        .map((r) => {
-          return {
-            ...r,
-            request_created_at: toISOStringClickhousePatch(
-              r.request_created_at
-            ),
-            feedback_created_at: r.feedback_created_at
-              ? toISOStringClickhousePatch(r.feedback_created_at)
-              : null,
-            response_created_at: r.response_created_at
-              ? toISOStringClickhousePatch(r.response_created_at)
-              : null,
-            model:
-              r.model_override ??
-              r.request_model ??
-              r.response_model ??
-              getModelFromPath(r.target_url) ??
-              "unknown",
-          };
-        })
-        .filter((r) => {
-          if (seen.has(r.request_id)) {
-            return false;
+      const reqs = req.map((r) => {
+        return {
+          ...r,
+          updated_at: r.updated_at ? toISOStringClickhousePatch(r.updated_at) : new Date().toISOString(),
+          request_created_at: toISOStringClickhousePatch(r.request_created_at),
+          feedback_created_at: r.feedback_created_at
+            ? toISOStringClickhousePatch(r.feedback_created_at)
+            : null,
+          response_created_at: r.response_created_at
+            ? toISOStringClickhousePatch(r.response_created_at)
+            : null,
+          model:
+            r.model_override ??
+            r.request_model ??
+            r.response_model ??
+            getModelFromPath(r.target_url) ??
+            "unknown",
+        };
+      });
+      const seen = new Map<string, HeliconeRequest>();
+
+      for (const r of reqs) {
+        if (seen.has(r.request_id)) {
+          const existing = seen.get(r.request_id);
+          if (existing?.updated_at && r.updated_at && r.updated_at > existing.updated_at) {
+            seen.set(r.request_id, r);
           }
-          seen.add(r.request_id);
-          return true;
-        });
+        }
+      }
+
+      if (sort.created_at === "asc") {
+        reqs.reverse();
+      }
+      return reqs;
     });
   }
 

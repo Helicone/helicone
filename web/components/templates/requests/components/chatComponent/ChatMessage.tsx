@@ -34,7 +34,6 @@ const getMessageType = (message: Message): MessageType => {
 
   // Check for image URL if _type is image (legacy or non-base64 images)
   if (message._type === "image" && message.image_url) {
-    console.log("yahan par");
     return "image";
   }
 

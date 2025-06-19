@@ -328,6 +328,7 @@ export interface HeliconeRequest {
   completion_tokens: number | null;
   prompt_audio_tokens: number | null;
   completion_audio_tokens: number | null;
+  cost: number | null;
   prompt_id: string | null;
   feedback_created_at?: string | null;
   feedback_id?: string | null;
@@ -345,4 +346,5 @@ export interface HeliconeRequest {
   model: string;
   cache_reference_id: string | null;
   cache_enabled: boolean;
+  updated_at?: string;
 }

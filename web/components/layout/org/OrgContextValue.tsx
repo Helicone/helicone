@@ -8,6 +8,4 @@ export interface OrgContextValue {
     orgId: Database["public"]["Tables"]["organization"]["Row"]["id"]
   ) => void;
   refetchOrgs: () => void;
-
-  isResellerOfCurrentCustomerOrg: boolean;
 }

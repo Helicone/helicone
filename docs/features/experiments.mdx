@@ -5,6 +5,10 @@ description: "Experiments is a spreadsheet-like experience designed to tune your
 "twitter:title": "Experiments | Helicone OSS LLM Observability"
 ---
 
+<Warning>
+  We are deprecating the Experiments feature and it will be removed from the platform on September 1st, 2025.
+</Warning>
+
 import QuestionsSection from "/snippets/questions-section.mdx";
 
 ## What are prompt experiments?
@@ -128,8 +132,8 @@ The next step is to import golden datasets or your request data in Helicone. The
 </Frame>
 
 <Steps>
-    <Step title="Toggle on `Show scores`."></Step>
-    <Step title="Under the dropdown, select 'Create new custom evaluators'"></Step>
+    <Step title="Toggle on `Show scores`." />
+    <Step title="Under the dropdown, select 'Create new custom evaluators'" />
     <Step title="Create the evaluator">
         On the side panel, you will be able to create a new evaluator. We currently support LLM-as-a-judge; Python and TypeScript support is coming soon!
         <Tip>You can add as many evaluators as you like, and run them all at the same time.</Tip>

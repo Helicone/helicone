@@ -7,7 +7,7 @@
     "start": "ts-node index.ts"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.27.1",
+    "@anthropic-ai/sdk": "^0.54.0",
     "@azure/identity": "^4.4.1",
     "@helicone/prompts": "^1.0.10",
     "dotenv": "^16.0.3",

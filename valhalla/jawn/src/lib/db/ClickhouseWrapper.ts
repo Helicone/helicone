@@ -232,6 +232,7 @@ export interface RequestResponseRMT {
   updated_at?: string;
   cache_reference_id?: string;
   cache_enabled: boolean;
+  cost: number;
 }
 
 export interface CacheMetricSMT {

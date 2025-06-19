@@ -643,13 +643,6 @@ export interface components {
       "not-contains"?: string;
     };
     /** @description Make all properties in T optional */
-    Partial_TimestampOperators_: {
-      gte?: string;
-      lte?: string;
-      lt?: string;
-      gt?: string;
-    };
-    /** @description Make all properties in T optional */
     Partial_NumberOperators_: {
       /** Format: double */
       "not-equals"?: number;
@@ -665,19 +658,9 @@ export interface components {
       gt?: number;
     };
     /** @description Make all properties in T optional */
-    Partial_UserMetricsToOperators_: {
-      user_id?: components["schemas"]["Partial_TextOperators_"];
-      last_active?: components["schemas"]["Partial_TimestampOperators_"];
-      total_requests?: components["schemas"]["Partial_NumberOperators_"];
-      active_for?: components["schemas"]["Partial_NumberOperators_"];
-      average_requests_per_day_active?: components["schemas"]["Partial_NumberOperators_"];
-      average_tokens_per_request?: components["schemas"]["Partial_NumberOperators_"];
-      total_completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      total_prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      cost?: components["schemas"]["Partial_NumberOperators_"];
-    };
-    /** @description Make all properties in T optional */
     Partial_TimestampOperatorsTyped_: {
+      /** Format: date-time */
+      equals?: string;
       /** Format: date-time */
       gte?: string;
       /** Format: date-time */
@@ -686,6 +669,19 @@ export interface components {
       lt?: string;
       /** Format: date-time */
       gt?: string;
+    };
+    /** @description Make all properties in T optional */
+    Partial_UserViewToOperators_: {
+      user_user_id?: components["schemas"]["Partial_TextOperators_"];
+      user_active_for?: components["schemas"]["Partial_NumberOperators_"];
+      user_first_active?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      user_last_active?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      user_total_requests?: components["schemas"]["Partial_NumberOperators_"];
+      user_average_requests_per_day_active?: components["schemas"]["Partial_NumberOperators_"];
+      user_average_tokens_per_request?: components["schemas"]["Partial_NumberOperators_"];
+      user_total_completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      user_total_prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      user_cost?: components["schemas"]["Partial_NumberOperators_"];
     };
     /** @description Make all properties in T optional */
     Partial_BooleanOperators_: {
@@ -733,12 +729,12 @@ export interface components {
       "helicone-score-feedback"?: components["schemas"]["Partial_BooleanOperators_"];
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.user_metrics-or-request_response_rmt_": {
-      user_metrics?: components["schemas"]["Partial_UserMetricsToOperators_"];
+    "Pick_FilterLeaf.users_view-or-request_response_rmt_": {
+      users_view?: components["schemas"]["Partial_UserViewToOperators_"];
       request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
     };
-    "FilterLeafSubset_user_metrics-or-request_response_rmt_": components["schemas"]["Pick_FilterLeaf.user_metrics-or-request_response_rmt_"];
-    UserFilterNode: components["schemas"]["FilterLeafSubset_user_metrics-or-request_response_rmt_"] | components["schemas"]["UserFilterBranch"] | "all";
+    "FilterLeafSubset_users_view-or-request_response_rmt_": components["schemas"]["Pick_FilterLeaf.users_view-or-request_response_rmt_"];
+    UserFilterNode: components["schemas"]["FilterLeafSubset_users_view-or-request_response_rmt_"] | components["schemas"]["UserFilterBranch"] | "all";
     UserFilterBranch: {
       right: components["schemas"]["UserFilterNode"];
       /** @enum {string} */
@@ -767,8 +763,9 @@ export interface components {
       /** Format: double */
       cost: number;
     };
-    "ResultSuccess__users-UserMetricsResult-Array--count-number__": {
+    "ResultSuccess__users-UserMetricsResult-Array--count-number--hasUsers-boolean__": {
       data: {
+        hasUsers: boolean;
         /** Format: double */
         count: number;
         users: components["schemas"]["UserMetricsResult"][];
@@ -776,7 +773,7 @@ export interface components {
       /** @enum {number|null} */
       error: null;
     };
-    "Result__users-UserMetricsResult-Array--count-number_.string_": components["schemas"]["ResultSuccess__users-UserMetricsResult-Array--count-number__"] | components["schemas"]["ResultError_string_"];
+    "Result__users-UserMetricsResult-Array--count-number--hasUsers-boolean_.string_": components["schemas"]["ResultSuccess__users-UserMetricsResult-Array--count-number--hasUsers-boolean__"] | components["schemas"]["ResultError_string_"];
     /** @enum {string} */
     SortDirection: "asc" | "desc";
     SortLeafUsers: {
@@ -788,6 +785,8 @@ export interface components {
       total_requests?: components["schemas"]["SortDirection"];
       average_requests_per_day_active?: components["schemas"]["SortDirection"];
       average_tokens_per_request?: components["schemas"]["SortDirection"];
+      total_prompt_tokens?: components["schemas"]["SortDirection"];
+      total_completion_tokens?: components["schemas"]["SortDirection"];
       cost?: components["schemas"]["SortDirection"];
       rate_limited_count?: components["schemas"]["SortDirection"];
     };
@@ -1013,6 +1012,14 @@ export interface components {
       body_completion?: components["schemas"]["Partial_TextOperators_"];
       status?: components["schemas"]["Partial_NumberOperators_"];
       model?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_TimestampOperators_: {
+      equals?: string;
+      gte?: string;
+      lte?: string;
+      lt?: string;
+      gt?: string;
     };
     /** @description Make all properties in T optional */
     Partial_RequestTableToOperators_: {
@@ -1312,6 +1319,8 @@ export interface components {
       prompt_audio_tokens: number | null;
       /** Format: double */
       completion_audio_tokens: number | null;
+      /** Format: double */
+      cost: number | null;
       prompt_id: string | null;
       feedback_created_at?: string | null;
       feedback_id?: string | null;
@@ -1330,6 +1339,7 @@ export interface components {
       model: string;
       cache_reference_id: string | null;
       cache_enabled: boolean;
+      updated_at?: string;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];
@@ -3263,7 +3273,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result__users-UserMetricsResult-Array--count-number_.string_"];
+          "application/json": components["schemas"]["Result__users-UserMetricsResult-Array--count-number--hasUsers-boolean_.string_"];
         };
       };
     };

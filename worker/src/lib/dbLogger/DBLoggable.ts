@@ -543,6 +543,7 @@ export class DBLoggable {
       return err(`Auth failed! ${error}`);
     }
 
+    let orgRateLimit = false;
     try {
       const org = await db.dbWrapper.getOrganization();
       if (org.error !== null) {
@@ -556,26 +557,15 @@ export class DBLoggable {
         return rateLimiter;
       }
 
+      // TODO: Add an early exit if we really want to rate limit in the future
       const rateLimit = await rateLimiter.data.checkRateLimit(tier);
+
+      if (rateLimit.data?.isRateLimited) {
+        orgRateLimit = true;
+      }
 
       if (rateLimit.error) {
         console.error(`Error checking rate limit: ${rateLimit.error}`);
-      }
-
-      if (!rateLimit.error && rateLimit.data?.isRateLimited) {
-        await db.clickhouse.dbInsertClickhouse("rate_limit_log_v2", [
-          {
-            request_id: this.request.requestId,
-            organization_id: org.data.id,
-            tier: tier,
-            rate_limit_created_at: formatTimeStringDateTime(
-              new Date().toISOString()
-            ),
-          },
-        ]);
-        return ok({
-          cost: 0,
-        });
       }
     } catch (e) {
       console.error(`Error checking rate limit: ${e}`);
@@ -585,6 +575,7 @@ export class DBLoggable {
       db,
       authParams,
       S3_ENABLED,
+      orgRateLimit,
       requestHeaders,
       cachedHeaders,
       cacheSettings
@@ -626,6 +617,7 @@ export class DBLoggable {
     },
     authParams: AuthParams,
     S3_ENABLED: Env["S3_ENABLED"],
+    orgRateLimit: boolean,
     requestHeaders?: HeliconeHeaders,
     cachedHeaders?: Headers,
     cacheSettings?: CacheSettings
@@ -731,20 +723,30 @@ export class DBLoggable {
           timeToFirstToken,
           responseCreatedAt: endTime,
           delayMs: endTime.getTime() - this.timing.startTime.getTime(),
-          cachedLatency: cacheReferenceId == DEFAULT_UUID ? 0 : (() => {
-            try {
-              return Number(cachedHeaders?.get("Helicone-Cache-Latency") ?? 0);
-            } catch {
-              return 0;
-            }
-          })(),
+          cachedLatency:
+            cacheReferenceId == DEFAULT_UUID
+              ? 0
+              : (() => {
+                  try {
+                    return Number(
+                      cachedHeaders?.get("Helicone-Cache-Latency") ?? 0
+                    );
+                  } catch {
+                    return 0;
+                  }
+                })(),
         },
       },
     };
 
-    // Send to Kafka or REST if not enabled
-    await db.producer.sendMessage(kafkaMessage);
+    if (orgRateLimit) {
+      console.log(
+        `Setting lower priority for org ${authParams.organizationId} because of rate limit`
+      );
+      db.producer.setLowerPriority();
+    }
 
+    await db.producer.sendMessage(kafkaMessage);
     return ok(null);
   }
 

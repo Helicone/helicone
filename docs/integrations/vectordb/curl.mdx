@@ -1,14 +1,62 @@
 ---
-title: "Vector DB Curl Integration"
+title: "Vector DB tracing with cURL"
 sidebarTitle: "cURL"
 description: "Log any Vector DB interactions to Helicone using cURL."
 icon: "code"
 iconType: "solid"
 ---
 
-## Request Structure
+import { strings } from "/snippets/strings.mdx";
 
-A typical request will have the following structure:
+## Example
+
+```bash
+curl -X POST https://api.worker.helicone.ai/custom/v1/log \
+-H 'Authorization: Bearer <YOUR_HELICONE_API_KEY>' \
+-H 'Content-Type: application/json' \
+-d '{
+  "providerRequest": {
+    "url": "custom-model-nopath",
+    "json": {
+      "_type": "vector_db",
+      "operation": "search",
+      "text": "sample query text",
+      "topK": 3,
+      "databaseName": "sample_vector_db"
+    },
+    "meta": {
+      "source": "test_integration",
+      "environment": "development"
+    }
+  },
+  "providerResponse": {
+    "json": {
+      "_type": "vector_db",
+      "results": [
+        {"id": "doc1", "score": 0.92, "content": "Sample document 1"},
+        {"id": "doc2", "score": 0.85, "content": "Sample document 2"},
+        {"id": "doc3", "score": 0.78, "content": "Sample document 3"}
+      ]
+    },
+    "status": 200,
+    "headers": {
+      "content-type": "application/json"
+    }
+  },
+  "timing": {
+    "startTime": {
+      "seconds": 1625686222,
+      "milliseconds": 500
+    },
+    "endTime": {
+      "seconds": 1625686244,
+      "milliseconds": 750
+    }
+  }
+}'
+```
+
+## Request Structure
 
 ### Endpoint
 
@@ -20,9 +68,9 @@ POST https://api.worker.helicone.ai/custom/v1/log
 
 | Name          | Value              |
 | ------------- | ------------------ |
-| Authorization | Bearer `{API_KEY}` |
+| Authorization | Bearer `<YOUR_HELICONE_API_KEY>` |
 
-Replace `{API_KEY}` with your actual API Key.
+<div dangerouslySetInnerHTML={{ __html: strings.generateKeyInstructions }} />
 
 ### Body
 
@@ -68,52 +116,4 @@ export type Timing = {
     milliseconds: number;
   };
 };
-```
-
-## Example Usage
-
-```
-curl -X POST https://api.worker.helicone.ai/custom/v1/log \
--H 'Authorization: Bearer your_api_key' \
--H 'Content-Type: application/json' \
--d '{
-  "providerRequest": {
-    "url": "custom-model-nopath",
-    "json": {
-      "_type": "vector_db",
-      "operation": "search",
-      "text": "sample query text",
-      "topK": 3,
-      "databaseName": "sample_vector_db"
-    },
-    "meta": {
-      "source": "test_integration",
-      "environment": "development"
-    }
-  },
-  "providerResponse": {
-    "json": {
-      "_type": "vector_db",
-      "results": [
-        {"id": "doc1", "score": 0.92, "content": "Sample document 1"},
-        {"id": "doc2", "score": 0.85, "content": "Sample document 2"},
-        {"id": "doc3", "score": 0.78, "content": "Sample document 3"}
-      ]
-    },
-    "status": 200,
-    "headers": {
-      "content-type": "application/json"
-    }
-  },
-  "timing": {
-    "startTime": {
-      "seconds": 1625686222,
-      "milliseconds": 500
-    },
-    "endTime": {
-      "seconds": 1625686244,
-      "milliseconds": 750
-    }
-  }
-}'
 ```

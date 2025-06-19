@@ -154,14 +154,35 @@ export const useCachePageClickHouse = ({
     );
   }
 
-  const isAnyLoading =
-    Object.values(overTimeData).some((x) => isLoading(x)) ||
-    Object.values(metrics).some((x) => isLoading(x)) ||
-    isRequestsLoading(topSourceRequestsWithBodies);
+  const loadingStates = {
+    cacheHits: isLoading(overTimeData.cacheHits),
+    totalCacheHits: isLoading(metrics.totalCacheHits),
+    totalRequests: isLoading(metrics.totalRequests),
+    totalSavings: isLoading(metrics.totalSavings),
+    timeSaved: isLoading(metrics.timeSaved),
+    topRequests: isLoading(metrics.topRequests),
+    avgLatency: isLoading(metrics.avgLatency),
+    avgLatencyCached: isLoading(metrics.avgLatencyCached),
+    topSourceRequests: isRequestsLoading(topSourceRequestsWithBodies),
+  };
+
+  const isAnyLoading = Object.values(loadingStates).some(Boolean);
+
+  const hasCacheData = (() => {
+    if (loadingStates.totalCacheHits) return null;
+
+    const cacheHits = metrics.totalCacheHits.data?.data;
+    if (cacheHits === undefined || cacheHits === null) {
+      return false;
+    }
+    return +cacheHits > 0;
+  })();
 
   return {
     overTimeData,
     metrics: { ...metrics, topSourceRequestsWithBodies },
     isAnyLoading,
+    loadingStates,
+    hasCacheData,
   };
 };

@@ -10,11 +10,11 @@ import {
 } from "tsoa";
 import { KVCache } from "../../lib/cache/kvCache";
 import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
-import { buildFilterWithAuthClickHouse } from "@helicone-package/filters/filters";
+import { buildFilterWithAuthClickHouse, buildFilterWithAuthClickHouseOrganizationProperties } from "@helicone-package/filters/filters";
 import { resultMap } from "../../packages/common/result";
-import { clickhousePriceCalc } from "@helicone-package/cost";
 import type { JawnAuthenticatedRequest } from "../../types/request";
 import { quickCacheResultCustom } from "../../utils/cacheResult";
+import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 
 export interface Property {
   property: string;
@@ -39,15 +39,15 @@ export class PropertyController extends Controller {
     requestBody: {},
     @Request() request: JawnAuthenticatedRequest
   ) {
-    const builtFilter = await buildFilterWithAuthClickHouse({
+    const builtFilter = await buildFilterWithAuthClickHouseOrganizationProperties({
       org_id: request.authParams.organizationId,
       argsAcc: [],
       filter: "all",
     });
 
     const query = `
-    SELECT DISTINCT arrayJoin(mapKeys(properties)) AS property
-    FROM request_response_rmt
+    SELECT DISTINCT property_key AS property
+    FROM organization_properties
     WHERE (
       ${builtFilter.filter}
     )
@@ -142,7 +142,7 @@ export class PropertyController extends Controller {
     const topQuery = `
     SELECT
       properties[${propertySQLKey}] as value,
-      ${clickhousePriceCalc("request_response_rmt")} as cost
+      sum(cost) / ${COST_PRECISION_MULTIPLIER} as cost
     FROM request_response_rmt
     WHERE (
       ${builtFilter.filter}
@@ -156,7 +156,7 @@ export class PropertyController extends Controller {
     // Query to get the total cost for this property
     const totalQuery = `
     SELECT
-      ${clickhousePriceCalc("request_response_rmt")} as cost
+      sum(cost) / ${COST_PRECISION_MULTIPLIER} as cost
     FROM request_response_rmt
     WHERE (
       ${builtFilter.filter}

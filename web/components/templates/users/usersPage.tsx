@@ -1,26 +1,38 @@
 import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
+import FoldedHeader from "@/components/shared/FoldedHeader";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useFilterAST } from "@/filterAST/context/filterContext";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { UserMetric } from "@/lib/api/users/UserMetric";
-import { UserGroupIcon } from "@heroicons/react/24/outline";
-import { LockIcon } from "lucide-react";
+import { LockIcon, PieChart, Table } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useUsers } from "../../../services/hooks/users";
 import {
   SortDirection,
   SortLeafRequest,
 } from "../../../services/lib/sorts/requests/sorts";
-import AuthHeader from "../../shared/authHeader";
-import ThemedTable from "../../shared/themed/table/themedTableOld";
+import ThemedTable from "../../shared/themed/table/themedTable";
 import { UpgradeProDialog } from "../organization/plan/upgradeProDialog";
-import TableFooter from "../requests/tableFooter";
 import { INITIAL_COLUMNS } from "./initialColumns";
 import { UserMetrics } from "./UserMetrics";
+import { Small } from "@/components/ui/typography";
+import { FilterASTButton } from "@/filterAST/FilterASTButton";
+import ViewColumns from "../../shared/themed/table/columns/viewColumns";
+import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
+import {
+  getTimeIntervalAgo,
+  TimeInterval,
+} from "../../../lib/timeCalculations/time";
+import { TimeFilter } from "@/types/timeFilter";
+import {
+  columnDefsToDragColumnItems,
+  DragColumnItem,
+} from "../../shared/themed/table/columns/DragList";
+import { useLocalStorage } from "@/services/hooks/localStorage";
+import TableFooter from "../requests/tableFooter";
 
 interface UsersPageV2Props {
   currentPage: number;
@@ -31,6 +43,19 @@ interface UsersPageV2Props {
     isCustomProperty: boolean;
   };
 }
+
+const TABS = [
+  {
+    id: "users",
+    label: "Users",
+    icon: <Table size={16} />,
+  },
+  {
+    id: "metrics",
+    label: "Metrics",
+    icon: <PieChart size={16} />,
+  },
+];
 
 function useQueryParam(
   paramName: string,
@@ -55,11 +80,9 @@ function useQueryParam(
     [router, paramName]
   );
 
-  // Get the current value from the URL
   const queryParam = searchParams?.get(paramName) || defaultValue;
 
   useEffect(() => {
-    // If the parameter is not in the URL, set it to the default value
     if (!searchParams?.has(paramName)) {
       setQueryParam(defaultValue);
     }
@@ -69,40 +92,68 @@ function useQueryParam(
 }
 
 const UsersPageV2 = (props: UsersPageV2Props) => {
-  const [currentPage, setCurrentPage] = useQueryParam("page", "1");
-  const [pageSize, setPageSize] = useQueryParam("pageSize", "100");
-  const [sortDirection, setSortDirection] = useQueryParam(
-    "sortDirection",
-    "asc"
-  );
-  const [sortKey, setSortKey] = useQueryParam("sortKey", "last_active");
+  const {
+    currentPage: currentPageProp,
+    pageSize: pageSizeProp,
+    sort: sortProp,
+  } = props;
 
-  const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
-
+  const tableRef = useRef<any>(null);
   const router = useRouter();
 
-  const sortLeaf: SortLeafRequest =
-    sortKey && sortDirection
-      ? {
-          [sortKey]: sortDirection,
-        }
-      : {
-          last_active: "desc",
-        };
+  const [currentPage, setCurrentPage] = useQueryParam(
+    "page",
+    currentPageProp.toString()
+  );
+  const [pageSize, setPageSize] = useQueryParam(
+    "pageSize",
+    pageSizeProp.toString()
+  );
+  const [sortDirection, setSortDirection] = useQueryParam(
+    "sortDirection",
+    sortProp.sortDirection ?? "desc"
+  );
+  const [sortKey, setSortKey] = useQueryParam("sortKey", "last_active");
+  const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
+  const [currentTab, setCurrentTab] = useLocalStorage<
+    (typeof TABS)[number]["id"]
+  >("user-details-tab", "users");
+
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>({
+    start: getTimeIntervalAgo("1m"),
+    end: new Date(),
+  });
+
+  const sortLeaf: SortLeafRequest = {
+    [sortKey]: sortDirection as SortDirection,
+  };
 
   const { userMetrics } = useUsers(
     parseInt(currentPage, 10),
     parseInt(pageSize, 10),
-    sortLeaf
+    sortLeaf,
+    timeFilter
   );
 
   const { hasAccess, freeLimit, upgradeMessage, canCreate } = useFeatureLimit(
     "users",
-    userMetrics.data?.data?.data?.count ?? 0
+    userMetrics.data?.count ?? 0
   );
 
-  const [activeTab, setActiveTab] = useQueryParam("tab", "all");
-  const filter = useFilterAST();
+  const onTimeSelectHandler = (key: string, value: string) => {
+    if (key === "custom") {
+      const [startDate, endDate] = value.split("_");
+      setTimeFilter({
+        start: new Date(startDate),
+        end: new Date(endDate),
+      });
+    } else {
+      setTimeFilter({
+        start: getTimeIntervalAgo(key as TimeInterval),
+        end: new Date(),
+      });
+    }
+  };
 
   const columns = useMemo(() => {
     if (hasAccess) {
@@ -116,8 +167,8 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
           cell: (info: any) => {
             const user = info.row.original;
             const userIndex =
-              userMetrics.data?.data?.data?.users?.findIndex(
-                (u) => u.user_id === user.user_id
+              userMetrics.data?.users?.findIndex(
+                (u: { user_id: string }) => u.user_id === user.user_id
               ) ?? 0;
             const isPremium = userIndex >= freeLimit;
 
@@ -142,8 +193,8 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
           cell: (info: any) => {
             const user = info.row.original;
             const userIndex =
-              userMetrics.data?.data?.data?.users?.findIndex(
-                (u) => u.user_id === user.user_id
+              userMetrics.data?.users?.findIndex(
+                (u: { user_id: string }) => u.user_id === user.user_id
               ) ?? 0;
             const isPremium = userIndex >= freeLimit;
 
@@ -166,16 +217,19 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
     });
   }, [hasAccess, freeLimit, userMetrics]);
 
+  const [activeColumns, setActiveColumns] = useState<DragColumnItem[]>(
+    columnDefsToDragColumnItems(columns)
+  );
+
   const handleRowSelect = (row: UserMetric) => {
-    // Fast exit if user has full access - direct navigation
     if (hasAccess) {
       router.push(`/users/${encodeURIComponent(row.user_id)}`);
       return;
     }
 
     const userIndex =
-      userMetrics.data?.data?.data?.users?.findIndex(
-        (u) => u.user_id === row.user_id
+      userMetrics.data?.users?.findIndex(
+        (u: { user_id: string }) => u.user_id === row.user_id
       ) ?? 0;
     const isPremiumUser = userIndex >= freeLimit;
 
@@ -188,17 +242,10 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
   };
 
   const hasNoUsers = useMemo(() => {
-    return (
-      userMetrics.data?.data?.data?.users?.length === 0 ||
-      (userMetrics.data?.data?.data?.users?.length === 1 &&
-        userMetrics.data?.data?.data?.users?.[0]?.user_id === "")
-    );
+    return userMetrics.data?.hasUsers === false;
   }, [userMetrics]);
 
-  if (
-    userMetrics.data?.data?.data?.users?.length === 0 &&
-    !filter.store.filter
-  ) {
+  if (hasNoUsers && !userMetrics.isLoading) {
     return (
       <div className="flex flex-col w-full h-screen bg-background dark:bg-sidebar-background">
         <div className="flex flex-1 h-full">
@@ -209,90 +256,105 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
   }
 
   return (
-    <>
+    <main className="h-screen flex flex-col w-full animate-fade-in">
       <Tabs
-        value={activeTab}
-        onValueChange={(value) => setActiveTab(value)}
-        defaultValue="all"
-        className=""
+        value={currentTab}
+        onValueChange={(value) => setCurrentTab(value)}
+        className="flex flex-col flex-1 overflow-hidden"
       >
-        <AuthHeader
-          title={"Users"}
-          actions={
-            <TabsList>
-              <TabsTrigger value="all">All Users</TabsTrigger>
-              <TabsTrigger value="active">User Metrics</TabsTrigger>
-            </TabsList>
+        <FoldedHeader
+          leftSection={
+            <section className="flex flex-row items-center gap-2">
+              <Link href="/users" className="no-underline">
+                <Small className="font-semibold">Users</Small>
+              </Link>
+              <Small className="font-semibold">/</Small>
+
+              <ThemedTimeFilter
+                currentTimeFilter={timeFilter}
+                timeFilterOptions={[]}
+                onSelect={onTimeSelectHandler}
+                isFetching={userMetrics.isLoading}
+                defaultValue={"1m"}
+                custom={true}
+              />
+
+              <FilterASTButton />
+            </section>
           }
+          rightSection={
+            <section className="flex flex-row items-center gap-2">
+              <div className="h-8 flex flex-row items-center border border-border rounded-lg divide-x divide-border overflow-hidden shadow-sm">
+                <label className="text-xs px-2 py-1">Views</label>
+
+                <TabsList
+                  size={"sm"}
+                  variant={"secondary"}
+                  asPill={"none"}
+                  className="divide-x divide-border"
+                >
+                  {TABS.map((tab) => (
+                    <TabsTrigger
+                      variant={"secondary"}
+                      asPill={"none"}
+                      key={tab.id}
+                      value={tab.id}
+                      className="flex items-center gap-2 bg-sidebar-background dark:bg-sidebar-foreground"
+                    >
+                      {tab.icon}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </div>
+
+              <ViewColumns
+                columns={tableRef.current?.getAllColumns() || []}
+                activeColumns={activeColumns}
+                setActiveColumns={setActiveColumns}
+              />
+            </section>
+          }
+          showFold={false}
         />
 
-        <TabsContent value="all">
-          <div className="flex flex-col space-y-4 pb-10">
-            {!canCreate && (
-              <FreeTierLimitBanner
-                feature="users"
-                itemCount={userMetrics.data?.data?.data?.count ?? 0}
-                freeLimit={freeLimit}
-                className="w-full"
-              />
-            )}
+        {!canCreate && (
+          <FreeTierLimitBanner
+            feature="users"
+            itemCount={userMetrics.data?.count ?? 0}
+            freeLimit={freeLimit}
+            className="w-full"
+          />
+        )}
 
+        <TabsContent value="users" className="flex-1 flex flex-col min-h-0">
+          <div className="flex-1 overflow-auto">
             <ThemedTable
-              id="user-table"
-              defaultData={userMetrics.data?.data?.data?.users ?? []}
+              id="users-table"
+              tableRef={tableRef}
+              defaultData={userMetrics.data?.users ?? []}
               defaultColumns={columns}
               skeletonLoading={userMetrics.isLoading}
-              dataLoading={false}
-              sortable={{
-                sortKey: sortKey,
-                sortDirection: sortDirection as SortDirection,
-                isCustomProperty: false,
-              }}
-              exportData={userMetrics.data?.data?.data?.users ?? []}
+              dataLoading={userMetrics.isLoading}
+              activeColumns={activeColumns}
+              setActiveColumns={setActiveColumns}
+              rowLink={(row: UserMetric) =>
+                `/users/${encodeURIComponent(row.user_id)}`
+              }
               onRowSelect={handleRowSelect}
-              showFilters
-            />
-
-            {!userMetrics.isLoading && hasNoUsers && (
-              <div className="flex flex-col w-full h-96 justify-center items-center bg-white rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-black">
-                <div className="flex flex-col w-2/5">
-                  <UserGroupIcon className="h-12 w-12 text-black dark:text-white border border-gray-300 dark:border-gray-700 bg-white dark:bg-black p-2 rounded-lg" />
-                  <p className="text-xl text-black dark:text-white font-semibold mt-8">
-                    No unique users found.
-                  </p>
-                  <p className="text-sm text-gray-500 max-w-sm mt-2">
-                    Please explore our docs{" "}
-                    <Link
-                      href="https://docs.helicone.ai/features/advanced-usage/user-metrics"
-                      target="_blank"
-                      rel="noreferrer noopener"
-                      className="underline text-blue-500"
-                    >
-                      here
-                    </Link>{" "}
-                    to learn more about user tracking and metrics.
-                  </p>
-                </div>
-              </div>
-            )}
-
-            <TableFooter
-              currentPage={parseInt(currentPage, 10)}
-              pageSize={parseInt(pageSize, 10)}
-              isCountLoading={userMetrics.isLoading}
-              count={userMetrics.data?.data?.data?.count ?? 0}
-              onPageChange={(newPage) => {
-                setCurrentPage(newPage.toString());
-              }}
-              onPageSizeChange={(newPageSize) => {
-                setPageSize(newPageSize.toString());
-              }}
-              pageSizeOptions={[100, 250, 500]}
-              showCount={true}
             />
           </div>
+
+          <TableFooter
+            currentPage={parseInt(currentPage, 10)}
+            pageSize={parseInt(pageSize, 10)}
+            isCountLoading={userMetrics.isLoading}
+            count={userMetrics.data?.count || 0}
+            onPageChange={(n) => setCurrentPage(n.toString())}
+            onPageSizeChange={(n) => setPageSize(n.toString())}
+            pageSizeOptions={[25, 50, 100, 250, 500]}
+          />
         </TabsContent>
-        <TabsContent value="active">
+        <TabsContent value="metrics" className="h-full">
           <UserMetrics />
         </TabsContent>
       </Tabs>
@@ -303,7 +365,7 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
         featureName="Users"
         limitMessage={upgradeMessage}
       />
-    </>
+    </main>
   );
 };
 

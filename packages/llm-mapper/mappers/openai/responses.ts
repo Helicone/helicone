@@ -207,9 +207,9 @@ const convertTools = (
   if (!tools) return [];
   return tools.map((tool) => ({
     type: "function",
-    name: tool.function.name,
-    description: tool.function.description,
-    parameters: tool.function.parameters,
+    name: tool.function?.name,
+    description: tool.function?.description,
+    parameters: tool.function?.parameters,
   }));
 };
 
@@ -221,9 +221,9 @@ const toExternalTools = (
   return tools.map((tool) => ({
     type: "function",
     function: {
-      name: tool.name,
-      description: tool.description,
-      parameters: tool.parameters || {},
+      name: tool?.name,
+      description: tool?.description,
+      parameters: tool?.parameters || {},
     },
   }));
 };
@@ -278,7 +278,7 @@ const toExternalToolChoice = (
   }
 
   // Handle "tool" type with name
-  if (toolChoice.type === "tool" && toolChoice.name) {
+  if (toolChoice.type === "tool" && toolChoice?.name) {
     return {
       type: "function",
       function: {
@@ -291,6 +291,17 @@ const toExternalToolChoice = (
   // Default to "auto" if we can't map it properly
   return "auto";
 };
+
+function convertToReasoningEffort(reasoning?: OpenAIResponseRequest["reasoning"]): LlmSchema["request"]["reasoning_effort"] {
+  if (!reasoning) return undefined;
+  return reasoning.effort;
+}
+
+function convertFromReasoningEffort(reasoning_effort: LlmSchema["request"]["reasoning_effort"]): OpenAIResponseRequest["reasoning"] {
+  if (!reasoning_effort) return undefined;
+  return { effort: reasoning_effort };
+}
+
 
 export const openaiResponseMapper = new MapperBuilder<OpenAIResponseRequest>(
   "openai-response"
@@ -309,7 +320,7 @@ export const openaiResponseMapper = new MapperBuilder<OpenAIResponseRequest>(
   .map("stream", "stream")
   .map("max_output_tokens", "max_tokens")
   .map("parallel_tool_calls", "parallel_tool_calls")
-  .map("reasoning", "reasoning_effort")
+  .mapWithTransform("reasoning", "reasoning_effort", convertToReasoningEffort, convertFromReasoningEffort)
   .mapWithTransform("tools", "tools", convertTools, toExternalTools)
   .mapWithTransform(
     "tool_choice",

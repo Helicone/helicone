@@ -127,6 +127,23 @@ export async function consumeRequestResponseLogs() {
   }
 }
 
+export async function consumeRequestResponseLogsLowPriority() {
+  while (true) {
+    await withMessages({
+      queueUrl: QUEUE_URLS.requestResponseLogsLowPriority,
+      sizeSetting: "sqs:request-response-logs", // TODO: Add a new setting for this
+      process: async (messages) => {
+        const mappedMessages = messages.map((message) =>
+          mapMessageDates(JSON.parse(message.Body ?? "{}"))
+        );
+
+        const logManager = new LogManager();
+        await logManager.processLogEntries(mappedMessages, {});
+      },
+    });
+  }
+}
+
 export async function consumeRequestResponseLogsDlq() {
   while (true) {
     await withMessages({

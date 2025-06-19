@@ -27,6 +27,13 @@ if (IS_RATE_LIMIT_ENABLED) {
       if (req.path.startsWith("/v1/trace")) {
         return 10_000;
       }
+
+      if (req.path.startsWith("/v1/router/control-plane/sign-s3-url")) {
+        if (authParams?.tier && authParams?.tier !== "free") {
+          return 10_000;
+        }
+        return 100;
+      }
       return 200;
     },
 

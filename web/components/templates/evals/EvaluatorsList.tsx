@@ -22,6 +22,7 @@ import { useOrg } from "@/components/layout/org/organizationContext";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { Deprecated } from "@/components/shared/Deprecated";
 
 export default function EvaluatorsList() {
   const { evaluators, deleteEvaluator } = useEvaluators();
@@ -155,40 +156,48 @@ export default function EvaluatorsList() {
   // Empty state
   if (evaluatorsList.length === 0) {
     return (
-      <div>
-        <AuthHeader
-          title="Evaluators"
-          actions={[
-            <Link href="/evaluators/new" key="create-evaluator">
-              <Button variant="action" size="sm" className="gap-1 items-center">
-                <PiPlusBold className="h-3.5 w-3.5" />
-                Create Evaluator
-              </Button>
-            </Link>,
-          ]}
-        />
-        <div className="p-6">
-          <GenericEmptyState
-            title="Create Your First Evaluator"
-            description="Create an evaluator to score your LLM outputs and measure their quality."
-            icon={<LineChart size={28} className="text-accent-foreground" />}
-            className="w-full"
-            actions={
-              <Link href="/evaluators/new">
-                <Button variant="default">
+      <>
+        <Deprecated feature="Evaluators" />
+        <div>
+          <AuthHeader
+            title="Evaluators"
+            actions={[
+              <Link href="/evaluators/new" key="create-evaluator">
+                <Button
+                  variant="action"
+                  size="sm"
+                  className="gap-1 items-center"
+                >
+                  <PiPlusBold className="h-3.5 w-3.5" />
                   Create Evaluator
-                  <PiPlusBold className="h-4 w-4 ml-2" />
                 </Button>
-              </Link>
-            }
+              </Link>,
+            ]}
           />
+          <div className="p-6">
+            <GenericEmptyState
+              title="Create Your First Evaluator"
+              description="Create an evaluator to score your LLM outputs and measure their quality."
+              icon={<LineChart size={28} className="text-accent-foreground" />}
+              className="w-full"
+              actions={
+                <Link href="/evaluators/new">
+                  <Button variant="default">
+                    Create Evaluator
+                    <PiPlusBold className="h-4 w-4 ml-2" />
+                  </Button>
+                </Link>
+              }
+            />
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
     <div>
+      <Deprecated feature="Evaluators" />
       <AuthHeader
         title="Evaluators"
         actions={[

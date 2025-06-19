@@ -1051,7 +1051,7 @@
 				],
 				"type": "object"
 			},
-			"Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type-or-onboarding_status_": {
+			"Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-organization_type-or-onboarding_status_": {
 				"properties": {
 					"name": {
 						"type": "string"
@@ -1068,7 +1068,6 @@
 					"limits": {
 						"$ref": "#/components/schemas/Json"
 					},
-					"reseller_id": {},
 					"organization_type": {
 						"type": "string"
 					},
@@ -1077,8 +1076,7 @@
 					}
 				},
 				"required": [
-					"name",
-					"reseller_id"
+					"name"
 				],
 				"type": "object",
 				"description": "From T, pick a set of properties whose keys are in the union K"
@@ -1086,7 +1084,7 @@
 			"UpdateOrganizationParams": {
 				"allOf": [
 					{
-						"$ref": "#/components/schemas/Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type-or-onboarding_status_"
+						"$ref": "#/components/schemas/Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-organization_type-or-onboarding_status_"
 					},
 					{
 						"properties": {
@@ -2139,6 +2137,9 @@
 			},
 			"Partial_TimestampOperators_": {
 				"properties": {
+					"equals": {
+						"type": "string"
+					},
 					"gte": {
 						"type": "string"
 					},
@@ -2277,6 +2278,10 @@
 			},
 			"Partial_TimestampOperatorsTyped_": {
 				"properties": {
+					"equals": {
+						"type": "string",
+						"format": "date-time"
+					},
 					"gte": {
 						"type": "string",
 						"format": "date-time"
@@ -3409,6 +3414,11 @@
 						"format": "double",
 						"nullable": true
 					},
+					"cost": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
 					"prompt_id": {
 						"type": "string",
 						"nullable": true
@@ -3490,6 +3500,9 @@
 					},
 					"cache_enabled": {
 						"type": "boolean"
+					},
+					"updated_at": {
+						"type": "string"
 					}
 				},
 				"required": [
@@ -3516,6 +3529,7 @@
 					"completion_tokens",
 					"prompt_audio_tokens",
 					"completion_audio_tokens",
+					"cost",
 					"prompt_id",
 					"llmSchema",
 					"country_code",
@@ -45333,6 +45347,44 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"ResultSuccess__url-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"url": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"url"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__url-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__url-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
 			}
 		},
 		"securitySchemes": {
@@ -52016,6 +52068,55 @@
 					}
 				],
 				"parameters": []
+			}
+		},
+		"/v1/router/control-plane/sign-s3-url": {
+			"post": {
+				"operationId": "SignS3Url",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__url-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Router Control Plane"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"payloadSize": {
+										"type": "number",
+										"format": "double"
+									},
+									"requestId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"payloadSize",
+									"requestId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
 			}
 		}
 	},

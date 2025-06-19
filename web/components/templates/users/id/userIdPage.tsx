@@ -1,10 +1,10 @@
 import { IslandContainer } from "@/components/ui/islandContainer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ThemedLineChart } from "@/components/ui/themedLineChart";
 import {
   PresentationChartLineIcon,
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
-import { AreaChart } from "@tremor/react";
 import { useRouter } from "next/router";
 import { ElementType } from "react";
 import { useUserId } from "../../../../services/hooks/users";
@@ -80,7 +80,7 @@ const UserIdPage = (props: UserIdPageProps) => {
           <div className="grid grid-cols-10 gap-8 w-full pt-8">
             <div className="flex flex-col items-start space-y-4 w-full col-span-12 md:col-span-3 pt-2">
               <div className="flex flex-col space-y-2 divide-y divide-gray-200 dark:divide-gray-800 w-full text-black dark:text-white">
-                <p className="font-semibold text-md">Overview</p>
+                <p className="font-semibold text-md">Overview (Last 30 days)</p>
                 <div className="flex flex-wrap w-full justify-between gap-2 pt-4 pr-4">
                   <div className="flex flex-col items-start space-y-1">
                     <p className="text-sm font-semibold">Total Cost</p>
@@ -103,7 +103,7 @@ const UserIdPage = (props: UserIdPageProps) => {
                 </div>
               </div>
               <div className="flex flex-col space-y-2 divide-y divide-gray-200 dark:divide-gray-800 w-full pt-8 text-black dark:text-white">
-                <p className="font-semibold text-md">Details</p>
+                <p className="font-semibold text-md">Details (Last 30 days)</p>
                 <div className="flex flex-col pt-4 pr-4 space-y-4">
                   <div className="flex flex-col items-start space-y-1">
                     <p className="text-sm font-semibold">First Active</p>
@@ -169,14 +169,12 @@ const UserIdPage = (props: UserIdPageProps) => {
                       isDataOverTimeLoading={isLoading}
                       height={"200px"}
                     >
-                      <AreaChart
+                      <ThemedLineChart
                         data={requestOverTime}
+                        index="date"
                         categories={["requests"]}
-                        index={"date"}
-                        className="h-56"
-                        colors={["blue"]}
-                        showLegend={false}
-                        curveType="monotone"
+                        colors={["chart1"]}
+                        height="200px"
                       />
                     </StyledAreaChart>
                     <StyledAreaChart
@@ -185,17 +183,15 @@ const UserIdPage = (props: UserIdPageProps) => {
                       isDataOverTimeLoading={isLoading}
                       height={"200px"}
                     >
-                      <AreaChart
+                      <ThemedLineChart
                         data={costOverTime}
+                        index="date"
                         categories={["cost"]}
-                        index={"date"}
-                        className="h-56"
-                        colors={["green"]}
-                        showLegend={false}
-                        valueFormatter={(value) => {
-                          return `$${formatNumber(value, 6)}`;
-                        }}
-                        curveType="monotone"
+                        colors={["chart2"]}
+                        height="200px"
+                        valueFormatter={(value: number) =>
+                          `$${formatNumber(value, 6)}`
+                        }
                       />
                     </StyledAreaChart>
                   </div>
@@ -212,6 +208,7 @@ const UserIdPage = (props: UserIdPageProps) => {
                       }}
                       userId={userId}
                       organizationLayoutAvailable={false}
+                      showSelection={false}
                     />
                   </div>
                 </TabsContent>

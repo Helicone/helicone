@@ -17,7 +17,6 @@ export type UpdateOrganizationParams = Pick<
   | "icon"
   | "org_provider_key"
   | "limits"
-  | "reseller_id"
   | "organization_type"
   | "onboarding_status"
 > & {

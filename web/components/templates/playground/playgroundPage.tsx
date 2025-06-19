@@ -1,12 +1,11 @@
-import FoldedHeader from "@/components/shared/FoldedHeader";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { Small } from "@/components/ui/typography";
 import { generateStream } from "@/lib/api/llm/generate-stream";
 import { processStream } from "@/lib/api/llm/process-stream";
+import { useLocalStorage } from "@/services/hooks/localStorage";
 import { useGetRequestWithBodies } from "@/services/hooks/requests";
 import { openAIMessageToHeliconeMessage } from "@helicone-package/llm-mapper/mappers/openai/chat";
 import { openaiChatMapper } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
@@ -23,6 +22,8 @@ import useNotification from "../../shared/notification/useNotification";
 import PlaygroundMessagesPanel from "./components/PlaygroundMessagesPanel";
 import PlaygroundResponsePanel from "./components/PlaygroundResponsePanel";
 import { OPENROUTER_MODEL_MAP } from "./new/openRouterModelMap";
+import FoldedHeader from "@/components/shared/FoldedHeader";
+import { Small } from "@/components/ui/typography";
 
 export interface ModelParameters {
   temperature: number | null | undefined;
@@ -116,43 +117,19 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     null
   );
 
-  const [mappedContent, setMappedContent] = useState<MappedLLMRequest | null>(
-    null
-  );
-  const [localStorageError, setLocalStorageError] = useState(false);
+  const [mappedContent, setMappedContent] =
+    useLocalStorage<MappedLLMRequest | null>(
+      `playground-${requestId || "clear"}`,
+      null
+    );
 
-  // Try to use localStorage, fall back to state if it fails
   useEffect(() => {
-    if (localStorageError) return;
-
-    try {
-      const stored = localStorage.getItem(`playground-${requestId || "clear"}`);
-      if (stored) {
-        setMappedContent(JSON.parse(stored));
-      }
-    } catch (error) {
-      console.warn("Failed to use localStorage, falling back to state:", error);
-      setLocalStorageError(true);
+    if (!requestId) {
+      setMappedContent(DEFAULT_EMPTY_CHAT);
+      setDefaultContent(DEFAULT_EMPTY_CHAT);
     }
-  }, [requestId, localStorageError]);
-
-  // Save to localStorage if possible
-  useEffect(() => {
-    if (localStorageError || !mappedContent) return;
-
-    try {
-      localStorage.setItem(
-        `playground-${requestId || "clear"}`,
-        JSON.stringify(mappedContent)
-      );
-    } catch (error) {
-      console.warn(
-        "Failed to save to localStorage, falling back to state:",
-        error
-      );
-      setLocalStorageError(true);
-    }
-  }, [mappedContent, requestId, localStorageError]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [requestId]);
 
   const [tools, setTools] = useState<Tool[]>([]);
 
@@ -269,20 +246,28 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       const parsedResponse = JSON.parse(response);
       const newMessageMappedResponse =
         openAIMessageToHeliconeMessage(parsedResponse);
+      if (!mappedContent) {
+        return;
+      }
+      // TODO: be able to remove the @ts-ignore
       // @ts-ignore
-      setMappedContent((prev: MappedLLMRequest | null) => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          schema: {
-            ...prev.schema,
-            response: {
-              ...(prev.schema.response ?? {}),
-              messages: [newMessageMappedResponse],
-            },
+      setMappedContent((prev: MappedLLMRequest) => ({
+        ...prev,
+        raw: {
+          ...prev.raw,
+          response: {
+            ...prev.raw.response,
+            messages: [parsedResponse],
           },
-        };
-      });
+        },
+        schema: {
+          ...prev.schema,
+          response: {
+            ...(prev.schema.response ?? {}),
+            messages: [newMessageMappedResponse],
+          },
+        },
+      }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [response]);
@@ -292,12 +277,10 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       setNotification("No mapped content", "error");
       return;
     }
-    console.log("mappedContent", mappedContent);
     const openaiRequest = openaiChatMapper.toExternal({
       ...mappedContent.schema.request,
       tools: tools && tools.length > 0 ? tools : undefined,
     } as any);
-    console.log("openaiRequest", openaiRequest);
 
     try {
       setError(null);

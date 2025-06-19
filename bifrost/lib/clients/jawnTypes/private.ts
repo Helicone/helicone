@@ -410,6 +410,9 @@ export interface paths {
   "/v1/router/control-plane/whoami": {
     get: operations["Whoami"];
   };
+  "/v1/router/control-plane/sign-s3-url": {
+    post: operations["SignS3Url"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -668,17 +671,16 @@ Json: JsonObject;
       color?: string;
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type-or-onboarding_status_": {
+    "Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-organization_type-or-onboarding_status_": {
       name: string;
       color?: string;
       icon?: string;
       org_provider_key?: string;
       limits?: components["schemas"]["Json"];
-      reseller_id: unknown;
       organization_type?: string;
       onboarding_status?: components["schemas"]["Json"];
     };
-    UpdateOrganizationParams: components["schemas"]["Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type-or-onboarding_status_"] & {
+    UpdateOrganizationParams: components["schemas"]["Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-organization_type-or-onboarding_status_"] & {
       variant?: string;
     };
     UIFilterRowTree: components["schemas"]["UIFilterRowNode"] | components["schemas"]["FilterRow"];
@@ -936,6 +938,7 @@ Json: JsonObject;
     };
     /** @description Make all properties in T optional */
     Partial_TimestampOperators_: {
+      equals?: string;
       gte?: string;
       lte?: string;
       lt?: string;
@@ -992,6 +995,8 @@ Json: JsonObject;
     };
     /** @description Make all properties in T optional */
     Partial_TimestampOperatorsTyped_: {
+      /** Format: date-time */
+      equals?: string;
       /** Format: date-time */
       gte?: string;
       /** Format: date-time */
@@ -1320,6 +1325,8 @@ Json: JsonObject;
       prompt_audio_tokens: number | null;
       /** Format: double */
       completion_audio_tokens: number | null;
+      /** Format: double */
+      cost: number | null;
       prompt_id: string | null;
       feedback_created_at?: string | null;
       feedback_id?: string | null;
@@ -1338,6 +1345,7 @@ Json: JsonObject;
       model: string;
       cache_reference_id: string | null;
       cache_enabled: boolean;
+      updated_at?: string;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];
@@ -15193,6 +15201,14 @@ Json: JsonObject;
     ConvertToWavRequestBody: {
       audioData: string;
     };
+    "ResultSuccess__url-string__": {
+      data: {
+        url: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__url-string_.string_": components["schemas"]["ResultSuccess__url-string__"] | components["schemas"]["ResultError_string_"];
   };
   responses: {
   };
@@ -17714,6 +17730,25 @@ export interface operations {
             organizationId: string;
             userId: string;
           };
+        };
+      };
+    };
+  };
+  SignS3Url: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: double */
+          payloadSize: number;
+          requestId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__url-string_.string_"];
         };
       };
     };
