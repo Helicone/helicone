@@ -4,7 +4,7 @@ sidebarTitle: "Configuration"
 description: "Complete reference for configuring your LLM Gateway"
 ---
 
-The AI Gateway is configured through a `config.yaml` file that defines how requests are routed, balanced, and processed across different LLM providers.
+The AI Gateway is configured through a `ai-gateway-config.yaml` file that defines how requests are routed, balanced, and processed across different LLM providers.
 
 ## Routers
 
@@ -41,7 +41,7 @@ Each Helicone AI Gateway deployment can configure multiple independent routing p
 
 Distribute requests across multiple providers to optimize performance, costs, and reliability. The gateway supports latency-based and weighted strategies for different use cases.
 
-[Learn more](/gateway/features/loadbalancing)
+[Learn more](/ai-gateway/features/loadbalancing)
 
 ### Latency Strategy
 
@@ -112,7 +112,7 @@ Distribute requests across multiple providers to optimize performance, costs, an
 
 Store and reuse LLM responses for identical requests to dramatically reduce costs and improve response times. Cache directives control response freshness and staleness tolerance.
 
-[Learn more](/gateway/features/cache)
+[Learn more](/ai-gateway/features/cache)
 
 <ParamField path="routers.[name].cache" type="object" optional>
   Configure response caching for a router.
@@ -174,7 +174,7 @@ Store and reuse LLM responses for identical requests to dramatically reduce cost
 
 Automatic retry logic for failed requests with configurable backoff strategies to improve reliability without overwhelming providers.
 
-[Learn more](/gateway/features/retries)
+[Learn more](/ai-gateway/features/retries)
 
 <ParamField path="routers.[name].retries" type="object" optional>
   Configure retry behavior for this router.
@@ -251,7 +251,7 @@ Automatic retry logic for failed requests with configurable backoff strategies t
 
 Control request frequency using GCRA (Generic Cell Rate Algorithm) with burst capacity and smooth rate limiting. Global limits are checked first, then router-specific limits are applied.
 
-[Learn more](/gateway/features/rate-limiting)
+[Learn more](/ai-gateway/features/rate-limiting)
 
 ### Global Rate Limiting
 
@@ -349,7 +349,7 @@ The following fields are available for both global and router-level rate limitin
 
 Configure integration with the Helicone platform for authentication and observability. When enabled, requests must include a valid Helicone API key.
 
-[Learn more](/gateway/features/helicone-integration)
+[Learn more](/ai-gateway/features/helicone-integration)
 
 ### Authentication
 
@@ -381,7 +381,7 @@ If you plan on enabling authentication, you'll need to register your router with
 Configure LLM providers, their endpoints, and available models. 
 
 <Note>
-The gateway ships with [comprehensive defaults](https://github.com/Helicone/helicone-router/blob/main/llm-proxy/config/embedded/providers.yaml) for all major providers. Most users will not need to configure this section, [this guide](/gateway/features/providers) will walk you through when you might need to.
+The gateway ships with [comprehensive defaults](https://github.com/Helicone/helicone-router/blob/main/llm-proxy/config/embedded/providers.yaml) for all major providers. Most users will not need to configure this section, [this guide](/ai-gateway/features/providers) will walk you through when you might need to.
 </Note>
 
 <ParamField path="providers" type="object">
@@ -448,7 +448,7 @@ The gateway ships with [comprehensive defaults](https://github.com/Helicone/heli
 Define equivalencies between models from different providers for seamless switching and load balancing. 
 
 <Note>
-The Gateway ships with [comprehensive defaults](https://github.com/Helicone/helicone-router/blob/main/llm-proxy/config/embedded/model-mapping.yaml) for all major providers. Most users will not need to configure this section, [this guide](/gateway/features/model-mapping) will walk you through when you might need to.
+The Gateway ships with [comprehensive defaults](https://github.com/Helicone/helicone-router/blob/main/llm-proxy/config/embedded/model-mapping.yaml) for all major providers. Most users will not need to configure this section, [this guide](/ai-gateway/features/model-mapping) will walk you through when you might need to.
 </Note>
 
 <ParamField path="routers.[name].model-mappings" type="object" optional>
@@ -482,7 +482,7 @@ Configure monitoring and logging via OpenTelemetry for the AI Gateway's health a
 <Note>
   Monitor the AI Gateway's health and performance with OpenTelemetry. We provide Docker Compose for local testing and Grafana dashboard configs for production. 
   
-  [Learn more](/gateway/features/observability)
+  [Learn more](/ai-gateway/features/observability)
 </Note>
 
 <ParamField path="telemetry.level" type="string" default="info,llm_proxy=trace">
@@ -538,7 +538,7 @@ Control which headers are returned to provide visibility into the gateway's rout
 
 Configure the AI Gateway's runtime behavior for different deployment patterns and environments.
 
-[Learn more about deployment modes](/gateway/deployment)
+[Learn more about deployment modes](/ai-gateway/deployment)
 
 <ParamField path="deployment-target" type="string" default="sidecar">
   Deployment environment type.

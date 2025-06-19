@@ -22,7 +22,7 @@ Retries help you:
 </Info>
 
 <Note>
-  For complete configuration options and syntax, see the [Configuration Reference](/gateway/config#retries).
+  For complete configuration options and syntax, see the [Configuration Reference](/ai-gateway/config#retries).
 </Note>
 
 ### How Retries Work
@@ -166,7 +166,7 @@ Retries are disabled by default to provide predictable behavior. Enable them exp
 
 #### Load Balancing Integration
 
-Retries and [load balancing](/gateway/features/loadbalancing) work together to maximize reliability:
+Retries and [load balancing](/ai-gateway/features/loadbalancing) work together to maximize reliability:
 
 - **Per-request:** When a request fails, retries attempt the same provider multiple times
 - **Per-provider:** If a provider keeps failing requests, health monitoring removes it from the load balancer

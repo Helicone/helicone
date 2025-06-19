@@ -256,7 +256,7 @@ routers:
 ## Reference
 
 <Note>
-  For complete configuration options and syntax, see the [Configuration Reference](/gateway/config#router-configuration).
+  For complete configuration options and syntax, see the [Configuration Reference](/ai-gateway/config#router-configuration).
 </Note>
 
 ### Router Naming Rules
@@ -332,7 +332,7 @@ Each router can be configured with the following features:
         - anthropic
   ```
   
-  [Learn more about load balancing →](/gateway/features/loadbalancing)
+  [Learn more about load balancing →](/ai-gateway/features/loadbalancing)
 </ParamField>
 
 <ParamField path="cache" type="object" optional>
@@ -345,7 +345,7 @@ Each router can be configured with the following features:
     buckets: 10
   ```
   
-  [Learn more about caching →](/gateway/features/cache)
+  [Learn more about caching →](/ai-gateway/features/cache)
 </ParamField>
 
 <ParamField path="retries" type="object" optional>
@@ -358,7 +358,7 @@ Each router can be configured with the following features:
     strategy: exponential
   ```
   
-  [Learn more about retries →](/gateway/features/retries)
+  [Learn more about retries →](/ai-gateway/features/retries)
 </ParamField>
 
 <ParamField path="rate-limit" type="object" optional>
@@ -371,7 +371,7 @@ Each router can be configured with the following features:
       refill-frequency: 1s
   ```
   
-  [Learn more about rate limiting →](/gateway/features/rate-limiting)
+  [Learn more about rate limiting →](/ai-gateway/features/rate-limiting)
 </ParamField>
 
 <ParamField path="model-mappings" type="object" optional>
@@ -383,7 +383,7 @@ Each router can be configured with the following features:
     gpt-4o-mini: claude-3-haiku
   ```
   
-  [Learn more about model mapping →](/gateway/features/model-mapping)
+  [Learn more about model mapping →](/ai-gateway/features/model-mapping)
 </ParamField>
 
 ### Default Router Behavior
