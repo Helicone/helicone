@@ -107,7 +107,7 @@ The gateway uses a **3-tier mapping system** with automatic fallback. When load 
         load-balance:
           chat:
             strategy: latency
-            providers:
+            targets:
               - openai
               - anthropic
               - gemini
@@ -134,7 +134,7 @@ The gateway uses a **3-tier mapping system** with automatic fallback. When load 
         load-balance:
           chat:
             strategy: latency
-            providers:
+            targets:
               - openai
               - anthropic
               - gemini
@@ -158,7 +158,7 @@ The gateway uses a **3-tier mapping system** with automatic fallback. When load 
         load-balance:
           chat:
             strategy: latency
-            providers:
+            targets:
               - openai
               - anthropic
               - gemini
@@ -168,7 +168,7 @@ The gateway uses a **3-tier mapping system** with automatic fallback. When load 
         load-balance:
           chat:
             strategy: weighted
-            providers:
+            targets:
               - provider: anthropic
                 weight: '0.8'
               - provider: gemini

@@ -10,33 +10,27 @@ description: "Get started with Helicone AI Gateway in 1 minute"
 </Note>
 
 <Steps>
-    <Step title="Configure provider secrets">
-        In order to deploy the Gateway, you'll need to configure the provider
-        secrets for all the providers you wish to use.
+    <Step title="Set up your AI Gateway">
+    ```bash
+    npx @helicone/ai-gateway start
+    ```
 
-        Set your OpenAI API Key as an environment variable, for example
-        with a `.env` file.
+    The Gateway will be running on `http://localhost:8080` with sensible defaults.
+    </Step>
+    <Step title="Configure provider secrets">
+        The Gateway centralizes management of your LLM provider credentials.
+
+        We support OpenAI, Anthropic, and Gemini out of the box.
+
+        Just add your API keys to the `.env` file:
 
         ```bash
         export OPENAI_API_KEY=your-api-key
+        export ANTHROPIC_API_KEY=your-api-key
+        export GEMINI_API_KEY=your-api-key
         ```
 
-        The default configuration for the Gateway enables OpenAI as the only
-        provider to make quickstart easy.
-
         Using other providers? Check how to add them [here](/gateway/config/#provider-configuration).
-    </Step>
-    <Step title="Set up your AI Gateway">
-    ```bash
-    npx @helicone/ai-gateway
-    ```
-
-    The Gateway will be running on `http://localhost:8080` and has
-    three routes:
-    - `/ai` for a Unified API endpoint compatible with the OpenAI endpoint
-    - `/router/{router-name}` for load balancing
-    - `/{provider}` for a direct gateway to a provider
-
     </Step>
     <Step title="Make your first request">
     <CodeGroup>
@@ -44,11 +38,11 @@ description: "Get started with Helicone AI Gateway in 1 minute"
     import { OpenAI } from "openai";
 
     const openai = new OpenAI({
-      baseURL: "http://localhost:8080/ai"
+      baseURL: "http://localhost:8080"
     });
 
     const response = await openai.chat.completions.create({
-      model: "openai/gpt-4o-mini", // 100+ models available
+      model: "gpt-4o-mini", // 100+ models available
       messages: [{ role: "user", content: "Hello, world!" }],
     });
 
@@ -58,23 +52,12 @@ description: "Get started with Helicone AI Gateway in 1 minute"
     import openai
 
     openai.api_base = "http://localhost:8080"
-    openai.api_key = "fake-key-as-real-key-is-managed-by-gateway"
+    openai.api_key = os.getenv("OPENAI_API_KEY")
 
     response = openai.ChatCompletion.create(
-        model="openai/gpt-4o-mini",  # 100+ models available
+        model="gpt-4o-mini",  # 100+ models available
         messages=[{"role": "user", "content": "Hello, world!"}]
     )
-    ```
-    ```bash Bash
-    curl http://localhost:8080/ai/v1/chat/completions \
-      -H "Authorization: Bearer $HELICONE_API_KEY" \
-      -H "Content-Type: application/json" \
-      -d '{
-        "model": "openai/gpt-4o-mini",
-        "messages": [
-          { "role": "user", "content": "Hello, world!" }
-        ]
-      }'
     ```
     </CodeGroup>
 
@@ -88,7 +71,8 @@ description: "Get started with Helicone AI Gateway in 1 minute"
     Just add the following environment variables to your Gateway configuration:
 
     ```bash
-    export AI_GATEWAY__HELICONE__API_KEY=your-api-key
+    export HELICONE_API_KEY=your-api-key
+    export HELICONE_PROJECT_ID=your-project-id
     ```
     </Step>
 </Steps>

@@ -46,7 +46,7 @@ Load balancing helps you:
         load-balance:
           chat:
             strategy: latency
-            providers:
+            targets:
               - openai
               - anthropic
               - google-gemini
@@ -67,7 +67,7 @@ Load balancing helps you:
         load-balance:
           chat:
             strategy: weighted
-            providers:
+            targets:
               - provider: anthropic
                 weight: 0.75
               - provider: openai
@@ -116,7 +116,7 @@ Load balancing helps you:
         load-balance:
           chat:
             strategy: latency
-            providers:
+            targets:
               - openai
               - anthropic
               - gemini
@@ -132,7 +132,7 @@ Load balancing helps you:
         load-balance:
           chat:
             strategy: weighted
-            providers:
+            targets:
               - provider: anthropic    # Claude 3.5 Sonnet: $3/$15 per 1M tokens
                 weight: 0.80
               - provider: openai       # GPT-4o: $5/$15 per 1M tokens
@@ -149,7 +149,7 @@ Load balancing helps you:
         load-balance:
           chat:
             strategy: weighted
-            providers:
+            targets:
               - provider: openai       # Current stable provider
                 weight: 0.90
               - provider: gemini       # Testing new provider
@@ -166,7 +166,7 @@ Load balancing helps you:
         load-balance:
           chat:
             strategy: weighted
-            providers:
+            targets:
               - provider: anthropic    # Migrating TO this provider
                 weight: 0.70
               - provider: openai       # Migrating FROM this provider
@@ -183,7 +183,7 @@ Load balancing helps you:
         load-balance:
           chat:
             strategy: weighted
-            providers:
+            targets:
               - provider: ollama       # Local models for dev
                 weight: 1.0
       
@@ -191,7 +191,7 @@ Load balancing helps you:
         load-balance:
           chat:
             strategy: latency
-            providers:
+            targets:
               - openai
               - anthropic
     ```
@@ -273,7 +273,7 @@ For compliance requirements, deploy **multiple router instances** rather than co
         load-balance:
           chat:
             strategy: latency
-            providers: [anthropic-eu, openai-eu]
+            targets: [anthropic-eu, openai-eu]
     ```
   </Tab>
 
@@ -291,7 +291,7 @@ For compliance requirements, deploy **multiple router instances** rather than co
         load-balance:
           chat:
             strategy: weighted
-            providers:
+            targets:
               - provider: anthropic-baa
                 weight: 1.0
     
@@ -314,7 +314,7 @@ For compliance requirements, deploy **multiple router instances** rather than co
         load-balance:
           chat:
             strategy: weighted
-            providers:
+            targets:
               - provider: ollama
                 weight: 1.0
     ```
