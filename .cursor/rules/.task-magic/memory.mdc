@@ -1,0 +1,65 @@
+---
+description: This rule explains how the agent should use the memory system to find context of the project
+globs:
+alwaysApply: false
+---
+# AI Memory System
+
+Whenever you use this rule, start your message with the following:
+
+"Checking Task Magic memory..."
+
+This project utilizes a memory system located in the `.ai/memory/` directory to store a history of completed, failed, or superseded work, providing valuable context for ongoing development. It archives both tasks and plans.
+
+## Structure
+
+The memory system consists of:
+
+### Task Archive
+
+*   **`.ai/memory/tasks/`**: This directory contains the full Markdown files (`task{id}_name.md`) of tasks that have been archived (status: `completed` or `failed`). These files retain the original details, descriptions, and test strategies defined when the task was active.
+*   **`.ai/memory/TASKS_LOG.md`**: This is an append-only Markdown file that serves as a chronological log of when tasks were archived. Each entry summarizes the archived task, including its ID, Title, final Status, Dependencies, and the Description extracted from the task file at the time of archival.
+
+### Plan Archive
+
+*   **`.ai/memory/plans/`**: This directory contains the full Markdown files of PRDs (both global `PLAN.md` versions and feature plans like `{feature}-plan.md`) that have been archived. Plans might be archived when they are completed (all associated features are implemented and stable), deprecated (the feature or project direction is abandoned), or superseded by a newer version of the plan.
+*   **`.ai/memory/PLANS_LOG.md`**: This is an append-only Markdown file that serves as a chronological log of when plans were archived. Each entry should summarize the archived plan, including its **full path within the `.ai/memory/plans/` directory** (e.g., `.ai/memory/plans/old-feature-plan.md`), a version or date stamp, the reason for archival (e.g., Completed, Deprecated, Superseded), and a brief description or title of the plan.
+    *   **Log Entry Format Example for PLANS_LOG.md:**
+        ```markdown
+        - **Archived Plan:** `.ai/memory/plans/old-feature-plan.md`
+          - **Archived On:** YYYY-MM-DD HH:MM:SS
+          - **Reason:** Deprecated
+          - **Title:** PRD: Old Feature
+          - **Original File (Optional):** {.ai/plans/features/old-feature-plan.md}
+        ```
+
+## Directory and File Management
+
+When working with the memory system, the agent should always verify that required directories and files exist before attempting operations:
+
+1. **Check Directories Before Creation:** Before performing operations, check if directories like `.ai/memory/tasks/` or `.ai/memory/plans/` exist by using the `list_dir` tool on its parent (`.ai/memory/`) or by using `file_search` for the specific directory path. If a directory does not appear in the results, it can be implicitly created when using `edit_file` to write a file within that path, as `edit_file` creates necessary parent directories.
+
+2. **Check Files Before Operations:** Before operating on files like `.ai/memory/TASKS_LOG.md` or `.ai/memory/PLANS_LOG.md`, the agent should use the `file_search` tool with the full file path to check for its existence.
+
+3. **Safe File Creation/Modification:** If a file like `.ai/memory/TASKS_LOG.md` or `.ai/memory/PLANS_LOG.md` doesn't exist (as determined by `file_search`), and it needs to be created with initial content (e.g., `"\# Task Archive Log\\n\\n"` or `"\# Plan Archive Log\\n\\n"`), use the `edit_file` tool. To append to an existing file, first use `read_file` to get its current content, then append the new data to this content, and finally use `edit_file` to write the combined content back.
+
+4. **Archiving Plan Files:** When moving a plan file (e.g., from `.ai/plans/features/` to `.ai/memory/plans/`), always use the `run_terminal_cmd` tool with the `mv` command. Do not use `edit_file` to create a new file in the destination and `delete_file` to remove the original. This ensures the file is moved atomically and preserves its history if version control is used. Example: `mv .ai/plans/features/my-feature-plan.md .ai/memory/plans/my-feature-plan.md`.
+
+## Purpose and Usage
+
+The memory system serves as the project's historical record of development activity and planning managed by the AI task system.
+
+**When to Consult Memory:**
+
+*   **Understanding Past Implementations & Plans:** Before starting a new task or planning a new feature, consult the memory (`TASKS_LOG.md`, `PLANS_LOG.md`, and relevant archived files) to understand how similar or dependent features were built and planned.
+*   **Avoiding Redundancy:** Check if a similar task, requirement, or plan has been addressed previously.
+*   **Planning Related Features:** Review past tasks and plans for a feature to inform the planning and task breakdown of new, related features.
+*   **Investigating Failed Tasks:** If a task failed previously, reviewing its archived file (including the `error_log` in the YAML) can provide context.
+*   **Historical Context of Decisions:** Archived plans provide a snapshot of the project's goals, requirements, and intended direction at a particular point in time.
+
+**How to Consult Memory:**
+
+1.  **Start with the Logs:** Read `.ai/memory/TASKS_LOG.md` and `.ai/memory/PLANS_LOG.md` to get a chronological overview of archived items. Identify potentially relevant tasks or plans based on their titles, descriptions, and reasons for archival.
+2.  **Dive into Archived Files:** If a log entry suggests an item is highly relevant, read the full archived file from its respective directory (`.ai/memory/tasks/` or `.ai/memory/plans/`) to get the complete details.
+
+By leveraging this historical context, the AI can make more informed decisions, maintain consistency, and work more efficiently on the project.
