@@ -107,7 +107,7 @@ routers:
     load-balance:
       chat:
         strategy: latency
-        providers:
+        targets:
           - openai
           - anthropic
   
@@ -116,7 +116,7 @@ routers:
     load-balance:
       chat:
         strategy: weighted
-        providers:
+        targets:
           - provider: anthropic
             weight: '0.7'
           - provider: openai
@@ -129,7 +129,7 @@ routers:
     load-balance:
       chat:
         strategy: latency
-        providers:
+        targets:
           - ollama      # Local models for development
           - openai      # Fallback to cloud
 ```
@@ -146,7 +146,7 @@ routers:
     load-balance:
       chat:
         strategy: latency
-        providers:
+        targets:
           - openai
           - anthropic
           - gemini
@@ -161,7 +161,7 @@ routers:
     load-balance:
       chat:
         strategy: weighted
-        providers:
+        targets:
           - provider: openai
             weight: '0.8'
           - provider: anthropic  
@@ -173,7 +173,7 @@ routers:
     load-balance:
       chat:
         strategy: latency
-        providers:
+        targets:
           - ollama
           - openai
 ```
@@ -193,7 +193,7 @@ routers:
     load-balance:
       chat:
         strategy: weighted
-        providers:
+        targets:
           - provider: anthropic    # Cheaper option
             weight: '0.9'
           - provider: openai       # Premium fallback
@@ -203,7 +203,7 @@ routers:
     load-balance:
       chat:
         strategy: latency
-        providers:
+        targets:
           - openai
           - anthropic
           - gemini
@@ -212,7 +212,7 @@ routers:
     load-balance:
       chat:
         strategy: weighted
-        providers:
+        targets:
           - provider: ollama       # Free local models
             weight: '0.8'
           - provider: anthropic    # Paid fallback
@@ -229,7 +229,7 @@ routers:
     load-balance:
       chat:
         strategy: latency
-        providers:
+        targets:
           - openai
           - anthropic
     rate-limit:
@@ -241,7 +241,7 @@ routers:
     load-balance:
       chat:
         strategy: weighted
-        providers:
+        targets:
           - provider: anthropic
             weight: '1.0'
     cache:
@@ -327,7 +327,7 @@ Each router can be configured with the following features:
   load-balance:
     chat:
       strategy: latency  # or weighted
-      providers:
+      targets:
         - openai
         - anthropic
   ```
@@ -396,7 +396,7 @@ routers:
     load-balance:
       chat:
         strategy: latency
-        providers: []  # No providers configured by default
+        targets: []  # No providers configured by default
 ```
 
 **Important:** You must configure at least one provider target in your default router for it to work.
@@ -419,7 +419,7 @@ routers:
     load-balance:
       chat:
         strategy: latency
-        providers:
+        targets:
           - openai
           - anthropic
     rate-limit:
@@ -434,7 +434,7 @@ routers:
     load-balance:
       chat:
         strategy: weighted
-        providers:
+        targets:
           - provider: gemini
             weight: '0.8'
           - provider: ollama
@@ -466,7 +466,7 @@ routers:
     load-balance:
       chat:
         strategy: latency
-        providers:
+        targets:
           - openai      # Will be removed if unhealthy
           - anthropic   # Will be removed if unhealthy
           - gemini      # Will be removed if unhealthy

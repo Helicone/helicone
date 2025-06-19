@@ -54,7 +54,7 @@ You'll need to configure providers when you have:
         load-balance:
           chat:
             strategy: latency
-            providers:
+            targets:
               - anthropic
     ```
   </Tab>
@@ -76,7 +76,7 @@ You'll need to configure providers when you have:
         load-balance:
           chat:
             strategy: latency
-            providers:
+            targets:
               - ollama
     ```
   </Tab>
@@ -97,7 +97,7 @@ You'll need to configure providers when you have:
         load-balance:
           chat:
             strategy: latency
-            providers:
+            targets:
               - bedrock
     ```
   </Tab>
