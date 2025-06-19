@@ -117,8 +117,8 @@ async fn rate_limit_per_user_isolation_impl(
         ]))
         .build();
 
-    let user1_auth = "Bearer sk-helicone-user1-key";
-    let user2_auth = "Bearer sk-helicone-user2-key";
+    let user1_auth = "sk-helicone-user1-key";
+    let user2_auth = "sk-helicone-user2-key";
     let user1_id = Uuid::new_v4();
     let user2_id = Uuid::new_v4();
 
@@ -139,7 +139,9 @@ async fn rate_limit_per_user_isolation_impl(
         .await;
 
     for i in 1..=3 {
-        let response = make_chat_request(&mut harness, user1_auth).await;
+        let response =
+            make_chat_request(&mut harness, &format!("Bearer {user1_auth}"))
+                .await;
         assert_eq!(
             response.status(),
             StatusCode::OK,
@@ -148,7 +150,8 @@ async fn rate_limit_per_user_isolation_impl(
         let _body = response.into_body().collect().await.unwrap();
     }
 
-    let response = make_chat_request(&mut harness, user1_auth).await;
+    let response =
+        make_chat_request(&mut harness, &format!("Bearer {user1_auth}")).await;
     assert_eq!(
         response.status(),
         StatusCode::TOO_MANY_REQUESTS,

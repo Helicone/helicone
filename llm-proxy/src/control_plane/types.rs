@@ -79,8 +79,7 @@ impl crate::tests::TestDefault for Config {
         use uuid::Uuid;
 
         let test_key = "sk-helicone-test-key";
-        let auth_header = format!("Bearer {test_key}");
-        let key_hash = hash_key(&auth_header);
+        let key_hash = hash_key(test_key);
         let user_id = Uuid::new_v4();
         let organization_id = Uuid::new_v4();
         Self {

@@ -27,12 +27,12 @@ impl AuthService {
         api_key: &str,
     ) -> Result<AuthContext, AuthError> {
         let config = &app_state.0.control_plane_state.read().await.config;
-        let computed_hash = hash_key(api_key);
+        let api_key_without_bearer = api_key.replace("Bearer ", "");
+        let computed_hash = hash_key(&api_key_without_bearer);
         let key = config.get_key_from_hash(&computed_hash);
-
         if let Some(key) = key {
             Ok(AuthContext {
-                api_key: Secret::from(api_key.replace("Bearer ", "")),
+                api_key: Secret::from(api_key_without_bearer),
                 user_id: key.owner_id.as_str().try_into()?,
                 org_id: config.auth.organization_id.as_str().try_into()?,
             })
