@@ -137,7 +137,7 @@ export class RequestController extends Controller {
       this.setStatus(201);
     }
 
-    // TODO This is a hack for backwards compatibility on previous requests tagged as OPENAI coming from Azure OpenAI. 
+    // TODO This is a hack for backwards compatibility on previous requests tagged as OPENAI coming from Azure OpenAI.
     // TODO Move this to a separate function, since it is not specific to clickhouse
     function patchAzureProvider(requests: Result<HeliconeRequest[], string>) {
       const azurePattern =
@@ -145,16 +145,15 @@ export class RequestController extends Controller {
 
       if (requests.data && Array.isArray(requests.data)) {
         for (const request of requests.data) {
-          const targetUrl = request?.['target_url'];
-          if (typeof targetUrl === 'string' && azurePattern.test(targetUrl)) {
-            request['provider'] = 'AZURE';
+          const targetUrl = request?.["target_url"];
+          if (typeof targetUrl === "string" && azurePattern.test(targetUrl)) {
+            request["provider"] = "AZURE";
           }
         }
       }
     }
 
     patchAzureProvider(requests);
-
 
     return requests;
   }
