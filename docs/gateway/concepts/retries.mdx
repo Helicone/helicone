@@ -1,27 +1,132 @@
 ---
-title: "Retry Configuration"
+title: "Automatic Retries"
 sidebarTitle: "Retries"
-description: "Automatic retry logic for failed requests with configurable strategies and backoff patterns"
+description: "Exponential backoff retry logic for failed AI provider requests"
 ---
 
-# Retry Configuration
+The AI Gateway automatically retries failed requests to AI providers using configurable exponential backoff strategies, improving reliability without overwhelming providers with rapid successive requests.
 
-Automatic retry logic for failed requests with configurable strategies and backoff patterns to improve reliability and handle transient failures gracefully.
+Retries use smart failure detection with configurable maximum attempts, backoff timing, and per-router configuration.
 
-## Why Use Retries?
+## Getting Started
 
-Retries improve reliability by:
-- **Handling temporary provider outages** or network issues
-- **Reducing error rates** from transient failures
-- **Providing graceful degradation** during high load periods
+### Why Use Retries?
 
-## How It Works
+Retries help you:
+- **Improve reliability** by automatically recovering from transient provider failures
+- **Handle network issues** by retrying requests that fail due to connectivity problems
+- **Maintain user experience** by transparently recovering from failures
 
-When a request fails, the gateway waits according to the backoff strategy before retrying. Exponential backoff increases wait times between retries to avoid overwhelming providers that may be experiencing issues.
+<Info>
+  **Rate limit handling is automatic** - when providers return 429 status codes, the AI Gateway automatically removes them from load balancing rotation. Retries are for handling other types of failures like 5xx errors or network issues.
+</Info>
 
-## Configuration Options
+<Note>
+  For complete configuration options and syntax, see the [Configuration Reference](/gateway/config#retries).
+</Note>
 
-### Basic Retry Setup
+### How Retries Work
+
+The AI Gateway automatically retries failed requests using exponential backoff, which doubles the wait time between each attempt to avoid overwhelming providers.
+
+**What gets retried:** 5xx server errors and network connectivity issues  
+**What doesn't:** 4xx client errors, rate limits (handled by load balancing), and successful responses
+
+<Steps>
+  <Step title="Request Fails">
+    Request fails with a retryable error (5xx server error or network issue)
+  </Step>
+  
+  <Step title="Wait Period">
+    AI Gateway waits for the calculated backoff period (starts at base duration)
+  </Step>
+  
+  <Step title="Retry Request">
+    Request is retried with the same parameters to the same provider
+  </Step>
+  
+  <Step title="Repeat or Return">
+    Process repeats with doubled wait time until success or max retries reached
+  </Step>
+</Steps>
+
+### Configuration Examples
+
+<Tabs>
+  <Tab title="Production API - Reliable Service">
+    **Use case:** Production API that needs high reliability and can tolerate slightly higher latency for better success rates.
+
+    ```yaml
+    routers:
+      production:
+        retries:
+          enabled: true
+          max-retries: 3
+          strategy: exponential
+          base: 1s
+          max: 30s
+    ```
+    
+    **Timing:** 1s → 2s → 4s → fail (up to 7 seconds total retry time)
+  </Tab>
+
+  <Tab title="Development Environment - Fast Feedback">
+    **Use case:** Development environment where you want some retry protection but prefer fast feedback over maximum reliability.
+
+    ```yaml
+    routers:
+      development:
+        retries:
+          enabled: true
+          max-retries: 2
+          strategy: exponential
+          base: 500ms
+          max: 5s
+    ```
+    
+    **Timing:** 500ms → 1s → fail (up to 1.5 seconds total retry time)
+  </Tab>
+
+  <Tab title="Batch Processing - Maximum Reliability">
+    **Use case:** Background batch processing where reliability is more important than latency.
+
+    ```yaml
+    routers:
+      batch:
+        retries:
+          enabled: true
+          max-retries: 5
+          strategy: exponential
+          base: 2s
+          max: 60s
+    ```
+    
+    **Timing:** 2s → 4s → 8s → 16s → 32s → fail (up to 62 seconds total retry time)
+  </Tab>
+
+  <Tab title="Real-time Applications - Disabled">
+    **Use case:** Real-time applications where fast feedback is more important than retry reliability.
+
+    ```yaml
+    routers:
+      realtime-api:
+        retries:
+          enabled: false  # No retries for immediate response
+    ```
+    
+    **Behavior:** Failed requests return immediately without any retry attempts.
+  </Tab>
+</Tabs>
+
+## Reference
+
+### Configuration Scope
+
+Retry settings are configured per-router, allowing different retry policies for different use cases.
+
+#### Router-Specific Configuration
+
+Each router can have custom retry settings or disable retries entirely based on the use case:
 
 ```yaml
 routers:
@@ -32,60 +137,39 @@ routers:
       strategy: exponential
       base: 1s
       max: 30s
+  
+  development:
+    retries:
+      enabled: false  # Disable for faster feedback
 ```
 
-### Configuration Fields
+#### Default Behavior
 
-| Field | Type | Description | Default |
-|-------|------|-------------|---------|
-| `enabled` | boolean | Enable or disable retry logic | `false` |
-| `max-retries` | integer | Maximum retry attempts (0-255) | `3` |
-| `strategy` | string | Backoff strategy (`exponential`) | `exponential` |
-| `base` | duration | Initial retry delay | `1s` |
-| `max` | duration | Maximum delay between retries | `30s` |
+Retries are disabled by default to provide predictable behavior. Enable them explicitly where needed.
 
-### Exponential Backoff
+### Retry Behavior Details
 
-With exponential backoff, each retry waits progressively longer:
+#### What Gets Retried
 
-- **First retry**: Wait `base` duration (e.g., 1s)
-- **Second retry**: Wait `base * 2` (e.g., 2s)  
-- **Third retry**: Wait `base * 4` (e.g., 4s)
-- **Maximum**: Never exceed `max` duration (e.g., 30s)
+| Condition | Retried? | Reason | Examples |
+|-----------|----------|---------|----------|
+| **5xx Server Errors** | ✅ Yes | Temporary provider issues | `500 Internal Server Error`, `502 Bad Gateway`, `503 Service Unavailable`, `504 Gateway Timeout` |
+| **Network Transport Errors** | ✅ Yes | Connection/network problems | Connection refused, timeouts, DNS failures, TLS handshake errors |
+| **Stream Interruptions** | ✅ Yes | Streaming response failures | Stream ended unexpectedly, transport errors during streaming |
+| **Load Balancer Errors** | ✅ Yes | Internal service failures | Provider selection failures, request buffering issues |
+| **4xx Client Errors** | ❌ No | Request format/auth issues | `400 Bad Request`, `401 Unauthorized`, `403 Forbidden`, `404 Not Found`, `422 Unprocessable Entity` |
+| **429 Rate Limits** | ❌ No | Handled by load balancing | Provider temporarily removed from rotation based on `Retry-After` header |
+| **2xx Success Responses** | ❌ No | Request succeeded | `200 OK`, `201 Created`, `202 Accepted` |
+| **Auth/Config Errors** | ❌ No | Setup/configuration issues | Invalid Helicone API keys, missing auth headers, provider not configured |
+| **Cache/Storage Errors** | ❌ No | Persistent storage issues | Cache operation failures, malformed request/response bodies |
 
-This prevents overwhelming providers while still providing multiple retry attempts for transient issues.
 
-## Best Practices
+#### Load Balancing Integration
 
-1. **Start conservatively** - Begin with 3 retries and adjust based on provider behavior
-2. **Set reasonable maximums** - Avoid delays longer than your application's timeout
-3. **Monitor retry rates** - High retry rates may indicate provider issues or configuration problems
-4. **Consider provider limits** - Some providers may have specific retry policies
+Retries and [load balancing](/gateway/features/loadbalancing) work together to maximize reliability:
 
-## When Retries Occur
+- **Per-request:** When a request fails, retries attempt the same provider multiple times
+- **Per-provider:** If a provider keeps failing requests, health monitoring removes it from the load balancer
+- **Result:** New requests automatically go to healthy providers while failed requests still get retried
 
-The gateway automatically retries requests for:
-- **Network timeouts** and connection errors
-- **Provider rate limit responses** (429 status codes)
-- **Server errors** (5xx status codes)
-- **Temporary unavailability** responses
 
-Retries do **not** occur for:
-- **Authentication errors** (401, 403)
-- **Bad requests** (400, 422)
-- **Not found errors** (404)
-- **Client errors** that indicate permanent issues
-
-## Monitoring Retry Behavior
-
-Track retry metrics to optimize your configuration:
-- **Retry rate** - Percentage of requests that required retries
-- **Retry success rate** - How often retries succeed
-- **Average retry count** - Typical number of retries per failed request
-- **Retry latency** - Additional time from retry delays
-
-High retry rates may indicate:
-- Provider instability
-- Network issues
-- Aggressive retry configuration
-- Need for different load balancing strategy
