@@ -35,7 +35,7 @@ anthropic:
   base-url: https://api.anthropic.com
   version: "2023-06-01"
 
-gemini:
+google:
   enabled: true
   models:
     - gemini-2.5-flash

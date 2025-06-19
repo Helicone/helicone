@@ -1526,7 +1526,7 @@ mod tests {
 
     #[test]
     fn test_from_str_google_gemini_model() {
-        let model_str = "gemini/gemini-pro";
+        let model_str = "google/gemini-pro";
         let result = ModelId::from_str(model_str).unwrap();
 
         if let ModelId::GoogleGemini(model_with_version) = result {

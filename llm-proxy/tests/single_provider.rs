@@ -87,7 +87,7 @@ async fn google_with_openai_request_style() {
         .await;
     let request_body = axum_core::body::Body::from(
         serde_json::to_vec(&json!({
-            "model": "gemini/gemini-2.0-flash",
+            "model": "google/gemini-2.0-flash",
             "messages": [
                 {"role": "user", "content": "Explain to me how AI works"}
             ],

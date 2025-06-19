@@ -249,7 +249,7 @@ mod tests {
                     .extensions_mut()
                     .insert(InferenceProvider::GoogleGemini);
                 response.extensions_mut().insert(ProviderRequestId(
-                    HeaderValue::from_static("gemini-req-456"),
+                    HeaderValue::from_static("google-req-456"),
                 ));
                 response
             }),
@@ -261,11 +261,11 @@ mod tests {
 
         assert_eq!(
             response.headers().get("helicone-provider").unwrap(),
-            "gemini"
+            "google"
         );
         assert_eq!(
             response.headers().get("helicone-provider-req-id").unwrap(),
-            "gemini-req-456"
+            "google-req-456"
         );
     }
 
