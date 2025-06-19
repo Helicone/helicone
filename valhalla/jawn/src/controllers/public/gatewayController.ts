@@ -10,7 +10,7 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { JawnAuthenticatedRequest } from "../../types/request";
+import type { JawnAuthenticatedRequest } from "../../types/request";
 import { err, ok, Result } from "../../packages/common/result";
 import { GatewayManager } from "../../managers/gatewayManager";
 
