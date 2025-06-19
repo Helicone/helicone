@@ -13,7 +13,13 @@ export async function authenticateBearer(bearer: string): Promise<AuthResult> {
       tier: string;
     }
   >(
-    `SELECT * FROM helicone_api_keys INNER JOIN organization ON helicone_api_keys.organization_id = organization.id WHERE helicone_api_keys.api_key_hash = $1 AND helicone_api_keys.soft_delete = false`,
+    `SELECT 
+      helicone_api_keys.*,
+      organization.tier
+    FROM helicone_api_keys
+    INNER JOIN organization
+    ON helicone_api_keys.organization_id = organization.id
+    WHERE helicone_api_keys.api_key_hash = $1 AND helicone_api_keys.soft_delete = false`,
     [hashedBearer]
   );
 
@@ -29,7 +35,7 @@ export async function authenticateBearer(bearer: string): Promise<AuthResult> {
         tier: string;
       }
     >(
-      `SELECT * FROM helicone_api_keys INNER JOIN organization ON helicone_api_keys.organization_id = organization.id WHERE helicone_api_keys.api_key_hash = $1 AND helicone_api_keys.soft_delete = false`,
+      `SELECT helicone_api_keys.*, organization.tier FROM helicone_api_keys INNER JOIN organization ON helicone_api_keys.organization_id = organization.id WHERE helicone_api_keys.api_key_hash = $1 AND helicone_api_keys.soft_delete = false`,
       [hashedBearer2]
     );
   }
