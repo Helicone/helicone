@@ -16,7 +16,7 @@ edition = "2024"
 authors = [ "Thomas Harmon <tom@helicone.ai>, Justin Torre <justin@helicone.ai>, Kavin Desi Valli <kavin@helicone.ai>, Charlie Wu <charlie@helicone.ai>", "Helicone Developers" ]
 license = "UNLICENSED"
 publish = false
-version = "0.1.0"
+version = "0.2.0-beta.0"
 
 [profile.release]
 opt-level = 3

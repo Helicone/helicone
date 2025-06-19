@@ -2780,7 +2780,7 @@ checksum = "241eaef5fd12c88705a01fc1066c48c4b36e0dd4377dcdc7ec3942cea7a69956"
 
 [[package]]
 name = "llm-proxy"
-version = "0.1.0"
+version = "0.2.0-beta.0"
 dependencies = [
  "anthropic-ai-sdk",
  "async-openai",
@@ -3000,7 +3000,7 @@ dependencies = [
 
 [[package]]
 name = "mock-server"
-version = "0.1.0"
+version = "0.2.0-beta.0"
 dependencies = [
  "llm-proxy",
  "tokio",
@@ -5025,7 +5025,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 
 [[package]]
 name = "telemetry"
-version = "0.1.0"
+version = "0.2.0-beta.0"
 dependencies = [
  "http 1.3.1",
  "log-panics",
@@ -5970,7 +5970,7 @@ dependencies = [
 
 [[package]]
 name = "weighted-balance"
-version = "0.1.0"
+version = "0.2.0-beta.0"
 dependencies = [
  "futures",
  "pin-project-lite",

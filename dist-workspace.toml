@@ -3,6 +3,7 @@ members = ["cargo:llm-proxy"]
 
 # Config for 'dist'
 [dist]
+publish-preleases = true
 # The preferred dist version to use in CI (Cargo.toml SemVer syntax)
 cargo-dist-version = "0.28.5"
 # CI backends to support
