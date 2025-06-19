@@ -39,7 +39,7 @@ Each Helicone AI Gateway deployment can configure multiple independent routing p
 
 ## Load Balancing
 
-Distribute requests across multiple providers to optimize performance, costs, and reliability. The gateway supports latency-based and weighted strategies for different use cases.
+Distribute requests across multiple providers to optimize performance, costs, and reliability. The gateway currently supports latency-based and weighted strategies with cost strategies coming soon.
 
 [Learn more](/gateway/features/loadbalancing)
 
@@ -61,7 +61,8 @@ Distribute requests across multiple providers to optimize performance, costs, an
             - ollama
   ```
 
-  **How it works:** Routes requests to the provider with the lowest measured latency.
+  **How it works:** Routes requests to the provider with the lowest measured latency based on the PeakEWMA
+  for the time to first byte/token.
 </ParamField>
 
 ### Weighted Strategy
@@ -108,6 +109,10 @@ Distribute requests across multiple providers to optimize performance, costs, an
   ```
 </ParamField>
 
+<Note>
+  Support is coming soon to configure load balance strategies with specific provider and model combinations (e.g., `openai/gpt-4o`, `anthropic/claude-3-5-sonnet`) for more granular routing control.
+</Note>
+
 ## Caching
 
 Store and reuse LLM responses for identical requests to dramatically reduce costs and improve response times. Cache directives control response freshness and staleness tolerance.
@@ -121,20 +126,26 @@ Store and reuse LLM responses for identical requests to dramatically reduce cost
   routers:
     production:
       cache:
-        enabled: true
         directive: "max-age=3600, max-stale=1800"
         buckets: 10
         seed: "unique-cache-seed"
   ```
 </ParamField>
 
-<ParamField path="routers.[name].cache.enabled" type="boolean">
-  Enable or disable caching for this router.
+<ParamField path="routers.[name].cache.store" type="string" default="in-memory">
+  Storage backend for cache data.
 
   ```yaml
   cache:
-    enabled: true
+    store: in-memory
   ```
+
+  **Options:**
+  - `in-memory` - Local in-memory storage (default)
+
+  <Note>
+    `redis` support is coming soon for distributed caching across multiple gateway instances.
+  </Note>
 </ParamField>
 
 <ParamField path="routers.[name].cache.directive" type="string">
@@ -145,7 +156,10 @@ Store and reuse LLM responses for identical requests to dramatically reduce cost
     directive: "max-age=3600, max-stale=1800"
   ```
 
-  **How it works:** Defines cache freshness (`max-age`) and staleness tolerance (`max-stale`) in seconds.
+  **How it works:** Defines default `cache-control` request headers applied to all requests in the router.
+  This can be disabled on a per-request basis with a `Helicone-cache-enabled: false` request header.
+
+  `cache-control` headers sent by the request will take precedence over what's set in the Gateway config.
 </ParamField>
 
 <ParamField path="routers.[name].cache.buckets" type="number">
@@ -170,7 +184,112 @@ Store and reuse LLM responses for identical requests to dramatically reduce cost
   **How it works:** Creates isolated cache namespaces - different seeds maintain separate cache spaces for the same requests.
 </ParamField>
 
+## Rate Limiting
+
+Control request frequency using GCRA (Generic Cell Rate Algorithm) with burst capacity and smooth rate limiting. Global limits are checked first, then router-specific limits are applied.
+
+[Learn more](/gateway/features/rate-limiting)
+
+### Global Rate Limiting
+
+<ParamField path="global.rate-limit" type="object">
+  Configure application-wide rate limits that apply to all requests.
+
+  ```yaml
+  global:
+    rate-limit:
+      store: in-memory
+      per-api-key:
+        capacity: 500
+        refill-frequency: 1s
+  ```
+
+  **How it works:** These limits are checked first for every request across all routers.
+</ParamField>
+
+### Router-Level Rate Limiting
+
+<ParamField path="routers.[name].rate-limit" type="object">
+  Configure additional rate limiting specific to this router (applied after global limits).
+
+  ```yaml
+  routers:
+    production:
+      rate-limit:
+        per-api-key:
+          capacity: 100
+          refill-frequency: 1m
+  ```
+
+  **How it works:** If global limits are configured, they're checked first. Then these router-specific limits are applied as an additional layer.
+</ParamField>
+
+### Rate Limit Configuration Fields
+
+The following fields are available for both global and router-level rate limiting:
+
+<ParamField path="[context].rate-limit.store" type="string" default="in-memory">
+  Storage backend for rate limit counters.
+
+  ```yaml
+  store: in-memory
+  ```
+
+  **Options:**
+  - `in-memory` - Local memory storage (default)
+</ParamField>
+
+<Note>
+  Support is coming soon to use Redids and S3 as stores.
+</Note>
+
+<ParamField path="[context].rate-limit.per-api-key" type="object">
+  Rate limits applied per API key.
+
+  ```yaml
+  per-api-key:
+    capacity: 500
+    refill-frequency: 1s
+  ```
+</ParamField>
+
+<ParamField path="[context].rate-limit.per-api-key.capacity" type="integer" default="500">
+  Maximum number of requests in the bucket (burst capacity).
+
+  ```yaml
+  per-api-key:
+    capacity: 1000
+  ```
+
+  **How it works:** This is the maximum number of requests that can be made instantly before rate limiting kicks in.
+</ParamField>
+
+<ParamField path="[context].rate-limit.per-api-key.refill-frequency" type="duration" default="1s">
+  Time to completely refill the capacity bucket.
+
+  ```yaml
+  per-api-key:
+    refill-frequency: 1s
+  ```
+
+  **How it works:** With capacity=500 and refill-frequency=1s, you get 500 requests per second sustained rate.
+</ParamField>
+
+<ParamField path="[context].rate-limit.cleanup-interval" type="duration" default="5m">
+  How often to clean up expired rate limit entries.
+
+  ```yaml
+  cleanup-interval: 5m
+  ```
+
+  **Note:** Only available for global rate limiting configuration.
+</ParamField>
+
 ## Retries
+
+<Note>
+Support for automatic retries is shipping soon!
+</Note>
 
 Automatic retry logic for failed requests with configurable backoff strategies to improve reliability without overwhelming providers.
 
@@ -183,23 +302,11 @@ Automatic retry logic for failed requests with configurable backoff strategies t
   routers:
     production:
       retries:
-        enabled: true
         max-retries: 3
         strategy: exponential
-        base: 1s
-        max: 30s
+        base: 500ms
+        max: 10s
   ```
-</ParamField>
-
-<ParamField path="routers.[name].retries.enabled" type="boolean">
-  Enable or disable retry logic.
-
-  ```yaml
-  retries:
-    enabled: false
-  ```
-
-  **When disabled:** Failed requests immediately return errors without retrying.
 </ParamField>
 
 <ParamField path="routers.[name].retries.max-retries" type="integer">
@@ -247,107 +354,11 @@ Automatic retry logic for failed requests with configurable backoff strategies t
   **Exponential cap:** Prevents exponential backoff from growing indefinitely.
 </ParamField>
 
-## Rate Limiting
-
-Control request frequency using GCRA (Generic Cell Rate Algorithm) with burst capacity and smooth rate limiting. Global limits are checked first, then router-specific limits are applied.
-
-[Learn more](/gateway/features/rate-limiting)
-
-### Global Rate Limiting
-
-<ParamField path="global.rate-limit" type="object">
-  Configure application-wide rate limits that apply to all requests.
-
-  ```yaml
-  global:
-    rate-limit:
-      store: in-memory
-      per-api-key:
-        capacity: 500
-        refill-frequency: 1s
-      cleanup-interval: 5m
-  ```
-
-  **How it works:** These limits are checked first for every request across all routers.
-</ParamField>
-
-### Router-Level Rate Limiting
-
-<ParamField path="routers.[name].rate-limit" type="object">
-  Configure additional rate limiting specific to this router (applied after global limits).
-
-  ```yaml
-  routers:
-    production:
-      rate-limit:
-        per-api-key:
-          capacity: 100
-          refill-frequency: 1m
-  ```
-
-  **How it works:** If global limits are configured, they're checked first. Then these router-specific limits are applied as an additional layer.
-</ParamField>
-
-### Rate Limit Configuration Fields
-
-The following fields are available for both global and router-level rate limiting:
-
-<ParamField path="[context].rate-limit.store" type="string" default="in-memory">
-  Storage backend for rate limit counters.
-
-  ```yaml
-  store: in-memory
-  ```
-
-  **Options:**
-  - `in-memory` - Local memory storage (default)
-</ParamField>
-
-<ParamField path="[context].rate-limit.per-api-key" type="object">
-  Rate limits applied per API key.
-
-  ```yaml
-  per-api-key:
-    capacity: 500
-    refill-frequency: 1s
-  ```
-</ParamField>
-
-<ParamField path="[context].rate-limit.per-api-key.capacity" type="integer" default="500">
-  Maximum number of requests in the bucket (burst capacity).
-
-  ```yaml
-  per-api-key:
-    capacity: 1000
-  ```
-
-  **How it works:** This is the maximum number of requests that can be made instantly before rate limiting kicks in.
-</ParamField>
-
-<ParamField path="[context].rate-limit.per-api-key.refill-frequency" type="duration" default="1s">
-  Time to completely refill the capacity bucket.
-
-  ```yaml
-  per-api-key:
-    refill-frequency: 1s
-  ```
-
-  **How it works:** With capacity=500 and refill-frequency=1s, you get 500 requests per second sustained rate.
-</ParamField>
-
-<ParamField path="[context].rate-limit.cleanup-interval" type="duration" default="5m">
-  How often to clean up expired rate limit entries.
-
-  ```yaml
-  cleanup-interval: 5m
-  ```
-
-  **Note:** Only available for global rate limiting configuration.
-</ParamField>
 
 ## Helicone Observability
 
-Configure integration with the Helicone platform for authentication and observability. When enabled, requests must include a valid Helicone API key.
+Configure integration with the Helicone platform for authentication and observability. When enabled, requests must include a valid Helicone API key
+for your organization.
 
 [Learn more](/gateway/features/helicone-integration)
 
@@ -363,7 +374,7 @@ If you plan on enabling authentication, you'll need to register your router with
     enable: true
   ```
 
-  **When enabled:** Requests must include a valid Helicone API key, and observability data is automatically sent to Helicone.
+  **When enabled:** Requests must include a valid Helicone API key for your organization, and observability data is automatically sent to Helicone.
 </ParamField>
 
 <ParamField path="helicone-observability.base-url" type="string" default="https://api.helicone.ai">
@@ -390,19 +401,22 @@ The gateway ships with [comprehensive defaults](https://github.com/Helicone/heli
   ```yaml
   providers:
     anthropic:
+      enabled: true
       base-url: "https://api.anthropic.com"
       version: "2023-06-01"
       models:
         - claude-3-5-haiku
     
     ollama:
-      base-url: "http://192.168.1.100:8080"
+      enabled: true
+      base-url: "http://192.168.1.100:11434"
       models:
         - llama3.2
         - deepseek-r1
         - custom-fine-tuned-model
     
     bedrock:
+      enabled: true
       base-url: "https://bedrock-runtime.us-west-2.amazonaws.com"
       models:
         - anthropic.claude-3-5-sonnet-20241022-v2:0
@@ -456,7 +470,7 @@ The Gateway ships with [comprehensive defaults](https://github.com/Helicone/heli
 
   ```yaml
   routers:
-    custom-equivalents:
+    custom-router:
       model-mappings:
         gpt-4o: claude-3-opus
         claude-3-5-sonnet: gemini-1.5-pro
@@ -477,7 +491,7 @@ The Gateway ships with [comprehensive defaults](https://github.com/Helicone/heli
 
 ## Telemetry
 
-Configure monitoring and logging via OpenTelemetry for the AI Gateway's health and performance.
+Configure Gateway application monitoring and logging via OpenTelemetry for observability into the AI Gateway's health and performance.
 
 <Note>
   Monitor the AI Gateway's health and performance with OpenTelemetry. We provide Docker Compose for local testing and Grafana dashboard configs for production. 
@@ -485,12 +499,12 @@ Configure monitoring and logging via OpenTelemetry for the AI Gateway's health a
   [Learn more](/gateway/features/observability)
 </Note>
 
-<ParamField path="telemetry.level" type="string" default="info,llm_proxy=trace">
+<ParamField path="telemetry.level" type="string" default="info">
   Logging level in env logger format.
 
   ```yaml
   telemetry:
-    level: "info,llm_proxy=trace"
+    level: "info"
   ```
 
   **Common patterns:**
@@ -505,6 +519,15 @@ Configure monitoring and logging via OpenTelemetry for the AI Gateway's health a
   ```yaml
   telemetry:
     otlp-endpoint: "http://localhost:4317"
+  ```
+</ParamField>
+
+<ParamField path="telemetry.propagate" type="boolean" default="true">
+  Enables tracing propagation via OpenTelemetry [context propagation](https://opentelemetry.io/docs/concepts/context-propagation/).
+
+  ```yaml
+  telemetry:
+    propagate: true
   ```
 </ParamField>
 
@@ -618,3 +641,9 @@ Configure how the AI Gateway monitors provider health and automatically removes 
 
   **How it works:** Providers won't be marked unhealthy until they've handled at least this many requests.
 </ParamField>
+
+## Rate Limit Aware Load Balancing
+
+All routers are automatically rate limit aware. This means an LLM provider that returns a rate limit
+will automatically take them out of the potential providers to serve requests until the rate limit 
+will resolve according to the `retry-after` response header or a default value of 1 minute.

@@ -19,10 +19,7 @@ Enable observability by configuring the telemetry section in your `config.yaml`:
 ```yaml
 telemetry:
   level: "info,llm_proxy=trace"
-  service-name: "conduit-router"
-  exporter: "otlp"
   otlp-endpoint: "http://localhost:4317"
-  propagate: true
 ```
 
 <CardGroup cols={2}>
@@ -52,9 +49,7 @@ telemetry:
     ```yaml
     telemetry:
       level: "debug,llm_proxy=trace"
-      service-name: "conduit-dev"
       exporter: "stdout"
-      propagate: true
     ```
     
     Perfect for development and debugging:
@@ -69,9 +64,8 @@ telemetry:
     
     ```yaml
     telemetry:
-      level: "info,llm_proxy=trace"
+      level: "info"
       service-name: "conduit-production"
-      exporter: "otlp"
       otlp-endpoint: "https://otel-collector.yourcompany.com:4317"
       propagate: true
     ```
@@ -81,25 +75,6 @@ telemetry:
     - Structured telemetry data
     - Cross-service correlation
     - Optimized performance
-  </Tab>
-
-  <Tab title="Hybrid">
-    **Both console and OTLP export**
-    
-    ```yaml
-    telemetry:
-      level: "info,llm_proxy=debug"
-      service-name: "conduit-staging"
-      exporter: "both"
-      otlp-endpoint: "http://jaeger:14268/api/traces"
-      propagate: true
-    ```
-    
-    Best for staging environments:
-    - Local debugging with console output
-    - Remote collection for analysis
-    - Flexible troubleshooting
-    - Development/production parity
   </Tab>
 </Tabs>
 
@@ -150,15 +125,11 @@ telemetry:
     
     # OTLP export only  
     exporter: "otlp"
-    
-    # Both console and OTLP
-    exporter: "both"
     ```
     
     **When to use each:**
     - `stdout`: Development, debugging, container logs
     - `otlp`: Production, observability platforms
-    - `both`: Staging, troubleshooting, hybrid deployments
   </Accordion>
 
   <Accordion title="OTLP Endpoint" icon="globe">
@@ -285,25 +256,23 @@ All logs include trace correlation and structured data:
     ```bash
     # Start the full observability stack
     cd infrastructure
-    docker-compose up -d
+    docker compose up -d
     
     # Access Grafana dashboard
     open http://localhost:3010
     ```
+
+    Then you'll want to import the provided Grafana dashboard by
+    import the JSON dashboard from `infrastructure/grafana/dashboards/helicone-router.json`.
+    Then, sending requests to the AI Gateway will begin to populate metrics!
     
     **Configured services:**
     - **Grafana** (port 3010) - Dashboards and visualization
     - **Prometheus** (port 9090) - Metrics storage and querying
     - **Tempo** (port 3200) - Distributed tracing backend
     - **Loki** (port 3100) - Log aggregation and search
+    - **Redis** (port 6379) - Caching and rate limiting, if configured
     - **OpenTelemetry Collector** (port 4317) - Telemetry ingestion
-    
-    Point Conduit to the collector:
-    ```yaml
-    telemetry:
-      exporter: "otlp"
-      otlp-endpoint: "http://localhost:4317"
-    ```
   </Tab>
 
   <Tab title="Jaeger">
@@ -326,25 +295,6 @@ All logs include trace correlation and structured data:
     ```
     
     View traces at: http://localhost:16686
-  </Tab>
-
-  <Tab title="Honeycomb">
-    **Cloud-native observability**
-    
-    ```yaml
-    telemetry:
-      service-name: "conduit-production"
-      exporter: "otlp"
-      otlp-endpoint: "https://api.honeycomb.io:443"
-    ```
-    
-    Environment variables:
-    ```bash
-    export HONEYCOMB_API_KEY="your_api_key"
-    export HONEYCOMB_DATASET="conduit"
-    ```
-    
-    Headers automatically added for authentication.
   </Tab>
 
   <Tab title="Custom Backend">

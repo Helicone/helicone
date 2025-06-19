@@ -31,7 +31,7 @@ description: "Get started with Helicone AI Gateway in 1 minute"
     npx @helicone/ai-gateway
     ```
 
-    The Gateway will be running on `http://localhost:5678` and has
+    The Gateway will be running on `http://localhost:8080` and has
     three routes:
     - `/ai` for a Unified API endpoint compatible with the OpenAI endpoint
     - `/router/{router-name}` for load balancing
@@ -44,7 +44,7 @@ description: "Get started with Helicone AI Gateway in 1 minute"
     import { OpenAI } from "openai";
 
     const openai = new OpenAI({
-      baseURL: "http://localhost:5678/ai"
+      baseURL: "http://localhost:8080/ai"
     });
 
     const response = await openai.chat.completions.create({
@@ -57,7 +57,7 @@ description: "Get started with Helicone AI Gateway in 1 minute"
     ```python Python
     import openai
 
-    openai.api_base = "http://localhost:5678"
+    openai.api_base = "http://localhost:8080"
     openai.api_key = "fake-key-as-real-key-is-managed-by-gateway"
 
     response = openai.ChatCompletion.create(
@@ -66,7 +66,7 @@ description: "Get started with Helicone AI Gateway in 1 minute"
     )
     ```
     ```bash Bash
-    curl http://localhost:5678/ai/v1/chat/completions \
+    curl http://localhost:8080/ai/v1/chat/completions \
       -H "Authorization: Bearer $HELICONE_API_KEY" \
       -H "Content-Type: application/json" \
       -d '{
