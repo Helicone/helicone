@@ -8,7 +8,9 @@ The AI Gateway automatically caches LLM responses and reuses them for identical 
 
 Caching uses exact parameter matching with configurable TTL, staleness policies, and bucketed responses for variety.
 
-## Why Use Caching?
+## Getting Started
+
+### Why Use Caching?
 
 Caching helps you:
 - **Eliminate CI/test costs** by reusing responses across test runs and development
@@ -21,7 +23,7 @@ Caching helps you:
   For complete configuration options and syntax, see the [Configuration Reference](/gateway/config#caching).
 </Note>
 
-## How Caching Works
+### How Caching Works
 
 All caching uses **exact parameter matching**—identical requests (model, messages, temperature, all parameters) return cached responses instantly.
 
@@ -41,7 +43,52 @@ routers:
       buckets: 1   # Single response per cache key
 ```
 
-## Configuration Options
+### Configuration Examples
+
+<Tabs>
+  <Tab title="CI/Test Pipeline - Eliminate Costs">
+    **Use case:** CI pipeline or test suite that makes repeated identical requests. Cache for the duration of the test run to eliminate all provider costs.
+
+    ```yaml
+    routers:
+      testing:
+        cache:
+          enabled: true
+          directive: "max-age=7200, max-stale=3600"  # 2-hour TTL for test runs
+          buckets: 1   # Consistent responses for tests
+    ```
+  </Tab>
+
+  <Tab title="Development Environment - Fast Iteration">
+    **Use case:** Local development where you want to avoid repeated API calls while building and debugging.
+
+    ```yaml
+    routers:
+      dev:
+        cache:
+          enabled: true
+          directive: "max-age=3600, max-stale=1800"  # 1-hour TTL
+          buckets: 3   # Some variety for testing
+    ```
+  </Tab>
+
+  <Tab title="Production API - Cost Optimization">
+    **Use case:** Production API that needs to minimize provider costs while maintaining response freshness for users.
+
+    ```yaml
+    routers:
+      production:
+        cache:
+          enabled: true
+          directive: "max-age=1800, max-stale=900"  # 30-min TTL
+          buckets: 1   # Consistent responses
+    ```
+  </Tab>
+</Tabs>
+
+## Reference
+
+### Configuration Options
 
 <AccordionGroup>
   <Accordion title="Multiple Responses (Buckets)" icon="bucket">
@@ -117,97 +164,7 @@ Cache settings are applied in precedence order when a request comes in:
   </Step>
 </Steps>
 
-
-### Configuration Examples
-
-<Tabs>
-  <Tab title="CI/Test Pipeline - Eliminate Costs">
-    **Use case:** CI pipeline or test suite that makes repeated identical requests. Cache for the duration of the test run to eliminate all provider costs.
-
-    ```yaml
-    routers:
-      testing:
-        cache:
-          enabled: true
-          directive: "max-age=7200, max-stale=3600"  # 2-hour TTL for test runs
-          buckets: 1   # Consistent responses for tests
-    ```
-  </Tab>
-
-  <Tab title="Development Environment - Fast Iteration">
-    **Use case:** Local development where you want to avoid repeated API calls while building and debugging.
-
-    ```yaml
-    routers:
-      dev:
-        cache:
-          enabled: true
-          directive: "max-age=3600, max-stale=1800"  # 1-hour TTL
-          buckets: 3   # Some variety for testing
-    ```
-  </Tab>
-
-  <Tab title="Production API - Cost Optimization">
-    **Use case:** Production API that needs to minimize provider costs while maintaining response freshness for users.
-
-    ```yaml
-    routers:
-      production:
-        cache:
-          enabled: true
-          directive: "max-age=1800, max-stale=900"  # 30-min TTL
-          buckets: 1   # Consistent responses
-    ```
-  </Tab>
-
-  <Tab title="Creative Applications - Response Variety">
-    **Use case:** Creative writing or brainstorming app where users want variety in responses while still benefiting from caching.
-
-    ```yaml
-    routers:
-      creative:
-        cache:
-          enabled: true
-          directive: "max-age=900, max-stale=300"  # 15-min TTL
-          buckets: 10  # High variety
-    ```
-  </Tab>
-
-  <Tab title="Multi-Tenant SaaS - User Isolation">
-    **Use case:** SaaS application where each customer needs isolated cache to prevent data leakage between tenants.
-
-    ```yaml
-    routers:
-      saas:
-        cache:
-          enabled: true
-          directive: "max-age=3600, max-stale=1800"
-          buckets: 2
-          seed: "default-tenant"  # Default, overridden per request
-    ```
-
-    **Per-tenant requests:**
-    ```bash
-    # Each tenant gets isolated cache
-    curl -H "Helicone-Cache-Seed: tenant-123" \
-         -H "Authorization: Bearer $API_KEY" \
-         https://gateway.example.com/v1/chat/completions
-    ```
-  </Tab>
-</Tabs>
-
-### Choosing the Right Configuration
-
-| Use Case                    | Recommended Approach               | Availability |
-| --------------------------- | ---------------------------------- | ------------ |
-| **Production APIs**         | 1-hour TTL, buckets 1-3            | v0           |
-| **Development/Testing**     | 24-hour TTL, buckets 5-10          | v0           |
-| **Creative applications**   | 30-min TTL, buckets 10+            | v0           |
-| **High-traffic systems**    | Short TTL (≤2 h), buckets 3-5      | v0           |
-| **User-specific caching**   | Seeds for namespace isolation      | v0           |
-| **Single instance**         | In-memory storage                  | v0           |
-
-## Storage Backend Options
+### Storage Backend Options
 
 Cache responses can be stored in different backends depending on your deployment needs:
 
@@ -243,7 +200,18 @@ Cache responses can be stored in different backends depending on your deployment
   </Accordion>
 </AccordionGroup>
 
-## Cache Response Headers
+### Choosing the Right Configuration
+
+| Use Case                    | Recommended Approach               | Availability |
+| --------------------------- | ---------------------------------- | ------------ |
+| **Production APIs**         | 1-hour TTL, buckets 1-3            | v0           |
+| **Development/Testing**     | 24-hour TTL, buckets 5-10          | v0           |
+| **Creative applications**   | 30-min TTL, buckets 10+            | v0           |
+| **High-traffic systems**    | Short TTL (≤2 h), buckets 3-5      | v0           |
+| **User-specific caching**   | Seeds for namespace isolation      | v0           |
+| **Single instance**         | In-memory storage                  | v0           |
+
+### Cache Response Headers
 
 When caching is enabled, the gateway adds response headers to indicate cache status and performance:
 
