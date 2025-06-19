@@ -1,0 +1,7 @@
+target
+node_modules
+.wrangler
+.env
+.idea/*
+.DS_Store
+bindings/

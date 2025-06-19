@@ -1,0 +1,34 @@
+# fly.toml app configuration file generated for rockstar-otel-collector on 2024-09-06T18:30:42-07:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'rockstar-otel-collector'
+primary_region = 'sjc'
+
+[experimental]
+  cmd = ['--config=/etc/config.yaml']
+
+[build]
+  image = 'otel/opentelemetry-collector:0.108.0'
+
+[[services]]
+  protocol = 'tcp'
+  internal_port = 4317
+  auto_stop_machines = 'off'
+  auto_start_machines = true
+  min_machines_running = 1
+  ports = []
+
+[[files]]
+  guest_path = '/etc/config.yaml'
+  local_path = './config-production.yaml'
+
+[[vm]]
+  memory = '512mb'
+  cpu_kind = 'shared'
+  cpus = 1
+
+[[metrics]]
+  port = 8888
+  path = '/metrics'
