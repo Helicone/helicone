@@ -1,0 +1,317 @@
+import { components } from "@/lib/clients/jawnTypes/public";
+import { HeliconeUser } from "@/packages/common/auth/types";
+import { useClickhouseSchemas } from "@/services/hooks/heliconeSql";
+import MonacoEditor, { useMonaco } from "@monaco-editor/react";
+import { useEffect, useRef, useState } from "react";
+import TopBar from "./topBar";
+import { Directory } from "./directory";
+import QueryResult from "./QueryResult";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
+const SQL_KEYWORDS = [
+  "SELECT",
+  "FROM",
+  "WHERE",
+  "GROUP BY",
+  "ORDER BY",
+  "HAVING",
+  "JOIN",
+  "INNER JOIN",
+  "LEFT JOIN",
+  "RIGHT JOIN",
+  "FULL JOIN",
+  "ON",
+  "AS",
+  "AND",
+  "OR",
+  "NOT",
+  "IN",
+  "EXISTS",
+  "BETWEEN",
+  "LIKE",
+  "IS",
+  "NULL",
+  "DISTINCT",
+  "LIMIT",
+  "OFFSET",
+  "UNION",
+  "UNION ALL",
+  "WITH",
+  "CASE",
+  "WHEN",
+  "THEN",
+  "ELSE",
+  "END",
+  "COUNT",
+  "SUM",
+  "AVG",
+  "MIN",
+  "MAX",
+  "CAST",
+  "COALESCE",
+];
+
+const CLICKHOUSE_KEYWORDS = [
+  "FINAL",
+  "SAMPLE",
+  "PREWHERE",
+  "ARRAY JOIN",
+  "GLOBAL",
+  "uniq",
+  "groupArray",
+  "arrayJoin",
+  "toStartOfHour",
+  "toStartOfDay",
+  "toStartOfMonth",
+  "today",
+  "yesterday",
+  "now",
+  "formatDateTime",
+  "toString",
+  "toDate",
+  "toDateTime",
+  "splitByChar",
+  "arrayMap",
+];
+
+const ALL_KEYWORDS = [...SQL_KEYWORDS, ...CLICKHOUSE_KEYWORDS];
+interface HQLPageProps {
+  user: HeliconeUser;
+}
+
+function HQLPage({ user }: HQLPageProps) {
+  const monaco = useMonaco();
+  const clickhouseSchemas = useClickhouseSchemas();
+  const monacoInstance = useMonaco();
+  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+  const [result, setResult] = useState<Record<string, string>[]>([]);
+  const [queryLoading, setQueryLoading] = useState(false);
+
+  // Setup autocompletion
+  useEffect(() => {
+    if (!monacoInstance || !clickhouseSchemas.data) return;
+
+    const tableSchema = clickhouseSchemas.data;
+    const schemaTableNames = getTableNames(tableSchema);
+    const schemaTableNamesSet = getTableNamesSet(tableSchema);
+
+    const disposable = monacoInstance.languages.registerCompletionItemProvider(
+      "sql",
+      {
+        provideCompletionItems: (model, position) => {
+          let suggestions: monaco.languages.CompletionItem[] = [];
+
+          const word = model.getWordUntilPosition(position);
+          const range = new monacoInstance.Range(
+            position.lineNumber,
+            word.startColumn,
+            position.lineNumber,
+            word.endColumn
+          );
+
+          const fullQueryText = model.getValue();
+          const tableNamesAndAliases = new Map(
+            parseSqlAndFindTableNameAndAliases(fullQueryText).map(
+              ({ table_name, alias }) => [alias, table_name]
+            )
+          );
+
+          const thisLine = model.getValueInRange({
+            startLineNumber: position.lineNumber,
+            startColumn: 1,
+            endLineNumber: position.lineNumber,
+            endColumn: position.column,
+          });
+
+          const thisToken = thisLine.trim().split(" ").slice(-1)?.[0] || "";
+          const lastTokenBeforeSpace = /\s?(\w+)\s+\w+$/.exec(
+            thisLine.trim()
+          )?.[1];
+          const lastTokenBeforeDot = /(\w+)\.\w*$/.exec(thisToken)?.[1];
+
+          // Table name suggestions after FROM/JOIN/UPDATE/INTO
+          if (
+            lastTokenBeforeSpace &&
+            /from|join|update|into/i.test(lastTokenBeforeSpace)
+          ) {
+            suggestions.push(
+              ...schemaTableNames.map((table_name) => ({
+                label: table_name,
+                kind: monacoInstance.languages.CompletionItemKind.Field,
+                insertText: table_name,
+                range,
+              }))
+            );
+          }
+
+          // Column suggestions after table alias or table name and dot
+          if (lastTokenBeforeDot) {
+            let table_name = null;
+            if (schemaTableNamesSet.has(lastTokenBeforeDot)) {
+              table_name = lastTokenBeforeDot;
+            } else if (tableNamesAndAliases.get(lastTokenBeforeDot)) {
+              table_name = tableNamesAndAliases.get(lastTokenBeforeDot);
+            }
+            if (table_name) {
+              suggestions.push(
+                ...tableSchema
+                  .filter((d) => d.table_name === table_name)
+                  .flatMap((d) =>
+                    d.columns.map((col) => ({
+                      label: col.name,
+                      kind: monacoInstance.languages.CompletionItemKind.Field,
+                      insertText: col.name,
+                      detail: col.type,
+                      documentation: col.type,
+                      range,
+                    }))
+                  )
+              );
+            }
+          }
+
+          suggestions.push(
+            ...ALL_KEYWORDS.map((keyword) => ({
+              label: keyword,
+              kind: monacoInstance.languages.CompletionItemKind.Keyword,
+              insertText: keyword,
+              detail: keyword.includes("(")
+                ? "ClickHouse function"
+                : "SQL keyword",
+              sortText: "1" + keyword, // Sort keywords before other suggestions
+              range,
+            }))
+          );
+
+          // Remove duplicates by insertText
+          const seen = new Set();
+          suggestions = suggestions.filter((s) => {
+            if (seen.has(s.insertText)) return false;
+            seen.add(s.insertText);
+            return true;
+          });
+
+          return { suggestions };
+        },
+      }
+    );
+
+    return () => disposable.dispose();
+  }, [monacoInstance, clickhouseSchemas.data]);
+
+  return (
+    <div className="flex flex-row h-screen w-full">
+      <Directory tables={clickhouseSchemas.data ?? []} />
+      <ResizablePanelGroup direction="vertical">
+        <ResizablePanel
+          defaultSize={75}
+          minSize={20}
+          collapsible={false}
+          className="min-h-[64px]"
+        >
+          <TopBar
+            sql={editorRef.current?.getValue() ?? ""}
+            setResult={setResult}
+            setQueryLoading={setQueryLoading}
+          />
+          <MonacoEditor
+            defaultLanguage="sql"
+            defaultValue="select * from request_response_rmt"
+            onMount={(editor, monaco) => {
+              editorRef.current = editor;
+              validateSQL(editor.getValue(), monaco, editorRef);
+              editor.onDidChangeModelContent(() => {
+                validateSQL(editor.getValue(), monaco, editorRef);
+              });
+            }}
+            onChange={(value) => {
+              if (value) {
+                validateSQL(value, monaco, editorRef);
+              }
+            }}
+          />
+        </ResizablePanel>
+        <ResizableHandle withHandle={true} />
+        <ResizablePanel
+          className="max-w-full overflow-x-scroll"
+          collapsible={true}
+          collapsedSize={10}
+          defaultSize={25}
+        >
+          <QueryResult result={result} loading={queryLoading} />
+        </ResizablePanel>
+      </ResizablePanelGroup>
+    </div>
+  );
+}
+
+export default HQLPage;
+
+const getTableNames = (
+  schemas: {
+    table_name: string;
+    columns: components["schemas"]["ClickHouseTableColumn"][];
+  }[]
+) => Array.from(new Set(schemas?.map((d) => d.table_name) ?? []));
+
+const getTableNamesSet = (
+  schemas: {
+    table_name: string;
+    columns: components["schemas"]["ClickHouseTableColumn"][];
+  }[]
+) => new Set(getTableNames(schemas));
+
+function parseSqlAndFindTableNameAndAliases(sql: string) {
+  const regex =
+    /\b(?:FROM|JOIN)\s+([^\s.]+(?:\.[^\s.]+)?)\s*(?:AS)?\s*([^\s,]+)?/gi;
+  const tables = [];
+  while (true) {
+    const match = regex.exec(sql);
+    if (!match) break;
+    const table_name = match[1];
+    if (!/\(/.test(table_name)) {
+      let alias = match[2] as string | null;
+      if (alias && /on|where|inner|left|right|join/.test(alias)) {
+        alias = null;
+      }
+      tables.push({ table_name, alias: alias || table_name });
+    }
+  }
+  return tables;
+}
+
+// Custom validation function
+const validateSQL = (
+  value: string,
+  monacoInstance: typeof monaco,
+  editorRef: React.RefObject<monaco.editor.IStandaloneCodeEditor | null>
+) => {
+  if (!monacoInstance || !editorRef.current) return;
+
+  const model = editorRef.current.getModel();
+  if (!model) return;
+
+  // Regex to match forbidden write statements (case-insensitive, at start of line ignoring whitespace)
+  const forbidden =
+    /\b(insert|update|delete|drop|alter|create|truncate|replace)\b/i;
+
+  if (forbidden.test(value)) {
+    monacoInstance.editor.setModelMarkers(model, "custom-sql-validation", [
+      {
+        startLineNumber: 1,
+        startColumn: 1,
+        endLineNumber: 1,
+        endColumn: 1,
+        message:
+          "Only read (SELECT) queries are allowed. Write operations are not permitted.",
+        severity: monacoInstance.MarkerSeverity.Error,
+      },
+    ]);
+  } else {
+    // Clear custom markers if no forbidden statements
+    monacoInstance.editor.setModelMarkers(model, "custom-sql-validation", []);
+  }
+};
