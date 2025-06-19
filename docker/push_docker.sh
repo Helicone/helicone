@@ -109,6 +109,25 @@ create_ecr_repo() {
   fi
 }
 
+# Function to get existing ECR tags and find available version tag
+get_available_ecr_tag() {
+  local repo_name=$1
+  local base_tag=$2
+  
+  echo "Checking existing tags for ECR repository $repo_name..." >&2
+  local existing_tags
+  existing_tags=$(aws ecr describe-images --repository-name "$repo_name" --region "$AWS_REGION" --query 'imageDetails[].imageTags[]' --output text 2>/dev/null || echo "")
+  
+  local tag=$base_tag
+  local counter=1
+  while [[ $existing_tags =~ $tag ]]; do
+    tag=$base_tag-$counter
+    ((counter++))
+  done
+  
+  echo "$tag"
+}
+
 # Prune Docker images if not disabled
 if [ "$DONT_PRUNE" = false ]; then
   echo "Pruning Docker images..."
@@ -174,24 +193,18 @@ if [ "$MODE" = "dockerhub" ]; then
     IFS=':' read -r IMAGE_NAME CONTEXT <<< "$IMAGE_INFO"
     echo "Processing $IMAGE_NAME..."
     
-    # Get the Docker tags for the current image from Docker Hub (only for legacy images)
-    if [[ "$IMAGE_NAME" == "helicone/supabase-migration-runner" || 
-          "$IMAGE_NAME" == "helicone/worker-helicone-api" || 
-          "$IMAGE_NAME" == "helicone/worker-openai-proxy" || 
-          "$IMAGE_NAME" == "helicone/clickhouse-migration-runner" ]]; then
-      tags=$(curl -s "https://hub.docker.com/v2/repositories/${IMAGE_NAME}/tags/?page_size=100" | jq -r '.results|.[]|.name')
+    # Get the Docker tags for the current image from Docker Hub
+    echo "Checking existing tags for $IMAGE_NAME..."
+    tags=$(curl -s "https://hub.docker.com/v2/repositories/${IMAGE_NAME}/tags/?page_size=100" | jq -r '.results|.[]|.name' 2>/dev/null || echo "")
 
-      # Check if the current date tag exists already
-      tag=$VERSION_TAG
-      counter=1
-      while [[ $tags =~ $tag ]]; do
-        # If it does, increment the counter and append it to the date tag
-        tag=$VERSION_TAG-$counter
-        ((counter++))
-      done
-    else
-      tag=$VERSION_TAG
-    fi
+    # Check if the current date tag exists already
+    tag=$VERSION_TAG
+    counter=1
+    while [[ $tags =~ $tag ]]; do
+      # If it does, increment the counter and append it to the date tag
+      tag=$VERSION_TAG-$counter
+      ((counter++))
+    done
 
     # Get Dockerfile path and context
     DOCKERFILE_NAME=$(basename "$IMAGE_NAME" | tr '-' '_')
@@ -283,6 +296,9 @@ elif [ "$MODE" = "ecr" ]; then
     
     echo "Processing $IMAGE_NAME..."
     
+    # Get available tag (with counter if needed)
+    tag=$(get_available_ecr_tag "$IMAGE_NAME" "$VERSION_TAG")
+    
     # Get Dockerfile path and context
     DOCKERFILE_NAME=$(basename "$IMAGE_NAME" | tr '-' '_')
     DOCKERFILE_PATH="dockerfiles/dockerfile_${DOCKERFILE_NAME}"
@@ -299,7 +315,7 @@ elif [ "$MODE" = "ecr" ]; then
     
     # Build image
     ECR_REPO="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME"
-    FULL_IMAGE_TAG="$ECR_REPO:$VERSION_TAG"
+    FULL_IMAGE_TAG="$ECR_REPO:$tag"
     echo "Building $FULL_IMAGE_TAG..."
     run_command docker build --platform linux/amd64 -t "$FULL_IMAGE_TAG" -f "$DOCKERFILE_PATH" "$BUILD_CONTEXT"
     
