@@ -159,7 +159,7 @@ IMAGES=(
   "helicone/web:.."
   "helicone/jawn:.."
   "helicone/migrations:.."
-  "helicone/helix:.."
+  "helicone/aigateway:.."
 )
 
 # Docker Hub mode
@@ -171,7 +171,7 @@ if [ "$MODE" = "dockerhub" ]; then
     "helicone/web:.."
     "helicone/jawn:.."
     "helicone/migrations:.."
-    "helicone/helix:.."
+    "helicone/aigateway:.."
   )
   
   # Filter images if specific ones were selected
@@ -215,9 +215,9 @@ if [ "$MODE" = "dockerhub" ]; then
       DOCKERFILE_PATH="../valhalla/dockerfile"
     elif [ "$DOCKERFILE_NAME" = "migrations" ]; then
       DOCKERFILE_PATH="dockerfiles/dockerfile_migrations"
-    elif [ "$DOCKERFILE_NAME" = "helix" ]; then
-      DOCKERFILE_PATH="../helix/Dockerfile"
-      BUILD_CONTEXT="../helix"
+    elif [ "$DOCKERFILE_NAME" = "aigateway" ]; then
+      DOCKERFILE_PATH="../aigateway/Dockerfile"
+      BUILD_CONTEXT="../aigateway"
     fi
 
     # Build image
@@ -251,7 +251,7 @@ elif [ "$MODE" = "ecr" ]; then
     "helicone/web:.."
     "helicone/jawn:.."
     "helicone/migrations:.."
-    "helicone/helix:.."
+    "helicone/aigateway:.."
   )
   
   # Create ECR repositories first
@@ -308,9 +308,9 @@ elif [ "$MODE" = "ecr" ]; then
       DOCKERFILE_PATH="../valhalla/dockerfile"
     elif [ "$DOCKERFILE_NAME" = "migrations" ]; then
       DOCKERFILE_PATH="dockerfiles/dockerfile_migrations"
-    elif [ "$DOCKERFILE_NAME" = "helix" ]; then
-      DOCKERFILE_PATH="../helix/Dockerfile"
-      BUILD_CONTEXT="../helix"
+    elif [ "$DOCKERFILE_NAME" = "aigateway" ]; then
+      DOCKERFILE_PATH="../aigateway/Dockerfile"
+      BUILD_CONTEXT="../aigateway"
     fi
     
     # Build image
