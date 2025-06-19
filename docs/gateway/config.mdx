@@ -4,7 +4,7 @@ sidebarTitle: "Configuration"
 description: "Complete reference for configuring your LLM Gateway"
 ---
 
-The AI Gateway is configured through a `config.yaml` file that defines how requests are routed, balanced, and processed across different LLM providers.
+The AI Gateway is configured through a `config.yaml` file that defines how requests are routed, load balanced, and processed across different LLM providers.
 
 ## Routers
 
@@ -16,10 +16,10 @@ Each Helicone AI Gateway deployment can configure multiple independent routing p
   ```yaml
   routers:
     production:
-      balance:
+      load-balance:
         chat:
           strategy: latency
-          targets:
+          providers:
             - openai
             - anthropic
     
@@ -27,7 +27,7 @@ Each Helicone AI Gateway deployment can configure multiple independent routing p
       balance:
         chat:
           strategy: weighted
-          targets:
+          providers:
             - provider: anthropic
               weight: '0.9'
             - provider: openai
@@ -54,7 +54,7 @@ Distribute requests across multiple providers to optimize performance, costs, an
       load-balance:
         chat:
           strategy: latency
-          targets:
+          providers:
             - openai
             - anthropic
             - gemini
@@ -75,7 +75,7 @@ Distribute requests across multiple providers to optimize performance, costs, an
       load-balance:
         chat:
           strategy: weighted
-          targets:
+          providers:
             - provider: anthropic
               weight: '0.95'
             - provider: openai
@@ -85,14 +85,14 @@ Distribute requests across multiple providers to optimize performance, costs, an
   **Important:** Weights must sum to exactly `1.0`
 </ParamField>
 
-### Balance Targets
+### Balance providers
 
-<ParamField path="routers.[name].load-balance.chat.targets" type="array">
+<ParamField path="routers.[name].load-balance.chat.providers" type="array">
   List of target providers for load balancing.
 
   **For Latency Strategy:**
   ```yaml
-  targets:
+  providers:
     - openai
     - anthropic
     - gemini
@@ -100,7 +100,7 @@ Distribute requests across multiple providers to optimize performance, costs, an
 
   **For Weighted Strategy:**
   ```yaml
-  targets:
+  providers:
     - provider: anthropic
       weight: '0.7'
     - provider: openai
