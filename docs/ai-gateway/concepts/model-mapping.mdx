@@ -59,23 +59,14 @@ The gateway uses a **3-tier mapping system** with automatic fallback. When load 
     **Check organization-wide default mappings you've configured.**
     
     These apply to all routers unless overridden by router-specific mappings.
+
+    The gateway ships with comprehensive and sensible defaults for the 
+    `default-model-mapping` configuration, and are updated as soon as new
+    models are released.
     
     ```yaml
     default-model-mapping:
       gpt-4o: claude-3-5-sonnet   # Global preference
-    
-    # Result: gpt-4o request → Routes to Anthropic → Uses claude-3-5-sonnet
-    ```
-  </Step>
-  
-  <Step title="Built-in Intelligent Mapping">
-    **Finally, fall back to the gateway's built-in intelligent mappings.**
-    
-    These are maintained automatically and updated as new models are released.
-    
-    ```yaml
-    # Built-in mapping (from embedded configuration)
-    gpt-4o: [claude-3-5-sonnet, gemini-1.5-pro]
     
     # Result: gpt-4o request → Routes to Anthropic → Uses claude-3-5-sonnet
     ```

@@ -39,7 +39,7 @@ Each Helicone AI Gateway deployment can configure multiple independent routing p
 
 ## Load Balancing
 
-Distribute requests across multiple providers to optimize performance, costs, and reliability. The gateway supports latency-based and weighted strategies for different use cases.
+Distribute requests across multiple providers to optimize performance, costs, and reliability. The gateway currently supports latency-based and weighted strategies with cost strategies coming soon.
 
 [Learn more](/ai-gateway/features/loadbalancing)
 
@@ -106,6 +106,10 @@ Distribute requests across multiple providers to optimize performance, costs, an
   ```
 </ParamField>
 
+<Note>
+  Support is coming soon to configure load balance strategies with specific provider and model combinations (e.g., `openai/gpt-4o`, `anthropic/claude-3-5-sonnet`) for more granular routing control.
+</Note>
+
 ## Caching
 
 Store and reuse LLM responses for identical requests to dramatically reduce costs and improve response times. Cache directives control response freshness and staleness tolerance.
@@ -119,19 +123,18 @@ Store and reuse LLM responses for identical requests to dramatically reduce cost
   routers:
     production:
       cache:
-        enabled: true
         directive: "max-age=3600, max-stale=1800"
         buckets: 10
         seed: "unique-cache-seed"
   ```
 </ParamField>
 
-<ParamField path="routers.[name].cache.enabled" type="boolean">
-  Enable or disable caching for this router.
+<ParamField path="routers.[name].cache.store" type="string" default="in-memory">
+  Storage backend for cache data.
 
   ```yaml
   cache:
-    enabled: true
+    store: in-memory
   ```
 
   **How it works:** When enabled, the Gateway will cache responses for identical requests. Optionally override with `Helicone-Cache-Enabled: false` request header.
@@ -286,7 +289,7 @@ If you plan on enabling authentication, you'll need to register your router with
     enable: true
   ```
 
-  **When enabled:** Requests must include a valid Helicone API key, and observability data is automatically sent to Helicone.
+  **When enabled:** Requests must include a valid Helicone API key for your organization, and observability data is automatically sent to Helicone.
 </ParamField>
 
 <ParamField path="helicone-observability.base-url" type="string" default="https://api.helicone.ai">
@@ -313,19 +316,22 @@ The gateway ships with [comprehensive defaults](https://github.com/Helicone/heli
   ```yaml
   providers:
     anthropic:
+      enabled: true
       base-url: "https://api.anthropic.com"
       version: "2023-06-01"
       models:
         - claude-3-5-haiku
     
     ollama:
-      base-url: "http://192.168.1.100:8080"
+      enabled: true
+      base-url: "http://192.168.1.100:11434"
       models:
         - llama3.2
         - deepseek-r1
         - custom-fine-tuned-model
     
     bedrock:
+      enabled: true
       base-url: "https://bedrock-runtime.us-west-2.amazonaws.com"
       models:
         - anthropic.claude-3-5-sonnet-20241022-v2:0
@@ -472,24 +478,6 @@ Configure the AI Gateway's runtime behavior for different deployment patterns an
 
 [Learn more about deployment modes](/ai-gateway/deployment)
 
-<ParamField path="deployment-target" type="string" default="sidecar">
-  Deployment environment type.
-
-  ```yaml
-  deployment-target: "self-hosted"  # sidecar | self-hosted
-  ```
-</ParamField>
-
-<ParamField path="is-production" type="boolean" default="false">
-  Production environment flag for optimized logging and performance settings.
-
-  ```yaml
-  is-production: true
-  ```
-
-  **When enabled:** Optimizes telemetry output and logging levels for production workloads.
-</ParamField>
-
 ## Health Monitoring
 
 Configure how the AI Gateway monitors provider health and automatically removes failing providers from load balancing rotation.
@@ -550,3 +538,9 @@ Configure how the AI Gateway monitors provider health and automatically removes 
 
   **How it works:** Providers won't be marked unhealthy until they've handled at least this many requests.
 </ParamField>
+
+## Rate Limit Aware Load Balancing
+
+All routers are automatically rate limit aware. This means an LLM provider that returns a rate limit
+will automatically take them out of the potential providers to serve requests until the rate limit 
+will resolve according to the `retry-after` response header or a default value of 1 minute.

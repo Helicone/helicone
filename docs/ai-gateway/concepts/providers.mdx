@@ -44,7 +44,6 @@ You'll need to configure providers when you have:
     ```yaml
     providers:
       anthropic:
-        base-url: "https://api.anthropic.com" 
         version: "2023-06-01"
         models:
           - claude-3-5-haiku  # Only allow cheaper, faster model
@@ -118,7 +117,6 @@ The AI Gateway supports the following LLM providers with built-in configurations
 | **Anthropic**    | `https://api.anthropic.com`              | ✅ (regional variants)  |
 | **Google Gemini** | `https://generativelanguage.googleapis.com` | ✅ (VertexAI, custom)   |
 | **AWS Bedrock**  | Regional AWS endpoints                    | ✅ (cross-region)       |
-| **VertexAI**     | Regional GCP endpoints                    | ✅ (cross-region)       |
 | **Ollama**       | `http://localhost:11434`                 | ✅ (any host/port)      |
 
 ### Supported Models

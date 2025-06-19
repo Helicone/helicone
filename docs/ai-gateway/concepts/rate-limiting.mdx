@@ -53,20 +53,23 @@ Rate limiting helps you:
     ```
   </Accordion>
 
-  <Accordion title="Fixed Window Rate Limiting" icon="window">
-    **Simple time-based request counting** *(Coming in v2)*
+  <Accordion title="Rate limiting per end user" icon="window">
+    **Rate limit per end user** *(Coming in v1)*
+    If you would like to rate limit based on your end user, you can either use the `user` parameter
+    with OpenAI or attach the `Helicone-User-Id` request header. See
+    [User metrics quickstart](/features/advanced-usage/user-metrics#quick-start)
+    for more information.
     
-    Traditional rate limiting based on fixed time windows (e.g., 1000 requests per hour, reset at the top of each hour).
     
-    **Best for:** Simple use cases where burst behavior is less important than predictable reset times
+    **Best for:** Ensuring one of your users don't exceed usage limits.
   </Accordion>
 
-  <Accordion title="Sliding Window Rate Limiting" icon="chart-line">
-    **Rolling time-based request counting** *(Coming in v2)*
+  <Accordion title="Token count and Count usage based limits" icon="chart-line">
+    **Rate limit based off token usage or spend rather than request count** *(Coming in v2)*
+
+    Enforce team or project budgets via spend or token based rate limits.
     
-    Rate limiting based on a rolling time window that provides smoother behavior than fixed windows.
-    
-    **Best for:** Applications requiring more predictable rate limiting without the complexity of token buckets
+    **Best for:** Spend controls, enforcing end user usage limits
   </Accordion>
 </AccordionGroup>
 
