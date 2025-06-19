@@ -356,7 +356,6 @@ export default function ChatMessage({
                       ...contentArray,
                       {
                         _type: "image" as const,
-                        content: "",
                         role: "user",
                         image_url: base64,
                       },
