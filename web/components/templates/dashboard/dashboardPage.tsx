@@ -1,11 +1,10 @@
 import { HeliconeUser } from "@/packages/common/auth/types";
 import { TimeFilter } from "@/types/timeFilter";
 import {
-  ArrowPathIcon,
   ChartBarIcon,
   PresentationChartLineIcon,
 } from "@heroicons/react/24/outline";
-import { AreaChart, BarChart, BarList, Card } from "@tremor/react";
+import { AreaChart as TremorAreaChart, BarChart, BarList } from "@tremor/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Responsive, ResponsiveProps, WidthProvider } from "react-grid-layout";
 import {
@@ -23,15 +22,10 @@ import { useOrg } from "../../layout/org/organizationContext";
 
 import { useFilterStore } from "@/filterAST/store/filterStore";
 import { toFilterNode } from "@/filterAST/toFilterNode";
-import AuthHeader from "../../shared/authHeader";
-import { clsx } from "../../shared/clsx";
-import LoadingAnimation from "../../shared/loadingAnimation";
 import {
   MetricsPanel,
   MetricsPanelProps,
 } from "../../shared/metrics/metricsPanel";
-import ThemedTableHeader from "../../shared/themed/themedHeader";
-import { ThemedSwitch } from "../../shared/themed/themedSwitch";
 import UpgradeProModal from "../../shared/upgradeProModal";
 import { formatLargeNumber } from "../../shared/utils/numberFormat";
 import useSearchParams from "../../shared/utils/useSearchParams";
@@ -49,6 +43,16 @@ import { QuantilesGraph } from "./quantilesGraph";
 import StyledAreaChart from "./styledAreaChart";
 import SuggestionModal from "./suggestionsModal";
 import { useDashboardPage } from "./useDashboardPage";
+import Header from "@/components/shared/Header";
+import LivePill from "@/components/shared/LivePill";
+import ThemedTimeFilter from "@/components/shared/themed/themedTimeFilter";
+import FilterASTButton from "@/filterAST/FilterASTButton";
+import { Card } from "@/components/ui/card";
+import { DollarSignIcon } from "lucide-react";
+import { ChartConfig } from "@/components/ui/chart";
+import RequestsOverTime from "./panels/RequestsOverTime";
+import { cn } from "@/lib/utils";
+import ErrorsCard from "./panels/ErrorsCard";
 const ResponsiveGridLayout = WidthProvider(Responsive) as React.ComponentType<
   ResponsiveProps & { children?: React.ReactNode }
 >;
@@ -133,8 +137,10 @@ const DashboardPage = (props: DashboardPageProps) => {
     overTimeData: realOverTimeData,
     isAnyLoading,
     refetch,
+    isAnyRefetching,
     models: realModels,
     isModelsLoading,
+    isModelsRefetching,
   } = useDashboardPage({
     timeFilter,
     timeZoneDifference: new Date().getTimezoneOffset(),
@@ -161,7 +167,7 @@ const DashboardPage = (props: DashboardPageProps) => {
             )}`
           : "$0.00",
       label: "Avg Cost / Req",
-      icon: ChartBarIcon,
+      icon: DollarSignIcon,
       isLoading: metrics.totalCost.isLoading || metrics.totalRequests.isLoading,
     },
     {
@@ -293,34 +299,55 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   const [openSuggestGraph, setOpenSuggestGraph] = useState(false);
 
+  const onTimeSelectHandler = (key: TimeInterval, value: string) => {
+    if ((key as string) === "custom") {
+      value = value.replace("custom:", "");
+      const start = new Date(value.split("_")[0]);
+      const end = new Date(value.split("_")[1]);
+      setInterval(key);
+      setTimeFilter({
+        start,
+        end,
+      });
+    } else {
+      setInterval(key);
+      setTimeFilter({
+        start: getTimeIntervalAgo(key),
+        end: new Date(),
+      });
+    }
+  };
+
   return (
     <>
-      <div className="px-8">
+      <div>
         {!shouldShowMockData && (
-          <AuthHeader
-            isWithinIsland={true}
+          <Header
+            className="border-b-0"
             title={"Dashboard"}
-            headerActions={
-              <button
-                onClick={() => {
-                  refetch();
-                }}
-                className="font-semibold text-black dark:text-white text-sm items-center flex flex-row hover:text-sky-700"
-              >
-                <ArrowPathIcon
-                  className={clsx(
-                    isAnyLoading ? "animate-spin" : "",
-                    "h-5 w-5 inline"
-                  )}
+            leftActions={
+              <div className="flex flex-row items-center gap-2">
+                <ThemedTimeFilter
+                  timeFilterOptions={[]}
+                  isFetching={isAnyLoading || isModelsLoading}
+                  onSelect={(key: string, value: string) =>
+                    onTimeSelectHandler(key as TimeInterval, value)
+                  }
+                  defaultValue={interval ?? "all"}
+                  currentTimeFilter={timeFilter}
+                  custom={true}
                 />
-              </button>
+                <FilterASTButton />
+              </div>
             }
-            actions={
+            rightActions={
               <div>
-                <ThemedSwitch
-                  checked={isLive}
-                  onChange={setIsLive}
-                  label="Live"
+                <LivePill
+                  isLive={isLive}
+                  setIsLive={setIsLive}
+                  isDataLoading={isAnyLoading || isModelsLoading}
+                  isRefetching={isAnyRefetching || isModelsRefetching}
+                  refetch={refetch}
                 />
               </div>
             }
@@ -329,43 +356,13 @@ const DashboardPage = (props: DashboardPageProps) => {
         {unauthorized ? (
           <UnauthorizedView currentTier={currentTier || ""} />
         ) : (
-          <div className={`${shouldShowMockData ? "pt-6" : "mt-2 space-y-4"}`}>
-            <ThemedTableHeader
-              isFetching={isAnyLoading || isModelsLoading}
-              timeFilter={
-                shouldShowMockData
-                  ? undefined
-                  : {
-                      currentTimeFilter: timeFilter,
-                      customTimeFilter: true,
-                      timeFilterOptions: [],
-                      defaultTimeFilter: interval,
-                      onTimeSelectHandler: (
-                        key: TimeInterval,
-                        value: string
-                      ) => {
-                        if ((key as string) === "custom") {
-                          value = value.replace("custom:", "");
-                          const start = new Date(value.split("_")[0]);
-                          const end = new Date(value.split("_")[1]);
-                          setInterval(key);
-                          setTimeFilter({
-                            start,
-                            end,
-                          });
-                        } else {
-                          setInterval(key);
-                          setTimeFilter({
-                            start: getTimeIntervalAgo(key),
-                            end: new Date(),
-                          });
-                        }
-                      },
-                    }
-              }
-              savedFilters={undefined}
-            />
-            <section id="panels" className="-m-2">
+          <div
+            className={cn(
+              shouldShowMockData ? "pt-6" : "px-4 pt-2",
+              "bg-slate-100 dark:bg-slate-900"
+            )}
+          >
+            <section id="panels" className="">
               <ResponsiveGridLayout
                 className="layout"
                 layouts={{
@@ -375,12 +372,14 @@ const DashboardPage = (props: DashboardPageProps) => {
                   xs: SMALL_LAYOUT,
                   xxs: SMALL_LAYOUT,
                 }}
-                autoSize={true}
-                isBounded={true}
+                // autoSize={true}
+                // isBounded={true}
                 isDraggable={false}
                 breakpoints={{ lg: 1200, md: 996, sm: 600, xs: 360, xxs: 0 }}
                 cols={gridCols}
                 rowHeight={96}
+                // margin={[0, 0]}
+                containerPadding={[0, 0]}
               >
                 {metricsData.map((m, i) => (
                   <div key={m.id}>
@@ -388,112 +387,36 @@ const DashboardPage = (props: DashboardPageProps) => {
                   </div>
                 ))}
                 <div key="requests">
-                  <Card className="border border-slate-200 bg-white text-slate-950 !shadow-sm dark:border-slate-800 dark:bg-black dark:text-slate-50 rounded-lg ring-0">
-                    <div className="flex flex-row items-center justify-between">
-                      <div className="flex flex-col space-y-0.5">
-                        <p className="text-slate-500 text-sm">Requests</p>
-                        <p className="text-slate-950 dark:text-slate-50 text-xl font-semibold">
-                          {metrics.totalRequests?.data?.data
-                            ? `${formatNumberString(
-                                metrics.totalRequests?.data?.data.toFixed(2)
-                              )}`
-                            : "0"}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div
-                      className={clsx("p-2", "w-full")}
-                      style={{
-                        height: "212px",
-                      }}
-                    >
-                      {overTimeData.requests.isLoading ? (
-                        <div className="h-full w-full bg-slate-200 dark:bg-slate-800 rounded-md pt-4">
-                          <LoadingAnimation height={175} width={175} />
-                        </div>
-                      ) : (
-                        <AreaChart
-                          className="h-[14rem]"
-                          data={flattenedOverTime}
-                          index="date"
-                          categories={["success", "error"]}
-                          colors={["green", "red"]}
-                          showYAxis={false}
-                          curveType="monotone"
-                          animationDuration={1000}
-                          showAnimation={true}
-                        />
-                      )}
-                    </div>
-                  </Card>
+                  <RequestsOverTime
+                    isLoading={overTimeData.requests.isLoading}
+                    flattenedOverTime={flattenedOverTime}
+                    requestsOverTime={
+                      metrics.totalRequests?.data?.data
+                        ? `${formatNumberString(
+                            metrics.totalRequests?.data?.data.toFixed(2)
+                          )}`
+                        : "0"
+                    }
+                  />
                 </div>
                 <div key="errors">
-                  <Card className="h-full w-full flex flex-col border border-slate-200 bg-white text-slate-950 !shadow-sm dark:border-slate-800 dark:bg-black dark:text-slate-50 rounded-lg ring-0">
-                    <div className="flex flex-col h-full">
-                      <h2 className="text-slate-500 text-sm mb-2">
-                        All Errors
-                      </h2>
-                      {(() => {
-                        const totalErrors = accumulatedStatusCounts.reduce(
-                          (sum, e) => sum + e.value,
-                          0
-                        );
-                        const errorPercentage =
-                          (totalErrors /
-                            (metrics.totalRequests?.data?.data ?? 1)) *
-                            100 || 0;
-                        return (
-                          <div className="mb-2 text-sm">
-                            <span className="font-semibold">
-                              {formatLargeNumber(totalErrors)}
-                            </span>{" "}
-                            total errors (
-                            <span className="font-semibold">
-                              {errorPercentage.toFixed(2)}%
-                            </span>{" "}
-                            of all requests)
-                          </div>
-                        );
-                      })()}
-                      <div className="flex-grow overflow-hidden flex flex-col">
-                        <div className="flex flex-row justify-between items-center pb-2">
-                          <p className="text-xs font-semibold text-slate-700">
-                            Error Type
-                          </p>
-                          <p className="text-xs font-semibold text-slate-700">
-                            Percentage
-                          </p>
-                        </div>
-                        <div className="overflow-y-auto flex-grow">
-                          <BarList
-                            data={(() => {
-                              const totalErrors =
-                                accumulatedStatusCounts.reduce(
-                                  (sum, e) => sum + e.value,
-                                  0
-                                );
-                              return accumulatedStatusCounts
-                                .sort((a, b) => b.value - a.value)
-                                .map((error, index) => ({
-                                  name: `${error.name} (${formatLargeNumber(
-                                    error.value
-                                  )})`,
-                                  value: (error.value / totalErrors) * 100,
-                                  color: listColors[index % listColors.length],
-                                }));
-                            })()}
-                            className="h-full"
-                            showAnimation={true}
-                            valueFormatter={(value: number) =>
-                              `${value.toFixed(1)}%`
-                            }
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
+                  <ErrorsCard
+                    data={accumulatedStatusCounts}
+                    totalErrors={accumulatedStatusCounts.reduce(
+                      (sum, e) => sum + e.value,
+                      0
+                    )}
+                    errorPercentage={
+                      (accumulatedStatusCounts.reduce(
+                        (sum, e) => sum + e.value,
+                        0
+                      ) /
+                        (metrics.totalRequests?.data?.data ?? 1)) *
+                        100 || 0
+                    }
+                  />
                 </div>
+
                 <div key="models">
                   <StyledAreaChart
                     title={`Top Models`}
@@ -613,7 +536,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                     )} s / req`}
                     isDataOverTimeLoading={overTimeData.latency.isLoading}
                   >
-                    <AreaChart
+                    <TremorAreaChart
                       className="h-[14rem]"
                       data={
                         overTimeData.latency.data?.data?.map((r) => ({
@@ -651,7 +574,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                       overTimeData.timeToFirstToken.isLoading
                     }
                   >
-                    <AreaChart
+                    <TremorAreaChart
                       className="h-[14rem]"
                       data={
                         overTimeData.timeToFirstToken.data?.data?.map((r) => ({
@@ -680,7 +603,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                     )}`}
                     isDataOverTimeLoading={overTimeData.threats.isLoading}
                   >
-                    <AreaChart
+                    <TremorAreaChart
                       className="h-[14rem]"
                       data={
                         overTimeData.threats.data?.data?.map((r) => ({
@@ -697,7 +620,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                   </StyledAreaChart>
                 </div>
                 <div key="suggest-more-graphs">
-                  <div className="space-y-2 bg-white dark:bg-black border border-slate-200 dark:border-slate-900 border-dashed w-full h-full p-2 text-slate-950 dark:text-slate-50 shadow-sm rounded-lg flex flex-col items-center justify-center">
+                  <div className="space-y-2 bg-white dark:bg-black border-noneborder-slate-200 dark:border-slate-900 border-dashed w-full h-full p-2 text-slate-950 dark:text-slate-50 shadow-sm flex flex-col items-center justify-center">
                     <PresentationChartLineIcon className="h-12 w-12 text-black dark:text-white" />
                     <button
                       className="p-4 text-semibold text-lg"
@@ -735,7 +658,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                     )} tokens`}
                     isDataOverTimeLoading={overTimeData.users.isLoading}
                   >
-                    <AreaChart
+                    <TremorAreaChart
                       className="h-[14rem]"
                       data={
                         overTimeData.promptTokensOverTime.data?.data?.map(

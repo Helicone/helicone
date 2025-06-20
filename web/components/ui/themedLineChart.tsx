@@ -100,13 +100,13 @@ export function ThemedLineChart<T extends Record<string, any>>({
           )}
           <Tooltip
             contentStyle={{
-              backgroundColor: "var(--background)",
-              borderColor: "var(--border)",
+              backgroundColor: "hsl(var(--background))",
+              borderColor: "hsl(var(--border))",
               borderRadius: "0.5rem",
-              color: "var(--foreground)",
+              color: "hsl(var(--foreground))",
             }}
             formatter={valueFormatter}
-            labelStyle={{ color: "var(--foreground)" }}
+            labelStyle={{ color: "hsl(var(--foreground))" }}
           />
           {categories.map((category, i) => (
             <Area

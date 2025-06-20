@@ -2,7 +2,6 @@ import { HeliconeUser } from "@/packages/common/auth/types";
 import { ReactElement } from "react";
 import AuthLayout from "../components/layout/auth/authLayout";
 import DashboardPage from "../components/templates/dashboard/dashboardPage";
-import { GetServerSidePropsContext } from "next";
 
 interface DashboardProps {
   user: HeliconeUser;
@@ -20,9 +19,7 @@ Dashboard.getLayout = function getLayout(page: ReactElement) {
 
 export default Dashboard;
 
-export const getServerSideProps = async (
-  context: GetServerSidePropsContext
-) => {
+export const getServerSideProps = async () => {
   return {
     props: {
       user: {

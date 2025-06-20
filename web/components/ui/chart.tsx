@@ -236,14 +236,15 @@ const ChartTooltipContent = React.forwardRef<
                           {itemConfig?.label || item.name}
                         </span>
                       </div>
-                      {item.payload[`${item.dataKey}_original`] !== undefined ||
+                      {`${item.dataKey}_original` in item.payload &&
+                      item.payload[`${item.dataKey}_original`] !== undefined &&
                       item.payload[`${item.dataKey}_original`] !== null ? (
                         <span className="font-mono font-medium tabular-nums text-slate-950 dark:text-slate-50">
                           {item.payload[`${item.dataKey}_original`]}
                         </span>
-                      ) : item.value ? (
+                      ) : item.value !== undefined && item.value !== null ? (
                         <span className="font-mono font-medium tabular-nums text-slate-950 dark:text-slate-50">
-                          {item.value.toLocaleString()}
+                          {item.value?.toLocaleString()}
                         </span>
                       ) : null}
                     </div>

@@ -72,11 +72,11 @@ export const useDashboardPage = ({
   const filterStore = useFilterStore();
   const filter = filterStore.filter ? toFilterNode(filterStore.filter) : "all";
 
-  const { isLoading: isModelsLoading, models } = useModels(
-    timeFilter,
-    1000,
-    filter
-  );
+  const {
+    isLoading: isModelsLoading,
+    isRefetching: isModelsRefetching,
+    models,
+  } = useModels(timeFilter, 1000, filter);
   const topModels =
     models?.data?.sort((a, b) =>
       a.total_requests > b.total_requests ? -1 : 1
@@ -252,6 +252,10 @@ export const useDashboardPage = ({
     ) ||
     isModelsLoading;
 
+  const isAnyRefetching =
+    Object.values(overTimeData).some(({ isRefetching }) => isRefetching) ||
+    Object.values(metrics).some(({ isRefetching }) => isRefetching);
+
   return {
     metrics,
     overTimeData,
@@ -263,5 +267,7 @@ export const useDashboardPage = ({
     },
     models: ok(topModels),
     isModelsLoading,
+    isModelsRefetching,
+    isAnyRefetching,
   };
 };
