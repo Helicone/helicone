@@ -53,14 +53,14 @@ const PlaygroundMessagesPanel = ({
   useEffect(() => {
     if (mappedContent?.schema.request?.messages) {
       const messages = mappedContent.schema.request.messages;
-      const needsIds = messages.some(message => !message.id);
-      
+      const needsIds = messages.some((message) => !message.id);
+
       if (needsIds) {
         const messagesWithIds = messages.map((message, index) => ({
           ...message,
           id: message.id || `msg-${index}-${Date.now()}`,
         }));
-        
+
         setMappedContent({
           ...mappedContent,
           schema: {

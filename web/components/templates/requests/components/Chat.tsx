@@ -19,7 +19,6 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { GripVertical } from "lucide-react";
-import { v4 as uuidv4 } from "uuid";
 
 export type ChatMode = "PLAYGROUND_INPUT" | "PLAYGROUND_OUTPUT" | "DEFAULT";
 
@@ -57,11 +56,13 @@ export default function Chat({
             Array.isArray(message.contentArray)
           ) {
             // Map over the contentArray and assign the parent message's role to each part
-            const flattenedParts = message.contentArray.map((part, partIndex) => ({
-              ...part,
-              role: message.role || part.role, // Use parent role, fallback to part's own role if parent is missing
-              id: part.id || `${message.id}-part-${partIndex}`, // Ensure unique ID for parts
-            }));
+            const flattenedParts = message.contentArray.map(
+              (part, partIndex) => ({
+                ...part,
+                role: message.role || part.role, // Use parent role, fallback to part's own role if parent is missing
+                id: part.id || `${message.id}-part-${partIndex}`, // Ensure unique ID for parts
+              })
+            );
             return [...acc, ...flattenedParts];
           }
           // If not a contentArray or it's empty, just add the message itself
@@ -81,7 +82,7 @@ export default function Chat({
 
     if (over && active.id !== over.id && onChatChange) {
       const requestMessages = mappedRequest.schema.request?.messages ?? [];
-      
+
       const oldIndex = requestMessages.findIndex((m) => m.id === active.id);
       const newIndex = requestMessages.findIndex((m) => m.id === over.id);
 
@@ -105,7 +106,7 @@ export default function Chat({
   const addMessage = () => {
     if (!onChatChange) return;
 
-    const nextIndex = (mappedRequest.schema.request?.messages?.length ?? 0);
+    const nextIndex = mappedRequest.schema.request?.messages?.length ?? 0;
     const newMessage: Message = {
       role: "user",
       content: "",

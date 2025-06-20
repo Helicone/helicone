@@ -7,7 +7,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { MappedLLMRequest, Message } from "@helicone-package/llm-mapper/types";
 import Image from "next/image";
 import { Dispatch, ReactNode, SetStateAction, useRef, useState } from "react";
-import { LuChevronDown, LuFileText, LuImage } from "react-icons/lu";
+import { LuChevronDown, LuFileText } from "react-icons/lu";
 import { ChatMode } from "../Chat";
 import AssistantToolCalls from "./single/AssistantToolCalls";
 import { JsonRenderer } from "./single/JsonRenderer";
@@ -72,29 +72,24 @@ interface ChatMessageProps {
   dragHandle?: ReactNode;
 }
 
-const DeleteItemButton = ({ 
-  onDelete, 
-  className = "absolute top-2 right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity" 
-}: { 
+const DeleteItemButton = ({
+  onDelete,
+  className = "absolute top-2 right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity",
+}: {
   onDelete: () => void;
   className?: string;
 }) => (
-  <Button
-    variant="ghost"
-    size="icon"
-    className={className}
-    onClick={onDelete}
-  >
+  <Button variant="ghost" size="icon" className={className} onClick={onDelete}>
     <Trash2Icon className="h-4 w-4 text-muted-foreground" />
   </Button>
 );
 
-const ContentWrapper = ({ 
-  children, 
-  showDeleteButton, 
-  onDelete, 
+const ContentWrapper = ({
+  children,
+  showDeleteButton,
+  onDelete,
   wrapperClassName,
-  deleteButtonClassName 
+  deleteButtonClassName,
 }: {
   children: React.ReactNode;
   showDeleteButton?: boolean;
@@ -106,7 +101,10 @@ const ContentWrapper = ({
     return (
       <div className={cn("relative group", wrapperClassName)}>
         {children}
-        <DeleteItemButton onDelete={onDelete} className={deleteButtonClassName} />
+        <DeleteItemButton
+          onDelete={onDelete}
+          className={deleteButtonClassName}
+        />
       </div>
     );
   }
@@ -239,8 +237,9 @@ const renderTextContent = (
     />
   );
 
-  const shouldShowDeleteButton = options.showDeleteButton && 
-    chatMode === "PLAYGROUND_INPUT" && 
+  const shouldShowDeleteButton =
+    options.showDeleteButton &&
+    chatMode === "PLAYGROUND_INPUT" &&
     !!options.onDelete;
 
   return (
@@ -363,7 +362,9 @@ export default function ChatMessage({
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [pendingFileAction, setPendingFileAction] = useState<'add' | 'change' | null>(null);
+  const [pendingFileAction, setPendingFileAction] = useState<
+    "add" | "change" | null
+  >(null);
 
   const toggleMessage = (index: number) => {
     setExpandedMessages((prev) => ({
@@ -381,7 +382,7 @@ export default function ChatMessage({
     const reader = new FileReader();
     reader.onload = (event) => {
       const base64 = event.target?.result as string;
-      if (pendingFileAction === 'change') {
+      if (pendingFileAction === "change") {
         onChatChange({
           ...mappedRequest,
           schema: {
@@ -428,16 +429,16 @@ export default function ChatMessage({
                         ],
                       };
                     }
-                    
+
                     const contentArray = [];
-                    
+
                     contentArray.push({
                       _type: "message" as const,
                       role: "user",
                       content: msg.content,
                       id: `text-${messageIndex}-${Date.now()}`,
                     });
-                    
+
                     contentArray.push({
                       _type: "image" as const,
                       role: "user",
@@ -469,7 +470,7 @@ export default function ChatMessage({
   };
 
   const addImageToMessage = () => {
-    setPendingFileAction('add');
+    setPendingFileAction("add");
     setTimeout(() => {
       fileInputRef.current?.click();
     }, 0);
@@ -508,7 +509,7 @@ export default function ChatMessage({
     }
 
     if (newRole === "image") {
-      setPendingFileAction('change');
+      setPendingFileAction("change");
       setTimeout(() => {
         fileInputRef.current?.click();
       }, 0);
@@ -604,13 +605,13 @@ export default function ChatMessage({
         ...mappedRequest.schema,
         request: {
           ...mappedRequest.schema.request,
-          messages: mappedRequest.schema.request?.messages?.map(
-            (msg, i) => {
+          messages: mappedRequest.schema.request?.messages
+            ?.map((msg, i) => {
               if (i === messageIndex && msg._type === "contentArray") {
                 const updatedContentArray = msg.contentArray?.filter(
                   (_, j) => j !== contentIndex
                 );
-                
+
                 if (updatedContentArray?.length === 1) {
                   const remainingItem = updatedContentArray[0];
                   if (remainingItem._type === "message") {
@@ -621,19 +622,19 @@ export default function ChatMessage({
                     };
                   }
                 }
-                
+
                 if (!updatedContentArray || updatedContentArray.length === 0) {
                   return null;
                 }
-                
+
                 return {
                   ...msg,
                   contentArray: updatedContentArray,
                 };
               }
               return msg;
-            }
-          ).filter((msg): msg is Message => msg !== null),
+            })
+            .filter((msg): msg is Message => msg !== null),
         },
       },
     });
@@ -648,51 +649,49 @@ export default function ChatMessage({
         ...mappedRequest.schema,
         request: {
           ...mappedRequest.schema.request,
-          messages: mappedRequest.schema.request?.messages?.map(
-            (msg, i) => {
-              if (i === messageIndex) {
-                if (msg._type === "contentArray" && msg.contentArray) {
-                  return {
-                    ...msg,
-                    contentArray: [
-                      ...msg.contentArray,
-                      {
-                        _type: "message" as const,
-                        role: "user",
-                        content: "",
-                        id: `text-${messageIndex}-${Date.now()}`,
-                      },
-                    ],
-                  };
-                }
-                
-                const contentArray = [];
-                
-                contentArray.push({
-                  _type: "message" as const,
-                  role: "user",
-                  content: msg.content,
-                  id: `text-${messageIndex}-${Date.now()}`,
-                });
-                
-                contentArray.push({
-                  _type: "message" as const,
-                  role: "user",
-                  content: "",
-                  id: `text-${messageIndex}-${Date.now() + 1}`,
-                });
-
+          messages: mappedRequest.schema.request?.messages?.map((msg, i) => {
+            if (i === messageIndex) {
+              if (msg._type === "contentArray" && msg.contentArray) {
                 return {
-                  content: "",
-                  _type: "contentArray" as const,
-                  role: "user",
-                  contentArray,
-                  id: msg.id || `msg-${messageIndex}-${Date.now()}`,
+                  ...msg,
+                  contentArray: [
+                    ...msg.contentArray,
+                    {
+                      _type: "message" as const,
+                      role: "user",
+                      content: "",
+                      id: `text-${messageIndex}-${Date.now()}`,
+                    },
+                  ],
                 };
               }
-              return msg;
+
+              const contentArray = [];
+
+              contentArray.push({
+                _type: "message" as const,
+                role: "user",
+                content: msg.content,
+                id: `text-${messageIndex}-${Date.now()}`,
+              });
+
+              contentArray.push({
+                _type: "message" as const,
+                role: "user",
+                content: "",
+                id: `text-${messageIndex}-${Date.now() + 1}`,
+              });
+
+              return {
+                content: "",
+                _type: "contentArray" as const,
+                role: "user",
+                contentArray,
+                id: msg.id || `msg-${messageIndex}-${Date.now()}`,
+              };
             }
-          ),
+            return msg;
+          }),
         },
       },
     });
@@ -740,7 +739,7 @@ export default function ChatMessage({
         accept="image/*"
         onChange={handleFileChange}
       />
-      
+
       {/* Message Role Header */}
       {(chatMode !== "PLAYGROUND_OUTPUT" ||
         (chatMode === "PLAYGROUND_OUTPUT" &&
@@ -775,8 +774,9 @@ export default function ChatMessage({
           <div className="flex flex-col gap-4">
             {message.contentArray?.map((content, index) => {
               const contentType = getMessageType(content);
-              const shouldShowContent = chatMode === "PLAYGROUND_INPUT" || content.content;
-              
+              const shouldShowContent =
+                chatMode === "PLAYGROUND_INPUT" || content.content;
+
               return shouldShowContent ? (
                 <div key={index}>
                   {renderContentByType(
