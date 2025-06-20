@@ -1,0 +1,48 @@
+{
+  "id": "success:ollama:chat_completions",
+  "request": {
+    "method": "POST",
+    "url": "/v1/chat/completions"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "chatcmpl-B9MBs8CjcvOU2jLn4n570S5qMJKcT",
+      "object": "chat.completion",
+      "created": 1741569952,
+      "model": "llama3",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "Gooooood morning!!!! Let's do some Rust coding!",
+            "refusal": null,
+            "annotations": []
+          },
+          "logprobs": null,
+          "finish_reason": "stop"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 29,
+        "completion_tokens": 20,
+        "total_tokens": 49,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "service_tier": "default"
+    }
+  }
+}
