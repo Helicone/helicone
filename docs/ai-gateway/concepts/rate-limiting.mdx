@@ -185,19 +185,6 @@ Rate limiting counters can be stored in different backends depending on your dep
   Additional storage backends (Redis and Database) are [coming soon](#coming-soon) for distributed rate limiting and advanced analytics.
 </Note>
 
-### Choosing the Right Configuration
-
-| Use Case                    | Recommended Approach          | Availability |
-| --------------------------- | ----------------------------- | ------------ |
-| **Production APIs**         | Global GCRA with burst tolerance | v0       |
-| **Development/Testing**     | Conservative limits with long refill periods | v0 |
-| **Multi-tier services**     | Router-specific limit overrides | v0        |
-| **High-volume systems**     | High capacity with short refill periods | v0 |
-| **Single instance**         | In-memory storage             | v0           |
-| **Distributed deployments** | Redis storage                 | v1           |
-| **SaaS applications**       | Per-end-user limits           | v1           |
-| **Enterprise governance**   | Per-team and per-team-member limits | v2    |
-
 ## Coming Soon
 
 The following rate limiting features are planned for future releases:
