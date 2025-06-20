@@ -44,7 +44,7 @@ By integrating with Helicone, you can monitor performance, analyze interactions,
 
       config();
 
-      const url = "wss://api.helicone.ai/v1/ai-gateway/oai/realtime?model=[MODEL_NAME]"; // gpt-4o-realtime-preview-2024-12-17
+      const url = "wss://api.helicone.ai/v1/gateway/oai/realtime?model=[MODEL_NAME]"; // gpt-4o-realtime-preview-2024-12-17
 
       const ws = new WebSocket(url, {
         headers: {
@@ -78,7 +78,7 @@ By integrating with Helicone, you can monitor performance, analyze interactions,
 
       config();
 
-      const url = `wss://api.helicone.ai/v1/ai-gateway/oai/realtime?resource=${process.env.AZURE_RESOURCE}&deployment=${process.env.AZURE_DEPLOYMENT}`;
+      const url = `wss://api.helicone.ai/v1/gateway/oai/realtime?resource=${process.env.AZURE_RESOURCE}&deployment=${process.env.AZURE_DEPLOYMENT}`;
 
       const ws = new WebSocket(url, {
         headers: {
