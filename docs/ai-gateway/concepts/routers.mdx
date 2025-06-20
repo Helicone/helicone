@@ -269,12 +269,12 @@ routers:
 **Valid names:** `production`, `dev`, `team-a`, `cost_opt`, `v2`  
 **Invalid names:** `very-long-router-name`, `team@prod`, `router with spaces`
 
-### URL Path Structure
+### AI Gateway Endpoints
 
 The AI Gateway supports three different routing patterns:
 
 <AccordionGroup>
-  <Accordion title="Router-Based Routing (Recommended)">
+  <Accordion title="Load-Balanced Based Routing (Recommended)">
     **Pattern:** `/router/{name}/{api-path}`
     
     **Examples:**
@@ -289,20 +289,6 @@ The AI Gateway supports three different routing patterns:
     - Model mapping
   </Accordion>
   
-  <Accordion title="Direct Provider Routing">
-    **Pattern:** `/{provider}/{api-path}`
-    
-    **Examples:**
-    - `/openai/v1/chat/completions`
-    - `/anthropic/v1/messages`
-    - `/google/v1beta/generateContent`
-    
-    **Features:**
-    - Direct proxy to specific provider
-    - No load balancing or router features
-    - Global rate limiting only
-  </Accordion>
-  
   <Accordion title="Unified API Routing">
     **Pattern:** `/ai/{api-path}`
     
@@ -312,7 +298,24 @@ The AI Gateway supports three different routing patterns:
     **Features:**
     - Automatic provider detection from model name
     - Limited to OpenAI-compatible endpoints
-    - No router-specific configuration
+    - No router-specific configuration, uses global
+      rate limits and cache configuration.
+  </Accordion>
+  
+  <Accordion title="Direct Provider Routing">
+    **Pattern:** `/{provider}/{api-path}`
+    
+    **Examples:**
+    - `/openai/v1/chat/completions`
+    - `/anthropic/v1/messages`
+    - `/gemini/v1beta/generateContent`
+    
+    **Features:**
+    - Direct gateway to specific provider,
+      with LLM observability when `helicone-observability.enabled: true`.
+    - No load balancing or router features
+    - No router-specific configuration, uses global
+      rate limits and cache configuration.
   </Accordion>
 </AccordionGroup>
 
@@ -395,8 +398,9 @@ routers:
   default:
     load-balance:
       chat:
-        strategy: latency
-        providers: []  # No providers configured by default
+        strategy: weighted
+        providers:
+          - openai
 ```
 
 **Important:** You must configure at least one provider target in your default router for it to work.

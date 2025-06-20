@@ -45,11 +45,11 @@ Rate limiting helps you:
     
     **Example:**
     ```yaml
-    rate-limit:
-      global:
-        per-api-key:
-          capacity: 500
-          refill-frequency: 1s  # 500 requests per second sustained
+    global:
+      rate-limit:
+          per-api-key:
+            capacity: 500
+            refill-frequency: 1s  # 500 requests per second sustained
     ```
   </Accordion>
 
@@ -80,8 +80,8 @@ Rate limiting helps you:
     **Use case:** Production API that needs to prevent abuse while allowing reasonable burst traffic for legitimate users.
 
     ```yaml
-    rate-limit:
-      global:
+    global:
+      rate-limit:
         store: in-memory
         per-api-key:
           capacity: 1000
@@ -94,8 +94,8 @@ Rate limiting helps you:
     **Use case:** Development environment where you want to prevent accidental high costs while allowing reasonable experimentation.
 
     ```yaml
-    rate-limit:
-      global:
+    global:
+      rate-limit:
         store: in-memory
         per-api-key:
           capacity: 100
@@ -108,8 +108,8 @@ Rate limiting helps you:
     **Use case:** Different service tiers with varying rate limits. Premium router gets higher limits than basic router.
 
     ```yaml
-    rate-limit:
-      global:
+    global:
+      rate-limit:
         store: in-memory
         cleanup-interval: 5m
     
@@ -175,8 +175,8 @@ Rate limiting counters can be stored in different backends depending on your dep
     Rate limiting state is stored locally in each router instance. Fast and simple, but limits are not shared across multiple instances.
     
     ```yaml
-    rate-limit:
-      global:
+    global:
+      rate-limit:
         store: in-memory
         cleanup-interval: 5m
     ```
@@ -193,8 +193,8 @@ Rate limiting counters can be stored in different backends depending on your dep
     Rate limiting state is stored in Redis, allowing coordination across multiple router instances for consistent limits.
     
     ```yaml
-    rate-limit:
-      global:
+    global:
+      rate-limit:
         store: redis
         redis:
           url: "redis://localhost:6379"

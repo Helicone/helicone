@@ -79,29 +79,39 @@ Load balancing helps you:
     </Callout>
   </Accordion>
 
-  <Accordion title="Cost-Optimized Strategy" icon="dollar-sign">
-    **Route to the cheapest equivalent model** *(Coming in v2)*
-    
-    For a given model, picks the provider that offers that same model or any allowed configured equivalent models for the lowest price.
-    
-    **Best for:** Cost-sensitive workloads where minor latency differences are acceptable
-  </Accordion>
-
   <Accordion title="Model-Level Weighted Strategy" icon="bullseye">
-    **Provider + model specific weighting** *(Coming in v2)*
+    **Provider + model specific weighting** *(Coming in v1)*
     
     Same as weighted strategy over providers, except configurable for provider+model pairs. E.g., [openai/o1, bedrock/claude-3-5-sonnet] with weights [0.90, 0.10].
     
     **Best for:** Fine-grained control over specific model routing
   </Accordion>
 
+  <Accordion title="Cost-Optimized Strategy" icon="dollar-sign">
+    **Route to the cheapest equivalent model** *(Coming in v2)*
+    
+    For a given model, picks the provider that offers that same model or any allowed configured equivalent models for the lowest price.
+
+    Rate limit aware algorithms allow consumption of token budgets with the cheapest provider, automatically removing them when
+    limits are hit allowing requests to smoothly flow to the next cheapest provider.
+    
+    **Best for:** Cost-sensitive workloads where minor latency differences are acceptable
+  </Accordion>
+
   <Accordion title="Tag-based Routing" icon="tag">
     **Header-driven routing decisions** *(Coming in v3)*
     
     Route requests to specific providers and models based on tags passed via request headers.
+
+    TODO: @Cole, actually i think this could be solved with the unified
+    api endpoint that doesn't do load balancing. the difference to the user
+    is whether they modify the header vs the `model` field in the request body.
+    wdyt? should we build this? and pls help me update the right places in the docs that
+    talk about this use case
     
-    **Best for:** A/B testing, user-specific routing, compliance requirements
+    **Best for:** testing, user-specific routing, compliance requirements
   </Accordion>
+
 </AccordionGroup>
 
 ### Configuration Examples
@@ -133,9 +143,9 @@ Load balancing helps you:
           chat:
             strategy: weighted
             providers:
-              - provider: anthropic    # Claude 3.5 Sonnet: $3/$15 per 1M tokens
+              - provider: openai    # o3: $2/$8 per 1M tokens
                 weight: 0.80
-              - provider: openai       # GPT-4o: $5/$15 per 1M tokens
+              - provider: google    # gemini-2.5-pro: $5/$15 per 1M tokens
                 weight: 0.20
     ```
   </Tab>
@@ -208,7 +218,7 @@ The AI Gateway supports load balancing at multiple levels of granularity:
 | ----------------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
 | **Providers**           | v0 (live!)           | Balance across different AI companies                                                                                       | OpenAI vs Anthropic vs Google Gemini             |
 | **Deployments/Regions** | v0 (live!)           | Balance across regions for providers that support them                                                                     | `us-east-1` vs `us-west-2` vs `eu-west-1`        |
-| **Models**              | v2 (coming soon!)           | Balance over (provider, model) pairs. | `openai/gpt-4o` vs `anthropic/claude-3-5-sonnet` |
+| **Models**              | v2 (coming soon!)     | Balance over (provider, model) pairs. | `openai/gpt-4o` vs `anthropic/claude-3-5-sonnet` |
 
 <Callout type="info">
   Currently, the AI Gateway load balances at the **provider level**. Model-level and regional load balancing are planned for future releases.
@@ -223,7 +233,7 @@ The AI Gateway supports load balancing at multiple levels of granularity:
 | **Provider migration**   | Weighted                   | v0           |
 | **A/B testing**          | Weighted → Tag-based       | v0 → v3      |
 | **Fine-grained control** | Model-level weighted       | v2           |
-| **Compliance routing**   | [Multiple routers](#compliance-based-routing)                  | v3           |
+| **Compliance routing**   | [Multiple gateway instances](#compliance-based-routing)                  | v3           |
 
 ## Advanced Configuration
 

@@ -10,14 +10,18 @@ Provider configuration becomes necessary when you need custom endpoints, enterpr
 
 ## Getting Started
 
+### Enabling providers
+
+Providers are enabled by providing credentials via environment variables. Many users can end here
+as the gateway includes [comprehensive defaults](https://github.com/Helicone/helicone-router/blob/main/llm-proxy/config/embedded/providers.yaml)
+that work out-of-the-box for standard deployments.
+
 ### What is Provider Configuration?
 
 Provider configuration defines how the AI Gateway connects to and communicates with LLM providers. Each provider has specific requirements for:
 - **Base URLs** - The API endpoint to send requests to
 - **API Versions** - Some providers require specific version headers
 - **Supported Models** - Which models are available through each provider
-
-The gateway includes [comprehensive defaults](https://github.com/Helicone/helicone-router/blob/main/llm-proxy/config/embedded/providers.yaml) that work out-of-the-box for standard deployments.
 
 ### Why Configure Providers?
 
@@ -28,7 +32,7 @@ You'll need to configure providers when you have:
 - **Limit available models** - Override default provider config to restrict which models are accessible
 
 <Note>
-  **New models are automatically detected!** The router uses smart model detection with embedded configurations that are regularly updated. You don't need to manually add new models unless you want to restrict the available model set.
+  **New models are added immediately after their release!** The router ships with embedded configurations that are regularly updated. You don't need to manually configure new models unless you want to restrict the available model set.
 </Note>
 
 <Note>
