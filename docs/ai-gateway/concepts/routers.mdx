@@ -149,7 +149,7 @@ routers:
         providers:
           - openai
           - anthropic
-          - gemini
+          - google
     cache:
       enabled: true
       directive: "max-age=1800"
@@ -206,7 +206,7 @@ routers:
         providers:
           - openai
           - anthropic
-          - gemini
+          - google
     
   budget-conscious:
     load-balance:
@@ -295,7 +295,7 @@ The AI Gateway supports three different routing patterns:
     **Examples:**
     - `/openai/v1/chat/completions`
     - `/anthropic/v1/messages`
-    - `/gemini/v1beta/generateContent`
+    - `/google/v1beta/generateContent`
     
     **Features:**
     - Direct proxy to specific provider
@@ -435,7 +435,7 @@ routers:
       chat:
         strategy: weighted
         providers:
-          - provider: gemini
+          - provider: google
             weight: '0.8'
           - provider: ollama
             weight: '0.2'
@@ -469,18 +469,7 @@ routers:
         providers:
           - openai      # Will be removed if unhealthy
           - anthropic   # Will be removed if unhealthy
-          - gemini      # Will be removed if unhealthy
+          - google      # Will be removed if unhealthy
 ```
 
 **How it works:** If a provider becomes unhealthy (error rate > 10%), it's automatically removed from load balancing across all routers until it recovers.
-
-## Coming Soon
-
-<Note>
-  **Dynamic Router Management:** Hot-reloading router configurations and API-driven router management coming in v2.
-</Note>
-
-- **Runtime router creation** - Add/remove routers without restarting
-- **Router templates** - Predefined router configurations for common patterns  
-- **Router metrics** - Per-router observability and performance metrics
-- **Conditional routing** - Route based on request headers, user attributes, or other conditions 

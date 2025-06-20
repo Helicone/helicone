@@ -53,7 +53,7 @@ routers:
     routers:
       testing:
         cache:
-          enabled: true
+          store: in-memory
           directive: "max-age=7200, max-stale=3600"  # 2-hour TTL for test runs
           buckets: 1   # Consistent responses for tests
     ```
@@ -66,7 +66,7 @@ routers:
     routers:
       dev:
         cache:
-          enabled: true
+          store: in-memory
           directive: "max-age=3600, max-stale=1800"  # 1-hour TTL
           buckets: 3   # Some variety for testing
     ```
@@ -79,7 +79,7 @@ routers:
     routers:
       production:
         cache:
-          enabled: true
+          store: in-memory
           directive: "max-age=1800, max-stale=900"  # 30-min TTL
           buckets: 1   # Consistent responses
     ```
@@ -101,7 +101,7 @@ routers:
     **Example:**
     ```yaml
     cache:
-      enabled: true
+      store: in-memory
       buckets: 10  # Store up to 10 different responses
       directive: "max-age=3600"
     ```
@@ -122,7 +122,7 @@ routers:
     **Example (router config):**
     ```yaml
     cache:
-      enabled: true
+      store: in-memory
       directive: "max-age=3600, max-stale=1800"
       seed: "tenant-alpha"
     ```
@@ -177,39 +177,24 @@ Cache responses can be stored in different backends depending on your deployment
     **Best for:**
     - Single-instance deployments
     - Development environments
-    - High-performance scenarios
-  </Accordion>
-
-  <Accordion title="Redis Storage" icon="database">
-    **Distributed cache storage**
-    
-    Will allow sharing cache across multiple router instances and persistence across restarts.
-    
-    *Configuration details will be documented closer to release.*
-  </Accordion>
-
-  <Accordion title="Database Storage" icon="server">
-    **Persistent cache storage**
-    
-    Cache responses stored in a database for long-term persistence and advanced analytics.
-    
-    **Best for:**
-    - Long-term cache analytics
-    - Compliance requirements
-    - Advanced cache management
+          - High-performance scenarios
   </Accordion>
 </AccordionGroup>
 
+<Note>
+  Additional storage backends (Redis and Database) are [coming soon](#coming-soon) for distributed caching and advanced analytics.
+</Note>
+
 ### Choosing the Right Configuration
 
-| Use Case                    | Recommended Approach               | Availability |
-| --------------------------- | ---------------------------------- | ------------ |
-| **Production APIs**         | 1-hour TTL, buckets 1-3            | v0           |
-| **Development/Testing**     | 24-hour TTL, buckets 5-10          | v0           |
-| **Creative applications**   | 30-min TTL, buckets 10+            | v0           |
-| **High-traffic systems**    | Short TTL (≤2 h), buckets 3-5      | v0           |
-| **User-specific caching**   | Seeds for namespace isolation      | v0           |
-| **Single instance**         | In-memory storage                  | v0           |
+| Use Case                    | Recommended Approach               |
+| --------------------------- | ---------------------------------- |
+| **Production APIs**         | 1-hour TTL, buckets 1-3            |
+| **Development/Testing**     | 24-hour TTL, buckets 5-10          |
+| **Creative applications**   | 30-min TTL, buckets 10+            |
+| **High-traffic systems**    | Short TTL (≤2 h), buckets 3-5      |
+| **User-specific caching**   | Seeds for namespace isolation      |
+| **Single instance**         | In-memory storage                  |
 
 ### Cache Response Headers
 
@@ -238,3 +223,10 @@ curl -i -H "Helicone-Cache-Enabled: true" \
 # helicone-cache: HIT
 # helicone-cache-bucket-idx: 2
 ```
+
+## Coming Soon
+
+| Feature | Description | Version |
+|---------|-------------|---------|
+| **Redis Storage** | Distributed cache sharing across multiple router instances with persistence across restarts | v1 |
+| **Database Storage** | Persistent cache storage with advanced analytics and compliance features | v1 |
