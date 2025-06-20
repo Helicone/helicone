@@ -1,0 +1,77 @@
+---
+title: "AI Gateway Overview"
+sidebarTitle: "Overview"
+description: "Complete guide to Helicone's AI Gateway - routing, load balancing, and monitoring for 100+ LLM providers"
+---
+
+Helicone AI Gateway is a lightweight, Rust-based proxy that provides intelligent routing, load balancing, and monitoring for over 100 LLM providers. Whether you're building AI applications or managing production workloads, the Gateway simplifies LLM operations with enterprise-grade features.
+
+## Getting Started
+
+<CardGroup cols={2}>
+<Card title="Introduction" icon="book-open" href="/ai-gateway/introduction">
+  Learn about the AI Gateway's features and benefits
+</Card>
+<Card title="Quickstart" icon="rocket" href="/ai-gateway/quickstart">
+  Get started in 1 minute with your first AI Gateway deployment
+</Card>
+</CardGroup>
+
+## Configuration & Setup
+
+<CardGroup cols={2}>
+<Card title="Configuration Reference" icon="gear" href="/ai-gateway/config">
+  Complete YAML configuration guide for all Gateway features
+</Card>
+<Card title="Helicone Integration" icon="chart-line" href="/ai-gateway/helicone-integration">
+  Enable authentication and observability with Helicone platform
+</Card>
+</CardGroup>
+
+## Core Concepts
+
+<CardGroup cols={3}>
+<Card title="Routers" icon="route" href="/ai-gateway/concepts/routers">
+  Configure multiple routing policies for different use cases
+</Card>
+<Card title="Load Balancing" icon="scale-balanced" href="/ai-gateway/concepts/loadbalancing">
+  Distribute requests across providers for optimal performance
+</Card>
+<Card title="Caching" icon="database" href="/ai-gateway/concepts/cache">
+  Store and reuse responses to reduce costs and latency
+</Card>
+<Card title="Rate Limiting" icon="gauge-high" href="/ai-gateway/concepts/rate-limiting">
+  Control request frequency with GCRA algorithm
+</Card>
+<Card title="Retries" icon="rotate-right" href="/ai-gateway/concepts/retries">
+  Automatic retry logic with exponential backoff
+</Card>
+<Card title="Model Mapping" icon="arrows-left-right" href="/ai-gateway/concepts/model-mapping">
+  Define equivalencies between models from different providers
+</Card>
+<Card title="Providers" icon="server" href="/ai-gateway/concepts/providers">
+  Configure custom LLM provider endpoints and models
+</Card>
+<Card title="Secret Management" icon="key" href="/ai-gateway/concepts/secret-management">
+  Centralize and secure your API keys and credentials
+</Card>
+</CardGroup>
+
+## Deployment Options
+
+<CardGroup cols={2}>
+<Card title="Self-hosted Deployment" icon="server" href="/ai-gateway/self-host">
+  Deploy on your own infrastructure with full control
+</Card>
+<Card title="Deployment Guides" icon="book" href="/ai-gateway/deployment">
+  Platform-specific deployment instructions and best practices
+</Card>
+</CardGroup>
+
+## Monitoring & Debugging
+
+<CardGroup cols={2}>
+<Card title="Application Health" icon="heart-pulse" href="/ai-gateway/debugging">
+  Monitor Gateway performance with OpenTelemetry integration
+</Card>
+</CardGroup>
