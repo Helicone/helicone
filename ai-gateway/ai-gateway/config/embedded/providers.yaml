@@ -1,0 +1,103 @@
+openai:
+  enabled: true
+  models:
+    - gpt-4
+    - gpt-4-turbo
+    - gpt-4o
+    - gpt-4o-mini
+    - gpt-4.1
+    - gpt-4.1-mini
+    - gpt-4.1-nano
+    - gpt-4.5
+    - o1
+    - o1-mini
+    - o1-pro
+    - o3
+    - o3-mini
+    - o4-mini
+    - codex-mini
+    - gpt-4o-mini-search
+    - gpt-4o-search
+  base-url: https://api.openai.com
+  version: null
+
+anthropic:
+  enabled: true
+  models:
+    - claude-opus-4-0
+    - claude-sonnet-4-0
+    # the alias Anthropic provides for these below models require that it
+    # include an explicit `-latest` suffix when sent to Antrhopic
+    - claude-3-7-sonnet
+    - claude-3-5-haiku
+    - claude-3-5-sonnet
+    - claude-3-opus
+  base-url: https://api.anthropic.com
+  version: "2023-06-01"
+
+google:
+  enabled: true
+  models:
+    - gemini-2.5-flash
+    - gemini-2.5-pro
+    - gemini-2.0-flash
+    - gemini-2.0-flash-lite
+    - gemini-1.5-flash
+    - gemini-1.5-flash-8b
+    - gemini-1.5-pro
+  base-url: https://generativelanguage.googleapis.com
+  version: null
+
+ollama:
+  enabled: false
+  models:
+    - deepseek-r1
+    - gemma3
+    - qwen3
+    - llama4
+    - llama3.3
+    - llama3.2
+    - llama3
+    - phi4
+    - llava
+  base-url: http://localhost:11434
+
+bedrock:
+  enabled: false
+  # bedrock models must be enabled prior to sending
+  # requests which use them
+  models:
+    - us.anthropic.claude-3-5-haiku-20241022-v1:0
+    - anthropic.claude-3-5-sonnet-20240620-v1:0
+    - us.anthropic.claude-3-opus-20240229-v1:0
+    - us.anthropic.claude-3-7-sonnet-20250219-v1:0
+    - us.anthropic.claude-opus-4-20250514-v1:0
+    - us.anthropic.claude-sonnet-4-20250514-v1:0
+    - us.deepseek.r1-v1:0
+    - us.amazon.nova-premier-v1:0
+    - amazon.titan-text-premier-v1:0
+    - amazon.titan-text-express-v1
+    - amazon.titan-text-lite-v1
+    - amazon.nova-sonic-v1:0
+    - amazon.nova-pro-v1:0
+    - amazon.nova-lite-v1:0
+    - amazon.nova-micro-v1:0
+    - ai21.jamba-1-5-large-v1:0
+    - ai21.jamba-1-5-mini-v1:0
+    - cohere.command-light-text-v14
+    - cohere.command-r-plus-v1:0
+    - cohere.command-text-v14
+    - meta.llama3-8b-instruct-v1:0
+    - meta.llama3-70b-instruct-v1:0
+    - us.meta.llama3-1-8b-instruct-v1:0
+    - us.meta.llama3-2-1b-instruct-v1:0
+    - us.meta.llama3-2-3b-instruct-v1:0
+    - us.meta.llama3-2-90b-instruct-v1:0
+    - us.meta.llama4-maverick-17b-instruct-v1:0
+    - mistral.mistral-7b-instruct-v0:2
+    - mistral.mistral-large-2402-v1:0
+    - mistral.mistral-small-2402-v1:0
+    - mistral.mixtral-8x7b-instruct-v0:1
+    - us.mistral.pixtral-large-2502-v1:0
+  base-url: https://bedrock-runtime.us-east-1.amazonaws.com
+  version: null

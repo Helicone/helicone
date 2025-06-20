@@ -1,0 +1,27 @@
+[analytics]
+reporting_enabled = false
+
+[auth.github]
+enabled = true
+allow_sign_up = true
+auto_login = false
+# not a secret value
+client_id = Ov23liAd2ug1cSDmRFHx
+allowed_organizations = the-harmonious-simulation
+allow_assign_grafana_admin = true
+
+role_attribute_path = "'GrafanaAdmin'"
+skip_org_role_sync = false
+
+[path]
+data = "/var/lib/grafana"
+plugins = "/var/lib/grafana/plugins"
+
+[security]
+admin_email = "tom@harmon.tech"
+
+[server]
+root_url = "https://rockstar-grafana.fly.dev/"
+
+[snapshots]
+external_enabled = false

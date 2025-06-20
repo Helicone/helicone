@@ -1,0 +1,19 @@
+routers:
+  default:
+    load-balance:
+      chat:
+        strategy: latency
+        providers:
+          - openai
+          - anthropic
+
+# routers:
+#   default:
+#     load-balance:
+#       chat:
+#         strategy: weighted
+#         providers:
+#         - provider: anthropic
+#           weight: '0.95'
+#         - provider: openai
+#           weight: '0.05'

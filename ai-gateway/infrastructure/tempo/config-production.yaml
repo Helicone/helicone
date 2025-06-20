@@ -1,0 +1,25 @@
+server:
+  http_listen_port: 3200
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+
+compactor:
+  ring:
+    kvstore:
+      store: inmemory
+  compaction:
+    # 4 days
+    block_retention: 96h
+
+storage:
+  trace:
+    backend: local
+    wal:
+      path: /var/lib/tempo/wal
+    local:
+      path: /var/lib/tempo/blocks

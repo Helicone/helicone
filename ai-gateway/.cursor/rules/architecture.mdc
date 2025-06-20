@@ -1,0 +1,31 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# LLM Proxy Architecture
+
+This document outlines the architecture of the LLM Proxy system.
+
+## Core Components
+
+### Server and Routing
+- [ai-gateway/src/app.rs](mdc:ai-gateway/src/app.rs) - Main application server setup
+- [ai-gateway/src/router/](mdc:ai-gateway/src/router) - API request routing logic
+- [ai-gateway/src/dispatcher.rs](mdc:ai-gateway/src/dispatcher.rs) - Dispatches requests to appropriate providers
+
+### Provider Integration
+- [ai-gateway/src/balancer/](mdc:ai-gateway/src/balancer) - Load balancing between different LLM providers
+
+### Configuration and Error Handling
+- [ai-gateway/src/config/](mdc:ai-gateway/src/config) - Application configuration
+- [ai-gateway/src/error/](mdc:ai-gateway/src/error) - Error handling and reporting
+
+### Middleware and Utils
+- [ai-gateway/src/middleware/](mdc:ai-gateway/src/middleware) - HTTP middleware components
+- [ai-gateway/src/utils/](mdc:ai-gateway/src/utils) - Utility functions and helpers
+
+### Observability
+- [ai-gateway/src/logger/](mdc:ai-gateway/src/logger) - Logging infrastructure
+- [crates/telemetry/](mdc:crates/telemetry) - Telemetry for tracing and metrics
+- [crates/metrics/](mdc:crates/metrics) - Metrics collection and reporting

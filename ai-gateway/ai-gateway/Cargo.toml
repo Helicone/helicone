@@ -1,0 +1,154 @@
+[package]
+name = "ai-gateway"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+repository = "https://github.com/Helicone/helicone-router"
+default-run = "ai-gateway"
+description = "A high-performance LLM proxy router."
+homepage = "https://docs.helicone.ai/ai-gateway"
+
+[dependencies]
+anthropic-ai-sdk = { workspace = true }
+sha2 = { workspace = true }
+async-openai = { workspace = true }
+axum-core = { workspace = true }
+axum-server = { workspace = true, features = ["tls-rustls"] }
+aws-sdk-bedrockruntime = { workspace = true }
+aws-smithy-types = { workspace = true }
+aws-sigv4 = { workspace = true }
+aws-smithy-runtime-api = { workspace = true }
+aws-credential-types = { workspace = true }
+bytes = { workspace = true, features = ['serde'] }
+cfg-if = { workspace = true }
+chrono = { workspace = true, features = ['default', 'serde'] }
+clap = { workspace = true }
+compact_str = { workspace = true, features = ['serde'] }
+config = { workspace = true }
+derive_more = { workspace = true, features = ['as_ref', 'constructor', 'debug', 'deref', 'deref_mut', 'display', 'from', 'into', 'from_str'] }
+displaydoc = { workspace = true }
+dotenvy = { workspace = true }
+eventsource-stream = { workspace = true }
+futures = { workspace = true }
+governor = { workspace = true }
+heck = { workspace = true }
+http = { workspace = true }
+http-body = { workspace = true }
+http-body-util = { workspace = true }
+http-cache = { workspace = true, features = ["manager-moka"] }
+http-cache-semantics = { workspace = true }
+humantime-serde = { workspace = true }
+hyper = { workspace = true }
+hyper-util = { workspace = true, features = ['server-auto', 'server-graceful', 'tokio'] }
+indexmap = { workspace = true, features = ['serde'] }
+isocountry = { workspace = true }
+jemallocator = { workspace = true }
+json-patch = { workspace = true }
+meltdown = { workspace = true }
+mime = { workspace = true }
+moka = { workspace = true }
+nonempty-collections = { workspace = true, features = ["serde"] }
+opentelemetry = { workspace = true }
+opentelemetry_sdk = { workspace = true, features = ["rt-tokio"] }
+opentelemetry-system-metrics = { workspace = true }
+pin-project-lite = { workspace = true }
+r2d2 = { workspace = true }
+rand = { workspace = true }
+redis = { workspace = true }
+regex = { workspace = true }
+reqwest = { workspace = true }
+reqwest-eventsource = { workspace = true }
+rust_decimal = { workspace = true }
+rustc-hash = { workspace = true }
+rusty-s3 = { workspace = true }
+serde = { workspace = true, features = ['derive', 'rc'] }
+serde_json = { workspace = true }
+serde_path_to_error = { workspace = true }
+serde_with = { workspace = true }
+serde_yml = { workspace = true }
+serial_test = { workspace = true, optional = true }
+strum = { workspace = true, features = ["derive"] }
+stubr = { workspace = true, optional = true }
+telemetry = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+tokio-stream = { workspace = true, features = ['sync'] }
+tokio-tungstenite = { workspace = true }
+tokio-util = { workspace = true }
+tower = { workspace = true, features = ['full'] }
+tower_governor = { workspace = true, features = [] }
+tower-http = { workspace = true, features = ['default', 'auth', 'catch-panic', 'add-extension', 'normalize-path', 'request-id', 'trace', 'util', 'sensitive-headers'] }
+tower-otel-http-metrics = { workspace = true }
+tracing = { workspace = true }
+tracing-opentelemetry.workspace = true
+tracing-subscriber = { workspace = true, features = ['env-filter', 'std'] }
+typed-builder = { workspace = true }
+url = { workspace = true, features = ['serde'] }
+utoipa = { workspace = true }
+uuid = { workspace = true, features = ["serde", "v7"] }
+weighted-balance = { workspace = true }
+workspace_root = { workspace = true, optional = true }
+ts-rs = { workspace = true }
+
+[dev-dependencies]
+cargo-husky = { workspace = true, features = ["user-hooks"] }
+pretty_assertions = { workspace = true }
+
+[features]
+default = []
+testing = ["dep:stubr", "dep:serial_test", "dep:workspace_root"]
+
+[lints]
+workspace = true
+
+[[test]]
+name = "auth"
+required-features = ["testing"]
+
+[[test]]
+name = "single_provider"
+required-features = ["testing"]
+
+[[test]]
+name = "load_balance"
+required-features = ["testing"]
+
+[[test]]
+name = "logger"
+required-features = ["testing"]
+
+[[test]]
+name = "weighted_balance"
+required-features = ["testing"]
+
+[[test]]
+name = "health_monitor"
+required-features = ["testing"]
+
+[[test]]
+name = "rate_limit"
+required-features = ["testing"]
+
+[[test]]
+name = "passthrough"
+required-features = ["testing"]
+
+[[test]]
+name = "rate_limit_combinations"
+required-features = ["testing"]
+
+[[test]]
+name = "rate_limit_monitor"
+required-features = ["testing"]
+
+[[test]]
+name = "direct_proxy"
+required-features = ["testing"]
+
+[[test]]
+name = "unified_api"
+required-features = ["testing"]
+
+[[test]]
+name = "cache"
+required-features = ["testing"]

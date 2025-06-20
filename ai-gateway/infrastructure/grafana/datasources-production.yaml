@@ -1,0 +1,46 @@
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    uid: prometheus
+    access: proxy
+    orgId: 1
+    url: https://api.fly.io/prometheus/the-simulation
+    basicAuth: false
+    isDefault: false
+    version: 1
+    editable: false
+    jsonData:
+      httpMethod: GET
+      httpHeaderName1: "Authorization"
+    secureJsonData:
+      httpHeaderValue1: "$__env{PROMETHEUS_API_TOKEN}"
+  - name: Tempo
+    type: tempo
+    access: proxy
+    orgId: 1
+    url: http://rockstar-tempo.internal:3200
+    basicAuth: false
+    isDefault: false
+    version: 1
+    editable: false
+    apiVersion: 1
+    uid: tempo
+    jsonData:
+      httpMethod: GET
+      serviceMap:
+        datasourceUid: prometheus
+  - name: Loki
+    type: loki
+    access: proxy
+    orgId: 1
+    url: http://rockstar-loki.internal:3100
+    basicAuth: false
+    isDefault: false
+    version: 1
+    editable: false
+    apiVersion: 1
+    uid: loki
+    jsonData:
+      httpMethod: GET
