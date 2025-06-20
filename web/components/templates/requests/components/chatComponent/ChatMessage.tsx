@@ -72,6 +72,52 @@ interface ChatMessageProps {
   dragHandle?: ReactNode;
 }
 
+const DeleteItemButton = ({ 
+  onDelete, 
+  className = "absolute top-2 right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity" 
+}: { 
+  onDelete: () => void;
+  className?: string;
+}) => (
+  <Button
+    variant="ghost"
+    size="icon"
+    className={className}
+    onClick={onDelete}
+  >
+    <Trash2Icon className="h-4 w-4 text-muted-foreground" />
+  </Button>
+);
+
+const ContentWrapper = ({ 
+  children, 
+  showDeleteButton, 
+  onDelete, 
+  wrapperClassName,
+  deleteButtonClassName 
+}: {
+  children: React.ReactNode;
+  showDeleteButton?: boolean;
+  onDelete?: () => void;
+  wrapperClassName?: string;
+  deleteButtonClassName?: string;
+}) => {
+  if (showDeleteButton && onDelete) {
+    return (
+      <div className={cn("relative group", wrapperClassName)}>
+        {children}
+        <DeleteItemButton onDelete={onDelete} className={deleteButtonClassName} />
+      </div>
+    );
+  }
+
+  return wrapperClassName ? (
+    <div className={wrapperClassName}>{children}</div>
+  ) : (
+    <div className="my-4">{children}</div>
+  );
+};
+
 const renderToolMessage = (
   content: string,
   message: Message,
@@ -153,26 +199,15 @@ const renderImageContent = (
     </div>
   );
 
-  if (options.showDeleteButton && options.onDelete) {
-    return (
-      <div className={cn("relative group", options.wrapperClassName)}>
-        {imageElement}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute top-1/2 right-2 -translate-y-1/2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-          onClick={options.onDelete}
-        >
-          <Trash2Icon className="h-4 w-4 text-muted-foreground" />
-        </Button>
-      </div>
-    );
-  }
-
-  return options.wrapperClassName ? (
-    <div className={options.wrapperClassName}>{imageElement}</div>
-  ) : (
-    <div className="my-4">{imageElement}</div>
+  return (
+    <ContentWrapper
+      showDeleteButton={options.showDeleteButton}
+      onDelete={options.onDelete}
+      wrapperClassName={options.wrapperClassName}
+      deleteButtonClassName="absolute top-1/2 right-2 -translate-y-1/2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+    >
+      {imageElement}
+    </ContentWrapper>
   );
 };
 
@@ -206,25 +241,17 @@ const renderTextContent = (
 
   const shouldShowDeleteButton = options.showDeleteButton && 
     chatMode === "PLAYGROUND_INPUT" && 
-    options.onDelete;
+    !!options.onDelete;
 
-  if (shouldShowDeleteButton) {
-    return (
-      <div className="relative group">
-        {textElement}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute top-2 right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-          onClick={options.onDelete}
-        >
-          <Trash2Icon className="h-4 w-4 text-muted-foreground" />
-        </Button>
-      </div>
-    );
-  }
-
-  return textElement;
+  return (
+    <ContentWrapper
+      showDeleteButton={shouldShowDeleteButton}
+      onDelete={options.onDelete}
+      deleteButtonClassName="absolute top-2 right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+    >
+      {textElement}
+    </ContentWrapper>
+  );
 };
 
 const renderPdfContent = (
@@ -245,27 +272,79 @@ const renderPdfContent = (
     </div>
   );
 
-  if (options.showDeleteButton && options.onDelete) {
-    return (
-      <div className={cn("relative group", options.wrapperClassName)}>
-        {pdfElement}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute top-2 right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-          onClick={options.onDelete}
-        >
-          <Trash2Icon className="h-4 w-4 text-muted-foreground" />
-        </Button>
-      </div>
-    );
-  }
-
-  return options.wrapperClassName ? (
-    <div className={options.wrapperClassName}>{pdfElement}</div>
-  ) : (
-    <div className="my-4">{pdfElement}</div>
+  return (
+    <ContentWrapper
+      showDeleteButton={options.showDeleteButton}
+      onDelete={options.onDelete}
+      wrapperClassName={options.wrapperClassName}
+    >
+      {pdfElement}
+    </ContentWrapper>
   );
+};
+
+const renderContentByType = (
+  message: Message,
+  messageType: MessageType,
+  displayContent: string,
+  chatMode: ChatMode,
+  mappedRequest: MappedLLMRequest,
+  messageIndex: number,
+  mode: "rendered" | "raw" | "json" | "debug",
+  options: {
+    isPartOfContentArray?: boolean;
+    parentIndex?: number;
+    onChatChange?: (_mappedRequest: MappedLLMRequest) => void;
+    showDeleteButton?: boolean;
+    onDelete?: () => void;
+  } = {}
+) => {
+  switch (messageType) {
+    case "image":
+      return renderImageContent(message, {
+        showDeleteButton: options.showDeleteButton,
+        onDelete: options.onDelete,
+      });
+    case "pdf":
+      return renderPdfContent(message, {
+        showDeleteButton: options.showDeleteButton,
+        onDelete: options.onDelete,
+      });
+    case "tool":
+      return mode === "raw" && chatMode !== "PLAYGROUND_INPUT" ? (
+        <MarkdownEditor
+          language="json"
+          setText={() => {}}
+          text={
+            typeof message === "string"
+              ? message
+              : JSON.stringify(message, null, 2)
+          }
+          disabled
+        />
+      ) : (
+        renderToolMessage(
+          displayContent,
+          message,
+          chatMode === "PLAYGROUND_INPUT",
+          mappedRequest,
+          messageIndex,
+          options.onChatChange
+        )
+      );
+    case "text":
+      return renderTextContent(
+        message,
+        displayContent,
+        chatMode,
+        mappedRequest,
+        messageIndex,
+        mode,
+        options
+      );
+    default:
+      return null;
+  }
 };
 
 export default function ChatMessage({
@@ -283,9 +362,8 @@ export default function ChatMessage({
   const { mode } = useRequestRenderModeStore();
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
-  const fileInputRefs = useRef<HTMLInputElement[]>([]);
-  const [fileInputCount, setFileInputCount] = useState(0);
-  const [roleChangeInputs, setRoleChangeInputs] = useState<Set<number>>(new Set());
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [pendingFileAction, setPendingFileAction] = useState<'add' | 'change' | null>(null);
 
   const toggleMessage = (index: number) => {
     setExpandedMessages((prev) => ({
@@ -294,17 +372,16 @@ export default function ChatMessage({
     }));
   };
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, inputIndex: number) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !onChatChange) {
+    if (!file || !onChatChange || !pendingFileAction) {
       return;
     }
 
-    if (roleChangeInputs.has(inputIndex)) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const base64 = event.target?.result as string;
-        
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target?.result as string;
+      if (pendingFileAction === 'change') {
         onChatChange({
           ...mappedRequest,
           schema: {
@@ -327,88 +404,74 @@ export default function ChatMessage({
             },
           },
         });
-      };
-      reader.readAsDataURL(file);
-      
-      setRoleChangeInputs(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(inputIndex);
-        return newSet;
-      });
-      return;
-    }
+      } else {
+        onChatChange({
+          ...mappedRequest,
+          schema: {
+            ...mappedRequest.schema,
+            request: {
+              ...mappedRequest.schema.request,
+              messages: mappedRequest.schema.request?.messages?.map(
+                (msg, i) => {
+                  if (i === messageIndex) {
+                    if (msg._type === "contentArray" && msg.contentArray) {
+                      return {
+                        ...msg,
+                        contentArray: [
+                          ...msg.contentArray,
+                          {
+                            _type: "image" as const,
+                            role: "user",
+                            image_url: base64,
+                            id: `img-${messageIndex}-${Date.now()}`,
+                          },
+                        ],
+                      };
+                    }
+                    
+                    const contentArray = [];
+                    
+                    contentArray.push({
+                      _type: "message" as const,
+                      role: "user",
+                      content: msg.content,
+                      id: `text-${messageIndex}-${Date.now()}`,
+                    });
+                    
+                    contentArray.push({
+                      _type: "image" as const,
+                      role: "user",
+                      image_url: base64,
+                      id: `img-${messageIndex}-${Date.now() + 1}`,
+                    });
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const base64 = event.target?.result as string;
-
-      onChatChange({
-        ...mappedRequest,
-        schema: {
-          ...mappedRequest.schema,
-          request: {
-            ...mappedRequest.schema.request,
-            messages: mappedRequest.schema.request?.messages?.map(
-              (msg, i) => {
-                if (i === messageIndex) {
-                  if (msg._type === "contentArray" && msg.contentArray) {
                     return {
-                      ...msg,
-                      contentArray: [
-                        ...msg.contentArray,
-                        {
-                          _type: "image" as const,
-                          role: "user",
-                          image_url: base64,
-                          id: `img-${messageIndex}-${Date.now()}`,
-                        },
-                      ],
+                      content: "",
+                      _type: "contentArray" as const,
+                      role: "user",
+                      contentArray,
+                      id: msg.id || `msg-${messageIndex}-${Date.now()}`,
                     };
                   }
-                  
-                  const contentArray = [];
-                  
-                  contentArray.push({
-                    _type: "message" as const,
-                    role: "user",
-                    content: msg.content,
-                    id: `text-${messageIndex}-${Date.now()}`,
-                  });
-                  
-                  contentArray.push({
-                    _type: "image" as const,
-                    role: "user",
-                    image_url: base64,
-                    id: `img-${messageIndex}-${Date.now() + 1}`,
-                  });
-
-                  return {
-                    content: "",
-                    _type: "contentArray" as const,
-                    role: "user",
-                    contentArray,
-                    id: msg.id || `msg-${messageIndex}-${Date.now()}`,
-                  };
+                  return msg;
                 }
-                return msg;
-              }
-            ),
+              ),
+            },
           },
-        },
-      });
+        });
+      }
     };
     reader.onerror = (error) => {
       console.error("FileReader error:", error);
     };
     reader.readAsDataURL(file);
+    setPendingFileAction(null);
   };
 
   const addImageToMessage = () => {
-    const newInputIndex = fileInputCount;
-    setFileInputCount(prev => prev + 1);
-    
+    setPendingFileAction('add');
     setTimeout(() => {
-      fileInputRefs.current[newInputIndex]?.click();
+      fileInputRef.current?.click();
     }, 0);
   };
 
@@ -445,13 +508,9 @@ export default function ChatMessage({
     }
 
     if (newRole === "image") {
-      const newInputIndex = fileInputCount;
-      setFileInputCount(prev => prev + 1);
-      
-      setRoleChangeInputs(prev => new Set(prev).add(newInputIndex));
-      
+      setPendingFileAction('change');
       setTimeout(() => {
-        fileInputRefs.current[newInputIndex]?.click();
+        fileInputRef.current?.click();
       }, 0);
       return;
     }
@@ -674,20 +733,13 @@ export default function ChatMessage({
       ref={setNodeRef}
       style={style}
     >
-      {Array.from({ length: fileInputCount }, (_, index) => (
-        <input
-          key={index}
-          type="file"
-          ref={(el) => {
-            if (el) {
-              fileInputRefs.current[index] = el;
-            }
-          }}
-          className="hidden"
-          accept="image/*"
-          onChange={(e) => handleFileChange(e, index)}
-        />
-      ))}
+      <input
+        type="file"
+        ref={fileInputRef}
+        className="hidden"
+        accept="image/*"
+        onChange={handleFileChange}
+      />
       
       {/* Message Role Header */}
       {(chatMode !== "PLAYGROUND_OUTPUT" ||
@@ -719,112 +771,52 @@ export default function ChatMessage({
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
       >
-        {(() => {
-          switch (messageType) {
-            case "image":
-              return renderImageContent(message, {
-                showDeleteButton: chatMode === "PLAYGROUND_INPUT",
-                onDelete: () => deleteMessage(messageIndex),
-              });
-            case "pdf":
-              return renderPdfContent(message, {
-                showDeleteButton: chatMode === "PLAYGROUND_INPUT",
-                onDelete: () => deleteMessage(messageIndex),
-              });
-            case "tool":
-              return mode === "raw" && chatMode !== "PLAYGROUND_INPUT" ? (
-                <MarkdownEditor
-                  language="json"
-                  setText={() => {}}
-                  text={
-                    typeof message === "string"
-                      ? message
-                      : JSON.stringify(message, null, 2)
-                  }
-                  disabled
-                />
-              ) : (
-                renderToolMessage(
-                  displayContent,
-                  message,
-                  chatMode === "PLAYGROUND_INPUT",
-                  mappedRequest,
-                  messageIndex,
-                  onChatChange
-                )
-              );
-            case "text":
-              return renderTextContent(
-                message,
-                displayContent,
-                chatMode,
-                mappedRequest,
-                messageIndex,
-                mode,
-                {
-                  isPartOfContentArray,
-                  parentIndex,
-                  onChatChange,
-                }
-              );
-            case "contentArray":
-              return (
-                <div className="flex flex-col gap-4">
-                  {message.contentArray?.map((content, index) => {
-                    const contentType = getMessageType(content);
-                    
-                    switch (contentType) {
-                      case "image":
-                        return (
-                          <div key={index}>
-                            {renderImageContent(content, {
-                              showDeleteButton: chatMode === "PLAYGROUND_INPUT",
-                              onDelete: () => deleteContentArrayItem(index),
-                            })}
-                          </div>
-                        );
-                      
-                      case "text":
-                        return (chatMode === "PLAYGROUND_INPUT" || content.content) ? (
-                          <div key={index}>
-                            {renderTextContent(
-                              content,
-                              content.content || "",
-                              chatMode,
-                              mappedRequest,
-                              index,
-                              mode,
-                              {
-                                isPartOfContentArray: true,
-                                parentIndex: messageIndex,
-                                onChatChange,
-                                showDeleteButton: chatMode === "PLAYGROUND_INPUT",
-                                onDelete: () => deleteContentArrayItem(index),
-                              }
-                            )}
-                          </div>
-                        ) : null;
-                      
-                      case "pdf":
-                        return (
-                          <div key={index}>
-                            {renderPdfContent(content, {
-                              showDeleteButton: chatMode === "PLAYGROUND_INPUT",
-                              onDelete: () => deleteContentArrayItem(index),
-                            })}
-                          </div>
-                        );
-                      
-                      default:
-                        return null;
+        {messageType === "contentArray" ? (
+          <div className="flex flex-col gap-4">
+            {message.contentArray?.map((content, index) => {
+              const contentType = getMessageType(content);
+              const shouldShowContent = chatMode === "PLAYGROUND_INPUT" || content.content;
+              
+              return shouldShowContent ? (
+                <div key={index}>
+                  {renderContentByType(
+                    content,
+                    contentType,
+                    content.content || "",
+                    chatMode,
+                    mappedRequest,
+                    index,
+                    mode,
+                    {
+                      isPartOfContentArray: true,
+                      parentIndex: messageIndex,
+                      onChatChange,
+                      showDeleteButton: chatMode === "PLAYGROUND_INPUT",
+                      onDelete: () => deleteContentArrayItem(index),
                     }
-                  })}
+                  )}
                 </div>
-              );
-            default:
-              return null;
-          }
-        })()}
+              ) : null;
+            })}
+          </div>
+        ) : (
+          renderContentByType(
+            message,
+            messageType,
+            displayContent,
+            chatMode,
+            mappedRequest,
+            messageIndex,
+            mode,
+            {
+              isPartOfContentArray,
+              parentIndex,
+              onChatChange,
+              showDeleteButton: chatMode === "PLAYGROUND_INPUT",
+              onDelete: () => deleteMessage(messageIndex),
+            }
+          )
+        )}
 
         {isLongMessage && !["image", "pdf"].includes(messageType) && (
           <Button
