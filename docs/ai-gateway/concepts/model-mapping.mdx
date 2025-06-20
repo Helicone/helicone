@@ -110,7 +110,7 @@ The gateway uses a **3-tier mapping system** with automatic fallback. When load 
             providers:
               - openai
               - anthropic
-              - gemini
+              - google
     ```
 
     **What happens:** When load balancer routes a `gpt-4o` request to Anthropic, it uses `claude-3-opus` instead of the default `claude-3-5-sonnet` mapping.
@@ -137,7 +137,7 @@ The gateway uses a **3-tier mapping system** with automatic fallback. When load 
             providers:
               - openai
               - anthropic
-              - gemini
+              - google
     ```
 
     **What happens:** Even though `claude-3-5-haiku` is the logical equivalent, all requests get mapped to `claude-3-5-sonnet` when routed to Anthropic.
@@ -161,7 +161,7 @@ The gateway uses a **3-tier mapping system** with automatic fallback. When load 
             providers:
               - openai
               - anthropic
-              - gemini
+              - google
       
       development:
         # Inherits the global default mappings above
@@ -171,7 +171,7 @@ The gateway uses a **3-tier mapping system** with automatic fallback. When load 
             providers:
               - provider: anthropic
                 weight: '0.8'
-              - provider: gemini
+              - provider: google
                 weight: '0.2'
     ```
 
