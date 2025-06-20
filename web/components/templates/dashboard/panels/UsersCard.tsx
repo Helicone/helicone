@@ -7,29 +7,29 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 
-interface CostsCardProps {
-  totalCost: string;
+interface UsersCardProps {
+  totalUsers: string;
   isLoading: boolean;
   data: {
     date: string;
-    cost: number;
+    users: number;
   }[];
 }
 
 const chartConfig = {
-  cost: {
-    label: "Cost",
-    color: "oklch(var(--chart-9))",
+  users: {
+    label: "Users",
+    color: "oklch(var(--chart-10))",
   },
 } satisfies ChartConfig;
 
-export default function CostsCard({
-  totalCost,
+export default function UsersCard({
+  totalUsers,
   isLoading,
   data,
-}: CostsCardProps) {
+}: UsersCardProps) {
   return (
-    <StatsCard title="Costs" value={totalCost} isLoading={isLoading}>
+    <StatsCard title="Users" value={totalUsers} isLoading={isLoading}>
       <ChartContainer config={chartConfig} className="h-full w-full">
         <BarChart accessibilityLayer data={data}>
           <CartesianGrid vertical={false} />
@@ -43,7 +43,7 @@ export default function CostsCard({
             cursor={false}
             content={<ChartTooltipContent hideLabel />}
           />
-          <Bar dataKey="cost" fill="var(--color-cost)" />
+          <Bar dataKey="users" fill="var(--color-users)" />
         </BarChart>
       </ChartContainer>
     </StatsCard>

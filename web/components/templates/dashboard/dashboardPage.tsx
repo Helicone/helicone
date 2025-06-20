@@ -53,6 +53,7 @@ import { cn } from "@/lib/utils";
 import ErrorsCard from "./panels/ErrorsCard";
 import ModelsCard from "./panels/ModelsCard";
 import CostsCard from "./panels/CostsCard";
+import UsersCard from "./panels/UsersCard";
 const ResponsiveGridLayout = WidthProvider(Responsive) as React.ComponentType<
   ResponsiveProps & { children?: React.ReactNode }
 >;
@@ -456,29 +457,20 @@ const DashboardPage = (props: DashboardPageProps) => {
                   />
                 </div>
                 <div key="users">
-                  <StyledAreaChart
-                    title={"Users"}
-                    value={
+                  <UsersCard
+                    totalUsers={
                       metrics.activeUsers.data?.data
                         ? formatLargeNumber(metrics.activeUsers.data?.data)
                         : "0"
                     }
-                    isDataOverTimeLoading={overTimeData.users.isLoading}
-                  >
-                    <BarChart
-                      className="h-[14rem]"
-                      data={
-                        overTimeData.users.data?.data?.map((r) => ({
-                          date: getTimeMap(timeIncrement)(r.time),
-                          users: r.count,
-                        })) ?? []
-                      }
-                      index="date"
-                      categories={["users"]}
-                      colors={["orange"]}
-                      showYAxis={false}
-                    />
-                  </StyledAreaChart>
+                    isLoading={overTimeData.users.isLoading}
+                    data={
+                      overTimeData.users.data?.data?.map((r) => ({
+                        date: getTimeMap(timeIncrement)(r.time),
+                        users: r.count,
+                      })) ?? []
+                    }
+                  />
                 </div>
                 <div key="countries">
                   <CountryPanel timeFilter={timeFilter} userFilters={filters} />
