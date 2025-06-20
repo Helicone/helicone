@@ -33,6 +33,10 @@ Rate limiting helps you:
 
 The AI Gateway uses burst-aware rate limiting with smooth sustained rates. Control request frequency using capacity (burst allowance) and refill frequency (sustained rate). Uses GCRA (Generic Cell Rate Algorithm) for smooth token bucket behavior that's more sophisticated than simple sliding window approaches.
 
+<Note>
+  Additional rate limiting features are [coming soon](#coming-soon) for more granular control.
+</Note>
+
 #### How it works
 1. Each API key gets a virtual token bucket with specified capacity
 2. Requests consume tokens from the bucket
@@ -196,3 +200,5 @@ The following rate limiting features are planned for future releases:
 | **Per-End-User Limits** | Rate limits applied to end users via `Helicone-User-Id` header for SaaS user quotas | v1 |
 | **Per-Team Limits** | Rate limits applied to teams for budget and governance controls | v2 |
 | **Per-Team-Member Limits** | Rate limits applied to individual team members for governance | v2 |
+| **Spend Limits** | Cost-based limits that restrict usage based on dollar amounts spent per time period | v2 |
+| **Usage Limits** | Token-based limits that restrict usage based on input/output tokens consumed | v2 |
