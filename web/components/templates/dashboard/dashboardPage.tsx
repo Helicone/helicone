@@ -47,12 +47,11 @@ import Header from "@/components/shared/Header";
 import LivePill from "@/components/shared/LivePill";
 import ThemedTimeFilter from "@/components/shared/themed/themedTimeFilter";
 import FilterASTButton from "@/filterAST/FilterASTButton";
-import { Card } from "@/components/ui/card";
 import { DollarSignIcon } from "lucide-react";
-import { ChartConfig } from "@/components/ui/chart";
 import RequestsOverTime from "./panels/RequestsOverTime";
 import { cn } from "@/lib/utils";
 import ErrorsCard from "./panels/ErrorsCard";
+import ModelsCard from "./panels/ModelsCard";
 const ResponsiveGridLayout = WidthProvider(Responsive) as React.ComponentType<
   ResponsiveProps & { children?: React.ReactNode }
 >;
@@ -401,6 +400,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                 </div>
                 <div key="errors">
                   <ErrorsCard
+                    isLoading={overTimeData.requestsWithStatus.isLoading}
                     data={accumulatedStatusCounts}
                     totalErrors={accumulatedStatusCounts.reduce(
                       (sum, e) => sum + e.value,
@@ -418,7 +418,21 @@ const DashboardPage = (props: DashboardPageProps) => {
                 </div>
 
                 <div key="models">
-                  <StyledAreaChart
+                  <ModelsCard
+                    isLoading={isModelsLoading}
+                    models={
+                      models?.data
+                        ?.map((model) => ({
+                          name: model.model || "n/a",
+                          value: model.total_requests,
+                        }))
+                        .sort(
+                          (a, b) =>
+                            b.value - a.value - (b.name === "n/a" ? 1 : 0)
+                        ) ?? []
+                    }
+                  />
+                  {/* <StyledAreaChart
                     title={`Top Models`}
                     value={undefined}
                     isDataOverTimeLoading={isModelsLoading}
@@ -448,7 +462,7 @@ const DashboardPage = (props: DashboardPageProps) => {
                       className="overflow-auto h-full"
                       showAnimation={true}
                     />
-                  </StyledAreaChart>
+                  </StyledAreaChart> */}
                 </div>
                 <div key="costs">
                   <StyledAreaChart
