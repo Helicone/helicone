@@ -4,7 +4,7 @@ sidebarTitle: "Configuration"
 description: "Complete reference for configuring your LLM Gateway"
 ---
 
-The AI Gateway is configured through a `config.yaml` file that defines how requests are routed, balanced, and processed across different LLM providers.
+The AI Gateway is configured through a `ai-gateway-config.yaml` file that defines how requests are routed, load balanced, and processed across different LLM providers.
 
 ## Routers
 
@@ -16,18 +16,18 @@ Each Helicone AI Gateway deployment can configure multiple independent routing p
   ```yaml
   routers:
     production:
-      balance:
+      load-balance:
         chat:
           strategy: latency
-          targets:
+          providers:
             - openai
             - anthropic
     
     experimental:
-      balance:
+      load-balance:
         chat:
           strategy: weighted
-          targets:
+          providers:
             - provider: anthropic
               weight: '0.9'
             - provider: openai
@@ -41,7 +41,7 @@ Each Helicone AI Gateway deployment can configure multiple independent routing p
 
 Distribute requests across multiple providers to optimize performance, costs, and reliability. The gateway supports latency-based and weighted strategies for different use cases.
 
-[Learn more](/gateway/features/loadbalancing)
+[Learn more](/ai-gateway/features/loadbalancing)
 
 ### Latency Strategy
 
@@ -54,14 +54,12 @@ Distribute requests across multiple providers to optimize performance, costs, an
       load-balance:
         chat:
           strategy: latency
-          targets:
+          providers:
             - openai
             - anthropic
             - gemini
             - ollama
   ```
-
-  **How it works:** Routes requests to the provider with the lowest measured latency.
 </ParamField>
 
 ### Weighted Strategy
@@ -75,7 +73,7 @@ Distribute requests across multiple providers to optimize performance, costs, an
       load-balance:
         chat:
           strategy: weighted
-          targets:
+          providers:
             - provider: anthropic
               weight: '0.95'
             - provider: openai
@@ -85,14 +83,14 @@ Distribute requests across multiple providers to optimize performance, costs, an
   **Important:** Weights must sum to exactly `1.0`
 </ParamField>
 
-### Balance Targets
+### Balance providers
 
-<ParamField path="routers.[name].load-balance.chat.targets" type="array">
+<ParamField path="routers.[name].load-balance.chat.providers" type="array">
   List of target providers for load balancing.
 
   **For Latency Strategy:**
   ```yaml
-  targets:
+  providers:
     - openai
     - anthropic
     - gemini
@@ -100,7 +98,7 @@ Distribute requests across multiple providers to optimize performance, costs, an
 
   **For Weighted Strategy:**
   ```yaml
-  targets:
+  providers:
     - provider: anthropic
       weight: '0.7'
     - provider: openai
@@ -112,7 +110,7 @@ Distribute requests across multiple providers to optimize performance, costs, an
 
 Store and reuse LLM responses for identical requests to dramatically reduce costs and improve response times. Cache directives control response freshness and staleness tolerance.
 
-[Learn more](/gateway/features/cache)
+[Learn more](/ai-gateway/features/cache)
 
 <ParamField path="routers.[name].cache" type="object" optional>
   Configure response caching for a router.
@@ -135,6 +133,8 @@ Store and reuse LLM responses for identical requests to dramatically reduce cost
   cache:
     enabled: true
   ```
+
+  **How it works:** When enabled, the Gateway will cache responses for identical requests. Optionally override with `Helicone-Cache-Enabled: false` request header.
 </ParamField>
 
 <ParamField path="routers.[name].cache.directive" type="string">
@@ -145,7 +145,7 @@ Store and reuse LLM responses for identical requests to dramatically reduce cost
     directive: "max-age=3600, max-stale=1800"
   ```
 
-  **How it works:** Defines cache freshness (`max-age`) and staleness tolerance (`max-stale`) in seconds.
+  **How it works:** Defines cache freshness (`max-age`) and staleness tolerance (`max-stale`) in seconds for all requests. Optionally override with `cache-control` request headers.
 </ParamField>
 
 <ParamField path="routers.[name].cache.buckets" type="number">
@@ -170,88 +170,11 @@ Store and reuse LLM responses for identical requests to dramatically reduce cost
   **How it works:** Creates isolated cache namespaces - different seeds maintain separate cache spaces for the same requests.
 </ParamField>
 
-## Retries
-
-Automatic retry logic for failed requests with configurable backoff strategies to improve reliability without overwhelming providers.
-
-[Learn more](/gateway/features/retries)
-
-<ParamField path="routers.[name].retries" type="object" optional>
-  Configure retry behavior for this router.
-
-  ```yaml
-  routers:
-    production:
-      retries:
-        enabled: true
-        max-retries: 3
-        strategy: exponential
-        base: 1s
-        max: 30s
-  ```
-</ParamField>
-
-<ParamField path="routers.[name].retries.enabled" type="boolean">
-  Enable or disable retry logic.
-
-  ```yaml
-  retries:
-    enabled: false
-  ```
-
-  **When disabled:** Failed requests immediately return errors without retrying.
-</ParamField>
-
-<ParamField path="routers.[name].retries.max-retries" type="integer">
-  Maximum number of retry attempts before giving up.
-
-  ```yaml
-  retries:
-    max-retries: 5
-  ```
-
-  **Range:** 0-255. Setting to 0 effectively disables retries.
-</ParamField>
-
-<ParamField path="routers.[name].retries.strategy" type="string">
-  Backoff strategy for spacing retry attempts.
-
-  ```yaml
-  retries:
-    strategy: exponential
-  ```
-
-  **Options:**
-  - `exponential` - Doubles wait time between retries (recommended)
-</ParamField>
-
-<ParamField path="routers.[name].retries.base" type="duration">
-  Initial wait time before the first retry attempt.
-
-  ```yaml
-  retries:
-    base: 500ms
-  ```
-
-  **Format:** Human-readable durations like `1s`, `500ms`, `2m`
-</ParamField>
-
-<ParamField path="routers.[name].retries.max" type="duration">
-  Maximum wait time between retry attempts.
-
-  ```yaml
-  retries:
-    max: 10s
-  ```
-
-  **Exponential cap:** Prevents exponential backoff from growing indefinitely.
-</ParamField>
-
 ## Rate Limiting
 
 Control request frequency using GCRA (Generic Cell Rate Algorithm) with burst capacity and smooth rate limiting. Global limits are checked first, then router-specific limits are applied.
 
-[Learn more](/gateway/features/rate-limiting)
+[Learn more](/ai-gateway/features/rate-limiting)
 
 ### Global Rate Limiting
 
@@ -265,7 +188,6 @@ Control request frequency using GCRA (Generic Cell Rate Algorithm) with burst ca
       per-api-key:
         capacity: 500
         refill-frequency: 1s
-      cleanup-interval: 5m
   ```
 
   **How it works:** These limits are checked first for every request across all routers.
@@ -301,6 +223,7 @@ The following fields are available for both global and router-level rate limitin
 
   **Options:**
   - `in-memory` - Local memory storage (default)
+  - `redis` - Redis storage (coming soon...) 
 </ParamField>
 
 <ParamField path="[context].rate-limit.per-api-key" type="object">
@@ -347,9 +270,9 @@ The following fields are available for both global and router-level rate limitin
 
 ## Helicone Observability
 
-Configure integration with the Helicone platform for authentication and observability. When enabled, requests must include a valid Helicone API key.
+Configure integration with the Helicone platform for authentication and/or observability. When enabled, requests must include a valid Helicone API key.
 
-[Learn more](/gateway/features/helicone-integration)
+[Learn more](/ai-gateway/features/helicone-integration)
 
 ### Authentication
 
@@ -381,7 +304,7 @@ If you plan on enabling authentication, you'll need to register your router with
 Configure LLM providers, their endpoints, and available models. 
 
 <Note>
-The gateway ships with [comprehensive defaults](https://github.com/Helicone/helicone-router/blob/main/llm-proxy/config/embedded/providers.yaml) for all major providers. Most users will not need to configure this section, [this guide](/gateway/features/providers) will walk you through when you might need to.
+The gateway ships with [comprehensive defaults](https://github.com/Helicone/helicone-router/blob/main/llm-proxy/config/embedded/providers.yaml) for all major providers. Most users will not need to configure this section, [this guide](/ai-gateway/features/providers) will walk you through when you might need to.
 </Note>
 
 <ParamField path="providers" type="object">
@@ -448,7 +371,7 @@ The gateway ships with [comprehensive defaults](https://github.com/Helicone/heli
 Define equivalencies between models from different providers for seamless switching and load balancing. 
 
 <Note>
-The Gateway ships with [comprehensive defaults](https://github.com/Helicone/helicone-router/blob/main/llm-proxy/config/embedded/model-mapping.yaml) for all major providers. Most users will not need to configure this section, [this guide](/gateway/features/model-mapping) will walk you through when you might need to.
+The Gateway ships with [comprehensive defaults](https://github.com/Helicone/helicone-router/blob/main/llm-proxy/config/embedded/model-mapping.yaml) for all major providers. Most users will not need to configure this section, [this guide](/ai-gateway/features/model-mapping) will walk you through when you might need to.
 </Note>
 
 <ParamField path="routers.[name].model-mappings" type="object" optional>
@@ -456,7 +379,7 @@ The Gateway ships with [comprehensive defaults](https://github.com/Helicone/heli
 
   ```yaml
   routers:
-    custom-equivalents:
+    production:
       model-mappings:
         gpt-4o: claude-3-opus
         claude-3-5-sonnet: gemini-1.5-pro
@@ -477,26 +400,26 @@ The Gateway ships with [comprehensive defaults](https://github.com/Helicone/heli
 
 ## Telemetry
 
-Configure monitoring and logging via OpenTelemetry for the AI Gateway's health and performance.
+Configure OpenTelemetry monitoring for the AI Gateway application's health and performance.
 
 <Note>
   Monitor the AI Gateway's health and performance with OpenTelemetry. We provide Docker Compose for local testing and Grafana dashboard configs for production. 
   
-  [Learn more](/gateway/features/observability)
+  [Learn more](/ai-gateway/features/observability)
 </Note>
 
-<ParamField path="telemetry.level" type="string" default="info,llm_proxy=trace">
+<ParamField path="telemetry.level" type="string" default="info">
   Logging level in env logger format.
 
   ```yaml
   telemetry:
-    level: "info,llm_proxy=trace"
+    level: "info"
   ```
 
   **Common patterns:**
   - `"info"` - General information for all modules
-  - `"debug,llm_proxy=info"` - Debug for dependencies, info for gateway
-  - `"warn,hyper=off"` - Warnings only, disable specific modules
+  - `"debug"` - Debug for dependencies, info for gateway
+  - `"warn"` - Warnings only, disable specific modules
 </ParamField>
 
 <ParamField path="telemetry.otlp-endpoint" type="string" default="http://localhost:4317/v1/metrics">
@@ -505,6 +428,15 @@ Configure monitoring and logging via OpenTelemetry for the AI Gateway's health a
   ```yaml
   telemetry:
     otlp-endpoint: "http://localhost:4317"
+  ```
+</ParamField>
+
+<ParamField path="telemetry.propagate" type="boolean" default="true">
+  Enables tracing propagation via OpenTelemetry [context propagation](https://opentelemetry.io/docs/concepts/context-propagation/).
+
+  ```yaml
+  telemetry:
+    propagate: true
   ```
 </ParamField>
 
@@ -538,7 +470,7 @@ Control which headers are returned to provide visibility into the gateway's rout
 
 Configure the AI Gateway's runtime behavior for different deployment patterns and environments.
 
-[Learn more about deployment modes](/gateway/deployment)
+[Learn more about deployment modes](/ai-gateway/deployment)
 
 <ParamField path="deployment-target" type="string" default="sidecar">
   Deployment environment type.

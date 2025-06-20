@@ -20,7 +20,7 @@ Load balancing helps you:
 - **Enable gradual rollouts** and A/B testing across providers
 
 <Note>
-  For complete configuration options and syntax, see the [Configuration Reference](/gateway/config#load-balancing).
+  For complete configuration options and syntax, see the [Configuration Reference](/ai-gateway/config#load-balancing).
 </Note>
 
 ### Available Strategies
@@ -46,7 +46,7 @@ Load balancing helps you:
         load-balance:
           chat:
             strategy: latency
-            targets:
+            providers:
               - openai
               - anthropic
               - google-gemini
@@ -67,7 +67,7 @@ Load balancing helps you:
         load-balance:
           chat:
             strategy: weighted
-            targets:
+            providers:
               - provider: anthropic
                 weight: 0.75
               - provider: openai
@@ -116,7 +116,7 @@ Load balancing helps you:
         load-balance:
           chat:
             strategy: latency
-            targets:
+            providers:
               - openai
               - anthropic
               - gemini
@@ -132,7 +132,7 @@ Load balancing helps you:
         load-balance:
           chat:
             strategy: weighted
-            targets:
+            providers:
               - provider: anthropic    # Claude 3.5 Sonnet: $3/$15 per 1M tokens
                 weight: 0.80
               - provider: openai       # GPT-4o: $5/$15 per 1M tokens
@@ -149,7 +149,7 @@ Load balancing helps you:
         load-balance:
           chat:
             strategy: weighted
-            targets:
+            providers:
               - provider: openai       # Current stable provider
                 weight: 0.90
               - provider: gemini       # Testing new provider
@@ -166,7 +166,7 @@ Load balancing helps you:
         load-balance:
           chat:
             strategy: weighted
-            targets:
+            providers:
               - provider: anthropic    # Migrating TO this provider
                 weight: 0.70
               - provider: openai       # Migrating FROM this provider
@@ -183,7 +183,7 @@ Load balancing helps you:
         load-balance:
           chat:
             strategy: weighted
-            targets:
+            providers:
               - provider: ollama       # Local models for dev
                 weight: 1.0
       
@@ -191,7 +191,7 @@ Load balancing helps you:
         load-balance:
           chat:
             strategy: latency
-            targets:
+            providers:
               - openai
               - anthropic
     ```
@@ -250,7 +250,7 @@ All load balancing strategies automatically handle provider failures through int
   The AI Gateway monitors provider health every 5 seconds by default. The health check uses a rolling 60-second window with configurable error thresholds.
 </Note>
 
-To customize health monitoring behavior, see the [Configuration Reference](/gateway/config#health-monitoring).
+To customize health monitoring behavior, see the [Configuration Reference](/ai-gateway/config#health-monitoring).
 
 ### Compliance-Based Routing
 
@@ -273,7 +273,7 @@ For compliance requirements, deploy **multiple router instances** rather than co
         load-balance:
           chat:
             strategy: latency
-            targets: [anthropic-eu, openai-eu]
+            providers: [anthropic-eu, openai-eu]
     ```
   </Tab>
 
@@ -291,7 +291,7 @@ For compliance requirements, deploy **multiple router instances** rather than co
         load-balance:
           chat:
             strategy: weighted
-            targets:
+            providers:
               - provider: anthropic-baa
                 weight: 1.0
     
@@ -314,7 +314,7 @@ For compliance requirements, deploy **multiple router instances** rather than co
         load-balance:
           chat:
             strategy: weighted
-            targets:
+            providers:
               - provider: ollama
                 weight: 1.0
     ```
