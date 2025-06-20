@@ -38,7 +38,7 @@ All caching uses **exact parameter matching**—identical requests (model, messa
 routers:
   default:
     cache:
-      enabled: true
+      store: in-memory
       directive: "max-age=3600, max-stale=1800"  # 1-hour TTL, 30-min stale
       buckets: 1   # Single response per cache key
 ```

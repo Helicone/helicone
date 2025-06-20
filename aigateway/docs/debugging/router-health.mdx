@@ -18,7 +18,7 @@ Enable observability by configuring the telemetry section in your `config.yaml`:
 
 ```yaml
 telemetry:
-  level: "info,llm_proxy=trace"
+  level: "info,ai_gateway=trace"
   otlp-endpoint: "http://localhost:4317"
 ```
 
@@ -43,22 +43,6 @@ telemetry:
 ## Configuration Options
 
 <Tabs>
-  <Tab title="Development">
-    **Local development with console output**
-    
-    ```yaml
-    telemetry:
-      level: "debug,llm_proxy=trace"
-      exporter: "stdout"
-    ```
-    
-    Perfect for development and debugging:
-    - Pretty-printed logs to console
-    - Full trace information
-    - No external dependencies
-    - Human-readable format
-  </Tab>
-
   <Tab title="Production">
     **Full observability stack integration**
     
@@ -76,6 +60,38 @@ telemetry:
     - Cross-service correlation
     - Optimized performance
   </Tab>
+
+  <Tab title="Without OpenTelemetry">
+    **Stdout logging without OpenTelemetry**
+    
+    ```yaml
+    telemetry:
+      level: "info,ai_gateway=debug"
+      exporter: "stdout"
+    ```
+    
+    Best for:
+    - Deployments that don't contain an OTel stack
+    - Flexible troubleshooting
+    - Ease of local development
+  </Tab>
+
+  <Tab title="Development">
+    **Console log output + Distributed Tracing Enabled**
+    
+    ```yaml
+    telemetry:
+      level: "debug,ai_gateway=trace"
+      exporter: "both"
+    ```
+    
+    Perfect for development and debugging the Gateway:
+    - Pretty-printed logs to console
+    - Full distributed tracing enabled via OTel
+      with Loki, Prometheus, and Tempo running in
+      docker compose
+  </Tab>
+
 </Tabs>
 
 ## Configuration Reference
@@ -86,7 +102,7 @@ telemetry:
     
     ```yaml
     # Available log levels per module
-    level: "info,llm_proxy=trace,tower=debug"
+    level: "info,ai_gateway=trace,tower=debug"
     ```
     
     **Common configurations:**
@@ -95,7 +111,7 @@ telemetry:
     - `"info"` - General information (default)
     - `"debug"` - Detailed debugging
     - `"trace"` - Maximum verbosity
-    - `"info,llm_proxy=trace"` - Trace Conduit, info for dependencies
+    - `"info,ai_gateway=trace"` - Trace Conduit, info for dependencies
   </Accordion>
 
   <Accordion title="Service Name" icon="tag">
@@ -233,7 +249,7 @@ All logs include trace correlation and structured data:
 {
   "timestamp": "2024-01-15T10:30:45Z",
   "level": "INFO",
-  "target": "llm_proxy::router",
+  "target": "ai_gateway::router",
   "message": "Request routed successfully",
   "trace_id": "a1b2c3d4e5f6",
   "span_id": "g7h8i9j0",
@@ -273,6 +289,12 @@ All logs include trace correlation and structured data:
     - **Loki** (port 3100) - Log aggregation and search
     - **Redis** (port 6379) - Caching and rate limiting, if configured
     - **OpenTelemetry Collector** (port 4317) - Telemetry ingestion
+
+    <Note>
+      The default telemetry config works with our provided docker compose stack.
+      For your own deployment, you may need to customize the 
+      [`telemetry.otlp-endpoint`](/gateway/config#telemetry).
+    </Note>
   </Tab>
 
   <Tab title="Jaeger">
@@ -280,7 +302,7 @@ All logs include trace correlation and structured data:
     
     ```yaml
     telemetry:
-      level: "info,llm_proxy=trace"
+      level: "info,ai_gateway=debug"
       service-name: "conduit"
       exporter: "otlp"
       otlp-endpoint: "http://jaeger:14268/api/traces"
@@ -326,7 +348,7 @@ All logs include trace correlation and structured data:
     
     ```yaml
     telemetry:
-      level: "info,llm_proxy=debug"  # Avoid trace in production
+      level: "info"  # Avoid trace in production
       service-name: "conduit-prod-us-west-1"
       exporter: "otlp"
       otlp-endpoint: "https://otel-collector.internal:4317"
@@ -381,15 +403,15 @@ Override configuration with environment variables:
 
 ```bash
 # Telemetry configuration
-export PROXY_TELEMETRY__LEVEL="info,llm_proxy=debug"
-export PROXY_TELEMETRY__SERVICE_NAME="conduit-staging"
-export PROXY_TELEMETRY__EXPORTER="otlp"
-export PROXY_TELEMETRY__OTLP_ENDPOINT="http://otel-collector:4317"
-export PROXY_TELEMETRY__PROPAGATE="true"
+export AI_GATEWAY__TELEMETRY__LEVEL="info,ai_gateway=debug"
+export AI_GATEWAY__TELEMETRY__SERVICE_NAME="conduit-staging"
+export AI_GATEWAY__TELEMETRY__EXPORTER="otlp"
+export AI_GATEWAY__TELEMETRY__OTLP_ENDPOINT="http://otel-collector:4317"
+export AI_GATEWAY__TELEMETRY__PROPAGATE="true"
 ```
 
 <Note>
-  Environment variables use double underscores (`__`) to separate nested configuration keys and follow the `PROXY_` prefix convention.
+  Environment variables use double underscores (`__`) to separate nested configuration keys and follow the `AI_GATEWAY_` prefix convention.
 </Note>
 
 ## Troubleshooting
@@ -421,7 +443,7 @@ export PROXY_TELEMETRY__PROPAGATE="true"
     
     1. Reduce log level for noisy modules:
        ```yaml
-       level: "warn,llm_proxy=info"
+       level: "warn,ai_gateway=info"
        ```
     
     2. Use sampling in the collector:

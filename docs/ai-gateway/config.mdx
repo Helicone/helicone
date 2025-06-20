@@ -39,7 +39,7 @@ Each Helicone AI Gateway deployment can configure multiple independent routing p
 
 ## Load Balancing
 
-Distribute requests across multiple providers to optimize performance, costs, and reliability. The gateway currently supports latency-based and weighted strategies with cost strategies coming soon.
+ Distribute requests across multiple providers to optimize performance, costs, and reliability. The gateway supports latency-based and weighted strategies for different use cases.
 
 [Learn more](/ai-gateway/features/loadbalancing)
 
@@ -83,7 +83,7 @@ Distribute requests across multiple providers to optimize performance, costs, an
   **Important:** Weights must sum to exactly `1.0`
 </ParamField>
 
-### Balance providers
+### Load Balance Providers
 
 <ParamField path="routers.[name].load-balance.chat.providers" type="array">
   List of target providers for load balancing.
@@ -105,10 +105,6 @@ Distribute requests across multiple providers to optimize performance, costs, an
       weight: '0.3'
   ```
 </ParamField>
-
-<Note>
-  Support is coming soon to configure load balance strategies with specific provider and model combinations (e.g., `openai/gpt-4o`, `anthropic/claude-3-5-sonnet`) for more granular routing control.
-</Note>
 
 ## Caching
 
@@ -316,14 +312,12 @@ The gateway ships with [comprehensive defaults](https://github.com/Helicone/heli
   ```yaml
   providers:
     anthropic:
-      enabled: true
       base-url: "https://api.anthropic.com"
       version: "2023-06-01"
       models:
         - claude-3-5-haiku
     
     ollama:
-      enabled: true
       base-url: "http://192.168.1.100:11434"
       models:
         - llama3.2
@@ -331,7 +325,6 @@ The gateway ships with [comprehensive defaults](https://github.com/Helicone/heli
         - custom-fine-tuned-model
     
     bedrock:
-      enabled: true
       base-url: "https://bedrock-runtime.us-west-2.amazonaws.com"
       models:
         - anthropic.claude-3-5-sonnet-20241022-v2:0
@@ -424,8 +417,22 @@ Configure OpenTelemetry monitoring for the AI Gateway application's health and p
 
   **Common patterns:**
   - `"info"` - General information for all modules
-  - `"debug"` - Debug for dependencies, info for gateway
-  - `"warn"` - Warnings only, disable specific modules
+  - `"debug,ai_gateway=info"` - Debug for dependencies, info for gateway
+  - `"warn,hyper=off"` - Warnings only, disable specific modules
+</ParamField>
+
+<ParamField path="telemetry.exporter" type="string" default="stdout">
+  Telemetry data export destination.
+
+  ```yaml
+  telemetry:
+    exporter: "otlp"
+  ```
+
+  **Options:**
+  - `stdout` - Export telemetry data to standard output (default)
+  - `otlp` - Export telemetry data to OTLP collector endpoint
+  - `both` - Export to both stdout and OTLP collector
 </ParamField>
 
 <ParamField path="telemetry.otlp-endpoint" type="string" default="http://localhost:4317/v1/metrics">
@@ -434,15 +441,6 @@ Configure OpenTelemetry monitoring for the AI Gateway application's health and p
   ```yaml
   telemetry:
     otlp-endpoint: "http://localhost:4317"
-  ```
-</ParamField>
-
-<ParamField path="telemetry.propagate" type="boolean" default="true">
-  Enables tracing propagation via OpenTelemetry [context propagation](https://opentelemetry.io/docs/concepts/context-propagation/).
-
-  ```yaml
-  telemetry:
-    propagate: true
   ```
 </ParamField>
 
@@ -538,9 +536,3 @@ Configure how the AI Gateway monitors provider health and automatically removes 
 
   **How it works:** Providers won't be marked unhealthy until they've handled at least this many requests.
 </ParamField>
-
-## Rate Limit Aware Load Balancing
-
-All routers are automatically rate limit aware. This means an LLM provider that returns a rate limit
-will automatically take them out of the potential providers to serve requests until the rate limit 
-will resolve according to the `retry-after` response header or a default value of 1 minute.

@@ -122,7 +122,6 @@ routers:
           - provider: openai
             weight: '0.3'
     cache:
-      enabled: true
       directive: "max-age=3600"
     
   development:
@@ -151,7 +150,6 @@ routers:
           - anthropic
           - google
     cache:
-      enabled: true
       directive: "max-age=1800"
     retries:
       enabled: true
@@ -245,7 +243,6 @@ routers:
           - provider: anthropic
             weight: '1.0'
     cache:
-      enabled: true
       directive: "max-age=3600"
     rate-limit:
       per-api-key:
@@ -343,7 +340,6 @@ Each router can be configured with the following features:
   
   ```yaml
   cache:
-    enabled: true
     directive: "max-age=3600"
     buckets: 10
   ```
@@ -431,7 +427,6 @@ routers:
         capacity: 10000
         refill-frequency: 1s
     cache:
-      enabled: true
       seed: "high-volume-cache"
     
   experimental:
@@ -448,7 +443,6 @@ routers:
         capacity: 100
         refill-frequency: 1s
     cache:
-      enabled: true
       seed: "experimental-cache"
 ```
 

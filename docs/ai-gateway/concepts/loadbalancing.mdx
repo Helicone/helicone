@@ -218,7 +218,7 @@ The AI Gateway supports load balancing at multiple levels of granularity:
 | ----------------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
 | **Providers**           | v0 (live!)           | Balance across different AI companies                                                                                       | OpenAI vs Anthropic vs Google Gemini             |
 | **Deployments/Regions** | v0 (live!)           | Balance across regions for providers that support them                                                                     | `us-east-1` vs `us-west-2` vs `eu-west-1`        |
-| **Models**              | v2 (coming soon!)     | Balance over (provider, model) pairs. | `openai/gpt-4o` vs `anthropic/claude-3-5-sonnet` |
+| **Models**              | v1 (coming soon!)     | Balance over (provider, model) pairs. | `openai/gpt-4o` vs `anthropic/claude-3-5-sonnet` |
 
 <Callout type="info">
   Currently, the AI Gateway load balances at the **provider level**. Model-level and regional load balancing are planned for future releases.
