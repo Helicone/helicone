@@ -52,6 +52,7 @@ import RequestsOverTime from "./panels/RequestsOverTime";
 import { cn } from "@/lib/utils";
 import ErrorsCard from "./panels/ErrorsCard";
 import ModelsCard from "./panels/ModelsCard";
+import CostsCard from "./panels/CostsCard";
 const ResponsiveGridLayout = WidthProvider(Responsive) as React.ComponentType<
   ResponsiveProps & { children?: React.ReactNode }
 >;
@@ -432,42 +433,10 @@ const DashboardPage = (props: DashboardPageProps) => {
                         ) ?? []
                     }
                   />
-                  {/* <StyledAreaChart
-                    title={`Top Models`}
-                    value={undefined}
-                    isDataOverTimeLoading={isModelsLoading}
-                    withAnimation={true}
-                  >
-                    <div className="flex flex-row justify-between items-center pb-2">
-                      <p className="text-xs font-semibold text-slate-700">
-                        Name
-                      </p>
-                      <p className="text-xs font-semibold text-slate-700">
-                        Requests
-                      </p>
-                    </div>
-                    <BarList
-                      data={
-                        models?.data
-                          ?.map((model, index) => ({
-                            name: model.model || "n/a",
-                            value: model.total_requests,
-                            color: listColors[index % listColors.length],
-                          }))
-                          .sort(
-                            (a, b) =>
-                              b.value - a.value - (b.name === "n/a" ? 1 : 0)
-                          ) ?? []
-                      }
-                      className="overflow-auto h-full"
-                      showAnimation={true}
-                    />
-                  </StyledAreaChart> */}
                 </div>
                 <div key="costs">
-                  <StyledAreaChart
-                    title={"Costs"}
-                    value={
+                  <CostsCard
+                    totalCost={
                       metrics.totalCost.data?.data
                         ? `$${formatNumberString(
                             metrics.totalCost.data?.data < 0.02
@@ -477,27 +446,14 @@ const DashboardPage = (props: DashboardPageProps) => {
                           )}`
                         : "$0.00"
                     }
-                    isDataOverTimeLoading={overTimeData.costs.isLoading}
-                  >
-                    <BarChart
-                      className="h-[14rem]"
-                      data={
-                        overTimeData.costs.data?.data?.map((r) => ({
-                          date: getTimeMap(timeIncrement)(r.time),
-                          costs: r.cost,
-                        })) ?? []
-                      }
-                      index="date"
-                      categories={["costs"]}
-                      colors={["blue"]}
-                      showYAxis={false}
-                      valueFormatter={(number: number | bigint) =>
-                        `$ ${new Intl.NumberFormat("us")
-                          .format(number)
-                          .toString()}`
-                      }
-                    />
-                  </StyledAreaChart>
+                    isLoading={overTimeData.costs.isLoading}
+                    data={
+                      overTimeData.costs.data?.data?.map((r) => ({
+                        date: getTimeMap(timeIncrement)(r.time),
+                        cost: r.cost,
+                      })) ?? []
+                    }
+                  />
                 </div>
                 <div key="users">
                   <StyledAreaChart
