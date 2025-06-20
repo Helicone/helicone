@@ -50,6 +50,31 @@ const PlaygroundMessagesPanel = ({
   const resizeTimeoutRef = useRef<NodeJS.Timeout>();
   const clientHeightRef = useRef<number>(0);
 
+  useEffect(() => {
+    if (mappedContent?.schema.request?.messages) {
+      const messages = mappedContent.schema.request.messages;
+      const needsIds = messages.some(message => !message.id);
+      
+      if (needsIds) {
+        const messagesWithIds = messages.map((message, index) => ({
+          ...message,
+          id: message.id || `msg-${index}-${Date.now()}`,
+        }));
+        
+        setMappedContent({
+          ...mappedContent,
+          schema: {
+            ...mappedContent.schema,
+            request: {
+              ...mappedContent.schema.request,
+              messages: messagesWithIds,
+            },
+          },
+        });
+      }
+    }
+  }, [mappedContent, setMappedContent]);
+
   const checkScrollPosition = useCallback((scrollArea: Element) => {
     const scrollTop = scrollArea.scrollTop;
     const scrollHeight = scrollArea.scrollHeight;

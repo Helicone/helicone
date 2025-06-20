@@ -215,31 +215,6 @@ export default function ChatMessage({
   const deleteMessage = (index: number) => {
     if (!onChatChange) return;
 
-    if (message._type === "image" && isPartOfContentArray) {
-      return onChatChange({
-        ...mappedRequest,
-        schema: {
-          ...mappedRequest.schema,
-          request: {
-            ...mappedRequest.schema.request,
-            messages: mappedRequest.schema.request?.messages?.map(
-              (message, i) => {
-                if (i === parentIndex) {
-                  return {
-                    ...message,
-                    contentArray: message.contentArray?.filter(
-                      (_, j) => j !== index
-                    ),
-                  };
-                }
-                return message;
-              }
-            ),
-          },
-        },
-      });
-    }
-
     onChatChange({
       ...mappedRequest,
       schema: {
@@ -247,7 +222,7 @@ export default function ChatMessage({
         request: {
           ...mappedRequest.schema.request,
           messages: mappedRequest.schema.request?.messages?.filter(
-            (_, i) => i !== index
+            (_, i) => i !== messageIndex
           ),
         },
       },
@@ -287,6 +262,50 @@ export default function ChatMessage({
     setPopoverOpen(false);
   };
 
+  const deleteContentArrayItem = (contentIndex: number) => {
+    if (!onChatChange) return;
+
+    onChatChange({
+      ...mappedRequest,
+      schema: {
+        ...mappedRequest.schema,
+        request: {
+          ...mappedRequest.schema.request,
+          messages: mappedRequest.schema.request?.messages?.map(
+            (msg, i) => {
+              if (i === messageIndex && msg._type === "contentArray") {
+                const updatedContentArray = msg.contentArray?.filter(
+                  (_, j) => j !== contentIndex
+                );
+                
+                if (updatedContentArray?.length === 1) {
+                  const remainingItem = updatedContentArray[0];
+                  if (remainingItem._type === "message") {
+                    return {
+                      ...remainingItem,
+                      role: msg.role,
+                      id: msg.id,
+                    };
+                  }
+                }
+                
+                if (!updatedContentArray || updatedContentArray.length === 0) {
+                  return null;
+                }
+                
+                return {
+                  ...msg,
+                  contentArray: updatedContentArray,
+                };
+              }
+              return msg;
+            }
+          ).filter((msg): msg is Message => msg !== null),
+        },
+      },
+    });
+  };
+
   const content = message.content ?? JSON.stringify(message.tool_calls) ?? "";
   const isLongMessage = content.length > MESSAGE_LENGTH_THRESHOLD;
   const isExpanded = expandedMessages[messageIndex];
@@ -314,11 +333,8 @@ export default function ChatMessage({
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log("handleFileChange called");
     const file = e.target.files?.[0];
-    console.log("file:", file);
     if (!file || !onChatChange) {
-      console.log("no file or onChatChange:", { file, onChatChange });
       return;
     }
 
@@ -338,30 +354,47 @@ export default function ChatMessage({
               (message, i) => {
                 if (i === messageIndex) {
                   const currentContent = message.content || "";
-                  const contentArray = Array.isArray(message.content)
-                    ? message.content
-                    : [
+                  
+                  if (message._type === "contentArray" && message.contentArray) {
+                    return {
+                      ...message,
+                      contentArray: [
+                        ...message.contentArray,
                         {
-                          _type: "message",
+                          _type: "image" as const,
                           role: "user",
-                          content: currentContent,
+                          image_url: base64,
+                          id: `img-${messageIndex}-${Date.now()}`,
                         },
-                      ];
+                      ],
+                    };
+                  }
+                  
+                  const contentArray = [];
+                  
+                  if (currentContent.trim()) {
+                    contentArray.push({
+                      _type: "message" as const,
+                      role: "user",
+                      content: currentContent,
+                      id: `text-${messageIndex}-${Date.now()}`,
+                    });
+                  }
+                  
+                  contentArray.push({
+                    _type: "image" as const,
+                    role: "user",
+                    image_url: base64,
+                    id: `img-${messageIndex}-${Date.now() + 1}`,
+                  });
 
-                  const updatedMessage = {
+                  return {
                     content: "",
                     _type: "contentArray" as const,
                     role: "user",
-                    contentArray: [
-                      ...contentArray,
-                      {
-                        _type: "image" as const,
-                        role: "user",
-                        image_url: base64,
-                      },
-                    ],
+                    contentArray,
+                    id: message.id || `msg-${messageIndex}-${Date.now()}`,
                   };
-                  return updatedMessage;
                 }
                 return message;
               }
@@ -509,24 +542,98 @@ export default function ChatMessage({
               );
             case "contentArray":
               return (
-                <>
+                <div className="flex flex-col gap-4">
                   {message.contentArray?.map((content, index) => {
-                    return (
-                      <ChatMessage
-                        parentIndex={messageIndex}
-                        isPartOfContentArray={true}
-                        key={index}
-                        message={content}
-                        expandedMessages={expandedMessages}
-                        setExpandedMessages={setExpandedMessages}
-                        chatMode={chatMode}
-                        mappedRequest={mappedRequest}
-                        messageIndex={index}
-                        onChatChange={onChatChange}
-                      />
-                    );
+                    const contentType = getMessageType(content);
+                    
+                    switch (contentType) {
+                      case "image":
+                        let imageSrc = content.image_url;
+                        if (content.content && content.mime_type?.startsWith("image/")) {
+                          imageSrc = `data:${content.mime_type};base64,${content.content}`;
+                        } else if (content.content && !content.mime_type) {
+                          console.warn("Image message missing mime_type, assuming image/png");
+                          imageSrc = `data:image/png;base64,${content.content}`;
+                        }
+                        
+                        return imageSrc ? (
+                          <div key={index} className="relative group">
+                            <div className="relative w-full max-w-md h-[400px]">
+                              <Image
+                                src={imageSrc}
+                                alt="Input image"
+                                fill
+                                className="rounded-lg object-contain border border-border"
+                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                              />
+                            </div>
+                            {chatMode === "PLAYGROUND_INPUT" && (
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={() => deleteContentArrayItem(index)}
+                              >
+                                ×
+                              </Button>
+                            )}
+                          </div>
+                        ) : null;
+                      
+                      case "text":
+                        return content.content ? (
+                          <div key={index} className="relative group">
+                            <TextMessage
+                              isPartOfContentArray={true}
+                              parentIndex={messageIndex}
+                              displayContent={content.content}
+                              chatMode={chatMode}
+                              mappedRequest={mappedRequest}
+                              messageIndex={index}
+                              onChatChange={onChatChange}
+                              mode={mode}
+                            />
+                            {chatMode === "PLAYGROUND_INPUT" && message.contentArray && message.contentArray.length > 1 && (
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={() => deleteContentArrayItem(index)}
+                              >
+                                ×
+                              </Button>
+                            )}
+                          </div>
+                        ) : null;
+                      
+                      case "pdf":
+                        const filename = content.filename || "PDF File";
+                        return (
+                          <div key={index} className="relative group">
+                            <div className="flex items-center gap-2 p-4 bg-muted rounded-lg border border-dashed border-border">
+                              <LuFileText className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                              <span className="text-sm text-muted-foreground">
+                                {filename} (Base64 Encoded PDF - Preview/Download not available)
+                              </span>
+                            </div>
+                            {chatMode === "PLAYGROUND_INPUT" && (
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={() => deleteContentArrayItem(index)}
+                              >
+                                ×
+                              </Button>
+                            )}
+                          </div>
+                        );
+                      
+                      default:
+                        return null;
+                    }
                   })}
-                </>
+                </div>
               );
             default:
               return null;
