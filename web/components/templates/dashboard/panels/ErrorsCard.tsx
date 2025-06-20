@@ -119,7 +119,8 @@ export default function ErrorsCard({
               }}
               dataKey="value"
               position={{
-                x: chartContainerWidth,
+                x:
+                  chartContainerWidth || chartContainerRef.current?.clientWidth,
                 y: 18,
               }}
               offset={8}
