@@ -2,7 +2,7 @@
 2. Create Helicone API Key in Helicone UI
 3. Copy template env file `cp .env.template .env`
 4. Set the following env vars in `.env` file:
-   - `PROXY__HELICONE__API_KEY`
+   - `HELICONE_CONTROL_PLANE_API_KEY`
    - `OPENAI_API_KEY`
    - `ANTHROPIC_API_KEY`
 5. Run the router locally with `cargo`:

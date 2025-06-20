@@ -71,12 +71,11 @@ impl<'a> S3Client<'a> {
                 (signed_url, s3_log)
             }
             Self::Sidecar(client) => {
-                let signed_request_url =
-                    app_state
-                        .config()
-                        .helicone
-                        .base_url
-                        .join("/v1/router/control-plane/sign-s3-url")?;
+                let signed_request_url = app_state
+                    .config()
+                    .helicone_observability
+                    .base_url
+                    .join("/v1/router/control-plane/sign-s3-url")?;
                 let request_body = String::from_utf8(request_body.to_vec())?;
                 let response_body = String::from_utf8(response_body.to_vec())?;
 
@@ -122,6 +121,8 @@ impl<'a> S3Client<'a> {
         let _resp = app_state
             .0
             .minio
+            .as_ref()
+            .ok_or(LoggerError::MinioNotConfigured)?
             .client
             .put(signed_url)
             .json(&s3_log)

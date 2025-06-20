@@ -16,7 +16,7 @@ async fn openai_direct_proxy() {
     let mut config = Config::test_default();
     // Disable auth for this test since we're testing basic passthrough
     // functionality
-    config.helicone.enable_auth = false;
+    config.helicone_observability.enable_auth = false;
 
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([
@@ -59,7 +59,7 @@ async fn anthropic_direct_proxy() {
     let mut config = Config::test_default();
     // Disable auth for this test since we're testing basic passthrough
     // functionality
-    config.helicone.enable_auth = false;
+    config.helicone_observability.enable_auth = false;
 
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([

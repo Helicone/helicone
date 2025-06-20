@@ -232,8 +232,8 @@ impl ProviderMonitorInner<WeightedKey> {
         };
 
         match balance_config {
-            BalanceConfigInner::Weighted { targets } => {
-                for target in targets {
+            BalanceConfigInner::Weighted { providers } => {
+                for target in providers {
                     if target.provider == provider {
                         let weight = Weight::from(
                             target

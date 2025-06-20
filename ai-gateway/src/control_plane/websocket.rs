@@ -264,7 +264,7 @@ mod tests {
     async fn test_integration_localhost_8585_heartbeat() {
         unsafe {
             std::env::set_var(
-                "HELICONE_API_KEY",
+                "HELICONE_CONTROL_PLANE_API_KEY",
                 "sk-helicone-n2zkt2i-x3mukmi-tgvgzyy-xom3q4y",
             );
         }

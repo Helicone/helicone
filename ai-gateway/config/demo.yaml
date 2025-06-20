@@ -3,7 +3,7 @@ routers:
     load-balance:
       chat:
         strategy: latency
-        targets:
+        providers:
           - openai
           - anthropic
 
@@ -12,7 +12,7 @@ routers:
 #     load-balance:
 #       chat:
 #         strategy: weighted
-#         targets:
+#         providers:
 #         - provider: anthropic
 #           weight: '0.95'
 #         - provider: openai

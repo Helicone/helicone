@@ -84,8 +84,8 @@ async fn check_weighted_monitor(
         inner.router_config.load_balance.as_ref()
     {
         match balance_config {
-            BalanceConfigInner::Weighted { targets } => {
-                for target in targets {
+            BalanceConfigInner::Weighted { providers } => {
+                for target in providers {
                     let provider = target.provider;
                     let weight =
                         Weight::from(target.weight.to_f64().ok_or(
@@ -159,8 +159,8 @@ async fn check_p2c_monitor(
         inner.router_config.load_balance.as_ref()
     {
         match balance_config {
-            BalanceConfigInner::Latency { targets } => {
-                for &provider in targets {
+            BalanceConfigInner::Latency { providers } => {
+                for &provider in providers {
                     let key = Key::new(provider, *endpoint_type);
                     let is_healthy = inner.check_health(provider)?;
                     let was_unhealthy = inner.unhealthy_keys.contains(&key);

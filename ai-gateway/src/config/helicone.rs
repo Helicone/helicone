@@ -20,7 +20,7 @@ pub struct HeliconeConfig {
     ///
     /// **Note**: without this enabled, anyone sending requests to your
     /// AI gateway instance will be able to use your provider API keys!
-    #[serde(default = "default_true")]
+    #[serde(alias = "enable", default = "default_true")]
     pub enable_auth: bool,
 }
 
@@ -37,17 +37,17 @@ impl Default for HeliconeConfig {
 
 fn default_api_key() -> Secret<String> {
     Secret::from(
-        std::env::var("HELICONE_API_KEY")
+        std::env::var("HELICONE_CONTROL_PLANE_API_KEY")
             .unwrap_or("sk-helicone-...".to_string()),
     )
 }
 
 fn default_base_url() -> Url {
-    "http://localhost:8585".parse().unwrap()
+    "https://api.helicone.ai".parse().unwrap()
 }
 
 fn default_websocket_url() -> Url {
-    "ws://localhost:8585/ws/v1/router/control-plane"
+    "wss://api.helicone.ai/ws/v1/router/control-plane"
         .parse()
         .unwrap()
 }
@@ -55,6 +55,13 @@ fn default_websocket_url() -> Url {
 #[cfg(feature = "testing")]
 impl crate::tests::TestDefault for HeliconeConfig {
     fn test_default() -> Self {
-        Self::default()
+        Self {
+            base_url: "http://localhost:8585".parse().unwrap(),
+            websocket_url: "ws://localhost:8585/ws/v1/router/control-plane"
+                .parse()
+                .unwrap(),
+            enable_auth: true,
+            api_key: default_api_key(),
+        }
     }
 }

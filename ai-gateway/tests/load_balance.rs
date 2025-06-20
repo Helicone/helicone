@@ -22,7 +22,7 @@ fn p2c_config_openai_anthropic_google() -> RouterConfigs {
             load_balance: BalanceConfig(HashMap::from([(
                 EndpointType::Chat,
                 BalanceConfigInner::Latency {
-                    targets: nes![
+                    providers: nes![
                         InferenceProvider::OpenAI,
                         InferenceProvider::Anthropic,
                         InferenceProvider::GoogleGemini
@@ -42,7 +42,7 @@ fn p2c_config_openai_anthropic_google() -> RouterConfigs {
 async fn openai_slow() {
     let mut config = Config::test_default();
     // Disable auth for this test since we're testing load balancing behavior
-    config.helicone.enable_auth = false;
+    config.helicone_observability.enable_auth = false;
     // Use p2c balance config with OpenAI, Anthropic, and Google providers
     config.routers = p2c_config_openai_anthropic_google();
     let latency = 100;
@@ -94,7 +94,7 @@ async fn openai_slow() {
 async fn anthropic_slow() {
     let mut config = Config::test_default();
     // Disable auth for this test since we're testing load balancing behavior
-    config.helicone.enable_auth = false;
+    config.helicone_observability.enable_auth = false;
     // Use p2c balance config with OpenAI, Anthropic, and Google providers
     config.routers = p2c_config_openai_anthropic_google();
     let latency = 10;

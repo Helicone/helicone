@@ -18,7 +18,7 @@ impl Default for BalanceConfig {
         Self(HashMap::from([(
             EndpointType::Chat,
             BalanceConfigInner::Latency {
-                targets: nes![
+                providers: nes![
                     InferenceProvider::OpenAI,
                     InferenceProvider::Anthropic,
                     InferenceProvider::GoogleGemini,
@@ -35,7 +35,7 @@ impl BalanceConfig {
         Self(HashMap::from([(
             EndpointType::Chat,
             BalanceConfigInner::Weighted {
-                targets: nes![BalanceTarget {
+                providers: nes![BalanceTarget {
                     provider: InferenceProvider::OpenAI,
                     weight: Decimal::from(1),
                 }],
@@ -49,7 +49,7 @@ impl BalanceConfig {
         Self(HashMap::from([(
             EndpointType::Chat,
             BalanceConfigInner::Weighted {
-                targets: nes![BalanceTarget {
+                providers: nes![BalanceTarget {
                     provider: InferenceProvider::Anthropic,
                     weight: Decimal::from(1),
                 }],
@@ -63,7 +63,7 @@ impl BalanceConfig {
         Self(HashMap::from([(
             EndpointType::Chat,
             BalanceConfigInner::Weighted {
-                targets: nes![BalanceTarget {
+                providers: nes![BalanceTarget {
                     provider: InferenceProvider::GoogleGemini,
                     weight: Decimal::from(1),
                 }],
@@ -77,7 +77,7 @@ impl BalanceConfig {
         Self(HashMap::from([(
             EndpointType::Chat,
             BalanceConfigInner::Weighted {
-                targets: nes![BalanceTarget {
+                providers: nes![BalanceTarget {
                     provider: InferenceProvider::Ollama,
                     weight: Decimal::from(1),
                 }],
@@ -91,7 +91,7 @@ impl BalanceConfig {
         Self(HashMap::from([(
             EndpointType::Chat,
             BalanceConfigInner::Weighted {
-                targets: nes![BalanceTarget {
+                providers: nes![BalanceTarget {
                     provider: InferenceProvider::Bedrock,
                     weight: Decimal::from(1),
                 }],
@@ -111,18 +111,18 @@ impl BalanceConfig {
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case", tag = "strategy")]
 pub enum BalanceConfigInner {
-    Weighted { targets: NESet<BalanceTarget> },
-    Latency { targets: NESet<InferenceProvider> },
+    Weighted { providers: NESet<BalanceTarget> },
+    Latency { providers: NESet<InferenceProvider> },
 }
 
 impl BalanceConfigInner {
     #[must_use]
     pub fn providers(&self) -> IndexSet<InferenceProvider> {
         match self {
-            Self::Weighted { targets } => {
-                targets.iter().map(|t| t.provider).collect()
+            Self::Weighted { providers } => {
+                providers.iter().map(|t| t.provider).collect()
             }
-            Self::Latency { targets } => targets.iter().copied().collect(),
+            Self::Latency { providers } => providers.iter().copied().collect(),
         }
     }
 }

@@ -21,7 +21,7 @@ async fn openai() {
     let mut config = Config::test_default();
     // Disable auth for this test since we're testing basic provider
     // functionality
-    config.helicone.enable_auth = false;
+    config.helicone_observability.enable_auth = false;
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([
             ("success:openai:chat_completion", 1.into()),
@@ -64,7 +64,7 @@ async fn google_with_openai_request_style() {
     let mut config = Config::test_default();
     // Disable auth for this test since we're testing basic provider
     // functionality
-    config.helicone.enable_auth = false;
+    config.helicone_observability.enable_auth = false;
     let router_config = RouterConfigs::new(HashMap::from([(
         RouterId::Default,
         RouterConfig {
@@ -130,7 +130,7 @@ async fn anthropic_with_openai_request_style() {
     let mut config = Config::test_default();
     // Disable auth for this test since we're testing basic provider
     // functionality
-    config.helicone.enable_auth = false;
+    config.helicone_observability.enable_auth = false;
     let router_config = RouterConfigs::new(HashMap::from([(
         RouterId::Default,
         RouterConfig {
@@ -204,7 +204,7 @@ async fn ollama() {
     let mut config = Config::test_default();
     // Disable auth for this test since we're testing basic provider
     // functionality
-    config.helicone.enable_auth = false;
+    config.helicone_observability.enable_auth = false;
     let router_config = RouterConfigs::new(HashMap::from([(
         RouterId::Default,
         RouterConfig {
@@ -254,7 +254,7 @@ async fn ollama() {
 #[serial_test::serial(default_mock)]
 async fn bedrock_with_openai_request_style() {
     let mut config = Config::test_default();
-    config.helicone.enable_auth = false;
+    config.helicone_observability.enable_auth = false;
     let router_config = RouterConfigs::new(HashMap::from([(
         RouterId::Default,
         RouterConfig {

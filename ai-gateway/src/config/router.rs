@@ -58,9 +58,9 @@ impl RouterConfig {
     pub fn validate(&self) -> Result<(), InitError> {
         for balance_config in self.load_balance.0.values() {
             match balance_config {
-                BalanceConfigInner::Weighted { targets } => {
+                BalanceConfigInner::Weighted { providers } => {
                     let total =
-                        targets.iter().map(|t| t.weight).sum::<Decimal>();
+                        providers.iter().map(|t| t.weight).sum::<Decimal>();
                     if total != Decimal::from(1) {
                         return Err(InitError::InvalidWeightedBalancer(
                             format!("Balance weights dont sum to 1: {total}"),
@@ -113,7 +113,7 @@ impl crate::tests::TestDefault for RouterConfigs {
                 load_balance: BalanceConfig(HashMap::from([(
                     crate::endpoints::EndpointType::Chat,
                     BalanceConfigInner::Latency {
-                        targets: nonempty_collections::nes![
+                        providers: nonempty_collections::nes![
                             crate::types::provider::InferenceProvider::OpenAI
                         ],
                     },

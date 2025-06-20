@@ -13,7 +13,7 @@ use tower::Service;
 #[serial_test::serial]
 async fn require_auth_enabled_with_valid_token() {
     let mut config = Config::test_default();
-    config.helicone.enable_auth = true;
+    config.helicone_observability.enable_auth = true;
 
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([
@@ -73,7 +73,7 @@ async fn require_auth_enabled_with_valid_token() {
 #[serial_test::serial]
 async fn require_auth_enabled_without_token() {
     let mut config = Config::test_default();
-    config.helicone.enable_auth = true;
+    config.helicone_observability.enable_auth = true;
 
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([
@@ -120,7 +120,7 @@ async fn require_auth_enabled_without_token() {
 #[serial_test::serial]
 async fn require_auth_disabled_without_token() {
     let mut config = Config::test_default();
-    config.helicone.enable_auth = false;
+    config.helicone_observability.enable_auth = false;
 
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([
@@ -164,7 +164,7 @@ async fn require_auth_disabled_without_token() {
 #[serial_test::serial]
 async fn require_auth_disabled_with_token() {
     let mut config = Config::test_default();
-    config.helicone.enable_auth = false;
+    config.helicone_observability.enable_auth = false;
 
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([

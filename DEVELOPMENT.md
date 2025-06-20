@@ -22,7 +22,7 @@ Run the following commands to get started with local development of the Helicon
    cp .env.template .env
    ```
    Fill out the following environment variables in you .env file:
-   - `PROXY__HELICONE__API_KEY`
+   - `HELICONE_CONTROL_PLANE_API_KEY`
    - `HELICONE_API_KEY`
    - `OPENAI_API_KEY`
    - `ANTHROPIC_API_KEY`

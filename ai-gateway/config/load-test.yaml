@@ -9,7 +9,7 @@ providers:
 minio:
   host: "http://localhost:8103"
 
-helicone:
+helicone-observability:
   base-url: "http://localhost:8104"
 
 telemetry:

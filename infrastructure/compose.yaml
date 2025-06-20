@@ -1,4 +1,4 @@
-name: helicone-proxy-cluster
+name: ai-gateway-cluster
 
 networks:
   traces:
@@ -89,21 +89,21 @@ services:
       retries: 5
       start_period: 5s
 
-  helix:
+  ai-gateway:
     build:
       context: ../
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:
-      - '5678:5678'
-    profiles: ["include-helix"]
+      - '8080:8080'
+    profiles: ["include-ai-gateway"]
     depends_on:
       redis:
         condition: service_healthy
     env_file: "../.env"
     environment:
       # Configure server to bind to all interfaces (0.0.0.0) instead of localhost (127.0.0.1)
-      - PROXY__SERVER__ADDRESS=0.0.0.0
+      - AI_GATEWAY__SERVER__ADDRESS=0.0.0.0
     networks:
       - traces
       - default

@@ -23,11 +23,11 @@ use tower::Service;
 async fn errors_remove_provider_from_lb_pool() {
     let mut config = Config::test_default();
     // Enable auth so that logging services are called
-    config.helicone.enable_auth = true;
+    config.helicone_observability.enable_auth = true;
     let balance_config = BalanceConfig::from(HashMap::from([(
         EndpointType::Chat,
         BalanceConfigInner::Weighted {
-            targets: nes![
+            providers: nes![
                 BalanceTarget {
                     provider: InferenceProvider::OpenAI,
                     weight: Decimal::try_from(0.20).unwrap(),

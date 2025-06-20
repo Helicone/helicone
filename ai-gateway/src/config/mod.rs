@@ -66,7 +66,8 @@ pub struct MiddlewareConfig {
 pub struct Config {
     pub telemetry: telemetry::Config,
     pub server: self::server::ServerConfig,
-    pub minio: self::minio::Config,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub minio: Option<self::minio::Config>,
     pub dispatcher: self::dispatcher::DispatcherConfig,
     pub discover: self::discover::DiscoverConfig,
     pub response_headers: self::response_headers::ResponseHeadersConfig,
@@ -76,7 +77,7 @@ pub struct Config {
     /// If a request is made with a model that is not in the `RouterConfig`
     /// model mapping, then we fallback to this.
     pub default_model_mapping: self::model_mapping::ModelMappingConfig,
-    pub helicone: self::helicone::HeliconeConfig,
+    pub helicone_observability: self::helicone::HeliconeConfig,
     /// *ALL* supported providers, independent of router configuration.
     pub providers: self::providers::ProvidersConfig,
 
@@ -125,6 +126,11 @@ impl Config {
             }
         }
         self.validate_model_mappings()?;
+        if matches!(self.deployment_target, DeploymentTarget::SelfHosted)
+            && self.minio.is_none()
+        {
+            return Err(InitError::MinioNotConfigured);
+        }
         Ok(())
     }
 }
@@ -146,14 +152,15 @@ impl crate::tests::TestDefault for Config {
         Config {
             telemetry,
             server: self::server::ServerConfig::test_default(),
-            minio: self::minio::Config::test_default(),
+            minio: Some(self::minio::Config::test_default()),
             dispatcher: self::dispatcher::DispatcherConfig::test_default(),
             default_model_mapping:
                 self::model_mapping::ModelMappingConfig::default(),
             global: middleware,
             is_production: false,
             providers: self::providers::ProvidersConfig::default(),
-            helicone: self::helicone::HeliconeConfig::test_default(),
+            helicone_observability:
+                self::helicone::HeliconeConfig::test_default(),
             deployment_target: DeploymentTarget::Sidecar,
             discover: self::discover::DiscoverConfig::test_default(),
             routers: self::router::RouterConfigs::test_default(),

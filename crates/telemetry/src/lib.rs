@@ -56,18 +56,18 @@ impl Default for Config {
 #[derive(Default, Clone, Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields, rename_all = "kebab-case")]
 pub enum Exporter {
+    #[default]
     Stdout,
     Otlp,
-    #[default]
     Both,
 }
 
 fn default_service_name() -> String {
-    "helicone-router".to_string()
+    "ai-gateway".to_string()
 }
 
 fn default_level() -> String {
-    "info,ai_gateway=trace".to_string()
+    "info".to_string()
 }
 
 fn default_otlp_endpoint() -> String {

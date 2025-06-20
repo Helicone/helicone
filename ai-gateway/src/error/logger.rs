@@ -20,4 +20,6 @@ pub enum LoggerError {
     NoAuthContextSet,
     /// Unexpected response: {0}
     UnexpectedResponse(String),
+    /// Minio not configured
+    MinioNotConfigured,
 }

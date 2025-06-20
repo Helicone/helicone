@@ -88,9 +88,13 @@ impl LoggerService {
         let resp_body_len = response_body.len();
         let request_id = Uuid::new_v4();
         let s3_client = match self.app_state.config().deployment_target {
-            DeploymentTarget::SelfHosted => {
-                S3Client::self_hosted(&self.app_state.0.minio)
-            }
+            DeploymentTarget::SelfHosted => S3Client::self_hosted(
+                self.app_state
+                    .0
+                    .minio
+                    .as_ref()
+                    .ok_or(LoggerError::MinioNotConfigured)?,
+            ),
             DeploymentTarget::Sidecar => {
                 S3Client::sidecar(&self.app_state.0.jawn_http_client)
             }
@@ -153,7 +157,7 @@ impl LoggerService {
         let helicone_url = self
             .app_state
             .config()
-            .helicone
+            .helicone_observability
             .base_url
             .join("/v1/log/request")?;
 

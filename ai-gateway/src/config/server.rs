@@ -1,6 +1,6 @@
 use std::{
     fmt::Display,
-    net::{IpAddr, Ipv6Addr},
+    net::{IpAddr, Ipv4Addr},
     path::PathBuf,
     time::Duration,
 };
@@ -16,8 +16,6 @@ pub struct ServerConfig {
     pub port: u16,
     #[serde(default)]
     pub tls: TlsConfig,
-    #[serde(with = "humantime_serde", default = "default_request_timeout")]
-    pub request_timeout: Duration,
     #[serde(with = "humantime_serde", default = "default_shutdown_timeout")]
     pub shutdown_timeout: Duration,
 }
@@ -28,31 +26,28 @@ impl Default for ServerConfig {
             address: default_address(),
             port: default_port(),
             tls: TlsConfig::default(),
-            request_timeout: default_request_timeout(),
             shutdown_timeout: default_shutdown_timeout(),
         }
     }
 }
 
 fn default_address() -> IpAddr {
-    Ipv6Addr::LOCALHOST.into()
+    Ipv4Addr::LOCALHOST.into()
 }
 
 fn default_port() -> u16 {
-    5678
+    8080
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Default, Debug, Clone, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub enum TlsConfig {
-    Enabled { cert: PathBuf, key: PathBuf },
+    Enabled {
+        cert: PathBuf,
+        key: PathBuf,
+    },
+    #[default]
     Disabled,
-}
-
-impl Default for TlsConfig {
-    fn default() -> Self {
-        Self::Disabled
-    }
 }
 
 impl Display for TlsConfig {
@@ -62,10 +57,6 @@ impl Display for TlsConfig {
             Self::Disabled => write!(f, "Disabled"),
         }
     }
-}
-
-fn default_request_timeout() -> Duration {
-    Duration::from_secs(20)
 }
 
 fn default_shutdown_timeout() -> Duration {

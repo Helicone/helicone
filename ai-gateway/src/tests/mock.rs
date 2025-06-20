@@ -147,7 +147,8 @@ impl Mock {
             args.minio_port,
         )
         .await;
-        config.minio.host = Url::parse(&minio_mock.uri()).unwrap();
+        config.minio.as_mut().unwrap().host =
+            Url::parse(&minio_mock.uri()).unwrap();
 
         let jawn_mock = start_mock_for_test(
             &get_stubs_path("jawn"),
@@ -157,7 +158,8 @@ impl Mock {
             args.jawn_port,
         )
         .await;
-        config.helicone.base_url = Url::parse(&jawn_mock.uri()).unwrap();
+        config.helicone_observability.base_url =
+            Url::parse(&jawn_mock.uri()).unwrap();
 
         handle_presigned_url_mock(&jawn_mock, &minio_mock, args.stubs.as_ref())
             .await;

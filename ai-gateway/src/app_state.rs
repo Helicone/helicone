@@ -47,7 +47,7 @@ impl AppState {
 #[derive(Debug)]
 pub struct InnerAppState {
     pub config: Config,
-    pub minio: Minio,
+    pub minio: Option<Minio>,
     pub jawn_http_client: JawnClient,
     pub control_plane_state: Arc<RwLock<ControlPlaneState>>,
     pub direct_proxy_api_keys: ProviderKeys,

@@ -95,7 +95,7 @@ impl ConfigDiscovery<WeightedKey> {
             router_config.load_balance.as_ref()
         {
             let weighted_balance_targets = match balance_config {
-                BalanceConfigInner::Weighted { targets } => targets,
+                BalanceConfigInner::Weighted { providers } => providers,
                 BalanceConfigInner::Latency { .. } => {
                     return Err(InitError::InvalidWeightedBalancer(
                         "P2C balancer not supported for weighted discovery"

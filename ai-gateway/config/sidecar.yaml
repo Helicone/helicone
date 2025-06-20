@@ -1,4 +1,4 @@
-helicone:
+helicone-observability:
   websocket-url: "wss://api.helicone.ai/ws/v1/router/control-plane"
   base-url: "https://api.helicone.ai"
 
@@ -7,6 +7,6 @@ routers:
     load-balance:
       chat:
         strategy: latency
-        targets:
+        providers:
           - openai
           - anthropic

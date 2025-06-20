@@ -46,7 +46,7 @@ use crate::{
 };
 
 pub(crate) const BUFFER_SIZE: usize = 1024;
-const SERVICE_NAME: &str = "helicone-router";
+const SERVICE_NAME: &str = "ai-gateway";
 
 pub type AppResponseBody = tower_http::body::UnsyncBoxBody<
     bytes::Bytes,
@@ -175,7 +175,11 @@ impl tower::Service<crate::types::request::Request> for App {
 impl App {
     pub async fn new(config: Config) -> Result<Self, InitError> {
         tracing::info!("creating app");
-        let minio = Minio::new(config.minio.clone())?;
+        let minio = config
+            .minio
+            .as_ref()
+            .map(|c| Minio::new(c.clone()))
+            .transpose()?;
 
         let jawn_http_client = JawnClient::new()?;
 
@@ -309,7 +313,7 @@ impl meltdown::Service for App {
                             .handle(handle.clone())
                             .serve(app_factory) => server_output.map_err(RuntimeError::Serve)?,
                         () = token => {
-                            handle.graceful_shutdown(Some(std::time::Duration::from_secs(10)));
+                            handle.graceful_shutdown(Some(config.server.shutdown_timeout));
                         }
                     };
                 }
@@ -320,7 +324,7 @@ impl meltdown::Service for App {
                             .handle(handle.clone())
                             .serve(app_factory) => server_output.map_err(RuntimeError::Serve)?,
                         () = token => {
-                            handle.graceful_shutdown(Some(std::time::Duration::from_secs(10)));
+                            handle.graceful_shutdown(Some(config.server.shutdown_timeout));
                         }
                     };
                 }

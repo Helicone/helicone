@@ -3,10 +3,7 @@ use indexmap::{IndexMap, IndexSet};
 use serde::{Deserialize, Serialize};
 use url::Url;
 
-use crate::{
-    types::{model_id::ModelName, provider::InferenceProvider},
-    utils::default_true,
-};
+use crate::types::{model_id::ModelName, provider::InferenceProvider};
 
 const PROVIDERS_YAML: &str =
     include_str!("../../config/embedded/providers.yaml");
@@ -22,8 +19,9 @@ pub struct GlobalProviderConfig {
     /// instead load the models from the provider's respective APIs
     pub models: IndexSet<ModelName<'static>>,
     pub base_url: Url,
+    #[serde(default)]
     pub version: Option<String>,
-    #[serde(default = "default_true")]
+    #[serde(default)]
     pub enabled: bool,
 }
 

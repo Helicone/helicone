@@ -33,7 +33,7 @@ async fn rate_limit_capacity_enforced_impl(
     rate_limit_config: GlobalRateLimitConfig,
 ) {
     let mut config = Config::test_default();
-    config.helicone.enable_auth = true;
+    config.helicone_observability.enable_auth = true;
     config.global.rate_limit = Some(rate_limit_config);
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([
@@ -105,7 +105,7 @@ async fn rate_limit_per_user_isolation_impl(
     rate_limit_config: GlobalRateLimitConfig,
 ) {
     let mut config = Config::test_default();
-    config.helicone.enable_auth = true;
+    config.helicone_observability.enable_auth = true;
     config.global.rate_limit = Some(rate_limit_config);
 
     let mock_args = MockArgs::builder()
@@ -193,7 +193,7 @@ async fn rate_limit_per_user_isolation_impl(
 #[serial_test::serial]
 async fn rate_limit_disabled() {
     let mut config = Config::test_default();
-    config.helicone.enable_auth = true;
+    config.helicone_observability.enable_auth = true;
 
     let mock_args = MockArgs::builder()
         .stubs(HashMap::from([

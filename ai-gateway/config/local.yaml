@@ -1,2 +1,8 @@
-helicone:
+telemetry:
+  level: "info,llm_proxy=trace"
+  exporter: both
+
+helicone-observability:
+  base-url: "http://localhost:8585"
+  websocket-url: "ws://localhost:8585/ws/v1/router/control-plane"
   enable-auth: false

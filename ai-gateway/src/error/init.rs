@@ -60,4 +60,6 @@ pub enum InitError {
     InvalidRouterId(String),
     /// Cache not configured
     CacheNotConfigured,
+    /// Minio not configured
+    MinioNotConfigured,
 }
