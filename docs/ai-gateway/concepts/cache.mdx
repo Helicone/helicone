@@ -28,19 +28,19 @@ Caching helps you:
 All caching uses **exact parameter matching**—identical requests (model, messages, temperature, all parameters) return cached responses instantly.
 
 **How it works:**
-1. Incoming request parameters are hashed to create a unique cache key
-2. System checks the cache store for an existing cached response
-3. If found and not expired, returns cached response immediately
-4. If not found, forwards request to provider and caches the response
+1. Configuration is merged from global → router → request headers to determine final cache settings
+2. Incoming request parameters are hashed to create a unique cache key
+3. System checks the cache store for an existing cached response
+4. If found and not expired, returns cached response immediately
+5. If not found, forwards request to provider and caches the response
 
 **Basic example:**
 ```yaml
-routers:
-  default:
-    cache:
-      enabled: true
-      directive: "max-age=3600, max-stale=1800"  # 1-hour TTL, 30-min stale
-      buckets: 1   # Single response per cache key
+global:
+  cache:
+    store: in-memory
+    directive: "max-age=3600, max-stale=1800"  # 1-hour TTL, 30-min stale
+    buckets: 1   # Single response per cache key
 ```
 
 ### Configuration Examples
@@ -50,25 +50,46 @@ routers:
     **Use case:** CI pipeline or test suite that makes repeated identical requests. Cache for the duration of the test run to eliminate all provider costs.
 
     ```yaml
-    routers:
-      testing:
-        cache:
-          store: in-memory
-          directive: "max-age=7200, max-stale=3600"  # 2-hour TTL for test runs
-          buckets: 1   # Consistent responses for tests
+    global:
+      cache:
+        store: in-memory
+        directive: "max-age=7200, max-stale=3600"  # 2-hour TTL for test runs
+        buckets: 1   # Consistent responses for tests
     ```
   </Tab>
 
-  <Tab title="Development Environment - Fast Iteration">
-    **Use case:** Local development where you want to avoid repeated API calls while building and debugging.
+  <Tab title="Multiple Environments - Different Cache Policies">
+    **Use case:** Different environments with different caching strategies - production optimized for freshness, development for cost savings.
+
+  <Note>
+  If using router cache configuration, we suggest not using the global cache configuration due to the merging behavior confusion.
+  </Note>
 
     ```yaml
     routers:
-      dev:
+      production:
         cache:
           store: in-memory
-          directive: "max-age=3600, max-stale=1800"  # 1-hour TTL
-          buckets: 3   # Some variety for testing
+          directive: "max-age=1800"  # 30-min TTL for production freshness
+          buckets: 1                 # Consistent responses
+        load-balance:
+          chat:
+            strategy: latency
+            providers:
+              - openai
+              - anthropic
+      
+      development:
+        cache:
+          store: in-memory
+          directive: "max-age=7200"  # 2-hour TTL to reduce dev costs
+          buckets: 5                 # More variety for testing
+        load-balance:
+          chat:
+            strategy: latency
+            providers:
+              - openai
+              - anthropic
     ```
   </Tab>
 
@@ -76,12 +97,11 @@ routers:
     **Use case:** Production API that needs to minimize provider costs while maintaining response freshness for users.
 
     ```yaml
-    routers:
-      production:
-        cache:
-          store: in-memory
-          directive: "max-age=1800, max-stale=900"  # 30-min TTL
-          buckets: 1   # Consistent responses
+    global:
+      cache:
+        store: in-memory
+        directive: "max-age=1800, max-stale=900"  # 30-min TTL
+        buckets: 1   # Consistent responses
     ```
   </Tab>
 </Tabs>
@@ -100,10 +120,11 @@ routers:
     
     **Example:**
     ```yaml
-    cache:
-      store: in-memory
-      buckets: 10  # Store up to 10 different responses
-      directive: "max-age=3600"
+    global:
+      cache:
+        store: in-memory
+        buckets: 10  # Store up to 10 different responses
+        directive: "max-age=3600"
     ```
   </Accordion>
 
@@ -121,10 +142,11 @@ routers:
     
     **Example (router config):**
     ```yaml
-    cache:
-      store: in-memory
-      directive: "max-age=3600, max-stale=1800"
-      seed: "tenant-alpha"
+    global:
+      cache:
+        store: in-memory
+        directive: "max-age=3600, max-stale=1800"
+        seed: "tenant-alpha"
     ```
     
     **Example (per-request header):**
@@ -136,33 +158,76 @@ routers:
 
 ### Configuration Scope
 
-Cache settings are applied in precedence order when a request comes in:
+Cache settings are applied in precedence order (highest to lowest priority):
 
 <Steps>
   <Step title="Request Headers">
     **Per-request cache control**
     
-    Headers like `Helicone-Cache-Enabled` and `Helicone-Cache-Seed` override router settings for specific requests.
+    Headers override all other cache settings for specific requests. Can enable/disable caching even when configured globally or per-router.
     
     ```bash
-    # Disable caching for this request
+    # Disable caching for this request (overrides router/global config)
     curl -H "Helicone-Cache-Enabled: false" \
          -H "Authorization: Bearer $API_KEY" \
          https://gateway.example.com/v1/chat/completions
     
-    # Use custom cache seed for isolation
-    curl -H "Helicone-Cache-Seed: user-123" \
+    # Override cache directive and seed
+    curl -H "Cache-Control: max-age=300" \
+         -H "Helicone-Cache-Seed: user-123" \
          -H "Authorization: Bearer $API_KEY" \
          https://gateway.example.com/v1/chat/completions
     ```
+    
+    **Available headers:**
+    - `Helicone-Cache-Enabled: true/false`
+    - `Cache-Control: "max-age=3600"`
+    - `Helicone-Cache-Seed: "custom-seed"`
+    - `Helicone-Cache-Bucket-Max-Size: 5`
   </Step>
   
   <Step title="Router Configuration">
-    **Default cache policies per router**
+    **Per-router cache policies**
+
+    <Note>
+      We suggest using either the router cache configuration or the global cache configuration, but not both.
+      The merging behavior of the two configurations can be confusing.
+    </Note>
     
-    Each router can have custom cache settings (TTL, buckets, seed) or disable caching entirely.
+    Each router can have custom cache settings that override global defaults.
+    
+    ```yaml
+    routers:
+      production:
+        cache:
+          store: in-memory
+          directive: "max-age=1800"
+          buckets: 3
+          seed: "router-seed"
+    ```
+  </Step>
+  
+  <Step title="Global Configuration">
+    **Application-wide cache defaults**
+    
+    Global cache settings apply to all routers unless overridden.
+    
+    ```yaml
+    global:
+      cache:
+        store: in-memory
+        directive: "max-age=3600"
+        buckets: 1
+        seed: "global-seed"
+    ```
   </Step>
 </Steps>
+
+#### Merging Behavior
+
+Settings from higher priority levels override lower priority levels. For example, if global config sets `buckets: 1` but router config doesn't specify buckets, the global value is used. If request headers specify `Cache-Control`, it overrides both router and global directives.
+
+The cache configuration is first merged from the global config, then the router config, and finally the request headers, then checked a single time for the cache key.
 
 ### Storage Backend Options
 
