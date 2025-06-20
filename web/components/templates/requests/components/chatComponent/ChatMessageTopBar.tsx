@@ -32,6 +32,8 @@ interface ChatMessageTopBarProps {
   deleteMessage: (_index: number) => void;
   popoverOpen: boolean;
   setPopoverOpen: (_open: boolean) => void;
+  onAddText?: () => void;
+  onAddImage?: () => void;
 }
 
 export default function ChatMessageTopBar({
@@ -46,6 +48,8 @@ export default function ChatMessageTopBar({
   deleteMessage,
   popoverOpen,
   setPopoverOpen,
+  onAddText,
+  onAddImage,
 }: ChatMessageTopBarProps) {
   return (
     <header className="h-12 w-full flex flex-row items-center justify-between px-4 sticky top-0 bg-sidebar-background dark:bg-black z-10 group">
@@ -89,7 +93,7 @@ export default function ChatMessageTopBar({
       </div>
       {chatMode === "PLAYGROUND_INPUT" && (
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity [&:has([data-state=open])]:opacity-100">
-          {message.role === "assistant" && (
+          {message.role !== "system" && (
             <DropdownMenu open={popoverOpen} onOpenChange={setPopoverOpen}>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -101,12 +105,30 @@ export default function ChatMessageTopBar({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem
-                  className="text-xs"
-                  onClick={() => addToolCall(messageIndex)}
-                >
-                  Add Tool Call
-                </DropdownMenuItem>
+                {message.role === "assistant" && (
+                  <DropdownMenuItem
+                    className="text-xs"
+                    onClick={() => addToolCall(messageIndex)}
+                  >
+                    Add Tool Call
+                  </DropdownMenuItem>
+                )}
+                {message.role === "user" && (
+                  <>
+                    <DropdownMenuItem
+                      className="text-xs"
+                      onClick={onAddText}
+                    >
+                      Add Text
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="text-xs"
+                      onClick={onAddImage}
+                    >
+                      Add Image
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           )}

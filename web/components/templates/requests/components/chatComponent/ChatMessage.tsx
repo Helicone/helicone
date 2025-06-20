@@ -14,6 +14,7 @@ import { JsonRenderer } from "./single/JsonRenderer";
 import ToolMessage from "./ToolMessage";
 import TextMessage from "./single/TextMessage";
 import ChatMessageTopBar from "./ChatMessageTopBar";
+import { Trash2Icon } from "lucide-react";
 
 type MessageType = "image" | "tool" | "text" | "pdf" | "contentArray";
 
@@ -121,6 +122,152 @@ const renderToolMessage = (
 
 const MESSAGE_LENGTH_THRESHOLD = 1000; // Characters before truncating
 
+const renderImageContent = (
+  message: Message,
+  options: {
+    showDeleteButton?: boolean;
+    onDelete?: () => void;
+    wrapperClassName?: string;
+  } = {}
+) => {
+  let imageSrc = message.image_url;
+  if (message.content && message.mime_type?.startsWith("image/")) {
+    imageSrc = `data:${message.mime_type};base64,${message.content}`;
+  } else if (message.content && !message.mime_type) {
+    console.warn("Image message missing mime_type, assuming image/png");
+    imageSrc = `data:image/png;base64,${message.content}`;
+  }
+
+  if (!imageSrc) return null;
+
+  const imageElement = (
+    <div className="relative w-full max-w-md">
+      <Image
+        src={imageSrc}
+        alt="Input image"
+        width={1000}
+        height={1000}
+        className="object-contain max-w-full w-auto h-auto max-h-[200px]"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      />
+    </div>
+  );
+
+  if (options.showDeleteButton && options.onDelete) {
+    return (
+      <div className={cn("relative group", options.wrapperClassName)}>
+        {imageElement}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute top-1/2 right-2 -translate-y-1/2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={options.onDelete}
+        >
+          <Trash2Icon className="h-4 w-4 text-muted-foreground" />
+        </Button>
+      </div>
+    );
+  }
+
+  return options.wrapperClassName ? (
+    <div className={options.wrapperClassName}>{imageElement}</div>
+  ) : (
+    <div className="my-4">{imageElement}</div>
+  );
+};
+
+const renderTextContent = (
+  message: Message,
+  displayContent: string,
+  chatMode: ChatMode,
+  mappedRequest: MappedLLMRequest,
+  messageIndex: number,
+  mode: "rendered" | "raw" | "json" | "debug",
+  options: {
+    isPartOfContentArray?: boolean;
+    parentIndex?: number;
+    onChatChange?: (_mappedRequest: MappedLLMRequest) => void;
+    showDeleteButton?: boolean;
+    onDelete?: () => void;
+  } = {}
+) => {
+  const textElement = (
+    <TextMessage
+      isPartOfContentArray={options.isPartOfContentArray || false}
+      parentIndex={options.parentIndex}
+      displayContent={displayContent}
+      chatMode={chatMode}
+      mappedRequest={mappedRequest}
+      messageIndex={messageIndex}
+      onChatChange={options.onChatChange}
+      mode={mode}
+    />
+  );
+
+  const shouldShowDeleteButton = options.showDeleteButton && 
+    chatMode === "PLAYGROUND_INPUT" && 
+    options.onDelete;
+
+  if (shouldShowDeleteButton) {
+    return (
+      <div className="relative group">
+        {textElement}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute top-2 right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={options.onDelete}
+        >
+          <Trash2Icon className="h-4 w-4 text-muted-foreground" />
+        </Button>
+      </div>
+    );
+  }
+
+  return textElement;
+};
+
+const renderPdfContent = (
+  message: Message,
+  options: {
+    showDeleteButton?: boolean;
+    onDelete?: () => void;
+    wrapperClassName?: string;
+  } = {}
+) => {
+  const filename = message.filename || "PDF File";
+  const pdfElement = (
+    <div className="flex items-center gap-2 p-4 bg-muted rounded-lg border border-dashed border-border">
+      <LuFileText className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+      <span className="text-sm text-muted-foreground">
+        {filename} (Base64 Encoded PDF - Preview/Download not available)
+      </span>
+    </div>
+  );
+
+  if (options.showDeleteButton && options.onDelete) {
+    return (
+      <div className={cn("relative group", options.wrapperClassName)}>
+        {pdfElement}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute top-2 right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={options.onDelete}
+        >
+          <Trash2Icon className="h-4 w-4 text-muted-foreground" />
+        </Button>
+      </div>
+    );
+  }
+
+  return options.wrapperClassName ? (
+    <div className={options.wrapperClassName}>{pdfElement}</div>
+  ) : (
+    <div className="my-4">{pdfElement}</div>
+  );
+};
+
 export default function ChatMessage({
   parentIndex,
   isPartOfContentArray = false,
@@ -134,15 +281,135 @@ export default function ChatMessage({
   dragHandle,
 }: ChatMessageProps) {
   const { mode } = useRequestRenderModeStore();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
+  const fileInputRefs = useRef<HTMLInputElement[]>([]);
+  const [fileInputCount, setFileInputCount] = useState(0);
+  const [roleChangeInputs, setRoleChangeInputs] = useState<Set<number>>(new Set());
 
   const toggleMessage = (index: number) => {
     setExpandedMessages((prev) => ({
       ...prev,
       [index]: !prev[index],
     }));
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, inputIndex: number) => {
+    const file = e.target.files?.[0];
+    if (!file || !onChatChange) {
+      return;
+    }
+
+    if (roleChangeInputs.has(inputIndex)) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64 = event.target?.result as string;
+        
+        onChatChange({
+          ...mappedRequest,
+          schema: {
+            ...mappedRequest.schema,
+            request: {
+              ...mappedRequest.schema.request,
+              messages: mappedRequest.schema.request?.messages?.map(
+                (message, i) => {
+                  if (i === messageIndex) {
+                    return {
+                      role: "user",
+                      _type: "image",
+                      image_url: base64,
+                      id: message.id || `msg-${messageIndex}-${Date.now()}`,
+                    };
+                  }
+                  return message;
+                }
+              ),
+            },
+          },
+        });
+      };
+      reader.readAsDataURL(file);
+      
+      setRoleChangeInputs(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(inputIndex);
+        return newSet;
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target?.result as string;
+
+      onChatChange({
+        ...mappedRequest,
+        schema: {
+          ...mappedRequest.schema,
+          request: {
+            ...mappedRequest.schema.request,
+            messages: mappedRequest.schema.request?.messages?.map(
+              (msg, i) => {
+                if (i === messageIndex) {
+                  if (msg._type === "contentArray" && msg.contentArray) {
+                    return {
+                      ...msg,
+                      contentArray: [
+                        ...msg.contentArray,
+                        {
+                          _type: "image" as const,
+                          role: "user",
+                          image_url: base64,
+                          id: `img-${messageIndex}-${Date.now()}`,
+                        },
+                      ],
+                    };
+                  }
+                  
+                  const contentArray = [];
+                  
+                  contentArray.push({
+                    _type: "message" as const,
+                    role: "user",
+                    content: msg.content,
+                    id: `text-${messageIndex}-${Date.now()}`,
+                  });
+                  
+                  contentArray.push({
+                    _type: "image" as const,
+                    role: "user",
+                    image_url: base64,
+                    id: `img-${messageIndex}-${Date.now() + 1}`,
+                  });
+
+                  return {
+                    content: "",
+                    _type: "contentArray" as const,
+                    role: "user",
+                    contentArray,
+                    id: msg.id || `msg-${messageIndex}-${Date.now()}`,
+                  };
+                }
+                return msg;
+              }
+            ),
+          },
+        },
+      });
+    };
+    reader.onerror = (error) => {
+      console.error("FileReader error:", error);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const addImageToMessage = () => {
+    const newInputIndex = fileInputCount;
+    setFileInputCount(prev => prev + 1);
+    
+    setTimeout(() => {
+      fileInputRefs.current[newInputIndex]?.click();
+    }, 0);
   };
 
   const changeMessageRole = (index: number, newRole: string) => {
@@ -178,7 +445,14 @@ export default function ChatMessage({
     }
 
     if (newRole === "image") {
-      fileInputRef.current?.click();
+      const newInputIndex = fileInputCount;
+      setFileInputCount(prev => prev + 1);
+      
+      setRoleChangeInputs(prev => new Set(prev).add(newInputIndex));
+      
+      setTimeout(() => {
+        fileInputRefs.current[newInputIndex]?.click();
+      }, 0);
       return;
     }
 
@@ -306,6 +580,65 @@ export default function ChatMessage({
     });
   };
 
+  const addTextToMessage = () => {
+    if (!onChatChange) return;
+
+    onChatChange({
+      ...mappedRequest,
+      schema: {
+        ...mappedRequest.schema,
+        request: {
+          ...mappedRequest.schema.request,
+          messages: mappedRequest.schema.request?.messages?.map(
+            (msg, i) => {
+              if (i === messageIndex) {
+                if (msg._type === "contentArray" && msg.contentArray) {
+                  return {
+                    ...msg,
+                    contentArray: [
+                      ...msg.contentArray,
+                      {
+                        _type: "message" as const,
+                        role: "user",
+                        content: "",
+                        id: `text-${messageIndex}-${Date.now()}`,
+                      },
+                    ],
+                  };
+                }
+                
+                const contentArray = [];
+                
+                contentArray.push({
+                  _type: "message" as const,
+                  role: "user",
+                  content: msg.content,
+                  id: `text-${messageIndex}-${Date.now()}`,
+                });
+                
+                contentArray.push({
+                  _type: "message" as const,
+                  role: "user",
+                  content: "",
+                  id: `text-${messageIndex}-${Date.now() + 1}`,
+                });
+
+                return {
+                  content: "",
+                  _type: "contentArray" as const,
+                  role: "user",
+                  contentArray,
+                  id: msg.id || `msg-${messageIndex}-${Date.now()}`,
+                };
+              }
+              return msg;
+            }
+          ),
+        },
+      },
+    });
+  };
+
   const content = message.content ?? JSON.stringify(message.tool_calls) ?? "";
   const isLongMessage = content.length > MESSAGE_LENGTH_THRESHOLD;
   const isExpanded = expandedMessages[messageIndex];
@@ -332,83 +665,6 @@ export default function ChatMessage({
     opacity: isDragging ? 0.5 : 1,
   };
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !onChatChange) {
-      return;
-    }
-
-    // Convert file to base64
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      const base64 = event.target?.result as string;
-
-      // Update the message with the image data
-      onChatChange({
-        ...mappedRequest,
-        schema: {
-          ...mappedRequest.schema,
-          request: {
-            ...mappedRequest.schema.request,
-            messages: mappedRequest.schema.request?.messages?.map(
-              (message, i) => {
-                if (i === messageIndex) {
-                  const currentContent = message.content || "";
-                  
-                  if (message._type === "contentArray" && message.contentArray) {
-                    return {
-                      ...message,
-                      contentArray: [
-                        ...message.contentArray,
-                        {
-                          _type: "image" as const,
-                          role: "user",
-                          image_url: base64,
-                          id: `img-${messageIndex}-${Date.now()}`,
-                        },
-                      ],
-                    };
-                  }
-                  
-                  const contentArray = [];
-                  
-                  if (currentContent.trim()) {
-                    contentArray.push({
-                      _type: "message" as const,
-                      role: "user",
-                      content: currentContent,
-                      id: `text-${messageIndex}-${Date.now()}`,
-                    });
-                  }
-                  
-                  contentArray.push({
-                    _type: "image" as const,
-                    role: "user",
-                    image_url: base64,
-                    id: `img-${messageIndex}-${Date.now() + 1}`,
-                  });
-
-                  return {
-                    content: "",
-                    _type: "contentArray" as const,
-                    role: "user",
-                    contentArray,
-                    id: message.id || `msg-${messageIndex}-${Date.now()}`,
-                  };
-                }
-                return message;
-              }
-            ),
-          },
-        },
-      });
-    };
-    reader.onerror = (error) => {
-      console.error("FileReader error:", error);
-    };
-    reader.readAsDataURL(file);
-  };
-
   return (
     <div
       className={cn(
@@ -418,13 +674,21 @@ export default function ChatMessage({
       ref={setNodeRef}
       style={style}
     >
-      <input
-        type="file"
-        ref={fileInputRef}
-        className="hidden"
-        accept="image/*"
-        onChange={handleFileChange}
-      />
+      {Array.from({ length: fileInputCount }, (_, index) => (
+        <input
+          key={index}
+          type="file"
+          ref={(el) => {
+            if (el) {
+              fileInputRefs.current[index] = el;
+            }
+          }}
+          className="hidden"
+          accept="image/*"
+          onChange={(e) => handleFileChange(e, index)}
+        />
+      ))}
+      
       {/* Message Role Header */}
       {(chatMode !== "PLAYGROUND_OUTPUT" ||
         (chatMode === "PLAYGROUND_OUTPUT" &&
@@ -441,6 +705,8 @@ export default function ChatMessage({
           listeners={listeners}
           addToolCall={addToolCall}
           deleteMessage={deleteMessage}
+          onAddText={addTextToMessage}
+          onAddImage={addImageToMessage}
         />
       )}
 
@@ -456,41 +722,15 @@ export default function ChatMessage({
         {(() => {
           switch (messageType) {
             case "image":
-              let imageSrc = message.image_url;
-              if (message.content && message.mime_type?.startsWith("image/")) {
-                imageSrc = `data:${message.mime_type};base64,${message.content}`;
-              } else if (message.content && !message.mime_type) {
-                console.warn(
-                  "Image message missing mime_type, assuming image/png"
-                );
-                imageSrc = `data:image/png;base64,${message.content}`;
-              }
-
-              return (
-                imageSrc && (
-                  <div className="relative w-full max-w-md h-[400px] my-4">
-                    <Image
-                      src={imageSrc}
-                      alt="Input image"
-                      fill
-                      className="rounded-lg object-contain border border-border"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    />
-                  </div>
-                )
-              );
+              return renderImageContent(message, {
+                showDeleteButton: chatMode === "PLAYGROUND_INPUT",
+                onDelete: () => deleteMessage(messageIndex),
+              });
             case "pdf":
-              // Display info indicating a PDF file is present
-              const filename = message.filename || "PDF File";
-              return (
-                <div className="flex items-center gap-2 p-4 bg-muted rounded-lg border border-dashed border-border my-4">
-                  <LuFileText className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                  <span className="text-sm text-muted-foreground">
-                    {filename} (Base64 Encoded PDF - Preview/Download not
-                    available)
-                  </span>
-                </div>
-              );
+              return renderPdfContent(message, {
+                showDeleteButton: chatMode === "PLAYGROUND_INPUT",
+                onDelete: () => deleteMessage(messageIndex),
+              });
             case "tool":
               return mode === "raw" && chatMode !== "PLAYGROUND_INPUT" ? (
                 <MarkdownEditor
@@ -514,31 +754,18 @@ export default function ChatMessage({
                 )
               );
             case "text":
-              return (
-                <div className="relative">
-                  <TextMessage
-                    isPartOfContentArray={isPartOfContentArray}
-                    parentIndex={parentIndex}
-                    displayContent={displayContent}
-                    chatMode={chatMode}
-                    mappedRequest={mappedRequest}
-                    messageIndex={messageIndex}
-                    onChatChange={onChatChange}
-                    mode={mode}
-                  />
-                  {chatMode === "PLAYGROUND_INPUT" &&
-                    isHovering &&
-                    message.role === "user" && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="absolute top-2 right-2"
-                        onClick={() => fileInputRef.current?.click()}
-                      >
-                        <LuImage className="h-4 w-4" />
-                      </Button>
-                    )}
-                </div>
+              return renderTextContent(
+                message,
+                displayContent,
+                chatMode,
+                mappedRequest,
+                messageIndex,
+                mode,
+                {
+                  isPartOfContentArray,
+                  parentIndex,
+                  onChatChange,
+                }
               );
             case "contentArray":
               return (
@@ -548,84 +775,43 @@ export default function ChatMessage({
                     
                     switch (contentType) {
                       case "image":
-                        let imageSrc = content.image_url;
-                        if (content.content && content.mime_type?.startsWith("image/")) {
-                          imageSrc = `data:${content.mime_type};base64,${content.content}`;
-                        } else if (content.content && !content.mime_type) {
-                          console.warn("Image message missing mime_type, assuming image/png");
-                          imageSrc = `data:image/png;base64,${content.content}`;
-                        }
-                        
-                        return imageSrc ? (
-                          <div key={index} className="relative group">
-                            <div className="relative w-full max-w-md h-[400px]">
-                              <Image
-                                src={imageSrc}
-                                alt="Input image"
-                                fill
-                                className="rounded-lg object-contain border border-border"
-                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                              />
-                            </div>
-                            {chatMode === "PLAYGROUND_INPUT" && (
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                                onClick={() => deleteContentArrayItem(index)}
-                              >
-                                ×
-                              </Button>
-                            )}
+                        return (
+                          <div key={index}>
+                            {renderImageContent(content, {
+                              showDeleteButton: chatMode === "PLAYGROUND_INPUT",
+                              onDelete: () => deleteContentArrayItem(index),
+                            })}
                           </div>
-                        ) : null;
+                        );
                       
                       case "text":
-                        return content.content ? (
-                          <div key={index} className="relative group">
-                            <TextMessage
-                              isPartOfContentArray={true}
-                              parentIndex={messageIndex}
-                              displayContent={content.content}
-                              chatMode={chatMode}
-                              mappedRequest={mappedRequest}
-                              messageIndex={index}
-                              onChatChange={onChatChange}
-                              mode={mode}
-                            />
-                            {chatMode === "PLAYGROUND_INPUT" && message.contentArray && message.contentArray.length > 1 && (
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                                onClick={() => deleteContentArrayItem(index)}
-                              >
-                                ×
-                              </Button>
+                        return (chatMode === "PLAYGROUND_INPUT" || content.content) ? (
+                          <div key={index}>
+                            {renderTextContent(
+                              content,
+                              content.content || "",
+                              chatMode,
+                              mappedRequest,
+                              index,
+                              mode,
+                              {
+                                isPartOfContentArray: true,
+                                parentIndex: messageIndex,
+                                onChatChange,
+                                showDeleteButton: chatMode === "PLAYGROUND_INPUT",
+                                onDelete: () => deleteContentArrayItem(index),
+                              }
                             )}
                           </div>
                         ) : null;
                       
                       case "pdf":
-                        const filename = content.filename || "PDF File";
                         return (
-                          <div key={index} className="relative group">
-                            <div className="flex items-center gap-2 p-4 bg-muted rounded-lg border border-dashed border-border">
-                              <LuFileText className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                              <span className="text-sm text-muted-foreground">
-                                {filename} (Base64 Encoded PDF - Preview/Download not available)
-                              </span>
-                            </div>
-                            {chatMode === "PLAYGROUND_INPUT" && (
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                                onClick={() => deleteContentArrayItem(index)}
-                              >
-                                ×
-                              </Button>
-                            )}
+                          <div key={index}>
+                            {renderPdfContent(content, {
+                              showDeleteButton: chatMode === "PLAYGROUND_INPUT",
+                              onDelete: () => deleteContentArrayItem(index),
+                            })}
                           </div>
                         );
                       
