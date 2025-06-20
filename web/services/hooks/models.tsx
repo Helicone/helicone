@@ -9,7 +9,11 @@ const useModels = (
   limit: number,
   userFilters?: FilterNode
 ) => {
-  const { data: models, isLoading } = useQuery({
+  const {
+    data: models,
+    isLoading,
+    isRefetching,
+  } = useQuery({
     queryKey: ["modelMetrics", timeFilter, userFilters],
     queryFn: async (query) => {
       return await fetch("/api/models", {
@@ -28,7 +32,33 @@ const useModels = (
     refetchOnWindowFocus: false,
   });
 
-  return { models, isLoading };
+  return { models, isLoading, isRefetching };
 };
 
-export { useModels };
+const useModelCount = (timeFilter: TimeFilter, userFilters?: FilterNode) => {
+  const {
+    data: count,
+    isLoading,
+    isRefetching,
+  } = useQuery({
+    queryKey: ["modelCount", timeFilter, userFilters],
+    queryFn: async () => {
+      return await fetch("/api/models", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          filter: userFilters ?? "all",
+          count: true,
+          timeFilter,
+        }),
+      }).then((res) => res.json() as Promise<Result<number, string>>);
+    },
+    refetchOnWindowFocus: false,
+  });
+
+  return { count, isLoading, isRefetching };
+};
+
+export { useModels, useModelCount };

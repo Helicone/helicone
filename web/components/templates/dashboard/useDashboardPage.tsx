@@ -16,7 +16,7 @@ import { ThreatsOverTime } from "../../../lib/api/metrics/getThreatsOverTime";
 import { TimeToFirstToken } from "../../../lib/api/metrics/getTimeToFirstToken";
 import { UsersOverTime } from "../../../lib/api/metrics/getUsersOverTime";
 import { UnPromise } from "../../../lib/tsxHelpers";
-import { useModels } from "../../../services/hooks/models";
+import { useModelCount, useModels } from "../../../services/hooks/models";
 import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
 import {
   BackendMetricsCall,
@@ -81,6 +81,13 @@ export const useDashboardPage = ({
     models?.data?.sort((a, b) =>
       a.total_requests > b.total_requests ? -1 : 1
     ) ?? [];
+
+  const {
+    count,
+    isLoading: isCountLoading,
+    isRefetching: isCountRefetching,
+  } = useModelCount(timeFilter, filter);
+  const totalModels = count?.data ?? 0;
 
   const params: BackendMetricsCall<any>["params"] = {
     timeFilter,
@@ -269,5 +276,8 @@ export const useDashboardPage = ({
     isModelsLoading,
     isModelsRefetching,
     isAnyRefetching,
+    totalModels,
+    isCountLoading,
+    isCountRefetching,
   };
 };

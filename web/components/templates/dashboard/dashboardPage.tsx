@@ -142,6 +142,9 @@ const DashboardPage = (props: DashboardPageProps) => {
     models: realModels,
     isModelsLoading,
     isModelsRefetching,
+    totalModels,
+    isCountLoading,
+    isCountRefetching,
   } = useDashboardPage({
     timeFilter,
     timeZoneDifference: new Date().getTimezoneOffset(),
@@ -421,7 +424,7 @@ const DashboardPage = (props: DashboardPageProps) => {
 
                 <div key="models">
                   <ModelsCard
-                    isLoading={isModelsLoading}
+                    isLoading={isModelsLoading || isCountLoading}
                     models={
                       models?.data
                         ?.map((model) => ({
@@ -433,6 +436,8 @@ const DashboardPage = (props: DashboardPageProps) => {
                             b.value - a.value - (b.name === "n/a" ? 1 : 0)
                         ) ?? []
                     }
+                    totalModels={totalModels}
+                    isRefetching={isModelsRefetching || isCountRefetching}
                   />
                 </div>
                 <div key="costs">

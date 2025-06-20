@@ -1,7 +1,12 @@
 import { formatLargeNumber } from "@/components/shared/utils/numberFormat";
 import StatsCard from "./StatsCard";
 import { CardTitle } from "@/components/ui/card";
-import { ChartConfig, ChartContainer } from "@/components/ui/chart";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 import { useMemo, useRef, useState } from "react";
 import { useEffect } from "react";
 import { Bar, BarChart, LabelList, XAxis, YAxis } from "recharts";
@@ -30,6 +35,7 @@ export default function ErrorsCard({
         { label: d.name, color: `oklch(var(--chart-${(i % 10) + 1}))` },
       ]),
       ["label", { color: "hsl(var(--foreground))" }],
+      ["value", { label: "Error %" }],
     ]) satisfies ChartConfig;
     return config;
   }, [data]);
@@ -99,6 +105,9 @@ export default function ErrorsCard({
             hide
           />
           <XAxis dataKey="value" type="number" hide />
+          <ChartTooltip
+            content={<ChartTooltipContent cursor={false} hideLabel />}
+          />
           <Bar dataKey="value" layout="vertical" radius={4} maxBarSize={30}>
             <LabelList
               formatter={(value: string) => {
@@ -130,70 +139,6 @@ export default function ErrorsCard({
           </Bar>
         </BarChart>
       </ChartContainer>
-      {/* <Card className="h-full w-full flex flex-col border border-slate-200 bg-white text-slate-950 !shadow-sm dark:border-slate-800 dark:bg-black dark:text-slate-50 rounded-lg ring-0">
-                    <div className="flex flex-col h-full">
-                      <h2 className="text-slate-500 text-sm mb-2">
-                        All Errors
-                      </h2>
-                      {(() => {
-                        const totalErrors = accumulatedStatusCounts.reduce(
-                          (sum, e) => sum + e.value,
-                          0
-                        );
-                        const errorPercentage =
-                          (totalErrors /
-                            (metrics.totalRequests?.data?.data ?? 1)) *
-                            100 || 0;
-                        return (
-                          <div className="mb-2 text-sm">
-                            <span className="font-semibold">
-                              {formatLargeNumber(totalErrors)}
-                            </span>{" "}
-                            total errors (
-                            <span className="font-semibold">
-                              {errorPercentage.toFixed(2)}%
-                            </span>{" "}
-                            of all requests)
-                          </div>
-                        );
-                      })()}
-                      <div className="flex-grow overflow-hidden flex flex-col">
-                        <div className="flex flex-row justify-between items-center pb-2">
-                          <p className="text-xs font-semibold text-slate-700">
-                            Error Type
-                          </p>
-                          <p className="text-xs font-semibold text-slate-700">
-                            Percentage
-                          </p>
-                        </div>
-                        <div className="overflow-y-auto flex-grow">
-                          <BarList
-                            data={(() => {
-                              const totalErrors =
-                                accumulatedStatusCounts.reduce(
-                                  (sum, e) => sum + e.value,
-                                  0
-                                );
-                              return accumulatedStatusCounts
-                                .sort((a, b) => b.value - a.value)
-                                .map((error, index) => ({
-                                  name: `${error.name} (${formatLargeNumber(
-                                    error.value
-                                  )})`,
-                                  value: (error.value / totalErrors) * 100,
-                                  color: listColors[index % listColors.length],
-                                }));
-                            })()}
-                            className="h-full"
-                            showAnimation={true}
-                            valueFormatter={(value: number) =>
-                              `${value.toFixed(1)}%`
-                            }
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </Card> */}
     </StatsCard>
   );
 }
