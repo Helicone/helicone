@@ -233,19 +233,7 @@ server.on("upgrade", async (req, socket, head) => {
   if (req.url?.startsWith("/v1/gateway/oai/realtime")) {
     webSocketProxyForwarder(requestWrapper, socket, head);
   } else if (req.url?.startsWith("/ws/v1/router/control-plane")) {
-    const auth = await authFromRequest(toExpressRequest(req));
-    if (auth.error) {
-      socket.write(
-        JSON.stringify({
-          type: "error",
-          error: auth.error,
-        })
-      );
-      socket.destroy();
-      return;
-    } else {
-      return webSocketControlPlaneServer(requestWrapper, socket, head);
-    }
+    return webSocketControlPlaneServer(requestWrapper, socket, head);
   } else {
     socket.destroy();
   }
