@@ -419,9 +419,8 @@ Configure OpenTelemetry monitoring for the AI Gateway application's health and p
   ```
 
   **Common patterns:**
-  - `"info"` - General information for all modules
-  - `"debug,ai_gateway=info"` - Debug for dependencies, info for gateway
-  - `"warn,hyper=off"` - Warnings only, disable specific modules
+  - `"info"` - General information for all modules, recommended for production
+  - `"info,ai_gateway=debug"` - Debug for dependencies, info for gateway, recommended for development
 </ParamField>
 
 <ParamField path="telemetry.exporter" type="string" default="stdout">
