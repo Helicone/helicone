@@ -60,7 +60,7 @@ export class SupabaseConnector {
 
     const member = await this.client
       .from("organization_member")
-      .select("*")
+      .select("*, organization(id,tier)")
       .eq("member", data.user.id)
       .eq("organization", orgId);
 
@@ -77,10 +77,10 @@ export class SupabaseConnector {
     }
     if (member.data.length !== 0) {
       return ok({
-        organizationId: member.data[0].organization,
+        organizationId: member.data[0].organization.id,
         userId: data.user.id,
         role: member.data[0].org_role as Role,
-        tier: owner.data[0].tier ?? "",
+        tier: member.data[0].organization.tier ?? "",
       });
     }
     if (owner.data.length !== 0) {
