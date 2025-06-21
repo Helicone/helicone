@@ -166,6 +166,16 @@ export const costs: ModelRow[] = [
       completion_token: 0.0000006,
     },
   },
+  {
+    model: {
+      operator: "includes",
+      value: "gemini-2.5-flash-lite-preview-06-17",
+    },
+    cost: {
+      prompt_token: 0.0000001,
+      completion_token: 0.0000004,
+    },
+  },
 ];
 
 export const modelDetails: ModelDetailsMap = {
