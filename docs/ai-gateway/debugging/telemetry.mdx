@@ -23,29 +23,9 @@ AI Gateway application monitoring provides:
   For complete configuration options, see the [Configuration Reference](/ai-gateway/config#telemetry).
 </Note>
 
-### How Observability Works
+### Telemetry Levels
 
-The AI Gateway uses OpenTelemetry to automatically capture telemetry data from every request and export it to your observability backend.
-
-**Data flow:** Request processing → Automatic instrumentation → Export to backend → Dashboard visualization
-
-<Steps>
-  <Step title="Request Instrumentation">
-    Every request is automatically traced with spans for authentication, load balancing, provider calls, and response processing
-  </Step>
-  
-  <Step title="Metrics Collection">
-    Performance metrics, error rates, and system health data are continuously collected and exported
-  </Step>
-  
-  <Step title="Structured Logging">
-    All logs include trace correlation IDs and structured data for easy searching and analysis
-  </Step>
-  
-  <Step title="Backend Export">
-    Telemetry data is exported via OpenTelemetry protocol to your chosen observability platform
-  </Step>
-</Steps>
+The recommended telemetry level is `info,ai_gateway=debug` for development and `info` for production.
 
 ### Configuration Examples
 
@@ -55,7 +35,7 @@ The AI Gateway uses OpenTelemetry to automatically capture telemetry data from e
 
     ```yaml
     telemetry:
-      level: "debug"
+      level: "info,ai_gateway=debug" # Recommended for development
       otlp-endpoint: "http://localhost:4317"
     ```
     
@@ -67,7 +47,7 @@ The AI Gateway uses OpenTelemetry to automatically capture telemetry data from e
 
     ```yaml
     telemetry:
-      level: "info"
+      level: "info" # Recommended for production
       otlp-endpoint: "https://otel-collector.yourcompany.com:4317"
     ```
     
@@ -79,7 +59,7 @@ The AI Gateway uses OpenTelemetry to automatically capture telemetry data from e
 
     ```yaml
     telemetry:
-      level: "info"
+      level: "info,ai_gateway=debug"
       otlp-endpoint: "http://localhost:4317"
     ```
     

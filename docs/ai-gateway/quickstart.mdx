@@ -10,39 +10,47 @@ description: "Get started with Helicone AI Gateway in 1 minute"
 </Note>
 
 <Steps>
-    <Step title="Set up your AI Gateway">
+  <Step title="Configure provider secrets">
+    To get started, you'll need to configure the provider secrets for the providers you want to use.
+
+    Just add your API keys to the `.env` file:
+
+    ```bash
+    OPENAI_API_KEY=your-api-key
+    ANTHROPIC_API_KEY=your-api-key
+    GOOGLE_API_KEY=your-api-key
+    ```
+
+    All supported models and providers are available [here](https://github.com/Helicone/helicone-router/blob/main/ai-gateway/config/embedded/providers.yaml)
+
+    Using unsupported providers or custom endpoints? Check how to configure them [here](/ai-gateway/config/#provider-configuration).
+  </Step>
+  <Step title="Start the Gateway">
     ```bash
     npx @helicone/ai-gateway start
     ```
 
-    The Gateway will be running on `http://localhost:8080` with sensible defaults.
-    </Step>
-    <Step title="Configure provider secrets">
-        The Gateway centralizes management of your LLM provider credentials.
+    The Gateway will be running on `http://localhost:8080/ai` and has three routes:
 
-        We support OpenAI, Anthropic, and Gemini out of the box.
+    - `/ai` for a Unified API compatible with the OpenAI API
+    - `/router/{router-name}`  for load balancing with multiple providers
+    - `/{provider-name}` for a direct gateway to a specific provider.
+  </Step>
 
-        Just add your API keys to the `.env` file:
-
-        ```bash
-        export OPENAI_API_KEY=your-api-key
-        export ANTHROPIC_API_KEY=your-api-key
-        export GEMINI_API_KEY=your-api-key
-        ```
-
-        Using other providers? Check how to add them [here](/ai-gateway/config/#provider-configuration).
-    </Step>
     <Step title="Make your first request">
+    Let's start with a simple request to the Unified API. Don't worry, we'll show you how to create custom routers next!
+
     <CodeGroup>
     ```typescript Typescript
     import { OpenAI } from "openai";
 
     const openai = new OpenAI({
-      baseURL: "http://localhost:8080"
+      baseURL: "http://localhost:8080",
+      apiKey: "fake-api-key", // Required by SDK, but gateway handles real auth
     });
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini", // 100+ models available
+      model: "openai/gpt-4o-mini", // 100+ models available
       messages: [{ role: "user", content: "Hello, world!" }],
     });
 
@@ -51,11 +59,11 @@ description: "Get started with Helicone AI Gateway in 1 minute"
     ```python Python
     import openai
 
-    openai.api_base = "http://localhost:8080"
-    openai.api_key = os.getenv("OPENAI_API_KEY")
+    openai.api_base = "http://localhost:8080/ai"
+    openai.api_key = "fake-api-key" # Required by SDK, but gateway handles real auth
 
     response = openai.ChatCompletion.create(
-        model="gpt-4o-mini",  # 100+ models available
+        model="openai/gpt-4o-mini",  # 100+ models available
         messages=[{"role": "user", "content": "Hello, world!"}]
     )
     ```
@@ -71,8 +79,7 @@ description: "Get started with Helicone AI Gateway in 1 minute"
     Just add the following environment variables to your Gateway configuration:
 
     ```bash
-    export HELICONE_API_KEY=your-api-key
-    export HELICONE_PROJECT_ID=your-project-id
+    export HELICONE_CONTROL_PLANE_API_KEY=your-api-key
     ```
     </Step>
 </Steps>
@@ -83,6 +90,6 @@ Great job getting your Gateway started! The next step is making it work exactly 
 
 Interested in adding new providers, balancing request loads, or caching responses for efficiency?
 
-<Card title="Configuration" horizontal icon="gear" href="/ai-gateway/config">
-  Dive into our configuration guides to build the perfect Gateway for your use case.
+<Card title="Router Quickstart" href="/ai-gateway/router-quickstart">
+    Build custom routers with load balancing, caching, and multiple environments in 5 minutes
 </Card>

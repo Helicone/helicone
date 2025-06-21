@@ -1,12 +1,12 @@
 ---
 title: "Model Mapping"
 sidebarTitle: "Model Mapping"
-description: "Intelligent model equivalencies for seamless switching and load balancing"
+description: "Default model equivalencies for seamless switching and load balancing"
 ---
 
-The AI Gateway includes intelligent model mapping that automatically handles equivalencies between models from different providers. This enables seamless switching, load balancing, and fallback scenarios without changing your application code.
+The AI Gateway includes default model mapping that handles equivalencies between models from different providers. This enables seamless switching, load balancing, and fallback scenarios without changing your application code.
 
-**Most users never need to configure model mappings manually** - the gateway ships with comprehensive defaults that work out-of-the-box.
+**The gateway ships with [comprehensive default mappings](https://github.com/Helicone/helicone-router/blob/main/ai-gateway/config/embedded/model-mapping.yaml)** that work out-of-the-box, but you can override them for your specific needs.
 
 ## Getting Started
 
@@ -17,8 +17,6 @@ Model mapping defines equivalencies between models from different providers, ena
 - **Provider fallback** when your preferred provider is unavailable  
 - **Cost optimization** by routing to cheaper equivalent models
 - **Performance tuning** by selecting faster equivalent models
-
-The gateway includes [comprehensive defaults](https://github.com/Helicone/helicone-router/blob/main/llm-proxy/config/embedded/model-mapping.yaml) with intelligent mappings between all major providers.
 
 <Note>
   For complete configuration options and syntax, see the [Configuration Reference](/ai-gateway/config#model-mapping).
@@ -49,7 +47,8 @@ The gateway uses a **3-tier mapping system** with automatic fallback. When load 
     routers:
       production:
         model-mappings:
-          gpt-4o: claude-3-opus    # Custom mapping for this router
+          gpt-4o: 
+            - claude-3-opus    # Custom mapping for this router
     
     # Result: gpt-4o request → Routes to Anthropic → Uses claude-3-opus
     ```
@@ -62,20 +61,23 @@ The gateway uses a **3-tier mapping system** with automatic fallback. When load 
     
     ```yaml
     default-model-mapping:
-      gpt-4o: claude-3-5-sonnet   # Global preference
+      gpt-4o: 
+        - claude-3-5-sonnet   # Global preference
     
     # Result: gpt-4o request → Routes to Anthropic → Uses claude-3-5-sonnet
     ```
   </Step>
   
-  <Step title="Built-in Intelligent Mapping">
-    **Finally, fall back to the gateway's built-in intelligent mappings.**
+  <Step title="Built-in Default Mapping">
+    **Finally, fall back to the gateway's built-in default mappings.**
     
-    These are maintained automatically and updated as new models are released.
+    These are comprehensive defaults that ship with the gateway and cover all major models and providers.
     
     ```yaml
     # Built-in mapping (from embedded configuration)
-    gpt-4o: [claude-3-5-sonnet, gemini-1.5-pro]
+    gpt-4o: 
+      - claude-3-5-sonnet
+      - gemini-1.5-pro
     
     # Result: gpt-4o request → Routes to Anthropic → Uses claude-3-5-sonnet
     ```
@@ -85,7 +87,7 @@ The gateway uses a **3-tier mapping system** with automatic fallback. When load 
 ### Configuration Examples
 
 <Note>
-  The gateway's default mappings prioritize equivalent quality and capability. You only need custom mappings when you disagree with these equivalencies for business reasons.
+  The gateway ships with [comprehensive default mappings](https://github.com/Helicone/helicone-router/blob/main/ai-gateway/config/embedded/model-mapping.yaml) that prioritize equivalent quality and capability. You only need custom mappings when you want to override these defaults for your specific use case.
 </Note>
 
 <Tabs>
@@ -98,11 +100,13 @@ The gateway uses a **3-tier mapping system** with automatic fallback. When load 
         model-mappings:
           # Default maps gpt-4o to claude-3-5-sonnet
           # But you think claude-3-opus is more equivalent for your use case
-          gpt-4o: claude-3-opus
+          gpt-4o: 
+            - claude-3-opus
           
           # Default maps claude-3-5-sonnet to gpt-4o
           # But you think gemini-1.5-pro is more equivalent
-          claude-3-5-sonnet: gemini-1.5-pro
+          claude-3-5-sonnet: 
+            - gemini-1.5-pro
         
         load-balance:
           chat:
@@ -110,7 +114,7 @@ The gateway uses a **3-tier mapping system** with automatic fallback. When load 
             providers:
               - openai
               - anthropic
-              - gemini
+              - google
     ```
 
     **What happens:** When load balancer routes a `gpt-4o` request to Anthropic, it uses `claude-3-opus` instead of the default `claude-3-5-sonnet` mapping.
@@ -125,11 +129,13 @@ The gateway uses a **3-tier mapping system** with automatic fallback. When load 
         model-mappings:
           # Default maps gpt-4o-mini to claude-3-5-haiku
           # Override because you want to avoid haiku entirely
-          gpt-4o-mini: claude-3-5-sonnet
+          gpt-4o-mini: 
+            - claude-3-5-sonnet
           
           # Default maps gemini-1.5-flash to claude-3-5-haiku  
           # Override to avoid haiku for all requests
-          gemini-1.5-flash: claude-3-5-sonnet
+          gemini-1.5-flash: 
+            - claude-3-5-sonnet
         
         load-balance:
           chat:
@@ -137,7 +143,7 @@ The gateway uses a **3-tier mapping system** with automatic fallback. When load 
             providers:
               - openai
               - anthropic
-              - gemini
+              - google
     ```
 
     **What happens:** Even though `claude-3-5-haiku` is the logical equivalent, all requests get mapped to `claude-3-5-sonnet` when routed to Anthropic.
@@ -149,9 +155,12 @@ The gateway uses a **3-tier mapping system** with automatic fallback. When load 
     ```yaml
     default-model-mapping:
       # Override built-in defaults for your organization's preferences
-      gpt-4o: claude-3-opus              # Your org prefers opus over sonnet
-      gpt-4o-mini: claude-3-5-sonnet     # Avoid haiku globally
-      claude-3-5-sonnet: gemini-1.5-pro  # Prefer Google for certain tasks
+      gpt-4o: 
+        - claude-3-opus              # Your org prefers opus over sonnet
+      gpt-4o-mini: 
+        - claude-3-5-sonnet     # Avoid haiku globally
+      claude-3-5-sonnet: 
+        - gemini-1.5-pro  # Prefer Google for certain tasks
 
     routers:
       production:
@@ -161,7 +170,7 @@ The gateway uses a **3-tier mapping system** with automatic fallback. When load 
             providers:
               - openai
               - anthropic
-              - gemini
+              - google
       
       development:
         # Inherits the global default mappings above
@@ -171,7 +180,7 @@ The gateway uses a **3-tier mapping system** with automatic fallback. When load 
             providers:
               - provider: anthropic
                 weight: '0.8'
-              - provider: gemini
+              - provider: google
                 weight: '0.2'
     ```
 
@@ -179,22 +188,14 @@ The gateway uses a **3-tier mapping system** with automatic fallback. When load 
   </Tab>
 </Tabs>
 
-## Reference
-
 <Note>
   For complete configuration options and syntax, see the [Configuration Reference](/ai-gateway/config#model-mapping).
 </Note>
 
-### Multiple Fallback Options
+## Coming Soon
 
-Define multiple fallback options with automatic selection:
+The following model mapping features are planned for future releases:
 
-```yaml
-default-model-mapping:
-  gpt-4o:
-    - claude-3-5-sonnet    # First choice
-    - gemini-1.5-pro       # Second choice
-    - gpt-4                # Final fallback
-```
-
-**How it works:** The gateway selects the first available model from the list that the target provider supports.
+| Feature | Description | Version |
+|---------|-------------|---------|
+| **Intelligent Mapping** | Automatically maintained model equivalencies that update with new model releases, eliminating the need for manual configuration | v2 |

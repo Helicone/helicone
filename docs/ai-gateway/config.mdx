@@ -83,7 +83,7 @@ Distribute requests across multiple providers to optimize performance, costs, an
   **Important:** Weights must sum to exactly `1.0`
 </ParamField>
 
-### Balance providers
+### Load Balancing Providers
 
 <ParamField path="routers.[name].load-balance.chat.providers" type="array">
   List of target providers for load balancing.
@@ -126,15 +126,17 @@ Store and reuse LLM responses for identical requests to dramatically reduce cost
   ```
 </ParamField>
 
-<ParamField path="routers.[name].cache.enabled" type="boolean">
-  Enable or disable caching for this router.
+<ParamField path="routers.[name].cache.store" type="string" default="in-memory">
+  Define where to store cached responses.
 
   ```yaml
   cache:
-    enabled: true
+    store: in-memory
   ```
 
-  **How it works:** When enabled, the Gateway will cache responses for identical requests. Optionally override with `Helicone-Cache-Enabled: false` request header.
+  **Options:**
+  - `in-memory` - Local memory storage (default)
+  - `redis` - Redis storage (coming soon...) 
 </ParamField>
 
 <ParamField path="routers.[name].cache.directive" type="string">
@@ -319,7 +321,7 @@ The gateway ships with [comprehensive defaults](https://github.com/Helicone/heli
         - claude-3-5-haiku
     
     ollama:
-      base-url: "http://192.168.1.100:8080"
+      base-url: "http://192.168.1.100:11434"
       models:
         - llama3.2
         - deepseek-r1
@@ -417,9 +419,22 @@ Configure OpenTelemetry monitoring for the AI Gateway application's health and p
   ```
 
   **Common patterns:**
-  - `"info"` - General information for all modules
-  - `"debug"` - Debug for dependencies, info for gateway
-  - `"warn"` - Warnings only, disable specific modules
+  - `"info"` - General information for all modules, recommended for production
+  - `"info,ai_gateway=debug"` - Debug for dependencies, info for gateway, recommended for development
+</ParamField>
+
+<ParamField path="telemetry.exporter" type="string" default="stdout">
+  Telemetry data export destination.
+
+  ```yaml
+  telemetry:
+    exporter: "otlp"
+  ```
+
+  **Options:**
+  - `stdout` - Export telemetry data to standard output (default)
+  - `otlp` - Export telemetry data to OTLP collector endpoint
+  - `both` - Export to both stdout and OTLP collector
 </ParamField>
 
 <ParamField path="telemetry.otlp-endpoint" type="string" default="http://localhost:4317/v1/metrics">
@@ -428,15 +443,6 @@ Configure OpenTelemetry monitoring for the AI Gateway application's health and p
   ```yaml
   telemetry:
     otlp-endpoint: "http://localhost:4317"
-  ```
-</ParamField>
-
-<ParamField path="telemetry.propagate" type="boolean" default="true">
-  Enables tracing propagation via OpenTelemetry [context propagation](https://opentelemetry.io/docs/concepts/context-propagation/).
-
-  ```yaml
-  telemetry:
-    propagate: true
   ```
 </ParamField>
 
@@ -464,30 +470,6 @@ Control which headers are returned to provide visibility into the gateway's rout
   ```
 
   **When enabled:** Responses include header like `helicone-provider-req-id: req-12345` for request tracing.
-</ParamField>
-
-## Deployment Configuration
-
-Configure the AI Gateway's runtime behavior for different deployment patterns and environments.
-
-[Learn more about deployment modes](/ai-gateway/deployment)
-
-<ParamField path="deployment-target" type="string" default="sidecar">
-  Deployment environment type.
-
-  ```yaml
-  deployment-target: "self-hosted"  # sidecar | self-hosted
-  ```
-</ParamField>
-
-<ParamField path="is-production" type="boolean" default="false">
-  Production environment flag for optimized logging and performance settings.
-
-  ```yaml
-  is-production: true
-  ```
-
-  **When enabled:** Optimizes telemetry output and logging levels for production workloads.
 </ParamField>
 
 ## Health Monitoring

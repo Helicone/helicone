@@ -1,0 +1,365 @@
+---
+title: "Router Quickstart"
+sidebarTitle: "Router Quickstart"
+description: "Build your first custom router with load balancing and caching in 5 minutes"
+---
+
+Ready to unlock the full power of the AI Gateway? This guide will walk you through creating custom routers with load balancing, caching, and multiple environments. You'll go from basic routing to production-ready configurations.
+
+<Note>
+  **Prerequisites:** Make sure you've completed the [main quickstart](/ai-gateway/quickstart) and have the gateway running with your API keys configured.
+</Note>
+
+## What Are Routers?
+
+Think of routers as separate "virtual gateways" within your single AI Gateway deployment. Each router has its own:
+
+- **URL endpoint** - `http://localhost:8080/router/{name}/v1/chat/completions`
+- **Load balancing strategy** - How requests are distributed across providers
+- **Provider pool** - Which LLM providers are available
+- **Features** - Caching, rate limiting, retries, and more
+
+This lets you have different configurations for different use cases - all from one gateway deployment.
+
+## Step 1: Create Your First Router
+
+Let's start with a basic router configuration. Create a file called `ai-gateway-config.yaml`:
+
+```yaml
+routers:
+  my-router:
+    load-balance:
+      chat:
+        strategy: latency
+        providers:
+          - openai
+          - anthropic
+```
+
+**What this does:**
+- Creates a router named `my-router` 
+- Available at `http://localhost:8080/router/my-router/v1/chat/completions`
+- Uses latency-based load balancing between OpenAI and Anthropic
+- Automatically routes to whichever provider responds fastest
+
+<Steps>
+  <Step title="Save the configuration">
+    Save the YAML above as `ai-gateway-config.yaml` in your current directory.
+  </Step>
+  
+  <Step title="Restart the gateway">
+    ```bash
+    npx @helicone/ai-gateway start --config ai-gateway-config.yaml
+    ```
+  </Step>
+  
+  <Step title="Test your router">
+    ```bash
+    curl -X POST http://localhost:8080/router/my-router/v1/chat/completions \
+      -H "Content-Type: application/json" \
+      -d '{
+        "model": "gpt-4o-mini",
+        "messages": [{"role": "user", "content": "Hello from my custom router!"}]
+      }'
+    ```
+  </Step>
+</Steps>
+
+🎉 **Success!** Your request was automatically load-balanced between OpenAI and Anthropic based on which responds faster.
+
+## Step 2: Add Intelligent Caching
+
+Now let's add caching to dramatically reduce costs and improve response times:
+
+```yaml
+routers:
+  my-router:
+    load-balance:
+      chat:
+        strategy: latency
+        providers:
+          - openai
+          - anthropic
+    cache:
+      enabled: true
+      directive: "max-age=3600"  # Cache for 1 hour
+      buckets: 1                 # Single response per cache key
+```
+
+**What this adds:**
+- Caches identical requests for 1 hour
+- Subsequent identical requests return instantly from cache
+- Can reduce costs by 90%+ for repeated requests
+
+<Steps>
+  <Step title="Update your configuration">
+    Replace your `ai-gateway-config.yaml` with the configuration above.
+  </Step>
+  
+  <Step title="Restart the gateway">
+    ```bash
+    npx @helicone/ai-gateway start --config ai-gateway-config.yaml
+    ```
+  </Step>
+  
+  <Step title="Test caching">
+    Make the same request twice and notice the second one is much faster:
+    
+    ```bash
+    # First request - goes to provider
+    time curl -X POST http://localhost:8080/router/my-router/v1/chat/completions \
+      -H "Content-Type: application/json" \
+      -d '{"model": "gpt-4o-mini", "messages": [{"role": "user", "content": "What is 2+2?"}]}'
+    
+    # Second request - returns from cache instantly
+    time curl -X POST http://localhost:8080/router/my-router/v1/chat/completions \
+      -H "Content-Type: application/json" \
+      -d '{"model": "gpt-4o-mini", "messages": [{"role": "user", "content": "What is 2+2?"}]}'
+    ```
+  </Step>
+</Steps>
+
+## Step 3: Multiple Environments
+
+Real applications need different configurations for different environments. Let's create production and development routers:
+
+```yaml
+routers:
+  production:
+    load-balance:
+      chat:
+        strategy: latency
+        providers:
+          - openai
+          - anthropic
+          - google
+    cache:
+      enabled: true
+      directive: "max-age=1800"  # 30 minutes for production freshness
+    retries:
+      enabled: true
+      max-retries: 3
+  
+  development:
+    load-balance:
+      chat:
+        strategy: weighted
+        providers:
+          - provider: ollama        # Free local models
+            weight: '0.8'
+          - provider: openai        # Paid fallback
+            weight: '0.2'
+    cache:
+      enabled: true
+      directive: "max-age=7200"    # 2 hours to reduce dev costs
+  
+  staging:
+    load-balance:
+      chat:
+        strategy: latency
+        providers:
+          - openai
+          - anthropic
+    cache:
+      enabled: false              # No caching for testing
+```
+
+**What this creates:**
+
+| Router | Endpoint | Strategy | Use Case |
+|--------|----------|----------|----------|
+| **production** | `/router/production/...` | Latency + retries | Customer traffic |
+| **development** | `/router/development/...` | Weighted (80% local) | Cost-effective dev |
+| **staging** | `/router/staging/...` | Latency (no cache) | Testing |
+
+<Steps>
+  <Step title="Update configuration">
+    Replace your `ai-gateway-config.yaml` with the multi-environment config above.
+  </Step>
+  
+  <Step title="Restart the gateway">
+    ```bash
+    npx @helicone/ai-gateway start --config ai-gateway-config.yaml
+    ```
+  </Step>
+  
+  <Step title="Test different environments">
+    ```bash
+    # Production router - optimized for reliability
+    curl -X POST http://localhost:8080/router/production/v1/chat/completions \
+      -H "Content-Type: application/json" \
+      -d '{"model": "gpt-4o-mini", "messages": [{"role": "user", "content": "Production test"}]}'
+    
+    # Development router - cost-optimized with local models
+    curl -X POST http://localhost:8080/router/development/v1/chat/completions \
+      -H "Content-Type: application/json" \
+      -d '{"model": "llama3.2", "messages": [{"role": "user", "content": "Development test"}]}'
+    ```
+  </Step>
+</Steps>
+
+## Step 4: Use in Your Applications
+
+Now update your applications to use specific routers:
+
+<CodeGroup>
+```python Production App
+import openai
+
+# Production router with reliability features
+client = openai.OpenAI(
+    base_url="http://localhost:8080/router/production",
+    api_key="sk-placeholder"
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "Hello from production!"}]
+)
+```
+
+```python Development App
+import openai
+
+# Development router with cost optimization
+client = openai.OpenAI(
+    base_url="http://localhost:8080/router/development", 
+    api_key="sk-placeholder"
+)
+
+response = client.chat.completions.create(
+    model="llama3.2",  # Will use local Ollama 80% of the time
+    messages=[{"role": "user", "content": "Hello from development!"}]
+)
+```
+
+```javascript Node.js
+import OpenAI from 'openai';
+
+// Production router
+const prodClient = new OpenAI({
+  baseURL: 'http://localhost:8080/router/production',
+  apiKey: 'sk-placeholder'
+});
+
+// Development router  
+const devClient = new OpenAI({
+  baseURL: 'http://localhost:8080/router/development',
+  apiKey: 'sk-placeholder'
+});
+```
+</CodeGroup>
+
+## Key Concepts You've Learned
+
+<AccordionGroup>
+  <Accordion title="Load Balancing Strategies" icon="scale-balanced">
+    **Latency Strategy:** Routes to the fastest provider automatically
+    ```yaml
+    strategy: latency
+    providers:
+      - openai
+      - anthropic
+    ```
+    
+    **Weighted Strategy:** Custom traffic distribution
+    ```yaml
+    strategy: weighted
+    providers:
+      - provider: ollama
+        weight: '0.8'
+      - provider: openai  
+        weight: '0.2'
+    ```
+  </Accordion>
+  
+  <Accordion title="Intelligent Caching" icon="database">
+    **Cache Configuration:** Reduce costs and improve latency
+    ```yaml
+    cache:
+      enabled: true
+      directive: "max-age=3600"  # TTL in seconds
+      buckets: 1                 # Responses per cache key
+    ```
+    
+    **Cache Benefits:**
+    - 90%+ cost reduction for repeated requests
+    - Instant response times for cached requests
+    - Configurable TTL and staleness policies
+  </Accordion>
+  
+  <Accordion title="Multi-Environment Setup" icon="server">
+    **Environment-Specific Configuration:**
+    - **Production:** Reliability + moderate caching
+    - **Development:** Cost optimization + longer caching  
+    - **Staging:** Testing without cache interference
+    
+    Each environment gets its own URL and configuration.
+  </Accordion>
+</AccordionGroup>
+
+## What's Next?
+
+You now have a solid foundation with custom routers! Here are the next steps to explore:
+
+<CardGroup cols={2}>
+  <Card title="Rate Limiting" icon="gauge-high" href="/ai-gateway/concepts/rate-limiting">
+    Add request frequency controls to prevent abuse and manage costs
+  </Card>
+  <Card title="Model Mapping" icon="arrows-left-right" href="/ai-gateway/concepts/model-mapping">
+    Define equivalencies between models from different providers
+  </Card>
+  <Card title="Advanced Load Balancing" icon="scale-balanced" href="/ai-gateway/concepts/loadbalancing">
+    Explore weighted strategies, health monitoring, and failover
+  </Card>
+  <Card title="Full Configuration Reference" icon="gear" href="/ai-gateway/config">
+    Complete guide to all available configuration options
+  </Card>
+</CardGroup>
+
+## Complete Example Configuration
+
+Here's the final configuration from this guide:
+
+```yaml
+routers:
+  production:
+    load-balance:
+      chat:
+        strategy: latency
+        providers:
+          - openai
+          - anthropic
+          - google
+    cache:
+      enabled: true
+      directive: "max-age=1800"
+    retries:
+      enabled: true
+      max-retries: 3
+  
+  development:
+    load-balance:
+      chat:
+        strategy: weighted
+        providers:
+          - provider: ollama
+            weight: '0.8'
+          - provider: openai
+            weight: '0.2'
+    cache:
+      enabled: true
+      directive: "max-age=7200"
+  
+  staging:
+    load-balance:
+      chat:
+        strategy: latency
+        providers:
+          - openai
+          - anthropic
+    cache:
+      enabled: false
+```
+
+Save this as `ai-gateway-config.yaml` and you'll have a production-ready multi-environment setup

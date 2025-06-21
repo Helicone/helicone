@@ -79,30 +79,12 @@ Load balancing helps you:
     </Callout>
   </Accordion>
 
-  <Accordion title="Cost-Optimized Strategy" icon="dollar-sign">
-    **Route to the cheapest equivalent model** *(Coming in v2)*
-    
-    For a given model, picks the provider that offers that same model or any allowed configured equivalent models for the lowest price.
-    
-    **Best for:** Cost-sensitive workloads where minor latency differences are acceptable
-  </Accordion>
 
-  <Accordion title="Model-Level Weighted Strategy" icon="bullseye">
-    **Provider + model specific weighting** *(Coming in v2)*
-    
-    Same as weighted strategy over providers, except configurable for provider+model pairs. E.g., [openai/o1, bedrock/claude-3-5-sonnet] with weights [0.90, 0.10].
-    
-    **Best for:** Fine-grained control over specific model routing
-  </Accordion>
+  </AccordionGroup>
 
-  <Accordion title="Tag-based Routing" icon="tag">
-    **Header-driven routing decisions** *(Coming in v3)*
-    
-    Route requests to specific providers and models based on tags passed via request headers.
-    
-    **Best for:** A/B testing, user-specific routing, compliance requirements
-  </Accordion>
-</AccordionGroup>
+<Note>
+  Additional load balancing strategies (Cost-Optimized, Model-Level Weighted, Tag-based Routing) are [coming soon](#coming-soon) for advanced routing scenarios.
+</Note>
 
 ### Configuration Examples
 
@@ -122,30 +104,13 @@ Load balancing helps you:
               - google
     ```
   </Tab>
-
-  <Tab title="Cost Optimization - Budget Control">
-    **Use case:** Internal tools or batch processing where cost matters more than speed. Route 80% of traffic to the more affordable provider while keeping some capacity on premium providers for quality comparison.
-
-    ```yaml
-    routers:
-      cost-optimized:
-        load-balance:
-          chat:
-            strategy: weighted
-            providers:
-              - provider: anthropic    # Claude 3.5 Sonnet: $3/$15 per 1M tokens
-                weight: 0.80
-              - provider: openai       # GPT-4o: $5/$15 per 1M tokens
-                weight: 0.20
-    ```
-  </Tab>
-
+  
   <Tab title="A/B Testing New Provider">
     **Use case:** Testing a new provider's quality and performance with 10% of traffic before committing to larger rollout. Monitor metrics to compare providers safely.
 
     ```yaml
     routers:
-      experimental:
+      production:
         load-balance:
           chat:
             strategy: weighted
@@ -162,7 +127,7 @@ Load balancing helps you:
 
     ```yaml
     routers:
-      migration:
+      production:
         load-balance:
           chat:
             strategy: weighted
@@ -198,32 +163,39 @@ Load balancing helps you:
   </Tab>
 </Tabs>
 
+<Note>
+  For complete configuration options and syntax, see the [Configuration Reference](/ai-gateway/config#load-balancing).
+</Note>
+
+
 ## Reference
 
 ### Load Balancing Levels
 
-The AI Gateway supports load balancing at multiple levels of granularity:
+**Provider-Level Load Balancing**
 
-| Level                   | Availability | Description                                                                                                                 | Example                                          |
-| ----------------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| **Providers**           | v0 (live!)           | Balance across different AI companies                                                                                       | OpenAI vs Anthropic vs Google Gemini             |
-| **Deployments/Regions** | v0 (live!)           | Balance across regions for providers that support them                                                                     | `us-east-1` vs `us-west-2` vs `eu-west-1`        |
-| **Models**              | v2 (coming soon!)           | Balance over (provider, model) pairs. | `openai/gpt-4o` vs `anthropic/claude-3-5-sonnet` |
+The AI Gateway currently supports load balancing across different AI providers and their regional deployments. This allows you to distribute traffic across different AI companies (OpenAI, Anthropic, Google) and their available regions for optimal performance and reliability.
 
-<Callout type="info">
-  Currently, the AI Gateway load balances at the **provider level**. Model-level and regional load balancing are planned for future releases.
-</Callout>
+**Examples:**
+- **Providers**: OpenAI vs Anthropic vs Google Gemini
+- **Deployments/Regions**: `us-east-1` vs `us-west-2` vs `eu-west-1`
+
+<Note>
+  Model-level load balancing (provider+model pairs) is [coming soon](#coming-soon) for more granular control.
+</Note>
 
 ### Choosing the Right Strategy
 
 | Use Case                 | Recommended Strategy       | Availability |
 | ------------------------ | -------------------------- | ------------ |
 | **Production APIs**      | Latency-based (P2C)        | v0           |
-| **Cost optimization**    | Weighted → Cost-optimized  | v0 → v2      |
 | **Provider migration**   | Weighted                   | v0           |
-| **A/B testing**          | Weighted → Tag-based       | v0 → v3      |
-| **Fine-grained control** | Model-level weighted       | v2           |
-| **Compliance routing**   | [Multiple routers](#compliance-based-routing)                  | v3           |
+| **A/B testing**          | Weighted                   | v0           |
+| **Compliance routing**   | [Multiple AI Gateways](#compliance-based-routing) | v0 |
+
+<Note>
+  Advanced strategies (Cost-optimized, Model-level weighted, Tag-based routing) are [coming soon](#coming-soon) for more sophisticated routing scenarios.
+</Note>
 
 ## Advanced Configuration
 
@@ -254,7 +226,7 @@ To customize health monitoring behavior, see the [Configuration Reference](/ai-g
 
 ### Compliance-Based Routing
 
-For compliance requirements, deploy **multiple router instances** rather than complex routing logic. This provides better isolation, security, and auditability.
+For compliance requirements, deploy **multiple AI Gateway instances** rather than complex routing logic. This provides better isolation, security, and auditability.
 
 #### Common Scenarios
 
@@ -322,3 +294,13 @@ For compliance requirements, deploy **multiple router instances** rather than co
 </Tabs>
 
 **Benefits:** Separate networks, authentication, audit trails, and certification scope per deployment.
+
+## Coming Soon
+
+The following load balancing features are planned for future releases:
+
+| Feature | Description | Version |
+|---------|-------------|---------|
+| **Cost-Optimized Strategy** | Route to the cheapest equivalent model - picks the provider that offers the same model or configured equivalent models for the lowest price | v2 |
+| **Model-Level Weighted Strategy** | Provider + model specific weighting - configure weights for provider+model pairs (e.g., openai/o1 vs bedrock/claude-3-5-sonnet) | v2 |
+| **Tag-based Routing** | Header-driven routing decisions - route requests to specific providers and models based on tags passed via request headers | v3 |
