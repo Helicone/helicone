@@ -45,28 +45,31 @@ Rate limiting helps you:
     
     **Example:**
     ```yaml
-    rate-limit:
-      global:
-        per-api-key:
-          capacity: 500
-          refill-frequency: 1s  # 500 requests per second sustained
+    global:
+      rate-limit:
+          per-api-key:
+            capacity: 500
+            refill-frequency: 1s  # 500 requests per second sustained
     ```
   </Accordion>
 
-  <Accordion title="Fixed Window Rate Limiting" icon="window">
-    **Simple time-based request counting** *(Coming in v2)*
+  <Accordion title="Rate limiting per end user" icon="window">
+    **Rate limit per end user** *(Coming in v1)*
+    If you would like to rate limit based on your end user, you can either use the `user` parameter
+    with OpenAI or attach the `Helicone-User-Id` request header. See
+    [User metrics quickstart](/features/advanced-usage/user-metrics#quick-start)
+    for more information.
     
-    Traditional rate limiting based on fixed time windows (e.g., 1000 requests per hour, reset at the top of each hour).
     
-    **Best for:** Simple use cases where burst behavior is less important than predictable reset times
+    **Best for:** Ensuring one of your users don't exceed usage limits.
   </Accordion>
 
-  <Accordion title="Sliding Window Rate Limiting" icon="chart-line">
-    **Rolling time-based request counting** *(Coming in v2)*
+  <Accordion title="Token count and Count usage based limits" icon="chart-line">
+    **Rate limit based off token usage or spend rather than request count** *(Coming in v2)*
+
+    Enforce team or project budgets via spend or token based rate limits.
     
-    Rate limiting based on a rolling time window that provides smoother behavior than fixed windows.
-    
-    **Best for:** Applications requiring more predictable rate limiting without the complexity of token buckets
+    **Best for:** Spend controls, enforcing end user usage limits
   </Accordion>
 </AccordionGroup>
 
@@ -77,8 +80,8 @@ Rate limiting helps you:
     **Use case:** Production API that needs to prevent abuse while allowing reasonable burst traffic for legitimate users.
 
     ```yaml
-    rate-limit:
-      global:
+    global:
+      rate-limit:
         store: in-memory
         per-api-key:
           capacity: 1000
@@ -91,8 +94,8 @@ Rate limiting helps you:
     **Use case:** Development environment where you want to prevent accidental high costs while allowing reasonable experimentation.
 
     ```yaml
-    rate-limit:
-      global:
+    global:
+      rate-limit:
         store: in-memory
         per-api-key:
           capacity: 100
@@ -105,8 +108,8 @@ Rate limiting helps you:
     **Use case:** Different service tiers with varying rate limits. Premium router gets higher limits than basic router.
 
     ```yaml
-    rate-limit:
-      global:
+    global:
+      rate-limit:
         store: in-memory
         cleanup-interval: 5m
     
@@ -172,8 +175,8 @@ Rate limiting counters can be stored in different backends depending on your dep
     Rate limiting state is stored locally in each router instance. Fast and simple, but limits are not shared across multiple instances.
     
     ```yaml
-    rate-limit:
-      global:
+    global:
+      rate-limit:
         store: in-memory
         cleanup-interval: 5m
     ```
@@ -190,8 +193,8 @@ Rate limiting counters can be stored in different backends depending on your dep
     Rate limiting state is stored in Redis, allowing coordination across multiple router instances for consistent limits.
     
     ```yaml
-    rate-limit:
-      global:
+    global:
+      rate-limit:
         store: redis
         redis:
           url: "redis://localhost:6379"
