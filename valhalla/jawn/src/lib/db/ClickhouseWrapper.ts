@@ -1,4 +1,9 @@
-import { ClickHouseClient, createClient, ClickHouseSettings, DataFormat } from "@clickhouse/client";
+import {
+  ClickHouseClient,
+  createClient,
+  ClickHouseSettings,
+  DataFormat,
+} from "@clickhouse/client";
 import { Result } from "../../packages/common/result";
 
 interface ClickhouseEnv {
@@ -243,7 +248,7 @@ export interface CacheMetricSMT {
   model: string;
   provider: string;
   cache_hit_count: number;
-  
+
   // Saving metrics
   saved_latency_ms: number;
   saved_completion_tokens: number;
