@@ -34,30 +34,29 @@ export class AnthropicStreamBodyProcessor implements IBodyProcessor {
       if (line === "") continue;
 
       // Process data lines
-      if (line.startsWith("data:")) {
-        try {
-          const data = JSON.parse(line.replace("data:", "").trim());
 
-          // Handle input_json_delta for tool_use
-          if (
-            data.type === "content_block_delta" &&
-            data.delta?.type === "input_json_delta" &&
-            data.delta?.partial_json !== undefined
-          ) {
-            // Initialize if first fragment for this index
-            if (!jsonDeltaMap[data.index]) {
-              jsonDeltaMap[data.index] = "";
-            }
+      try {
+        const data = JSON.parse(line.replace("data:", "").trim());
 
-            // Concatenate partial JSON fragments
-            jsonDeltaMap[data.index] += data.delta.partial_json;
+        // Handle input_json_delta for tool_use
+        if (
+          data.type === "content_block_delta" &&
+          data.delta?.type === "input_json_delta" &&
+          data.delta?.partial_json !== undefined
+        ) {
+          // Initialize if first fragment for this index
+          if (!jsonDeltaMap[data.index]) {
+            jsonDeltaMap[data.index] = "";
           }
 
-          processedLines.push(data);
-        } catch (e) {
-          console.error("Error parsing line Anthropic", line);
-          processedLines.push({});
+          // Concatenate partial JSON fragments
+          jsonDeltaMap[data.index] += data.delta.partial_json;
         }
+
+        processedLines.push(data);
+      } catch (e) {
+        console.error("Error parsing line Anthropic", line);
+        processedLines.push({});
       }
     }
 
