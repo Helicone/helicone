@@ -2530,7 +2530,6 @@ export type Database = {
         Row: {
           created_at: string
           id: string
-          key_id: number | null
           name: string | null
           organization_id: string
           router_hash: string
@@ -2538,7 +2537,6 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
-          key_id?: number | null
           name?: string | null
           organization_id: string
           router_hash: string
@@ -2546,24 +2544,52 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
-          key_id?: number | null
           name?: string | null
           organization_id?: string
           router_hash?: string
         }
         Relationships: [
           {
-            foreignKeyName: "public_router_configs_key_id_fkey"
-            columns: ["key_id"]
+            foreignKeyName: "public_router_configs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      router_keys: {
+        Row: {
+          api_key_id: number
+          created_at: string
+          id: number
+          router_id: string
+        }
+        Insert: {
+          api_key_id: number
+          created_at?: string
+          id?: number
+          router_id: string
+        }
+        Update: {
+          api_key_id?: number
+          created_at?: string
+          id?: number
+          router_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_router_keys_api_key_id_fkey"
+            columns: ["api_key_id"]
             isOneToOne: false
             referencedRelation: "helicone_api_keys"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "public_router_configs_organization_id_fkey"
-            columns: ["organization_id"]
+            foreignKeyName: "public_router_keys_router_id_fkey"
+            columns: ["router_id"]
             isOneToOne: false
-            referencedRelation: "organization"
+            referencedRelation: "router_configs"
             referencedColumns: ["id"]
           },
         ]
