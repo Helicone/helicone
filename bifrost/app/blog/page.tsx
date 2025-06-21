@@ -221,6 +221,11 @@ export type BlogStructure =
 export const BLOG_CONTENT: BlogStructure[] = [
   {
     dynmaicEntry: {
+      folderName: "how-llm-routers-enhance-app-reliability",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "claude-opus-and-sonnet-4-full-developer-guide",
     },
   },
