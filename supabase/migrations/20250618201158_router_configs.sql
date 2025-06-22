@@ -2,7 +2,6 @@ create table "public"."router_configs" (
     "id" uuid not null default gen_random_uuid(),
     "created_at" timestamp with time zone not null default now(),
     "organization_id" uuid not null,
-    "router_hash" character varying not null,
     "name" character varying
 );
 
