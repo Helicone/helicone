@@ -8575,11 +8575,11 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ResultSuccess__gatewayConfigs_58__id-string--name-string_-Array__": {
+			"ResultSuccess__routerConfigs_58__id-string--name-string_-Array__": {
 				"properties": {
 					"data": {
 						"properties": {
-							"gatewayConfigs": {
+							"routerConfigs": {
 								"items": {
 									"properties": {
 										"name": {
@@ -8599,7 +8599,7 @@
 							}
 						},
 						"required": [
-							"gatewayConfigs"
+							"routerConfigs"
 						],
 						"type": "object"
 					},
@@ -8618,17 +8618,17 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result__gatewayConfigs_58__id-string--name-string_-Array_.string_": {
+			"Result__routerConfigs_58__id-string--name-string_-Array_.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess__gatewayConfigs_58__id-string--name-string_-Array__"
+						"$ref": "#/components/schemas/ResultSuccess__routerConfigs_58__id-string--name-string_-Array__"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
 			},
-			"GatewayConfig": {
+			"RouterConfig": {
 				"properties": {
 					"config": {
 						"type": "string"
@@ -8655,10 +8655,10 @@
 				],
 				"type": "object"
 			},
-			"ResultSuccess_GatewayConfig_": {
+			"ResultSuccess_RouterConfig_": {
 				"properties": {
 					"data": {
-						"$ref": "#/components/schemas/GatewayConfig"
+						"$ref": "#/components/schemas/RouterConfig"
 					},
 					"error": {
 						"type": "number",
@@ -8675,34 +8675,34 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result_GatewayConfig.string_": {
+			"Result_RouterConfig.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess_GatewayConfig_"
+						"$ref": "#/components/schemas/ResultSuccess_RouterConfig_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
 			},
-			"ResultSuccess__gatewayConfigId-string--gatewayVersionId-string--apiKey-string__": {
+			"ResultSuccess__routerConfigId-string--routerVersionId-string--apiKey-string__": {
 				"properties": {
 					"data": {
 						"properties": {
 							"apiKey": {
 								"type": "string"
 							},
-							"gatewayVersionId": {
+							"routerVersionId": {
 								"type": "string"
 							},
-							"gatewayConfigId": {
+							"routerConfigId": {
 								"type": "string"
 							}
 						},
 						"required": [
 							"apiKey",
-							"gatewayVersionId",
-							"gatewayConfigId"
+							"routerVersionId",
+							"routerConfigId"
 						],
 						"type": "object"
 					},
@@ -8721,10 +8721,10 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result__gatewayConfigId-string--gatewayVersionId-string--apiKey-string_.string_": {
+			"Result__routerConfigId-string--routerVersionId-string--apiKey-string_.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess__gatewayConfigId-string--gatewayVersionId-string--apiKey-string__"
+						"$ref": "#/components/schemas/ResultSuccess__routerConfigId-string--routerVersionId-string--apiKey-string__"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -16420,14 +16420,14 @@
 		},
 		"/v1/gateway": {
 			"get": {
-				"operationId": "GetGatewayConfigs",
+				"operationId": "GetRouterConfigs",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result__gatewayConfigs_58__id-string--name-string_-Array_.string_"
+									"$ref": "#/components/schemas/Result__routerConfigs_58__id-string--name-string_-Array_.string_"
 								}
 							}
 						}
@@ -16446,14 +16446,14 @@
 		},
 		"/v1/gateway/{id}": {
 			"get": {
-				"operationId": "GetGatewayConfig",
+				"operationId": "GetLatestRouterConfig",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result_GatewayConfig.string_"
+									"$ref": "#/components/schemas/Result_RouterConfig.string_"
 								}
 							}
 						}
@@ -16479,7 +16479,7 @@
 				]
 			},
 			"put": {
-				"operationId": "UpdateGatewayConfig",
+				"operationId": "UpdateRouterConfig",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -16536,14 +16536,14 @@
 		},
 		"/v1/gateway/create": {
 			"post": {
-				"operationId": "CreateGatewayConfig",
+				"operationId": "CreateRouterConfig",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result__gatewayConfigId-string--gatewayVersionId-string--apiKey-string_.string_"
+									"$ref": "#/components/schemas/Result__routerConfigId-string--routerVersionId-string--apiKey-string_.string_"
 								}
 							}
 						}

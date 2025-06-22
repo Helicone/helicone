@@ -462,14 +462,14 @@ export interface paths {
     post: operations["DeleteHeliconeDataset"];
   };
   "/v1/gateway": {
-    get: operations["GetGatewayConfigs"];
+    get: operations["GetRouterConfigs"];
   };
   "/v1/gateway/{id}": {
-    get: operations["GetGatewayConfig"];
-    put: operations["UpdateGatewayConfig"];
+    get: operations["GetLatestRouterConfig"];
+    put: operations["UpdateRouterConfig"];
   };
   "/v1/gateway/create": {
-    post: operations["CreateGatewayConfig"];
+    post: operations["CreateRouterConfig"];
   };
   "/v1/evals/query": {
     post: operations["QueryEvals"];
@@ -2889,9 +2889,9 @@ Json: JsonObject;
       /** @enum {number|null} */
       error: null;
     };
-    "ResultSuccess__gatewayConfigs_58__id-string--name-string_-Array__": {
+    "ResultSuccess__routerConfigs_58__id-string--name-string_-Array__": {
       data: {
-        gatewayConfigs: {
+        routerConfigs: {
             name: string;
             id: string;
           }[];
@@ -2899,30 +2899,30 @@ Json: JsonObject;
       /** @enum {number|null} */
       error: null;
     };
-    "Result__gatewayConfigs_58__id-string--name-string_-Array_.string_": components["schemas"]["ResultSuccess__gatewayConfigs_58__id-string--name-string_-Array__"] | components["schemas"]["ResultError_string_"];
-    GatewayConfig: {
+    "Result__routerConfigs_58__id-string--name-string_-Array_.string_": components["schemas"]["ResultSuccess__routerConfigs_58__id-string--name-string_-Array__"] | components["schemas"]["ResultError_string_"];
+    RouterConfig: {
       config: string;
       version: string;
       apiKey: string;
       name: string;
       id: string;
     };
-    ResultSuccess_GatewayConfig_: {
-      data: components["schemas"]["GatewayConfig"];
+    ResultSuccess_RouterConfig_: {
+      data: components["schemas"]["RouterConfig"];
       /** @enum {number|null} */
       error: null;
     };
-    "Result_GatewayConfig.string_": components["schemas"]["ResultSuccess_GatewayConfig_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__gatewayConfigId-string--gatewayVersionId-string--apiKey-string__": {
+    "Result_RouterConfig.string_": components["schemas"]["ResultSuccess_RouterConfig_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__routerConfigId-string--routerVersionId-string--apiKey-string__": {
       data: {
         apiKey: string;
-        gatewayVersionId: string;
-        gatewayConfigId: string;
+        routerVersionId: string;
+        routerConfigId: string;
       };
       /** @enum {number|null} */
       error: null;
     };
-    "Result__gatewayConfigId-string--gatewayVersionId-string--apiKey-string_.string_": components["schemas"]["ResultSuccess__gatewayConfigId-string--gatewayVersionId-string--apiKey-string__"] | components["schemas"]["ResultError_string_"];
+    "Result__routerConfigId-string--routerVersionId-string--apiKey-string_.string_": components["schemas"]["ResultSuccess__routerConfigId-string--routerVersionId-string--apiKey-string__"] | components["schemas"]["ResultError_string_"];
     Eval: {
       name: string;
       /** Format: double */
@@ -5819,17 +5819,17 @@ export interface operations {
       };
     };
   };
-  GetGatewayConfigs: {
+  GetRouterConfigs: {
     responses: {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result__gatewayConfigs_58__id-string--name-string_-Array_.string_"];
+          "application/json": components["schemas"]["Result__routerConfigs_58__id-string--name-string_-Array_.string_"];
         };
       };
     };
   };
-  GetGatewayConfig: {
+  GetLatestRouterConfig: {
     parameters: {
       path: {
         id: string;
@@ -5839,12 +5839,12 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_GatewayConfig.string_"];
+          "application/json": components["schemas"]["Result_RouterConfig.string_"];
         };
       };
     };
   };
-  UpdateGatewayConfig: {
+  UpdateRouterConfig: {
     parameters: {
       path: {
         id: string;
@@ -5867,7 +5867,7 @@ export interface operations {
       };
     };
   };
-  CreateGatewayConfig: {
+  CreateRouterConfig: {
     requestBody: {
       content: {
         "application/json": {
@@ -5880,7 +5880,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result__gatewayConfigId-string--gatewayVersionId-string--apiKey-string_.string_"];
+          "application/json": components["schemas"]["Result__routerConfigId-string--routerVersionId-string--apiKey-string_.string_"];
         };
       };
     };

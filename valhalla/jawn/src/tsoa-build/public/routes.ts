@@ -2718,51 +2718,51 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ResultSuccess__gatewayConfigs_58__id-string--name-string_-Array__": {
+    "ResultSuccess__routerConfigs_58__id-string--name-string_-Array__": {
         "dataType": "refObject",
         "properties": {
-            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"gatewayConfigs":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"name":{"dataType":"string","required":true},"id":{"dataType":"string","required":true}}},"required":true}},"required":true},
+            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"routerConfigs":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"name":{"dataType":"string","required":true},"id":{"dataType":"string","required":true}}},"required":true}},"required":true},
             "error": {"dataType":"enum","enums":[null],"required":true},
         },
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Result__gatewayConfigs_58__id-string--name-string_-Array_.string_": {
+    "Result__routerConfigs_58__id-string--name-string_-Array_.string_": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__gatewayConfigs_58__id-string--name-string_-Array__"},{"ref":"ResultError_string_"}],"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__routerConfigs_58__id-string--name-string_-Array__"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "GatewayConfig": {
+    "RouterConfig": {
         "dataType": "refAlias",
         "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"config":{"dataType":"string","required":true},"version":{"dataType":"string","required":true},"apiKey":{"dataType":"string","required":true},"name":{"dataType":"string","required":true},"id":{"dataType":"string","required":true}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ResultSuccess_GatewayConfig_": {
+    "ResultSuccess_RouterConfig_": {
         "dataType": "refObject",
         "properties": {
-            "data": {"ref":"GatewayConfig","required":true},
+            "data": {"ref":"RouterConfig","required":true},
             "error": {"dataType":"enum","enums":[null],"required":true},
         },
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Result_GatewayConfig.string_": {
+    "Result_RouterConfig.string_": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_GatewayConfig_"},{"ref":"ResultError_string_"}],"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_RouterConfig_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ResultSuccess__gatewayConfigId-string--gatewayVersionId-string--apiKey-string__": {
+    "ResultSuccess__routerConfigId-string--routerVersionId-string--apiKey-string__": {
         "dataType": "refObject",
         "properties": {
-            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"apiKey":{"dataType":"string","required":true},"gatewayVersionId":{"dataType":"string","required":true},"gatewayConfigId":{"dataType":"string","required":true}},"required":true},
+            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"apiKey":{"dataType":"string","required":true},"routerVersionId":{"dataType":"string","required":true},"routerConfigId":{"dataType":"string","required":true}},"required":true},
             "error": {"dataType":"enum","enums":[null],"required":true},
         },
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Result__gatewayConfigId-string--gatewayVersionId-string--apiKey-string_.string_": {
+    "Result__routerConfigId-string--routerVersionId-string--apiKey-string_.string_": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__gatewayConfigId-string--gatewayVersionId-string--apiKey-string__"},{"ref":"ResultError_string_"}],"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__routerConfigId-string--routerVersionId-string--apiKey-string__"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Eval": {
@@ -8225,26 +8225,26 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsGatewayController_getGatewayConfigs: Record<string, TsoaRoute.ParameterSchema> = {
+        const argsGatewayController_getRouterConfigs: Record<string, TsoaRoute.ParameterSchema> = {
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };
         app.get('/v1/gateway',
             authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(GatewayController)),
-            ...(fetchMiddlewares<RequestHandler>(GatewayController.prototype.getGatewayConfigs)),
+            ...(fetchMiddlewares<RequestHandler>(GatewayController.prototype.getRouterConfigs)),
 
-            async function GatewayController_getGatewayConfigs(request: ExRequest, response: ExResponse, next: any) {
+            async function GatewayController_getRouterConfigs(request: ExRequest, response: ExResponse, next: any) {
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
             let validatedArgs: any[] = [];
             try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsGatewayController_getGatewayConfigs, request, response });
+                validatedArgs = templateService.getValidatedArgs({ args: argsGatewayController_getRouterConfigs, request, response });
 
                 const controller = new GatewayController();
 
               await templateService.apiHandler({
-                methodName: 'getGatewayConfigs',
+                methodName: 'getRouterConfigs',
                 controller,
                 response,
                 next,
@@ -8256,27 +8256,27 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsGatewayController_getGatewayConfig: Record<string, TsoaRoute.ParameterSchema> = {
+        const argsGatewayController_getLatestRouterConfig: Record<string, TsoaRoute.ParameterSchema> = {
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
                 id: {"in":"path","name":"id","required":true,"dataType":"string"},
         };
         app.get('/v1/gateway/:id',
             authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(GatewayController)),
-            ...(fetchMiddlewares<RequestHandler>(GatewayController.prototype.getGatewayConfig)),
+            ...(fetchMiddlewares<RequestHandler>(GatewayController.prototype.getLatestRouterConfig)),
 
-            async function GatewayController_getGatewayConfig(request: ExRequest, response: ExResponse, next: any) {
+            async function GatewayController_getLatestRouterConfig(request: ExRequest, response: ExResponse, next: any) {
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
             let validatedArgs: any[] = [];
             try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsGatewayController_getGatewayConfig, request, response });
+                validatedArgs = templateService.getValidatedArgs({ args: argsGatewayController_getLatestRouterConfig, request, response });
 
                 const controller = new GatewayController();
 
               await templateService.apiHandler({
-                methodName: 'getGatewayConfig',
+                methodName: 'getLatestRouterConfig',
                 controller,
                 response,
                 next,
@@ -8288,27 +8288,27 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsGatewayController_createGatewayConfig: Record<string, TsoaRoute.ParameterSchema> = {
+        const argsGatewayController_createRouterConfig: Record<string, TsoaRoute.ParameterSchema> = {
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
                 body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"config":{"dataType":"string","required":true},"name":{"dataType":"string","required":true}}},
         };
         app.post('/v1/gateway/create',
             authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(GatewayController)),
-            ...(fetchMiddlewares<RequestHandler>(GatewayController.prototype.createGatewayConfig)),
+            ...(fetchMiddlewares<RequestHandler>(GatewayController.prototype.createRouterConfig)),
 
-            async function GatewayController_createGatewayConfig(request: ExRequest, response: ExResponse, next: any) {
+            async function GatewayController_createRouterConfig(request: ExRequest, response: ExResponse, next: any) {
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
             let validatedArgs: any[] = [];
             try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsGatewayController_createGatewayConfig, request, response });
+                validatedArgs = templateService.getValidatedArgs({ args: argsGatewayController_createRouterConfig, request, response });
 
                 const controller = new GatewayController();
 
               await templateService.apiHandler({
-                methodName: 'createGatewayConfig',
+                methodName: 'createRouterConfig',
                 controller,
                 response,
                 next,
@@ -8320,7 +8320,7 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsGatewayController_updateGatewayConfig: Record<string, TsoaRoute.ParameterSchema> = {
+        const argsGatewayController_updateRouterConfig: Record<string, TsoaRoute.ParameterSchema> = {
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
                 id: {"in":"path","name":"id","required":true,"dataType":"string"},
                 body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"config":{"dataType":"string","required":true},"name":{"dataType":"string","required":true}}},
@@ -8328,20 +8328,20 @@ export function RegisterRoutes(app: Router) {
         app.put('/v1/gateway/:id',
             authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(GatewayController)),
-            ...(fetchMiddlewares<RequestHandler>(GatewayController.prototype.updateGatewayConfig)),
+            ...(fetchMiddlewares<RequestHandler>(GatewayController.prototype.updateRouterConfig)),
 
-            async function GatewayController_updateGatewayConfig(request: ExRequest, response: ExResponse, next: any) {
+            async function GatewayController_updateRouterConfig(request: ExRequest, response: ExResponse, next: any) {
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
             let validatedArgs: any[] = [];
             try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsGatewayController_updateGatewayConfig, request, response });
+                validatedArgs = templateService.getValidatedArgs({ args: argsGatewayController_updateRouterConfig, request, response });
 
                 const controller = new GatewayController();
 
               await templateService.apiHandler({
-                methodName: 'updateGatewayConfig',
+                methodName: 'updateRouterConfig',
                 controller,
                 response,
                 next,

@@ -14,7 +14,7 @@ import type { JawnAuthenticatedRequest } from "../../types/request";
 import { err, ok, Result } from "../../packages/common/result";
 import { GatewayManager } from "../../managers/gatewayManager";
 
-export type GatewayConfig = {
+export type RouterConfig = {
   id: string;
   name: string;
   apiKey: string;
@@ -27,45 +27,45 @@ export type GatewayConfig = {
 @Security("api_key")
 export class GatewayController extends Controller {
   @Get("/")
-  public async getGatewayConfigs(
+  public async getRouterConfigs(
     @Request() request: JawnAuthenticatedRequest
   ): Promise<
-    Result<{ gatewayConfigs: { id: string; name: string }[] }, string>
+    Result<{ routerConfigs: { id: string; name: string }[] }, string>
   > {
     const gatewayManager = new GatewayManager(request.authParams);
-    const result = await gatewayManager.getGatewayConfigs();
+    const result = await gatewayManager.getRouterConfigs();
     if (result.error || !result.data) {
-      return err(result.error ?? "Failed to get gateway configs");
+      return err(result.error ?? "Failed to get router configs");
     }
     return ok(result.data);
   }
 
   @Get("/:id")
-  public async getGatewayConfig(
+  public async getLatestRouterConfig(
     @Request() request: JawnAuthenticatedRequest,
     @Path() id: string
-  ): Promise<Result<GatewayConfig, string>> {
+  ): Promise<Result<RouterConfig, string>> {
     const gatewayManager = new GatewayManager(request.authParams);
-    const result = await gatewayManager.getGatewayConfig(id);
+    const result = await gatewayManager.getLatestRouterConfig(id);
     if (result.error || !result.data) {
-      return err(result.error ?? "Failed to get gateway config");
+      return err(result.error ?? "Failed to get router config");
     }
     return ok(result.data);
   }
 
   @Post("/create")
-  public async createGatewayConfig(
+  public async createRouterConfig(
     @Request() request: JawnAuthenticatedRequest,
     @Body() body: { name: string; config: string }
   ): Promise<
     Result<
-      { gatewayConfigId: string; gatewayVersionId: string; apiKey: string },
+      { routerConfigId: string; routerVersionId: string; apiKey: string },
       string
     >
   > {
     try {
       const gatewayManager = new GatewayManager(request.authParams);
-      const result = await gatewayManager.createGatewayConfig({
+      const result = await gatewayManager.createRouterConfig({
         name: body.name,
         config: body.config,
       });
@@ -73,11 +73,11 @@ export class GatewayController extends Controller {
         return err(result.error);
       }
       if (!result.data) {
-        return err("Failed to create gateway config");
+        return err("Failed to create router config");
       }
       return ok({
-        gatewayConfigId: result.data.gatewayConfigId,
-        gatewayVersionId: result.data.gatewayVersionId,
+        routerConfigId: result.data.routerConfigId,
+        routerVersionId: result.data.routerVersionId,
         apiKey: result.data.apiKey,
       });
     } catch (error) {
@@ -86,13 +86,13 @@ export class GatewayController extends Controller {
   }
 
   @Put("/:id")
-  public async updateGatewayConfig(
+  public async updateRouterConfig(
     @Request() request: JawnAuthenticatedRequest,
     @Path() id: string,
     @Body() body: { name: string; config: string }
   ): Promise<Result<null, string>> {
     const gatewayManager = new GatewayManager(request.authParams);
-    const result = await gatewayManager.updateGatewayConfig({
+    const result = await gatewayManager.updateRouterConfig({
       id,
       name: body.name,
       config: body.config,
