@@ -1,0 +1,88 @@
+---
+title: "Quickstart"
+sidebarTitle: "Quickstart"
+description: "Get started with Helicone AI Gateway in 1 minute"
+---
+
+<Note>
+  Helicone AI Gateway is currently only available as a self-hosted solution. 
+  Our cloud-based solution is coming soon.
+</Note>
+
+<Steps>
+    <Step title="Set up your AI Gateway">
+    ```bash
+    npx @helicone/ai-gateway start
+    ```
+
+    The Gateway will be running on `http://localhost:8080` with sensible defaults.
+    </Step>
+    <Step title="Configure provider secrets">
+        The Gateway centralizes management of your LLM provider credentials.
+
+        We support OpenAI, Anthropic, and Gemini out of the box.
+
+        Just add your API keys to the `.env` file:
+
+        ```bash
+        export OPENAI_API_KEY=your-api-key
+        export ANTHROPIC_API_KEY=your-api-key
+        export GEMINI_API_KEY=your-api-key
+        ```
+
+        Using other providers? Check how to add them [here](/ai-gateway/config/#provider-configuration).
+    </Step>
+    <Step title="Make your first request">
+    <CodeGroup>
+    ```typescript Typescript
+    import { OpenAI } from "openai";
+
+    const openai = new OpenAI({
+      baseURL: "http://localhost:8080"
+    });
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini", // 100+ models available
+      messages: [{ role: "user", content: "Hello, world!" }],
+    });
+
+    console.log(response);
+    ```
+    ```python Python
+    import openai
+
+    openai.api_base = "http://localhost:8080"
+    openai.api_key = os.getenv("OPENAI_API_KEY")
+
+    response = openai.ChatCompletion.create(
+        model="gpt-4o-mini",  # 100+ models available
+        messages=[{"role": "user", "content": "Hello, world!"}]
+    )
+    ```
+    </CodeGroup>
+
+    You're all set! 🎉 
+    
+    Your AI Gateway is now ready to handle requests across 100+ AI models!
+    </Step>
+    <Step title="Optional: Enable Helicone observability">
+    Gain detailed tracing and insights into your AI usage directly from your Gateway.
+    
+    Just add the following environment variables to your Gateway configuration:
+
+    ```bash
+    export HELICONE_API_KEY=your-api-key
+    export HELICONE_PROJECT_ID=your-project-id
+    ```
+    </Step>
+</Steps>
+
+## Next step:
+
+Great job getting your Gateway started! The next step is making it work exactly how you want.
+
+Interested in adding new providers, balancing request loads, or caching responses for efficiency?
+
+<Card title="Configuration" horizontal icon="gear" href="/ai-gateway/config">
+  Dive into our configuration guides to build the perfect Gateway for your use case.
+</Card>

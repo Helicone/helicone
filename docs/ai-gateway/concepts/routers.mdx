@@ -1,0 +1,475 @@
+---
+title: "Routers"
+sidebarTitle: "Routers"
+description: "Configure multiple independent routing policies for different use cases in a single AI Gateway deployment"
+---
+
+Routers are the core concept of the Helicone AI Gateway. They allow you to configure multiple independent routing policies within a single gateway deployment, each with its own load balancing strategy, provider configuration, and middleware settings.
+
+## Getting Started
+
+### Understanding Router URLs
+
+Each router you define becomes part of the URL path when making requests to the gateway. This design allows a single deployed gateway to serve multiple routing configurations.
+
+**URL Format:** `http://your-gateway-host/router/{router-name}/{api-path}`
+
+<CodeGroup>
+```bash Production Router
+# Using the 'production' router
+curl -X POST http://localhost:8080/router/production/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4",
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }'
+```
+
+```bash Development Router  
+# Using the 'development' router
+curl -X POST http://localhost:8080/router/development/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4",
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }'
+```
+
+```bash Default Router
+# Using the 'default' router (special case)
+curl -X POST http://localhost:8080/router/default/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4",
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }'
+```
+</CodeGroup>
+
+### SDK Configuration
+
+Configure your OpenAI SDK to use a specific router by setting the base URL:
+
+<CodeGroup>
+```python Python
+import openai
+
+# Production router
+client = openai.OpenAI(
+    base_url="http://localhost:8080/router/production",
+    api_key="sk-placeholder"  # Required by SDK, but gateway handles real auth
+)
+
+# Development router
+dev_client = openai.OpenAI(
+    base_url="http://localhost:8080/router/development", 
+    api_key="sk-placeholder"  # Required by SDK, but gateway handles real auth
+)
+```
+
+```javascript Node.js
+import OpenAI from 'openai';
+
+// Production router
+const client = new OpenAI({
+  baseURL: 'http://localhost:8080/router/production',
+  apiKey: 'sk-placeholder'  // Required by SDK, but gateway handles real auth
+});
+
+// Development router
+const devClient = new OpenAI({
+  baseURL: 'http://localhost:8080/router/development',
+  apiKey: 'sk-placeholder'  // Required by SDK, but gateway handles real auth
+});
+```
+
+```bash cURL
+# Production router
+curl -X POST http://localhost:8080/router/production/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{"model": "gpt-4", "messages": [{"role": "user", "content": "Hello!"}]}'
+
+# Development router  
+curl -X POST http://localhost:8080/router/development/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{"model": "gpt-4", "messages": [{"role": "user", "content": "Hello!"}]}'
+```
+</CodeGroup>
+
+### Basic Router Configuration
+
+Every AI Gateway deployment requires at least a `default` router. You can then add additional named routers for different use cases.
+
+```yaml
+routers:
+  # Required: default router
+  default:
+    load-balance:
+      chat:
+        strategy: latency
+        providers:
+          - openai
+          - anthropic
+  
+  # Optional: additional named routers
+  production:
+    load-balance:
+      chat:
+        strategy: weighted
+        providers:
+          - provider: anthropic
+            weight: '0.7'
+          - provider: openai
+            weight: '0.3'
+    cache:
+      enabled: true
+      directive: "max-age=3600"
+    
+  development:
+    load-balance:
+      chat:
+        strategy: latency
+        providers:
+          - ollama      # Local models for development
+          - openai      # Fallback to cloud
+```
+
+## Common Use Cases
+
+### Multi-Environment Deployment
+
+Use different routers for different environments, all from a single gateway deployment:
+
+```yaml
+routers:
+  production:
+    load-balance:
+      chat:
+        strategy: latency
+        providers:
+          - openai
+          - anthropic
+          - google
+    cache:
+      enabled: true
+      directive: "max-age=1800"
+    retries:
+      enabled: true
+      max-retries: 3
+    
+  staging:
+    load-balance:
+      chat:
+        strategy: weighted
+        providers:
+          - provider: openai
+            weight: '0.8'
+          - provider: anthropic  
+            weight: '0.2'
+    cache:
+      enabled: false
+    
+  development:
+    load-balance:
+      chat:
+        strategy: latency
+        providers:
+          - ollama
+          - openai
+```
+
+**Usage:**
+- Production: `http://gateway.company.com/router/production`
+- Staging: `http://gateway.company.com/router/staging`  
+- Development: `http://gateway.company.com/router/development`
+
+### Cost Optimization Strategies
+
+Create routers optimized for different cost profiles:
+
+```yaml
+routers:
+  cost-optimized:
+    load-balance:
+      chat:
+        strategy: weighted
+        providers:
+          - provider: anthropic    # Cheaper option
+            weight: '0.9'
+          - provider: openai       # Premium fallback
+            weight: '0.1'
+    
+  performance-first:
+    load-balance:
+      chat:
+        strategy: latency
+        providers:
+          - openai
+          - anthropic
+          - google
+    
+  budget-conscious:
+    load-balance:
+      chat:
+        strategy: weighted
+        providers:
+          - provider: ollama       # Free local models
+            weight: '0.8'
+          - provider: anthropic    # Paid fallback
+            weight: '0.2'
+```
+
+### Team-Specific Configurations
+
+Different teams can have their own router configurations:
+
+```yaml
+routers:
+  ml-team:
+    load-balance:
+      chat:
+        strategy: latency
+        providers:
+          - openai
+          - anthropic
+    rate-limit:
+      per-api-key:
+        capacity: 1000
+        refill-frequency: 1s
+    
+  frontend-team:
+    load-balance:
+      chat:
+        strategy: weighted
+        providers:
+          - provider: anthropic
+            weight: '1.0'
+    cache:
+      enabled: true
+      directive: "max-age=3600"
+    rate-limit:
+      per-api-key:
+        capacity: 100
+        refill-frequency: 1s
+```
+
+## Reference
+
+<Note>
+  For complete configuration options and syntax, see the [Configuration Reference](/ai-gateway/config#router-configuration).
+</Note>
+
+### Router Naming Rules
+
+- Router names must be 1-12 characters long
+- Only alphanumeric characters, hyphens, and underscores allowed: `[A-Za-z0-9_-]`
+- `default` is a special reserved name for the default router
+- Case-insensitive for the `default` router only
+
+**Valid names:** `production`, `dev`, `team-a`, `cost_opt`, `v2`  
+**Invalid names:** `very-long-router-name`, `team@prod`, `router with spaces`
+
+### URL Path Structure
+
+The AI Gateway supports three different routing patterns:
+
+<AccordionGroup>
+  <Accordion title="Router-Based Routing (Recommended)">
+    **Pattern:** `/router/{name}/{api-path}`
+    
+    **Examples:**
+    - `/router/production/v1/chat/completions`
+    - `/router/development/v1/chat/completions`
+    - `/router/cost-optimized/v1/embeddings`
+    
+    **Features:**
+    - Full router configuration support
+    - Load balancing, caching, retries
+    - Router-specific rate limiting
+    - Model mapping
+  </Accordion>
+  
+  <Accordion title="Direct Provider Routing">
+    **Pattern:** `/{provider}/{api-path}`
+    
+    **Examples:**
+    - `/openai/v1/chat/completions`
+    - `/anthropic/v1/messages`
+    - `/google/v1beta/generateContent`
+    
+    **Features:**
+    - Direct proxy to specific provider
+    - No load balancing or router features
+    - Global rate limiting only
+  </Accordion>
+  
+  <Accordion title="Unified API Routing">
+    **Pattern:** `/ai/{api-path}`
+    
+    **Examples:**
+    - `/ai/v1/chat/completions`
+    
+    **Features:**
+    - Automatic provider detection from model name
+    - Limited to OpenAI-compatible endpoints
+    - No router-specific configuration
+  </Accordion>
+</AccordionGroup>
+
+### Router Configuration Options
+
+Each router can be configured with the following features:
+
+<ParamField path="load-balance" type="object" required>
+  Load balancing strategy and target providers.
+  
+  ```yaml
+  load-balance:
+    chat:
+      strategy: latency  # or weighted
+      providers:
+        - openai
+        - anthropic
+  ```
+  
+  [Learn more about load balancing →](/ai-gateway/features/loadbalancing)
+</ParamField>
+
+<ParamField path="cache" type="object" optional>
+  Response caching configuration.
+  
+  ```yaml
+  cache:
+    enabled: true
+    directive: "max-age=3600"
+    buckets: 10
+  ```
+  
+  [Learn more about caching →](/ai-gateway/features/cache)
+</ParamField>
+
+<ParamField path="retries" type="object" optional>
+  Retry configuration for failed requests.
+  
+  ```yaml
+  retries:
+    enabled: true
+    max-retries: 3
+    strategy: exponential
+  ```
+  
+  [Learn more about retries →](/ai-gateway/features/retries)
+</ParamField>
+
+<ParamField path="rate-limit" type="object" optional>
+  Router-specific rate limiting (applied after global limits).
+  
+  ```yaml
+  rate-limit:
+    per-api-key:
+      capacity: 500
+      refill-frequency: 1s
+  ```
+  
+  [Learn more about rate limiting →](/ai-gateway/features/rate-limiting)
+</ParamField>
+
+<ParamField path="model-mappings" type="object" optional>
+  Router-specific model equivalencies for load balancing.
+  
+  ```yaml
+  model-mappings:
+    gpt-4: claude-3-opus
+    gpt-4o-mini: claude-3-haiku
+  ```
+  
+  [Learn more about model mapping →](/ai-gateway/features/model-mapping)
+</ParamField>
+
+### Default Router Behavior
+
+The AI Gateway ships with a minimal default router configuration:
+
+```yaml
+routers:
+  default:
+    load-balance:
+      chat:
+        strategy: latency
+        providers: []  # No providers configured by default
+```
+
+**Important:** You must configure at least one provider target in your default router for it to work.
+
+## Advanced Configuration
+
+### Router Isolation
+
+Each router operates independently with its own:
+
+- **Provider pool:** Different routers can use different sets of providers
+- **Rate limits:** Router-specific limits are applied after global limits
+- **Caching:** Separate cache namespaces using different seeds
+- **Model mappings:** Router-specific model equivalencies
+- **Middleware stack:** Independent retry, caching, and other middleware
+
+```yaml
+routers:
+  high-volume:
+    load-balance:
+      chat:
+        strategy: latency
+        providers:
+          - openai
+          - anthropic
+    rate-limit:
+      per-api-key:
+        capacity: 10000
+        refill-frequency: 1s
+    cache:
+      enabled: true
+      seed: "high-volume-cache"
+    
+  experimental:
+    load-balance:
+      chat:
+        strategy: weighted
+        providers:
+          - provider: google
+            weight: '0.8'
+          - provider: ollama
+            weight: '0.2'
+    rate-limit:
+      per-api-key:
+        capacity: 100
+        refill-frequency: 1s
+    cache:
+      enabled: true
+      seed: "experimental-cache"
+```
+
+### Health Monitoring Per Router
+
+Provider health is monitored globally but affects each router's load balancing independently:
+
+```yaml
+discover:
+  monitor:
+    health:
+      ratio: 0.1
+      window: 60s
+      grace-period:
+        min-requests: 20
+
+routers:
+  production:
+    load-balance:
+      chat:
+        strategy: latency
+        providers:
+          - openai      # Will be removed if unhealthy
+          - anthropic   # Will be removed if unhealthy
+          - google      # Will be removed if unhealthy
+```
+
+**How it works:** If a provider becomes unhealthy (error rate > 10%), it's automatically removed from load balancing across all routers until it recovers.

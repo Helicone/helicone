@@ -1,0 +1,175 @@
+---
+title: "Automatic Retries"
+sidebarTitle: "Retries"
+description: "Exponential backoff retry logic for failed AI provider requests"
+---
+
+The AI Gateway automatically retries failed requests to AI providers using configurable exponential backoff strategies, improving reliability without overwhelming providers with rapid successive requests.
+
+Retries use smart failure detection with configurable maximum attempts, backoff timing, and per-router configuration.
+
+## Getting Started
+
+### Why Use Retries?
+
+Retries help you:
+- **Improve reliability** by automatically recovering from transient provider failures
+- **Handle network issues** by retrying requests that fail due to connectivity problems
+- **Maintain user experience** by transparently recovering from failures
+
+<Info>
+  **Rate limit handling is automatic** - when providers return 429 status codes, the AI Gateway automatically removes them from load balancing rotation. Retries are for handling other types of failures like 5xx errors or network issues.
+</Info>
+
+<Note>
+  For complete configuration options and syntax, see the [Configuration Reference](/ai-gateway/config#retries).
+</Note>
+
+### How Retries Work
+
+The AI Gateway automatically retries failed requests using exponential backoff, which doubles the wait time between each attempt to avoid overwhelming providers.
+
+**What gets retried:** 5xx server errors and network connectivity issues  
+**What doesn't:** 4xx client errors, rate limits (handled by load balancing), and successful responses
+
+<Steps>
+  <Step title="Request Fails">
+    Request fails with a retryable error (5xx server error or network issue)
+  </Step>
+  
+  <Step title="Wait Period">
+    AI Gateway waits for the calculated backoff period (starts at base duration)
+  </Step>
+  
+  <Step title="Retry Request">
+    Request is retried with the same parameters to the same provider
+  </Step>
+  
+  <Step title="Repeat or Return">
+    Process repeats with doubled wait time until success or max retries reached
+  </Step>
+</Steps>
+
+### Configuration Examples
+
+<Tabs>
+  <Tab title="Production API - Reliable Service">
+    **Use case:** Production API that needs high reliability and can tolerate slightly higher latency for better success rates.
+
+    ```yaml
+    routers:
+      production:
+        retries:
+          enabled: true
+          max-retries: 3
+          strategy: exponential
+          base: 1s
+          max: 30s
+    ```
+    
+    **Timing:** 1s → 2s → 4s → fail (up to 7 seconds total retry time)
+  </Tab>
+
+  <Tab title="Development Environment - Fast Feedback">
+    **Use case:** Development environment where you want some retry protection but prefer fast feedback over maximum reliability.
+
+    ```yaml
+    routers:
+      development:
+        retries:
+          enabled: true
+          max-retries: 2
+          strategy: exponential
+          base: 500ms
+          max: 5s
+    ```
+    
+    **Timing:** 500ms → 1s → fail (up to 1.5 seconds total retry time)
+  </Tab>
+
+  <Tab title="Batch Processing - Maximum Reliability">
+    **Use case:** Background batch processing where reliability is more important than latency.
+
+    ```yaml
+    routers:
+      batch:
+        retries:
+          enabled: true
+          max-retries: 5
+          strategy: exponential
+          base: 2s
+          max: 60s
+    ```
+    
+    **Timing:** 2s → 4s → 8s → 16s → 32s → fail (up to 62 seconds total retry time)
+  </Tab>
+
+  <Tab title="Real-time Applications - Disabled">
+    **Use case:** Real-time applications where fast feedback is more important than retry reliability.
+
+    ```yaml
+    routers:
+      realtime-api:
+        retries:
+          enabled: false  # No retries for immediate response
+    ```
+    
+    **Behavior:** Failed requests return immediately without any retry attempts.
+  </Tab>
+</Tabs>
+
+## Reference
+
+### Configuration Scope
+
+Retry settings are configured per-router, allowing different retry policies for different use cases.
+
+#### Router-Specific Configuration
+
+Each router can have custom retry settings or disable retries entirely based on the use case:
+
+```yaml
+routers:
+  production:
+    retries:
+      enabled: true
+      max-retries: 3
+      strategy: exponential
+      base: 1s
+      max: 30s
+  
+  development:
+    retries:
+      enabled: false  # Disable for faster feedback
+```
+
+#### Default Behavior
+
+Retries are disabled by default to provide predictable behavior. Enable them explicitly where needed.
+
+### Retry Behavior Details
+
+#### What Gets Retried
+
+| Condition | Retried? | Reason | Examples |
+|-----------|----------|---------|----------|
+| **5xx Server Errors** | ✅ Yes | Temporary provider issues | `500 Internal Server Error`, `502 Bad Gateway`, `503 Service Unavailable`, `504 Gateway Timeout` |
+| **Network Transport Errors** | ✅ Yes | Connection/network problems | Connection refused, timeouts, DNS failures, TLS handshake errors |
+| **Stream Interruptions** | ✅ Yes | Streaming response failures | Stream ended unexpectedly, transport errors during streaming |
+| **Load Balancer Errors** | ✅ Yes | Internal service failures | Provider selection failures, request buffering issues |
+| **4xx Client Errors** | ❌ No | Request format/auth issues | `400 Bad Request`, `401 Unauthorized`, `403 Forbidden`, `404 Not Found`, `422 Unprocessable Entity` |
+| **429 Rate Limits** | ❌ No | Handled by load balancing | Provider temporarily removed from rotation based on `Retry-After` header |
+| **2xx Success Responses** | ❌ No | Request succeeded | `200 OK`, `201 Created`, `202 Accepted` |
+| **Auth/Config Errors** | ❌ No | Setup/configuration issues | Invalid Helicone API keys, missing auth headers, provider not configured |
+| **Cache/Storage Errors** | ❌ No | Persistent storage issues | Cache operation failures, malformed request/response bodies |
+
+
+#### Load Balancing Integration
+
+Retries and [load balancing](/ai-gateway/features/loadbalancing) work together to maximize reliability:
+
+- **Per-request:** When a request fails, retries attempt the same provider multiple times
+- **Per-provider:** If a provider keeps failing requests, health monitoring removes it from the load balancer
+- **Result:** New requests automatically go to healthy providers while failed requests still get retried
+
+
