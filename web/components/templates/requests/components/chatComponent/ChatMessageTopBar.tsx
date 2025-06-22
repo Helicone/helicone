@@ -32,7 +32,52 @@ interface ChatMessageTopBarProps {
   deleteMessage: (_index: number) => void;
   popoverOpen: boolean;
   setPopoverOpen: (_open: boolean) => void;
+  onAddText?: () => void;
+  onAddImage?: () => void;
 }
+
+const ROLE_OPTIONS = [
+  { value: "user", label: "User" },
+  { value: "assistant", label: "Assistant" },
+  { value: "system", label: "System" },
+  { value: "tool", label: "Tool" },
+  { value: "image", label: "Image" },
+] as const;
+
+const getDropdownItems = (
+  messageRole: string,
+  handlers: {
+    addToolCall: () => void;
+    onAddText?: () => void;
+    onAddImage?: () => void;
+  }
+) => {
+  const items = [];
+
+  if (messageRole === "assistant") {
+    items.push({
+      label: "Add Tool Call",
+      onClick: handlers.addToolCall,
+    });
+  }
+
+  if (messageRole === "user") {
+    if (handlers.onAddText) {
+      items.push({
+        label: "Add Text",
+        onClick: handlers.onAddText,
+      });
+    }
+    if (handlers.onAddImage) {
+      items.push({
+        label: "Add Image",
+        onClick: handlers.onAddImage,
+      });
+    }
+  }
+
+  return items;
+};
 
 export default function ChatMessageTopBar({
   dragHandle,
@@ -46,7 +91,15 @@ export default function ChatMessageTopBar({
   deleteMessage,
   popoverOpen,
   setPopoverOpen,
+  onAddText,
+  onAddImage,
 }: ChatMessageTopBarProps) {
+  const dropdownItems = getDropdownItems(message.role || "user", {
+    addToolCall: () => addToolCall(messageIndex),
+    onAddText,
+    onAddImage,
+  });
+
   return (
     <header className="h-12 w-full flex flex-row items-center justify-between px-4 sticky top-0 bg-sidebar-background dark:bg-black z-10 group">
       <div className="flex items-center gap-2">
@@ -64,18 +117,11 @@ export default function ChatMessageTopBar({
               <SelectValue placeholder="Select role" />
             </SelectTrigger>
             <SelectContent className="min-w-[140px]">
-              <SelectItem value="user" className="text-xs">
-                User
-              </SelectItem>
-              <SelectItem value="assistant" className="text-xs">
-                Assistant
-              </SelectItem>
-              <SelectItem value="system" className="text-xs">
-                System
-              </SelectItem>
-              <SelectItem value="tool" className="text-xs">
-                Tool
-              </SelectItem>
+              {ROLE_OPTIONS.map(({ value, label }) => (
+                <SelectItem key={value} value={value} className="text-xs">
+                  {label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         ) : (
@@ -86,7 +132,7 @@ export default function ChatMessageTopBar({
       </div>
       {chatMode === "PLAYGROUND_INPUT" && (
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity [&:has([data-state=open])]:opacity-100">
-          {message.role === "assistant" && (
+          {message.role !== "system" && dropdownItems.length > 0 && (
             <DropdownMenu open={popoverOpen} onOpenChange={setPopoverOpen}>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -98,12 +144,15 @@ export default function ChatMessageTopBar({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem
-                  className="text-xs"
-                  onClick={() => addToolCall(messageIndex)}
-                >
-                  Add Tool Call
-                </DropdownMenuItem>
+                {dropdownItems.map((item, index) => (
+                  <DropdownMenuItem
+                    key={index}
+                    className="text-xs"
+                    onClick={item.onClick}
+                  >
+                    {item.label}
+                  </DropdownMenuItem>
+                ))}
               </DropdownMenuContent>
             </DropdownMenu>
           )}

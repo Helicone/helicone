@@ -265,17 +265,6 @@ export default function RequestDrawer(props: RequestDivProps) {
       });
   }, [jawn, request, router, setNotification]);
 
-  // Test prompt handler
-  const handleTestPrompt = useCallback(() => {
-    if (!request) return;
-
-    if (promptDataQuery.data?.id) {
-      router.push(`/prompts/${promptDataQuery.data?.id}`);
-    } else {
-      router.push(`/prompts/fromRequest/${request.id}`);
-    }
-  }, [promptDataQuery.data?.id, request, router]);
-
   // Update keyboard event handler
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -726,15 +715,16 @@ export default function RequestDrawer(props: RequestDivProps) {
           <div className="flex flex-row justify-between items-center gap-2 px-3">
             <div className="flex flex-row items-center gap-2">
               {isChatRequest && (
-                <Button
-                  variant="action"
-                  size="sm"
-                  className="flex flex-row items-center gap-1.5"
-                  onClick={handleTestPrompt}
-                >
-                  <PiPlayBold className="h-4 w-4" />
-                  Test Prompt
-                </Button>
+                <Link href={`/playground?requestId=${request.id}`}>
+                  <Button
+                    variant="action"
+                    size="sm"
+                    className="flex flex-row items-center gap-1.5"
+                  >
+                    <PiPlayBold className="h-4 w-4" />
+                    Test Prompt
+                  </Button>
+                </Link>
               )}
 
               {isChatRequest && (

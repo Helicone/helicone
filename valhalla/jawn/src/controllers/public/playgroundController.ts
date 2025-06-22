@@ -127,6 +127,12 @@ export class PlaygroundController extends Controller {
         try {
           const response = await openai.chat.completions.create(
             {
+              provider: isOnPrem
+                ? undefined
+                : {
+                    sort: "throughput",
+                    order: ["Fireworks"],
+                  },
               model: isOnPrem ? params.model?.split("/")[1] : params.model,
               messages: params.messages,
               temperature: params.temperature,
