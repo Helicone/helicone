@@ -2532,21 +2532,18 @@ export type Database = {
           id: string
           name: string | null
           organization_id: string
-          router_hash: string
         }
         Insert: {
           created_at?: string
           id?: string
           name?: string | null
           organization_id: string
-          router_hash: string
         }
         Update: {
           created_at?: string
           id?: string
           name?: string | null
           organization_id?: string
-          router_hash?: string
         }
         Relationships: [
           {
