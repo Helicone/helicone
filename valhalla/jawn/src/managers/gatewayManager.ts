@@ -4,7 +4,10 @@ import { err, ok, Result } from "../packages/common/result";
 import { BaseManager } from "./BaseManager";
 import crypto from "crypto";
 import { KeyManager } from "./apiKeys/KeyManager";
-import { RouterConfig } from "../controllers/public/gatewayController";
+import {
+  LatestRouterConfig,
+  RouterConfig,
+} from "../controllers/public/gatewayController";
 
 export class GatewayManager extends BaseManager {
   constructor(authParams: AuthParams) {
@@ -12,10 +15,24 @@ export class GatewayManager extends BaseManager {
   }
 
   async getRouterConfigs(): Promise<
-    Result<{ routerConfigs: { id: string; name: string }[] }, string>
+    Result<
+      {
+        routerConfigs: RouterConfig[];
+      },
+      string
+    >
   > {
-    const result = await dbExecute<{ id: string; name: string }>(
-      `SELECT id, name FROM router_configs WHERE organization_id = $1`,
+    const result = await dbExecute<RouterConfig>(
+      `SELECT
+        router_configs.id,
+        router_configs.name,
+        router_config_versions.version as latestVersion,
+        router_config_versions.created_at as lastUpdatedAt
+      FROM router_configs
+      INNER JOIN router_config_versions ON router_configs.id = router_config_versions.config_id
+      WHERE router_configs.organization_id = $1
+      ORDER BY router_config_versions.created_at DESC
+      LIMIT 1`,
       [this.authParams.organizationId]
     );
 
@@ -28,8 +45,8 @@ export class GatewayManager extends BaseManager {
 
   async getLatestRouterConfig(
     id: string
-  ): Promise<Result<RouterConfig, string>> {
-    const result = await dbExecute<RouterConfig>(
+  ): Promise<Result<LatestRouterConfig, string>> {
+    const result = await dbExecute<LatestRouterConfig>(
       `SELECT router_configs.id, router_configs.name, router_config_versions.version, router_config_versions.config
       FROM router_configs
       INNER JOIN router_config_versions ON router_configs.id = router_config_versions.config_id

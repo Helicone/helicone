@@ -14,12 +14,19 @@ import type { JawnAuthenticatedRequest } from "../../types/request";
 import { err, ok, Result } from "../../packages/common/result";
 import { GatewayManager } from "../../managers/gatewayManager";
 
-export type RouterConfig = {
+export type LatestRouterConfig = {
   id: string;
   name: string;
   apiKey: string;
   version: string;
   config: string;
+};
+
+export type RouterConfig = {
+  id: string;
+  name: string;
+  latestVersion: string;
+  lastUpdatedAt: string;
 };
 
 @Route("v1/gateway")
@@ -29,9 +36,7 @@ export class GatewayController extends Controller {
   @Get("/")
   public async getRouterConfigs(
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<
-    Result<{ routerConfigs: { id: string; name: string }[] }, string>
-  > {
+  ): Promise<Result<{ routerConfigs: RouterConfig[] }, string>> {
     const gatewayManager = new GatewayManager(request.authParams);
     const result = await gatewayManager.getRouterConfigs();
     if (result.error || !result.data) {
@@ -44,7 +49,7 @@ export class GatewayController extends Controller {
   public async getLatestRouterConfig(
     @Request() request: JawnAuthenticatedRequest,
     @Path() id: string
-  ): Promise<Result<RouterConfig, string>> {
+  ): Promise<Result<LatestRouterConfig, string>> {
     const gatewayManager = new GatewayManager(request.authParams);
     const result = await gatewayManager.getLatestRouterConfig(id);
     if (result.error || !result.data) {

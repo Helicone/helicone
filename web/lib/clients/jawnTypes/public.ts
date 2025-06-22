@@ -2889,30 +2889,33 @@ Json: JsonObject;
       /** @enum {number|null} */
       error: null;
     };
-    "ResultSuccess__routerConfigs_58__id-string--name-string_-Array__": {
+    RouterConfig: {
+      lastUpdatedAt: string;
+      latestVersion: string;
+      name: string;
+      id: string;
+    };
+    "ResultSuccess__routerConfigs-RouterConfig-Array__": {
       data: {
-        routerConfigs: {
-            name: string;
-            id: string;
-          }[];
+        routerConfigs: components["schemas"]["RouterConfig"][];
       };
       /** @enum {number|null} */
       error: null;
     };
-    "Result__routerConfigs_58__id-string--name-string_-Array_.string_": components["schemas"]["ResultSuccess__routerConfigs_58__id-string--name-string_-Array__"] | components["schemas"]["ResultError_string_"];
-    RouterConfig: {
+    "Result__routerConfigs-RouterConfig-Array_.string_": components["schemas"]["ResultSuccess__routerConfigs-RouterConfig-Array__"] | components["schemas"]["ResultError_string_"];
+    LatestRouterConfig: {
       config: string;
       version: string;
       apiKey: string;
       name: string;
       id: string;
     };
-    ResultSuccess_RouterConfig_: {
-      data: components["schemas"]["RouterConfig"];
+    ResultSuccess_LatestRouterConfig_: {
+      data: components["schemas"]["LatestRouterConfig"];
       /** @enum {number|null} */
       error: null;
     };
-    "Result_RouterConfig.string_": components["schemas"]["ResultSuccess_RouterConfig_"] | components["schemas"]["ResultError_string_"];
+    "Result_LatestRouterConfig.string_": components["schemas"]["ResultSuccess_LatestRouterConfig_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__routerConfigId-string--routerVersionId-string--apiKey-string__": {
       data: {
         apiKey: string;
@@ -5824,7 +5827,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result__routerConfigs_58__id-string--name-string_-Array_.string_"];
+          "application/json": components["schemas"]["Result__routerConfigs-RouterConfig-Array_.string_"];
         };
       };
     };
@@ -5839,7 +5842,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_RouterConfig.string_"];
+          "application/json": components["schemas"]["Result_LatestRouterConfig.string_"];
         };
       };
     };

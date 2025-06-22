@@ -8575,25 +8575,36 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ResultSuccess__routerConfigs_58__id-string--name-string_-Array__": {
+			"RouterConfig": {
+				"properties": {
+					"lastUpdatedAt": {
+						"type": "string"
+					},
+					"latestVersion": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"lastUpdatedAt",
+					"latestVersion",
+					"name",
+					"id"
+				],
+				"type": "object"
+			},
+			"ResultSuccess__routerConfigs-RouterConfig-Array__": {
 				"properties": {
 					"data": {
 						"properties": {
 							"routerConfigs": {
 								"items": {
-									"properties": {
-										"name": {
-											"type": "string"
-										},
-										"id": {
-											"type": "string"
-										}
-									},
-									"required": [
-										"name",
-										"id"
-									],
-									"type": "object"
+									"$ref": "#/components/schemas/RouterConfig"
 								},
 								"type": "array"
 							}
@@ -8618,17 +8629,17 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result__routerConfigs_58__id-string--name-string_-Array_.string_": {
+			"Result__routerConfigs-RouterConfig-Array_.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess__routerConfigs_58__id-string--name-string_-Array__"
+						"$ref": "#/components/schemas/ResultSuccess__routerConfigs-RouterConfig-Array__"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
 			},
-			"RouterConfig": {
+			"LatestRouterConfig": {
 				"properties": {
 					"config": {
 						"type": "string"
@@ -8655,10 +8666,10 @@
 				],
 				"type": "object"
 			},
-			"ResultSuccess_RouterConfig_": {
+			"ResultSuccess_LatestRouterConfig_": {
 				"properties": {
 					"data": {
-						"$ref": "#/components/schemas/RouterConfig"
+						"$ref": "#/components/schemas/LatestRouterConfig"
 					},
 					"error": {
 						"type": "number",
@@ -8675,10 +8686,10 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result_RouterConfig.string_": {
+			"Result_LatestRouterConfig.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess_RouterConfig_"
+						"$ref": "#/components/schemas/ResultSuccess_LatestRouterConfig_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -16427,7 +16438,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result__routerConfigs_58__id-string--name-string_-Array_.string_"
+									"$ref": "#/components/schemas/Result__routerConfigs-RouterConfig-Array_.string_"
 								}
 							}
 						}
@@ -16453,7 +16464,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result_RouterConfig.string_"
+									"$ref": "#/components/schemas/Result_LatestRouterConfig.string_"
 								}
 							}
 						}
