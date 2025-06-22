@@ -87,7 +87,7 @@ export class GatewayManager extends BaseManager {
 
     const versionHash = crypto
       .createHash("sha256")
-      .update(config ?? "{}" + Date.now().toString())
+      .update(config ?? "{}")
       .digest("hex");
     const versionResult = await dbExecute<{ id: string }>(
       `INSERT INTO router_config_versions (config_id, version, config) VALUES ($1, $2, $3)`,
@@ -151,7 +151,7 @@ export class GatewayManager extends BaseManager {
 
     const versionHash = crypto
       .createHash("sha256")
-      .update(config ?? "{}" + Date.now().toString())
+      .update(config ?? "{}")
       .digest("hex");
     const versionResult = await dbExecute(
       `INSERT INTO router_config_versions (config_id, version, config) VALUES ($1, $2, $3)`,
