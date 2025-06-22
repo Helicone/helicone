@@ -122,7 +122,7 @@ export class KeyManager extends BaseManager {
    */
   async createNormalKey(
     keyName: string,
-    keyPermissions: "rw" | "r" | "w" = "rw"
+    keyPermissions: "rw" | "r" | "w" | "g" = "rw"
   ): Promise<Result<{ id: string; apiKey: string }, string>> {
     try {
       const IS_EU = process.env.AWS_REGION === "eu-west-1";

@@ -8575,6 +8575,173 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"RouterConfig": {
+				"properties": {
+					"lastUpdatedAt": {
+						"type": "string"
+					},
+					"latestVersion": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"lastUpdatedAt",
+					"latestVersion",
+					"name",
+					"id"
+				],
+				"type": "object"
+			},
+			"ResultSuccess__routerConfigs-RouterConfig-Array__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"routerConfigs": {
+								"items": {
+									"$ref": "#/components/schemas/RouterConfig"
+								},
+								"type": "array"
+							}
+						},
+						"required": [
+							"routerConfigs"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__routerConfigs-RouterConfig-Array_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__routerConfigs-RouterConfig-Array__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"LatestRouterConfig": {
+				"properties": {
+					"config": {
+						"type": "string"
+					},
+					"version": {
+						"type": "string"
+					},
+					"apiKey": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"config",
+					"version",
+					"apiKey",
+					"name",
+					"id"
+				],
+				"type": "object"
+			},
+			"ResultSuccess_LatestRouterConfig_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/LatestRouterConfig"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_LatestRouterConfig.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_LatestRouterConfig_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__routerConfigId-string--routerVersionId-string--apiKey-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"apiKey": {
+								"type": "string"
+							},
+							"routerVersionId": {
+								"type": "string"
+							},
+							"routerConfigId": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"apiKey",
+							"routerVersionId",
+							"routerConfigId"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__routerConfigId-string--routerVersionId-string--apiKey-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__routerConfigId-string--routerVersionId-string--apiKey-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"Eval": {
 				"properties": {
 					"name": {
@@ -16260,6 +16427,170 @@
 						}
 					}
 				]
+			}
+		},
+		"/v1/gateway": {
+			"get": {
+				"operationId": "GetRouterConfigs",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__routerConfigs-RouterConfig-Array_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Gateway"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/gateway/{id}": {
+			"get": {
+				"operationId": "GetLatestRouterConfig",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_LatestRouterConfig.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Gateway"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdateRouterConfig",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Gateway"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"config": {
+										"type": "string"
+									},
+									"name": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"config",
+									"name"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/gateway/create": {
+			"post": {
+				"operationId": "CreateRouterConfig",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__routerConfigId-string--routerVersionId-string--apiKey-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Gateway"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"config": {
+										"type": "string"
+									},
+									"name": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"config",
+									"name"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/evals/query": {

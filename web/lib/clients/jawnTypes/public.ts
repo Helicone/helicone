@@ -461,6 +461,16 @@ export interface paths {
   "/v1/helicone-dataset/{datasetId}/delete": {
     post: operations["DeleteHeliconeDataset"];
   };
+  "/v1/gateway": {
+    get: operations["GetRouterConfigs"];
+  };
+  "/v1/gateway/{id}": {
+    get: operations["GetLatestRouterConfig"];
+    put: operations["UpdateRouterConfig"];
+  };
+  "/v1/gateway/create": {
+    post: operations["CreateRouterConfig"];
+  };
   "/v1/evals/query": {
     post: operations["QueryEvals"];
   };
@@ -2879,6 +2889,43 @@ Json: JsonObject;
       /** @enum {number|null} */
       error: null;
     };
+    RouterConfig: {
+      lastUpdatedAt: string;
+      latestVersion: string;
+      name: string;
+      id: string;
+    };
+    "ResultSuccess__routerConfigs-RouterConfig-Array__": {
+      data: {
+        routerConfigs: components["schemas"]["RouterConfig"][];
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__routerConfigs-RouterConfig-Array_.string_": components["schemas"]["ResultSuccess__routerConfigs-RouterConfig-Array__"] | components["schemas"]["ResultError_string_"];
+    LatestRouterConfig: {
+      config: string;
+      version: string;
+      apiKey: string;
+      name: string;
+      id: string;
+    };
+    ResultSuccess_LatestRouterConfig_: {
+      data: components["schemas"]["LatestRouterConfig"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_LatestRouterConfig.string_": components["schemas"]["ResultSuccess_LatestRouterConfig_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__routerConfigId-string--routerVersionId-string--apiKey-string__": {
+      data: {
+        apiKey: string;
+        routerVersionId: string;
+        routerConfigId: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__routerConfigId-string--routerVersionId-string--apiKey-string_.string_": components["schemas"]["ResultSuccess__routerConfigId-string--routerVersionId-string--apiKey-string__"] | components["schemas"]["ResultError_string_"];
     Eval: {
       name: string;
       /** Format: double */
@@ -5771,6 +5818,72 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetRouterConfigs: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__routerConfigs-RouterConfig-Array_.string_"];
+        };
+      };
+    };
+  };
+  GetLatestRouterConfig: {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_LatestRouterConfig.string_"];
+        };
+      };
+    };
+  };
+  UpdateRouterConfig: {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          config: string;
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  CreateRouterConfig: {
+    requestBody: {
+      content: {
+        "application/json": {
+          config: string;
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__routerConfigId-string--routerVersionId-string--apiKey-string_.string_"];
         };
       };
     };
