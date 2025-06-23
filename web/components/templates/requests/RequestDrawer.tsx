@@ -265,7 +265,6 @@ export default function RequestDrawer(props: RequestDivProps) {
       });
   }, [jawn, request, router, setNotification]);
 
-  // Test prompt handler
   const handleTestPrompt = useCallback(() => {
     if (!request) return;
 
