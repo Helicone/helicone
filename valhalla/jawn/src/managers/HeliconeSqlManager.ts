@@ -23,34 +23,34 @@ export class HeliconeSqlManager {
     Result<ClickHouseTableSchema[], string>
   > {
     try {
-      const schema: ClickHouseTableSchema[] = [];
+      const schema: ClickHouseTableSchema[] = await Promise.all(
+        CLICKHOUSE_TABLES.map(async (table_name) => {
+          const columns = await clickhouseDb.dbQuery<ClickHouseTableRow>(
+            `DESCRIBE TABLE ${table_name}`,
+            []
+          );
 
-      for (const table_name of CLICKHOUSE_TABLES) {
-        const columns = await clickhouseDb.dbQuery<ClickHouseTableRow>(
-          `DESCRIBE TABLE ${table_name}`,
-          []
-        );
+          if (columns.error) {
+            throw new Error(columns.error);
+          }
 
-        if (columns.error) {
-          return err(columns.error);
-        }
-
-        schema.push({
-          table_name,
-          columns:
-            columns.data
-              ?.map((col: ClickHouseTableRow) => ({
-                name: col.name,
-                type: col.type,
-                default_type: col.default_type,
-                default_expression: col.default_expression,
-                comment: col.comment,
-                codec_expression: col.codec_expression,
-                ttl_expression: col.ttl_expression,
-              }))
-              .filter((col) => col.name !== "organization_id") ?? [],
-        });
-      }
+          return {
+            table_name,
+            columns:
+              columns.data
+                ?.map((col: ClickHouseTableRow) => ({
+                  name: col.name,
+                  type: col.type,
+                  default_type: col.default_type,
+                  default_expression: col.default_expression,
+                  comment: col.comment,
+                  codec_expression: col.codec_expression,
+                  ttl_expression: col.ttl_expression,
+                }))
+                .filter((col) => col.name !== "organization_id") ?? [],
+          };
+        })
+      );
 
       return ok(schema);
     } catch (e) {
@@ -96,16 +96,10 @@ export class HeliconeSqlManager {
 function validateSql(sql: string): Result<null, string> {
   const parser = new Parser();
   const opt = { database: "Postgresql" }; // clickhouse not supported yet but closest supported
-  const ast = parser.astify(sql, opt);
+  const ast = normalizeAst(parser.astify(sql, opt));
 
-  if (Array.isArray(ast)) {
-    for (const node of ast) {
-      if (node.type !== "select") {
-        return err("Only select statements are allowed");
-      }
-    }
-  } else {
-    if (ast.type !== "select") {
+  for (const node of ast) {
+    if (node.type !== "select") {
       return err("Only select statements are allowed");
     }
   }
@@ -133,10 +127,7 @@ function conertSqlToAst(sql: string): Result<AST[], string> {
   const parser = new Parser();
   const opt = { database: "Postgresql" }; // clickhouse not supported yet but closest supported
   const ast = parser.astify(sql, opt);
-  if (!Array.isArray(ast)) {
-    return ok([ast]);
-  }
-  return ok(ast);
+  return ok(normalizeAst(ast));
 }
 
 function appendOrgIdToAst(ast: AST, orgId: string): AST {
@@ -165,4 +156,12 @@ function appendOrgIdToAst(ast: AST, orgId: string): AST {
   }
 
   return ast;
+}
+
+function normalizeAst(ast: AST | AST[]): AST[] {
+  if (Array.isArray(ast)) {
+    return ast;
+  }
+
+  return [ast];
 }
