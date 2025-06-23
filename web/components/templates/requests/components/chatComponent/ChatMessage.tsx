@@ -396,7 +396,7 @@ export default function ChatMessage({
                       role: "user",
                       _type: "image",
                       image_url: base64,
-                      id: message.id || `msg-${messageIndex}-${Date.now()}`,
+                      id: message.id || `msg-${Date.now()}`,
                     };
                   }
                   return message;
@@ -424,7 +424,7 @@ export default function ChatMessage({
                             _type: "image" as const,
                             role: "user",
                             image_url: base64,
-                            id: `img-${messageIndex}-${Date.now()}`,
+                            id: `img-${Date.now()}`,
                           },
                         ],
                       };
@@ -435,13 +435,13 @@ export default function ChatMessage({
                         _type: "message" as const,
                         role: "user",
                         content: msg.content,
-                        id: `text-${messageIndex}-${Date.now()}`,
+                        id: `text-${Date.now()}`,
                       },
                       {
                         _type: "image" as const,
                         role: "user",
                         image_url: base64,
-                        id: `img-${messageIndex}-${Date.now() + 1}`,
+                        id: `img-${Date.now() + 1}`,
                       },
                     ];
 
@@ -450,7 +450,7 @@ export default function ChatMessage({
                       _type: "contentArray" as const,
                       role: "user",
                       contentArray,
-                      id: msg.id || `msg-${messageIndex}-${Date.now()}`,
+                      id: msg.id || `msg-${Date.now() + 2}`,
                     };
                   }
                   return msg;
@@ -649,7 +649,7 @@ export default function ChatMessage({
                       _type: "message" as const,
                       role: "user",
                       content: "",
-                      id: `text-${messageIndex}-${Date.now()}`,
+                      id: `text-${Date.now()}`,
                     },
                   ],
                 };
@@ -661,14 +661,14 @@ export default function ChatMessage({
                 _type: "message" as const,
                 role: "user",
                 content: msg.content,
-                id: `text-${messageIndex}-${Date.now()}`,
+                id: `text-${Date.now()}`,
               });
 
               contentArray.push({
                 _type: "message" as const,
                 role: "user",
                 content: "",
-                id: `text-${messageIndex}-${Date.now() + 1}`,
+                id: `text-${Date.now() + 1}`,
               });
 
               return {
@@ -676,7 +676,7 @@ export default function ChatMessage({
                 _type: "contentArray" as const,
                 role: "user",
                 contentArray,
-                id: msg.id || `msg-${messageIndex}-${Date.now()}`,
+                id: msg.id || `msg-${Date.now() + 2}`,
               };
             }
             return msg;

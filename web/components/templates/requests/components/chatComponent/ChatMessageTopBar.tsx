@@ -51,6 +51,21 @@ const getDropdownItems = (
     onAddImage?: () => void;
   }
 ) => {
+  return [
+    ...(messageRole === "assistant" && handlers.addToolCall ? [{
+      label: "Add Tool Call", 
+      onClick: handlers.addToolCall,
+    }] : []),
+    ...(messageRole === "user" && handlers.onAddText ? [{
+      label: "Add Text",
+      onClick: handlers.onAddText,
+    }] : []),
+    ...(messageRole === "user" && handlers.onAddImage ? [{
+      label: "Add Image",
+      onClick: handlers.onAddImage,
+    }] : [])
+  ];
+  
   const items = [];
 
   if (messageRole === "assistant") {

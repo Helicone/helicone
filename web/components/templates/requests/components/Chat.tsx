@@ -37,6 +37,8 @@ export default function Chat({
     Record<number, boolean>
   >({});
 
+  console.log(mappedRequest.schema.request?.messages);
+
   const messages = useMemo(() => {
     const requestMessages = mappedRequest.schema.request?.messages ?? [];
     const responseMessages = mappedRequest.schema.response?.messages ?? [];
@@ -106,12 +108,11 @@ export default function Chat({
   const addMessage = () => {
     if (!onChatChange) return;
 
-    const nextIndex = mappedRequest.schema.request?.messages?.length ?? 0;
     const newMessage: Message = {
       role: "user",
       content: "",
       _type: "message",
-      id: `msg-${nextIndex}-${Date.now()}`, // Standardized index-based ID
+      id: `msg-${Date.now()}`, // Standardized index-based ID
     };
 
     onChatChange({
