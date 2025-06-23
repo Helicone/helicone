@@ -13,9 +13,17 @@ export class GoogleStreamBodyProcessor implements IBodyProcessor {
 
     const { responseBody } = parseInput;
 
-    const lines = responseBody
-      .split("\n")
-      .filter((line) => line.startsWith("data: "));
+    const lines = responseBody.split("\n").filter((line) => {
+      if (line.startsWith("data: ")) {
+        return true;
+      }
+      try {
+        JSON.parse(line);
+        return true;
+      } catch {
+        return false;
+      }
+    });
 
     const data = lines.reduce((acc: any[], line, index) => {
       try {
