@@ -4,7 +4,7 @@ sidebarTitle: "Providers"
 description: "Configure LLM provider endpoints and models for custom deployments"
 ---
 
-The AI Gateway ships with comprehensive built-in configurations for all major LLM providers, including their endpoints, API versions, and supported models. **Most users never need to configure providers manually.**
+The AI Gateway ships with built-in configurations for all major LLM providers, including their endpoints, API versions, and supported models. **Most users never need to configure providers manually**.
 
 Provider configuration becomes necessary when you need custom endpoints, enterprise deployments, or want to add models not yet included in the defaults.
 
@@ -17,7 +17,7 @@ Provider configuration defines how the AI Gateway connects to and communicates w
 - **API Versions** - Some providers require specific version headers
 - **Supported Models** - Which models are available through each provider
 
-The gateway includes [comprehensive defaults](https://github.com/Helicone/helicone-router/blob/main/llm-proxy/config/embedded/providers.yaml) that work out-of-the-box for standard deployments.
+The gateway includes [comprehensive defaults](https://github.com/Helicone/helicone-router/blob/main/ai-gateway/config/embedded/providers.yaml) that work out-of-the-box for standard deployments.
 
 ### Why Configure Providers?
 
@@ -28,12 +28,12 @@ You'll need to configure providers when you have:
 - **Limit available models** - Override default provider config to restrict which models are accessible
 
 <Note>
-  **New models are automatically detected!** The router uses smart model detection with embedded configurations that are regularly updated. You don't need to manually add new models unless you want to restrict the available model set.
-</Note>
-
-<Note>
   Provider configuration only defines endpoints and models. API key management is handled separately in [Secret Management](/ai-gateway/concepts/secret-management).
 </Note>
+
+### How to Enable Providers?
+
+Providers are enabled by simply setting their API keys as environment variables. See [Secret Management](/ai-gateway/concepts/secret-management) for details on API key configuration.
 
 ### Configuration Examples
 
@@ -103,10 +103,11 @@ You'll need to configure providers when you have:
   </Tab>
 </Tabs>
 
-## Reference
 <Note>
   For complete configuration options and syntax, see the [Configuration Reference](/ai-gateway/config#provider-configuration).
 </Note>
+
+## Reference
 
 ### Supported Providers
 
@@ -116,35 +117,17 @@ The AI Gateway supports the following LLM providers with built-in configurations
 | ---------------- | ----------------------------------------- | ----------------------- |
 | **OpenAI**       | `https://api.openai.com`                 | ✅ (regional variants)      |
 | **Anthropic**    | `https://api.anthropic.com`              | ✅ (regional variants)  |
-| **Google Gemini** | `https://generativelanguage.googleapis.com` | ✅ (VertexAI, custom)   |
+| **Gemini**       | `https://generativelanguage.googleapis.com` | ✅ (Gemini)   |
 | **AWS Bedrock**  | Regional AWS endpoints                    | ✅ (cross-region)       |
 | **VertexAI**     | Regional GCP endpoints                    | ✅ (cross-region)       |
 | **Ollama**       | `http://localhost:11434`                 | ✅ (any host/port)      |
 
 ### Supported Models
 
-For current model support by provider, see the [embedded provider configuration](https://github.com/Helicone/helicone-router/blob/main/llm-proxy/config/embedded/providers.yaml) which is automatically updated as new models are released.
+For current model support by provider, see the [embedded provider configuration](https://github.com/Helicone/helicone-router/blob/main/ai-gateway/config/embedded/providers.yaml) which is automatically updated as new models are released.
 
 **Model categories supported:**
 - **Chat/Completion models** - GPT-4, Claude, Gemini, etc.
 - **Embedding models** - text-embedding-ada-002, etc.
 - **Vision models** - GPT-4 Vision, Claude 3 Vision
 - **Local models** - Any Ollama-compatible model
-
-## Custom Endpoints
-
-Override default provider endpoints for enterprise deployments, regional compliance, or self-hosted models:
-
-```yaml
-providers:
-  ollama:
-    base-url: "http://192.168.1.100:8080"  # Custom Ollama server
-  
-  bedrock:
-    base-url: "https://bedrock-runtime.us-west-2.amazonaws.com"  # Regional AWS endpoint
-  
-  anthropic:
-    version: "2023-06-01"  # Lock API version
-```
-
-See [Configuration Reference](/ai-gateway/config#provider-configuration) for complete router configurations.

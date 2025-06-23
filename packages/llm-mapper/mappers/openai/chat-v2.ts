@@ -275,20 +275,36 @@ const toExternalMessages = (
 ): OpenAIChatRequest["messages"] => {
   if (!messages) return [];
 
-  return messages.map(({ _type, id, ...rest }) => ({
-    role: rest.role || "user",
-    content: rest.content || "",
-    name: rest.name,
-    tool_calls: rest.tool_calls?.map((toolCall) => ({
-      id: toolCall.id ?? "",
-      function: {
-        arguments: JSON.stringify(toolCall.arguments),
-        name: toolCall.name ?? "",
-      },
-      type: "function",
-    })),
-    tool_call_id: rest.tool_call_id,
-  }));
+  return messages.map(({ _type, id, ...rest }) => {
+    if (_type === "contentArray") {
+      return {
+        role: rest.role || "user",
+        content:
+          rest.contentArray?.map((content) => ({
+            type: content._type === "image" ? "image_url" : "text",
+            text: content.content,
+            image_url:
+              content._type === "image" && content.image_url
+                ? { url: content.image_url }
+                : undefined,
+          })) || [],
+      };
+    }
+    return {
+      role: rest.role || "user",
+      content: rest.content || "",
+      name: rest.name,
+      tool_calls: rest.tool_calls?.map((toolCall) => ({
+        id: toolCall.id ?? "",
+        function: {
+          arguments: JSON.stringify(toolCall.arguments),
+          name: toolCall.name ?? "",
+        },
+        type: "function",
+      })),
+      tool_call_id: rest.tool_call_id,
+    };
+  });
 };
 
 /**

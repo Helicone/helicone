@@ -31,7 +31,7 @@ export class RateLimiter {
           method: "POST",
           body: JSON.stringify({
             windowSizeSeconds: 60,
-            maxCount: 5_000,
+            maxCount: 100,
           }),
           headers: {
             "content-type": "application/json",

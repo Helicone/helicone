@@ -1,7 +1,7 @@
 import Chat from "@/components/templates/requests/components/Chat";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MappedLLMRequest } from "@helicone-package/llm-mapper/types";
+import { MappedLLMRequest, Message } from "@helicone-package/llm-mapper/types";
 import PlaygroundHeader from "./PlaygroundHeader";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Tool } from "@helicone-package/llm-mapper/types";
@@ -10,7 +10,7 @@ import { ModelParameters } from "../playgroundPage";
 interface PlaygroundMessagesPanelProps {
   mappedContent: MappedLLMRequest | null;
   defaultContent: MappedLLMRequest | null;
-  setMappedContent: (_mappedContent: MappedLLMRequest) => void;
+  setMappedContent: (value: MappedLLMRequest | null) => void;
   selectedModel: string;
   setSelectedModel: (_model: string) => void;
   tools: Tool[];
@@ -49,6 +49,32 @@ const PlaygroundMessagesPanel = ({
   const scrollTimeoutRef = useRef<NodeJS.Timeout>();
   const resizeTimeoutRef = useRef<NodeJS.Timeout>();
   const clientHeightRef = useRef<number>(0);
+
+  useEffect(() => {
+    if (!mappedContent) return;
+    if (!mappedContent.schema.request?.messages) return;
+
+    const messages = mappedContent.schema.request.messages;
+    const needsIds = messages.some((message: Message) => !message.id);
+
+    if (!needsIds) return;
+
+    const messagesWithIds = messages.map((message: Message, index: number) => ({
+      ...message,
+      id: message.id || `msg-${Date.now()}`,
+    }));
+
+    setMappedContent({
+      ...mappedContent,
+      schema: {
+        ...mappedContent.schema,
+        request: {
+          ...mappedContent.schema.request,
+          messages: messagesWithIds,
+        },
+      },
+    });
+  }, [mappedContent]);
 
   const checkScrollPosition = useCallback((scrollArea: Element) => {
     const scrollTop = scrollArea.scrollTop;

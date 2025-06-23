@@ -1,0 +1,157 @@
+---
+title: "Deploy with Docker"
+sidebarTitle: "Docker"
+description: "Deploy Helicone AI Gateway using Docker in 2 minutes"
+---
+
+Deploy the AI Gateway using Docker for easy containerized deployment to any cloud provider or local environment.
+
+<Steps>
+  <Step title="Pull the Docker image">
+    Get the latest AI Gateway Docker image:
+
+    ```bash
+    docker pull helicone/ai-gateway:latest
+    ```
+
+    <Note>
+      The image is automatically built and published to Docker Hub from the latest source.
+    </Note>
+  </Step>
+
+  <Step title="Configure environment">
+    Create a `.env` file with your provider API keys:
+
+    ```bash
+    # .env file
+    OPENAI_API_KEY=sk-...
+    ANTHROPIC_API_KEY=sk-ant-...
+    GEMINI_API_KEY=...
+    # Add other provider keys as needed
+    ```
+
+    All supported providers are listed in the [secret management guide](/ai-gateway/features/secret-management).
+  </Step>
+
+  <Step title="Run the container">
+    Start the AI Gateway container:
+
+    ```bash
+    docker run -d \
+      --name ai-gateway \
+      -p 8080:8080 \
+      --env-file .env \
+      helicone/ai-gateway:latest
+    ```
+
+    The Gateway will be running on `http://localhost:8080` with these routes:
+
+    - `/ai` - Unified API that works out of the box
+    - `/router/{router-name}` - Custom routing with load balancing  
+    - `/{provider-name}` - Direct provider access
+  </Step>
+
+  <Step title="Test your deployment">
+    Make a test request to verify everything works:
+
+    ```bash
+    curl http://localhost:8080/ai/v1/chat/completions \
+      -H "Content-Type: application/json" \
+      -d '{
+        "model": "openai/gpt-4o-mini",
+        "messages": [
+          { "role": "user", "content": "Hello from Docker!" }
+        ]
+      }'
+    ```
+
+    You should see a response from the AI model! 🎉
+  </Step>
+</Steps>
+
+## Configuration
+
+For production deployments, mount a custom `config.yaml` file:
+
+```bash
+docker run -d \
+  --name ai-gateway \
+  -p 8080:8080 \
+  --env-file .env \
+  -v $(pwd)/config.yaml:/app/config.yaml \
+  helicone/ai-gateway:latest
+```
+
+Example `config.yaml`:
+
+```yaml
+routers:
+  production:
+    load-balance:
+      chat:
+        strategy: latency
+        targets:
+          - openai
+          - anthropic
+          - gemini
+
+global:
+  cache:
+    enabled: true
+    directive: "max-age=3600"
+```
+
+## Docker Compose
+
+For local development or testing with additional services, use Docker Compose:
+
+```yaml
+# docker-compose.yml
+version: '3.8'
+services:
+  ai-gateway:
+    image: helicone/ai-gateway:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    volumes:
+      - ./config.yaml:/app/config.yaml
+```
+
+Run with:
+```bash
+docker-compose up -d
+```
+
+## Cloud Deployment Options
+
+The containerized AI Gateway can be deployed to various cloud platforms:
+
+<CardGroup cols={2}>
+  <Card title="AWS ECS" href="/ai-gateway/deployment/aws">
+    One-click deployment to AWS ECS with Terraform
+  </Card>
+  <Card title="Kubernetes" href="/ai-gateway/deployment/kubernetes">
+    Deploy using Helm charts for production workloads
+  </Card>
+  <Card title="Fly.io" href="https://fly.io">
+    Simple container deployment platform
+  </Card>
+  <Card title="DigitalOcean" href="https://digitalocean.com">
+    Container registry and app platform
+  </Card>
+</CardGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Configuration Reference" href="/ai-gateway/config">
+    Complete configuration options for routers, caching, and load balancing
+  </Card>
+  <Card title="Production Deployment" href="/ai-gateway/deployment">
+    Learn about production-ready deployment patterns
+  </Card>
+</CardGroup>

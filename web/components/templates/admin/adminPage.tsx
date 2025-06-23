@@ -1,4 +1,7 @@
+"use client";
+
 import AlertBanners from "./panels/alertBanners";
+import CostBackfiller from "./panels/costBackfiller";
 import KafkaSettings from "./panels/kafkaSettings";
 import OrgMember from "./panels/orgMember";
 
@@ -19,6 +22,9 @@ const AdminPage = (props: AdminPageProps) => {
         </li>
         <li className="w-full h-full rounded-lg flex flex-col bg-gray-500 p-4 space-y-4">
           <KafkaSettings />
+        </li>
+        <li className="w-full h-full rounded-lg flex flex-col bg-gray-500 p-4 space-y-4">
+          <CostBackfiller />
         </li>
       </ul>
     </div>

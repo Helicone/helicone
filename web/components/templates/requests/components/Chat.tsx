@@ -48,7 +48,7 @@ export default function Chat({
         ? responseMessages
         : [...requestMessages, ...responseMessages];
 
-    // Flatten contentArray messages, preserving the parent role
+    // For contentArray messages, flatten. In playground, we treat as one message dynamically.
     return mode === "PLAYGROUND_INPUT"
       ? allMessages
       : allMessages.reduce<Message[]>((acc, message) => {
@@ -57,10 +57,13 @@ export default function Chat({
             Array.isArray(message.contentArray)
           ) {
             // Map over the contentArray and assign the parent message's role to each part
-            const flattenedParts = message.contentArray.map((part) => ({
-              ...part,
-              role: message.role || part.role, // Use parent role, fallback to part's own role if parent is missing
-            }));
+            const flattenedParts = message.contentArray.map(
+              (part, partIndex) => ({
+                ...part,
+                role: message.role || part.role, // Use parent role, fallback to part's own role if parent is missing
+                id: part.id || `${message.id}-part-${partIndex}`, // Ensure unique ID for parts
+              })
+            );
             return [...acc, ...flattenedParts];
           }
           // If not a contentArray or it's empty, just add the message itself
@@ -78,13 +81,15 @@ export default function Chat({
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
-    if (over && active.id !== over.id) {
-      const oldIndex = messages.findIndex((m) => m.id === active.id);
-      const newIndex = messages.findIndex((m) => m.id === over.id);
+    if (over && active.id !== over.id && onChatChange) {
+      const requestMessages = mappedRequest.schema.request?.messages ?? [];
 
-      const newMessages = arrayMove(messages, oldIndex, newIndex);
+      const oldIndex = requestMessages.findIndex((m) => m.id === active.id);
+      const newIndex = requestMessages.findIndex((m) => m.id === over.id);
 
-      if (onChatChange) {
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const newMessages = arrayMove(requestMessages, oldIndex, newIndex);
+
         onChatChange({
           ...mappedRequest,
           schema: {
@@ -106,7 +111,7 @@ export default function Chat({
       role: "user",
       content: "",
       _type: "message",
-      id: `msg-${uuidv4()}`, // Add unique ID for drag and drop
+      id: `msg-${uuidv4()}`, // Standardized index-based ID
     };
 
     onChatChange({

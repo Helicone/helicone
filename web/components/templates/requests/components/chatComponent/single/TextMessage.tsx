@@ -14,6 +14,8 @@ const ReactMarkdown = dynamic(() => import("react-markdown"), {
 });
 
 interface TextMessageProps {
+  isPartOfContentArray?: boolean;
+  parentIndex?: number;
   displayContent: string;
   chatMode: ChatMode;
   mappedRequest: MappedLLMRequest;
@@ -22,6 +24,8 @@ interface TextMessageProps {
   mode: Mode;
 }
 export default function TextMessage({
+  isPartOfContentArray,
+  parentIndex,
   displayContent,
   chatMode,
   mappedRequest,
@@ -52,10 +56,32 @@ export default function TextMessage({
                     ...mappedRequest.schema.request,
                     messages: mappedRequest.schema.request?.messages?.map(
                       (message, markdownMessageIndex) => {
-                        if (markdownMessageIndex === messageIndex) {
+                        if (
+                          !isPartOfContentArray &&
+                          markdownMessageIndex === messageIndex
+                        ) {
                           return {
                             ...message,
                             content: text,
+                          };
+                        }
+                        if (
+                          isPartOfContentArray &&
+                          markdownMessageIndex === parentIndex
+                        ) {
+                          return {
+                            ...message,
+                            contentArray: message.contentArray?.map(
+                              (content, index) => {
+                                if (index === messageIndex) {
+                                  return {
+                                    ...content,
+                                    content: text,
+                                  };
+                                }
+                                return content;
+                              }
+                            ),
                           };
                         }
                         return message;
