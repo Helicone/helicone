@@ -159,7 +159,7 @@ routers:
             providers:
               - openai
               - anthropic
-              - google
+              - gemini
         cache:
           enabled: true
           directive: "max-age=1800"
@@ -276,7 +276,7 @@ The AI Gateway supports three different routing patterns:
     **Examples:**
     - `/openai/v1/chat/completions`
     - `/anthropic/v1/messages`
-    - `/google/v1beta/generateContent`
+    - `/gemini/v1beta/generateContent`
     
     **Features:**
     - Direct proxy to specific provider
