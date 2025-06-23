@@ -30,15 +30,15 @@ description: "Get started with Helicone AI Gateway in 1 minute"
     npx @helicone/ai-gateway start
     ```
 
-    The Gateway will be running on `http://localhost:8080/ai` and has three routes:
+    The Gateway will be running on `http://localhost:8080` and has three routes:
 
-    - `/ai` for a Unified API compatible with the OpenAI API
-    - `/router/{router-name}`  for load balancing with multiple providers
-    - `/{provider-name}` for a direct gateway to a specific provider.
+    - `/ai` for a standard OpenAI-compatible Unified API that works out of the box
+    - `/router/{router-name}` for advanced Unified API with custom routing logic and load balancing
+    - `/{provider-name}` for direct access to a specific provider without routing
   </Step>
 
     <Step title="Make your first request">
-    Let's start with a simple request to the Unified API. Don't worry, we'll show you how to create custom routers next!
+    Let's start with a simple request to the pre-configured `/ai` route. Don't worry, we'll show you how to create custom routers next!
 
     <CodeGroup>
     ```typescript Typescript
@@ -66,6 +66,16 @@ description: "Get started with Helicone AI Gateway in 1 minute"
         model="openai/gpt-4o-mini",  # 100+ models available
         messages=[{"role": "user", "content": "Hello, world!"}]
     )
+    ```
+    ```bash cURL
+    curl http://localhost:8080/ai/v1/chat/completions \
+      -H "Content-Type: application/json" \
+      -d '{
+        "model": "openai/gpt-4o-mini", # 100+ models available
+        "messages": [
+          { "role": "user", "content": "Hello, world!" }
+        ]
+      }'
     ```
     </CodeGroup>
 
