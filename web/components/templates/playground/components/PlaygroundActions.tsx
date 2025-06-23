@@ -7,7 +7,8 @@ import {
 } from "@/components/ui/tooltip";
 import { MappedLLMRequest, Tool } from "@helicone-package/llm-mapper/types";
 import _ from "lodash";
-import { ModelParameters, DEFAULT_EMPTY_CHAT } from "../playgroundPage";
+import { ModelParameters } from "@/lib/api/llm/generate";
+import { DEFAULT_EMPTY_CHAT } from "../playgroundPage";
 import { CommandIcon, Undo2Icon } from "lucide-react";
 
 interface PlaygroundActionsProps {

@@ -8,6 +8,15 @@ import { ORG_ID_COOKIE_KEY } from "@/lib/constants";
 import Cookies from "js-cookie";
 import { OpenAI } from "openai";
 
+export interface ModelParameters {
+  temperature: number | null | undefined;
+  maxTokens: number | null | undefined;
+  topP: number | null | undefined;
+  frequencyPenalty: number | null | undefined;
+  presencePenalty: number | null | undefined;
+  stop: string | null | undefined;
+}
+
 export interface GenerateParams {
   provider: Provider;
   model: string;

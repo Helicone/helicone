@@ -24,15 +24,7 @@ import PlaygroundResponsePanel from "./components/PlaygroundResponsePanel";
 import { OPENROUTER_MODEL_MAP } from "./new/openRouterModelMap";
 import FoldedHeader from "@/components/shared/FoldedHeader";
 import { Small } from "@/components/ui/typography";
-
-export interface ModelParameters {
-  temperature: number | null | undefined;
-  maxTokens: number | null | undefined;
-  topP: number | null | undefined;
-  frequencyPenalty: number | null | undefined;
-  presencePenalty: number | null | undefined;
-  stop: string | null | undefined;
-}
+import { ModelParameters } from "@/lib/api/llm/generate";
 
 export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
   _type: "openai-chat",
