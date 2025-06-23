@@ -19,6 +19,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { GripVertical } from "lucide-react";
+import { v4 as uuidv4 } from "uuid";
 
 export type ChatMode = "PLAYGROUND_INPUT" | "PLAYGROUND_OUTPUT" | "DEFAULT";
 
@@ -36,8 +37,6 @@ export default function Chat({
   const [expandedMessages, setExpandedMessages] = useState<
     Record<number, boolean>
   >({});
-
-  console.log(mappedRequest.schema.request?.messages);
 
   const messages = useMemo(() => {
     const requestMessages = mappedRequest.schema.request?.messages ?? [];
@@ -112,7 +111,7 @@ export default function Chat({
       role: "user",
       content: "",
       _type: "message",
-      id: `msg-${Date.now()}`, // Standardized index-based ID
+      id: `msg-${uuidv4()}`, // Standardized index-based ID
     };
 
     onChatChange({

@@ -15,6 +15,7 @@ import ToolMessage from "./ToolMessage";
 import TextMessage from "./single/TextMessage";
 import ChatMessageTopBar from "./ChatMessageTopBar";
 import { Trash2Icon } from "lucide-react";
+import { v4 as uuidv4 } from "uuid";
 
 type MessageType = "image" | "tool" | "text" | "pdf" | "contentArray";
 
@@ -396,7 +397,7 @@ export default function ChatMessage({
                       role: "user",
                       _type: "image",
                       image_url: base64,
-                      id: message.id || `msg-${Date.now()}`,
+                      id: message.id || `msg-${uuidv4()}`,
                     };
                   }
                   return message;
@@ -424,7 +425,7 @@ export default function ChatMessage({
                             _type: "image" as const,
                             role: "user",
                             image_url: base64,
-                            id: `img-${Date.now()}`,
+                            id: `img-${uuidv4()}`,
                           },
                         ],
                       };
@@ -435,13 +436,13 @@ export default function ChatMessage({
                         _type: "message" as const,
                         role: "user",
                         content: msg.content,
-                        id: `text-${Date.now()}`,
+                        id: `text-${uuidv4()}`,
                       },
                       {
                         _type: "image" as const,
                         role: "user",
                         image_url: base64,
-                        id: `img-${Date.now() + 1}`,
+                        id: `img-${uuidv4() + 1}`,
                       },
                     ];
 
@@ -450,7 +451,7 @@ export default function ChatMessage({
                       _type: "contentArray" as const,
                       role: "user",
                       contentArray,
-                      id: msg.id || `msg-${Date.now() + 2}`,
+                      id: msg.id || `msg-${uuidv4() + 2}`,
                     };
                   }
                   return msg;
@@ -569,7 +570,7 @@ export default function ChatMessage({
                   tool_calls: [
                     ...(message.tool_calls || []),
                     {
-                      id: `call_${Date.now()}`,
+                      id: `call_${uuidv4()}`,
                       name: "new_function",
                       arguments: {},
                     },
@@ -649,7 +650,7 @@ export default function ChatMessage({
                       _type: "message" as const,
                       role: "user",
                       content: "",
-                      id: `text-${Date.now()}`,
+                      id: `text-${uuidv4()}`,
                     },
                   ],
                 };
@@ -661,14 +662,14 @@ export default function ChatMessage({
                 _type: "message" as const,
                 role: "user",
                 content: msg.content,
-                id: `text-${Date.now()}`,
+                id: `text-${uuidv4()}`,
               });
 
               contentArray.push({
                 _type: "message" as const,
                 role: "user",
                 content: "",
-                id: `text-${Date.now() + 1}`,
+                id: `text-${uuidv4() + 1}`,
               });
 
               return {
@@ -676,7 +677,7 @@ export default function ChatMessage({
                 _type: "contentArray" as const,
                 role: "user",
                 contentArray,
-                id: msg.id || `msg-${Date.now() + 2}`,
+                id: msg.id || `msg-${uuidv4() + 2}`,
               };
             }
             return msg;
