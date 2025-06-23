@@ -27,7 +27,7 @@ description: "Get started with Helicone AI Gateway in 1 minute"
   </Step>
   <Step title="Start the Gateway">
     ```bash
-    npx @helicone/ai-gateway start
+    npx @helicone/ai-gateway
     ```
 
     The Gateway will be running on `http://localhost:8080` and has three routes:
@@ -45,7 +45,7 @@ description: "Get started with Helicone AI Gateway in 1 minute"
     import { OpenAI } from "openai";
 
     const openai = new OpenAI({
-      baseURL: "http://localhost:8080",
+      baseURL: "http://localhost:8080/ai",
       apiKey: "fake-api-key", // Required by SDK, but gateway handles real auth
     });
 
