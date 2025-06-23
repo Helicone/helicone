@@ -5,7 +5,7 @@ import { MappedLLMRequest, Message } from "@helicone-package/llm-mapper/types";
 import PlaygroundHeader from "./PlaygroundHeader";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Tool } from "@helicone-package/llm-mapper/types";
-import { ModelParameters } from "../playgroundPage";
+import { ModelParameters } from "@/lib/api/llm/generate";
 
 interface PlaygroundMessagesPanelProps {
   mappedContent: MappedLLMRequest | null;
