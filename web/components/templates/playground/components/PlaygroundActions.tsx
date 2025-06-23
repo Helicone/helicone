@@ -41,10 +41,10 @@ const PlaygroundActions = ({
       // Reset all states in sequence
       setModelParameters({
         temperature: defaultContent.schema.request.temperature,
-        maxTokens: defaultContent.schema.request.max_tokens,
-        topP: defaultContent.schema.request.top_p,
-        frequencyPenalty: defaultContent.schema.request.frequency_penalty,
-        presencePenalty: defaultContent.schema.request.presence_penalty,
+        max_tokens: defaultContent.schema.request.max_tokens,
+        top_p: defaultContent.schema.request.top_p,
+        frequency_penalty: defaultContent.schema.request.frequency_penalty,
+        presence_penalty: defaultContent.schema.request.presence_penalty,
         stop: defaultContent.schema.request.stop
           ? Array.isArray(defaultContent.schema.request.stop)
             ? defaultContent.schema.request.stop.join(",")
@@ -59,10 +59,10 @@ const PlaygroundActions = ({
       setTools([]);
       setModelParameters({
         temperature: 0.7,
-        maxTokens: 1000,
-        topP: 1,
-        frequencyPenalty: 0,
-        presencePenalty: 0,
+        max_tokens: 1000,
+        top_p: 1,
+        frequency_penalty: 0,
+        presence_penalty: 0,
         stop: undefined,
       });
       setMappedContent(DEFAULT_EMPTY_CHAT);

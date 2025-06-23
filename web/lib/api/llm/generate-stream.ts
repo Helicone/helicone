@@ -11,13 +11,6 @@ export async function generateStream(
 
   generate({
     ...params,
-    temperature: params.temperature,
-    max_tokens: params.maxTokens,
-    top_p: params.topP,
-    frequency_penalty: params.frequencyPenalty,
-    presence_penalty: params.presencePenalty,
-    stop: params.stop,
-
     signal: abortController.signal,
     // @ts-ignore
     stream: {

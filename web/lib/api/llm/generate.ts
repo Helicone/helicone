@@ -10,10 +10,10 @@ import { OpenAI } from "openai";
 
 export interface ModelParameters {
   temperature: number | null | undefined;
-  maxTokens: number | null | undefined;
-  topP: number | null | undefined;
-  frequencyPenalty: number | null | undefined;
-  presencePenalty: number | null | undefined;
+  max_tokens: number | null | undefined;
+  top_p: number | null | undefined;
+  frequency_penalty: number | null | undefined;
+  presence_penalty: number | null | undefined;
   stop: string | null | undefined;
 }
 
@@ -61,15 +61,10 @@ async function handleStreamResponse(
   try {
     while (true) {
       const { done, value } = await reader.read();
-      console.log("done", done);
-      console.log("value", value);
       if (done) {
-        console.log("buffer", buffer);
         if (buffer.trim()) {
           const events = buffer.split("\n\n");
-          console.log("events", events);
           for (const event of events) {
-            console.log("event", event);
             if (event.startsWith("data: ")) {
               const jsonString = event.substring(6).trim();
               if (jsonString) {
