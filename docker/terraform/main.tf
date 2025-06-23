@@ -50,7 +50,7 @@ resource "aws_ecr_repository" "migrations" {
 }
 
 resource "aws_ecr_repository" "aigateway" {
-  name                 = "helicone/aigateway"
+  name                 = "helicone/ai-gateway"
   image_tag_mutability = "MUTABLE"
 
   image_scanning_configuration {
