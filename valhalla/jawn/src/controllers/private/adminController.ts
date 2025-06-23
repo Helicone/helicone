@@ -21,6 +21,7 @@ import { Setting } from "../../utils/settings";
 import type { SettingName } from "../../utils/settings";
 import Stripe from "stripe";
 import { AdminManager } from "../../managers/admin/AdminManager";
+import { clickhousePriceCalcNonAggregated } from "@helicone-package/cost";
 
 export const authCheckThrow = async (userId: string | undefined) => {
   if (!userId) {
@@ -1316,5 +1317,83 @@ export class AdminController extends Controller {
 
     // Return the data
     return result.data;
+  }
+
+  /**
+   * Backfill costs in Clickhouse with updated cost package data.
+   */
+  @Post("/backfill-costs")
+  public async backfillCosts(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body() body: {
+      timeExpression: string;
+      specifyModel: boolean;
+      modelId: string;
+      totalChunks: number;
+      chunkNumber: number;
+    }
+  ): Promise<{
+    success: boolean;
+  }> {
+    await authCheckThrow(request.authParams.userId);
+    
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    
+    try {
+    const query = `
+    INSERT INTO request_response_rmt
+    SELECT
+      response_id,
+      response_created_at,
+      latency,
+      status,
+      completion_tokens,
+      completion_audio_tokens,
+      cache_reference_id,
+      prompt_tokens,
+      prompt_cache_write_tokens,
+      prompt_cache_read_tokens,
+      prompt_audio_tokens,
+      model,
+      request_id,
+      request_created_at,
+      user_id,
+      organization_id,
+      proxy_key_id,
+      threat,
+      time_to_first_token,
+      provider,
+      target_url,
+      country_code,
+      cache_enabled,
+      properties,
+      scores,
+      request_body,
+      response_body,
+      ${clickhousePriceCalcNonAggregated(
+        "request_response_rmt",
+        false,
+        true,
+        body.totalChunks,
+        body.chunkNumber,
+        true,
+        true
+      )} as cost,
+      assets,
+      now() as updated_at
+    FROM
+      request_response_rmt FINAL
+    WHERE
+      request_created_at >= ${body.timeExpression}
+      ${body.specifyModel ? `AND model = '${body.modelId}'` : ""}
+    `
+    const { error } = await clickhouseDb.dbQuery(query, []);
+    
+    } catch (e) {
+      console.error("Backfill error:", e);
+      throw e;
+    }
+
+    return { success: true };
   }
 }
