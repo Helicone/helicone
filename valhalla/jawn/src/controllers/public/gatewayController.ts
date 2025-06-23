@@ -58,7 +58,7 @@ export class GatewayController extends Controller {
     return ok(result.data);
   }
 
-  @Post("/create")
+  @Post("/")
   public async createRouterConfig(
     @Request() request: JawnAuthenticatedRequest,
     @Body() body: { name: string; config: string }
