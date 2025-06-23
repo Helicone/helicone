@@ -2497,60 +2497,31 @@ export type Database = {
       router_config_versions: {
         Row: {
           config: Json
-          config_id: string
           created_at: string
           id: string
+          router_id: string
           version: string
         }
         Insert: {
           config: Json
-          config_id: string
           created_at?: string
           id?: string
+          router_id: string
           version: string
         }
         Update: {
           config?: Json
-          config_id?: string
           created_at?: string
           id?: string
+          router_id?: string
           version?: string
         }
         Relationships: [
           {
-            foreignKeyName: "public_router_config_versions_config_id_fkey"
-            columns: ["config_id"]
+            foreignKeyName: "public_router_config_versions_router_id_fkey"
+            columns: ["router_id"]
             isOneToOne: false
-            referencedRelation: "router_configs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      router_configs: {
-        Row: {
-          created_at: string
-          id: string
-          name: string | null
-          organization_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          name?: string | null
-          organization_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string | null
-          organization_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "public_router_configs_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organization"
+            referencedRelation: "routers"
             referencedColumns: ["id"]
           },
         ]
@@ -2586,7 +2557,36 @@ export type Database = {
             foreignKeyName: "public_router_keys_router_id_fkey"
             columns: ["router_id"]
             isOneToOne: false
-            referencedRelation: "router_configs"
+            referencedRelation: "routers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      routers: {
+        Row: {
+          created_at: string
+          id: string
+          name: string | null
+          organization_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name?: string | null
+          organization_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string | null
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_routers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
             referencedColumns: ["id"]
           },
         ]
