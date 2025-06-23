@@ -2739,7 +2739,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "LatestRouterConfig": {
         "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"config":{"dataType":"string","required":true},"version":{"dataType":"string","required":true},"apiKey":{"dataType":"string","required":true},"name":{"dataType":"string","required":true},"id":{"dataType":"string","required":true}},"validators":{}},
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"config":{"dataType":"string","required":true},"version":{"dataType":"string","required":true},"name":{"dataType":"string","required":true},"id":{"dataType":"string","required":true}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ResultSuccess_LatestRouterConfig_": {
@@ -2756,18 +2756,23 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_LatestRouterConfig_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ResultSuccess__routerConfigId-string--routerVersionId-string--apiKey-string__": {
+    "CreateRouterConfigResult": {
+        "dataType": "refAlias",
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"apiKey":{"dataType":"string","required":true},"routerVersionId":{"dataType":"string","required":true},"routerConfigId":{"dataType":"string","required":true}},"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess_CreateRouterConfigResult_": {
         "dataType": "refObject",
         "properties": {
-            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"apiKey":{"dataType":"string","required":true},"routerVersionId":{"dataType":"string","required":true},"routerConfigId":{"dataType":"string","required":true}},"required":true},
+            "data": {"ref":"CreateRouterConfigResult","required":true},
             "error": {"dataType":"enum","enums":[null],"required":true},
         },
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Result__routerConfigId-string--routerVersionId-string--apiKey-string_.string_": {
+    "Result_CreateRouterConfigResult.string_": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__routerConfigId-string--routerVersionId-string--apiKey-string__"},{"ref":"ResultError_string_"}],"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_CreateRouterConfigResult_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Eval": {
@@ -8297,7 +8302,7 @@ export function RegisterRoutes(app: Router) {
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
                 body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"config":{"dataType":"string","required":true},"name":{"dataType":"string","required":true}}},
         };
-        app.post('/v1/gateway/create',
+        app.post('/v1/gateway',
             authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(GatewayController)),
             ...(fetchMiddlewares<RequestHandler>(GatewayController.prototype.createRouterConfig)),

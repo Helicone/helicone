@@ -463,13 +463,11 @@ export interface paths {
   };
   "/v1/gateway": {
     get: operations["GetRouterConfigs"];
+    post: operations["CreateRouterConfig"];
   };
   "/v1/gateway/{id}": {
     get: operations["GetLatestRouterConfig"];
     put: operations["UpdateRouterConfig"];
-  };
-  "/v1/gateway/create": {
-    post: operations["CreateRouterConfig"];
   };
   "/v1/evals/query": {
     post: operations["QueryEvals"];
@@ -2906,7 +2904,6 @@ Json: JsonObject;
     LatestRouterConfig: {
       config: string;
       version: string;
-      apiKey: string;
       name: string;
       id: string;
     };
@@ -2916,16 +2913,17 @@ Json: JsonObject;
       error: null;
     };
     "Result_LatestRouterConfig.string_": components["schemas"]["ResultSuccess_LatestRouterConfig_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__routerConfigId-string--routerVersionId-string--apiKey-string__": {
-      data: {
-        apiKey: string;
-        routerVersionId: string;
-        routerConfigId: string;
-      };
+    CreateRouterConfigResult: {
+      apiKey: string;
+      routerVersionId: string;
+      routerConfigId: string;
+    };
+    ResultSuccess_CreateRouterConfigResult_: {
+      data: components["schemas"]["CreateRouterConfigResult"];
       /** @enum {number|null} */
       error: null;
     };
-    "Result__routerConfigId-string--routerVersionId-string--apiKey-string_.string_": components["schemas"]["ResultSuccess__routerConfigId-string--routerVersionId-string--apiKey-string__"] | components["schemas"]["ResultError_string_"];
+    "Result_CreateRouterConfigResult.string_": components["schemas"]["ResultSuccess_CreateRouterConfigResult_"] | components["schemas"]["ResultError_string_"];
     Eval: {
       name: string;
       /** Format: double */
@@ -5832,6 +5830,24 @@ export interface operations {
       };
     };
   };
+  CreateRouterConfig: {
+    requestBody: {
+      content: {
+        "application/json": {
+          config: string;
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_CreateRouterConfigResult.string_"];
+        };
+      };
+    };
+  };
   GetLatestRouterConfig: {
     parameters: {
       path: {
@@ -5866,24 +5882,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  CreateRouterConfig: {
-    requestBody: {
-      content: {
-        "application/json": {
-          config: string;
-          name: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__routerConfigId-string--routerVersionId-string--apiKey-string_.string_"];
         };
       };
     };

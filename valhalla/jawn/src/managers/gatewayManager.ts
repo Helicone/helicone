@@ -5,6 +5,7 @@ import { BaseManager } from "./BaseManager";
 import crypto from "crypto";
 import { KeyManager } from "./apiKeys/KeyManager";
 import {
+  CreateRouterConfigResult,
   LatestRouterConfig,
   RouterConfig,
 } from "../controllers/public/gatewayController";
@@ -66,12 +67,7 @@ export class GatewayManager extends BaseManager {
   async createRouterConfig(params: {
     name?: string;
     config?: string;
-  }): Promise<
-    Result<
-      { routerConfigId: string; routerVersionId: string; apiKey: string },
-      string
-    >
-  > {
+  }): Promise<Result<CreateRouterConfigResult, string>> {
     const { name, config } = params;
 
     const result = await dbExecute<{ id: string }>(

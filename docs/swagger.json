@@ -8647,9 +8647,6 @@
 					"version": {
 						"type": "string"
 					},
-					"apiKey": {
-						"type": "string"
-					},
 					"name": {
 						"type": "string"
 					},
@@ -8660,7 +8657,6 @@
 				"required": [
 					"config",
 					"version",
-					"apiKey",
 					"name",
 					"id"
 				],
@@ -8696,26 +8692,29 @@
 					}
 				]
 			},
-			"ResultSuccess__routerConfigId-string--routerVersionId-string--apiKey-string__": {
+			"CreateRouterConfigResult": {
+				"properties": {
+					"apiKey": {
+						"type": "string"
+					},
+					"routerVersionId": {
+						"type": "string"
+					},
+					"routerConfigId": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"apiKey",
+					"routerVersionId",
+					"routerConfigId"
+				],
+				"type": "object"
+			},
+			"ResultSuccess_CreateRouterConfigResult_": {
 				"properties": {
 					"data": {
-						"properties": {
-							"apiKey": {
-								"type": "string"
-							},
-							"routerVersionId": {
-								"type": "string"
-							},
-							"routerConfigId": {
-								"type": "string"
-							}
-						},
-						"required": [
-							"apiKey",
-							"routerVersionId",
-							"routerConfigId"
-						],
-						"type": "object"
+						"$ref": "#/components/schemas/CreateRouterConfigResult"
 					},
 					"error": {
 						"type": "number",
@@ -8732,10 +8731,10 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result__routerConfigId-string--routerVersionId-string--apiKey-string_.string_": {
+			"Result_CreateRouterConfigResult.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess__routerConfigId-string--routerVersionId-string--apiKey-string__"
+						"$ref": "#/components/schemas/ResultSuccess_CreateRouterConfigResult_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -16453,6 +16452,52 @@
 					}
 				],
 				"parameters": []
+			},
+			"post": {
+				"operationId": "CreateRouterConfig",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_CreateRouterConfigResult.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Gateway"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"config": {
+										"type": "string"
+									},
+									"name": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"config",
+									"name"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/gateway/{id}": {
@@ -16521,54 +16566,6 @@
 						}
 					}
 				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"config": {
-										"type": "string"
-									},
-									"name": {
-										"type": "string"
-									}
-								},
-								"required": [
-									"config",
-									"name"
-								],
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/gateway/create": {
-			"post": {
-				"operationId": "CreateRouterConfig",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result__routerConfigId-string--routerVersionId-string--apiKey-string_.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Gateway"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [],
 				"requestBody": {
 					"required": true,
 					"content": {

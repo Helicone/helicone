@@ -17,7 +17,6 @@ import { GatewayManager } from "../../managers/gatewayManager";
 export type LatestRouterConfig = {
   id: string;
   name: string;
-  apiKey: string;
   version: string;
   config: string;
 };
@@ -27,6 +26,12 @@ export type RouterConfig = {
   name: string;
   latestVersion: string;
   lastUpdatedAt: string;
+};
+
+export type CreateRouterConfigResult = {
+  routerConfigId: string;
+  routerVersionId: string;
+  apiKey: string;
 };
 
 @Route("v1/gateway")
@@ -62,12 +67,7 @@ export class GatewayController extends Controller {
   public async createRouterConfig(
     @Request() request: JawnAuthenticatedRequest,
     @Body() body: { name: string; config: string }
-  ): Promise<
-    Result<
-      { routerConfigId: string; routerVersionId: string; apiKey: string },
-      string
-    >
-  > {
+  ): Promise<Result<CreateRouterConfigResult, string>> {
     try {
       const gatewayManager = new GatewayManager(request.authParams);
       const result = await gatewayManager.createRouterConfig({
@@ -80,11 +80,7 @@ export class GatewayController extends Controller {
       if (!result.data) {
         return err("Failed to create router config");
       }
-      return ok({
-        routerConfigId: result.data.routerConfigId,
-        routerVersionId: result.data.routerVersionId,
-        apiKey: result.data.apiKey,
-      });
+      return ok(result.data);
     } catch (error) {
       return err(error as string);
     }
