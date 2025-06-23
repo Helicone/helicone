@@ -222,7 +222,7 @@ const PlaygroundMessagesPanel = ({
         ref={headerRef}
         className={`transition-all duration-200 ${
           isScrolled
-            ? "absolute bottom-0 left-1/2 -translate-x-1/2 z-50 rounded-lg shadow-xl mx-4 mb-4 w-[500px] bg-background border-none"
+            ? "absolute bottom-0 left-1/2 -translate-x-1/2 z-50 rounded-lg shadow-xl mx-4 mb-4 w-[600px] bg-background border-none"
             : "bg-sidebar-background"
         }`}
       >
