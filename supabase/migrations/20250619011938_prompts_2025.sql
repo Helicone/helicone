@@ -41,6 +41,10 @@ alter table "public"."prompts_2025" add constraint "prompts_2025_organization_fk
 
 alter table "public"."prompts_2025" validate constraint "prompts_2025_organization_fkey";
 
+alter table "public"."prompts_2025" add constraint "prompts_2025_organization_fkey" FOREIGN KEY (organization) REFERENCES organization(id) ON DELETE CASCADE not valid;
+
+alter table "public"."prompts_2025" validate constraint "prompts_2025_organization_fkey";
+
 alter table "public"."prompts_2025_versions" add constraint "prompts_2025_versions_created_by_fkey" FOREIGN KEY (created_by) REFERENCES auth.users(id) ON DELETE SET NULL not valid;
 
 alter table "public"."prompts_2025_versions" validate constraint "prompts_2025_versions_created_by_fkey";
