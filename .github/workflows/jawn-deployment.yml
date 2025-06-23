@@ -119,9 +119,373 @@ jobs:
             ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.US_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:eu-${{ steps.set-tag.outputs.tag }}
             ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.US_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:eu
 
+  create_task_definition_us:
+    name: Create US Task Definition with Datadog
+    needs: build_and_push
+    if: ${{ github.event.inputs.environment == 'all' || github.event.inputs.environment == 'us' }}
+    runs-on: ubuntu-latest
+    outputs:
+      task_definition_arn: ${{ steps.register-task-def.outputs.task_definition_arn }}
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_GITHUB_ACTIONS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_GITHUB_ACTIONS_SECRET_KEY }}
+          aws-region: ${{ env.US_REGION }}
+
+      - name: Create Task Definition JSON
+        id: create-task-def
+        run: |
+          cat > task-definition-us.json << 'EOF'
+          {
+            "family": "valhalla_jawn_production_dd",
+            "networkMode": "awsvpc",
+            "requiresCompatibilities": ["FARGATE"],
+            "cpu": "4096",
+            "memory": "8192",
+            "executionRoleArn": "arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/ecsTaskExecutionRole",
+            "containerDefinitions": [
+              {
+                "name": "valhalla_jawn_staging",
+                "image": "${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.US_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:us-${{ needs.build_and_push.outputs.image_tag }}",
+                "cpu": 0,
+                "portMappings": [
+                  {
+                    "name": "jawn-staging-8585-tcp",
+                    "containerPort": 8585,
+                    "hostPort": 8585,
+                    "protocol": "tcp",
+                    "appProtocol": "http"
+                  }
+                ],
+                "essential": true,
+                "environment": [
+                  {
+                    "name": "ENV",
+                    "value": "production"
+                  },
+                  {
+                    "name": "AURORA_HOST",
+                    "value": "helicone-be-writer-proxy.proxy-cr0pbknv3xbp.us-west-2.rds.amazonaws.com"
+                  },
+                  {
+                    "name": "AURORA_PORT",
+                    "value": "5432"
+                  },
+                  {
+                    "name": "DD_SERVICE",
+                    "value": "jawn"
+                  },
+                  {
+                    "name": "DD_ENV",
+                    "value": "production"
+                  },
+                  {
+                    "name": "DD_VERSION",
+                    "value": "${{ needs.build_and_push.outputs.image_tag }}"
+                  },
+                  {
+                    "name": "DD_AGENT_HOST",
+                    "value": "localhost"
+                  },
+                  {
+                    "name": "DD_TRACE_AGENT_PORT",
+                    "value": "8126"
+                  },
+                  {
+                    "name": "DD_LOGS_INJECTION",
+                    "value": "true"
+                  },
+                  {
+                    "name": "DD_RUNTIME_METRICS_ENABLED",
+                    "value": "true"
+                  },
+                  {
+                    "name": "DD_PROFILING_ENABLED",
+                    "value": "true"
+                  }
+                ],
+                "secrets": [
+                  {
+                    "name": "AURORA_CREDS",
+                    "valueFrom": "arn:aws:secretsmanager:us-west-2:849596434884:secret:rds!cluster-179c1dd0-5f1a-45c0-8bf5-23772168986e-tQgDiV"
+                  },
+                  {
+                    "name": "SUPABASE_CREDS",
+                    "valueFrom": "arn:aws:secretsmanager:us-west-2:849596434884:secret:supabase_prod-CwtjpK"
+                  },
+                  {
+                    "name": "DD_API_KEY",
+                    "valueFrom": "arn:aws:secretsmanager:us-west-2:849596434884:secret:datadog-api-key"
+                  }
+                ],
+                "logConfiguration": {
+                  "logDriver": "awslogs",
+                  "options": {
+                    "awslogs-group": "/ecs/valhalla_jawn",
+                    "awslogs-create-group": "true",
+                    "awslogs-region": "us-west-2",
+                    "awslogs-stream-prefix": "ecs"
+                  },
+                  "secretOptions": []
+                },
+                "dependsOn": [
+                  {
+                    "containerName": "datadog-agent",
+                    "condition": "START"
+                  }
+                ]
+              },
+              {
+                "name": "datadog-agent",
+                "image": "public.ecr.aws/datadog/agent:latest",
+                "cpu": 256,
+                "memory": 512,
+                "essential": true,
+                "environment": [
+                  {
+                    "name": "DD_APM_ENABLED",
+                    "value": "true"
+                  },
+                  {
+                    "name": "DD_APM_NON_LOCAL_TRAFFIC",
+                    "value": "true"
+                  },
+                  {
+                    "name": "DD_DOGSTATSD_NON_LOCAL_TRAFFIC",
+                    "value": "true"
+                  },
+                  {
+                    "name": "DD_LOG_LEVEL",
+                    "value": "INFO"
+                  },
+                  {
+                    "name": "DD_SITE",
+                    "value": "datadoghq.com"
+                  },
+                  {
+                    "name": "ECS_FARGATE",
+                    "value": "true"
+                  }
+                ],
+                "secrets": [
+                  {
+                    "name": "DD_API_KEY",
+                    "valueFrom": "arn:aws:secretsmanager:us-west-2:849596434884:secret:datadog-api-key"
+                  }
+                ],
+                "logConfiguration": {
+                  "logDriver": "awslogs",
+                  "options": {
+                    "awslogs-group": "/ecs/valhalla_jawn",
+                    "awslogs-create-group": "true",
+                    "awslogs-region": "us-west-2",
+                    "awslogs-stream-prefix": "datadog"
+                  }
+                }
+              }
+            ]
+          }
+          EOF
+
+      - name: Register Task Definition
+        id: register-task-def
+        run: |
+          TASK_DEF_ARN=$(aws ecs register-task-definition \
+            --region ${{ env.US_REGION }} \
+            --cli-input-json file://task-definition-us.json \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)
+          echo "task_definition_arn=${TASK_DEF_ARN}" >> $GITHUB_OUTPUT
+          echo "Registered task definition: ${TASK_DEF_ARN}"
+
+  create_task_definition_eu:
+    name: Create EU Task Definition with Datadog
+    needs: build_and_push
+    if: ${{ github.event.inputs.environment == 'all' || github.event.inputs.environment == 'eu' }}
+    runs-on: ubuntu-latest
+    outputs:
+      task_definition_arn: ${{ steps.register-task-def.outputs.task_definition_arn }}
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_GITHUB_ACTIONS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_GITHUB_ACTIONS_SECRET_KEY }}
+          aws-region: ${{ env.EU_REGION }}
+
+      - name: Create Task Definition JSON
+        id: create-task-def
+        run: |
+          cat > task-definition-eu.json << 'EOF'
+          {
+            "family": "eu_valhalla_jawn_production_dd",
+            "networkMode": "awsvpc",
+            "requiresCompatibilities": ["FARGATE"],
+            "cpu": "4096",
+            "memory": "8192",
+            "executionRoleArn": "arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/ecsTaskExecutionRole",
+            "containerDefinitions": [
+              {
+                "name": "eu_jawn",
+                "image": "${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.US_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:eu-${{ needs.build_and_push.outputs.image_tag }}",
+                "cpu": 0,
+                "portMappings": [
+                  {
+                    "name": "eu-jawn-8585-tcp",
+                    "containerPort": 8585,
+                    "hostPort": 8585,
+                    "protocol": "tcp",
+                    "appProtocol": "http"
+                  }
+                ],
+                "essential": true,
+                "environment": [
+                  {
+                    "name": "ENV",
+                    "value": "production"
+                  },
+                  {
+                    "name": "AURORA_HOST",
+                    "value": "helicone-be-writer-proxy.proxy-cr0pbknv3xbp.eu-west-1.rds.amazonaws.com"
+                  },
+                  {
+                    "name": "AURORA_PORT",
+                    "value": "5432"
+                  },
+                  {
+                    "name": "DD_SERVICE",
+                    "value": "jawn"
+                  },
+                  {
+                    "name": "DD_ENV",
+                    "value": "production"
+                  },
+                  {
+                    "name": "DD_VERSION",
+                    "value": "${{ needs.build_and_push.outputs.image_tag }}"
+                  },
+                  {
+                    "name": "DD_AGENT_HOST",
+                    "value": "localhost"
+                  },
+                  {
+                    "name": "DD_TRACE_AGENT_PORT",
+                    "value": "8126"
+                  },
+                  {
+                    "name": "DD_LOGS_INJECTION",
+                    "value": "true"
+                  },
+                  {
+                    "name": "DD_RUNTIME_METRICS_ENABLED",
+                    "value": "true"
+                  },
+                  {
+                    "name": "DD_PROFILING_ENABLED",
+                    "value": "true"
+                  }
+                ],
+                "secrets": [
+                  {
+                    "name": "AURORA_CREDS",
+                    "valueFrom": "arn:aws:secretsmanager:eu-west-1:849596434884:secret:rds!cluster-179c1dd0-5f1a-45c0-8bf5-23772168986e-tQgDiV"
+                  },
+                  {
+                    "name": "SUPABASE_CREDS",
+                    "valueFrom": "arn:aws:secretsmanager:eu-west-1:849596434884:secret:supabase_prod-CwtjpK"
+                  },
+                  {
+                    "name": "DD_API_KEY",
+                    "valueFrom": "arn:aws:secretsmanager:eu-west-1:849596434884:secret:datadog-api-key"
+                  }
+                ],
+                "logConfiguration": {
+                  "logDriver": "awslogs",
+                  "options": {
+                    "awslogs-group": "/ecs/eu_valhalla_jawn",
+                    "awslogs-create-group": "true",
+                    "awslogs-region": "eu-west-1",
+                    "awslogs-stream-prefix": "ecs"
+                  },
+                  "secretOptions": []
+                },
+                "dependsOn": [
+                  {
+                    "containerName": "datadog-agent",
+                    "condition": "START"
+                  }
+                ]
+              },
+              {
+                "name": "datadog-agent",
+                "image": "public.ecr.aws/datadog/agent:latest",
+                "cpu": 256,
+                "memory": 512,
+                "essential": true,
+                "environment": [
+                  {
+                    "name": "DD_APM_ENABLED",
+                    "value": "true"
+                  },
+                  {
+                    "name": "DD_APM_NON_LOCAL_TRAFFIC",
+                    "value": "true"
+                  },
+                  {
+                    "name": "DD_DOGSTATSD_NON_LOCAL_TRAFFIC",
+                    "value": "true"
+                  },
+                  {
+                    "name": "DD_LOG_LEVEL",
+                    "value": "INFO"
+                  },
+                  {
+                    "name": "DD_SITE",
+                    "value": "datadoghq.com"
+                  },
+                  {
+                    "name": "ECS_FARGATE",
+                    "value": "true"
+                  }
+                ],
+                "secrets": [
+                  {
+                    "name": "DD_API_KEY",
+                    "valueFrom": "arn:aws:secretsmanager:eu-west-1:849596434884:secret:datadog-api-key"
+                  }
+                ],
+                "logConfiguration": {
+                  "logDriver": "awslogs",
+                  "options": {
+                    "awslogs-group": "/ecs/eu_valhalla_jawn",
+                    "awslogs-create-group": "true",
+                    "awslogs-region": "eu-west-1",
+                    "awslogs-stream-prefix": "datadog"
+                  }
+                }
+              }
+            ]
+          }
+          EOF
+
+      - name: Register Task Definition
+        id: register-task-def
+        run: |
+          TASK_DEF_ARN=$(aws ecs register-task-definition \
+            --region ${{ env.EU_REGION }} \
+            --cli-input-json file://task-definition-eu.json \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)
+          echo "task_definition_arn=${TASK_DEF_ARN}" >> $GITHUB_OUTPUT
+          echo "Registered task definition: ${TASK_DEF_ARN}"
+
   deploy_us:
     name: Deploy to US
-    needs: build_and_push
+    needs: [build_and_push, create_task_definition_us]
     if: ${{ github.event.inputs.environment == 'all' || github.event.inputs.environment == 'us' }}
     runs-on: ubuntu-latest
     environment: production-us
@@ -141,12 +505,12 @@ jobs:
             --application-name AppECS-valhalla_cluster-jawn-prod-blue-green \
             --deployment-group-name DgpECS-valhalla_cluster-jawn-prod-blue-green \
             --deployment-config-name CodeDeployDefault.ECSAllAtOnce \
-            --description "GitHub Actions deployment ${{ needs.build_and_push.outputs.image_tag }}" \
-            --revision '{"revisionType": "AppSpecContent", "appSpecContent": {"content": "{\"version\": 1, \"Resources\": [{\"TargetService\": {\"Type\": \"AWS::ECS::Service\", \"Properties\": {\"TaskDefinition\": \"arn:aws:ecs:${{ env.US_REGION }}:${{ env.AWS_ACCOUNT_ID }}:task-definition/valhalla_jawn_production:39\", \"LoadBalancerInfo\": {\"ContainerName\": \"valhalla_jawn_staging\", \"ContainerPort\": 8585}, \"PlatformVersion\": \"1.4.0\"}}}]}"}}'
+            --description "GitHub Actions deployment ${{ needs.build_and_push.outputs.image_tag }} with Datadog" \
+            --revision "{\"revisionType\": \"AppSpecContent\", \"appSpecContent\": {\"content\": \"{\\\"version\\\": 1, \\\"Resources\\\": [{\\\"TargetService\\\": {\\\"Type\\\": \\\"AWS::ECS::Service\\\", \\\"Properties\\\": {\\\"TaskDefinition\\\": \\\"${{ needs.create_task_definition_us.outputs.task_definition_arn }}\\\", \\\"LoadBalancerInfo\\\": {\\\"ContainerName\\\": \\\"valhalla_jawn_staging\\\", \\\"ContainerPort\\\": 8585}, \\\"PlatformVersion\\\": \\\"1.4.0\\\"}}}]}\"}}"
 
   deploy_eu:
     name: Deploy to EU
-    needs: build_and_push
+    needs: [build_and_push, create_task_definition_eu]
     if: ${{ github.event.inputs.environment == 'all' || github.event.inputs.environment == 'eu' }}
     runs-on: ubuntu-latest
     environment: production-eu
@@ -166,5 +530,5 @@ jobs:
             --application-name AppECS-eu-cluster-jawn-prod-bg \
             --deployment-group-name DgpECS-eu-jawn-prod-blue-green \
             --deployment-config-name CodeDeployDefault.ECSAllAtOnce \
-            --description "GitHub Actions deployment ${{ needs.build_and_push.outputs.image_tag }}" \
-            --revision '{"revisionType": "AppSpecContent", "appSpecContent": {"content": "{\"version\": 1, \"Resources\": [{\"TargetService\": {\"Type\": \"AWS::ECS::Service\", \"Properties\": {\"TaskDefinition\": \"arn:aws:ecs:${{ env.EU_REGION }}:${{ env.AWS_ACCOUNT_ID }}:task-definition/eu_valhalla_jawn_production:27\", \"LoadBalancerInfo\": {\"ContainerName\": \"eu_jawn\", \"ContainerPort\": 8585}, \"PlatformVersion\": \"1.4.0\"}}}]}"}}'
+            --description "GitHub Actions deployment ${{ needs.build_and_push.outputs.image_tag }} with Datadog" \
+            --revision "{\"revisionType\": \"AppSpecContent\", \"appSpecContent\": {\"content\": \"{\\\"version\\\": 1, \\\"Resources\\\": [{\\\"TargetService\\\": {\\\"Type\\\": \\\"AWS::ECS::Service\\\", \\\"Properties\\\": {\\\"TaskDefinition\\\": \\\"${{ needs.create_task_definition_eu.outputs.task_definition_arn }}\\\", \\\"LoadBalancerInfo\\\": {\\\"ContainerName\\\": \\\"eu_jawn\\\", \\\"ContainerPort\\\": 8585}, \\\"PlatformVersion\\\": \\\"1.4.0\\\"}}}]}\"}}"
