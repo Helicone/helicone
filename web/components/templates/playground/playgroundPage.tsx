@@ -261,6 +261,29 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [response]);
 
+  const onSavePrompt = async () => {
+    if (!mappedContent) {
+      setNotification("No mapped content", "error");
+      return;
+    }
+    const openaiRequest = openaiChatMapper.toExternal({
+      ...mappedContent.schema.request,
+      tools: tools && tools.length > 0 ? tools : undefined,
+    } as any);
+
+    const promptBody = {
+      ...openaiRequest,
+
+      // Model Parameters
+    }; // as OpenAI.Chat.Completions.ChatCompletionCreateParams;
+
+    console.log("unasserted", promptBody);
+    console.log(
+      "asserted",
+      promptBody as OpenAI.Chat.Completions.ChatCompletionCreateParams
+    );
+  };
+
   const onRun = async () => {
     if (!mappedContent) {
       setNotification("No mapped content", "error");
@@ -413,6 +436,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               setResponseFormat={setResponseFormat}
               modelParameters={modelParameters}
               setModelParameters={setModelParameters}
+              onSavePrompt={onSavePrompt}
               onRun={onRun}
               useAIGateway={useAIGateway}
               setUseAIGateway={setUseAIGateway}
