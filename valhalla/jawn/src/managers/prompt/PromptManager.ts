@@ -962,10 +962,20 @@ export class Prompt2025Manager extends BaseManager {
       (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
     );
   }
+
+  async createPrompt(
+    name: string,
+    tags: string[],
+    promptBody: CompletionCreateParams,
+  ) {
+    // Create prompt
+    // Create prompt version
+    // Create prompt in s3
+  }
   
   // Unsure about typing of the data, should double check this when writing using code.
   // Unsure if we use every field in CompletionCreateParams.
-  async storePrompt(
+  private async storePrompt(
     promptId: string,
     promptBody: CompletionCreateParams
   ) {
