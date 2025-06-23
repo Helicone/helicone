@@ -38,15 +38,7 @@ import { Dialog } from "@/components/ui/dialog";
 import { providers } from "@/data/providers";
 import { ProviderCard } from "@/components/providers/ProviderCard";
 import Image from "next/image";
-
-interface ModelParameters {
-  temperature: number | undefined | null;
-  maxTokens: number | undefined | null;
-  topP: number | undefined | null;
-  frequencyPenalty: number | undefined | null;
-  presencePenalty: number | undefined | null;
-  stop: string | undefined | null;
-}
+import { ModelParameters } from "@/lib/api/llm/generate";
 
 interface ModelParametersFormProps {
   isScrolled: boolean;
