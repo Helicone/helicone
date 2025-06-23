@@ -160,6 +160,7 @@ const PlaygroundHeader = ({
           setTools={setTools}
           onSavePrompt={onSavePrompt}
           onRun={onRun}
+          isScrolled={isScrolled}
         />
       </div>
     </div>

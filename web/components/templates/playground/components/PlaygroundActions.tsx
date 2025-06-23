@@ -10,6 +10,7 @@ import _ from "lodash";
 import { ModelParameters } from "@/lib/api/llm/generate";
 import { DEFAULT_EMPTY_CHAT } from "../playgroundPage";
 import { CommandIcon, Undo2Icon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface PlaygroundActionsProps {
   mappedContent: MappedLLMRequest | null;
@@ -20,6 +21,7 @@ interface PlaygroundActionsProps {
   onSavePrompt: () => void;
   onRun: () => void;
   requestId?: string;
+  isScrolled: boolean;
 }
 const PlaygroundActions = ({
   mappedContent,
@@ -27,8 +29,10 @@ const PlaygroundActions = ({
   setMappedContent,
   setModelParameters,
   setTools,
+  onSavePrompt,
   onRun,
   requestId,
+  isScrolled,
 }: PlaygroundActionsProps) => {
   const resetToDefault = () => {
     console.log("Reset triggered with:", {
@@ -83,7 +87,16 @@ const PlaygroundActions = ({
           </TooltipContent>
         </Tooltip>
       )}
-      <Button variant="outline" onClick={() => {}}>
+      <Button
+        variant="outline"
+        className={cn(
+          "border-none",
+          isScrolled &&
+            "bg-slate-100 dark:bg-slate-950 hover:bg-slate-200 dark:hover:bg-slate-900"
+        )}
+        onClick={onSavePrompt}
+        disabled={!mappedContent}
+      >
         Save Prompt
       </Button>
       <Tooltip>

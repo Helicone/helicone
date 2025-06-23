@@ -274,8 +274,15 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
 
     const promptBody = {
       ...openaiRequest,
-
-      // Model Parameters
+      ...modelParameters,
+      model: selectedModel,
+      response_format:
+        responseFormat?.type === "json_schema"
+          ? {
+              type: "json_schema",
+              json_schema: responseFormat.json_schema,
+            }
+          : undefined,
     }; // as OpenAI.Chat.Completions.ChatCompletionCreateParams;
 
     console.log("unasserted", promptBody);
