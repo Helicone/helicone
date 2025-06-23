@@ -22,7 +22,10 @@ import {
   toHeliconeRequest,
 } from "./HandlerContext";
 import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
-import { COST_PRECISION_MULTIPLIER, modelCost } from "@helicone-package/cost/costCalc";
+import {
+  COST_PRECISION_MULTIPLIER,
+  modelCost,
+} from "@helicone-package/cost/costCalc";
 
 type S3Record = {
   requestId: string;
@@ -472,6 +475,7 @@ export class LoggingHandler extends AbstractLogHandler {
       this.requestResponseTextFromContext(context);
 
     const isCacheHit =
+      context.message.log.request.cacheReferenceId &&
       context.message.log.request.cacheReferenceId != DEFAULT_UUID;
 
     const requestResponseLog: RequestResponseRMT = {
@@ -494,18 +498,21 @@ export class LoggingHandler extends AbstractLogHandler {
       completion_audio_tokens: isCacheHit
         ? 0
         : usage.completionAudioTokens ?? 0,
-      cost: isCacheHit ? 0 : modelCost({
-        provider: request.provider ?? "",
-        model: context.processedLog.model ?? "",
-        sum_prompt_tokens: usage.promptTokens ?? 0,
-        sum_completion_tokens: usage.completionTokens ?? 0,
-        prompt_cache_write_tokens: usage.promptCacheWriteTokens ?? 0,
-        prompt_cache_read_tokens: usage.promptCacheReadTokens ?? 0,
-        prompt_audio_tokens: usage.promptAudioTokens ?? 0,
-        completion_audio_tokens: usage.completionAudioTokens ?? 0,
-        sum_tokens: (usage.promptTokens ?? 0) + (usage.completionTokens ?? 0),
-        multiple: COST_PRECISION_MULTIPLIER,
-      }),
+      cost: isCacheHit
+        ? 0
+        : modelCost({
+            provider: request.provider ?? "",
+            model: context.processedLog.model ?? "",
+            sum_prompt_tokens: usage.promptTokens ?? 0,
+            sum_completion_tokens: usage.completionTokens ?? 0,
+            prompt_cache_write_tokens: usage.promptCacheWriteTokens ?? 0,
+            prompt_cache_read_tokens: usage.promptCacheReadTokens ?? 0,
+            prompt_audio_tokens: usage.promptAudioTokens ?? 0,
+            completion_audio_tokens: usage.completionAudioTokens ?? 0,
+            sum_tokens:
+              (usage.promptTokens ?? 0) + (usage.completionTokens ?? 0),
+            multiple: COST_PRECISION_MULTIPLIER,
+          }),
       request_created_at: formatTimeString(
         request.requestCreatedAt.toISOString()
       ),
