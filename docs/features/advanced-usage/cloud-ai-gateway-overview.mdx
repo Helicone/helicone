@@ -1,0 +1,48 @@
+---
+title: "Cloud AI Gateway (Legacy)"
+sidebarTitle: "Overview"
+description: "Documentation for Helicone's legacy cloud-based AI Gateway"
+---
+
+<Warning>
+  **This cloud AI Gateway is being deprecated.** While it remains available for existing users, we are no longer adding new features or major updates to this version.
+</Warning>
+
+## Migration Path
+
+We're building a **new cloud-hosted AI Gateway** based on our improved [self-hosted AI Gateway](/ai-gateway/introduction). The new version offers:
+
+- **Better performance** with Rust-based architecture
+- **More providers** with 100+ LLM models supported
+- **Advanced load balancing** with intelligent routing
+- **Enhanced caching** for cost optimization
+- **Improved reliability** with automatic failover
+
+**Timeline:**
+- **Current**: Legacy cloud gateway remains available
+- **Coming Soon**: New cloud gateway based on self-hosted version
+- **Future**: Gradual migration path for existing users
+
+## Legacy Cloud AI Gateway Features
+
+While you're using the current cloud gateway, here's the complete documentation for all available features:
+
+### Core Gateway Features
+
+<CardGroup cols={2}>
+<Card title="Custom Rate Limits" icon="gauge" href="/features/advanced-usage/custom-rate-limits">
+  Configure request rate limiting and spending controls for your applications
+</Card>
+<Card title="Gateway Fallbacks" icon="shield" href="/getting-started/integration-method/gateway-fallbacks">
+  Set up automatic fallback providers when your primary LLM provider fails
+</Card>
+<Card title="LLM Security" icon="lock" href="/features/advanced-usage/llm-security">
+  Implement security measures and content filtering for your LLM requests
+</Card>
+<Card title="Content Moderation" icon="eye" href="/features/advanced-usage/moderations">
+  Automatically detect and filter inappropriate content in requests and responses
+</Card>
+<Card title="Automatic Retries" icon="arrows-rotate" href="/features/advanced-usage/retries">
+  Configure retry logic for failed requests with exponential backoff
+</Card>
+</CardGroup>
