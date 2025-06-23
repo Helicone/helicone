@@ -263,6 +263,11 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   }, [response]);
 
   const onSavePrompt = async () => {
+    // TODO: Add functionality to update existing prompt to new
+    // minor or major version.
+    // Currently just assumes we're creating a new prompt - we would probably define the behaviour based on the
+    // route params.
+
     if (!mappedContent) {
       setNotification("No mapped content", "error");
       return;
