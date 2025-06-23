@@ -17,6 +17,7 @@ interface PlaygroundActionsProps {
   setMappedContent: (_mappedContent: MappedLLMRequest) => void;
   setModelParameters: (_modelParameters: ModelParameters) => void;
   setTools: (_tools: Tool[]) => void;
+  onSavePrompt: () => void;
   onRun: () => void;
   requestId?: string;
 }
@@ -82,6 +83,9 @@ const PlaygroundActions = ({
           </TooltipContent>
         </Tooltip>
       )}
+      <Button variant="outline" onClick={() => {}}>
+        Save Prompt
+      </Button>
       <Tooltip>
         <TooltipTrigger asChild>
           <Button onClick={onRun}>Run</Button>
