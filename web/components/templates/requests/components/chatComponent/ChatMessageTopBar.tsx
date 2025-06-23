@@ -41,7 +41,6 @@ const ROLE_OPTIONS = [
   { value: "assistant", label: "Assistant" },
   { value: "system", label: "System" },
   { value: "tool", label: "Tool" },
-  { value: "image", label: "Image" },
 ] as const;
 
 const getDropdownItems = (
@@ -53,14 +52,14 @@ const getDropdownItems = (
   }
 ) => {
   const items = [];
-
+  
   if (messageRole === "assistant") {
     items.push({
       label: "Add Tool Call",
       onClick: handlers.addToolCall,
     });
   }
-
+  
   if (messageRole === "user") {
     if (handlers.onAddText) {
       items.push({
@@ -75,7 +74,7 @@ const getDropdownItems = (
       });
     }
   }
-
+  
   return items;
 };
 

@@ -430,21 +430,20 @@ export default function ChatMessage({
                       };
                     }
 
-                    const contentArray = [];
-
-                    contentArray.push({
-                      _type: "message" as const,
-                      role: "user",
-                      content: msg.content,
-                      id: `text-${messageIndex}-${Date.now()}`,
-                    });
-
-                    contentArray.push({
-                      _type: "image" as const,
-                      role: "user",
-                      image_url: base64,
-                      id: `img-${messageIndex}-${Date.now() + 1}`,
-                    });
+                    const contentArray = [
+                      {
+                        _type: "message" as const,
+                        role: "user",
+                        content: msg.content,
+                        id: `text-${messageIndex}-${Date.now()}`,
+                      },
+                      {
+                        _type: "image" as const,
+                        role: "user",
+                        image_url: base64,
+                        id: `img-${messageIndex}-${Date.now() + 1}`,
+                      }
+                    ];
 
                     return {
                       content: "",
@@ -471,9 +470,7 @@ export default function ChatMessage({
 
   const addImageToMessage = () => {
     setPendingFileAction("add");
-    setTimeout(() => {
-      fileInputRef.current?.click();
-    }, 0);
+    fileInputRef.current?.click();
   };
 
   const changeMessageRole = (index: number, newRole: string) => {
@@ -506,14 +503,6 @@ export default function ChatMessage({
           },
         },
       });
-    }
-
-    if (newRole === "image") {
-      setPendingFileAction("change");
-      setTimeout(() => {
-        fileInputRef.current?.click();
-      }, 0);
-      return;
     }
 
     return onChatChange({
