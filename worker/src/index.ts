@@ -11,6 +11,7 @@ import { ProviderName } from "./packages/cost/providers/mappings";
 import { buildRouter } from "./routers/routerFactory";
 import { ReportManager } from "./lib/managers/ReportManager";
 import { ReportStore } from "./lib/db/ReportStore";
+import { alertSqsCongestion } from "./lib/clients/cronCalls/alertSqsCongestion";
 
 const FALLBACK_QUEUE = "fallback-queue";
 
@@ -32,6 +33,7 @@ export interface EU_Env {
   EU_AWS_REGION?: "eu-west-1";
 }
 export interface BASE_Env {
+  SLACK_API_KEY: string;
   SUPABASE_SERVICE_ROLE_KEY: string;
   SUPABASE_URL: string;
   TOKENIZER_COUNT_API: string;
@@ -461,9 +463,23 @@ export default {
       env.EU_SUPABASE_URL,
       env.EU_SUPABASE_SERVICE_ROLE_KEY
     );
+    const alertManager = new AlertManager(
+      new AlertStore(
+        supabaseClientUS,
+        new ClickhouseClientWrapper({
+          CLICKHOUSE_HOST: env.CLICKHOUSE_HOST,
+          CLICKHOUSE_USER: env.CLICKHOUSE_USER,
+          CLICKHOUSE_PASSWORD: env.CLICKHOUSE_PASSWORD,
+        })
+      ),
+      env
+    );
     await updateLoopUsers(env);
     if (controller.cron === "0 * * * *") {
       return;
+    }
+    if (controller.cron === "*/5 * * * *") {
+      await alertSqsCongestion(env, alertManager);
     }
     if (controller.cron === "0 10 * * mon") {
       const reportManagerUS = new ReportManager(
