@@ -56,7 +56,10 @@ export default function TextMessage({
                     ...mappedRequest.schema.request,
                     messages: mappedRequest.schema.request?.messages?.map(
                       (message, markdownMessageIndex) => {
-                        if (!isPartOfContentArray && markdownMessageIndex === messageIndex) {
+                        if (
+                          !isPartOfContentArray &&
+                          markdownMessageIndex === messageIndex
+                        ) {
                           return {
                             ...message,
                             content: text,

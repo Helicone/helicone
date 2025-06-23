@@ -442,7 +442,7 @@ export default function ChatMessage({
                         role: "user",
                         image_url: base64,
                         id: `img-${messageIndex}-${Date.now() + 1}`,
-                      }
+                      },
                     ];
 
                     return {

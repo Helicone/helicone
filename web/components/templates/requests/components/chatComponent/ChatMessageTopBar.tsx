@@ -52,14 +52,14 @@ const getDropdownItems = (
   }
 ) => {
   const items = [];
-  
+
   if (messageRole === "assistant") {
     items.push({
       label: "Add Tool Call",
       onClick: handlers.addToolCall,
     });
   }
-  
+
   if (messageRole === "user") {
     if (handlers.onAddText) {
       items.push({
@@ -74,7 +74,7 @@ const getDropdownItems = (
       });
     }
   }
-  
+
   return items;
 };
 
