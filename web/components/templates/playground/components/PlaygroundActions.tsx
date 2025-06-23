@@ -89,11 +89,17 @@ const PlaygroundActions = ({
           </TooltipContent>
         </Tooltip>
       )}
+<<<<<<< HEAD
       <PromptForm
         isScrolled={isScrolled}
         promptId={promptId}
         onSavePrompt={onSavePrompt}
       />
+=======
+      <Button variant="outline" onClick={() => {}}>
+        Save Prompt
+      </Button>
+>>>>>>> 0575ad263 (save prompt button)
       <Tooltip>
         <TooltipTrigger asChild>
           <Button onClick={onRun}>Run</Button>
