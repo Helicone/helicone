@@ -27,3 +27,18 @@ rosebud/
 
 dev.vars.*
 node_modules/
+
+# Terraform files
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+.terraformrc
+terraform.rc
+crash.log
+crash.*.log
+*.tfplan
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json

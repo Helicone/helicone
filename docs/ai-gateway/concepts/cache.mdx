@@ -1,0 +1,297 @@
+---
+title: "Response Caching"
+sidebarTitle: "Caching"
+description: "Intelligent LLM response caching to reduce costs and improve latency"
+---
+
+The AI Gateway automatically caches LLM responses and reuses them for identical requests, reducing costs by up to 95% and improving response times.
+
+Caching uses exact parameter matching with configurable TTL, staleness policies, and bucketed responses for variety.
+
+## Getting Started
+
+### Why Use Caching?
+
+Caching helps you:
+- **Eliminate CI/test costs** by reusing responses across test runs and development
+- **Reduce costs** by eliminating duplicate API calls to providers
+- **Improve latency** by serving cached responses instantly
+- **Handle high traffic** by reducing load on upstream providers
+- **Cross-provider efficiency** by reusing responses across different providers
+
+<Note>
+  For complete configuration options and syntax, see the [Configuration Reference](/ai-gateway/config#caching).
+</Note>
+
+### How Caching Works
+
+All caching uses **exact parameter matching**—identical requests (model, messages, temperature, all parameters) return cached responses instantly.
+
+**How it works:**
+1. Configuration is merged from global → router → request headers to determine final cache settings
+2. Incoming request parameters are hashed to create a unique cache key
+3. System checks the cache store for an existing cached response
+4. If found and not expired, returns cached response immediately
+5. If not found, forwards request to provider and caches the response
+
+**Basic example:**
+```yaml
+global:
+  cache:
+    store: in-memory
+    directive: "max-age=3600, max-stale=1800"  # 1-hour TTL, 30-min stale
+    buckets: 1   # Single response per cache key
+```
+
+### Configuration Examples
+
+<Tabs>
+  <Tab title="CI/Test Pipeline - Eliminate Costs">
+    **Use case:** CI pipeline or test suite that makes repeated identical requests. Cache for the duration of the test run to eliminate all provider costs.
+
+    ```yaml
+    global:
+      cache:
+        store: in-memory
+        directive: "max-age=7200, max-stale=3600"  # 2-hour TTL for test runs
+        buckets: 1   # Consistent responses for tests
+    ```
+  </Tab>
+
+  <Tab title="Multiple Environments - Different Cache Policies">
+    **Use case:** Different environments with different caching strategies - production optimized for freshness, development for cost savings.
+
+  <Note>
+  If using router cache configuration, we suggest not using the global cache configuration due to the merging behavior confusion.
+  </Note>
+
+    ```yaml
+    routers:
+      production:
+        cache:
+          store: in-memory
+          directive: "max-age=1800"  # 30-min TTL for production freshness
+          buckets: 1                 # Consistent responses
+        load-balance:
+          chat:
+            strategy: latency
+            providers:
+              - openai
+              - anthropic
+      
+      development:
+        cache:
+          store: in-memory
+          directive: "max-age=7200"  # 2-hour TTL to reduce dev costs
+          buckets: 5                 # More variety for testing
+        load-balance:
+          chat:
+            strategy: latency
+            providers:
+              - openai
+              - anthropic
+    ```
+  </Tab>
+
+  <Tab title="Production API - Cost Optimization">
+    **Use case:** Production API that needs to minimize provider costs while maintaining response freshness for users.
+
+    ```yaml
+    global:
+      cache:
+        store: in-memory
+        directive: "max-age=1800, max-stale=900"  # 30-min TTL
+        buckets: 1   # Consistent responses
+    ```
+  </Tab>
+</Tabs>
+
+## Reference
+
+### Configuration Options
+
+<AccordionGroup>
+  <Accordion title="Multiple Responses (Buckets)" icon="bucket">
+    **Store multiple responses for the same cache key**
+    
+    Instead of storing one response per cache key, store multiple responses to provide variety for non-deterministic use cases while still benefiting from caching.
+    
+    **Best for:** Creative applications where response variety is desired
+    
+    **Example:**
+    ```yaml
+    global:
+      cache:
+        store: in-memory
+        buckets: 10  # Store up to 10 different responses
+        directive: "max-age=3600"
+    ```
+  </Accordion>
+
+  <Accordion title="Cache Namespacing (Seeds)" icon="key">
+    **Partition cache by seed for multi-tenant isolation**
+    
+    Each cache entry lives in a namespace derived from a **seed**. You can set the seed once in the router config or override it per-request with the `Helicone-Cache-Seed` header.
+    
+    **Best for:** SaaS apps and multi-tenant systems that need user-level isolation
+    
+    **How it works:**
+    1. Router config can set a default `seed` value
+    2. Incoming requests may override the seed via header
+    3. The seed is prefixed to the cache key, creating an isolated namespace
+    
+    **Example (router config):**
+    ```yaml
+    global:
+      cache:
+        store: in-memory
+        directive: "max-age=3600, max-stale=1800"
+        seed: "tenant-alpha"
+    ```
+    
+    **Example (per-request header):**
+    ```bash
+    curl -H "Helicone-Cache-Seed: user-123" ...
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Configuration Scope
+
+Cache settings are applied in precedence order (highest to lowest priority):
+
+<Steps>
+  <Step title="Request Headers">
+    **Per-request cache control**
+    
+    Headers override all other cache settings for specific requests. Can enable/disable caching even when configured globally or per-router.
+    
+    ```bash
+    # Disable caching for this request (overrides router/global config)
+    curl -H "Helicone-Cache-Enabled: false" \
+         -H "Authorization: Bearer $API_KEY" \
+         https://gateway.example.com/v1/chat/completions
+    
+    # Override cache directive and seed
+    curl -H "Cache-Control: max-age=300" \
+         -H "Helicone-Cache-Seed: user-123" \
+         -H "Authorization: Bearer $API_KEY" \
+         https://gateway.example.com/v1/chat/completions
+    ```
+    
+    **Available headers:**
+    - `Helicone-Cache-Enabled: true/false`
+    - `Cache-Control: "max-age=3600"`
+    - `Helicone-Cache-Seed: "custom-seed"`
+    - `Helicone-Cache-Bucket-Max-Size: 5`
+  </Step>
+  
+  <Step title="Router Configuration">
+    **Per-router cache policies**
+
+    <Note>
+      We suggest using either the router cache configuration or the global cache configuration, but not both.
+      The merging behavior of the two configurations can be confusing.
+    </Note>
+    
+    Each router can have custom cache settings that override global defaults.
+    
+    ```yaml
+    routers:
+      production:
+        cache:
+          store: in-memory
+          directive: "max-age=1800"
+          buckets: 3
+          seed: "router-seed"
+    ```
+  </Step>
+  
+  <Step title="Global Configuration">
+    **Application-wide cache defaults**
+    
+    Global cache settings apply to all routers unless overridden.
+    
+    ```yaml
+    global:
+      cache:
+        store: in-memory
+        directive: "max-age=3600"
+        buckets: 1
+        seed: "global-seed"
+    ```
+  </Step>
+</Steps>
+
+#### Merging Behavior
+
+Settings from higher priority levels override lower priority levels. For example, if global config sets `buckets: 1` but router config doesn't specify buckets, the global value is used. If request headers specify `Cache-Control`, it overrides both router and global directives.
+
+The cache configuration is first merged from the global config, then the router config, and finally the request headers, then checked a single time for the cache key.
+
+### Storage Backend Options
+
+Cache responses can be stored in different backends depending on your deployment needs:
+
+<AccordionGroup>
+  <Accordion title="In-Memory Storage" icon="memory">
+    **Local cache storage**
+    
+    Cache responses are stored locally in each router instance—no external dependencies, ultra-fast lookup.
+    
+    **Best for:**
+    - Single-instance deployments
+    - Development environments
+          - High-performance scenarios
+  </Accordion>
+</AccordionGroup>
+
+<Note>
+  Additional storage backends (Redis and Database) are [coming soon](#coming-soon) for distributed caching and advanced analytics.
+</Note>
+
+### Choosing the Right Configuration
+
+| Use Case                    | Recommended Approach               |
+| --------------------------- | ---------------------------------- |
+| **Production APIs**         | 1-hour TTL, buckets 1-3            |
+| **Development/Testing**     | 24-hour TTL, buckets 5-10          |
+| **Creative applications**   | 30-min TTL, buckets 10+            |
+| **High-traffic systems**    | Short TTL (≤2 h), buckets 3-5      |
+| **User-specific caching**   | Seeds for namespace isolation      |
+| **Single instance**         | In-memory storage                  |
+
+### Cache Response Headers
+
+When caching is enabled, the gateway adds response headers to indicate cache status and performance:
+
+<ParamField path="helicone-cache" type="string">
+  Indicates whether the response was served from cache.
+
+  **Values:** `"HIT"` for cache hits, `"MISS"` for cache misses
+</ParamField>
+
+<ParamField path="helicone-cache-bucket-idx" type="number">
+  Index of the cache bucket used for this response.
+
+  **How it works:** When using bucketed caching, shows which stored response was returned (0-based index)
+</ParamField>
+
+**Example checking cache headers:**
+```bash
+curl -i -H "Helicone-Cache-Enabled: true" \
+     -H "Authorization: Bearer $API_KEY" \
+     https://gateway.example.com/v1/chat/completions \
+     -d '{"model": "gpt-4", "messages": [{"role": "user", "content": "Hello"}]}'
+
+# Response headers:
+# helicone-cache: HIT
+# helicone-cache-bucket-idx: 2
+```
+
+## Coming Soon
+
+| Feature | Description | Version |
+|---------|-------------|---------|
+| **Redis Storage** | Distributed cache sharing across multiple router instances with persistence across restarts | v1 |
+| **Database Storage** | Persistent cache storage with advanced analytics and compliance features | v1 |

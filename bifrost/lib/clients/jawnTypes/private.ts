@@ -414,6 +414,9 @@ export interface paths {
   "/v1/router/control-plane/whoami": {
     get: operations["Whoami"];
   };
+  "/v1/router/control-plane/sign-s3-url": {
+    post: operations["SignS3Url"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -523,10 +526,10 @@ Json: JsonObject;
           stripe_customer_id: string | null;
           soft_delete: boolean;
           size: string | null;
-          reseller_id: string | null;
           /** Format: double */
           request_limit: number | null;
           referral: string | null;
+          playground_helicone: boolean;
           /** Format: double */
           percent_to_log: number | null;
           owner: string;
@@ -534,7 +537,6 @@ Json: JsonObject;
           org_provider_key: string | null;
           onboarding_status: components["schemas"]["Json"];
           name: string;
-          logo_path: string | null;
           limits: components["schemas"]["Json"] | null;
           is_personal: boolean;
           is_main_org: boolean;
@@ -562,10 +564,10 @@ Json: JsonObject;
         stripe_customer_id: string | null;
         soft_delete: boolean;
         size: string | null;
-        reseller_id: string | null;
         /** Format: double */
         request_limit: number | null;
         referral: string | null;
+        playground_helicone: boolean;
         /** Format: double */
         percent_to_log: number | null;
         owner: string;
@@ -573,7 +575,6 @@ Json: JsonObject;
         org_provider_key: string | null;
         onboarding_status: components["schemas"]["Json"];
         name: string;
-        logo_path: string | null;
         limits: components["schemas"]["Json"] | null;
         is_personal: boolean;
         is_main_org: boolean;
@@ -589,7 +590,7 @@ Json: JsonObject;
       error: null;
     };
     "Result_Database-at-public_91_Tables_93_-at-organization_91_Row_93_.string_": components["schemas"]["ResultSuccess_Database-at-public_91_Tables_93_-at-organization_91_Row_93__"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--logo_path-string--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
+    "ResultSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
       data: {
           tier: string;
           subscription_status: string;
@@ -599,10 +600,10 @@ Json: JsonObject;
           stripe_customer_id: string;
           soft_delete: boolean;
           size: string;
-          reseller_id: string;
           /** Format: double */
           request_limit: number;
           referral: string;
+          playground_helicone: boolean;
           /** Format: double */
           percent_to_log: number;
           owner: string;
@@ -610,7 +611,6 @@ Json: JsonObject;
           org_provider_key: string;
           onboarding_status: components["schemas"]["Json"];
           name: string;
-          logo_path: string;
           limits: components["schemas"]["Json"];
           is_personal: boolean;
           is_main_org: boolean;
@@ -625,9 +625,9 @@ Json: JsonObject;
       /** @enum {number|null} */
       error: null;
     };
-    "Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--logo_path-string--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_": components["schemas"]["ResultSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--logo_path-string--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--logo_path-string--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__": {
-      data: components["schemas"]["Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--logo_path-string--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_"];
+    "Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_": components["schemas"]["ResultSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__": {
+      data: components["schemas"]["Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_"];
       /** @enum {number|null} */
       error: null;
     };
@@ -636,7 +636,7 @@ Json: JsonObject;
       data: null;
       error: unknown;
     };
-    "Result_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--logo_path-string--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_": components["schemas"]["ResultSuccess_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--logo_path-string--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__"] | components["schemas"]["ResultError_unknown_"];
+    "Result_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_": components["schemas"]["ResultSuccess_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__"] | components["schemas"]["ResultError_unknown_"];
     ResultSuccess_string_: {
       data: string;
       /** @enum {number|null} */
@@ -652,10 +652,10 @@ Json: JsonObject;
       stripe_customer_id?: string | null;
       soft_delete?: boolean;
       size?: string | null;
-      reseller_id?: string | null;
       /** Format: double */
       request_limit?: number | null;
       referral?: string | null;
+      playground_helicone?: boolean;
       /** Format: double */
       percent_to_log?: number | null;
       owner: string;
@@ -663,7 +663,6 @@ Json: JsonObject;
       org_provider_key?: string | null;
       onboarding_status?: components["schemas"]["Json"];
       name: string;
-      logo_path?: string | null;
       limits?: components["schemas"]["Json"] | null;
       is_personal?: boolean;
       is_main_org?: boolean;
@@ -676,17 +675,16 @@ Json: JsonObject;
       color?: string;
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type-or-onboarding_status_": {
+    "Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-organization_type-or-onboarding_status_": {
       name: string;
       color?: string;
       icon?: string;
       org_provider_key?: string;
       limits?: components["schemas"]["Json"];
-      reseller_id?: string;
       organization_type?: string;
       onboarding_status?: components["schemas"]["Json"];
     };
-    UpdateOrganizationParams: components["schemas"]["Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type-or-onboarding_status_"] & {
+    UpdateOrganizationParams: components["schemas"]["Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-organization_type-or-onboarding_status_"] & {
       variant?: string;
     };
     UIFilterRowTree: components["schemas"]["UIFilterRowNode"] | components["schemas"]["FilterRow"];
@@ -944,6 +942,7 @@ Json: JsonObject;
     };
     /** @description Make all properties in T optional */
     Partial_TimestampOperators_: {
+      equals?: string;
       gte?: string;
       lte?: string;
       lt?: string;
@@ -1000,6 +999,8 @@ Json: JsonObject;
     };
     /** @description Make all properties in T optional */
     Partial_TimestampOperatorsTyped_: {
+      /** Format: date-time */
+      equals?: string;
       /** Format: date-time */
       gte?: string;
       /** Format: date-time */
@@ -1128,6 +1129,7 @@ Json: JsonObject;
     /** @enum {string} */
     LlmType: "chat" | "completion";
     FunctionCall: {
+      id?: string;
       name: string;
       arguments: components["schemas"]["Record_string.any_"];
     };
@@ -1347,6 +1349,7 @@ Json: JsonObject;
       model: string;
       cache_reference_id: string | null;
       cache_enabled: boolean;
+      updated_at?: string;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];
@@ -15202,6 +15205,14 @@ Json: JsonObject;
     ConvertToWavRequestBody: {
       audioData: string;
     };
+    "ResultSuccess__url-string__": {
+      data: {
+        url: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__url-string_.string_": components["schemas"]["ResultSuccess__url-string__"] | components["schemas"]["ResultError_string_"];
   };
   responses: {
   };
@@ -15601,7 +15612,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--logo_path-string--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_"];
+          "application/json": components["schemas"]["Result_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_"];
         };
       };
     };
@@ -17749,6 +17760,25 @@ export interface operations {
             organizationId: string;
             userId: string;
           };
+        };
+      };
+    };
+  };
+  SignS3Url: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: double */
+          payloadSize: number;
+          requestId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__url-string_.string_"];
         };
       };
     };

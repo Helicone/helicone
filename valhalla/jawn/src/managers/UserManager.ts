@@ -33,7 +33,7 @@ function assertValidSortDirection(direction: SortDirection) {
 }
 const kv = new KVCache(60); // 1 minute
 export interface UserMetric {
-  id?: string;
+  id: string;
   user_id: string;
   active_for: number;
   first_active: string;
@@ -41,6 +41,8 @@ export interface UserMetric {
   total_requests: number;
   average_requests_per_day_active: number;
   average_tokens_per_request: number;
+  total_prompt_tokens: number;
+  total_completion_tokens: number;
   cost: number;
   rate_limited_count: number;
 }
@@ -50,7 +52,8 @@ export type SortLeafUsers = {
 };
 
 const sortMappings: { [K in keyof UserMetric]: string } = {
-  user_id: "request.user_id",
+  id: "id",
+  user_id: "user_id",
   active_for: "active_for",
   last_active: "last_active",
   total_requests: "total_requests",
@@ -59,6 +62,8 @@ const sortMappings: { [K in keyof UserMetric]: string } = {
   first_active: "first_active",
   cost: "cost",
   rate_limited_count: "rate_limited_count",
+  total_prompt_tokens: "total_prompt_tokens",
+  total_completion_tokens: "total_completion_tokens",
 };
 
 export function buildUserSort(
@@ -136,7 +141,7 @@ export class UserManager extends BaseManager {
 
   async getUserMetrics(
     queryParams: UserMetricsQueryParams
-  ): Promise<Result<{ users: UserMetricsResult[]; count: number }, string>> {
+  ): Promise<Result<{ users: UserMetricsResult[]; count: number; hasUsers: boolean }, string>> {
     const {
       filter,
       offset,
@@ -149,6 +154,16 @@ export class UserManager extends BaseManager {
     } = queryParams;
     const { organizationId } = this.authParams;
     const { argsAcc, orderByString } = buildUserSort(sort);
+
+    const hasUsersQuery = `
+    SELECT count() > 0 AS has_users
+    FROM request_response_rmt
+    WHERE organization_id = {val_0: String}
+      AND user_id != ''
+    LIMIT 1
+    `;
+
+    const hasUsersResult = await dbQueryClickhouse<{ has_users: number }>(hasUsersQuery, [organizationId]);
 
     const builtFilter = await buildFilterWithAuthClickHouse({
       org_id: organizationId,
@@ -203,7 +218,7 @@ export class UserManager extends BaseManager {
       count(r.request_id) / count(DISTINCT date_trunc('day', r.request_created_at)) as average_requests_per_day_active,
       (sum(r.prompt_tokens) + sum(r.completion_tokens)) / count(r.request_id) as average_tokens_per_request,
       sum(r.completion_tokens) as total_completion_tokens,
-      sum(r.prompt_tokens) as total_prompt_token,
+      sum(r.prompt_tokens) as total_prompt_tokens,
       sum(r.cost) / ${COST_PRECISION_MULTIPLIER} as cost,
       sum(CASE WHEN r.properties['Helicone-Rate-Limit-Status'] = 'rate_limited' THEN 1 ELSE 0 END) as rate_limited_count
     from request_response_rmt r
@@ -237,19 +252,7 @@ export class UserManager extends BaseManager {
       kv
     );
 
-    const results = await clickhouseDb.dbQuery<{
-      id: string;
-      user_id: string;
-      active_for: number;
-      first_active: string;
-      last_active: string;
-      total_requests: number;
-      average_requests_per_day_active: number;
-      average_tokens_per_request: number;
-      total_completion_tokens: number;
-      total_prompt_tokens: number;
-      cost: number;
-    }>(query, builtFilter.argsAcc);
+    const results = await clickhouseDb.dbQuery<UserMetric>(query, builtFilter.argsAcc);
 
     const users = resultMap(results, (x) =>
       x.map((y) => ({
@@ -276,6 +279,7 @@ export class UserManager extends BaseManager {
     return ok({
       users: users.data!,
       count: countResult.data?.[0].count ?? 0,
+      hasUsers: hasUsersResult.data?.[0].has_users === 1,
     });
   }
 }

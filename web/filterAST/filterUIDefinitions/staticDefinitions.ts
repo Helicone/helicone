@@ -6,7 +6,7 @@ export const STATIC_USER_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     label: "User ID",
     type: "string",
     operators: ["eq", "neq", "like", "ilike", "contains"],
-    table: "user_metrics",
+    table: "users_view",
     subType: "user",
   },
   {
@@ -14,7 +14,7 @@ export const STATIC_USER_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     label: "Active For (days)",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
-    table: "user_metrics",
+    table: "users_view",
     subType: "user",
   },
   {
@@ -22,7 +22,7 @@ export const STATIC_USER_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     label: "First Active",
     type: "datetime",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
-    table: "user_metrics",
+    table: "users_view",
     subType: "user",
   },
   {
@@ -30,7 +30,7 @@ export const STATIC_USER_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     label: "Last Active",
     type: "datetime",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
-    table: "user_metrics",
+    table: "users_view",
     subType: "user",
   },
   {
@@ -38,7 +38,7 @@ export const STATIC_USER_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     label: "Total Requests",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
-    table: "user_metrics",
+    table: "users_view",
     subType: "user",
   },
   {
@@ -46,7 +46,7 @@ export const STATIC_USER_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     label: "Avg Requests per Day",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
-    table: "user_metrics",
+    table: "users_view",
     subType: "user",
   },
   {
@@ -54,7 +54,7 @@ export const STATIC_USER_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     label: "Avg Tokens per Request",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
-    table: "user_metrics",
+    table: "users_view",
     subType: "user",
   },
   {
@@ -62,23 +62,23 @@ export const STATIC_USER_VIEW_DEFINITIONS: FilterUIDefinition[] = [
     label: "Total Completion Tokens",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
-    table: "user_metrics",
+    table: "users_view",
     subType: "user",
   },
   {
-    id: "user_total_prompt_token",
+    id: "user_total_prompt_tokens",
     label: "Total Prompt Tokens",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
-    table: "user_metrics",
+    table: "users_view",
     subType: "user",
   },
   {
-    id: "user_total_cost",
+    id: "user_cost",
     label: "Total Cost",
     type: "number",
     operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
-    table: "user_metrics",
+    table: "users_view",
     subType: "user",
   },
 ];

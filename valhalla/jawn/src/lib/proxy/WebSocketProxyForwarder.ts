@@ -1,9 +1,8 @@
-import console from "console";
 import internal from "stream";
 import { WebSocket, WebSocketServer } from "ws";
 import { SocketMessage } from "../../types/realtime";
 import { safeJsonParse } from "../../utils/helpers";
-import { HeliconeQueueProducer } from "../clients/HeliconeQuequeProducer";
+import { HeliconeQueueProducer } from "../clients/HeliconeQueueProducer";
 import { RequestWrapper } from "../requestWrapper/requestWrapper";
 import { getHeliconeAuthClient } from "../../packages/common/auth/server/AuthClientFactory";
 import { S3Client } from "../shared/db/s3Client";
@@ -24,7 +23,7 @@ const wss = new WebSocketServer({ noServer: true });
 async function logCurrentSession(
   loggedRequestId: string | null,
   messages: SocketMessage[],
-  requestWrapper: RequestWrapper,
+  requestWrapper: RequestWrapper
 ): Promise<{
   requestId: string | null;
 }> {
@@ -39,8 +38,7 @@ async function logCurrentSession(
     const requestId = await loggable.getRequestId();
 
     // 2. Get the auth
-    const { data: auth, error: authError } =
-      await requestWrapper.auth();
+    const { data: auth, error: authError } = await requestWrapper.auth();
     if (authError !== null) {
       console.error("Error getting auth", authError);
       return { requestId };
@@ -71,8 +69,7 @@ async function logCurrentSession(
             process.env.S3_SECRET_KEY ?? "",
             process.env.S3_ENDPOINT ?? "",
             process.env.S3_BUCKET_NAME ?? "",
-            (process.env.S3_REGION as "us-west-2" | "eu-west-1") ??
-              "us-west-2"
+            (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
           )
         ),
         kafkaProducer: new HeliconeQueueProducer(),
@@ -108,7 +105,6 @@ export function webSocketProxyForwarder(
     const messageBuffer: Array<{ data: ArrayBufferLike; isBinary: boolean }> =
       [];
 
-    
     let requestId: string | null = null;
     let loggingInterval: NodeJS.Timeout | null = null;
 
@@ -177,7 +173,11 @@ export function webSocketProxyForwarder(
       });
 
       loggingInterval = setInterval(async () => {
-        const { requestId: newRequestId } = await logCurrentSession(requestId, [...messages], requestWrapper);
+        const { requestId: newRequestId } = await logCurrentSession(
+          requestId,
+          [...messages],
+          requestWrapper
+        );
         requestId = newRequestId;
       }, REALTIME_LOGGING_INTERVAL);
 
@@ -197,15 +197,18 @@ export function webSocketProxyForwarder(
               timestamp: new Date().toISOString(),
               from,
             });
-          }
+          } else if (messageType === "close") {
           /* -------------------------------------------------------------------------- */
           /*                            Handle Closing Event                            */
           /* -------------------------------------------------------------------------- */
-          else if (messageType === "close") {
             if (loggingInterval) {
               clearInterval(loggingInterval);
             }
-            const { requestId: newRequestId } = await logCurrentSession(requestId, [...messages], requestWrapper);
+            const { requestId: newRequestId } = await logCurrentSession(
+              requestId,
+              [...messages],
+              requestWrapper
+            );
             requestId = newRequestId;
           }
         },

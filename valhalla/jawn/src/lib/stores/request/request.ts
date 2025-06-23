@@ -193,7 +193,8 @@ export async function getRequestsClickhouseNoSort(
       target_url,
       cache_reference_id,
       cache_enabled,
-      cost / ${COST_PRECISION_MULTIPLIER} as cost
+      cost / ${COST_PRECISION_MULTIPLIER} as cost,
+      updated_at
     FROM request_response_rmt
     WHERE (
       (${builtFilter.filter})
@@ -269,8 +270,9 @@ export async function getRequestsClickhouse(
       target_url,
       cache_reference_id,
       cache_enabled,
-      cost / ${COST_PRECISION_MULTIPLIER} as cost
-    FROM request_response_rmt FINAL
+      cost / ${COST_PRECISION_MULTIPLIER} as cost,
+      updated_at
+    FROM request_response_rmt
     WHERE (
       (${builtFilter.filter})
     )

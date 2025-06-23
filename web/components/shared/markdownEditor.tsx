@@ -20,6 +20,7 @@ const MonacoMarkdownEditor = (props: MarkdownEditorProps) => {
     disabled = false,
     className,
     textareaClassName,
+    containerClassName,
   } = props;
   const { theme: currentTheme } = useTheme();
   const minHeight = 100;
@@ -34,9 +35,9 @@ const MonacoMarkdownEditor = (props: MarkdownEditorProps) => {
     );
 
   return (
-    <div>
+    <div className={containerClassName}>
       <MonacoEditor
-        value={text}
+        value={typeof text === "string" ? text : JSON.stringify(text)}
         onChange={(value) => setText(value || "")}
         language={language}
         theme={currentTheme === "dark" ? "vs-dark" : "vs-light"}
@@ -65,16 +66,19 @@ const MonacoMarkdownEditor = (props: MarkdownEditorProps) => {
 };
 
 interface MarkdownEditorProps {
-  text: string;
+  text: string | object;
   setText: (text: string) => void;
   language: "json" | "markdown" | "python";
   disabled?: boolean;
   className?: string;
   textareaClassName?: string;
   monaco?: boolean;
+  id?: string;
+  placeholder?: string;
+  containerClassName?: string;
 }
 
-const LARGE_TEXT_THRESHOLD = 50;
+const LARGE_TEXT_THRESHOLD = 20;
 
 const LARGE_TEXT_THRESHOLD_CHARS = 10_000;
 
@@ -87,6 +91,8 @@ const MarkdownEditor = (props: MarkdownEditorProps) => {
     className,
     textareaClassName,
     monaco = false,
+    id,
+    placeholder,
   } = props;
 
   const text = useMemo(() => {
@@ -123,6 +129,8 @@ const MarkdownEditor = (props: MarkdownEditorProps) => {
 
   return (
     <Editor
+      placeholder={placeholder}
+      {...(id && { id })}
       value={text}
       onValueChange={setText}
       highlight={(code) => {

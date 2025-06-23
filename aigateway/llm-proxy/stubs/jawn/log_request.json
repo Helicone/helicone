@@ -1,0 +1,10 @@
+{
+  "id":"success:jawn:log_request",
+  "request":{
+    "method":"POST",
+    "url":"/v1/log/request"
+  },
+  "response":{
+    "status":200
+  }
+}

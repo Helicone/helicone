@@ -4,6 +4,7 @@ import { RequestWrapper } from "../lib/requestWrapper";
 import { AuthParams } from "../packages/common/auth/types";
 import { getHeliconeAuthClient } from "../packages/common/auth/server/AuthClientFactory";
 import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
+import { err, Result } from "../packages/common/result";
 
 // Replace PostHog with ClickHouse logging
 export const logHttpRequestInClickhouse = (
@@ -46,6 +47,22 @@ export const logHttpRequestInClickhouse = (
   return onFinish;
 };
 
+export const authFromRequest = async (
+  req: Request
+): Promise<Result<AuthParams, string>> => {
+  const request = new RequestWrapper(req);
+  const authorization = request.authHeader();
+
+  if (authorization.error) {
+    return err(authorization.error);
+  }
+
+  return await getHeliconeAuthClient().authenticate(
+    authorization.data!,
+    req.headers
+  );
+};
+
 export const authMiddleware = async (
   req: Request,
   res: Response,
@@ -55,7 +72,7 @@ export const authMiddleware = async (
     next();
     return;
   }
-  if (req.path === "/v1/organization") {
+  if (req.path === "/v1/organization" && req.method === "GET") {
     next();
     return;
   }
@@ -64,17 +81,7 @@ export const authMiddleware = async (
     const request = new RequestWrapper(req);
     const authorization = request.authHeader();
 
-    if (authorization.error) {
-      res.status(401).json({
-        error: authorization.error,
-      });
-      return;
-    }
-
-    const authParams = await getHeliconeAuthClient().authenticate(
-      authorization.data!,
-      req.headers
-    );
+    const authParams = await authFromRequest(req);
 
     if (
       authParams.error ||
@@ -107,7 +114,7 @@ export const authMiddleware = async (
     res.on("finish", onFinish);
 
     if (req.path.startsWith("/v1/admin")) {
-      if(authorization.data?._type !== "jwt") {
+      if (authorization.data?._type !== "jwt") {
         res.status(401).json({
           error: "Unauthorized",
         });

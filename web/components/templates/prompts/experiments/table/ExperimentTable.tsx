@@ -59,6 +59,7 @@ import ExperimentDatasetSelector from "../experimentDatasetSelector";
 import ImportCSVDialog from "./ImportCSVDialog";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
 import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
+import { Deprecated } from "@/components/shared/Deprecated";
 
 type TableDataType = {
   index: number;
@@ -507,6 +508,7 @@ export function ExperimentTable({
 
   return (
     <>
+      <Deprecated feature="Experiments" />
       <div className="flex justify-between items-center py-4 pr-4">
         <IslandContainer>
           <HcBreadcrumb

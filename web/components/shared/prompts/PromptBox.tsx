@@ -5,7 +5,7 @@ import { createSelectionRange } from "@/utils/selection";
 import { toCamelCase, toSnakeCase } from "@/utils/strings";
 import { getVariableStatus, isVariable } from "@/utils/variables";
 
-import { generateStream } from "@/lib/api/llm/generate-stream";
+import { generateStream } from "@/lib/api/llm-old/generate-stream";
 import autoCompletePrompt from "@/prompts/auto-complete";
 import performEditPrompt, { suggestions } from "@/prompts/perform-edit";
 import { $assistant, $system, $user } from "@/utils/generate";
@@ -18,7 +18,7 @@ import {
 
 import Toolbar from "@/components/shared/prompts/Toolbar";
 import LoadingDots from "@/components/shared/universal/LoadingDots";
-import { processStream } from "@/lib/api/llm/process-stream";
+import { processStream } from "@/lib/api/llm-old/process-stream";
 import { MdKeyboardTab } from "react-icons/md";
 import { PiChatDotsBold } from "react-icons/pi";
 

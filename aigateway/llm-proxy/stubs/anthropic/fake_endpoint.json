@@ -1,0 +1,16 @@
+{
+  "id": "success:anthropic:fake_endpoint",
+  "request": {
+    "method": "POST",
+    "url": "/v1/fake_endpoint"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "message": "Hello, world!"
+    }
+  }
+}

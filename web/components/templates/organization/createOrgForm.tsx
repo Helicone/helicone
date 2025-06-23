@@ -303,12 +303,6 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                         color: selectedColor.name,
                         icon: selectedIcon.name,
                         variant,
-                        ...(variant === "reseller" && {
-                          org_provider_key: providerKey,
-                          limits: limits || undefined,
-                          reseller_id: orgContext?.currentOrg?.id!,
-                          organization_type: "customer",
-                        }),
                       },
                     }
                   );
@@ -335,12 +329,6 @@ const CreateOrgForm = (props: CreateOrgFormProps) => {
                         icon: selectedIcon.name,
                         has_onboarded: false,
                         tier: "free",
-                        ...(variant === "reseller" && {
-                          org_provider_key: providerKey,
-                          limits: limits || undefined,
-                          reseller_id: orgContext?.currentOrg?.id!,
-                          organization_type: "customer",
-                        }),
                       },
                     }
                   );

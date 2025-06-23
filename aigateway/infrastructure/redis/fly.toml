@@ -1,0 +1,31 @@
+# fly.toml app configuration file generated for rockstar-redis on 2024-10-13T08:22:06-07:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'rockstar-redis'
+primary_region = 'sjc'
+
+[build]
+  image = "flyio/redis:6.2.6"
+
+[mounts]
+  source = 'redis_storage_1'
+  destination = '/data'
+  initial_size = '10gb'
+
+[[services]]
+  protocol = 'tcp'
+  internal_port = 6379
+  auto_stop_machines = 'off'
+  min_machines_running = 1
+  ports = []
+
+  [[services.tcp_checks]]
+    interval = '15s'
+    grace_period = '3s'
+
+[[vm]]
+  memory = '512mb'
+  cpu_kind = 'shared'
+  cpus = 1

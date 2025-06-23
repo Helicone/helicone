@@ -4,7 +4,7 @@ import { LlmSchema, Message } from "../../types";
 /**
  * Simplified interface for the OpenAI Chat request format
  */
-interface OpenAIChatRequest {
+export interface OpenAIChatRequest {
   model?: string;
   messages?: {
     role: string;
@@ -14,8 +14,18 @@ interface OpenAIChatRequest {
           type: string;
           text?: string;
           image_url?: { url: string };
-        }>;
+        }>
+      | null;
     name?: string;
+    tool_call_id?: string;
+    tool_calls?: {
+      id: string;
+      function: {
+        name: string;
+        arguments: string;
+      };
+      type: "function";
+    }[];
   }[];
   temperature?: number;
   top_p?: number;
@@ -183,7 +193,7 @@ const convertToolChoice = (
     if (toolChoice.type === "function" && toolChoice.function?.name) {
       return {
         type: "tool",
-        name: toolChoice.function.name,
+        name: toolChoice.function?.name,
       };
     }
   }
@@ -251,9 +261,9 @@ const convertTools = (
   if (!tools || !Array.isArray(tools)) return undefined;
 
   return tools.map((tool) => ({
-    name: tool.function.name,
-    description: tool.function.description,
-    parameters: tool.function.parameters,
+    name: tool.function?.name,
+    description: tool.function?.description,
+    parameters: tool.function?.parameters,
   }));
 };
 
@@ -269,6 +279,15 @@ const toExternalMessages = (
     role: rest.role || "user",
     content: rest.content || "",
     name: rest.name,
+    tool_calls: rest.tool_calls?.map((toolCall) => ({
+      id: toolCall.id ?? "",
+      function: {
+        arguments: JSON.stringify(toolCall.arguments),
+        name: toolCall.name ?? "",
+      },
+      type: "function",
+    })),
+    tool_call_id: rest.tool_call_id,
   }));
 };
 

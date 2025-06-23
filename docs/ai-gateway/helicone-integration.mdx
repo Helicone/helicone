@@ -1,0 +1,222 @@
+---
+title: "Helicone Observability"
+sidebarTitle: "Helicone Observability"
+description: "Authentication and observability integration with the Helicone platform"
+---
+
+The AI Gateway integrates directly with the Helicone platform to provide secure authentication and comprehensive observability for your AI requests. When enabled, the gateway requires valid Helicone API keys and automatically logs all requests to your Helicone dashboard.
+
+## Getting Started
+
+### Why Use Helicone Integration?
+
+Helicone integration provides:
+- **Secure authentication** by requiring valid Helicone API keys for all gateway access
+- **Automatic observability** with detailed request/response logging and metrics
+- **Cost tracking** across all providers with unified billing and usage analytics
+
+<Info>
+  **Security Note** - Without authentication enabled, anyone with access to your AI Gateway can use your provider API keys. Enable Helicone integration to secure your deployment.
+</Info>
+
+<Note>
+  For complete configuration options, see the [Configuration Reference](/gateway/config#helicone-observability).
+</Note>
+
+### How Helicone Integration Works
+
+When enabled, the AI Gateway connects to Helicone's control plane to manage authentication and automatically logs all requests for observability.
+
+**Authentication flow:** API key validation → User identification → Request authorization  
+**Logging flow:** Request processing → Automatic capture → Helicone dashboard
+
+<Steps>
+  <Step title="API Key Validation">
+    Incoming requests must include a valid Helicone API key in the Authorization header
+  </Step>
+  
+  <Step title="Control Plane Sync">
+    Gateway connects to Helicone via WebSocket to receive authorized API keys and user data
+  </Step>
+  
+  <Step title="Request Processing">
+    Authenticated requests are processed normally through your configured routers and providers
+  </Step>
+  
+  <Step title="Automatic Logging">
+    All request/response data, timing, and metadata are automatically sent to your Helicone dashboard
+  </Step>
+</Steps>
+
+### Configuration Examples
+
+<Tabs>
+  <Tab title="Production - Secure & Observable">
+    **Use case:** Production deployment requiring authentication and full observability.
+
+    ```yaml
+    helicone:
+      enable-auth: true
+      base-url: "https://api.helicone.ai"
+      websocket-url: "wss://gateway.helicone.ai/ws"
+    ```
+    
+    **Environment variables:**
+    ```bash
+    HELICONE_API_KEY=sk-helicone-your-api-key
+    ```
+
+    **Result:** All requests require valid Helicone API keys and are automatically logged to your dashboard.
+  </Tab>
+
+  <Tab title="Development - Auth Disabled">
+    **Use case:** Development environment where you want to test without authentication requirements.
+
+    ```yaml
+    helicone:
+      enable-auth: false
+    ```
+    
+    **Result:** No authentication required, no automatic logging to Helicone.
+  </Tab>
+
+  <Tab title="Self-Hosted Helicone">
+    **Use case:** Using a self-hosted Helicone instance with custom endpoints.
+
+    ```yaml
+    helicone:
+      enable-auth: true
+      base-url: "https://helicone.your-domain.com"
+      websocket-url: "wss://helicone.your-domain.com/ws"
+    ```
+    
+    **Environment variables:**
+    ```bash
+    HELICONE_API_KEY=sk-helicone-your-api-key
+    ```
+  </Tab>
+</Tabs>
+
+## Reference
+
+### Authentication Requirements
+
+When Helicone integration is enabled, all requests to the AI Gateway must include a valid Helicone API key.
+
+#### Required Headers
+
+```bash
+Authorization: Bearer sk-helicone-your-api-key
+```
+
+#### API Key Format
+
+Helicone API keys follow the format: `sk-helicone-[unique-identifier]`
+
+**Example request:**
+```bash
+curl -X POST http://localhost:8080/router/production/v1/chat/completions \
+  -H "Authorization: Bearer sk-helicone-abc123def456" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4",
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }'
+```
+
+### Automatic Observability
+
+When authentication is enabled, the AI Gateway automatically captures and logs comprehensive data about every request.
+
+#### What Gets Logged
+
+| Data Type | Captured Information | Purpose |
+|-----------|---------------------|---------|
+| **Request Data** | Headers, body, model, provider, timestamp | Track usage patterns and debug issues |
+| **Response Data** | Status code, body, response time, token counts | Monitor performance and costs |
+| **User Context** | User ID, organization ID from API key | Associate requests with users for billing |
+| **Provider Metrics** | Which provider handled request, latency, errors | Optimize provider selection and monitor health |
+| **Gateway Metrics** | Router used, load balancing decisions, cache hits | Understand gateway performance |
+
+#### Observability Features
+
+- **Real-time dashboards** showing request volume, latency, and error rates
+- **Cost tracking** with per-user and per-model breakdowns
+- **Provider analytics** comparing performance across OpenAI, Anthropic, etc.
+- **Request tracing** for debugging failed or slow requests
+- **Usage alerts** for cost or rate limit monitoring
+
+### Control Plane Connection
+
+The AI Gateway maintains a persistent WebSocket connection to Helicone's control plane for real-time configuration updates.
+
+#### Connection Details
+
+- **Protocol:** WebSocket over TLS
+- **Authentication:** Uses your `HELICONE_API_KEY` for connection auth
+- **Purpose:** Receives authorized API keys and user data
+- **Reconnection:** Automatic reconnection with exponential backoff
+
+#### What Gets Synchronized
+
+- **Authorized API keys** and their associated users
+- **Organization configuration** and permissions
+- **Real-time key revocation** for immediate access control
+
+### Security Considerations
+
+#### Access Control
+
+- **Gateway protection:** Without valid Helicone API keys, requests are rejected with 401 Unauthorized
+- **Provider key isolation:** Your provider API keys (OpenAI, Anthropic, etc.) remain secure in the gateway environment
+- **User identification:** Each request is associated with a specific Helicone user for audit trails
+
+#### Data Privacy
+
+- **Request/response logging:** Full request and response bodies are captured for observability
+- **Opt-out headers:** Use `x-helicone-omit-request-log` or `x-helicone-omit-response-log` to exclude sensitive data
+- **Encryption:** All data transmission to Helicone uses TLS encryption
+
+### Deployment Modes
+
+#### Self-Hosted Mode
+
+When `deployment-target: self-hosted`, the gateway manages its own S3 storage for request/response bodies.
+
+**Requirements:**
+- MinIO or S3-compatible storage configured
+- Direct network access to Helicone's control plane
+
+#### Sidecar Mode  
+
+When `deployment-target: sidecar`, the gateway uses Helicone's managed S3 storage.
+
+**Benefits:**
+- No additional storage infrastructure required
+- Automatic scaling and backup
+- Integrated with Helicone's data retention policies
+
+### Troubleshooting
+
+#### Authentication Issues
+
+**Problem:** `401 Unauthorized` responses
+**Solutions:**
+- Verify `HELICONE_API_KEY` environment variable is set correctly
+- Check that your Helicone API key is valid and not expired
+- Ensure WebSocket connection to control plane is established
+
+**Problem:** WebSocket connection failures
+**Solutions:**
+- Check network connectivity to `gateway.helicone.ai`
+- Verify firewall rules allow WebSocket connections
+- Review gateway logs for connection error details
+
+#### Logging Issues
+
+**Problem:** Requests not appearing in Helicone dashboard
+**Solutions:**
+- Confirm `enable-auth: true` in configuration
+- Check that requests are properly authenticated
+- Verify `base-url` points to correct Helicone instance
+- Review gateway logs for logging service errors 
