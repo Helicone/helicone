@@ -14,7 +14,8 @@ import {
   PromptsResult,
 } from "../../controllers/public/promptController";
 import {
-  PromptCreateResponse
+  Prompt2025,
+  Prompt2025Version,
 } from "../../controllers/public/prompt2025Controller";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { FilterNode } from "@helicone-package/filters/filterDefs";
@@ -52,6 +53,31 @@ export class Prompt2025Manager extends BaseManager {
       result += chars[Math.floor(Math.random() * chars.length)];
     }
     return result;
+  }
+
+  async getPrompts(params: {
+    search: string;
+  }): Promise<Result<Prompt2025[], string>> {
+    const result = await dbExecute<Prompt2025>(
+    `
+      SELECT
+        id,
+        name,
+        tags,
+        model
+      FROM prompts_2025
+      WHERE name ILIKE $1 AND organization = $2
+      ORDER BY created_at DESC
+      LIMIT 100
+    `,
+      [`%${params.search}%`, this.authParams.organizationId]
+    );
+
+    if (result.error) {
+      return err(result.error);
+    }
+
+    return ok(result.data ?? []);
   }
 
   async createPrompt(params: {
