@@ -15,7 +15,6 @@ import { Database } from "../../lib/db/database.types";
 @Route("v1/alert-banner")
 @Tags("Alert Banner")
 export class AlertBannerController extends Controller {
-  @Security("api_key")
   @Get("/")
   public async getAlertBanners(@Request() request: JawnAuthenticatedRequest) {
     return await dbExecute<

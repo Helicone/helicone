@@ -16,7 +16,6 @@ export async function callJawn<T, R>(
   env: Env
 ) {
   let response;
-  console.log("calling jawn", `${env.VALHALLA_URL}${path}`);
   if (body !== null) {
     response = await fetch(`${env.VALHALLA_URL}${path}`, {
       method: verb,
@@ -36,7 +35,7 @@ export async function callJawn<T, R>(
     });
   }
 
-  if (!response.ok) {
+  if (!response.ok && env.ENVIRONMENT != "dev") {
     const sentry = new SentryManager(env);
     sentry.sendError(
       `Failed to call Jawn: ${response.statusText}`,

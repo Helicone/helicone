@@ -50642,11 +50642,7 @@
 				"tags": [
 					"Alert Banner"
 				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
+				"security": [],
 				"parameters": []
 			}
 		},

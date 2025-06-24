@@ -17775,7 +17775,6 @@ export function RegisterRoutes(app: Router) {
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };
         app.get('/v1/alert-banner',
-            authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AlertBannerController)),
             ...(fetchMiddlewares<RequestHandler>(AlertBannerController.prototype.getAlertBanners)),
 

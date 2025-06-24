@@ -65,8 +65,6 @@ export class AlertBannerController extends Controller {
       []
     );
 
-    console.log("data", data);
-
     if (error) {
       return err("Unable to get alert banners");
     }

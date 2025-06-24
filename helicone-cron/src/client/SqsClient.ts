@@ -28,12 +28,14 @@ export class SqsClient {
     this.queueUrl = env.REQUEST_LOGS_QUEUE_URL;
   }
 
-  async getQueueSize(): Promise<number> {
+  async getQueueSize(): Promise<number | null> {
     const command = new GetQueueAttributesCommand({
       QueueUrl: this.queueUrl,
       AttributeNames: ["ApproximateNumberOfMessages"],
     });
     const response = await this.sqs.send(command);
-    return Number(response.Attributes?.ApproximateNumberOfMessages ?? 0);
+    return response.Attributes?.ApproximateNumberOfMessages
+      ? Number(response.Attributes.ApproximateNumberOfMessages)
+      : null;
   }
 }

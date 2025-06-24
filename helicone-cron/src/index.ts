@@ -38,6 +38,7 @@ export interface Env {
   AWS_ACCESS_KEY_ID: string;
   AWS_SECRET_ACCESS_KEY: string;
   REQUEST_LOGS_QUEUE_URL: string;
+  SLACK_ALERT_CHANNEL: string;
 }
 
 const constructorMapping: Record<string, any> = {
