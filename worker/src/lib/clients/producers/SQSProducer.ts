@@ -1,8 +1,4 @@
-import {
-  GetQueueAttributesCommand,
-  SendMessageCommand,
-  SQSClient,
-} from "@aws-sdk/client-sqs";
+import { SendMessageCommand, SQSClient } from "@aws-sdk/client-sqs";
 import { Env } from "../../..";
 import { MessageData, MessageProducer } from "./types";
 import { Result, err, ok } from "../../util/results";
@@ -68,14 +64,5 @@ export class SQSProducerImpl implements MessageProducer {
       }
     }
     return err(`Failed to send message to SQS`);
-  }
-
-  async getQueueSize(): Promise<number> {
-    const command = new GetQueueAttributesCommand({
-      QueueUrl: this.queueUrl,
-      AttributeNames: ["ApproximateNumberOfMessages"],
-    });
-    const response = await this.sqs.send(command);
-    return Number(response.Attributes?.ApproximateNumberOfMessages ?? 0);
   }
 }
