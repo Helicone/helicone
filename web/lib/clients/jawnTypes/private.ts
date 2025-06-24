@@ -162,6 +162,21 @@ export interface paths {
   "/v1/prompt-2025": {
     post: operations["CreatePrompt2025"];
   };
+  "/v1/prompt-2025/count": {
+    get: operations["GetPrompt2025Count"];
+  };
+  "/v1/prompt-2025/query": {
+    post: operations["GetPrompts2025"];
+  };
+  "/v1/prompt-2025/query/versions": {
+    post: operations["GetPrompt2025Versions"];
+  };
+  "/v1/prompt-2025/query/production-version": {
+    post: operations["GetPrompt2025ProductionVersion"];
+  };
+  "/v1/prompt-2025/query/total-versions": {
+    post: operations["GetPrompt2025TotalVersions"];
+  };
   "/v1/request/count/query": {
     post: operations["GetRequestCount"];
   };
@@ -1033,6 +1048,53 @@ Json: JsonObject;
       error: null;
     };
     "Result_number.string_": components["schemas"]["ResultSuccess_number_"] | components["schemas"]["ResultError_string_"];
+    Prompt2025: {
+      id: string;
+      name: string;
+      tags: string[];
+      created_at: string;
+    };
+    "ResultSuccess_Prompt2025-Array_": {
+      data: components["schemas"]["Prompt2025"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Prompt2025-Array.string_": components["schemas"]["ResultSuccess_Prompt2025-Array_"] | components["schemas"]["ResultError_string_"];
+    Prompt2025Version: {
+      id: string;
+      model: string;
+      prompt_id: string;
+      /** Format: double */
+      major_version: number;
+      /** Format: double */
+      minor_version: number;
+      commit_message: string;
+      created_at: string;
+    };
+    "ResultSuccess_Prompt2025Version-Array_": {
+      data: components["schemas"]["Prompt2025Version"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Prompt2025Version-Array.string_": components["schemas"]["ResultSuccess_Prompt2025Version-Array_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_Prompt2025Version_: {
+      data: components["schemas"]["Prompt2025Version"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Prompt2025Version.string_": components["schemas"]["ResultSuccess_Prompt2025Version_"] | components["schemas"]["ResultError_string_"];
+    PromptVersionCounts: {
+      /** Format: double */
+      totalVersions: number;
+      /** Format: double */
+      majorVersions: number;
+    };
+    ResultSuccess_PromptVersionCounts_: {
+      data: components["schemas"]["PromptVersionCounts"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptVersionCounts.string_": components["schemas"]["ResultSuccess_PromptVersionCounts_"] | components["schemas"]["ResultError_string_"];
     /** @description Make all properties in T optional */
     Partial_TextOperators_: {
       "not-equals"?: string;
@@ -16204,6 +16266,90 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_PromptCreateResponse.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025Count: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_number.string_"];
+        };
+      };
+    };
+  };
+  GetPrompts2025: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: double */
+          pageSize: number;
+          /** Format: double */
+          page: number;
+          search: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025-Array.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025Versions: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: double */
+          majorVersion?: number;
+          promptId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025Version-Array.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025ProductionVersion: {
+    requestBody: {
+      content: {
+        "application/json": {
+          promptId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025Version.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025TotalVersions: {
+    requestBody: {
+      content: {
+        "application/json": {
+          promptId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionCounts.string_"];
         };
       };
     };

@@ -100,7 +100,10 @@ export default function PromptForm({
             variant="outline"
             size="sm"
             className="w-full mt-2"
-            onClick={() => onSavePrompt(model, [], promptName)}
+            onClick={() => {
+              onSavePrompt(model, [], promptName);
+              setIsPromptFormPopoverOpen(false);
+            }}
           >
             {promptId ? "Save Prompt" : "Create Prompt"}
           </Button>

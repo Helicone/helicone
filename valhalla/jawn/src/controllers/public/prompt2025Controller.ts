@@ -18,8 +18,34 @@ import type { JawnAuthenticatedRequest } from "../../types/request";
 import { type OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
 import { PROMPTS_FEATURE_FLAG, checkFeatureFlag } from "../../lib/utils/featureFlags";
 
+export interface Prompt2025Version {
+  id: string;
+  model: string;
+  prompt_id: string;
+  major_version: number;
+  minor_version: number;
+  commit_message: string;
+
+  created_at: string;
+
+  // TODO: add another type for the user that created
+  // it and union with this one for the info.
+}
+
+export interface Prompt2025 {
+  id: string;
+  name: string;
+  tags: string[];
+  created_at: string;
+}
+
 export interface PromptCreateResponse {
   id: string;
+}
+
+export interface PromptVersionCounts {
+  totalVersions: number;
+  majorVersions: number;
 }
 
 
@@ -52,6 +78,98 @@ export class Prompt2025Controller extends Controller {
       this.setStatus(500);
     } else {
       this.setStatus(201); // set return status 201
+    }
+    return result;
+  }
+
+  @Get("count")
+  public async getPrompt2025Count(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<number, string>> {
+    const promptManager = new Prompt2025Manager(request.authParams);
+    const result = await promptManager.totalPrompts();
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
+  @Post("query")
+  public async getPrompts2025(
+    @Body()
+    requestBody: {
+      search: string;
+      page: number;
+      pageSize: number;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<Prompt2025[], string>> {
+    const promptManager = new Prompt2025Manager(request.authParams);
+
+    const result = await promptManager.getPrompts(requestBody);
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200); // set return status 201
+    }
+    return result;
+  }
+
+  @Post("query/versions")
+  public async getPrompt2025Versions(
+    @Body()
+    requestBody: {
+      promptId: string;
+      majorVersion?: number;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<Prompt2025Version[], string>> {
+    const promptManager = new Prompt2025Manager(request.authParams);
+
+    const result = await promptManager.getPromptVersions(requestBody);
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
+  @Post("query/production-version")
+  public async getPrompt2025ProductionVersion(
+    @Body()
+    requestBody: {
+      promptId: string;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<Prompt2025Version, string>> {
+    const promptManager = new Prompt2025Manager(request.authParams);
+    const result = await promptManager.getPromptProductionVersion(requestBody);
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
+  @Post("query/total-versions")
+  public async getPrompt2025TotalVersions(
+    @Body()
+    requestBody: {
+      promptId: string;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<PromptVersionCounts, string>> {
+    const promptManager = new Prompt2025Manager(request.authParams);
+
+    const result = await promptManager.getPromptVersionCounts(requestBody);
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
     }
     return result;
   }
