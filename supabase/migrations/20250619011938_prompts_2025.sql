@@ -5,7 +5,7 @@ create table "public"."prompts_2025" (
     "name" character varying,
     "tags" text[],
     "model" text not null,
-    "production_version" uuid default gen_random_uuid()
+    "production_version" uuid default null
 );
 
 
@@ -36,10 +36,6 @@ CREATE UNIQUE INDEX prompts_2025_versions_pkey1 ON public.prompts_2025_versions 
 alter table "public"."prompts_2025" add constraint "prompts_2025_versions_pkey" PRIMARY KEY using index "prompts_2025_versions_pkey";
 
 alter table "public"."prompts_2025_versions" add constraint "prompts_2025_versions_pkey1" PRIMARY KEY using index "prompts_2025_versions_pkey1";
-
-alter table "public"."prompts_2025" add constraint "prompts_2025_production_version_fkey" FOREIGN KEY (production_version) REFERENCES prompts_2025_versions(id) ON DELETE SET NULL not valid;
-
-alter table "public"."prompts_2025" validate constraint "prompts_2025_production_version_fkey";
 
 alter table "public"."prompts_2025" add constraint "prompts_2025_organization_fkey" FOREIGN KEY (organization) REFERENCES organization(id) ON DELETE CASCADE not valid;
 
