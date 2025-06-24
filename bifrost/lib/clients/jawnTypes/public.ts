@@ -468,6 +468,14 @@ export interface paths {
   "/v1/helicone-dataset/{datasetId}/delete": {
     post: operations["DeleteHeliconeDataset"];
   };
+  "/v1/gateway": {
+    get: operations["GetRouterConfigs"];
+    post: operations["CreateRouterConfig"];
+  };
+  "/v1/gateway/{id}": {
+    get: operations["GetLatestRouterConfig"];
+    put: operations["UpdateRouterConfig"];
+  };
   "/v1/evals/query": {
     post: operations["QueryEvals"];
   };
@@ -2914,6 +2922,43 @@ Json: JsonObject;
       /** @enum {number|null} */
       error: null;
     };
+    RouterConfig: {
+      lastUpdatedAt: string;
+      latestVersion: string;
+      name: string;
+      id: string;
+    };
+    "ResultSuccess__routerConfigs-RouterConfig-Array__": {
+      data: {
+        routerConfigs: components["schemas"]["RouterConfig"][];
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__routerConfigs-RouterConfig-Array_.string_": components["schemas"]["ResultSuccess__routerConfigs-RouterConfig-Array__"] | components["schemas"]["ResultError_string_"];
+    LatestRouterConfig: {
+      config: string;
+      version: string;
+      name: string;
+      id: string;
+    };
+    ResultSuccess_LatestRouterConfig_: {
+      data: components["schemas"]["LatestRouterConfig"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_LatestRouterConfig.string_": components["schemas"]["ResultSuccess_LatestRouterConfig_"] | components["schemas"]["ResultError_string_"];
+    CreateRouterConfigResult: {
+      apiKey: string;
+      routerVersionId: string;
+      routerConfigId: string;
+    };
+    ResultSuccess_CreateRouterConfigResult_: {
+      data: components["schemas"]["CreateRouterConfigResult"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_CreateRouterConfigResult.string_": components["schemas"]["ResultSuccess_CreateRouterConfigResult_"] | components["schemas"]["ResultError_string_"];
     Eval: {
       name: string;
       /** Format: double */
@@ -5825,6 +5870,72 @@ export interface operations {
     parameters: {
       path: {
         datasetId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetRouterConfigs: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__routerConfigs-RouterConfig-Array_.string_"];
+        };
+      };
+    };
+  };
+  CreateRouterConfig: {
+    requestBody: {
+      content: {
+        "application/json": {
+          config: string;
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_CreateRouterConfigResult.string_"];
+        };
+      };
+    };
+  };
+  GetLatestRouterConfig: {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_LatestRouterConfig.string_"];
+        };
+      };
+    };
+  };
+  UpdateRouterConfig: {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          config: string;
+          name: string;
+        };
       };
     };
     responses: {
