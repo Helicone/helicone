@@ -61,7 +61,6 @@ export default {
     ctx: ExecutionContext
   ): Promise<void> {
     if (controller.cron === "* * * * *") {
-      await alertSqsCongestion(env, new AlertManager(env));
       const heartBeats = JSON.parse(env.HEARTBEAT_URLS_JSON) as HeartBeatItem[];
 
       const heartBeatPromises = heartBeats.map(async (item) => {
@@ -80,6 +79,7 @@ export default {
       });
 
       await Promise.all(heartBeatPromises);
+      await alertSqsCongestion(env, new AlertManager(env));
     } else if (controller.cron === "0 * * * *") {
       const clickhouseWrapper = new ClickhouseWrapper({
         CLICKHOUSE_HOST: env.CLICKHOUSE_HOST,

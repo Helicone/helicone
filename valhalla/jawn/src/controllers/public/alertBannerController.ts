@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Patch, Request, Route, Tags } from "tsoa";
-import { JawnAuthenticatedRequest } from "../../types/request";
+import { type JawnAuthenticatedRequest } from "../../types/request";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { err, ok, Result } from "../../packages/common/result";
 
