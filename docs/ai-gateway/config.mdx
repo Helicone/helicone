@@ -270,36 +270,44 @@ The following fields are available for both global and router-level rate limitin
   **Note:** Only available for global rate limiting configuration.
 </ParamField>
 
-## Helicone Observability
+## Helicone Add-Ons
 
-Configure integration with the Helicone platform for authentication and/or observability. When enabled, requests must include a valid Helicone API key.
+Configure integration with the Helicone platform for authentication and comprehensive observability. When enabled, requests must include a valid Helicone API key and all requests are automatically logged to your Helicone dashboard.
 
 [Learn more](/ai-gateway/helicone-integration)
 
-### Authentication
-
-If you plan on enabling authentication, you'll need to register your router with Helicone first.
-
-<ParamField path="helicone-observability.enable" type="boolean" default="false">
-  Enable Helicone platform integration and authentication.
+<ParamField path="helicone.enable-auth" type="boolean" default="false">
+  Enable Helicone authentication and observability.
 
   ```yaml
-  helicone-observability:
-    enable: true
+  helicone:
+    enable-auth: true
   ```
 
-  **When enabled:** Requests must include a valid Helicone API key, and observability data is automatically sent to Helicone.
-</ParamField>
+  **When enabled:** Must set the `HELICONE_CONTROL_PLANE_API_KEY` environment variable with your Helicone API key.
+  </ParamField>
 
-<ParamField path="helicone-observability.base-url" type="string" default="https://api.helicone.ai">
+<ParamField path="helicone.base-url" type="string" default="https://api.helicone.ai">
   Helicone API endpoint URL.
 
   ```yaml
-  helicone-observability:
+  helicone:
     base-url: "https://api.helicone.ai"
   ```
+
+  **Note:** Only change this if you're self-hosting Helicone. Use the default for Helicone Cloud.
 </ParamField>
 
+<ParamField path="helicone.websocket-url" type="string" default="wss://api.helicone.ai/ws/v1/router/control-plane">
+  WebSocket URL for control plane connection.
+
+  ```yaml
+  helicone:
+    websocket-url: "wss://api.helicone.ai/ws/v1/router/control-plane"
+  ```
+
+  **Note:** Only change this if you're self-hosting Helicone. Use the default for Helicone Cloud.
+</ParamField>
 
 ## Provider Configuration
 
