@@ -24,6 +24,8 @@ export interface Prompt2025Version {
   minor_version: number;
   commit_message: string;
 
+  created_at: string;
+
   // TODO: add another type for the user that created
   // it and union with this one for the info.
 }
@@ -33,6 +35,7 @@ export interface Prompt2025 {
   name: string;
   tags: string[];
   model: string;
+  created_at: string;
 }
 
 export interface PromptCreateResponse {
@@ -81,6 +84,46 @@ export class Prompt2025Controller extends Controller {
       this.setStatus(500);
     } else {
       this.setStatus(200); // set return status 201
+    }
+    return result;
+  }
+
+  @Post("query/versions")
+  public async getPrompt2025Versions(
+    @Body()
+    requestBody: {
+      promptId: string;
+      page: number;
+      pageSize: number;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<Prompt2025Version[], string>> {
+    const promptManager = new Prompt2025Manager(request.authParams);
+
+    const result = await promptManager.getPromptVersions(requestBody);
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
+  @Post("query/total-versions")
+  public async getPrompt2025TotalVersions(
+    @Body()
+    requestBody: {
+      promptId: string;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<number, string>> {
+    const promptManager = new Prompt2025Manager(request.authParams);
+
+    const result = await promptManager.getPromptTotalVersions(requestBody);
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
     }
     return result;
   }

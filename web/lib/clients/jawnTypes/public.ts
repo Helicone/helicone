@@ -79,6 +79,12 @@ export interface paths {
   "/v1/prompt-2025/query": {
     post: operations["GetPrompts2025"];
   };
+  "/v1/prompt-2025/query/versions": {
+    post: operations["GetPrompt2025Versions"];
+  };
+  "/v1/prompt-2025/query/total-versions": {
+    post: operations["GetPrompt2025TotalVersions"];
+  };
   "/v1/request/count/query": {
     post: operations["GetRequestCount"];
   };
@@ -1131,6 +1137,7 @@ export interface components {
       name: string;
       tags: string[];
       model: string;
+      created_at: string;
     };
     "ResultSuccess_Prompt2025-Array_": {
       data: components["schemas"]["Prompt2025"][];
@@ -1138,6 +1145,22 @@ export interface components {
       error: null;
     };
     "Result_Prompt2025-Array.string_": components["schemas"]["ResultSuccess_Prompt2025-Array_"] | components["schemas"]["ResultError_string_"];
+    Prompt2025Version: {
+      id: string;
+      prompt_id: string;
+      /** Format: double */
+      major_version: number;
+      /** Format: double */
+      minor_version: number;
+      commit_message: string;
+      created_at: string;
+    };
+    "ResultSuccess_Prompt2025Version-Array_": {
+      data: components["schemas"]["Prompt2025Version"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Prompt2025Version-Array.string_": components["schemas"]["ResultSuccess_Prompt2025Version-Array_"] | components["schemas"]["ResultError_string_"];
     ResultSuccess_number_: {
       /** Format: double */
       data: number;
@@ -3714,6 +3737,44 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Prompt2025-Array.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025Versions: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: double */
+          pageSize: number;
+          /** Format: double */
+          page: number;
+          promptId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025Version-Array.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025TotalVersions: {
+    requestBody: {
+      content: {
+        "application/json": {
+          promptId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_number.string_"];
         };
       };
     };
