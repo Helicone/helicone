@@ -27,6 +27,7 @@ export interface Env {
   SUPABASE_DATABASE_SSL: string;
   ENVIRONMENT: string;
   HYPERDRIVE: Hyperdrive;
+  SLACK_WEBHOOK_URL: string;
 }
 
 const constructorMapping: Record<string, any> = {

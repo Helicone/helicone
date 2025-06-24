@@ -14,19 +14,19 @@ export class AlertManager {
   COOLDOWN_PERIOD_MS = 5 * 60 * 1000;
   private utilityKv: Env["UTILITY_KV"];
   private resendApiKey: Env["RESEND_API_KEY"];
-  private slackApiKey: Env["SLACK_API_KEY"];
+  private slackWebhookUrl: Env["SLACK_WEBHOOK_URL"];
 
   constructor(private alertStore: AlertStore, private env: Env) {
     this.utilityKv = env.UTILITY_KV;
     this.resendApiKey = env.RESEND_API_KEY;
-    this.slackApiKey = env.SLACK_API_KEY;
+    this.slackWebhookUrl = env.SLACK_WEBHOOK_URL;
   }
 
   public async sendSlackMessageToChannel(
     channel: string,
     message: string
   ): Promise<Result<null, string>> {
-    if (!this.slackApiKey) {
+    if (!this.slackWebhookUrl) {
       return err("Slack API key not configured");
     }
 
@@ -48,10 +48,9 @@ export class AlertManager {
     ];
 
     try {
-      const res = await fetch("https://slack.com/api/chat.postMessage", {
+      const res = await fetch(this.slackWebhookUrl, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${this.slackApiKey}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({

@@ -38,10 +38,23 @@ S3_ENDPOINT = "http://localhost:9000"
 S3_ACCESS_KEY = "minioadmin"
 S3_SECRET_KEY = "minioadmin"
 S3_BUCKET_NAME = "request-response-storage"
-HELICONE_MANUAL_ACCESS_KEY = "Q2xH5Cwid/gAmuLv8QWhgcpNXA4DG1Dxe0ypQTJ8oEA="
+HELICONE_MANUAL_ACCESS_KEY="Q2xH5Cwid/gAmuLv8QWhgcpNXA4DG1Dxe0ypQTJ8oEA="
+QUEUE_PROVIDER="sqs"
+AWS_REGION="us-west-2"
+AWS_ACCESS_KEY_ID="AKIA4LT7EZHCOAREDFUL"
+AWS_SECRET_ACCESS_KEY="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"
+REQUEST_LOGS_QUEUE_URL="https://sqs.us-west-2.amazonaws.com/849596434884/request-response-logs-queue"
+REQUEST_LOGS_QUEUE_URL_LOW_PRIORITY="test"
+UPSTASH_KAFKA_URL="dead"
+UPSTASH_KAFKA_USERNAME="dead"
+UPSTASH_KAFKA_PASSWORD="bring back justin"
+SLACK_WEBHOOK_URL="https://hooks.slack.com/services/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"
 
 [triggers]
-crons = ["* * * * *", "0 * * * *", "0 10 * * mon"]
+crons = ["* * * * *", "0 * * * *", "0 10 * * mon", "*/5 * * * *"]
+
+[env.dev.triggers]
+crons = ["*/5 * * * *"]
 
 [env.production]
 name = "helicone-worker-prod"

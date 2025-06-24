@@ -33,7 +33,7 @@ export interface EU_Env {
   EU_AWS_REGION?: "eu-west-1";
 }
 export interface BASE_Env {
-  SLACK_API_KEY: string;
+  SLACK_WEBHOOK_URL: string;
   SUPABASE_SERVICE_ROLE_KEY: string;
   SUPABASE_URL: string;
   TOKENIZER_COUNT_API: string;
@@ -153,6 +153,24 @@ async function modifyEnvBasedOnPath(
       AWS_REGION: env.EU_AWS_REGION ?? "eu-west-1",
     };
   }
+
+  const supabaseClientUS = createClient<Database>(
+    env.SUPABASE_URL,
+    env.SUPABASE_SERVICE_ROLE_KEY
+  );
+  const alertManager = new AlertManager(
+    new AlertStore(
+      supabaseClientUS,
+      new ClickhouseClientWrapper({
+        CLICKHOUSE_HOST: env.CLICKHOUSE_HOST,
+        CLICKHOUSE_USER: env.CLICKHOUSE_USER,
+        CLICKHOUSE_PASSWORD: env.CLICKHOUSE_PASSWORD,
+      })
+    ),
+    env
+  );
+  console.log("alerting");
+  await alertSqsCongestion(env, alertManager);
 
   if (env.WORKER_TYPE) {
     return env;

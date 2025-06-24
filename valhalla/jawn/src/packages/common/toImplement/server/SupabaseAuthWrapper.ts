@@ -188,6 +188,7 @@ export class SupabaseConnector {
     authorization: HeliconeAuth,
     organizationId?: string
   ): AuthResult {
+    console.log("authorization", authorization);
     const cacheKey = await hashAuth(
       JSON.stringify(authorization) + organizationId
     );

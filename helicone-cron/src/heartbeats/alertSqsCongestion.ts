@@ -10,7 +10,7 @@ export async function alertSqsCongestion(env: Env, alertManager: AlertManager) {
   const sqsProducer = new SQSProducerImpl(env);
   // Check SQS queue size
   const queueSize = await sqsProducer.getQueueSize();
-  if (queueSize === -1) {
+  if (queueSize >= 0) {
     // Set logs to lower priority
     await callJawn(
       "/v1/public/alert-banner",
@@ -26,31 +26,27 @@ export async function alertSqsCongestion(env: Env, alertManager: AlertManager) {
       FIRE_ALERT_CHANNEL,
       `SQS size is too high..queue size: {${queueSize}}. Setting Alert Banner to active`
     );
-  } else if (queueSize < 10000000) {
+  } else if (queueSize < 10) {
     const alertBanners = await callJawn<
-      null,
+      object,
       {
-        data: {
-          updated_at: string;
-          title: string;
-          message: string;
-          id: string;
-          created_at: string;
-          active: boolean;
-        }[];
-      }
-    >("/v1/public/alert-banner", "GET", null, env);
+        updated_at: string;
+        title: string;
+        message: string;
+        id: number;
+        created_at: string;
+        active: boolean;
+      }[]
+    >("/v1/alert-banner", "GET", {}, env);
 
-    console.log("alertBanners", alertBanners);
-
-    const banner = alertBanners?.data?.find(
-      (banner) => banner.id === String(ALERT_BANNER_ID_DELAY_IN_QUEUE)
+    const banner = alertBanners?.find(
+      (banner) => banner.id === ALERT_BANNER_ID_DELAY_IN_QUEUE
     );
 
     if (banner && banner.active == false) {
       await callJawn(
-        "/v1/public/alert-banner",
-        "PATCH",
+        "/v1/public/security/alert-banner",
+        "POST",
         {
           id: ALERT_BANNER_ID_DELAY_IN_QUEUE,
           active: false,

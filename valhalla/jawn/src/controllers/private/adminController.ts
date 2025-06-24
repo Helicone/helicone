@@ -1325,7 +1325,8 @@ export class AdminController extends Controller {
   @Post("/backfill-costs")
   public async backfillCosts(
     @Request() request: JawnAuthenticatedRequest,
-    @Body() body: {
+    @Body()
+    body: {
       timeExpression: string;
       specifyModel: boolean;
       modelId: string;
@@ -1336,11 +1337,11 @@ export class AdminController extends Controller {
     success: boolean;
   }> {
     await authCheckThrow(request.authParams.userId);
-    
+
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    
+
     try {
-    const query = `
+      const query = `
     INSERT INTO request_response_rmt
     SELECT
       response_id,
@@ -1386,9 +1387,8 @@ export class AdminController extends Controller {
     WHERE
       request_created_at >= ${body.timeExpression}
       ${body.specifyModel ? `AND model = '${body.modelId}'` : ""}
-    `
-    const { error } = await clickhouseDb.dbQuery(query, []);
-    
+    `;
+      const { error } = await clickhouseDb.dbQuery(query, []);
     } catch (e) {
       console.error("Backfill error:", e);
       throw e;
