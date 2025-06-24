@@ -302,9 +302,11 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
 
     try {
       const result = await createPromptMutation.mutateAsync({
-        name: promptName,
-        tags: tags,
-        promptBody: promptBody as OpenAIChatRequest,
+        body: {
+          name: promptName,
+          tags: tags,
+          promptBody: promptBody as OpenAIChatRequest,
+        },
       });
 
       setNotification(

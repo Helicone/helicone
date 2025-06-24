@@ -1,9 +1,14 @@
 import { Small } from "@/components/ui/typography";
 
 import FoldedHeader from "@/components/shared/FoldedHeader";
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
-import { useGetPrompts } from "@/services/hooks/prompts";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
+import { useGetPromptsWithVersions } from "@/services/hooks/prompts";
 import { useState } from "react";
+import PromptCard from "./promptCard";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -12,8 +17,7 @@ interface PromptsPageProps {
 const PromptsPage = (props: PromptsPageProps) => {
   const [search, setSearch] = useState("");
 
-  const { data: prompts, isLoading } = useGetPrompts(search);
-  console.log(prompts);
+  const { data: prompts, isLoading } = useGetPromptsWithVersions(search);
 
   return (
     <main className="h-screen flex flex-col w-full animate-fade-in">
@@ -32,10 +36,40 @@ const PromptsPage = (props: PromptsPageProps) => {
             defaultSize={70}
             minSize={30}
           >
-            <div>Prompt list</div>
+            <div className="w-full h-full overflow-y-auto">
+              {isLoading ? (
+                <div className="p-4">Loading...</div>
+              ) : prompts && prompts.length > 0 ? (
+                prompts.map((promptWithVersions) => {
+                  const latestVersion = promptWithVersions.versions.reduce((latest, current) => 
+                    new Date(current.created_at) > new Date(latest.created_at) ? current : latest
+                  );
+                  
+                  const updatedAt = new Date(Math.max(
+                    ...promptWithVersions.versions.map(v => new Date(v.created_at).getTime())
+                  ));
+                  
+                  return (
+                    <PromptCard
+                      key={promptWithVersions.prompt.id}
+                      name={promptWithVersions.prompt.name}
+                      id={promptWithVersions.prompt.id}
+                      majorVersion={latestVersion.major_version}
+                      minorVersion={latestVersion.minor_version}
+                      totalVersions={promptWithVersions.totalVersions}
+                      model={promptWithVersions.prompt.model}
+                      updatedAt={updatedAt}
+                      createdAt={new Date(promptWithVersions.prompt.created_at)}
+                    />
+                  );
+                })
+              ) : (
+                <div className="p-4 text-muted-foreground">No prompts found</div>
+              )}
+            </div>
           </ResizablePanel>
           <ResizableHandle withHandle />
-          <ResizablePanel defaultSize={50} minSize={50}>
+          <ResizablePanel defaultSize={40} minSize={30} maxSize={60}>
             <div>Prompt details</div>
           </ResizablePanel>
         </ResizablePanelGroup>

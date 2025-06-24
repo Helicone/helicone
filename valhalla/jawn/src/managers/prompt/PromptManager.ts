@@ -64,13 +64,63 @@ export class Prompt2025Manager extends BaseManager {
         id,
         name,
         tags,
-        model
+        model,
+        created_at
       FROM prompts_2025
       WHERE name ILIKE $1 AND organization = $2
       ORDER BY created_at DESC
       LIMIT 100
     `,
       [`%${params.search}%`, this.authParams.organizationId]
+    );
+
+    if (result.error) {
+      return err(result.error);
+    }
+
+    return ok(result.data ?? []);
+  }
+
+  async getPromptTotalVersions(params: {
+    promptId: string;
+  }): Promise<Result<number, string>> {
+    const result = await dbExecute<{ count: number }>(
+      `SELECT
+        COUNT(*) as count
+      FROM prompts_2025_versions
+      WHERE prompt_id = $1 AND organization = $2
+      `,
+      [params.promptId, this.authParams.organizationId]
+    );
+
+    if (result.error) {
+      return err(result.error);
+    }
+
+    return ok(result.data?.[0]?.count ?? 0);
+  }
+
+  async getPromptVersions(params: {
+    promptId: string;
+    page: number;
+    pageSize: number;
+  }): Promise<Result<Prompt2025Version[], string>> {
+    const result = await dbExecute<Prompt2025Version>(
+      `
+      SELECT 
+        id,
+        prompt_id,
+        major_version,
+        minor_version,
+        commit_message,
+        created_at
+      FROM prompts_2025_versions
+      WHERE prompt_id = $1
+      AND organization = $2
+      ORDER BY created_at DESC
+      LIMIT $3 OFFSET $4
+      `,
+      [params.promptId, this.authParams.organizationId, params.pageSize, params.page * params.pageSize]
     );
 
     if (result.error) {
