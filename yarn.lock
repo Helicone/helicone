@@ -2136,6 +2136,11 @@
   resolved "https://registry.yarnpkg.com/@helicone/helpers/-/helpers-1.1.0.tgz#4012a7ec8df911dea77964855f280df7cca94d41"
   integrity sha512-TlCKpmeLDABo66ptIMWWQc2QFLoGAu1pVTm0+mVH6X3sYC92xnyP4BS6lyo+iqvkMN+W0SEYwDEthy5b2tpdXQ==
 
+"@helicone/prompts@1.0.15":
+  version "1.0.15"
+  resolved "https://registry.yarnpkg.com/@helicone/prompts/-/prompts-1.0.15.tgz#06b6bec9cf33eca1fc23f6b0dc6caed8aeefe84d"
+  integrity sha512-qCbNuLQZEQekH067t2rLCMgd9AJH9N68RODI5pN8WgOFScdJemTbuF9zqskY4P4GivRNPFTicmVPCquOZ5HZug==
+
 "@helicone/prompts@^1.0.11":
   version "1.0.12"
   resolved "https://registry.npmjs.org/@helicone/prompts/-/prompts-1.0.12.tgz"
