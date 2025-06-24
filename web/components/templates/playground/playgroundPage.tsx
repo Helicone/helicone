@@ -265,11 +265,12 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
 
   const createPromptMutation = useCreatePrompt();
 
-  const onSavePrompt = async () => {
+  const onSavePrompt = async (model: string, tags: string[], promptName: string) => {
     // TODO: Add functionality to update existing prompt to new
     // minor or major version.
-    // Currently just assumes we're creating a new prompt - we would probably define the behaviour based on the
+    // - Currently just assumes we're creating a new prompt - we would probably define the behaviour based on the
     // route params.
+    // - Use model slugs from AI Gateway, for now it just uses the selected model.
 
     if (!mappedContent) {
       setNotification("No mapped content", "error");
@@ -291,22 +292,15 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               json_schema: responseFormat.json_schema,
             }
           : undefined,
-    }; // as OpenAI.Chat.Completions.ChatCompletionCreateParams;
-
-    console.log("unasserted", promptBody);
-    console.log(
-      "asserted",
-      promptBody as OpenAI.Chat.Completions.ChatCompletionCreateParams
-    );
+    };
 
     try {
       const result = await createPromptMutation.mutateAsync({
-        name: "BOMBOCLAAAAAT",
-        tags: ["agagaagagag", "go go helicone"],
+        name: promptName,
+        tags: tags,
         promptBody: promptBody as OpenAIChatRequest,
       });
 
-      console.log("result", result);
       setNotification(`Prompt saved successfully! ${result.data?.id}`, "success");
     } catch (error) {
       console.error("Failed to save prompt:", error);
@@ -466,6 +460,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               setResponseFormat={setResponseFormat}
               modelParameters={modelParameters}
               setModelParameters={setModelParameters}
+              promptId={undefined} // TODO: From route params, for editing an existing prompt. For now, assume creating anew.
               onSavePrompt={onSavePrompt}
               onRun={onRun}
               useAIGateway={useAIGateway}
