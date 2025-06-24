@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useOrg } from "../../components/layout/org/organizationContext";
 import { getJawnClient } from "../../lib/clients/jawn";
 import type { OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
@@ -35,3 +35,28 @@ export const useCreatePrompt = () => {
     },
   });
 };
+
+
+export const useGetPrompts = (search: string) => {
+  const org = useOrg();
+  const queryClient = useQueryClient();
+
+  return useQuery({
+    queryKey: ["prompts"],
+    queryFn: async () => {
+      const jawnClient = getJawnClient(org?.currentOrg?.id);
+
+      const result = await jawnClient.POST("/v1/prompt-2025/query", {
+        body: {
+          search: search,
+        },
+      });
+
+      if (result.error || result.data?.error) {
+        throw new Error(result.error || result.data?.error || "Failed to get prompts");
+      }
+
+      return result.data;
+    }
+  })
+}

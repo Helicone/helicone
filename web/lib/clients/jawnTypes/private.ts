@@ -162,6 +162,9 @@ export interface paths {
   "/v1/prompt-2025/create": {
     post: operations["CreatePrompt2025"];
   };
+  "/v1/prompt-2025/query": {
+    post: operations["GetPrompts2025"];
+  };
   "/v1/request/count/query": {
     post: operations["GetRequestCount"];
   };
@@ -1026,6 +1029,18 @@ Json: JsonObject;
       };
       functions?: unknown[];
     };
+    Prompt2025: {
+      id: string;
+      name: string;
+      tags: string[];
+      model: string;
+    };
+    "ResultSuccess_Prompt2025-Array_": {
+      data: components["schemas"]["Prompt2025"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Prompt2025-Array.string_": components["schemas"]["ResultSuccess_Prompt2025-Array_"] | components["schemas"]["ResultError_string_"];
     ResultSuccess_number_: {
       /** Format: double */
       data: number;
@@ -16204,6 +16219,23 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_PromptCreateResponse.string_"];
+        };
+      };
+    };
+  };
+  GetPrompts2025: {
+    requestBody: {
+      content: {
+        "application/json": {
+          search: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025-Array.string_"];
         };
       };
     };
