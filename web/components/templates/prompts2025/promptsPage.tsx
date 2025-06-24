@@ -20,7 +20,6 @@ const PromptsPage = (props: PromptsPageProps) => {
   const [search, setSearch] = useState("");
 
   const { data: prompts, isLoading } = useGetPromptsWithVersions(search);
-  console.log(prompts);
 
   return (
     <main className="h-screen flex flex-col w-full animate-fade-in">
