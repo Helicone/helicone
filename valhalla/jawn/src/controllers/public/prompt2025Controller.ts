@@ -113,6 +113,7 @@ export class Prompt2025Controller extends Controller {
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<Prompt2025[], string>> {
+<<<<<<< HEAD
     const featureFlagResult = await checkFeatureFlag(
       request.authParams.organizationId,
       PROMPTS_FEATURE_FLAG
@@ -120,6 +121,8 @@ export class Prompt2025Controller extends Controller {
     if (featureFlagResult.error) {
       return err(featureFlagResult.error);
     }
+=======
+>>>>>>> 1a3aabb6c (start prompts page, prompts query endpoint)
     const promptManager = new Prompt2025Manager(request.authParams);
 
     const result = await promptManager.getPrompts(requestBody);
@@ -140,6 +143,7 @@ export class Prompt2025Controller extends Controller {
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<Prompt2025Version[], string>> {
+<<<<<<< HEAD
     const featureFlagResult = await checkFeatureFlag(
       request.authParams.organizationId,
       PROMPTS_FEATURE_FLAG
@@ -147,6 +151,8 @@ export class Prompt2025Controller extends Controller {
     if (featureFlagResult.error) {
       return err(featureFlagResult.error);
     }
+=======
+>>>>>>> 1a3aabb6c (start prompts page, prompts query endpoint)
     const promptManager = new Prompt2025Manager(request.authParams);
 
     const result = await promptManager.getPromptVersions(requestBody);
@@ -166,6 +172,7 @@ export class Prompt2025Controller extends Controller {
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<Prompt2025Version, string>> {
+<<<<<<< HEAD
     const featureFlagResult = await checkFeatureFlag(
       request.authParams.organizationId,
       PROMPTS_FEATURE_FLAG
@@ -173,6 +180,8 @@ export class Prompt2025Controller extends Controller {
     if (featureFlagResult.error) {
       return err(featureFlagResult.error);
     }
+=======
+>>>>>>> 1a3aabb6c (start prompts page, prompts query endpoint)
     const promptManager = new Prompt2025Manager(request.authParams);
     const result = await promptManager.getPromptProductionVersion(requestBody);
     if (result.error || !result.data) {
@@ -191,6 +200,7 @@ export class Prompt2025Controller extends Controller {
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<PromptVersionCounts, string>> {
+<<<<<<< HEAD
     const featureFlagResult = await checkFeatureFlag(
       request.authParams.organizationId,
       PROMPTS_FEATURE_FLAG
@@ -198,6 +208,8 @@ export class Prompt2025Controller extends Controller {
     if (featureFlagResult.error) {
       return err(featureFlagResult.error);
     }
+=======
+>>>>>>> 1a3aabb6c (start prompts page, prompts query endpoint)
     const promptManager = new Prompt2025Manager(request.authParams);
 
     const result = await promptManager.getPromptVersionCounts(requestBody);
