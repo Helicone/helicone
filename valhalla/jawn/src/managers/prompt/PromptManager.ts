@@ -13,6 +13,9 @@ import {
   PromptsQueryParams,
   PromptsResult,
 } from "../../controllers/public/promptController";
+import {
+  PromptCreateResponse
+} from "../../controllers/public/prompt2025Controller";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { FilterNode } from "@helicone-package/filters/filterDefs";
 import { buildFilterPostgres } from "@helicone-package/filters/filters";
@@ -21,10 +24,132 @@ import { BaseManager } from "../BaseManager";
 import { RequestManager } from "../request/RequestManager";
 
 import { S3Client } from "../../lib/shared/db/s3Client";
-import type { CompletionCreateParams } from 'openai/resources/completions';
+import type { OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
 import { AuthParams } from "../../packages/common/auth/types";
 
 
+const PROMPT_ID_LENGTH = 6;
+const MAX_PROMPT_ID_GENERATION_ATTEMPTS = 3;
+
+export class Prompt2025Manager extends BaseManager {
+  private s3Client: S3Client;
+
+  constructor(authParams: AuthParams) {
+    super(authParams);
+    this.s3Client = new S3Client(
+      process.env.S3_ACCESS_KEY ?? "",
+      process.env.S3_SECRET_KEY ?? "",
+      process.env.S3_ENDPOINT_PUBLIC ?? process.env.S3_ENDPOINT ?? "",
+      process.env.S3_BUCKET_NAME ?? "",
+      (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
+    );
+  }
+
+  private generateRandomPromptId() : string {
+    const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    let result = '';
+    for (let i = 0; i < PROMPT_ID_LENGTH; i++) {
+      result += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return result;
+  }
+
+  async createPrompt(params: {
+    name: string,
+    tags: string[],
+    promptBody: OpenAIChatRequest,
+  }): Promise<Result<{ id: string }, string>> {
+    // Create prompt
+    let attempts = 0;
+    let insertPromptResult = null;
+
+    while (attempts < MAX_PROMPT_ID_GENERATION_ATTEMPTS) {
+      const promptId = this.generateRandomPromptId();
+      try {
+        insertPromptResult = await dbExecute<{ id: string }>(
+          `
+        INSERT INTO prompts_2025 (id, name, tags, model, created_at, organization)
+        VALUES ($1, $2, $3, $4, NOW(), $5)
+        RETURNING id
+          `, [
+            promptId,
+            params.name,
+            params.tags,
+            params.promptBody.model,
+            this.authParams.organizationId,
+          ]
+        );
+        break;
+      } catch (error: any) {
+        if (error.code === '23505') {
+          attempts++;
+          continue;
+        }
+        return err(error);
+      }
+    }
+    
+    if (insertPromptResult?.error) {
+      return err(insertPromptResult.error);
+    }
+    
+    const promptId = insertPromptResult?.data?.[0]?.id ?? '';
+    
+    
+    const insertPromptVersionResult = await dbExecute<{ id: string }>(
+      `
+      INSERT INTO prompts_2025_versions (
+        created_at,
+        prompt_id,
+        major_version,
+        minor_version,
+        commit_message,
+        created_by,
+        organization
+      )
+      VALUES (NOW(), $1, 0, 0, 'First version.', $2, $3)
+      RETURNING id
+      `, [
+        promptId,
+        this.authParams.userId,
+        this.authParams.organizationId,
+      ]
+    )
+    
+    if (insertPromptVersionResult?.error) {
+      return err(insertPromptVersionResult.error);
+    }
+
+    const promptVersionId = insertPromptVersionResult?.data?.[0]?.id ?? '';
+
+    console.log("storing prompt", promptId, promptVersionId, params.promptBody);
+    const s3Result = await this.storePrompt(promptId, promptVersionId, params.promptBody);
+    if (s3Result.error) {
+      return err(s3Result.error);
+    }
+
+    return ok({ id: promptId });
+  }
+  
+  // Unsure about typing of the data, should double check this when writing using code.
+  // Unsure if we use every field in CompletionCreateParams.
+  private async storePrompt(
+    promptId: string,
+    promptVersionId: string,
+    promptBody: OpenAIChatRequest
+  ): Promise<Result<null, string>> {
+    if (!promptId) return err("Prompt ID is required");
+    const key = this.s3Client.getPromptKey(promptId, promptVersionId, this.authParams.organizationId);
+    
+    const s3result = await this.s3Client.store(key, JSON.stringify(promptBody)); 
+    if (s3result.error) return err(s3result.error);
+    
+    return ok(null);
+  }
+
+  // TODO: add other methods for deletion, etc.
+  // TODO: Add query methods for getting prompts and metrics from Postgres, Clickhouse.
+}
 
 // DEPRECATED
 // TODO: Remove this once Prompt2025Manager and new prompt system is live
@@ -947,47 +1072,4 @@ export class PromptManager extends BaseManager {
       return err(`Failed to create prompt input keys: ${error}`);
     }
   }
-}
-
-export class Prompt2025Manager extends BaseManager {
-  private s3Client: S3Client;
-
-  constructor(authParams: AuthParams) {
-    super(authParams);
-    this.s3Client = new S3Client(
-      process.env.S3_ACCESS_KEY ?? "",
-      process.env.S3_SECRET_KEY ?? "",
-      process.env.S3_ENDPOINT_PUBLIC ?? process.env.S3_ENDPOINT ?? "",
-      process.env.S3_BUCKET_NAME ?? "",
-      (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
-    );
-  }
-
-  async createPrompt(
-    name: string,
-    tags: string[],
-    promptBody: CompletionCreateParams,
-  ) {
-    // Create prompt
-    // Create prompt version
-    // Create prompt in s3
-  }
-  
-  // Unsure about typing of the data, should double check this when writing using code.
-  // Unsure if we use every field in CompletionCreateParams.
-  private async storePrompt(
-    promptId: string,
-    promptBody: CompletionCreateParams
-  ) {
-    if (!promptId) return err("Prompt ID is required");
-    const key = this.s3Client.getPromptKey(promptId, this.authParams.organizationId);
-    
-    const s3result = await this.s3Client.store(key, JSON.stringify(promptBody)); 
-    if (s3result.error) return err(s3result.error);
-    
-    return ok(null);
-  }
-
-  // TODO: add other methods for deletion, etc.
-  // TODO: Add query methods for getting prompts and metrics from Postgres, Clickhouse.
 }
