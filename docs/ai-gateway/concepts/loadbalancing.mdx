@@ -6,24 +6,63 @@ description: "Intelligent request routing across providers with latency-based P2
 
 The AI Gateway automatically distributes requests across multiple providers using sophisticated algorithms that consider latency, provider health, and your custom preferences. 
 
-All strategies are **rate-limit aware** and **health-monitored**—unhealthy providers are automatically removed and re-added when they recover. This is enabled by default and [configurable](#health-monitoring).
+All strategies are **rate-limit aware** and **health-monitored**—unhealthy providers are automatically removed and re-added when they recover.
 
-## Getting Started
-
-### Why Use Load Balancing?
-
-Load balancing helps you:
+**Benefits:**
 - **Optimize latency** by routing to the fastest available providers
 - **Improve reliability** with automatic failover when providers fail
 - **Handle rate limits** by temporarily removing rate-limited providers
 - **Control traffic distribution** with custom weights for cost optimization
 - **Enable gradual rollouts** and A/B testing across providers
 
-<Note>
-  For complete configuration options and syntax, see the [Configuration Reference](/ai-gateway/config#load-balancing).
-</Note>
+## Quick Start
 
-### Available Strategies
+<Steps>
+  <Step title="Create your configuration">
+    Create `ai-gateway-config.yaml` with latency-based routing (automatically picks the fastest provider):
+
+    ```yaml
+    routers:
+      default:
+        load-balance:
+          chat:
+            strategy: latency
+            providers:
+              - openai
+              - anthropic
+              - gemini
+    ```
+  </Step>
+
+  <Step title="Ensure your provider API keys are set">
+    ```bash
+    export OPENAI_API_KEY=sk-your-openai-key
+    export ANTHROPIC_API_KEY=sk-ant-your-anthropic-key
+    export GEMINI_API_KEY=your-gemini-key
+    ```
+  </Step>
+
+  <Step title="Start the gateway">
+    ```bash
+    npx @helicone/ai-gateway --config ai-gateway-config.yaml
+    ```
+  </Step>
+
+  <Step title="Test load balancing">
+    ```bash
+    curl -X POST http://localhost:8080/router/default/v1/chat/completions \
+      -H "Content-Type: application/json" \
+      -d '{
+        "model": "gpt-4o-mini",
+        "messages": [{"role": "user", "content": "Hello!"}]
+      }'
+    ```
+    
+    ✅ The gateway automatically routes to the fastest available provider!
+  </Step>
+</Steps>
+
+## Available Strategies
 
 <AccordionGroup>
   <Accordion title="Latency-based (P2C + PeakEWMA) - Default" icon="bolt">
@@ -86,7 +125,7 @@ Load balancing helps you:
   Additional load balancing strategies (Cost-Optimized, Model-Level Weighted, Tag-based Routing) are [coming soon](#coming-soon) for advanced routing scenarios.
 </Note>
 
-### Configuration Examples
+## Use Cases
 
 <Tabs>
   <Tab title="Production API - Optimize for Speed">
@@ -163,43 +202,52 @@ Load balancing helps you:
   </Tab>
 </Tabs>
 
-<Note>
-  For complete configuration options and syntax, see the [Configuration Reference](/ai-gateway/config#load-balancing).
-</Note>
+## How It Works
 
+### Request Flow
 
-## Reference
+<Steps>
+  <Step title="Request Arrives">
+    A request comes in for a specific model (e.g., `gpt-4o-mini`)
+  </Step>
+  
+  <Step title="Provider Selection">
+    The load balancer identifies which providers can handle this model and applies your chosen strategy:
+    
+    - **Latency strategy**: Picks 2 random healthy providers, routes to the one with lower load
+    - **Weighted strategy**: Routes based on your configured percentages
+  </Step>
+  
+  <Step title="Health Check">
+    Before routing, the gateway ensures the selected provider is healthy (not rate-limited, not failing)
+  </Step>
+  
+  <Step title="Request Forwarded">
+    The request is sent to the selected provider with the original model name
+  </Step>
+  
+  <Step title="Response & Learning">
+    The response is returned to you, and the gateway updates its latency/health metrics for future routing decisions
+  </Step>
+</Steps>
 
-### Load Balancing Levels
+### What Gets Load Balanced
 
-**Provider-Level Load Balancing**
+The AI Gateway distributes requests across **providers** (OpenAI, Anthropic, Google, etc.) that support the requested model.
 
-The AI Gateway currently supports load balancing across different AI providers and their regional deployments. This allows you to distribute traffic across different AI companies (OpenAI, Anthropic, Google) and their available regions for optimal performance and reliability.
+**Example**: When you request `gpt-4o-mini`:
+- ✅ **OpenAI** - Native support for `gpt-4o-mini`
+- ✅ **Anthropic** - Via model mapping to `claude-3-5-haiku` 
+- ✅ **Ollama** - Via model mapping to `llama3.2`
 
-**Examples:**
-- **Providers**: OpenAI vs Anthropic vs Google Gemini
-- **Deployments/Regions**: `us-east-1` vs `us-west-2` vs `eu-west-1`
+**Example**: When you request a model not in any mappings:
+- ✅ **OpenAI** - If OpenAI natively supports it
+- ❌ **Anthropic** - No mapping available
+- ❌ **Ollama** - No mapping available
 
-<Note>
-  Model-level load balancing (provider+model pairs) is [coming soon](#coming-soon) for more granular control.
-</Note>
+The load balancer only considers providers that can actually handle your request.
 
-### Choosing the Right Strategy
-
-| Use Case                 | Recommended Strategy       | Availability |
-| ------------------------ | -------------------------- | ------------ |
-| **Production APIs**      | Latency-based (P2C)        | v0           |
-| **Provider migration**   | Weighted                   | v0           |
-| **A/B testing**          | Weighted                   | v0           |
-| **Compliance routing**   | [Multiple AI Gateways](#compliance-based-routing) | v0 |
-
-<Note>
-  Advanced strategies (Cost-optimized, Model-level weighted, Tag-based routing) are [coming soon](#coming-soon) for more sophisticated routing scenarios.
-</Note>
-
-## Advanced Configuration
-
-### Health Monitoring
+### Automatic Health Monitoring
 
 All load balancing strategies automatically handle provider failures through intelligent health monitoring:
 
@@ -222,13 +270,21 @@ All load balancing strategies automatically handle provider failures through int
   The AI Gateway monitors provider health every 5 seconds by default. The health check uses a rolling 60-second window with configurable error thresholds.
 </Note>
 
-To customize health monitoring behavior, see the [Configuration Reference](/ai-gateway/config#health-monitoring).
+### Strategy Selection Guide
 
-### Compliance-Based Routing
+| Use Case                 | Recommended Strategy       | 
+| ------------------------ | -------------------------- |
+| **Production APIs**      | Latency-based - Automatically optimizes for speed |
+| **Provider migration**   | Weighted - Gradual traffic shifting with instant rollback |
+| **A/B testing**          | Weighted - Controlled traffic splits for comparison |
+| **Cost optimization**    | Weighted - Route more traffic to cheaper providers |
+| **Compliance routing**   | [Multiple AI Gateways](#compliance-based-routing) - Better isolation |
+
+## Compliance-Based Routing
 
 For compliance requirements, deploy **multiple AI Gateway instances** rather than complex routing logic. This provides better isolation, security, and auditability.
 
-#### Common Scenarios
+### Common Scenarios
 
 <Tabs>
   <Tab title="Data Sovereignty - GDPR">
@@ -294,6 +350,10 @@ For compliance requirements, deploy **multiple AI Gateway instances** rather tha
 </Tabs>
 
 **Benefits:** Separate networks, authentication, audit trails, and certification scope per deployment.
+
+<Note>
+  For complete configuration options and syntax, see the [Configuration Reference](/ai-gateway/config#load-balancing).
+</Note>
 
 ## Coming Soon
 
