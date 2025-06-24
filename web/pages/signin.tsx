@@ -93,7 +93,7 @@ const SignIn = ({
                 });
 
               if (error) {
-                setNotification("Error logging in. Please try again.", "error");
+                setNotification(error, "error");
                 console.error(error);
                 return;
               }

@@ -4,6 +4,60 @@ import { HeliconeOrg, HeliconeUser } from "../../auth/types";
 import { err, ok, Result } from "../../result";
 
 export const authClient = createAuthClient();
+
+// Helper: Check app DB for user (real API call)
+async function userExistsInAppDb(email: string): Promise<boolean> {
+  try {
+    const res = await fetch("/api/internal/user-exists", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    if (!res.ok) return false;
+    const data = await res.json();
+    return !!data.exists;
+  } catch (e) {
+    return false;
+  }
+}
+
+// Helper: Ensure user exists in Better Auth
+async function ensureUserInBetterAuth(email: string, password: string): Promise<boolean> {
+  // Check if user exists in app DB
+  const exists = await userExistsInAppDb(email);
+  if (!exists) return false;
+  
+  // For Better Auth, we would typically use the signUp API to create the user
+  // Since we're in the sign-in flow, we'll try to create the user using Better Auth's signUp
+  try {
+    const result = await authClient.signUp.email({
+      email,
+      password,
+      name: "",
+    });
+    
+    if (result.data) {
+      return true;
+    }
+    
+    // If signUp fails because user already exists, that's also fine
+    if (result.error && result.error.message && result.error.message.includes('already exists')) {
+      return true;
+    }
+    
+    // Handle 422 error (user exists in Better Auth but not as credential)
+    if (result.error && result.error.status === 422) {
+      console.log('Sign-up failed: user already exists in Better Auth, but no credential. Prompt for password reset.');
+      return false;
+    }
+    
+    return false;
+  } catch (error) {
+    console.error('Error creating user in Better Auth:', error);
+    return false;
+  }
+}
+
 export const heliconeAuthClientFromSession = (
   session: ReturnType<typeof authClient.useSession>["data"],
   refetch: () => void,
@@ -86,11 +140,35 @@ export const heliconeAuthClientFromSession = (
           };
           return ok(user);
         } else if (result.error) {
-          return err(result.error.message || "Sign in failed");
+          try {
+            const ensured = await ensureUserInBetterAuth(params.email, params.password);
+            if (ensured) {
+              // Retry sign-in
+              const retry = await authClient.signIn.email({
+                email: params.email,
+                password: params.password,
+              });
+              if (retry.data) {
+                const user = {
+                  id: retry.data.user.id,
+                  email: retry.data.user.email ?? "",
+                };
+                return ok(user);
+              }
+              // If the retry fails with 401 or 422, show the custom error
+              if (retry.error && (retry.error.status === 401 || retry.error.status === 422)) {
+                return err("Account exists but cannot be signed in with email/password. Please reset your password or contact support.");
+              }
+              return err(retry.error?.message || "Sign in failed after provisioning");
+            }
+            // If auto-provisioning failed due to 422, suggest password reset
+            return err("Account exists but cannot be signed in with email/password. Please reset your password or contact support.");
+          } catch (provisionErr: any) {
+            return err(provisionErr?.message || "Auto-provisioning failed");
+          }
         }
-        return err("Sign in failed");
+        return err(result.error?.message || "Sign in failed");
       } catch (error: any) {
-        console.error("Better Auth password sign in error:", error);
         return err(error.message || "Sign in failed");
       }
     },
