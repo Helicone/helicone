@@ -4,7 +4,6 @@ create table "public"."prompts_2025" (
     "created_at" timestamp with time zone not null default now(),
     "name" character varying,
     "tags" text[],
-    "model" text not null,
     "production_version" uuid default null
 );
 
@@ -20,6 +19,7 @@ create table "public"."prompts_2025_versions" (
     "major_version" integer not null,
     "minor_version" integer,
     "commit_message" text,
+    "model" text not null,
     "created_by" uuid default gen_random_uuid(),
     "id" uuid not null default gen_random_uuid()
 );
