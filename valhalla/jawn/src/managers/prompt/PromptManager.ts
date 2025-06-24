@@ -122,6 +122,22 @@ export class Prompt2025Manager extends BaseManager {
 
     const promptVersionId = insertPromptVersionResult?.data?.[0]?.id ?? '';
 
+    const updateProductionVersionResult = await dbExecute(
+      `
+      UPDATE prompts_2025
+      SET production_version = $1
+      WHERE id = $2 AND organization = $3
+      `, [
+        promptVersionId,
+        promptId,
+        this.authParams.organizationId,
+      ]
+    )
+
+    if (updateProductionVersionResult?.error) {
+      return err(updateProductionVersionResult.error);
+    }
+
     console.log("storing prompt", promptId, promptVersionId, params.promptBody);
     const s3Result = await this.storePrompt(promptId, promptVersionId, params.promptBody);
     if (s3Result.error) {
