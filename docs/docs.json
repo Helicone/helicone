@@ -453,6 +453,15 @@
                 ]
               },
               {
+                "group": "AI Gateway",
+                "pages": [
+                  "guides/cookbooks/ai-gateway/overview",
+                  "guides/cookbooks/ai-gateway/fallbacks",
+                  "guides/cookbooks/ai-gateway/caching",
+                  "guides/cookbooks/ai-gateway/rate-limits"
+                ]
+              },
+              {
                 "group": "Prompt Engineering",
                 "pages": [
                   "guides/prompt-engineering/overview",

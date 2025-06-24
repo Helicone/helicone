@@ -1,0 +1,47 @@
+---
+title: "Scaling your AI app with Helicone AI Gateway: A Production Cookbook"
+sidebarTitle: "Overview"
+description: "Hands-on guide to scaling production AI apps with Helicone AI Gateway"
+"twitter:title": "Overview - Scaling your AI app with Helicone AI Gateway | Helicone"
+---
+
+import QuestionsSection from "/snippets/questions-section.mdx";
+
+<Frame>
+  <img
+    src="/images/guide/prompt-engineering/overview.webp"
+    alt="Helicone's guides for prompt engineering to guide Large Language Models to produce accurate and desired outputs."
+  />
+</Frame>
+
+You've built an AI app and it's gaining traction. Users love it, traffic is growing, and everything seems great—until your LLM provider goes down or costs start spiraling out of control.
+
+LLM Routers like Helicone AI Gateway were designed to solve these problems and are quickly becoming the standard for scaling AI apps.
+
+This cookbook walks through real production scenarios and shows exactly how to solve problems and scale with Helicone AI Gateway. Each recipe builds on the previous one, taking you from basic reliability to enterprise-scale optimization.
+
+## Your AI App's Journey
+
+We'll follow a fictional AI-powered writing assistant called "**DraftGenius**" as it scales from prototype to production. Starting with simple fallbacks for reliability, we'll progressively add cost controls, user management, and enterprise features as the app grows.
+
+## What You'll Learn
+
+1. **Reliability First**: Adding fallbacks when providers go down
+2. **Cost Control**: Implementing caching to reduce API calls by up to 90%+
+3. **User Management**: Rate limiting specific users and groups
+4. **Multi-Environment**: Different configs for dev/staging/prod
+5. **Advanced Routing**: A/B testing and gradual provider migration
+6. **Security**: Authentication and access control
+7. **Observability**: Monitoring and debugging at scale
+8. **Cost Optimization**: Combining features for maximum savings
+9. **Enterprise Patterns**: Compliance, regional routing, and audit trails
+
+Each chapter includes real code, configurations, and step-by-step instructions.
+
+Let's start with the most common problem: what happens when your LLM provider goes down?
+
+<Card title="Adding Fallbacks for Reliability" icon="server" href="/guides/cookbooks/ai-gateway/fallbacks">
+  Use fallbacks to make your AI app more reliable
+</Card>
+
+<QuestionsSection />

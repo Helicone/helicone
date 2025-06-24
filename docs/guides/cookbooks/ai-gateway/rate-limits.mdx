@@ -1,0 +1,117 @@
+---
+title: "Implementing Rate Limits to Protect Your App"
+sidebarTitle: "Implementing Rate Limits"
+description: "Use rate limits to protect your app from abuse and save money with Helicone AI Gateway"
+"twitter:title": "Implementing Rate Limits | Helicone"
+---
+
+**DraftGenius** has a free tier, and some users are exploiting it, degrading performance for everyone. Other users are starting to complain. You need granular control over who can make how many requests.
+
+**The Solution**: Implement rate limiting. With Helicone AI Gateway, you can set rate limits at multiple levels—global, per router, and per user.
+
+## Basic Rate Limiting
+
+Start with global rate limits to protect your infrastructure:
+
+```yaml
+global:
+  rate-limit:
+    store: in-memory
+    per-api-key:
+      capacity: 100
+      refill-frequency: 1m  # 100 requests per minute
+    cleanup-interval: 5m
+```
+
+This applies to all requests across all routers.
+
+## How Rate Limits Work
+
+The gateway uses <a href="https://en.wikipedia.org/wiki/Generic_cell_rate_algorithm" target="_blank" rel="noopener">Generic Cell Rate Algorithm (GCRA)</a>, which provides smooth rate limiting with burst capacity. Think of it as a "token bucket" that refills over time.
+
+### How GCRA Works
+
+**1. You start with a bucket of tokens**
+- `capacity: 100` = Your bucket holds 100 tokens max
+
+**2. Each request consumes one token**
+- Request arrives → Takes 1 token from bucket
+- No tokens left → Request rejected (429 error)
+
+**3. Tokens refill continuously**
+- `refill-frequency: 1m` = Time to refill ALL tokens
+- This means 1.67 tokens get added to the bucket every second
+
+## Multi-Tier Rate Limiting
+
+You can set different rate limits for different routers—useful for different user tiers:
+
+```yaml
+routers:
+  # Free tier - strict limits
+  free:
+    rate-limit:
+      per-api-key:
+        capacity: 100
+        refill-frequency: 1h  # 100 requests per hour
+  
+  # Pro tier - generous limits
+  pro:
+    rate-limit:
+      per-api-key:
+        capacity: 1000
+        refill-frequency: 1m  # 1000 requests per minute
+  
+  # Enterprise - custom limits
+  enterprise:
+    rate-limit:
+      per-api-key:
+        capacity: 10000
+        refill-frequency: 1m  # 10k requests per minute
+```
+
+## Per-User Rate Limiting
+
+When using Helicone authentication, you can set rate limits per API key:
+
+```yaml
+helicone:
+  enable-auth: true
+
+routers:
+  production:
+    rate-limit:
+      per-api-key:
+        capacity: 500
+        refill-frequency: 1m
+```
+
+Each user's Helicone API key gets its own rate limit bucket.
+
+<Note>
+  When using Caching, rate limits count actual provider requests, not cache hits.
+</Note>
+
+## Advanced Patterns
+
+### Time-of-Day Limits
+
+Use multiple routers for time-based limits with peak hours having higher limits and off hours having lower limits, routing requests based on current time
+
+### Cost-Based Rate Limiting
+
+Limit by estimated cost instead of request count, tracking costs per user and checking against monthly spend to dynamically adjust limits.
+
+### Dynamic Rate Limiting
+
+Adjust limits based on user behavior by scoring users based on request patterns, decreasing score for suspicious patterns and increasing score for normal usage.
+
+## Key Takeaways
+
+1. **Layered approach**: Global → Router → User-specific limits
+2. **GCRA algorithm**: Smooth rate limiting with burst capacity
+3. **Cache synergy**: Cache hits don't count against limits
+
+Now that individual features work well, let's tackle a new challenge: managing different environments efficiently.
+
+<QuestionsSection />
