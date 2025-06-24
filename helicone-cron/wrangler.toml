@@ -13,3 +13,7 @@ name = "helicone-heartbeat-prod"
 binding = "HYPERDRIVE"
 id = "e5d49fcb7b0942e7b0ec8f4c27c322e7"
 localConnectionString = "postgresql://postgres:postgres@localhost:54322/postgres"
+
+[vars]
+VALHALLA_URL = "http://localhost:8585"
+HELICONE_MANUAL_ACCESS_KEY="Q2xH5Cwid/gAmuLv8QWhgcpNXA4DG1Dxe0ypQTJ8oEA="

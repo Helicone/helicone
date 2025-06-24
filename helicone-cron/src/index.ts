@@ -10,6 +10,8 @@ import { GraphQLHeartBeat } from "./heartbeats/graphQL";
 import { OpenAIProxyHeartBeat } from "./heartbeats/oaiProxy";
 import { UsageManager } from "./managers/UsageManager";
 import { PgWrapper } from "./db/PgWrapper";
+import { alertSqsCongestion } from "./heartbeats/alertSqsCongestion";
+import { AlertManager } from "./managers/AlertManager";
 
 export interface Env {
   OPENAI_API_KEY: string;
@@ -28,6 +30,14 @@ export interface Env {
   ENVIRONMENT: string;
   HYPERDRIVE: Hyperdrive;
   SLACK_WEBHOOK_URL: string;
+  SENTRY_API_KEY: string;
+  SENTRY_PROJECT_ID: string;
+  VALHALLA_URL: string;
+  HELICONE_MANUAL_ACCESS_KEY: string;
+  AWS_REGION: string;
+  AWS_ACCESS_KEY_ID: string;
+  AWS_SECRET_ACCESS_KEY: string;
+  REQUEST_LOGS_QUEUE_URL: string;
 }
 
 const constructorMapping: Record<string, any> = {
@@ -50,6 +60,7 @@ export default {
     ctx: ExecutionContext
   ): Promise<void> {
     if (controller.cron === "* * * * *") {
+      await alertSqsCongestion(env, new AlertManager(env));
       const heartBeats = JSON.parse(env.HEARTBEAT_URLS_JSON) as HeartBeatItem[];
 
       const heartBeatPromises = heartBeats.map(async (item) => {
