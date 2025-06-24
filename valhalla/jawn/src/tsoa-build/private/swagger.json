@@ -2080,6 +2080,366 @@
 					}
 				]
 			},
+			"PromptCreateResponse": {
+				"properties": {
+					"id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_PromptCreateResponse_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/PromptCreateResponse"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_PromptCreateResponse.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_PromptCreateResponse_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"Record_string.number_": {
+				"properties": {},
+				"additionalProperties": {
+					"type": "number",
+					"format": "double"
+				},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
+			"OpenAIChatRequest": {
+				"description": "Simplified interface for the OpenAI Chat request format",
+				"properties": {
+					"model": {
+						"type": "string"
+					},
+					"messages": {
+						"items": {
+							"properties": {
+								"tool_calls": {
+									"items": {
+										"properties": {
+											"type": {
+												"type": "string",
+												"enum": [
+													"function"
+												],
+												"nullable": false
+											},
+											"function": {
+												"properties": {
+													"arguments": {
+														"type": "string"
+													},
+													"name": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"arguments",
+													"name"
+												],
+												"type": "object"
+											},
+											"id": {
+												"type": "string"
+											}
+										},
+										"required": [
+											"type",
+											"function",
+											"id"
+										],
+										"type": "object"
+									},
+									"type": "array"
+								},
+								"tool_call_id": {
+									"type": "string"
+								},
+								"name": {
+									"type": "string"
+								},
+								"content": {
+									"anyOf": [
+										{
+											"type": "string"
+										},
+										{
+											"items": {
+												"properties": {
+													"image_url": {
+														"properties": {
+															"url": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"url"
+														],
+														"type": "object"
+													},
+													"text": {
+														"type": "string"
+													},
+													"type": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"type"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										}
+									],
+									"nullable": true
+								},
+								"role": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"content",
+								"role"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"temperature": {
+						"type": "number",
+						"format": "double"
+					},
+					"top_p": {
+						"type": "number",
+						"format": "double"
+					},
+					"max_tokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"max_completion_tokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"stream": {
+						"type": "boolean"
+					},
+					"stop": {
+						"anyOf": [
+							{
+								"items": {
+									"type": "string"
+								},
+								"type": "array"
+							},
+							{
+								"type": "string"
+							}
+						]
+					},
+					"tools": {
+						"items": {
+							"properties": {
+								"function": {
+									"properties": {
+										"parameters": {
+											"$ref": "#/components/schemas/Record_string.any_"
+										},
+										"description": {
+											"type": "string"
+										},
+										"name": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"parameters",
+										"description",
+										"name"
+									],
+									"type": "object"
+								},
+								"type": {
+									"type": "string",
+									"enum": [
+										"function"
+									],
+									"nullable": false
+								}
+							},
+							"required": [
+								"function",
+								"type"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"tool_choice": {
+						"anyOf": [
+							{
+								"properties": {
+									"function": {
+										"properties": {
+											"name": {
+												"type": "string"
+											},
+											"type": {
+												"type": "string",
+												"enum": [
+													"function"
+												],
+												"nullable": false
+											}
+										},
+										"required": [
+											"name",
+											"type"
+										],
+										"type": "object"
+									},
+									"type": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"type"
+								],
+								"type": "object"
+							},
+							{
+								"type": "string",
+								"enum": [
+									"none",
+									"auto",
+									"required"
+								]
+							}
+						]
+					},
+					"parallel_tool_calls": {
+						"type": "boolean"
+					},
+					"reasoning_effort": {
+						"type": "string",
+						"enum": [
+							"low",
+							"medium",
+							"high"
+						]
+					},
+					"frequency_penalty": {
+						"type": "number",
+						"format": "double"
+					},
+					"presence_penalty": {
+						"type": "number",
+						"format": "double"
+					},
+					"logit_bias": {
+						"$ref": "#/components/schemas/Record_string.number_"
+					},
+					"logprobs": {
+						"type": "boolean"
+					},
+					"top_logprobs": {
+						"type": "number",
+						"format": "double"
+					},
+					"n": {
+						"type": "number",
+						"format": "double"
+					},
+					"modalities": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"prediction": {},
+					"audio": {},
+					"response_format": {
+						"properties": {
+							"json_schema": {},
+							"type": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"type"
+						],
+						"type": "object"
+					},
+					"seed": {
+						"type": "number",
+						"format": "double"
+					},
+					"service_tier": {
+						"type": "string"
+					},
+					"store": {
+						"type": "boolean"
+					},
+					"stream_options": {},
+					"metadata": {
+						"$ref": "#/components/schemas/Record_string.string_"
+					},
+					"user": {
+						"type": "string"
+					},
+					"function_call": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"properties": {
+									"name": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"name"
+								],
+								"type": "object"
+							}
+						]
+					},
+					"functions": {
+						"items": {},
+						"type": "array"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
 			"ResultSuccess_number_": {
 				"properties": {
 					"data": {
@@ -2664,7 +3024,8 @@
 					"X",
 					"AVIAN",
 					"NEBIUS",
-					"NOVITA"
+					"NOVITA",
+					"OPENPIPE"
 				]
 			},
 			"Provider": {
@@ -3303,15 +3664,6 @@
 				],
 				"type": "object",
 				"additionalProperties": false
-			},
-			"Record_string.number_": {
-				"properties": {},
-				"additionalProperties": {
-					"type": "number",
-					"format": "double"
-				},
-				"type": "object",
-				"description": "Construct a type with a set of properties K of type T"
 			},
 			"HeliconeRequest": {
 				"properties": {
@@ -47618,6 +47970,61 @@
 						}
 					}
 				]
+			}
+		},
+		"/v1/prompt-2025/create": {
+			"post": {
+				"operationId": "CreatePrompt2025",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_PromptCreateResponse.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt2025"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"promptBody": {
+										"$ref": "#/components/schemas/OpenAIChatRequest"
+									},
+									"tags": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									},
+									"name": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"promptBody",
+									"tags",
+									"name"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/request/count/query": {
