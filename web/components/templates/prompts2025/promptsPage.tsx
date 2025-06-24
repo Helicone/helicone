@@ -9,6 +9,8 @@ import {
 import { useGetPromptsWithVersions } from "@/services/hooks/prompts";
 import { useState } from "react";
 import PromptCard from "./promptCard";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -18,6 +20,7 @@ const PromptsPage = (props: PromptsPageProps) => {
   const [search, setSearch] = useState("");
 
   const { data: prompts, isLoading } = useGetPromptsWithVersions(search);
+  console.log(prompts);
 
   return (
     <main className="h-screen flex flex-col w-full animate-fade-in">
@@ -36,10 +39,24 @@ const PromptsPage = (props: PromptsPageProps) => {
             defaultSize={70}
             minSize={30}
           >
-            <div className="w-full h-full overflow-y-auto">
-              {isLoading ? (
-                <div className="p-4">Loading...</div>
-              ) : prompts && prompts.length > 0 ? (
+            <div className="w-full h-full flex flex-col">
+              <div className="p-4 border-b border-border bg-background">
+                <div className="relative">
+                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    placeholder="Search prompts..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
+              </div>
+              
+              {/* Prompts list */}
+              <div className="flex-1 overflow-y-auto">
+                {isLoading ? (
+                  <div className="p-4">Loading...</div>
+                ) : prompts && prompts.length > 0 ? (
                 prompts.map((promptWithVersions) => {
                   const latestVersion = promptWithVersions.versions.reduce((latest, current) => 
                     new Date(current.created_at) > new Date(latest.created_at) ? current : latest
@@ -63,9 +80,10 @@ const PromptsPage = (props: PromptsPageProps) => {
                     />
                   );
                 })
-              ) : (
-                <div className="p-4 text-muted-foreground">No prompts found</div>
-              )}
+                ) : (
+                  <div className="p-4 text-muted-foreground">No prompts found</div>
+                )}
+              </div>
             </div>
           </ResizablePanel>
           <ResizableHandle withHandle />
