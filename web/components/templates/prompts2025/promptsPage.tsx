@@ -8,7 +8,8 @@ import {
 } from "@/components/ui/resizable";
 import { useGetPromptsWithVersions } from "@/services/hooks/prompts";
 import { useState } from "react";
-import PromptCard from "./promptCard";
+import PromptCard from "./PromptCard";
+// import PromptDetails from "./PromptDetails";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 
@@ -87,7 +88,8 @@ const PromptsPage = (props: PromptsPageProps) => {
           </ResizablePanel>
           <ResizableHandle withHandle />
           <ResizablePanel defaultSize={40} minSize={30} maxSize={60}>
-            <div>Prompt details</div>
+            <div>bruh</div>
+            {/* <PromptDetails /> */}
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
