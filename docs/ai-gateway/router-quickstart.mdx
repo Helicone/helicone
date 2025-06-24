@@ -14,7 +14,7 @@ Ready to unlock the full power of the AI Gateway? This guide will walk you throu
 
 Think of routers as separate "virtual gateways" within your single AI Gateway deployment. Each router has its own:
 
-- **URL endpoint** - `http://localhost:8080/router/{name}/v1/chat/completions`
+- **URL endpoint** - `http://localhost:8080/router/{name}/v1`
 - **Load balancing strategy** - How requests are distributed across providers
 - **Provider pool** - Which LLM providers are available
 - **Features** - Caching, rate limiting, retries, and more
@@ -40,7 +40,7 @@ routers:
 
 **What this does:**
 - Creates a router named `my-router` 
-- Available at `http://localhost:8080/router/my-router/v1/chat/completions`
+- Available at `http://localhost:8080/router/my-router/v1`
 - Uses [latency-based load balancing](/ai-gateway/concepts/loadbalancing#latency-based-p2c-peakewma-default) between OpenAI and Anthropic
 - Automatically routes to whichever provider responds fastest
 
@@ -51,7 +51,7 @@ routers:
   
   <Step title="Restart the gateway">
     ```bash
-    npx @helicone/ai-gateway start --config ai-gateway-config.yaml
+    npx @helicone/ai-gateway --config ai-gateway-config.yaml
     ```
   </Step>
   
@@ -61,7 +61,7 @@ routers:
     import { OpenAI } from "openai";
 
     const openai = new OpenAI({
-      baseURL: "http://localhost:8080/router/my-router",
+      baseURL: "http://localhost:8080/router/my-router/v1",
       apiKey: "fake-api-key", // Required by SDK, but gateway handles real auth
     });
 
@@ -73,14 +73,16 @@ routers:
     console.log(response);
     ```
     ```python Python
-    import openai
+    from openai import OpenAI
 
-    openai.api_base = "http://localhost:8080/router/my-router"
-    openai.api_key = "fake-api-key" # Required by SDK, but gateway handles real auth
+    client = OpenAI(
+        base_url="http://localhost:8080/router/my-router/v1",
+        api_key="sk-fake-key",
+    )
 
-    response = openai.ChatCompletion.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": "Hello from my custom router!"}]
+    response = client.chat.completions.create(
+        model="openai/gpt-4o-mini",
+        messages=[{"role": "user", "content": "Hello from my custom router!"}],
     )
     ```
     ```bash cURL
@@ -111,9 +113,9 @@ routers:
           - openai
           - anthropic
     cache:
-      enabled: true
-      directive: "max-age=3600"  # Cache for 1 hour
-      buckets: 1                 # Single response per cache key
+      store:
+        in-memory: {}
+      directive: "max-age=3600"
 ```
 
 **What this adds:**
@@ -128,7 +130,7 @@ routers:
   
   <Step title="Restart the gateway">
     ```bash
-    npx @helicone/ai-gateway start --config ai-gateway-config.yaml
+    npx @helicone/ai-gateway --config ai-gateway-config.yaml
     ```
   </Step>
   
@@ -139,12 +141,12 @@ routers:
     # First request - goes to provider
     time curl -X POST http://localhost:8080/router/my-router/v1/chat/completions \
       -H "Content-Type: application/json" \
-      -d '{"model": "gpt-4o-mini", "messages": [{"role": "user", "content": "What is 2+2?"}]}'
+      -d '{"model": "gpt-4o-mini", "messages": [{"role": "user", "content": "To be or not to be?"}]}'
     
     # Second request - returns from cache instantly
     time curl -X POST http://localhost:8080/router/my-router/v1/chat/completions \
       -H "Content-Type: application/json" \
-      -d '{"model": "gpt-4o-mini", "messages": [{"role": "user", "content": "What is 2+2?"}]}'
+      -d '{"model": "gpt-4o-mini", "messages": [{"role": "user", "content": "To be or not to be?"}]}'
     ```
   </Step>
 </Steps>
@@ -207,9 +209,9 @@ routers:
 
 | Router | Endpoint | Strategy | Use Case |
 |--------|----------|----------|----------|
-| **production** | `/router/production/...` | Latency + rate limits | Customer traffic |
-| **development** | `/router/development/...` | Weighted (80% local) | Cost-effective dev |
-| **staging** | `/router/staging/...` | Latency (no cache) | Testing |
+| **production** | `/router/production/v1...` | Latency + rate limits | Customer traffic |
+| **development** | `/router/development/v1...` | Weighted (80% local) | Cost-effective dev |
+| **staging** | `/router/staging/v1...` | Latency (no cache) | Testing |
 
 <Steps>
   <Step title="Update configuration">
@@ -218,7 +220,7 @@ routers:
   
   <Step title="Restart the gateway">
     ```bash
-    npx @helicone/ai-gateway start --config ai-gateway-config.yaml
+    npx @helicone/ai-gateway --config ai-gateway-config.yaml
     ```
   </Step>
   
