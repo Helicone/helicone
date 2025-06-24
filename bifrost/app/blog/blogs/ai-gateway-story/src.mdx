@@ -1,0 +1,74 @@
+**1 API, 100+ Models**
+
+The Helicone AI Gateway is now available in beta.
+
+Built in Rust for performance, the AI Gateway lets you switch between 100+ AI models without rewriting integrations or managing multiple API keys. The AI Gateway handles failovers, rate limiting, caching, and observability.
+
+```bash
+# Get started in 30 seconds
+npx @helicone/ai-gateway
+```
+
+```typescript
+// Same code, any provider
+const openai = new OpenAI({
+  baseURL: "http://localhost:8080/ai"
+});
+
+const response = await openai.chat.completions.create({
+  model: "anthropic/claude-3-sonnet"  // Route to Claude via OpenAI syntax
+});
+```
+
+Start routing AI traffic like the above.
+
+Get started with the [Helicone AI Gateway](https://docs.helicone.ai/ai-gateway/quickstart), or continue reading to learn more.
+
+---
+
+## Why We're Building the Helicone AI Gateway
+
+The AI development space is progressing at an exponential rate. We see it every day at Helicone—over 90% of our users run 5+ LLMs in production, each with its own SDK, auth scheme, rate limits, and quirks.
+
+Keeping up today means rewriting integrations for every new model, managing a maze of API keys, engineering custom fallbacks for provider outages, and constantly tuning traffic for cost or compliance.
+
+We've talked to hundreds of high-growth AI companies over the past two years. The same frustrations come up in every conversation:
+
+**"The AI space moves so fast, new models drop weekly and we were constantly rewriting integrations."** - Engineering lead at a 50-person AI startup
+
+**"We spent an entire sprint building custom fallback logic, and now we have to constantly maintain it to ensure our product is always reliable."** - CTO of Greptile.com
+
+**"We outgrew our routing solution which couldn't scale for our growth and had to build our own. Now we're shopping for alternatives again."** - CTO of a 100-person AI startup
+
+Every AI company hits the same problems.
+
+Here's what we realized: routing is a solved problem. It just needs to be built properly. You wouldn't use NGINX written in TypeScript or Python - that would be insane. Critical infrastructure demands performance, reliability, and predictable behavior under load.
+
+Every team was building their own AI gateway or settling for subpar solutions because no one had built the definitive one yet. But once someone builds it right - in Rust, self-hosted, designed for scale, by people who've built routers for years - it becomes the default.
+
+The Helicone AI Gateway is our answer. A lightweight Rust router inspired by NGINX that removes the integration tax so you can focus on shipping features. **We're building the routing infrastructure that every AI company will eventually use.**
+
+## Why This Will Become the Default
+
+NGINX didn't win because it had the best marketing. It won because it was built right - performant, reliable, and boring. Redis didn't become the default cache because of features. It became default because it just worked, everywhere, for everyone.
+
+We're applying the same principles to AI routing. Rust for performance that doesn't degrade. Self-hosting so you never depend on our uptime. Apache license so you never worry about our business model. Deploy anywhere because your infrastructure choices shouldn't limit your routing options.
+
+The AI gateway that wins will be the one that's fastest to deploy, hardest to break, and impossible to outgrow. That's what we built.
+
+## Our Mission
+
+We build for high-growth AI startups whose primary focus should be building features that differentiate you in the fastest growing market in history, not routing infrastructure and outage fixes.
+
+The AI Gateway is part of our bigger mission: helping AI teams ship fast without breaking things. Reliable infrastructure that just works, so you can focus on what makes your product unique.
+
+## Get Started
+
+The AI development space is moving fast, but reliability can't be an afterthought. If you believe AI infrastructure should be as dependable as the rest of your stack, start with our GitHub repo and give us a star.
+
+<CallToAction
+  title="Try the Helicone AI Gateway"
+  description="Open source, self-hosted, and ready to deploy in your infrastructure today."
+  primaryButtonText="Star on GitHub"
+  primaryButtonLink="https://github.com/Helicone/ai-gateway"
+/>
