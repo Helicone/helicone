@@ -221,7 +221,7 @@ export type BlogStructure =
 export const BLOG_CONTENT: BlogStructure[] = [
   {
     dynmaicEntry: {
-      folderName: "ai-gateway-story",
+      folderName: "introducing-ai-gateway",
     },
   },
   {

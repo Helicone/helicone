@@ -3,7 +3,7 @@
   "title1": "Introducing the Helicone AI Gateway",
   "title2": "Introducing the Helicone AI Gateway",
   "description": "We talked to hundreds of AI companies and found the same pattern: 90% run 5+ models in production, each one a potential point of failure. Here's why we built the Helicone AI Gateway to solve their reliability crisis.",
-  "images": "/static/blog/ai-gateway-story/cover.webp",
+  "images": "/static/blog/introducing-ai-gateway/ai-gateway-cover.webp",
   "time": "4 minute read",
   "author": "Cole Gottdank",
   "date": "June 24, 2025",

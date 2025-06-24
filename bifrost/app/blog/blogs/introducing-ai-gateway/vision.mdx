@@ -1,0 +1,205 @@
+**Problem:** Helicone lacks a cohesive product strategy with a clear target customer, leaving us with decent but undifferentiated offerings across observability, experimentation, and routing in the competitive LLM tooling market.
+
+**Solution:** Become the LiteLLM <> LangFuse stack for growth-stage AI companies.
+
+**ICP**
+
+| Great fit | 1 | 2 | 3 | 4 |
+| --- | --- | --- | --- | --- |
+| Type | Early stage, fast-growing AI companies | YC Startup |  AI-Adopting Mid-Sized Companies | Tech-Forward Mid Market |
+| Size | 20-100 | 2-10 | 20-500 | 500-10,000 |
+| Industry | AI-native | AI-native | Vertical SaaS / Modern B2B | Mixed |
+| Geography | US-based | US-based | US-based | US-based |
+| Avg ARR | $5-100M | $<5M | $5-100M | $50-300M |
+| Tech Stack | T3 | T3 |  | Modern Cloud |
+| Attributes | - Latency and reliability sensitive
+- Distributed models and providers
+- Prompts change less frequently
+- Minor performance gains starting to matter | - Favor ease of setup
+- Iterate prompts daily
+- Need lightweight tracing
+- Cost sensitive
+- Looking for step changes | - ROI conscious
+- Rapidly testing AI value in existing product
+- Distributed models and providers
+- Iterate prompts daily
+- Need lightweight tracing | - ROI conscious
+- Distributed models and providers
+- Prompt change less frequently
+- Minor performance gains matter |
+| Examples | trullion, parrot.us, corvee, tenderco, animaapp, animahealth, parade.ai, hadrius, QAWolf, Assis.co, Volition, Plot.so, Intelligo, gecko, Ninjacat, cogna
+ | videogen, pocketpod, govsignals, greptile, jungleai, lex.page, gambly | Seneca, instrumentl, ixigo, chatarmin, national academy, carwow, liveminds.co.uk | Filevine, Sunrun, Clay, hear.com |
+
+Groom 2.
+
+### Market Moves
+
+**Moving further up market concerns:**
+
+- Long sales cycle
+- Requires governance
+- Complicates routing
+- Regression prevention via evals & experiments top priority
+- Self-hosted requirement
+- **Scariest Competitors:** BrainTrust, LangFuse, LangSmith, HumanLoop, DeepChecks
+- **Others:** Portkey, Comet, DataDog, Fiddler AI, Galileo, Arize Phoenix
+
+**Moving further down market concern:**
+
+- High company failure rate
+- Low willingness to pay
+- Would need to build OpenRouter like router
+    - Pass through billing
+    - Not latency concerned (self-hosted router, rust)
+    - No need to supply keys
+- Less latency and reliability concerned (router doesn’t align)
+- **Competing with:** LangFuse, LangSmith, KeywordsAI
+- **Others:** PortKey, Traceloop, Lunary
+
+<aside>
+🤔
+
+Interesting case study - NovelCrafter, one of OpenRouter’s top customers, looking for another solution due to further distribution of models & providers. 
+
+Why? They’re finding PMF and now need to optimize for: profit, reliability, speed.
+
+If I’m NovelCrafter and I have these needs, where do I go? 
+- LiteLLM + LangFuse
+- Portkey
+- LangDB
+
+</aside>
+
+**Benefits of growth-stage AI**
+
+- Rapid sales cycle (mostly fully self-serve)
+- High willingness to switch
+- Regression prevention via evals & experimentation not top priority
+- Latency & reliability matter (rust)
+- High volume & higher willingness to pay
+- **Scariest Competitors:** Langfuse <> LiteLLM, Langfuse, LangSmith, PostHog
+- **Others:** BrainTrust, HumanLoop
+
+### **How do we standout g**rowth-stage AI**?**
+
+**Summary:** We cannot win by competing on all fronts simultaneously. Instead, we'll target the growth-stage AI with our core router strength, deliberately trading off secondary features like evals and experiments. This focused approach will drive the growth needed to later expand horizontally or move upmarket. We must be willing to decline customers who don't align with this strategy rather than diluting our focus.
+
+**Why a unified Helicone Stack > LiteLLM + Langfuse / Langfuse?**
+
+- Single vendor simplifies procurement, support, and legal overhead
+- Eliminates integration risk if vendors become competitors
+- Shared UI & auth
+- Can deliver better performance with optimized end-to-end architecture (& rust)
+    - Possible Apple like synergies
+- Combine router & LLM observability
+- A/B testing & observability
+
+**Why Helicone Stack > Portkey Stack?**
+
+- Better US distribution. Superior devex.
+- Clean, polished UI/UX, higher reliability.
+They’re Hasura, we’re Supabase.
+They're Heroku, we're Vercel
+- Focus (jack of all trades, master of none)
+- Different ICP (growth-stage AI vs enterprise)
+- Rust router for latency, ease of self-hosting
+
+**Why Helicone Stack > PostHog Stack?**
+
+- Focus (jack of all trades, master of none)
+    - We can only do 1 thing better than PostHog, we must double down on it and offer export to PostHog
+- Router
+
+**Why Helicone Stack > LangSmith Stack?**
+
+- Framework agnostic vs lock in
+- Superior UI/UX
+- Router
+
+### GTM
+
+**Summary:** We’ve found our wedge. Now we need product <> gtm alignment. 
+
+“Helicone: Full-stack infrastructure for AI products in hyper-growth”
+
+“Helicone: Trace, route, and own your AI in one place.”
+
+**How does growth-stage AI find solutions?**
+
+- Typically high intent, event driven (customer complaint, production goes down)
+- Time to research & compare solutions within a sprint length evaluation window. Days, not weeks.
+- They ask ChatGPT, Google search, skim Twitter threads, Hackernews, and follow AI newsletters
+- Predominantly bottoms up adoption, leads approve
+- Word of mouth drives significant adoption, testimonials from peers matter, peer networks fuel adoption
+
+**Acquisition Strategy:**
+
+1. Product-Led
+
+Router as entry point for immediate value. Start with router, expand to full observability suite
+
+1. Integrations
+
+Matter more than ever. Now with 2 paths: router & observability. Router without integrations is useless. Need integrations for their distributed models & providers stack.
+
+1. SEO/GEO
+
+Comparisons have impact, they spend that sprint searching for a solution. Need to catch them when intent is high.
+
+1. Testimonials
+
+Envision peer testimonials on Twitter. Clay, Axiom, or Trullion praising our product. 
+
+1. Target Evolution
+
+YC startups → Growth-Stage AI companies. 
+
+Get them when they’re young. Find companies at scale inflection points. This means we MUST be on top of the market.
+
+1. (OPTIONAL) Outbound Strategy
+
+Reactivate with focused messaging. 
+
+Target companies at scale inflection points. 
+
+Position as solution to scaling challenges they're now facing
+
+Leverage existing customer success stories
+
+---
+
+### Next Steps
+
+**Pre-series A**
+
+Hire design engineer asap.
+
+Eng team integrations cadence. 
+
+Justin → more GTM
+
+Forecast and raise what we need.
+
+3-6 more months of consistent growth >10%. raise A.
+
+**Post-series A**
+
+Step on the gas.
+
+Timing will be perfect. 
+
+Growth-Stage AI will be maturing.
+
+Their PMF will be further approaching. 
+
+1-2% gains begin to matter.
+
+We expand into evals + experimentation.
+
+The Braintrust uno 
+
+### Questions
+
+- How to answer the evaluation question?
+- Outbound vs high intent inbound
+- Increase GTM spend
