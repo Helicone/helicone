@@ -16,6 +16,7 @@ import {
 import {
   Prompt2025,
   Prompt2025Version,
+  PromptVersionCounts,
 } from "../../controllers/public/prompt2025Controller";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { FilterNode } from "@helicone-package/filters/filterDefs";
@@ -80,14 +81,47 @@ export class Prompt2025Manager extends BaseManager {
     return ok(result.data ?? []);
   }
 
-  async getPromptTotalVersions(params: {
+  async getPromptVersionCounts(params: {
     promptId: string;
-  }): Promise<Result<number, string>> {
-    const result = await dbExecute<{ count: number }>(
+  }): Promise<Result<PromptVersionCounts, string>> {
+    const result = await dbExecute<{ total_versions: number, major_versions: number }>(
       `SELECT
-        COUNT(*) as count
+        COUNT(*)::integer as total_versions,
+        MAX(major_version) as major_versions
       FROM prompts_2025_versions
       WHERE prompt_id = $1 AND organization = $2
+      `,
+      [params.promptId, this.authParams.organizationId]
+    );
+    console.log("buh", result);
+
+    if (result.error) {
+      return err(result.error);
+    }
+
+    return ok({
+      totalVersions: result.data?.[0]?.total_versions ?? 0,
+      majorVersions: result.data?.[0]?.major_versions ?? 0,
+    });
+  }
+
+  async getPromptProductionVersion(params: {
+    promptId: string;
+  }): Promise<Result<Prompt2025Version, string>> {
+    const result = await dbExecute<Prompt2025Version>(
+      `
+      SELECT
+        versions.id,
+        versions.prompt_id,
+        versions.major_version,
+        versions.minor_version,
+        versions.commit_message,
+        versions.created_at,
+        versions.model
+      FROM prompts_2025 AS prompts
+      INNER JOIN prompts_2025_versions AS versions
+      ON prompts.production_version = versions.id
+      WHERE prompts.id = $1 AND prompts.organization = $2
       `,
       [params.promptId, this.authParams.organizationId]
     );
@@ -96,7 +130,10 @@ export class Prompt2025Manager extends BaseManager {
       return err(result.error);
     }
 
-    return ok(result.data?.[0]?.count ?? 0);
+    if (!result.data?.[0]) {
+      return err("Production version not found");
+    }
+    return ok(result.data[0]);
   }
 
   async getPromptVersions(params: {

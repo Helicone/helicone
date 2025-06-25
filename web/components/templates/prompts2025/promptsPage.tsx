@@ -9,9 +9,10 @@ import {
 import { useGetPromptsWithVersions } from "@/services/hooks/prompts";
 import { useState } from "react";
 import PromptCard from "./PromptCard";
-// import PromptDetails from "./PromptDetails";
+import PromptDetails from "./PromptDetails";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
+import type { PromptWithVersions } from "@/services/hooks/prompts";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -19,6 +20,7 @@ interface PromptsPageProps {
 
 const PromptsPage = (props: PromptsPageProps) => {
   const [search, setSearch] = useState("");
+  const [selectedPrompt, setSelectedPrompt] = useState<PromptWithVersions | null>(null);
 
   const { data: prompts, isLoading } = useGetPromptsWithVersions(search);
   console.log(prompts);
@@ -59,26 +61,29 @@ const PromptsPage = (props: PromptsPageProps) => {
                   <div className="p-4">Loading...</div>
                 ) : prompts && prompts.length > 0 ? (
                 prompts.map((promptWithVersions) => {
-                  const latestVersion = promptWithVersions.versions.reduce((latest, current) => 
-                    new Date(current.created_at) > new Date(latest.created_at) ? current : latest
-                  );
-                  
-                  const updatedAt = new Date(Math.max(
-                    ...promptWithVersions.versions.map(v => new Date(v.created_at).getTime())
-                  ));
+                  const productionVersion = promptWithVersions.productionVersion;
                   
                   return (
-                    <PromptCard
+                    <div
                       key={promptWithVersions.prompt.id}
-                      name={promptWithVersions.prompt.name}
-                      id={promptWithVersions.prompt.id}
-                      majorVersion={latestVersion.major_version}
-                      minorVersion={latestVersion.minor_version}
-                      totalVersions={promptWithVersions.totalVersions}
-                      model={latestVersion.model}
-                      updatedAt={updatedAt}
-                      createdAt={new Date(promptWithVersions.prompt.created_at)}
-                    />
+                      onClick={() => setSelectedPrompt(promptWithVersions)}
+                      className={`cursor-pointer transition-colors hover:bg-accent/50 ${
+                        selectedPrompt?.prompt.id === promptWithVersions.prompt.id 
+                          ? 'bg-accent' 
+                          : ''
+                      }`}
+                    >
+                      <PromptCard
+                        name={promptWithVersions.prompt.name}
+                        id={promptWithVersions.prompt.id}
+                        majorVersion={productionVersion.major_version}
+                        minorVersion={productionVersion.minor_version}
+                        totalVersions={promptWithVersions.totalVersions}
+                        model={productionVersion.model}
+                        updatedAt={new Date(productionVersion.created_at)}
+                        createdAt={new Date(promptWithVersions.prompt.created_at)}
+                      />
+                    </div>
                   );
                 })
                 ) : (
@@ -89,8 +94,7 @@ const PromptsPage = (props: PromptsPageProps) => {
           </ResizablePanel>
           <ResizableHandle withHandle />
           <ResizablePanel defaultSize={40} minSize={30} maxSize={60}>
-            <div>bruh</div>
-            {/* <PromptDetails /> */}
+            <PromptDetails promptWithVersions={selectedPrompt} />
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
