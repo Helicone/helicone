@@ -438,6 +438,7 @@
                   "guides/cookbooks/environment-tracking",
                   "guides/cookbooks/etl",
                   "guides/cookbooks/experiments",
+                  "guides/cookbooks/helicone-evals-with-ragas",
                   "guides/cookbooks/fine-tune",
                   "guides/cookbooks/getting-sessions",
                   "guides/cookbooks/getting-user-requests",

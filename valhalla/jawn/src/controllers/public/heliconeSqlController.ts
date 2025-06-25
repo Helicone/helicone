@@ -42,14 +42,14 @@ export class HeliconeSqlController extends Controller {
     @Body() requestBody: ExecuteSqlRequest,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<Array<Record<string, any>>, string>> {
-    const heliconeSqlManager = new HeliconeSqlManager(request.authParams);
-    const result = await heliconeSqlManager.executeSql(requestBody.sql);
-    if (result.error) {
-      this.setStatus(500);
-      return err(result.error);
-    }
-
-    this.setStatus(200);
-    return ok(result.data);
+    return ok([]);
+    // const heliconeSqlManager = new HeliconeSqlManager(request.authParams);
+    // const result = await heliconeSqlManager.executeSql(requestBody.sql);
+    // if (result.error) {
+    //   this.setStatus(500);
+    //   return err(result.error);
+    // }
+    // this.setStatus(200);
+    // return ok(result.data);
   }
 }

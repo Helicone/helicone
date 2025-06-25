@@ -50642,12 +50642,56 @@
 				"tags": [
 					"Alert Banner"
 				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/v1/admin/has-feature-flag": {
+			"post": {
+				"operationId": "HasFeatureFlag",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_boolean.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
 				"security": [
 					{
 						"api_key": []
 					}
 				],
-				"parameters": []
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"orgId": {
+										"type": "string"
+									},
+									"feature": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"orgId",
+									"feature"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/admin/feature-flags": {

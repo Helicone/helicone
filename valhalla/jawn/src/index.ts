@@ -1,3 +1,6 @@
+// This line must come before importing any instrumented module.
+import "./tracer";
+
 // Load env before anything else
 import "./lib/env";
 

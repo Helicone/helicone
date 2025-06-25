@@ -10,6 +10,8 @@ import { GraphQLHeartBeat } from "./heartbeats/graphQL";
 import { OpenAIProxyHeartBeat } from "./heartbeats/oaiProxy";
 import { UsageManager } from "./managers/UsageManager";
 import { PgWrapper } from "./db/PgWrapper";
+import { alertSqsCongestion } from "./heartbeats/alertSqsCongestion";
+import { AlertManager } from "./managers/AlertManager";
 
 export interface Env {
   OPENAI_API_KEY: string;
@@ -27,6 +29,16 @@ export interface Env {
   SUPABASE_DATABASE_SSL: string;
   ENVIRONMENT: string;
   HYPERDRIVE: Hyperdrive;
+  SLACK_WEBHOOK_URL: string;
+  SENTRY_API_KEY: string;
+  SENTRY_PROJECT_ID: string;
+  VALHALLA_URL: string;
+  HELICONE_MANUAL_ACCESS_KEY: string;
+  AWS_REGION: string;
+  AWS_ACCESS_KEY_ID: string;
+  AWS_SECRET_ACCESS_KEY: string;
+  REQUEST_LOGS_QUEUE_URL: string;
+  SLACK_ALERT_CHANNEL: string;
 }
 
 const constructorMapping: Record<string, any> = {
@@ -67,6 +79,7 @@ export default {
       });
 
       await Promise.all(heartBeatPromises);
+      await alertSqsCongestion(env, new AlertManager(env));
     } else if (controller.cron === "0 * * * *") {
       const clickhouseWrapper = new ClickhouseWrapper({
         CLICKHOUSE_HOST: env.CLICKHOUSE_HOST,

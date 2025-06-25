@@ -352,6 +352,9 @@ export interface paths {
   "/v1/alert-banner": {
     get: operations["GetAlertBanners"];
   };
+  "/v1/admin/has-feature-flag": {
+    post: operations["HasFeatureFlag"];
+  };
   "/v1/admin/feature-flags": {
     post: operations["UpdateFeatureFlags"];
     delete: operations["DeleteFeatureFlag"];
@@ -17284,6 +17287,24 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result__active-boolean--created_at-string--id-number--message-string--title-string--updated_at-string_-Array.string_"];
+        };
+      };
+    };
+  };
+  HasFeatureFlag: {
+    requestBody: {
+      content: {
+        "application/json": {
+          orgId: string;
+          feature: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_boolean.string_"];
         };
       };
     };

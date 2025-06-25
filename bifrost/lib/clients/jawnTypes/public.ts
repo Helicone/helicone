@@ -546,6 +546,10 @@ export interface paths {
     delete: operations["DeleteAPIKey"];
     patch: operations["UpdateAPIKey"];
   };
+  "/v1/public/alert-banner": {
+    get: operations["GetAlertBanners"];
+    patch: operations["UpdateAlertBannerActive"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -3185,6 +3189,26 @@ Json: JsonObject;
       error: null;
     };
     "Result__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array.string_": components["schemas"]["ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_void_: {
+      data: unknown;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_void.string_": components["schemas"]["ResultSuccess_void_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array_": {
+      data: {
+          updated_at: string;
+          created_at: string;
+          message: string;
+          title: string;
+          active: boolean;
+          /** Format: double */
+          id: number;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array.string_": components["schemas"]["ResultSuccess__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array_"] | components["schemas"]["ResultError_string_"];
   };
   responses: {
   };
@@ -4977,7 +5001,9 @@ export interface operations {
   Generate: {
     requestBody: {
       content: {
-        "application/json": components["schemas"]["OpenAIChatRequest"];
+        "application/json": components["schemas"]["OpenAIChatRequest"] & {
+          useAIGateway?: boolean;
+        };
       };
     };
     responses: {
@@ -6368,6 +6394,35 @@ export interface operations {
           "application/json": {
             error: string;
           };
+        };
+      };
+    };
+  };
+  GetAlertBanners: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array.string_"];
+        };
+      };
+    };
+  };
+  UpdateAlertBannerActive: {
+    requestBody: {
+      content: {
+        "application/json": {
+          active: boolean;
+          /** Format: double */
+          id: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_void.string_"];
         };
       };
     };
