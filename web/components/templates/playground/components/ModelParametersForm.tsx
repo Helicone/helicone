@@ -39,6 +39,8 @@ import { providers } from "@/data/providers";
 import { ProviderCard } from "@/components/providers/ProviderCard";
 import Image from "next/image";
 import { ModelParameters } from "@/lib/api/llm/generate";
+import { useOrg } from "@/components/layout/org/organizationContext";
+import { useFeatureFlag } from "@/services/hooks/admin";
 
 interface ModelParametersFormProps {
   isScrolled: boolean;
@@ -52,6 +54,8 @@ interface ModelParametersFormProps {
     type: string;
     json_schema?: string;
   }) => void;
+  useAIGateway: boolean;
+  setUseAIGateway: (_useAIGateway: boolean) => void;
 }
 
 export default function ModelParametersForm({
@@ -67,7 +71,15 @@ export default function ModelParametersForm({
   onParametersChange,
   responseFormat,
   onResponseFormatChange,
+  useAIGateway,
+  setUseAIGateway,
 }: ModelParametersFormProps) {
+  const organization = useOrg();
+  const { data: hasAccessToAIGateway } = useFeatureFlag(
+    "ai_gateway",
+    organization?.currentOrg?.id ?? ""
+  );
+
   const updateParameter = (key: keyof ModelParameters, value: any) => {
     onParametersChange({
       ...parameters,
@@ -190,6 +202,26 @@ export default function ModelParametersForm({
                 />
               </div>
             </div>
+            {hasAccessToAIGateway && (
+              <div className="flex justify-end">
+                <div className="flex gap-2 items-center">
+                  <Label htmlFor="ai-gateway" className="text-sm">
+                    Use Helicone AI Gateway
+                  </Label>
+                  <Switch
+                    className="data-[state=checked]:bg-foreground"
+                    size="sm"
+                    variant="helicone"
+                    id="ai-gateway"
+                    checked={useAIGateway}
+                    onCheckedChange={(checked) => {
+                      setUseAIGateway(checked);
+                    }}
+                    disabled={isPending}
+                  />
+                </div>
+              </div>
+            )}
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-2">

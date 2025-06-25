@@ -6625,7 +6625,7 @@ export function RegisterRoutes(app: Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsPlaygroundController_generate: Record<string, TsoaRoute.ParameterSchema> = {
-                params: {"in":"body","name":"params","required":true,"ref":"OpenAIChatRequest"},
+                bodyParams: {"in":"body","name":"bodyParams","required":true,"dataType":"intersection","subSchemas":[{"ref":"OpenAIChatRequest"},{"dataType":"nestedObjectLiteral","nestedProperties":{"useAIGateway":{"dataType":"boolean"}}}]},
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };
         app.post('/v1/playground/generate',

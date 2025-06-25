@@ -26,6 +26,8 @@ interface PlaygroundMessagesPanelProps {
   modelParameters: ModelParameters;
   setModelParameters: (_modelParameters: ModelParameters) => void;
   onRun: () => void;
+  useAIGateway: boolean;
+  setUseAIGateway: (_useAIGateway: boolean) => void;
 }
 
 const PlaygroundMessagesPanel = ({
@@ -41,6 +43,8 @@ const PlaygroundMessagesPanel = ({
   modelParameters,
   setModelParameters,
   onRun,
+  useAIGateway,
+  setUseAIGateway,
 }: PlaygroundMessagesPanelProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
@@ -234,6 +238,8 @@ const PlaygroundMessagesPanel = ({
           setMappedContent={setMappedContent}
           onRun={onRun}
           isScrolled={isScrolled}
+          useAIGateway={useAIGateway}
+          setUseAIGateway={setUseAIGateway}
         />
       </div>
     </div>
