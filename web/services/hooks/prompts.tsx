@@ -5,10 +5,12 @@ import type { components } from "../../lib/clients/jawnTypes/public";
 type Prompt2025 = components["schemas"]["Prompt2025"];
 type Prompt2025Version = components["schemas"]["Prompt2025Version"];
 
-interface PromptWithVersions {
+export interface PromptWithVersions {
   prompt: Prompt2025;
   totalVersions: number;
   versions: Prompt2025Version[];
+  productionVersion: Prompt2025Version;
+  majorVersions: number;
 }
 
 // TODO: Delete old prompts.tsx hooks and fix the paths here
@@ -26,7 +28,11 @@ export const useCreatePrompt = () => {
   );
 };
 
-export const useGetPromptsWithVersions = (search: string) => {
+export const useGetPromptsWithVersions = (
+  search: string,
+  page?: number,
+  pageSize?: number
+) => {
   return useQuery<PromptWithVersions[]>({
     queryKey: ["promptsWithVersions", search],
     refetchOnWindowFocus: false,
@@ -49,8 +55,8 @@ export const useGetPromptsWithVersions = (search: string) => {
           const versionsResult = await $JAWN_API.POST("/v1/prompt-2025/query/versions", {
             body: {
               promptId: prompt.id,
-              page: 0,
-              pageSize: 10,
+              page: page ?? 0,
+              pageSize: pageSize ?? 10,
             },
           });
 
@@ -60,19 +66,47 @@ export const useGetPromptsWithVersions = (search: string) => {
             },
           });
 
-          if (versionsResult.error || !versionsResult.data?.data || totalVersionsResult.error || !totalVersionsResult.data?.data) {
-            console.error(`Error fetching versions for prompt ${prompt.id}:`, versionsResult.error);
+          const productionVersionResult = await $JAWN_API.POST("/v1/prompt-2025/query/production-version", {
+            body: {
+              promptId: prompt.id,
+            },
+          });
+
+          if (
+            versionsResult.error ||
+            !versionsResult.data?.data ||
+            totalVersionsResult.error ||
+            !totalVersionsResult.data?.data ||
+            productionVersionResult.error ||
+            !productionVersionResult.data?.data
+          ) {
+            console.error(
+              `Error fetching versions for prompt ${prompt.id}:`,
+              versionsResult.error
+            );
             return {
               prompt,
               totalVersions: 0,
               versions: [],
+              productionVersion: {
+                id: "",
+                model: "",
+                prompt_id: "",
+                major_version: 0,
+                minor_version: 0,
+                commit_message: "",
+                created_at: "",
+              },
+              majorVersions: 0,
             };
           }
 
           return {
             prompt,
-            totalVersions: totalVersionsResult.data.data,
+            totalVersions: totalVersionsResult.data.data.totalVersions,
+            majorVersions: totalVersionsResult.data.data.majorVersions,
             versions: versionsResult.data.data,
+            productionVersion: productionVersionResult.data.data,
           };
         })
       );

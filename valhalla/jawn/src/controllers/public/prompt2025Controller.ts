@@ -42,6 +42,11 @@ export interface PromptCreateResponse {
   id: string;
 }
 
+export interface PromptVersionCounts {
+  totalVersions: number;
+  majorVersions: number;
+}
+
 
 // TODO: Delete old promptController and rename this to promptController
 @Route("v1/prompt-2025")
@@ -109,6 +114,24 @@ export class Prompt2025Controller extends Controller {
     return result;
   }
 
+  @Post("query/production-version")
+  public async getPrompt2025ProductionVersion(
+    @Body()
+    requestBody: {
+      promptId: string;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<Prompt2025Version, string>> {
+    const promptManager = new Prompt2025Manager(request.authParams);
+    const result = await promptManager.getPromptProductionVersion(requestBody);
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
   @Post("query/total-versions")
   public async getPrompt2025TotalVersions(
     @Body()
@@ -116,10 +139,10 @@ export class Prompt2025Controller extends Controller {
       promptId: string;
     },
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<number, string>> {
+  ): Promise<Result<PromptVersionCounts, string>> {
     const promptManager = new Prompt2025Manager(request.authParams);
 
-    const result = await promptManager.getPromptTotalVersions(requestBody);
+    const result = await promptManager.getPromptVersionCounts(requestBody);
     if (result.error || !result.data) {
       this.setStatus(500);
     } else {

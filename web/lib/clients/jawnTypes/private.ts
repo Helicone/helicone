@@ -168,6 +168,9 @@ export interface paths {
   "/v1/prompt-2025/query/versions": {
     post: operations["GetPrompt2025Versions"];
   };
+  "/v1/prompt-2025/query/production-version": {
+    post: operations["GetPrompt2025ProductionVersion"];
+  };
   "/v1/prompt-2025/query/total-versions": {
     post: operations["GetPrompt2025TotalVersions"];
   };
@@ -1064,6 +1067,24 @@ Json: JsonObject;
       error: null;
     };
     "Result_Prompt2025Version-Array.string_": components["schemas"]["ResultSuccess_Prompt2025Version-Array_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_Prompt2025Version_: {
+      data: components["schemas"]["Prompt2025Version"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Prompt2025Version.string_": components["schemas"]["ResultSuccess_Prompt2025Version_"] | components["schemas"]["ResultError_string_"];
+    PromptVersionCounts: {
+      /** Format: double */
+      totalVersions: number;
+      /** Format: double */
+      majorVersions: number;
+    };
+    ResultSuccess_PromptVersionCounts_: {
+      data: components["schemas"]["PromptVersionCounts"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptVersionCounts.string_": components["schemas"]["ResultSuccess_PromptVersionCounts_"] | components["schemas"]["ResultError_string_"];
     ResultSuccess_number_: {
       /** Format: double */
       data: number;
@@ -16284,6 +16305,23 @@ export interface operations {
       };
     };
   };
+  GetPrompt2025ProductionVersion: {
+    requestBody: {
+      content: {
+        "application/json": {
+          promptId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025Version.string_"];
+        };
+      };
+    };
+  };
   GetPrompt2025TotalVersions: {
     requestBody: {
       content: {
@@ -16296,7 +16334,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_number.string_"];
+          "application/json": components["schemas"]["Result_PromptVersionCounts.string_"];
         };
       };
     };
