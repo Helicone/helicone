@@ -1,0 +1,276 @@
+---
+title: "Helicone Evals with Ragas"
+sidebarTitle: "Helicone Evals with Ragas"
+description: "Evaluate your LLM applications with Ragas and Helicone."
+"twitter:title": "Helicone Evals with Ragas - Helicone OSS LLM Observability"
+---
+
+Helicone's Datasets and Fine Tuning feature can be used in combination with Ragas to provide evals for your LLM application.
+
+# Prerequisites
+
+If you wish to evaluate on real requests follow the [quick start documentation](https://docs.helicone.ai/getting-started/quick-start). For this tutorial, the Helicone demo will be used, which contains mock request data.
+
+Follow the [dataset documentation](https://docs.helicone.ai/features/fine-tuning) to add LLM responses to a dataset. Then, download the dataset as a CSV by clicking the "export data" button on the upper right hand corner. This will output a CSV with the following columns: `_type,id,schema,preview,model,raw,heliconeMetadata`.
+
+[https://youtu.be/Dsy1kdSOJ1k](https://youtu.be/Dsy1kdSOJ1k)
+
+
+# Human Labeling
+
+Add a column  to the CSV exported from Helicone with `mock_data` which includes [gold answers](https://stackoverflow.com/questions/69515119/what-does-gold-mean-in-nlp).
+Below is an example script which augments the CSV exported from Helicone with an additional column. It will copy the LLM's response into the golden answer column as a placeholder. Then, replace each of the column's cells with the correct output corresponding to the user input.
+
+Adding gold answer column to the CSV:
+
+```python
+"""
+add_mock_gold.py
+
+Takes your existing data.csv, parses the model’s response,
+and writes out data_with_gold.csv with a new `gold_answer` column
+that simply mirrors the model’s own answer (so that you can test your evaluation pipeline).
+"""
+
+import pandas as pd
+import json
+
+# 1. Read the original CSV
+df = pd.read_csv("data.csv")
+
+# 2. Build a list of “mock” gold answers by copying the model’s response
+gold_answers = []
+for _, row in df.iterrows():
+    # Parse the “choices” JSON string and extract the assistant’s text
+    choices = json.loads(row["choices"])
+    assistant_text = choices[0]["message"]["content"]
+    gold_answers.append(assistant_text)
+
+# 3. Add the new column
+df["gold_answer"] = gold_answers
+
+# 4. Write out a new CSV
+df.to_csv("data_with_gold.csv", index=False)
+
+print(f"✅ Wrote {len(df)} rows to data_with_gold.csv, each with a mock gold_answer.")
+
+```
+
+---
+
+# Defining Metrics
+
+Ragas provides several metrics with which to evaluate LLM responses. The below script showcases how to take in as input the human annotated CSV, then evaluate based on the [answer correctness](https://docs.ragas.io/en/latest/concepts/metrics/available_metrics/answer_correctness/) and [semantic answer similarity](https://docs.ragas.io/en/v0.1.21/concepts/metrics/semantic_similarity.html) metric.
+
+```python
+"""
+evaluate_llm_outputs.py
+
+Script to evaluate LLM outputs using Ragas.
+
+Prerequisites:
+    pip install ragas pandas datasets
+"""
+
+import pandas as pd
+import json
+from ragas import evaluate
+from ragas.metrics import answer_correctness, answer_similarity
+from datasets import Dataset
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# 1. Load your CSV data
+df = pd.read_csv('data.csv')
+
+# 2. Build the evaluation dataset in Ragas's expected format
+eval_data = {
+    'question': [],
+    'answer': [],
+    'ground_truth': []
+}
+
+for _, row in df.iterrows():
+    # Extract the prompt/question
+    prompt = row['messages']
+
+    # Parse the "choices" JSON and pull out the assistant's response text
+    choices = json.loads(row['choices'])
+    response = choices[0]['message']['content']
+
+    # Check for gold_answer column
+    if 'gold_answer' in df.columns and not pd.isna(row['gold_answer']):
+        gold_answer = row['gold_answer']
+    else:
+        raise KeyError(
+            "Column 'gold_answer' not found or contains NaN. "
+            "Evaluation metrics require a reference answer. "
+            "Please add a 'gold_answer' column to your CSV."
+        )
+
+    eval_data['question'].append(prompt)
+    eval_data['answer'].append(response)
+    eval_data['ground_truth'].append(gold_answer)
+
+# 3. Convert to Dataset format
+dataset = Dataset.from_dict(eval_data)
+
+# 4. Define metrics (using available ragas metrics)
+metrics = [
+    answer_correctness,
+    answer_similarity
+]
+
+# 5. Run the evaluation
+results = evaluate(
+    dataset=dataset,
+    metrics=metrics
+)
+
+# 6. Output the results
+results_df = results.to_pandas()
+print(results_df)
+
+# 7. Save to CSV
+results_df.to_csv('evaluation_results.csv', index=False)
+
+```
+
+This will output a result containing the correctness and semantic similarity metrics for those LLM responses:
+
+```
+user_input,response,reference,answer_correctness,semantic_similarity
+"[{""role"":""system"",""content"":""As a travel expert, select the most suitable flight for this trip. Consider the duration, price, and amenities.\\n\\n  Travel Plan:\\n  {\\""destination\\"":\\""Tokyo\\"",\\""startDate\\"":\\""April 5\\"",\\""endDate\\"":\\""April 15\\"",\\""activities\\"":[\\""see the sakura\\"",\\""visit some temples\\"",\\""try sushi\\"",\\""take a day trip to Mount Fuji\\""]}\\n\\n  YOUR OUTPUT SHOULD BE IN THE FOLLOWING FORMAT:\\n  {\\n    \\""selectedFlightId\\"": string,\\n    \\""cabinClass\\"": string,\\n    \\""reasoningPoints\\"": string[],\\n    \\""alternativeId\\"": string\\n  }""}]","{
+  ""selectedFlightId"": ""JL123"",
+  ""cabinClass"": ""Business Class"",
+  ""reasoningPoints"": [""Top-rated airline with excellent service"",""Direct flight with short duration"",""Comfortable Business Class amenities""],
+  ""alternativeId"": ""NH456""
+}","{
+  ""selectedFlightId"": ""JL123"",
+  ""cabinClass"": ""Business Class"",
+  ""reasoningPoints"": [""Top-rated airline with excellent service"",""Direct flight with short duration"",""Comfortable Business Class amenities""],
+  ""alternativeId"": ""NH456""
+}",1.0,0.9999989484399617
+"[{""role"":""system"",""content"":""As a travel planner, generate travel tips based on the user's travel plans.\\n\\n  {\\""destination\\"":\\""Tokyo\\"",\\""startDate\\"":\\""April 5\\"",\\""endDate\\"":\\""April 15\\"",\\""activities\\"":[\\""see the sakura\\"",\\""visit some temples\\"",\\""try sushi\\"",\\""take a day trip to Mount Fuji\\""]}\\n\\n  YOUR OUTPUT SHOULD BE IN THE FOLLOWING FORMAT:\\n  {\\n    \\""tips\\"": string[]\\n  }""}]","{
+  ""tips"": [
+    ""Make sure to book accommodations in advance as Tokyo can get crowded during the cherry blossom season in April."",
+    ""Don't miss the opportunity to see the beautiful sakura (cherry blossoms) during your visit. Check out popular spots like Ueno Park or Shinjuku Gyoen."",
+    ""When visiting temples, be respectful of the customs and traditions. Remember to bow before entering and avoid taking photos in sacred areas."",
+    ""For a truly authentic sushi experience, consider dining at a traditional sushiya where the chef serves sushi directly to you. Tsukiji Outer Market is a great place to try fresh sushi."",
+    ""Plan a day trip to Mount Fuji for breathtaking views. Consider taking a bus tour or the train for a convenient and scenic journey.""
+  ]
+}","{
+  ""tips"": [
+    ""Make sure to book accommodations in advance as Tokyo can get crowded during the cherry blossom season in April."",
+    ""Don't miss the opportunity to see the beautiful sakura (cherry blossoms) during your visit. Check out popular spots like Ueno Park or Shinjuku Gyoen."",
+    ""When visiting temples, be respectful of the customs and traditions. Remember to bow before entering and avoid taking photos in sacred areas."",
+    ""For a truly authentic sushi experience, consider dining at a traditional sushiya where the chef serves sushi directly to you. Tsukiji Outer Market is a great place to try fresh sushi."",
+    ""Plan a day trip to Mount Fuji for breathtaking views. Consider taking a bus tour or the train for a convenient and scenic journey.""
+  ]
+}",1.0,0.9999999999999998
+
+```
+
+---
+
+## Performance Metrics
+
+Scores generated by Ragas or other evaluation tools can be added directly into Helicone. This can be done either through the UI or through the Helicone request/response API.
+
+### UI
+
+Click on any request within the requests page, then add properties with your metrics for each respective request. Refer to https://docs.helicone.ai/features/advanced-usage/custom-properties for more information.
+
+### Helicone Scoring API
+
+Follow https://docs.helicone.ai/rest/request/post-v1request-score and annotate each respective request with the score generated from Ragas.
+
+Here is an example script which submits scores outputted from Ragas to annotate each corresponding request:
+
+```python
+"""
+score_requests.py
+
+Script to post score metrics to Helicone API for multiple requests.
+
+Prerequisites:
+    pip install pandas requests python-dotenv
+
+Usage:
+    1. Export your Helicone API key:
+         export HELICONE_API_KEY="your-key-here"
+    2. Ensure your `evaluation_results.csv` has at least these columns:
+         - requestId
+         - answer_correctness
+         - semantic_similarity
+    3. Run:
+         python score_requests.py
+"""
+
+import os
+import json
+import requests
+import pandas as pd
+from dotenv import load_dotenv
+
+# Load HELICONE_API_KEY from .env or environment
+load_dotenv()
+API_KEY = os.getenv("HELICONE_API_KEY")
+if not API_KEY:
+    raise ValueError("Please set the HELICONE_API_KEY environment variable")
+
+# Base URL template for Helicone scoring endpoint
+BASE_URL = "https://api.helicone.ai/v1/request/{request_id}/score"
+
+def post_scores(request_id: str, scores: dict):
+    """POST the given scores dict to Helicone for a single request."""
+    url = BASE_URL.format(request_id=request_id)
+    payload = {"scores": scores}
+    headers = {
+        "authorization": API_KEY,
+        "Content-Type": "application/json"
+    }
+    resp = requests.post(url, json=payload, headers=headers)
+    if resp.ok:
+        print(f"[✔] {request_id} → {scores}")
+    else:
+        print(f"[✖] {request_id} → {resp.status_code} {resp.text}")
+
+def main():
+    # 1. Load your Ragas evaluation results
+    df = pd.read_csv("evaluation_results.csv")
+    
+    # 2. Validate presence of requestId
+    if 'requestId' not in df.columns:
+        raise KeyError("CSV must contain a 'requestId' column")
+    
+    # 3. Determine which columns are your metric scores
+    #    (everything except requestId and any other metadata)
+    skip = {'requestId', 'user_input', 'response', 'reference'}
+    score_cols = [c for c in df.columns if c not in skip]
+    
+    if not score_cols:
+        raise ValueError("No metric columns found to send as scores")
+    
+    # 4. Iterate and post
+    for _, row in df.iterrows():
+        rid = row['requestId']
+        scores = {col: float(row[col]) for col in score_cols}
+        post_scores(rid, scores)
+
+if __name__ == "__main__":
+    main()
+```
+
+## Trace Annotation and Annotation Queues
+
+We have developed the infrastructure for annotating evaluation traces and managing annotation queues, improving accuracy, traceability, and collaboration during evaluations. We will build out the UI further within the Helicone platform to better support attachment of feedback to specific runs, grouping runs together, and providing feedback on these group runs.
+
+## Data Exports for Evals
+
+We plan to add better data export controls to support evals with performance and task metrics as part of the export. This will enable easier integration with third parties such as Ragas.
+
+## Response and Task Metrics
+
+On our roadmap is targeted evaluation metrics for assessing response quality and task-specific performance, such as evaluating whether an agent selected the correct tool or used a tool correctly given a scenario the agent is tasked to complete.
