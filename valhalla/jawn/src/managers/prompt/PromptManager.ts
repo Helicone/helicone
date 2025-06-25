@@ -56,8 +56,21 @@ export class Prompt2025Manager extends BaseManager {
     return result;
   }
 
+  async totalPrompts(): Promise<Result<number, string>> {
+    const result = await dbExecute<{ count: number }>(
+      `SELECT COUNT(*) as count FROM prompts_2025 WHERE organization = $1`,
+      [this.authParams.organizationId]
+    );
+    if (result.error) {
+      return err(result.error);
+    }
+    return ok(Number(result.data?.[0]?.count ?? 0));
+  }
+
   async getPrompts(params: {
     search: string;
+    page: number;
+    pageSize: number;
   }): Promise<Result<Prompt2025[], string>> {
     const result = await dbExecute<Prompt2025>(
     `
@@ -69,9 +82,9 @@ export class Prompt2025Manager extends BaseManager {
       FROM prompts_2025
       WHERE name ILIKE $1 AND organization = $2
       ORDER BY created_at DESC
-      LIMIT 100
+      LIMIT $3 OFFSET $4
     `,
-      [`%${params.search}%`, this.authParams.organizationId]
+      [`%${params.search}%`, this.authParams.organizationId, params.pageSize, params.page * params.pageSize]
     );
 
     if (result.error) {
@@ -93,7 +106,6 @@ export class Prompt2025Manager extends BaseManager {
       `,
       [params.promptId, this.authParams.organizationId]
     );
-    console.log("buh", result);
 
     if (result.error) {
       return err(result.error);
@@ -140,6 +152,7 @@ export class Prompt2025Manager extends BaseManager {
     promptId: string;
     page: number;
     pageSize: number;
+    majorVersion?: number;
   }): Promise<Result<Prompt2025Version[], string>> {
     const result = await dbExecute<Prompt2025Version>(
       `
@@ -154,10 +167,11 @@ export class Prompt2025Manager extends BaseManager {
       FROM prompts_2025_versions
       WHERE prompt_id = $1
       AND organization = $2
+      ${params.majorVersion ? `AND major_version = $3` : ''}
       ORDER BY created_at DESC
-      LIMIT $3 OFFSET $4
+      LIMIT $4 OFFSET $5
       `,
-      [params.promptId, this.authParams.organizationId, params.pageSize, params.page * params.pageSize]
+      [params.promptId, this.authParams.organizationId, params.majorVersion, params.pageSize, params.page * params.pageSize]
     );
 
     if (result.error) {

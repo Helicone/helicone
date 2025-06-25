@@ -74,11 +74,27 @@ export class Prompt2025Controller extends Controller {
     return result;
   }
 
+  @Get("count")
+  public async getPrompt2025Count(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<number, string>> {
+    const promptManager = new Prompt2025Manager(request.authParams);
+    const result = await promptManager.totalPrompts();
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
   @Post("query")
   public async getPrompts2025(
     @Body()
     requestBody: {
       search: string;
+      page: number;
+      pageSize: number;
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<Prompt2025[], string>> {
@@ -100,6 +116,7 @@ export class Prompt2025Controller extends Controller {
       promptId: string;
       page: number;
       pageSize: number;
+      majorVersion?: number;
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<Prompt2025Version[], string>> {
