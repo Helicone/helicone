@@ -1,12 +1,12 @@
 Running multiple LLMs in production is complex. You need to manage different API formats, handle provider outages, optimize costs, and monitor performance—all while keeping latency low. 
 
-Fortunately, LLM routers have emerged to solve these problems, acting as intelligent gateways between your application and AI providers.
+Fortunately, **LLM routers** can help solve these problems, acting as intelligent gateways between your application and AI providers and becoming a must-have for anyone building production-scale AI applications.
 
 ![ Top 5 LLM Routers in 2025](/static/blog/top-llm-routers-comparison-2025/top-llm-routers-comparison-2025-cover.webp)
 
 This guide evaluates the top 5 LLM routers available today, with a focus on **real-world utility** and **production readiness**.
 
-Let's dive in.
+Let's dive in!
 
 ## TL;DR
 
@@ -14,11 +14,11 @@ Here's a quick overview of the top 5 LLM routers:
 
 | Router                  | Strengths                                                                                                                         | Weaknesses                                               | Best For                                                                          |
 | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| **Helicone AI Gateway** | • Built with Rust (blazingly fast)<br/>• Most sophisticated load-balancing<br/>• Seamless integration with Helicone for robust observability<br/>• Open-source (free to use)<br/>• Distributed rate limiting | • Optional Redis setup required for additional features like governance and distributed rate limiting             | • High-scale production applications needing advanced routing, monitoring and speed |
-| **OpenRouter**          | • Easy setup<br/>• User-friendly interface<br/>• Good for non-technical users                                                                 | • 5% markup on requests<br/>No self-hosting                   | • Quick prototyping                           |
-| **Portkey**             | • Rich enterprise features<br/>• Advanced guardrails                                                                                     | • Learning curve for advanced features                     | • Development teams needing detailed control and enterprise security                |
-| **LiteLLM**             | • Good customization<br/>• Strong community                                                                                           | • CLI-only<br/>• Technical setup with a steep learning curve | • Engineering teams building custom LLM infrastructure                              |
-| **Unify AI**            | • Simple and straightforward<br/>• Good for basic needs                                                                                  | • No load-balancing<br/>• Limited production scale              | • Small projects with basic provider switching needs                                |
+| **Helicone AI Gateway** | • Built with Rust (blazingly fast)<br/>• Health and rate-limit aware load-balancing<br/>• Seamless integration with Helicone for robust observability<br/>• Open-source (free to use)<br/>• Distributed rate limiting | • No pass-through billing             | • High-scale AI applications needing reliability, speed and cost optimization |
+| **OpenRouter**          | • Easy setup<br/>• Passthrough billing<br/>• Good for non-technical users                                                                 | • 5% markup on requests<br/>• No self-hosting<br/>• No custom models                  | • Quick prototyping for small projects                          |
+| **Portkey**             | • Rich enterprise features<br/>• Advanced guardrails                                                                                     | • Learning curve for advanced features<br/>• Limited scalability and reliability<br/>• No pass-through billing                   | • Development teams needing detailed control and enterprise security                |
+| **LiteLLM**             | • Good customization<br/>• Strong community                                                                                           | • Highly technical setup with a steep learning curve<br/>• Limited scalability<br/>• No pass-through billing | • Engineering teams building custom LLM infrastructure                              |
+| **Unify AI**            | • Simple and straightforward<br/>• Good for basic needs<br/>• Pass-through billing                                                                                 | • No load-balancing<br/>• Limited production scale              | • Small projects with basic provider switching needs                                | 
 
 ## Table of Contents
 
@@ -48,24 +48,25 @@ Here are five key things to consider when selecting the best LLM router:
 
 ## Top 5 LLM Routers: In-Depth Comparison
 
+*Scroll to see the full table —>*
+
 | Feature                                         | Helicone AI Gateway                                                                           | OpenRouter                                                                       | Portkey                                                               | LiteLLM                                                                                             | Unify AI                                                                                   |
 | ----------------------------------------------- | --------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| **Routing Strategy**                            | Latency, weighted, cost-aware, use-case dependent; health aware                               | Latency, cost-aware, weighted, tag-based; health-aware                           | Cost-aware, weighted, region-aware;  | latency, cost, weighted, least-busy;      | Quality, latency, cost, constraint-based              |
+| **Routing Strategy**                            | Latency, weighted, cost-aware, use-case dependent; **All health-aware**                               | Latency, cost-aware, weighted, tag-based; health-aware                           | Cost-aware, weighted, region-aware;  | latency, cost, weighted, least-busy;      | Quality, latency, cost, constraint-based              |
 | **Pricing**       | **Free** | **Free**: Limited models<br/> Pay-as-you-go: 5% markup | Developers: **Free**<br/> Production: $49/mo<br/> Enterprise: Custom | **Free** (self-hosted)<br/> Enterprise: Custom     | Personal: **Free**<br/> Professional: $40/seat/mo<br/> Enterprise: Custom |
 | **Language & Runtime**                          | Rust (super fast)                                                                             | Python/TypeScript                                                                | Python                                                                | Python/TypeScript                                                                                   | Python                                                                                     |
-| **Supported Providers**                         | 100+ models and 25+ providers inluding OpenAI, Anthropic, Google, Bedrock, etc.                                                                            | 400+ models and providers                                                                        | 100+ models                                                    | All major + custom                                                                                  | All major + custom                                                                         |
+| **Supported Providers**                         | 100+ models and 25+ providers inluding OpenAI, Anthropic, Google, Bedrock, etc.<br/> Custom models                                                                            | 400+ models and providers                                                                        | 100+ models                                                    | All major + custom                                                                                  | All major + custom                                                                         |
 | **Deployment Options**  | Docker, Kubernetes, self-hosted, cloud-managed                                 | Cloud-managed only (SaaS)                     | Docker, Kubernetes, self-hosted, cloud-managed          | Docker, Kubernetes, self-hosted only         | Cloud-managed, self-hosted                                    |
 | **Unified API**                                 | ✅                                                                                            | ✅                                                                               | ✅                                                                    | ✅                                                                                                  | ✅                                                                                         |
-| **Caching**                                     | Redis-based, providing up to 95% cost savings  | Provider-native (varies by provider)  | Built-in Simple & Semantic caching  | In-memory & Redis | Client-side file-based with per-query control |
+| **Caching**                                     | In-memory & Redis-based caching with intelligent strategies and scopes  | Provider-native (varies by provider)  | Built-in Simple & Semantic caching  | In-memory & Redis | Client-side file-based with per-query control |
 | **Fallbacks**                                   | Automatic retries and switching with health monitoring                                                      | Automatic provider switching                                                     | Automatic, with error-based triggering   | Advanced, with cooldowns  | Automatic multi-level fallbacks  |
-| **Rate Limiting**                               | Flexible limits (global, router-level, request, token, cost) by user/team/provider; 429-aware | Global limits by API key; fixed RPM/RPD quotas                                   | Flexible limits (request, token, cost)                                | Flexible global limits(cost, tag-based, model-specific) per user/team/key                           | Provider based                                                                             |
-| **LLM Observability & Monitoring Capabilities** | Deep integration with <a href="https://helicone.ai" target="_blank" rel="noopener">Helicone</a> and OpenTelemetry                                                    | Activity logs only                                                               | Integration with <a href="https://portkey.ai/docs" target="_blank" rel="noopener">Portkey</a>                                           | 15+ native integrations (Helicone, Langfuse, etc.) | Custom logging & visualizations (DIY)                                                      |
-| **Load-Balancing**                              | Latency, regional & weighted (provider/model specific) with health checks                      | Price-weighted, latency, throughput, or order | Request distribution                                                  | Latency-based, weighted, least-busy, cost-based                                                     | ❌                                                                                         |
+| **Rate Limiting**                               | Flexible limits (global, router-level, request, token, cost) by user/team/provider; Health-aware | Global limits by API key; fixed RPM/RPD quotas                                   | Flexible limits (request, token, cost)                                | Flexible global limits(cost, tag-based, model-specific) per user/team/key                           | Provider based                                                                             |
+| **LLM Observability & Monitoring Capabilities** | Seamless integration with <a href="https://helicone.ai" target="_blank" rel="noopener">Helicone</a> and OpenTelemetry                                                    | Activity logs only                                                               | Integration with <a href="https://portkey.ai/docs" target="_blank" rel="noopener">Portkey</a>                                           | 15+ native integrations (Helicone, Langfuse, etc.) | Custom logging & visualizations (DIY)                                                      |
+| **Load-Balancing**                              | Latency, regional & weighted with automatic health monitoring. Rate-limit aware.                      | Price-weighted, latency, throughput, or order | Request distribution                                                  | Latency-based, weighted, least-busy, cost-based                                                     | ❌                                                                                         |
 | **Estimated Setup Time**                                  | &lt;5 minutes                                                                                 | &lt;5 minutes                                                                    | &lt;5 minutes                                                         | ⛔ 15-30 minutes                                                                                       | ⛔ 5-10 minutes                                                                               |
 | **Setup Difficulty**                            | Easy                                                                                          | Easy                                                                             | Easy                                                                  | ⛔ Technical                                                                                           | Easy                                                                                       |
-| **Open Source**                                 | ✅                                                                                            | ❌                                                                               | ✅                                                                    | ✅                                                                                                  | ✅                                                                                         |
-| **Data Privacy**        | Self-hosting, encrypted storage, configurable retention (1mo to forever)          | Managed service only, standard web protections | Self-hosting available, enterprise data controls         | Full self-hosting, open-source transparency | Basic privacy, limited control                                |
-| **Security Features**   | SOC2/HIPAA/GDPR, API key vault, prompt injection protection, audit trails     | Basic API security, DDoS protection           | SOC2/HIPAA/GDPR, advanced guardrails, SSO, virtual keys | DIY security, community audits, virtual keys | Basic API authentication only                                 |
+| **Open Source**                                 | ✅                                                                                            | ❌                                                                               | ✅                                                                    | ✅                                                                                                  | ❌                                                                                         |
+| **Security Features**   | SOC2/HIPAA/GDPR, prompt injection protection, SSO, audit trails     | Basic API security, DDoS protection           | SOC2/HIPAA/GDPR, advanced guardrails, SSO, virtual keys | DIY security, community audits, virtual keys | Basic API authentication only                                 |
 
 Let's now take a look at each router in detail.
 
@@ -77,7 +78,7 @@ The Helicone <a href="https://docs.helicone.ai/gateway/config" target="_blank" r
 
 It provides ultra-fast performance (e.g., 8ms P50 latency) and is horizontally scalable. It also features a single binary deployment, making it simple to run on AWS, GCP, Azure, on-prem, Kubernetes, Docker, or bare metal.
 
-It is also tightly integrated with Helicone's observability tools, providing real-time insights into provider performance and usage patterns.
+It also integrates seamlessly with Helicone's observability tools, providing real-time insights into provider performance and usage patterns.
 
 ### Standout Features
 
@@ -88,19 +89,17 @@ It is also tightly integrated with Helicone's observability tools, providing rea
 - **Multi-Level Rate Limiting**: Granular controls across users, teams, providers, and global limits. Distributed enforcement prevents quota overruns in multi-instance deployments.
 - **Health-Aware Routing**: Automatic provider health monitoring with circuit breaking. Removes failing providers and tests for recovery without manual intervention.
 - **Regional Load-Balancing**: Routes to nearest provider regions automatically for global applications.
-- **Secret Management**: securely manages API keys via envinroment variables or encrypted DB storage, supporting multi-tenant isolation, auditing, and best practices like rotation and least privilege.
 
 ### Pros & Cons
 
 | Pros                                                                      | Cons                                                            |
 | ------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| Features the most sophisticated load-balancing algorithms                                    | Requires Redis for caching functionality (optional)  |
+| Features the most sophisticated load-balancing algorithms with automatic health monitoring                                    | No pass-through billing  |
 | Built with Rust which makes it lightweight and very fast                  | Not very suitable for non-technical users  |
-| Open-source with flexible self-hosting options                            |                                                                 |
+| Free to use & open-source with flexible self-hosting options                            |                                                                 |
 | Distributed rate limiting prevents cascading failures                     |                                                                 |
 | Cross-provider caching maximizes cost savings                             |                                                                 |
-| Built on distributed architecture (Cloudflare Workers, ClickHouse, Kafka) |                                                                 |
-| Comprehensive LLM observability eliminates separate monitoring tools      |                                                                 |
+| Seamless Helicone integration for comprehensive LLM observability      |                                                                 |
 
 ### Getting Started with Helicone AI Gateway
 
@@ -122,7 +121,8 @@ docker run -d --name helix \
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="http://localhost:8080/"
+    base_url="http://localhost:8080/ai",
+    api_key="sk--xxxx" # Dummy key, gateway manages auth
 )
 
 # Route to any provider through the same interface, we handle the rest.
@@ -133,14 +133,14 @@ response = client.chat.completions.create(
 
 ```
 
-And that's it! You now have automatic failover, load-balancing, and full observability!
+And that's it! 
 
-You can also <a href="https://github.com/Helicone/helicone-router?tab=readme-ov-file#option-2-binary-download" target="_blank" rel="noopener">install directly from the binary</a> or <a href="https://github.com/Helicone/helicone-router?tab=readme-ov-file#option-3-cargo-from-source" target="_blank" rel="noopener">install via Cargo</a>.
+{/* You can also <a href="https://github.com/Helicone/helicone-router?tab=readme-ov-file#option-2-binary-download" target="_blank" rel="noopener">install directly from the binary</a> or <a href="https://github.com/Helicone/helicone-router?tab=readme-ov-file#option-3-cargo-from-source" target="_blank" rel="noopener">install via Cargo</a>. */}
 
 <CallToAction
-  title="Improve UX and save costs with Helicone AI Gateway ⚡️"
-  description="Maximize your resources with our super fast, production-ready LLM router that automatically handles fallbacks and load-balancing—complete with robust observability via Helicone's platform. Track costs, latency, and errors across all your AI providers in one dashboard."
-  primaryButtonText="Start Free Trial"
+  title="Improve App Reliability with Helicone AI Gateway ⚡️"
+  description="Protect your AI applications from outages and reduce costs with AI Gateway. Multiple deployment options, including self-hosting, and seamless integration with Helicone."
+  primaryButtonText="Get Started"
   primaryButtonLink="https://helicone.ai/signup"
   secondaryButtonText="View Documentation"
   secondaryButtonLink="https://docs.helicone.ai/gateway/config"
@@ -148,7 +148,7 @@ You can also <a href="https://github.com/Helicone/helicone-router?tab=readme-ov-
 
 ## 2. OpenRouter
 
-![OpenRouter Dashboard](/static/blog/top-llm-routers-comparison-2025/openrouter-chatroom.webp)
+![OpenRouter Dashboard](/static/blog/top-llm-routers-comparison-2025/openrouter-logo.webp)
 
 <a href="https://openrouter.ai/docs/quick-start" target="_blank" rel="noopener">OpenRouter</a> provides a unified API that gives you access to hundreds of AI models through a single endpoint, while automatically handling fallbacks and selecting the most cost-effective options.
 
@@ -158,7 +158,7 @@ It focuses on providing a simple, user-friendly interface for non-technical user
 
 - **User-Friendly Interface**: Web UI allows direct interaction without coding
 - **Extensive Model Support**: Access to hundreds of models through a unified API
-- **Provider-Native Caching**: Supports caching for OpenAI, Anthropic, DeepSeek, and Google Gemini
+- **Pass-through billing**: Centralized billing for all providers
 - **Automatic Fallbacks**: Seamlessly switches providers during outages
 - **Quick Setup**: &lt;5 minutes from signup to first request
 
@@ -174,7 +174,7 @@ It focuses on providing a simple, user-friendly interface for non-technical user
 
 ## 3. Portkey
 
-![Portkey Dashboard](/static/blog/top-llm-routers-comparison-2025/portkey-guardrails.webp)
+![Portkey Dashboard](/static/blog/top-llm-routers-comparison-2025/portkey-logo.webp)
 
 <a href="https://github.com/Portkey-AI/gateway" target="_blank" rel="noopener">Portkey's AI Gateway</a> is a comprehensive platform designed to streamline and enhance AI integration for developers and organizations. 
 
@@ -222,12 +222,12 @@ It excels at advanced routing algorithms and comprehensive team management throu
 
 | Pros                                     | Cons                                             |
 | ---------------------------------------- | ------------------------------------------------ |
-| Completely free and open-source          | CLI-only interface (no GUI)                      |
-| Extensive provider support (100+)        | 15–30 minute technical setup                     |
-| Advanced routing algorithms              | Requires Python expertise and YAML configuration |
-| Robust retry logic and fallbacks         | All features require manual configuration        |
-| Comprehensive team and budget management | Steep learning curve for advanced features       |
-| Strong community support                 | Additional setup overhead due to Redis caching   |
+| Completely free and open-source          | 15–30 minute technical setup                     |
+| Extensive provider support (100+)        | Requires Python expertise and YAML configuration |
+| Advanced routing algorithms              | All features require manual configuration        |
+| Robust retry logic and fallbacks         | Steep learning curve for advanced features       |
+| Comprehensive team and budget management | Additional setup overhead due to Redis caching   |
+| Strong community support                 |                                                                 |
 
 **Best For**: Engineering teams building production LLM infrastructure who need maximum control, extensive provider support, and advanced routing capabilities.
 
@@ -258,7 +258,7 @@ It's designed for developers who want to build custom interfaces for logging, ev
 
 | Use Case | Requirements | Recommended Router |
 | --- | --- | --- |
-| **High-Scale Production** | Distributed rate limiting, advanced load-balancing, native observability | Helicone's AI Gateway |
+| **High-Scale Production** | Distributed rate limiting, health-aware load-balancing, native observability | Helicone's AI Gateway |
 | **Quick Prototyping** | Minimal setup with a friendly UI | OpenRouter |
 | **Maximum Control** | Open-source preference, comfortable with configuration | Helicone AI Gateway or LiteLLM (both open-source) |
 | **Enterprise Requirements** | Advanced guardrails and compliance features | Helicone AI Gateway or Portkey |
