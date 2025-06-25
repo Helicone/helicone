@@ -141,7 +141,7 @@ For custom routing and advanced features, create a `config.yaml` file:
     });
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "openai/gpt-4o-mini",
       messages: [{ role: "user", content: "Hello from my custom router!" }],
     });
 
@@ -156,17 +156,17 @@ For custom routing and advanced features, create a `config.yaml` file:
     )
 
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model="openai/gpt-4o-mini",
         messages=[{"role": "user", "content": "Hello from my custom router!"}]
     )
 
     print(response)
     ```
     ```bash cURL
-    curl http://localhost:8080/router/production/chat/completions \
+    curl http://localhost:8080/router/production/v1/chat/completions \
       -H "Content-Type: application/json" \
       -d '{
-        "model": "gpt-4o-mini",
+        "model": "openai/gpt-4o-mini",
         "messages": [
           { "role": "user", "content": "Hello from my custom router!" }
         ]
