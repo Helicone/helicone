@@ -1129,7 +1129,6 @@ export interface components {
       id: string;
       name: string;
       tags: string[];
-      model: string;
       created_at: string;
     };
     "ResultSuccess_Prompt2025-Array_": {
@@ -1140,6 +1139,7 @@ export interface components {
     "Result_Prompt2025-Array.string_": components["schemas"]["ResultSuccess_Prompt2025-Array_"] | components["schemas"]["ResultError_string_"];
     Prompt2025Version: {
       id: string;
+      model: string;
       prompt_id: string;
       /** Format: double */
       major_version: number;

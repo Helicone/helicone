@@ -664,7 +664,6 @@ const models: TsoaRoute.Models = {
             "id": {"dataType":"string","required":true},
             "name": {"dataType":"string","required":true},
             "tags": {"dataType":"array","array":{"dataType":"string"},"required":true},
-            "model": {"dataType":"string","required":true},
             "created_at": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
@@ -688,6 +687,7 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "id": {"dataType":"string","required":true},
+            "model": {"dataType":"string","required":true},
             "prompt_id": {"dataType":"string","required":true},
             "major_version": {"dataType":"double","required":true},
             "minor_version": {"dataType":"double","required":true},

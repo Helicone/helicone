@@ -2454,9 +2454,6 @@
 						},
 						"type": "array"
 					},
-					"model": {
-						"type": "string"
-					},
 					"created_at": {
 						"type": "string"
 					}
@@ -2465,7 +2462,6 @@
 					"id",
 					"name",
 					"tags",
-					"model",
 					"created_at"
 				],
 				"type": "object",
@@ -2509,6 +2505,9 @@
 					"id": {
 						"type": "string"
 					},
+					"model": {
+						"type": "string"
+					},
 					"prompt_id": {
 						"type": "string"
 					},
@@ -2529,6 +2528,7 @@
 				},
 				"required": [
 					"id",
+					"model",
 					"prompt_id",
 					"major_version",
 					"minor_version",
