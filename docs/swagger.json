@@ -11435,21 +11435,11 @@
 										"type": "number",
 										"format": "double"
 									},
-									"pageSize": {
-										"type": "number",
-										"format": "double"
-									},
-									"page": {
-										"type": "number",
-										"format": "double"
-									},
 									"promptId": {
 										"type": "string"
 									}
 								},
 								"required": [
-									"pageSize",
-									"page",
 									"promptId"
 								],
 								"type": "object"

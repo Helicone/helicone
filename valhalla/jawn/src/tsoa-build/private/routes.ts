@@ -15815,7 +15815,7 @@ export function RegisterRoutes(app: Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsPrompt2025Controller_getPrompt2025Versions: Record<string, TsoaRoute.ParameterSchema> = {
-                requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"majorVersion":{"dataType":"double"},"pageSize":{"dataType":"double","required":true},"page":{"dataType":"double","required":true},"promptId":{"dataType":"string","required":true}}},
+                requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"majorVersion":{"dataType":"double"},"promptId":{"dataType":"string","required":true}}},
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };
         app.post('/v1/prompt-2025/query/versions',

@@ -114,8 +114,6 @@ export class Prompt2025Controller extends Controller {
     @Body()
     requestBody: {
       promptId: string;
-      page: number;
-      pageSize: number;
       majorVersion?: number;
     },
     @Request() request: JawnAuthenticatedRequest

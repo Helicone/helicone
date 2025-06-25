@@ -16307,10 +16307,6 @@ export interface operations {
         "application/json": {
           /** Format: double */
           majorVersion?: number;
-          /** Format: double */
-          pageSize: number;
-          /** Format: double */
-          page: number;
           promptId: string;
         };
       };

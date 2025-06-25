@@ -6,7 +6,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { useGetPromptsWithVersions } from "@/services/hooks/prompts";
+import { useGetPromptsWithVersions, useGetPromptVersions } from "@/services/hooks/prompts";
 import { useState } from "react";
 import PromptCard from "./PromptCard";
 import PromptDetails from "./PromptDetails";
@@ -25,10 +25,27 @@ const PromptsPage = (props: PromptsPageProps) => {
   const [selectedPrompt, setSelectedPrompt] = useState<PromptWithVersions | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
+  const [filteredMajorVersion, setFilteredMajorVersion] = useState<number | null>(null);
 
   const { data, isLoading } = useGetPromptsWithVersions(search, currentPage - 1, pageSize);
   const prompts = data?.prompts || [];
   const totalCount = data?.totalCount || 0;
+
+  const { data: filteredVersions, isLoading: isLoadingFilteredVersions } = useGetPromptVersions(
+    selectedPrompt?.prompt.id || "",
+    filteredMajorVersion !== null ? filteredMajorVersion : undefined
+  );
+
+  const displayPrompt = selectedPrompt && filteredMajorVersion !== null && filteredVersions
+    ? {
+        ...selectedPrompt,
+        versions: filteredVersions,
+      }
+    : selectedPrompt;
+
+  const handleFilterVersion = (majorVersion: number | null) => {
+    setFilteredMajorVersion(majorVersion);
+  };
 
   return (
     <main className="h-screen flex flex-col w-full animate-fade-in">
@@ -71,7 +88,10 @@ const PromptsPage = (props: PromptsPageProps) => {
                   return (
                     <div
                       key={promptWithVersions.prompt.id}
-                      onClick={() => setSelectedPrompt(promptWithVersions)}
+                      onClick={() => {
+                        setSelectedPrompt(promptWithVersions);
+                        setFilteredMajorVersion(null);
+                      }}
                       className={`cursor-pointer transition-colors hover:bg-accent/50 ${
                         selectedPrompt?.prompt.id === promptWithVersions.prompt.id 
                           ? 'bg-accent' 
@@ -112,8 +132,11 @@ const PromptsPage = (props: PromptsPageProps) => {
             </div>
           </ResizablePanel>
           <ResizableHandle withHandle />
-          <ResizablePanel defaultSize={40} minSize={30} maxSize={60}>
-            <PromptDetails promptWithVersions={selectedPrompt} />
+          <ResizablePanel defaultSize={50} minSize={50} maxSize={60}>
+            <PromptDetails 
+              promptWithVersions={displayPrompt} 
+              onFilterVersion={handleFilterVersion}
+            />
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
