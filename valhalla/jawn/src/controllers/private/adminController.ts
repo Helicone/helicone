@@ -23,6 +23,8 @@ import Stripe from "stripe";
 import { AdminManager } from "../../managers/admin/AdminManager";
 import { clickhousePriceCalcNonAggregated } from "@helicone-package/cost";
 
+import { err, ok, Result } from "../../packages/common/result";
+
 export const authCheckThrow = async (userId: string | undefined) => {
   if (!userId) {
     throw new Error("Unauthorized");
@@ -50,6 +52,26 @@ export const authCheckThrow = async (userId: string | undefined) => {
 @Tags("Admin")
 @Security("api_key")
 export class AdminController extends Controller {
+  @Post("/has-feature-flag")
+  public async hasFeatureFlag(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body() body: { feature: string; orgId: string }
+  ): Promise<Result<boolean, string>> {
+    try {
+      const { data } = await dbExecute<{
+        id: string;
+      }>(`SELECT id FROM feature_flags WHERE org_id = $1 AND feature = $2`, [
+        body.orgId,
+        body.feature,
+      ]);
+
+      return ok(!!(data && data.length > 0));
+    } catch (e) {
+      console.error("Error checking feature flag:", e);
+      return err("Error checking feature flag");
+    }
+  }
+
   @Post("/feature-flags")
   public async updateFeatureFlags(
     @Request() request: JawnAuthenticatedRequest,
@@ -1325,7 +1347,8 @@ export class AdminController extends Controller {
   @Post("/backfill-costs")
   public async backfillCosts(
     @Request() request: JawnAuthenticatedRequest,
-    @Body() body: {
+    @Body()
+    body: {
       timeExpression: string;
       specifyModel: boolean;
       modelId: string;
@@ -1336,11 +1359,11 @@ export class AdminController extends Controller {
     success: boolean;
   }> {
     await authCheckThrow(request.authParams.userId);
-    
+
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    
+
     try {
-    const query = `
+      const query = `
     INSERT INTO request_response_rmt
     SELECT
       response_id,
@@ -1386,9 +1409,8 @@ export class AdminController extends Controller {
     WHERE
       request_created_at >= ${body.timeExpression}
       ${body.specifyModel ? `AND model = '${body.modelId}'` : ""}
-    `
-    const { error } = await clickhouseDb.dbQuery(query, []);
-    
+    `;
+      const { error } = await clickhouseDb.dbQuery(query, []);
     } catch (e) {
       console.error("Backfill error:", e);
       throw e;

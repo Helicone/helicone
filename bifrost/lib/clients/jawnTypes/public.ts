@@ -4977,7 +4977,9 @@ export interface operations {
   Generate: {
     requestBody: {
       content: {
-        "application/json": components["schemas"]["OpenAIChatRequest"];
+        "application/json": components["schemas"]["OpenAIChatRequest"] & {
+          useAIGateway?: boolean;
+        };
       };
     };
     responses: {

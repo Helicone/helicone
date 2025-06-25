@@ -37,6 +37,7 @@ export interface GenerateParams {
     onChunk: (chunk: string) => void;
     onCompletion: () => void;
   };
+  useAIGateway?: boolean;
 }
 
 export type GenerateResponse = {
@@ -151,11 +152,12 @@ async function handleNonStreamResponse(
 
 export async function generate<T extends object | undefined = undefined>(
   params: OpenAI.Chat.Completions.ChatCompletionCreateParams & {
-    stream: {
+    stream?: {
       onChunk: (chunk: string) => void;
       onCompletion: () => void;
     };
     schema?: z.ZodType<object>;
+    useAIGateway?: boolean;
   }
 ): Promise<GenerateResponse> {
   const currentOrgId = Cookies.get(ORG_ID_COOKIE_KEY);
@@ -176,6 +178,7 @@ export async function generate<T extends object | undefined = undefined>(
         tools: params.tools,
         response_format: params.response_format,
         model: params.model,
+        useAIGateway: params.useAIGateway,
       }),
       headers: {
         "helicone-authorization": JSON.stringify({

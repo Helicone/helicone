@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Parser from "rss-parser";
-import { getJawnClient } from "../../lib/clients/jawn";
+import { $JAWN_API, getJawnClient } from "../../lib/clients/jawn";
 import { components } from "../../lib/clients/jawnTypes/private";
 
 const useCreateAlertBanner = (onSuccess?: () => void) => {
@@ -161,15 +161,18 @@ const useBackfillCosts = (onSuccess?: () => void) => {
       chunkNumber: number;
     }) => {
       const jawnClient = getJawnClient();
-      const { data, error } = await jawnClient.POST("/v1/admin/backfill-costs", {
-        body: {
-          timeExpression: req.timeExpression,
-          specifyModel: req.specifyModel,
-          modelId: req.modelId,
-          totalChunks: req.totalChunks,
-          chunkNumber: req.chunkNumber,
-        },
-      });
+      const { data, error } = await jawnClient.POST(
+        "/v1/admin/backfill-costs",
+        {
+          body: {
+            timeExpression: req.timeExpression,
+            specifyModel: req.specifyModel,
+            modelId: req.modelId,
+            totalChunks: req.totalChunks,
+            chunkNumber: req.chunkNumber,
+          },
+        }
+      );
 
       console.log(`Backfilled costs`, data);
 
@@ -183,6 +186,24 @@ const useBackfillCosts = (onSuccess?: () => void) => {
   };
 };
 
+const useFeatureFlag = (feature: string, orgId: string) => {
+  const { data, isLoading, error } = $JAWN_API.useQuery(
+    "post",
+    "/v1/admin/has-feature-flag",
+    {
+      body: {
+        feature,
+        orgId,
+      },
+    }
+  );
+  return {
+    data,
+    isLoading,
+    error,
+  };
+};
+
 export {
   useChangelog,
   useCreateAlertBanner,
@@ -190,4 +211,5 @@ export {
   useUpdateAlertBanner,
   useUpdateSetting,
   useBackfillCosts,
+  useFeatureFlag,
 };

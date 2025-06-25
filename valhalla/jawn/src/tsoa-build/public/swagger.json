@@ -14303,7 +14303,19 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/OpenAIChatRequest"
+								"allOf": [
+									{
+										"$ref": "#/components/schemas/OpenAIChatRequest"
+									},
+									{
+										"properties": {
+											"useAIGateway": {
+												"type": "boolean"
+											}
+										},
+										"type": "object"
+									}
+								]
 							}
 						}
 					}

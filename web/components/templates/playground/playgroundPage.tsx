@@ -97,7 +97,6 @@ export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
 
 const PlaygroundPage = (props: PlaygroundPageProps) => {
   const { requestId } = props;
-
   const { data: requestData, isLoading: isRequestLoading } =
     useGetRequestWithBodies(requestId ?? "");
 
@@ -232,6 +231,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   const { setNotification } = useNotification();
   const abortController = useRef<AbortController | null>(null);
   const [isStreaming, setIsLoading] = useState<boolean>(false);
+  const [useAIGateway, setUseAIGateway] = useState<boolean>(false);
 
   useEffect(() => {
     if (response) {
@@ -292,6 +292,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                   json_schema: responseFormat.json_schema,
                 }
               : undefined,
+          useAIGateway,
         } as any);
 
         const result = await processStream(
@@ -416,6 +417,8 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               modelParameters={modelParameters}
               setModelParameters={setModelParameters}
               onRun={onRun}
+              useAIGateway={useAIGateway}
+              setUseAIGateway={setUseAIGateway}
             />
           </ResizablePanel>
           <ResizableHandle withHandle />
