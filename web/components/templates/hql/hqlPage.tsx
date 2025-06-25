@@ -109,14 +109,14 @@ function HQLPage({ user }: HQLPageProps) {
           position.lineNumber,
           word.startColumn,
           position.lineNumber,
-          word.endColumn
+          word.endColumn,
         );
 
         const fullQueryText = model.getValue();
         const tableNamesAndAliases = new Map(
           parseSqlAndFindTableNameAndAliases(fullQueryText).map(
-            ({ table_name, alias }) => [alias, table_name]
-          )
+            ({ table_name, alias }) => [alias, table_name],
+          ),
         );
 
         const thisLine = model.getValueInRange({
@@ -128,7 +128,7 @@ function HQLPage({ user }: HQLPageProps) {
 
         const thisToken = thisLine.trim().split(" ").slice(-1)?.[0] || "";
         const lastTokenBeforeSpace = /\s?(\w+)\s+\w+$/.exec(
-          thisLine.trim()
+          thisLine.trim(),
         )?.[1];
         const lastTokenBeforeDot = /(\w+)\.\w*$/.exec(thisToken)?.[1];
 
@@ -143,7 +143,7 @@ function HQLPage({ user }: HQLPageProps) {
               kind: monaco.languages.CompletionItemKind.Field,
               insertText: table_name,
               range,
-            }))
+            })),
           );
         }
 
@@ -167,8 +167,8 @@ function HQLPage({ user }: HQLPageProps) {
                     detail: col.type,
                     documentation: col.type,
                     range,
-                  }))
-                )
+                  })),
+                ),
             );
           }
         }
@@ -183,7 +183,7 @@ function HQLPage({ user }: HQLPageProps) {
               : "SQL keyword",
             sortText: "1" + keyword, // Sort keywords before other suggestions
             range,
-          }))
+          })),
         );
 
         // Remove duplicates by insertText
@@ -202,7 +202,7 @@ function HQLPage({ user }: HQLPageProps) {
   }, [monaco, clickhouseSchemas.data]);
 
   return (
-    <div className="flex flex-row h-screen w-full">
+    <div className="flex h-screen w-full flex-row">
       <Directory tables={clickhouseSchemas.data ?? []} />
       <ResizablePanelGroup direction="vertical">
         <ResizablePanel
@@ -245,7 +245,7 @@ function HQLPage({ user }: HQLPageProps) {
                 monaco.editor.setModelMarkers(
                   model,
                   "custom-sql-validation",
-                  []
+                  [],
                 );
               }
               editor.onDidChangeModelContent(() => {
@@ -263,14 +263,14 @@ function HQLPage({ user }: HQLPageProps) {
                           "Only read (SELECT) queries are allowed. Write operations are not permitted.",
                         severity: monaco.MarkerSeverity.Error,
                       },
-                    ]
+                    ],
                   );
                 } else {
                   // Clear custom markers if no forbidden statements
                   monaco.editor.setModelMarkers(
                     model,
                     "custom-sql-validation",
-                    []
+                    [],
                   );
                 }
               });
@@ -300,14 +300,14 @@ function HQLPage({ user }: HQLPageProps) {
                           "Only read (SELECT) queries are allowed. Write operations are not permitted.",
                         severity: monaco.MarkerSeverity.Error,
                       },
-                    ]
+                    ],
                   );
                 } else {
                   // Clear custom markers if no forbidden statements
                   monaco.editor.setModelMarkers(
                     model,
                     "custom-sql-validation",
-                    []
+                    [],
                   );
                 }
               }
@@ -334,14 +334,14 @@ const getTableNames = (
   schemas: {
     table_name: string;
     columns: components["schemas"]["ClickHouseTableColumn"][];
-  }[]
+  }[],
 ) => Array.from(new Set(schemas?.map((d) => d.table_name) ?? []));
 
 const getTableNamesSet = (
   schemas: {
     table_name: string;
     columns: components["schemas"]["ClickHouseTableColumn"][];
-  }[]
+  }[],
 ) => new Set(getTableNames(schemas));
 
 function parseSqlAndFindTableNameAndAliases(sql: string) {

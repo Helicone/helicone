@@ -20,13 +20,13 @@ export default function TopBar({
   const [queryName, setQueryName] = useState("Untitled query");
 
   return (
-    <div className="border-b bg-card w-full">
+    <div className="w-full border-b bg-card">
       <div className="flex items-center justify-between px-4 py-2">
         <div className="flex items-center gap-4">
           <Input
             value={queryName}
             onChange={(e) => setQueryName(e.target.value)}
-            className="text-lg font-medium border-none bg-transparent focus-visible:ring-0 w-48"
+            className="w-48 border-none bg-transparent text-lg font-medium focus-visible:ring-0"
           />
         </div>
 
@@ -50,12 +50,12 @@ export default function TopBar({
               return result;
             }}
           >
-            <Play className="w-4 h-4 mr-1" />
+            <Play className="mr-1 h-4 w-4" />
             Run
           </Button>
 
           <Button variant="outline" size="sm" className="w-32">
-            <Save className="w-4 h-4 mr-1" />
+            <Save className="mr-1 h-4 w-4" />
             Save
           </Button>
         </div>
