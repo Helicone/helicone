@@ -1,0 +1,67 @@
+---
+title: "Observability with Helicone"
+sidebarTitle: "Enable Observability"
+description: "Monitor your AI Gateway requests with Helicone"
+---
+
+Enable observability to automatically log all requests to your Helicone dashboard for monitoring usage, costs, and performance across all providers.
+
+## Quick Start
+
+<Steps>
+  <Step title="Set your Helicone API key">
+    Add your Helicone API key as an environment variable:
+
+    ```bash
+    export HELICONE_CONTROL_PLANE_API_KEY=sk-helicone-your-api-key
+    ```
+  </Step>
+  
+  <Step title="Enable Helicone observability">
+    Create or update your `ai-gateway-config.yaml`:
+
+    ```yaml
+    helicone:
+      observability: true
+    
+    routers:
+      default:
+        load-balance:
+          chat:
+            strategy: latency
+            providers:
+              - openai
+              - anthropic
+    ```
+  </Step>
+  
+  <Step title="Start the gateway">
+    ```bash
+    npx @helicone/ai-gateway@latest --config ai-gateway-config.yaml
+    ```
+  </Step>
+  
+  <Step title="Make requests">
+    ```bash
+    curl -X POST http://localhost:8080/router/default/v1/chat/completions \
+      -H "Content-Type: application/json" \
+      -d '{
+        "model": "openai/gpt-4o-mini",
+        "messages": [{"role": "user", "content": "Hello!"}]
+      }'
+    ```
+    ✅ Check your [Helicone dashboard](https://us.helicone.ai) to see requests logged automatically!
+  </Step>
+</Steps>
+
+## Privacy Controls
+
+To exclude sensitive data from logs:
+
+```bash
+curl -X POST http://localhost:8080/router/default/v1/chat/completions \
+  -H "x-helicone-omit-request-log: true" \
+  -H "x-helicone-omit-response-log: true" \
+  -H "Content-Type: application/json" \
+  -d '{"model": "openai/gpt-4o-mini", "messages": [{"role": "user", "content": "Sensitive data"}]}'
+``` 

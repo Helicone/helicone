@@ -153,51 +153,62 @@ routers:
 
 ### Step 3: Environment-Specific Rate Limits
 
-Real applications need different rate limits for different environments. Let's create production and development routers with appropriate protections:
+Real applications need different rate limits for different environments. Rate limiting in the AI Gateway works **per-API-key**, which requires authentication to identify users. Let's set up Helicone authentication and create production and development routers with appropriate protections.
+
+<Note>
+  **Authentication Required**: Rate limiting is applied per-API-key, so you need Helicone authentication enabled to track and limit requests for different users.
+</Note>
+
+First, get your Helicone API key:
+
+1. Go to [Helicone Settings](https://us.helicone.ai/settings/api-keys)
+2. Click **"Generate New Key"**
+3. Copy the key (starts with `sk-helicone-`)
+4. Set it as an environment variable:
+
+```bash
+export HELICONE_CONTROL_PLANE_API_KEY="sk-helicone-your-api-key"
+```
+
+Now create the configuration with authentication and rate limits:
 
 ```yaml
+helicone:
+  authentication: true
+  observability: false # Set to true to enable observability
+
 routers:
   production:
     rate-limit:
       per-api-key:
         capacity: 1000
-        refill-frequency: 1m  # 1000 requests per minute
+        refill-frequency: 1m # 1000 requests per minute
     load-balance:
       chat:
         strategy: latency
-        providers: [openai, anthropic]
+        providers:
+          - openai
+          - anthropic
     cache:
       store:
         in-memory: {}
-      directive: "max-age=1800"  # 30 minutes for production freshness
-  
+      directive: "max-age=1800" # 30 minutes for production freshness
+
   development:
     rate-limit:
       per-api-key:
         capacity: 100
-        refill-frequency: 1h  # 100 requests per hour for cost safety
+        refill-frequency: 1h # 100 requests per hour for cost safety
     load-balance:
       chat:
         strategy: latency
-        providers: [openai, anthropic]
+        providers:
+          - openai
+          - anthropic
     cache:
       store:
         in-memory: {}
-      directive: "max-age=7200"  # 2 hours to reduce dev costs
-  
-  staging:
-    rate-limit:
-      per-api-key:
-        capacity: 200
-        refill-frequency: 1m  # 200 requests per minute for testing
-    load-balance:
-      chat:
-        strategy: latency
-        providers: [openai, anthropic]
-    cache:
-      store:
-        in-memory: {}
-      directive: "no-cache"  # No caching for testing
+      directive: "max-age=7200" # 2 hours to reduce dev costs
 ```
 
 **What this creates:**
@@ -206,7 +217,6 @@ routers:
 |--------|----------|------------|----------|
 | **production** | `/router/production...` | 1000/min | High-traffic customer requests |
 | **development** | `/router/development...` | 100/hour | Cost-controlled development |
-| **staging** | `/router/staging...` | 200/min | Testing without cache interference |
 
 <Steps>
   <Step title="Update configuration">
@@ -219,36 +229,32 @@ routers:
     ```
   </Step>
   
-  <Step title="Test rate limits">
+  <Step title="Test your routers">
+    Now requests require authentication. Test each environment:
+    
     ```bash
-    # Production router - allows 1000 requests per minute
+    # Production router
     curl -X POST http://localhost:8080/router/production/v1/chat/completions \
+      -H "Authorization: Bearer sk-helicone-your-api-key" \
       -H "Content-Type: application/json" \
-      -d '{"model": "gpt-4o-mini", "messages": [{"role": "user", "content": "Production test"}]}'
+      -d '{"model": "openai/gpt-4o-mini", "messages": [{"role": "user", "content": "Production test"}]}'
     
-    # Development router - only allows 100 requests per hour
+    # Development router
     curl -X POST http://localhost:8080/router/development/v1/chat/completions \
+      -H "Authorization: Bearer sk-helicone-your-api-key" \
       -H "Content-Type: application/json" \
-      -d '{"model": "gpt-4o-mini", "messages": [{"role": "user", "content": "Development test"}]}'
-    
-    # Test rate limiting by making multiple quick requests to development:
-    for i in {1..5}; do
-      curl -X POST http://localhost:8080/router/development/v1/chat/completions \
-        -H "Content-Type: application/json" \
-        -d '{"model": "gpt-4o-mini", "messages": [{"role": "user", "content": "Request '$i'"}]}'
-      echo "Request $i completed"
-    done
+      -d '{"model": "openai/gpt-4o-mini", "messages": [{"role": "user", "content": "Development test"}]}'
     ```
     
     <Note>
-      The development router will start rate limiting after you exceed the hourly quota, returning HTTP 429 responses.
+      Each router now has different rate limits (1000/min for production, 100/hour for development) applied per API key. If you exceed the limits, you'll get HTTP 429 responses.
     </Note>
   </Step>
 </Steps>
 
 ### Step 4: Use in Your Applications
 
-Just change the base URL to use different routers:
+Just change the base URL to use different routers. Remember to use your Helicone API key for authentication:
 
 <CodeGroup>
 ```python Production
@@ -256,11 +262,11 @@ import openai
 
 client = openai.OpenAI(
     base_url="http://localhost:8080/router/production",
-    api_key="sk-placeholder"
+    api_key="sk-helicone-your-api-key"  # Your Helicone API key
 )
 
 response = client.chat.completions.create(
-    model="gpt-4o-mini",
+    model="openai/gpt-4o-mini",
     messages=[{"role": "user", "content": "Hello!"}]
 )
 ```
@@ -270,11 +276,11 @@ import openai
 
 client = openai.OpenAI(
     base_url="http://localhost:8080/router/development", 
-    api_key="sk-placeholder"
+    api_key="sk-helicone-your-api-key"  # Your Helicone API key
 )
 
 response = client.chat.completions.create(
-    model="gpt-4o-mini",
+    model="openai/gpt-4o-mini",
     messages=[{"role": "user", "content": "Hello!"}]
 )
 ```
@@ -285,13 +291,13 @@ import OpenAI from 'openai';
 // Production
 const prodClient = new OpenAI({
   baseURL: 'http://localhost:8080/router/production',
-  apiKey: 'sk-placeholder'
+  apiKey: 'sk-helicone-your-api-key'  // Your Helicone API key
 });
 
 // Development
 const devClient = new OpenAI({
   baseURL: 'http://localhost:8080/router/development',
-  apiKey: 'sk-placeholder'
+  apiKey: 'sk-helicone-your-api-key'  // Your Helicone API key
 });
 ```
 </CodeGroup>
