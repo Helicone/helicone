@@ -21,6 +21,7 @@ const PromptsPage = (props: PromptsPageProps) => {
   const [search, setSearch] = useState("");
 
   const { data: prompts, isLoading } = useGetPromptsWithVersions(search);
+  console.log(prompts);
 
   return (
     <main className="h-screen flex flex-col w-full animate-fade-in">
@@ -74,7 +75,7 @@ const PromptsPage = (props: PromptsPageProps) => {
                       majorVersion={latestVersion.major_version}
                       minorVersion={latestVersion.minor_version}
                       totalVersions={promptWithVersions.totalVersions}
-                      model={promptWithVersions.prompt.model}
+                      model={latestVersion.model}
                       updatedAt={updatedAt}
                       createdAt={new Date(promptWithVersions.prompt.created_at)}
                     />

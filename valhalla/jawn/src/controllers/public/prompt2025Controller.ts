@@ -19,6 +19,7 @@ import { type OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/ope
 
 export interface Prompt2025Version {
   id: string;
+  model: string;
   prompt_id: string;
   major_version: number;
   minor_version: number;
@@ -34,7 +35,6 @@ export interface Prompt2025 {
   id: string;
   name: string;
   tags: string[];
-  model: string;
   created_at: string;
 }
 

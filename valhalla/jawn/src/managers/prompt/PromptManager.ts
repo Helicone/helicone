@@ -64,7 +64,6 @@ export class Prompt2025Manager extends BaseManager {
         id,
         name,
         tags,
-        model,
         created_at
       FROM prompts_2025
       WHERE name ILIKE $1 AND organization = $2
@@ -113,7 +112,8 @@ export class Prompt2025Manager extends BaseManager {
         major_version,
         minor_version,
         commit_message,
-        created_at
+        created_at,
+        model
       FROM prompts_2025_versions
       WHERE prompt_id = $1
       AND organization = $2
