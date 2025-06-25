@@ -22,9 +22,11 @@ Caching uses exact parameter matching with configurable TTL, staleness policies,
     Create `ai-gateway-config.yaml` with basic caching (1-hour TTL with 30-minute stale allowance):
 
     ```yaml
+    cache-store:
+      in-memory: {}
+
     global:
       cache:
-        store: in-memory
         directive: "max-age=3600, max-stale=1800"
         buckets: 1
     ```
@@ -37,17 +39,10 @@ Caching uses exact parameter matching with configurable TTL, staleness policies,
   </Step>
 
   <Step title="Test caching">
+    Send this request twice and see the second request return instantly from cache with `helicone-cache: HIT` header!
+
     ```bash
-    # First request - cache miss
-    curl -X POST http://localhost:8080/router/default/v1/chat/completions \
-      -H "Content-Type: application/json" \
-      -d '{
-        "model": "openai/gpt-4o-mini",
-        "messages": [{"role": "user", "content": "Hello!"}]
-      }'
-    
-    # Second identical request - cache hit!
-    curl -X POST http://localhost:8080/router/default/v1/chat/completions \
+    curl -X POST http://localhost:8080/ai/v1/chat/completions \
       -H "Content-Type: application/json" \
       -d '{
         "model": "openai/gpt-4o-mini",
@@ -63,33 +58,9 @@ Caching uses exact parameter matching with configurable TTL, staleness policies,
   For complete configuration options and syntax, see the [Configuration Reference](/ai-gateway/config#caching).
 </Note>
 
-## Available Strategies
+## Cache Options
 
 <AccordionGroup>
-  <Accordion title="Exact Parameter Matching - Default" icon="fingerprint">
-    **Hash-based caching with configurable TTL**
-    
-    All caching uses exact parameter matching—identical requests (model, messages, temperature, all parameters) return cached responses instantly. Request parameters are hashed to create a unique cache key.
-    
-    **Best for:** Most use cases where consistent responses are desired
-    
-    **How it works:**
-    1. Configuration is merged from global → router → request headers
-    2. Incoming request parameters are hashed to create a unique cache key
-    3. System checks the cache store for an existing cached response
-    4. If found and not expired, returns cached response immediately
-    5. If not found, forwards request to provider and caches the response
-    
-    **Example:**
-    ```yaml
-    global:
-      cache:
-        store: in-memory
-        directive: "max-age=3600, max-stale=1800"  # 1-hour TTL, 30-min stale
-        buckets: 1   # Single response per cache key
-    ```
-  </Accordion>
-
   <Accordion title="Multiple Responses (Buckets)" icon="bucket">
     **Store multiple responses for the same cache key**
     
@@ -99,9 +70,11 @@ Caching uses exact parameter matching with configurable TTL, staleness policies,
     
     **Example:**
     ```yaml
+    cache-store:
+      in-memory: {}
+
     global:
       cache:
-        store: in-memory
         buckets: 10  # Store up to 10 different responses
         directive: "max-age=3600"
     ```
@@ -121,9 +94,11 @@ Caching uses exact parameter matching with configurable TTL, staleness policies,
     
     **Example (router config):**
     ```yaml
+    cache-store:
+      in-memory: {}
+
     global:
       cache:
-        store: in-memory
         directive: "max-age=3600, max-stale=1800"
         seed: "tenant-alpha"
     ```
@@ -142,9 +117,11 @@ Caching uses exact parameter matching with configurable TTL, staleness policies,
     **Use case:** CI pipeline or test suite that makes repeated identical requests. Cache for the duration of the test run to eliminate all provider costs.
 
     ```yaml
+    cache-store:
+      in-memory: {}
+
     global:
       cache:
-        store: in-memory
         directive: "max-age=7200, max-stale=3600"  # 2-hour TTL for test runs
         buckets: 1   # Consistent responses for tests
     ```
@@ -154,9 +131,11 @@ Caching uses exact parameter matching with configurable TTL, staleness policies,
     **Use case:** Production API that needs to minimize provider costs while maintaining response freshness for users.
 
     ```yaml
+    cache-store:
+      in-memory: {}
+
     global:
       cache:
-        store: in-memory
         directive: "max-age=1800, max-stale=900"  # 30-min TTL
         buckets: 1   # Consistent responses
     ```
@@ -170,10 +149,12 @@ Caching uses exact parameter matching with configurable TTL, staleness policies,
     </Note>
 
     ```yaml
+    cache-store:
+      in-memory: {}
+
     routers:
       production:
         cache:
-          store: in-memory
           directive: "max-age=1800"  # 30-min TTL for production freshness
           buckets: 1                 # Consistent responses
         load-balance:
@@ -183,7 +164,6 @@ Caching uses exact parameter matching with configurable TTL, staleness policies,
       
       development:
         cache:
-          store: in-memory
           directive: "max-age=7200"  # 2-hour TTL to reduce dev costs
           buckets: 5                 # More variety for testing
         load-balance:
@@ -195,6 +175,10 @@ Caching uses exact parameter matching with configurable TTL, staleness policies,
 </Tabs>
 
 ## How It Works
+
+**Exact Parameter Matching**
+
+All caching uses exact parameter matching—identical requests (model, messages, temperature, all parameters) return cached responses instantly. Request parameters are hashed to create a unique cache key.
 
 ### Request Flow
 
@@ -257,14 +241,16 @@ Cache responses can be stored in different backends depending on your deployment
 
 <AccordionGroup>
   <Accordion title="In-Memory Storage" icon="memory">
-    **Local cache storage**
+    **Local cache storage (Default and Only Option)**
     
     Cache responses are stored locally in each router instance—no external dependencies, ultra-fast lookup.
     
     ```yaml
+    cache-store:
+      in-memory: {}  # Uses default max-size
+
     global:
       cache:
-        store: in-memory
         directive: "max-age=3600"
     ```
     
@@ -276,7 +262,7 @@ Cache responses can be stored in different backends depending on your deployment
 </AccordionGroup>
 
 <Note>
-  Additional storage backends (Redis and Database) are [coming soon](#coming-soon) for distributed caching and advanced analytics.
+  In-memory storage is currently the only available option. Additional storage backends (Redis and Database) are [coming soon](#coming-soon) for distributed caching and advanced analytics.
 </Note>
 
 ### Strategy Selection Guide

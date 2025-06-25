@@ -1,10 +1,10 @@
 ---
 title: "Create Your First Router"
 sidebarTitle: "Create Your First Router"
-description: "Build your first custom router with load balancing and caching in **5 minutes**"
+description: "Build your first custom router with load balancing, caching, and rate limiting in **5 minutes**"
 ---
 
-Ready to unlock the full power of the AI Gateway? This guide will walk you through creating custom routers with load balancing, caching, and multiple environments. You'll go from basic routing to production-ready configurations.
+Ready to unlock the full power of the AI Gateway? This guide will walk you through creating custom routers with load balancing, caching, and rate limiting. You'll go from basic routing to production-ready configurations.
 
 <Note>
   **Prerequisites:** Make sure you've completed the [main quickstart](/ai-gateway/quickstart) and have the gateway running with your API keys configured.
@@ -66,7 +66,7 @@ routers:
     });
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "openai/gpt-4o-mini",
       messages: [{ role: "user", content: "Hello from my custom router!" }],
     });
 
@@ -89,7 +89,7 @@ routers:
     curl -X POST http://localhost:8080/router/my-router/v1/chat/completions \
       -H "Content-Type: application/json" \
       -d '{
-        "model": "gpt-4o-mini",
+        "model": "openai/gpt-4o-mini",
         "messages": [{"role": "user", "content": "Hello from my custom router!"}]
       }'
     ```
@@ -104,6 +104,9 @@ routers:
 Now let's add caching to dramatically reduce costs and improve response times:
 
 ```yaml
+cache-store:
+  in-memory: {}
+
 routers:
   my-router:
     load-balance:
@@ -113,8 +116,6 @@ routers:
           - openai
           - anthropic
     cache:
-      store:
-        in-memory: {}
       directive: "max-age=3600"
 ```
 
@@ -141,17 +142,17 @@ routers:
     # First request - goes to provider
     time curl -X POST http://localhost:8080/router/my-router/v1/chat/completions \
       -H "Content-Type: application/json" \
-      -d '{"model": "gpt-4o-mini", "messages": [{"role": "user", "content": "To be or not to be?"}]}'
+      -d '{"model": "openai/gpt-4o-mini", "messages": [{"role": "user", "content": "To be or not to be?"}]}'
     
     # Second request - returns from cache instantly
     time curl -X POST http://localhost:8080/router/my-router/v1/chat/completions \
       -H "Content-Type: application/json" \
-      -d '{"model": "gpt-4o-mini", "messages": [{"role": "user", "content": "To be or not to be?"}]}'
+      -d '{"model": "openai/gpt-4o-mini", "messages": [{"role": "user", "content": "To be or not to be?"}]}'
     ```
   </Step>
 </Steps>
 
-### Step 3: Environment-Specific Rate Limits
+### Step 3: Rate Limit per Environment
 
 Real applications need different rate limits for different environments. Rate limiting in the AI Gateway works **per-API-key**, which requires authentication to identify users. Let's set up Helicone authentication and create production and development routers with appropriate protections.
 
@@ -177,6 +178,9 @@ helicone:
   authentication: true
   observability: false # Set to true to enable observability
 
+cache-store:
+  in-memory: {}
+
 routers:
   production:
     rate-limit:
@@ -190,8 +194,6 @@ routers:
           - openai
           - anthropic
     cache:
-      store:
-        in-memory: {}
       directive: "max-age=1800" # 30 minutes for production freshness
 
   development:
@@ -206,8 +208,6 @@ routers:
           - openai
           - anthropic
     cache:
-      store:
-        in-memory: {}
       directive: "max-age=7200" # 2 hours to reduce dev costs
 ```
 
