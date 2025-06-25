@@ -23,7 +23,7 @@ Each Helicone AI Gateway deployment can configure multiple independent routing p
             - openai
             - anthropic
     
-    experimental:
+    development:
       load-balance:
         chat:
           strategy: weighted
@@ -112,31 +112,44 @@ Store and reuse LLM responses for identical requests to dramatically reduce cost
 
 [Learn more](/ai-gateway/concepts/caching)
 
+### Cache Store
+
+<ParamField path="cache-store" type="object">
+  Define the cache storage backend. Must be configured at the top level.
+
+  ```yaml
+  cache-store:
+    in-memory: {}  # Uses default max-size
+  ```
+
+  **With custom max-size:**
+  ```yaml
+  cache-store:
+    in-memory:
+      max-size: 10000  # Number of cached entries
+  ```
+
+  **Options:**
+  - Default: `268435456` (256MB worth of entries)
+  - Small: `1000` (good for development)
+  - Medium: `10000` (good for moderate traffic)
+  - Large: `536870912` (512MB worth for high traffic)
+</ParamField>
+
 <ParamField path="routers.[name].cache" type="object" optional>
   Configure response caching for a router.
 
   ```yaml
+  cache-store:
+    in-memory: {}
+
   routers:
     production:
       cache:
-        enabled: true
         directive: "max-age=3600, max-stale=1800"
         buckets: 10
         seed: "unique-cache-seed"
   ```
-</ParamField>
-
-<ParamField path="routers.[name].cache.store" type="string" default="in-memory">
-  Define where to store cached responses.
-
-  ```yaml
-  cache:
-    store: in-memory
-  ```
-
-  **Options:**
-  - `in-memory` - Local memory storage (default)
-  - `redis` - Redis storage (coming soon...) 
 </ParamField>
 
 <ParamField path="routers.[name].cache.directive" type="string">
@@ -175,6 +188,10 @@ Store and reuse LLM responses for identical requests to dramatically reduce cost
 ## Rate Limiting
 
 Control request frequency using GCRA (Generic Cell Rate Algorithm) with burst capacity and smooth rate limiting. Global limits are checked first, then router-specific limits are applied.
+
+<Warning>
+  **Authentication Required**: Rate limiting works per-API-key, so you must enable Helicone authentication for rate limiting to function properly. [Set up authentication](/ai-gateway/authentication) first.
+</Warning>
 
 [Learn more](/ai-gateway/concepts/rate-limiting)
 
@@ -270,22 +287,35 @@ The following fields are available for both global and router-level rate limitin
   **Note:** Only available for global rate limiting configuration.
 </ParamField>
 
-## Authentication & Observability
+## Helicone Add-ons
 
-Configure integration with the Helicone platform for authentication and comprehensive observability. When enabled, requests must include a valid Helicone API key and all requests are automatically logged to your Helicone dashboard.
+Configure integration with the Helicone platform for authentication and observability. Authentication and observability are now separate controls.
 
-[Learn more](/ai-gateway/helicone-integration)
+[Learn more about Authentication](/ai-gateway/authentication) | [Learn more about Observability](/ai-gateway/observability)
 
-<ParamField path="helicone.enable-auth" type="boolean" default="false">
-  Enable Helicone authentication and observability.
+<ParamField path="helicone.authentication" type="boolean" default="false">
+  Enable Helicone authentication for secure API access.
 
   ```yaml
   helicone:
-    enable-auth: true
+    authentication: true
+    observability: false  # Optional: enable observability
   ```
 
   **When enabled:** Must set the `HELICONE_CONTROL_PLANE_API_KEY` environment variable with your Helicone API key.
-  </ParamField>
+</ParamField>
+
+<ParamField path="helicone.observability" type="boolean" default="false">
+  Enable request logging to your Helicone dashboard.
+
+  ```yaml
+  helicone:
+    authentication: true  # Required for observability
+    observability: true
+  ```
+
+  **Note:** Observability requires authentication to be enabled.
+</ParamField>
 
 <ParamField path="helicone.base-url" type="string" default="https://api.helicone.ai">
   Helicone API endpoint URL.

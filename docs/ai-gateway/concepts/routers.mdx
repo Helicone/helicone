@@ -30,7 +30,7 @@ Each router you define becomes part of the URL path when making requests to the 
 curl -X POST http://localhost:8080/router/production/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "gpt-4",
+    "model": "openai/gpt-4",
     "messages": [{"role": "user", "content": "Hello!"}]
   }'
 ```
@@ -40,17 +40,7 @@ curl -X POST http://localhost:8080/router/production/v1/chat/completions \
 curl -X POST http://localhost:8080/router/development/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "gpt-4",
-    "messages": [{"role": "user", "content": "Hello!"}]
-  }'
-```
-
-```bash Default Router
-# Using the 'default' router (special case)
-curl -X POST http://localhost:8080/router/default/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "gpt-4",
+    "model": "openai/gpt-4",
     "messages": [{"role": "user", "content": "Hello!"}]
   }'
 ```
@@ -97,23 +87,23 @@ const devClient = new OpenAI({
 # Production router
 curl -X POST http://localhost:8080/router/production/v1/chat/completions \
   -H "Content-Type: application/json" \
-  -d '{"model": "gpt-4", "messages": [{"role": "user", "content": "Hello!"}]}'
+  -d '{"model": "openai/gpt-4", "messages": [{"role": "user", "content": "Hello!"}]}'
 
 # Development router  
 curl -X POST http://localhost:8080/router/development/v1/chat/completions \
   -H "Content-Type: application/json" \
-  -d '{"model": "gpt-4", "messages": [{"role": "user", "content": "Hello!"}]}'
+  -d '{"model": "openai/gpt-4", "messages": [{"role": "user", "content": "Hello!"}]}'
 ```
 </CodeGroup>
 
 ### Basic Router Configuration
 
-Every AI Gateway deployment requires at least a `default` router. You can then add additional named routers for different use cases.
+You can configure any number of named routers for different use cases.
 
 ```yaml
 routers:
-  # Required: default router
-  default:
+  # Any router name you want
+  my-router:
     load-balance:
       chat:
         strategy: latency
@@ -121,7 +111,7 @@ routers:
           - openai
           - anthropic
   
-  # Optional: additional named routers
+  # Additional named routers
   production:
     load-balance:
       chat:
@@ -132,7 +122,6 @@ routers:
           - provider: openai
             weight: '0.3'
     cache:
-      enabled: true
       directive: "max-age=3600"
     
   development:
@@ -161,11 +150,7 @@ routers:
               - anthropic
               - gemini
         cache:
-          enabled: true
           directive: "max-age=1800"
-        retries:
-          enabled: true
-          max-retries: 3
         
       staging:
         load-balance:
@@ -176,8 +161,6 @@ routers:
                 weight: '0.8'
               - provider: anthropic  
                 weight: '0.2'
-        cache:
-          enabled: false
         
       development:
         load-balance:
@@ -219,7 +202,6 @@ routers:
               - provider: anthropic
                 weight: '1.0'
         cache:
-          enabled: true
           directive: "max-age=3600"
         rate-limit:
           per-api-key:
@@ -242,13 +224,14 @@ routers:
 
 ### Router Naming Rules
 
-- Router names must be 1-12 characters long
-- Only alphanumeric characters, hyphens, and underscores allowed: `[A-Za-z0-9_-]`
-- `default` is a special reserved name for the default router
-- Case-insensitive for the `default` router only
+Router names must follow this regex pattern: `^[A-Za-z0-9_-]{1,12}$`
 
-**Valid names:** `production`, `dev`, `team-a`, `cost_opt`, `v2`  
-**Invalid names:** `very-long-router-name`, `team@prod`, `router with spaces`
+- **Length:** 1-12 characters
+- **Allowed characters:** Letters (A-Z, a-z), numbers (0-9), hyphens (-), underscores (_)
+- **No spaces or special characters**
+
+**Valid names:** `production`, `dev`, `team-a`, `cost_opt`, `v2`, `A`, `my_router`  
+**Invalid names:** `very-long-router-name` (too long), `team@prod` (@ not allowed), `router with spaces` (spaces not allowed)
 
 ### URL Path Structure
 
