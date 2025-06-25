@@ -9,6 +9,8 @@ export async function alertSqsCongestion(env: Env, alertManager: AlertManager) {
   const sqsClient = new SqsClient(env);
   const queueSize = await sqsClient.getQueueSize();
 
+  console.log("Queue size: ", queueSize);
+
   // If we can't determine queue size, don't change alert state
   if (queueSize === null) {
     console.error("Failed to determine SQS queue size");
