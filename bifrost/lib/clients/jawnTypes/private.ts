@@ -162,6 +162,9 @@ export interface paths {
   "/v1/prompt-2025/create": {
     post: operations["CreatePrompt2025"];
   };
+  "/v1/prompt-2025/count": {
+    get: operations["GetPrompt2025Count"];
+  };
   "/v1/prompt-2025/query": {
     post: operations["GetPrompts2025"];
   };
@@ -1038,6 +1041,13 @@ Json: JsonObject;
       };
       functions?: unknown[];
     };
+    ResultSuccess_number_: {
+      /** Format: double */
+      data: number;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_number.string_": components["schemas"]["ResultSuccess_number_"] | components["schemas"]["ResultError_string_"];
     Prompt2025: {
       id: string;
       name: string;
@@ -1085,13 +1095,6 @@ Json: JsonObject;
       error: null;
     };
     "Result_PromptVersionCounts.string_": components["schemas"]["ResultSuccess_PromptVersionCounts_"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_number_: {
-      /** Format: double */
-      data: number;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_number.string_": components["schemas"]["ResultSuccess_number_"] | components["schemas"]["ResultError_string_"];
     /** @description Make all properties in T optional */
     Partial_TextOperators_: {
       "not-equals"?: string;
@@ -16267,10 +16270,24 @@ export interface operations {
       };
     };
   };
+  GetPrompt2025Count: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_number.string_"];
+        };
+      };
+    };
+  };
   GetPrompts2025: {
     requestBody: {
       content: {
         "application/json": {
+          /** Format: double */
+          pageSize: number;
+          /** Format: double */
+          page: number;
           search: string;
         };
       };
@@ -16288,6 +16305,8 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
+          /** Format: double */
+          majorVersion?: number;
           /** Format: double */
           pageSize: number;
           /** Format: double */

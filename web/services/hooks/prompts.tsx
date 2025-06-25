@@ -30,22 +30,30 @@ export const useCreatePrompt = () => {
 
 export const useGetPromptsWithVersions = (
   search: string,
-  page?: number,
-  pageSize?: number
+  page: number = 0,
+  pageSize: number = 10,
 ) => {
-  return useQuery<PromptWithVersions[]>({
-    queryKey: ["promptsWithVersions", search],
+  return useQuery<{
+    prompts: PromptWithVersions[];
+    totalCount: number;
+  }>({
+    queryKey: ["promptsWithVersions", search, page, pageSize],
     refetchOnWindowFocus: false,
     queryFn: async () => {
       const promptsResult = await $JAWN_API.POST("/v1/prompt-2025/query", {
         body: {
           search: search,
+          page: page,
+          pageSize: pageSize,
         },
       });
 
       if (promptsResult.error || !promptsResult.data?.data) {
         console.error("Error fetching prompts:", promptsResult.error);
-        return [];
+        return {
+          prompts: [],
+          totalCount: 0,
+        };
       }
 
       const prompts = promptsResult.data.data;
@@ -55,8 +63,8 @@ export const useGetPromptsWithVersions = (
           const versionsResult = await $JAWN_API.POST("/v1/prompt-2025/query/versions", {
             body: {
               promptId: prompt.id,
-              page: page ?? 0,
-              pageSize: pageSize ?? 10,
+              page: 0,
+              pageSize: 10,
             },
           });
 
@@ -111,7 +119,20 @@ export const useGetPromptsWithVersions = (
         })
       );
 
-      return promptsWithVersions;
+
+      const totalPromptsResult = await $JAWN_API.GET("/v1/prompt-2025/count", {});
+      if (totalPromptsResult.error || !totalPromptsResult.data?.data) {
+        console.error("Error fetching total prompts:", totalPromptsResult.error);
+        return {
+          prompts: [],
+          totalCount: 0,
+        };
+      }
+      return {
+        prompts: promptsWithVersions,
+        totalCount: totalPromptsResult.data.data,
+      };
+
     },
   });
 };
