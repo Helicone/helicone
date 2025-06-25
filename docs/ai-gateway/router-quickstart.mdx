@@ -14,7 +14,7 @@ Ready to unlock the full power of the AI Gateway? This guide will walk you throu
 
 Think of routers as separate "virtual gateways" within your single AI Gateway deployment. Each router has its own:
 
-- **URL endpoint** - `http://localhost:8080/router/{name}/v1`
+- **URL endpoint** - `http://localhost:8080/router/{name}`
 - **Load balancing strategy** - How requests are distributed across providers
 - **Provider pool** - Which LLM providers are available
 - **Features** - Caching, rate limiting, retries, and more
@@ -40,7 +40,7 @@ routers:
 
 **What this does:**
 - Creates a router named `my-router` 
-- Available at `http://localhost:8080/router/my-router/v1`
+- Available at `http://localhost:8080/router/my-router`
 - Uses [latency-based load balancing](/ai-gateway/concepts/loadbalancing#latency-based-p2c-peakewma-default) between OpenAI and Anthropic
 - Automatically routes to whichever provider responds fastest
 
@@ -61,7 +61,7 @@ routers:
     import { OpenAI } from "openai";
 
     const openai = new OpenAI({
-      baseURL: "http://localhost:8080/router/my-router/v1",
+      baseURL: "http://localhost:8080/router/my-router",
       apiKey: "fake-api-key", // Required by SDK, but gateway handles real auth
     });
 
@@ -76,7 +76,7 @@ routers:
     from openai import OpenAI
 
     client = OpenAI(
-        base_url="http://localhost:8080/router/my-router/v1",
+        base_url="http://localhost:8080/router/my-router",
         api_key="sk-fake-key",
     )
 
@@ -151,67 +151,62 @@ routers:
   </Step>
 </Steps>
 
-### Step 3: Multiple Environments
+### Step 3: Environment-Specific Rate Limits
 
-Real applications need different configurations for different environments. Let's create production and development routers:
+Real applications need different rate limits for different environments. Let's create production and development routers with appropriate protections:
 
 ```yaml
 routers:
   production:
-    load-balance:
-      chat:
-        strategy: latency
-        providers:
-          - openai
-          - anthropic
-          - gemini
-    cache:
-      enabled: true
-      directive: "max-age=1800"  # 30 minutes for production freshness
     rate-limit:
       per-api-key:
         capacity: 1000
-        refill-frequency: 1m      # 1000 requests per minute
-  
-  development:
-    load-balance:
-      chat:
-        strategy: weighted
-        providers:
-          - provider: ollama        # Free local models
-            weight: '0.8'
-          - provider: openai        # Paid fallback
-            weight: '0.2'
-    cache:
-      enabled: true
-      directive: "max-age=7200"    # 2 hours to reduce dev costs
-    rate-limit:
-      per-api-key:
-        capacity: 100
-        refill-frequency: 1h      # 100 requests per hour for cost safety
-  
-  staging:
+        refill-frequency: 1m  # 1000 requests per minute
     load-balance:
       chat:
         strategy: latency
-        providers:
-          - openai
-          - anthropic
+        providers: [openai, anthropic]
     cache:
-      enabled: false              # No caching for testing
+      store:
+        in-memory: {}
+      directive: "max-age=1800"  # 30 minutes for production freshness
+  
+  development:
+    rate-limit:
+      per-api-key:
+        capacity: 100
+        refill-frequency: 1h  # 100 requests per hour for cost safety
+    load-balance:
+      chat:
+        strategy: latency
+        providers: [openai, anthropic]
+    cache:
+      store:
+        in-memory: {}
+      directive: "max-age=7200"  # 2 hours to reduce dev costs
+  
+  staging:
     rate-limit:
       per-api-key:
         capacity: 200
-        refill-frequency: 1m      # 200 requests per minute for testing
+        refill-frequency: 1m  # 200 requests per minute for testing
+    load-balance:
+      chat:
+        strategy: latency
+        providers: [openai, anthropic]
+    cache:
+      store:
+        in-memory: {}
+      directive: "no-cache"  # No caching for testing
 ```
 
 **What this creates:**
 
-| Router | Endpoint | Strategy | Use Case |
-|--------|----------|----------|----------|
-| **production** | `/router/production/v1...` | Latency + rate limits | Customer traffic |
-| **development** | `/router/development/v1...` | Weighted (80% local) | Cost-effective dev |
-| **staging** | `/router/staging/v1...` | Latency (no cache) | Testing |
+| Router | Endpoint | Rate Limit | Use Case |
+|--------|----------|------------|----------|
+| **production** | `/router/production...` | 1000/min | High-traffic customer requests |
+| **development** | `/router/development...` | 100/hour | Cost-controlled development |
+| **staging** | `/router/staging...` | 200/min | Testing without cache interference |
 
 <Steps>
   <Step title="Update configuration">
@@ -224,30 +219,41 @@ routers:
     ```
   </Step>
   
-  <Step title="Test different environments">
+  <Step title="Test rate limits">
     ```bash
-    # Production router - optimized for reliability
+    # Production router - allows 1000 requests per minute
     curl -X POST http://localhost:8080/router/production/v1/chat/completions \
       -H "Content-Type: application/json" \
       -d '{"model": "gpt-4o-mini", "messages": [{"role": "user", "content": "Production test"}]}'
     
-    # Development router - cost-optimized with local models
+    # Development router - only allows 100 requests per hour
     curl -X POST http://localhost:8080/router/development/v1/chat/completions \
       -H "Content-Type: application/json" \
-      -d '{"model": "llama3.2", "messages": [{"role": "user", "content": "Development test"}]}'
+      -d '{"model": "gpt-4o-mini", "messages": [{"role": "user", "content": "Development test"}]}'
+    
+    # Test rate limiting by making multiple quick requests to development:
+    for i in {1..5}; do
+      curl -X POST http://localhost:8080/router/development/v1/chat/completions \
+        -H "Content-Type: application/json" \
+        -d '{"model": "gpt-4o-mini", "messages": [{"role": "user", "content": "Request '$i'"}]}'
+      echo "Request $i completed"
+    done
     ```
+    
+    <Note>
+      The development router will start rate limiting after you exceed the hourly quota, returning HTTP 429 responses.
+    </Note>
   </Step>
 </Steps>
 
 ### Step 4: Use in Your Applications
 
-Now update your applications to use specific routers:
+Just change the base URL to use different routers:
 
 <CodeGroup>
-```python Production App
+```python Production
 import openai
 
-# Production router with rate limiting
 client = openai.OpenAI(
     base_url="http://localhost:8080/router/production",
     api_key="sk-placeholder"
@@ -255,35 +261,34 @@ client = openai.OpenAI(
 
 response = client.chat.completions.create(
     model="gpt-4o-mini",
-    messages=[{"role": "user", "content": "Hello from production!"}]
+    messages=[{"role": "user", "content": "Hello!"}]
 )
 ```
 
-```python Development App
+```python Development
 import openai
 
-# Development router with cost optimization
 client = openai.OpenAI(
     base_url="http://localhost:8080/router/development", 
     api_key="sk-placeholder"
 )
 
 response = client.chat.completions.create(
-    model="llama3.2",  # Will use local Ollama 80% of the time
-    messages=[{"role": "user", "content": "Hello from development!"}]
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "Hello!"}]
 )
 ```
 
 ```javascript Node.js
 import OpenAI from 'openai';
 
-// Production router
+// Production
 const prodClient = new OpenAI({
   baseURL: 'http://localhost:8080/router/production',
   apiKey: 'sk-placeholder'
 });
 
-// Development router  
+// Development
 const devClient = new OpenAI({
   baseURL: 'http://localhost:8080/router/development',
   apiKey: 'sk-placeholder'
