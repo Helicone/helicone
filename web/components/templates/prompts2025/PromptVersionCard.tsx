@@ -1,0 +1,47 @@
+import { Small } from "@/components/ui/typography";
+import ModelPill from "@/components/templates/requests/modelPill";
+import type { components } from "../../../lib/clients/jawnTypes/public";
+import { formatTime } from "./timeUtils";
+
+type Prompt2025Version = components["schemas"]["Prompt2025Version"];
+
+interface PromptVersionCardProps {
+  version: Prompt2025Version;
+  isProductionVersion?: boolean;
+}
+
+const PromptVersionCard = ({ version, isProductionVersion = false }: PromptVersionCardProps) => {
+  const versionDisplay = version.minor_version === 0 ? `v${version.major_version}` : `v${version.major_version}.${version.minor_version}`;
+  
+  const displayCommitMessage = version.commit_message.length > 40 
+    ? version.commit_message.substring(0, 37) + "..." 
+    : version.commit_message;
+
+  return (
+    <div className="w-full border-b border-border bg-background hover:bg-muted/50 transition-colors cursor-pointer">
+      <div className="flex items-center justify-between px-4 py-2">
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-foreground">{displayCommitMessage}</span>
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary ring-1 ring-inset ring-primary/20">
+              {versionDisplay}
+            </span>
+            {isProductionVersion && (
+              <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800 ring-1 ring-inset ring-green-600/20">
+                Production
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center gap-4 px-4 pb-3">
+        <ModelPill model={version.model} />
+        <span className="text-xs text-muted-foreground">
+          {formatTime(new Date(version.created_at), "Created")}
+        </span>
+      </div>
+    </div>
+  );
+};
+
+export default PromptVersionCard; 

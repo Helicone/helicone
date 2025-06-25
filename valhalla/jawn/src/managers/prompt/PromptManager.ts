@@ -150,8 +150,6 @@ export class Prompt2025Manager extends BaseManager {
 
   async getPromptVersions(params: {
     promptId: string;
-    page: number;
-    pageSize: number;
     majorVersion?: number;
   }): Promise<Result<Prompt2025Version[], string>> {
     const result = await dbExecute<Prompt2025Version>(
@@ -167,11 +165,11 @@ export class Prompt2025Manager extends BaseManager {
       FROM prompts_2025_versions
       WHERE prompt_id = $1
       AND organization = $2
-      ${params.majorVersion ? `AND major_version = $3` : ''}
+      ${params.majorVersion !== undefined ? `AND major_version = $3` : ''}
       ORDER BY created_at DESC
-      LIMIT $4 OFFSET $5
+      LIMIT 50
       `,
-      [params.promptId, this.authParams.organizationId, params.majorVersion, params.pageSize, params.page * params.pageSize]
+      [params.promptId, this.authParams.organizationId, params.majorVersion]
     );
 
     if (result.error) {
