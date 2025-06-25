@@ -144,14 +144,13 @@ export class Prompt2025Manager extends BaseManager {
       try {
         insertPromptResult = await dbExecute<{ id: string }>(
           `
-        INSERT INTO prompts_2025 (id, name, tags, model, created_at, organization)
-        VALUES ($1, $2, $3, $4, NOW(), $5)
+        INSERT INTO prompts_2025 (id, name, tags, created_at, organization)
+        VALUES ($1, $2, $3, NOW(), $4)
         RETURNING id
           `, [
             promptId,
             params.name,
             params.tags,
-            params.promptBody.model,
             this.authParams.organizationId,
           ]
         );
@@ -181,14 +180,16 @@ export class Prompt2025Manager extends BaseManager {
         minor_version,
         commit_message,
         created_by,
-        organization
+        organization,
+        model
       )
-      VALUES (NOW(), $1, 0, 0, 'First version.', $2, $3)
+      VALUES (NOW(), $1, 0, 0, 'First version.', $2, $3, $4)
       RETURNING id
       `, [
         promptId,
         this.authParams.userId,
         this.authParams.organizationId,
+        params.promptBody.model,
       ]
     )
     
