@@ -18,7 +18,7 @@ description: "Choose the deployment method that works best for your infrastructu
   <Card title="Docker" icon="docker" href="/ai-gateway/deployment/docker">
     Run in containers for consistent environments
   </Card>
-  <Card title="Kubernetes" icon="kubernetes" href="/deployment/kubernetes">
+  <Card title="Kubernetes" icon="chart-network" href="/deployment/k8s">
     Deploy at scale with orchestration and management
   </Card>
 </CardGroup>
@@ -26,34 +26,19 @@ description: "Choose the deployment method that works best for your infrastructu
 ## Cloud Platforms
 
 <CardGroup cols={3}>
-  <Card title="AWS" icon="aws" href="/deployment/aws">
+  <Card title="AWS ECS" icon="aws" href="/ai-gateway/deployment/ecs">
     Deploy on Amazon Web Services
   </Card>
-  <Card title="Google Cloud" icon="google-cloud" href="/deployment/gcp">
-    Run on Google Cloud Platform
-  </Card>
-  <Card title="Fly.io" icon="plane" href="/deployment/fly">
+  <Card title="Fly.io" icon="plane" href="/ai-gateway/deployment/fly">
     Deploy globally with edge computing
   </Card>
-</CardGroup>
-
-## Platform Services
-
-<CardGroup cols={2}>
-  <Card title="Porter" icon="ship" href="/deployment/porter">
+  <Card title="Porter" icon="ship" href="/ai-gateway/deployment/porter">
     Simplified cloud deployments with Porter
   </Card>
-  <Card title="Replit" icon="code" href="/deployment/replit">
-    Quick prototyping and development on Replit
-  </Card>
 </CardGroup>
 
-## Choosing the Right Option
+## Secure Your Gateway
 
-- **NPX/Cargo**: Perfect for local development and testing
-- **Docker**: Great for consistent deployments across environments
-- **Kubernetes**: Ideal for production workloads requiring scaling and orchestration
-- **Cloud Platforms**: Best for production deployments with managed infrastructure
-- **Platform Services**: Excellent for rapid prototyping and simplified deployments
+All of our cloud deployment guides include instructions on how to secure your gateway with authentication and authorization.
 
-Need help deciding? Check out our [deployment comparison guide](/deployment/comparison) or reach out to our community for recommendations based on your specific use case.
+To learn more about how to secure your gateway, check out our [authentication guide](/ai-gateway/authentication).
