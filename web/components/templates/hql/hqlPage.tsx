@@ -12,6 +12,8 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { editor } from "monaco-editor";
+import * as monaco from "monaco-editor";
+import { $JAWN_API } from "@/lib/clients/jawn";
 
 const SQL_KEYWORDS = [
   "SELECT",
@@ -91,6 +93,7 @@ function HQLPage({ user }: HQLPageProps) {
 
   const [result, setResult] = useState<Record<string, string>[]>([]);
   const [queryLoading, setQueryLoading] = useState(false);
+  const [queryError, setQueryError] = useState<string | null>(null);
 
   // Setup autocompletion
   useEffect(() => {
@@ -215,6 +218,7 @@ function HQLPage({ user }: HQLPageProps) {
             sql={editorRef.current?.getValue() ?? ""}
             setResult={setResult}
             setQueryLoading={setQueryLoading}
+            setQueryError={setQueryError}
           />
           <Editor
             defaultLanguage="sql"
@@ -223,6 +227,39 @@ function HQLPage({ user }: HQLPageProps) {
               editorRef.current = editor;
               const model = editor.getModel();
               if (!model) return;
+
+              // Add keyboard event listener
+              editor.onKeyDown((e) => {
+                if ((e.ctrlKey || e.metaKey) && e.code === "Enter") {
+                  setQueryLoading(true);
+                  console.log(editor.getValue());
+                  $JAWN_API
+                    .POST("/v1/helicone-sql/execute", {
+                      body: {
+                        sql: editor.getValue(),
+                      },
+                    })
+                    .then((result) => {
+                      if ("error" in result && result.error) {
+                        console.log(result);
+                        setQueryError(result.error.error ?? "Unknown error");
+                        setResult([]);
+                      } else {
+                        setQueryLoading(false);
+                        setQueryError(null);
+                        console.log(result.data.data);
+                        setResult(
+                          result.data?.data as Record<string, string>[],
+                        );
+                      }
+                    })
+                    .catch((error) => {
+                      console.error(error);
+                      setQueryError(error.message);
+                      setResult([]);
+                    });
+                }
+              });
 
               // Regex to match forbidden write statements (case-insensitive, at start of line ignoring whitespace)
               const forbidden =
@@ -321,7 +358,11 @@ function HQLPage({ user }: HQLPageProps) {
           collapsedSize={10}
           defaultSize={25}
         >
-          <QueryResult result={result} loading={queryLoading} />
+          <QueryResult
+            result={result}
+            loading={queryLoading}
+            error={queryError}
+          />
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>

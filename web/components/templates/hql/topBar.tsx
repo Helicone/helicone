@@ -9,12 +9,14 @@ interface TopBarProps {
   sql: string;
   setResult: (result: Array<Record<string, any>>) => void;
   setQueryLoading: (loading: boolean) => void;
+  setQueryError: (error: string) => void;
 }
 
 export default function TopBar({
   sql,
   setResult,
   setQueryLoading,
+  setQueryError,
 }: TopBarProps) {
   // TODO: can be untitled query hash
   const [queryName, setQueryName] = useState("Untitled query");
@@ -44,8 +46,10 @@ export default function TopBar({
               });
               setQueryLoading(false);
 
-              if (!result.error) {
+              if ("data" in result && result.data) {
                 setResult(result.data?.data ?? []);
+              } else if ("error" in result) {
+                setQueryError((result.error as { message: string }).message);
               }
               return result;
             }}
