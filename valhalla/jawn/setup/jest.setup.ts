@@ -6,8 +6,6 @@ import { testClickhouseDb } from "../src/lib/db/TestClickhouseWrapper";
  * @doc https://jestjs.io/docs/configuration#setupfilesafterenv-array
  */
 beforeAll(async () => {
-  console.log("Setting up test database...");
-
   // Set NODE_ENV to test to ensure we use test database
   console.log(process.env.NODE_ENV, "setting up test env");
 }, 30000); // 30 second timeout for setup

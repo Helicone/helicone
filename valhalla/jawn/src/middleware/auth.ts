@@ -26,8 +26,6 @@ export const logHttpRequestInClickhouse = (
       const organizationId =
         authParams?.organizationId ?? "00000000-0000-0000-0000-000000000000";
 
-      console.log(clickhouseDb, "jonny");
-
       clickhouseDb.dbInsertClickhouse("jawn_http_logs", [
         {
           organization_id: organizationId,

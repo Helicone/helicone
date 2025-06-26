@@ -310,7 +310,6 @@ const { CLICKHOUSE_USER, CLICKHOUSE_PASSWORD, CLICKHOUSE_HOST } = JSON.parse(
 };
 
 export const clickhouseDb = (() => {
-  console.log(process.env.NODE_ENV, "whoami");
   if (process.env.NODE_ENV === "test") {
     return new TestClickhouseClientWrapper({
       CLICKHOUSE_HOST: "http://localhost:18124",

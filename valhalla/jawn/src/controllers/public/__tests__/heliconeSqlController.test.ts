@@ -1,9 +1,10 @@
 import { describe, expect, test, beforeEach, afterEach } from "@jest/globals";
 import { testClickhouseDb } from "../../../lib/db/TestClickhouseWrapper";
+import { CLICKHOUSE_TABLES } from "../../../managers/HeliconeSqlManager";
 
 // Test configuration
 const BASE_URL = "http://127.0.0.1:8585/v1";
-const TEST_ORG_ID = "ee562ee8-7e70-4550-976a-601c8fe8d9f3"; // From CSV data
+const TEST_ORG_ID = "83635a30-5ba6-41a8-8cc6-fb7df941b24a"; // From CSV data
 const authToken = "sk-helicone-aizk36y-5yue2my-qmy5tza-n7x3aqa";
 
 describe("HeliconeSqlController HTTP Integration Tests", () => {
@@ -40,8 +41,6 @@ describe("HeliconeSqlController HTTP Integration Tests", () => {
       const tableNames =
         result.data?.map((table: any) => table.table_name) || [];
       expect(tableNames).toContain("request_response_rmt");
-      expect(tableNames).toContain("tags");
-      expect(tableNames).toContain("cache_metrics");
 
       // Check that organization_id is filtered out
       const requestTable = result.data?.find(
@@ -140,7 +139,7 @@ describe("HeliconeSqlController HTTP Integration Tests", () => {
 
       // Should have results for stardust model
       const models = result.data?.map((row: any) => row.model) || [];
-      expect(models).toContain("stardust");
+      expect(models).toContain("blendic.ai");
     });
   });
 
@@ -363,13 +362,7 @@ describe("HeliconeSqlController HTTP Integration Tests", () => {
     });
 
     test("should allow queries to authorized tables", async () => {
-      const authorizedTables = [
-        "request_response_rmt",
-        "tags",
-        "cache_metrics",
-      ];
-
-      for (const table of authorizedTables) {
+      for (const table of CLICKHOUSE_TABLES) {
         const requestBody = {
           sql: `SELECT COUNT(*) as count FROM ${table}`,
         };
@@ -394,35 +387,6 @@ describe("HeliconeSqlController HTTP Integration Tests", () => {
   });
 
   describe("POST /helicone-sql/execute - Complex Queries", () => {
-    test("should handle JOIN queries", async () => {
-      const requestBody = {
-        sql: `
-          SELECT r.request_id, r.model, t.tag 
-          FROM request_response_rmt r 
-          LEFT JOIN tags t ON r.request_id = t.entity_id 
-          WHERE r.model = 'stardust' 
-          LIMIT 5
-        `,
-      };
-
-      const response = await fetch(`${BASE_URL}/helicone-sql/execute`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authToken}`,
-          "Helicone-Organization-Id": TEST_ORG_ID,
-        },
-        body: JSON.stringify(requestBody),
-      });
-
-      expect(response.status).toBe(200);
-      const result = await response.json();
-
-      expect(result.error).toBeNull();
-      expect(result.data).toBeDefined();
-      expect(Array.isArray(result.data)).toBe(true);
-    });
-
     test("should handle subqueries", async () => {
       const requestBody = {
         sql: `
@@ -488,7 +452,7 @@ describe("HeliconeSqlController HTTP Integration Tests", () => {
   describe("POST /helicone-sql/execute - Error Handling", () => {
     test("should handle malformed SQL", async () => {
       const requestBody = {
-        sql: "SELECT * FROM request_response_rmt WHERE invalid_column = 'test'",
+        sql: "SELECT * FROM request_response_rmt WHERE invalid_columnsafdasdf = 'test'",
       };
 
       const response = await fetch(`${BASE_URL}/helicone-sql/execute`, {

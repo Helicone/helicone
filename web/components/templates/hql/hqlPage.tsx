@@ -15,6 +15,8 @@ import { editor } from "monaco-editor";
 import * as monaco from "monaco-editor";
 import { $JAWN_API } from "@/lib/clients/jawn";
 import { useMutation } from "@tanstack/react-query";
+import { useFeatureFlag } from "@/services/hooks/admin";
+import { useOrg } from "@/components/layout/org/organizationContext";
 
 const SQL_KEYWORDS = [
   "SELECT",
@@ -88,6 +90,11 @@ interface HQLPageProps {
 }
 
 function HQLPage({ user }: HQLPageProps) {
+  const organization = useOrg();
+  const { data: hasAccessToHQL } = useFeatureFlag(
+    "hql",
+    organization?.currentOrg?.id ?? "",
+  );
   const monaco = useMonaco();
   const clickhouseSchemas = useClickhouseSchemas();
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
@@ -232,6 +239,10 @@ function HQLPage({ user }: HQLPageProps) {
       setQueryLoading(false);
     },
   });
+
+  if (!hasAccessToHQL && process.env.NODE_ENV === "production") {
+    return <div>You do not have access to HQL</div>;
+  }
 
   return (
     <div className="flex h-screen w-full flex-row">

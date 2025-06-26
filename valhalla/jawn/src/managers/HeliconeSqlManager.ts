@@ -4,7 +4,7 @@ import { AuthParams } from "../packages/common/auth/types";
 import { err, ok, Result } from "../packages/common/result";
 import { AST, Parser } from "node-sql-parser";
 
-const CLICKHOUSE_TABLES = ["request_response_rmt"];
+export const CLICKHOUSE_TABLES = ["request_response_rmt"];
 const parser = new Parser();
 interface ClickHouseTableRow {
   name: string;
@@ -90,6 +90,11 @@ export class HeliconeSqlManager {
       const result = await clickhouseDb.dbQuery<any>(sqlWithCtes, [
         this.authParams.organizationId,
       ]);
+
+      if (result.error) {
+        return err(result.error);
+      }
+
       return ok(result.data);
     } catch (e) {
       return err(String(e));

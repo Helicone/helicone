@@ -41,7 +41,6 @@ export class TestClickhouseClientWrapper {
       });
       return { data: queryResult.query_id, error: null };
     } catch (err) {
-      console.error("dbInsertClickhouseError", err);
       return {
         data: null,
         error: JSON.stringify(err),
@@ -66,8 +65,6 @@ export class TestClickhouseClientWrapper {
       });
       return { data: await queryResult.json<T[]>(), error: null };
     } catch (err) {
-      console.error("Error executing Clickhouse query: ", query, parameters);
-      console.error(err);
       return {
         data: null,
         error: JSON.stringify(err),
@@ -125,32 +122,21 @@ export class TestClickhouseClientWrapper {
           return aNum - bNum;
         });
 
-      console.log(
-        `Running ${migrationFiles.length} migration files for test database...`
-      );
-
       // Run each migration file
       for (const migrationFile of migrationFiles) {
         const migrationPath = path.join(migrationsDir, migrationFile);
         const migrationContent = fs.readFileSync(migrationPath, "utf8");
-
-        console.log(`Running migration: ${migrationFile}`);
 
         try {
           await this.clickHouseClient.query({
             query: migrationContent,
           });
         } catch (err) {
-          console.warn(
-            `Warning: Migration ${migrationFile} failed, continuing...`,
-            err
-          );
           // Continue with other migrations even if one fails
           // This is useful for migrations that might not apply to test data
         }
       }
 
-      console.log("All migrations completed for test database");
       return { data: null, error: null };
     } catch (err) {
       return {
@@ -182,10 +168,6 @@ export class TestClickhouseClientWrapper {
           return bNum - aNum; // Reverse order for dropping
         });
 
-      console.log(
-        `Dropping tables from ${migrationFiles.length} migration files for test database...`
-      );
-
       // Extract table names from migration files and drop them
       for (const migrationFile of migrationFiles) {
         const migrationPath = path.join(migrationsDir, migrationFile);
@@ -202,21 +184,15 @@ export class TestClickhouseClientWrapper {
               .trim();
             const dropQuery = `DROP TABLE IF EXISTS default.${tableName}`;
 
-            console.log(`Dropping table: ${tableName}`);
             try {
               await this.clickHouseClient.query({ query: dropQuery });
             } catch (err) {
-              console.warn(
-                `Warning: Failed to drop table ${tableName}, continuing...`,
-                err
-              );
               // Continue with other tables even if one fails
             }
           }
         }
       }
 
-      console.log("All tables dropped for test database");
       return { data: null, error: null };
     } catch (err) {
       return {
@@ -270,16 +246,11 @@ export class TestClickhouseClientWrapper {
         } as RequestResponseRMT;
       });
 
-      console.log(`Inserting ${rows.length} rows from CSV file...`);
-
       // Insert data using proper ClickHouse insert method
       try {
         await this.dbInsertClickhouse("request_response_rmt", rows);
-      } catch (err) {
-        console.warn(`Warning: Failed to insert rows, continuing...`, err);
-      }
+      } catch (err) {}
 
-      console.log("Test data insertion completed");
       return { data: null, error: null };
     } catch (err) {
       return {
