@@ -54,7 +54,7 @@ export const useGetPromptVersionWithBody = (promptVersionId?: string) => {
         };
       }
 
-      const promptResult = await $JAWN_API.GET("/v1/prompt-2025/{promptId}", {
+      const promptResult = await $JAWN_API.GET("/v1/prompt-2025/id/{promptId}", {
         params: {
           path: {
             promptId: result.data.data.prompt_id

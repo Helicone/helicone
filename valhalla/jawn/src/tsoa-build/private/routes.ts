@@ -15738,7 +15738,7 @@ export function RegisterRoutes(app: Router) {
                 promptId: {"in":"path","name":"promptId","required":true,"dataType":"string"},
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };
-        app.get('/v1/prompt-2025/:promptId',
+        app.get('/v1/prompt-2025/id/:promptId',
             authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(Prompt2025Controller)),
             ...(fetchMiddlewares<RequestHandler>(Prompt2025Controller.prototype.getPrompt2025)),
