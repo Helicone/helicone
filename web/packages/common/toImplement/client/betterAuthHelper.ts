@@ -5,32 +5,12 @@ import { err, ok, Result } from "../../result";
 
 export const authClient = createAuthClient();
 
-// Helper: Check app DB for user (real API call)
-async function userExistsInAppDb(email: string): Promise<boolean> {
-  try {
-    const res = await fetch("/api/internal/user-exists", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
-    });
-    if (!res.ok) return false;
-    const data = await res.json();
-    return !!data.exists;
-  } catch (e) {
-    return false;
-  }
-}
-
 // Helper: Ensure user exists in Better Auth
 async function ensureUserInBetterAuth(email: string, password: string): Promise<boolean> {
-  // Check if user exists in app DB
-  const exists = await userExistsInAppDb(email);
-  if (!exists) return false;
-  
   // For Better Auth, we would typically use the signUp API to create the user
   // Since we're in the sign-in flow, we'll try to create the user using Better Auth's signUp
   try {
-    const result = await authClient.signUp.email({
+    const result: any = await authClient.signUp.email({
       email,
       password,
       name: "",
@@ -107,7 +87,7 @@ export const heliconeAuthClientFromSession = (
     async signUp(params): Promise<Result<HeliconeUser, string>> {
       try {
         console.log("sign up params", params);
-        const result = await authClient.signUp.email({
+        const result: any = await authClient.signUp.email({
           email: params.email,
           password: params.password,
           name: "",
@@ -129,7 +109,7 @@ export const heliconeAuthClientFromSession = (
 
     async signInWithPassword(params): Promise<Result<HeliconeUser, string>> {
       try {
-        const result = await authClient.signIn.email({
+        const result: any = await authClient.signIn.email({
           email: params.email,
           password: params.password,
         });
@@ -144,7 +124,7 @@ export const heliconeAuthClientFromSession = (
             const ensured = await ensureUserInBetterAuth(params.email, params.password);
             if (ensured) {
               // Retry sign-in
-              const retry = await authClient.signIn.email({
+              const retry: any = await authClient.signIn.email({
                 email: params.email,
                 password: params.password,
               });
