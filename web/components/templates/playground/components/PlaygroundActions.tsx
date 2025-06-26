@@ -11,7 +11,6 @@ import _ from "lodash";
 import { ModelParameters } from "@/lib/api/llm/generate";
 import { DEFAULT_EMPTY_CHAT } from "../playgroundPage";
 import { CommandIcon, Undo2Icon } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 interface PlaygroundActionsProps {
   mappedContent: MappedLLMRequest | null;
