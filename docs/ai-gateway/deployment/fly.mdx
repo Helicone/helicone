@@ -145,7 +145,7 @@ response = client.chat.completions.create(
 print(response)
 ```
 ```bash cURL
-curl https://your-app-name.fly.dev/ai/v1/chat/completions \
+curl https://your-app-name.fly.dev/ai/chat/completions \
   -H "Authorization: Bearer sk-helicone-your-api-key" \
   -H "Content-Type: application/json" \
   -d '{
@@ -176,7 +176,7 @@ The default fly.toml includes a basic router configuration, but you can customiz
       port: 8080
 
     routers:
-      default:
+      my-router:
         load-balance:
           chat:
             strategy: latency

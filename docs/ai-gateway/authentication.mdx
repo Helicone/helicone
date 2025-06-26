@@ -55,7 +55,7 @@ The AI Gateway integrates with Helicone to provide secure authentication for you
     Now you must include your Helicone API key in the request.
 
     ```bash
-    curl -X POST http://localhost:8080/router/my-router/v1/chat/completions \
+    curl -X POST http://localhost:8080/router/my-router/chat/completions \
       -H "Authorization: Bearer sk-helicone-your-api-key" \
       -H "Content-Type: application/json" \
       -d '{
@@ -77,7 +77,7 @@ The AI Gateway integrates with Helicone to provide secure authentication for you
 When authentication is enabled (`authentication: true`), include your Helicone API key with every request:
 
 ```bash
-curl -X POST http://localhost:8080/router/my-router/v1/chat/completions \
+curl -X POST http://localhost:8080/router/my-router/chat/completions \
   -H "Authorization: Bearer sk-helicone-abc123def456" \
   -H "Content-Type: application/json" \
   -d '{

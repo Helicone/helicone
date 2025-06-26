@@ -86,7 +86,7 @@ routers:
     )
     ```
     ```bash cURL
-    curl -X POST http://localhost:8080/router/my-router/v1/chat/completions \
+    curl -X POST http://localhost:8080/router/my-router/chat/completions \
       -H "Content-Type: application/json" \
       -d '{
         "model": "openai/gpt-4o-mini",
@@ -140,12 +140,12 @@ routers:
     
     ```bash
     # First request - goes to provider
-    time curl -X POST http://localhost:8080/router/my-router/v1/chat/completions \
+    time curl -X POST http://localhost:8080/router/my-router/chat/completions \
       -H "Content-Type: application/json" \
       -d '{"model": "openai/gpt-4o-mini", "messages": [{"role": "user", "content": "To be or not to be?"}]}'
     
     # Second request - returns from cache instantly
-    time curl -X POST http://localhost:8080/router/my-router/v1/chat/completions \
+    time curl -X POST http://localhost:8080/router/my-router/chat/completions \
       -H "Content-Type: application/json" \
       -d '{"model": "openai/gpt-4o-mini", "messages": [{"role": "user", "content": "To be or not to be?"}]}'
     ```
@@ -234,13 +234,13 @@ routers:
     
     ```bash
     # Production router
-    curl -X POST http://localhost:8080/router/production/v1/chat/completions \
+    curl -X POST http://localhost:8080/router/production/chat/completions \
       -H "Authorization: Bearer sk-helicone-your-api-key" \
       -H "Content-Type: application/json" \
       -d '{"model": "openai/gpt-4o-mini", "messages": [{"role": "user", "content": "Production test"}]}'
     
     # Development router
-    curl -X POST http://localhost:8080/router/development/v1/chat/completions \
+    curl -X POST http://localhost:8080/router/development/chat/completions \
       -H "Authorization: Bearer sk-helicone-your-api-key" \
       -H "Content-Type: application/json" \
       -d '{"model": "openai/gpt-4o-mini", "messages": [{"role": "user", "content": "Development test"}]}'

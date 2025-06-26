@@ -50,7 +50,7 @@ Enable observability to automatically log all requests to your Helicone dashboar
     Since authentication is enabled, you must include your Helicone API key:
 
     ```bash
-    curl -X POST http://localhost:8080/router/my-router/v1/chat/completions \
+    curl -X POST http://localhost:8080/router/my-router/chat/completions \
       -H "Authorization: Bearer sk-helicone-your-api-key" \
       -H "Content-Type: application/json" \
       -d '{
@@ -67,7 +67,7 @@ Enable observability to automatically log all requests to your Helicone dashboar
 To exclude sensitive data from logs:
 
 ```bash
-curl -X POST http://localhost:8080/router/my-router/v1/chat/completions \
+curl -X POST http://localhost:8080/router/my-router/chat/completions \
   -H "Authorization: Bearer sk-helicone-your-api-key" \
   -H "x-helicone-omit-request-log: true" \
   -H "x-helicone-omit-response-log: true" \
