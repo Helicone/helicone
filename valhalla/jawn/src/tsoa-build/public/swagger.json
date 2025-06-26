@@ -11389,6 +11389,70 @@
 				}
 			}
 		},
+		"/v1/prompt-2025/update": {
+			"post": {
+				"operationId": "UpdatePrompt2025",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__id-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt2025"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"promptBody": {
+										"$ref": "#/components/schemas/OpenAIChatRequest"
+									},
+									"commitMessage": {
+										"type": "string"
+									},
+									"setAsProduction": {
+										"type": "boolean"
+									},
+									"newMajorVersion": {
+										"type": "boolean"
+									},
+									"promptVersionId": {
+										"type": "string"
+									},
+									"promptId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"promptBody",
+									"commitMessage",
+									"setAsProduction",
+									"newMajorVersion",
+									"promptVersionId",
+									"promptId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/prompt-2025/count": {
 			"get": {
 				"operationId": "GetPrompt2025Count",

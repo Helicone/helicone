@@ -28,11 +28,9 @@ import { OPENROUTER_MODEL_MAP } from "./new/openRouterModelMap";
 import FoldedHeader from "@/components/shared/FoldedHeader";
 import { Small } from "@/components/ui/typography";
 import { ModelParameters } from "@/lib/api/llm/generate";
-import {
-  useCreatePrompt,
-  useGetPromptVersionWithBody,
-} from "@/services/hooks/prompts";
+import { useCreatePrompt, useUpdatePrompt, useGetPromptVersionWithBody } from "@/services/hooks/prompts";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
   _type: "openai-chat",
@@ -472,6 +470,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   }, [response]);
 
   const createPromptMutation = useCreatePrompt();
+  const updatePromptMutation = useUpdatePrompt();
 
   const onCreatePrompt = async (
     tags: string[],
@@ -510,7 +509,44 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       setNotification("No mapped content", "error");
       return;
     }
-    
+
+    if (!promptVersionData?.promptVersion || !promptVersionData?.prompt) {
+      setNotification("No prompt version data available", "error");
+      return;
+    }
+
+    const promptBody = convertMappedLLMRequestToOpenAIChatRequest(
+      mappedContent, 
+      tools, 
+      modelParameters, 
+      selectedModel, 
+      responseFormat
+    );
+
+    try {
+      const result = await updatePromptMutation.mutateAsync({
+        body: {
+          promptId: promptVersionData.prompt.id,
+          promptVersionId: promptVersionData.promptVersion.id,
+          newMajorVersion,
+          setAsProduction,
+          commitMessage,
+          promptBody,
+        },
+      });
+
+      if (result.data?.id) {
+        router.push(`/playground?promptVersionId=${result.data.id}`);
+        
+        setNotification(
+          `Prompt version saved successfully!`,
+          "success"
+        );
+      }
+    } catch (error) {
+      console.error("Failed to save prompt version:", error);
+      setNotification("Failed to save prompt version", "error");
+    }
   }
 
   const onRun = async () => {
