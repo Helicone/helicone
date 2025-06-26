@@ -7,7 +7,10 @@ import { generateStream } from "@/lib/api/llm/generate-stream";
 import { processStream } from "@/lib/api/llm/process-stream";
 import { useGetRequestWithBodies } from "@/services/hooks/requests";
 import { openAIMessageToHeliconeMessage } from "@helicone-package/llm-mapper/mappers/openai/chat";
-import { openaiChatMapper, OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
+import {
+  openaiChatMapper,
+  OpenAIChatRequest,
+} from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
 import {
   MappedLLMRequest,
   Provider,
@@ -24,7 +27,6 @@ import { OPENROUTER_MODEL_MAP } from "./new/openRouterModelMap";
 import FoldedHeader from "@/components/shared/FoldedHeader";
 import { Small } from "@/components/ui/typography";
 import { ModelParameters } from "@/lib/api/llm/generate";
-import { OpenAI } from "openai";
 import { useCreatePrompt } from "@/services/hooks/prompts";
 
 export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
@@ -265,7 +267,11 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
 
   const createPromptMutation = useCreatePrompt();
 
-  const onSavePrompt = async (model: string, tags: string[], promptName: string) => {
+  const onSavePrompt = async (
+    model: string,
+    tags: string[],
+    promptName: string
+  ) => {
     // TODO: Add functionality to update existing prompt to new
     // minor or major version.
     // - Currently just assumes we're creating a new prompt - we would probably define the behaviour based on the
@@ -301,7 +307,10 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         promptBody: promptBody as OpenAIChatRequest,
       });
 
-      setNotification(`Prompt saved successfully! ${result.data?.id}`, "success");
+      setNotification(
+        `Prompt saved successfully! ${result.data?.id}`,
+        "success"
+      );
     } catch (error) {
       console.error("Failed to save prompt:", error);
       setNotification("Failed to save prompt", "error");
