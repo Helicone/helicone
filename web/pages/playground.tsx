@@ -6,13 +6,13 @@ import PlaygroundPage from "../components/templates/playground/playgroundPage";
 const Playground = () => {
   const router = useRouter();
 
-  const { requestId } = router.query;
+  const { requestId, promptVersionId } = router.query;
 
   return (
     <div className="flex flex-col">
       <PlaygroundPage
         requestId={requestId as string | undefined}
-        showNewButton={true}
+        promptVersionId={promptVersionId as string | undefined}
       />
     </div>
   );

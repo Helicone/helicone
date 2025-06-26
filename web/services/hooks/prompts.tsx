@@ -28,6 +28,28 @@ export const useCreatePrompt = () => {
   );
 };
 
+export const useGetPromptVersionWithBody = (promptVersionId?: string) => {
+  return useQuery<Prompt2025Version>({
+    queryKey: ["promptVersionWithBody", promptVersionId],
+    refetchOnWindowFocus: false,
+    enabled: !!promptVersionId,
+    queryFn: async () => {
+      const result = await $JAWN_API.POST("/v1/prompt-2025/query/version", {
+        body: {
+          promptVersionId: promptVersionId!,
+        },
+      });
+
+      if (result.error || !result.data?.data) {
+        console.error("Error fetching prompt version with body:", result.error);
+        return {} as Prompt2025Version;
+      }
+
+      return result.data.data;
+    },
+  });
+}
+
 export const useGetPromptVersions = (promptId: string, majorVersion?: number) => {
   return useQuery<Prompt2025Version[]>({
     queryKey: ["promptVersions", promptId, majorVersion],
