@@ -101,7 +101,6 @@ function validateSql(sql: string): Result<null, string> {
   const parser = new Parser();
 
   const tables = parser.tableList(sql, { database: "Postgresql" });
-  console.log("tables: ", tables);
 
   // type::DB::table
   const invalidTable = tables.find((table) => {
