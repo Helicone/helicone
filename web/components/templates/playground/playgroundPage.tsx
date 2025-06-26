@@ -562,9 +562,28 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       <FoldedHeader
         showFold={false}
         leftSection={
-          <Small className="font-bold text-gray-500 dark:text-slate-300">
-            Playground
-          </Small>
+          <div className="flex items-center gap-3">
+            <Small className="font-bold text-gray-500 dark:text-slate-300">
+              Playground
+            </Small>
+            {promptVersionData?.prompt && promptVersionData?.promptVersion && (
+              <>
+                <div className="w-px h-4 bg-border" />
+                <div className="flex items-center gap-2">
+                  <Small className="font-bold text-gray-500 dark:text-slate-300">
+                    {promptVersionData.prompt.name.length > 30 
+                      ? promptVersionData.prompt.name.substring(0, 27) + "..." 
+                      : promptVersionData.prompt.name}
+                  </Small>
+                  <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary ring-1 ring-inset ring-primary/20">
+                    {promptVersionData.promptVersion.minor_version === 0
+                      ? `v${promptVersionData.promptVersion.major_version}`
+                      : `v${promptVersionData.promptVersion.major_version}.${promptVersionData.promptVersion.minor_version}`}
+                  </span>
+                </div>
+              </>
+            )}
+          </div>
         }
       />
       <div className="flex flex-col w-full h-full min-h-[80vh] border-t border-border">
