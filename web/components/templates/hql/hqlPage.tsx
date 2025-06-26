@@ -232,7 +232,6 @@ function HQLPage({ user }: HQLPageProps) {
               editor.onKeyDown((e) => {
                 if ((e.ctrlKey || e.metaKey) && e.code === "Enter") {
                   setQueryLoading(true);
-                  console.log(editor.getValue());
                   $JAWN_API
                     .POST("/v1/helicone-sql/execute", {
                       body: {

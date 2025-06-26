@@ -9,7 +9,7 @@ interface TopBarProps {
   sql: string;
   setResult: (result: Array<Record<string, any>>) => void;
   setQueryLoading: (loading: boolean) => void;
-  setQueryError: (error: string) => void;
+  setQueryError: (error: string | null) => void;
 }
 
 export default function TopBar({
@@ -46,10 +46,15 @@ export default function TopBar({
               });
               setQueryLoading(false);
 
-              if ("data" in result && result.data) {
-                setResult(result.data?.data ?? []);
-              } else if ("error" in result) {
-                setQueryError((result.error as { message: string }).message);
+              if ("error" in result && result.error) {
+                console.log(result);
+                setQueryError(result.error.error ?? "Unknown error");
+                setResult([]);
+              } else {
+                setQueryLoading(false);
+                setQueryError(null);
+                console.log(result.data.data);
+                setResult(result.data?.data as Record<string, string>[]);
               }
               return result;
             }}
