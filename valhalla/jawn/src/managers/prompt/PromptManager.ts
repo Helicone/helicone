@@ -57,6 +57,26 @@ export class Prompt2025Manager extends BaseManager {
     return result;
   }
 
+  private async updateProductionVersion(promptId: string, promptVersionId: string): Promise<Result<null, string>> {
+    const updateProductionVersionResult = await dbExecute(
+      `
+      UPDATE prompts_2025
+      SET production_version = $1
+      WHERE id = $2 AND organization = $3
+      `, [
+        promptVersionId,
+        promptId,
+        this.authParams.organizationId,
+      ]
+    )
+
+    if (updateProductionVersionResult?.error) {
+      return err(updateProductionVersionResult.error);
+    }
+
+    return ok(null);
+  }
+
   async totalPrompts(): Promise<Result<number, string>> {
     const result = await dbExecute<{ count: number }>(
       `SELECT COUNT(*) as count FROM prompts_2025 WHERE organization = $1`,
@@ -311,18 +331,7 @@ export class Prompt2025Manager extends BaseManager {
 
     const promptVersionId = insertPromptVersionResult?.data?.[0]?.id ?? '';
 
-    const updateProductionVersionResult = await dbExecute(
-      `
-      UPDATE prompts_2025
-      SET production_version = $1
-      WHERE id = $2 AND organization = $3
-      `, [
-        promptVersionId,
-        promptId,
-        this.authParams.organizationId,
-      ]
-    )
-
+    const updateProductionVersionResult = await this.updateProductionVersion(promptId, promptVersionId);
     if (updateProductionVersionResult?.error) {
       return err(updateProductionVersionResult.error);
     }
@@ -333,6 +342,109 @@ export class Prompt2025Manager extends BaseManager {
     }
 
     return ok({ id: promptId });
+  }
+
+  async newPromptVersion(params: {
+    promptId: string;
+    promptVersionId: string;
+    newMajorVersion: boolean;
+    setAsProduction: boolean;
+    commitMessage: string;
+    promptBody: OpenAIChatRequest;
+  }): Promise<Result<{ id: string }, string>> {
+    const currentVersionInfo = await dbExecute<{
+      major_version: number;
+      minor_version: number;
+      prompt_id: string;
+    }>(
+      `SELECT major_version, minor_version, prompt_id 
+      FROM prompts_2025_versions 
+      WHERE id = $1 AND organization = $2`,
+      [params.promptVersionId, this.authParams.organizationId]
+    );
+
+    if (currentVersionInfo.error || !currentVersionInfo.data?.[0]) {
+      return err(currentVersionInfo.error || "Current version not found");
+    }
+
+    const current = currentVersionInfo.data[0];
+    let nextMajor: number;
+    let nextMinor: number;
+
+    if (params.newMajorVersion) {
+      const maxMajorResult = await dbExecute<{ next_major: number }>(
+        `SELECT COALESCE(MAX(major_version), 0) + 1 as next_major 
+        FROM prompts_2025_versions 
+        WHERE prompt_id = $1 AND organization = $2`,
+        [params.promptId, this.authParams.organizationId]
+      );
+
+      if (maxMajorResult.error || !maxMajorResult.data?.[0]) {
+        return err(maxMajorResult.error || "Failed to calculate next major version");
+      }
+
+      nextMajor = maxMajorResult.data[0].next_major;
+      nextMinor = 0;
+    } else {
+      const maxMinorResult = await dbExecute<{ next_minor: number }>(
+        `SELECT COALESCE(MAX(minor_version), 0) + 1 as next_minor 
+        FROM prompts_2025_versions 
+        WHERE prompt_id = $1 AND major_version = $2 AND organization = $3`,
+        [params.promptId, current.major_version, this.authParams.organizationId]
+      );
+
+      if (maxMinorResult.error || !maxMinorResult.data?.[0]) {
+        return err(maxMinorResult.error || "Failed to calculate next minor version");
+      }
+
+      nextMajor = current.major_version;
+      nextMinor = maxMinorResult.data[0].next_minor;
+    }
+
+    const insertPromptVersionResult = await dbExecute<{ id: string }>(
+      `
+      INSERT INTO prompts_2025_versions (
+        created_at,
+        prompt_id,
+        major_version,
+        minor_version,
+        commit_message,
+        created_by,
+        organization,
+        model
+      )
+      VALUES (NOW(), $1, $2, $3, $4, $5, $6, $7)
+      RETURNING id
+      `, [
+        params.promptId,
+        nextMajor,
+        nextMinor,
+        params.commitMessage,
+        this.authParams.userId,
+        this.authParams.organizationId,
+        params.promptBody.model,
+      ]
+    )
+
+    if (insertPromptVersionResult?.error) {
+      return err(insertPromptVersionResult.error);
+    }
+
+    const promptVersionId = insertPromptVersionResult?.data?.[0]?.id ?? '';
+
+    if (params.setAsProduction) {
+      const updateProductionVersionResult = await this.updateProductionVersion(params.promptId, promptVersionId);
+      if (updateProductionVersionResult?.error) {
+        return err(updateProductionVersionResult.error);
+      }
+    }
+
+    const s3Result = await this.storePrompt(params.promptId, promptVersionId, params.promptBody);
+    if (s3Result.error) {
+      return err(s3Result.error);
+    }
+
+    return ok({ id: promptVersionId });
   }
   
   // Unsure about typing of the data, should double check this when writing using code.

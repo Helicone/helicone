@@ -79,6 +79,9 @@ export interface paths {
   "/v1/prompt-2025": {
     post: operations["CreatePrompt2025"];
   };
+  "/v1/prompt-2025/update": {
+    post: operations["UpdatePrompt2025"];
+  };
   "/v1/prompt-2025/count": {
     get: operations["GetPrompt2025Count"];
   };
@@ -3793,6 +3796,28 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_PromptCreateResponse.string_"];
+        };
+      };
+    };
+  };
+  UpdatePrompt2025: {
+    requestBody: {
+      content: {
+        "application/json": {
+          promptBody: components["schemas"]["OpenAIChatRequest"];
+          commitMessage: string;
+          setAsProduction: boolean;
+          newMajorVersion: boolean;
+          promptVersionId: string;
+          promptId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-string_.string_"];
         };
       };
     };

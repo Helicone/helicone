@@ -29,6 +29,20 @@ export const useCreatePrompt = () => {
   );
 };
 
+export const useUpdatePrompt = () => {
+  const queryClient = useQueryClient();
+
+  return $JAWN_API.useMutation(
+    "post",
+    "/v1/prompt-2025/update",
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["prompts"] });
+      },
+    }
+  );
+};
+
 export const useGetPromptVersionWithBody = (promptVersionId?: string) => {
   return useQuery<{
     promptVersion: Prompt2025Version;

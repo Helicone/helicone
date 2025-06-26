@@ -106,6 +106,30 @@ export class Prompt2025Controller extends Controller {
     return result;
   }
 
+  @Post("update")
+  public async updatePrompt2025(
+    @Body()
+    requestBody: {
+      promptId: string;
+      promptVersionId: string;
+      newMajorVersion: boolean;
+      setAsProduction: boolean;
+      commitMessage: string;
+      promptBody: OpenAIChatRequest;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<{ id: string }, string>> {
+    const promptManager = new Prompt2025Manager(request.authParams);
+
+    const result = await promptManager.newPromptVersion(requestBody);
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
   @Get("count")
   public async getPrompt2025Count(
     @Request() request: JawnAuthenticatedRequest

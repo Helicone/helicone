@@ -165,6 +165,9 @@ export interface paths {
   "/v1/prompt-2025": {
     post: operations["CreatePrompt2025"];
   };
+  "/v1/prompt-2025/update": {
+    post: operations["UpdatePrompt2025"];
+  };
   "/v1/prompt-2025/count": {
     get: operations["GetPrompt2025Count"];
   };
@@ -1059,6 +1062,14 @@ Json: JsonObject;
       };
       functions?: unknown[];
     };
+    "ResultSuccess__id-string__": {
+      data: {
+        id: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__id-string_.string_": components["schemas"]["ResultSuccess__id-string__"] | components["schemas"]["ResultError_string_"];
     ResultSuccess_number_: {
       /** Format: double */
       data: number;
@@ -2037,14 +2048,6 @@ Json: JsonObject;
       error: null;
     };
     "Result_StoreFilterType.string_": components["schemas"]["ResultSuccess_StoreFilterType_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__id-string__": {
-      data: {
-        id: string;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__id-string_.string_": components["schemas"]["ResultSuccess__id-string__"] | components["schemas"]["ResultError_string_"];
     "ChatCompletionTokenLogprob.TopLogprob": {
       /** @description The token. */
       token: string;
@@ -16294,6 +16297,28 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_PromptCreateResponse.string_"];
+        };
+      };
+    };
+  };
+  UpdatePrompt2025: {
+    requestBody: {
+      content: {
+        "application/json": {
+          promptBody: components["schemas"]["OpenAIChatRequest"];
+          commitMessage: string;
+          setAsProduction: boolean;
+          newMajorVersion: boolean;
+          promptVersionId: string;
+          promptId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-string_.string_"];
         };
       };
     };
