@@ -18,6 +18,7 @@ import {
 } from "@helicone-package/llm-mapper/types";
 import { heliconeRequestToMappedContent } from "@helicone-package/llm-mapper/utils/getMappedContent";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/router";
 import findBestMatch from "string-similarity-js";
 import { v4 as uuidv4 } from "uuid";
 import useNotification from "../../shared/notification/useNotification";
@@ -28,6 +29,7 @@ import FoldedHeader from "@/components/shared/FoldedHeader";
 import { Small } from "@/components/ui/typography";
 import { ModelParameters } from "@/lib/api/llm/generate";
 import { useCreatePrompt, useGetPromptVersionWithBody } from "@/services/hooks/prompts";
+import LoadingAnimation from "@/components/shared/loadingAnimation";
 
 export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
   _type: "openai-chat",
@@ -155,6 +157,17 @@ const convertOpenAIChatRequestToMappedLLMRequest = (openaiRequest: OpenAIChatReq
 
 const PlaygroundPage = (props: PlaygroundPageProps) => {
   const { requestId, promptVersionId } = props;
+  const { setNotification } = useNotification();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (requestId && promptVersionId) {
+      setNotification("Cannot load request and prompt at the same time.", "error");
+      router.push("/playground");
+      return;
+    }
+  }, [requestId, promptVersionId, setNotification, router]);
+
   const { data: requestData, isLoading: isRequestLoading } =
     useGetRequestWithBodies(requestId ?? "");
 
@@ -174,12 +187,12 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   );
 
   useEffect(() => {
-    if (!requestId) {
+    if (!requestId && !promptVersionId) {
       setMappedContent(DEFAULT_EMPTY_CHAT);
       setDefaultContent(DEFAULT_EMPTY_CHAT);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [requestId]);
+  }, [requestId, promptVersionId]);
 
   useEffect(() => {
     if (promptVersionData && promptVersionData.promptBody && !isPromptVersionLoading) {
@@ -332,7 +345,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
 
   const [response, setResponse] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
-  const { setNotification } = useNotification();
   const abortController = useRef<AbortController | null>(null);
   const [isStreaming, setIsLoading] = useState<boolean>(false);
   const [useAIGateway, setUseAIGateway] = useState<boolean>(false);
@@ -562,6 +574,9 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
             defaultSize={70}
             minSize={30}
           >
+            {isPromptVersionLoading || isRequestLoading ? (
+              <LoadingAnimation />
+            ) : (
             <PlaygroundMessagesPanel
               mappedContent={mappedContent}
               defaultContent={defaultContent}
@@ -578,8 +593,9 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               onSavePrompt={onSavePrompt}
               onRun={onRun}
               useAIGateway={useAIGateway}
-              setUseAIGateway={setUseAIGateway}
-            />
+                setUseAIGateway={setUseAIGateway}
+              />
+            )}
           </ResizablePanel>
           <ResizableHandle withHandle />
           <ResizablePanel defaultSize={30} minSize={20}>
