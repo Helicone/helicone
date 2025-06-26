@@ -159,7 +159,7 @@ export interface paths {
   "/v1/evaluator/{evaluatorId}/stats": {
     get: operations["GetEvaluatorStats"];
   };
-  "/v1/prompt-2025/{promptId}": {
+  "/v1/prompt-2025/id/{promptId}": {
     get: operations["GetPrompt2025"];
   };
   "/v1/prompt-2025/create": {
