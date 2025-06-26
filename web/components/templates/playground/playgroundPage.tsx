@@ -43,7 +43,7 @@ export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
       },
     ],
   },
-  model: "gpt-4o",
+  model: "gpt-4.1-mini",
   raw: {
     request: {},
     response: {},
@@ -98,6 +98,61 @@ export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
   },
 };
 
+const convertOpenAIChatRequestToMappedLLMRequest = (openaiRequest: OpenAIChatRequest): MappedLLMRequest => {
+  const internalRequest = openaiChatMapper.toInternal(openaiRequest);
+  
+  return {
+    _type: "openai-chat",
+    id: "",
+    preview: {
+      request: internalRequest.messages?.[0]?.content ?? "",
+      response: "",
+      concatenatedMessages: internalRequest.messages || [],
+    },
+    model: openaiRequest.model || "gpt-4.1-mini",
+    raw: {
+      request: openaiRequest,
+      response: {},
+    },
+    heliconeMetadata: {
+      requestId: "",
+      path: "",
+      countryCode: null,
+      cacheEnabled: false,
+      cacheReferenceId: null,
+      createdAt: new Date().toISOString(),
+      totalTokens: null,
+      promptTokens: null,
+      completionTokens: null,
+      latency: null,
+      user: null,
+      status: {
+        code: 200,
+        statusType: "success",
+      },
+      customProperties: null,
+      cost: null,
+      feedback: {
+        createdAt: null,
+        id: null,
+        rating: null,
+      },
+      provider: "OPENAI" as Provider,
+      promptCacheWriteTokens: 0,
+      promptCacheReadTokens: 0,
+    },
+    schema: {
+      request: {
+        ...internalRequest,
+        messages: internalRequest.messages?.map((message) => ({
+          ...message,
+          id: uuidv4(),
+        })) ?? [],
+      },
+    },
+  };
+};
+
 const PlaygroundPage = (props: PlaygroundPageProps) => {
   const { requestId, promptVersionId } = props;
   const { data: requestData, isLoading: isRequestLoading } =
@@ -107,7 +162,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     useGetPromptVersionWithBody(promptVersionId);
 
   const [selectedModel, setSelectedModel] = useState<string>(
-    "openai/gpt-4o"
+    "openai/gpt-4.1-mini"
   );
 
   const [defaultContent, setDefaultContent] = useState<MappedLLMRequest | null>(
@@ -125,6 +180,51 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [requestId]);
+
+  useEffect(() => {
+    if (promptVersionData && promptVersionData.promptBody && !isPromptVersionLoading) {
+      const convertedContent = convertOpenAIChatRequestToMappedLLMRequest(promptVersionData.promptBody);
+      
+      const model = promptVersionData.promptBody.model;
+      if (model && model in OPENROUTER_MODEL_MAP) {
+        setSelectedModel(OPENROUTER_MODEL_MAP[model.split("/")[1]]);
+      } else if (model) {
+        const similarities = Object.keys(OPENROUTER_MODEL_MAP).map((m) => ({
+          target: m,
+          similarity: findBestMatch(model, m),
+        }));
+
+        const closestMatch = similarities.reduce((best, current) =>
+          current.similarity > best.similarity ? current : best
+        );
+        setSelectedModel(OPENROUTER_MODEL_MAP[closestMatch.target]);
+      }
+
+      setMappedContent(convertedContent);
+      setDefaultContent(convertedContent);
+      setTools(convertedContent.schema.request.tools ?? []);
+      
+      setModelParameters({
+        temperature: promptVersionData.promptBody.temperature,
+        max_tokens: promptVersionData.promptBody.max_tokens,
+        top_p: promptVersionData.promptBody.top_p,
+        frequency_penalty: promptVersionData.promptBody.frequency_penalty,
+        presence_penalty: promptVersionData.promptBody.presence_penalty,
+        stop: promptVersionData.promptBody.stop
+          ? Array.isArray(promptVersionData.promptBody.stop)
+            ? promptVersionData.promptBody.stop.join(",")
+            : promptVersionData.promptBody.stop
+          : undefined,
+      });
+
+      if (promptVersionData.promptBody.response_format) {
+        setResponseFormat({
+          type: promptVersionData.promptBody.response_format.type || "text",
+          json_schema: promptVersionData.promptBody.response_format.json_schema,
+        });
+      }
+    }
+  }, [promptVersionData, isPromptVersionLoading]);
 
   const [tools, setTools] = useState<Tool[]>([]);
 

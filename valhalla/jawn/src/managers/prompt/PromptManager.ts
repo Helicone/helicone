@@ -304,7 +304,6 @@ export class Prompt2025Manager extends BaseManager {
       return err(updateProductionVersionResult.error);
     }
 
-    console.log("storing prompt", promptId, promptVersionId, params.promptBody);
     const s3Result = await this.storePrompt(promptId, promptVersionId, params.promptBody);
     if (s3Result.error) {
       return err(s3Result.error);
