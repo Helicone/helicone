@@ -254,6 +254,51 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     }
   }, [promptVersionData, isPromptVersionLoading]);
 
+  useEffect(() => {
+    if (promptVersionData && promptVersionData.promptBody && !isPromptVersionLoading) {
+      const convertedContent = convertOpenAIChatRequestToMappedLLMRequest(promptVersionData.promptBody);
+      
+      const model = promptVersionData.promptBody.model;
+      if (model && model in OPENROUTER_MODEL_MAP) {
+        setSelectedModel(OPENROUTER_MODEL_MAP[model.split("/")[1]]);
+      } else if (model) {
+        const similarities = Object.keys(OPENROUTER_MODEL_MAP).map((m) => ({
+          target: m,
+          similarity: findBestMatch(model, m),
+        }));
+
+        const closestMatch = similarities.reduce((best, current) =>
+          current.similarity > best.similarity ? current : best
+        );
+        setSelectedModel(OPENROUTER_MODEL_MAP[closestMatch.target]);
+      }
+
+      setMappedContent(convertedContent);
+      setDefaultContent(convertedContent);
+      setTools(convertedContent.schema.request.tools ?? []);
+      
+      setModelParameters({
+        temperature: promptVersionData.promptBody.temperature,
+        max_tokens: promptVersionData.promptBody.max_tokens,
+        top_p: promptVersionData.promptBody.top_p,
+        frequency_penalty: promptVersionData.promptBody.frequency_penalty,
+        presence_penalty: promptVersionData.promptBody.presence_penalty,
+        stop: promptVersionData.promptBody.stop
+          ? Array.isArray(promptVersionData.promptBody.stop)
+            ? promptVersionData.promptBody.stop.join(",")
+            : promptVersionData.promptBody.stop
+          : undefined,
+      });
+
+      if (promptVersionData.promptBody.response_format) {
+        setResponseFormat({
+          type: promptVersionData.promptBody.response_format.type || "text",
+          json_schema: promptVersionData.promptBody.response_format.json_schema,
+        });
+      }
+    }
+  }, [promptVersionData, isPromptVersionLoading]);
+
   const [tools, setTools] = useState<Tool[]>([]);
 
   const [modelParameters, setModelParameters] = useState<ModelParameters>({
