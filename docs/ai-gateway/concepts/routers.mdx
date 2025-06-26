@@ -27,7 +27,7 @@ Each router you define becomes part of the URL path when making requests to the 
 <CodeGroup>
 ```bash Production Router
 # Using the 'production' router
-curl -X POST http://localhost:8080/router/production/v1/chat/completions \
+curl -X POST http://localhost:8080/router/production/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
     "model": "openai/gpt-4",
@@ -37,7 +37,7 @@ curl -X POST http://localhost:8080/router/production/v1/chat/completions \
 
 ```bash Development Router  
 # Using the 'development' router
-curl -X POST http://localhost:8080/router/development/v1/chat/completions \
+curl -X POST http://localhost:8080/router/development/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
     "model": "openai/gpt-4",
@@ -85,12 +85,12 @@ const devClient = new OpenAI({
 
 ```bash cURL
 # Production router
-curl -X POST http://localhost:8080/router/production/v1/chat/completions \
+curl -X POST http://localhost:8080/router/production/chat/completions \
   -H "Content-Type: application/json" \
   -d '{"model": "openai/gpt-4", "messages": [{"role": "user", "content": "Hello!"}]}'
 
 # Development router  
-curl -X POST http://localhost:8080/router/development/v1/chat/completions \
+curl -X POST http://localhost:8080/router/development/chat/completions \
   -H "Content-Type: application/json" \
   -d '{"model": "openai/gpt-4", "messages": [{"role": "user", "content": "Hello!"}]}'
 ```
@@ -242,9 +242,9 @@ The AI Gateway supports three different routing patterns:
     **Pattern:** `/router/{name}/{api-path}`
     
     **Examples:**
-    - `/router/production/v1/chat/completions`
-    - `/router/development/v1/chat/completions`
-    - `/router/cost-optimized/v1/embeddings`
+    - `/router/production/chat/completions`
+    - `/router/development/chat/completions`
+    - `/router/cost-optimized/embeddings`
     
     **Features:**
     - Full router configuration support
@@ -257,8 +257,8 @@ The AI Gateway supports three different routing patterns:
     **Pattern:** `/{provider}/{api-path}`
     
     **Examples:**
-    - `/openai/v1/chat/completions`
-    - `/anthropic/v1/messages`
+    - `/openai/chat/completions`
+    - `/anthropic/messages`
     - `/gemini/v1beta/generateContent`
     
     **Features:**
@@ -271,7 +271,7 @@ The AI Gateway supports three different routing patterns:
     **Pattern:** `/ai/{api-path}`
     
     **Examples:**
-    - `/ai/v1/chat/completions`
+    - `/ai/chat/completions`
     
     **Features:**
     - Automatic provider detection from model name

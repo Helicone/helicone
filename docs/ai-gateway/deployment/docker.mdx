@@ -83,7 +83,7 @@ Deploy the AI Gateway using Docker for easy containerized deployment to any clou
     print(response)
     ```
     ```bash cURL
-    curl http://localhost:8080/ai/v1/chat/completions \
+    curl http://localhost:8080/ai/chat/completions \
       -H "Content-Type: application/json" \
       -d '{
         "model": "openai/gpt-4o-mini",
@@ -163,7 +163,7 @@ For custom routing and advanced features, create a `config.yaml` file:
     print(response)
     ```
     ```bash cURL
-    curl http://localhost:8080/router/production/v1/chat/completions \
+    curl http://localhost:8080/router/production/chat/completions \
       -H "Content-Type: application/json" \
       -d '{
         "model": "openai/gpt-4o-mini",
