@@ -6,7 +6,10 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { useGetPromptsWithVersions, useGetPromptVersions } from "@/services/hooks/prompts";
+import {
+  useGetPromptsWithVersions,
+  useGetPromptVersions,
+} from "@/services/hooks/prompts";
 import { useState } from "react";
 import PromptCard from "./PromptCard";
 import PromptDetails from "./PromptDetails";
@@ -22,26 +25,35 @@ interface PromptsPageProps {
 
 const PromptsPage = (props: PromptsPageProps) => {
   const [search, setSearch] = useState("");
-  const [selectedPrompt, setSelectedPrompt] = useState<PromptWithVersions | null>(null);
+  const [selectedPrompt, setSelectedPrompt] =
+    useState<PromptWithVersions | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
-  const [filteredMajorVersion, setFilteredMajorVersion] = useState<number | null>(null);
+  const [filteredMajorVersion, setFilteredMajorVersion] = useState<
+    number | null
+  >(null);
 
-  const { data, isLoading } = useGetPromptsWithVersions(search, currentPage - 1, pageSize);
+  const { data, isLoading } = useGetPromptsWithVersions(
+    search,
+    currentPage - 1,
+    pageSize
+  );
   const prompts = data?.prompts || [];
   const totalCount = data?.totalCount || 0;
 
-  const { data: filteredVersions, isLoading: isLoadingFilteredVersions } = useGetPromptVersions(
-    selectedPrompt?.prompt.id || "",
-    filteredMajorVersion !== null ? filteredMajorVersion : undefined
-  );
+  const { data: filteredVersions, isLoading: isLoadingFilteredVersions } =
+    useGetPromptVersions(
+      selectedPrompt?.prompt.id || "",
+      filteredMajorVersion !== null ? filteredMajorVersion : undefined
+    );
 
-  const displayPrompt = selectedPrompt && filteredMajorVersion !== null && filteredVersions
-    ? {
-        ...selectedPrompt,
-        versions: filteredVersions,
-      }
-    : selectedPrompt;
+  const displayPrompt =
+    selectedPrompt && filteredMajorVersion !== null && filteredVersions
+      ? {
+          ...selectedPrompt,
+          versions: filteredVersions,
+        }
+      : selectedPrompt;
 
   const handleFilterVersion = (majorVersion: number | null) => {
     setFilteredMajorVersion(majorVersion);
@@ -67,7 +79,10 @@ const PromptsPage = (props: PromptsPageProps) => {
             <div className="w-full h-full flex flex-col">
               <div className="p-4 border-b border-border bg-background">
                 <div className="relative">
-                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <Search
+                    size={16}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  />
                   <Input
                     placeholder="Search prompts..."
                     value={search}
@@ -76,43 +91,49 @@ const PromptsPage = (props: PromptsPageProps) => {
                   />
                 </div>
               </div>
-              
+
               {/* Prompts list */}
               <div className="flex-1 overflow-y-auto">
                 {isLoading ? (
                   <LoadingAnimation />
                 ) : prompts && prompts.length > 0 ? (
-                prompts.map((promptWithVersions) => {
-                  const productionVersion = promptWithVersions.productionVersion;
-                  
-                  return (
-                    <div
-                      key={promptWithVersions.prompt.id}
-                      onClick={() => {
-                        setSelectedPrompt(promptWithVersions);
-                        setFilteredMajorVersion(null);
-                      }}
-                      className={`cursor-pointer transition-colors hover:bg-accent/50 ${
-                        selectedPrompt?.prompt.id === promptWithVersions.prompt.id 
-                          ? 'bg-accent' 
-                          : ''
-                      }`}
-                    >
-                      <PromptCard
-                        name={promptWithVersions.prompt.name}
-                        id={promptWithVersions.prompt.id}
-                        majorVersion={productionVersion.major_version}
-                        minorVersion={productionVersion.minor_version}
-                        totalVersions={promptWithVersions.totalVersions}
-                        model={productionVersion.model}
-                        updatedAt={new Date(productionVersion.created_at)}
-                        createdAt={new Date(promptWithVersions.prompt.created_at)}
-                      />
-                    </div>
-                  );
-                })
+                  prompts.map((promptWithVersions) => {
+                    const productionVersion =
+                      promptWithVersions.productionVersion;
+
+                    return (
+                      <div
+                        key={promptWithVersions.prompt.id}
+                        onClick={() => {
+                          setSelectedPrompt(promptWithVersions);
+                          setFilteredMajorVersion(null);
+                        }}
+                        className={`cursor-pointer transition-colors hover:bg-accent/50 ${
+                          selectedPrompt?.prompt.id ===
+                          promptWithVersions.prompt.id
+                            ? "bg-accent"
+                            : ""
+                        }`}
+                      >
+                        <PromptCard
+                          name={promptWithVersions.prompt.name}
+                          id={promptWithVersions.prompt.id}
+                          majorVersion={productionVersion.major_version}
+                          minorVersion={productionVersion.minor_version}
+                          totalVersions={promptWithVersions.totalVersions}
+                          model={productionVersion.model}
+                          updatedAt={new Date(productionVersion.created_at)}
+                          createdAt={
+                            new Date(promptWithVersions.prompt.created_at)
+                          }
+                        />
+                      </div>
+                    );
+                  })
                 ) : (
-                  <div className="p-4 text-muted-foreground">No prompts found</div>
+                  <div className="p-4 text-muted-foreground">
+                    No prompts found
+                  </div>
                 )}
               </div>
 
@@ -133,8 +154,8 @@ const PromptsPage = (props: PromptsPageProps) => {
           </ResizablePanel>
           <ResizableHandle withHandle />
           <ResizablePanel defaultSize={50} minSize={50} maxSize={60}>
-            <PromptDetails 
-              promptWithVersions={displayPrompt} 
+            <PromptDetails
+              promptWithVersions={displayPrompt}
               onFilterVersion={handleFilterVersion}
             />
           </ResizablePanel>

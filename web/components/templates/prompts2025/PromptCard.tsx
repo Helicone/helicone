@@ -1,4 +1,3 @@
-import { Small } from "@/components/ui/typography";
 import ModelPill from "@/components/templates/requests/modelPill";
 import { formatTime } from "./timeUtils";
 
@@ -23,15 +22,20 @@ const PromptCard = ({
   updatedAt,
   createdAt,
 }: PromptCardProps) => {
-  const versionDisplay = minorVersion === 0 ? `v${majorVersion}` : `v${majorVersion}.${minorVersion}`;
-  
+  const versionDisplay =
+    minorVersion === 0
+      ? `v${majorVersion}`
+      : `v${majorVersion}.${minorVersion}`;
+
   const displayName = name.length > 60 ? name.substring(0, 57) + "..." : name;
 
   return (
     <div className="w-full border-b border-border bg-background hover:bg-muted/50 transition-colors cursor-pointer">
       <div className="flex items-center justify-between px-4 py-2">
         <div className="flex items-center gap-3">
-          <span className="font-medium text-sm text-foreground">{displayName}</span>
+          <span className="font-medium text-sm text-foreground">
+            {displayName}
+          </span>
           <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary ring-1 ring-inset ring-primary/20">
             {versionDisplay}
           </span>
