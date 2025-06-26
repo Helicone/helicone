@@ -13,7 +13,7 @@ import {
   Tags,
 } from "tsoa";
 import { Result } from "../../packages/common/result";
-import { Prompt2025Manager } from "../../managers/prompt/PromptManager";
+import { Prompt2025Manager, PromptManager } from "../../managers/prompt/PromptManager";
 import type { JawnAuthenticatedRequest } from "../../types/request";
 import { type OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
 
@@ -115,6 +115,28 @@ export class Prompt2025Controller extends Controller {
     return result;
   }
 
+  @Post("update/production-version")
+  public async setProductionVersion(
+    @Body()
+    requestBody: {
+      promptId: string;
+      promptVersionId: string;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const promptManager = new Prompt2025Manager(request.authParams);
+    const result = await promptManager.setProductionVersion({
+      promptId: requestBody.promptId,
+      promptVersionId: requestBody.promptVersionId,
+    });
+    if (result.error) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+  
   @Get("count")
   public async getPrompt2025Count(
     @Request() request: JawnAuthenticatedRequest
