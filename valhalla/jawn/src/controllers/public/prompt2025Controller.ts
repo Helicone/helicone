@@ -56,7 +56,7 @@ export interface PromptVersionCounts {
 @Tags("Prompt2025")
 @Security("api_key")
 export class Prompt2025Controller extends Controller {
-  @Get("{promptId}")
+  @Get("id/{promptId}")
   public async getPrompt2025(
     @Path() promptId: string,
     @Request() request: JawnAuthenticatedRequest,

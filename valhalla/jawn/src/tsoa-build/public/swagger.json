@@ -11361,7 +11361,7 @@
 				]
 			}
 		},
-		"/v1/prompt-2025/{promptId}": {
+		"/v1/prompt-2025/id/{promptId}": {
 			"get": {
 				"operationId": "GetPrompt2025",
 				"responses": {
