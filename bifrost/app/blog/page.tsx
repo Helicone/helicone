@@ -221,7 +221,7 @@ export type BlogStructure =
 export const BLOG_CONTENT: BlogStructure[] = [
   {
     dynmaicEntry: {
-      folderName: "how-llm-routers-enhance-app-reliability",
+      folderName: "how-ai-gateways-enhance-app-reliability",
     },
   },
   {
