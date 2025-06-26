@@ -20,7 +20,7 @@ interface PlaygroundActionsProps {
   setMappedContent: (_mappedContent: MappedLLMRequest) => void;
   setModelParameters: (_modelParameters: ModelParameters) => void;
   setTools: (_tools: Tool[]) => void;
-  promptId: string | undefined;
+  promptVersionId: string | undefined;
   onSavePrompt: (model: string, tags: string[], promptName: string) => void;
   onRun: () => void;
   requestId?: string;
@@ -32,7 +32,7 @@ const PlaygroundActions = ({
   setMappedContent,
   setModelParameters,
   setTools,
-  promptId,
+  promptVersionId,
   onSavePrompt,
   onRun,
   requestId,
@@ -100,7 +100,7 @@ const PlaygroundActions = ({
       {hasAccessToPrompts && (
         <PromptForm
           isScrolled={isScrolled}
-          promptId={promptId}
+          promptVersionId={promptVersionId}
           onSavePrompt={onSavePrompt}
         />
       )}

@@ -27,7 +27,7 @@ import { OPENROUTER_MODEL_MAP } from "./new/openRouterModelMap";
 import FoldedHeader from "@/components/shared/FoldedHeader";
 import { Small } from "@/components/ui/typography";
 import { ModelParameters } from "@/lib/api/llm/generate";
-import { useCreatePrompt } from "@/services/hooks/prompts";
+import { useCreatePrompt, useGetPromptVersionWithBody } from "@/services/hooks/prompts";
 
 export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
   _type: "openai-chat",
@@ -99,9 +99,12 @@ export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
 };
 
 const PlaygroundPage = (props: PlaygroundPageProps) => {
-  const { requestId } = props;
+  const { requestId, promptVersionId } = props;
   const { data: requestData, isLoading: isRequestLoading } =
     useGetRequestWithBodies(requestId ?? "");
+
+  const { data: promptVersionData, isLoading: isPromptVersionLoading } =
+    useGetPromptVersionWithBody(promptVersionId);
 
   const [selectedModel, setSelectedModel] = useState<string>(
     "openai/gpt-4o"
@@ -471,7 +474,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               setResponseFormat={setResponseFormat}
               modelParameters={modelParameters}
               setModelParameters={setModelParameters}
-              promptId={undefined} // TODO: From route params, for editing an existing prompt. For now, assume creating anew.
+              promptVersionId={promptVersionId}
               onSavePrompt={onSavePrompt}
               onRun={onRun}
               useAIGateway={useAIGateway}
@@ -498,6 +501,6 @@ export default PlaygroundPage;
 
 /** Types and Function for using finetuned models in Playground, Experiments Page */
 interface PlaygroundPageProps {
-  showNewButton?: boolean;
   requestId?: string;
+  promptVersionId?: string;
 }

@@ -28,6 +28,8 @@ export interface Prompt2025Version {
 
   created_at: string;
 
+  s3_url?: string;
+
   // TODO: add another type for the user that created
   // it and union with this one for the info.
 }
@@ -127,6 +129,24 @@ export class Prompt2025Controller extends Controller {
       this.setStatus(500);
     } else {
       this.setStatus(200); // set return status 201
+    }
+    return result;
+  }
+
+  @Post("query/version")
+  public async getPrompt2025Version(
+    @Body()
+    requestBody: {
+      promptVersionId: string;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<Prompt2025Version, string>> {
+    const promptManager = new Prompt2025Manager(request.authParams);
+    const result = await promptManager.getPromptVersionWithBody(requestBody);
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
     }
     return result;
   }

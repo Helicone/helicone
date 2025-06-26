@@ -180,6 +180,46 @@ export class Prompt2025Manager extends BaseManager {
     return ok(result.data ?? []);
   }
 
+  async getPromptVersionWithBody(params: {
+    promptVersionId: string;
+  }): Promise<Result<Prompt2025Version, string>> {
+    const result = await dbExecute<Prompt2025Version>(
+      `
+      SELECT 
+        id,
+        prompt_id,
+        major_version,
+        minor_version,
+        commit_message,
+        created_at,
+        model
+      FROM prompts_2025_versions
+      WHERE id = $1
+      AND organization = $2
+      LIMIT 1
+      `,
+      [params.promptVersionId, this.authParams.organizationId]
+    );
+
+    if (result.error) {
+      return err(result.error);
+    }
+
+    if (!result.data?.[0]) {
+      return err("Prompt version not found");
+    }
+
+    const promptVersion = result.data[0];
+
+    const s3UrlResult = await this.getPromptVersionS3Url(promptVersion.prompt_id, promptVersion.id);
+    if (s3UrlResult.error) {
+      return err(s3UrlResult.error);
+    }
+    promptVersion.s3_url = s3UrlResult.data ?? undefined;
+
+    return ok(promptVersion);
+  }
+
   async createPrompt(params: {
     name: string,
     tags: string[],
@@ -288,6 +328,13 @@ export class Prompt2025Manager extends BaseManager {
     if (s3result.error) return err(s3result.error);
     
     return ok(null);
+  }
+
+  private async getPromptVersionS3Url(promptId: string, promptVersionId: string): Promise<Result<string, string>> {
+    const key = this.s3Client.getPromptKey(promptId, promptVersionId, this.authParams.organizationId);
+    const s3Result = await this.s3Client.getSignedUrl(key);
+    if (s3Result.error) return err(s3Result.error);
+    return ok(s3Result.data ?? '');
   }
 
   // TODO: add other methods for deletion, etc.
