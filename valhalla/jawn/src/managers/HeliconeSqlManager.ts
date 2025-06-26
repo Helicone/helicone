@@ -63,30 +63,30 @@ export class HeliconeSqlManager {
   // Add limit check
   // Execute it
   async executeSql(sql: string): Promise<Result<any, string>> {
-    const ast = parser.astify(sql, { database: "Postgresql" });
-    const normalizedAst = normalizeAst(ast)[0];
+    try {
+      const ast = parser.astify(sql, { database: "Postgresql" });
+      const normalizedAst = normalizeAst(ast)[0];
 
-    // always get first semi colon to prevent sql injection like snowflake lol
-    const firstSql = parser.sqlify(normalizedAst, { database: "Postgresql" });
-    const validatedSql = validateSql(firstSql);
+      // always get first semi colon to prevent sql injection like snowflake lol
+      const firstSql = parser.sqlify(normalizedAst, { database: "Postgresql" });
+      const validatedSql = validateSql(firstSql);
 
-    if (validatedSql.error) {
-      return err(validatedSql.error);
-    }
+      if (validatedSql.error) {
+        return err(validatedSql.error);
+      }
 
-    // Create CTEs for each table with organization_id filter
-    const cteStatements = CLICKHOUSE_TABLES.map(
-      (table) =>
-        `${table} AS (SELECT * FROM ${table} WHERE organization_id = { val_0: UUID } )`
-    ).join(", ");
+      // Create CTEs for each table with organization_id filter
+      const cteStatements = CLICKHOUSE_TABLES.map(
+        (table) =>
+          `${table} AS (SELECT * FROM ${table} WHERE organization_id = { val_0: UUID } )`
+      ).join(", ");
 
-    // Wrap the user's SQL with CTEs
-    const sqlWithCtes = `
+      // Wrap the user's SQL with CTEs
+      const sqlWithCtes = `
       WITH ${cteStatements}
       ${firstSql}
     `;
 
-    try {
       const result = await clickhouseDb.dbQuery<any>(sqlWithCtes, [
         this.authParams.organizationId,
       ]);

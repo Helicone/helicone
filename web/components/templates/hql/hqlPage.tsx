@@ -14,6 +14,8 @@ import {
 import { editor } from "monaco-editor";
 import * as monaco from "monaco-editor";
 import { $JAWN_API } from "@/lib/clients/jawn";
+import { useMutation } from "@tanstack/react-query";
+import { useJawnClient } from "@/lib/clients/jawnHook";
 
 const SQL_KEYWORDS = [
   "SELECT",
@@ -204,6 +206,34 @@ function HQLPage({ user }: HQLPageProps) {
     return () => disposable.dispose();
   }, [monaco, clickhouseSchemas.data]);
 
+  const { mutate: handleExecuteQuery } = useMutation({
+    mutationFn: async (sql: string) => {
+      const response = await $JAWN_API.POST("/v1/helicone-sql/execute", {
+        body: {
+          sql: sql,
+        },
+      });
+
+      return response;
+    },
+    onSuccess: (data) => {
+      if (data.error || !data.data?.data) {
+        // @ts-ignore
+        setQueryError(data.error.error);
+        setResult([]);
+      } else {
+        setQueryError(null);
+        setResult(data.data?.data as Record<string, string>[]);
+      }
+      setQueryLoading(false);
+    },
+    onError: (error) => {
+      setQueryError(error.message);
+      setResult([]);
+      setQueryLoading(false);
+    },
+  });
+
   return (
     <div className="flex h-screen w-full flex-row">
       <Directory tables={clickhouseSchemas.data ?? []} />
@@ -216,47 +246,21 @@ function HQLPage({ user }: HQLPageProps) {
         >
           <TopBar
             sql={editorRef.current?.getValue() ?? ""}
-            setResult={setResult}
-            setQueryLoading={setQueryLoading}
-            setQueryError={setQueryError}
+            handleExecuteQuery={handleExecuteQuery}
           />
           <Editor
             defaultLanguage="sql"
             defaultValue="select * from request_response_rmt"
-            onMount={(editor, monaco) => {
+            onMount={async (editor, monaco) => {
               editorRef.current = editor;
               const model = editor.getModel();
               if (!model) return;
 
               // Add keyboard event listener
-              editor.onKeyDown((e) => {
+              editor.onKeyDown(async (e) => {
                 if ((e.ctrlKey || e.metaKey) && e.code === "Enter") {
                   setQueryLoading(true);
-                  $JAWN_API
-                    .POST("/v1/helicone-sql/execute", {
-                      body: {
-                        sql: editor.getValue(),
-                      },
-                    })
-                    .then((result) => {
-                      if ("error" in result && result.error) {
-                        console.log(result);
-                        setQueryError(result.error.error ?? "Unknown error");
-                        setResult([]);
-                      } else {
-                        setQueryLoading(false);
-                        setQueryError(null);
-                        console.log(result.data.data);
-                        setResult(
-                          result.data?.data as Record<string, string>[],
-                        );
-                      }
-                    })
-                    .catch((error) => {
-                      console.error(error);
-                      setQueryError(error.message);
-                      setResult([]);
-                    });
+                  await handleExecuteQuery(editor.getValue());
                 }
               });
 

@@ -7,17 +7,10 @@ import { $JAWN_API } from "@/lib/clients/jawn";
 
 interface TopBarProps {
   sql: string;
-  setResult: (result: Array<Record<string, any>>) => void;
-  setQueryLoading: (loading: boolean) => void;
-  setQueryError: (error: string | null) => void;
+  handleExecuteQuery: (sql: string) => void;
 }
 
-export default function TopBar({
-  sql,
-  setResult,
-  setQueryLoading,
-  setQueryError,
-}: TopBarProps) {
+export default function TopBar({ sql, handleExecuteQuery }: TopBarProps) {
   // TODO: can be untitled query hash
   const [queryName, setQueryName] = useState("Untitled query");
 
@@ -38,25 +31,7 @@ export default function TopBar({
             size="sm"
             className="w-32"
             onClick={async () => {
-              setQueryLoading(true);
-              const result = await $JAWN_API.POST("/v1/helicone-sql/execute", {
-                body: {
-                  sql: sql,
-                },
-              });
-              setQueryLoading(false);
-
-              if ("error" in result && result.error) {
-                console.log(result);
-                setQueryError(result.error.error ?? "Unknown error");
-                setResult([]);
-              } else {
-                setQueryLoading(false);
-                setQueryError(null);
-                console.log(result.data.data);
-                setResult(result.data?.data as Record<string, string>[]);
-              }
-              return result;
+              handleExecuteQuery(sql);
             }}
           >
             <Play className="mr-1 h-4 w-4" />
