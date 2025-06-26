@@ -5,7 +5,6 @@ import {
 } from "@/components/ui/resizable";
 import { generateStream } from "@/lib/api/llm/generate-stream";
 import { processStream } from "@/lib/api/llm/process-stream";
-import { useLocalStorage } from "@/services/hooks/localStorage";
 import { useGetRequestWithBodies } from "@/services/hooks/requests";
 import { openAIMessageToHeliconeMessage } from "@helicone-package/llm-mapper/mappers/openai/chat";
 import { openaiChatMapper } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
@@ -108,7 +107,9 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     null
   );
 
-  const [mappedContent, setMappedContent] = useState<MappedLLMRequest | null>(null);
+  const [mappedContent, setMappedContent] = useState<MappedLLMRequest | null>(
+    null
+  );
 
   useEffect(() => {
     if (!requestId) {
