@@ -113,7 +113,7 @@ const ContentWrapper = ({
   return wrapperClassName ? (
     <div className={wrapperClassName}>{children}</div>
   ) : (
-    <div className="my-4">{children}</div>
+    <div className="">{children}</div>
   );
 };
 
@@ -467,6 +467,9 @@ export default function ChatMessage({
     };
     reader.readAsDataURL(file);
     setPendingFileAction(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const addImageToMessage = () => {
@@ -802,7 +805,7 @@ export default function ChatMessage({
               isPartOfContentArray,
               parentIndex,
               onChatChange,
-              showDeleteButton: chatMode === "PLAYGROUND_INPUT",
+              showDeleteButton: false,
               onDelete: () => deleteMessage(messageIndex),
             }
           )
