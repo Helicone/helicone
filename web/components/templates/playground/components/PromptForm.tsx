@@ -19,23 +19,28 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Switch } from "@/components/ui/switch";
 import { InfoIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface PromptFormProps {
   isScrolled: boolean;
-  promptVersionId: string | undefined;
-  onSavePrompt: (model: string, tags: string[], promptName: string) => void;
+  saveAndVersion: boolean;
+  onCreatePrompt: (tags: string[], promptName: string) => void;
+  onSavePrompt: (newMajorVersion: boolean, setAsProduction: boolean, commitMessage: string) => void;
 }
 
 export default function PromptForm({
   isScrolled,
-  promptVersionId,
+  saveAndVersion,
+  onCreatePrompt,
   onSavePrompt,
 }: PromptFormProps) {
-  const [model, setModel] = useState("");
   const [promptName, setPromptName] = useState("");
+  const [commitMessage, setCommitMessage] = useState("Update.");
   const [isPromptFormPopoverOpen, setIsPromptFormPopoverOpen] = useState(false);
+  const [upgradeMajorVersion, setUpgradeMajorVersion] = useState(false);
+  const [setAsProduction, setSetAsProduction] = useState(true);
 
   return (
     <Popover
@@ -56,56 +61,103 @@ export default function PromptForm({
       </PopoverTrigger>
       <PopoverContent className="w-96 mr-2">
         <div className="flex flex-col gap-4 py-4 w-full">
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2">
-              <Label htmlFor="model">Model</Label>
-              <Tooltip>
-                <TooltipTrigger>
-                  <InfoIcon className="h-4 w-4 text-muted-foreground" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  Model slug that will be used when using this prompt in
-                  production.
-                </TooltipContent>
-              </Tooltip>
+          {!saveAndVersion && (
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <Label htmlFor="promptName">Prompt Name</Label>
+              </div>
+              <Input
+                id="promptName"
+                value={promptName}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setPromptName(e.target.value)
+                }
+                placeholder="new-prompt"
+                className="w-full"
+              />
             </div>
-            <Select value={model} onValueChange={(value) => setModel(value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select Model" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="gpt-4">GPT-4</SelectItem>
-                <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
-                <SelectItem value="claude-2">Claude 2</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          )}
 
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
-              <Label htmlFor="promptName">Prompt Name</Label>
+              <Label htmlFor="commitMessage">Commit Message</Label>
             </div>
             <Input
-              id="promptName"
-              value={promptName}
+              id="commitMessage"
+              value={commitMessage}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setPromptName(e.target.value)
+                setCommitMessage(e.target.value)
               }
-              placeholder="new-prompt"
+              placeholder="Update."
               className="w-full"
             />
           </div>
+
+          {saveAndVersion && (
+            <>
+              <div className="flex justify-end">
+                <div className="flex gap-2 items-center">
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <InfoIcon className="h-3 w-3 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent align="start">
+                      Create a new major version instead of incrementing the minor version.
+                    </TooltipContent>
+                  </Tooltip>
+                  <Label htmlFor="upgrade-major-version" className="text-sm">
+                    Upgrade major version
+                  </Label>
+                  <Switch
+                    className="data-[state=checked]:bg-foreground"
+                    size="sm"
+                    variant="helicone"
+                    id="upgrade-major-version"
+                    checked={upgradeMajorVersion}
+                    onCheckedChange={setUpgradeMajorVersion}
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end">
+                <div className="flex gap-2 items-center">
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <InfoIcon className="h-3 w-3 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent align="start">
+                      Mark this version as the production version for this prompt.
+                    </TooltipContent>
+                  </Tooltip>
+                  <Label htmlFor="set-as-production" className="text-sm">
+                    Set as production
+                  </Label>
+                  <Switch
+                    className="data-[state=checked]:bg-foreground"
+                    size="sm"
+                    variant="helicone"
+                    id="set-as-production"
+                    checked={setAsProduction}
+                    onCheckedChange={setSetAsProduction}
+                  />
+                </div>
+              </div>
+            </>
+          )}
 
           <Button
             variant="outline"
             size="sm"
             className="w-full mt-2"
             onClick={() => {
-              onSavePrompt(model, [], promptName);
+              if (saveAndVersion) {
+                onSavePrompt(upgradeMajorVersion, setAsProduction, commitMessage);
+              } else {
+                onCreatePrompt([], promptName);
+              }
               setIsPromptFormPopoverOpen(false);
             }}
           >
-            {promptVersionId ? "Save Prompt" : "Create Prompt"}
+            {saveAndVersion ? "Save Prompt" : "Create Prompt"}
           </Button>
         </div>
       </PopoverContent>

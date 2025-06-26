@@ -105,9 +105,40 @@ export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
   },
 };
 
-const convertOpenAIChatRequestToMappedLLMRequest = (
-  openaiRequest: OpenAIChatRequest
-): MappedLLMRequest => {
+const convertMappedLLMRequestToOpenAIChatRequest = (
+  mappedContent: MappedLLMRequest, tools: Tool[],
+  modelParameters: ModelParameters,
+  selectedModel: string,
+  responseFormat: { type: string, json_schema?: string }
+): OpenAIChatRequest => {
+  const openaiRequest = openaiChatMapper.toExternal({
+    ...mappedContent.schema.request,
+    tools: tools && tools.length > 0 ? tools : undefined,
+  } as any);
+
+
+  const promptBody = {
+    ...openaiRequest,
+    ...Object.fromEntries(
+      Object.entries(modelParameters).map(([key, value]) => [
+        key,
+        value === null ? undefined : value,
+      ])
+    ),
+    model: selectedModel,
+    response_format:
+      responseFormat?.type === "json_schema"
+        ? {
+            type: "json_schema",
+            json_schema: responseFormat.json_schema,
+          }
+        : undefined,
+  };
+
+  return promptBody;
+}
+
+const convertOpenAIChatRequestToMappedLLMRequest = (openaiRequest: OpenAIChatRequest): MappedLLMRequest => {
   const internalRequest = openaiChatMapper.toInternal(openaiRequest);
 
   return {
@@ -449,39 +480,15 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
 
   const createPromptMutation = useCreatePrompt();
 
-  const onSavePrompt = async (
-    model: string,
+  const onCreatePrompt = async (
     tags: string[],
-    promptName: string
+    promptName: string,
   ) => {
-    // TODO: Add functionality to update existing prompt to new
-    // minor or major version.
-    // - Currently just assumes we're creating a new prompt - we would probably define the behaviour based on the
-    // route params.
-    // - Use model slugs from AI Gateway, for now it just uses the selected model.
-
     if (!mappedContent) {
       setNotification("No mapped content", "error");
       return;
     }
-    const openaiRequest = openaiChatMapper.toExternal({
-      ...mappedContent.schema.request,
-      tools: tools && tools.length > 0 ? tools : undefined,
-    } as any);
-
-    const promptBody = {
-      ...openaiRequest,
-      ...modelParameters,
-      model: selectedModel,
-      response_format:
-        responseFormat?.type === "json_schema"
-          ? {
-              type: "json_schema",
-              json_schema: responseFormat.json_schema,
-            }
-          : undefined,
-    };
-
+    const promptBody = convertMappedLLMRequestToOpenAIChatRequest(mappedContent, tools, modelParameters, selectedModel, responseFormat);
     try {
       const result = await createPromptMutation.mutateAsync({
         body: {
@@ -501,15 +508,23 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     }
   };
 
+  const onSavePrompt = async (
+    newMajorVersion: boolean,
+    setAsProduction: boolean,
+    commitMessage: string,
+  ) => {
+    if (!mappedContent) {
+      setNotification("No mapped content", "error");
+      return;
+    }
+    
+  }
+
   const onRun = async () => {
     if (!mappedContent) {
       setNotification("No mapped content", "error");
       return;
     }
-    const openaiRequest = openaiChatMapper.toExternal({
-      ...mappedContent.schema.request,
-      tools: tools && tools.length > 0 ? tools : undefined,
-    } as any);
 
     try {
       setError(null);
@@ -517,18 +532,17 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       abortController.current = new AbortController();
 
       try {
+        const openaiRequest = convertMappedLLMRequestToOpenAIChatRequest(
+          mappedContent,
+          tools,
+          modelParameters,
+          selectedModel,
+          responseFormat
+        );
+
         const stream = await generateStream({
           ...openaiRequest,
-          model: selectedModel,
           signal: abortController.current.signal,
-          ...modelParameters,
-          response_format:
-            responseFormat?.type === "json_schema"
-              ? {
-                  type: "json_schema",
-                  json_schema: responseFormat.json_schema,
-                }
-              : undefined,
           useAIGateway,
         } as any);
 
@@ -663,22 +677,23 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
             {isPromptVersionLoading || isRequestLoading ? (
               <LoadingAnimation />
             ) : (
-              <PlaygroundMessagesPanel
-                mappedContent={mappedContent}
-                defaultContent={defaultContent}
-                setMappedContent={setMappedContent}
-                selectedModel={selectedModel}
-                setSelectedModel={handleSelectedModelChange}
-                tools={tools}
-                setTools={handleToolsChange}
-                responseFormat={responseFormat}
-                setResponseFormat={setResponseFormat}
-                modelParameters={modelParameters}
-                setModelParameters={setModelParameters}
-                promptVersionId={promptVersionId}
-                onSavePrompt={onSavePrompt}
-                onRun={onRun}
-                useAIGateway={useAIGateway}
+            <PlaygroundMessagesPanel
+              mappedContent={mappedContent}
+              defaultContent={defaultContent}
+              setMappedContent={setMappedContent}
+              selectedModel={selectedModel}
+              setSelectedModel={handleSelectedModelChange}
+              tools={tools}
+              setTools={handleToolsChange}
+              responseFormat={responseFormat}
+              setResponseFormat={setResponseFormat}
+              modelParameters={modelParameters}
+              setModelParameters={setModelParameters}
+              promptVersionId={promptVersionId}
+              onCreatePrompt={onCreatePrompt}
+              onSavePrompt={onSavePrompt}
+              onRun={onRun}
+              useAIGateway={useAIGateway}
                 setUseAIGateway={setUseAIGateway}
               />
             )}
