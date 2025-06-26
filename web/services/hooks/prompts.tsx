@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { $JAWN_API } from "../../lib/clients/jawn";
 import type { components } from "../../lib/clients/jawnTypes/public";
+import type { OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
 
 type Prompt2025 = components["schemas"]["Prompt2025"];
 type Prompt2025Version = components["schemas"]["Prompt2025Version"];
@@ -29,7 +30,10 @@ export const useCreatePrompt = () => {
 };
 
 export const useGetPromptVersionWithBody = (promptVersionId?: string) => {
-  return useQuery<Prompt2025Version>({
+  return useQuery<{
+    promptVersion: Prompt2025Version;
+    openaiRequest?: OpenAIChatRequest;
+  }>({
     queryKey: ["promptVersionWithBody", promptVersionId],
     refetchOnWindowFocus: false,
     enabled: !!promptVersionId,
@@ -42,10 +46,33 @@ export const useGetPromptVersionWithBody = (promptVersionId?: string) => {
 
       if (result.error || !result.data?.data) {
         console.error("Error fetching prompt version with body:", result.error);
-        return {} as Prompt2025Version;
+        return {
+          promptVersion: {} as Prompt2025Version,
+          openaiRequest: undefined,
+        };
       }
 
-      return result.data.data;
+      const promptVersion = result.data.data;
+      let openaiRequest: OpenAIChatRequest | undefined;
+
+      if (promptVersion.s3_url) {
+        try {
+          const s3Response = await fetch(promptVersion.s3_url);
+          if (s3Response.ok) {
+            const promptBody = await s3Response.json();
+            openaiRequest = promptBody as OpenAIChatRequest;
+          } else {
+            console.error("Failed to fetch from S3 URL:", s3Response.status);
+          }
+        } catch (error) {
+          console.error("Error fetching prompt body from S3:", error);
+        }
+      }
+
+      return {
+        promptVersion,
+        openaiRequest,
+      };
     },
   });
 }
