@@ -48368,6 +48368,54 @@
 				}
 			}
 		},
+		"/v1/prompt-2025/update/production-version": {
+			"post": {
+				"operationId": "SetProductionVersion",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt2025"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"promptVersionId": {
+										"type": "string"
+									},
+									"promptId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"promptVersionId",
+									"promptId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/prompt-2025/count": {
 			"get": {
 				"operationId": "GetPrompt2025Count",
