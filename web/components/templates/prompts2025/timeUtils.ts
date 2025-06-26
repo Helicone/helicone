@@ -4,7 +4,7 @@ export const formatTime = (date: Date, prefix: string) => {
   const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
   const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
   const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
-  
+
   if (diffInMinutes < 60) {
     return `${prefix} ${diffInMinutes}m ago`;
   } else if (diffInHours < 24) {
@@ -12,4 +12,4 @@ export const formatTime = (date: Date, prefix: string) => {
   } else {
     return `${prefix} ${diffInDays}d ago`;
   }
-}; 
+};
