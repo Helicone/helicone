@@ -32,13 +32,13 @@ Every LLM provider implements authentication differently. OpenAI uses `Authoriza
 
 ### Challenge 2: Unpredictable Performance
 
-Model performance varies dramatically. **GPT-3.5-turbo** responds in under a second. **GPT-4** takes 3-5 seconds. **Claude Opus** might take even longer. Costs differ by 10-20X between models. Your fast, cheap model hits rate limits. Your expensive model has an outage. Now what?
+Model performance varies dramatically. While **Gemini-2.5-pro** might take 3-5 seconds, **Claude Opus** might take longer. Costs differ by 10-20X between models. Your fast, cheap model hits rate limits. Your expensive model has an outage. Now what?
 
 {/* <a href="https://docs.helicone.ai/features/routing/load-balancing" target="_blank" rel="noopener">Intelligent load balancing</a> solves this. Modern routers implement latency-aware algorithms that route to the fastest available provider. They track real-time performance metrics, automatically shifting traffic when one provider slows down. Weighted routing lets you balance cost and performance—send 80% to cheap models, 20% to premium for quality checks. */}
 
 ### Challenge 3: Reliability at Scale
 
-Production AI demands 99.99% uptime. But individual providers <a href="https://status.openai.com/" target="_blank" rel="noopener">rarely exceed 99.8%</a>. 
+Production AI demands 99.99% uptime. But individual providers rarely exceed 99.7%. 
 
 The solution is simple: use multiple providers. But, the implementation? Not so much. You need health checks, circuit breakers, failover logic, and state synchronization.
 
@@ -92,17 +92,21 @@ The gateway **adapts retry strategies** to error types: exponential backoff for 
 
 ## Helicone AI Gateway vs. The Competition
 
-| Feature | Helicone AI Gateway | OpenRouter | LiteLLM | Unify.AI | Portkey |
-|---------|-------------------|------------|----------|-----------|----------|
-| Deployment | Self-hosted/Cloud | Cloud | Self-hosted | Cloud | Self-hosted/Cloud |
-| UI for Non-Technical Users | ✅ | ✅ | ❌ | ❌ | ✅ |
-| Unified API | ✅ (100+ models) | ✅ | ✅ | ✅ | ✅ |
-| Load Balancing | Advanced (Health + Rate-limit aware) | Basic | Basic | Provider-only | Yes |
-| Caching | ✅ (Bucketed) | Provider-only | ✅ | ✅ | ✅ |
-| Rate Limiting | ✅ (GCRA) | Basic | ✅ | ❌ | ✅ |
-| Observability | Native Helicone | Limited | Basic | ❌ | Native Portkey |
-| Open Source | ✅ | ❌ | ✅ | ❌ | ✅ |
-| Pricing | Free (self-hosted) | 5% markup | Free/Enterprise | Free/Premium from $40/seat | Free/Premium from $49/seat |
+| Feature                            | Helicone AI Gateway                                      | LiteLLM                           | OpenRouter    | Unify.AI                          | Portkey                           |
+| ---------------------------------- | -------------------------------------------------------- | --------------------------------- | ------------- | --------------------------------- | --------------------------------- |
+| Deployment                         | Self-hosted/Cloud                                        | Self-hosted                       | Cloud         | Cloud                             | Self-hosted/Cloud                 |
+| UI for Non-Technical Users         | ✅                                                        | ❌                                 | ✅             | ❌                                 | ✅                                 |
+| Unified API                        | ✅ (100+ models)                                          | ✅                                 | ✅             | ✅                                 | ✅                                 |
+| Load Balancing                     | Advanced (Health + Rate-limit aware)                     | Basic                             | Basic         | Provider-only                     | Yes                               |
+| Smart Uptime and Rate-limit checks | Yes. Checks provider health and rate-limit automatically | ❌ No smart checks. Basic failover | Health-only   | ❌ No smart checks. Basic failover | ❌ No smart checks. Basic failover |
+| Caching                            | ✅ (Bucketed)                                             | ✅                                 | Provider-only | ✅                                 | ✅                                 |
+| Rate Limiting                      | ✅ (GCRA)                                                 | ✅                                 | Basic         | ❌                                 | ✅                                 |
+| Observability                      | Native Helicone                                          | Basic                             | Limited       | ❌                                 | Native Portkey                    |
+| Open Source                        | ✅                                                        | ✅                                 | ❌             | ❌                                 | ✅                                 |
+| Pricing                            | Free (self-hosted)                                       | Free/Enterprise                   | 5% markup     | Free/Premium from \$40/seat       | Free/Premium from \$49/seat       |
+| Pass-through Billing                            | ❌                                                        | ❌                                 | ✅             | ❌                                 | ❌                                 |
+| Pricing                            | Free (self-hosted)                                       | Free/Enterprise                   | 5% markup     | Free/Premium from \$40/seat       | Free/Premium from \$49/seat       |
+| Route to Self-hosted Deployments (Custom Models)                           | ✅                                       | ✅                                 | ❌             | ✅                                 | ❌                                 |
 
 ### What makes Helicone AI Gateway different?
 
@@ -154,9 +158,9 @@ response = client.chat.completions.create(
 
 The evolution from direct API integration to gateway architectures mirrors broader infrastructure patterns. Just as CDNs became essential for web applications, LLM gateways are becoming critical infrastructure for AI applications.
 
-Organizations scaling beyond proof-of-concept find gateway architectures not just beneficial but essential. Direct integration creates technical debt that compounds with each new model. Gateways provide the abstraction layer that makes multi-model strategies sustainable.
+Direct integration creates technical debt that compounds with each new model. Gateways provide the abstraction layer that makes multi-model strategies sustainable and are certainly here to stay.
 
-Upcoming features will further enhance capabilities. Semantic routing will automatically select models based on query types. Cost-based limits will track spending rather than request counts. Enhanced observability will provide deeper insights into model performance and user patterns.
+{/* Upcoming features will further enhance capabilities. Semantic routing will automatically select models based on query types. Cost-based limits will track spending rather than request counts. Enhanced observability will provide deeper insights into model performance and user patterns. */}
 
 ### You might also like: 
 
