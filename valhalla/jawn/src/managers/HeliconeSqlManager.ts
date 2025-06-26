@@ -22,7 +22,6 @@ export class HeliconeSqlManager {
   async getClickhouseSchema(): Promise<
     Result<ClickHouseTableSchema[], string>
   > {
-    console.log(clickhouseDb, "jonny");
     try {
       const schema: ClickHouseTableSchema[] = await Promise.all(
         CLICKHOUSE_TABLES.map(async (table_name) => {

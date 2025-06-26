@@ -1,10 +1,6 @@
 import { describe, expect, test, beforeEach, afterEach } from "@jest/globals";
 import { testClickhouseDb } from "../../../lib/db/TestClickhouseWrapper";
 
-require("dotenv").config({
-  path: "./.env",
-});
-
 // Test configuration
 const BASE_URL = "http://127.0.0.1:8585/v1";
 const TEST_ORG_ID = "ee562ee8-7e70-4550-976a-601c8fe8d9f3"; // From CSV data

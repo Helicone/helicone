@@ -309,20 +309,23 @@ const { CLICKHOUSE_USER, CLICKHOUSE_PASSWORD, CLICKHOUSE_HOST } = JSON.parse(
   CLICKHOUSE_HOST?: string;
 };
 
-export const clickhouseDb =
-  process.env.NODE_ENV === "test"
-    ? new TestClickhouseClientWrapper({
-        CLICKHOUSE_HOST: "http://localhost:18124",
-        CLICKHOUSE_USER: "default",
-        CLICKHOUSE_PASSWORD: "",
-      })
-    : new ClickhouseClientWrapper({
-        CLICKHOUSE_HOST:
-          CLICKHOUSE_HOST ??
-          process.env.CLICKHOUSE_HOST ??
-          "http://localhost:18123",
-        CLICKHOUSE_USER:
-          CLICKHOUSE_USER ?? process.env.CLICKHOUSE_USER ?? "default",
-        CLICKHOUSE_PASSWORD:
-          CLICKHOUSE_PASSWORD ?? process.env.CLICKHOUSE_PASSWORD ?? "",
-      });
+export const clickhouseDb = (() => {
+  console.log(process.env.NODE_ENV, "whoami");
+  if (process.env.NODE_ENV === "test") {
+    return new TestClickhouseClientWrapper({
+      CLICKHOUSE_HOST: "http://localhost:18124",
+      CLICKHOUSE_USER: "default",
+      CLICKHOUSE_PASSWORD: "",
+    });
+  }
+  return new ClickhouseClientWrapper({
+    CLICKHOUSE_HOST:
+      CLICKHOUSE_HOST ??
+      process.env.CLICKHOUSE_HOST ??
+      "http://localhost:18123",
+    CLICKHOUSE_USER:
+      CLICKHOUSE_USER ?? process.env.CLICKHOUSE_USER ?? "default",
+    CLICKHOUSE_PASSWORD:
+      CLICKHOUSE_PASSWORD ?? process.env.CLICKHOUSE_PASSWORD ?? "",
+  });
+})();

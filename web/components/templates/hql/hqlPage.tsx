@@ -15,7 +15,6 @@ import { editor } from "monaco-editor";
 import * as monaco from "monaco-editor";
 import { $JAWN_API } from "@/lib/clients/jawn";
 import { useMutation } from "@tanstack/react-query";
-import { useJawnClient } from "@/lib/clients/jawnHook";
 
 const SQL_KEYWORDS = [
   "SELECT",
