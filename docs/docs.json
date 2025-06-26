@@ -175,6 +175,7 @@
               }
             ]
           },
+
           {
             "group": "Tracing",
             "pages": [
@@ -210,17 +211,54 @@
           {
             "group": "AI Gateway",
             "pages": [
-              "features/advanced-usage/custom-rate-limits",
-              "getting-started/integration-method/gateway-fallbacks",
-              "features/advanced-usage/llm-security",
-              "features/advanced-usage/moderations",
-              "features/advanced-usage/retries",
-              "features/advanced-usage/vault"
+              "ai-gateway/introduction",
+              "ai-gateway/quickstart",
+              "ai-gateway/router-quickstart",
+              "ai-gateway/deployment/overview",
+              "ai-gateway/authentication",
+              "ai-gateway/observability",
+              "ai-gateway/config",
+              {
+                "group": "Concepts",
+                "pages": [
+                  "ai-gateway/concepts/routers",
+                  "ai-gateway/concepts/loadbalancing",
+                  "ai-gateway/concepts/cache",
+                  "ai-gateway/concepts/rate-limiting",
+                  "ai-gateway/concepts/secret-management",
+                  "ai-gateway/concepts/providers",
+                  "ai-gateway/concepts/model-mapping"
+                ]
+              },
+              {
+                "group": "Deployment",
+                "pages": [
+                  "ai-gateway/deployment/docker",
+                  "ai-gateway/deployment/fly",
+                  "ai-gateway/deployment/porter"
+                ]
+              },
+              {
+                "group": "Debugging",
+                "pages": ["ai-gateway/debugging/telemetry"]
+              }
             ]
           },
           {
             "group": "References",
             "pages": [
+              {
+                "group": "Cloud AI Gateway (Legacy)",
+                "pages": [
+                  "features/advanced-usage/cloud-ai-gateway-overview",
+                  "features/advanced-usage/custom-rate-limits",
+                  "getting-started/integration-method/gateway-fallbacks",
+                  "features/advanced-usage/llm-security",
+                  "features/advanced-usage/moderations",
+                  "features/advanced-usage/retries",
+                  "features/advanced-usage/vault"
+                ]
+              },
               {
                 "group": "Async Logging",
                 "pages": [
