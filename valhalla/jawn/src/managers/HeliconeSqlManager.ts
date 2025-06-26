@@ -4,7 +4,7 @@ import { AuthParams } from "../packages/common/auth/types";
 import { err, ok, Result } from "../packages/common/result";
 import { AST, Parser } from "node-sql-parser";
 
-const CLICKHOUSE_TABLES = ["request_response_rmt", "tags", "cache_metrics"];
+const CLICKHOUSE_TABLES = ["request_response_rmt"];
 const parser = new Parser();
 interface ClickHouseTableRow {
   name: string;
@@ -22,6 +22,7 @@ export class HeliconeSqlManager {
   async getClickhouseSchema(): Promise<
     Result<ClickHouseTableSchema[], string>
   > {
+    console.log(clickhouseDb, "jonny");
     try {
       const schema: ClickHouseTableSchema[] = await Promise.all(
         CLICKHOUSE_TABLES.map(async (table_name) => {

@@ -1,58 +1,40 @@
-import {
-  describe,
-  expect,
-  test,
-  beforeAll,
-  afterAll,
-  beforeEach,
-  afterEach,
-} from "@jest/globals";
-import { HeliconeSqlController } from "../heliconeSqlController";
-import { HeliconeSqlManager } from "../../../managers/HeliconeSqlManager";
+import { describe, expect, test, beforeEach, afterEach } from "@jest/globals";
 import { testClickhouseDb } from "../../../lib/db/TestClickhouseWrapper";
 
-describe("HeliconeSqlController Integration Tests", () => {
-  let controller: HeliconeSqlController;
-  let manager: HeliconeSqlManager;
-  let mockRequest: any;
+require("dotenv").config({
+  path: "./.env",
+});
 
-  beforeAll(async () => {
-    // Initialize test database
-    await testClickhouseDb.createTestDatabase();
-    await testClickhouseDb.createTables();
-  });
+// Test configuration
+const BASE_URL = "http://127.0.0.1:8585/v1";
+const TEST_ORG_ID = "ee562ee8-7e70-4550-976a-601c8fe8d9f3"; // From CSV data
+const authToken = "sk-helicone-aizk36y-5yue2my-qmy5tza-n7x3aqa";
 
-  afterAll(async () => {
-    // Cleanup test database
-    await testClickhouseDb.dropTables();
-    await testClickhouseDb.dropTestDatabase();
-  });
-
+describe("HeliconeSqlController HTTP Integration Tests", () => {
   beforeEach(async () => {
     // Reset test data before each test
+    await testClickhouseDb.createTables();
     await testClickhouseDb.insertTestData();
-
-    controller = new HeliconeSqlController();
-    mockRequest = {
-      authParams: {
-        organizationId: "test-org-1", // Use the test org ID from the wrapper
-        userId: "test-user-id",
-      },
-    };
-
-    // Create manager with test database connection
-    manager = new HeliconeSqlManager(mockRequest.authParams);
   });
 
   afterEach(async () => {
-    // Clean up after each test by dropping and recreating tables
+    // Clean up after each test
     await testClickhouseDb.dropTables();
-    await testClickhouseDb.createTables();
   });
 
-  describe("getClickHouseSchema", () => {
+  describe("GET /helicone-sql/schema", () => {
     test("should return schema for allowed tables", async () => {
-      const result = await controller.getClickHouseSchema(mockRequest);
+      const response = await fetch(`${BASE_URL}/helicone-sql/schema`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+          "Helicone-Organization-Id": TEST_ORG_ID,
+        },
+      });
+
+      expect(response.status).toBe(200);
+      const result = await response.json();
 
       expect(result.error).toBeNull();
       expect(result.data).toBeDefined();
@@ -75,34 +57,66 @@ describe("HeliconeSqlController Integration Tests", () => {
         expect(columnNames).not.toContain("organization_id");
       }
     });
+
+    test("should return 401 without authentication", async () => {
+      const response = await fetch(`${BASE_URL}/helicone-sql/schema`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      expect(response.status).toBe(401);
+    });
   });
 
-  describe("executeSql - Basic Queries", () => {
+  describe("POST /helicone-sql/execute", () => {
     test("should execute simple SELECT query", async () => {
       const requestBody = { sql: "SELECT * FROM request_response_rmt LIMIT 5" };
 
-      const result = await controller.executeSql(requestBody, mockRequest);
+      const response = await fetch(`${BASE_URL}/helicone-sql/execute`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+          "Helicone-Organization-Id": TEST_ORG_ID,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      expect(response.status).toBe(200);
+      const result = await response.json();
 
       expect(result.error).toBeNull();
       expect(result.data).toBeDefined();
       expect(Array.isArray(result.data)).toBe(true);
-      expect(controller.getStatus()).toBe(200);
     });
 
     test("should execute query with WHERE clause", async () => {
       const requestBody = {
-        sql: "SELECT request_id, model FROM request_response_rmt WHERE model = 'gpt-3.5-turbo' LIMIT 3",
+        sql: "SELECT request_id, model FROM request_response_rmt WHERE model = 'stardust' LIMIT 3",
       };
 
-      const result = await controller.executeSql(requestBody, mockRequest);
+      const response = await fetch(`${BASE_URL}/helicone-sql/execute`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+          "Helicone-Organization-Id": TEST_ORG_ID,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      expect(response.status).toBe(200);
+      const result = await response.json();
 
       expect(result.error).toBeNull();
       expect(result.data).toBeDefined();
       expect(Array.isArray(result.data)).toBe(true);
 
-      // All results should be gpt-3.5-turbo
+      // All results should be stardust model
       result.data?.forEach((row: any) => {
-        expect(row.model).toBe("gpt-3.5-turbo");
+        expect(row.model).toBe("stardust");
       });
     });
 
@@ -111,26 +125,47 @@ describe("HeliconeSqlController Integration Tests", () => {
         sql: "SELECT model, COUNT(*) as count FROM request_response_rmt GROUP BY model",
       };
 
-      const result = await controller.executeSql(requestBody, mockRequest);
+      const response = await fetch(`${BASE_URL}/helicone-sql/execute`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+          "Helicone-Organization-Id": TEST_ORG_ID,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      expect(response.status).toBe(200);
+      const result = await response.json();
 
       expect(result.error).toBeNull();
       expect(result.data).toBeDefined();
       expect(Array.isArray(result.data)).toBe(true);
 
-      // Should have results for each model
+      // Should have results for stardust model
       const models = result.data?.map((row: any) => row.model) || [];
-      expect(models).toContain("gpt-3.5-turbo");
-      expect(models).toContain("gpt-4");
+      expect(models).toContain("stardust");
     });
   });
 
-  describe("executeSql - Organization Isolation", () => {
+  describe("POST /helicone-sql/execute - Organization Isolation", () => {
     test("should only return data for the authenticated organization", async () => {
       const requestBody = {
         sql: "SELECT organization_id, COUNT(*) as count FROM request_response_rmt GROUP BY organization_id",
       };
 
-      const result = await controller.executeSql(requestBody, mockRequest);
+      const response = await fetch(`${BASE_URL}/helicone-sql/execute`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+          "Helicone-Organization-Id": TEST_ORG_ID,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      expect(response.status).toBe(200);
+      const result = await response.json();
 
       expect(result.error).toBeNull();
       expect(result.data).toBeDefined();
@@ -138,7 +173,7 @@ describe("HeliconeSqlController Integration Tests", () => {
 
       // Should only have data for the test organization
       result.data?.forEach((row: any) => {
-        expect(row.organization_id).toBe("test-org-1");
+        expect(row.organization_id).toBe(TEST_ORG_ID);
       });
     });
 
@@ -147,29 +182,50 @@ describe("HeliconeSqlController Integration Tests", () => {
         sql: "SELECT * FROM request_response_rmt ORDER BY request_created_at DESC LIMIT 10",
       };
 
-      const result = await controller.executeSql(requestBody, mockRequest);
+      const response = await fetch(`${BASE_URL}/helicone-sql/execute`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+          "Helicone-Organization-Id": TEST_ORG_ID,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      expect(response.status).toBe(200);
+      const result = await response.json();
 
       expect(result.error).toBeNull();
       expect(result.data).toBeDefined();
 
       // All results should belong to the test organization
       result.data?.forEach((row: any) => {
-        expect(row.organization_id).toBe("test-org-1");
+        expect(row.organization_id).toBe(TEST_ORG_ID);
       });
     });
   });
 
-  describe("executeSql - SQL Injection Prevention", () => {
+  describe("POST /helicone-sql/execute - SQL Injection Prevention", () => {
     test("should reject DROP statements", async () => {
       const requestBody = {
         sql: "DROP TABLE request_response_rmt",
       };
 
-      const result = await controller.executeSql(requestBody, mockRequest);
+      const response = await fetch(`${BASE_URL}/helicone-sql/execute`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+          "Helicone-Organization-Id": TEST_ORG_ID,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      expect(response.status).toBe(500);
+      const result = await response.json();
 
       expect(result.error).toBeDefined();
       expect(result.error).toContain("Only select statements");
-      expect(controller.getStatus()).toBe(500);
     });
 
     test("should reject INSERT statements", async () => {
@@ -177,11 +233,21 @@ describe("HeliconeSqlController Integration Tests", () => {
         sql: "INSERT INTO request_response_rmt (request_id) VALUES ('test')",
       };
 
-      const result = await controller.executeSql(requestBody, mockRequest);
+      const response = await fetch(`${BASE_URL}/helicone-sql/execute`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+          "Helicone-Organization-Id": TEST_ORG_ID,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      expect(response.status).toBe(500);
+      const result = await response.json();
 
       expect(result.error).toBeDefined();
       expect(result.error).toContain("Only select statements");
-      expect(controller.getStatus()).toBe(500);
     });
 
     test("should reject UPDATE statements", async () => {
@@ -189,11 +255,21 @@ describe("HeliconeSqlController Integration Tests", () => {
         sql: "UPDATE request_response_rmt SET model = 'hacked' WHERE 1=1",
       };
 
-      const result = await controller.executeSql(requestBody, mockRequest);
+      const response = await fetch(`${BASE_URL}/helicone-sql/execute`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+          "Helicone-Organization-Id": TEST_ORG_ID,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      expect(response.status).toBe(500);
+      const result = await response.json();
 
       expect(result.error).toBeDefined();
       expect(result.error).toContain("Only select statements");
-      expect(controller.getStatus()).toBe(500);
     });
 
     test("should reject DELETE statements", async () => {
@@ -201,11 +277,21 @@ describe("HeliconeSqlController Integration Tests", () => {
         sql: "DELETE FROM request_response_rmt WHERE 1=1",
       };
 
-      const result = await controller.executeSql(requestBody, mockRequest);
+      const response = await fetch(`${BASE_URL}/helicone-sql/execute`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+          "Helicone-Organization-Id": TEST_ORG_ID,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      expect(response.status).toBe(500);
+      const result = await response.json();
 
       expect(result.error).toBeDefined();
       expect(result.error).toContain("Only select statements");
-      expect(controller.getStatus()).toBe(500);
     });
 
     test("should reject CREATE statements", async () => {
@@ -213,27 +299,47 @@ describe("HeliconeSqlController Integration Tests", () => {
         sql: "CREATE TABLE malicious (id INT)",
       };
 
-      const result = await controller.executeSql(requestBody, mockRequest);
+      const response = await fetch(`${BASE_URL}/helicone-sql/execute`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+          "Helicone-Organization-Id": TEST_ORG_ID,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      expect(response.status).toBe(500);
+      const result = await response.json();
 
       expect(result.error).toBeDefined();
       expect(result.error).toContain("Only select statements");
-      expect(controller.getStatus()).toBe(500);
     });
   });
 
-  describe("executeSql - Table Access Control", () => {
+  describe("POST /helicone-sql/execute - Table Access Control", () => {
     test("should reject queries to unauthorized tables", async () => {
       const requestBody = {
         sql: "SELECT * FROM users",
       };
 
-      const result = await controller.executeSql(requestBody, mockRequest);
+      const response = await fetch(`${BASE_URL}/helicone-sql/execute`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+          "Helicone-Organization-Id": TEST_ORG_ID,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      expect(response.status).toBe(500);
+      const result = await response.json();
 
       expect(result.error).toBeDefined();
       expect(result.error).toContain(
         "Only select statements and tables in CLICKHOUSE_TABLES are allowed"
       );
-      expect(controller.getStatus()).toBe(500);
     });
 
     test("should reject queries to system tables", async () => {
@@ -241,13 +347,23 @@ describe("HeliconeSqlController Integration Tests", () => {
         sql: "SELECT * FROM system.users",
       };
 
-      const result = await controller.executeSql(requestBody, mockRequest);
+      const response = await fetch(`${BASE_URL}/helicone-sql/execute`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+          "Helicone-Organization-Id": TEST_ORG_ID,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      expect(response.status).toBe(500);
+      const result = await response.json();
 
       expect(result.error).toBeDefined();
       expect(result.error).toContain(
         "Only select statements and tables in CLICKHOUSE_TABLES are allowed"
       );
-      expect(controller.getStatus()).toBe(500);
     });
 
     test("should allow queries to authorized tables", async () => {
@@ -262,28 +378,49 @@ describe("HeliconeSqlController Integration Tests", () => {
           sql: `SELECT COUNT(*) as count FROM ${table}`,
         };
 
-        const result = await controller.executeSql(requestBody, mockRequest);
+        const response = await fetch(`${BASE_URL}/helicone-sql/execute`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${authToken}`,
+            "Helicone-Organization-Id": TEST_ORG_ID,
+          },
+          body: JSON.stringify(requestBody),
+        });
+
+        expect(response.status).toBe(200);
+        const result = await response.json();
 
         expect(result.error).toBeNull();
         expect(result.data).toBeDefined();
-        expect(controller.getStatus()).toBe(200);
       }
     });
   });
 
-  describe("executeSql - Complex Queries", () => {
+  describe("POST /helicone-sql/execute - Complex Queries", () => {
     test("should handle JOIN queries", async () => {
       const requestBody = {
         sql: `
           SELECT r.request_id, r.model, t.tag 
           FROM request_response_rmt r 
           LEFT JOIN tags t ON r.request_id = t.entity_id 
-          WHERE r.model = 'gpt-3.5-turbo' 
+          WHERE r.model = 'stardust' 
           LIMIT 5
         `,
       };
 
-      const result = await controller.executeSql(requestBody, mockRequest);
+      const response = await fetch(`${BASE_URL}/helicone-sql/execute`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+          "Helicone-Organization-Id": TEST_ORG_ID,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      expect(response.status).toBe(200);
+      const result = await response.json();
 
       expect(result.error).toBeNull();
       expect(result.data).toBeDefined();
@@ -302,7 +439,18 @@ describe("HeliconeSqlController Integration Tests", () => {
         `,
       };
 
-      const result = await controller.executeSql(requestBody, mockRequest);
+      const response = await fetch(`${BASE_URL}/helicone-sql/execute`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+          "Helicone-Organization-Id": TEST_ORG_ID,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      expect(response.status).toBe(200);
+      const result = await response.json();
 
       expect(result.error).toBeNull();
       expect(result.data).toBeDefined();
@@ -322,7 +470,18 @@ describe("HeliconeSqlController Integration Tests", () => {
         `,
       };
 
-      const result = await controller.executeSql(requestBody, mockRequest);
+      const response = await fetch(`${BASE_URL}/helicone-sql/execute`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+          "Helicone-Organization-Id": TEST_ORG_ID,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      expect(response.status).toBe(200);
+      const result = await response.json();
 
       expect(result.error).toBeNull();
       expect(result.data).toBeDefined();
@@ -330,16 +489,26 @@ describe("HeliconeSqlController Integration Tests", () => {
     });
   });
 
-  describe("executeSql - Error Handling", () => {
+  describe("POST /helicone-sql/execute - Error Handling", () => {
     test("should handle malformed SQL", async () => {
       const requestBody = {
         sql: "SELECT * FROM request_response_rmt WHERE invalid_column = 'test'",
       };
 
-      const result = await controller.executeSql(requestBody, mockRequest);
+      const response = await fetch(`${BASE_URL}/helicone-sql/execute`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+          "Helicone-Organization-Id": TEST_ORG_ID,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      expect(response.status).toBe(500);
+      const result = await response.json();
 
       expect(result.error).toBeDefined();
-      expect(controller.getStatus()).toBe(500);
     });
 
     test("should handle empty SQL", async () => {
@@ -347,10 +516,20 @@ describe("HeliconeSqlController Integration Tests", () => {
         sql: "",
       };
 
-      const result = await controller.executeSql(requestBody, mockRequest);
+      const response = await fetch(`${BASE_URL}/helicone-sql/execute`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+          "Helicone-Organization-Id": TEST_ORG_ID,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      expect(response.status).toBe(500);
+      const result = await response.json();
 
       expect(result.error).toBeDefined();
-      expect(controller.getStatus()).toBe(500);
     });
 
     test("should handle SQL with syntax errors", async () => {
@@ -358,10 +537,20 @@ describe("HeliconeSqlController Integration Tests", () => {
         sql: "SELECT * FROM request_response_rmt WHERE model = 'test",
       };
 
-      const result = await controller.executeSql(requestBody, mockRequest);
+      const response = await fetch(`${BASE_URL}/helicone-sql/execute`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+          "Helicone-Organization-Id": TEST_ORG_ID,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      expect(response.status).toBe(500);
+      const result = await response.json();
 
       expect(result.error).toBeDefined();
-      expect(controller.getStatus()).toBe(500);
     });
   });
 });

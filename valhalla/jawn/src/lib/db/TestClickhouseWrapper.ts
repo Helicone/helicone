@@ -2,6 +2,7 @@ import { ClickHouseClient, createClient } from "@clickhouse/client";
 import { Result } from "../../packages/common/result";
 import * as fs from "fs";
 import * as path from "path";
+import { ClickhouseDB, RequestResponseRMT } from "./ClickhouseWrapper";
 
 interface ClickhouseEnv {
   CLICKHOUSE_HOST: string;
@@ -18,6 +19,34 @@ export class TestClickhouseClientWrapper {
       username: env.CLICKHOUSE_USER,
       password: env.CLICKHOUSE_PASSWORD,
     });
+  }
+
+  async dbInsertClickhouse<T extends keyof ClickhouseDB["Tables"]>(
+    table: T,
+    values: ClickhouseDB["Tables"][T][]
+  ): Promise<Result<string, string>> {
+    try {
+      const queryResult = await this.clickHouseClient.insert({
+        table: table,
+        values: values,
+        format: "JSONEachRow",
+        // Recommended for cluster usage to avoid situations
+        // where a query processing error occurred after the response code
+        // and HTTP headers were sent to the client.
+        // See https://clickhouse.com/docs/en/interfaces/http/#response-buffering
+        clickhouse_settings: {
+          async_insert: 1,
+          wait_end_of_query: 1,
+        },
+      });
+      return { data: queryResult.query_id, error: null };
+    } catch (err) {
+      console.error("dbInsertClickhouseError", err);
+      return {
+        data: null,
+        error: JSON.stringify(err),
+      };
+    }
   }
 
   async dbQuery<T>(
@@ -199,32 +228,58 @@ export class TestClickhouseClientWrapper {
 
   async insertTestData(): Promise<Result<null, string>> {
     try {
-      // Insert test data for different organizations
-      const testDataQueries = [
-        // Test data for organization "test-org-1"
-        `INSERT INTO default.request_response_rmt VALUES
-        ('resp-1', '2024-01-01 10:00:00', 1000, 200, 50, 100, 0, 0, 0, 0, 'gpt-4', 'req-1', '2024-01-01 10:00:00', 'user-1', 'test-org-1', 'proxy-1', false, 500, 'openai', 'US', 'https://api.openai.com/v1/chat/completions', '{}', '{}', '{"messages":[]}', '{"choices":[]}', '[]', '2024-01-01 10:00:00', '', false, 0.002),
-        ('resp-2', '2024-01-01 11:00:00', 1500, 200, 75, 150, 0, 0, 0, 0, 'gpt-3.5-turbo', 'req-2', '2024-01-01 11:00:00', 'user-1', 'test-org-1', 'proxy-1', false, 600, 'openai', 'US', 'https://api.openai.com/v1/chat/completions', '{}', '{}', '{"messages":[]}', '{"choices":[]}', '[]', '2024-01-01 11:00:00', '', false, 0.001)`,
+      // Read test data from CSV file
+      const csvPath = path.join(process.cwd(), "setup", "test_seed_rmt.csv");
+      const csvContent = fs.readFileSync(csvPath, "utf8");
 
-        // Test data for organization "test-org-2"
-        `INSERT INTO default.request_response_rmt VALUES
-        ('resp-3', '2024-01-01 12:00:00', 2000, 200, 100, 200, 0, 0, 0, 0, 'claude-3', 'req-3', '2024-01-01 12:00:00', 'user-2', 'test-org-2', 'proxy-2', false, 800, 'anthropic', 'CA', 'https://api.anthropic.com/v1/messages', '{}', '{}', '{"messages":[]}', '{"choices":[]}', '[]', '2024-01-01 12:00:00', '', false, 0.005)`,
+      // Parse CSV content into structured data
+      const lines = csvContent.trim().split("\n");
+      const rows = lines.map((line) => {
+        const values = this.parseCSVLine(line);
+        return {
+          response_id: values[0],
+          response_created_at: values[1],
+          latency: parseInt(values[2]),
+          status: parseInt(values[3]),
+          completion_tokens: parseInt(values[4]),
+          prompt_tokens: parseInt(values[7]),
+          prompt_cache_write_tokens: parseInt(values[8]),
+          prompt_cache_read_tokens: parseInt(values[9]),
+          prompt_audio_tokens: parseInt(values[10]),
+          completion_audio_tokens: parseInt(values[10]),
+          model: values[11],
+          request_id: values[12],
+          request_created_at: values[13],
+          user_id: values[14],
+          organization_id: values[15],
+          proxy_key_id: values[16],
+          threat: values[17] === "true",
+          time_to_first_token: parseInt(values[18]),
+          provider: values[19],
+          country_code: values[21],
+          target_url: values[20],
+          properties: {},
+          scores: {},
+          request_body: values[25],
+          response_body: values[26],
+          assets: [values[28]],
+          updated_at: values[29],
+          cache_reference_id: values[6],
+          cache_enabled: values[21] === "true",
+          cost: parseFloat(values[27]),
+        } as RequestResponseRMT;
+      });
 
-        // Test tags data
-        `INSERT INTO default.tags VALUES
-        ('test-org-1', 'request', 'req-1', 'production', '2024-01-01 10:00:00', '2024-01-01 10:00:00'),
-        ('test-org-1', 'request', 'req-2', 'staging', '2024-01-01 11:00:00', '2024-01-01 11:00:00'),
-        ('test-org-2', 'request', 'req-3', 'production', '2024-01-01 12:00:00', '2024-01-01 12:00:00')`,
+      console.log(`Inserting ${rows.length} rows from CSV file...`);
 
-        // Test cache metrics data
-        `INSERT INTO default.cache_metrics VALUES
-        ('test-org-1', '2024-01-01', 10, 'req-1', 'gpt-4', 'openai', 5, 5000, 250, 500, 0, 0, 0, 0, '2024-01-01 10:05:00', '2024-01-01 10:00:00', '{"messages":[]}', '{"choices":[]}')`,
-      ];
-
-      for (const query of testDataQueries) {
-        await this.clickHouseClient.query({ query });
+      // Insert data using proper ClickHouse insert method
+      try {
+        await this.dbInsertClickhouse("request_response_rmt", rows);
+      } catch (err) {
+        console.warn(`Warning: Failed to insert rows, continuing...`, err);
       }
 
+      console.log("Test data insertion completed");
       return { data: null, error: null };
     } catch (err) {
       return {
@@ -232,6 +287,38 @@ export class TestClickhouseClientWrapper {
         error: JSON.stringify(err),
       };
     }
+  }
+
+  private parseCSVLine(line: string): string[] {
+    const values: string[] = [];
+    let current = "";
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+
+      if (char === '"') {
+        if (inQuotes && line[i + 1] === '"') {
+          // Escaped quote
+          current += '"';
+          i++; // Skip next quote
+        } else {
+          // Toggle quote state
+          inQuotes = !inQuotes;
+        }
+      } else if (char === "," && !inQuotes) {
+        // End of value
+        values.push(current.trim());
+        current = "";
+      } else {
+        current += char;
+      }
+    }
+
+    // Add the last value
+    values.push(current.trim());
+
+    return values;
   }
 
   private paramsToValues(params: (number | string | boolean | Date)[]) {
@@ -258,7 +345,7 @@ export class TestClickhouseClientWrapper {
 
 // Export a singleton instance for tests
 export const testClickhouseDb = new TestClickhouseClientWrapper({
-  CLICKHOUSE_HOST: process.env.CLICKHOUSE_HOST || "http://localhost:18123",
+  CLICKHOUSE_HOST: "http://localhost:18124",
   CLICKHOUSE_USER: process.env.CLICKHOUSE_USER || "default",
   CLICKHOUSE_PASSWORD: process.env.CLICKHOUSE_PASSWORD || "",
 });
