@@ -108,11 +108,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     null
   );
 
-  const [mappedContent, setMappedContent] =
-    useLocalStorage<MappedLLMRequest | null>(
-      `playground-${requestId || "clear"}`,
-      null
-    );
+  const [mappedContent, setMappedContent] = useState<MappedLLMRequest | null>(null);
 
   useEffect(() => {
     if (!requestId) {
