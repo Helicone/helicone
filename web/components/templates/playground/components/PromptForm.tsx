@@ -65,14 +65,12 @@ export default function PromptForm({
                     <InfoIcon className="h-4 w-4 text-muted-foreground" />
                   </TooltipTrigger>
                   <TooltipContent>
-                    Model slug that will be used when using this prompt in production.
+                    Model slug that will be used when using this prompt in
+                    production.
                   </TooltipContent>
                 </Tooltip>
               </div>
-              <Select
-                value={model}
-                onValueChange={(value) => setModel(value)}
-              >
+              <Select value={model} onValueChange={(value) => setModel(value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select Model" />
                 </SelectTrigger>
@@ -91,7 +89,9 @@ export default function PromptForm({
               <Input
                 id="promptName"
                 value={promptName}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPromptName(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setPromptName(e.target.value)
+                }
                 placeholder="new-prompt"
                 className="w-full"
               />
@@ -99,7 +99,7 @@ export default function PromptForm({
 
             <Button
               variant="outline"
-              size="sm" 
+              size="sm"
               className="w-full mt-2"
               onClick={() => onSavePrompt(model, [], promptName)}
             >
@@ -109,5 +109,5 @@ export default function PromptForm({
         </PopoverContent>
       </Popover>
     </>
-  )
+  );
 }
