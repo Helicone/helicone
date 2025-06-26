@@ -1,28 +1,28 @@
 Running multiple LLMs in production is complex. You need to manage different API formats, handle provider outages, optimize costs, and monitor performance—all while keeping latency low. 
 
-Fortunately, **LLM routers** can help solve these problems, acting as intelligent gateways between your application and AI providers and becoming a must-have for anyone building production-scale AI applications.
+Fortunately, **LLM Gateways** (or LLM routers) can help solve these problems, acting as intelligent gateways between your application and AI providers and becoming a must-have for anyone building production-scale AI applications.
 
-![ Top 5 LLM Routers in 2025](/static/blog/top-llm-routers-comparison-2025/top-llm-routers-comparison-2025-cover.webp)
+![ Top 5 LLM Routers in 2025](/static/blog/top-llm-gateways-comparison-2025/top-llm-routers-comparison-2025-cover.webp)
 
-This guide evaluates the top 5 LLM routers available today, with a focus on **real-world utility** and **production readiness**.
+This guide evaluates the top 5 LLM Gateways available today, with a focus on **real-world utility** and **production readiness**.
 
 Let's dive in!
 
 ## TL;DR
 
-Here's a quick overview of the top 5 LLM routers:
+Here's a quick overview of the top 5 LLM Gateways:
 
 | Router                  | Strengths                                                                                                                         | Weaknesses                                               | Best For                                                                          |
 | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- | --------------------------------------------------------------------------------- |
 | **Helicone AI Gateway** | • Built with Rust (blazingly fast)<br/>• Health and rate-limit aware load-balancing<br/>• Seamless integration with Helicone for robust observability<br/>• Open-source (free to use)<br/>• Distributed rate limiting | • No pass-through billing             | • High-scale AI applications needing reliability, speed and cost optimization |
 | **OpenRouter**          | • Easy setup<br/>• Passthrough billing<br/>• Good for non-technical users                                                                 | • 5% markup on requests<br/>• No self-hosting<br/>• No custom models                  | • Quick prototyping for small projects                          |
-| **Portkey**             | • Rich enterprise features<br/>• Advanced guardrails                                                                                     | • Learning curve for advanced features<br/>• Limited scalability and reliability<br/>• No pass-through billing                   | • Development teams needing detailed control and enterprise security                |
-| **LiteLLM**             | • Good customization<br/>• Strong community                                                                                           | • Highly technical setup with a steep learning curve<br/>• Limited scalability<br/>• No pass-through billing | • Engineering teams building custom LLM infrastructure                              |
+| **Portkey**             | • Rich enterprise features<br/>• Advanced guardrails                                                                                     | • Steep learning curve<br/>• Limited scalability and reliability<br/>• No pass-through billing                   | • Development teams needing detailed control and enterprise security                |
+| **LiteLLM**             | • Good customization<br/>• Strong community<br/>• Strong feature set                                                                                          | • Limited scalability (Each request adds > 50ms latency and is resource intensive)<br/>• Highly technical setup with a steep learning curve<br/>• No pass-through billing | • Engineering teams building custom LLM infrastructure                              |
 | **Unify AI**            | • Simple and straightforward<br/>• Good for basic needs<br/>• Pass-through billing                                                                                 | • No load-balancing<br/>• Limited production scale              | • Small projects with basic provider switching needs                                | 
 
 ## Table of Contents
 
-## Why You Need an LLM Router
+## Why You Need an LLM Gateway
 
 Integrating LLMs via direct API calls seems simple until you hit production and start to scale. Here are some things that could go wrong:
 
@@ -44,9 +44,9 @@ Here are five key things to consider when selecting the best LLM router:
 - **Optimization**: What cost-saving features, caching mechanisms, and performance tools does it offer?
 - **Integration**: How easy is setup? What frameworks are supported? How customizable is it?
 - **Reliability**: Does it provide monitoring, load-balancing, and failover capabilities?
-- **Security**: How does it handle data privacy, authentication, and compliance?
+- **Scalability**: How easy is it to scale as your application grows?
 
-## Top 5 LLM Routers: In-Depth Comparison
+## Top 5 LLM Gateways: In-Depth Comparison
 
 *Scroll to see the full table —>*
 
@@ -72,7 +72,7 @@ Let's now take a look at each router in detail.
 
 ## 1.Helicone AI Gateway
 
-![Helicone AI Gateway Flowchart](/static/blog/top-llm-routers-comparison-2025/ai-gateway-flowchart.webp)
+![Helicone AI Gateway Flowchart](/static/blog/top-llm-gateways-comparison-2025/ai-gateway.webp)
 
 The Helicone <a href="https://docs.helicone.ai/gateway/config" target="_blank" rel="noopener">AI Gateway</a> is one of the few LLM routers written in the highly performant Rust programming language. 
 
@@ -148,7 +148,7 @@ And that's it!
 
 ## 2. OpenRouter
 
-![OpenRouter Dashboard](/static/blog/top-llm-routers-comparison-2025/openrouter-logo.webp)
+![OpenRouter Dashboard](/static/blog/top-llm-gateways-comparison-2025/openrouter-logo.webp)
 
 <a href="https://openrouter.ai/docs/quick-start" target="_blank" rel="noopener">OpenRouter</a> provides a unified API that gives you access to hundreds of AI models through a single endpoint, while automatically handling fallbacks and selecting the most cost-effective options.
 
@@ -174,7 +174,7 @@ It focuses on providing a simple, user-friendly interface for non-technical user
 
 ## 3. Portkey
 
-![Portkey Dashboard](/static/blog/top-llm-routers-comparison-2025/portkey-logo.webp)
+![Portkey Dashboard](/static/blog/top-llm-gateways-comparison-2025/portkey-logo.webp)
 
 <a href="https://github.com/Portkey-AI/gateway" target="_blank" rel="noopener">Portkey's AI Gateway</a> is a comprehensive platform designed to streamline and enhance AI integration for developers and organizations. 
 
@@ -207,7 +207,7 @@ Built on top of Portkey—an observability tool, it serves as a unified interfac
 
 ## 4. LiteLLM
 
-![LiteLLM Logo](/static/blog/top-llm-routers-comparison-2025/litellm-logo-dark.webp)
+![LiteLLM Logo](/static/blog/top-llm-gateways-comparison-2025/litellm-logo-dark.webp)
 
 <a href="https://www.litellm.ai/docs" target="_blank" rel="noopener">LiteLLM</a> is an LLM router that focuses on flexibility, offering a unified interface across 100+ LLM providers with completely free, open-source access. 
 
@@ -233,7 +233,7 @@ It excels at advanced routing algorithms and comprehensive team management throu
 
 ## 5. Unify AI
 
-![Unify AI Logo](/static/blog/top-llm-routers-comparison-2025/unify-ai-logo.webp)
+![Unify AI Logo](/static/blog/top-llm-gateways-comparison-2025/unify-ai-logo.webp)
 
 <a href="https://docs.unify.ai" target="_blank" rel="noopener">Unify.AI</a> is a highly customizable LLMOps platform that prioritizes simplicity and customization over complexity. 
 
@@ -275,7 +275,7 @@ It's designed for developers who want to build custom interfaces for logging, ev
 
 ## Conclusion
 
-LLM routers are becoming essential infrastructure for production AI applications. While all five options solve basic routing needs, they differ significantly in sophistication and capabilities.
+LLM gateways are becoming essential infrastructure for production AI applications. While all five options solve basic routing needs, they differ significantly in sophistication and capabilities.
 
 Helicone AI Gateway provides a robust set of production-grade features like latency load-balancing and built-in observability. OpenRouter excels at simplicity. Portkey offers enterprise controls. LiteLLM provides open-source flexibility. Unify.AI covers basic needs.
 
@@ -284,8 +284,8 @@ This guide should serve as a good starting point for your decision-making proces
 <FAQ 
  items={[
    {
-     question: "What is an LLM router and why do I need one?",
-     answer: "An LLM router acts as an intelligent gateway between your application and multiple AI providers. It handles API format differences, manages failovers during provider outages, optimizes costs through smart routing, and provides monitoring capabilities. Without one, you're stuck with provider lock-in, no redundancy when services go down, and blind spots in your AI spending."
+     question: "What is an LLM gateway and why do I need one?",
+     answer: "An LLM gateway (or LLM router) acts as an intelligent gateway between your application and multiple AI providers. It handles API format differences, manages failovers during provider outages, optimizes costs through smart routing, and provides monitoring capabilities. Without one, you're stuck with provider lock-in, no redundancy when services go down, and blind spots in your AI spending."
    },
    {
      question: "How does Helicone AI Gateway compare to using providers directly?",
@@ -296,11 +296,11 @@ This guide should serve as a good starting point for your decision-making proces
      answer: "For production environments, Helicone AI Gateway and LiteLLM are the strongest options. Helicone excels with its Rust-based performance, sophisticated load-balancing algorithms, and native observability integration. LiteLLM offers maximum customization but requires more technical setup. OpenRouter and Portkey work well for specific use cases, while Unify AI is better suited for basic routing needs."
    },
    {
-     question: "How much does it cost to use an LLM router?",
+     question: "How much does it cost to use an LLM gateway?",
      answer: "Pricing varies significantly. Helicone AI Gateway and LiteLLM are open-source and free to self-host. OpenRouter adds a 5% markup on all requests. Portkey starts at $49/month. Unify AI offers a free tier with pay-as-you-go pricing. Consider both the router costs and potential savings from features like caching and intelligent routing when evaluating total cost."
    },
    {
-     question: "How difficult is it to set up an LLM router?",
+     question: "How difficult is it to set up an LLM gateway?",
      answer: "Setup difficulty varies by router. OpenRouter, Helicone AI Gateway, and Portkey can be configured in under 5 minutes with simple API changes. LiteLLM requires 15-30 minutes of technical setup including YAML configuration. Unify AI takes 5-10 minutes. All routers provide documentation, but technical complexity increases with advanced features like custom routing algorithms or distributed deployments."
    },
    {
@@ -308,7 +308,7 @@ This guide should serve as a good starting point for your decision-making proces
      answer: "Quality routers handle provider failures automatically. Helicone AI Gateway uses health-aware routing with circuit breaking to detect failures and route to healthy providers. OpenRouter and Portkey offer automatic fallbacks to backup providers. LiteLLM provides advanced retry logic with configurable cooldowns. Without a router, your application fails when your provider fails."
    },
    {
-     question: "Do LLM routers add latency to requests?",
+     question: "Do LLM gateways add latency to requests?",
      answer: "Yes, but it's minimal and often offset by performance improvements. Helicone AI Gateway (built with Rust) adds ~50ms latency. Other routers add 50-200ms depending on features enabled. However, intelligent routing often reduces overall latency by selecting faster providers, and caching can eliminate latency entirely for repeated requests. The reliability benefits typically outweigh the small latency cost."
    }
  ]}
