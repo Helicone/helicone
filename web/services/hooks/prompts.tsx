@@ -32,7 +32,7 @@ export const useCreatePrompt = () => {
 export const useGetPromptVersionWithBody = (promptVersionId?: string) => {
   return useQuery<{
     promptVersion: Prompt2025Version;
-    openaiRequest?: OpenAIChatRequest;
+    promptBody?: OpenAIChatRequest;
   }>({
     queryKey: ["promptVersionWithBody", promptVersionId],
     refetchOnWindowFocus: false,
@@ -48,19 +48,18 @@ export const useGetPromptVersionWithBody = (promptVersionId?: string) => {
         console.error("Error fetching prompt version with body:", result.error);
         return {
           promptVersion: {} as Prompt2025Version,
-          openaiRequest: undefined,
+          promptBody: undefined,
         };
       }
 
       const promptVersion = result.data.data;
-      let openaiRequest: OpenAIChatRequest | undefined;
+      let promptBody: OpenAIChatRequest | undefined;
 
       if (promptVersion.s3_url) {
         try {
           const s3Response = await fetch(promptVersion.s3_url);
           if (s3Response.ok) {
-            const promptBody = await s3Response.json();
-            openaiRequest = promptBody as OpenAIChatRequest;
+            promptBody = await s3Response.json() as OpenAIChatRequest;
           } else {
             console.error("Failed to fetch from S3 URL:", s3Response.status);
           }
@@ -71,7 +70,7 @@ export const useGetPromptVersionWithBody = (promptVersionId?: string) => {
 
       return {
         promptVersion,
-        openaiRequest,
+        promptBody,
       };
     },
   });
