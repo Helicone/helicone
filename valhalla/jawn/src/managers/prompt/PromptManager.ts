@@ -67,6 +67,28 @@ export class Prompt2025Manager extends BaseManager {
     return ok(Number(result.data?.[0]?.count ?? 0));
   }
 
+  async getPrompt(promptId: string): Promise<Result<Prompt2025, string>> {
+    const result = await dbExecute<Prompt2025>(
+      `SELECT
+        id,
+        name,
+        tags,
+        created_at
+      FROM prompts_2025
+      WHERE id = $1 AND organization = $2
+      LIMIT 1
+      `,
+      [promptId, this.authParams.organizationId]
+    );
+    if (result.error) {
+      return err(result.error);
+    }
+    if (!result.data?.[0]) {
+      return err("Prompt not found");
+    }
+    return ok(result.data[0]);
+  }
+
   async getPrompts(params: {
     search: string;
     page: number;

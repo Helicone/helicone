@@ -33,6 +33,7 @@ export const useGetPromptVersionWithBody = (promptVersionId?: string) => {
   return useQuery<{
     promptVersion: Prompt2025Version;
     promptBody?: OpenAIChatRequest;
+    prompt: Prompt2025;
   }>({
     queryKey: ["promptVersionWithBody", promptVersionId],
     refetchOnWindowFocus: false,
@@ -49,9 +50,28 @@ export const useGetPromptVersionWithBody = (promptVersionId?: string) => {
         return {
           promptVersion: {} as Prompt2025Version,
           promptBody: undefined,
+          prompt: {} as Prompt2025,
         };
       }
 
+      const promptResult = await $JAWN_API.GET("/v1/prompt-2025/{promptId}", {
+        params: {
+          path: {
+            promptId: result.data.data.prompt_id
+          }
+        }
+      });
+
+      if (promptResult.error || !promptResult.data?.data) {
+        console.error("Error fetching prompt:", promptResult.error);
+        return {
+          promptVersion: {} as Prompt2025Version,
+          promptBody: undefined,
+          prompt: {} as Prompt2025,
+        };
+      }  
+
+      const prompt = promptResult.data.data;
       const promptVersion = result.data.data;
       let promptBody: OpenAIChatRequest | undefined;
 
@@ -71,6 +91,7 @@ export const useGetPromptVersionWithBody = (promptVersionId?: string) => {
       return {
         promptVersion,
         promptBody,
+        prompt,
       };
     },
   });
