@@ -168,6 +168,9 @@ export interface paths {
   "/v1/prompt-2025/update": {
     post: operations["UpdatePrompt2025"];
   };
+  "/v1/prompt-2025/update/production-version": {
+    post: operations["SetProductionVersion"];
+  };
   "/v1/prompt-2025/count": {
     get: operations["GetPrompt2025Count"];
   };
@@ -16319,6 +16322,24 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result__id-string_.string_"];
+        };
+      };
+    };
+  };
+  SetProductionVersion: {
+    requestBody: {
+      content: {
+        "application/json": {
+          promptVersionId: string;
+          promptId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };

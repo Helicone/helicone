@@ -445,7 +445,37 @@ export class Prompt2025Manager extends BaseManager {
 
     return ok({ id: promptVersionId });
   }
-  
+
+  async setProductionVersion(params: {
+    promptId: string;
+    promptVersionId: string;
+  }): Promise<Result<null, string>> {
+    const versionCheck = await dbExecute<{ id: string }>(
+      `SELECT id FROM prompts_2025_versions 
+      WHERE id = $1 AND prompt_id = $2 AND organization = $3`,
+      [params.promptVersionId, params.promptId, this.authParams.organizationId]
+    );
+
+    if (versionCheck.error) {
+      return err(versionCheck.error);
+    }
+
+    if (!versionCheck.data?.[0]) {
+      return err("Prompt version not found or does not belong to the specified prompt");
+    }
+
+    const result = await dbExecute<null>(
+      `UPDATE prompts_2025 SET production_version = $1 WHERE id = $2 AND organization = $3`,
+      [params.promptVersionId, params.promptId, this.authParams.organizationId]
+    );
+
+    if (result.error) {
+      return err(result.error);
+    }
+
+    return ok(null);
+  }
+
   // Unsure about typing of the data, should double check this when writing using code.
   // Unsure if we use every field in CompletionCreateParams.
   private async storePrompt(

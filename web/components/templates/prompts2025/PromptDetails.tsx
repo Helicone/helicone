@@ -13,11 +13,15 @@ import PromptVersionHistory from "./PromptVersionHistory";
 
 interface PromptDetailsProps {
   promptWithVersions: PromptWithVersions | null;
+  onSetProductionVersion: (promptId: string, promptVersionId: string) => void;
+  onOpenPromptVersion: (promptVersionId: string) => void;
   onFilterVersion?: (majorVersion: number | null) => void;
 }
 
 const PromptDetails = ({
   promptWithVersions,
+  onSetProductionVersion,
+  onOpenPromptVersion,
   onFilterVersion,
 }: PromptDetailsProps) => {
   const [selectedVersion, setSelectedVersion] = useState<string>(
@@ -100,7 +104,11 @@ const PromptDetails = ({
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        <PromptVersionHistory promptWithVersions={promptWithVersions} />
+        <PromptVersionHistory
+          promptWithVersions={promptWithVersions}
+          onSetProductionVersion={onSetProductionVersion}
+          onOpenPromptVersion={onOpenPromptVersion}
+        />
       </div>
     </div>
   );
