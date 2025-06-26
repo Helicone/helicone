@@ -2080,6 +2080,63 @@
 					}
 				]
 			},
+			"Prompt2025": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"tags": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"created_at": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"name",
+					"tags",
+					"created_at"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_Prompt2025_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/Prompt2025"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_Prompt2025.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_Prompt2025_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"PromptCreateResponse": {
 				"properties": {
 					"id": {
@@ -2470,33 +2527,6 @@
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
-			},
-			"Prompt2025": {
-				"properties": {
-					"id": {
-						"type": "string"
-					},
-					"name": {
-						"type": "string"
-					},
-					"tags": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
-					},
-					"created_at": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"id",
-					"name",
-					"tags",
-					"created_at"
-				],
-				"type": "object",
-				"additionalProperties": false
 			},
 			"ResultSuccess_Prompt2025-Array_": {
 				"properties": {
@@ -48175,6 +48205,41 @@
 					{
 						"in": "path",
 						"name": "evaluatorId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/prompt-2025/{promptId}": {
+			"get": {
+				"operationId": "GetPrompt2025",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Prompt2025.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt2025"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "promptId",
 						"required": true,
 						"schema": {
 							"type": "string"
