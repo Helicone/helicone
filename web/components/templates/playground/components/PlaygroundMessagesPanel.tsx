@@ -26,7 +26,8 @@ interface PlaygroundMessagesPanelProps {
   modelParameters: ModelParameters;
   setModelParameters: (_modelParameters: ModelParameters) => void;
   promptVersionId: string | undefined;
-  onSavePrompt: (model: string, tags: string[], promptName: string) => void;
+  onCreatePrompt: (tags: string[], promptName: string) => void;
+  onSavePrompt: (newMajorVersion: boolean, setAsProduction: boolean, commitMessage: string) => void;
   onRun: () => void;
   useAIGateway: boolean;
   setUseAIGateway: (_useAIGateway: boolean) => void;
@@ -45,6 +46,7 @@ const PlaygroundMessagesPanel = ({
   modelParameters,
   setModelParameters,
   promptVersionId,
+  onCreatePrompt,
   onSavePrompt,
   onRun,
   useAIGateway,
@@ -241,6 +243,7 @@ const PlaygroundMessagesPanel = ({
           defaultContent={defaultContent}
           setMappedContent={setMappedContent}
           promptVersionId={promptVersionId}
+          onCreatePrompt={onCreatePrompt}
           onSavePrompt={onSavePrompt}
           onRun={onRun}
           isScrolled={isScrolled}
