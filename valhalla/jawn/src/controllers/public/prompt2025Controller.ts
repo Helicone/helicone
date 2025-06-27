@@ -69,7 +69,21 @@ export class Prompt2025Controller extends Controller {
     }
     return result;
   }
-  
+
+  @Get("tags")
+  public async getPrompt2025Tags(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<string[], string>> {
+    const promptManager = new Prompt2025Manager(request.authParams);
+    const result = await promptManager.getPromptTags();
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
   @Post("create")
   public async createPrompt2025(
     @Body()
@@ -156,13 +170,14 @@ export class Prompt2025Controller extends Controller {
     @Body()
     requestBody: {
       search: string;
+      tagsFilter: string[];
       page: number;
       pageSize: number;
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<Prompt2025[], string>> {
     const promptManager = new Prompt2025Manager(request.authParams);
-
+    console.log("requestBody", requestBody);
     const result = await promptManager.getPrompts(requestBody);
     if (result.error || !result.data) {
       this.setStatus(500);

@@ -28,6 +28,7 @@ import { RequestManager } from "../request/RequestManager";
 import { S3Client } from "../../lib/shared/db/s3Client";
 import type { OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
 import { AuthParams } from "../../packages/common/auth/types";
+import { StringChain } from "lodash";
 
 
 const PROMPT_ID_LENGTH = 6;
@@ -87,6 +88,17 @@ export class Prompt2025Manager extends BaseManager {
     return ok(Number(result.data?.[0]?.count ?? 0));
   }
 
+  async getPromptTags(): Promise<Result<string[], string>> {
+    const result = await dbExecute<{ tags: string }>(
+      `SELECT DISTINCT UNNEST(tags) as tags FROM prompts_2025 WHERE organization = $1`,
+      [this.authParams.organizationId]
+    );
+    if (result.error) {
+      return err(result.error);
+    }
+    return ok(result.data?.map((tag: { tags: string }) => tag.tags) ?? []);
+  }
+
   async getPrompt(promptId: string): Promise<Result<Prompt2025, string>> {
     const result = await dbExecute<Prompt2025>(
       `SELECT
@@ -111,9 +123,11 @@ export class Prompt2025Manager extends BaseManager {
 
   async getPrompts(params: {
     search: string;
+    tagsFilter: string[];
     page: number;
     pageSize: number;
   }): Promise<Result<Prompt2025[], string>> {
+    const tagsFilterClause = params.tagsFilter.length > 0 ? `AND tags && $3::text[]` : "";
     const result = await dbExecute<Prompt2025>(
     `
       SELECT
@@ -123,10 +137,17 @@ export class Prompt2025Manager extends BaseManager {
         created_at
       FROM prompts_2025
       WHERE name ILIKE $1 AND organization = $2
+      ${tagsFilterClause}
       ORDER BY created_at DESC
-      LIMIT $3 OFFSET $4
+      LIMIT $4 OFFSET $5
     `,
-      [`%${params.search}%`, this.authParams.organizationId, params.pageSize, params.page * params.pageSize]
+      [
+        `%${params.search}%`,
+        this.authParams.organizationId,
+        params.tagsFilter,
+        params.pageSize,
+        params.page * params.pageSize
+      ]
     );
 
     if (result.error) {
