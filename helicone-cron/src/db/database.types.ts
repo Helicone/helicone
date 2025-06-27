@@ -2528,24 +2528,41 @@ export type Database = {
       }
       router_keys: {
         Row: {
+          added_by: string
           api_key_id: number
           created_at: string
           id: number
           router_id: string
         }
         Insert: {
+          added_by: string
           api_key_id: number
           created_at?: string
           id?: number
           router_id: string
         }
         Update: {
+          added_by?: string
           api_key_id?: number
           created_at?: string
           id?: number
           router_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "public_router_keys_added_by_fkey"
+            columns: ["added_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_router_keys_added_by_fkey"
+            columns: ["added_by"]
+            isOneToOne: false
+            referencedRelation: "users_view"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "public_router_keys_api_key_id_fkey"
             columns: ["api_key_id"]
