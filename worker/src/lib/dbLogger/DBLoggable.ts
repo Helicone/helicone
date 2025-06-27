@@ -538,72 +538,77 @@ export class DBLoggable {
       string
     >
   > {
-    const { data: authParams, error } = await db.dbWrapper.getAuthParams();
-    if (error || !authParams?.organizationId) {
-      return err(`Auth failed! ${error}`);
-    }
-
-    let orgRateLimit = false;
     try {
-      const org = await db.dbWrapper.getOrganization();
-      if (org.error !== null) {
-        return err(org.error);
+      const { data: authParams, error } = await db.dbWrapper.getAuthParams();
+      if (error || !authParams?.organizationId) {
+        return err(`Auth failed! ${error}`);
       }
 
-      const tier = org.data?.tier;
+      let orgRateLimit = false;
+      try {
+        const org = await db.dbWrapper.getOrganization();
+        if (org.error !== null) {
+          return err(org.error);
+        }
 
-      const rateLimiter = await db.dbWrapper.getRateLimiter();
-      if (rateLimiter.error !== null) {
-        return rateLimiter;
+        const tier = org.data?.tier;
+
+        const rateLimiter = await db.dbWrapper.getRateLimiter();
+        if (rateLimiter.error !== null) {
+          return rateLimiter;
+        }
+
+        // TODO: Add an early exit if we really want to rate limit in the future
+        const rateLimit = await rateLimiter.data.checkRateLimit(tier);
+
+        if (rateLimit.data?.isRateLimited) {
+          orgRateLimit = true;
+        }
+
+        if (rateLimit.error) {
+          console.error(`Error checking rate limit: ${rateLimit.error}`);
+        }
+      } catch (e) {
+        console.error(`Error checking rate limit: ${e}`);
       }
 
-      // TODO: Add an early exit if we really want to rate limit in the future
-      const rateLimit = await rateLimiter.data.checkRateLimit(tier);
+      await this.useKafka(
+        db,
+        authParams,
+        S3_ENABLED,
+        orgRateLimit,
+        requestHeaders,
+        cachedHeaders,
+        cacheSettings
+      );
 
-      if (rateLimit.data?.isRateLimited) {
-        orgRateLimit = true;
-      }
+      // THIS IS ONLY USED FOR COST CALCULATION ON RATELIMITING
+      const readResponse = await this.readResponse();
 
-      if (rateLimit.error) {
-        console.error(`Error checking rate limit: ${rateLimit.error}`);
-      }
-    } catch (e) {
-      console.error(`Error checking rate limit: ${e}`);
+      const model =
+        this.request.modelOverride ??
+        readResponse.data?.response.model ??
+        "not-found";
+
+      const cost =
+        this.modelCost({
+          model: model,
+          sum_completion_tokens:
+            readResponse.data?.response?.completion_tokens ?? 0,
+          sum_prompt_tokens: readResponse.data?.response?.prompt_tokens ?? 0,
+          sum_tokens:
+            (readResponse.data?.response.completion_tokens ?? 0) +
+            (readResponse.data?.response.prompt_tokens ?? 0),
+          provider: this.request.provider ?? "",
+        }) ?? 0;
+
+      return ok({
+        cost: cost,
+      });
+    } catch (error) {
+      console.error("Error logging", error);
+      return err("Error logging");
     }
-
-    await this.useKafka(
-      db,
-      authParams,
-      S3_ENABLED,
-      orgRateLimit,
-      requestHeaders,
-      cachedHeaders,
-      cacheSettings
-    );
-
-    // THIS IS ONLY USED FOR COST CALCULATION ON RATELIMITING
-    const readResponse = await this.readResponse();
-
-    const model =
-      this.request.modelOverride ??
-      readResponse.data?.response.model ??
-      "not-found";
-
-    const cost =
-      this.modelCost({
-        model: model,
-        sum_completion_tokens:
-          readResponse.data?.response?.completion_tokens ?? 0,
-        sum_prompt_tokens: readResponse.data?.response?.prompt_tokens ?? 0,
-        sum_tokens:
-          (readResponse.data?.response.completion_tokens ?? 0) +
-          (readResponse.data?.response.prompt_tokens ?? 0),
-        provider: this.request.provider ?? "",
-      }) ?? 0;
-
-    return ok({
-      cost: cost,
-    });
   }
 
   async useKafka(
