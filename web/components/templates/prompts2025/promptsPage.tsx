@@ -10,6 +10,7 @@ import {
   useGetPromptsWithVersions,
   useGetPromptVersions,
   useSetProductionVersion,
+  useGetPromptTags,
 } from "@/services/hooks/prompts";
 import { useState, useEffect, useRef } from "react";
 import PromptDetails from "./PromptDetails";
@@ -25,6 +26,7 @@ import useNotification from "@/components/shared/notification/useNotification";
 import { SimpleTable } from "@/components/shared/table/simpleTable";
 import { useLocalStorage } from "@/services/hooks/localStorage";
 import { getInitialColumns } from "./initialColumns";
+import TagsFilter from "./TagsFilter";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -46,13 +48,16 @@ const PromptsPage = (props: PromptsPageProps) => {
   );
   const [sortKey, setSortKey] = useState<string | undefined>("created");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
-  
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
   const { setNotification } = useNotification();
   const drawerRef = useRef<any>(null);
   const [drawerSize, setDrawerSize] = useLocalStorage("prompt-drawer-size", 40);
 
+  const { data: tags = [], isLoading: isLoadingTags } = useGetPromptTags(); 
   const { data, isLoading } = useGetPromptsWithVersions(
     search,
+    selectedTags,
     currentPage - 1,
     pageSize
   );
@@ -173,22 +178,29 @@ const PromptsPage = (props: PromptsPageProps) => {
           <ResizablePanel>
             <div className="w-full h-full flex flex-col">
               <div className="p-3 border-b border-border bg-background">
-                <div className="relative">
-                  <Search
-                    size={16}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                  />
-                  <Input
-                    placeholder="Search prompts..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="pl-9"
+                <div className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <Search
+                      size={16}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                    />
+                    <Input
+                      placeholder="Search prompts..."
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      className="pl-9"
+                    />
+                  </div>
+                  <TagsFilter
+                    tags={tags}
+                    selectedTags={selectedTags}
+                    onTagsChange={setSelectedTags}
                   />
                 </div>
               </div>
 
               <div className="flex-1 overflow-hidden">
-                {isLoading ? (
+                {isLoading || isLoadingTags ? (
                   <LoadingAnimation />
                 ) : (
                   <SimpleTable
