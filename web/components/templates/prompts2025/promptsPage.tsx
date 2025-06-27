@@ -11,8 +11,7 @@ import {
   useGetPromptVersions,
   useSetProductionVersion,
 } from "@/services/hooks/prompts";
-import { useState, useEffect } from "react";
-import PromptCard from "./PromptCard";
+import { useState, useEffect, useRef } from "react";
 import PromptDetails from "./PromptDetails";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
@@ -23,6 +22,9 @@ import { useFeatureFlag } from "@/services/hooks/admin";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import router from "next/router";
 import useNotification from "@/components/shared/notification/useNotification";
+import { SimpleTable } from "@/components/shared/table/simpleTable";
+import { useLocalStorage } from "@/services/hooks/localStorage";
+import { getInitialColumns } from "./initialColumns";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -33,7 +35,7 @@ const PromptsPage = (props: PromptsPageProps) => {
   const [selectedPrompt, setSelectedPrompt] =
     useState<PromptWithVersions | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(10);
+  const [pageSize, setPageSize] = useState<number>(25);
   const [filteredMajorVersion, setFilteredMajorVersion] = useState<
     number | null
   >(null);
@@ -42,7 +44,12 @@ const PromptsPage = (props: PromptsPageProps) => {
     "prompts_2025",
     organization?.currentOrg?.id ?? "",
   );
+  const [sortKey, setSortKey] = useState<string | undefined>("created");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  
   const { setNotification } = useNotification();
+  const drawerRef = useRef<any>(null);
+  const [drawerSize, setDrawerSize] = useLocalStorage("prompt-drawer-size", 40);
 
   const { data, isLoading } = useGetPromptsWithVersions(
     search,
@@ -105,6 +112,52 @@ const PromptsPage = (props: PromptsPageProps) => {
     router.push(`/playground?promptVersionId=${promptVersionId}`);
   };
 
+  const handleRowSelect = (promptWithVersions: PromptWithVersions) => {
+    setSelectedPrompt(promptWithVersions);
+    setFilteredMajorVersion(null);
+    drawerRef.current?.expand();
+  };
+
+  const handleSort = (key: string | undefined, direction: "asc" | "desc") => {
+    setSortKey(key);
+    setSortDirection(direction);
+  };
+
+  const sortedPrompts = [...prompts].sort((a, b) => {
+    if (!sortKey) return 0;
+
+    let aValue: any;
+    let bValue: any;
+
+    switch (sortKey) {
+      case "name":
+        aValue = a.prompt.name;
+        bValue = b.prompt.name;
+        break;
+      case "version":
+        aValue = parseFloat(`${a.productionVersion.major_version}.${a.productionVersion.minor_version}`);
+        bValue = parseFloat(`${b.productionVersion.major_version}.${b.productionVersion.minor_version}`);
+        break;
+      case "totalVersions":
+        aValue = a.totalVersions;
+        bValue = b.totalVersions;
+        break;
+      case "created":
+        aValue = new Date(a.prompt.created_at);
+        bValue = new Date(b.prompt.created_at);
+        break;
+      default:
+        return 0;
+    }
+
+    if (aValue === bValue) return 0;
+
+    const compareResult = aValue < bValue ? -1 : 1;
+    return sortDirection === "asc" ? compareResult : -compareResult;
+  });
+
+  const columns = getInitialColumns();
+
   return (
     <main className="h-screen flex flex-col w-full animate-fade-in">
       <FoldedHeader
@@ -117,13 +170,9 @@ const PromptsPage = (props: PromptsPageProps) => {
       />
       <div className="flex flex-col w-full h-full min-h-[80vh] border-t border-border">
         <ResizablePanelGroup direction="horizontal">
-          <ResizablePanel
-            className="flex w-full h-full"
-            defaultSize={70}
-            minSize={30}
-          >
+          <ResizablePanel>
             <div className="w-full h-full flex flex-col">
-              <div className="p-4 border-b border-border bg-background">
+              <div className="p-3 border-b border-border bg-background">
                 <div className="relative">
                   <Search
                     size={16}
@@ -138,48 +187,20 @@ const PromptsPage = (props: PromptsPageProps) => {
                 </div>
               </div>
 
-              {/* Prompts list */}
-              <div className="flex-1 overflow-y-auto">
+              <div className="flex-1 overflow-hidden">
                 {isLoading ? (
                   <LoadingAnimation />
-                ) : prompts && prompts.length > 0 ? (
-                  prompts.map((promptWithVersions) => {
-                    const productionVersion =
-                      promptWithVersions.productionVersion;
-
-                    return (
-                      <div
-                        key={promptWithVersions.prompt.id}
-                        onClick={() => {
-                          setSelectedPrompt(promptWithVersions);
-                          setFilteredMajorVersion(null);
-                        }}
-                        className={`cursor-pointer transition-colors hover:bg-accent/50 ${
-                          selectedPrompt?.prompt.id ===
-                          promptWithVersions.prompt.id
-                            ? "bg-accent"
-                            : ""
-                        }`}
-                      >
-                        <PromptCard
-                          name={promptWithVersions.prompt.name}
-                          id={promptWithVersions.prompt.id}
-                          majorVersion={productionVersion.major_version}
-                          minorVersion={productionVersion.minor_version}
-                          totalVersions={promptWithVersions.totalVersions}
-                          model={productionVersion.model}
-                          updatedAt={new Date(productionVersion.created_at)}
-                          createdAt={
-                            new Date(promptWithVersions.prompt.created_at)
-                          }
-                        />
-                      </div>
-                    );
-                  })
                 ) : (
-                  <div className="p-4 text-muted-foreground">
-                    No prompts found
-                  </div>
+                  <SimpleTable
+                    data={sortedPrompts}
+                    columns={columns}
+                    emptyMessage="No prompts found"
+                    onSelect={handleRowSelect}
+                    onSort={handleSort}
+                    currentSortKey={sortKey}
+                    currentSortDirection={sortDirection}
+                    className="h-full"
+                  />
                 )}
               </div>
 
@@ -193,18 +214,35 @@ const PromptsPage = (props: PromptsPageProps) => {
                   setPageSize(newPageSize);
                   setCurrentPage(1);
                 }}
-                pageSizeOptions={[10, 25, 50, 100]}
-                showCount={true}
+                pageSizeOptions={[25, 50, 100]}
+                showCount={false}
               />
             </div>
           </ResizablePanel>
-          <ResizableHandle withHandle />
-          <ResizablePanel defaultSize={50} minSize={50} maxSize={60}>
+
+          <ResizableHandle />
+
+          <ResizablePanel
+            ref={drawerRef}
+            defaultSize={0}
+            minSize={40}
+            maxSize={80}
+            onResize={(size) => {
+              if (size > 0) {
+                setDrawerSize(size);
+              }
+            }}
+            onExpand={() => {
+              drawerRef.current?.resize(drawerSize);
+            }}
+            collapsible={true}
+          >
             <PromptDetails
               onSetProductionVersion={handleSetProductionVersion}
               onOpenPromptVersion={handleOpenPromptVersion}
               promptWithVersions={displayPrompt}
               onFilterVersion={handleFilterVersion}
+              onCollapse={() => drawerRef.current?.collapse()}
             />
           </ResizablePanel>
         </ResizablePanelGroup>
