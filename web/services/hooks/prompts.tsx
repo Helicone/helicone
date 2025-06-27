@@ -24,6 +24,7 @@ export const useCreatePrompt = () => {
     {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["prompts"] });
+        queryClient.invalidateQueries({ queryKey: ["promptTags"] });
       },
     }
   );
@@ -41,6 +42,20 @@ export const useUpdatePrompt = () => {
       },
     }
   );
+};
+
+export const useGetPromptTags = () => {
+  return useQuery<string[]>({
+    queryKey: ["promptTags"],
+    queryFn: async () => {
+      const result = await $JAWN_API.GET("/v1/prompt-2025/tags", {});
+      if (result.error || !result.data?.data) {
+        console.error("Error fetching prompt tags:", result.error);
+        return [];
+      }
+      return result.data.data;
+    },
+  });
 };
 
 export const useSetProductionVersion = () => {
@@ -155,6 +170,7 @@ export const useGetPromptVersions = (promptId: string, majorVersion?: number) =>
 
 export const useGetPromptsWithVersions = (
   search: string,
+  tagsFilter: string[],
   page: number = 0,
   pageSize: number = 10,
 ) => {
@@ -162,12 +178,13 @@ export const useGetPromptsWithVersions = (
     prompts: PromptWithVersions[];
     totalCount: number;
   }>({
-    queryKey: ["promptsWithVersions", search, page, pageSize],
+    queryKey: ["promptsWithVersions", search, tagsFilter, page, pageSize],
     refetchOnWindowFocus: false,
     queryFn: async () => {
       const promptsResult = await $JAWN_API.POST("/v1/prompt-2025/query", {
         body: {
           search: search,
+          tagsFilter: tagsFilter,
           page: page,
           pageSize: pageSize,
         },
