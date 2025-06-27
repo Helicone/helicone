@@ -210,6 +210,7 @@
           },
           {
             "group": "AI Gateway",
+            "tag": "BETA",
             "pages": [
               "ai-gateway/introduction",
               "ai-gateway/quickstart",
