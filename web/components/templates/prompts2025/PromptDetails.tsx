@@ -7,15 +7,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useState, useEffect } from "react";
 import type { PromptWithVersions } from "@/services/hooks/prompts";
 import PromptVersionHistory from "./PromptVersionHistory";
+import { LuPanelRightClose } from "react-icons/lu";
 
 interface PromptDetailsProps {
   promptWithVersions: PromptWithVersions | null;
   onSetProductionVersion: (promptId: string, promptVersionId: string) => void;
   onOpenPromptVersion: (promptVersionId: string) => void;
   onFilterVersion?: (majorVersion: number | null) => void;
+  onCollapse: () => void;
 }
 
 const PromptDetails = ({
@@ -23,6 +32,7 @@ const PromptDetails = ({
   onSetProductionVersion,
   onOpenPromptVersion,
   onFilterVersion,
+  onCollapse,
 }: PromptDetailsProps) => {
   const [selectedVersion, setSelectedVersion] = useState<string>(
     "All (last 50 versions)"
@@ -71,10 +81,31 @@ const PromptDetails = ({
   return (
     <div className="w-full h-full flex flex-col">
       <div className="p-4 border-b border-border bg-background">
-        <div className="mb-2">
-          <span className="font-semibold text-foreground">{prompt.name}</span>
-          <div className="text-xs text-muted-foreground mt-1">
-            id: {prompt.id}
+        <div className="mb-2 flex items-center gap-2">
+          <TooltipProvider>
+            <Tooltip delayDuration={100}>
+              <TooltipTrigger asChild>
+                <Button
+                  variant={"none"}
+                  size={"square_icon"}
+                  className="w-fit text-muted-foreground hover:text-primary"
+                  onClick={onCollapse}
+                >
+                  <LuPanelRightClose className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">
+                Collapse Drawer
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <div className="flex flex-col min-w-0">
+            <span className="font-semibold text-foreground truncate">
+              {prompt.name}
+            </span>
+            <div className="text-xs text-muted-foreground truncate">
+              id: {prompt.id}
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-3">
