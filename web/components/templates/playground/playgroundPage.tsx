@@ -5,7 +5,6 @@ import {
 } from "@/components/ui/resizable";
 import { generateStream } from "@/lib/api/llm/generate-stream";
 import { processStream } from "@/lib/api/llm/process-stream";
-import { useLocalStorage } from "@/services/hooks/localStorage";
 import { useGetRequestWithBodies } from "@/services/hooks/requests";
 import { openAIMessageToHeliconeMessage } from "@helicone-package/llm-mapper/mappers/openai/chat";
 import { openaiChatMapper } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
@@ -24,15 +23,7 @@ import PlaygroundResponsePanel from "./components/PlaygroundResponsePanel";
 import { OPENROUTER_MODEL_MAP } from "./new/openRouterModelMap";
 import FoldedHeader from "@/components/shared/FoldedHeader";
 import { Small } from "@/components/ui/typography";
-
-export interface ModelParameters {
-  temperature: number | null | undefined;
-  maxTokens: number | null | undefined;
-  topP: number | null | undefined;
-  frequencyPenalty: number | null | undefined;
-  presencePenalty: number | null | undefined;
-  stop: string | null | undefined;
-}
+import { ModelParameters } from "@/lib/api/llm/generate";
 
 export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
   _type: "openai-chat",
@@ -105,7 +96,6 @@ export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
 
 const PlaygroundPage = (props: PlaygroundPageProps) => {
   const { requestId } = props;
-
   const { data: requestData, isLoading: isRequestLoading } =
     useGetRequestWithBodies(requestId ?? "");
 
@@ -117,11 +107,9 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     null
   );
 
-  const [mappedContent, setMappedContent] =
-    useLocalStorage<MappedLLMRequest | null>(
-      `playground-${requestId || "clear"}`,
-      null
-    );
+  const [mappedContent, setMappedContent] = useState<MappedLLMRequest | null>(
+    null
+  );
 
   useEffect(() => {
     if (!requestId) {
@@ -135,10 +123,10 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
 
   const [modelParameters, setModelParameters] = useState<ModelParameters>({
     temperature: undefined,
-    maxTokens: undefined,
-    topP: undefined,
-    frequencyPenalty: undefined,
-    presencePenalty: undefined,
+    max_tokens: undefined,
+    top_p: undefined,
+    frequency_penalty: undefined,
+    presence_penalty: undefined,
     stop: undefined,
   });
 
@@ -155,10 +143,10 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       setTools([]);
       setModelParameters({
         temperature: undefined,
-        maxTokens: undefined,
-        topP: undefined,
-        frequencyPenalty: undefined,
-        presencePenalty: undefined,
+        max_tokens: undefined,
+        top_p: undefined,
+        frequency_penalty: undefined,
+        presence_penalty: undefined,
         stop: undefined,
       });
       setMappedContent(DEFAULT_EMPTY_CHAT);
@@ -201,10 +189,10 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         setTools(contentWithIds?.schema.request.tools ?? []);
         setModelParameters({
           temperature: contentWithIds.schema.request.temperature,
-          maxTokens: contentWithIds.schema.request.max_tokens,
-          topP: contentWithIds.schema.request.top_p,
-          frequencyPenalty: contentWithIds.schema.request.frequency_penalty,
-          presencePenalty: contentWithIds.schema.request.presence_penalty,
+          max_tokens: contentWithIds.schema.request.max_tokens,
+          top_p: contentWithIds.schema.request.top_p,
+          frequency_penalty: contentWithIds.schema.request.frequency_penalty,
+          presence_penalty: contentWithIds.schema.request.presence_penalty,
           stop: contentWithIds.schema.request.stop
             ? Array.isArray(contentWithIds.schema.request.stop)
               ? contentWithIds.schema.request.stop.join(",")
@@ -215,10 +203,10 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         setTools(mappedContent?.schema.request.tools ?? []);
         setModelParameters({
           temperature: mappedContent?.schema.request.temperature,
-          maxTokens: mappedContent?.schema.request.max_tokens,
-          topP: mappedContent?.schema.request.top_p,
-          frequencyPenalty: mappedContent?.schema.request.frequency_penalty,
-          presencePenalty: mappedContent?.schema.request.presence_penalty,
+          max_tokens: mappedContent?.schema.request.max_tokens,
+          top_p: mappedContent?.schema.request.top_p,
+          frequency_penalty: mappedContent?.schema.request.frequency_penalty,
+          presence_penalty: mappedContent?.schema.request.presence_penalty,
           stop: mappedContent?.schema.request.stop
             ? Array.isArray(mappedContent?.schema.request.stop)
               ? mappedContent?.schema.request.stop.join(",")
@@ -240,6 +228,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   const { setNotification } = useNotification();
   const abortController = useRef<AbortController | null>(null);
   const [isStreaming, setIsLoading] = useState<boolean>(false);
+  const [useAIGateway, setUseAIGateway] = useState<boolean>(false);
 
   useEffect(() => {
     if (response) {
@@ -300,6 +289,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                   json_schema: responseFormat.json_schema,
                 }
               : undefined,
+          useAIGateway,
         } as any);
 
         const result = await processStream(
@@ -424,6 +414,8 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               modelParameters={modelParameters}
               setModelParameters={setModelParameters}
               onRun={onRun}
+              useAIGateway={useAIGateway}
+              setUseAIGateway={setUseAIGateway}
             />
           </ResizablePanel>
           <ResizableHandle withHandle />

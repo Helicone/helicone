@@ -226,6 +226,16 @@ export const BLOG_CONTENT: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
+      folderName: "top-llm-gateways-comparison-2025",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "introducing-ai-gateway",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "claude-opus-and-sonnet-4-full-developer-guide",
     },
   },

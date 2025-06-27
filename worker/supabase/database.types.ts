@@ -1003,77 +1003,6 @@ export type Database = {
           },
         ]
       }
-      gateway_config_versions: {
-        Row: {
-          config: Json
-          config_id: string
-          created_at: string
-          id: string
-          version: string
-        }
-        Insert: {
-          config: Json
-          config_id: string
-          created_at?: string
-          id?: string
-          version: string
-        }
-        Update: {
-          config?: Json
-          config_id?: string
-          created_at?: string
-          id?: string
-          version?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "public_gateway_config_versions_config_id_fkey"
-            columns: ["config_id"]
-            isOneToOne: false
-            referencedRelation: "gateway_configs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      gateway_configs: {
-        Row: {
-          created_at: string
-          id: string
-          key_id: number | null
-          name: string | null
-          organization_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          key_id?: number | null
-          name?: string | null
-          organization_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          key_id?: number | null
-          name?: string | null
-          organization_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "public_gateway_configs_key_id_fkey"
-            columns: ["key_id"]
-            isOneToOne: false
-            referencedRelation: "helicone_api_keys"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "public_gateway_configs_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organization"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       helicone_api_keys: {
         Row: {
           api_key_hash: string
@@ -2564,6 +2493,120 @@ export type Database = {
           version?: number
         }
         Relationships: []
+      }
+      router_config_versions: {
+        Row: {
+          config: Json
+          created_at: string
+          id: string
+          router_id: string
+          version: string
+        }
+        Insert: {
+          config: Json
+          created_at?: string
+          id?: string
+          router_id: string
+          version: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          id?: string
+          router_id?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_router_config_versions_router_id_fkey"
+            columns: ["router_id"]
+            isOneToOne: false
+            referencedRelation: "routers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      router_keys: {
+        Row: {
+          added_by: string
+          api_key_id: number
+          created_at: string
+          id: number
+          router_id: string
+        }
+        Insert: {
+          added_by: string
+          api_key_id: number
+          created_at?: string
+          id?: number
+          router_id: string
+        }
+        Update: {
+          added_by?: string
+          api_key_id?: number
+          created_at?: string
+          id?: number
+          router_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_router_keys_added_by_fkey"
+            columns: ["added_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_router_keys_added_by_fkey"
+            columns: ["added_by"]
+            isOneToOne: false
+            referencedRelation: "users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_router_keys_api_key_id_fkey"
+            columns: ["api_key_id"]
+            isOneToOne: false
+            referencedRelation: "helicone_api_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_router_keys_router_id_fkey"
+            columns: ["router_id"]
+            isOneToOne: false
+            referencedRelation: "routers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      routers: {
+        Row: {
+          created_at: string
+          id: string
+          name: string | null
+          organization_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name?: string | null
+          organization_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string | null
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_routers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       score_attribute: {
         Row: {

@@ -17,7 +17,7 @@ import { playgroundModels as PLAYGROUND_MODELS } from "@helicone-package/cost/pr
 import { MappedLLMRequest, Tool } from "@helicone-package/llm-mapper/types";
 import { CheckIcon, ChevronsUpDownIcon } from "lucide-react";
 import { useState } from "react";
-import { ModelParameters } from "../playgroundPage";
+import { ModelParameters } from "@/lib/api/llm/generate";
 import ModelParametersForm from "./ModelParametersForm";
 import ToolsConfigurationModal from "./ToolsConfigurationModal";
 import PlaygroundActions from "./PlaygroundActions";
@@ -42,6 +42,8 @@ interface PlaygroundHeaderProps {
   setMappedContent: (_mappedContent: MappedLLMRequest) => void;
   onRun: () => void;
   isScrolled: boolean;
+  useAIGateway: boolean;
+  setUseAIGateway: (_useAIGateway: boolean) => void;
 }
 
 const PlaygroundHeader = ({
@@ -58,6 +60,8 @@ const PlaygroundHeader = ({
   setMappedContent,
   onRun,
   isScrolled,
+  useAIGateway,
+  setUseAIGateway,
 }: PlaygroundHeaderProps) => {
   const [modelListOpen, setModelListOpen] = useState<boolean>(false);
   return (
@@ -141,6 +145,8 @@ const PlaygroundHeader = ({
               onResponseFormatChange={setResponseFormat}
               parameters={modelParameters}
               onParametersChange={setModelParameters}
+              useAIGateway={useAIGateway}
+              setUseAIGateway={setUseAIGateway}
             />
           </div>
         </div>

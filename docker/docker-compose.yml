@@ -82,6 +82,21 @@ services:
       - "1025:1025" # SMTP port
       - "8025:8025" # Web UI port
 
+  redis:
+    image: redis:8.0.2-alpine
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    environment:
+      - REDIS_PASSWORD=helicone-redis-pw
+      - REDIS_PORT=6379
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
   migrations:
     build:
       context: ../
@@ -105,6 +120,27 @@ services:
   # =============================================================================
   # HELICONE CORE SERVICES (include-helicone profile)
   # =============================================================================
+
+  aigateway:
+    build:
+      context: ../aigateway
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - '5678:5678'
+    profiles: ["include-helix"]
+    depends_on:
+      redis:
+        condition: service_healthy
+    env_file: "../aigateway/.env"
+    environment:
+      # Configure server to bind to all interfaces (0.0.0.0) instead of localhost (127.0.0.1)
+      - PROXY__SERVER__ADDRESS=0.0.0.0
+    networks:
+      - traces
+      - default
+    extra_hosts:
+      - host.docker.internal:host-gateway
 
   jawn:
     container_name: helicone-jawn
@@ -436,3 +472,7 @@ volumes:
     driver: local
   clickhouse_data:
     driver: local
+
+networks:
+  traces:
+    driver: bridge

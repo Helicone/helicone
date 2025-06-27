@@ -363,6 +363,13 @@ export interface paths {
   "/v1/integration/slack/channels": {
     get: operations["GetSlackChannels"];
   };
+  "/v1/helicone-sql/schema": {
+    /** @description Get ClickHouse schema (tables and columns) */
+    get: operations["GetClickHouseSchema"];
+  };
+  "/v1/helicone-sql/execute": {
+    post: operations["ExecuteSql"];
+  };
   "/v1/experiment/new-empty": {
     post: operations["CreateNewEmptyExperiment"];
   };
@@ -461,6 +468,14 @@ export interface paths {
   "/v1/helicone-dataset/{datasetId}/delete": {
     post: operations["DeleteHeliconeDataset"];
   };
+  "/v1/gateway": {
+    get: operations["GetRouterConfigs"];
+    post: operations["CreateRouterConfig"];
+  };
+  "/v1/gateway/{id}": {
+    get: operations["GetLatestRouterConfig"];
+    put: operations["UpdateRouterConfig"];
+  };
   "/v1/evals/query": {
     post: operations["QueryEvals"];
   };
@@ -530,6 +545,10 @@ export interface paths {
   "/v1/api-keys/{apiKeyId}": {
     delete: operations["DeleteAPIKey"];
     patch: operations["UpdateAPIKey"];
+  };
+  "/v1/public/alert-banner": {
+    get: operations["GetAlertBanners"];
+    patch: operations["UpdateAlertBannerActive"];
   };
 }
 
@@ -2559,6 +2578,34 @@ Json: JsonObject;
       error: null;
     };
     "Result_Array__id-string--name-string__.string_": components["schemas"]["ResultSuccess_Array__id-string--name-string___"] | components["schemas"]["ResultError_string_"];
+    ClickHouseTableColumn: {
+      name: string;
+      type: string;
+      default_type?: string;
+      default_expression?: string;
+      comment?: string;
+      codec_expression?: string;
+      ttl_expression?: string;
+    };
+    ClickHouseTableSchema: {
+      table_name: string;
+      columns: components["schemas"]["ClickHouseTableColumn"][];
+    };
+    "ResultSuccess_ClickHouseTableSchema-Array_": {
+      data: components["schemas"]["ClickHouseTableSchema"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ClickHouseTableSchema-Array.string_": components["schemas"]["ResultSuccess_ClickHouseTableSchema-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_Array_Record_string.any___": {
+      data: components["schemas"]["Record_string.any_"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Array_Record_string.any__.string_": components["schemas"]["ResultSuccess_Array_Record_string.any___"] | components["schemas"]["ResultError_string_"];
+    ExecuteSqlRequest: {
+      sql: string;
+    };
     "ResultSuccess__tableId-string--experimentId-string__": {
       data: {
         experimentId: string;
@@ -2879,6 +2926,43 @@ Json: JsonObject;
       /** @enum {number|null} */
       error: null;
     };
+    RouterConfig: {
+      lastUpdatedAt: string;
+      latestVersion: string;
+      name: string;
+      id: string;
+    };
+    "ResultSuccess__routerConfigs-RouterConfig-Array__": {
+      data: {
+        routerConfigs: components["schemas"]["RouterConfig"][];
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__routerConfigs-RouterConfig-Array_.string_": components["schemas"]["ResultSuccess__routerConfigs-RouterConfig-Array__"] | components["schemas"]["ResultError_string_"];
+    LatestRouterConfig: {
+      config: string;
+      version: string;
+      name: string;
+      id: string;
+    };
+    ResultSuccess_LatestRouterConfig_: {
+      data: components["schemas"]["LatestRouterConfig"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_LatestRouterConfig.string_": components["schemas"]["ResultSuccess_LatestRouterConfig_"] | components["schemas"]["ResultError_string_"];
+    CreateRouterConfigResult: {
+      apiKey: string;
+      routerVersionId: string;
+      routerConfigId: string;
+    };
+    ResultSuccess_CreateRouterConfigResult_: {
+      data: components["schemas"]["CreateRouterConfigResult"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_CreateRouterConfigResult.string_": components["schemas"]["ResultSuccess_CreateRouterConfigResult_"] | components["schemas"]["ResultError_string_"];
     Eval: {
       name: string;
       /** Format: double */
@@ -3105,6 +3189,26 @@ Json: JsonObject;
       error: null;
     };
     "Result__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array.string_": components["schemas"]["ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_void_: {
+      data: unknown;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_void.string_": components["schemas"]["ResultSuccess_void_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array_": {
+      data: {
+          updated_at: string;
+          created_at: string;
+          message: string;
+          title: string;
+          active: boolean;
+          /** Format: double */
+          id: number;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array.string_": components["schemas"]["ResultSuccess__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array_"] | components["schemas"]["ResultError_string_"];
   };
   responses: {
   };
@@ -4897,7 +5001,9 @@ export interface operations {
   Generate: {
     requestBody: {
       content: {
-        "application/json": components["schemas"]["OpenAIChatRequest"];
+        "application/json": components["schemas"]["OpenAIChatRequest"] & {
+          useAIGateway?: boolean;
+        };
       };
     };
     responses: {
@@ -5149,6 +5255,32 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Array__id-string--name-string__.string_"];
+        };
+      };
+    };
+  };
+  /** @description Get ClickHouse schema (tables and columns) */
+  GetClickHouseSchema: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ClickHouseTableSchema-Array.string_"];
+        };
+      };
+    };
+  };
+  ExecuteSql: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ExecuteSqlRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Array_Record_string.any__.string_"];
         };
       };
     };
@@ -5775,6 +5907,72 @@ export interface operations {
       };
     };
   };
+  GetRouterConfigs: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__routerConfigs-RouterConfig-Array_.string_"];
+        };
+      };
+    };
+  };
+  CreateRouterConfig: {
+    requestBody: {
+      content: {
+        "application/json": {
+          config: string;
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_CreateRouterConfigResult.string_"];
+        };
+      };
+    };
+  };
+  GetLatestRouterConfig: {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_LatestRouterConfig.string_"];
+        };
+      };
+    };
+  };
+  UpdateRouterConfig: {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          config: string;
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
   QueryEvals: {
     requestBody: {
       content: {
@@ -6196,6 +6394,35 @@ export interface operations {
           "application/json": {
             error: string;
           };
+        };
+      };
+    };
+  };
+  GetAlertBanners: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array.string_"];
+        };
+      };
+    };
+  };
+  UpdateAlertBannerActive: {
+    requestBody: {
+      content: {
+        "application/json": {
+          active: boolean;
+          /** Format: double */
+          id: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_void.string_"];
         };
       };
     };

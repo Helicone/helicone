@@ -50642,12 +50642,56 @@
 				"tags": [
 					"Alert Banner"
 				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/v1/admin/has-feature-flag": {
+			"post": {
+				"operationId": "HasFeatureFlag",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_boolean.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
 				"security": [
 					{
 						"api_key": []
 					}
 				],
-				"parameters": []
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"orgId": {
+										"type": "string"
+									},
+									"feature": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"orgId",
+									"feature"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/admin/feature-flags": {
@@ -51994,6 +52038,77 @@
 						}
 					}
 				]
+			}
+		},
+		"/v1/admin/backfill-costs": {
+			"post": {
+				"operationId": "BackfillCosts",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"success": {
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"success"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"description": "Backfill costs in Clickhouse with updated cost package data.",
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"chunkNumber": {
+										"type": "number",
+										"format": "double"
+									},
+									"totalChunks": {
+										"type": "number",
+										"format": "double"
+									},
+									"modelId": {
+										"type": "string"
+									},
+									"specifyModel": {
+										"type": "boolean"
+									},
+									"timeExpression": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"chunkNumber",
+									"totalChunks",
+									"modelId",
+									"specifyModel",
+									"timeExpression"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/audio/convert-to-wav": {

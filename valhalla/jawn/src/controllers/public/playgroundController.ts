@@ -48,7 +48,10 @@ const isOnPrem = false;
 export class PlaygroundController extends Controller {
   @Post("/generate")
   public async generate(
-    @Body() params: OpenAIChatRequest,
+    @Body()
+    bodyParams: OpenAIChatRequest & {
+      useAIGateway?: boolean;
+    },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<
     Result<
@@ -58,6 +61,7 @@ export class PlaygroundController extends Controller {
     >
   > {
     try {
+      const { useAIGateway, ...params } = bodyParams;
       const org = await dbExecute<{
         id: string;
         playground_helicone: boolean;
@@ -65,13 +69,34 @@ export class PlaygroundController extends Controller {
         request.authParams.organizationId,
       ]);
 
+      if (useAIGateway) {
+        const featureFlags = await dbExecute<{
+          id: string;
+        }>(
+          `SELECT id from feature_flags where org_id = $1 and feature = 'ai_gateway'`,
+          [request.authParams.organizationId]
+        );
+        if (featureFlags.error) {
+          return err(`Failed to get feature flags: ${featureFlags.error}`);
+        }
+        const hasAccessToAIGateway =
+          featureFlags.data && featureFlags.data.length > 0;
+
+        if (!hasAccessToAIGateway) {
+          return err(
+            "You do not have access to the AI Gateway. Please contact support to enable this feature."
+          );
+        }
+      }
+
       if (org.error) {
         return err(`Failed to get organization: ${org.error}`);
       }
 
-      const tempKey = org.data?.[0]?.playground_helicone
-        ? await generateTempHeliconeAPIKey(request.authParams.organizationId)
-        : await getHeliconeDefaultTempKey(request.authParams.organizationId);
+      const tempKey =
+        !useAIGateway && org.data?.[0]?.playground_helicone
+          ? await generateTempHeliconeAPIKey(request.authParams.organizationId)
+          : await getHeliconeDefaultTempKey(request.authParams.organizationId);
 
       if (tempKey.error || !tempKey.data) {
         throw new Error(
@@ -111,8 +136,10 @@ export class PlaygroundController extends Controller {
         >
       >(async (secretKey) => {
         const openai = new OpenAI({
-          baseURL: `https://openrouter.helicone.ai/api/v1/`,
-          apiKey: openRouterKey,
+          baseURL: useAIGateway
+            ? `https://test.gateway.helicone.ai/router/default/v1`
+            : `https://openrouter.helicone.ai/api/v1/`,
+          apiKey: useAIGateway ? secretKey : openRouterKey,
           defaultHeaders: {
             "Helicone-Auth": `Bearer ${secretKey}`,
             "Helicone-User-Id": request.authParams.organizationId,

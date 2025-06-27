@@ -21,6 +21,14 @@
     {
       "source": "/open-stats",
       "destination": "https://us.helicone.ai/open-stats"
+    },
+    {
+      "source": "/gateway",
+      "destination": "https://github.com/Helicone/ai-gateway"
+    },
+    {
+      "source": "/ai-gateway",
+      "destination": "https://github.com/Helicone/ai-gateway"
     }
   ]
 }

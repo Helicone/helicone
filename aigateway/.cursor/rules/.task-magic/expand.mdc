@@ -1,0 +1,62 @@
+---
+description: This rule explains how the agent should check if a given task needs to be expanded into sub-tasks.
+globs:
+alwaysApply: false
+---
+# Expanding Large Tasks
+
+Whenever you use this rule, start your message with the following:
+
+"Checking if task needs to be expanded..."
+
+This rule provides guidelines for an AI agent to assess if a task defined in the Task Magic system is too complex or large and should be recommended for expansion into smaller, more manageable sub-tasks.
+
+You are a senior software architect and product manager and an expert in analyzing task complexity to decide whether or not a given task or tasks should be recommended for expansion into smaller subtasks.
+
+## 1. When to Assess Task Complexity for Expansion
+
+Task complexity should be assessed:
+
+*   **During Task Creation:** When a new task is being defined based on a PRD or user request.
+*   **Before Starting a Task:** When an agent is about to pick up a `pending` task.
+*   **If a Task Stagnates:** If an `inprogress` task shows little progress over a significant period.
+
+## 2. Criteria for Identifying Tasks Needing Expansion
+
+A task might be a candidate for expansion if it meets several of the following criteria:
+
+*   **Estimated Effort:** The task seems likely to take more than a predefined threshold (e.g., 2-3 ideal developer days) to complete.
+*   **Multiple Distinct Components:** The task involves changes across multiple unrelated modules, services, or UI areas.
+*   **High Uncertainty/Ambiguity:** The requirements are not fully clear, or there are many unknown technical challenges.
+*   **Multiple Logical Outcomes:** The task has several distinct, independently verifiable outcomes.
+*   **Numerous Acceptance Criteria:** The "Details" or "Test Strategy" sections are exceptionally long and cover many different aspects.
+*   **Blocks Multiple Other Tasks:** It's a large prerequisite for a significant number of subsequent tasks.
+
+## 3. Recommendation for Expansion
+
+If a task is deemed too complex for direct execution based on the criteria above, the agent should:
+
+1.  **Identify Sub-Goals:** Mentally break the original task's objective into smaller, logical, and sequential (or parallelizable) sub-goals.
+2.  **Recommend Sub-Tasks:** Propose a list of sub-tasks to the user or the calling process. For each proposed sub-task, suggest:
+    *   A descriptive title.
+    *   A brief description of its objective.
+    *   Potential dependencies on other proposed sub-tasks or the original parent task.
+    *   A suggested priority.
+3.  **State the Recommendation Clearly:** The agent's output should be a clear recommendation that the original task be expanded, followed by the list of suggested sub-tasks. For example:
+    "Based on the complexity, I recommend expanding Task {original_task_id} '{Original Task Title}' into the following sub-tasks:
+    1.  **Title:** Setup Database Schema for User Profiles
+        *   **Description:** Create and migrate the necessary database tables for storing user profile information.
+        *   **Priority:** critical
+        *   **Dependencies:** None
+    2.  **Title:** Implement User Profile API Endpoints
+        *   **Description:** Develop the CRUD API endpoints for managing user profiles.
+        *   **Priority:** high
+        *   **Dependencies:** Sub-task 1
+    3.  **Title:** Build User Profile Frontend View
+        *   **Description:** Create the UI components to display and edit user profiles.
+        *   **Priority:** high
+        *   **Dependencies:** Sub-task 2"
+
+**The actual creation of sub-task files, numbering, and updates to `TASKS.md` will be handled by the process that receives this recommendation, typically guided by the `task-magic/tasks.mdc` rule.**
+
+By focusing on analysis and recommendation, this rule provides a clear decision point before proceeding with the mechanics of task splitting.

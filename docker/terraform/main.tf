@@ -49,8 +49,8 @@ resource "aws_ecr_repository" "migrations" {
   }
 }
 
-resource "aws_ecr_repository" "helix" {
-  name                 = "helicone/helix"
+resource "aws_ecr_repository" "aigateway" {
+  name                 = "helicone/ai-gateway"
   image_tag_mutability = "MUTABLE"
 
   image_scanning_configuration {
@@ -71,6 +71,6 @@ output "migrations_repository_url" {
   value = aws_ecr_repository.migrations.repository_url
 }
 
-output "helix_repository_url" {
-  value = aws_ecr_repository.helix.repository_url
+output "aigateway_repository_url" {
+  value = aws_ecr_repository.aigateway.repository_url
 }

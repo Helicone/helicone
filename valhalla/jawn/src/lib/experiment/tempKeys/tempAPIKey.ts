@@ -115,9 +115,6 @@ export async function getHeliconeDefaultTempKey(
   orgId: string
 ): Promise<Result<HeliconeDefaultTempKey, string>> {
   const apiKey = await GET_KEY("key:helicone_on_helicone_key");
-  console.log({
-    apiKey,
-  });
   if (apiKey.error) {
     return err(`Failed to get Helicone default temp key: ${apiKey.error}`);
   }

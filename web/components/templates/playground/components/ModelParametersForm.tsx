@@ -38,15 +38,9 @@ import { Dialog } from "@/components/ui/dialog";
 import { providers } from "@/data/providers";
 import { ProviderCard } from "@/components/providers/ProviderCard";
 import Image from "next/image";
-
-interface ModelParameters {
-  temperature: number | undefined | null;
-  maxTokens: number | undefined | null;
-  topP: number | undefined | null;
-  frequencyPenalty: number | undefined | null;
-  presencePenalty: number | undefined | null;
-  stop: string | undefined | null;
-}
+import { ModelParameters } from "@/lib/api/llm/generate";
+import { useOrg } from "@/components/layout/org/organizationContext";
+import { useFeatureFlag } from "@/services/hooks/admin";
 
 interface ModelParametersFormProps {
   isScrolled: boolean;
@@ -60,22 +54,32 @@ interface ModelParametersFormProps {
     type: string;
     json_schema?: string;
   }) => void;
+  useAIGateway: boolean;
+  setUseAIGateway: (_useAIGateway: boolean) => void;
 }
 
 export default function ModelParametersForm({
   isScrolled,
   parameters = {
     temperature: undefined,
-    maxTokens: undefined,
-    topP: undefined,
-    frequencyPenalty: undefined,
-    presencePenalty: undefined,
+    max_tokens: undefined,
+    top_p: undefined,
+    frequency_penalty: undefined,
+    presence_penalty: undefined,
     stop: undefined,
   },
   onParametersChange,
   responseFormat,
   onResponseFormatChange,
+  useAIGateway,
+  setUseAIGateway,
 }: ModelParametersFormProps) {
+  const organization = useOrg();
+  const { data: hasAccessToAIGateway } = useFeatureFlag(
+    "ai_gateway",
+    organization?.currentOrg?.id ?? ""
+  );
+
   const updateParameter = (key: keyof ModelParameters, value: any) => {
     onParametersChange({
       ...parameters,
@@ -198,6 +202,26 @@ export default function ModelParametersForm({
                 />
               </div>
             </div>
+            {hasAccessToAIGateway && (
+              <div className="flex justify-end">
+                <div className="flex gap-2 items-center">
+                  <Label htmlFor="ai-gateway" className="text-sm">
+                    Use Helicone AI Gateway
+                  </Label>
+                  <Switch
+                    className="data-[state=checked]:bg-foreground"
+                    size="sm"
+                    variant="helicone"
+                    id="ai-gateway"
+                    checked={useAIGateway}
+                    onCheckedChange={(checked) => {
+                      setUseAIGateway(checked);
+                    }}
+                    disabled={isPending}
+                  />
+                </div>
+              </div>
+            )}
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-2">
@@ -286,7 +310,7 @@ export default function ModelParametersForm({
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Label htmlFor="maxTokens">Max Tokens</Label>
+                  <Label htmlFor="max_tokens">Max Tokens</Label>
                   <Tooltip>
                     <TooltipTrigger>
                       <InfoIcon className="h-4 w-4 text-muted-foreground" />
@@ -298,29 +322,29 @@ export default function ModelParametersForm({
                 </div>
                 <div className="flex items-center gap-2">
                   <Checkbox
-                    id="maxTokens-default"
-                    checked={parameters.maxTokens === undefined}
-                    onCheckedChange={() => toggleDefault("maxTokens")}
+                    id="max_tokens-default"
+                    checked={parameters.max_tokens === undefined}
+                    onCheckedChange={() => toggleDefault("max_tokens")}
                   />
-                  <Label htmlFor="maxTokens-default">Use Default</Label>
+                  <Label htmlFor="max_tokens-default">Use Default</Label>
                 </div>
               </div>
               <Input
-                id="maxTokens"
+                id="max_tokens"
                 type="number"
-                value={parameters.maxTokens ?? 0}
+                value={parameters.max_tokens ?? 0}
                 onChange={(e) =>
-                  updateParameter("maxTokens", parseInt(e.target.value))
+                  updateParameter("max_tokens", parseInt(e.target.value))
                 }
                 min={1}
-                disabled={parameters.maxTokens === undefined}
+                disabled={parameters.max_tokens === undefined}
               />
             </div>
 
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Label htmlFor="topP">Top P</Label>
+                  <Label htmlFor="top_p">Top P</Label>
                   <Tooltip>
                     <TooltipTrigger>
                       <InfoIcon className="h-4 w-4 text-muted-foreground" />
@@ -333,35 +357,35 @@ export default function ModelParametersForm({
                 </div>
                 <div className="flex items-center gap-2">
                   <Checkbox
-                    id="topP-default"
-                    checked={parameters.topP === undefined}
-                    onCheckedChange={() => toggleDefault("topP")}
+                    id="top_p-default"
+                    checked={parameters.top_p === undefined}
+                    onCheckedChange={() => toggleDefault("top_p")}
                   />
-                  <Label htmlFor="topP-default">Use Default</Label>
+                  <Label htmlFor="top_p-default">Use Default</Label>
                 </div>
               </div>
               <div className="flex items-center gap-4">
                 <Slider
-                  id="topP"
+                  id="top_p"
                   min={0}
                   max={1}
                   step={0.05}
-                  value={[parameters.topP ?? 0]}
-                  onValueChange={([value]) => updateParameter("topP", value)}
+                  value={[parameters.top_p ?? 0]}
+                  onValueChange={([value]) => updateParameter("top_p", value)}
                   className="flex-1"
-                  disabled={parameters.topP === undefined}
+                  disabled={parameters.top_p === undefined}
                 />
                 <Input
                   type="number"
-                  value={parameters.topP ?? 0}
+                  value={parameters.top_p ?? 0}
                   onChange={(e) =>
-                    updateParameter("topP", parseFloat(e.target.value))
+                    updateParameter("top_p", parseFloat(e.target.value))
                   }
                   className="w-20"
                   min={0}
                   max={1}
                   step={0.05}
-                  disabled={parameters.topP === undefined}
+                  disabled={parameters.top_p === undefined}
                 />
               </div>
             </div>
@@ -369,7 +393,7 @@ export default function ModelParametersForm({
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Label htmlFor="frequencyPenalty">Frequency Penalty</Label>
+                  <Label htmlFor="frequency_penalty">Frequency Penalty</Label>
                   <Tooltip>
                     <TooltipTrigger>
                       <InfoIcon className="h-4 w-4 text-muted-foreground" />
@@ -382,32 +406,32 @@ export default function ModelParametersForm({
                 </div>
                 <div className="flex items-center gap-2">
                   <Checkbox
-                    id="frequencyPenalty-default"
-                    checked={parameters.frequencyPenalty === undefined}
-                    onCheckedChange={() => toggleDefault("frequencyPenalty")}
+                    id="frequency_penalty-default"
+                    checked={parameters.frequency_penalty === undefined}
+                    onCheckedChange={() => toggleDefault("frequency_penalty")}
                   />
-                  <Label htmlFor="frequencyPenalty-default">Use Default</Label>
+                  <Label htmlFor="frequency_penalty-default">Use Default</Label>
                 </div>
               </div>
               <div className="flex items-center gap-4">
                 <Slider
-                  id="frequencyPenalty"
+                  id="frequency_penalty"
                   min={-2}
                   max={2}
                   step={0.1}
-                  value={[parameters.frequencyPenalty ?? 0]}
+                  value={[parameters.frequency_penalty ?? 0]}
                   onValueChange={([value]) =>
-                    updateParameter("frequencyPenalty", value)
+                    updateParameter("frequency_penalty", value)
                   }
                   className="flex-1"
-                  disabled={parameters.frequencyPenalty === undefined}
+                  disabled={parameters.frequency_penalty === undefined}
                 />
                 <Input
                   type="number"
-                  value={parameters.frequencyPenalty ?? 0}
+                  value={parameters.frequency_penalty ?? 0}
                   onChange={(e) =>
                     updateParameter(
-                      "frequencyPenalty",
+                      "frequency_penalty",
                       parseFloat(e.target.value)
                     )
                   }
@@ -415,7 +439,7 @@ export default function ModelParametersForm({
                   min={-2}
                   max={2}
                   step={0.1}
-                  disabled={parameters.frequencyPenalty === undefined}
+                  disabled={parameters.frequency_penalty === undefined}
                 />
               </div>
             </div>
@@ -423,7 +447,7 @@ export default function ModelParametersForm({
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Label htmlFor="presencePenalty">Presence Penalty</Label>
+                  <Label htmlFor="presence_penalty">Presence Penalty</Label>
                   <Tooltip>
                     <TooltipTrigger>
                       <InfoIcon className="h-4 w-4 text-muted-foreground" />
@@ -436,32 +460,32 @@ export default function ModelParametersForm({
                 </div>
                 <div className="flex items-center gap-2">
                   <Checkbox
-                    id="presencePenalty-default"
-                    checked={parameters.presencePenalty === undefined}
-                    onCheckedChange={() => toggleDefault("presencePenalty")}
+                    id="presence_penalty-default"
+                    checked={parameters.presence_penalty === undefined}
+                    onCheckedChange={() => toggleDefault("presence_penalty")}
                   />
-                  <Label htmlFor="presencePenalty-default">Use Default</Label>
+                  <Label htmlFor="presence_penalty-default">Use Default</Label>
                 </div>
               </div>
               <div className="flex items-center gap-4">
                 <Slider
-                  id="presencePenalty"
+                  id="presence_penalty"
                   min={-2}
                   max={2}
                   step={0.1}
-                  value={[parameters.presencePenalty ?? 0]}
+                  value={[parameters.presence_penalty ?? 0]}
                   onValueChange={([value]) =>
-                    updateParameter("presencePenalty", value)
+                    updateParameter("presence_penalty", value)
                   }
                   className="flex-1"
-                  disabled={parameters.presencePenalty === undefined}
+                  disabled={parameters.presence_penalty === undefined}
                 />
                 <Input
                   type="number"
-                  value={parameters.presencePenalty ?? 0}
+                  value={parameters.presence_penalty ?? 0}
                   onChange={(e) =>
                     updateParameter(
-                      "presencePenalty",
+                      "presence_penalty",
                       parseFloat(e.target.value)
                     )
                   }
@@ -469,7 +493,7 @@ export default function ModelParametersForm({
                   min={-2}
                   max={2}
                   step={0.1}
-                  disabled={parameters.presencePenalty === undefined}
+                  disabled={parameters.presence_penalty === undefined}
                 />
               </div>
             </div>

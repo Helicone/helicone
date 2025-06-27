@@ -8,6 +8,15 @@ import { ORG_ID_COOKIE_KEY } from "@/lib/constants";
 import Cookies from "js-cookie";
 import { OpenAI } from "openai";
 
+export interface ModelParameters {
+  temperature: number | null | undefined;
+  max_tokens: number | null | undefined;
+  top_p: number | null | undefined;
+  frequency_penalty: number | null | undefined;
+  presence_penalty: number | null | undefined;
+  stop: string | null | undefined;
+}
+
 export interface GenerateParams {
   provider: Provider;
   model: string;
@@ -28,6 +37,7 @@ export interface GenerateParams {
     onChunk: (chunk: string) => void;
     onCompletion: () => void;
   };
+  useAIGateway?: boolean;
 }
 
 export type GenerateResponse = {
@@ -52,15 +62,10 @@ async function handleStreamResponse(
   try {
     while (true) {
       const { done, value } = await reader.read();
-      console.log("done", done);
-      console.log("value", value);
       if (done) {
-        console.log("buffer", buffer);
         if (buffer.trim()) {
           const events = buffer.split("\n\n");
-          console.log("events", events);
           for (const event of events) {
-            console.log("event", event);
             if (event.startsWith("data: ")) {
               const jsonString = event.substring(6).trim();
               if (jsonString) {
@@ -147,11 +152,12 @@ async function handleNonStreamResponse(
 
 export async function generate<T extends object | undefined = undefined>(
   params: OpenAI.Chat.Completions.ChatCompletionCreateParams & {
-    stream: {
+    stream?: {
       onChunk: (chunk: string) => void;
       onCompletion: () => void;
     };
     schema?: z.ZodType<object>;
+    useAIGateway?: boolean;
   }
 ): Promise<GenerateResponse> {
   const currentOrgId = Cookies.get(ORG_ID_COOKIE_KEY);
@@ -172,6 +178,7 @@ export async function generate<T extends object | undefined = undefined>(
         tools: params.tools,
         response_format: params.response_format,
         model: params.model,
+        useAIGateway: params.useAIGateway,
       }),
       headers: {
         "helicone-authorization": JSON.stringify({
