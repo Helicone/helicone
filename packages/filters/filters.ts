@@ -243,10 +243,7 @@ const whereKeyMappings: KeyMappings = {
       prompt_cache_write_tokens: "request_response_rmt.prompt_cache_write_tokens",
     })(filter, placeValueSafely);
   },
-  users_view: easyKeyMappings<"request_response_log">({
-    status: "r.status",
-    user_id: "r.user_id",
-  }),
+  users_view: easyKeyMappings<"users_view">({}),
   properties_v3: easyKeyMappings<"properties_v3">({
     key: "properties_v3.key",
     value: "properties_v3.value",
@@ -314,15 +311,16 @@ const havingKeyMappings: KeyMappings = {
     cost: "cost",
   }),
   users_view: easyKeyMappings<"users_view">({
-    active_for: "active_for",
-    first_active: "first_active",
-    last_active: "last_active",
-    total_requests: "total_requests",
-    average_requests_per_day_active: "average_requests_per_day_active",
-    average_tokens_per_request: "average_tokens_per_request",
-    total_completion_tokens: "total_completion_tokens",
-    total_prompt_token: "total_prompt_token",
-    cost: "cost",
+    user_user_id: "user_id",
+    user_active_for: "active_for",
+    user_first_active: "first_active",
+    user_last_active: "last_active",
+    user_total_requests: "total_requests",
+    user_average_requests_per_day_active: "average_requests_per_day_active",
+    user_average_tokens_per_request: "average_tokens_per_request",
+    user_total_completion_tokens: "total_completion_tokens",
+    user_total_prompt_tokens: "total_prompt_tokens",
+    user_cost: "cost",
   }),
   sessions_request_response_rmt:
     easyKeyMappings<"sessions_request_response_rmt">({

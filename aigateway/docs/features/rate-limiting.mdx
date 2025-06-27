@@ -1,0 +1,311 @@
+---
+title: "Rate Limiting & Spend Controls"
+sidebarTitle: "Rate Limiting"
+description: "Comprehensive rate limiting across users, teams, providers, and cost controls"
+---
+
+# Rate Limiting & Spend Controls
+
+Conduit provides flexible rate limiting and spend controls to help you manage costs, prevent abuse, and stay within provider limits. Configure limits by user, team, provider, or globally with granular control over requests, tokens, and costs.
+
+<Note>
+  Rate limits and spend controls are managed through the [Helicone dashboard](https://helicone.ai), providing a unified interface for cross-cutting resource allocation rules.
+</Note>
+
+## How Rate Limiting Works
+
+Rate limits are configured using three key dimensions:
+
+<CardGroup cols={3}>
+  <Card title="Segments" icon="users">
+    **Who** gets rate limited
+    
+    Users, teams, providers, or global limits
+  </Card>
+  
+  <Card title="Units" icon="gauge">
+    **What** gets measured
+    
+    Requests, tokens, or cost in USD
+  </Card>
+  
+  <Card title="Refresh Interval" icon="clock">
+    **When** limits reset
+    
+    Per minute, hour, day, or custom intervals
+  </Card>
+</CardGroup>
+
+This flexible system allows configurations like:
+- **1000 requests per minute** per user
+- **$50 per day** per team  
+- **100K tokens per hour** across all providers
+- **500 requests per minute** to OpenAI specifically
+
+## Rate Limit Segments
+
+<AccordionGroup>
+  <Accordion title="Global Limits" icon="globe">
+    **Organization-wide rate limiting** *(Available in v0)*
+    
+    **Precedence:** Highest (applied first)
+    
+    Ensure your entire organization stays within limits across all users and teams. Global limits act as a safety net to prevent runaway costs or hitting provider-level quotas.
+    
+    ```yaml
+    # Example: Global limits
+    - segment: global
+      unit: cost
+      limit: 1000  # $1000 USD
+      interval: "1d"  # per day
+    ```
+    
+    **Use cases:**
+    - Monthly budget caps
+    - Emergency cost controls
+    - Provider quota management
+  </Accordion>
+
+  <Accordion title="Helicone User Limits" icon="user">
+    **Individual user rate limiting** *(Available in v0)*
+    
+    **Precedence:** Lowest (applied last)
+    
+    Ensure individual users within the Helicone platform stay within their allocated limits.
+    
+    ```yaml
+    # Example: Per-user limits  
+    - segment: helicone-user
+      unit: requests
+      limit: 100
+      interval: "1m"  # 100 requests per minute
+    ```
+    
+    **Use cases:**
+    - Developer quotas
+    - Fair usage policies
+    - Individual cost tracking
+  </Accordion>
+
+  <Accordion title="Provider Limits" icon="server">
+    **Provider-specific rate limiting** *(Coming in v1)*
+    
+    **Precedence:** Highest (applied first)
+    
+    Stay within LLM provider limits across all Conduit router instances. This provides an extra layer of protection beyond load balancing strategies.
+    
+    ```yaml
+    # Example: Provider limits
+    - segment: provider
+      provider: openai
+      unit: requests  
+      limit: 10000
+      interval: "1m"  # 10K requests per minute to OpenAI
+    ```
+    
+    **Features:**
+    - Cross-instance coordination
+    - Provider quota awareness  
+    - Automatic failover integration
+    
+    <Note>
+      All load balancing strategies are already provider rate limit aware. This adds an additional safety layer.
+    </Note>
+  </Accordion>
+
+  <Accordion title="End User Limits" icon="id-card">
+    **End-user rate limiting via headers** *(Coming in v1)*
+    
+    **Precedence:** Lowest (applied last)
+    
+    Rate limit your application's end users by including the `Helicone-User-Id` header in requests.
+    
+    ```bash
+    curl -X POST https://your-conduit.com/v1/chat/completions \
+         -H "Helicone-User-Id: user_123" \
+         -H "Authorization: Bearer $OPENAI_KEY" \
+         # ... rest of request
+    ```
+    
+    **Use cases:**
+    - SaaS application user limits
+    - Freemium tier enforcement  
+    - Abuse prevention
+  </Accordion>
+
+  <Accordion title="Team Limits" icon="users-gear">
+    **Team-based budget controls** *(Coming in v1)*
+    
+    **Precedence:** High (applied early)
+    
+    Ensure teams stay within their allocated budgets and usage quotas.
+    
+    ```yaml
+    # Example: Team limits
+    - segment: team
+      team: engineering
+      unit: cost
+      limit: 500  # $500 USD
+      interval: "7d"  # per week
+    ```
+    
+    **Use cases:**
+    - Department budgets
+    - Project cost allocation
+    - Team resource management
+  </Accordion>
+</AccordionGroup>
+
+## Rate Limit Units
+
+<Tabs>
+  <Tab title="Requests">
+    **Count-based limiting** *(Available in v0)*
+    
+    Limit the total number of requests per refresh interval, regardless of size or cost.
+    
+    ```yaml
+    unit: requests
+    limit: 1000
+    interval: "1h"  # 1000 requests per hour
+    ```
+    
+    **Best for:**
+    - Simple usage quotas
+    - API call counting
+    - Basic abuse prevention
+  </Tab>
+
+  <Tab title="Token Usage">
+    **Token-based limiting** *(Coming in v1)*
+    
+    Limit based on token consumption (input + output tokens) per refresh interval.
+    
+    ```yaml  
+    unit: tokens
+    limit: 100000
+    interval: "1d"  # 100K tokens per day
+    ```
+    
+    **Best for:**
+    - Resource-aware limiting
+    - Model-agnostic quotas
+    - Usage-based billing alignment
+  </Tab>
+
+  <Tab title="Cost">
+    **Cost-based limiting** *(Coming in v1)*
+    
+    Limit based on estimated USD cost per refresh interval across all providers.
+    
+    ```yaml
+    unit: cost  
+    limit: 50.00
+    interval: "1d"  # $50 per day
+    ```
+    
+    **Best for:**
+    - Budget enforcement
+    - Cost control
+    - Financial guardrails
+  </Tab>
+</Tabs>
+
+## Precedence & Enforcement
+
+Rate limits are enforced in **precedence order** - higher precedence limits are checked first:
+
+<Steps>
+  <Step title="Global & Provider Limits">
+    **Highest precedence** - Organization-wide and provider-specific limits applied first
+  </Step>
+  
+  <Step title="Team Limits">  
+    **High precedence** - Team-based budget and usage controls
+  </Step>
+  
+  <Step title="User & End-User Limits">
+    **Lowest precedence** - Individual user quotas applied last
+  </Step>
+</Steps>
+
+When any limit is exceeded, the request is rejected with a `429 Too Many Requests` response including retry headers.
+
+## Configuration Examples
+
+<CodeGroup>
+```yaml Multi-tier Limits
+# Complete rate limiting configuration
+rate_limits:
+  # Global safety net
+  - segment: global
+    unit: cost
+    limit: 5000
+    interval: "1d"
+    
+  # Per-team budgets  
+  - segment: team
+    team: engineering
+    unit: cost
+    limit: 200
+    interval: "1d"
+    
+  # Per-user quotas
+  - segment: helicone-user  
+    unit: requests
+    limit: 1000
+    interval: "1h"
+    
+  # Provider limits
+  - segment: provider
+    provider: openai
+    unit: requests
+    limit: 50000
+    interval: "1m"
+```
+
+```yaml Development Environment
+# Simple rate limits for development
+rate_limits:
+  # Global limit to prevent accidents
+  - segment: global
+    unit: requests
+    limit: 10000
+    interval: "1d"
+    
+  # Per-developer limits  
+  - segment: helicone-user
+    unit: requests
+    limit: 100
+    interval: "1m"
+```
+
+```yaml Production SaaS
+# Production SaaS application limits
+rate_limits:
+  # Monthly budget cap
+  - segment: global
+    unit: cost
+    limit: 10000
+    interval: "30d"
+    
+  # End-user limits (freemium)
+  - segment: end-user
+    unit: requests
+    limit: 50
+    interval: "1d"
+    
+  # Team quotas
+  - segment: team
+    team: premium-customers
+    unit: cost
+    limit: 1000
+    interval: "30d"
+```
+</CodeGroup>
+
+---
+
+<Info>
+  **Dashboard Management**: All rate limits are configured and monitored through the [Helicone dashboard](https://helicone.ai). Real-time usage tracking, alerts, and historical analytics help you optimize your limits over time.
+</Info>

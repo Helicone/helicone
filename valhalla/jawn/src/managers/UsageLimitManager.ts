@@ -1,9 +1,9 @@
 import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
 import { Database } from "../lib/db/database.types";
 import { Result, err, ok } from "../packages/common/result";
-import { clickhousePriceCalc } from "@helicone-package/cost";
 import { hashAuth } from "../utils/hash";
 import { redisClient } from "../lib/clients/redisClient";
+import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 
 export class UsageLimitManager {
   // uses Dat trunc
@@ -24,7 +24,7 @@ export class UsageLimitManager {
       `
     SELECT
       count(*) as count,
-      ${clickhousePriceCalc("request_response_rmt")} as cost
+      sum(cost) / ${COST_PRECISION_MULTIPLIER} as cost
     FROM request_response_rmt
     WHERE (
       request_response_rmt.request_created_at >= DATE_TRUNC('${timeGrain}', now())
@@ -60,7 +60,7 @@ export class UsageLimitManager {
     return `
     (
       SELECT count(*) as count,
-      ${clickhousePriceCalc("request_response_rmt")} as cost
+      sum(cost) / ${COST_PRECISION_MULTIPLIER} as cost
       FROM request_response_rmt
       WHERE (
         request_response_rmt.request_created_at >= now() - INTERVAL {${secondsVal} : Int32} SECOND

@@ -1,7 +1,21 @@
-import { modelMapping } from "@helicone-package/cost/unified/models";
+// import { $JAWN_API } from "@/lib/clients/jawn";
 import { Provider } from "@helicone-package/cost/unified/types";
 import { Message, Tool } from "@helicone-package/llm-mapper/types";
 import { z } from "zod";
+import { env } from "next-runtime-env";
+import { getHeliconeCookie } from "@/lib/cookies";
+import { ORG_ID_COOKIE_KEY } from "@/lib/constants";
+import Cookies from "js-cookie";
+import { OpenAI } from "openai";
+
+export interface ModelParameters {
+  temperature: number | null | undefined;
+  max_tokens: number | null | undefined;
+  top_p: number | null | undefined;
+  frequency_penalty: number | null | undefined;
+  presence_penalty: number | null | undefined;
+  stop: string | null | undefined;
+}
 
 export interface GenerateParams {
   provider: Provider;
@@ -12,7 +26,7 @@ export interface GenerateParams {
   topP?: number;
   frequencyPenalty?: number;
   presencePenalty?: number;
-  stop?: string[];
+  stop?: string[] | string;
   tools?: Tool[];
   schema?: object extends object ? z.ZodType<object> : never;
   signal?: AbortSignal;
@@ -23,6 +37,7 @@ export interface GenerateParams {
     onChunk: (chunk: string) => void;
     onCompletion: () => void;
   };
+  useAIGateway?: boolean;
 }
 
 export type GenerateResponse = {
@@ -31,187 +46,164 @@ export type GenerateResponse = {
   calls: string;
 };
 
-export async function generate<T extends object | undefined = undefined>(
-  params: GenerateParams
+async function handleStreamResponse(
+  response: Response,
+  onChunk: (_chunk: string) => void,
+  onCompletion: () => void
 ): Promise<GenerateResponse> {
-  // Find the OpenRouter model string for the given model
-  let openRouterModelString = params.model;
-
-  // Search through all creators and their models to find the OpenRouter model string
-  let foundMatch = false;
-  for (const creator of Object.keys(modelMapping) as Array<
-    keyof typeof modelMapping
-  >) {
-    if (foundMatch) break;
-    for (const modelName of Object.keys(modelMapping[creator])) {
-      const modelConfig = modelMapping[creator][modelName];
-
-      // Find the provider model that matches our model string
-      const providerModel = modelConfig.providers.find(
-        (pm) => pm.modelString === params.model
-      );
-
-      if (providerModel) {
-        // If we found a match, look for the OpenRouter model string
-        const openRouterProvider = modelConfig.providers.find(
-          (pm) => pm.provider === "OPENROUTER"
-        );
-
-        if (openRouterProvider) {
-          openRouterModelString = openRouterProvider.modelString;
-          foundMatch = true;
-          break;
-        }
-      }
-    }
+  if (!response.body) {
+    throw new Error("No response body");
   }
 
-  // Always use OpenRouter as the provider
-  const modifiedParams = {
-    ...params,
-    provider: "OPENROUTER" as Provider,
-    model: openRouterModelString,
-  };
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
 
-  const response = await fetch("/api/llm", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      "x-cancel": "0",
-      "x-helicone-client": "browser",
-    },
-    body: JSON.stringify({
-      ...modifiedParams,
-      stream: !!params.stream,
-    }),
-  });
-
-  if (params.stream) {
-    if (!response.body) {
-      throw new Error("No response body");
-    }
-
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = "";
-
-    try {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) {
-          // Process any remaining buffer content
-          if (buffer.trim()) {
-            console.warn(
-              "[generate] Stream ended with unprocessed buffer content:",
-              buffer
-            );
-            // Attempt to process remaining buffer as if it were a complete event
-            const potentialEvents = buffer.split("\n\n");
-            for (const event of potentialEvents) {
-              if (event.startsWith("data: ")) {
-                const jsonString = event.substring(6).trim();
-                if (jsonString) {
-                  try {
-                    // Just pass the raw JSON string from the data field
-                    params.stream?.onChunk(jsonString);
-                  } catch (parseError) {
-                    console.error(
-                      "[generate] Error parsing final buffer JSON:",
-                      parseError,
-                      "JSON String:",
-                      jsonString
-                    );
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        if (buffer.trim()) {
+          const events = buffer.split("\n\n");
+          for (const event of events) {
+            if (event.startsWith("data: ")) {
+              const jsonString = event.substring(6).trim();
+              if (jsonString) {
+                try {
+                  const data = JSON.parse(jsonString);
+                  if (data.error) {
+                    throw new Error(data.error);
                   }
+                  onChunk(jsonString);
+                } catch (e) {
+                  if (e instanceof Error) throw e;
+                  onChunk(jsonString);
                 }
               }
             }
           }
-          break;
         }
+        break;
+      }
 
-        buffer += decoder.decode(value, { stream: true });
-        const events = buffer.split("\n\n");
+      buffer += decoder.decode(value, { stream: true });
+      const events = buffer.split("\n\n");
+      buffer = events.pop() || "";
 
-        // Keep the last potentially incomplete event in the buffer
-        buffer = events.pop() || "";
-
-        for (const event of events) {
-          if (event.startsWith("data: ")) {
-            const jsonString = event.substring(6).trim(); // Extract JSON string after "data: "
-            if (jsonString) {
-              try {
-                // Pass the raw JSON string from the data field to onChunk
-                params.stream?.onChunk(jsonString);
-              } catch (parseError) {
-                console.error(
-                  "[generate] Error parsing event JSON:",
-                  parseError,
-                  "Event:",
-                  event
-                );
-                // Decide how to handle parse errors, e.g., skip or log
+      for (const event of events) {
+        if (event.startsWith("data: ")) {
+          const jsonString = event.substring(6).trim();
+          if (jsonString) {
+            try {
+              const data = JSON.parse(jsonString);
+              if (data.error) {
+                throw new Error(data.error);
               }
-            } else if (event.trim()) {
-              // Handle potential non-data lines (e.g., comments, empty lines)
-              console.info("[generate] Received non-data SSE line:", event);
+              onChunk(jsonString);
+            } catch (e) {
+              if (e instanceof Error) throw e;
+              onChunk(jsonString);
             }
           }
         }
       }
-
-      // Return empty state object; processStream manages the actual final state
-      // This return is mostly a placeholder as processStream's result is the definitive one for streams
-      return { content: "", reasoning: "", calls: "" };
-    } catch (error) {
-      // Error handling for the stream reading itself
-      console.error("[generate] Error reading stream:", error);
-      if (error instanceof Error && error.name === "AbortError") {
-        // Return empty state object on abort
-        return { content: "", reasoning: "", calls: "" };
-      }
-      throw error; // Re-throw other errors
-    } finally {
-      // Ensure the stream callback knows the process is complete
-      params.stream?.onCompletion();
     }
+    return { content: "", reasoning: "", calls: "" };
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      return { content: "", reasoning: "", calls: "" };
+    }
+    throw error;
+  } finally {
+    onCompletion();
   }
+}
 
+async function handleNonStreamResponse(
+  response: Response,
+  schema?: z.ZodType<object>
+): Promise<GenerateResponse> {
   const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.error || "Failed to generate response");
-  }
 
-  // Handle potential schema parsing for non-streaming
   if (
-    params.schema &&
+    schema &&
     typeof data === "object" &&
     data !== null &&
     "content" in data
   ) {
     try {
-      const parsedSchema = params.schema.parse(JSON.parse(data.content));
-      // If schema parse works, we might want to return that structure
-      // For now, let's stick to the standard GenerateResponse structure,
-      // potentially losing the specific schema typing here.
-      // Or we could adjust GenerateResponse or add another return type.
-      // Let's return the standard structure, including the parsed content.
+      const parsedSchema = schema.parse(JSON.parse(data.content));
       return {
-        content: JSON.stringify(parsedSchema), // Return the parsed content stringified
+        content: JSON.stringify(parsedSchema),
         reasoning: (data as any).reasoning || "",
-        calls: "", // Schemas typically don't involve calls in this flow
+        calls: "",
       };
-    } catch (parseError) {
-      console.error("[generate] Failed to parse schema response:", parseError);
-      // Fall back to standard response if parsing fails
+    } catch (error) {
+      console.error("[generate] Failed to parse schema response:", error);
     }
   }
 
-  // Ensure non-streaming also returns the standard object structure
-  const content =
-    typeof data === "string" ? data : (data as any)?.content || "";
-  const reasoning = (data as any)?.reasoning || "";
-  const calls = (data as any)?.calls || ""; // Assuming non-streaming might return calls directly
+  return {
+    content: typeof data === "string" ? data : (data as any)?.content || "",
+    reasoning: (data as any)?.reasoning || "",
+    calls: (data as any)?.calls || "",
+  };
+}
 
-  return { content, reasoning, calls };
+export async function generate<T extends object | undefined = undefined>(
+  params: OpenAI.Chat.Completions.ChatCompletionCreateParams & {
+    stream?: {
+      onChunk: (chunk: string) => void;
+      onCompletion: () => void;
+    };
+    schema?: z.ZodType<object>;
+    useAIGateway?: boolean;
+  }
+): Promise<GenerateResponse> {
+  const currentOrgId = Cookies.get(ORG_ID_COOKIE_KEY);
+  const jwtToken = getHeliconeCookie().data?.jwtToken ?? "";
+  const response = await fetch(
+    `${env("NEXT_PUBLIC_HELICONE_JAWN_SERVICE")}/v1/playground/generate`,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        messages: params.messages,
+        stream: !!params.stream,
+        max_tokens: params.max_tokens,
+        temperature: params.temperature,
+        top_p: params.top_p,
+        frequency_penalty: params.frequency_penalty,
+        presence_penalty: params.presence_penalty,
+        stop: params.stop,
+        tools: params.tools,
+        response_format: params.response_format,
+        model: params.model,
+        useAIGateway: params.useAIGateway,
+      }),
+      headers: {
+        "helicone-authorization": JSON.stringify({
+          _type: "jwt",
+          token: jwtToken,
+          orgId: currentOrgId ?? "no-org-id",
+        }),
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to generate response");
+  }
+
+  if (params.stream) {
+    return handleStreamResponse(
+      response,
+      params.stream.onChunk,
+      params.stream.onCompletion
+    );
+  }
+
+  return handleNonStreamResponse(response, params.schema);
 }

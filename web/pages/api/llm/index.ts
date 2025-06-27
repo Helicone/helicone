@@ -1,6 +1,6 @@
 import { dbExecute } from "@/lib/api/db/dbExecute";
 import { HandlerWrapperOptions, withAuth } from "@/lib/api/handlerWrappers";
-import { GenerateParams } from "@/lib/api/llm/generate";
+import { GenerateParams } from "@/lib/api/llm-old/generate";
 import { getOpenAIKeyFromAdmin } from "@/lib/clients/settings";
 import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";

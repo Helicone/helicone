@@ -8,23 +8,6 @@ export class RateLimiter {
     private authParams: AuthParams
   ) {}
 
-  private getRateLimitParams(tier: string) {
-    const rateLimitParams: Record<
-      string,
-      {
-        windowSizeSeconds: number;
-        maxCount: number;
-      }
-    > = {
-      free: {
-        windowSizeSeconds: 60,
-        maxCount: 10_000,
-      },
-    };
-
-    return rateLimitParams[tier];
-  }
-
   async checkRateLimit(tier: string): Promise<
     Result<
       {
@@ -42,13 +25,14 @@ export class RateLimiter {
 
       const rateLimiter = this.rateLimiter.get(rateLimiterId);
 
-      const params = this.getRateLimitParams(tier);
-
       const rateLimitRes = await rateLimiter.fetch(
         "https://www.this_does_matter.helicone.ai",
         {
           method: "POST",
-          body: JSON.stringify(params),
+          body: JSON.stringify({
+            windowSizeSeconds: 60,
+            maxCount: 100,
+          }),
           headers: {
             "content-type": "application/json",
           },

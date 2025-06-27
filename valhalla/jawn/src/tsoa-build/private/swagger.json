@@ -399,10 +399,6 @@
 											"type": "string",
 											"nullable": true
 										},
-										"reseller_id": {
-											"type": "string",
-											"nullable": true
-										},
 										"request_limit": {
 											"type": "number",
 											"format": "double",
@@ -411,6 +407,9 @@
 										"referral": {
 											"type": "string",
 											"nullable": true
+										},
+										"playground_helicone": {
+											"type": "boolean"
 										},
 										"percent_to_log": {
 											"type": "number",
@@ -432,10 +431,6 @@
 										},
 										"name": {
 											"type": "string"
-										},
-										"logo_path": {
-											"type": "string",
-											"nullable": true
 										},
 										"limits": {
 											"allOf": [
@@ -489,16 +484,15 @@
 										"stripe_customer_id",
 										"soft_delete",
 										"size",
-										"reseller_id",
 										"request_limit",
 										"referral",
+										"playground_helicone",
 										"percent_to_log",
 										"owner",
 										"organization_type",
 										"org_provider_key",
 										"onboarding_status",
 										"name",
-										"logo_path",
 										"limits",
 										"is_personal",
 										"is_main_org",
@@ -586,10 +580,6 @@
 								"type": "string",
 								"nullable": true
 							},
-							"reseller_id": {
-								"type": "string",
-								"nullable": true
-							},
 							"request_limit": {
 								"type": "number",
 								"format": "double",
@@ -598,6 +588,9 @@
 							"referral": {
 								"type": "string",
 								"nullable": true
+							},
+							"playground_helicone": {
+								"type": "boolean"
 							},
 							"percent_to_log": {
 								"type": "number",
@@ -619,10 +612,6 @@
 							},
 							"name": {
 								"type": "string"
-							},
-							"logo_path": {
-								"type": "string",
-								"nullable": true
 							},
 							"limits": {
 								"allOf": [
@@ -676,16 +665,15 @@
 							"stripe_customer_id",
 							"soft_delete",
 							"size",
-							"reseller_id",
 							"request_limit",
 							"referral",
+							"playground_helicone",
 							"percent_to_log",
 							"owner",
 							"organization_type",
 							"org_provider_key",
 							"onboarding_status",
 							"name",
-							"logo_path",
 							"limits",
 							"is_personal",
 							"is_main_org",
@@ -724,7 +712,7 @@
 					}
 				]
 			},
-			"ResultSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--logo_path-string--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
+			"ResultSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
 				"properties": {
 					"data": {
 						"items": {
@@ -753,15 +741,15 @@
 								"size": {
 									"type": "string"
 								},
-								"reseller_id": {
-									"type": "string"
-								},
 								"request_limit": {
 									"type": "number",
 									"format": "double"
 								},
 								"referral": {
 									"type": "string"
+								},
+								"playground_helicone": {
+									"type": "boolean"
 								},
 								"percent_to_log": {
 									"type": "number",
@@ -780,9 +768,6 @@
 									"$ref": "#/components/schemas/Json"
 								},
 								"name": {
-									"type": "string"
-								},
-								"logo_path": {
 									"type": "string"
 								},
 								"limits": {
@@ -825,16 +810,15 @@
 								"stripe_customer_id",
 								"soft_delete",
 								"size",
-								"reseller_id",
 								"request_limit",
 								"referral",
+								"playground_helicone",
 								"percent_to_log",
 								"owner",
 								"organization_type",
 								"org_provider_key",
 								"onboarding_status",
 								"name",
-								"logo_path",
 								"limits",
 								"is_personal",
 								"is_main_org",
@@ -865,20 +849,20 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--logo_path-string--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_": {
+			"Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--logo_path-string--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_"
+						"$ref": "#/components/schemas/ResultSuccess__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
 			},
-			"ResultSuccess_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--logo_path-string--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__": {
+			"ResultSuccess_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__": {
 				"properties": {
 					"data": {
-						"$ref": "#/components/schemas/Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--logo_path-string--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_"
+						"$ref": "#/components/schemas/Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_"
 					},
 					"error": {
 						"type": "number",
@@ -913,10 +897,10 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--logo_path-string--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_": {
+			"Result_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--logo_path-string--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__"
+						"$ref": "#/components/schemas/ResultSuccess_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_unknown_"
@@ -985,10 +969,6 @@
 						"type": "string",
 						"nullable": true
 					},
-					"reseller_id": {
-						"type": "string",
-						"nullable": true
-					},
 					"request_limit": {
 						"type": "number",
 						"format": "double",
@@ -997,6 +977,9 @@
 					"referral": {
 						"type": "string",
 						"nullable": true
+					},
+					"playground_helicone": {
+						"type": "boolean"
 					},
 					"percent_to_log": {
 						"type": "number",
@@ -1018,10 +1001,6 @@
 					},
 					"name": {
 						"type": "string"
-					},
-					"logo_path": {
-						"type": "string",
-						"nullable": true
 					},
 					"limits": {
 						"allOf": [
@@ -1072,7 +1051,7 @@
 				],
 				"type": "object"
 			},
-			"Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type-or-onboarding_status_": {
+			"Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-organization_type-or-onboarding_status_": {
 				"properties": {
 					"name": {
 						"type": "string"
@@ -1088,9 +1067,6 @@
 					},
 					"limits": {
 						"$ref": "#/components/schemas/Json"
-					},
-					"reseller_id": {
-						"type": "string"
 					},
 					"organization_type": {
 						"type": "string"
@@ -1108,7 +1084,7 @@
 			"UpdateOrganizationParams": {
 				"allOf": [
 					{
-						"$ref": "#/components/schemas/Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-reseller_id-or-organization_type-or-onboarding_status_"
+						"$ref": "#/components/schemas/Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-organization_type-or-onboarding_status_"
 					},
 					{
 						"properties": {
@@ -2161,6 +2137,9 @@
 			},
 			"Partial_TimestampOperators_": {
 				"properties": {
+					"equals": {
+						"type": "string"
+					},
 					"gte": {
 						"type": "string"
 					},
@@ -2299,6 +2278,10 @@
 			},
 			"Partial_TimestampOperatorsTyped_": {
 				"properties": {
+					"equals": {
+						"type": "string",
+						"format": "date-time"
+					},
 					"gte": {
 						"type": "string",
 						"format": "date-time"
@@ -2706,6 +2689,9 @@
 			},
 			"FunctionCall": {
 				"properties": {
+					"id": {
+						"type": "string"
+					},
 					"name": {
 						"type": "string"
 					},
@@ -3428,6 +3414,11 @@
 						"format": "double",
 						"nullable": true
 					},
+					"cost": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
 					"prompt_id": {
 						"type": "string",
 						"nullable": true
@@ -3509,6 +3500,9 @@
 					},
 					"cache_enabled": {
 						"type": "boolean"
+					},
+					"updated_at": {
+						"type": "string"
 					}
 				},
 				"required": [
@@ -3535,6 +3529,7 @@
 					"completion_tokens",
 					"prompt_audio_tokens",
 					"completion_audio_tokens",
+					"cost",
 					"prompt_id",
 					"llmSchema",
 					"country_code",
@@ -45352,6 +45347,44 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"ResultSuccess__url-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"url": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"url"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__url-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__url-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
 			}
 		},
 		"securitySchemes": {
@@ -46396,7 +46429,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--logo_path-string--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--referral-string--request_limit-number--reseller_id-string--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_"
+									"$ref": "#/components/schemas/Result_Result__color-string--created_at-string--domain-string--governance_settings-Json--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_"
 								}
 							}
 						}
@@ -50609,12 +50642,56 @@
 				"tags": [
 					"Alert Banner"
 				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/v1/admin/has-feature-flag": {
+			"post": {
+				"operationId": "HasFeatureFlag",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_boolean.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
 				"security": [
 					{
 						"api_key": []
 					}
 				],
-				"parameters": []
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"orgId": {
+										"type": "string"
+									},
+									"feature": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"orgId",
+									"feature"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/admin/feature-flags": {
@@ -51963,6 +52040,77 @@
 				]
 			}
 		},
+		"/v1/admin/backfill-costs": {
+			"post": {
+				"operationId": "BackfillCosts",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"success": {
+											"type": "boolean"
+										}
+									},
+									"required": [
+										"success"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"description": "Backfill costs in Clickhouse with updated cost package data.",
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"chunkNumber": {
+										"type": "number",
+										"format": "double"
+									},
+									"totalChunks": {
+										"type": "number",
+										"format": "double"
+									},
+									"modelId": {
+										"type": "string"
+									},
+									"specifyModel": {
+										"type": "boolean"
+									},
+									"timeExpression": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"chunkNumber",
+									"totalChunks",
+									"modelId",
+									"specifyModel",
+									"timeExpression"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/audio/convert-to-wav": {
 			"post": {
 				"operationId": "ConvertToWav",
@@ -52035,6 +52183,55 @@
 					}
 				],
 				"parameters": []
+			}
+		},
+		"/v1/router/control-plane/sign-s3-url": {
+			"post": {
+				"operationId": "SignS3Url",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__url-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Router Control Plane"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"payloadSize": {
+										"type": "number",
+										"format": "double"
+									},
+									"requestId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"payloadSize",
+									"requestId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
 			}
 		}
 	},

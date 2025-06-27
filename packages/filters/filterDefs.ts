@@ -27,9 +27,9 @@ export type NumberOperators = Record<
 
 export type BooleanOperators = Record<"equals", boolean>;
 
-export type TimestampOperators = Record<"gte" | "lte" | "lt" | "gt", string>;
+export type TimestampOperators = Record<"equals" | "gte" | "lte" | "lt" | "gt", string>;
 
-export type TimestampOperatorsTyped = Record<"gte" | "lte" | "lt" | "gt", Date>;
+export type TimestampOperatorsTyped = Record<"equals" | "gte" | "lte" | "lt" | "gt", Date>;
 
 export type AnyOperator =
   | SingleKey<TextOperators>
@@ -232,16 +232,16 @@ export type FilterLeafSessionsRequestResponseRMT =
 
 // users_view
 type UserViewToOperators = {
-  user_id: SingleKey<TextOperators>;
-  active_for: SingleKey<NumberOperators>;
-  first_active: SingleKey<TimestampOperators>;
-  last_active: SingleKey<TimestampOperators>;
-  total_requests: SingleKey<NumberOperators>;
-  average_requests_per_day_active: SingleKey<NumberOperators>;
-  average_tokens_per_request: SingleKey<NumberOperators>;
-  total_completion_tokens: SingleKey<NumberOperators>;
-  total_prompt_token: SingleKey<NumberOperators>;
-  cost: SingleKey<NumberOperators>;
+  user_user_id: SingleKey<TextOperators>;
+  user_active_for: SingleKey<NumberOperators>;
+  user_first_active: SingleKey<TimestampOperatorsTyped>;
+  user_last_active: SingleKey<TimestampOperatorsTyped>;
+  user_total_requests: SingleKey<NumberOperators>;
+  user_average_requests_per_day_active: SingleKey<NumberOperators>;
+  user_average_tokens_per_request: SingleKey<NumberOperators>;
+  user_total_completion_tokens: SingleKey<NumberOperators>;
+  user_total_prompt_tokens: SingleKey<NumberOperators>;
+  user_cost: SingleKey<NumberOperators>;
 };
 export type FilterLeafUserView = SingleKey<UserViewToOperators>;
 

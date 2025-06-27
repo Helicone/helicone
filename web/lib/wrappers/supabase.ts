@@ -110,9 +110,7 @@ export class SupabaseServerWrapper<T> {
       return memberCheck.data ? memberCheck.data.org_role : null;
     };
 
-    const role =
-      (await checkMembership(org.id)) ||
-      (org.reseller_id && (await checkMembership(org.reseller_id)));
+    const role = await checkMembership(org.id);
 
     if (!role) {
       return { error: "Unauthorized", data: null };

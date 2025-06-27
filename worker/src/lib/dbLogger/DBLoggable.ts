@@ -26,9 +26,7 @@ import { parseOpenAIStream } from "./streamParsers/openAIStreamParser";
 import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 import { costOfPrompt } from "../../packages/cost";
 import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
-import {
-  MessageData,
-} from "../clients/producers/types";
+import { MessageData } from "../clients/producers/types";
 import { DEFAULT_UUID } from "../../packages/llm-mapper/types";
 
 export interface DBLoggableProps {
@@ -545,6 +543,7 @@ export class DBLoggable {
       return err(`Auth failed! ${error}`);
     }
 
+    let orgRateLimit = false;
     try {
       const org = await db.dbWrapper.getOrganization();
       if (org.error !== null) {
@@ -561,6 +560,10 @@ export class DBLoggable {
       // TODO: Add an early exit if we really want to rate limit in the future
       const rateLimit = await rateLimiter.data.checkRateLimit(tier);
 
+      if (rateLimit.data?.isRateLimited) {
+        orgRateLimit = true;
+      }
+
       if (rateLimit.error) {
         console.error(`Error checking rate limit: ${rateLimit.error}`);
       }
@@ -572,6 +575,7 @@ export class DBLoggable {
       db,
       authParams,
       S3_ENABLED,
+      orgRateLimit,
       requestHeaders,
       cachedHeaders,
       cacheSettings
@@ -613,6 +617,7 @@ export class DBLoggable {
     },
     authParams: AuthParams,
     S3_ENABLED: Env["S3_ENABLED"],
+    orgRateLimit: boolean,
     requestHeaders?: HeliconeHeaders,
     cachedHeaders?: Headers,
     cacheSettings?: CacheSettings
@@ -734,8 +739,14 @@ export class DBLoggable {
       },
     };
 
-    await db.producer.sendMessage(kafkaMessage);
+    if (orgRateLimit) {
+      console.log(
+        `Setting lower priority for org ${authParams.organizationId} because of rate limit`
+      );
+      db.producer.setLowerPriority();
+    }
 
+    await db.producer.sendMessage(kafkaMessage);
     return ok(null);
   }
 

@@ -226,6 +226,11 @@ export const BLOG_CONTENT: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
+      folderName: "introducing-ai-gateway",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "claude-opus-and-sonnet-4-full-developer-guide",
     },
   },

@@ -139,10 +139,66 @@ const useChangelog = () => {
   };
 };
 
+const useBackfillCosts = (onSuccess?: () => void) => {
+  const { mutate: backfillCosts, isPending: isBackfillingCosts } = useMutation({
+    mutationKey: ["backfill-costs"],
+    mutationFn: async (req: {
+      timeExpression: string;
+      specifyModel: boolean;
+      modelId: string;
+      totalChunks: number;
+      chunkNumber: number;
+    }) => {
+      const jawnClient = getJawnClient();
+      const { data, error } = await jawnClient.POST(
+        "/v1/admin/backfill-costs",
+        {
+          body: {
+            timeExpression: req.timeExpression,
+            specifyModel: req.specifyModel,
+            modelId: req.modelId,
+            totalChunks: req.totalChunks,
+            chunkNumber: req.chunkNumber,
+          },
+        }
+      );
+
+      console.log(`Backfilled costs`, data);
+
+      return { data, error };
+    },
+  });
+
+  return {
+    backfillCosts,
+    isBackfillingCosts,
+  };
+};
+
+const useFeatureFlag = (feature: string, orgId: string) => {
+  const { data, isLoading, error } = $JAWN_API.useQuery(
+    "post",
+    "/v1/admin/has-feature-flag",
+    {
+      body: {
+        feature,
+        orgId,
+      },
+    }
+  );
+  return {
+    data: data?.data ?? false,
+    isLoading,
+    error,
+  };
+};
+
 export {
   useChangelog,
   useCreateAlertBanner,
   useGetSetting,
   useUpdateAlertBanner,
   useUpdateSetting,
+  useBackfillCosts,
+  useFeatureFlag,
 };

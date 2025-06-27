@@ -4,6 +4,7 @@ import { KVCache } from "../../cache/kvCache";
 import { Result, err, ok } from "../../../packages/common/result";
 import { BaseTempKey } from "./baseTempKey";
 import { dbExecute } from "../../shared/db/dbExecute";
+import { GET_KEY } from "../../clients/constant";
 
 const CACHE_TTL = 60 * 1000 * 30; // 30 minutes
 
@@ -100,4 +101,22 @@ export async function generateTempHeliconeAPIKey(
       new TempHeliconeAPIKey(apiKey.data!.apiKey, apiKey.data!.heliconeApiKeyId)
     );
   }
+}
+
+class HeliconeDefaultTempKey {
+  constructor(private apiKey: string) {}
+
+  with<T>(callback: (apiKey: string) => Promise<T>): Promise<T> {
+    return callback(this.apiKey);
+  }
+}
+
+export async function getHeliconeDefaultTempKey(
+  orgId: string
+): Promise<Result<HeliconeDefaultTempKey, string>> {
+  const apiKey = await GET_KEY("key:helicone_on_helicone_key");
+  if (apiKey.error) {
+    return err(`Failed to get Helicone default temp key: ${apiKey.error}`);
+  }
+  return ok(new HeliconeDefaultTempKey(apiKey));
 }

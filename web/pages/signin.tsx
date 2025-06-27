@@ -3,7 +3,7 @@ import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientF
 import { GetServerSidePropsContext } from "next";
 import { env } from "next-runtime-env";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import PublicMetaData from "../components/layout/public/publicMetaData";
 import useNotification from "../components/shared/notification/useNotification";
 import AuthForm from "../components/templates/auth/authForm";
@@ -26,22 +26,60 @@ const SignIn = ({
 
   const customerPortalContent = customerPortal?.data || undefined;
   const { unauthorized } = router.query;
+  const [refreshed, setRefreshed] = useState(false);
+  const [redirectCount, setRedirectCount] = useState(0);
+
   useEffect(() => {
+    // Prevent infinite loops by limiting redirects
+    if (redirectCount >= 3) {
+      console.error(
+        "Too many redirects detected. Stopping to prevent infinite loop."
+      );
+      return;
+    }
+
     if (
       unauthorized === "true" &&
       heliconeAuthClient &&
       heliconeAuthClient.user?.id
     ) {
-      heliconeAuthClient.refreshSession();
-      router.push("/signin");
+      if (!refreshed) {
+        // FIX: Clear the unauthorized parameter when redirecting to prevent infinite loop
+        const { unauthorized: _, ...cleanQuery } = router.query;
+        router
+          .push({
+            pathname: "/signin",
+            query: cleanQuery,
+          })
+          .then(() => {
+            heliconeAuthClient.refreshSession();
+            setRefreshed(true);
+            setRedirectCount((prev) => prev + 1);
+          });
+      } else {
+        // If already refreshed, redirect to dashboard
+        const { unauthorized: _, ...cleanQuery } = router.query;
+        router.push({
+          pathname: "/dashboard",
+          query: cleanQuery,
+        });
+      }
+      return;
     } else if (heliconeAuthClient.user?.id) {
-      const { pi_session, ...restQuery } = router.query;
+      const { pi_session, unauthorized: _, ...restQuery } = router.query;
       router.push({
         pathname: pi_session ? "/pi/onboarding" : "/dashboard",
-        query: router.query,
+        query: restQuery, // FIX: Don't include unauthorized in the query
       });
     }
-  }, [unauthorized, heliconeAuthClient, setNotification, router]);
+  }, [
+    unauthorized,
+    heliconeAuthClient,
+    setNotification,
+    router,
+    refreshed,
+    redirectCount,
+  ]);
 
   return (
     <PublicMetaData

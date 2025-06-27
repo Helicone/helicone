@@ -3,7 +3,7 @@ terraform {
     organization = "helicone" 
 
     workspaces { 
-      name = "helicone" 
+      name = "helicone-ecr" 
     } 
   }
 
@@ -49,27 +49,28 @@ resource "aws_ecr_repository" "migrations" {
   }
 }
 
-# Output the repository URLs
-output "worker_repository_url" {
-  value = aws_ecr_repository.worker.repository_url
+resource "aws_ecr_repository" "aigateway" {
+  name                 = "helicone/ai-gateway"
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
 }
 
+# Output the repository URLs
 output "web_repository_url" {
   value = aws_ecr_repository.web.repository_url
-}
-
-output "web_dev_repository_url" {
-  value = aws_ecr_repository.web_dev.repository_url
-}
-
-output "supabase_migration_runner_repository_url" {
-  value = aws_ecr_repository.supabase_migration_runner.repository_url
-}
-
-output "clickhouse_migration_runner_repository_url" {
-  value = aws_ecr_repository.clickhouse_migration_runner.repository_url
 }
 
 output "jawn_repository_url" {
   value = aws_ecr_repository.jawn.repository_url
 } 
+
+output "migrations_repository_url" {
+  value = aws_ecr_repository.migrations.repository_url
+}
+
+output "aigateway_repository_url" {
+  value = aws_ecr_repository.aigateway.repository_url
+}
