@@ -55,6 +55,7 @@ const TagsFilter = ({ tags, selectedTags, onTagsChange }: TagsFilterProps) => {
                     onTagsChange([]);
                     setOpen(false);
                   }}
+                  className="mb-1"
                 >
                   <CheckIcon
                     className={cn(
