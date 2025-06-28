@@ -9,10 +9,13 @@ import { TimeFilter } from "@/types/timeFilter";
 import { COUTNRY_CODE_DIRECTORY } from "../../requests/countryCodeDirectory";
 import { CountryData } from "../../../../services/lib/country";
 import ThemedModal from "../../../shared/themed/themedModal";
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FilterNode } from "@helicone-package/filters/filterDefs";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { getMockCountries } from "../mockDashboardData";
+import StatsCard from "./StatsCard";
+import { ChartConfig, ChartContainer } from "@/components/ui/chart";
+import { Bar, BarChart, LabelList, XAxis, YAxis } from "recharts";
 
 interface CountryPanelProps {
   timeFilter: TimeFilter;
@@ -36,23 +39,114 @@ const CountryPanel = (props: CountryPanelProps) => {
   // Use either mock or real data
   const countries = shouldShowMockData ? mockCountries : realCountries;
 
-  const countryMapper = (country: CountryData, index: number) => {
-    const countryInfo = COUTNRY_CODE_DIRECTORY.find(
-      (c) => c.isoCode === country.country
-    );
+  const chartConfig = useMemo(() => {
+    if (!countries?.data || countries.data.length === 0) return {};
+    const config = Object.fromEntries([
+      ...countries.data.map((country, i) => {
+        const countryInfo = COUTNRY_CODE_DIRECTORY.find(
+          (c) => c.isoCode === country.country
+        );
+        return [
+          `country-${country.country.toLowerCase().replaceAll(" ", "-")}`,
+          {
+            label:
+              `${countryInfo?.emojiFlag} ${countryInfo?.country} (${countryInfo?.isoCode})` ||
+              "n/a",
+            color: `oklch(var(--chart-${(i % 10) + 1}))`,
+          },
+        ];
+      }),
+      ["label", { color: "hsl(var(--foreground))" }],
+    ]) satisfies ChartConfig;
+    return config;
+  }, [countries]);
 
-    return {
-      name: `${countryInfo?.country} (${countryInfo?.isoCode})` || "n/a",
-      value: country.total_requests,
-      icon: function TwitterIcon() {
-        return <div className="pr-2">{countryInfo?.emojiFlag}</div>;
-      },
-    };
-  };
+  const chartContainerRef = useRef<HTMLDivElement>(null);
+  const [chartContainerWidth, setChartContainerWidth] = useState(0);
+
+  // listen to resize of the chart container
+  useEffect(() => {
+    if (chartContainerRef.current) {
+      setChartContainerWidth(chartContainerRef.current?.clientWidth ?? 0);
+      const resizeObserver = new ResizeObserver((entries) => {
+        setChartContainerWidth(entries[0].contentRect.width);
+      });
+      resizeObserver.observe(chartContainerRef.current);
+      return () => {
+        resizeObserver.disconnect();
+      };
+    }
+  }, [chartContainerRef]);
 
   return (
     <>
-      <StyledAreaChart
+      <StatsCard
+        title="Top Countries"
+        isLoading={isCountriesLoading && !shouldShowMockData}
+      >
+        <ChartContainer
+          ref={chartContainerRef}
+          config={chartConfig}
+          className="h-full w-full"
+        >
+          <BarChart
+            layout="vertical"
+            margin={{ right: 20 }}
+            accessibilityLayer
+            data={countries?.data?.map((country, i) => ({
+              country: `country-${country.country
+                .toLowerCase()
+                .replaceAll(" ", "-")}`,
+              value: +country.total_requests,
+              fill: `oklch(var(--chart-${(i % 10) + 1}))`,
+            }))}
+          >
+            {/* <CartesianGrid vertical={false} /> */}
+            <YAxis
+              dataKey="country"
+              type="category"
+              tickLine={false}
+              tickMargin={10}
+              axisLine={false}
+              tickFormatter={(value) => {
+                return (
+                  chartConfig[value as keyof typeof chartConfig]?.label ?? value
+                );
+              }}
+              hide
+            />
+            <XAxis dataKey="value" type="number" hide />
+            <Bar dataKey="value" layout="vertical" radius={4} maxBarSize={30}>
+              <LabelList
+                formatter={(value: string) => {
+                  return (
+                    chartConfig[value as keyof typeof chartConfig]?.label ??
+                    value.replace("error-", "").replace(/-/g, " ")
+                  );
+                }}
+                dataKey="country"
+                position="insideLeft"
+                offset={8}
+                className="fill-[--color-label]"
+                fontSize={12}
+              />
+              <LabelList
+                dataKey="value"
+                position={{
+                  x:
+                    chartContainerWidth ||
+                    chartContainerRef.current?.clientWidth,
+                  y: 18,
+                }}
+                offset={8}
+                className="fill-[--color-label]"
+                fontSize={12}
+              />
+            </Bar>
+          </BarChart>
+        </ChartContainer>
+      </StatsCard>
+      {/* <StyledAreaChart
         title={`Top Countries`}
         value={undefined}
         isDataOverTimeLoading={isCountriesLoading && !shouldShowMockData}
@@ -126,7 +220,7 @@ const CountryPanel = (props: CountryPanelProps) => {
             </button>
           </div>
         </div>
-      </ThemedModal>
+      </ThemedModal> */}
     </>
   );
 };
