@@ -16,6 +16,51 @@ interface ClickHouseTableRow {
   ttl_expression?: string;
 }
 
+function validateSql(sql: string): Result<null, string> {
+  const parser = new Parser();
+
+  const tables = parser.tableList(sql, { database: "Postgresql" });
+
+  // type::DB::table
+  const invalidTable = tables.find((table) => {
+    const [type, _, tableName] = table.split("::");
+    return type !== "select" || !CLICKHOUSE_TABLES.includes(tableName);
+  });
+
+  if (invalidTable) {
+    return err(
+      "Only select statements and tables in CLICKHOUSE_TABLES are allowed"
+    );
+  }
+
+  return ok(null);
+}
+
+function addLimit(ast: AST): AST {
+  if (ast.type !== "select") {
+    throw new Error("Only select statements are allowed");
+  }
+
+  ast.limit = {
+    seperator: ",",
+    value: [
+      {
+        type: "number",
+        value: 1000,
+      },
+    ],
+  };
+  return ast;
+}
+
+function normalizeAst(ast: AST | AST[]): AST[] {
+  if (Array.isArray(ast)) {
+    return ast;
+  }
+
+  return [ast];
+}
+
 export class HeliconeSqlManager {
   constructor(private authParams: AuthParams) {}
 
@@ -65,10 +110,10 @@ export class HeliconeSqlManager {
   async executeSql(sql: string): Promise<Result<any, string>> {
     try {
       const ast = parser.astify(sql, { database: "Postgresql" });
-      const normalizedAst = normalizeAst(ast)[0];
-
       // always get first semi colon to prevent sql injection like snowflake lol
+      const normalizedAst = addLimit(normalizeAst(ast)[0]);
       const firstSql = parser.sqlify(normalizedAst, { database: "Postgresql" });
+
       const validatedSql = validateSql(firstSql);
 
       if (validatedSql.error) {
@@ -100,32 +145,4 @@ export class HeliconeSqlManager {
       return err(String(e));
     }
   }
-}
-
-function validateSql(sql: string): Result<null, string> {
-  const parser = new Parser();
-
-  const tables = parser.tableList(sql, { database: "Postgresql" });
-
-  // type::DB::table
-  const invalidTable = tables.find((table) => {
-    const [type, _, tableName] = table.split("::");
-    return type !== "select" || !CLICKHOUSE_TABLES.includes(tableName);
-  });
-
-  if (invalidTable) {
-    return err(
-      "Only select statements and tables in CLICKHOUSE_TABLES are allowed"
-    );
-  }
-
-  return ok(null);
-}
-
-function normalizeAst(ast: AST | AST[]): AST[] {
-  if (Array.isArray(ast)) {
-    return ast;
-  }
-
-  return [ast];
 }

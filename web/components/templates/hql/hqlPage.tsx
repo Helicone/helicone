@@ -160,7 +160,7 @@ function HQLPage({ user }: HQLPageProps) {
 
         // Column suggestions after table alias or table name and dot
         if (lastTokenBeforeDot) {
-          let table_name = null;
+          let table_name: string | undefined = undefined;
           if (schemaTableNamesSet.has(lastTokenBeforeDot)) {
             table_name = lastTokenBeforeDot;
           } else if (tableNamesAndAliases.get(lastTokenBeforeDot)) {

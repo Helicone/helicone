@@ -2,7 +2,10 @@ import { Controller, Get, Route, Tags, Request, Post, Body } from "tsoa";
 import { err, ok, Result } from "../../packages/common/result";
 import { HeliconeSqlManager } from "../../managers/HeliconeSqlManager";
 import { type JawnAuthenticatedRequest } from "../../types/request";
-import { checkFeatureFlag, HQL_FEATURE_FLAG } from "../../lib/utils/featureFlags";
+import {
+  checkFeatureFlag,
+  HQL_FEATURE_FLAG,
+} from "../../lib/utils/featureFlags";
 
 // --- Response Types ---
 export interface ClickHouseTableSchema {
