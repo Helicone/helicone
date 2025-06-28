@@ -240,7 +240,7 @@ function HQLPage({ user }: HQLPageProps) {
     },
   });
 
-  if (!hasAccessToHQL && process.env.NODE_ENV === "production") {
+  if (!hasAccessToHQL) {
     return <div>You do not have access to HQL</div>;
   }
 
@@ -366,7 +366,7 @@ function HQLPage({ user }: HQLPageProps) {
         </ResizablePanel>
         <ResizableHandle withHandle={true} />
         <ResizablePanel
-          className="max-w-full overflow-x-scroll"
+          className="max-h-full max-w-full overflow-x-scroll !overflow-y-scroll"
           collapsible={true}
           collapsedSize={10}
           defaultSize={25}

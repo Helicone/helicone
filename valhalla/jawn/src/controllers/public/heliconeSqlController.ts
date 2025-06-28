@@ -2,7 +2,7 @@ import { Controller, Get, Route, Tags, Request, Post, Body } from "tsoa";
 import { err, ok, Result } from "../../packages/common/result";
 import { HeliconeSqlManager } from "../../managers/HeliconeSqlManager";
 import { type JawnAuthenticatedRequest } from "../../types/request";
-import { dbExecute } from "../../lib/shared/db/dbExecute";
+import { checkFeatureFlag, HQL_FEATURE_FLAG } from "../../lib/utils/featureFlags";
 
 // --- Response Types ---
 export interface ClickHouseTableSchema {
@@ -43,17 +43,12 @@ export class HeliconeSqlController extends Controller {
     @Body() requestBody: ExecuteSqlRequest,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<Array<Record<string, any>>, string>> {
-    if (process.env.NODE_ENV === "production") {
-      const { data } = await dbExecute<{
-        id: string;
-      }>(`SELECT id FROM feature_flags WHERE org_id = $1 AND feature = $2`, [
-        request.authParams.organizationId,
-        "hql",
-      ]);
-
-      if (!data || data.length === 0) {
-        return err("You do not have access to HQL");
-      }
+    const featureFlagResult = await checkFeatureFlag(
+      request.authParams.organizationId,
+      HQL_FEATURE_FLAG
+    );
+    if (featureFlagResult.error) {
+      return err(featureFlagResult.error);
     }
 
     const heliconeSqlManager = new HeliconeSqlManager(request.authParams);
