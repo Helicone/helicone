@@ -2,7 +2,7 @@ import ModelPill from "@/components/templates/requests/modelPill";
 import type { components } from "../../../lib/clients/jawnTypes/public";
 import { formatTime } from "./timeUtils";
 import { Button } from "@/components/ui/button";
-import { TestTube2, Crown } from "lucide-react";
+import { TestTube2, Crown, Clock } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -90,9 +90,12 @@ const PromptVersionCard = ({
       </div>
       <div className="flex items-center gap-4 px-4 pb-3">
         <ModelPill model={version.model} />
-        <span className="text-xs text-muted-foreground">
-          {formatTime(new Date(version.created_at), "Created")}
-        </span>
+        <div className="flex items-center gap-1 text-muted-foreground whitespace-nowrap">
+          <Clock className="h-4 w-4" />
+          <span className="text-xs">
+            {formatTime(new Date(version.created_at), "")}
+          </span>
+        </div>
       </div>
     </div>
   );
