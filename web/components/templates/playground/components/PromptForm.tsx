@@ -22,6 +22,8 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { InfoIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useGetPromptTags } from "@/services/hooks/prompts";
+import TagsFilter from "@/components/templates/prompts2025/TagsFilter";
 
 interface PromptFormProps {
   isScrolled: boolean;
@@ -41,6 +43,22 @@ export default function PromptForm({
   const [isPromptFormPopoverOpen, setIsPromptFormPopoverOpen] = useState(false);
   const [upgradeMajorVersion, setUpgradeMajorVersion] = useState(false);
   const [setAsProduction, setSetAsProduction] = useState(true);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [customTags, setCustomTags] = useState("");
+
+  const { data: existingTags = [], isLoading: isLoadingTags } = useGetPromptTags();
+
+  const handleTagsChange = (tags: string[]) => {
+    setSelectedTags(tags);
+  };
+
+  const getAllTags = () => {
+    const customTagsList = customTags
+      .split(",")
+      .map(tag => tag.trim())
+      .filter(tag => tag.length > 0);
+    return Array.from(new Set([...selectedTags, ...customTagsList]));
+  };
 
   return (
     <Popover
@@ -62,20 +80,49 @@ export default function PromptForm({
       <PopoverContent className="w-96 mr-2">
         <div className="flex flex-col gap-4 py-4 w-full">
           {!saveAndVersion && (
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2">
-                <Label htmlFor="promptName">Prompt Name</Label>
+            <>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="promptName">Prompt Name</Label>
+                </div>
+                <Input
+                  id="promptName"
+                  value={promptName}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setPromptName(e.target.value)
+                  }
+                  placeholder="new-prompt"
+                  className="w-full"
+                />
               </div>
-              <Input
-                id="promptName"
-                value={promptName}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setPromptName(e.target.value)
-                }
-                placeholder="new-prompt"
-                className="w-full"
-              />
-            </div>
+
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <Label>Tags</Label>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <InfoIcon className="h-3 w-3 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent align="start">
+                      Add tags to help organize and filter your prompts
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+                <TagsFilter
+                  tags={existingTags}
+                  selectedTags={selectedTags}
+                  onTagsChange={handleTagsChange}
+                />
+                <div className="flex flex-col gap-2 mt-2">
+                  <Input
+                    id="customTags"
+                    value={customTags}
+                    onChange={(e) => setCustomTags(e.target.value)}
+                    placeholder="Tags separated by commas (e.g. tag1, tag2, tag3)"
+                  />
+                </div>
+              </div>
+            </>
           )}
 
           <div className="flex flex-col gap-2">
@@ -152,7 +199,7 @@ export default function PromptForm({
               if (saveAndVersion) {
                 onSavePrompt(upgradeMajorVersion, setAsProduction, commitMessage);
               } else {
-                onCreatePrompt([], promptName);
+                onCreatePrompt(getAllTags(), promptName);
               }
               setIsPromptFormPopoverOpen(false);
             }}
