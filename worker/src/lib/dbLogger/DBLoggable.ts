@@ -557,11 +557,21 @@ export class DBLoggable {
         return rateLimiter;
       }
 
-      // TODO: Add an early exit if we really want to rate limit in the future
       const rateLimit = await rateLimiter.data.checkRateLimit(tier);
 
+      // Rate limit here means set to lower priority
       if (rateLimit.data?.isRateLimited) {
         orgRateLimit = true;
+        await db.clickhouse.dbInsertClickhouse("rate_limit_log_v2", [
+          {
+            request_id: this.request.requestId,
+            organization_id: org.data.id,
+            tier: tier,
+            rate_limit_created_at: formatTimeStringDateTime(
+              new Date().toISOString()
+            ),
+          },
+        ]);
       }
 
       if (rateLimit.error) {
