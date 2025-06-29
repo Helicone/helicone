@@ -2,6 +2,7 @@ import { createAuthClient } from "better-auth/react";
 import { HeliconeAuthClient } from "../../auth/client/HeliconeAuthClient";
 import { HeliconeOrg, HeliconeUser } from "../../auth/types";
 import { err, ok, Result } from "../../result";
+import { setOrgCookie } from "../helpers/setOrgCookie";
 
 export const authClient = createAuthClient();
 export const heliconeAuthClientFromSession = (
@@ -24,6 +25,7 @@ export const heliconeAuthClientFromSession = (
 
     async signOut() {
       try {
+        setOrgCookie("none");
         await authClient.signOut();
       } catch (error: any) {
         console.error("Better Auth sign out error:", error);
