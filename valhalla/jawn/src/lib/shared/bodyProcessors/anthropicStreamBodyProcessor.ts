@@ -92,7 +92,9 @@ export class AnthropicStreamBodyProcessor implements IBodyProcessor {
       if (
         model?.includes("claude-3") ||
         model?.includes("claude-sonnet-4") ||
-        model?.includes("claude-opus-4")
+        model?.includes("claude-opus-4") ||
+        // for AI SDK
+        model?.includes("claude-4")
       ) {
         const processedBody = {
           ...processConsolidatedJsonForClaude3(processedLines),
@@ -185,7 +187,7 @@ function processConsolidatedJsonForClaude3(events: any[]): any {
       if (item.usage) {
         acc.usage = {
           ...acc.usage,
-          output_tokens: (item.usage as any).output_tokens
+          output_tokens: (item.usage as any).output_tokens,
         };
       }
     } else if (item.type === "content_block_start" && item.content_block) {
