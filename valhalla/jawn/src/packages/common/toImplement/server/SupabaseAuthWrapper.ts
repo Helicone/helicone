@@ -254,9 +254,8 @@ export class SupabaseAuthWrapper implements HeliconeAuthClient {
   }
 
   async getUserById(userId: string): HeliconeUserResult {
-    const user = await this.supabaseServer.client.auth.admin.getUserById(
-      userId
-    );
+    const user =
+      await this.supabaseServer.client.auth.admin.getUserById(userId);
     if (user.error) {
       return err(user.error.message);
     }

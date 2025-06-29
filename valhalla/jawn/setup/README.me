@@ -1,0 +1,11 @@
+## Setup Instructions
+
+1. **Start ClickHouse Database**
+   ```bash
+   ./clickhouse/manage_databases.sh test restart
+   ```
+
+2. **Start Backend Server**
+   ```bash
+   NODE_ENV=test yarn dev
+   ```

@@ -478,9 +478,8 @@ export class AdminManager extends BaseManager {
    */
   private async fetchUpcomingInvoices(): Promise<Stripe.UpcomingInvoice[]> {
     const cacheKey = `upcoming-invoices-${this.authParams.organizationId}`;
-    const cachedData = await adminKVCache.get<Stripe.UpcomingInvoice[]>(
-      cacheKey
-    );
+    const cachedData =
+      await adminKVCache.get<Stripe.UpcomingInvoice[]>(cacheKey);
 
     if (cachedData) {
       return cachedData;

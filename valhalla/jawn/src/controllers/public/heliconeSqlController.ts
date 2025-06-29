@@ -2,6 +2,10 @@ import { Controller, Get, Route, Tags, Request, Post, Body } from "tsoa";
 import { err, ok, Result } from "../../packages/common/result";
 import { HeliconeSqlManager } from "../../managers/HeliconeSqlManager";
 import { type JawnAuthenticatedRequest } from "../../types/request";
+import {
+  checkFeatureFlag,
+  HQL_FEATURE_FLAG,
+} from "../../lib/utils/featureFlags";
 
 // --- Response Types ---
 export interface ClickHouseTableSchema {
@@ -42,14 +46,21 @@ export class HeliconeSqlController extends Controller {
     @Body() requestBody: ExecuteSqlRequest,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<Array<Record<string, any>>, string>> {
-    return ok([]);
-    // const heliconeSqlManager = new HeliconeSqlManager(request.authParams);
-    // const result = await heliconeSqlManager.executeSql(requestBody.sql);
-    // if (result.error) {
-    //   this.setStatus(500);
-    //   return err(result.error);
-    // }
-    // this.setStatus(200);
-    // return ok(result.data);
+    const featureFlagResult = await checkFeatureFlag(
+      request.authParams.organizationId,
+      HQL_FEATURE_FLAG
+    );
+    if (featureFlagResult.error) {
+      return err(featureFlagResult.error);
+    }
+
+    const heliconeSqlManager = new HeliconeSqlManager(request.authParams);
+    const result = await heliconeSqlManager.executeSql(requestBody.sql);
+    if (result.error) {
+      this.setStatus(500);
+      return err(result.error);
+    }
+    this.setStatus(200);
+    return ok(result.data);
   }
 }
