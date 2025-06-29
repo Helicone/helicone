@@ -17,7 +17,9 @@ export class AnthropicBodyProcessor implements IBodyProcessor {
     if (
       model?.includes("claude-3") ||
       model?.includes("claude-sonnet-4") ||
-      model?.includes("claude-opus-4")
+      model?.includes("claude-opus-4") ||
+      // for AI SDK
+      model?.includes("claude-4")
     ) {
       if (
         !parsedResponseBody?.usage?.output_tokens ||
