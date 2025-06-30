@@ -58,6 +58,15 @@ resource "aws_ecr_repository" "aigateway" {
   }
 }
 
+resource "aws_ecr_repository" "helicone" {
+  name                 = "helicone/helicone"
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+}
+
 # Output the repository URLs
 output "web_repository_url" {
   value = aws_ecr_repository.web.repository_url
