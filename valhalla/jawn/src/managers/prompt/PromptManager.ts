@@ -14,12 +14,20 @@ import {
   PromptsResult,
 } from "../../controllers/public/promptController";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
-import { FilterNode } from "../../lib/shared/filters/filterDefs";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
 import { buildFilterPostgres } from "@helicone-package/filters/filters";
 import { Result, err, ok, resultMap } from "../../packages/common/result";
 import { BaseManager } from "../BaseManager";
 import { RequestManager } from "../request/RequestManager";
 
+import { S3Client } from "../../lib/shared/db/s3Client";
+import type { CompletionCreateParams } from 'openai/resources/completions';
+import { AuthParams } from "../../packages/common/auth/types";
+
+
+
+// DEPRECATED
+// TODO: Remove this once Prompt2025Manager and new prompt system is live
 export class PromptManager extends BaseManager {
   async getOrCreatePromptVersionFromRequest(
     requestId: string
@@ -939,4 +947,37 @@ export class PromptManager extends BaseManager {
       return err(`Failed to create prompt input keys: ${error}`);
     }
   }
+}
+
+export class Prompt2025Manager extends BaseManager {
+  private s3Client: S3Client;
+
+  constructor(authParams: AuthParams) {
+    super(authParams);
+    this.s3Client = new S3Client(
+      process.env.S3_ACCESS_KEY ?? "",
+      process.env.S3_SECRET_KEY ?? "",
+      process.env.S3_ENDPOINT_PUBLIC ?? process.env.S3_ENDPOINT ?? "",
+      process.env.S3_BUCKET_NAME ?? "",
+      (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
+    );
+  }
+  
+  // Unsure about typing of the data, should double check this when writing using code.
+  // Unsure if we use every field in CompletionCreateParams.
+  async storePrompt(
+    promptId: string,
+    promptBody: CompletionCreateParams
+  ) {
+    if (!promptId) return err("Prompt ID is required");
+    const key = this.s3Client.getPromptKey(promptId, this.authParams.organizationId);
+    
+    const s3result = await this.s3Client.store(key, JSON.stringify(promptBody)); 
+    if (s3result.error) return err(s3result.error);
+    
+    return ok(null);
+  }
+
+  // TODO: add other methods for deletion, etc.
+  // TODO: Add query methods for getting prompts and metrics from Postgres, Clickhouse.
 }
