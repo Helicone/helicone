@@ -37,13 +37,6 @@ alter table "public"."prompts_2025" add constraint "prompts_2025_versions_pkey" 
 
 alter table "public"."prompts_2025_versions" add constraint "prompts_2025_versions_pkey1" PRIMARY KEY using index "prompts_2025_versions_pkey1";
 
-<<<<<<< HEAD
-alter table "public"."prompts_2025" add constraint "prompts_2025_organization_fkey" FOREIGN KEY (organization) REFERENCES organization(id) ON DELETE CASCADE not valid;
-
-alter table "public"."prompts_2025" validate constraint "prompts_2025_organization_fkey";
-
-=======
->>>>>>> dec2b480b (make production_version not required)
 alter table "public"."prompts_2025" add constraint "prompts_2025_organization_fkey" FOREIGN KEY (organization) REFERENCES organization(id) ON DELETE CASCADE not valid;
 
 alter table "public"."prompts_2025" validate constraint "prompts_2025_organization_fkey";
