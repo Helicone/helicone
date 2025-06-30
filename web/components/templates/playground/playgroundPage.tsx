@@ -7,7 +7,10 @@ import { generateStream } from "@/lib/api/llm/generate-stream";
 import { processStream } from "@/lib/api/llm/process-stream";
 import { useGetRequestWithBodies } from "@/services/hooks/requests";
 import { openAIMessageToHeliconeMessage } from "@helicone-package/llm-mapper/mappers/openai/chat";
-import { openaiChatMapper } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
+import {
+  openaiChatMapper,
+  OpenAIChatRequest,
+} from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
 import {
   MappedLLMRequest,
   Provider,
@@ -24,6 +27,7 @@ import { OPENROUTER_MODEL_MAP } from "./new/openRouterModelMap";
 import FoldedHeader from "@/components/shared/FoldedHeader";
 import { Small } from "@/components/ui/typography";
 import { ModelParameters } from "@/lib/api/llm/generate";
+import { useCreatePrompt } from "@/services/hooks/prompts";
 
 export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
   _type: "openai-chat",
@@ -261,6 +265,58 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [response]);
 
+  const createPromptMutation = useCreatePrompt();
+
+  const onSavePrompt = async (
+    model: string,
+    tags: string[],
+    promptName: string
+  ) => {
+    // TODO: Add functionality to update existing prompt to new
+    // minor or major version.
+    // - Currently just assumes we're creating a new prompt - we would probably define the behaviour based on the
+    // route params.
+    // - Use model slugs from AI Gateway, for now it just uses the selected model.
+
+    if (!mappedContent) {
+      setNotification("No mapped content", "error");
+      return;
+    }
+    const openaiRequest = openaiChatMapper.toExternal({
+      ...mappedContent.schema.request,
+      tools: tools && tools.length > 0 ? tools : undefined,
+    } as any);
+
+    const promptBody = {
+      ...openaiRequest,
+      ...modelParameters,
+      model: selectedModel,
+      response_format:
+        responseFormat?.type === "json_schema"
+          ? {
+              type: "json_schema",
+              json_schema: responseFormat.json_schema,
+            }
+          : undefined,
+    };
+
+    try {
+      const result = await createPromptMutation.mutateAsync({
+        name: promptName,
+        tags: tags,
+        promptBody: promptBody as OpenAIChatRequest,
+      });
+
+      setNotification(
+        `Prompt saved successfully! ${result.data?.id}`,
+        "success"
+      );
+    } catch (error) {
+      console.error("Failed to save prompt:", error);
+      setNotification("Failed to save prompt", "error");
+    }
+  };
+
   const onRun = async () => {
     if (!mappedContent) {
       setNotification("No mapped content", "error");
@@ -413,6 +469,8 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               setResponseFormat={setResponseFormat}
               modelParameters={modelParameters}
               setModelParameters={setModelParameters}
+              promptId={undefined} // TODO: From route params, for editing an existing prompt. For now, assume creating anew.
+              onSavePrompt={onSavePrompt}
               onRun={onRun}
               useAIGateway={useAIGateway}
               setUseAIGateway={setUseAIGateway}
