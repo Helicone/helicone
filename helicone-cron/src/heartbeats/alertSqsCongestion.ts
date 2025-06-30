@@ -8,16 +8,17 @@ const ALERT_BANNER_ID_DELAY_IN_QUEUE = 7;
 export async function alertSqsCongestion(env: Env, alertManager: AlertManager) {
   const sqsClient = new SqsClient(env);
   const queueSize = await sqsClient.getQueueSize();
+  const queueSizeLowPriority = await sqsClient.getQueueSizeLowPriority();
 
   console.log("Queue size: ", queueSize);
 
   // If we can't determine queue size, don't change alert state
-  if (queueSize === null) {
+  if (queueSize === null || queueSizeLowPriority === null) {
     console.error("Failed to determine SQS queue size");
     return;
   }
 
-  if (queueSize >= 100000) {
+  if (queueSize >= 100000 || queueSizeLowPriority >= 100000) {
     await callJawn(
       "/v1/public/alert-banner",
       "PATCH",
@@ -32,7 +33,7 @@ export async function alertSqsCongestion(env: Env, alertManager: AlertManager) {
       env.SLACK_ALERT_CHANNEL,
       `SQS size is too high..queue size: {${queueSize}}. Setting Alert Banner to active. Also reminder to set tasks in ECS to at least 10`
     );
-  } else if (queueSize > 10) {
+  } else if (queueSize >= 0 || queueSizeLowPriority >= 0) {
     const alertBanners = await callJawn<
       null,
       {
