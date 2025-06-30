@@ -41,15 +41,33 @@ function addLimit(ast: AST): AST {
     throw new Error("Only select statements are allowed");
   }
 
-  ast.limit = {
-    seperator: ",",
-    value: [
-      {
-        type: "number",
-        value: 1000,
-      },
-    ],
-  };
+  // If there's already a limit, ensure it doesn't exceed 1000
+  if (ast.limit && ast.limit.value.length > 0) {
+    if (ast.limit.value.length === 1) {
+      const currentLimit = ast.limit.value[0]?.value;
+      if (typeof currentLimit === "number") {
+        ast.limit.value[0].value = Math.min(currentLimit, 1000);
+      }
+    } else if (ast.limit.value.length === 2) {
+      // Double LIMIT: LIMIT offset, count
+      const currentCount = ast.limit.value[1]?.value;
+      if (typeof currentCount === "number") {
+        ast.limit.value[1].value = Math.min(currentCount, 1000);
+      }
+    }
+  } else {
+    // No existing limit, add one with 1000
+    ast.limit = {
+      seperator: ",",
+      value: [
+        {
+          type: "number",
+          value: 1000,
+        },
+      ],
+    };
+  }
+
   return ast;
 }
 

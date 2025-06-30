@@ -5,7 +5,7 @@ import {
   DataFormat,
 } from "@clickhouse/client";
 import { Result } from "../../packages/common/result";
-import { TestClickhouseClientWrapper } from "./TestClickhouseWrapper";
+import { TestClickhouseClientWrapper } from "./test/TestClickhouseWrapper";
 
 interface ClickhouseEnv {
   CLICKHOUSE_HOST: string;

@@ -1,5 +1,5 @@
 import { describe, expect, test, beforeEach, afterEach } from "@jest/globals";
-import { testClickhouseDb } from "../../../lib/db/TestClickhouseWrapper";
+import { testClickhouseDb } from "../../../lib/db/test/TestClickhouseWrapper";
 import { CLICKHOUSE_TABLES } from "../../../managers/HeliconeSqlManager";
 
 // Test configuration
@@ -221,6 +221,133 @@ describe("HeliconeSqlController HTTP Integration Tests", () => {
 
       expect(result.error).toBeDefined();
       expect(result.error).toContain("Only select statements");
+    });
+
+    test("multiple statements", async () => {
+      const requestBody = {
+        sql: "SELECT * FROM request_response_rmt where organization_id = '83635a30-5ba6-41a8-8cc6-fb7df941b24b'; DROP TABLE request_response_rmt",
+      };
+
+      const response = await fetch(`${BASE_URL}/helicone-sql/execute`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+          "Helicone-Organization-Id": TEST_ORG_ID,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      expect(response.status).toBe(200);
+      const result = await response.json();
+
+      expect(Array.isArray(result.data)).toBe(true);
+      const response2 = await fetch(`${BASE_URL}/helicone-sql/execute`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+          "Helicone-Organization-Id": TEST_ORG_ID,
+        },
+        body: JSON.stringify({
+          sql: "SELECT * FROM request_response_rmt",
+        }),
+      });
+
+      expect(response2.status).toBe(200);
+      const result2 = await response2.json();
+
+      expect(result2.error).toBeNull();
+      expect(result2.data).toBeDefined();
+      expect(result2.data?.length).not.toBe(0);
+    });
+
+    test("query from different organization", async () => {
+      const requestBody = {
+        sql: "SELECT * FROM request_response_rmt WHERE organization_id = '83635a30-5ba6-41a8-8cc6-fb7df941b24b'",
+      };
+
+      const response = await fetch(`${BASE_URL}/helicone-sql/execute`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+          "Helicone-Organization-Id": TEST_ORG_ID,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      expect(response.status).toBe(200);
+      const result = await response.json();
+
+      expect(result.error).toBeNull();
+      expect(result.data).toBeDefined();
+      expect(Array.isArray(result.data)).toBe(true);
+
+      expect(result.data?.length).toBe(0);
+    });
+
+    test("subqueries", async () => {
+      const requestBody = {
+        sql: "SELECT * FROM (SELECT * FROM request_response_rmt WHERE organization_id = '83635a30-5ba6-41a8-8cc6-fb7df941b24b')",
+      };
+
+      const response = await fetch(`${BASE_URL}/helicone-sql/execute`, {
+        body: JSON.stringify(requestBody),
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+          "Helicone-Organization-Id": TEST_ORG_ID,
+        },
+      });
+
+      expect(response.status).toBe(200);
+      const result = await response.json();
+
+      expect(result.error).toBeNull();
+      expect(result.data).toBeDefined();
+      expect(Array.isArray(result.data)).toBe(true);
+    });
+
+    test("subqeries with group by", async () => {
+      const requestBody = {
+        sql: "SELECT * FROM (SELECT COUNT(*) from request_response_rmt GROUP BY organization_id HAVING organization_id = '83635a30-5ba6-41a8-8cc6-fb7df941b24b')",
+      };
+
+      const response = await fetch(`${BASE_URL}/helicone-sql/execute`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+          "Helicone-Organization-Id": TEST_ORG_ID,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      expect(response.status).toBe(200);
+      const result = await response.json();
+
+      expect(result.error).toBeNull();
+      expect(result.data?.length).toBe(0);
+    });
+
+    test("redefine CTE but should fail since cannot have multiple WITH statemets", async () => {
+      const requestBody = {
+        sql: "WITH request_response_rmt AS (SELECT * FROM request_response_rmt WHERE organization_id = '83635a30-5ba6-41a8-8cc6-fb7df941b24b') SELECT * FROM request_response_rmt",
+      };
+
+      const response = await fetch(`${BASE_URL}/helicone-sql/execute`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+          "Helicone-Organization-Id": TEST_ORG_ID,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      expect(response.status).toBe(500);
     });
 
     test("should reject INSERT statements", async () => {

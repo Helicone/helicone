@@ -1,8 +1,8 @@
 import { ClickHouseClient, createClient } from "@clickhouse/client";
-import { Result } from "../../packages/common/result";
 import * as fs from "fs";
 import * as path from "path";
-import { ClickhouseDB, RequestResponseRMT } from "./ClickhouseWrapper";
+import { ClickhouseDB, RequestResponseRMT } from "../ClickhouseWrapper";
+import { Result } from "../../../packages/common/result";
 
 interface ClickhouseEnv {
   CLICKHOUSE_HOST: string;

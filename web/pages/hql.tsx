@@ -19,15 +19,3 @@ HQL.getLayout = function getLayout(page: ReactElement) {
 };
 
 export default HQL;
-
-export const getServerSideProps = async (
-  context: GetServerSidePropsContext,
-) => {
-  return {
-    props: {
-      user: {
-        id: "",
-      },
-    },
-  };
-};

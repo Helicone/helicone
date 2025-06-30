@@ -57,33 +57,33 @@ manage_test() {
         "start")
             check_docker
             check_port 18124
-            python3 ./clickhouse/ch_hcone_test.py --start --no-password--port 18124 --host localhost
+            python3 ./clickhouse/ch_hcone.py --start --no-password--port 18124 --host localhost --test
             print_success "Test database started on port 18124"
             ;;
         "stop")
-            python3 ./clickhouse/ch_hcone_test.py --stop
+            python3 ./clickhouse/ch_hcone.py --stop --test
             print_success "Test database stopped"
             ;;
         "restart")
             check_docker
-            python3 ./clickhouse/ch_hcone_test.py --restart --no-password --port 18124 --host localhost
+            python3 ./clickhouse/ch_hcone.py --restart --no-password --port 18124 --host localhost --test
             print_success "Test database restarted"
             ;;
         "migrate")
-            python3 ./clickhouse/ch_hcone_test.py --upgrade --no-password --port 18124 --host localhost
+            python3 ./clickhouse/ch_hcone.py --upgrade --no-password --port 18124 --host localhost --test
             print_success "Test database migrations applied"
             ;;
         "setup")
-            python3 ./clickhouse/ch_hcone_test.py --upgrade --no-password --port 18124 --host localhost
-            python3 ./clickhouse/ch_hcone_test.py --create-test-data --no-password --port 18124 --host localhost
+            python3 ./clickhouse/ch_hcone.py --upgrade --no-password --port 18124 --host localhost --test
+            python3 ./clickhouse/ch_hcone.py --create-test-data --no-password --port 18124 --host localhost --test
             print_success "Test database setup complete with test data"
             ;;
         "cleanup")
-            python3 ./clickhouse/ch_hcone_test.py --cleanup-test-data --no-password --port 18124 --host localhost
+            python3 ./clickhouse/ch_hcone.py --cleanup-test-data --no-password --port 18124 --host localhost --test
             print_success "Test data cleaned up"
             ;;
         "status")
-            python3 ./clickhouse/ch_hcone_test.py --list-migrations --no-password --port 18124 --host localhost
+            python3 ./clickhouse/ch_hcone.py --list-migrations --no-password --port 18124 --host localhost --test
             ;;
         *)
             print_error "Unknown action: $action"
