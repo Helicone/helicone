@@ -28,7 +28,10 @@ import { OPENROUTER_MODEL_MAP } from "./new/openRouterModelMap";
 import FoldedHeader from "@/components/shared/FoldedHeader";
 import { Small } from "@/components/ui/typography";
 import { ModelParameters } from "@/lib/api/llm/generate";
-import { useCreatePrompt, useGetPromptVersionWithBody } from "@/services/hooks/prompts";
+import {
+  useCreatePrompt,
+  useGetPromptVersionWithBody,
+} from "@/services/hooks/prompts";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 
 export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
@@ -100,9 +103,11 @@ export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
   },
 };
 
-const convertOpenAIChatRequestToMappedLLMRequest = (openaiRequest: OpenAIChatRequest): MappedLLMRequest => {
+const convertOpenAIChatRequestToMappedLLMRequest = (
+  openaiRequest: OpenAIChatRequest
+): MappedLLMRequest => {
   const internalRequest = openaiChatMapper.toInternal(openaiRequest);
-  
+
   return {
     _type: "openai-chat",
     id: "",
@@ -146,10 +151,11 @@ const convertOpenAIChatRequestToMappedLLMRequest = (openaiRequest: OpenAIChatReq
     schema: {
       request: {
         ...internalRequest,
-        messages: internalRequest.messages?.map((message) => ({
-          ...message,
-          id: uuidv4(),
-        })) ?? [],
+        messages:
+          internalRequest.messages?.map((message) => ({
+            ...message,
+            id: uuidv4(),
+          })) ?? [],
       },
     },
   };
@@ -162,7 +168,10 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
 
   useEffect(() => {
     if (requestId && promptVersionId) {
-      setNotification("Cannot load request and prompt at the same time.", "error");
+      setNotification(
+        "Cannot load request and prompt at the same time.",
+        "error"
+      );
       router.push("/playground");
       return;
     }
@@ -195,9 +204,15 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   }, [requestId, promptVersionId]);
 
   useEffect(() => {
-    if (promptVersionData && promptVersionData.promptBody && !isPromptVersionLoading) {
-      const convertedContent = convertOpenAIChatRequestToMappedLLMRequest(promptVersionData.promptBody);
-      
+    if (
+      promptVersionData &&
+      promptVersionData.promptBody &&
+      !isPromptVersionLoading
+    ) {
+      const convertedContent = convertOpenAIChatRequestToMappedLLMRequest(
+        promptVersionData.promptBody
+      );
+
       const model = promptVersionData.promptBody.model;
       if (model && model in OPENROUTER_MODEL_MAP) {
         setSelectedModel(OPENROUTER_MODEL_MAP[model.split("/")[1]]);
@@ -216,7 +231,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       setMappedContent(convertedContent);
       setDefaultContent(convertedContent);
       setTools(convertedContent.schema.request.tools ?? []);
-      
+
       setModelParameters({
         temperature: promptVersionData.promptBody.temperature,
         max_tokens: promptVersionData.promptBody.max_tokens,
@@ -571,8 +586,8 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                 <div className="w-px h-4 bg-border" />
                 <div className="flex items-center gap-2">
                   <Small className="font-bold text-gray-500 dark:text-slate-300">
-                    {promptVersionData.prompt.name.length > 30 
-                      ? promptVersionData.prompt.name.substring(0, 27) + "..." 
+                    {promptVersionData.prompt.name.length > 30
+                      ? promptVersionData.prompt.name.substring(0, 27) + "..."
                       : promptVersionData.prompt.name}
                   </Small>
                   <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary ring-1 ring-inset ring-primary/20">
@@ -596,22 +611,22 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
             {isPromptVersionLoading || isRequestLoading ? (
               <LoadingAnimation />
             ) : (
-            <PlaygroundMessagesPanel
-              mappedContent={mappedContent}
-              defaultContent={defaultContent}
-              setMappedContent={setMappedContent}
-              selectedModel={selectedModel}
-              setSelectedModel={handleSelectedModelChange}
-              tools={tools}
-              setTools={handleToolsChange}
-              responseFormat={responseFormat}
-              setResponseFormat={setResponseFormat}
-              modelParameters={modelParameters}
-              setModelParameters={setModelParameters}
-              promptVersionId={promptVersionId}
-              onSavePrompt={onSavePrompt}
-              onRun={onRun}
-              useAIGateway={useAIGateway}
+              <PlaygroundMessagesPanel
+                mappedContent={mappedContent}
+                defaultContent={defaultContent}
+                setMappedContent={setMappedContent}
+                selectedModel={selectedModel}
+                setSelectedModel={handleSelectedModelChange}
+                tools={tools}
+                setTools={handleToolsChange}
+                responseFormat={responseFormat}
+                setResponseFormat={setResponseFormat}
+                modelParameters={modelParameters}
+                setModelParameters={setModelParameters}
+                promptVersionId={promptVersionId}
+                onSavePrompt={onSavePrompt}
+                onRun={onRun}
+                useAIGateway={useAIGateway}
                 setUseAIGateway={setUseAIGateway}
               />
             )}
