@@ -23,6 +23,7 @@ def schema_sort_key(filename):
 all_schemas.sort(key=schema_sort_key)
 
 container_name = "helicone-clickhouse-server"
+container_test_name = "helicone-clickhouse-server-test"
 
 
 def get_host(host: str):
@@ -169,7 +170,14 @@ def main():
         "--no-password", action="store_true", help="Do not prompt for password"
     )
 
+    parser.add_argument(
+        "--test", action="store_true", help="Run in test mode"
+    )
+
     args = parser.parse_args()
+    test_env = args.test
+    port = 19001 if test_env else 19000
+    dynamic_container_name = container_name if not test_env else container_test_name
 
     password = os.getenv("CLICKHOUSE_PASSWORD")
 
@@ -188,7 +196,7 @@ def main():
     if args.start:
         print("Starting services")
         res = subprocess.run(
-            f"docker run -d -p {args.port}:8123 -p19000:9000 --name {container_name} "
+            f"docker run -d -p {args.port}:8123 -p {port}:9000 --name {dynamic_container_name} "
             "--ulimit nofile=262144:262144 clickhouse/clickhouse-server:24.10",
             shell=True,
         )
@@ -214,7 +222,7 @@ echo 'SELECT 1' | curl '{get_host(args.host)}:{args.port}/' --data-binary @-
         subprocess.run(f"docker stop {container_name}", shell=True)
         subprocess.run(f"docker rm {container_name}", shell=True)
         subprocess.run(
-            f"docker run -d -p {args.port}:8123 -p19000:9000 --name {container_name} "
+            f"docker run -d -p {args.port}:8123 -p {port}:9000 --name {dynamic_container_name} "
             "--ulimit nofile=262144:262144 clickhouse/clickhouse-server:24.10",
             shell=True,
         )
