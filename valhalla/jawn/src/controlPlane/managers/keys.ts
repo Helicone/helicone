@@ -4,7 +4,7 @@ import { err, ok, Result } from "../../packages/common/result";
 import { AuthParams } from "../../packages/common/auth/types";
 
 export async function getKeys(organizationId: string) {
-  return await await dbExecute<{
+  return await dbExecute<{
     user_id: string;
     api_key_hash: string;
   }>(

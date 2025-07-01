@@ -33,7 +33,9 @@ export abstract class AbstractLogHandler implements LogHandler {
         executionTimeMs,
         `${this.constructor.name}.handle`
       )
-    ).catch();
+    ).catch((error) => {
+      console.error(`Failed to log DataDog metric for ${this.constructor.name}.handle:`, error);
+    });
 
     return result;
   }

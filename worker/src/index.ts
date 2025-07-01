@@ -286,16 +286,27 @@ async function modifyEnvBasedOnPath(
       };
     } else if (hostParts[0].includes("bedrock")) {
       request.removeBedrock();
-      const region = url.pathname.split("/v1/")[1].split("/")[0];
-      const forwardToHost =
-        "bedrock-runtime." +
-        url.pathname.split("/v1/")[1].split("/")[0] +
-        ".amazonaws.com";
-      const forwardToUrl =
-        "https://" +
-        forwardToHost +
-        "/" +
-        url.pathname.split("/v1/")[1].split("/").slice(1).join("/");
+      
+      // Safely parse the URL path to extract region and remaining path
+      const pathParts = url.pathname.split("/v1/");
+      if (pathParts.length < 2) {
+        throw new Error("Invalid bedrock URL format: missing /v1/ in path");
+      }
+      
+      const afterV1Parts = pathParts[1].split("/");
+      if (afterV1Parts.length === 0) {
+        throw new Error("Invalid bedrock URL format: missing region after /v1/");
+      }
+      
+      const region = afterV1Parts[0];
+      if (!region) {
+        throw new Error("Invalid bedrock URL format: empty region");
+      }
+      
+      const forwardToHost = `bedrock-runtime.${region}.amazonaws.com`;
+      const remainingPath = afterV1Parts.slice(1).join("/");
+      const forwardToUrl = `https://${forwardToHost}/${remainingPath}`;
+      
       await request.signAWSRequest({
         region,
         forwardToHost,
