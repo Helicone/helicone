@@ -1,0 +1,429 @@
+---
+description: 
+globs: docs/*.mdx
+alwaysApply: false
+---
+# AI Gateway Documentation Standards
+
+This rule defines the standard structure, style, and conventions for all AI Gateway concept and feature documentation.
+
+## Document Structure Pattern
+
+Every AI Gateway documentation file must follow this exact structure:
+
+### 1. Front Matter (Required)
+
+```yaml
+---
+title: "[Full Descriptive Title]"
+sidebarTitle: "[Short Navigation Title]"
+description: "[Detailed description with value proposition and key benefits. Should be 1-2 sentences explaining what the feature does and why it's valuable.]"
+---
+```
+
+### 2. Content Flow Structure (Required Order)
+
+1. **Introduction Content** (Required - NO HEADER)
+
+```mdx
+[Concise feature overview paragraph - 1-2 sentences maximum explaining what it does]
+
+[Optional secondary paragraph with brief technical context - 1 sentence maximum]
+
+**Benefits:**
+- **[Primary Benefit]** by [specific capability or outcome]
+- **[Secondary Benefit]** with [technical advantage]
+- **[Tertiary Benefit]** by [user experience improvement]
+```
+
+**Guidelines for Introduction:**
+- Feature overview: Maximum 2 sentences
+- Optional second paragraph: Maximum 1 sentence
+- Benefits: Exactly 3 benefits maximum
+- Keep total introduction under 100 words
+
+2. **Optional Info/Warning Callouts** (As needed)
+
+```mdx
+<Info>
+  **[Context or clarification]** - [Detailed explanation of important context]
+</Info>
+
+<Note>
+  For complete configuration options and syntax, see the [Configuration Reference](mdc:ai-gateway/config#[section]).
+</Note>
+```
+
+3. **Quick Start Section** (Required)
+
+```mdx
+## Quick Start
+
+<Steps>
+  <Step title="[Action-oriented step title]">
+    [Clear instructions with explanation]
+
+    ```yaml
+    [Configuration example]
+    ```
+  </Step>
+
+  <Step title="[Next action step]">
+    ```bash
+    [Command or setup instruction]
+    ```
+  </Step>
+
+  <Step title="[Test/verification step]">
+    ```bash
+    [Test command with example]
+    ```
+    ✅ [Expected successful outcome description]
+  </Step>
+</Steps>
+```
+
+4. **Available Strategies/Options Section** (Required)
+
+```mdx
+## Available [Strategies/Options/Features]
+
+<AccordionGroup>
+  <Accordion title="[Strategy Name] - [Default/Recommended]" icon="[lucide-icon-name]">
+    **[Brief technical description]**
+    
+    [Detailed explanation of how it works and when to use it]
+    
+    **Best for:** [Use case description]
+    
+    **How it works:**
+    1. [Step 1 explanation]
+    2. [Step 2 explanation]
+    3. [Step 3 explanation]
+    4. [Step 4 explanation]
+    
+    **Example:**
+    ```yaml
+    [Configuration example]
+    ```
+  </Accordion>
+
+  <Accordion title="[Alternative Strategy Name]" icon="[lucide-icon-name]">
+    **[Brief technical description]**
+    
+    [Detailed explanation]
+    
+    **Best for:** [Different use case]
+    
+    **Example:**
+    ```yaml
+    [Configuration example]
+    ```
+    
+    <Callout type="warning">
+      [Important warning or constraint if applicable]
+    </Callout>
+  </Accordion>
+</AccordionGroup>
+```
+
+5. **Optional Note About Future Features**
+
+```mdx
+<Note>
+  Additional [feature type] ([Feature 1], [Feature 2], [Feature 3]) are [coming soon](mdc:#coming-soon) for [advanced use case description].
+</Note>
+```
+
+6. **Use Cases Section** (Required)
+
+```mdx
+## Use Cases
+
+<Tabs>
+  <Tab title="[Use Case 1 Title] - [Key Benefit]">
+    **Use case:** [Detailed scenario description with business context]
+
+    ```yaml
+    [Complete configuration example]
+    ```
+  </Tab>
+
+  <Tab title="[Use Case 2 Title]">
+    **Use case:** [Different scenario with different needs]
+
+    ```yaml
+    [Configuration example for this use case]
+    ```
+  </Tab>
+
+  <Tab title="[Use Case 3 Title]">
+    **Use case:** [Complex scenario description]
+
+    <Note>
+      [Important note about configuration if applicable]
+    </Note>
+
+    ```yaml
+    [More complex configuration example]
+    ```
+
+    **Usage:**
+    - [Environment 1]: `http://localhost:8080/router/[router-name]`
+    - [Environment 2]: `http://localhost:8080/router/[router-name]`
+  </Tab>
+</Tabs>
+```
+
+7. **How It Works Section** (Required)
+
+```mdx
+## How It Works
+
+**[Key Technical Concept]**
+
+[Explanation of the core technical implementation or algorithm]
+
+### Request Flow
+
+<Steps>
+  <Step title="[Flow Step 1]">
+    [Description of what happens in this step]
+  </Step>
+  
+  <Step title="[Flow Step 2]">
+    [Description with technical details]
+    
+    - **[Sub-detail 1]**: [Explanation]
+    - **[Sub-detail 2]**: [Explanation]
+    - **[Sub-detail 3]**: [Explanation]
+  </Step>
+  
+  <Step title="[Flow Step 3]">
+    [Description of final step or outcome]
+  </Step>
+</Steps>
+```
+
+8. **Optional Reference Tables** (As needed)
+
+```mdx
+### [Reference Section Title]
+
+[Explanation of what the table contains]
+
+| [Column 1]       | [Column 2]           | [Column 3] | [Column 4]                      |
+| ---------------- | -------------------- | ---------- | ------------------------------- |
+| **[Item 1]**     | `[ITEM_1_VALUE]`     | [Status]   | [Description or notes]          |
+| **[Item 2]**     | `[ITEM_2_VALUE]`     | [Status]   | [Description or notes]          |
+```
+
+9. **Optional Coming Soon Section**
+
+```mdx
+## Coming Soon
+
+The following features are planned for future releases:
+
+- **[Feature 1]** - [Brief description]
+- **[Feature 2]** - [Brief description]
+- **[Feature 3]** - [Brief description]
+
+[Contact information or feedback request]
+```
+
+## Writing Style Guidelines
+
+### Documentation Types and Approach
+
+AI Gateway documentation combines **explanation** (understanding-oriented) and **reference** (information-oriented) approaches:
+
+**Explanation sections** (Introduction, Use Cases, How It Works):
+- **Understanding-oriented**: Help readers comprehend concepts and make connections
+- **Discursive treatment**: Allow for reflection and deeper understanding
+- **Context-rich**: Provide background, design decisions, and the "why" behind features
+- **Opinion-inclusive**: Acknowledge alternatives, trade-offs, and different perspectives
+
+**Reference sections** (Quick Start, Configuration Options):
+- **Information-oriented**: Provide factual, authoritative technical descriptions
+- **Austere and precise**: Neutral description without opinion or speculation
+- **Action-focused**: Clear, imperative instructions for immediate use
+- **Consistent patterns**: Standardized formatting for predictable user experience
+
+### Tone & Voice
+
+- **Explanatory sections**: Conversational yet authoritative, helping readers understand the "why" and broader context
+- **Reference sections**: Neutral, factual, and uncompromising - like consulting a technical manual
+- **Throughout**: Confident presentation of information as definitive and reliable
+- **Accessible**: Complex concepts explained simply without sacrificing technical accuracy
+
+### Content Patterns
+
+1. **Open with understanding** - Explain what it does, why it matters, and how it fits into the bigger picture
+2. **Provide immediate utility** - Quick Start with minimal, working configuration
+3. **Describe the machinery** - Neutral, complete description of available options and their behavior
+4. **Contextualize with scenarios** - Real-world use cases that help readers understand when and how to apply features
+5. **Unfold the internal workings** - Technical implementation details that reveal how the system operates
+
+### Language Conventions
+
+**For explanation sections:**
+- Use present tense for descriptions
+- Make connections to related concepts and external context
+- Provide historical context and design rationale where relevant
+- Acknowledge alternatives: "Some users prefer X because Y, however Z..."
+- Explain relationships: "Feature X interacts with Y as follows..."
+
+**For reference sections:**
+- Use imperative mood for instructions ("Create", "Start", "Configure")
+- State facts about behavior: "The gateway routes requests based on..."
+- List options systematically: "Available strategies are: A, B, C"
+- Provide warnings where appropriate: "You must not use X unless Y"
+- Use consistent, predictable patterns for similar information
+
+**Throughout:**
+- Use "The AI Gateway" when referring to the system
+- Be specific with technical terms and provide context
+- Use bullet points with bold lead-ins for benefits and key concepts
+- Maintain consistent placeholder naming conventions
+
+## Technical Implementation Standards
+
+### Configuration Examples
+
+Always use YAML configuration blocks with proper syntax:
+
+```yaml
+# Use comments to explain complex sections
+routers:
+  my-router:
+    load-balance:
+      chat:
+        strategy: latency
+        providers:
+          - openai
+          - anthropic
+```
+
+### Code Examples
+
+Use appropriate language-specific examples:
+
+```bash
+# Bash commands for setup and testing
+export API_KEY="your-key"
+curl -X POST http://localhost:8080/router/my-router/chat/completions
+```
+
+```python
+# Python SDK configuration
+import openai
+
+client = openai.OpenAI(
+    base_url="http://localhost:8080/router/production",
+    api_key="sk-placeholder"
+)
+```
+
+### Placeholder Conventions
+
+- `sk-...` for API keys in examples
+- `my-router` for router names in examples
+- `localhost:8080` for gateway URLs
+- `[router-name]` for variable router names in documentation
+
+## UI Components Standards
+
+### Required Components Usage
+
+**Steps Component** (for sequential processes):
+
+```mdx
+<Steps>
+  <Step title="Action-oriented title">
+    Clear instructions with code examples
+  </Step>
+</Steps>
+```
+
+**Accordion Components** (for feature options):
+
+```mdx
+<AccordionGroup>
+  <Accordion title="Feature Name - Default" icon="lucide-icon">
+    Technical explanation with examples
+  </Accordion>
+</AccordionGroup>
+```
+
+**Tabs Component** (for use cases):
+
+```mdx
+<Tabs>
+  <Tab title="Use Case Name">
+    Complete scenario with configuration
+  </Tab>
+</Tabs>
+```
+
+**Callout Components**:
+
+- `<Note>` - General information and cross-references
+- `<Info>` - Important context or clarifications
+- `<Callout type="warning">` - Constraints or important warnings
+
+## Content Organization Standards
+
+### Header Hierarchy
+
+- `# Title` - Only in front matter, never in content
+- `## Major Sections` - Quick Start, Available Options, Use Cases, How It Works
+- `### Subsections` - Request Flow, specific configuration areas
+- `#### Sub-subsections` - Rare, only for complex nested content
+
+### Section Naming Conventions
+
+- **NO `## Introduction` header** - start directly with content
+- `## Quick Start` (required)
+- `## Available [Strategies/Options/Features]` (required)
+- `## Use Cases` (required)
+- `## How It Works` (required)
+- `### Request Flow` (common subsection)
+
+### Icon Usage
+
+Use appropriate Lucide icons for accordions:
+- `bolt` - Performance/speed related features
+- `key` - Authentication/security features
+- `bucket` - Storage/caching features
+- `chart-pie` - Analytics/distribution features
+- `gear` - Configuration/settings features
+
+## Quality Standards Checklist
+
+### Completeness Requirements
+
+- [ ] Clear value proposition in introduction
+- [ ] Working Quick Start example
+- [ ] All available options documented with examples
+- [ ] Real-world use cases with complete configurations
+- [ ] Technical implementation explanation
+- [ ] Cross-references to configuration documentation
+
+### Consistency Requirements
+
+- [ ] Uniform YAML configuration formatting
+- [ ] Consistent placeholder naming
+- [ ] Standard component usage (Steps, Accordions, Tabs)
+- [ ] Matching section structure across documents
+- [ ] Benefits listed with bold lead-ins
+
+### User Experience Requirements
+
+- [ ] Progressive disclosure from simple to complex
+- [ ] Complete, copy-pasteable configuration examples
+- [ ] Clear success indicators (✅ messages)
+- [ ] Practical scenarios that users can relate to
+- [ ] Technical depth without overwhelming beginners
+
+This standard ensures consistent, high-quality AI Gateway documentation that helps users understand concepts, implement features successfully, and troubleshoot issues effectively.

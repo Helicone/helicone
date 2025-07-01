@@ -1,215 +1,400 @@
 ---
 title: "Custom Properties"
 sidebarTitle: "Custom Properties"
-description: "Add custom metadata to LLM requests for advanced segmentation and analysis. Tag requests with session IDs, conversation context, or application data to gain deeper insights into your AI application performance."
+"meta:description": "Add custom metadata to LLM requests for advanced segmentation and analysis. Tag requests with feature context, environment data, or business attributes to gain deeper insights into your AI application performance."
 "twitter:title": "Custom Properties - Helicone OSS LLM Observability"
 ---
 
 import QuestionsSection from "/snippets/questions-section.mdx";
 
-<iframe
-  width="100%"
-  height="420"
-  src="https://www.youtube.com/embed/NU0Ybp29eXQ?autoplay=1&mute=1"
-></iframe>
+Custom Properties are a powerful feature which allows you to attach any arbitrary metadata to your LLM requests for enhanced tracking and analysis.
 
-## Introduction
+Add contextual information like feature identifiers, environment labels, customer tier tracking, or other business-specific data to segment and analyze your AI application performance.
 
-Custom Properties allow you to add any additional information to your requests, such as:
+Benefits:
+- **Cost Attribution** by grouping related requests and calculating total spend per feature or business unit
+- **Performance Analysis** with detailed segmentation across environments, features, and application contexts  
+- **Unit Economics** by tracking average cost per feature, customer segment, or business outcome
+- **Advanced Filtering** with custom dimensions for precise data analysis and reporting
 
-- The `session`, `conversation`, or `app` id
-- The `prompt chain` by adding a common value to group of requests
-- `Application` or `user` metadata making the request
-
-<Frame caption="Custom Properties appear as headers in the `Request` table. ">
+<Frame caption="Custom Properties appear as filterable throughout Helicone">
   <img
-    src="/images/example-custom-properties.png"
+    src="/images/custom-properties/properties-page.webp"
     alt="Helicone Custom Properties feature for filtering and segmenting data in the Request table."
   />
 </Frame>
 
-### Why Custom Properties
-
-- Get the total cost or latency for a group of requests in a prompt chain
-- Get the "unit economics" of your application. For example, the average cost of a conversation.
-- Slice and dice your requests and metrics by any custom property.
-
 ## Quick Start
 
-### Adding Custom Properties at Request Time
-
-Use headers to add Custom Properties to your LLM requests.
-
 <Steps>
-  <Step title="Define the Header">
-    Name your header in the format `Helicone-Property-[Name]` where `Name` is the name of your custom property.
-  </Step>
-  <Step title="Define the Value">
-    The value is a string that labels your request for this custom property. Here are some examples:
+  <Step title="Add Property Headers">
+    Use the format `Helicone-Property-[Name]` where `Name` is your custom property identifier.
 
-    <CodeGroup>
-
-    ```bash Curl
+    ```bash
     curl https://oai.helicone.ai/v1/completions \
       -H 'Content-Type: application/json' \
       -H 'Helicone-Auth: Bearer HELICONE_API_KEY' \
-      -H 'Helicone-Property-Session: "24"' \ # Example 1
-      -H 'Helicone-Property-Conversation: "support_issue_2"' \ # Example 2
-      -H 'Helicone-Property-App: "mobile"' # Example 3
-      -d ...
+      -H 'Helicone-Property-Feature: "code_review"' \
+      -H 'Helicone-Property-Environment: "production"' \
+      -d '{
+        "model": "gpt-3.5-turbo",
+        "messages": [{"role": "user", "content": "Review this code"}]
+      }'
     ```
+  </Step>
 
-    ```python Python
-    openai.api_base = "https://oai.helicone.ai/v1"
-    openai
+  <Step title="Configure Your Client">
+    ```python
+    from openai import OpenAI
 
-    client.chat.completions.create(
-        model="text-davinci-003",
-        prompt="Say this is a test",
+    client = OpenAI(
+        api_key="your-openai-key",
+        base_url="https://oai.helicone.ai/v1"
+    )
+
+    response = client.chat.completions.create(
+        model="gpt-4",
+        messages=[{"role": "user", "content": "Generate unit tests"}],
         extra_headers={
             "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
-            "Helicone-Property-Session": "24", # Example 1
-            "Helicone-Property-Conversation": "support_issue_2", # Example 2
-            "Helicone-Property-App": "mobile", # Example 3
+            "Helicone-Property-Feature": "test_generation",
+            "Helicone-Property-Environment": "development",
         }
     )
     ```
+  </Step>
 
-    ```js Node.js
-    import { OpenAI } from "openai";
-    const configuration = {
-      apiKey: process.env.OPENAI_API_KEY,
-      basePath: "https://oai.helicone.ai/v1",
-      defaultHeaders: {
-        "Helicone-Auth": `Bearer ${HELICONE_API_KEY}`,
-        "Helicone-Property-Session": "24", // Example 1
-        "Helicone-Property-Conversation": "support_issue_2", // Example 2
-        "Helicone-Property-App": "mobile", // Example 3
-      },
-    };
-    const openai = new OpenAI(configuration);
+  <Step title="Verify in Dashboard">
+    ```bash
+    # Check your request appears with custom properties
+    curl https://api.helicone.ai/v1/request/query \
+      -H "Authorization: Bearer YOUR_API_KEY" \
+      -H "Content-Type: application/json"
     ```
-
-    ```python Langchain (Python)
-    llm = ChatOpenAI(
-        openai_api_key="<OPENAI_API_KEY>",
-        openai_api_base="https://oai.helicone.ai/v1",
-        default_headers={
-            "Helicone-Auth": "Bearer <HELICONE_API_KEY>"
-            "Helicone-Property-Type": "Course Outline"
-        }
-    )
-
-    course = llm.predict("Generate a course outline about AI.")
-
-    # Update helicone properties/headers for each request
-    headers["Helicone-Property-Type"] = "Lesson"
-    llm.model_kwargs["headers"] = headers
-
-    lesson = llm.predict("Generate a lesson for the AI course.")
-    ```
-    </CodeGroup>
-
+    ✅ Your requests now appear with custom property columns for advanced filtering and analysis
   </Step>
 </Steps>
 
-### Special Case: Helicone-User-Id
+## Available Property Types
 
-While most custom properties can be defined freely, `Helicone-User-Id` is a **reserved header** for attributing requests to individual users. It enables per-user metrics such as request volume, cost, and behavior, visible in the **Users** tab of your dashboard.
+<AccordionGroup>
+  <Accordion title="Standard Properties - Recommended" icon="key">
+    **Custom metadata attached via headers during request**
+    
+    Standard properties are the most common way to add metadata to requests. They're set using special headers and appear immediately in your dashboard for filtering and analysis.
+    
+    **Best for:** Feature attribution, environment tracking, A/B testing, and business context
+    
+    **How it works:**
+    1. Add `Helicone-Property-[Name]` headers to your requests
+    2. Properties appear as filterable columns in the dashboard
+    3. Use properties for cost analysis and performance segmentation
+    4. Group related requests for feature-level metrics
+    
+    **Example:**
+    ```python
+    extra_headers={
+        "Helicone-Property-Feature": "document_analysis",
+        "Helicone-Property-Environment": "production",
+        "Helicone-Property-Customer_Tier": "enterprise"
+    }
+    ```
+  </Accordion>
 
-```bash
--H 'Helicone-User-Id: "alicebob@gmail.com"' # Special case for user-level attribution
-```
+  <Accordion title="User Attribution" icon="user">
+    **Special property for user-specific tracking and analytics**
+    
+    The `Helicone-User-Id` header is reserved for user identification and enables detailed per-user analytics in your dashboard's Users tab.
+    
+    **Best for:** User behavior analysis, cost attribution per user, usage pattern tracking
+    
+    **Example:**
+    ```python
+    extra_headers={
+        "Helicone-User-Id": "user@example.com"
+    }
+    ```
+    
+    <Note>
+      User attribution powers advanced analytics including request volume per user, cost attribution, and behavior analysis in the Users dashboard tab.
+    </Note>
+  </Accordion>
 
-Refer to [User Metrics Documentation](https://docs.helicone.ai/features/advanced-usage/user-metrics#option-2-sending-the-user-id-via-helicone) for implementation details.
+  <Accordion title="Post-Request Updates" icon="edit">
+    **Modify properties after request completion via REST API**
+    
+    Update or add properties to existing requests using the REST API. Useful for adding context that's only available after request processing.
+    
+    **Best for:** Adding computed values, post-processing metadata, or corrections to existing requests
+    
+    **Example:**
+    ```bash
+    curl -X PUT https://api.helicone.ai/v1/request/property \
+      -H "Authorization: Bearer YOUR_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "requestId": "'$request_id'",
+        "properties": {
+          "outcome": "successful",
+          "user_satisfaction": "high"
+        }
+      }'
+    ```
+  </Accordion>
+</AccordionGroup>
 
-### Updating Custom Properties After Request
+## Use Cases
 
-You can also update Custom Properties post-request submission by making a PUT request to a designated API endpoint.
+<Tabs>
+  <Tab title="A/B Testing & Experiments">
+    **Use case:** Track performance and costs across different model configurations, prompts, or feature variants
+
+    ```python
+    # Variant A: GPT-4 with detailed prompt
+    response_a = client.chat.completions.create(
+        model="gpt-4",
+        messages=[{"role": "user", "content": "Analyze this code thoroughly and provide detailed feedback..."}],
+        extra_headers={
+            "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+            "Helicone-Property-Experiment": "code_review_v2",
+            "Helicone-Property-Variant": "detailed_gpt4",
+            "Helicone-Property-Feature": "code_review",
+            "Helicone-Property-Cost_Center": "engineering"
+        }
+    )
+
+    # Variant B: GPT-3.5 with concise prompt
+    response_b = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": "Review this code and highlight issues"}],
+        extra_headers={
+            "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+            "Helicone-Property-Experiment": "code_review_v2",
+            "Helicone-Property-Variant": "concise_gpt35",
+            "Helicone-Property-Feature": "code_review",
+            "Helicone-Property-Cost_Center": "engineering"
+        }
+    )
+    ```
+
+    **Analysis Benefits:**
+    - Compare cost efficiency between variants
+    - Track performance metrics by experiment
+    - Measure feature adoption across variants
+  </Tab>
+
+  <Tab title="Environment & Deployment Tracking">
+    **Use case:** Monitor AI usage patterns and costs across different environments and deployment stages
+
+    ```javascript
+    // Development environment
+    const devResponse = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [{"role": "user", "content": "Help debug this API endpoint"}],
+      extra_headers: {
+        "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+        "Helicone-Property-Environment": "development",
+        "Helicone-Property-Feature": "api_debugging",
+        "Helicone-Property-Developer": "alice",
+        "Helicone-Property-Branch": "feature/new-endpoint"
+      }
+    });
+
+    // Production environment
+    const prodResponse = await openai.chat.completions.create({
+      model: "gpt-4",
+      messages: [{"role": "user", "content": "Generate customer support response"}],
+      extra_headers: {
+        "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+        "Helicone-Property-Environment": "production",
+        "Helicone-Property-Feature": "customer_support",
+        "Helicone-Property-Region": "us-east-1",
+        "Helicone-Property-Service": "support-bot"
+      }
+    });
+    ```
+
+    **Analysis Benefits:**
+    - Track development vs production usage patterns
+    - Monitor cost differences across environments
+    - Identify high-usage features by environment
+  </Tab>
+
+  <Tab title="Business Context & Attribution">
+    **Use case:** Track AI costs and performance by business units, customer tiers, or revenue-generating features
+
+    <Note>
+      Use business-relevant properties to enable cost attribution and ROI analysis across different parts of your organization.
+    </Note>
+
+    ```python
+    # Enterprise customer feature
+    enterprise_response = client.chat.completions.create(
+        model="gpt-4",
+        messages=[{"role": "user", "content": "Generate comprehensive market analysis report"}],
+        extra_headers={
+            "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+            "Helicone-Property-Customer_Tier": "enterprise",
+            "Helicone-Property-Feature": "market_analysis",
+            "Helicone-Property-Business_Unit": "sales",
+            "Helicone-Property-Revenue_Impact": "high",
+            "Helicone-Property-Report_Type": "quarterly"
+        }
+    )
+    
+    # Freemium customer feature
+    freemium_response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": "Summarize this document"}],
+        extra_headers={
+            "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+            "Helicone-Property-Customer_Tier": "freemium",
+            "Helicone-Property-Feature": "document_summary",
+            "Helicone-Property-Business_Unit": "product",
+            "Helicone-Property-Usage_Limit": "applied",
+            "Helicone-Property-Conversion_Funnel": "trial"
+        }
+    )
+    
+    # Internal tooling
+    internal_response = client.chat.completions.create(
+        model="gpt-4",
+        messages=[{"role": "user", "content": "Review this pull request"}],
+        extra_headers={
+            "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
+            "Helicone-Property-Customer_Tier": "internal",
+            "Helicone-Property-Feature": "code_review",
+            "Helicone-Property-Business_Unit": "engineering",
+            "Helicone-Property-Team": "platform",
+            "Helicone-Property-Priority": "high"
+        }
+    )
+    ```
+
+    **Analysis Benefits:**
+    - **Cost Attribution**: Track AI spend by business unit and customer tier
+    - **ROI Analysis**: Measure revenue impact vs AI costs per feature
+    - **Resource Planning**: Understand usage patterns across customer segments
+  </Tab>
+</Tabs>
+
+## How It Works
+
+**Request Metadata Attachment**
+
+Custom Properties are attached to requests via HTTP headers and stored alongside request logs for enhanced analysis and filtering capabilities.
+
+### Request Flow
 
 <Steps>
-  <Step title="Obtain the Request ID">
-    <AccordionGroup>
-    <Accordion title="Option 1: Pre-define the Request ID">
-
-      You can pre-define the Request ID and assign to the header `Helicone-Request-Id`. This approach allows you to control the request ID yourself, to meet certain requirements or follow a specific format.
-
-      <CodeGroup>
-      ```ts Node.js
-      import { OpenAI } from "openai";
-      const uuid = randomUUID(); // define your Request ID
-      const configuration = {
-        apiKey: process.env.OPENAI_API_KEY,
-        basePath: "https://oai.helicone.ai/v1", // Set the API endpoint
-        defaultHeaders: {
-          "Helicone-Auth": `Bearer ${HELICONE_API_KEY}`,
-          "Helicone-Request-Id": uuid, // Assign your Request ID
-        },
-      };
-      ```
-      ```python Python
-      import uuid
-      my_helicone_request_id = str(uuid.uuid4()) # define your Request ID
-
-      client = OpenAI(
-        api_key="<your-api-key-here>",
-        base_url="https://oai.helicone.ai/v1" # Set the API endpoint
-        default_headers= {
-          "Helicone-Auth": f"Bearer {HELICONE_API_KEY}",
-          "Helicone-Request-Id": my_helicone_request_id # Assign your Request ID
-        }
-      )
-      ```
-      </CodeGroup>
-
-      <Warning>**Make sure each UUID is unique.** Otherwise, your existing log with that request ID will be overwritten. </Warning>
-
-      Refer to [Request ID Predefinition](https://docs.helicone.ai/helicone-headers/predefining-request-id) for additional documentation.
-
-    </Accordion>
-    <Accordion title="Option 2: Get the Request ID From the Response Header">
-      Alternatively, you can retrieve your Request ID from the response header `helicone-id`. Depending on the client library, the method to extract the Request ID may be different.
-      <CodeGroup>
-      ```ts Node.js
-      const { data, response } = await openai.chat.completions
-          .create({
-            model: "gpt-4o",
-            messages: [
-              {
-                role: "user",
-                content: "Write 5 random words",
-              },
-            ],
-          })
-          .withResponse(); // include this line
-
-        console.log(response.headers.get("helicone-id")); // get the request ID
-      ```
-      ```python Python
-      response = openai.ChatCompletion.create(
-          model="gpt-4o",
-          messages=[
-              {
-                  "role": "user",
-                  "content": "Write 5 random words",
-              },
-          ]
-      )
-
-      print(response['headers']['helicone-id'])
-      ```
-      </CodeGroup>
-    </Accordion>
-
-  </AccordionGroup>
+  <Step title="Header Processing">
+    The Helicone proxy intercepts requests and extracts any headers matching the `Helicone-Property-*` pattern.
+    
+    - **Property Extraction**: Headers are parsed to extract property names and values
+    - **Validation**: Property names are validated for consistency and dashboard compatibility  
+    - **Storage Preparation**: Properties are prepared for database storage alongside request metadata
   </Step>
-  <Step title="Make a PUT Request">
-    Here are the code snippets on how to make a PUT request:
-    <Card title="PUT Request API" icon="link" href="https://docs.helicone.ai/rest/request/put-v1request-property">
-      Check out the detailed documentation.
-    </Card>
-
+  
+  <Step title="Request Forwarding">
+    The original request is forwarded to the LLM provider while properties are retained for logging.
+    
+    - **Clean Headers**: Helicone-specific headers are removed before forwarding
+    - **Provider Compatibility**: Original request structure is preserved for provider compatibility
+    - **Response Tracking**: Response is captured with associated property metadata
+  </Step>
+  
+  <Step title="Data Storage and Indexing">
+    Properties are stored and indexed for efficient filtering and analysis in the dashboard.
+    
+    - **Database Storage**: Properties are stored as structured metadata with each request
+    - **Index Creation**: Properties are indexed for fast filtering and aggregation queries
+    - **Dashboard Integration**: Properties appear as filterable columns in the request dashboard
   </Step>
 </Steps>
+
+### Post-Request Updates
+
+<Steps>
+  <Step title="Request ID Resolution">
+    Identify the target request using either a pre-defined request ID or the response header ID.
+
+    ```python
+    # Option 1: Pre-define request ID
+    import uuid
+    request_id = str(uuid.uuid4())
+    
+    response = client.chat.completions.create(
+        model="gpt-4",
+        messages=[{"role": "user", "content": "Hello"}],
+        extra_headers={
+            "Helicone-Request-Id": request_id
+        }
+    )
+    
+    # Option 2: Extract from response
+    request_id = response.headers.get('helicone-id')
+    ```
+  </Step>
+
+  <Step title="Property Update API Call">
+    Use the REST API to add or modify properties on existing requests.
+
+    ```bash
+    curl -X PUT https://api.helicone.ai/v1/request/property \
+      -H "Authorization: Bearer YOUR_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "requestId": "'$request_id'",
+        "properties": {
+          "outcome": "successful",
+          "user_satisfaction": "high"
+        }
+      }'
+    ```
+  </Step>
+</Steps>
+
+## Best Practices
+
+### Property Naming Conventions
+
+Use consistent, descriptive naming patterns for better organization:
+
+```python
+# ✅ Good naming patterns
+"Helicone-Property-Feature": "document_analysis"
+"Helicone-Property-Environment": "production"
+"Helicone-Property-Customer_Tier": "enterprise"
+"Helicone-Property-Business_Unit": "sales"
+
+# ❌ Avoid inconsistent naming
+"Helicone-Property-feat": "doc_analysis"
+"Helicone-Property-ENV": "prod"
+"Helicone-Property-customer-type": "ent"
+```
+
+### Value Management Standards
+
+- **Consistent Formatting**: Use standardized value formats across your application
+- **Meaningful Values**: Choose descriptive values that provide clear filtering options
+- **Enumerated Options**: Consider using predefined value sets for better dashboard filtering
+
+```python
+# ✅ Consistent value patterns
+"Helicone-Property-Priority": "high"  # high, medium, low
+"Helicone-Property-Status": "completed"  # pending, processing, completed, failed
+"Helicone-Property-Environment": "production"  # development, staging, production
+"Helicone-Property-Customer_Tier": "enterprise"  # freemium, pro, enterprise
+```
+
+### Performance Considerations
+
+- **Limit Property Count**: Use 5-10 properties per request for optimal performance
+- **Efficient Values**: Keep property values concise but meaningful
+- **Request Size**: Consider the impact of additional headers on request payload size
+
+<Note>
+  For complete API reference and advanced configuration options, see the [Custom Properties API Reference](/rest/request/put-v1request-property).
+</Note>
 
 <QuestionsSection />
