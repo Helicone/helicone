@@ -57,7 +57,7 @@ manage_test() {
         "start")
             check_docker
             check_port 18124
-            python3 ./clickhouse/ch_hcone.py --start --no-password--port 18124 --host localhost --test
+            python3 ./clickhouse/ch_hcone.py --start --no-password--port 18124 --host localhost --test --seed-roles
             print_success "Test database started on port 18124"
             ;;
         "stop")
@@ -66,7 +66,7 @@ manage_test() {
             ;;
         "restart")
             check_docker
-            python3 ./clickhouse/ch_hcone.py --restart --no-password --port 18124 --host localhost --test
+            python3 ./clickhouse/ch_hcone.py --restart --no-password --port 18124 --host localhost --test --seed-roles
             print_success "Test database restarted"
             ;;
         "migrate")
@@ -84,6 +84,10 @@ manage_test() {
             ;;
         "status")
             python3 ./clickhouse/ch_hcone.py --list-migrations --no-password --port 18124 --host localhost --test
+            ;;
+        "seed-roles")
+            python3 ./clickhouse/ch_hcone.py --seed-roles --no-password --port 18124 --host localhost --test
+            print_success "Roles seeded"
             ;;
         *)
             print_error "Unknown action: $action"

@@ -150,7 +150,7 @@ export class HeliconeSqlManager {
       ${firstSql}
     `;
 
-      const result = await clickhouseDb.dbQuery<any>(sqlWithCtes, [
+      const result = await clickhouseDb.dbQueryHql<any>(sqlWithCtes, [
         this.authParams.organizationId,
       ]);
 

@@ -265,12 +265,13 @@ echo 'SELECT 1' | curl '{get_host(args.host)}:{args.port}/' --data-binary @-
         print("Listing applied migrations")
         list_migrations(args.host, args.port, args.user, password)
 
-    elif args.seed_roles:
-        print("Running roles seed file only")
-        run_roles_seed(args.host, args.port, user=args.user, password=password)
-
     else:
         print("No action specified")
+
+    # Seed roles after all migrations are applied
+    if args.seed_roles:
+        print("Running roles seed file only")
+        run_roles_seed(args.host, args.port, user=args.user, password=password)
 
 
 if __name__ == "__main__":

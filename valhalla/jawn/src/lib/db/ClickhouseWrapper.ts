@@ -15,12 +15,19 @@ interface ClickhouseEnv {
 
 export class ClickhouseClientWrapper {
   private clickHouseClient: ClickHouseClient;
+  private clickHouseHqlClient: ClickHouseClient;
 
   constructor(env: ClickhouseEnv) {
     this.clickHouseClient = createClient({
       host: env.CLICKHOUSE_HOST,
       username: env.CLICKHOUSE_USER,
       password: env.CLICKHOUSE_PASSWORD,
+    });
+
+    this.clickHouseHqlClient = createClient({
+      host: env.CLICKHOUSE_HOST,
+      username: "hql_user",
+      password: "",
     });
   }
 
@@ -53,6 +60,36 @@ export class ClickhouseClientWrapper {
   }
 
   async dbQuery<T>(
+    query: string,
+    parameters: (number | string | boolean | Date)[]
+  ): Promise<Result<T[], string>> {
+    try {
+      const query_params = paramsToValues(parameters);
+
+      const queryResult = await this.clickHouseHqlClient.query({
+        query,
+        query_params,
+        format: "JSONEachRow",
+        // Recommended for cluster usage to avoid situations
+        // where a query processing error occurred after the response code
+        // and HTTP headers were sent to the client.
+        // See https://clickhouse.com/docs/en/interfaces/http/#response-buffering
+        clickhouse_settings: {
+          wait_end_of_query: 1,
+        },
+      });
+      return { data: await queryResult.json<T[]>(), error: null };
+    } catch (err) {
+      console.error("Error executing Clickhouse query: ", query, parameters);
+      console.error(err);
+      return {
+        data: null,
+        error: JSON.stringify(err),
+      };
+    }
+  }
+
+  async dbQueryHql<T>(
     query: string,
     parameters: (number | string | boolean | Date)[]
   ): Promise<Result<T[], string>> {

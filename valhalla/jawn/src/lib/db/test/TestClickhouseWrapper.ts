@@ -12,11 +12,18 @@ interface ClickhouseEnv {
 
 export class TestClickhouseClientWrapper {
   private clickHouseClient: ClickHouseClient;
+  private clickHouseHqlClient: ClickHouseClient;
 
   constructor(env: ClickhouseEnv) {
     this.clickHouseClient = createClient({
       host: env.CLICKHOUSE_HOST,
       username: env.CLICKHOUSE_USER,
+      password: env.CLICKHOUSE_PASSWORD,
+    });
+
+    this.clickHouseHqlClient = createClient({
+      host: env.CLICKHOUSE_HOST,
+      username: "hql_user",
       password: env.CLICKHOUSE_PASSWORD,
     });
   }
@@ -56,6 +63,30 @@ export class TestClickhouseClientWrapper {
       const query_params = this.paramsToValues(parameters);
 
       const queryResult = await this.clickHouseClient.query({
+        query,
+        query_params,
+        format: "JSONEachRow",
+        clickhouse_settings: {
+          wait_end_of_query: 1,
+        },
+      });
+      return { data: await queryResult.json<T[]>(), error: null };
+    } catch (err) {
+      return {
+        data: null,
+        error: JSON.stringify(err),
+      };
+    }
+  }
+
+  async dbQueryHql<T>(
+    query: string,
+    parameters: (number | string | boolean | Date)[]
+  ): Promise<Result<T[], string>> {
+    try {
+      const query_params = this.paramsToValues(parameters);
+
+      const queryResult = await this.clickHouseHqlClient.query({
         query,
         query_params,
         format: "JSONEachRow",
