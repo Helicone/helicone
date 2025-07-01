@@ -9,9 +9,12 @@ import {
   useGetOrgSlackChannels,
   useGetOrgSlackIntegration,
 } from "@/services/hooks/organizations";
-import { MultiSelect, MultiSelectItem } from "@tremor/react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import useNotification from "../../shared/notification/useNotification";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Check, ChevronsUpDown, X } from "lucide-react";
+import { clsx } from "../../shared/clsx";
 
 const ReportsPage = () => {
   const {
@@ -206,13 +209,15 @@ const ReportsPage = () => {
             size="md"
           />
         </div>
-        <small className="text-gray-500 col-span-4">
+        <small className="col-span-4">
           Receive a weekly summary report every <strong>Monday</strong> at{" "}
           <strong>10am UTC</strong>.
         </small>
         {reportEnabled && (
           <div className="col-span-4 w-full p-6 bg-gray-100 rounded-md space-y-1.5">
-            <h3 className="text-gray-500 font-semibold">Notify By</h3>
+            <h3 className="font-semibold">
+              Notify By
+            </h3>
             <div className="col-span-4 w-full space-y-1.5 text-sm">
               <div className="flex items-center justify-between">
                 <label htmlFor="alert-emails" className="text-gray-500">
@@ -226,27 +231,83 @@ const ReportsPage = () => {
                 />
               </div>
               {showEmails && (
-                <MultiSelect
-                  disabled={isLoading}
-                  placeholder="Select emails to send alerts to"
-                  value={selectedEmails}
-                  onValueChange={(values: string[]) => {
-                    setSelectedEmails(values);
-                  }}
-                  className="!mb-8"
-                >
-                  {members.map((member, idx) => {
-                    return (
-                      <MultiSelectItem
-                        value={member.email}
-                        key={idx}
-                        className="font-medium text-black"
+                <div className="space-y-2">
+                  <Popover modal={true}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        className="w-full justify-between"
+                        size="sm"
+                        disabled={isLoading}
                       >
-                        {member.email}
-                      </MultiSelectItem>
-                    );
-                  })}
-                </MultiSelect>
+                        <span className="truncate">
+                          {selectedEmails.length > 0
+                            ? `${selectedEmails.length} email${selectedEmails.length > 1 ? 's' : ''} selected`
+                            : "Select emails to send alerts to"}
+                        </span>
+                        <ChevronsUpDown className="ml-2 h-3.5 w-3.5 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[300px] p-0" align="start">
+                      <Command>
+                        <CommandInput placeholder="Search emails..." />
+                        <CommandList>
+                          <CommandEmpty>No emails found.</CommandEmpty>
+                          <CommandGroup>
+                            {members.map((member) => (
+                              <CommandItem
+                                key={member.email}
+                                onSelect={() => {
+                                  const email = member.email;
+                                  setSelectedEmails((prev) =>
+                                    prev.includes(email)
+                                      ? prev.filter((e) => e !== email)
+                                      : [...prev, email]
+                                  );
+                                }}
+                                value={member.email}
+                              >
+                                <Check
+                                  className={clsx(
+                                    "mr-2 h-4 w-4",
+                                    selectedEmails.includes(member.email)
+                                      ? "opacity-100"
+                                      : "opacity-0"
+                                  )}
+                                />
+                                {member.email}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                  {selectedEmails.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {selectedEmails.map((email) => (
+                        <div
+                          key={email}
+                          className="flex items-center gap-1 bg-muted px-2 py-1 rounded-md text-sm"
+                        >
+                          <span className="truncate max-w-[200px]">{email}</span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setSelectedEmails((prev) =>
+                                prev.filter((e) => e !== email)
+                              )
+                            }
+                            className="ml-1 hover:bg-muted-foreground/20 rounded-sm"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               )}
             </div>
             <div className="col-span-4 w-full space-y-1.5 text-sm">
@@ -264,26 +325,86 @@ const ReportsPage = () => {
               {showSlackChannels &&
                 (slackIntegration?.data ? (
                   <>
-                    <MultiSelect
-                      disabled={isLoadingSlackChannels}
-                      placeholder="Select slack channels to send alerts to"
-                      value={selectedSlackChannels}
-                      onValueChange={(values: string[]) => {
-                        setSelectedSlackChannels(values);
-                      }}
-                    >
-                      {slackChannels.map((channel, idx) => {
-                        return (
-                          <MultiSelectItem
-                            value={channel.id}
-                            key={idx}
-                            className="font-medium text-black"
+                    <div className="space-y-2">
+                      <Popover modal={true}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            className="w-full justify-between"
+                            size="sm"
+                            disabled={isLoadingSlackChannels}
                           >
-                            {channel.name}
-                          </MultiSelectItem>
-                        );
-                      })}
-                    </MultiSelect>
+                            <span className="truncate">
+                              {selectedSlackChannels.length > 0
+                                ? `${selectedSlackChannels.length} channel${selectedSlackChannels.length > 1 ? 's' : ''} selected`
+                                : "Select slack channels to send alerts to"}
+                            </span>
+                            <ChevronsUpDown className="ml-2 h-3.5 w-3.5 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[300px] p-0" align="start">
+                          <Command>
+                            <CommandInput placeholder="Search channels..." />
+                            <CommandList>
+                              <CommandEmpty>No channels found.</CommandEmpty>
+                              <CommandGroup>
+                                {slackChannels.map((channel) => (
+                                  <CommandItem
+                                    key={channel.id}
+                                    onSelect={() => {
+                                      const channelId = channel.id;
+                                      setSelectedSlackChannels((prev) =>
+                                        prev.includes(channelId)
+                                          ? prev.filter((c) => c !== channelId)
+                                          : [...prev, channelId]
+                                      );
+                                    }}
+                                    value={channel.name}
+                                  >
+                                    <Check
+                                      className={clsx(
+                                        "mr-2 h-4 w-4",
+                                        selectedSlackChannels.includes(channel.id)
+                                          ? "opacity-100"
+                                          : "opacity-0"
+                                      )}
+                                    />
+                                    {channel.name}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                      {selectedSlackChannels.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {selectedSlackChannels.map((channelId) => {
+                            const channel = slackChannels.find(c => c.id === channelId);
+                            return channel ? (
+                              <div
+                                key={channelId}
+                                className="flex items-center gap-1 bg-muted px-2 py-1 rounded-md text-sm"
+                              >
+                                <span className="truncate max-w-[200px]">{channel.name}</span>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setSelectedSlackChannels((prev) =>
+                                      prev.filter((c) => c !== channelId)
+                                    )
+                                  }
+                                  className="ml-1 hover:bg-muted-foreground/20 rounded-sm"
+                                >
+                                  <X className="h-3 w-3" />
+                                </button>
+                              </div>
+                            ) : null;
+                          })}
+                        </div>
+                      )}
+                    </div>
                     <small className="text-gray-500">
                       If the channel is private, you will need to add the bot to
                       the channel by mentioning <strong>@Helicone</strong> in
@@ -307,22 +428,21 @@ const ReportsPage = () => {
           </div>
         )}
         <div className="col-span-4 flex justify-end gap-2 pt-4">
-          <button
+          <Button
             onClick={() => {
               setSelectedEmails([]);
               setSelectedSlackChannels([]);
             }}
             type="button"
-            className="flex flex-row items-center rounded-md bg-white dark:bg-black px-4 py-2 text-sm font-semibold border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm hover:text-gray-700 dark:hover:text-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+            variant="outline"
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             type="submit"
-            className="items-center rounded-md bg-black dark:bg-white px-4 py-2 text-sm flex font-semibold text-white dark:text-black shadow-sm hover:bg-gray-800 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
             Save
-          </button>
+          </Button>
         </div>
       </form>
     </div>

@@ -6,12 +6,7 @@ import {
   useGetOrgSlackIntegration,
 } from "../../../services/hooks/organizations";
 import useNotification from "../../shared/notification/useNotification";
-import {
-  MultiSelect,
-  MultiSelectItem,
-  Select,
-  SelectItem,
-} from "@tremor/react";
+import { Select, SelectContent, SelectItem, SelectValue, SelectTrigger } from "@/components/ui/select";
 import {
   CodeBracketSquareIcon,
   CurrencyDollarIcon,
@@ -23,6 +18,10 @@ import { alertTimeWindows } from "./constant";
 import { Database } from "../../../db/database.types";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Check, ChevronsUpDown, X } from "lucide-react";
 
 export type AlertRequest = {
   name: string;
@@ -173,14 +172,13 @@ const AlertForm = (props: AlertFormProps) => {
         >
           Name
         </label>
-        <input
+        <Input
           type="text"
           name="alert-name"
           id="alert-name"
-          className="block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-black text-gray-900 dark:text-gray-100 shadow-sm p-2 text-sm"
           required
           defaultValue={initialValues?.name || ""}
-          placeholder={"Alert Name"}
+          placeholder="Alert Name"
         />
       </div>
 
@@ -192,14 +190,16 @@ const AlertForm = (props: AlertFormProps) => {
           Metric
         </label>
         <Select
-          placeholder="Select a metric"
           value={selectedMetric}
           defaultValue="response.status"
           onValueChange={(values: string) => {
             setSelectedMetric(values);
           }}
-          enableClear={false}
         >
+          <SelectTrigger>
+            <SelectValue placeholder="Select a metric" />
+          </SelectTrigger>
+          <SelectContent>
           {[
             {
               icon: CodeBracketSquareIcon,
@@ -213,11 +213,11 @@ const AlertForm = (props: AlertFormProps) => {
             },
           ].map((option, idx) => {
             return (
-              <SelectItem value={option.value} key={idx} icon={option.icon}>
+              <SelectItem value={option.value} key={idx}>
                 {option.label}
               </SelectItem>
             );
-          })}
+          })}</SelectContent>
         </Select>
       </div>
       <div className="col-span-2 w-full space-y-1.5 text-sm ">
@@ -244,14 +244,13 @@ const AlertForm = (props: AlertFormProps) => {
               </span>
             </div>
           )}
-          <input
+          <Input
             type="number"
             name="alert-threshold"
             id="alert-threshold"
             className={clsx(
               selectedMetric === "response.status" && "pr-8",
-              selectedMetric === "cost" && "pl-8",
-              "block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-black text-gray-900 dark:text-gray-100 shadow-sm p-2 text-sm"
+              selectedMetric === "cost" && "pl-8"
             )}
             min={selectedMetric === "response.status" ? 1 : 0.01}
             defaultValue={initialValues?.threshold.toString()}
@@ -278,20 +277,22 @@ const AlertForm = (props: AlertFormProps) => {
           </Tooltip>
         </label>
         <Select
-          placeholder="Select a time frame"
           value={selectedTimeWindow}
           onValueChange={(values: string) => {
             setSelectedTimeWindow(values);
           }}
-          enableClear={false}
         >
+          <SelectTrigger>
+            <SelectValue placeholder="Select a time frame" />
+          </SelectTrigger>
+          <SelectContent>
           {Object.entries(alertTimeWindows).map(([key, value], idx) => {
             return (
               <SelectItem value={value.toString()} key={idx}>
                 {key}
               </SelectItem>
             );
-          })}
+          })}</SelectContent>
         </Select>
       </div>
       <div className="col-span-2 w-full space-y-1.5 text-sm">
@@ -304,13 +305,10 @@ const AlertForm = (props: AlertFormProps) => {
             <InformationCircleIcon className="h-4 w-4 text-gray-500 inline" />
           </Tooltip>
         </label>
-        <input
+        <Input
           type="number"
           name="min-requests"
           id="min-requests"
-          className={clsx(
-            "block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-black text-gray-900 dark:text-gray-100 shadow-sm p-2 text-sm"
-          )}
           defaultValue={initialValues?.minimum_request_count?.toString() || "0"}
           min={0}
           step={1}
@@ -334,26 +332,82 @@ const AlertForm = (props: AlertFormProps) => {
             />
           </div>
           {showEmails && (
-            <MultiSelect
-              placeholder="Select emails to send alerts to"
-              value={selectedEmails}
-              onValueChange={(values: string[]) => {
-                setSelectedEmails(values);
-              }}
-              className="!mb-8"
-            >
-              {members.map((member, idx) => {
-                return (
-                  <MultiSelectItem
-                    value={member.email}
-                    key={idx}
-                    className="font-medium text-black"
+            <div className="space-y-2">
+              <Popover modal={true}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    className="w-full justify-between"
+                    size="sm"
                   >
-                    {member.email}
-                  </MultiSelectItem>
-                );
-              })}
-            </MultiSelect>
+                    <span className="truncate">
+                      {selectedEmails.length > 0
+                        ? `${selectedEmails.length} email${selectedEmails.length > 1 ? 's' : ''} selected`
+                        : "Select emails to send alerts to"}
+                    </span>
+                    <ChevronsUpDown className="ml-2 h-3.5 w-3.5 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[300px] p-0" align="start">
+                  <Command>
+                    <CommandInput placeholder="Search emails..." />
+                    <CommandList>
+                      <CommandEmpty>No emails found.</CommandEmpty>
+                      <CommandGroup>
+                        {members.map((member) => (
+                          <CommandItem
+                            key={member.email}
+                            onSelect={() => {
+                              const email = member.email;
+                              setSelectedEmails((prev) =>
+                                prev.includes(email)
+                                  ? prev.filter((e) => e !== email)
+                                  : [...prev, email]
+                              );
+                            }}
+                            value={member.email}
+                          >
+                            <Check
+                              className={clsx(
+                                "mr-2 h-4 w-4",
+                                selectedEmails.includes(member.email)
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
+                            {member.email}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              {selectedEmails.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {selectedEmails.map((email) => (
+                    <div
+                      key={email}
+                      className="flex items-center gap-1 bg-muted px-2 py-1 rounded-md text-sm"
+                    >
+                      <span className="truncate max-w-[200px]">{email}</span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSelectedEmails((prev) =>
+                            prev.filter((e) => e !== email)
+                          )
+                        }
+                        className="ml-1 hover:bg-muted-foreground/20 rounded-sm"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
         </div>
         <div className="col-span-4 w-full space-y-1.5 text-sm">
@@ -373,25 +427,85 @@ const AlertForm = (props: AlertFormProps) => {
           {showSlackChannels &&
             (slackIntegration?.data ? (
               <>
-                <MultiSelect
-                  placeholder="Select slack channels to send alerts to"
-                  value={selectedSlackChannels}
-                  onValueChange={(values: string[]) => {
-                    setSelectedSlackChannels(values);
-                  }}
-                >
-                  {slackChannels.map((channel, idx) => {
-                    return (
-                      <MultiSelectItem
-                        value={channel.id}
-                        key={idx}
-                        className="font-medium text-black"
+                <div className="space-y-2">
+                  <Popover modal={true}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        className="w-full justify-between"
+                        size="sm"
                       >
-                        {channel.name}
-                      </MultiSelectItem>
-                    );
-                  })}
-                </MultiSelect>
+                        <span className="truncate">
+                          {selectedSlackChannels.length > 0
+                            ? `${selectedSlackChannels.length} channel${selectedSlackChannels.length > 1 ? 's' : ''} selected`
+                            : "Select slack channels to send alerts to"}
+                        </span>
+                        <ChevronsUpDown className="ml-2 h-3.5 w-3.5 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[300px] p-0" align="start">
+                      <Command>
+                        <CommandInput placeholder="Search channels..." />
+                        <CommandList>
+                          <CommandEmpty>No channels found.</CommandEmpty>
+                          <CommandGroup>
+                            {slackChannels.map((channel) => (
+                              <CommandItem
+                                key={channel.id}
+                                onSelect={() => {
+                                  const channelId = channel.id;
+                                  setSelectedSlackChannels((prev) =>
+                                    prev.includes(channelId)
+                                      ? prev.filter((c) => c !== channelId)
+                                      : [...prev, channelId]
+                                  );
+                                }}
+                                value={channel.name}
+                              >
+                                <Check
+                                  className={clsx(
+                                    "mr-2 h-4 w-4",
+                                    selectedSlackChannels.includes(channel.id)
+                                      ? "opacity-100"
+                                      : "opacity-0"
+                                  )}
+                                />
+                                {channel.name}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                  {selectedSlackChannels.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {selectedSlackChannels.map((channelId) => {
+                        const channel = slackChannels.find(c => c.id === channelId);
+                        return channel ? (
+                          <div
+                            key={channelId}
+                            className="flex items-center gap-1 bg-muted px-2 py-1 rounded-md text-sm"
+                          >
+                            <span className="truncate max-w-[200px]">{channel.name}</span>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setSelectedSlackChannels((prev) =>
+                                  prev.filter((c) => c !== channelId)
+                                )
+                              }
+                              className="ml-1 hover:bg-muted-foreground/20 rounded-sm"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </div>
+                        ) : null;
+                      })}
+                    </div>
+                  )}
+                </div>
                 <small className="text-gray-500">
                   If the channel is private, you will need to add the bot to the
                   channel by mentioning <strong>@Helicone</strong> in the
