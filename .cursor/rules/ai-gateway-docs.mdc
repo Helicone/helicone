@@ -14,7 +14,7 @@ Critical rules to ensure documentation accuracy based on configuration changes.
 ```yaml
 # ✅ CORRECT - cache-store at top level
 cache-store:
-  in-memory: {}
+  type: "in-memory"
 
 routers:
   my-router:
