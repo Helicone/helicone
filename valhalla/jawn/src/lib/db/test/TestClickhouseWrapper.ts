@@ -8,6 +8,8 @@ interface ClickhouseEnv {
   CLICKHOUSE_HOST: string;
   CLICKHOUSE_USER: string;
   CLICKHOUSE_PASSWORD: string;
+  CLICKHOUSE_HQL_USER: string;
+  CLICKHOUSE_HQL_PASSWORD: string;
 }
 
 export class TestClickhouseClientWrapper {
@@ -23,8 +25,8 @@ export class TestClickhouseClientWrapper {
 
     this.clickHouseHqlClient = createClient({
       host: env.CLICKHOUSE_HOST,
-      username: "hql_user",
-      password: env.CLICKHOUSE_PASSWORD,
+      username: env.CLICKHOUSE_HQL_USER,
+      password: env.CLICKHOUSE_HQL_PASSWORD,
     });
   }
 
@@ -350,4 +352,6 @@ export const testClickhouseDb = new TestClickhouseClientWrapper({
   CLICKHOUSE_HOST: "http://localhost:18124",
   CLICKHOUSE_USER: process.env.CLICKHOUSE_USER || "default",
   CLICKHOUSE_PASSWORD: process.env.CLICKHOUSE_PASSWORD || "",
+  CLICKHOUSE_HQL_USER: process.env.CLICKHOUSE_HQL_USER || "hql_user",
+  CLICKHOUSE_HQL_PASSWORD: process.env.CLICKHOUSE_HQL_PASSWORD || "",
 });

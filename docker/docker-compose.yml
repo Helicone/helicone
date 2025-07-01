@@ -4,7 +4,7 @@ services:
   # =============================================================================
   # INFRASTRUCTURE SERVICES (Default profile - always runs)
   # =============================================================================
-  
+
   db:
     image: postgres:17.4
     container_name: helicone-postgres-flyway-test
@@ -38,7 +38,11 @@ services:
       CLICKHOUSE_DEFAULT_USER: default
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -86,7 +90,7 @@ services:
     image: redis:8.0.2-alpine
     restart: unless-stopped
     ports:
-      - '6379:6379'
+      - "6379:6379"
     environment:
       - REDIS_PASSWORD=helicone-redis-pw
       - REDIS_PORT=6379
@@ -127,7 +131,7 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:
-      - '5678:5678'
+      - "5678:5678"
     profiles: ["include-helix"]
     depends_on:
       redis:
@@ -172,7 +176,9 @@ services:
         {
           "CLICKHOUSE_HOST": "http://clickhouse:8123",
           "CLICKHOUSE_USER": "default",
-          "CLICKHOUSE_PASSWORD": ""
+          "CLICKHOUSE_PASSWORD": "",
+          "CLICKHOUSE_HQL_USER": "hql_user",
+          "CLICKHOUSE_HQL_PASSWORD": ""
         }
       VERCEL_ENV: ${VERCEL_ENV:-development}
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-your-secret-key}
@@ -243,7 +249,9 @@ services:
         {
           "CLICKHOUSE_HOST": "http://clickhouse:8123",
           "CLICKHOUSE_USER": "default",
-          "CLICKHOUSE_PASSWORD": ""
+          "CLICKHOUSE_PASSWORD": "",
+          "CLICKHOUSE_HQL_USER": "hql_user",
+          "CLICKHOUSE_HQL_PASSWORD": ""
         }
       VERCEL_ENV: ${VERCEL_ENV:-development}
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-your-secret-key}

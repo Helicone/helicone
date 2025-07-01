@@ -11,6 +11,8 @@ interface ClickhouseEnv {
   CLICKHOUSE_HOST: string;
   CLICKHOUSE_USER: string;
   CLICKHOUSE_PASSWORD: string;
+  CLICKHOUSE_HQL_USER: string;
+  CLICKHOUSE_HQL_PASSWORD: string;
 }
 
 export class ClickhouseClientWrapper {
@@ -26,8 +28,8 @@ export class ClickhouseClientWrapper {
 
     this.clickHouseHqlClient = createClient({
       host: env.CLICKHOUSE_HOST,
-      username: "hql_user",
-      password: "",
+      username: env.CLICKHOUSE_HQL_USER,
+      password: env.CLICKHOUSE_HQL_PASSWORD,
     });
   }
 
@@ -66,7 +68,7 @@ export class ClickhouseClientWrapper {
     try {
       const query_params = paramsToValues(parameters);
 
-      const queryResult = await this.clickHouseHqlClient.query({
+      const queryResult = await this.clickHouseClient.query({
         query,
         query_params,
         format: "JSONEachRow",
@@ -338,12 +340,18 @@ export interface ClickhouseDB {
   };
 }
 
-const { CLICKHOUSE_USER, CLICKHOUSE_PASSWORD, CLICKHOUSE_HOST } = JSON.parse(
-  process.env.CLICKHOUSE_CREDS ?? "{}"
-) as {
+const {
+  CLICKHOUSE_USER,
+  CLICKHOUSE_PASSWORD,
+  CLICKHOUSE_HOST,
+  CLICKHOUSE_HQL_USER,
+  CLICKHOUSE_HQL_PASSWORD,
+} = JSON.parse(process.env.CLICKHOUSE_CREDS ?? "{}") as {
   CLICKHOUSE_USER?: string;
   CLICKHOUSE_PASSWORD?: string;
   CLICKHOUSE_HOST?: string;
+  CLICKHOUSE_HQL_USER?: string;
+  CLICKHOUSE_HQL_PASSWORD?: string;
 };
 
 export const clickhouseDb = (() => {
@@ -351,6 +359,10 @@ export const clickhouseDb = (() => {
     return new TestClickhouseClientWrapper({
       CLICKHOUSE_HOST: "http://localhost:18124",
       CLICKHOUSE_USER: "default",
+      CLICKHOUSE_HQL_USER:
+        CLICKHOUSE_HQL_USER ?? process.env.CLICKHOUSE_HQL_USER ?? "hql_user",
+      CLICKHOUSE_HQL_PASSWORD:
+        CLICKHOUSE_HQL_PASSWORD ?? process.env.CLICKHOUSE_HQL_PASSWORD ?? "",
       CLICKHOUSE_PASSWORD: "",
     });
   }
@@ -363,5 +375,9 @@ export const clickhouseDb = (() => {
       CLICKHOUSE_USER ?? process.env.CLICKHOUSE_USER ?? "default",
     CLICKHOUSE_PASSWORD:
       CLICKHOUSE_PASSWORD ?? process.env.CLICKHOUSE_PASSWORD ?? "",
+    CLICKHOUSE_HQL_USER:
+      CLICKHOUSE_HQL_USER ?? process.env.CLICKHOUSE_HQL_USER ?? "hql_user",
+    CLICKHOUSE_HQL_PASSWORD:
+      CLICKHOUSE_HQL_PASSWORD ?? process.env.CLICKHOUSE_HQL_PASSWORD ?? "",
   });
 })();
