@@ -1,0 +1,250 @@
+---
+title: "How to migrate from LiteLLM to Helicone AI Gateway"
+description: "Learn how to migrate from LiteLLM to Helicone AI Gateway while maintaining API compatibility for your existing applications."
+"twitter:title": "How to migrate from LiteLLM to Helicone AI Gateway"
+---
+
+import QuestionsSection from "/snippets/questions-section.mdx";
+
+This cookbook shows you how to replace your LiteLLM deployment with Helicone AI Gateway while maintaining API compatibility for your existing applications.
+
+## Prerequisites
+
+- Running LiteLLM instance with existing `config.yaml` (or a similar configuration file)
+- Applications using LiteLLM's OpenAI-compatible endpoints
+- Provider API keys configured in LiteLLM
+- Understanding of your current load balancing and routing setup
+
+## Migration Process
+
+<Steps>
+  <Step title="Map your LiteLLM configuration">
+    First, extract key settings from your LiteLLM `config.yaml` to understand what needs migration:
+
+    ```yaml
+    # Your existing LiteLLM config.yaml
+    model_list:
+      - model_name: gpt-3.5-turbo
+        litellm_params:
+          model: azure/my-deployment
+          api_base: https://my-endpoint.openai.azure.com/
+          api_key: os.environ/AZURE_API_KEY
+      - model_name: claude-3.7-sonnet
+        litellm_params:
+          model: anthropic/claude-3.7-sonnet
+          api_key: os.environ/ANTHROPIC_API_KEY
+
+    router_settings:
+      routing_strategy: simple-shuffle
+      num_retries: 2
+      timeout: 30
+
+    general_settings:
+      master_key: sk-1234
+      database_url: postgresql://user:pass@host:5432/db
+    ```
+
+    Document all your:
+
+    - Model aliases and their provider mappings
+    - Routing strategies and retry settings
+    - Authentication keys (master_key, virtual keys)
+    - Database configurations for spend tracking
+  </Step>
+
+  <Step title="Convert to Helicone AI Gateway configuration">
+    Create an equivalent `ai-gateway-config.yaml` that maps your LiteLLM settings:
+
+    ```yaml
+    # Map LiteLLM auth to Helicone auth
+    helicone:
+      authentication: true  # Replaces master_key functionality
+      observability: true   # Optional: Built-in logging (no database needed)
+
+    # Map model_list to routers with load balancing
+    routers:
+      default:
+        load-balance:
+          chat:
+            strategy: latency  
+            providers:
+              - openai    # Maps to your Azure deployment
+              - anthropic # Direct provider support
+        
+        # Map router_settings
+        retries:
+          enabled: true
+          max-retries: 2
+          strategy: exponential
+          base: 1s
+          max: 30s
+
+    # If using custom endpoints (Azure, etc)
+    providers:
+      openai:
+        base-url: "https://my-endpoint.openai.azure.com/"
+        models:
+          - gpt-35-turbo  # Azure model name
+
+    # Set the port to LiteLLM's default port (optional)
+    server:
+        port: 4000
+    ```
+
+    Key mappings:
+    - `master_key` → Helicone authentication
+    - `database_url` → Built-in observability (no DB needed)
+    - `routing_strategy` → Load balancing strategies
+    - `model_list` → Provider configuration
+  </Step>
+
+  <Step title="Set environment variables">
+    Map your existing provider credentials. Helicone uses the same environment variable names as LiteLLM:
+
+    ```bash
+    # .env file with your existing credentials. These work exactly like in LiteLLM
+    OPENAI_API_KEY=${AZURE_API_KEY}
+    ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    
+    # New: Helicone authentication (replaces master_key)
+    HELICONE_CONTROL_PLANE_API_KEY=sk-helicone-your-api-key
+    ```
+
+    <Note>
+      Get your Helicone API key from [Helicone Settings](https://us.helicone.ai/settings/api-keys). This replaces LiteLLM's master_key functionality.
+    </Note>
+  </Step>
+
+  <Step title="Handle model name differences">
+    If your applications use LiteLLM's model aliases, configure mappings to ensure compatibility:
+
+    ```yaml
+    routers:
+      default:
+        model-mappings:
+          # Map LiteLLM model names to actual provider models
+          "gpt-3.5-turbo":
+            - "gpt-35-turbo"  # Azure naming
+          
+        load-balance:
+          chat:
+            strategy: latency
+            providers:
+              - openai
+              - anthropic
+    ```
+
+    This ensures your existing API calls continue working without code changes.
+  </Step>
+
+  <Step title="Deploy Helicone AI Gateway">
+    Deploy Helicone AI Gateway:
+
+    ```bash
+    # Start Helicone AI Gateway 
+    npx @helicone/ai-gateway@latest --config ai-gateway-config.yaml
+    ```
+  </Step>
+
+  <Step title="Update application endpoints">
+    Update your applications to use the new endpoints. Changes are minimal:
+
+    <CodeGroup>
+    ```python Python
+    # Before (LiteLLM)
+    client = OpenAI(
+        api_key="sk-1234",  # LiteLLM master key
+        base_url="http://localhost:4000"
+    )
+
+    client = OpenAI(
+        base_url="http://localhost:4000/ai",
+        apiKey: "fake-api-key", # Required by SDK, but gateway handles real auth
+    )
+    ```
+
+    ```javascript Node.js
+    // Before (LiteLLM)
+    const client = new OpenAI({
+      apiKey: "sk-1234",
+      baseURL: "http://localhost:4000"
+    });
+
+    // After (Helicone)
+    const client = new OpenAI({
+      apiKey:  "fake-api-key", // Required by SDK, but gateway handles real auth
+      baseURL: "http://localhost:4000/ai"
+    });
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Migrate advanced features">
+    Map LiteLLM's advanced features to Helicone equivalents:
+
+    **Virtual Keys → Helicone API Keys**
+    
+    LiteLLM virtual keys map directly to Helicone API keys. Instead of generating keys via API:
+    ```bash
+    # LiteLLM approach
+    curl -X POST 'http://localhost:4000/key/generate' \
+      -H 'Authorization: Bearer sk-1234'
+    ```
+    
+    Use Helicone's dashboard at https://us.helicone.ai/settings/api-keys
+
+    **Database/Spend Tracking → Built-in Observability**
+    
+    No migration needed! Helicone automatically tracks:
+    - Cost per request
+    - Token usage
+    - Request/response logs
+    - Error rates
+    
+    **Caching Configuration**
+    
+    If using LiteLLM's Redis cache, migrate to Helicone's in-memory caching:
+    ```yaml
+    routers:
+      default:
+        cache:
+          directive: "max-age=3600"  # 1 hour cache
+          buckets: 1
+    ```
+
+     <Note>
+      AI Gateway will soon support Redis caching.
+    </Note>
+  </Step>
+</Steps>
+
+{/* ## Post-Migration Benefits
+
+After successful migration, you'll have:
+
+- **Better performance**: ~10x higher throughput (up to 10k vs 1.5k requests/second)
+- **Automatic observability**: No database management or batch writes
+- **Improved routing**: P2C latency-based routing vs simple shuffle
+- **Simpler operations**: No Redis/Postgres dependencies
+- **Cost savings**: Built-in caching reduces API calls
+- **Better debugging**: Request tracing and provider visibility */}
+
+## Troubleshooting
+
+**Model not found errors:**
+- Check model mappings match your LiteLLM aliases
+- Verify provider models are correctly configured
+
+**Authentication failures:**
+- Ensure Helicone API key is set correctly
+- Check if authentication is enabled in config
+
+**Different response format:**
+- Helicone maintains OpenAI compatibility
+- Check for any custom LiteLLM response modifications
+
+**Missing spend tracking:**
+- Access Helicone dashboard for automatic tracking
+- No database configuration needed
+
+<QuestionsSection />
