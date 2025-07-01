@@ -175,9 +175,7 @@ export const toHeliconeRequest = (context: HandlerContext): HeliconeRequest => {
     prompt_cache_write_tokens: isCacheHit
       ? 0
       : context.usage.promptCacheWriteTokens ?? null,
-    prompt_cache_read_tokens: isCacheHit
-      ? 0
-      : context.usage.promptCacheReadTokens ?? null,
+    prompt_cache_read_tokens: context.usage.promptCacheReadTokens ?? null,
     prompt_audio_tokens: isCacheHit
       ? 0
       : context.usage.promptAudioTokens ?? null,
