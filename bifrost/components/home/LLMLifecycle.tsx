@@ -2410,14 +2410,18 @@ const LLMLifecycle = () => {
       >
         <div className="flex flex-col flex-1 gap-6">
           <h2 className="text-4xl sm:text-5xl font-semibold text-black max-w-[520px] text-wrap sm:leading-[57.6px]">
-            Designed for the{" "}
-            <span className="text-brand">entire LLM lifecycle</span>
+            Fastest, lightest, and most powerful{" "}
+            <span className="text-brand">LLMOps platform</span>
           </h2>
           <p className="text-lg sm:text-xl max-w-[440px] text-wrap font-light leading-relaxed text-landing-description">
-            The CI workflow to take your LLM application from MVP to production,
-            and from production to perfection.
+            Route intelligently, monitor comprehensively, optimize continuously.
+            The platform for every stage of your AI development lifecycle.
           </p>
-          <Link href="https://www.helicone.ai/blog/introducing-helicone-v2" target="_blank" rel="noopener">
+          <Link
+            href="https://www.helicone.ai/blog/introducing-helicone-v2"
+            target="_blank"
+            rel="noopener"
+          >
             <Button
               variant="link"
               className="text-brand p-0 text-base md:text-lg lg:text-md gap-2 rounded-lg z-[10]"

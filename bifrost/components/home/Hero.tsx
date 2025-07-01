@@ -35,20 +35,20 @@ const Hero = () => {
           priority
         />
       </div>
-      <h1 className="text-5xl sm:text-7xl md:text-[84px] font-semibold mb-3 w-full max-w-3xl text-wrap text-black z-[10]">
-        Ship your AI app with <span className="text-brand">confidence</span>
+      <h1 className="text-xl sm:text-7xl md:text-[84px] font-semibold mb-3 w-full max-w-4xl text-wrap text-black z-[10]">
+        How top startups <span className="text-brand">build reliable AI apps</span>
       </h1>
       <p className="text-lg sm:text-xl 2xl:text-2xl text-landing-secondary font-light mb-6 lg:mb-12 z-[10]">
-        The all-in-one platform to monitor, debug and improve{" "}
+        The end-to-end solution AI engineers trust{" "}
         <span className="hidden sm:inline">
           <br />
         </span>
-        production-ready LLM applications.
+        for routing and monitoring LLM applications.
       </p>
       <div className="flex flex-col md:flex-row gap-4">
         <Link href="https://us.helicone.ai/signup">
           <Button className="bg-brand p-5 text-base md:text-lg md:py-4 lg:py-7 lg:px-7 lg:text-xl gap-2 rounded-lg items-center z-[10]">
-            Start monitoring
+            Get started
             <ChevronRight className="size-5 md:size-6" />
           </Button>
         </Link>

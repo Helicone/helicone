@@ -9,16 +9,18 @@ import Image from "next/image";
 
 const Quote2 = () => {
   return (
-    <div className="px-3 py-12 lg:pb-48 lg:px-16">
+    <div className="bg-[#f2f9fc] pt-12 pb-20 lg:pb-48 lg:px-16">
       <div className={cn(ISLAND_WIDTH)}>
-        <div className="flex flex-col gap-y-8 justify-between items-center">
-          <h2 className="text-2xl md:text-[40px] tracking-tight leading-relaxed md:leading-[52px] font-semibold text-[#ACB3BA] max-w-[816px] text-wrap text-center">
-            <span className="hidden md:inline">“</span>Probably{" "}
-            <span className="text-accent-foreground">the most impactful one-line change</span>{" "}
+        <div className="flex flex-col gap-y-8 items-center">
+          <h2 className="text-2xl md:text-[40px] tracking-tight leading-normal md:leading-[52px] font-semibold text-[#ACB3BA] w-full max-w-[816px] text-wrap text-center mx-auto">
+            <span className="hidden md:inline">&ldquo;</span>Probably{" "}
+            <span className="text-black">
+              the most impactful one-line change
+            </span>{" "}
             I&apos;ve seen applied to our codebase.
-            <span className="hidden md:inline">”</span>
+            <span className="hidden md:inline">&rdquo;</span>
           </h2>
-          <div className="flex items-center gap-6">
+          <div className="flex items-end gap-6 justify-center max-w-[816px] w-full">
             <Image
               src="/static/home/nishantshukla.webp"
               alt="nishant shukla"
@@ -34,6 +36,13 @@ const Quote2 = () => {
                 Sr. Director of AI
               </p>
             </div>
+              <Image
+                src="/static/qawolf.webp"
+                alt="qawolf"
+                width={128}
+                height={32}
+                className="w-32 pb-2"
+              />
           </div>
         </div>
       </div>

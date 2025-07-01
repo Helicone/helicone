@@ -194,7 +194,7 @@ const OpenSource = async () => {
             Proudly <span className="text-brand">open-source</span>
           </h2>
           <p className="text-lg sm:text-xl font-light leading-relaxed text-landing-description">
-            We value transparency and we believe in the power of community.
+            We value transparency and believe the best products are built in community.
           </p>
         </div>
         <a
@@ -230,52 +230,47 @@ const OpenSource = async () => {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
         <Link
-          href="https://github.com/helicone/helicone"
+          href="https://us.helicone.ai/open-stats"
           target="_blank"
-          className="col-span-1 md:col-span-3 p-6 bg-slate-50 rounded-xl border border-slate-200 flex flex-col gap-9 justify-between hover:bg-slate-100 transition-colors"
+          className="col-span-1 md:col-span-2 p-6 bg-slate-50 rounded-xl border border-slate-200 relative hover:bg-slate-100 transition-colors flex flex-col h-full justify-between"
         >
           <div className="flex flex-col gap-2">
-            <h3 className="text-xl sm:text-2xl font-semibold text-black">
-              Join our community
-            </h3>
-            <p className="text-base sm:text-lg">
-              Come say hi to us on{" "}
-              <a
-                href="https://discord.com/invite/2TkeWdXNPQ"
-                target="_blank"
-                className="text-brand font-medium"
-              >
-                Discord
-              </a>{" "}
-              or become a contributor!
-            </p>
-            <span className="text-brand text-base sm:text-lg font-medium flex items-center gap-1">
-              Fork Helicone
-              <ArrowUpRight className="size-5 md:size-6" />
-            </span>
+            <p className="text-sm text-slate-500">Become a contributor</p>
+
+            <div className="flex items-center gap-2">
+              <h3 className="text-xl sm:text-2xl font-semibold text-black">
+                Join our community
+              </h3>
+              <ArrowUpRight className="w-4 h-4 text-brand" />
+            </div>
           </div>
+          <p className="text-base sm:text-lg max-w-[380px] text-wrap">
+            Share insights, get support, and learn from other AI engineers.
+          </p>
+          <br />
           <Image src={ContributorsImg} alt="Contributors" className="w-full" />
         </Link>
         <Link
-          href="/contact"
+          href="/llm-cost"
           target="_blank"
-          className="col-span-1 md:col-span-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col gap-6 hover:bg-slate-100 transition-colors"
+          className="col-span-1 md:col-span-4 px-6 pt-6 pb-2 sm:pb-6 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row items-center sm:items-stretch gap-y-8 justify-between relative hover:bg-slate-100 transition-colors"
         >
-          <div className="flex flex-col gap-2 p-6">
-            <h3 className="text-xl sm:text-2xl font-semibold text-black">
-              Deploy on-prem
-            </h3>
-            <p className="text-base sm:text-lg">
-              Cloud-host or deploy on-prem with our production-ready HELM chart
-              for maximum security. Chat with us about other options.
+          <div className="flex flex-col gap-4 sm:gap-10">
+            <div className="flex flex-col gap-2">
+              <p className="text-sm text-slate-500">AI Engineers</p>
+              <div className="flex items-center gap-2">
+                <h3 className="text-xl sm:text-2xl font-semibold text-black">
+                  Deploy your own AI Gateway
+                </h3>
+                <ArrowUpRight className="w-4 h-4 text-brand" />
+              </div>
+            </div>
+            <p className="text-base sm:text-lg max-w-[486px] text-wrap">
+              Whether through single-click deployment or our production-ready HELM chart, self-host the AI Gateway in your own infrastructure.
             </p>
-            <span className="text-brand text-base sm:text-lg font-medium flex items-center gap-1">
-              Get in touch
-              <ArrowUpRight className="w-4 h-4" />
-            </span>
           </div>
           <Image
-            className="self-end pl-8 w-3/5"
+            className="self-end pl-8 w-2/5"
             src={DeployImg}
             alt="Deploy on prem"
           />
@@ -296,9 +291,7 @@ const OpenSource = async () => {
               </div>
             </div>
             <p className="text-base sm:text-lg max-w-[486px] text-wrap">
-              Compare LLM costs with the largest open-source API pricing
-              database with 300+ models and providers such as OpenAI, Anthropic
-              and more.
+              Compare LLM costs with the largest open-source API pricing database with 300+ models and providers such as OpenAI, Anthropic and more.
             </p>
           </div>
           <div className="h-[200px]">
@@ -311,7 +304,7 @@ const OpenSource = async () => {
           className="col-span-1 md:col-span-2 p-6 bg-slate-50 rounded-xl border border-slate-200 relative hover:bg-slate-100 transition-colors flex flex-col h-full justify-between"
         >
           <div className="flex flex-col gap-2">
-            <p className="text-sm text-slate-500">Built by Helicone</p>
+            <p className="text-sm text-slate-500">Check out our data</p>
 
             <div className="flex items-center gap-2">
               <h3 className="text-xl sm:text-2xl font-semibold text-black">
@@ -321,8 +314,7 @@ const OpenSource = async () => {
             </div>
           </div>
           <p className="text-base sm:text-lg max-w-[380px] text-wrap">
-            The largest public AI conversation datasets consisting of all of
-            Helicone&apos;s LLM usage data. All anonymized.
+            The largest public AI conversation datasets consisting of all of Helicone&apos;s LLM usage data. All anonymized.
           </p>
           <OpenStatsSVG />
         </Link>

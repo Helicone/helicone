@@ -51,9 +51,9 @@ const CTA = () => {
                 "rotate-[-3deg]"
               )}
             >
-              <h1>Actionable</h1>
+              <h1>Reliable</h1>
             </div>
-            <h1>insights</h1>
+            <h1>AI applications</h1>
           </div>
           <h1>starting today</h1>
         </div>
