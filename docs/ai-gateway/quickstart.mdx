@@ -65,7 +65,7 @@ description: "Get started with Helicone AI Gateway in 1 minute"
     openai.api_base = "http://localhost:8080/ai"
     openai.api_key = "fake-api-key" # Required by SDK, but gateway handles real auth
 
-    response = openai.ChatCompletion.create(
+    response = openai.chat.completions.create(
         model="openai/gpt-4o-mini",  # 100+ models available
         messages=[{"role": "user", "content": "Hello, world!"}]
     )
