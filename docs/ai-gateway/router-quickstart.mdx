@@ -105,7 +105,7 @@ Now let's add caching to dramatically reduce costs and improve response times:
 
 ```yaml
 cache-store:
-  in-memory: {}
+  type: "in-memory"
 
 routers:
   my-router:
@@ -179,7 +179,7 @@ helicone:
   observability: false # Set to true to enable observability
 
 cache-store:
-  in-memory: {}
+  type: "in-memory"
 
 routers:
   production:

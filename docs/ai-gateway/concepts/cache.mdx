@@ -23,7 +23,7 @@ Caching uses exact parameter matching with configurable TTL, staleness policies,
 
     ```yaml
     cache-store:
-      in-memory: {}
+      type: "in-memory"
 
     global:
       cache:
@@ -71,7 +71,7 @@ Caching uses exact parameter matching with configurable TTL, staleness policies,
     **Example:**
     ```yaml
     cache-store:
-      in-memory: {}
+      type: "in-memory"
 
     global:
       cache:
@@ -95,7 +95,7 @@ Caching uses exact parameter matching with configurable TTL, staleness policies,
     **Example (router config):**
     ```yaml
     cache-store:
-      in-memory: {}
+      type: "in-memory"
 
     global:
       cache:
@@ -118,7 +118,7 @@ Caching uses exact parameter matching with configurable TTL, staleness policies,
 
     ```yaml
     cache-store:
-      in-memory: {}
+      type: "in-memory"
 
     global:
       cache:
@@ -132,7 +132,7 @@ Caching uses exact parameter matching with configurable TTL, staleness policies,
 
     ```yaml
     cache-store:
-      in-memory: {}
+      type: "in-memory"
 
     global:
       cache:
@@ -150,7 +150,7 @@ Caching uses exact parameter matching with configurable TTL, staleness policies,
 
     ```yaml
     cache-store:
-      in-memory: {}
+      type: "in-memory"
 
     routers:
       production:
@@ -241,13 +241,13 @@ Cache responses can be stored in different backends depending on your deployment
 
 <AccordionGroup>
   <Accordion title="In-Memory Storage" icon="memory">
-    **Local cache storage (Default and Only Option)**
+    **Local cache storage (Default)**
     
     Cache responses are stored locally in each router instance—no external dependencies, ultra-fast lookup.
     
     ```yaml
     cache-store:
-      in-memory: {}  # Uses default max-size
+      type: "in-memory" # Uses default max-size
 
     global:
       cache:
@@ -259,10 +259,30 @@ Cache responses can be stored in different backends depending on your deployment
     - Development environments
     - High-performance scenarios
   </Accordion>
+
+  <Accordion title="Redis" icon="database">
+    **Redis cache storage**
+    
+    Cache responses are stored in Redis, enabling cache sharing across multiple router instances and persistence across restarts.
+    
+    ```yaml
+    cache-store:
+      type: "redis"
+      host-url: "redis://localhost:6379"
+
+    global:
+      cache:
+        directive: "max-age=3600"
+    ```
+    
+    **Best for:**
+    - Distributed cache sharing across multiple router instances
+    - Cache persistence across restarts
+  </Accordion>
 </AccordionGroup>
 
 <Note>
-  In-memory storage is currently the only available option. Additional storage backends (Redis and Database) are [coming soon](#coming-soon) for distributed caching and advanced analytics.
+  Database storage for caching is coming soon.
 </Note>
 
 ### Strategy Selection Guide
@@ -275,6 +295,7 @@ Cache responses can be stored in different backends depending on your deployment
 | **High-traffic systems**    | Short TTL (≤2 h), buckets 3-5      |
 | **User-specific caching**   | Seeds for namespace isolation      |
 | **Single instance**         | In-memory storage                  |
+| **Multiple instances** | Redis storage |
 
 <Note>
   For complete configuration options and syntax, see the [Configuration Reference](/ai-gateway/config#caching).
@@ -286,5 +307,4 @@ The following caching features are planned for future releases:
 
 | Feature | Description | Version |
 |---------|-------------|---------|
-| **Redis Storage** | Distributed cache sharing across multiple router instances with persistence across restarts | v1 |
 | **Database Storage** | Persistent cache storage with advanced analytics and compliance features | v1 |
