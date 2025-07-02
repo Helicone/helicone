@@ -1,0 +1,234 @@
+---
+title: "How to migrate from Portkey to Helicone AI Gateway"
+sidebarTitle: "Migrate from Portkey"
+description: "Learn how to migrate from Portkey to Helicone AI Gateway while maintaining API compatibility for your existing applications."
+"twitter:title": "How to migrate from Portkey to Helicone AI Gateway"
+---
+
+import QuestionsSection from "/snippets/questions-section.mdx";
+
+This guide walks through migrating your Portkey setup to Helicone's self-hosted AI gateway while maintaining API compatibility for your existing applications.
+
+## Prerequisites
+
+- Active Portkey account and API key
+- Understanding of your current routing rules and provider setup
+- API keys for your LLM providers (OpenAI, Anthropic, etc.)
+
+## Migration Process
+
+<Steps>
+  <Step title="Document your Portkey configuration">
+    Start by documenting your current Portkey setup to ensure nothing gets lost in migration:
+
+    Export or document:
+    - Virtual keys (or Model Catalog) and their associated providers
+    - Routing configurations (loadbalance, fallback rules)
+    - Caching settings and TTLs
+    - Rate limiting rules
+    - Custom metadata and tags
+    - Guardrail configurations
+  </Step>
+
+  <Step title="Set up provider API keys">
+    Portkey uses virtual keys to manage provider credentials. With Helicone AI Gateway, you'll use environment variables:
+
+    ```bash
+    # .env file
+    # Get these from each provider's dashboard
+    OPENAI_API_KEY=sk-...
+    ANTHROPIC_API_KEY=sk-ant-...
+    GEMINI_API_KEY=...
+    GROQ_API_KEY=...
+    
+    # Optional: For Helicone authentication and observability
+    HELICONE_CONTROL_PLANE_API_KEY=sk-helicone-...
+    ```
+  </Step>
+
+  <Step title="Convert Portkey config to Helicone format">
+    Transform your Portkey JSON config into Helicone's YAML format:
+
+    **Portkey configuration:**
+    ```javascript
+    {
+    "strategy": {
+        "mode": "loadbalance"
+    },
+    "targets": [
+            {
+                "override_params": {
+                    "model": "@openai-prod/gpt-4o"
+                }
+            },
+            {
+                "override_params": {
+                    "model": "@bedrock-main/claude-3-sonnet"
+                }
+            }
+        ]
+    }
+    ```
+
+    **Equivalent Helicone configuration (`ai-gateway-config.yaml`):**
+    ```yaml
+    # Optional: Enable authentication
+    helicone:
+      authentication: true
+      observability: true
+
+    routers:
+      production:
+        # Replicate Portkey's load balancing
+        load-balance:
+          chat:
+            strategy: weighted
+            providers:
+              - provider: openai
+                weight: 0.7
+              - provider: bedrock
+                weight: 0.3
+    ```
+  </Step>
+
+  <Step title="Update your application code">
+    Unlike Portkey, Helicone AI Gateway does not require a special SDK. Replace Portkey SDK calls with standard OpenAI SDK pointing to Helicone:
+
+    <CodeGroup>
+    ```python Python
+    # Before (Portkey)
+    from portkey_ai import Portkey
+    
+    portkey = Portkey(
+        api_key="PORTKEY_API_KEY",
+        config=config
+    )
+    
+    response = portkey.chat.completions.create(
+        model="@openai-prod/gpt-4",
+        messages=[{"role": "user", "content": "Hello!"}]
+    )
+
+    # After (Helicone AI Gateway)
+    from openai import OpenAI
+    
+    client = OpenAI(
+        base_url="http://localhost:8080/ai",
+        api_key="sk-helicone-..."  # If auth enabled, else use a placeholder
+    )
+    
+    response = client.chat.completions.create(
+        model="gpt-4",
+        messages=[{"role": "user", "content": "Hello!"}]
+    )
+    ```
+
+    ```typescript TypeScript
+    // Before (Portkey)
+    import Portkey from 'portkey-ai';
+    
+    const portkey = new Portkey({
+      apiKey: process.env.PORTKEY_API_KEY,
+      config: config
+    });
+    
+    const response = await portkey.chat.completions.create({
+      model: '@openai-prod/gpt-4',
+      messages: [{ role: 'user', content: 'Hello!' }]
+    });
+
+    // After (Helicone AI Gateway)
+    import OpenAI from 'openai';
+    
+    const client = new OpenAI({
+      baseURL: 'http://localhost:8080/ai',
+      apiKey: process.env.HELICONE_API_KEY || 'placeholder' // If auth enabled, else use a placeholder 
+    });
+    
+    const response = await client.chat.completions.create({
+      model: 'gpt-4',
+      messages: [{ role: 'user', content: 'Hello!' }]
+    });
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Migrate advanced features">
+    Map Portkey's advanced features to Helicone equivalents, as shown below:
+
+    **Fallbacks:**
+    ```yaml
+    routers:
+      production:
+        # Automatic health monitoring handles fallbacks
+        load-balance:
+          chat:
+            strategy: latency  # Automatically routes away from failing providers
+            providers:
+              - openai      
+              - anthropic   
+              - gemini      
+    ```
+
+    **Retries:**
+    ```yaml
+    routers:
+      production:
+        retries:
+          enabled: true
+          max-retries: 3
+          strategy: exponential
+          base: 1s
+          max: 30s
+    ```
+
+    **Caching and Rate Limiting (Helicone AI Gateway only):**
+    ```yaml
+    cache-store:
+      type: "in-memory" # or redis
+      in-memory: {}
+    
+    rate-limit:
+      store: in-memory 
+    per-api-key:
+      capacity: 1000
+      refill-frequency: 1m
+    ```
+  </Step>
+
+  <Step title="Deploy and test">
+    Start Helicone AI Gateway with your configuration:
+
+    ```bash
+    npx @helicone/ai-gateway@latest 
+    ```
+
+    Test the migration:
+    ```bash
+    # Test basic routing
+    curl http://localhost:8080/router/default/chat/completions \
+      -H "Authorization: Bearer $HELICONE_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "model": "gpt-4",
+        "messages": [{"role": "user", "content": "Migration test"}]
+      }'
+    ```
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+**"Provider not found" errors:**
+- Ensure all provider API keys are set in environment variables
+- Check provider names match exactly (lowercase)
+
+**Rate limiting not working:**
+- Enable Helicone authentication (`authentication: true`)
+- Set `HELICONE_CONTROL_PLANE_API_KEY` environment variable
+
+**Authentication issues:**
+- If using Helicone auth, ensure `HELICONE_CONTROL_PLANE_API_KEY` is set
+- Check provider API Keys
+
+<QuestionsSection />
