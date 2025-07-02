@@ -506,6 +506,12 @@
                   "guides/prompt-engineering/use-structured-formats",
                   "guides/prompt-engineering/use-thread-of-thought-prompting"
                 ]
+              },
+              {
+                "group": "AI Gateway",
+                "pages": [
+                  "guides/cookbooks/ai-gateway/migrate-from-openrouter"
+                ]
               }
             ]
           },

@@ -1,0 +1,177 @@
+---
+title: "How to migrate from OpenRouter to Helicone AI Gateway"
+sidebarTitle: "Migrate from OpenRouter"
+description: "Learn how to migrate from OpenRouter to Helicone AI Gateway while maintaining API compatibility for your existing applications."
+"twitter:title": "How to migrate from OpenRouter to Helicone AI Gateway"
+---
+
+import QuestionsSection from "/snippets/questions-section.mdx";
+
+This cookbook shows you how to replace OpenRouter with Helicone AI Gateway while maintaining API compatibility for your existing applications.
+
+## Prerequisites
+
+- Active OpenRouter account with API key
+- Understanding of your current model usage and routing preferences
+- Provider API keys for the models you're using (OpenAI, Anthropic, etc.)
+
+## Migration Process
+
+<Steps>
+  <Step title="Identify your OpenRouter usage patterns">
+    First, document your current OpenRouter setup to understand what needs migration:
+
+    Document all:
+    - Models you're actively using
+    - Provider preferences and fallback settings
+    - Custom headers (HTTP-Referer, X-Title)
+    - Rate limits and usage patterns
+  </Step>
+
+  <Step title="Set up provider API keys">
+    Unlike OpenRouter which uses a single API key, Helicone AI Gateway needs direct provider keys:
+
+    ```bash
+    # .env file
+    # Get these from each provider's dashboard
+    OPENAI_API_KEY=sk-...
+    ANTHROPIC_API_KEY=sk-ant-...
+    GEMINI_API_KEY=...
+    
+    # Optional: For Helicone Observability 
+    HELICONE_CONTROL_PLANE_API_KEY=sk-helicone-...
+    ```
+  </Step>
+
+  <Step title="Create Helicone AI Gateway configuration">
+    Create an `ai-gateway-config.yaml` that replicates your OpenRouter behavior:
+
+    ```yaml
+    # Optional: Enable Helicone authentication for AI Gateway
+    helicone:
+      authentication: true  # Use Helicone API key for auth
+      observability: true   # Get better insights 
+
+    routers:
+      default:
+        # Replicate or replace OpenRouter setup's load balancing behavior 
+        load-balance:
+          chat:
+            strategy: latency  # Routes to fastest provider 
+            providers:
+              - openai
+              - anthropic
+              - gemini
+        
+        # Handle fallbacks 
+        retries:
+          enabled: true
+          max-retries: 2
+          strategy: exponential
+          base: 1s
+          max: 10s
+        
+        # Optional: Add caching (not available in OpenRouter)
+        cache:
+          directive: "max-age=3600"  # Cache for 1 hour
+          buckets: 1
+    ```
+
+    <Note>
+        Use Weighted load balancing to mimic Openrouter's default cost-based strategy
+    </Note>
+  </Step>
+
+  <Step title="Update your application code">
+    Minimal changes needed - just update the base URL:
+
+    <CodeGroup>
+    ```python Python
+    # Before (OpenRouter)
+    import openai
+    
+    client = openai.OpenAI(
+        base_url="https://openrouter.ai/api/v1",
+        api_key=OPENROUTER_API_KEY
+    )
+
+    # After (Helicone AI Gateway)
+    client = openai.OpenAI(
+        base_url="http://localhost:8080/ai",
+        api_key=HELICONE_API_KEY  # If auth enabled, else use dummy
+    )
+    
+    # Your code remains the same!
+    response = client.chat.completions.create(
+        model="openai/gpt-4",
+        messages=[{"role": "user", "content": "Hello!"}]
+    )
+    ```
+
+    ```typescript TypeScript SDK
+    // Before (OpenRouter)
+    import OpenAI from 'openai';
+
+    const openai = new OpenAI({
+      baseURL: 'https://openrouter.ai/api/v1',
+      apiKey: process.env.OPENROUTER_API_KEY,
+      defaultHeaders: {
+        'HTTP-Referer': 'https://your-site.com',
+        'X-Title': 'Your App Name',
+      }
+    });
+
+    // After (Helicone AI Gateway)
+    const openai = new OpenAI({
+      baseURL: 'http://localhost:8080/ai',
+      apiKey: process.env.HELICONE_API_KEY || 'sk-dummy' // If auth enabled, else use dummy
+    });
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Deploy Helicone AI Gateway">
+    Start the gateway with your configuration:
+
+    ```bash
+    npx @helicone/ai-gateway@latest 
+    ```
+
+    The gateway starts instantly and is ready to handle requests.
+  </Step>
+
+  <Step title="Verify the migration">
+    Test your migrated setup:
+
+    ```bash
+    # Test with curl
+    curl http://localhost:8080/ai/v1/chat/completions \
+      -H "Content-Type: application/json" \
+      -H "Authorization: Bearer $HELICONE_API_KEY" \
+      -d '{
+        "model": "openai/gpt-4",
+        "messages": [{"role": "user", "content": "Test migration"}]
+      }'
+    ```
+
+    Check that:
+    - ✓ Requests route successfully
+    - ✓ Model names work as expected
+    - ✓ Fallbacks trigger on provider failures
+    - ✓ Response format matches OpenRouter
+    - ✓ Activity gets logged to Helicone dashboard if being used
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+**"Model not found" errors:**
+- Ensure provider API keys are set correctly
+- Check that providers support the requested model
+- Verify model name format matches OpenRouter's
+
+**Authentication issues:**
+- If using Helicone auth, ensure `HELICONE_CONTROL_PLANE_API_KEY` is set
+- Check provider API Keys
+
+<QuestionsSection />
