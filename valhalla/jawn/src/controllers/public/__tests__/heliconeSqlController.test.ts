@@ -223,6 +223,24 @@ describe("HeliconeSqlController HTTP Integration Tests", () => {
       expect(result.error).toContain("Only select statements");
     });
 
+    test("create more to CTE", async () => {
+      const requestBody = {
+        sql: "tmp as (SELECT * FROM request_response_rmt) SELECT * from tmp;",
+      };
+
+      const response = await fetch(`${BASE_URL}/helicone-sql/execute`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+          "Helicone-Organization-Id": TEST_ORG_ID,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      expect(response.status).toBe(500);
+    });
+
     test("multiple statements", async () => {
       const requestBody = {
         sql: "SELECT * FROM request_response_rmt where organization_id = '83635a30-5ba6-41a8-8cc6-fb7df941b24b'; DROP TABLE request_response_rmt",

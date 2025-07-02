@@ -8,16 +8,25 @@ interface ClickhouseEnv {
   CLICKHOUSE_HOST: string;
   CLICKHOUSE_USER: string;
   CLICKHOUSE_PASSWORD: string;
+  CLICKHOUSE_HQL_USER: string;
+  CLICKHOUSE_HQL_PASSWORD: string;
 }
 
 export class TestClickhouseClientWrapper {
   private clickHouseClient: ClickHouseClient;
+  private clickHouseHqlClient: ClickHouseClient;
 
   constructor(env: ClickhouseEnv) {
     this.clickHouseClient = createClient({
       host: env.CLICKHOUSE_HOST,
       username: env.CLICKHOUSE_USER,
       password: env.CLICKHOUSE_PASSWORD,
+    });
+
+    this.clickHouseHqlClient = createClient({
+      host: env.CLICKHOUSE_HOST,
+      username: env.CLICKHOUSE_HQL_USER,
+      password: env.CLICKHOUSE_HQL_PASSWORD,
     });
   }
 
@@ -56,6 +65,30 @@ export class TestClickhouseClientWrapper {
       const query_params = this.paramsToValues(parameters);
 
       const queryResult = await this.clickHouseClient.query({
+        query,
+        query_params,
+        format: "JSONEachRow",
+        clickhouse_settings: {
+          wait_end_of_query: 1,
+        },
+      });
+      return { data: await queryResult.json<T[]>(), error: null };
+    } catch (err) {
+      return {
+        data: null,
+        error: JSON.stringify(err),
+      };
+    }
+  }
+
+  async dbQueryHql<T>(
+    query: string,
+    parameters: (number | string | boolean | Date)[]
+  ): Promise<Result<T[], string>> {
+    try {
+      const query_params = this.paramsToValues(parameters);
+
+      const queryResult = await this.clickHouseHqlClient.query({
         query,
         query_params,
         format: "JSONEachRow",
@@ -319,4 +352,6 @@ export const testClickhouseDb = new TestClickhouseClientWrapper({
   CLICKHOUSE_HOST: "http://localhost:18124",
   CLICKHOUSE_USER: process.env.CLICKHOUSE_USER || "default",
   CLICKHOUSE_PASSWORD: process.env.CLICKHOUSE_PASSWORD || "",
+  CLICKHOUSE_HQL_USER: process.env.CLICKHOUSE_HQL_USER || "hql_user",
+  CLICKHOUSE_HQL_PASSWORD: process.env.CLICKHOUSE_HQL_PASSWORD || "",
 });
