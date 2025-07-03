@@ -9,7 +9,11 @@ import {
 } from "../clients/KVRateLimiterClient";
 import { RequestWrapper } from "../RequestWrapper";
 import { ResponseBuilder } from "../ResponseBuilder";
-import { getCachedResponse, saveToCache } from "../util/cache/cacheFunctions";
+import {
+  getCachedResponse,
+  saveToCache,
+  trySaveToCache,
+} from "../util/cache/cacheFunctions";
 import { CacheSettings, getCacheSettings } from "../util/cache/cacheSettings";
 import { HeliconeHeaders } from "../models/HeliconeHeaders";
 import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
@@ -316,7 +320,7 @@ export async function proxyForwarder(
                 : await loggable.getStatus();
 
             if (status >= 200 && status < 300) {
-              saveToCache({
+              trySaveToCache({
                 request: proxyRequest,
                 response,
                 responseBody: responseBody.body,
@@ -326,6 +330,7 @@ export async function proxyForwarder(
                   responseBody.endTime.getTime() - loggable.getTimingStart(),
                 cacheKv: env.CACHE_KV,
                 cacheSeed: cacheSettings.cacheSeed ?? null,
+                hardFail: true,
               });
             }
           });
@@ -336,12 +341,15 @@ export async function proxyForwarder(
             },
           });
         } catch (error) {
-          return new Response("Error saving to cache", {
-            status: 500,
-            headers: {
-              "connor-justin-helicone": "true",
-            },
-          });
+          return new Response(
+            `Error saving to cache: ${JSON.stringify(error)}`,
+            {
+              status: 500,
+              headers: {
+                "connor-justin-helicone": "true",
+              },
+            }
+          );
         }
       }
 

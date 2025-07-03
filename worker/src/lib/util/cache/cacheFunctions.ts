@@ -1,7 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
 import { Env, hash } from "../../..";
 import { HeliconeProxyRequest } from "../../models/HeliconeProxyRequest";
-import { ClickhouseClientWrapper, RequestResponseRMT } from "../../db/ClickhouseWrapper";
+import {
+  ClickhouseClientWrapper,
+  RequestResponseRMT,
+} from "../../db/ClickhouseWrapper";
 import { Database } from "../../../../supabase/database.types";
 import { safePut } from "../../safePut";
 import { DBLoggable } from "../../dbLogger/DBLoggable";
@@ -51,9 +54,10 @@ interface SaveToCacheOptions {
   settings: { bucketSize: number };
   cacheKv: KVNamespace;
   cacheSeed: string | null;
+  hardFail: boolean;
 }
 
-async function trySaveToCache(options: SaveToCacheOptions) {
+export async function trySaveToCache(options: SaveToCacheOptions) {
   try {
     const {
       request,
@@ -63,6 +67,7 @@ async function trySaveToCache(options: SaveToCacheOptions) {
       settings,
       cacheKv,
       cacheSeed,
+      hardFail = false,
     } = options;
     const expirationTtl = cacheControl.includes("max-age=")
       ? parseInt(cacheControl.split("max-age=")[1])
@@ -87,14 +92,22 @@ async function trySaveToCache(options: SaveToCacheOptions) {
         },
       });
       if (!result.success) {
-        console.error("Error saving to cache:", result.error);
+        if (hardFail) {
+          throw new Error(result.error);
+        } else {
+          console.error("Error saving to cache:", result.error);
+        }
       }
       return result.success;
     } else {
       return false;
     }
   } catch (error) {
-    console.error("Error saving to cache:", error);
+    if (options.hardFail) {
+      throw error;
+    } else {
+      console.error("Error saving to cache:", error);
+    }
     return false;
   }
 }
@@ -148,8 +161,9 @@ export async function getCachedResponse(
         cacheIdx.toString()
       );
       cachedResponseHeaders.append(
-        "Helicone-Cache-Latency", randomCache.latency ? randomCache.latency.toString() : "0"
-      )
+        "Helicone-Cache-Latency",
+        randomCache.latency ? randomCache.latency.toString() : "0"
+      );
 
       const cachedStream = new ReadableStream({
         start(controller) {
