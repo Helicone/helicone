@@ -15,8 +15,8 @@ import {
 import type { DraggableAttributes } from "@dnd-kit/core";
 import type { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities";
 import { Message } from "@helicone-package/llm-mapper/types";
-import { Trash2Icon } from "lucide-react";
-import { ReactNode } from "react";
+import { Trash2Icon, ClipboardIcon, ClipboardCheckIcon } from "lucide-react";
+import { ReactNode, useState } from "react";
 import { LuPlus } from "react-icons/lu";
 import { ChatMode } from "../Chat";
 
@@ -34,6 +34,7 @@ interface ChatMessageTopBarProps {
   setPopoverOpen: (_open: boolean) => void;
   onAddText?: () => void;
   onAddImage?: () => void;
+  onCopyContent?: () => void;
 }
 
 const ROLE_OPTIONS = [
@@ -77,32 +78,6 @@ const getDropdownItems = (
         ]
       : []),
   ];
-
-  const items = [];
-
-  if (messageRole === "assistant") {
-    items.push({
-      label: "Add Tool Call",
-      onClick: handlers.addToolCall,
-    });
-  }
-
-  if (messageRole === "user") {
-    if (handlers.onAddText) {
-      items.push({
-        label: "Add Text",
-        onClick: handlers.onAddText,
-      });
-    }
-    if (handlers.onAddImage) {
-      items.push({
-        label: "Add Image",
-        onClick: handlers.onAddImage,
-      });
-    }
-  }
-
-  return items;
 };
 
 export default function ChatMessageTopBar({
@@ -119,7 +94,16 @@ export default function ChatMessageTopBar({
   setPopoverOpen,
   onAddText,
   onAddImage,
+  onCopyContent,
 }: ChatMessageTopBarProps) {
+  const [copied, setCopied] = useState(false);
+  
+  const handleCopy = () => {
+    onCopyContent?.();
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   const dropdownItems = getDropdownItems(message.role || "user", {
     addToolCall: () => addToolCall(messageIndex),
     onAddText,
@@ -151,9 +135,25 @@ export default function ChatMessageTopBar({
             </SelectContent>
           </Select>
         ) : (
-          <h2 className="text-secondary font-medium capitalize text-sm">
-            {message.role}
-          </h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-secondary font-medium capitalize text-sm">
+              {message.role}
+            </h2>
+            {onCopyContent && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-4 w-4 text-muted-foreground hover:text-foreground"
+                onClick={handleCopy}
+              >
+                {copied ? (
+                  <ClipboardCheckIcon className="h-3 w-3 text-emerald-500 dark:text-emerald-400" />
+                ) : (
+                  <ClipboardIcon className="h-3 w-3" />
+                )}
+              </Button>
+            )}
+          </div>
         )}
       </div>
       {chatMode === "PLAYGROUND_INPUT" && (

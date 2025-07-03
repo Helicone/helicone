@@ -751,6 +751,7 @@ export default function ChatMessage({
           deleteMessage={deleteMessage}
           onAddText={addTextToMessage}
           onAddImage={addImageToMessage}
+          onCopyContent={() => navigator.clipboard.writeText(content)}
         />
       )}
 
