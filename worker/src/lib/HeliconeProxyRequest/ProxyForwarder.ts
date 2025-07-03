@@ -9,7 +9,11 @@ import {
 } from "../clients/KVRateLimiterClient";
 import { RequestWrapper } from "../RequestWrapper";
 import { ResponseBuilder } from "../ResponseBuilder";
-import { getCachedResponse, saveToCache } from "../util/cache/cacheFunctions";
+import {
+  getCachedResponse,
+  saveToCache,
+  trySaveToCache,
+} from "../util/cache/cacheFunctions";
 import { CacheSettings, getCacheSettings } from "../util/cache/cacheSettings";
 import { HeliconeHeaders } from "../models/HeliconeHeaders";
 import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
@@ -85,6 +89,17 @@ export async function proxyForwarder(
             cacheSettings.cacheSeed
           );
           if (cachedResponse) {
+            if (
+              request.headers.get("connor-justin-helicone-check-response") ===
+              "true"
+            ) {
+              return new Response("Cached response found!", {
+                status: 200,
+                headers: {
+                  "connor-justin-helicone": "true",
+                },
+              });
+            }
             const { data, error } = await handleProxyRequest(
               proxyRequest,
               cachedResponse // Pass the cached response directly
@@ -166,7 +181,8 @@ export async function proxyForwarder(
   }
 
   if (
-    proxyRequest.requestWrapper.heliconeHeaders.promptSecurityEnabled === true &&
+    proxyRequest.requestWrapper.heliconeHeaders.promptSecurityEnabled ===
+      true &&
     provider === "OPENAI"
   ) {
     const { data: latestMsg, error: latestMsgErr } =
@@ -295,13 +311,58 @@ export async function proxyForwarder(
     if (authError == null) {
       const db = new DBWrapper(env, auth);
       const { data: orgData, error: orgError } = await db.getAuthParams();
+      if (request.headers.get("connor-justin-helicone") === "true") {
+        try {
+          await loggable.waitForResponse().then(async (responseBody) => {
+            const status =
+              request.headers.get("connor-justin-helicone") === "true"
+                ? response.status
+                : await loggable.getStatus();
+
+            if (status >= 200 && status < 300) {
+              trySaveToCache({
+                request: proxyRequest,
+                response,
+                responseBody: responseBody.body,
+                cacheControl: cacheSettings.cacheControl,
+                settings: cacheSettings.bucketSettings,
+                responseLatencyMs:
+                  responseBody.endTime.getTime() - loggable.getTimingStart(),
+                cacheKv: env.CACHE_KV,
+                cacheSeed: cacheSettings.cacheSeed ?? null,
+                hardFail: true,
+              });
+            }
+          });
+          return new Response("Saved to cache!", {
+            status: 200,
+            headers: {
+              "connor-justin-helicone": "true",
+            },
+          });
+        } catch (error) {
+          return new Response(
+            `Error saving to cache: ${JSON.stringify(error)}`,
+            {
+              status: 500,
+              headers: {
+                "connor-justin-helicone": "true",
+              },
+            }
+          );
+        }
+      }
 
       if (orgError !== null || !orgData?.organizationId) {
         console.error("Error getting org", orgError);
       } else {
         ctx.waitUntil(
           loggable.waitForResponse().then(async (responseBody) => {
-            const status = await loggable.getStatus();
+            const status =
+              request.headers.get("connor-justin-helicone") === "true"
+                ? response.status
+                : await loggable.getStatus();
+
             if (status >= 200 && status < 300) {
               saveToCache({
                 request: proxyRequest,
@@ -309,7 +370,8 @@ export async function proxyForwarder(
                 responseBody: responseBody.body,
                 cacheControl: cacheSettings.cacheControl,
                 settings: cacheSettings.bucketSettings,
-                responseLatencyMs: responseBody.endTime.getTime() - loggable.getTimingStart(),
+                responseLatencyMs:
+                  responseBody.endTime.getTime() - loggable.getTimingStart(),
                 cacheKv: env.CACHE_KV,
                 cacheSeed: cacheSettings.cacheSeed ?? null,
               });
