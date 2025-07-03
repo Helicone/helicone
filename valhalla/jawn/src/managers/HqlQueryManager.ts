@@ -49,8 +49,13 @@ export class HqlQueryManager {
   ): Promise<Result<HqlSavedQuery, string>> {
     try {
       const result = await dbExecute<HqlSavedQuery>(
-        "UPDATE saved_queries SET name = $1, sql = $2 WHERE id = $3 RETURNING id, name, sql, organization_id, created_at, updated_at",
-        [requestBody.name, requestBody.sql, requestBody.id]
+        "UPDATE saved_queries SET name = $1, sql = $2 WHERE id = $3 and organization_id = $4 RETURNING id, name, sql, organization_id, created_at, updated_at",
+        [
+          requestBody.name,
+          requestBody.sql,
+          requestBody.id,
+          this.authParams.organizationId,
+        ]
       );
       if (result.error || !result.data) {
         return err(result.error);

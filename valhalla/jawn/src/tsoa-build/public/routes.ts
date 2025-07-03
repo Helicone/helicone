@@ -2381,9 +2381,9 @@ const models: TsoaRoute.Models = {
     "UpdateSavedQueryRequest": {
         "dataType": "refObject",
         "properties": {
-            "id": {"dataType":"string","required":true},
             "name": {"dataType":"string","required":true},
             "sql": {"dataType":"string","required":true},
+            "id": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
     },
@@ -7393,7 +7393,7 @@ export function RegisterRoutes(app: Router) {
                 requestBody: {"in":"body","name":"requestBody","required":true,"ref":"CreateSavedQueryRequest"},
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };
-        app.post('/v1/helicone-sql/create-saved-query',
+        app.post('/v1/helicone-sql/saved-query',
             ...(fetchMiddlewares<RequestHandler>(HeliconeSqlController)),
             ...(fetchMiddlewares<RequestHandler>(HeliconeSqlController.prototype.createSavedQuery)),
 
@@ -7424,7 +7424,7 @@ export function RegisterRoutes(app: Router) {
                 requestBody: {"in":"body","name":"requestBody","required":true,"ref":"UpdateSavedQueryRequest"},
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
         };
-        app.put('/v1/helicone-sql/update-saved-query',
+        app.put('/v1/helicone-sql/saved-query',
             ...(fetchMiddlewares<RequestHandler>(HeliconeSqlController)),
             ...(fetchMiddlewares<RequestHandler>(HeliconeSqlController.prototype.updateSavedQuery)),
 

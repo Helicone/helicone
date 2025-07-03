@@ -33,10 +33,8 @@ export interface CreateSavedQueryRequest {
   sql: string;
 }
 
-export interface UpdateSavedQueryRequest {
+export interface UpdateSavedQueryRequest extends CreateSavedQueryRequest {
   id: string;
-  name: string;
-  sql: string;
 }
 
 export interface HqlSavedQuery {
@@ -99,7 +97,7 @@ export class HeliconeSqlController extends Controller {
     return ok(res.data || []);
   }
 
-  @Post("create-saved-query")
+  @Post("saved-query")
   public async createSavedQuery(
     @Body() requestBody: CreateSavedQueryRequest,
     @Request() request: JawnAuthenticatedRequest
@@ -114,7 +112,7 @@ export class HeliconeSqlController extends Controller {
     return ok(result.data);
   }
 
-  @Put("update-saved-query")
+  @Put("saved-query")
   public async updateSavedQuery(
     @Body() requestBody: UpdateSavedQueryRequest,
     @Request() request: JawnAuthenticatedRequest

@@ -373,11 +373,9 @@ export interface paths {
   "/v1/helicone-sql/saved-queries": {
     get: operations["GetSavedQueries"];
   };
-  "/v1/helicone-sql/create-saved-query": {
-    post: operations["CreateSavedQuery"];
-  };
-  "/v1/helicone-sql/update-saved-query": {
+  "/v1/helicone-sql/saved-query": {
     put: operations["UpdateSavedQuery"];
+    post: operations["CreateSavedQuery"];
   };
   "/v1/experiment/new-empty": {
     post: operations["CreateNewEmptyExperiment"];
@@ -2646,9 +2644,9 @@ Json: JsonObject;
     };
     "Result_HqlSavedQuery.string_": components["schemas"]["ResultSuccess_HqlSavedQuery_"] | components["schemas"]["ResultError_string_"];
     UpdateSavedQueryRequest: {
-      id: string;
       name: string;
       sql: string;
+      id: string;
     };
     "ResultSuccess__tableId-string--experimentId-string__": {
       data: {
@@ -5339,21 +5337,6 @@ export interface operations {
       };
     };
   };
-  CreateSavedQuery: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateSavedQueryRequest"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_HqlSavedQuery-Array.string_"];
-        };
-      };
-    };
-  };
   UpdateSavedQuery: {
     requestBody: {
       content: {
@@ -5365,6 +5348,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_HqlSavedQuery.string_"];
+        };
+      };
+    };
+  };
+  CreateSavedQuery: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateSavedQueryRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HqlSavedQuery-Array.string_"];
         };
       };
     };

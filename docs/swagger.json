@@ -7505,20 +7505,20 @@
 			},
 			"UpdateSavedQueryRequest": {
 				"properties": {
-					"id": {
-						"type": "string"
-					},
 					"name": {
 						"type": "string"
 					},
 					"sql": {
 						"type": "string"
+					},
+					"id": {
+						"type": "string"
 					}
 				},
 				"required": [
-					"id",
 					"name",
-					"sql"
+					"sql",
+					"id"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -15270,7 +15270,7 @@
 				"parameters": []
 			}
 		},
-		"/v1/helicone-sql/create-saved-query": {
+		"/v1/helicone-sql/saved-query": {
 			"post": {
 				"operationId": "CreateSavedQuery",
 				"responses": {
@@ -15300,9 +15300,7 @@
 						}
 					}
 				}
-			}
-		},
-		"/v1/helicone-sql/update-saved-query": {
+			},
 			"put": {
 				"operationId": "UpdateSavedQuery",
 				"responses": {
