@@ -10,7 +10,7 @@ const Hero = () => {
   return (
     <div
       className={cn(
-        "flex flex-col justify-top h-auto lg:h-[65vh] relative",
+        "flex flex-col justify-top h-auto lg:h-[500px] 2xl:h-[550px] relative lg:w-[1300px] 2xl:w-[1500px]",
         ISLAND_WIDTH
       )}
     >
@@ -63,54 +63,54 @@ const Hero = () => {
         {/* Gemini */}
         <LogoBox
           imgSrc="/static/home/gemini.webp"
-          className="w-[96px] h-[96px] 2xl:w-[112px] 2xl:h-[112px] absolute top-[80px] right-1/3 2xl:translate-x-[-200px] translate-x-[-100px] rotate-[-15deg]"
+          className="w-[96px] h-[96px] absolute top-[80px] right-1/3 translate-x-[-100px] rotate-[-15deg]"
           innerClassName=""
         />
         {/* No Clue */}
         <LogoBox
           imgSrc="/static/home/logos/deepseek.webp"
-          className="w-[120px] h-[120px] 2xl:w-[180px] 2xl:h-[180px] absolute top-[160px] right-1/3 2xl:translate-x-[50px] translate-x-[80px] rotate-[13deg]"
+          className="w-[120px] h-[120px] absolute top-[160px] right-1/3 translate-x-[80px] rotate-[13deg]"
         />
         {/* OpenAI */}
         <LogoBox
           imgSrc="/static/home/logos/openai.webp"
-          className="w-[140px] h-[140px] 2xl:w-[180px] 2xl:h-[180px] absolute top-[20px] right-1/4 2xl:translate-x-[150px] translate-x-[100px] rotate-[15deg]"
+          className="w-[140px] h-[140px] absolute top-[20px] right-1/4 translate-x-[100px] rotate-[15deg]"
           innerClassName="rounded-3xl"
         />
         {/* Together AI */}
         <LogoBox
           imgSrc="/static/home/logos/togetherai.webp"
-          className="w-[120px] h-[120px] 2xl:w-[160px] 2xl:h-[160px] absolute top-[48px] right-0 2xl:-translate-x-[100px] -translate-x-[40px] rotate-[6deg]"
+          className="w-[120px] h-[120px] absolute top-[48px] right-0 -translate-x-[40px] rotate-[6deg]"
           innerClassName="rounded-3xl"
         />
         {/* Anthropic */}
         <LogoBox
           imgSrc="/static/home/anthropic.webp"
-          className="w-[150px] h-[150px] 2xl:w-[190px] 2xl:h-[190px] absolute bottom-[20px] right-1/3 2xl:translate-x-[50px] translate-x-[0px] rotate-[13deg]"
+          className="w-[150px] h-[150px] absolute bottom-[20px] right-1/3 translate-x-[0px] rotate-[13deg]"
           innerClassName="p-4"
         />
         {/* Mistral */}
         <LogoBox
           imgSrc="/static/home/mistral.webp"
-          className="w-[96px] h-[96px] 2xl:w-[112px] 2xl:h-[112px] absolute bottom-1/3 right-1/4 2xl:translate-x-[100px] translate-x-[100px] -rotate-[15deg]"
+          className="w-[96px] h-[96px] absolute bottom-1/3 right-1/4 translate-x-[100px] -rotate-[15deg]"
           innerClassName="p-2"
         />
         {/* Groq */}
         <LogoBox
           imgSrc="/static/home/logos/groq.webp"
-          className="w-[120px] h-[120px] 2xl:w-[160px] 2xl:h-[160px] absolute top-1/2 2xl:-translate-y-[100px] -translate-y-[50px] right-0 2xl:-translate-x-[150px] -translate-x-[80px] rotate-[27deg]"
+          className="w-[120px] h-[120px] absolute top-1/2 -translate-y-[50px] right-0 -translate-x-[80px] rotate-[27deg]"
           innerClassName="p-2"
         />
         {/* OpenRouter  */}
         <LogoBox
           imgSrc="/static/home/logos/openrouter.webp"
-          className="w-[112px] h-[112px] 2xl:w-[128px] 2xl:h-[128px] absolute bottom-0 right-1/4 2xl:translate-x-[100px] translate-x-[100px] rotate-[-32deg]"
+          className="w-[112px] h-[112px] absolute bottom-0 right-1/4 translate-x-[100px] rotate-[-32deg]"
           innerClassName="p-2"
         />
         {/* AnyScale? */}
         <LogoBox
           imgSrc="/static/home/logo4.webp"
-          className="w-[80px] h-[80px] 2xl:w-[96px] 2xl:h-[96px] absolute bottom-[60px] right-0 2xl:-translate-x-[150px] -translate-x-[60px] rotate-[-15deg]"
+          className="w-[80px] h-[80px] absolute bottom-[60px] right-0 -translate-x-[60px] rotate-[-15deg]"
         />
       </div>
     </div>
