@@ -573,7 +573,7 @@ const costs: ModelRow[] = [
   },
   {
     model: {
-      operator: "includes",
+      operator: "equals",
       value: "o3-2025-04-16",
     },
     cost: {
