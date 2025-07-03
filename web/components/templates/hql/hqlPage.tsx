@@ -100,8 +100,91 @@ function HQLPage({ user }: HQLPageProps) {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 
   const [result, setResult] = useState<Record<string, string>[]>([]);
+  const [currentQuery, setCurrentQuery] = useState<{
+    id: string | undefined;
+    sql: string;
+  }>({ id: undefined, sql: "select * from request_response_rmt" });
   const [queryLoading, setQueryLoading] = useState(false);
   const [queryError, setQueryError] = useState<string | null>(null);
+  const { mutate: handleExecuteQuery } = useMutation({
+    mutationFn: async (sql: string) => {
+      const response = await $JAWN_API.POST("/v1/helicone-sql/execute", {
+        body: {
+          sql: sql,
+        },
+      });
+
+      return response;
+    },
+    onSuccess: (data) => {
+      if (data.error || !data.data?.data) {
+        // @ts-ignore
+        setQueryError(data.error.error);
+        setResult([]);
+      } else {
+        setQueryError(null);
+        setResult(data.data?.data as Record<string, string>[]);
+      }
+      setQueryLoading(false);
+    },
+    onError: (error) => {
+      setQueryError(error.message);
+      setResult([]);
+      setQueryLoading(false);
+    },
+  });
+
+  const { mutate: handleSaveQuery } = useMutation({
+    mutationFn: async (savedQuery: {
+      id?: string;
+      name: string;
+      sql: string;
+      path: string;
+    }) => {
+      console.log("savedQuery", savedQuery);
+      if (savedQuery.id) {
+        const response = await $JAWN_API.PUT(
+          "/v1/helicone-sql/update-saved-query",
+          {
+            body: {
+              id: savedQuery.id,
+              name: savedQuery.name,
+              sql: savedQuery.sql,
+              path: savedQuery.path,
+            },
+          },
+        );
+
+        return response;
+      } else {
+        const response = await $JAWN_API.POST(
+          "/v1/helicone-sql/create-saved-query",
+          {
+            body: {
+              name: savedQuery.name,
+              sql: savedQuery.sql,
+              path: savedQuery.path,
+            },
+          },
+        );
+
+        console.log("charlie", response);
+
+        if (response.data?.data) {
+          console.log("wtf", response.data.data[0].id);
+          setCurrentQuery({
+            id: response.data.data[0].id,
+            sql: response.data.data[0].sql,
+          });
+        }
+
+        return response;
+      }
+    },
+    onError: (error) => {
+      throw new Error(error.message);
+    },
+  });
 
   // Setup autocompletion
   useEffect(() => {
@@ -123,9 +206,8 @@ function HQLPage({ user }: HQLPageProps) {
           word.endColumn,
         );
 
-        const fullQueryText = model.getValue();
         const tableNamesAndAliases = new Map(
-          parseSqlAndFindTableNameAndAliases(fullQueryText).map(
+          parseSqlAndFindTableNameAndAliases(currentQuery.sql).map(
             ({ table_name, alias }) => [alias, table_name],
           ),
         );
@@ -212,33 +294,34 @@ function HQLPage({ user }: HQLPageProps) {
     return () => disposable.dispose();
   }, [monaco, clickhouseSchemas.data]);
 
-  const { mutate: handleExecuteQuery } = useMutation({
-    mutationFn: async (sql: string) => {
-      const response = await $JAWN_API.POST("/v1/helicone-sql/execute", {
-        body: {
-          sql: sql,
-        },
-      });
+  useEffect(() => {
+    $JAWN_API.GET("/v1/helicone-sql/saved-queries").then((res) => {
+      if (res.data?.data && res.data.data.length > 0) {
+        setCurrentQuery({
+          id: res.data.data[0].id,
+          sql: res.data.data[0].sql,
+        });
 
-      return response;
-    },
-    onSuccess: (data) => {
-      if (data.error || !data.data?.data) {
-        // @ts-ignore
-        setQueryError(data.error.error);
-        setResult([]);
-      } else {
-        setQueryError(null);
-        setResult(data.data?.data as Record<string, string>[]);
+        editorRef.current?.setValue(res.data.data[0].sql);
       }
-      setQueryLoading(false);
-    },
-    onError: (error) => {
-      setQueryError(error.message);
-      setResult([]);
-      setQueryLoading(false);
-    },
-  });
+    });
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = async (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.code === "s") {
+        // Save query
+        handleSaveQuery({
+          id: currentQuery.id,
+          name: "Untitled query",
+          sql: currentQuery.sql,
+          path: "/",
+        });
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [currentQuery]);
 
   if (!hasAccessToHQL) {
     return <div>You do not have access to HQL</div>;
@@ -255,22 +338,23 @@ function HQLPage({ user }: HQLPageProps) {
           className="min-h-[64px]"
         >
           <TopBar
-            sql={editorRef.current?.getValue() ?? ""}
+            currentQuery={currentQuery}
             handleExecuteQuery={handleExecuteQuery}
+            handleSaveQuery={handleSaveQuery}
           />
           <Editor
             defaultLanguage="sql"
-            defaultValue="select * from request_response_rmt"
+            defaultValue={currentQuery.sql}
             onMount={async (editor, monaco) => {
               editorRef.current = editor;
               const model = editor.getModel();
               if (!model) return;
 
               // Add keyboard event listener
-              editor.onKeyDown(async (e) => {
+              editor.onKeyDown((e) => {
                 if ((e.ctrlKey || e.metaKey) && e.code === "Enter") {
                   setQueryLoading(true);
-                  await handleExecuteQuery(editor.getValue());
+                  handleExecuteQuery(currentQuery.sql);
                 }
               });
 
@@ -278,7 +362,7 @@ function HQLPage({ user }: HQLPageProps) {
               const forbidden =
                 /\b(insert|update|delete|drop|alter|create|truncate|replace)\b/i;
 
-              if (forbidden.test(editor.getValue())) {
+              if (forbidden.test(currentQuery.sql)) {
                 monaco.editor.setModelMarkers(model, "custom-sql-validation", [
                   {
                     startLineNumber: 1,
@@ -299,7 +383,7 @@ function HQLPage({ user }: HQLPageProps) {
                 );
               }
               editor.onDidChangeModelContent(() => {
-                if (forbidden.test(editor.getValue())) {
+                if (forbidden.test(currentQuery.sql)) {
                   monaco.editor.setModelMarkers(
                     model,
                     "custom-sql-validation",
@@ -326,6 +410,10 @@ function HQLPage({ user }: HQLPageProps) {
               });
             }}
             onChange={(value) => {
+              setCurrentQuery({
+                id: currentQuery.id,
+                sql: value ?? "",
+              });
               if (value) {
                 if (!monaco || !editorRef.current) return;
 
