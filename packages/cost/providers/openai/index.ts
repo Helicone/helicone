@@ -541,6 +541,16 @@ const costs: ModelRow[] = [
   },
   {
     model: {
+      operator: "includes",
+      value: "o1-pro",
+    },
+    cost: {
+      prompt_token: 0.00015,
+      completion_token: 0.0006,
+    }
+  },
+  {
+    model: {
       operator: "equals",
       value: "o3-mini",
     },
@@ -567,11 +577,21 @@ const costs: ModelRow[] = [
       value: "o3-2025-04-16",
     },
     cost: {
-      prompt_token: 0.00001,
-      completion_token: 0.00004,
-      prompt_cache_read_token: 0.0000025,
+      prompt_token: 0.000002,
+      completion_token: 0.000008,
+      prompt_cache_read_token: 0.0000005,
     },
     showInPlayground: true,
+  },
+  {
+    model: {
+      operator: "includes",
+      value: "o3-pro"
+    },
+    cost: {
+      prompt_token: 0.00002,
+      completion_token: 0.00008,
+    }
   },
   {
     model: {
