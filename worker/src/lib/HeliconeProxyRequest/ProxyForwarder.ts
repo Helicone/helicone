@@ -85,6 +85,14 @@ export async function proxyForwarder(
             cacheSettings.cacheSeed
           );
           if (cachedResponse) {
+            if (request.headers.get("connor-justin-helicone") === "true") {
+              return new Response("Cached response found!", {
+                status: 200,
+                headers: {
+                  "connor-justin-helicone": "true",
+                },
+              });
+            }
             const { data, error } = await handleProxyRequest(
               proxyRequest,
               cachedResponse // Pass the cached response directly
@@ -292,14 +300,6 @@ export async function proxyForwarder(
   const { loggable, response } = data;
 
   if (cacheSettings.shouldSaveToCache && response.status === 200) {
-    if (response.headers.get("connor-justin-helicone") === "true") {
-      return new Response("Saving to cache!", {
-        status: 200,
-        headers: {
-          "connor-justin-helicone": "true",
-        },
-      });
-    }
     const { data: auth, error: authError } = await request.auth();
     if (authError == null) {
       const db = new DBWrapper(env, auth);
@@ -308,9 +308,22 @@ export async function proxyForwarder(
       if (orgError !== null || !orgData?.organizationId) {
         console.error("Error getting org", orgError);
       } else {
+        if (request.headers.get("connor-justin-helicone") === "true") {
+          const status = await loggable.getStatus();
+          return new Response(
+            `Attempting to save to cache! status: ${status}`,
+            {
+              status: 200,
+              headers: {
+                "connor-justin-helicone": "true",
+              },
+            }
+          );
+        }
         ctx.waitUntil(
           loggable.waitForResponse().then(async (responseBody) => {
             const status = await loggable.getStatus();
+
             if (status >= 200 && status < 300) {
               saveToCache({
                 request: proxyRequest,
