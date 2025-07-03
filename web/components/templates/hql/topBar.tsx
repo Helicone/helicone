@@ -9,6 +9,7 @@ import { components } from "@/lib/clients/jawnTypes/public";
 interface TopBarProps {
   currentQuery: {
     id?: string;
+    name: string;
     sql: string;
   };
   handleExecuteQuery: (sql: string) => void;
@@ -16,7 +17,6 @@ interface TopBarProps {
     id?: string;
     name: string;
     sql: string;
-    path: string;
   }) => void;
 }
 
@@ -26,18 +26,23 @@ export default function TopBar({
   handleSaveQuery,
 }: TopBarProps) {
   // TODO: can be untitled query hash
+  const [queryName, setQueryName] = useState(currentQuery.name);
 
+  // Sync local state with prop changes
   useEffect(() => {
-    console.log(currentQuery);
-  }, [currentQuery]);
+    setQueryName(currentQuery.name);
+  }, [currentQuery.name]);
 
   return (
     <div className="w-full border-b bg-card">
       <div className="flex items-center justify-between px-4 py-2">
         <div className="flex items-center gap-4">
           <Input
-            value={"Untitled query"}
-            onChange={(e) => {}}
+            value={queryName}
+            onChange={(e) => {
+              const newName = e.target.value;
+              setQueryName(newName);
+            }}
             className="w-48 border-none bg-transparent text-lg font-medium focus-visible:ring-0"
           />
         </div>
@@ -60,12 +65,10 @@ export default function TopBar({
             size="sm"
             className="w-32"
             onClick={() => {
-              const name = "Untitled query";
               handleSaveQuery({
                 id: currentQuery.id,
-                name: name,
+                name: queryName,
                 sql: currentQuery.sql,
-                path: "/",
               });
             }}
           >

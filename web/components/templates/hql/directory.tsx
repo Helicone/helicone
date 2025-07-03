@@ -9,6 +9,7 @@ interface DirectoryProps {
     columns: components["schemas"]["ClickHouseTableColumn"][];
   }[];
 }
+
 export function Directory({ tables }: DirectoryProps) {
   return (
     <div className="flex h-screen w-80 flex-col border-r bg-background">
@@ -18,6 +19,7 @@ export function Directory({ tables }: DirectoryProps) {
           Tables
         </button>
         <button className="flex-1 px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground">
+          {/* TODO: will eventually support saving multiple queries */}
           Queries
         </button>
       </section>

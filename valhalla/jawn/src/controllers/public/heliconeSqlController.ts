@@ -31,21 +31,18 @@ export interface ExecuteSqlRequest {
 export interface CreateSavedQueryRequest {
   name: string;
   sql: string;
-  path: string;
 }
 
 export interface UpdateSavedQueryRequest {
   id: string;
   name: string;
   sql: string;
-  path: string;
 }
 
 export interface HqlSavedQuery {
   id: string;
   organization_id: string;
   name: string;
-  path: string;
   sql: string;
   created_at: string;
   updated_at: string;
@@ -114,7 +111,6 @@ export class HeliconeSqlController extends Controller {
       return err(result.error || "Error creating saved query");
     }
     this.setStatus(200);
-    console.log("result", result.data);
     return ok(result.data);
   }
 

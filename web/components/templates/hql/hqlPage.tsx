@@ -17,6 +17,7 @@ import { $JAWN_API } from "@/lib/clients/jawn";
 import { useMutation } from "@tanstack/react-query";
 import { useFeatureFlag } from "@/services/hooks/admin";
 import { useOrg } from "@/components/layout/org/organizationContext";
+import useNotification from "@/components/shared/notification/useNotification";
 
 const SQL_KEYWORDS = [
   "SELECT",
@@ -85,16 +86,15 @@ const CLICKHOUSE_KEYWORDS = [
 ];
 
 const ALL_KEYWORDS = [...SQL_KEYWORDS, ...CLICKHOUSE_KEYWORDS];
-interface HQLPageProps {
-  user: HeliconeUser;
-}
 
-function HQLPage({ user }: HQLPageProps) {
+function HQLPage() {
   const organization = useOrg();
   const { data: hasAccessToHQL } = useFeatureFlag(
     "hql",
     organization?.currentOrg?.id ?? "",
   );
+  const { setNotification } = useNotification();
+
   const monaco = useMonaco();
   const clickhouseSchemas = useClickhouseSchemas();
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
@@ -102,10 +102,16 @@ function HQLPage({ user }: HQLPageProps) {
   const [result, setResult] = useState<Record<string, string>[]>([]);
   const [currentQuery, setCurrentQuery] = useState<{
     id: string | undefined;
+    name: string;
     sql: string;
-  }>({ id: undefined, sql: "select * from request_response_rmt" });
+  }>({
+    id: undefined,
+    name: "Untitled query",
+    sql: "select * from request_response_rmt",
+  });
   const [queryLoading, setQueryLoading] = useState(false);
   const [queryError, setQueryError] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
   const { mutate: handleExecuteQuery } = useMutation({
     mutationFn: async (sql: string) => {
       const response = await $JAWN_API.POST("/v1/helicone-sql/execute", {
@@ -139,9 +145,7 @@ function HQLPage({ user }: HQLPageProps) {
       id?: string;
       name: string;
       sql: string;
-      path: string;
     }) => {
-      console.log("savedQuery", savedQuery);
       if (savedQuery.id) {
         const response = await $JAWN_API.PUT(
           "/v1/helicone-sql/update-saved-query",
@@ -150,7 +154,6 @@ function HQLPage({ user }: HQLPageProps) {
               id: savedQuery.id,
               name: savedQuery.name,
               sql: savedQuery.sql,
-              path: savedQuery.path,
             },
           },
         );
@@ -163,17 +166,14 @@ function HQLPage({ user }: HQLPageProps) {
             body: {
               name: savedQuery.name,
               sql: savedQuery.sql,
-              path: savedQuery.path,
             },
           },
         );
 
-        console.log("charlie", response);
-
         if (response.data?.data) {
-          console.log("wtf", response.data.data[0].id);
           setCurrentQuery({
             id: response.data.data[0].id,
+            name: response.data.data[0].name,
             sql: response.data.data[0].sql,
           });
         }
@@ -181,8 +181,11 @@ function HQLPage({ user }: HQLPageProps) {
         return response;
       }
     },
+    onSuccess: () => {
+      setNotification("Successfully saved query", "success");
+    },
     onError: (error) => {
-      throw new Error(error.message);
+      setNotification(error.message, "error");
     },
   });
 
@@ -295,16 +298,24 @@ function HQLPage({ user }: HQLPageProps) {
   }, [monaco, clickhouseSchemas.data]);
 
   useEffect(() => {
-    $JAWN_API.GET("/v1/helicone-sql/saved-queries").then((res) => {
-      if (res.data?.data && res.data.data.length > 0) {
-        setCurrentQuery({
-          id: res.data.data[0].id,
-          sql: res.data.data[0].sql,
-        });
+    $JAWN_API
+      .GET("/v1/helicone-sql/saved-queries")
+      .then((res) => {
+        // TODO: will eventually support saving multiple queries
+        if (res.data?.data && res.data.data.length > 0) {
+          setCurrentQuery({
+            id: res.data.data[0].id,
+            name: res.data.data[0].name,
+            sql: res.data.data[0].sql,
+          });
 
-        editorRef.current?.setValue(res.data.data[0].sql);
-      }
-    });
+          editorRef.current?.setValue(res.data.data[0].sql);
+        }
+        setIsInitialized(true);
+      })
+      .catch(() => {
+        setIsInitialized(true);
+      });
   }, []);
 
   useEffect(() => {
@@ -315,7 +326,6 @@ function HQLPage({ user }: HQLPageProps) {
           id: currentQuery.id,
           name: "Untitled query",
           sql: currentQuery.sql,
-          path: "/",
         });
       }
     };
@@ -325,6 +335,14 @@ function HQLPage({ user }: HQLPageProps) {
 
   if (!hasAccessToHQL) {
     return <div>You do not have access to HQL</div>;
+  }
+
+  if (!isInitialized) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <div className="text-lg">Loading...</div>
+      </div>
+    );
   }
 
   return (
@@ -412,6 +430,7 @@ function HQLPage({ user }: HQLPageProps) {
             onChange={(value) => {
               setCurrentQuery({
                 id: currentQuery.id,
+                name: currentQuery.name,
                 sql: value ?? "",
               });
               if (value) {

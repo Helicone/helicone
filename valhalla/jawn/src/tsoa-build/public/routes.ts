@@ -2320,7 +2320,6 @@ const models: TsoaRoute.Models = {
             "id": {"dataType":"string","required":true},
             "organization_id": {"dataType":"string","required":true},
             "name": {"dataType":"string","required":true},
-            "path": {"dataType":"string","required":true},
             "sql": {"dataType":"string","required":true},
             "created_at": {"dataType":"string","required":true},
             "updated_at": {"dataType":"string","required":true},
@@ -2361,7 +2360,6 @@ const models: TsoaRoute.Models = {
         "properties": {
             "name": {"dataType":"string","required":true},
             "sql": {"dataType":"string","required":true},
-            "path": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
     },
@@ -2386,7 +2384,6 @@ const models: TsoaRoute.Models = {
             "id": {"dataType":"string","required":true},
             "name": {"dataType":"string","required":true},
             "sql": {"dataType":"string","required":true},
-            "path": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
     },

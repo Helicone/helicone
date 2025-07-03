@@ -7370,9 +7370,6 @@
 					"name": {
 						"type": "string"
 					},
-					"path": {
-						"type": "string"
-					},
 					"sql": {
 						"type": "string"
 					},
@@ -7387,7 +7384,6 @@
 					"id",
 					"organization_id",
 					"name",
-					"path",
 					"sql",
 					"created_at",
 					"updated_at"
@@ -7468,15 +7464,11 @@
 					},
 					"sql": {
 						"type": "string"
-					},
-					"path": {
-						"type": "string"
 					}
 				},
 				"required": [
 					"name",
-					"sql",
-					"path"
+					"sql"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -7521,16 +7513,12 @@
 					},
 					"sql": {
 						"type": "string"
-					},
-					"path": {
-						"type": "string"
 					}
 				},
 				"required": [
 					"id",
 					"name",
-					"sql",
-					"path"
+					"sql"
 				],
 				"type": "object",
 				"additionalProperties": false

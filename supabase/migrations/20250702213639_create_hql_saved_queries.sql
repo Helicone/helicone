@@ -4,7 +4,6 @@ CREATE TABLE IF NOT EXISTS public.saved_queries
     organization_id uuid NOT NULL,
     name text NOT NULL,
     sql text NOT NULL,
-    path text NOT NULL,
     created_at timestamp with time zone NOT NULL DEFAULT now(),
     updated_at timestamp with time zone NOT NULL DEFAULT now(),
     CONSTRAINT saved_queries_pkey PRIMARY KEY (id),

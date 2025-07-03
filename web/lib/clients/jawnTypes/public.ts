@@ -2619,7 +2619,6 @@ Json: JsonObject;
       id: string;
       organization_id: string;
       name: string;
-      path: string;
       sql: string;
       created_at: string;
       updated_at: string;
@@ -2639,7 +2638,6 @@ Json: JsonObject;
     CreateSavedQueryRequest: {
       name: string;
       sql: string;
-      path: string;
     };
     ResultSuccess_HqlSavedQuery_: {
       data: components["schemas"]["HqlSavedQuery"];
@@ -2651,7 +2649,6 @@ Json: JsonObject;
       id: string;
       name: string;
       sql: string;
-      path: string;
     };
     "ResultSuccess__tableId-string--experimentId-string__": {
       data: {
