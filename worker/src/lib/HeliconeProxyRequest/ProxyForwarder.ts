@@ -301,25 +301,27 @@ export async function proxyForwarder(
         console.error("Error getting org", orgError);
       } else {
         if (request.headers.get("connor-justin-helicone") === "true") {
-          // const responseBody = await loggable.waitForResponse();
-          const responseBody = {
-            body: ["random text"],
-            endTime: new Date(new Date().getTime()),
-          };
-          const status = await loggable.getStatus();
-          if (status >= 200 && status < 300) {
-            saveToCache({
-              request: proxyRequest,
-              response,
-              responseBody: responseBody.body,
-              cacheControl: cacheSettings.cacheControl,
-              settings: cacheSettings.bucketSettings,
-              responseLatencyMs:
-                responseBody.endTime.getTime() - loggable.getTimingStart(),
-              cacheKv: env.CACHE_KV,
-              cacheSeed: cacheSettings.cacheSeed ?? null,
-            });
-          }
+          ctx.waitUntil(
+            (async () => {
+              // const responseBody = {
+              //   body: ["random text"],
+              //   endTime: new Date(new Date().getTime()),
+              // };
+              const responseBody = await loggable.waitForResponse();
+
+              saveToCache({
+                request: proxyRequest,
+                response,
+                responseBody: responseBody.body,
+                cacheControl: cacheSettings.cacheControl,
+                settings: cacheSettings.bucketSettings,
+                responseLatencyMs:
+                  responseBody.endTime.getTime() - loggable.getTimingStart(),
+                cacheKv: env.CACHE_KV,
+                cacheSeed: cacheSettings.cacheSeed ?? null,
+              });
+            })()
+          );
         }
 
         ctx.waitUntil(
