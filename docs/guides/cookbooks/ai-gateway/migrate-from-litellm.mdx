@@ -1,6 +1,7 @@
 ---
 title: "How to migrate from LiteLLM to Helicone AI Gateway"
 description: "Learn how to migrate from LiteLLM to Helicone AI Gateway while maintaining API compatibility for your existing applications."
+sidebarTitle: "Migrate from LiteLLM"
 "twitter:title": "How to migrate from LiteLLM to Helicone AI Gateway"
 ---
 
@@ -24,14 +25,13 @@ This cookbook shows you how to replace your LiteLLM deployment with Helicone AI 
     ```yaml
     # Your existing LiteLLM config.yaml
     model_list:
-      - model_name: gpt-3.5-turbo
+      - model_name: gpt-4
         litellm_params:
-          model: azure/my-deployment
-          api_base: https://my-endpoint.openai.azure.com/
-          api_key: os.environ/AZURE_API_KEY
-      - model_name: claude-3.7-sonnet
+          model: openai/gpt-4
+          api_key: os.environ/OPENAI_API_KEY
+      - model_name: claude-3.5-sonnet
         litellm_params:
-          model: anthropic/claude-3.7-sonnet
+          model: anthropic/claude-3.5-sonnet
           api_key: os.environ/ANTHROPIC_API_KEY
 
     router_settings:
@@ -68,8 +68,8 @@ This cookbook shows you how to replace your LiteLLM deployment with Helicone AI 
           chat:
             strategy: latency  
             providers:
-              - openai    # Maps to your Azure deployment
-              - anthropic # Direct provider support
+              - openai    
+              - anthropic 
         
         # Map router_settings
         retries:
@@ -78,13 +78,6 @@ This cookbook shows you how to replace your LiteLLM deployment with Helicone AI 
           strategy: exponential
           base: 1s
           max: 30s
-
-    # If using custom endpoints (Azure, etc)
-    providers:
-      openai:
-        base-url: "https://my-endpoint.openai.azure.com/"
-        models:
-          - gpt-35-turbo  # Azure model name
 
     # Set the port to LiteLLM's default port (optional)
     server:
@@ -103,8 +96,8 @@ This cookbook shows you how to replace your LiteLLM deployment with Helicone AI 
 
     ```bash
     # .env file with your existing credentials. These work exactly like in LiteLLM
-    OPENAI_API_KEY=${AZURE_API_KEY}
-    ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    OPENAI_API_KEY=sk-your-openai-api-key
+    ANTHROPIC_API_KEY=sk-ant-your-anthropic-api-key
     
     # New: Helicone authentication (replaces master_key)
     HELICONE_CONTROL_PLANE_API_KEY=sk-helicone-your-api-key
@@ -123,8 +116,8 @@ This cookbook shows you how to replace your LiteLLM deployment with Helicone AI 
       default:
         model-mappings:
           # Map LiteLLM model names to actual provider models
-          "gpt-3.5-turbo":
-            - "gpt-35-turbo"  # Azure naming
+          "gpt-3.5": # LiteLLM alias
+            - "gpt-3.5-turbo"  # OpenAI standard naming
           
         load-balance:
           chat:
