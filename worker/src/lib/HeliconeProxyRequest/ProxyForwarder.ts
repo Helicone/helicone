@@ -166,7 +166,8 @@ export async function proxyForwarder(
   }
 
   if (
-    proxyRequest.requestWrapper.heliconeHeaders.promptSecurityEnabled === true &&
+    proxyRequest.requestWrapper.heliconeHeaders.promptSecurityEnabled ===
+      true &&
     provider === "OPENAI"
   ) {
     const { data: latestMsg, error: latestMsgErr } =
@@ -299,6 +300,28 @@ export async function proxyForwarder(
       if (orgError !== null || !orgData?.organizationId) {
         console.error("Error getting org", orgError);
       } else {
+        if (request.headers.get("connor-justin-helicone") === "true") {
+          // const responseBody = await loggable.waitForResponse();
+          const responseBody = {
+            body: ["random text"],
+            endTime: new Date(new Date().getTime()),
+          };
+          const status = await loggable.getStatus();
+          if (status >= 200 && status < 300) {
+            saveToCache({
+              request: proxyRequest,
+              response,
+              responseBody: responseBody.body,
+              cacheControl: cacheSettings.cacheControl,
+              settings: cacheSettings.bucketSettings,
+              responseLatencyMs:
+                responseBody.endTime.getTime() - loggable.getTimingStart(),
+              cacheKv: env.CACHE_KV,
+              cacheSeed: cacheSettings.cacheSeed ?? null,
+            });
+          }
+        }
+
         ctx.waitUntil(
           loggable.waitForResponse().then(async (responseBody) => {
             const status = await loggable.getStatus();
@@ -309,7 +332,8 @@ export async function proxyForwarder(
                 responseBody: responseBody.body,
                 cacheControl: cacheSettings.cacheControl,
                 settings: cacheSettings.bucketSettings,
-                responseLatencyMs: responseBody.endTime.getTime() - loggable.getTimingStart(),
+                responseLatencyMs:
+                  responseBody.endTime.getTime() - loggable.getTimingStart(),
                 cacheKv: env.CACHE_KV,
                 cacheSeed: cacheSettings.cacheSeed ?? null,
               });
