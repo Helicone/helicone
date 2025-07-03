@@ -303,11 +303,11 @@ export async function proxyForwarder(
         if (request.headers.get("connor-justin-helicone") === "true") {
           ctx.waitUntil(
             (async () => {
-              // const responseBody = {
-              //   body: ["random text"],
-              //   endTime: new Date(new Date().getTime()),
-              // };
-              const responseBody = await loggable.waitForResponse();
+              const responseBody = {
+                body: ["random text"],
+                endTime: new Date(new Date().getTime()),
+              };
+              // const responseBody = await loggable.waitForResponse();
 
               saveToCache({
                 request: proxyRequest,
