@@ -4,14 +4,8 @@ import AuthLayout from "../components/layout/auth/authLayout";
 import { GetServerSidePropsContext } from "next";
 import HQLPage from "../components/templates/hql/hqlPage";
 
-interface HQLProps {
-  user: HeliconeUser;
-}
-
-const HQL = (props: HQLProps) => {
-  const { user } = props;
-
-  return <HQLPage user={user} />;
+const HQL = () => {
+  return <HQLPage />;
 };
 
 HQL.getLayout = function getLayout(page: ReactElement) {

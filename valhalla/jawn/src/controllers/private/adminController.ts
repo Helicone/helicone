@@ -611,8 +611,8 @@ export class AdminController extends Controller {
           organizationId
             ? "o.id = $1"
             : userId
-            ? "om.member = $1"
-            : "u.email = $1"
+              ? "om.member = $1"
+              : "u.email = $1"
         }
       )
       SELECT

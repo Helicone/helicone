@@ -17,6 +17,7 @@ import { $JAWN_API } from "@/lib/clients/jawn";
 import { useMutation } from "@tanstack/react-query";
 import { useFeatureFlag } from "@/services/hooks/admin";
 import { useOrg } from "@/components/layout/org/organizationContext";
+import useNotification from "@/components/shared/notification/useNotification";
 
 const SQL_KEYWORDS = [
   "SELECT",
@@ -85,23 +86,101 @@ const CLICKHOUSE_KEYWORDS = [
 ];
 
 const ALL_KEYWORDS = [...SQL_KEYWORDS, ...CLICKHOUSE_KEYWORDS];
-interface HQLPageProps {
-  user: HeliconeUser;
-}
 
-function HQLPage({ user }: HQLPageProps) {
+function HQLPage() {
   const organization = useOrg();
   const { data: hasAccessToHQL } = useFeatureFlag(
     "hql",
     organization?.currentOrg?.id ?? "",
   );
+  const { setNotification } = useNotification();
+
   const monaco = useMonaco();
   const clickhouseSchemas = useClickhouseSchemas();
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 
   const [result, setResult] = useState<Record<string, string>[]>([]);
+  const [currentQuery, setCurrentQuery] = useState<{
+    id: string | undefined;
+    name: string;
+    sql: string;
+  }>({
+    id: undefined,
+    name: "Untitled query",
+    sql: "select * from request_response_rmt",
+  });
   const [queryLoading, setQueryLoading] = useState(false);
   const [queryError, setQueryError] = useState<string | null>(null);
+  const { mutate: handleExecuteQuery } = useMutation({
+    mutationFn: async (sql: string) => {
+      const response = await $JAWN_API.POST("/v1/helicone-sql/execute", {
+        body: {
+          sql: sql,
+        },
+      });
+
+      return response;
+    },
+    onSuccess: (data) => {
+      if (data.error || !data.data?.data) {
+        // @ts-ignore
+        setQueryError(data.error.error);
+        setResult([]);
+      } else {
+        setQueryError(null);
+        setResult(data.data?.data as Record<string, string>[]);
+      }
+      setQueryLoading(false);
+    },
+    onError: (error) => {
+      setQueryError(error.message);
+      setResult([]);
+      setQueryLoading(false);
+    },
+  });
+
+  const { mutate: handleSaveQuery } = useMutation({
+    mutationFn: async (savedQuery: {
+      id?: string;
+      name: string;
+      sql: string;
+    }) => {
+      if (savedQuery.id) {
+        const response = await $JAWN_API.PUT("/v1/helicone-sql/saved-query", {
+          body: {
+            id: savedQuery.id,
+            name: savedQuery.name,
+            sql: savedQuery.sql,
+          },
+        });
+
+        return response;
+      } else {
+        const response = await $JAWN_API.POST("/v1/helicone-sql/saved-query", {
+          body: {
+            name: savedQuery.name,
+            sql: savedQuery.sql,
+          },
+        });
+
+        if (response.data?.data) {
+          setCurrentQuery({
+            id: response.data.data[0].id,
+            name: response.data.data[0].name,
+            sql: response.data.data[0].sql,
+          });
+        }
+
+        return response;
+      }
+    },
+    onSuccess: () => {
+      setNotification("Successfully saved query", "success");
+    },
+    onError: (error) => {
+      setNotification(error.message, "error");
+    },
+  });
 
   // Setup autocompletion
   useEffect(() => {
@@ -123,9 +202,8 @@ function HQLPage({ user }: HQLPageProps) {
           word.endColumn,
         );
 
-        const fullQueryText = model.getValue();
         const tableNamesAndAliases = new Map(
-          parseSqlAndFindTableNameAndAliases(fullQueryText).map(
+          parseSqlAndFindTableNameAndAliases(currentQuery.sql).map(
             ({ table_name, alias }) => [alias, table_name],
           ),
         );
@@ -212,36 +290,31 @@ function HQLPage({ user }: HQLPageProps) {
     return () => disposable.dispose();
   }, [monaco, clickhouseSchemas.data]);
 
-  const { mutate: handleExecuteQuery } = useMutation({
-    mutationFn: async (sql: string) => {
-      const response = await $JAWN_API.POST("/v1/helicone-sql/execute", {
-        body: {
-          sql: sql,
-        },
+  const { data: savedQueries, isLoading: savedQueriesLoading } =
+    $JAWN_API.useQuery("get", "/v1/helicone-sql/saved-queries", {});
+
+  useEffect(() => {
+    if (savedQueries?.data && savedQueries.data.length > 0) {
+      setCurrentQuery({
+        id: savedQueries.data[0].id,
+        name: savedQueries.data[0].name,
+        sql: savedQueries.data[0].sql,
       });
 
-      return response;
-    },
-    onSuccess: (data) => {
-      if (data.error || !data.data?.data) {
-        // @ts-ignore
-        setQueryError(data.error.error);
-        setResult([]);
-      } else {
-        setQueryError(null);
-        setResult(data.data?.data as Record<string, string>[]);
-      }
-      setQueryLoading(false);
-    },
-    onError: (error) => {
-      setQueryError(error.message);
-      setResult([]);
-      setQueryLoading(false);
-    },
-  });
+      editorRef.current?.setValue(savedQueries.data[0].sql);
+    }
+  }, [savedQueries]);
 
   if (!hasAccessToHQL) {
     return <div>You do not have access to HQL</div>;
+  }
+
+  if (savedQueriesLoading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <div className="text-lg">Loading...</div>
+      </div>
+    );
   }
 
   return (
@@ -255,22 +328,23 @@ function HQLPage({ user }: HQLPageProps) {
           className="min-h-[64px]"
         >
           <TopBar
-            sql={editorRef.current?.getValue() ?? ""}
+            currentQuery={currentQuery}
             handleExecuteQuery={handleExecuteQuery}
+            handleSaveQuery={handleSaveQuery}
           />
           <Editor
             defaultLanguage="sql"
-            defaultValue="select * from request_response_rmt"
+            defaultValue={currentQuery.sql}
             onMount={async (editor, monaco) => {
               editorRef.current = editor;
               const model = editor.getModel();
               if (!model) return;
 
               // Add keyboard event listener
-              editor.onKeyDown(async (e) => {
+              editor.onKeyDown((e) => {
                 if ((e.ctrlKey || e.metaKey) && e.code === "Enter") {
                   setQueryLoading(true);
-                  await handleExecuteQuery(editor.getValue());
+                  handleExecuteQuery(currentQuery.sql);
                 }
               });
 
@@ -278,7 +352,7 @@ function HQLPage({ user }: HQLPageProps) {
               const forbidden =
                 /\b(insert|update|delete|drop|alter|create|truncate|replace)\b/i;
 
-              if (forbidden.test(editor.getValue())) {
+              if (forbidden.test(currentQuery.sql)) {
                 monaco.editor.setModelMarkers(model, "custom-sql-validation", [
                   {
                     startLineNumber: 1,
@@ -299,7 +373,7 @@ function HQLPage({ user }: HQLPageProps) {
                 );
               }
               editor.onDidChangeModelContent(() => {
-                if (forbidden.test(editor.getValue())) {
+                if (forbidden.test(currentQuery.sql)) {
                   monaco.editor.setModelMarkers(
                     model,
                     "custom-sql-validation",
@@ -326,6 +400,11 @@ function HQLPage({ user }: HQLPageProps) {
               });
             }}
             onChange={(value) => {
+              setCurrentQuery({
+                id: currentQuery.id,
+                name: currentQuery.name,
+                sql: value ?? "",
+              });
               if (value) {
                 if (!monaco || !editorRef.current) return;
 

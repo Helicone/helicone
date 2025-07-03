@@ -370,6 +370,13 @@ export interface paths {
   "/v1/helicone-sql/execute": {
     post: operations["ExecuteSql"];
   };
+  "/v1/helicone-sql/saved-queries": {
+    get: operations["GetSavedQueries"];
+  };
+  "/v1/helicone-sql/saved-query": {
+    put: operations["UpdateSavedQuery"];
+    post: operations["CreateSavedQuery"];
+  };
   "/v1/experiment/new-empty": {
     post: operations["CreateNewEmptyExperiment"];
   };
@@ -2605,6 +2612,41 @@ Json: JsonObject;
     "Result_Array_Record_string.any__.string_": components["schemas"]["ResultSuccess_Array_Record_string.any___"] | components["schemas"]["ResultError_string_"];
     ExecuteSqlRequest: {
       sql: string;
+    };
+    HqlSavedQuery: {
+      id: string;
+      organization_id: string;
+      name: string;
+      sql: string;
+      created_at: string;
+      updated_at: string;
+    };
+    ResultSuccess_Array_HqlSavedQuery__: {
+      data: components["schemas"]["HqlSavedQuery"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Array_HqlSavedQuery_.string_": components["schemas"]["ResultSuccess_Array_HqlSavedQuery__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_HqlSavedQuery-Array_": {
+      data: components["schemas"]["HqlSavedQuery"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_HqlSavedQuery-Array.string_": components["schemas"]["ResultSuccess_HqlSavedQuery-Array_"] | components["schemas"]["ResultError_string_"];
+    CreateSavedQueryRequest: {
+      name: string;
+      sql: string;
+    };
+    ResultSuccess_HqlSavedQuery_: {
+      data: components["schemas"]["HqlSavedQuery"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_HqlSavedQuery.string_": components["schemas"]["ResultSuccess_HqlSavedQuery_"] | components["schemas"]["ResultError_string_"];
+    UpdateSavedQueryRequest: {
+      name: string;
+      sql: string;
+      id: string;
     };
     "ResultSuccess__tableId-string--experimentId-string__": {
       data: {
@@ -5281,6 +5323,46 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Array_Record_string.any__.string_"];
+        };
+      };
+    };
+  };
+  GetSavedQueries: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Array_HqlSavedQuery_.string_"];
+        };
+      };
+    };
+  };
+  UpdateSavedQuery: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateSavedQueryRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HqlSavedQuery.string_"];
+        };
+      };
+    };
+  };
+  CreateSavedQuery: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateSavedQueryRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HqlSavedQuery-Array.string_"];
         };
       };
     };
