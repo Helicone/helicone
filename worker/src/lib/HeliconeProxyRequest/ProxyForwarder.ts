@@ -166,7 +166,8 @@ export async function proxyForwarder(
   }
 
   if (
-    proxyRequest.requestWrapper.heliconeHeaders.promptSecurityEnabled === true &&
+    proxyRequest.requestWrapper.heliconeHeaders.promptSecurityEnabled ===
+      true &&
     provider === "OPENAI"
   ) {
     const { data: latestMsg, error: latestMsgErr } =
@@ -291,6 +292,14 @@ export async function proxyForwarder(
   const { loggable, response } = data;
 
   if (cacheSettings.shouldSaveToCache && response.status === 200) {
+    if (response.headers.get("connor-justin-helicone") === "true") {
+      return new Response("Saving to cache!", {
+        status: 200,
+        headers: {
+          "connor-justin-helicone": "true",
+        },
+      });
+    }
     const { data: auth, error: authError } = await request.auth();
     if (authError == null) {
       const db = new DBWrapper(env, auth);
@@ -309,7 +318,8 @@ export async function proxyForwarder(
                 responseBody: responseBody.body,
                 cacheControl: cacheSettings.cacheControl,
                 settings: cacheSettings.bucketSettings,
-                responseLatencyMs: responseBody.endTime.getTime() - loggable.getTimingStart(),
+                responseLatencyMs:
+                  responseBody.endTime.getTime() - loggable.getTimingStart(),
                 cacheKv: env.CACHE_KV,
                 cacheSeed: cacheSettings.cacheSeed ?? null,
               });
