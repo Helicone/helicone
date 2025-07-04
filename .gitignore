@@ -7,7 +7,6 @@ server.py
 Localhost.session.sql
 tmp/
 .vscode
-main.py
 __pycache__/
 .DS_Store
 resend-cli/
