@@ -268,7 +268,7 @@ client = OpenAI(
         </div>
 
         {/* Code block */}
-        <div className="rounded-2xl border border-[hsl(var(--border))] overflow-hidden hidden md:block">
+        <div className="rounded-2xl border border-[hsl(var(--border))] overflow-hidden">
           <div className="flex gap-4 p-3 bg-[#24292e] border-b border-[hsl(var(--border))]">
             {languages.map((language) => (
               <button
