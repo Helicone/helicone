@@ -269,14 +269,14 @@ client = OpenAI(
 
         {/* Code block */}
         <div className="rounded-2xl border border-[hsl(var(--border))] overflow-hidden">
-          <div className="flex gap-4 p-3 bg-[#24292e] border-b border-[hsl(var(--border))]">
+          <div className="flex gap-2 md:gap-4 p-2 md:p-3 bg-[#24292e] border-b border-[hsl(var(--border))]">
             {languages.map((language) => (
               <button
                 key={language}
                 onClick={() => setCurrentLanguage(language)}
-                className={`text-sm font-medium relative px-1 ${
+                className={`text-xs md:text-sm font-medium relative px-1 ${
                   currentLanguage === language
-                    ? "text-white after:absolute after:bottom-[-12px] after:left-0 after:w-full after:h-[2px] after:bg-white"
+                    ? "text-white after:absolute after:bottom-[-8px] md:after:bottom-[-12px] after:left-0 after:w-full after:h-[2px] after:bg-white"
                     : "text-[hsl(var(--muted-foreground))] hover:text-white"
                 }`}
               >
@@ -290,13 +290,13 @@ client = OpenAI(
                     navigator.clipboard.writeText(currentCode || "");
                     toast.success("Copied to clipboard");
                   }}
-                  className="h-6 w-6"
+                  className="h-4 w-4 md:h-6 md:w-6"
                 />
               </button>
             </div>
           </div>
           <div
-            className="p-4 bg-[#24292e] overflow-x-auto"
+            className="p-2 md:p-4 bg-[#24292e] overflow-x-auto text-xs md:text-sm"
             dangerouslySetInnerHTML={{ __html: highlightedCode }}
           />
         </div>
