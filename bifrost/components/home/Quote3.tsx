@@ -33,7 +33,9 @@ const Quote3 = () => {
               <h4 className="text-[17px] sm:text-xl font-medium whitespace-nowrap">
                 Hassan El Mghari
               </h4>
-              <p className="text-[15px] sm:text-lg w-auto">DevRel Lead</p>
+              <p className="text-[15px] sm:text-lg w-auto">
+                Director of Developer Relations
+              </p>
             </div>
           </div>
         </div>

@@ -6,6 +6,7 @@ import { Button } from "../ui/button";
 import { ArrowUpRight } from "lucide-react";
 import { useState } from "react";
 import { XIcon, PlusIcon } from "lucide-react";
+import Image from "next/image";
 import PythonGatewayRequest from "@/public/static/home/python-gateway-request";
 
 const AiGateway = () => {
@@ -15,7 +16,13 @@ const AiGateway = () => {
     <div className="w-full pr-4 sm:pr-16 md:pr-24 2xl:pr-40 max-w-[2000px] mx-auto pt-28">
       <div className="grid grid-cols-1 md:grid-cols-2">
         <div className="w-full sm:pl-16 mx-auto flex items-center justify-center py-0 md:py-8 pb-20">
-          <PythonGatewayRequest />
+          <Image
+            src="/static/home/logos/github.webp"
+            alt="AI Gateway Routing"
+            width={1000}
+            height={1000}
+            className="w-[600px]  rounded-2xl"
+          />
         </div>
         <div className="flex flex-col items-start md:items-end gap-3 md:gap-9 order-1 md:order-2 pl-4 md:pl-0">
           <div className="flex items-center gap-2.5">
@@ -31,7 +38,8 @@ const AiGateway = () => {
               LLM routing
             </h2>
             <p className="text-lg max-w-[520px] text-landing-description font-light leading-relaxed">
-              We make sure you always have the best model for your request, so you can focus on shipping features.
+              We make sure you always have the best model for your request, so
+              you can focus on shipping features.
             </p>
           </div>
           <div className="flex gap-3 items-center">

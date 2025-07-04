@@ -1,384 +1,210 @@
 "use client";
 
 import { ISLAND_WIDTH } from "@/lib/utils";
-import { DiffHighlight } from "@/components/shared/diffHighlight";
 import { cn } from "@/lib/utils";
-import { ArrowUpRightIcon, ClipboardIcon } from "@heroicons/react/24/outline";
+import { ClipboardIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast, Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { ArrowUpRight, ChevronRight } from "lucide-react";
+import { createHighlighter } from "shiki";
 
-interface IntegrationsProps { }
+// Create a singleton highlighter instance
+const highlighterPromise = createHighlighter({
+  themes: ["github-light", "github-dark"],
+  langs: ["javascript", "python", "bash"],
+});
+
+interface IntegrationsProps {}
 
 const Integrations = (props: IntegrationsProps) => {
-  const { } = props;
+  const {} = props;
 
-  const PROVIDERS: {
-    name: string;
-    // logo is a react element
-    logo: JSX.Element;
-    integrations: Record<
-      string,
-      {
-        language: string;
-        code: string;
-      }
-    >;
-    href: string;
-  }[] = [
-      {
-        name: "OpenAI",
-        logo: (
-          <div className="p-3">
-            <Image
-              src={"/static/openai.webp"}
-              alt={"OpenAI"}
-              width={2048}
-              height={2048}
-            />
-          </div>
-        ),
-        href: "https://docs.helicone.ai/integrations/openai/javascript#openai-javascript-sdk-integration",
-        integrations: {
-          javascript: {
-            language: "tsx",
-            code: `import OpenAI from "openai";
+  const CODE_SNIPPETS = {
+    openai: {
+      formattedName: "OpenAI",
+      logo: "/static/openai.webp",
+      typescript: `import OpenAI from "openai";
 
-const openai = new OpenAI({
-  apiKey: OPENAI_API_KEY,
-  baseURL: \`https://oai.helicone.ai/v1/\$\{HELICONE_API_KEY\}/\`
+const client = new OpenAI({
+  apiKey: "{{OPENAI_API_KEY}}",
+  baseURL: "https://oai.helicone.ai/v1/{{HELICONE_API_KEY}}"
 });`,
-          },
-          python: {
-            language: "python",
-            code: `from openai import OpenAI    
+      python: `from openai import OpenAI
 
 client = OpenAI(
-  api_key=OPENAI_API_KEY, 
-  base_url=f"https://oai.helicone.ai/v1/{HELICONE_API_KEY}/"
+  api_key="{{OPENAI_API_KEY}}",
+  base_url="https://oai.helicone.ai/v1/{{HELICONE_API_KEY}}"
 )`,
-          },
-          langchain: {
-            language: "python",
-            code: `llm = ChatOpenAI(
-  openai_api_base=f"https://oai.helicone.ai/v1/{HELICONE_API_KEY}/"
-  openai_api_key=OPENAI_API_KEY
-)`,
-          },
-          langchainJS: {
-            language: "tsx",
-            code: `const llm = new OpenAI({
-  modelName: "gpt-3.5-turbo",
-  configuration: {
-    basePath: "https://oai.helicone.ai/v1/HELICONE_API_KEY/"
-});`,
-          },
-        },
-      },
-      {
-        name: "Anthropic",
-        logo: (
-          <div className="p-3">
-            <Image
-              src={"/static/anthropic.webp"}
-              alt={"Anthropic"}
-              width={2048}
-              height={2048}
-            />
-          </div>
-        ),
-        href: "https://docs.helicone.ai/integrations/anthropic/javascript",
-        integrations: {
-          javascript: {
-            language: "tsx",
-            code: `import Anthropic from "@anthropic-ai/sdk";
-
-const anthropic = new Anthropic({
-  apiKey: ANTHROPIC_API_KEY,
-  baseURL: "https://anthropic.helicone.ai/\$\{HELICONE_API_KEY\}/\",
-});`,
-          },
-          python: {
-            language: "python",
-            code: `import anthropic
-
-client = anthropic.Anthropic(
-  api_key=ANTHROPIC_API_KEY,
-  base_url="https://anthropic.helicone.ai/{HELICONE_API_KEY}/"
-)`,
-          },
-          langchain: {
-            language: "python",
-            code: `const llm = new ChatAnthropic({
-  modelName: "claude-2",
-  anthropicApiKey: "ANTHROPIC_API_KEY",
-  clientOptions: {
-    baseURL: "https://anthropic.helicone.ai/{HELICONE_API_KEY}/",
-  },
-});
-`,
-          },
-        },
-      },
-      {
-        name: "Azure",
-        logo: (
-          <div className="p-3">
-            <Image
-              src={"/static/azure.webp"}
-              alt={"Azure"}
-              width={2048}
-              height={2048}
-            />
-          </div>
-        ),
-        href: "https://docs.helicone.ai/integrations/azure/javascript",
-        integrations: {
-          javascript: {
-            language: "tsx",
-            code: `import OpenAI from "openai";
-
-const openai = new OpenAI({
-  baseURL: "https://oai.helicone.ai/openai/deployments/[DEPLOYMENT_NAME]",
-  defaultHeaders: {
-    "Helicone-Auth": Bearer <HELICONE_API_KEY>,
-    "Helicone-OpenAI-API-Base": "https://[AZURE_DOMAIN].openai.azure.com",
-    "api-key": "[AZURE_API_KEY]",
-  },
-  defaultQuery: { 
-    "api-version": "[API_VERSION]" 
-  },
-});`,
-          },
-          python: {
-            language: "python",
-            code: `import OpenAI 
-
-client = OpenAI(
-  api_key="[AZURE_OPENAI_API_KEY]",
-  base_url="https://oai.helicone.ai/openai/deployments/[DEPLOYMENT]",
-  default_headers={
-    "Helicone-OpenAI-Api-Base": "https://[AZURE_DOMAIN].openai.azure.com",
-    "Helicone-Auth": Bearer <HELICONE_API_KEY>,
-    "api-key": "[AZURE_OPENAI_API_KEY]",
-  },
-  default_query={
-    "api-version": "[API_VERSION]"
-  }
-)`,
-          },
-          langchain: {
-            language: "python",
-            code: `from langchain.chat_models import AzureChatOpenAI
-
-helicone_headers = {
-  "Helicone-Auth": Bearer <HELICONE_API_KEY>,
-  "Helicone-OpenAI-Api-Base": "https://<model_name>.openai.azure.com/"
-}
-
-self.model = AzureChatOpenAI(
-  openai_api_base="https://oai.helicone.ai"
-  deployment_name="gpt-35-turbo",
-  openai_api_key=<AZURE_OPENAI_API_KEY>,
-  openai_api_version="2023-05-15",
-  openai_api_type="azure",
-  max_retries=max_retries,
-  headers=helicone_headers,
-  **kwargs,
-)`,
-          },
-          langchainJS: {
-            language: "tsx",
-            code: `const model = new ChatOpenAI({
-  azureOpenAIApiKey: "[AZURE_OPENAI_API_KEY]",
-  azureOpenAIApiDeploymentName: "openai/deployments/gpt-35-turbo",
-  azureOpenAIApiVersion: "2023-03-15-preview",
-  azureOpenAIBasePath: "https://oai.helicone.ai",
-  configuration: {
-    organization: "[organization]",
-    baseOptions: {
-      headers: {
-        "Helicone-Auth": Bearer <HELICONE_API_KEY>,
-        "Helicone-OpenAI-Api-Base":
-          "https://[YOUR_AZURE_DOMAIN].openai.azure.com",
-      },
-    },
-  },
-});`,
-          },
-        },
-      },
-
-      {
-        name: "Gemini",
-        logo: (
-          <div className="p-3">
-            <Image
-              src={"/static/gemini.webp"}
-              alt={"Gemini"}
-              width={2048}
-              height={2048}
-            />
-          </div>
-        ),
-        integrations: {
-          curl: {
-            language: "shell",
-            code: `curl --request POST \\
-  --url "https://gateway.helicone.ai/v1beta/models/model-name:generateContent?key=$\{GOOGLE_GENERATIVE_API_KEY\}" \\
-  --header "Content-Type: application/json" \\
-  --header "Helicone-Auth: Bearer $\{HELICONE_API_KEY\}" \\
-  --header "Helicone-Target-URL: https://generativelanguage.googleapis.com" \\
-  --data '{
-    "contents": [{
-      "parts":[{
-        "text": "Write a story about a magic backpack."
-      }]
-    }]
+      curl: `curl "https://oai.helicone.ai/v1/chat/completions" \\
+  -H "Authorization: Bearer {{OPENAI_API_KEY}}" \\
+  -H "Helicone-Auth: Bearer {{HELICONE_API_KEY}}" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "model": "gpt-4o-mini",
+    "messages": [{"role": "user", "content": "Hello!"}]
   }'`,
-          },
-        },
-        href: "https://docs.helicone.ai/integrations/gemini/api/curl",
-      },
-      {
-        name: "OpenRouter",
-        logo: (
-          <div className="p-3">
-            <Image
-              src={"/static/openrouter.webp"}
-              alt={"Open Router"}
-              width={2048}
-              height={2048}
-            />
-          </div>
-        ),
-        integrations: {
-          javascript: {
-            language: "tsx",
-            code: `fetch("https://openrouter.helicone.ai/api/v1/chat/completions", {
-  method: "POST",
-  headers: {
-    Authorization: \`Bearer $\{OPENROUTER_API_KEY\}\`,
-    "Helicone-Auth": \`Bearer $\{HELICONE_API_KEY\}\`,
-    "HTTP-Referer": \`$\{YOUR_SITE_URL\}\`, // Optional, for including your app on openrouter.ai rankings.
-    "X-Title": \`$\{YOUR_SITE_NAME\}\`, // Optional. Shows in rankings on openrouter.ai.
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    model: "openai/gpt-3.5-turbo", // Optional (user controls the default),
-    messages: [{ role: "user", content: "What is the meaning of life?" }],
-    stream: true,
-  }),
+      docsLink: "https://docs.helicone.ai/getting-started/integration/openai",
+    },
+    anthropic: {
+      formattedName: "Anthropic",
+      logo: "/static/anthropic.webp",
+      typescript: `import Anthropic from "@anthropic-ai/sdk";
+
+const client = new Anthropic({
+  apiKey: "{{ANTHROPIC_API_KEY}}",
+  baseURL: "https://anthropic.helicone.ai/{{HELICONE_API_KEY}}",
 });`,
-          },
-        },
-        href: "https://docs.helicone.ai/getting-started/integration-method/openrouter",
-      },
-      {
-        name: "Vercel AI SDK",
-        logo: (
-          <div className="p-3">
-            <Image
-              src={"/static/vercel.webp"}
-              alt={"Vercel AI"}
-              width={2048}
-              height={2048}
-            />
-          </div>
-        ),
-        integrations: {},
-        href: "https://docs.helicone.ai/getting-started/integration-method/vercelai",
-      },
-      {
-        name: "TogetherAI",
-        logo: (
-          <div className="p-3">
-            <Image
-              src={"/static/together.webp"}
-              alt={"TogetherAI"}
-              width={2048}
-              height={2048}
-            />
-          </div>
-        ),
-        integrations: {},
-        href: "https://docs.helicone.ai/getting-started/integration-method/together",
-      },
-      {
-        name: "AWS Bedrock",
-        logo: (
-          <div className="p-3">
-            <Image
-              src={"/static/aws-bedrock.webp"}
-              alt={"AWS Bedrock"}
-              width={2048}
-              height={2048}
-            />
-          </div>
-        ),
-        integrations: {},
-        href: "https://docs.helicone.ai/integrations/bedrock/",
-      },
-      {
-        name: "LangChain",
-        logo: (
-          <div className="p-3">
-            <Image
-              src={"/static/langchain.webp"}
-              alt={"LangChain"}
-              width={2048}
-              height={2048}
-            />
-          </div>
-        ),
-        integrations: {},
-        href: "https://docs.helicone.ai/integrations/openai/langchain",
-      },
-      {
-        name: "Groq",
-        logo: (
-          <div className="p-3">
-            <Image
-              src={"/static/groq.webp"}
-              alt={"Groq"}
-              width={2048}
-              height={2048}
-            />
-          </div>
-        ),
-        integrations: {},
-        href: "https://docs.helicone.ai/integrations/groq/",
-      },
-      {
-        name: "LiteLLM",
-        logo: (
-          <div className="p-3">
-            <Image
-              src={"/static/litellm.webp"}
-              alt={"LiteLLM"}
-              width={2048}
-              height={2048}
-            />
-          </div>
-        ),
-        integrations: {},
-        href: "https://docs.helicone.ai/getting-started/integration-method/litellm",
-      },
-    ];
+      python: `from anthropic import Anthropic
 
-  const [currentProvider, setCurrentProvider] = useState("OpenAI");
+client = Anthropic(
+  api_key="{{ANTHROPIC_API_KEY}}",
+  base_url="https://anthropic.helicone.ai/{{HELICONE_API_KEY}}",
+)`,
+      curl: `curl "https://anthropic.helicone.ai/v1/messages" \\
+  -H "x-api-key: {{ANTHROPIC_API_KEY}}" \\
+  -H "Helicone-Auth: Bearer {{HELICONE_API_KEY}}" \\
+  -H "anthropic-version: 2023-06-01" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "model": "claude-3-7-sonnet-20250219",
+    "messages": [{"role": "user", "content": "Hello!"}],
+    "max_tokens": 1024
+  }'`,
+      docsLink:
+        "https://docs.helicone.ai/getting-started/integration/anthropic",
+    },
+    azure: {
+      formattedName: "Azure OpenAI",
+      logo: "/static/azure.webp",
+      typescript: `import OpenAI from "openai";
 
-  const [currentIntegration, setCurrentIntregration] = useState("javascript");
+const client = new OpenAI({
+  apiKey: "{{AZURE_API_KEY}}",
+  baseURL: "https://oai.helicone.ai/openai/deployments/{{YOUR_DEPLOYMENT}}",
+  defaultHeaders: {
+    "Helicone-Auth": "Bearer {{HELICONE_API_KEY}}",
+    "Helicone-OpenAI-Api-Base": "https://{{RESOURCE_NAME}}.openai.azure.com"
+  },
+  defaultQuery: { "api-version": "{{API_VERSION}}" }
+});`,
+      python: `from openai import OpenAI
 
-  const selectedProvider = PROVIDERS.find(
-    (provider) => provider.name === currentProvider
-  );
+client = OpenAI(
+  api_key="{{AZURE_API_KEY}}",
+  base_url="https://oai.helicone.ai/openai/deployments/{{YOUR_DEPLOYMENT}}",
+  default_headers={
+    "Helicone-Auth": "Bearer {{HELICONE_API_KEY}}",
+    "Helicone-OpenAI-Api-Base": "https://{{RESOURCE_NAME}}.openai.azure.com"
+  },
+  default_query={ "api-version": "{{API_VERSION}}" }
+)`,
+      curl: `curl "https://oai.helicone.ai/openai/deployments/{{YOUR_DEPLOYMENT}}/chat/completions?api-version={{API_VERSION}}" \\
+  -H "api-key: {{AZURE_API_KEY}}" \\
+  -H "Helicone-Auth: Bearer {{HELICONE_API_KEY}}" \\
+  -H "Helicone-OpenAI-Api-Base: https://{{RESOURCE_NAME}}.openai.azure.com" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "model": "gpt-4o-mini",
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }'`,
+      docsLink: "https://docs.helicone.ai/getting-started/integration/azure",
+    },
+  };
 
-  const currentCodeBlock = selectedProvider?.integrations[currentIntegration];
+  const ADDITIONAL_PROVIDERS = [
+    {
+      name: "Gemini",
+      logo: "/static/gemini.webp",
+      href: "https://docs.helicone.ai/integrations/gemini/api/curl",
+    },
+    {
+      name: "OpenRouter",
+      logo: "/static/openrouter.webp",
+      href: "https://docs.helicone.ai/getting-started/integration-method/openrouter",
+    },
+    {
+      name: "Vercel AI SDK",
+      logo: "/static/vercel.webp",
+      href: "https://docs.helicone.ai/getting-started/integration-method/vercelai",
+    },
+    {
+      name: "TogetherAI",
+      logo: "/static/together.webp",
+      href: "https://docs.helicone.ai/getting-started/integration-method/together",
+    },
+    {
+      name: "AWS Bedrock",
+      logo: "/static/aws-bedrock.webp",
+      href: "https://docs.helicone.ai/integrations/bedrock/",
+    },
+    {
+      name: "LangChain",
+      logo: "/static/langchain.webp",
+      href: "https://docs.helicone.ai/integrations/openai/langchain",
+    },
+    {
+      name: "Groq",
+      logo: "/static/groq.webp",
+      href: "https://docs.helicone.ai/integrations/groq/",
+    },
+    {
+      name: "LiteLLM",
+      logo: "/static/litellm.webp",
+      href: "https://docs.helicone.ai/getting-started/integration-method/litellm",
+    },
+  ];
+
+  const [currentProvider, setCurrentProvider] =
+    useState<keyof typeof CODE_SNIPPETS>("openai");
+  const [currentLanguage, setCurrentLanguage] = useState<
+    "typescript" | "python" | "curl"
+  >("typescript");
+  const [highlightedCode, setHighlightedCode] = useState("");
+
+  const languages: Array<"typescript" | "python" | "curl"> = [
+    "typescript",
+    "python",
+    "curl",
+  ];
+
+  const selectedProvider = CODE_SNIPPETS[currentProvider];
+  const currentCode = selectedProvider[currentLanguage];
+
+  useEffect(() => {
+    const updateHighlightedCode = async () => {
+      const highlighter = await highlighterPromise;
+      const code = currentCode || "";
+
+      const html = highlighter.codeToHtml(code, {
+        lang:
+          currentLanguage === "typescript"
+            ? "javascript"
+            : currentLanguage === "curl"
+            ? "bash"
+            : "python",
+        theme: "github-dark",
+      });
+      setHighlightedCode(html);
+    };
+
+    updateHighlightedCode();
+  }, [currentProvider, currentLanguage, currentCode]);
+
+  const getLanguageDisplayName = (lang: string) => {
+    switch (lang) {
+      case "typescript":
+        return "TypeScript";
+      case "python":
+        return "Python";
+      case "curl":
+        return "cURL";
+      default:
+        return lang;
+    }
+  };
 
   return (
     <div className={cn(ISLAND_WIDTH, "py-16 md:py-32 flex flex-col gap-10")}>
@@ -389,98 +215,113 @@ self.model = AzureChatOpenAI(
               Get integrated in <span className="text-brand">seconds</span>
             </h2>
             <p className="text-lg font-normal sm:text-xl text-muted-foreground">
-              The simplest integration that connects seamlessly to any LLM provider and framework.{" "}
+              Add logging, monitoring, and analytics to any LLM provider with a
+              single line of code.
             </p>
-            <div className="flex flex-col items-start gap-1">
-              <div className="flex flex-wrap">
-                {PROVIDERS.map((provider) => (
-                  <div
-                    key={provider.name}
+            <div className="flex flex-col items-start gap-4">
+              {/* Main providers with code examples */}
+              <div className="flex flex-wrap gap-3">
+                {Object.entries(CODE_SNIPPETS).map(([key, provider]) => (
+                  <button
+                    key={key}
                     className={cn(
-                      "size-20 rounded-md p-2.5 hover:bg-sky-50 transition-colors ease-in-out duration-200 cursor-pointer",
-                      selectedProvider?.name === provider.name ? "bg-sky-100" : ""
+                      "flex items-center gap-3 px-4 py-3 rounded-lg border transition-all duration-200",
+                      currentProvider === key
+                        ? "bg-brand/10 border-brand text-brand"
+                        : "bg-background border-border hover:border-brand/50 hover:bg-brand/5"
                     )}
-                    onClick={() => {
-                      if (
-                        Object.keys(provider.integrations).length == 0 ||
-                        window.matchMedia("(max-width: 768px)").matches
-                      ) {
-                        window.open(provider.href, "_blank");
-                        return;
-                      }
-                      setCurrentProvider(provider.name);
-                      if (!provider.integrations[currentIntegration]) {
-                        if (provider.name === "Gemini") {
-                          setCurrentIntregration("curl");
-                        } else {
-                          setCurrentIntregration("javascript");
-                        }
-                      }
-                    }}
+                    onClick={() =>
+                      setCurrentProvider(key as keyof typeof CODE_SNIPPETS)
+                    }
                   >
-                    <div className="flex items-center justify-center bg-background border border-border rounded-md h-full">
-                      {provider.logo}
-                    </div>
-                  </div>
+                    <Image
+                      src={provider.logo}
+                      alt={provider.formattedName}
+                      width={24}
+                      height={24}
+                      className="w-6 h-6 object-contain"
+                    />
+                    <span className="text-sm font-medium">
+                      {provider.formattedName}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Additional providers */}
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="text-sm text-muted-foreground">
+                  Plus 50+ more:
+                </span>
+                {ADDITIONAL_PROVIDERS.map((provider) => (
+                  <button
+                    key={provider.name}
+                    className="text-sm text-brand hover:text-brand/80 underline underline-offset-2 hover:no-underline transition-colors"
+                    onClick={() => window.open(provider.href, "_blank")}
+                  >
+                    {provider.name}
+                  </button>
                 ))}
               </div>
             </div>
           </div>
-
         </div>
-        <div className="border rounded-2xl hidden md:flex flex-col divide-y divide-gray-700">
-          <div className="flex items-center justify-between py-2 px-8 bg-gray-900 rounded-t-2xl">
-            <ul className="flex items-center space-x-0">
-              {Object.keys(selectedProvider?.integrations || {}).map(
-                (integration) => (
-                  <li
-                    key={integration}
-                    className={`text-gray-300 cursor-pointer text-sm px-4 py-2 ${currentIntegration === integration
-                      ? "border border-gray-500 rounded-lg bg-gray-700"
-                      : ""
-                      }`}
-                    onClick={() => setCurrentIntregration(integration)}
-                  >
-                    {integration}
-                  </li>
-                )
-              )}
-            </ul>
-            <button className="text-gray-300">
-              <ClipboardIcon
-                onClick={() => {
-                  navigator.clipboard.writeText(currentCodeBlock?.code || "");
-                  toast.success("Copied to clipboard");
-                }}
-                className="h-6 w-6"
-              />
-            </button>
+
+        {/* Code block */}
+        <div className="rounded-2xl border border-[hsl(var(--border))] overflow-hidden hidden md:block">
+          <div className="flex gap-4 p-3 bg-[#24292e] border-b border-[hsl(var(--border))]">
+            {languages.map((language) => (
+              <button
+                key={language}
+                onClick={() => setCurrentLanguage(language)}
+                className={`text-sm font-medium relative px-1 ${
+                  currentLanguage === language
+                    ? "text-white after:absolute after:bottom-[-12px] after:left-0 after:w-full after:h-[2px] after:bg-white"
+                    : "text-[hsl(var(--muted-foreground))] hover:text-white"
+                }`}
+              >
+                {getLanguageDisplayName(language)}
+              </button>
+            ))}
+            <div className="ml-auto">
+              <button className="text-gray-300">
+                <ClipboardIcon
+                  onClick={() => {
+                    navigator.clipboard.writeText(currentCode || "");
+                    toast.success("Copied to clipboard");
+                  }}
+                  className="h-6 w-6"
+                />
+              </button>
+            </div>
           </div>
-          <div className="w-full">
-            <DiffHighlight
-              code={currentCodeBlock?.code || ""}
-              language={currentCodeBlock?.language || "tsx"}
-            />
-          </div>
+          <div
+            className="p-4 bg-[#24292e] overflow-x-auto"
+            dangerouslySetInnerHTML={{ __html: highlightedCode }}
+          />
         </div>
         <Toaster />
       </div>
+
       <div className="flex flex-col sm:flex-row gap-2 items-start md:gap-4">
-        <Link href="/signup">
-          <Button
-            variant="landing_primary"
-            size="landing_page"
-          >
-            Integrate today
-            <ChevronRight className="size-5 md:size-6" />
-          </Button>
-        </Link>
-        <Link href="https://docs.helicone.ai/getting-started/quick-start#quick-start" target="_blank" rel="noopener">
-          <Button
-            variant="ghost"
-            size="landing_page"
-          >
-            Other providers
+        <div className="flex flex-col gap-2">
+          <Link href="/signup">
+            <Button className="bg-brand px-8 py-4 text-base md:text-lg md:py-3 lg:py-6 lg:px-10 lg:text-xl gap-2 rounded-lg items-center">
+              Try for free
+              <ChevronRight className="size-5 md:size-6" />
+            </Button>
+          </Link>
+          <p className="text-sm text-landing-secondary">
+            No credit card required, 7-day free trial
+          </p>
+        </div>
+        <Link
+          href="https://docs.helicone.ai/getting-started/quick-start#quick-start"
+          target="_blank"
+          rel="noopener"
+        >
+          <Button variant="ghost" size="landing_page">
+            View all providers
             <ArrowUpRight className="size-4 md:size-6" />
           </Button>
         </Link>

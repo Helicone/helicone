@@ -7,33 +7,38 @@ interface CompaniesProps {
 
 const Companies = ({ className }: CompaniesProps) => {
   return (
-    <div className={cn("pb-12", className)}>
-      <div className="flex flex-col gap-4">
-        {/* <ul className="grid grid-cols-4 lg:grid-cols-8 gap-8 md:gap-12 px-2 md:px-8 grayscale opacity-40 items-center"> */}
-        <ul className="grid grid-cols-4 lg:grid-cols-8 gap-2 lg:gap-8 grayscale opacity-40 items-center">
+    <div className={cn("py-16", className)}>
+      <div className="max-w-6xl mx-auto px-4">
+        <p className="text-center text-md mb-8">
+          1000+ AI teams use Helicone to build reliable AI apps
+        </p>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-8 items-center justify-items-center">
           {(
             [
               ["/static/togetherai.webp", "togetherai", 169, 53],
               ["/static/qawolf.webp", "qawolf", 157, 53],
               ["/static/home/clay.webp", "clay", 150, 53],
-              ["/static/home/axiom.webp", "axiom", 132, 53],
+              ["/static/home/logos/sia.webp", "Singapore Airlines", 132, 53],
               ["/static/home/duolingo2.png", "duolingo", 240, 53],
               ["/static/sunrun.webp", "sunrun", 132, 53],
               ["/static/filevine.webp", "filevine", 130, 53],
-              ["/static/home/hear.webp", "hear.com", 92, 53],
+              ["/static/home/logos/podpitch.webp", "podpitch", 132, 53],
             ] as const
           ).map((src, index) => (
-            <li className="flex items-center justify-center p-2" key={index}>
+            <div
+              key={index}
+              className="flex items-center justify-center grayscale opacity-50 hover:opacity-70 transition-opacity duration-300"
+            >
               <Image
                 src={src[0]}
                 alt={src[1]}
                 width={src[2]}
                 height={src[3]}
-                objectFit="contain"
+                className="max-w-full h-auto object-contain"
               />
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       </div>
     </div>
   );
