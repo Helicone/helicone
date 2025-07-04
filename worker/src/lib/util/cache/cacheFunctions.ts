@@ -53,7 +53,7 @@ interface SaveToCacheOptions {
   cacheSeed: string | null;
 }
 
-async function trySaveToCache(options: SaveToCacheOptions) {
+async function trySaveToCache(options: SaveToCacheOptions): Promise<boolean> {
   try {
     const {
       request,
@@ -99,18 +99,17 @@ async function trySaveToCache(options: SaveToCacheOptions) {
   }
 }
 
-async function saveToCacheBackoff(options: SaveToCacheOptions) {
+async function saveToCacheBackoff(options: SaveToCacheOptions): Promise<boolean> {
   for (let i = 0; i < CACHE_BACKOFF_RETRIES; i++) {
     const result = await trySaveToCache(options);
-    if (result) {
-      return;
-    }
+    if (result) return result;
     await new Promise((resolve) => setTimeout(resolve, 1000 * 2 ** i));
   }
+  return false;
 }
 
-export async function saveToCache(options: SaveToCacheOptions): Promise<void> {
-  await saveToCacheBackoff(options);
+export async function saveToCache(options: SaveToCacheOptions): Promise<boolean> {
+  return await saveToCacheBackoff(options);
 }
 
 export async function getCachedResponse(
