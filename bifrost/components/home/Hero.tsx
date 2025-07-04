@@ -41,7 +41,7 @@ const Hero = () => {
         <span className="text-brand">AI Apps</span>
       </h1>
       <p className="text-lg sm:text-xl 2xl:text-2xl text-landing-secondary font-light mb-6 lg:mb-12 z-[10]">
-        The world's fastest-growing AI companies rely on Helicone
+        The world&apos;s fastest-growing AI companies rely on Helicone
         <br />
         to route, debug, and analyze their applications.
       </p>

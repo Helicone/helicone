@@ -95,8 +95,8 @@ const AiGateway = () => {
               <div className="overflow-hidden">
                 <p className="text-sm sm:text-lg font-light text-gray-400">
                   LLM routing intelligently directs your requests to the optimal
-                  model based on your criteria - whether that's cost, speed,
-                  accuracy, or availability.
+                  model based on your criteria - whether that&apos;s cost,
+                  speed, accuracy, or availability.
                   <br />
                   <br />
                   Instead of managing separate integrations for OpenAI,

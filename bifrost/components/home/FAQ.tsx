@@ -35,7 +35,7 @@ const FAQ = () => {
               <br />
               <br />
               For our cloud gateway, computational overhead is still under 1ms,
-              plus one network hop. We're deployed globally on the edge to
+              plus one network hop. We&apos;re deployed globally on the edge to
               minimize latency - see our{" "}
               <a
                 href="https://docs.helicone.ai/references/latency-affect"
@@ -156,13 +156,13 @@ const FAQ = () => {
             <AccordionContent className="text-muted-foreground text-base sm:text-lg font-normal">
               You have two options: use Helicone Observability without the AI
               Gateway (SDK integration without proxying), or self-host our
-              open-source AI Gateway to eliminate any dependency on Helicone's
-              uptime while keeping all routing benefits.
+              open-source AI Gateway to eliminate any dependency on
+              Helicone&apos;s uptime while keeping all routing benefits.
               <br />
               <br />
               However, <span className="font-bold">thousands</span> of companies
               use our cloud proxy in production with high reliability. We
-              leverage Cloudflare's global network for minimal latency and
+              leverage Cloudflare&apos;s global network for minimal latency and
               maximum uptime.
               <br />
               <br />

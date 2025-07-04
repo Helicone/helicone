@@ -12,7 +12,7 @@ const Quote3 = () => {
             <span className="text-black">
               essential for debugging our complex agentic flows
             </span>{" "}
-            for AI code reviews. Can't imagine building without it.
+            for AI code reviews. Can&apos;t imagine building without it.
           </h2>
           <div className="flex items-end gap-6">
             <Image
