@@ -305,7 +305,7 @@ export async function proxyForwarder(
             const status = await loggable.getStatus();
             if (status >= 200 && status < 300) {
               try {
-                await saveToCache({
+                const success = await saveToCache({
                   request: proxyRequest,
                   response,
                   responseBody: responseBody.body,
@@ -315,6 +315,13 @@ export async function proxyForwarder(
                   cacheKv: env.CACHE_KV,
                   cacheSeed: cacheSettings.cacheSeed ?? null,
                 });
+                if (!success) {
+                  const sentryManager = new SentryManager(env);
+                  await sentryManager.sendError(
+                    "Failed to save to cache",
+                    "all retries failed"
+                  );
+                }
               } catch (error) {
                 const sentryManager = new SentryManager(env);
                 await sentryManager.sendError(
