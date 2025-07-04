@@ -9,9 +9,9 @@ const Log = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-y-8">
         <div className="flex flex-col gap-9 pr-4 sm:pr-0">
           <div className="flex items-center gap-2.5">
-            <p className="text-base sm:text-xl">01</p>
+            <p className="text-base sm:text-xl">02</p>
             <div className="text-base sm:text-lg font-medium text-slate-700">
-              Log
+              Debug
             </div>
           </div>
           <div className="flex flex-col gap-6">
@@ -20,10 +20,14 @@ const Log = () => {
             </h2>
             <p className="text-lg max-w-[520px] text-landing-description font-light leading-relaxed">
               Visualize your multi-step LLM interactions, log requests in
-              real-time and pinpoint root cause of errors.
+              real-time, and pinpoint the root cause of errors.
             </p>
             <div className="inline-flex">
-              <Link href="https://docs.helicone.ai/features/sessions" target="_blank" rel="noopener">
+              <Link
+                href="https://docs.helicone.ai/features/sessions"
+                target="_blank"
+                rel="noopener"
+              >
                 <Button
                   variant="landing_primary"
                   size="landing_page"
