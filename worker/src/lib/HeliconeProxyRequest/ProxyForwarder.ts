@@ -32,6 +32,7 @@ import {
 import { RequestResponseManager } from "../managers/RequestResponseManager";
 import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
 import { RateLimitManager } from "../managers/RateLimitManager";
+import { SentryManager } from "../managers/SentryManager";
 
 export async function proxyForwarder(
   request: RequestWrapper,
@@ -303,16 +304,25 @@ export async function proxyForwarder(
           loggable.waitForResponse().then(async (responseBody) => {
             const status = await loggable.getStatus();
             if (status >= 200 && status < 300) {
-              saveToCache({
-                request: proxyRequest,
-                response,
-                responseBody: responseBody.body,
-                cacheControl: cacheSettings.cacheControl,
-                settings: cacheSettings.bucketSettings,
-                responseLatencyMs: responseBody.endTime.getTime() - loggable.getTimingStart(),
-                cacheKv: env.CACHE_KV,
-                cacheSeed: cacheSettings.cacheSeed ?? null,
-              });
+              try {
+                await saveToCache({
+                  request: proxyRequest,
+                  response,
+                  responseBody: responseBody.body,
+                  cacheControl: cacheSettings.cacheControl,
+                  settings: cacheSettings.bucketSettings,
+                  responseLatencyMs: responseBody.endTime.getTime() - loggable.getTimingStart(),
+                  cacheKv: env.CACHE_KV,
+                  cacheSeed: cacheSettings.cacheSeed ?? null,
+                });
+              } catch (error) {
+                const sentryManager = new SentryManager(env);
+                await sentryManager.sendError(
+                  "Failed to save to cache",
+                  error instanceof Error ? error.stack ?? error.message : String(error)
+                );
+                console.error("Failed to save to cache:", error);
+              }
             }
           })
         );
