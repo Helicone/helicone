@@ -11,7 +11,7 @@ const Log = () => {
           <div className="flex items-center gap-2.5">
             <p className="text-base sm:text-xl">02</p>
             <div className="text-base sm:text-lg font-medium text-slate-700">
-              Log
+              Debug
             </div>
           </div>
           <div className="flex flex-col gap-6">
@@ -23,7 +23,11 @@ const Log = () => {
               real-time, and pinpoint the root cause of errors.
             </p>
             <div className="inline-flex">
-              <Link href="https://docs.helicone.ai/features/sessions" target="_blank" rel="noopener">
+              <Link
+                href="https://docs.helicone.ai/features/sessions"
+                target="_blank"
+                rel="noopener"
+              >
                 <Button
                   variant="landing_primary"
                   size="landing_page"

@@ -17,7 +17,7 @@ const AiGateway = () => {
       <div className="grid grid-cols-1 md:grid-cols-2">
         <div className="w-full sm:pl-16 mx-auto flex items-center justify-center py-0 md:py-8 pb-20">
           <Image
-            src="/static/home/logos/github.webp"
+            src="/static/home/logos/route-homepage.webp"
             alt="AI Gateway Routing"
             width={1000}
             height={1000}
@@ -28,14 +28,14 @@ const AiGateway = () => {
           <div className="flex items-center gap-2.5">
             <p className="text-base sm:text-xl">01</p>
             <div className="text-base sm:text-lg font-medium text-slate-700">
-              Routing
+              Route
             </div>
           </div>
           <div className="flex flex-col items-start md:items-end gap-6 text-left md:text-right">
             <h2 className="font-semibold text-4xl sm:text-5xl leading-[120%] max-w-[600px] text-wrap text-black">
-              <span className="text-brand">Smart and speedy</span>
+              <span className="text-brand">Smart & Speedy</span>
               <br />
-              LLM routing
+              LLM Routing
             </h2>
             <p className="text-lg max-w-[520px] text-landing-description font-light leading-relaxed">
               We make sure you always have the best model for your request, so
@@ -94,17 +94,20 @@ const AiGateway = () => {
             >
               <div className="overflow-hidden">
                 <p className="text-sm sm:text-lg font-light text-gray-400">
-                  A new model is released every week. Which one should you use?
-                  The cheapest, the fastest, or the most accurate?
+                  LLM routing intelligently directs your requests to the optimal
+                  model based on your criteria - whether that's cost, speed,
+                  accuracy, or availability.
                   <br />
                   <br />
-                  Helicone AI Gateway bundles all providers under a single
-                  interface so your request is always the best for your needs.
+                  Instead of managing separate integrations for OpenAI,
+                  Anthropic, Google, and dozens of other providers, you route
+                  through one unified interface that automatically picks the
+                  best option.
                   <br />
                   <br />
-                  On top of it, we enable you with caching capabilities,
-                  observability, load balancing, and more - so your users always
-                  get the best experience without breaking your bank.
+                  With smart load balancing, automatic failovers, and response
+                  caching, routing ensures your app stays fast and reliable
+                  while optimizing costs across all providers.
                 </p>
               </div>
             </div>

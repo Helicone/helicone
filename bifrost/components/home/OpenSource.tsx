@@ -194,7 +194,8 @@ const OpenSource = async () => {
             Proudly <span className="text-brand">open-source</span>
           </h2>
           <p className="text-lg sm:text-xl font-light leading-relaxed text-landing-description">
-            We value transparency and believe the best products are built in community.
+            We value transparency and believe the best products are built in
+            community.
           </p>
         </div>
         <a
@@ -230,7 +231,7 @@ const OpenSource = async () => {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
         <Link
-          href="https://us.helicone.ai/open-stats"
+          href="https://github.com/helicone/helicone"
           target="_blank"
           className="col-span-1 md:col-span-2 p-6 bg-slate-50 rounded-xl border border-slate-200 relative hover:bg-slate-100 transition-colors flex flex-col h-full justify-between"
         >
@@ -251,7 +252,7 @@ const OpenSource = async () => {
           <Image src={ContributorsImg} alt="Contributors" className="w-full" />
         </Link>
         <Link
-          href="/llm-cost"
+          href="https://docs.helicone.ai/ai-gateway/quickstart"
           target="_blank"
           className="col-span-1 md:col-span-4 px-6 pt-6 pb-2 sm:pb-6 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row items-center sm:items-stretch gap-y-8 justify-between relative hover:bg-slate-100 transition-colors"
         >
@@ -266,7 +267,8 @@ const OpenSource = async () => {
               </div>
             </div>
             <p className="text-base sm:text-lg max-w-[486px] text-wrap">
-              Whether through single-click deployment or our production-ready HELM chart, self-host the AI Gateway in your own infrastructure.
+              Whether through single-click deployment or our production-ready
+              HELM chart, self-host the AI Gateway in your own infrastructure.
             </p>
           </div>
           <Image
@@ -291,7 +293,9 @@ const OpenSource = async () => {
               </div>
             </div>
             <p className="text-base sm:text-lg max-w-[486px] text-wrap">
-              Compare LLM costs with the largest open-source API pricing database with 300+ models and providers such as OpenAI, Anthropic and more.
+              Compare LLM costs with the largest open-source API pricing
+              database with 300+ models and providers such as OpenAI, Anthropic
+              and more.
             </p>
           </div>
           <div className="h-[200px]">
@@ -314,7 +318,8 @@ const OpenSource = async () => {
             </div>
           </div>
           <p className="text-base sm:text-lg max-w-[380px] text-wrap">
-            The largest public AI conversation datasets consisting of all of Helicone&apos;s LLM usage data. All anonymized.
+            The largest public AI conversation datasets consisting of all of
+            Helicone&apos;s LLM usage data. All anonymized.
           </p>
           <OpenStatsSVG />
         </Link>
