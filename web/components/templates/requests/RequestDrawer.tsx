@@ -201,6 +201,14 @@ export default function RequestDrawer(props: RequestDivProps) {
       { label: "User", value: request.heliconeMetadata.user || "Unknown" },
     ];
 
+    // Add cost information
+    if (request.heliconeMetadata.cost !== null && request.heliconeMetadata.cost !== undefined) {
+      requestInfo.push({
+        label: "Cost",
+        value: `$${formatNumber(request.heliconeMetadata.cost || 0)}`,
+      });
+    }
+
     // Token Information
     const tokenInfo = [
       {
@@ -216,6 +224,14 @@ export default function RequestDrawer(props: RequestDivProps) {
         value: request.heliconeMetadata.totalTokens || 0,
       },
     ];
+
+    // Add cached token information if available
+    if (request.heliconeMetadata.promptCacheReadTokens) {
+      tokenInfo.push({
+        label: "Cached Tokens",
+        value: request.heliconeMetadata.promptCacheReadTokens || 0,
+      });
+    }
 
     // Parameter Information (only include defined parameters)
     const parameterInfo = Object.entries(requestParameters)
@@ -490,20 +506,6 @@ export default function RequestDrawer(props: RequestDivProps) {
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="text-xs">
                     Latency
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-
-              {/* Cost Badge */}
-              <TooltipProvider>
-                <Tooltip delayDuration={100}>
-                  <TooltipTrigger asChild>
-                    <Badge variant={"secondary"} asPill={false}>
-                      ${formatNumber(request.heliconeMetadata.cost || 0)}
-                    </Badge>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="text-xs">
-                    Cost
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
