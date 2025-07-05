@@ -13,6 +13,11 @@ import {
   PromptsQueryParams,
   PromptsResult,
 } from "../../controllers/public/promptController";
+import {
+  Prompt2025,
+  Prompt2025Version,
+  PromptVersionCounts,
+} from "../../controllers/public/prompt2025Controller";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { FilterNode } from "@helicone-package/filters/filterDefs";
 import { buildFilterPostgres } from "@helicone-package/filters/filters";
@@ -21,10 +26,340 @@ import { BaseManager } from "../BaseManager";
 import { RequestManager } from "../request/RequestManager";
 
 import { S3Client } from "../../lib/shared/db/s3Client";
-import type { CompletionCreateParams } from 'openai/resources/completions';
+import type { OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
 import { AuthParams } from "../../packages/common/auth/types";
 
 
+const PROMPT_ID_LENGTH = 6;
+const MAX_PROMPT_ID_GENERATION_ATTEMPTS = 3;
+
+export class Prompt2025Manager extends BaseManager {
+  private s3Client: S3Client;
+
+  constructor(authParams: AuthParams) {
+    super(authParams);
+    this.s3Client = new S3Client(
+      process.env.S3_ACCESS_KEY ?? "",
+      process.env.S3_SECRET_KEY ?? "",
+      process.env.S3_ENDPOINT_PUBLIC ?? process.env.S3_ENDPOINT ?? "",
+      process.env.S3_BUCKET_NAME ?? "",
+      (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
+    );
+  }
+
+  private generateRandomPromptId() : string {
+    const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    let result = '';
+    for (let i = 0; i < PROMPT_ID_LENGTH; i++) {
+      result += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return result;
+  }
+
+  async totalPrompts(): Promise<Result<number, string>> {
+    const result = await dbExecute<{ count: number }>(
+      `SELECT COUNT(*) as count FROM prompts_2025 WHERE organization = $1`,
+      [this.authParams.organizationId]
+    );
+    if (result.error) {
+      return err(result.error);
+    }
+    return ok(Number(result.data?.[0]?.count ?? 0));
+  }
+
+  async getPrompt(promptId: string): Promise<Result<Prompt2025, string>> {
+    const result = await dbExecute<Prompt2025>(
+      `SELECT
+        id,
+        name,
+        tags,
+        created_at
+      FROM prompts_2025
+      WHERE id = $1 AND organization = $2
+      LIMIT 1
+      `,
+      [promptId, this.authParams.organizationId]
+    );
+    if (result.error) {
+      return err(result.error);
+    }
+    if (!result.data?.[0]) {
+      return err("Prompt not found");
+    }
+    return ok(result.data[0]);
+  }
+
+  async getPrompts(params: {
+    search: string;
+    page: number;
+    pageSize: number;
+  }): Promise<Result<Prompt2025[], string>> {
+    const result = await dbExecute<Prompt2025>(
+    `
+      SELECT
+        id,
+        name,
+        tags,
+        created_at
+      FROM prompts_2025
+      WHERE name ILIKE $1 AND organization = $2
+      ORDER BY created_at DESC
+      LIMIT $3 OFFSET $4
+    `,
+      [`%${params.search}%`, this.authParams.organizationId, params.pageSize, params.page * params.pageSize]
+    );
+
+    if (result.error) {
+      return err(result.error);
+    }
+
+    return ok(result.data ?? []);
+  }
+
+  async getPromptVersionCounts(params: {
+    promptId: string;
+  }): Promise<Result<PromptVersionCounts, string>> {
+    const result = await dbExecute<{ total_versions: number, major_versions: number }>(
+      `SELECT
+        COUNT(*)::integer as total_versions,
+        MAX(major_version) as major_versions
+      FROM prompts_2025_versions
+      WHERE prompt_id = $1 AND organization = $2
+      `,
+      [params.promptId, this.authParams.organizationId]
+    );
+
+    if (result.error) {
+      return err(result.error);
+    }
+
+    return ok({
+      totalVersions: result.data?.[0]?.total_versions ?? 0,
+      majorVersions: result.data?.[0]?.major_versions ?? 0,
+    });
+  }
+
+  async getPromptProductionVersion(params: {
+    promptId: string;
+  }): Promise<Result<Prompt2025Version, string>> {
+    const result = await dbExecute<Prompt2025Version>(
+      `
+      SELECT
+        versions.id,
+        versions.prompt_id,
+        versions.major_version,
+        versions.minor_version,
+        versions.commit_message,
+        versions.created_at,
+        versions.model
+      FROM prompts_2025 AS prompts
+      INNER JOIN prompts_2025_versions AS versions
+      ON prompts.production_version = versions.id
+      WHERE prompts.id = $1 AND prompts.organization = $2
+      `,
+      [params.promptId, this.authParams.organizationId]
+    );
+
+    if (result.error) {
+      return err(result.error);
+    }
+
+    if (!result.data?.[0]) {
+      return err("Production version not found");
+    }
+    return ok(result.data[0]);
+  }
+
+  async getPromptVersions(params: {
+    promptId: string;
+    majorVersion?: number;
+  }): Promise<Result<Prompt2025Version[], string>> {
+    const result = await dbExecute<Prompt2025Version>(
+      `
+      SELECT 
+        id,
+        prompt_id,
+        major_version,
+        minor_version,
+        commit_message,
+        created_at,
+        model
+      FROM prompts_2025_versions
+      WHERE prompt_id = $1
+      AND organization = $2
+      ${params.majorVersion !== undefined ? `AND major_version = $3` : ''}
+      ORDER BY created_at DESC
+      LIMIT 50
+      `,
+      [params.promptId, this.authParams.organizationId, params.majorVersion]
+    );
+
+    if (result.error) {
+      return err(result.error);
+    }
+
+    return ok(result.data ?? []);
+  }
+
+  async getPromptVersionWithBody(params: {
+    promptVersionId: string;
+  }): Promise<Result<Prompt2025Version, string>> {
+    const result = await dbExecute<Prompt2025Version>(
+      `
+      SELECT 
+        id,
+        prompt_id,
+        major_version,
+        minor_version,
+        commit_message,
+        created_at,
+        model
+      FROM prompts_2025_versions
+      WHERE id = $1
+      AND organization = $2
+      LIMIT 1
+      `,
+      [params.promptVersionId, this.authParams.organizationId]
+    );
+
+    if (result.error) {
+      return err(result.error);
+    }
+
+    if (!result.data?.[0]) {
+      return err("Prompt version not found");
+    }
+
+    const promptVersion = result.data[0];
+
+    const s3UrlResult = await this.getPromptVersionS3Url(promptVersion.prompt_id, promptVersion.id);
+    if (s3UrlResult.error) {
+      return err(s3UrlResult.error);
+    }
+    promptVersion.s3_url = s3UrlResult.data ?? undefined;
+
+    return ok(promptVersion);
+  }
+
+  async createPrompt(params: {
+    name: string,
+    tags: string[],
+    promptBody: OpenAIChatRequest,
+  }): Promise<Result<{ id: string }, string>> {
+    // Create prompt
+    let attempts = 0;
+    let insertPromptResult = null;
+
+    while (attempts < MAX_PROMPT_ID_GENERATION_ATTEMPTS) {
+      const promptId = this.generateRandomPromptId();
+      try {
+        insertPromptResult = await dbExecute<{ id: string }>(
+          `
+        INSERT INTO prompts_2025 (id, name, tags, created_at, organization)
+        VALUES ($1, $2, $3, NOW(), $4)
+        RETURNING id
+          `, [
+            promptId,
+            params.name,
+            params.tags,
+            this.authParams.organizationId,
+          ]
+        );
+        break;
+      } catch (error: any) {
+        if (error.code === '23505') {
+          attempts++;
+          continue;
+        }
+        return err(error);
+      }
+    }
+    
+    if (insertPromptResult?.error) {
+      return err(insertPromptResult.error);
+    }
+    
+    const promptId = insertPromptResult?.data?.[0]?.id ?? '';
+    
+    
+    const insertPromptVersionResult = await dbExecute<{ id: string }>(
+      `
+      INSERT INTO prompts_2025_versions (
+        created_at,
+        prompt_id,
+        major_version,
+        minor_version,
+        commit_message,
+        created_by,
+        organization,
+        model
+      )
+      VALUES (NOW(), $1, 0, 0, 'First version.', $2, $3, $4)
+      RETURNING id
+      `, [
+        promptId,
+        this.authParams.userId,
+        this.authParams.organizationId,
+        params.promptBody.model,
+      ]
+    )
+    
+    if (insertPromptVersionResult?.error) {
+      return err(insertPromptVersionResult.error);
+    }
+
+    const promptVersionId = insertPromptVersionResult?.data?.[0]?.id ?? '';
+
+    const updateProductionVersionResult = await dbExecute(
+      `
+      UPDATE prompts_2025
+      SET production_version = $1
+      WHERE id = $2 AND organization = $3
+      `, [
+        promptVersionId,
+        promptId,
+        this.authParams.organizationId,
+      ]
+    )
+
+    if (updateProductionVersionResult?.error) {
+      return err(updateProductionVersionResult.error);
+    }
+
+    const s3Result = await this.storePrompt(promptId, promptVersionId, params.promptBody);
+    if (s3Result.error) {
+      return err(s3Result.error);
+    }
+
+    return ok({ id: promptId });
+  }
+  
+  // Unsure about typing of the data, should double check this when writing using code.
+  // Unsure if we use every field in CompletionCreateParams.
+  private async storePrompt(
+    promptId: string,
+    promptVersionId: string,
+    promptBody: OpenAIChatRequest
+  ): Promise<Result<null, string>> {
+    if (!promptId) return err("Prompt ID is required");
+    const key = this.s3Client.getPromptKey(promptId, promptVersionId, this.authParams.organizationId);
+    
+    const s3result = await this.s3Client.store(key, JSON.stringify(promptBody)); 
+    if (s3result.error) return err(s3result.error);
+    
+    return ok(null);
+  }
+
+  private async getPromptVersionS3Url(promptId: string, promptVersionId: string): Promise<Result<string, string>> {
+    const key = this.s3Client.getPromptKey(promptId, promptVersionId, this.authParams.organizationId);
+    const s3Result = await this.s3Client.getSignedUrl(key);
+    if (s3Result.error) return err(s3Result.error);
+    return ok(s3Result.data ?? '');
+  }
+
+  // TODO: add other methods for deletion, etc.
+  // TODO: Add query methods for getting prompts and metrics from Postgres, Clickhouse.
+}
 
 // DEPRECATED
 // TODO: Remove this once Prompt2025Manager and new prompt system is live
@@ -947,37 +1282,4 @@ export class PromptManager extends BaseManager {
       return err(`Failed to create prompt input keys: ${error}`);
     }
   }
-}
-
-export class Prompt2025Manager extends BaseManager {
-  private s3Client: S3Client;
-
-  constructor(authParams: AuthParams) {
-    super(authParams);
-    this.s3Client = new S3Client(
-      process.env.S3_ACCESS_KEY ?? "",
-      process.env.S3_SECRET_KEY ?? "",
-      process.env.S3_ENDPOINT_PUBLIC ?? process.env.S3_ENDPOINT ?? "",
-      process.env.S3_BUCKET_NAME ?? "",
-      (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
-    );
-  }
-  
-  // Unsure about typing of the data, should double check this when writing using code.
-  // Unsure if we use every field in CompletionCreateParams.
-  async storePrompt(
-    promptId: string,
-    promptBody: CompletionCreateParams
-  ) {
-    if (!promptId) return err("Prompt ID is required");
-    const key = this.s3Client.getPromptKey(promptId, this.authParams.organizationId);
-    
-    const s3result = await this.s3Client.store(key, JSON.stringify(promptBody)); 
-    if (s3result.error) return err(s3result.error);
-    
-    return ok(null);
-  }
-
-  // TODO: add other methods for deletion, etc.
-  // TODO: Add query methods for getting prompts and metrics from Postgres, Clickhouse.
 }
