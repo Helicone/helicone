@@ -1,0 +1,165 @@
+---
+title: "Implementing Caching to Reduce Costs"
+sidebarTitle: "Implementing Caching"
+description: "Use caching to reduce API calls and save money with Helicone AI Gateway"
+"twitter:title": "Implementing Caching | Helicone"
+---
+
+DraftGenius is getting popular, but costs are getting out of control. You realize that users often ask similar queries. You're effectively paying for the same LLM calls repeatedly. 
+
+**The Solution**: Cache identical requests to eliminate redundant API calls.
+
+## Basic Caching Setup
+
+Add caching to your existing configuration:
+
+```yaml
+routers:
+  production:
+    load-balance:
+      chat:
+        strategy: latency
+        providers:
+          - openai
+          - anthropic
+    cache:
+      store: in-memory
+      directive: "max-age=3600, max-stale=1800"  # 1 hour fresh, 30 min stale
+```
+
+Restart the gateway and that's it. Identical requests now return instantly from cache.
+
+## Understanding Cache Directives
+
+The `directive` field uses HTTP Cache-Control syntax:
+
+- `max-age=3600`: Cache responses for 3600 seconds (1 hour)
+- `max-stale=1800`: Use stale cache for additional 1800 seconds if needed
+- `no-cache`: Always validate with provider
+- `no-store`: Never cache this response
+
+## Smart Caching for Different Features
+
+AI Gateway supports different cache strategies for different parts of your app:
+
+```yaml
+routers:
+  # Grammar checking - highly cacheable
+  grammar-check:
+    cache:
+      store: in-memory
+      directive: "max-age=86400"  # 24 hours
+      buckets: 1                  # Always same response
+    load-balance:
+      chat:
+        strategy: latency
+        providers: [openai, anthropic]
+
+  # Creative writing - needs variety
+  creative-writing:
+    cache:
+      store: in-memory
+      directive: "max-age=1800"   # 30 minutes
+      buckets: 10                 # Store 10 different responses
+    load-balance:
+      chat:
+        strategy: latency
+        providers: [openai, anthropic]
+
+  # Real-time chat - minimal caching
+  chat:
+    cache:
+      store: in-memory
+      directive: "max-age=60"     # 1 minute only
+      buckets: 1
+    load-balance:
+      chat:
+        strategy: latency
+        providers: [openai, anthropic]
+```
+
+## Using Cache Buckets 
+
+Cache buckets store multiple responses for identical requests:
+
+```yaml
+cache:
+  buckets: 5  # Store up to 5 different responses
+```
+
+How it works:
+1. First 5 identical requests: Store each unique response
+2. After 5 responses: Randomly return one of the stored responses
+3. Provides variety while still saving costs
+
+Perfect for creative tasks where you want different outputs.
+
+## Cache Namespacing 
+
+You can isolate cache by user or organization:
+
+```yaml
+routers:
+  production:
+    cache:
+      store: in-memory
+      directive: "max-age=3600"
+      seed: "default"  # Default namespace
+```
+
+Then use headers to create user-specific caches:
+
+```python
+# User-specific cache namespace
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=messages,
+    extra_headers={
+        "Helicone-Cache-Seed": f"user-{user_id}"
+    }
+)
+```
+
+Now each user has their own isolated cache.
+
+## Cache Storage Options
+
+### In-Memory (Default)
+
+```yaml
+cache:
+  store: in-memory
+```
+
+- **Pros**: Fastest, no dependencies
+- **Cons**: Lost on restart, single instance only
+- **Use for**: Development, small deployments
+
+### Redis (Coming Soon)
+
+```yaml
+cache:
+  store: redis
+  redis:
+    url: redis://localhost:6379
+```
+
+- **Pros**: Persistent, shared across instances
+- **Cons**: Additional dependency
+- **Use for**: Production, multi-instance deployments
+
+## Key Takeaways
+
+1. **Instant savings**: Just add cache configuration, no code changes
+2. **Flexible strategies**: Different cache times for different features
+3. **User isolation**: Cache namespacing for multi-tenant apps
+4. **Variety control**: Buckets allow you to store multiple responses for identical requests—useful for creative tasks where you want different outputs
+
+Caching solved the cost problem, but now certain power users are hammering the API. Time to add rate limits.
+
+<Card title="Implementing Rate Limits to Protect Your App" icon="gauge-high" href="/guides/cookbooks/ai-gateway/rate-limits">
+  Implement rate limits to protect your app from abuse
+</Card>
+
+
+<QuestionsSection />

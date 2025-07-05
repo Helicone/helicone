@@ -1,0 +1,169 @@
+---
+title: "Adding Fallbacks for Reliability"
+sidebarTitle: "Adding Fallbacks for Reliability"
+description: "Use fallbacks to make your AI app more reliable with Helicone AI Gateway"
+"twitter:title": "Adding Fallbacks for Reliability | Helicone"
+---
+
+import QuestionsSection from "/snippets/questions-section.mdx";
+
+When your app encounters provider API outages, rate limits, or gets slogged, your users experience degraded service as the LLMs are unable to respond.
+
+With Helicone AI Gateway, you can implement load balancing across multiple providers with automatic fallback capabilities. This ensures that your app remains available and responsive even when one provider is experiencing issues.
+
+## Setting Up Basic Fallbacks
+
+<Steps>
+  <Step title="Create your config file">
+    Create an `ai-gateway-config.yaml` file with latency-based routing (automatically picks the fastest provider):
+
+    ```yaml
+    routers:
+      default:
+        load-balance:
+          chat:
+            strategy: latency
+            providers:
+              - openai
+              - anthropic
+              - gemini
+    ```
+  </Step>
+
+  <Step title="Ensure your provider API keys are set">
+    ```bash
+    export OPENAI_API_KEY=sk-your-openai-key
+    export ANTHROPIC_API_KEY=sk-ant-your-anthropic-key
+    export GEMINI_API_KEY=your-gemini-key
+    ```
+  </Step>
+
+  <Step title="Start the gateway">
+    ```bash
+    npx @helicone/ai-gateway@latest --config ai-gateway-config.yaml
+    ```
+  </Step>
+
+  <Step title="Test load balancing">
+    ```bash
+    curl -X POST http://localhost:8080/router/default/v1/chat/completions \
+      -H "Content-Type: application/json" \
+      -d '{
+        "model": "gpt-4o-mini",
+        "messages": [{"role": "user", "content": "Hello!"}]
+      }'
+    ```
+    
+    ✅ The gateway automatically routes to the fastest available provider!
+  </Step>
+</Steps>
+
+<Note>
+  By simply integrating the Helicone AI Gateway (without any extra configuration) you can automatically route to one of three default providers (OpenAI, Anthropic, or Gemini) in case one goes down. All routing strategies are rate-limit aware and health-monitored.
+</Note>
+
+## How Latency-Based Load Balancing Works
+
+The gateway uses a Power-of-Two-Choices (P2C) algorithm with Peak Exponentially Weighted Moving Average (PeakEWMA):
+
+1. Randomly selects 2 healthy providers
+2. Routes to the one with lower latency score
+3. Updates latency metrics after each request
+4. Automatically removes unhealthy providers
+
+This means your app always uses the fastest available provider without any code changes.
+
+## Advanced Fallback Strategies
+
+### Weighted Distribution
+
+This allows you to distribute load even when all providers are healthy—useful for A/B testing or gradual provider migrations.
+
+```yaml
+routers:
+  production:
+    load-balance:
+      chat:
+        strategy: weighted
+        providers:
+          - provider: openai
+            weight: 0.7    # 70% of traffic
+          - provider: anthropic
+            weight: 0.2    # 20% of traffic
+          - provider: gemini
+            weight: 0.1    # 10% of traffic
+```
+
+### Model Mapping for Seamless Fallbacks
+
+Configure mappings so the router can automatically route to the correct model for a given provider.
+
+```yaml
+routers:
+  production:
+    model-mappings:
+      gpt-4o: claude-3-5-sonnet      # When routing to Anthropic
+      gpt-4o-mini: claude-3-5-haiku   # Use equivalent model
+    load-balance:
+      chat:
+        strategy: latency
+        providers:
+          - openai
+          - anthropic
+```
+
+Now `model="gpt-4o"` automatically becomes `claude-3-5-sonnet` when routed to Anthropic.
+
+### Automatic Retries
+
+Add retries for transient failures:
+
+```yaml
+routers:
+  production:
+    retries:
+      enabled: true
+      max-retries: 3
+      strategy: exponential
+      base: 1s      # First retry after 1 second
+      max: 30s      # Max wait between retries
+    load-balance:
+      chat:
+        strategy: latency
+        providers:
+          - openai
+          - anthropic
+          - gemini
+```
+
+## Monitoring Provider Health
+
+The gateway tracks provider health automatically:
+
+```yaml
+discover:
+  monitor:
+    health:
+      ratio: 0.1              # Remove provider if >10% errors
+      window: 60s             # Check over 60-second window
+      grace-period:
+        min-requests: 20      # Need 20 requests before removal
+```
+
+## Key Takeaways
+
+1. **Zero code changes**: Just point your existing code to the gateway
+2. **Automatic failover**: Unhealthy providers removed instantly
+3. **Performance optimization**: Latency-based routing automatically routes to fastest provider
+4. **Model compatibility**: Automatic mapping between provider models
+5. **Resilience**: Handles retries and transient failures
+
+Your app now stays online even when providers don't. 
+
+**Next up**: what to do when those API bills start stacking up?
+
+<Card title="Implementing Caching to Reduce Costs" icon="database" href="/guides/cookbooks/ai-gateway/caching">
+  Implement caching to reduce API calls and save money
+</Card>
+
+<QuestionsSection />
