@@ -86,11 +86,21 @@ export class HeliconeManualLogger {
 
     const streamedData: any[] = [];
     const decoder = new TextDecoder();
-    for await (const chunk of stream) {
-      if (!firstChunkTimeUnix) {
-        firstChunkTimeUnix = Date.now();
+    
+    // Use stream reader for compatibility
+    const reader = stream.getReader();
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        if (!firstChunkTimeUnix) {
+          firstChunkTimeUnix = Date.now();
+        }
+        streamedData.push(decoder.decode(value));
       }
-      streamedData.push(decoder.decode(chunk));
+    } finally {
+      reader.releaseLock();
     }
 
     await this.sendLog(request, streamedData.join(""), {
@@ -299,9 +309,19 @@ class HeliconeStreamResultRecorder {
           this.firstChunkTimeUnix = Date.now();
         }
         const streamedData: any[] = [];
-        for await (const chunk of stream) {
-          streamedData.push(decoder.decode(chunk));
+        
+        // Use stream reader for compatibility
+        const reader = stream.getReader();
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            streamedData.push(decoder.decode(value));
+          }
+        } finally {
+          reader.releaseLock();
         }
+        
         return streamedData.join("");
       })
     );

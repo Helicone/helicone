@@ -18,7 +18,7 @@
     "strictNullChecks": true,
     "target": "es2020",
     "module": "CommonJS",
-    "lib": ["es2020"],
+    "lib": ["es2020", "dom", "dom.iterable"],
     "moduleResolution": "Node",
     "noImplicitAny": true,
     "outDir": "dist",

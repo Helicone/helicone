@@ -128,6 +128,27 @@ async function getHeliconeJwtAuthParams(
   }
 }
 
+async function getHeliconeSessionTokenAuthParams(
+  sessionTokenAuth: SessionTokenAuth
+): Promise<Result<InternalAuthParams, string>> {
+  const { payload } = sessionTokenAuth;
+  
+  // Check if token is expired
+  const currentTime = Math.floor(Date.now() / 1000);
+  if (payload.exp < currentTime) {
+    return { error: "Session token has expired", data: null };
+  }
+
+  return {
+    data: {
+      organizationId: payload.orgId,
+      userId: payload.userId,
+      heliconeApiKeyId: undefined,
+    },
+    error: null,
+  };
+}
+
 export type JwtAuth = {
   _type: "jwt";
   token: string;
@@ -144,7 +165,22 @@ export type BearerAuthProxy = {
   token: string;
 };
 
-export type HeliconeAuth = JwtAuth | BearerAuthProxy | BearerAuth;
+export type SessionTokenAuth = {
+  _type: "sessionToken";
+  token: string;
+  payload: {
+    sessionId: string;
+    sessionName: string;
+    sessionPath: string;
+    userId: string;
+    customProperties: Record<string, any>;
+    orgId: string;
+    iat: number;
+    exp: number;
+  };
+};
+
+export type HeliconeAuth = JwtAuth | BearerAuthProxy | BearerAuth | SessionTokenAuth;
 
 export class DBWrapper {
   private supabaseClient: SupabaseClient<Database>;
@@ -202,6 +238,8 @@ export class DBWrapper {
         return getHeliconeProxyKeyRow(this.supabaseClient, this.auth, this.env);
       case "bearer":
         return getHeliconeApiKeyRow(this.supabaseClient, this.auth.token);
+      case "sessionToken":
+        return getHeliconeSessionTokenAuthParams(this.auth);
     }
     throw new Error("Invalid authentication."); // this is unreachable
   }

@@ -230,6 +230,16 @@ export class RequestWrapper {
         return err(res.error);
       }
       return ok({ _type: "bearer", token });
+    } else if (tokenType === "sessionToken") {
+      const payload = this.heliconeHeaders.heliconeAuthV2.payload;
+      if (!payload) {
+        return err("Invalid session token payload");
+      }
+      return ok({
+        _type: "sessionToken",
+        token,
+        payload,
+      });
     }
     throw new Error("Unreachable");
   }
