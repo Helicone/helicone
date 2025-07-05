@@ -5,6 +5,7 @@ import {
   TooltipContent,
   Tooltip,
 } from "@/components/ui/tooltip";
+import PromptForm from "./PromptForm";
 import { MappedLLMRequest, Tool } from "@helicone-package/llm-mapper/types";
 import _ from "lodash";
 import { ModelParameters } from "@/lib/api/llm/generate";
@@ -17,8 +18,11 @@ interface PlaygroundActionsProps {
   setMappedContent: (_mappedContent: MappedLLMRequest) => void;
   setModelParameters: (_modelParameters: ModelParameters) => void;
   setTools: (_tools: Tool[]) => void;
+  promptId: string | undefined;
+  onSavePrompt: (model: string, tags: string[], promptName: string) => void;
   onRun: () => void;
   requestId?: string;
+  isScrolled: boolean;
 }
 const PlaygroundActions = ({
   mappedContent,
@@ -26,8 +30,11 @@ const PlaygroundActions = ({
   setMappedContent,
   setModelParameters,
   setTools,
+  promptId,
+  onSavePrompt,
   onRun,
   requestId,
+  isScrolled,
 }: PlaygroundActionsProps) => {
   const resetToDefault = () => {
     console.log("Reset triggered with:", {
@@ -82,6 +89,11 @@ const PlaygroundActions = ({
           </TooltipContent>
         </Tooltip>
       )}
+      <PromptForm
+        isScrolled={isScrolled}
+        promptId={promptId}
+        onSavePrompt={onSavePrompt}
+      />
       <Tooltip>
         <TooltipTrigger asChild>
           <Button onClick={onRun}>Run</Button>
