@@ -17,8 +17,9 @@ export type HeliconeBearerKeyType = "standard" | "rate-limited";
 export interface IHeliconeHeaders {
   heliconeAuth: Nullable<string>;
   heliconeAuthV2: Nullable<{
-    _type: "jwt" | "bearer";
+    _type: "jwt" | "bearer" | "sessionToken";
     token: string;
+    payload?: any;
   }>;
   rateLimitPolicy: Nullable<string>;
 
@@ -83,10 +84,11 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   heliconeProperties: Record<string, string>;
   heliconeAuth: Nullable<string>;
   heliconeAuthV2: Nullable<{
-    _type: "jwt" | "bearer";
+    _type: "jwt" | "bearer" | "sessionToken";
     token: string;
     orgId?: string;
     keyType?: HeliconeBearerKeyType;
+    payload?: any;
   }>;
   rateLimitPolicy: Nullable<string>;
   featureFlags: {
@@ -244,14 +246,27 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   }
 
   private getHeliconeAuthV2(): Nullable<{
-    _type: "jwt" | "bearer";
+    _type: "jwt" | "bearer" | "sessionToken";
     token: string;
     orgId?: string;
     keyType?: HeliconeBearerKeyType;
+    payload?: any;
   }> {
     const heliconeAuth = this.headers.get("helicone-auth");
 
     if (heliconeAuth) {
+      // Check if this is a session token (starts with "Bearer session:")
+      if (heliconeAuth.startsWith("Bearer session:")) {
+        const sessionToken = heliconeAuth.replace("Bearer session:", "");
+        const payload = this.decodeSessionToken(sessionToken);
+        if (payload) {
+          return {
+            _type: "sessionToken",
+            token: sessionToken,
+            payload: payload,
+          };
+        }
+      }
       return {
         _type: "bearer",
         token: heliconeAuth,
@@ -260,6 +275,18 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     }
     const heliconeAuthFallback = this.headers.get("authorization");
     if (heliconeAuthFallback) {
+      // Check if this is a session token (starts with "Bearer session:")
+      if (heliconeAuthFallback.startsWith("Bearer session:")) {
+        const sessionToken = heliconeAuthFallback.replace("Bearer session:", "");
+        const payload = this.decodeSessionToken(sessionToken);
+        if (payload) {
+          return {
+            _type: "sessionToken",
+            token: sessionToken,
+            payload: payload,
+          };
+        }
+      }
       return {
         _type: "bearer",
         token: heliconeAuthFallback,
@@ -275,6 +302,53 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       };
     }
     return null;
+  }
+
+  private decodeSessionToken(token: string): any {
+    try {
+      // JWT tokens have 3 parts separated by dots
+      const parts = token.split('.');
+      if (parts.length !== 3) {
+        return null;
+      }
+      
+      // Decode the payload (second part)
+      let payload = parts[1];
+      // Convert from base64url to base64
+      payload = payload.replace(/-/g, '+').replace(/_/g, '/');
+      
+      // Add padding if necessary
+      while (payload.length % 4) {
+        payload += '=';
+      }
+      
+      // Simple base64 decode for JWT payload
+      const decoded = this.base64Decode(payload);
+      return JSON.parse(decoded);
+    } catch (error) {
+      console.error("Error decoding session token:", error);
+      return null;
+    }
+  }
+
+  private base64Decode(str: string): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+    let result = '';
+    
+    for (let i = 0; i < str.length; i += 4) {
+      const a = chars.indexOf(str[i]);
+      const b = chars.indexOf(str[i + 1]);
+      const c = chars.indexOf(str[i + 2]);
+      const d = chars.indexOf(str[i + 3]);
+      
+      const bitmap = (a << 18) | (b << 12) | (c << 6) | d;
+      
+      result += String.fromCharCode((bitmap >> 16) & 255);
+      if (c !== -1) result += String.fromCharCode((bitmap >> 8) & 255);
+      if (d !== -1) result += String.fromCharCode(bitmap & 255);
+    }
+    
+    return result;
   }
 
   determineBearerKeyType(bearerKey: string): HeliconeBearerKeyType {

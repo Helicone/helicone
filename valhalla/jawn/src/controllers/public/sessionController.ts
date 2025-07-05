@@ -21,6 +21,7 @@ import { err, ok, Result } from "../../packages/common/result";
 import { type JawnAuthenticatedRequest } from "../../types/request";
 import { cacheResultCustom } from "../../utils/cacheResult";
 import { TimeFilterMs } from "@helicone-package/filters/filterDefs";
+import * as jwt from "jsonwebtoken";
 
 export type SessionFilterBranch = {
   left: SessionFilterNode;
@@ -60,6 +61,19 @@ export interface SessionMetricsQueryParams {
   useInterquartile?: boolean;
   timeFilter?: TimeFilterMs; // TODO: after deploy backend and frontend it should always be present
   filter?: SessionFilterNode; // TODO: after deploy backend and frontend it should always be present
+}
+
+export interface SessionTokenOptions {
+  sessionId: string;
+  sessionName: string;
+  sessionPath: string;
+  userId: string;
+  customProperties?: Record<string, any>;
+  ttl?: number; // Time to live in seconds, default 1 hour (3600)
+}
+
+export interface SessionTokenResult {
+  sessionToken: string;
 }
 
 const kvCache = new KVCache(60 * 1000); // 5 minutes
@@ -213,5 +227,75 @@ export class SessionController extends Controller {
       this.setStatus(200);
     }
     return result;
+  }
+
+  @Post("/token")
+  public async createSessionToken(
+    @Body() requestBody: SessionTokenOptions,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<SessionTokenResult, string>> {
+    const {
+      sessionId,
+      sessionName,
+      sessionPath,
+      userId,
+      customProperties = {},
+      ttl = 3600, // Default 1 hour
+    } = requestBody;
+
+    try {
+      const payload = {
+        sessionId,
+        sessionName,
+        sessionPath,
+        userId,
+        customProperties,
+        orgId: request.authParams.organizationId,
+        iat: Math.floor(Date.now() / 1000),
+        exp: Math.floor(Date.now() / 1000) + ttl,
+      };
+
+      const secretKey = process.env.JWT_SECRET || process.env.HELICONE_SESSION_SECRET || 'helicone-default-session-secret';
+      const token = jwt.sign(payload, secretKey);
+
+      this.setStatus(200);
+      return ok({ sessionToken: token });
+    } catch (error) {
+      console.error("Error creating session token:", error);
+      this.setStatus(500);
+      return err("Failed to create session token");
+    }
+  }
+
+  @Post("/token/validate")
+  public async validateSessionToken(
+    @Body() requestBody: { sessionToken: string },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<{ valid: boolean; payload?: any }, string>> {
+    try {
+      const { sessionToken } = requestBody;
+      const secretKey = process.env.JWT_SECRET || process.env.HELICONE_SESSION_SECRET || 'helicone-default-session-secret';
+
+      try {
+        const decoded = jwt.verify(sessionToken, secretKey) as any;
+        
+        // Verify organization matches
+        if (decoded.orgId !== request.authParams.organizationId) {
+          this.setStatus(200);
+          return ok({ valid: false });
+        }
+
+        this.setStatus(200);
+        return ok({ valid: true, payload: decoded });
+      } catch (jwtError) {
+        // Token is invalid or expired
+        this.setStatus(200);
+        return ok({ valid: false });
+      }
+    } catch (error) {
+      console.error("Error validating session token:", error);
+      this.setStatus(500);
+      return err("Failed to validate session token");
+    }
   }
 }
