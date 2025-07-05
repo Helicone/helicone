@@ -215,6 +215,12 @@ async function modifyEnvBasedOnPath(
         }
         throw new Error("Unknown path");
       }
+    } else if (hostParts[0] === "google") {
+      return {
+        ...env,
+        WORKER_TYPE: "GATEWAY_API",
+        GATEWAY_TARGET: "https://generativelanguage.googleapis.com",
+      };
     } else if (hostParts[0].includes("openrouter")) {
       if (isRootPath(url) && request.getMethod() === "GET") {
         return {
