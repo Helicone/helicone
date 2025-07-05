@@ -22,6 +22,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Inter } from "next/font/google";
 import { env } from "next-runtime-env";
 import { FilterProvider } from "@/filterAST/context/filterContext";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -116,6 +117,9 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
                 </OrgContextProvider>
               </DndProvider>
             </NotificationProvider>
+            {process.env.NODE_ENV === "development" && (
+              <ReactQueryDevtools initialIsOpen={false} />
+            )}
           </QueryClientProvider>
         </SupabaseProvider>
       </PHProvider>
