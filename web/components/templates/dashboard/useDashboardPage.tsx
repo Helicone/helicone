@@ -16,7 +16,7 @@ import { ThreatsOverTime } from "../../../lib/api/metrics/getThreatsOverTime";
 import { TimeToFirstToken } from "../../../lib/api/metrics/getTimeToFirstToken";
 import { UsersOverTime } from "../../../lib/api/metrics/getUsersOverTime";
 import { UnPromise } from "../../../lib/tsxHelpers";
-import { useModels } from "../../../services/hooks/models";
+import { useModelCount, useModels } from "../../../services/hooks/models";
 import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
 import {
   BackendMetricsCall,
@@ -72,15 +72,22 @@ export const useDashboardPage = ({
   const filterStore = useFilterStore();
   const filter = filterStore.filter ? toFilterNode(filterStore.filter) : "all";
 
-  const { isLoading: isModelsLoading, models } = useModels(
-    timeFilter,
-    1000,
-    filter
-  );
+  const {
+    isLoading: isModelsLoading,
+    isRefetching: isModelsRefetching,
+    models,
+  } = useModels(timeFilter, 1000, filter);
   const topModels =
     models?.data?.sort((a, b) =>
       a.total_requests > b.total_requests ? -1 : 1
     ) ?? [];
+
+  const {
+    count,
+    isLoading: isCountLoading,
+    isRefetching: isCountRefetching,
+  } = useModelCount(timeFilter, filter);
+  const totalModels = count?.data ?? 0;
 
   const params: BackendMetricsCall<any>["params"] = {
     timeFilter,
@@ -252,6 +259,10 @@ export const useDashboardPage = ({
     ) ||
     isModelsLoading;
 
+  const isAnyRefetching =
+    Object.values(overTimeData).some(({ isRefetching }) => isRefetching) ||
+    Object.values(metrics).some(({ isRefetching }) => isRefetching);
+
   return {
     metrics,
     overTimeData,
@@ -263,5 +274,10 @@ export const useDashboardPage = ({
     },
     models: ok(topModels),
     isModelsLoading,
+    isModelsRefetching,
+    isAnyRefetching,
+    totalModels,
+    isCountLoading,
+    isCountRefetching,
   };
 };
