@@ -73,6 +73,24 @@ export interface paths {
   "/v1/evaluator/{evaluatorId}/stats": {
     get: operations["GetEvaluatorStats"];
   };
+  "/v1/prompt-2025/create": {
+    post: operations["CreatePrompt2025"];
+  };
+  "/v1/prompt-2025/count": {
+    get: operations["GetPrompt2025Count"];
+  };
+  "/v1/prompt-2025/query": {
+    post: operations["GetPrompts2025"];
+  };
+  "/v1/prompt-2025/query/versions": {
+    post: operations["GetPrompt2025Versions"];
+  };
+  "/v1/prompt-2025/query/production-version": {
+    post: operations["GetPrompt2025ProductionVersion"];
+  };
+  "/v1/prompt-2025/query/total-versions": {
+    post: operations["GetPrompt2025TotalVersions"];
+  };
   "/v1/request/count/query": {
     post: operations["GetRequestCount"];
   };
@@ -1024,6 +1042,102 @@ export interface components {
       error: null;
     };
     "Result_EvaluatorStats.string_": components["schemas"]["ResultSuccess_EvaluatorStats_"] | components["schemas"]["ResultError_string_"];
+    PromptCreateResponse: {
+      id: string;
+    };
+    ResultSuccess_PromptCreateResponse_: {
+      data: components["schemas"]["PromptCreateResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptCreateResponse.string_": components["schemas"]["ResultSuccess_PromptCreateResponse_"] | components["schemas"]["ResultError_string_"];
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.number_": {
+      [key: string]: number;
+    };
+    /** @description Simplified interface for the OpenAI Chat request format */
+    OpenAIChatRequest: {
+      model?: string;
+      messages?: ({
+          tool_calls?: {
+              /** @enum {string} */
+              type: "function";
+              function: {
+                arguments: string;
+                name: string;
+              };
+              id: string;
+            }[];
+          tool_call_id?: string;
+          name?: string;
+          content: (string | {
+              image_url?: {
+                url: string;
+              };
+              text?: string;
+              type: string;
+            }[]) | null;
+          role: string;
+        })[];
+      /** Format: double */
+      temperature?: number;
+      /** Format: double */
+      top_p?: number;
+      /** Format: double */
+      max_tokens?: number;
+      /** Format: double */
+      max_completion_tokens?: number;
+      stream?: boolean;
+      stop?: string[] | string;
+      tools?: {
+          function: {
+            parameters: components["schemas"]["Record_string.any_"];
+            description: string;
+            name: string;
+          };
+          /** @enum {string} */
+          type: "function";
+        }[];
+      tool_choice?: {
+        function?: {
+          name: string;
+          /** @enum {string} */
+          type: "function";
+        };
+        type: string;
+      } | ("none" | "auto" | "required");
+      parallel_tool_calls?: boolean;
+      /** @enum {string} */
+      reasoning_effort?: "low" | "medium" | "high";
+      /** Format: double */
+      frequency_penalty?: number;
+      /** Format: double */
+      presence_penalty?: number;
+      logit_bias?: components["schemas"]["Record_string.number_"];
+      logprobs?: boolean;
+      /** Format: double */
+      top_logprobs?: number;
+      /** Format: double */
+      n?: number;
+      modalities?: string[];
+      prediction?: unknown;
+      audio?: unknown;
+      response_format?: {
+        json_schema?: unknown;
+        type: string;
+      };
+      /** Format: double */
+      seed?: number;
+      service_tier?: string;
+      store?: boolean;
+      stream_options?: unknown;
+      metadata?: components["schemas"]["Record_string.string_"];
+      user?: string;
+      function_call?: string | {
+        name: string;
+      };
+      functions?: unknown[];
+    };
     ResultSuccess_number_: {
       /** Format: double */
       data: number;
@@ -1031,6 +1145,53 @@ export interface components {
       error: null;
     };
     "Result_number.string_": components["schemas"]["ResultSuccess_number_"] | components["schemas"]["ResultError_string_"];
+    Prompt2025: {
+      id: string;
+      name: string;
+      tags: string[];
+      created_at: string;
+    };
+    "ResultSuccess_Prompt2025-Array_": {
+      data: components["schemas"]["Prompt2025"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Prompt2025-Array.string_": components["schemas"]["ResultSuccess_Prompt2025-Array_"] | components["schemas"]["ResultError_string_"];
+    Prompt2025Version: {
+      id: string;
+      model: string;
+      prompt_id: string;
+      /** Format: double */
+      major_version: number;
+      /** Format: double */
+      minor_version: number;
+      commit_message: string;
+      created_at: string;
+    };
+    "ResultSuccess_Prompt2025Version-Array_": {
+      data: components["schemas"]["Prompt2025Version"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Prompt2025Version-Array.string_": components["schemas"]["ResultSuccess_Prompt2025Version-Array_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_Prompt2025Version_: {
+      data: components["schemas"]["Prompt2025Version"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Prompt2025Version.string_": components["schemas"]["ResultSuccess_Prompt2025Version_"] | components["schemas"]["ResultError_string_"];
+    PromptVersionCounts: {
+      /** Format: double */
+      totalVersions: number;
+      /** Format: double */
+      majorVersions: number;
+    };
+    ResultSuccess_PromptVersionCounts_: {
+      data: components["schemas"]["PromptVersionCounts"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptVersionCounts.string_": components["schemas"]["ResultSuccess_PromptVersionCounts_"] | components["schemas"]["ResultError_string_"];
     /** @description Make all properties in T optional */
     Partial_ResponseTableToOperators_: {
       body_tokens?: components["schemas"]["Partial_NumberOperators_"];
@@ -1305,10 +1466,6 @@ export interface components {
     LlmSchema: {
       request: components["schemas"]["LLMRequestBody"];
       response?: components["schemas"]["LLMResponseBody"] | null;
-    };
-    /** @description Construct a type with a set of properties K of type T */
-    "Record_string.number_": {
-      [key: string]: number;
     };
     HeliconeRequest: {
       response_id: string | null;
@@ -2331,89 +2488,6 @@ Json: JsonObject;
       error: null;
     };
     "Result_ChatCompletion-or-_content-string--reasoning-string--calls-any_.string_": components["schemas"]["ResultSuccess_ChatCompletion-or-_content-string--reasoning-string--calls-any__"] | components["schemas"]["ResultError_string_"];
-    /** @description Simplified interface for the OpenAI Chat request format */
-    OpenAIChatRequest: {
-      model?: string;
-      messages?: ({
-          tool_calls?: {
-              /** @enum {string} */
-              type: "function";
-              function: {
-                arguments: string;
-                name: string;
-              };
-              id: string;
-            }[];
-          tool_call_id?: string;
-          name?: string;
-          content: (string | {
-              image_url?: {
-                url: string;
-              };
-              text?: string;
-              type: string;
-            }[]) | null;
-          role: string;
-        })[];
-      /** Format: double */
-      temperature?: number;
-      /** Format: double */
-      top_p?: number;
-      /** Format: double */
-      max_tokens?: number;
-      /** Format: double */
-      max_completion_tokens?: number;
-      stream?: boolean;
-      stop?: string[] | string;
-      tools?: {
-          function: {
-            parameters: components["schemas"]["Record_string.any_"];
-            description: string;
-            name: string;
-          };
-          /** @enum {string} */
-          type: "function";
-        }[];
-      tool_choice?: {
-        function?: {
-          name: string;
-          /** @enum {string} */
-          type: "function";
-        };
-        type: string;
-      } | ("none" | "auto" | "required");
-      parallel_tool_calls?: boolean;
-      /** @enum {string} */
-      reasoning_effort?: "low" | "medium" | "high";
-      /** Format: double */
-      frequency_penalty?: number;
-      /** Format: double */
-      presence_penalty?: number;
-      logit_bias?: components["schemas"]["Record_string.number_"];
-      logprobs?: boolean;
-      /** Format: double */
-      top_logprobs?: number;
-      /** Format: double */
-      n?: number;
-      modalities?: string[];
-      prediction?: unknown;
-      audio?: unknown;
-      response_format?: {
-        json_schema?: unknown;
-        type: string;
-      };
-      /** Format: double */
-      seed?: number;
-      service_tier?: string;
-      store?: boolean;
-      stream_options?: unknown;
-      metadata?: components["schemas"]["Record_string.string_"];
-      user?: string;
-      function_call?: string | {
-        name: string;
-      };
-      functions?: unknown[];
-    };
     "ResultSuccess__apiKey-string__": {
       data: {
         apiKey: string;
@@ -3651,6 +3725,109 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_EvaluatorStats.string_"];
+        };
+      };
+    };
+  };
+  CreatePrompt2025: {
+    requestBody: {
+      content: {
+        "application/json": {
+          promptBody: components["schemas"]["OpenAIChatRequest"];
+          tags: string[];
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptCreateResponse.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025Count: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_number.string_"];
+        };
+      };
+    };
+  };
+  GetPrompts2025: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: double */
+          pageSize: number;
+          /** Format: double */
+          page: number;
+          search: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025-Array.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025Versions: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: double */
+          majorVersion?: number;
+          promptId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025Version-Array.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025ProductionVersion: {
+    requestBody: {
+      content: {
+        "application/json": {
+          promptId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025Version.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025TotalVersions: {
+    requestBody: {
+      content: {
+        "application/json": {
+          promptId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionCounts.string_"];
         };
       };
     };
