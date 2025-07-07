@@ -26,6 +26,24 @@ export class HqlQueryManager {
     }
   }
 
+  async getSavedQuery(
+    id: string
+  ): Promise<Result<HqlSavedQuery | undefined, string>> {
+    try {
+      const result = await dbExecute<HqlSavedQuery>(
+        "SELECT * FROM saved_queries WHERE id = $1 AND organization_id = $2",
+        [id, this.authParams.organizationId]
+      );
+      if (result.error) {
+        return err(result.error);
+      }
+
+      return ok(result.data?.[0]);
+    } catch (e) {
+      return err(String(e));
+    }
+  }
+
   async createSavedQuery(
     requestBody: CreateSavedQueryRequest
   ): Promise<Result<HqlSavedQuery[], string>> {

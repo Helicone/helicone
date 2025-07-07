@@ -376,6 +376,9 @@ export interface paths {
   "/v1/helicone-sql/saved-queries": {
     get: operations["GetSavedQueries"];
   };
+  "/v1/helicone-sql/saved-query/{queryId}": {
+    get: operations["GetSavedQuery"];
+  };
   "/v1/helicone-sql/saved-query": {
     put: operations["UpdateSavedQuery"];
     post: operations["CreateSavedQuery"];
@@ -2607,12 +2610,21 @@ Json: JsonObject;
       error: null;
     };
     "Result_ClickHouseTableSchema-Array.string_": components["schemas"]["ResultSuccess_ClickHouseTableSchema-Array_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_Array_Record_string.any___": {
-      data: components["schemas"]["Record_string.any_"][];
+    ExecuteSqlResponse: {
+      rows: components["schemas"]["Record_string.any_"][];
+      /** Format: double */
+      elapsedMilliseconds: number;
+      /** Format: double */
+      size: number;
+      /** Format: double */
+      rowCount: number;
+    };
+    ResultSuccess_ExecuteSqlResponse_: {
+      data: components["schemas"]["ExecuteSqlResponse"];
       /** @enum {number|null} */
       error: null;
     };
-    "Result_Array_Record_string.any__.string_": components["schemas"]["ResultSuccess_Array_Record_string.any___"] | components["schemas"]["ResultError_string_"];
+    "Result_ExecuteSqlResponse.string_": components["schemas"]["ResultSuccess_ExecuteSqlResponse_"] | components["schemas"]["ResultError_string_"];
     ExecuteSqlRequest: {
       sql: string;
     };
@@ -2630,6 +2642,12 @@ Json: JsonObject;
       error: null;
     };
     "Result_Array_HqlSavedQuery_.string_": components["schemas"]["ResultSuccess_Array_HqlSavedQuery__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_HqlSavedQuery-or-undefined-or-null_": {
+      data?: components["schemas"]["HqlSavedQuery"] | null;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_HqlSavedQuery-or-undefined-or-null.string_": components["schemas"]["ResultSuccess_HqlSavedQuery-or-undefined-or-null_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess_HqlSavedQuery-Array_": {
       data: components["schemas"]["HqlSavedQuery"][];
       /** @enum {number|null} */
@@ -5325,7 +5343,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_Array_Record_string.any__.string_"];
+          "application/json": components["schemas"]["Result_ExecuteSqlResponse.string_"];
         };
       };
     };
@@ -5351,6 +5369,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Array_HqlSavedQuery_.string_"];
+        };
+      };
+    };
+  };
+  GetSavedQuery: {
+    parameters: {
+      path: {
+        queryId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HqlSavedQuery-or-undefined-or-null.string_"];
         };
       };
     };

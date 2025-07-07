@@ -4,9 +4,7 @@ import { AuthParams } from "../packages/common/auth/types";
 import { err, ok, Result } from "../packages/common/result";
 import { AST, Parser } from "node-sql-parser";
 import { createArrayCsvWriter } from "csv-writer";
-import { S3Client } from "../lib/shared/db/s3Client";
 import { HqlStore } from "../lib/stores/HqlStore";
-import fs from "fs";
 
 export const CLICKHOUSE_TABLES = ["request_response_rmt"];
 const MAX_LIMIT = 300000;
@@ -85,7 +83,11 @@ function normalizeAst(ast: AST | AST[]): AST[] {
 }
 
 export class HeliconeSqlManager {
-  constructor(private authParams: AuthParams) {}
+  private hqlStore: HqlStore;
+
+  constructor(private authParams: AuthParams) {
+    this.hqlStore = new HqlStore();
+  }
 
   async getClickhouseSchema(): Promise<
     Result<ClickHouseTableSchema[], string>
@@ -191,14 +193,10 @@ export class HeliconeSqlManager {
       header: Object.keys(result.data[0]),
     });
 
-    await csvWriter.writeRecords(
-      result.data.slice(1).map((row) => Object.values(row))
-    );
+    await csvWriter.writeRecords(result.data.map((row) => Object.values(row)));
 
     // upload to s3
-    const hqlStore = new HqlStore();
-
-    const uploadResult = await hqlStore.uploadCsv(
+    const uploadResult = await this.hqlStore.uploadCsv(
       fileName,
       `${this.authParams.organizationId}/${fileName}`
     );

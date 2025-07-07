@@ -7314,13 +7314,40 @@
 					}
 				]
 			},
-			"ResultSuccess_Array_Record_string.any___": {
+			"ExecuteSqlResponse": {
 				"properties": {
-					"data": {
+					"rows": {
 						"items": {
 							"$ref": "#/components/schemas/Record_string.any_"
 						},
 						"type": "array"
+					},
+					"elapsedMilliseconds": {
+						"type": "number",
+						"format": "double"
+					},
+					"size": {
+						"type": "number",
+						"format": "double"
+					},
+					"rowCount": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"rows",
+					"elapsedMilliseconds",
+					"size",
+					"rowCount"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_ExecuteSqlResponse_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/ExecuteSqlResponse"
 					},
 					"error": {
 						"type": "number",
@@ -7337,10 +7364,10 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result_Array_Record_string.any__.string_": {
+			"Result_ExecuteSqlResponse.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess_Array_Record_string.any___"
+						"$ref": "#/components/schemas/ResultSuccess_ExecuteSqlResponse_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -7418,6 +7445,40 @@
 				"anyOf": [
 					{
 						"$ref": "#/components/schemas/ResultSuccess_Array_HqlSavedQuery__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess_HqlSavedQuery-or-undefined-or-null_": {
+				"properties": {
+					"data": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/HqlSavedQuery"
+							}
+						],
+						"nullable": true
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_HqlSavedQuery-or-undefined-or-null.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_HqlSavedQuery-or-undefined-or-null_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -15225,7 +15286,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result_Array_Record_string.any__.string_"
+									"$ref": "#/components/schemas/Result_ExecuteSqlResponse.string_"
 								}
 							}
 						}
@@ -15300,6 +15361,37 @@
 				],
 				"security": [],
 				"parameters": []
+			}
+		},
+		"/v1/helicone-sql/saved-query/{queryId}": {
+			"get": {
+				"operationId": "GetSavedQuery",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_HqlSavedQuery-or-undefined-or-null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"HeliconeSql"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "queryId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/v1/helicone-sql/saved-query": {

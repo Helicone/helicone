@@ -2,6 +2,8 @@ import { err, ok, Result } from "../../packages/common/result";
 import { S3Client } from "../shared/db/s3Client";
 import fs from "fs";
 
+const HQL_STORE_BUCKET = "hql-store";
+
 export class HqlStore {
   private s3Client: S3Client;
 
@@ -10,7 +12,7 @@ export class HqlStore {
       process.env.S3_ACCESS_KEY ?? "",
       process.env.S3_SECRET_KEY ?? "",
       process.env.S3_ENDPOINT ?? "",
-      "hql-store",
+      HQL_STORE_BUCKET,
       (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
     );
   }
@@ -27,12 +29,14 @@ export class HqlStore {
     );
 
     if (uploadResult.error) {
+      fs.unlinkSync(fileName);
       return err(uploadResult.error);
     }
 
     const result = await this.s3Client.getSignedUrl(key);
 
     if (result.error || !result.data) {
+      fs.unlinkSync(fileName);
       return err(result.error ?? "Failed to get signed url");
     }
 
