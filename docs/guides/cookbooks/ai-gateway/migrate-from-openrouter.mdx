@@ -87,13 +87,13 @@ This cookbook shows you how to replace OpenRouter with Helicone AI Gateway while
 
     <CodeGroup>
     ```python Python
-    # Before (OpenRouter)
     import openai
     
-    client = openai.OpenAI(
-        base_url="https://openrouter.ai/api/v1",
-        api_key=OPENROUTER_API_KEY
-    )
+    # Before (OpenRouter)
+    # client = openai.OpenAI(
+    #     base_url="https://openrouter.ai/api/v1",
+    #     api_key=OPENROUTER_API_KEY
+    # )
 
     # After (Helicone AI Gateway)
     client = openai.OpenAI(
@@ -103,23 +103,23 @@ This cookbook shows you how to replace OpenRouter with Helicone AI Gateway while
     
     # Your code remains the same!
     response = client.chat.completions.create(
-        model="openai/gpt-4",
+        model="openai/gpt-4", # Need provider prefix
         messages=[{"role": "user", "content": "Hello!"}]
     )
     ```
 
     ```typescript TypeScript SDK
-    // Before (OpenRouter)
     import OpenAI from 'openai';
 
-    const openai = new OpenAI({
-      baseURL: 'https://openrouter.ai/api/v1',
-      apiKey: process.env.OPENROUTER_API_KEY,
-      defaultHeaders: {
-        'HTTP-Referer': 'https://your-site.com',
-        'X-Title': 'Your App Name',
-      }
-    });
+    // Before (OpenRouter)
+    // const openai = new OpenAI({
+    //   baseURL: 'https://openrouter.ai/api/v1',
+    //   apiKey: process.env.OPENROUTER_API_KEY,
+    //   defaultHeaders: {
+    //     'HTTP-Referer': 'https://your-site.com',
+    //     'X-Title': 'Your App Name',
+    //   }
+    // });
 
     // After (Helicone AI Gateway)
     const openai = new OpenAI({
@@ -170,7 +170,7 @@ This cookbook shows you how to replace OpenRouter with Helicone AI Gateway while
 - Check that providers support the requested model
 - Verify model name format matches OpenRouter's
 
-**Authentication issues:**
+**Authentication/Logging issues:**
 - If using Helicone auth, ensure `HELICONE_CONTROL_PLANE_API_KEY` is set
 - Check provider API Keys
 
