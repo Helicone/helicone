@@ -53321,6 +53321,54 @@
 					}
 				}
 			}
+		},
+		"/v1/router/control-plane/sign-s3-get-url": {
+			"post": {
+				"operationId": "SignS3GetUrl",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__url-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Router Control Plane"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"versionId": {
+										"type": "string"
+									},
+									"promptId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"versionId",
+									"promptId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
 		}
 	},
 	"servers": [
