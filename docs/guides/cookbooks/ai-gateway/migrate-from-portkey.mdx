@@ -39,7 +39,6 @@ This guide walks through migrating your Portkey setup to Helicone's self-hosted 
     OPENAI_API_KEY=sk-...
     ANTHROPIC_API_KEY=sk-ant-...
     GEMINI_API_KEY=...
-    GROQ_API_KEY=...
     
     # Optional: For Helicone authentication and observability
     HELICONE_CONTROL_PLANE_API_KEY=sk-helicone-...
@@ -50,23 +49,23 @@ This guide walks through migrating your Portkey setup to Helicone's self-hosted 
     Transform your Portkey JSON config into Helicone's YAML format:
 
     **Portkey configuration:**
-    ```javascript
+    ```json
     {
-    "strategy": {
-        "mode": "loadbalance"
-    },
-    "targets": [
-            {
-                "override_params": {
-                    "model": "@openai-prod/gpt-4o"
-                }
-            },
-            {
-                "override_params": {
-                    "model": "@bedrock-main/claude-3-sonnet"
-                }
-            }
-        ]
+      "strategy": {
+          "mode": "loadbalance"
+      },
+      "targets": [
+        {
+          "override_params": {
+              "model": "@openai-prod/gpt-4o"
+          }
+        },
+        {
+          "override_params": {
+              "model": "@bedrock-main/claude-3-sonnet"
+          }
+        }
+      ]
     }
     ```
 
@@ -97,17 +96,17 @@ This guide walks through migrating your Portkey setup to Helicone's self-hosted 
     <CodeGroup>
     ```python Python
     # Before (Portkey)
-    from portkey_ai import Portkey
+    # from portkey_ai import Portkey
     
-    portkey = Portkey(
-        api_key="PORTKEY_API_KEY",
-        config=config
-    )
+    # portkey = Portkey(
+    #     api_key="PORTKEY_API_KEY",
+    #     config=config
+    # )
     
-    response = portkey.chat.completions.create(
-        model="@openai-prod/gpt-4",
-        messages=[{"role": "user", "content": "Hello!"}]
-    )
+    # response = portkey.chat.completions.create(
+    #     model="@openai-prod/gpt-4",
+    #     messages=[{"role": "user", "content": "Hello!"}]
+    # )
 
     # After (Helicone AI Gateway)
     from openai import OpenAI
@@ -146,7 +145,7 @@ This guide walks through migrating your Portkey setup to Helicone's self-hosted 
     });
     
     const response = await client.chat.completions.create({
-      model: 'gpt-4',
+      model: 'openai/gpt-4', // Need provider prefix
       messages: [{ role: 'user', content: 'Hello!' }]
     });
     ```
@@ -206,7 +205,7 @@ This guide walks through migrating your Portkey setup to Helicone's self-hosted 
     Test the migration:
     ```bash
     # Test basic routing
-    curl http://localhost:8080/router/default/chat/completions \
+    curl http://localhost:8080/ai/chat/completions \
       -H "Authorization: Bearer $HELICONE_API_KEY" \
       -H "Content-Type: application/json" \
       -d '{
@@ -219,15 +218,16 @@ This guide walks through migrating your Portkey setup to Helicone's self-hosted 
 
 ## Troubleshooting
 
-**"Provider not found" errors:**
+**"Model/Provider not found" errors:**
 - Ensure all provider API keys are set in environment variables
 - Check provider names match exactly (lowercase)
+- Ensure provider suffix is included in the model name (e.g. `openai/gpt-4`)
 
 **Rate limiting not working:**
 - Enable Helicone authentication (`authentication: true`)
 - Set `HELICONE_CONTROL_PLANE_API_KEY` environment variable
 
-**Authentication issues:**
+**Authentication/Logging issues:**
 - If using Helicone auth, ensure `HELICONE_CONTROL_PLANE_API_KEY` is set
 - Check provider API Keys
 
