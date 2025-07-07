@@ -39,6 +39,7 @@ This cookbook shows you how to replace your LiteLLM deployment with Helicone AI 
       num_retries: 2
       timeout: 30
 
+    # Optional
     general_settings:
       master_key: sk-1234
       database_url: postgresql://user:pass@host:5432/db
@@ -78,14 +79,10 @@ This cookbook shows you how to replace your LiteLLM deployment with Helicone AI 
           strategy: exponential
           base: 1s
           max: 30s
-
-    # Set the port to LiteLLM's default port (optional)
-    server:
-        port: 4000
     ```
 
     Key mappings:
-    - `master_key` → Helicone authentication
+    - `master_key` → Helicone authentication (optional)
     - `database_url` → Built-in observability (no DB needed)
     - `routing_strategy` → Load balancing strategies
     - `model_list` → Provider configuration
@@ -99,7 +96,7 @@ This cookbook shows you how to replace your LiteLLM deployment with Helicone AI 
     OPENAI_API_KEY=sk-your-openai-api-key
     ANTHROPIC_API_KEY=sk-ant-your-anthropic-api-key
     
-    # New: Helicone authentication (replaces master_key)
+    # (Optional) Helicone authentication 
     HELICONE_CONTROL_PLANE_API_KEY=sk-helicone-your-api-key
     ```
 
@@ -177,16 +174,9 @@ This cookbook shows you how to replace your LiteLLM deployment with Helicone AI 
 
     **Virtual Keys → Helicone API Keys**
     
-    LiteLLM virtual keys map directly to Helicone API keys. Instead of generating keys via API:
-    ```bash
-    # LiteLLM approach
-    curl -X POST 'http://localhost:4000/key/generate' \
-      -H 'Authorization: Bearer sk-1234'
-    ```
-    
-    Use Helicone's dashboard at https://us.helicone.ai/settings/api-keys
+    LiteLLM virtual keys map directly to Helicone API keys. Instead of generating keys via API, use Helicone's dashboard at https://us.helicone.ai/settings/api-keys
 
-    **Database/Spend Tracking → Built-in Observability**
+    **Simple Database/Spend Tracking → Robust Built-in Observability**
     
     No migration needed! Helicone automatically tracks:
     - Cost per request
@@ -196,7 +186,7 @@ This cookbook shows you how to replace your LiteLLM deployment with Helicone AI 
     
     **Caching Configuration**
     
-    If using LiteLLM's Redis cache, migrate to Helicone's in-memory caching:
+    If using LiteLLM's Redis cache, migrate to Helicone's in-memory (or Redis) caching:
     ```yaml
     routers:
       default:
@@ -204,10 +194,6 @@ This cookbook shows you how to replace your LiteLLM deployment with Helicone AI 
           directive: "max-age=3600"  # 1 hour cache
           buckets: 1
     ```
-
-     <Note>
-      AI Gateway will soon support Redis caching.
-    </Note>
   </Step>
 </Steps>
 
@@ -228,7 +214,7 @@ After successful migration, you'll have:
 - Check model mappings match your LiteLLM aliases
 - Verify provider models are correctly configured
 
-**Authentication failures:**
+**Authentication failures/Helicone Logging issues:**
 - Ensure Helicone API key is set correctly
 - Check if authentication is enabled in config
 
