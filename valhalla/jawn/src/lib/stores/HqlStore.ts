@@ -1,0 +1,42 @@
+import { err, ok, Result } from "../../packages/common/result";
+import { S3Client } from "../shared/db/s3Client";
+import fs from "fs";
+
+export class HqlStore {
+  private s3Client: S3Client;
+
+  constructor() {
+    this.s3Client = new S3Client(
+      process.env.S3_ACCESS_KEY ?? "",
+      process.env.S3_SECRET_KEY ?? "",
+      process.env.S3_ENDPOINT ?? "",
+      "hql-store",
+      (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
+    );
+  }
+
+  async uploadCsv(
+    fileName: string,
+    key: string
+  ): Promise<Result<string, string>> {
+    const csvBuffer = fs.readFileSync(fileName);
+    const uploadResult = await this.s3Client.uploadToS3(
+      key,
+      csvBuffer,
+      "text/csv"
+    );
+
+    if (uploadResult.error) {
+      return err(uploadResult.error);
+    }
+
+    const result = await this.s3Client.getSignedUrl(key);
+
+    if (result.error || !result.data) {
+      return err(result.error ?? "Failed to get signed url");
+    }
+
+    fs.unlinkSync(fileName);
+    return ok(result.data);
+  }
+}

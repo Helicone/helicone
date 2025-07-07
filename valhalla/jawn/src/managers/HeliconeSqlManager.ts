@@ -3,8 +3,13 @@ import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
 import { AuthParams } from "../packages/common/auth/types";
 import { err, ok, Result } from "../packages/common/result";
 import { AST, Parser } from "node-sql-parser";
+import { createArrayCsvWriter } from "csv-writer";
+import { S3Client } from "../lib/shared/db/s3Client";
+import { HqlStore } from "../lib/stores/HqlStore";
+import fs from "fs";
 
 export const CLICKHOUSE_TABLES = ["request_response_rmt"];
+const MAX_LIMIT = 300000;
 const parser = new Parser();
 interface ClickHouseTableRow {
   name: string;
@@ -36,7 +41,7 @@ function validateSql(sql: string): Result<null, string> {
   return ok(null);
 }
 
-function addLimit(ast: AST): AST {
+function addLimit(ast: AST, limit: number): AST {
   if (ast.type !== "select") {
     throw new Error("Only select statements are allowed");
   }
@@ -125,11 +130,14 @@ export class HeliconeSqlManager {
   // Validate sql by only allowing select statements and tables in CLICKHOUSE_TABLES
   // Add limit check
   // Execute it
-  async executeSql(sql: string): Promise<Result<any, string>> {
+  async executeSql(
+    sql: string,
+    limit: number = 1000
+  ): Promise<Result<Array<Record<string, any>>, string>> {
     try {
       const ast = parser.astify(sql, { database: "Postgresql" });
       // always get first semi colon to prevent sql injection like snowflake lol
-      const normalizedAst = addLimit(normalizeAst(ast)[0]);
+      const normalizedAst = addLimit(normalizeAst(ast)[0], limit);
       const firstSql = parser.sqlify(normalizedAst, { database: "Postgresql" });
 
       const validatedSql = validateSql(firstSql);
@@ -150,17 +158,55 @@ export class HeliconeSqlManager {
       ${firstSql}
     `;
 
-      const result = await clickhouseDb.dbQueryHql<any>(sqlWithCtes, [
-        this.authParams.organizationId,
-      ]);
+      const result = await clickhouseDb.dbQueryHql<Array<Record<string, any>>>(
+        sqlWithCtes,
+        [this.authParams.organizationId]
+      );
 
       if (result.error) {
         return err(result.error);
       }
 
-      return ok(result.data);
+      return ok(result.data ?? []);
     } catch (e) {
       return err(String(e));
     }
+  }
+
+  async downloadCsv(sql: string): Promise<Result<string, string>> {
+    const result = await this.executeSql(sql, MAX_LIMIT);
+    if (result.error) {
+      return err(result.error);
+    }
+
+    if (!result.data?.length) {
+      return err("No data returned from query");
+    }
+
+    const fileName = `${Date.now()}.csv`;
+
+    // if result is ok, if over 100k store in s3 and return url
+    const csvWriter = createArrayCsvWriter({
+      path: fileName,
+      header: Object.keys(result.data[0]),
+    });
+
+    await csvWriter.writeRecords(
+      result.data.slice(1).map((row) => Object.values(row))
+    );
+
+    // upload to s3
+    const hqlStore = new HqlStore();
+
+    const uploadResult = await hqlStore.uploadCsv(
+      fileName,
+      `${this.authParams.organizationId}/${fileName}`
+    );
+
+    if (uploadResult.error || !uploadResult.data) {
+      return err(uploadResult.error ?? "Failed to upload csv");
+    }
+
+    return ok(uploadResult.data);
   }
 }

@@ -75,10 +75,26 @@ export class HeliconeSqlController extends Controller {
 
     const heliconeSqlManager = new HeliconeSqlManager(request.authParams);
     const result = await heliconeSqlManager.executeSql(requestBody.sql);
-    if (result.error) {
+    if (result.error || !result.data) {
       this.setStatus(500);
       return err(result.error);
     }
+    this.setStatus(200);
+    return ok(result.data);
+  }
+
+  @Post("download")
+  public async downloadCsv(
+    @Body() requestBody: ExecuteSqlRequest,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<string, string>> {
+    const heliconeSqlManager = new HeliconeSqlManager(request.authParams);
+    const result = await heliconeSqlManager.downloadCsv(requestBody.sql);
+    if (result.error || !result.data) {
+      this.setStatus(500);
+      return err(result.error ?? "Failed to download csv");
+    }
+
     this.setStatus(200);
     return ok(result.data);
   }

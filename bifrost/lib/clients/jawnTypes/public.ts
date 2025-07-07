@@ -370,6 +370,9 @@ export interface paths {
   "/v1/helicone-sql/execute": {
     post: operations["ExecuteSql"];
   };
+  "/v1/helicone-sql/download": {
+    post: operations["DownloadCsv"];
+  };
   "/v1/helicone-sql/saved-queries": {
     get: operations["GetSavedQueries"];
   };
@@ -5323,6 +5326,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Array_Record_string.any__.string_"];
+        };
+      };
+    };
+  };
+  DownloadCsv: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ExecuteSqlRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string.string_"];
         };
       };
     };

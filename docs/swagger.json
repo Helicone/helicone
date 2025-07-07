@@ -15248,6 +15248,38 @@
 				}
 			}
 		},
+		"/v1/helicone-sql/download": {
+			"post": {
+				"operationId": "DownloadCsv",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_string.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"HeliconeSql"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ExecuteSqlRequest"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/helicone-sql/saved-queries": {
 			"get": {
 				"operationId": "GetSavedQueries",
