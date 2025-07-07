@@ -39,7 +39,7 @@ export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
       },
     ],
   },
-  model: "gpt-3.5-turbo",
+  model: "gpt-4o",
   raw: {
     request: {},
     response: {},
@@ -81,7 +81,7 @@ export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
         },
       ],
       tool_choice: undefined,
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o",
       temperature: undefined,
       tools: undefined,
       response_format: { type: "text" },
@@ -100,7 +100,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     useGetRequestWithBodies(requestId ?? "");
 
   const [selectedModel, setSelectedModel] = useState<string>(
-    "openai/gpt-3.5-turbo"
+    "openai/gpt-4o"
   );
 
   const [defaultContent, setDefaultContent] = useState<MappedLLMRequest | null>(
