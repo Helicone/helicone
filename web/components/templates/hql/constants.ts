@@ -1,4 +1,7 @@
 import { components } from "@/lib/clients/jawnTypes/public";
+import { IKeyboardEvent } from "monaco-editor";
+import { $JAWN_API } from "@/lib/clients/jawn";
+import React from "react";
 
 export const SQL_KEYWORDS = [
   "SELECT",
@@ -99,3 +102,104 @@ export function parseSqlAndFindTableNameAndAliases(sql: string) {
   }
   return tables;
 }
+
+// Execute query mutation
+export const createExecuteQueryMutation = (
+  setResult: React.Dispatch<
+    React.SetStateAction<components["schemas"]["ExecuteSqlResponse"]>
+  >,
+  setQueryError: (error: string | null) => void,
+  setQueryLoading: (loading: boolean) => void,
+) => {
+  return {
+    mutationFn: async (sql: string) => {
+      const response = await $JAWN_API.POST("/v1/helicone-sql/execute", {
+        body: {
+          sql: sql,
+        },
+      });
+      return response;
+    },
+    onSuccess: (data: any) => {
+      if (data.error || !data.data?.data) {
+        // @ts-ignore
+        setQueryError(data.error.error);
+        setResult({
+          rows: [],
+          elapsedMilliseconds: 0,
+          size: 0,
+          rowCount: 0,
+        });
+      } else {
+        setQueryError(null);
+        setResult({
+          rows: data.data?.data.rows as Record<string, any>[],
+          elapsedMilliseconds: data.data?.data.elapsedMilliseconds,
+          size: data.data?.data.size,
+          rowCount: data.data?.data.rowCount,
+        });
+      }
+      setQueryLoading(false);
+    },
+    onError: (error: any) => {
+      setQueryError(error.message);
+      setResult({
+        rows: [],
+        elapsedMilliseconds: 0,
+        size: 0,
+        rowCount: 0,
+      });
+      setQueryLoading(false);
+    },
+  };
+};
+
+// Save query mutation
+export const createSaveQueryMutation = (
+  setCurrentQuery: React.Dispatch<
+    React.SetStateAction<{ id: string | undefined; name: string; sql: string }>
+  >,
+  setNotification: (message: string, type: "success" | "error") => void,
+) => {
+  return {
+    mutationFn: async (savedQuery: {
+      id?: string;
+      name: string;
+      sql: string;
+    }) => {
+      if (savedQuery.id) {
+        const response = await $JAWN_API.PUT("/v1/helicone-sql/saved-query", {
+          body: {
+            id: savedQuery.id,
+            name: savedQuery.name,
+            sql: savedQuery.sql,
+          },
+        });
+        return response;
+      } else {
+        const response = await $JAWN_API.POST("/v1/helicone-sql/saved-query", {
+          body: {
+            name: savedQuery.name,
+            sql: savedQuery.sql,
+          },
+        });
+
+        if (response.data?.data) {
+          setCurrentQuery({
+            id: response.data.data[0].id,
+            name: response.data.data[0].name,
+            sql: response.data.data[0].sql,
+          });
+        }
+
+        return response;
+      }
+    },
+    onSuccess: () => {
+      setNotification("Successfully saved query", "success");
+    },
+    onError: (error: any) => {
+      setNotification(error.message, "error");
+    },
+  };
+};

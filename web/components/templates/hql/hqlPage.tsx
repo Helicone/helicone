@@ -22,6 +22,8 @@ import {
   getTableNames,
   getTableNamesSet,
   parseSqlAndFindTableNameAndAliases,
+  createSaveQueryMutation,
+  createExecuteQueryMutation,
 } from "./constants";
 
 interface HQLPageProps {
@@ -59,91 +61,13 @@ function HQLPage({ lastestSavedId }: HQLPageProps) {
   });
   const [queryLoading, setQueryLoading] = useState(false);
   const [queryError, setQueryError] = useState<string | null>(null);
-  const { mutate: handleExecuteQuery } = useMutation({
-    mutationFn: async (sql: string) => {
-      const response = await $JAWN_API.POST("/v1/helicone-sql/execute", {
-        body: {
-          sql: sql,
-        },
-      });
+  const { mutate: handleExecuteQuery } = useMutation(
+    createExecuteQueryMutation(setResult, setQueryError, setQueryLoading),
+  );
 
-      return response;
-    },
-    onSuccess: (data) => {
-      if (data.error || !data.data?.data) {
-        // @ts-ignore
-        setQueryError(data.error.error);
-        setResult({
-          rows: [],
-          elapsedMilliseconds: 0,
-          size: 0,
-          rowCount: 0,
-        });
-      } else {
-        setQueryError(null);
-        setResult({
-          rows: data.data?.data.rows as Record<string, any>[],
-          elapsedMilliseconds: data.data?.data.elapsedMilliseconds,
-          size: data.data?.data.size,
-          rowCount: data.data?.data.rowCount,
-        });
-      }
-      setQueryLoading(false);
-    },
-    onError: (error) => {
-      setQueryError(error.message);
-      setResult({
-        rows: [],
-        elapsedMilliseconds: 0,
-        size: 0,
-        rowCount: 0,
-      });
-      setQueryLoading(false);
-    },
-  });
-
-  const { mutate: handleSaveQuery } = useMutation({
-    mutationFn: async (savedQuery: {
-      id?: string;
-      name: string;
-      sql: string;
-    }) => {
-      if (savedQuery.id) {
-        const response = await $JAWN_API.PUT("/v1/helicone-sql/saved-query", {
-          body: {
-            id: savedQuery.id,
-            name: savedQuery.name,
-            sql: savedQuery.sql,
-          },
-        });
-
-        return response;
-      } else {
-        const response = await $JAWN_API.POST("/v1/helicone-sql/saved-query", {
-          body: {
-            name: savedQuery.name,
-            sql: savedQuery.sql,
-          },
-        });
-
-        if (response.data?.data) {
-          setCurrentQuery({
-            id: response.data.data[0].id,
-            name: response.data.data[0].name,
-            sql: response.data.data[0].sql,
-          });
-        }
-
-        return response;
-      }
-    },
-    onSuccess: () => {
-      setNotification("Successfully saved query", "success");
-    },
-    onError: (error) => {
-      setNotification(error.message, "error");
-    },
-  });
+  const { mutate: handleSaveQuery } = useMutation(
+    createSaveQueryMutation(setCurrentQuery, setNotification),
+  );
 
   // Setup autocompletion
   useEffect(() => {
@@ -259,7 +183,7 @@ function HQLPage({ lastestSavedId }: HQLPageProps) {
     });
 
   useEffect(() => {
-    if (!savedQueryDetailsLoading && savedQueryDetails?.data) {
+    if (savedQueryDetails?.data) {
       setCurrentQuery({
         id: savedQueryDetails.data.id,
         name: savedQueryDetails.data.name,
@@ -298,6 +222,13 @@ function HQLPage({ lastestSavedId }: HQLPageProps) {
             currentQuery={currentQuery}
             handleExecuteQuery={handleExecuteQuery}
             handleSaveQuery={handleSaveQuery}
+            handleRenameQuery={(newName) => {
+              setCurrentQuery({
+                id: currentQuery.id,
+                name: newName,
+                sql: currentQuery.sql,
+              });
+            }}
           />
           <Editor
             defaultLanguage="sql"
@@ -306,14 +237,6 @@ function HQLPage({ lastestSavedId }: HQLPageProps) {
               editorRef.current = editor;
               const model = editor.getModel();
               if (!model) return;
-
-              // Add keyboard event listener
-              editor.onKeyDown((e) => {
-                if ((e.ctrlKey || e.metaKey) && e.code === "Enter") {
-                  setQueryLoading(true);
-                  handleExecuteQuery(currentQuery.sql);
-                }
-              });
 
               // Regex to match forbidden write statements (case-insensitive, at start of line ignoring whitespace)
               const forbidden =

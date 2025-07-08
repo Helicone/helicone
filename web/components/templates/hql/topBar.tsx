@@ -2,9 +2,6 @@ import { Button } from "@/components/ui/button";
 import { Save } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Play } from "lucide-react";
-import { useEffect, useState } from "react";
-import { $JAWN_API } from "@/lib/clients/jawn";
-import { components } from "@/lib/clients/jawnTypes/public";
 
 interface TopBarProps {
   currentQuery: {
@@ -18,30 +15,24 @@ interface TopBarProps {
     name: string;
     sql: string;
   }) => void;
+  handleRenameQuery: (newName: string) => void;
 }
 
 export default function TopBar({
   currentQuery,
   handleExecuteQuery,
   handleSaveQuery,
+  handleRenameQuery,
 }: TopBarProps) {
-  // TODO: can be untitled query hash
-  const [queryName, setQueryName] = useState(currentQuery.name);
-
-  // Sync local state with prop changes
-  useEffect(() => {
-    setQueryName(currentQuery.name);
-  }, [currentQuery.name]);
-
   return (
     <div className="w-full border-b bg-card">
       <div className="flex items-center justify-between px-4 py-2">
         <div className="flex items-center gap-4">
           <Input
-            value={queryName}
+            value={currentQuery.name}
             onChange={(e) => {
               const newName = e.target.value;
-              setQueryName(newName);
+              handleRenameQuery(newName);
             }}
             className="w-48 border-none bg-transparent text-lg font-medium focus-visible:ring-0"
           />
@@ -67,7 +58,7 @@ export default function TopBar({
             onClick={() => {
               handleSaveQuery({
                 id: currentQuery.id,
-                name: queryName,
+                name: currentQuery.name,
                 sql: currentQuery.sql,
               });
             }}
