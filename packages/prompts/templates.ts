@@ -1,21 +1,4 @@
-interface TemplateVariable {
-  name: string;
-  type: string;
-  raw: string;
-}
-
-interface ValidationError {
-  variable: string;
-  expected: string;
-  actual: string;
-  value: any;
-}
-
-interface SubstitutionResult {
-  success: boolean;
-  result?: string;
-  errors?: ValidationError[];
-}
+import { TemplateVariable, ValidationError, SubstitutionResult } from './types';
 
 export class HeliconeTemplateManager {
   private static readonly TEMPLATE_REGEX = /\{\{\s*hc\s*:\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*:\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\}\}/g;
