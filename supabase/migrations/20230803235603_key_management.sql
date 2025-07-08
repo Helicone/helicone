@@ -60,6 +60,29 @@ REVOKE EXECUTE ON FUNCTION public.soft_delete_helicone_proxy_keys() FROM anon;
 ALTER TABLE public.request 
 ADD COLUMN helicone_proxy_key_id uuid NULL REFERENCES public.helicone_proxy_keys(id);
 
+-- A MOCK DECRYPTER PROVIDER KEYS TABLE TO REPLICATE THE PROD VIEW
+ALTER TABLE provider_keys ADD COLUMN IF NOT EXISTS key_id UUID DEFAULT NULL; /* just to have a column to replicate it as it is in prod */
+ALTER TABLE provider_keys ADD COLUMN IF NOT EXISTS nonce BYTEA DEFAULT NULL; /* just to have a column to replicate it as it is in prod */
+
+CREATE VIEW decrypted_provider_keys AS
+(
+  SELECT
+    provider_keys.id,
+    provider_keys.org_id,
+    provider_keys.provider_name,
+    provider_keys.provider_key_name,
+    provider_keys.vault_key_id,
+    provider_keys.soft_delete,
+    provider_keys.created_at,
+    provider_keys.provider_key,
+    provider_keys.provider_key as decrypted_provider_key,
+    provider_keys.key_id,
+    provider_keys.nonce,
+    provider_keys.config
+  FROM provider_keys
+)
+
+
 -- CREATE EXTENSION IF NOT EXISTS pgsodium;
 
 -- CREATE OR REPLACE FUNCTION verify_helicone_proxy_key(api_key text, stored_hashed_key text)
