@@ -1,7 +1,7 @@
 import { TemplateVariable, ValidationError, SubstitutionResult } from './types';
 
 export const TEMPLATE_REGEX = /\{\{\s*hc\s*:\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*:\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\}\}/g;
-
+export const BOOLEAN_VALUES = ['true', 'false', 'yes', 'no'];
 export class HeliconeTemplateManager {
   /**
    * Extract all distinct variables and their types from a template string
@@ -48,18 +48,15 @@ export class HeliconeTemplateManager {
         errors.push({
           variable: variable.name,
           expected: variable.type,
-          actual: 'undefined',
           value
         });
         continue;
       }
       
-      const actualType = this.getValueType(value);
-      if (!this.isTypeCompatible(actualType, variable.type)) {
+      if (!this.isTypeCompatible(value, variable.type)) {
         errors.push({
           variable: variable.name,
           expected: variable.type,
-          actual: actualType,
           value
         });
       }
@@ -68,18 +65,6 @@ export class HeliconeTemplateManager {
     return errors;
   }
   
-  /**
-   * Get the type of a value
-   * @param value - The value to check
-   * @returns String representation of the type
-   */
-  private static getValueType(value: any): string {
-    if (typeof value === 'string') return 'string';
-    if (typeof value === 'number') return 'number';
-    if (typeof value === 'boolean') return 'boolean';
-    if (typeof value === 'object') return 'object';
-    return typeof value;
-  }
   
   /**
    * Check if actual type is compatible with expected type
@@ -87,25 +72,17 @@ export class HeliconeTemplateManager {
    * @param expectedType - The expected type from template
    * @returns True if types are compatible
    */
-  private static isTypeCompatible(actualType: string, expectedType: string): boolean {
-    // Exact match
-    if (actualType === expectedType) return true;
-    
-    switch (expectedType.toLowerCase()) {
+  private static isTypeCompatible(value: any, expectedType: string): boolean {
+    switch (expectedType) {
       case 'string':
-        return ['string', 'number', 'boolean'].includes(actualType);
-      
+        return true;
       case 'number':
-        return actualType === 'number';
-      
+        return typeof value === 'number' || !isNaN(Number(value));
       case 'boolean':
-        return actualType === 'boolean';
-      
-      case 'object':
-        return actualType === 'object';
-      
+        return typeof value === 'boolean' || 
+          (typeof value === 'string' && BOOLEAN_VALUES.includes(value.toLowerCase()));
       default:
-        return actualType === expectedType;
+        return true;
     }
   }
   
@@ -116,7 +93,7 @@ export class HeliconeTemplateManager {
    * @returns String representation of the value
    */
   private static valueToString(value: any, expectedType: string): string {
-    switch (expectedType.toLowerCase()) {
+    switch (expectedType) {
       case 'string':
         return String(value);
       
@@ -125,9 +102,6 @@ export class HeliconeTemplateManager {
       
       case 'boolean':
         return String(value);
-      
-      case 'object':
-        return typeof value === 'object' ? JSON.stringify(value) : String(value);
       
       default:
         return String(value);

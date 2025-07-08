@@ -1,3 +1,4 @@
+export type ALLOWED_VARIABLE_TYPE = "string" | "boolean" | "number";
 export interface TemplateVariable {
   name: string;
   type: string;
@@ -7,7 +8,6 @@ export interface TemplateVariable {
 export interface ValidationError {
   variable: string;
   expected: string;
-  actual: string;
   value: any;
 }
 
