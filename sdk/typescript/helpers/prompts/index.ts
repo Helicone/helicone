@@ -1,1 +1,1 @@
-export * from "./templates";
+export * from "./HeliconeTemplateManager";
