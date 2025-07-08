@@ -24,6 +24,7 @@ import { v4 as uuidv4 } from "uuid";
 import useNotification from "../../shared/notification/useNotification";
 import PlaygroundMessagesPanel from "./components/PlaygroundMessagesPanel";
 import PlaygroundResponsePanel from "./components/PlaygroundResponsePanel";
+import PlaygroundVariablesPanel from "./components/PlaygroundVariablesPanel";
 import { OPENROUTER_MODEL_MAP } from "./new/openRouterModelMap";
 import FoldedHeader from "@/components/shared/FoldedHeader";
 import { Small } from "@/components/ui/typography";
@@ -32,6 +33,9 @@ import { useCreatePrompt, useUpdatePrompt, useGetPromptVersionWithBody } from "@
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { useFeatureFlag } from "@/services/hooks/admin";
+import { HeliconeTemplateManager } from "@helicone-package/prompts/templates";
+import { TemplateVariable } from "@helicone-package/prompts/types";
+import { Message } from "@helicone-package/llm-mapper/types";
 
 export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
   _type: "openai-chat",
@@ -263,7 +267,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         setSelectedModel(OPENROUTER_MODEL_MAP[closestMatch.target]);
       }
 
-      setMappedContent(convertedContent);
+      onUpdateMappedContent(convertedContent);
       setDefaultContent(convertedContent);
       setTools(convertedContent.schema.request.tools ?? []);
 
@@ -352,6 +356,17 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     type: "text",
     json_schema: undefined,
   });
+
+  const [templateVariables, setTemplateVariableiables] = useState<Map<string, TemplateVariable>>(new Map());
+  const [substitutionValues, setSubstitutionValues] = useState<Map<string, string>>(new Map());
+
+  const onUpdateSubstitutionValue = (name: string, value: string) => {
+    setSubstitutionValues(prev => {
+      const next = new Map(prev);
+      next.set(name, value);
+      return next;
+    });
+  };
 
   useMemo(() => {
     if (!requestId) {
@@ -630,6 +645,75 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     }
   };
 
+  const onUpdateMappedContent = (newMappedContent: MappedLLMRequest | null) => {
+    if (!newMappedContent) {
+      setMappedContent(null);
+      return;
+    }
+
+    const messages = newMappedContent.schema.request.messages;
+    const allVariables = new Map<string, TemplateVariable>();
+    const templatedMessages: Message[] = [];
+
+    const processContent = (content: string) => {
+      const variables = HeliconeTemplateManager.extractVariables(content);
+      variables.forEach((variable: TemplateVariable) => allVariables.set(variable.name, variable));
+      return variables;
+    };
+
+    if (messages) {
+      for (const message of messages) {
+        if (message._type === "message" && message.content) {
+          processContent(message.content);
+          const substituted = HeliconeTemplateManager.substituteVariables(
+            message.content,
+            Object.fromEntries(substitutionValues)
+          );
+          templatedMessages.push({
+            ...message,
+            content: substituted.success ? substituted.result : message.content
+          });
+        } else if (message._type === "function" && message.content) {
+          processContent(message.content);
+          const substituted = HeliconeTemplateManager.substituteVariables(
+            message.content,
+            Object.fromEntries(substitutionValues)
+          );
+          templatedMessages.push({
+            ...message,
+            content: substituted.success ? substituted.result : message.content
+          });
+        } else if (message._type === "contentArray" && message.contentArray) {
+          const processedContentArray = message.contentArray.map(item => {
+            if (item._type === "message" && item.content) {
+              processContent(item.content);
+              const substituted = HeliconeTemplateManager.substituteVariables(
+                item.content,
+                Object.fromEntries(substitutionValues)
+              );
+              return { 
+                ...item,
+                content: substituted.success ? substituted.result : item.content 
+              };
+            }
+            return item;
+          });
+          templatedMessages.push({
+            ...message,
+            contentArray: processedContentArray
+          });
+        }
+      }
+    }
+
+    console.log("Templated Messages:", templatedMessages);
+    console.log("Template Variables:", Object.fromEntries(allVariables));
+    console.log("Substitution Values:", Object.fromEntries(substitutionValues));
+
+    setTemplateVariableiables(allVariables);
+    setMappedContent(newMappedContent);
+  };
+
   // Add keyboard shortcut listener
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -649,12 +733,12 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     if (!mappedContent) {
       return;
     }
-    setMappedContent({
+    onUpdateMappedContent({
       ...mappedContent,
       schema: {
         ...mappedContent.schema,
-        request: { ...mappedContent.schema.request, tools: newTools },
-      },
+        request: { ...mappedContent.schema.request, tools: newTools }
+      }
     });
   };
 
@@ -663,7 +747,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     if (!mappedContent) {
       return;
     }
-    setMappedContent({
+    onUpdateMappedContent({
       ...mappedContent,
       model: newModel,
       schema: {
@@ -715,7 +799,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
             <PlaygroundMessagesPanel
               mappedContent={mappedContent}
               defaultContent={defaultContent}
-              setMappedContent={setMappedContent}
+              setMappedContent={onUpdateMappedContent}
               selectedModel={selectedModel}
               setSelectedModel={handleSelectedModelChange}
               tools={tools}
@@ -735,13 +819,25 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           </ResizablePanel>
           <ResizableHandle withHandle />
           <ResizablePanel defaultSize={30} minSize={20}>
-            <PlaygroundResponsePanel
-              mappedContent={mappedContent}
-              setMappedContent={setMappedContent}
-              error={error}
-              response={response}
-              isStreaming={isStreaming}
-            />
+            <ResizablePanelGroup direction="vertical">
+              <ResizablePanel defaultSize={60} minSize={30}>
+                <PlaygroundResponsePanel
+                  mappedContent={mappedContent}
+                  setMappedContent={onUpdateMappedContent}
+                  error={error}
+                  response={response}
+                  isStreaming={isStreaming}
+                />
+              </ResizablePanel>
+              <ResizableHandle />
+              <ResizablePanel defaultSize={40} minSize={20}>
+                <PlaygroundVariablesPanel 
+                  variables={templateVariables}
+                  onUpdateValue={onUpdateSubstitutionValue}
+                  values={substitutionValues}
+                />
+              </ResizablePanel>
+            </ResizablePanelGroup>
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
