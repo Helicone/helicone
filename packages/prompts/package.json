@@ -1,0 +1,6 @@
+{
+  "name": "@helicone-package/prompts",
+  "types": "./",
+  "sideEffects": false,
+  "version": "1.0.0"
+}
