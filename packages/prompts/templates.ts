@@ -1,8 +1,8 @@
 import { TemplateVariable, ValidationError, SubstitutionResult } from './types';
 
+export const TEMPLATE_REGEX = /\{\{\s*hc\s*:\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*:\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\}\}/g;
+
 export class HeliconeTemplateManager {
-  private static readonly TEMPLATE_REGEX = /\{\{\s*hc\s*:\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*:\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\}\}/g;
-  
   /**
    * Extract all distinct variables and their types from a template string
    * @param template - The template string containing {{hc:NAME:type}} patterns
@@ -12,9 +12,9 @@ export class HeliconeTemplateManager {
     const variables = new Map<string, TemplateVariable>();
     let match;
     
-    this.TEMPLATE_REGEX.lastIndex = 0;
+    TEMPLATE_REGEX.lastIndex = 0;
     
-    while ((match = this.TEMPLATE_REGEX.exec(template)) !== null) {
+    while ((match = TEMPLATE_REGEX.exec(template)) !== null) {
       const [fullMatch, name, type] = match;
       
       if (!variables.has(name)) {
@@ -155,9 +155,9 @@ export class HeliconeTemplateManager {
     }
     
     let result = template;
-    this.TEMPLATE_REGEX.lastIndex = 0;
+    TEMPLATE_REGEX.lastIndex = 0;
     
-    result = result.replace(this.TEMPLATE_REGEX, (match, name, type) => {
+    result = result.replace(TEMPLATE_REGEX, (match, name, type) => {
       const value = inputs[name.trim()];
       if (value !== undefined && value !== null) {
         return this.valueToString(value, type.trim());
