@@ -31,9 +31,10 @@ import { Small } from "@/components/ui/typography";
 import { ModelParameters } from "@/lib/api/llm/generate";
 import { useCreatePrompt, useUpdatePrompt, useGetPromptVersionWithBody } from "@/services/hooks/prompts";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
-import { HeliconeTemplateManager } from "@helicone-package/prompts";
+import { HeliconeTemplateManager } from "@helicone-package/prompts/templates";
 import { TemplateVariable } from "@helicone-package/prompts/types";
 import { Message } from "@helicone-package/llm-mapper/types";
+import { useVariableColorMapStore } from "@/store/features/playground/variableColorMap";
 
 export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
   _type: "openai-chat",
@@ -197,6 +198,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   const { requestId, promptVersionId } = props;
   const { setNotification } = useNotification();
   const router = useRouter();
+  const { initializeColorMap } = useVariableColorMapStore();
 
   useEffect(() => {
     if (requestId && promptVersionId) {
@@ -747,6 +749,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     console.log("Templated Messages:", templatedMessages);
     console.log("Template Variables:", Object.fromEntries(allVariables));
     console.log("Substitution Values:", Object.fromEntries(substitutionValues));
+    initializeColorMap(Array.from(allVariables.keys()));
 
     setTemplateVariableiables(allVariables);
     setMappedContent(newMappedContent);
