@@ -14,7 +14,7 @@ import { TEMPLATE_REGEX } from "@helicone-package/prompts/templates";
 import { useVariableColorMapStore } from "@/store/features/playground/variableColorMap";
 import { HeliconeTemplateManager } from "@helicone-package/prompts/templates";
 
-const MAX_EDITOR_HEIGHT = 500;
+const MAX_EDITOR_HEIGHT = 1000000;
 const MonacoMarkdownEditor = (props: MarkdownEditorProps) => {
   const {
     text,
@@ -81,9 +81,9 @@ interface MarkdownEditorProps {
   containerClassName?: string;
 }
 
-const LARGE_TEXT_THRESHOLD = 20;
+const LARGE_TEXT_THRESHOLD = 100;
 
-const LARGE_TEXT_THRESHOLD_CHARS = 10_000;
+const LARGE_TEXT_THRESHOLD_CHARS = 20_000;
 
 const MarkdownEditor = (props: MarkdownEditorProps) => {
   const {
