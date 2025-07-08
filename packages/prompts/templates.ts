@@ -2,7 +2,6 @@ import { TemplateVariable, ValidationError, SubstitutionResult } from './types';
 
 export const TEMPLATE_REGEX = /\{\{\s*hc\s*:\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*:\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\}\}/g;
 export const BOOLEAN_VALUES = ['true', 'false', 'yes', 'no'];
-
 export class HeliconeTemplateManager {
   /**
    * Extract all distinct variables and their types from a template string
@@ -50,7 +49,6 @@ export class HeliconeTemplateManager {
         return true;
     }
   }
-
   /**
    * Substitute variables in template with provided inputs after type validation
    * @param template - The template string containing {{hc:NAME:type}} patterns
