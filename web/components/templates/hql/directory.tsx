@@ -2,6 +2,10 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { components } from "@/lib/clients/jawnTypes/public";
+import { $JAWN_API } from "@/lib/clients/jawn";
+import { useState } from "react";
+import { clsx } from "clsx";
+import { ChevronDown, ChevronRight } from "lucide-react";
 
 interface DirectoryProps {
   tables: {
@@ -11,15 +15,44 @@ interface DirectoryProps {
 }
 
 export function Directory({ tables }: DirectoryProps) {
+  const [activeTab, setActiveTab] = useState<"tables" | "queries">("tables");
+  const [savedQueries, setSavedQueries] = useState<any[]>([]); // Adjust type as needed
+  const [loadingQueries, setLoadingQueries] = useState(false);
+
+  const fetchSavedQueries = async () => {
+    setLoadingQueries(true);
+    const res = await $JAWN_API.GET("/v1/helicone-sql/saved-queries");
+    setSavedQueries(res.data?.data || []);
+    setLoadingQueries(false);
+  };
+
   return (
     <div className="flex h-screen w-80 flex-col border-r bg-background">
       {/* Tabs */}
       <section className="flex border-b">
-        <button className="flex-1 border-b-2 border-primary px-4 py-3 text-sm font-medium text-primary">
+        <button
+          className={clsx(
+            "flex-1 border-b-2 px-4 py-3 text-sm font-medium",
+            activeTab === "tables"
+              ? "border-primary text-primary"
+              : "border-transparent text-muted-foreground hover:text-foreground",
+          )}
+          onClick={() => setActiveTab("tables")}
+        >
           Tables
         </button>
-        <button className="flex-1 px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground">
-          {/* TODO: will eventually support saving multiple queries */}
+        <button
+          className={clsx(
+            "flex-1 border-b-2 px-4 py-3 text-sm font-medium",
+            activeTab === "queries"
+              ? "border-primary text-primary"
+              : "border-transparent text-muted-foreground hover:text-foreground",
+          )}
+          onClick={() => {
+            setActiveTab("queries");
+            fetchSavedQueries();
+          }}
+        >
           Queries
         </button>
       </section>
@@ -36,27 +69,105 @@ export function Directory({ tables }: DirectoryProps) {
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full">
           <div className="px-4">
-            <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-sm font-medium text-muted-foreground">
-                Tables ({tables.length})
-              </h3>
-            </div>
-
-            <div className="space-y-1">
-              {tables.map((table, index) => (
-                <div
-                  key={index}
-                  className="group flex cursor-pointer items-center justify-between rounded-md px-2 py-2 hover:bg-muted/50"
-                >
-                  <span className="truncate pr-2 text-sm font-medium">
-                    {table.table_name}
-                  </span>
-                </div>
-              ))}
-            </div>
+            {activeTab === "tables" ? (
+              <TableList tables={tables} />
+            ) : (
+              <QueryList queries={savedQueries} loading={loadingQueries} />
+            )}
           </div>
         </ScrollArea>
       </div>
     </div>
   );
 }
+
+function TableList({ tables }: { tables: any[] }) {
+  const [expandedTables, setExpandedTables] = useState<Set<string>>(new Set());
+
+  return (
+    <>
+      <div className="mb-3 flex items-center justify-between">
+        <h3 className="text-sm font-medium text-muted-foreground">
+          Tables ({tables.length})
+        </h3>
+      </div>
+      <div className="space-y-1">
+        {tables.map((table, index) => (
+          <div key={index}>
+            <div
+              className="group flex cursor-pointer items-center justify-between rounded-md px-2 py-2 hover:bg-muted/50"
+              onClick={() => toggleTable(table.table_name, setExpandedTables)}
+            >
+              <div className="flex items-center gap-2">
+                {expandedTables.has(table.table_name) ? (
+                  <ChevronDown size={16} />
+                ) : (
+                  <ChevronRight size={16} />
+                )}
+                <span className="truncate pr-2 text-sm font-medium">
+                  {table.table_name}
+                </span>
+              </div>
+            </div>
+            {expandedTables.has(table.table_name) && (
+              <div className="mb-2 ml-6">
+                {table.columns.map((col: any) => (
+                  <div
+                    key={col.name}
+                    className="flex justify-between py-0.5 text-xs text-muted-foreground"
+                  >
+                    <span>{col.name}</span>
+                    <span className="text-[10px]">{col.type}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+function QueryList({ queries, loading }: { queries: any[]; loading: boolean }) {
+  return (
+    <>
+      <div className="mb-3 flex items-center justify-between">
+        <h3 className="text-sm font-medium text-muted-foreground">
+          Queries ({queries.length})
+        </h3>
+      </div>
+      {loading ? (
+        <div className="text-sm text-muted-foreground">Loading...</div>
+      ) : (
+        <div className="space-y-1">
+          {queries.map((query, index) => (
+            <div
+              key={query.id || index}
+              className="group flex cursor-pointer items-center justify-between rounded-md px-2 py-2 hover:bg-muted/50"
+            >
+              <span className="truncate pr-2 text-sm font-medium">
+                {query.name}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+
+const toggleTable = (
+  tableName: string,
+  setExpandedTables: React.Dispatch<React.SetStateAction<Set<string>>>,
+) => {
+  setExpandedTables((prev) => {
+    const newSet = new Set(prev);
+    if (newSet.has(tableName)) {
+      newSet.delete(tableName);
+    } else {
+      newSet.add(tableName);
+    }
+    return newSet;
+  });
+};

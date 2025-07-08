@@ -1,5 +1,4 @@
 import { components } from "@/lib/clients/jawnTypes/public";
-import { HeliconeUser } from "@/packages/common/auth/types";
 import { useClickhouseSchemas } from "@/services/hooks/heliconeSql";
 import { useMonaco, Editor } from "@monaco-editor/react";
 import { useEffect, useRef, useState } from "react";
@@ -18,76 +17,20 @@ import { useMutation } from "@tanstack/react-query";
 import { useFeatureFlag } from "@/services/hooks/admin";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import useNotification from "@/components/shared/notification/useNotification";
+import { ALL_KEYWORDS } from "./constants";
+import {
+  getTableNames,
+  getTableNamesSet,
+  parseSqlAndFindTableNameAndAliases,
+  createSaveQueryMutation,
+  createExecuteQueryMutation,
+} from "./constants";
 
-const SQL_KEYWORDS = [
-  "SELECT",
-  "FROM",
-  "WHERE",
-  "GROUP BY",
-  "ORDER BY",
-  "HAVING",
-  "JOIN",
-  "INNER JOIN",
-  "LEFT JOIN",
-  "RIGHT JOIN",
-  "FULL JOIN",
-  "ON",
-  "AS",
-  "AND",
-  "OR",
-  "NOT",
-  "IN",
-  "EXISTS",
-  "BETWEEN",
-  "LIKE",
-  "IS",
-  "NULL",
-  "DISTINCT",
-  "LIMIT",
-  "OFFSET",
-  "UNION",
-  "UNION ALL",
-  "WITH",
-  "CASE",
-  "WHEN",
-  "THEN",
-  "ELSE",
-  "END",
-  "COUNT",
-  "SUM",
-  "AVG",
-  "MIN",
-  "MAX",
-  "CAST",
-  "COALESCE",
-];
+interface HQLPageProps {
+  lastestSavedId: string | null;
+}
 
-const CLICKHOUSE_KEYWORDS = [
-  "FINAL",
-  "SAMPLE",
-  "PREWHERE",
-  "ARRAY JOIN",
-  "GLOBAL",
-  "uniq",
-  "groupArray",
-  "arrayJoin",
-  "toStartOfHour",
-  "toStartOfDay",
-  "toStartOfMonth",
-  "today",
-  "yesterday",
-  "now",
-  "formatDateTime",
-  "toString",
-  "toDate",
-  "toDateTime",
-  "splitByChar",
-  "arrayMap",
-];
-
-const ALL_KEYWORDS = [...SQL_KEYWORDS, ...CLICKHOUSE_KEYWORDS];
-
-function HQLPage() {
+function HQLPage({ lastestSavedId }: HQLPageProps) {
   const organization = useOrg();
   const { data: hasAccessToHQL } = useFeatureFlag(
     "hql",
@@ -99,7 +42,14 @@ function HQLPage() {
   const clickhouseSchemas = useClickhouseSchemas();
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 
-  const [result, setResult] = useState<Record<string, string>[]>([]);
+  const [result, setResult] = useState<
+    components["schemas"]["ExecuteSqlResponse"]
+  >({
+    rows: [],
+    elapsedMilliseconds: 0,
+    size: 0,
+    rowCount: 0,
+  });
   const [currentQuery, setCurrentQuery] = useState<{
     id: string | undefined;
     name: string;
@@ -111,76 +61,13 @@ function HQLPage() {
   });
   const [queryLoading, setQueryLoading] = useState(false);
   const [queryError, setQueryError] = useState<string | null>(null);
-  const { mutate: handleExecuteQuery } = useMutation({
-    mutationFn: async (sql: string) => {
-      const response = await $JAWN_API.POST("/v1/helicone-sql/execute", {
-        body: {
-          sql: sql,
-        },
-      });
+  const { mutate: handleExecuteQuery } = useMutation(
+    createExecuteQueryMutation(setResult, setQueryError, setQueryLoading),
+  );
 
-      return response;
-    },
-    onSuccess: (data) => {
-      if (data.error || !data.data?.data) {
-        // @ts-ignore
-        setQueryError(data.error.error);
-        setResult([]);
-      } else {
-        setQueryError(null);
-        setResult(data.data?.data as Record<string, string>[]);
-      }
-      setQueryLoading(false);
-    },
-    onError: (error) => {
-      setQueryError(error.message);
-      setResult([]);
-      setQueryLoading(false);
-    },
-  });
-
-  const { mutate: handleSaveQuery } = useMutation({
-    mutationFn: async (savedQuery: {
-      id?: string;
-      name: string;
-      sql: string;
-    }) => {
-      if (savedQuery.id) {
-        const response = await $JAWN_API.PUT("/v1/helicone-sql/saved-query", {
-          body: {
-            id: savedQuery.id,
-            name: savedQuery.name,
-            sql: savedQuery.sql,
-          },
-        });
-
-        return response;
-      } else {
-        const response = await $JAWN_API.POST("/v1/helicone-sql/saved-query", {
-          body: {
-            name: savedQuery.name,
-            sql: savedQuery.sql,
-          },
-        });
-
-        if (response.data?.data) {
-          setCurrentQuery({
-            id: response.data.data[0].id,
-            name: response.data.data[0].name,
-            sql: response.data.data[0].sql,
-          });
-        }
-
-        return response;
-      }
-    },
-    onSuccess: () => {
-      setNotification("Successfully saved query", "success");
-    },
-    onError: (error) => {
-      setNotification(error.message, "error");
-    },
-  });
+  const { mutate: handleSaveQuery } = useMutation(
+    createSaveQueryMutation(setCurrentQuery, setNotification),
+  );
 
   // Setup autocompletion
   useEffect(() => {
@@ -263,7 +150,7 @@ function HQLPage() {
         }
 
         suggestions.push(
-          ...ALL_KEYWORDS.map((keyword) => ({
+          ...ALL_KEYWORDS.map((keyword: string) => ({
             label: keyword,
             kind: monaco.languages.CompletionItemKind.Keyword,
             insertText: keyword,
@@ -290,26 +177,30 @@ function HQLPage() {
     return () => disposable.dispose();
   }, [monaco, clickhouseSchemas.data]);
 
-  const { data: savedQueries, isLoading: savedQueriesLoading } =
-    $JAWN_API.useQuery("get", "/v1/helicone-sql/saved-queries", {});
+  const { data: savedQueryDetails, isLoading: savedQueryDetailsLoading } =
+    $JAWN_API.useQuery("get", "/v1/helicone-sql/saved-query/{queryId}", {
+      params: { path: { queryId: lastestSavedId ?? "" } },
+    });
 
   useEffect(() => {
-    if (savedQueries?.data && savedQueries.data.length > 0) {
+    if (savedQueryDetails?.data) {
       setCurrentQuery({
-        id: savedQueries.data[0].id,
-        name: savedQueries.data[0].name,
-        sql: savedQueries.data[0].sql,
+        id: savedQueryDetails.data.id,
+        name: savedQueryDetails.data.name,
+        sql: savedQueryDetails.data.sql,
       });
 
-      editorRef.current?.setValue(savedQueries.data[0].sql);
+      if (editorRef.current) {
+        editorRef.current.setValue(savedQueryDetails.data.sql);
+      }
     }
-  }, [savedQueries]);
+  }, [savedQueryDetails]);
 
   if (!hasAccessToHQL) {
     return <div>You do not have access to HQL</div>;
   }
 
-  if (savedQueriesLoading) {
+  if (savedQueryDetailsLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <div className="text-lg">Loading...</div>
@@ -331,6 +222,13 @@ function HQLPage() {
             currentQuery={currentQuery}
             handleExecuteQuery={handleExecuteQuery}
             handleSaveQuery={handleSaveQuery}
+            handleRenameQuery={(newName) => {
+              setCurrentQuery({
+                id: currentQuery.id,
+                name: newName,
+                sql: currentQuery.sql,
+              });
+            }}
           />
           <Editor
             defaultLanguage="sql"
@@ -339,14 +237,6 @@ function HQLPage() {
               editorRef.current = editor;
               const model = editor.getModel();
               if (!model) return;
-
-              // Add keyboard event listener
-              editor.onKeyDown((e) => {
-                if ((e.ctrlKey || e.metaKey) && e.code === "Enter") {
-                  setQueryLoading(true);
-                  handleExecuteQuery(currentQuery.sql);
-                }
-              });
 
               // Regex to match forbidden write statements (case-insensitive, at start of line ignoring whitespace)
               const forbidden =
@@ -451,7 +341,14 @@ function HQLPage() {
           defaultSize={25}
         >
           <QueryResult
-            result={result}
+            sql={currentQuery.sql}
+            result={result.rows}
+            queryStats={{
+              elapsedMilliseconds: result.elapsedMilliseconds,
+              rowCount: result.rowCount,
+              size: result.size,
+              rows: result.rows,
+            }}
             loading={queryLoading}
             error={queryError}
           />
@@ -462,36 +359,3 @@ function HQLPage() {
 }
 
 export default HQLPage;
-
-const getTableNames = (
-  schemas: {
-    table_name: string;
-    columns: components["schemas"]["ClickHouseTableColumn"][];
-  }[],
-) => Array.from(new Set(schemas?.map((d) => d.table_name) ?? []));
-
-const getTableNamesSet = (
-  schemas: {
-    table_name: string;
-    columns: components["schemas"]["ClickHouseTableColumn"][];
-  }[],
-) => new Set(getTableNames(schemas));
-
-function parseSqlAndFindTableNameAndAliases(sql: string) {
-  const regex =
-    /\b(?:FROM|JOIN)\s+([^\s.]+(?:\.[^\s.]+)?)\s*(?:AS)?\s*([^\s,]+)?/gi;
-  const tables = [];
-  while (true) {
-    const match = regex.exec(sql);
-    if (!match) break;
-    const table_name = match[1];
-    if (!/\(/.test(table_name)) {
-      let alias = match[2] as string | null;
-      if (alias && /on|where|inner|left|right|join/.test(alias)) {
-        alias = null;
-      }
-      tables.push({ table_name, alias: alias || table_name });
-    }
-  }
-  return tables;
-}
