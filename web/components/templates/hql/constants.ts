@@ -1,5 +1,4 @@
 import { components } from "@/lib/clients/jawnTypes/public";
-import { IKeyboardEvent } from "monaco-editor";
 import { $JAWN_API } from "@/lib/clients/jawn";
 import React from "react";
 
@@ -24,6 +23,7 @@ export const SQL_KEYWORDS = [
   "EXISTS",
   "BETWEEN",
   "LIKE",
+  "ILIKE",
   "IS",
   "NULL",
   "DISTINCT",
@@ -133,7 +133,7 @@ export const createExecuteQueryMutation = (
       } else {
         setQueryError(null);
         setResult({
-          rows: data.data?.data.rows as Record<string, any>[],
+          rows: data.data?.data.rows,
           elapsedMilliseconds: data.data?.data.elapsedMilliseconds,
           size: data.data?.data.size,
           rowCount: data.data?.data.rowCount,

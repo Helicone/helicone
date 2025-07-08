@@ -2293,14 +2293,8 @@ const models: TsoaRoute.Models = {
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ExecuteSqlResponse": {
-        "dataType": "refObject",
-        "properties": {
-            "rows": {"dataType":"array","array":{"dataType":"refAlias","ref":"Record_string.any_"},"required":true},
-            "elapsedMilliseconds": {"dataType":"double","required":true},
-            "size": {"dataType":"double","required":true},
-            "rowCount": {"dataType":"double","required":true},
-        },
-        "additionalProperties": false,
+        "dataType": "refAlias",
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"rowCount":{"dataType":"double","required":true},"size":{"dataType":"double","required":true},"elapsedMilliseconds":{"dataType":"double","required":true},"rows":{"dataType":"array","array":{"dataType":"refAlias","ref":"Record_string.any_"},"required":true}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ResultSuccess_ExecuteSqlResponse_": {
@@ -2352,18 +2346,18 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_Array_HqlSavedQuery__"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ResultSuccess_HqlSavedQuery-or-undefined-or-null_": {
+    "ResultSuccess_HqlSavedQuery-or-null_": {
         "dataType": "refObject",
         "properties": {
-            "data": {"dataType":"union","subSchemas":[{"ref":"HqlSavedQuery"},{"dataType":"undefined"},{"dataType":"enum","enums":[null]}],"required":true},
+            "data": {"dataType":"union","subSchemas":[{"ref":"HqlSavedQuery"},{"dataType":"enum","enums":[null]}],"required":true},
             "error": {"dataType":"enum","enums":[null],"required":true},
         },
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Result_HqlSavedQuery-or-undefined-or-null.string_": {
+    "Result_HqlSavedQuery-or-null.string_": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_HqlSavedQuery-or-undefined-or-null_"},{"ref":"ResultError_string_"}],"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_HqlSavedQuery-or-null_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ResultSuccess_HqlSavedQuery-Array_": {

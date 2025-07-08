@@ -2611,13 +2611,13 @@ Json: JsonObject;
     };
     "Result_ClickHouseTableSchema-Array.string_": components["schemas"]["ResultSuccess_ClickHouseTableSchema-Array_"] | components["schemas"]["ResultError_string_"];
     ExecuteSqlResponse: {
-      rows: components["schemas"]["Record_string.any_"][];
       /** Format: double */
-      elapsedMilliseconds: number;
+      rowCount: number;
       /** Format: double */
       size: number;
       /** Format: double */
-      rowCount: number;
+      elapsedMilliseconds: number;
+      rows: components["schemas"]["Record_string.any_"][];
     };
     ResultSuccess_ExecuteSqlResponse_: {
       data: components["schemas"]["ExecuteSqlResponse"];
@@ -2642,12 +2642,12 @@ Json: JsonObject;
       error: null;
     };
     "Result_Array_HqlSavedQuery_.string_": components["schemas"]["ResultSuccess_Array_HqlSavedQuery__"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_HqlSavedQuery-or-undefined-or-null_": {
-      data?: components["schemas"]["HqlSavedQuery"] | null;
+    "ResultSuccess_HqlSavedQuery-or-null_": {
+      data: components["schemas"]["HqlSavedQuery"] | null;
       /** @enum {number|null} */
       error: null;
     };
-    "Result_HqlSavedQuery-or-undefined-or-null.string_": components["schemas"]["ResultSuccess_HqlSavedQuery-or-undefined-or-null_"] | components["schemas"]["ResultError_string_"];
+    "Result_HqlSavedQuery-or-null.string_": components["schemas"]["ResultSuccess_HqlSavedQuery-or-null_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess_HqlSavedQuery-Array_": {
       data: components["schemas"]["HqlSavedQuery"][];
       /** @enum {number|null} */
@@ -5383,7 +5383,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_HqlSavedQuery-or-undefined-or-null.string_"];
+          "application/json": components["schemas"]["Result_HqlSavedQuery-or-null.string_"];
         };
       };
     };

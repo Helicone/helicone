@@ -1,3 +1,4 @@
+import { createArrayCsvWriter } from "csv-writer";
 import { err, ok, Result } from "../../packages/common/result";
 import { S3Client } from "../shared/db/s3Client";
 import fs from "fs";
@@ -19,8 +20,17 @@ export class HqlStore {
 
   async uploadCsv(
     fileName: string,
-    key: string
+    organizationId: string,
+    rows: Record<string, any>[]
   ): Promise<Result<string, string>> {
+    // if result is ok, if over 100k store in s3 and return url
+    const key = `${organizationId}/${fileName}`;
+    const csvWriter = createArrayCsvWriter({
+      path: fileName,
+      header: Object.keys(rows[0]),
+    });
+
+    await csvWriter.writeRecords(rows.map((row) => Object.values(row)));
     const csvBuffer = fs.readFileSync(fileName);
     const uploadResult = await this.s3Client.uploadToS3(
       key,

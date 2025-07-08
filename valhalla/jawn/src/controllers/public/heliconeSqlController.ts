@@ -56,12 +56,12 @@ export interface HqlSavedQuery {
   updated_at: string;
 }
 
-export interface ExecuteSqlResponse {
+export type ExecuteSqlResponse = {
   rows: Record<string, any>[];
   elapsedMilliseconds: number;
   size: number;
   rowCount: number;
-}
+};
 
 @Route("v1/helicone-sql")
 @Tags("HeliconeSql")
@@ -91,21 +91,14 @@ export class HeliconeSqlController extends Controller {
     }
 
     const heliconeSqlManager = new HeliconeSqlManager(request.authParams);
-    const { result, elapsedMilliseconds } = await withElapsedTime(() =>
-      heliconeSqlManager.executeSql(requestBody.sql)
-    );
+    const result = await heliconeSqlManager.executeSql(requestBody.sql);
     if (result.error || !result.data) {
       this.setStatus(500);
       return err(result.error);
     }
 
     this.setStatus(200);
-    return ok({
-      rows: result.data,
-      elapsedMilliseconds: elapsedMilliseconds,
-      size: Buffer.byteLength(JSON.stringify(result.data), "utf8"),
-      rowCount: result.data.length,
-    });
+    return ok(result.data);
   }
 
   @Post("download")
@@ -142,7 +135,7 @@ export class HeliconeSqlController extends Controller {
   public async getSavedQuery(
     @Path() queryId: string,
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<HqlSavedQuery | undefined | null, string>> {
+  ): Promise<Result<HqlSavedQuery | null, string>> {
     const heliconeSqlManager = new HqlQueryManager(request.authParams);
     const result = await heliconeSqlManager.getSavedQuery(queryId);
     if (result.error) {
@@ -183,13 +176,4 @@ export class HeliconeSqlController extends Controller {
     this.setStatus(200);
     return ok(result.data);
   }
-}
-
-async function withElapsedTime<T>(
-  fn: () => Promise<T>
-): Promise<{ result: T; elapsedMilliseconds: number }> {
-  const start = Date.now();
-  const result = await fn();
-  const end = Date.now();
-  return { result, elapsedMilliseconds: end - start };
 }

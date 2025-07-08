@@ -1,9 +1,11 @@
-import { ClickHouseTableSchema } from "../controllers/public/heliconeSqlController";
+import {
+  ClickHouseTableSchema,
+  ExecuteSqlResponse,
+} from "../controllers/public/heliconeSqlController";
 import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
 import { AuthParams } from "../packages/common/auth/types";
 import { err, ok, Result } from "../packages/common/result";
 import { AST, Parser } from "node-sql-parser";
-import { createArrayCsvWriter } from "csv-writer";
 import { HqlStore } from "../lib/stores/HqlStore";
 
 export const CLICKHOUSE_TABLES = ["request_response_rmt"];
@@ -44,18 +46,18 @@ function addLimit(ast: AST, limit: number): AST {
     throw new Error("Only select statements are allowed");
   }
 
-  // If there's already a limit, ensure it doesn't exceed 1000
+  // If there's already a limit, ensure it doesn't exceed the limit
   if (ast.limit && ast.limit.value.length > 0) {
     if (ast.limit.value.length === 1) {
       const currentLimit = ast.limit.value[0]?.value;
       if (typeof currentLimit === "number") {
-        ast.limit.value[0].value = Math.min(currentLimit, 1000);
+        ast.limit.value[0].value = Math.min(currentLimit, limit);
       }
     } else if (ast.limit.value.length === 2) {
       // Double LIMIT: LIMIT offset, count
       const currentCount = ast.limit.value[1]?.value;
       if (typeof currentCount === "number") {
-        ast.limit.value[1].value = Math.min(currentCount, 1000);
+        ast.limit.value[1].value = Math.min(currentCount, limit);
       }
     }
   } else {
@@ -65,7 +67,7 @@ function addLimit(ast: AST, limit: number): AST {
       value: [
         {
           type: "number",
-          value: 1000,
+          value: limit,
         },
       ],
     };
@@ -135,7 +137,7 @@ export class HeliconeSqlManager {
   async executeSql(
     sql: string,
     limit: number = 1000
-  ): Promise<Result<Array<Record<string, any>>, string>> {
+  ): Promise<Result<ExecuteSqlResponse, string>> {
     try {
       const ast = parser.astify(sql, { database: "Postgresql" });
       // always get first semi colon to prevent sql injection like snowflake lol
@@ -160,16 +162,24 @@ export class HeliconeSqlManager {
       ${firstSql}
     `;
 
-      const result = await clickhouseDb.dbQueryHql<Array<Record<string, any>>>(
+      const start = Date.now();
+
+      const result = await clickhouseDb.dbQueryHql<ExecuteSqlResponse["rows"]>(
         sqlWithCtes,
         [this.authParams.organizationId]
       );
 
+      const elapsedMilliseconds = Date.now() - start;
       if (result.error) {
         return err(result.error);
       }
 
-      return ok(result.data ?? []);
+      return ok({
+        rows: result.data ?? [],
+        elapsedMilliseconds,
+        size: Buffer.byteLength(JSON.stringify(result.data), "utf8"),
+        rowCount: result.data?.length ?? 0,
+      });
     } catch (e) {
       return err(String(e));
     }
@@ -181,24 +191,15 @@ export class HeliconeSqlManager {
       return err(result.error);
     }
 
-    if (!result.data?.length) {
+    if (!result.data?.rows?.length) {
       return err("No data returned from query");
     }
 
-    const fileName = `${Date.now()}.csv`;
-
-    // if result is ok, if over 100k store in s3 and return url
-    const csvWriter = createArrayCsvWriter({
-      path: fileName,
-      header: Object.keys(result.data[0]),
-    });
-
-    await csvWriter.writeRecords(result.data.map((row) => Object.values(row)));
-
     // upload to s3
     const uploadResult = await this.hqlStore.uploadCsv(
-      fileName,
-      `${this.authParams.organizationId}/${fileName}`
+      `${Date.now()}.csv`,
+      this.authParams.organizationId,
+      result.data.rows
     );
 
     if (uploadResult.error || !uploadResult.data) {
