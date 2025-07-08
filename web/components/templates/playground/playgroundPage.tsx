@@ -116,7 +116,6 @@ const convertMappedLLMRequestToOpenAIChatRequest = (
     tools: tools && tools.length > 0 ? tools : undefined,
   } as any);
 
-
   const promptBody = {
     ...openaiRequest,
     ...Object.fromEntries(
@@ -397,8 +396,9 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     json_schema: undefined,
   });
 
-  const [templateVariables, setTemplateVariableiables] = useState<Map<string, TemplateVariable>>(new Map());
+  const [templateVariables, setTemplateVariables] = useState<Map<string, TemplateVariable>>(new Map());
   const [substitutionValues, setSubstitutionValues] = useState<Map<string, string>>(new Map());
+  const [templatedMessages, setTemplatedMessages] = useState<Message[]>([]);
 
   const onUpdateSubstitutionValue = (name: string, value: string) => {
     setSubstitutionValues(prev => {
@@ -610,6 +610,96 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     }
   }
 
+  const createTemplatedMessages = (messages: Message[]): { hasSubstitutionFailure: boolean, templatedMessages: Message[] } => {
+    const templatedMessages: Message[] = [];
+    let hasSubstitutionFailure = false;
+
+    if (!messages) return { hasSubstitutionFailure, templatedMessages };
+
+    for (const message of messages) {
+      if (message._type === "message" && message.content) {
+        const substituted = HeliconeTemplateManager.substituteVariables(
+          message.content,
+          Object.fromEntries(substitutionValues)
+        );
+        if (!substituted.success) hasSubstitutionFailure = true;
+        templatedMessages.push({
+          ...message,
+          content: substituted.success ? substituted.result : message.content
+        });
+      } else if (message._type === "function" && message.content) {
+        const substituted = HeliconeTemplateManager.substituteVariables(
+          message.content,
+          Object.fromEntries(substitutionValues)
+        );
+        if (!substituted.success) hasSubstitutionFailure = true;
+        templatedMessages.push({
+          ...message,
+          content: substituted.success ? substituted.result : message.content
+        });
+      } else if (message._type === "contentArray" && message.contentArray) {
+        const processedContentArray = message.contentArray.map(item => {
+          if (item._type === "message" && item.content) {
+            const substituted = HeliconeTemplateManager.substituteVariables(
+              item.content,
+              Object.fromEntries(substitutionValues)
+            );
+            if (!substituted.success) hasSubstitutionFailure = true;
+            return { 
+              ...item,
+              content: substituted.success ? substituted.result : item.content 
+            };
+          }
+          return item;
+        });
+        templatedMessages.push({
+          ...message,
+          contentArray: processedContentArray
+        });
+      } else {
+        templatedMessages.push(message);
+      }
+    }
+    
+    return { hasSubstitutionFailure, templatedMessages };
+  };
+
+  const onUpdateMappedContent = (newMappedContent: MappedLLMRequest | null) => {
+    if (!newMappedContent) {
+      setMappedContent(null);
+      return;
+    }
+
+    const messages = newMappedContent.schema.request.messages;
+    const allVariables = new Map<string, TemplateVariable>();
+
+    const processContent = (content: string) => {
+      const variables = HeliconeTemplateManager.extractVariables(content);
+      variables.forEach((variable: TemplateVariable) => allVariables.set(variable.name, variable));
+      return variables;
+    };
+
+    if (messages) {
+      for (const message of messages) {
+        if (message._type === "message" && message.content) {
+          processContent(message.content);
+        } else if (message._type === "function" && message.content) {
+          processContent(message.content);
+        } else if (message._type === "contentArray" && message.contentArray) {
+          message.contentArray.forEach(item => {
+            if (item._type === "message" && item.content) {
+              processContent(item.content);
+            }
+          });
+        }
+      }
+    }
+
+    initializeColorMap(Array.from(allVariables.keys()));
+    setTemplateVariables(allVariables);
+    setMappedContent(newMappedContent);
+  };
+
   const onRun = async () => {
     if (!mappedContent) {
       setNotification("No mapped content", "error");
@@ -622,8 +712,25 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       abortController.current = new AbortController();
 
       try {
+        const { hasSubstitutionFailure, templatedMessages } = createTemplatedMessages(mappedContent.schema.request.messages || []);
+        if (hasSubstitutionFailure) {
+          setNotification("Improper template values!", "error");
+          return;
+        }
+
+        const templatedContent = {
+          ...mappedContent,
+          schema: {
+            ...mappedContent.schema,
+            request: {
+              ...mappedContent.schema.request,
+              messages: templatedMessages
+            }
+          }
+        };
+
         const openaiRequest = convertMappedLLMRequestToOpenAIChatRequest(
-          mappedContent,
+          templatedContent,
           tools,
           modelParameters,
           selectedModel,
@@ -683,76 +790,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         setError(error.message);
       }
     }
-  };
-
-  const onUpdateMappedContent = (newMappedContent: MappedLLMRequest | null) => {
-    if (!newMappedContent) {
-      setMappedContent(null);
-      return;
-    }
-
-    const messages = newMappedContent.schema.request.messages;
-    const allVariables = new Map<string, TemplateVariable>();
-    const templatedMessages: Message[] = [];
-
-    const processContent = (content: string) => {
-      const variables = HeliconeTemplateManager.extractVariables(content);
-      variables.forEach((variable: TemplateVariable) => allVariables.set(variable.name, variable));
-      return variables;
-    };
-
-    if (messages) {
-      for (const message of messages) {
-        if (message._type === "message" && message.content) {
-          processContent(message.content);
-          const substituted = HeliconeTemplateManager.substituteVariables(
-            message.content,
-            Object.fromEntries(substitutionValues)
-          );
-          templatedMessages.push({
-            ...message,
-            content: substituted.success ? substituted.result : message.content
-          });
-        } else if (message._type === "function" && message.content) {
-          processContent(message.content);
-          const substituted = HeliconeTemplateManager.substituteVariables(
-            message.content,
-            Object.fromEntries(substitutionValues)
-          );
-          templatedMessages.push({
-            ...message,
-            content: substituted.success ? substituted.result : message.content
-          });
-        } else if (message._type === "contentArray" && message.contentArray) {
-          const processedContentArray = message.contentArray.map(item => {
-            if (item._type === "message" && item.content) {
-              processContent(item.content);
-              const substituted = HeliconeTemplateManager.substituteVariables(
-                item.content,
-                Object.fromEntries(substitutionValues)
-              );
-              return { 
-                ...item,
-                content: substituted.success ? substituted.result : item.content 
-              };
-            }
-            return item;
-          });
-          templatedMessages.push({
-            ...message,
-            contentArray: processedContentArray
-          });
-        }
-      }
-    }
-
-    console.log("Templated Messages:", templatedMessages);
-    console.log("Template Variables:", Object.fromEntries(allVariables));
-    console.log("Substitution Values:", Object.fromEntries(substitutionValues));
-    initializeColorMap(Array.from(allVariables.keys()));
-
-    setTemplateVariableiables(allVariables);
-    setMappedContent(newMappedContent);
   };
 
   // Add keyboard shortcut listener
