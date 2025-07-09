@@ -1,6 +1,7 @@
 import { components } from "@/lib/clients/jawnTypes/public";
 import { $JAWN_API } from "@/lib/clients/jawn";
 import React from "react";
+import { queryOptions, useQueryClient } from "@tanstack/react-query";
 
 export const SQL_KEYWORDS = [
   "SELECT",
@@ -161,6 +162,7 @@ export const createSaveQueryMutation = (
   >,
   setNotification: (message: string, type: "success" | "error") => void,
 ) => {
+  const queryClient = useQueryClient();
   return {
     mutationFn: async (savedQuery: {
       id?: string;
@@ -196,6 +198,9 @@ export const createSaveQueryMutation = (
       }
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["get", "/v1/helicone-sql/saved-queries"],
+      });
       setNotification("Successfully saved query", "success");
     },
     onError: (error: any) => {

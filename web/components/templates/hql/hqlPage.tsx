@@ -72,9 +72,16 @@ function HQLPage({ lastestSavedId }: HQLPageProps) {
   );
 
   const { data: savedQueryDetails, isLoading: savedQueryDetailsLoading } =
-    $JAWN_API.useQuery("get", "/v1/helicone-sql/saved-query/{queryId}", {
-      params: { path: { queryId: lastestSavedId ?? "" } },
-    });
+    $JAWN_API.useQuery(
+      "get",
+      "/v1/helicone-sql/saved-query/{queryId}",
+      {
+        params: { path: { queryId: lastestSavedId ?? "" } },
+      },
+      {
+        enabled: !!lastestSavedId,
+      },
+    );
 
   useEffect(() => {
     if (savedQueryDetails?.data) {

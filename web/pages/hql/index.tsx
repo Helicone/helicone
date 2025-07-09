@@ -5,24 +5,22 @@ import { $JAWN_API } from "@/lib/clients/jawn";
 import Router from "next/router";
 
 const HQL = () => {
-  const lastestSavedId = useRef<string | null>(null);
+  const { data: savedQueries, isLoading } = $JAWN_API.useQuery(
+    "get",
+    "/v1/helicone-sql/saved-queries",
+  );
 
   useEffect(() => {
-    const fetchSavedQueries = async () => {
-      const { data: savedQueries } = await $JAWN_API.GET(
-        "/v1/helicone-sql/saved-queries",
-      );
+    if (savedQueries?.data && savedQueries.data.length > 0) {
+      Router.replace(`/hql/${savedQueries.data[0].id}`);
+    }
+  }, [savedQueries]);
 
-      if (savedQueries?.data && savedQueries.data.length > 0) {
-        lastestSavedId.current = savedQueries.data[0].id;
-        Router.replace(`/hql/${lastestSavedId.current}`);
-      }
-    };
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
-    fetchSavedQueries();
-  }, []);
-
-  return <HQLPage lastestSavedId={lastestSavedId.current} />;
+  return <HQLPage lastestSavedId={savedQueries?.data?.[0]?.id ?? null} />;
 };
 
 HQL.getLayout = function getLayout(page: ReactElement) {

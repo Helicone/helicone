@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import ThemedTable from "@/components/shared/themed/table/themedTable";
 import ThemedModal from "@/components/shared/themed/themedModal";
@@ -55,7 +55,7 @@ function QueryResult({
     );
   }
 
-  const columns = Object.keys(result[0]);
+  const columns = useMemo(() => Object.keys(result[0]), [result]);
 
   return (
     <div className="flex flex-col">
