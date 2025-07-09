@@ -16,8 +16,11 @@ interface DirectoryProps {
 
 export function Directory({ tables }: DirectoryProps) {
   const [activeTab, setActiveTab] = useState<"tables" | "queries">("tables");
-  const [savedQueries, setSavedQueries] = useState<any[]>([]); // Adjust type as needed
+  const [savedQueries, setSavedQueries] = useState<
+    components["schemas"]["HqlSavedQuery"][]
+  >([]);
   const [loadingQueries, setLoadingQueries] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const fetchSavedQueries = async () => {
     setLoadingQueries(true);
@@ -25,6 +28,14 @@ export function Directory({ tables }: DirectoryProps) {
     setSavedQueries(res.data?.data || []);
     setLoadingQueries(false);
   };
+
+  const filteredTables = tables.filter((table) =>
+    table.table_name.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
+
+  const filteredQueries = savedQueries.filter((query) =>
+    query.name.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
 
   return (
     <div className="flex h-screen w-80 flex-col border-r bg-background">
@@ -59,9 +70,17 @@ export function Directory({ tables }: DirectoryProps) {
 
       {/* Search */}
       <div className="px-4 py-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
-          <Input placeholder="Search resources" className="h-9 pl-9" />
+        <div className="relative w-full">
+          <Search
+            className="absolute left-3 top-1/2 -translate-y-1/2"
+            size={16}
+          />
+          <Input
+            placeholder={`Search ${activeTab === "tables" ? "tables" : "queries"}`}
+            className="h-9 pl-9"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
       </div>
 
@@ -70,9 +89,9 @@ export function Directory({ tables }: DirectoryProps) {
         <ScrollArea className="h-full">
           <div className="px-4">
             {activeTab === "tables" ? (
-              <TableList tables={tables} />
+              <TableList tables={filteredTables} />
             ) : (
-              <QueryList queries={savedQueries} loading={loadingQueries} />
+              <QueryList queries={filteredQueries} loading={loadingQueries} />
             )}
           </div>
         </ScrollArea>
