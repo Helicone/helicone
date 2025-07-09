@@ -163,6 +163,13 @@ export class Prompt2025Controller extends Controller {
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<Prompt2025Version, string>> {
+    const featureFlagResult = await checkFeatureFlag(
+      request.authParams.organizationId,
+      PROMPTS_FEATURE_FLAG
+    );
+    if (featureFlagResult.error) {
+      return err(featureFlagResult.error);
+    }
     const promptManager = new Prompt2025Manager(request.authParams);
     const result = await promptManager.getPromptVersionWithBody(requestBody);
     if (result.error || !result.data) {
