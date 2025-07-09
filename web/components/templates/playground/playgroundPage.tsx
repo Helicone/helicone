@@ -33,6 +33,8 @@ import {
   useGetPromptVersionWithBody,
 } from "@/services/hooks/prompts";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
+import { useOrg } from "@/components/layout/org/organizationContext";
+import { useFeatureFlag } from "@/services/hooks/admin";
 
 export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
   _type: "openai-chat",
@@ -165,6 +167,11 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   const { requestId, promptVersionId } = props;
   const { setNotification } = useNotification();
   const router = useRouter();
+  const organization = useOrg();
+  const { data: hasAccessToPrompts } = useFeatureFlag(
+    "prompts_2025",
+    organization?.currentOrg?.id ?? "",
+  );
 
   useEffect(() => {
     if (requestId && promptVersionId) {
@@ -581,7 +588,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
             <Small className="font-bold text-gray-500 dark:text-slate-300">
               Playground
             </Small>
-            {promptVersionData?.prompt && promptVersionData?.promptVersion && (
+            {hasAccessToPrompts && promptVersionData?.prompt && promptVersionData?.promptVersion && (
               <>
                 <div className="w-px h-4 bg-border" />
                 <div className="flex items-center gap-2">
