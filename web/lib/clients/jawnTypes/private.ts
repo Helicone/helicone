@@ -159,6 +159,9 @@ export interface paths {
   "/v1/evaluator/{evaluatorId}/stats": {
     get: operations["GetEvaluatorStats"];
   };
+  "/v1/prompt-2025/id/{promptId}": {
+    get: operations["GetPrompt2025"];
+  };
   "/v1/prompt-2025": {
     post: operations["CreatePrompt2025"];
   };
@@ -167,6 +170,9 @@ export interface paths {
   };
   "/v1/prompt-2025/query": {
     post: operations["GetPrompts2025"];
+  };
+  "/v1/prompt-2025/query/version": {
+    post: operations["GetPrompt2025Version"];
   };
   "/v1/prompt-2025/query/versions": {
     post: operations["GetPrompt2025Versions"];
@@ -945,6 +951,18 @@ Json: JsonObject;
       error: null;
     };
     "Result_EvaluatorStats.string_": components["schemas"]["ResultSuccess_EvaluatorStats_"] | components["schemas"]["ResultError_string_"];
+    Prompt2025: {
+      id: string;
+      name: string;
+      tags: string[];
+      created_at: string;
+    };
+    ResultSuccess_Prompt2025_: {
+      data: components["schemas"]["Prompt2025"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Prompt2025.string_": components["schemas"]["ResultSuccess_Prompt2025_"] | components["schemas"]["ResultError_string_"];
     PromptCreateResponse: {
       id: string;
     };
@@ -1048,12 +1066,6 @@ Json: JsonObject;
       error: null;
     };
     "Result_number.string_": components["schemas"]["ResultSuccess_number_"] | components["schemas"]["ResultError_string_"];
-    Prompt2025: {
-      id: string;
-      name: string;
-      tags: string[];
-      created_at: string;
-    };
     "ResultSuccess_Prompt2025-Array_": {
       data: components["schemas"]["Prompt2025"][];
       /** @enum {number|null} */
@@ -1070,19 +1082,20 @@ Json: JsonObject;
       minor_version: number;
       commit_message: string;
       created_at: string;
+      s3_url?: string;
     };
-    "ResultSuccess_Prompt2025Version-Array_": {
-      data: components["schemas"]["Prompt2025Version"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_Prompt2025Version-Array.string_": components["schemas"]["ResultSuccess_Prompt2025Version-Array_"] | components["schemas"]["ResultError_string_"];
     ResultSuccess_Prompt2025Version_: {
       data: components["schemas"]["Prompt2025Version"];
       /** @enum {number|null} */
       error: null;
     };
     "Result_Prompt2025Version.string_": components["schemas"]["ResultSuccess_Prompt2025Version_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_Prompt2025Version-Array_": {
+      data: components["schemas"]["Prompt2025Version"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Prompt2025Version-Array.string_": components["schemas"]["ResultSuccess_Prompt2025Version-Array_"] | components["schemas"]["ResultError_string_"];
     PromptVersionCounts: {
       /** Format: double */
       totalVersions: number;
@@ -16251,6 +16264,21 @@ export interface operations {
       };
     };
   };
+  GetPrompt2025: {
+    parameters: {
+      path: {
+        promptId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025.string_"];
+        };
+      };
+    };
+  };
   CreatePrompt2025: {
     requestBody: {
       content: {
@@ -16297,6 +16325,23 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Prompt2025-Array.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025Version: {
+    requestBody: {
+      content: {
+        "application/json": {
+          promptVersionId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025Version.string_"];
         };
       };
     };

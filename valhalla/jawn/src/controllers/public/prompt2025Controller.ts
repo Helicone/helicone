@@ -28,6 +28,8 @@ export interface Prompt2025Version {
 
   created_at: string;
 
+  s3_url?: string;
+
   // TODO: add another type for the user that created
   // it and union with this one for the info.
 }
@@ -54,6 +56,28 @@ export interface PromptVersionCounts {
 @Tags("Prompt2025")
 @Security("api_key")
 export class Prompt2025Controller extends Controller {
+  @Get("id/{promptId}")
+  public async getPrompt2025(
+    @Path() promptId: string,
+    @Request() request: JawnAuthenticatedRequest,
+  ): Promise<Result<Prompt2025, string>> {
+    const featureFlagResult = await checkFeatureFlag(
+      request.authParams.organizationId,
+      PROMPTS_FEATURE_FLAG
+    );
+    if (featureFlagResult.error) {
+      return err(featureFlagResult.error);
+    }
+    const promptManager = new Prompt2025Manager(request.authParams);
+    const result = await promptManager.getPrompt(promptId);
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+  
   @Post("")
   public async createPrompt2025(
     @Body()
@@ -127,6 +151,31 @@ export class Prompt2025Controller extends Controller {
       this.setStatus(500);
     } else {
       this.setStatus(200); // set return status 201
+    }
+    return result;
+  }
+
+  @Post("query/version")
+  public async getPrompt2025Version(
+    @Body()
+    requestBody: {
+      promptVersionId: string;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<Prompt2025Version, string>> {
+    const featureFlagResult = await checkFeatureFlag(
+      request.authParams.organizationId,
+      PROMPTS_FEATURE_FLAG
+    );
+    if (featureFlagResult.error) {
+      return err(featureFlagResult.error);
+    }
+    const promptManager = new Prompt2025Manager(request.authParams);
+    const result = await promptManager.getPromptVersionWithBody(requestBody);
+    if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
     }
     return result;
   }

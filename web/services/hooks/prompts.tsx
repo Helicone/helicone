@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { $JAWN_API } from "../../lib/clients/jawn";
 import type { components } from "../../lib/clients/jawnTypes/public";
+import type { OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
 
 type Prompt2025 = components["schemas"]["Prompt2025"];
 type Prompt2025Version = components["schemas"]["Prompt2025Version"];
@@ -27,6 +28,74 @@ export const useCreatePrompt = () => {
     }
   );
 };
+
+export const useGetPromptVersionWithBody = (promptVersionId?: string) => {
+  return useQuery<{
+    promptVersion: Prompt2025Version;
+    promptBody?: OpenAIChatRequest;
+    prompt: Prompt2025;
+  }>({
+    queryKey: ["promptVersionWithBody", promptVersionId],
+    refetchOnWindowFocus: false,
+    enabled: !!promptVersionId,
+    queryFn: async () => {
+      const result = await $JAWN_API.POST("/v1/prompt-2025/query/version", {
+        body: {
+          promptVersionId: promptVersionId!,
+        },
+      });
+
+      if (result.error || !result.data?.data) {
+        console.error("Error fetching prompt version with body:", result.error);
+        return {
+          promptVersion: {} as Prompt2025Version,
+          promptBody: undefined,
+          prompt: {} as Prompt2025,
+        };
+      }
+
+      const promptResult = await $JAWN_API.GET("/v1/prompt-2025/id/{promptId}", {
+        params: {
+          path: {
+            promptId: result.data.data.prompt_id
+          }
+        }
+      });
+
+      if (promptResult.error || !promptResult.data?.data) {
+        console.error("Error fetching prompt:", promptResult.error);
+        return {
+          promptVersion: {} as Prompt2025Version,
+          promptBody: undefined,
+          prompt: {} as Prompt2025,
+        };
+      }  
+
+      const prompt = promptResult.data.data;
+      const promptVersion = result.data.data;
+      let promptBody: OpenAIChatRequest | undefined;
+
+      if (promptVersion.s3_url) {
+        try {
+          const s3Response = await fetch(promptVersion.s3_url);
+          if (s3Response.ok) {
+            promptBody = await s3Response.json() as OpenAIChatRequest;
+          } else {
+            console.error("Failed to fetch from S3 URL:", s3Response.status);
+          }
+        } catch (error) {
+          console.error("Error fetching prompt body from S3:", error);
+        }
+      }
+
+      return {
+        promptVersion,
+        promptBody,
+        prompt,
+      };
+    },
+  });
+}
 
 export const useGetPromptVersions = (promptId: string, majorVersion?: number) => {
   return useQuery<Prompt2025Version[]>({

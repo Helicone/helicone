@@ -24,13 +24,13 @@ import { cn } from "@/lib/utils";
 
 interface PromptFormProps {
   isScrolled: boolean;
-  promptId: string | undefined;
+  promptVersionId: string | undefined;
   onSavePrompt: (model: string, tags: string[], promptName: string) => void;
 }
 
 export default function PromptForm({
   isScrolled,
-  promptId,
+  promptVersionId,
   onSavePrompt,
 }: PromptFormProps) {
   const [model, setModel] = useState("");
@@ -105,7 +105,7 @@ export default function PromptForm({
               setIsPromptFormPopoverOpen(false);
             }}
           >
-            {promptId ? "Save Prompt" : "Create Prompt"}
+            {promptVersionId ? "Save Prompt" : "Create Prompt"}
           </Button>
         </div>
       </PopoverContent>

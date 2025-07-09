@@ -18,6 +18,7 @@ import {
 } from "@helicone-package/llm-mapper/types";
 import { heliconeRequestToMappedContent } from "@helicone-package/llm-mapper/utils/getMappedContent";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/router";
 import findBestMatch from "string-similarity-js";
 import { v4 as uuidv4 } from "uuid";
 import useNotification from "../../shared/notification/useNotification";
@@ -27,7 +28,13 @@ import { OPENROUTER_MODEL_MAP } from "./new/openRouterModelMap";
 import FoldedHeader from "@/components/shared/FoldedHeader";
 import { Small } from "@/components/ui/typography";
 import { ModelParameters } from "@/lib/api/llm/generate";
-import { useCreatePrompt } from "@/services/hooks/prompts";
+import {
+  useCreatePrompt,
+  useGetPromptVersionWithBody,
+} from "@/services/hooks/prompts";
+import LoadingAnimation from "@/components/shared/loadingAnimation";
+import { useOrg } from "@/components/layout/org/organizationContext";
+import { useFeatureFlag } from "@/services/hooks/admin";
 
 export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
   _type: "openai-chat",
@@ -43,7 +50,7 @@ export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
       },
     ],
   },
-  model: "gpt-4o",
+  model: "gpt-4.1-mini",
   raw: {
     request: {},
     response: {},
@@ -98,13 +105,93 @@ export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
   },
 };
 
+const convertOpenAIChatRequestToMappedLLMRequest = (
+  openaiRequest: OpenAIChatRequest
+): MappedLLMRequest => {
+  const internalRequest = openaiChatMapper.toInternal(openaiRequest);
+
+  return {
+    _type: "openai-chat",
+    id: "",
+    preview: {
+      request: internalRequest.messages?.[0]?.content ?? "",
+      response: "",
+      concatenatedMessages: internalRequest.messages || [],
+    },
+    model: openaiRequest.model || "gpt-4.1-mini",
+    raw: {
+      request: openaiRequest,
+      response: {},
+    },
+    heliconeMetadata: {
+      requestId: "",
+      path: "",
+      countryCode: null,
+      cacheEnabled: false,
+      cacheReferenceId: null,
+      createdAt: new Date().toISOString(),
+      totalTokens: null,
+      promptTokens: null,
+      completionTokens: null,
+      latency: null,
+      user: null,
+      status: {
+        code: 200,
+        statusType: "success",
+      },
+      customProperties: null,
+      cost: null,
+      feedback: {
+        createdAt: null,
+        id: null,
+        rating: null,
+      },
+      provider: "OPENAI" as Provider,
+      promptCacheWriteTokens: 0,
+      promptCacheReadTokens: 0,
+    },
+    schema: {
+      request: {
+        ...internalRequest,
+        messages:
+          internalRequest.messages?.map((message) => ({
+            ...message,
+            id: uuidv4(),
+          })) ?? [],
+      },
+    },
+  };
+};
+
 const PlaygroundPage = (props: PlaygroundPageProps) => {
-  const { requestId } = props;
+  const { requestId, promptVersionId } = props;
+  const { setNotification } = useNotification();
+  const router = useRouter();
+  const organization = useOrg();
+  const { data: hasAccessToPrompts } = useFeatureFlag(
+    "prompts_2025",
+    organization?.currentOrg?.id ?? "",
+  );
+
+  useEffect(() => {
+    if (requestId && promptVersionId) {
+      setNotification(
+        "Cannot load request and prompt at the same time.",
+        "error"
+      );
+      router.push("/playground");
+      return;
+    }
+  }, [requestId, promptVersionId, setNotification, router]);
+
   const { data: requestData, isLoading: isRequestLoading } =
     useGetRequestWithBodies(requestId ?? "");
 
+  const { data: promptVersionData, isLoading: isPromptVersionLoading } =
+    useGetPromptVersionWithBody(promptVersionId);
+
   const [selectedModel, setSelectedModel] = useState<string>(
-    "openai/gpt-4o"
+    "openai/gpt-4.1-mini"
   );
 
   const [defaultContent, setDefaultContent] = useState<MappedLLMRequest | null>(
@@ -116,12 +203,63 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   );
 
   useEffect(() => {
-    if (!requestId) {
+    if (!requestId && !promptVersionId) {
       setMappedContent(DEFAULT_EMPTY_CHAT);
       setDefaultContent(DEFAULT_EMPTY_CHAT);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [requestId]);
+  }, [requestId, promptVersionId]);
+
+  useEffect(() => {
+    if (
+      promptVersionData &&
+      promptVersionData.promptBody &&
+      !isPromptVersionLoading
+    ) {
+      const convertedContent = convertOpenAIChatRequestToMappedLLMRequest(
+        promptVersionData.promptBody
+      );
+
+      const model = promptVersionData.promptBody.model;
+      if (model && model in OPENROUTER_MODEL_MAP) {
+        setSelectedModel(OPENROUTER_MODEL_MAP[model.split("/")[1]]);
+      } else if (model) {
+        const similarities = Object.keys(OPENROUTER_MODEL_MAP).map((m) => ({
+          target: m,
+          similarity: findBestMatch(model, m),
+        }));
+
+        const closestMatch = similarities.reduce((best, current) =>
+          current.similarity > best.similarity ? current : best
+        );
+        setSelectedModel(OPENROUTER_MODEL_MAP[closestMatch.target]);
+      }
+
+      setMappedContent(convertedContent);
+      setDefaultContent(convertedContent);
+      setTools(convertedContent.schema.request.tools ?? []);
+
+      setModelParameters({
+        temperature: promptVersionData.promptBody.temperature,
+        max_tokens: promptVersionData.promptBody.max_tokens,
+        top_p: promptVersionData.promptBody.top_p,
+        frequency_penalty: promptVersionData.promptBody.frequency_penalty,
+        presence_penalty: promptVersionData.promptBody.presence_penalty,
+        stop: promptVersionData.promptBody.stop
+          ? Array.isArray(promptVersionData.promptBody.stop)
+            ? promptVersionData.promptBody.stop.join(",")
+            : promptVersionData.promptBody.stop
+          : undefined,
+      });
+
+      if (promptVersionData.promptBody.response_format) {
+        setResponseFormat({
+          type: promptVersionData.promptBody.response_format.type || "text",
+          json_schema: promptVersionData.promptBody.response_format.json_schema,
+        });
+      }
+    }
+  }, [promptVersionData, isPromptVersionLoading]);
 
   const [tools, setTools] = useState<Tool[]>([]);
 
@@ -229,7 +367,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
 
   const [response, setResponse] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
-  const { setNotification } = useNotification();
   const abortController = useRef<AbortController | null>(null);
   const [isStreaming, setIsLoading] = useState<boolean>(false);
   const [useAIGateway, setUseAIGateway] = useState<boolean>(false);
@@ -447,9 +584,28 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       <FoldedHeader
         showFold={false}
         leftSection={
-          <Small className="font-bold text-gray-500 dark:text-slate-300">
-            Playground
-          </Small>
+          <div className="flex items-center gap-3">
+            <Small className="font-bold text-gray-500 dark:text-slate-300">
+              Playground
+            </Small>
+            {hasAccessToPrompts && promptVersionData?.prompt && promptVersionData?.promptVersion && (
+              <>
+                <div className="w-px h-4 bg-border" />
+                <div className="flex items-center gap-2">
+                  <Small className="font-bold text-gray-500 dark:text-slate-300">
+                    {promptVersionData.prompt.name.length > 30
+                      ? promptVersionData.prompt.name.substring(0, 27) + "..."
+                      : promptVersionData.prompt.name}
+                  </Small>
+                  <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary ring-1 ring-inset ring-primary/20">
+                    {promptVersionData.promptVersion.minor_version === 0
+                      ? `v${promptVersionData.promptVersion.major_version}`
+                      : `v${promptVersionData.promptVersion.major_version}.${promptVersionData.promptVersion.minor_version}`}
+                  </span>
+                </div>
+              </>
+            )}
+          </div>
         }
       />
       <div className="flex flex-col w-full h-full min-h-[80vh] border-t border-border">
@@ -459,24 +615,28 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
             defaultSize={70}
             minSize={30}
           >
-            <PlaygroundMessagesPanel
-              mappedContent={mappedContent}
-              defaultContent={defaultContent}
-              setMappedContent={setMappedContent}
-              selectedModel={selectedModel}
-              setSelectedModel={handleSelectedModelChange}
-              tools={tools}
-              setTools={handleToolsChange}
-              responseFormat={responseFormat}
-              setResponseFormat={setResponseFormat}
-              modelParameters={modelParameters}
-              setModelParameters={setModelParameters}
-              promptId={undefined} // TODO: From route params, for editing an existing prompt. For now, assume creating anew.
-              onSavePrompt={onSavePrompt}
-              onRun={onRun}
-              useAIGateway={useAIGateway}
-              setUseAIGateway={setUseAIGateway}
-            />
+            {isPromptVersionLoading || isRequestLoading ? (
+              <LoadingAnimation />
+            ) : (
+              <PlaygroundMessagesPanel
+                mappedContent={mappedContent}
+                defaultContent={defaultContent}
+                setMappedContent={setMappedContent}
+                selectedModel={selectedModel}
+                setSelectedModel={handleSelectedModelChange}
+                tools={tools}
+                setTools={handleToolsChange}
+                responseFormat={responseFormat}
+                setResponseFormat={setResponseFormat}
+                modelParameters={modelParameters}
+                setModelParameters={setModelParameters}
+                promptVersionId={promptVersionId}
+                onSavePrompt={onSavePrompt}
+                onRun={onRun}
+                useAIGateway={useAIGateway}
+                setUseAIGateway={setUseAIGateway}
+              />
+            )}
           </ResizablePanel>
           <ResizableHandle withHandle />
           <ResizablePanel defaultSize={30} minSize={20}>
@@ -498,6 +658,6 @@ export default PlaygroundPage;
 
 /** Types and Function for using finetuned models in Playground, Experiments Page */
 interface PlaygroundPageProps {
-  showNewButton?: boolean;
   requestId?: string;
+  promptVersionId?: string;
 }
