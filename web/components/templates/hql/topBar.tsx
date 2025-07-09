@@ -2,6 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Save } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Play } from "lucide-react";
+import { components } from "@/lib/clients/jawnTypes/public";
+import { Badge } from "@/components/ui/badge";
 
 interface TopBarProps {
   currentQuery: {
@@ -28,14 +30,21 @@ export default function TopBar({
     <div className="flex w-full shrink-0 flex-col border-b bg-background dark:border-border">
       <div className="flex items-center justify-between px-4 py-2">
         <div className="flex items-center gap-4">
-          <Input
-            value={currentQuery.name}
-            onChange={(e) => {
-              const newName = e.target.value;
-              handleRenameQuery(newName);
-            }}
-            className="w-48 border-none bg-transparent text-lg font-medium focus-visible:ring-0"
-          />
+          <div className="flex items-center gap-2">
+            <Input
+              value={currentQuery.name}
+              onChange={(e) => {
+                const newName = e.target.value;
+                handleRenameQuery(newName);
+              }}
+              className="w-48 border-none bg-transparent text-lg font-medium focus-visible:ring-0"
+            />
+            {!currentQuery.id && (
+              <Badge variant="secondary" className="text-xs">
+                Unsaved
+              </Badge>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
@@ -52,7 +61,7 @@ export default function TopBar({
           </Button>
 
           <Button
-            variant="outline"
+            variant={!currentQuery.id ? "action" : "outline"}
             size="sm"
             className="w-32"
             onClick={() => {
@@ -64,7 +73,7 @@ export default function TopBar({
             }}
           >
             <Save className="mr-1 h-4 w-4" />
-            Save
+            {!currentQuery.id ? "Save Query" : "Save"}
           </Button>
         </div>
       </div>

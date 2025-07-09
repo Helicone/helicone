@@ -17,7 +17,6 @@ import {
   createDeleteQueryMutation,
   createSaveQueryMutation,
 } from "./constants";
-import Router from "next/router";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -32,6 +31,11 @@ interface DirectoryProps {
     table_name: string;
     columns: components["schemas"]["ClickHouseTableColumn"][];
   }[];
+  currentQuery: {
+    id: string | undefined;
+    name: string;
+    sql: string;
+  };
   setCurrentQuery: Dispatch<
     SetStateAction<{
       id: string | undefined;
@@ -41,7 +45,11 @@ interface DirectoryProps {
   >;
 }
 
-export function Directory({ tables, setCurrentQuery }: DirectoryProps) {
+export function Directory({
+  tables,
+  currentQuery,
+  setCurrentQuery,
+}: DirectoryProps) {
   const [activeTab, setActiveTab] = useState<"tables" | "queries">("tables");
   const [searchTerm, setSearchTerm] = useState("");
   const { setNotification } = useNotification();
@@ -118,7 +126,11 @@ export function Directory({ tables, setCurrentQuery }: DirectoryProps) {
                     const data = response.data?.data;
                     const id = Array.isArray(data) ? data[0]?.id : data?.id;
                     if (id) {
-                      Router.replace(`/hql/${id}`);
+                      setCurrentQuery({
+                        id,
+                        name: "Untitled query",
+                        sql: "select * from request_response_rmt",
+                      });
                     }
                   }}
                 >
@@ -155,7 +167,12 @@ export function Directory({ tables, setCurrentQuery }: DirectoryProps) {
             {activeTab === "tables" ? (
               <TableList tables={filteredTables} />
             ) : (
-              <QueryList queries={queries} isLoading={isLoading} />
+              <QueryList
+                queries={queries}
+                isLoading={isLoading}
+                currentQuery={currentQuery}
+                setCurrentQuery={setCurrentQuery}
+              />
             )}
           </div>
         </ScrollArea>
@@ -216,9 +233,23 @@ function TableList({ tables }: { tables: any[] }) {
 function QueryList({
   queries,
   isLoading,
+  currentQuery,
+  setCurrentQuery,
 }: {
   queries: components["schemas"]["HqlSavedQuery"][];
   isLoading: boolean;
+  currentQuery: {
+    id: string | undefined;
+    name: string;
+    sql: string;
+  };
+  setCurrentQuery: Dispatch<
+    SetStateAction<{
+      id: string | undefined;
+      name: string;
+      sql: string;
+    }>
+  >;
 }) {
   const { setNotification } = useNotification();
 
@@ -229,12 +260,41 @@ function QueryList({
   const handleDeleteQuery = (queryId: string, queryName: string) => {
     if (confirm(`Are you sure you want to delete "${queryName}"?`)) {
       deleteQueryMutation.mutate(queryId);
-      Router.replace("/hql");
     }
   };
 
   return (
     <>
+      {/* Show current unsaved query */}
+      {!currentQuery.id && (
+        <div className="mb-3">
+          <div className="flex items-center justify-between rounded-md border border-orange-200 bg-orange-50 px-3 py-2 dark:border-orange-800 dark:bg-orange-950/20">
+            <div className="flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                className="size-5 text-orange-600 dark:text-orange-400"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="m6.75 7.5 3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 18V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v12a2.25 2.25 0 0 0 2.25 2.25Z"
+                />
+              </svg>
+              <span className="text-sm font-medium text-orange-800 dark:text-orange-200">
+                {currentQuery.name}
+              </span>
+              <span className="text-xs text-orange-600 dark:text-orange-400">
+                (Unsaved)
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-sm font-medium text-muted-foreground">
           Queries ({queries.length})
@@ -247,7 +307,16 @@ function QueryList({
           {queries.map((query, index) => (
             <ContextMenu key={query.id || index}>
               <ContextMenuTrigger>
-                <div className="group flex cursor-pointer items-center justify-between rounded-md px-2 py-2 hover:bg-muted/50">
+                <div
+                  className="group flex cursor-pointer items-center justify-between rounded-md px-2 py-2 hover:bg-muted/50"
+                  onClick={() => {
+                    setCurrentQuery({
+                      id: query.id,
+                      name: query.name,
+                      sql: query.sql,
+                    });
+                  }}
+                >
                   <span className="flex items-center gap-2 truncate pr-2 text-sm">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"

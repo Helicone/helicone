@@ -25,12 +25,9 @@ import {
   createSaveQueryMutation,
   createExecuteQueryMutation,
 } from "./constants";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
-interface HQLPageProps {
-  lastestSavedId: string | null;
-}
-
-function HQLPage({ lastestSavedId }: HQLPageProps) {
+function HQLPage() {
   const organization = useOrg();
   const { data: hasAccessToHQL } = useFeatureFlag(
     "hql",
@@ -76,10 +73,10 @@ function HQLPage({ lastestSavedId }: HQLPageProps) {
       "get",
       "/v1/helicone-sql/saved-query/{queryId}",
       {
-        params: { path: { queryId: lastestSavedId ?? "" } },
+        params: { path: { queryId: currentQuery.id as string } },
       },
       {
-        enabled: !!lastestSavedId,
+        enabled: !!currentQuery.id,
       },
     );
 
@@ -231,6 +228,7 @@ function HQLPage({ lastestSavedId }: HQLPageProps) {
       >
         <Directory
           tables={clickhouseSchemas.data ?? []}
+          currentQuery={currentQuery}
           setCurrentQuery={setCurrentQuery}
         />
       </ResizablePanel>
@@ -385,6 +383,15 @@ function HQLPage({ lastestSavedId }: HQLPageProps) {
             collapsedSize={10}
             defaultSize={25}
           >
+            {result.rowCount >= 100 && (
+              <Alert variant="warning" className="mb-2">
+                <AlertTitle>Row Limit Reached</AlertTitle>
+                <AlertDescription>
+                  Only the first 100 rows are shown. Please refine your query
+                  for more specific results. Or download for more data.
+                </AlertDescription>
+              </Alert>
+            )}
             <QueryResult
               sql={currentQuery.sql}
               result={result.rows}
