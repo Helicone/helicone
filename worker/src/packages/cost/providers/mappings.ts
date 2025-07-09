@@ -69,6 +69,9 @@ const nebius = /^https:\/\/api\.studio\.nebius\.ai/;
 // https://api.novita.ai
 const novita = /^https:\/\/api\.novita\.ai/;
 
+// api.openpipe.ai
+const openpipe = /^https:\/\/api\.openpipe\.ai/;
+
 export const providersNames = [
   "OPENAI",
   "ANTHROPIC",
@@ -98,6 +101,7 @@ export const providersNames = [
   "AVIAN",
   "NEBIUS",
   "NOVITA",
+  "OPENPIPE",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -248,26 +252,15 @@ export const providers: {
     provider: "NOVITA",
     costs: novitaCosts,
   },
+  {
+    pattern: openpipe,
+    provider: "OPENPIPE",
+    costs: [],
+  },
 ];
 
-export const playgroundModels: {
-  name: string;
-  provider: ProviderName;
-}[] =
-  (providers
-    .map((provider) => {
-      return provider.costs
-        ?.filter((cost) => cost.showInPlayground)
-        .map((cost) => ({
-          name: cost.model.value,
-          provider: provider.provider,
-        }));
-    })
-    .flat()
-    .filter((model) => model !== undefined) as {
-    name: string;
-    provider: ProviderName;
-  }[]) ?? [];
+export const playgroundModels =
+  openRouterCosts.map((cost) => cost.model.value) ?? [];
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 export const defaultProvider = providers.find(
