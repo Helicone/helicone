@@ -226,6 +226,7 @@
                   "ai-gateway/concepts/loadbalancing",
                   "ai-gateway/concepts/cache",
                   "ai-gateway/concepts/rate-limiting",
+                  "ai-gateway/concepts/retries",
                   "ai-gateway/concepts/secret-management",
                   "ai-gateway/concepts/providers",
                   "ai-gateway/concepts/model-mapping"

@@ -311,13 +311,82 @@ The following fields are available for both global and router-level rate limitin
   **Note:** Only available for global rate limiting configuration.
 </ParamField>
 
+## Retries
+
+Automatically retry transient errors with a customizable retry policy.
+
+### Global Retry Configuration
+
+<ParamField path="global.rate-limit" type="object">
+  Configure an application-wide retry policy that applies to all requests
+
+  Available strategies are `constant`:
+
+  ```yaml
+  global:
+    retries:
+      strategy: "constant"
+      delay: "50ms"
+      max-retries: 2
+  ```
+
+  And `exponential`:
+  ```yaml
+  global:
+    retries:
+      strategy: "exponential"
+      min-delay: "15ms"
+      max-delay: "200ms"
+      max-retries: 3
+      factor: 2.0
+  ```
+
+  **How it works:** If a transient error is encountered on any endpoint, the request will be retried with the given policy.
+</ParamField>
+
+### Router-Level Retry Configuration
+
+Configure a more specific retry configuration at the granularity of each router
+
+<ParamField path="routers.[name].retries" type="object">
+  Configure an retry policy that applies to requests to a specific router.
+
+  Available strategies are `constant`:
+
+  ```yaml
+  routers:
+    production:
+      retries:
+        strategy: "constant"
+        delay: "10ms"
+        max-retries: 2
+  ```
+
+  And `exponential`:
+
+  ```yaml
+  routers:
+    production:
+      retries:
+        strategy: "exponential"
+        min-delay: "5ms"
+        max-delay: "20ms"
+        max-retries: 2
+        factor: 2.0
+  ```
+
+  **How it works:** If a transient error is encountered on any endpoint, the request will be retried with the given policy.
+</ParamField>
+
+
+
 ## Helicone Add-ons
 
 Configure integration with the Helicone platform for authentication and observability.
 
 [Learn more about Authentication](/ai-gateway/authentication) | [Learn more about Observability](/ai-gateway/observability)
 
-<ParamField path="helicone.features" type="string" default="none">
+<ParamField path="helicone.features" type="string" default="none" optional>
   Enable Helicone features such as LLM observability and authentication for secure API access.
 
   ```yaml
