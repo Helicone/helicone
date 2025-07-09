@@ -91,11 +91,11 @@ const PromptsPage = (props: PromptsPageProps) => {
     setFilteredMajorVersion(majorVersion);
   };
 
+  const setProductionVersion = useSetProductionVersion();
+
   if (!hasAccessToPrompts) {
     return <div>You do not have access to Prompts</div>;
   }
-
-  const setProductionVersion = useSetProductionVersion();
 
   const handleSetProductionVersion = async (promptId: string, promptVersionId: string) => {
     const result = await setProductionVersion.mutateAsync({
