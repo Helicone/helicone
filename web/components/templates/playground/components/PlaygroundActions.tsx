@@ -11,6 +11,8 @@ import _ from "lodash";
 import { ModelParameters } from "@/lib/api/llm/generate";
 import { DEFAULT_EMPTY_CHAT } from "../playgroundPage";
 import { CommandIcon, Undo2Icon } from "lucide-react";
+import { useFeatureFlag } from "@/services/hooks/admin";
+import { useOrg } from "@/components/layout/org/organizationContext";
 
 interface PlaygroundActionsProps {
   mappedContent: MappedLLMRequest | null;
@@ -36,6 +38,11 @@ const PlaygroundActions = ({
   requestId,
   isScrolled,
 }: PlaygroundActionsProps) => {
+  const organization = useOrg();
+  const { data: hasAccessToPrompts } = useFeatureFlag(
+    "prompts_2025",
+    organization?.currentOrg?.id ?? "",
+  );
   const resetToDefault = () => {
     console.log("Reset triggered with:", {
       defaultContent,
@@ -89,11 +96,14 @@ const PlaygroundActions = ({
           </TooltipContent>
         </Tooltip>
       )}
-      <PromptForm
-        isScrolled={isScrolled}
-        promptId={promptId}
-        onSavePrompt={onSavePrompt}
-      />
+      
+      {hasAccessToPrompts && (
+        <PromptForm
+          isScrolled={isScrolled}
+          promptId={promptId}
+          onSavePrompt={onSavePrompt}
+        />
+      )}
       <Tooltip>
         <TooltipTrigger asChild>
           <Button onClick={onRun}>Run</Button>

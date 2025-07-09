@@ -12,10 +12,11 @@ import {
   Security,
   Tags,
 } from "tsoa";
-import { Result } from "../../packages/common/result";
+import { err, Result } from "../../packages/common/result";
 import { Prompt2025Manager } from "../../managers/prompt/PromptManager";
 import type { JawnAuthenticatedRequest } from "../../types/request";
 import { type OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
+import { PROMPTS_FEATURE_FLAG, checkFeatureFlag } from "../../lib/utils/featureFlags";
 
 export interface PromptCreateResponse {
   id: string;
@@ -37,6 +38,13 @@ export class Prompt2025Controller extends Controller {
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<PromptCreateResponse, string>> {
+    const featureFlagResult = await checkFeatureFlag(
+      request.authParams.organizationId,
+      PROMPTS_FEATURE_FLAG
+    );
+    if (featureFlagResult.error) {
+      return err(featureFlagResult.error);
+    }
     const promptManager = new Prompt2025Manager(request.authParams);
 
     const result = await promptManager.createPrompt(requestBody);
