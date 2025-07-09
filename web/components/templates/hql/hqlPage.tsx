@@ -65,9 +65,30 @@ function HQLPage({ lastestSavedId }: HQLPageProps) {
     createExecuteQueryMutation(setResult, setQueryError, setQueryLoading),
   );
 
+  // a hack to get the latest query in the editor
+  const latestQueryRef = useRef(currentQuery);
   const { mutate: handleSaveQuery } = useMutation(
     createSaveQueryMutation(setCurrentQuery, setNotification),
   );
+
+  const { data: savedQueryDetails, isLoading: savedQueryDetailsLoading } =
+    $JAWN_API.useQuery("get", "/v1/helicone-sql/saved-query/{queryId}", {
+      params: { path: { queryId: lastestSavedId ?? "" } },
+    });
+
+  useEffect(() => {
+    if (savedQueryDetails?.data) {
+      setCurrentQuery({
+        id: savedQueryDetails.data.id,
+        name: savedQueryDetails.data.name,
+        sql: savedQueryDetails.data.sql,
+      });
+
+      if (editorRef.current) {
+        editorRef.current.setValue(savedQueryDetails.data.sql);
+      }
+    }
+  }, [savedQueryDetails]);
 
   // Setup autocompletion
   useEffect(() => {
@@ -177,24 +198,9 @@ function HQLPage({ lastestSavedId }: HQLPageProps) {
     return () => disposable.dispose();
   }, [monaco, clickhouseSchemas.data]);
 
-  const { data: savedQueryDetails, isLoading: savedQueryDetailsLoading } =
-    $JAWN_API.useQuery("get", "/v1/helicone-sql/saved-query/{queryId}", {
-      params: { path: { queryId: lastestSavedId ?? "" } },
-    });
-
   useEffect(() => {
-    if (savedQueryDetails?.data) {
-      setCurrentQuery({
-        id: savedQueryDetails.data.id,
-        name: savedQueryDetails.data.name,
-        sql: savedQueryDetails.data.sql,
-      });
-
-      if (editorRef.current) {
-        editorRef.current.setValue(savedQueryDetails.data.sql);
-      }
-    }
-  }, [savedQueryDetails]);
+    latestQueryRef.current = currentQuery;
+  }, [currentQuery]);
 
   if (!hasAccessToHQL) {
     return <div>You do not have access to HQL</div>;
@@ -288,6 +294,22 @@ function HQLPage({ lastestSavedId }: HQLPageProps) {
                   );
                 }
               });
+
+              // Add Command/Ctrl+Enter command
+              editor.addCommand(
+                monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+                () => {
+                  handleExecuteQuery(latestQueryRef.current.sql);
+                },
+              );
+
+              // Add Command/Ctrl+S command
+              editor.addCommand(
+                monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
+                () => {
+                  handleSaveQuery(latestQueryRef.current);
+                },
+              );
             }}
             onChange={(value) => {
               setCurrentQuery({
