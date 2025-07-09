@@ -14,7 +14,10 @@ import {
   PromptsResult,
 } from "../../controllers/public/promptController";
 import {
-  PromptCreateResponse
+  Prompt2025,
+  Prompt2025Version,
+  PromptCreateResponse,
+  PromptVersionCounts,
 } from "../../controllers/public/prompt2025Controller";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { FilterNode } from "@helicone-package/filters/filterDefs";
@@ -54,6 +57,129 @@ export class Prompt2025Manager extends BaseManager {
     return result;
   }
 
+  async totalPrompts(): Promise<Result<number, string>> {
+    const result = await dbExecute<{ count: number }>(
+      `SELECT COUNT(*) as count FROM prompts_2025 WHERE organization = $1`,
+      [this.authParams.organizationId]
+    );
+    if (result.error) {
+      return err(result.error);
+    }
+    return ok(Number(result.data?.[0]?.count ?? 0));
+  }
+
+  async getPrompts(params: {
+    search: string;
+    page: number;
+    pageSize: number;
+  }): Promise<Result<Prompt2025[], string>> {
+    const result = await dbExecute<Prompt2025>(
+    `
+      SELECT
+        id,
+        name,
+        tags,
+        created_at
+      FROM prompts_2025
+      WHERE name ILIKE $1 AND organization = $2
+      ORDER BY created_at DESC
+      LIMIT $3 OFFSET $4
+    `,
+      [`%${params.search}%`, this.authParams.organizationId, params.pageSize, params.page * params.pageSize]
+    );
+
+    if (result.error) {
+      return err(result.error);
+    }
+
+    return ok(result.data ?? []);
+  }
+
+  async getPromptVersionCounts(params: {
+    promptId: string;
+  }): Promise<Result<PromptVersionCounts, string>> {
+    const result = await dbExecute<{ total_versions: number, major_versions: number }>(
+      `SELECT
+        COUNT(*)::integer as total_versions,
+        MAX(major_version) as major_versions
+      FROM prompts_2025_versions
+      WHERE prompt_id = $1 AND organization = $2
+      `,
+      [params.promptId, this.authParams.organizationId]
+    );
+
+    if (result.error) {
+      return err(result.error);
+    }
+
+    return ok({
+      totalVersions: result.data?.[0]?.total_versions ?? 0,
+      majorVersions: result.data?.[0]?.major_versions ?? 0,
+    });
+  }
+
+  async getPromptProductionVersion(params: {
+    promptId: string;
+  }): Promise<Result<Prompt2025Version, string>> {
+    const result = await dbExecute<Prompt2025Version>(
+      `
+      SELECT
+        versions.id,
+        versions.prompt_id,
+        versions.major_version,
+        versions.minor_version,
+        versions.commit_message,
+        versions.created_at,
+        versions.model
+      FROM prompts_2025 AS prompts
+      INNER JOIN prompts_2025_versions AS versions
+      ON prompts.production_version = versions.id
+      WHERE prompts.id = $1 AND prompts.organization = $2
+      `,
+      [params.promptId, this.authParams.organizationId]
+    );
+
+    if (result.error) {
+      return err(result.error);
+    }
+
+    if (!result.data?.[0]) {
+      return err("Production version not found");
+    }
+    return ok(result.data[0]);
+  }
+
+  async getPromptVersions(params: {
+    promptId: string;
+    majorVersion?: number;
+  }): Promise<Result<Prompt2025Version[], string>> {
+    const result = await dbExecute<Prompt2025Version>(
+      `
+      SELECT 
+        id,
+        prompt_id,
+        major_version,
+        minor_version,
+        commit_message,
+        created_at,
+        model
+      FROM prompts_2025_versions
+      WHERE prompt_id = $1
+      AND organization = $2
+      ${params.majorVersion !== undefined ? `AND major_version = $3` : ''}
+      ORDER BY created_at DESC
+      LIMIT 50
+      `,
+      [params.promptId, this.authParams.organizationId, params.majorVersion]
+    );
+
+    if (result.error) {
+      return err(result.error);
+    }
+
+    return ok(result.data ?? []);
+  }
+
   async createPrompt(params: {
     name: string,
     tags: string[],
@@ -68,14 +194,13 @@ export class Prompt2025Manager extends BaseManager {
       try {
         insertPromptResult = await dbExecute<{ id: string }>(
           `
-        INSERT INTO prompts_2025 (id, name, tags, model, created_at, organization)
-        VALUES ($1, $2, $3, $4, NOW(), $5)
+        INSERT INTO prompts_2025 (id, name, tags, created_at, organization)
+        VALUES ($1, $2, $3, NOW(), $4)
         RETURNING id
           `, [
             promptId,
             params.name,
             params.tags,
-            params.promptBody.model,
             this.authParams.organizationId,
           ]
         );
@@ -105,14 +230,16 @@ export class Prompt2025Manager extends BaseManager {
         minor_version,
         commit_message,
         created_by,
-        organization
+        organization,
+        model
       )
-      VALUES (NOW(), $1, 0, 0, 'First version.', $2, $3)
+      VALUES (NOW(), $1, 0, 0, 'First version.', $2, $3, $4)
       RETURNING id
       `, [
         promptId,
         this.authParams.userId,
         this.authParams.organizationId,
+        params.promptBody.model,
       ]
     )
     
