@@ -6,7 +6,7 @@ const Banner = () => {
     <div
       className={cn("flex flex-col justify-center w-full h-auto pb-4 relative")}
     >
-      <div className="bg-blue-600 text-blue-50 text-center text-sm md:text-base py-3 w-full">
+      <div className="bg-sky-500 text-blue-50 text-center text-sm md:text-base py-3 w-full">
         <p>
           🔥 Introducing the{" "}
           <Link
