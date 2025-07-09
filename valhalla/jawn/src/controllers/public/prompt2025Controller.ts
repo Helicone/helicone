@@ -220,7 +220,6 @@ export class Prompt2025Controller extends Controller {
       return err(featureFlagResult.error);
     }
     const promptManager = new Prompt2025Manager(request.authParams);
-    console.log("requestBody", requestBody);
     const result = await promptManager.getPrompts(requestBody);
     if (result.error || !result.data) {
       this.setStatus(500);
