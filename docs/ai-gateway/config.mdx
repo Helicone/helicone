@@ -313,32 +313,28 @@ The following fields are available for both global and router-level rate limitin
 
 ## Helicone Add-ons
 
-Configure integration with the Helicone platform for authentication and observability. Authentication and observability are now separate controls.
+Configure integration with the Helicone platform for authentication and observability.
 
 [Learn more about Authentication](/ai-gateway/authentication) | [Learn more about Observability](/ai-gateway/observability)
 
-<ParamField path="helicone.authentication" type="boolean" default="false">
-  Enable Helicone authentication for secure API access.
+<ParamField path="helicone.features" type="string" default="none">
+  Enable Helicone features such as LLM observability and authentication for secure API access.
 
   ```yaml
   helicone:
-    authentication: true
-    observability: false  # Optional: enable observability
+    # Set to `features: observability` to enable observability and auth
+    features: auth
   ```
 
-  **When enabled:** Must set the `HELICONE_CONTROL_PLANE_API_KEY` environment variable with your Helicone API key.
-</ParamField>
-
-<ParamField path="helicone.observability" type="boolean" default="false">
-  Enable request logging to your Helicone dashboard.
+  Enable authentication (required) and request logging to your Helicone dashboard.
 
   ```yaml
   helicone:
-    authentication: true  # Required for observability
-    observability: true
+    features: observability
   ```
 
-  **Note:** Observability requires authentication to be enabled.
+  **When enabled:** Must set the `HELICONE_CONTROL_PLANE_API_KEY` environment variable with your Helicone API key when deploying
+  the AI Gateway when using Helicone add ons.
 </ParamField>
 
 <ParamField path="helicone.base-url" type="string" default="https://api.helicone.ai">

@@ -31,8 +31,8 @@ The AI Gateway integrates with Helicone to provide secure authentication for you
 
     ```yaml
     helicone:
-      authentication: true
-      observability: false  # Set to true to enable observability
+      # Set to `features: observability` to enable both auth and observability
+      features: auth
     
     routers:
       my-router:
@@ -74,7 +74,13 @@ The AI Gateway integrates with Helicone to provide secure authentication for you
 
 ## Authentication Usage
 
-When authentication is enabled (`authentication: true`), include your Helicone API key with every request:
+Configure `helicone.features` to control authentication and observability:
+
+- **`none`** - No authentication or observability
+- **`auth`** - Authentication only
+- **`observability`** - Authentication + observability
+
+When authentication is enabled, include your Helicone API key with every request:
 
 ```bash
 curl -X POST http://localhost:8080/router/my-router/chat/completions \
@@ -100,8 +106,8 @@ The gateway validates keys in real-time through a persistent WebSocket connectio
 
     ```yaml
     helicone:
-      authentication: true
-      observability: false  # Set to true to enable observability
+      # Set to `features: observability` to enable observability and auth
+      features: auth
     ```
     
     **Environment variables:**
@@ -117,8 +123,8 @@ The gateway validates keys in real-time through a persistent WebSocket connectio
 
     ```yaml
     helicone:
-      authentication: true
-      observability: false  # Set to true to enable observability
+      # Set to `features: observability` to enable observability and auth
+      features: auth
       base-url: "https://helicone.your-domain.com"
       websocket-url: "wss://helicone.your-domain.com/ws/v1/router/control-plane"
     ```

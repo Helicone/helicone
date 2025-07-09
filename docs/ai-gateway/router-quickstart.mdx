@@ -175,11 +175,8 @@ Now create the configuration with authentication and rate limits:
 
 ```yaml
 helicone:
-  authentication: true
-  observability: false # Set to true to enable observability
-
-cache-store:
-  type: "in-memory"
+  # Set to `features: observability` to enable observability
+  features: auth
 
 routers:
   production:
