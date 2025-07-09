@@ -113,6 +113,7 @@ export const createExecuteQueryMutation = (
 ) => {
   return {
     mutationFn: async (sql: string) => {
+      setQueryLoading(true);
       const response = await $JAWN_API.POST("/v1/helicone-sql/execute", {
         body: {
           sql: sql,
@@ -121,6 +122,7 @@ export const createExecuteQueryMutation = (
       return response;
     },
     onSuccess: (data: any) => {
+      setQueryLoading(false);
       if (data.error || !data.data?.data) {
         // @ts-ignore
         setQueryError(data.error.error);
@@ -139,7 +141,6 @@ export const createExecuteQueryMutation = (
           rowCount: data.data?.data.rowCount,
         });
       }
-      setQueryLoading(false);
     },
     onError: (error: any) => {
       setQueryError(error.message);
@@ -149,7 +150,6 @@ export const createExecuteQueryMutation = (
         size: 0,
         rowCount: 0,
       });
-      setQueryLoading(false);
     },
   };
 };
