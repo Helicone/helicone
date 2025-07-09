@@ -16,7 +16,7 @@ export const useCreatePrompt = () => {
     }) => {
       const jawnClient = getJawnClient(org?.currentOrg?.id);
       
-      const result = await jawnClient.POST("/v1/prompt-2025/create", {
+      const result = await jawnClient.POST("/v1/prompt-2025", {
         body: {
           name: params.name,
           tags: params.tags,

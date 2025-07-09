@@ -58,7 +58,7 @@ export class Prompt2025Manager extends BaseManager {
     name: string,
     tags: string[],
     promptBody: OpenAIChatRequest,
-  }): Promise<Result<{ id: string }, string>> {
+  }): Promise<Result<PromptCreateResponse, string>> {
     // Create prompt
     let attempts = 0;
     let insertPromptResult = null;

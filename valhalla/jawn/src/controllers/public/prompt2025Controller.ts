@@ -27,7 +27,7 @@ export interface PromptCreateResponse {
 @Tags("Prompt2025")
 @Security("api_key")
 export class Prompt2025Controller extends Controller {
-  @Post("create")
+  @Post("")
   public async createPrompt2025(
     @Body()
     requestBody: {

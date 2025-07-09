@@ -47972,7 +47972,7 @@
 				]
 			}
 		},
-		"/v1/prompt-2025/create": {
+		"/v1/prompt-2025": {
 			"post": {
 				"operationId": "CreatePrompt2025",
 				"responses": {
