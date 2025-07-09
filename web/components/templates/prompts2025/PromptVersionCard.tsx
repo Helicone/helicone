@@ -2,7 +2,7 @@ import ModelPill from "@/components/templates/requests/modelPill";
 import type { components } from "../../../lib/clients/jawnTypes/public";
 import { formatTime } from "./timeUtils";
 import { Button } from "@/components/ui/button";
-import { TestTube2, Crown } from "lucide-react";
+import { TestTube2, Crown, Clock } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -29,19 +29,14 @@ const PromptVersionCard = ({
       ? `v${version.major_version}`
       : `v${version.major_version}.${version.minor_version}`;
 
-  const displayCommitMessage =
-    version.commit_message.length > 40
-      ? version.commit_message.substring(0, 37) + "..."
-      : version.commit_message;
-
   return (
     <div className="w-full border-b border-border bg-background hover:bg-muted/50 transition-colors cursor-pointer group">
       <div className="flex items-center justify-between px-4 py-2">
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-foreground">
-            {displayCommitMessage}
+        <div className="flex items-center gap-3 min-w-0">
+          <span className="text-sm text-foreground truncate">
+            {version.commit_message}
           </span>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary ring-1 ring-inset ring-primary/20">
               {versionDisplay}
             </span>
@@ -52,7 +47,7 @@ const PromptVersionCard = ({
             )}
           </div>
         </div>
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
           <Tooltip delayDuration={100}>
             <TooltipTrigger asChild>
               <Button 
@@ -95,9 +90,12 @@ const PromptVersionCard = ({
       </div>
       <div className="flex items-center gap-4 px-4 pb-3">
         <ModelPill model={version.model} />
-        <span className="text-xs text-muted-foreground">
-          {formatTime(new Date(version.created_at), "Created")}
-        </span>
+        <div className="flex items-center gap-1 text-muted-foreground whitespace-nowrap">
+          <Clock className="h-4 w-4" />
+          <span className="text-xs">
+            {formatTime(new Date(version.created_at), "")}
+          </span>
+        </div>
       </div>
     </div>
   );

@@ -7,15 +7,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useState, useEffect } from "react";
 import type { PromptWithVersions } from "@/services/hooks/prompts";
 import PromptVersionHistory from "./PromptVersionHistory";
+import { LuPanelRightClose, LuCopy } from "react-icons/lu";
+import TagsSummary from "./TagsSummary";
+import useNotification from "@/components/shared/notification/useNotification";
 
 interface PromptDetailsProps {
   promptWithVersions: PromptWithVersions | null;
   onSetProductionVersion: (promptId: string, promptVersionId: string) => void;
   onOpenPromptVersion: (promptVersionId: string) => void;
   onFilterVersion?: (majorVersion: number | null) => void;
+  onCollapse: () => void;
 }
 
 const PromptDetails = ({
@@ -23,7 +34,9 @@ const PromptDetails = ({
   onSetProductionVersion,
   onOpenPromptVersion,
   onFilterVersion,
+  onCollapse,
 }: PromptDetailsProps) => {
+  const { setNotification } = useNotification();
   const [selectedVersion, setSelectedVersion] = useState<string>(
     "All (last 50 versions)"
   );
@@ -71,17 +84,54 @@ const PromptDetails = ({
   return (
     <div className="w-full h-full flex flex-col">
       <div className="p-4 border-b border-border bg-background">
-        <div className="mb-2">
-          <span className="font-semibold text-foreground">{prompt.name}</span>
-          <div className="text-xs text-muted-foreground mt-1">
-            id: {prompt.id}
+        <div className="flex flex-col h-full gap-4">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <TooltipProvider>
+                <Tooltip delayDuration={100}>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant={"none"}
+                      size={"square_icon"}
+                      className="w-fit text-muted-foreground hover:text-primary"
+                      onClick={onCollapse}
+                    >
+                      <LuPanelRightClose className="w-4 h-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="text-xs">
+                    Collapse Drawer
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
+              <div className="flex items-center gap-2 truncate">
+                <span className="font-semibold text-foreground truncate">
+                  {prompt.name}
+                </span>
+                <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary ring-1 ring-inset ring-primary/20">
+                  {versionDisplay}
+                </span>
+              </div>
+            </div>
+
+            <ModelPill model={productionVersion.model} />
           </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary ring-1 ring-inset ring-primary/20">
-            {versionDisplay}
-          </span>
-          <ModelPill model={productionVersion.model} />
+
+          <div 
+            className="flex items-center group cursor-pointer text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
+            onClick={() => {
+              navigator.clipboard.writeText(prompt.id);
+              setNotification("ID copied to clipboard", "success");
+            }}
+          >
+            <span>ID: {prompt.id}</span>
+            <LuCopy className="h-4 w-4 ml-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+          </div>
+
+          <div className="flex items-end">
+            <TagsSummary tags={prompt.tags} className="w-full" />
+          </div>
         </div>
       </div>
 

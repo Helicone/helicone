@@ -76,6 +76,9 @@ export interface paths {
   "/v1/prompt-2025/id/{promptId}": {
     get: operations["GetPrompt2025"];
   };
+  "/v1/prompt-2025/tags": {
+    get: operations["GetPrompt2025Tags"];
+  };
   "/v1/prompt-2025": {
     post: operations["CreatePrompt2025"];
   };
@@ -1072,6 +1075,12 @@ export interface components {
       error: null;
     };
     "Result_Prompt2025.string_": components["schemas"]["ResultSuccess_Prompt2025_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_string-Array_": {
+      data: string[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_string-Array.string_": components["schemas"]["ResultSuccess_string-Array_"] | components["schemas"]["ResultError_string_"];
     PromptCreateResponse: {
       id: string;
     };
@@ -1871,12 +1880,6 @@ Json: JsonObject;
       error: null;
     };
     "Result_ExperimentV2PromptVersion-Array.string_": components["schemas"]["ResultSuccess_ExperimentV2PromptVersion-Array_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_string-Array_": {
-      data: string[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_string-Array.string_": components["schemas"]["ResultSuccess_string-Array_"] | components["schemas"]["ResultError_string_"];
     ResultSuccess_string_: {
       data: string;
       /** @enum {number|null} */
@@ -3784,6 +3787,16 @@ export interface operations {
       };
     };
   };
+  GetPrompt2025Tags: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string-Array.string_"];
+        };
+      };
+    };
+  };
   CreatePrompt2025: {
     requestBody: {
       content: {
@@ -3861,6 +3874,7 @@ export interface operations {
           pageSize: number;
           /** Format: double */
           page: number;
+          tagsFilter: string[];
           search: string;
         };
       };
