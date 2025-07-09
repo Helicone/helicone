@@ -9,8 +9,9 @@ import {
 import {
   useGetPromptsWithVersions,
   useGetPromptVersions,
+  useSetProductionVersion,
 } from "@/services/hooks/prompts";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PromptCard from "./PromptCard";
 import PromptDetails from "./PromptDetails";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,8 @@ import LoadingAnimation from "@/components/shared/loadingAnimation";
 import TableFooter from "../requests/tableFooter";
 import { useFeatureFlag } from "@/services/hooks/admin";
 import { useOrg } from "@/components/layout/org/organizationContext";
+import router from "next/router";
+import useNotification from "@/components/shared/notification/useNotification";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -39,6 +42,7 @@ const PromptsPage = (props: PromptsPageProps) => {
     "prompts_2025",
     organization?.currentOrg?.id ?? "",
   );
+  const { setNotification } = useNotification();
 
   const { data, isLoading } = useGetPromptsWithVersions(
     search,
@@ -48,6 +52,15 @@ const PromptsPage = (props: PromptsPageProps) => {
   const prompts = data?.prompts || [];
   const totalCount = data?.totalCount || 0;
 
+  useEffect(() => {
+    if (selectedPrompt && prompts.length > 0) {
+      const updatedPrompt = prompts.find(p => p.prompt.id === selectedPrompt.prompt.id);
+      if (updatedPrompt) {
+        setSelectedPrompt(updatedPrompt);
+      }
+    }
+  }, [prompts, selectedPrompt?.prompt.id]);
+  
   const { data: filteredVersions, isLoading: isLoadingFilteredVersions } =
     useGetPromptVersions(
       selectedPrompt?.prompt.id || "",
@@ -69,6 +82,28 @@ const PromptsPage = (props: PromptsPageProps) => {
   if (!hasAccessToPrompts) {
     return <div>You do not have access to Prompts</div>;
   }
+
+  const setProductionVersion = useSetProductionVersion();
+
+  const handleSetProductionVersion = async (promptId: string, promptVersionId: string) => {
+    const result = await setProductionVersion.mutateAsync({
+      body: {
+        promptId,
+        promptVersionId,
+      },
+    });
+
+    if (result.error) {
+      setNotification("Error setting production version", "error");
+      console.error("Error setting production version", result.error);
+    } else {
+      setNotification("Production version set successfully", "success");
+    }
+  }
+
+  const handleOpenPromptVersion = (promptVersionId: string) => {
+    router.push(`/playground?promptVersionId=${promptVersionId}`);
+  };
 
   return (
     <main className="h-screen flex flex-col w-full animate-fade-in">
@@ -166,6 +201,8 @@ const PromptsPage = (props: PromptsPageProps) => {
           <ResizableHandle withHandle />
           <ResizablePanel defaultSize={50} minSize={50} maxSize={60}>
             <PromptDetails
+              onSetProductionVersion={handleSetProductionVersion}
+              onOpenPromptVersion={handleOpenPromptVersion}
               promptWithVersions={displayPrompt}
               onFilterVersion={handleFilterVersion}
             />

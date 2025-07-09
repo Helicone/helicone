@@ -28,10 +28,7 @@ import { OPENROUTER_MODEL_MAP } from "./new/openRouterModelMap";
 import FoldedHeader from "@/components/shared/FoldedHeader";
 import { Small } from "@/components/ui/typography";
 import { ModelParameters } from "@/lib/api/llm/generate";
-import {
-  useCreatePrompt,
-  useGetPromptVersionWithBody,
-} from "@/services/hooks/prompts";
+import { useCreatePrompt, useUpdatePrompt, useGetPromptVersionWithBody } from "@/services/hooks/prompts";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { useFeatureFlag } from "@/services/hooks/admin";
@@ -105,9 +102,40 @@ export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
   },
 };
 
-const convertOpenAIChatRequestToMappedLLMRequest = (
-  openaiRequest: OpenAIChatRequest
-): MappedLLMRequest => {
+const convertMappedLLMRequestToOpenAIChatRequest = (
+  mappedContent: MappedLLMRequest, tools: Tool[],
+  modelParameters: ModelParameters,
+  selectedModel: string,
+  responseFormat: { type: string, json_schema?: string }
+): OpenAIChatRequest => {
+  const openaiRequest = openaiChatMapper.toExternal({
+    ...mappedContent.schema.request,
+    tools: tools && tools.length > 0 ? tools : undefined,
+  } as any);
+
+
+  const promptBody = {
+    ...openaiRequest,
+    ...Object.fromEntries(
+      Object.entries(modelParameters).map(([key, value]) => [
+        key,
+        value === null ? undefined : value,
+      ])
+    ),
+    model: selectedModel,
+    response_format:
+      responseFormat?.type === "json_schema"
+        ? {
+            type: "json_schema",
+            json_schema: responseFormat.json_schema,
+          }
+        : undefined,
+  };
+
+  return promptBody;
+}
+
+const convertOpenAIChatRequestToMappedLLMRequest = (openaiRequest: OpenAIChatRequest): MappedLLMRequest => {
   const internalRequest = openaiChatMapper.toInternal(openaiRequest);
 
   return {
@@ -239,6 +267,51 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       setDefaultContent(convertedContent);
       setTools(convertedContent.schema.request.tools ?? []);
 
+      setModelParameters({
+        temperature: promptVersionData.promptBody.temperature,
+        max_tokens: promptVersionData.promptBody.max_tokens,
+        top_p: promptVersionData.promptBody.top_p,
+        frequency_penalty: promptVersionData.promptBody.frequency_penalty,
+        presence_penalty: promptVersionData.promptBody.presence_penalty,
+        stop: promptVersionData.promptBody.stop
+          ? Array.isArray(promptVersionData.promptBody.stop)
+            ? promptVersionData.promptBody.stop.join(",")
+            : promptVersionData.promptBody.stop
+          : undefined,
+      });
+
+      if (promptVersionData.promptBody.response_format) {
+        setResponseFormat({
+          type: promptVersionData.promptBody.response_format.type || "text",
+          json_schema: promptVersionData.promptBody.response_format.json_schema,
+        });
+      }
+    }
+  }, [promptVersionData, isPromptVersionLoading]);
+
+  useEffect(() => {
+    if (promptVersionData && promptVersionData.promptBody && !isPromptVersionLoading) {
+      const convertedContent = convertOpenAIChatRequestToMappedLLMRequest(promptVersionData.promptBody);
+      
+      const model = promptVersionData.promptBody.model;
+      if (model && model in OPENROUTER_MODEL_MAP) {
+        setSelectedModel(OPENROUTER_MODEL_MAP[model.split("/")[1]]);
+      } else if (model) {
+        const similarities = Object.keys(OPENROUTER_MODEL_MAP).map((m) => ({
+          target: m,
+          similarity: findBestMatch(model, m),
+        }));
+
+        const closestMatch = similarities.reduce((best, current) =>
+          current.similarity > best.similarity ? current : best
+        );
+        setSelectedModel(OPENROUTER_MODEL_MAP[closestMatch.target]);
+      }
+
+      setMappedContent(convertedContent);
+      setDefaultContent(convertedContent);
+      setTools(convertedContent.schema.request.tools ?? []);
+      
       setModelParameters({
         temperature: promptVersionData.promptBody.temperature,
         max_tokens: promptVersionData.promptBody.max_tokens,
@@ -403,40 +476,17 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   }, [response]);
 
   const createPromptMutation = useCreatePrompt();
+  const updatePromptMutation = useUpdatePrompt();
 
-  const onSavePrompt = async (
-    model: string,
+  const onCreatePrompt = async (
     tags: string[],
-    promptName: string
+    promptName: string,
   ) => {
-    // TODO: Add functionality to update existing prompt to new
-    // minor or major version.
-    // - Currently just assumes we're creating a new prompt - we would probably define the behaviour based on the
-    // route params.
-    // - Use model slugs from AI Gateway, for now it just uses the selected model.
-
     if (!mappedContent) {
       setNotification("No mapped content", "error");
       return;
     }
-    const openaiRequest = openaiChatMapper.toExternal({
-      ...mappedContent.schema.request,
-      tools: tools && tools.length > 0 ? tools : undefined,
-    } as any);
-
-    const promptBody = {
-      ...openaiRequest,
-      ...modelParameters,
-      model: selectedModel,
-      response_format:
-        responseFormat?.type === "json_schema"
-          ? {
-              type: "json_schema",
-              json_schema: responseFormat.json_schema,
-            }
-          : undefined,
-    };
-
+    const promptBody = convertMappedLLMRequestToOpenAIChatRequest(mappedContent, tools, modelParameters, selectedModel, responseFormat);
     try {
       const result = await createPromptMutation.mutateAsync({
         body: {
@@ -456,15 +506,60 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     }
   };
 
+  const onSavePrompt = async (
+    newMajorVersion: boolean,
+    setAsProduction: boolean,
+    commitMessage: string,
+  ) => {
+    if (!mappedContent) {
+      setNotification("No mapped content", "error");
+      return;
+    }
+
+    if (!promptVersionData?.promptVersion || !promptVersionData?.prompt) {
+      setNotification("No prompt version data available", "error");
+      return;
+    }
+
+    const promptBody = convertMappedLLMRequestToOpenAIChatRequest(
+      mappedContent, 
+      tools, 
+      modelParameters, 
+      selectedModel, 
+      responseFormat
+    );
+
+    try {
+      const result = await updatePromptMutation.mutateAsync({
+        body: {
+          promptId: promptVersionData.prompt.id,
+          promptVersionId: promptVersionData.promptVersion.id,
+          newMajorVersion,
+          setAsProduction,
+          commitMessage,
+          promptBody,
+        },
+      });
+
+      if (result.data?.id) {
+        router.push(`/playground?promptVersionId=${result.data.id}`);
+        
+        setNotification(
+          `Prompt version saved successfully!`,
+          "success"
+        );
+      }
+    } catch (error) {
+      console.error("Failed to save prompt version:", error);
+      setNotification("Failed to save prompt version", "error");
+    }
+  }
+
   const onRun = async () => {
     if (!mappedContent) {
       setNotification("No mapped content", "error");
       return;
     }
-    const openaiRequest = openaiChatMapper.toExternal({
-      ...mappedContent.schema.request,
-      tools: tools && tools.length > 0 ? tools : undefined,
-    } as any);
 
     try {
       setError(null);
@@ -472,18 +567,17 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       abortController.current = new AbortController();
 
       try {
+        const openaiRequest = convertMappedLLMRequestToOpenAIChatRequest(
+          mappedContent,
+          tools,
+          modelParameters,
+          selectedModel,
+          responseFormat
+        );
+
         const stream = await generateStream({
           ...openaiRequest,
-          model: selectedModel,
           signal: abortController.current.signal,
-          ...modelParameters,
-          response_format:
-            responseFormat?.type === "json_schema"
-              ? {
-                  type: "json_schema",
-                  json_schema: responseFormat.json_schema,
-                }
-              : undefined,
           useAIGateway,
         } as any);
 
@@ -618,22 +712,23 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
             {isPromptVersionLoading || isRequestLoading ? (
               <LoadingAnimation />
             ) : (
-              <PlaygroundMessagesPanel
-                mappedContent={mappedContent}
-                defaultContent={defaultContent}
-                setMappedContent={setMappedContent}
-                selectedModel={selectedModel}
-                setSelectedModel={handleSelectedModelChange}
-                tools={tools}
-                setTools={handleToolsChange}
-                responseFormat={responseFormat}
-                setResponseFormat={setResponseFormat}
-                modelParameters={modelParameters}
-                setModelParameters={setModelParameters}
-                promptVersionId={promptVersionId}
-                onSavePrompt={onSavePrompt}
-                onRun={onRun}
-                useAIGateway={useAIGateway}
+            <PlaygroundMessagesPanel
+              mappedContent={mappedContent}
+              defaultContent={defaultContent}
+              setMappedContent={setMappedContent}
+              selectedModel={selectedModel}
+              setSelectedModel={handleSelectedModelChange}
+              tools={tools}
+              setTools={handleToolsChange}
+              responseFormat={responseFormat}
+              setResponseFormat={setResponseFormat}
+              modelParameters={modelParameters}
+              setModelParameters={setModelParameters}
+              promptVersionId={promptVersionId}
+              onCreatePrompt={onCreatePrompt}
+              onSavePrompt={onSavePrompt}
+              onRun={onRun}
+              useAIGateway={useAIGateway}
                 setUseAIGateway={setUseAIGateway}
               />
             )}

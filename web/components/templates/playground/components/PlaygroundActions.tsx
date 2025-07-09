@@ -21,7 +21,8 @@ interface PlaygroundActionsProps {
   setModelParameters: (_modelParameters: ModelParameters) => void;
   setTools: (_tools: Tool[]) => void;
   promptVersionId: string | undefined;
-  onSavePrompt: (model: string, tags: string[], promptName: string) => void;
+  onCreatePrompt: (tags: string[], promptName: string) => void;
+  onSavePrompt: (newMajorVersion: boolean, setAsProduction: boolean, commitMessage: string) => void;
   onRun: () => void;
   requestId?: string;
   isScrolled: boolean;
@@ -33,6 +34,7 @@ const PlaygroundActions = ({
   setModelParameters,
   setTools,
   promptVersionId,
+  onCreatePrompt,
   onSavePrompt,
   onRun,
   requestId,
@@ -100,7 +102,8 @@ const PlaygroundActions = ({
       {hasAccessToPrompts && (
         <PromptForm
           isScrolled={isScrolled}
-          promptVersionId={promptVersionId}
+          saveAndVersion={!!promptVersionId}
+          onCreatePrompt={onCreatePrompt}
           onSavePrompt={onSavePrompt}
         />
       )}
