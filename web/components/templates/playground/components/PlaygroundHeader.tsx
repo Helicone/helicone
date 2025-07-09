@@ -40,8 +40,6 @@ interface PlaygroundHeaderProps {
   mappedContent: MappedLLMRequest | null;
   defaultContent: MappedLLMRequest | null;
   setMappedContent: (_mappedContent: MappedLLMRequest) => void;
-  promptId: string | undefined;
-  onSavePrompt: (model: string, tags: string[], promptName: string) => void;
   onRun: () => void;
   isScrolled: boolean;
   useAIGateway: boolean;
@@ -60,8 +58,6 @@ const PlaygroundHeader = ({
   mappedContent,
   defaultContent,
   setMappedContent,
-  promptId,
-  onSavePrompt,
   onRun,
   isScrolled,
   useAIGateway,
@@ -160,10 +156,7 @@ const PlaygroundHeader = ({
           setMappedContent={setMappedContent}
           setModelParameters={setModelParameters}
           setTools={setTools}
-          promptId={promptId}
-          onSavePrompt={onSavePrompt}
           onRun={onRun}
-          isScrolled={isScrolled}
         />
       </div>
     </div>
