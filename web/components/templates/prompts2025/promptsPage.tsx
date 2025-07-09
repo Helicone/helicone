@@ -18,6 +18,8 @@ import { Search } from "lucide-react";
 import type { PromptWithVersions } from "@/services/hooks/prompts";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import TableFooter from "../requests/tableFooter";
+import { useFeatureFlag } from "@/services/hooks/admin";
+import { useOrg } from "@/components/layout/org/organizationContext";
 
 interface PromptsPageProps {
   defaultIndex: number;
@@ -32,6 +34,11 @@ const PromptsPage = (props: PromptsPageProps) => {
   const [filteredMajorVersion, setFilteredMajorVersion] = useState<
     number | null
   >(null);
+  const organization = useOrg();
+  const { data: hasAccessToPrompts } = useFeatureFlag(
+    "prompts_2025",
+    organization?.currentOrg?.id ?? "",
+  );
 
   const { data, isLoading } = useGetPromptsWithVersions(
     search,
@@ -58,6 +65,10 @@ const PromptsPage = (props: PromptsPageProps) => {
   const handleFilterVersion = (majorVersion: number | null) => {
     setFilteredMajorVersion(majorVersion);
   };
+
+  if (!hasAccessToPrompts) {
+    return <div>You do not have access to Prompts</div>;
+  }
 
   return (
     <main className="h-screen flex flex-col w-full animate-fade-in">
