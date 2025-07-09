@@ -74,11 +74,11 @@ The AI Gateway integrates with Helicone to provide secure authentication for you
 
 ## Authentication Usage
 
-| Helicone features | Authentication |
-|-------------------|----------------|
-| `none`            | disabled       |
-| `auth`            | enabled        |
-| `observability`   | enabled        |
+Configure `helicone.features` to control authentication and observability:
+
+- **`none`** - No authentication or observability
+- **`auth`** - Authentication only
+- **`observability`** - Authentication + observability
 
 When authentication is enabled, include your Helicone API key with every request:
 
