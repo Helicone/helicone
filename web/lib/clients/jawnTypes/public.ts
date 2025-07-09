@@ -73,7 +73,7 @@ export interface paths {
   "/v1/evaluator/{evaluatorId}/stats": {
     get: operations["GetEvaluatorStats"];
   };
-  "/v1/prompt-2025/create": {
+  "/v1/prompt-2025": {
     post: operations["CreatePrompt2025"];
   };
   "/v1/request/count/query": {
