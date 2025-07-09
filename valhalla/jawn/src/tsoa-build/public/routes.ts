@@ -14,6 +14,8 @@ import { UserController } from './../../controllers/public/userController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { EvaluatorController } from './../../controllers/public/evaluatorController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { Prompt2025Controller } from './../../controllers/public/prompt2025Controller';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { RequestController } from './../../controllers/public/requestController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { PromptController } from './../../controllers/public/promptController';
@@ -592,6 +594,70 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_EvaluatorStats_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "PromptCreateResponse": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess_PromptCreateResponse_": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"ref":"PromptCreateResponse","required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result_PromptCreateResponse.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_PromptCreateResponse_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Record_string.number_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"dataType":"double"},"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "OpenAIChatRequest": {
+        "dataType": "refObject",
+        "properties": {
+            "model": {"dataType":"string"},
+            "messages": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"tool_calls":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"type":{"dataType":"enum","enums":["function"],"required":true},"function":{"dataType":"nestedObjectLiteral","nestedProperties":{"arguments":{"dataType":"string","required":true},"name":{"dataType":"string","required":true}},"required":true},"id":{"dataType":"string","required":true}}}},"tool_call_id":{"dataType":"string"},"name":{"dataType":"string"},"content":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"image_url":{"dataType":"nestedObjectLiteral","nestedProperties":{"url":{"dataType":"string","required":true}}},"text":{"dataType":"string"},"type":{"dataType":"string","required":true}}}},{"dataType":"enum","enums":[null]}],"required":true},"role":{"dataType":"string","required":true}}}},
+            "temperature": {"dataType":"double"},
+            "top_p": {"dataType":"double"},
+            "max_tokens": {"dataType":"double"},
+            "max_completion_tokens": {"dataType":"double"},
+            "stream": {"dataType":"boolean"},
+            "stop": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"string"}},{"dataType":"string"}]},
+            "tools": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"function":{"dataType":"nestedObjectLiteral","nestedProperties":{"parameters":{"ref":"Record_string.any_","required":true},"description":{"dataType":"string","required":true},"name":{"dataType":"string","required":true}},"required":true},"type":{"dataType":"enum","enums":["function"],"required":true}}}},
+            "tool_choice": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["none"]},{"dataType":"enum","enums":["auto"]},{"dataType":"enum","enums":["required"]},{"dataType":"nestedObjectLiteral","nestedProperties":{"function":{"dataType":"nestedObjectLiteral","nestedProperties":{"name":{"dataType":"string","required":true},"type":{"dataType":"enum","enums":["function"],"required":true}}},"type":{"dataType":"string","required":true}}}]},
+            "parallel_tool_calls": {"dataType":"boolean"},
+            "reasoning_effort": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["low"]},{"dataType":"enum","enums":["medium"]},{"dataType":"enum","enums":["high"]}]},
+            "frequency_penalty": {"dataType":"double"},
+            "presence_penalty": {"dataType":"double"},
+            "logit_bias": {"ref":"Record_string.number_"},
+            "logprobs": {"dataType":"boolean"},
+            "top_logprobs": {"dataType":"double"},
+            "n": {"dataType":"double"},
+            "modalities": {"dataType":"array","array":{"dataType":"string"}},
+            "prediction": {"dataType":"any"},
+            "audio": {"dataType":"any"},
+            "response_format": {"dataType":"nestedObjectLiteral","nestedProperties":{"json_schema":{"dataType":"any"},"type":{"dataType":"string","required":true}}},
+            "seed": {"dataType":"double"},
+            "service_tier": {"dataType":"string"},
+            "store": {"dataType":"boolean"},
+            "stream_options": {"dataType":"any"},
+            "metadata": {"ref":"Record_string.string_"},
+            "user": {"dataType":"string"},
+            "function_call": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"nestedObjectLiteral","nestedProperties":{"name":{"dataType":"string","required":true}}}]},
+            "functions": {"dataType":"array","array":{"dataType":"any"}},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ResultSuccess_number_": {
         "dataType": "refObject",
         "properties": {
@@ -691,7 +757,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ProviderName": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["OPENAI"]},{"dataType":"enum","enums":["ANTHROPIC"]},{"dataType":"enum","enums":["AZURE"]},{"dataType":"enum","enums":["LOCAL"]},{"dataType":"enum","enums":["HELICONE"]},{"dataType":"enum","enums":["AMDBARTEK"]},{"dataType":"enum","enums":["ANYSCALE"]},{"dataType":"enum","enums":["CLOUDFLARE"]},{"dataType":"enum","enums":["2YFV"]},{"dataType":"enum","enums":["TOGETHER"]},{"dataType":"enum","enums":["LEMONFOX"]},{"dataType":"enum","enums":["FIREWORKS"]},{"dataType":"enum","enums":["PERPLEXITY"]},{"dataType":"enum","enums":["GOOGLE"]},{"dataType":"enum","enums":["OPENROUTER"]},{"dataType":"enum","enums":["WISDOMINANUTSHELL"]},{"dataType":"enum","enums":["GROQ"]},{"dataType":"enum","enums":["COHERE"]},{"dataType":"enum","enums":["MISTRAL"]},{"dataType":"enum","enums":["DEEPINFRA"]},{"dataType":"enum","enums":["QSTASH"]},{"dataType":"enum","enums":["FIRECRAWL"]},{"dataType":"enum","enums":["AWS"]},{"dataType":"enum","enums":["DEEPSEEK"]},{"dataType":"enum","enums":["X"]},{"dataType":"enum","enums":["AVIAN"]},{"dataType":"enum","enums":["NEBIUS"]},{"dataType":"enum","enums":["NOVITA"]}],"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["OPENAI"]},{"dataType":"enum","enums":["ANTHROPIC"]},{"dataType":"enum","enums":["AZURE"]},{"dataType":"enum","enums":["LOCAL"]},{"dataType":"enum","enums":["HELICONE"]},{"dataType":"enum","enums":["AMDBARTEK"]},{"dataType":"enum","enums":["ANYSCALE"]},{"dataType":"enum","enums":["CLOUDFLARE"]},{"dataType":"enum","enums":["2YFV"]},{"dataType":"enum","enums":["TOGETHER"]},{"dataType":"enum","enums":["LEMONFOX"]},{"dataType":"enum","enums":["FIREWORKS"]},{"dataType":"enum","enums":["PERPLEXITY"]},{"dataType":"enum","enums":["GOOGLE"]},{"dataType":"enum","enums":["OPENROUTER"]},{"dataType":"enum","enums":["WISDOMINANUTSHELL"]},{"dataType":"enum","enums":["GROQ"]},{"dataType":"enum","enums":["COHERE"]},{"dataType":"enum","enums":["MISTRAL"]},{"dataType":"enum","enums":["DEEPINFRA"]},{"dataType":"enum","enums":["QSTASH"]},{"dataType":"enum","enums":["FIRECRAWL"]},{"dataType":"enum","enums":["AWS"]},{"dataType":"enum","enums":["DEEPSEEK"]},{"dataType":"enum","enums":["X"]},{"dataType":"enum","enums":["AVIAN"]},{"dataType":"enum","enums":["NEBIUS"]},{"dataType":"enum","enums":["NOVITA"]},{"dataType":"enum","enums":["OPENPIPE"]}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Provider": {
@@ -802,11 +868,6 @@ const models: TsoaRoute.Models = {
             "response": {"dataType":"union","subSchemas":[{"ref":"LLMResponseBody"},{"dataType":"enum","enums":[null]}]},
         },
         "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Record_string.number_": {
-        "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"dataType":"double"},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "HeliconeRequest": {
@@ -2012,43 +2073,6 @@ const models: TsoaRoute.Models = {
     "Result_ChatCompletion-or-_content-string--reasoning-string--calls-any_.string_": {
         "dataType": "refAlias",
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_ChatCompletion-or-_content-string--reasoning-string--calls-any__"},{"ref":"ResultError_string_"}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "OpenAIChatRequest": {
-        "dataType": "refObject",
-        "properties": {
-            "model": {"dataType":"string"},
-            "messages": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"tool_calls":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"type":{"dataType":"enum","enums":["function"],"required":true},"function":{"dataType":"nestedObjectLiteral","nestedProperties":{"arguments":{"dataType":"string","required":true},"name":{"dataType":"string","required":true}},"required":true},"id":{"dataType":"string","required":true}}}},"tool_call_id":{"dataType":"string"},"name":{"dataType":"string"},"content":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"image_url":{"dataType":"nestedObjectLiteral","nestedProperties":{"url":{"dataType":"string","required":true}}},"text":{"dataType":"string"},"type":{"dataType":"string","required":true}}}},{"dataType":"enum","enums":[null]}],"required":true},"role":{"dataType":"string","required":true}}}},
-            "temperature": {"dataType":"double"},
-            "top_p": {"dataType":"double"},
-            "max_tokens": {"dataType":"double"},
-            "max_completion_tokens": {"dataType":"double"},
-            "stream": {"dataType":"boolean"},
-            "stop": {"dataType":"union","subSchemas":[{"dataType":"array","array":{"dataType":"string"}},{"dataType":"string"}]},
-            "tools": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"function":{"dataType":"nestedObjectLiteral","nestedProperties":{"parameters":{"ref":"Record_string.any_","required":true},"description":{"dataType":"string","required":true},"name":{"dataType":"string","required":true}},"required":true},"type":{"dataType":"enum","enums":["function"],"required":true}}}},
-            "tool_choice": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["none"]},{"dataType":"enum","enums":["auto"]},{"dataType":"enum","enums":["required"]},{"dataType":"nestedObjectLiteral","nestedProperties":{"function":{"dataType":"nestedObjectLiteral","nestedProperties":{"name":{"dataType":"string","required":true},"type":{"dataType":"enum","enums":["function"],"required":true}}},"type":{"dataType":"string","required":true}}}]},
-            "parallel_tool_calls": {"dataType":"boolean"},
-            "reasoning_effort": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["low"]},{"dataType":"enum","enums":["medium"]},{"dataType":"enum","enums":["high"]}]},
-            "frequency_penalty": {"dataType":"double"},
-            "presence_penalty": {"dataType":"double"},
-            "logit_bias": {"ref":"Record_string.number_"},
-            "logprobs": {"dataType":"boolean"},
-            "top_logprobs": {"dataType":"double"},
-            "n": {"dataType":"double"},
-            "modalities": {"dataType":"array","array":{"dataType":"string"}},
-            "prediction": {"dataType":"any"},
-            "audio": {"dataType":"any"},
-            "response_format": {"dataType":"nestedObjectLiteral","nestedProperties":{"json_schema":{"dataType":"any"},"type":{"dataType":"string","required":true}}},
-            "seed": {"dataType":"double"},
-            "service_tier": {"dataType":"string"},
-            "store": {"dataType":"boolean"},
-            "stream_options": {"dataType":"any"},
-            "metadata": {"ref":"Record_string.string_"},
-            "user": {"dataType":"string"},
-            "function_call": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"nestedObjectLiteral","nestedProperties":{"name":{"dataType":"string","required":true}}}]},
-            "functions": {"dataType":"array","array":{"dataType":"any"}},
-        },
-        "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ResultSuccess__apiKey-string__": {
@@ -4029,6 +4053,38 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'getEvaluatorStats',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsPrompt2025Controller_createPrompt2025: Record<string, TsoaRoute.ParameterSchema> = {
+                requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"promptBody":{"ref":"OpenAIChatRequest","required":true},"tags":{"dataType":"array","array":{"dataType":"string"},"required":true},"name":{"dataType":"string","required":true}}},
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.post('/v1/prompt-2025',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(Prompt2025Controller)),
+            ...(fetchMiddlewares<RequestHandler>(Prompt2025Controller.prototype.createPrompt2025)),
+
+            async function Prompt2025Controller_createPrompt2025(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsPrompt2025Controller_createPrompt2025, request, response });
+
+                const controller = new Prompt2025Controller();
+
+              await templateService.apiHandler({
+                methodName: 'createPrompt2025',
                 controller,
                 response,
                 next,

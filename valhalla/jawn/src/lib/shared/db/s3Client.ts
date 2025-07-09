@@ -349,9 +349,9 @@ export class S3Client {
     return `organizations/${orgId}/datasets/${datasetId}/requests/${requestId}/request_response_body`;
   };
 
-  getPromptKey = (promptId: string, orgId: string) => {
-    return `organizations/${orgId}/prompts/${promptId}/prompt_body`;
-  };
+  getPromptKey = (promptId: string, promptVersionId: string, orgId: string) => {
+    return `organizations/${orgId}/prompts/${promptId}/versions/${promptVersionId}/prompt_body`;
+  }
 
   getRequestResponseImageKey = (
     requestId: string,

@@ -159,6 +159,9 @@ export interface paths {
   "/v1/evaluator/{evaluatorId}/stats": {
     get: operations["GetEvaluatorStats"];
   };
+  "/v1/prompt-2025": {
+    post: operations["CreatePrompt2025"];
+  };
   "/v1/request/count/query": {
     post: operations["GetRequestCount"];
   };
@@ -927,6 +930,102 @@ Json: JsonObject;
       error: null;
     };
     "Result_EvaluatorStats.string_": components["schemas"]["ResultSuccess_EvaluatorStats_"] | components["schemas"]["ResultError_string_"];
+    PromptCreateResponse: {
+      id: string;
+    };
+    ResultSuccess_PromptCreateResponse_: {
+      data: components["schemas"]["PromptCreateResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptCreateResponse.string_": components["schemas"]["ResultSuccess_PromptCreateResponse_"] | components["schemas"]["ResultError_string_"];
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.number_": {
+      [key: string]: number;
+    };
+    /** @description Simplified interface for the OpenAI Chat request format */
+    OpenAIChatRequest: {
+      model?: string;
+      messages?: ({
+          tool_calls?: {
+              /** @enum {string} */
+              type: "function";
+              function: {
+                arguments: string;
+                name: string;
+              };
+              id: string;
+            }[];
+          tool_call_id?: string;
+          name?: string;
+          content: (string | {
+              image_url?: {
+                url: string;
+              };
+              text?: string;
+              type: string;
+            }[]) | null;
+          role: string;
+        })[];
+      /** Format: double */
+      temperature?: number;
+      /** Format: double */
+      top_p?: number;
+      /** Format: double */
+      max_tokens?: number;
+      /** Format: double */
+      max_completion_tokens?: number;
+      stream?: boolean;
+      stop?: string[] | string;
+      tools?: {
+          function: {
+            parameters: components["schemas"]["Record_string.any_"];
+            description: string;
+            name: string;
+          };
+          /** @enum {string} */
+          type: "function";
+        }[];
+      tool_choice?: {
+        function?: {
+          name: string;
+          /** @enum {string} */
+          type: "function";
+        };
+        type: string;
+      } | ("none" | "auto" | "required");
+      parallel_tool_calls?: boolean;
+      /** @enum {string} */
+      reasoning_effort?: "low" | "medium" | "high";
+      /** Format: double */
+      frequency_penalty?: number;
+      /** Format: double */
+      presence_penalty?: number;
+      logit_bias?: components["schemas"]["Record_string.number_"];
+      logprobs?: boolean;
+      /** Format: double */
+      top_logprobs?: number;
+      /** Format: double */
+      n?: number;
+      modalities?: string[];
+      prediction?: unknown;
+      audio?: unknown;
+      response_format?: {
+        json_schema?: unknown;
+        type: string;
+      };
+      /** Format: double */
+      seed?: number;
+      service_tier?: string;
+      store?: boolean;
+      stream_options?: unknown;
+      metadata?: components["schemas"]["Record_string.string_"];
+      user?: string;
+      function_call?: string | {
+        name: string;
+      };
+      functions?: unknown[];
+    };
     ResultSuccess_number_: {
       /** Format: double */
       data: number;
@@ -1127,7 +1226,7 @@ Json: JsonObject;
       isScored?: boolean;
     };
     /** @enum {string} */
-    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA";
+    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE";
     Provider: components["schemas"]["ProviderName"] | "CUSTOM";
     /** @enum {string} */
     LlmType: "chat" | "completion";
@@ -1292,10 +1391,6 @@ Json: JsonObject;
     LlmSchema: {
       request: components["schemas"]["LLMRequestBody"];
       response?: components["schemas"]["LLMResponseBody"] | null;
-    };
-    /** @description Construct a type with a set of properties K of type T */
-    "Record_string.number_": {
-      [key: string]: number;
     };
     HeliconeRequest: {
       response_id: string | null;
@@ -16090,6 +16185,25 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_EvaluatorStats.string_"];
+        };
+      };
+    };
+  };
+  CreatePrompt2025: {
+    requestBody: {
+      content: {
+        "application/json": {
+          promptBody: components["schemas"]["OpenAIChatRequest"];
+          tags: string[];
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptCreateResponse.string_"];
         };
       };
     };
