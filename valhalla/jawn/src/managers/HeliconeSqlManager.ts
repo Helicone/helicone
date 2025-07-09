@@ -136,7 +136,7 @@ export class HeliconeSqlManager {
   // Execute it
   async executeSql(
     sql: string,
-    limit: number = 1000
+    limit: number = 100
   ): Promise<Result<ExecuteSqlResponse, string>> {
     try {
       const ast = parser.astify(sql, { database: "Postgresql" });

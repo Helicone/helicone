@@ -105,7 +105,7 @@ function HQLPage({ lastestSavedId }: HQLPageProps) {
     const schemaTableNames = getTableNames(tableSchema);
     const schemaTableNamesSet = getTableNamesSet(tableSchema);
 
-    const disposable = monaco.languages.registerCompletionItemProvider("sql", {
+    const disposable = monaco.languages.registerCompletionItemProvider("*", {
       provideCompletionItems: (model, position) => {
         let suggestions: monaco.languages.CompletionItem[] = [];
 
@@ -222,60 +222,51 @@ function HQLPage({ lastestSavedId }: HQLPageProps) {
   }
 
   return (
-    <div className="flex h-screen w-full flex-row">
-      <Directory tables={clickhouseSchemas.data ?? []} />
-      <ResizablePanelGroup direction="vertical">
-        <ResizablePanel
-          defaultSize={75}
-          minSize={20}
-          collapsible={false}
-          className="min-h-[64px]"
-        >
-          <TopBar
-            currentQuery={currentQuery}
-            handleExecuteQuery={handleExecuteQuery}
-            handleSaveQuery={handleSaveQuery}
-            handleRenameQuery={(newName) => {
-              setCurrentQuery({
-                id: currentQuery.id,
-                name: newName,
-                sql: currentQuery.sql,
-              });
-            }}
-          />
-          <Editor
-            defaultLanguage="sql"
-            defaultValue={currentQuery.sql}
-            onMount={async (editor, monaco) => {
-              editorRef.current = editor;
-              const model = editor.getModel();
-              if (!model) return;
+    <ResizablePanelGroup direction="horizontal">
+      <ResizablePanel
+        defaultSize={20}
+        maxSize={40}
+        collapsible={true}
+        collapsedSize={4}
+      >
+        <Directory
+          tables={clickhouseSchemas.data ?? []}
+          setCurrentQuery={setCurrentQuery}
+        />
+      </ResizablePanel>
+      <ResizableHandle />
+      <ResizablePanel defaultSize={80}>
+        <ResizablePanelGroup direction="vertical">
+          <ResizablePanel
+            defaultSize={75}
+            minSize={20}
+            collapsible={false}
+            className="min-h-[64px]"
+          >
+            <TopBar
+              currentQuery={currentQuery}
+              handleExecuteQuery={handleExecuteQuery}
+              handleSaveQuery={handleSaveQuery}
+              handleRenameQuery={(newName) => {
+                setCurrentQuery({
+                  id: currentQuery.id,
+                  name: newName,
+                  sql: currentQuery.sql,
+                });
+              }}
+            />
+            <Editor
+              defaultLanguage="sql"
+              defaultValue={currentQuery.sql}
+              onMount={async (editor, monaco) => {
+                editorRef.current = editor;
+                const model = editor.getModel();
+                if (!model) return;
 
-              // Regex to match forbidden write statements (case-insensitive, at start of line ignoring whitespace)
-              const forbidden =
-                /\b(insert|update|delete|drop|alter|create|truncate|replace)\b/i;
+                // Regex to match forbidden write statements (case-insensitive, at start of line ignoring whitespace)
+                const forbidden =
+                  /\b(insert|update|delete|drop|alter|create|truncate|replace)\b/i;
 
-              if (forbidden.test(currentQuery.sql)) {
-                monaco.editor.setModelMarkers(model, "custom-sql-validation", [
-                  {
-                    startLineNumber: 1,
-                    startColumn: 1,
-                    endLineNumber: 1,
-                    endColumn: 1,
-                    message:
-                      "Only read (SELECT) queries are allowed. Write operations are not permitted.",
-                    severity: monaco.MarkerSeverity.Error,
-                  },
-                ]);
-              } else {
-                // Clear custom markers if no forbidden statements
-                monaco.editor.setModelMarkers(
-                  model,
-                  "custom-sql-validation",
-                  [],
-                );
-              }
-              editor.onDidChangeModelContent(() => {
                 if (forbidden.test(currentQuery.sql)) {
                   monaco.editor.setModelMarkers(
                     model,
@@ -300,90 +291,116 @@ function HQLPage({ lastestSavedId }: HQLPageProps) {
                     [],
                   );
                 }
-              });
+                editor.onDidChangeModelContent(() => {
+                  if (forbidden.test(currentQuery.sql)) {
+                    monaco.editor.setModelMarkers(
+                      model,
+                      "custom-sql-validation",
+                      [
+                        {
+                          startLineNumber: 1,
+                          startColumn: 1,
+                          endLineNumber: 1,
+                          endColumn: 1,
+                          message:
+                            "Only read (SELECT) queries are allowed. Write operations are not permitted.",
+                          severity: monaco.MarkerSeverity.Error,
+                        },
+                      ],
+                    );
+                  } else {
+                    // Clear custom markers if no forbidden statements
+                    monaco.editor.setModelMarkers(
+                      model,
+                      "custom-sql-validation",
+                      [],
+                    );
+                  }
+                });
 
-              // Add Command/Ctrl+Enter command
-              editor.addCommand(
-                monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-                () => {
-                  handleExecuteQuery(latestQueryRef.current.sql);
-                },
-              );
+                // Add Command/Ctrl+Enter command
+                editor.addCommand(
+                  monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+                  () => {
+                    handleExecuteQuery(latestQueryRef.current.sql);
+                  },
+                );
 
-              // Add Command/Ctrl+S command
-              editor.addCommand(
-                monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
-                () => {
-                  handleSaveQuery(latestQueryRef.current);
-                },
-              );
-            }}
-            onChange={(value) => {
-              setCurrentQuery({
-                id: currentQuery.id,
-                name: currentQuery.name,
-                sql: value ?? "",
-              });
-              if (value) {
-                if (!monaco || !editorRef.current) return;
+                // Add Command/Ctrl+S command
+                editor.addCommand(
+                  monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
+                  () => {
+                    handleSaveQuery(latestQueryRef.current);
+                  },
+                );
+              }}
+              onChange={(value) => {
+                setCurrentQuery({
+                  id: currentQuery.id,
+                  name: currentQuery.name,
+                  sql: value ?? "",
+                });
+                if (value) {
+                  if (!monaco || !editorRef.current) return;
 
-                const model = editorRef.current.getModel();
-                if (!model) return;
+                  const model = editorRef.current.getModel();
+                  if (!model) return;
 
-                // Regex to match forbidden write statements (case-insensitive, at start of line ignoring whitespace)
-                const forbidden =
-                  /\b(insert|update|delete|drop|alter|create|truncate|replace)\b/i;
+                  // Regex to match forbidden write statements (case-insensitive, at start of line ignoring whitespace)
+                  const forbidden =
+                    /\b(insert|update|delete|drop|alter|create|truncate|replace)\b/i;
 
-                if (forbidden.test(value)) {
-                  monaco.editor.setModelMarkers(
-                    model,
-                    "custom-sql-validation",
-                    [
-                      {
-                        startLineNumber: 1,
-                        startColumn: 1,
-                        endLineNumber: 1,
-                        endColumn: 1,
-                        message:
-                          "Only read (SELECT) queries are allowed. Write operations are not permitted.",
-                        severity: monaco.MarkerSeverity.Error,
-                      },
-                    ],
-                  );
-                } else {
-                  // Clear custom markers if no forbidden statements
-                  monaco.editor.setModelMarkers(
-                    model,
-                    "custom-sql-validation",
-                    [],
-                  );
+                  if (forbidden.test(value)) {
+                    monaco.editor.setModelMarkers(
+                      model,
+                      "custom-sql-validation",
+                      [
+                        {
+                          startLineNumber: 1,
+                          startColumn: 1,
+                          endLineNumber: 1,
+                          endColumn: 1,
+                          message:
+                            "Only read (SELECT) queries are allowed. Write operations are not permitted.",
+                          severity: monaco.MarkerSeverity.Error,
+                        },
+                      ],
+                    );
+                  } else {
+                    // Clear custom markers if no forbidden statements
+                    monaco.editor.setModelMarkers(
+                      model,
+                      "custom-sql-validation",
+                      [],
+                    );
+                  }
                 }
-              }
-            }}
-          />
-        </ResizablePanel>
-        <ResizableHandle withHandle={true} />
-        <ResizablePanel
-          className="max-h-full max-w-full overflow-x-scroll !overflow-y-scroll"
-          collapsible={true}
-          collapsedSize={10}
-          defaultSize={25}
-        >
-          <QueryResult
-            sql={currentQuery.sql}
-            result={result.rows}
-            queryStats={{
-              elapsedMilliseconds: result.elapsedMilliseconds,
-              rowCount: result.rowCount,
-              size: result.size,
-              rows: result.rows,
-            }}
-            loading={queryLoading}
-            error={queryError}
-          />
-        </ResizablePanel>
-      </ResizablePanelGroup>
-    </div>
+              }}
+            />
+          </ResizablePanel>
+          <ResizableHandle withHandle={true} />
+          <ResizablePanel
+            className="max-h-full max-w-full overflow-x-scroll !overflow-y-scroll"
+            collapsible={true}
+            collapsedSize={10}
+            defaultSize={25}
+          >
+            <QueryResult
+              sql={currentQuery.sql}
+              result={result.rows}
+              queryStats={{
+                elapsedMilliseconds: result.elapsedMilliseconds,
+                rowCount: result.rowCount,
+                size: result.size,
+                rows: result.rows,
+              }}
+              loading={queryLoading}
+              error={queryError}
+            />
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      </ResizablePanel>
+    </ResizablePanelGroup>
   );
 }
 

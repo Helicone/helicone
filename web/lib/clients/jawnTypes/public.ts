@@ -378,6 +378,7 @@ export interface paths {
   };
   "/v1/helicone-sql/saved-query/{queryId}": {
     get: operations["GetSavedQuery"];
+    delete: operations["DeleteSavedQuery"];
   };
   "/v1/helicone-sql/saved-query": {
     put: operations["UpdateSavedQuery"];
@@ -2648,6 +2649,12 @@ Json: JsonObject;
       error: null;
     };
     "Result_HqlSavedQuery-or-null.string_": components["schemas"]["ResultSuccess_HqlSavedQuery-or-null_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_void_: {
+      data: unknown;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_void.string_": components["schemas"]["ResultSuccess_void_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess_HqlSavedQuery-Array_": {
       data: components["schemas"]["HqlSavedQuery"][];
       /** @enum {number|null} */
@@ -3252,12 +3259,6 @@ Json: JsonObject;
       error: null;
     };
     "Result__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array.string_": components["schemas"]["ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_void_: {
-      data: unknown;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_void.string_": components["schemas"]["ResultSuccess_void_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array_": {
       data: {
           updated_at: string;
@@ -5384,6 +5385,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_HqlSavedQuery-or-null.string_"];
+        };
+      };
+    };
+  };
+  DeleteSavedQuery: {
+    parameters: {
+      path: {
+        queryId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_void.string_"];
         };
       };
     };

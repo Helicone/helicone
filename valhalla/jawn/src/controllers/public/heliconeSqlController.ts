@@ -8,6 +8,7 @@ import {
   Body,
   Put,
   Path,
+  Delete,
 } from "tsoa";
 import { err, ok, Result } from "../../packages/common/result";
 import { HeliconeSqlManager } from "../../managers/HeliconeSqlManager";
@@ -145,6 +146,21 @@ export class HeliconeSqlController extends Controller {
 
     this.setStatus(200);
     return ok(result.data);
+  }
+
+  @Delete("saved-query/{queryId}")
+  public async deleteSavedQuery(
+    @Path() queryId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<void, string>> {
+    const heliconeSqlManager = new HqlQueryManager(request.authParams);
+    const result = await heliconeSqlManager.deleteSavedQuery(queryId);
+    if (result.error) {
+      this.setStatus(500);
+      return err(result.error);
+    }
+    this.setStatus(200);
+    return ok(undefined);
   }
 
   @Post("saved-query")

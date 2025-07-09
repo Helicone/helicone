@@ -2360,6 +2360,20 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_HqlSavedQuery-or-null_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess_void_": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"dataType":"void","required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result_void.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_void_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ResultSuccess_HqlSavedQuery-Array_": {
         "dataType": "refObject",
         "properties": {
@@ -3224,20 +3238,6 @@ const models: TsoaRoute.Models = {
     "Result__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array.string_": {
         "dataType": "refAlias",
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_"},{"ref":"ResultError_string_"}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ResultSuccess_void_": {
-        "dataType": "refObject",
-        "properties": {
-            "data": {"dataType":"void","required":true},
-            "error": {"dataType":"enum","enums":[null],"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Result_void.string_": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_void_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ResultSuccess__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array_": {
@@ -7459,6 +7459,37 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'getSavedQuery',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsHeliconeSqlController_deleteSavedQuery: Record<string, TsoaRoute.ParameterSchema> = {
+                queryId: {"in":"path","name":"queryId","required":true,"dataType":"string"},
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.delete('/v1/helicone-sql/saved-query/:queryId',
+            ...(fetchMiddlewares<RequestHandler>(HeliconeSqlController)),
+            ...(fetchMiddlewares<RequestHandler>(HeliconeSqlController.prototype.deleteSavedQuery)),
+
+            async function HeliconeSqlController_deleteSavedQuery(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsHeliconeSqlController_deleteSavedQuery, request, response });
+
+                const controller = new HeliconeSqlController();
+
+              await templateService.apiHandler({
+                methodName: 'deleteSavedQuery',
                 controller,
                 response,
                 next,
