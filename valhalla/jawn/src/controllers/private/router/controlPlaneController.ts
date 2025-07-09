@@ -65,4 +65,39 @@ export class RouterControlPlaneController extends Controller {
       });
     }
   }
+
+  @Post("/sign-s3-get-url")
+  public async signS3GetUrl(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body()
+    body: {
+      promptId: string;
+      versionId: string;
+    }
+  ): Promise<
+    Result<
+      {
+        url: string;
+      },
+      string
+    >
+  > {
+    const controlPlaneManager = new ControlPlaneManager(request.authParams);
+    const { promptId, versionId } = body;
+    
+    let signedUrl = await controlPlaneManager.signS3GetUrlForPrompt(
+      promptId,
+      versionId,
+      request.authParams
+    );
+    
+    if (signedUrl.error) {
+      this.setStatus(500);
+      return err(signedUrl.error);
+    } else {
+      return ok({
+        url: signedUrl.data!,
+      });
+    }
+  }
 }

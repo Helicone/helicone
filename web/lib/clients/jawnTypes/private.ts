@@ -453,6 +453,9 @@ export interface paths {
   "/v1/router/control-plane/sign-s3-url": {
     post: operations["SignS3Url"];
   };
+  "/v1/router/control-plane/sign-s3-get-url": {
+    post: operations["SignS3GetUrl"];
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -18157,6 +18160,24 @@ export interface operations {
           /** Format: double */
           payloadSize: number;
           requestId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__url-string_.string_"];
+        };
+      };
+    };
+  };
+  SignS3GetUrl: {
+    requestBody: {
+      content: {
+        "application/json": {
+          versionId: string;
+          promptId: string;
         };
       };
     };
