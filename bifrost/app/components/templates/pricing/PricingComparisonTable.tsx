@@ -74,7 +74,7 @@ const featureGroups: FeatureGroup[] = [
       {
         name: "Seats",
         hobby: "1",
-        pro: "$30/seat/mo",
+        pro: "$20/seat/mo",
         team: "Unlimited",
         enterprise: "Unlimited",
       },
