@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import ThemedTable from "@/components/shared/themed/table/themedTable";
 import ThemedModal from "@/components/shared/themed/themedModal";
@@ -26,6 +26,8 @@ import { $JAWN_API } from "@/lib/clients/jawn";
 import { CellContext } from "@tanstack/react-table";
 import { components } from "@/lib/clients/jawnTypes/public";
 import useNotification from "@/components/shared/notification/useNotification";
+import { CircleCheckBig, CircleDashed } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
 interface QueryResultProps {
   sql: string;
@@ -53,15 +55,7 @@ function QueryResult({
     );
   }
 
-  if (loading) {
-    return (
-      <div className="p-4 text-center text-muted-foreground">
-        <LoadingAnimation />
-      </div>
-    );
-  }
-
-  const columns = Object.keys(result[0]);
+  const columns = useMemo(() => Object.keys(result[0]), [result]);
 
   return (
     <div className="flex flex-col">
@@ -71,37 +65,44 @@ function QueryResult({
         size={queryStats.size}
         rows={result}
         sql={sql}
+        queryLoading={loading}
       />
-      <ThemedTable
-        id="hql-result"
-        defaultData={result}
-        defaultColumns={[
-          {
-            header: "#",
-            accessorKey: "__rowNum",
-            cell: (info) => info.row.index + 1,
-          },
-          ...columns.map((col) => ({
-            header: col,
-            accessorKey: col,
-            cell: (info: CellContext<Record<string, any>, unknown>) => {
-              const value = info.getValue();
-              if (typeof value === "object" && value !== null) {
-                return JSON.stringify(value);
-              }
-              return value;
+      {loading ? (
+        <div className="p-4 text-center text-muted-foreground">
+          <LoadingAnimation />
+        </div>
+      ) : (
+        <ThemedTable
+          id="hql-result"
+          defaultData={result}
+          defaultColumns={[
+            {
+              header: "#",
+              accessorKey: "__rowNum",
+              cell: (info) => info.row.index + 1,
             },
-          })),
-        ]}
-        skeletonLoading={false}
-        dataLoading={false}
-        checkboxMode="never"
-        onRowSelect={() => {}}
-        onSelectAll={() => {}}
-        selectedIds={[]}
-        activeColumns={[]}
-        setActiveColumns={() => {}}
-      />
+            ...columns.map((col) => ({
+              header: col,
+              accessorKey: col,
+              cell: (info: CellContext<Record<string, any>, unknown>) => {
+                const value = info.getValue();
+                if (typeof value === "object" && value !== null) {
+                  return JSON.stringify(value);
+                }
+                return value;
+              },
+            })),
+          ]}
+          skeletonLoading={false}
+          dataLoading={false}
+          checkboxMode="never"
+          onRowSelect={() => {}}
+          onSelectAll={() => {}}
+          selectedIds={[]}
+          activeColumns={[]}
+          setActiveColumns={() => {}}
+        />
+      )}
     </div>
   );
 }
@@ -111,17 +112,55 @@ const StatusBar = ({
   rowCount,
   size,
   sql,
-}: components["schemas"]["ExecuteSqlResponse"] & { sql: string }) => (
-  <div className="flex items-center justify-between border-b-2 border-tremor-brand-subtle bg-background px-4 py-1">
-    <div className="flex items-center gap-6 text-xs text-muted-foreground">
-      <span>Elapsed: {elapsedMilliseconds} ms</span>
-      <span>
-        Read: {rowCount} rows ({size} bytes)
-      </span>
+  queryLoading,
+}: components["schemas"]["ExecuteSqlResponse"] & {
+  sql: string;
+  queryLoading: boolean;
+}) => {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (queryLoading) {
+      setProgress(10);
+      interval = setInterval(() => {
+        setProgress((prev) => (prev < 90 ? prev + 10 : prev));
+      }, 200);
+    } else if (!queryLoading && progress > 0) {
+      setProgress(100);
+      setTimeout(() => setProgress(0), 500);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [queryLoading]);
+
+  return (
+    <div className="flex items-center justify-between border-b border-tremor-brand-subtle bg-background px-4 py-1">
+      {queryLoading && (
+        <Progress
+          value={progress}
+          className="mr-2 h-1 [&>div]:bg-sky-500 dark:[&>div]:bg-sky-500"
+        />
+      )}
+      <div className="flex items-center gap-6 text-xs text-muted-foreground">
+        <span className="flex items-center">
+          {queryLoading ? (
+            <CircleDashed className="mr-2 h-5 w-5 animate-spin text-muted-foreground" />
+          ) : (
+            <CircleCheckBig className="mr-2 h-5 w-5 text-green-500" />
+          )}
+          Elapsed: {queryLoading ? "?" : elapsedMilliseconds} ms
+        </span>
+        <span>
+          Read: {queryLoading ? "?" : rowCount} rows (
+          {queryLoading ? "?" : size} bytes)
+        </span>
+      </div>
+      {!queryLoading && <ExportButton sql={sql} />}
     </div>
-    <ExportButton sql={sql} />
-  </div>
-);
+  );
+};
 
 interface ExportButtonProps {
   sql: string;

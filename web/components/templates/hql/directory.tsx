@@ -3,9 +3,10 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { components } from "@/lib/clients/jawnTypes/public";
 import { $JAWN_API } from "@/lib/clients/jawn";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { clsx } from "clsx";
 import { ChevronDown, ChevronRight } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface DirectoryProps {
   tables: {
@@ -16,15 +17,15 @@ interface DirectoryProps {
 
 export function Directory({ tables }: DirectoryProps) {
   const [activeTab, setActiveTab] = useState<"tables" | "queries">("tables");
-  const [savedQueries, setSavedQueries] = useState<any[]>([]); // Adjust type as needed
-  const [loadingQueries, setLoadingQueries] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const fetchSavedQueries = async () => {
-    setLoadingQueries(true);
-    const res = await $JAWN_API.GET("/v1/helicone-sql/saved-queries");
-    setSavedQueries(res.data?.data || []);
-    setLoadingQueries(false);
-  };
+  const filteredTables = useMemo(
+    () =>
+      tables.filter((table) =>
+        table.table_name.toLowerCase().includes(searchTerm.toLowerCase()),
+      ),
+    [tables, searchTerm],
+  );
 
   return (
     <div className="flex h-screen w-80 flex-col border-r bg-background">
@@ -50,7 +51,6 @@ export function Directory({ tables }: DirectoryProps) {
           )}
           onClick={() => {
             setActiveTab("queries");
-            fetchSavedQueries();
           }}
         >
           Queries
@@ -59,9 +59,17 @@ export function Directory({ tables }: DirectoryProps) {
 
       {/* Search */}
       <div className="px-4 py-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
-          <Input placeholder="Search resources" className="h-9 pl-9" />
+        <div className="relative w-full">
+          <Search
+            className="absolute left-3 top-1/2 -translate-y-1/2"
+            size={16}
+          />
+          <Input
+            placeholder={`Search ${activeTab === "tables" ? "tables" : "queries"}`}
+            className="h-9 pl-9"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
       </div>
 
@@ -70,9 +78,9 @@ export function Directory({ tables }: DirectoryProps) {
         <ScrollArea className="h-full">
           <div className="px-4">
             {activeTab === "tables" ? (
-              <TableList tables={tables} />
+              <TableList tables={filteredTables} />
             ) : (
-              <QueryList queries={savedQueries} loading={loadingQueries} />
+              <QueryList searchTerm={searchTerm} />
             )}
           </div>
         </ScrollArea>
@@ -129,7 +137,25 @@ function TableList({ tables }: { tables: any[] }) {
   );
 }
 
-function QueryList({ queries, loading }: { queries: any[]; loading: boolean }) {
+function QueryList({ searchTerm }: { searchTerm: string }) {
+  const queryClient = useQueryClient();
+
+  const savedQueries = queryClient.getQueryData<{
+    data: components["schemas"]["HqlSavedQuery"][];
+  }>(["get", "/v1/helicone-sql/saved-queries"]);
+
+  const isLoading = queryClient.isFetching({
+    queryKey: ["get", "/v1/helicone-sql/saved-queries"],
+  });
+
+  const queries = useMemo(
+    () =>
+      savedQueries?.data?.filter((query) =>
+        query.name.toLowerCase().includes(searchTerm.toLowerCase()),
+      ) || [],
+    [savedQueries, searchTerm],
+  );
+
   return (
     <>
       <div className="mb-3 flex items-center justify-between">
@@ -137,7 +163,7 @@ function QueryList({ queries, loading }: { queries: any[]; loading: boolean }) {
           Queries ({queries.length})
         </h3>
       </div>
-      {loading ? (
+      {isLoading ? (
         <div className="text-sm text-muted-foreground">Loading...</div>
       ) : (
         <div className="space-y-1">
