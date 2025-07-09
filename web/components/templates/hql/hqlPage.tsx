@@ -38,6 +38,7 @@ function HQLPage() {
   const monaco = useMonaco();
   const clickhouseSchemas = useClickhouseSchemas();
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
+  const [activeTab, setActiveTab] = useState<"tables" | "queries">("tables");
 
   const [result, setResult] = useState<
     components["schemas"]["ExecuteSqlResponse"]
@@ -230,6 +231,8 @@ function HQLPage() {
           tables={clickhouseSchemas.data ?? []}
           currentQuery={currentQuery}
           setCurrentQuery={setCurrentQuery}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
         />
       </ResizablePanel>
       <ResizableHandle />

@@ -43,14 +43,17 @@ interface DirectoryProps {
       sql: string;
     }>
   >;
+  activeTab: "tables" | "queries";
+  setActiveTab: Dispatch<SetStateAction<"tables" | "queries">>;
 }
 
 export function Directory({
   tables,
   currentQuery,
   setCurrentQuery,
+  activeTab,
+  setActiveTab,
 }: DirectoryProps) {
-  const [activeTab, setActiveTab] = useState<"tables" | "queries">("tables");
   const [searchTerm, setSearchTerm] = useState("");
   const { setNotification } = useNotification();
 
