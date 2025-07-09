@@ -3,11 +3,13 @@ import type { components } from "../../../lib/clients/jawnTypes/public";
 import { formatTime } from "./timeUtils";
 import { Button } from "@/components/ui/button";
 import { TestTube2, Crown, Clock } from "lucide-react";
+import { LuCopy } from "react-icons/lu";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import useNotification from "@/components/shared/notification/useNotification";
 
 type Prompt2025Version = components["schemas"]["Prompt2025Version"];
 
@@ -24,6 +26,7 @@ const PromptVersionCard = ({
   onSetProductionVersion,
   onOpenPromptVersion,
 }: PromptVersionCardProps) => {
+  const { setNotification } = useNotification();
   const versionDisplay =
     version.minor_version === 0
       ? `v${version.major_version}`
@@ -48,6 +51,25 @@ const PromptVersionCard = ({
           </div>
         </div>
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+          <Tooltip delayDuration={100}>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigator.clipboard.writeText(version.id);
+                  setNotification("Version ID copied to clipboard", "success");
+                }}
+              >
+                <LuCopy className="h-4 w-4 text-muted-foreground" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Copy Version ID</p>
+            </TooltipContent>
+          </Tooltip>
           <Tooltip delayDuration={100}>
             <TooltipTrigger asChild>
               <Button 
