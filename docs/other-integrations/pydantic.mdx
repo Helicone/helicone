@@ -1,0 +1,364 @@
+---
+title: "Pydantic AI Integration"
+sidebarTitle: "Pydantic AI"
+description: "Use Pydantic AI to integrate Helicone with your LLM workflows."
+"twitter:title": "Pydantic AI Integration - Helicone OSS LLM Observability"
+iconType: "solid"
+---
+
+<Steps title="Pydantic AI Integration">
+  <Step title="Create an account + Generate an API Key">
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+  </Step>
+  <Step title="Set required API keys as environment variables">
+```bash
+# Required for all integrations
+export HELICONE_API_KEY=<your Helicone API key>
+
+# Required for specific LLM providers
+export ANTHROPIC_API_KEY=<your Anthropic API key>
+export OPENAI_API_KEY=<your OpenAI API key>
+```
+  </Step>
+  <Step title="Install required dependencies">
+```bash
+pip install pydantic-ai-slim[anthropic] httpx
+```
+  </Step>
+  <Step title="Create a Helicone Provider">
+Since Pydantic AI doesn't have built-in Helicone support, you'll need to create a custom provider class. Here's an example for Anthropic:
+
+```python
+import os
+import httpx
+from pydantic_ai.profiles import ModelProfile
+from pydantic_ai.providers import Provider
+
+try:
+    from anthropic import AsyncAnthropic
+except ImportError as _import_error:
+    raise ImportError(
+        "Please install `anthropic` to use the Helicone Anthropic provider, "
+        "you can use the `anthropic` optional group — "
+        '`pip install "pydantic-ai-slim[anthropic]"`'
+    ) from _import_error
+
+
+class HeliconeAnthropicProvider(Provider[AsyncAnthropic]):
+    """
+    Provider for Anthropic API through Helicone proxy.
+
+    This provider automatically routes requests through Helicone when
+    HELICONE_API_KEY is set, and provides the necessary authentication headers.
+    """
+
+    def __init__(
+        self,
+        *,
+        api_key: str | None = None,
+        helicone_api_key: str | None = None,
+        prompt_id: str | None = None,
+        anthropic_client: AsyncAnthropic | None = None,
+        http_client: httpx.AsyncClient | None = None,
+    ) -> None:
+        """
+        Create a new Helicone Anthropic provider.
+
+        Args:
+            api_key: The Anthropic API key to use for authentication. If not provided,
+                the `ANTHROPIC_API_KEY` environment variable will be used.
+            helicone_api_key: The Helicone API key to use. If not provided,
+                the `HELICONE_API_KEY` environment variable will be used.
+            prompt_id: The Helicone prompt ID to include in requests for tracking.
+            anthropic_client: An existing AsyncAnthropic client to use. If provided,
+                other arguments will be ignored.
+            http_client: An existing httpx.AsyncClient to use for making HTTP requests.
+        """
+        if anthropic_client is not None:
+            self._client = anthropic_client
+        else:
+            # Use provided keys or fall back to environment variables
+            api_key = api_key or os.getenv("ANTHROPIC_API_KEY")
+            helicone_api_key = helicone_api_key or os.getenv("HELICONE_API_KEY")
+
+            # Configure HTTP client for Helicone if key is available
+            if helicone_api_key and http_client is None:
+                headers = {
+                    "Helicone-Auth": f"Bearer {helicone_api_key}",
+                    "Helicone-Cache-Enabled": "true",
+                    "Helicone-Cache-Bucket-Max-Size": "1",
+                }
+                if prompt_id:
+                    headers["Helicone-Prompt-Id"] = prompt_id
+                
+                http_client = httpx.AsyncClient(headers=headers)
+
+            # Set base URL for Helicone if key is available
+            base_url = "https://anthropic.helicone.ai" if helicone_api_key else None
+
+            self._client = AsyncAnthropic(
+                api_key=api_key,
+                base_url=base_url,
+                http_client=http_client,
+            )
+
+    @property
+    def name(self) -> str:
+        """The provider name."""
+        return "helicone-anthropic"
+
+    @property
+    def base_url(self) -> str:
+        """The base URL for the provider API."""
+        return str(self._client.base_url)
+
+    @property
+    def client(self) -> AsyncAnthropic:
+        """The Anthropic client configured for Helicone."""
+        return self._client
+
+    def model_profile(self, model_name: str) -> ModelProfile | None:
+        """The model profile for the named model, if available."""
+        # Use the same profiles as the standard Anthropic provider
+        # This could be extended to provide Helicone-specific profiles
+        return None
+```
+  </Step>
+  <Step title="Use the Helicone Provider with Pydantic AI">
+```python
+import os
+from pydantic_ai import Agent
+
+# Initialize the Helicone provider
+helicone_provider = HeliconeAnthropicProvider(
+    api_key=os.getenv("ANTHROPIC_API_KEY"),
+    helicone_api_key=os.getenv("HELICONE_API_KEY"),
+    prompt_id="my-prompt-id"  # Optional: for tracking specific prompts
+)
+
+# Create a Pydantic AI agent with the Helicone provider
+agent = Agent(
+    model=helicone_provider,
+    model_name="claude-3-5-sonnet-20241022",
+    system_prompt="You are a helpful assistant."
+)
+
+# Use the agent
+async def main():
+    result = await agent.run("What is the capital of France?")
+    print(result.data)
+
+# Run the agent
+import asyncio
+asyncio.run(main())
+```
+  </Step>
+</Steps>
+
+## Complete Working Example
+
+Here's a complete example showing how to use Pydantic AI with Helicone:
+
+```python
+import os
+import asyncio
+import httpx
+from pydantic_ai import Agent
+from pydantic_ai.profiles import ModelProfile
+from pydantic_ai.providers import Provider
+from anthropic import AsyncAnthropic
+
+
+class HeliconeAnthropicProvider(Provider[AsyncAnthropic]):
+    """Provider for Anthropic API through Helicone proxy."""
+
+    def __init__(
+        self,
+        *,
+        api_key: str | None = None,
+        helicone_api_key: str | None = None,
+        prompt_id: str | None = None,
+        session_id: str | None = None,
+        anthropic_client: AsyncAnthropic | None = None,
+        http_client: httpx.AsyncClient | None = None,
+    ) -> None:
+        if anthropic_client is not None:
+            self._client = anthropic_client
+        else:
+            api_key = api_key or os.getenv("ANTHROPIC_API_KEY")
+            helicone_api_key = helicone_api_key or os.getenv("HELICONE_API_KEY")
+
+            if helicone_api_key and http_client is None:
+                headers = {
+                    "Helicone-Auth": f"Bearer {helicone_api_key}",
+                    "Helicone-Cache-Enabled": "true",
+                    "Helicone-Cache-Bucket-Max-Size": "1",
+                }
+                if prompt_id:
+                    headers["Helicone-Prompt-Id"] = prompt_id
+                if session_id:
+                    headers["Helicone-Session-Id"] = session_id
+                
+                http_client = httpx.AsyncClient(headers=headers)
+
+            base_url = "https://anthropic.helicone.ai" if helicone_api_key else None
+
+            self._client = AsyncAnthropic(
+                api_key=api_key,
+                base_url=base_url,
+                http_client=http_client,
+            )
+
+    @property
+    def name(self) -> str:
+        return "helicone-anthropic"
+
+    @property
+    def base_url(self) -> str:
+        return str(self._client.base_url)
+
+    @property
+    def client(self) -> AsyncAnthropic:
+        return self._client
+
+    def model_profile(self, model_name: str) -> ModelProfile | None:
+        return None
+
+
+async def main():
+    # Initialize the Helicone provider
+    helicone_provider = HeliconeAnthropicProvider(
+        api_key=os.getenv("ANTHROPIC_API_KEY"),
+        helicone_api_key=os.getenv("HELICONE_API_KEY"),
+        prompt_id="weather-assistant",
+        session_id="session-123"
+    )
+
+    # Create a Pydantic AI agent
+    agent = Agent(
+        model=helicone_provider,
+        model_name="claude-3-5-sonnet-20241022",
+        system_prompt="You are a helpful weather assistant."
+    )
+
+    # Use the agent
+    result = await agent.run("What's the weather like in San Francisco?")
+    print(f"Response: {result.data}")
+
+    # All requests will be logged to your Helicone dashboard
+    print("Check your Helicone dashboard for request logs and analytics!")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+## Additional Features
+
+### Custom Properties
+
+You can add custom properties to your requests by modifying the HTTP headers in your provider:
+
+```python
+# Add custom properties to track user interactions
+headers = {
+    "Helicone-Auth": f"Bearer {helicone_api_key}",
+    "Helicone-Cache-Enabled": "true",
+    "Helicone-Property-User": "user123",
+    "Helicone-Property-Environment": "production",
+    "Helicone-Property-Feature": "chat-assistant",
+}
+```
+
+### Session Tracking
+
+Track conversations across multiple requests using session IDs:
+
+```python
+import uuid
+
+session_id = str(uuid.uuid4())
+helicone_provider = HeliconeAnthropicProvider(
+    session_id=session_id,
+    prompt_id="conversation-agent"
+)
+```
+
+### Caching
+
+Enable caching to reduce costs and improve response times:
+
+```python
+# Enable caching with custom settings
+headers = {
+    "Helicone-Auth": f"Bearer {helicone_api_key}",
+    "Helicone-Cache-Enabled": "true",
+    "Helicone-Cache-Bucket-Max-Size": "5",  # Store up to 5 variations
+}
+```
+
+## OpenAI Provider Example
+
+You can create a similar provider for OpenAI:
+
+```python
+import httpx
+from pydantic_ai.profiles import ModelProfile
+from pydantic_ai.providers import Provider
+from openai import AsyncOpenAI
+
+
+class HeliconeOpenAIProvider(Provider[AsyncOpenAI]):
+    """Provider for OpenAI API through Helicone proxy."""
+
+    def __init__(
+        self,
+        *,
+        api_key: str | None = None,
+        helicone_api_key: str | None = None,
+        prompt_id: str | None = None,
+        openai_client: AsyncOpenAI | None = None,
+        http_client: httpx.AsyncClient | None = None,
+    ) -> None:
+        if openai_client is not None:
+            self._client = openai_client
+        else:
+            api_key = api_key or os.getenv("OPENAI_API_KEY")
+            helicone_api_key = helicone_api_key or os.getenv("HELICONE_API_KEY")
+
+            if helicone_api_key and http_client is None:
+                headers = {
+                    "Helicone-Auth": f"Bearer {helicone_api_key}",
+                    "Helicone-Cache-Enabled": "true",
+                }
+                if prompt_id:
+                    headers["Helicone-Prompt-Id"] = prompt_id
+                
+                http_client = httpx.AsyncClient(headers=headers)
+
+            base_url = "https://oai.helicone.ai/v1" if helicone_api_key else None
+
+            self._client = AsyncOpenAI(
+                api_key=api_key,
+                base_url=base_url,
+                http_client=http_client,
+            )
+
+    @property
+    def name(self) -> str:
+        return "helicone-openai"
+
+    @property
+    def base_url(self) -> str:
+        return str(self._client.base_url)
+
+    @property
+    def client(self) -> AsyncOpenAI:
+        return self._client
+
+    def model_profile(self, model_name: str) -> ModelProfile | None:
+        return None
+```
+
+This integration allows you to leverage Helicone's observability features while using Pydantic AI's powerful agent framework. 

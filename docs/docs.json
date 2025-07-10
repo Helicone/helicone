@@ -147,6 +147,7 @@
                   "other-integrations/open-devin",
                   "other-integrations/open-webui",
                   "getting-started/integration-method/openrouter",
+                  "other-integrations/pydantic",
                   "other-integrations/ragas",
                   "getting-started/integration-method/posthog",
                   {
