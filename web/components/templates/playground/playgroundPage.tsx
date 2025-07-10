@@ -643,16 +643,14 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
 
     if (messages) {
       for (const message of messages) {
-        if (message._type === "message" && message.content) {
-          processContent(message.content);
-        } else if (message._type === "function" && message.content) {
-          processContent(message.content);
-        } else if (message._type === "contentArray" && message.contentArray) {
+        if (message._type === "contentArray" && message.contentArray) {
           message.contentArray.forEach(item => {
             if (item._type === "message" && item.content) {
               processContent(item.content);
             }
           });
+        } else if (message.content) {
+          processContent(message.content);
         }
       }
     }
