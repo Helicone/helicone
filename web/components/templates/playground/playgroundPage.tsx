@@ -579,27 +579,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     if (!messages) return { hasSubstitutionFailure, templatedMessages };
 
     for (const message of messages) {
-      if (message._type === "message" && message.content) {
-        const substituted = HeliconeTemplateManager.substituteVariables(
-          message.content,
-          Object.fromEntries(substitutionValues)
-        );
-        if (!substituted.success) hasSubstitutionFailure = true;
-        templatedMessages.push({
-          ...message,
-          content: substituted.success ? substituted.result : message.content
-        });
-      } else if (message._type === "function" && message.content) {
-        const substituted = HeliconeTemplateManager.substituteVariables(
-          message.content,
-          Object.fromEntries(substitutionValues)
-        );
-        if (!substituted.success) hasSubstitutionFailure = true;
-        templatedMessages.push({
-          ...message,
-          content: substituted.success ? substituted.result : message.content
-        });
-      } else if (message._type === "contentArray" && message.contentArray) {
+      if (message._type === "contentArray" && message.contentArray) {
         const processedContentArray = message.contentArray.map(item => {
           if (item._type === "message" && item.content) {
             const substituted = HeliconeTemplateManager.substituteVariables(
@@ -618,9 +598,19 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           ...message,
           contentArray: processedContentArray
         });
+      } else if (message.content) {
+        const substituted = HeliconeTemplateManager.substituteVariables(
+          message.content,
+          Object.fromEntries(substitutionValues)
+        );
+        if (!substituted.success) hasSubstitutionFailure = true;
+        templatedMessages.push({
+          ...message,
+          content: substituted.success ? substituted.result : message.content
+        });
       } else {
         templatedMessages.push(message);
-      }
+      } 
     }
     
     return { hasSubstitutionFailure, templatedMessages };
