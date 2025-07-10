@@ -7770,6 +7770,34 @@
 					}
 				]
 			},
+			"ResultSuccess_void_": {
+				"properties": {
+					"data": {},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_void.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_void_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"ResultSuccess_HqlSavedQuery-Array_": {
 				"properties": {
 					"data": {
@@ -10298,34 +10326,6 @@
 				"anyOf": [
 					{
 						"$ref": "#/components/schemas/ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"ResultSuccess_void_": {
-				"properties": {
-					"data": {},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result_void.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess_void_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -16153,6 +16153,35 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/Result_HqlSavedQuery-or-null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"HeliconeSql"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "queryId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"delete": {
+				"operationId": "DeleteSavedQuery",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_void.string_"
 								}
 							}
 						}

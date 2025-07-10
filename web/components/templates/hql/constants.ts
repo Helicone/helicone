@@ -208,3 +208,31 @@ export const createSaveQueryMutation = (
     },
   };
 };
+
+// Delete query mutation
+export const createDeleteQueryMutation = (
+  setNotification: (message: string, type: "success" | "error") => void,
+) => {
+  const queryClient = useQueryClient();
+  return {
+    mutationFn: async (queryId: string) => {
+      const response = await $JAWN_API.DELETE(
+        "/v1/helicone-sql/saved-query/{queryId}",
+        {
+          params: { path: { queryId } },
+        },
+      );
+      return response;
+    },
+    onSuccess: () => {
+      setNotification("Query deleted successfully", "success");
+      // Invalidate the queries cache to refresh the list
+      queryClient.invalidateQueries({
+        queryKey: ["get", "/v1/helicone-sql/saved-queries"],
+      });
+    },
+    onError: (error: Error) => {
+      setNotification(error.message, "error");
+    },
+  };
+};

@@ -84,4 +84,20 @@ export class HqlQueryManager {
       return err(String(e));
     }
   }
+
+  async deleteSavedQuery(id: string): Promise<Result<void, string>> {
+    try {
+      const result = await dbExecute<void>(
+        "DELETE FROM saved_queries WHERE id = $1 AND organization_id = $2",
+        [id, this.authParams.organizationId]
+      );
+      if (result.error) {
+        return err(result.error);
+      }
+
+      return ok(undefined);
+    } catch (e) {
+      return err(String(e));
+    }
+  }
 }
