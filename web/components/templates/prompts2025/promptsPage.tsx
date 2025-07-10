@@ -11,6 +11,8 @@ import {
   useGetPromptVersions,
   useSetProductionVersion,
   useGetPromptTags,
+  useDeletePrompt,
+  useDeletePromptVersion,
 } from "@/services/hooks/prompts";
 import { useState, useEffect, useRef } from "react";
 import PromptDetails from "./PromptDetails";
@@ -92,6 +94,8 @@ const PromptsPage = (props: PromptsPageProps) => {
   };
 
   const setProductionVersion = useSetProductionVersion();
+  const deletePrompt = useDeletePrompt();
+  const deletePromptVersion = useDeletePromptVersion();
 
   if (!hasAccessToPrompts) {
     return <div>You do not have access to Prompts</div>;
@@ -112,6 +116,57 @@ const PromptsPage = (props: PromptsPageProps) => {
       setNotification("Production version set successfully", "success");
     }
   }
+
+  const handleDeletePrompt = async (promptId: string) => {
+    try {
+      const result = await deletePrompt.mutateAsync({
+        params: {
+          path: {
+            promptId,
+          },
+        },
+      });
+
+      if (result.error) {
+        setNotification("Error deleting prompt", "error");
+        console.error("Error deleting prompt", result.error);
+      } else {
+        setNotification("Prompt deleted successfully", "success");
+        if (selectedPrompt?.prompt.id === promptId) {
+          setSelectedPrompt(null);
+          drawerRef.current?.collapse();
+        }
+      }
+    } catch (error) {
+      setNotification("Error deleting prompt", "error");
+      console.error("Error deleting prompt", error);
+    }
+  };
+
+  const handleDeletePromptVersion = async (promptVersionId: string) => {
+    if (!selectedPrompt) return;
+
+    try {
+      const result = await deletePromptVersion.mutateAsync({
+        params: {
+          path: {
+            promptId: selectedPrompt.prompt.id,
+            versionId: promptVersionId,
+          },
+        },
+      });
+
+      if (result.error) {
+        setNotification("Error deleting prompt version", "error");
+        console.error("Error deleting prompt version", result.error);
+      } else {
+        setNotification("Prompt version deleted successfully", "success");
+      }
+    } catch (error) {
+      setNotification("Error deleting prompt version", "error");
+      console.error("Error deleting prompt version", error);
+    }
+  };
 
   const handleOpenPromptVersion = (promptVersionId: string) => {
     router.push(`/playground?promptVersionId=${promptVersionId}`);
@@ -252,6 +307,8 @@ const PromptsPage = (props: PromptsPageProps) => {
             <PromptDetails
               onSetProductionVersion={handleSetProductionVersion}
               onOpenPromptVersion={handleOpenPromptVersion}
+              onDeletePrompt={handleDeletePrompt}
+              onDeletePromptVersion={handleDeletePromptVersion}
               promptWithVersions={displayPrompt}
               onFilterVersion={handleFilterVersion}
               onCollapse={() => drawerRef.current?.collapse()}

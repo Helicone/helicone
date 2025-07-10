@@ -18,6 +18,7 @@ import { useState, useEffect } from "react";
 import type { PromptWithVersions } from "@/services/hooks/prompts";
 import PromptVersionHistory from "./PromptVersionHistory";
 import { LuPanelRightClose, LuCopy } from "react-icons/lu";
+import { Trash2 } from "lucide-react";
 import TagsSummary from "./TagsSummary";
 import useNotification from "@/components/shared/notification/useNotification";
 
@@ -25,6 +26,8 @@ interface PromptDetailsProps {
   promptWithVersions: PromptWithVersions | null;
   onSetProductionVersion: (promptId: string, promptVersionId: string) => void;
   onOpenPromptVersion: (promptVersionId: string) => void;
+  onDeletePrompt: (promptId: string) => void;
+  onDeletePromptVersion: (promptVersionId: string) => void;
   onFilterVersion?: (majorVersion: number | null) => void;
   onCollapse: () => void;
 }
@@ -33,6 +36,8 @@ const PromptDetails = ({
   promptWithVersions,
   onSetProductionVersion,
   onOpenPromptVersion,
+  onDeletePrompt,
+  onDeletePromptVersion,
   onFilterVersion,
   onCollapse,
 }: PromptDetailsProps) => {
@@ -115,7 +120,26 @@ const PromptDetails = ({
               </div>
             </div>
 
-            <ModelPill model={productionVersion.model} />
+            <div className="flex items-center gap-2">
+              <ModelPill model={productionVersion.model}/>
+              <TooltipProvider>
+                <Tooltip delayDuration={100}>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="none"
+                      size="square_icon"
+                      className="w-fit text-muted-foreground hover:text-destructive ml-1"
+                      onClick={() => onDeletePrompt(prompt.id)}
+                    >
+                      <Trash2 size={16} />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="text-xs">
+                    Delete Prompt
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
           </div>
 
           <div 
@@ -158,6 +182,7 @@ const PromptDetails = ({
           promptWithVersions={promptWithVersions}
           onSetProductionVersion={onSetProductionVersion}
           onOpenPromptVersion={onOpenPromptVersion}
+          onDeletePromptVersion={onDeletePromptVersion}
         />
       </div>
     </div>

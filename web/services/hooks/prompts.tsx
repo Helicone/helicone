@@ -76,6 +76,42 @@ export const useSetProductionVersion = () => {
   );
 };
 
+export const useDeletePrompt = () => {
+  const queryClient = useQueryClient();
+
+  return $JAWN_API.useMutation(
+    "delete",
+    "/v1/prompt-2025/{promptId}",
+    {
+      onSuccess: () => {
+        console.log("deleted prompt")
+        queryClient.invalidateQueries({ queryKey: ["prompts"] });
+        queryClient.invalidateQueries({ queryKey: ["promptsWithVersions"] });
+        queryClient.invalidateQueries({ queryKey: ["promptTags"] });
+        queryClient.invalidateQueries({ queryKey: ["promptVersions"] });
+        queryClient.invalidateQueries({ queryKey: ["promptVersionWithBody"] });
+      },
+    }
+  );
+};
+
+export const useDeletePromptVersion = () => {
+  const queryClient = useQueryClient();
+
+  return $JAWN_API.useMutation(
+    "delete",
+    "/v1/prompt-2025/{promptId}/{versionId}",
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["prompts"] });
+        queryClient.invalidateQueries({ queryKey: ["promptsWithVersions"] });
+        queryClient.invalidateQueries({ queryKey: ["promptVersions"] });
+        queryClient.invalidateQueries({ queryKey: ["promptVersionWithBody"] });
+      },
+    }
+  );
+};
+
 export const useGetPromptVersionWithBody = (promptVersionId?: string) => {
   return useQuery<{
     promptVersion: Prompt2025Version;
@@ -178,7 +214,7 @@ export const useGetPromptsWithVersions = (
     prompts: PromptWithVersions[];
     totalCount: number;
   }>({
-    queryKey: ["promptsWithVersions", search, tagsFilter, page, pageSize],
+    queryKey: ["promptsWithVersions"],
     refetchOnWindowFocus: false,
     queryFn: async () => {
       const promptsResult = await $JAWN_API.POST("/v1/prompt-2025/query", {

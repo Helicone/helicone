@@ -5,12 +5,14 @@ interface PromptVersionHistoryProps {
   promptWithVersions: PromptWithVersions;
   onSetProductionVersion: (promptId: string, promptVersionId: string) => void;
   onOpenPromptVersion: (promptVersionId: string) => void;
+  onDeletePromptVersion: (promptVersionId: string) => void;
 }
 
 const PromptVersionHistory = ({
   promptWithVersions,
   onSetProductionVersion,
   onOpenPromptVersion,
+  onDeletePromptVersion,
 }: PromptVersionHistoryProps) => {
   const { versions, productionVersion } = promptWithVersions;
 
@@ -23,6 +25,7 @@ const PromptVersionHistory = ({
           isProductionVersion={version.id === productionVersion.id}
           onSetProductionVersion={onSetProductionVersion}
           onOpenPromptVersion={onOpenPromptVersion}
+          onDeletePromptVersion={onDeletePromptVersion}
         />
       ))}
     </div>
