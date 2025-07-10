@@ -11,7 +11,7 @@ export class HeliconeTemplateManager {
    */
   static extractVariables(template: string): TemplateVariable[] {
     const variables = new Map<string, TemplateVariable>();
-    let match;
+    let match: RegExpExecArray | null;
     
     TEMPLATE_REGEX.lastIndex = 0;
     
@@ -83,11 +83,10 @@ export class HeliconeTemplateManager {
       };
     }
     
-    // Perform substitution
     TEMPLATE_REGEX.lastIndex = 0;
-    const result = template.replace(TEMPLATE_REGEX, (match, name, type) => {
+    const result = template.replace(TEMPLATE_REGEX, (match, name) => {
       const value = inputs[name.trim()];
-      return value !== undefined && value !== null ? String(value) : match;
+      return value ? String(value) : match;
     });
     
     return {
