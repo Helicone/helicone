@@ -513,10 +513,13 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         },
       });
 
-      setNotification(
-        `Prompt saved successfully! ${result.data?.id}`,
-        "success"
-      );
+      if (result.data?.versionId) {
+        router.push(`/playground?promptVersionId=${result.data.versionId}`);
+        setNotification(
+          `Prompt created successfully!`,
+          "success"
+        );
+      }
     } catch (error) {
       console.error("Failed to save prompt:", error);
       setNotification("Failed to save prompt", "error");

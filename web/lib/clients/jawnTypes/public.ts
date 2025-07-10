@@ -1090,6 +1090,7 @@ export interface components {
     "Result_string-Array.string_": components["schemas"]["ResultSuccess_string-Array_"] | components["schemas"]["ResultError_string_"];
     PromptCreateResponse: {
       id: string;
+      versionId: string;
     };
     ResultSuccess_PromptCreateResponse_: {
       data: components["schemas"]["PromptCreateResponse"];

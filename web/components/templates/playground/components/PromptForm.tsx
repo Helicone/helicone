@@ -45,6 +45,7 @@ export default function PromptForm({
   const [setAsProduction, setSetAsProduction] = useState(true);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [customTags, setCustomTags] = useState("");
+  const [saveAsNewPrompt, setSaveAsNewPrompt] = useState(!saveAndVersion);
 
   const { data: existingTags = [], isLoading: isLoadingTags } = useGetPromptTags();
 
@@ -79,7 +80,33 @@ export default function PromptForm({
       </PopoverTrigger>
       <PopoverContent className="w-96 mr-2">
         <div className="flex flex-col gap-4 py-4 w-full">
-          {!saveAndVersion && (
+          {saveAndVersion && (
+            <div className="flex justify-end">
+              <div className="flex gap-2 items-center">
+                <Tooltip>
+                  <TooltipTrigger>
+                    <InfoIcon className="h-3 w-3 text-muted-foreground" />
+                  </TooltipTrigger>
+                  <TooltipContent align="start">
+                    Create a new prompt instead of versioning the current one.
+                  </TooltipContent>
+                </Tooltip>
+                <Label htmlFor="save-as-new-prompt" className="text-sm">
+                  Save as new prompt
+                </Label>
+                <Switch
+                  className="data-[state=checked]:bg-foreground"
+                  size="sm"
+                  variant="helicone"
+                  id="save-as-new-prompt"
+                  checked={saveAsNewPrompt}
+                  onCheckedChange={setSaveAsNewPrompt}
+                />
+              </div>
+            </div>
+          )}
+
+          {(!saveAndVersion || saveAsNewPrompt) && (
             <>
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
@@ -140,7 +167,7 @@ export default function PromptForm({
             />
           </div>
 
-          {saveAndVersion && (
+          {saveAndVersion && !saveAsNewPrompt && (
             <>
               <div className="flex justify-end">
                 <div className="flex gap-2 items-center">
@@ -196,15 +223,15 @@ export default function PromptForm({
             size="sm"
             className="w-full mt-2"
             onClick={() => {
-              if (saveAndVersion) {
-                onSavePrompt(upgradeMajorVersion, setAsProduction, commitMessage);
-              } else {
+              if (!saveAndVersion || saveAsNewPrompt) {
                 onCreatePrompt(getAllTags(), promptName);
+              } else {
+                onSavePrompt(upgradeMajorVersion, setAsProduction, commitMessage);
               }
               setIsPromptFormPopoverOpen(false);
             }}
           >
-            {saveAndVersion ? "Save Prompt" : "Create Prompt"}
+            {(!saveAndVersion || saveAsNewPrompt) ? "Create Prompt" : "Save Prompt"}
           </Button>
         </div>
       </PopoverContent>

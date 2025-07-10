@@ -362,7 +362,7 @@ export class Prompt2025Manager extends BaseManager {
       return err(s3Result.error);
     }
 
-    return ok({ id: promptId });
+    return ok({ id: promptId, versionId: promptVersionId });
   }
 
   async newPromptVersion(params: {
