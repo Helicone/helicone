@@ -869,14 +869,18 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                   isStreaming={isStreaming}
                 />
               </ResizablePanel>
-              <ResizableHandle />
-              <ResizablePanel defaultSize={40} minSize={20}>
-                <PlaygroundVariablesPanel 
-                  variables={templateVariables}
-                  onUpdateValue={onUpdateSubstitutionValue}
-                  values={substitutionValues}
-                />
-              </ResizablePanel>
+              {hasAccessToPrompts && (
+                <>
+                <ResizableHandle />
+                <ResizablePanel defaultSize={40} minSize={20}>
+                  <PlaygroundVariablesPanel 
+                    variables={templateVariables}
+                    onUpdateValue={onUpdateSubstitutionValue}
+                    values={substitutionValues}
+                  />
+                </ResizablePanel>
+              </>
+              )}
             </ResizablePanelGroup>
           </ResizablePanel>
         </ResizablePanelGroup>
