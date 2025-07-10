@@ -637,6 +637,7 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "id": {"dataType":"string","required":true},
+            "versionId": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
     },

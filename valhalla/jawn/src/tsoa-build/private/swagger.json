@@ -2174,10 +2174,14 @@
 				"properties": {
 					"id": {
 						"type": "string"
+					},
+					"versionId": {
+						"type": "string"
 					}
 				},
 				"required": [
-					"id"
+					"id",
+					"versionId"
 				],
 				"type": "object",
 				"additionalProperties": false

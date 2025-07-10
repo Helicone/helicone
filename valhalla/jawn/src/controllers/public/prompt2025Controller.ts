@@ -43,6 +43,7 @@ export interface Prompt2025 {
 
 export interface PromptCreateResponse {
   id: string;
+  versionId: string;
 }
 
 export interface PromptVersionCounts {
