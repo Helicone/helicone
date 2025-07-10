@@ -80,7 +80,7 @@ export class Prompt2025Manager extends BaseManager {
 
   async totalPrompts(): Promise<Result<number, string>> {
     const result = await dbExecute<{ count: number }>(
-      `SELECT COUNT(*) as count FROM prompts_2025 WHERE organization = $1 AND deleted is false`,
+      `SELECT COUNT(*) as count FROM prompts_2025 WHERE organization = $1 AND soft_delete is false`,
       [this.authParams.organizationId]
     );
     if (result.error) {
@@ -91,7 +91,7 @@ export class Prompt2025Manager extends BaseManager {
 
   async getPromptTags(): Promise<Result<string[], string>> {
     const result = await dbExecute<{ tags: string }>(
-      `SELECT DISTINCT UNNEST(tags) as tags FROM prompts_2025 WHERE organization = $1 AND deleted is false`,
+      `SELECT DISTINCT UNNEST(tags) as tags FROM prompts_2025 WHERE organization = $1 AND soft_delete is false`,
       [this.authParams.organizationId]
     );
     if (result.error) {
@@ -108,7 +108,7 @@ export class Prompt2025Manager extends BaseManager {
         tags,
         created_at
       FROM prompts_2025
-      WHERE id = $1 AND organization = $2 AND deleted is false
+      WHERE id = $1 AND organization = $2 AND soft_delete is false
       LIMIT 1
       `,
       [promptId, this.authParams.organizationId]
@@ -137,7 +137,7 @@ export class Prompt2025Manager extends BaseManager {
         tags,
         created_at
       FROM prompts_2025
-      WHERE name ILIKE $1 AND organization = $2 AND deleted is false
+      WHERE name ILIKE $1 AND organization = $2 AND soft_delete is false
       ${tagsFilterClause}
       ORDER BY created_at DESC
       LIMIT $4 OFFSET $5
@@ -166,7 +166,7 @@ export class Prompt2025Manager extends BaseManager {
         COUNT(*)::integer as total_versions,
         MAX(major_version) as major_versions
       FROM prompts_2025_versions
-      WHERE prompt_id = $1 AND organization = $2 AND deleted is false
+      WHERE prompt_id = $1 AND organization = $2 AND soft_delete is false
       `,
       [params.promptId, this.authParams.organizationId]
     );
@@ -197,7 +197,7 @@ export class Prompt2025Manager extends BaseManager {
       FROM prompts_2025 AS prompts
       INNER JOIN prompts_2025_versions AS versions
       ON prompts.production_version = versions.id
-      WHERE prompts.id = $1 AND prompts.organization = $2 AND prompts.deleted is false AND versions.deleted is false
+      WHERE prompts.id = $1 AND prompts.organization = $2 AND prompts.soft_delete is false AND versions.soft_delete is false
       `,
       [params.promptId, this.authParams.organizationId]
     );
@@ -228,7 +228,7 @@ export class Prompt2025Manager extends BaseManager {
         model
       FROM prompts_2025_versions
       WHERE prompt_id = $1
-      AND organization = $2 AND deleted is false
+      AND organization = $2 AND soft_delete is false
       ${params.majorVersion !== undefined ? `AND major_version = $3` : ''}
       ORDER BY created_at DESC
       LIMIT 50
@@ -258,7 +258,7 @@ export class Prompt2025Manager extends BaseManager {
         model
       FROM prompts_2025_versions
       WHERE id = $1
-      AND organization = $2 AND deleted is false
+      AND organization = $2 AND soft_delete is false
       LIMIT 1
       `,
       [params.promptVersionId, this.authParams.organizationId]
@@ -380,7 +380,7 @@ export class Prompt2025Manager extends BaseManager {
     }>(
       `SELECT major_version, minor_version, prompt_id 
       FROM prompts_2025_versions 
-      WHERE id = $1 AND organization = $2 AND deleted is false`,
+      WHERE id = $1 AND organization = $2 AND soft_delete is false`,
       [params.promptVersionId, this.authParams.organizationId]
     );
 
@@ -396,7 +396,7 @@ export class Prompt2025Manager extends BaseManager {
       const maxMajorResult = await dbExecute<{ next_major: number }>(
         `SELECT COALESCE(MAX(major_version), 0) + 1 as next_major 
         FROM prompts_2025_versions 
-        WHERE prompt_id = $1 AND organization = $2 AND deleted is false`,
+        WHERE prompt_id = $1 AND organization = $2 AND soft_delete is false`,
         [params.promptId, this.authParams.organizationId]
       );
 
@@ -410,7 +410,7 @@ export class Prompt2025Manager extends BaseManager {
       const maxMinorResult = await dbExecute<{ next_minor: number }>(
         `SELECT COALESCE(MAX(minor_version), 0) + 1 as next_minor 
         FROM prompts_2025_versions 
-        WHERE prompt_id = $1 AND major_version = $2 AND organization = $3 AND deleted is false`,
+        WHERE prompt_id = $1 AND major_version = $2 AND organization = $3 AND soft_delete is false`,
         [params.promptId, current.major_version, this.authParams.organizationId]
       );
 
@@ -474,7 +474,7 @@ export class Prompt2025Manager extends BaseManager {
   }): Promise<Result<null, string>> {
     const versionCheck = await dbExecute<{ id: string }>(
       `SELECT id FROM prompts_2025_versions 
-      WHERE id = $1 AND prompt_id = $2 AND organization = $3 AND deleted is false`,
+      WHERE id = $1 AND prompt_id = $2 AND organization = $3 AND soft_delete is false`,
       [params.promptVersionId, params.promptId, this.authParams.organizationId]
     );
 
@@ -487,7 +487,7 @@ export class Prompt2025Manager extends BaseManager {
     }
 
     const result = await dbExecute<null>(
-      `UPDATE prompts_2025 SET production_version = $1 WHERE id = $2 AND organization = $3 AND deleted is false`,
+      `UPDATE prompts_2025 SET production_version = $1 WHERE id = $2 AND organization = $3 AND soft_delete is false`,
       [params.promptVersionId, params.promptId, this.authParams.organizationId]
     );
 
@@ -502,7 +502,7 @@ export class Prompt2025Manager extends BaseManager {
     promptId: string;
   }): Promise<Result<null, string>> {
     const versionsResult = await dbExecute<{ id: string }>(
-      `SELECT id FROM prompts_2025_versions WHERE prompt_id = $1 AND organization = $2 AND deleted is false`,
+      `SELECT id FROM prompts_2025_versions WHERE prompt_id = $1 AND organization = $2 AND soft_delete is false`,
       [params.promptId, this.authParams.organizationId]
     );
 
@@ -521,7 +521,7 @@ export class Prompt2025Manager extends BaseManager {
 
     // this will happen on cascade anyways when we delete the source prompt.
     const versionResult = await dbExecute<null>(
-      `UPDATE prompts_2025_versions SET deleted = true WHERE prompt_id = $1 AND organization = $2`,
+      `UPDATE prompts_2025_versions SET soft_delete = true WHERE prompt_id = $1 AND organization = $2`,
       [params.promptId, this.authParams.organizationId]
     );
 
@@ -530,7 +530,7 @@ export class Prompt2025Manager extends BaseManager {
     }
 
     const result = await dbExecute<null>(
-      `UPDATE prompts_2025 SET deleted = true WHERE id = $1 AND organization = $2`,
+      `UPDATE prompts_2025 SET soft_delete = true WHERE id = $1 AND organization = $2`,
       [params.promptId, this.authParams.organizationId]
     );
 
@@ -546,7 +546,7 @@ export class Prompt2025Manager extends BaseManager {
     promptVersionId: string;
   }): Promise<Result<null, string>> {
     const result = await dbExecute<null>(
-      `UPDATE prompts_2025_versions SET deleted = true WHERE id = $1 AND organization = $2`,
+      `UPDATE prompts_2025_versions SET soft_delete = true WHERE id = $1 AND organization = $2`,
       [params.promptVersionId, this.authParams.organizationId]
     );
 
