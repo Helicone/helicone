@@ -56,6 +56,7 @@ export interface PromptVersionCounts {
 @Tags("Prompt2025")
 @Security("api_key")
 export class Prompt2025Controller extends Controller {
+  // Unsure why id/ is here, it is not RESTFUL. But there is a reason for it.
   @Get("id/{promptId}")
   public async getPrompt2025(
     @Path() promptId: string,
@@ -71,6 +72,51 @@ export class Prompt2025Controller extends Controller {
     const promptManager = new Prompt2025Manager(request.authParams);
     const result = await promptManager.getPrompt(promptId);
     if (result.error || !result.data) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
+  @Delete("{promptId}")
+  public async deletePrompt2025(
+    @Path() promptId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const featureFlagResult = await checkFeatureFlag(
+      request.authParams.organizationId,
+      PROMPTS_FEATURE_FLAG
+    );
+    if (featureFlagResult.error) {
+      return err(featureFlagResult.error);
+    }
+    const promptManager = new Prompt2025Manager(request.authParams);
+    const result = await promptManager.deletePrompt({ promptId });
+    if (result.error) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
+  @Delete("{promptId}/{versionId}")
+  public async deletePrompt2025Version(
+    @Path() promptId: string,
+    @Path() versionId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<null, string>> {
+    const featureFlagResult = await checkFeatureFlag(
+      request.authParams.organizationId,
+      PROMPTS_FEATURE_FLAG
+    );
+    if (featureFlagResult.error) {
+      return err(featureFlagResult.error);
+    }
+    const promptManager = new Prompt2025Manager(request.authParams);
+    const result = await promptManager.deletePromptVersion({ promptId, promptVersionId: versionId });
+    if (result.error) {
       this.setStatus(500);
     } else {
       this.setStatus(200);

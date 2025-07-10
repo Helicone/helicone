@@ -357,7 +357,7 @@ export class Prompt2025Manager extends BaseManager {
       return err(updateProductionVersionResult.error);
     }
 
-    const s3Result = await this.storePrompt(promptId, promptVersionId, params.promptBody);
+    const s3Result = await this.storePromptBody(promptId, promptVersionId, params.promptBody);
     if (s3Result.error) {
       return err(s3Result.error);
     }
@@ -460,7 +460,7 @@ export class Prompt2025Manager extends BaseManager {
       }
     }
 
-    const s3Result = await this.storePrompt(params.promptId, promptVersionId, params.promptBody);
+    const s3Result = await this.storePromptBody(params.promptId, promptVersionId, params.promptBody);
     if (s3Result.error) {
       return err(s3Result.error);
     }
@@ -498,9 +498,73 @@ export class Prompt2025Manager extends BaseManager {
     return ok(null);
   }
 
+  async deletePrompt(params: {
+    promptId: string;
+  }): Promise<Result<null, string>> {
+    const versionsResult = await dbExecute<{ id: string }>(
+      `SELECT id FROM prompts_2025_versions WHERE prompt_id = $1 AND organization = $2`,
+      [params.promptId, this.authParams.organizationId]
+    );
+
+    if (versionsResult.error) {
+      return err(versionsResult.error);
+    }
+
+    const versionIds = versionsResult.data || [];
+    for (const version of versionIds) {
+      const s3Result = await this.deletePromptBody(params.promptId, version.id);
+      if (s3Result.error) {
+        console.error(`Failed to delete S3 object for version ${version.id}:`, s3Result.error);
+        // continue with other deletions even if one fails
+      }
+    }
+
+    // this will happen on cascade anyways when we delete the source prompt.
+    const versionResult = await dbExecute<null>(
+      `DELETE FROM prompts_2025_versions WHERE prompt_id = $1 AND organization = $2`,
+      [params.promptId, this.authParams.organizationId]
+    );
+
+    if (versionResult.error) {
+      return err(versionResult.error);
+    }
+
+    const result = await dbExecute<null>(
+      `DELETE FROM prompts_2025 WHERE id = $1 AND organization = $2`,
+      [params.promptId, this.authParams.organizationId]
+    );
+
+    if (result.error) {
+      return err(result.error);
+    }
+
+    return ok(null);
+  }
+
+  async deletePromptVersion(params: {
+    promptId: string;
+    promptVersionId: string;
+  }): Promise<Result<null, string>> {
+    const result = await dbExecute<null>(
+      `DELETE FROM prompts_2025_versions WHERE id = $1 AND organization = $2`,
+      [params.promptVersionId, this.authParams.organizationId]
+    );
+
+    if (result.error) {
+      return err(result.error);
+    }
+
+    const s3Result = await this.deletePromptBody(params.promptId, params.promptVersionId);
+    if (s3Result.error) {
+      return err(s3Result.error);
+    }
+
+    return ok(null);
+  }
+
   // Unsure about typing of the data, should double check this when writing using code.
   // Unsure if we use every field in CompletionCreateParams.
-  private async storePrompt(
+  private async storePromptBody(
     promptId: string,
     promptVersionId: string,
     promptBody: OpenAIChatRequest
@@ -511,6 +575,17 @@ export class Prompt2025Manager extends BaseManager {
     const s3result = await this.s3Client.store(key, JSON.stringify(promptBody)); 
     if (s3result.error) return err(s3result.error);
     
+    return ok(null);
+  }
+
+  private async deletePromptBody(
+    promptId: string,
+    promptVersionId: string
+  ): Promise<Result<null, string>> {
+    const key = this.s3Client.getPromptKey(promptId, promptVersionId, this.authParams.organizationId);
+    
+    const s3Result = await this.s3Client.remove(key);
+    if (s3Result.error) return err(s3Result.error);
     return ok(null);
   }
 

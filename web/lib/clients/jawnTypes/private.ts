@@ -162,6 +162,12 @@ export interface paths {
   "/v1/prompt-2025/id/{promptId}": {
     get: operations["GetPrompt2025"];
   };
+  "/v1/prompt-2025/{promptId}": {
+    delete: operations["DeletePrompt2025"];
+  };
+  "/v1/prompt-2025/{promptId}/{versionId}": {
+    delete: operations["DeletePrompt2025Version"];
+  };
   "/v1/prompt-2025/tags": {
     get: operations["GetPrompt2025Tags"];
   };
@@ -16287,6 +16293,37 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Prompt2025.string_"];
+        };
+      };
+    };
+  };
+  DeletePrompt2025: {
+    parameters: {
+      path: {
+        promptId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  DeletePrompt2025Version: {
+    parameters: {
+      path: {
+        promptId: string;
+        versionId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };

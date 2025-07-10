@@ -2,7 +2,7 @@ import ModelPill from "@/components/templates/requests/modelPill";
 import type { components } from "../../../lib/clients/jawnTypes/public";
 import { formatTime } from "./timeUtils";
 import { Button } from "@/components/ui/button";
-import { TestTube2, Crown, Clock } from "lucide-react";
+import { TestTube2, Crown, Clock, Trash2 } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -16,6 +16,7 @@ interface PromptVersionCardProps {
   isProductionVersion?: boolean;
   onSetProductionVersion: (promptId: string, promptVersionId: string) => void;
   onOpenPromptVersion: (promptVersionId: string) => void;
+  onDeletePromptVersion: (promptVersionId: string) => void;
 }
 
 const PromptVersionCard = ({
@@ -23,6 +24,7 @@ const PromptVersionCard = ({
   isProductionVersion = false,
   onSetProductionVersion,
   onOpenPromptVersion,
+  onDeletePromptVersion,
 }: PromptVersionCardProps) => {
   const versionDisplay =
     version.minor_version === 0
@@ -86,6 +88,24 @@ const PromptVersionCard = ({
               </TooltipContent>
             </Tooltip>
           )}
+          <Tooltip delayDuration={100}>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDeletePromptVersion(version.id);
+                }}
+              >
+                <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Delete Version</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
       </div>
       <div className="flex items-center gap-4 px-4 pb-3">
