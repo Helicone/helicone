@@ -313,32 +313,21 @@ The following fields are available for both global and router-level rate limitin
 
 ## Retries
 
-Automatically retry transient errors with a customizable retry policy.
+Automatically retry transient errors from AI providers using configurable strategies. Retries use smart failure detection with configurable maximum attempts and backoff timing.
+
+[Learn more](/ai-gateway/concepts/retries)
 
 ### Global Retry Configuration
 
-<ParamField path="global.rate-limit" type="object">
-  Configure an application-wide retry policy that applies to all requests
-
-  Available strategies are `constant`:
+<ParamField path="global.retries" type="object">
+  Configure an application-wide retry policy that applies to all requests.
 
   ```yaml
   global:
     retries:
       strategy: "constant"
       delay: "50ms"
-      max-retries: 2
-  ```
-
-  And `exponential`:
-  ```yaml
-  global:
-    retries:
-      strategy: "exponential"
-      min-delay: "15ms"
-      max-delay: "200ms"
       max-retries: 3
-      factor: 2.0
   ```
 
   **How it works:** If a transient error is encountered on any endpoint, the request will be retried with the given policy.
@@ -346,36 +335,114 @@ Automatically retry transient errors with a customizable retry policy.
 
 ### Router-Level Retry Configuration
 
-Configure a more specific retry configuration at the granularity of each router
-
 <ParamField path="routers.[name].retries" type="object">
-  Configure an retry policy that applies to requests to a specific router.
-
-  Available strategies are `constant`:
-
-  ```yaml
-  routers:
-    production:
-      retries:
-        strategy: "constant"
-        delay: "10ms"
-        max-retries: 2
-  ```
-
-  And `exponential`:
+  Configure retry policy specific to this router (overrides global retry settings).
 
   ```yaml
   routers:
     production:
       retries:
         strategy: "exponential"
-        min-delay: "5ms"
-        max-delay: "20ms"
-        max-retries: 2
+        min-delay: "100ms"
+        max-delay: "30s"
+        max-retries: 5
         factor: 2.0
   ```
 
-  **How it works:** If a transient error is encountered on any endpoint, the request will be retried with the given policy.
+  **How it works:** Router-specific retry settings take precedence over global retry configuration.
+</ParamField>
+
+### Retry Strategy Fields
+
+The following fields are available for both global and router-level retry configuration:
+
+<ParamField path="[context].retries.strategy" type="string" required>
+  Retry backoff strategy.
+
+  ```yaml
+  retries:
+    strategy: "constant"
+  ```
+
+  **Options:**
+  - `constant` - Fixed delay between retry attempts with jitter
+  - `exponential` - Exponentially increasing delays with jitter and configurable bounds
+</ParamField>
+
+#### Constant Strategy Fields
+
+<ParamField path="[context].retries.delay" type="duration" default="1s">
+  Fixed delay between retry attempts (for constant strategy).
+
+  ```yaml
+  retries:
+    strategy: "constant"
+    delay: "50ms"
+  ```
+
+  **How it works:** Each retry waits exactly this duration (plus jitter) before attempting again.
+</ParamField>
+
+<ParamField path="[context].retries.max-retries" type="integer" default="2">
+  Maximum number of retry attempts.
+
+  ```yaml
+  retries:
+    strategy: "constant"
+    max-retries: 3
+  ```
+
+  **How it works:** After this many failed attempts, the request fails permanently.
+</ParamField>
+
+#### Exponential Strategy Fields
+
+<ParamField path="[context].retries.min-delay" type="duration" default="1s">
+  Minimum delay for exponential backoff strategy.
+
+  ```yaml
+  retries:
+    strategy: "exponential"
+    min-delay: "100ms"
+  ```
+
+  **How it works:** First retry waits this duration, then each subsequent retry increases exponentially.
+</ParamField>
+
+<ParamField path="[context].retries.max-delay" type="duration" default="30s">
+  Maximum delay cap for exponential backoff strategy.
+
+  ```yaml
+  retries:
+    strategy: "exponential"
+    max-delay: "60s"
+  ```
+
+  **How it works:** Delays will never exceed this value, even with exponential growth.
+</ParamField>
+
+<ParamField path="[context].retries.max-retries" type="integer" default="2">
+  Maximum number of retry attempts.
+
+  ```yaml
+  retries:
+    strategy: "exponential"
+    max-retries: 5
+  ```
+
+  **How it works:** After this many failed attempts, the request fails permanently.
+</ParamField>
+
+<ParamField path="[context].retries.factor" type="number" default="2.0">
+  Exponential backoff multiplication factor.
+
+  ```yaml
+  retries:
+    strategy: "exponential"
+    factor: 1.5
+  ```
+
+  **How it works:** Each retry delay is multiplied by this factor. With factor=2.0: 100ms → 200ms → 400ms → 800ms.
 </ParamField>
 
 
