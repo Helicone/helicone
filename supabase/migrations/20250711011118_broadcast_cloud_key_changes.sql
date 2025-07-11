@@ -5,7 +5,7 @@ BEGIN
     json_build_object(
       'event', 'api_key_updated',
       'organization_id', COALESCE(NEW.organization_id, OLD.organization_id),
-      'api_key_id', COALESCE(NEW.id, OLD.id),
+      'api_key_hash', COALESCE(NEW.api_key_hash, OLD.api_key_hash),
       'owner_id', COALESCE(NEW.user_id, OLD.user_id),
       'op', TG_OP
     )::text
