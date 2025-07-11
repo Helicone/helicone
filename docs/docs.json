@@ -181,10 +181,9 @@
             "pages": [
               "features/advanced-usage/caching",
               "features/advanced-usage/custom-properties",
-              "features/customer-portal",
-              "features/advanced-usage/omit-logs",
               "features/sessions",
-              "features/advanced-usage/user-metrics"
+              "features/advanced-usage/user-metrics",
+              "features/advanced-usage/omit-logs"
             ]
           },
           {

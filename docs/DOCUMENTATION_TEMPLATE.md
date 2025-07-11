@@ -339,6 +339,16 @@ Fourth related feature if needed
 - Build complexity gradually from simple to advanced
 - Focus on real-world developer problems and solutions
 
+**Creating Great Use Cases:**
+- **Start with developer context**: What specific problem does this solve for developers?
+- **Use concrete, relatable examples**: Code generation, API documentation, PR reviews vs generic "workflow automation"
+- **Show immediate business value**: Security scoring, compliance monitoring vs abstract "evaluation"
+- **Include working code**: Complete examples developers can copy-paste and adapt
+- **Think about daily developer workflows**: What do developers actually build with AI?
+- **Avoid generic scenarios**: Trip planning, customer support unless genuinely relevant
+- **Focus on technical use cases**: Code analysis, documentation generation, testing automation
+- **Show practical integrations**: How this connects to existing developer tools and workflows
+
 #### Understanding [Feature Name]
 
 - Deep conceptual explanations that developers need to avoid confusion
