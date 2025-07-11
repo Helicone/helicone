@@ -522,12 +522,12 @@ export interface paths {
     post: operations["DeleteHeliconeDataset"];
   };
   "/v1/gateway": {
-    get: operations["GetRouterConfigs"];
-    post: operations["CreateRouterConfig"];
+    get: operations["GetRouters"];
+    post: operations["CreateRouter"];
   };
   "/v1/gateway/{id}": {
     get: operations["GetLatestRouterConfig"];
-    put: operations["UpdateRouterConfig"];
+    put: operations["UpdateRouter"];
   };
   "/v1/evals/query": {
     post: operations["QueryEvals"];
@@ -3099,23 +3099,25 @@ Json: JsonObject;
       /** @enum {number|null} */
       error: null;
     };
-    RouterConfig: {
+    Router: {
       lastUpdatedAt: string;
       latestVersion: string;
       name: string;
+      hash: string;
       id: string;
     };
-    "ResultSuccess__routerConfigs-RouterConfig-Array__": {
+    "ResultSuccess__routers-Router-Array__": {
       data: {
-        routerConfigs: components["schemas"]["RouterConfig"][];
+        routers: components["schemas"]["Router"][];
       };
       /** @enum {number|null} */
       error: null;
     };
-    "Result__routerConfigs-RouterConfig-Array_.string_": components["schemas"]["ResultSuccess__routerConfigs-RouterConfig-Array__"] | components["schemas"]["ResultError_string_"];
+    "Result__routers-Router-Array_.string_": components["schemas"]["ResultSuccess__routers-Router-Array__"] | components["schemas"]["ResultError_string_"];
     LatestRouterConfig: {
       config: string;
       version: string;
+      hash: string;
       name: string;
       id: string;
     };
@@ -3125,17 +3127,18 @@ Json: JsonObject;
       error: null;
     };
     "Result_LatestRouterConfig.string_": components["schemas"]["ResultSuccess_LatestRouterConfig_"] | components["schemas"]["ResultError_string_"];
-    CreateRouterConfigResult: {
+    CreateRouterResult: {
       apiKey: string;
       routerVersionId: string;
-      routerConfigId: string;
+      routerHash: string;
+      routerId: string;
     };
-    ResultSuccess_CreateRouterConfigResult_: {
-      data: components["schemas"]["CreateRouterConfigResult"];
+    ResultSuccess_CreateRouterResult_: {
+      data: components["schemas"]["CreateRouterResult"];
       /** @enum {number|null} */
       error: null;
     };
-    "Result_CreateRouterConfigResult.string_": components["schemas"]["ResultSuccess_CreateRouterConfigResult_"] | components["schemas"]["ResultError_string_"];
+    "Result_CreateRouterResult.string_": components["schemas"]["ResultSuccess_CreateRouterResult_"] | components["schemas"]["ResultError_string_"];
     Eval: {
       name: string;
       /** Format: double */
@@ -6376,17 +6379,17 @@ export interface operations {
       };
     };
   };
-  GetRouterConfigs: {
+  GetRouters: {
     responses: {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result__routerConfigs-RouterConfig-Array_.string_"];
+          "application/json": components["schemas"]["Result__routers-Router-Array_.string_"];
         };
       };
     };
   };
-  CreateRouterConfig: {
+  CreateRouter: {
     requestBody: {
       content: {
         "application/json": {
@@ -6399,7 +6402,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_CreateRouterConfigResult.string_"];
+          "application/json": components["schemas"]["Result_CreateRouterResult.string_"];
         };
       };
     };
@@ -6419,7 +6422,7 @@ export interface operations {
       };
     };
   };
-  UpdateRouterConfig: {
+  UpdateRouter: {
     parameters: {
       path: {
         id: string;

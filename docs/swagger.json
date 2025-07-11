@@ -9245,7 +9245,7 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"RouterConfig": {
+			"Router": {
 				"properties": {
 					"lastUpdatedAt": {
 						"type": "string"
@@ -9256,6 +9256,9 @@
 					"name": {
 						"type": "string"
 					},
+					"hash": {
+						"type": "string"
+					},
 					"id": {
 						"type": "string"
 					}
@@ -9264,23 +9267,24 @@
 					"lastUpdatedAt",
 					"latestVersion",
 					"name",
+					"hash",
 					"id"
 				],
 				"type": "object"
 			},
-			"ResultSuccess__routerConfigs-RouterConfig-Array__": {
+			"ResultSuccess__routers-Router-Array__": {
 				"properties": {
 					"data": {
 						"properties": {
-							"routerConfigs": {
+							"routers": {
 								"items": {
-									"$ref": "#/components/schemas/RouterConfig"
+									"$ref": "#/components/schemas/Router"
 								},
 								"type": "array"
 							}
 						},
 						"required": [
-							"routerConfigs"
+							"routers"
 						],
 						"type": "object"
 					},
@@ -9299,10 +9303,10 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result__routerConfigs-RouterConfig-Array_.string_": {
+			"Result__routers-Router-Array_.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess__routerConfigs-RouterConfig-Array__"
+						"$ref": "#/components/schemas/ResultSuccess__routers-Router-Array__"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -9317,6 +9321,9 @@
 					"version": {
 						"type": "string"
 					},
+					"hash": {
+						"type": "string"
+					},
 					"name": {
 						"type": "string"
 					},
@@ -9327,6 +9334,7 @@
 				"required": [
 					"config",
 					"version",
+					"hash",
 					"name",
 					"id"
 				],
@@ -9362,7 +9370,7 @@
 					}
 				]
 			},
-			"CreateRouterConfigResult": {
+			"CreateRouterResult": {
 				"properties": {
 					"apiKey": {
 						"type": "string"
@@ -9370,21 +9378,25 @@
 					"routerVersionId": {
 						"type": "string"
 					},
-					"routerConfigId": {
+					"routerHash": {
+						"type": "string"
+					},
+					"routerId": {
 						"type": "string"
 					}
 				},
 				"required": [
 					"apiKey",
 					"routerVersionId",
-					"routerConfigId"
+					"routerHash",
+					"routerId"
 				],
 				"type": "object"
 			},
-			"ResultSuccess_CreateRouterConfigResult_": {
+			"ResultSuccess_CreateRouterResult_": {
 				"properties": {
 					"data": {
-						"$ref": "#/components/schemas/CreateRouterConfigResult"
+						"$ref": "#/components/schemas/CreateRouterResult"
 					},
 					"error": {
 						"type": "number",
@@ -9401,10 +9413,10 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result_CreateRouterConfigResult.string_": {
+			"Result_CreateRouterResult.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess_CreateRouterConfigResult_"
+						"$ref": "#/components/schemas/ResultSuccess_CreateRouterResult_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -17978,14 +17990,14 @@
 		},
 		"/v1/gateway": {
 			"get": {
-				"operationId": "GetRouterConfigs",
+				"operationId": "GetRouters",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result__routerConfigs-RouterConfig-Array_.string_"
+									"$ref": "#/components/schemas/Result__routers-Router-Array_.string_"
 								}
 							}
 						}
@@ -18002,14 +18014,14 @@
 				"parameters": []
 			},
 			"post": {
-				"operationId": "CreateRouterConfig",
+				"operationId": "CreateRouter",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result_CreateRouterConfigResult.string_"
+									"$ref": "#/components/schemas/Result_CreateRouterResult.string_"
 								}
 							}
 						}
@@ -18083,7 +18095,7 @@
 				]
 			},
 			"put": {
-				"operationId": "UpdateRouterConfig",
+				"operationId": "UpdateRouter",
 				"responses": {
 					"200": {
 						"description": "Ok",

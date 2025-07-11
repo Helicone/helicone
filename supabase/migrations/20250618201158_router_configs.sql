@@ -1,5 +1,6 @@
 create table "public"."routers" (
     "id" uuid not null default gen_random_uuid(),
+    "hash" varchar(255) unique not null,
     "created_at" timestamp with time zone not null default now(),
     "organization_id" uuid not null,
     "name" character varying
