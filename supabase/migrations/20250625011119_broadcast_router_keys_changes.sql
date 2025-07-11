@@ -1,5 +1,6 @@
 CREATE OR REPLACE FUNCTION broadcast_router_keys_change() RETURNS trigger AS $$
 DECLARE
+  owner_id uuid;
   org_id uuid;
   router_hash text;
   key_hash text;
@@ -10,7 +11,7 @@ BEGIN
   WHERE r.id = COALESCE(NEW.router_id, OLD.router_id);
 
   -- Get api_key_hash from helicone_api_keys
-  SELECT api_key_hash INTO key_hash
+  SELECT api_key_hash, user_id INTO key_hash, owner_id
   FROM helicone_api_keys
   WHERE id = COALESCE(NEW.api_key_id, OLD.api_key_id);
 
@@ -22,6 +23,7 @@ BEGIN
       'router_hash', router_hash,
       'router_id', COALESCE(NEW.router_id, OLD.router_id),
       'api_key_hash', key_hash,
+      'owner_id', owner_id,
       'op', TG_OP
     )::text
   );
