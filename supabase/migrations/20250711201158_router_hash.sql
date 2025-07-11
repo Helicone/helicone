@@ -1,1 +1,0 @@
-alter table "public"."routers" add column "hash" varchar(255) unique not null;
