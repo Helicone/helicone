@@ -187,9 +187,8 @@
             ]
           },
           {
-            "group": "Prompt Engineering",
+            "group": "Prompt Management",
             "pages": [
-              "features/experiments",
               "features/fine-tuning",
               {
                 "group": "Prompts",
