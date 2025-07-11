@@ -9372,9 +9372,6 @@
 			},
 			"CreateRouterResult": {
 				"properties": {
-					"apiKey": {
-						"type": "string"
-					},
 					"routerVersionId": {
 						"type": "string"
 					},
@@ -9386,7 +9383,6 @@
 					}
 				},
 				"required": [
-					"apiKey",
 					"routerVersionId",
 					"routerHash",
 					"routerId"

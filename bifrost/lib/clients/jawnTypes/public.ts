@@ -3128,7 +3128,6 @@ Json: JsonObject;
     };
     "Result_LatestRouterConfig.string_": components["schemas"]["ResultSuccess_LatestRouterConfig_"] | components["schemas"]["ResultError_string_"];
     CreateRouterResult: {
-      apiKey: string;
       routerVersionId: string;
       routerHash: string;
       routerId: string;
