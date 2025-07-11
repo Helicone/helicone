@@ -2671,69 +2671,6 @@ export type Database = {
           },
         ]
       }
-      router_keys: {
-        Row: {
-          added_by: string
-          api_key_id: number
-          created_at: string
-          id: number
-          organization_id: string
-          router_id: string | null
-        }
-        Insert: {
-          added_by: string
-          api_key_id: number
-          created_at?: string
-          id?: number
-          organization_id: string
-          router_id?: string | null
-        }
-        Update: {
-          added_by?: string
-          api_key_id?: number
-          created_at?: string
-          id?: number
-          organization_id?: string
-          router_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "public_router_keys_added_by_fkey"
-            columns: ["added_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "public_router_keys_added_by_fkey"
-            columns: ["added_by"]
-            isOneToOne: false
-            referencedRelation: "users_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "public_router_keys_api_key_id_fkey"
-            columns: ["api_key_id"]
-            isOneToOne: false
-            referencedRelation: "helicone_api_keys"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "public_router_keys_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organization"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "public_router_keys_router_id_fkey"
-            columns: ["router_id"]
-            isOneToOne: false
-            referencedRelation: "routers"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       routers: {
         Row: {
           created_at: string

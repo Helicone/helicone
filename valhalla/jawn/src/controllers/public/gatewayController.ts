@@ -34,7 +34,6 @@ export type CreateRouterResult = {
   routerId: string;
   routerHash: string;
   routerVersionId: string;
-  apiKey: string;
 };
 
 @Route("v1/gateway")

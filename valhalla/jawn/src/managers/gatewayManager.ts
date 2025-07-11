@@ -75,26 +75,13 @@ export class GatewayManager extends BaseManager {
 
     const routerHash = createId();
 
-    // Note: the probability of this happening is extremely low,
-    // but this is there just in case.
-    const routerHashResult = await dbExecute<{ id: string }>(
-      `SELECT id FROM routers WHERE hash = $1 AND organization_id = $2`,
-      [routerHash, this.authParams.organizationId]
-    );
-    if (
-      routerHashResult.error ||
-      (routerHashResult.data && routerHashResult.data.length > 0)
-    ) {
-      return err(`Router hash already exists`);
-    }
-
     const result = await dbExecute<{ id: string }>(
       `INSERT INTO routers (name, hash, organization_id) VALUES ($1, $2, $3) RETURNING id`,
       [name ?? "", routerHash, this.authParams.organizationId]
     );
 
     if (result.error || !result.data) {
-      return err(`Failed to create router config: ${result.error}`);
+      return err(`Failed to create router: ${result.error}`);
     }
 
     const routerId = result.data[0].id;
@@ -113,29 +100,10 @@ export class GatewayManager extends BaseManager {
       );
     }
 
-    const keyManager = new KeyManager(this.authParams);
-
-    const keyResult = await keyManager.createNormalKey(
-      `router-${routerId}`,
-      "g"
-    );
-    if (keyResult.error || !keyResult.data) {
-      return err(`Failed to create temporary key: ${keyResult.error}`);
-    }
-
-    const routerKeyResult = await dbExecute<{ id: string }>(
-      `INSERT INTO router_keys (router_id, api_key_id) VALUES ($1, $2)`,
-      [routerId, keyResult.data.id]
-    );
-    if (routerKeyResult.error) {
-      return err(`Failed to create router key: ${routerKeyResult.error}`);
-    }
-
     return ok({
       routerId,
       routerHash,
       routerVersionId: versionResult.data[0].id,
-      apiKey: keyResult.data.apiKey,
     });
   }
 
