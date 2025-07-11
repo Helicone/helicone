@@ -87,7 +87,14 @@ export class IntercomSlackService {
     threadTs?: string,
     authorEmail?: string,
     userId?: string,
-    conversationUrl?: string
+    conversationUrl?: string,
+    attachments?: Array<{
+      type: string;
+      name: string;
+      url: string;
+      content_type: string;
+      filesize: number;
+    }>
   ): Promise<{ ts: string; channel: string }> {
     console.log("=== SLACK MESSAGE SEND START ===");
     console.log("Author:", authorName);
@@ -95,6 +102,7 @@ export class IntercomSlackService {
     console.log("Conversation ID:", conversationId);
     console.log("Message ID:", messageId);
     console.log("Thread TS:", threadTs);
+    console.log("Attachments:", attachments?.length ? attachments.length : 0);
     
     const slackBotToken = process.env.SLACK_BOT_TOKEN;
     const slackChannelId = process.env.SLACK_CHANNEL_ID;
@@ -117,6 +125,27 @@ export class IntercomSlackService {
     
     const metadataText = metadataElements.join(" • ");
     
+    // Handle attachments - just show a simple message
+    let attachmentMessage = "";
+    if (attachments && attachments.length > 0) {
+      console.log("Processing attachments:", JSON.stringify(attachments, null, 2));
+      
+      const imageCount = attachments.filter(a => a.content_type.startsWith('image/')).length;
+      const fileCount = attachments.length - imageCount;
+      
+      const messages = [];
+      if (imageCount > 0) {
+        messages.push(`📷 ${imageCount} image${imageCount > 1 ? 's' : ''}`);
+      }
+      if (fileCount > 0) {
+        messages.push(`📎 ${fileCount} file${fileCount > 1 ? 's' : ''}`);
+      }
+      
+      if (messages.length > 0) {
+        attachmentMessage = `\n*Attachments:* ${messages.join(', ')}`;
+      }
+    }
+
     const slackPayload: any = {
       channel: slackChannelId,
       text: threadTs ? `Reply from ${authorName}` : `New Intercom message from ${authorName}`,
@@ -126,8 +155,8 @@ export class IntercomSlackService {
           text: {
             type: "mrkdwn",
             text: threadTs 
-              ? `*Reply from ${authorName}:*\n${message}`
-              : `*New Intercom Message*\n*From:* ${authorName}${authorEmail ? ` (${authorEmail})` : ""}\n*Message:* ${message}`
+              ? `*Reply from ${authorName}:*\n${message}${attachmentMessage}`
+              : `*New Intercom Message*\n*From:* ${authorName}${authorEmail ? ` (${authorEmail})` : ""}\n*Message:* ${message}${attachmentMessage}`
           }
         },
         ...(threadTs ? [] : [{

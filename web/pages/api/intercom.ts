@@ -18,12 +18,20 @@ interface IntercomMessage {
     type: string;
     id: string;
     body: string;
+    url?: string;
     author: {
       type: string;
       id: string;
       name?: string;
       email?: string;
     };
+    attachments?: Array<{
+      type: string;
+      name: string;
+      url: string;
+      content_type: string;
+      filesize: number;
+    }>;
   };
   conversation_parts?: {
     conversation_parts: Array<{
@@ -36,6 +44,13 @@ interface IntercomMessage {
         name?: string;
         email?: string;
       };
+      attachments?: Array<{
+        type: string;
+        name: string;
+        url: string;
+        content_type: string;
+        filesize: number;
+      }>;
     }>;
   };
 }
@@ -116,13 +131,14 @@ export default async function handler(
           console.log("Full conversation object:", JSON.stringify(conversation, null, 2));
           
           // For conversation.user.created events, check source first, then conversation_parts
-          let messageContent, authorInfo, messageId;
+          let messageContent, authorInfo, messageId, attachments;
           
           if (webhookData.topic === "conversation.user.created" && conversation.source?.body) {
             // First message is in the source field
             messageContent = conversation.source.body;
             authorInfo = conversation.source.author;
             messageId = conversation.source.id;
+            attachments = conversation.source.attachments || [];
             console.log("Using source for first message:", JSON.stringify(conversation.source, null, 2));
           } else {
             // Get the latest message from conversation_parts
@@ -136,6 +152,7 @@ export default async function handler(
             messageContent = latestPart.body;
             authorInfo = latestPart.author;
             messageId = latestPart.id;
+            attachments = latestPart.attachments || [];
           }
           
           console.log("Message author type:", authorInfo?.type);
@@ -182,7 +199,8 @@ export default async function handler(
             threadTs, // Pass thread_ts for replies
             authorInfo?.email,
             authorInfo?.id,
-            conversation.source?.url || `https://app.intercom.com/a/apps/${process.env.INTERCOM_APP_ID || 'mna0ba2h'}/inbox/inbox/all/conversations/${conversation.id}`
+            conversation.source?.url || `https://app.intercom.com/a/apps/${process.env.INTERCOM_APP_ID || 'mna0ba2h'}/inbox/inbox/all/conversations/${conversation.id}`,
+            attachments
           );
           
           console.log("Slack response:", slackResponse);
