@@ -86,4 +86,15 @@ export const costs: ModelRow[] = [
       completion_token: 0.000004,
     },
   },
+  {
+    model: {
+      operator: "includes",
+      value: "grok-4",
+    },
+    cost: {
+      prompt_token: 0.000003,
+      prompt_cache_read_token: 0.00000075,
+      completion_token: 0.000015,
+    }
+  }
 ];
