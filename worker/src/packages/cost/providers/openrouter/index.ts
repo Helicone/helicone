@@ -1559,6 +1559,17 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "x-ai/grok-4",
+    },
+    cost: {
+      prompt_token: 0.000003,
+      prompt_cache_read_token: 0.00000075,
+      completion_token: 0.000015,
+    }
+  },
+  {
+    model: {
+      operator: "equals",
       value: "mistralai/ministral-8b",
     },
     cost: {
