@@ -4,6 +4,8 @@ import { callJawn } from "../util/helpers";
 import { SqsClient } from "../client/SqsClient";
 
 const ALERT_BANNER_ID_DELAY_IN_QUEUE = 7;
+const HIGH_PRIORITY_QUEUE_SIZE_THRESHOLD = 100_000;
+const LOW_PRIORITY_QUEUE_SIZE_THRESHOLD = 10_000_000;
 
 export async function alertSqsCongestion(env: Env, alertManager: AlertManager) {
   const sqsClient = new SqsClient(env);
@@ -18,7 +20,10 @@ export async function alertSqsCongestion(env: Env, alertManager: AlertManager) {
     return;
   }
 
-  if (queueSize >= 100000 || queueSizeLowPriority >= 100000) {
+  if (
+    queueSize >= HIGH_PRIORITY_QUEUE_SIZE_THRESHOLD ||
+    queueSizeLowPriority >= LOW_PRIORITY_QUEUE_SIZE_THRESHOLD
+  ) {
     const alertBanners = await callJawn<
       null,
       {
