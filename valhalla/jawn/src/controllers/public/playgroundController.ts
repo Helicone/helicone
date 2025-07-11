@@ -137,7 +137,7 @@ export class PlaygroundController extends Controller {
       >(async (secretKey) => {
         const openai = new OpenAI({
           baseURL: useAIGateway
-            ? `https://test.gateway.helicone.ai/router/default/v1`
+            ? `https://test.gateway.helicone.ai/ai`
             : `https://openrouter.helicone.ai/api/v1/`,
           apiKey: useAIGateway ? secretKey : openRouterKey,
           defaultHeaders: {
