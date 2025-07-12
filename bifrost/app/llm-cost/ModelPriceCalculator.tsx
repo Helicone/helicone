@@ -18,8 +18,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { costOf, costOfPrompt } from "../../packages/cost"; // Ensure the path is correct
-import { providers } from "../../packages/cost/providers/mappings"; // Ensure the path is correct
+import { costOf, costOfPrompt } from "@helicone-package/cost"; // Ensure the path is correct
+import { providers } from "@helicone-package/cost/providers/mappings"; // Ensure the path is correct
 import CalculatorInfo, { formatProviderName } from "./CalculatorInfo";
 import { ProviderWithModels } from "./utils";
 
@@ -208,7 +208,7 @@ export default function ModelPriceCalculator({
       // This assumes `providers` mapping is relatively static and doesn't need constant updates
       // Alternatively, if costOf/costOfPrompt don't need the full providers map, adjust imports
       const currentProviders =
-        require("../../packages/cost/providers/mappings").providers;
+        require("@helicone-package/cost/providers/mappings").providers;
 
       currentProviders.forEach((prov: any) => {
         prov.costs?.forEach((modelCost: any) => {

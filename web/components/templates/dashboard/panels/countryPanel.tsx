@@ -10,7 +10,7 @@ import { COUTNRY_CODE_DIRECTORY } from "../../requests/countryCodeDirectory";
 import { CountryData } from "../../../../services/lib/country";
 import ThemedModal from "../../../shared/themed/themedModal";
 import { useState } from "react";
-import { FilterNode } from "../../../../services/lib/filters/filterDefs";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { getMockCountries } from "../mockDashboardData";
 

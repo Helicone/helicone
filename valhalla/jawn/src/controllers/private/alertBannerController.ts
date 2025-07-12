@@ -1,11 +1,19 @@
-import { Controller, Get, Request, Route, Security, Tags } from "tsoa";
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Request,
+  Route,
+  Security,
+  Tags,
+} from "tsoa";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
-import { JawnAuthenticatedRequest } from "../../types/request";
+import type { JawnAuthenticatedRequest } from "../../types/request";
 import { Database } from "../../lib/db/database.types";
 
 @Route("v1/alert-banner")
 @Tags("Alert Banner")
-@Security("api_key")
 export class AlertBannerController extends Controller {
   @Get("/")
   public async getAlertBanners(@Request() request: JawnAuthenticatedRequest) {

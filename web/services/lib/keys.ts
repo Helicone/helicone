@@ -1,6 +1,6 @@
 import { dbExecute } from "@/lib/api/db/dbExecute";
 import { Database } from "../../db/database.types";
-import { Result, resultMap } from "../../packages/common/result";
+import { Result, resultMap } from "@/packages/common/result";
 
 export type DecryptedProviderKey = {
   id: string | null;

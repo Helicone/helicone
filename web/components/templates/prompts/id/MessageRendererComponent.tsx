@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { PromptMessage } from "@/packages/llm-mapper/types";
+import { PromptMessage } from "@helicone-package/llm-mapper/types";
 import React from "react";
 import { MessageRenderer } from "../../requests/components/chatComponent/MessageRenderer";
 import { JsonView } from "../../requests/components/chatComponent/jsonView";

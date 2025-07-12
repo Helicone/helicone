@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { TimeFilter } from "../lib/filters/filterDefs";
+import { TimeFilter } from "@helicone-package/filters/filterDefs";
 import { TimeIncrement } from "../../lib/timeCalculations/fetchTimeData";
-import { FilterNode } from "../lib/filters/filterDefs";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
 
 export interface BackendMetricsCall<T> {
   params: {

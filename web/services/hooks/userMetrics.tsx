@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useOrg } from "../../components/layout/org/organizationContext";
 import { getJawnClient } from "../../lib/clients/jawn";
-import { FilterNode } from "../lib/filters/filterDefs";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
 
 const useUserMetrics = (
   filter: FilterNode,

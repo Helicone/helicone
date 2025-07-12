@@ -73,6 +73,45 @@ export interface paths {
   "/v1/evaluator/{evaluatorId}/stats": {
     get: operations["GetEvaluatorStats"];
   };
+  "/v1/prompt-2025/id/{promptId}": {
+    get: operations["GetPrompt2025"];
+  };
+  "/v1/prompt-2025/{promptId}": {
+    delete: operations["DeletePrompt2025"];
+  };
+  "/v1/prompt-2025/{promptId}/{versionId}": {
+    delete: operations["DeletePrompt2025Version"];
+  };
+  "/v1/prompt-2025/tags": {
+    get: operations["GetPrompt2025Tags"];
+  };
+  "/v1/prompt-2025": {
+    post: operations["CreatePrompt2025"];
+  };
+  "/v1/prompt-2025/update": {
+    post: operations["UpdatePrompt2025"];
+  };
+  "/v1/prompt-2025/update/production-version": {
+    post: operations["SetProductionVersion"];
+  };
+  "/v1/prompt-2025/count": {
+    get: operations["GetPrompt2025Count"];
+  };
+  "/v1/prompt-2025/query": {
+    post: operations["GetPrompts2025"];
+  };
+  "/v1/prompt-2025/query/version": {
+    post: operations["GetPrompt2025Version"];
+  };
+  "/v1/prompt-2025/query/versions": {
+    post: operations["GetPrompt2025Versions"];
+  };
+  "/v1/prompt-2025/query/production-version": {
+    post: operations["GetPrompt2025ProductionVersion"];
+  };
+  "/v1/prompt-2025/query/total-versions": {
+    post: operations["GetPrompt2025TotalVersions"];
+  };
   "/v1/request/count/query": {
     post: operations["GetRequestCount"];
   };
@@ -217,18 +256,6 @@ export interface paths {
   "/v2/experiment/{experimentId}/{requestId}/{scoreKey}": {
     get: operations["GetExperimentScore"];
   };
-  "/v1/trace/custom/v1/log": {
-    post: operations["LogCustomTraceLegacy"];
-  };
-  "/v1/trace/custom/log": {
-    post: operations["LogCustomTrace"];
-  };
-  "/v1/trace/log": {
-    post: operations["LogTrace"];
-  };
-  "/v1/trace/log-python": {
-    post: operations["LogPythonTrace"];
-  };
   "/v1/stripe/subscription/cost-for-prompts": {
     get: operations["GetCostForPrompts"];
   };
@@ -278,6 +305,18 @@ export interface paths {
   "/v1/stripe/webhook": {
     post: operations["HandleStripeWebhook"];
   };
+  "/v1/trace/custom/v1/log": {
+    post: operations["LogCustomTraceLegacy"];
+  };
+  "/v1/trace/custom/log": {
+    post: operations["LogCustomTrace"];
+  };
+  "/v1/trace/log": {
+    post: operations["LogTrace"];
+  };
+  "/v1/trace/log-python": {
+    post: operations["LogPythonTrace"];
+  };
   "/v1/session/has-session": {
     get: operations["HasSession"];
   };
@@ -311,6 +350,13 @@ export interface paths {
   };
   "/v1/property/{propertyKey}/top-costs/query": {
     post: operations["GetTopCosts"];
+  };
+  "/v1/playground/generate": {
+    post: operations["Generate"];
+  };
+  "/v1/playground/requests-through-helicone": {
+    get: operations["GetRequestsThroughHelicone"];
+    post: operations["RequestsThroughHelicone"];
   };
   "/v1/public/pi/get-api-key": {
     post: operations["GetApiKey"];
@@ -355,6 +401,27 @@ export interface paths {
   };
   "/v1/integration/slack/channels": {
     get: operations["GetSlackChannels"];
+  };
+  "/v1/helicone-sql/schema": {
+    /** @description Get ClickHouse schema (tables and columns) */
+    get: operations["GetClickHouseSchema"];
+  };
+  "/v1/helicone-sql/execute": {
+    post: operations["ExecuteSql"];
+  };
+  "/v1/helicone-sql/download": {
+    post: operations["DownloadCsv"];
+  };
+  "/v1/helicone-sql/saved-queries": {
+    get: operations["GetSavedQueries"];
+  };
+  "/v1/helicone-sql/saved-query/{queryId}": {
+    get: operations["GetSavedQuery"];
+    delete: operations["DeleteSavedQuery"];
+  };
+  "/v1/helicone-sql/saved-query": {
+    put: operations["UpdateSavedQuery"];
+    post: operations["CreateSavedQuery"];
   };
   "/v1/experiment/new-empty": {
     post: operations["CreateNewEmptyExperiment"];
@@ -454,6 +521,14 @@ export interface paths {
   "/v1/helicone-dataset/{datasetId}/delete": {
     post: operations["DeleteHeliconeDataset"];
   };
+  "/v1/gateway": {
+    get: operations["GetRouterConfigs"];
+    post: operations["CreateRouterConfig"];
+  };
+  "/v1/gateway/{id}": {
+    get: operations["GetLatestRouterConfig"];
+    put: operations["UpdateRouterConfig"];
+  };
   "/v1/evals/query": {
     post: operations["QueryEvals"];
   };
@@ -523,6 +598,10 @@ export interface paths {
   "/v1/api-keys/{apiKeyId}": {
     delete: operations["DeleteAPIKey"];
     patch: operations["UpdateAPIKey"];
+  };
+  "/v1/public/alert-banner": {
+    get: operations["GetAlertBanners"];
+    patch: operations["UpdateAlertBannerActive"];
   };
 }
 
@@ -636,13 +715,6 @@ export interface components {
       "not-contains"?: string;
     };
     /** @description Make all properties in T optional */
-    Partial_TimestampOperators_: {
-      gte?: string;
-      lte?: string;
-      lt?: string;
-      gt?: string;
-    };
-    /** @description Make all properties in T optional */
     Partial_NumberOperators_: {
       /** Format: double */
       "not-equals"?: number;
@@ -658,19 +730,9 @@ export interface components {
       gt?: number;
     };
     /** @description Make all properties in T optional */
-    Partial_UserMetricsToOperators_: {
-      user_id?: components["schemas"]["Partial_TextOperators_"];
-      last_active?: components["schemas"]["Partial_TimestampOperators_"];
-      total_requests?: components["schemas"]["Partial_NumberOperators_"];
-      active_for?: components["schemas"]["Partial_NumberOperators_"];
-      average_requests_per_day_active?: components["schemas"]["Partial_NumberOperators_"];
-      average_tokens_per_request?: components["schemas"]["Partial_NumberOperators_"];
-      total_completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      total_prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      cost?: components["schemas"]["Partial_NumberOperators_"];
-    };
-    /** @description Make all properties in T optional */
     Partial_TimestampOperatorsTyped_: {
+      /** Format: date-time */
+      equals?: string;
       /** Format: date-time */
       gte?: string;
       /** Format: date-time */
@@ -679,6 +741,19 @@ export interface components {
       lt?: string;
       /** Format: date-time */
       gt?: string;
+    };
+    /** @description Make all properties in T optional */
+    Partial_UserViewToOperators_: {
+      user_user_id?: components["schemas"]["Partial_TextOperators_"];
+      user_active_for?: components["schemas"]["Partial_NumberOperators_"];
+      user_first_active?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      user_last_active?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      user_total_requests?: components["schemas"]["Partial_NumberOperators_"];
+      user_average_requests_per_day_active?: components["schemas"]["Partial_NumberOperators_"];
+      user_average_tokens_per_request?: components["schemas"]["Partial_NumberOperators_"];
+      user_total_completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      user_total_prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      user_cost?: components["schemas"]["Partial_NumberOperators_"];
     };
     /** @description Make all properties in T optional */
     Partial_BooleanOperators_: {
@@ -691,6 +766,7 @@ export interface components {
     /** @description Make all properties in T optional */
     Partial_RequestResponseRMTToOperators_: {
       latency?: components["schemas"]["Partial_NumberOperators_"];
+      time_to_first_token?: components["schemas"]["Partial_NumberOperators_"];
       status?: components["schemas"]["Partial_NumberOperators_"];
       request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
       response_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
@@ -703,6 +779,8 @@ export interface components {
       request_id?: components["schemas"]["Partial_TextOperators_"];
       prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
       completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      prompt_cache_read_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      prompt_cache_write_tokens?: components["schemas"]["Partial_NumberOperators_"];
       total_tokens?: components["schemas"]["Partial_NumberOperators_"];
       target_url?: components["schemas"]["Partial_TextOperators_"];
       properties?: {
@@ -717,14 +795,18 @@ export interface components {
       scores_column?: components["schemas"]["Partial_TextOperators_"];
       request_body?: components["schemas"]["Partial_VectorOperators_"];
       response_body?: components["schemas"]["Partial_VectorOperators_"];
+      cache_enabled?: components["schemas"]["Partial_BooleanOperators_"];
+      cache_reference_id?: components["schemas"]["Partial_TextOperators_"];
+      assets?: components["schemas"]["Partial_TextOperators_"];
+      "helicone-score-feedback"?: components["schemas"]["Partial_BooleanOperators_"];
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.user_metrics-or-request_response_rmt_": {
-      user_metrics?: components["schemas"]["Partial_UserMetricsToOperators_"];
+    "Pick_FilterLeaf.users_view-or-request_response_rmt_": {
+      users_view?: components["schemas"]["Partial_UserViewToOperators_"];
       request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
     };
-    "FilterLeafSubset_user_metrics-or-request_response_rmt_": components["schemas"]["Pick_FilterLeaf.user_metrics-or-request_response_rmt_"];
-    UserFilterNode: components["schemas"]["FilterLeafSubset_user_metrics-or-request_response_rmt_"] | components["schemas"]["UserFilterBranch"] | "all";
+    "FilterLeafSubset_users_view-or-request_response_rmt_": components["schemas"]["Pick_FilterLeaf.users_view-or-request_response_rmt_"];
+    UserFilterNode: components["schemas"]["FilterLeafSubset_users_view-or-request_response_rmt_"] | components["schemas"]["UserFilterBranch"] | "all";
     UserFilterBranch: {
       right: components["schemas"]["UserFilterNode"];
       /** @enum {string} */
@@ -753,8 +835,9 @@ export interface components {
       /** Format: double */
       cost: number;
     };
-    "ResultSuccess__users-UserMetricsResult-Array--count-number__": {
+    "ResultSuccess__users-UserMetricsResult-Array--count-number--hasUsers-boolean__": {
       data: {
+        hasUsers: boolean;
         /** Format: double */
         count: number;
         users: components["schemas"]["UserMetricsResult"][];
@@ -762,7 +845,7 @@ export interface components {
       /** @enum {number|null} */
       error: null;
     };
-    "Result__users-UserMetricsResult-Array--count-number_.string_": components["schemas"]["ResultSuccess__users-UserMetricsResult-Array--count-number__"] | components["schemas"]["ResultError_string_"];
+    "Result__users-UserMetricsResult-Array--count-number--hasUsers-boolean_.string_": components["schemas"]["ResultSuccess__users-UserMetricsResult-Array--count-number--hasUsers-boolean__"] | components["schemas"]["ResultError_string_"];
     /** @enum {string} */
     SortDirection: "asc" | "desc";
     SortLeafUsers: {
@@ -774,6 +857,8 @@ export interface components {
       total_requests?: components["schemas"]["SortDirection"];
       average_requests_per_day_active?: components["schemas"]["SortDirection"];
       average_tokens_per_request?: components["schemas"]["SortDirection"];
+      total_prompt_tokens?: components["schemas"]["SortDirection"];
+      total_completion_tokens?: components["schemas"]["SortDirection"];
       cost?: components["schemas"]["SortDirection"];
       rate_limited_count?: components["schemas"]["SortDirection"];
     };
@@ -985,6 +1070,121 @@ export interface components {
       error: null;
     };
     "Result_EvaluatorStats.string_": components["schemas"]["ResultSuccess_EvaluatorStats_"] | components["schemas"]["ResultError_string_"];
+    Prompt2025: {
+      id: string;
+      name: string;
+      tags: string[];
+      created_at: string;
+    };
+    ResultSuccess_Prompt2025_: {
+      data: components["schemas"]["Prompt2025"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Prompt2025.string_": components["schemas"]["ResultSuccess_Prompt2025_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_string-Array_": {
+      data: string[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_string-Array.string_": components["schemas"]["ResultSuccess_string-Array_"] | components["schemas"]["ResultError_string_"];
+    PromptCreateResponse: {
+      id: string;
+      versionId: string;
+    };
+    ResultSuccess_PromptCreateResponse_: {
+      data: components["schemas"]["PromptCreateResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptCreateResponse.string_": components["schemas"]["ResultSuccess_PromptCreateResponse_"] | components["schemas"]["ResultError_string_"];
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.number_": {
+      [key: string]: number;
+    };
+    /** @description Simplified interface for the OpenAI Chat request format */
+    OpenAIChatRequest: {
+      model?: string;
+      messages?: ({
+          tool_calls?: {
+              /** @enum {string} */
+              type: "function";
+              function: {
+                arguments: string;
+                name: string;
+              };
+              id: string;
+            }[];
+          tool_call_id?: string;
+          name?: string;
+          content: (string | {
+              image_url?: {
+                url: string;
+              };
+              text?: string;
+              type: string;
+            }[]) | null;
+          role: string;
+        })[];
+      /** Format: double */
+      temperature?: number;
+      /** Format: double */
+      top_p?: number;
+      /** Format: double */
+      max_tokens?: number;
+      /** Format: double */
+      max_completion_tokens?: number;
+      stream?: boolean;
+      stop?: string[] | string;
+      tools?: {
+          function: {
+            parameters: components["schemas"]["Record_string.any_"];
+            description: string;
+            name: string;
+          };
+          /** @enum {string} */
+          type: "function";
+        }[];
+      tool_choice?: {
+        function?: {
+          name: string;
+          /** @enum {string} */
+          type: "function";
+        };
+        type: string;
+      } | ("none" | "auto" | "required");
+      parallel_tool_calls?: boolean;
+      /** @enum {string} */
+      reasoning_effort?: "low" | "medium" | "high";
+      /** Format: double */
+      frequency_penalty?: number;
+      /** Format: double */
+      presence_penalty?: number;
+      logit_bias?: components["schemas"]["Record_string.number_"];
+      logprobs?: boolean;
+      /** Format: double */
+      top_logprobs?: number;
+      /** Format: double */
+      n?: number;
+      modalities?: string[];
+      prediction?: unknown;
+      audio?: unknown;
+      response_format?: {
+        json_schema?: unknown;
+        type: string;
+      };
+      /** Format: double */
+      seed?: number;
+      service_tier?: string;
+      store?: boolean;
+      stream_options?: unknown;
+      metadata?: components["schemas"]["Record_string.string_"];
+      user?: string;
+      function_call?: string | {
+        name: string;
+      };
+      functions?: unknown[];
+    };
     ResultSuccess_number_: {
       /** Format: double */
       data: number;
@@ -992,6 +1192,48 @@ export interface components {
       error: null;
     };
     "Result_number.string_": components["schemas"]["ResultSuccess_number_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_Prompt2025-Array_": {
+      data: components["schemas"]["Prompt2025"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Prompt2025-Array.string_": components["schemas"]["ResultSuccess_Prompt2025-Array_"] | components["schemas"]["ResultError_string_"];
+    Prompt2025Version: {
+      id: string;
+      model: string;
+      prompt_id: string;
+      /** Format: double */
+      major_version: number;
+      /** Format: double */
+      minor_version: number;
+      commit_message: string;
+      created_at: string;
+      s3_url?: string;
+    };
+    ResultSuccess_Prompt2025Version_: {
+      data: components["schemas"]["Prompt2025Version"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Prompt2025Version.string_": components["schemas"]["ResultSuccess_Prompt2025Version_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_Prompt2025Version-Array_": {
+      data: components["schemas"]["Prompt2025Version"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Prompt2025Version-Array.string_": components["schemas"]["ResultSuccess_Prompt2025Version-Array_"] | components["schemas"]["ResultError_string_"];
+    PromptVersionCounts: {
+      /** Format: double */
+      totalVersions: number;
+      /** Format: double */
+      majorVersions: number;
+    };
+    ResultSuccess_PromptVersionCounts_: {
+      data: components["schemas"]["PromptVersionCounts"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptVersionCounts.string_": components["schemas"]["ResultSuccess_PromptVersionCounts_"] | components["schemas"]["ResultError_string_"];
     /** @description Make all properties in T optional */
     Partial_ResponseTableToOperators_: {
       body_tokens?: components["schemas"]["Partial_NumberOperators_"];
@@ -999,6 +1241,14 @@ export interface components {
       body_completion?: components["schemas"]["Partial_TextOperators_"];
       status?: components["schemas"]["Partial_NumberOperators_"];
       model?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_TimestampOperators_: {
+      equals?: string;
+      gte?: string;
+      lte?: string;
+      lt?: string;
+      gt?: string;
     };
     /** @description Make all properties in T optional */
     Partial_RequestTableToOperators_: {
@@ -1012,6 +1262,7 @@ export interface components {
       model?: components["schemas"]["Partial_TextOperators_"];
       modelOverride?: components["schemas"]["Partial_TextOperators_"];
       path?: components["schemas"]["Partial_TextOperators_"];
+      country_code?: components["schemas"]["Partial_TextOperators_"];
       prompt_id?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description Make all properties in T optional */
@@ -1034,23 +1285,13 @@ export interface components {
       session_latest_request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
       session_tag?: components["schemas"]["Partial_TextOperators_"];
     };
-    /** @description Make all properties in T optional */
-    Partial_CacheHitsTableToOperators_: {
-      organization_id?: components["schemas"]["Partial_TextOperators_"];
-      request_id?: components["schemas"]["Partial_TextOperators_"];
-      latency?: components["schemas"]["Partial_NumberOperators_"];
-      completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
-    };
     /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": {
+    "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_": {
       request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
       response?: components["schemas"]["Partial_ResponseTableToOperators_"];
       request?: components["schemas"]["Partial_RequestTableToOperators_"];
       feedback?: components["schemas"]["Partial_FeedbackTableToOperators_"];
       sessions_request_response_rmt?: components["schemas"]["Partial_SessionsRequestResponseRMTToOperators_"];
-      cache_hits?: components["schemas"]["Partial_CacheHitsTableToOperators_"];
       properties?: {
         [key: string]: components["schemas"]["Partial_TextOperators_"];
       };
@@ -1058,8 +1299,8 @@ export interface components {
         [key: string]: components["schemas"]["Partial_TextOperators_"];
       };
     };
-    "FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_": components["schemas"]["Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_"];
-    RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-cache_hits-or-request_response_rmt-or-sessions_request_response_rmt_"] | components["schemas"]["RequestFilterBranch"] | "all";
+    "FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_": components["schemas"]["Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_"];
+    RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_"] | components["schemas"]["RequestFilterBranch"] | "all";
     RequestFilterBranch: {
       right: components["schemas"]["RequestFilterNode"];
       /** @enum {string} */
@@ -1102,11 +1343,12 @@ export interface components {
       isScored?: boolean;
     };
     /** @enum {string} */
-    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA";
+    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE";
     Provider: components["schemas"]["ProviderName"] | "CUSTOM";
     /** @enum {string} */
     LlmType: "chat" | "completion";
     FunctionCall: {
+      id?: string;
       name: string;
       arguments: components["schemas"]["Record_string.any_"];
     };
@@ -1267,10 +1509,6 @@ export interface components {
       request: components["schemas"]["LLMRequestBody"];
       response?: components["schemas"]["LLMResponseBody"] | null;
     };
-    /** @description Construct a type with a set of properties K of type T */
-    "Record_string.number_": {
-      [key: string]: number;
-    };
     HeliconeRequest: {
       response_id: string | null;
       response_created_at: string | null;
@@ -1306,6 +1544,8 @@ export interface components {
       prompt_audio_tokens: number | null;
       /** Format: double */
       completion_audio_tokens: number | null;
+      /** Format: double */
+      cost: number | null;
       prompt_id: string | null;
       feedback_created_at?: string | null;
       feedback_id?: string | null;
@@ -1322,6 +1562,9 @@ export interface components {
       assets: string[];
       target_url: string;
       model: string;
+      cache_reference_id: string | null;
+      cache_enabled: boolean;
+      updated_at?: string;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];
@@ -1645,12 +1888,6 @@ Json: JsonObject;
       error: null;
     };
     "Result_ExperimentV2PromptVersion-Array.string_": components["schemas"]["ResultSuccess_ExperimentV2PromptVersion-Array_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_string-Array_": {
-      data: string[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_string-Array.string_": components["schemas"]["ResultSuccess_string-Array_"] | components["schemas"]["ResultError_string_"];
     ResultSuccess_string_: {
       data: string;
       /** @enum {number|null} */
@@ -1687,6 +1924,41 @@ Json: JsonObject;
       error: null;
     };
     "Result_ScoreV2-or-null.string_": components["schemas"]["ResultSuccess_ScoreV2-or-null_"] | components["schemas"]["ResultError_string_"];
+    UpgradeToProRequest: {
+      addons?: {
+        evals?: boolean;
+        experiments?: boolean;
+        prompts?: boolean;
+        alerts?: boolean;
+      };
+      /** Format: double */
+      seats?: number;
+      /** @enum {string} */
+      ui_mode?: "embedded" | "hosted";
+    };
+    UpgradeToTeamBundleRequest: {
+      /** @enum {string} */
+      ui_mode?: "embedded" | "hosted";
+    };
+    LLMUsage: {
+      model: string;
+      provider: string;
+      /** Format: double */
+      prompt_tokens: number;
+      /** Format: double */
+      completion_tokens: number;
+      /** Format: double */
+      total_count: number;
+      /** Format: double */
+      amount: number;
+      description: string;
+      totalCost: {
+        /** Format: double */
+        prompt_token: number;
+        /** Format: double */
+        completion_token: number;
+      };
+    };
     OTELTrace: {
       resourceSpans: {
           scopeSpans: {
@@ -1742,41 +2014,6 @@ Json: JsonObject;
               }[];
           };
         }[];
-    };
-    UpgradeToProRequest: {
-      addons?: {
-        evals?: boolean;
-        experiments?: boolean;
-        prompts?: boolean;
-        alerts?: boolean;
-      };
-      /** Format: double */
-      seats?: number;
-      /** @enum {string} */
-      ui_mode?: "embedded" | "hosted";
-    };
-    UpgradeToTeamBundleRequest: {
-      /** @enum {string} */
-      ui_mode?: "embedded" | "hosted";
-    };
-    LLMUsage: {
-      model: string;
-      provider: string;
-      /** Format: double */
-      prompt_tokens: number;
-      /** Format: double */
-      completion_tokens: number;
-      /** Format: double */
-      total_count: number;
-      /** Format: double */
-      amount: number;
-      description: string;
-      totalCost: {
-        /** Format: double */
-        prompt_token: number;
-        /** Format: double */
-        completion_token: number;
-      };
     };
     SessionResult: {
       created_at: string;
@@ -1979,6 +2216,314 @@ Json: JsonObject;
         start: string;
       };
     };
+    "ChatCompletionTokenLogprob.TopLogprob": {
+      /** @description The token. */
+      token: string;
+      /**
+       * @description A list of integers representing the UTF-8 bytes representation of the token.
+       * Useful in instances where characters are represented by multiple tokens and
+       * their byte representations must be combined to generate the correct text
+       * representation. Can be `null` if there is no bytes representation for the token.
+       */
+      bytes: number[] | null;
+      /**
+       * Format: double
+       * @description The log probability of this token, if it is within the top 20 most likely
+       * tokens. Otherwise, the value `-9999.0` is used to signify that the token is very
+       * unlikely.
+       */
+      logprob: number;
+    };
+    ChatCompletionTokenLogprob: {
+      /** @description The token. */
+      token: string;
+      /**
+       * @description A list of integers representing the UTF-8 bytes representation of the token.
+       * Useful in instances where characters are represented by multiple tokens and
+       * their byte representations must be combined to generate the correct text
+       * representation. Can be `null` if there is no bytes representation for the token.
+       */
+      bytes: number[] | null;
+      /**
+       * Format: double
+       * @description The log probability of this token, if it is within the top 20 most likely
+       * tokens. Otherwise, the value `-9999.0` is used to signify that the token is very
+       * unlikely.
+       */
+      logprob: number;
+      /**
+       * @description List of the most likely tokens and their log probability, at this token
+       * position. In rare cases, there may be fewer than the number of requested
+       * `top_logprobs` returned.
+       */
+      top_logprobs: components["schemas"]["ChatCompletionTokenLogprob.TopLogprob"][];
+    };
+    /** @description Log probability information for the choice. */
+    "ChatCompletion.Choice.Logprobs": {
+      /** @description A list of message content tokens with log probability information. */
+      content: components["schemas"]["ChatCompletionTokenLogprob"][] | null;
+      /** @description A list of message refusal tokens with log probability information. */
+      refusal: components["schemas"]["ChatCompletionTokenLogprob"][] | null;
+    };
+    /** @description A URL citation when using web search. */
+    "ChatCompletionMessage.Annotation.URLCitation": {
+      /**
+       * Format: double
+       * @description The index of the last character of the URL citation in the message.
+       */
+      end_index: number;
+      /**
+       * Format: double
+       * @description The index of the first character of the URL citation in the message.
+       */
+      start_index: number;
+      /** @description The title of the web resource. */
+      title: string;
+      /** @description The URL of the web resource. */
+      url: string;
+    };
+    /** @description A URL citation when using web search. */
+    "ChatCompletionMessage.Annotation": {
+      /**
+       * @description The type of the URL citation. Always `url_citation`.
+       * @enum {string}
+       */
+      type: "url_citation";
+      /** @description A URL citation when using web search. */
+      url_citation: components["schemas"]["ChatCompletionMessage.Annotation.URLCitation"];
+    };
+    /**
+     * @description If the audio output modality is requested, this object contains data about the
+     * audio response from the model.
+     * [Learn more](https://platform.openai.com/docs/guides/audio).
+     */
+    ChatCompletionAudio: {
+      /** @description Unique identifier for this audio response. */
+      id: string;
+      /**
+       * @description Base64 encoded audio bytes generated by the model, in the format specified in
+       * the request.
+       */
+      data: string;
+      /**
+       * Format: double
+       * @description The Unix timestamp (in seconds) for when this audio response will no longer be
+       * accessible on the server for use in multi-turn conversations.
+       */
+      expires_at: number;
+      /** @description Transcript of the audio generated by the model. */
+      transcript: string;
+    };
+    /** @deprecated */
+    "ChatCompletionMessage.FunctionCall": {
+      /**
+       * @description The arguments to call the function with, as generated by the model in JSON
+       * format. Note that the model does not always generate valid JSON, and may
+       * hallucinate parameters not defined by your function schema. Validate the
+       * arguments in your code before calling your function.
+       */
+      arguments: string;
+      /** @description The name of the function to call. */
+      name: string;
+    };
+    /** @description The function that the model called. */
+    "ChatCompletionMessageToolCall.Function": {
+      /**
+       * @description The arguments to call the function with, as generated by the model in JSON
+       * format. Note that the model does not always generate valid JSON, and may
+       * hallucinate parameters not defined by your function schema. Validate the
+       * arguments in your code before calling your function.
+       */
+      arguments: string;
+      /** @description The name of the function to call. */
+      name: string;
+    };
+    ChatCompletionMessageToolCall: {
+      /** @description The ID of the tool call. */
+      id: string;
+      /** @description The function that the model called. */
+      function: components["schemas"]["ChatCompletionMessageToolCall.Function"];
+      /**
+       * @description The type of the tool. Currently, only `function` is supported.
+       * @enum {string}
+       */
+      type: "function";
+    };
+    /** @description A chat completion message generated by the model. */
+    ChatCompletionMessage: {
+      /** @description The contents of the message. */
+      content: string | null;
+      /** @description The refusal message generated by the model. */
+      refusal: string | null;
+      /**
+       * @description The role of the author of this message.
+       * @enum {string}
+       */
+      role: "assistant";
+      /**
+       * @description Annotations for the message, when applicable, as when using the
+       * [web search tool](https://platform.openai.com/docs/guides/tools-web-search?api-mode=chat).
+       */
+      annotations?: components["schemas"]["ChatCompletionMessage.Annotation"][];
+      /**
+       * @description If the audio output modality is requested, this object contains data about the
+       * audio response from the model.
+       * [Learn more](https://platform.openai.com/docs/guides/audio).
+       */
+      audio?: components["schemas"]["ChatCompletionAudio"] | null;
+      /** @deprecated */
+      function_call?: components["schemas"]["ChatCompletionMessage.FunctionCall"] | null;
+      /** @description The tool calls generated by the model, such as function calls. */
+      tool_calls?: components["schemas"]["ChatCompletionMessageToolCall"][];
+    };
+    "ChatCompletion.Choice": {
+      /**
+       * @description The reason the model stopped generating tokens. This will be `stop` if the model
+       * hit a natural stop point or a provided stop sequence, `length` if the maximum
+       * number of tokens specified in the request was reached, `content_filter` if
+       * content was omitted due to a flag from our content filters, `tool_calls` if the
+       * model called a tool, or `function_call` (deprecated) if the model called a
+       * function.
+       * @enum {string}
+       */
+      finish_reason: "stop" | "length" | "tool_calls" | "content_filter" | "function_call";
+      /**
+       * Format: double
+       * @description The index of the choice in the list of choices.
+       */
+      index: number;
+      /** @description Log probability information for the choice. */
+      logprobs: components["schemas"]["ChatCompletion.Choice.Logprobs"] | null;
+      /** @description A chat completion message generated by the model. */
+      message: components["schemas"]["ChatCompletionMessage"];
+    };
+    /** @description Breakdown of tokens used in a completion. */
+    "CompletionUsage.CompletionTokensDetails": {
+      /**
+       * Format: double
+       * @description When using Predicted Outputs, the number of tokens in the prediction that
+       * appeared in the completion.
+       */
+      accepted_prediction_tokens?: number;
+      /**
+       * Format: double
+       * @description Audio input tokens generated by the model.
+       */
+      audio_tokens?: number;
+      /**
+       * Format: double
+       * @description Tokens generated by the model for reasoning.
+       */
+      reasoning_tokens?: number;
+      /**
+       * Format: double
+       * @description When using Predicted Outputs, the number of tokens in the prediction that did
+       * not appear in the completion. However, like reasoning tokens, these tokens are
+       * still counted in the total completion tokens for purposes of billing, output,
+       * and context window limits.
+       */
+      rejected_prediction_tokens?: number;
+    };
+    /** @description Breakdown of tokens used in the prompt. */
+    "CompletionUsage.PromptTokensDetails": {
+      /**
+       * Format: double
+       * @description Audio input tokens present in the prompt.
+       */
+      audio_tokens?: number;
+      /**
+       * Format: double
+       * @description Cached tokens present in the prompt.
+       */
+      cached_tokens?: number;
+    };
+    /** @description Usage statistics for the completion request. */
+    CompletionUsage: {
+      /**
+       * Format: double
+       * @description Number of tokens in the generated completion.
+       */
+      completion_tokens: number;
+      /**
+       * Format: double
+       * @description Number of tokens in the prompt.
+       */
+      prompt_tokens: number;
+      /**
+       * Format: double
+       * @description Total number of tokens used in the request (prompt + completion).
+       */
+      total_tokens: number;
+      /** @description Breakdown of tokens used in a completion. */
+      completion_tokens_details?: components["schemas"]["CompletionUsage.CompletionTokensDetails"];
+      /** @description Breakdown of tokens used in the prompt. */
+      prompt_tokens_details?: components["schemas"]["CompletionUsage.PromptTokensDetails"];
+    };
+    /**
+     * @description Represents a chat completion response returned by model, based on the provided
+     * input.
+     */
+    ChatCompletion: {
+      /** @description A unique identifier for the chat completion. */
+      id: string;
+      /**
+       * @description A list of chat completion choices. Can be more than one if `n` is greater
+       * than 1.
+       */
+      choices: components["schemas"]["ChatCompletion.Choice"][];
+      /**
+       * Format: double
+       * @description The Unix timestamp (in seconds) of when the chat completion was created.
+       */
+      created: number;
+      /** @description The model used for the chat completion. */
+      model: string;
+      /**
+       * @description The object type, which is always `chat.completion`.
+       * @enum {string}
+       */
+      object: "chat.completion";
+      /**
+       * @description Specifies the latency tier to use for processing the request. This parameter is
+       * relevant for customers subscribed to the scale tier service:
+       *
+       * - If set to 'auto', and the Project is Scale tier enabled, the system will
+       *   utilize scale tier credits until they are exhausted.
+       * - If set to 'auto', and the Project is not Scale tier enabled, the request will
+       *   be processed using the default service tier with a lower uptime SLA and no
+       *   latency guarentee.
+       * - If set to 'default', the request will be processed using the default service
+       *   tier with a lower uptime SLA and no latency guarentee.
+       * - If set to 'flex', the request will be processed with the Flex Processing
+       *   service tier.
+       *   [Learn more](https://platform.openai.com/docs/guides/flex-processing).
+       * - When not set, the default behavior is 'auto'.
+       *
+       * When this parameter is set, the response body will include the `service_tier`
+       * utilized.
+       * @enum {string|null}
+       */
+      service_tier?: "auto" | "default" | "flex" | null;
+      /**
+       * @description This fingerprint represents the backend configuration that the model runs with.
+       *
+       * Can be used in conjunction with the `seed` request parameter to understand when
+       * backend changes have been made that might impact determinism.
+       */
+      system_fingerprint?: string;
+      /** @description Usage statistics for the completion request. */
+      usage?: components["schemas"]["CompletionUsage"];
+    };
+    "ResultSuccess_ChatCompletion-or-_content-string--reasoning-string--calls-any__": {
+      data: components["schemas"]["ChatCompletion"] | {
+        calls: unknown;
+        reasoning: string;
+        content: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ChatCompletion-or-_content-string--reasoning-string--calls-any_.string_": components["schemas"]["ResultSuccess_ChatCompletion-or-_content-string--reasoning-string--calls-any__"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__apiKey-string__": {
       data: {
         apiKey: string;
@@ -2150,6 +2695,90 @@ Json: JsonObject;
       error: null;
     };
     "Result_Array__id-string--name-string__.string_": components["schemas"]["ResultSuccess_Array__id-string--name-string___"] | components["schemas"]["ResultError_string_"];
+    ClickHouseTableColumn: {
+      name: string;
+      type: string;
+      default_type?: string;
+      default_expression?: string;
+      comment?: string;
+      codec_expression?: string;
+      ttl_expression?: string;
+    };
+    ClickHouseTableSchema: {
+      table_name: string;
+      columns: components["schemas"]["ClickHouseTableColumn"][];
+    };
+    "ResultSuccess_ClickHouseTableSchema-Array_": {
+      data: components["schemas"]["ClickHouseTableSchema"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ClickHouseTableSchema-Array.string_": components["schemas"]["ResultSuccess_ClickHouseTableSchema-Array_"] | components["schemas"]["ResultError_string_"];
+    ExecuteSqlResponse: {
+      /** Format: double */
+      rowCount: number;
+      /** Format: double */
+      size: number;
+      /** Format: double */
+      elapsedMilliseconds: number;
+      rows: components["schemas"]["Record_string.any_"][];
+    };
+    ResultSuccess_ExecuteSqlResponse_: {
+      data: components["schemas"]["ExecuteSqlResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ExecuteSqlResponse.string_": components["schemas"]["ResultSuccess_ExecuteSqlResponse_"] | components["schemas"]["ResultError_string_"];
+    ExecuteSqlRequest: {
+      sql: string;
+    };
+    HqlSavedQuery: {
+      id: string;
+      organization_id: string;
+      name: string;
+      sql: string;
+      created_at: string;
+      updated_at: string;
+    };
+    ResultSuccess_Array_HqlSavedQuery__: {
+      data: components["schemas"]["HqlSavedQuery"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Array_HqlSavedQuery_.string_": components["schemas"]["ResultSuccess_Array_HqlSavedQuery__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_HqlSavedQuery-or-null_": {
+      data: components["schemas"]["HqlSavedQuery"] | null;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_HqlSavedQuery-or-null.string_": components["schemas"]["ResultSuccess_HqlSavedQuery-or-null_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_void_: {
+      data: unknown;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_void.string_": components["schemas"]["ResultSuccess_void_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_HqlSavedQuery-Array_": {
+      data: components["schemas"]["HqlSavedQuery"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_HqlSavedQuery-Array.string_": components["schemas"]["ResultSuccess_HqlSavedQuery-Array_"] | components["schemas"]["ResultError_string_"];
+    CreateSavedQueryRequest: {
+      name: string;
+      sql: string;
+    };
+    ResultSuccess_HqlSavedQuery_: {
+      data: components["schemas"]["HqlSavedQuery"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_HqlSavedQuery.string_": components["schemas"]["ResultSuccess_HqlSavedQuery_"] | components["schemas"]["ResultError_string_"];
+    UpdateSavedQueryRequest: {
+      name: string;
+      sql: string;
+      id: string;
+    };
     "ResultSuccess__tableId-string--experimentId-string__": {
       data: {
         experimentId: string;
@@ -2470,6 +3099,43 @@ Json: JsonObject;
       /** @enum {number|null} */
       error: null;
     };
+    RouterConfig: {
+      lastUpdatedAt: string;
+      latestVersion: string;
+      name: string;
+      id: string;
+    };
+    "ResultSuccess__routerConfigs-RouterConfig-Array__": {
+      data: {
+        routerConfigs: components["schemas"]["RouterConfig"][];
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__routerConfigs-RouterConfig-Array_.string_": components["schemas"]["ResultSuccess__routerConfigs-RouterConfig-Array__"] | components["schemas"]["ResultError_string_"];
+    LatestRouterConfig: {
+      config: string;
+      version: string;
+      name: string;
+      id: string;
+    };
+    ResultSuccess_LatestRouterConfig_: {
+      data: components["schemas"]["LatestRouterConfig"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_LatestRouterConfig.string_": components["schemas"]["ResultSuccess_LatestRouterConfig_"] | components["schemas"]["ResultError_string_"];
+    CreateRouterConfigResult: {
+      apiKey: string;
+      routerVersionId: string;
+      routerConfigId: string;
+    };
+    ResultSuccess_CreateRouterConfigResult_: {
+      data: components["schemas"]["CreateRouterConfigResult"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_CreateRouterConfigResult.string_": components["schemas"]["ResultSuccess_CreateRouterConfigResult_"] | components["schemas"]["ResultError_string_"];
     Eval: {
       name: string;
       /** Format: double */
@@ -2696,6 +3362,20 @@ Json: JsonObject;
       error: null;
     };
     "Result__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array.string_": components["schemas"]["ResultSuccess__api_key_hash-string--api_key_name-string--created_at-string--governance-boolean--id-number--key_permissions-string--organization_id-string--soft_delete-boolean--temp_key-boolean--user_id-string_-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array_": {
+      data: {
+          updated_at: string;
+          created_at: string;
+          message: string;
+          title: string;
+          active: boolean;
+          /** Format: double */
+          id: number;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array.string_": components["schemas"]["ResultSuccess__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array_"] | components["schemas"]["ResultError_string_"];
   };
   responses: {
   };
@@ -2864,7 +3544,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result__users-UserMetricsResult-Array--count-number_.string_"];
+          "application/json": components["schemas"]["Result__users-UserMetricsResult-Array--count-number--hasUsers-boolean_.string_"];
         };
       };
     };
@@ -3100,6 +3780,223 @@ export interface operations {
       };
     };
   };
+  GetPrompt2025: {
+    parameters: {
+      path: {
+        promptId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025.string_"];
+        };
+      };
+    };
+  };
+  DeletePrompt2025: {
+    parameters: {
+      path: {
+        promptId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  DeletePrompt2025Version: {
+    parameters: {
+      path: {
+        promptId: string;
+        versionId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025Tags: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string-Array.string_"];
+        };
+      };
+    };
+  };
+  CreatePrompt2025: {
+    requestBody: {
+      content: {
+        "application/json": {
+          promptBody: components["schemas"]["OpenAIChatRequest"];
+          tags: string[];
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptCreateResponse.string_"];
+        };
+      };
+    };
+  };
+  UpdatePrompt2025: {
+    requestBody: {
+      content: {
+        "application/json": {
+          promptBody: components["schemas"]["OpenAIChatRequest"];
+          commitMessage: string;
+          setAsProduction: boolean;
+          newMajorVersion: boolean;
+          promptVersionId: string;
+          promptId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-string_.string_"];
+        };
+      };
+    };
+  };
+  SetProductionVersion: {
+    requestBody: {
+      content: {
+        "application/json": {
+          promptVersionId: string;
+          promptId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025Count: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_number.string_"];
+        };
+      };
+    };
+  };
+  GetPrompts2025: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: double */
+          pageSize: number;
+          /** Format: double */
+          page: number;
+          tagsFilter: string[];
+          search: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025-Array.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025Version: {
+    requestBody: {
+      content: {
+        "application/json": {
+          promptVersionId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025Version.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025Versions: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: double */
+          majorVersion?: number;
+          promptId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025Version-Array.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025ProductionVersion: {
+    requestBody: {
+      content: {
+        "application/json": {
+          promptId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025Version.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025TotalVersions: {
+    requestBody: {
+      content: {
+        "application/json": {
+          promptId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionCounts.string_"];
+        };
+      };
+    };
+  };
   GetRequestCount: {
     requestBody: {
       content: {
@@ -3116,22 +4013,8 @@ export interface operations {
     };
   };
   GetRequests: {
-    /** @description Request query filters */
     requestBody: {
       content: {
-        /**
-         * @example {
-         *   "filter": "all",
-         *   "isCached": false,
-         *   "limit": 10,
-         *   "offset": 0,
-         *   "sort": {
-         *     "created_at": "desc"
-         *   },
-         *   "isScored": false,
-         *   "isPartOfExperiment": false
-         * }
-         */
         "application/json": components["schemas"]["RequestQueryParams"];
       };
     };
@@ -3145,23 +4028,8 @@ export interface operations {
     };
   };
   GetRequestsClickhouse: {
-    /** @description Request query filters */
     requestBody: {
       content: {
-        /**
-         * @example {
-         *   "filter": "all",
-         *   "isCached": false,
-         *   "limit": 100,
-         *   "offset": 0,
-         *   "sort": {
-         *     "created_at": "desc"
-         *   },
-         *   "includeInputs": false,
-         *   "isScored": false,
-         *   "isPartOfExperiment": false
-         * }
-         */
         "application/json": components["schemas"]["RequestQueryParams"];
       };
     };
@@ -4014,58 +4882,6 @@ export interface operations {
       };
     };
   };
-  LogCustomTraceLegacy: {
-    requestBody: {
-      content: {
-        "application/json": unknown;
-      };
-    };
-    responses: {
-      /** @description No content */
-      204: {
-        content: never;
-      };
-    };
-  };
-  LogCustomTrace: {
-    requestBody: {
-      content: {
-        "application/json": unknown;
-      };
-    };
-    responses: {
-      /** @description No content */
-      204: {
-        content: never;
-      };
-    };
-  };
-  LogTrace: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["OTELTrace"];
-      };
-    };
-    responses: {
-      /** @description No content */
-      204: {
-        content: never;
-      };
-    };
-  };
-  LogPythonTrace: {
-    requestBody: {
-      content: {
-        "application/json": unknown;
-      };
-    };
-    responses: {
-      /** @description No content */
-      204: {
-        content: never;
-      };
-    };
-  };
   GetCostForPrompts: {
     responses: {
       /** @description Ok */
@@ -4315,6 +5131,58 @@ export interface operations {
       };
     };
   };
+  LogCustomTraceLegacy: {
+    requestBody: {
+      content: {
+        "application/json": unknown;
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
+      };
+    };
+  };
+  LogCustomTrace: {
+    requestBody: {
+      content: {
+        "application/json": unknown;
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
+      };
+    };
+  };
+  LogTrace: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OTELTrace"];
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
+      };
+    };
+  };
+  LogPythonTrace: {
+    requestBody: {
+      content: {
+        "application/json": unknown;
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
+      };
+    };
+  };
   HasSession: {
     responses: {
       /** @description Ok */
@@ -4510,6 +5378,50 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result__value-string--cost-number_-Array.string_"];
+        };
+      };
+    };
+  };
+  Generate: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OpenAIChatRequest"] & {
+          useAIGateway?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ChatCompletion-or-_content-string--reasoning-string--calls-any_.string_"];
+        };
+      };
+    };
+  };
+  GetRequestsThroughHelicone: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_boolean.string_"];
+        };
+      };
+    };
+  };
+  RequestsThroughHelicone: {
+    requestBody: {
+      content: {
+        "application/json": {
+          requestsThroughHelicone: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string.string_"];
         };
       };
     };
@@ -4727,6 +5639,117 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Array__id-string--name-string__.string_"];
+        };
+      };
+    };
+  };
+  /** @description Get ClickHouse schema (tables and columns) */
+  GetClickHouseSchema: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ClickHouseTableSchema-Array.string_"];
+        };
+      };
+    };
+  };
+  ExecuteSql: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ExecuteSqlRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ExecuteSqlResponse.string_"];
+        };
+      };
+    };
+  };
+  DownloadCsv: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ExecuteSqlRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string.string_"];
+        };
+      };
+    };
+  };
+  GetSavedQueries: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Array_HqlSavedQuery_.string_"];
+        };
+      };
+    };
+  };
+  GetSavedQuery: {
+    parameters: {
+      path: {
+        queryId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HqlSavedQuery-or-null.string_"];
+        };
+      };
+    };
+  };
+  DeleteSavedQuery: {
+    parameters: {
+      path: {
+        queryId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_void.string_"];
+        };
+      };
+    };
+  };
+  UpdateSavedQuery: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateSavedQueryRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HqlSavedQuery.string_"];
+        };
+      };
+    };
+  };
+  CreateSavedQuery: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateSavedQueryRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HqlSavedQuery-Array.string_"];
         };
       };
     };
@@ -5353,6 +6376,72 @@ export interface operations {
       };
     };
   };
+  GetRouterConfigs: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__routerConfigs-RouterConfig-Array_.string_"];
+        };
+      };
+    };
+  };
+  CreateRouterConfig: {
+    requestBody: {
+      content: {
+        "application/json": {
+          config: string;
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_CreateRouterConfigResult.string_"];
+        };
+      };
+    };
+  };
+  GetLatestRouterConfig: {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_LatestRouterConfig.string_"];
+        };
+      };
+    };
+  };
+  UpdateRouterConfig: {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          config: string;
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
   QueryEvals: {
     requestBody: {
       content: {
@@ -5774,6 +6863,35 @@ export interface operations {
           "application/json": {
             error: string;
           };
+        };
+      };
+    };
+  };
+  GetAlertBanners: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array.string_"];
+        };
+      };
+    };
+  };
+  UpdateAlertBannerActive: {
+    requestBody: {
+      content: {
+        "application/json": {
+          active: boolean;
+          /** Format: double */
+          id: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_void.string_"];
         };
       };
     };

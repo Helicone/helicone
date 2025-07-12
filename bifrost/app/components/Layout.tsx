@@ -1,5 +1,6 @@
 import Footer from "@/components/layout/footer";
 import NavBar from "@/components/layout/navbar";
+import Banner from "@/components/home/Banner";
 import { getMetadata } from "@/components/templates/blog/getMetaData";
 import { BLOG_CONTENT } from "../blog/page";
 
@@ -21,7 +22,7 @@ export const Layout = async ({
 
   return (
     <>
-      {/* <Banner /> */}
+      <Banner />
 
       <NavBar stars={stars} featuredBlogMetadata={featuredBlogMetadata || {
         title: "Check out our latest blog",

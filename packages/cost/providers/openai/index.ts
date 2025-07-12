@@ -541,6 +541,16 @@ const costs: ModelRow[] = [
   },
   {
     model: {
+      operator: "includes",
+      value: "o1-pro",
+    },
+    cost: {
+      prompt_token: 0.00015,
+      completion_token: 0.0006,
+    }
+  },
+  {
+    model: {
       operator: "equals",
       value: "o3-mini",
     },
@@ -567,11 +577,21 @@ const costs: ModelRow[] = [
       value: "o3-2025-04-16",
     },
     cost: {
-      prompt_token: 0.00001,
-      completion_token: 0.00004,
-      prompt_cache_read_token: 0.0000025,
+      prompt_token: 0.000002,
+      completion_token: 0.000008,
+      prompt_cache_read_token: 0.0000005,
     },
     showInPlayground: true,
+  },
+  {
+    model: {
+      operator: "includes",
+      value: "o3-pro"
+    },
+    cost: {
+      prompt_token: 0.00002,
+      completion_token: 0.00008,
+    }
   },
   {
     model: {
@@ -677,7 +697,7 @@ const costs: ModelRow[] = [
     },
     cost: {
       prompt_token: 0.0000011,
-      completion_token: 0.0000044
+      completion_token: 0.0000044,
     },
     showInPlayground: true,
   },
@@ -688,18 +708,15 @@ const costs: ModelRow[] = [
     },
     cost: {
       prompt_token: 0.0000011,
-      completion_token: 0.0000044
+      completion_token: 0.0000044,
     },
     showInPlayground: true,
-  }
+  },
 ];
 
 const modelDetails: ModelDetailsMap = {
   "gpt-4.1": {
-    matches: [
-      "gpt-4.1",
-      "gpt-4.1-2025-04-14",
-    ],
+    matches: ["gpt-4.1", "gpt-4.1-2025-04-14"],
     searchTerms: ["gpt 4.1", "gpt-4.1", "chat gpt 4.1", "4.1", "chat 4.1"],
     info: {
       maxTokens: 1000000,
@@ -709,7 +726,7 @@ const modelDetails: ModelDetailsMap = {
       tradeOffs: [
         "Higher resource requirements than smaller models",
         "More costly than mini and nano variants",
-        "May be more literal in instruction following"
+        "May be more literal in instruction following",
       ],
       benchmarks: {
         mmlu: 0.902,
@@ -717,42 +734,45 @@ const modelDetails: ModelDetailsMap = {
         swe_bench: 0.546,
         gpqa: 0.663,
         multicballenge: 0.383,
-        ifeval: 0.874
+        ifeval: 0.874,
       },
       capabilities: [
         "Advanced coding skills (54.6% on SWE-bench Verified)",
         "Improved instruction following (38.3% on MultiChallenge)",
         "Long context understanding (1M tokens)",
         "Vision processing capabilities",
-        "Reliable code diff handling"
+        "Reliable code diff handling",
       ],
       strengths: [
         "Superior coding performance (21.4% better than GPT-4o)",
         "Excellent long-context comprehension",
         "Enhanced instruction following reliability",
         "Better frontend coding with aesthetic results",
-        "Less prone to extraneous code edits (2% vs 9% with GPT-4o)"
+        "Less prone to extraneous code edits (2% vs 9% with GPT-4o)",
       ],
       weaknesses: [
         "Can be more literal in instruction following",
         "First token latency of ~15s with 128K tokens",
-        "Requires specific prompting for best results"
+        "Requires specific prompting for best results",
       ],
       recommendations: [
         "Complex software engineering tasks",
         "Working with large codebases",
         "Frontend development and web applications",
         "Multi-document processing (legal, financial)",
-        "Building reliable agents with long contexts"
+        "Building reliable agents with long contexts",
       ],
     },
   },
   "gpt-4.1-mini": {
-    matches: [
+    matches: ["gpt-4.1-mini", "gpt-4.1-mini-2025-04-14"],
+    searchTerms: [
+      "gpt 4.1 mini",
       "gpt-4.1-mini",
-      "gpt-4.1-mini-2025-04-14",
+      "chat gpt 4.1 mini",
+      "4.1 mini",
+      "chat 4.1 mini",
     ],
-    searchTerms: ["gpt 4.1 mini", "gpt-4.1-mini", "chat gpt 4.1 mini", "4.1 mini", "chat 4.1 mini"],
     info: {
       maxTokens: 1000000,
       releaseDate: "2025-04-14",
@@ -761,48 +781,51 @@ const modelDetails: ModelDetailsMap = {
       tradeOffs: [
         "Lower cost than GPT-4.1 ($0.40/1M tokens input vs $2.00/1M)",
         "Reduced latency compared to GPT-4.1",
-        "Better performance-to-cost ratio"
+        "Better performance-to-cost ratio",
       ],
       benchmarks: {
         mmlu: 0.875,
         hellaswag: 0.92,
         mathvista: 0.731,
         gpqa: 0.65,
-        multicballenge: 0.358
+        multicballenge: 0.358,
       },
       capabilities: [
         "Strong coding abilities (23.6% on SWE-bench Verified)",
         "Excellent vision capabilities (often beating GPT-4o)",
         "Long context processing (1M tokens)",
         "Good instruction following",
-        "Efficient resource utilization"
+        "Efficient resource utilization",
       ],
       strengths: [
         "Significantly outperforms GPT-4o mini",
         "Matches or exceeds GPT-4o on intelligence evaluations",
         "Exceptional vision performance (73.1% on MathVista)",
         "Lower latency with large context windows",
-        "Cost-effective for production deployments"
+        "Cost-effective for production deployments",
       ],
       weaknesses: [
         "Lower performance on complex coding tasks than GPT-4.1",
-        "Reduced function calling capability (49.3% on ComplexFuncBench)"
+        "Reduced function calling capability (49.3% on ComplexFuncBench)",
       ],
       recommendations: [
         "Production applications requiring good performance-to-cost ratio",
         "Image understanding and visual tasks",
         "Applications with latency requirements",
         "Standard software development tasks",
-        "Cost-sensitive deployments with long context needs"
+        "Cost-sensitive deployments with long context needs",
       ],
     },
   },
   "gpt-4.1-nano": {
-    matches: [
+    matches: ["gpt-4.1-nano", "gpt-4.1-nano-2025-04-14"],
+    searchTerms: [
+      "gpt 4.1 nano",
       "gpt-4.1-nano",
-      "gpt-4.1-nano-2025-04-14",
+      "chat gpt 4.1 nano",
+      "4.1 nano",
+      "chat 4.1 nano",
     ],
-    searchTerms: ["gpt 4.1 nano", "gpt-4.1-nano", "chat gpt 4.1 nano", "4.1 nano", "chat 4.1 nano"],
     info: {
       maxTokens: 1000000,
       releaseDate: "2025-04-14",
@@ -811,40 +834,40 @@ const modelDetails: ModelDetailsMap = {
       tradeOffs: [
         "Lowest cost in the GPT-4.1 series ($0.10/1M tokens input)",
         "Fastest response time (under 5 seconds for 128K tokens)",
-        "Performance trade-off for speed and cost"
+        "Performance trade-off for speed and cost",
       ],
       benchmarks: {
         mmlu: 0.801,
         gpqa: 0.503,
         aider_polyglot: 0.098,
         hellaswag: 0.88,
-        ifeval: 0.745
+        ifeval: 0.745,
       },
       capabilities: [
         "Fast response time (first token in <5s for 128K tokens)",
         "Long context window (1M tokens)",
         "Basic vision capabilities",
         "Classification and autocompletion tasks",
-        "Simple instruction following"
+        "Simple instruction following",
       ],
       strengths: [
         "Outperforms GPT-4o mini on key benchmarks",
         "Extremely cost-effective",
         "Lowest latency of the GPT-4.1 family",
         "Ideal for high-volume, latency-sensitive applications",
-        "Cost-efficient for classification tasks"
+        "Cost-efficient for classification tasks",
       ],
       weaknesses: [
         "Limited complex reasoning compared to larger models",
         "Poor function calling ability (0.6% on ComplexFuncBench)",
-        "Basic coding capabilities"
+        "Basic coding capabilities",
       ],
       recommendations: [
         "Classification tasks",
         "Autocompletion features",
         "High-volume production deployments",
         "Applications with strict latency requirements",
-        "Cost-sensitive implementations"
+        "Cost-sensitive implementations",
       ],
     },
   },

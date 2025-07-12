@@ -1,3 +1,4 @@
+import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 import {
   DataIsBeautifulRequestBody,
   ModelBreakdown,
@@ -18,7 +19,6 @@ import {
 } from "../controllers/public/dataIsBeautifulController";
 import { clickhouseDb } from "../lib/db/ClickhouseWrapper";
 import { Result, err, ok } from "../packages/common/result";
-import { clickhousePriceCalc } from "../packages/cost";
 
 function andCondition(...conditions: string[]): string {
   return conditions.filter(Boolean).join(" AND ");
@@ -119,9 +119,6 @@ export class DataIsBeautifulManager {
       filters.provider ? [filters.provider] : undefined
     );
 
-    // Generate the cost calculation using the clickhousePriceCalc function
-    const costCalculation = clickhousePriceCalc("request_response_rmt");
-
     const query = `
   WITH
     request_data AS (
@@ -135,7 +132,7 @@ export class DataIsBeautifulManager {
           END`
             : "model"
         } AS matched_model,
-        ${costCalculation} AS cost,
+        sum(cost) / ${COST_PRECISION_MULTIPLIER} AS cost,
         model
       FROM request_response_rmt rrv
       WHERE 
@@ -444,10 +441,9 @@ export class DataIsBeautifulManager {
   }
 
   private async getTotalCost(): Promise<number> {
-    const costQuery = clickhousePriceCalc("request_response_rmt");
     const query = `
     SELECT
-      ${costQuery} AS total_cost
+      sum(cost) / ${COST_PRECISION_MULTIPLIER} AS total_cost
     FROM request_response_rmt
     WHERE status = 200
     `;

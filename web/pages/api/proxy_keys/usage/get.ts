@@ -3,9 +3,9 @@ import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../../lib/api/handlerWrappers";
-import { Result } from "../../../../packages/common/result";
-import { clickhousePriceCalc } from "../../../../packages/cost";
+import { Result } from "@/packages/common/result";
 import { DecryptedProviderKeyMapping } from "../../../../services/lib/keys";
+import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 import { Permission } from "../../../../services/lib/user";
 import { LimitUsageResult } from "./LimitUsageResult";
 const generateSubquery = (
@@ -19,7 +19,7 @@ const generateSubquery = (
   return `
     (
       SELECT count(*) as count,
-      ${clickhousePriceCalc("request_response_rmt")} as cost
+      sum(cost) / ${COST_PRECISION_MULTIPLIER} AS cost
       FROM request_response_rmt
       WHERE (
         request_response_rmt.request_created_at >= now() - INTERVAL {${secondsVal} : Int32} SECOND

@@ -4,6 +4,7 @@ import { Result } from "../../util/results";
 
 export interface MessageProducer {
   sendMessage(msg: MessageData): Promise<Result<null, string>>;
+  setLowerPriority(): void;
 }
 
 export type HeliconeMeta = {
@@ -44,6 +45,11 @@ export type Log = {
     heliconeTemplate?: TemplateWithInputs;
     experimentColumnId?: string;
     experimentRowIndex?: string;
+    cacheEnabled?: boolean;
+    cacheSeed?: number;
+    cacheBucketMaxSize?: number;
+    cacheControl?: string;
+    cacheReferenceId?: string;
   };
   response: {
     id: string;
@@ -52,5 +58,6 @@ export type Log = {
     timeToFirstToken?: number;
     responseCreatedAt: Date;
     delayMs: number;
+    cachedLatency?: number;
   };
 };

@@ -1,0 +1,49 @@
+# fly.toml app configuration file generated for rockstar-tempo on 2024-09-06T16:47:29-07:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'rockstar-tempo'
+primary_region = 'sjc'
+
+[experimental]
+  cmd = ['-config.file=/etc/tempo.yaml']
+
+[build]
+  image = 'grafana/tempo:2.5.0'
+
+[[mounts]]
+  source = 'tempo_storage_1'
+  destination = '/var/lib/tempo'
+  initial_size = "10gb"
+
+[[services]]
+  protocol = 'tcp'
+  internal_port = 3200
+  ports = []
+
+  [[services.http_checks]]
+    interval = '15s'
+    timeout = '3s'
+    grace_period = '1m0s'
+    path = '/ready'
+    protocol = 'http'
+    tls_skip_verify = true
+
+[[services]]
+  protocol = 'tcp'
+  internal_port = 4317
+  ports = []
+
+[[files]]
+  guest_path = '/etc/tempo.yaml'
+  local_path = './config-production.yaml'
+
+[[vm]]
+  memory = '512mb'
+  cpu_kind = 'shared'
+  cpus = 1
+
+[[metrics]]
+  port = 3200
+  path = '/metrics'

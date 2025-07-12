@@ -10,9 +10,9 @@ import {
   REQUEST_TABLE_FILTERS,
   SingleFilterDef,
   getPropertyFiltersV2,
-} from "../../../services/lib/filters/frontendFilterDefs";
+} from "@helicone-package/filters/frontendFilterDefs";
 import ExportButton from "../../shared/themed/table/exportButton";
-import { UIFilterRow } from "@/services/lib/filters/types";
+import { UIFilterRow } from "@helicone-package/filters/types";
 import ThemedTableHeader from "../../shared/themed/themedHeader";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import { formatNumber } from "../users/initialColumns";

@@ -4,13 +4,13 @@ import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import {
   FilterLeaf,
   FilterLeafSubset,
-  filterListToTree,
-} from "../../lib/shared/filters/filterDefs";
-import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
+} from "@helicone-package/filters/filterDefs";
+import { filterListToTree } from "@helicone-package/filters/helpers";
+import { buildFilterWithAuthClickHouse } from "@helicone-package/filters/filters";
 import { Result } from "../../packages/common/result";
 import { PSize, SortLeafUsers, UserManager } from "../../managers/UserManager";
-import { clickhousePriceCalc } from "../../packages/cost";
-import { JawnAuthenticatedRequest } from "../../types/request";
+import type { JawnAuthenticatedRequest } from "../../types/request";
+import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 
 export interface UserQueryParams {
   userIds?: string[];
@@ -27,7 +27,7 @@ export type UserFilterBranch = {
 };
 
 type UserFilterNode =
-  | FilterLeafSubset<"user_metrics" | "request_response_rmt">
+  | FilterLeafSubset<"users_view" | "request_response_rmt">
   | UserFilterBranch
   | "all";
 export interface UserMetricsQueryParams {
@@ -82,7 +82,7 @@ export class UserController extends Controller {
     @Body()
     requestBody: UserMetricsQueryParams,
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<{ users: UserMetricsResult[]; count: number }, string>> {
+  ): Promise<Result<{ users: UserMetricsResult[]; count: number; hasUsers: boolean }, string>> {
     const userManager = new UserManager(request.authParams);
     if (requestBody.limit > 1000) {
       this.setStatus(400);
@@ -171,7 +171,7 @@ export class UserController extends Controller {
       sum(prompt_tokens) as prompt_tokens, 
       sum(completion_tokens) as completion_tokens, 
       user_id,
-      ${clickhousePriceCalc("request_response_rmt")} as cost_usd
+      sum(cost) / ${COST_PRECISION_MULTIPLIER} as cost_usd
       from request_response_rmt
     WHERE (
       ${filter.filter}

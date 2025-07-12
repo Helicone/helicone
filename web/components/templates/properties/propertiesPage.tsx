@@ -12,7 +12,7 @@ import { LockIcon, Tag } from "lucide-react";
 import { useRouter } from "next/router";
 import { useEffect, useMemo } from "react";
 import { useGetPropertiesV2 } from "../../../services/hooks/propertiesV2";
-import { getPropertyFiltersV2 } from "../../../services/lib/filters/frontendFilterDefs";
+import { getPropertyFiltersV2 } from "@helicone-package/filters/frontendFilterDefs";
 import PropertyPanel from "./propertyPanel";
 
 const PropertiesPage = (props: { initialPropertyKey?: string }) => {

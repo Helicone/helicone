@@ -1,9 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
 import { Env, hash } from "../../..";
 import { HeliconeProxyRequest } from "../../models/HeliconeProxyRequest";
-import { ClickhouseClientWrapper } from "../../db/ClickhouseWrapper";
+import { ClickhouseClientWrapper, RequestResponseRMT } from "../../db/ClickhouseWrapper";
 import { Database } from "../../../../supabase/database.types";
 import { safePut } from "../../safePut";
+import { DBLoggable } from "../../dbLogger/DBLoggable";
 const CACHE_BACKOFF_RETRIES = 5;
 
 function isGoogleAuthHeader(value: string): boolean {
@@ -45,13 +46,14 @@ interface SaveToCacheOptions {
   request: HeliconeProxyRequest;
   response: Response;
   responseBody: string[];
+  responseLatencyMs: number;
   cacheControl: string;
   settings: { bucketSize: number };
   cacheKv: KVNamespace;
   cacheSeed: string | null;
 }
 
-async function trySaveToCache(options: SaveToCacheOptions) {
+async function trySaveToCache(options: SaveToCacheOptions): Promise<boolean> {
   try {
     const {
       request,
@@ -77,6 +79,7 @@ async function trySaveToCache(options: SaveToCacheOptions) {
         keyName: await kvKeyFromRequest(request, freeIndexes[0], cacheSeed),
         value: JSON.stringify({
           headers: Object.fromEntries(response.headers.entries()),
+          latency: options.responseLatencyMs,
           body: responseBody,
         }),
         options: {
@@ -96,84 +99,19 @@ async function trySaveToCache(options: SaveToCacheOptions) {
   }
 }
 
-async function saveToCacheBackoff(options: SaveToCacheOptions) {
+async function saveToCacheBackoff(options: SaveToCacheOptions): Promise<boolean> {
   for (let i = 0; i < CACHE_BACKOFF_RETRIES; i++) {
     const result = await trySaveToCache(options);
-    if (result) {
-      return;
-    }
+    if (result) return result;
     await new Promise((resolve) => setTimeout(resolve, 1000 * 2 ** i));
   }
+  return false;
 }
 
-export async function saveToCache(options: SaveToCacheOptions): Promise<void> {
-  await saveToCacheBackoff(options);
+export async function saveToCache(options: SaveToCacheOptions): Promise<boolean> {
+  return await saveToCacheBackoff(options);
 }
 
-export async function recordCacheHit(
-  headers: Headers,
-  env: Env,
-  clickhouseDb: ClickhouseClientWrapper,
-  organizationId: string,
-  provider: string,
-  countryCode: string | null
-): Promise<void> {
-  const requestId = headers.get("helicone-id");
-  if (!requestId) {
-    console.error("No request id found in cache hit");
-    return;
-  }
-  // Dual writing for now
-  const dbClient = createClient<Database>(
-    env.SUPABASE_URL,
-    env.SUPABASE_SERVICE_ROLE_KEY
-  );
-
-  // const { error } = await dbClient
-  //   .from("cache_hits")
-  //   .insert({ request_id: requestId, organization_id: organizationId });
-
-  // if (error) {
-  //   console.error(error);
-  // }
-
-  const { data: response, error: responseError } = await dbClient
-    .from("response")
-    .select("*")
-    .eq("request", requestId)
-    .single();
-
-  if (responseError) {
-    console.error(responseError);
-  }
-
-  const model = (response?.body as { model: string })?.model ?? null;
-  const promptTokens = response?.prompt_tokens ?? 0;
-  const completionTokens = response?.completion_tokens ?? 0;
-  const latency = response?.delay_ms ?? 0;
-
-  if (organizationId !== "ba195205-9d19-42de-9317-b479c20ed6ae") {
-    const { error: clickhouseError } = await clickhouseDb.dbInsertClickhouse(
-      "cache_hits",
-      [
-        {
-          request_id: requestId,
-          organization_id: organizationId,
-          prompt_tokens: promptTokens,
-          completion_tokens: completionTokens,
-          model: model ?? "",
-          latency: latency,
-          created_at: null,
-          provider,
-          country_code: countryCode,
-        },
-      ]
-    );
-    if (clickhouseError) {
-      console.error(clickhouseError);
-    }
-  }
-}
 export async function getCachedResponse(
   request: HeliconeProxyRequest,
   settings: { bucketSize: number },
@@ -191,6 +129,7 @@ export async function getCachedResponse(
     ])) as {
       requests: {
         headers: Record<string, string>;
+        latency: number;
         body: string[];
       }[];
       freeIndexes: number[];
@@ -207,6 +146,9 @@ export async function getCachedResponse(
         "Helicone-Cache-Bucket-Idx",
         cacheIdx.toString()
       );
+      cachedResponseHeaders.append(
+        "Helicone-Cache-Latency", randomCache.latency ? randomCache.latency.toString() : "0"
+      )
 
       const cachedStream = new ReadableStream({
         start(controller) {
@@ -251,6 +193,7 @@ async function getMaxCachedResponses(
       const requestCache = await kvKeyFromRequest(request, idx, cacheSeed);
       return cacheKv.get<{
         headers: Record<string, string>;
+        latency: number;
         body: string[];
       }>(requestCache, { type: "json" });
     })
@@ -259,6 +202,7 @@ async function getMaxCachedResponses(
   return {
     requests: previouslyCachedReqs.filter((r) => r !== null) as {
       headers: Record<string, string>;
+      latency: number;
       body: string[];
     }[],
     freeIndexes: previouslyCachedReqs

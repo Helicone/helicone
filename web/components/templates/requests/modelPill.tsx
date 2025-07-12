@@ -1,5 +1,5 @@
-import { MapperType } from "@/packages/llm-mapper/types";
-import { getMapperType } from "@/packages/llm-mapper/utils/getMapperType";
+import { MapperType } from "@helicone-package/llm-mapper/types";
+import { getMapperType } from "@helicone-package/llm-mapper/utils/getMapperType";
 import { clsx } from "../../shared/clsx";
 
 interface ModelPillProps {
@@ -44,8 +44,8 @@ const ModelPill = (props: ModelPillProps) => {
   return (
     <span
       className={clsx(
-        modelMapping[builderType] || "bg-gray-50 text-gray-700 ring-gray-200",
-        `w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset`
+        modelMapping[builderType] || "bg-gray-50 text-gray-700 ring-gray-200 truncate",
+        `w-max items-center rounded-lg px-2 py-1 -my-1 text-xs font-medium ring-1 ring-inset truncate`
       )}
     >
       {model && model !== "" ? model : "Unsupported"}

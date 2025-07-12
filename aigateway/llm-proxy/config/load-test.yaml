@@ -1,0 +1,16 @@
+providers:
+  openai:
+    base-url: "http://localhost:8100"
+  anthropic:
+    base-url: "http://localhost:8101"
+  gemini:
+    base-url: "http://localhost:8102"
+
+minio:
+  host: "http://localhost:8103"
+
+helicone:
+  base-url: "http://localhost:8104"
+
+telemetry:
+  level: info

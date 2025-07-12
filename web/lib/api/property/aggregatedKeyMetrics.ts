@@ -1,9 +1,9 @@
-import { clickhousePriceCalc } from "../../../packages/cost";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
-import { timeFilterToFilterNode } from "@/services/lib/filters/helpers/filterFunctions";
-import { buildFilterWithAuthClickHousePropertiesV2 } from "../../../services/lib/filters/filters";
-import { resultMap } from "../../../packages/common/result";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
+import { timeFilterToFilterNode } from "@helicone-package/filters/helpers";
+import { buildFilterWithAuthClickHousePropertiesV2 } from "@helicone-package/filters/filters";
+import { resultMap } from "@/packages/common/result";
 import { dbQueryClickhouse } from "../db/dbExecute";
+import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 
 export async function getAggregatedKeyMetrics(
   filter: FilterNode,
@@ -55,7 +55,7 @@ export async function getAggregatedKeyMetrics(
     sum(request_response_rmt.completion_tokens) / count(*) AS avg_completion_tokens_per_request,
     sum(request_response_rmt.prompt_tokens) / count(*) AS avg_prompt_tokens_per_request,
     sum(request_response_rmt.latency) / count(*) AS avg_latency_per_request,
-    ${clickhousePriceCalc("request_response_rmt")} AS total_cost
+    sum(cost) / ${COST_PRECISION_MULTIPLIER} AS total_cost
   FROM request_response_rmt
   ARRAY JOIN mapValues(properties) AS value, mapKeys(properties) AS key
   WHERE (

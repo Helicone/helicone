@@ -4,13 +4,7 @@ import { useFilterAST } from "@/filterAST/context/filterContext";
 import { FilterExpression } from "@/filterAST/filterAst";
 import { toFilterNode } from "@/filterAST/toFilterNode";
 import { getJawnClient } from "@/lib/clients/jawn";
-import { getTimeMap } from "../../lib/timeCalculations/constants";
-import { filterListToTree } from "../lib/filters/filterListToTree";
-import {
-  DASHBOARD_PAGE_TABLE_FILTERS,
-  SingleFilterDef,
-} from "../lib/filters/frontendFilterDefs";
-import { filterUIToFilterLeafs } from "../lib/filters/helpers/filterFunctions";
+import { TimeFilter } from "@/types/timeFilter";
 
 const useUserId = (userId: string) => {
   const org = useOrg();
@@ -19,21 +13,10 @@ const useUserId = (userId: string) => {
     queryKey: ["users", userId],
     queryFn: async (query) => {
       const userId = query.queryKey[1] as string;
-      const filterMap = DASHBOARD_PAGE_TABLE_FILTERS as SingleFilterDef<any>[];
-
-      const userFilters = filterUIToFilterLeafs(filterMap, []).concat([
-        {
-          request_response_rmt: {
-            user_id: {
-              equals: userId,
-            },
-          },
-        },
-      ]);
 
       const timeFilter = {
-        start: new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000),
-        end: new Date(),
+        start: new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+        end: new Date().toISOString(),
       };
 
       const [response, requestOverTime, costOverTime] = await Promise.all([
@@ -51,6 +34,10 @@ const useUserId = (userId: string) => {
             sort: {
               last_active: "desc",
             },
+            timeFilter: {
+              startTimeUnixSeconds: Math.floor(new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000).getTime() / 1000),
+              endTimeUnixSeconds: Math.floor(new Date().getTime() / 1000),
+            },
             timeZoneDifferenceMinutes: new Date().getTimezoneOffset(),
           },
         }),
@@ -60,61 +47,58 @@ const useUserId = (userId: string) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            timeFilter: {
-              start: timeFilter.start.toISOString(),
-              end: timeFilter.end.toISOString(),
+            timeFilter,
+            filter: {
+              request_response_rmt: {
+                user_id: {
+                  equals: userId,
+                },
+              },
             },
-            filter: filterListToTree(userFilters, "and"),
             apiKeyFilter: null,
             dbIncrement: "day",
             timeZoneDifference: new Date().getTimezoneOffset(),
           }),
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            const cleaned = data.data.map((d: any) => ({
-              requests: +d.count,
-              date: getTimeMap("day")(new Date(d.time)),
-            }));
-            return cleaned;
-            // setUserRequests(cleaned);
-          })
-          .catch((err) => {
-            console.error(err);
-          }),
+        }).then((res) => res.json()),
         fetch("/api/metrics/costOverTime", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            timeFilter: {
-              start: timeFilter.start.toISOString(),
-              end: timeFilter.end.toISOString(),
+            timeFilter,
+            filter: {
+              request_response_rmt: {
+                user_id: {
+                  equals: userId,
+                },
+              },
             },
-            filter: filterListToTree(userFilters, "and"),
             apiKeyFilter: null,
             dbIncrement: "day",
             timeZoneDifference: new Date().getTimezoneOffset(),
           }),
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            const cleaned = data.data.map((d: any) => ({
-              cost: +d.cost,
-              date: getTimeMap("day")(new Date(d.time)),
-            }));
-            return cleaned;
-          })
-          .catch((err) => {
-            console.error(err);
-          }),
+        }).then((res) => res.json()),
       ]);
 
       return {
         response,
-        requestOverTime,
-        costOverTime,
+        requestOverTime: requestOverTime?.data?.map((d: any) => ({
+          requests: +d.count,
+          date: new Date(d.time).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          }),
+        })),
+        costOverTime: costOverTime?.data?.map((d: any) => ({
+          cost: +d.cost,
+          date: new Date(d.time).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          }),
+        })),
       };
     },
     refetchOnWindowFocus: false,
@@ -139,10 +123,10 @@ const useUserId = (userId: string) => {
 const useUsers = (
   currentPage: number,
   currentPageSize: number,
-  sortLeaf: any
+  sortLeaf: any,
+  timeFilter: TimeFilter
 ) => {
   const org = useOrg();
-
   const filter = useFilterAST();
 
   const userMetrics = useQuery({
@@ -153,6 +137,7 @@ const useUsers = (
       sortLeaf,
       org?.currentOrg?.id,
       filter.store.filter,
+      timeFilter,
     ],
     queryFn: async (query) => {
       const currentPage = query.queryKey[1] as number;
@@ -160,9 +145,9 @@ const useUsers = (
       const sortLeaf = query.queryKey[3];
       const orgId = query.queryKey[4] as string;
       const filter = query.queryKey[5] as FilterExpression | null;
+      const timeFilter = query.queryKey[6] as TimeFilter;
 
       const jawn = getJawnClient(orgId);
-
       const filterNode = filter ? toFilterNode(filter) : "all";
 
       const result = await jawn.POST("/v1/user/metrics/query", {
@@ -171,13 +156,18 @@ const useUsers = (
           offset: (currentPage - 1) * currentPageSize,
           limit: currentPageSize,
           sort: sortLeaf,
+          timeFilter: {
+            startTimeUnixSeconds: Math.floor(timeFilter.start.getTime() / 1000),
+            endTimeUnixSeconds: Math.floor(timeFilter.end.getTime() / 1000),
+          },
           timeZoneDifferenceMinutes: new Date().getTimezoneOffset(),
-        },
+        }
       });
+
       if (result.error || result.data.error) {
         throw new Error(result.error || result.data.error || "Unknown error");
       }
-      return result;
+      return result.data.data;
     },
     retry: 2,
     refetchOnWindowFocus: false,

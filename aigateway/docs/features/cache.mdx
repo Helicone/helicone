@@ -1,0 +1,154 @@
+---
+title: "Caching"
+sidebarTitle: "Caching"
+description: "Cache LLM responses to reduce costs and improve latency"
+---
+
+## Intro to Caching
+
+Helix will automatically store LLM responses and reuse them for identical requests, generating cache keys from model, messages, temperature, and all parameters.
+
+## When to use Caching
+- **During development**: Save money while testing by reducing API calls
+- **High-traffic apps**: Improve response times for repeated requests  
+- **Cost optimization**: Reduce provider bills by up to 95%
+- **Cross-provider scenarios**: Cache OpenAI responses, serve for Anthropic calls
+
+## Quick Start
+
+<Steps>
+<Step title="Start Redis">
+Caching requires a Redis server. Start one with our infrastructure:
+```bash
+cd infrastructure && docker compose up -d redis
+```
+
+<Accordion title="Using your own Redis?">
+Set the Redis URL:
+```bash
+export PROXY__CACHE__REDIS__URL="redis://your-host:6379"
+```
+</Accordion>
+</Step>
+<Step title="Enable Response Caching">
+Add to `config.yaml`:
+```yaml
+cache:
+  enabled: true
+  directive:
+    max-age: 3600
+    max-stale: 1800
+```
+
+See [Configuration Options](#configuration-options) below for advanced cache settings.
+
+</Step>
+<Step title="Test it works">
+Make the same request twice and check for cache hits in the response:
+
+```json
+{
+  "helicone": {
+    "cache": {
+      "hit": true,
+      "age": 1440
+    }
+  }
+}
+```
+</Step>
+</Steps>
+
+## Advanced Configuration
+
+### Runtime Control
+
+For more control, you can enable or disable caching per request using headers:
+
+```bash
+curl -H "Helicone-Cache-Enabled: false" \
+     https://your-helix/v1/chat/completions
+```
+
+### Cache Settings
+
+Set in your `config.yaml`
+
+#### Overview
+
+| Setting | Type | Description | Default | Example |
+|---------|------|-------------|---------|---------|
+| `enabled` | boolean | Turn caching on/off globally | `false` | `true` |
+| `max-bucket-size` | number | Maximum number of items per cache bucket | `16` | `10` |
+| `seed` | string | Seed for generating cache keys (ensures consistent hashing) | `""` | `"router-seed-1"` |
+| `directive.max-age` | number | How long responses stay fresh (seconds) | `3600` | `3600` |
+| `directive.max-stale` | number | How long stale responses are acceptable (seconds) | `0` | `1800` |
+
+#### Explanations & Examples
+<AccordionGroup title="Examples">
+<Accordion title="Bucket Size">
+Bucket size is the max number of items that can be stored in a bucket.
+
+If the bucket is full, the oldest item will be evicted.
+
+If the bucket is not full, the new item will be added to the bucket.
+
+
+```javascript
+openai.completion("give me a random number") -> "42"
+# Cache Miss
+openai.completion("give me a random number") -> "47"
+# Cache Miss
+openai.completion("give me a random number") -> "17"
+# Cache Miss
+
+openai.completion("give me a random number") -> This will randomly choose 42 | 47 | 17
+# Cache Hit
+```
+
+</Accordion>
+<Accordion title="Seed" icon="wrench">
+Different seeds create isolated cache namespaces:
+
+```bash
+# Seed: "user-123" 
+curl -H "Helicone-Cache-Seed: user-123" ... -> "42"     # Cache MISS
+curl -H "Helicone-Cache-Seed: user-123" ... -> "42"     # Cache HIT
+
+# Seed: "user-456"
+curl -H "Helicone-Cache-Seed: user-456" ... -> "17"     # Cache MISS  
+curl -H "Helicone-Cache-Seed: user-456" ... -> "17"     # Cache HIT
+
+# Back to "user-123"
+curl -H "Helicone-Cache-Seed: user-123" ... -> "42"     # Cache HIT
+```
+</Accordion>
+
+</AccordionGroup>
+
+
+## Cache Responses
+
+Cached responses include metadata:
+
+```json
+{
+  "id": "chatcmpl-...",
+  "object": "chat.completion", 
+  "choices": [...],
+  "helicone": {
+    "cache": {
+      "hit": true,
+      "age": 1440,
+      "key": "sha256:abc123..."
+    }
+  }
+}
+```
+
+
+## How It Works
+
+**Cache Key Generation**
+- Exact matching on model, messages, temperature, and all parameters
+- Identical requests return cached responses instantly

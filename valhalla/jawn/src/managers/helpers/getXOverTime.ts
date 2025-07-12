@@ -4,7 +4,7 @@ import { FilterNode } from "../../lib/shared/filters/filterDefs";
 import {
   buildFilterWithAuthClickHouse,
   clickhouseParam,
-} from "../../lib/shared/filters/filters";
+} from "@helicone-package/filters/filters";
 import { Result } from "../../packages/common/result";
 import {
   isValidTimeFilter,

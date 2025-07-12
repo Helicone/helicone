@@ -2,7 +2,7 @@ import { Controller, Get, Request, Route, Security, Tags } from "tsoa";
 import { KVCache } from "../../lib/cache/kvCache";
 import { err, ok, Result } from "../../packages/common/result";
 import { ModelComparisonManager } from "../../managers/ModelComparisonManager";
-import { JawnAuthenticatedRequest } from "../../types/request";
+import { type JawnAuthenticatedRequest } from "../../types/request";
 import { cacheResultCustom } from "../../utils/cacheResult";
 import { Model } from "openai/resources/models";
 import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";

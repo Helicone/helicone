@@ -179,10 +179,6 @@ export const useUpdateOrgMutation = () => {
       color,
       icon,
       variant,
-      orgProviderKey,
-      limits,
-      resellerId,
-      organizationType,
     }: {
       orgId: string;
       name: string;
@@ -191,7 +187,6 @@ export const useUpdateOrgMutation = () => {
       variant: string;
       orgProviderKey?: string;
       limits?: any;
-      resellerId?: string;
       organizationType?: string;
     }) => {
       const jawn = getJawnClient(orgId);
@@ -204,12 +199,6 @@ export const useUpdateOrgMutation = () => {
             color,
             icon,
             variant,
-            ...(variant === "reseller" && {
-              org_provider_key: orgProviderKey,
-              limits,
-              reseller_id: resellerId,
-              organization_type: organizationType,
-            }),
           },
         }
       );
@@ -307,11 +296,6 @@ const useOrgsContextManager = (): OrgContextValue => {
   return {
     allOrgs: orgs ?? [],
     currentOrg: org ?? undefined,
-    isResellerOfCurrentCustomerOrg: !!(
-      org?.organization_type === "customer" &&
-      org.reseller_id &&
-      orgs?.find((x) => x.id === org.reseller_id)
-    ),
     setCurrentOrg: (orgId) => {
       setSelectedOrgId(orgId);
       refetch();

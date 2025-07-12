@@ -1,5 +1,5 @@
 ---
-title: "OpenAI cURL Integration"
+title: "OpenAI with cURL"
 sidebarTitle: "cURL"
 description: "Use cURL to integrate OpenAI with Helicone to log your OpenAI usage."
 "twitter:title": "OpenAI cURL Integration - Helicone OSS LLM Observability"
@@ -7,17 +7,16 @@ icon: "code"
 iconType: "solid"
 ---
 
+import { strings } from "/snippets/strings.mdx";
+
+## {strings.howToIntegrate}
+
 <Steps>
-  <Step title="Create an account + Generate an API Key">
-    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
-    can generate an [API key](https://helicone.ai/developer).
+  <Step title={strings.generateKey}>
+    <div dangerouslySetInnerHTML={{ __html: strings.generateKeyInstructions }} />
   </Step>
-  <Step title="Modify the API base and add the `Helicone-Auth` header">
 
-    <Note>
-    Please ensure to replace API keys with your own.
-    </Note>
-
+  <Step title={strings.modifyBasePath}>
     ```bash
     curl --request POST \
         --url https://oai.helicone.ai/v1/chat/completions \
@@ -36,13 +35,16 @@ iconType: "solid"
             "max_tokens": 10
     }'
     ```
-    </Step>
+  </Step>
 
+  <Step title={strings.verifyInHelicone}>
+    <div dangerouslySetInnerHTML={{ __html: strings.verifyInHeliconeDesciption("OpenAI") }} />
+  </Step>
 </Steps>
 
-### Related Guides
+## {strings.relatedGuides}
 
-<CardGroup cols={1}>
+<CardGroup cols={2}>
   <Card
     title="Building a chatbot with OpenAI structured outputs"
     icon="lightbulb"
@@ -50,7 +52,15 @@ iconType: "solid"
     iconType="light"
     vertical
   >
-    This step-by-step guide covers function calling, response formatting and
-    monitoring with Helicone.
+    {strings.chatbotCookbookDescription}
+  </Card>
+  <Card
+    title="How to Prompt Thinking Models"
+    icon="brain"
+    href="/guides/cookbooks/prompt-thinking-models"
+    iconType="light"
+    vertical
+  >
+    {strings.howToPromptThinkingModelsCookbookDescription}
   </Card>
 </CardGroup>

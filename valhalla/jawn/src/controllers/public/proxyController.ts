@@ -1,13 +1,14 @@
 import express, {
   Request as ExpressRequest,
   Response as ExpressResponse,
+  RequestHandler,
 } from "express";
 import fetch, { Response } from "node-fetch";
 import { Readable as NodeReadableStream } from "stream";
 import { proxyForwarder } from "../../lib/proxy/ProxyForwarder";
 import { webSocketProxyForwarder } from "../../lib/proxy/WebSocketProxyForwarder";
 import { RequestWrapper } from "../../lib/requestWrapper/requestWrapper";
-import { Provider } from "../../packages/llm-mapper/types";
+import { Provider } from "@helicone-package/llm-mapper/types";
 
 export const proxyRouter = express.Router();
 proxyRouter.use(express.json());
@@ -22,67 +23,65 @@ export interface ProxyRequestBody {
 /* -------------------------------------------------------------------------- */
 /*                                /:provider/*                                */
 /* -------------------------------------------------------------------------- */
-proxyRouter.post(
-  "/v1/gateway/:provider/*",
-  async (req: ExpressRequest, res: ExpressResponse) => {
-    const { provider } = req.params;
+proxyRouter.post("/v1/gateway/:provider/{*path}", (async (
+  req: ExpressRequest,
+  res: ExpressResponse
+) => {
+  const { provider } = req.params;
 
-    const { data: requestWrapper, error: requestWrapperErr } =
-      await RequestWrapper.create(req);
-    if (requestWrapperErr || !requestWrapper) {
-      return res
-        .status(500)
-        .json({ message: "Error creating request wrapper" });
-    }
+  const { data: requestWrapper, error: requestWrapperErr } =
+    await RequestWrapper.create(req);
+  if (requestWrapperErr || !requestWrapper) {
+    return res.status(500).json({ message: "Error creating request wrapper" });
+  }
 
-    const routerFunction = ROUTER_MAP[provider.toUpperCase()];
+  const routerFunction = ROUTER_MAP[provider.toUpperCase()];
 
-    if (routerFunction) {
-      const response: Response = await routerFunction(
-        { data: requestWrapper, error: requestWrapperErr }.data
-      );
+  if (routerFunction) {
+    const response: Response = await routerFunction(
+      { data: requestWrapper, error: requestWrapperErr }.data
+    );
 
-      res.status(response.status);
+    res.status(response.status);
 
-      response.headers.forEach((value, key) => {
-        res.setHeader(key, value);
-      });
+    response.headers.forEach((value, key) => {
+      res.setHeader(key, value);
+    });
 
-      // TODO we need to pipe the response body to res. but the response body is a ReadableStream or a Buffer or a string
-      const responseBody = response.body;
+    // TODO we need to pipe the response body to res. but the response body is a ReadableStream or a Buffer or a string
+    const responseBody = response.body;
 
-      if (responseBody instanceof NodeReadableStream) {
-        // Pipe ReadableStream to the response
-        responseBody.pipe(res);
-      } else if (Buffer.isBuffer(responseBody)) {
-        // Write Buffer to the response
-        res.end(responseBody);
-      } else if (typeof responseBody === "string") {
-        // Write string to the response
-        res.end(responseBody);
-      } else {
-        try {
-          const text = await response.text();
-          if (text) {
-            res.end(text);
-          } else {
-            res.status(500).json({ message: "Unsupported response body type" });
-          }
-        } catch (e) {
+    if (responseBody instanceof NodeReadableStream) {
+      // Pipe ReadableStream to the response
+      responseBody.pipe(res);
+    } else if (Buffer.isBuffer(responseBody)) {
+      // Write Buffer to the response
+      res.end(responseBody);
+    } else if (typeof responseBody === "string") {
+      // Write string to the response
+      res.end(responseBody);
+    } else {
+      try {
+        const text = await response.text();
+        if (text) {
+          res.end(text);
+        } else {
           res.status(500).json({ message: "Unsupported response body type" });
         }
+      } catch (e) {
+        res.status(500).json({ message: "Unsupported response body type" });
       }
-    } else {
-      res.status(400).json({ message: "Invalid provider" });
     }
+  } else {
+    res.status(400).json({ message: "Invalid provider" });
   }
-);
+}) as RequestHandler);
 
 /* -------------------------------------------------------------------------- */
 /*                                /* (Error)                                  */
 /* -------------------------------------------------------------------------- */
 proxyRouter.post(
-  "/v1/gateway/*",
+  "/v1/gateway/{*path}",
   async (req: ExpressRequest, res: ExpressResponse) => {
     throw new Error("Not implemented");
     //   const { data: requestWrapper, error: requestWrapperErr } =

@@ -1,7 +1,6 @@
 import FoldedHeader from "@/components/shared/FoldedHeader";
 import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
-import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -16,40 +15,41 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Muted, Small, XSmall } from "@/components/ui/typography";
-import { FilterASTButton } from "@/filterAST/FilterASTButton";
-import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
-import { useLocalStorage } from "@/services/hooks/localStorage";
-import { useURLParams } from "@/services/hooks/localURLParams";
-import { SortDirection } from "@/services/lib/sorts/requests/sorts";
-import { TimeFilter } from "@/types/timeFilter";
-import { PieChart, Table, Check } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import ExportButton from "../../shared/themed/table/exportButton";
-import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
+import { Muted, Small, XSmall } from "@/components/ui/typography";
+import { FilterASTButton } from "@/filterAST/FilterASTButton";
+import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
+import { cn } from "@/lib/utils";
+import { useLocalStorage } from "@/services/hooks/localStorage";
+import { useURLParams } from "@/services/hooks/localURLParams";
+import { SortDirection } from "@/services/lib/sorts/requests/sorts";
+import { TimeFilter } from "@/types/timeFilter";
+import { Check, ChevronDown, PieChart, Table } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   getTimeIntervalAgo,
   TimeInterval,
 } from "../../../lib/timeCalculations/time";
+import { useSelectMode } from "../../../services/hooks/dataset/selectMode";
 import { useDebounce } from "../../../services/hooks/debounce";
-import { useSessionNames, useSessions } from "../../../services/hooks/sessions";
 import { getRequestsByIdsWithBodies } from "../../../services/hooks/requests";
+import { useSessionNames, useSessions } from "../../../services/hooks/sessions";
 import {
   columnDefsToDragColumnItems,
   DragColumnItem,
 } from "../../shared/themed/table/columns/DragList";
 import ViewColumns from "../../shared/themed/table/columns/viewColumns";
+import ExportButton from "../../shared/themed/table/exportButton";
 import ThemedTable from "../../shared/themed/table/themedTable";
 import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
 import { getColumns } from "./initialColumns";
+import { EMPTY_SESSION_NAME } from "./sessionId/SessionContent";
 import SessionMetrics from "./SessionMetrics";
-import { cn } from "@/lib/utils";
 
 interface SessionsPageProps {
   currentPage: number;
@@ -63,11 +63,8 @@ interface SessionsPageProps {
   selectedName?: string;
 }
 
-// Define a constant for the unnamed session value
-const UNNAMED_SESSION_VALUE = "__helicone_unnamed_session__";
-
 // Moved from SessionDetails.tsx
-type TSessions = {
+export type TSessions = {
   id: string;
   metadata: {
     created_at: string;
@@ -122,6 +119,15 @@ const SessionsPage = (props: SessionsPageProps) => {
   const debouncedSessionNameSearch = useDebounce(sessionNameSearch, 500);
 
   const names = useSessionNames(debouncedSessionNameSearch ?? "", timeFilter);
+  const sessionNames = [
+    "All",
+    ...names.sessions
+      .sort(
+        (a, b) =>
+          new Date(b.last_used).getTime() - new Date(a.last_used).getTime()
+      )
+      .map((name) => name.name),
+  ];
   const allNames = useSessionNames("", timeFilter);
 
   const debouncedSessionIdSearch = useDebounce(sessionIdSearch, 500); // 0.5 seconds
@@ -136,9 +142,9 @@ const SessionsPage = (props: SessionsPageProps) => {
   });
 
   const sessionsWithId = useMemo(() => {
-    return sessions.map((session) => ({
+    return sessions.map((session, index) => ({
       metadata: session,
-      id: session.session_id,
+      id: index.toString(),
     }));
   }, [sessions]);
 
@@ -151,53 +157,14 @@ const SessionsPage = (props: SessionsPageProps) => {
     (typeof TABS)[number]["id"]
   >("session-details-tab", "sessions");
 
-  const { hasAccess } = useFeatureLimit("sessions", allNames.sessions.length);
-
-  useEffect(() => {
-    if (
-      !hasAccess &&
-      hasSessions &&
-      selectedName === undefined &&
-      !allNames.isLoading
-    ) {
-      const sortedSessions = [...allNames.sessions].sort(
-        (a, b) =>
-          new Date(b.last_used).getTime() - new Date(a.last_used).getTime()
-      );
-
-      if (sortedSessions.length > 0) {
-        setSelectedName(sortedSessions[0].name);
-      }
-    }
-  }, [
-    hasSessions,
-    allNames.sessions,
-    allNames.isLoading,
-    selectedName,
-    hasAccess,
-  ]);
-
-  const [selectedData, setSelectedData] = useState<TSessions | undefined>(
-    undefined
-  );
-  const [selectedDataIndex, setSelectedDataIndex] = useState<number>();
-
-  const {
-    selectMode,
-    toggleSelectMode: _toggleSelectMode,
-    selectedIds,
-    toggleSelection,
-    selectAll,
-    isShiftPressed,
-  } = useSelectMode({
-    items: sessionsWithId,
-    getItemId: (session: TSessions) => session.id,
-  });
+  const { selectedIds, toggleSelection, selectAll, isShiftPressed } =
+    useSelectMode({
+      items: sessionsWithId,
+      getItemId: (session: TSessions) => session.id,
+    });
 
   const handleSelectSessionName = (value: string) => {
-    if (value === "all") {
-      setSelectedName(undefined);
-    } else if (value === UNNAMED_SESSION_VALUE) {
+    if (value === "" || value === "All") {
       setSelectedName(""); // Map placeholder back to empty string
     } else {
       setSelectedName(value);
@@ -230,15 +197,17 @@ const SessionsPage = (props: SessionsPageProps) => {
   };
 
   const onFetchBulkSessions = async () => {
-    if (selectedIds.length === 0) {
-      // then download for all rows
-      const data = await getRequestsByIdsWithBodies(
-        sessionsWithId.map((session) => session.metadata.session_id)
-      );
+    // Download all sessions if no sessions are selected
+    if (!selectedIds.length) {
+      const data = await getRequestsByIdsWithBodies(sessionsWithId);
       return data;
     }
-    const data = await getRequestsByIdsWithBodies(selectedIds);
-    return data;
+
+    const filteredSessions = sessionsWithId.filter((session) =>
+      selectedIds.includes(session.id)
+    );
+
+    return await getRequestsByIdsWithBodies(filteredSessions);
   };
 
   const onRowSelectHandler = useCallback(
@@ -250,12 +219,9 @@ const SessionsPage = (props: SessionsPageProps) => {
           event.target.closest("button") !== null);
       if (isShiftPressed || event?.metaKey || isCheckboxClick) {
         toggleSelection(row);
-      } else {
-        setSelectedDataIndex(index);
-        setSelectedData(row);
       }
     },
-    [isShiftPressed, toggleSelection, setSelectedDataIndex, setSelectedData]
+    [isShiftPressed, toggleSelection]
   );
 
   // Calculate aggregated stats
@@ -337,7 +303,7 @@ const SessionsPage = (props: SessionsPageProps) => {
                     aria-expanded={open}
                   >
                     {selectedName === ""
-                      ? UNNAMED_SESSION_VALUE
+                      ? EMPTY_SESSION_NAME
                       : selectedName ?? "All"}
                     <ChevronDown className="ml-2 h-3 w-3 shrink-0 opacity-50 " />
                   </Button>
@@ -355,40 +321,26 @@ const SessionsPage = (props: SessionsPageProps) => {
                     <CommandEmpty>No results found.</CommandEmpty>
 
                     <CommandList>
-                      {names.sessions
-                        .sort(
-                          (a, b) =>
-                            new Date(b.last_used).getTime() -
-                            new Date(a.last_used).getTime()
-                        )
-                        .map((session) => (
-                          <CommandItem
-                            key={session.name}
-                            value={
-                              session.name === ""
-                                ? UNNAMED_SESSION_VALUE
-                                : session.name
-                            }
-                            onSelect={() => {
-                              setOpen(false);
-                              handleSelectSessionName(
-                                session.name === ""
-                                  ? UNNAMED_SESSION_VALUE
-                                  : session.name
-                              );
-                            }}
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-3 w-3",
-                                selectedName === session.name
-                                  ? "opacity-100"
-                                  : "opacity-0"
-                              )}
-                            />
-                            {session.name === "" ? "Unnamed" : session.name}
-                          </CommandItem>
-                        ))}
+                      {sessionNames.map((name) => (
+                        <CommandItem
+                          key={name}
+                          value={name}
+                          onSelect={() => {
+                            setOpen(false);
+                            handleSelectSessionName(name);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-3 w-3",
+                              selectedName === name
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                          {name === "" ? EMPTY_SESSION_NAME : name}
+                        </CommandItem>
+                      ))}
                     </CommandList>
                   </Command>
                 </PopoverContent>
@@ -487,10 +439,13 @@ const SessionsPage = (props: SessionsPageProps) => {
             activeColumns={activeColumns}
             setActiveColumns={setActiveColumns}
             rowLink={(row: TSessions) =>
-              `/sessions/${encodeURIComponent(row.id)}`
+              `/sessions/${
+                row.metadata.session_name
+                  ? encodeURIComponent(row.metadata.session_name)
+                  : EMPTY_SESSION_NAME
+              }/${encodeURIComponent(row.metadata.session_id)}`
             }
             checkboxMode={"on_hover"}
-            highlightedIds={selectedData ? [selectedData.id] : selectedIds}
             onRowSelect={onRowSelectHandler}
             onSelectAll={selectAll}
             selectedIds={selectedIds}

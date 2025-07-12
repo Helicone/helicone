@@ -4,7 +4,7 @@ import {
   FilterNode,
   FilterBranch,
   FilterLeaf,
-} from "@/services/lib/filters/filterDefs";
+} from "@helicone-package/filters/filterDefs";
 import {
   FilterExpression,
   ConditionExpression,
@@ -19,6 +19,7 @@ import {
 const operatorMap: Record<string, string> = {
   eq: "equals",
   neq: "not-equals",
+  is: "equals",
   gt: "gt",
   gte: "gte",
   lt: "lt",

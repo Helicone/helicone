@@ -2,7 +2,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Provider } from "@/packages/cost/unified/types";
+import { Provider } from "@helicone-package/cost/unified/types";
 import { PromptState } from "@/types/prompt-state";
 import {
   getEnvFileExample,

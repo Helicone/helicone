@@ -4,7 +4,7 @@ import {
   withAuth,
 } from "../../../lib/api/handlerWrappers";
 import { getRequestCountClickhouse } from "../../../lib/api/request/request";
-import { Result } from "../../../packages/common/result";
+import { Result } from "@/packages/common/result";
 
 async function checkAndUpdateOrgs(orgId: string): Promise<boolean> {
   const count = (await getRequestCountClickhouse(orgId, "all")).data ?? 0;

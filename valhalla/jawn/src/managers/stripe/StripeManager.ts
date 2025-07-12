@@ -7,11 +7,11 @@ import {
 import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
 import { Database } from "../../lib/db/database.types";
 import { dbExecute, dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
-import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
+import { buildFilterWithAuthClickHouse } from "@helicone-package/filters/filters";
 import { getHeliconeAuthClient } from "../../packages/common/auth/server/AuthClientFactory";
 import { AuthParams } from "../../packages/common/auth/types";
 import { Result, err, ok } from "../../packages/common/result";
-import { costOf } from "../../packages/cost";
+import { costOf } from "@helicone-package/cost";
 import { BaseManager } from "../BaseManager";
 import { OrganizationManager } from "../organization/OrganizationManager";
 import { KVCache } from "../../lib/cache/kvCache";

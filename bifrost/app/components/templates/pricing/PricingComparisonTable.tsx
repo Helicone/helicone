@@ -150,7 +150,7 @@ const featureGroups: FeatureGroup[] = [
     ],
   },
   {
-    title: "Prompts & Experiments",
+    title: "Prompts & Testing",
     features: [
       {
         name: "Playground",
@@ -163,28 +163,21 @@ const featureGroups: FeatureGroup[] = [
         name: "Prompt management",
         hobby: "3 prompts",
         pro: "Unlimited with $50/mo add-on",
-        team: true,
+        team: "Unlimited",
         enterprise: true,
       },
       {
         name: "• Collaborative workspace",
         hobby: false,
         pro: "Included",
-        team: true,
+        team: "Included",
         enterprise: true,
       },
       {
         name: "• Version history",
         hobby: "3 versions",
         pro: "Included",
-        team: true,
-        enterprise: true,
-      },
-      {
-        name: "Prompt experiments",
-        hobby: "3 experiments",
-        pro: "Unlimited with $50/mo add-on",
-        team: true,
+        team: "Included",
         enterprise: true,
       },
     ],
@@ -193,32 +186,11 @@ const featureGroups: FeatureGroup[] = [
     title: "Evaluations",
     features: [
       {
-        name: "Evaluators",
-        hobby: "1",
-        pro: "Unlimited with $100/mo add-on",
-        team: true,
-        enterprise: true,
-      },
-      {
-        name: "• Online evaluations (real-time)",
-        hobby: false,
-        pro: "Included",
-        team: true,
-        enterprise: true,
-      },
-      {
-        name: "• Offline evaluations (batch)",
-        hobby: false,
-        pro: "Included",
-        team: true,
-        enterprise: true,
-      },
-      {
-        name: "• LLM-as-a-judge",
-        hobby: false,
-        pro: "Included",
-        team: true,
-        enterprise: true,
+        name: "Human annotation queue",
+        hobby: "coming soon...",
+        pro: "coming soon...",
+        team: "coming soon...",
+        enterprise: "coming soon...",
       },
       {
         name: "User feedback",

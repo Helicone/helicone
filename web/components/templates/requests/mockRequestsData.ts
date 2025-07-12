@@ -1,4 +1,7 @@
-import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+import {
+  DEFAULT_UUID,
+  MappedLLMRequest,
+} from "@helicone-package/llm-mapper/types";
 
 // Simple mock filter map with just the properties we need for display
 export const getMockFilterMap = () => {
@@ -257,10 +260,14 @@ const generateMockRequest = (
       requestId: id,
       path: "/v1/chat/completions",
       countryCode: "US",
+      cacheEnabled: false,
+      cacheReferenceId: DEFAULT_UUID,
       createdAt: time.toISOString(),
       totalTokens: totalTokens,
       promptTokens: promptTokens,
       completionTokens: completionTokens,
+      promptCacheReadTokens: 0,
+      promptCacheWriteTokens: 0,
       latency: Math.floor(Math.random() * 2000) + 500,
       user: `user-${Math.floor(Math.random() * 999)}`,
       status: {

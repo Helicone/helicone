@@ -1,6 +1,6 @@
 import * as Sentry from "@sentry/node";
 import { dataDogClient } from "../lib/clients/DataDogClient";
-import { HeliconeQueueProducer } from "../lib/clients/HeliconeQuequeProducer";
+import { HeliconeQueueProducer } from "../lib/clients/HeliconeQueueProducer";
 import { AuthenticationHandler } from "../lib/handlers/AuthenticationHandler";
 import {
   HandlerContext,
@@ -175,6 +175,9 @@ export class LogManager {
     stripeLogHandler: StripeLogHandler,
     logMetaData: LogMetaData
   ): Promise<void> {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return;
+    }
     const start = performance.now();
     await stripeLogHandler.handleResults();
     const end = performance.now();
@@ -223,8 +226,7 @@ export class LogManager {
       });
 
       console.error(
-        `Error inserting logs: ${JSON.stringify(result.error)} for batch ${
-          logMetaData.batchId
+        `Error inserting logs: ${JSON.stringify(result.error)} for batch ${logMetaData.batchId
         }`
       );
 

@@ -38,7 +38,7 @@ The result? What once took days to set up now takes minutes.
 ```bash
 git clone https://github.com/Helicone/helicone.git
 cd docker
-docker compose up -d
+./helicone-compose.sh helicone up
 ```
 
 That's it. Your Helicone dashboard is now available at `localhost:3000`.
@@ -117,7 +117,7 @@ For users who have deployed using our instructions, staying current is as simple
 ```bash
 git pull
 cd docker
-docker compose up -d
+./helicone-compose.sh helicone up
 ```
 
 For Helm chart users, the latest containers are published to Docker Hub regularly.

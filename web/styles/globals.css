@@ -61,7 +61,7 @@
     --chart-10: 0.588 0.158 241.966; /* oklch(0.588 0.158 241.966) */
 
     /* Sidebar Colors */
-    --sidebar-background: 210 40% 98%;
+    --sidebar-background: oklch(96.8% 0.007 247.896);
     --sidebar: oklch(0.985 0 0);
     --sidebar-foreground: oklch(0.145 0 0);
     --sidebar-primary: oklch(0.205 0 0);
@@ -80,7 +80,7 @@
 
   .dark {
     /* Background Colors */
-    --background: 229 84% 5%;
+    --background: 0 0% 0%; /* hsl(229 84% 5%) */
     --foreground: 210 40% 98%;
     --card: 229 84% 5%;
     --card-foreground: 210 40% 98%;
@@ -125,7 +125,7 @@
     --chart-10: 0.388 0.158 241.966;
 
     /* Sidebar Colors */
-    --sidebar-background: 222 47% 11%;
+    --sidebar-background: oklch(14.5% 0 0);
     --sidebar: oklch(0.205 0 0);
     --sidebar-foreground: oklch(0.985 0 0);
     --sidebar-primary: oklch(0.488 0.243 264.376);

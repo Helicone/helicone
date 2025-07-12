@@ -9,17 +9,16 @@ import {
   Tags,
 } from "tsoa";
 import { Result, err, ok } from "../../packages/common/result";
-import { JawnAuthenticatedRequest } from "../../types/request";
+import { type JawnAuthenticatedRequest } from "../../types/request";
 
-import { RequestManager } from "../../managers/request/RequestManager";
-import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
-import { timeFilterToFilterNode } from "../../lib/shared/filters/filterDefs";
+import { buildFilterWithAuthClickHouse } from "@helicone-package/filters/filters";
+import { timeFilterToFilterNode } from "@helicone-package/filters/helpers";
 import { dbExecute, dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
-import { clickhousePriceCalc } from "../../packages/cost";
 import {
-  DataOverTimeRequest,
+  type DataOverTimeRequest,
   getXOverTime,
 } from "../../managers/helpers/getXOverTime";
+import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 
 @Route("/v1/pi")
 @Tags("PI")
@@ -108,7 +107,7 @@ export class PiController extends Controller {
 
     const query = `
   WITH total_cost AS (
-    SELECT ${clickhousePriceCalc("request_response_rmt")} as cost
+    SELECT sum(cost) / ${COST_PRECISION_MULTIPLIER} as cost
     FROM request_response_rmt
     WHERE (
       (${filterString})
@@ -195,7 +194,7 @@ export class PiController extends Controller {
       cost: number;
     }>(requestBody, {
       orgId: request.authParams.organizationId,
-      countColumns: [`${clickhousePriceCalc("request_response_rmt")} as cost`],
+      countColumns: [`sum(request_response_rmt.cost) / ${COST_PRECISION_MULTIPLIER} as cost`],
       groupByColumns: ["created_at_trunc"],
     });
   }

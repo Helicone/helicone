@@ -1,7 +1,7 @@
 import * as Sentry from "@sentry/node";
 import { validate as uuidValidate } from "uuid";
 import { dataDogClient } from "../../lib/clients/DataDogClient";
-import { HeliconeQueueProducer } from "../../lib/clients/HeliconeQuequeProducer";
+import { HeliconeQueueProducer } from "../../lib/clients/HeliconeQueueProducer";
 import { HeliconeScoresMessage } from "../../lib/handlers/HandlerContext";
 import { AuthParams } from "../../packages/common/auth/types";
 import { DelayedOperationService } from "../../lib/shared/delayedOperationService";

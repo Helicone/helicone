@@ -1,11 +1,11 @@
-import { clickhousePriceCalc } from "../../../packages/cost";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
 import {
   buildFilterClickHouse,
   buildFilterWithAuthClickHouse,
-} from "../../../services/lib/filters/filters";
-import { Result } from "../../../packages/common/result";
+} from "@helicone-package/filters/filters";
+import { Result } from "@/packages/common/result";
 import { dbQueryClickhouse } from "../db/dbExecute";
+import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 
 export interface ModelMetric {
   id?: string;
@@ -69,7 +69,7 @@ request_response_rmt.model as model,
   sum(request_response_rmt.completion_tokens) as total_completion_tokens,
   sum(request_response_rmt.prompt_tokens) as total_prompt_token,
   sum(request_response_rmt.prompt_tokens) + sum(request_response_rmt.completion_tokens) as total_tokens,
-  (${clickhousePriceCalc("request_response_rmt")}) as cost
+  sum(cost) / ${COST_PRECISION_MULTIPLIER} as cost
 from request_response_rmt
 WHERE (${builtFilter.filter})
 GROUP BY request_response_rmt.model

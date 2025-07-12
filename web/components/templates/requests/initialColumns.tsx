@@ -1,12 +1,22 @@
-import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+import { MappedLLMRequest } from "@helicone-package/llm-mapper/types";
 import { HandThumbDownIcon, HandThumbUpIcon } from "@heroicons/react/24/solid";
 import { ColumnDef } from "@tanstack/react-table";
 import { clsx } from "../../shared/clsx";
-import { getUSDateFromString } from "../../shared/utils/utils";
+import {
+  getUSDateFromString,
+  get24HourFromString,
+} from "../../shared/utils/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import CostPill from "./costPill";
 import { COUTNRY_CODE_DIRECTORY } from "./countryCodeDirectory";
 import ModelPill from "./modelPill";
 import StatusBadge from "./statusBadge";
+import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
 
 function formatNumber(num: number) {
   const numParts = num.toString().split(".");
@@ -25,18 +35,28 @@ function formatNumber(num: number) {
   }
 }
 
-export const getInitialColumns: (
-  isCached?: boolean
-) => ColumnDef<MappedLLMRequest>[] = (isCached = false) => [
+export const getInitialColumns = (): ColumnDef<MappedLLMRequest>[] => [
   {
     id: "createdAt",
     accessorKey: "createdAt",
     header: "Created At",
-    cell: (info) => (
-      <span className="text-gray-900 dark:text-gray-100 font-medium">
-        {getUSDateFromString(info.row.original.heliconeMetadata.createdAt)}
-      </span>
-    ),
+    cell: (info) => {
+      const value = info.row.original.heliconeMetadata.createdAt;
+      return (
+        <TooltipProvider>
+          <Tooltip delayDuration={100}>
+            <TooltipTrigger asChild>
+              <span className="text-gray-900 dark:text-gray-100 font-medium cursor-default">
+                {getUSDateFromString(value)}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="text-xs">
+              <p>{get24HourFromString(value)}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    },
     meta: {
       sortKey: "created_at",
     },
@@ -48,6 +68,9 @@ export const getInitialColumns: (
     header: "Status",
     cell: (info) => {
       const status = info.row.original.heliconeMetadata.status;
+      const isCached =
+        info.row.original.heliconeMetadata.cacheReferenceId &&
+        info.row.original.heliconeMetadata.cacheReferenceId !== DEFAULT_UUID;
 
       if (!status) {
         return <span>{JSON.stringify(status)}</span>;
@@ -134,14 +157,18 @@ export const getInitialColumns: (
     id: "latency",
     accessorKey: "latency",
     header: "Latency",
-    cell: (info) => (
-      <span>
-        {isCached
-          ? 0
-          : Number(info.row.original.heliconeMetadata.latency) / 1000}
-        s
-      </span>
-    ),
+    cell: (info) => {
+      const isCached =
+        info.row.original.heliconeMetadata.cacheReferenceId !== DEFAULT_UUID;
+      return (
+        <span>
+          {isCached
+            ? 0
+            : Number(info.row.original.heliconeMetadata.latency) / 1000}
+          s
+        </span>
+      );
+    },
     meta: {
       sortKey: "latency",
     },
@@ -162,13 +189,13 @@ export const getInitialColumns: (
     cell: (info) => {
       const statusCode = info.row.original.heliconeMetadata.status.code;
       const num = Number(info.row.original.heliconeMetadata.cost);
+      const isCached =
+        info.row.original.heliconeMetadata.cacheReferenceId !== DEFAULT_UUID;
 
       if (Number(num) === 0 && !isCached && statusCode === 200) {
         return <CostPill />;
-      } else if (Number(num) > 0) {
-        return <span>${formatNumber(num)}</span>;
       }
-      return <span></span>;
+      return <span>${formatNumber(num)}</span>;
     },
     meta: {
       sortKey: "cost_usd",
@@ -234,5 +261,37 @@ export const getInitialColumns: (
       );
     },
     minSize: 200,
+  },
+  {
+    id: "promptCacheReadTokens",
+    accessorKey: "promptCacheReadTokens",
+    header: "Prompt Cache Read Tokens",
+    cell: (info) => {
+      const tokens = Number(
+        info.row.original.heliconeMetadata.promptCacheReadTokens
+      );
+      return <span>{tokens >= 0 ? tokens : "not found"}</span>;
+    },
+  },
+  {
+    id: "promptCacheWriteTokens",
+    accessorKey: "promptCacheWriteTokens",
+    header: "Prompt Cache Write Tokens",
+    cell: (info) => {
+      const tokens = Number(
+        info.row.original.heliconeMetadata.promptCacheWriteTokens
+      );
+      return <span>{tokens >= 0 ? tokens : "not found"}</span>;
+    },
+  },
+  {
+    id: "cacheEnabled",
+    accessorKey: "cacheEnabled",
+    header: "Cache Enabled",
+    cell: (info) => {
+      const cacheEnabled = info.row.original.heliconeMetadata.cacheEnabled;
+      return cacheEnabled ? <span>Yes</span> : <span>No</span>;
+    },
+    size: 100,
   },
 ];

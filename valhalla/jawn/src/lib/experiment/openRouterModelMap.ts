@@ -43,6 +43,7 @@ export const OPENROUTER_MODEL_MAP: Record<string, string> = {
   "mistral-8x7b": "mistralai/mistral-8x7b",
   "mistral-7b-instruct-v0.1": "mistralai/mistral-7b-instruct-v0.1",
   "grok-beta": "x-ai/grok-beta",
+  "grok-4": "x-ai/grok-4",
   "llama-3.2-3b-instruct:free": "meta-llama/llama-3.2-3b-instruct:free",
   "llama-3.2-3b-instruct": "meta-llama/llama-3.2-3b-instruct",
   "llama-3.2-1b-instruct:free": "meta-llama/llama-3.2-1b-instruct:free",
@@ -70,6 +71,6 @@ export const OPENROUTER_MODEL_MAP: Record<string, string> = {
   "llama-2-13b-chat": "meta-llama/llama-2-13b-chat",
   "deepseek/deepseek-chat": "deepseek/deepseek-chat",
   "deepseek/deepseek-r1": "deepseek/deepseek-r1",
-  "o3-mini": "o3-mini",
-  "o1-mini": "o1-mini",
+  "o3-mini": "openai/o3-mini",
+  "o1-mini": "openai/o1-mini",
 };

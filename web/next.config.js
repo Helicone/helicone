@@ -8,8 +8,20 @@ configureRuntimeEnv();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "*",
+      },
+    ],
+  },
   reactStrictMode: false,
   swcMinify: true,
+  transpilePackages: [
+    "@helicone-package/cost",
+    "@helicone-package/llm-mapper",
+  ],
   webpack: (config) => {
     config.module.rules.push({
       test: /\.(graphql|gql)$/,

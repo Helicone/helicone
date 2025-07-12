@@ -1,6 +1,6 @@
-import { HeliconeRequest, Message } from "@/packages/llm-mapper/types";
-import { heliconeRequestToMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
-import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+import { HeliconeRequest, Message } from "@helicone-package/llm-mapper/types";
+import { heliconeRequestToMappedContent } from "@helicone-package/llm-mapper/utils/getMappedContent";
+import { MappedLLMRequest } from "@helicone-package/llm-mapper/types";
 
 // Given a mapped request, return a sorted array of "valid" messages.
 // => Valid, for e.g messages that can be displayed as a row in Sessions, separately.
@@ -107,7 +107,11 @@ function createSimulatedRequestStep(
     let base = request.request_properties?.["Helicone-Session-Path"];
     if (message._type === "functionCall" || message._type === "function") {
       return base ? base + "-Tool" : "/Tool";
-    } else if (message.role === "user" || message.role === "assistant") {
+    } else if (
+      message.role === "user" ||
+      message.role === "assistant" ||
+      message.role === "system"
+    ) {
       const role =
         message.role?.charAt(0).toUpperCase() + message.role?.slice(1);
       return base ? base + `-${role}` : `/${role}`;

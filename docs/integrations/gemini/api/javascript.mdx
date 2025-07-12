@@ -81,12 +81,12 @@ iconType: "solid"
   <Step title="Install necessary packages">
     Ensure you have the necessary packages installed in your Javascript project:
     ```bash
-    npm install @google/generative-ai
+    npm install @google/genai
     ```
   </Step>
   <Step title="Import and configure the client">
     ```javascript
-    import { GoogleGenerativeAI } from "@google/generative-ai";
+    import { GoogleGenAI } from "@google/genai";
 
     if (!process.env.GOOGLE_API_KEY) {
       throw new Error("GOOGLE_API_KEY environment variable must be set");
@@ -96,32 +96,28 @@ iconType: "solid"
       throw new Error("HELICONE_API_KEY environment variable must be set");
     }
 
-    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
-
-    const modelParams = {
-      model: "gemini-2.0-flash",
-      systemInstruction: "You are a helpful assistant that can answer questions and help with tasks.",
-    };
-
-    const modelInstance = genAI.getGenerativeModel(modelParams, {
-      baseUrl: "https://gateway.helicone.ai",
-      customHeaders: {
-        'Helicone-Auth': `Bearer ${process.env.HELICONE_API_KEY}`,
-        'Helicone-Target-URL': 'https://generativelanguage.googleapis.com'
-      }
+    const genAI = new GoogleGenAI({
+      apiKey: `${process.env.GOOGLE_API_KEY}`,
+      httpOptions: {
+        baseUrl: "https://gateway.helicone.ai",
+        headers: {
+          "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+          "Helicone-Target-URL": "https://generativelanguage.googleapis.com", // Change this to "https://aiplatform.googleapis.com" if vertexai is set to true
+        },
+      },
     });
-    ```
+
+````
 
   </Step>
   <Step title="Generate content using the model">
     ```javascript
     async function generateContent() {
-      try {
-        const response = await modelInstance.generateContent("Hello, world!");
-        console.log(JSON.stringify(response, null, 2));
-      } catch (error) {
-        console.error("Error generating content:", error);
-      }
+      const response = await genAI.models.generateContent({
+        model: "gemini-2.0-flash-001",
+        contents: "Why is the sky blue?",
+      });
+      console.log(response.text);
     }
 
     generateContent();
@@ -129,3 +125,4 @@ iconType: "solid"
 
   </Step>
 </Steps>
+````

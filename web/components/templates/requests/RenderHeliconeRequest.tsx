@@ -1,9 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { XSmall } from "@/components/ui/typography";
-import { HeliconeRequest, MappedLLMRequest } from "@/packages/llm-mapper/types";
-import { getMappedContent } from "@/packages/llm-mapper/utils/getMappedContent";
-import { getMapperTypeFromHeliconeRequest } from "@/packages/llm-mapper/utils/getMapperType";
+import {
+  HeliconeRequest,
+  MappedLLMRequest,
+} from "@helicone-package/llm-mapper/types";
+import { getMappedContent } from "@helicone-package/llm-mapper/utils/getMappedContent";
+import { getMapperTypeFromHeliconeRequest } from "@helicone-package/llm-mapper/utils/getMapperType";
 import useShiftKeyPress from "@/services/hooks/isShiftPressed";
 import {
   MODE_LABELS,
@@ -90,7 +93,7 @@ export function RenderMappedRequest({
       <Button
         variant={"outline"}
         size={"sm"}
-        className="flex felx-row gap-1 absolute top-2 right-4 z-20"
+        className="flex felx-row gap-1 absolute top-2 right-2 z-20"
         onClick={() => toggleMode(isShiftPressed)}
       >
         <XSmall className="text-secondary font-medium">

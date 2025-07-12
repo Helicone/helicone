@@ -2,7 +2,7 @@ import KeyPage from "@/components/templates/keys/keyPage";
 import SettingsLayout from "@/components/templates/settings/settingsLayout";
 import { ReactElement } from "react";
 import AuthLayout from "../../components/layout/auth/authLayout";
-import { withAuthSSR } from "../../lib/api/handlerWrappers";
+import { GetServerSidePropsContext } from "next";
 import { SortDirection } from "../../services/lib/sorts/requests/sorts";
 
 const Connections = () => {
@@ -19,9 +19,11 @@ Connections.getLayout = function getLayout(page: ReactElement) {
 
 export default Connections;
 
-export const getServerSideProps = withAuthSSR(async (options) => {
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
   const { page, page_size, sortKey, sortDirection, isCustomProperty, tab } =
-    options.context.query;
+    context.query;
 
   const currentPage = parseInt(page as string, 10) || 1;
   const pageSize = parseInt(page_size as string, 10) || 10;
@@ -38,4 +40,4 @@ export const getServerSideProps = withAuthSSR(async (options) => {
       defaultIndex: tab ? parseInt(tab as string) : 0,
     },
   };
-});
+};

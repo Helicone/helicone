@@ -27,16 +27,16 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useFeatureLimit } from "@/hooks/useFreeTierLimit";
-import { generateStream } from "@/lib/api/llm/generate-stream";
-import { processStream } from "@/lib/api/llm/process-stream";
+import { generateStream } from "@/lib/api/llm-old/generate-stream";
+import { processStream } from "@/lib/api/llm-old/process-stream";
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { usePromptRunsStore } from "@/lib/stores/promptRunsStore";
-import { openaiChatMapper } from "@/packages/llm-mapper/mappers/openai/chat-v2";
+import { openaiChatMapper } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
 import {
   heliconeRequestToMappedContent,
   MAPPERS,
-} from "@/packages/llm-mapper/utils/getMappedContent";
-import { getMapperType } from "@/packages/llm-mapper/utils/getMapperType";
+} from "@helicone-package/llm-mapper/utils/getMappedContent";
+import { getMapperType } from "@helicone-package/llm-mapper/utils/getMapperType";
 import autoImprovePrompt from "@/prompts/auto-improve";
 import { PromptState, StateInputs } from "@/types/prompt-state";
 import { $system, $user, findClosestModelProvider } from "@/utils/generate";
@@ -58,7 +58,7 @@ import { autoFillInputs } from "@helicone/prompts";
 import { FlaskConicalIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { LLMRequestBody, Message } from "packages/llm-mapper/types";
+import { LLMRequestBody, Message } from "@helicone-package/llm-mapper/types";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MdKeyboardReturn } from "react-icons/md";
 import {

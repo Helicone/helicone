@@ -11,13 +11,14 @@ async function main() {
     defaultHeaders: {
       "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
       "Helicone-Cache-Enabled": "true",
+      "Helicone-Cache-Bucket-Max-Size": "3",
     },
   });
 
   const chatCompletion = await openai.chat.completions
     .create(
       {
-        model: "gpt-4-turbo",
+        model: "gpt-4.1-nano",
         messages: [
           {
             role: "system",
@@ -32,10 +33,14 @@ async function main() {
         max_tokens: 700,
 
         stream: true,
+        stream_options: {
+          include_usage: true,
+        }
       },
       {
         headers: {
           "Helicone-Cache-Enabled": "true",
+          "Helicone-Cache-Bucket-Max-Size": "3",
         },
       }
     )

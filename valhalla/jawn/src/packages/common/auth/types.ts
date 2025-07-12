@@ -24,6 +24,7 @@ export interface AuthParams {
   heliconeApiKeyId?: number;
   keyPermissions?: KeyPermissions;
   role?: Role;
+  tier?: string;
 }
 export type AuthResult = PromiseGenericResult<AuthParams>;
 

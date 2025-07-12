@@ -130,7 +130,7 @@ export default {
         },
         // Sidebar Colors
         sidebar: {
-          background: "hsl(var(--sidebar-background))",
+          background: "var(--sidebar-background)",
           foreground: "hsl(var(--sidebar-foreground))",
           primary: "hsl(var(--sidebar-primary))",
           "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
@@ -259,6 +259,10 @@ export default {
     },
     {
       pattern: /^(bg-chart-[1-9]|bg-chart-10)$/,
+      variants: ["hover"],
+    },
+    {
+      pattern: /^(text-chart-[1-9]|text-chart-10)$/,
       variants: ["hover"],
     },
     {

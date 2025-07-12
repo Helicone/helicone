@@ -1,8 +1,8 @@
-import { clickhousePriceCalc } from "../../../packages/cost";
-import { Result, resultMap } from "../../../packages/common/result";
+import { Result, resultMap } from "@/packages/common/result";
 import { getXOverTime } from "./getXOverTime";
 
 import { DataOverTimeRequest } from "./timeDataHandlerWrapper";
+import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 
 export interface DateCountDBModel {
   time: Date;
@@ -14,7 +14,7 @@ export async function getCostOverTime(
 ): Promise<Result<DateCountDBModel[], string>> {
   const res = await getXOverTime<{
     cost: number;
-  }>(data, `${clickhousePriceCalc("request_response_rmt")} AS cost`);
+  }>(data, `sum(cost) / ${COST_PRECISION_MULTIPLIER} AS cost`);
   return resultMap(res, (resData) =>
     resData.map((d) => ({
       time: new Date(new Date(d.created_at_trunc).getTime()),

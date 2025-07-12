@@ -45,16 +45,22 @@ export function startSQSConsumers({
   scoresCount,
   scoresDlqCount,
   backFillCount,
+  lowCount,
 }: {
   normalCount: number;
   dlqCount: number;
   scoresCount: number;
   scoresDlqCount: number;
   backFillCount: number;
+  lowCount: number;
 }) {
   for (let i = 0; i < normalCount; i++) {
     const worker = new Worker(`${__dirname}/sqsConsumer.js`);
     worker.postMessage("start");
+  }
+  for (let i = 0; i < lowCount; i++) {
+    const worker = new Worker(`${__dirname}/sqsConsumer.js`);
+    worker.postMessage("start-low");
   }
 
   for (let i = 0; i < dlqCount; i++) {

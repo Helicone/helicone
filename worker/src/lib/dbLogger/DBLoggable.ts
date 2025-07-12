@@ -16,6 +16,7 @@ import { PromptSettings, RequestWrapper } from "../RequestWrapper";
 import { INTERNAL_ERRORS } from "../util/constants";
 import { withTimeout } from "../util/helpers";
 import { Result, err, ok } from "../util/results";
+import { CacheSettings } from "../util/cache/cacheSettings";
 import {
   anthropicAIStream,
   getModel,
@@ -26,6 +27,7 @@ import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
 import { costOfPrompt } from "../../packages/cost";
 import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
 import { MessageData } from "../clients/producers/types";
+import { DEFAULT_UUID } from "../../packages/llm-mapper/types";
 
 export interface DBLoggableProps {
   response: {
@@ -240,6 +242,10 @@ export class DBLoggable {
     return await this.response.getResponseBody();
   }
 
+  getTimingStart(): number {
+    return this.timing.startTime.getTime();
+  }
+
   async tokenCounter(text: string): Promise<number> {
     return getTokenCount(text, this.provider, this.tokenCalcUrl);
   }
@@ -377,6 +383,10 @@ export class DBLoggable {
       prompt_tokens: usage?.prompt_tokens ?? usage?.input_tokens,
       completion_tokens: usage?.completion_tokens ?? usage?.output_tokens,
     };
+  }
+
+  async getStatus() {
+    return await this.response.status();
   }
 
   async getResponse() {
@@ -517,7 +527,9 @@ export class DBLoggable {
       producer: HeliconeProducer;
     },
     S3_ENABLED: Env["S3_ENABLED"],
-    requestHeaders?: HeliconeHeaders
+    requestHeaders?: HeliconeHeaders,
+    cachedHeaders?: Headers,
+    cacheSettings?: CacheSettings
   ): Promise<
     Result<
       {
@@ -526,74 +538,77 @@ export class DBLoggable {
       string
     >
   > {
-    const { data: authParams, error } = await db.dbWrapper.getAuthParams();
-    if (error || !authParams?.organizationId) {
-      return err(`Auth failed! ${error}`);
-    }
-
     try {
-      const org = await db.dbWrapper.getOrganization();
-      if (org.error !== null) {
-        return err(org.error);
+      const { data: authParams, error } = await db.dbWrapper.getAuthParams();
+      if (error || !authParams?.organizationId) {
+        return err(`Auth failed! ${error}`);
       }
 
-      const tier = org.data?.tier;
+      let orgRateLimit = false;
+      try {
+        const org = await db.dbWrapper.getOrganization();
+        if (org.error !== null) {
+          return err(org.error);
+        }
 
-      const rateLimiter = await db.dbWrapper.getRateLimiter();
-      if (rateLimiter.error !== null) {
-        return rateLimiter;
+        const tier = org.data?.tier;
+
+        const rateLimiter = await db.dbWrapper.getRateLimiter();
+        if (rateLimiter.error !== null) {
+          return rateLimiter;
+        }
+
+        // TODO: Add an early exit if we really want to rate limit in the future
+        const rateLimit = await rateLimiter.data.checkRateLimit(tier);
+
+        if (rateLimit.data?.isRateLimited) {
+          orgRateLimit = true;
+        }
+
+        if (rateLimit.error) {
+          console.error(`Error checking rate limit: ${rateLimit.error}`);
+        }
+      } catch (e) {
+        console.error(`Error checking rate limit: ${e}`);
       }
 
-      const rateLimit = await rateLimiter.data.checkRateLimit(tier);
+      await this.useKafka(
+        db,
+        authParams,
+        S3_ENABLED,
+        orgRateLimit,
+        requestHeaders,
+        cachedHeaders,
+        cacheSettings
+      );
 
-      if (rateLimit.error) {
-        console.error(`Error checking rate limit: ${rateLimit.error}`);
-      }
+      // THIS IS ONLY USED FOR COST CALCULATION ON RATELIMITING
+      const readResponse = await this.readResponse();
 
-      if (!rateLimit.error && rateLimit.data?.isRateLimited) {
-        await db.clickhouse.dbInsertClickhouse("rate_limit_log_v2", [
-          {
-            request_id: this.request.requestId,
-            organization_id: org.data.id,
-            tier: tier,
-            rate_limit_created_at: formatTimeStringDateTime(
-              new Date().toISOString()
-            ),
-          },
-        ]);
-        return ok({
-          cost: 0,
-        });
-      }
-    } catch (e) {
-      console.error(`Error checking rate limit: ${e}`);
+      const model =
+        this.request.modelOverride ??
+        readResponse.data?.response.model ??
+        "not-found";
+
+      const cost =
+        this.modelCost({
+          model: model,
+          sum_completion_tokens:
+            readResponse.data?.response?.completion_tokens ?? 0,
+          sum_prompt_tokens: readResponse.data?.response?.prompt_tokens ?? 0,
+          sum_tokens:
+            (readResponse.data?.response.completion_tokens ?? 0) +
+            (readResponse.data?.response.prompt_tokens ?? 0),
+          provider: this.request.provider ?? "",
+        }) ?? 0;
+
+      return ok({
+        cost: cost,
+      });
+    } catch (error) {
+      console.error("Error logging", error);
+      return err("Error logging");
     }
-
-    await this.useKafka(db, authParams, S3_ENABLED, requestHeaders);
-
-    // THIS IS ONLY USED FOR COST CALCULATION ON RATELIMITING
-    const readResponse = await this.readResponse();
-
-    const model =
-      this.request.modelOverride ??
-      readResponse.data?.response.model ??
-      "not-found";
-
-    const cost =
-      this.modelCost({
-        model: model,
-        sum_completion_tokens:
-          readResponse.data?.response?.completion_tokens ?? 0,
-        sum_prompt_tokens: readResponse.data?.response?.prompt_tokens ?? 0,
-        sum_tokens:
-          (readResponse.data?.response.completion_tokens ?? 0) +
-          (readResponse.data?.response.prompt_tokens ?? 0),
-        provider: this.request.provider ?? "",
-      }) ?? 0;
-
-    return ok({
-      cost: cost,
-    });
   }
 
   async useKafka(
@@ -607,7 +622,10 @@ export class DBLoggable {
     },
     authParams: AuthParams,
     S3_ENABLED: Env["S3_ENABLED"],
-    requestHeaders?: HeliconeHeaders
+    orgRateLimit: boolean,
+    requestHeaders?: HeliconeHeaders,
+    cachedHeaders?: Headers,
+    cacheSettings?: CacheSettings
   ): Promise<Result<null, string>> {
     if (
       !authParams?.organizationId ||
@@ -650,6 +668,11 @@ export class DBLoggable {
       timeToFirstToken = undefined;
     }
 
+    const cacheReferenceId =
+      cacheSettings?.shouldReadFromCache && cachedHeaders
+        ? cachedHeaders.get("Helicone-Id")
+        : DEFAULT_UUID;
+
     const kafkaMessage: MessageData = {
       id: this.request.requestId,
       authorization: requestHeaders.heliconeAuthV2.token,
@@ -673,6 +696,12 @@ export class DBLoggable {
             this.request.promptSettings.promptMode === "production"
               ? this.request.promptSettings.promptId
               : "",
+          cacheReferenceId: cacheReferenceId ?? DEFAULT_UUID,
+          cacheEnabled: requestHeaders.cacheHeaders.cacheEnabled ?? undefined,
+          cacheSeed: requestHeaders.cacheHeaders.cacheSeed ?? undefined,
+          cacheBucketMaxSize:
+            requestHeaders.cacheHeaders.cacheBucketMaxSize ?? undefined,
+          cacheControl: requestHeaders.cacheHeaders.cacheControl ?? undefined,
           promptVersion: this.request.promptSettings.promptVersion,
           properties: this.request.properties,
           heliconeApiKeyId: authParams.heliconeApiKeyId, // If undefined, proxy key id must be present
@@ -691,6 +720,7 @@ export class DBLoggable {
           experimentRowIndex:
             requestHeaders.experimentHeaders.rowIndex ?? undefined,
         },
+
         response: {
           id: this.response.responseId,
           status: await this.response.status(),
@@ -698,13 +728,30 @@ export class DBLoggable {
           timeToFirstToken,
           responseCreatedAt: endTime,
           delayMs: endTime.getTime() - this.timing.startTime.getTime(),
+          cachedLatency:
+            cacheReferenceId == DEFAULT_UUID
+              ? 0
+              : (() => {
+                  try {
+                    return Number(
+                      cachedHeaders?.get("Helicone-Cache-Latency") ?? 0
+                    );
+                  } catch {
+                    return 0;
+                  }
+                })(),
         },
       },
     };
 
-    // Send to Kafka or REST if not enabled
-    await db.producer.sendMessage(kafkaMessage);
+    if (orgRateLimit) {
+      console.log(
+        `Setting lower priority for org ${authParams.organizationId} because of rate limit`
+      );
+      db.producer.setLowerPriority();
+    }
 
+    await db.producer.sendMessage(kafkaMessage);
     return ok(null);
   }
 
@@ -755,8 +802,10 @@ export class DBLoggable {
         promptTokens,
         completionTokens,
         provider: modelRow.provider,
-        promptCacheReadTokens: 0,
         promptCacheWriteTokens: 0,
+        promptCacheReadTokens: 0,
+        promptAudioTokens: 0,
+        completionAudioTokens: 0,
       }) ?? 0
     );
   }

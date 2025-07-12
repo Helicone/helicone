@@ -7,9 +7,9 @@ import {
 import quantilesCalc, {
   Quantiles,
 } from "../../../lib/api/metrics/quantilesCalc";
-import { Result } from "../../../packages/common/result";
+import { Result } from "@/packages/common/result";
 import { TimeIncrement } from "../../../lib/timeCalculations/fetchTimeData";
-import { FilterNode } from "../../../services/lib/filters/filterDefs";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
 
 type QuantilesBackendBody = {
   userFilter: FilterNode;

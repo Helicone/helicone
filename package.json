@@ -1,0 +1,17 @@
+{
+  "name": "helicone-monorepo",
+  "private": true,
+  "workspaces": [
+    "bifrost",
+    "web",
+    "packages/*",
+    "valhalla/jawn"
+  ],
+  "scripts": {
+    "build:web": "yarn workspace helicone build"
+  },
+  "engines": {
+    "node": "=20"
+  },
+  "version": "0.1.0"
+}

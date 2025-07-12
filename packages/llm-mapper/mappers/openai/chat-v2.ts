@@ -4,7 +4,7 @@ import { LlmSchema, Message } from "../../types";
 /**
  * Simplified interface for the OpenAI Chat request format
  */
-interface OpenAIChatRequest {
+export interface OpenAIChatRequest {
   model?: string;
   messages?: {
     role: string;
@@ -14,8 +14,18 @@ interface OpenAIChatRequest {
           type: string;
           text?: string;
           image_url?: { url: string };
-        }>;
+        }>
+      | null;
     name?: string;
+    tool_call_id?: string;
+    tool_calls?: {
+      id: string;
+      function: {
+        name: string;
+        arguments: string;
+      };
+      type: "function";
+    }[];
   }[];
   temperature?: number;
   top_p?: number;
@@ -110,28 +120,73 @@ const convertRequestMessages = (
   if (!Array.isArray(messages) || messages.length === 0) return [];
 
   return messages.map((msg, idx): Message => {
-    // Handle different content types
-    let content = "";
+    if (msg.tool_calls || (msg as any).function_call) {
+      const convertedToolCalls = msg.tool_calls?.map((toolCall) => ({
+        id: toolCall.id,
+        name: toolCall.function.name,
+        arguments: JSON.parse(toolCall.function.arguments || "{}"),
+      })) || [];
 
-    if (typeof msg.content === "string") {
-      content = msg.content;
-    } else if (Array.isArray(msg.content)) {
-      content =
-        msg.content
-          .map((c: any) => {
-            if (typeof c === "string") return c;
-            if (c.type === "text" && c.text) return c.text;
-            // For other types like image_url, we don't extract text content
-            return "";
-          })
-          .filter((text) => text) // Remove empty strings
-          .join(" ") + " "; // Add trailing space to match expected test output
+      return {
+        _type: "functionCall",
+        role: msg.role,
+        content: typeof msg.content === "string" ? msg.content : "",
+        id: `req-msg-${idx}`,
+        name: msg.name,
+        tool_calls: convertedToolCalls,
+      };
+    }
+
+    if (msg.role === "tool" || msg.role === "function") {
+      return {
+        _type: "function",
+        role: msg.role,
+        content: typeof msg.content === "string" ? msg.content : "",
+        id: `req-msg-${idx}`,
+        name: msg.name,
+        tool_call_id: msg.tool_call_id,
+      };
+    }
+
+    if (Array.isArray(msg.content)) {
+      const contentArray = msg.content.map((content, contentIdx) => {
+        if (content.type === "text") {
+          return {
+            _type: "message" as const,
+            role: msg.role,
+            content: content.text || "",
+            id: `content-${idx}-${contentIdx}`,
+          };
+        } else if (content.type === "image_url") {
+          return {
+            _type: "image" as const,
+            role: msg.role,
+            content: "",
+            image_url: content.image_url?.url || "",
+            id: `content-${idx}-${contentIdx}`,
+          };
+        } // TODO: Support files
+        return {
+          _type: "message" as const,
+          role: msg.role,
+          content: JSON.stringify(content),
+          id: `content-${idx}-${contentIdx}`,
+        };
+      });
+
+      return {
+        _type: "contentArray",
+        role: msg.role,
+        content: "",
+        contentArray,
+        id: `req-msg-${idx}`,
+      };
     }
 
     return {
       _type: "message",
       role: msg.role,
-      content,
+      content: typeof msg.content === "string" ? msg.content : "",
       id: `req-msg-${idx}`,
       name: msg.name,
     };
@@ -183,7 +238,7 @@ const convertToolChoice = (
     if (toolChoice.type === "function" && toolChoice.function?.name) {
       return {
         type: "tool",
-        name: toolChoice.function.name,
+        name: toolChoice.function?.name,
       };
     }
   }
@@ -251,9 +306,9 @@ const convertTools = (
   if (!tools || !Array.isArray(tools)) return undefined;
 
   return tools.map((tool) => ({
-    name: tool.function.name,
-    description: tool.function.description,
-    parameters: tool.function.parameters,
+    name: tool.function?.name,
+    description: tool.function?.description,
+    parameters: tool.function?.parameters,
   }));
 };
 
@@ -265,11 +320,36 @@ const toExternalMessages = (
 ): OpenAIChatRequest["messages"] => {
   if (!messages) return [];
 
-  return messages.map(({ _type, id, ...rest }) => ({
-    role: rest.role || "user",
-    content: rest.content || "",
-    name: rest.name,
-  }));
+  return messages.map(({ _type, id, ...rest }) => {
+    if (_type === "contentArray") {
+      return {
+        role: rest.role || "user",
+        content:
+          rest.contentArray?.map((content) => ({
+            type: content._type === "image" ? "image_url" : "text",
+            text: content.content,
+            image_url:
+              content._type === "image" && content.image_url
+                ? { url: content.image_url }
+                : undefined,
+          })) || [],
+      };
+    }
+    return {
+      role: rest.role || "user",
+      content: rest.content || "",
+      name: rest.name,
+      tool_calls: rest.tool_calls?.map((toolCall) => ({
+        id: toolCall.id ?? "",
+        function: {
+          arguments: JSON.stringify(toolCall.arguments),
+          name: toolCall.name ?? "",
+        },
+        type: "function",
+      })),
+      tool_call_id: rest.tool_call_id,
+    };
+  });
 };
 
 /**

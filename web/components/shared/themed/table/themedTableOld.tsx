@@ -1,4 +1,4 @@
-import { UIFilterRowTree } from "@/services/lib/filters/types";
+import { UIFilterRowTree } from "@helicone-package/filters/types";
 import { TimeFilter } from "@/types/timeFilter";
 import {
   AdjustmentsHorizontalIcon,
@@ -13,9 +13,9 @@ import {
 import Link from "next/link";
 import React, { useEffect, useMemo, useState } from "react";
 import { TimeInterval } from "../../../../lib/timeCalculations/time";
-import { Result } from "../../../../packages/common/result";
+import { Result } from "@/packages/common/result";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
-import { SingleFilterDef } from "../../../../services/lib/filters/frontendFilterDefs";
+import { SingleFilterDef } from "@helicone-package/filters/frontendFilterDefs";
 import { OrganizationFilter } from "../../../../services/lib/organization_layout/organization_layout";
 import { SortDirection } from "../../../../services/lib/sorts/requests/sorts";
 
@@ -36,7 +36,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { MappedLLMRequest } from "@/packages/llm-mapper/types";
+import { MappedLLMRequest } from "@helicone-package/llm-mapper/types";
 import { RequestViews } from "./RequestViews";
 import useShiftKeyPress from "@/services/hooks/isShiftPressed";
 

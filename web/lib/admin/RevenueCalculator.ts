@@ -15,7 +15,8 @@ export interface InvoiceData {
   id: string;
   subscriptionId?: string;
   amount: number;
-  amountAfterDiscount: number;
+  amountAfterProcessing: number;
+  refundAmount: number;
   customerEmail: string;
   status: string;
   created: Date;
@@ -149,11 +150,11 @@ export class RevenueCalculator {
 
       // Calculate monthly totals
       const current = monthInvoices.reduce(
-        (sum, inv) => sum + inv.amountAfterDiscount,
+        (sum, inv) => sum + inv.amountAfterProcessing,
         0
       );
       const projected = relevantUpcomingInvoices.reduce(
-        (sum, inv) => sum + inv.amountAfterDiscount,
+        (sum, inv) => sum + inv.amountAfterProcessing,
         0
       );
 
@@ -240,31 +241,32 @@ export class RevenueCalculator {
     return invoices
       .map((inv) => {
         const isRegularInvoice = "id" in inv;
-        const { amount, amountAfterDiscount } = calculateInvoiceAmounts(
-          inv,
-          this.discounts,
-          typeof productId === "string" ? productId : undefined // Only pass single productId
-        );
+        const { amount, amountAfterProcessing, refundAmount } =
+          calculateInvoiceAmounts(
+            inv,
+            this.discounts,
+            typeof productId === "string" ? productId : undefined // Only pass single productId
+          );
 
-        if (amountAfterDiscount <= 0) return null;
+        if (amountAfterProcessing <= 0) return null;
 
-        // Extract subscription ID from the invoice
-        const subscriptionId =
-          typeof inv.subscription === "string"
-            ? inv.subscription
-            : (inv.subscription as any)?.id;
-
-        return {
-          id: isRegularInvoice ? inv.id : crypto.randomUUID(),
-          subscriptionId,
+        const invoiceData: InvoiceData = {
+          id: isRegularInvoice ? (inv as Stripe.Invoice).id : "upcoming",
+          subscriptionId:
+            typeof inv.subscription === "string"
+              ? inv.subscription
+              : (inv.subscription as any)?.id,
           amount,
-          amountAfterDiscount,
+          amountAfterProcessing,
+          refundAmount,
           customerEmail: inv.customer_email || "unknown",
           status: inv.status || "unknown",
           created: new Date(inv.created * 1000),
           rawJSON: inv,
         };
+
+        return invoiceData;
       })
-      .filter(Boolean) as InvoiceData[];
+      .filter((inv) => inv !== null) as InvoiceData[];
   }
 }

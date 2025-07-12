@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { HeliconeRequestType } from "@/lib/sessions/sessionTypes";
-import { UIFilterRowTree } from "@/services/lib/filters/types";
+import { UIFilterRowTree } from "@helicone-package/filters/types";
 import { useColorMapStore } from "@/store/features/sessions/colorMap";
 import { TimeFilter } from "@/types/timeFilter";
 import {
@@ -28,8 +28,8 @@ import { ChevronDown, ChevronRight, ChevronsUpDown } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useMemo } from "react";
 import { TimeInterval } from "../../../../../lib/timeCalculations/time";
-import { Result } from "../../../../../packages/common/result";
-import { SingleFilterDef } from "../../../../../services/lib/filters/frontendFilterDefs";
+import { Result } from "@/packages/common/result";
+import { SingleFilterDef } from "@helicone-package/filters/frontendFilterDefs";
 import { OrganizationFilter } from "../../../../../services/lib/organization_layout/organization_layout";
 import { SortDirection } from "../../../../../services/lib/sorts/requests/sorts";
 
@@ -137,15 +137,11 @@ export default function SessionTimelineTable(
 
   const [expanded, setExpanded] = React.useState<ExpandedState>(true);
   const descendantErrorMap = useMemo(() => {
-    const map = new Map<string, boolean>();
-    defaultData.forEach((topLevelNode) => {
-      // Assuming TableTreeNode has an 'id' property
-      if (topLevelNode.id) {
-        map.set(topLevelNode.id, hasDescendant4xxError(topLevelNode, true));
-      }
-    });
-    return map;
-  }, [defaultData]); // Recalculate only when data changes
+    return defaultData.reduce((mapAccumulator, topLevelNode) => {
+      setDescendantError(topLevelNode, mapAccumulator);
+      return mapAccumulator;
+    }, new Map<string, boolean>());
+  }, [defaultData]);
 
   const table = useReactTable({
     data: defaultData,
@@ -479,9 +475,7 @@ export default function SessionTimelineTable(
                           </div>
                         )}
                         {cell.column.id === "path" &&
-                          row.getParentRow() === undefined &&
-                          descendantErrorMap.get(row.original.id ?? "") ===
-                            true && (
+                          descendantErrorMap.get(row.original.id) && (
                             <span
                               title="Contains descendant error"
                               className="w-2 h-2 ml-2 rounded-full bg-red-600 shrink-0"
@@ -553,31 +547,24 @@ const REQUEST_TYPE_CONFIG: Record<
   },
 };
 
-// Helper function to check for descendant 4xx errors
-// Assumes T extends TableTreeNode and has subRows & status
-function hasDescendant4xxError<T extends TableTreeNode>(
+function setDescendantError<T extends TableTreeNode>(
   node: T,
-  isTopLevel: boolean
+  map: Map<string, boolean>
 ): boolean {
-  // Use type assertion if subRows isn't directly on TableTreeNode but expected
-
-  if (!node.subRows || node.subRows.length === 0) {
-    // Base case: Check self only if not top-level
-    if (!isTopLevel) {
-      return false;
-    }
-  }
-
+  let hasError = false;
   for (const child of node.subRows ?? []) {
-    const childStatus = child.status;
-    if (childStatus && childStatus >= 400) return true;
+    if (child.status && child.status >= 400 && child.status < 500) {
+      map.set(child.id, true);
+      hasError = true;
+    }
 
-    if (hasDescendant4xxError(child, false)) {
-      return true;
+    if (setDescendantError(child, map)) {
+      hasError = true;
     }
   }
 
-  return false;
+  map.set(node.id, hasError);
+  return hasError;
 }
 
 function expandRow(row: Row<any>) {

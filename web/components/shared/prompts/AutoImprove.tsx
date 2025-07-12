@@ -1,7 +1,7 @@
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Message } from "@/packages/llm-mapper/types";
+import { Message } from "@helicone-package/llm-mapper/types";
 import { parseImprovedMessages } from "@/utils/messages";
 import { PiBrainBold } from "react-icons/pi";
 import ReactMarkdown from "react-markdown";

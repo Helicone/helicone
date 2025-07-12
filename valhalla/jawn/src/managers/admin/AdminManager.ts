@@ -290,7 +290,11 @@ export class AdminManager extends BaseManager {
               gte: chunk.start,
               lt: chunk.end,
             },
-            expand: ["data.subscription"],
+            expand: [
+              "data.subscription",
+              "data.discounts",
+              "data.charge.refunds",
+            ],
             limit: 100,
           }),
         lastId ? { starting_after: lastId } : {}
@@ -474,9 +478,8 @@ export class AdminManager extends BaseManager {
    */
   private async fetchUpcomingInvoices(): Promise<Stripe.UpcomingInvoice[]> {
     const cacheKey = `upcoming-invoices-${this.authParams.organizationId}`;
-    const cachedData = await adminKVCache.get<Stripe.UpcomingInvoice[]>(
-      cacheKey
-    );
+    const cachedData =
+      await adminKVCache.get<Stripe.UpcomingInvoice[]>(cacheKey);
 
     if (cachedData) {
       return cachedData;

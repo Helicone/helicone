@@ -48,22 +48,42 @@ export class GenericBodyProcessor implements IBodyProcessor {
     const response = parsedResponse as {
       usage: {
         prompt_tokens?: number;
-        prompt_cache_write_tokens?: number;
-        prompt_cache_read_tokens?: number;
         completion_tokens?: number;
         input_tokens?: number;
         output_tokens?: number;
+        total_tokens?: number;
+        prompt_tokens_details?: {
+          cached_tokens?: number;
+          audio_tokens?: number;
+        };
+        completion_tokens_details?: {
+          reasoning_tokens?: number;
+          audio_tokens?: number;
+          accepted_prediction_tokens?: number;
+          rejected_prediction_tokens?: number;
+        };
       };
     };
 
+    // OpenAI charges for input, input cache read, output, output audio, input audio.
     const usage = response.usage;
+    const effectivePromptTokens = usage?.prompt_tokens !== undefined
+        ? Math.max(0, (usage.prompt_tokens ?? 0) - (usage.prompt_tokens_details?.cached_tokens ?? 0) - (usage.prompt_tokens_details?.audio_tokens ?? 0))
+        : usage?.input_tokens;
+    const effectiveCompletionTokens = usage?.completion_tokens !== undefined
+        ? Math.max(0, (usage.completion_tokens ?? 0) - (usage.completion_tokens_details?.audio_tokens ?? 0))
+        : usage?.output_tokens;
 
     return {
-      promptTokens: usage?.prompt_tokens ?? usage?.input_tokens,
-      promptCacheWriteTokens: usage?.prompt_cache_write_tokens,
-      promptCacheReadTokens: usage?.prompt_cache_read_tokens,
-      completionTokens: usage?.completion_tokens ?? usage?.output_tokens,
-      totalTokens: undefined,
+      promptTokens: effectivePromptTokens,
+      // promptCacheWriteTokens, not explicitly provided in OpenAI spec response.
+      // While this isn't technically our problem, its worth noting that providers like OpenRouter
+      // provide Claude models which DO charge for cache writes.
+      // Its easy to calculate per provider, (e.g Claude does it as 128 token increments), but not generally.
+      // If the schema is every updated, this needs to be promptly updated.
+      promptCacheReadTokens: usage?.prompt_tokens_details?.cached_tokens,
+      completionTokens: effectiveCompletionTokens,
+      totalTokens: usage?.total_tokens,
       heliconeCalculated: false,
     };
   }

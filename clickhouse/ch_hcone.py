@@ -13,6 +13,9 @@ file_dir = os.path.dirname(os.path.realpath(__file__))
 schema_dir = os.path.join(file_dir, "migrations")
 all_schemas = [os.path.join(schema_dir, file)
                for file in os.listdir(schema_dir)]
+seeds_dir = os.path.join(file_dir, "seeds")
+all_seeds = [os.path.join(seeds_dir, file)
+             for file in os.listdir(seeds_dir)]
 
 
 def schema_sort_key(filename):
@@ -23,6 +26,7 @@ def schema_sort_key(filename):
 all_schemas.sort(key=schema_sort_key)
 
 container_name = "helicone-clickhouse-server"
+container_test_name = "helicone-clickhouse-server-test"
 
 
 def get_host(host: str):
@@ -129,6 +133,21 @@ def list_migrations(host, port, user=None, password=None):
     print(tabulate.tabulate(migrations, headers=headers, tablefmt="grid"))
 
 
+def run_roles_seed(host, port, user=None, password=None):
+    """Run the roles.sql seed file to create roles and grant permissions"""
+    for seed_file in all_seeds:
+        print(seed_file)
+        res = run_curl_command(None, host, port, user, password, seed_file)
+        if res.returncode != 0:
+            print("Warning: Failed to run seed file")
+            print("STDOUT:", res.stdout)
+            print("STDERR:", res.stderr)
+            continue
+        print("Successfully applied seed file")
+        print(res)
+    
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Helicone CLI tool to manage migrations and start services"
@@ -168,8 +187,18 @@ def main():
     parser.add_argument(
         "--no-password", action="store_true", help="Do not prompt for password"
     )
+    parser.add_argument(
+        "--seed-roles", action="store_true", help="Run roles seed file only"
+    )
+
+    parser.add_argument(
+        "--test", action="store_true", help="Run in test mode"
+    )
 
     args = parser.parse_args()
+    test_env = args.test
+    port = 19001 if test_env else 19000
+    dynamic_container_name = container_name if not test_env else container_test_name
 
     password = os.getenv("CLICKHOUSE_PASSWORD")
 
@@ -188,8 +217,8 @@ def main():
     if args.start:
         print("Starting services")
         res = subprocess.run(
-            f"docker run -d -p {args.port}:8123 -p19000:9000 --name {container_name} "
-            "--ulimit nofile=262144:262144 clickhouse/clickhouse-server:24.3.13.40",
+            f"docker run -d -p {args.port}:8123 -p {port}:9000 --name {dynamic_container_name} "
+            "--ulimit nofile=262144:262144 clickhouse/clickhouse-server:24.10",
             shell=True,
         )
         time.sleep(1)
@@ -214,8 +243,8 @@ echo 'SELECT 1' | curl '{get_host(args.host)}:{args.port}/' --data-binary @-
         subprocess.run(f"docker stop {container_name}", shell=True)
         subprocess.run(f"docker rm {container_name}", shell=True)
         subprocess.run(
-            f"docker run -d -p {args.port}:8123 -p19000:9000 --name {container_name} "
-            "--ulimit nofile=262144:262144 clickhouse/clickhouse-server:24.3.13.40",
+            f"docker run -d -p {args.port}:8123 -p {port}:9000 --name {dynamic_container_name} "
+            "--ulimit nofile=262144:262144 clickhouse/clickhouse-server:24.10",
             shell=True,
         )
         time.sleep(5)
@@ -238,6 +267,11 @@ echo 'SELECT 1' | curl '{get_host(args.host)}:{args.port}/' --data-binary @-
 
     else:
         print("No action specified")
+
+    # Seed roles after all migrations are applied
+    if args.seed_roles:
+        print("Running roles seed file only")
+        run_roles_seed(args.host, args.port, user=args.user, password=password)
 
 
 if __name__ == "__main__":

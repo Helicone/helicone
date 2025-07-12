@@ -4,25 +4,23 @@ import { KVCache } from "../../lib/cache/kvCache";
 import { HeliconeScoresMessage } from "../../lib/handlers/HandlerContext";
 import { dbExecute, dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import { S3Client } from "../../lib/shared/db/s3Client";
-import { FilterNode } from "../../lib/shared/filters/filterDefs";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
 import { Result, err, ok, resultMap } from "../../packages/common/result";
 import { VersionedRequestStore } from "../../lib/stores/request/VersionedRequestStore";
 import {
   HeliconeRequestAsset,
   getRequestAsset,
   getRequests,
-  getRequestsCached,
-  getRequestsCachedClickhouse,
   getRequestsClickhouse,
   getRequestsClickhouseNoSort,
 } from "../../lib/stores/request/request";
-import { costOfPrompt } from "../../packages/cost";
-import { HeliconeRequest } from "../../packages/llm-mapper/types";
+import { costOfPrompt } from "@helicone-package/cost";
+import { HeliconeRequest } from "@helicone-package/llm-mapper/types";
 import { cacheResultCustom } from "../../utils/cacheResult";
 import { BaseManager } from "../BaseManager";
 import { ScoreManager } from "../score/ScoreManager";
 import { AuthParams } from "../../packages/common/auth/types";
-import { buildFilterWithAuthClickHouse } from "../../lib/shared/filters/filters";
+import { buildFilterWithAuthClickHouse } from "@helicone-package/filters/filters";
 export const getModelFromPath = (path: string) => {
   const regex1 = /\/engines\/([^/]+)/;
   const regex2 = /models\/([^/:]+)/;
@@ -404,23 +402,13 @@ export class RequestManager extends BaseManager {
       newFilter = this.addPartOfExperimentFilter(isPartOfExperiment, newFilter);
     }
 
-    const requests = isCached
-      ? await getRequestsCached(
-          this.authParams.organizationId,
-          filter,
-          offset,
-          limit,
-          sort,
-          isPartOfExperiment,
-          isScored
-        )
-      : await getRequests(
-          this.authParams.organizationId,
-          newFilter,
-          offset,
-          limit,
-          sort
-        );
+    const requests = await getRequests(
+      this.authParams.organizationId,
+      newFilter,
+      offset,
+      limit,
+      sort
+    );
 
     return resultMap(requests, (req) => {
       return req.map((r) => {
@@ -481,8 +469,6 @@ export class RequestManager extends BaseManager {
       sort = {
         created_at: "desc",
       },
-      isCached,
-      isPartOfExperiment,
       isScored,
     } = params;
 
@@ -492,61 +478,57 @@ export class RequestManager extends BaseManager {
       newFilter = this.addScoreFilterClickhouse(isScored, newFilter);
     }
 
-    const requests = isCached
-      ? await getRequestsCachedClickhouse(
-          this.authParams.organizationId,
-          filter,
-          offset,
-          limit,
-          sort,
-          isPartOfExperiment,
-          isScored
-        )
-      : sort.created_at === "desc"
-      ? await getRequestsClickhouseNoSort(
-          this.authParams.organizationId,
-          newFilter,
-          offset,
-          limit
-        )
-      : await getRequestsClickhouse(
-          this.authParams.organizationId,
-          newFilter,
-          offset,
-          limit,
-          sort
-        );
+    const requests =
+      sort.created_at === "desc" || sort.created_at === "asc"
+        ? await getRequestsClickhouseNoSort(
+            this.authParams.organizationId,
+            newFilter,
+            offset,
+            limit
+          )
+        : await getRequestsClickhouse(
+            this.authParams.organizationId,
+            newFilter,
+            offset,
+            limit,
+            sort
+          );
 
     return resultMap(requests, (req) => {
-      const seen = new Set();
-      return req
-        .map((r) => {
-          return {
-            ...r,
-            request_created_at: toISOStringClickhousePatch(
-              r.request_created_at
-            ),
-            feedback_created_at: r.feedback_created_at
-              ? toISOStringClickhousePatch(r.feedback_created_at)
-              : null,
-            response_created_at: r.response_created_at
-              ? toISOStringClickhousePatch(r.response_created_at)
-              : null,
-            model:
-              r.model_override ??
-              r.request_model ??
-              r.response_model ??
-              getModelFromPath(r.target_url) ??
-              "unknown",
-          };
-        })
-        .filter((r) => {
-          if (seen.has(r.request_id)) {
-            return false;
+      const reqs = req.map((r) => {
+        return {
+          ...r,
+          updated_at: r.updated_at ? toISOStringClickhousePatch(r.updated_at) : new Date().toISOString(),
+          request_created_at: toISOStringClickhousePatch(r.request_created_at),
+          feedback_created_at: r.feedback_created_at
+            ? toISOStringClickhousePatch(r.feedback_created_at)
+            : null,
+          response_created_at: r.response_created_at
+            ? toISOStringClickhousePatch(r.response_created_at)
+            : null,
+          model:
+            r.model_override ??
+            r.request_model ??
+            r.response_model ??
+            getModelFromPath(r.target_url) ??
+            "unknown",
+        };
+      });
+      const seen = new Map<string, HeliconeRequest>();
+
+      for (const r of reqs) {
+        if (seen.has(r.request_id)) {
+          const existing = seen.get(r.request_id);
+          if (existing?.updated_at && r.updated_at && r.updated_at > existing.updated_at) {
+            seen.set(r.request_id, r);
           }
-          seen.add(r.request_id);
-          return true;
-        });
+        }
+      }
+
+      if (sort.created_at === "asc") {
+        reqs.reverse();
+      }
+      return reqs;
     });
   }
 

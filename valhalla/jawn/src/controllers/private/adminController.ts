@@ -16,10 +16,14 @@ import {
 import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
 import { prepareRequestAzure } from "../../lib/experiment/requestPrep/azure";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
-import { JawnAuthenticatedRequest } from "../../types/request";
-import { Setting, SettingName } from "../../utils/settings";
+import type { JawnAuthenticatedRequest } from "../../types/request";
+import { Setting } from "../../utils/settings";
+import type { SettingName } from "../../utils/settings";
 import Stripe from "stripe";
 import { AdminManager } from "../../managers/admin/AdminManager";
+import { clickhousePriceCalcNonAggregated } from "@helicone-package/cost";
+
+import { err, ok, Result } from "../../packages/common/result";
 
 export const authCheckThrow = async (userId: string | undefined) => {
   if (!userId) {
@@ -48,6 +52,26 @@ export const authCheckThrow = async (userId: string | undefined) => {
 @Tags("Admin")
 @Security("api_key")
 export class AdminController extends Controller {
+  @Post("/has-feature-flag")
+  public async hasFeatureFlag(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body() body: { feature: string; orgId: string }
+  ): Promise<Result<boolean, string>> {
+    try {
+      const { data } = await dbExecute<{
+        id: string;
+      }>(`SELECT id FROM feature_flags WHERE org_id = $1 AND feature = $2`, [
+        body.orgId,
+        body.feature,
+      ]);
+
+      return ok(!!(data && data.length > 0));
+    } catch (e) {
+      console.error("Error checking feature flag:", e);
+      return err("Error checking feature flag");
+    }
+  }
+
   @Post("/feature-flags")
   public async updateFeatureFlags(
     @Request() request: JawnAuthenticatedRequest,
@@ -587,8 +611,8 @@ export class AdminController extends Controller {
           organizationId
             ? "o.id = $1"
             : userId
-            ? "om.member = $1"
-            : "u.email = $1"
+              ? "om.member = $1"
+              : "u.email = $1"
         }
       )
       SELECT
@@ -1315,5 +1339,83 @@ export class AdminController extends Controller {
 
     // Return the data
     return result.data;
+  }
+
+  /**
+   * Backfill costs in Clickhouse with updated cost package data.
+   */
+  @Post("/backfill-costs")
+  public async backfillCosts(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body()
+    body: {
+      timeExpression: string;
+      specifyModel: boolean;
+      modelId: string;
+      totalChunks: number;
+      chunkNumber: number;
+    }
+  ): Promise<{
+    success: boolean;
+  }> {
+    await authCheckThrow(request.authParams.userId);
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    try {
+      const query = `
+    INSERT INTO request_response_rmt
+    SELECT
+      response_id,
+      response_created_at,
+      latency,
+      status,
+      completion_tokens,
+      completion_audio_tokens,
+      cache_reference_id,
+      prompt_tokens,
+      prompt_cache_write_tokens,
+      prompt_cache_read_tokens,
+      prompt_audio_tokens,
+      model,
+      request_id,
+      request_created_at,
+      user_id,
+      organization_id,
+      proxy_key_id,
+      threat,
+      time_to_first_token,
+      provider,
+      target_url,
+      country_code,
+      cache_enabled,
+      properties,
+      scores,
+      request_body,
+      response_body,
+      ${clickhousePriceCalcNonAggregated(
+        "request_response_rmt",
+        false,
+        true,
+        body.totalChunks,
+        body.chunkNumber,
+        true,
+        true
+      )} as cost,
+      assets,
+      now() as updated_at
+    FROM
+      request_response_rmt FINAL
+    WHERE
+      request_created_at >= ${body.timeExpression}
+      ${body.specifyModel ? `AND model = '${body.modelId}'` : ""}
+    `;
+      const { error } = await clickhouseDb.dbQuery(query, []);
+    } catch (e) {
+      console.error("Backfill error:", e);
+      throw e;
+    }
+
+    return { success: true };
   }
 }

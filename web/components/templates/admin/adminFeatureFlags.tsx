@@ -160,7 +160,7 @@ export const AdminFeatureFlags = () => {
         <div className="flex space-x-2">
           <Input
             type="text"
-            value={newFeatureFlag}
+            value={selectedOrgId}
             onChange={(e) => setSelectedOrgId(e.target.value)}
             placeholder="Organization ID"
             className="flex-grow"

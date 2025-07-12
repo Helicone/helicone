@@ -5,13 +5,13 @@ import {
 } from "../controllers/public/sessionController";
 import { clickhouseDb, Tags } from "../lib/db/ClickhouseWrapper";
 import { dbExecute, printRunnableQuery } from "../lib/shared/db/dbExecute";
-import { filterListToTree, FilterNode } from "../lib/shared/filters/filterDefs";
-import { buildFilterWithAuthClickHouse } from "../lib/shared/filters/filters";
-import { TimeFilterMs } from "../lib/shared/filters/timeFilter";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
+import { filterListToTree } from "@helicone-package/filters/helpers";
+import { buildFilterWithAuthClickHouse } from "@helicone-package/filters/filters";
+import { TimeFilterMs } from "@helicone-package/filters/filterDefs";
 import { AuthParams } from "../packages/common/auth/types";
 import { err, ok, Result, resultMap } from "../packages/common/result";
 import { TagType } from "../packages/common/sessions/tags";
-import { clickhousePriceCalc } from "../packages/cost";
 import { isValidTimeZoneDifference } from "../utils/helpers";
 import {
   getHistogramRowOnKeys,
@@ -20,6 +20,7 @@ import {
   AverageRow,
 } from "./helpers/percentileDistributions";
 import { RequestManager } from "./request/RequestManager";
+import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 
 export interface SessionResult {
   created_at: string;
@@ -96,6 +97,13 @@ export class SessionManager {
       argsAcc: [],
     });
 
+    const havingFilter = await buildFilterWithAuthClickHouse({
+      org_id: this.authParams.organizationId,
+      filter: filterListToTree(filters, "and"),
+      argsAcc: [],
+      having: true,
+    });
+
     const histogramData = await getHistogramRowOnKeys({
       keys: [
         { key: "properties['Helicone-Session-Name']", alias: "session_name" },
@@ -129,14 +137,14 @@ export class SessionManager {
       pSize: requestBody.pSize ?? "p75",
       useInterquartile: requestBody.useInterquartile ?? false,
       builtFilter,
-      aggregateFunction: clickhousePriceCalc("request_response_rmt"),
+      aggregateFunction: `sum(cost) / ${COST_PRECISION_MULTIPLIER}`,
     });
 
     const averageResults = await Promise.all([
       getAveragePerSession({
         key: { key: "properties['Helicone-Session-Id']", alias: "cost" },
         builtFilter,
-        aggregateFunction: clickhousePriceCalc("request_response_rmt"),
+        aggregateFunction: `sum(cost) / ${COST_PRECISION_MULTIPLIER}`,
       }),
       getAveragePerSession({
         key: { key: "properties['Helicone-Session-Id']", alias: "duration" },
@@ -194,7 +202,7 @@ export class SessionManager {
         request_response_rmt: {
           properties: {
             "Helicone-Session-Name": {
-              equals: nameContains,
+              contains: nameContains,
             },
           },
         },
@@ -329,7 +337,7 @@ export class SessionManager {
       properties['Helicone-Session-Id'] as session_id,
       properties['Helicone-Session-Name'] as session_name,
       avg(request_response_rmt.latency) as avg_latency,
-      ${clickhousePriceCalc("request_response_rmt")} AS total_cost,
+      sum(request_response_rmt.cost) / ${COST_PRECISION_MULTIPLIER} AS total_cost,
       count(*) AS total_requests,
       sum(request_response_rmt.prompt_tokens) AS prompt_tokens,
       sum(request_response_rmt.completion_tokens) AS completion_tokens,
@@ -342,6 +350,7 @@ export class SessionManager {
         )
     )
     GROUP BY properties['Helicone-Session-Id'], properties['Helicone-Session-Name']
+    HAVING (${havingFilter.filter})
     ORDER BY created_at DESC -- TODO: REMOVE FOR TEST
     LIMIT 50
     `;

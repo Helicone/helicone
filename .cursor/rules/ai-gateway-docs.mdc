@@ -1,0 +1,76 @@
+---
+description: 
+globs: docs/ai-gateway/*
+alwaysApply: false
+---
+# AI Gateway Documentation Rules
+
+Critical rules to ensure documentation accuracy based on configuration changes.
+
+## Configuration Structure (BREAKING CHANGES)
+
+### 1. Cache Store Configuration
+
+```yaml
+# ✅ CORRECT - cache-store at top level
+cache-store:
+  type: "in-memory"
+
+routers:
+  my-router:
+    cache:
+      directive: "max-age=3600"
+
+# ❌ WRONG - old structure
+routers:
+  my-router:
+    cache:
+      store: in-memory
+      enabled: true
+```
+
+### 2. Helicone Configuration
+
+```yaml
+# ✅ CORRECT - separate fields
+helicone:
+  authentication: true
+  observability: true
+
+# ❌ WRONG - old structure
+helicone-observability:
+  enable-auth: true
+```
+
+## Required Dependencies
+
+### 3. Authentication Requirements
+
+- **Rate limiting requires authentication** (works per-API-key)
+- **Observability requires authentication** to function
+- Always add warning and link to `/ai-gateway/authentication`
+
+### 4. Model Names
+
+```yaml
+# ✅ CORRECT - provider prefix
+"model": "openai/gpt-4o-mini"
+
+# ❌ WRONG - no prefix
+"model": "gpt-4o-mini"
+```
+
+## Examples That Actually Work
+
+### 5. Code Examples
+
+- **Always include:** TypeScript, Python, cURL (no Node.js)
+- **Router URLs:** `http://localhost:8080/router/{name}/v1/chat/completions`
+- **API Keys:** Use `sk-placeholder` for local, real keys for public deployments
+
+### 6. Deprecated Patterns to Never Use
+
+- ❌ `cache.enabled: true/false`
+- ❌ `cache.store: in-memory`
+- ❌ `helicone-observability.enable-auth`
+- ❌ Model names without provider prefixes

@@ -230,7 +230,7 @@ const DesktopSidebar = ({
         <div className="w-full flex flex-col h-full border-r border-slate-200 dark:border-slate-800">
           {/* Collapse button and OrgDropdown */}
           <div
-            className={`flex flex-row items-center border-b border-slate-200 dark:border-slate-800 p-2.5 
+            className={`flex flex-row items-center p-2.5 
               ${isCollapsed ? "justify-center" : "justify-between"}`}
           >
             {/* - OrgDropdown */}
@@ -256,33 +256,6 @@ const DesktopSidebar = ({
             <div className="flex-1 overflow-y-auto flex flex-col justify-between h-full mb-2">
               {/* Navigation items */}
               <div className="flex flex-col">
-                {((!isCollapsed &&
-                  orgContext?.currentOrg?.organization_type === "reseller") ||
-                  orgContext?.isResellerOfCurrentCustomerOrg) && (
-                  <div className="flex w-full justify-center px-5 py-2">
-                    <Button
-                      variant="outline"
-                      className="w-full dark:text-slate-400"
-                      size="sm_sleek"
-                      onClick={() => {
-                        router.push("/enterprise/portal");
-                        if (
-                          orgContext.currentOrg?.organization_type ===
-                            "customer" &&
-                          orgContext.currentOrg?.reseller_id
-                        ) {
-                          orgContext.setCurrentOrg(
-                            orgContext.currentOrg.reseller_id
-                          );
-                        }
-                      }}
-                    >
-                      {orgContext.currentOrg?.organization_type === "customer"
-                        ? "Back to Portal"
-                        : "Customer Portal"}
-                    </Button>
-                  </div>
-                )}
                 <div
                   ref={navItemsRef}
                   data-collapsed={isCollapsed}

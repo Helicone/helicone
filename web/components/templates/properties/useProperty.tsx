@@ -1,5 +1,5 @@
 import { UseQueryResult } from "@tanstack/react-query";
-import { Result, resultMap } from "../../../packages/common/result";
+import { Result, resultMap } from "@/packages/common/result";
 
 import { getAggregatedKeyMetrics } from "../../../lib/api/property/aggregatedKeyMetrics";
 import { UnPromise } from "../../../lib/tsxHelpers";
@@ -7,10 +7,7 @@ import {
   BackendMetricsCall,
   useBackendMetricCall,
 } from "../../../services/hooks/useBackendFunction";
-import {
-  FilterBranch,
-  FilterLeaf,
-} from "../../../services/lib/filters/filterDefs";
+import { FilterBranch, FilterLeaf } from "@helicone-package/filters/filterDefs";
 
 export interface PropertyPageData {
   timeFilter: {

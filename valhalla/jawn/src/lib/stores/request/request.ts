@@ -1,29 +1,21 @@
-import { FilterNode } from "../../shared/filters/filterDefs";
+import { Result, err, ok, resultMap } from "../../../packages/common/result";
+import {
+  DEFAULT_UUID,
+  HeliconeRequest,
+} from "@helicone-package/llm-mapper/types";
+import { dbExecute, dbQueryClickhouse } from "../../shared/db/dbExecute";
+import { S3Client } from "../../shared/db/s3Client";
+import { FilterNode } from "@helicone-package/filters/filterDefs";
 import {
   buildFilterWithAuth,
-  buildFilterWithAuthCacheHits,
   buildFilterWithAuthClickHouse,
-} from "../../shared/filters/filters";
+} from "@helicone-package/filters/filters";
 import {
   SortLeafRequest,
   buildRequestSort,
   buildRequestSortClickhouse,
 } from "../../shared/sorts/requests/sorts";
-import { Result, resultMap, ok, err } from "../../../packages/common/result";
-import {
-  dbExecute,
-  dbQueryClickhouse,
-  printRunnableQuery,
-} from "../../shared/db/dbExecute";
-import { LlmSchema } from "../../shared/requestResponseModel";
-import { mapGeminiPro } from "./mappers";
-import { S3Client } from "../../shared/db/s3Client";
-import { Provider } from "../../../packages/llm-mapper/types";
-import { HeliconeRequest } from "../../../packages/llm-mapper/types";
-import {
-  clickhousePriceCalc,
-  clickhousePriceCalcNonAggregated,
-} from "../../../packages/cost";
+import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 
 const MAX_TOTAL_BODY_SIZE = 1024 * 1024;
 
@@ -191,12 +183,18 @@ export async function getRequestsClickhouseNoSort(
       time_to_first_token,
       (prompt_tokens + completion_tokens) AS total_tokens,
       completion_tokens,
+      prompt_cache_read_tokens,
+      prompt_cache_write_tokens,
       prompt_tokens,
       country_code,
       scores,
       properties,
       assets as asset_ids,
-      target_url
+      target_url,
+      cache_reference_id,
+      cache_enabled,
+      cost / ${COST_PRECISION_MULTIPLIER} as cost,
+      updated_at
     FROM request_response_rmt
     WHERE (
       (${builtFilter.filter})
@@ -231,7 +229,6 @@ export async function getRequestsClickhouse(
   limit: number,
   sort: SortLeafRequest
 ): Promise<Result<HeliconeRequest[], string>> {
-  console.log("getRequestsClickhouse");
   if (isNaN(offset) || isNaN(limit)) {
     return { data: null, error: "Invalid offset or limit" };
   }
@@ -264,13 +261,18 @@ export async function getRequestsClickhouse(
       (prompt_tokens + completion_tokens) AS total_tokens,
       completion_tokens,
       prompt_tokens,
+      prompt_cache_read_tokens,
+      prompt_cache_write_tokens,
       country_code,
       scores,
       properties,
       assets as asset_ids,
       target_url,
-      ${clickhousePriceCalcNonAggregated("request_response_rmt")} as cost_usd
-    FROM request_response_rmt FINAL
+      cache_reference_id,
+      cache_enabled,
+      cost / ${COST_PRECISION_MULTIPLIER} as cost,
+      updated_at
+    FROM request_response_rmt
     WHERE (
       (${builtFilter.filter})
     )
@@ -297,187 +299,6 @@ export async function getRequestsClickhouse(
   return mappedRequests;
 }
 
-export async function getRequestsCachedClickhouse(
-  orgId: string,
-  filter: FilterNode,
-  offset: number,
-  limit: number,
-  sort: SortLeafRequest,
-  isPartOfExperiment?: boolean,
-  isScored?: boolean
-): Promise<Result<HeliconeRequest[], string>> {
-  if (isNaN(offset) || isNaN(limit)) {
-    return { data: null, error: "Invalid offset or limit" };
-  }
-
-  if (offset > 10_000 || offset < 0) {
-    return err("unsupported offset value");
-  }
-
-  if (limit < 0 || limit > 1_000) {
-    return err("invalid limit");
-  }
-
-  const builtFilter = await buildFilterWithAuthClickHouse({
-    org_id: orgId,
-    filter,
-    argsAcc: [],
-  });
-
-  const sortSQL = buildRequestSortClickhouse(sort);
-
-  const query = `
-  SELECT
-    rmt.response_id,
-          map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as response_body,
-    rmt.response_created_at,
-    rmt.status AS response_status,
-    rmt.request_id,
-          map('helicone_message', 'fetching body from signed_url... contact engineering@helicone.ai for more information') as request_body,
-    rmt.request_created_at,
-    rmt.user_id AS request_user_id,
-    rmt.properties AS request_properties,
-    rmt.provider,
-    rmt.target_url,
-    rmt.model AS request_model,
-    rmt.time_to_first_token,
-    rmt.prompt_tokens + rmt.completion_tokens AS total_tokens,
-    rmt.completion_tokens,
-    rmt.prompt_tokens,
-    rmt.country_code,
-    rmt.scores,
-    rmt.properties,
-    rmt.assets as asset_ids,
-    ch.created_at AS cache_hit_created_at,
-    ch.latency AS cache_hit_latency
-  FROM request_response_rmt rmt
-  INNER JOIN cache_hits ch ON rmt.request_id = ch.request_id
-  WHERE rmt.organization_id = '${orgId}'
-    AND (${builtFilter.filter})
-  ${
-    sortSQL !== undefined
-      ? `ORDER BY ${sortSQL}`
-      : "ORDER BY rmt.request_created_at DESC"
-  }
-  LIMIT ${limit}
-  OFFSET ${offset}
-  `;
-
-  const requests = await dbQueryClickhouse<HeliconeRequest>(
-    query,
-    builtFilter.argsAcc
-  );
-
-  const s3Client = new S3Client(
-    process.env.S3_ACCESS_KEY ?? "",
-    process.env.S3_SECRET_KEY ?? "",
-    process.env.S3_ENDPOINT_PUBLIC ?? process.env.S3_ENDPOINT ?? "",
-    process.env.S3_BUCKET_NAME ?? "",
-    (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
-  );
-
-  const results = await mapLLMCalls(requests.data, s3Client, orgId);
-
-  return resultMap(results, (data) => {
-    return data;
-  });
-}
-
-export async function getRequestsCached(
-  orgId: string,
-  filter: FilterNode,
-  offset: number,
-  limit: number,
-  sort: SortLeafRequest,
-  isPartOfExperiment?: boolean,
-  isScored?: boolean
-): Promise<Result<HeliconeRequest[], string>> {
-  if (isNaN(offset) || isNaN(limit)) {
-    return { data: null, error: "Invalid offset or limit" };
-  }
-
-  if (offset > 10_000 || offset < 0) {
-    return err("unsupport offset value");
-  }
-
-  if (limit < 0 || limit > 1_000) {
-    return err("invalid limit");
-  }
-
-  const joinQuery = addJoinQueries("", filter);
-  const builtFilter = await buildFilterWithAuthCacheHits({
-    org_id: orgId,
-    filter,
-    argsAcc: [],
-  });
-  const sortSQL = buildRequestSort(sort);
-  const query = `
-  SELECT response.id AS response_id,
-    cache_hits.created_at as response_created_at,
-    '{"helicone_message": "fetching body from signed_url... contact engineering@helicone.ai for more information"}'::jsonb AS response_body,
-    response.status AS response_status,
-    request.id AS request_id,
-    request.created_at as request_created_at,
-    '{"helicone_message": "fetching body from signed_url... contact engineering@helicone.ai for more information"}'::jsonb AS request_body,
-    request.country_code as country_code,
-    request.path AS request_path,
-    request.user_id AS request_user_id,
-    request.properties AS request_properties,
-    request.provider as provider,
-    request.model as request_model,
-    request.model_override as model_override,
-    response.model as response_model,
-    response.feedback as request_feedback,
-    request.helicone_user as helicone_user,
-    response.delay_ms as delay_ms,
-    response.time_to_first_token as time_to_first_token,
-    (response.prompt_tokens + response.completion_tokens) as total_tokens,
-    response.completion_tokens as completion_tokens,
-    response.prompt_tokens as prompt_tokens,
-    request.prompt_id as prompt_id,
-    feedback.created_at AS feedback_created_at,
-    feedback.id AS feedback_id,
-    feedback.rating AS feedback_rating,
-    (
-    SELECT ARRAY_AGG(asset.id)
-    FROM asset
-    WHERE asset.request_id = request.id
-    ) AS asset_ids,
-    (
-      SELECT jsonb_object_agg(sa.score_key, sv.int_value)
-      FROM score_value sv
-      JOIN score_attribute sa ON sv.score_attribute = sa.id
-      WHERE sv.request_id = request.id
-    ) AS scores
-  FROM cache_hits
-    inner join request on cache_hits.request_id = request.id
-    inner join response on request.id = response.request
-    left join feedback on response.id = feedback.response_id
-    ${joinQuery}
-  WHERE (
-    (${builtFilter.filter})
-  )
-  ${sortSQL !== undefined ? `ORDER BY ${sortSQL}` : ""}
-  LIMIT ${limit}
-  OFFSET ${offset}
-`;
-
-  const requests = await dbExecute<HeliconeRequest>(query, builtFilter.argsAcc);
-
-  const s3Client = new S3Client(
-    process.env.S3_ACCESS_KEY ?? "",
-    process.env.S3_SECRET_KEY ?? "",
-    process.env.S3_ENDPOINT_PUBLIC ?? process.env.S3_ENDPOINT ?? "",
-    process.env.S3_BUCKET_NAME ?? "",
-    (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
-  );
-  const results = await mapLLMCalls(requests.data, s3Client, orgId);
-
-  return resultMap(results, (data) => {
-    return data;
-  });
-}
-
 async function mapLLMCalls(
   heliconeRequests: HeliconeRequest[] | null,
   s3Client: S3Client,
@@ -495,7 +316,9 @@ async function mapLLMCalls(
         const { data: signedBodyUrl, error: signedBodyUrlErr } =
           await s3Client.getRequestResponseBodySignedUrl(
             orgId,
-            heliconeRequest.request_id
+            heliconeRequest.cache_reference_id === DEFAULT_UUID
+              ? heliconeRequest.request_id
+              : heliconeRequest.cache_reference_id ?? heliconeRequest.request_id
           );
 
         if (signedBodyUrlErr || !signedBodyUrl) {
@@ -591,35 +414,6 @@ export async function getRequestsDateRange(
       max: new Date(data[0].max),
     };
   });
-}
-
-export async function getRequestCountCached(
-  org_id: string,
-  filter: FilterNode
-): Promise<Result<number, string>> {
-  const builtFilter = await buildFilterWithAuth({
-    org_id,
-    argsAcc: [],
-    filter,
-  });
-
-  const query = `
-  SELECT count(request.id)::bigint as count
-  FROM cache_hits
-    left join request on cache_hits.request_id = request.id
-    left join response on request.id = response.request
-  WHERE (
-    (${builtFilter.filter})
-  )
-  `;
-  const { data, error } = await dbExecute<{ count: number }>(
-    query,
-    builtFilter.argsAcc
-  );
-  if (error !== null) {
-    return { data: null, error: error };
-  }
-  return { data: +data[0].count, error: null };
 }
 
 export async function getRequestCount(

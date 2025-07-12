@@ -1,20 +1,35 @@
-import { ClickHouseClient, createClient } from "@clickhouse/client";
+import {
+  ClickHouseClient,
+  createClient,
+  ClickHouseSettings,
+  DataFormat,
+} from "@clickhouse/client";
 import { Result } from "../../packages/common/result";
+import { TestClickhouseClientWrapper } from "./test/TestClickhouseWrapper";
 
 interface ClickhouseEnv {
   CLICKHOUSE_HOST: string;
   CLICKHOUSE_USER: string;
   CLICKHOUSE_PASSWORD: string;
+  CLICKHOUSE_HQL_USER: string;
+  CLICKHOUSE_HQL_PASSWORD: string;
 }
 
 export class ClickhouseClientWrapper {
   private clickHouseClient: ClickHouseClient;
+  private clickHouseHqlClient: ClickHouseClient;
 
   constructor(env: ClickhouseEnv) {
     this.clickHouseClient = createClient({
       host: env.CLICKHOUSE_HOST,
       username: env.CLICKHOUSE_USER,
       password: env.CLICKHOUSE_PASSWORD,
+    });
+
+    this.clickHouseHqlClient = createClient({
+      host: env.CLICKHOUSE_HOST,
+      username: env.CLICKHOUSE_HQL_USER,
+      password: env.CLICKHOUSE_HQL_PASSWORD,
     });
   }
 
@@ -47,6 +62,36 @@ export class ClickhouseClientWrapper {
   }
 
   async dbQuery<T>(
+    query: string,
+    parameters: (number | string | boolean | Date)[]
+  ): Promise<Result<T[], string>> {
+    try {
+      const query_params = paramsToValues(parameters);
+
+      const queryResult = await this.clickHouseClient.query({
+        query,
+        query_params,
+        format: "JSONEachRow",
+        // Recommended for cluster usage to avoid situations
+        // where a query processing error occurred after the response code
+        // and HTTP headers were sent to the client.
+        // See https://clickhouse.com/docs/en/interfaces/http/#response-buffering
+        clickhouse_settings: {
+          wait_end_of_query: 1,
+        },
+      });
+      return { data: await queryResult.json<T[]>(), error: null };
+    } catch (err) {
+      console.error("Error executing Clickhouse query: ", query, parameters);
+      console.error(err);
+      return {
+        data: null,
+        error: JSON.stringify(err),
+      };
+    }
+  }
+
+  async dbQueryHql<T>(
     query: string,
     parameters: (number | string | boolean | Date)[]
   ): Promise<Result<T[], string>> {
@@ -230,6 +275,34 @@ export interface RequestResponseRMT {
   response_body: string;
   assets: Array<string>;
   updated_at?: string;
+  cache_reference_id?: string;
+  cache_enabled: boolean;
+  cost: number;
+}
+
+export interface CacheMetricSMT {
+  organization_id: string;
+  date: string;
+  hour: number;
+  request_id: string;
+  model: string;
+  provider: string;
+  cache_hit_count: number;
+
+  // Saving metrics
+  saved_latency_ms: number;
+  saved_completion_tokens: number;
+  saved_prompt_tokens: number;
+  saved_completion_audio_tokens: number;
+  saved_prompt_audio_tokens: number;
+  saved_prompt_cache_write_tokens: number;
+  saved_prompt_cache_read_tokens: number;
+
+  last_hit: string;
+  first_hit: string;
+
+  request_body: string;
+  response_body: string;
 }
 
 export interface JawnHttpLogs {
@@ -257,6 +330,7 @@ export interface ClickhouseDB {
     properties_v3: PropertiesV3;
     property_with_response_v1: PropertyWithResponseV1;
     request_response_versioned: RequestResponseVersioned;
+    cache_metrics: CacheMetricSMT;
     rate_limit_log: RateLimitLog;
     rate_limit_log_v2: RateLimitLogV2;
     cache_hits: CacheHits;
@@ -266,18 +340,44 @@ export interface ClickhouseDB {
   };
 }
 
-const { CLICKHOUSE_USER, CLICKHOUSE_PASSWORD, CLICKHOUSE_HOST } = JSON.parse(
-  process.env.CLICKHOUSE_CREDS ?? "{}"
-) as {
+const {
+  CLICKHOUSE_USER,
+  CLICKHOUSE_PASSWORD,
+  CLICKHOUSE_HOST,
+  CLICKHOUSE_HQL_USER,
+  CLICKHOUSE_HQL_PASSWORD,
+} = JSON.parse(process.env.CLICKHOUSE_CREDS ?? "{}") as {
   CLICKHOUSE_USER?: string;
   CLICKHOUSE_PASSWORD?: string;
   CLICKHOUSE_HOST?: string;
+  CLICKHOUSE_HQL_USER?: string;
+  CLICKHOUSE_HQL_PASSWORD?: string;
 };
 
-export const clickhouseDb = new ClickhouseClientWrapper({
-  CLICKHOUSE_HOST:
-    CLICKHOUSE_HOST ?? process.env.CLICKHOUSE_HOST ?? "http://localhost:18123",
-  CLICKHOUSE_USER: CLICKHOUSE_USER ?? process.env.CLICKHOUSE_USER ?? "default",
-  CLICKHOUSE_PASSWORD:
-    CLICKHOUSE_PASSWORD ?? process.env.CLICKHOUSE_PASSWORD ?? "",
-});
+export const clickhouseDb = (() => {
+  if (process.env.NODE_ENV === "test") {
+    return new TestClickhouseClientWrapper({
+      CLICKHOUSE_HOST: "http://localhost:18124",
+      CLICKHOUSE_USER: "default",
+      CLICKHOUSE_HQL_USER:
+        CLICKHOUSE_HQL_USER ?? process.env.CLICKHOUSE_HQL_USER ?? "hql_user",
+      CLICKHOUSE_HQL_PASSWORD:
+        CLICKHOUSE_HQL_PASSWORD ?? process.env.CLICKHOUSE_HQL_PASSWORD ?? "",
+      CLICKHOUSE_PASSWORD: "",
+    });
+  }
+  return new ClickhouseClientWrapper({
+    CLICKHOUSE_HOST:
+      CLICKHOUSE_HOST ??
+      process.env.CLICKHOUSE_HOST ??
+      "http://localhost:18123",
+    CLICKHOUSE_USER:
+      CLICKHOUSE_USER ?? process.env.CLICKHOUSE_USER ?? "default",
+    CLICKHOUSE_PASSWORD:
+      CLICKHOUSE_PASSWORD ?? process.env.CLICKHOUSE_PASSWORD ?? "",
+    CLICKHOUSE_HQL_USER:
+      CLICKHOUSE_HQL_USER ?? process.env.CLICKHOUSE_HQL_USER ?? "hql_user",
+    CLICKHOUSE_HQL_PASSWORD:
+      CLICKHOUSE_HQL_PASSWORD ?? process.env.CLICKHOUSE_HQL_PASSWORD ?? "",
+  });
+})();

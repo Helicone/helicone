@@ -2,15 +2,13 @@ import Hero from "@/components/home/Hero";
 import { Layout } from "@/app/components/Layout";
 import Integrations from "@/components/templates/landing/integrations";
 import dynamic from "next/dynamic";
-import { Suspense } from "react";
 import LazyLoadComponent from "@/components/shared/LazyLoadComponent";
 import { cn, ISLAND_WIDTH } from "@/lib/utils";
 
+const AiGateway = dynamic(() => import("@/components/home/AiGateway"));
 const BigDashboard = dynamic(() => import("@/components/home/BigDashboard"));
 const Companies = dynamic(() => import("@/components/home/Companies"));
 const CTA = dynamic(() => import("@/components/home/CTA"));
-const Evaluate = dynamic(() => import("@/components/home/Evaluate"));
-const Experiment = dynamic(() => import("@/components/home/Experiment"));
 const FAQ = dynamic(() => import("@/components/home/FAQ"));
 const LLMLifecycle = dynamic(() => import("@/components/home/LLMLifecycle"));
 const Log = dynamic(() => import("@/components/home/Log"));
@@ -39,14 +37,13 @@ export default async function Home() {
       next: { revalidate: 3600 },
     }
   );
-  // console.log(await response.text());
-  // const totalValuesData = undefined;
+
   const totalValuesData = response.ok
     ? ((await response.json()).data as {
-      total_requests?: number;
-      total_tokens?: number;
-      total_cost?: number;
-    })
+        total_requests?: number;
+        total_tokens?: number;
+        total_cost?: number;
+      })
     : undefined;
 
   return (
@@ -56,28 +53,25 @@ export default async function Home() {
           <Hero />
           <Prototype />
           <LazyLoadComponent fallback={<LoadingSection height="h-24" />}>
-            <Companies className={cn("bg-[#f2f9fc]", ISLAND_WIDTH)} />
-          </LazyLoadComponent>
-          <LazyLoadComponent fallback={<LoadingSection />}>
-            <Quote />
-          </LazyLoadComponent>
-          <LazyLoadComponent fallback={<LoadingSection />}>
-            <Integrations />
+            <Companies className={cn("bg-[#f2f9fc]")} />
           </LazyLoadComponent>
           <LazyLoadComponent fallback={<LoadingSection />}>
             <Quote2 />
           </LazyLoadComponent>
           <LazyLoadComponent fallback={<LoadingSection />}>
+            <Integrations />
+          </LazyLoadComponent>
+          <LazyLoadComponent fallback={<LoadingSection />}>
+            <Quote />
+          </LazyLoadComponent>
+          <LazyLoadComponent fallback={<LoadingSection />}>
             <LLMLifecycle />
           </LazyLoadComponent>
           <LazyLoadComponent fallback={<LoadingSection />}>
+            <AiGateway />
+          </LazyLoadComponent>
+          <LazyLoadComponent fallback={<LoadingSection />}>
             <Log />
-          </LazyLoadComponent>
-          <LazyLoadComponent fallback={<LoadingSection />}>
-            <Evaluate />
-          </LazyLoadComponent>
-          <LazyLoadComponent fallback={<LoadingSection />}>
-            <Experiment />
           </LazyLoadComponent>
           <LazyLoadComponent fallback={<LoadingSection />}>
             <Production />
