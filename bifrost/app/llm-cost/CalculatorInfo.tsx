@@ -908,19 +908,19 @@ curl "https://helicone.ai/api/llm-costs?provider=openai&format=csv" \\
                         <td className="px-4 py-2 text-sm text-slate-700 font-mono">provider</td>
                         <td className="px-4 py-2 text-sm text-slate-500">string</td>
                         <td className="px-4 py-2 text-sm text-slate-500">-</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">Filter by exact provider name (e.g., "OPENAI", "ANTHROPIC")</td>
+                        <td className="px-4 py-2 text-sm text-slate-500">Filter by exact provider name (e.g., &quot;OPENAI&quot;, &quot;ANTHROPIC&quot;)</td>
                       </tr>
                       <tr>
                         <td className="px-4 py-2 text-sm text-slate-700 font-mono">model</td>
                         <td className="px-4 py-2 text-sm text-slate-500">string</td>
                         <td className="px-4 py-2 text-sm text-slate-500">-</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">Search models containing this text (e.g., "gpt", "claude")</td>
+                        <td className="px-4 py-2 text-sm text-slate-500">Search models containing this text (e.g., &quot;gpt&quot;, &quot;claude&quot;)</td>
                       </tr>
                       <tr>
                         <td className="px-4 py-2 text-sm text-slate-700 font-mono">format</td>
                         <td className="px-4 py-2 text-sm text-slate-500">string</td>
                         <td className="px-4 py-2 text-sm text-slate-500">json</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">Output format: "json" or "csv"</td>
+                        <td className="px-4 py-2 text-sm text-slate-500">Output format: &quot;json&quot; or &quot;csv&quot;</td>
                       </tr>
                     </tbody>
                   </table>
@@ -940,7 +940,7 @@ curl "https://helicone.ai/api/llm-costs?provider=openai&format=csv" \\
                     <tbody className="bg-white divide-y divide-slate-200">
                       <tr>
                         <td className="px-4 py-2 text-sm text-slate-700 font-mono">provider</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">Provider name (e.g., "OPENAI", "ANTHROPIC")</td>
+                        <td className="px-4 py-2 text-sm text-slate-500">Provider name (e.g., &quot;OPENAI&quot;, &quot;ANTHROPIC&quot;)</td>
                       </tr>
                       <tr>
                         <td className="px-4 py-2 text-sm text-slate-700 font-mono">model</td>
@@ -948,7 +948,7 @@ curl "https://helicone.ai/api/llm-costs?provider=openai&format=csv" \\
                       </tr>
                       <tr>
                         <td className="px-4 py-2 text-sm text-slate-700 font-mono">operator</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">How the model name matching works ("equals", "startsWith", "includes")</td>
+                        <td className="px-4 py-2 text-sm text-slate-500">How the model name matching works (&quot;equals&quot;, &quot;startsWith&quot;, &quot;includes&quot;)</td>
                       </tr>
                       <tr>
                         <td className="px-4 py-2 text-sm text-slate-700 font-mono">input_cost_per_1m</td>
@@ -977,7 +977,7 @@ curl "https://helicone.ai/api/llm-costs?provider=openai&format=csv" \\
                   <li>All costs are per 1 million tokens, making it easy to calculate expenses</li>
                   <li>Model operators help understand how model matching works</li>
                   <li>Results are sorted by provider, then by model name</li>
-                  <li>Data comes directly from Helicone's production cost database</li>
+                  <li>Data comes directly from Helicone&apos;s production cost database</li>
                   <li>API supports CORS for browser-based applications</li>
                   <li>Use CSV format for easy import into spreadsheets</li>
                 </ul>
@@ -1074,19 +1074,19 @@ curl "https://helicone.ai/api/llm-costs?provider=openai&format=csv" \\
                         <td className="px-4 py-2 text-sm text-slate-700 font-mono">provider</td>
                         <td className="px-4 py-2 text-sm text-slate-500">string</td>
                         <td className="px-4 py-2 text-sm text-slate-500">-</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">Filter by exact provider name (e.g., "OPENAI", "ANTHROPIC")</td>
+                        <td className="px-4 py-2 text-sm text-slate-500">Filter by exact provider name (e.g., &quot;OPENAI&quot;, &quot;ANTHROPIC&quot;)</td>
                       </tr>
                       <tr>
                         <td className="px-4 py-2 text-sm text-slate-700 font-mono">model</td>
                         <td className="px-4 py-2 text-sm text-slate-500">string</td>
                         <td className="px-4 py-2 text-sm text-slate-500">-</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">Search models containing this text (e.g., "gpt", "claude")</td>
+                        <td className="px-4 py-2 text-sm text-slate-500">Search models containing this text (e.g., &quot;gpt&quot;, &quot;claude&quot;)</td>
                       </tr>
                       <tr>
                         <td className="px-4 py-2 text-sm text-slate-700 font-mono">format</td>
                         <td className="px-4 py-2 text-sm text-slate-500">string</td>
                         <td className="px-4 py-2 text-sm text-slate-500">json</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">Output format: "json" or "csv"</td>
+                        <td className="px-4 py-2 text-sm text-slate-500">Output format: &quot;json&quot; or &quot;csv&quot;</td>
                       </tr>
                     </tbody>
                   </table>
@@ -1106,7 +1106,7 @@ curl "https://helicone.ai/api/llm-costs?provider=openai&format=csv" \\
                     <tbody className="bg-white divide-y divide-slate-200">
                       <tr>
                         <td className="px-4 py-2 text-sm text-slate-700 font-mono">provider</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">Provider name (e.g., "OPENAI", "ANTHROPIC")</td>
+                        <td className="px-4 py-2 text-sm text-slate-500">Provider name (e.g., &quot;OPENAI&quot;, &quot;ANTHROPIC&quot;)</td>
                       </tr>
                       <tr>
                         <td className="px-4 py-2 text-sm text-slate-700 font-mono">model</td>
@@ -1114,7 +1114,7 @@ curl "https://helicone.ai/api/llm-costs?provider=openai&format=csv" \\
                       </tr>
                       <tr>
                         <td className="px-4 py-2 text-sm text-slate-700 font-mono">operator</td>
-                        <td className="px-4 py-2 text-sm text-slate-500">How the model name matching works ("equals", "startsWith", "includes")</td>
+                        <td className="px-4 py-2 text-sm text-slate-500">How the model name matching works (&quot;equals&quot;, &quot;startsWith&quot;, &quot;includes&quot;)</td>
                       </tr>
                       <tr>
                         <td className="px-4 py-2 text-sm text-slate-700 font-mono">input_cost_per_1m</td>
@@ -1143,7 +1143,7 @@ curl "https://helicone.ai/api/llm-costs?provider=openai&format=csv" \\
                   <li>All costs are per 1 million tokens, making it easy to calculate expenses</li>
                   <li>Model operators help understand how model matching works</li>
                   <li>Results are sorted by provider, then by model name</li>
-                  <li>Data comes directly from Helicone's production cost database</li>
+                  <li>Data comes directly from Helicone&apos;s production cost database</li>
                   <li>API supports CORS for browser-based applications</li>
                   <li>Use CSV format for easy import into spreadsheets</li>
                 </ul>
