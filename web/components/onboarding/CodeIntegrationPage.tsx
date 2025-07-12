@@ -25,7 +25,7 @@ import {
   Copy,
   Loader,
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Result } from "@/packages/common/result";
 import { useRouter } from "next/navigation";
 import { useOrgOnboarding } from "@/services/hooks/useOrgOnboarding";
@@ -74,6 +74,7 @@ export function CodeIntegrationPage({
   const { setNotification } = useNotification();
   const org = useOrg();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { updateCurrentStep, completeOnboarding } = useOrgOnboarding(
     org?.currentOrg?.id ?? ""
   );
@@ -173,13 +174,43 @@ export function CodeIntegrationPage({
   useEffect(() => {
     if (hasEvent?.data) {
       const timeout = setTimeout(async () => {
+        // Invalidate all queries related to requests and dashboard metrics
+        // This ensures fresh data is loaded when redirecting to dashboard
+        await queryClient.invalidateQueries({
+          queryKey: ["requestsWithSignedUrls"],
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ["requestsCount"],
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ["requestOverTime"],
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ["errorOverTime"],
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ["costOverTime"],
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ["latencyOverTime"],
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ["usersOverTime"],
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ["timeToFirstToken"],
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ["topRequests"],
+        });
+        
         await completeOnboarding();
         router.push("/dashboard");
       }, 1500);
 
       return () => clearTimeout(timeout);
     }
-  }, [hasEvent?.data, router, completeOnboarding]);
+  }, [hasEvent?.data, router, completeOnboarding, queryClient]);
 
   const availableLanguages = Object.keys(codeSnippets[provider]).filter(
     (key) => typeof codeSnippets[provider][key] === "function"
