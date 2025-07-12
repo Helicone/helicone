@@ -1876,6 +1876,13 @@
   resolved "https://registry.npmjs.org/@floating-ui/utils/-/utils-0.2.9.tgz"
   integrity sha512-MDWhGtE+eHw5JW7lq4qhc5yRLS11ERl1c7Z6Xd0a58DozHES6EnNNwUWbMiG4J9Cgj053Bhk8zvlhFYKVhULwg==
 
+"@google-cloud/vertexai@^1.10.0":
+  version "1.10.0"
+  resolved "https://registry.npmjs.org/@google-cloud/vertexai/-/vertexai-1.10.0.tgz"
+  integrity sha512-HqYqoivNtkq59po8m7KI0n+lWKdz4kabENncYQXZCX/hBWJfXtKAfR/2nUQsP+TwSfHKoA7zDL2RrJYIv/j3VQ==
+  dependencies:
+    google-auth-library "^9.1.0"
+
 "@google/genai@^1.9.0":
   version "1.9.0"
   resolved "https://registry.npmjs.org/@google/genai/-/genai-1.9.0.tgz"
@@ -9963,7 +9970,7 @@ goober@^2.1.16:
   resolved "https://registry.npmjs.org/goober/-/goober-2.1.16.tgz"
   integrity sha512-erjk19y1U33+XAMe1VTvIONHYoSqE4iS7BYUZfHaqeohLmnC0FdxEh7rQU+6MZ4OajItzjZFSRtVANrQwNq6/g==
 
-google-auth-library@^9.14.2:
+google-auth-library@^9.1.0, google-auth-library@^9.14.2:
   version "9.15.1"
   resolved "https://registry.npmjs.org/google-auth-library/-/google-auth-library-9.15.1.tgz"
   integrity sha512-Jb6Z0+nvECVz+2lzSMt9u98UsoakXxA2HGHMCxh+so3n90XgYWkq5dur19JAJV7ONiJY22yBTyJB1TSkvPq9Ng==

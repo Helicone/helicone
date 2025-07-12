@@ -43,7 +43,11 @@ export async function getTokenCount(
     const response = await result.json() as { tokens?: number };
     return response?.tokens ?? 0;
   } else if (provider === "GOOGLE") {
-    // 1. Try SDK
+    // For Google/Vertex AI, we should prioritize response usageMetadata
+    // This function is only called when response metadata is missing
+    // (e.g., for pre-flight pricing or if an older proxy strips the field)
+    
+    // 1. Try SDK countTokens endpoint
     try {
       // Dynamically import to avoid breaking environments without SDK
       const { GoogleGenAI } = await import("@google/genai");
@@ -54,7 +58,7 @@ export async function getTokenCount(
       const result = await ai.models.countTokens({ model, contents: [{ text: inputText }] });
       if (typeof result?.totalTokens === "number") return result.totalTokens;
     } catch (sdkErr) {
-      // 2. Fallback to REST
+      // 2. Fallback to REST countTokens endpoint
       try {
         const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.GCP_API_KEY;
         if (!apiKey) throw new Error("Google API key not found");
