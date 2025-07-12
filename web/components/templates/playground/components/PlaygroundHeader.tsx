@@ -21,20 +21,15 @@ import { ModelParameters } from "@/lib/api/llm/generate";
 import ModelParametersForm from "./ModelParametersForm";
 import ToolsConfigurationModal from "./ToolsConfigurationModal";
 import PlaygroundActions from "./PlaygroundActions";
+import { ResponseFormat } from "../types";
 
 interface PlaygroundHeaderProps {
   selectedModel: string;
   setSelectedModel: (_model: string) => void;
   tools: Tool[];
   setTools: (_tools: Tool[]) => void;
-  responseFormat: {
-    type: string;
-    json_schema?: string;
-  };
-  setResponseFormat: (_responseFormat: {
-    type: string;
-    json_schema?: string;
-  }) => void;
+  responseFormat: ResponseFormat;
+  setResponseFormat: (_responseFormat: ResponseFormat) => boolean;
   modelParameters: ModelParameters;
   setModelParameters: (_modelParameters: ModelParameters) => void;
   mappedContent: MappedLLMRequest | null;

@@ -78,6 +78,7 @@ export default function ToolMessage({
           }
         />
       ) : (
+        <div className="max-h-[400px] overflow-y-auto">
         <MarkdownEditor
           className="w-full rounded-none bg-white dark:bg-slate-950"
           language="markdown"
@@ -108,6 +109,7 @@ export default function ToolMessage({
           }}
           text={message.content || ""}
         />
+        </div>
       )}
     </div>
   );

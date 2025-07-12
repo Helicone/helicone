@@ -28,6 +28,8 @@ const MonacoMarkdownEditor = (props: MarkdownEditorProps) => {
   const { theme: currentTheme } = useTheme();
   const minHeight = 100;
 
+  console.log("text", text);
+
   const [height, setHeight] = useState(minHeight);
   const updateHeight = (editor: editor.IStandaloneCodeEditor) =>
     setHeight(
@@ -142,7 +144,7 @@ const MarkdownEditor = (props: MarkdownEditorProps) => {
         if (typeof code !== "string") return "";
         
         let highlighted = highlight(code, lang, ref);
-        if (language === "markdown") {
+        if (language === "markdown" || language === "json") {
           highlighted = highlighted.replace(
             TEMPLATE_REGEX,
             (match) => {

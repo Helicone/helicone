@@ -37,6 +37,7 @@ import { HeliconeTemplateManager } from "@helicone-package/prompts/templates";
 import { TemplateVariable } from "@helicone-package/prompts/types";
 import { Message } from "@helicone-package/llm-mapper/types";
 import { useVariableColorMapStore } from "@/store/features/playground/variableColorMap";
+import { ResponseFormat, ResponseFormatType } from "./types";
 
 export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
   _type: "openai-chat",
@@ -111,7 +112,7 @@ const convertMappedLLMRequestToOpenAIChatRequest = (
   mappedContent: MappedLLMRequest, tools: Tool[],
   modelParameters: ModelParameters,
   selectedModel: string,
-  responseFormat: { type: string, json_schema?: string }
+  responseFormat: ResponseFormat
 ): OpenAIChatRequest => {
   const openaiRequest = openaiChatMapper.toExternal({
     ...mappedContent.schema.request,
@@ -268,55 +269,10 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         setSelectedModel(OPENROUTER_MODEL_MAP[closestMatch.target]);
       }
 
-      onUpdateMappedContent(convertedContent);
-      setDefaultContent(convertedContent);
-      setTools(convertedContent.schema.request.tools ?? []);
-
-      setModelParameters({
-        temperature: promptVersionData.promptBody.temperature,
-        max_tokens: promptVersionData.promptBody.max_tokens,
-        top_p: promptVersionData.promptBody.top_p,
-        frequency_penalty: promptVersionData.promptBody.frequency_penalty,
-        presence_penalty: promptVersionData.promptBody.presence_penalty,
-        stop: promptVersionData.promptBody.stop
-          ? Array.isArray(promptVersionData.promptBody.stop)
-            ? promptVersionData.promptBody.stop.join(",")
-            : promptVersionData.promptBody.stop
-          : undefined,
-      });
-
-      if (promptVersionData.promptBody.response_format) {
-        setResponseFormat({
-          type: promptVersionData.promptBody.response_format.type || "text",
-          json_schema: promptVersionData.promptBody.response_format.json_schema,
-        });
-      }
-    }
-  }, [promptVersionData, isPromptVersionLoading]);
-
-  useEffect(() => {
-    if (promptVersionData && promptVersionData.promptBody && !isPromptVersionLoading) {
-      const convertedContent = convertOpenAIChatRequestToMappedLLMRequest(promptVersionData.promptBody);
-      
-      const model = promptVersionData.promptBody.model;
-      if (model && model in OPENROUTER_MODEL_MAP) {
-        setSelectedModel(OPENROUTER_MODEL_MAP[model.split("/")[1]]);
-      } else if (model) {
-        const similarities = Object.keys(OPENROUTER_MODEL_MAP).map((m) => ({
-          target: m,
-          similarity: findBestMatch(model, m),
-        }));
-
-        const closestMatch = similarities.reduce((best, current) =>
-          current.similarity > best.similarity ? current : best
-        );
-        setSelectedModel(OPENROUTER_MODEL_MAP[closestMatch.target]);
-      }
-
       setMappedContent(convertedContent);
       setDefaultContent(convertedContent);
       setTools(convertedContent.schema.request.tools ?? []);
-      
+
       setModelParameters({
         temperature: promptVersionData.promptBody.temperature,
         max_tokens: promptVersionData.promptBody.max_tokens,
@@ -330,12 +286,21 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           : undefined,
       });
 
-      if (promptVersionData.promptBody.response_format) {
+      const storedResponseFormat = convertedContent?.schema.request.response_format as ResponseFormat;
+      if (storedResponseFormat) {
         setResponseFormat({
-          type: promptVersionData.promptBody.response_format.type || "text",
-          json_schema: promptVersionData.promptBody.response_format.json_schema,
+          type: "json_schema" as ResponseFormatType,
+          json_schema: storedResponseFormat.json_schema,
         });
       }
+
+      processDefinedPromptInputs({
+        newMappedContent: convertedContent,
+        newResponseFormat: storedResponseFormat ?? {
+          type: "text" as ResponseFormatType,
+          json_schema: undefined,
+        } as ResponseFormat,
+      });
     }
   }, [promptVersionData, isPromptVersionLoading]);
 
@@ -350,17 +315,13 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     stop: undefined,
   });
 
-  const [responseFormat, setResponseFormat] = useState<{
-    type: string;
-    json_schema?: string;
-  }>({
+  const [responseFormat, setResponseFormat] = useState<ResponseFormat>({
     type: "text",
     json_schema: undefined,
   });
 
   const [templateVariables, setTemplateVariables] = useState<Map<string, TemplateVariable>>(new Map());
   const [substitutionValues, setSubstitutionValues] = useState<Map<string, string>>(new Map());
-  const [templatedMessages, setTemplatedMessages] = useState<Message[]>([]);
 
   const onUpdateSubstitutionValue = (name: string, value: string) => {
     setSubstitutionValues(prev => {
@@ -579,8 +540,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     const templatedMessages: Message[] = [];
     let hasSubstitutionFailure = false;
 
-    if (!messages) return { hasSubstitutionFailure, templatedMessages };
-
     for (const message of messages) {
       if (message._type === "contentArray" && message.contentArray) {
         const processedContentArray = message.contentArray.map(item => {
@@ -615,8 +574,105 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         templatedMessages.push(message);
       } 
     }
-    
+
     return { hasSubstitutionFailure, templatedMessages };
+  };
+
+  const createTemplatedResponseFormat = (responseFormat: ResponseFormat) => {
+    if (!responseFormat.json_schema || responseFormat.type !== "json_schema") {
+      return responseFormat;
+    }
+
+    const substituted = HeliconeTemplateManager.substituteVariables(
+      responseFormat.json_schema || "{}",
+      Object.fromEntries(substitutionValues)
+    );
+
+    if (!substituted.success) {
+      return responseFormat;
+    }
+
+    try {
+      const parsed = JSON.parse(substituted.result || "{}");
+      return {
+        ...responseFormat,
+        json_schema: parsed
+      };
+    } catch (e) {
+      setNotification("Failed to parse response format", "error");
+      return responseFormat;
+    }
+  }
+
+
+  const processDefinedPromptInputs = (parts: {
+    newMappedContent: MappedLLMRequest | null,
+    newResponseFormat: ResponseFormat | null
+  }): Map<string, TemplateVariable> => {
+    const { newMappedContent, newResponseFormat } = parts;
+    const allVariables = new Map<string, TemplateVariable>();
+
+    const processContent = (content: string) => {
+      const variables = HeliconeTemplateManager.extractVariables(content);
+      variables.forEach((variable: TemplateVariable) => allVariables.set(variable.name, variable));
+      return variables;
+    };
+    
+    if (newMappedContent) {
+      const messages = newMappedContent.schema.request.messages;
+      if (messages) {
+        for (const message of messages) {
+          if (message._type === "contentArray" && message.contentArray) {
+            message.contentArray.forEach(item => {
+              if (item._type === "message" && item.content) {
+                processContent(item.content);
+              }
+            });
+          } else if (message.content) {
+            processContent(message.content);
+          }
+        }
+      }
+    }
+
+    if (newResponseFormat && newResponseFormat.type === "json_schema") {
+      if (newResponseFormat.json_schema) {
+        processContent(newResponseFormat.json_schema);
+      }
+    }
+
+    initializeColorMap(Array.from(allVariables.keys()));
+    setTemplateVariables(allVariables);
+    return allVariables;
+  }
+
+  const onUpdateResponseFormat = (newResponseFormat: ResponseFormat): boolean => {
+    if (!newResponseFormat.json_schema || newResponseFormat.type !== "json_schema") {
+      setResponseFormat(newResponseFormat);
+      onUpdateMappedContent(mappedContent);
+      return true;
+    }
+
+    // since helicone tags, even when properly used, may contribute to valid json,
+    // replace them with "" (valid JSON in usage) where possible.
+    const substitutedJsonSchema = HeliconeTemplateManager.placeholderAllVariables(
+      newResponseFormat.json_schema || "{}"
+    );
+    
+    // then check if the result is valid JSON.
+    if (newResponseFormat.type === "json_schema") {
+      try {
+        JSON.parse(substitutedJsonSchema);
+      } catch (e) {
+        return false;
+      }
+    }
+
+    // Process variables from the original JSON schema (with template variables)
+    processDefinedPromptInputs({ newMappedContent: mappedContent, newResponseFormat });
+
+    setResponseFormat(newResponseFormat);
+    return true;
   };
 
   const onUpdateMappedContent = (newMappedContent: MappedLLMRequest | null) => {
@@ -625,31 +681,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       return;
     }
 
-    const messages = newMappedContent.schema.request.messages;
-    const allVariables = new Map<string, TemplateVariable>();
-
-    const processContent = (content: string) => {
-      const variables = HeliconeTemplateManager.extractVariables(content);
-      variables.forEach((variable: TemplateVariable) => allVariables.set(variable.name, variable));
-      return variables;
-    };
-
-    if (messages) {
-      for (const message of messages) {
-        if (message._type === "contentArray" && message.contentArray) {
-          message.contentArray.forEach(item => {
-            if (item._type === "message" && item.content) {
-              processContent(item.content);
-            }
-          });
-        } else if (message.content) {
-          processContent(message.content);
-        }
-      }
-    }
-
-    initializeColorMap(Array.from(allVariables.keys()));
-    setTemplateVariables(allVariables);
+    processDefinedPromptInputs({ newMappedContent, newResponseFormat: responseFormat });
     setMappedContent(newMappedContent);
   };
 
@@ -671,6 +703,8 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           return;
         }
 
+        const templatedResponseFormat = createTemplatedResponseFormat(responseFormat);
+
         const templatedContent = {
           ...mappedContent,
           schema: {
@@ -687,7 +721,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           tools,
           modelParameters,
           selectedModel,
-          responseFormat
+          templatedResponseFormat
         );
 
         const stream = await generateStream({
@@ -836,7 +870,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               tools={tools}
               setTools={handleToolsChange}
               responseFormat={responseFormat}
-              setResponseFormat={setResponseFormat}
+              setResponseFormat={onUpdateResponseFormat}
               modelParameters={modelParameters}
               setModelParameters={setModelParameters}
               promptVersionId={promptVersionId}
