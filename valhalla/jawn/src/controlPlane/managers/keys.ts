@@ -29,6 +29,7 @@ export async function getConfig(params: {
     keys: keys.data!.map((key) => ({
       ownerId: key.user_id,
       keyHash: key.api_key_hash,
+      organizationId: params.auth.organizationId,
     })),
     routerId: "router",
     routerConfig: "",
