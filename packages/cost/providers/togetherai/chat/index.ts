@@ -500,4 +500,114 @@ export const costs: ModelRow[] = [
       completion_token: 0.0000024,
     },
   },
+
+  {
+    model: {
+      operator: "equals",
+      value: "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
+    },
+    cost: {
+      prompt_token: 0.00027,
+      completion_token: 0.00085,
+    },
+  },
+
+  {
+    model: {
+      operator: "equals",
+      value: "meta-llama/Llama-4-Scout-17B-16E-Instruct",
+    },
+    cost: {
+      prompt_token: 0.00018,
+      completion_token: 0.00059,
+    },
+  },
+
+  {
+    model: {
+      operator: "equals",
+      value: "deepseek-ai/DeepSeek-V3",
+    },
+    cost: {
+      prompt_token: 0.00125,
+      completion_token: 0.00125,
+    },
+  },
+
+  {
+    model: {
+      operator: "equals",
+      value: "deepseek-ai/DeepSeek-R1",
+    },
+    cost: {
+      prompt_token: 0.003,
+      completion_token: 0.007,
+    },
+  },
+
+  {
+    model: {
+      operator: "equals",
+      value: "deepseek-ai/DeepSeek-R1-0528-tput",
+    },
+    cost: {
+      prompt_token: 0.00055,
+      completion_token: 0.00219,
+    },
+  },
+
+  {
+    model: {
+      operator: "equals",
+      value: "Qwen/Qwen2.5-7B-Instruct-Turbo",
+    },
+    cost: {
+      prompt_token: 0.0003,
+      completion_token: 0.0003,
+    },
+  },
+
+  {
+    model: {
+      operator: "equals",
+      value: "Qwen/Qwen2.5-72B-Instruct-Turbo",
+    },
+    cost: {
+      prompt_token: 0.0012,
+      completion_token: 0.0012,
+    },
+  },
+
+  {
+    model: {
+      operator: "equals",
+      value: "Qwen/Qwen2.5-VL-72B-Instruct",
+    },
+    cost: {
+      prompt_token: 0.0012,
+      completion_token: 0.0012,
+    },
+  },
+
+  {
+    model: {
+      operator: "equals",
+      value: "Qwen/Qwen2.5-Coder-32B-Instruct",
+    },
+    cost: {
+      prompt_token: 0.0008,
+      completion_token: 0.0008,
+    },
+  },
+
+  {
+    model: {
+      operator: "equals",
+      value: "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+    },
+    cost: {
+      prompt_token: 0.00000088,
+      completion_token: 0.00000088,
+    },
+  },
 ];
