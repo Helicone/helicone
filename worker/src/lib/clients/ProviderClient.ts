@@ -9,7 +9,7 @@ export interface CallProps {
   headers: Headers;
   method: string;
   apiBase: string;
-  body: string | null;
+  body: string | ReadableStream<Uint8Array> | null;
   increaseTimeout: boolean;
   originalUrl: URL;
   extraHeaders: Headers | null;
@@ -18,9 +18,19 @@ export interface CallProps {
 export function callPropsFromProxyRequest(
   proxyRequest: HeliconeProxyRequest
 ): CallProps {
+  // Check if this is a multipart form data request
+  const contentType = proxyRequest.requestWrapper.getHeaders().get("content-type");
+  const isMultipart = contentType && contentType.includes("multipart/form-data");
+  
+  // For multipart requests, preserve the original body stream
+  // For other requests, use the processed body text
+  const body = isMultipart 
+    ? proxyRequest.requestWrapper.getBody()
+    : proxyRequest.bodyText;
+
   return {
     apiBase: proxyRequest.api_base,
-    body: proxyRequest.bodyText,
+    body: body,
     headers: proxyRequest.requestWrapper.getHeaders(),
     method: proxyRequest.requestWrapper.getMethod(),
     increaseTimeout:
@@ -59,7 +69,7 @@ async function callWithMapper(
         headers: Headers;
       }
     | {
-        body: string;
+        body: string | ReadableStream<Uint8Array>;
         method: string;
         headers: Headers;
       }
@@ -71,8 +81,14 @@ async function callWithMapper(
         init.headers.forEach((value, key) => {
           headers[key] = value;
         });
+        
+        // Convert ReadableStream to string for llmmapper if needed
+        const body = typeof init.body === 'string' 
+          ? init.body 
+          : await new Response(init.body).text();
+          
         return await llmmapper(targetUrl, {
-          body: init.body,
+          body: body,
           headers: headers,
         });
       } else {

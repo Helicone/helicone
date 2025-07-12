@@ -185,6 +185,14 @@ export class HeliconeProxyRequestMapper {
       return null;
     }
 
+    // Check if this is a multipart form data request (likely containing file uploads)
+    const contentType = this.request.getHeaders().get("content-type");
+    if (contentType && contentType.includes("multipart/form-data")) {
+      // For multipart requests, we need to preserve the original body
+      // This is especially important for file uploads from toFile
+      return await this.request.getRawText();
+    }
+
     if (this.request.heliconeHeaders.featureFlags.streamUsage) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const jsonBody = (await this.request.getJson()) as any;
