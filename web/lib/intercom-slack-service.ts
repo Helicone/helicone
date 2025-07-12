@@ -103,6 +103,11 @@ export class IntercomSlackService {
     console.log("Message ID:", messageId);
     console.log("Thread TS:", threadTs);
     console.log("Attachments:", attachments?.length ? attachments.length : 0);
+    console.log("Environment check:");
+    console.log("- SLACK_BOT_TOKEN exists:", !!slackBotToken);
+    console.log("- SLACK_BOT_TOKEN first 20 chars:", slackBotToken?.substring(0, 20));
+    console.log("- SLACK_CHANNEL_ID:", slackChannelId);
+    console.log("- NODE_ENV:", process.env.NODE_ENV);
     
     const slackBotToken = process.env.SLACK_BOT_TOKEN;
     const slackChannelId = process.env.SLACK_CHANNEL_ID;
@@ -110,6 +115,28 @@ export class IntercomSlackService {
     if (!slackBotToken || !slackChannelId) {
       console.error("SLACK_BOT_TOKEN or SLACK_CHANNEL_ID not configured");
       throw new Error("Slack Web API not configured");
+    }
+
+    // Test channel access first
+    try {
+      console.log("Testing channel access...");
+      const channelTestResponse = await fetch("https://slack.com/api/conversations.info", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${slackBotToken}`,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: `channel=${slackChannelId}`
+      });
+      
+      const channelTestData = await channelTestResponse.json();
+      console.log("Channel test response:", JSON.stringify(channelTestData, null, 2));
+      
+      if (!channelTestData.ok) {
+        console.error("Channel access test failed:", channelTestData.error);
+      }
+    } catch (error) {
+      console.error("Error testing channel access:", error);
     }
 
     // Create metadata text
@@ -215,6 +242,8 @@ export class IntercomSlackService {
     if (!response.ok) {
       const errorText = await response.text();
       console.error("Slack error response:", errorText);
+      console.error("Channel ID used:", slackChannelId);
+      console.error("Bot token (first 20 chars):", slackBotToken?.substring(0, 20));
       throw new Error(`Failed to send Slack message: ${response.statusText} - ${errorText}`);
     }
 
@@ -223,6 +252,11 @@ export class IntercomSlackService {
     
     if (!responseData.ok) {
       console.error("Slack API error:", responseData.error);
+      
+      if (responseData.error === "not_in_channel") {
+        throw new Error(`Slack bot is not a member of channel ${slackChannelId}. Please invite the bot to the channel or check the SLACK_CHANNEL_ID environment variable.`);
+      }
+      
       throw new Error(`Slack API error: ${responseData.error}`);
     }
 
