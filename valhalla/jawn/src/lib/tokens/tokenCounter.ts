@@ -1,6 +1,7 @@
 import claudeRanks from "@anthropic-ai/tokenizer/claude.json";
 import { Tiktoken } from "js-tiktoken";
 import { get_encoding, encoding_for_model } from "tiktoken";
+import { fromPreTrained } from "@lenml/tokenizer-gemini";
 
 import { Worker } from "worker_threads";
 
@@ -13,6 +14,9 @@ const anthropicTokenizer = new Tiktoken({
   special_tokens: claudeRanks.special_tokens,
   pat_str: claudeRanks.pat_str,
 });
+
+// Initialize offline Gemini tokenizer
+let offlineGeminiTok: any;
 
 const TIKTOKEN_MODELS = [
   "davinci-002",
@@ -72,6 +76,7 @@ const TIKTOKEN_MODELS = [
   "gpt-4o",
   "gpt-4o-2024-05-13",
 ];
+
 export async function getTokenCountGPT3(
   inputText: string,
   model: string
@@ -92,4 +97,59 @@ export async function getTokenCountAnthropic(
   // Normalize the potentially unicode input to Anthropic standard of normalization
   // https://github.com/anthropics/anthropic-tokenizer-typescript/blob/bd241051066ea37120f2898419e3fc8662fab280/index.ts#L7C19-L7C19
   return anthropicTokenizer.encode(inputText.normalize("NFKC"), "all").length;
+}
+
+export async function getTokenCountGemini(
+  inputText: string,
+  model: string = "gemini-2.5-flash"
+): Promise<number> {
+  if (!inputText) return 0;
+  
+  // 1. Try SDK
+  try {
+    // Dynamically import to avoid breaking environments without SDK
+    const { GoogleGenAI } = await import("@google/genai");
+    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.GCP_API_KEY;
+    if (!apiKey) throw new Error("Google API key not found");
+    const ai = new GoogleGenAI({ apiKey });
+    // SDK expects array of content parts
+    const result = await ai.models.countTokens({ model, contents: [{ text: inputText }] });
+    if (typeof result?.totalTokens === "number") return result.totalTokens;
+  } catch (sdkErr) {
+    // 2. Fallback to REST
+    try {
+      const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.GCP_API_KEY;
+      if (!apiKey) throw new Error("Google API key not found");
+      const resp = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:countTokens?key=${apiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ contents: [{ parts: [{ text: inputText }] }] }),
+        }
+      );
+      if (resp.ok) {
+        const data: { totalTokens?: number } = await resp.json();
+        if (typeof data.totalTokens === "number") return data.totalTokens;
+      }
+    } catch (restErr) {
+      // 3. Fallback to offline tokenizer
+      try {
+        if (!offlineGeminiTok) offlineGeminiTok = fromPreTrained();
+        return offlineGeminiTok.encode(inputText).length;
+      } catch (offlineErr) {
+        // 4. Last resort: chars/4
+        return getFallbackGeminiTokenCount(inputText);
+      }
+    }
+  }
+  // If all else fails
+  return getFallbackGeminiTokenCount(inputText);
+}
+
+// Fallback function for when all else fails
+function getFallbackGeminiTokenCount(inputText: string): number {
+  if (!inputText) return 0;
+  // Character-based estimation: tokens ≈ UTF-8 characters / 4
+  return Math.max(1, Math.floor(inputText.length / 4));
 }

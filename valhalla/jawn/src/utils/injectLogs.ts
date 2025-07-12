@@ -19,6 +19,11 @@ export function initLogs(router: express.Router) {
         return null;
       }
 
+      if (req.url === "/v1/tokens/gemini" && req.method === "POST") {
+        // Skip logging and return null
+        return null;
+      }
+
       // Default Morgan combined format
       return [
         tokens.method(req, res),

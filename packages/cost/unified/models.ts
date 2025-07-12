@@ -323,6 +323,63 @@ export const modelMapping: CreatorModelMapping = {
     },
   },
   Google: {
+    "Gemini 2.5 Flash": {
+      defaultTokenCost: {
+        input: 0,
+        output: 0,
+      },
+      defaultParameters: {
+        response_format: true,
+      },
+      providers: [
+        {
+          provider: "GOOGLE_GEMINI",
+          modelString: "gemini-2.5-flash",
+        },
+        {
+          provider: "GOOGLE_VERTEXAI",
+          modelString: "gemini-2.5-flash",
+        },
+      ],
+    },
+    "Gemini 2.5 Flash-Lite": {
+      defaultTokenCost: {
+        input: 0,
+        output: 0,
+      },
+      defaultParameters: {
+        response_format: true,
+      },
+      providers: [
+        {
+          provider: "GOOGLE_GEMINI",
+          modelString: "gemini-2.5-flash-lite",
+        },
+        {
+          provider: "GOOGLE_VERTEXAI",
+          modelString: "gemini-2.5-flash-lite",
+        },
+      ],
+    },
+    "Gemini 2.5 Pro": {
+      defaultTokenCost: {
+        input: 0,
+        output: 0,
+      },
+      defaultParameters: {
+        response_format: true,
+      },
+      providers: [
+        {
+          provider: "GOOGLE_GEMINI",
+          modelString: "gemini-2.5-pro",
+        },
+        {
+          provider: "GOOGLE_VERTEXAI",
+          modelString: "gemini-2.5-pro",
+        },
+      ],
+    },
     "Gemini 2.0 Flash": {
       defaultTokenCost: {
         input: 0,
