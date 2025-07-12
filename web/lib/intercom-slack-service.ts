@@ -104,13 +104,15 @@ export class IntercomSlackService {
     console.log("Thread TS:", threadTs);
     console.log("Attachments:", attachments?.length ? attachments.length : 0);
     console.log("Environment check:");
+    const slackBotToken = process.env.SLACK_BOT_TOKEN;
+    const slackChannelId = process.env.SLACK_CHANNEL_ID;
     console.log("- SLACK_BOT_TOKEN exists:", !!slackBotToken);
     console.log("- SLACK_BOT_TOKEN first 20 chars:", slackBotToken?.substring(0, 20));
     console.log("- SLACK_CHANNEL_ID:", slackChannelId);
     console.log("- NODE_ENV:", process.env.NODE_ENV);
     
-    const slackBotToken = process.env.SLACK_BOT_TOKEN;
-    const slackChannelId = process.env.SLACK_CHANNEL_ID;
+    
+    
     
     if (!slackBotToken || !slackChannelId) {
       console.error("SLACK_BOT_TOKEN or SLACK_CHANNEL_ID not configured");
