@@ -93,3 +93,24 @@ export async function getTokenCountAnthropic(
   // https://github.com/anthropics/anthropic-tokenizer-typescript/blob/bd241051066ea37120f2898419e3fc8662fab280/index.ts#L7C19-L7C19
   return anthropicTokenizer.encode(inputText.normalize("NFKC"), "all").length;
 }
+
+export async function getTokenCountGemini(
+  inputText: string
+): Promise<number> {
+  if (!inputText) return 0;
+  
+  // TODO: Implement proper Gemini token counting using Google's official tokenizer
+  // For now, use a simple approximation based on word count
+  // This is a temporary solution until we integrate the official Google tokenizer
+  const words = inputText.trim().split(/\s+/).length;
+  const characters = inputText.length;
+  
+  // Rough approximation: 1 token ≈ 4 characters or 0.75 words
+  // This is based on typical token-to-character ratios for modern LLMs
+  const estimatedTokens = Math.max(
+    Math.ceil(characters / 4),
+    Math.ceil(words * 0.75)
+  );
+  
+  return estimatedTokens;
+}

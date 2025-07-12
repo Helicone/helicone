@@ -22,7 +22,8 @@ export async function getTokenCount(
       body: JSON.stringify({ content: inputText }),
     });
 
-    return result.json<{ tokens?: number }>().then((r) => r?.tokens ?? 0);
+    const response = await result.json() as { tokens?: number };
+    return response?.tokens ?? 0;
   } else if (provider === "ANTHROPIC") {
     const url = new URL(_tokenCalcUrl);
     url.pathname = "/v1/tokens/anthropic";
@@ -35,7 +36,22 @@ export async function getTokenCount(
       body: JSON.stringify({ content: inputText }),
     });
 
-    return result.json<{ tokens?: number }>().then((r) => r?.tokens ?? 0);
+    const response = await result.json() as { tokens?: number };
+    return response?.tokens ?? 0;
+  } else if (provider === "GOOGLE") {
+    const url = new URL(_tokenCalcUrl);
+    url.pathname = "/v1/tokens/gemini";
+    const result = await fetch(url.toString(), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: "Bearer " + process.env.TOKEN_KEY,
+      },
+      body: JSON.stringify({ content: inputText }),
+    });
+
+    const response = await result.json() as { tokens?: number };
+    return response?.tokens ?? 0;
   } else if (provider === "OPENROUTER") {
     console.error("OpenRouter does not support token counting");
     return 0;
