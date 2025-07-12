@@ -13,5 +13,10 @@
   "engines": {
     "node": "=20"
   },
-  "version": "0.1.0"
+  "version": "0.1.0",
+  "dependencies": {
+    "@google/genai": "^1.9.0",
+    "@google/generative-ai": "^0.24.1",
+    "@lenml/tokenizer-gemini": "^3.4.2"
+  }
 }

@@ -43,6 +43,8 @@
     "@clickhouse/client-common": "^0.2.1",
     "@clickhouse/client-web": "^0.2.2",
     "@cloudflare/itty-router-openapi": "^1.0.7",
+    "@google/genai": "^1.9.0",
+    "@google/generative-ai": "^0.24.1",
     "@helicone/prompts": "^1.0.12",
     "@smithy/protocol-http": "^4.1.7",
     "@smithy/signature-v4": "^4.2.3",
