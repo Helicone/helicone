@@ -118,7 +118,7 @@ Include context about your evaluation for better analysis:
 // Note: Scores API currently doesn't support metadata in request body
 // Store evaluation context in your application or use Custom Properties:
 const response = await openai.chat.completions.create({
-  model: "gpt-4",
+  model: "gpt-4o-mini",
   messages: [{ role: "user", content: "Test message" }]
 }, {
   headers: {
@@ -351,7 +351,7 @@ async def evaluate_chat_response(user_query, assistant_response, requestId):
 ```typescript
 // 1. Make LLM request
 const response = await openai.chat.completions.create({
-  model: "gpt-4",
+  model: "gpt-4o-mini",
   messages: [{ role: "user", content: prompt }]
 }, {
   headers: { "Helicone-Auth": `Bearer ${HELICONE_API_KEY}` }

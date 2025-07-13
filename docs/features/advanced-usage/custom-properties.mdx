@@ -171,7 +171,7 @@ const openai = new OpenAI({
 // Track costs per user for billing
 const response = await openai.chat.completions.create(
   {
-    model: "gpt-4",
+    model: "gpt-4o-mini",
     messages: [{ role: "user", content: userQuery }]
   },
   {
@@ -198,7 +198,7 @@ client = openai.OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gpt-4",
+    model="gpt-4o-mini",
     messages=[{"role": "user", "content": user_query}],
     extra_headers={
         "Helicone-User-Id": user_id,
@@ -217,7 +217,7 @@ Compare performance and costs across different features in your application:
 // Code generation feature
 const codeResponse = await openai.chat.completions.create(
   {
-    model: "gpt-4",
+    model: "gpt-4o-mini",
     messages: [{ role: "user", content: "Generate a React component" }]
   },
   {
@@ -254,7 +254,7 @@ Track performance across different environments and application versions:
 ```typescript
 const response = await openai.chat.completions.create(
   {
-    model: "gpt-4",
+    model: "gpt-4o-mini",
     messages: [{ role: "user", content: prompt }]
   },
   {

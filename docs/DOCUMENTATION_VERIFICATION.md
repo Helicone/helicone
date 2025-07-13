@@ -14,19 +14,21 @@ rg -l "feature-name" --type ts
 # Find API controllers
 find valhalla/jawn/src/controllers -name "*controller.ts" | xargs grep -l "feature"
 
-# Check managers/services  
+# Check managers/services
 find valhalla/jawn/src/managers -name "*.ts" | xargs grep -l "feature"
 ```
 
 ### 2. Verify API Endpoints
 
 **Check controller files for:**
+
 - Endpoint paths match documentation
 - HTTP methods are correct (GET, POST, PUT, DELETE)
 - Request/response structures match
 - Authentication requirements
 
 **Quick validation:**
+
 ```bash
 # Find all API endpoints
 rg "@(Get|Post|Put|Delete)" valhalla/jawn/src/controllers/ -A 2
@@ -38,12 +40,14 @@ rg "Helicone-Auth|Authorization" --type ts
 ### 3. Verify Configuration Options
 
 **Check for:**
+
 - All documented options exist in code
 - Default values match implementation
 - Type information is accurate
 - Required vs optional parameters
 
 **Search commands:**
+
 ```bash
 # Find interfaces and config objects
 rg "interface.*Config|type.*Config" valhalla/jawn/src/ -A 10
@@ -83,16 +87,16 @@ export OPENAI_API_KEY="sk-proj-xxx"
 ### 2. Test Template
 
 ```javascript
-const OpenAI = require('openai');
-const fetch = require('node-fetch');
-const crypto = require('crypto');
+const OpenAI = require("openai");
+const fetch = require("node-fetch");
+const crypto = require("crypto");
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const HELICONE_API_KEY = process.env.HELICONE_API_KEY;
 
 async function testExample() {
-  console.log('🧪 Testing documentation example...');
-  
+  console.log("🧪 Testing documentation example...");
+
   try {
     // Copy exact code from documentation
     const openai = new OpenAI({
@@ -104,20 +108,20 @@ async function testExample() {
     });
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4",
-      messages: [{ role: "user", content: "Test message" }]
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: "Test message" }],
     });
 
     // Verify response
     if (response.choices && response.choices[0]) {
-      console.log('✅ Test passed');
+      console.log("✅ Test passed");
       return true;
     } else {
-      console.log('❌ Unexpected response structure');
+      console.log("❌ Unexpected response structure");
       return false;
     }
   } catch (error) {
-    console.error('❌ Test failed:', error.message);
+    console.error("❌ Test failed:", error.message);
     return false;
   }
 }
@@ -130,20 +134,20 @@ testExample();
 ```javascript
 async function testAPIEndpoint() {
   const requestId = crypto.randomUUID();
-  
+
   // Test the documented API call
   const response = await fetch(
     `https://api.helicone.ai/v1/request/${requestId}/feedback`,
     {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${HELICONE_API_KEY}`,
+        Authorization: `Bearer ${HELICONE_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ rating: true }),
     }
   );
-  
+
   console.log(`Status: ${response.status}`);
   console.log(`Response: ${await response.text()}`);
 }
@@ -156,17 +160,17 @@ async function testConfigurations() {
   const configs = [
     {
       name: "Basic config",
-      headers: { "Helicone-Auth": `Bearer ${HELICONE_API_KEY}` }
+      headers: { "Helicone-Auth": `Bearer ${HELICONE_API_KEY}` },
     },
     {
-      name: "With user ID", 
+      name: "With user ID",
       headers: {
         "Helicone-Auth": `Bearer ${HELICONE_API_KEY}`,
-        "Helicone-User-Id": "test-user-123"
-      }
-    }
+        "Helicone-User-Id": "test-user-123",
+      },
+    },
   ];
-  
+
   for (const config of configs) {
     console.log(`Testing: ${config.name}`);
     // Test each configuration...
@@ -177,24 +181,28 @@ async function testConfigurations() {
 ## Verification Checklist
 
 ### API Accuracy
+
 - [ ] All documented endpoints exist in controllers
-- [ ] HTTP methods match implementation  
+- [ ] HTTP methods match implementation
 - [ ] Request/response formats are accurate
 - [ ] Authentication requirements correct
 
 ### Configuration
+
 - [ ] All options documented and exist in code
 - [ ] Default values match implementation
 - [ ] Type information is correct
 - [ ] Required vs optional marked accurately
 
-### Code Examples  
+### Code Examples
+
 - [ ] All imports are valid and current
 - [ ] Examples include required setup
 - [ ] All code examples tested and working
 - [ ] Error handling is appropriate
 
 ### Content Quality
+
 - [ ] Follows template structure
 - [ ] Uses proper components
 - [ ] Focuses on developer use cases
@@ -222,16 +230,19 @@ rg "process\.env\." valhalla/jawn/src/ | grep -i feature
 ## Common Issues
 
 **Authentication Problems:**
+
 - Check header names match exactly (case-sensitive)
 - Verify API key format and validity
 - Confirm Bearer token prefix required
 
 **API Mismatches:**
+
 - Endpoint paths don't match controller routes
 - Request body structure differs from documentation
 - Response format has changed
 
 **Configuration Errors:**
+
 - Default values don't match code
 - Missing configuration options
 - Incorrect type information
@@ -239,6 +250,7 @@ rg "process\.env\." valhalla/jawn/src/ | grep -i feature
 ## Fix and Update
 
 After validation/testing:
+
 1. Fix any failing examples with corrected code
 2. Add missing configuration options found in code
 3. Update authentication details if needed

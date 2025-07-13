@@ -51,7 +51,7 @@ Execute your LLM request with the session headers included:
 
 ```typescript
 const response = await openai.chat.completions.create(
-  { messages: [{ role: "user", content: "Hello" }], model: "gpt-4" },
+  { messages: [{ role: "user", content: "Hello" }], model: "gpt-4o-mini" },
   {
     headers: {
       "Helicone-Session-Id": sessionId,
@@ -133,7 +133,7 @@ const sessionId = randomUUID();
 const response1 = await openai.chat.completions.create(
   {
     messages: [{ role: "user", content: "Create a React component for user authentication with email and password" }],
-    model: "gpt-4",
+    model: "gpt-4o-mini",
   },
   {
     headers: {
@@ -152,7 +152,7 @@ const response2 = await openai.chat.completions.create(
       { role: "assistant", content: response1.choices[0].message.content },
       { role: "user", content: "Can you add form validation and error handling?" }
     ],
-    model: "gpt-4",
+    model: "gpt-4o-mini",
   },
   {
     headers: {
@@ -169,7 +169,7 @@ const response3 = await openai.chat.completions.create(
     messages: [
       { role: "user", content: "Convert this to TypeScript with proper interfaces" }
     ],
-    model: "gpt-4",
+    model: "gpt-4o-mini",
   },
   {
     headers: {
@@ -197,7 +197,7 @@ session_id = str(uuid.uuid4())
 
 # Initial feature request
 response1 = client.chat.completions.create(
-    model="gpt-4",
+    model="gpt-4o-mini",
     messages=[{"role": "user", "content": "Create a React component for user authentication with email and password"}],
     extra_headers={
         "Helicone-Session-Id": session_id,
@@ -208,7 +208,7 @@ response1 = client.chat.completions.create(
 
 # User asks for clarification
 response2 = client.chat.completions.create(
-    model="gpt-4",
+    model="gpt-4o-mini",
     messages=[
         {"role": "user", "content": "Create a React component for user authentication with email and password"},
         {"role": "assistant", "content": response1.choices[0].message.content},
@@ -223,7 +223,7 @@ response2 = client.chat.completions.create(
 
 # User requests TypeScript version
 response3 = client.chat.completions.create(
-    model="gpt-4",
+    model="gpt-4o-mini",
     messages=[{"role": "user", "content": "Convert this to TypeScript with proper interfaces"}],
     extra_headers={
         "Helicone-Session-Id": session_id,
@@ -245,7 +245,7 @@ const sessionId = randomUUID();
 const analysis = await openai.chat.completions.create(
   { 
     messages: [{ role: "user", content: "Analyze this pull request for code quality and potential issues: [PR diff content]" }],
-    model: "gpt-4" 
+    model: "gpt-4o-mini" 
   },
   {
     headers: {
@@ -260,7 +260,7 @@ const analysis = await openai.chat.completions.create(
 const securityCheck = await openai.chat.completions.create(
   { 
     messages: [{ role: "user", content: "Check for security vulnerabilities: SQL injection, XSS, authentication issues" }],
-    model: "gpt-4" 
+    model: "gpt-4o-mini" 
   },
   {
     headers: {
@@ -275,7 +275,7 @@ const securityCheck = await openai.chat.completions.create(
 const reviewComments = await openai.chat.completions.create(
   { 
     messages: [{ role: "user", content: "Generate constructive review comments based on analysis" }],
-    model: "gpt-4" 
+    model: "gpt-4o-mini" 
   },
   {
     headers: {
@@ -298,7 +298,7 @@ const sessionId = randomUUID();
 const endpoints = await openai.chat.completions.create(
   {
     messages: [{ role: "user", content: "Analyze these API routes and extract endpoint information: [code content]" }],
-    model: "gpt-4",
+    model: "gpt-4o-mini",
   },
   {
     headers: {
@@ -315,7 +315,7 @@ const openApiSpec = await openai.chat.completions.create(
     messages: [
       { role: "user", content: "Generate OpenAPI 3.0 specification based on these endpoints" }
     ],
-    model: "gpt-4",
+    model: "gpt-4o-mini",
   },
   {
     headers: {
@@ -330,7 +330,7 @@ const openApiSpec = await openai.chat.completions.create(
 const examples = await openai.chat.completions.create(
   {
     messages: [{ role: "user", content: "Create code examples for each endpoint in multiple languages" }],
-    model: "gpt-4",
+    model: "gpt-4o-mini",
   },
   {
     headers: {

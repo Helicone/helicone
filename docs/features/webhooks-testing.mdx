@@ -1,108 +1,493 @@
 ---
-title: "LLM Webhooks Testing locally Helicone"
-sidebarTitle: "Local Testing Webhooks"
-description: "This is a short guide on how to test webhooks locally."
-twitter:title: "Helicone Webhooks: Real-Time LLM Integration & Automation"
+title: "Webhooks Local Testing"
+sidebarTitle: "Webhooks Local Testing"
 ---
 
-## How to test webhooks locally
+When developing webhook integrations, you need to test how your application handles Helicone events before deploying to production. Webhooks local testing uses tunneling tools like ngrok to expose your local development server to the internet, allowing Helicone to send real webhook events to your local machine for debugging and integration testing.
 
-The idea is that we are going to use a tool like [ngrok](https://ngrok.com/) to create a secure tunnel to your local machine so that Helicone can send events to your local server.
+## Why use Webhooks Local Testing
 
-## Create your local worker server
+- **Debug integration issues**: Test webhook handlers with real events before deploying to production
+- **Iterate quickly**: Make changes to your webhook handler and test immediately without deployment cycles
+- **Validate event handling**: Ensure your application correctly processes different webhook event types and payloads
 
-Here is a simple python example using [FastAPI](https://fastapi.tiangolo.com/):
+<Frame caption="Ngrok forwarding local webhook server to public URL">
+  <img
+    src="/images/webhooks/ngrok-example.webp"
+    alt="Ngrok terminal showing secure tunnel from public URL to localhost webhook server"
+  />
+</Frame>
 
-```bash
-python3 -m pip install fastapi uvicorn
-```
+## Quick Start
 
-Create a file called `main.py` and add the following code:
+<Steps>
+<Step title="Create webhook handler">
+Set up a local server to receive webhook events:
 
 ```python
 from fastapi import FastAPI, Request
+import json
 
 app = FastAPI()
 
-@app.post("/")
+@app.post("/webhook")
+async def webhook_handler(request: Request):
+    # Parse the webhook payload
+    payload = await request.json()
+    
+    # Log the event for debugging
+    print(f"Received event: {payload['event_type']}")
+    print(f"Request ID: {payload['request_id']}")
+    
+    # Your webhook logic here
+    # e.g., store in database, trigger notifications, etc.
+    
+    return {"status": "success"}
+
+# Run with: uvicorn main:app --reload --port 8000
+```
+
+<Accordion title="Node.js webhook handler example">
+```javascript
+const express = require('express');
+const app = express();
+
+app.use(express.json());
+
+app.post('/webhook', (req, res) => {
+  const payload = req.body;
+  
+  console.log(`Received event: ${payload.event_type}`);
+  console.log(`Request ID: ${payload.request_id}`);
+  
+  // Your webhook logic here
+  
+  res.json({ status: 'success' });
+});
+
+app.listen(8000, () => {
+  console.log('Webhook server running on port 8000');
+});
+```
+</Accordion>
+</Step>
+
+<Step title="Set up ngrok tunnel">
+Install and configure ngrok to expose your local server:
+
+```bash
+# Install ngrok (macOS)
+brew install ngrok
+
+# Or download from https://ngrok.com/download
+
+# Start tunnel to your local server
+ngrok http 8000
+```
+
+You'll see output like:
+```
+Forwarding  https://abc123.ngrok-free.app -> http://localhost:8000
+```
+
+Copy the HTTPS URL for the next step.
+</Step>
+
+<Step title="Configure webhook in Helicone">
+Add your ngrok URL to Helicone's webhook settings:
+
+1. Go to your Helicone dashboard → Settings → Webhooks
+2. Click "Add Webhook"
+3. Enter your ngrok URL with the webhook path: `https://abc123.ngrok-free.app/webhook`
+4. Select the events you want to receive
+5. (Optional) Add property filters for testing:
+   ```json
+   {
+     "environment": "development"
+   }
+   ```
+6. Save the webhook configuration
+</Step>
+</Steps>
+
+## Configuration Options
+
+### Basic Settings
+
+| Setting | Type | Description | Default | Example |
+|---------|------|-------------|---------|----------|
+| `URL` | `string` | Your webhook endpoint URL | N/A | `"https://api.example.com/webhook"` |
+| `Events` | `array` | Event types to receive | All events | `["request.created", "request.updated"]` |
+| `Active` | `boolean` | Enable/disable webhook | `true` | `true` |
+
+### Advanced Settings
+
+<AccordionGroup>
+<Accordion title="Property Filters">
+Filter which requests trigger webhooks based on custom properties:
+
+```json
+{
+  "environment": "production",
+  "feature": "chat",
+  "user_tier": "premium"
+}
+```
+
+Only requests matching ALL specified properties will trigger the webhook.
+</Accordion>
+
+<Accordion title="Security Headers">
+Add authentication headers to webhook requests for security:
+
+```json
+{
+  "headers": {
+    "X-Webhook-Secret": "your-secret-key",
+    "Authorization": "Bearer webhook-token"
+  }
+}
+```
+
+Helicone will include these headers in every webhook request.
+</Accordion>
+
+<Accordion title="Retry Configuration">
+Configure retry behavior for failed webhook deliveries:
+
+- **Initial retry**: After 30 seconds
+- **Subsequent retries**: Exponential backoff up to 3 attempts
+- **Timeout**: 10 seconds per request
+
+Webhooks returning 2xx status codes are considered successful.
+</Accordion>
+</AccordionGroup>
+
+## Use Cases
+
+<Tabs>
+<Tab title="Development Testing">
+Test webhook integration during local development:
+
+<CodeGroup>
+```python Python
+from fastapi import FastAPI, Request, HTTPException
+import json
+import logging
+
+app = FastAPI()
+logger = logging.getLogger(__name__)
+
+@app.post("/webhook/helicone")
+async def helicone_webhook(request: Request):
+    try:
+        payload = await request.json()
+        
+        # Log full payload for debugging
+        logger.info(f"Webhook payload: {json.dumps(payload, indent=2)}")
+        
+        # Process the webhook payload
+        request_id = payload["request_id"]
+        model = payload.get("model")
+        cost = payload.get("cost", 0)
+        user_id = payload.get("user_id")
+        
+        logger.info(f"Webhook for request {request_id}")
+        logger.info(f"Model: {model}, Cost: ${cost}")
+        
+        if user_id:
+            logger.info(f"User: {user_id}")
+            
+        # Check if this is a high-cost request
+        if cost > 1.0:
+            logger.warning(f"High cost request detected: ${cost}")
+        
+        return {"status": "processed"}
+        
+    except Exception as e:
+        logger.error(f"Webhook error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Test with property filter
+# Add header: Helicone-Property-Environment: development
+```
+
+```javascript Node.js
+const express = require('express');
+const app = express();
+
+app.use(express.json());
+
+// Webhook endpoint
+app.post('/webhook/helicone', (req, res) => {
+  const payload = req.body;
+  
+  console.log('Webhook received:', JSON.stringify(payload, null, 2));
+  
+  // Process the webhook payload
+  const { request_id, model, cost = 0, user_id } = payload;
+  
+  console.log(`Webhook for request ${request_id}`);
+  console.log(`Model: ${model}, Cost: $${cost}`);
+  
+  if (user_id) {
+    console.log(`User: ${user_id}`);
+  }
+  
+  // Check if this is a high-cost request
+  if (cost > 1.0) {
+    console.warn(`High cost request detected: $${cost}`);
+  }
+  
+  res.json({ status: 'processed' });
+});
+
+app.listen(8000, () => {
+  console.log('Webhook server running on http://localhost:8000');
+});
+```
+</CodeGroup>
+</Tab>
+
+<Tab title="Event Processing Pipeline">
+Build a complete webhook processing system:
+
+```python
+import asyncio
+from fastapi import FastAPI, Request, BackgroundTasks
+import aioredis
+import json
+
+app = FastAPI()
+redis = None
+
+@app.on_event("startup")
+async def startup():
+    global redis
+    redis = await aioredis.create_redis_pool('redis://localhost')
+
+@app.post("/webhook")
+async def webhook_handler(
+    request: Request, 
+    background_tasks: BackgroundTasks
+):
+    # Quick acknowledgment
+    payload = await request.json()
+    
+    # Queue for async processing
+    await redis.lpush(
+        "webhook_queue", 
+        json.dumps(payload)
+    )
+    
+    # Process async
+    background_tasks.add_task(
+        process_webhook_event, 
+        payload
+    )
+    
+    return {"status": "queued"}
+
+async def process_webhook_event(payload):
+    """Process webhook events asynchronously"""
+    # Process completed request
+    cost = payload.get("cost", 0)
+    
+    # Check for anomalies
+    if cost > 1.0:  # High cost threshold
+        await send_alert(
+            f"High cost request: ${cost}",
+            payload
+        )
+    
+    # Update metrics
+    await update_usage_metrics(payload)
+    
+    # Check rate limits
+    user_id = payload.get("user_id")
+    if user_id:
+        await check_user_limits(user_id, cost)
+
+async def send_alert(message, data):
+    # Send to Slack, email, etc.
+    pass
+
+async def update_usage_metrics(payload):
+    # Update dashboard, analytics, etc.
+    pass
+
+async def check_user_limits(user_id, cost):
+    # Implement usage limiting logic
+    pass
+```
+</Tab>
+
+<Tab title="Integration Testing">
+Test webhook reliability and error handling:
+
+```python
+# webhook_test_server.py
+from fastapi import FastAPI, Request, Response
+import random
+import time
+
+app = FastAPI()
+
+# Simulate different scenarios
+@app.post("/webhook/{scenario}")
+async def test_webhook(scenario: str, request: Request):
+    payload = await request.json()
+    
+    if scenario == "success":
+        # Normal processing
+        return {"status": "ok"}
+    
+    elif scenario == "slow":
+        # Test timeout handling
+        time.sleep(15)  # Exceed 10s timeout
+        return {"status": "ok"}
+    
+    elif scenario == "intermittent":
+        # Random failures for retry testing
+        if random.random() > 0.5:
+            return Response(status_code=500)
+        return {"status": "ok"}
+    
+    elif scenario == "auth":
+        # Test auth validation
+        auth = request.headers.get("Authorization")
+        if auth != "Bearer expected-token":
+            return Response(status_code=401)
+        return {"status": "authenticated"}
+
+# Run different test scenarios:
+# ngrok http 8000
+# Configure webhooks with different paths:
+# - https://xxx.ngrok.app/webhook/success
+# - https://xxx.ngrok.app/webhook/slow
+# - https://xxx.ngrok.app/webhook/intermittent
+```
+</Tab>
+</Tabs>
+
+## Understanding Webhooks Local Testing
+
+### How Tunneling Works
+
+Local webhook testing uses secure tunnels to bridge your local development environment with Helicone's cloud services:
+
+**The flow:**
+1. Your local server runs on localhost (e.g., `http://localhost:8000`)
+2. Ngrok creates a public HTTPS endpoint (e.g., `https://abc123.ngrok.app`)
+3. Helicone sends webhooks to the public endpoint
+4. Ngrok forwards requests to your local server
+5. Your local server processes and responds
+
+**Security considerations:**
+```bash
+# ✅ Good - use authentication in development
+ngrok http 8000 --auth="username:password"
+
+# ✅ Good - restrict to specific paths
+ngrok http 8000 --host-header=rewrite
+
+# ❌ Avoid - exposing without any protection
+ngrok http 8000  # Anyone can access your endpoint
+```
+
+### Testing Best Practices
+
+**Effective webhook testing strategies:**
+
+1. **Use property filters** to isolate test traffic:
+```typescript
+// Only trigger webhooks for dev environment
+{
+  headers: {
+    "Helicone-Property-Environment": "development",
+    "Helicone-Property-Test": "true"
+  }
+}
+```
+
+2. **Log everything** during development:
+```python
+import json
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+
+@app.post("/webhook")
 async def webhook(request: Request):
-    return {"message": "Webhook received"}
+    payload = await request.json()
+    
+    # Log full request details
+    logging.info(f"Headers: {dict(request.headers)}")
+    logging.info(f"Payload: {json.dumps(payload, indent=2)}")
+    
+    # Your processing logic
+    return {"status": "ok"}
 ```
 
-Run the server using:
+3. **Test error scenarios** explicitly:
+- Network timeouts
+- Invalid payloads  
+- Authentication failures
+- Server errors (500s)
+- Rate limiting
 
+### Common Issues and Solutions
+
+**Ngrok connection issues:**
 ```bash
-python3 -m uvicorn server:app --reload --port 9393
+# Issue: Ngrok session expired
+# Solution: Restart ngrok (free tier has 2-hour limit)
+
+# Issue: Can't access ngrok URL
+# Solution: Check firewall and use --region flag
+ngrok http 8000 --region=us
 ```
 
-you should see something like this...
+**Webhook not triggering:**
+- Verify property filters match your request
+- Check webhook is marked as "Active"
+- Ensure events are selected correctly
+- Look for errors in Helicone webhook logs
 
-```
-INFO:     Uvicorn running on http://127.0.0.1:9393 (Press CTRL+C to quit)
-INFO:     Started reloader process [20505] using StatReload
-INFO:     Started server process [20507]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-```
-
-## Setting up ngrok
-
-1. Install ngrok using the [official guide](https://ngrok.com/docs/getting-started/setup/install).
-2. Run `ngrok http <port>`, where `<port>` is the port that your local server is running on.
-
+**Testing specific events:**
 ```bash
-ngrok http 9393
-```
-
-You should see something like this...
-
-```
-Session Status                online
-Account                       justin@helicone.ai (Plan: Free)
-Version                       3.15.1
-Region                        United States (us)
-Latency                       63ms
-Web Interface                 http://127.0.0.1:4040
-Forwarding                    https://9742-103-249-231-120.ngrok-free.app -> http://localhost:9393
-```
-
-## Copy the ngrok URL
-
-Add the URL outputed from `ngrok` to your webhook configuration in the Helicone webhooks page.
-
-in our example it would be:
-`https://9742-103-249-231-120.ngrok-free.app`
-
-<Frame caption="Webhooks page">
-  <img src="/images/webhooks/ngrok-example.png" alt="Ngrok example" />
-</Frame>
-
-<Note>
-  For this testing example I added the property filter `environment` to equal to
-  `dev` so that it only sends events to this webhook from our development
-  environment.
-</Note>
-
-## Send a request through Helicone to receive the webhook
-
-```bash
-curl --request POST \
-  --url https://oai.helicone.ai/v1/chat/completions \
-  --header 'Authorization: Bearer $OPENAI_API_KEY' \
-  --header 'Helicone-Auth: Bearer $HELICONE_API_KEY' \
-  --header 'Helicone-Property-environment: dev' \
-  --header 'Content-Type: application/json' \
-  --data '{
+# Trigger request.created event
+curl -X POST https://oai.helicone.ai/v1/chat/completions \
+  -H "Authorization: Bearer $OPENAI_API_KEY" \
+  -H "Helicone-Auth: Bearer $HELICONE_API_KEY" \
+  -H "Helicone-Property-Environment: development" \
+  -d '{
     "model": "gpt-3.5-turbo",
-    "messages": [
-        {
-            "role": "system",
-            "content": "Say Hello!"
-        }
-    ],
-    "temperature": 1,
-    "max_tokens": 10
-}'
+    "messages": [{"role": "user", "content": "Test webhook"}]
+  }'
+
+# Trigger request.updated event (with feedback)
+# First make request, then add feedback via API
 ```
 
-After sending the request you should see the webhook hit your local server.
+## Related Features
+
+<CardGroup cols={2}>
+<Card title="Webhooks" icon="webhook" href="/features/webhooks">
+Learn about webhook events, payloads, and production configuration
+</Card>
+
+<Card title="Custom Properties" icon="tag" href="/features/advanced-usage/custom-properties">
+Use property filters to control which requests trigger webhooks
+</Card>
+
+<Card title="User Feedback" icon="thumbs-up" href="/features/advanced-usage/feedback">
+Receive webhooks when users provide feedback on responses
+</Card>
+
+<Card title="Alerts" icon="bell" href="/features/alerts">
+Set up alert rules that trigger webhook notifications
+</Card>
+</CardGroup>
+
+<QuestionsSection />

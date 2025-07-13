@@ -46,7 +46,7 @@ Execute your LLM request - the first call will be cached:
 ```typescript
 const response = await openai.chat.completions.create(
   {
-    model: "gpt-4",
+    model: "gpt-4o-mini",
     messages: [{ role: "user", content: "Hello world" }]
   },
   {
@@ -65,7 +65,7 @@ Make the same request again - it should return instantly from cache:
 // This exact same request will return a cached response
 const cachedResponse = await openai.chat.completions.create(
   {
-    model: "gpt-4", 
+    model: "gpt-4o-mini", 
     messages: [{ role: "user", content: "Hello world" }]
   },
   {
@@ -188,7 +188,7 @@ const openai = new OpenAI({
 
 // This request will be cached
 const response = await openai.chat.completions.create({
-  model: "gpt-4",
+  model: "gpt-4o-mini",
   messages: [{ role: "user", content: "Explain quantum computing" }]
 });
 
@@ -209,7 +209,7 @@ client = openai.OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gpt-4",
+    model="gpt-4o-mini",
     messages=[{"role": "user", "content": "Explain quantum computing"}]
 )
 ```
@@ -225,7 +225,7 @@ const codeHash = crypto.createHash('md5').update(codeSnippet).digest('hex');
 
 const response = await openai.chat.completions.create(
   {
-    model: "gpt-4",
+    model: "gpt-4o-mini",
     messages: [{ 
       role: "user", 
       content: `Explain this code:\n\n${codeSnippet}` 
@@ -250,7 +250,7 @@ Cache answers to frequently asked questions about your API or product:
 ```typescript
 const response = await openai.chat.completions.create(
   {
-    model: "gpt-4",
+    model: "gpt-4o-mini",
     messages: [{ 
       role: "user", 
       content: "How do I authenticate with the API?" 
@@ -275,7 +275,7 @@ const response = await openai.chat.completions.create(
 
 ### How Cache Keys Work
 Helicone generates cache keys based on:
-- **Model name**: `gpt-4` vs `gpt-3.5-turbo` 
+- **Model name**: `gpt-4o-mini` vs `gpt-3.5-turbo` 
 - **Messages**: Exact message content and order
 - **Parameters**: Temperature, max_tokens, etc.
 - **Cache seed**: If specified
@@ -283,14 +283,14 @@ Helicone generates cache keys based on:
 **What triggers cache hits:**
 ```typescript
 // ✅ Cache hit - identical requests
-const request1 = { model: "gpt-4", messages: [{ role: "user", content: "Hello" }] };
-const request2 = { model: "gpt-4", messages: [{ role: "user", content: "Hello" }] };
+const request1 = { model: "gpt-4o-mini", messages: [{ role: "user", content: "Hello" }] };
+const request2 = { model: "gpt-4o-mini", messages: [{ role: "user", content: "Hello" }] };
 
 // ❌ Cache miss - different content  
-const request3 = { model: "gpt-4", messages: [{ role: "user", content: "Hi" }] };
+const request3 = { model: "gpt-4o-mini", messages: [{ role: "user", content: "Hi" }] };
 
 // ❌ Cache miss - different parameters
-const request4 = { model: "gpt-4", messages: [{ role: "user", content: "Hello" }], temperature: 0.5 };
+const request4 = { model: "gpt-4o-mini", messages: [{ role: "user", content: "Hello" }], temperature: 0.5 };
 ```
 
 ### Cache Response Headers
