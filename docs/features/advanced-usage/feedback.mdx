@@ -91,51 +91,26 @@ Access feedback metrics in your Helicone dashboard to analyze response quality t
 
 ## Configuration Options
 
-### Basic Settings
-
 Feedback collection requires minimal configuration:
 
 | Parameter | Type | Description | Default | Example |
 |-----------|------|-------------|---------|----------|
 | `rating` | `boolean` | User's feedback on the response | N/A | `true` (positive) or `false` (negative) |
-| `helicone-id` | `string` | Request ID to attach feedback to | N/A | `"req_abc123"` or custom UUID |
-
-### Advanced Settings
+| `helicone-id` | `string` | Request ID to attach feedback to | N/A | UUID |
 
 <AccordionGroup>
-<Accordion title="Feedback with metadata">
-Add additional context to feedback for richer analysis:
+<Accordion title="Processing multiple feedback ratings">
+When you need to submit feedback for multiple requests, use parallel API calls:
 
 ```typescript
-// Current API only supports boolean rating
-const feedback = await fetch(
-  `https://api.helicone.ai/v1/request/${heliconeId}/feedback`,
-  {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${process.env.HELICONE_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      rating: false  // Only boolean rating is currently supported
-    }),
-  }
-);
-```
-</Accordion>
-
-<Accordion title="Bulk feedback operations">
-For processing multiple feedback ratings efficiently:
-
-```typescript
-// Process feedback from a batch of user interactions
+// Note: There is no bulk feedback endpoint - each rating requires a separate API call
 const feedbackBatch = [
-  { requestId: "req_123", rating: true },
-  { requestId: "req_124", rating: false },
-  { requestId: "req_125", rating: true }
+  { requestId: "f47ac10b-58cc-4372-a567-0e02b2c3d479", rating: true },
+  { requestId: "6ba7b810-9dad-11d1-80b4-00c04fd430c8", rating: false },
+  { requestId: "6ba7b811-9dad-11d1-80b4-00c04fd430c8", rating: true }
 ];
 
-// Submit feedback for each request
+// Submit feedback in parallel for better performance
 const feedbackPromises = feedbackBatch.map(({ requestId, rating }) =>
   fetch(`https://api.helicone.ai/v1/request/${requestId}/feedback`, {
     method: "POST",
@@ -147,7 +122,15 @@ const feedbackPromises = feedbackBatch.map(({ requestId, rating }) =>
   })
 );
 
-await Promise.all(feedbackPromises);
+// Wait for all feedback submissions to complete
+const results = await Promise.all(feedbackPromises);
+
+// Check for any failed submissions
+results.forEach((result, index) => {
+  if (!result.ok) {
+    console.error(`Failed to submit feedback for request ${feedbackBatch[index].requestId}`);
+  }
+});
 ```
 </Accordion>
 </AccordionGroup>
@@ -364,34 +347,66 @@ async function handleSupportQuery(ticketId: string, query: string) {
 
 ## Understanding User Feedback
 
-### Feedback Collection Flow
+### How it works
 
 User feedback creates a continuous improvement loop for your AI application:
 
-**How it works:**
 - Each LLM request gets a unique Helicone ID
 - Users rate responses as positive (helpful) or negative (not helpful)
 - Feedback is linked to the original request for analysis
 - Dashboard aggregates feedback to show quality trends
 
-**Best practices for collection:**
+
+### Explicit vs Implicit Feedback
+
+**Explicit feedback** is when users directly rate responses (thumbs up/down, star ratings). While valuable, it has low response rates since users must take deliberate action.
+
+**Implicit feedback** is derived from user behavior and is much more valuable since it reflects actual usage patterns:
+
+Track user actions that indicate response quality:
+
 ```typescript
-// ✅ Good - clear feedback UI with context
-const FeedbackButtons = ({ responseId }) => (
-  <div className="feedback-container">
-    <button onClick={() => submitFeedback(responseId, true)}>👍 Helpful</button>
-    <button onClick={() => submitFeedback(responseId, false)}>👎 Not helpful</button>
-  </div>
-);
+// Code completion acceptance (like Cursor)
+async function trackCodeCompletion(requestId: string, suggestion: string) {
+  // Monitor if user accepts the completion
+  const accepted = await waitForUserAction(suggestion);
+  
+  await fetch(`https://api.helicone.ai/v1/request/${requestId}/feedback`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${process.env.HELICONE_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ 
+      rating: accepted // true if accepted, false if rejected/ignored
+    }),
+  });
+}
 
-// ❌ Avoid - ambiguous feedback options
-const BadFeedback = () => (
-  <div>
-    <button onClick={handleFeedback}>Rate</button> {/* Unclear action */}
-  </div>
-);
+// Chat engagement patterns
+async function trackChatEngagement(requestId: string, response: string) {
+  // Track user behavior after response
+  const userActions = await monitorUserBehavior(60000); // 1 minute
+  
+  const implicitRating = 
+    userActions.continuedConversation || // User asked follow-up
+    userActions.copiedResponse ||        // User copied the answer
+    userActions.sharedResponse ||        // User shared/saved
+    userActions.timeSpent > 30;          // User read for >30 seconds
+  
+  await submitFeedback(requestId, implicitRating);
+}
+
+// Search/recommendation clicks
+async function trackSearchResult(requestId: string, results: string[]) {
+  // Monitor if user clicks on suggested results
+  const clicked = await trackClicks(results, 300000); // 5 minutes
+  
+  // High click-through rate = good recommendations
+  const rating = clicked.length > 0;
+  await submitFeedback(requestId, rating);
+}
 ```
-
 ## Related Features
 
 <CardGroup cols={2}>
