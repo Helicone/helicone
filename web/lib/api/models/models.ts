@@ -88,3 +88,61 @@ OFFSET ${offset}
   }
   return { data: data, error: null };
 }
+
+export async function modelCount(
+  orgId: string,
+  filter: FilterNode,
+  timeFilter: {
+    start: Date;
+    end: Date;
+  }
+): Promise<Result<number, string>> {
+  const builtFilter = await buildFilterWithAuthClickHouse({
+    org_id: orgId,
+    argsAcc: [],
+    filter: {
+      left: filter,
+      operator: "and",
+      right: {
+        left: {
+          request_response_rmt: {
+            request_created_at: {
+              gte: new Date(timeFilter.start),
+            },
+          },
+        },
+        operator: "and",
+        right: {
+          request_response_rmt: {
+            request_created_at: {
+              lte: new Date(timeFilter.end),
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const havingFilter = buildFilterClickHouse({
+    filter,
+    having: true,
+    argsAcc: builtFilter.argsAcc,
+  });
+
+  const query = `
+SELECT
+  count(DISTINCT request_response_rmt.model) as count
+from request_response_rmt
+WHERE (${builtFilter.filter})
+HAVING (${havingFilter.filter})
+  `;
+
+  const { data, error } = await dbQueryClickhouse<{ count: number }>(
+    query,
+    havingFilter.argsAcc
+  );
+  if (error !== null) {
+    return { data: null, error: error };
+  }
+  return { data: data?.[0]?.count ?? 0, error: null };
+}
