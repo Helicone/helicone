@@ -37,7 +37,8 @@ import { HeliconeTemplateManager } from "@helicone-package/prompts/templates";
 import { TemplateVariable } from "@helicone-package/prompts/types";
 import { Message } from "@helicone-package/llm-mapper/types";
 import { useVariableColorMapStore } from "@/store/features/playground/variableColorMap";
-import { ResponseFormat, ResponseFormatType } from "./types";
+import { ResponseFormat, ResponseFormatType, VariableInput } from "./types";
+import { useLocalStorage } from "@/services/hooks/localStorage";
 
 export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
   _type: "openai-chat",
@@ -294,13 +295,6 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
         });
       }
 
-      processDefinedPromptInputs({
-        newMappedContent: convertedContent,
-        newResponseFormat: storedResponseFormat ?? {
-          type: "text" as ResponseFormatType,
-          json_schema: undefined,
-        } as ResponseFormat,
-      });
     }
   }, [promptVersionData, isPromptVersionLoading]);
 
@@ -321,15 +315,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   });
 
   const [templateVariables, setTemplateVariables] = useState<Map<string, TemplateVariable>>(new Map());
-  const [substitutionValues, setSubstitutionValues] = useState<Map<string, string>>(new Map());
-
-  const onUpdateSubstitutionValue = (name: string, value: string) => {
-    setSubstitutionValues(prev => {
-      const next = new Map(prev);
-      next.set(name, value);
-      return next;
-    });
-  };
+  const [variableInputs, setVariableInputs] = useLocalStorage<Record<string, VariableInput>>("variableInputs", {});
 
   useMemo(() => {
     if (!requestId) {
@@ -536,7 +522,53 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     }
   }
 
-  const createTemplatedMessages = (messages: Message[]): { hasSubstitutionFailure: boolean, templatedMessages: Message[] } => {
+  // Watch changes to mappedContent, to update template variables
+  useEffect(() => {
+    const allVariables = new Map<string, TemplateVariable>();
+
+    const processContent = (content: string) => {
+      const variables = HeliconeTemplateManager.extractVariables(content);
+      variables.forEach((variable: TemplateVariable) => allVariables.set(variable.name, variable));
+      return variables;
+    };
+    
+    if (mappedContent) {
+      const messages = mappedContent.schema.request.messages;
+      if (messages) {
+        for (const message of messages) {
+          if (message._type === "contentArray" && message.contentArray) {
+            message.contentArray.forEach(item => {
+              if (item._type === "message" && item.content) {
+                processContent(item.content);
+              }
+            });
+          } else if (message.content) {
+            processContent(message.content);
+          }
+        }
+      }
+
+      const responseFormat = mappedContent.schema.request.response_format;
+      if (responseFormat && responseFormat.type === "json_schema") {
+        if (responseFormat.json_schema) {
+          const jsonSchemaString = JSON.stringify(responseFormat.json_schema);
+          processContent(jsonSchemaString);
+        }
+      }
+
+      const tools = mappedContent.schema.request.tools;
+      if (tools) {
+        const toolsString = JSON.stringify(tools);
+        processContent(toolsString);
+      }
+    }
+
+    initializeColorMap(Array.from(allVariables.keys()));
+    setTemplateVariables(allVariables);
+  }, [mappedContent]);
+
+
+  const createTemplatedMessages = (substitutionValues: Record<string, any>, messages: Message[]): { hasSubstitutionFailure: boolean, templatedMessages: Message[] } => {
     const templatedMessages: Message[] = [];
     let hasSubstitutionFailure = false;
 
@@ -546,7 +578,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
           if (item._type === "message" && item.content) {
             const substituted = HeliconeTemplateManager.substituteVariables(
               item.content,
-              Object.fromEntries(substitutionValues)
+              substitutionValues
             );
             if (!substituted.success) hasSubstitutionFailure = true;
             return { 
@@ -563,7 +595,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       } else if (message.content) {
         const substituted = HeliconeTemplateManager.substituteVariables(
           message.content,
-          Object.fromEntries(substitutionValues)
+          substitutionValues
         );
         if (!substituted.success) hasSubstitutionFailure = true;
         templatedMessages.push({
@@ -578,112 +610,59 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     return { hasSubstitutionFailure, templatedMessages };
   };
 
-  const createTemplatedResponseFormat = (responseFormat: ResponseFormat) => {
-    if (!responseFormat.json_schema || responseFormat.type !== "json_schema") {
-      return responseFormat;
-    }
 
-    const substituted = HeliconeTemplateManager.substituteVariables(
-      responseFormat.json_schema || "{}",
-      Object.fromEntries(substitutionValues)
-    );
-
-    if (!substituted.success) {
-      return responseFormat;
-    }
-
+  const createTemplatedMappedContent = (mappedContent: MappedLLMRequest): MappedLLMRequest => {
     try {
-      const parsed = JSON.parse(substituted.result || "{}");
+      const substitutionValues = Object.fromEntries(
+        Object.entries(variableInputs).map(([name, { isObject, value }]) => {
+          if (isObject) {
+            try {
+              return [name, JSON.parse(value)];
+            } catch (error) {
+              throw new Error(`Invalid JSON for variable "${name}": ${error}`);
+            }
+          }
+          return [name, value];
+        })
+      );
+      const { hasSubstitutionFailure, templatedMessages } = createTemplatedMessages(substitutionValues, mappedContent.schema.request.messages || []);
+      if (hasSubstitutionFailure) {
+        setNotification("Improper template values!", "error");
+        return mappedContent;
+      }
+      const substituted = HeliconeTemplateManager.substituteVariablesJSON(
+        mappedContent.schema.request.response_format as ResponseFormat,
+        substitutionValues
+      );
+      if (!substituted.success) {
+        setNotification("Improper template values!", "error");
+      }
+
+      const substitutedTools = HeliconeTemplateManager.substituteVariablesJSON(
+        mappedContent.schema.request.tools as Tool[],
+        substitutionValues
+      );
+      if (!substitutedTools.success) {
+        setNotification("Improper template values!", "error");
+      }
+
       return {
-        ...responseFormat,
-        json_schema: parsed
-      };
-    } catch (e) {
-      setNotification("Failed to parse response format", "error");
-      return responseFormat;
-    }
-  }
-
-
-  const processDefinedPromptInputs = (parts: {
-    newMappedContent: MappedLLMRequest | null,
-    newResponseFormat: ResponseFormat | null
-  }): Map<string, TemplateVariable> => {
-    const { newMappedContent, newResponseFormat } = parts;
-    const allVariables = new Map<string, TemplateVariable>();
-
-    const processContent = (content: string) => {
-      const variables = HeliconeTemplateManager.extractVariables(content);
-      variables.forEach((variable: TemplateVariable) => allVariables.set(variable.name, variable));
-      return variables;
-    };
-    
-    if (newMappedContent) {
-      const messages = newMappedContent.schema.request.messages;
-      if (messages) {
-        for (const message of messages) {
-          if (message._type === "contentArray" && message.contentArray) {
-            message.contentArray.forEach(item => {
-              if (item._type === "message" && item.content) {
-                processContent(item.content);
-              }
-            });
-          } else if (message.content) {
-            processContent(message.content);
+        ...mappedContent,
+        schema: {
+          ...mappedContent.schema,
+          request: { 
+            ...mappedContent.schema.request,
+            messages: templatedMessages,
+            response_format: substituted.success ? substituted.result : mappedContent.schema.request.response_format,
+            tools: substitutedTools.success ? substitutedTools.result : mappedContent.schema.request.tools
           }
         }
-      }
+      };
+    } catch (error) {
+      setNotification("Improper template values!", "error");
+      return mappedContent;
     }
-
-    if (newResponseFormat && newResponseFormat.type === "json_schema") {
-      if (newResponseFormat.json_schema) {
-        processContent(newResponseFormat.json_schema);
-      }
-    }
-
-    initializeColorMap(Array.from(allVariables.keys()));
-    setTemplateVariables(allVariables);
-    return allVariables;
   }
-
-  const onUpdateResponseFormat = (newResponseFormat: ResponseFormat): boolean => {
-    if (!newResponseFormat.json_schema || newResponseFormat.type !== "json_schema") {
-      setResponseFormat(newResponseFormat);
-      onUpdateMappedContent(mappedContent);
-      return true;
-    }
-
-    // since helicone tags, even when properly used, may contribute to valid json,
-    // replace them with "" (valid JSON in usage) where possible.
-    const substitutedJsonSchema = HeliconeTemplateManager.placeholderAllVariables(
-      newResponseFormat.json_schema || "{}"
-    );
-    
-    // then check if the result is valid JSON.
-    if (newResponseFormat.type === "json_schema") {
-      try {
-        JSON.parse(substitutedJsonSchema);
-      } catch (e) {
-        return false;
-      }
-    }
-
-    // Process variables from the original JSON schema (with template variables)
-    processDefinedPromptInputs({ newMappedContent: mappedContent, newResponseFormat });
-
-    setResponseFormat(newResponseFormat);
-    return true;
-  };
-
-  const onUpdateMappedContent = (newMappedContent: MappedLLMRequest | null) => {
-    if (!newMappedContent) {
-      setMappedContent(null);
-      return;
-    }
-
-    processDefinedPromptInputs({ newMappedContent, newResponseFormat: responseFormat });
-    setMappedContent(newMappedContent);
-  };
 
   const onRun = async () => {
     if (!mappedContent) {
@@ -697,31 +676,15 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       abortController.current = new AbortController();
 
       try {
-        const { hasSubstitutionFailure, templatedMessages } = createTemplatedMessages(mappedContent.schema.request.messages || []);
-        if (hasSubstitutionFailure) {
-          setNotification("Improper template values!", "error");
-          return;
-        }
 
-        const templatedResponseFormat = createTemplatedResponseFormat(responseFormat);
-
-        const templatedContent = {
-          ...mappedContent,
-          schema: {
-            ...mappedContent.schema,
-            request: {
-              ...mappedContent.schema.request,
-              messages: templatedMessages
-            }
-          }
-        };
+        const templatedMappedContent = createTemplatedMappedContent(mappedContent);
 
         const openaiRequest = convertMappedLLMRequestToOpenAIChatRequest(
-          templatedContent,
+          templatedMappedContent,
           tools,
           modelParameters,
           selectedModel,
-          templatedResponseFormat
+          templatedMappedContent.schema.request.response_format as ResponseFormat
         );
 
         const stream = await generateStream({
@@ -793,12 +756,27 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mappedContent]);
 
+  const handleResponseFormatChange = (newResponseFormat: ResponseFormat) => {
+    setResponseFormat(newResponseFormat);
+    if (!mappedContent) {
+      return;
+    }
+    setMappedContent({
+      ...mappedContent,
+      schema: {
+        ...mappedContent.schema,
+        request: { ...mappedContent.schema.request, response_format: newResponseFormat }
+      }
+    });
+  }
+  
+  
   const handleToolsChange = (newTools: Tool[]) => {
     setTools(newTools);
     if (!mappedContent) {
       return;
     }
-    onUpdateMappedContent({
+    setMappedContent({
       ...mappedContent,
       schema: {
         ...mappedContent.schema,
@@ -812,7 +790,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     if (!mappedContent) {
       return;
     }
-    onUpdateMappedContent({
+    setMappedContent({
       ...mappedContent,
       model: newModel,
       schema: {
@@ -864,13 +842,13 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
             <PlaygroundMessagesPanel
               mappedContent={mappedContent}
               defaultContent={defaultContent}
-              setMappedContent={onUpdateMappedContent}
+              setMappedContent={setMappedContent}
               selectedModel={selectedModel}
               setSelectedModel={handleSelectedModelChange}
               tools={tools}
               setTools={handleToolsChange}
               responseFormat={responseFormat}
-              setResponseFormat={onUpdateResponseFormat}
+              setResponseFormat={handleResponseFormatChange}
               modelParameters={modelParameters}
               setModelParameters={setModelParameters}
               promptVersionId={promptVersionId}
@@ -888,7 +866,7 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
               <ResizablePanel defaultSize={60} minSize={30}>
                 <PlaygroundResponsePanel
                   mappedContent={mappedContent}
-                  setMappedContent={onUpdateMappedContent}
+                  setMappedContent={setMappedContent}
                   error={error}
                   response={response}
                   isStreaming={isStreaming}
@@ -900,8 +878,10 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                 <ResizablePanel defaultSize={40} minSize={20}>
                   <PlaygroundVariablesPanel 
                     variables={templateVariables}
-                    onUpdateValue={onUpdateSubstitutionValue}
-                    values={substitutionValues}
+                    onUpdateValue={(name, { isObject, value }) => {
+                      setVariableInputs({ ...variableInputs, [name]: { isObject, value } });
+                    }}
+                    values={variableInputs}
                   />
                 </ResizablePanel>
               </>

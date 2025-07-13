@@ -29,7 +29,7 @@ interface PlaygroundHeaderProps {
   tools: Tool[];
   setTools: (_tools: Tool[]) => void;
   responseFormat: ResponseFormat;
-  setResponseFormat: (_responseFormat: ResponseFormat) => boolean;
+  setResponseFormat: (_responseFormat: ResponseFormat) => void;
   modelParameters: ModelParameters;
   setModelParameters: (_modelParameters: ModelParameters) => void;
   mappedContent: MappedLLMRequest | null;

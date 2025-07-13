@@ -48,7 +48,7 @@ interface ModelParametersFormProps {
   parameters: ModelParameters;
   onParametersChange: (_parameters: ModelParameters) => void;
   responseFormat: ResponseFormat;
-  onResponseFormatChange: (_responseFormat: ResponseFormat) => boolean;
+  onResponseFormatChange: (_responseFormat: ResponseFormat) => void;
   useAIGateway: boolean;
   setUseAIGateway: (_useAIGateway: boolean) => void;
 }

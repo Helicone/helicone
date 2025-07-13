@@ -31,8 +31,6 @@ const MonacoMarkdownEditor = (props: MarkdownEditorProps) => {
   const { theme: currentTheme } = useTheme();
   const minHeight = 100;
 
-  console.log("text", text);
-
   const [height, setHeight] = useState(minHeight);
   const updateHeight = (editor: editor.IStandaloneCodeEditor) =>
     setHeight(

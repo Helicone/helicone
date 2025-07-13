@@ -14,7 +14,7 @@ import useNotification from "@/components/shared/notification/useNotification";
 
 interface ResponseFormatModalProps {
   responseFormat: any;
-  onResponseFormatChange: (format: any) => boolean;
+  onResponseFormatChange: (format: any) => void;
   open: boolean;
   setOpen: (open: boolean) => void;
 }
@@ -89,13 +89,16 @@ export default function ResponseFormatModal({
           </DialogClose>
           <Button
             onClick={() => {
-              if (responseFormatText) {
-                const success = onResponseFormatChange(responseFormatText);
-                if (success) {
-                  setOpen(false);
+              try {
+                if (responseFormatText) {
+                  const parsed = JSON.parse(responseFormatText || "{}");
+                  onResponseFormatChange(parsed);
                 } else {
-                  setNotification("Invalid JSON", "error");
+                  onResponseFormatChange(undefined);
                 }
+                setOpen(false);
+              } catch (e) {
+                setNotification("Invalid JSON", "error");
               }
             }}
           >

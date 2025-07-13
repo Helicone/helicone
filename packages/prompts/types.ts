@@ -13,6 +13,6 @@ export interface ValidationError {
 
 export interface SubstitutionResult {
   success: boolean;
-  result?: string;
+  result?: any;
   errors?: ValidationError[];
 }

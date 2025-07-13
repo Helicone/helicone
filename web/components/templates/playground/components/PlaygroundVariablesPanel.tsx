@@ -1,16 +1,17 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
 import { TemplateVariable } from "@helicone-package/prompts/types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { useVariableColorMapStore } from "@/store/features/playground/variableColorMap";
+import MarkdownEditor from "@/components/shared/markdownEditor";
+import { VariableInput } from "../types";
 
 interface PlaygroundVariablesPanelProps {
   variables: Map<string, TemplateVariable>;
-  values: Map<string, string>;
-  onUpdateValue: (name: string, value: string) => void;
+  values: Record<string, VariableInput>;
+  onUpdateValue: (name: string, { isObject, value }: VariableInput) => void;
 }
 
 const PlaygroundVariablesPanel = ({
@@ -18,11 +19,11 @@ const PlaygroundVariablesPanel = ({
   values,
   onUpdateValue,
 }: PlaygroundVariablesPanelProps) => {
-  const [longTextModes, setLongTextModes] = useState<Set<string>>(new Set());
+  const [editObjectModes, setEditObjectModes] = useState<Set<string>>(new Set());
   const { getColor } = useVariableColorMapStore();
 
-  const toggleLongText = (name: string) => {
-    setLongTextModes(prev => {
+  const toggleEditObject = (name: string) => {
+    setEditObjectModes(prev => {
       const next = new Set(prev);
       if (next.has(name)) {
         next.delete(name);
@@ -31,6 +32,12 @@ const PlaygroundVariablesPanel = ({
       }
       return next;
     });
+
+    onUpdateValue(name, { isObject: editObjectModes.has(name), value: values[name]?.value || "" });
+  };
+
+  const handleValueChange = (name: string, value: string) => {
+    onUpdateValue(name, { isObject: editObjectModes.has(name), value });
   };
 
   return (
@@ -54,31 +61,32 @@ const PlaygroundVariablesPanel = ({
                       <code className="px-1 py-0.5 bg-muted rounded text-xs">{variable.type}</code>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Label htmlFor={`long-text-${name}`} className="text-xs text-muted-foreground">
-                        Long Text
+                      <Label htmlFor={`edit-object-${name}`} className="text-xs text-muted-foreground">
+                        Edit Object
                       </Label>
                       <Switch
-                        id={`long-text-${name}`}
+                        id={`edit-object-${name}`}
                         className="data-[state=checked]:bg-foreground"
                         size="sm"
                         variant="helicone"
-                        checked={longTextModes.has(name)}
-                        onCheckedChange={() => toggleLongText(name)}
+                        checked={editObjectModes.has(name)}
+                        onCheckedChange={() => toggleEditObject(name)}
                       />
                     </div>
                   </div>
-                  {longTextModes.has(name) ? (
-                    <Textarea
+                  {editObjectModes.has(name) ? (
+                    <MarkdownEditor
                       placeholder={`Enter ${variable.type} value...`}
-                      value={values.get(name) ?? ""}
-                      onChange={(e) => onUpdateValue(name, e.target.value)}
-                      className="min-h-[100px]"
+                      language="json"
+                      setText={(value) => handleValueChange(name, value)}
+                      text={values[name]?.value || ""}
+                      className="min-h-[100px] border-border border-2"
                     />
                   ) : (
                     <Input
                       placeholder={`Enter ${variable.type} value...`}
-                      value={values.get(name) ?? ""}
-                      onChange={(e) => onUpdateValue(name, e.target.value)}
+                      value={values[name]?.value || ""}
+                      onChange={(e) => handleValueChange(name, e.target.value)}
                     />
                   )}
                   <div className="text-xs text-muted-foreground font-mono">
