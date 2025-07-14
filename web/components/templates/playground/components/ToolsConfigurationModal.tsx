@@ -30,7 +30,7 @@ import { cn } from "@/lib/utils";
 
 interface ToolsConfigurationModalProps {
   tools: Tool[];
-  onToolsChange: (_tools: Tool[]) => boolean;
+  onToolsChange: (_tools: Tool[]) => void;
   isScrolled: boolean;
 }
 
