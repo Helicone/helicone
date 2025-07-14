@@ -1283,6 +1283,39 @@ export type Database = {
           },
         ]
       }
+      intercom_slack_mappings: {
+        Row: {
+          created_at: string | null
+          id: string
+          intercom_conversation_id: string
+          intercom_message_id: string
+          slack_channel_id: string
+          slack_message_ts: string
+          slack_thread_ts: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          intercom_conversation_id: string
+          intercom_message_id: string
+          slack_channel_id: string
+          slack_message_ts: string
+          slack_thread_ts: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          intercom_conversation_id?: string
+          intercom_message_id?: string
+          slack_channel_id?: string
+          slack_message_ts?: string
+          slack_thread_ts?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       job: {
         Row: {
           created_at: string | null

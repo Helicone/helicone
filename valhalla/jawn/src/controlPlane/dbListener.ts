@@ -35,6 +35,7 @@ export const startDBListener = async () => {
               data: keys.data!.map((key) => ({
                 ownerId: key.user_id,
                 keyHash: key.api_key_hash,
+                organizationId: payload.organization_id,
               })),
             },
           });

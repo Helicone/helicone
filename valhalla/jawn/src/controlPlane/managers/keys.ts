@@ -17,6 +17,8 @@ export async function getConfig(params: {
   auth: AuthParams;
 }): Promise<Result<Config, string>> {
   const keys = await getKeys(params.auth.organizationId);
+  console.log("keys", keys);
+  console.log("params", params.auth);
   if (keys.error) {
     return err(keys.error);
   }
