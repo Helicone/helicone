@@ -95,6 +95,86 @@ export class HeliconeTemplateManager {
     };
   }
 
+
+  private static isWholeMatch = (str: string): boolean => {
+    if (typeof str !== 'string') return false;
+    TEMPLATE_REGEX.lastIndex = 0;
+    const match = TEMPLATE_REGEX.exec(str);
+    return match !== null && match[0] === str;
+  };
+
+  private static getVariableName = (str: string): string | null => {
+    if (typeof str !== 'string') return null;
+    TEMPLATE_REGEX.lastIndex = 0;
+    const match = TEMPLATE_REGEX.exec(str);
+    return match ? match[1].trim() : null;
+  };
+
+  private static performRegexReplacement(str: string, inputs: Record<string, any>): string {
+    TEMPLATE_REGEX.lastIndex = 0;
+    return str.replace(TEMPLATE_REGEX, (match, name) => {
+      const value = inputs[name.trim()];
+      return value !== undefined && value !== null ? String(value) : match;
+    });
+  }
+
+  private static processObjectKV(
+    obj: any, 
+    inputs: Record<string, any>, 
+    errors: ValidationError[]
+  ): any {
+    if (typeof obj === 'string') {
+      // If it's a string and wholly matches tag regex, replace with input value
+      if (this.isWholeMatch(obj)) {
+        const varName = this.getVariableName(obj);
+        if (varName && inputs[varName] !== undefined) {
+          return inputs[varName];
+        }
+      }
+      // Otherwise, perform regex replacement
+      return this.performRegexReplacement(obj, inputs);
+    } else if (Array.isArray(obj)) {
+      return obj.map(item => this.processObjectKV(item, inputs, errors));
+    } else if (obj !== null && typeof obj === 'object') {
+      const result: Record<string, any> = {};
+      
+      for (const [key, value] of Object.entries(obj)) {
+        let processedKey = key;
+        
+        if (typeof key === 'string') {
+          if (this.isWholeMatch(key)) {
+            // Key wholly matches -> must be string replacement only
+            const varName = this.getVariableName(key);
+            if (varName && inputs[varName]) {
+              const inputValue = inputs[varName];
+              if (typeof inputValue === 'string') {
+                processedKey = inputValue;
+              } else {
+                errors.push({
+                  variable: varName,
+                  expected: 'string',
+                  value: inputValue
+                });
+                continue;
+              }
+            }
+          } else {
+            // Key contains template but not wholly -> regex replacement
+            processedKey = this.performRegexReplacement(key, inputs);
+          }
+        }
+        
+        const processedValue = this.processObjectKV(value, inputs, errors);
+        result[processedKey] = processedValue;
+      }
+    
+      return result;
+    }
+    
+    // For other types (number, boolean, null), return as-is
+    return obj;
+  }
+
   /**
    * Substitute variables in JSON format object with provided inputs
    * @param json - The JSON object containing "{{hc:NAME:type}}" patterns
@@ -126,92 +206,17 @@ export class HeliconeTemplateManager {
         errors
       };
     }
-
-    const isWholeMatch = (str: string): boolean => {
-      if (typeof str !== 'string') return false;
-      TEMPLATE_REGEX.lastIndex = 0;
-      const match = TEMPLATE_REGEX.exec(str);
-      return match !== null && match[0] === str;
-    };
-
-    const getVariableName = (str: string): string | null => {
-      if (typeof str !== 'string') return null;
-      TEMPLATE_REGEX.lastIndex = 0;
-      const match = TEMPLATE_REGEX.exec(str);
-      return match ? match[1].trim() : null;
-    };
-
-    const performRegexReplacement = (str: string): string => {
-      TEMPLATE_REGEX.lastIndex = 0;
-      return str.replace(TEMPLATE_REGEX, (match, name) => {
-        const value = inputs[name.trim()];
-        return value !== undefined && value !== null ? String(value) : match;
-      });
-    };
-
-    // Recursively process JSON compatible object for helicone prompt tags
-    const processObject = (obj: any): any => {
-      if (typeof obj === 'string') {
-        // If it's a string and wholly matches tag regex, replace with input value
-        if (isWholeMatch(obj)) {
-          const varName = getVariableName(obj);
-          if (varName && inputs[varName] !== undefined) {
-            return inputs[varName];
-          }
-        }
-        // Otherwise, perform regex replacement
-        return performRegexReplacement(obj);
-      } else if (Array.isArray(obj)) {
-        return obj.map(item => processObject(item));
-      } else if (obj !== null && typeof obj === 'object') {
-        const result: Record<string, any> = {};
-        
-        for (const [key, value] of Object.entries(obj)) {
-          let processedKey = key;
-          
-          if (typeof key === 'string') {
-            if (isWholeMatch(key)) {
-              // Key wholly matches -> must be string replacement only
-              const varName = getVariableName(key);
-              if (varName && inputs[varName]) {
-                const inputValue = inputs[varName];
-                if (typeof inputValue === 'string') {
-                  processedKey = inputValue;
-                } else {
-                  errors.push({
-                    variable: varName,
-                    expected: 'string',
-                    value: inputValue
-                  });
-                  continue;
-                }
-              }
-            } else {
-              // Key contains template but not wholly -> regex replacement
-              processedKey = performRegexReplacement(key);
-            }
-          }
-          
-          const processedValue = processObject(value);
-          result[processedKey] = processedValue;
-        }
-        
-        return result;
+    
+    try {
+      const result = this.processObjectKV(json, inputs, errors);
+      
+      if (errors.length > 0) {
+        return {
+          success: false,
+          errors
+        };
       }
       
-      // For other types (number, boolean, null), return as-is
-      return obj;
-    };
-
-    if (errors.length > 0) {
-      return {
-        success: false,
-        errors
-      };
-    }
-
-    try {
-      const result = processObject(json);
       return {
         success: true,
         result
