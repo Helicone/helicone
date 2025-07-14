@@ -728,9 +728,19 @@ const costs: ModelRow[] = [
       value: "gpt-4o-search-preview",
     },
     cost: {
-      prompt_token: 2.5e-6,
-      completion_token: 1e-5,
+      prompt_token: 0.0000025,
+      completion_token: 0.00001,
     },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "chatgpt-4o-latest",
+    },
+    cost: {
+      prompt_token: 0.000005,
+      completion_token: 0.000015,
+    }
   }
 ];
 
