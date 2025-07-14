@@ -71,7 +71,7 @@ llm = LLM(
 ```python
 llm = LLM(
     model="anthropic/claude-3-sonnet-20240229-v1:0",
-    base_url="https://anthropic.helicone.ai",
+    base_url="https://anthropic.helicone.ai/v1",
     api_key=os.environ.get("ANTHROPIC_API_KEY"),
     extra_headers={
         "Helicone-Auth": f"Bearer {os.environ.get('HELICONE_API_KEY')}",

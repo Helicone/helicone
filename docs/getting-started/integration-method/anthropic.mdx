@@ -12,7 +12,7 @@ description: "Connect Helicone with Anthropic, a platform for running open-sourc
     import anthropic
     client = anthropic.Client(
         api_key="<Anthropic API Key>",
-        base_url="https://anthropic.helicone.ai"
+        base_url="https://anthropic.helicone.ai/v1"
     )
     res = client._request_as_json(
         "post",
@@ -36,7 +36,7 @@ description: "Connect Helicone with Anthropic, a platform for running open-sourc
     Change the api base and add a Helicone-Auth header
     ```typescript
   const anthropic = new Anthropic({
-    baseURL: "https://anthropic.helicone.ai/",
+    baseURL: "https://anthropic.helicone.ai/v1",
     apiKey: "my api key",
     defaultHeaders: {
       "Helicone-Auth": "Bearer <HELICONE_API_KEY>",
@@ -59,7 +59,7 @@ max_tokens_to_sample: 300,
 
 - POST https://api.anthropic.com
 
-* POST https://anthropic.helicone.ai
+* POST https://anthropic.helicone.ai/v1
 
 ```
 
@@ -103,7 +103,7 @@ curl --request POST \
     anthropic = ChatAnthropic(
       temperature=0.9,
       model="claude-2",
-      anthropic_api_url="https://anthropic.helicone.ai/",
+      anthropic_api_url="https://anthropic.helicone.ai/v1",
       anthropic_api_key="ANTHROPIC_API_KEY",
       model_kwargs={
           "extra_headers":{
@@ -119,7 +119,7 @@ curl --request POST \
       modelName: "claude-2",
       anthropicApiKey: "ANTHROPIC_API_KEY",
       clientOptions: {
-        baseURL: "https://anthropic.helicone.ai/",
+        baseURL: "https://anthropic.helicone.ai/v1",
         defaultHeaders: {
           "Helicone-Auth": `Bearer HELICONE_API_KEY`,
         }

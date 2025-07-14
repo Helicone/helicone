@@ -203,3 +203,47 @@ const response = streamText({
   },
 });
 ```
+
+## Using with Existing Custom Base URLs
+
+If you're already using a custom base URL for an OpenAI-compatible vendor, you can proxy your requests through Helicone by setting the `Helicone-Target-URL` header to your existing vendor's endpoint.
+
+### Example with Custom Vendor
+
+```javascript
+import { createOpenAI } from "@ai-sdk/openai";
+
+const openai = createOpenAI({
+  baseURL: "https://oai.helicone.ai/v1",
+  headers: {
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+    "Helicone-Target-URL": "https://your-vendor-api.com/v1", // Your existing vendor's endpoint
+  },
+});
+
+// Use openai to make API calls - requests will be proxied to your vendor
+const response = streamText({
+  model: openai("gpt-4o"),
+  prompt: "Hello world",
+});
+```
+
+### Example with Multiple Vendors
+
+You can also dynamically set the target URL per request:
+
+```javascript
+const response = streamText({
+  model: openai("gpt-4o"),
+  prompt: "Hello world",
+  headers: {
+    "Helicone-Target-URL": "https://your-vendor-api.com/v1", // Override for this request
+  },
+});
+```
+
+This approach allows you to:
+- Keep your existing vendor integrations
+- Add Helicone monitoring and features
+- Switch between vendors without changing your base URL
+- Maintain compatibility with your current setup
