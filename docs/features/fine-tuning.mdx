@@ -22,227 +22,68 @@ When building production AI applications, you need to improve model performance 
 
 <Steps>
 <Step title="Score Your Requests">
-Review your existing LLM requests and assign quality scores based on accuracy and relevance to your use case.
+Review your existing LLM requests in the Helicone dashboard and assign quality scores based on accuracy and relevance. You can score manually or use [automated scoring](/features/advanced-usage/scores) to identify your best examples.
 
-```typescript
-// Requests are automatically captured when using Helicone proxy
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  baseURL: "https://oai.helicone.ai/v1",
-  defaultHeaders: {
-    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-  },
-});
-```
+![Score your requests](/images/datasets/scores.webp)
 </Step>
 
-<Step title="Filter High-Quality Data">
-Use Helicone's filtering system to select requests with high scores and add them to your dataset.
+<Step title="Filter Requests">
+Use Helicone's filtering system to find high-quality requests based on scores, dates, models, or custom properties.
 
-```typescript
-// Filter requests by score, date range, or specific prompts
-// in the Helicone dashboard
-```
+![Filter your requests](/images/datasets/filters.webp)
 </Step>
 
-<Step title="Export or Fine-Tune">
-Export your curated dataset in JSONL format or connect directly to fine-tuning platforms.
+<Step title="Select for Dataset">
+Choose the filtered requests you want to include and add them to a new or existing dataset.
 
-```json
-{
-  "messages": [
-    {"role": "user", "content": "Your filtered prompt"},
-    {"role": "assistant", "content": "High-quality response"}
-  ]
-}
-```
+<video
+  autoPlay  
+  controls
+  loop
+  muted
+  playsInline
+  className="w-full aspect-video rounded-xl"
+  src="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/datasets-create.mp4"
+></video>
+</Step>
+
+<Step title="Curate Dataset">
+Review, organize, and refine your dataset by removing poor examples, balancing categories, and ensuring consistency.
+
+<video
+  autoPlay  
+  controls
+  loop
+  muted
+  playsInline
+  className="w-full aspect-video rounded-xl"
+  src="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/datasets-curate.mp4"
+></video>
+</Step>
+
+<Step title="Export">
+Export your curated dataset in JSONL format for use with fine-tuning platforms like OpenAI, Anthropic, or OpenPipe.
+
+<video
+  autoPlay  
+  controls
+  loop
+  muted
+  playsInline
+  className="w-full aspect-video rounded-xl"
+  src="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/datasets-download.mp4"
+></video>
 </Step>
 </Steps>
 
-## Configuration Options
+## Export Formats
 
-### Basic Settings
+Helicone supports multiple export formats for different fine-tuning platforms:
 
-Dataset creation and export options for fine-tuning workflows.
-
-| Setting | Type | Description | Default | Example |
-|---------|------|-------------|---------|----------|
-| `min_score` | `number` | Minimum score for requests to include | `3` | `4` |
-| `export_format` | `string` | Output format for dataset | `"jsonl"` | `"jsonl"` |
-| `include_metadata` | `boolean` | Include request metadata in export | `false` | `true` |
-
-### Advanced Settings
-
-| Setting | Type | Description | Default | Example |
-|---------|------|-------------|---------|----------|
-| `filter_criteria` | `object` | Complex filtering rules | `{}` | `{"model": "gpt-4o-mini", "tokens": {"min": 100}}` |
-| `validation_split` | `number` | Percentage for validation set | `0.2` | `0.15` |
-
-## Use Cases
-
-<Tabs>
-<Tab title="Customer Support Bot">
-Fine-tune a model for better customer service responses using your actual support conversations.
-
-<CodeGroup>
-```typescript Node.js
-import OpenAI from "openai";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  baseURL: "https://oai.helicone.ai/v1",
-  defaultHeaders: {
-    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-    "Helicone-Property-Dataset": "customer-support",
-  },
-});
-
-// Your support bot conversations are automatically logged
-const response = await openai.chat.completions.create({
-  model: "gpt-4o-mini",
-  messages: [
-    {role: "system", content: "You are a helpful customer support agent."},
-    {role: "user", content: "How do I reset my password?"}
-  ],
-});
-```
-
-```python Python
-import openai
-
-client = openai.OpenAI(
-    api_key=os.environ["OPENAI_API_KEY"],
-    base_url="https://oai.helicone.ai/v1",
-    default_headers={
-        "Helicone-Auth": f"Bearer {os.environ['HELICONE_API_KEY']}",
-        "Helicone-Property-Dataset": "customer-support",
-    }
-)
-
-# Support conversations logged for dataset creation
-response = client.chat.completions.create(
-    model="gpt-4o-mini",
-    messages=[
-        {"role": "system", "content": "You are a helpful customer support agent."},
-        {"role": "user", "content": "How do I reset my password?"}
-    ]
-)
-```
-</CodeGroup>
-</Tab>
-
-<Tab title="Code Documentation Generator">
-Create a specialized model for generating API documentation from your codebase patterns.
-
-```typescript
-// Tag requests for documentation generation
-const openai = new OpenAI({
-  baseURL: "https://oai.helicone.ai/v1",
-  defaultHeaders: {
-    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-    "Helicone-Property-Dataset": "code-docs",
-  },
-});
-
-const response = await openai.chat.completions.create({
-  model: "gpt-4o-mini",
-  messages: [
-    {role: "system", content: "Generate clear API documentation for the following function."},
-    {role: "user", content: functionCode}
-  ],
-});
-```
-</Tab>
-
-<Tab title="Domain-Specific QA">
-Fine-tune for specialized knowledge in your industry or domain using real user questions.
-
-```typescript
-// Medical, legal, or technical domain fine-tuning
-const response = await openai.chat.completions.create({
-  model: "gpt-4o-mini",
-  messages: [
-    {role: "system", content: "Answer medical questions accurately based on current research."},
-    {role: "user", content: "What are the side effects of this medication?"}
-  ],
-});
-
-// Score responses in Helicone dashboard
-// Export high-scored interactions for fine-tuning
-```
-</Tab>
-</Tabs>
-
-## Understanding Datasets & Fine-Tuning
-
-### Dataset Quality
-
-**What makes a good training dataset:**
-
-- High-quality examples from real production usage
-- Consistent formatting and response patterns
-- Diverse scenarios covering your use cases
-- Proper scoring based on actual performance
-
-**How to improve dataset quality:**
-
-```typescript
-// ✅ Good: Specific, scored real conversations
-{
-  "messages": [
-    {"role": "user", "content": "How do I integrate webhooks with my Node.js app?"},
-    {"role": "assistant", "content": "Here's a complete example using Express..."}
-  ],
-  "score": 5,
-  "metadata": {"context": "developer-support", "resolved": true}
-}
-
-// ❌ Bad: Generic, unscored synthetic data
-{
-  "messages": [
-    {"role": "user", "content": "Help me"},
-    {"role": "assistant", "content": "I'll help you"}
-  ]
-}
-```
-
-### Fine-Tuning Integration
-
-**Export Options:**
-
-- **JSONL format**: Compatible with OpenAI, Anthropic, and most platforms
-- **OpenPipe integration**: Direct connection for open-source model fine-tuning
-- **Custom formats**: API access for building your own workflows
-
-**Best Practices:**
-
-```typescript
-// Pattern 1 - Tag requests by dataset
-const headers = {
-  "Helicone-Property-Dataset": "customer-support-v2",
-  "Helicone-Property-Version": "2024-01"
-};
-
-// Pattern 2 - Score responses for quality filtering
-// Use Helicone dashboard to manually score
-// or implement automated scoring
-```
-
-### Iterative Improvement
-
-**Continuous refinement process:**
-
-- Monitor fine-tuned model performance in production
-- Collect new high-quality examples
-- Re-score existing data based on new criteria
-- Create updated datasets for incremental training
-
-**Avoid:**
-
-- Fine-tuning on unscored or low-quality data
-- Using datasets without validation splits
-- Ignoring production performance metrics
-- Creating datasets too small for effective training
+- **OpenAI JSONL**: Compatible with OpenAI's fine-tuning API
+- **Anthropic Format**: For Claude model fine-tuning
+- **Generic JSONL**: Works with most platforms
+- **CSV**: For data analysis and custom workflows
 
 ## Related Features
 

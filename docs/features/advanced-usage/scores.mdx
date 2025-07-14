@@ -2,8 +2,11 @@
 title: "Eval Scores"
 sidebarTitle: "Eval Scores"
 ---
-
 When running evaluation frameworks to measure model performance, you need visibility into how well your AI applications are performing across different metrics. Scores let you report evaluation results from any framework to Helicone, providing centralized observability for accuracy, hallucination rates, helpfulness, and custom metrics.
+
+<Note>
+Helicone doesn't run evaluations for you - we're not an evaluation framework. Instead, we provide a centralized location to report and analyze evaluation results from any framework (like RAGAS, LangSmith, or custom evaluations), giving you unified observability across all your evaluation metrics.
+</Note>
 
 ## Why use Scores
 
@@ -15,19 +18,7 @@ When running evaluation frameworks to measure model performance, you need visibi
 
 <Steps>
 <Step title="Run your evaluation">
-Execute your evaluation framework to assess model outputs:
-
-```typescript
-// Example using your evaluation framework
-const evalResult = await evaluateLLMResponse({
-  prompt: "Explain quantum computing",
-  response: llmResponse,
-  expectedBehavior: "accurate, technical, no hallucinations"
-});
-
-// Returns scores like:
-// {accuracy: 92, hallucination: 8, helpfulness: 85}
-```
+Use your evaluation framework or custom logic to assess model responses and generate scores (integers or booleans) for metrics like accuracy, helpfulness, or safety.
 </Step>
 
 <Step title="Report scores to Helicone">
@@ -65,6 +56,11 @@ Analyze evaluation results in the Helicone dashboard to track performance trends
 </Step>
 </Steps>
 
+<Warning>
+Scores are processed with a **10 minute delay** by default for analytics aggregation.
+</Warning>
+
+
 ## API Format
 
 ### Request Structure
@@ -82,65 +78,9 @@ The scores API expects this exact format:
 | `integer` | Numeric scores (no decimals) | `92`, `85`, `0` |
 | `boolean` | Pass/fail or true/false metrics | `true`, `false` |
 
-**Important:** Float values like `0.92` are rejected. Convert to integers: `0.92` → `92`
-
-#### Detailed Explanations
-
-<AccordionGroup>
-<Accordion title="Batch Scoring">
-Report multiple evaluation metrics in a single API call:
-
-```typescript
-// Report all evaluation metrics at once
-await fetch(`https://api.helicone.ai/v1/request/${requestId}/score`, {
-  method: "POST",
-  headers: {
-    "Authorization": `Bearer ${HELICONE_API_KEY}`,
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    scores: {
-      "accuracy": 92,             // Convert decimals to integers
-      "hallucination_rate": 8,    // 0.08 * 100
-      "response_relevance": 87,   // 0.87 * 100
-      "context_precision": 90,    // 0.90 * 100
-      "faithfulness": 85          // 0.85 * 100
-    }
-  })
-});
-```
-</Accordion>
-
-<Accordion title="Score Metadata">
-Include context about your evaluation for better analysis:
-
-```typescript
-// Note: Scores API currently doesn't support metadata in request body
-// Store evaluation context in your application or use Custom Properties:
-const response = await openai.chat.completions.create({
-  model: "gpt-4o-mini",
-  messages: [{ role: "user", content: "Test message" }]
-}, {
-  headers: {
-    "Helicone-Auth": `Bearer ${HELICONE_API_KEY}`,
-    "Helicone-Property-Framework": "custom-eval-v2",
-    "Helicone-Property-Dataset": "golden-test-set",
-    "Helicone-Property-Environment": "production"
-  }
-});
-
-// Then report scores using the API
-await fetch(`https://api.helicone.ai/v1/request/${requestId}/score`, {
-  method: "POST",
-  headers: {
-    "Authorization": `Bearer ${HELICONE_API_KEY}`,
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({ scores })
-});
-```
-</Accordion>
-</AccordionGroup>
+<Warning>
+Float values like `0.92` are rejected. Convert to integers: `0.92` → `92`
+</Warning>
 
 ## Use Cases
 
@@ -337,44 +277,6 @@ async def evaluate_chat_response(user_query, assistant_response, requestId):
 ```
 </Tab>
 </Tabs>
-
-## Understanding Scores
-
-### Score Timing and Delays
-
-**Important considerations:**
-- Scores are processed with a **10 minute delay** by default for analytics aggregation
-- Real-time access available via PostgreSQL, analytics via ClickHouse after delay
-- Multiple scores can be reported in a single API call for efficiency
-
-**Workflow example:**
-```typescript
-// 1. Make LLM request
-const response = await openai.chat.completions.create({
-  model: "gpt-4o-mini",
-  messages: [{ role: "user", content: prompt }]
-}, {
-  headers: { "Helicone-Auth": `Bearer ${HELICONE_API_KEY}` }
-});
-
-const requestId = response.headers.get("helicone-id");
-
-// 2. Run evaluation (can be async)
-const scores = await evaluateResponse(response);
-
-// 3. Report scores immediately
-await fetch(`https://api.helicone.ai/v1/request/${requestId}/score`, {
-  method: "POST",
-  headers: {
-    "Authorization": `Bearer ${HELICONE_API_KEY}`,
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({ scores })
-});
-
-// 4. Scores appear in analytics dashboard after ~10 minutes
-```
-
 
 ## Related Features
 

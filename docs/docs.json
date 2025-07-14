@@ -187,11 +187,10 @@
             ]
           },
           {
-            "group": "Prompt Management",
+            "group": "Prompts & Evals",
             "pages": [
-              "features/fine-tuning",
               {
-                "group": "Prompts",
+                "group": "Prompt Management",
                 "pages": [
                   "features/prompts/editor",
                   "features/prompts/generate",
@@ -200,6 +199,7 @@
               },
               "features/advanced-usage/scores",
               "features/advanced-usage/feedback",
+              "features/fine-tuning",
               {
                 "group": "Webhooks",
                 "pages": ["features/webhooks", "features/webhooks-testing"]

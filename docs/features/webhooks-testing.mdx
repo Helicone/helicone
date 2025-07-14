@@ -11,13 +11,6 @@ When developing webhook integrations, you need to test how your application hand
 - **Iterate quickly**: Make changes to your webhook handler and test immediately without deployment cycles
 - **Validate event handling**: Ensure your application correctly processes different webhook event types and payloads
 
-<Frame caption="Ngrok forwarding local webhook server to public URL">
-  <img
-    src="/images/webhooks/ngrok-example.webp"
-    alt="Ngrok terminal showing secure tunnel from public URL to localhost webhook server"
-  />
-</Frame>
-
 ## Quick Start
 
 <Steps>
@@ -100,68 +93,9 @@ Add your ngrok URL to Helicone's webhook settings:
 2. Click "Add Webhook"
 3. Enter your ngrok URL with the webhook path: `https://abc123.ngrok-free.app/webhook`
 4. Select the events you want to receive
-5. (Optional) Add property filters for testing:
-   ```json
-   {
-     "environment": "development"
-   }
-   ```
-6. Save the webhook configuration
+5. Save the webhook configuration
 </Step>
 </Steps>
-
-## Configuration Options
-
-### Basic Settings
-
-| Setting | Type | Description | Default | Example |
-|---------|------|-------------|---------|----------|
-| `URL` | `string` | Your webhook endpoint URL | N/A | `"https://api.example.com/webhook"` |
-| `Events` | `array` | Event types to receive | All events | `["request.created", "request.updated"]` |
-| `Active` | `boolean` | Enable/disable webhook | `true` | `true` |
-
-### Advanced Settings
-
-<AccordionGroup>
-<Accordion title="Property Filters">
-Filter which requests trigger webhooks based on custom properties:
-
-```json
-{
-  "environment": "production",
-  "feature": "chat",
-  "user_tier": "premium"
-}
-```
-
-Only requests matching ALL specified properties will trigger the webhook.
-</Accordion>
-
-<Accordion title="Security Headers">
-Add authentication headers to webhook requests for security:
-
-```json
-{
-  "headers": {
-    "X-Webhook-Secret": "your-secret-key",
-    "Authorization": "Bearer webhook-token"
-  }
-}
-```
-
-Helicone will include these headers in every webhook request.
-</Accordion>
-
-<Accordion title="Retry Configuration">
-Configure retry behavior for failed webhook deliveries:
-
-- **Initial retry**: After 30 seconds
-- **Subsequent retries**: Exponential backoff up to 3 attempts
-- **Timeout**: 10 seconds per request
-
-Webhooks returning 2xx status codes are considered successful.
-</Accordion>
-</AccordionGroup>
 
 ## Use Cases
 
@@ -193,14 +127,14 @@ async def helicone_webhook(request: Request):
         user_id = payload.get("user_id")
         
         logger.info(f"Webhook for request {request_id}")
-        logger.info(f"Model: {model}, Cost: ${cost}")
+        logger.info(f"Model: {model}, Cost: {cost}")
         
         if user_id:
             logger.info(f"User: {user_id}")
             
         # Check if this is a high-cost request
         if cost > 1.0:
-            logger.warning(f"High cost request detected: ${cost}")
+            logger.warning(f"High cost request detected: {cost}")
         
         return {"status": "processed"}
         
@@ -296,7 +230,7 @@ async def process_webhook_event(payload):
     # Check for anomalies
     if cost > 1.0:  # High cost threshold
         await send_alert(
-            f"High cost request: ${cost}",
+            f"High cost request: {cost}",
             payload
         )
     
@@ -322,153 +256,7 @@ async def check_user_limits(user_id, cost):
 ```
 </Tab>
 
-<Tab title="Integration Testing">
-Test webhook reliability and error handling:
-
-```python
-# webhook_test_server.py
-from fastapi import FastAPI, Request, Response
-import random
-import time
-
-app = FastAPI()
-
-# Simulate different scenarios
-@app.post("/webhook/{scenario}")
-async def test_webhook(scenario: str, request: Request):
-    payload = await request.json()
-    
-    if scenario == "success":
-        # Normal processing
-        return {"status": "ok"}
-    
-    elif scenario == "slow":
-        # Test timeout handling
-        time.sleep(15)  # Exceed 10s timeout
-        return {"status": "ok"}
-    
-    elif scenario == "intermittent":
-        # Random failures for retry testing
-        if random.random() > 0.5:
-            return Response(status_code=500)
-        return {"status": "ok"}
-    
-    elif scenario == "auth":
-        # Test auth validation
-        auth = request.headers.get("Authorization")
-        if auth != "Bearer expected-token":
-            return Response(status_code=401)
-        return {"status": "authenticated"}
-
-# Run different test scenarios:
-# ngrok http 8000
-# Configure webhooks with different paths:
-# - https://xxx.ngrok.app/webhook/success
-# - https://xxx.ngrok.app/webhook/slow
-# - https://xxx.ngrok.app/webhook/intermittent
-```
-</Tab>
 </Tabs>
-
-## Understanding Webhooks Local Testing
-
-### How Tunneling Works
-
-Local webhook testing uses secure tunnels to bridge your local development environment with Helicone's cloud services:
-
-**The flow:**
-1. Your local server runs on localhost (e.g., `http://localhost:8000`)
-2. Ngrok creates a public HTTPS endpoint (e.g., `https://abc123.ngrok.app`)
-3. Helicone sends webhooks to the public endpoint
-4. Ngrok forwards requests to your local server
-5. Your local server processes and responds
-
-**Security considerations:**
-```bash
-# ✅ Good - use authentication in development
-ngrok http 8000 --auth="username:password"
-
-# ✅ Good - restrict to specific paths
-ngrok http 8000 --host-header=rewrite
-
-# ❌ Avoid - exposing without any protection
-ngrok http 8000  # Anyone can access your endpoint
-```
-
-### Testing Best Practices
-
-**Effective webhook testing strategies:**
-
-1. **Use property filters** to isolate test traffic:
-```typescript
-// Only trigger webhooks for dev environment
-{
-  headers: {
-    "Helicone-Property-Environment": "development",
-    "Helicone-Property-Test": "true"
-  }
-}
-```
-
-2. **Log everything** during development:
-```python
-import json
-import logging
-
-logging.basicConfig(level=logging.DEBUG)
-
-@app.post("/webhook")
-async def webhook(request: Request):
-    payload = await request.json()
-    
-    # Log full request details
-    logging.info(f"Headers: {dict(request.headers)}")
-    logging.info(f"Payload: {json.dumps(payload, indent=2)}")
-    
-    # Your processing logic
-    return {"status": "ok"}
-```
-
-3. **Test error scenarios** explicitly:
-- Network timeouts
-- Invalid payloads  
-- Authentication failures
-- Server errors (500s)
-- Rate limiting
-
-### Common Issues and Solutions
-
-**Ngrok connection issues:**
-```bash
-# Issue: Ngrok session expired
-# Solution: Restart ngrok (free tier has 2-hour limit)
-
-# Issue: Can't access ngrok URL
-# Solution: Check firewall and use --region flag
-ngrok http 8000 --region=us
-```
-
-**Webhook not triggering:**
-- Verify property filters match your request
-- Check webhook is marked as "Active"
-- Ensure events are selected correctly
-- Look for errors in Helicone webhook logs
-
-**Testing specific events:**
-```bash
-# Trigger request.created event
-curl -X POST https://oai.helicone.ai/v1/chat/completions \
-  -H "Authorization: Bearer $OPENAI_API_KEY" \
-  -H "Helicone-Auth: Bearer $HELICONE_API_KEY" \
-  -H "Helicone-Property-Environment: development" \
-  -d '{
-    "model": "gpt-3.5-turbo",
-    "messages": [{"role": "user", "content": "Test webhook"}]
-  }'
-
-# Trigger request.updated event (with feedback)
-# First make request, then add feedback via API
-```
 
 ## Related Features
 

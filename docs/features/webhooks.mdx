@@ -104,22 +104,6 @@ headers: {
 Only requests matching ALL specified properties will trigger webhooks.
 </Accordion>
 
-<Accordion title="Sample Rate">
-Control webhook volume by setting a sample rate:
-
-```yaml
-# Send webhooks for 25% of requests
-sample_rate: 25
-
-# Send webhooks for all requests
-sample_rate: 100
-
-# Disable webhooks
-sample_rate: 0
-```
-
-<Tip>Use lower sample rates for high-volume applications to reduce webhook processing load.</Tip>
-</Accordion>
 </AccordionGroup>
 
 ## Use Cases
@@ -308,48 +292,13 @@ if (!isValid) {
 
 **URL expiration:**
 - `request_response_url` expires after 30 minutes
-- Fetch data promptly after receiving webhooks
-- Implement retry logic for temporary failures
+- Always use `request_response_url` for complete data
 
 **Webhook timeouts:**
 - Webhook delivery times out after 2 minutes
-- Respond quickly to webhook requests
-- Use queues for long-running processing
 
 **Payload size limits:**
 - Request/response bodies are truncated at 10KB in webhook payload
-- Always use `request_response_url` for complete data
-- Consider payload size when processing webhooks
-
-### Setting User IDs
-
-To include `user_id` in webhook payloads, set it in your LLM requests:
-
-```javascript
-// Option 1: Using Helicone-User-Id header
-const response = await openai.chat.completions.create(
-  { /* request data */ },
-  {
-    headers: {
-      "Helicone-Auth": "Bearer YOUR_API_KEY",
-      "Helicone-User-Id": "user-123" // Included in webhooks
-    }
-  }
-);
-
-// Option 2: Using custom property
-const response = await openai.chat.completions.create(
-  { /* request data */ },
-  {
-    headers: {
-      "Helicone-Auth": "Bearer YOUR_API_KEY", 
-      "Helicone-Property-UserId": "user-123" // Also included
-    }
-  }
-);
-```
-
-<Note>The `user_id` field only appears in webhook payloads when explicitly set in the original request.</Note>
 
 ## Related Features
 
