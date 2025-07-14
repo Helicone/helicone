@@ -1,50 +1,106 @@
 ---
 title: "Datasets & Fine-Tuning"
 sidebarTitle: "Datasets & Fine-Tuning"
-description: "Curate datasets and fine-tune your LLMs with Helicone to improve performance on specific tasks."
-twitter:title: "Datasets & Fine-Tuning - Helicone OSS LLM Observability"
 ---
 
-Helicone provides powerful features to help you curate high-quality datasets and fine-tune your Language Models (LLMs) for improved performance on specific tasks.
+When building production AI applications, you need to improve model performance on specific tasks beyond what general-purpose models provide. Datasets & Fine-Tuning help you curate high-quality training data from your real production traffic and fine-tune models for better accuracy, consistency, and domain-specific performance.
 
-<iframe
-  width="100%"
-  height="420"
-  src="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/dataset.mp4"
-></iframe>
+## Why use Datasets & Fine-Tuning
 
-## Dataset Curation
+- **Production-ready datasets**: Transform your actual LLM requests into high-quality training data with scoring and filtering
+- **Seamless fine-tuning integration**: Export to JSONL or connect directly to fine-tuning platforms like OpenPipe
+- **Iterative improvement**: Use real performance data to continuously refine your datasets and models
 
-With Helicone, you can easily create and manage high-quality datasets for fine-tuning:
+<Frame caption="Dataset curation interface showing request filtering and scoring for fine-tuning preparation">
+  <img
+    src="/images/features/fine-tuning/dataset2.webp"
+    alt="Helicone dataset curation interface with request filtering, scoring, and dataset management tools"
+  />
+</Frame>
+
+## Quick Start
 
 <Steps>
-  <Step>
-    **Evaluate Requests**: Review your existing requests and assign scores based
-    on quality and relevance.
-  </Step>
-  <Step>
-    **Filter and Add**: Use Helicone's advanced filtering to select high-scoring
-    requests and add them to your dataset.
-  </Step>
-  <Step>
-    **Curate and Refine**: Modify the selected requests to create a perfect,
-    high-quality dataset tailored to your needs.
-  </Step>
+<Step title="Score Your Requests">
+Review your existing LLM requests in the Helicone dashboard and assign quality scores based on accuracy and relevance. You can score manually or use [automated scoring](/features/advanced-usage/scores) to identify your best examples.
+
+![Score your requests](/images/datasets/scores.webp)
+</Step>
+
+<Step title="Filter Requests">
+Use Helicone's filtering system to find high-quality requests based on scores, dates, models, or custom properties.
+
+![Filter your requests](/images/datasets/filters.webp)
+</Step>
+
+<Step title="Select for Dataset">
+Choose the filtered requests you want to include and add them to a new or existing dataset.
+
+<video
+  autoPlay  
+  controls
+  loop
+  muted
+  playsInline
+  className="w-full aspect-video rounded-xl"
+  src="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/datasets-create.mp4"
+></video>
+</Step>
+
+<Step title="Curate Dataset">
+Review, organize, and refine your dataset by removing poor examples, balancing categories, and ensuring consistency.
+
+<video
+  autoPlay  
+  controls
+  loop
+  muted
+  playsInline
+  className="w-full aspect-video rounded-xl"
+  src="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/datasets-curate.mp4"
+></video>
+</Step>
+
+<Step title="Export">
+Export your curated dataset in JSONL format for use with fine-tuning platforms like OpenAI, Anthropic, or OpenPipe.
+
+<video
+  autoPlay  
+  controls
+  loop
+  muted
+  playsInline
+  className="w-full aspect-video rounded-xl"
+  src="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/datasets-download.mp4"
+></video>
+</Step>
 </Steps>
 
-![Helicone Dataset Curation](/images/features/fine-tuning/dataset2.webp)
+## Export Formats
 
-## Fine-Tuning Integration
+Helicone supports multiple export formats for different fine-tuning platforms:
 
-Helicone offers streamlined options for fine-tuning integration:
+- **OpenAI JSONL**: Compatible with OpenAI's fine-tuning API
+- **Anthropic Format**: For Claude model fine-tuning
+- **Generic JSONL**: Works with most platforms
+- **CSV**: For data analysis and custom workflows
 
-- **JSONL Export**: Easily export your curated datasets in JSONL format, compatible with various fine-tuning platforms.
-- **OpenPipe Integration**: Connect directly to OpenPipe (openpipe.ai) to send your data and fine-tune open-source models seamlessly.
-- **Iteration Support**: Quickly iterate on your datasets and fine-tuning processes based on real-world performance data captured by Helicone.
+## Related Features
 
-<Callout type="info">
-  For a step-by-step guide on how to use Helicone for fine-tuning, check out our
-  [Fine-Tuning Guide](/guides/cookbooks/fine-tune).
-</Callout>
+<CardGroup cols={2}>
+<Card title="Scores" icon="star" href="/features/advanced-usage/scores">
+Score LLM responses to identify high-quality training data
+</Card>
 
-By leveraging Helicone's dataset curation and fine-tuning integration features, you can significantly improve your LLM's performance on specific tasks and domains.
+<Card title="User Feedback" icon="thumbs-up" href="/features/advanced-usage/feedback">
+Collect user feedback to improve dataset quality
+</Card>
+
+<Card title="Prompt Management" icon="file-text" href="/features/prompts">
+Version and manage prompts used in your training data
+</Card>
+
+<Card title="Sessions" icon="layers" href="/features/sessions">
+Group related requests for better dataset organization
+</Card>
+</CardGroup>

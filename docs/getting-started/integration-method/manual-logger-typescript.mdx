@@ -98,7 +98,7 @@ const openai = new OpenAI({
 ```typescript
 // Define your request
 const requestBody = {
-  model: "gpt-4",
+  model: "gpt-4o-mini",
   messages: [
     { role: "user", content: "Explain quantum computing in simple terms" },
   ],
@@ -120,7 +120,7 @@ console.log(response.choices[0].message.content);
 
 ```typescript
 const streamingRequestBody = {
-  model: "gpt-4",
+  model: "gpt-4o-mini",
   messages: [{ role: "user", content: "Write a short story about AI" }],
   stream: true,
 };

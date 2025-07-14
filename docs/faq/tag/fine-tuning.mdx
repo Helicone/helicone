@@ -1,35 +1,391 @@
 ---
-title: "FAQ - Fine-tuning"
+title: "Fine-tuning"
 sidebarTitle: "Fine-tuning"
-description: "Questions about fine-tuning in Helicone."
 ---
 
-<CardGroup cols={1} gap="medium">
-  <Card
-    title="How to use OpenAI fine-tuning API?"
-    icon="code"
-    href="/faq/openai-fine-tuning-api"
-    horizontal
-    iconType="light"
-  >
-    Step-by-step guide on using the OpenAI fine-tuning API.
-  </Card>
-  <Card
-    title="Fine-tuning Duration"
-    icon="clock"
-    href="/faq/llm-fine-tuning-time"
-    horizontal
-    iconType="light"
-  >
-    Understand the time requirements for fine-tuning Large Language Models.
-  </Card>
-  <Card
-    title="RAG vs Fine-tuning"
-    icon="scale-balanced"
-    href="/faq/rag-vs-fine-tuning"
-    horizontal
-    iconType="light"
-  >
-    Compare Retrieval Augmented Generation (RAG) and fine-tuning approaches.
-  </Card>
+When building AI applications that need domain-specific knowledge or consistent formatting, generic models often fall short. Fine-tuning lets you train models on your curated datasets from Helicone, creating specialized AI that understands your unique requirements and consistently delivers the exact outputs your application needs.
+
+## Why use Fine-tuning
+
+- **Create domain experts**: Train models on your specific data to excel at specialized tasks like legal analysis or medical coding
+- **Ensure consistent outputs**: Get reliable formatting and structure that matches your exact specifications every time
+- **Reduce costs and latency**: Smaller fine-tuned models often outperform larger generic models at specific tasks
+
+<Frame caption="Helicone's dataset curation interface for preparing fine-tuning data">
+  <img
+    src="/images/fine-tuning/dataset-curation.webp"
+    alt="Dataset curation interface showing request filtering and evaluation for fine-tuning"
+  />
+</Frame>
+
+## Quick Start
+
+<Steps>
+<Step title="Curate your dataset">
+Filter and select high-quality request-response pairs from your Helicone logs:
+
+```typescript
+// Navigate to Datasets in Helicone dashboard
+// Apply filters to find ideal training examples:
+// - Status: 200 (successful requests only)
+// - Model: gpt-4o-mini (or your preferred base model)
+// - Custom properties for specific use cases
+```
+
+<Accordion title="Advanced filtering options">
+Use Helicone's powerful filtering to find the best training data:
+- Score thresholds for quality control
+- User feedback filters
+- Token count ranges
+- Custom property combinations
+</Accordion>
+</Step>
+
+<Step title="Export for fine-tuning">
+Export your curated dataset in the format your fine-tuning platform requires:
+
+```bash
+# Export as JSONL for OpenAI
+helicone datasets export --format openai --id dataset-123
+
+# Export for other platforms
+helicone datasets export --format anthropic --id dataset-123
+helicone datasets export --format cohere --id dataset-123
+```
+</Step>
+
+<Step title="Create fine-tuning job">
+Use your exported dataset with your chosen platform:
+
+```python
+# OpenAI fine-tuning example
+import openai
+
+# Upload training file
+file = openai.File.create(
+  file=open("helicone-dataset.jsonl", "rb"),
+  purpose='fine-tune'
+)
+
+# Create fine-tuning job
+job = openai.FineTuningJob.create(
+  training_file=file.id,
+  model="gpt-3.5-turbo"
+)
+```
+</Step>
+</Steps>
+
+## Configuration Options
+
+### Basic Settings
+
+Core options for dataset curation and export:
+
+| Setting | Type | Description | Default | Example |
+|---------|------|-------------|---------|---------|
+| `minScore` | `number` | Minimum score for including requests | `0` | `0.8` |
+| `maxTokens` | `number` | Maximum tokens per example | `∞` | `4096` |
+| `format` | `string` | Export format for platform | `"openai"` | `"anthropic"` |
+| `includeMetadata` | `boolean` | Include Helicone metadata | `false` | `true` |
+
+### Advanced Settings
+
+| Setting | Type | Description | Default | Example |
+|---------|------|-------------|---------|---------|
+| `validationSplit` | `number` | Percentage for validation set | `0.2` | `0.15` |
+| `deduplication` | `boolean` | Remove duplicate examples | `true` | `false` |
+| `sampling` | `object` | Sampling configuration | `{}` | `{"method": "random", "size": 1000}` |
+
+#### Detailed Explanations
+
+<AccordionGroup>
+<Accordion title="Validation Split">
+Control how your dataset is divided for training and validation:
+
+```typescript
+// 80/20 training/validation split
+export const config = {
+  validationSplit: 0.2,
+  shuffleSeed: 42 // For reproducible splits
+}
+```
+
+Larger validation sets help detect overfitting but reduce training data.
+</Accordion>
+
+<Accordion title="Deduplication Strategies">
+Remove duplicate or near-duplicate examples to improve training:
+
+```typescript
+// Exact match deduplication
+export const config = {
+  deduplication: true,
+  deduplicationKey: "input" // or "output" or "both"
+}
+
+// Semantic deduplication (coming soon)
+export const config = {
+  deduplication: "semantic",
+  similarityThreshold: 0.95
+}
+```
+</Accordion>
+</AccordionGroup>
+
+## Use Cases
+
+<Tabs>
+<Tab title="Customer Support Agent">
+Fine-tune a model on your best support conversations for consistent, brand-aligned responses:
+
+<CodeGroup>
+```typescript Node.js
+// 1. Tag high-quality support conversations
+const response = await openai.chat.completions.create(
+  {
+    model: "gpt-4o-mini",
+    messages: supportConversation
+  },
+  {
+    headers: {
+      "Helicone-Property-Quality": "excellent",
+      "Helicone-Property-UseCase": "support",
+      "Helicone-Property-Resolved": "true"
+    }
+  }
+);
+
+// 2. Create dataset from tagged conversations
+const dataset = await helicone.datasets.create({
+  name: "support-agent-training",
+  filters: {
+    properties: {
+      Quality: "excellent",
+      UseCase: "support",
+      Resolved: "true"
+    },
+    minScore: 0.9
+  }
+});
+
+// 3. Fine-tune on curated examples
+const fineTunedModel = await trainModel(dataset);
+```
+
+```python Python
+# Tag high-quality support conversations
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=support_conversation,
+    extra_headers={
+        "Helicone-Property-Quality": "excellent",
+        "Helicone-Property-UseCase": "support",
+        "Helicone-Property-Resolved": "true"
+    }
+)
+
+# Create and export dataset
+dataset = helicone.datasets.create(
+    name="support-agent-training",
+    filters={
+        "properties": {
+            "Quality": "excellent",
+            "UseCase": "support"
+        }
+    }
+)
+```
+</CodeGroup>
+</Tab>
+
+<Tab title="Code Generation Specialist">
+Train a model on your team's coding patterns and standards:
+
+```typescript
+// Filter for successful code generation requests
+const codeDataset = await helicone.datasets.create({
+  name: "code-generation-training",
+  filters: {
+    model: "gpt-4o-mini",
+    properties: {
+      Feature: "code-generation",
+      Language: "typescript",
+      TestsPassed: "true"
+    },
+    responseTime: { max: 5000 }, // Fast, efficient examples
+    tags: ["reviewed", "production-ready"]
+  },
+  maxExamples: 5000
+});
+
+// Export with custom formatting
+const exported = await codeDataset.export({
+  format: "openai",
+  includeSystemPrompt: true,
+  validateSyntax: true // Ensure valid code examples
+});
+```
+</Tab>
+
+<Tab title="Domain-Specific Expert">
+Create a specialized model for your industry with carefully selected examples:
+
+```typescript
+// Legal document analysis specialist
+const legalDataset = await helicone.datasets.create({
+  name: "legal-analysis-v2",
+  filters: {
+    properties: {
+      Domain: "legal",
+      DocumentType: ["contract", "agreement", "terms"],
+      Accuracy: { min: 0.95 }
+    },
+    user: ["senior-lawyer-1", "senior-lawyer-2"], // Verified by experts
+    dateRange: {
+      start: "2024-01-01",
+      end: "2024-12-31"
+    }
+  },
+  
+  // Stratified sampling for balanced dataset
+  sampling: {
+    method: "stratified",
+    stratifyBy: "DocumentType",
+    samplesPerStratum: 500
+  }
+});
+
+// Fine-tune with platform-specific parameters
+const fineTuneJob = await openai.fineTuning.create({
+  model: "gpt-3.5-turbo",
+  trainingFile: legalDataset.exportedFileId,
+  hyperparameters: {
+    nEpochs: 3,
+    batchSize: 8,
+    learningRateMultiplier: 0.1
+  }
+});
+```
+</Tab>
+</Tabs>
+
+## Understanding Fine-tuning
+
+### When to Use Fine-tuning vs RAG
+
+Fine-tuning and RAG (Retrieval Augmented Generation) solve different problems:
+
+**What Fine-tuning is best for:**
+- Teaching consistent behavior and output formats
+- Improving performance on specific tasks
+- Reducing latency and costs with smaller models
+- Encoding domain knowledge into the model
+
+**What RAG is best for:**
+- Working with frequently changing information
+- Handling large knowledge bases
+- Maintaining source attribution
+- Quick updates without retraining
+
+```typescript
+// ✅ Good fine-tuning use case
+// Teaching a model to always format API responses consistently
+const apiResponseExample = {
+  input: "Get user data for ID 123",
+  output: {
+    status: "success",
+    data: { id: 123, name: "John" },
+    metadata: { timestamp: "2024-01-01T00:00:00Z" }
+  }
+};
+
+// ❌ Poor fine-tuning use case  
+// Trying to teach current product inventory (use RAG instead)
+const inventoryExample = {
+  input: "What's in stock?",
+  output: "SKU-123: 45 units, SKU-456: 0 units" // This changes daily!
+};
+```
+
+### Dataset Quality Guidelines
+
+The quality of your fine-tuning dataset determines model performance:
+
+**Key principles:**
+- **Diversity**: Include varied examples covering edge cases
+- **Consistency**: Ensure similar inputs have similar outputs
+- **Quality**: Only include high-quality, verified examples
+- **Quantity**: Start with 50-100 examples minimum
+
+**Quality indicators in Helicone:**
+```typescript
+// High-quality dataset criteria
+const qualityDataset = {
+  filters: {
+    // Performance indicators
+    responseTime: { max: 3000 },
+    tokenCount: { min: 50, max: 2000 },
+    
+    // Quality signals
+    scores: { 
+      userFeedback: { min: 4 },
+      accuracy: { min: 0.9 }
+    },
+    
+    // Consistency checks
+    status: "success",
+    errorRate: { max: 0.01 }
+  }
+};
+```
+
+### Fine-tuning Workflow Best Practices
+
+**Data preparation checklist:**
+- Review examples for quality and consistency
+- Remove PII and sensitive information
+- Balance dataset across different use cases
+- Validate format matches platform requirements
+
+**Monitoring fine-tuned models:**
+```typescript
+// Track fine-tuned model performance
+const response = await openai.chat.completions.create(
+  {
+    model: "ft:gpt-3.5-turbo:org-name:model-name:id",
+    messages: [{ role: "user", content: prompt }]
+  },
+  {
+    headers: {
+      "Helicone-Property-Model-Type": "fine-tuned",
+      "Helicone-Property-Base-Model": "gpt-3.5-turbo",
+      "Helicone-Property-Training-Job": "ftjob-123"
+    }
+  }
+);
+
+// Compare against base model performance
+```
+
+## Related Features
+
+<CardGroup cols={2}>
+<Card title="Datasets" icon="database" href="/features/datasets">
+Create and manage training datasets from your Helicone requests
+</Card>
+
+<Card title="Scores" icon="chart-line" href="/features/advanced-usage/scores">
+Score requests to identify high-quality training examples
+</Card>
+
+<Card title="Request Filtering" icon="filter" href="/features/advanced-usage/filtering">
+Advanced filtering to find the perfect training examples
+</Card>
+
+<Card title="Custom Properties" icon="tag" href="/features/advanced-usage/custom-properties">
+Tag requests for easier dataset curation
+</Card>
 </CardGroup>
+
+<Snippet file="questions-section.mdx" />

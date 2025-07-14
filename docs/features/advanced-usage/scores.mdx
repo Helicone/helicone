@@ -1,104 +1,301 @@
 ---
-title: "Scores"
-sidebarTitle: "Scores"
-description: "Add custom scoring metrics to your LLM requests and experiments. Evaluate prompt performance, compare results across datasets, and quantify model outputs for continuous improvement."
-"twitter:title": "Scores - Helicone OSS LLM Observability"
+title: "Eval Scores"
+sidebarTitle: "Eval Scores"
 ---
+When running evaluation frameworks to measure model performance, you need visibility into how well your AI applications are performing across different metrics. Scores let you report evaluation results from any framework to Helicone, providing centralized observability for accuracy, hallucination rates, helpfulness, and custom metrics.
 
-import QuestionsSection from "/snippets/questions-section.mdx";
+<Note>
+Helicone doesn't run evaluations for you - we're not an evaluation framework. Instead, we provide a centralized location to report and analyze evaluation results from any framework (like RAGAS, LangSmith, or custom evaluations), giving you unified observability across all your evaluation metrics.
+</Note>
 
-<Warning>
-  Scores will be ingested with a **10 minutes delay** to ensure there is enough
-  time to process the request.
-</Warning>
+## Why use Scores
 
-## Introduction
-
-Helicone's scores [API](https://docs.helicone.ai/rest/request/post-v1request-score) allows you to score your requests and experiments. You can use this feature to evaluate the performance of your prompts and compare different experiments and datasets. E.g., if you are building an image classification application, you might need a variety of scores to help you determine how accurate the outputs are compared to what you expect. For example, an image classification app might have one score that tells you how accurate the model classifies images into the correct categories, and another that measures the confidence level of the model's predictions.
-
-<Frame caption="Example: Experiment scores. ">
-  <img
-    src="/images/scores/example-experiment-scores.png"
-    alt="Example of experiment scores compared to the original scores displayed in Helicone."
-  />
-</Frame>
-
-### Why Scores
-
-Scoring request allows you:
-
-- Evaluate the performance of your prompts.
-- Compare the scores of different experiments and datasets.
-
-<Info>
-  We are currently not supporting autoscoring, but you can write your own logic
-  and submit scores via our
-  [API](https://docs.helicone.ai/rest/request/post-v1request-score).
-</Info>
+- **Centralize evaluation results**: Report scores from any evaluation framework for unified monitoring and analysis
+- **Track model performance over time**: Visualize how accuracy, hallucination rates, and other metrics evolve
+- **Compare experiments side-by-side**: Evaluate different prompts, models, or configurations with consistent metrics
 
 ## Quick Start
 
-### Option 1: Using the Request Page
+<Steps>
+<Step title="Run your evaluation">
+Use your evaluation framework or custom logic to assess model responses and generate scores (integers or booleans) for metrics like accuracy, helpfulness, or safety.
+</Step>
 
-You can add scores to your `requests` directly from the request page:
+<Step title="Report scores to Helicone">
+Send evaluation results using the Helicone API:
 
-<Frame caption="Example: Adding scores on the request page. ">
-  <img
-    src="/images/scores/example-scores-request-page.png"
-    alt="Example of adding scores post-request on the Requests page in Helicone."
-  />
-</Frame>
+```typescript
+// Get the request ID from response headers
+const requestId = response.headers.get("helicone-id");
 
-### Option 2: Setting up your own Scoring Webhook
+// Report evaluation scores
+await fetch(`https://api.helicone.ai/v1/request/${requestId}/score`, {
+  method: "POST",
+  headers: {
+    "Authorization": `Bearer ${HELICONE_API_KEY}`,
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    scores: {
+      "accuracy": 92,        // Integer values required
+      "hallucination": 8,    // Converted to integers (0.08 * 100)
+      "helpfulness": 85,
+      "is_safe": true        // Booleans supported
+    }
+  })
+});
+```
 
-You can set up your own scoring webhook to score your requests. Here's an example of how you can do this with Cloudflare Workers:
+<Accordion title="Alternative: Add scores via dashboard">
+You can also add scores directly in the Helicone dashboard on the request details page. This is useful for manual evaluation or quick testing.
+</Accordion>
+</Step>
+
+<Step title="View score analytics">
+Analyze evaluation results in the Helicone dashboard to track performance trends, compare experiments, and identify areas for improvement.
+</Step>
+</Steps>
+
+<Warning>
+Scores are processed with a **10 minute delay** by default for analytics aggregation.
+</Warning>
+
+
+## API Format
+
+### Request Structure
+
+The scores API expects this exact format:
+
+| Field | Type | Description | Required | Example |
+|-------|------|-------------|----------|---------|
+| `scores` | `object` | Key-value pairs of evaluation metrics | ✅ Yes | `{"accuracy": 92}` |
+
+### Score Values
+
+| Type | Description | Example |
+|------|-------------|---------|
+| `integer` | Numeric scores (no decimals) | `92`, `85`, `0` |
+| `boolean` | Pass/fail or true/false metrics | `true`, `false` |
+
+<Warning>
+Float values like `0.92` are rejected. Convert to integers: `0.92` → `92`
+</Warning>
+
+## Use Cases
 
 <Tabs>
-  <Tab title="Example">
-    <Steps>
-    <Step title="Deploy Worker">
-    First, deploy Cloudflare Worker template by clicking the button above. [![Deploy with Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/Helicone/helicone/tree/main/examples/worker-helicone-scores)
-    </Step>
-      <Step title="Create a Webhook">
-     Create a webhook to be able receive request and response data [create a webhook](/features/webhooks) with your Scoring Worker URL.
-      </Step>
+<Tab title="RAG Accuracy Evaluation">
+Evaluate retrieval-augmented generation for accuracy and hallucination:
 
-      <Step title="Customize your scoring logic">
-      You can can customize the scoring logic in the `index.js` file in your Scoring Worker.
+<CodeGroup>
+```python Python
+import requests
+from ragas import evaluate
+from ragas.metrics import Faithfulness, ResponseRelevancy
+from datasets import Dataset
 
-      ```tsx
-      // You can customize the scoring function below and add more scores as needed.
-      function calculateScore(data: HeliconeRequest): Record<string, number> {
-        if (data.response_body) {
-          return {
-            vocabulary_diversity: calculateVocabularyDiversity(data.response_body),
-            // Add more scores here
-          };
+# Run RAG evaluation
+def evaluate_rag_response(question, answer, contexts, ground_truth, requestId):
+    # Initialize RAGAS metrics
+    metrics = [Faithfulness(), ResponseRelevancy()]
+    
+    # Create dataset in RAGAS format
+    data = {
+        "question": [question],
+        "answer": [answer], 
+        "contexts": [contexts],
+        "ground_truth": [ground_truth]
+    }
+    dataset = Dataset.from_dict(data)
+    
+    # Run evaluation
+    result = evaluate(dataset, metrics=metrics)
+    
+    # Extract scores (RAGAS returns 0-1 values)
+    faithfulness_score = result['faithfulness'] if 'faithfulness' in result else 0
+    relevancy_score = result['answer_relevancy'] if 'answer_relevancy' in result else 0
+    
+    # Report to Helicone (convert to 0-100 scale)
+    response = requests.post(
+        f"https://api.helicone.ai/v1/request/{requestId}/score",
+        headers={
+            "Authorization": f"Bearer {HELICONE_API_KEY}",
+            "Content-Type": "application/json"
+        },
+        json={
+            "scores": {
+                "faithfulness": int(faithfulness_score * 100),
+                "answer_relevancy": int(relevancy_score * 100)
+            }
         }
+    )
+    
+    return result
 
-        return {};
+# Example usage
+scores = evaluate_rag_response(
+    question="What is the capital of France?",
+    answer="The capital of France is Paris.",
+    contexts=["France is a country in Europe. Paris is its capital."],
+    ground_truth="Paris",
+    requestId="your-request-id-here"
+)
+```
+
+```typescript TypeScript
+// RAG evaluation with custom metrics
+async function evaluateRAGResponse(
+  question: string,
+  answer: string,
+  contexts: string[],
+  requestId: string
+) {
+  // Custom evaluation logic
+  const scores = {
+    relevance: calculateRelevance(answer, question),
+    groundedness: checkGroundedness(answer, contexts),
+    completeness: measureCompleteness(answer, question),
+    hallucination: detectHallucination(answer, contexts)
+  };
+  
+  // Report to Helicone
+  await fetch(`https://api.helicone.ai/v1/request/${requestId}/score`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${HELICONE_API_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ scores })
+  });
+  
+  // Alert on poor performance
+  if (scores.hallucination > 0.2) {
+    console.warn("High hallucination detected:", scores);
+  }
+  
+  return scores;
+}
+```
+</CodeGroup>
+</Tab>
+
+<Tab title="Code Generation Quality">
+Evaluate code generation for correctness, style, and functionality:
+
+```typescript
+// Evaluate generated code quality
+async function evaluateCodeGeneration(
+  prompt: string,
+  generatedCode: string,
+  requestId: string
+) {
+  const scores = {
+    // Syntax validity
+    syntax_valid: await validateSyntax(generatedCode) ? 1.0 : 0.0,
+    
+    // Test pass rate
+    test_pass_rate: await runTests(generatedCode),
+    
+    // Code quality metrics
+    complexity: calculateCyclomaticComplexity(generatedCode),
+    readability: assessReadability(generatedCode),
+    
+    // Security checks
+    security_score: await runSecurityScan(generatedCode),
+    
+    // Performance benchmarks
+    performance: await benchmarkCode(generatedCode)
+  };
+  
+  // Report comprehensive evaluation
+  await fetch(`https://api.helicone.ai/v1/request/${requestId}/score`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${HELICONE_API_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      scores: {
+        ...scores,
+        // Convert any decimal scores to integers
+        test_pass_rate: Math.round(scores.test_pass_rate * 100)
       }
-      ```
+    })
+  });
+  
+  return scores;
+}
+```
+</Tab>
 
+<Tab title="Helpfulness & Safety">
+Evaluate model outputs for helpfulness, safety, and alignment:
 
-      </Step>
-    </Steps>
-
-  </Tab>
+```python
+# Multi-dimensional evaluation for chatbots
+async def evaluate_chat_response(user_query, assistant_response, requestId):
+    # Use LLM as judge for subjective metrics
+    eval_prompt = f"""
+    Rate the following assistant response on these criteria (0-1):
+    - Helpfulness: How well does it address the user's question?
+    - Safety: Is the response safe and appropriate?
+    - Accuracy: Is the information correct?
+    - Clarity: Is the response clear and well-structured?
+    
+    User: {user_query}
+    Assistant: {assistant_response}
+    """
+    
+    # Get evaluation from judge model
+    eval_scores = await llm_judge(eval_prompt)
+    
+    # Add objective metrics
+    scores = {
+        **eval_scores,
+        "response_length": len(assistant_response),
+        "reading_level": calculate_reading_level(assistant_response),
+        "contains_refusal": "I cannot" in assistant_response or "I won't" in assistant_response
+    }
+    
+    # Report all scores (convert decimals to integers)
+    integer_scores = {
+        key: int(value * 100) if isinstance(value, float) and 0 <= value <= 1 else value
+        for key, value in scores.items()
+    }
+    
+    response = requests.post(
+        f"https://api.helicone.ai/v1/request/{requestId}/score",
+        headers={
+            "Authorization": f"Bearer {HELICONE_API_KEY}",
+            "Content-Type": "application/json"
+        },
+        json={"scores": integer_scores}
+    )
+    
+    return scores
+```
+</Tab>
 </Tabs>
 
-## Local Testing
+## Related Features
 
-If you want to test your scoring logic locally you'll need to use wrangler secrets to add appropriate value for `HELICONE_AUTH`.
+<CardGroup cols={2}>
+<Card title="Experiments" icon="flask" href="/features/experiments">
+Compare different configurations with consistent scoring
+</Card>
 
-```sh
-$ wrangler secret put HELICONE_AUTH
-```
+<Card title="Sessions" icon="link" href="/features/sessions">
+Evaluate multi-turn conversations and workflows
+</Card>
 
-And run Scoring Webhook locally:
+<Card title="Custom Properties" icon="tag" href="/features/advanced-usage/custom-properties">
+Tag requests for segmented evaluation analysis
+</Card>
 
-```sh
-$ wrangler deploy
-```
+<Card title="Webhooks" icon="webhook" href="/features/webhooks">
+Trigger evaluations automatically when requests complete
+</Card>
+</CardGroup>
 
-<QuestionsSection />
+<Snippet file="questions-section.mdx" />

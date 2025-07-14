@@ -59,7 +59,7 @@ def chat_completion_operation(result_recorder: HeliconeResultRecorder):
 
 # Define your request
 request = {
-    "model": "gpt-4",
+    "model": "gpt-4o-mini",
     "messages": [{"role": "user", "content": "Hello, world!"}]
 }
 
@@ -212,7 +212,7 @@ client = openai.OpenAI(api_key="your-openai-api-key")
 
 # Define your request
 request = {
-    "model": "gpt-4",
+    "model": "gpt-4o-mini",
     "messages": [{"role": "user", "content": "Write a story about a robot."}],
     "stream": True
 }
