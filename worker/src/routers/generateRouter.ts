@@ -176,6 +176,11 @@ const generateHandler = async (
       inputs: parameters.inputs,
       autoInputs: [], // Never used
     }) as LLMRequestBody;
+    if (["o1", "o3-mini"].includes(filledTemplate.model ?? "")) {
+      if ("temperature" in filledTemplate) {
+        filledTemplate.temperature = undefined;
+      }
+    }
 
     // b. Add any chat messages to the template messages
     if (parameters.chat) {
