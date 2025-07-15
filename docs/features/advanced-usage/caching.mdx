@@ -220,8 +220,8 @@ response = client.chat.completions.create(
 Cache explanations for commonly asked code snippets across your team:
 
 ```typescript
-// Hash the code snippet to create consistent cache keys
-const codeHash = crypto.createHash('md5').update(codeSnippet).digest('hex');
+// Use a consistent identifier for the code snippet
+const codeIdentifier = `code-${codeSnippet.length}-${codeSnippet.slice(0, 20)}`;
 
 const response = await openai.chat.completions.create(
   {
@@ -234,8 +234,8 @@ const response = await openai.chat.completions.create(
   {
     headers: {
       "Helicone-Cache-Enabled": "true",
-      "Helicone-Cache-Seed": codeHash,    // Same code = same cache
-      "Cache-Control": "max-age=604800"   // Cache for 1 week
+      "Helicone-Cache-Seed": codeIdentifier,    // Same code = same cache
+      "Cache-Control": "max-age=604800"         // Cache for 1 week
     }
   }
 );
@@ -274,11 +274,12 @@ const response = await openai.chat.completions.create(
 ## Understanding Caching
 
 ### How Cache Keys Work
-Helicone generates cache keys based on:
-- **Model name**: `gpt-4o-mini` vs `gpt-3.5-turbo` 
-- **Messages**: Exact message content and order
-- **Parameters**: Temperature, max_tokens, etc.
-- **Cache seed**: If specified
+Helicone generates cache keys by hashing:
+- **Cache seed**: If specified (for namespacing)
+- **Request URL**: The full endpoint URL
+- **Request body**: Complete request payload including all parameters
+- **Relevant headers**: Authorization and Helicone-specific cache headers
+- **Bucket index**: For multi-response caching
 
 **What triggers cache hits:**
 ```typescript
@@ -290,7 +291,7 @@ const request2 = { model: "gpt-4o-mini", messages: [{ role: "user", content: "He
 const request3 = { model: "gpt-4o-mini", messages: [{ role: "user", content: "Hi" }] };
 
 // ❌ Cache miss - different parameters
-const request4 = { model: "gpt-4", messages: [{ role: "user", content: "Hello" }], temperature: 0.5 };
+const request4 = { model: "gpt-4o-mini", messages: [{ role: "user", content: "Hello" }], temperature: 0.5 };
 ```
 
 ### Cache Response Headers
@@ -312,10 +313,10 @@ const chatCompletion = await client.chat.completions.with_raw_response.create(
   }
 );
 
-const cacheStatus = chatCompletion.http_response.headers.get('helicone-cache');
+const cacheStatus = chatCompletion.http_response.headers.get('Helicone-Cache');
 console.log(cacheStatus); // "HIT" or "MISS"
 
-const bucketIndex = chatCompletion.http_response.headers.get('helicone-cache-bucket-idx');
+const bucketIndex = chatCompletion.http_response.headers.get('Helicone-Cache-Bucket-Idx');
 console.log(bucketIndex); // Index of cached response used
 ```
 
@@ -335,7 +336,7 @@ Cache buckets store multiple responses for the same request:
 - **Maximum duration**: 365 days
 - **Maximum bucket size**: 20 (enterprise plans support more)
 - **Cache key sensitivity**: Any parameter change creates new cache entry
-- **Storage location**: Cached on Cloudflare edge, not your infrastructure
+- **Storage location**: Cached in Cloudflare Workers KV (edge-distributed), not your infrastructure
 
 ## Related Features
 
