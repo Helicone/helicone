@@ -691,6 +691,13 @@ export type Database = {
             foreignKeyName: "public_experiment_v2_hypothesis_provider_key_fkey"
             columns: ["provider_key"]
             isOneToOne: false
+            referencedRelation: "decrypted_provider_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_experiment_v2_hypothesis_provider_key_fkey"
+            columns: ["provider_key"]
+            isOneToOne: false
             referencedRelation: "provider_keys"
             referencedColumns: ["id"]
           },
@@ -998,6 +1005,13 @@ export type Database = {
             foreignKeyName: "finetune_job_provider_key_id_fkey"
             columns: ["provider_key_id"]
             isOneToOne: false
+            referencedRelation: "decrypted_provider_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finetune_job_provider_key_id_fkey"
+            columns: ["provider_key_id"]
+            isOneToOne: false
             referencedRelation: "provider_keys"
             referencedColumns: ["id"]
           },
@@ -1216,6 +1230,13 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helicone_proxy_keys_provider_key_id_fkey"
+            columns: ["provider_key_id"]
+            isOneToOne: false
+            referencedRelation: "decrypted_provider_keys"
             referencedColumns: ["id"]
           },
           {
@@ -1752,6 +1773,13 @@ export type Database = {
           tier?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "organization_org_provider_key_fkey"
+            columns: ["org_provider_key"]
+            isOneToOne: false
+            referencedRelation: "decrypted_provider_keys"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "organization_org_provider_key_fkey"
             columns: ["org_provider_key"]
@@ -2333,34 +2361,40 @@ export type Database = {
           config: Json | null
           created_at: string | null
           id: string
+          key_id: string | null
+          nonce: string | null
           org_id: string
           provider_key: string
           provider_key_name: string
           provider_name: string
           soft_delete: boolean
-          vault_key_id: string
+          vault_key_id: string | null
         }
         Insert: {
           config?: Json | null
           created_at?: string | null
           id?: string
+          key_id?: string | null
+          nonce?: string | null
           org_id: string
           provider_key: string
           provider_key_name: string
           provider_name: string
           soft_delete?: boolean
-          vault_key_id: string
+          vault_key_id?: string | null
         }
         Update: {
           config?: Json | null
           created_at?: string | null
           id?: string
+          key_id?: string | null
+          nonce?: string | null
           org_id?: string
           provider_key?: string
           provider_key_name?: string
           provider_name?: string
           soft_delete?: boolean
-          vault_key_id?: string
+          vault_key_id?: string | null
         }
         Relationships: [
           {
@@ -3061,6 +3095,59 @@ export type Database = {
       }
     }
     Views: {
+      decrypted_provider_keys: {
+        Row: {
+          config: Json | null
+          created_at: string | null
+          decrypted_provider_key: string | null
+          id: string | null
+          key_id: string | null
+          nonce: string | null
+          org_id: string | null
+          provider_key: string | null
+          provider_key_name: string | null
+          provider_name: string | null
+          soft_delete: boolean | null
+          vault_key_id: string | null
+        }
+        Insert: {
+          config?: Json | null
+          created_at?: string | null
+          decrypted_provider_key?: string | null
+          id?: string | null
+          key_id?: string | null
+          nonce?: string | null
+          org_id?: string | null
+          provider_key?: string | null
+          provider_key_name?: string | null
+          provider_name?: string | null
+          soft_delete?: boolean | null
+          vault_key_id?: string | null
+        }
+        Update: {
+          config?: Json | null
+          created_at?: string | null
+          decrypted_provider_key?: string | null
+          id?: string | null
+          key_id?: string | null
+          nonce?: string | null
+          org_id?: string | null
+          provider_key?: string | null
+          provider_key_name?: string | null
+          provider_name?: string | null
+          soft_delete?: boolean | null
+          vault_key_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_keys_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users_view: {
         Row: {
           created_at: string | null

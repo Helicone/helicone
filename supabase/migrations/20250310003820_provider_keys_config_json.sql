@@ -18,3 +18,26 @@ COMMENT ON COLUMN public.provider_keys.config IS 'Stores provider-specific confi
  "sessionToken": "aws-session-token-optional"
  }
  */
+
+-- A MOCK DECRYPTER PROVIDER KEYS TABLE TO REPLICATE THE PROD VIEW
+ALTER TABLE provider_keys ADD COLUMN IF NOT EXISTS key_id UUID DEFAULT NULL; /* just to have a column to replicate it as it is in prod */
+ALTER TABLE provider_keys ADD COLUMN IF NOT EXISTS nonce BYTEA DEFAULT NULL; /* just to have a column to replicate it as it is in prod */
+ALTER TABLE provider_keys ALTER COLUMN vault_key_id DROP NOT NULL;
+
+CREATE VIEW decrypted_provider_keys AS
+(
+  SELECT
+    provider_keys.id,
+    provider_keys.org_id,
+    provider_keys.provider_name,
+    provider_keys.provider_key_name,
+    provider_keys.vault_key_id,
+    provider_keys.soft_delete,
+    provider_keys.created_at,
+    provider_keys.provider_key,
+    provider_keys.provider_key as decrypted_provider_key,
+    provider_keys.key_id,
+    provider_keys.nonce,
+    provider_keys.config
+  FROM provider_keys
+)
