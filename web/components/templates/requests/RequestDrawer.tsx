@@ -44,7 +44,7 @@ import FeedbackAction from "../feedback/thumbsUpThumbsDown";
 import { RenderMappedRequest } from "./RenderHeliconeRequest";
 import ScrollableBadges from "./ScrollableBadges";
 import StatusBadge from "./statusBadge";
-import { get24HourFromString, getUSDateFromString } from "@/components/shared/utils/utils";
+import { getUSDateFromString } from "@/components/shared/utils/utils";
 
 const RequestDescTooltip = (props: {
   displayText: string;
