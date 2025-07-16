@@ -1,6 +1,11 @@
 import { LlmSchema, Message } from "../../types";
 import { MapperFn } from "../types";
 
+// NOTE FOR DEVS:
+// -> This Meta mapper is WIP! It takes a lot of code/inspo
+// from the Anthropic mapper - hopefully everything is supported but
+// definitely something that will be improved as we go.
+
 const randomId = () => {
   return (
     Math.random().toString(36).substring(2, 15) +
