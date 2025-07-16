@@ -44,6 +44,7 @@ import FeedbackAction from "../feedback/thumbsUpThumbsDown";
 import { RenderMappedRequest } from "./RenderHeliconeRequest";
 import ScrollableBadges from "./ScrollableBadges";
 import StatusBadge from "./statusBadge";
+import { get24HourFromString, getUSDateFromString } from "@/components/shared/utils/utils";
 
 const RequestDescTooltip = (props: {
   displayText: string;
@@ -196,6 +197,7 @@ export default function RequestDrawer(props: RequestDivProps) {
       {
         label: "Created At",
         value: formatDate(request.heliconeMetadata.createdAt),
+        fullValue: getUSDateFromString(request.heliconeMetadata.createdAt, true),
       },
       { label: "Request ID", value: request.id },
       { label: "User", value: request.heliconeMetadata.user || "Unknown" },
@@ -620,6 +622,19 @@ export default function RequestDrawer(props: RequestDivProps) {
                             </TooltipTrigger>
                             <TooltipContent side="bottom" className="text-xs">
                               Copy
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ) : item.label === "Created At" ? (
+                        <TooltipProvider>
+                          <Tooltip delayDuration={100}>
+                            <TooltipTrigger asChild>
+                              <p className="text-xs truncate min-w-0 text-right cursor-pointer">
+                                {item.value}
+                              </p>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom" className="text-xs">
+                              {item.fullValue}
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
