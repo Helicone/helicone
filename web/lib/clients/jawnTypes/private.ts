@@ -1226,6 +1226,7 @@ Json: JsonObject;
     };
     /** @description Make all properties in T optional */
     Partial_RequestResponseRMTToOperators_: {
+      country_code?: components["schemas"]["Partial_TextOperators_"];
       latency?: components["schemas"]["Partial_NumberOperators_"];
       time_to_first_token?: components["schemas"]["Partial_NumberOperators_"];
       status?: components["schemas"]["Partial_NumberOperators_"];

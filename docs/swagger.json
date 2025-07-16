@@ -558,6 +558,9 @@
 			},
 			"Partial_RequestResponseRMTToOperators_": {
 				"properties": {
+					"country_code": {
+						"$ref": "#/components/schemas/Partial_TextOperators_"
+					},
 					"latency": {
 						"$ref": "#/components/schemas/Partial_NumberOperators_"
 					},
