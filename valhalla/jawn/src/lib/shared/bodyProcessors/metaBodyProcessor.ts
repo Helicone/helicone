@@ -21,7 +21,6 @@ export class MetaBodyProcessor implements IBodyProcessor {
     const totalTokensMetric = metrics.find(m => m.metric === "num_total_tokens");
 
     if (promptTokensMetric && completionTokensMetric) {
-      console.log(parsedResponseBody);
       return ok({
         processedBody: parsedResponseBody,
         usage: {
