@@ -1557,6 +1557,8 @@ Json: JsonObject;
       cache_reference_id: string | null;
       cache_enabled: boolean;
       updated_at?: string;
+      gateway_router_id?: string | null;
+      gateway_deployment_target?: string | null;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];
@@ -1910,6 +1912,8 @@ Json: JsonObject;
     };
     "Result_ScoreV2-or-null.string_": components["schemas"]["ResultSuccess_ScoreV2-or-null_"] | components["schemas"]["ResultError_string_"];
     HeliconeMeta: {
+      gatewayDeploymentTarget?: string;
+      gatewayRouterId?: string;
       heliconeManualAccessKey?: string;
       lytixHost?: string;
       lytixKey?: string;

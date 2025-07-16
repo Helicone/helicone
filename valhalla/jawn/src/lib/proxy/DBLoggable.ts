@@ -142,6 +142,9 @@ export class DBLoggable {
         webhookEnabled: requestHeaders.webhookEnabled,
         posthogApiKey: requestHeaders.posthogKey ?? undefined,
         posthogHost: requestHeaders.posthogHost ?? undefined,
+        gatewayRouterId: requestHeaders.gatewayRouterId ?? undefined,
+        gatewayDeploymentTarget:
+          requestHeaders.gatewayDeploymentTarget ?? undefined,
       },
       log: {
         request: {

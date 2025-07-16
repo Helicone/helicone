@@ -4175,6 +4175,14 @@
 					},
 					"updated_at": {
 						"type": "string"
+					},
+					"gateway_router_id": {
+						"type": "string",
+						"nullable": true
+					},
+					"gateway_deployment_target": {
+						"type": "string",
+						"nullable": true
 					}
 				},
 				"required": [
@@ -5726,6 +5734,12 @@
 			},
 			"HeliconeMeta": {
 				"properties": {
+					"gatewayDeploymentTarget": {
+						"type": "string"
+					},
+					"gatewayRouterId": {
+						"type": "string"
+					},
 					"heliconeManualAccessKey": {
 						"type": "string"
 					},

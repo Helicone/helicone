@@ -2465,6 +2465,8 @@ export type Database = {
           country_code: string | null
           created_at: string
           formatted_prompt_id: string | null
+          gateway_deployment_target: string | null
+          gateway_router_id: string | null
           helicone_api_key_id: number | null
           helicone_org_id: string | null
           helicone_proxy_key_id: string | null
@@ -2488,6 +2490,8 @@ export type Database = {
           country_code?: string | null
           created_at?: string
           formatted_prompt_id?: string | null
+          gateway_deployment_target?: string | null
+          gateway_router_id?: string | null
           helicone_api_key_id?: number | null
           helicone_org_id?: string | null
           helicone_proxy_key_id?: string | null
@@ -2511,6 +2515,8 @@ export type Database = {
           country_code?: string | null
           created_at?: string
           formatted_prompt_id?: string | null
+          gateway_deployment_target?: string | null
+          gateway_router_id?: string | null
           helicone_api_key_id?: number | null
           helicone_org_id?: string | null
           helicone_proxy_key_id?: string | null
@@ -2530,6 +2536,13 @@ export type Database = {
           version?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "request_gateway_router_id_fkey"
+            columns: ["gateway_router_id"]
+            isOneToOne: false
+            referencedRelation: "routers"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "request_helicone_api_key_id_fkey"
             columns: ["helicone_api_key_id"]

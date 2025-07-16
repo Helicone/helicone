@@ -108,6 +108,8 @@ export type HeliconeMeta = {
   lytixKey?: string;
   lytixHost?: string;
   heliconeManualAccessKey?: string;
+  gatewayRouterId?: string;
+  gatewayDeploymentTarget?: string;
 };
 
 export type KafkaMessageContents = {
@@ -148,6 +150,7 @@ export const toHeliconeRequest = (context: HandlerContext): HeliconeRequest => {
   const isCacheHit =
     context.message.log.request.cacheReferenceId != DEFAULT_UUID;
   return {
+    cost: context.usage.cost ?? null,
     request_body: context.processedLog.request.body,
     response_body: context.processedLog.response.body,
     request_id: context.message.log.request.id,
@@ -169,21 +172,23 @@ export const toHeliconeRequest = (context: HandlerContext): HeliconeRequest => {
     time_to_first_token: context.message.log.response.timeToFirstToken ?? null,
 
     // We don't track tokens on cache hits, since cost is 0
-    total_tokens: isCacheHit ? 0 : context.usage.totalTokens ?? null,
-    prompt_tokens: isCacheHit ? 0 : context.usage.promptTokens ?? null,
-    completion_tokens: isCacheHit ? 0 : context.usage.completionTokens ?? null,
+    total_tokens: isCacheHit ? 0 : (context.usage.totalTokens ?? null),
+    prompt_tokens: isCacheHit ? 0 : (context.usage.promptTokens ?? null),
+    completion_tokens: isCacheHit
+      ? 0
+      : (context.usage.completionTokens ?? null),
     prompt_cache_write_tokens: isCacheHit
       ? 0
-      : context.usage.promptCacheWriteTokens ?? null,
+      : (context.usage.promptCacheWriteTokens ?? null),
     prompt_cache_read_tokens: isCacheHit
       ? 0
-      : context.usage.promptCacheReadTokens ?? null,
+      : (context.usage.promptCacheReadTokens ?? null),
     prompt_audio_tokens: isCacheHit
       ? 0
-      : context.usage.promptAudioTokens ?? null,
+      : (context.usage.promptAudioTokens ?? null),
     completion_audio_tokens: isCacheHit
       ? 0
-      : context.usage.completionAudioTokens ?? null,
+      : (context.usage.completionAudioTokens ?? null),
 
     prompt_id: context.message.log.request.promptId ?? null,
     llmSchema: null,

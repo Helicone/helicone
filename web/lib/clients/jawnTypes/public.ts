@@ -1566,6 +1566,8 @@ export interface components {
       cache_reference_id: string | null;
       cache_enabled: boolean;
       updated_at?: string;
+      gateway_router_id?: string | null;
+      gateway_deployment_target?: string | null;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];

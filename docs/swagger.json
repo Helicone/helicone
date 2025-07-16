@@ -3563,6 +3563,14 @@
 					},
 					"updated_at": {
 						"type": "string"
+					},
+					"gateway_router_id": {
+						"type": "string",
+						"nullable": true
+					},
+					"gateway_deployment_target": {
+						"type": "string",
+						"nullable": true
 					}
 				},
 				"required": [

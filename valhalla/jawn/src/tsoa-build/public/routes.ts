@@ -1036,6 +1036,8 @@ const models: TsoaRoute.Models = {
             "cache_reference_id": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
             "cache_enabled": {"dataType":"boolean","required":true},
             "updated_at": {"dataType":"string"},
+            "gateway_router_id": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
+            "gateway_deployment_target": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}]},
         },
         "additionalProperties": false,
     },
