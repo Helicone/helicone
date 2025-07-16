@@ -10,6 +10,7 @@ import {
 import { AnthropicBodyProcessor } from "../shared/bodyProcessors/anthropicBodyProcessor";
 import { AnthropicStreamBodyProcessor } from "../shared/bodyProcessors/anthropicStreamBodyProcessor";
 import { GenericBodyProcessor } from "../shared/bodyProcessors/genericBodyProcessor";
+import { MetaBodyProcessor } from "../shared/bodyProcessors/metaBodyProcessor";
 import { OpenAIBodyProcessor } from "../shared/bodyProcessors/openaiBodyProcessor";
 import { GoogleBodyProcessor } from "../shared/bodyProcessors/googleBodyProcessor";
 import { GoogleStreamBodyProcessor } from "../shared/bodyProcessors/googleStreamBodyProcessor";
@@ -326,6 +327,8 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       return new AnthropicBodyProcessor();
     } else if (!isStream && provider === "OPENAI") {
       return new OpenAIBodyProcessor();
+    } else if (!isStream && provider === "META") {
+      return new MetaBodyProcessor();
     } else if (!isStream && provider === "GOOGLE") {
       return new GoogleBodyProcessor();
     } else if (

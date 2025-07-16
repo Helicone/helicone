@@ -11541,6 +11541,11 @@ lines-and-columns@^1.1.6:
   resolved "https://registry.npmjs.org/lines-and-columns/-/lines-and-columns-1.2.4.tgz"
   integrity sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==
 
+llama-api-client@^0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/llama-api-client/-/llama-api-client-0.1.2.tgz#66ef44e737fb45183bd533f99c0b3ec265cc669a"
+  integrity sha512-gJ8QhTJALU+UkgwC22rBjaYauwcC5wJKdSuitbLLSwq/wxq4m8TSY/OuqTbzapo/Z87eaizohCD3HBtNaBBvYg==
+
 load-tsconfig@^0.2.3:
   version "0.2.5"
   resolved "https://registry.yarnpkg.com/load-tsconfig/-/load-tsconfig-0.2.5.tgz#453b8cd8961bfb912dea77eb6c168fe8cca3d3a1"

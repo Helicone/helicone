@@ -68,6 +68,7 @@ export class HeliconeProducer {
 
   private async sendMessageHttp(msg: MessageData) {
     try {
+      console.log(msg);
       const result = await fetch(`${this.VALHALLA_URL}/v1/log/request`, {
         method: "POST",
         headers: {
