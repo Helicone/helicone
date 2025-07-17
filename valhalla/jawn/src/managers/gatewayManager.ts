@@ -29,8 +29,8 @@ export class GatewayManager extends BaseManager {
         routers.id,
         routers.hash,
         routers.name,
-        router_config_versions.version as latestVersion,
-        router_config_versions.created_at as lastUpdatedAt
+        router_config_versions.version as "latestVersion",
+        router_config_versions.created_at as "lastUpdatedAt"
       FROM routers
       INNER JOIN router_config_versions ON routers.id = router_config_versions.router_id
       WHERE routers.organization_id = $1
