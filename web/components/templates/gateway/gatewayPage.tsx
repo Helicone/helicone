@@ -13,6 +13,7 @@ import { PlusIcon, Search } from "lucide-react";
 import { useState } from "react";
 import { formatTime } from "../prompts2025/timeUtils";
 import { useRouter } from "next/router";
+import CreateRouterDialog from "./createRouterDialog";
 
 type Router = components["schemas"]["Router"];
 
@@ -50,9 +51,10 @@ const columns: ColumnConfig<Router>[] = [
 
 const GatewayPage = () => {
   const [search, setSearch] = useState("");
+  const [isCreateRouterDialogOpen, setIsCreateRouterDialogOpen] =
+    useState(false);
   const router = useRouter();
   const { data: routers, isLoading } = $JAWN_API.useQuery("get", "/v1/gateway");
-  console.log(routers?.data?.routers.map((router) => router.lastUpdatedAt));
 
   return (
     <main className="flex h-screen w-full animate-fade-in flex-col">
@@ -79,10 +81,10 @@ const GatewayPage = () => {
                 className="pl-9"
               />
             </div>
-            <Button>
-              <PlusIcon className="h-4 w-4" />
-              Add Router
-            </Button>
+            <CreateRouterDialog
+              open={isCreateRouterDialogOpen}
+              setOpen={setIsCreateRouterDialogOpen}
+            />
           </div>
         </div>
         <div className="flex-1 overflow-hidden">
