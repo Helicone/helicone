@@ -3,6 +3,7 @@ import { anthropicProvider } from "./anthropic";
 import { costs as avianCosts } from "./avian";
 import { costs as awsBedrockCosts } from "./awsBedrock";
 import { costs as azureCosts } from "./azure";
+import { costs as llamaCosts } from "./llama";
 import { costs as cohereCosts } from "./cohere";
 import { costs as deepseekCosts } from "./deepseek";
 import { costs as fireworksAICosts } from "./fireworks";
@@ -135,7 +136,7 @@ export const providers: {
   {
     pattern: llamaApiPattern,
     provider: "LLAMA",
-    // TODO: Add Llama API costs
+    costs: llamaCosts,
   },
   {
     pattern: azurePattern,
